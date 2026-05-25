@@ -1,8 +1,24 @@
 import { type DmConversation, useConversations } from "@rezics/api/dm/dm";
-import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type { FC } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  inbox_conversations_empty,
+  inbox_conversations_load_failed,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  inbox_conversations_empty,
+  inbox_conversations_load_failed,
+};
+
+const i18nMessages = {
+  common_loading,
+  inbox_conversations_empty,
+  inbox_conversations_load_failed,
+};
 
 function compareUpdatedDesc(a: DmConversation, b: DmConversation): number {
   return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
@@ -19,6 +35,7 @@ function formatPeerInitial(c: DmConversation): string {
  * shape as `NotificationTabSection` for a consistent inbox feel.
  */
 export const ConversationListSection: FC = () => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, isError } = useConversations();
   const conversations = (data?.conversations ?? [])
     .slice()

@@ -1,6 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { scoreQueries } from "@rezics/api/score/score";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -14,6 +13,17 @@ import {
   setBookDetailAtomFamily,
 } from "../states/bookDetailAtoms";
 import { BookDetailLayoutContext } from "./bookDetailLayoutContext";
+import { useMessage } from "@rezics/i18n/react";
+import { common_error_generic, common_loading } from "@rezics/i18n/messages";
+const m = {
+  common_error_generic,
+  common_loading,
+};
+
+const i18nMessages = {
+  common_error_generic,
+  common_loading,
+};
 
 /**
  * Book Detail Layout
@@ -28,6 +38,7 @@ import { BookDetailLayoutContext } from "./bookDetailLayoutContext";
 export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const m = useMessage(i18nMessages);
   const params = useParams({ strict: false }) as { bookId?: string };
   const bookId = params.bookId ?? "";
   const queriesEnabled = Boolean(bookId);

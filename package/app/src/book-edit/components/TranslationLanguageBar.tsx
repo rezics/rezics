@@ -1,6 +1,22 @@
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { UnitTranslationLanguageBar } from "@/unit";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_book_edit_info_translation_add_button,
+  page_book_edit_info_translation_default_badge,
+  page_book_edit_info_translation_language_label,
+} from "@rezics/i18n/messages";
+const m = {
+  page_book_edit_info_translation_add_button,
+  page_book_edit_info_translation_default_badge,
+  page_book_edit_info_translation_language_label,
+};
+
+const i18nMessages = {
+  page_book_edit_info_translation_add_button,
+  page_book_edit_info_translation_default_badge,
+  page_book_edit_info_translation_language_label,
+};
 
 export interface TranslationLanguageBarProps {
   existingLanguages: string[];
@@ -19,6 +35,7 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
   onAddClick,
   hasAvailable,
 }) => {
+  const m = useMessage(i18nMessages);
   return (
     <UnitTranslationLanguageBar
       existingLanguages={existingLanguages}

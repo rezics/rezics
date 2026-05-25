@@ -2,9 +2,25 @@ import type {
   ContentSearchDocument,
   ContentSearchResult,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  search_empty_title,
+  search_results_summary,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  search_empty_title,
+  search_results_summary,
+};
+
+const i18nMessages = {
+  common_loading,
+  search_empty_title,
+  search_results_summary,
+};
 
 function resolveTitle(
   titles: string[],
@@ -60,6 +76,7 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
   preferredLanguage,
   renderItem,
 }) => {
+  const m = useMessage(i18nMessages);
   if (isLoading) {
     return (
       <div className="py-12 text-center">

@@ -3,14 +3,49 @@ import {
   type ContentSearchDocument,
   contentDocMarkdownFallback,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { Link } from "@/shared/ui/link";
 import { DescriptionBox } from "@/user/components/DescriptionBox";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_pinned,
+  common_untitled,
+  profile_following,
+  profile_no_pinned_items,
+  profile_no_recent_activity,
+  profile_recent_activity,
+  profile_tab_content,
+  profile_tab_followers,
+  profile_tab_shelves,
+} from "@rezics/i18n/messages";
+const m = {
+  common_pinned,
+  common_untitled,
+  profile_following,
+  profile_no_pinned_items,
+  profile_no_recent_activity,
+  profile_recent_activity,
+  profile_tab_content,
+  profile_tab_followers,
+  profile_tab_shelves,
+};
+
+const i18nMessages = {
+  common_pinned,
+  common_untitled,
+  profile_following,
+  profile_no_pinned_items,
+  profile_no_recent_activity,
+  profile_recent_activity,
+  profile_tab_content,
+  profile_tab_followers,
+  profile_tab_shelves,
+};
 
 export const ProfileOverviewPage: FC = () => {
+  const m = useMessage(i18nMessages);
   const { user, userId } = useProfileContext();
 
   // MOCK: pinned items — first 6 published units by this user
@@ -133,6 +168,7 @@ const StatItem: FC<{
 
 // MOCK: pinned card component
 const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
+  const m = useMessage(i18nMessages);
   const title =
     item.translations?.[0]?.title ?? item.type ?? m.common_untitled();
 
@@ -157,6 +193,7 @@ const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
 
 // MOCK: activity item component
 const ActivityItem: FC<{ item: ContentSearchDocument }> = ({ item }) => {
+  const m = useMessage(i18nMessages);
   const title =
     item.translations?.[0]?.title ?? item.type ?? m.common_untitled();
   const date = item.updatedAt

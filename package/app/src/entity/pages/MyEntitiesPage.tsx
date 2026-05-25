@@ -1,13 +1,36 @@
 import { useEntityList } from "@rezics/api/entity";
 import { useCurrentUserId } from "@rezics/api/hooks";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { unitHref } from "@/shared/ui/link";
 import { EntityIdentityRow } from "../components/EntityIdentityRow";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  entity_declare,
+  entity_empty_owned,
+  entity_login_required,
+  entity_my_entities,
+  entity_new_button,
+} from "@rezics/i18n/messages";
+const m = {
+  entity_declare,
+  entity_empty_owned,
+  entity_login_required,
+  entity_my_entities,
+  entity_new_button,
+};
+
+const i18nMessages = {
+  entity_declare,
+  entity_empty_owned,
+  entity_login_required,
+  entity_my_entities,
+  entity_new_button,
+};
 
 export function MyEntitiesPage() {
+  const m = useMessage(i18nMessages);
   const currentUserUnitId = useCurrentUserId();
 
   const { data, isLoading } = useEntityList(

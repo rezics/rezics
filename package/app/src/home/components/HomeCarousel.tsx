@@ -1,7 +1,6 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
-import * as m from "@rezics/i18n/messages";
 import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
 import { useEmblaAutoplay } from "@rezics/ui/primitive/carousel/use-embla-autoplay.ts";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
@@ -16,6 +15,15 @@ import React, { useEffect, useState } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { useIsMobile } from "@/shared/utils/use-media-query";
+import { useMessage } from "@rezics/i18n/react";
+import { page_home_carousel_alert_parse_failed } from "@rezics/i18n/messages";
+const m = {
+  page_home_carousel_alert_parse_failed,
+};
+
+const i18nMessages = {
+  page_home_carousel_alert_parse_failed,
+};
 
 type ProductType = {
   cover?: string;
@@ -108,6 +116,7 @@ interface BookCarouselProps {
 export const BookCarousel: React.FC<BookCarouselProps> = ({
   autoplayIntervalNum = 3000,
 }) => {
+  const m = useMessage(i18nMessages);
   const maxHeightClass = "max-h-[250px]";
 
   const { data } = useQuery(echoKvGetQuery("home_carousel"));

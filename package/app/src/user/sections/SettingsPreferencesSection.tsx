@@ -19,7 +19,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -37,6 +36,56 @@ import { type FC, useState } from "react";
 import { ContentRatingPreferences } from "@/user/components/ContentRatingPreferences";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_add,
+  settings_preferences_add_language,
+  settings_preferences_content_rating_description,
+  settings_preferences_content_rating_title,
+  settings_preferences_drag_handle,
+  settings_preferences_language_description,
+  settings_preferences_language_empty,
+  settings_preferences_language_saved,
+  settings_preferences_language_title,
+  settings_preferences_realm_tags_description,
+  settings_preferences_realm_tags_empty,
+  settings_preferences_realm_tags_meta,
+  settings_preferences_realm_tags_title,
+  settings_preferences_remove_language,
+} from "@rezics/i18n/messages";
+const m = {
+  common_add,
+  settings_preferences_add_language,
+  settings_preferences_content_rating_description,
+  settings_preferences_content_rating_title,
+  settings_preferences_drag_handle,
+  settings_preferences_language_description,
+  settings_preferences_language_empty,
+  settings_preferences_language_saved,
+  settings_preferences_language_title,
+  settings_preferences_realm_tags_description,
+  settings_preferences_realm_tags_empty,
+  settings_preferences_realm_tags_meta,
+  settings_preferences_realm_tags_title,
+  settings_preferences_remove_language,
+};
+
+const i18nMessages = {
+  common_add,
+  settings_preferences_add_language,
+  settings_preferences_content_rating_description,
+  settings_preferences_content_rating_title,
+  settings_preferences_drag_handle,
+  settings_preferences_language_description,
+  settings_preferences_language_empty,
+  settings_preferences_language_saved,
+  settings_preferences_language_title,
+  settings_preferences_realm_tags_description,
+  settings_preferences_realm_tags_empty,
+  settings_preferences_realm_tags_meta,
+  settings_preferences_realm_tags_title,
+  settings_preferences_remove_language,
+};
 
 const SUPPORTED_LANGUAGES = Object.values(LANGUAGES);
 
@@ -55,6 +104,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
   onRemove,
   disabled,
 }) => {
+  const m = useMessage(i18nMessages);
   const {
     attributes,
     listeners,
@@ -104,6 +154,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
 };
 
 export const SettingsPreferencesSection: FC = () => {
+  const m = useMessage(i18nMessages);
   useRequireAuth();
 
   const { data: settings, isLoading: settingsLoading } = useQuery(

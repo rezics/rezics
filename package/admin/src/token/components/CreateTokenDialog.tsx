@@ -1,5 +1,4 @@
 import type { CreateApiTokenInput } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -15,6 +14,35 @@ import {
 import type { FC } from "react";
 import { useState } from "react";
 import { ScopesEditor } from "./ScopesEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_token_create_dialog_title,
+  admin_token_creating,
+  admin_token_default_name,
+  admin_token_expires_at_optional,
+  admin_token_token_name,
+  common_cancel,
+  common_create,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_token_create_dialog_title,
+  admin_token_creating,
+  admin_token_default_name,
+  admin_token_expires_at_optional,
+  admin_token_token_name,
+  common_cancel,
+  common_create,
+};
+
+const i18nMessages = {
+  admin_token_create_dialog_title,
+  admin_token_creating,
+  admin_token_default_name,
+  admin_token_expires_at_optional,
+  admin_token_token_name,
+  common_cancel,
+  common_create,
+};
 
 interface CreateTokenDialogProps {
   open: boolean;
@@ -34,6 +62,7 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
   creating,
   error,
 }) => {
+  const m = useMessage(i18nMessages);
   const [name, setName] = useState("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [scopes, setScopes] = useState<Record<string, string[]>>({});

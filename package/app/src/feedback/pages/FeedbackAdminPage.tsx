@@ -1,5 +1,4 @@
 import { feedbackListQuery } from "@rezics/api/feedback/feedback.queries";
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Input,
@@ -14,8 +13,56 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import FeedbackDrawer from "../components/FeedbackDrawer";
 import FeedbackList from "../components/FeedbackList";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_status,
+  common_view,
+  feedback_admin_title,
+  feedback_new,
+  feedback_search_label,
+  feedback_search_placeholder,
+  feedback_status_resolved,
+  feedback_status_unresolved,
+  feedback_user_id_placeholder,
+  feedback_view_mine,
+  feedback_view_user,
+  search_category_all,
+  user_id_label,
+} from "@rezics/i18n/messages";
+const m = {
+  common_status,
+  common_view,
+  feedback_admin_title,
+  feedback_new,
+  feedback_search_label,
+  feedback_search_placeholder,
+  feedback_status_resolved,
+  feedback_status_unresolved,
+  feedback_user_id_placeholder,
+  feedback_view_mine,
+  feedback_view_user,
+  search_category_all,
+  user_id_label,
+};
+
+const i18nMessages = {
+  common_status,
+  common_view,
+  feedback_admin_title,
+  feedback_new,
+  feedback_search_label,
+  feedback_search_placeholder,
+  feedback_status_resolved,
+  feedback_status_unresolved,
+  feedback_user_id_placeholder,
+  feedback_view_mine,
+  feedback_view_user,
+  search_category_all,
+  user_id_label,
+};
 
 export const FeedbackAdminPage: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const [open, setOpen] = React.useState(false);
   const [type, setType] = React.useState<"all" | "mine" | "user">("all");
   const [userId, setUserId] = React.useState<string>("");

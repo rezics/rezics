@@ -1,5 +1,5 @@
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
+import { setLocale, useMessage } from "@rezics/i18n/react";
 import {
   DropdownMenuItem,
   DropdownMenuSub,
@@ -7,13 +7,21 @@ import {
   DropdownMenuSubTrigger,
 } from "@rezics/ui/shadcn";
 import { Languages as LanguageIcon } from "lucide-react";
-import { setRezicsLocale } from "@/app/locale";
 import { ThemeToggler } from "./ThemeToggler";
+import { layout_header_toggle_language } from "@rezics/i18n/messages";
+const m = {
+  layout_header_toggle_language,
+};
+
+const i18nMessages = {
+  layout_header_toggle_language,
+};
 
 const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
 
 export function MiscMenuItems() {
-  const changeLang = (lang: Language) => setRezicsLocale(lang);
+  const m = useMessage(i18nMessages);
+  const changeLang = (lang: Language) => setLocale(lang);
 
   return (
     <>

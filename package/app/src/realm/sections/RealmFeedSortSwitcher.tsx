@@ -1,6 +1,15 @@
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
+import {
+  realm_feed_sort_hot,
+  realm_feed_sort_new,
+  realm_feed_sort_top,
+} from "@rezics/i18n/messages";
+const m = {
+  realm_feed_sort_hot,
+  realm_feed_sort_new,
+  realm_feed_sort_top,
+};
 
 export type RealmFeedSort = "new" | "top" | "hot";
 

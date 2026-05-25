@@ -16,7 +16,6 @@ import type {
   RealmTagApplicationDTO,
   UnitTagDTO,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -45,12 +44,87 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_tag_low_score_description,
+  admin_tag_low_score_empty,
+  admin_tag_low_score_failed_load,
+  admin_tag_low_score_title,
+  admin_tag_pin,
+  admin_tag_realm_filter_label,
+  admin_tag_realm_filter_placeholder,
+  admin_tag_scope_global,
+  admin_tag_scope_realm,
+  admin_tag_threshold_label,
+  admin_tag_unpin,
+  common_actions,
+  common_apply,
+  common_delete,
+  common_pinned,
+  common_realm,
+  common_scope,
+  common_score,
+  common_tag,
+  common_unit,
+  common_votes,
+  common_yes,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_tag_low_score_description,
+  admin_tag_low_score_empty,
+  admin_tag_low_score_failed_load,
+  admin_tag_low_score_title,
+  admin_tag_pin,
+  admin_tag_realm_filter_label,
+  admin_tag_realm_filter_placeholder,
+  admin_tag_scope_global,
+  admin_tag_scope_realm,
+  admin_tag_threshold_label,
+  admin_tag_unpin,
+  common_actions,
+  common_apply,
+  common_delete,
+  common_pinned,
+  common_realm,
+  common_scope,
+  common_score,
+  common_tag,
+  common_unit,
+  common_votes,
+  common_yes,
+};
+
+const i18nMessages = {
+  admin_tag_low_score_description,
+  admin_tag_low_score_empty,
+  admin_tag_low_score_failed_load,
+  admin_tag_low_score_title,
+  admin_tag_pin,
+  admin_tag_realm_filter_label,
+  admin_tag_realm_filter_placeholder,
+  admin_tag_scope_global,
+  admin_tag_scope_realm,
+  admin_tag_threshold_label,
+  admin_tag_unpin,
+  common_actions,
+  common_apply,
+  common_delete,
+  common_pinned,
+  common_realm,
+  common_scope,
+  common_score,
+  common_tag,
+  common_unit,
+  common_votes,
+  common_yes,
+};
 
 type Row =
   | ({ kind: "global" } & UnitTagDTO)
   | ({ kind: "realm" } & RealmTagApplicationDTO);
 
 export default function LowScoreTagsPage() {
+  const m = useMessage(i18nMessages);
   const [scope, setScope] = React.useState<LowScoreTagsScope>("global");
   const [thresholdInput, setThresholdInput] = React.useState("-100");
   const [realmInput, setRealmInput] = React.useState("");

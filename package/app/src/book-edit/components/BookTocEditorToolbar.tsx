@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Tooltip,
@@ -17,6 +16,50 @@ import {
   ChevronsUpDown as UnfoldMore,
 } from "lucide-react";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_edit_add_chapter_to_last_volume,
+  book_edit_collapse_all,
+  book_edit_exit_selection_mode,
+  book_edit_exit_sorting_mode,
+  book_edit_expand_all,
+  book_edit_rate_selected,
+  book_edit_resync_index_overrides,
+  book_edit_search_chapters_placeholder,
+  book_edit_select_chapters,
+  book_edit_set_rating_for_selected,
+  book_edit_sorting_mode,
+  common_new,
+} from "@rezics/i18n/messages";
+const m = {
+  book_edit_add_chapter_to_last_volume,
+  book_edit_collapse_all,
+  book_edit_exit_selection_mode,
+  book_edit_exit_sorting_mode,
+  book_edit_expand_all,
+  book_edit_rate_selected,
+  book_edit_resync_index_overrides,
+  book_edit_search_chapters_placeholder,
+  book_edit_select_chapters,
+  book_edit_set_rating_for_selected,
+  book_edit_sorting_mode,
+  common_new,
+};
+
+const i18nMessages = {
+  book_edit_add_chapter_to_last_volume,
+  book_edit_collapse_all,
+  book_edit_exit_selection_mode,
+  book_edit_exit_sorting_mode,
+  book_edit_expand_all,
+  book_edit_rate_selected,
+  book_edit_resync_index_overrides,
+  book_edit_search_chapters_placeholder,
+  book_edit_select_chapters,
+  book_edit_set_rating_for_selected,
+  book_edit_sorting_mode,
+  common_new,
+};
 
 interface BookTocEditorToolbarProps {
   searchTerm: string;
@@ -47,6 +90,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
   onBulkSetRating,
   onResyncOverrides,
 }) => {
+  const m = useMessage(i18nMessages);
   return (
     <TooltipProvider>
       <div className="flex items-center gap-2 pb-3">

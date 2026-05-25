@@ -4,11 +4,27 @@ import {
   type RealmDTO,
   type RealmSearchDocument,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { RealmCard } from "../components/RealmCard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  realm_none_found,
+  realm_search_placeholder,
+  realm_search_title,
+} from "@rezics/i18n/messages";
+const m = {
+  realm_none_found,
+  realm_search_placeholder,
+  realm_search_title,
+};
+
+const i18nMessages = {
+  realm_none_found,
+  realm_search_placeholder,
+  realm_search_title,
+};
 
 function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
   return {
@@ -30,6 +46,7 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
 }
 
 export function RealmSearchPage() {
+  const m = useMessage(i18nMessages);
   const search = useSearchQuery({});
   const keyword = search.query.keyword ?? "";
   const keywordBind = search.bind("keyword");

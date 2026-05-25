@@ -3,13 +3,42 @@ import { useCurrentUserId } from "@rezics/api/hooks";
 import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import { markdownContentDoc } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { ExcerptEditPage } from "./ExcerptEditPage";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  auth_flow_onboarding_sign_in_first,
+  common_submit,
+  common_submitting,
+  excerpt_book_unit_id,
+  excerpt_create_failed,
+  excerpt_created_success,
+  excerpt_new_title,
+} from "@rezics/i18n/messages";
+const m = {
+  auth_flow_onboarding_sign_in_first,
+  common_submit,
+  common_submitting,
+  excerpt_book_unit_id,
+  excerpt_create_failed,
+  excerpt_created_success,
+  excerpt_new_title,
+};
+
+const i18nMessages = {
+  auth_flow_onboarding_sign_in_first,
+  common_submit,
+  common_submitting,
+  excerpt_book_unit_id,
+  excerpt_create_failed,
+  excerpt_created_success,
+  excerpt_new_title,
+};
 
 export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
+  const m = useMessage(i18nMessages);
   const [excerptData, setExcerptData] = useState<UnitFormData>(
     {} as UnitFormData,
   );

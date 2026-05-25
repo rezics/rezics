@@ -8,7 +8,22 @@ function rulesFor(relFilePath: string, source: string) {
 }
 
 describe("frontend i18n convention checks", () => {
-  test("passes direct generated message calls", () => {
+  test("passes named generated message imports", () => {
+    expect(
+      rulesFor(
+        "package/app/src/example.tsx",
+        `
+          import { common_save } from "@rezics/i18n/messages";
+
+          export function Example() {
+            return <button>{common_save()}</button>;
+          }
+        `,
+      ),
+    ).toEqual([]);
+  });
+
+  test("rejects generated message namespace imports", () => {
     expect(
       rulesFor(
         "package/app/src/example.tsx",
@@ -20,7 +35,7 @@ describe("frontend i18n convention checks", () => {
           }
         `,
       ),
-    ).toEqual([]);
+    ).toContain("R11");
   });
 
   test("rejects legacy fallback-string translation calls", () => {

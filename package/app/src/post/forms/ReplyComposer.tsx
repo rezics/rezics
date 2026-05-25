@@ -7,7 +7,6 @@ import {
   PostKind,
   type TagTreeNode,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -22,6 +21,47 @@ import {
 } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  auth_login,
+  common_cancel,
+  common_reply,
+  page_shelf_searching,
+  post_composer_invalid_configuration,
+  post_composer_post,
+  post_composer_posting,
+  post_reply_placeholder,
+  post_tag_picker_no_matches,
+  shelf_discussion_signInPrompt,
+  tag_search_this,
+} from "@rezics/i18n/messages";
+const m = {
+  auth_login,
+  common_cancel,
+  common_reply,
+  page_shelf_searching,
+  post_composer_invalid_configuration,
+  post_composer_post,
+  post_composer_posting,
+  post_reply_placeholder,
+  post_tag_picker_no_matches,
+  shelf_discussion_signInPrompt,
+  tag_search_this,
+};
+
+const i18nMessages = {
+  auth_login,
+  common_cancel,
+  common_reply,
+  page_shelf_searching,
+  post_composer_invalid_configuration,
+  post_composer_post,
+  post_composer_posting,
+  post_reply_placeholder,
+  post_tag_picker_no_matches,
+  shelf_discussion_signInPrompt,
+  tag_search_this,
+};
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -114,6 +154,7 @@ function RealmPostTagPicker({
   selectedTagIds: string[];
   onSelectedTagIdsChange: (tagIds: string[]) => void;
 }) {
+  const m = useMessage(i18nMessages);
   const [searchTerm, setSearchTerm] = useState("");
   const firstRealmId = realmUnitIds.length === 1 ? realmUnitIds[0] : undefined;
   const { data: realm } = useQuery({
@@ -270,6 +311,7 @@ export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
   ReplyComposerProps
 >(function ReplyComposer(props, ref) {
+  const m = useMessage(i18nMessages);
   const authGuard = useAuthGuard();
   const {
     mode,

@@ -5,8 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
+import { setLocale } from "@rezics/i18n/react";
 import React from "react";
-import { setRezicsLocale } from "@/app/locale";
 
 type LangToggleProps = {
   children: (props: {
@@ -21,7 +21,7 @@ export const LangToggle: React.FC<LangToggleProps> = ({ children }) => {
 
   const handleChangeLang = (lang: Language) => {
     setOpen(false);
-    setRezicsLocale(lang);
+    setLocale(lang);
   };
 
   return (

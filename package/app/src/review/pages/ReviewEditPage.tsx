@@ -5,15 +5,50 @@ import {
   useUpdatePostMutation,
 } from "@rezics/api/post/post";
 import { mainMarkdownSource, markdownContentDoc } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 import { Route as reviewEditRoute } from "@/routes/_mainLayout/review/$reviewId/edit";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  common_submit,
+  common_submitting,
+  review_edit_title,
+  review_messages_delete_success,
+  review_messages_failed_load,
+  review_messages_rating_range_error,
+  review_messages_update_success,
+  review_validation_min_chars,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  common_submit,
+  common_submitting,
+  review_edit_title,
+  review_messages_delete_success,
+  review_messages_failed_load,
+  review_messages_rating_range_error,
+  review_messages_update_success,
+  review_validation_min_chars,
+};
+
+const i18nMessages = {
+  common_loading,
+  common_submit,
+  common_submitting,
+  review_edit_title,
+  review_messages_delete_success,
+  review_messages_failed_load,
+  review_messages_rating_range_error,
+  review_messages_update_success,
+  review_validation_min_chars,
+};
 
 export function ReviewEditPageContainer() {
+  const m = useMessage(i18nMessages);
   const { reviewId } = reviewEditRoute.useParams();
   const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
   const navigate = useNavigate();

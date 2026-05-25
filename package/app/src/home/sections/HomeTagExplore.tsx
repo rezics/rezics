@@ -1,6 +1,5 @@
 import { tagQueries } from "@rezics/api/tag/tag.queries";
-import * as m from "@rezics/i18n/messages";
-import { useLocale } from "@rezics/i18n/react";
+import { useLocale, useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +7,14 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Link } from "@/shared/ui/link";
+import { page_home_sections_tag_explore } from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_tag_explore,
+};
+
+const i18nMessages = {
+  page_home_sections_tag_explore,
+};
 
 export type HomeTagExploreProps = {
   title?: string;
@@ -20,6 +27,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   limit = 60,
   maxTags = 18,
 }) => {
+  const m = useMessage(i18nMessages);
   const locale = useLocale();
   const resolvedTitle = title ?? m.page_home_sections_tag_explore();
 

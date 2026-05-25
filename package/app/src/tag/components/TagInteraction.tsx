@@ -5,7 +5,6 @@ import type {
   BookDTO,
   UnitTagDTO,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Badge, Button, Popover, PopoverContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -21,6 +20,44 @@ import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
 import type { InjectedTag } from "@/search/models/injectedTags";
 import { cn } from "@/shared/utils/css-util";
 import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_close,
+  common_edit,
+  tag_clear,
+  tag_downvote,
+  tag_score,
+  tag_search_selected,
+  tag_search_this,
+  tag_selected_count,
+  tag_upvote,
+  tag_votes,
+} from "@rezics/i18n/messages";
+const m = {
+  common_close,
+  common_edit,
+  tag_clear,
+  tag_downvote,
+  tag_score,
+  tag_search_selected,
+  tag_search_this,
+  tag_selected_count,
+  tag_upvote,
+  tag_votes,
+};
+
+const i18nMessages = {
+  common_close,
+  common_edit,
+  tag_clear,
+  tag_downvote,
+  tag_score,
+  tag_search_selected,
+  tag_search_this,
+  tag_selected_count,
+  tag_upvote,
+  tag_votes,
+};
 
 const TAG_CHIP_SELECTOR = '[data-tag-chip="true"]';
 
@@ -80,6 +117,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   onSearchTags,
   className,
 }) => {
+  const m = useMessage(i18nMessages);
   const [state, dispatch] = useTagInteractionReducer();
   const defaultNavigate = useNavigateToTagSearch();
   const navigateToTagSearch = onSearchTags ?? defaultNavigate;

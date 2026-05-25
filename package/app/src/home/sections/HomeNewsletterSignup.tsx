@@ -1,9 +1,29 @@
-import * as m from "@rezics/i18n/messages";
 import { Button, Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_home_sections_newsletter_email_placeholder,
+  page_home_sections_newsletter_submit,
+  page_home_sections_newsletter_thanks,
+  page_home_sections_newsletter_title,
+} from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_newsletter_email_placeholder,
+  page_home_sections_newsletter_submit,
+  page_home_sections_newsletter_thanks,
+  page_home_sections_newsletter_title,
+};
+
+const i18nMessages = {
+  page_home_sections_newsletter_email_placeholder,
+  page_home_sections_newsletter_submit,
+  page_home_sections_newsletter_thanks,
+  page_home_sections_newsletter_title,
+};
 
 export const HomeNewsletterSignup: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 

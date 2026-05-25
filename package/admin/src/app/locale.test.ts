@@ -1,8 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
+import {
+  getLocale,
+  initI18n as initAdapterI18n,
+  setLocale,
+} from "@rezics/i18n/react";
 import { getLocale as getProductLocale } from "@rezics/i18n/runtime";
 import { getLocale as getUiLocale } from "@rezics/ui/i18n/runtime";
-import { getStoredRezicsLocale, setRezicsLocale } from "./locale";
+import { initI18n } from "./providers/i18n";
 
 const storage = new Map<string, string>();
 
@@ -25,7 +30,8 @@ globalThis.localStorage = {
 
 describe("admin locale setup", () => {
   test("supports Korean across product and UI Paraglide runtimes", () => {
-    setRezicsLocale("ko");
+    initI18n();
+    setLocale("ko");
 
     expect(getProductLocale()).toBe("ko");
     expect(getUiLocale()).toBe("ko");
@@ -34,6 +40,8 @@ describe("admin locale setup", () => {
   test("normalizes invalid stored locale to the default language", () => {
     localStorage.setItem("lang", "ko-KR");
 
-    expect(getStoredRezicsLocale()).toBe(DEFAULT_LANGUAGE);
+    initAdapterI18n();
+
+    expect(getLocale()).toBe(DEFAULT_LANGUAGE);
   });
 });

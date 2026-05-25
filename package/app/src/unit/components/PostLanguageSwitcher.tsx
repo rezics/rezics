@@ -1,8 +1,18 @@
 import { LANGUAGE_META, type Language } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Badge, Button, Skeleton } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus as AddIcon } from "lucide-react";
+import { useMessage } from "@rezics/i18n/react";
+import { post_add_translation, post_languages } from "@rezics/i18n/messages";
+const m = {
+  post_add_translation,
+  post_languages,
+};
+
+const i18nMessages = {
+  post_add_translation,
+  post_languages,
+};
 
 type Sibling = {
   unitId: string;
@@ -34,6 +44,7 @@ export function PostLanguageSwitcher({
   canAddTranslation,
   onAddTranslation,
 }: PostLanguageSwitcherProps) {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
 
   if (isLoading) {

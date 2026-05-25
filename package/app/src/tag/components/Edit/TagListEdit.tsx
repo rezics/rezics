@@ -4,7 +4,6 @@ import {
   useDetachTagMutation,
 } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -17,6 +16,44 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { SingleTagChip } from "../TagList";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_add,
+  common_error,
+  common_loading,
+  common_search_failed,
+  common_unlink,
+  shelf_view_list,
+  tag_empty,
+  tag_no_matching,
+  tag_search_and_add,
+  tag_search_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  common_add,
+  common_error,
+  common_loading,
+  common_search_failed,
+  common_unlink,
+  shelf_view_list,
+  tag_empty,
+  tag_no_matching,
+  tag_search_and_add,
+  tag_search_placeholder,
+};
+
+const i18nMessages = {
+  common_add,
+  common_error,
+  common_loading,
+  common_search_failed,
+  common_unlink,
+  shelf_view_list,
+  tag_empty,
+  tag_no_matching,
+  tag_search_and_add,
+  tag_search_placeholder,
+};
 
 /**
  * TagListEdit - now uses UnitTagDTO (scored tags) instead of old TagDetailDTO.
@@ -31,6 +68,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   objectUnitId,
   className,
 }) => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, error, refetch } = useQuery(
     tagQueries.forUnit(objectUnitId),
   );

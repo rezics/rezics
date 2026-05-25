@@ -1,11 +1,30 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { ShelfView } from "@rezics/api/shelf";
-import * as m from "@rezics/i18n/messages";
 import { Button, Checkbox } from "@rezics/ui/shadcn";
 import { GripVertical, MoveRight, Trash2 } from "lucide-react";
 import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfItemRenderer } from "./ShelfItemRenderer";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_delete,
+  shelf_drag_to_reorder,
+  shelf_move_to_another_page,
+  shelf_select_for_bulk_action,
+} from "@rezics/i18n/messages";
+const m = {
+  common_delete,
+  shelf_drag_to_reorder,
+  shelf_move_to_another_page,
+  shelf_select_for_bulk_action,
+};
+
+const i18nMessages = {
+  common_delete,
+  shelf_drag_to_reorder,
+  shelf_move_to_another_page,
+  shelf_select_for_bulk_action,
+};
 
 interface ShelfEditorItemRowProps {
   entry: ShelfStreamEntry;
@@ -38,6 +57,7 @@ export function ShelfEditorItemRow({
   onToggleSelected,
   preview,
 }: ShelfEditorItemRowProps) {
+  const m = useMessage(i18nMessages);
   const {
     attributes,
     listeners,

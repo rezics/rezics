@@ -2,7 +2,6 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import { useCurrentUserId } from "@rezics/api/hooks";
 import { markdownContentDoc } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +13,41 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import type { Chapter } from "./ChapterArborist";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  auth_flow_onboarding_sign_in_first,
+  book_chapter_content_required,
+  book_chapter_create_failed,
+  book_chapter_title_content_required,
+  book_edit_chapter_title,
+  book_edit_create_chapter,
+  common_create,
+  common_required,
+  common_submitting,
+} from "@rezics/i18n/messages";
+const m = {
+  auth_flow_onboarding_sign_in_first,
+  book_chapter_content_required,
+  book_chapter_create_failed,
+  book_chapter_title_content_required,
+  book_edit_chapter_title,
+  book_edit_create_chapter,
+  common_create,
+  common_required,
+  common_submitting,
+};
+
+const i18nMessages = {
+  auth_flow_onboarding_sign_in_first,
+  book_chapter_content_required,
+  book_chapter_create_failed,
+  book_chapter_title_content_required,
+  book_edit_chapter_title,
+  book_edit_create_chapter,
+  common_create,
+  common_required,
+  common_submitting,
+};
 
 interface CreateChapterDialogProps {
   open: boolean;
@@ -36,6 +70,7 @@ export function CreateChapterDialog({
   bookUnitId,
   currentEditParentId,
 }: CreateChapterDialogProps) {
+  const m = useMessage(i18nMessages);
   const userId = useCurrentUserId();
   const { show } = useAlertStore();
 

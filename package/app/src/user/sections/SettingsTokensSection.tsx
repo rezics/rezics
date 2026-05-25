@@ -4,7 +4,6 @@ import {
 } from "@rezics/api/token/token.mutations";
 import { tokenQueries } from "@rezics/api/token/token.queries";
 import type { ApiTokenDTO, ApiTokenScopes } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -27,6 +26,59 @@ import { SettingsSection } from "@/user/components/SettingsSection";
 import { TokenCreateDialog } from "@/user/components/TokenCreateDialog";
 import { TokenListItem } from "@/user/components/TokenListItem";
 import { useRequireAuth } from "@/user/pages/useAuth";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_revoke,
+  common_save,
+  common_saving,
+  common_scopes,
+  settings_tokens_description,
+  settings_tokens_edit_title,
+  settings_tokens_empty,
+  settings_tokens_expiration_date,
+  settings_tokens_generate,
+  settings_tokens_name_label,
+  settings_tokens_revoke_description,
+  settings_tokens_revoke_title,
+  settings_tokens_revoking,
+  settings_tokens_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_revoke,
+  common_save,
+  common_saving,
+  common_scopes,
+  settings_tokens_description,
+  settings_tokens_edit_title,
+  settings_tokens_empty,
+  settings_tokens_expiration_date,
+  settings_tokens_generate,
+  settings_tokens_name_label,
+  settings_tokens_revoke_description,
+  settings_tokens_revoke_title,
+  settings_tokens_revoking,
+  settings_tokens_title,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_revoke,
+  common_save,
+  common_saving,
+  common_scopes,
+  settings_tokens_description,
+  settings_tokens_edit_title,
+  settings_tokens_empty,
+  settings_tokens_expiration_date,
+  settings_tokens_generate,
+  settings_tokens_name_label,
+  settings_tokens_revoke_description,
+  settings_tokens_revoke_title,
+  settings_tokens_revoking,
+  settings_tokens_title,
+};
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },
@@ -59,6 +111,7 @@ function setToScopes(set: Set<string>): ApiTokenScopes {
 }
 
 export const SettingsTokensSection: FC = () => {
+  const m = useMessage(i18nMessages);
   useRequireAuth();
 
   const { data, isLoading } = useQuery(tokenQueries.list());

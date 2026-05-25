@@ -1,6 +1,28 @@
 import type { UnitFieldLockDTO } from "@rezics/contract";
 import { UNIT_FIELD_LOCK_ALL } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
+import {
+  authority_all_fields_label,
+  authority_group_content,
+  authority_group_credits,
+  authority_group_metadata,
+  authority_group_translations,
+  authority_path_authors,
+  authority_path_avatar,
+  authority_path_entity_kind,
+  authority_path_entity_verified,
+  authority_path_post_content,
+  authority_path_post_main,
+  authority_path_post_source,
+  authority_path_slug,
+  book_author_info_bio_label,
+  book_description,
+  book_fields_cover_url,
+  book_fields_isbn,
+  book_fields_title,
+  common_description,
+  common_name,
+  entity_avatar_url,
+} from "@rezics/i18n/messages";
 
 export type LockFieldGroup = {
   id: string;
@@ -11,7 +33,7 @@ export type LockFieldGroup = {
 export const BOOK_LOCK_FIELD_GROUPS: readonly LockFieldGroup[] = [
   {
     id: "translations",
-    title: m.authority_group_translations(),
+    title: authority_group_translations(),
     paths: [
       "translations.en.title",
       "translations.en.description",
@@ -21,17 +43,17 @@ export const BOOK_LOCK_FIELD_GROUPS: readonly LockFieldGroup[] = [
   },
   {
     id: "metadata",
-    title: m.authority_group_metadata(),
+    title: authority_group_metadata(),
     paths: ["extension.isbn13", "extension.coverUrl"],
   },
   {
     id: "content",
-    title: m.authority_group_content(),
+    title: authority_group_content(),
     paths: ["post.content", "post.content.main", "post.content.main.source"],
   },
   {
     id: "credits",
-    title: m.authority_group_credits(),
+    title: authority_group_credits(),
     paths: ["credits.authors"],
   },
 ];
@@ -41,7 +63,7 @@ export function lockMatchesPath(lock: UnitFieldLockDTO, path: string) {
 }
 
 export function editorialPathLabel(path: string) {
-  if (path === UNIT_FIELD_LOCK_ALL) return m.authority_all_fields_label();
+  if (path === UNIT_FIELD_LOCK_ALL) return authority_all_fields_label();
 
   const translationMatch = /^translations\.([^.]+)\.(.+)$/.exec(path);
   if (translationMatch) {
@@ -49,9 +71,9 @@ export function editorialPathLabel(path: string) {
     const [rootField, ...leafSegments] = field.split(".");
     const rootLabel =
       rootField === "title"
-        ? m.book_fields_title()
+        ? book_fields_title()
         : rootField === "description"
-          ? m.book_description()
+          ? book_description()
           : slotLabel(rootField);
     const fieldLabel =
       leafSegments.length > 0
@@ -61,20 +83,20 @@ export function editorialPathLabel(path: string) {
   }
 
   const labels: Record<string, string> = {
-    "extension.coverUrl": m.book_fields_cover_url(),
-    "extension.isbn13": m.book_fields_isbn(),
-    "post.content": m.authority_path_post_content(),
-    "post.content.main": m.authority_path_post_main(),
-    "post.content.main.source": m.authority_path_post_source(),
-    "credits.authors": m.authority_path_authors(),
-    "entity.avatar": m.entity_avatar_url(),
-    "entity.kind": m.authority_path_entity_kind(),
-    "entity.verified": m.authority_path_entity_verified(),
-    "unit.slug": m.authority_path_slug(),
-    "user.avatar": m.authority_path_avatar(),
-    "user.bio": m.book_author_info_bio_label(),
-    "user.description": m.common_description(),
-    "user.name": m.common_name(),
+    "extension.coverUrl": book_fields_cover_url(),
+    "extension.isbn13": book_fields_isbn(),
+    "post.content": authority_path_post_content(),
+    "post.content.main": authority_path_post_main(),
+    "post.content.main.source": authority_path_post_source(),
+    "credits.authors": authority_path_authors(),
+    "entity.avatar": entity_avatar_url(),
+    "entity.kind": authority_path_entity_kind(),
+    "entity.verified": authority_path_entity_verified(),
+    "unit.slug": authority_path_slug(),
+    "user.avatar": authority_path_avatar(),
+    "user.bio": book_author_info_bio_label(),
+    "user.description": common_description(),
+    "user.name": common_name(),
   };
 
   return labels[path] ?? path;

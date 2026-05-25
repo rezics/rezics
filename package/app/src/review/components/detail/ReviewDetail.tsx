@@ -1,6 +1,5 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { useMemo } from "react";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
@@ -8,6 +7,15 @@ import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
+import { useMessage } from "@rezics/i18n/react";
+import { pages_review_page } from "@rezics/i18n/messages";
+const m = {
+  pages_review_page,
+};
+
+const i18nMessages = {
+  pages_review_page,
+};
 
 interface ReviewDetailProps {
   review: PostDTO;
@@ -20,6 +28,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
   book,
   onReplyInvoke,
 }) => {
+  const m = useMessage(i18nMessages);
   const rating = (review.extra as { rating?: number } | null)?.rating;
   const title = (review.extra as { title?: string } | null)?.title;
   const hydrationIds = useMemo(

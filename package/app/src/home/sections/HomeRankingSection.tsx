@@ -1,6 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +11,15 @@ import {
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import { page_home_sections_ranking } from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_ranking,
+};
+
+const i18nMessages = {
+  page_home_sections_ranking,
+};
 
 type Book = BookDTO;
 
@@ -28,6 +36,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   title,
   limit = 10,
 }) => {
+  const m = useMessage(i18nMessages);
   const resolvedTitle = title ?? m.page_home_sections_ranking();
 
   const { data, isLoading, error } = useQuery(

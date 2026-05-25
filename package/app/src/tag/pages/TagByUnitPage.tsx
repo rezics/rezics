@@ -1,14 +1,34 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
 import { Route as tagBookRoute } from "@/routes/_mainLayout/tag/book/$bookId/route";
 import { TextLink } from "@/shared/ui/link";
 import { TagWrapper } from "../components/TagWrapper";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_load_failed,
+  common_loading,
+  tag_title,
+  tag_view_all,
+} from "@rezics/i18n/messages";
+const m = {
+  common_load_failed,
+  common_loading,
+  tag_title,
+  tag_view_all,
+};
+
+const i18nMessages = {
+  common_load_failed,
+  common_loading,
+  tag_title,
+  tag_view_all,
+};
 
 export function TagByBookPage() {
+  const m = useMessage(i18nMessages);
   const { bookId } = tagBookRoute.useParams();
   const pageSize = 30;
   const {
@@ -60,6 +80,7 @@ export function TagByBookPage() {
 }
 
 export function TagByBookFullPage() {
+  const m = useMessage(i18nMessages);
   const matchRoute = useMatchRoute();
   const withDomain = matchRoute({
     to: "/tag/book/$bookId/tag/$domainId",

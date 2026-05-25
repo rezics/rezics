@@ -1,5 +1,4 @@
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
-import * as m from "@rezics/i18n/messages";
 import {
   Separator,
   Sheet,
@@ -9,6 +8,15 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import FeedbackForm from "./FeedbackForm";
+import { useMessage } from "@rezics/i18n/react";
+import { feedback_submit } from "@rezics/i18n/messages";
+const m = {
+  feedback_submit,
+};
+
+const i18nMessages = {
+  feedback_submit,
+};
 
 type FeedbackDrawerProps = {
   open: boolean;
@@ -25,6 +33,7 @@ const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
   onClose,
   defaultValues,
 }) => {
+  const m = useMessage(i18nMessages);
   return (
     <Sheet
       open={open}

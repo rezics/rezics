@@ -11,13 +11,25 @@ import type {
   UserSearchDocument,
 } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { ReviewCard } from "@/review/components/item/ReviewCard";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { CATEGORY_LABELS } from "./permittedCategories";
+import {
+  common_loading,
+  common_view_more,
+  search_category_shelves,
+  search_empty_title,
+  search_origin_book,
+  search_origin_entity,
+  search_origin_post,
+  search_origin_realm,
+  search_origin_user,
+  search_realm_members,
+  search_results_summary,
+} from "@rezics/i18n/messages";
 
 function pickTitle(titles: readonly string[] | null | undefined): string {
   if (!titles || titles.length === 0) return "";
@@ -61,7 +73,7 @@ function PostItemRow({ item }: { item: PostSearchDocument }) {
   return (
     <div className="py-3 border-b border-border-whisper last:border-b-0">
       <p className="text-xs text-text-secondary">
-        {item.kind ?? m.search_origin_post()} ·{" "}
+        {item.kind ?? search_origin_post()} ·{" "}
         {item.authorName ?? item.authorUserId}
       </p>
       {item.contentText && (
@@ -77,7 +89,7 @@ function RealmItemRow({ item }: { item: RealmSearchDocument }) {
     <div className="py-3 border-b border-border-whisper last:border-b-0">
       <p className="text-sm font-medium truncate">{title || item.id}</p>
       <p className="text-xs text-text-secondary">
-        {m.search_realm_members({ count: item.memberCount })}
+        {search_realm_members({ count: item.memberCount })}
       </p>
     </div>
   );
@@ -122,7 +134,7 @@ function EntityItemRow({ item }: { item: EntitySearchDocument }) {
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{title || item.id}</p>
         <p className="text-xs text-text-secondary">
-          {item.kind ?? m.search_origin_entity()}
+          {item.kind ?? search_origin_entity()}
         </p>
       </div>
     </div>
@@ -161,16 +173,16 @@ function originBadge(hit: FederatedRankedHit): string {
   if (origin.indexUid === "content") {
     const doc = hit as ContentSearchDocument & { _origin: typeof origin };
     return doc.type === "SHELF"
-      ? m.search_category_shelves()
-      : m.search_origin_book();
+      ? search_category_shelves()
+      : search_origin_book();
   }
   if (origin.indexUid === "post") {
     const doc = hit as PostSearchDocument & { _origin: typeof origin };
-    return doc.kind ?? m.search_origin_post();
+    return doc.kind ?? search_origin_post();
   }
-  if (origin.indexUid === "realm") return m.search_origin_realm();
-  if (origin.indexUid === "user") return m.search_origin_user();
-  if (origin.indexUid === "entities") return m.search_origin_entity();
+  if (origin.indexUid === "realm") return search_origin_realm();
+  if (origin.indexUid === "user") return search_origin_user();
+  if (origin.indexUid === "entities") return search_origin_entity();
   return origin.indexUid;
 }
 
@@ -229,13 +241,13 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
   if (isLoading) {
     return (
       <div className="py-12 text-center">
-        <p className="text-text-secondary">{m.common_loading()}</p>
+        <p className="text-text-secondary">{common_loading()}</p>
       </div>
     );
   }
 
   if (!result) {
-    return <EmptyState title={m.search_empty_title()} />;
+    return <EmptyState title={search_empty_title()} />;
   }
 
   if (result.kind === "grouped") {
@@ -255,7 +267,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
     const visible = sectionEntries.filter(([, sec]) => sec.totalHits > 0);
     if (visible.length === 0) {
-      return <EmptyState title={m.search_empty_title()} />;
+      return <EmptyState title={search_empty_title()} />;
     }
 
     return (
@@ -274,7 +286,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
                 size="sm"
                 onClick={() => onCategoryChange(category)}
               >
-                {m.common_view_more()}
+                {common_view_more()}
               </Button>
             </header>
             <div>
@@ -292,12 +304,12 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
   if (result.kind === "ranked") {
     if (result.hits.length === 0) {
-      return <EmptyState title={m.search_empty_title()} />;
+      return <EmptyState title={search_empty_title()} />;
     }
     return (
       <div>
         <p className="mb-2 text-xs text-text-secondary">
-          {m.search_results_summary({
+          {search_results_summary({
             count: result.totalHits,
             ms: result.processingTimeMs,
           })}
@@ -313,12 +325,12 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
   // single
   if (result.items.length === 0) {
-    return <EmptyState title={m.search_empty_title()} />;
+    return <EmptyState title={search_empty_title()} />;
   }
   return (
     <div>
       <p className="mb-2 text-xs text-text-secondary">
-        {m.search_results_summary({
+        {search_results_summary({
           count: result.totalHits,
           ms: result.processingTimeMs,
         })}

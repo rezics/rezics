@@ -1,9 +1,22 @@
+import { useMessage } from "@rezics/i18n/react";
 import { Eye as Visibility, EyeOff as VisibilityOff } from "lucide-react";
 import React, { type FC, useState } from "react";
-import * as m from "#/paraglide/messages.js";
+import {
+  ui_password_help,
+  ui_password_hide,
+  ui_password_label,
+  ui_password_show,
+} from "#/paraglide/messages.js";
 import { Button } from "#/shadcn/button";
 import { Input } from "#/shadcn/input";
 import { Label } from "#/shadcn/label";
+
+const passwordFieldMessages = {
+  ui_password_help,
+  ui_password_hide,
+  ui_password_label,
+  ui_password_show,
+};
 
 interface PasswordFieldProps {
   name?: string;
@@ -31,6 +44,7 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   required = true,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const m = useMessage(passwordFieldMessages);
 
   const inputName = name ?? "password";
   const help = helperText ?? m.ui_password_help();

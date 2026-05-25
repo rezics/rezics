@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Input,
@@ -22,6 +21,38 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_first_page,
+  common_go,
+  common_go_to_page,
+  common_last_page,
+  common_next_page,
+  common_pagination_range,
+  common_previous_page,
+  common_rows_per_page,
+} from "@rezics/i18n/messages";
+const m = {
+  common_first_page,
+  common_go,
+  common_go_to_page,
+  common_last_page,
+  common_next_page,
+  common_pagination_range,
+  common_previous_page,
+  common_rows_per_page,
+};
+
+const i18nMessages = {
+  common_first_page,
+  common_go,
+  common_go_to_page,
+  common_last_page,
+  common_next_page,
+  common_pagination_range,
+  common_previous_page,
+  common_rows_per_page,
+};
 
 export type PaginatedColumn<T> = {
   id: string;
@@ -58,6 +89,7 @@ export function PaginatedTable<T>({
   enablePageJump?: boolean;
   className?: string;
 }) {
+  const m = useMessage(i18nMessages);
   const totalPages = rowsPerPage > 0 ? Math.ceil(count / rowsPerPage) : 0;
   const [pageInput, setPageInput] = React.useState(() => String(page + 1));
 

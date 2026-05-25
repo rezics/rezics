@@ -1,5 +1,4 @@
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
-import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -10,8 +9,32 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_edit_book_url,
+  book_edit_create_book_by_url_description,
+  book_edit_create_book_by_url_title,
+  book_edit_supported_sites,
+  common_create,
+} from "@rezics/i18n/messages";
+const m = {
+  book_edit_book_url,
+  book_edit_create_book_by_url_description,
+  book_edit_create_book_by_url_title,
+  book_edit_supported_sites,
+  common_create,
+};
+
+const i18nMessages = {
+  book_edit_book_url,
+  book_edit_create_book_by_url_description,
+  book_edit_create_book_by_url_title,
+  book_edit_supported_sites,
+  common_create,
+};
 
 export function NewBookByUrl() {
+  const m = useMessage(i18nMessages);
   const [url, setUrl] = useState("");
   function handleCreateBook() {
     // TODO 对接爬虫

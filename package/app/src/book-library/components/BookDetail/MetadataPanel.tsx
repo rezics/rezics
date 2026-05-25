@@ -1,8 +1,36 @@
 import type { BookDTO, LicenseSlug } from "@rezics/contract";
 import { licenseLabel } from "@rezics/i18n";
-import * as m from "@rezics/i18n/messages";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_fields_chapter_count,
+  book_fields_format,
+  book_fields_isbn,
+  book_fields_page_count,
+  book_fields_publication_license,
+  book_fields_text_length,
+  book_info_panel_title,
+} from "@rezics/i18n/messages";
+const m = {
+  book_fields_chapter_count,
+  book_fields_format,
+  book_fields_isbn,
+  book_fields_page_count,
+  book_fields_publication_license,
+  book_fields_text_length,
+  book_info_panel_title,
+};
+
+const i18nMessages = {
+  book_fields_chapter_count,
+  book_fields_format,
+  book_fields_isbn,
+  book_fields_page_count,
+  book_fields_publication_license,
+  book_fields_text_length,
+  book_info_panel_title,
+};
 
 export type MetadataPanelProps = {
   bookInfo: BookDTO;
@@ -17,6 +45,7 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   bookInfo,
   variant = "panel",
 }) => {
+  const m = useMessage(i18nMessages);
   const publicationLicenseLabel = bookInfo.licenseSlug
     ? licenseLabel(bookInfo.licenseSlug as LicenseSlug)
     : undefined;

@@ -1,9 +1,26 @@
-import * as m from "@rezics/i18n/messages";
 import { useEffect, useRef, useState } from "react";
 import { BookCarousel } from "../components/HomeCarousel";
 import { NoticeBoard } from "./NoticeBoard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_home_hero_kicker,
+  page_home_hero_subtitle,
+  page_home_hero_title_highlight,
+} from "@rezics/i18n/messages";
+const m = {
+  page_home_hero_kicker,
+  page_home_hero_subtitle,
+  page_home_hero_title_highlight,
+};
+
+const i18nMessages = {
+  page_home_hero_kicker,
+  page_home_hero_subtitle,
+  page_home_hero_title_highlight,
+};
 
 export function ResponsiveCarouselNotice() {
+  const m = useMessage(i18nMessages);
   const containerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);

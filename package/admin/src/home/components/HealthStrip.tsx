@@ -1,5 +1,21 @@
-import * as m from "@rezics/i18n/messages";
 import { Card, CardContent } from "@rezics/ui/shadcn";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_health_meili,
+  admin_health_server,
+  admin_health_system,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_health_meili,
+  admin_health_server,
+  admin_health_system,
+};
+
+const i18nMessages = {
+  admin_health_meili,
+  admin_health_server,
+  admin_health_system,
+};
 
 interface HealthStripProps {
   server: "ok" | "degraded";
@@ -12,6 +28,7 @@ function StatusDot({ status }: { status: "ok" | "degraded" | "unreachable" }) {
 }
 
 export function HealthStrip({ server, meili }: HealthStripProps) {
+  const m = useMessage(i18nMessages);
   return (
     <Card>
       <CardContent className="flex gap-8 items-center py-3">

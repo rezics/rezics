@@ -1,8 +1,28 @@
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  home_mobile_cta_app_store,
+  home_mobile_cta_description,
+  home_mobile_cta_google_play,
+  home_mobile_cta_title,
+} from "@rezics/i18n/messages";
+const m = {
+  home_mobile_cta_app_store,
+  home_mobile_cta_description,
+  home_mobile_cta_google_play,
+  home_mobile_cta_title,
+};
+
+const i18nMessages = {
+  home_mobile_cta_app_store,
+  home_mobile_cta_description,
+  home_mobile_cta_google_play,
+  home_mobile_cta_title,
+};
 
 export const HomeMobileDownloadCTA: React.FC = () => {
+  const m = useMessage(i18nMessages);
   return (
     <div className="w-full rounded border p-4 flex items-center justify-between bg-gray-50">
       <div>

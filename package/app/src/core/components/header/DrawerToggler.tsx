@@ -1,6 +1,14 @@
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { Menu } from "lucide-react";
+import { useMessage } from "@rezics/i18n/react";
+import { accessibility_open_drawer } from "@rezics/i18n/messages";
+const m = {
+  accessibility_open_drawer,
+};
+
+const i18nMessages = {
+  accessibility_open_drawer,
+};
 
 interface DrawerTogglerProps {
   handleDrawerToggleInner: () => void;
@@ -13,6 +21,7 @@ export const DrawerToggler = ({
   layoutType,
   sidebarOpen,
 }: DrawerTogglerProps) => {
+  const m = useMessage(i18nMessages);
   const hidden = layoutType === "type-a" && sidebarOpen;
   return (
     <Button

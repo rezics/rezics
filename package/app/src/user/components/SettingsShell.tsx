@@ -1,10 +1,19 @@
-import * as m from "@rezics/i18n/messages";
 import { Outlet } from "@tanstack/react-router";
 import type { FC } from "react";
 import { SettingsSidebar } from "./SettingsSidebar";
 import { SettingsTabBar } from "./SettingsTabBar";
+import { useMessage } from "@rezics/i18n/react";
+import { settings_title } from "@rezics/i18n/messages";
+const m = {
+  settings_title,
+};
+
+const i18nMessages = {
+  settings_title,
+};
 
 export const SettingsShell: FC = () => {
+  const m = useMessage(i18nMessages);
   return (
     <div className="w-full max-w-6xl mx-auto pb-12">
       <h5 className="text-xl font-semibold px-4 pt-8 pb-4">

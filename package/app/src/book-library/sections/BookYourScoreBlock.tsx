@@ -6,7 +6,6 @@ import {
   useUpsertScoreMutation,
 } from "@rezics/api/score/score";
 import { SCORE_MAX } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -24,6 +23,41 @@ import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_hero_your_score_dialog_edit,
+  book_hero_your_score_dialog_rate,
+  book_hero_your_score_label,
+  book_hero_your_score_rate,
+  book_hero_your_score_remove,
+  book_hero_your_score_sign_in,
+  common_cancel,
+  common_saving,
+  common_submit,
+} from "@rezics/i18n/messages";
+const m = {
+  book_hero_your_score_dialog_edit,
+  book_hero_your_score_dialog_rate,
+  book_hero_your_score_label,
+  book_hero_your_score_rate,
+  book_hero_your_score_remove,
+  book_hero_your_score_sign_in,
+  common_cancel,
+  common_saving,
+  common_submit,
+};
+
+const i18nMessages = {
+  book_hero_your_score_dialog_edit,
+  book_hero_your_score_dialog_rate,
+  book_hero_your_score_label,
+  book_hero_your_score_rate,
+  book_hero_your_score_remove,
+  book_hero_your_score_sign_in,
+  common_cancel,
+  common_saving,
+  common_submit,
+};
 
 interface BookYourScoreBlockProps {
   bookUnitId: string;
@@ -34,6 +68,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
   bookUnitId,
   realmId = getDefaultRealmId() ?? "default",
 }) => {
+  const m = useMessage(i18nMessages);
   const userId = useCurrentUserId();
   const isAuthed = Boolean(userId);
 

@@ -1,5 +1,4 @@
 import { userMutations } from "@rezics/api/user/user.mutations";
-import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -16,8 +15,59 @@ import React from "react";
 
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_user_avatar_url_label,
+  admin_user_bio_label,
+  admin_user_create_description,
+  admin_user_create_failed,
+  admin_user_create_note,
+  admin_user_create_title,
+  admin_user_creating,
+  admin_user_password_min_help,
+  admin_user_rezics_email_label,
+  admin_user_slug_help,
+  admin_user_slug_label,
+  common_back,
+  common_create,
+  common_password,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_user_avatar_url_label,
+  admin_user_bio_label,
+  admin_user_create_description,
+  admin_user_create_failed,
+  admin_user_create_note,
+  admin_user_create_title,
+  admin_user_creating,
+  admin_user_password_min_help,
+  admin_user_rezics_email_label,
+  admin_user_slug_help,
+  admin_user_slug_label,
+  common_back,
+  common_create,
+  common_password,
+};
+
+const i18nMessages = {
+  admin_user_avatar_url_label,
+  admin_user_bio_label,
+  admin_user_create_description,
+  admin_user_create_failed,
+  admin_user_create_note,
+  admin_user_create_title,
+  admin_user_creating,
+  admin_user_password_min_help,
+  admin_user_rezics_email_label,
+  admin_user_slug_help,
+  admin_user_slug_label,
+  common_back,
+  common_create,
+  common_password,
+};
 
 export default function UserCreatePage() {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
 
   const [email, setEmail] = React.useState("");

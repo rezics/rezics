@@ -1,11 +1,19 @@
 import { postsByTargetQuery } from "@rezics/api/post/post";
 import type { PostKind } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { PostCard } from "../components/item/PostCard";
+import { useMessage } from "@rezics/i18n/react";
+import { discussion_empty } from "@rezics/i18n/messages";
+const m = {
+  discussion_empty,
+};
+
+const i18nMessages = {
+  discussion_empty,
+};
 
 interface PostListSectionProps {
   targetUnitId: string;
@@ -18,6 +26,7 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
   kind,
   limit = 20,
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const { data, isLoading } = useQuery(
     postsByTargetQuery(targetUnitId, {

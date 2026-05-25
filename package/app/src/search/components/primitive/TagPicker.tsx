@@ -1,10 +1,18 @@
 import type { TagRef } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTagSuggest } from "../../hooks/useTagSuggest";
+import { useMessage } from "@rezics/i18n/react";
+import { tag_clear } from "@rezics/i18n/messages";
+const m = {
+  tag_clear,
+};
+
+const i18nMessages = {
+  tag_clear,
+};
 
 export type TagPickerProps = {
   value: TagRef[];
@@ -24,6 +32,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   label,
   placeholder,
 }) => {
+  const m = useMessage(i18nMessages);
   const [inputValue, setInputValue] = useState("");
   const { suggestions } = useTagSuggest(inputValue);
 

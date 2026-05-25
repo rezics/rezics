@@ -1,6 +1,5 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -11,8 +10,41 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  common_next_page,
+  common_page_of,
+  common_previous_page,
+  profile_following,
+  profile_no_followers,
+  profile_no_following,
+  profile_tab_followers,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  common_next_page,
+  common_page_of,
+  common_previous_page,
+  profile_following,
+  profile_no_followers,
+  profile_no_following,
+  profile_tab_followers,
+};
+
+const i18nMessages = {
+  common_loading,
+  common_next_page,
+  common_page_of,
+  common_previous_page,
+  profile_following,
+  profile_no_followers,
+  profile_no_following,
+  profile_tab_followers,
+};
 
 export const FollowersTabSection: FC = () => {
+  const m = useMessage(i18nMessages);
   const { user, userId, isCurrentUser } = useProfileContext();
   const [filter, setFilter] = useState("followers");
   const [page, setPage] = useState(1);

@@ -8,10 +8,26 @@ import {
   markdownContentDoc,
   type PostDTO,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_save,
+  common_saving,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_save,
+  common_saving,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_save,
+  common_saving,
+};
 
 export interface WikiPostEditorProps {
   targetUnitId?: string;
@@ -26,6 +42,7 @@ export function WikiPostEditor({
   onSaved,
   onCancel,
 }: WikiPostEditorProps) {
+  const m = useMessage(i18nMessages);
   const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const resize = useMemo(

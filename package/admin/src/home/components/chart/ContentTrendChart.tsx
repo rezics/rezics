@@ -1,5 +1,4 @@
 import type { AdminStatsResponse } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   BarElement,
   CategoryScale,
@@ -10,6 +9,20 @@ import {
 } from "chart.js";
 import { useMemo } from "react";
 import { Bar } from "react-chartjs-2";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_dashboard_comments,
+  admin_nav_books,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_dashboard_comments,
+  admin_nav_books,
+};
+
+const i18nMessages = {
+  admin_dashboard_comments,
+  admin_nav_books,
+};
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -30,6 +43,7 @@ function readCssVar(name: string, fallback: string): string {
 }
 
 export function ContentTrendChart({ trend }: ContentTrendChartProps) {
+  const m = useMessage(i18nMessages);
   const isDark =
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");

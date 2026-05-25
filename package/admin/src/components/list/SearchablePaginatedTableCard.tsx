@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -15,6 +14,17 @@ import {
   type PaginatedColumn,
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
+import { useMessage } from "@rezics/i18n/react";
+import { common_failed_to_load, common_search } from "@rezics/i18n/messages";
+const m = {
+  common_failed_to_load,
+  common_search,
+};
+
+const i18nMessages = {
+  common_failed_to_load,
+  common_search,
+};
 
 export function SearchablePaginatedTableCard<T>({
   title,
@@ -57,6 +67,7 @@ export function SearchablePaginatedTableCard<T>({
   onPageChange: (nextPage: number) => void;
   onRowsPerPageChange: (nextRowsPerPage: number) => void;
 }) {
+  const m = useMessage(i18nMessages);
   return (
     <>
       {title ? <h2 className="text-xl font-extrabold mb-2">{title}</h2> : null}

@@ -1,7 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
-import * as m from "@rezics/i18n/messages";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -15,6 +14,26 @@ import {
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { TextLink } from "@/shared/ui/link";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_edit,
+  common_loading,
+  common_no_data,
+  review_comments,
+} from "@rezics/i18n/messages";
+const m = {
+  common_edit,
+  common_loading,
+  common_no_data,
+  review_comments,
+};
+
+const i18nMessages = {
+  common_edit,
+  common_loading,
+  common_no_data,
+  review_comments,
+};
 
 interface ReviewDetailSectionProps {
   reviewId: string;
@@ -23,6 +42,7 @@ interface ReviewDetailSectionProps {
 export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
   reviewId,
 }) => {
+  const m = useMessage(i18nMessages);
   const commentRef = useRef<HTMLDivElement>(null);
   const composerRef = useFocusReplyFromQuery();
 

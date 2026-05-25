@@ -1,10 +1,19 @@
-import * as m from "@rezics/i18n/messages";
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
 import { Moon as Brightness4Icon, Sun as Brightness7Icon } from "lucide-react";
 import { useMemo } from "react";
 import { useAppStore } from "@/app/states/appStore";
+import { useMessage } from "@rezics/i18n/react";
+import { app_toggle_theme } from "@rezics/i18n/messages";
+const m = {
+  app_toggle_theme,
+};
+
+const i18nMessages = {
+  app_toggle_theme,
+};
 
 export function ThemeToggler() {
+  const m = useMessage(i18nMessages);
   const themeMode = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
 

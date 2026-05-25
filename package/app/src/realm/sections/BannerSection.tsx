@@ -1,8 +1,8 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource, type RealmBannerExtra } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { realm_banner } from "@rezics/i18n/messages";
 
 export interface BannerSectionProps {
   banner?: RealmBannerExtra | null;
@@ -22,7 +22,7 @@ function getPostBannerUrl(post: unknown): string | undefined {
 function getPostBannerTitle(post: unknown): string {
   const body =
     mainMarkdownSource((post as { content?: unknown })?.content) ?? "";
-  return body.trim().split("\n").find(Boolean) ?? m.realm_banner();
+  return body.trim().split("\n").find(Boolean) ?? realm_banner();
 }
 
 export const BannerSection: React.FC<BannerSectionProps> = ({ banner }) => {

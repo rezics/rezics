@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -14,6 +13,26 @@ import {
 } from "lucide-react";
 import type React from "react";
 import type { Action, EngagementSize } from "../types";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_more_actions,
+  common_reply,
+  common_share,
+  shelf_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_more_actions,
+  common_reply,
+  common_share,
+  shelf_title,
+};
+
+const i18nMessages = {
+  common_more_actions,
+  common_reply,
+  common_share,
+  shelf_title,
+};
 
 export type OverflowMenuProps = {
   items: Action[];
@@ -53,6 +72,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
   onInvoke,
   children,
 }) => {
+  const m = useMessage(i18nMessages);
   const visible = items.filter(
     (token) => DESCRIPTORS[token] !== undefined,
   ) as Action[];

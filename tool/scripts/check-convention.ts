@@ -799,6 +799,10 @@ function getStagedFilePaths(): string[] {
 
 const dynamicMessagePattern =
   /\bm\s*\[\s*(?!["'][A-Za-z0-9_.-]+["'])|const\s+\{[^}]+\}\s*=\s*m\b/;
+const generatedMessageNamespaceImportPattern =
+  /import\s+\*\s+as\s+\w+\s+from\s+["'](?:@rezics\/i18n\/messages|@rezics\/ui\/i18n\/messages|[^"']*paraglide\/messages(?:\.js)?)["']/;
+const adapterGeneratedMessageImportPattern =
+  /from\s+["'](?:@rezics\/i18n\/messages|@rezics\/ui\/i18n\/messages|[^"']*paraglide\/messages(?:\.js)?)["']/;
 const i18nKeyCallPattern = /\bt\s*\([^)]*\.i18nKey\b/;
 const contractI18nKeyPattern = /\bi18nKey\s*:/;
 const frontendSourcePattern =
@@ -838,6 +842,33 @@ export function scanI18nSourceForTest(
       path: relFilePath,
       message:
         "generated Paraglide messages must be referenced statically; route dynamic discriminators through explicit label maps",
+      spec: SPEC_LINK.R11,
+    });
+  }
+
+  if (
+    frontendSourcePattern.test(relFilePath) &&
+    !relFilePath.endsWith(".stories.tsx") &&
+    generatedMessageNamespaceImportPattern.test(source)
+  ) {
+    violations.push({
+      rule: "R11",
+      path: relFilePath,
+      message:
+        "production React source must import generated messages by name and bind them through useMessage(messageBag)",
+      spec: SPEC_LINK.R11,
+    });
+  }
+
+  if (
+    relFilePath === "package/i18n/src/react.ts" &&
+    adapterGeneratedMessageImportPattern.test(source)
+  ) {
+    violations.push({
+      rule: "R11",
+      path: relFilePath,
+      message:
+        "@rezics/i18n/react must stay neutral and must not import generated message catalogs",
       spec: SPEC_LINK.R11,
     });
   }

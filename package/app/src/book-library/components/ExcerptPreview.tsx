@@ -1,10 +1,18 @@
 import { postQueries } from "@rezics/api/post/post";
 import { type PostDTO, PostKind, type UnitDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ExcerptList } from "@/excerpt";
+import { useMessage } from "@rezics/i18n/react";
+import { common_loading } from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+};
+
+const i18nMessages = {
+  common_loading,
+};
 
 export type ExcerptPreviewProps = {
   id: string;
@@ -15,6 +23,7 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   id,
   excerptNumber = 3,
 }) => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, error } = useQuery(
     postQueries.byTarget(id, {
       kind: PostKind.EXCERPT,

@@ -1,6 +1,5 @@
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -10,6 +9,41 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  profile_realms_load_failed,
+  profile_realms_none_created,
+  profile_realms_none_joined,
+  realm_member_count,
+  realm_official,
+  realm_private,
+  common_created,
+  profile_realms_joined,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  profile_realms_load_failed,
+  profile_realms_none_created,
+  profile_realms_none_joined,
+  realm_member_count,
+  realm_official,
+  realm_private,
+  common_created,
+  profile_realms_joined,
+};
+
+const i18nMessages = {
+  common_loading,
+  profile_realms_load_failed,
+  profile_realms_none_created,
+  profile_realms_none_joined,
+  realm_member_count,
+  realm_official,
+  realm_private,
+  common_created,
+  profile_realms_joined,
+};
 
 const FILTER_CHIP_LABEL = {
   joined: m.profile_realms_joined,
@@ -42,6 +76,7 @@ function mapJoinedRealmToListItem(realm: RealmDTO): RealmListItemModel {
 }
 
 export const RealmsTabSection: FC = () => {
+  const m = useMessage(i18nMessages);
   const { userId } = useProfileContext();
   const [filter, setFilter] = useState("joined");
 
@@ -117,6 +152,7 @@ export const RealmsTabSection: FC = () => {
 };
 
 const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
+  const m = useMessage(i18nMessages);
   return (
     <Link
       to={unitHref({

@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -9,8 +8,23 @@ import { Plus as AddIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { CreateMenuItem } from "./CreateMenuItem";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  app_create_menu_aria_label,
+  common_create,
+} from "@rezics/i18n/messages";
+const m = {
+  app_create_menu_aria_label,
+  common_create,
+};
+
+const i18nMessages = {
+  app_create_menu_aria_label,
+  common_create,
+};
 
 export const CreateMenu: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const [open, setOpen] = useState(false);
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

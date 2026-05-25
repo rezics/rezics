@@ -1,5 +1,11 @@
 import type { UserUnitProgressStatus } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
+import {
+  book_hero_actions_dropped,
+  book_hero_actions_paused,
+  book_hero_actions_read,
+  book_hero_actions_reading,
+  book_hero_actions_want_to_read,
+} from "@rezics/i18n/messages";
 
 export type ReadStatus = UserUnitProgressStatus;
 
@@ -12,11 +18,11 @@ export const READ_STATUS_VALUES = [
 ] as const satisfies readonly ReadStatus[];
 
 const READ_STATUS_MESSAGE = {
-  BACKLOG: m.book_hero_actions_want_to_read,
-  ACTIVE: m.book_hero_actions_reading,
-  PAUSED: m.book_hero_actions_paused,
-  COMPLETED: m.book_hero_actions_read,
-  DROPPED: m.book_hero_actions_dropped,
+  BACKLOG: book_hero_actions_want_to_read,
+  ACTIVE: book_hero_actions_reading,
+  PAUSED: book_hero_actions_paused,
+  COMPLETED: book_hero_actions_read,
+  DROPPED: book_hero_actions_dropped,
 } as const satisfies Record<ReadStatus, () => string>;
 
 export function readStatusLabel(status: ReadStatus): string {

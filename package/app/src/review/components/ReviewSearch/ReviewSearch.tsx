@@ -1,5 +1,4 @@
 import type { SearchQuery } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import {
   AppliedFilterChips,
@@ -7,6 +6,23 @@ import {
   TagPicker,
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  review_search_placeholder,
+  search_input_tags_hint,
+  search_input_tags_label,
+} from "@rezics/i18n/messages";
+const m = {
+  review_search_placeholder,
+  search_input_tags_hint,
+  search_input_tags_label,
+};
+
+const i18nMessages = {
+  review_search_placeholder,
+  search_input_tags_hint,
+  search_input_tags_label,
+};
 
 export type ReviewSearchProps = {
   query: UseSearchQueryReturn["query"];
@@ -27,6 +43,7 @@ export const ReviewSearch: React.FC<ReviewSearchProps> = ({
   middleware,
   keywordPlaceholder,
 }) => {
+  const m = useMessage(i18nMessages);
   const keyword = bind("keyword");
   const tags = bind("tags");
 

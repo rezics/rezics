@@ -1,7 +1,6 @@
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -10,6 +9,26 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_remark,
+  review_search_placeholder,
+  review_short_review,
+  review_tabs_label,
+} from "@rezics/i18n/messages";
+const m = {
+  book_remark,
+  review_search_placeholder,
+  review_short_review,
+  review_tabs_label,
+};
+
+const i18nMessages = {
+  book_remark,
+  review_search_placeholder,
+  review_short_review,
+  review_tabs_label,
+};
 
 type Review = PostDTO;
 
@@ -18,6 +37,7 @@ export interface ReviewsPageProps {
 }
 
 export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
+  const m = useMessage(i18nMessages);
   const ref = useRef<UniversalPaginatorHandle>(null);
   const targetUnitId = bookUnitId ?? "";
   const EXTERNAL_PAGE_SIZE = 50;

@@ -8,7 +8,6 @@ import {
   useUpdateShelfMutation,
 } from "@rezics/api/shelf/shelf.mutations";
 import { contentDocMarkdownFallback } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -28,6 +27,22 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
+import {
+  common_cancel,
+  common_save,
+  shelf_back_to_shelf,
+  shelf_content_type_label,
+  shelf_content_type_update_failed,
+  shelf_cover_url_label,
+  shelf_default_view_help,
+  shelf_default_view_label,
+  shelf_description_label,
+  shelf_edit_title,
+  shelf_title_label,
+  shelf_unsaved_changes_confirm,
+  shelf_view_flat,
+  shelf_view_nested,
+} from "@rezics/i18n/messages";
 
 interface ShelfEditPageProps {
   shelfId: string;
@@ -39,8 +54,8 @@ function normalizeViewMode(raw: unknown): ShelfView {
 }
 
 const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
-  { value: "nested", label: m.shelf_view_nested() },
-  { value: "flat", label: m.shelf_view_flat() },
+  { value: "nested", label: shelf_view_nested() },
+  { value: "flat", label: shelf_view_flat() },
   // { value: "masonry", label: "Masonry" },
 ];
 
@@ -109,7 +124,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   useBlocker({
     shouldBlockFn: () => {
       if (!isDirty) return false;
-      return !window.confirm(m.shelf_unsaved_changes_confirm());
+      return !window.confirm(shelf_unsaved_changes_confirm());
     },
     enableBeforeUnload: () => isDirty,
   });
@@ -144,19 +159,19 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label={m.shelf_back_to_shelf()}
+          aria-label={shelf_back_to_shelf()}
           onClick={() =>
             navigate({ to: "/shelf/$shelfId", params: { shelfId } })
           }
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-2xl font-semibold">{m.shelf_edit_title()}</h1>
+        <h1 className="text-2xl font-semibold">{shelf_edit_title()}</h1>
       </div>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-title">{m.shelf_title_label()}</Label>
+          <Label htmlFor="edit-shelf-title">{shelf_title_label()}</Label>
           <Input
             id="edit-shelf-title"
             value={title}
@@ -165,7 +180,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-shelf-description">
-            {m.shelf_description_label()}
+            {shelf_description_label()}
           </Label>
           <textarea
             id="edit-shelf-description"
@@ -176,7 +191,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-cover">{m.shelf_cover_url_label()}</Label>
+          <Label htmlFor="edit-shelf-cover">{shelf_cover_url_label()}</Label>
           <Input
             id="edit-shelf-cover"
             value={coverUrl}
@@ -184,7 +199,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label>{m.shelf_content_type_label()}</Label>
+          <Label>{shelf_content_type_label()}</Label>
           <SeedTagChipGroup
             value={pinnedTagIds}
             onChange={handlePinnedTagsChange}
@@ -193,13 +208,13 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           {setPinnedTagsMutation.isError && (
             <span className="text-xs text-error-text">
               {setPinnedTagsMutation.error?.message ??
-                m.shelf_content_type_update_failed()}
+                shelf_content_type_update_failed()}
             </span>
           )}
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="edit-shelf-default-view">
-            {m.shelf_default_view_label()}
+            {shelf_default_view_label()}
           </Label>
           <Select
             value={defaultViewMode}
@@ -210,7 +225,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             <SelectTrigger id="edit-shelf-default-view" className="w-full">
               <SelectValue>
                 {VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode)
-                  ?.label ?? m.shelf_view_nested()}
+                  ?.label ?? shelf_view_nested()}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -222,7 +237,7 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             </SelectContent>
           </Select>
           <span className="text-xs text-text-secondary">
-            {m.shelf_default_view_help()}
+            {shelf_default_view_help()}
           </span>
         </div>
         <div className="flex flex-row justify-end gap-4">
@@ -232,13 +247,13 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
               navigate({ to: "/shelf/$shelfId", params: { shelfId } })
             }
           >
-            {m.common_cancel()}
+            {common_cancel()}
           </Button>
           <Button
             onClick={handleSave}
             disabled={updateMutation.isPending || !metadataDirty}
           >
-            {m.common_save()}
+            {common_save()}
           </Button>
         </div>
 

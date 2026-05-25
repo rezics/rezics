@@ -1,5 +1,4 @@
 import { mainMarkdownSource, type PublicUser } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButtonFloatRight.tsx";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
@@ -9,6 +8,29 @@ import type React from "react";
 import { FollowButton } from "@/engagement/components/FollowButton.tsx";
 import { unitHref } from "@/shared/ui/link";
 import { useIsMobile } from "@/shared/utils/use-media-query.ts";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_author_avatar_alt,
+  book_author_info_author_line,
+  book_author_info_bio_label,
+  book_author_info_description_label,
+  common_edit,
+} from "@rezics/i18n/messages";
+const m = {
+  book_author_avatar_alt,
+  book_author_info_author_line,
+  book_author_info_bio_label,
+  book_author_info_description_label,
+  common_edit,
+};
+
+const i18nMessages = {
+  book_author_avatar_alt,
+  book_author_info_author_line,
+  book_author_info_bio_label,
+  book_author_info_description_label,
+  common_edit,
+};
 
 // --------- Types ---------
 export type Author = PublicUser;
@@ -33,6 +55,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
+  const m = useMessage(i18nMessages);
   const description = mainMarkdownSource(author.description);
 
   return (
@@ -94,6 +117,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
+  const m = useMessage(i18nMessages);
   const description = mainMarkdownSource(author.description);
 
   return (

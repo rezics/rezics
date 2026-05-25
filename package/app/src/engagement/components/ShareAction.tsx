@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -12,6 +11,23 @@ import { cn } from "@/shared/utils/css-util";
 import { useShareMenu } from "../hooks/useShareMenu";
 import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_copy_link,
+  common_share,
+  common_share_via,
+} from "@rezics/i18n/messages";
+const m = {
+  common_copy_link,
+  common_share,
+  common_share_via,
+};
+
+const i18nMessages = {
+  common_copy_link,
+  common_share,
+  common_share_via,
+};
 
 export type ShareActionProps = {
   /** Override the size from context. Rarely needed; prefer setting on the bar. */
@@ -38,6 +54,7 @@ export const ShareAction: React.FC<ShareActionProps> = ({
   href,
   title,
 }) => {
+  const m = useMessage(i18nMessages);
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const isPill = ctx.variant === "pill";

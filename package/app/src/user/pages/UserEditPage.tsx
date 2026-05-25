@@ -6,7 +6,6 @@ import {
   type UpdateUser,
   type UserDTO,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import {
@@ -28,6 +27,44 @@ import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_description,
+  common_nickname,
+  common_save,
+  entity_avatar_url,
+  settings_profile_about_help,
+  settings_profile_avatar_help,
+  settings_profile_bio,
+  settings_profile_edit_title,
+  user_load_failed,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_description,
+  common_nickname,
+  common_save,
+  entity_avatar_url,
+  settings_profile_about_help,
+  settings_profile_avatar_help,
+  settings_profile_bio,
+  settings_profile_edit_title,
+  user_load_failed,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_description,
+  common_nickname,
+  common_save,
+  entity_avatar_url,
+  settings_profile_about_help,
+  settings_profile_avatar_help,
+  settings_profile_bio,
+  settings_profile_edit_title,
+  user_load_failed,
+};
 
 export interface UserEditPageProps {
   onCancel?: () => void;
@@ -48,6 +85,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   onSuccess,
   userId,
 }) => {
+  const m = useMessage(i18nMessages);
   const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
   const resolvedUserId = userId ?? routeMatch?.params.userId;
   const [user, setUser] = useState<UserDTO | null>(null);

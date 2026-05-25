@@ -6,19 +6,41 @@ Shared product and domain translations for Rezics frontends.
 
 - Edit source messages in `messages/{locale}.json`.
 - Run `bun --filter=@rezics/i18n run compile` after changing messages.
-- Import product messages from `@rezics/i18n/messages` or helpers from
+- Import product messages by name from `@rezics/i18n/messages` or helpers from
   `@rezics/i18n`.
 - Do not edit `src/paraglide/` by hand.
-- Frontend UI copy must call generated message functions directly:
+- React UI copy must bind explicit message bags through `@rezics/i18n/react`:
 
-```ts
-import * as m from "@rezics/i18n/messages";
+```tsx
+import { common_save } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 
-m.common_save();
-m.review_validation_min_chars();
-m.book_hero_meta_chapter_count({ count });
+const messages = { common_save };
+
+export function SaveButton() {
+  const m = useMessage(messages);
+  return <button>{m.common_save()}</button>;
+}
 ```
 
+- App/admin bootstrap must register Paraglide runtimes before React renders:
+
+```ts
+import { initI18n, registerParaglideRuntime } from "@rezics/i18n/react";
+import * as productRuntime from "@rezics/i18n/runtime";
+import * as uiRuntime from "@rezics/ui/i18n/runtime";
+
+registerParaglideRuntime(productRuntime);
+registerParaglideRuntime(uiRuntime);
+initI18n();
+```
+
+- `@rezics/i18n/react` is a neutral adapter. It must not import generated
+  message catalogs, UI package code, routers, API clients, or app/admin shell
+  modules.
+- Named imports and module-scope message bags keep Paraglide output
+  tree-shakeable. Do not import `* as m` from generated message catalogs in
+  production React code, and do not introduce global message registries.
 - Do not use runtime string-key resolvers, fallback string arguments, or
   `useTranslation().t(...)` for UI copy.
 

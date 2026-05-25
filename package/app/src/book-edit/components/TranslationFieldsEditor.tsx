@@ -1,7 +1,26 @@
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import type { TranslationDraft } from "../hooks/useBookTranslationEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_description,
+  book_fields_title,
+  page_book_edit_info_translation_fields_subtitle,
+  page_book_edit_info_translation_fields_summary,
+} from "@rezics/i18n/messages";
+const m = {
+  book_description,
+  book_fields_title,
+  page_book_edit_info_translation_fields_subtitle,
+  page_book_edit_info_translation_fields_summary,
+};
+
+const i18nMessages = {
+  book_description,
+  book_fields_title,
+  page_book_edit_info_translation_fields_subtitle,
+  page_book_edit_info_translation_fields_summary,
+};
 
 export interface TranslationFieldsEditorProps {
   draft: TranslationDraft;
@@ -16,6 +35,7 @@ export interface TranslationFieldsEditorProps {
 export const TranslationFieldsEditor: React.FC<
   TranslationFieldsEditorProps
 > = ({ draft, onChange, disabled, afterTitleSlot }) => {
+  const m = useMessage(i18nMessages);
   return (
     <div className="flex flex-col gap-5">
       <div className="space-y-1">

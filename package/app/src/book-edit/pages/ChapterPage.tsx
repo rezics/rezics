@@ -12,7 +12,6 @@ import {
   mainMarkdownSource,
   markdownContentDoc,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -39,6 +38,23 @@ import {
   RezicsMarkdownEditor,
   type ViewMode,
 } from "@/shared/ui/RezicsMarkdownEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  chapter_metadata,
+  chapter_move_volume,
+  placeholders_chapter_title,
+} from "@rezics/i18n/messages";
+const m = {
+  chapter_metadata,
+  chapter_move_volume,
+  placeholders_chapter_title,
+};
+
+const i18nMessages = {
+  chapter_metadata,
+  chapter_move_volume,
+  placeholders_chapter_title,
+};
 
 function updateContentStructureNodeTitle(
   nodes: BookContentStructureItem[],
@@ -64,6 +80,7 @@ function updateContentStructureNodeTitle(
  * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验
  */
 export const BookEditChapterPage: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const { bookId } = bookEditLayoutRoute.useParams();
   const { chapterId } = bookEditChapterRoute.useParams();
   // Load chapter detail

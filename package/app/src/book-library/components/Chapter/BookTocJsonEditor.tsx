@@ -1,12 +1,22 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookContentStructureItem } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { useMessage } from "@rezics/i18n/react";
+import { book_toc_disabled, common_loading } from "@rezics/i18n/messages";
+const m = {
+  book_toc_disabled,
+  common_loading,
+};
+
+const i18nMessages = {
+  book_toc_disabled,
+  common_loading,
+};
 
 /** Props for BookTocJsonEditor component. */
 interface BookTocJsonEditorProps {
@@ -27,6 +37,7 @@ type BookTocJsonData = {
 export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
   bookId,
 }) => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, error } = useQuery(
     bookQueries.contentStructure(bookId),
   );

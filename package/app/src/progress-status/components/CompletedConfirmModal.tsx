@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -9,6 +8,26 @@ import {
   DialogTitle,
 } from "@rezics/ui/shadcn";
 import { useEffect, useRef, useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_confirm,
+  progress_status_completed_modal_description,
+  progress_status_completed_modal_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_confirm,
+  progress_status_completed_modal_description,
+  progress_status_completed_modal_title,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_confirm,
+  progress_status_completed_modal_description,
+  progress_status_completed_modal_title,
+};
 
 type CompletedConfirmModalProps = {
   open: boolean;
@@ -35,6 +54,7 @@ export function CompletedConfirmModal({
   onConfirm,
   isPending,
 }: CompletedConfirmModalProps) {
+  const m = useMessage(i18nMessages);
   const [displayCount, setDisplayCount] = useState(currentCount);
   const [badgeFading, setBadgeFading] = useState(false);
   const [animating, setAnimating] = useState(false);

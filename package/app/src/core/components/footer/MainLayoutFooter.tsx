@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { GithubIcon, TelegramIcon } from "@rezics/icons";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import {
@@ -11,6 +10,89 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_logo_alt,
+  layout_footer_brand_description,
+  layout_footer_brand_slogan,
+  layout_footer_copyright,
+  layout_footer_legal_contact,
+  layout_footer_legal_privacy,
+  layout_footer_legal_terms,
+  layout_footer_newsletter_description,
+  layout_footer_newsletter_email_aria,
+  layout_footer_newsletter_email_placeholder,
+  layout_footer_newsletter_submit,
+  layout_footer_newsletter_title,
+  layout_footer_product_aria,
+  layout_footer_product_discover,
+  layout_footer_product_reviews,
+  layout_footer_product_search,
+  layout_footer_product_shelves,
+  layout_footer_product_title,
+  layout_footer_resources_api,
+  layout_footer_resources_aria,
+  layout_footer_resources_changelog,
+  layout_footer_resources_docs,
+  layout_footer_resources_title,
+  layout_footer_social_github,
+  layout_footer_social_telegram,
+} from "@rezics/i18n/messages";
+const m = {
+  common_logo_alt,
+  layout_footer_brand_description,
+  layout_footer_brand_slogan,
+  layout_footer_copyright,
+  layout_footer_legal_contact,
+  layout_footer_legal_privacy,
+  layout_footer_legal_terms,
+  layout_footer_newsletter_description,
+  layout_footer_newsletter_email_aria,
+  layout_footer_newsletter_email_placeholder,
+  layout_footer_newsletter_submit,
+  layout_footer_newsletter_title,
+  layout_footer_product_aria,
+  layout_footer_product_discover,
+  layout_footer_product_reviews,
+  layout_footer_product_search,
+  layout_footer_product_shelves,
+  layout_footer_product_title,
+  layout_footer_resources_api,
+  layout_footer_resources_aria,
+  layout_footer_resources_changelog,
+  layout_footer_resources_docs,
+  layout_footer_resources_title,
+  layout_footer_social_github,
+  layout_footer_social_telegram,
+};
+
+const i18nMessages = {
+  common_logo_alt,
+  layout_footer_brand_description,
+  layout_footer_brand_slogan,
+  layout_footer_copyright,
+  layout_footer_legal_contact,
+  layout_footer_legal_privacy,
+  layout_footer_legal_terms,
+  layout_footer_newsletter_description,
+  layout_footer_newsletter_email_aria,
+  layout_footer_newsletter_email_placeholder,
+  layout_footer_newsletter_submit,
+  layout_footer_newsletter_title,
+  layout_footer_product_aria,
+  layout_footer_product_discover,
+  layout_footer_product_reviews,
+  layout_footer_product_search,
+  layout_footer_product_shelves,
+  layout_footer_product_title,
+  layout_footer_resources_api,
+  layout_footer_resources_aria,
+  layout_footer_resources_changelog,
+  layout_footer_resources_docs,
+  layout_footer_resources_title,
+  layout_footer_social_github,
+  layout_footer_social_telegram,
+};
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -36,6 +118,7 @@ function FooterLink({
 }
 
 export function MainLayoutFooter({ className }: { className?: string }) {
+  const m = useMessage(i18nMessages);
   const year = new Date().getFullYear();
 
   return (

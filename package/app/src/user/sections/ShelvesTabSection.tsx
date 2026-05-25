@@ -4,7 +4,6 @@ import {
   SYSTEM_SHELF_KIND_KEYS,
   type SystemShelfKindKey,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
 import { Link } from "@/shared/ui/link";
@@ -15,6 +14,44 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  search_category_all,
+  shelf_controls_sort_by,
+  shelf_empty_yet,
+  shelf_items_count,
+  shelf_no_search_matches,
+  shelf_search_placeholder,
+  shelf_untitled,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  search_category_all,
+  shelf_controls_sort_by,
+  shelf_empty_yet,
+  shelf_items_count,
+  shelf_no_search_matches,
+  shelf_search_placeholder,
+  shelf_untitled,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+};
+
+const i18nMessages = {
+  common_loading,
+  search_category_all,
+  shelf_controls_sort_by,
+  shelf_empty_yet,
+  shelf_items_count,
+  shelf_no_search_matches,
+  shelf_search_placeholder,
+  shelf_untitled,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+};
 
 function isSystemKindKey(
   kindKey: string | null | undefined,
@@ -30,6 +67,7 @@ const SORT_OPTION_LABEL = {
 } as const satisfies Record<string, () => string>;
 
 export const ShelvesTabSection: FC = () => {
+  const m = useMessage(i18nMessages);
   const { user, userId, isCurrentUser } = useProfileContext();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
@@ -140,6 +178,7 @@ const ShelfCard: FC<{
   isOwnerView: boolean;
   userSlug?: string;
 }> = ({ shelf, isOwnerView, userSlug }) => {
+  const m = useMessage(i18nMessages);
   const dbTitle = shelf.translations?.[0]?.title ?? m.shelf_untitled();
   const systemKindKey = isSystemKindKey(shelf.kindKey) ? shelf.kindKey : null;
   const isSystemShelf = systemKindKey !== null;

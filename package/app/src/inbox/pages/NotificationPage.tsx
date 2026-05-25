@@ -3,14 +3,37 @@ import {
   useMarkAsReadMutation,
   useNotifications,
 } from "@rezics/api/notification";
-import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { InboxTabBar } from "../components/InboxTabBar.tsx";
 import { NotificationCard } from "../components/NotificationCard.tsx";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  notifications_empty,
+  notifications_load_failed,
+  notifications_mark_all_read,
+  notifications_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  notifications_empty,
+  notifications_load_failed,
+  notifications_mark_all_read,
+  notifications_title,
+};
+
+const i18nMessages = {
+  common_loading,
+  notifications_empty,
+  notifications_load_failed,
+  notifications_mark_all_read,
+  notifications_title,
+};
 
 export const NotificationPage: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, isError } = useNotifications(1, 50);
   const markAsRead = useMarkAsReadMutation();
   const markAllAsRead = useMarkAllAsReadMutation();

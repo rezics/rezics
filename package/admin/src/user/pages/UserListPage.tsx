@@ -1,8 +1,6 @@
 import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
-
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -22,6 +20,65 @@ import {
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_user_actions,
+  admin_user_failed_to_load_users,
+  admin_user_join_date,
+  admin_user_list_description,
+  admin_user_list_meili_description,
+  admin_user_list_meili_title,
+  admin_user_list_title,
+  admin_user_name_label,
+  admin_user_rezics_email_label,
+  admin_user_roles,
+  admin_user_search_action,
+  admin_user_search_placeholder,
+  admin_user_slug,
+  admin_user_user_id,
+  common_create,
+  common_edit,
+  common_search,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_user_actions,
+  admin_user_failed_to_load_users,
+  admin_user_join_date,
+  admin_user_list_description,
+  admin_user_list_meili_description,
+  admin_user_list_meili_title,
+  admin_user_list_title,
+  admin_user_name_label,
+  admin_user_rezics_email_label,
+  admin_user_roles,
+  admin_user_search_action,
+  admin_user_search_placeholder,
+  admin_user_slug,
+  admin_user_user_id,
+  common_create,
+  common_edit,
+  common_search,
+};
+
+const i18nMessages = {
+  admin_user_actions,
+  admin_user_failed_to_load_users,
+  admin_user_join_date,
+  admin_user_list_description,
+  admin_user_list_meili_description,
+  admin_user_list_meili_title,
+  admin_user_list_title,
+  admin_user_name_label,
+  admin_user_rezics_email_label,
+  admin_user_roles,
+  admin_user_search_action,
+  admin_user_search_placeholder,
+  admin_user_slug,
+  admin_user_user_id,
+  common_create,
+  common_edit,
+  common_search,
+};
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -31,6 +88,7 @@ function fmtDate(v?: string | Date) {
 }
 
 export default function UserListPage() {
+  const m = useMessage(i18nMessages);
   const matchRoute = useMatchRoute();
   const isMeiliMode = Boolean(matchRoute({ to: "/user/meili" }));
   const [q, setQ] = React.useState("");

@@ -4,13 +4,25 @@ import {
   themeGlobalTypes,
   withRezicsTheme,
 } from "@rezics/storybook-config/preview";
-import { setLocale } from "@rezics/ui/i18n/runtime";
+import { registerParaglideRuntime, setLocale } from "@rezics/i18n/react";
+import * as uiRuntime from "@rezics/ui/i18n/runtime";
 import type { Decorator, Preview } from "@storybook/react-vite";
 
 import "virtual:uno.css";
 
+let runtimeRegistered = false;
+
+function ensureUiRuntimeRegistered() {
+  if (runtimeRegistered) return;
+  registerParaglideRuntime(uiRuntime);
+  runtimeRegistered = true;
+}
+
 const withUiLocale: Decorator = (Story, context) => {
-  setLocale(context.globals.locale ?? "zh-hant", { reload: false });
+  const locale = context.globals.locale ?? "zh-hant";
+  ensureUiRuntimeRegistered();
+  setLocale(locale);
+  document.documentElement.lang = locale;
   return <Story />;
 };
 

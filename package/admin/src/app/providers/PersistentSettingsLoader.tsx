@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { initRezicsLocale } from "@/app/locale";
+import { initI18n } from "./i18n";
 
 export function PersistentSettingsLoader() {
   useEffect(() => {
-    initRezicsLocale();
+    initI18n();
   }, []);
 
   return null;

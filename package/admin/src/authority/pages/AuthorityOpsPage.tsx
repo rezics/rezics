@@ -1,6 +1,5 @@
 import { apiFetch } from "@rezics/api/react-query/http";
 import { unitAuthorityQueries } from "@rezics/api/unit/unit";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -16,6 +15,65 @@ import { useQuery } from "@tanstack/react-query";
 import { RotateCcw as RetryIcon, Search as SearchIcon } from "lucide-react";
 import React from "react";
 import { Page } from "@/core/layouts/Page";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_authority_description,
+  admin_authority_empty_help,
+  admin_authority_retry_failed,
+  admin_authority_retry_failed_button,
+  admin_authority_retry_queued,
+  admin_authority_title,
+  admin_authority_unit_search_placeholder,
+  admin_unit_collaborator_added_by,
+  admin_unit_collaborators_empty,
+  admin_unit_collaborators_failed_load,
+  admin_unit_collaborators_title,
+  admin_unit_field_lock_locked_by,
+  admin_unit_field_locks_empty,
+  admin_unit_field_locks_failed_load,
+  admin_unit_field_locks_title,
+  common_search,
+  common_unit_id,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_authority_description,
+  admin_authority_empty_help,
+  admin_authority_retry_failed,
+  admin_authority_retry_failed_button,
+  admin_authority_retry_queued,
+  admin_authority_title,
+  admin_authority_unit_search_placeholder,
+  admin_unit_collaborator_added_by,
+  admin_unit_collaborators_empty,
+  admin_unit_collaborators_failed_load,
+  admin_unit_collaborators_title,
+  admin_unit_field_lock_locked_by,
+  admin_unit_field_locks_empty,
+  admin_unit_field_locks_failed_load,
+  admin_unit_field_locks_title,
+  common_search,
+  common_unit_id,
+};
+
+const i18nMessages = {
+  admin_authority_description,
+  admin_authority_empty_help,
+  admin_authority_retry_failed,
+  admin_authority_retry_failed_button,
+  admin_authority_retry_queued,
+  admin_authority_title,
+  admin_authority_unit_search_placeholder,
+  admin_unit_collaborator_added_by,
+  admin_unit_collaborators_empty,
+  admin_unit_collaborators_failed_load,
+  admin_unit_collaborators_title,
+  admin_unit_field_lock_locked_by,
+  admin_unit_field_locks_empty,
+  admin_unit_field_locks_failed_load,
+  admin_unit_field_locks_title,
+  common_search,
+  common_unit_id,
+};
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -25,6 +83,7 @@ function fmtDate(v?: string | Date) {
 }
 
 export default function AuthorityOpsPage() {
+  const m = useMessage(i18nMessages);
   const [unitIdInput, setUnitIdInput] = React.useState("");
   const [unitId, setUnitId] = React.useState("");
   const [message, setMessage] = React.useState<string | null>(null);

@@ -1,5 +1,4 @@
 import type { PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Tooltip,
   TooltipContent,
@@ -18,12 +17,22 @@ import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { remarkCardActions, remarkPolicy } from "../../models/remarkPolicy";
+import { useMessage } from "@rezics/i18n/react";
+import { remark_open_remark_page } from "@rezics/i18n/messages";
+const m = {
+  remark_open_remark_page,
+};
+
+const i18nMessages = {
+  remark_open_remark_page,
+};
 
 interface RemarkRatingBadgeProps {
   remark: PostDTO;
 }
 
 const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
+  const m = useMessage(i18nMessages);
   const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
   const dateStr = remark.createdAt

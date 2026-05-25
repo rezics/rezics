@@ -1,6 +1,5 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import type { BookDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -21,6 +20,29 @@ import {
 import type React from "react";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
 import { BookProgressStatusSection } from "@/progress-status";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_hero_actions_add_to_shelf,
+  book_hero_actions_edit_details,
+  common_copy_link,
+  common_share,
+  common_share_via,
+} from "@rezics/i18n/messages";
+const m = {
+  book_hero_actions_add_to_shelf,
+  book_hero_actions_edit_details,
+  common_copy_link,
+  common_share,
+  common_share_via,
+};
+
+const i18nMessages = {
+  book_hero_actions_add_to_shelf,
+  book_hero_actions_edit_details,
+  common_copy_link,
+  common_share,
+  common_share_via,
+};
 
 interface BookHeroActionBarProps {
   bookInfo: BookDTO;
@@ -34,6 +56,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   bookInfo,
   shareTitle,
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "book", ownerUnit: bookInfo });
   const bookId = bookInfo?.unitId ?? "";

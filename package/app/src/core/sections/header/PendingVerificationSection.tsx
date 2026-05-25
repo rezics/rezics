@@ -1,9 +1,23 @@
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { logout } from "@/user/models/handler";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  auth_flow_complete_registration_action,
+  auth_logout,
+} from "@rezics/i18n/messages";
+const m = {
+  auth_flow_complete_registration_action,
+  auth_logout,
+};
+
+const i18nMessages = {
+  auth_flow_complete_registration_action,
+  auth_logout,
+};
 
 export function PendingVerificationSection() {
+  const m = useMessage(i18nMessages);
   const handleLogout = async () => {
     await logout();
   };

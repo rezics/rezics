@@ -1,5 +1,4 @@
 import { postQueries, postSubtreeQuery } from "@rezics/api/post/post";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -9,8 +8,18 @@ import { PostCard } from "../components/item/PostCard";
 import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { PostTreeList } from "../sections/PostTreeList";
+import { useMessage } from "@rezics/i18n/react";
+import { post_back_to_original_thread } from "@rezics/i18n/messages";
+const m = {
+  post_back_to_original_thread,
+};
+
+const i18nMessages = {
+  post_back_to_original_thread,
+};
 
 export const ContinueThreadPage: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const { rootPostUnitId, unitId } = useParams({ strict: false }) as {
     rootPostUnitId: string;
     unitId: string;

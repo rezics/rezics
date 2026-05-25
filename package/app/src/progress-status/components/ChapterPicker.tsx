@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Select,
   SelectContent,
@@ -7,6 +6,20 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useChapterPicker } from "../hooks/useChapterPicker";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  progress_status_chapter_picker_none,
+  progress_status_chapter_picker_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  progress_status_chapter_picker_none,
+  progress_status_chapter_picker_placeholder,
+};
+
+const i18nMessages = {
+  progress_status_chapter_picker_none,
+  progress_status_chapter_picker_placeholder,
+};
 
 type ChapterPickerProps = {
   bookUnitId: string;
@@ -23,6 +36,7 @@ export function ChapterPicker({
   onChange,
   disabled,
 }: ChapterPickerProps) {
+  const m = useMessage(i18nMessages);
   const { options, isLoading } = useChapterPicker(bookUnitId);
 
   return (

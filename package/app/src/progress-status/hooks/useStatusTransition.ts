@@ -12,7 +12,6 @@ import type {
   UnitLastPosition,
   UserUnitProgressStatus,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import {
@@ -20,6 +19,12 @@ import {
   planTransition,
   type ShelfOp,
 } from "../models/transition";
+import {
+  common_retry,
+  progress_status_toast_both_failed,
+  progress_status_toast_progress_failed,
+  progress_status_toast_shelf_failed,
+} from "@rezics/i18n/messages";
 
 export type StatusTransitionPayload = {
   to: UserUnitProgressStatus;
@@ -75,7 +80,7 @@ export function useStatusTransition(
       if (inFlightRetries.current.has(retryKey)) return;
       toast.error(message(), {
         action: {
-          label: m.common_retry(),
+          label: common_retry(),
           onClick: () => {
             if (inFlightRetries.current.has(retryKey)) return;
             inFlightRetries.current.add(retryKey);
@@ -110,7 +115,7 @@ export function useStatusTransition(
       if (progressFailed && shelfFailed) {
         showRetryToast(
           `${unitId}:both`,
-          m.progress_status_toast_both_failed,
+          progress_status_toast_both_failed,
           async () => {
             await Promise.allSettled([retryProgress(), retryShelf()]);
           },
@@ -118,13 +123,13 @@ export function useStatusTransition(
       } else if (progressFailed) {
         showRetryToast(
           `${unitId}:progress`,
-          m.progress_status_toast_progress_failed,
+          progress_status_toast_progress_failed,
           retryProgress,
         );
       } else if (shelfFailed) {
         showRetryToast(
           `${unitId}:shelf`,
-          m.progress_status_toast_shelf_failed,
+          progress_status_toast_shelf_failed,
           retryShelf,
         );
       }

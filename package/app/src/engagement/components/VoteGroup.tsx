@@ -1,5 +1,4 @@
 import { useReactionData } from "@rezics/api/reaction/reaction";
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
@@ -7,6 +6,17 @@ import { cn } from "@/shared/utils/css-util";
 import { useVoteController } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
+import { useMessage } from "@rezics/i18n/react";
+import { tag_downvote, tag_upvote } from "@rezics/i18n/messages";
+const m = {
+  tag_downvote,
+  tag_upvote,
+};
+
+const i18nMessages = {
+  tag_downvote,
+  tag_upvote,
+};
 
 export type VoteGroupProps = {
   targetUnitId: string;
@@ -48,6 +58,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
   targetUnitId,
   size: sizeProp,
 }) => {
+  const m = useMessage(i18nMessages);
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const variant = ctx.variant;

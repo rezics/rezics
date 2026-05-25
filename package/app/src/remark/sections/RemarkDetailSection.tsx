@@ -1,6 +1,5 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
@@ -8,6 +7,23 @@ import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "@/post/sections/PostTreeSection";
 import { TextLink } from "@/shared/ui/link";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_edit,
+  common_loading,
+  common_no_data,
+} from "@rezics/i18n/messages";
+const m = {
+  common_edit,
+  common_loading,
+  common_no_data,
+};
+
+const i18nMessages = {
+  common_edit,
+  common_loading,
+  common_no_data,
+};
 
 interface RemarkDetailSectionProps {
   remarkId: string;
@@ -16,6 +32,7 @@ interface RemarkDetailSectionProps {
 export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   remarkId,
 }) => {
+  const m = useMessage(i18nMessages);
   const composerRef = useFocusReplyFromQuery();
   const { data: remark, isLoading } = useQuery(postQueries.detail(remarkId));
   const canEdit = useCanEdit({

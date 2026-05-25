@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Avatar,
   AvatarFallback,
@@ -21,12 +20,33 @@ import { Link, unitHref } from "@/shared/ui/link";
 import { logout } from "@/user/models/handler";
 import { useUserProfileStore } from "@/user/states";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  app_account_menu_aria_label,
+  auth_logout,
+  navigation_profile,
+  navigation_settings,
+} from "@rezics/i18n/messages";
+const m = {
+  app_account_menu_aria_label,
+  auth_logout,
+  navigation_profile,
+  navigation_settings,
+};
+
+const i18nMessages = {
+  app_account_menu_aria_label,
+  auth_logout,
+  navigation_profile,
+  navigation_settings,
+};
 
 export type AccountMenuProps = {
   onLogout?: () => void;
 };
 
 export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const clearProfile = useUserProfileStore((state) => state.clearProfile);
   const user = useUserProfileStore((state) => state.user);

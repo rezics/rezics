@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Card,
@@ -7,6 +6,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@rezics/ui/shadcn";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_meili_full_sync_description,
+  admin_meili_full_sync_title,
+  admin_meili_index_initialization_description,
+  admin_meili_index_initialization_title,
+  admin_meili_sync_help,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_meili_full_sync_description,
+  admin_meili_full_sync_title,
+  admin_meili_index_initialization_description,
+  admin_meili_index_initialization_title,
+  admin_meili_sync_help,
+};
+
+const i18nMessages = {
+  admin_meili_full_sync_description,
+  admin_meili_full_sync_title,
+  admin_meili_index_initialization_description,
+  admin_meili_index_initialization_title,
+  admin_meili_sync_help,
+};
 
 export interface MeiliAction {
   id: string;
@@ -42,6 +64,7 @@ export function MeiliOperationsSection({
   initActions: MeiliAction[];
   syncActions: MeiliAction[];
 }) {
+  const m = useMessage(i18nMessages);
   return (
     <div className="space-y-4">
       <Card className="border-border-whisper bg-surface-base">

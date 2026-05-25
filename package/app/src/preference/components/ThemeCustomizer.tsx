@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -20,6 +19,44 @@ import {
 import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/states/appStore";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_apply,
+  common_cancel,
+  common_close,
+  common_reset,
+  theme_customizer_current_accent,
+  theme_customizer_custom_color,
+  theme_customizer_hex_format,
+  theme_customizer_preset_colors,
+  theme_customizer_static_theme,
+  theme_customizer_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_apply,
+  common_cancel,
+  common_close,
+  common_reset,
+  theme_customizer_current_accent,
+  theme_customizer_custom_color,
+  theme_customizer_hex_format,
+  theme_customizer_preset_colors,
+  theme_customizer_static_theme,
+  theme_customizer_title,
+};
+
+const i18nMessages = {
+  common_apply,
+  common_cancel,
+  common_close,
+  common_reset,
+  theme_customizer_current_accent,
+  theme_customizer_custom_color,
+  theme_customizer_hex_format,
+  theme_customizer_preset_colors,
+  theme_customizer_static_theme,
+  theme_customizer_title,
+};
 
 const BRAND_DEFAULT_COLOR = "#f4606c";
 
@@ -55,6 +92,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   open,
   onClose,
 }) => {
+  const m = useMessage(i18nMessages);
   const customColor = useAppStore((state: any) => state.customColor);
   const setCustomColor = useAppStore((state: any) => state.setCustomColor);
 
@@ -210,6 +248,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
 // 快速主题切换按钮组件
 export const ThemeQuickToggle: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const [open, setOpen] = useState(false);
 
   return (

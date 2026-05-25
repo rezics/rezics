@@ -1,6 +1,5 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { contentDocMarkdownFallback, type UnitDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -23,6 +22,12 @@ import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
+import {
+  unit_open_content_page,
+  unit_type_tabs_label,
+  unit_untitled_content,
+  units_search_placeholder,
+} from "@rezics/i18n/messages";
 
 type Unit = UnitDTO;
 
@@ -49,11 +54,11 @@ function defaultChildren(units: Unit[]) {
                       </Link>
                     )}
                   />
-                  <TooltipContent>{m.unit_open_content_page()}</TooltipContent>
+                  <TooltipContent>{unit_open_content_page()}</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <p className="text-base font-semibold truncate mb-1">
-                {item.translations?.[0]?.title || m.unit_untitled_content()}
+                {item.translations?.[0]?.title || unit_untitled_content()}
               </p>
             </div>
             {item.translations?.[0]?.description && (
@@ -224,12 +229,12 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
             <KeywordInput
               value={keywordBind.value ?? ""}
               onChange={(v) => keywordBind.onChange(v)}
-              placeholder={m.units_search_placeholder()}
+              placeholder={units_search_placeholder()}
             />
             {!isSingle && (
               <div className="mt-4 mb-4 border-b border-border-whisper">
                 <Tabs value={tab} onValueChange={(v) => setTab(v)}>
-                  <TabsList aria-label={m.unit_type_tabs_label()}>
+                  <TabsList aria-label={unit_type_tabs_label()}>
                     {types.map((t) => (
                       <TabsTrigger key={t} value={t}>
                         {t}

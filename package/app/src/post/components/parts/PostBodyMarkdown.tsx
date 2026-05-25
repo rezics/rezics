@@ -1,8 +1,18 @@
 import { mainMarkdownSource } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { Collapsible } from "@rezics/ui/primitive/typography/collapsible/Collapsible.tsx";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import { common_collapse, common_expand } from "@rezics/i18n/messages";
+const m = {
+  common_collapse,
+  common_expand,
+};
+
+const i18nMessages = {
+  common_collapse,
+  common_expand,
+};
 
 interface PostBodyMarkdownProps {
   content: unknown;
@@ -15,6 +25,7 @@ export const PostBodyMarkdown: React.FC<PostBodyMarkdownProps> = ({
   clamp,
   className,
 }) => {
+  const m = useMessage(i18nMessages);
   const markdown = mainMarkdownSource(content) ?? "";
 
   if (clamp) {

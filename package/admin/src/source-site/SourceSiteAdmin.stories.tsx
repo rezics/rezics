@@ -51,7 +51,7 @@ const qidian: SourceSiteDTO = {
     eligibleSubjectRoles: [],
     slug: "qidian",
     translations: [
-      { unitId: "source-site-1", language: "zh-Hant", title: "起點中文網" },
+      { unitId: "source-site-1", language: "zh-hant", title: "起點中文網" },
     ],
   },
 };

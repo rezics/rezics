@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import * as productMessages from "@rezics/i18n/messages";
-import { subscribeLocale } from "@rezics/i18n/react";
+import { setLocale, subscribeLocale } from "@rezics/i18n/react";
 import { getLocale as getProductLocale } from "@rezics/i18n/runtime";
 import * as uiMessages from "@rezics/ui/i18n/messages";
 import { getLocale as getUiLocale } from "@rezics/ui/i18n/runtime";
-import { setRezicsLocale } from "./locale";
+import { initI18n } from "./providers/i18n";
 
 const storage = new Map<string, string>();
 
@@ -25,22 +25,23 @@ globalThis.localStorage = {
   },
 } as Storage;
 
-describe("setRezicsLocale", () => {
+describe("app i18n bootstrap", () => {
   test("synchronizes product and UI Paraglide runtimes", () => {
-    setRezicsLocale("en");
+    initI18n();
+    setLocale("en");
 
     expect(getProductLocale()).toBe("en");
     expect(getUiLocale()).toBe("en");
     expect(String(productMessages.title())).toBe("REZICS");
     expect(String(uiMessages.ui_password_label())).toBe("Password");
 
-    setRezicsLocale("zh-hant");
+    setLocale("zh-hant");
 
     expect(getProductLocale()).toBe("zh-hant");
     expect(getUiLocale()).toBe("zh-hant");
     expect(String(uiMessages.ui_password_label())).toBe("密碼");
 
-    setRezicsLocale("ko");
+    setLocale("ko");
 
     expect(getProductLocale()).toBe("ko");
     expect(getUiLocale()).toBe("ko");
@@ -53,7 +54,8 @@ describe("setRezicsLocale", () => {
       calls += 1;
     });
 
-    setRezicsLocale("ja");
+    initI18n();
+    setLocale("ja");
 
     unsubscribe();
     expect(calls).toBe(1);

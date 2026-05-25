@@ -1,5 +1,4 @@
 import type { BookDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Select,
   SelectContent,
@@ -15,6 +14,26 @@ import type React from "react";
 import { useMemo } from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { useBookLanguage } from "../hooks/useBookLanguage";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_book_tabs_community,
+  page_book_tabs_content,
+  page_book_tabs_overview,
+  page_book_tabs_review_shelf,
+} from "@rezics/i18n/messages";
+const m = {
+  page_book_tabs_community,
+  page_book_tabs_content,
+  page_book_tabs_overview,
+  page_book_tabs_review_shelf,
+};
+
+const i18nMessages = {
+  page_book_tabs_community,
+  page_book_tabs_content,
+  page_book_tabs_overview,
+  page_book_tabs_review_shelf,
+};
 
 const TAB_ROUTES = [
   "info",
@@ -47,6 +66,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   children,
   sidebar,
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const activeTab = useActiveTabRoute();

@@ -1,17 +1,37 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentDocMarkdownFallback, type ShelfDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_edit,
+  shelf_by_author,
+  shelf_items_count,
+  shelf_untitled,
+} from "@rezics/i18n/messages";
+const m = {
+  common_edit,
+  shelf_by_author,
+  shelf_items_count,
+  shelf_untitled,
+};
+
+const i18nMessages = {
+  common_edit,
+  shelf_by_author,
+  shelf_items_count,
+  shelf_untitled,
+};
 
 interface SingleShelfProps {
   shelf: ShelfDTO;
 }
 
 export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
+  const m = useMessage(i18nMessages);
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? m.shelf_untitled();
   const description = contentDocMarkdownFallback(translation?.description);

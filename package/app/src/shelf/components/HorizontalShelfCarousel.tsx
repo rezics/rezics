@@ -1,10 +1,18 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ShelfDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import type * as React from "react";
 import { useMemo } from "react";
 import { ShelfCard } from "./ShelfCard";
+import { useMessage } from "@rezics/i18n/react";
+import { shelf_list_title } from "@rezics/i18n/messages";
+const m = {
+  shelf_list_title,
+};
+
+const i18nMessages = {
+  shelf_list_title,
+};
 
 export interface HorizontalShelfCarouselProps {
   shelves: ShelfDTO[];
@@ -17,6 +25,7 @@ const SHELF_ITEM_CLASS =
 export const HorizontalShelfCarousel: React.FC<
   HorizontalShelfCarouselProps
 > = ({ shelves, className }) => {
+  const m = useMessage(i18nMessages);
   const targetIds = useMemo(
     () => shelves.map((s) => s.unitId).filter(Boolean) as string[],
     [shelves],

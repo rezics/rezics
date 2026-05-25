@@ -1,16 +1,39 @@
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { unitHref } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_no_description,
+  realm_member_count,
+  realm_official,
+  realm_public,
+  realm_untitled,
+} from "@rezics/i18n/messages";
+const m = {
+  common_no_description,
+  realm_member_count,
+  realm_official,
+  realm_public,
+  realm_untitled,
+};
+
+const i18nMessages = {
+  common_no_description,
+  realm_member_count,
+  realm_official,
+  realm_public,
+  realm_untitled,
+};
 
 interface RealmCardProps {
   realm: RealmDTO;
 }
 
 export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
+  const m = useMessage(i18nMessages);
   const translation = getTranslation(realm.translations);
   const title = translation?.title ?? m.realm_untitled();
   const description = contentDocMarkdownFallback(translation?.description);

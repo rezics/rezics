@@ -1,12 +1,28 @@
 import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 import { useZone } from "../hooks/useZone";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  zone_not_found,
+  zone_search_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  zone_not_found,
+  zone_search_title,
+};
+
+const i18nMessages = {
+  common_loading,
+  zone_not_found,
+  zone_search_title,
+};
 
 export type ZoneSearchPageProps = {
   slug: string;
@@ -17,6 +33,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   slug,
   initialKeyword,
 }) => {
+  const m = useMessage(i18nMessages);
   const { zone, isLoading: zoneLoading } = useZone(slug);
   const { allowed } = useAllowedRatings();
 

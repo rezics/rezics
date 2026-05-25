@@ -1,5 +1,4 @@
 import type { EntityDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Select,
@@ -19,6 +18,15 @@ import {
 import { EntityAvatar } from "./EntityAvatar";
 import { EntityKindBadge } from "./EntityKindBadge";
 import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
+import { useMessage } from "@rezics/i18n/react";
+import { entity_edit } from "@rezics/i18n/messages";
+const m = {
+  entity_edit,
+};
+
+const i18nMessages = {
+  entity_edit,
+};
 
 interface EntityHeroProps {
   entity: EntityDTO;
@@ -33,6 +41,7 @@ export function EntityHero({
   onLanguageChange,
   canEdit = false,
 }: EntityHeroProps) {
+  const m = useMessage(i18nMessages);
   const title = getEntityPrimaryTitle(entity, language);
   const tr = getEntityTranslation(entity, language);
   const languages = getEntityLanguages(entity);

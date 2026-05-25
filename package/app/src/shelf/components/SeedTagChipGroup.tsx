@@ -4,9 +4,17 @@ import {
   SEED_TAG_TITLES,
   type SeedTagName,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Badge } from "@rezics/ui/shadcn";
 import { useMemo } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import { shelf_content_type_tags_legend } from "@rezics/i18n/messages";
+const m = {
+  shelf_content_type_tags_legend,
+};
+
+const i18nMessages = {
+  shelf_content_type_tags_legend,
+};
 
 export interface SeedTagChipGroupProps {
   value: string[];
@@ -19,6 +27,7 @@ export function SeedTagChipGroup({
   onChange,
   disabled = false,
 }: SeedTagChipGroupProps) {
+  const m = useMessage(i18nMessages);
   const chips = useMemo(
     () =>
       SEED_TAG_NAMES.map((name) => {

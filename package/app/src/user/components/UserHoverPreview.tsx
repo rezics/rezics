@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Avatar,
   AvatarFallback,
@@ -14,6 +13,10 @@ import { useId, useState } from "react";
 import { FollowButton } from "@/engagement/components/FollowButton";
 import { Link, unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
+import {
+  profile_following,
+  profile_tab_followers,
+} from "@rezics/i18n/messages";
 
 export type UserHoverPreviewSize = "compact" | "default";
 
@@ -308,8 +311,8 @@ function getAvatarFallback(
 
 function getStats(user: UserHoverPreviewUser) {
   return [
-    { label: m.profile_tab_followers(), value: user.followersCount },
-    { label: m.profile_following(), value: user.followingsCount },
+    { label: profile_tab_followers(), value: user.followersCount },
+    { label: profile_following(), value: user.followingsCount },
   ]
     .filter((stat) => typeof stat.value === "number")
     .map((stat) => ({ label: stat.label, value: stat.value ?? 0 }));

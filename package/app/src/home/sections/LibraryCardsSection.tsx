@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import {
@@ -7,6 +6,26 @@ import {
   Gamepad2 as SportsEsportsOutlinedIcon,
 } from "lucide-react";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_home_sections_library_cards_coming_soon,
+  page_home_sections_library_cards_book_library,
+  page_home_sections_library_cards_game_library,
+  page_home_sections_library_cards_media_library,
+} from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_library_cards_coming_soon,
+  page_home_sections_library_cards_book_library,
+  page_home_sections_library_cards_game_library,
+  page_home_sections_library_cards_media_library,
+};
+
+const i18nMessages = {
+  page_home_sections_library_cards_coming_soon,
+  page_home_sections_library_cards_book_library,
+  page_home_sections_library_cards_game_library,
+  page_home_sections_library_cards_media_library,
+};
 
 const libraries = [
   {
@@ -38,6 +57,7 @@ const LIBRARY_CARD_TITLE = {
 } as const satisfies Record<LibraryKey, () => string>;
 
 export const LibraryCardsSection: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const renderLibraryCard = (lib: (typeof libraries)[number]) => (
     <Link key={lib.key} to={lib.to} className="min-w-0">
       <Card size="sm" className="h-full border-0 shadow-none">

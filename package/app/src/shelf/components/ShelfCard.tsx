@@ -3,12 +3,34 @@ import {
   type ShelfDTO,
   shelfCoverImageSpec,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_anonymous,
+  shelf_cover_alt,
+  shelf_items_count,
+  shelf_no_description,
+  shelf_untitled,
+} from "@rezics/i18n/messages";
+const m = {
+  common_anonymous,
+  shelf_cover_alt,
+  shelf_items_count,
+  shelf_no_description,
+  shelf_untitled,
+};
+
+const i18nMessages = {
+  common_anonymous,
+  shelf_cover_alt,
+  shelf_items_count,
+  shelf_no_description,
+  shelf_untitled,
+};
 
 interface ShelfCardProps {
   shelf: ShelfDTO;
@@ -20,6 +42,7 @@ type ShelfCardLinkable = ShelfDTO & {
 };
 
 export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
+  const m = useMessage(i18nMessages);
   const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "";

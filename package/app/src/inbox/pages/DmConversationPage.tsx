@@ -1,11 +1,28 @@
 import { useConversations } from "@rezics/api/dm/dm";
-import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link, useParams } from "@tanstack/react-router";
 import type React from "react";
 import { ConversationThreadSection } from "../sections/ConversationThreadSection";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  inbox_all_conversations,
+  inbox_conversation_loading,
+  inbox_conversation_title,
+} from "@rezics/i18n/messages";
+const m = {
+  inbox_all_conversations,
+  inbox_conversation_loading,
+  inbox_conversation_title,
+};
+
+const i18nMessages = {
+  inbox_all_conversations,
+  inbox_conversation_loading,
+  inbox_conversation_title,
+};
 
 export const DmConversationPage: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const { conversationId } = useParams({
     from: "/_mainLayout/inbox/dm/$conversationId",
   });

@@ -1,11 +1,16 @@
 import type { SystemShelfKindKey } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
+import {
+  shelf_system_active,
+  shelf_system_backlog,
+  shelf_system_completed,
+  shelf_system_favorites,
+} from "@rezics/i18n/messages";
 
 const SYSTEM_SHELF_KIND_LABEL = {
-  active: m.shelf_system_active,
-  backlog: m.shelf_system_backlog,
-  completed: m.shelf_system_completed,
-  favorites: m.shelf_system_favorites,
+  active: shelf_system_active,
+  backlog: shelf_system_backlog,
+  completed: shelf_system_completed,
+  favorites: shelf_system_favorites,
 } as const satisfies Record<SystemShelfKindKey, () => string>;
 
 export function systemShelfKindLabel(kindKey: SystemShelfKindKey): string {

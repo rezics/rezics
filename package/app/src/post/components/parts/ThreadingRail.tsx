@@ -1,6 +1,19 @@
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { useThreadingHover } from "./ThreadingContext";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  post_collapse_thread,
+  post_expand_thread,
+} from "@rezics/i18n/messages";
+const m = {
+  post_collapse_thread,
+  post_expand_thread,
+};
+
+const i18nMessages = {
+  post_collapse_thread,
+  post_expand_thread,
+};
 
 export interface ThreadingRailProps {
   isCollapsed?: boolean;
@@ -43,6 +56,7 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
   useSharedHover = true,
   onHoverChange,
 }) => {
+  const m = useMessage(i18nMessages);
   const { hovered, setHovered } = useThreadingHover();
 
   const handleClick = (event: React.MouseEvent) => {

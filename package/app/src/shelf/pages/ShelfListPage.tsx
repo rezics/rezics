@@ -1,12 +1,38 @@
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ShelfCard } from "../components/ShelfCard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_load_more,
+  common_loading,
+  common_search,
+  shelf_empty_yet,
+  shelf_list_title,
+  shelf_new_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_load_more,
+  common_loading,
+  common_search,
+  shelf_empty_yet,
+  shelf_list_title,
+  shelf_new_title,
+};
+
+const i18nMessages = {
+  common_load_more,
+  common_loading,
+  common_search,
+  shelf_empty_yet,
+  shelf_list_title,
+  shelf_new_title,
+};
 
 export function ShelfListPage() {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery(

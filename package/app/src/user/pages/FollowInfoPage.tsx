@@ -1,6 +1,5 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -23,6 +22,29 @@ import { useMemo, useRef, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  profile_follow_info_description,
+  profile_follow_info_title,
+  user_cannot_resolve,
+  user_cannot_resolve_description,
+  user_empty,
+} from "@rezics/i18n/messages";
+const m = {
+  profile_follow_info_description,
+  profile_follow_info_title,
+  user_cannot_resolve,
+  user_cannot_resolve_description,
+  user_empty,
+};
+
+const i18nMessages = {
+  profile_follow_info_description,
+  profile_follow_info_title,
+  user_cannot_resolve,
+  user_cannot_resolve_description,
+  user_empty,
+};
 
 type SimpleUser = Omit<UserDTO, "email">;
 
@@ -35,6 +57,7 @@ const ITEMS_PER_PAGE = 20;
 const EXTERNAL_ITEMS_PER_PAGE = 20;
 
 function FollowUserList({ users }: { users: SimpleUser[] }) {
+  const m = useMessage(i18nMessages);
   if (users.length === 0) {
     return (
       <div className="py-16 text-center text-text-secondary">
@@ -73,6 +96,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   unitId,
   isCurrentUser = false,
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const currentUser = useUserProfileStore((state) => state.user);
   const resolvedUnitId = useMemo(

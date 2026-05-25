@@ -1,6 +1,5 @@
 import { useCreateFeedbackMutation } from "@rezics/api/feedback/feedback.mutations";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Input,
@@ -14,6 +13,50 @@ import {
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_reset,
+  common_submitting,
+  feedback_content_label,
+  feedback_content_placeholder,
+  feedback_content_required,
+  feedback_submit,
+  feedback_submit_failed,
+  feedback_type_label,
+  feedback_type_bug,
+  feedback_type_feature,
+  feedback_type_other,
+  feedback_type_report,
+} from "@rezics/i18n/messages";
+const m = {
+  common_reset,
+  common_submitting,
+  feedback_content_label,
+  feedback_content_placeholder,
+  feedback_content_required,
+  feedback_submit,
+  feedback_submit_failed,
+  feedback_type_label,
+  feedback_type_bug,
+  feedback_type_feature,
+  feedback_type_other,
+  feedback_type_report,
+};
+
+const i18nMessages = {
+  common_reset,
+  common_submitting,
+  feedback_content_label,
+  feedback_content_placeholder,
+  feedback_content_required,
+  feedback_submit,
+  feedback_submit_failed,
+  feedback_type_label,
+  feedback_type_bug,
+  feedback_type_feature,
+  feedback_type_other,
+  feedback_type_report,
+};
 
 type FeedbackFormProps = {
   defaultValues?: Partial<CreateFeedbackInput>;
@@ -34,6 +77,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   defaultValues,
   onSubmitted,
 }) => {
+  const m = useMessage(i18nMessages);
   const locationKey = useRouterState({
     select: (s) => `${s.location.pathname}${s.location.search ?? ""}`,
   });

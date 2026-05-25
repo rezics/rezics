@@ -1,17 +1,28 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useState } from "react";
 import { RealmRuleDialog } from "./RealmRuleDialog";
+import { useMessage } from "@rezics/i18n/react";
+import { common_view, realm_rules_title } from "@rezics/i18n/messages";
+const m = {
+  common_view,
+  realm_rules_title,
+};
+
+const i18nMessages = {
+  common_view,
+  realm_rules_title,
+};
 
 export interface RuleSectionProps {
   postUnitId?: string | null;
 }
 
 export const RuleSection: React.FC<RuleSectionProps> = ({ postUnitId }) => {
+  const m = useMessage(i18nMessages);
   const [open, setOpen] = useState(false);
   const { data: post, isError } = useQuery({
     ...postQueries.detail(postUnitId ?? ""),

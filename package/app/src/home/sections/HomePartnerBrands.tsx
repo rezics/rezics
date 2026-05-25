@@ -1,6 +1,14 @@
-import * as m from "@rezics/i18n/messages";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import { page_home_sections_partner_brands } from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_partner_brands,
+};
+
+const i18nMessages = {
+  page_home_sections_partner_brands,
+};
 
 const defaultBrands = [
   "https://dummyimage.com/100x40/cccccc/000&text=Brand+A",
@@ -19,6 +27,7 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
   logos = defaultBrands,
   title,
 }) => {
+  const m = useMessage(i18nMessages);
   const resolvedTitle = title ?? m.page_home_sections_partner_brands();
   return (
     <div className="w-full">

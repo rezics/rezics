@@ -14,7 +14,6 @@ import {
   normalizeLanguage,
   type RealmExtraListKey,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import {
   Button,
@@ -39,6 +38,65 @@ import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { StaleIdsBanner } from "../components/StaleIdsBanner";
 import { usePinboardList } from "../hooks/usePinboard";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_delete,
+  common_save,
+  pinboard_admin_create,
+  pinboard_admin_delete_description,
+  pinboard_admin_delete_done,
+  pinboard_admin_delete_failed,
+  pinboard_admin_delete_title,
+  pinboard_admin_tabs_aria,
+  pinboard_admin_title,
+  pinboard_editor_created,
+  pinboard_editor_errors_save_failed,
+  pinboard_editor_saved,
+  pinboard_editor_title_create,
+  pinboard_editor_title_edit,
+  pinboard_admin_tabs_announcement,
+  pinboard_admin_tabs_pinboard,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_delete,
+  common_save,
+  pinboard_admin_create,
+  pinboard_admin_delete_description,
+  pinboard_admin_delete_done,
+  pinboard_admin_delete_failed,
+  pinboard_admin_delete_title,
+  pinboard_admin_tabs_aria,
+  pinboard_admin_title,
+  pinboard_editor_created,
+  pinboard_editor_errors_save_failed,
+  pinboard_editor_saved,
+  pinboard_editor_title_create,
+  pinboard_editor_title_edit,
+  pinboard_admin_tabs_announcement,
+  pinboard_admin_tabs_pinboard,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_delete,
+  common_save,
+  pinboard_admin_create,
+  pinboard_admin_delete_description,
+  pinboard_admin_delete_done,
+  pinboard_admin_delete_failed,
+  pinboard_admin_delete_title,
+  pinboard_admin_tabs_aria,
+  pinboard_admin_title,
+  pinboard_editor_created,
+  pinboard_editor_errors_save_failed,
+  pinboard_editor_saved,
+  pinboard_editor_title_create,
+  pinboard_editor_title_edit,
+  pinboard_admin_tabs_announcement,
+  pinboard_admin_tabs_pinboard,
+};
 
 export interface PinboardAdminSectionProps {
   realmUnitId: string;
@@ -61,6 +119,7 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   realmUnitId,
   isDefaultRealm,
 }) => {
+  const m = useMessage(i18nMessages);
   const availableKeys = useMemo<PinboardListKey[]>(
     () => (isDefaultRealm ? ["announcement", "pinboard"] : ["pinboard"]),
     [isDefaultRealm],
@@ -101,6 +160,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   realmUnitId,
   pinboardKey,
 }) => {
+  const m = useMessage(i18nMessages);
   const { entries, staleIds, isLoading, isError, error, refetch } =
     usePinboardList({
       realmUnitId,
@@ -332,6 +392,7 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
   onCreate,
   onEdit,
 }) => {
+  const m = useMessage(i18nMessages);
   const isEdit = entry !== null;
   const detailQuery = useQuery({
     ...unitDetailQuery(entry?.unitId ?? ""),

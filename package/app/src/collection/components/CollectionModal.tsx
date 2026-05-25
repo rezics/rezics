@@ -9,7 +9,6 @@ import {
   type SeedTagName,
   type SystemShelfKindKey,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -23,6 +22,47 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { useCallback, useMemo, useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  collection_independent_unit,
+  collection_no_shelves_found,
+  collection_select_shelf,
+  collection_title,
+  common_all,
+  common_cancel,
+  common_save,
+  common_saving,
+  common_untitled,
+  shelf_items_count,
+  shelf_system_favorites,
+} from "@rezics/i18n/messages";
+const m = {
+  collection_independent_unit,
+  collection_no_shelves_found,
+  collection_select_shelf,
+  collection_title,
+  common_all,
+  common_cancel,
+  common_save,
+  common_saving,
+  common_untitled,
+  shelf_items_count,
+  shelf_system_favorites,
+};
+
+const i18nMessages = {
+  collection_independent_unit,
+  collection_no_shelves_found,
+  collection_select_shelf,
+  collection_title,
+  common_all,
+  common_cancel,
+  common_save,
+  common_saving,
+  common_untitled,
+  shelf_items_count,
+  shelf_system_favorites,
+};
 
 // Backlog/Active/Completed are reached only via progress-status side-effects
 // (`user-unit-progress` spec). Surfacing them as collectable targets in the
@@ -56,6 +96,7 @@ export function CollectionModal({
   isLoading,
   isReview = false,
 }: CollectionModalProps) {
+  const m = useMessage(i18nMessages);
   const [selectedShelves, setSelectedShelves] = useState<Set<string>>(
     new Set(),
   );

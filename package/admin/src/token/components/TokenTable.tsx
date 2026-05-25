@@ -1,5 +1,4 @@
 import type { ApiTokenDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Button,
@@ -16,6 +15,50 @@ import {
 } from "@rezics/ui/shadcn";
 import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_auth_actions_title,
+  admin_auth_user_name,
+  admin_token_never,
+  admin_token_no_scopes,
+  admin_token_revoked,
+  admin_token_scopes,
+  common_created,
+  common_edit,
+  common_expires,
+  common_no,
+  common_revoke,
+  common_yes,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_auth_actions_title,
+  admin_auth_user_name,
+  admin_token_never,
+  admin_token_no_scopes,
+  admin_token_revoked,
+  admin_token_scopes,
+  common_created,
+  common_edit,
+  common_expires,
+  common_no,
+  common_revoke,
+  common_yes,
+};
+
+const i18nMessages = {
+  admin_auth_actions_title,
+  admin_auth_user_name,
+  admin_token_never,
+  admin_token_no_scopes,
+  admin_token_revoked,
+  admin_token_scopes,
+  common_created,
+  common_edit,
+  common_expires,
+  common_no,
+  common_revoke,
+  common_yes,
+};
 
 interface TokenTableProps {
   tokens: ApiTokenDTO[];
@@ -33,6 +76,7 @@ export const TokenTable: FC<TokenTableProps> = ({
   onRevoke,
   onEdit,
 }) => {
+  const m = useMessage(i18nMessages);
   const renderScopes = (scopes?: Record<string, string[]>) => {
     if (!scopes || Object.keys(scopes).length === 0) {
       return (

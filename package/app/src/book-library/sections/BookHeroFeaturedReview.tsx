@@ -1,6 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource, type PostDTO, PostKind } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
 import {
   Avatar,
@@ -11,6 +10,32 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_hero_featured_review_empty_body,
+  book_hero_featured_review_empty_quote,
+  book_hero_featured_review_read_full,
+  book_hero_featured_review_score_label,
+  book_hero_featured_review_unknown_author,
+  book_hero_featured_review_write_cta,
+} from "@rezics/i18n/messages";
+const m = {
+  book_hero_featured_review_empty_body,
+  book_hero_featured_review_empty_quote,
+  book_hero_featured_review_read_full,
+  book_hero_featured_review_score_label,
+  book_hero_featured_review_unknown_author,
+  book_hero_featured_review_write_cta,
+};
+
+const i18nMessages = {
+  book_hero_featured_review_empty_body,
+  book_hero_featured_review_empty_quote,
+  book_hero_featured_review_read_full,
+  book_hero_featured_review_score_label,
+  book_hero_featured_review_unknown_author,
+  book_hero_featured_review_write_cta,
+};
 
 interface BookHeroFeaturedReviewProps {
   bookId: string;
@@ -32,6 +57,7 @@ function mockReviewScore(post: PostDTO): number | null {
 export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   bookId,
 }) => {
+  const m = useMessage(i18nMessages);
   // MOCK: should sort by reaction count once postsByTarget supports it.
   // For now, take the most recent review.
   const { data, isLoading } = useQuery({

@@ -1,5 +1,4 @@
 import type { BookDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@/shared/ui/link";
@@ -8,6 +7,17 @@ import {
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import { book_no_cover, book_unknown_author } from "@rezics/i18n/messages";
+const m = {
+  book_no_cover,
+  book_unknown_author,
+};
+
+const i18nMessages = {
+  book_no_cover,
+  book_unknown_author,
+};
 
 const BookCard = ({
   book,
@@ -16,6 +26,7 @@ const BookCard = ({
   book: BookDTO;
   className?: string;
 }) => {
+  const m = useMessage(i18nMessages);
   const title = getBookTitle(book);
   const coverUrl = getBookCoverUrl(book);
   const authorName = getBookAuthorName(book);

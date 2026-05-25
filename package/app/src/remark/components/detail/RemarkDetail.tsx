@@ -1,6 +1,5 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   ThumbsDown as ThumbDownIcon,
   ThumbsUp as ThumbUpIcon,
@@ -12,6 +11,15 @@ import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { TextLink } from "@/shared/ui/link";
 import { remarkDetailActions, remarkPolicy } from "../../models/remarkPolicy";
+import { useMessage } from "@rezics/i18n/react";
+import { page_book_edit_info_dialog_view_book } from "@rezics/i18n/messages";
+const m = {
+  page_book_edit_info_dialog_view_book,
+};
+
+const i18nMessages = {
+  page_book_edit_info_dialog_view_book,
+};
 
 interface RemarkDetailProps {
   remark: PostDTO;
@@ -22,6 +30,7 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
   remark,
   onReplyInvoke,
 }) => {
+  const m = useMessage(i18nMessages);
   const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
   const bookUnitId = remark.targetUnitId;

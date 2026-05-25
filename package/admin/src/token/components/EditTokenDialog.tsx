@@ -1,5 +1,4 @@
 import type { ApiTokenDTO, UpdateApiTokenInput } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -15,6 +14,32 @@ import {
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { ScopesEditor } from "./ScopesEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_token_edit_dialog_title,
+  admin_token_expires_at_optional,
+  admin_token_token_name,
+  admin_token_updating,
+  common_cancel,
+  common_update,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_token_edit_dialog_title,
+  admin_token_expires_at_optional,
+  admin_token_token_name,
+  admin_token_updating,
+  common_cancel,
+  common_update,
+};
+
+const i18nMessages = {
+  admin_token_edit_dialog_title,
+  admin_token_expires_at_optional,
+  admin_token_token_name,
+  admin_token_updating,
+  common_cancel,
+  common_update,
+};
 
 interface EditTokenDialogProps {
   open: boolean;
@@ -36,6 +61,7 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
   updating,
   error,
 }) => {
+  const m = useMessage(i18nMessages);
   const [name, setName] = useState("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [scopes, setScopes] = useState<Record<string, string[]>>({});

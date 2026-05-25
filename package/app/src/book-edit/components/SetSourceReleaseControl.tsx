@@ -1,7 +1,6 @@
 import { bookKeys, bookQueries } from "@rezics/api/book/book";
 import { useSetTranslationSourceMutation } from "@rezics/api/unit/translation-source.mutations";
 import type { BookDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Select,
   SelectContent,
@@ -12,6 +11,20 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_book_edit_info_translation_set_source_label,
+  page_book_edit_info_translation_set_source_none,
+} from "@rezics/i18n/messages";
+const m = {
+  page_book_edit_info_translation_set_source_label,
+  page_book_edit_info_translation_set_source_none,
+};
+
+const i18nMessages = {
+  page_book_edit_info_translation_set_source_label,
+  page_book_edit_info_translation_set_source_none,
+};
 
 const NO_SOURCE = "__none__";
 
@@ -29,6 +42,7 @@ export interface SetSourceReleaseControlProps {
 export const SetSourceReleaseControl: React.FC<
   SetSourceReleaseControlProps
 > = ({ book, language, currentSourceReleaseUnitId }) => {
+  const m = useMessage(i18nMessages);
   const siblingFilter = book.workUnitId
     ? { workUnitId: book.workUnitId }
     : { workUnitId: book.unitId };

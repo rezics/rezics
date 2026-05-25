@@ -1,10 +1,18 @@
 import { contentDocMarkdownFallback } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { BookOpen } from "lucide-react";
 import { useId } from "react";
 import { cn } from "@/shared/utils/css-util";
 import { UserHoverPreview } from "@/user/components";
 import type { UnitCardSummary } from "../models/unitCardSummary";
+import { useMessage } from "@rezics/i18n/react";
+import { unit_card_added_at } from "@rezics/i18n/messages";
+const m = {
+  unit_card_added_at,
+};
+
+const i18nMessages = {
+  unit_card_added_at,
+};
 
 export interface UnitCardProps {
   summary: UnitCardSummary;
@@ -21,6 +29,7 @@ export function UnitCard({
   authorSlot,
   className,
 }: UnitCardProps) {
+  const m = useMessage(i18nMessages);
   const titleId = useId();
   const isCompact = variant === "compact";
   const addedAt = formatAddedAt(summary.addedAt);

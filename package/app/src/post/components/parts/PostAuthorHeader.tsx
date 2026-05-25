@@ -1,8 +1,21 @@
 import { contentDocMarkdownFallback, type PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
 import { UserHoverPreview } from "@/user/components";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  post_anonymous_author,
+  post_anonymous_avatar_alt,
+} from "@rezics/i18n/messages";
+const m = {
+  post_anonymous_author,
+  post_anonymous_avatar_alt,
+};
+
+const i18nMessages = {
+  post_anonymous_author,
+  post_anonymous_avatar_alt,
+};
 
 interface PostAuthorHeaderProps {
   post: PostDTO;
@@ -66,6 +79,7 @@ export function PostAuthorAvatar({
   size?: "compact" | "default";
   className?: string;
 }) {
+  const m = useMessage(i18nMessages);
   const author = post.author?.unitId ? post.author : undefined;
   const avatarClassName = [size === "compact" ? "size-8" : "size-9", className]
     .filter(Boolean)
@@ -106,6 +120,7 @@ function AnonymousAuthor({
   showAvatar,
   avatarClassName,
 }: AnonymousAuthorProps) {
+  const m = useMessage(i18nMessages);
   return (
     <span className="inline-flex min-w-0 items-center gap-2">
       {showAvatar ? (

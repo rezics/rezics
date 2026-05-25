@@ -5,7 +5,6 @@ import {
   creditAttributionRoles,
 } from "@rezics/contract";
 import { creditRoleLabel } from "@rezics/i18n";
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Save, Trash2 } from "lucide-react";
@@ -22,6 +21,29 @@ import {
   removeCreditAttribution,
 } from "@/entity";
 import { EntityPicker } from "@/entity-picker";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_actions_add_credit,
+  book_actions_remove_credit,
+  book_empty_credit_attributions,
+  common_loading,
+  common_save_changes,
+} from "@rezics/i18n/messages";
+const m = {
+  book_actions_add_credit,
+  book_actions_remove_credit,
+  book_empty_credit_attributions,
+  common_loading,
+  common_save_changes,
+};
+
+const i18nMessages = {
+  book_actions_add_credit,
+  book_actions_remove_credit,
+  book_empty_credit_attributions,
+  common_loading,
+  common_save_changes,
+};
 
 interface BookCreditAttributionEditorProps {
   bookUnitId: string;
@@ -38,6 +60,7 @@ export function BookCreditAttributionEditor({
   bookUnitId,
   disabled,
 }: BookCreditAttributionEditorProps) {
+  const m = useMessage(i18nMessages);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [queue, setQueue] = useState(() => createEntityAttributionEditQueue());
 

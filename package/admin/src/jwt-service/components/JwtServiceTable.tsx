@@ -1,5 +1,4 @@
 import type { JwtServiceDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Button,
@@ -16,6 +15,47 @@ import {
 } from "@rezics/ui/shadcn";
 import { Pencil as EditOutlinedIcon } from "lucide-react";
 import type { FC } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_auth_actions_title,
+  admin_auth_email_status,
+  admin_jwt_audience,
+  admin_jwt_issuer,
+  admin_jwt_local,
+  admin_jwt_local_issuer,
+  admin_jwt_remote,
+  admin_jwt_service_key,
+  common_active,
+  common_edit,
+  common_inactive,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_auth_actions_title,
+  admin_auth_email_status,
+  admin_jwt_audience,
+  admin_jwt_issuer,
+  admin_jwt_local,
+  admin_jwt_local_issuer,
+  admin_jwt_remote,
+  admin_jwt_service_key,
+  common_active,
+  common_edit,
+  common_inactive,
+};
+
+const i18nMessages = {
+  admin_auth_actions_title,
+  admin_auth_email_status,
+  admin_jwt_audience,
+  admin_jwt_issuer,
+  admin_jwt_local,
+  admin_jwt_local_issuer,
+  admin_jwt_remote,
+  admin_jwt_service_key,
+  common_active,
+  common_edit,
+  common_inactive,
+};
 
 type Props = {
   services: JwtServiceDTO[];
@@ -23,6 +63,7 @@ type Props = {
 };
 
 export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
+  const m = useMessage(i18nMessages);
   return (
     <TooltipProvider>
       <div className="rounded-md border border-border-whisper">

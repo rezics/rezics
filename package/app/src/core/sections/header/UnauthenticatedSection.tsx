@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -6,8 +5,20 @@ import { useIsMobile } from "@/shared/utils/use-media-query";
 import { LoginModal } from "@/user/pages/LoginPage";
 import { RegisterModal } from "@/user/pages/RegisterPage";
 import { MoreHorizMenu } from "../../components/header/MoreHorizMenu";
+import { useMessage } from "@rezics/i18n/react";
+import { auth_login, auth_register } from "@rezics/i18n/messages";
+const m = {
+  auth_login,
+  auth_register,
+};
+
+const i18nMessages = {
+  auth_login,
+  auth_register,
+};
 
 const LoginPrompt = () => {
+  const m = useMessage(i18nMessages);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const isMobile = useIsMobile();

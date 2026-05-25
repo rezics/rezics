@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -8,6 +7,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  progress_status_remove_backlog_modal_confirm,
+  progress_status_remove_backlog_modal_description,
+  progress_status_remove_backlog_modal_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  progress_status_remove_backlog_modal_confirm,
+  progress_status_remove_backlog_modal_description,
+  progress_status_remove_backlog_modal_title,
+};
+
+const i18nMessages = {
+  common_cancel,
+  progress_status_remove_backlog_modal_confirm,
+  progress_status_remove_backlog_modal_description,
+  progress_status_remove_backlog_modal_title,
+};
 
 type BacklogRemoveConfirmModalProps = {
   open: boolean;
@@ -22,6 +41,7 @@ export function BacklogRemoveConfirmModal({
   onConfirm,
   isPending,
 }: BacklogRemoveConfirmModalProps) {
+  const m = useMessage(i18nMessages);
   const handleConfirm = async () => {
     await onConfirm();
     onCancel();

@@ -1,5 +1,4 @@
 import type { ContentRating } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { RatingSelector } from "@rezics/ui";
 import {
   Button,
@@ -9,6 +8,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_chapter_bulk_rating_description,
+  book_chapter_bulk_rating_title,
+  common_apply,
+  common_cancel,
+} from "@rezics/i18n/messages";
+const m = {
+  book_chapter_bulk_rating_description,
+  book_chapter_bulk_rating_title,
+  common_apply,
+  common_cancel,
+};
+
+const i18nMessages = {
+  book_chapter_bulk_rating_description,
+  book_chapter_bulk_rating_title,
+  common_apply,
+  common_cancel,
+};
 
 interface BulkRatingDialogProps {
   open: boolean;
@@ -27,6 +46,7 @@ export function BulkRatingDialog({
   onChange,
   onConfirm,
 }: BulkRatingDialogProps) {
+  const m = useMessage(i18nMessages);
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xs">

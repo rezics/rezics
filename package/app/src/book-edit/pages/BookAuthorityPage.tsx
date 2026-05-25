@@ -10,7 +10,6 @@ import {
   EDITORIAL_LOCK_PATH_OPTIONS,
   UNIT_FIELD_LOCK_ALL,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import {
@@ -27,6 +26,89 @@ import {
   editorialPathLabel,
   lockMatchesPath,
 } from "@/unit/models/lockFieldLabels";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  authority_all_fields_description,
+  authority_all_fields_locked,
+  authority_all_fields_title,
+  authority_all_fields_unlocked,
+  authority_current_locks_title,
+  authority_custom_path_description,
+  authority_custom_path_label,
+  authority_custom_path_option,
+  authority_custom_path_required,
+  authority_custom_path_title,
+  authority_field_covered_badge,
+  authority_field_covered_description,
+  authority_field_locked_badge,
+  authority_lock_action,
+  authority_lock_field_action,
+  authority_lock_path_label,
+  authority_no_locks,
+  authority_page_description,
+  authority_page_title,
+  authority_readonly_notice,
+  authority_reason_label,
+  authority_remove_lock_action,
+  authority_remove_lock_label,
+  authority_unlock_field_action,
+  common_loading,
+} from "@rezics/i18n/messages";
+const m = {
+  authority_all_fields_description,
+  authority_all_fields_locked,
+  authority_all_fields_title,
+  authority_all_fields_unlocked,
+  authority_current_locks_title,
+  authority_custom_path_description,
+  authority_custom_path_label,
+  authority_custom_path_option,
+  authority_custom_path_required,
+  authority_custom_path_title,
+  authority_field_covered_badge,
+  authority_field_covered_description,
+  authority_field_locked_badge,
+  authority_lock_action,
+  authority_lock_field_action,
+  authority_lock_path_label,
+  authority_no_locks,
+  authority_page_description,
+  authority_page_title,
+  authority_readonly_notice,
+  authority_reason_label,
+  authority_remove_lock_action,
+  authority_remove_lock_label,
+  authority_unlock_field_action,
+  common_loading,
+};
+
+const i18nMessages = {
+  authority_all_fields_description,
+  authority_all_fields_locked,
+  authority_all_fields_title,
+  authority_all_fields_unlocked,
+  authority_current_locks_title,
+  authority_custom_path_description,
+  authority_custom_path_label,
+  authority_custom_path_option,
+  authority_custom_path_required,
+  authority_custom_path_title,
+  authority_field_covered_badge,
+  authority_field_covered_description,
+  authority_field_locked_badge,
+  authority_lock_action,
+  authority_lock_field_action,
+  authority_lock_path_label,
+  authority_no_locks,
+  authority_page_description,
+  authority_page_title,
+  authority_readonly_notice,
+  authority_reason_label,
+  authority_remove_lock_action,
+  authority_remove_lock_label,
+  authority_unlock_field_action,
+  common_loading,
+};
 
 const CUSTOM_LOCK_PATH = "__custom__";
 
@@ -60,6 +142,7 @@ export function BookAuthorityPanel({
   initialLocks?: UnitFieldLockDTO[];
   unitId?: string;
 }) {
+  const m = useMessage(i18nMessages);
   const [selectedPath, setSelectedPath] = useState<string>(
     EDITORIAL_LOCK_PATH_OPTIONS[1],
   );
@@ -382,6 +465,7 @@ function FieldLockRow({
   path: string;
   showMutationControls: boolean;
 }) {
+  const m = useMessage(i18nMessages);
   const locked = Boolean(lock);
   const covered = allFieldsLocked && !locked;
 

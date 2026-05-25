@@ -1,6 +1,5 @@
 import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { useLocale } from "@rezics/i18n/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
@@ -27,6 +26,12 @@ import {
   openStatusModalAtom,
   statusModalAtom,
 } from "../states/statusModalAtom";
+import {
+  book_hero_actions_mark_as_read,
+  book_hero_actions_read_again,
+  book_hero_actions_start_reading,
+  book_hero_actions_want_to_read,
+} from "@rezics/i18n/messages";
 
 export type BookProgressStatusSectionProps = {
   bookUnitId: string;
@@ -49,27 +54,27 @@ function getDefaultPrimaryAction(status: UserUnitProgressStatus | null): {
   if (!status) {
     return {
       status: "BACKLOG",
-      label: m.book_hero_actions_want_to_read(),
+      label: book_hero_actions_want_to_read(),
     };
   }
 
   if (status === "ACTIVE") {
     return {
       status: "COMPLETED",
-      label: m.book_hero_actions_mark_as_read(),
+      label: book_hero_actions_mark_as_read(),
     };
   }
 
   if (status === "COMPLETED") {
     return {
       status: "COMPLETED",
-      label: m.book_hero_actions_read_again(),
+      label: book_hero_actions_read_again(),
     };
   }
 
   return {
     status: "ACTIVE",
-    label: m.book_hero_actions_start_reading(),
+    label: book_hero_actions_start_reading(),
   };
 }
 

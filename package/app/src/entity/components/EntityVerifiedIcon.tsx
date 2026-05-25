@@ -1,11 +1,20 @@
-import * as m from "@rezics/i18n/messages";
 import { BadgeCheck } from "lucide-react";
+import { useMessage } from "@rezics/i18n/react";
+import { entity_verified } from "@rezics/i18n/messages";
+const m = {
+  entity_verified,
+};
+
+const i18nMessages = {
+  entity_verified,
+};
 
 interface EntityVerifiedIconProps {
   verified?: boolean | null;
 }
 
 export function EntityVerifiedIcon({ verified }: EntityVerifiedIconProps) {
+  const m = useMessage(i18nMessages);
   if (!verified) return null;
 
   return (

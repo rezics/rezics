@@ -1,5 +1,4 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
-import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -8,6 +7,29 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { withBookContentStructureOccurrences } from "../../models/bookContentStructurePath";
 import type { ChapterArboristRefHandle } from "./ChapterArborist";
 import { ChapterArborist } from "./ChapterArborist";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_chapter_search_term_placeholder,
+  common_collapse_all,
+  common_expand_all,
+  common_loading,
+  common_search,
+} from "@rezics/i18n/messages";
+const m = {
+  book_chapter_search_term_placeholder,
+  common_collapse_all,
+  common_expand_all,
+  common_loading,
+  common_search,
+};
+
+const i18nMessages = {
+  book_chapter_search_term_placeholder,
+  common_collapse_all,
+  common_expand_all,
+  common_loading,
+  common_search,
+};
 
 /** Props for LinearChapterList component. */
 interface LinearChapterListProps {
@@ -30,6 +52,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   width = 300,
   height = 300,
 }) => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, error } = useQuery(
     bookQueries.contentStructure(bookId),
   );

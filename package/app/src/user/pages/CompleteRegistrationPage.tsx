@@ -1,6 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import {
@@ -36,6 +35,113 @@ import { OtpInput } from "../components/OtpInput";
 import { Layout } from "../layouts/Layout";
 import { logout } from "../models/handler";
 import { useAuth } from "./useAuth";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  auth_flow_complete_registration_intro,
+  auth_flow_complete_registration_title,
+  auth_flow_onboarding_sign_in_first,
+  auth_flow_pause_registration,
+  auth_flow_pause_registration_confirm,
+  auth_flow_registration_complete_redirecting,
+  auth_flow_setup_display_name,
+  auth_flow_setup_slug_available,
+  auth_flow_setup_slug_checking,
+  auth_flow_setup_slug_invalid,
+  auth_flow_setup_slug_label,
+  auth_flow_setup_slug_short,
+  auth_flow_setup_slug_taken,
+  auth_flow_setup_submit,
+  auth_flow_setup_title,
+  auth_flow_verify_checking_state,
+  auth_flow_verify_code_expires,
+  auth_flow_verify_code_incomplete,
+  auth_flow_verify_code_sent_to,
+  auth_flow_verify_complete_widget,
+  auth_flow_verify_intro_prefix,
+  auth_flow_verify_intro_suffix,
+  auth_flow_verify_resend_code,
+  auth_flow_verify_resend_cooldown,
+  auth_flow_verify_send_code,
+  auth_flow_verify_sending_code,
+  auth_flow_verify_sent,
+  auth_flow_verify_submit_code,
+  auth_flow_verify_title,
+  auth_flow_verify_widget_loading,
+  auth_login,
+  auth_logout,
+  common_loading,
+} from "@rezics/i18n/messages";
+const m = {
+  auth_flow_complete_registration_intro,
+  auth_flow_complete_registration_title,
+  auth_flow_onboarding_sign_in_first,
+  auth_flow_pause_registration,
+  auth_flow_pause_registration_confirm,
+  auth_flow_registration_complete_redirecting,
+  auth_flow_setup_display_name,
+  auth_flow_setup_slug_available,
+  auth_flow_setup_slug_checking,
+  auth_flow_setup_slug_invalid,
+  auth_flow_setup_slug_label,
+  auth_flow_setup_slug_short,
+  auth_flow_setup_slug_taken,
+  auth_flow_setup_submit,
+  auth_flow_setup_title,
+  auth_flow_verify_checking_state,
+  auth_flow_verify_code_expires,
+  auth_flow_verify_code_incomplete,
+  auth_flow_verify_code_sent_to,
+  auth_flow_verify_complete_widget,
+  auth_flow_verify_intro_prefix,
+  auth_flow_verify_intro_suffix,
+  auth_flow_verify_resend_code,
+  auth_flow_verify_resend_cooldown,
+  auth_flow_verify_send_code,
+  auth_flow_verify_sending_code,
+  auth_flow_verify_sent,
+  auth_flow_verify_submit_code,
+  auth_flow_verify_title,
+  auth_flow_verify_widget_loading,
+  auth_login,
+  auth_logout,
+  common_loading,
+};
+
+const i18nMessages = {
+  auth_flow_complete_registration_intro,
+  auth_flow_complete_registration_title,
+  auth_flow_onboarding_sign_in_first,
+  auth_flow_pause_registration,
+  auth_flow_pause_registration_confirm,
+  auth_flow_registration_complete_redirecting,
+  auth_flow_setup_display_name,
+  auth_flow_setup_slug_available,
+  auth_flow_setup_slug_checking,
+  auth_flow_setup_slug_invalid,
+  auth_flow_setup_slug_label,
+  auth_flow_setup_slug_short,
+  auth_flow_setup_slug_taken,
+  auth_flow_setup_submit,
+  auth_flow_setup_title,
+  auth_flow_verify_checking_state,
+  auth_flow_verify_code_expires,
+  auth_flow_verify_code_incomplete,
+  auth_flow_verify_code_sent_to,
+  auth_flow_verify_complete_widget,
+  auth_flow_verify_intro_prefix,
+  auth_flow_verify_intro_suffix,
+  auth_flow_verify_resend_code,
+  auth_flow_verify_resend_cooldown,
+  auth_flow_verify_send_code,
+  auth_flow_verify_sending_code,
+  auth_flow_verify_sent,
+  auth_flow_verify_submit_code,
+  auth_flow_verify_title,
+  auth_flow_verify_widget_loading,
+  auth_login,
+  auth_logout,
+  common_loading,
+};
 
 function deriveSlugFromName(name: string): string {
   return name
@@ -112,6 +218,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
 // --- Step 2: Account Setup Form ---
 
 function IdentityStep({ onComplete }: { onComplete: () => void }) {
+  const m = useMessage(i18nMessages);
   const auth = useAuth();
   const [displayName, setDisplayName] = useState(
     auth.authAccountState?.email?.split("@")[0] ?? "",
@@ -238,6 +345,7 @@ function EmailVerificationStep({
   email: string;
   onComplete: () => void;
 }) {
+  const m = useMessage(i18nMessages);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
   const [error, setError] = useState<string>();
@@ -438,6 +546,7 @@ function EmailVerificationStep({
 // --- Main Page ---
 
 export const CompleteRegistrationPage: FC = () => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const auth = useAuth();
   const [justCompletedEmail, setJustCompletedEmail] = useState(false);

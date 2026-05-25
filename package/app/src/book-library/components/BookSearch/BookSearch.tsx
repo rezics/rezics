@@ -1,5 +1,4 @@
 import type { SearchQuery } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { SlidersHorizontal as TuneIcon } from "lucide-react";
 import type React from "react";
@@ -14,6 +13,29 @@ import {
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  placeholders_search_books,
+  search_advanced_label,
+  search_input_tags_hint,
+  search_input_tags_label,
+  search_input_word_count_label,
+} from "@rezics/i18n/messages";
+const m = {
+  placeholders_search_books,
+  search_advanced_label,
+  search_input_tags_hint,
+  search_input_tags_label,
+  search_input_word_count_label,
+};
+
+const i18nMessages = {
+  placeholders_search_books,
+  search_advanced_label,
+  search_input_tags_hint,
+  search_input_tags_label,
+  search_input_word_count_label,
+};
 
 export type BookSearchProps = {
   query: UseSearchQueryReturn["query"];
@@ -53,6 +75,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
   showWordCount = true,
   keywordPlaceholder,
 }) => {
+  const m = useMessage(i18nMessages);
   const keyword = bind("keyword");
   const tags = bind("tags");
   const ratings = bind("ratings");

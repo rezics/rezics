@@ -1,7 +1,6 @@
 import "github-markdown-css/github-markdown-light.css";
 import { AuthProvider } from "@rezics/api/providers";
-import * as m from "@rezics/i18n/messages";
-import { useLocale } from "@rezics/i18n/react";
+import { useLocale, useMessage } from "@rezics/i18n/react";
 import { getTextDirection } from "@rezics/i18n/runtime";
 import { ExternalLinkModal } from "@rezics/ui";
 import { RouterProvider } from "@tanstack/react-router";
@@ -17,8 +16,17 @@ import { useAppStore } from "./states/appStore";
 
 import "virtual:uno.css";
 import "@rezics/ui/config/base.css";
+import { app_error_boundary_message } from "@rezics/i18n/messages";
+const m = {
+  app_error_boundary_message,
+};
+
+const i18nMessages = {
+  app_error_boundary_message,
+};
 
 function AppProviders({ children }: { children: ReactNode }) {
+  const m = useMessage(i18nMessages);
   const themeMode = useAppStore((s) => s.theme);
 
   useAppInit();

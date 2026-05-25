@@ -2,7 +2,6 @@ import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
 } from "@rezics/api/reaction/reaction.types";
-import * as m from "@rezics/i18n/messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import {
   Bookmark,
@@ -16,6 +15,20 @@ import {
 } from "lucide-react";
 import type { FC } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  reactions_deleted_content,
+  reactions_reacted_with,
+} from "@rezics/i18n/messages";
+const m = {
+  reactions_deleted_content,
+  reactions_reacted_with,
+};
+
+const i18nMessages = {
+  reactions_deleted_content,
+  reactions_reacted_with,
+};
 
 const REACTION_ICONS: Record<string, LucideIcon> = {
   like: ThumbsUp,
@@ -54,6 +67,7 @@ type ReceivedProps = {
 export type ReactionHistoryItemProps = GivenProps | ReceivedProps;
 
 export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
+  const m = useMessage(i18nMessages);
   const { mode, item } = props;
   const Icon = reactionIconFor(item.reaction);
   const timestamp = formatTimestamp(item.createdAt);

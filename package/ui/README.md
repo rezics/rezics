@@ -38,6 +38,26 @@ import "@rezics/ui/config/base.css";
 See [docs/using-rezics-design.md](./docs/using-rezics-design.md) for the full
 integration guide.
 
+## Localized Component Copy
+
+Reusable UI components that own default copy import their own generated UI
+messages by name and bind them through the neutral adapter:
+
+```tsx
+import { useMessage } from "@rezics/i18n/react";
+import { ui_password_label } from "#/paraglide/messages.js";
+
+const messages = { ui_password_label };
+
+function Example() {
+  const m = useMessage(messages);
+  return <span>{m.ui_password_label()}</span>;
+}
+```
+
+Host string override props stay host-owned. If a host passes a label or helper
+text, the UI component renders that string as supplied.
+
 ## Component Categories
 
 ### Composite (`./`)

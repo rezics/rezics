@@ -1,6 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { Card, CardContent } from "@rezics/ui/shadcn";
@@ -13,6 +12,15 @@ import {
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import { page_home_sections_editor_picks } from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_editor_picks,
+};
+
+const i18nMessages = {
+  page_home_sections_editor_picks,
+};
 
 type Book = BookDTO;
 
@@ -25,6 +33,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   title,
   limit = 8,
 }) => {
+  const m = useMessage(i18nMessages);
   const resolvedTitle = title ?? m.page_home_sections_editor_picks();
 
   const { data, isLoading, error } = useQuery(

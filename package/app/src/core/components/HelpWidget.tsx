@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import {
   Plus as AddIcon,
@@ -8,6 +7,7 @@ import {
 import * as React from "react";
 import FeedbackDialog from "@/feedback/components/FeedbackDialog";
 import { cn } from "@/shared/utils/css-util";
+import { app_help_aria_label, app_help_feedback } from "@rezics/i18n/messages";
 
 export interface HelpFabAction {
   id: string;
@@ -28,7 +28,7 @@ function getDefaultHelpActions(): HelpFabAction[] {
   return [
     {
       id: "feedback",
-      label: m.app_help_feedback(),
+      label: app_help_feedback(),
       icon: <ReportProblemIcon className="w-4 h-4" />,
     },
   ];
@@ -40,7 +40,7 @@ function getDefaultHelpActions(): HelpFabAction[] {
 export const HelpFab: React.FC<HelpFabProps> = ({
   actions,
   icon,
-  ariaLabel = m.app_help_aria_label(),
+  ariaLabel = app_help_aria_label(),
   visible = true,
   enterDelayMs = 0,
 }) => {

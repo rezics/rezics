@@ -1,16 +1,27 @@
 import { postQueries } from "@rezics/api/post/post";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RemarkEditDialog } from "../forms/RemarkEditDialog";
+import { useMessage } from "@rezics/i18n/react";
+import { common_loading, common_no_data } from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  common_no_data,
+};
+
+const i18nMessages = {
+  common_loading,
+  common_no_data,
+};
 
 interface RemarkEditPageProps {
   reviewId: string;
 }
 
 export const RemarkEditPage: React.FC<RemarkEditPageProps> = ({ reviewId }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(postQueries.detail(reviewId));
 

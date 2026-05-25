@@ -1,11 +1,19 @@
 import type { UnitTagDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { TagDetailCard } from "./TagCards";
+import { useMessage } from "@rezics/i18n/react";
+import { tag_empty } from "@rezics/i18n/messages";
+const m = {
+  tag_empty,
+};
+
+const i18nMessages = {
+  tag_empty,
+};
 
 interface SingleTagChipProps {
   tag: UnitTagDTO;
@@ -63,6 +71,7 @@ export const TagList: React.FC<{
   className?: string;
   autoSelectFirst?: boolean;
 }> = ({ tags, className, autoSelectFirst }) => {
+  const m = useMessage(i18nMessages);
   const [activeId, setActiveId] = useState<string | null>(
     autoSelectFirst && tags.length > 0 ? tags[0].tagUnitId : null,
   );

@@ -1,6 +1,5 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Avatar,
   AvatarFallback,
@@ -16,6 +15,26 @@ import { Search as SearchIcon } from "lucide-react";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { UserError, UserLoading } from "./UserState";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  user_list_title,
+  user_no_bio,
+  user_none_found,
+  user_search_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  user_list_title,
+  user_no_bio,
+  user_none_found,
+  user_search_placeholder,
+};
+
+const i18nMessages = {
+  user_list_title,
+  user_no_bio,
+  user_none_found,
+  user_search_placeholder,
+};
 
 export interface UserListPageProps {
   onUserClick?: (unitId: string) => void;
@@ -26,6 +45,7 @@ export interface UserListPageProps {
  * 显示所有用户，支持搜索和分页
  */
 export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
+  const m = useMessage(i18nMessages);
   const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);

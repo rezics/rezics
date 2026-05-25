@@ -1,10 +1,18 @@
 import type { SearchQuery } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import type { QueryMiddleware } from "../../hooks/useSearchQuery";
+import { useMessage } from "@rezics/i18n/react";
+import { accessibility_search } from "@rezics/i18n/messages";
+const m = {
+  accessibility_search,
+};
+
+const i18nMessages = {
+  accessibility_search,
+};
 
 export type KeywordInputProps = {
   value: string;
@@ -27,6 +35,7 @@ export const KeywordInput: React.FC<KeywordInputProps> = ({
   placeholder,
   label,
 }) => {
+  const m = useMessage(i18nMessages);
   const [local, setLocal] = useState(value);
 
   const commit = () => {

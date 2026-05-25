@@ -1,9 +1,22 @@
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { PinboardEntryCard } from "../components/PinboardEntryCard";
 import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { usePinboardList } from "../hooks/usePinboard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  pinboard_pinned_heading,
+  pinboard_pinned_region,
+} from "@rezics/i18n/messages";
+const m = {
+  pinboard_pinned_heading,
+  pinboard_pinned_region,
+};
+
+const i18nMessages = {
+  pinboard_pinned_heading,
+  pinboard_pinned_region,
+};
 
 export interface PinnedFeedSectionProps {
   realmUnitId: string;
@@ -20,6 +33,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   realmUnitId,
   linkFor,
 }) => {
+  const m = useMessage(i18nMessages);
   const { entries, isLoading, isError, refetch } = usePinboardList({
     realmUnitId,
     pinboardKey: "pinboard",

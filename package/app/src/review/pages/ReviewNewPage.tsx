@@ -4,13 +4,36 @@ import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { markdownContentDoc, PostKind } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_submit,
+  common_submitting,
+  excerpt_book_unit_id,
+  remark_new_title,
+  review_new_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_submit,
+  common_submitting,
+  excerpt_book_unit_id,
+  remark_new_title,
+  review_new_title,
+};
+
+const i18nMessages = {
+  common_submit,
+  common_submitting,
+  excerpt_book_unit_id,
+  remark_new_title,
+  review_new_title,
+};
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
+  const m = useMessage(i18nMessages);
   const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = new URLSearchParams(search);
   const navigate = useNavigate();

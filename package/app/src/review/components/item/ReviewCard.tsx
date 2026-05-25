@@ -1,5 +1,4 @@
 import type { PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Tooltip,
   TooltipContent,
@@ -15,12 +14,27 @@ import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { reviewCardActions, reviewPolicy } from "../../models/reviewPolicy";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  review_open_review_page,
+  review_target_work_label,
+} from "@rezics/i18n/messages";
+const m = {
+  review_open_review_page,
+  review_target_work_label,
+};
+
+const i18nMessages = {
+  review_open_review_page,
+  review_target_work_label,
+};
 
 interface ReviewRatingBadgeProps {
   review: PostDTO;
 }
 
 const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
+  const m = useMessage(i18nMessages);
   const rating = (review.extra as { rating?: number } | null)?.rating;
 
   return (
@@ -82,6 +96,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   targetWork,
   showTargetWork = true,
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
 
   const reviewTitle = (review.extra as any)?.title as string | undefined;

@@ -1,7 +1,6 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import type { UnitListResponse } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -24,15 +23,36 @@ import {
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
+import {
+  admin_auth_actions_title,
+  admin_auth_email_status,
+  admin_unit_failed_load_list,
+  admin_unit_list_description,
+  admin_unit_list_meili_description,
+  admin_unit_list_meili_title,
+  admin_unit_list_title,
+  admin_unit_no_title,
+  admin_unit_search_label,
+  admin_unit_search_placeholder,
+  common_create,
+  common_created,
+  common_edit,
+  common_id,
+  common_search,
+  common_title,
+  common_type,
+  common_updated,
+  common_user,
+} from "@rezics/i18n/messages";
 
 /** Extract the best title from the translations array on a UnitDTO. */
 function extractUnitTitle(unit: UnitDTO): string {
   const translations = unit.translations;
-  if (!translations?.length) return m.admin_unit_no_title();
+  if (!translations?.length) return admin_unit_no_title();
   const primary =
     translations.find((t) => t.language === unit.defaultLanguage) ??
     translations[0];
-  return primary?.title || m.admin_unit_no_title();
+  return primary?.title || admin_unit_no_title();
 }
 
 export default function UnitsPage() {
@@ -84,13 +104,13 @@ export default function UnitsPage() {
     const cols: PaginatedColumn<UnitDTO>[] = [
       {
         id: "id",
-        header: m.common_id(),
+        header: common_id(),
         minWidth: 220,
         cell: (u) => <span className="text-sm font-mono">{u.id}</span>,
       },
       {
         id: "title",
-        header: m.common_title(),
+        header: common_title(),
         minWidth: 220,
         cell: (u) => (
           <span className="text-sm font-semibold whitespace-nowrap">
@@ -100,20 +120,20 @@ export default function UnitsPage() {
       },
       {
         id: "type",
-        header: m.common_type(),
+        header: common_type(),
         minWidth: 120,
         cell: (u) =>
           u.type ? <Badge variant="secondary">{u.type}</Badge> : "-",
       },
       {
         id: "status",
-        header: m.admin_auth_email_status(),
+        header: admin_auth_email_status(),
         minWidth: 120,
         cell: (u) => u.status || "-",
       },
       {
         id: "user",
-        header: m.common_user(),
+        header: common_user(),
         minWidth: 200,
         cell: (u) => (
           <div className="flex flex-col">
@@ -130,19 +150,19 @@ export default function UnitsPage() {
       },
       {
         id: "createdAt",
-        header: m.common_created(),
+        header: common_created(),
         minWidth: 170,
         cell: (u) => fmtDate(u.createdAt),
       },
       {
         id: "updatedAt",
-        header: m.common_updated(),
+        header: common_updated(),
         minWidth: 170,
         cell: (u) => fmtDate(u.updatedAt),
       },
       {
         id: "actions",
-        header: m.admin_auth_actions_title(),
+        header: admin_auth_actions_title(),
         minWidth: 120,
         cell: (u) => (
           <Button
@@ -150,7 +170,7 @@ export default function UnitsPage() {
             variant="outline"
             render={(props) => (
               <Link to="/unit/$unitId" params={{ unitId: u.id }} {...props}>
-                {m.common_edit()}
+                {common_edit()}
               </Link>
             )}
           />
@@ -163,19 +183,17 @@ export default function UnitsPage() {
   return (
     <Page
       title={
-        isMeiliMode
-          ? m.admin_unit_list_meili_title()
-          : m.admin_unit_list_title()
+        isMeiliMode ? admin_unit_list_meili_title() : admin_unit_list_title()
       }
       description={
         isMeiliMode
-          ? m.admin_unit_list_meili_description()
-          : m.admin_unit_list_description()
+          ? admin_unit_list_meili_description()
+          : admin_unit_list_description()
       }
     >
       {isMeiliMode ? (
         <SearchablePaginatedTableCard<UnitDTO>
-          searchPlaceholder={m.admin_unit_search_placeholder()}
+          searchPlaceholder={admin_unit_search_placeholder()}
           q={q}
           onQChange={setQ}
           onSearch={() => {
@@ -188,7 +206,7 @@ export default function UnitsPage() {
               render={(props) => (
                 <Link to="/unit/create" {...props}>
                   <AddIcon className="size-4" />
-                  {m.common_create()}
+                  {common_create()}
                 </Link>
               )}
             />
@@ -214,11 +232,11 @@ export default function UnitsPage() {
             <div className="flex flex-col sm:flex-row gap-3 items-stretch">
               <div className="flex-1 flex flex-col gap-1">
                 <Label htmlFor="unit-search" className="text-xs">
-                  {m.admin_unit_search_label()}
+                  {admin_unit_search_label()}
                 </Label>
                 <Input
                   id="unit-search"
-                  placeholder={m.admin_unit_search_placeholder()}
+                  placeholder={admin_unit_search_placeholder()}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   onKeyDown={(e) => {
@@ -232,7 +250,7 @@ export default function UnitsPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={m.common_search()}
+                aria-label={common_search()}
                 onClick={() => {
                   setPage(0);
                   setQuery(q.trim());
@@ -246,7 +264,7 @@ export default function UnitsPage() {
                 render={(props) => (
                   <Link to="/unit/create" {...props}>
                     <AddIcon className="size-4" />
-                    {m.common_create()}
+                    {common_create()}
                   </Link>
                 )}
               />
@@ -261,7 +279,7 @@ export default function UnitsPage() {
             ) : normalQuery.isError ? (
               <div>
                 <p className="text-sm text-error-text">
-                  {m.admin_unit_failed_load_list()}
+                  {admin_unit_failed_load_list()}
                 </p>
                 {normalQuery.error ? (
                   <p className="text-xs text-error-text">

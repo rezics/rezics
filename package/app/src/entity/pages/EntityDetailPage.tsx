@@ -1,7 +1,6 @@
 import { entityDetailQueryOptions, useEntity } from "@rezics/api/entity";
 import { useServerPermission } from "@rezics/api/hooks";
 import { BasicAdminPermission } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
@@ -11,6 +10,32 @@ import { getEntityLanguages, getEntityTranslation } from "../models/types";
 import { AboutTab, hasAboutData } from "../sections/AboutTab";
 import { hasOverviewData, OverviewTab } from "../sections/OverviewTab";
 import { WorksTab } from "../sections/WorksTab";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  entity_no_content,
+  entity_not_found,
+  entity_not_found_description,
+  entity_tab_about,
+  entity_tab_overview,
+  entity_tab_works,
+} from "@rezics/i18n/messages";
+const m = {
+  entity_no_content,
+  entity_not_found,
+  entity_not_found_description,
+  entity_tab_about,
+  entity_tab_overview,
+  entity_tab_works,
+};
+
+const i18nMessages = {
+  entity_no_content,
+  entity_not_found,
+  entity_not_found_description,
+  entity_tab_about,
+  entity_tab_overview,
+  entity_tab_works,
+};
 
 /*
  * AWARDS_TAB: uncomment when an awards data source lands.
@@ -33,6 +58,7 @@ interface EntityDetailPageProps {
 }
 
 export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
+  const m = useMessage(i18nMessages);
   const { data: entity, isLoading, error } = useEntity(unitId);
   const permission = useServerPermission();
 

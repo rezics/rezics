@@ -1,12 +1,22 @@
 import type { TagFilters } from "@rezics/api/tag/tag";
 import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { RealmTagHighlights } from "./RealmTagHighlights";
 import TagList from "./TagList";
+import { useMessage } from "@rezics/i18n/react";
+import { tag_load_failed, tag_loading } from "@rezics/i18n/messages";
+const m = {
+  tag_load_failed,
+  tag_loading,
+};
+
+const i18nMessages = {
+  tag_load_failed,
+  tag_loading,
+};
 
 type Mode = "flat" | "grouped";
 
@@ -25,6 +35,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   domainIds: _domainIds,
   className,
 }) => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, error } = useQuery(tagQueries.list(filters));
   const tags: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
 

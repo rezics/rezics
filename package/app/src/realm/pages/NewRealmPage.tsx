@@ -1,12 +1,32 @@
 import { useCreateRealmMutation } from "@rezics/api/realm/realm";
 import { DEFAULT_LANGUAGE, markdownContentDoc } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { unitHref } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_create,
+  common_description,
+  common_name,
+  realm_new_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_create,
+  common_description,
+  common_name,
+  realm_new_title,
+};
+
+const i18nMessages = {
+  common_create,
+  common_description,
+  common_name,
+  realm_new_title,
+};
 
 export function NewRealmPage() {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const createMutation = useCreateRealmMutation();
   const [title, setTitle] = useState("");

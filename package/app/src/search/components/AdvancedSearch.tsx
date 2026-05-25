@@ -1,5 +1,4 @@
 import type { SearchQuery } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
@@ -15,6 +14,38 @@ import {
   TagPicker,
   WordCountRangeInput,
 } from "./primitive";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  search_close_advanced_label,
+  search_filters_postKind,
+  search_filters_sort,
+  search_filters_type,
+  search_filters_wordCount,
+  search_input_placeholder,
+  search_input_tags_hint,
+  search_input_tags_label,
+} from "@rezics/i18n/messages";
+const m = {
+  search_close_advanced_label,
+  search_filters_postKind,
+  search_filters_sort,
+  search_filters_type,
+  search_filters_wordCount,
+  search_input_placeholder,
+  search_input_tags_hint,
+  search_input_tags_label,
+};
+
+const i18nMessages = {
+  search_close_advanced_label,
+  search_filters_postKind,
+  search_filters_sort,
+  search_filters_type,
+  search_filters_wordCount,
+  search_input_placeholder,
+  search_input_tags_hint,
+  search_input_tags_label,
+};
 
 export type AdvancedSearchProps = {
   query: UseSearchQueryReturn["query"];
@@ -35,6 +66,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
   middleware,
   keywordPlaceholder,
 }) => {
+  const m = useMessage(i18nMessages);
   const keyword = bind("keyword");
   const tags = bind("tags");
   const type = bind("type");

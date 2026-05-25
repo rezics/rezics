@@ -1,6 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +7,20 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_home_sections_trending_wiki,
+  page_home_sections_wiki_teaser_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_trending_wiki,
+  page_home_sections_wiki_teaser_placeholder,
+};
+
+const i18nMessages = {
+  page_home_sections_trending_wiki,
+  page_home_sections_wiki_teaser_placeholder,
+};
 
 type Book = BookDTO;
 
@@ -20,6 +33,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
   title,
   limit = 6,
 }) => {
+  const m = useMessage(i18nMessages);
   const resolvedTitle = title ?? m.page_home_sections_trending_wiki();
 
   const { data, isLoading, error } = useQuery(

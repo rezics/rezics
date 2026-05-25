@@ -3,7 +3,6 @@ import {
   meiliAdminMutations,
   meiliAdminQueries,
 } from "@rezics/api/meili/meili.admin.queries";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -26,6 +25,64 @@ import {
   type MeiliAction,
   MeiliOperationsSection,
 } from "../components/MeiliOperationsSection";
+import {
+  admin_meili_admin_key_created,
+  admin_meili_admin_key_created_console,
+  admin_meili_all_content_deleted,
+  admin_meili_all_entities_deleted,
+  admin_meili_all_feedbacks_deleted,
+  admin_meili_all_indexes_deleted,
+  admin_meili_all_posts_deleted,
+  admin_meili_all_realms_deleted,
+  admin_meili_all_users_deleted,
+  admin_meili_checking_status,
+  admin_meili_content_index_initialized,
+  admin_meili_content_sync_started,
+  admin_meili_delete_all_content,
+  admin_meili_delete_all_content_confirm,
+  admin_meili_delete_all_entities,
+  admin_meili_delete_all_entities_confirm,
+  admin_meili_delete_all_feedbacks,
+  admin_meili_delete_all_feedbacks_confirm,
+  admin_meili_delete_all_posts,
+  admin_meili_delete_all_posts_confirm,
+  admin_meili_delete_all_realms,
+  admin_meili_delete_all_realms_confirm,
+  admin_meili_delete_all_users,
+  admin_meili_delete_all_users_confirm,
+  admin_meili_delete_key_confirm,
+  admin_meili_deleting,
+  admin_meili_description,
+  admin_meili_entities_index_initialized,
+  admin_meili_entities_sync_started,
+  admin_meili_feedbacks_index_initialized,
+  admin_meili_feedbacks_sync_started,
+  admin_meili_init_content_index,
+  admin_meili_init_entities_index,
+  admin_meili_init_feedbacks_index,
+  admin_meili_init_posts_index,
+  admin_meili_init_realms_index,
+  admin_meili_init_users_index,
+  admin_meili_initializing,
+  admin_meili_key_deleted,
+  admin_meili_posts_index_initialized,
+  admin_meili_posts_sync_started,
+  admin_meili_realms_index_initialized,
+  admin_meili_realms_sync_started,
+  admin_meili_status_label,
+  admin_meili_sync_all_content,
+  admin_meili_sync_all_entities,
+  admin_meili_sync_all_feedbacks,
+  admin_meili_sync_all_posts,
+  admin_meili_sync_all_realms,
+  admin_meili_sync_all_users,
+  admin_meili_syncing,
+  admin_meili_title,
+  admin_meili_users_index_initialized,
+  admin_meili_users_sync_started,
+  common_dismiss,
+  common_unknown,
+} from "@rezics/i18n/messages";
 
 type MessageState = {
   type: "success" | "error" | "info";
@@ -44,7 +101,7 @@ function messageClass(type: "success" | "error" | "info") {
 }
 
 function meiliDeleteConfirmLabel(key: MeiliKey) {
-  return m.admin_meili_delete_key_confirm({
+  return admin_meili_delete_key_confirm({
     uid: key.uid ?? "",
     name: key.name ? ` (${key.name})` : "",
   });
@@ -70,7 +127,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_content_index_initialized(),
+        text: res.message || admin_meili_content_index_initialized(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -80,7 +137,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_feedbacks_index_initialized(),
+        text: res.message || admin_meili_feedbacks_index_initialized(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -90,7 +147,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_users_index_initialized(),
+        text: res.message || admin_meili_users_index_initialized(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -100,7 +157,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_posts_index_initialized(),
+        text: res.message || admin_meili_posts_index_initialized(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -110,7 +167,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_realms_index_initialized(),
+        text: res.message || admin_meili_realms_index_initialized(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -120,7 +177,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_entities_index_initialized(),
+        text: res.message || admin_meili_entities_index_initialized(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -130,7 +187,7 @@ export function MeiliPage() {
     onSuccess: () => {
       setMessage({
         type: "success",
-        text: m.admin_meili_content_sync_started(),
+        text: admin_meili_content_sync_started(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -140,7 +197,7 @@ export function MeiliPage() {
     onSuccess: () => {
       setMessage({
         type: "success",
-        text: m.admin_meili_feedbacks_sync_started(),
+        text: admin_meili_feedbacks_sync_started(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -148,14 +205,14 @@ export function MeiliPage() {
 
   const syncUsersMutation = meiliAdminMutations.useSyncUsers({
     onSuccess: () => {
-      setMessage({ type: "success", text: m.admin_meili_users_sync_started() });
+      setMessage({ type: "success", text: admin_meili_users_sync_started() });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
   const syncPostsMutation = meiliAdminMutations.useSyncPosts({
     onSuccess: () => {
-      setMessage({ type: "success", text: m.admin_meili_posts_sync_started() });
+      setMessage({ type: "success", text: admin_meili_posts_sync_started() });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
@@ -164,7 +221,7 @@ export function MeiliPage() {
     onSuccess: () => {
       setMessage({
         type: "success",
-        text: m.admin_meili_realms_sync_started(),
+        text: admin_meili_realms_sync_started(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -174,7 +231,7 @@ export function MeiliPage() {
     onSuccess: () => {
       setMessage({
         type: "success",
-        text: m.admin_meili_entities_sync_started(),
+        text: admin_meili_entities_sync_started(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -184,7 +241,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_all_content_deleted(),
+        text: res.message || admin_meili_all_content_deleted(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -194,7 +251,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_all_feedbacks_deleted(),
+        text: res.message || admin_meili_all_feedbacks_deleted(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -204,7 +261,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_all_users_deleted(),
+        text: res.message || admin_meili_all_users_deleted(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -214,7 +271,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_all_posts_deleted(),
+        text: res.message || admin_meili_all_posts_deleted(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -224,7 +281,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_all_realms_deleted(),
+        text: res.message || admin_meili_all_realms_deleted(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -234,7 +291,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_all_entities_deleted(),
+        text: res.message || admin_meili_all_entities_deleted(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -244,7 +301,7 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_all_indexes_deleted(),
+        text: res.message || admin_meili_all_indexes_deleted(),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -258,8 +315,8 @@ export function MeiliPage() {
       setMessage({
         type: "success",
         text: keyString
-          ? m.admin_meili_admin_key_created()
-          : m.admin_meili_admin_key_created_console(),
+          ? admin_meili_admin_key_created()
+          : admin_meili_admin_key_created_console(),
       });
       if (!keyString) console.log("Meili admin key response", res);
     },
@@ -270,7 +327,7 @@ export function MeiliPage() {
     onSuccess: async (res) => {
       setMessage({
         type: "success",
-        text: res.message || m.admin_meili_key_deleted(),
+        text: res.message || admin_meili_key_deleted(),
       });
       await refetchKeys();
     },
@@ -287,43 +344,43 @@ export function MeiliPage() {
   const initActions: MeiliAction[] = [
     {
       id: "content",
-      label: m.admin_meili_init_content_index(),
-      pendingLabel: m.admin_meili_initializing(),
+      label: admin_meili_init_content_index(),
+      pendingLabel: admin_meili_initializing(),
       isPending: initContentMutation.isPending,
       onClick: () => initContentMutation.mutate(),
     },
     {
       id: "feedbacks",
-      label: m.admin_meili_init_feedbacks_index(),
-      pendingLabel: m.admin_meili_initializing(),
+      label: admin_meili_init_feedbacks_index(),
+      pendingLabel: admin_meili_initializing(),
       isPending: initFeedbacksMutation.isPending,
       onClick: () => initFeedbacksMutation.mutate(),
     },
     {
       id: "users",
-      label: m.admin_meili_init_users_index(),
-      pendingLabel: m.admin_meili_initializing(),
+      label: admin_meili_init_users_index(),
+      pendingLabel: admin_meili_initializing(),
       isPending: initUsersMutation.isPending,
       onClick: () => initUsersMutation.mutate(),
     },
     {
       id: "posts",
-      label: m.admin_meili_init_posts_index(),
-      pendingLabel: m.admin_meili_initializing(),
+      label: admin_meili_init_posts_index(),
+      pendingLabel: admin_meili_initializing(),
       isPending: initPostsMutation.isPending,
       onClick: () => initPostsMutation.mutate(),
     },
     {
       id: "realms",
-      label: m.admin_meili_init_realms_index(),
-      pendingLabel: m.admin_meili_initializing(),
+      label: admin_meili_init_realms_index(),
+      pendingLabel: admin_meili_initializing(),
       isPending: initRealmsMutation.isPending,
       onClick: () => initRealmsMutation.mutate(),
     },
     {
       id: "entities",
-      label: m.admin_meili_init_entities_index(),
-      pendingLabel: m.admin_meili_initializing(),
+      label: admin_meili_init_entities_index(),
+      pendingLabel: admin_meili_initializing(),
       isPending: initEntitiesMutation.isPending,
       onClick: () => initEntitiesMutation.mutate(),
     },
@@ -332,48 +389,48 @@ export function MeiliPage() {
   const syncActions: MeiliAction[] = [
     {
       id: "content",
-      label: m.admin_meili_sync_all_content(),
-      pendingLabel: m.admin_meili_syncing(),
+      label: admin_meili_sync_all_content(),
+      pendingLabel: admin_meili_syncing(),
       isPending: syncContentMutation.isPending,
       onClick: () => syncContentMutation.mutate(),
       variant: "outline",
     },
     {
       id: "feedbacks",
-      label: m.admin_meili_sync_all_feedbacks(),
-      pendingLabel: m.admin_meili_syncing(),
+      label: admin_meili_sync_all_feedbacks(),
+      pendingLabel: admin_meili_syncing(),
       isPending: syncFeedbacksMutation.isPending,
       onClick: () => syncFeedbacksMutation.mutate(),
       variant: "outline",
     },
     {
       id: "users",
-      label: m.admin_meili_sync_all_users(),
-      pendingLabel: m.admin_meili_syncing(),
+      label: admin_meili_sync_all_users(),
+      pendingLabel: admin_meili_syncing(),
       isPending: syncUsersMutation.isPending,
       onClick: () => syncUsersMutation.mutate(),
       variant: "outline",
     },
     {
       id: "posts",
-      label: m.admin_meili_sync_all_posts(),
-      pendingLabel: m.admin_meili_syncing(),
+      label: admin_meili_sync_all_posts(),
+      pendingLabel: admin_meili_syncing(),
       isPending: syncPostsMutation.isPending,
       onClick: () => syncPostsMutation.mutate(),
       variant: "outline",
     },
     {
       id: "realms",
-      label: m.admin_meili_sync_all_realms(),
-      pendingLabel: m.admin_meili_syncing(),
+      label: admin_meili_sync_all_realms(),
+      pendingLabel: admin_meili_syncing(),
       isPending: syncRealmsMutation.isPending,
       onClick: () => syncRealmsMutation.mutate(),
       variant: "outline",
     },
     {
       id: "entities",
-      label: m.admin_meili_sync_all_entities(),
-      pendingLabel: m.admin_meili_syncing(),
+      label: admin_meili_sync_all_entities(),
+      pendingLabel: admin_meili_syncing(),
       isPending: syncEntitiesMutation.isPending,
       onClick: () => syncEntitiesMutation.mutate(),
       variant: "outline",
@@ -383,49 +440,49 @@ export function MeiliPage() {
   const deleteActions: MeiliDangerAction[] = [
     {
       id: "content",
-      label: m.admin_meili_delete_all_content(),
-      pendingLabel: m.admin_meili_deleting(),
-      confirmLabel: m.admin_meili_delete_all_content_confirm(),
+      label: admin_meili_delete_all_content(),
+      pendingLabel: admin_meili_deleting(),
+      confirmLabel: admin_meili_delete_all_content_confirm(),
       isPending: deleteAllContentMutation.isPending,
       onConfirm: () => deleteAllContentMutation.mutate(),
     },
     {
       id: "feedbacks",
-      label: m.admin_meili_delete_all_feedbacks(),
-      pendingLabel: m.admin_meili_deleting(),
-      confirmLabel: m.admin_meili_delete_all_feedbacks_confirm(),
+      label: admin_meili_delete_all_feedbacks(),
+      pendingLabel: admin_meili_deleting(),
+      confirmLabel: admin_meili_delete_all_feedbacks_confirm(),
       isPending: deleteAllFeedbacksMutation.isPending,
       onConfirm: () => deleteAllFeedbacksMutation.mutate(),
     },
     {
       id: "users",
-      label: m.admin_meili_delete_all_users(),
-      pendingLabel: m.admin_meili_deleting(),
-      confirmLabel: m.admin_meili_delete_all_users_confirm(),
+      label: admin_meili_delete_all_users(),
+      pendingLabel: admin_meili_deleting(),
+      confirmLabel: admin_meili_delete_all_users_confirm(),
       isPending: deleteAllUsersMutation.isPending,
       onConfirm: () => deleteAllUsersMutation.mutate(),
     },
     {
       id: "posts",
-      label: m.admin_meili_delete_all_posts(),
-      pendingLabel: m.admin_meili_deleting(),
-      confirmLabel: m.admin_meili_delete_all_posts_confirm(),
+      label: admin_meili_delete_all_posts(),
+      pendingLabel: admin_meili_deleting(),
+      confirmLabel: admin_meili_delete_all_posts_confirm(),
       isPending: deleteAllPostsMutation.isPending,
       onConfirm: () => deleteAllPostsMutation.mutate(),
     },
     {
       id: "realms",
-      label: m.admin_meili_delete_all_realms(),
-      pendingLabel: m.admin_meili_deleting(),
-      confirmLabel: m.admin_meili_delete_all_realms_confirm(),
+      label: admin_meili_delete_all_realms(),
+      pendingLabel: admin_meili_deleting(),
+      confirmLabel: admin_meili_delete_all_realms_confirm(),
       isPending: deleteAllRealmsMutation.isPending,
       onConfirm: () => deleteAllRealmsMutation.mutate(),
     },
     {
       id: "entities",
-      label: m.admin_meili_delete_all_entities(),
-      pendingLabel: m.admin_meili_deleting(),
-      confirmLabel: m.admin_meili_delete_all_entities_confirm(),
+      label: admin_meili_delete_all_entities(),
+      pendingLabel: admin_meili_deleting(),
+      confirmLabel: admin_meili_delete_all_entities_confirm(),
       isPending: deleteAllEntitiesMutation.isPending,
       onConfirm: () => deleteAllEntitiesMutation.mutate(),
     },
@@ -433,18 +490,18 @@ export function MeiliPage() {
 
   return (
     <Page
-      title={m.admin_meili_title()}
+      title={admin_meili_title()}
       description={
         <div className="space-y-2">
-          <p>{m.admin_meili_description()}</p>
+          <p>{admin_meili_description()}</p>
           {isHealthLoading ? (
             <div className="flex items-center gap-2 text-sm text-text-secondary">
               <Spinner size="sm" />
-              <span>{m.admin_meili_checking_status()}</span>
+              <span>{admin_meili_checking_status()}</span>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-sm">
-              <span>{m.admin_meili_status_label()}</span>
+              <span>{admin_meili_status_label()}</span>
               <Badge
                 variant="outline"
                 className={
@@ -453,7 +510,7 @@ export function MeiliPage() {
                     : "border-border-whisper bg-surface-subtle text-warning-text"
                 }
               >
-                {health?.status ?? m.common_unknown()}
+                {health?.status ?? common_unknown()}
               </Badge>
             </div>
           )}
@@ -479,7 +536,7 @@ export function MeiliPage() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={m.common_dismiss()}
+                aria-label={common_dismiss()}
                 onClick={() => setMessage(null)}
               >
                 <CloseIcon className="size-4" />

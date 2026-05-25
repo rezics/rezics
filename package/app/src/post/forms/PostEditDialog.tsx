@@ -9,7 +9,6 @@ import {
   markdownContentDoc,
   PostKind,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -22,6 +21,29 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_edit,
+  common_save,
+  common_saving,
+  post_edit_wiki_post,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_edit,
+  common_save,
+  common_saving,
+  post_edit_wiki_post,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_edit,
+  common_save,
+  common_saving,
+  post_edit_wiki_post,
+};
 
 interface PostEditDialogProps {
   post: PostDTO;
@@ -34,6 +56,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   open,
   onClose,
 }) => {
+  const m = useMessage(i18nMessages);
   const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isWikiPost = post.kind === PostKind.WIKI;

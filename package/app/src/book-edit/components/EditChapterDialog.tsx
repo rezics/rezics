@@ -1,5 +1,4 @@
 import type { ContentRating } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { RatingSelector } from "@rezics/ui";
 import {
   Button,
@@ -18,6 +17,38 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_chapter_edit_dialog_status,
+  book_chapter_edit_dialog_title,
+  book_fields_title,
+  common_cancel,
+  common_save,
+  book_chapter_status_archived,
+  book_chapter_status_draft,
+  book_chapter_status_published,
+} from "@rezics/i18n/messages";
+const m = {
+  book_chapter_edit_dialog_status,
+  book_chapter_edit_dialog_title,
+  book_fields_title,
+  common_cancel,
+  common_save,
+  book_chapter_status_archived,
+  book_chapter_status_draft,
+  book_chapter_status_published,
+};
+
+const i18nMessages = {
+  book_chapter_edit_dialog_status,
+  book_chapter_edit_dialog_title,
+  book_fields_title,
+  common_cancel,
+  common_save,
+  book_chapter_status_archived,
+  book_chapter_status_draft,
+  book_chapter_status_published,
+};
 
 // MOCK: publish statuses — replace with contract enum when backend is ready
 const PUBLISH_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
@@ -46,6 +77,7 @@ export function EditChapterDialog({
   chapter,
   onSave,
 }: EditChapterDialogProps) {
+  const m = useMessage(i18nMessages);
   const [title, setTitle] = useState("");
   const [status, setStatus] = useState<PublishStatus>("DRAFT");
   const [rating, setRating] = useState<ContentRating>("GENERAL");

@@ -1,6 +1,14 @@
 import { contentDocMarkdownFallback, type EntityDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { getEntityTranslation } from "../models/types";
+import { useMessage } from "@rezics/i18n/react";
+import { entity_no_overview_available } from "@rezics/i18n/messages";
+const m = {
+  entity_no_overview_available,
+};
+
+const i18nMessages = {
+  entity_no_overview_available,
+};
 
 interface OverviewTabProps {
   entity: EntityDTO;
@@ -8,6 +16,7 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ entity, language }: OverviewTabProps) {
+  const m = useMessage(i18nMessages);
   const tr = getEntityTranslation(entity, language);
   // Per entity detail page spec: do NOT silently fall back to another language;
   // explicit empty-state for the current language.

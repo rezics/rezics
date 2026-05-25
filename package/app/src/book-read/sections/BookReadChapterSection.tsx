@@ -4,7 +4,6 @@ import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
-import * as m from "@rezics/i18n/messages";
 import { handleExternalLinkClick } from "@rezics/ui/link/handleExternalLinkClick.ts";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -22,8 +21,53 @@ import {
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostListSection, ReplyComposer } from "@/post";
 import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_read_chapter_actions_content,
+  book_read_chapter_actions_discuss,
+  book_read_chapter_actions_preparing,
+  book_read_chapter_actions_progress,
+  book_read_chapter_actions_review,
+  book_read_chapter_actions_saving,
+  book_read_empty_chapter_actions_hint,
+  book_read_empty_chapter_description,
+  book_read_position_save,
+  book_read_position_saving,
+  common_edit,
+  common_loading,
+} from "@rezics/i18n/messages";
+const m = {
+  book_read_chapter_actions_content,
+  book_read_chapter_actions_discuss,
+  book_read_chapter_actions_preparing,
+  book_read_chapter_actions_progress,
+  book_read_chapter_actions_review,
+  book_read_chapter_actions_saving,
+  book_read_empty_chapter_actions_hint,
+  book_read_empty_chapter_description,
+  book_read_position_save,
+  book_read_position_saving,
+  common_edit,
+  common_loading,
+};
+
+const i18nMessages = {
+  book_read_chapter_actions_content,
+  book_read_chapter_actions_discuss,
+  book_read_chapter_actions_preparing,
+  book_read_chapter_actions_progress,
+  book_read_chapter_actions_review,
+  book_read_chapter_actions_saving,
+  book_read_empty_chapter_actions_hint,
+  book_read_empty_chapter_description,
+  book_read_position_save,
+  book_read_position_saving,
+  common_edit,
+  common_loading,
+};
 
 export const BookReadChapterPage: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const { bookId, chapterId } = bookReadLayoutRoute.useParams();
   const search = bookReadLayoutRoute.useSearch();
   const navigate = useNavigate();

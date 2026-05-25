@@ -1,6 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { type BookDTO, mainMarkdownSource } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Tooltip,
@@ -17,6 +16,29 @@ import {
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_book_edit_info_translation_source_label,
+  page_book_edit_info_translation_source_no_match,
+  page_book_edit_info_translation_source_open_button,
+  page_book_edit_info_translation_source_sync_button,
+  page_book_edit_info_translation_source_sync_tooltip,
+} from "@rezics/i18n/messages";
+const m = {
+  page_book_edit_info_translation_source_label,
+  page_book_edit_info_translation_source_no_match,
+  page_book_edit_info_translation_source_open_button,
+  page_book_edit_info_translation_source_sync_button,
+  page_book_edit_info_translation_source_sync_tooltip,
+};
+
+const i18nMessages = {
+  page_book_edit_info_translation_source_label,
+  page_book_edit_info_translation_source_no_match,
+  page_book_edit_info_translation_source_open_button,
+  page_book_edit_info_translation_source_sync_button,
+  page_book_edit_info_translation_source_sync_tooltip,
+};
 
 export interface TranslationSyncActionsProps {
   /** Source release unit id this language is wired to. Falsy disables actions. */
@@ -38,6 +60,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   language,
   onSync,
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
 
   const { data: sourceBook, isFetching } = useQuery({

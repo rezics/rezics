@@ -1,5 +1,4 @@
 import { authApi } from "@rezics/api/auth/auth.api";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -15,6 +14,89 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
 import { Page } from "@/core/layouts/Page";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_auth_email_api_duration,
+  admin_auth_email_completed,
+  admin_auth_email_connected_to,
+  admin_auth_email_connection_failed,
+  admin_auth_email_connection_test_failed,
+  admin_auth_email_failed_load_templates,
+  admin_auth_email_failed_render_preview,
+  admin_auth_email_failed_send,
+  admin_auth_email_preview,
+  admin_auth_email_preview_title,
+  admin_auth_email_recipient,
+  admin_auth_email_recipient_label,
+  admin_auth_email_select_template_to_preview,
+  admin_auth_email_send_test,
+  admin_auth_email_send_test_email,
+  admin_auth_email_send_timing,
+  admin_auth_email_sent_to,
+  admin_auth_email_smtp_diagnostics,
+  admin_auth_email_started,
+  admin_auth_email_status,
+  admin_auth_email_status_error,
+  admin_auth_email_status_success,
+  admin_auth_email_template,
+  admin_auth_email_templates_title,
+  admin_auth_email_test_connection,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_auth_email_api_duration,
+  admin_auth_email_completed,
+  admin_auth_email_connected_to,
+  admin_auth_email_connection_failed,
+  admin_auth_email_connection_test_failed,
+  admin_auth_email_failed_load_templates,
+  admin_auth_email_failed_render_preview,
+  admin_auth_email_failed_send,
+  admin_auth_email_preview,
+  admin_auth_email_preview_title,
+  admin_auth_email_recipient,
+  admin_auth_email_recipient_label,
+  admin_auth_email_select_template_to_preview,
+  admin_auth_email_send_test,
+  admin_auth_email_send_test_email,
+  admin_auth_email_send_timing,
+  admin_auth_email_sent_to,
+  admin_auth_email_smtp_diagnostics,
+  admin_auth_email_started,
+  admin_auth_email_status,
+  admin_auth_email_status_error,
+  admin_auth_email_status_success,
+  admin_auth_email_template,
+  admin_auth_email_templates_title,
+  admin_auth_email_test_connection,
+};
+
+const i18nMessages = {
+  admin_auth_email_api_duration,
+  admin_auth_email_completed,
+  admin_auth_email_connected_to,
+  admin_auth_email_connection_failed,
+  admin_auth_email_connection_test_failed,
+  admin_auth_email_failed_load_templates,
+  admin_auth_email_failed_render_preview,
+  admin_auth_email_failed_send,
+  admin_auth_email_preview,
+  admin_auth_email_preview_title,
+  admin_auth_email_recipient,
+  admin_auth_email_recipient_label,
+  admin_auth_email_select_template_to_preview,
+  admin_auth_email_send_test,
+  admin_auth_email_send_test_email,
+  admin_auth_email_send_timing,
+  admin_auth_email_sent_to,
+  admin_auth_email_smtp_diagnostics,
+  admin_auth_email_started,
+  admin_auth_email_status,
+  admin_auth_email_status_error,
+  admin_auth_email_status_success,
+  admin_auth_email_template,
+  admin_auth_email_templates_title,
+  admin_auth_email_test_connection,
+};
 
 type EmailTemplate = {
   name: string;
@@ -35,6 +117,7 @@ type SendTestStats = {
 };
 
 export default function AuthEmailPage() {
+  const m = useMessage(i18nMessages);
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [formValues, setFormValues] = useState<Record<string, string>>({});

@@ -1,11 +1,30 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { markdownContentDoc, PostKind, SCORE_MAX } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_submitting,
+  remark_compose_placeholder,
+  remark_form_rating,
+  remark_submit,
+} from "@rezics/i18n/messages";
+const m = {
+  common_submitting,
+  remark_compose_placeholder,
+  remark_form_rating,
+  remark_submit,
+};
+
+const i18nMessages = {
+  common_submitting,
+  remark_compose_placeholder,
+  remark_form_rating,
+  remark_submit,
+};
 
 interface RemarkInlineFormProps {
   bookUnitId: string;
@@ -16,6 +35,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   bookUnitId,
   onSuccess,
 }) => {
+  const m = useMessage(i18nMessages);
   const [expanded, setExpanded] = useState(false);
   const [body, setBody] = useState("");
   const [score, setScore] = useState<number | null>(null);

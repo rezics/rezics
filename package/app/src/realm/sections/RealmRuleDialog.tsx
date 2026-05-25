@@ -1,5 +1,4 @@
 import type { PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -10,6 +9,29 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { PostBodyMarkdown } from "@/post";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_close,
+  realm_agree_and_join,
+  realm_joining,
+  realm_rules_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_close,
+  realm_agree_and_join,
+  realm_joining,
+  realm_rules_title,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_close,
+  realm_agree_and_join,
+  realm_joining,
+  realm_rules_title,
+};
 
 export interface RealmRuleDialogProps {
   open: boolean;
@@ -28,6 +50,7 @@ export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
   onOpenChange,
   onAgree,
 }) => {
+  const m = useMessage(i18nMessages);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">

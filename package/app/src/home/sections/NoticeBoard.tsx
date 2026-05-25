@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
 import { Bell as NotificationsRoundedIcon } from "lucide-react";
 import type React from "react";
@@ -7,16 +6,28 @@ import {
   type PinboardAnnouncementItem,
 } from "@/pinboard";
 import { TextLink } from "@/shared/ui/link";
+import {
+  common_new,
+  common_pinned,
+  common_view_all,
+  page_home_noticeboard_caption,
+  page_home_noticeboard_empty,
+  page_home_noticeboard_time_days_ago_other,
+  page_home_noticeboard_time_hours_ago_other,
+  page_home_noticeboard_time_just_now,
+  page_home_noticeboard_time_weeks_ago_other,
+  page_home_noticeboard_title,
+} from "@rezics/i18n/messages";
 
 function formatRelative(dateIso: string): string {
   const ms = Date.now() - new Date(dateIso).getTime();
   const h = Math.floor(ms / 36e5);
-  if (h < 1) return m.page_home_noticeboard_time_just_now();
-  if (h < 24) return m.page_home_noticeboard_time_hours_ago_other({ count: h });
+  if (h < 1) return page_home_noticeboard_time_just_now();
+  if (h < 24) return page_home_noticeboard_time_hours_ago_other({ count: h });
   const d = Math.floor(h / 24);
-  if (d < 7) return m.page_home_noticeboard_time_days_ago_other({ count: d });
+  if (d < 7) return page_home_noticeboard_time_days_ago_other({ count: d });
   const w = Math.floor(d / 7);
-  return m.page_home_noticeboard_time_weeks_ago_other({ count: w });
+  return page_home_noticeboard_time_weeks_ago_other({ count: w });
 }
 
 function NoticeBoardHeader({ className }: { className?: string }) {
@@ -29,10 +40,10 @@ function NoticeBoardHeader({ className }: { className?: string }) {
           </div>
           <div>
             <p className="text-xs text-text-secondary">
-              {m.page_home_noticeboard_caption()}
+              {page_home_noticeboard_caption()}
             </p>
             <p className="text-base font-semibold">
-              {m.page_home_noticeboard_title()}
+              {page_home_noticeboard_title()}
             </p>
           </div>
         </div>
@@ -42,7 +53,7 @@ function NoticeBoardHeader({ className }: { className?: string }) {
           color="primary"
           variant="body2"
         >
-          {m.common_view_all()}
+          {common_view_all()}
         </TextLink>
       </div>
 
@@ -60,7 +71,7 @@ function NoticeBoardItem({ item }: { item: PinboardAnnouncementItem }) {
       >
         <div className="flex flex-row gap-3 items-start w-full">
           <Badge variant={item.pin ? "default" : "outline"} className="mt-0.5">
-            {item.pin ? m.common_pinned() : m.common_new()}
+            {item.pin ? common_pinned() : common_new()}
           </Badge>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-text-primary truncate min-w-0">
@@ -113,7 +124,7 @@ export const NoticeBoard: React.FC = () => {
             if (items.length === 0) {
               return (
                 <p className="text-sm text-text-secondary">
-                  {m.page_home_noticeboard_empty()}
+                  {page_home_noticeboard_empty()}
                 </p>
               );
             }

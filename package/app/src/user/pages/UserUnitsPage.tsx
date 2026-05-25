@@ -6,7 +6,6 @@ import {
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
 import { PostKind, UnitType } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -27,6 +26,35 @@ import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDT
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  profile_search_content_placeholder,
+  profile_unit_tabs_label,
+  search_category_books,
+  search_category_excerpts,
+  search_category_remarks,
+  search_category_reviews,
+  search_category_shelves,
+} from "@rezics/i18n/messages";
+const m = {
+  profile_search_content_placeholder,
+  profile_unit_tabs_label,
+  search_category_books,
+  search_category_excerpts,
+  search_category_remarks,
+  search_category_reviews,
+  search_category_shelves,
+};
+
+const i18nMessages = {
+  profile_search_content_placeholder,
+  profile_unit_tabs_label,
+  search_category_books,
+  search_category_excerpts,
+  search_category_remarks,
+  search_category_reviews,
+  search_category_shelves,
+};
 
 export interface UserUnitsPageProps {
   userId: string;
@@ -47,6 +75,7 @@ type TabKey = "shelf" | "review" | "remark" | "excerpt" | "book";
 const EXTERNAL_PAGE_SIZE = 50;
 
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
+  const m = useMessage(i18nMessages);
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
 

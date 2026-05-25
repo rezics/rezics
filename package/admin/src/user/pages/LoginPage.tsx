@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -13,6 +12,35 @@ import { useState } from "react";
 
 import { Route } from "@/routes/login";
 import { adminLogin } from "@/user/models/handler";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_user_admin_login_description,
+  admin_user_admin_login_title,
+  admin_user_login_failed,
+  admin_user_login_signing_in,
+  auth_login,
+  common_email,
+  common_password,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_user_admin_login_description,
+  admin_user_admin_login_title,
+  admin_user_login_failed,
+  admin_user_login_signing_in,
+  auth_login,
+  common_email,
+  common_password,
+};
+
+const i18nMessages = {
+  admin_user_admin_login_description,
+  admin_user_admin_login_title,
+  admin_user_login_failed,
+  admin_user_login_signing_in,
+  auth_login,
+  common_email,
+  common_password,
+};
 
 function normalizeRedirect(to?: string) {
   if (!to) return "/";
@@ -21,6 +49,7 @@ function normalizeRedirect(to?: string) {
 }
 
 export default function LoginPage() {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const { redirect: redirectTo } = Route.useSearch();
 

@@ -1,5 +1,17 @@
 import type { SearchCategory, SearchScope } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
+import {
+  search_category_all,
+  search_category_books,
+  search_category_entities,
+  search_category_excerpts,
+  search_category_mixed,
+  search_category_posts,
+  search_category_realms,
+  search_category_remarks,
+  search_category_reviews,
+  search_category_shelves,
+  search_category_users,
+} from "@rezics/i18n/messages";
 
 export const ALL_CATEGORIES: readonly SearchCategory[] = [
   "all",
@@ -16,17 +28,17 @@ export const ALL_CATEGORIES: readonly SearchCategory[] = [
 ];
 
 export const CATEGORY_LABELS = {
-  all: m.search_category_all,
-  mixed: m.search_category_mixed,
-  books: m.search_category_books,
-  reviews: m.search_category_reviews,
-  excerpts: m.search_category_excerpts,
-  remarks: m.search_category_remarks,
-  posts: m.search_category_posts,
-  shelves: m.search_category_shelves,
-  realms: m.search_category_realms,
-  users: m.search_category_users,
-  entities: m.search_category_entities,
+  all: search_category_all,
+  mixed: search_category_mixed,
+  books: search_category_books,
+  reviews: search_category_reviews,
+  excerpts: search_category_excerpts,
+  remarks: search_category_remarks,
+  posts: search_category_posts,
+  shelves: search_category_shelves,
+  realms: search_category_realms,
+  users: search_category_users,
+  entities: search_category_entities,
 } as const satisfies Record<SearchCategory, () => string>;
 
 export function permittedCategoriesForScope(

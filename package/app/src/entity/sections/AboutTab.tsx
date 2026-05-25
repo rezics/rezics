@@ -1,6 +1,34 @@
 import type { EntityDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { getEntityTranslation } from "../models/types";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_no,
+  common_translation,
+  common_yes,
+  entity_kind_label,
+  entity_no_details_available,
+  entity_slug_label,
+  entity_verified,
+} from "@rezics/i18n/messages";
+const m = {
+  common_no,
+  common_translation,
+  common_yes,
+  entity_kind_label,
+  entity_no_details_available,
+  entity_slug_label,
+  entity_verified,
+};
+
+const i18nMessages = {
+  common_no,
+  common_translation,
+  common_yes,
+  entity_kind_label,
+  entity_no_details_available,
+  entity_slug_label,
+  entity_verified,
+};
 
 interface AboutTabProps {
   entity: EntityDTO;
@@ -8,6 +36,7 @@ interface AboutTabProps {
 }
 
 export function AboutTab({ entity, language }: AboutTabProps) {
+  const m = useMessage(i18nMessages);
   const tr = getEntityTranslation(entity, language);
   const items: Array<{ label: string; value: string }> = [];
 

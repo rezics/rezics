@@ -4,8 +4,7 @@ import {
   LANGUAGES,
   normalizeLanguage,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
-import { useLocale } from "@rezics/i18n/react";
+import { setLocale, useLocale, useMessage } from "@rezics/i18n/react";
 import {
   Card,
   CardContent,
@@ -19,18 +18,46 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import React from "react";
-import { setRezicsLocale } from "@/app/locale";
 import { Page } from "@/core/layouts/Page";
+import {
+  admin_setting_appearance_title,
+  admin_setting_dark_mode_label,
+  admin_setting_description,
+  admin_setting_language_description,
+  admin_setting_language_select_label,
+  admin_setting_language_title,
+  admin_setting_title,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_setting_appearance_title,
+  admin_setting_dark_mode_label,
+  admin_setting_description,
+  admin_setting_language_description,
+  admin_setting_language_select_label,
+  admin_setting_language_title,
+  admin_setting_title,
+};
+
+const i18nMessages = {
+  admin_setting_appearance_title,
+  admin_setting_dark_mode_label,
+  admin_setting_description,
+  admin_setting_language_description,
+  admin_setting_language_select_label,
+  admin_setting_language_title,
+  admin_setting_title,
+};
 
 const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
 
 export default function SettingsPage() {
+  const m = useMessage(i18nMessages);
   const [dark, setDark] = React.useState(false);
   const locale = normalizeLanguage(useLocale()) ?? DEFAULT_LANGUAGE;
 
   const handleLanguageChange = (value: string | null) => {
     const nextLocale = value ? normalizeLanguage(value) : null;
-    if (nextLocale) setRezicsLocale(nextLocale);
+    if (nextLocale) setLocale(nextLocale);
   };
 
   return (

@@ -5,7 +5,6 @@ import {
   type PostDTO,
   SCORE_MAX,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -17,6 +16,29 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_edit,
+  common_save,
+  common_saving,
+  remark_form_rating,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_edit,
+  common_save,
+  common_saving,
+  remark_form_rating,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_edit,
+  common_save,
+  common_saving,
+  remark_form_rating,
+};
 
 interface RemarkEditDialogProps {
   remark: PostDTO;
@@ -29,6 +51,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   open,
   onClose,
 }) => {
+  const m = useMessage(i18nMessages);
   const initialRating = (remark.extra as { rating?: number } | null)?.rating;
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,

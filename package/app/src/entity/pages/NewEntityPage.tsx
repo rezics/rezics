@@ -1,7 +1,6 @@
 import { useCreateEntity } from "@rezics/api/entity";
 import type { CreateEntityInput, EntityKind } from "@rezics/contract";
 import { CreationMode, entityKinds } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
@@ -10,8 +9,59 @@ import {
   suggestSubjectEligibility,
 } from "@/entity-picker/models/eligibilitySuggestions";
 import { unitHref } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_creating,
+  common_language,
+  entity_avatar_person_placeholder,
+  entity_avatar_url,
+  entity_create,
+  entity_create_failed,
+  entity_kind_label,
+  entity_new_description,
+  entity_new_title,
+  entity_title_label,
+  entity_title_placeholder,
+  entity_title_required,
+  language_code_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_creating,
+  common_language,
+  entity_avatar_person_placeholder,
+  entity_avatar_url,
+  entity_create,
+  entity_create_failed,
+  entity_kind_label,
+  entity_new_description,
+  entity_new_title,
+  entity_title_label,
+  entity_title_placeholder,
+  entity_title_required,
+  language_code_placeholder,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_creating,
+  common_language,
+  entity_avatar_person_placeholder,
+  entity_avatar_url,
+  entity_create,
+  entity_create_failed,
+  entity_kind_label,
+  entity_new_description,
+  entity_new_title,
+  entity_title_label,
+  entity_title_placeholder,
+  entity_title_required,
+  language_code_placeholder,
+};
 
 export function NewEntityPage() {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("en");

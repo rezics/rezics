@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   FileText as DescriptionIcon,
   History as HistoryIcon,
@@ -6,6 +5,14 @@ import {
   ShieldCheck as AuthorityIcon,
 } from "lucide-react";
 import type { EditConsoleLayoutProps } from "@/core/layouts/EditConsoleLayout";
+import {
+  book_edit_sidebar_authority,
+  book_edit_sidebar_back_to_book,
+  book_edit_sidebar_chapters,
+  book_edit_sidebar_history,
+  book_edit_sidebar_main,
+  book_edit_sidebar_tags,
+} from "@rezics/i18n/messages";
 
 const BOOK_EDIT_RESERVED_SEGMENTS = new Set([
   "authority",
@@ -49,23 +56,23 @@ export function createBookEditConsoleConfig(
 
   return {
     returnItem: {
-      label: m.book_edit_sidebar_back_to_book(),
+      label: book_edit_sidebar_back_to_book(),
       href: bookBase,
       icon: DashboardIcon,
     },
     primaryItems: [
       {
-        label: m.book_edit_sidebar_main(),
+        label: book_edit_sidebar_main(),
         href: editBase,
         icon: DescriptionIcon,
       },
       {
-        label: m.book_edit_sidebar_tags(),
+        label: book_edit_sidebar_tags(),
         href: `${editBase}/tag`,
         icon: DescriptionIcon,
       },
       {
-        label: m.book_edit_sidebar_chapters(),
+        label: book_edit_sidebar_chapters(),
         href: `${editBase}/chapter`,
         icon: DescriptionIcon,
         isActive: (pathname) =>
@@ -75,12 +82,12 @@ export function createBookEditConsoleConfig(
     ],
     operationalItems: [
       {
-        label: m.book_edit_sidebar_authority(),
+        label: book_edit_sidebar_authority(),
         href: `${editBase}/authority`,
         icon: AuthorityIcon,
       },
       {
-        label: m.book_edit_sidebar_history(),
+        label: book_edit_sidebar_history(),
         href: `${editBase}/history`,
         icon: HistoryIcon,
         activeMatch: "prefix",

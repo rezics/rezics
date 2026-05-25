@@ -4,7 +4,6 @@ import {
   LICENSE_SLUGS,
 } from "@rezics/contract";
 import { licenseLabel } from "@rezics/i18n";
-import * as m from "@rezics/i18n/messages";
 import { RatingSelector } from "@rezics/ui";
 import {
   Checkbox,
@@ -21,6 +20,41 @@ import {
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
 import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_fields_cover_url,
+  book_fields_isbn,
+  book_fields_page_count,
+  book_fields_publication_license,
+  book_fields_rating,
+  book_fields_text_length,
+  book_flags_licensed,
+  book_tooltips_licensed,
+  common_url_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  book_fields_cover_url,
+  book_fields_isbn,
+  book_fields_page_count,
+  book_fields_publication_license,
+  book_fields_rating,
+  book_fields_text_length,
+  book_flags_licensed,
+  book_tooltips_licensed,
+  common_url_placeholder,
+};
+
+const i18nMessages = {
+  book_fields_cover_url,
+  book_fields_isbn,
+  book_fields_page_count,
+  book_fields_publication_license,
+  book_fields_rating,
+  book_fields_text_length,
+  book_flags_licensed,
+  book_tooltips_licensed,
+  common_url_placeholder,
+};
 
 function TooltipIconTrigger(props: Record<string, unknown>) {
   const { ref: _ref, ...triggerProps } = props;
@@ -87,6 +121,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   onChange,
   disabled,
 }) => {
+  const m = useMessage(i18nMessages);
   const currentIsbn = value?.isbn13 ?? "";
   const currentCoverUrl = value?.coverUrl ?? "";
   const currentPageCount = value?.pageCount ?? "";
@@ -219,6 +254,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 };
 
 export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
+  const m = useMessage(i18nMessages);
   return (
     <div className="flex items-center gap-1 whitespace-nowrap">
       <span>{m.book_flags_licensed()}</span>

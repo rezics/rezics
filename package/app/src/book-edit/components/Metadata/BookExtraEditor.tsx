@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Button } from "@rezics/ui/shadcn";
 import {
@@ -8,6 +7,23 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_extra_publish_urls_title,
+  common_add,
+  placeholders_enter_url,
+} from "@rezics/i18n/messages";
+const m = {
+  book_extra_publish_urls_title,
+  common_add,
+  placeholders_enter_url,
+};
+
+const i18nMessages = {
+  book_extra_publish_urls_title,
+  common_add,
+  placeholders_enter_url,
+};
 
 /** Book extra data structure. */
 export type BookExtraData = {
@@ -24,6 +40,7 @@ interface BookExtraEditorProps {
 }
 
 function PublishURL({ value, onChange }: BookExtraEditorProps) {
+  const m = useMessage(i18nMessages);
   const [newUrl, setNewUrl] = useState("");
   const urls: string[] = Array.isArray(value) ? value : [];
 

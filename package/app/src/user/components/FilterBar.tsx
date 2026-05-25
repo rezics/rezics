@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Input,
   Select,
@@ -8,6 +7,15 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import { common_search } from "@rezics/i18n/messages";
+const m = {
+  common_search,
+};
+
+const i18nMessages = {
+  common_search,
+};
 
 export interface FilterDropdownConfig {
   key: string;
@@ -33,35 +41,38 @@ export const FilterBar: FC<FilterBarProps> = ({
   values,
   onChange,
   className,
-}) => (
-  <div className={`flex flex-wrap items-center gap-3 ${className ?? ""}`}>
-    {config.showSearch && (
-      <Input
-        placeholder={config.searchPlaceholder ?? m.common_search()}
-        value={values.q ?? ""}
-        onChange={(e) => onChange("q", e.target.value)}
-        className="min-w-[180px] flex-1 md:flex-none h-9"
-      />
-    )}
-    {config.dropdowns?.map((dd) => (
-      <Select
-        key={dd.key}
-        value={values[dd.key] ?? ""}
-        onValueChange={(value) => {
-          if (value != null) onChange(dd.key, value);
-        }}
-      >
-        <SelectTrigger className="min-w-[120px] h-9">
-          <SelectValue placeholder={dd.label} />
-        </SelectTrigger>
-        <SelectContent>
-          {dd.options.map((opt) => (
-            <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    ))}
-  </div>
-);
+}) => {
+  const m = useMessage(i18nMessages);
+  return (
+    <div className={`flex flex-wrap items-center gap-3 ${className ?? ""}`}>
+      {config.showSearch && (
+        <Input
+          placeholder={config.searchPlaceholder ?? m.common_search()}
+          value={values.q ?? ""}
+          onChange={(e) => onChange("q", e.target.value)}
+          className="min-w-[180px] flex-1 md:flex-none h-9"
+        />
+      )}
+      {config.dropdowns?.map((dd) => (
+        <Select
+          key={dd.key}
+          value={values[dd.key] ?? ""}
+          onValueChange={(value) => {
+            if (value != null) onChange(dd.key, value);
+          }}
+        >
+          <SelectTrigger className="min-w-[120px] h-9">
+            <SelectValue placeholder={dd.label} />
+          </SelectTrigger>
+          <SelectContent>
+            {dd.options.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ))}
+    </div>
+  );
+};

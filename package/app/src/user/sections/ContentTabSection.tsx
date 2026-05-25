@@ -1,6 +1,5 @@
 import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +12,59 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  common_next_page,
+  common_no_data,
+  common_page_of,
+  common_previous_page,
+  profile_search_content_placeholder,
+  search_empty_title,
+  shelf_controls_sort_by,
+  profile_sort_most_replies,
+  search_category_excerpts,
+  search_category_posts,
+  search_category_remarks,
+  search_category_reviews,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  common_next_page,
+  common_no_data,
+  common_page_of,
+  common_previous_page,
+  profile_search_content_placeholder,
+  search_empty_title,
+  shelf_controls_sort_by,
+  profile_sort_most_replies,
+  search_category_excerpts,
+  search_category_posts,
+  search_category_remarks,
+  search_category_reviews,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+};
+
+const i18nMessages = {
+  common_loading,
+  common_next_page,
+  common_no_data,
+  common_page_of,
+  common_previous_page,
+  profile_search_content_placeholder,
+  search_empty_title,
+  shelf_controls_sort_by,
+  profile_sort_most_replies,
+  search_category_excerpts,
+  search_category_posts,
+  search_category_remarks,
+  search_category_reviews,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+};
 
 const KIND_CHIP_LABEL = {
   REVIEW: m.search_category_reviews,
@@ -28,6 +80,7 @@ const SORT_OPTION_LABEL = {
 } as const satisfies Record<string, () => string>;
 
 export const ContentTabSection: FC = () => {
+  const m = useMessage(i18nMessages);
   const { userId } = useProfileContext();
   const [kind, setKind] = useState("REVIEW");
   const [filters, setFilters] = useState<Record<string, string>>({

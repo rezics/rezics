@@ -7,8 +7,11 @@ import {
   useAuthSessionStore,
 } from "@rezics/api/states";
 import { userKeys } from "@rezics/api/user/user.keys";
-import * as m from "@rezics/i18n/messages";
 import { qc } from "@/app/providers/reactQueryUtil";
+import {
+  admin_user_login_token_exchange_failed,
+  admin_user_login_unauthorized,
+} from "@rezics/i18n/messages";
 
 /**
  * Admin login: sign in -> verify admin role -> exchange for session token -> hydrate.
@@ -18,7 +21,7 @@ export async function adminLogin(email: string, password: string) {
 
   const refreshed = await exchangeForSessionToken();
   if (!refreshed) {
-    throw new Error(m.admin_user_login_token_exchange_failed());
+    throw new Error(admin_user_login_token_exchange_failed());
   }
 
   await hydrateAuthSessionState();
@@ -26,7 +29,7 @@ export async function adminLogin(email: string, password: string) {
   if (!(role === "admin" || role === "owner")) {
     await authApi.signOut();
     clearAuthSessionState();
-    throw new Error(m.admin_user_login_unauthorized());
+    throw new Error(admin_user_login_unauthorized());
   }
 
   return { token: null };

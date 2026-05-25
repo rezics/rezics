@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Input,
@@ -12,8 +11,41 @@ import {
 import React from "react";
 import FeedbackDrawer from "../components/FeedbackDrawer";
 import FeedbackList from "../components/FeedbackList";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_status,
+  feedback_my_title,
+  feedback_search_label,
+  feedback_search_placeholder,
+  feedback_status_resolved,
+  feedback_status_unresolved,
+  feedback_submit,
+  search_category_all,
+} from "@rezics/i18n/messages";
+const m = {
+  common_status,
+  feedback_my_title,
+  feedback_search_label,
+  feedback_search_placeholder,
+  feedback_status_resolved,
+  feedback_status_unresolved,
+  feedback_submit,
+  search_category_all,
+};
+
+const i18nMessages = {
+  common_status,
+  feedback_my_title,
+  feedback_search_label,
+  feedback_search_placeholder,
+  feedback_status_resolved,
+  feedback_status_unresolved,
+  feedback_submit,
+  search_category_all,
+};
 
 export const FeedbackPage: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const [resolvedFilter, setResolvedFilter] = React.useState<

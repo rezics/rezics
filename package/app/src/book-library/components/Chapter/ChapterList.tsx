@@ -1,6 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { BookContentStructureItem } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import {
   Button,
@@ -32,6 +31,17 @@ import {
   ContentChapterVirtualTree,
   type ContentChapterVirtualTreeHandle,
 } from "./ContentChapterVirtualTree";
+import { useMessage } from "@rezics/i18n/react";
+import { book_toc, common_loading } from "@rezics/i18n/messages";
+const m = {
+  book_toc,
+  common_loading,
+};
+
+const i18nMessages = {
+  book_toc,
+  common_loading,
+};
 
 export type BookTocTreeHandle = {
   expandAll: () => void;
@@ -355,6 +365,7 @@ export interface ChapterListProps {
  * Fetches chapter data and renders using BookTocTreeView.
  */
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, error } = useQuery(bookQueries.contentStructure(id));
 
   const bookTocTree: BookContentStructureItem[] = useMemo(

@@ -1,7 +1,7 @@
-import * as m from "@rezics/i18n/messages";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { Monitor as ComputerIcon } from "lucide-react";
 import type { FC } from "react";
+import { settings_security_unknown_device } from "@rezics/i18n/messages";
 
 interface SessionListItemProps {
   session: {
@@ -19,7 +19,7 @@ interface SessionListItemProps {
 }
 
 function parseUserAgent(ua?: string): string {
-  if (!ua) return m.settings_security_unknown_device();
+  if (!ua) return settings_security_unknown_device();
   const browser =
     ua.match(/(?:Chrome|Firefox|Safari|Edge|Opera|MSIE|Trident)[/ ]\S+/)?.[0] ??
     "";

@@ -2,10 +2,27 @@ import {
   useMarkAsReadMutation,
   useNotifications,
 } from "@rezics/api/notification";
-import * as m from "@rezics/i18n/messages";
 import { NotificationCard } from "../components/NotificationCard.tsx";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_loading,
+  notifications_empty,
+  notifications_load_failed,
+} from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  notifications_empty,
+  notifications_load_failed,
+};
+
+const i18nMessages = {
+  common_loading,
+  notifications_empty,
+  notifications_load_failed,
+};
 
 export function NotificationTabSection() {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, isError } = useNotifications(1, 10);
   const markAsRead = useMarkAsReadMutation();
 

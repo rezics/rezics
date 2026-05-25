@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { Button, Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
 import {
   useCanGoBack,
@@ -8,6 +7,23 @@ import {
 } from "@tanstack/react-router";
 import { MapPin as Place } from "lucide-react";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_back,
+  common_home,
+  common_not_found,
+} from "@rezics/i18n/messages";
+const m = {
+  common_back,
+  common_home,
+  common_not_found,
+};
+
+const i18nMessages = {
+  common_back,
+  common_home,
+  common_not_found,
+};
 
 export type NotFoundShowProps = {
   path: string;
@@ -20,6 +36,7 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
   onBack,
   onHome,
 }) => {
+  const m = useMessage(i18nMessages);
   const canGoBack = useCanGoBack();
   return (
     <div className="min-h-screen flex items-center justify-center">

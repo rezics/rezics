@@ -4,11 +4,30 @@ import {
   type RealmDTO,
   type RealmSearchDocument,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { RealmCard } from "../components/RealmCard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_search,
+  realm_empty_yet,
+  realm_list_title,
+  realm_new_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_search,
+  realm_empty_yet,
+  realm_list_title,
+  realm_new_title,
+};
+
+const i18nMessages = {
+  common_search,
+  realm_empty_yet,
+  realm_list_title,
+  realm_new_title,
+};
 
 function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
   return {
@@ -30,6 +49,7 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
 }
 
 export function RealmListPage() {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const { data, isLoading } = useRealmSearchQuery({
     isPublic: true,

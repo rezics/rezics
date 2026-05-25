@@ -33,3 +33,7 @@
 - App/admin wrappers should import `@rezics/api` and pass user search/upload adapters to editor UI.
 - New core UI source must not import `@tanstack/react-router`, `@rezics/api`, `@rezics/server`, or app/admin internals. `bun run check:convention` enforces this boundary.
 - `@rezics/contract` imports are acceptable for stable shared vocabulary, not for app policy, workflow ownership, fetching, or navigation.
+- Core UI source may import `@rezics/i18n/react` for active-locale subscriptions
+  and `useMessage(messageBag)`. This subpath is intentionally neutral and must
+  not import generated product messages, UI message catalogs, routers, API
+  clients, or app/admin shell modules.

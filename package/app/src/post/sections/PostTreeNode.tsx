@@ -1,5 +1,4 @@
 import type { PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { TextLink } from "@/shared/ui/link";
 import { PostReply } from "../components/item/PostReply";
@@ -15,6 +14,20 @@ import {
   RAIL_TOP_PX,
   TOGGLE_TOP_PX,
 } from "./postTreeLayout";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  post_collapse_thread,
+  post_continue_thread,
+} from "@rezics/i18n/messages";
+const m = {
+  post_collapse_thread,
+  post_continue_thread,
+};
+
+const i18nMessages = {
+  post_collapse_thread,
+  post_continue_thread,
+};
 
 export interface PostTreeNodeProps {
   node: PostTreeNodeModel;
@@ -47,6 +60,7 @@ export function PostTreeNode({
   onComposerDone,
   onThreadHoverChange,
 }: PostTreeNodeProps) {
+  const m = useMessage(i18nMessages);
   const { post } = node;
   const collapsed = isCollapsed(post.unitId);
   const hasVisibleChildren = node.children.length > 0 && !collapsed;

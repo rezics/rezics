@@ -3,7 +3,6 @@ import {
   useSubscribeMutation,
   useUnsubscribeMutation,
 } from "@rezics/api/subscription/subscription";
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Tooltip,
@@ -17,6 +16,23 @@ import { useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  profile_follow,
+  profile_followers_count,
+  profile_following,
+} from "@rezics/i18n/messages";
+const m = {
+  profile_follow,
+  profile_followers_count,
+  profile_following,
+};
+
+const i18nMessages = {
+  profile_follow,
+  profile_followers_count,
+  profile_following,
+};
 
 type ButtonVariant =
   | "default"
@@ -58,6 +74,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   fullWidth = false,
   className,
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
   const authSessionLoading = useAuthSessionStore(

@@ -1,6 +1,5 @@
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -28,6 +27,53 @@ import {
   type UnitWorkContext,
 } from "../models/unitCardSummary";
 import { UnitCandidateRow } from "./UnitPicker/UnitCandidateRow";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  unit_picker_add,
+  unit_picker_add_item,
+  unit_picker_browse_named_work,
+  unit_picker_browse_panel,
+  unit_picker_no_search_results,
+  unit_picker_no_sub_units,
+  unit_picker_parse_error,
+  unit_picker_search_label,
+  unit_picker_search_placeholder,
+  unit_picker_search_tab,
+  unit_picker_url_label,
+  unit_picker_url_placeholder,
+  unit_picker_url_tab,
+} from "@rezics/i18n/messages";
+const m = {
+  unit_picker_add,
+  unit_picker_add_item,
+  unit_picker_browse_named_work,
+  unit_picker_browse_panel,
+  unit_picker_no_search_results,
+  unit_picker_no_sub_units,
+  unit_picker_parse_error,
+  unit_picker_search_label,
+  unit_picker_search_placeholder,
+  unit_picker_search_tab,
+  unit_picker_url_label,
+  unit_picker_url_placeholder,
+  unit_picker_url_tab,
+};
+
+const i18nMessages = {
+  unit_picker_add,
+  unit_picker_add_item,
+  unit_picker_browse_named_work,
+  unit_picker_browse_panel,
+  unit_picker_no_search_results,
+  unit_picker_no_sub_units,
+  unit_picker_parse_error,
+  unit_picker_search_label,
+  unit_picker_search_placeholder,
+  unit_picker_search_tab,
+  unit_picker_url_label,
+  unit_picker_url_placeholder,
+  unit_picker_url_tab,
+};
 
 export interface UnitAddPickerProps {
   language?: string;
@@ -50,6 +96,7 @@ export function UnitAddPicker({
   onSelectCandidate,
   renderItemAction,
 }: UnitAddPickerProps) {
+  const m = useMessage(i18nMessages);
   const explicitContext = useMemo(
     () =>
       workContextUnitId
@@ -155,6 +202,7 @@ export function UnitSearchSelect({
   actionForCandidate,
   onPreview,
 }: UnitSearchSelectProps) {
+  const m = useMessage(i18nMessages);
   const inputId = useId();
   const [query, setQuery] = useState(initialQuery ?? "");
   const trimmedQuery = query.trim();
@@ -221,6 +269,7 @@ export function UnitUrlImport({
   actionForCandidate,
   onPreview,
 }: UnitUrlImportProps) {
+  const m = useMessage(i18nMessages);
   const inputId = useId();
   const [input, setInput] = useState(initialInput ?? "");
   const { resolved, parseError } = useUnitCandidates(input);
@@ -283,6 +332,7 @@ export function UnitBrowseRelated({
   actionForCandidate,
   onPreview,
 }: UnitBrowseRelatedProps) {
+  const m = useMessage(i18nMessages);
   const [expanded, setExpanded] = useState(true);
   const { data, isLoading, error } = useQuery({
     ...unitQueries.list({ workUnitId: context.unitId, limit: 100 }),

@@ -1,8 +1,30 @@
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpenText, ListTree } from "lucide-react";
 import { Link } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  edit_console_chapter_context_back_to_chapters,
+  edit_console_chapter_context_error,
+  edit_console_chapter_context_label,
+  edit_console_chapter_context_loading,
+  edit_console_chapter_context_untitled,
+} from "@rezics/i18n/messages";
+const m = {
+  edit_console_chapter_context_back_to_chapters,
+  edit_console_chapter_context_error,
+  edit_console_chapter_context_label,
+  edit_console_chapter_context_loading,
+  edit_console_chapter_context_untitled,
+};
+
+const i18nMessages = {
+  edit_console_chapter_context_back_to_chapters,
+  edit_console_chapter_context_error,
+  edit_console_chapter_context_label,
+  edit_console_chapter_context_loading,
+  edit_console_chapter_context_untitled,
+};
 
 interface BookEditChapterContextProps {
   bookId: string;
@@ -13,6 +35,7 @@ export function BookEditChapterContext({
   bookId,
   chapterId,
 }: BookEditChapterContextProps) {
+  const m = useMessage(i18nMessages);
   const { data, isError, isPending } = useQuery(chapterDetailQuery(chapterId));
   const title =
     data && "title" in data && typeof data.title === "string" ? data.title : "";

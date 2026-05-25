@@ -5,7 +5,6 @@ import {
   useAdminUnbanUserMutation,
 } from "@rezics/api/auth/auth.mutations";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -31,6 +30,77 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_auth_actions_title,
+  admin_auth_role_admin,
+  admin_auth_role_owner,
+  admin_auth_role_user,
+  admin_auth_user_name,
+  admin_auth_user_role,
+  admin_auth_users_ban,
+  admin_auth_users_banned,
+  admin_auth_users_description,
+  admin_auth_users_failed_load,
+  admin_auth_users_remove_description,
+  admin_auth_users_remove_title,
+  admin_auth_users_title,
+  admin_auth_users_unban,
+  common_active,
+  common_cancel,
+  common_confirm,
+  common_created,
+  common_email,
+  common_id,
+  common_remove,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_auth_actions_title,
+  admin_auth_role_admin,
+  admin_auth_role_owner,
+  admin_auth_role_user,
+  admin_auth_user_name,
+  admin_auth_user_role,
+  admin_auth_users_ban,
+  admin_auth_users_banned,
+  admin_auth_users_description,
+  admin_auth_users_failed_load,
+  admin_auth_users_remove_description,
+  admin_auth_users_remove_title,
+  admin_auth_users_title,
+  admin_auth_users_unban,
+  common_active,
+  common_cancel,
+  common_confirm,
+  common_created,
+  common_email,
+  common_id,
+  common_remove,
+};
+
+const i18nMessages = {
+  admin_auth_actions_title,
+  admin_auth_role_admin,
+  admin_auth_role_owner,
+  admin_auth_role_user,
+  admin_auth_user_name,
+  admin_auth_user_role,
+  admin_auth_users_ban,
+  admin_auth_users_banned,
+  admin_auth_users_description,
+  admin_auth_users_failed_load,
+  admin_auth_users_remove_description,
+  admin_auth_users_remove_title,
+  admin_auth_users_title,
+  admin_auth_users_unban,
+  common_active,
+  common_cancel,
+  common_confirm,
+  common_created,
+  common_email,
+  common_id,
+  common_remove,
+};
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -49,6 +119,7 @@ type AuthUser = {
 };
 
 export default function AuthUsersPage() {
+  const m = useMessage(i18nMessages);
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
   const [confirmDialog, setConfirmDialog] = React.useState<{

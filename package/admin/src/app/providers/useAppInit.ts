@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { initRezicsLocale } from "@/app/locale";
+import { initI18n } from "./i18n";
 
 function initI18nStorage() {
-  initRezicsLocale();
+  initI18n();
 }
 
 export function useAppInit() {

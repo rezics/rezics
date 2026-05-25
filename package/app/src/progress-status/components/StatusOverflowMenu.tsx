@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   DropdownMenu,
@@ -17,6 +16,20 @@ import {
   X,
 } from "lucide-react";
 import { type ReadStatus, readStatusLabel } from "../models/status";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  progress_status_overflow_aria,
+  progress_status_overflow_remove_progress,
+} from "@rezics/i18n/messages";
+const m = {
+  progress_status_overflow_aria,
+  progress_status_overflow_remove_progress,
+};
+
+const i18nMessages = {
+  progress_status_overflow_aria,
+  progress_status_overflow_remove_progress,
+};
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -49,6 +62,7 @@ export function StatusOverflowMenu({
   showPrimaryStatuses = false,
   className,
 }: StatusOverflowMenuProps) {
+  const m = useMessage(i18nMessages);
   const renderStatusMarker = (status: ReadStatus) => (
     <span
       aria-hidden="true"

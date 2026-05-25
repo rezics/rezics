@@ -1,7 +1,32 @@
-import * as m from "@rezics/i18n/messages";
 import { RatingInput } from "@rezics/ui";
 import { Star } from "lucide-react";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_hero_score_be_first,
+  book_hero_score_count,
+  book_hero_score_empty,
+  book_hero_score_empty_short,
+  book_hero_score_label,
+  book_hero_score_rezics_label,
+} from "@rezics/i18n/messages";
+const m = {
+  book_hero_score_be_first,
+  book_hero_score_count,
+  book_hero_score_empty,
+  book_hero_score_empty_short,
+  book_hero_score_label,
+  book_hero_score_rezics_label,
+};
+
+const i18nMessages = {
+  book_hero_score_be_first,
+  book_hero_score_count,
+  book_hero_score_empty,
+  book_hero_score_empty_short,
+  book_hero_score_label,
+  book_hero_score_rezics_label,
+};
 
 interface BookHeroScoreBlockProps {
   /** Average score, 0–10 scale, 0 means no ratings yet. */
@@ -23,6 +48,7 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
   onRate,
   variant = "block",
 }) => {
+  const m = useMessage(i18nMessages);
   const hasRating = rating > 0;
 
   if (variant === "inline") {

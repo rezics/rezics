@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
@@ -18,12 +17,27 @@ import { HelpFab } from "../components/HelpWidget";
 import { Header } from "../components/header/MainLayoutHeader";
 import { NAVIGATION } from "../components/navigation/MainNavigation";
 import { Sidebar } from "../components/sidebar/MainLayoutSidebar";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  app_document_title_account_settings,
+  app_document_title_library,
+} from "@rezics/i18n/messages";
+const m = {
+  app_document_title_account_settings,
+  app_document_title_library,
+};
+
+const i18nMessages = {
+  app_document_title_account_settings,
+  app_document_title_library,
+};
 
 export interface MainLayoutProps {
   children: ReactNode;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const m = useMessage(i18nMessages);
   useSyncUserProfile();
   const navigate = useNavigate();
   const location = useLocation();

@@ -1,12 +1,26 @@
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  profile_reaction_info_description,
+  profile_reaction_info_title,
+} from "@rezics/i18n/messages";
+const m = {
+  profile_reaction_info_description,
+  profile_reaction_info_title,
+};
+
+const i18nMessages = {
+  profile_reaction_info_description,
+  profile_reaction_info_title,
+};
 
 // MOCK: Reaction history page — waiting on reaction service /reactions/history endpoint
 export const ReactionInfoPage: React.FC = () => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const currentUser = useUserProfileStore((state) => state.user);
 

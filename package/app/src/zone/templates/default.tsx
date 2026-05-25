@@ -1,8 +1,24 @@
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import type { ZoneTemplateProps } from "./types";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  zone_content_placeholder,
+  zone_latest_content,
+  zone_search_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  zone_content_placeholder,
+  zone_latest_content,
+  zone_search_placeholder,
+};
+
+const i18nMessages = {
+  zone_content_placeholder,
+  zone_latest_content,
+  zone_search_placeholder,
+};
 
 /**
  * Default zone homepage template.
@@ -12,6 +28,7 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
   zone,
   onSearch,
 }) => {
+  const m = useMessage(i18nMessages);
   const search = useSearchQuery({});
   const keywordBind = search.bind("keyword");
   const bgImage = (zone.styling as Record<string, unknown> | null)?.bgImage as

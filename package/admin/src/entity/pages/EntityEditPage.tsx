@@ -6,7 +6,6 @@ import {
   markdownContentDoc,
   validateSlug,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -29,6 +28,110 @@ import React from "react";
 import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/entity/$unitId";
 import { Link } from "@/shared/ui/link";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_entity_avatar_placeholder,
+  admin_entity_avatar_url,
+  admin_entity_edit_description,
+  admin_entity_edit_title,
+  admin_entity_failed_load,
+  admin_entity_remove_translation,
+  admin_entity_slug_help_disabled,
+  admin_entity_slug_help_enabled,
+  admin_entity_slug_invalid,
+  admin_entity_slug_invalid_short,
+  admin_entity_slug_placeholder,
+  admin_entity_slug_requires_verified,
+  admin_entity_translation_index,
+  admin_entity_translations_empty,
+  admin_entity_unverified_slug_disabled,
+  admin_entity_verified,
+  admin_entity_verified_slug_allowed,
+  admin_unit_translations,
+  admin_unit_update_failed,
+  book_description,
+  common_add_translation,
+  common_back,
+  common_language,
+  common_language_code_placeholder,
+  common_none,
+  common_save,
+  common_saving,
+  common_slug,
+  common_subtitle,
+  common_summary,
+  common_title,
+  common_type,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_entity_avatar_placeholder,
+  admin_entity_avatar_url,
+  admin_entity_edit_description,
+  admin_entity_edit_title,
+  admin_entity_failed_load,
+  admin_entity_remove_translation,
+  admin_entity_slug_help_disabled,
+  admin_entity_slug_help_enabled,
+  admin_entity_slug_invalid,
+  admin_entity_slug_invalid_short,
+  admin_entity_slug_placeholder,
+  admin_entity_slug_requires_verified,
+  admin_entity_translation_index,
+  admin_entity_translations_empty,
+  admin_entity_unverified_slug_disabled,
+  admin_entity_verified,
+  admin_entity_verified_slug_allowed,
+  admin_unit_translations,
+  admin_unit_update_failed,
+  book_description,
+  common_add_translation,
+  common_back,
+  common_language,
+  common_language_code_placeholder,
+  common_none,
+  common_save,
+  common_saving,
+  common_slug,
+  common_subtitle,
+  common_summary,
+  common_title,
+  common_type,
+};
+
+const i18nMessages = {
+  admin_entity_avatar_placeholder,
+  admin_entity_avatar_url,
+  admin_entity_edit_description,
+  admin_entity_edit_title,
+  admin_entity_failed_load,
+  admin_entity_remove_translation,
+  admin_entity_slug_help_disabled,
+  admin_entity_slug_help_enabled,
+  admin_entity_slug_invalid,
+  admin_entity_slug_invalid_short,
+  admin_entity_slug_placeholder,
+  admin_entity_slug_requires_verified,
+  admin_entity_translation_index,
+  admin_entity_translations_empty,
+  admin_entity_unverified_slug_disabled,
+  admin_entity_verified,
+  admin_entity_verified_slug_allowed,
+  admin_unit_translations,
+  admin_unit_update_failed,
+  book_description,
+  common_add_translation,
+  common_back,
+  common_language,
+  common_language_code_placeholder,
+  common_none,
+  common_save,
+  common_saving,
+  common_slug,
+  common_subtitle,
+  common_summary,
+  common_title,
+  common_type,
+};
 
 interface TranslationDraft {
   _draftId: string;
@@ -50,6 +153,7 @@ function createTranslationDraft(
 }
 
 export default function EntityEditPage() {
+  const m = useMessage(i18nMessages);
   const { unitId } = Route.useParams();
   const entityQuery = useEntity(unitId);
   const [error, setError] = React.useState<string | null>(null);

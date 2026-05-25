@@ -1,6 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Select,
@@ -13,6 +12,26 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_release_current,
+  book_release_label,
+  book_release_untitled,
+  realm_official,
+} from "@rezics/i18n/messages";
+const m = {
+  book_release_current,
+  book_release_label,
+  book_release_untitled,
+  realm_official,
+};
+
+const i18nMessages = {
+  book_release_current,
+  book_release_label,
+  book_release_untitled,
+  realm_official,
+};
 
 export type ReleaseOption = {
   unitId: string;
@@ -67,6 +86,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
   selectedReleaseUnitId,
   onSelect,
 }) => {
+  const m = useMessage(i18nMessages);
   const workUnitId = bookInfo.workUnitId ?? undefined;
 
   const { data: releaseList } = useQuery({

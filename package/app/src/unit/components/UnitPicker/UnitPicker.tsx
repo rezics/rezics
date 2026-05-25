@@ -1,6 +1,5 @@
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +8,29 @@ import { type ReactNode, useState } from "react";
 import { useUnitCandidates } from "../../hooks/useUnitCandidates";
 import type { Candidate } from "../../models/types";
 import { UnitCandidateRow } from "./UnitCandidateRow";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  unit_picker_browse_panel,
+  unit_picker_no_sub_units,
+  unit_picker_parse_error,
+  unit_picker_url_label,
+  unit_picker_url_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  unit_picker_browse_panel,
+  unit_picker_no_sub_units,
+  unit_picker_parse_error,
+  unit_picker_url_label,
+  unit_picker_url_placeholder,
+};
+
+const i18nMessages = {
+  unit_picker_browse_panel,
+  unit_picker_no_sub_units,
+  unit_picker_parse_error,
+  unit_picker_url_label,
+  unit_picker_url_placeholder,
+};
 
 export interface UnitPickerProps {
   workContextUnitId?: string;
@@ -29,6 +51,7 @@ export function UnitPicker({
   label,
   placeholder,
 }: UnitPickerProps) {
+  const m = useMessage(i18nMessages);
   const [input, setInput] = useState(initialInput ?? "");
   const { resolved, parseError } = useUnitCandidates(input);
 
@@ -89,6 +112,7 @@ function BrowsePanel({
   language,
   renderItemAction,
 }: BrowsePanelProps) {
+  const m = useMessage(i18nMessages);
   const [expanded, setExpanded] = useState(false);
 
   const { data, isLoading, error } = useQuery({

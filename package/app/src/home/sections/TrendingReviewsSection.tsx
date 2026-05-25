@@ -1,6 +1,5 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostDTO } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +8,15 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalReviewCarousel } from "@/review/components/list/HorizontalReviewCarousel";
+import { useMessage } from "@rezics/i18n/react";
+import { page_home_sections_trending_reviews } from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_trending_reviews,
+};
+
+const i18nMessages = {
+  page_home_sections_trending_reviews,
+};
 
 export type TrendingReviewsProps = {
   title?: string;
@@ -19,6 +27,7 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   title,
   limit = 8,
 }) => {
+  const m = useMessage(i18nMessages);
   const resolvedTitle = title ?? m.page_home_sections_trending_reviews();
   const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(

@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
 import {
@@ -20,6 +19,32 @@ import { ModalLayout } from "../layouts/ModalLayout";
 import { resolvePostAuthDestination } from "../models/authRedirect";
 import { login } from "../models/handler";
 import { validateEmail } from "../models/validate";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  auth_flow_create_account,
+  auth_flow_forgot_password,
+  auth_flow_new_to_app,
+  auth_login,
+  common_email,
+  common_loading,
+} from "@rezics/i18n/messages";
+const m = {
+  auth_flow_create_account,
+  auth_flow_forgot_password,
+  auth_flow_new_to_app,
+  auth_login,
+  common_email,
+  common_loading,
+};
+
+const i18nMessages = {
+  auth_flow_create_account,
+  auth_flow_forgot_password,
+  auth_flow_new_to_app,
+  auth_login,
+  common_email,
+  common_loading,
+};
 
 interface LoginData {
   email: string;
@@ -42,6 +67,7 @@ export const LoginPage: FC<LoginPageProps> = ({
   onClose,
   onRegisterClick,
 }) => {
+  const m = useMessage(i18nMessages);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<LoginData>({

@@ -1,8 +1,18 @@
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { scoreQueries } from "@rezics/api/score/score";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import { score_no_ratings, score_ratings_count } from "@rezics/i18n/messages";
+const m = {
+  score_no_ratings,
+  score_ratings_count,
+};
+
+const i18nMessages = {
+  score_no_ratings,
+  score_ratings_count,
+};
 
 interface ScoreOverviewProps {
   unitId: string;
@@ -13,6 +23,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   unitId,
   realm = getDefaultRealmId() ?? "default",
 }) => {
+  const m = useMessage(i18nMessages);
   const { data: aggregates } = useQuery(scoreQueries.aggregates(unitId));
 
   const aggregate =

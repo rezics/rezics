@@ -4,7 +4,6 @@ import {
 } from "@rezics/api/translation-group";
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { mainMarkdownSource } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import {
@@ -22,6 +21,44 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { TextLink, unitHref } from "@/shared/ui/link";
 import { PostLanguageSwitcher } from "../components/PostLanguageSwitcher";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_created_at,
+  common_loading,
+  common_no_data,
+  common_updated_at,
+  pages_unit_page,
+  post_add_translation_prompt,
+  unit_meta_data,
+  unit_no_content,
+  unit_no_metadata,
+  user_open_profile,
+} from "@rezics/i18n/messages";
+const m = {
+  common_created_at,
+  common_loading,
+  common_no_data,
+  common_updated_at,
+  pages_unit_page,
+  post_add_translation_prompt,
+  unit_meta_data,
+  unit_no_content,
+  unit_no_metadata,
+  user_open_profile,
+};
+
+const i18nMessages = {
+  common_created_at,
+  common_loading,
+  common_no_data,
+  common_updated_at,
+  pages_unit_page,
+  post_add_translation_prompt,
+  unit_meta_data,
+  unit_no_content,
+  unit_no_metadata,
+  user_open_profile,
+};
 
 function formatMetadataValue(value: unknown): string {
   if (value === null || value === undefined) return "-";
@@ -39,6 +76,7 @@ function formatMetadataValue(value: unknown): string {
 }
 
 export function UnitPageById({ unitId }: { unitId: string }) {
+  const m = useMessage(i18nMessages);
   const {
     data: unit,
     isLoading,

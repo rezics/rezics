@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -7,6 +6,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
+import { useMessage } from "@rezics/i18n/react";
+import { common_cancel, shelf_move_to_page_title } from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  shelf_move_to_page_title,
+};
+
+const i18nMessages = {
+  common_cancel,
+  shelf_move_to_page_title,
+};
 
 interface CrossPageMoveModalProps {
   open: boolean;
@@ -23,6 +33,7 @@ export function CrossPageMoveModal({
   currentPage,
   onPick,
 }: CrossPageMoveModalProps) {
+  const m = useMessage(i18nMessages);
   const pages = Array.from({ length: Math.max(pageCount, 1) }, (_, i) => i + 1);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

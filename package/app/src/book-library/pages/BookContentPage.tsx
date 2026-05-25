@@ -1,5 +1,4 @@
 import { bookQueries } from "@rezics/api/book/book";
-import * as m from "@rezics/i18n/messages";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
@@ -11,23 +10,47 @@ import { useBookLanguage } from "../hooks/useBookLanguage";
 import { useReleaseSelection } from "../hooks/useReleaseSelection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_content_pages,
+  book_content_reading,
+  book_content_text_length,
+} from "@rezics/i18n/messages";
+const m = {
+  book_content_pages,
+  book_content_reading,
+  book_content_text_length,
+};
+
+const i18nMessages = {
+  book_content_pages,
+  book_content_reading,
+  book_content_text_length,
+};
 
 const ContentSidebar: React.FC<{ textLength: number; pageCount?: number }> = ({
   textLength,
   pageCount,
-}) => (
-  <div className="bg-surface-elevated p-4 border border-border-whisper rounded-md">
-    <h3 className="text-base font-semibold mb-2">{m.book_content_reading()}</h3>
-    <div className="flex flex-col gap-2">
-      <p className="text-sm">
-        {m.book_content_text_length({ count: textLength.toLocaleString() })}
-      </p>
-      {pageCount != null && (
-        <p className="text-sm">{m.book_content_pages({ count: pageCount })}</p>
-      )}
+}) => {
+  const m = useMessage(i18nMessages);
+  return (
+    <div className="bg-surface-elevated p-4 border border-border-whisper rounded-md">
+      <h3 className="text-base font-semibold mb-2">
+        {m.book_content_reading()}
+      </h3>
+      <div className="flex flex-col gap-2">
+        <p className="text-sm">
+          {m.book_content_text_length({ count: textLength.toLocaleString() })}
+        </p>
+        {pageCount != null && (
+          <p className="text-sm">
+            {m.book_content_pages({ count: pageCount })}
+          </p>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const BookContentPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };

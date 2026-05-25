@@ -1,11 +1,21 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ReviewList } from "../components/list/ReviewList";
+import { useMessage } from "@rezics/i18n/react";
+import { common_loading, review_list_empty_title } from "@rezics/i18n/messages";
+const m = {
+  common_loading,
+  review_list_empty_title,
+};
+
+const i18nMessages = {
+  common_loading,
+  review_list_empty_title,
+};
 
 interface ReviewListSectionProps {
   targetUnitId: string;
@@ -16,6 +26,7 @@ export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
   targetUnitId,
   limit = 20,
 }) => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, error } = useQuery({
     ...postQueries.byTarget(targetUnitId, { kind: PostKind.REVIEW, limit }),
     enabled: !!targetUnitId,

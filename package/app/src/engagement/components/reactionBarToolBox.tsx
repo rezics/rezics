@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   FacebookIcon,
   InstagramIcon,
@@ -8,6 +7,17 @@ import {
 import { Button, Dialog, DialogContent, DialogFooter } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import { common_open, common_share } from "@rezics/i18n/messages";
+const m = {
+  common_open,
+  common_share,
+};
+
+const i18nMessages = {
+  common_open,
+  common_share,
+};
 
 export type ReactionBarToolBoxProps = {
   open: boolean;
@@ -22,6 +32,7 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   itemUrl,
   itemText = "Source: REZICS",
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const origin = window?.location?.origin;
   const itemFullUrl = origin + itemUrl;

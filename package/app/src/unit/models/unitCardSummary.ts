@@ -13,8 +13,8 @@ import {
   mainMarkdownSource,
   readCoverUrlFromExtra,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { getTranslation } from "../../shared/utils/translation-helpers";
+import { unit_untitled } from "@rezics/i18n/messages";
 
 export type UnitCardAuthor = PublicUser;
 
@@ -96,7 +96,7 @@ export function unitDtoToUnitCardSummary(
     text(translation?.title) ??
     text(options.fallbackTitle) ??
     text(unitId) ??
-    m.unit_untitled();
+    unit_untitled();
   const imageUrl =
     text(unit.coverUrl) ??
     readCoverUrlFromExtra(translation?.extra) ??

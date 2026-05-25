@@ -564,6 +564,7 @@
         "@dnd-kit/utilities": "^3.2.2",
         "@rezics/contract": "workspace:*",
         "@rezics/editor": "workspace:*",
+        "@rezics/i18n": "workspace:*",
         "@rezics/storybook-config": "workspace:*",
         "@tanstack/react-table": "^8.21.3",
         "@unocss/preset-wind4": "^66.5.10",

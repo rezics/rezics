@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -6,6 +5,23 @@ import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalExcerptCarousel } from "@/excerpt/components/list/HorizontalExcerptCarousel";
 import { useHomeExcerpts } from "./hooks/hooks";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  page_home_sections_trending_excerpt_empty,
+  page_home_sections_trending_excerpt_more,
+  page_home_sections_trending_excerpt_title,
+} from "@rezics/i18n/messages";
+const m = {
+  page_home_sections_trending_excerpt_empty,
+  page_home_sections_trending_excerpt_more,
+  page_home_sections_trending_excerpt_title,
+};
+
+const i18nMessages = {
+  page_home_sections_trending_excerpt_empty,
+  page_home_sections_trending_excerpt_more,
+  page_home_sections_trending_excerpt_title,
+};
 
 export type TrendingExcerptSectionProps = {
   title?: string;
@@ -16,6 +32,7 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
   title,
   limit = 8,
 }) => {
+  const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const resolvedTitle = title ?? m.page_home_sections_trending_excerpt_title();
   const { items, isLoading, error } = useHomeExcerpts(limit);

@@ -1,3 +1,4 @@
+import { useMessage } from "@rezics/i18n/react";
 import {
   ArrowDown as ArrowDownward,
   ArrowUp as ArrowUpward,
@@ -8,7 +9,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useImperativeHandle, useMemo, useState } from "react";
-import * as m from "#/paraglide/messages.js";
+import { ui_pagination_tips } from "#/paraglide/messages.js";
 import { Button } from "#/shadcn/button";
 import { Label } from "#/shadcn/label";
 import {
@@ -19,6 +20,10 @@ import {
   SelectValue,
 } from "#/shadcn/select";
 import { ToggleGroup, ToggleGroupItem } from "#/shadcn/toggle-group";
+
+const paginationMessages = {
+  ui_pagination_tips,
+};
 
 /**
  * example:
@@ -117,6 +122,8 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   onPageChange,
   tipsLabel,
 }) => {
+  const m = useMessage(paginationMessages);
+
   useEffect(() => {
     console.log(
       "PaginationBar",

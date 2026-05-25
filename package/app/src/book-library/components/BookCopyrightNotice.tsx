@@ -1,8 +1,22 @@
-import * as m from "@rezics/i18n/messages";
 import { Copyright as CopyrightOutlined } from "lucide-react";
 import type React from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  book_copyright_notice_body,
+  book_copyright_notice_fair_use,
+} from "@rezics/i18n/messages";
+const m = {
+  book_copyright_notice_body,
+  book_copyright_notice_fair_use,
+};
+
+const i18nMessages = {
+  book_copyright_notice_body,
+  book_copyright_notice_fair_use,
+};
 
 export const BookCopyrightNotice: React.FC = () => {
+  const m = useMessage(i18nMessages);
   return (
     <div>
       <div className="flex flex-row gap-3 items-start">

@@ -4,11 +4,28 @@ import {
   useMessages,
   useSendDmMutation,
 } from "@rezics/api/dm/dm";
-import * as m from "@rezics/i18n/messages";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { type FC, type FormEvent, useEffect, useRef, useState } from "react";
 import { useAuthSessionStore } from "@/user/states";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  inbox_message_label,
+  inbox_message_placeholder,
+  inbox_messages_empty,
+  inbox_messages_load_failed,
+  inbox_messages_loading,
+  inbox_send,
+} from "@rezics/i18n/messages";
+
+const i18nMessages = {
+  inbox_message_label,
+  inbox_message_placeholder,
+  inbox_messages_empty,
+  inbox_messages_load_failed,
+  inbox_messages_loading,
+  inbox_send,
+};
 
 interface ConversationThreadSectionProps {
   conversationId: string;
@@ -29,6 +46,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   conversationId,
   peerId,
 }) => {
+  const m = useMessage(i18nMessages);
   const { data, isLoading, isError } = useMessages(conversationId);
   const sendMutation = useSendDmMutation();
   const queryClient = useQueryClient();

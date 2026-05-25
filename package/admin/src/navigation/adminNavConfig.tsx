@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   ShieldUser as AdminPanelSettingsOutlinedIcon,
   Activity as ActivityIcon,
@@ -19,6 +18,59 @@ import {
   KeyRound as VpnKeyOutlinedIcon,
 } from "lucide-react";
 import type React from "react";
+import {
+  admin_nav_auth,
+  admin_nav_auth_email_templates,
+  admin_nav_auth_jwt_services,
+  admin_nav_auth_status,
+  admin_nav_authority,
+  admin_nav_books,
+  admin_nav_create,
+  admin_nav_dashboard,
+  admin_nav_echokv,
+  admin_nav_entities,
+  admin_nav_jwt_services,
+  admin_nav_list,
+  admin_nav_low_score,
+  admin_nav_meili,
+  admin_nav_meili_search,
+  admin_nav_misc,
+  admin_nav_realms,
+  admin_nav_sessions,
+  admin_nav_settings,
+  admin_nav_shelves,
+  admin_nav_tags,
+  admin_nav_token,
+  admin_nav_units,
+  admin_nav_users,
+} from "@rezics/i18n/messages";
+
+const m = {
+  admin_nav_auth,
+  admin_nav_auth_email_templates,
+  admin_nav_auth_jwt_services,
+  admin_nav_auth_status,
+  admin_nav_authority,
+  admin_nav_books,
+  admin_nav_create,
+  admin_nav_dashboard,
+  admin_nav_echokv,
+  admin_nav_entities,
+  admin_nav_jwt_services,
+  admin_nav_list,
+  admin_nav_low_score,
+  admin_nav_meili,
+  admin_nav_meili_search,
+  admin_nav_misc,
+  admin_nav_realms,
+  admin_nav_sessions,
+  admin_nav_settings,
+  admin_nav_shelves,
+  admin_nav_tags,
+  admin_nav_token,
+  admin_nav_units,
+  admin_nav_users,
+};
 
 export type AdminNavItem = {
   id: string;

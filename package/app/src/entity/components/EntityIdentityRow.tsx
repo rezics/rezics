@@ -3,11 +3,11 @@ import type {
   EntityKind,
   UnitTranslationDTO,
 } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { EntityAvatar } from "./EntityAvatar";
 import { EntityKindBadge } from "./EntityKindBadge";
 import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
+import { entity_untitled } from "@rezics/i18n/messages";
 
 export interface EntityIdentity {
   unitId?: string;
@@ -28,7 +28,7 @@ interface EntityIdentityRowProps {
 
 export function getEntityIdentityTitle(
   entity?: EntityIdentity | EntityDTO | null,
-  fallbackTitle: string = m.entity_untitled(),
+  fallbackTitle: string = entity_untitled(),
 ) {
   const title = entity?.translations?.[0]?.title?.trim();
   return title || fallbackTitle;

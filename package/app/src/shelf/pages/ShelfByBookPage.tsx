@@ -1,15 +1,35 @@
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { ShelfCard } from "../components/ShelfCard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_load_more,
+  common_loading,
+  shelf_containing_this_book_title,
+  shelf_none_for_this_book,
+} from "@rezics/i18n/messages";
+const m = {
+  common_load_more,
+  common_loading,
+  shelf_containing_this_book_title,
+  shelf_none_for_this_book,
+};
+
+const i18nMessages = {
+  common_load_more,
+  common_loading,
+  shelf_containing_this_book_title,
+  shelf_none_for_this_book,
+};
 
 interface ShelfByBookPageProps {
   bookId: string;
 }
 
 export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
+  const m = useMessage(i18nMessages);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery(
       shelfInfiniteListQuery({ containsUnitId: bookId, limit: 50 }),

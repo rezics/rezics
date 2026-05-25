@@ -17,13 +17,32 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 import { PinboardEntryCard } from "./PinboardEntryCard";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  pinboard_reorder_conflict,
+  pinboard_reorder_drag_handle,
+  pinboard_reorder_error,
+  pinboard_reorder_list,
+} from "@rezics/i18n/messages";
+const m = {
+  pinboard_reorder_conflict,
+  pinboard_reorder_drag_handle,
+  pinboard_reorder_error,
+  pinboard_reorder_list,
+};
+
+const i18nMessages = {
+  pinboard_reorder_conflict,
+  pinboard_reorder_drag_handle,
+  pinboard_reorder_error,
+  pinboard_reorder_list,
+};
 
 interface SortableRowProps {
   entry: PinboardEntryView;
@@ -33,6 +52,7 @@ interface SortableRowProps {
 }
 
 function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
+  const m = useMessage(i18nMessages);
   const {
     attributes,
     listeners,
@@ -95,6 +115,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
   onDelete,
   onConflict,
 }) => {
+  const m = useMessage(i18nMessages);
   const [working, setWorking] = useState<string[] | null>(null);
   const ids = useMemo(
     () => working ?? entries.map((e) => e.unitId),

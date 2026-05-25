@@ -1,9 +1,25 @@
-import * as m from "@rezics/i18n/messages";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { PostListSection, ReplyComposer } from "@/post";
 import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  auth_login,
+  shelf_discussion_composer_placeholder,
+  shelf_discussion_signInPrompt,
+} from "@rezics/i18n/messages";
+const m = {
+  auth_login,
+  shelf_discussion_composer_placeholder,
+  shelf_discussion_signInPrompt,
+};
+
+const i18nMessages = {
+  auth_login,
+  shelf_discussion_composer_placeholder,
+  shelf_discussion_signInPrompt,
+};
 
 interface ShelfDiscussionSectionProps {
   shelfUnitId: string;
@@ -13,6 +29,7 @@ interface ShelfDiscussionSectionProps {
 export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
   shelfUnitId,
 }) => {
+  const m = useMessage(i18nMessages);
   const { isAuthenticated } = useAuth();
   const auth = useAuthModal("login");
 

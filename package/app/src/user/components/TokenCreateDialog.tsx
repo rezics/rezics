@@ -1,6 +1,5 @@
 import { useCreateTokenMutation } from "@rezics/api/token/token.mutations";
 import type { ApiTokenScopes } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Alert,
   AlertDescription,
@@ -16,6 +15,50 @@ import {
 } from "@rezics/ui/shadcn";
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
 import { type FC, useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_creating,
+  common_done,
+  common_scopes,
+  settings_tokens_copy,
+  settings_tokens_created_title,
+  settings_tokens_created_warning,
+  settings_tokens_expiration_optional,
+  settings_tokens_generate,
+  settings_tokens_generate_action,
+  settings_tokens_name_label,
+  settings_tokens_name_placeholder,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_creating,
+  common_done,
+  common_scopes,
+  settings_tokens_copy,
+  settings_tokens_created_title,
+  settings_tokens_created_warning,
+  settings_tokens_expiration_optional,
+  settings_tokens_generate,
+  settings_tokens_generate_action,
+  settings_tokens_name_label,
+  settings_tokens_name_placeholder,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_creating,
+  common_done,
+  common_scopes,
+  settings_tokens_copy,
+  settings_tokens_created_title,
+  settings_tokens_created_warning,
+  settings_tokens_expiration_optional,
+  settings_tokens_generate,
+  settings_tokens_generate_action,
+  settings_tokens_name_label,
+  settings_tokens_name_placeholder,
+};
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },
@@ -36,6 +79,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
   open,
   onClose,
 }) => {
+  const m = useMessage(i18nMessages);
   const [name, setName] = useState("");
   const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
   const [expiresAt, setExpiresAt] = useState("");

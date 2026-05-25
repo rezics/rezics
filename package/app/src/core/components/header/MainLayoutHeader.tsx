@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import { useRouterState } from "@tanstack/react-router";
 import React from "react";
 import { AuthenticatedSection } from "@/core/sections/header/AuthenticatedSection.tsx";
@@ -10,6 +9,15 @@ import { useAuth } from "@/user/pages/useAuth";
 import { useLayoutStore } from "../../states/layoutStore.ts";
 import { DrawerToggler } from "./DrawerToggler.tsx";
 import { HeaderSearch } from "./HeaderSearch.tsx";
+import { useMessage } from "@rezics/i18n/react";
+import { common_logo_alt } from "@rezics/i18n/messages";
+const m = {
+  common_logo_alt,
+};
+
+const i18nMessages = {
+  common_logo_alt,
+};
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -23,6 +31,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
     layoutType = "type-b",
     disableDrawerToggle = false,
   }) => {
+    const m = useMessage(i18nMessages);
     const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
     const drawerWidth = useLayoutStore((s) => s.drawerWidth);
     const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);

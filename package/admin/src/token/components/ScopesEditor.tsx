@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import {
   Badge,
   Button,
@@ -17,6 +16,41 @@ import {
 } from "lucide-react";
 import type { FC } from "react";
 import { useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_token_domain,
+  admin_token_permission,
+  admin_token_remove_domain,
+  admin_token_remove_permission,
+  admin_token_scope_custom,
+  admin_token_scope_custom_domain,
+  admin_token_scopes_default_help,
+  admin_token_scopes_title,
+  common_add,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_token_domain,
+  admin_token_permission,
+  admin_token_remove_domain,
+  admin_token_remove_permission,
+  admin_token_scope_custom,
+  admin_token_scope_custom_domain,
+  admin_token_scopes_default_help,
+  admin_token_scopes_title,
+  common_add,
+};
+
+const i18nMessages = {
+  admin_token_domain,
+  admin_token_permission,
+  admin_token_remove_domain,
+  admin_token_remove_permission,
+  admin_token_scope_custom,
+  admin_token_scope_custom_domain,
+  admin_token_scopes_default_help,
+  admin_token_scopes_title,
+  common_add,
+};
 
 interface ScopesEditorProps {
   scopes: Record<string, string[]>;
@@ -42,6 +76,7 @@ const PREDEFINED_PERMISSIONS = ["read", "write", "delete", "admin"];
  * ScopesEditor - 编辑 API token 权限 (scopes) 的组件
  */
 export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
+  const m = useMessage(i18nMessages);
   const [newDomain, setNewDomain] = useState("");
   const [newPermission, setNewPermission] = useState("");
   const [customDomain, setCustomDomain] = useState("");

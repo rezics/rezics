@@ -1,7 +1,6 @@
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import { RatingBadge } from "@rezics/ui";
 import {
   Alert,
@@ -17,6 +16,38 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  settings_content_rating_always_on,
+  settings_content_rating_opt_in_modal_body,
+  settings_content_rating_opt_in_modal_confirm,
+  settings_content_rating_opt_in_modal_title,
+  settings_content_rating_saved,
+  settings_content_rating_description_R_18,
+  settings_content_rating_description_R_18G,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  settings_content_rating_always_on,
+  settings_content_rating_opt_in_modal_body,
+  settings_content_rating_opt_in_modal_confirm,
+  settings_content_rating_opt_in_modal_title,
+  settings_content_rating_saved,
+  settings_content_rating_description_R_18,
+  settings_content_rating_description_R_18G,
+};
+
+const i18nMessages = {
+  common_cancel,
+  settings_content_rating_always_on,
+  settings_content_rating_opt_in_modal_body,
+  settings_content_rating_opt_in_modal_confirm,
+  settings_content_rating_opt_in_modal_title,
+  settings_content_rating_saved,
+  settings_content_rating_description_R_18,
+  settings_content_rating_description_R_18G,
+};
 
 type OptInRating = "R_18" | "R_18G";
 const OPT_IN_RATINGS: OptInRating[] = ["R_18", "R_18G"];
@@ -28,6 +59,7 @@ const OPT_IN_RATING_DESCRIPTION = {
 } as const satisfies Record<OptInRating, () => string>;
 
 export const ContentRatingPreferences: FC = () => {
+  const m = useMessage(i18nMessages);
   const { data: settings } = useQuery(userQueries.settings());
   const updateSettings = useUpdateSettingsMutation();
 

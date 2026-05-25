@@ -1,4 +1,3 @@
-import * as m from "@rezics/i18n/messages";
 import type React from "react";
 import type { PostTreeNodeModel } from "../models/postTreeRails";
 import {
@@ -11,6 +10,15 @@ import {
   TERMINAL_RAIL_HEIGHT_PX,
   THREAD_INDENT_PX,
 } from "./postTreeLayout";
+import { useMessage } from "@rezics/i18n/react";
+import { post_collapse_thread } from "@rezics/i18n/messages";
+const m = {
+  post_collapse_thread,
+};
+
+const i18nMessages = {
+  post_collapse_thread,
+};
 
 interface PostTreeRailProps {
   childrenNodes: PostTreeNodeModel[];
@@ -31,6 +39,7 @@ export function PostTreeRail({
   onRailToggle,
   renderChild,
 }: PostTreeRailProps) {
+  const m = useMessage(i18nMessages);
   const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
   const lineLeftPx = railCenterLeftPx - RAIL_STROKE_PX / 2;
   const railLeftPx = railCenterLeftPx - RAIL_HITBOX_PX / 2;

@@ -3,7 +3,6 @@ import {
   hydrateAuthSessionState,
   useAuthSessionStore,
 } from "@rezics/api/states";
-import * as m from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -22,10 +21,109 @@ import { Shield, ShieldUser } from "lucide-react";
 import { useState } from "react";
 import { Page } from "@/core/layouts/Page";
 import { adminLogout } from "@/user/models/handler";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  admin_auth_action_hydrate,
+  admin_auth_action_hydrate_completed,
+  admin_auth_action_logout_completed,
+  admin_auth_actions_title,
+  admin_auth_cookie_session,
+  admin_auth_failed,
+  admin_auth_identity,
+  admin_auth_main_user_exists,
+  admin_auth_member_session,
+  admin_auth_missing_session,
+  admin_auth_needs_main_setup,
+  admin_auth_refresh_session,
+  admin_auth_registration_complete,
+  admin_auth_registration_stage,
+  admin_auth_rehydrate_session_description,
+  admin_auth_server_permission,
+  admin_auth_session_id,
+  admin_auth_session_store,
+  admin_auth_status_description,
+  admin_auth_status_hydration,
+  admin_auth_status_title,
+  admin_auth_user_email,
+  admin_auth_user_id,
+  admin_auth_user_name,
+  admin_auth_user_role,
+  auth_logout,
+  common_active,
+  common_no,
+  common_none,
+  common_yes,
+} from "@rezics/i18n/messages";
+const m = {
+  admin_auth_action_hydrate,
+  admin_auth_action_hydrate_completed,
+  admin_auth_action_logout_completed,
+  admin_auth_actions_title,
+  admin_auth_cookie_session,
+  admin_auth_failed,
+  admin_auth_identity,
+  admin_auth_main_user_exists,
+  admin_auth_member_session,
+  admin_auth_missing_session,
+  admin_auth_needs_main_setup,
+  admin_auth_refresh_session,
+  admin_auth_registration_complete,
+  admin_auth_registration_stage,
+  admin_auth_rehydrate_session_description,
+  admin_auth_server_permission,
+  admin_auth_session_id,
+  admin_auth_session_store,
+  admin_auth_status_description,
+  admin_auth_status_hydration,
+  admin_auth_status_title,
+  admin_auth_user_email,
+  admin_auth_user_id,
+  admin_auth_user_name,
+  admin_auth_user_role,
+  auth_logout,
+  common_active,
+  common_no,
+  common_none,
+  common_yes,
+};
+
+const i18nMessages = {
+  admin_auth_action_hydrate,
+  admin_auth_action_hydrate_completed,
+  admin_auth_action_logout_completed,
+  admin_auth_actions_title,
+  admin_auth_cookie_session,
+  admin_auth_failed,
+  admin_auth_identity,
+  admin_auth_main_user_exists,
+  admin_auth_member_session,
+  admin_auth_missing_session,
+  admin_auth_needs_main_setup,
+  admin_auth_refresh_session,
+  admin_auth_registration_complete,
+  admin_auth_registration_stage,
+  admin_auth_rehydrate_session_description,
+  admin_auth_server_permission,
+  admin_auth_session_id,
+  admin_auth_session_store,
+  admin_auth_status_description,
+  admin_auth_status_hydration,
+  admin_auth_status_title,
+  admin_auth_user_email,
+  admin_auth_user_id,
+  admin_auth_user_name,
+  admin_auth_user_role,
+  auth_logout,
+  common_active,
+  common_no,
+  common_none,
+  common_yes,
+};
 
 type SessionStatus = "active" | "missing";
 
 function StatusBadge({ status }: { status: SessionStatus }) {
+  const m = useMessage(i18nMessages);
   const map = {
     active: {
       label: m.common_active(),
@@ -53,6 +151,7 @@ function SessionRefreshCard({
   onRefresh: () => Promise<void>;
   refreshLabel: string;
 }) {
+  const m = useMessage(i18nMessages);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -115,6 +214,7 @@ function SessionRefreshCard({
 }
 
 function SessionStoreCard() {
+  const m = useMessage(i18nMessages);
   const status = useAuthSessionStore((s) => s.status);
   const hasAuthIdentity = useAuthSessionStore((s) => s.auth.hasIdentity);
   const hasMemberSession = useAuthSessionStore(
@@ -200,6 +300,7 @@ function SessionStoreCard() {
 }
 
 function ActionsCard() {
+  const m = useMessage(i18nMessages);
   const [loading, setLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
@@ -277,6 +378,7 @@ function ActionsCard() {
 }
 
 export default function AuthStatusPage() {
+  const m = useMessage(i18nMessages);
   return (
     <Page
       title={m.admin_auth_status_title()}

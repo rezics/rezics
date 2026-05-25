@@ -1,11 +1,16 @@
 import type { ContentRating } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
+import {
+  rating_tier_GENERAL,
+  rating_tier_R_15,
+  rating_tier_R_18,
+  rating_tier_R_18G,
+} from "@rezics/i18n/messages";
 
 const RATING_TIER_LABEL = {
-  GENERAL: m.rating_tier_GENERAL,
-  R_15: m.rating_tier_R_15,
-  R_18: m.rating_tier_R_18,
-  R_18G: m.rating_tier_R_18G,
+  GENERAL: rating_tier_GENERAL,
+  R_15: rating_tier_R_15,
+  R_18: rating_tier_R_18,
+  R_18G: rating_tier_R_18G,
 } as const satisfies Record<ContentRating, () => string>;
 
 export function ratingTierLabel(rating: ContentRating): string {

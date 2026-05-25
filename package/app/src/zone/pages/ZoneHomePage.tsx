@@ -1,9 +1,25 @@
-import * as m from "@rezics/i18n/messages";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useZone } from "../hooks/useZone";
 import { BookZoneTemplate } from "../templates/book";
 import { DefaultZoneTemplate } from "../templates/default";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  zone_loading,
+  zone_not_found,
+  zone_not_found_description,
+} from "@rezics/i18n/messages";
+const m = {
+  zone_loading,
+  zone_not_found,
+  zone_not_found_description,
+};
+
+const i18nMessages = {
+  zone_loading,
+  zone_not_found,
+  zone_not_found_description,
+};
 
 const templates: Record<string, React.FC<any>> = {
   default: DefaultZoneTemplate,
@@ -15,6 +31,7 @@ export type ZoneHomePageProps = {
 };
 
 export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
+  const m = useMessage(i18nMessages);
   const { zone, isLoading, error } = useZone(slug);
   const navigate = useNavigate();
 

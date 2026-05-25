@@ -1,5 +1,4 @@
 import type { UnitLastPosition } from "@rezics/contract";
-import * as m from "@rezics/i18n/messages";
 import {
   Button,
   Dialog,
@@ -12,6 +11,32 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import { ChapterPicker } from "./ChapterPicker";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_cancel,
+  common_save,
+  progress_status_active_modal_chapter_label,
+  progress_status_active_modal_description,
+  progress_status_active_modal_progress_label,
+  progress_status_active_modal_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_cancel,
+  common_save,
+  progress_status_active_modal_chapter_label,
+  progress_status_active_modal_description,
+  progress_status_active_modal_progress_label,
+  progress_status_active_modal_title,
+};
+
+const i18nMessages = {
+  common_cancel,
+  common_save,
+  progress_status_active_modal_chapter_label,
+  progress_status_active_modal_description,
+  progress_status_active_modal_progress_label,
+  progress_status_active_modal_title,
+};
 
 type ActiveProgressModalProps = {
   open: boolean;
@@ -42,6 +67,7 @@ export function ActiveProgressModal({
   onSave,
   isPending,
 }: ActiveProgressModalProps) {
+  const m = useMessage(i18nMessages);
   const [progressPct, setProgressPct] = useState<number>(
     Math.round((initialProgress ?? 0) * 100),
   );

@@ -1,10 +1,35 @@
 import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
-import * as m from "@rezics/i18n/messages";
 import { Alert, AlertDescription, AlertTitle, Button } from "@rezics/ui/shadcn";
 import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { PinboardListKey } from "../models/types";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  common_dismiss,
+  pinboard_stale_cleanup,
+  pinboard_stale_cleanup_done,
+  pinboard_stale_cleanup_partial,
+  pinboard_stale_description,
+  pinboard_stale_title,
+} from "@rezics/i18n/messages";
+const m = {
+  common_dismiss,
+  pinboard_stale_cleanup,
+  pinboard_stale_cleanup_done,
+  pinboard_stale_cleanup_partial,
+  pinboard_stale_description,
+  pinboard_stale_title,
+};
+
+const i18nMessages = {
+  common_dismiss,
+  pinboard_stale_cleanup,
+  pinboard_stale_cleanup_done,
+  pinboard_stale_cleanup_partial,
+  pinboard_stale_description,
+  pinboard_stale_title,
+};
 
 interface StaleIdsBannerProps {
   realmUnitId: string;
@@ -19,6 +44,7 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   staleIds,
   onCleaned,
 }) => {
+  const m = useMessage(i18nMessages);
   const [dismissed, setDismissed] = useState(false);
   const [working, setWorking] = useState(false);
   const remove = useRemoveRealmExtraMutation();
