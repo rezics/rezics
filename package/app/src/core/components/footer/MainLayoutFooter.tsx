@@ -1,16 +1,3 @@
-import { GithubIcon, TelegramIcon } from "@rezics/icons";
-import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
-import {
-  Button,
-  Input,
-  Separator,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@rezics/ui/shadcn";
-import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_logo_alt,
   layout_footer_brand_description,
@@ -38,6 +25,20 @@ import {
   layout_footer_social_github,
   layout_footer_social_telegram,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { GithubIcon, TelegramIcon } from "@rezics/icons";
+import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
+import {
+  Button,
+  Input,
+  Separator,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@rezics/ui/shadcn";
+import type React from "react";
+
 const i18nMessages = {
   common_logo_alt,
   layout_footer_brand_description,

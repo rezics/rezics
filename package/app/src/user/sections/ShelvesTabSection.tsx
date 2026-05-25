@@ -4,6 +4,19 @@ import {
   SYSTEM_SHELF_KIND_KEYS,
   type SystemShelfKindKey,
 } from "@rezics/contract";
+import {
+  common_loading,
+  search_category_all,
+  shelf_controls_sort_by,
+  shelf_empty_yet,
+  shelf_items_count,
+  shelf_no_search_matches,
+  shelf_search_placeholder,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+  shelf_untitled,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
 import { Link } from "@/shared/ui/link";
@@ -14,19 +27,7 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_loading,
-  search_category_all,
-  shelf_controls_sort_by,
-  shelf_empty_yet,
-  shelf_items_count,
-  shelf_no_search_matches,
-  shelf_search_placeholder,
-  shelf_untitled,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
   search_category_all,

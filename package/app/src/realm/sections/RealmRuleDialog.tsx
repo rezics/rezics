@@ -1,5 +1,13 @@
 import type { PostDTO } from "@rezics/contract";
 import {
+  common_cancel,
+  common_close,
+  realm_agree_and_join,
+  realm_joining,
+  realm_rules_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Dialog,
   DialogContent,
@@ -9,14 +17,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { PostBodyMarkdown } from "@/post";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  common_close,
-  realm_agree_and_join,
-  realm_joining,
-  realm_rules_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   common_close,

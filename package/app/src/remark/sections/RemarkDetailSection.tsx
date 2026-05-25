@@ -1,5 +1,11 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
+import {
+  common_edit,
+  common_loading,
+  common_no_data,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
@@ -7,12 +13,7 @@ import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "@/post/sections/PostTreeSection";
 import { TextLink } from "@/shared/ui/link";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_edit,
-  common_loading,
-  common_no_data,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_edit,
   common_loading,

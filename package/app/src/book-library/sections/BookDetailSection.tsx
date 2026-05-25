@@ -1,5 +1,12 @@
 import type { BookDTO } from "@rezics/contract";
 import {
+  page_book_tabs_community,
+  page_book_tabs_content,
+  page_book_tabs_overview,
+  page_book_tabs_review_shelf,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -14,13 +21,7 @@ import type React from "react";
 import { useMemo } from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { useBookLanguage } from "../hooks/useBookLanguage";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_book_tabs_community,
-  page_book_tabs_content,
-  page_book_tabs_overview,
-  page_book_tabs_review_shelf,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_book_tabs_community,
   page_book_tabs_content,

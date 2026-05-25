@@ -10,7 +10,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { ExternalLink } from "lucide-react";
 import * as React from "react";
-import { AppSafeLink as SafeLink, Link, unitHref } from "@/shared/ui/link";
+import { Link, AppSafeLink as SafeLink, unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 
 export type SourceEvidencePreviewProps = {

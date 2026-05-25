@@ -3,8 +3,8 @@ import type {
   EntityKind,
   UnitTranslationDTO,
 } from "@rezics/contract";
-import { useMessage } from "@rezics/i18n/react";
 import { entity_untitled } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { cn } from "@/shared/utils/css-util";
 import { EntityAvatar } from "./EntityAvatar";
 import { EntityKindBadge } from "./EntityKindBadge";

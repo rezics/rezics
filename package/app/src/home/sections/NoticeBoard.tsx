@@ -1,11 +1,3 @@
-import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
-import { Bell as NotificationsRoundedIcon } from "lucide-react";
-import type React from "react";
-import {
-  AnnouncementFeedSection,
-  type PinboardAnnouncementItem,
-} from "@/pinboard";
-import { TextLink } from "@/shared/ui/link";
 import {
   common_new,
   common_pinned,
@@ -18,6 +10,14 @@ import {
   page_home_noticeboard_time_weeks_ago_other,
   page_home_noticeboard_title,
 } from "@rezics/i18n/messages";
+import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
+import { Bell as NotificationsRoundedIcon } from "lucide-react";
+import type React from "react";
+import {
+  AnnouncementFeedSection,
+  type PinboardAnnouncementItem,
+} from "@/pinboard";
+import { TextLink } from "@/shared/ui/link";
 
 function formatRelative(dateIso: string): string {
   const ms = Date.now() - new Date(dateIso).getTime();

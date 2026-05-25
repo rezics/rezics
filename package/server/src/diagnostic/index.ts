@@ -1,5 +1,4 @@
 export { statusApi } from "./status.api";
-export { getSystemStatusSummary } from "./system-status.service";
 export type {
   CdcStatus,
   FailedJobSummary,
@@ -14,3 +13,4 @@ export type {
   StatusState,
   SystemStatusSummary,
 } from "./status.types";
+export { getSystemStatusSummary } from "./system-status.service";

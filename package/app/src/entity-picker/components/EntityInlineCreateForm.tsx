@@ -12,13 +12,6 @@ import {
   subjectAttributionRoles,
 } from "@rezics/contract";
 import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
-import { Button, Input, Label } from "@rezics/ui/shadcn";
-import { type FormEvent, useMemo, useState } from "react";
-import {
-  suggestCreditEligibility,
-  suggestSubjectEligibility,
-} from "../models/eligibilitySuggestions";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_cancel,
   common_create,
@@ -36,6 +29,14 @@ import {
   entity_title_required,
   language_code_placeholder,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
+import { type FormEvent, useMemo, useState } from "react";
+import {
+  suggestCreditEligibility,
+  suggestSubjectEligibility,
+} from "../models/eligibilitySuggestions";
+
 const i18nMessages = {
   common_cancel,
   common_create,

@@ -1,11 +1,12 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import { common_loading } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RemarkList } from "../components/list/RemarkList";
-import { useMessage } from "@rezics/i18n/react";
-import { common_loading } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
 };

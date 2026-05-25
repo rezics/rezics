@@ -2,6 +2,12 @@ import { postQueries } from "@rezics/api/post/post";
 import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { PostKind } from "@rezics/contract";
+import {
+  book_hero_stat_reviews,
+  book_hero_stat_shelves,
+  book_hero_stat_tags,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import {
   BookMarked as CollectionsBookmarkOutlined,
@@ -10,12 +16,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_hero_stat_reviews,
-  book_hero_stat_shelves,
-  book_hero_stat_tags,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_hero_stat_reviews,
   book_hero_stat_shelves,

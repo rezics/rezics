@@ -1,6 +1,4 @@
 import type { EntityDTO } from "@rezics/contract";
-import { getEntityTranslation } from "../models/types";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_no,
   common_translation,
@@ -10,6 +8,9 @@ import {
   entity_slug_label,
   entity_verified,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { getEntityTranslation } from "../models/types";
+
 const i18nMessages = {
   common_no,
   common_translation,

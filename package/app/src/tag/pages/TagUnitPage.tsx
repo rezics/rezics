@@ -1,15 +1,16 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { useQuery } from "@tanstack/react-query";
-import { Route as tagUnitRoute } from "@/routes/_mainLayout/tag/$unitId";
-import { TagDetailCard } from "../components/TagCards";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_load_failed,
   tag_loading,
   tag_unit_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { Route as tagUnitRoute } from "@/routes/_mainLayout/tag/$unitId";
+import { TagDetailCard } from "../components/TagCards";
+
 const i18nMessages = {
   common_load_failed,
   tag_loading,

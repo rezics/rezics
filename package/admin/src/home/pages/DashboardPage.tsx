@@ -1,4 +1,16 @@
 import { adminStatsQueryOptions } from "@rezics/api/stat/stats.queries";
+import {
+  admin_dashboard_comments,
+  admin_dashboard_content_created_30d,
+  admin_dashboard_description,
+  admin_dashboard_history_failed,
+  admin_dashboard_history_pending,
+  admin_dashboard_title,
+  admin_dashboard_total_books,
+  admin_dashboard_total_users,
+  admin_dashboard_unresolved_feedback,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -12,18 +24,7 @@ import { Page } from "@/core/layouts/Page";
 import { StatusOverviewCard } from "@/system-health";
 import { ContentTrendChart } from "../components/chart/ContentTrendChart";
 import { StatCard } from "../components/StatCard";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_dashboard_comments,
-  admin_dashboard_content_created_30d,
-  admin_dashboard_description,
-  admin_dashboard_history_failed,
-  admin_dashboard_history_pending,
-  admin_dashboard_title,
-  admin_dashboard_total_books,
-  admin_dashboard_total_users,
-  admin_dashboard_unresolved_feedback,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_dashboard_comments,
   admin_dashboard_content_created_30d,

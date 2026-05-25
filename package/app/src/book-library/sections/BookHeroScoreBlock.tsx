@@ -1,7 +1,3 @@
-import { RatingInput } from "@rezics/ui";
-import { Star } from "lucide-react";
-import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   book_hero_score_be_first,
   book_hero_score_count,
@@ -10,6 +6,11 @@ import {
   book_hero_score_label,
   book_hero_score_rezics_label,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { RatingInput } from "@rezics/ui";
+import { Star } from "lucide-react";
+import type React from "react";
+
 const i18nMessages = {
   book_hero_score_be_first,
   book_hero_score_count,

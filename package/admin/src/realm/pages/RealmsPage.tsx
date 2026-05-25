@@ -1,12 +1,13 @@
-import { Card, CardContent } from "@rezics/ui/shadcn";
-import { Page } from "@/core/layouts/Page";
-import { useMessage } from "@rezics/i18n/react";
 import {
   admin_realm_description,
   admin_realm_management_description,
   admin_realm_management_title,
   admin_realm_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Card, CardContent } from "@rezics/ui/shadcn";
+import { Page } from "@/core/layouts/Page";
+
 const i18nMessages = {
   admin_realm_description,
   admin_realm_management_description,

@@ -1,14 +1,15 @@
 import { shelfQueries } from "@rezics/api/shelf/shelf";
+import {
+  common_loading,
+  shelf_includes_book_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_loading,
-  shelf_includes_book_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
   shelf_includes_book_title,

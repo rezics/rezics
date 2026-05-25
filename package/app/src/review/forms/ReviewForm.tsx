@@ -1,14 +1,15 @@
 import { SCORE_MAX } from "@rezics/contract";
-import { RatingInput } from "@rezics/ui";
-import { Input, Label } from "@rezics/ui/shadcn";
-import type React from "react";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import { useMessage } from "@rezics/i18n/react";
 import {
   review_form_rating,
   review_form_title,
   review_validation_min_chars,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { RatingInput } from "@rezics/ui";
+import { Input, Label } from "@rezics/ui/shadcn";
+import type React from "react";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+
 const i18nMessages = {
   review_form_rating,
   review_form_title,

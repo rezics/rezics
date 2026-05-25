@@ -13,8 +13,8 @@ import {
   mainMarkdownSource,
   readCoverUrlFromExtra,
 } from "@rezics/contract";
-import { getTranslation } from "../../shared/utils/translation-helpers";
 import { unit_untitled } from "@rezics/i18n/messages";
+import { getTranslation } from "../../shared/utils/translation-helpers";
 
 export type UnitCardAuthor = PublicUser;
 

@@ -6,6 +6,7 @@ import { authPublicApi } from "./auth-boundary";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
 import { creditAttributionApi } from "./credit-attribution";
+import { statusApi } from "./diagnostic";
 import { dispatchApi } from "./dispatch";
 import { echoKvApi } from "./echokv";
 import { entityApi } from "./entity";
@@ -35,9 +36,8 @@ import {
 import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
 import { slugApi } from "./slug";
-import { statusApi } from "./diagnostic";
-import { statsAdminApi } from "./stat";
 import { sourceSiteApi } from "./source-site";
+import { statsAdminApi } from "./stat";
 import { subjectAttributionApi } from "./subject-attribution";
 import { subscriptionApi } from "./subscription";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";

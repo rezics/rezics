@@ -2,6 +2,19 @@ import { postQueries } from "@rezics/api/post/post";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";
+import {
+  book_hero_kind_book,
+  book_hero_meta_author,
+  book_hero_meta_chapter_count,
+  book_hero_meta_co_author,
+  book_hero_meta_editor,
+  book_hero_meta_illustrator,
+  book_hero_meta_length_chars,
+  book_hero_meta_producer,
+  book_hero_meta_publisher,
+  book_hero_meta_translator,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -13,27 +26,15 @@ import {
   getEntityTranslationsByRole,
   getTranslation,
 } from "@/shared/utils/translation-helpers";
-import { useBookLanguage } from "../hooks/useBookLanguage";
 import { SourceEvidencePreview } from "../components/SourceEvidencePreview";
+import { useBookLanguage } from "../hooks/useBookLanguage";
 import { BookHeroActionBar } from "./BookHeroActionBar";
 import { BookHeroCountLinks } from "./BookHeroCountLinks";
 import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
 import { BookHeroScoreBlock } from "./BookHeroScoreBlock";
 import { BookHeroStatCards, type BookHeroStatKey } from "./BookHeroStatCards";
 import { BookYourScoreBlock } from "./BookYourScoreBlock";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_hero_kind_book,
-  book_hero_meta_chapter_count,
-  book_hero_meta_length_chars,
-  book_hero_meta_author,
-  book_hero_meta_co_author,
-  book_hero_meta_editor,
-  book_hero_meta_illustrator,
-  book_hero_meta_producer,
-  book_hero_meta_publisher,
-  book_hero_meta_translator,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_hero_kind_book,
   book_hero_meta_chapter_count,

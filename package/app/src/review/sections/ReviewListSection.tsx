@@ -1,12 +1,13 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import { common_loading, review_list_empty_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ReviewList } from "../components/list/ReviewList";
-import { useMessage } from "@rezics/i18n/react";
-import { common_loading, review_list_empty_title } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
   review_list_empty_title,

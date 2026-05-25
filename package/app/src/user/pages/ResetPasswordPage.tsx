@@ -1,4 +1,17 @@
 import { authApi } from "@rezics/api/auth/auth.api";
+import {
+  auth_error_invalid_password,
+  auth_error_passwords_mismatch,
+  auth_flow_reset_link_sending,
+  auth_reset_back_to_login,
+  auth_reset_missing_token,
+  auth_reset_send_link,
+  auth_reset_success_redirecting,
+  auth_reset_title,
+  common_email,
+  common_loading,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
@@ -16,19 +29,7 @@ import { type FC, useMemo, useState } from "react";
 import { Layout } from "../layouts/Layout.tsx";
 import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { validateEmail, validatePassword } from "../models/validate.ts";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  auth_error_invalid_password,
-  auth_error_passwords_mismatch,
-  auth_flow_reset_link_sending,
-  auth_reset_back_to_login,
-  auth_reset_missing_token,
-  auth_reset_send_link,
-  auth_reset_success_redirecting,
-  auth_reset_title,
-  common_email,
-  common_loading,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   auth_error_invalid_password,
   auth_error_passwords_mismatch,

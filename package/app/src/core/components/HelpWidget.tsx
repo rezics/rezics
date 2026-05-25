@@ -1,6 +1,6 @@
-import { Button } from "@rezics/ui/shadcn";
-import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
 import { app_help_aria_label, app_help_feedback } from "@rezics/i18n/messages";
+import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
+import { Button } from "@rezics/ui/shadcn";
 import {
   Plus as AddIcon,
   X as CloseIcon,

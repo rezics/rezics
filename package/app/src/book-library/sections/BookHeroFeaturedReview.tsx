@@ -1,5 +1,14 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource, type PostDTO, PostKind } from "@rezics/contract";
+import {
+  book_hero_featured_review_empty_body,
+  book_hero_featured_review_empty_quote,
+  book_hero_featured_review_read_full,
+  book_hero_featured_review_score_label,
+  book_hero_featured_review_unknown_author,
+  book_hero_featured_review_write_cta,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import {
   Avatar,
@@ -10,15 +19,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_hero_featured_review_empty_body,
-  book_hero_featured_review_empty_quote,
-  book_hero_featured_review_read_full,
-  book_hero_featured_review_score_label,
-  book_hero_featured_review_unknown_author,
-  book_hero_featured_review_write_cta,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_hero_featured_review_empty_body,
   book_hero_featured_review_empty_quote,

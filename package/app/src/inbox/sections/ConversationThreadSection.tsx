@@ -4,11 +4,6 @@ import {
   useMessages,
   useSendDmMutation,
 } from "@rezics/api/dm/dm";
-import { Button, Input } from "@rezics/ui/shadcn";
-import { useQueryClient } from "@tanstack/react-query";
-import { type FC, type FormEvent, useEffect, useRef, useState } from "react";
-import { useAuthSessionStore } from "@/user/states";
-import { useMessage } from "@rezics/i18n/react";
 import {
   inbox_message_label,
   inbox_message_placeholder,
@@ -17,6 +12,11 @@ import {
   inbox_messages_loading,
   inbox_send,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button, Input } from "@rezics/ui/shadcn";
+import { useQueryClient } from "@tanstack/react-query";
+import { type FC, type FormEvent, useEffect, useRef, useState } from "react";
+import { useAuthSessionStore } from "@/user/states";
 
 const i18nMessages = {
   inbox_message_label,

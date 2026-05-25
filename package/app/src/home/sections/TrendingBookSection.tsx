@@ -1,3 +1,9 @@
+import {
+  page_home_sections_trending_book_loading,
+  page_home_sections_trending_book_more,
+  page_home_sections_trending_book_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
@@ -9,12 +15,7 @@ import {
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
 import { useHomeBooks } from "./hooks/hooks";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_home_sections_trending_book_loading,
-  page_home_sections_trending_book_more,
-  page_home_sections_trending_book_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_sections_trending_book_loading,
   page_home_sections_trending_book_more,

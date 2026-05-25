@@ -1,10 +1,4 @@
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
-import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
-import type React from "react";
-import { unitHref } from "@/shared/ui/link";
-import { getTranslation } from "@/shared/utils/translation-helpers";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_no_description,
   realm_member_count,
@@ -12,6 +6,13 @@ import {
   realm_public,
   realm_untitled,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
+import { Link } from "@tanstack/react-router";
+import type React from "react";
+import { unitHref } from "@/shared/ui/link";
+import { getTranslation } from "@/shared/utils/translation-helpers";
+
 const i18nMessages = {
   common_no_description,
   realm_member_count,

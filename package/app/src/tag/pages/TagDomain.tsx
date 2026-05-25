@@ -1,15 +1,16 @@
 import { tagQueries } from "@rezics/api/tag/tag";
-import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { useQuery } from "@tanstack/react-query";
-import { Route as tagDomainRoute } from "@/routes/_mainLayout/tag/domain/$unitId/route";
-import { Route as tagDomainTitleRoute } from "@/routes/_mainLayout/tag/domain/$unitId/title/$title";
-import { TagWrapper } from "../components/TagWrapper";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_load_failed,
   tag_domain_title,
   tag_loading,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { Route as tagDomainRoute } from "@/routes/_mainLayout/tag/domain/$unitId/route";
+import { Route as tagDomainTitleRoute } from "@/routes/_mainLayout/tag/domain/$unitId/title/$title";
+import { TagWrapper } from "../components/TagWrapper";
+
 const i18nMessages = {
   common_load_failed,
   tag_domain_title,

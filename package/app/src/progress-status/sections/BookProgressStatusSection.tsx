@@ -1,6 +1,12 @@
 import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
 import {
+  book_hero_actions_mark_as_read,
+  book_hero_actions_read_again,
+  book_hero_actions_start_reading,
+  book_hero_actions_want_to_read,
+} from "@rezics/i18n/messages";
+import {
   type ReactiveMessageBag,
   useLocale,
   useMessage,
@@ -30,12 +36,6 @@ import {
   openStatusModalAtom,
   statusModalAtom,
 } from "../states/statusModalAtom";
-import {
-  book_hero_actions_mark_as_read,
-  book_hero_actions_read_again,
-  book_hero_actions_start_reading,
-  book_hero_actions_want_to_read,
-} from "@rezics/i18n/messages";
 
 const i18nMessages = {
   book_hero_actions_mark_as_read,

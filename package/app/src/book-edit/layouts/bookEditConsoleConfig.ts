@@ -1,11 +1,4 @@
 import {
-  FileText as DescriptionIcon,
-  History as HistoryIcon,
-  LayoutDashboard as DashboardIcon,
-  ShieldCheck as AuthorityIcon,
-} from "lucide-react";
-import type { EditConsoleLayoutProps } from "@/core/layouts/EditConsoleLayout";
-import {
   book_edit_sidebar_authority,
   book_edit_sidebar_back_to_book,
   book_edit_sidebar_chapters,
@@ -13,6 +6,13 @@ import {
   book_edit_sidebar_main,
   book_edit_sidebar_tags,
 } from "@rezics/i18n/messages";
+import {
+  ShieldCheck as AuthorityIcon,
+  LayoutDashboard as DashboardIcon,
+  FileText as DescriptionIcon,
+  History as HistoryIcon,
+} from "lucide-react";
+import type { EditConsoleLayoutProps } from "@/core/layouts/EditConsoleLayout";
 
 const BOOK_EDIT_RESERVED_SEGMENTS = new Set([
   "authority",

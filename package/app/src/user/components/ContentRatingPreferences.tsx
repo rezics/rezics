@@ -1,6 +1,17 @@
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
+import {
+  common_cancel,
+  settings_content_rating_always_on,
+  settings_content_rating_description_R_18,
+  settings_content_rating_description_R_18G,
+  settings_content_rating_opt_in_modal_body,
+  settings_content_rating_opt_in_modal_confirm,
+  settings_content_rating_opt_in_modal_title,
+  settings_content_rating_saved,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { RatingBadge } from "@rezics/ui";
 import {
   Alert,
@@ -16,17 +27,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  settings_content_rating_always_on,
-  settings_content_rating_opt_in_modal_body,
-  settings_content_rating_opt_in_modal_confirm,
-  settings_content_rating_opt_in_modal_title,
-  settings_content_rating_saved,
-  settings_content_rating_description_R_18,
-  settings_content_rating_description_R_18G,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   settings_content_rating_always_on,

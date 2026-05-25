@@ -8,6 +8,26 @@ import {
   entityKinds,
   markdownContentDoc,
 } from "@rezics/contract";
+import {
+  common_add,
+  common_add_translation,
+  common_cancel,
+  common_language,
+  common_save,
+  common_translation,
+  entity_avatar_url,
+  entity_description_label,
+  entity_edit_title,
+  entity_kind_label,
+  entity_kind_unspecified,
+  entity_section_entity,
+  entity_slug_label,
+  entity_subtitle_label,
+  entity_summary_label,
+  entity_title_label,
+  entity_verified,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -30,26 +50,7 @@ import {
   AddUnitTranslationLanguageDialog,
   UnitTranslationLanguageBar,
 } from "@/unit";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_add,
-  common_add_translation,
-  common_cancel,
-  common_language,
-  common_save,
-  common_translation,
-  entity_avatar_url,
-  entity_description_label,
-  entity_edit_title,
-  entity_kind_label,
-  entity_kind_unspecified,
-  entity_section_entity,
-  entity_slug_label,
-  entity_subtitle_label,
-  entity_summary_label,
-  entity_title_label,
-  entity_verified,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_add,
   common_add_translation,

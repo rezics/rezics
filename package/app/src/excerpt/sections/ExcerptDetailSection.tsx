@@ -1,5 +1,12 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
+import {
+  common_edit,
+  common_loading,
+  excerpt_not_found,
+  review_comments,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -8,13 +15,7 @@ import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { TextLink } from "@/shared/ui/link";
 import { ExcerptDetail } from "../components/detail/ExcerptDetail";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_edit,
-  common_loading,
-  excerpt_not_found,
-  review_comments,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_edit,
   common_loading,

@@ -1,6 +1,14 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { mainMarkdownSource } from "@rezics/contract";
+import {
+  book_editionFallback,
+  book_excerpts,
+  book_fields_tags,
+  book_otherEditions,
+  book_remark,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { WorkReleaseNav } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
@@ -23,14 +31,7 @@ import { RemarkPreview } from "../components/RemarkPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_editionFallback,
-  book_excerpts,
-  book_fields_tags,
-  book_otherEditions,
-  book_remark,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_editionFallback,
   book_excerpts,

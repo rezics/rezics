@@ -1,41 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import { Spinner } from "@rezics/ui";
-import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import {
-  CircleCheck as CheckCircleIcon,
-  Check as CheckIcon,
-} from "lucide-react";
-import {
-  type FC,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { env } from "@/env";
-import {
-  hydrateAuthSessionState,
-  selectRegistrationStage,
-  useAuthSessionStore,
-} from "@/user/states";
-import { OtpInput } from "../components/OtpInput";
-import { Layout } from "../layouts/Layout";
-import { logout } from "../models/handler";
-import { useAuth } from "./useAuth";
-import { useMessage } from "@rezics/i18n/react";
 import {
   auth_flow_complete_registration_intro,
   auth_flow_complete_registration_title,
@@ -71,6 +35,43 @@ import {
   auth_logout,
   common_loading,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  CircleCheck as CheckCircleIcon,
+  Check as CheckIcon,
+} from "lucide-react";
+import {
+  type FC,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { env } from "@/env";
+import {
+  hydrateAuthSessionState,
+  selectRegistrationStage,
+  useAuthSessionStore,
+} from "@/user/states";
+import { OtpInput } from "../components/OtpInput";
+import { Layout } from "../layouts/Layout";
+import { logout } from "../models/handler";
+import { useAuth } from "./useAuth";
+
 const i18nMessages = {
   auth_flow_complete_registration_intro,
   auth_flow_complete_registration_title,

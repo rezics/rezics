@@ -1,3 +1,5 @@
+import { post_collapse_thread } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import type React from "react";
 import type { PostTreeNodeModel } from "../models/postTreeRails";
 import {
@@ -10,8 +12,7 @@ import {
   TERMINAL_RAIL_HEIGHT_PX,
   THREAD_INDENT_PX,
 } from "./postTreeLayout";
-import { useMessage } from "@rezics/i18n/react";
-import { post_collapse_thread } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   post_collapse_thread,
 };

@@ -2,6 +2,15 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import { useCurrentUserId } from "@rezics/api/hooks";
 import { type ContentRating, markdownContentDoc } from "@rezics/contract";
+import {
+  book_chapter_content_required,
+  book_edit_chapter_title,
+  book_edit_create_chapter,
+  common_create,
+  common_creating,
+  common_required,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";
 import {
   Dialog,
@@ -14,15 +23,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import type { Chapter } from "./BookTocEditor";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_chapter_content_required,
-  book_edit_chapter_title,
-  book_edit_create_chapter,
-  common_create,
-  common_creating,
-  common_required,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_chapter_content_required,
   book_edit_chapter_title,

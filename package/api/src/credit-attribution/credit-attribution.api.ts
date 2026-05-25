@@ -1,7 +1,7 @@
 import type {
+  CreateCreditAttributionEvidenceInput,
   CreditAttributionDTO,
   CreditAttributionRole,
-  CreateCreditAttributionEvidenceInput,
   LinkCreditAttributionInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";

@@ -3,18 +3,6 @@ import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations"
 import { useCurrentUserId } from "@rezics/api/hooks";
 import { markdownContentDoc } from "@rezics/contract";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-} from "@rezics/ui/shadcn";
-import { useEffect, useMemo, useState } from "react";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import type { Chapter } from "./ChapterArborist";
-import { useMessage } from "@rezics/i18n/react";
-import {
   auth_flow_onboarding_sign_in_first,
   book_chapter_content_required,
   book_chapter_create_failed,
@@ -25,6 +13,19 @@ import {
   common_required,
   common_submitting,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
+import { useEffect, useMemo, useState } from "react";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import type { Chapter } from "./ChapterArborist";
+
 const i18nMessages = {
   auth_flow_onboarding_sign_in_first,
   book_chapter_content_required,

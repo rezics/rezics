@@ -2,12 +2,6 @@ import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
 } from "@rezics/api/reaction/reaction.types";
-import { EmptyState, Spinner } from "@rezics/ui";
-import { Button } from "@rezics/ui/shadcn";
-import { Sparkles } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { ReactionHistoryItem } from "./ReactionHistoryItem";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_end_of_list,
   common_load_more,
@@ -18,6 +12,13 @@ import {
   reactions_empty_received_description,
   reactions_load_failed,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { EmptyState, Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
+import { Sparkles } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { ReactionHistoryItem } from "./ReactionHistoryItem";
+
 const i18nMessages = {
   common_end_of_list,
   common_load_more,

@@ -1,4 +1,15 @@
 import type { ContentRating } from "@rezics/contract";
+import {
+  book_chapter_edit_dialog_status,
+  book_chapter_edit_dialog_title,
+  book_chapter_status_archived,
+  book_chapter_status_draft,
+  book_chapter_status_published,
+  book_fields_title,
+  common_cancel,
+  common_save,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";
 import {
   Button,
@@ -17,17 +28,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_chapter_edit_dialog_status,
-  book_chapter_edit_dialog_title,
-  book_fields_title,
-  common_cancel,
-  common_save,
-  book_chapter_status_archived,
-  book_chapter_status_draft,
-  book_chapter_status_published,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_chapter_edit_dialog_status,
   book_chapter_edit_dialog_title,

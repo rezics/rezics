@@ -12,6 +12,31 @@ import {
   contentDocMarkdownFallback,
   shelfCoverImageSpec,
 } from "@rezics/contract";
+import {
+  common_next,
+  common_prev,
+  shelf_by_author,
+  shelf_cleanup_orphans,
+  shelf_controls_sort_by,
+  shelf_controls_view,
+  shelf_cover_alt,
+  shelf_edit_action,
+  shelf_empty_items,
+  shelf_items_count,
+  shelf_items_load_failed,
+  shelf_orphan_count,
+  shelf_sort_manual,
+  shelf_sort_manual_reversed,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+  shelf_sort_prime_only,
+  shelf_sort_title_az,
+  shelf_sort_title_za,
+  shelf_title,
+  shelf_view_list,
+  shelf_view_nested,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button, Checkbox, DropdownMenuItem, Label } from "@rezics/ui/shadcn";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -34,31 +59,7 @@ import {
   type ShelfStreamEntry,
 } from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_next,
-  common_prev,
-  shelf_by_author,
-  shelf_cleanup_orphans,
-  shelf_controls_sort_by,
-  shelf_controls_view,
-  shelf_cover_alt,
-  shelf_edit_action,
-  shelf_empty_items,
-  shelf_items_count,
-  shelf_items_load_failed,
-  shelf_orphan_count,
-  shelf_sort_prime_only,
-  shelf_title,
-  shelf_sort_manual,
-  shelf_sort_manual_reversed,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-  shelf_sort_title_az,
-  shelf_sort_title_za,
-  shelf_view_list,
-  shelf_view_nested,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_next,
   common_prev,

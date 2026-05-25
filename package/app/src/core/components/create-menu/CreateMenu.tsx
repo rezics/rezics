@@ -1,4 +1,9 @@
 import {
+  app_create_menu_aria_label,
+  common_create,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -8,11 +13,7 @@ import { Plus as AddIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { CreateMenuItem } from "./CreateMenuItem";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  app_create_menu_aria_label,
-  common_create,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   app_create_menu_aria_label,
   common_create,

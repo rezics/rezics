@@ -13,6 +13,17 @@ import {
   DEFAULT_LANGUAGE,
   markdownContentDoc,
 } from "@rezics/contract";
+import {
+  common_add,
+  common_add_translation,
+  common_cancel,
+  common_description,
+  common_language,
+  common_name,
+  common_save,
+  realm_manage,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,17 +37,7 @@ import {
 } from "@/unit";
 import { canManageRealm } from "../models/canManageRealm";
 import { RealmExtraManageSection } from "../sections/RealmExtraManageSection";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_add,
-  common_add_translation,
-  common_cancel,
-  common_description,
-  common_language,
-  common_name,
-  common_save,
-  realm_manage,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_add,
   common_add_translation,

@@ -11,15 +11,15 @@
 // Page Components (Route-level entry points)
 // ============================================================================
 
-/** Chapter list edit page. */
-export { BookEditChapterListPage } from "./pages/ChapterListPage";
-/** Single chapter edit page. */
-export { BookEditChapterPage } from "./pages/ChapterPage";
 /** Book authority and field-lock management page. */
 export {
   BookAuthorityPage,
   BookAuthorityPanel,
 } from "./pages/BookAuthorityPage";
+/** Chapter list edit page. */
+export { BookEditChapterListPage } from "./pages/ChapterListPage";
+/** Single chapter edit page. */
+export { BookEditChapterPage } from "./pages/ChapterPage";
 /** Book info edit page. */
 export { BookEditMainPage } from "./pages/InfoPage";
 /** New book creation page. */

@@ -6,6 +6,19 @@ import {
   type UpdateUser,
   type UserDTO,
 } from "@rezics/contract";
+import {
+  common_cancel,
+  common_description,
+  common_nickname,
+  common_save,
+  entity_avatar_url,
+  settings_profile_about_help,
+  settings_profile_avatar_help,
+  settings_profile_bio,
+  settings_profile_edit_title,
+  user_load_failed,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import {
@@ -27,19 +40,7 @@ import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  common_description,
-  common_nickname,
-  common_save,
-  entity_avatar_url,
-  settings_profile_about_help,
-  settings_profile_avatar_help,
-  settings_profile_bio,
-  settings_profile_edit_title,
-  user_load_failed,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   common_description,

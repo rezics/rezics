@@ -1,3 +1,12 @@
+import {
+  settings_nav_account,
+  settings_nav_connections,
+  settings_nav_entities,
+  settings_nav_preferences,
+  settings_nav_profile,
+  settings_nav_security,
+  settings_nav_tokens,
+} from "@rezics/i18n/messages";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   CircleUser as AccountCircleIcon,
@@ -9,15 +18,7 @@ import {
   SlidersHorizontal as TuneIcon,
 } from "lucide-react";
 import type { FC } from "react";
-import {
-  settings_nav_account,
-  settings_nav_connections,
-  settings_nav_entities,
-  settings_nav_preferences,
-  settings_nav_profile,
-  settings_nav_security,
-  settings_nav_tokens,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   settings_nav_account,
   settings_nav_connections,

@@ -1,4 +1,9 @@
 import {
+  progress_status_overflow_aria,
+  progress_status_overflow_remove_progress,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -16,11 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { type ReadStatus, readStatusLabel } from "../models/status";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  progress_status_overflow_aria,
-  progress_status_overflow_remove_progress,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   progress_status_overflow_aria,
   progress_status_overflow_remove_progress,

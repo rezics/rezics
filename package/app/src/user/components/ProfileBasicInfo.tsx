@@ -1,13 +1,6 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
-import type { FC } from "react";
-import FollowButton from "@/engagement/components/FollowButton";
-import { Link } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
 import {
   profile_following,
   profile_stats,
@@ -17,6 +10,14 @@ import {
   settings_profile_edit_title,
   settings_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
+import type { FC } from "react";
+import FollowButton from "@/engagement/components/FollowButton";
+import { Link } from "@/shared/ui/link";
+
 const i18nMessages = {
   profile_following,
   profile_stats,

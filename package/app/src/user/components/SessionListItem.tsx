@@ -1,6 +1,6 @@
-import { Badge, Button } from "@rezics/ui/shadcn";
-import { useMessage } from "@rezics/i18n/react";
 import { settings_security_unknown_device } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Badge, Button } from "@rezics/ui/shadcn";
 import { Monitor as ComputerIcon } from "lucide-react";
 import type { FC } from "react";
 

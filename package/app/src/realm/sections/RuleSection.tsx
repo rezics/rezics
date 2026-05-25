@@ -1,12 +1,13 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource } from "@rezics/contract";
+import { common_view, realm_rules_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useState } from "react";
 import { RealmRuleDialog } from "./RealmRuleDialog";
-import { useMessage } from "@rezics/i18n/react";
-import { common_view, realm_rules_title } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_view,
   realm_rules_title,

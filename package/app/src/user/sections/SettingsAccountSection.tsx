@@ -5,27 +5,6 @@ import {
   useVerifyEmailContractMutation,
 } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
-import { Spinner } from "@rezics/ui";
-import {
-  Alert,
-  AlertDescription,
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { BadgeCheck as VerifiedIcon } from "lucide-react";
-import { type FC, useState } from "react";
-import { DangerZone } from "@/user/components/DangerZone";
-import { SettingsSection } from "@/user/components/SettingsSection";
-import { useRequireAuth } from "@/user/pages/useAuth";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_cancel,
   settings_account_change_rezics_email_description,
@@ -53,6 +32,28 @@ import {
   settings_account_verify,
   settings_account_verifying,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { BadgeCheck as VerifiedIcon } from "lucide-react";
+import { type FC, useState } from "react";
+import { DangerZone } from "@/user/components/DangerZone";
+import { SettingsSection } from "@/user/components/SettingsSection";
+import { useRequireAuth } from "@/user/pages/useAuth";
+
 const i18nMessages = {
   common_cancel,
   settings_account_change_rezics_email_description,

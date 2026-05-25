@@ -1,5 +1,7 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostDTO } from "@rezics/contract";
+import { page_home_sections_trending_reviews } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -8,8 +10,7 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalReviewCarousel } from "@/review/components/list/HorizontalReviewCarousel";
-import { useMessage } from "@rezics/i18n/react";
-import { page_home_sections_trending_reviews } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_sections_trending_reviews,
 };

@@ -1,5 +1,7 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
+import { user_not_found } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -7,8 +9,7 @@ import { createContext, type FC, useContext } from "react";
 import { useUserProfileStore } from "@/user/states";
 import { ProfileBasicInfo } from "./ProfileBasicInfo";
 import { ProfileShell } from "./ProfileShell";
-import { useMessage } from "@rezics/i18n/react";
-import { user_not_found } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   user_not_found,
 };

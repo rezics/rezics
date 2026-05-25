@@ -1,11 +1,12 @@
 import type { TagRef } from "@rezics/contract";
+import { tag_clear } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTagSuggest } from "../../hooks/useTagSuggest";
-import { useMessage } from "@rezics/i18n/react";
-import { tag_clear } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   tag_clear,
 };

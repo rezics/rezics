@@ -1,4 +1,10 @@
 import {
+  common_copy_link,
+  common_share,
+  common_share_via,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +17,7 @@ import { cn } from "@/shared/utils/css-util";
 import { useShareMenu } from "../hooks/useShareMenu";
 import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_copy_link,
-  common_share,
-  common_share_via,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_copy_link,
   common_share,

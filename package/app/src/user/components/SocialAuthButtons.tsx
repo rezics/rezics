@@ -1,7 +1,5 @@
 import { authApi, authQueries } from "@rezics/api/auth/auth";
 import type { AuthProvider } from "@rezics/contract";
-import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
-import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
 import {
   auth_flow_continue_with_provider,
   auth_flow_providers_divider,
@@ -11,6 +9,8 @@ import {
   auth_flow_providers_telegram,
   auth_flow_providers_twitter,
 } from "@rezics/i18n/messages";
+import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
+import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import {
   Alert,
   AlertDescription,

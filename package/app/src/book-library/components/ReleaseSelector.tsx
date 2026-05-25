@@ -1,6 +1,13 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import {
+  book_release_current,
+  book_release_label,
+  book_release_untitled,
+  realm_official,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Badge,
   Select,
   SelectContent,
@@ -12,13 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_release_current,
-  book_release_label,
-  book_release_untitled,
-  realm_official,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_release_current,
   book_release_label,

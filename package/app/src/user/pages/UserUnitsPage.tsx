@@ -7,6 +7,16 @@ import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
 import { PostKind, UnitType } from "@rezics/contract";
 import {
+  profile_search_content_placeholder,
+  profile_unit_tabs_label,
+  search_category_books,
+  search_category_excerpts,
+  search_category_remarks,
+  search_category_reviews,
+  search_category_shelves,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
@@ -26,16 +36,7 @@ import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDT
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  profile_search_content_placeholder,
-  profile_unit_tabs_label,
-  search_category_books,
-  search_category_excerpts,
-  search_category_remarks,
-  search_category_reviews,
-  search_category_shelves,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   profile_search_content_placeholder,
   profile_unit_tabs_label,

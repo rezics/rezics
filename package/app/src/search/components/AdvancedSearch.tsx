@@ -1,4 +1,15 @@
 import type { SearchQuery } from "@rezics/contract";
+import {
+  search_close_advanced_label,
+  search_filters_postKind,
+  search_filters_sort,
+  search_filters_type,
+  search_filters_wordCount,
+  search_input_placeholder,
+  search_input_tags_hint,
+  search_input_tags_label,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
@@ -14,17 +25,7 @@ import {
   TagPicker,
   WordCountRangeInput,
 } from "./primitive";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  search_close_advanced_label,
-  search_filters_postKind,
-  search_filters_sort,
-  search_filters_type,
-  search_filters_wordCount,
-  search_input_placeholder,
-  search_input_tags_hint,
-  search_input_tags_label,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   search_close_advanced_label,
   search_filters_postKind,

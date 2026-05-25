@@ -8,15 +8,16 @@ import {
   markdownContentDoc,
   type PostDTO,
 } from "@rezics/contract";
-import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
-import { useMemo, useState } from "react";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_cancel,
   common_save,
   common_saving,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
+import { useMemo, useState } from "react";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+
 const i18nMessages = {
   common_cancel,
   common_save,

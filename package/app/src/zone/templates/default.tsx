@@ -1,13 +1,14 @@
-import type React from "react";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-import type { ZoneTemplateProps } from "./types";
-import { useMessage } from "@rezics/i18n/react";
 import {
   zone_content_placeholder,
   zone_latest_content,
   zone_search_placeholder,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import type React from "react";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import type { ZoneTemplateProps } from "./types";
+
 const i18nMessages = {
   zone_content_placeholder,
   zone_latest_content,

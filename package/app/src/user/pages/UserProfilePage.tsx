@@ -1,6 +1,20 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import {
+  common_edit,
+  common_email,
+  engagement_bookmark,
+  profile_tab_followers,
+  profile_tab_reactions,
+  settings_profile_bio,
+  user_id_label,
+  user_joined_on,
+  user_navigation_label,
+  user_no_bio_available,
+  user_not_found,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -17,20 +31,7 @@ import { Link } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
 import { UserError, UserLoading } from "./UserState";
 import { UserUnitsPage } from "./UserUnitsPage";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_edit,
-  common_email,
-  engagement_bookmark,
-  profile_tab_followers,
-  profile_tab_reactions,
-  settings_profile_bio,
-  user_id_label,
-  user_joined_on,
-  user_navigation_label,
-  user_no_bio_available,
-  user_not_found,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_edit,
   common_email,

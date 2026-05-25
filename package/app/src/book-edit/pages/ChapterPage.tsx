@@ -12,6 +12,12 @@ import {
   mainMarkdownSource,
   markdownContentDoc,
 } from "@rezics/contract";
+import {
+  chapter_metadata,
+  chapter_move_volume,
+  placeholders_chapter_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -38,12 +44,7 @@ import {
   RezicsMarkdownEditor,
   type ViewMode,
 } from "@/shared/ui/RezicsMarkdownEditor";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  chapter_metadata,
-  chapter_move_volume,
-  placeholders_chapter_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   chapter_metadata,
   chapter_move_volume,

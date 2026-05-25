@@ -1,4 +1,9 @@
 import type { PostDTO } from "@rezics/contract";
+import {
+  post_collapse_thread,
+  post_continue_thread,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import type React from "react";
 import { TextLink } from "@/shared/ui/link";
 import { PostReply } from "../components/item/PostReply";
@@ -14,11 +19,7 @@ import {
   RAIL_TOP_PX,
   TOGGLE_TOP_PX,
 } from "./postTreeLayout";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  post_collapse_thread,
-  post_continue_thread,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   post_collapse_thread,
   post_continue_thread,

@@ -1,6 +1,6 @@
 export type {
-  CreditAttributionDTO,
   CreateCreditAttributionEvidenceInput,
+  CreditAttributionDTO,
   LinkCreditAttributionInput,
 } from "@rezics/contract";
 export { creditAttributionApi } from "./credit-attribution.api";

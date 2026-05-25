@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMessage } from "@rezics/i18n/react";
 import { search_category_remarks } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { createFileRoute } from "@tanstack/react-router";
 import { RemarkListSection } from "@/remark";
 
 const i18nMessages = {

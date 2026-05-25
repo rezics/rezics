@@ -1,4 +1,5 @@
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
+import { layout_header_toggle_language } from "@rezics/i18n/messages";
 import { setLocale, useMessage } from "@rezics/i18n/react";
 import {
   DropdownMenuItem,
@@ -8,7 +9,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Languages as LanguageIcon } from "lucide-react";
 import { ThemeToggler } from "./ThemeToggler";
-import { layout_header_toggle_language } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   layout_header_toggle_language,
 };

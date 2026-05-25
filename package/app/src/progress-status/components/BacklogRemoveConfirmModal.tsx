@@ -1,4 +1,11 @@
 import {
+  common_cancel,
+  progress_status_remove_backlog_modal_confirm,
+  progress_status_remove_backlog_modal_description,
+  progress_status_remove_backlog_modal_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Dialog,
   DialogContent,
@@ -7,13 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  progress_status_remove_backlog_modal_confirm,
-  progress_status_remove_backlog_modal_description,
-  progress_status_remove_backlog_modal_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   progress_status_remove_backlog_modal_confirm,

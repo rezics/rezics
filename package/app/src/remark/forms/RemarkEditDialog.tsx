@@ -5,6 +5,14 @@ import {
   type PostDTO,
   SCORE_MAX,
 } from "@rezics/contract";
+import {
+  common_cancel,
+  common_edit,
+  common_save,
+  common_saving,
+  remark_form_rating,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -16,14 +24,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  common_edit,
-  common_save,
-  common_saving,
-  remark_form_rating,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   common_edit,

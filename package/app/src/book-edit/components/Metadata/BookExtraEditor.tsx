@@ -1,3 +1,9 @@
+import {
+  book_extra_publish_urls_title,
+  common_add,
+  placeholders_enter_url,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Button } from "@rezics/ui/shadcn";
 import {
@@ -7,12 +13,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_extra_publish_urls_title,
-  common_add,
-  placeholders_enter_url,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_extra_publish_urls_title,
   common_add,

@@ -1,8 +1,5 @@
 import type { BookDTO, LicenseSlug } from "@rezics/contract";
 import { licenseLabel } from "@rezics/i18n";
-import { Separator } from "@rezics/ui/shadcn";
-import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   book_fields_chapter_count,
   book_fields_format,
@@ -12,6 +9,10 @@ import {
   book_fields_text_length,
   book_info_panel_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Separator } from "@rezics/ui/shadcn";
+import type React from "react";
+
 const i18nMessages = {
   book_fields_chapter_count,
   book_fields_format,

@@ -5,14 +5,6 @@ import {
 } from "@rezics/api/jwt-service/jwt-service.mutations";
 import { jwtServiceQueries } from "@rezics/api/jwt-service/jwt-service.queries";
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import { Alert, AlertDescription } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import type { FC } from "react";
-import { useEffect, useState } from "react";
-import { Page } from "@/core/layouts/Page";
-import { JwtServiceEditDialog, JwtServiceTable } from "../components";
-import { useMessage } from "@rezics/i18n/react";
 import {
   admin_jwt_activate_failed,
   admin_jwt_deactivate_failed,
@@ -20,6 +12,15 @@ import {
   admin_jwt_title,
   admin_jwt_update_failed,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Alert, AlertDescription } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import type { FC } from "react";
+import { useEffect, useState } from "react";
+import { Page } from "@/core/layouts/Page";
+import { JwtServiceEditDialog, JwtServiceTable } from "../components";
+
 const i18nMessages = {
   admin_jwt_activate_failed,
   admin_jwt_deactivate_failed,

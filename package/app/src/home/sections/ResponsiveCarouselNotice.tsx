@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { BookCarousel } from "../components/HomeCarousel";
-import { NoticeBoard } from "./NoticeBoard";
-import { useMessage } from "@rezics/i18n/react";
 import {
   page_home_hero_kicker,
   page_home_hero_subtitle,
   page_home_hero_title_highlight,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { useEffect, useRef, useState } from "react";
+import { BookCarousel } from "../components/HomeCarousel";
+import { NoticeBoard } from "./NoticeBoard";
+
 const i18nMessages = {
   page_home_hero_kicker,
   page_home_hero_subtitle,

@@ -1,7 +1,8 @@
+import { app_toggle_drawer_aria_label } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useMessage } from "@rezics/i18n/react";
-import { app_toggle_drawer_aria_label } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   app_toggle_drawer_aria_label,
 };

@@ -1,17 +1,18 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { ShelfView } from "@rezics/api/shelf";
-import { Button, Checkbox } from "@rezics/ui/shadcn";
-import { GripVertical, MoveRight, Trash2 } from "lucide-react";
-import type { ShelfStreamEntry } from "../models/shelfStream";
-import { ShelfItemRenderer } from "./ShelfItemRenderer";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_delete,
   shelf_drag_to_reorder,
   shelf_move_to_another_page,
   shelf_select_for_bulk_action,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button, Checkbox } from "@rezics/ui/shadcn";
+import { GripVertical, MoveRight, Trash2 } from "lucide-react";
+import type { ShelfStreamEntry } from "../models/shelfStream";
+import { ShelfItemRenderer } from "./ShelfItemRenderer";
+
 const i18nMessages = {
   common_delete,
   shelf_drag_to_reorder,

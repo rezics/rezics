@@ -1,15 +1,6 @@
 import { useCreateEntity } from "@rezics/api/entity";
 import type { CreateEntityInput, EntityKind } from "@rezics/contract";
 import { CreationMode, entityKinds } from "@rezics/contract";
-import { Button, Input, Label } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
-import { type FormEvent, useState } from "react";
-import {
-  suggestCreditEligibility,
-  suggestSubjectEligibility,
-} from "@/entity-picker/models/eligibilitySuggestions";
-import { unitHref } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_cancel,
   common_creating,
@@ -26,6 +17,16 @@ import {
   entity_title_required,
   language_code_placeholder,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
+import { useNavigate } from "@tanstack/react-router";
+import { type FormEvent, useState } from "react";
+import {
+  suggestCreditEligibility,
+  suggestSubjectEligibility,
+} from "@/entity-picker/models/eligibilitySuggestions";
+import { unitHref } from "@/shared/ui/link";
+
 const i18nMessages = {
   common_cancel,
   common_creating,

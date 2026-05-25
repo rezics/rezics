@@ -1,3 +1,5 @@
+import { common_failed_to_load, common_search } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -9,13 +11,11 @@ import {
 } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
-
 import {
   type PaginatedColumn,
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
-import { useMessage } from "@rezics/i18n/react";
-import { common_failed_to_load, common_search } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_failed_to_load,
   common_search,

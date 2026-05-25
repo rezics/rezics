@@ -2,13 +2,14 @@ import {
   useMarkAsReadMutation,
   useNotifications,
 } from "@rezics/api/notification";
-import { NotificationCard } from "../components/NotificationCard.tsx";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_loading,
   notifications_empty,
   notifications_load_failed,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { NotificationCard } from "../components/NotificationCard.tsx";
+
 const i18nMessages = {
   common_loading,
   notifications_empty,

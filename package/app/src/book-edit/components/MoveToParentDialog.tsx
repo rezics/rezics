@@ -1,4 +1,13 @@
 import {
+  book_chapter_move_dialog_moving,
+  book_chapter_move_dialog_no_results,
+  book_chapter_move_dialog_search_placeholder,
+  book_chapter_move_dialog_title,
+  common_cancel,
+  common_ok,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Dialog,
   DialogContent,
@@ -15,15 +24,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_chapter_move_dialog_moving,
-  book_chapter_move_dialog_no_results,
-  book_chapter_move_dialog_search_placeholder,
-  book_chapter_move_dialog_title,
-  common_cancel,
-  common_ok,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_chapter_move_dialog_moving,
   book_chapter_move_dialog_no_results,

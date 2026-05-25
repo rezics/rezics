@@ -1,23 +1,6 @@
 import { unitMutations } from "@rezics/api/unit/unit.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import {
-  Alert,
-  AlertDescription,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
-import React from "react";
-import { Page } from "@/core/layouts/Page";
-import { Link } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
-import {
   admin_auth_email_status,
   admin_auth_user_id,
   admin_token_creating,
@@ -39,6 +22,24 @@ import {
   common_title,
   common_type,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
+import React from "react";
+import { Page } from "@/core/layouts/Page";
+import { Link } from "@/shared/ui/link";
+
 const i18nMessages = {
   admin_auth_email_status,
   admin_auth_user_id,

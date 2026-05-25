@@ -1,3 +1,5 @@
+import { common_logo_alt } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useRouterState } from "@tanstack/react-router";
 import React from "react";
 import { AuthenticatedSection } from "@/core/sections/header/AuthenticatedSection.tsx";
@@ -9,8 +11,7 @@ import { useAuth } from "@/user/pages/useAuth";
 import { useLayoutStore } from "../../states/layoutStore.ts";
 import { DrawerToggler } from "./DrawerToggler.tsx";
 import { HeaderSearch } from "./HeaderSearch.tsx";
-import { useMessage } from "@rezics/i18n/react";
-import { common_logo_alt } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_logo_alt,
 };

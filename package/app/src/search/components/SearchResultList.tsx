@@ -2,14 +2,15 @@ import type {
   ContentSearchDocument,
   ContentSearchResult,
 } from "@rezics/contract";
-import { EmptyState } from "@rezics/ui";
-import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_loading,
   search_empty_title,
   search_results_summary,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { EmptyState } from "@rezics/ui";
+import type React from "react";
+
 const i18nMessages = {
   common_loading,
   search_empty_title,

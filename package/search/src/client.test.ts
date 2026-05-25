@@ -3,8 +3,8 @@ import { SearchClient } from "./client";
 import { PROGRESS_INDEX_NAME } from "./progress";
 import {
   EXPECTED_MEILI_INDEX_SCHEMAS,
-  getExpectedMeiliIndexSettings,
   type ExpectedMeiliIndexUid,
+  getExpectedMeiliIndexSettings,
 } from "./schema";
 
 describe("SearchClient", () => {

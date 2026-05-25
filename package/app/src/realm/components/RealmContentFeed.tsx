@@ -1,6 +1,8 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
+import { realm_content_empty_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -12,8 +14,7 @@ import {
 } from "@/review/components/item/ReviewCard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
-import { useMessage } from "@rezics/i18n/react";
-import { realm_content_empty_title } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   realm_content_empty_title,
 };

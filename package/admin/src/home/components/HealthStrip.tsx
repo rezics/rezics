@@ -1,10 +1,11 @@
-import { Card, CardContent } from "@rezics/ui/shadcn";
-import { useMessage } from "@rezics/i18n/react";
 import {
   admin_health_meili,
   admin_health_server,
   admin_health_system,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Card, CardContent } from "@rezics/ui/shadcn";
+
 const i18nMessages = {
   admin_health_meili,
   admin_health_server,

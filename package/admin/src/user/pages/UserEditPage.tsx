@@ -4,25 +4,6 @@ import {
   contentDocMarkdownFallback,
   markdownContentDoc,
 } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
-import React from "react";
-
-import { Page } from "@/core/layouts/Page";
-import { Route } from "@/routes/_admin/user/$userId";
-import { Link } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
 import {
   admin_user_avatar_url_label,
   admin_user_bio_label,
@@ -39,6 +20,25 @@ import {
   common_save,
   common_saving,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft as ArrowBackIcon, Save as SaveIcon } from "lucide-react";
+import React from "react";
+import { Page } from "@/core/layouts/Page";
+import { Route } from "@/routes/_admin/user/$userId";
+import { Link } from "@/shared/ui/link";
+
 const i18nMessages = {
   admin_user_avatar_url_label,
   admin_user_bio_label,

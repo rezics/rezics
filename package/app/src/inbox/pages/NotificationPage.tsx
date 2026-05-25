@@ -3,12 +3,6 @@ import {
   useMarkAsReadMutation,
   useNotifications,
 } from "@rezics/api/notification";
-import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { Button } from "@rezics/ui/shadcn";
-import type React from "react";
-import { InboxTabBar } from "../components/InboxTabBar.tsx";
-import { NotificationCard } from "../components/NotificationCard.tsx";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_loading,
   notifications_empty,
@@ -16,6 +10,13 @@ import {
   notifications_mark_all_read,
   notifications_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { Button } from "@rezics/ui/shadcn";
+import type React from "react";
+import { InboxTabBar } from "../components/InboxTabBar.tsx";
+import { NotificationCard } from "../components/NotificationCard.tsx";
+
 const i18nMessages = {
   common_loading,
   notifications_empty,

@@ -10,12 +10,11 @@ import {
   useRef,
   useState,
 } from "react";
-
-import { cn } from "../../../shared/lib/utils";
 import {
   ui_collapsible_show_less,
   ui_collapsible_show_more,
 } from "#/paraglide/messages.js";
+import { cn } from "../../../shared/lib/utils";
 
 export type CollapsibleProps = {
   children: React.ReactNode;

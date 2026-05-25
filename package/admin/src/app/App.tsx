@@ -17,6 +17,7 @@ import { useAppStore } from "./states/appStore";
 import "virtual:uno.css";
 import "@rezics/ui/config/base.css";
 import { app_error_boundary_message } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   app_error_boundary_message,
 };

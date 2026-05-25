@@ -4,6 +4,15 @@ import {
   LANGUAGES,
   normalizeLanguage,
 } from "@rezics/contract";
+import {
+  admin_setting_appearance_title,
+  admin_setting_dark_mode_label,
+  admin_setting_description,
+  admin_setting_language_description,
+  admin_setting_language_select_label,
+  admin_setting_language_title,
+  admin_setting_title,
+} from "@rezics/i18n/messages";
 import { setLocale, useLocale, useMessage } from "@rezics/i18n/react";
 import {
   Card,
@@ -19,15 +28,7 @@ import {
 } from "@rezics/ui/shadcn";
 import React from "react";
 import { Page } from "@/core/layouts/Page";
-import {
-  admin_setting_appearance_title,
-  admin_setting_dark_mode_label,
-  admin_setting_description,
-  admin_setting_language_description,
-  admin_setting_language_select_label,
-  admin_setting_language_title,
-  admin_setting_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_setting_appearance_title,
   admin_setting_dark_mode_label,

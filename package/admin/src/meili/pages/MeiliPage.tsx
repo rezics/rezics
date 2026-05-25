@@ -3,28 +3,6 @@ import {
   meiliAdminMutations,
   meiliAdminQueries,
 } from "@rezics/api/meili/meili.admin.queries";
-import { Spinner } from "@rezics/ui";
-import {
-  Alert,
-  AlertDescription,
-  Badge,
-  Button,
-  buttonVariants,
-} from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { BarChart3, X as CloseIcon } from "lucide-react";
-import { useState } from "react";
-import { Page } from "@/core/layouts/Page";
-import {
-  MeiliDangerZoneSection,
-  type MeiliDangerAction,
-} from "../components/MeiliDangerZoneSection";
-import { MeiliKeyManagementSection } from "../components/MeiliKeyManagementSection";
-import {
-  type MeiliAction,
-  MeiliOperationsSection,
-} from "../components/MeiliOperationsSection";
 import {
   admin_meili_admin_key_created,
   admin_meili_admin_key_created_console,
@@ -83,6 +61,28 @@ import {
   common_dismiss,
   common_unknown,
 } from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  buttonVariants,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { BarChart3, X as CloseIcon } from "lucide-react";
+import { useState } from "react";
+import { Page } from "@/core/layouts/Page";
+import {
+  type MeiliDangerAction,
+  MeiliDangerZoneSection,
+} from "../components/MeiliDangerZoneSection";
+import { MeiliKeyManagementSection } from "../components/MeiliKeyManagementSection";
+import {
+  type MeiliAction,
+  MeiliOperationsSection,
+} from "../components/MeiliOperationsSection";
 
 type MessageState = {
   type: "success" | "error" | "info";

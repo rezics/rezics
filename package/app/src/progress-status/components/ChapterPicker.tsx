@@ -1,4 +1,9 @@
 import {
+  progress_status_chapter_picker_none,
+  progress_status_chapter_picker_placeholder,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -6,11 +11,7 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useChapterPicker } from "../hooks/useChapterPicker";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  progress_status_chapter_picker_none,
-  progress_status_chapter_picker_placeholder,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   progress_status_chapter_picker_none,
   progress_status_chapter_picker_placeholder,

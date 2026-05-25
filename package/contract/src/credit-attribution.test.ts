@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  createCreditAttributionEvidenceSchema,
   creditAttributionBriefSchema,
   creditAttributionDTOSchema,
   creditAttributionRoleKeySchema,
   creditAttributionRoleRegistry,
-  createCreditAttributionEvidenceSchema,
   linkCreditAttributionSchema,
 } from "./credit-attribution";
 

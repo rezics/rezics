@@ -1,5 +1,21 @@
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
 import {
+  admin_jwt_activate,
+  admin_jwt_audience,
+  admin_jwt_deactivate,
+  admin_jwt_edit_title,
+  admin_jwt_issuer,
+  admin_jwt_jwks_path,
+  admin_jwt_jwks_url,
+  admin_jwt_local_issuer,
+  admin_jwt_saving,
+  common_active,
+  common_cancel,
+  common_inactive,
+  common_save,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Alert,
   AlertDescription,
   Badge,
@@ -16,22 +32,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_jwt_activate,
-  admin_jwt_audience,
-  admin_jwt_deactivate,
-  admin_jwt_edit_title,
-  admin_jwt_issuer,
-  admin_jwt_jwks_path,
-  admin_jwt_jwks_url,
-  admin_jwt_local_issuer,
-  admin_jwt_saving,
-  common_active,
-  common_cancel,
-  common_inactive,
-  common_save,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_jwt_activate,
   admin_jwt_audience,

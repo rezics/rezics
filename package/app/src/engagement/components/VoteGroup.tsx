@@ -1,4 +1,6 @@
 import { useReactionData } from "@rezics/api/reaction/reaction";
+import { tag_downvote, tag_upvote } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
@@ -6,8 +8,7 @@ import { cn } from "@/shared/utils/css-util";
 import { useVoteController } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
-import { useMessage } from "@rezics/i18n/react";
-import { tag_downvote, tag_upvote } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   tag_downvote,
   tag_upvote,

@@ -22,29 +22,6 @@ import {
   type UnitAuthorityRoleKey as UnitAuthorityRoleKeyType,
 } from "@rezics/contract";
 import { entityKindLabel, subjectRoleLabel } from "@rezics/i18n";
-import { Spinner } from "@rezics/ui";
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowLeft as ArrowBackIcon,
-  Plus as PlusIcon,
-  Save as SaveIcon,
-  Trash2 as TrashIcon,
-} from "lucide-react";
-import React from "react";
-import { Page } from "@/core/layouts/Page";
-import { Route } from "@/routes/_admin/unit/$unitId";
-import { Link } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
 import {
   admin_auth_email_status,
   admin_auth_user_id,
@@ -112,6 +89,30 @@ import {
   common_type,
   common_updated,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowLeft as ArrowBackIcon,
+  Plus as PlusIcon,
+  Save as SaveIcon,
+  Trash2 as TrashIcon,
+} from "lucide-react";
+import React from "react";
+import { Page } from "@/core/layouts/Page";
+import { Route } from "@/routes/_admin/unit/$unitId";
+import { Link } from "@/shared/ui/link";
+
 const i18nMessages = {
   admin_auth_email_status,
   admin_auth_user_id,

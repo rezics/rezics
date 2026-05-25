@@ -1,13 +1,14 @@
+import {
+  profile_reaction_info_description,
+  profile_reaction_info_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  profile_reaction_info_description,
-  profile_reaction_info_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   profile_reaction_info_description,
   profile_reaction_info_title,

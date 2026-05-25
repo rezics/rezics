@@ -1,3 +1,5 @@
+import { common_cancel, shelf_move_to_page_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -6,8 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-import { useMessage } from "@rezics/i18n/react";
-import { common_cancel, shelf_move_to_page_title } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   shelf_move_to_page_title,

@@ -1,24 +1,4 @@
 import {
-  ShieldUser as AdminPanelSettingsOutlinedIcon,
-  Activity as ActivityIcon,
-  BookMarked as CollectionsBookmarkIcon,
-  LayoutDashboard as DashboardIcon,
-  Mail as EmailOutlinedIcon,
-  MessagesSquare as ForumIcon,
-  IdCard as IdentityIcon,
-  Package as Inventory2Icon,
-  Key as KeyOutlinedIcon,
-  SearchCheck as ManageSearchOutlinedIcon,
-  Network as NetworkIcon,
-  Users as PeopleIcon,
-  Settings as SettingsIcon,
-  ShieldCheck as ShieldCheckIcon,
-  Database as StorageOutlinedIcon,
-  Tags as StyleOutlinedIcon,
-  KeyRound as VpnKeyOutlinedIcon,
-} from "lucide-react";
-import type React from "react";
-import {
   admin_nav_auth,
   admin_nav_auth_email_templates,
   admin_nav_auth_jwt_services,
@@ -44,6 +24,26 @@ import {
   admin_nav_units,
   admin_nav_users,
 } from "@rezics/i18n/messages";
+import {
+  Activity as ActivityIcon,
+  ShieldUser as AdminPanelSettingsOutlinedIcon,
+  BookMarked as CollectionsBookmarkIcon,
+  LayoutDashboard as DashboardIcon,
+  Mail as EmailOutlinedIcon,
+  MessagesSquare as ForumIcon,
+  IdCard as IdentityIcon,
+  Package as Inventory2Icon,
+  Key as KeyOutlinedIcon,
+  SearchCheck as ManageSearchOutlinedIcon,
+  Network as NetworkIcon,
+  Users as PeopleIcon,
+  Settings as SettingsIcon,
+  ShieldCheck as ShieldCheckIcon,
+  Database as StorageOutlinedIcon,
+  Tags as StyleOutlinedIcon,
+  KeyRound as VpnKeyOutlinedIcon,
+} from "lucide-react";
+import type React from "react";
 
 const i18nMessages = {
   admin_nav_auth,

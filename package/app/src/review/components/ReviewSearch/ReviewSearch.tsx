@@ -1,4 +1,10 @@
 import type { SearchQuery } from "@rezics/contract";
+import {
+  review_search_placeholder,
+  search_input_tags_hint,
+  search_input_tags_label,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import type React from "react";
 import {
   AppliedFilterChips,
@@ -6,12 +12,7 @@ import {
   TagPicker,
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  review_search_placeholder,
-  search_input_tags_hint,
-  search_input_tags_label,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   review_search_placeholder,
   search_input_tags_hint,

@@ -1,13 +1,14 @@
 import { type DmConversation, useConversations } from "@rezics/api/dm/dm";
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
-import type { FC } from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_loading,
   inbox_conversations_empty,
   inbox_conversations_load_failed,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
+import { Link } from "@tanstack/react-router";
+import type { FC } from "react";
+
 const i18nMessages = {
   common_loading,
   inbox_conversations_empty,

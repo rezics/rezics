@@ -1,16 +1,5 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { type FC, useState } from "react";
-import FollowButton from "@/engagement/components/FollowButton";
-import { Link, unitHref } from "@/shared/ui/link";
-import {
-  type ChipDefinition,
-  InnerFilterPanel,
-} from "@/user/components/InnerFilterPanel";
-import { useProfileContext } from "@/user/components/ProfileLayout";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_loading,
   common_next_page,
@@ -21,6 +10,18 @@ import {
   profile_no_following,
   profile_tab_followers,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { type FC, useState } from "react";
+import FollowButton from "@/engagement/components/FollowButton";
+import { Link, unitHref } from "@/shared/ui/link";
+import {
+  type ChipDefinition,
+  InnerFilterPanel,
+} from "@/user/components/InnerFilterPanel";
+import { useProfileContext } from "@/user/components/ProfileLayout";
+
 const i18nMessages = {
   common_loading,
   common_next_page,

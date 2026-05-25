@@ -1,5 +1,7 @@
 import type { EditableResource } from "@rezics/api/hooks";
 import { useCanEdit } from "@rezics/api/hooks";
+import { common_edit } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   Button,
   Tooltip,
@@ -10,8 +12,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as Edit } from "lucide-react";
 import { cn } from "@/shared/utils/css-util";
-import { useMessage } from "@rezics/i18n/react";
-import { common_edit } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_edit,
 };

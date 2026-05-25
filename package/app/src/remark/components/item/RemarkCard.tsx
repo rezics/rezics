@@ -1,4 +1,6 @@
 import type { PostDTO } from "@rezics/contract";
+import { remark_open_remark_page } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   Tooltip,
   TooltipContent,
@@ -17,8 +19,7 @@ import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { remarkCardActions, remarkPolicy } from "../../models/remarkPolicy";
-import { useMessage } from "@rezics/i18n/react";
-import { remark_open_remark_page } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   remark_open_remark_page,
 };

@@ -10,6 +10,14 @@ import {
   PostKind,
 } from "@rezics/contract";
 import {
+  common_cancel,
+  common_edit,
+  common_save,
+  common_saving,
+  post_edit_wiki_post,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Alert,
   AlertDescription,
   Button,
@@ -21,14 +29,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  common_edit,
-  common_save,
-  common_saving,
-  post_edit_wiki_post,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   common_edit,

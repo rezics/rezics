@@ -11,12 +11,6 @@ import type {
   UserSearchDocument,
 } from "@rezics/contract";
 import { PostKind } from "@rezics/contract";
-import { EmptyState } from "@rezics/ui";
-import { Badge, Button } from "@rezics/ui/shadcn";
-import type React from "react";
-import { ReviewCard } from "@/review/components/item/ReviewCard";
-import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
-import { CATEGORY_LABELS } from "./permittedCategories";
 import {
   common_loading,
   common_view_more,
@@ -30,6 +24,12 @@ import {
   search_realm_members,
   search_results_summary,
 } from "@rezics/i18n/messages";
+import { EmptyState } from "@rezics/ui";
+import { Badge, Button } from "@rezics/ui/shadcn";
+import type React from "react";
+import { ReviewCard } from "@/review/components/item/ReviewCard";
+import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
+import { CATEGORY_LABELS } from "./permittedCategories";
 
 function pickTitle(titles: readonly string[] | null | undefined): string {
   if (!titles || titles.length === 0) return "";

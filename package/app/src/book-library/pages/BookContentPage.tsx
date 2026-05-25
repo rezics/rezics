@@ -1,4 +1,10 @@
 import { bookQueries } from "@rezics/api/book/book";
+import {
+  book_content_pages,
+  book_content_reading,
+  book_content_text_length,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
@@ -10,12 +16,7 @@ import { useBookLanguage } from "../hooks/useBookLanguage";
 import { useReleaseSelection } from "../hooks/useReleaseSelection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_content_pages,
-  book_content_reading,
-  book_content_text_length,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_content_pages,
   book_content_reading,

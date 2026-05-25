@@ -1,10 +1,11 @@
-import type React from "react";
-import { useThreadingHover } from "./ThreadingContext";
-import { useMessage } from "@rezics/i18n/react";
 import {
   post_collapse_thread,
   post_expand_thread,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import type React from "react";
+import { useThreadingHover } from "./ThreadingContext";
+
 const i18nMessages = {
   post_collapse_thread,
   post_expand_thread,

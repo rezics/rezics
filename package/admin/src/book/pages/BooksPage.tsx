@@ -1,6 +1,26 @@
 import { type BookDTO, bookQueries } from "@rezics/api/book/book";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { BookListResponse } from "@rezics/contract";
+import {
+  admin_book_credits,
+  admin_book_edit_unit,
+  admin_book_failed_load_list,
+  admin_book_isbn13,
+  admin_book_list_description,
+  admin_book_list_meili_description,
+  admin_book_list_meili_title,
+  admin_book_list_title,
+  admin_book_meili_search_placeholder,
+  admin_book_search_placeholder,
+  admin_unit_no_title,
+  common_actions,
+  common_created,
+  common_search,
+  common_title,
+  common_unit_id,
+  common_updated,
+  common_user,
+} from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -26,26 +46,6 @@ import {
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
-import {
-  admin_book_credits,
-  admin_book_edit_unit,
-  admin_book_failed_load_list,
-  admin_book_isbn13,
-  admin_book_list_description,
-  admin_book_list_meili_description,
-  admin_book_list_meili_title,
-  admin_book_list_title,
-  admin_book_meili_search_placeholder,
-  admin_book_search_placeholder,
-  admin_unit_no_title,
-  common_actions,
-  common_created,
-  common_search,
-  common_title,
-  common_unit_id,
-  common_updated,
-  common_user,
-} from "@rezics/i18n/messages";
 
 /** Extract the best title from the translations array. */
 function extractTitle(book: BookDTO): string {

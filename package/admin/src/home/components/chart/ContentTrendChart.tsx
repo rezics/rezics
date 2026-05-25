@@ -1,5 +1,10 @@
 import type { AdminStatsResponse } from "@rezics/contract";
 import {
+  admin_dashboard_comments,
+  admin_nav_books,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   BarElement,
   CategoryScale,
   Chart as ChartJS,
@@ -9,11 +14,7 @@ import {
 } from "chart.js";
 import { useMemo } from "react";
 import { Bar } from "react-chartjs-2";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_dashboard_comments,
-  admin_nav_books,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_dashboard_comments,
   admin_nav_books,

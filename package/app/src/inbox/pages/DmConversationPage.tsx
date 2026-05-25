@@ -1,14 +1,15 @@
 import { useConversations } from "@rezics/api/dm/dm";
-import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
-import { Link, useParams } from "@tanstack/react-router";
-import type React from "react";
-import { ConversationThreadSection } from "../sections/ConversationThreadSection";
-import { useMessage } from "@rezics/i18n/react";
 import {
   inbox_all_conversations,
   inbox_conversation_loading,
   inbox_conversation_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { Link, useParams } from "@tanstack/react-router";
+import type React from "react";
+import { ConversationThreadSection } from "../sections/ConversationThreadSection";
+
 const i18nMessages = {
   inbox_all_conversations,
   inbox_conversation_loading,

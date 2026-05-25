@@ -4,17 +4,18 @@ import {
   type RealmDTO,
   type RealmSearchDocument,
 } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import { Button } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
-import { RealmCard } from "../components/RealmCard";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_search,
   realm_empty_yet,
   realm_list_title,
   realm_new_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
+import { useNavigate } from "@tanstack/react-router";
+import { RealmCard } from "../components/RealmCard";
+
 const i18nMessages = {
   common_search,
   realm_empty_yet,

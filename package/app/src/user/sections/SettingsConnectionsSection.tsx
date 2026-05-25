@@ -1,6 +1,11 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
 import type { AuthProvider } from "@rezics/contract";
+import {
+  settings_connections_description,
+  settings_connections_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -9,11 +14,7 @@ import { ProviderCard } from "@/user/components/ProviderCard";
 import { providerIcons } from "@/user/components/providerIcons";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  settings_connections_description,
-  settings_connections_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   settings_connections_description,
   settings_connections_title,

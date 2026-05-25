@@ -1,13 +1,5 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import { Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-import { ShelfCard } from "../components/ShelfCard";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_next,
   common_prev,
@@ -15,6 +7,15 @@ import {
   shelf_search_placeholder,
   shelf_search_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { ShelfCard } from "../components/ShelfCard";
+
 const i18nMessages = {
   common_next,
   common_prev,

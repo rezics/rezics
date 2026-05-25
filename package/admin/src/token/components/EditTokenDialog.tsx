@@ -1,5 +1,14 @@
 import type { ApiTokenDTO, UpdateApiTokenInput } from "@rezics/contract";
 import {
+  admin_token_edit_dialog_title,
+  admin_token_expires_at_optional,
+  admin_token_token_name,
+  admin_token_updating,
+  common_cancel,
+  common_update,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Alert,
   AlertDescription,
   Button,
@@ -14,15 +23,7 @@ import {
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { ScopesEditor } from "./ScopesEditor";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_token_edit_dialog_title,
-  admin_token_expires_at_optional,
-  admin_token_token_name,
-  admin_token_updating,
-  common_cancel,
-  common_update,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_token_edit_dialog_title,
   admin_token_expires_at_optional,

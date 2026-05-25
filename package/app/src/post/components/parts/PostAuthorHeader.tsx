@@ -1,12 +1,13 @@
 import { contentDocMarkdownFallback, type PostDTO } from "@rezics/contract";
-import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
-import type React from "react";
-import { UserHoverPreview } from "@/user/components";
-import { useMessage } from "@rezics/i18n/react";
 import {
   post_anonymous_author,
   post_anonymous_avatar_alt,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
+import type React from "react";
+import { UserHoverPreview } from "@/user/components";
+
 const i18nMessages = {
   post_anonymous_author,
   post_anonymous_avatar_alt,

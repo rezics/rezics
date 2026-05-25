@@ -1,5 +1,7 @@
 import { realmDetailQuery } from "@rezics/api/realm/realm";
 import { userQueries } from "@rezics/api/user/user";
+import { accessibility_search } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   Avatar,
   AvatarFallback,
@@ -17,8 +19,7 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
 import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
-import { useMessage } from "@rezics/i18n/react";
-import { accessibility_search } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   accessibility_search,
 };

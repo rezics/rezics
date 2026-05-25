@@ -1,11 +1,12 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
+import { remark_list_empty_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
 import { useMemo } from "react";
 import { RemarkCard } from "../item/RemarkCard";
-import { useMessage } from "@rezics/i18n/react";
-import { remark_list_empty_title } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   remark_list_empty_title,
 };

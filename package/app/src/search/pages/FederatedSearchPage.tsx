@@ -5,6 +5,8 @@ import type {
   SearchQuery,
   SearchScope,
 } from "@rezics/contract";
+import { accessibility_search } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useMemo } from "react";
 import {
   AdvancedSearch,
@@ -14,8 +16,7 @@ import {
 import { useInjectedTags } from "../hooks/useInjectedTags";
 import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";
-import { useMessage } from "@rezics/i18n/react";
-import { accessibility_search } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   accessibility_search,
 };

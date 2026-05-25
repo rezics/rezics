@@ -1,5 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { BookContentStructureItem } from "@rezics/contract";
+import { book_toc, common_loading } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import {
   Button,
@@ -31,8 +33,7 @@ import {
   ContentChapterVirtualTree,
   type ContentChapterVirtualTreeHandle,
 } from "./ContentChapterVirtualTree";
-import { useMessage } from "@rezics/i18n/react";
-import { book_toc, common_loading } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_toc,
   common_loading,

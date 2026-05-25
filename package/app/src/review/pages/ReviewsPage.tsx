@@ -1,6 +1,13 @@
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
+import {
+  book_remark,
+  review_search_placeholder,
+  review_short_review,
+  review_tabs_label,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -9,13 +16,7 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_remark,
-  review_search_placeholder,
-  review_short_review,
-  review_tabs_label,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_remark,
   review_search_placeholder,

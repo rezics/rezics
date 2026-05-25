@@ -1,6 +1,14 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import type { BookDTO } from "@rezics/contract";
 import {
+  book_hero_actions_add_to_shelf,
+  book_hero_actions_edit_details,
+  common_copy_link,
+  common_share,
+  common_share_via,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -20,14 +28,7 @@ import {
 import type React from "react";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
 import { BookProgressStatusSection } from "@/progress-status";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_hero_actions_add_to_shelf,
-  book_hero_actions_edit_details,
-  common_copy_link,
-  common_share,
-  common_share_via,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_hero_actions_add_to_shelf,
   book_hero_actions_edit_details,

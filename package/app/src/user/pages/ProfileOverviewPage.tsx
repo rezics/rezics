@@ -3,12 +3,6 @@ import {
   type ContentSearchDocument,
   contentDocMarkdownFallback,
 } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
-import type { FC } from "react";
-import { Link } from "@/shared/ui/link";
-import { DescriptionBox } from "@/user/components/DescriptionBox";
-import { useProfileContext } from "@/user/components/ProfileLayout";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_pinned,
   common_untitled,
@@ -20,6 +14,13 @@ import {
   profile_tab_followers,
   profile_tab_shelves,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { useQuery } from "@tanstack/react-query";
+import type { FC } from "react";
+import { Link } from "@/shared/ui/link";
+import { DescriptionBox } from "@/user/components/DescriptionBox";
+import { useProfileContext } from "@/user/components/ProfileLayout";
+
 const i18nMessages = {
   common_pinned,
   common_untitled,

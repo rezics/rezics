@@ -1,14 +1,15 @@
-import { Button } from "@rezics/ui/shadcn";
-import type React from "react";
-import { PostListSection, ReplyComposer } from "@/post";
-import { useAuthModal } from "@/user/components/useAuthModal";
-import { useAuth } from "@/user/pages/useAuth";
-import { useMessage } from "@rezics/i18n/react";
 import {
   auth_login,
   shelf_discussion_composer_placeholder,
   shelf_discussion_signInPrompt,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button } from "@rezics/ui/shadcn";
+import type React from "react";
+import { PostListSection, ReplyComposer } from "@/post";
+import { useAuthModal } from "@/user/components/useAuthModal";
+import { useAuth } from "@/user/pages/useAuth";
+
 const i18nMessages = {
   auth_login,
   shelf_discussion_composer_placeholder,

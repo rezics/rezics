@@ -8,6 +8,22 @@ import {
   useUpdateShelfMutation,
 } from "@rezics/api/shelf/shelf.mutations";
 import { contentDocMarkdownFallback } from "@rezics/contract";
+import {
+  common_cancel,
+  common_save,
+  shelf_back_to_shelf,
+  shelf_content_type_label,
+  shelf_content_type_update_failed,
+  shelf_cover_url_label,
+  shelf_default_view_help,
+  shelf_default_view_label,
+  shelf_description_label,
+  shelf_edit_title,
+  shelf_title_label,
+  shelf_unsaved_changes_confirm,
+  shelf_view_flat,
+  shelf_view_nested,
+} from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -27,22 +43,6 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
-import {
-  common_cancel,
-  common_save,
-  shelf_back_to_shelf,
-  shelf_content_type_label,
-  shelf_content_type_update_failed,
-  shelf_cover_url_label,
-  shelf_default_view_help,
-  shelf_default_view_label,
-  shelf_description_label,
-  shelf_edit_title,
-  shelf_title_label,
-  shelf_unsaved_changes_confirm,
-  shelf_view_flat,
-  shelf_view_nested,
-} from "@rezics/i18n/messages";
 
 interface ShelfEditPageProps {
   shelfId: string;

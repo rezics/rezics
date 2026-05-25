@@ -1,4 +1,12 @@
 import {
+  common_delete,
+  common_edit,
+  pinboard_entry_language,
+  pinboard_entry_stale,
+  pinboard_entry_untitled,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Badge,
   Button,
   Tooltip,
@@ -15,14 +23,7 @@ import {
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 import type { PinboardEntryView } from "../models/types";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_delete,
-  common_edit,
-  pinboard_entry_language,
-  pinboard_entry_stale,
-  pinboard_entry_untitled,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_delete,
   common_edit,

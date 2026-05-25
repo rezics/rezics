@@ -1,10 +1,5 @@
 import { useCreateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
 import { DEFAULT_LANGUAGE, markdownContentDoc } from "@rezics/contract";
-import { Button, Input, Label } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_create,
   shelf_content_type_label,
@@ -13,6 +8,12 @@ import {
   shelf_new_title,
   shelf_title_label,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
+
 const i18nMessages = {
   common_create,
   shelf_content_type_label,

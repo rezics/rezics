@@ -5,23 +5,6 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { entityKindLabel } from "@rezics/i18n";
-import { Spinner } from "@rezics/ui";
-import {
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { Search as SearchIcon } from "lucide-react";
-import React from "react";
-import {
-  type PaginatedColumn,
-  PaginatedTable,
-} from "@/components/table/PaginatedTable";
-import { Page } from "@/core/layouts/Page";
-import { Link } from "@/shared/ui/link";
 import {
   admin_auth_actions_title,
   admin_entity_failed_load_list,
@@ -44,6 +27,23 @@ import {
   common_unverified,
   common_yes,
 } from "@rezics/i18n/messages";
+import { Spinner } from "@rezics/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { Search as SearchIcon } from "lucide-react";
+import React from "react";
+import {
+  type PaginatedColumn,
+  PaginatedTable,
+} from "@/components/table/PaginatedTable";
+import { Page } from "@/core/layouts/Page";
+import { Link } from "@/shared/ui/link";
 
 function fmtDate(v?: string | Date) {
   if (!v) return "-";

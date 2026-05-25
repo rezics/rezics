@@ -1,6 +1,14 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import {
+  profile_follow_info_description,
+  profile_follow_info_title,
+  user_cannot_resolve,
+  user_cannot_resolve_description,
+  user_empty,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
@@ -22,14 +30,7 @@ import { useMemo, useRef, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  profile_follow_info_description,
-  profile_follow_info_title,
-  user_cannot_resolve,
-  user_cannot_resolve_description,
-  user_empty,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   profile_follow_info_description,
   profile_follow_info_title,

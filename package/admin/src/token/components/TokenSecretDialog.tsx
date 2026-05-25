@@ -1,4 +1,11 @@
 import {
+  admin_token_created_secret_description,
+  admin_token_created_secret_title,
+  common_close,
+  common_copy_link,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Alert,
   AlertDescription,
   Button,
@@ -10,13 +17,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Copy as ContentCopyIcon } from "lucide-react";
 import type { FC } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_token_created_secret_description,
-  admin_token_created_secret_title,
-  common_close,
-  common_copy_link,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_token_created_secret_description,
   admin_token_created_secret_title,

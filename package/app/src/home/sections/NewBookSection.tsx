@@ -1,3 +1,12 @@
+import {
+  page_home_sections_new_book_more,
+  page_home_sections_new_book_tab_latest_serial,
+  page_home_sections_new_book_tab_new_on_shelf,
+  page_home_sections_new_book_tab_recently_completed,
+  page_home_sections_new_book_title,
+  page_home_sections_trending_book_loading,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button, Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
@@ -9,15 +18,7 @@ import {
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
 import { useHomeBooks } from "./hooks/hooks";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_home_sections_new_book_more,
-  page_home_sections_new_book_tab_latest_serial,
-  page_home_sections_new_book_tab_new_on_shelf,
-  page_home_sections_new_book_tab_recently_completed,
-  page_home_sections_new_book_title,
-  page_home_sections_trending_book_loading,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_sections_new_book_more,
   page_home_sections_new_book_tab_latest_serial,

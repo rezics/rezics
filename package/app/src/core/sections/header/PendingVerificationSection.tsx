@@ -1,11 +1,12 @@
-import { Button } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
-import { logout } from "@/user/models/handler";
-import { useMessage } from "@rezics/i18n/react";
 import {
   auth_flow_complete_registration_action,
   auth_logout,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button } from "@rezics/ui/shadcn";
+import { Link } from "@tanstack/react-router";
+import { logout } from "@/user/models/handler";
+
 const i18nMessages = {
   auth_flow_complete_registration_action,
   auth_logout,

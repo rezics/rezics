@@ -1,3 +1,8 @@
+import {
+  page_home_hero_subtitle,
+  page_home_hero_title_highlight,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import type React from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { HomeSearch } from "@/search";
@@ -9,11 +14,7 @@ import { LibraryCardsSection } from "../sections/LibraryCardsSection";
 import { NewBookSection } from "../sections/NewBookSection";
 import { TrendingReviews } from "../sections/TrendingReviewsSection";
 import { TrendingShelfSection } from "../sections/TrendingShelfSection";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_home_hero_subtitle,
-  page_home_hero_title_highlight,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_hero_subtitle,
   page_home_hero_title_highlight,

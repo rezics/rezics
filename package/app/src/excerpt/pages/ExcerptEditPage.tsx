@@ -7,14 +7,6 @@ import {
   type ExcerptSource,
   markdownContentDoc,
 } from "@rezics/contract";
-import { Input, Label } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { Route as excerptEditRoute } from "@/routes/_mainLayout/excerpt/$unitId/edit";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import { ExcerptSourcePicker } from "../components/source/ExcerptSourcePicker";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_loading,
   common_save,
@@ -22,6 +14,15 @@ import {
   excerpt_messages_update_failed,
   excerpt_updated_success,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Input, Label } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { Route as excerptEditRoute } from "@/routes/_mainLayout/excerpt/$unitId/edit";
+import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import { ExcerptSourcePicker } from "../components/source/ExcerptSourcePicker";
+
 const i18nMessages = {
   common_loading,
   common_save,

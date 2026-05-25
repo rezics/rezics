@@ -1,4 +1,5 @@
 import { tagQueries } from "@rezics/api/tag/tag.queries";
+import { page_home_sections_tag_explore } from "@rezics/i18n/messages";
 import { useLocale, useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
@@ -7,7 +8,7 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Link } from "@/shared/ui/link";
-import { page_home_sections_tag_explore } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_sections_tag_explore,
 };

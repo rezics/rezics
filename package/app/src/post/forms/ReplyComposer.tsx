@@ -7,6 +7,20 @@ import {
   PostKind,
   type TagTreeNode,
 } from "@rezics/contract";
+import {
+  auth_login,
+  common_cancel,
+  common_reply,
+  page_shelf_searching,
+  post_composer_invalid_configuration,
+  post_composer_post,
+  post_composer_posting,
+  post_reply_placeholder,
+  post_tag_picker_no_matches,
+  shelf_discussion_signInPrompt,
+  tag_search_this,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -21,20 +35,7 @@ import {
 } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  auth_login,
-  common_cancel,
-  common_reply,
-  page_shelf_searching,
-  post_composer_invalid_configuration,
-  post_composer_post,
-  post_composer_posting,
-  post_reply_placeholder,
-  post_tag_picker_no_matches,
-  shelf_discussion_signInPrompt,
-  tag_search_this,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   auth_login,
   common_cancel,

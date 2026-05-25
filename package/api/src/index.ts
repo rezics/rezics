@@ -6,6 +6,7 @@ export {
   type UnitPublicationMetadata,
 } from "@rezics/contract";
 export * from "./credit-attribution/credit-attribution";
+export * from "./diagnostic/status";
 export * from "./entity-attribution/entity-attribution";
 export * from "./history/history";
 export * from "./meili/meili";
@@ -16,9 +17,8 @@ export {
   getLockedFieldError,
   type LockedFieldApiError,
 } from "./react-query/errors";
-export * from "./subject-attribution/subject-attribution";
 export * from "./source-site/source-site";
-export * from "./diagnostic/status";
+export * from "./subject-attribution/subject-attribution";
 export * from "./subscription/subscription";
 export * from "./unit/unit";
 export * from "./unit-alias-record/unit-alias";

@@ -1,15 +1,16 @@
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
-import { Spinner } from "@rezics/ui";
-import { Button } from "@rezics/ui/shadcn";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { ShelfCard } from "../components/ShelfCard";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_load_more,
   common_loading,
   shelf_containing_this_book_title,
   shelf_none_for_this_book,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { ShelfCard } from "../components/ShelfCard";
+
 const i18nMessages = {
   common_load_more,
   common_loading,

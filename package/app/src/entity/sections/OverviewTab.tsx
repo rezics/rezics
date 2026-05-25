@@ -1,7 +1,8 @@
 import { contentDocMarkdownFallback, type EntityDTO } from "@rezics/contract";
-import { getEntityTranslation } from "../models/types";
-import { useMessage } from "@rezics/i18n/react";
 import { entity_no_overview_available } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { getEntityTranslation } from "../models/types";
+
 const i18nMessages = {
   entity_no_overview_available,
 };

@@ -1,13 +1,14 @@
+import {
+  pinboard_pinned_heading,
+  pinboard_pinned_region,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import type React from "react";
 import { PinboardEntryCard } from "../components/PinboardEntryCard";
 import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { usePinboardList } from "../hooks/usePinboard";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  pinboard_pinned_heading,
-  pinboard_pinned_region,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   pinboard_pinned_heading,
   pinboard_pinned_region,

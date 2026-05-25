@@ -1,3 +1,9 @@
+import {
+  common_back,
+  common_home,
+  common_not_found,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button, Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
 import {
   useCanGoBack,
@@ -7,12 +13,7 @@ import {
 } from "@tanstack/react-router";
 import { MapPin as Place } from "lucide-react";
 import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_back,
-  common_home,
-  common_not_found,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_back,
   common_home,

@@ -1,4 +1,11 @@
 import {
+  app_account_menu_aria_label,
+  auth_logout,
+  navigation_profile,
+  navigation_settings,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -20,13 +27,7 @@ import { Link, unitHref } from "@/shared/ui/link";
 import { logout } from "@/user/models/handler";
 import { useUserProfileStore } from "@/user/states";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  app_account_menu_aria_label,
-  auth_logout,
-  navigation_profile,
-  navigation_settings,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   app_account_menu_aria_label,
   auth_logout,

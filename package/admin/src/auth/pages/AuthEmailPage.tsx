@@ -1,20 +1,4 @@
 import { authApi } from "@rezics/api/auth/auth.api";
-import { Spinner } from "@rezics/ui";
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@rezics/ui/shadcn";
-import { useEffect, useMemo, useState } from "react";
-import { Page } from "@/core/layouts/Page";
-import { useMessage } from "@rezics/i18n/react";
 import {
   admin_auth_email_api_duration,
   admin_auth_email_completed,
@@ -42,6 +26,23 @@ import {
   admin_auth_email_templates_title,
   admin_auth_email_test_connection,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@rezics/ui/shadcn";
+import { useEffect, useMemo, useState } from "react";
+import { Page } from "@/core/layouts/Page";
+
 const i18nMessages = {
   admin_auth_email_api_duration,
   admin_auth_email_completed,

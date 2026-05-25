@@ -1,3 +1,16 @@
+import {
+  search_filter_asc,
+  search_filter_desc,
+  search_filter_favorites,
+  search_filter_month_votes,
+  search_filter_recommendation,
+  search_filter_relevance,
+  search_filter_time,
+  search_filter_total_votes,
+  search_filter_week_votes,
+  search_filter_word_count,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import {
   Button,
@@ -12,19 +25,7 @@ import {
   ArrowUp as ArrowUpward,
 } from "lucide-react";
 import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  search_filter_asc,
-  search_filter_desc,
-  search_filter_month_votes,
-  search_filter_recommendation,
-  search_filter_total_votes,
-  search_filter_week_votes,
-  search_filter_favorites,
-  search_filter_relevance,
-  search_filter_time,
-  search_filter_word_count,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   search_filter_asc,
   search_filter_desc,

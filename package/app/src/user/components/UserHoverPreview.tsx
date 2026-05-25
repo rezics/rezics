@@ -1,4 +1,9 @@
 import {
+  profile_following,
+  profile_tab_followers,
+} from "@rezics/i18n/messages";
+import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -9,11 +14,6 @@ import {
   PopoverTrigger,
   Separator,
 } from "@rezics/ui/shadcn";
-import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
-import {
-  profile_following,
-  profile_tab_followers,
-} from "@rezics/i18n/messages";
 import { useId, useState } from "react";
 import { FollowButton } from "@/engagement/components/FollowButton";
 import { Link, unitHref } from "@/shared/ui/link";

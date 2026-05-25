@@ -1,11 +1,12 @@
 import { contentDocMarkdownFallback } from "@rezics/contract";
+import { unit_card_added_at } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { BookOpen } from "lucide-react";
 import { useId } from "react";
 import { cn } from "@/shared/utils/css-util";
 import { UserHoverPreview } from "@/user/components";
 import type { UnitCardSummary } from "../models/unitCardSummary";
-import { useMessage } from "@rezics/i18n/react";
-import { unit_card_added_at } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   unit_card_added_at,
 };

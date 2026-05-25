@@ -8,16 +8,17 @@ import {
   useUpdateTagMutation,
 } from "@rezics/api/tag/tag";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import { Button, Input, Label } from "@rezics/ui/shadcn";
-import type React from "react";
-import { useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_name,
   common_save_changes,
   tag_create,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Button, Input, Label } from "@rezics/ui/shadcn";
+import type React from "react";
+import { useState } from "react";
+
 const i18nMessages = {
   common_name,
   common_save_changes,

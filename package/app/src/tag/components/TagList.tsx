@@ -1,12 +1,13 @@
 import type { UnitTagDTO } from "@rezics/contract";
+import { tag_empty } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { TagDetailCard } from "./TagCards";
-import { useMessage } from "@rezics/i18n/react";
-import { tag_empty } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   tag_empty,
 };

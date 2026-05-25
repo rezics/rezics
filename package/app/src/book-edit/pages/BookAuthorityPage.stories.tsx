@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
 import { UNIT_FIELD_LOCK_ALL, type UnitFieldLockDTO } from "@rezics/contract";
-import { historyBookId } from "@/stories/fixtures/history";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { withRouter } from "@/stories/decorators/withRouter";
+import { historyBookId } from "@/stories/fixtures/history";
 import { BookAuthorityPanel } from "./BookAuthorityPage";
 
 const meta = {

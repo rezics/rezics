@@ -1,4 +1,6 @@
 import type { EntityDTO } from "@rezics/contract";
+import { entity_edit } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   Button,
   Select,
@@ -18,8 +20,7 @@ import {
 import { EntityAvatar } from "./EntityAvatar";
 import { EntityKindBadge } from "./EntityKindBadge";
 import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
-import { useMessage } from "@rezics/i18n/react";
-import { entity_edit } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   entity_edit,
 };

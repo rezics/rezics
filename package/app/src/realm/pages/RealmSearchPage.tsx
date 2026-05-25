@@ -4,16 +4,17 @@ import {
   type RealmDTO,
   type RealmSearchDocument,
 } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-import { RealmCard } from "../components/RealmCard";
-import { useMessage } from "@rezics/i18n/react";
 import {
   realm_none_found,
   realm_search_placeholder,
   realm_search_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { KeywordInput } from "@/search/components/primitive";
+import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { RealmCard } from "../components/RealmCard";
+
 const i18nMessages = {
   realm_none_found,
   realm_search_placeholder,

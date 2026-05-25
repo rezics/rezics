@@ -1,4 +1,9 @@
 import { bookQueries } from "@rezics/api/book/book";
+import {
+  book_community_sidebar_help,
+  page_book_tabs_community,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -8,11 +13,7 @@ import { useMemo } from "react";
 import { PostListSection, ReplyComposer } from "@/post";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_community_sidebar_help,
-  page_book_tabs_community,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_community_sidebar_help,
   page_book_tabs_community,

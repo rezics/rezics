@@ -1,5 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
+import { page_home_sections_ranking } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -11,8 +13,7 @@ import {
   getBookCoverUrl,
   getBookTitle,
 } from "@/shared/utils/translation-helpers";
-import { useMessage } from "@rezics/i18n/react";
-import { page_home_sections_ranking } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_sections_ranking,
 };

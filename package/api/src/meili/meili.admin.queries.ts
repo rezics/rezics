@@ -14,8 +14,8 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { apiFetch } from "../react-query/http";
 import type { MeiliStatusSummary } from "../diagnostic/status.types";
+import { apiFetch } from "../react-query/http";
 
 export type MeiliHealthResponse = {
   status: string;

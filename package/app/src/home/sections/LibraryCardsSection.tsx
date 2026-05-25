@@ -1,3 +1,10 @@
+import {
+  page_home_sections_library_cards_book_library,
+  page_home_sections_library_cards_coming_soon,
+  page_home_sections_library_cards_game_library,
+  page_home_sections_library_cards_media_library,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import {
@@ -6,13 +13,7 @@ import {
   Gamepad2 as SportsEsportsOutlinedIcon,
 } from "lucide-react";
 import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_home_sections_library_cards_coming_soon,
-  page_home_sections_library_cards_book_library,
-  page_home_sections_library_cards_game_library,
-  page_home_sections_library_cards_media_library,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_sections_library_cards_coming_soon,
   page_home_sections_library_cards_book_library,

@@ -1,11 +1,11 @@
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
+import { setLocale } from "@rezics/i18n/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
-import { setLocale } from "@rezics/i18n/react";
 import React from "react";
 
 type LangToggleProps = {

@@ -9,20 +9,6 @@ import {
   type SeedTagName,
   type SystemShelfKindKey,
 } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import {
-  Badge,
-  Button,
-  Checkbox,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { useCallback, useMemo, useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   collection_independent_unit,
   collection_no_shelves_found,
@@ -36,6 +22,21 @@ import {
   shelf_items_count,
   shelf_system_favorites,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Badge,
+  Button,
+  Checkbox,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { useCallback, useMemo, useState } from "react";
+
 const i18nMessages = {
   collection_independent_unit,
   collection_no_shelves_found,

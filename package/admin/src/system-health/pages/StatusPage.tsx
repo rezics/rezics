@@ -1,14 +1,14 @@
 import { Button } from "@rezics/ui/shadcn";
 import { RefreshCw } from "lucide-react";
 import { Page } from "@/core/layouts/Page";
+import { StatusIndicator } from "../components/StatusIndicator";
+import { SystemStatusPanels } from "../components/StatusPanels";
 import { useAdminSystemStatusQuery } from "../hooks/useAdminStatusQueries";
 import {
   describeStatusState,
   formatCheckedAt,
   formatStatusState,
 } from "../models/status";
-import { StatusIndicator } from "../components/StatusIndicator";
-import { SystemStatusPanels } from "../components/StatusPanels";
 
 export function StatusPage() {
   const query = useAdminSystemStatusQuery();

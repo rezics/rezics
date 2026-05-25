@@ -1,9 +1,10 @@
 import { LANGUAGE_META, type Language } from "@rezics/contract";
+import { post_add_translation, post_languages } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Badge, Button, Skeleton } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus as AddIcon } from "lucide-react";
-import { useMessage } from "@rezics/i18n/react";
-import { post_add_translation, post_languages } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   post_add_translation,
   post_languages,

@@ -1,12 +1,13 @@
 import { postsByTargetQuery } from "@rezics/api/post/post";
 import type { PostKind } from "@rezics/contract";
+import { discussion_empty } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { PostCard } from "../components/item/PostCard";
-import { useMessage } from "@rezics/i18n/react";
-import { discussion_empty } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   discussion_empty,
 };

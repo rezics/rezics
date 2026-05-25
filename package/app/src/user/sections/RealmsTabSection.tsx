@@ -1,5 +1,17 @@
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
+import {
+  common_created,
+  common_loading,
+  profile_realms_joined,
+  profile_realms_load_failed,
+  profile_realms_none_created,
+  profile_realms_none_joined,
+  realm_member_count,
+  realm_official,
+  realm_private,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -9,18 +21,7 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_loading,
-  profile_realms_load_failed,
-  profile_realms_none_created,
-  profile_realms_none_joined,
-  realm_member_count,
-  realm_official,
-  realm_private,
-  common_created,
-  profile_realms_joined,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
   profile_realms_load_failed,

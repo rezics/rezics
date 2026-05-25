@@ -1,4 +1,11 @@
 import type { ContentRating } from "@rezics/contract";
+import {
+  book_chapter_bulk_rating_description,
+  book_chapter_bulk_rating_title,
+  common_apply,
+  common_cancel,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";
 import {
   Button,
@@ -8,13 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_chapter_bulk_rating_description,
-  book_chapter_bulk_rating_title,
-  common_apply,
-  common_cancel,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_chapter_bulk_rating_description,
   book_chapter_bulk_rating_title,

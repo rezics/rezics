@@ -17,19 +17,20 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
-import { Button } from "@rezics/ui/shadcn";
-import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
-import type { PinboardEntryView, PinboardListKey } from "../models/types";
-import { PinboardEntryCard } from "./PinboardEntryCard";
-import { useMessage } from "@rezics/i18n/react";
 import {
   pinboard_reorder_conflict,
   pinboard_reorder_drag_handle,
   pinboard_reorder_error,
   pinboard_reorder_list,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button } from "@rezics/ui/shadcn";
+import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
+import type { PinboardEntryView, PinboardListKey } from "../models/types";
+import { PinboardEntryCard } from "./PinboardEntryCard";
+
 const i18nMessages = {
   pinboard_reorder_conflict,
   pinboard_reorder_drag_handle,

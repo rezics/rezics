@@ -1,11 +1,5 @@
 import { useEntityList } from "@rezics/api/entity";
 import { useCurrentUserId } from "@rezics/api/hooks";
-import { Spinner } from "@rezics/ui";
-import { Button } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
-import { unitHref } from "@/shared/ui/link";
-import { EntityIdentityRow } from "../components/EntityIdentityRow";
-import { useMessage } from "@rezics/i18n/react";
 import {
   entity_declare,
   entity_empty_owned,
@@ -13,6 +7,13 @@ import {
   entity_my_entities,
   entity_new_button,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
+import { Link } from "@tanstack/react-router";
+import { unitHref } from "@/shared/ui/link";
+import { EntityIdentityRow } from "../components/EntityIdentityRow";
+
 const i18nMessages = {
   entity_declare,
   entity_empty_owned,

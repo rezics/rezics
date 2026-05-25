@@ -1,3 +1,5 @@
+import { book_read_back_to_book, book_toc } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button, Separator } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
@@ -7,8 +9,7 @@ import { Header } from "@/core/components/header/MainLayoutHeader";
 import { Sidebar } from "@/core/components/sidebar/MainLayoutSidebar";
 import { useLayoutStore } from "@/core/states/layoutStore.ts";
 import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
-import { useMessage } from "@rezics/i18n/react";
-import { book_read_back_to_book, book_toc } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_read_back_to_book,
   book_toc,

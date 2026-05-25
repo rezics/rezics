@@ -1,6 +1,12 @@
 import { bookContentStructureQuery } from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ContentRating } from "@rezics/contract";
+import {
+  book_edit_toc_management_title,
+  common_edit,
+  common_loading,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
@@ -14,12 +20,7 @@ import {
   type BookTocEditorHandle,
   type Chapter,
 } from "../components/BookTocEditor";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_edit_toc_management_title,
-  common_edit,
-  common_loading,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_edit_toc_management_title,
   common_edit,

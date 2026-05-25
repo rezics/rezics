@@ -1,13 +1,14 @@
-import { Button, Input } from "@rezics/ui/shadcn";
-import type React from "react";
-import { useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   page_home_sections_newsletter_email_placeholder,
   page_home_sections_newsletter_submit,
   page_home_sections_newsletter_thanks,
   page_home_sections_newsletter_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button, Input } from "@rezics/ui/shadcn";
+import type React from "react";
+import { useState } from "react";
+
 const i18nMessages = {
   page_home_sections_newsletter_email_placeholder,
   page_home_sections_newsletter_submit,

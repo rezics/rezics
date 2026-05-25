@@ -4,6 +4,11 @@ import {
   type UnitDTO,
 } from "@rezics/contract";
 import {
+  excerpt_card_description_fallback,
+  excerpt_card_source_unknown,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -16,11 +21,7 @@ import type React from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { cn } from "@/shared/utils/css-util";
 import { excerptCardActions, excerptPolicy } from "../../models/excerptPolicy";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  excerpt_card_description_fallback,
-  excerpt_card_source_unknown,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   excerpt_card_description_fallback,
   excerpt_card_source_unknown,

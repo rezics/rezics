@@ -2,6 +2,11 @@ import { bookKeys, bookQueries } from "@rezics/api/book/book";
 import { useSetTranslationSourceMutation } from "@rezics/api/unit/translation-source.mutations";
 import type { BookDTO } from "@rezics/contract";
 import {
+  page_book_edit_info_translation_set_source_label,
+  page_book_edit_info_translation_set_source_none,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -11,11 +16,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_book_edit_info_translation_set_source_label,
-  page_book_edit_info_translation_set_source_none,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_book_edit_info_translation_set_source_label,
   page_book_edit_info_translation_set_source_none,

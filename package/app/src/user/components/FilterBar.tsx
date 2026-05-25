@@ -1,3 +1,5 @@
+import { common_search } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   Input,
   Select,
@@ -7,8 +9,7 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import { common_search } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_search,
 };

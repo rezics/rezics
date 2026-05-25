@@ -1,4 +1,12 @@
 import type { SearchQuery } from "@rezics/contract";
+import {
+  placeholders_search_books,
+  search_advanced_label,
+  search_input_tags_hint,
+  search_input_tags_label,
+  search_input_word_count_label,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { SlidersHorizontal as TuneIcon } from "lucide-react";
 import type React from "react";
@@ -13,14 +21,7 @@ import {
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  placeholders_search_books,
-  search_advanced_label,
-  search_input_tags_hint,
-  search_input_tags_label,
-  search_input_word_count_label,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   placeholders_search_books,
   search_advanced_label,

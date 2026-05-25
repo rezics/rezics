@@ -1,10 +1,10 @@
+import { registerParaglideRuntime, setLocale } from "@rezics/i18n/react";
 import {
   basePreviewParameters,
   localeGlobalTypes,
   themeGlobalTypes,
   withRezicsTheme,
 } from "@rezics/storybook-config/preview";
-import { registerParaglideRuntime, setLocale } from "@rezics/i18n/react";
 import * as uiRuntime from "@rezics/ui/i18n/runtime";
 import type { Decorator, Preview } from "@storybook/react-vite";
 

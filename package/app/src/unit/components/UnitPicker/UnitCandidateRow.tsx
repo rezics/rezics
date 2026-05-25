@@ -1,10 +1,11 @@
 import type { UnitDTO } from "@rezics/contract";
+import { common_loading } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import type { ReactNode } from "react";
 import type { Candidate } from "../../models/types";
 import { candidateToUnitCardSummary } from "../../models/unitCardSummary";
 import { UnitCard } from "../UnitCard";
-import { useMessage } from "@rezics/i18n/react";
-import { common_loading } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
 };

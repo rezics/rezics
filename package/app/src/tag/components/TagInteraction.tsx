@@ -5,6 +5,19 @@ import type {
   BookDTO,
   UnitTagDTO,
 } from "@rezics/contract";
+import {
+  common_close,
+  common_edit,
+  tag_clear,
+  tag_downvote,
+  tag_score,
+  tag_search_selected,
+  tag_search_this,
+  tag_selected_count,
+  tag_upvote,
+  tag_votes,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Badge, Button, Popover, PopoverContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -20,19 +33,7 @@ import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
 import type { InjectedTag } from "@/search/models/injectedTags";
 import { cn } from "@/shared/utils/css-util";
 import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_close,
-  common_edit,
-  tag_clear,
-  tag_downvote,
-  tag_score,
-  tag_search_selected,
-  tag_search_this,
-  tag_selected_count,
-  tag_upvote,
-  tag_votes,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_close,
   common_edit,

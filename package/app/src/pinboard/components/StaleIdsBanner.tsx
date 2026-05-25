@@ -1,10 +1,4 @@
 import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
-import { Alert, AlertDescription, AlertTitle, Button } from "@rezics/ui/shadcn";
-import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import type { PinboardListKey } from "../models/types";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_dismiss,
   pinboard_stale_cleanup,
@@ -13,6 +7,13 @@ import {
   pinboard_stale_description,
   pinboard_stale_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Alert, AlertDescription, AlertTitle, Button } from "@rezics/ui/shadcn";
+import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import type { PinboardListKey } from "../models/types";
+
 const i18nMessages = {
   common_dismiss,
   pinboard_stale_cleanup,

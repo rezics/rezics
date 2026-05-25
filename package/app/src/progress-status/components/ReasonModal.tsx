@@ -1,4 +1,18 @@
 import {
+  common_loading,
+  common_save,
+  progress_status_reason_modal_append,
+  progress_status_reason_modal_desc_dropped,
+  progress_status_reason_modal_desc_paused,
+  progress_status_reason_modal_history,
+  progress_status_reason_modal_placeholder,
+  progress_status_reason_modal_private,
+  progress_status_reason_modal_skip,
+  progress_status_reason_modal_title_dropped,
+  progress_status_reason_modal_title_paused,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Checkbox,
   Collapsible,
@@ -21,20 +35,7 @@ import {
 } from "../hooks/useReasonPostHistory";
 import type { ReasonPostVisibility } from "../hooks/useReasonPostMutations";
 import type { ReasonStatus } from "../models/extra";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_loading,
-  common_save,
-  progress_status_reason_modal_append,
-  progress_status_reason_modal_history,
-  progress_status_reason_modal_placeholder,
-  progress_status_reason_modal_private,
-  progress_status_reason_modal_skip,
-  progress_status_reason_modal_desc_dropped,
-  progress_status_reason_modal_desc_paused,
-  progress_status_reason_modal_title_dropped,
-  progress_status_reason_modal_title_paused,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
   common_save,

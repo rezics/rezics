@@ -1,10 +1,11 @@
-import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   page_book_home_hero_kicker,
   page_book_home_hero_subtitle,
   page_book_home_hero_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import type React from "react";
+
 const i18nMessages = {
   page_book_home_hero_kicker,
   page_book_home_hero_subtitle,

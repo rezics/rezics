@@ -1,7 +1,7 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource, type RealmBannerExtra } from "@rezics/contract";
-import { useMessage } from "@rezics/i18n/react";
 import { realm_banner } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 

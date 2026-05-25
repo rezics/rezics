@@ -1,5 +1,23 @@
 import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
+import {
+  common_loading,
+  common_next_page,
+  common_no_data,
+  common_page_of,
+  common_previous_page,
+  profile_search_content_placeholder,
+  profile_sort_most_replies,
+  search_category_excerpts,
+  search_category_posts,
+  search_category_remarks,
+  search_category_reviews,
+  search_empty_title,
+  shelf_controls_sort_by,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -12,24 +30,7 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_loading,
-  common_next_page,
-  common_no_data,
-  common_page_of,
-  common_previous_page,
-  profile_search_content_placeholder,
-  search_empty_title,
-  shelf_controls_sort_by,
-  profile_sort_most_replies,
-  search_category_excerpts,
-  search_category_posts,
-  search_category_remarks,
-  search_category_reviews,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
   common_next_page,

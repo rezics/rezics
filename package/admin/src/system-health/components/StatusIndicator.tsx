@@ -2,8 +2,8 @@ import { Badge } from "@rezics/ui/shadcn";
 import { AlertTriangle, CheckCircle2, CircleHelp, XCircle } from "lucide-react";
 import {
   formatStatusState,
-  statusTextClass,
   type StatusState,
+  statusTextClass,
 } from "../models/status";
 
 const STATUS_ICON = {

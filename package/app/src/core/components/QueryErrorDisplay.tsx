@@ -1,7 +1,4 @@
 import { ApiError } from "@rezics/api";
-import { Alert, AlertDescription } from "@rezics/ui/shadcn";
-import { useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_error_model,
   common_error_target,
@@ -10,6 +7,10 @@ import {
   common_technical_details,
   common_unexpected_error,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Alert, AlertDescription } from "@rezics/ui/shadcn";
+import { useState } from "react";
+
 const i18nMessages = {
   common_error_model,
   common_error_target,

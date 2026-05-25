@@ -1,6 +1,14 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { type BookDTO, mainMarkdownSource } from "@rezics/contract";
 import {
+  page_book_edit_info_translation_source_label,
+  page_book_edit_info_translation_source_no_match,
+  page_book_edit_info_translation_source_open_button,
+  page_book_edit_info_translation_source_sync_button,
+  page_book_edit_info_translation_source_sync_tooltip,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Tooltip,
   TooltipContent,
@@ -16,14 +24,7 @@ import {
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_book_edit_info_translation_source_label,
-  page_book_edit_info_translation_source_no_match,
-  page_book_edit_info_translation_source_open_button,
-  page_book_edit_info_translation_source_sync_button,
-  page_book_edit_info_translation_source_sync_tooltip,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_book_edit_info_translation_source_label,
   page_book_edit_info_translation_source_no_match,

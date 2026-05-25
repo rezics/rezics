@@ -1,4 +1,6 @@
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
+import { feedback_submit } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   Separator,
   Sheet,
@@ -8,8 +10,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import FeedbackForm from "./FeedbackForm";
-import { useMessage } from "@rezics/i18n/react";
-import { feedback_submit } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   feedback_submit,
 };

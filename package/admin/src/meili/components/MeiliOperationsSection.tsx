@@ -1,4 +1,12 @@
 import {
+  admin_meili_full_sync_description,
+  admin_meili_full_sync_title,
+  admin_meili_index_initialization_description,
+  admin_meili_index_initialization_title,
+  admin_meili_sync_help,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Card,
   CardContent,
@@ -6,14 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@rezics/ui/shadcn";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_meili_full_sync_description,
-  admin_meili_full_sync_title,
-  admin_meili_index_initialization_description,
-  admin_meili_index_initialization_title,
-  admin_meili_sync_help,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_meili_full_sync_description,
   admin_meili_full_sync_title,

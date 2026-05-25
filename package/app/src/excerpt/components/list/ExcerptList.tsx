@@ -1,11 +1,12 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { UnitDTO } from "@rezics/contract";
+import { excerpt_list_empty_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
 import { useMemo } from "react";
 import { ExcerptCard } from "../item/ExcerptCard";
-import { useMessage } from "@rezics/i18n/react";
-import { excerpt_list_empty_title } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   excerpt_list_empty_title,
 };

@@ -1,4 +1,9 @@
 import { realmListQuery } from "@rezics/api/realm/realm";
+import {
+  page_home_sections_active_realms_more,
+  page_home_sections_active_realms_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { buttonVariants } from "@rezics/ui/shadcn";
@@ -7,11 +12,7 @@ import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RealmCard } from "@/realm/components/RealmCard";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_home_sections_active_realms_more,
-  page_home_sections_active_realms_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_sections_active_realms_more,
   page_home_sections_active_realms_title,

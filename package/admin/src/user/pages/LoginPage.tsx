@@ -1,3 +1,13 @@
+import {
+  admin_user_admin_login_description,
+  admin_user_admin_login_title,
+  admin_user_login_failed,
+  admin_user_login_signing_in,
+  auth_login,
+  common_email,
+  common_password,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -9,19 +19,9 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import type { FormEvent } from "react";
 import { useState } from "react";
-
 import { Route } from "@/routes/login";
 import { adminLogin } from "@/user/models/handler";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_user_admin_login_description,
-  admin_user_admin_login_title,
-  admin_user_login_failed,
-  admin_user_login_signing_in,
-  auth_login,
-  common_email,
-  common_password,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_user_admin_login_description,
   admin_user_admin_login_title,

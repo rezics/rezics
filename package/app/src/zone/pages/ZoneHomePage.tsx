@@ -1,14 +1,15 @@
-import { useNavigate } from "@tanstack/react-router";
-import type React from "react";
-import { useZone } from "../hooks/useZone";
-import { BookZoneTemplate } from "../templates/book";
-import { DefaultZoneTemplate } from "../templates/default";
-import { useMessage } from "@rezics/i18n/react";
 import {
   zone_loading,
   zone_not_found,
   zone_not_found_description,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { useNavigate } from "@tanstack/react-router";
+import type React from "react";
+import { useZone } from "../hooks/useZone";
+import { BookZoneTemplate } from "../templates/book";
+import { DefaultZoneTemplate } from "../templates/default";
+
 const i18nMessages = {
   zone_loading,
   zone_not_found,

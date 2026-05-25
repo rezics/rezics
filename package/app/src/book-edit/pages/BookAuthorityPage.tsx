@@ -10,23 +10,6 @@ import {
   EDITORIAL_LOCK_PATH_OPTIONS,
   UNIT_FIELD_LOCK_ALL,
 } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
-import {
-  LockKeyhole,
-  Plus,
-  ShieldCheck,
-  ShieldOff,
-  Trash2,
-} from "lucide-react";
-import { useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import {
-  BOOK_LOCK_FIELD_GROUPS,
-  editorialPathLabel,
-  lockMatchesPath,
-} from "@/unit/models/lockFieldLabels";
-import { useMessage } from "@rezics/i18n/react";
 import {
   authority_all_fields_description,
   authority_all_fields_locked,
@@ -54,6 +37,24 @@ import {
   authority_unlock_field_action,
   common_loading,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
+import {
+  LockKeyhole,
+  Plus,
+  ShieldCheck,
+  ShieldOff,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import {
+  BOOK_LOCK_FIELD_GROUPS,
+  editorialPathLabel,
+  lockMatchesPath,
+} from "@/unit/models/lockFieldLabels";
+
 const i18nMessages = {
   authority_all_fields_description,
   authority_all_fields_locked,

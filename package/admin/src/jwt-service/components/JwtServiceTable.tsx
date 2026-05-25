@@ -1,5 +1,19 @@
 import type { JwtServiceDTO } from "@rezics/contract";
 import {
+  admin_auth_actions_title,
+  admin_auth_email_status,
+  admin_jwt_audience,
+  admin_jwt_issuer,
+  admin_jwt_local,
+  admin_jwt_local_issuer,
+  admin_jwt_remote,
+  admin_jwt_service_key,
+  common_active,
+  common_edit,
+  common_inactive,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Badge,
   Button,
   Table,
@@ -15,20 +29,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Pencil as EditOutlinedIcon } from "lucide-react";
 import type { FC } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_auth_actions_title,
-  admin_auth_email_status,
-  admin_jwt_audience,
-  admin_jwt_issuer,
-  admin_jwt_local,
-  admin_jwt_local_issuer,
-  admin_jwt_remote,
-  admin_jwt_service_key,
-  common_active,
-  common_edit,
-  common_inactive,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_auth_actions_title,
   admin_auth_email_status,

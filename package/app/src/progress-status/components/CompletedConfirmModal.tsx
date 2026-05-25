@@ -1,4 +1,11 @@
 import {
+  common_cancel,
+  common_confirm,
+  progress_status_completed_modal_description,
+  progress_status_completed_modal_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Dialog,
   DialogContent,
@@ -8,13 +15,7 @@ import {
   DialogTitle,
 } from "@rezics/ui/shadcn";
 import { useEffect, useRef, useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  common_confirm,
-  progress_status_completed_modal_description,
-  progress_status_completed_modal_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   common_confirm,

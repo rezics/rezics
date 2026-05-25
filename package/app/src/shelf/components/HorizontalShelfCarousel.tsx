@@ -1,11 +1,12 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ShelfDTO } from "@rezics/contract";
+import { shelf_list_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import type * as React from "react";
 import { useMemo } from "react";
 import { ShelfCard } from "./ShelfCard";
-import { useMessage } from "@rezics/i18n/react";
-import { shelf_list_title } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   shelf_list_title,
 };

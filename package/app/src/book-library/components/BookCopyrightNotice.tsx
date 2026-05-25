@@ -1,10 +1,11 @@
-import { Copyright as CopyrightOutlined } from "lucide-react";
-import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   book_copyright_notice_body,
   book_copyright_notice_fair_use,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Copyright as CopyrightOutlined } from "lucide-react";
+import type React from "react";
+
 const i18nMessages = {
   book_copyright_notice_body,
   book_copyright_notice_fair_use,

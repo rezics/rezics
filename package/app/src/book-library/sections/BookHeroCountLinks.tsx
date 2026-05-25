@@ -2,16 +2,17 @@ import { postQueries } from "@rezics/api/post/post";
 import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { PostKind } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
-import type React from "react";
-import { Link } from "@/shared/ui/link";
-import type { BookHeroStatKey } from "./BookHeroStatCards";
-import { useMessage } from "@rezics/i18n/react";
 import {
   book_hero_count_links_reviews,
   book_hero_count_links_shelves,
   book_hero_count_links_tags,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { Link } from "@/shared/ui/link";
+import type { BookHeroStatKey } from "./BookHeroStatCards";
+
 const i18nMessages = {
   book_hero_count_links_reviews,
   book_hero_count_links_shelves,

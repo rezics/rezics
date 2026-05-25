@@ -34,9 +34,9 @@ import {
   formatCheckedAt,
   formatStatusState,
   getMeiliDriftCount,
+  type StatusState,
   statusBorderClass,
   statusTextClass,
-  type StatusState,
 } from "../models/status";
 import { StatusIndicator } from "./StatusIndicator";
 

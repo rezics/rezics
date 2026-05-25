@@ -1,5 +1,6 @@
-import { useMessage } from "@rezics/i18n/react";
 import { media_library_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+
 const i18nMessages = {
   media_library_title,
 };

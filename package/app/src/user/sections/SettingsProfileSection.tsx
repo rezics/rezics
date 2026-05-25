@@ -5,6 +5,20 @@ import {
   markdownContentDoc,
   type UpdateUser,
 } from "@rezics/contract";
+import {
+  common_description,
+  common_username,
+  entity_avatar_url,
+  settings_profile_avatar_placeholder,
+  settings_profile_bio,
+  settings_profile_bio_placeholder,
+  settings_profile_description,
+  settings_profile_display_name,
+  settings_profile_save,
+  settings_profile_title,
+  settings_profile_updated,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -22,20 +36,7 @@ import { type FC, useEffect, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_description,
-  common_username,
-  entity_avatar_url,
-  settings_profile_avatar_placeholder,
-  settings_profile_bio,
-  settings_profile_bio_placeholder,
-  settings_profile_description,
-  settings_profile_display_name,
-  settings_profile_save,
-  settings_profile_title,
-  settings_profile_updated,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_description,
   common_username,

@@ -1,5 +1,11 @@
 import type { ContentRating } from "@rezics/contract";
 import {
+  search_filters_rating,
+  search_tooltips_ratingOptIn,
+  search_tooltips_ratingSignIn,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Checkbox,
   Tooltip,
   TooltipContent,
@@ -8,12 +14,7 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { ratingTierLabel } from "@/search/models/ratingTierLabel";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  search_filters_rating,
-  search_tooltips_ratingOptIn,
-  search_tooltips_ratingSignIn,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   search_filters_rating,
   search_tooltips_ratingOptIn,

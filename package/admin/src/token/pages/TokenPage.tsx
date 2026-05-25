@@ -9,6 +9,16 @@ import type {
   CreateApiTokenInput,
   UpdateApiTokenInput,
 } from "@rezics/contract";
+import {
+  admin_token_create_button,
+  admin_token_create_failed,
+  admin_token_empty,
+  admin_token_revoke_confirm,
+  admin_token_revoke_failed,
+  admin_token_title,
+  admin_token_update_failed,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -21,16 +31,7 @@ import {
   TokenSecretDialog,
   TokenTable,
 } from "../components";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_token_create_button,
-  admin_token_create_failed,
-  admin_token_empty,
-  admin_token_revoke_confirm,
-  admin_token_revoke_failed,
-  admin_token_title,
-  admin_token_update_failed,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_token_create_button,
   admin_token_create_failed,

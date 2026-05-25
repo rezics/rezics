@@ -1,7 +1,8 @@
+import { common_unexpected_error } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import type { FC, ReactNode } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import { common_unexpected_error } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_unexpected_error,
 };

@@ -19,6 +19,35 @@ import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
 import { useHydratedShelfUnits } from "@rezics/api/shelf";
 import type { ShelfDTO, ShelfUnitKind } from "@rezics/contract";
 import {
+  common_loading,
+  common_next,
+  common_prev,
+  common_retry,
+  shelf_controls_sort_by,
+  shelf_controls_view,
+  shelf_edit_add,
+  shelf_edit_delete_selected,
+  shelf_edit_discard_ops,
+  shelf_edit_empty,
+  shelf_edit_items_heading,
+  shelf_edit_mode_edit,
+  shelf_edit_mode_multi_select,
+  shelf_edit_mode_preview,
+  shelf_edit_save_n_ops,
+  shelf_edit_sort_prime_only,
+  shelf_mode_label,
+  shelf_ops_failed,
+  shelf_sort_manual,
+  shelf_sort_manual_reversed,
+  shelf_sort_newest,
+  shelf_sort_oldest,
+  shelf_sort_title_az,
+  shelf_sort_title_za,
+  shelf_view_list,
+  shelf_view_nested,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Checkbox,
   Label,
@@ -55,35 +84,7 @@ import {
   deriveShelfStream,
   type ShelfStreamEntry,
 } from "../models/shelfStream";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_loading,
-  common_next,
-  common_prev,
-  common_retry,
-  shelf_controls_sort_by,
-  shelf_controls_view,
-  shelf_edit_add,
-  shelf_edit_delete_selected,
-  shelf_edit_discard_ops,
-  shelf_edit_empty,
-  shelf_edit_items_heading,
-  shelf_edit_mode_edit,
-  shelf_edit_mode_multi_select,
-  shelf_edit_mode_preview,
-  shelf_edit_save_n_ops,
-  shelf_edit_sort_prime_only,
-  shelf_mode_label,
-  shelf_ops_failed,
-  shelf_sort_manual,
-  shelf_sort_manual_reversed,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-  shelf_sort_title_az,
-  shelf_sort_title_za,
-  shelf_view_list,
-  shelf_view_nested,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_loading,
   common_next,

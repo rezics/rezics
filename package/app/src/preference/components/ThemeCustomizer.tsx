@@ -1,4 +1,17 @@
 import {
+  common_apply,
+  common_cancel,
+  common_close,
+  common_reset,
+  theme_customizer_current_accent,
+  theme_customizer_custom_color,
+  theme_customizer_hex_format,
+  theme_customizer_preset_colors,
+  theme_customizer_static_theme,
+  theme_customizer_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Dialog,
   DialogContent,
@@ -19,19 +32,7 @@ import {
 import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/states/appStore";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_apply,
-  common_cancel,
-  common_close,
-  common_reset,
-  theme_customizer_current_accent,
-  theme_customizer_custom_color,
-  theme_customizer_hex_format,
-  theme_customizer_preset_colors,
-  theme_customizer_static_theme,
-  theme_customizer_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_apply,
   common_cancel,

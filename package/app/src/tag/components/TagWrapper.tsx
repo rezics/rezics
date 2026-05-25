@@ -1,13 +1,14 @@
 import type { TagFilters } from "@rezics/api/tag/tag";
 import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
+import { tag_load_failed, tag_loading } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { RealmTagHighlights } from "./RealmTagHighlights";
 import TagList from "./TagList";
-import { useMessage } from "@rezics/i18n/react";
-import { tag_load_failed, tag_loading } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   tag_load_failed,
   tag_loading,

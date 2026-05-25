@@ -1,9 +1,10 @@
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { scoreQueries } from "@rezics/api/score/score";
+import { score_no_ratings, score_ratings_count } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
-import { score_no_ratings, score_ratings_count } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   score_no_ratings,
   score_ratings_count,

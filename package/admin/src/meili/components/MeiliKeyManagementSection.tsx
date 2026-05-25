@@ -3,16 +3,6 @@ import type {
   MeiliKeyListResponse,
 } from "@rezics/api/meili/meili.admin.queries";
 import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@rezics/ui/shadcn";
-import { Spinner } from "@rezics/ui";
-import { useMessage } from "@rezics/i18n/react";
-import {
   admin_meili_create_admin_key,
   admin_meili_creating,
   admin_meili_existing_keys_title,
@@ -31,6 +21,17 @@ import {
   common_never,
   common_uid,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@rezics/ui/shadcn";
+
 const i18nMessages = {
   admin_meili_create_admin_key,
   admin_meili_creating,

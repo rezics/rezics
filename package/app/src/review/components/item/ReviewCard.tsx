@@ -1,5 +1,10 @@
 import type { PostDTO } from "@rezics/contract";
 import {
+  review_open_review_page,
+  review_target_work_label,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -14,11 +19,7 @@ import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { reviewCardActions, reviewPolicy } from "../../models/reviewPolicy";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  review_open_review_page,
-  review_target_work_label,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   review_open_review_page,
   review_target_work_label,

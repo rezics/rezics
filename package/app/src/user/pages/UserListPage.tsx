@@ -1,6 +1,13 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import {
+  user_list_title,
+  user_no_bio,
+  user_none_found,
+  user_search_placeholder,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -15,13 +22,7 @@ import { Search as SearchIcon } from "lucide-react";
 import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { UserError, UserLoading } from "./UserState";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  user_list_title,
-  user_no_bio,
-  user_none_found,
-  user_search_placeholder,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   user_list_title,
   user_no_bio,

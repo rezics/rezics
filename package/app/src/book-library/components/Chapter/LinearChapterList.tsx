@@ -1,4 +1,12 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
+import {
+  book_chapter_search_term_placeholder,
+  common_collapse_all,
+  common_expand_all,
+  common_loading,
+  common_search,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -7,14 +15,7 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { withBookContentStructureOccurrences } from "../../models/bookContentStructurePath";
 import type { ChapterArboristRefHandle } from "./ChapterArborist";
 import { ChapterArborist } from "./ChapterArborist";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  book_chapter_search_term_placeholder,
-  common_collapse_all,
-  common_expand_all,
-  common_loading,
-  common_search,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_chapter_search_term_placeholder,
   common_collapse_all,

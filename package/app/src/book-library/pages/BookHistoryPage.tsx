@@ -1,31 +1,9 @@
 import { historyQueries } from "@rezics/api";
-import {
-  type HistoryActorResolution,
-  type StructureEventDTO,
-  type UnitRevisionDTO,
+import type {
+  HistoryActorResolution,
+  StructureEventDTO,
+  UnitRevisionDTO,
 } from "@rezics/contract";
-import { useQuery } from "@tanstack/react-query";
-import {
-  Link,
-  useNavigate,
-  useParams,
-  useSearch,
-} from "@tanstack/react-router";
-import {
-  ArrowLeftRight,
-  CheckCircle2,
-  ChevronDown,
-  History,
-  RotateCcw,
-} from "lucide-react";
-import { useMemo, useState } from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { editorialPathLabel, slotLabel } from "@/unit/models/lockFieldLabels";
-import {
-  compareRevisionPathSnapshots,
-  type DiffPart,
-  type HistoryFieldChange,
-} from "../models/historyCompare";
 import {
   common_cancel,
   common_loading,
@@ -75,6 +53,28 @@ import {
   history_value_empty,
   history_value_null,
 } from "@rezics/i18n/messages";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearch,
+} from "@tanstack/react-router";
+import {
+  ArrowLeftRight,
+  CheckCircle2,
+  ChevronDown,
+  History,
+  RotateCcw,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { editorialPathLabel, slotLabel } from "@/unit/models/lockFieldLabels";
+import {
+  compareRevisionPathSnapshots,
+  type DiffPart,
+  type HistoryFieldChange,
+} from "../models/historyCompare";
 
 type HistoryTab = "editorial" | "structure";
 

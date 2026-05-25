@@ -8,6 +8,19 @@ import {
   subjectAttributionRoleRegistry,
 } from "@rezics/contract";
 import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
+import {
+  entity_picker_create_named,
+  entity_picker_create_new,
+  entity_picker_description,
+  entity_picker_errors_credit_role_required,
+  entity_picker_filters_all,
+  entity_picker_filters_credit_role,
+  entity_picker_filters_subject_role,
+  entity_picker_no_matches_create,
+  entity_picker_search_placeholder,
+  entity_picker_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -30,19 +43,7 @@ import { useMemo, useState } from "react";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { EntityInlineCreateForm } from "./EntityInlineCreateForm";
 import { EntityResultRow } from "./EntityResultRow";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  entity_picker_create_named,
-  entity_picker_create_new,
-  entity_picker_description,
-  entity_picker_errors_credit_role_required,
-  entity_picker_filters_all,
-  entity_picker_filters_credit_role,
-  entity_picker_filters_subject_role,
-  entity_picker_no_matches_create,
-  entity_picker_search_placeholder,
-  entity_picker_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   entity_picker_create_named,
   entity_picker_create_new,

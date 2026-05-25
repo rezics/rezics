@@ -1,8 +1,9 @@
+import { book_description } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import type React from "react";
 import type { BookDescriptionProps } from "./types";
-import { useMessage } from "@rezics/i18n/react";
-import { book_description } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   book_description,
 };

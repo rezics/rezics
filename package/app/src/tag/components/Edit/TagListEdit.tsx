@@ -4,19 +4,6 @@ import {
   useDetachTagMutation,
 } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import {
-  Badge,
-  Button,
-  Input,
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import type React from "react";
-import { useMemo, useState } from "react";
-import { SingleTagChip } from "../TagList";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_add,
   common_error,
@@ -29,6 +16,20 @@ import {
   tag_search_and_add,
   tag_search_placeholder,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Badge,
+  Button,
+  Input,
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useMemo, useState } from "react";
+import { SingleTagChip } from "../TagList";
+
 const i18nMessages = {
   common_add,
   common_error,

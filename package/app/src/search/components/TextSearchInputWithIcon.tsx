@@ -1,9 +1,10 @@
+import { accessibility_search } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { TextSearchInputBase } from "./TextSearchInputBase";
-import { useMessage } from "@rezics/i18n/react";
-import { accessibility_search } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   accessibility_search,
 };

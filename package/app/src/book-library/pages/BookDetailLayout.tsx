@@ -1,5 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { scoreQueries } from "@rezics/api/score/score";
+import { common_error_generic, common_loading } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -13,8 +15,7 @@ import {
   setBookDetailAtomFamily,
 } from "../states/bookDetailAtoms";
 import { BookDetailLayoutContext } from "./bookDetailLayoutContext";
-import { useMessage } from "@rezics/i18n/react";
-import { common_error_generic, common_loading } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_error_generic,
   common_loading,

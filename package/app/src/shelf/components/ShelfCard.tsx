@@ -3,12 +3,6 @@ import {
   type ShelfDTO,
   shelfCoverImageSpec,
 } from "@rezics/contract";
-import { Card, CardContent } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
-import type React from "react";
-import { cn } from "@/shared/utils/css-util";
-import { getTranslation } from "@/shared/utils/translation-helpers";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_anonymous,
   shelf_cover_alt,
@@ -16,6 +10,13 @@ import {
   shelf_no_description,
   shelf_untitled,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Card, CardContent } from "@rezics/ui/shadcn";
+import { Link } from "@tanstack/react-router";
+import type React from "react";
+import { cn } from "@/shared/utils/css-util";
+import { getTranslation } from "@/shared/utils/translation-helpers";
+
 const i18nMessages = {
   common_anonymous,
   shelf_cover_alt,

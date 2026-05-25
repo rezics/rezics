@@ -1,3 +1,9 @@
+import {
+  page_home_sections_trending_excerpt_empty,
+  page_home_sections_trending_excerpt_more,
+  page_home_sections_trending_excerpt_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -5,12 +11,7 @@ import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalExcerptCarousel } from "@/excerpt/components/list/HorizontalExcerptCarousel";
 import { useHomeExcerpts } from "./hooks/hooks";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  page_home_sections_trending_excerpt_empty,
-  page_home_sections_trending_excerpt_more,
-  page_home_sections_trending_excerpt_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   page_home_sections_trending_excerpt_empty,
   page_home_sections_trending_excerpt_more,

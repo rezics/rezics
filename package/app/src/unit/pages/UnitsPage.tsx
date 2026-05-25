@@ -1,12 +1,12 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { contentDocMarkdownFallback, type UnitDTO } from "@rezics/contract";
-import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
 import {
   unit_open_content_page,
   unit_type_tabs_label,
   unit_untitled_content,
   units_search_placeholder,
 } from "@rezics/i18n/messages";
+import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,

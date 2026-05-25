@@ -1,13 +1,14 @@
-import { EmptyState } from "@rezics/ui";
-import { Button } from "@rezics/ui/shadcn";
-import { CircleAlert as ErrorOutlineRoundedIcon } from "lucide-react";
-import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_retry,
   pinboard_error_description,
   pinboard_error_title,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { EmptyState } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
+import { CircleAlert as ErrorOutlineRoundedIcon } from "lucide-react";
+import type React from "react";
+
 const i18nMessages = {
   common_retry,
   pinboard_error_description,

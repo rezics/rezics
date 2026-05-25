@@ -1,17 +1,18 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentDocMarkdownFallback, type ShelfDTO } from "@rezics/contract";
-import { Button } from "@rezics/ui/shadcn";
-import { useNavigate } from "@tanstack/react-router";
-import { Pencil as EditOutlined } from "lucide-react";
-import type React from "react";
-import { getTranslation } from "@/shared/utils/translation-helpers";
-import { useMessage } from "@rezics/i18n/react";
 import {
   common_edit,
   shelf_by_author,
   shelf_items_count,
   shelf_untitled,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Button } from "@rezics/ui/shadcn";
+import { useNavigate } from "@tanstack/react-router";
+import { Pencil as EditOutlined } from "lucide-react";
+import type React from "react";
+import { getTranslation } from "@/shared/utils/translation-helpers";
+
 const i18nMessages = {
   common_edit,
   shelf_by_author,

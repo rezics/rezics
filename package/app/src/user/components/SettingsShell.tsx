@@ -1,9 +1,10 @@
+import { settings_title } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Outlet } from "@tanstack/react-router";
 import type { FC } from "react";
 import { SettingsSidebar } from "./SettingsSidebar";
 import { SettingsTabBar } from "./SettingsTabBar";
-import { useMessage } from "@rezics/i18n/react";
-import { settings_title } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   settings_title,
 };

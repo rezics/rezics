@@ -1,5 +1,20 @@
 import type { ApiTokenDTO } from "@rezics/contract";
 import {
+  admin_auth_actions_title,
+  admin_auth_user_name,
+  admin_token_never,
+  admin_token_no_scopes,
+  admin_token_revoked,
+  admin_token_scopes,
+  common_created,
+  common_edit,
+  common_expires,
+  common_no,
+  common_revoke,
+  common_yes,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Badge,
   Button,
   Table,
@@ -15,21 +30,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_auth_actions_title,
-  admin_auth_user_name,
-  admin_token_never,
-  admin_token_no_scopes,
-  admin_token_revoked,
-  admin_token_scopes,
-  common_created,
-  common_edit,
-  common_expires,
-  common_no,
-  common_revoke,
-  common_yes,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_auth_actions_title,
   admin_auth_user_name,

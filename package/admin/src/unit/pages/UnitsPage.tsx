@@ -1,6 +1,27 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import type { UnitListResponse } from "@rezics/contract";
+import {
+  admin_auth_actions_title,
+  admin_auth_email_status,
+  admin_unit_failed_load_list,
+  admin_unit_list_description,
+  admin_unit_list_meili_description,
+  admin_unit_list_meili_title,
+  admin_unit_list_title,
+  admin_unit_no_title,
+  admin_unit_search_label,
+  admin_unit_search_placeholder,
+  common_create,
+  common_created,
+  common_edit,
+  common_id,
+  common_search,
+  common_title,
+  common_type,
+  common_updated,
+  common_user,
+} from "@rezics/i18n/messages";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -23,27 +44,6 @@ import {
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
-import {
-  admin_auth_actions_title,
-  admin_auth_email_status,
-  admin_unit_failed_load_list,
-  admin_unit_list_description,
-  admin_unit_list_meili_description,
-  admin_unit_list_meili_title,
-  admin_unit_list_title,
-  admin_unit_no_title,
-  admin_unit_search_label,
-  admin_unit_search_placeholder,
-  common_create,
-  common_created,
-  common_edit,
-  common_id,
-  common_search,
-  common_title,
-  common_type,
-  common_updated,
-  common_user,
-} from "@rezics/i18n/messages";
 
 /** Extract the best title from the translations array on a UnitDTO. */
 function extractUnitTitle(unit: UnitDTO): string {

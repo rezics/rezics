@@ -1,3 +1,5 @@
+import { common_open, common_share } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   FacebookIcon,
   InstagramIcon,
@@ -7,8 +9,7 @@ import {
 import { Button, Dialog, DialogContent, DialogFooter } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
-import { common_open, common_share } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_open,
   common_share,

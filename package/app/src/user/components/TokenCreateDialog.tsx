@@ -1,6 +1,21 @@
 import { useCreateTokenMutation } from "@rezics/api/token/token.mutations";
 import type { ApiTokenScopes } from "@rezics/contract";
 import {
+  common_cancel,
+  common_creating,
+  common_done,
+  common_scopes,
+  settings_tokens_copy,
+  settings_tokens_created_title,
+  settings_tokens_created_warning,
+  settings_tokens_expiration_optional,
+  settings_tokens_generate,
+  settings_tokens_generate_action,
+  settings_tokens_name_label,
+  settings_tokens_name_placeholder,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Alert,
   AlertDescription,
   Button,
@@ -15,21 +30,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
 import { type FC, useState } from "react";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  common_creating,
-  common_done,
-  common_scopes,
-  settings_tokens_copy,
-  settings_tokens_created_title,
-  settings_tokens_created_warning,
-  settings_tokens_expiration_optional,
-  settings_tokens_generate,
-  settings_tokens_generate_action,
-  settings_tokens_name_label,
-  settings_tokens_name_placeholder,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   common_creating,

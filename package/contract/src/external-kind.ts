@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { type UnitType } from "./unit";
+import type { UnitType } from "./unit";
 
 export const externalKinds = [
   "book",

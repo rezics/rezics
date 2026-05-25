@@ -1,3 +1,8 @@
+import {
+  app_document_title_account_settings,
+  app_document_title_library,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
@@ -17,11 +22,7 @@ import { HelpFab } from "../components/HelpWidget";
 import { Header } from "../components/header/MainLayoutHeader";
 import { NAVIGATION } from "../components/navigation/MainNavigation";
 import { Sidebar } from "../components/sidebar/MainLayoutSidebar";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  app_document_title_account_settings,
-  app_document_title_library,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   app_document_title_account_settings,
   app_document_title_library,

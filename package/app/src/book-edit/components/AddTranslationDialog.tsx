@@ -2,6 +2,16 @@ import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
 import {
+  common_cancel,
+  page_book_edit_info_translation_add_dialog_language,
+  page_book_edit_info_translation_add_dialog_no_source,
+  page_book_edit_info_translation_add_dialog_source_release,
+  page_book_edit_info_translation_add_dialog_source_release_help,
+  page_book_edit_info_translation_add_dialog_submit,
+  page_book_edit_info_translation_add_dialog_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Dialog,
   DialogContent,
@@ -19,16 +29,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  page_book_edit_info_translation_add_dialog_language,
-  page_book_edit_info_translation_add_dialog_no_source,
-  page_book_edit_info_translation_add_dialog_source_release,
-  page_book_edit_info_translation_add_dialog_source_release_help,
-  page_book_edit_info_translation_add_dialog_submit,
-  page_book_edit_info_translation_add_dialog_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   page_book_edit_info_translation_add_dialog_language,

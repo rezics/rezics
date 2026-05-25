@@ -4,21 +4,6 @@ import {
   useSetPasswordMutation,
 } from "@rezics/api/auth/auth.mutations";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import { Spinner } from "@rezics/ui";
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { type FC, useState } from "react";
-import { SessionListItem } from "@/user/components/SessionListItem";
-import { SettingsSection } from "@/user/components/SettingsSection";
-import { useRequireAuth } from "@/user/pages/useAuth";
-import { useMessage } from "@rezics/i18n/react";
 import {
   settings_security_active_sessions_description,
   settings_security_active_sessions_title,
@@ -44,6 +29,22 @@ import {
   settings_security_set_password_title,
   settings_security_unavailable,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { type FC, useState } from "react";
+import { SessionListItem } from "@/user/components/SessionListItem";
+import { SettingsSection } from "@/user/components/SettingsSection";
+import { useRequireAuth } from "@/user/pages/useAuth";
+
 const i18nMessages = {
   settings_security_active_sessions_description,
   settings_security_active_sessions_title,

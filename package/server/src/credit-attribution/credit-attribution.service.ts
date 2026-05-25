@@ -1,6 +1,6 @@
 import type {
-  CreditAttributionDTO,
   CreateCreditAttributionEvidenceInput,
+  CreditAttributionDTO,
   LinkCreditAttributionInput,
   RezicsSessionClaims,
 } from "@rezics/contract";

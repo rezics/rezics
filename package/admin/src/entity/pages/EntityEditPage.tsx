@@ -6,29 +6,6 @@ import {
   markdownContentDoc,
   validateSlug,
 } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  Card,
-  CardContent,
-  Checkbox,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
-import {
-  Plus as AddIcon,
-  ArrowLeft as ArrowBackIcon,
-  Save as SaveIcon,
-  Trash2 as TrashIcon,
-} from "lucide-react";
-import React from "react";
-import { Page } from "@/core/layouts/Page";
-import { Route } from "@/routes/_admin/entity/$unitId";
-import { Link } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
 import {
   admin_entity_avatar_placeholder,
   admin_entity_avatar_url,
@@ -63,6 +40,30 @@ import {
   common_title,
   common_type,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import {
+  Plus as AddIcon,
+  ArrowLeft as ArrowBackIcon,
+  Save as SaveIcon,
+  Trash2 as TrashIcon,
+} from "lucide-react";
+import React from "react";
+import { Page } from "@/core/layouts/Page";
+import { Route } from "@/routes/_admin/entity/$unitId";
+import { Link } from "@/shared/ui/link";
+
 const i18nMessages = {
   admin_entity_avatar_placeholder,
   admin_entity_avatar_url,

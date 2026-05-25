@@ -1,3 +1,12 @@
+import {
+  auth_error_passwords_mismatch,
+  auth_flow_already_have_account,
+  auth_flow_sign_in_instead,
+  auth_register,
+  common_email,
+  common_loading,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
 import {
@@ -18,15 +27,7 @@ import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { resolvePostAuthDestination } from "../models/authRedirect";
 import { register } from "../models/handler.ts";
 import { validateEmail, validatePassword } from "../models/validate.ts";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  auth_error_passwords_mismatch,
-  auth_flow_already_have_account,
-  auth_flow_sign_in_instead,
-  auth_register,
-  common_email,
-  common_loading,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   auth_error_passwords_mismatch,
   auth_flow_already_have_account,

@@ -1,10 +1,9 @@
 import { t } from "elysia";
+
 export {
   DEFAULT_LANGUAGE,
   FALLBACK_LANGUAGE,
   LANGUAGE_META,
-} from "./language-core";
-export {
   LANGUAGES,
   type Language,
   normalizeLanguage,

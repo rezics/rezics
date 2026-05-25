@@ -1,5 +1,14 @@
 import type { UnitLastPosition } from "@rezics/contract";
 import {
+  common_cancel,
+  common_save,
+  progress_status_active_modal_chapter_label,
+  progress_status_active_modal_description,
+  progress_status_active_modal_progress_label,
+  progress_status_active_modal_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import {
   Button,
   Dialog,
   DialogContent,
@@ -11,15 +20,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import { ChapterPicker } from "./ChapterPicker";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  common_cancel,
-  common_save,
-  progress_status_active_modal_chapter_label,
-  progress_status_active_modal_description,
-  progress_status_active_modal_progress_label,
-  progress_status_active_modal_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   common_cancel,
   common_save,

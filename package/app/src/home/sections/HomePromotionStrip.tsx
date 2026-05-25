@@ -1,10 +1,11 @@
-import type React from "react";
-import { useMessage } from "@rezics/i18n/react";
 import {
   page_home_sections_promotion_item_1,
   page_home_sections_promotion_item_2,
   page_home_sections_promotion_item_3,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import type React from "react";
+
 const i18nMessages = {
   page_home_sections_promotion_item_1,
   page_home_sections_promotion_item_2,

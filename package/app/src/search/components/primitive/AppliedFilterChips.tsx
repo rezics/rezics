@@ -1,7 +1,4 @@
 import type { SearchQuery, TagRef } from "@rezics/contract";
-import { Badge, Button } from "@rezics/ui/shadcn";
-import { X as CloseIcon } from "lucide-react";
-import type React from "react";
 import {
   common_no,
   common_remove,
@@ -15,6 +12,9 @@ import {
   search_chip_type,
   search_chip_words,
 } from "@rezics/i18n/messages";
+import { Badge, Button } from "@rezics/ui/shadcn";
+import { X as CloseIcon } from "lucide-react";
+import type React from "react";
 
 export type { ChipDescriptor as AppliedFilterChipDescriptor };
 

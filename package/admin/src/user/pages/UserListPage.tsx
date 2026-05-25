@@ -1,26 +1,6 @@
 import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import { Spinner } from "@rezics/ui";
-import {
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { useMatchRoute } from "@tanstack/react-router";
-import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
-import React from "react";
-import {
-  type PaginatedColumn,
-  PaginatedTable,
-} from "@/components/table/PaginatedTable";
-import { Page } from "@/core/layouts/Page";
-import { Link } from "@/shared/ui/link";
-import { useMessage } from "@rezics/i18n/react";
 import {
   admin_user_actions,
   admin_user_failed_to_load_users,
@@ -40,6 +20,27 @@ import {
   common_edit,
   common_search,
 } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { Spinner } from "@rezics/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  Input,
+  Label,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { useMatchRoute } from "@tanstack/react-router";
+import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
+import React from "react";
+import {
+  type PaginatedColumn,
+  PaginatedTable,
+} from "@/components/table/PaginatedTable";
+import { Page } from "@/core/layouts/Page";
+import { Link } from "@/shared/ui/link";
+
 const i18nMessages = {
   admin_user_actions,
   admin_user_failed_to_load_users,

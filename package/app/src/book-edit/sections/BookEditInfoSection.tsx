@@ -23,51 +23,12 @@ import type {
 import {
   CreationMode as CreationModeValue,
   DEFAULT_LANGUAGE,
-  UNIT_FIELD_LOCK_ALL,
   lockPathIntersectsPatchPath,
   mainMarkdownSource,
   markdownContentDoc,
   normalizeLanguage,
+  UNIT_FIELD_LOCK_ALL,
 } from "@rezics/contract";
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Separator,
-} from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { ChevronDown as ExpandMore, LockKeyhole, Plus } from "lucide-react";
-import React from "react";
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { EntityPicker } from "@/entity-picker";
-import { TextLink } from "@/shared/ui/link";
-import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
-import { AddTranslationDialog } from "../components/AddTranslationDialog";
-import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
-import {
-  BookMetadataEditor,
-  type BookMetadataValue,
-} from "../components/Metadata/BookMetadataEditor";
-import { SetSourceReleaseControl } from "../components/SetSourceReleaseControl";
-import { TranslationFieldsEditor } from "../components/TranslationFieldsEditor";
-import { TranslationLanguageBar } from "../components/TranslationLanguageBar";
-import { TranslationSyncActions } from "../components/TranslationSyncActions";
-import {
-  ALL_LANGUAGES,
-  type TranslationDraft,
-  useBookTranslationEditor,
-} from "../hooks/useBookTranslationEditor";
-import {
-  isRestoreEditSubmitDisabled,
-  withRestoreSource,
-} from "../models/restoreEdit";
-import { editorialPathLabel } from "@/unit/models/lockFieldLabels";
 import {
   authority_edit_form_all_locked_notice,
   authority_edit_form_locked_error,
@@ -102,6 +63,45 @@ import {
   page_book_edit_info_translation_section_title,
   page_book_edit_info_validation_publish_url_required,
 } from "@rezics/i18n/messages";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Separator,
+} from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
+import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { ChevronDown as ExpandMore, LockKeyhole, Plus } from "lucide-react";
+import React from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { EntityPicker } from "@/entity-picker";
+import { TextLink } from "@/shared/ui/link";
+import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
+import { editorialPathLabel } from "@/unit/models/lockFieldLabels";
+import { AddTranslationDialog } from "../components/AddTranslationDialog";
+import { BookExtraEditor } from "../components/Metadata/BookExtraEditor";
+import {
+  BookMetadataEditor,
+  type BookMetadataValue,
+} from "../components/Metadata/BookMetadataEditor";
+import { SetSourceReleaseControl } from "../components/SetSourceReleaseControl";
+import { TranslationFieldsEditor } from "../components/TranslationFieldsEditor";
+import { TranslationLanguageBar } from "../components/TranslationLanguageBar";
+import { TranslationSyncActions } from "../components/TranslationSyncActions";
+import {
+  ALL_LANGUAGES,
+  type TranslationDraft,
+  useBookTranslationEditor,
+} from "../hooks/useBookTranslationEditor";
+import {
+  isRestoreEditSubmitDisabled,
+  withRestoreSource,
+} from "../models/restoreEdit";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));

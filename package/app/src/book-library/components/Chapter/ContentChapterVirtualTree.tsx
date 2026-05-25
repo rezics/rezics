@@ -1,3 +1,13 @@
+import {
+  book_chapter_label,
+  book_chapter_section_label,
+  book_edit_search_chapters_placeholder,
+  common_collapse,
+  common_collapse_all,
+  common_expand,
+  common_expand_all,
+  common_search,
+} from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import type React from "react";
@@ -17,16 +27,6 @@ import {
   EMPTY_CHAPTER_ROUTE_ID,
   encodeBookContentStructurePath,
 } from "../../models/bookContentStructurePath";
-import {
-  book_chapter_label,
-  book_chapter_section_label,
-  book_edit_search_chapters_placeholder,
-  common_collapse,
-  common_collapse_all,
-  common_expand,
-  common_expand_all,
-  common_search,
-} from "@rezics/i18n/messages";
 
 const CONTENT_ROW_HEIGHT = 64;
 const MIN_TREE_HEIGHT = 320;

@@ -1,13 +1,14 @@
+import {
+  admin_layout_open_menu,
+  admin_layout_title,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Button, Sheet, SheetContent } from "@rezics/ui/shadcn";
 import { Menu as MenuIcon } from "lucide-react";
 import React from "react";
 import { AdminNav } from "@/navigation/AdminNav";
 import { adminNav } from "@/navigation/adminNavConfig";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_layout_open_menu,
-  admin_layout_title,
-} from "@rezics/i18n/messages";
+
 const i18nMessages = {
   admin_layout_open_menu,
   admin_layout_title,

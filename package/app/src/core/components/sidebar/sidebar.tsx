@@ -1,9 +1,10 @@
+import { app_close_sidebar_aria_label } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { X } from "lucide-react";
 import type React from "react";
 import { useEffect } from "react";
 import { cn } from "@/shared/utils/css-util";
-import { useMessage } from "@rezics/i18n/react";
-import { app_close_sidebar_aria_label } from "@rezics/i18n/messages";
+
 const i18nMessages = {
   app_close_sidebar_aria_label,
 };
