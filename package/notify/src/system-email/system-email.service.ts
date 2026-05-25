@@ -32,8 +32,11 @@ export async function notifySystemAndEmail(
       : null;
   const claimId =
     typeof payload?.claimId === "string" ? (payload.claimId as string) : kind;
+  if (!workUnitId) {
+    throw new Error("System email payload is missing workUnitId");
+  }
 
-  const meta = {
+  const extra = {
     kind,
     payload,
     locale: locale ?? null,
@@ -50,18 +53,19 @@ export async function notifySystemAndEmail(
     const existing = await prisma.notification.findFirst({
       where: {
         recipientId: userId,
-        type: "SYSTEM",
-        entityType: "WORK_LINK_CLAIM",
+        kind,
+        sourceUnitId: workUnitId,
+        actorId: claimerUserId,
         createdAt: { gte: since },
         AND: [
-          { meta: { path: ["kind"], equals: kind } },
+          { extra: { path: ["kind"], equals: kind } },
           {
-            meta: {
+            extra: {
               path: ["payload", "claimerUserId"],
               equals: claimerUserId,
             },
           },
-          { meta: { path: ["payload", "workUnitId"], equals: workUnitId } },
+          { extra: { path: ["payload", "workUnitId"], equals: workUnitId } },
         ],
       },
       orderBy: { createdAt: "desc" },
@@ -71,7 +75,7 @@ export async function notifySystemAndEmail(
       const now = new Date();
       const refreshed = await prisma.notification.update({
         where: { id: existing.id },
-        data: { createdAt: now, read: false, readAt: null, meta },
+        data: { createdAt: now, read: false, readAt: null, extra },
       });
       return {
         success: true,
@@ -84,10 +88,10 @@ export async function notifySystemAndEmail(
   const notification = await prisma.notification.create({
     data: {
       recipientId: userId,
-      type: "SYSTEM",
-      entityType: "WORK_LINK_CLAIM",
-      entityId: claimId,
-      meta,
+      actorId: claimerUserId,
+      kind,
+      sourceUnitId: workUnitId,
+      extra: { ...extra, claimId },
     },
   });
 
