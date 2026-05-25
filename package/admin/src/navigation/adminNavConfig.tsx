@@ -9,6 +9,7 @@ import {
   Package as Inventory2Icon,
   Key as KeyOutlinedIcon,
   SearchCheck as ManageSearchOutlinedIcon,
+  Network as NetworkIcon,
   Users as PeopleIcon,
   Settings as SettingsIcon,
   ShieldCheck as ShieldCheckIcon,
@@ -118,6 +119,12 @@ export const adminNav = {
       label: m.admin_nav_entities,
       icon: <IdentityIcon fontSize="small" />,
       to: "/entities",
+    },
+    {
+      id: "source-sites",
+      label: () => "Source sites",
+      icon: <NetworkIcon fontSize="small" />,
+      to: "/source-sites",
     },
     {
       id: "authority",
