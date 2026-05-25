@@ -1,5 +1,12 @@
 import { type Index, MeiliSearch } from "meilisearch";
 import { PROGRESS_INDEX_NAME } from "./progress";
+import {
+  type ExpectedMeiliIndexSchema,
+  type ExpectedMeiliIndexUid,
+  getExpectedMeiliIndexSchema,
+  getExpectedMeiliIndexSettings,
+  getExpectedMeiliIndexUids,
+} from "./schema";
 
 export interface MeiliConfig {
   host: string;
@@ -61,152 +68,71 @@ export class SearchClient {
   }
 
   private knownIndexNames(): string[] {
-    return [
-      "content",
-      "feedbacks",
-      "users",
-      "posts",
-      "realms",
-      "entities",
-      PROGRESS_INDEX_NAME,
-    ];
+    return getExpectedMeiliIndexUids();
+  }
+
+  private indexForUid(uid: ExpectedMeiliIndexUid): Index {
+    switch (uid) {
+      case "content":
+        return this.contentIndex;
+      case "feedbacks":
+        return this.feedbackIndex;
+      case "users":
+        return this.userIndex;
+      case "posts":
+        return this.postIndex;
+      case "realms":
+        return this.realmIndex;
+      case "entities":
+        return this.entityIndex;
+      case PROGRESS_INDEX_NAME:
+        return this.progressIndex;
+    }
+  }
+
+  private async initIndexFromSchema(
+    schema: ExpectedMeiliIndexSchema,
+  ): Promise<void> {
+    const index = this.indexForUid(schema.uid);
+    const settingsTask = await index.updateSettings(
+      getExpectedMeiliIndexSettings(schema),
+    );
+    const primaryKeyTask = await index.addDocuments([], {
+      primaryKey: schema.primaryKey,
+    });
+    await this.waitForTasks([settingsTask, primaryKeyTask]);
   }
 
   // ANCHOR: Index initialization
 
   async initContentIndex(): Promise<void> {
-    const settingsTask = await this.contentIndex.updateSettings({
-      searchableAttributes: [
-        "titles",
-        "subtitles",
-        "contentText",
-        "descriptionText",
-        "descriptions",
-        "summaries",
-        "aliasValues",
-        "creditNames",
-        "subjectNames",
-        "tagLabels",
-      ],
-      filterableAttributes: [
-        "type",
-        "postKind",
-        "tagIds",
-        "realmIds",
-        "realmTagKeys",
-        "languages",
-        "rating",
-        "visibility",
-        "isLicensed",
-        "textLength",
-        "userId",
-        "containedUnitIds",
-        "subjectEntityIds",
-        "subjectKinds",
-        "subjectRoles",
-      ],
-      sortableAttributes: ["createdAt", "updatedAt", "publishedAt"],
-    });
-    const primaryKeyTask = await this.contentIndex.addDocuments([], {
-      primaryKey: "id",
-    });
-    await this.waitForTasks([settingsTask, primaryKeyTask]);
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("content"));
   }
 
   async initFeedbackIndex(): Promise<void> {
-    const settingsTask = await this.feedbackIndex.updateSettings({
-      searchableAttributes: ["id", "content", "url"],
-      filterableAttributes: [
-        "userId",
-        "unitId",
-        "type",
-        "resolved",
-        "createdAt",
-        "updatedAt",
-      ],
-      sortableAttributes: ["createdAt", "updatedAt"],
-    });
-    const primaryKeyTask = await this.feedbackIndex.addDocuments([], {
-      primaryKey: "id",
-    });
-    await this.waitForTasks([settingsTask, primaryKeyTask]);
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("feedbacks"));
   }
 
   async initUserIndex(): Promise<void> {
-    const settingsTask = await this.userIndex.updateSettings({
-      searchableAttributes: ["name", "slug", "email", "bio", "descriptionText"],
-      filterableAttributes: ["slug", "email", "joinDate"],
-      sortableAttributes: ["joinDate", "followersCount", "followingsCount"],
-    });
-    const primaryKeyTask = await this.userIndex.addDocuments([], {
-      primaryKey: "id",
-    });
-    await this.waitForTasks([settingsTask, primaryKeyTask]);
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("users"));
   }
 
   async initPostIndex(): Promise<void> {
-    const settingsTask = await this.postIndex.updateSettings({
-      searchableAttributes: ["contentText", "targetTitles", "authorName"],
-      filterableAttributes: [
-        "kind",
-        "targetUnitId",
-        "realmIds",
-        "authorUserId",
-        "depth",
-        "isLocked",
-        "rootPostUnitId",
-        "parentPostUnitId",
-        "rootTargetUnitId",
-        "rootTargetUnitType",
-      ],
-      sortableAttributes: ["createdAt", "updatedAt", "replyCount"],
-    });
-    const primaryKeyTask = await this.postIndex.addDocuments([], {
-      primaryKey: "id",
-    });
-    await this.waitForTasks([settingsTask, primaryKeyTask]);
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("posts"));
   }
 
   async initRealmIndex(): Promise<void> {
-    const settingsTask = await this.realmIndex.updateSettings({
-      searchableAttributes: ["titles", "descriptions", "aliasValues"],
-      filterableAttributes: ["isPublic", "isOfficial"],
-      sortableAttributes: ["memberCount", "createdAt", "updatedAt"],
-    });
-    const primaryKeyTask = await this.realmIndex.addDocuments([], {
-      primaryKey: "id",
-    });
-    await this.waitForTasks([settingsTask, primaryKeyTask]);
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("realms"));
   }
 
   async initEntityIndex(): Promise<void> {
-    const settingsTask = await this.entityIndex.updateSettings({
-      searchableAttributes: ["titles", "summaries", "aliasValues", "slug"],
-      filterableAttributes: [
-        "kind",
-        "verified",
-        "ownerUnitId",
-        "eligibleCreditRoles",
-        "eligibleSubjectRoles",
-      ],
-      sortableAttributes: ["createdAt", "updatedAt"],
-    });
-    const primaryKeyTask = await this.entityIndex.addDocuments([], {
-      primaryKey: "id",
-    });
-    await this.waitForTasks([settingsTask, primaryKeyTask]);
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("entities"));
   }
 
   async initProgressIndex(): Promise<void> {
-    const settingsTask = await this.progressIndex.updateSettings({
-      searchableAttributes: [],
-      filterableAttributes: ["unitId", "userId", "status", "progressBucket"],
-      sortableAttributes: ["lastSeenAt"],
-    });
-    const primaryKeyTask = await this.progressIndex.addDocuments([], {
-      primaryKey: "id",
-    });
-    await this.waitForTasks([settingsTask, primaryKeyTask]);
+    await this.initIndexFromSchema(
+      getExpectedMeiliIndexSchema(PROGRESS_INDEX_NAME),
+    );
   }
 
   // ANCHOR: Content document operations

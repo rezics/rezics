@@ -16,6 +16,7 @@ import { Route as MainLayoutTest03RouteImport } from './routes/_mainLayout/test0
 import { Route as MainLayoutTest02RouteImport } from './routes/_mainLayout/test02'
 import { Route as MainLayoutTestLinksRouteImport } from './routes/_mainLayout/test-links'
 import { Route as MainLayoutTestRouteImport } from './routes/_mainLayout/test'
+import { Route as MainLayoutStatusRouteImport } from './routes/_mainLayout/status'
 import { Route as MainLayoutResetPasswordRouteImport } from './routes/_mainLayout/reset-password'
 import { Route as MainLayoutRegisterRouteImport } from './routes/_mainLayout/register'
 import { Route as MainLayoutNoticeRouteImport } from './routes/_mainLayout/notice'
@@ -166,6 +167,11 @@ const MainLayoutTestLinksRoute = MainLayoutTestLinksRouteImport.update({
 const MainLayoutTestRoute = MainLayoutTestRouteImport.update({
   id: '/test',
   path: '/test',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
+const MainLayoutStatusRoute = MainLayoutStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => MainLayoutRoute,
 } as any)
 const MainLayoutResetPasswordRoute = MainLayoutResetPasswordRouteImport.update({
@@ -837,6 +843,7 @@ export interface FileRoutesByFullPath {
   '/notice': typeof MainLayoutNoticeRoute
   '/register': typeof MainLayoutRegisterRoute
   '/reset-password': typeof MainLayoutResetPasswordRoute
+  '/status': typeof MainLayoutStatusRoute
   '/test': typeof MainLayoutTestRoute
   '/test-links': typeof MainLayoutTestLinksRoute
   '/test02': typeof MainLayoutTest02Route
@@ -961,6 +968,7 @@ export interface FileRoutesByTo {
   '/notice': typeof MainLayoutNoticeRoute
   '/register': typeof MainLayoutRegisterRoute
   '/reset-password': typeof MainLayoutResetPasswordRoute
+  '/status': typeof MainLayoutStatusRoute
   '/test': typeof MainLayoutTestRoute
   '/test-links': typeof MainLayoutTestLinksRoute
   '/test02': typeof MainLayoutTest02Route
@@ -1077,6 +1085,7 @@ export interface FileRoutesById {
   '/_mainLayout/notice': typeof MainLayoutNoticeRoute
   '/_mainLayout/register': typeof MainLayoutRegisterRoute
   '/_mainLayout/reset-password': typeof MainLayoutResetPasswordRoute
+  '/_mainLayout/status': typeof MainLayoutStatusRoute
   '/_mainLayout/test': typeof MainLayoutTestRoute
   '/_mainLayout/test-links': typeof MainLayoutTestLinksRoute
   '/_mainLayout/test02': typeof MainLayoutTest02Route
@@ -1205,6 +1214,7 @@ export interface FileRouteTypes {
     | '/notice'
     | '/register'
     | '/reset-password'
+    | '/status'
     | '/test'
     | '/test-links'
     | '/test02'
@@ -1329,6 +1339,7 @@ export interface FileRouteTypes {
     | '/notice'
     | '/register'
     | '/reset-password'
+    | '/status'
     | '/test'
     | '/test-links'
     | '/test02'
@@ -1444,6 +1455,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/notice'
     | '/_mainLayout/register'
     | '/_mainLayout/reset-password'
+    | '/_mainLayout/status'
     | '/_mainLayout/test'
     | '/_mainLayout/test-links'
     | '/_mainLayout/test02'
@@ -1619,6 +1631,13 @@ declare module '@tanstack/react-router' {
       path: '/test'
       fullPath: '/test'
       preLoaderRoute: typeof MainLayoutTestRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/status': {
+      id: '/_mainLayout/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof MainLayoutStatusRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/reset-password': {
@@ -2665,6 +2684,7 @@ interface MainLayoutRouteChildren {
   MainLayoutNoticeRoute: typeof MainLayoutNoticeRoute
   MainLayoutRegisterRoute: typeof MainLayoutRegisterRoute
   MainLayoutResetPasswordRoute: typeof MainLayoutResetPasswordRoute
+  MainLayoutStatusRoute: typeof MainLayoutStatusRoute
   MainLayoutTestRoute: typeof MainLayoutTestRoute
   MainLayoutTestLinksRoute: typeof MainLayoutTestLinksRoute
   MainLayoutTest02Route: typeof MainLayoutTest02Route
@@ -2732,6 +2752,7 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutNoticeRoute: MainLayoutNoticeRoute,
   MainLayoutRegisterRoute: MainLayoutRegisterRoute,
   MainLayoutResetPasswordRoute: MainLayoutResetPasswordRoute,
+  MainLayoutStatusRoute: MainLayoutStatusRoute,
   MainLayoutTestRoute: MainLayoutTestRoute,
   MainLayoutTestLinksRoute: MainLayoutTestLinksRoute,
   MainLayoutTest02Route: MainLayoutTest02Route,

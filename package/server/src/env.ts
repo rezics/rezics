@@ -173,6 +173,39 @@ export const env = createEnv({
 
     /** Shared secret for authenticating internal job-runner enqueue requests. */
     JOB_RUNNER_INTERNAL_SECRET: v.optional(v.string()),
+
+    /** Browser-facing application URL shown on the internal status page. */
+    STATUS_APP_URL: v.optional(v.string()),
+
+    /** Browser/operator-facing main server URL shown on the status page. */
+    STATUS_SERVER_URL: v.optional(v.string()),
+
+    /** Auth service health URL used by the internal status aggregator. */
+    STATUS_AUTH_HEALTH_URL: v.optional(v.string()),
+
+    /** Job-runner health/admin base URL used by the internal status aggregator. */
+    STATUS_JOB_RUNNER_URL: v.optional(v.string()),
+
+    /** Meilisearch operator URL shown on the internal status page. */
+    STATUS_MEILI_URL: v.optional(v.string()),
+
+    /** Sequin UI URL shown on the internal status page. */
+    STATUS_SEQUIN_UI_URL: v.optional(v.string()),
+
+    /** Sequin health endpoint checked by the internal status aggregator. */
+    STATUS_SEQUIN_HEALTH_URL: v.optional(v.string()),
+
+    /** Safe display name for the Sequin sink/webhook target. */
+    STATUS_SEQUIN_WEBHOOK_TARGET_NAME: v.optional(v.string()),
+
+    /** Source database publication expected by Sequin CDC. */
+    STATUS_CDC_PUBLICATION_NAME: v.optional(v.string()),
+
+    /** Source database replication slot expected by Sequin CDC. */
+    STATUS_CDC_REPLICATION_SLOT_NAME: v.optional(v.string()),
+
+    /** Byte threshold where replication slot lag degrades CDC status. */
+    STATUS_CDC_LAG_WARNING_BYTES: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

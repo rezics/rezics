@@ -3,6 +3,7 @@ import type React from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { HomeSearch } from "@/search";
 import { useIsMobile } from "@/shared/utils/use-media-query";
+import { StatusOverviewCard } from "@/diagnostic";
 import { BookCarousel } from "../components/HomeCarousel";
 import { ActiveRealmsSection } from "../sections/ActiveRealmsSection";
 import { AnnouncementBarSection } from "../sections/AnnouncementBarSection";
@@ -40,6 +41,7 @@ export const Home: React.FC<HomeProps> = () => {
       </section>
 
       <LibraryCardsSection />
+      <StatusOverviewCard />
       <ActiveRealmsSection />
       <AnnouncementBarSection />
       <TrendingShelfSection />

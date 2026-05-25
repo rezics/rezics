@@ -11,6 +11,7 @@ import {
   LayoutDashboard as DashboardOutlinedIcon,
   CircleAlert as ErrorOutlineOutlinedIcon,
   MessageCircleQuestion as FeedbackOutlinedIcon,
+  MonitorCog as MonitorCogOutlinedIcon,
   Users as GroupsOutlinedIcon,
   UserCheck as HowToRegOutlinedIcon,
   ClipboardList as ListAltOutlinedIcon,
@@ -133,6 +134,12 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
           segment: "/feedback/admin",
           title: "Feedback Admin",
           icon: SupportAgentOutlinedIcon,
+        },
+        {
+          kind: "item",
+          segment: "/status",
+          title: "Status",
+          icon: MonitorCogOutlinedIcon,
         },
 
         { kind: "divider" },

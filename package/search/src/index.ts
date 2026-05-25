@@ -1,6 +1,16 @@
 export type { SearchResponse } from "meilisearch";
 export { type MeiliConfig, SearchClient } from "./client";
 export {
+  EXPECTED_MEILI_INDEX_SCHEMA_BY_UID,
+  EXPECTED_MEILI_INDEX_SCHEMAS,
+  getExpectedMeiliIndexSchema,
+  getExpectedMeiliIndexSettings,
+  getExpectedMeiliIndexUids,
+  type ExpectedMeiliIndexSchema,
+  type ExpectedMeiliIndexSettings,
+  type ExpectedMeiliIndexUid,
+} from "./schema";
+export {
   bucketize,
   buildProgressDocument,
   PROGRESS_BUCKET_COUNT,

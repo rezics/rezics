@@ -10,10 +10,16 @@ import {
   userListQuerySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro, verifyRootFromDb } from "@/middleware";
+import {
+  authMacro,
+  isAdminRole,
+  verifyAdminFromDb,
+  verifyRootFromDb,
+} from "@/middleware";
 import { mapUserSearchDocToPublicProfile } from "./mapper";
 import { meiliService } from "./meili.service";
 import { searchClient } from "./search-client";
+import { getMeiliStatusSummary } from "./status.service";
 
 export const meiliApi = new Elysia({ prefix: "/meili" })
   .use(authMacro)
@@ -27,6 +33,28 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       detail: {
         summary: "Meilisearch health check",
         tags: ["Meili"],
+      },
+    },
+  )
+  .get(
+    "/status",
+    async ({ identity, set }) => {
+      if (!isAdminRole(identity)) {
+        set.status = 403;
+        throw new Error("Forbidden: admin permission required");
+      }
+      const isAdmin = await verifyAdminFromDb(identity.userId);
+      if (!isAdmin) {
+        set.status = 403;
+        throw new Error("Forbidden: admin permission required");
+      }
+      return getMeiliStatusSummary();
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Meili status summary",
+        tags: ["Meili", "Admin", "Status"],
       },
     },
   )

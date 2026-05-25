@@ -35,6 +35,7 @@ import {
 import { scoreApi } from "./score/score.api";
 import { collectionApi, shelfApi } from "./shelf";
 import { slugApi } from "./slug";
+import { statusApi } from "./diagnostic";
 import { statsAdminApi } from "./stat";
 import { sourceSiteApi } from "./source-site";
 import { subjectAttributionApi } from "./subject-attribution";
@@ -223,6 +224,7 @@ routeApp
   .use(historyProxyApi)
   .use(historyResolutionApi)
   .use(jwtServiceAdminApi)
+  .use(statusApi)
   .use(statsAdminApi)
   .use(uploadApi)
   .use(dmBoundaryApi)

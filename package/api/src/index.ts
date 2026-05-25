@@ -8,6 +8,7 @@ export {
 export * from "./credit-attribution/credit-attribution";
 export * from "./entity-attribution/entity-attribution";
 export * from "./history/history";
+export * from "./meili/meili";
 export * from "./progress";
 export {
   ApiError,
@@ -17,6 +18,7 @@ export {
 } from "./react-query/errors";
 export * from "./subject-attribution/subject-attribution";
 export * from "./source-site/source-site";
+export * from "./diagnostic/status";
 export * from "./subscription/subscription";
 export * from "./unit/unit";
 export * from "./unit-alias-record/unit-alias";

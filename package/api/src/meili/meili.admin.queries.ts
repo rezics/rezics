@@ -15,6 +15,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { apiFetch } from "../react-query/http";
+import type { MeiliStatusSummary } from "../diagnostic/status.types";
 
 export type MeiliHealthResponse = {
   status: string;
@@ -53,6 +54,9 @@ export type MeiliKeyListResponse = {
 export const meiliAdminApi = {
   health: async (): Promise<MeiliHealthResponse> => {
     return apiFetch<MeiliHealthResponse>("/meili/health");
+  },
+  status: async (): Promise<MeiliStatusSummary> => {
+    return apiFetch<MeiliStatusSummary>("/meili/status");
   },
 
   // Index initialization
@@ -181,6 +185,13 @@ export const meiliAdminQueries = {
       queryKey: ["meili", "admin", "health"],
       queryFn: () => meiliAdminApi.health(),
       staleTime: 1000 * 5,
+    }),
+  status: () =>
+    queryOptions({
+      queryKey: ["meili", "admin", "status"],
+      queryFn: () => meiliAdminApi.status(),
+      staleTime: 1000 * 10,
+      refetchInterval: 1000 * 10,
     }),
   keys: () =>
     queryOptions({

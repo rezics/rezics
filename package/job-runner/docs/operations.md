@@ -134,6 +134,60 @@ Health endpoints:
 - `GET /health`
 - `GET /ready`
 
+## Internal Status Page
+
+Root/admin operators can use the Rezics app status page at `/status` after the
+main server is running. The page reads only the main server APIs:
+
+- `GET /diagnostic/system`
+- `GET /meili/status`
+
+The browser never calls Meilisearch, Sequin, Postgres, or job-runner admin
+endpoints directly. The main server performs bounded read-only checks and
+returns safe summaries.
+
+Configure these non-secret values on `@rezics/server` so the status page can
+show links and reach optional dependencies:
+
+| Variable | Local default / example | Purpose |
+| --- | --- | --- |
+| `STATUS_APP_URL` | `http://localhost:35001` | Browser-facing app URL. |
+| `STATUS_SERVER_URL` | `http://localhost:3000` | Main server URL for operators. |
+| `STATUS_AUTH_HEALTH_URL` | `http://localhost:3001/health` | Auth service health check. |
+| `STATUS_JOB_RUNNER_URL` | `http://localhost:3300` | Job-runner health/admin base URL. Falls back to `JOB_RUNNER_BASE_URL`. |
+| `STATUS_MEILI_URL` | `http://localhost:7700` | Meilisearch operator URL. Falls back to `MEILI_HOST`. |
+| `STATUS_SEQUIN_UI_URL` | `http://localhost:7376` | Optional Sequin UI URL. |
+| `STATUS_SEQUIN_HEALTH_URL` | `http://localhost:7376/health` | Optional Sequin health URL. |
+| `STATUS_SEQUIN_WEBHOOK_TARGET_NAME` | `job-runner /webhooks/sequin` | Safe display name for the configured sink target. |
+| `STATUS_CDC_PUBLICATION_NAME` | `rezics_sequin_pub_development` | Expected source DB publication. |
+| `STATUS_CDC_REPLICATION_SLOT_NAME` | `rezics_sequin_slot_development` | Expected source DB replication slot. |
+| `STATUS_CDC_LAG_WARNING_BYTES` | `268435456` | Lag threshold that marks CDC degraded. |
+
+Do not configure database URLs, passwords, API keys, or internal secrets as
+status link values. `JOB_RUNNER_INTERNAL_SECRET` and `MEILI_MASTER_KEY` remain
+server-only secrets and are never returned by status APIs.
+
+The status page replaces most manual spot checks during normal operations:
+
+- Use the Sequin and CDC panels before running the publication/slot SQL below.
+- Use the queue panel before querying pg-boss directly.
+- Use the Meili panel before opening the Meilisearch dashboard for index drift
+  or failed tasks.
+
+The page is diagnostic only. These checks are read-only: service health,
+Meilisearch health/version/stats/index settings/tasks, source DB `wal_level`,
+publication table membership, replication slot state/lag, job-runner
+health/readiness, queue counts, and failed job summaries.
+
+Existing Meili init/sync/delete/key endpoints keep their current root/admin
+guards. Init and sync operations may be useful repair follow-ups, but
+`deleteAll`, `resetAll`, key creation, and key deletion remain destructive or
+sensitive operations and must not be treated as status checks.
+
+Environments without Sequin or job-runner can leave the optional status URLs
+unset. The system status response will mark those sections `unknown` instead of
+failing the whole page. Enable the URLs later when the services are deployed.
+
 Queue database expectations:
 
 - `JOB_DATABASE_URL` points at a dedicated pg-boss database.

@@ -139,14 +139,16 @@ compose files. That would be fragile and risks exposing sensitive values.
 
 ### Decision: The `status` feature exports an overview card
 
-`package/app/src/status` should export:
+The status UI should live in the singular `package/app/src/diagnostic` feature
+folder to satisfy the repo folder convention while keeping the public route and
+component names status-oriented. It should export:
 
 - `StatusPage`
 - `StatusOverviewCard`
 
 The overview card summarizes top-level state and navigates to the status route
-when clicked. `home` can import the card from `@/status` without owning status
-logic or status-specific API calls.
+when clicked. `home` can import the card from `@/diagnostic` without owning
+status logic or status-specific API calls.
 
 Alternative considered: place the card inside `home`. That would couple an
 operational widget to the public home feature and make later dashboard reuse
