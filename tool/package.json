@@ -6,6 +6,7 @@
     "prisma:regenerate": "bun run db-script/prisma-regenerate.ts",
     "prisma:migrate": "bun run db-script/prisma-migrate.ts",
     "prisma:reset-db": "bun run db-script/prisma-reset-db.ts",
+    "sequin:source:prepare": "bun run db-script/prepare-sequin-source.ts",
     "install-services": "bun run install-services/install-services.ts",
     "deploy": "bun run deploy-script/deploy-script.ts",
     "generate-barrel": "bun run scripts/generate-barrel.ts",

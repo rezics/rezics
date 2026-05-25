@@ -25,6 +25,18 @@ bun run service:sequin:config:plan
 bun run service:sequin:config:apply
 ```
 
+Prepare and verify the source Postgres database before relying on CDC:
+
+```sh
+bun run service:sequin:source:prepare
+bun run service:sequin:source:prepare --apply --dev-reset
+```
+
+If the script changes `wal_level`, restart Postgres and run the same command
+again so the logical replication slot can be created. The `--dev-reset` mode is
+for local development and recreates the Sequin publication/slot; do not use it
+for preserving existing CDC progress.
+
 The Sequin wrapper chooses a compose runtime in this order:
 
 1. `CONTAINER_RUNTIME` when set (`podman`, `podman-compose`, or `docker`).

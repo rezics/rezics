@@ -16,6 +16,7 @@
     "service:sequin:health": "bun run tool/external-services/sequin.ts health",
     "service:sequin:config:plan": "bun run tool/external-services/sequin.ts config plan",
     "service:sequin:config:apply": "bun run tool/external-services/sequin.ts config apply",
+    "service:sequin:source:prepare": "bun run tool/db-script/prepare-sequin-source.ts",
     "seed": "bun run package/utils/bin/cli.ts",
     "factory": "bun run package/utils/bin/cli.ts factory",
     "lint": "biome lint .",
