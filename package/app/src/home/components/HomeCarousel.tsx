@@ -138,7 +138,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
         m.page_home_carousel_alert_parse_failed({ error: String(error) }),
       );
     }
-  }, [data, showAlert]);
+  }, [data, showAlert, m.page_home_carousel_alert_parse_failed]);
 
   // autoplay using carousel api
   useEmblaAutoplay(carouselApi, {

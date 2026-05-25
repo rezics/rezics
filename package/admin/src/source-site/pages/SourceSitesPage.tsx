@@ -70,7 +70,7 @@ function RuleEditor({
     <div className="flex flex-col gap-3">
       {rules.map((rule, index) => (
         <div
-          key={`${rule.externalKind}-${index}`}
+          key={rule.externalKind}
           className="grid gap-3 rounded-md border border-border-whisper p-3 md:grid-cols-12"
         >
           <div className="md:col-span-2">
@@ -133,15 +133,20 @@ function RuleEditor({
               className="mt-1"
             />
           </div>
-          <label className="flex items-center gap-2 text-sm md:col-span-3 md:self-end">
+          <div className="flex items-center gap-2 text-sm md:col-span-3 md:self-end">
             <Checkbox
+              id={`source-site-rule-crawl-supported-${rule.externalKind}`}
               checked={Boolean(rule.crawlSupported)}
               onCheckedChange={(value) =>
                 updateRule(index, { crawlSupported: value === true })
               }
             />
-            Crawl supported
-          </label>
+            <Label
+              htmlFor={`source-site-rule-crawl-supported-${rule.externalKind}`}
+            >
+              Crawl supported
+            </Label>
+          </div>
           <div className="md:col-span-5 md:self-end md:text-right">
             <Button
               type="button"
@@ -276,13 +281,14 @@ export function SourceSiteForm({ sourceSite }: { sourceSite?: SourceSiteDTO }) {
         </div>
       </div>
 
-      <label className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-2 text-sm">
         <Checkbox
+          id="source-site-crawl-enabled"
           checked={crawlEnabled}
           onCheckedChange={(value) => setCrawlEnabled(value === true)}
         />
-        Crawl enabled
-      </label>
+        <Label htmlFor="source-site-crawl-enabled">Crawl enabled</Label>
+      </div>
 
       <div className="rounded-md bg-surface-subtle p-3 text-sm leading-normal text-text-secondary">
         <span className="font-medium text-text-primary">Scheduling:</span>{" "}

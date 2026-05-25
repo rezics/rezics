@@ -233,7 +233,28 @@ export default function AuthUsersPage() {
       },
     ];
     return cols;
-  }, [banMutation, unbanMutation, setRoleMutation, removeMutation]);
+  }, [
+    banMutation,
+    unbanMutation,
+    setRoleMutation,
+    removeMutation,
+    m.admin_auth_actions_title,
+    m.admin_auth_role_admin,
+    m.admin_auth_role_owner,
+    m.admin_auth_role_user,
+    m.admin_auth_user_name,
+    m.admin_auth_user_role,
+    m.admin_auth_users_ban,
+    m.admin_auth_users_banned,
+    m.admin_auth_users_remove_description,
+    m.admin_auth_users_remove_title,
+    m.admin_auth_users_unban,
+    m.common_active,
+    m.common_created,
+    m.common_email,
+    m.common_id,
+    m.common_remove,
+  ]);
 
   return (
     <Page

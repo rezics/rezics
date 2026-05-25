@@ -129,7 +129,14 @@ export default function AuthSessionsPage() {
       },
     ];
     return cols;
-  }, []);
+  }, [
+    m.admin_auth_actions_title,
+    m.admin_auth_sessions_token,
+    m.common_created,
+    m.common_expires,
+    m.common_revoke,
+    m.common_user_agent,
+  ]);
 
   return (
     <Page

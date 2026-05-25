@@ -334,6 +334,18 @@ export default function LowScoreTagsPage() {
     deleteRealmTagApplication.isPending,
     patchUnitTag.isPending,
     patchRealmTagApplication.isPending,
+    m.admin_tag_pin,
+    m.admin_tag_unpin,
+    m.common_actions,
+    m.common_delete,
+    m.common_pinned,
+    m.common_realm,
+    m.common_scope,
+    m.common_score,
+    m.common_tag,
+    m.common_unit,
+    m.common_votes,
+    m.common_yes,
   ]);
 
   return (

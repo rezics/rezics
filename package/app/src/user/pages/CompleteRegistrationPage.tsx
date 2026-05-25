@@ -222,7 +222,13 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
         : m.auth_flow_setup_slug_invalid({ reason: slugCheck.reason ?? "" });
     }
     return undefined;
-  }, [slug, slugCheck]);
+  }, [
+    slug,
+    slugCheck,
+    m.auth_flow_setup_slug_invalid,
+    m.auth_flow_setup_slug_short,
+    m.auth_flow_setup_slug_taken,
+  ]);
 
   const canSubmit = slug.length >= 6 && !slugError && !checkingSlug && !loading;
 

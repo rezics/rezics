@@ -136,7 +136,7 @@ export default function AuthEmailPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [m.admin_auth_email_failed_load_templates]);
 
   useEffect(() => {
     if (!currentTemplate) return;
@@ -176,7 +176,7 @@ export default function AuthEmailPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedTemplate, formValues]);
+  }, [selectedTemplate, formValues, m.admin_auth_email_failed_render_preview]);
 
   const handleSendTest = async () => {
     if (!recipientEmail || !selectedTemplate) return;

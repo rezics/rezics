@@ -175,7 +175,16 @@ export default function UserListPage() {
       },
     ];
     return cols;
-  }, []);
+  }, [
+    m.admin_user_actions,
+    m.admin_user_join_date,
+    m.admin_user_name_label,
+    m.admin_user_rezics_email_label,
+    m.admin_user_roles,
+    m.admin_user_slug,
+    m.admin_user_user_id,
+    m.common_edit,
+  ]);
 
   return (
     <Page

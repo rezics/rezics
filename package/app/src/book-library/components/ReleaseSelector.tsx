@@ -134,7 +134,14 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
       });
     }
     return sortReleases(list, selectedLang);
-  }, [releaseList, bookInfo, officialByLang, selectedLang]);
+  }, [
+    releaseList,
+    bookInfo,
+    officialByLang,
+    selectedLang,
+    m.book_release_current,
+    m.book_release_untitled,
+  ]);
 
   if (options.length <= 1) return null;
 

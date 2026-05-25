@@ -197,7 +197,14 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
     } finally {
       setRemoving(false);
     }
-  }, [removeMut, pendingRemove, realmUnitId, pinboardKey]);
+  }, [
+    removeMut,
+    pendingRemove,
+    realmUnitId,
+    pinboardKey,
+    m.pinboard_admin_delete_done,
+    m.pinboard_admin_delete_failed,
+  ]);
 
   const handleCreate = useCallback(
     async (translations: TranslationEditorEntry[]) => {
@@ -229,7 +236,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
       toast.success(m.pinboard_editor_created());
       refetch();
     },
-    [append, realmUnitId, pinboardKey, refetch],
+    [append, realmUnitId, pinboardKey, refetch, m.pinboard_editor_created],
   );
 
   const handleEditSave = useCallback(
@@ -257,7 +264,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
       toast.success(m.pinboard_editor_saved());
       refetch();
     },
-    [queryClient, refetch],
+    [queryClient, refetch, m.pinboard_editor_saved],
   );
 
   return (
@@ -418,7 +425,14 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
     } finally {
       setSaving(false);
     }
-  }, [isEdit, entry, drafts, onCreate, onEdit]);
+  }, [
+    isEdit,
+    entry,
+    drafts,
+    onCreate,
+    onEdit,
+    m.pinboard_editor_errors_save_failed,
+  ]);
 
   return (
     <Dialog

@@ -113,12 +113,15 @@ export function CollectionModal({
     );
   }, [visibleShelves, filterTag]);
 
-  const shelfDisplayTitle = useCallback((shelf: ShelfSummaryDTO): string => {
-    if (shelf.kindKey === "favorites") {
-      return m.shelf_system_favorites();
-    }
-    return shelf.title ?? m.common_untitled();
-  }, []);
+  const shelfDisplayTitle = useCallback(
+    (shelf: ShelfSummaryDTO): string => {
+      if (shelf.kindKey === "favorites") {
+        return m.shelf_system_favorites();
+      }
+      return shelf.title ?? m.common_untitled();
+    },
+    [m.common_untitled, m.shelf_system_favorites],
+  );
 
   const toggleShelf = useCallback((shelfId: string) => {
     setSelectedShelves((prev) => {

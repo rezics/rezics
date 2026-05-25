@@ -71,7 +71,7 @@ export function ContentTrendChart({ trend }: ContentTrendChartProps) {
         },
       ],
     }),
-    [trend, primary, secondary],
+    [trend, primary, secondary, m.admin_dashboard_comments, m.admin_nav_books],
   );
 
   const options = useMemo(

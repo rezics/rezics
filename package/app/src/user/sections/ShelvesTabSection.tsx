@@ -88,7 +88,7 @@ export const ShelvesTabSection: FC = () => {
       chips.push({ value: k, label });
     }
     return chips;
-  }, [shelves, isCurrentUser]);
+  }, [shelves, isCurrentUser, m.search_category_all]);
 
   // Filter shelves
   const filtered = useMemo(() => {
