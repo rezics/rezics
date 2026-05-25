@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import { Page } from "@/core/layouts/Page";
 
 export const EchokvEditPage: React.FC = () => {
   const { show: showAlert } = useAlertStore();
@@ -72,9 +73,7 @@ export const EchokvEditPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto mt-8 mb-12 px-4">
-      <h1 className="text-2xl font-bold mb-2">EchoKV JSON 编辑器</h1>
-
+    <Page title="EchoKV JSON 编辑器">
       <div className="mt-2 rounded-lg p-4 bg-surface-elevated">
         <h2 className="text-base font-semibold mb-2">Key 列表</h2>
         <div className="flex flex-col gap-2">
@@ -169,7 +168,7 @@ export const EchokvEditPage: React.FC = () => {
           />
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
 

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
+import { Page } from "@/core/layouts/Page";
 
 type EmailTemplate = {
   name: string;
@@ -200,11 +201,7 @@ export default function AuthEmailPage() {
   };
 
   return (
-    <div className="p-6 max-w-[1200px]">
-      <h2 className="text-xl font-bold mb-4">
-        {m.admin_auth_email_templates_title()}
-      </h2>
-
+    <Page title={m.admin_auth_email_templates_title()}>
       {templateError && (
         <Alert className="mb-4">
           <AlertDescription className="text-error-text">
@@ -406,7 +403,7 @@ export default function AuthEmailPage() {
           )}
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
 

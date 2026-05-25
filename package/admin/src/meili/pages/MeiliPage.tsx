@@ -27,6 +27,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { X as CloseIcon } from "lucide-react";
 import { useState } from "react";
+import { Page } from "@/core/layouts/Page";
 
 type MessageState = {
   type: "success" | "error" | "info";
@@ -293,13 +294,11 @@ export function MeiliPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-8xl mx-auto px-4 py-8 space-y-8">
+    <Page
+      title={m.admin_meili_title()}
+      description={
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">{m.admin_meili_title()}</h1>
-          <p className="text-sm text-text-secondary">
-            {m.admin_meili_description()}
-          </p>
+          <p>{m.admin_meili_description()}</p>
           {isHealthLoading ? (
             <div className="flex items-center gap-2 text-sm text-text-secondary">
               <Spinner size="sm" />
@@ -320,7 +319,9 @@ export function MeiliPage() {
             </div>
           )}
         </div>
-
+      }
+    >
+      <div className="space-y-8">
         {message && (
           <Alert className="shadow-sm">
             <AlertDescription
@@ -796,7 +797,7 @@ export function MeiliPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 }
 

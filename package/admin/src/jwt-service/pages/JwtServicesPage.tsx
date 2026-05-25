@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
+import { Page } from "@/core/layouts/Page";
 import { JwtServiceEditDialog, JwtServiceTable } from "../components";
 
 export const JwtServicesPage: FC = () => {
@@ -87,11 +88,7 @@ export const JwtServicesPage: FC = () => {
   };
 
   return (
-    <div className="w-11/12 mx-auto mt-16">
-      <div className="flex flex-row justify-between items-center">
-        <h1 className="text-3xl font-bold mb-8">{m.admin_jwt_title()}</h1>
-      </div>
-
+    <Page title={m.admin_jwt_title()}>
       {isLoading && (
         <div className="flex items-center justify-center h-40">
           <Spinner />
@@ -129,7 +126,7 @@ export const JwtServicesPage: FC = () => {
         updating={updating}
         error={updatingError}
       />
-    </div>
+    </Page>
   );
 };
 

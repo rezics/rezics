@@ -36,7 +36,7 @@ function isItemVisible(item: AdminNavItem, role: string | null): boolean {
 }
 
 const navItemBaseClass =
-  "flex items-center gap-2 rounded-md py-[var(--padding-sidebar-item-y)] mx-2 text-sm transition-colors hover:bg-surface-elevated cursor-pointer";
+  "flex items-center gap-2 rounded-md py-[var(--padding-sidebar-item-y)] mx-2 text-sm transition-colors hover:bg-surface-subtle cursor-pointer";
 
 export function AdminNav({
   items,
@@ -109,7 +109,7 @@ export function AdminNav({
           className={clsx(
             navItemBaseClass,
             depth === 0 ? "pl-3" : "pl-8",
-            selected && "bg-surface-elevated font-semibold",
+            selected && "bg-surface-subtle font-semibold",
           )}
         >
           <span className="inline-flex items-center min-w-9">{item.icon}</span>
@@ -158,7 +158,7 @@ export function AdminNav({
                 className={clsx(
                   navItemBaseClass,
                   "pl-3 w-[calc(100%-1rem)]",
-                  anySelected && "bg-surface-elevated font-semibold",
+                  anySelected && "bg-surface-subtle font-semibold",
                 )}
               >
                 <span className="inline-flex items-center min-w-9">

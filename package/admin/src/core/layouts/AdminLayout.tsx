@@ -18,8 +18,8 @@ export default function AdminLayout({
   );
 
   return (
-    <div className="flex min-h-screen">
-      <header className="fixed top-0 left-0 right-0 z-40 border-b border-border-whisper bg-surface-elevated">
+    <div className="flex min-h-screen bg-surface-canvas">
+      <header className="fixed top-0 left-0 right-0 z-40 border-b border-border-whisper bg-surface-canvas">
         <div className="flex items-center gap-2 px-4 h-14">
           <Button
             variant="ghost"
@@ -47,8 +47,13 @@ export default function AdminLayout({
       </Sheet>
 
       {/* Desktop permanent sidebar — reserves space via flex shrink-0 */}
+      <div
+        className="hidden md:block shrink-0"
+        style={{ width: drawerWidth }}
+        aria-hidden="true"
+      />
       <aside
-        className="hidden md:block shrink-0 border-r border-border-whisper bg-surface-elevated"
+        className="fixed inset-y-0 left-0 z-30 hidden overflow-hidden border-r border-border-whisper bg-surface-canvas md:block"
         style={{ width: drawerWidth }}
       >
         {drawer}

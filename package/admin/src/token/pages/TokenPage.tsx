@@ -15,6 +15,7 @@ import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
+import { Page } from "@/core/layouts/Page";
 import {
   CreateTokenDialog,
   EditTokenDialog,
@@ -107,14 +108,14 @@ export const TokenPage: FC = () => {
   };
 
   return (
-    <div className="w-11/12 mx-auto mt-16">
-      <div className="flex flex-row justify-between items-center">
-        <h1 className="text-3xl font-bold mb-8">{m.admin_token_title()}</h1>
+    <Page
+      title={m.admin_token_title()}
+      actions={
         <Button onClick={() => setOpenCreate(true)}>
           {m.admin_token_create_button()}
         </Button>
-      </div>
-
+      }
+    >
       {isLoading && (
         <div className="flex items-center justify-center h-40">
           <Spinner />
@@ -174,7 +175,7 @@ export const TokenPage: FC = () => {
         secret={createdSecret}
         onClose={() => setCreatedSecret(null)}
       />
-    </div>
+    </Page>
   );
 };
 
