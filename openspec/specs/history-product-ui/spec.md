@@ -22,13 +22,15 @@ error, and ingestion-lag states.
 - **AND** it SHALL provide access to authority history when authority events
   exist or the viewer has sufficient permission
 
-#### Scenario: Legacy book history route has explicit behavior
+#### Scenario: Non-edit book history route is unavailable
 
-- **WHEN** a viewer opens an existing non-edit Book history route
-- **THEN** the app SHALL either render a compatible history view or redirect to
-  the canonical edit-console history route
-- **AND** the behavior SHALL be intentional rather than a duplicated accidental
-  navigation path
+- **WHEN** a viewer opens a non-edit Book history route such as
+  `/book/:bookId/history`, `/book/:bookId/history/:sequence`, or
+  `/book/:bookId/history/compare/:targetSequence`
+- **THEN** the app SHALL NOT render or redirect through a compatibility history
+  alias
+- **AND** product links to Book history SHALL target the canonical edit-console
+  history route family
 
 #### Scenario: Empty history state is successful
 
@@ -140,9 +142,10 @@ History and compare UI SHALL use localized user-facing copy, keyboard-accessible
 
 ### Requirement: History route remains connected to edit workflows
 
-Book history restore, compare, and revision detail actions SHALL keep authorized
+Book history restore, revision detail, and compare actions SHALL keep authorized
 actors within the edit-console route family when they originate from the edit
-history page.
+history page. Nested Book history routes SHALL render their routed child content
+inside the edit console route family.
 
 #### Scenario: Restore from edit history returns to edit flow
 
@@ -153,5 +156,13 @@ history page.
 #### Scenario: Compare from edit history preserves edit context
 
 - **WHEN** an actor opens compare from the edit-console history page
-- **THEN** the compare surface SHALL remain associated with the edit-console
-  history route family or provide an explicit path back to it
+- **THEN** the compare surface SHALL render within the edit-console history route
+  family
+- **AND** it SHALL provide an explicit path back to the edit history timeline
+
+#### Scenario: Revision detail from edit history preserves edit context
+
+- **WHEN** an actor opens revision detail from the edit-console history page
+- **THEN** the revision detail surface SHALL render within the edit-console
+  history route family
+- **AND** the edit sidebar SHALL remain visible as navigation context
