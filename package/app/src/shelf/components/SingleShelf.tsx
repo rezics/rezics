@@ -12,13 +12,6 @@ import {
   shelf_items_count,
   shelf_untitled,
 } from "@rezics/i18n/messages";
-const m = {
-  common_edit,
-  shelf_by_author,
-  shelf_items_count,
-  shelf_untitled,
-};
-
 const i18nMessages = {
   common_edit,
   shelf_by_author,

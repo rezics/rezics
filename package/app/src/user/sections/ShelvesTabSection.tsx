@@ -27,19 +27,6 @@ import {
   shelf_sort_newest,
   shelf_sort_oldest,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  search_category_all,
-  shelf_controls_sort_by,
-  shelf_empty_yet,
-  shelf_items_count,
-  shelf_no_search_matches,
-  shelf_search_placeholder,
-  shelf_untitled,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-};
-
 const i18nMessages = {
   common_loading,
   search_category_all,
@@ -62,8 +49,8 @@ function isSystemKindKey(
 }
 
 const SORT_OPTION_LABEL = {
-  "createdAt:desc": m.shelf_sort_newest,
-  "createdAt:asc": m.shelf_sort_oldest,
+  "createdAt:desc": i18nMessages.shelf_sort_newest,
+  "createdAt:asc": i18nMessages.shelf_sort_oldest,
 } as const satisfies Record<string, () => string>;
 
 export const ShelvesTabSection: FC = () => {

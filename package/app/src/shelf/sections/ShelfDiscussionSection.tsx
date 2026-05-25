@@ -9,12 +9,6 @@ import {
   shelf_discussion_composer_placeholder,
   shelf_discussion_signInPrompt,
 } from "@rezics/i18n/messages";
-const m = {
-  auth_login,
-  shelf_discussion_composer_placeholder,
-  shelf_discussion_signInPrompt,
-};
-
 const i18nMessages = {
   auth_login,
   shelf_discussion_composer_placeholder,

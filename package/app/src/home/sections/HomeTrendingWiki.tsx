@@ -12,11 +12,6 @@ import {
   page_home_sections_trending_wiki,
   page_home_sections_wiki_teaser_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_trending_wiki,
-  page_home_sections_wiki_teaser_placeholder,
-};
-
 const i18nMessages = {
   page_home_sections_trending_wiki,
   page_home_sections_wiki_teaser_placeholder,

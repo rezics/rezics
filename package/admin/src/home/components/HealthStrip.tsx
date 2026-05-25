@@ -5,12 +5,6 @@ import {
   admin_health_server,
   admin_health_system,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_health_meili,
-  admin_health_server,
-  admin_health_system,
-};
-
 const i18nMessages = {
   admin_health_meili,
   admin_health_server,

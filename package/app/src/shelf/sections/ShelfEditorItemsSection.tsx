@@ -84,35 +84,6 @@ import {
   shelf_view_list,
   shelf_view_nested,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  common_next,
-  common_prev,
-  common_retry,
-  shelf_controls_sort_by,
-  shelf_controls_view,
-  shelf_edit_add,
-  shelf_edit_delete_selected,
-  shelf_edit_discard_ops,
-  shelf_edit_empty,
-  shelf_edit_items_heading,
-  shelf_edit_mode_edit,
-  shelf_edit_mode_multi_select,
-  shelf_edit_mode_preview,
-  shelf_edit_save_n_ops,
-  shelf_edit_sort_prime_only,
-  shelf_mode_label,
-  shelf_ops_failed,
-  shelf_sort_manual,
-  shelf_sort_manual_reversed,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-  shelf_sort_title_az,
-  shelf_sort_title_za,
-  shelf_view_list,
-  shelf_view_nested,
-};
-
 const i18nMessages = {
   common_loading,
   common_next,
@@ -154,17 +125,21 @@ interface ShelfEditorItemsSectionProps {
 }
 
 const SORT_OPTIONS: ShelfSortChoice[] = [
-  { field: "manual", order: "desc", label: m.shelf_sort_manual },
-  { field: "manual", order: "asc", label: m.shelf_sort_manual_reversed },
-  { field: "addedAt", order: "desc", label: m.shelf_sort_newest },
-  { field: "addedAt", order: "asc", label: m.shelf_sort_oldest },
-  { field: "title", order: "asc", label: m.shelf_sort_title_az },
-  { field: "title", order: "desc", label: m.shelf_sort_title_za },
+  { field: "manual", order: "desc", label: i18nMessages.shelf_sort_manual },
+  {
+    field: "manual",
+    order: "asc",
+    label: i18nMessages.shelf_sort_manual_reversed,
+  },
+  { field: "addedAt", order: "desc", label: i18nMessages.shelf_sort_newest },
+  { field: "addedAt", order: "asc", label: i18nMessages.shelf_sort_oldest },
+  { field: "title", order: "asc", label: i18nMessages.shelf_sort_title_az },
+  { field: "title", order: "desc", label: i18nMessages.shelf_sort_title_za },
 ];
 
 const VIEW_OPTIONS: ShelfViewChoice<"nested" | "flat">[] = [
-  { value: "nested", label: m.shelf_view_nested },
-  { value: "flat", label: m.shelf_view_list },
+  { value: "nested", label: i18nMessages.shelf_view_nested },
+  { value: "flat", label: i18nMessages.shelf_view_list },
 ];
 
 function candidateKindToShelfUnitKind(kind: string): ShelfUnitKind {

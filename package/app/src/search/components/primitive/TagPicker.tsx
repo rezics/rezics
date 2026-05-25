@@ -6,10 +6,6 @@ import { useState } from "react";
 import { useTagSuggest } from "../../hooks/useTagSuggest";
 import { useMessage } from "@rezics/i18n/react";
 import { tag_clear } from "@rezics/i18n/messages";
-const m = {
-  tag_clear,
-};
-
 const i18nMessages = {
   tag_clear,
 };

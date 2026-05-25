@@ -13,15 +13,6 @@ import {
   shelf_new_title,
   shelf_title_label,
 } from "@rezics/i18n/messages";
-const m = {
-  common_create,
-  shelf_content_type_label,
-  shelf_cover_url_label,
-  shelf_description_label,
-  shelf_new_title,
-  shelf_title_label,
-};
-
 const i18nMessages = {
   common_create,
   shelf_content_type_label,

@@ -31,14 +31,6 @@ import {
   book_otherEditions,
   book_remark,
 } from "@rezics/i18n/messages";
-const m = {
-  book_editionFallback,
-  book_excerpts,
-  book_fields_tags,
-  book_otherEditions,
-  book_remark,
-};
-
 const i18nMessages = {
   book_editionFallback,
   book_excerpts,

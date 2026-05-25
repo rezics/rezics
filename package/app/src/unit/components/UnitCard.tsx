@@ -6,10 +6,6 @@ import { UserHoverPreview } from "@/user/components";
 import type { UnitCardSummary } from "../models/unitCardSummary";
 import { useMessage } from "@rezics/i18n/react";
 import { unit_card_added_at } from "@rezics/i18n/messages";
-const m = {
-  unit_card_added_at,
-};
-
 const i18nMessages = {
   unit_card_added_at,
 };

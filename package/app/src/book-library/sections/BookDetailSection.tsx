@@ -21,13 +21,6 @@ import {
   page_book_tabs_overview,
   page_book_tabs_review_shelf,
 } from "@rezics/i18n/messages";
-const m = {
-  page_book_tabs_community,
-  page_book_tabs_content,
-  page_book_tabs_overview,
-  page_book_tabs_review_shelf,
-};
-
 const i18nMessages = {
   page_book_tabs_community,
   page_book_tabs_content,

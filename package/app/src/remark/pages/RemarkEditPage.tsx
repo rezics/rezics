@@ -6,11 +6,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RemarkEditDialog } from "../forms/RemarkEditDialog";
 import { useMessage } from "@rezics/i18n/react";
 import { common_loading, common_no_data } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  common_no_data,
-};
-
 const i18nMessages = {
   common_loading,
   common_no_data,

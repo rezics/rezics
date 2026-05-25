@@ -14,13 +14,6 @@ import {
   progress_status_remove_backlog_modal_description,
   progress_status_remove_backlog_modal_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  progress_status_remove_backlog_modal_confirm,
-  progress_status_remove_backlog_modal_description,
-  progress_status_remove_backlog_modal_title,
-};
-
 const i18nMessages = {
   common_cancel,
   progress_status_remove_backlog_modal_confirm,

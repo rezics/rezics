@@ -11,11 +11,6 @@ import {
   progress_status_chapter_picker_none,
   progress_status_chapter_picker_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  progress_status_chapter_picker_none,
-  progress_status_chapter_picker_placeholder,
-};
-
 const i18nMessages = {
   progress_status_chapter_picker_none,
   progress_status_chapter_picker_placeholder,

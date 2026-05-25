@@ -17,16 +17,6 @@ import {
   settings_profile_edit_title,
   settings_title,
 } from "@rezics/i18n/messages";
-const m = {
-  profile_following,
-  profile_stats,
-  profile_tab_content,
-  profile_tab_followers,
-  profile_tab_shelves,
-  settings_profile_edit_title,
-  settings_title,
-};
-
 const i18nMessages = {
   profile_following,
   profile_stats,

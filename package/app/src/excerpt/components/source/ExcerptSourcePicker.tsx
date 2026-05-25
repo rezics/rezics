@@ -14,15 +14,6 @@ import {
   excerpt_form_source_url,
   excerpt_form_use_this,
 } from "@rezics/i18n/messages";
-const m = {
-  common_clear,
-  excerpt_form_linked_unit,
-  excerpt_form_raw_url,
-  excerpt_form_source_title,
-  excerpt_form_source_url,
-  excerpt_form_use_this,
-};
-
 const i18nMessages = {
   common_clear,
   excerpt_form_linked_unit,

@@ -17,16 +17,6 @@ import {
   excerpt_created_success,
   excerpt_new_title,
 } from "@rezics/i18n/messages";
-const m = {
-  auth_flow_onboarding_sign_in_first,
-  common_submit,
-  common_submitting,
-  excerpt_book_unit_id,
-  excerpt_create_failed,
-  excerpt_created_success,
-  excerpt_new_title,
-};
-
 const i18nMessages = {
   auth_flow_onboarding_sign_in_first,
   common_submit,

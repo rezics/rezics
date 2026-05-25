@@ -10,15 +10,6 @@ import {
   book_hero_score_label,
   book_hero_score_rezics_label,
 } from "@rezics/i18n/messages";
-const m = {
-  book_hero_score_be_first,
-  book_hero_score_count,
-  book_hero_score_empty,
-  book_hero_score_empty_short,
-  book_hero_score_label,
-  book_hero_score_rezics_label,
-};
-
 const i18nMessages = {
   book_hero_score_be_first,
   book_hero_score_count,

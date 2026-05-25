@@ -12,9 +12,9 @@
 - [x] 2.1 Add unit tests for `setLocale`, `getLocale`, `subscribeLocale`, invalid locale handling, and persisted locale initialization.
 - [x] 2.2 Add runtime registration tests proving product and UI Paraglide runtimes both update when adapter locale changes.
 - [x] 2.3 Add a test proving a direct registered runtime `setLocale()` call updates the adapter locale and notifies subscribers exactly once.
-- [ ] 2.4 Add React tests for `useMessage()` rerendering when locale changes.
+- [x] 2.4 Add React tests for `useMessage()` rerendering when locale changes.
 - [x] 2.5 Add type-level tests or compile fixtures proving `useMessage()` preserves generated message input requirements.
-- [ ] 2.6 Add a bundle/tree-shaking fixture that imports `useMessage()` and one generated message, then verifies unrelated generated message text or keys are absent from the bundle.
+- [x] 2.6 Add a bundle/tree-shaking fixture that imports `useMessage()` and one generated message, then verifies unrelated generated message text or keys are absent from the bundle.
 
 ## 3. App/Admin Bootstrap
 
@@ -67,7 +67,7 @@
 
 - [x] 8.1 Run `bun --filter=@rezics/i18n run compile` and `bun --filter=@rezics/ui run i18n:compile`.
 - [x] 8.2 Run targeted adapter, app locale, admin locale, and UI component tests.
-- [ ] 8.3 Run `bun run format:check`.
+- [x] 8.3 Run `bun run format:check`.
 - [x] 8.4 Run `bun run check:convention`.
 - [x] 8.5 Run `bun --filter=@rezics/app run build`.
 - [x] 8.6 Run `bun --filter=@rezics/admin run build`.

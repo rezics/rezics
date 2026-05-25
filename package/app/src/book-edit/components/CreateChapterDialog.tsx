@@ -23,15 +23,6 @@ import {
   common_creating,
   common_required,
 } from "@rezics/i18n/messages";
-const m = {
-  book_chapter_content_required,
-  book_edit_chapter_title,
-  book_edit_create_chapter,
-  common_create,
-  common_creating,
-  common_required,
-};
-
 const i18nMessages = {
   book_chapter_content_required,
   book_edit_chapter_title,

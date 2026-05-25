@@ -18,7 +18,7 @@ import {
   settings_nav_security,
   settings_nav_tokens,
 } from "@rezics/i18n/messages";
-const m = {
+const i18nMessages = {
   settings_nav_account,
   settings_nav_connections,
   settings_nav_entities,
@@ -29,17 +29,37 @@ const m = {
 };
 
 const SETTINGS_NAV = [
-  { label: m.settings_nav_profile, path: "profile", icon: AccountCircleIcon },
-  { label: m.settings_nav_account, path: "account", icon: EmailIcon },
-  { label: m.settings_nav_security, path: "security", icon: SecurityIcon },
-  { label: m.settings_nav_connections, path: "connections", icon: LinkIcon },
-  { label: m.settings_nav_tokens, path: "tokens", icon: KeyIcon },
-  { label: m.settings_nav_preferences, path: "preferences", icon: TuneIcon },
+  {
+    label: i18nMessages.settings_nav_profile,
+    path: "profile",
+    icon: AccountCircleIcon,
+  },
+  {
+    label: i18nMessages.settings_nav_account,
+    path: "account",
+    icon: EmailIcon,
+  },
+  {
+    label: i18nMessages.settings_nav_security,
+    path: "security",
+    icon: SecurityIcon,
+  },
+  {
+    label: i18nMessages.settings_nav_connections,
+    path: "connections",
+    icon: LinkIcon,
+  },
+  { label: i18nMessages.settings_nav_tokens, path: "tokens", icon: KeyIcon },
+  {
+    label: i18nMessages.settings_nav_preferences,
+    path: "preferences",
+    icon: TuneIcon,
+  },
 ] as const;
 
 const EXTRA_NAV = [
   {
-    label: m.settings_nav_entities,
+    label: i18nMessages.settings_nav_entities,
     to: "/user/me/entities",
     icon: IdentityIcon,
   },

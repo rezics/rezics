@@ -7,10 +7,6 @@ import type React from "react";
 import { PostCard } from "../components/item/PostCard";
 import { useMessage } from "@rezics/i18n/react";
 import { discussion_empty } from "@rezics/i18n/messages";
-const m = {
-  discussion_empty,
-};
-
 const i18nMessages = {
   discussion_empty,
 };

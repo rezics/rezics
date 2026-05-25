@@ -1,6 +1,10 @@
 import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
-import { useLocale } from "@rezics/i18n/react";
+import {
+  type ReactiveMessageBag,
+  useLocale,
+  useMessage,
+} from "@rezics/i18n/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
@@ -33,6 +37,15 @@ import {
   book_hero_actions_want_to_read,
 } from "@rezics/i18n/messages";
 
+const i18nMessages = {
+  book_hero_actions_mark_as_read,
+  book_hero_actions_read_again,
+  book_hero_actions_start_reading,
+  book_hero_actions_want_to_read,
+};
+
+type ProgressMessages = ReactiveMessageBag<typeof i18nMessages>;
+
 export type BookProgressStatusSectionProps = {
   bookUnitId: string;
 };
@@ -47,34 +60,37 @@ function usesChineseProgressLayout(language: string | undefined) {
   return language?.toLowerCase().startsWith("zh") ?? false;
 }
 
-function getDefaultPrimaryAction(status: UserUnitProgressStatus | null): {
+function getDefaultPrimaryAction(
+  status: UserUnitProgressStatus | null,
+  m: ProgressMessages,
+): {
   status: ToggleGroupStatus;
   label: string;
 } {
   if (!status) {
     return {
       status: "BACKLOG",
-      label: book_hero_actions_want_to_read(),
+      label: m.book_hero_actions_want_to_read(),
     };
   }
 
   if (status === "ACTIVE") {
     return {
       status: "COMPLETED",
-      label: book_hero_actions_mark_as_read(),
+      label: m.book_hero_actions_mark_as_read(),
     };
   }
 
   if (status === "COMPLETED") {
     return {
       status: "COMPLETED",
-      label: book_hero_actions_read_again(),
+      label: m.book_hero_actions_read_again(),
     };
   }
 
   return {
     status: "ACTIVE",
-    label: book_hero_actions_start_reading(),
+    label: m.book_hero_actions_start_reading(),
   };
 }
 
@@ -82,6 +98,7 @@ export function BookProgressStatusSection({
   bookUnitId,
 }: BookProgressStatusSectionProps) {
   const language = useLocale();
+  const m = useMessage(i18nMessages);
   const progress = useUnitProgress(bookUnitId);
   const currentStatus: UserUnitProgressStatus | null =
     progress.data?.status ?? null;
@@ -262,7 +279,7 @@ export function BookProgressStatusSection({
       ? modal.status
       : null;
   const isChineseLayout = usesChineseProgressLayout(language);
-  const primaryAction = getDefaultPrimaryAction(currentStatus);
+  const primaryAction = getDefaultPrimaryAction(currentStatus, m);
 
   return (
     <div className="flex flex-col gap-2 w-full">

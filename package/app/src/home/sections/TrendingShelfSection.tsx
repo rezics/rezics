@@ -10,10 +10,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
 import { useMessage } from "@rezics/i18n/react";
 import { page_home_sections_trending_shelves } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_trending_shelves,
-};
-
 const i18nMessages = {
   page_home_sections_trending_shelves,
 };

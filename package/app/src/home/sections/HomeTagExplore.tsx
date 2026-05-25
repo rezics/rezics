@@ -8,10 +8,6 @@ import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Link } from "@/shared/ui/link";
 import { page_home_sections_tag_explore } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_tag_explore,
-};
-
 const i18nMessages = {
   page_home_sections_tag_explore,
 };

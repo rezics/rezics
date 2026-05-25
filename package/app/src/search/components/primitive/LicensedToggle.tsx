@@ -3,10 +3,6 @@ import type React from "react";
 import { IsLicensedInfo } from "@/book-edit/components/Metadata/BookMetadataEditor";
 import { useMessage } from "@rezics/i18n/react";
 import { search_tooltips_licensed } from "@rezics/i18n/messages";
-const m = {
-  search_tooltips_licensed,
-};
-
 const i18nMessages = {
   search_tooltips_licensed,
 };

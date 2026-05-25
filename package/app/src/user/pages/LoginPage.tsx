@@ -28,15 +28,6 @@ import {
   common_email,
   common_loading,
 } from "@rezics/i18n/messages";
-const m = {
-  auth_flow_create_account,
-  auth_flow_forgot_password,
-  auth_flow_new_to_app,
-  auth_login,
-  common_email,
-  common_loading,
-};
-
 const i18nMessages = {
   auth_flow_create_account,
   auth_flow_forgot_password,

@@ -7,10 +7,6 @@ import type React from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
 import { useMessage } from "@rezics/i18n/react";
 import { book_reviews_of_book } from "@rezics/i18n/messages";
-const m = {
-  book_reviews_of_book,
-};
-
 const i18nMessages = {
   book_reviews_of_book,
 };

@@ -3,11 +3,16 @@ import type {
   EntityKind,
   UnitTranslationDTO,
 } from "@rezics/contract";
+import { useMessage } from "@rezics/i18n/react";
+import { entity_untitled } from "@rezics/i18n/messages";
 import { cn } from "@/shared/utils/css-util";
 import { EntityAvatar } from "./EntityAvatar";
 import { EntityKindBadge } from "./EntityKindBadge";
 import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
-import { entity_untitled } from "@rezics/i18n/messages";
+
+const i18nMessages = {
+  entity_untitled,
+};
 
 export interface EntityIdentity {
   unitId?: string;
@@ -28,7 +33,7 @@ interface EntityIdentityRowProps {
 
 export function getEntityIdentityTitle(
   entity?: EntityIdentity | EntityDTO | null,
-  fallbackTitle: string = entity_untitled(),
+  fallbackTitle = "",
 ) {
   const title = entity?.translations?.[0]?.title?.trim();
   return title || fallbackTitle;
@@ -42,7 +47,11 @@ export function EntityIdentityRow({
   avatarSize = "md",
   className,
 }: EntityIdentityRowProps) {
-  const title = getEntityIdentityTitle(entity, fallbackTitle);
+  const m = useMessage(i18nMessages);
+  const title = getEntityIdentityTitle(
+    entity,
+    fallbackTitle ?? m.entity_untitled(),
+  );
 
   return (
     <span

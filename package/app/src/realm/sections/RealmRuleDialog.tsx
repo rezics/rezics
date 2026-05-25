@@ -17,14 +17,6 @@ import {
   realm_joining,
   realm_rules_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_close,
-  realm_agree_and_join,
-  realm_joining,
-  realm_rules_title,
-};
-
 const i18nMessages = {
   common_cancel,
   common_close,

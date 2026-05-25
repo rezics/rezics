@@ -22,12 +22,6 @@ import {
   profile_followers_count,
   profile_following,
 } from "@rezics/i18n/messages";
-const m = {
-  profile_follow,
-  profile_followers_count,
-  profile_following,
-};
-
 const i18nMessages = {
   profile_follow,
   profile_followers_count,

@@ -12,12 +12,6 @@ import {
   search_input_tags_hint,
   search_input_tags_label,
 } from "@rezics/i18n/messages";
-const m = {
-  review_search_placeholder,
-  search_input_tags_hint,
-  search_input_tags_label,
-};
-
 const i18nMessages = {
   review_search_placeholder,
   search_input_tags_hint,

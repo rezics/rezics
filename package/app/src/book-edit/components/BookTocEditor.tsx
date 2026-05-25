@@ -53,14 +53,6 @@ import {
   common_save,
   common_saving,
 } from "@rezics/i18n/messages";
-const m = {
-  book_edit_create_first_chapter,
-  book_edit_no_chapters_yet,
-  book_edit_toc_footer_summary,
-  common_save,
-  common_saving,
-};
-
 const i18nMessages = {
   book_edit_create_first_chapter,
   book_edit_no_chapters_yet,

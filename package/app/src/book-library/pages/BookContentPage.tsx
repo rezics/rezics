@@ -16,12 +16,6 @@ import {
   book_content_reading,
   book_content_text_length,
 } from "@rezics/i18n/messages";
-const m = {
-  book_content_pages,
-  book_content_reading,
-  book_content_text_length,
-};
-
 const i18nMessages = {
   book_content_pages,
   book_content_reading,

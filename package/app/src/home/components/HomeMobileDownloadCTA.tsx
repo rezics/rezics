@@ -7,13 +7,6 @@ import {
   home_mobile_cta_google_play,
   home_mobile_cta_title,
 } from "@rezics/i18n/messages";
-const m = {
-  home_mobile_cta_app_store,
-  home_mobile_cta_description,
-  home_mobile_cta_google_play,
-  home_mobile_cta_title,
-};
-
 const i18nMessages = {
   home_mobile_cta_app_store,
   home_mobile_cta_description,

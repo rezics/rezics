@@ -28,17 +28,6 @@ import {
   book_chapter_status_draft,
   book_chapter_status_published,
 } from "@rezics/i18n/messages";
-const m = {
-  book_chapter_edit_dialog_status,
-  book_chapter_edit_dialog_title,
-  book_fields_title,
-  common_cancel,
-  common_save,
-  book_chapter_status_archived,
-  book_chapter_status_draft,
-  book_chapter_status_published,
-};
-
 const i18nMessages = {
   book_chapter_edit_dialog_status,
   book_chapter_edit_dialog_title,
@@ -55,9 +44,9 @@ const PUBLISH_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
 type PublishStatus = (typeof PUBLISH_STATUSES)[number];
 
 const PUBLISH_STATUS_LABEL = {
-  DRAFT: m.book_chapter_status_draft,
-  PUBLISHED: m.book_chapter_status_published,
-  ARCHIVED: m.book_chapter_status_archived,
+  DRAFT: i18nMessages.book_chapter_status_draft,
+  PUBLISHED: i18nMessages.book_chapter_status_published,
+  ARCHIVED: i18nMessages.book_chapter_status_archived,
 } as const satisfies Record<PublishStatus, () => string>;
 
 interface EditChapterDialogProps {

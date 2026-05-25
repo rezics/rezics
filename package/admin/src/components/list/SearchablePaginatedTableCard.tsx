@@ -16,11 +16,6 @@ import {
 } from "@/components/table/PaginatedTable";
 import { useMessage } from "@rezics/i18n/react";
 import { common_failed_to_load, common_search } from "@rezics/i18n/messages";
-const m = {
-  common_failed_to_load,
-  common_search,
-};
-
 const i18nMessages = {
   common_failed_to_load,
   common_search,
@@ -29,7 +24,7 @@ const i18nMessages = {
 export function SearchablePaginatedTableCard<T>({
   title,
   description,
-  searchLabel = m.common_search(),
+  searchLabel = i18nMessages.common_search(),
   searchPlaceholder,
   q,
   onQChange,

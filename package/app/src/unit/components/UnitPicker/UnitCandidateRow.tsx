@@ -5,10 +5,6 @@ import { candidateToUnitCardSummary } from "../../models/unitCardSummary";
 import { UnitCard } from "../UnitCard";
 import { useMessage } from "@rezics/i18n/react";
 import { common_loading } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-};
-
 const i18nMessages = {
   common_loading,
 };

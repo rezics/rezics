@@ -33,11 +33,6 @@ import {
 } from "./ContentChapterVirtualTree";
 import { useMessage } from "@rezics/i18n/react";
 import { book_toc, common_loading } from "@rezics/i18n/messages";
-const m = {
-  book_toc,
-  common_loading,
-};
-
 const i18nMessages = {
   book_toc,
   common_loading,

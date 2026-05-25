@@ -36,20 +36,6 @@ import {
   shelf_items_count,
   shelf_system_favorites,
 } from "@rezics/i18n/messages";
-const m = {
-  collection_independent_unit,
-  collection_no_shelves_found,
-  collection_select_shelf,
-  collection_title,
-  common_all,
-  common_cancel,
-  common_save,
-  common_saving,
-  common_untitled,
-  shelf_items_count,
-  shelf_system_favorites,
-};
-
 const i18nMessages = {
   collection_independent_unit,
   collection_no_shelves_found,

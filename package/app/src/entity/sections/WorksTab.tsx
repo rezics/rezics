@@ -1,11 +1,6 @@
 import { useEntityWorks } from "../hooks/useEntityWorks";
 import { useMessage } from "@rezics/i18n/react";
 import { entity_loading_works, entity_no_works } from "@rezics/i18n/messages";
-const m = {
-  entity_loading_works,
-  entity_no_works,
-};
-
 const i18nMessages = {
   entity_loading_works,
   entity_no_works,

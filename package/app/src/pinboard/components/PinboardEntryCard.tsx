@@ -23,14 +23,6 @@ import {
   pinboard_entry_stale,
   pinboard_entry_untitled,
 } from "@rezics/i18n/messages";
-const m = {
-  common_delete,
-  common_edit,
-  pinboard_entry_language,
-  pinboard_entry_stale,
-  pinboard_entry_untitled,
-};
-
 const i18nMessages = {
   common_delete,
   common_edit,

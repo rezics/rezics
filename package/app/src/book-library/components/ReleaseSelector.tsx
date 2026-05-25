@@ -19,13 +19,6 @@ import {
   book_release_untitled,
   realm_official,
 } from "@rezics/i18n/messages";
-const m = {
-  book_release_current,
-  book_release_label,
-  book_release_untitled,
-  realm_official,
-};
-
 const i18nMessages = {
   book_release_current,
   book_release_label,

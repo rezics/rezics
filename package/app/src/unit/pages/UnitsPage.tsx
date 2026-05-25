@@ -1,5 +1,12 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { contentDocMarkdownFallback, type UnitDTO } from "@rezics/contract";
+import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
+import {
+  unit_open_content_page,
+  unit_type_tabs_label,
+  unit_untitled_content,
+  units_search_placeholder,
+} from "@rezics/i18n/messages";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -22,18 +29,21 @@ import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
-import {
+
+const i18nMessages = {
   unit_open_content_page,
   unit_type_tabs_label,
   unit_untitled_content,
   units_search_placeholder,
-} from "@rezics/i18n/messages";
+};
+
+type UnitsMessages = ReactiveMessageBag<typeof i18nMessages>;
 
 type Unit = UnitDTO;
 
 type UnitsPageMode = "tab" | "single";
 
-function defaultChildren(units: Unit[]) {
+function defaultChildren(units: Unit[], m: UnitsMessages) {
   return (
     <div className="space-y-3">
       {units.map((item) => (
@@ -54,11 +64,11 @@ function defaultChildren(units: Unit[]) {
                       </Link>
                     )}
                   />
-                  <TooltipContent>{unit_open_content_page()}</TooltipContent>
+                  <TooltipContent>{m.unit_open_content_page()}</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <p className="text-base font-semibold truncate mb-1">
-                {item.translations?.[0]?.title || unit_untitled_content()}
+                {item.translations?.[0]?.title || m.unit_untitled_content()}
               </p>
             </div>
             {item.translations?.[0]?.description && (
@@ -105,8 +115,9 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   type,
   types = ["UNIT", "POST", "QUOTE", "BOOK"],
   userId,
-  children = defaultChildren,
+  children,
 }) => {
+  const m = useMessage(i18nMessages);
   const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
   const routerSearch = useRouterState({
@@ -229,12 +240,12 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
             <KeywordInput
               value={keywordBind.value ?? ""}
               onChange={(v) => keywordBind.onChange(v)}
-              placeholder={units_search_placeholder()}
+              placeholder={m.units_search_placeholder()}
             />
             {!isSingle && (
               <div className="mt-4 mb-4 border-b border-border-whisper">
                 <Tabs value={tab} onValueChange={(v) => setTab(v)}>
-                  <TabsList aria-label={unit_type_tabs_label()}>
+                  <TabsList aria-label={m.unit_type_tabs_label()}>
                     {types.map((t) => (
                       <TabsTrigger key={t} value={t}>
                         {t}
@@ -247,7 +258,11 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
           </div>
         }
       >
-        {(currentPageItems: Unit[]) => children(currentPageItems)}
+        {(currentPageItems: Unit[]) =>
+          children
+            ? children(currentPageItems)
+            : defaultChildren(currentPageItems, m)
+        }
       </UniversalPaginator>
     </div>
   );

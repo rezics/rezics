@@ -24,14 +24,6 @@ import {
   common_saving,
   remark_form_rating,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_edit,
-  common_save,
-  common_saving,
-  remark_form_rating,
-};
-
 const i18nMessages = {
   common_cancel,
   common_edit,

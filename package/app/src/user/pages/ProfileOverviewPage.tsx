@@ -20,18 +20,6 @@ import {
   profile_tab_followers,
   profile_tab_shelves,
 } from "@rezics/i18n/messages";
-const m = {
-  common_pinned,
-  common_untitled,
-  profile_following,
-  profile_no_pinned_items,
-  profile_no_recent_activity,
-  profile_recent_activity,
-  profile_tab_content,
-  profile_tab_followers,
-  profile_tab_shelves,
-};
-
 const i18nMessages = {
   common_pinned,
   common_untitled,

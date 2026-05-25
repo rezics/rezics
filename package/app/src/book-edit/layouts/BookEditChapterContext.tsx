@@ -10,14 +10,6 @@ import {
   edit_console_chapter_context_loading,
   edit_console_chapter_context_untitled,
 } from "@rezics/i18n/messages";
-const m = {
-  edit_console_chapter_context_back_to_chapters,
-  edit_console_chapter_context_error,
-  edit_console_chapter_context_label,
-  edit_console_chapter_context_loading,
-  edit_console_chapter_context_untitled,
-};
-
 const i18nMessages = {
   edit_console_chapter_context_back_to_chapters,
   edit_console_chapter_context_error,

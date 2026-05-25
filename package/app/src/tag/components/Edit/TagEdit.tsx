@@ -18,12 +18,6 @@ import {
   common_save_changes,
   tag_create,
 } from "@rezics/i18n/messages";
-const m = {
-  common_name,
-  common_save_changes,
-  tag_create,
-};
-
 const i18nMessages = {
   common_name,
   common_save_changes,

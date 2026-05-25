@@ -9,12 +9,6 @@ import {
   review_form_title,
   review_validation_min_chars,
 } from "@rezics/i18n/messages";
-const m = {
-  review_form_rating,
-  review_form_title,
-  review_validation_min_chars,
-};
-
 const i18nMessages = {
   review_form_rating,
   review_form_title,

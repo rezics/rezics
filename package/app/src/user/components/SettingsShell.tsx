@@ -4,10 +4,6 @@ import { SettingsSidebar } from "./SettingsSidebar";
 import { SettingsTabBar } from "./SettingsTabBar";
 import { useMessage } from "@rezics/i18n/react";
 import { settings_title } from "@rezics/i18n/messages";
-const m = {
-  settings_title,
-};
-
 const i18nMessages = {
   settings_title,
 };

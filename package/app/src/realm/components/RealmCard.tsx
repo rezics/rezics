@@ -12,14 +12,6 @@ import {
   realm_public,
   realm_untitled,
 } from "@rezics/i18n/messages";
-const m = {
-  common_no_description,
-  realm_member_count,
-  realm_official,
-  realm_public,
-  realm_untitled,
-};
-
 const i18nMessages = {
   common_no_description,
   realm_member_count,

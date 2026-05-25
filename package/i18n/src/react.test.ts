@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { DEFAULT_LANGUAGE, type Language } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  type Language,
+} from "@rezics/contract/language-core";
+import { common_save } from "@rezics/i18n/messages";
+import { JSDOM } from "jsdom";
+import { act, createElement } from "react";
+import { createRoot } from "react-dom/client";
 import {
   getLocale,
   initI18n,
@@ -7,6 +14,7 @@ import {
   registerParaglideRuntime,
   setLocale,
   subscribeLocale,
+  useMessage,
 } from "./react";
 
 const storage = new Map<string, string>();
@@ -68,6 +76,10 @@ beforeEach(() => {
   storage.clear();
   initI18n({ locale: DEFAULT_LANGUAGE });
 });
+
+const reactMessages = {
+  common_save,
+};
 
 describe("React i18n locale store", () => {
   test("sets, gets, subscribes, and persists canonical locales", () => {
@@ -156,5 +168,53 @@ describe("registerParaglideRuntime", () => {
 
     unsubscribe();
     unregister();
+  });
+});
+
+describe("useMessage", () => {
+  test("rerenders subscribed React components when locale changes", async () => {
+    const dom = new JSDOM("<!doctype html><div id='root'></div>", {
+      url: "https://rezics.local",
+    });
+    const previousWindow = globalThis.window;
+    const previousDocument = globalThis.document;
+    const previousHTMLElement = globalThis.HTMLElement;
+    const previousActEnvironment = globalThis.IS_REACT_ACT_ENVIRONMENT;
+    globalThis.window = dom.window as unknown as Window & typeof globalThis;
+    globalThis.document = dom.window.document;
+    globalThis.HTMLElement = dom.window.HTMLElement;
+    globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+    const container = dom.window.document.getElementById("root");
+    if (!container) throw new Error("Missing root test container");
+
+    const root = createRoot(container);
+
+    function Probe() {
+      const m = useMessage(reactMessages);
+      return createElement("span", null, m.common_save());
+    }
+
+    try {
+      await act(async () => {
+        root.render(createElement(Probe));
+      });
+
+      expect(container.textContent).toBe("儲存");
+
+      await act(async () => {
+        setLocale("en");
+      });
+
+      expect(container.textContent).toBe("Save");
+    } finally {
+      await act(async () => {
+        root.unmount();
+      });
+      globalThis.window = previousWindow;
+      globalThis.document = previousDocument;
+      globalThis.HTMLElement = previousHTMLElement;
+      globalThis.IS_REACT_ACT_ENVIRONMENT = previousActEnvironment;
+    }
   });
 });

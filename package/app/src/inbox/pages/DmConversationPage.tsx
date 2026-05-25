@@ -9,12 +9,6 @@ import {
   inbox_conversation_loading,
   inbox_conversation_title,
 } from "@rezics/i18n/messages";
-const m = {
-  inbox_all_conversations,
-  inbox_conversation_loading,
-  inbox_conversation_title,
-};
-
 const i18nMessages = {
   inbox_all_conversations,
   inbox_conversation_loading,

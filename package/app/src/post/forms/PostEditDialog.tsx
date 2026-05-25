@@ -29,14 +29,6 @@ import {
   common_saving,
   post_edit_wiki_post,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_edit,
-  common_save,
-  common_saving,
-  post_edit_wiki_post,
-};
-
 const i18nMessages = {
   common_cancel,
   common_edit,

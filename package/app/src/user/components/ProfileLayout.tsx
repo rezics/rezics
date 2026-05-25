@@ -9,10 +9,6 @@ import { ProfileBasicInfo } from "./ProfileBasicInfo";
 import { ProfileShell } from "./ProfileShell";
 import { useMessage } from "@rezics/i18n/react";
 import { user_not_found } from "@rezics/i18n/messages";
-const m = {
-  user_not_found,
-};
-
 const i18nMessages = {
   user_not_found,
 };

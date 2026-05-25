@@ -51,20 +51,6 @@ import {
   realm_tab_tags,
   realm_untitled,
 } from "@rezics/i18n/messages";
-const m = {
-  realm_join_to_post,
-  realm_manage,
-  realm_member_count,
-  realm_not_found,
-  realm_official,
-  realm_post_in_realm,
-  realm_public,
-  realm_tab_feed,
-  realm_tab_members,
-  realm_tab_tags,
-  realm_untitled,
-};
-
 const i18nMessages = {
   realm_join_to_post,
   realm_manage,

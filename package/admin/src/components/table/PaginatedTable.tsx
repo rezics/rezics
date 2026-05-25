@@ -32,17 +32,6 @@ import {
   common_previous_page,
   common_rows_per_page,
 } from "@rezics/i18n/messages";
-const m = {
-  common_first_page,
-  common_go,
-  common_go_to_page,
-  common_last_page,
-  common_next_page,
-  common_pagination_range,
-  common_previous_page,
-  common_rows_per_page,
-};
-
 const i18nMessages = {
   common_first_page,
   common_go,

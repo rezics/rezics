@@ -7,13 +7,6 @@ import {
   admin_realm_management_title,
   admin_realm_title,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_realm_description,
-  admin_realm_management_description,
-  admin_realm_management_title,
-  admin_realm_title,
-};
-
 const i18nMessages = {
   admin_realm_description,
   admin_realm_management_description,

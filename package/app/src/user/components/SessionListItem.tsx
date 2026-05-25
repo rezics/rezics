@@ -1,7 +1,12 @@
 import { Badge, Button } from "@rezics/ui/shadcn";
+import { useMessage } from "@rezics/i18n/react";
+import { settings_security_unknown_device } from "@rezics/i18n/messages";
 import { Monitor as ComputerIcon } from "lucide-react";
 import type { FC } from "react";
-import { settings_security_unknown_device } from "@rezics/i18n/messages";
+
+const i18nMessages = {
+  settings_security_unknown_device,
+};
 
 interface SessionListItemProps {
   session: {
@@ -18,8 +23,11 @@ interface SessionListItemProps {
   revoking?: boolean;
 }
 
-function parseUserAgent(ua?: string): string {
-  if (!ua) return settings_security_unknown_device();
+function parseUserAgent(
+  ua: string | undefined,
+  unknownDeviceLabel: string,
+): string {
+  if (!ua) return unknownDeviceLabel;
   const browser =
     ua.match(/(?:Chrome|Firefox|Safari|Edge|Opera|MSIE|Trident)[/ ]\S+/)?.[0] ??
     "";
@@ -37,7 +45,11 @@ export const SessionListItem: FC<SessionListItemProps> = ({
   onRevoke,
   revoking,
 }) => {
-  const userAgent = parseUserAgent(session.userAgent);
+  const m = useMessage(i18nMessages);
+  const userAgent = parseUserAgent(
+    session.userAgent,
+    m.settings_security_unknown_device(),
+  );
   const createdAt = session.createdAt
     ? new Date(session.createdAt).toLocaleDateString(undefined, {
         year: "numeric",

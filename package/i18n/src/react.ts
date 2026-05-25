@@ -2,7 +2,7 @@ import {
   DEFAULT_LANGUAGE,
   type Language,
   normalizeLanguage,
-} from "@rezics/contract";
+} from "@rezics/contract/language-core";
 import { useMemo, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "lang";

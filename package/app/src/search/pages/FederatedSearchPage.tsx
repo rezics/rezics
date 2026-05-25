@@ -16,10 +16,6 @@ import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";
 import { useMessage } from "@rezics/i18n/react";
 import { accessibility_search } from "@rezics/i18n/messages";
-const m = {
-  accessibility_search,
-};
-
 const i18nMessages = {
   accessibility_search,
 };

@@ -9,12 +9,6 @@ import {
   zone_not_found,
   zone_not_found_description,
 } from "@rezics/i18n/messages";
-const m = {
-  zone_loading,
-  zone_not_found,
-  zone_not_found_description,
-};
-
 const i18nMessages = {
   zone_loading,
   zone_not_found,

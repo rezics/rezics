@@ -44,12 +44,6 @@ import {
   chapter_move_volume,
   placeholders_chapter_title,
 } from "@rezics/i18n/messages";
-const m = {
-  chapter_metadata,
-  chapter_move_volume,
-  placeholders_chapter_title,
-};
-
 const i18nMessages = {
   chapter_metadata,
   chapter_move_volume,

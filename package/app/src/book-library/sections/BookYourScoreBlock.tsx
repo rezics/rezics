@@ -35,18 +35,6 @@ import {
   common_saving,
   common_submit,
 } from "@rezics/i18n/messages";
-const m = {
-  book_hero_your_score_dialog_edit,
-  book_hero_your_score_dialog_rate,
-  book_hero_your_score_label,
-  book_hero_your_score_rate,
-  book_hero_your_score_remove,
-  book_hero_your_score_sign_in,
-  common_cancel,
-  common_saving,
-  common_submit,
-};
-
 const i18nMessages = {
   book_hero_your_score_dialog_edit,
   book_hero_your_score_dialog_rate,

@@ -5,12 +5,6 @@ import {
   page_home_sections_promotion_item_2,
   page_home_sections_promotion_item_3,
 } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_promotion_item_1,
-  page_home_sections_promotion_item_2,
-  page_home_sections_promotion_item_3,
-};
-
 const i18nMessages = {
   page_home_sections_promotion_item_1,
   page_home_sections_promotion_item_2,

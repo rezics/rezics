@@ -36,16 +36,6 @@ import {
   search_category_reviews,
   search_category_shelves,
 } from "@rezics/i18n/messages";
-const m = {
-  profile_search_content_placeholder,
-  profile_unit_tabs_label,
-  search_category_books,
-  search_category_excerpts,
-  search_category_remarks,
-  search_category_reviews,
-  search_category_shelves,
-};
-
 const i18nMessages = {
   profile_search_content_placeholder,
   profile_unit_tabs_label,

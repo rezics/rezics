@@ -9,14 +9,22 @@ import {
   PopoverTrigger,
   Separator,
 } from "@rezics/ui/shadcn";
-import { useId, useState } from "react";
-import { FollowButton } from "@/engagement/components/FollowButton";
-import { Link, unitHref } from "@/shared/ui/link";
-import { cn } from "@/shared/utils/css-util";
+import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
 import {
   profile_following,
   profile_tab_followers,
 } from "@rezics/i18n/messages";
+import { useId, useState } from "react";
+import { FollowButton } from "@/engagement/components/FollowButton";
+import { Link, unitHref } from "@/shared/ui/link";
+import { cn } from "@/shared/utils/css-util";
+
+const i18nMessages = {
+  profile_following,
+  profile_tab_followers,
+};
+
+type UserHoverMessages = ReactiveMessageBag<typeof i18nMessages>;
 
 export type UserHoverPreviewSize = "compact" | "default";
 
@@ -58,6 +66,7 @@ export function UserHoverPreview({
   showName = true,
   defaultOpen = false,
 }: UserHoverPreviewProps) {
+  const m = useMessage(i18nMessages);
   const idPrefix = useId();
   const userId = getOptionalText(user.unitId);
   const slug = getOptionalText(user.slug);
@@ -99,7 +108,7 @@ export function UserHoverPreview({
     );
   }
 
-  const stats = getStats(user);
+  const stats = getStats(user, m);
   const profileHref = unitHref({
     type: "USER",
     unitId: userId,
@@ -309,10 +318,10 @@ function getAvatarFallback(
   return fallback.toUpperCase();
 }
 
-function getStats(user: UserHoverPreviewUser) {
+function getStats(user: UserHoverPreviewUser, m: UserHoverMessages) {
   return [
-    { label: profile_tab_followers(), value: user.followersCount },
-    { label: profile_following(), value: user.followingsCount },
+    { label: m.profile_tab_followers(), value: user.followersCount },
+    { label: m.profile_following(), value: user.followingsCount },
   ]
     .filter((stat) => typeof stat.value === "number")
     .map((stat) => ({ label: stat.label, value: stat.value ?? 0 }));

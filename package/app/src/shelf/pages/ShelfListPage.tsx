@@ -13,15 +13,6 @@ import {
   shelf_list_title,
   shelf_new_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_load_more,
-  common_loading,
-  common_search,
-  shelf_empty_yet,
-  shelf_list_title,
-  shelf_new_title,
-};
-
 const i18nMessages = {
   common_load_more,
   common_loading,

@@ -11,10 +11,6 @@ import { DrawerToggler } from "./DrawerToggler.tsx";
 import { HeaderSearch } from "./HeaderSearch.tsx";
 import { useMessage } from "@rezics/i18n/react";
 import { common_logo_alt } from "@rezics/i18n/messages";
-const m = {
-  common_logo_alt,
-};
-
 const i18nMessages = {
   common_logo_alt,
 };

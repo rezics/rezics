@@ -33,19 +33,6 @@ import {
   tag_upvote,
   tag_votes,
 } from "@rezics/i18n/messages";
-const m = {
-  common_close,
-  common_edit,
-  tag_clear,
-  tag_downvote,
-  tag_score,
-  tag_search_selected,
-  tag_search_this,
-  tag_selected_count,
-  tag_upvote,
-  tag_votes,
-};
-
 const i18nMessages = {
   common_close,
   common_edit,

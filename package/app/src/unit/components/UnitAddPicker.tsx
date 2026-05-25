@@ -43,22 +43,6 @@ import {
   unit_picker_url_placeholder,
   unit_picker_url_tab,
 } from "@rezics/i18n/messages";
-const m = {
-  unit_picker_add,
-  unit_picker_add_item,
-  unit_picker_browse_named_work,
-  unit_picker_browse_panel,
-  unit_picker_no_search_results,
-  unit_picker_no_sub_units,
-  unit_picker_parse_error,
-  unit_picker_search_label,
-  unit_picker_search_placeholder,
-  unit_picker_search_tab,
-  unit_picker_url_label,
-  unit_picker_url_placeholder,
-  unit_picker_url_tab,
-};
-
 const i18nMessages = {
   unit_picker_add,
   unit_picker_add_item,

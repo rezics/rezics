@@ -69,31 +69,6 @@ import {
   common_votes,
   common_yes,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_tag_low_score_description,
-  admin_tag_low_score_empty,
-  admin_tag_low_score_failed_load,
-  admin_tag_low_score_title,
-  admin_tag_pin,
-  admin_tag_realm_filter_label,
-  admin_tag_realm_filter_placeholder,
-  admin_tag_scope_global,
-  admin_tag_scope_realm,
-  admin_tag_threshold_label,
-  admin_tag_unpin,
-  common_actions,
-  common_apply,
-  common_delete,
-  common_pinned,
-  common_realm,
-  common_scope,
-  common_score,
-  common_tag,
-  common_unit,
-  common_votes,
-  common_yes,
-};
-
 const i18nMessages = {
   admin_tag_low_score_description,
   admin_tag_low_score_empty,

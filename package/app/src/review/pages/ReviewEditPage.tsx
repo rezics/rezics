@@ -23,18 +23,6 @@ import {
   review_messages_update_success,
   review_validation_min_chars,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  common_submit,
-  common_submitting,
-  review_edit_title,
-  review_messages_delete_success,
-  review_messages_failed_load,
-  review_messages_rating_range_error,
-  review_messages_update_success,
-  review_validation_min_chars,
-};
-
 const i18nMessages = {
   common_loading,
   common_submit,

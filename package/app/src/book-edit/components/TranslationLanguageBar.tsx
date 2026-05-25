@@ -6,12 +6,6 @@ import {
   page_book_edit_info_translation_default_badge,
   page_book_edit_info_translation_language_label,
 } from "@rezics/i18n/messages";
-const m = {
-  page_book_edit_info_translation_add_button,
-  page_book_edit_info_translation_default_badge,
-  page_book_edit_info_translation_language_label,
-};
-
 const i18nMessages = {
   page_book_edit_info_translation_add_button,
   page_book_edit_info_translation_default_badge,

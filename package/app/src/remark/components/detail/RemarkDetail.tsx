@@ -13,10 +13,6 @@ import { TextLink } from "@/shared/ui/link";
 import { remarkDetailActions, remarkPolicy } from "../../models/remarkPolicy";
 import { useMessage } from "@rezics/i18n/react";
 import { page_book_edit_info_dialog_view_book } from "@rezics/i18n/messages";
-const m = {
-  page_book_edit_info_dialog_view_book,
-};
-
 const i18nMessages = {
   page_book_edit_info_dialog_view_book,
 };

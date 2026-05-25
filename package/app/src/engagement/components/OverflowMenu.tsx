@@ -20,13 +20,6 @@ import {
   common_share,
   shelf_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_more_actions,
-  common_reply,
-  common_share,
-  shelf_title,
-};
-
 const i18nMessages = {
   common_more_actions,
   common_reply,
@@ -45,12 +38,15 @@ type MenuDescriptor = { label: () => string; icon: React.ReactNode };
 
 const DESCRIPTORS: Partial<Record<Action, MenuDescriptor>> = {
   reply: {
-    label: m.common_reply,
+    label: i18nMessages.common_reply,
     icon: <MessageSquare size={18} strokeWidth={2} />,
   },
-  share: { label: m.common_share, icon: <Share2 size={18} strokeWidth={2} /> },
+  share: {
+    label: i18nMessages.common_share,
+    icon: <Share2 size={18} strokeWidth={2} />,
+  },
   shelf: {
-    label: m.shelf_title,
+    label: i18nMessages.shelf_title,
     icon: <BookmarkPlus size={18} strokeWidth={2} />,
   },
 };

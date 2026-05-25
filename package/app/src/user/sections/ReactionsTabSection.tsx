@@ -14,7 +14,7 @@ import {
   profile_reactions_given,
   profile_reactions_received,
 } from "@rezics/i18n/messages";
-const m = {
+const i18nMessages = {
   profile_reactions_given,
   profile_reactions_received,
 };
@@ -22,8 +22,8 @@ const m = {
 type Mode = "given" | "received";
 
 const REACTION_MODE_LABEL = {
-  given: m.profile_reactions_given,
-  received: m.profile_reactions_received,
+  given: i18nMessages.profile_reactions_given,
+  received: i18nMessages.profile_reactions_received,
 } as const satisfies Record<Mode, () => string>;
 
 export const ReactionsTabSection: FC = () => {

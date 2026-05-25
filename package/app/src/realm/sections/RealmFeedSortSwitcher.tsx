@@ -5,7 +5,7 @@ import {
   realm_feed_sort_new,
   realm_feed_sort_top,
 } from "@rezics/i18n/messages";
-const m = {
+const i18nMessages = {
   realm_feed_sort_hot,
   realm_feed_sort_new,
   realm_feed_sort_top,
@@ -19,9 +19,9 @@ export interface RealmFeedSortSwitcherProps {
 }
 
 const OPTIONS = {
-  new: m.realm_feed_sort_new,
-  top: m.realm_feed_sort_top,
-  hot: m.realm_feed_sort_hot,
+  new: i18nMessages.realm_feed_sort_new,
+  top: i18nMessages.realm_feed_sort_top,
+  hot: i18nMessages.realm_feed_sort_hot,
 } as const satisfies Record<RealmFeedSort, () => string>;
 
 export const RealmFeedSortSwitcher: React.FC<RealmFeedSortSwitcherProps> = ({

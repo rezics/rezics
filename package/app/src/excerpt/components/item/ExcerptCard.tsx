@@ -21,11 +21,6 @@ import {
   excerpt_card_description_fallback,
   excerpt_card_source_unknown,
 } from "@rezics/i18n/messages";
-const m = {
-  excerpt_card_description_fallback,
-  excerpt_card_source_unknown,
-};
-
 const i18nMessages = {
   excerpt_card_description_fallback,
   excerpt_card_source_unknown,

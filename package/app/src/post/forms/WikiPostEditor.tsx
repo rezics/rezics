@@ -17,12 +17,6 @@ import {
   common_save,
   common_saving,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_save,
-  common_saving,
-};
-
 const i18nMessages = {
   common_cancel,
   common_save,

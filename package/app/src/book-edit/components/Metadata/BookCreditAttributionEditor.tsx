@@ -29,14 +29,6 @@ import {
   common_loading,
   common_save_changes,
 } from "@rezics/i18n/messages";
-const m = {
-  book_actions_add_credit,
-  book_actions_remove_credit,
-  book_empty_credit_attributions,
-  common_loading,
-  common_save_changes,
-};
-
 const i18nMessages = {
   book_actions_add_credit,
   book_actions_remove_credit,

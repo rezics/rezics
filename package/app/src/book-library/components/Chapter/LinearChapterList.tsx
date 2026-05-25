@@ -15,14 +15,6 @@ import {
   common_loading,
   common_search,
 } from "@rezics/i18n/messages";
-const m = {
-  book_chapter_search_term_placeholder,
-  common_collapse_all,
-  common_expand_all,
-  common_loading,
-  common_search,
-};
-
 const i18nMessages = {
   book_chapter_search_term_placeholder,
   common_collapse_all,

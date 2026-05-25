@@ -15,13 +15,6 @@ import {
   excerpt_not_found,
   review_comments,
 } from "@rezics/i18n/messages";
-const m = {
-  common_edit,
-  common_loading,
-  excerpt_not_found,
-  review_comments,
-};
-
 const i18nMessages = {
   common_edit,
   common_loading,

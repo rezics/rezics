@@ -22,16 +22,6 @@ import {
   common_email,
   common_password,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_user_admin_login_description,
-  admin_user_admin_login_title,
-  admin_user_login_failed,
-  admin_user_login_signing_in,
-  auth_login,
-  common_email,
-  common_password,
-};
-
 const i18nMessages = {
   admin_user_admin_login_description,
   admin_user_admin_login_title,

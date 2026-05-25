@@ -31,26 +31,6 @@ import {
   common_never,
   common_uid,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_meili_create_admin_key,
-  admin_meili_creating,
-  admin_meili_existing_keys_title,
-  admin_meili_key_management_description,
-  admin_meili_key_management_title,
-  admin_meili_latest_admin_key,
-  admin_meili_loading_keys,
-  admin_meili_no_keys_found,
-  admin_meili_refresh_key_list,
-  common_action,
-  common_actions,
-  common_delete,
-  common_expires,
-  common_indexes,
-  common_name,
-  common_never,
-  common_uid,
-};
-
 const i18nMessages = {
   admin_meili_create_admin_key,
   admin_meili_creating,

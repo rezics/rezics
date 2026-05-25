@@ -8,11 +8,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useMessage } from "@rezics/i18n/react";
 import { common_cancel, shelf_move_to_page_title } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  shelf_move_to_page_title,
-};
-
 const i18nMessages = {
   common_cancel,
   shelf_move_to_page_title,

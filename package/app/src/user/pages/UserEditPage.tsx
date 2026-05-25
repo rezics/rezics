@@ -40,19 +40,6 @@ import {
   settings_profile_edit_title,
   user_load_failed,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_description,
-  common_nickname,
-  common_save,
-  entity_avatar_url,
-  settings_profile_about_help,
-  settings_profile_avatar_help,
-  settings_profile_bio,
-  settings_profile_edit_title,
-  user_load_failed,
-};
-
 const i18nMessages = {
   common_cancel,
   common_description,

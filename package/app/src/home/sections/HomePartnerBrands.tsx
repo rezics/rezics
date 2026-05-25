@@ -2,10 +2,6 @@ import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import type React from "react";
 import { useMessage } from "@rezics/i18n/react";
 import { page_home_sections_partner_brands } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_partner_brands,
-};
-
 const i18nMessages = {
   page_home_sections_partner_brands,
 };

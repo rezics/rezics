@@ -39,29 +39,6 @@ import {
   common_title,
   common_type,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_auth_email_status,
-  admin_auth_user_id,
-  admin_token_creating,
-  admin_unit_create_description,
-  admin_unit_create_failed,
-  admin_unit_create_tip,
-  admin_unit_create_title,
-  admin_unit_default_language,
-  admin_unit_default_language_help,
-  admin_unit_initial_translation,
-  admin_unit_primary_user_help,
-  admin_unit_status_placeholder,
-  admin_unit_title_help,
-  admin_unit_type_placeholder,
-  common_back,
-  common_create,
-  common_language_code_placeholder,
-  common_summary,
-  common_title,
-  common_type,
-};
-
 const i18nMessages = {
   admin_auth_email_status,
   admin_auth_user_id,

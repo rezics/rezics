@@ -19,11 +19,6 @@ import {
   review_open_review_page,
   review_target_work_label,
 } from "@rezics/i18n/messages";
-const m = {
-  review_open_review_page,
-  review_target_work_label,
-};
-
 const i18nMessages = {
   review_open_review_page,
   review_target_work_label,

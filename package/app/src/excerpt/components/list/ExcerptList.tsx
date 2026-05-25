@@ -6,10 +6,6 @@ import { useMemo } from "react";
 import { ExcerptCard } from "../item/ExcerptCard";
 import { useMessage } from "@rezics/i18n/react";
 import { excerpt_list_empty_title } from "@rezics/i18n/messages";
-const m = {
-  excerpt_list_empty_title,
-};
-
 const i18nMessages = {
   excerpt_list_empty_title,
 };

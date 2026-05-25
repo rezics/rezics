@@ -58,26 +58,6 @@ import {
   pinboard_admin_tabs_announcement,
   pinboard_admin_tabs_pinboard,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_delete,
-  common_save,
-  pinboard_admin_create,
-  pinboard_admin_delete_description,
-  pinboard_admin_delete_done,
-  pinboard_admin_delete_failed,
-  pinboard_admin_delete_title,
-  pinboard_admin_tabs_aria,
-  pinboard_admin_title,
-  pinboard_editor_created,
-  pinboard_editor_errors_save_failed,
-  pinboard_editor_saved,
-  pinboard_editor_title_create,
-  pinboard_editor_title_edit,
-  pinboard_admin_tabs_announcement,
-  pinboard_admin_tabs_pinboard,
-};
-
 const i18nMessages = {
   common_cancel,
   common_delete,
@@ -105,8 +85,8 @@ export interface PinboardAdminSectionProps {
 }
 
 const PINBOARD_ADMIN_TAB_LABEL = {
-  announcement: m.pinboard_admin_tabs_announcement,
-  pinboard: m.pinboard_admin_tabs_pinboard,
+  announcement: i18nMessages.pinboard_admin_tabs_announcement,
+  pinboard: i18nMessages.pinboard_admin_tabs_pinboard,
 } as const satisfies Record<PinboardListKey, () => string>;
 
 /**

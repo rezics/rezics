@@ -14,12 +14,6 @@ import {
   realm_search_placeholder,
   realm_search_title,
 } from "@rezics/i18n/messages";
-const m = {
-  realm_none_found,
-  realm_search_placeholder,
-  realm_search_title,
-};
-
 const i18nMessages = {
   realm_none_found,
   realm_search_placeholder,

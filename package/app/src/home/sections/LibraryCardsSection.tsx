@@ -13,13 +13,6 @@ import {
   page_home_sections_library_cards_game_library,
   page_home_sections_library_cards_media_library,
 } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_library_cards_coming_soon,
-  page_home_sections_library_cards_book_library,
-  page_home_sections_library_cards_game_library,
-  page_home_sections_library_cards_media_library,
-};
-
 const i18nMessages = {
   page_home_sections_library_cards_coming_soon,
   page_home_sections_library_cards_book_library,
@@ -51,9 +44,9 @@ const libraries = [
 type LibraryKey = (typeof libraries)[number]["key"];
 
 const LIBRARY_CARD_TITLE = {
-  book_library: m.page_home_sections_library_cards_book_library,
-  game_library: m.page_home_sections_library_cards_game_library,
-  media_library: m.page_home_sections_library_cards_media_library,
+  book_library: i18nMessages.page_home_sections_library_cards_book_library,
+  game_library: i18nMessages.page_home_sections_library_cards_game_library,
+  media_library: i18nMessages.page_home_sections_library_cards_media_library,
 } as const satisfies Record<LibraryKey, () => string>;
 
 export const LibraryCardsSection: React.FC = () => {

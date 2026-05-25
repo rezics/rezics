@@ -6,11 +6,6 @@ import { ReviewNewPage } from "./ReviewNewPage";
 import { ReviewsPage } from "./ReviewsPage";
 import { useMessage } from "@rezics/i18n/react";
 import { common_back, pages_review_page } from "@rezics/i18n/messages";
-const m = {
-  common_back,
-  pages_review_page,
-};
-
 const i18nMessages = {
   common_back,
   pages_review_page,

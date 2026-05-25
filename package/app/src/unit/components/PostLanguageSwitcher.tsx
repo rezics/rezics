@@ -4,11 +4,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { Plus as AddIcon } from "lucide-react";
 import { useMessage } from "@rezics/i18n/react";
 import { post_add_translation, post_languages } from "@rezics/i18n/messages";
-const m = {
-  post_add_translation,
-  post_languages,
-};
-
 const i18nMessages = {
   post_add_translation,
   post_languages,

@@ -16,14 +16,6 @@ import {
   shelf_no_description,
   shelf_untitled,
 } from "@rezics/i18n/messages";
-const m = {
-  common_anonymous,
-  shelf_cover_alt,
-  shelf_items_count,
-  shelf_no_description,
-  shelf_untitled,
-};
-
 const i18nMessages = {
   common_anonymous,
   shelf_cover_alt,

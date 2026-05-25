@@ -15,11 +15,6 @@ import {
 import { BookDetailLayoutContext } from "./bookDetailLayoutContext";
 import { useMessage } from "@rezics/i18n/react";
 import { common_error_generic, common_loading } from "@rezics/i18n/messages";
-const m = {
-  common_error_generic,
-  common_loading,
-};
-
 const i18nMessages = {
   common_error_generic,
   common_loading,

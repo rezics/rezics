@@ -24,16 +24,6 @@ import {
   common_cancel,
   common_create,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_token_create_dialog_title,
-  admin_token_creating,
-  admin_token_default_name,
-  admin_token_expires_at_optional,
-  admin_token_token_name,
-  common_cancel,
-  common_create,
-};
-
 const i18nMessages = {
   admin_token_create_dialog_title,
   admin_token_creating,

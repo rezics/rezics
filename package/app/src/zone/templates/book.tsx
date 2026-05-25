@@ -8,12 +8,6 @@ import {
   zone_books_title,
   zone_search_books_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  zone_book_content_placeholder,
-  zone_books_title,
-  zone_search_books_placeholder,
-};
-
 const i18nMessages = {
   zone_book_content_placeholder,
   zone_books_title,

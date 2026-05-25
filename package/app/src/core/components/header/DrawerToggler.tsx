@@ -2,10 +2,6 @@ import { Button } from "@rezics/ui/shadcn";
 import { Menu } from "lucide-react";
 import { useMessage } from "@rezics/i18n/react";
 import { accessibility_open_drawer } from "@rezics/i18n/messages";
-const m = {
-  accessibility_open_drawer,
-};
-
 const i18nMessages = {
   accessibility_open_drawer,
 };

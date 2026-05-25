@@ -12,10 +12,6 @@ import { Pencil as Edit } from "lucide-react";
 import { cn } from "@/shared/utils/css-util";
 import { useMessage } from "@rezics/i18n/react";
 import { common_edit } from "@rezics/i18n/messages";
-const m = {
-  common_edit,
-};
-
 const i18nMessages = {
   common_edit,
 };

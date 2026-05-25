@@ -6,10 +6,6 @@ import { useMemo } from "react";
 import { ShelfCard } from "./ShelfCard";
 import { useMessage } from "@rezics/i18n/react";
 import { shelf_list_title } from "@rezics/i18n/messages";
-const m = {
-  shelf_list_title,
-};
-
 const i18nMessages = {
   shelf_list_title,
 };

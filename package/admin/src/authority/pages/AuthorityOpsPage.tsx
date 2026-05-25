@@ -35,26 +35,6 @@ import {
   common_search,
   common_unit_id,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_authority_description,
-  admin_authority_empty_help,
-  admin_authority_retry_failed,
-  admin_authority_retry_failed_button,
-  admin_authority_retry_queued,
-  admin_authority_title,
-  admin_authority_unit_search_placeholder,
-  admin_unit_collaborator_added_by,
-  admin_unit_collaborators_empty,
-  admin_unit_collaborators_failed_load,
-  admin_unit_collaborators_title,
-  admin_unit_field_lock_locked_by,
-  admin_unit_field_locks_empty,
-  admin_unit_field_locks_failed_load,
-  admin_unit_field_locks_title,
-  common_search,
-  common_unit_id,
-};
-
 const i18nMessages = {
   admin_authority_description,
   admin_authority_empty_help,

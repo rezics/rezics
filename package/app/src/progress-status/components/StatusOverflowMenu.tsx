@@ -21,11 +21,6 @@ import {
   progress_status_overflow_aria,
   progress_status_overflow_remove_progress,
 } from "@rezics/i18n/messages";
-const m = {
-  progress_status_overflow_aria,
-  progress_status_overflow_remove_progress,
-};
-
 const i18nMessages = {
   progress_status_overflow_aria,
   progress_status_overflow_remove_progress,

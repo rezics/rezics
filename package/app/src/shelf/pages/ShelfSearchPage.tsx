@@ -15,14 +15,6 @@ import {
   shelf_search_placeholder,
   shelf_search_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_next,
-  common_prev,
-  shelf_none_found,
-  shelf_search_placeholder,
-  shelf_search_title,
-};
-
 const i18nMessages = {
   common_next,
   common_prev,

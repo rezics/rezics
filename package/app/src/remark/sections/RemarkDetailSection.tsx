@@ -13,12 +13,6 @@ import {
   common_loading,
   common_no_data,
 } from "@rezics/i18n/messages";
-const m = {
-  common_edit,
-  common_loading,
-  common_no_data,
-};
-
 const i18nMessages = {
   common_edit,
   common_loading,

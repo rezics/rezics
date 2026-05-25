@@ -4,11 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMessage } from "@rezics/i18n/react";
 import { score_no_ratings, score_ratings_count } from "@rezics/i18n/messages";
-const m = {
-  score_no_ratings,
-  score_ratings_count,
-};
-
 const i18nMessages = {
   score_no_ratings,
   score_ratings_count,

@@ -27,13 +27,6 @@ import {
   navigation_profile,
   navigation_settings,
 } from "@rezics/i18n/messages";
-const m = {
-  app_account_menu_aria_label,
-  auth_logout,
-  navigation_profile,
-  navigation_settings,
-};
-
 const i18nMessages = {
   app_account_menu_aria_label,
   auth_logout,

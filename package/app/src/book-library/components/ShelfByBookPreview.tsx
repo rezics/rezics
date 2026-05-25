@@ -9,11 +9,6 @@ import {
   common_loading,
   shelf_includes_book_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  shelf_includes_book_title,
-};
-
 const i18nMessages = {
   common_loading,
   shelf_includes_book_title,

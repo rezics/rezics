@@ -32,18 +32,6 @@ import {
   book_tooltips_licensed,
   common_url_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  book_fields_cover_url,
-  book_fields_isbn,
-  book_fields_page_count,
-  book_fields_publication_license,
-  book_fields_rating,
-  book_fields_text_length,
-  book_flags_licensed,
-  book_tooltips_licensed,
-  common_url_placeholder,
-};
-
 const i18nMessages = {
   book_fields_cover_url,
   book_fields_isbn,

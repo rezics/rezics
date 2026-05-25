@@ -8,12 +8,6 @@ import {
   zone_latest_content,
   zone_search_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  zone_content_placeholder,
-  zone_latest_content,
-  zone_search_placeholder,
-};
-
 const i18nMessages = {
   zone_content_placeholder,
   zone_latest_content,

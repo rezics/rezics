@@ -21,17 +21,6 @@ import {
   profile_no_following,
   profile_tab_followers,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  common_next_page,
-  common_page_of,
-  common_previous_page,
-  profile_following,
-  profile_no_followers,
-  profile_no_following,
-  profile_tab_followers,
-};
-
 const i18nMessages = {
   common_loading,
   common_next_page,

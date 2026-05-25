@@ -9,11 +9,6 @@ import { useLayoutStore } from "@/core/states/layoutStore.ts";
 import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
 import { useMessage } from "@rezics/i18n/react";
 import { book_read_back_to_book, book_toc } from "@rezics/i18n/messages";
-const m = {
-  book_read_back_to_book,
-  book_toc,
-};
-
 const i18nMessages = {
   book_read_back_to_book,
   book_toc,

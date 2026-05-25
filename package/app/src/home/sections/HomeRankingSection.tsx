@@ -13,10 +13,6 @@ import {
 } from "@/shared/utils/translation-helpers";
 import { useMessage } from "@rezics/i18n/react";
 import { page_home_sections_ranking } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_ranking,
-};
-
 const i18nMessages = {
   page_home_sections_ranking,
 };

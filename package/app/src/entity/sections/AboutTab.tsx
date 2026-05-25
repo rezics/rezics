@@ -10,16 +10,6 @@ import {
   entity_slug_label,
   entity_verified,
 } from "@rezics/i18n/messages";
-const m = {
-  common_no,
-  common_translation,
-  common_yes,
-  entity_kind_label,
-  entity_no_details_available,
-  entity_slug_label,
-  entity_verified,
-};
-
 const i18nMessages = {
   common_no,
   common_translation,

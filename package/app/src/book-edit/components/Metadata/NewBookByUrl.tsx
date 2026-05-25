@@ -17,14 +17,6 @@ import {
   book_edit_supported_sites,
   common_create,
 } from "@rezics/i18n/messages";
-const m = {
-  book_edit_book_url,
-  book_edit_create_book_by_url_description,
-  book_edit_create_book_by_url_title,
-  book_edit_supported_sites,
-  common_create,
-};
-
 const i18nMessages = {
   book_edit_book_url,
   book_edit_create_book_by_url_description,

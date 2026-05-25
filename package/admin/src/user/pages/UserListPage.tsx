@@ -40,26 +40,6 @@ import {
   common_edit,
   common_search,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_user_actions,
-  admin_user_failed_to_load_users,
-  admin_user_join_date,
-  admin_user_list_description,
-  admin_user_list_meili_description,
-  admin_user_list_meili_title,
-  admin_user_list_title,
-  admin_user_name_label,
-  admin_user_rezics_email_label,
-  admin_user_roles,
-  admin_user_search_action,
-  admin_user_search_placeholder,
-  admin_user_slug,
-  admin_user_user_id,
-  common_create,
-  common_edit,
-  common_search,
-};
-
 const i18nMessages = {
   admin_user_actions,
   admin_user_failed_to_load_users,

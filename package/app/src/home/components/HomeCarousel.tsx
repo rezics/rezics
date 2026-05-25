@@ -17,10 +17,6 @@ import { cn } from "@/shared/utils/css-util";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { useMessage } from "@rezics/i18n/react";
 import { page_home_carousel_alert_parse_failed } from "@rezics/i18n/messages";
-const m = {
-  page_home_carousel_alert_parse_failed,
-};
-
 const i18nMessages = {
   page_home_carousel_alert_parse_failed,
 };

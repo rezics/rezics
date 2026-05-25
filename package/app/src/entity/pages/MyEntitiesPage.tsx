@@ -13,14 +13,6 @@ import {
   entity_my_entities,
   entity_new_button,
 } from "@rezics/i18n/messages";
-const m = {
-  entity_declare,
-  entity_empty_owned,
-  entity_login_required,
-  entity_my_entities,
-  entity_new_button,
-};
-
 const i18nMessages = {
   entity_declare,
   entity_empty_owned,

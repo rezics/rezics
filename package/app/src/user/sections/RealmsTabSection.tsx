@@ -21,18 +21,6 @@ import {
   common_created,
   profile_realms_joined,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  profile_realms_load_failed,
-  profile_realms_none_created,
-  profile_realms_none_joined,
-  realm_member_count,
-  realm_official,
-  realm_private,
-  common_created,
-  profile_realms_joined,
-};
-
 const i18nMessages = {
   common_loading,
   profile_realms_load_failed,
@@ -46,8 +34,8 @@ const i18nMessages = {
 };
 
 const FILTER_CHIP_LABEL = {
-  joined: m.profile_realms_joined,
-  created: m.common_created,
+  joined: i18nMessages.profile_realms_joined,
+  created: i18nMessages.common_created,
 } as const satisfies Record<string, () => string>;
 
 type RealmListItemModel = {

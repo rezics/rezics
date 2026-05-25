@@ -6,10 +6,6 @@ import { useState } from "react";
 import type { QueryMiddleware } from "../../hooks/useSearchQuery";
 import { useMessage } from "@rezics/i18n/react";
 import { accessibility_search } from "@rezics/i18n/messages";
-const m = {
-  accessibility_search,
-};
-
 const i18nMessages = {
   accessibility_search,
 };

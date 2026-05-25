@@ -20,11 +20,6 @@ import {
   reactions_deleted_content,
   reactions_reacted_with,
 } from "@rezics/i18n/messages";
-const m = {
-  reactions_deleted_content,
-  reactions_reacted_with,
-};
-
 const i18nMessages = {
   reactions_deleted_content,
   reactions_reacted_with,

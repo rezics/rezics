@@ -3,10 +3,6 @@ import type React from "react";
 import type { BookDescriptionProps } from "./types";
 import { useMessage } from "@rezics/i18n/react";
 import { book_description } from "@rezics/i18n/messages";
-const m = {
-  book_description,
-};
-
 const i18nMessages = {
   book_description,
 };

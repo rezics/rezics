@@ -14,10 +14,6 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
 import { useMessage } from "@rezics/i18n/react";
 import { realm_content_empty_title } from "@rezics/i18n/messages";
-const m = {
-  realm_content_empty_title,
-};
-
 const i18nMessages = {
   realm_content_empty_title,
 };

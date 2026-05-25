@@ -8,11 +8,6 @@ import {
   admin_layout_open_menu,
   admin_layout_title,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_layout_open_menu,
-  admin_layout_title,
-};
-
 const i18nMessages = {
   admin_layout_open_menu,
   admin_layout_title,

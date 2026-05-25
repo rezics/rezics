@@ -10,7 +10,7 @@ import {
   profile_tab_realms,
   profile_tab_shelves,
 } from "@rezics/i18n/messages";
-const m = {
+const i18nMessages = {
   profile_tab_content,
   profile_tab_followers,
   profile_tab_overview,
@@ -20,12 +20,12 @@ const m = {
 };
 
 const PROFILE_TABS = [
-  { label: m.profile_tab_overview, path: "" },
-  { label: m.profile_tab_content, path: "/content" },
-  { label: m.profile_tab_shelves, path: "/shelves" },
-  { label: m.profile_tab_realms, path: "/realms" },
-  { label: m.profile_tab_followers, path: "/followers" },
-  { label: m.profile_tab_reactions, path: "/reactions" },
+  { label: i18nMessages.profile_tab_overview, path: "" },
+  { label: i18nMessages.profile_tab_content, path: "/content" },
+  { label: i18nMessages.profile_tab_shelves, path: "/shelves" },
+  { label: i18nMessages.profile_tab_realms, path: "/realms" },
+  { label: i18nMessages.profile_tab_followers, path: "/followers" },
+  { label: i18nMessages.profile_tab_reactions, path: "/reactions" },
 ] as const;
 
 interface ProfileTabBarProps {

@@ -14,11 +14,6 @@ import {
   settings_connections_description,
   settings_connections_title,
 } from "@rezics/i18n/messages";
-const m = {
-  settings_connections_description,
-  settings_connections_title,
-};
-
 const i18nMessages = {
   settings_connections_description,
   settings_connections_title,

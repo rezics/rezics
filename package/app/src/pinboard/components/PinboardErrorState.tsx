@@ -8,12 +8,6 @@ import {
   pinboard_error_description,
   pinboard_error_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_retry,
-  pinboard_error_description,
-  pinboard_error_title,
-};
-
 const i18nMessages = {
   common_retry,
   pinboard_error_description,

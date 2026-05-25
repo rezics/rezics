@@ -12,13 +12,6 @@ import {
   shelf_move_to_another_page,
   shelf_select_for_bulk_action,
 } from "@rezics/i18n/messages";
-const m = {
-  common_delete,
-  shelf_drag_to_reorder,
-  shelf_move_to_another_page,
-  shelf_select_for_bulk_action,
-};
-
 const i18nMessages = {
   common_delete,
   shelf_drag_to_reorder,

@@ -34,19 +34,6 @@ import {
   unit_no_metadata,
   user_open_profile,
 } from "@rezics/i18n/messages";
-const m = {
-  common_created_at,
-  common_loading,
-  common_no_data,
-  common_updated_at,
-  pages_unit_page,
-  post_add_translation_prompt,
-  unit_meta_data,
-  unit_no_content,
-  unit_no_metadata,
-  user_open_profile,
-};
-
 const i18nMessages = {
   common_created_at,
   common_loading,

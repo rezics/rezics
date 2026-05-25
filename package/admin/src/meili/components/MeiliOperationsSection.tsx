@@ -14,14 +14,6 @@ import {
   admin_meili_index_initialization_title,
   admin_meili_sync_help,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_meili_full_sync_description,
-  admin_meili_full_sync_title,
-  admin_meili_index_initialization_description,
-  admin_meili_index_initialization_title,
-  admin_meili_sync_help,
-};
-
 const i18nMessages = {
   admin_meili_full_sync_description,
   admin_meili_full_sync_title,

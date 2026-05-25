@@ -7,12 +7,6 @@ import {
   page_home_hero_subtitle,
   page_home_hero_title_highlight,
 } from "@rezics/i18n/messages";
-const m = {
-  page_home_hero_kicker,
-  page_home_hero_subtitle,
-  page_home_hero_title_highlight,
-};
-
 const i18nMessages = {
   page_home_hero_kicker,
   page_home_hero_subtitle,

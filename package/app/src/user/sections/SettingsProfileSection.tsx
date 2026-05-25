@@ -36,20 +36,6 @@ import {
   settings_profile_title,
   settings_profile_updated,
 } from "@rezics/i18n/messages";
-const m = {
-  common_description,
-  common_username,
-  entity_avatar_url,
-  settings_profile_avatar_placeholder,
-  settings_profile_bio,
-  settings_profile_bio_placeholder,
-  settings_profile_description,
-  settings_profile_display_name,
-  settings_profile_save,
-  settings_profile_title,
-  settings_profile_updated,
-};
-
 const i18nMessages = {
   common_description,
   common_username,

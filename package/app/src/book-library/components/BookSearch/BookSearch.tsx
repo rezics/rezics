@@ -21,14 +21,6 @@ import {
   search_input_tags_label,
   search_input_word_count_label,
 } from "@rezics/i18n/messages";
-const m = {
-  placeholders_search_books,
-  search_advanced_label,
-  search_input_tags_hint,
-  search_input_tags_label,
-  search_input_word_count_label,
-};
-
 const i18nMessages = {
   placeholders_search_books,
   search_advanced_label,

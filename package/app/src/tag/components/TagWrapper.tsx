@@ -8,11 +8,6 @@ import { RealmTagHighlights } from "./RealmTagHighlights";
 import TagList from "./TagList";
 import { useMessage } from "@rezics/i18n/react";
 import { tag_load_failed, tag_loading } from "@rezics/i18n/messages";
-const m = {
-  tag_load_failed,
-  tag_loading,
-};
-
 const i18nMessages = {
   tag_load_failed,
   tag_loading,

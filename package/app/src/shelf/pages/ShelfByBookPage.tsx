@@ -10,13 +10,6 @@ import {
   shelf_containing_this_book_title,
   shelf_none_for_this_book,
 } from "@rezics/i18n/messages";
-const m = {
-  common_load_more,
-  common_loading,
-  shelf_containing_this_book_title,
-  shelf_none_for_this_book,
-};
-
 const i18nMessages = {
   common_load_more,
   common_loading,

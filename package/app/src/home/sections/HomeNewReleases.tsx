@@ -14,10 +14,6 @@ import {
 } from "@/shared/utils/translation-helpers";
 import { useMessage } from "@rezics/i18n/react";
 import { page_home_sections_new_book_recommendations } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_new_book_recommendations,
-};
-
 const i18nMessages = {
   page_home_sections_new_book_recommendations,
 };

@@ -32,22 +32,6 @@ import {
   common_inactive,
   common_save,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_jwt_activate,
-  admin_jwt_audience,
-  admin_jwt_deactivate,
-  admin_jwt_edit_title,
-  admin_jwt_issuer,
-  admin_jwt_jwks_path,
-  admin_jwt_jwks_url,
-  admin_jwt_local_issuer,
-  admin_jwt_saving,
-  common_active,
-  common_cancel,
-  common_inactive,
-  common_save,
-};
-
 const i18nMessages = {
   admin_jwt_activate,
   admin_jwt_audience,

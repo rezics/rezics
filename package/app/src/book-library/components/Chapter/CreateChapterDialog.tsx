@@ -25,18 +25,6 @@ import {
   common_required,
   common_submitting,
 } from "@rezics/i18n/messages";
-const m = {
-  auth_flow_onboarding_sign_in_first,
-  book_chapter_content_required,
-  book_chapter_create_failed,
-  book_chapter_title_content_required,
-  book_edit_chapter_title,
-  book_edit_create_chapter,
-  common_create,
-  common_required,
-  common_submitting,
-};
-
 const i18nMessages = {
   auth_flow_onboarding_sign_in_first,
   book_chapter_content_required,

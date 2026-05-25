@@ -12,10 +12,6 @@ import {
 } from "./postTreeLayout";
 import { useMessage } from "@rezics/i18n/react";
 import { post_collapse_thread } from "@rezics/i18n/messages";
-const m = {
-  post_collapse_thread,
-};
-
 const i18nMessages = {
   post_collapse_thread,
 };

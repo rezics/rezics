@@ -8,11 +8,6 @@ import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
 import { useMessage } from "@rezics/i18n/react";
 import { tag_downvote, tag_upvote } from "@rezics/i18n/messages";
-const m = {
-  tag_downvote,
-  tag_upvote,
-};
-
 const i18nMessages = {
   tag_downvote,
   tag_upvote,

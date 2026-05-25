@@ -6,10 +6,6 @@ import UnitsPage from "@/unit/pages/UnitsPage";
 import { ExcerptNewPage } from "./ExcerptNewPage";
 import { useMessage } from "@rezics/i18n/react";
 import { excerpt_excerpts_title } from "@rezics/i18n/messages";
-const m = {
-  excerpt_excerpts_title,
-};
-
 const i18nMessages = {
   excerpt_excerpts_title,
 };

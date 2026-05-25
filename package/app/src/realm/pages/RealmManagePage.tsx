@@ -37,17 +37,6 @@ import {
   common_save,
   realm_manage,
 } from "@rezics/i18n/messages";
-const m = {
-  common_add,
-  common_add_translation,
-  common_cancel,
-  common_description,
-  common_language,
-  common_name,
-  common_save,
-  realm_manage,
-};
-
 const i18nMessages = {
   common_add,
   common_add_translation,

@@ -30,13 +30,6 @@ import {
   pinboard_reorder_error,
   pinboard_reorder_list,
 } from "@rezics/i18n/messages";
-const m = {
-  pinboard_reorder_conflict,
-  pinboard_reorder_drag_handle,
-  pinboard_reorder_error,
-  pinboard_reorder_list,
-};
-
 const i18nMessages = {
   pinboard_reorder_conflict,
   pinboard_reorder_drag_handle,

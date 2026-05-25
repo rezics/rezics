@@ -8,13 +8,6 @@ import {
   page_book_edit_info_translation_fields_subtitle,
   page_book_edit_info_translation_fields_summary,
 } from "@rezics/i18n/messages";
-const m = {
-  book_description,
-  book_fields_title,
-  page_book_edit_info_translation_fields_subtitle,
-  page_book_edit_info_translation_fields_summary,
-};
-
 const i18nMessages = {
   book_description,
   book_fields_title,

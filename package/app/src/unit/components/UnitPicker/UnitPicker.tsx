@@ -16,14 +16,6 @@ import {
   unit_picker_url_label,
   unit_picker_url_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  unit_picker_browse_panel,
-  unit_picker_no_sub_units,
-  unit_picker_parse_error,
-  unit_picker_url_label,
-  unit_picker_url_placeholder,
-};
-
 const i18nMessages = {
   unit_picker_browse_panel,
   unit_picker_no_sub_units,

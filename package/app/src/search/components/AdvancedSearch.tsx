@@ -25,17 +25,6 @@ import {
   search_input_tags_hint,
   search_input_tags_label,
 } from "@rezics/i18n/messages";
-const m = {
-  search_close_advanced_label,
-  search_filters_postKind,
-  search_filters_sort,
-  search_filters_type,
-  search_filters_wordCount,
-  search_input_placeholder,
-  search_input_tags_hint,
-  search_input_tags_label,
-};
-
 const i18nMessages = {
   search_close_advanced_label,
   search_filters_postKind,

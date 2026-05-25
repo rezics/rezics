@@ -9,10 +9,6 @@ import type React from "react";
 import { MiscMenuItems } from "./MiscMenuItems";
 import { useMessage } from "@rezics/i18n/react";
 import { common_more } from "@rezics/i18n/messages";
-const m = {
-  common_more,
-};
-
 const i18nMessages = {
   common_more,
 };

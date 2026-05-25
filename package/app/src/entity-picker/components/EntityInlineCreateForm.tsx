@@ -36,24 +36,6 @@ import {
   entity_title_required,
   language_code_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_create,
-  common_creating,
-  common_language,
-  entity_add_role,
-  entity_avatar_placeholder,
-  entity_avatar_url,
-  entity_create_failed,
-  entity_credit_eligibility,
-  entity_kind_label,
-  entity_subject_eligibility,
-  entity_title_label,
-  entity_title_placeholder,
-  entity_title_required,
-  language_code_placeholder,
-};
-
 const i18nMessages = {
   common_cancel,
   common_create,

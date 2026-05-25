@@ -34,19 +34,6 @@ import {
   book_hero_meta_publisher,
   book_hero_meta_translator,
 } from "@rezics/i18n/messages";
-const m = {
-  book_hero_kind_book,
-  book_hero_meta_chapter_count,
-  book_hero_meta_length_chars,
-  book_hero_meta_author,
-  book_hero_meta_co_author,
-  book_hero_meta_editor,
-  book_hero_meta_illustrator,
-  book_hero_meta_producer,
-  book_hero_meta_publisher,
-  book_hero_meta_translator,
-};
-
 const i18nMessages = {
   book_hero_kind_book,
   book_hero_meta_chapter_count,
@@ -73,25 +60,25 @@ type BriefPart = { id: string; text: string };
 type MetaRow = { key: string; label: string; credits: EntityTranslation[] };
 
 const CREDIT_ROLES = [
-  { role: "author", label: m.book_hero_meta_author },
+  { role: "author", label: i18nMessages.book_hero_meta_author },
   {
     role: "co-author",
-    label: m.book_hero_meta_co_author,
+    label: i18nMessages.book_hero_meta_co_author,
   },
   {
     role: "translator",
-    label: m.book_hero_meta_translator,
+    label: i18nMessages.book_hero_meta_translator,
   },
   {
     role: "illustrator",
-    label: m.book_hero_meta_illustrator,
+    label: i18nMessages.book_hero_meta_illustrator,
   },
-  { role: "editor", label: m.book_hero_meta_editor },
+  { role: "editor", label: i18nMessages.book_hero_meta_editor },
   {
     role: "publisher",
-    label: m.book_hero_meta_publisher,
+    label: i18nMessages.book_hero_meta_publisher,
   },
-  { role: "producer", label: m.book_hero_meta_producer },
+  { role: "producer", label: i18nMessages.book_hero_meta_producer },
 ] as const;
 
 export const BookHeroSection: React.FC<BookHeroSectionProps> = ({

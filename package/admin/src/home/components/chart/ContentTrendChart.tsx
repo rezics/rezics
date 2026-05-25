@@ -14,11 +14,6 @@ import {
   admin_dashboard_comments,
   admin_nav_books,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_dashboard_comments,
-  admin_nav_books,
-};
-
 const i18nMessages = {
   admin_dashboard_comments,
   admin_nav_books,

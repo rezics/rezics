@@ -24,15 +24,6 @@ import {
   common_cancel,
   common_ok,
 } from "@rezics/i18n/messages";
-const m = {
-  book_chapter_move_dialog_moving,
-  book_chapter_move_dialog_no_results,
-  book_chapter_move_dialog_search_placeholder,
-  book_chapter_move_dialog_title,
-  common_cancel,
-  common_ok,
-};
-
 const i18nMessages = {
   book_chapter_move_dialog_moving,
   book_chapter_move_dialog_no_results,

@@ -30,22 +30,6 @@ import {
   admin_meili_resetting,
   common_cancel,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_meili_dangerous_operations_description,
-  admin_meili_dangerous_operations_title,
-  admin_meili_delete_all_documents_description,
-  admin_meili_delete_all_documents_title,
-  admin_meili_delete_all_indexes,
-  admin_meili_reset_dialog_description,
-  admin_meili_reset_dialog_title,
-  admin_meili_reset_everything_description,
-  admin_meili_reset_everything_title,
-  admin_meili_reset_type_to_confirm_prefix,
-  admin_meili_reset_type_to_confirm_suffix,
-  admin_meili_resetting,
-  common_cancel,
-};
-
 const i18nMessages = {
   admin_meili_dangerous_operations_description,
   admin_meili_dangerous_operations_title,

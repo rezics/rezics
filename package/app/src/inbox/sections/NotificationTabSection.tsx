@@ -9,12 +9,6 @@ import {
   notifications_empty,
   notifications_load_failed,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  notifications_empty,
-  notifications_load_failed,
-};
-
 const i18nMessages = {
   common_loading,
   notifications_empty,

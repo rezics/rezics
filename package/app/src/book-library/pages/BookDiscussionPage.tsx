@@ -13,11 +13,6 @@ import {
   book_community_sidebar_help,
   page_book_tabs_community,
 } from "@rezics/i18n/messages";
-const m = {
-  book_community_sidebar_help,
-  page_book_tabs_community,
-};
-
 const i18nMessages = {
   book_community_sidebar_help,
   page_book_tabs_community,

@@ -17,13 +17,6 @@ import {
   common_close,
   common_copy_link,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_token_created_secret_description,
-  admin_token_created_secret_title,
-  common_close,
-  common_copy_link,
-};
-
 const i18nMessages = {
   admin_token_created_secret_description,
   admin_token_created_secret_title,

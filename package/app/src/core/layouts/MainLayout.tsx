@@ -22,11 +22,6 @@ import {
   app_document_title_account_settings,
   app_document_title_library,
 } from "@rezics/i18n/messages";
-const m = {
-  app_document_title_account_settings,
-  app_document_title_library,
-};
-
 const i18nMessages = {
   app_document_title_account_settings,
   app_document_title_library,

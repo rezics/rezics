@@ -7,11 +7,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ReviewList } from "../components/list/ReviewList";
 import { useMessage } from "@rezics/i18n/react";
 import { common_loading, review_list_empty_title } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  review_list_empty_title,
-};
-
 const i18nMessages = {
   common_loading,
   review_list_empty_title,

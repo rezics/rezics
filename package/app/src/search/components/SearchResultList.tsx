@@ -10,12 +10,6 @@ import {
   search_empty_title,
   search_results_summary,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  search_empty_title,
-  search_results_summary,
-};
-
 const i18nMessages = {
   common_loading,
   search_empty_title,

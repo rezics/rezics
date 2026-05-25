@@ -4,10 +4,6 @@ import { useEffect } from "react";
 import { cn } from "@/shared/utils/css-util";
 import { useMessage } from "@rezics/i18n/react";
 import { app_close_sidebar_aria_label } from "@rezics/i18n/messages";
-const m = {
-  app_close_sidebar_aria_label,
-};
-
 const i18nMessages = {
   app_close_sidebar_aria_label,
 };

@@ -39,23 +39,6 @@ import {
   common_save,
   common_saving,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_user_avatar_url_label,
-  admin_user_bio_label,
-  admin_user_description_label,
-  admin_user_edit_description,
-  admin_user_edit_title,
-  admin_user_email_display,
-  admin_user_failed_to_load,
-  admin_user_keep_password_help,
-  admin_user_name_label,
-  admin_user_new_password_label,
-  admin_user_update_failed,
-  common_back,
-  common_save,
-  common_saving,
-};
-
 const i18nMessages = {
   admin_user_avatar_url_label,
   admin_user_bio_label,

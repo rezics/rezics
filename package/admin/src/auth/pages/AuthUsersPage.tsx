@@ -54,30 +54,6 @@ import {
   common_id,
   common_remove,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_auth_actions_title,
-  admin_auth_role_admin,
-  admin_auth_role_owner,
-  admin_auth_role_user,
-  admin_auth_user_name,
-  admin_auth_user_role,
-  admin_auth_users_ban,
-  admin_auth_users_banned,
-  admin_auth_users_description,
-  admin_auth_users_failed_load,
-  admin_auth_users_remove_description,
-  admin_auth_users_remove_title,
-  admin_auth_users_title,
-  admin_auth_users_unban,
-  common_active,
-  common_cancel,
-  common_confirm,
-  common_created,
-  common_email,
-  common_id,
-  common_remove,
-};
-
 const i18nMessages = {
   admin_auth_actions_title,
   admin_auth_role_admin,

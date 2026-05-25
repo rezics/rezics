@@ -22,17 +22,6 @@ import {
   feedback_submit,
   search_category_all,
 } from "@rezics/i18n/messages";
-const m = {
-  common_status,
-  feedback_my_title,
-  feedback_search_label,
-  feedback_search_placeholder,
-  feedback_status_resolved,
-  feedback_status_unresolved,
-  feedback_submit,
-  search_category_all,
-};
-
 const i18nMessages = {
   common_status,
   feedback_my_title,

@@ -9,10 +9,6 @@ import {
 import { Languages as LanguageIcon } from "lucide-react";
 import { ThemeToggler } from "./ThemeToggler";
 import { layout_header_toggle_language } from "@rezics/i18n/messages";
-const m = {
-  layout_header_toggle_language,
-};
-
 const i18nMessages = {
   layout_header_toggle_language,
 };

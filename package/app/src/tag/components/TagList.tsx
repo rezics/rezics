@@ -7,10 +7,6 @@ import { cn } from "@/shared/utils/css-util";
 import { TagDetailCard } from "./TagCards";
 import { useMessage } from "@rezics/i18n/react";
 import { tag_empty } from "@rezics/i18n/messages";
-const m = {
-  tag_empty,
-};
-
 const i18nMessages = {
   tag_empty,
 };

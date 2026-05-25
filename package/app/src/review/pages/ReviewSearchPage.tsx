@@ -12,12 +12,6 @@ import {
   review_search_placeholder,
   review_search_title,
 } from "@rezics/i18n/messages";
-const m = {
-  review_search_empty_title,
-  review_search_placeholder,
-  review_search_title,
-};
-
 const i18nMessages = {
   review_search_empty_title,
   review_search_placeholder,

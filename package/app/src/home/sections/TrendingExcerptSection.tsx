@@ -11,12 +11,6 @@ import {
   page_home_sections_trending_excerpt_more,
   page_home_sections_trending_excerpt_title,
 } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_trending_excerpt_empty,
-  page_home_sections_trending_excerpt_more,
-  page_home_sections_trending_excerpt_title,
-};
-
 const i18nMessages = {
   page_home_sections_trending_excerpt_empty,
   page_home_sections_trending_excerpt_more,

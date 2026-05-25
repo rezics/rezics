@@ -22,14 +22,6 @@ import {
   excerpt_messages_update_failed,
   excerpt_updated_success,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  common_save,
-  excerpt_form_title,
-  excerpt_messages_update_failed,
-  excerpt_updated_success,
-};
-
 const i18nMessages = {
   common_loading,
   common_save,

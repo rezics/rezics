@@ -12,13 +12,6 @@ import {
   remark_form_rating,
   remark_submit,
 } from "@rezics/i18n/messages";
-const m = {
-  common_submitting,
-  remark_compose_placeholder,
-  remark_form_rating,
-  remark_submit,
-};
-
 const i18nMessages = {
   common_submitting,
   remark_compose_placeholder,

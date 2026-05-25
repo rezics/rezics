@@ -6,11 +6,6 @@ import {
   auth_flow_complete_registration_action,
   auth_logout,
 } from "@rezics/i18n/messages";
-const m = {
-  auth_flow_complete_registration_action,
-  auth_logout,
-};
-
 const i18nMessages = {
   auth_flow_complete_registration_action,
   auth_logout,

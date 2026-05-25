@@ -1,5 +1,20 @@
 import { useRevokeSessionMutation } from "@rezics/api/auth/auth.mutations";
 import { authQueries } from "@rezics/api/auth/auth.queries";
+import {
+  admin_auth_actions_title,
+  admin_auth_sessions_description,
+  admin_auth_sessions_failed_load,
+  admin_auth_sessions_revoke_description,
+  admin_auth_sessions_revoke_title,
+  admin_auth_sessions_title,
+  admin_auth_sessions_token,
+  common_cancel,
+  common_created,
+  common_expires,
+  common_revoke,
+  common_user_agent,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -19,35 +34,6 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
-import { useMessage } from "@rezics/i18n/react";
-import {
-  admin_auth_actions_title,
-  admin_auth_sessions_description,
-  admin_auth_sessions_failed_load,
-  admin_auth_sessions_revoke_description,
-  admin_auth_sessions_revoke_title,
-  admin_auth_sessions_title,
-  admin_auth_sessions_token,
-  common_cancel,
-  common_created,
-  common_expires,
-  common_revoke,
-  common_user_agent,
-} from "@rezics/i18n/messages";
-const m = {
-  admin_auth_actions_title,
-  admin_auth_sessions_description,
-  admin_auth_sessions_failed_load,
-  admin_auth_sessions_revoke_description,
-  admin_auth_sessions_revoke_title,
-  admin_auth_sessions_title,
-  admin_auth_sessions_token,
-  common_cancel,
-  common_created,
-  common_expires,
-  common_revoke,
-  common_user_agent,
-};
 
 const i18nMessages = {
   admin_auth_actions_title,

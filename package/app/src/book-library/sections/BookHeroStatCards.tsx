@@ -16,12 +16,6 @@ import {
   book_hero_stat_shelves,
   book_hero_stat_tags,
 } from "@rezics/i18n/messages";
-const m = {
-  book_hero_stat_reviews,
-  book_hero_stat_shelves,
-  book_hero_stat_tags,
-};
-
 const i18nMessages = {
   book_hero_stat_reviews,
   book_hero_stat_shelves,

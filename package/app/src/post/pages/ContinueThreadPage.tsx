@@ -10,10 +10,6 @@ import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { PostTreeList } from "../sections/PostTreeList";
 import { useMessage } from "@rezics/i18n/react";
 import { post_back_to_original_thread } from "@rezics/i18n/messages";
-const m = {
-  post_back_to_original_thread,
-};
-
 const i18nMessages = {
   post_back_to_original_thread,
 };

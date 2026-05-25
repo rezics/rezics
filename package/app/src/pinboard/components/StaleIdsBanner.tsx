@@ -13,15 +13,6 @@ import {
   pinboard_stale_description,
   pinboard_stale_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_dismiss,
-  pinboard_stale_cleanup,
-  pinboard_stale_cleanup_done,
-  pinboard_stale_cleanup_partial,
-  pinboard_stale_description,
-  pinboard_stale_title,
-};
-
 const i18nMessages = {
   common_dismiss,
   pinboard_stale_cleanup,

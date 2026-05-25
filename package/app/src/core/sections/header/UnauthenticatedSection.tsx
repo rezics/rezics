@@ -7,11 +7,6 @@ import { RegisterModal } from "@/user/pages/RegisterPage";
 import { MoreHorizMenu } from "../../components/header/MoreHorizMenu";
 import { useMessage } from "@rezics/i18n/react";
 import { auth_login, auth_register } from "@rezics/i18n/messages";
-const m = {
-  auth_login,
-  auth_register,
-};
-
 const i18nMessages = {
   auth_login,
   auth_register,

@@ -19,10 +19,6 @@ import { cn } from "@/shared/utils/css-util";
 import { remarkCardActions, remarkPolicy } from "../../models/remarkPolicy";
 import { useMessage } from "@rezics/i18n/react";
 import { remark_open_remark_page } from "@rezics/i18n/messages";
-const m = {
-  remark_open_remark_page,
-};
-
 const i18nMessages = {
   remark_open_remark_page,
 };

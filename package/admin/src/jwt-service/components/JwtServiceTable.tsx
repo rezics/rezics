@@ -29,20 +29,6 @@ import {
   common_edit,
   common_inactive,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_auth_actions_title,
-  admin_auth_email_status,
-  admin_jwt_audience,
-  admin_jwt_issuer,
-  admin_jwt_local,
-  admin_jwt_local_issuer,
-  admin_jwt_remote,
-  admin_jwt_service_key,
-  common_active,
-  common_edit,
-  common_inactive,
-};
-
 const i18nMessages = {
   admin_auth_actions_title,
   admin_auth_email_status,

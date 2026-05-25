@@ -16,11 +16,6 @@ import {
   page_book_edit_info_translation_set_source_label,
   page_book_edit_info_translation_set_source_none,
 } from "@rezics/i18n/messages";
-const m = {
-  page_book_edit_info_translation_set_source_label,
-  page_book_edit_info_translation_set_source_none,
-};
-
 const i18nMessages = {
   page_book_edit_info_translation_set_source_label,
   page_book_edit_info_translation_set_source_none,

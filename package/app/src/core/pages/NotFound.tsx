@@ -13,12 +13,6 @@ import {
   common_home,
   common_not_found,
 } from "@rezics/i18n/messages";
-const m = {
-  common_back,
-  common_home,
-  common_not_found,
-};
-
 const i18nMessages = {
   common_back,
   common_home,

@@ -5,11 +5,6 @@ import {
   book_copyright_notice_body,
   book_copyright_notice_fair_use,
 } from "@rezics/i18n/messages";
-const m = {
-  book_copyright_notice_body,
-  book_copyright_notice_fair_use,
-};
-
 const i18nMessages = {
   book_copyright_notice_body,
   book_copyright_notice_fair_use,

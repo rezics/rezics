@@ -15,13 +15,6 @@ import {
   common_apply,
   common_cancel,
 } from "@rezics/i18n/messages";
-const m = {
-  book_chapter_bulk_rating_description,
-  book_chapter_bulk_rating_title,
-  common_apply,
-  common_cancel,
-};
-
 const i18nMessages = {
   book_chapter_bulk_rating_description,
   book_chapter_bulk_rating_title,

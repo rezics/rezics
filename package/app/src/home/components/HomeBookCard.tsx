@@ -9,11 +9,6 @@ import {
 } from "@/shared/utils/translation-helpers";
 import { useMessage } from "@rezics/i18n/react";
 import { book_no_cover, book_unknown_author } from "@rezics/i18n/messages";
-const m = {
-  book_no_cover,
-  book_unknown_author,
-};
-
 const i18nMessages = {
   book_no_cover,
   book_unknown_author,

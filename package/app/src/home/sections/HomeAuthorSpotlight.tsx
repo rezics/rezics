@@ -8,10 +8,6 @@ import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { useMessage } from "@rezics/i18n/react";
 import { page_home_sections_author_spotlight } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_author_spotlight,
-};
-
 const i18nMessages = {
   page_home_sections_author_spotlight,
 };

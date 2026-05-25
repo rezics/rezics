@@ -12,16 +12,6 @@ import {
   book_fields_text_length,
   book_info_panel_title,
 } from "@rezics/i18n/messages";
-const m = {
-  book_fields_chapter_count,
-  book_fields_format,
-  book_fields_isbn,
-  book_fields_page_count,
-  book_fields_publication_license,
-  book_fields_text_length,
-  book_info_panel_title,
-};
-
 const i18nMessages = {
   book_fields_chapter_count,
   book_fields_format,

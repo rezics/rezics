@@ -20,12 +20,6 @@ import {
   common_edit,
   common_loading,
 } from "@rezics/i18n/messages";
-const m = {
-  book_edit_toc_management_title,
-  common_edit,
-  common_loading,
-};
-
 const i18nMessages = {
   book_edit_toc_management_title,
   common_edit,

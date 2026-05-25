@@ -4,10 +4,6 @@ import { useMemo } from "react";
 import { useAppStore } from "@/app/states/appStore";
 import { useMessage } from "@rezics/i18n/react";
 import { app_toggle_theme } from "@rezics/i18n/messages";
-const m = {
-  app_toggle_theme,
-};
-
 const i18nMessages = {
   app_toggle_theme,
 };

@@ -13,11 +13,6 @@ import {
   app_create_menu_aria_label,
   common_create,
 } from "@rezics/i18n/messages";
-const m = {
-  app_create_menu_aria_label,
-  common_create,
-};
-
 const i18nMessages = {
   app_create_menu_aria_label,
   common_create,

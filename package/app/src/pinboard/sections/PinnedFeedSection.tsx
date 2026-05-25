@@ -8,11 +8,6 @@ import {
   pinboard_pinned_heading,
   pinboard_pinned_region,
 } from "@rezics/i18n/messages";
-const m = {
-  pinboard_pinned_heading,
-  pinboard_pinned_region,
-};
-
 const i18nMessages = {
   pinboard_pinned_heading,
   pinboard_pinned_region,

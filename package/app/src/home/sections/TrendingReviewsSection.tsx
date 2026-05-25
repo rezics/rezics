@@ -10,10 +10,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalReviewCarousel } from "@/review/components/list/HorizontalReviewCarousel";
 import { useMessage } from "@rezics/i18n/react";
 import { page_home_sections_trending_reviews } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_trending_reviews,
-};
-
 const i18nMessages = {
   page_home_sections_trending_reviews,
 };

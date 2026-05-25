@@ -18,17 +18,6 @@ import {
   reactions_empty_received_description,
   reactions_load_failed,
 } from "@rezics/i18n/messages";
-const m = {
-  common_end_of_list,
-  common_load_more,
-  common_retry,
-  reactions_empty_given,
-  reactions_empty_given_description,
-  reactions_empty_received,
-  reactions_empty_received_description,
-  reactions_load_failed,
-};
-
 const i18nMessages = {
   common_end_of_list,
   common_load_more,

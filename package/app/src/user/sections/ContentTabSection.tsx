@@ -30,24 +30,6 @@ import {
   shelf_sort_newest,
   shelf_sort_oldest,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  common_next_page,
-  common_no_data,
-  common_page_of,
-  common_previous_page,
-  profile_search_content_placeholder,
-  search_empty_title,
-  shelf_controls_sort_by,
-  profile_sort_most_replies,
-  search_category_excerpts,
-  search_category_posts,
-  search_category_remarks,
-  search_category_reviews,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-};
-
 const i18nMessages = {
   common_loading,
   common_next_page,
@@ -67,16 +49,16 @@ const i18nMessages = {
 };
 
 const KIND_CHIP_LABEL = {
-  REVIEW: m.search_category_reviews,
-  REMARK: m.search_category_remarks,
-  EXCERPT: m.search_category_excerpts,
-  POST: m.search_category_posts,
+  REVIEW: i18nMessages.search_category_reviews,
+  REMARK: i18nMessages.search_category_remarks,
+  EXCERPT: i18nMessages.search_category_excerpts,
+  POST: i18nMessages.search_category_posts,
 } as const satisfies Record<string, () => string>;
 
 const SORT_OPTION_LABEL = {
-  "createdAt:desc": m.shelf_sort_newest,
-  "createdAt:asc": m.shelf_sort_oldest,
-  "replyCount:desc": m.profile_sort_most_replies,
+  "createdAt:desc": i18nMessages.shelf_sort_newest,
+  "createdAt:asc": i18nMessages.shelf_sort_oldest,
+  "replyCount:desc": i18nMessages.profile_sort_most_replies,
 } as const satisfies Record<string, () => string>;
 
 export const ContentTabSection: FC = () => {

@@ -11,6 +11,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./language-core": {
+      "types": "./src/language-core.ts",
+      "default": "./src/language-core.ts"
+    },
     "./reaction": {
       "types": "./src/reaction/index.ts",
       "default": "./src/reaction/index.ts"

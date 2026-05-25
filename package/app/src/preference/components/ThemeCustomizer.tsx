@@ -32,19 +32,6 @@ import {
   theme_customizer_static_theme,
   theme_customizer_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_apply,
-  common_cancel,
-  common_close,
-  common_reset,
-  theme_customizer_current_accent,
-  theme_customizer_custom_color,
-  theme_customizer_hex_format,
-  theme_customizer_preset_colors,
-  theme_customizer_static_theme,
-  theme_customizer_title,
-};
-
 const i18nMessages = {
   common_apply,
   common_cancel,

@@ -45,7 +45,7 @@ import {
   admin_nav_users,
 } from "@rezics/i18n/messages";
 
-const m = {
+const i18nMessages = {
   admin_nav_auth,
   admin_nav_auth_email_templates,
   admin_nav_auth_jwt_services,
@@ -94,7 +94,7 @@ export const adminNav = {
   items: [
     {
       id: "dashboard",
-      label: m.admin_nav_dashboard,
+      label: i18nMessages.admin_nav_dashboard,
       icon: <DashboardIcon fontSize="small" />,
       to: "/",
     },
@@ -106,24 +106,24 @@ export const adminNav = {
     },
     {
       id: "user",
-      label: m.admin_nav_users,
+      label: i18nMessages.admin_nav_users,
       icon: <PeopleIcon fontSize="small" />,
       children: [
         {
           id: "user.list",
-          label: m.admin_nav_list,
+          label: i18nMessages.admin_nav_list,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user",
         },
         {
           id: "user.meili",
-          label: m.admin_nav_meili_search,
+          label: i18nMessages.admin_nav_meili_search,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user/meili",
         },
         {
           id: "user.create",
-          label: m.admin_nav_create,
+          label: i18nMessages.admin_nav_create,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user/create",
         },
@@ -131,24 +131,24 @@ export const adminNav = {
     },
     {
       id: "unit",
-      label: m.admin_nav_units,
+      label: i18nMessages.admin_nav_units,
       icon: <Inventory2Icon fontSize="small" />,
       children: [
         {
           id: "unit.list",
-          label: m.admin_nav_list,
+          label: i18nMessages.admin_nav_list,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit",
         },
         {
           id: "unit.meili",
-          label: m.admin_nav_meili_search,
+          label: i18nMessages.admin_nav_meili_search,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/meili",
         },
         {
           id: "unit.create",
-          label: m.admin_nav_create,
+          label: i18nMessages.admin_nav_create,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/create",
         },
@@ -156,18 +156,18 @@ export const adminNav = {
     },
     {
       id: "book",
-      label: m.admin_nav_books,
+      label: i18nMessages.admin_nav_books,
       icon: <Inventory2Icon fontSize="small" />,
       children: [
         {
           id: "book.list",
-          label: m.admin_nav_list,
+          label: i18nMessages.admin_nav_list,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book",
         },
         {
           id: "book.meili",
-          label: m.admin_nav_meili_search,
+          label: i18nMessages.admin_nav_meili_search,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book/meili",
         },
@@ -175,7 +175,7 @@ export const adminNav = {
     },
     {
       id: "entities",
-      label: m.admin_nav_entities,
+      label: i18nMessages.admin_nav_entities,
       icon: <IdentityIcon fontSize="small" />,
       to: "/entity",
     },
@@ -187,19 +187,19 @@ export const adminNav = {
     },
     {
       id: "authority",
-      label: m.admin_nav_authority,
+      label: i18nMessages.admin_nav_authority,
       icon: <ShieldCheckIcon fontSize="small" />,
       to: "/authority",
     },
     // MOCK: realm management pages not yet implemented
     {
       id: "realm",
-      label: m.admin_nav_realms,
+      label: i18nMessages.admin_nav_realms,
       icon: <ForumIcon fontSize="small" />,
       children: [
         {
           id: "realm.list",
-          label: m.admin_nav_list,
+          label: i18nMessages.admin_nav_list,
           icon: <ForumIcon fontSize="small" />,
           to: "/realm",
         },
@@ -207,12 +207,12 @@ export const adminNav = {
     },
     {
       id: "tag",
-      label: m.admin_nav_tags,
+      label: i18nMessages.admin_nav_tags,
       icon: <StyleOutlinedIcon fontSize="small" />,
       children: [
         {
           id: "tag.low-score",
-          label: m.admin_nav_low_score,
+          label: i18nMessages.admin_nav_low_score,
           icon: <StyleOutlinedIcon fontSize="small" />,
           to: "/tag/low-score",
         },
@@ -221,12 +221,12 @@ export const adminNav = {
     // MOCK: shelf management pages not yet implemented
     {
       id: "shelf",
-      label: m.admin_nav_shelves,
+      label: i18nMessages.admin_nav_shelves,
       icon: <CollectionsBookmarkIcon fontSize="small" />,
       children: [
         {
           id: "shelf.list",
-          label: m.admin_nav_list,
+          label: i18nMessages.admin_nav_list,
           icon: <CollectionsBookmarkIcon fontSize="small" />,
           to: "/shelf",
         },
@@ -234,24 +234,24 @@ export const adminNav = {
     },
     {
       id: "misc",
-      label: m.admin_nav_misc,
+      label: i18nMessages.admin_nav_misc,
       icon: <StorageOutlinedIcon fontSize="small" />,
       children: [
         {
           id: "misc.echokv",
-          label: m.admin_nav_echokv,
+          label: i18nMessages.admin_nav_echokv,
           icon: <StorageOutlinedIcon fontSize="small" />,
           to: "/misc/echokv",
         },
         {
           id: "misc.token",
-          label: m.admin_nav_token,
+          label: i18nMessages.admin_nav_token,
           icon: <KeyOutlinedIcon fontSize="small" />,
           to: "/token",
         },
         {
           id: "misc.jwt-services",
-          label: m.admin_nav_jwt_services,
+          label: i18nMessages.admin_nav_jwt_services,
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/jwt-services",
           requiredRole: "owner",
@@ -260,7 +260,7 @@ export const adminNav = {
     },
     {
       id: "meili",
-      label: m.admin_nav_meili,
+      label: i18nMessages.admin_nav_meili,
       icon: <ManageSearchOutlinedIcon fontSize="small" />,
       children: [
         {
@@ -279,36 +279,36 @@ export const adminNav = {
     },
     {
       id: "auth",
-      label: m.admin_nav_auth,
+      label: i18nMessages.admin_nav_auth,
       icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
       children: [
         {
           id: "auth.users",
-          label: m.admin_nav_users,
+          label: i18nMessages.admin_nav_users,
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
           to: "/auth/users",
         },
         {
           id: "auth.sessions",
-          label: m.admin_nav_sessions,
+          label: i18nMessages.admin_nav_sessions,
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
           to: "/auth/sessions",
         },
         {
           id: "auth.status",
-          label: m.admin_nav_auth_status,
+          label: i18nMessages.admin_nav_auth_status,
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/auth/status",
         },
         {
           id: "auth.email",
-          label: m.admin_nav_auth_email_templates,
+          label: i18nMessages.admin_nav_auth_email_templates,
           icon: <EmailOutlinedIcon fontSize="small" />,
           to: "/auth/email",
         },
         {
           id: "auth.jwt-services",
-          label: m.admin_nav_auth_jwt_services,
+          label: i18nMessages.admin_nav_auth_jwt_services,
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/auth/jwt-services",
           requiredRole: "owner",
@@ -317,7 +317,7 @@ export const adminNav = {
     },
     {
       id: "settings",
-      label: m.admin_nav_settings,
+      label: i18nMessages.admin_nav_settings,
       icon: <SettingsIcon fontSize="small" />,
       to: "/settings",
     },

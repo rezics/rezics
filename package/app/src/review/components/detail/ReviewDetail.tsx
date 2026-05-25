@@ -9,10 +9,6 @@ import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
 import { useMessage } from "@rezics/i18n/react";
 import { pages_review_page } from "@rezics/i18n/messages";
-const m = {
-  pages_review_page,
-};
-
 const i18nMessages = {
   pages_review_page,
 };

@@ -16,13 +16,6 @@ import {
   review_short_review,
   review_tabs_label,
 } from "@rezics/i18n/messages";
-const m = {
-  book_remark,
-  review_search_placeholder,
-  review_short_review,
-  review_tabs_label,
-};
-
 const i18nMessages = {
   book_remark,
   review_search_placeholder,

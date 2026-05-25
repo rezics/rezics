@@ -30,14 +30,6 @@ import {
   user_cannot_resolve_description,
   user_empty,
 } from "@rezics/i18n/messages";
-const m = {
-  profile_follow_info_description,
-  profile_follow_info_title,
-  user_cannot_resolve,
-  user_cannot_resolve_description,
-  user_empty,
-};
-
 const i18nMessages = {
   profile_follow_info_description,
   profile_follow_info_title,

@@ -36,21 +36,6 @@ import {
   common_edit,
   common_loading,
 } from "@rezics/i18n/messages";
-const m = {
-  book_read_chapter_actions_content,
-  book_read_chapter_actions_discuss,
-  book_read_chapter_actions_preparing,
-  book_read_chapter_actions_progress,
-  book_read_chapter_actions_review,
-  book_read_chapter_actions_saving,
-  book_read_empty_chapter_actions_hint,
-  book_read_empty_chapter_description,
-  book_read_position_save,
-  book_read_position_saving,
-  common_edit,
-  common_loading,
-};
-
 const i18nMessages = {
   book_read_chapter_actions_content,
   book_read_chapter_actions_discuss,

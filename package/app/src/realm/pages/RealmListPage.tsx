@@ -15,13 +15,6 @@ import {
   realm_list_title,
   realm_new_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_search,
-  realm_empty_yet,
-  realm_list_title,
-  realm_new_title,
-};
-
 const i18nMessages = {
   common_search,
   realm_empty_yet,

@@ -35,20 +35,6 @@ import {
   progress_status_reason_modal_title_dropped,
   progress_status_reason_modal_title_paused,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  common_save,
-  progress_status_reason_modal_append,
-  progress_status_reason_modal_history,
-  progress_status_reason_modal_placeholder,
-  progress_status_reason_modal_private,
-  progress_status_reason_modal_skip,
-  progress_status_reason_modal_desc_dropped,
-  progress_status_reason_modal_desc_paused,
-  progress_status_reason_modal_title_dropped,
-  progress_status_reason_modal_title_paused,
-};
-
 const i18nMessages = {
   common_loading,
   common_save,
@@ -82,13 +68,13 @@ type ReasonModalProps = {
 };
 
 const TITLE_MESSAGE = {
-  PAUSED: m.progress_status_reason_modal_title_paused,
-  DROPPED: m.progress_status_reason_modal_title_dropped,
+  PAUSED: i18nMessages.progress_status_reason_modal_title_paused,
+  DROPPED: i18nMessages.progress_status_reason_modal_title_dropped,
 } as const satisfies Record<ReasonStatus, () => string>;
 
 const DESC_MESSAGE = {
-  PAUSED: m.progress_status_reason_modal_desc_paused,
-  DROPPED: m.progress_status_reason_modal_desc_dropped,
+  PAUSED: i18nMessages.progress_status_reason_modal_desc_paused,
+  DROPPED: i18nMessages.progress_status_reason_modal_desc_dropped,
 } as const satisfies Record<ReasonStatus, () => string>;
 
 export function ReasonModal({

@@ -12,11 +12,6 @@ import {
   page_home_sections_active_realms_more,
   page_home_sections_active_realms_title,
 } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_active_realms_more,
-  page_home_sections_active_realms_title,
-};
-
 const i18nMessages = {
   page_home_sections_active_realms_more,
   page_home_sections_active_realms_title,

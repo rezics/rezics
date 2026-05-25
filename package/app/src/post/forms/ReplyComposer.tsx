@@ -35,20 +35,6 @@ import {
   shelf_discussion_signInPrompt,
   tag_search_this,
 } from "@rezics/i18n/messages";
-const m = {
-  auth_login,
-  common_cancel,
-  common_reply,
-  page_shelf_searching,
-  post_composer_invalid_configuration,
-  post_composer_post,
-  post_composer_posting,
-  post_reply_placeholder,
-  post_tag_picker_no_matches,
-  shelf_discussion_signInPrompt,
-  tag_search_this,
-};
-
 const i18nMessages = {
   auth_login,
   common_cancel,

@@ -20,15 +20,6 @@ import {
   progress_status_active_modal_progress_label,
   progress_status_active_modal_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_save,
-  progress_status_active_modal_chapter_label,
-  progress_status_active_modal_description,
-  progress_status_active_modal_progress_label,
-  progress_status_active_modal_title,
-};
-
 const i18nMessages = {
   common_cancel,
   common_save,

@@ -17,12 +17,6 @@ import {
   common_share,
   common_share_via,
 } from "@rezics/i18n/messages";
-const m = {
-  common_copy_link,
-  common_share,
-  common_share_via,
-};
-
 const i18nMessages = {
   common_copy_link,
   common_share,

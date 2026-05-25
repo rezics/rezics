@@ -25,19 +25,6 @@ import {
   search_filter_time,
   search_filter_word_count,
 } from "@rezics/i18n/messages";
-const m = {
-  search_filter_asc,
-  search_filter_desc,
-  search_filter_month_votes,
-  search_filter_recommendation,
-  search_filter_total_votes,
-  search_filter_week_votes,
-  search_filter_favorites,
-  search_filter_relevance,
-  search_filter_time,
-  search_filter_word_count,
-};
-
 const i18nMessages = {
   search_filter_asc,
   search_filter_desc,
@@ -60,11 +47,11 @@ export type BookLibSortKey =
   | "recommend";
 
 const FILTER_LABEL = {
-  relevance: m.search_filter_relevance,
-  time: m.search_filter_time,
-  favorites: m.search_filter_favorites,
-  wordCount: m.search_filter_word_count,
-  monthVotes: m.search_filter_month_votes,
+  relevance: i18nMessages.search_filter_relevance,
+  time: i18nMessages.search_filter_time,
+  favorites: i18nMessages.search_filter_favorites,
+  wordCount: i18nMessages.search_filter_word_count,
+  monthVotes: i18nMessages.search_filter_month_votes,
 } as const satisfies Partial<Record<BookLibSortKey, () => string>>;
 
 export type BookSearchFilterProps = SortControlsProps;

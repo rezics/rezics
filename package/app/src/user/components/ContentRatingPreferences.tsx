@@ -27,17 +27,6 @@ import {
   settings_content_rating_description_R_18,
   settings_content_rating_description_R_18G,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  settings_content_rating_always_on,
-  settings_content_rating_opt_in_modal_body,
-  settings_content_rating_opt_in_modal_confirm,
-  settings_content_rating_opt_in_modal_title,
-  settings_content_rating_saved,
-  settings_content_rating_description_R_18,
-  settings_content_rating_description_R_18G,
-};
-
 const i18nMessages = {
   common_cancel,
   settings_content_rating_always_on,
@@ -54,8 +43,8 @@ const OPT_IN_RATINGS: OptInRating[] = ["R_18", "R_18G"];
 const BASELINE_RATINGS: ContentRating[] = ["GENERAL", "R_15"];
 
 const OPT_IN_RATING_DESCRIPTION = {
-  R_18: m.settings_content_rating_description_R_18,
-  R_18G: m.settings_content_rating_description_R_18G,
+  R_18: i18nMessages.settings_content_rating_description_R_18,
+  R_18G: i18nMessages.settings_content_rating_description_R_18G,
 } as const satisfies Record<OptInRating, () => string>;
 
 export const ContentRatingPreferences: FC = () => {

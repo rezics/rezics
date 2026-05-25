@@ -12,12 +12,6 @@ import {
   book_hero_count_links_shelves,
   book_hero_count_links_tags,
 } from "@rezics/i18n/messages";
-const m = {
-  book_hero_count_links_reviews,
-  book_hero_count_links_shelves,
-  book_hero_count_links_tags,
-};
-
 const i18nMessages = {
   book_hero_count_links_reviews,
   book_hero_count_links_shelves,

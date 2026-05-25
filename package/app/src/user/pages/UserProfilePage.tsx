@@ -31,20 +31,6 @@ import {
   user_no_bio_available,
   user_not_found,
 } from "@rezics/i18n/messages";
-const m = {
-  common_edit,
-  common_email,
-  engagement_bookmark,
-  profile_tab_followers,
-  profile_tab_reactions,
-  settings_profile_bio,
-  user_id_label,
-  user_joined_on,
-  user_navigation_label,
-  user_no_bio_available,
-  user_not_found,
-};
-
 const i18nMessages = {
   common_edit,
   common_email,

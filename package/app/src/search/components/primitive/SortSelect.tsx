@@ -13,7 +13,7 @@ import {
   search_sort_recently_updated,
   search_sort_relevance,
 } from "@rezics/i18n/messages";
-const m = {
+const i18nMessages = {
   search_sort_newest,
   search_sort_publication_date,
   search_sort_recently_updated,
@@ -21,10 +21,10 @@ const m = {
 };
 
 export const SORT_OPTIONS = [
-  { value: "relevance", label: m.search_sort_relevance },
-  { value: "createdAt", label: m.search_sort_newest },
-  { value: "updatedAt", label: m.search_sort_recently_updated },
-  { value: "publishedAt", label: m.search_sort_publication_date },
+  { value: "relevance", label: i18nMessages.search_sort_relevance },
+  { value: "createdAt", label: i18nMessages.search_sort_newest },
+  { value: "updatedAt", label: i18nMessages.search_sort_recently_updated },
+  { value: "publishedAt", label: i18nMessages.search_sort_publication_date },
 ] as const satisfies ReadonlyArray<{ value: string; label: () => string }>;
 
 export type SortOption = (typeof SORT_OPTIONS)[number];

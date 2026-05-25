@@ -13,12 +13,6 @@ import {
   common_add,
   placeholders_enter_url,
 } from "@rezics/i18n/messages";
-const m = {
-  book_extra_publish_urls_title,
-  common_add,
-  placeholders_enter_url,
-};
-
 const i18nMessages = {
   book_extra_publish_urls_title,
   common_add,

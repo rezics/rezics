@@ -44,32 +44,6 @@ import {
   settings_security_set_password_title,
   settings_security_unavailable,
 } from "@rezics/i18n/messages";
-const m = {
-  settings_security_active_sessions_description,
-  settings_security_active_sessions_title,
-  settings_security_change_login_email,
-  settings_security_change_password,
-  settings_security_change_password_description,
-  settings_security_change_password_title,
-  settings_security_confirm_password,
-  settings_security_current_login_email,
-  settings_security_login_email_confirmation_sent,
-  settings_security_login_email_description,
-  settings_security_login_email_title,
-  settings_security_new_login_email,
-  settings_security_new_password,
-  settings_security_no_active_sessions,
-  settings_security_password_changed,
-  settings_security_password_set,
-  settings_security_passwords_do_not_match,
-  settings_security_saving,
-  settings_security_sending,
-  settings_security_set_password,
-  settings_security_set_password_description,
-  settings_security_set_password_title,
-  settings_security_unavailable,
-};
-
 const i18nMessages = {
   settings_security_active_sessions_description,
   settings_security_active_sessions_title,

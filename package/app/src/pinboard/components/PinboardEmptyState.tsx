@@ -6,11 +6,6 @@ import {
   pinboard_empty_description,
   pinboard_empty_title,
 } from "@rezics/i18n/messages";
-const m = {
-  pinboard_empty_description,
-  pinboard_empty_title,
-};
-
 const i18nMessages = {
   pinboard_empty_description,
   pinboard_empty_title,

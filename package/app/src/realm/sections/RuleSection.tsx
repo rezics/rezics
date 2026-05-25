@@ -7,11 +7,6 @@ import { useState } from "react";
 import { RealmRuleDialog } from "./RealmRuleDialog";
 import { useMessage } from "@rezics/i18n/react";
 import { common_view, realm_rules_title } from "@rezics/i18n/messages";
-const m = {
-  common_view,
-  realm_rules_title,
-};
-
 const i18nMessages = {
   common_view,
   realm_rules_title,

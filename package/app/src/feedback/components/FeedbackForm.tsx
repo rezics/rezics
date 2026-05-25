@@ -28,21 +28,6 @@ import {
   feedback_type_other,
   feedback_type_report,
 } from "@rezics/i18n/messages";
-const m = {
-  common_reset,
-  common_submitting,
-  feedback_content_label,
-  feedback_content_placeholder,
-  feedback_content_required,
-  feedback_submit,
-  feedback_submit_failed,
-  feedback_type_label,
-  feedback_type_bug,
-  feedback_type_feature,
-  feedback_type_other,
-  feedback_type_report,
-};
-
 const i18nMessages = {
   common_reset,
   common_submitting,
@@ -67,10 +52,10 @@ const typeOptions: {
   value: NonNullable<CreateFeedbackInput["type"]>;
   label: () => string;
 }[] = [
-  { value: "BUG", label: m.feedback_type_bug },
-  { value: "FEATURE", label: m.feedback_type_feature },
-  { value: "REPORT", label: m.feedback_type_report },
-  { value: "OTHER", label: m.feedback_type_other },
+  { value: "BUG", label: i18nMessages.feedback_type_bug },
+  { value: "FEATURE", label: i18nMessages.feedback_type_feature },
+  { value: "REPORT", label: i18nMessages.feedback_type_report },
+  { value: "OTHER", label: i18nMessages.feedback_type_other },
 ];
 
 const FeedbackForm: React.FC<FeedbackFormProps> = ({

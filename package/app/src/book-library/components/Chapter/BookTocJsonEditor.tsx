@@ -8,11 +8,6 @@ import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { useMessage } from "@rezics/i18n/react";
 import { book_toc_disabled, common_loading } from "@rezics/i18n/messages";
-const m = {
-  book_toc_disabled,
-  common_loading,
-};
-
 const i18nMessages = {
   book_toc_disabled,
   common_loading,

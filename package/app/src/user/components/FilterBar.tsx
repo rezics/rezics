@@ -9,10 +9,6 @@ import {
 import type { FC } from "react";
 import { useMessage } from "@rezics/i18n/react";
 import { common_search } from "@rezics/i18n/messages";
-const m = {
-  common_search,
-};
-
 const i18nMessages = {
   common_search,
 };

@@ -13,13 +13,6 @@ import {
   tag_title,
   tag_view_all,
 } from "@rezics/i18n/messages";
-const m = {
-  common_load_failed,
-  common_loading,
-  tag_title,
-  tag_view_all,
-};
-
 const i18nMessages = {
   common_load_failed,
   common_loading,

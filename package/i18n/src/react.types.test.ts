@@ -1,4 +1,4 @@
-import type { Language } from "@rezics/contract";
+import type { Language } from "@rezics/contract/language-core";
 import type { ReactiveMessage } from "./react";
 
 type Options = {

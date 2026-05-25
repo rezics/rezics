@@ -10,15 +10,6 @@ import {
   common_technical_details,
   common_unexpected_error,
 } from "@rezics/i18n/messages";
-const m = {
-  common_error_model,
-  common_error_target,
-  common_http_error,
-  common_prisma_error,
-  common_technical_details,
-  common_unexpected_error,
-};
-
 const i18nMessages = {
   common_error_model,
   common_error_target,

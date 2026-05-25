@@ -8,11 +8,6 @@ import {
   profile_reaction_info_description,
   profile_reaction_info_title,
 } from "@rezics/i18n/messages";
-const m = {
-  profile_reaction_info_description,
-  profile_reaction_info_title,
-};
-
 const i18nMessages = {
   profile_reaction_info_description,
   profile_reaction_info_title,

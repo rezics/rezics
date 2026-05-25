@@ -18,15 +18,6 @@ import {
   page_home_sections_new_book_title,
   page_home_sections_trending_book_loading,
 } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_new_book_more,
-  page_home_sections_new_book_tab_latest_serial,
-  page_home_sections_new_book_tab_new_on_shelf,
-  page_home_sections_new_book_tab_recently_completed,
-  page_home_sections_new_book_title,
-  page_home_sections_trending_book_loading,
-};
-
 const i18nMessages = {
   page_home_sections_new_book_more,
   page_home_sections_new_book_tab_latest_serial,

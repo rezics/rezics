@@ -1,10 +1,6 @@
 import { BadgeCheck } from "lucide-react";
 import { useMessage } from "@rezics/i18n/react";
 import { entity_verified } from "@rezics/i18n/messages";
-const m = {
-  entity_verified,
-};
-
 const i18nMessages = {
   entity_verified,
 };

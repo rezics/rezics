@@ -9,11 +9,6 @@ import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMessage } from "@rezics/i18n/react";
 import { common_open, common_share } from "@rezics/i18n/messages";
-const m = {
-  common_open,
-  common_share,
-};
-
 const i18nMessages = {
   common_open,
   common_share,

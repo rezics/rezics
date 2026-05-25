@@ -7,11 +7,6 @@ import {
   post_anonymous_author,
   post_anonymous_avatar_alt,
 } from "@rezics/i18n/messages";
-const m = {
-  post_anonymous_author,
-  post_anonymous_avatar_alt,
-};
-
 const i18nMessages = {
   post_anonymous_author,
   post_anonymous_avatar_alt,

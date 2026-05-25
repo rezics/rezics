@@ -23,14 +23,6 @@ import {
   admin_jwt_deactivate_failed,
   admin_jwt_update_failed,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_jwt_activate_failed,
-  admin_jwt_auth_empty,
-  admin_jwt_auth_title,
-  admin_jwt_deactivate_failed,
-  admin_jwt_update_failed,
-};
-
 const i18nMessages = {
   admin_jwt_activate_failed,
   admin_jwt_auth_empty,

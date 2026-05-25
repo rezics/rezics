@@ -5,11 +5,6 @@ import {
   post_collapse_thread,
   post_expand_thread,
 } from "@rezics/i18n/messages";
-const m = {
-  post_collapse_thread,
-  post_expand_thread,
-};
-
 const i18nMessages = {
   post_collapse_thread,
   post_expand_thread,

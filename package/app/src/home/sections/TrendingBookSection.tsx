@@ -15,12 +15,6 @@ import {
   page_home_sections_trending_book_more,
   page_home_sections_trending_book_title,
 } from "@rezics/i18n/messages";
-const m = {
-  page_home_sections_trending_book_loading,
-  page_home_sections_trending_book_more,
-  page_home_sections_trending_book_title,
-};
-
 const i18nMessages = {
   page_home_sections_trending_book_loading,
   page_home_sections_trending_book_more,

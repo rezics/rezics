@@ -5,12 +5,6 @@ import {
   page_book_home_hero_subtitle,
   page_book_home_hero_title,
 } from "@rezics/i18n/messages";
-const m = {
-  page_book_home_hero_kicker,
-  page_book_home_hero_subtitle,
-  page_book_home_hero_title,
-};
-
 const i18nMessages = {
   page_book_home_hero_kicker,
   page_book_home_hero_subtitle,

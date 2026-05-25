@@ -29,19 +29,6 @@ import {
   tag_search_and_add,
   tag_search_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  common_add,
-  common_error,
-  common_loading,
-  common_search_failed,
-  common_unlink,
-  shelf_view_list,
-  tag_empty,
-  tag_no_matching,
-  tag_search_and_add,
-  tag_search_placeholder,
-};
-
 const i18nMessages = {
   common_add,
   common_error,

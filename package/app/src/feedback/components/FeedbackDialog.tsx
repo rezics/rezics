@@ -10,10 +10,6 @@ import type React from "react";
 import FeedbackForm from "./FeedbackForm";
 import { useMessage } from "@rezics/i18n/react";
 import { feedback_submit } from "@rezics/i18n/messages";
-const m = {
-  feedback_submit,
-};
-
 const i18nMessages = {
   feedback_submit,
 };

@@ -11,13 +11,6 @@ import {
   common_name,
   realm_new_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_create,
-  common_description,
-  common_name,
-  realm_new_title,
-};
-
 const i18nMessages = {
   common_create,
   common_description,

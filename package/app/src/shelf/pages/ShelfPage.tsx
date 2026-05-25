@@ -59,31 +59,6 @@ import {
   shelf_view_list,
   shelf_view_nested,
 } from "@rezics/i18n/messages";
-const m = {
-  common_next,
-  common_prev,
-  shelf_by_author,
-  shelf_cleanup_orphans,
-  shelf_controls_sort_by,
-  shelf_controls_view,
-  shelf_cover_alt,
-  shelf_edit_action,
-  shelf_empty_items,
-  shelf_items_count,
-  shelf_items_load_failed,
-  shelf_orphan_count,
-  shelf_sort_prime_only,
-  shelf_title,
-  shelf_sort_manual,
-  shelf_sort_manual_reversed,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-  shelf_sort_title_az,
-  shelf_sort_title_za,
-  shelf_view_list,
-  shelf_view_nested,
-};
-
 const i18nMessages = {
   common_next,
   common_prev,
@@ -126,17 +101,21 @@ const MASONRY_COLUMN_CLASS =
   "columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 [&>*]:break-inside-avoid [&>*]:mb-4 [&>*]:block";
 
 const SORT_OPTIONS: ShelfSortChoice[] = [
-  { field: "manual", order: "desc", label: m.shelf_sort_manual },
-  { field: "manual", order: "asc", label: m.shelf_sort_manual_reversed },
-  { field: "addedAt", order: "desc", label: m.shelf_sort_newest },
-  { field: "addedAt", order: "asc", label: m.shelf_sort_oldest },
-  { field: "title", order: "asc", label: m.shelf_sort_title_az },
-  { field: "title", order: "desc", label: m.shelf_sort_title_za },
+  { field: "manual", order: "desc", label: i18nMessages.shelf_sort_manual },
+  {
+    field: "manual",
+    order: "asc",
+    label: i18nMessages.shelf_sort_manual_reversed,
+  },
+  { field: "addedAt", order: "desc", label: i18nMessages.shelf_sort_newest },
+  { field: "addedAt", order: "asc", label: i18nMessages.shelf_sort_oldest },
+  { field: "title", order: "asc", label: i18nMessages.shelf_sort_title_az },
+  { field: "title", order: "desc", label: i18nMessages.shelf_sort_title_za },
 ];
 
 const VIEW_OPTIONS: ShelfViewChoice[] = [
-  { value: "nested", label: m.shelf_view_nested },
-  { value: "flat", label: m.shelf_view_list },
+  { value: "nested", label: i18nMessages.shelf_view_nested },
+  { value: "flat", label: i18nMessages.shelf_view_list },
   // { value: "masonry", label: "Grid" },
 ];
 

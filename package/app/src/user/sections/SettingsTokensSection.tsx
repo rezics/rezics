@@ -44,24 +44,6 @@ import {
   settings_tokens_revoking,
   settings_tokens_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_cancel,
-  common_revoke,
-  common_save,
-  common_saving,
-  common_scopes,
-  settings_tokens_description,
-  settings_tokens_edit_title,
-  settings_tokens_empty,
-  settings_tokens_expiration_date,
-  settings_tokens_generate,
-  settings_tokens_name_label,
-  settings_tokens_revoke_description,
-  settings_tokens_revoke_title,
-  settings_tokens_revoking,
-  settings_tokens_title,
-};
-
 const i18nMessages = {
   common_cancel,
   common_revoke,

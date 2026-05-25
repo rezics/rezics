@@ -20,10 +20,6 @@ import { EntityKindBadge } from "./EntityKindBadge";
 import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
 import { useMessage } from "@rezics/i18n/react";
 import { entity_edit } from "@rezics/i18n/messages";
-const m = {
-  entity_edit,
-};
-
 const i18nMessages = {
   entity_edit,
 };

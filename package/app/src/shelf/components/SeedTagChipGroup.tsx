@@ -8,10 +8,6 @@ import { Badge } from "@rezics/ui/shadcn";
 import { useMemo } from "react";
 import { useMessage } from "@rezics/i18n/react";
 import { shelf_content_type_tags_legend } from "@rezics/i18n/messages";
-const m = {
-  shelf_content_type_tags_legend,
-};
-
 const i18nMessages = {
   shelf_content_type_tags_legend,
 };

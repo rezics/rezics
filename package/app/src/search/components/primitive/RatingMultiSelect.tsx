@@ -15,12 +15,6 @@ import {
   search_tooltips_ratingOptIn,
   search_tooltips_ratingSignIn,
 } from "@rezics/i18n/messages";
-const m = {
-  search_filters_rating,
-  search_tooltips_ratingOptIn,
-  search_tooltips_ratingSignIn,
-};
-
 const i18nMessages = {
   search_filters_rating,
   search_tooltips_ratingOptIn,

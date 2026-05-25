@@ -7,13 +7,6 @@ import {
   admin_shelf_management_title,
   admin_shelf_title,
 } from "@rezics/i18n/messages";
-const m = {
-  admin_shelf_description,
-  admin_shelf_management_description,
-  admin_shelf_management_title,
-  admin_shelf_title,
-};
-
 const i18nMessages = {
   admin_shelf_description,
   admin_shelf_management_description,

@@ -29,19 +29,6 @@ import {
   common_email,
   common_loading,
 } from "@rezics/i18n/messages";
-const m = {
-  auth_error_invalid_password,
-  auth_error_passwords_mismatch,
-  auth_flow_reset_link_sending,
-  auth_reset_back_to_login,
-  auth_reset_missing_token,
-  auth_reset_send_link,
-  auth_reset_success_redirecting,
-  auth_reset_title,
-  common_email,
-  common_loading,
-};
-
 const i18nMessages = {
   auth_error_invalid_password,
   auth_error_passwords_mismatch,

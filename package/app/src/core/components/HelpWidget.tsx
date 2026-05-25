@@ -1,4 +1,6 @@
 import { Button } from "@rezics/ui/shadcn";
+import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
+import { app_help_aria_label, app_help_feedback } from "@rezics/i18n/messages";
 import {
   Plus as AddIcon,
   X as CloseIcon,
@@ -7,7 +9,13 @@ import {
 import * as React from "react";
 import FeedbackDialog from "@/feedback/components/FeedbackDialog";
 import { cn } from "@/shared/utils/css-util";
-import { app_help_aria_label, app_help_feedback } from "@rezics/i18n/messages";
+
+const i18nMessages = {
+  app_help_aria_label,
+  app_help_feedback,
+};
+
+type HelpMessages = ReactiveMessageBag<typeof i18nMessages>;
 
 export interface HelpFabAction {
   id: string;
@@ -24,11 +32,11 @@ export interface HelpFabProps {
   enterDelayMs?: number;
 }
 
-function getDefaultHelpActions(): HelpFabAction[] {
+function getDefaultHelpActions(m: HelpMessages): HelpFabAction[] {
   return [
     {
       id: "feedback",
-      label: app_help_feedback(),
+      label: m.app_help_feedback(),
       icon: <ReportProblemIcon className="w-4 h-4" />,
     },
   ];
@@ -40,14 +48,16 @@ function getDefaultHelpActions(): HelpFabAction[] {
 export const HelpFab: React.FC<HelpFabProps> = ({
   actions,
   icon,
-  ariaLabel = app_help_aria_label(),
+  ariaLabel,
   visible = true,
   enterDelayMs = 0,
 }) => {
+  const m = useMessage(i18nMessages);
   const [open, setOpen] = React.useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = React.useState(false);
 
-  const list = actions ?? getDefaultHelpActions();
+  const list = actions ?? getDefaultHelpActions(m);
+  const resolvedAriaLabel = ariaLabel ?? m.app_help_aria_label();
   if (!list.length) return null;
 
   const handleToggle = () => {
@@ -107,7 +117,7 @@ export const HelpFab: React.FC<HelpFabProps> = ({
         <Button
           variant="default"
           size="icon"
-          aria-label={ariaLabel}
+          aria-label={resolvedAriaLabel}
           onClick={handleToggle}
           className="rounded-full shadow-lg w-14 h-14"
         >

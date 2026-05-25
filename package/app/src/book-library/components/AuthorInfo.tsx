@@ -16,14 +16,6 @@ import {
   book_author_info_description_label,
   common_edit,
 } from "@rezics/i18n/messages";
-const m = {
-  book_author_avatar_alt,
-  book_author_info_author_line,
-  book_author_info_bio_label,
-  book_author_info_description_label,
-  common_edit,
-};
-
 const i18nMessages = {
   book_author_avatar_alt,
   book_author_info_author_line,

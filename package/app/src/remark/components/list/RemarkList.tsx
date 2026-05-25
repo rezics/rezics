@@ -6,10 +6,6 @@ import { useMemo } from "react";
 import { RemarkCard } from "../item/RemarkCard";
 import { useMessage } from "@rezics/i18n/react";
 import { remark_list_empty_title } from "@rezics/i18n/messages";
-const m = {
-  remark_list_empty_title,
-};
-
 const i18nMessages = {
   remark_list_empty_title,
 };

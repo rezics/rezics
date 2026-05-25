@@ -28,14 +28,6 @@ import {
   common_share,
   common_share_via,
 } from "@rezics/i18n/messages";
-const m = {
-  book_hero_actions_add_to_shelf,
-  book_hero_actions_edit_details,
-  common_copy_link,
-  common_share,
-  common_share_via,
-};
-
 const i18nMessages = {
   book_hero_actions_add_to_shelf,
   book_hero_actions_edit_details,

@@ -19,15 +19,6 @@ import {
   entity_tab_overview,
   entity_tab_works,
 } from "@rezics/i18n/messages";
-const m = {
-  entity_no_content,
-  entity_not_found,
-  entity_not_found_description,
-  entity_tab_about,
-  entity_tab_overview,
-  entity_tab_works,
-};
-
 const i18nMessages = {
   entity_no_content,
   entity_not_found,

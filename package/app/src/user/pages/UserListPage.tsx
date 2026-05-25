@@ -22,13 +22,6 @@ import {
   user_none_found,
   user_search_placeholder,
 } from "@rezics/i18n/messages";
-const m = {
-  user_list_title,
-  user_no_bio,
-  user_none_found,
-  user_search_placeholder,
-};
-
 const i18nMessages = {
   user_list_title,
   user_no_bio,

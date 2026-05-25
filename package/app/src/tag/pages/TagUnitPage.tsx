@@ -10,12 +10,6 @@ import {
   tag_loading,
   tag_unit_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_load_failed,
-  tag_loading,
-  tag_unit_title,
-};
-
 const i18nMessages = {
   common_load_failed,
   tag_loading,

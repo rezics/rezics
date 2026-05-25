@@ -16,14 +16,6 @@ import {
   remark_new_title,
   review_new_title,
 } from "@rezics/i18n/messages";
-const m = {
-  common_submit,
-  common_submitting,
-  excerpt_book_unit_id,
-  remark_new_title,
-  review_new_title,
-};
-
 const i18nMessages = {
   common_submit,
   common_submitting,

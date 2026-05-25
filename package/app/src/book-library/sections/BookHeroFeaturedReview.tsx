@@ -19,15 +19,6 @@ import {
   book_hero_featured_review_unknown_author,
   book_hero_featured_review_write_cta,
 } from "@rezics/i18n/messages";
-const m = {
-  book_hero_featured_review_empty_body,
-  book_hero_featured_review_empty_quote,
-  book_hero_featured_review_read_full,
-  book_hero_featured_review_score_label,
-  book_hero_featured_review_unknown_author,
-  book_hero_featured_review_write_cta,
-};
-
 const i18nMessages = {
   book_hero_featured_review_empty_body,
   book_hero_featured_review_empty_quote,

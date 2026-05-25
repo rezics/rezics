@@ -989,7 +989,7 @@ function readJsonFile(path: string): unknown {
 
 function getContractLanguages(): string[] {
   const source = readFileSync(
-    join(REPO_ROOT, "package/contract/src/language.ts"),
+    join(REPO_ROOT, "package/contract/src/language-core.ts"),
     "utf8",
   );
   const match = source.match(

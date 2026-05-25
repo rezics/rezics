@@ -53,23 +53,6 @@ import {
   settings_preferences_realm_tags_title,
   settings_preferences_remove_language,
 } from "@rezics/i18n/messages";
-const m = {
-  common_add,
-  settings_preferences_add_language,
-  settings_preferences_content_rating_description,
-  settings_preferences_content_rating_title,
-  settings_preferences_drag_handle,
-  settings_preferences_language_description,
-  settings_preferences_language_empty,
-  settings_preferences_language_saved,
-  settings_preferences_language_title,
-  settings_preferences_realm_tags_description,
-  settings_preferences_realm_tags_empty,
-  settings_preferences_realm_tags_meta,
-  settings_preferences_realm_tags_title,
-  settings_preferences_remove_language,
-};
-
 const i18nMessages = {
   common_add,
   settings_preferences_add_language,

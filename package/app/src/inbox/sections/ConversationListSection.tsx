@@ -8,12 +8,6 @@ import {
   inbox_conversations_empty,
   inbox_conversations_load_failed,
 } from "@rezics/i18n/messages";
-const m = {
-  common_loading,
-  inbox_conversations_empty,
-  inbox_conversations_load_failed,
-};
-
 const i18nMessages = {
   common_loading,
   inbox_conversations_empty,
