@@ -16,6 +16,7 @@ import { seedRealms } from "./realms.js";
 import { createSeedResult } from "./result.js";
 import { seedScores } from "./scores.js";
 import { seedShelves } from "./shelves.js";
+import { seedSourceSiteFixtures } from "./source-sites.js";
 import type { SeedCtx } from "./strategy.js";
 import { seedTags } from "./tags.js";
 import type { SeedPlan, SeedResult } from "./types.js";
@@ -82,6 +83,10 @@ export async function runFactorySeed(
   console.log(
     `[Seed]   ${books.length} books, ${games.length} games, ${mediaItems.length} media, ${subjectAttributionCount} subject attributions`,
   );
+  done();
+
+  done = stepTimer("Step 3b: Source site fixtures");
+  await seedSourceSiteFixtures(ctx, books, organizations);
   done();
 
   done = stepTimer("Step 4: Realms");
