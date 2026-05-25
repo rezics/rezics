@@ -27,7 +27,7 @@ export const Markdown: Story = {
     );
     return (
       <div style={{ width: 720, border: "1px solid #ddd", borderRadius: 8 }}>
-        <Editor value={value} onChange={setValue} plugins={[markdownFull()]} />
+        <Editor value={value} onChange={setValue} plugins={markdownFull()} />
       </div>
     );
   },
@@ -40,7 +40,7 @@ export const Json: Story = {
     );
     return (
       <div style={{ width: 720, border: "1px solid #ddd", borderRadius: 8 }}>
-        <Editor value={value} onChange={setValue} plugins={[jsonFull()]} />
+        <Editor value={value} onChange={setValue} plugins={jsonFull()} />
       </div>
     );
   },
