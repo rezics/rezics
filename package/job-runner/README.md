@@ -58,6 +58,8 @@ startup.
 Start Sequin explicitly when testing CDC or running job-runner HTTP ingress:
 
 ```bash
+cp tool/.env.example tool/.env
+
 # Generate real local secrets before first startup.
 openssl rand -base64 48 # SECRET_KEY_BASE
 openssl rand -base64 32 # VAULT_KEY
@@ -71,6 +73,10 @@ checked-in config delivers only to this service at `/webhooks/sequin` with the
 `x-internal-secret` value from `SEQUIN_WEBHOOK_SECRET`. It does not target
 `@rezics/history` directly; history ingestion is enqueued by the job-runner
 `history.outbox.ingest` worker lane.
+
+Tool-owned Sequin runtime settings live in `tool/.env`. The
+`SEQUIN_WEBHOOK_SECRET` value in `tool/.env` must match
+`package/job-runner/.env`.
 
 Run locally with:
 

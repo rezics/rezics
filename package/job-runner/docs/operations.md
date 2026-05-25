@@ -5,18 +5,22 @@
 Sequin CDC is started outside `@rezics/job-runner`:
 
 ```bash
+cp tool/.env.example tool/.env
 bun run service:sequin:up
 bun run service:sequin:health
 bun run service:sequin:logs
 bun run service:sequin:down
 ```
 
-The wrapper loads `package/job-runner/.env` when present, chooses Podman or
-Docker compose deterministically, and mounts
+The wrapper loads `tool/.env`, chooses Podman or Docker compose
+deterministically, and mounts
 `package/job-runner/sequin/sequin.yml` into Sequin through
 `CONFIG_FILE_PATH=/config/sequin.yml`. The base compose file is production
 capable; the dev override exposes Sequin on `127.0.0.1:7376` and defaults host
 aliases for local Postgres and Bun services.
+
+`SEQUIN_WEBHOOK_SECRET` in `tool/.env` must match
+`package/job-runner/.env`.
 
 Generate Sequin secrets with:
 

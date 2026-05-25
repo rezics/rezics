@@ -10,6 +10,13 @@ modules from `tool/`.
 are not started by `bun run dev`. The first wrapper manages Sequin CDC:
 
 ```sh
+cp tool/.env.example tool/.env
+```
+
+Set real local values for `SECRET_KEY_BASE` and `VAULT_KEY` before starting
+Sequin. `SEQUIN_WEBHOOK_SECRET` must match `package/job-runner/.env`.
+
+```sh
 bun run service:sequin:up
 bun run service:sequin:health
 bun run service:sequin:logs

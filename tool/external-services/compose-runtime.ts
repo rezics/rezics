@@ -43,7 +43,7 @@ function knownRuntimeError(name: string): Error {
 }
 
 export function detectComposeRuntime(
-  requested = process.env.CONTAINER_RUNTIME,
+  requested?: ComposeRuntimeKind,
 ): ComposeRuntime {
   if (requested) {
     if (

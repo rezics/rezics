@@ -1,22 +1,19 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { config as loadDotenv } from "dotenv";
+import {
+  env as toolEnv,
+  missingSequinEnv,
+  SECRET_KEY_BASE_EXAMPLE,
+  VAULT_KEY_EXAMPLE,
+} from "../env";
 import { detectComposeRuntime, runCompose } from "./compose-runtime";
 
 const SCRIPT_DIR = path.dirname(Bun.main);
 const TOOL_DIR = path.resolve(SCRIPT_DIR, "..");
-const ROOT_DIR = path.resolve(TOOL_DIR, "..");
 const SERVICE_DIR = path.join(TOOL_DIR, "external-services", "sequin");
-const JOB_RUNNER_ENV = path.join(ROOT_DIR, "package", "job-runner", ".env");
 const HEALTH_URL_DEFAULT = "http://127.0.0.1:7376/health";
-const SECRET_KEY_BASE_EXAMPLE = "DO-NOT-USE-IN-PRODUCTION-secret-key-base";
-const VAULT_KEY_EXAMPLE = "DO-NOT-USE-IN-PRODUCTION-vault-key";
 
 type Mode = "dev" | "prod";
-
-if (existsSync(JOB_RUNNER_ENV)) {
-  loadDotenv({ path: JOB_RUNNER_ENV });
-}
 
 function parseMode(args: string[]): { mode: Mode; args: string[] } {
   if (args.includes("--prod") || args.includes("--production")) {
@@ -52,8 +49,8 @@ function isSelinuxEnabled(): boolean {
 
 function assertRuntimeSecrets() {
   const badSecret =
-    process.env.SECRET_KEY_BASE === SECRET_KEY_BASE_EXAMPLE ||
-    process.env.VAULT_KEY === VAULT_KEY_EXAMPLE;
+    toolEnv.SECRET_KEY_BASE === SECRET_KEY_BASE_EXAMPLE ||
+    toolEnv.VAULT_KEY === VAULT_KEY_EXAMPLE;
 
   if (!badSecret) {
     return;
@@ -71,15 +68,15 @@ function assertRuntimeSecrets() {
 
 function localDefaults(runtimeHostAlias: string): NodeJS.ProcessEnv {
   return {
-    ENV: process.env.ENV ?? "development",
-    SOURCE_DB_HOST: process.env.SOURCE_DB_HOST ?? runtimeHostAlias,
+    ENV: toolEnv.ENV ?? "development",
+    SOURCE_DB_HOST: toolEnv.SOURCE_DB_HOST ?? runtimeHostAlias,
     JOB_RUNNER_BASE_URL:
-      process.env.JOB_RUNNER_BASE_URL ?? `http://${runtimeHostAlias}:3005`,
+      toolEnv.JOB_RUNNER_BASE_URL ?? `http://${runtimeHostAlias}:3005`,
   };
 }
 
 async function checkHealth() {
-  const url = process.env.SEQUIN_HEALTH_URL ?? HEALTH_URL_DEFAULT;
+  const url = toolEnv.SEQUIN_HEALTH_URL ?? HEALTH_URL_DEFAULT;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
@@ -106,6 +103,21 @@ function usage(): never {
   process.exit(1);
 }
 
+function assertSequinEnv(mode: Mode) {
+  const missing = missingSequinEnv(mode);
+  if (missing.length === 0) {
+    return;
+  }
+
+  throw new Error(
+    [
+      `Missing tool environment variables for Sequin ${mode}: ${missing.join(", ")}`,
+      "Copy tool/.env.example to tool/.env and set the missing values.",
+      "SEQUIN_WEBHOOK_SECRET must match package/job-runner/.env.",
+    ].join("\n"),
+  );
+}
+
 const { mode, args } = parseMode(process.argv.slice(2));
 const [command, subcommand] = args;
 
@@ -118,21 +130,23 @@ if (command === "health") {
   process.exit(0);
 }
 
-const runtime = detectComposeRuntime();
-const env: NodeJS.ProcessEnv = {
-  ...(mode === "dev" ? localDefaults(runtime.hostAlias) : {}),
-};
-
-if (runtime.kind === "podman" && isSelinuxEnabled()) {
-  env.SEQUIN_CONFIG_VOLUME_SUFFIX = "ro,Z";
-}
-
-const baseCommand = [...runtime.command, ...composeFiles(mode)] as [
-  string,
-  ...string[],
-];
-
 try {
+  assertSequinEnv(mode);
+
+  const runtime = detectComposeRuntime(toolEnv.CONTAINER_RUNTIME);
+  const env: NodeJS.ProcessEnv = {
+    ...(mode === "dev" ? localDefaults(runtime.hostAlias) : {}),
+  };
+
+  if (runtime.kind === "podman" && isSelinuxEnabled()) {
+    env.SEQUIN_CONFIG_VOLUME_SUFFIX = "ro,Z";
+  }
+
+  const baseCommand = [...runtime.command, ...composeFiles(mode)] as [
+    string,
+    ...string[],
+  ];
+
   if (command === "up") {
     assertRuntimeSecrets();
     runCompose([...baseCommand, "up", "-d"], { cwd: SERVICE_DIR, env });
@@ -155,7 +169,7 @@ try {
   const message = error instanceof Error ? error.message : String(error);
   console.error(message);
   console.error(
-    "Check CONTAINER_RUNTIME, Docker/Podman compose installation, required Sequin env vars, and package/job-runner/.env.",
+    "Check CONTAINER_RUNTIME, Docker/Podman compose installation, tool/.env, and package/job-runner/.env shared secrets.",
   );
   process.exit(1);
 }
