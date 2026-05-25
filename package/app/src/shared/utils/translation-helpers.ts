@@ -6,7 +6,11 @@
  * These helpers resolve the best match for a given language.
  */
 
-import type { BookDTO, UnitTranslationDTO } from "@rezics/contract";
+import type {
+  BookDTO,
+  CreditAttributionEvidenceSummary,
+  UnitTranslationDTO,
+} from "@rezics/contract";
 import { FALLBACK_LANGUAGE, mainMarkdownSource } from "@rezics/contract";
 
 /**
@@ -153,6 +157,7 @@ export type EntityTranslation = {
   bio?: string;
   kind?: string | null;
   slug?: string | null;
+  evidence?: CreditAttributionEvidenceSummary[];
 };
 
 /**
@@ -193,6 +198,7 @@ export function getEntityTranslationsByRole(
       bio: mainMarkdownSource(tr?.description) ?? undefined,
       kind: match.entity?.kind ?? undefined,
       slug: match.entity?.slug ?? undefined,
+      evidence: match.evidence,
     };
   });
 }

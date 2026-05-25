@@ -8,7 +8,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import type React from "react";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
-import { Link, unitHref } from "@/shared/ui/link";
 import {
   type EntityTranslation,
   getBookCoverUrl,
@@ -16,6 +15,7 @@ import {
   getTranslation,
 } from "@/shared/utils/translation-helpers";
 import { useBookLanguage } from "../hooks/useBookLanguage";
+import { SourceEvidencePreview } from "../components/SourceEvidencePreview";
 import { BookHeroActionBar } from "./BookHeroActionBar";
 import { BookHeroCountLinks } from "./BookHeroCountLinks";
 import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
@@ -233,16 +233,13 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
                               </span>
                             )}
                             {credit.unitId ? (
-                              <Link
-                                to={unitHref({
-                                  type: "ENTITY",
-                                  unitId: credit.unitId,
-                                  slug: credit.slug ?? null,
-                                })}
-                                className="text-white/90 underline underline-offset-4 decoration-white/30 transition-colors hover:text-white hover:decoration-white/70"
-                              >
-                                {credit.name}
-                              </Link>
+                              <SourceEvidencePreview
+                                entityUnitId={credit.unitId}
+                                entitySlug={credit.slug}
+                                entityName={credit.name}
+                                roleLabel={row.label}
+                                evidence={credit.evidence}
+                              />
                             ) : (
                               credit.name
                             )}
