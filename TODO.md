@@ -26,6 +26,7 @@
 - [ ] 設計參考https://better-auth.com/docs/infrastructure/plugins/dashboard
 - [ ] login page 太窄了，左侧可以添加图片之类的以美观，参考https://www.deviantart.com/join/
 - [ ] Annual Analysis Feature
+- [ ] 針對 unit 的擴展，地理擴展和時間擴展，不僅僅是真實時間和真實地理，而是能支持任何地理，不知道是否能做到。不過我認爲真實地理可能不要放在單獨表放在 unit 表比較好，就跟真實時間並不被抽象到單獨表一樣。
 
 ## Before launch
 

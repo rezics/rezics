@@ -59,7 +59,7 @@ The design system SHALL provide `success`, `warning`, `error`, and `info` semant
 
 ### Requirement: Border-led depth, not shadow-led
 
-Containment SHALL be expressed primarily via `--colors-border-whisper` (default surface boundary, 1px at 8% opacity) and whitespace, not via shadows. Cards, sections, table rows, and panels SHALL NOT carry box-shadow. Shadow tokens SHALL exist only for modal-tier surfaces (dialogs, command palettes, context menus, popovers).
+Containment SHALL be expressed primarily via `--colors-border-whisper` (default surface boundary, 1px at 8% opacity), whitespace, and the shadcn Card surface API. Sections, table rows, navs, and generic panels SHALL NOT carry box-shadow. Cards SHALL use shadcn `<Card surface="plain" | "contained" | "elevated">`; only `surface="elevated"` MAY carry a soft `shadow-1`, and only for same-color/near-same-color media-rich recommendation or article cards. Heavier shadow tokens SHALL exist only for floating or modal-tier surfaces (dialogs, command palettes, context menus, popovers).
 
 #### Scenario: Whisper border is the default boundary
 
@@ -71,6 +71,13 @@ Containment SHALL be expressed primarily via `--colors-border-whisper` (default 
 - **WHEN** `--shadow-1`, `--shadow-2`, `--shadow-3`, `--shadow-modal` are referenced
 - **THEN** all four SHALL resolve to declared values
 - **AND** `--rezics-shadow-modal` SHALL be a 4-layer accumulating stack
+
+#### Scenario: Elevated card shadow is restricted
+
+- **WHEN** an inline card needs soft visual separation
+- **THEN** it SHALL use shadcn `<Card surface="elevated">`
+- **AND** it SHALL NOT hand-roll `shadow-sm`, `shadow-md`, or custom `box-shadow` classes outside the Card surface API
+- **AND** `shadow-2`, `shadow-3`, and `shadow-modal` SHALL remain reserved for floating or modal-tier surfaces
 
 ### Requirement: Typography uses Latin + CJK layered families
 

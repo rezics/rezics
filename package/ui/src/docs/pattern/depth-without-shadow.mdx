@@ -5,7 +5,9 @@ import { DepthDemo, Compare, Do, Dont } from "../tokens/_gallery";
 
 # Depth Without Shadow
 
-rezics communicates depth through a **tonal surface ladder**, not through `box-shadow`. Each step in the ladder is a different background fill — canvas → base → elevated → subtle → sunken — and the contrast between adjacent fills is what signals the depth relationship. The system is mode-aware: light mode shifts warmer/cooler; dark mode shifts brighter/dimmer.
+rezics communicates most depth through a **tonal surface ladder**, not through `box-shadow`. Each step in the ladder is a different background fill — canvas → base → elevated → subtle → sunken — and the contrast between adjacent fills is what signals the depth relationship. The system is mode-aware: light mode shifts warmer/cooler; dark mode shifts brighter/dimmer.
+
+Cards are the narrow exception: shadcn `<Card surface="elevated">` may use a soft `shadow-1` while keeping the fill same-color/near-same-color. Use that for media-rich recommendation/article cards only; use `surface="plain"` for flat feed/media items and `surface="contained"` for default panels.
 
 ## Live preview
 
@@ -25,24 +27,28 @@ rezics communicates depth through a **tonal surface ladder**, not through `box-s
 
 Adjacent tiers are designed to be readable side-by-side. Skipping tiers (canvas → elevated, no base in between) is a smell — the visual jump reads as decorative rather than structural.
 
-## The shadow exception
+## The shadow exceptions
 
-`shadow-modal` is reserved for **modals only**. It carries the visual weight of "this surface is overlaying everything else, click outside to dismiss," which is a different signal from in-flow depth.
+`shadow-1` is allowed on shadcn `<Card surface="elevated">` for same-color media cards. `shadow-modal` is reserved for **modal-tier** surfaces. It carries the visual weight of "this surface is overlaying everything else, click outside to dismiss," which is a different signal from ordinary in-flow depth.
 
 ```tsx
+<Card surface="elevated">
+  ...
+</Card>
+
 <DialogContent className="bg-surface-elevated shadow-modal">
 ```
 
-There is no `shadow-card` or `shadow-popover` in rezics. Cards use the surface ladder; popovers use the surface ladder + a hairline border. If you reach for a shadow utility outside a modal, reach for `bg-surface-elevated` first.
+There is no ad hoc `shadow-card` recipe in rezics. Cards use the shadcn `surface` prop; popovers use the surface ladder + a hairline border. If you reach for a raw shadow utility on a card, use the `Card` surface API first.
 
 ## We don't do this
 
 <Compare>
   <Do caption="Tonal step communicates depth">
-    Place an `bg-surface-elevated` card on a `bg-surface-canvas` page. The depth read comes from the warmer/lighter fill, no shadow needed. Borderless. Parchment-quiet. Identical signal in dark mode via the dark-canvas / dark-base / dark-elevated values.
+    Place an `bg-surface-base` or `bg-surface-elevated` panel on a `bg-surface-canvas` page. The depth read comes from the warmer/lighter fill, no hand-rolled shadow needed. For media-rich item cards, use shadcn `Card surface="elevated"` instead of custom shadow classes.
   </Do>
   <Dont caption="MD3 dp shadow ladder">
-    `elevation-1` through `elevation-5` with progressively heavier `box-shadow` is engineered for dynamic surfaces (FAB lifts on press, card tilts on hover). rezics doesn't ship dynamic elevation — the visual rhythm is calmer without it, and shadow on parchment reads as Material brand.
+    `elevation-1` through `elevation-5` with progressively heavier `box-shadow` is engineered for dynamic surfaces (FAB lifts on press, card tilts on hover). rezics doesn't ship a generic dynamic elevation ladder — the visual rhythm is calmer when shadow is limited to the `elevated` card surface and modal-tier surfaces.
   </Dont>
 </Compare>
 

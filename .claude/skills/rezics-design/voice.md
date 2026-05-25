@@ -51,7 +51,7 @@ We do **not** draw from:
 ## The litmus test
 
 If a designer or AI introduces:
-- A bordered card with shadow → wrong mood
+- A hand-rolled bordered card with `shadow-md` chrome → wrong mood
 - An emoji in the chrome → wrong mood
 - A second chromatic accent → wrong mood
 - A gradient background → wrong mood

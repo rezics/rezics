@@ -87,7 +87,7 @@ The voice and patterns docs (and the skill's `patterns.md`) SHALL enumerate the 
 - **#3**: Emoji SHALL NOT be used as UI chrome icons (✕ ☰ ▶ ▼ ★ etc.); `lucide-react` icons SHALL be used by default, with `@tabler/icons-react` as the named fallback when lucide lacks a glyph. Content emoji (in user-generated text, fixtures) is acceptable.
 - **#4**: Raw `<a href>` SHALL NOT be used for outbound links; `<SafeLink>` from `@rezics/ui` SHALL be used (covered by `outbound-link-protection` spec).
 - **#5**: `line-height` SHALL NOT be set below `1.30`.
-- **#6**: Section / card / panel surfaces SHALL NOT carry decorative `box-shadow`; shadows are reserved for modal-tier surfaces.
+- **#6**: Section and panel surfaces SHALL NOT carry decorative `box-shadow`; cards may only use shadow through shadcn `<Card surface="elevated">` for media-rich item cards.
 
 #### Scenario: Hard-Never list authoritative
 
@@ -172,4 +172,3 @@ The voice and patterns docs SHALL reference the `icon-system` capability spec fo
 - **WHEN** `package/ui/src/docs/patterns.mdx` is read
 - **THEN** the icons section SHALL reference the `icon-system` capability and the `icons.md` skill mapping table
 - **AND** SHALL NOT duplicate the icon-vocabulary normative statements
-

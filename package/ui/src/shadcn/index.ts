@@ -26,6 +26,7 @@ export {
   CardFooter,
   CardHeader,
   CardTitle,
+  type CardSurface,
 } from "./card";
 export {
   Carousel,

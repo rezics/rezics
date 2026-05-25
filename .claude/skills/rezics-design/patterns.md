@@ -40,10 +40,20 @@ Bordered/shadowed section cards are the SaaS-dashboard look. rezics is a library
 
 ## 2. Cards (book / item / post)
 
-### ✅ DO — minimal chrome, content-led
+Use shadcn `<Card>` as the canonical card primitive. Choose the surface
+explicitly:
+
+- `surface="plain"`: flat feed/media/list item. No outer background, border, or
+  shadow.
+- `surface="contained"`: default panel card with `bg-surface-base` and a whisper
+  ring.
+- `surface="elevated"`: same-color/near-same-color media-rich recommendation or
+  article card with a soft `shadow-1`.
+
+### ✅ DO — plain content-led card
 
 ```tsx
-<article className="flex flex-col">
+<Card surface="plain" className="flex flex-col">
   <img
     src={book.cover}
     alt={book.title}
@@ -53,10 +63,26 @@ Bordered/shadowed section cards are the SaaS-dashboard look. rezics is a library
     <p className="font-medium text-text-primary">{book.title}</p>
     <p className="text-sm text-text-secondary">{book.author}</p>
   </div>
-</article>
+</Card>
 ```
 
 Image, title, author — that's the card. The cover art carries the visual weight.
+
+### ✅ DO — elevated media/article card
+
+```tsx
+<Card surface="elevated">
+  <img src={article.image} alt="" className="aspect-[16/9] w-full object-cover" />
+  <CardHeader>
+    <CardTitle>{article.title}</CardTitle>
+    <CardDescription>{article.meta}</CardDescription>
+  </CardHeader>
+</Card>
+```
+
+Elevated cards keep the fill same-color/near-same-color and use a soft shadow.
+Use them for recommendation/article/media cards, not for sections or admin
+panels.
 
 ### ✅ DO — list-row card with whisper border
 
@@ -72,7 +98,7 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 
 Whisper border for table-row separation is fine. It's containment, not chrome.
 
-### ❌ DON'T — heavy card
+### ❌ DON'T — hand-rolled heavy card
 
 ```tsx
 {/* WRONG */}

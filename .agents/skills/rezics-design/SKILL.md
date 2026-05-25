@@ -36,7 +36,7 @@ fixed `--padding-*` tokens, not as a runtime toolbar.
 
 1. **Brand color**: 轮回红 `#f4606c` (`--colors-brand-fill`). It is a fill color, never a text color. For brand-tinted text, use `text-text-brand` (`#C4433A` light / `#fa7882` dark) — already contrast-verified.
 2. **Background**: warm parchment `#f5f4ed` (light) / warm dark stone `#1a1a18` (dark). Not pure white, not pure black.
-3. **Borderless by default**: cards, sections, panels do NOT get bordered card chrome. Use whitespace and `border-whisper` (`rgba(0,0,0,0.08)`) for containment. Reserve shadows for modal-tier surfaces only.
+3. **Card surfaces are explicit**: shadcn `<Card>` is the canonical Rezics card and supports `surface="plain" | "contained" | "elevated"`. Use `plain` for flat feed/media items, `contained` for default panels, and `elevated` only for media-rich recommendation/article cards that need same-color soft separation. Sections and page panels still do NOT get bordered/shadowed card chrome.
 4. **shadcn-or-custom**. Pick from `@rezics/ui/shadcn` first; these primitives are vendored from the `base-luma` registry under Path P, with `carousel.tsx` and `sidebar.tsx` as explicit exceptions. Reach for rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local) only when shadcn lacks the component. See `component-selection.md` for the decision tree, `openspec/specs/ui-component-foundation/spec.md` for the spec, and `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` for the migration boundary.
 5. **No emoji icons in UI chrome**. Use `lucide-react` (default) or `@tabler/icons-react` (named fallback when lucide lacks the glyph). Emoji are content (user posts), not interface vocabulary.
 6. **No raw `<a href>`**. Always use `<SafeLink href={url}>` from `@rezics/ui` (enforced by `bun run check:convention` R5).
@@ -54,7 +54,7 @@ fixed `--padding-*` tokens, not as a runtime toolbar.
 | If you're picking…                | Default                                      | When to deviate                            |
 | --------------------------------- | -------------------------------------------- | ------------------------------------------ |
 | Button color                      | `brand-fill` background, `text-on-brand`     | Secondary = ghost (`text-text-primary`)    |
-| Card chrome                       | No border, whitespace separation             | Whisper border for table rows / list items |
+| Card surface                      | shadcn `<Card surface="contained">`          | `plain` for flat feed/media; `elevated` for media-rich feature cards |
 | Heading typography                | `font-sans` + medium weight (500)            | Long-form 書評 / book content → `font-serif` |
 | Spacing between sections          | `p-12` (48px) for app; `p-4` (16px) for admin | Hero pages → `p-24` (96px)                 |
 | Icon library                      | `lucide-react`                                | `@tabler/icons-react` only when lucide lacks the glyph |
@@ -98,7 +98,7 @@ Both forms resolve to the same underlying value because tokens flow:
 
 - **`voice.md`** — design mood, density, tone, brand voice. Read when authoring landing pages, marketing copy, hero sections, or any place that establishes "what is rezics". Storybook: `Foundation/Voice`.
 - **`tokens.md`** — full token cheatsheet: every token with its value, intended use, and common mistakes. Storybook: `Foundation/Tokens/{Colors,Typography,Spacing,Radius,Elevation,Motion,Iconography}`.
-- **`patterns.md`** — concrete do/don't gallery with code snippets. Storybook: `Foundation/Patterns/{Density,State Layer,Depth Without Shadow,Inverse Surface,Layout & Breakpoints,Patterns}`.
+- **`patterns.md`** — concrete do/don't gallery with code snippets. Storybook: `Foundation/Patterns/{Density,State Layer,Depth Without Shadow,Inverse Surface,Layout & Breakpoints,Patterns}` and `Primitives/Card`.
 - **`component-selection.md`** — shadcn-or-custom decision tree and category-by-category recommendations. Storybook: every shadcn primitive lives under `Primitives/<Name>`; rezics primitives under `Primitive/<Category>/<Name>`; composites under `Composite/<Category>/<Name>`.
 - **`icons.md`** — lucide-default + tabler-fallback icon guidance and brand-mark catalog. Storybook: `Foundation/Tokens/Iconography`.
 
@@ -111,7 +111,7 @@ For deeper context: `openspec/plans/design-system-research/briefs/01-foundation-
 1. Never use `#f4606c` as a text color (fails AA contrast on parchment).
 2. Never use raw `<a href>`. Use `<SafeLink>`.
 3. Never use emoji as UI icons. Use `lucide-react` (default) or `@tabler/icons-react` (named fallback).
-4. Never wrap a section/page in a bordered card with shadow. Use whitespace.
+4. Never wrap a section/page in a bordered card with shadow. Use whitespace. For item cards, use shadcn `<Card surface="plain" | "contained" | "elevated">` instead of ad hoc `div` shadow/border recipes.
 5. Never set `font-size: 14px` (or any fixed px). Use the `clamp()` scale.
 6. Never set line-height below 1.30 for any text. Below 1.55 for body. Below 1.60 for book reader.
 7. Never introduce a new chromatic accent color. The escape hatch is `palette.accent` (currently `null`); proposing a second hue requires an OpenSpec change.

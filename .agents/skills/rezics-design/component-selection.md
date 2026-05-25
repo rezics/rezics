@@ -39,7 +39,7 @@ Need a UI primitive?
 
 | Need                       | Recommendation                                                                          |
 | -------------------------- | --------------------------------------------------------------------------------------- |
-| Card surface               | shadcn `Card` family (no decorative border)                                             |
+| Card surface               | shadcn `Card` family. Use `surface="plain"` for flat feed/media items, `contained` for the default panel card, and `elevated` for same-color media-rich recommendation/article cards only. |
 | Divider                    | `<hr className="border-rezics-color-border" />`                                         |
 | Avatar                     | shadcn `Avatar` family                                                                  |
 | Badge / chip               | shadcn `Badge` (+ `Button size="icon"` with lucide `X` for removable)                   |

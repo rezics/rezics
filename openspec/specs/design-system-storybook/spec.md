@@ -113,7 +113,7 @@ The `@rezics/ui` Storybook SHALL provide seven MDX patterns pages, comprising th
 
 3. **Density** (`density.mdx`) — live nine-token `--padding-*` ladder showing intrinsic per-component density. Documents the opt-in / opt-out component lists. States the "density never affects type" rule and that density is not a runtime toggle.
 4. **State Layer** (`state-layer.mdx`) — live demo of the 8/12/12/16 opacity ladder applied as quiet rectangular tints. Includes a rejection sample for MD3 full-bleed circular ripple.
-5. **Depth Without Shadow** (`depth-without-shadow.mdx`) — live demo of the canvas → base → elevated → subtle → sunken surface ladder. Includes a rejection sample for the MD3 dp shadow ladder. Documents that shadow is reserved for modals only.
+5. **Depth Without Shadow** (`depth-without-shadow.mdx`) — live demo of the canvas → base → elevated → subtle → sunken surface ladder. Includes a rejection sample for the MD3 dp shadow ladder. Documents that shadow is reserved for modal-tier surfaces plus the narrow shadcn `<Card surface="elevated">` media-card exception.
 6. **Inverse Surface** (`inverse-surface.mdx`) — snackbar and pull-quote demos. Documents when and when not to use inverse-surface.
 7. **Layout & Breakpoints** (`layout-and-breakpoints.mdx`) — visual ruler of all rezics breakpoints, container widths, and the rationale for `xsm:450px` and `8xl:1440px` as rezics-specific additions.
 

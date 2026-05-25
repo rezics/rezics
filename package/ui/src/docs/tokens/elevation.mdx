@@ -5,7 +5,7 @@ import { Grid, ElevationSample } from "./_gallery";
 
 # Elevation
 
-**Default policy is borderless.** Surfaces separate via whisper borders or surface-color shifts, *not* shadows. Shadows are reserved for the modal tier and a small set of true float-above-canvas surfaces. Source: `package/ui/src/config/tokens/elevation.ts`.
+**Default policy is flat.** Surfaces separate via whitespace, whisper borders, or explicit card surface choices. Shadows are reserved for the modal tier, true float-above-canvas surfaces, and shadcn `<Card surface="elevated">` media cards. Source: `package/ui/src/config/tokens/elevation.ts`.
 
 This keeps the parchment-archive feel — the page is calm, layers are quiet, and elevation is something you only feel when it really means *I am temporarily on top*.
 
@@ -22,10 +22,10 @@ This keeps the parchment-archive feel — the page is calm, layers are quiet, an
 
 | Tier | Token | Use |
 | --- | --- | --- |
-| flat (default) | none | Cards, panels, sections — separate via `border-whisper` |
-| 1 | `--shadow-1` | Sticky bars, hover-lift micro affordance |
-| 2 | `--shadow-2` | Dropdowns, popovers |
-| 3 | `--shadow-3` | Floating action menus |
+| flat (default) | none | Sections, panels, table rows, `Card surface="plain"`, `Card surface="contained"` |
+| 1 | `--shadow-1` | `Card surface="elevated"` for media-rich recommendation/article cards; sticky bars and hover-lift micro affordance |
+| 2 | `--shadow-2` | Dropdowns, popovers, floating action menus |
+| 3 | `--shadow-3` | Exceptional floating surfaces |
 | modal | `--shadow-modal` | Modals, dialogs, full overlays |
 
 Dark mode shadows scale up opacity (×5) so they stay perceptible against deeper canvas tones.
@@ -44,8 +44,8 @@ Dark mode shadows scale up opacity (×5) so they stay perceptible against deeper
 <div className="rounded-lg bg-surface-elevated shadow-modal">
 ```
 
-Don't reach for `shadow-2` to "make a card stand out" — that's what surface tokens (`base` vs `elevated`) and whisper borders are for. Shadows for hierarchy is a Material-2 reflex; rezics is closer to Material-3 + Apple in temperament.
+Don't hand-roll `shadow-md` to "make a card stand out." Use shadcn `<Card surface="elevated">` when the item is media-rich and should read like a recommendation/article card; otherwise use `surface="plain"` or `surface="contained"`.
 
 ## Reference
 
-> **Apple HIG materials and MD3 elevation**: developer.apple.com/design/human-interface-guidelines/materials and m3.material.io/styles/elevation/overview — rezics adopts tonal separation for in-flow depth and reserves shadow for modal-tier surfaces.
+> **Apple HIG materials and MD3 elevation**: developer.apple.com/design/human-interface-guidelines/materials and m3.material.io/styles/elevation/overview — rezics adopts flat tonal separation for most in-flow depth, with a narrow same-color elevated card exception for media-rich content.

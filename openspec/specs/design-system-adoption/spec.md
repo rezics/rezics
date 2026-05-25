@@ -67,7 +67,7 @@ The following categories SHALL be classified as Hard-Never and SHALL be fixed in
 - `line-height` set below `1.30`.
 - Raw `<a href>` used for outbound links (subject to `outbound-link-protection` spec).
 - Pure white `#ffffff` or pure black `#000000` used as page canvas background.
-- Decorative `box-shadow` on cards / sections / panels (modal-tier only).
+- Decorative `box-shadow` on sections / panels, or on cards outside shadcn `<Card surface="elevated">`.
 
 #### Scenario: Hard-Never count is zero post-audit
 
@@ -89,4 +89,3 @@ The following categories SHALL be classified as defensible and SHALL NOT be forc
 
 - **WHEN** an adoption audit lists defensible items
 - **THEN** each entry SHALL include a one-sentence rationale tying back to one of the categories above
-

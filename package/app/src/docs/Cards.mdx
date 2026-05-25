@@ -5,8 +5,10 @@ import { Meta } from "@storybook/addon-docs/blocks";
 # Cards
 
 Each domain entity has a card. They follow the **content-led** card rules from
-[`Foundation/Patterns#cards`](?path=/docs/foundation-patterns--docs): no border,
-no shadow, no card chrome — image + title + secondary metadata.
+[`Foundation/Patterns#cards`](?path=/docs/foundation-patterns--docs): use shadcn
+`<Card>` surface variants deliberately. Most domain cards are
+`surface="plain"` content-led items; media-rich recommendations/articles may use
+`surface="elevated"` for same-color soft separation.
 
 ## Books
 

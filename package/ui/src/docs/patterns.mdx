@@ -77,10 +77,18 @@ Bordered/shadowed section cards are the SaaS-dashboard look. Rezics is a library
 
 ## 2. Cards (book / item / post)
 
+Use shadcn `<Card>` as the canonical Rezics card primitive. Card semantics come from the domain component (`BookCard`, `PostCard`, `ArticleCard`); the primitive only controls surface policy.
+
+| Surface | Visual read | Use |
+| --- | --- | --- |
+| `plain` | Same as page, no outer border or shadow | Flat feed/media/list items |
+| `contained` | `surface-base` with a whisper ring | Default panels and compact information cards |
+| `elevated` | Same-color/near-same-color fill with soft shadow | Media-rich recommendation and article cards |
+
 Image, title, author — that's the card. The cover art carries the visual weight. Whisper border for table-row separation is fine; it's containment, not chrome.
 
 <Compare>
-  <Do caption="Minimal chrome, content-led">
+  <Do caption="Plain content-led item">
     <div style={{ fontFamily: fontFamilies.sans, maxWidth: 160 }}>
       <div style={{ aspectRatio: "2/3", background: "var(--colors-surface-subtle)", borderRadius: radius.sm }} />
       <div style={{ paddingTop: 12 }}>
@@ -89,7 +97,26 @@ Image, title, author — that's the card. The cover art carries the visual weigh
       </div>
     </div>
   </Do>
-  <Dont caption="Heavy card with border + shadow">
+  <Do caption="Elevated media card">
+    <div
+      style={{
+        fontFamily: fontFamilies.sans,
+        maxWidth: 200,
+        overflow: "hidden",
+        borderRadius: radius.lg,
+        background: "var(--colors-surface-canvas)",
+        boxShadow: "var(--shadow-1)",
+        border: "1px solid var(--colors-border-whisper)",
+      }}
+    >
+      <div style={{ aspectRatio: "16/9", background: "var(--colors-surface-subtle)" }} />
+      <div style={{ padding: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--colors-text-primary)" }}>Editors' genre picks</div>
+        <div style={{ fontSize: 13, color: "var(--colors-text-secondary)", marginTop: 6 }}>Fiction · Historical fiction</div>
+      </div>
+    </div>
+  </Do>
+  <Dont caption="Hand-rolled heavy card">
     <div
       style={{
         fontFamily: fontFamilies.sans,
@@ -111,19 +138,28 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 </Compare>
 
 ```tsx
-// Do — content-led
-<article>
+// Do — flat content-led item
+<Card surface="plain">
   <img src={book.cover} alt={book.title} className="aspect-[2/3] rounded-md" />
   <div className="pt-3">
     <p className="text-base font-medium">{book.title}</p>
     <p className="text-sm text-text-secondary">{book.author}</p>
   </div>
-</article>
+</Card>
 
 // Do — list-row with whisper divider
 <div className="divide-y divide-border-whisper">
   {posts.map((p) => <div key={p.id} className="py-6">{/* row */}</div>)}
 </div>
+
+// Do — media-rich recommendation/article card
+<Card surface="elevated">
+  <img src={article.image} alt="" className="aspect-[16/9] w-full object-cover" />
+  <CardHeader>
+    <CardTitle>{article.title}</CardTitle>
+    <CardDescription>{article.categories.join(" · ")}</CardDescription>
+  </CardHeader>
+</Card>
 ```
 
 ---
