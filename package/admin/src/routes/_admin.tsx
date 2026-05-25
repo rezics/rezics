@@ -3,21 +3,12 @@ import {
   useAuthSessionStore,
 } from "@rezics/api/states";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { AdminAuthGuard } from "@/app/guard/AdminAuthGuard";
+import {
+  buildCurrentRedirectPath,
+  isAdminRole,
+} from "@/app/guard/adminAuthGuardUtils";
 import AdminLayout from "@/core/layouts/AdminLayout";
-
-function resolveAttemptedPath(location: any): string {
-  if (typeof location?.pathname === "string") {
-    return `${location.pathname ?? ""}${location.searchStr ?? ""}${location.hash ?? ""}`;
-  }
-  if (typeof location?.href === "string") {
-    return location.href;
-  }
-  return "/";
-}
-
-function isAdminRole(role: string | null | undefined): boolean {
-  return role === "admin" || role === "owner";
-}
 
 export const Route = createFileRoute("/_admin")({
   beforeLoad: async ({ location }) => {
@@ -35,12 +26,13 @@ export const Route = createFileRoute("/_admin")({
 
     throw redirect({
       to: "/login",
-      search: { redirect: resolveAttemptedPath(location) },
+      search: { redirect: buildCurrentRedirectPath(location) },
       replace: true,
     });
   },
   component: () => (
     <AdminLayout>
+      <AdminAuthGuard />
       <Outlet />
     </AdminLayout>
   ),

@@ -1,10 +1,3 @@
-import { QueryClient } from "@tanstack/react-query";
+import { createQueryClient } from "@rezics/api/react-query/tsr";
 
-export const qc = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // Avoid showing queries as immediately stale everywhere (devtools/UI).
-      staleTime: 30_000,
-    },
-  },
-});
+export const qc = createQueryClient();
