@@ -96,7 +96,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
 
   return (
     <div className="w-11/12 mx-auto max-w-4xl mt-16">
-      <Card className="shadow-lg rounded-2xl">
+      <Card surface="contained">
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
             <Avatar className="w-20 h-20 rounded-lg">
@@ -177,7 +177,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
         </CardContent>
       </Card>
       {(isCurrentUser || user.unitId === currentUser?.unitId) && (
-        <Card className="shadow-lg rounded-2xl mt-4">
+        <Card surface="contained" className="mt-4">
           <CardContent>
             <h6 className="text-lg font-semibold inline-block">
               {m.user_navigation_label()}

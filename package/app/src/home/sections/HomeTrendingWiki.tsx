@@ -54,7 +54,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
       </div>
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         {books.map((book) => (
-          <Card key={book.unitId} className="overflow-hidden">
+          <Card key={book.unitId} surface="contained">
             <CardContent>
               <p className="text-sm font-medium mb-1">{getBookTitle(book)}</p>
               <p className="text-sm text-text-secondary line-clamp-3 m-0">

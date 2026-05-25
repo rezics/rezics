@@ -32,7 +32,7 @@ export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   const description = contentDocMarkdownFallback(translation?.description);
 
   return (
-    <Card className="cursor-pointer border-0 shadow-none">
+    <Card surface="plain" className="cursor-pointer">
       <Link
         to={unitHref({
           type: "REALM",

@@ -164,7 +164,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
 
   return (
     <div className="w-11/12 max-w-2xl mx-auto mt-16">
-      <Card className="shadow-lg rounded-2xl">
+      <Card surface="contained">
         <CardContent className="pt-6">
           <div className="flex items-center gap-4 mb-6">
             <Avatar className="w-20 h-20 rounded-lg">

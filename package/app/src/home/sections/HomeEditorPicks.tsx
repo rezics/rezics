@@ -59,7 +59,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
           const coverUrl = getBookCoverUrl(book);
           const authorName = getBookAuthorName(book);
           return (
-            <Card key={book.unitId} className="overflow-hidden">
+            <Card key={book.unitId} surface="elevated" className="py-0">
               {coverUrl && (
                 <LazyLoadImage
                   src={coverUrl}
@@ -67,7 +67,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
                   className="w-full h-40 object-cover"
                 />
               )}
-              <CardContent className="!pt-3">
+              <CardContent className="p-3">
                 <p className="text-sm font-medium truncate m-0" title={title}>
                   {title}
                 </p>

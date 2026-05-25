@@ -59,7 +59,7 @@ The design system SHALL provide `success`, `warning`, `error`, and `info` semant
 
 ### Requirement: Border-led depth, not shadow-led
 
-Containment SHALL be expressed primarily via `--colors-border-whisper` (default surface boundary, 1px at 8% opacity), whitespace, and the shadcn Card surface API. Sections, table rows, navs, and generic panels SHALL NOT carry box-shadow. Cards SHALL use shadcn `<Card surface="plain" | "contained" | "elevated">`; only `surface="elevated"` MAY carry a soft `shadow-1`, and only for same-color/near-same-color media-rich recommendation or article cards. Heavier shadow tokens SHALL exist only for floating or modal-tier surfaces (dialogs, command palettes, context menus, popovers).
+Containment SHALL be expressed primarily via `--colors-border-whisper` (default surface boundary, 1px at 8% opacity), whitespace, and the shadcn Card surface API. Sections, table rows, navs, and generic panels SHALL NOT carry box-shadow. Cards SHALL use shadcn `<Card surface="plain" | "contained" | "elevated">`, SHALL use the small `rounded-md` card radius, and SHALL keep same-color/page-color fills rather than tonal card backgrounds. Only `surface="elevated"` MAY carry a soft `shadow-1`, and only for same-color/near-same-color media-rich recommendation or article cards. Heavier shadow tokens SHALL exist only for floating or modal-tier surfaces (dialogs, command palettes, context menus, popovers).
 
 #### Scenario: Whisper border is the default boundary
 

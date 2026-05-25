@@ -15,8 +15,10 @@ export const TagCard: React.FC<{
     // biome-ignore lint/a11y/useSemanticElements: interactive card wrapper
     <div
       className={cn(
-        "cursor-pointer transition border rounded-md p-3 flex flex-col gap-1 hover:shadow-sm",
-        selected ? "border-brand-fill shadow" : "border-border-whisper",
+        "cursor-pointer transition-colors border rounded-md p-3 flex flex-col gap-1 hover:bg-surface-subtle",
+        selected
+          ? "border-brand-fill bg-surface-subtle"
+          : "border-border-whisper",
       )}
       role="button"
       tabIndex={0}
@@ -51,7 +53,7 @@ export const TagDetailCard: React.FC<{
 }> = ({ tag, label: labelProp }) => {
   const label = labelProp ?? tag.tagUnitId;
   return (
-    <Card className="border border-border-whisper rounded-md shadow-none">
+    <Card surface="contained">
       <CardContent className="space-y-2">
         <h3 className="text-base font-semibold">
           {label}

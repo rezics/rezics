@@ -21,7 +21,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
-    <Card className="max-w-sm">
+    <Card surface="contained" className="max-w-sm">
       <CardHeader>
         <CardTitle>Reading list</CardTitle>
         <CardDescription>23 unread, 4 in progress</CardDescription>
@@ -96,7 +96,7 @@ export const SurfaceComparison: Story = {
         <div className="h-24 bg-surface-subtle" />
         <CardHeader>
           <CardTitle>Contained</CardTitle>
-          <CardDescription>Default card surface</CardDescription>
+          <CardDescription>Same-color card with ring</CardDescription>
         </CardHeader>
       </Card>
       <Card surface="elevated">
@@ -112,7 +112,7 @@ export const SurfaceComparison: Story = {
 
 export const WithAction: Story = {
   render: () => (
-    <Card className="max-w-sm">
+    <Card surface="contained" className="max-w-sm">
       <CardHeader>
         <CardTitle>Annotations</CardTitle>
         <CardDescription>Last synced 2 minutes ago</CardDescription>

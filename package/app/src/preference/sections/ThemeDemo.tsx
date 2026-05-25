@@ -65,7 +65,7 @@ export const ThemeDemo: React.FC = () => {
       <div className="grid grid-cols-12 gap-6">
         {/* 颜色系统演示 */}
         <div className="col-span-12 md:col-span-6">
-          <Card>
+          <Card surface="contained">
             <CardContent>
               <h2 className="text-2xl font-semibold mb-4 text-brand-fill">
                 颜色系统
@@ -107,7 +107,7 @@ export const ThemeDemo: React.FC = () => {
 
         {/* 组件演示 */}
         <div className="col-span-12 md:col-span-6">
-          <Card>
+          <Card surface="contained">
             <CardContent>
               <h2 className="text-2xl font-semibold mb-4 text-brand-fill">
                 组件展示
@@ -161,11 +161,8 @@ export const ThemeDemo: React.FC = () => {
                 className="col-span-12 sm:col-span-6 md:col-span-3"
               >
                 <Card
-                  className="transition-all hover:-translate-y-1"
-                  style={{
-                    background: `linear-gradient(135deg, ${color}1a 0%, ${color}0d 100%)`,
-                    borderColor: `${color}33`,
-                  }}
+                  surface="contained"
+                  className="transition-transform hover:-translate-y-1"
                 >
                   <CardContent>
                     <div className="flex items-center gap-3 mb-4">

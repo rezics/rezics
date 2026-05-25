@@ -114,20 +114,21 @@ The `@rezics/ui` Storybook SHALL provide seven MDX patterns pages, comprising th
 3. **Density** (`density.mdx`) — live nine-token `--padding-*` ladder showing intrinsic per-component density. Documents the opt-in / opt-out component lists. States the "density never affects type" rule and that density is not a runtime toggle.
 4. **State Layer** (`state-layer.mdx`) — live demo of the 8/12/12/16 opacity ladder applied as quiet rectangular tints. Includes a rejection sample for MD3 full-bleed circular ripple.
 5. **Depth Without Shadow** (`depth-without-shadow.mdx`) — live demo of the canvas → base → elevated → subtle → sunken surface ladder. Includes a rejection sample for the MD3 dp shadow ladder. Documents that shadow is reserved for modal-tier surfaces plus the narrow shadcn `<Card surface="elevated">` media-card exception.
-6. **Inverse Surface** (`inverse-surface.mdx`) — snackbar and pull-quote demos. Documents when and when not to use inverse-surface.
-7. **Layout & Breakpoints** (`layout-and-breakpoints.mdx`) — visual ruler of all rezics breakpoints, container widths, and the rationale for `xsm:450px` and `8xl:1440px` as rezics-specific additions.
+6. **Card Surfaces** (`card-surfaces.mdx`) — one-page live comparison of shadcn Card `plain`, `contained`, and `elevated` surfaces, with and without mocked images.
+7. **Inverse Surface** (`inverse-surface.mdx`) — snackbar and pull-quote demos. Documents when and when not to use inverse-surface.
+8. **Layout & Breakpoints** (`layout-and-breakpoints.mdx`) — visual ruler of all rezics breakpoints, container widths, and the rationale for `xsm:450px` and `8xl:1440px` as rezics-specific additions.
 
 Each new Patterns page SHALL include at least one live demo (not a screenshot) and SHALL pair every "we do" example with a "we don't do this" rejection sample where the contrast is instructive.
 
-#### Scenario: Seven Patterns pages register
+#### Scenario: Eight Patterns pages register
 
 - **WHEN** `bun -F @rezics/ui run build-storybook` is run
-- **THEN** the resulting `storybook-static/index.json` SHALL contain doc entries titled `Foundation/Voice`, `Foundation/Patterns`, `Foundation/Patterns/Density`, `Foundation/Patterns/State Layer`, `Foundation/Patterns/Depth Without Shadow`, `Foundation/Patterns/Inverse Surface`, and `Foundation/Patterns/Layout and Breakpoints`
+- **THEN** the resulting `storybook-static/index.json` SHALL contain doc entries titled `Foundation/Voice`, `Foundation/Patterns`, `Foundation/Patterns/Density`, `Foundation/Patterns/State Layer`, `Foundation/Patterns/Depth Without Shadow`, `Foundation/Patterns/Card Surfaces`, `Foundation/Patterns/Inverse Surface`, and `Foundation/Patterns/Layout and Breakpoints`
 
 #### Scenario: Each new Patterns page has live demos and rejection samples
 
-- **WHEN** any of the five new `Foundation/Patterns/<detail>` MDX files is parsed
-- **THEN** it SHALL include at least one live `<Story>`, `<Canvas>`, or `<*Demo>` element from the `_gallery.tsx` helper
+- **WHEN** any of the six new `Foundation/Patterns/<detail>` MDX files is parsed
+- **THEN** it SHALL include at least one live `<Story>`, `<Canvas>`, `<*Demo>` element from the `_gallery.tsx` helper, or live shadcn Card surface sample
 - **AND** SHALL include at least one "we don't do this" rejection sample where the contrast against MD3 / shadcn-default / Tailwind-default is instructive
 
 ### Requirement: Storybook toolbar exposes theme only

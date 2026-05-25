@@ -30,14 +30,15 @@ const BookCard = ({
   return (
     <Card
       key={book.unitId}
-      className={`flex flex-col rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300 group shadow-sm ${className}`}
+      surface="elevated"
+      className={`group flex flex-col py-0 transition-shadow duration-300 ${className}`}
     >
       <Link
         to={`/book/${book.unitId}` as any}
         className="flex flex-col items-stretch justify-start"
       >
         {coverUrl ? (
-          <div className="relative w-full h-42 aspect-[3/4] overflow-hidden bg-gray-100">
+          <div className="relative w-full h-42 aspect-[3/4] overflow-hidden bg-surface-subtle">
             <LazyLoadImage
               src={coverUrl}
               alt={title}
@@ -45,7 +46,7 @@ const BookCard = ({
             />
           </div>
         ) : (
-          <div className="w-full aspect-[3/4] h-42 bg-gray-200 flex items-center justify-center text-gray-400">
+          <div className="w-full aspect-[3/4] h-42 bg-surface-subtle flex items-center justify-center text-text-tertiary">
             {m.book_no_cover()}
           </div>
         )}
@@ -58,7 +59,7 @@ const BookCard = ({
             {title}
           </div>
 
-          <p className="text-xs text-gray-500 truncate mt-auto pt-1 m-0">
+          <p className="text-xs text-text-secondary truncate mt-auto pt-1 m-0">
             {authorName || m.book_unknown_author()}
           </p>
         </CardContent>

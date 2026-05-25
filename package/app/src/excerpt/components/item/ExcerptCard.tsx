@@ -70,8 +70,9 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
 
   return (
     <Card
+      surface="plain"
       className={cn(
-        "w-full transition-all mb-1 shadow-none border-none",
+        "w-full transition-all mb-1",
         excerptId && "cursor-pointer",
         className,
       )}

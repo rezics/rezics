@@ -206,7 +206,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
         </Button>
       </div>
 
-      <Card className="shadow-sm rounded-xl">
+      <Card surface="contained">
         <div className="px-4">
           <Tabs
             value={tab}

@@ -24,7 +24,8 @@ export const CardBookList = ({ books }: CardBookListProps) => {
         return (
           <Card
             key={book.unitId}
-            className="h-full flex flex-row items-stretch gap-4 w-full overflow-hidden rounded-md border-0 py-0 shadow-none ring-0"
+            surface="plain"
+            className="h-full flex flex-row items-stretch gap-4 w-full py-0"
           >
             {coverUrl && (
               <div className="w-[36%] overflow-hidden">

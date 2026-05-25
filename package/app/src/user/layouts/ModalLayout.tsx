@@ -8,7 +8,10 @@ export const ModalLayout: FC<{
   actions: React.ReactNode;
 }> = ({ title, content, actions }) => (
   <form>
-    <Card className="min-w-full sm:min-w-[384px] lg:min-w-[480px]">
+    <Card
+      surface="contained"
+      className="min-w-full sm:min-w-[384px] lg:min-w-[480px]"
+    >
       <CardContent className="flex flex-col gap-4">
         <h4 className="text-2xl font-semibold">{title}</h4>
         {content}

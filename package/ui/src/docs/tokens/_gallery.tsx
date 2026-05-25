@@ -879,7 +879,7 @@ export function DepthDemo() {
       name: "base",
       bg: "var(--colors-surface-base)",
       cssVar: "--colors-surface-base",
-      note: "Default cards",
+      note: "Panels / inline blocks",
     },
     {
       name: "elevated",

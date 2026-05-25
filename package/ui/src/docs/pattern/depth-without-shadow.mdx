@@ -7,7 +7,7 @@ import { DepthDemo, Compare, Do, Dont } from "../tokens/_gallery";
 
 rezics communicates most depth through a **tonal surface ladder**, not through `box-shadow`. Each step in the ladder is a different background fill — canvas → base → elevated → subtle → sunken — and the contrast between adjacent fills is what signals the depth relationship. The system is mode-aware: light mode shifts warmer/cooler; dark mode shifts brighter/dimmer.
 
-Cards are the narrow exception: shadcn `<Card surface="elevated">` may use a soft `shadow-1` while keeping the fill same-color/near-same-color. Use that for media-rich recommendation/article cards only; use `surface="plain"` for flat feed/media items and `surface="contained"` for default panels.
+Cards are the narrow exception: shadcn `<Card surface="elevated">` may use a soft `shadow-1` while keeping the fill same-color/near-same-color. Use that for media-rich recommendation/article cards only; use `surface="plain"` for flat feed/media items and `surface="contained"` for same-color ringed cards.
 
 ## Live preview
 
@@ -20,7 +20,7 @@ Cards are the narrow exception: shadcn `<Card surface="elevated">` may use a sof
 | Tier | Token | Use |
 | --- | --- | --- |
 | Canvas | `--colors-surface-canvas` | Page background. The deepest "back" surface. Parchment-warm in light mode. |
-| Base | `--colors-surface-base` | Default cards, panels, inline content blocks. One step forward. |
+| Base | `--colors-surface-base` | Panels and inline content blocks. One step forward. |
 | Elevated | `--colors-surface-elevated` | Modals, popovers, command palette. The "frontmost" persistent surface. |
 | Subtle | `--colors-surface-subtle` | Inset wells, hover states, secondary panels. One step back from base. |
 | Sunken | `--colors-surface-sunken` | Code blocks, deepest depression. Reading-context inset. |

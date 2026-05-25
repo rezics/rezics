@@ -19,7 +19,7 @@
 | Token              | Light      | Dark       | UnoCSS         | CSS var                          | When                                  |
 | ------------------ | ---------- | ---------- | -------------- | -------------------------------- | ------------------------------------- |
 | `surface-canvas`   | `#f5f4ed`  | `#1a1a18`  | `bg-surface`   | `--rezics-color-surface-canvas`     | Page background. Default body.        |
-| `surface-base`     | `#faf9f5`  | `#26251e`  | `bg-surface-base` | `--rezics-color-surface-base`    | Default raised surface (cards).       |
+| `surface-base`     | `#faf9f5`  | `#26251e`  | `bg-surface-base` | `--rezics-color-surface-base`    | Panels, inline content blocks.       |
 | `surface-elevated` | `#ffffff`  | `#30302e`  | `bg-surface-elevated` | `--rezics-color-surface-elevated` | Modals, popovers, command palette. |
 | `surface-subtle`   | `#ebeae5`  | `#1f1e1c`  | `bg-surface-subtle` | `--rezics-color-surface-subtle`  | Code blocks, table zebra, chip bg.    |
 | `surface-sunken`   | `#e6e5e0`  | `#141413`  | `bg-surface-sunken` | `--rezics-color-surface-sunken`  | Inset panels (rare).                  |
@@ -105,9 +105,9 @@ UnoCSS / preset-wind4 follows Tailwind v4's `N × 4px` model (`p-2 = 8px`, `p-4 
 | ------------- | ------ | -------------- | --------------------------------------------- |
 | `radius-xs`   | 4px    | `rounded-xs`   | Inline tags, code chips.                      |
 | `radius-sm`   | 6px    | `rounded-sm`   | Inputs, dense buttons.                        |
-| `radius-md`   | 8px    | `rounded-md` / `rounded` | **Default.** Buttons, chips, small cards. |
-| `radius-lg`   | 12px   | `rounded-lg`   | Cards, surfaces.                              |
-| `radius-xl`   | 16px   | `rounded-xl`   | Modals, large cards.                          |
+| `radius-md`   | 8px    | `rounded-md` / `rounded` | **Default.** Buttons, chips, cards. |
+| `radius-lg`   | 12px   | `rounded-lg`   | Popovers, contained controls, secondary surfaces. |
+| `radius-xl`   | 16px   | `rounded-xl`   | Modals, large overlay surfaces.                          |
 | `radius-2xl`  | 24px   | `rounded-2xl`  | Hero blocks, feature cards.                   |
 | `radius-pill` | 9999px | `rounded-pill` | Tags, status pills, hero CTAs.                |
 | `radius-full` | 50%    | `rounded-full` | Avatars, circular icon buttons.               |

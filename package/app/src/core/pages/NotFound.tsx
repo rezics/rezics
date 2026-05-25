@@ -35,7 +35,7 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
   const canGoBack = useCanGoBack();
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <Card className="min-w-md max-w-lg">
+      <Card surface="contained" className="min-w-md max-w-lg">
         <CardContent className="flex flex-col gap-4">
           <h4 className="text-2xl font-medium m-0">{m.common_not_found()}</h4>
           <div className="flex items-center gap-2">

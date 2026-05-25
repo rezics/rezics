@@ -45,8 +45,7 @@ explicitly:
 
 - `surface="plain"`: flat feed/media/list item. No outer background, border, or
   shadow.
-- `surface="contained"`: default panel card with `bg-surface-base` and a whisper
-  ring.
+- `surface="contained"`: same page-color card with a whisper ring.
 - `surface="elevated"`: same-color/near-same-color media-rich recommendation or
   article card with a soft `shadow-1`.
 

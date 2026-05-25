@@ -54,7 +54,7 @@ export const LibraryCardsSection: React.FC = () => {
   const m = useMessage(i18nMessages);
   const renderLibraryCard = (lib: (typeof libraries)[number]) => (
     <Link key={lib.key} to={lib.to} className="min-w-0">
-      <Card size="sm" className="h-full border-0 shadow-none">
+      <Card size="sm" surface="contained" className="h-full">
         <CardContent className="px-2 sm:px-4">
           <div className="flex min-w-0 flex-col items-center gap-2 text-center sm:flex-row sm:gap-4 sm:text-left">
             <lib.icon

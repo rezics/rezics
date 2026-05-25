@@ -18,7 +18,7 @@ Layered backgrounds, light → dark in stack order. Default canvas is parchment-
 <Unstyled>
   <Grid cols={5}>
     <Swatch name="canvas" cssVar="--colors-surface-canvas" value="var(--colors-surface-canvas)" description="Page background" contrastAgainst="--colors-text-primary" />
-    <Swatch name="base" cssVar="--colors-surface-base" value="var(--colors-surface-base)" description="Default cards / panels" contrastAgainst="--colors-text-primary" />
+    <Swatch name="base" cssVar="--colors-surface-base" value="var(--colors-surface-base)" description="Panels / inline blocks" contrastAgainst="--colors-text-primary" />
     <Swatch name="elevated" cssVar="--colors-surface-elevated" value="var(--colors-surface-elevated)" description="Modal / popover tier" contrastAgainst="--colors-text-primary" />
     <Swatch name="subtle" cssVar="--colors-surface-subtle" value="var(--colors-surface-subtle)" description="Inset wells, hover states" contrastAgainst="--colors-text-primary" />
     <Swatch name="sunken" cssVar="--colors-surface-sunken" value="var(--colors-surface-sunken)" description="Deepest depression, code blocks" contrastAgainst="--colors-text-primary" />
@@ -27,7 +27,7 @@ Layered backgrounds, light → dark in stack order. Default canvas is parchment-
 
 ## Text
 
-Each badge tests the text token against `--colors-surface-base` (the default surface where this text usually lives).
+Each badge tests the text token against `--colors-surface-base` (a common panel and inline-block surface).
 
 <Unstyled>
   <Grid cols={3}>
@@ -104,7 +104,7 @@ Whisper is the workhorse — used for borderless-feel section separation. Define
 <div className="bg-surface-base text-text-primary border-b border-border-whisper">
 
 // Raw CSS
-.card { background: var(--colors-surface-base); }
+.panel { background: var(--colors-surface-base); }
 ```
 
 Never hardcode `#1d1d1f` or `#f4606c` — always go through tokens so light/dark and AA-safe variants resolve correctly.
