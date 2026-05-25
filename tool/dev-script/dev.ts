@@ -7,6 +7,32 @@ const ROOT_DIR = path.resolve(TOOL_DIR, "..");
 
 const platform = process.platform;
 
+const DEV_SESSION_ENV_DENYLIST = [
+  "CONTAINER_RUNTIME",
+  "JOB_RUNNER_BASE_URL",
+  "PG_PASSWORD",
+  "PG_POOL_SIZE",
+  "SECRET_KEY_BASE",
+  "SEQUIN_CONFIG_VOLUME_SUFFIX",
+  "SEQUIN_HEALTH_URL",
+  "SEQUIN_WEBHOOK_SECRET",
+  "SOURCE_DB_HOST",
+  "SOURCE_DB_NAME",
+  "SOURCE_DB_PASSWORD",
+  "SOURCE_DB_POOL_SIZE",
+  "SOURCE_DB_PORT",
+  "SOURCE_DB_USER",
+  "VAULT_KEY",
+] as const;
+
+function createDevSessionEnv(): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  for (const key of DEV_SESSION_ENV_DENYLIST) {
+    delete env[key];
+  }
+  return env;
+}
+
 function commandExists(cmd: string): boolean {
   const whichCmd = platform === "win32" ? "where" : "which";
   const result = Bun.spawnSync([whichCmd, cmd], {
@@ -91,6 +117,7 @@ try {
     ],
     {
       cwd: ROOT_DIR,
+      env: createDevSessionEnv(),
       stdio: ["inherit", "inherit", "inherit"],
     },
   );

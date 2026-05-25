@@ -37,7 +37,7 @@ export const env = createEnv({
     SOURCE_DB_PASSWORD: v.optional(v.string()),
     SOURCE_DB_POOL_SIZE: v.optional(v.string()),
 
-    JOB_RUNNER_BASE_URL: v.optional(v.string()),
+    SEQUIN_JOB_RUNNER_BASE_URL: v.optional(v.string()),
     SEQUIN_WEBHOOK_SECRET: v.optional(v.string()),
   },
   runtimeEnv: process.env,
@@ -55,7 +55,7 @@ const REQUIRED_SEQUIN_KEYS = [
 const REQUIRED_PROD_SEQUIN_KEYS = [
   "ENV",
   "SOURCE_DB_HOST",
-  "JOB_RUNNER_BASE_URL",
+  "SEQUIN_JOB_RUNNER_BASE_URL",
 ] as const;
 
 export type SequinEnvKey =

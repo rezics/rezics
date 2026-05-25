@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "cd tool && bun run dev-script/dev.ts",
+    "dev": "bun run --no-env-file tool/dev-script/dev.ts",
     "prisma:generate": "cd tool && bun run db-script/prisma-regenerate.ts",
     "prisma:migrate": "cd tool && bun run db-script/prisma-migrate.ts",
     "prisma:reset": "cd tool && bun run db-script/prisma-reset-db.ts",

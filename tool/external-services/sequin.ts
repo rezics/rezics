@@ -1,9 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import {
-  env as toolEnv,
   missingSequinEnv,
   SECRET_KEY_BASE_EXAMPLE,
+  env as toolEnv,
   VAULT_KEY_EXAMPLE,
 } from "../env";
 import { detectComposeRuntime, runCompose } from "./compose-runtime";
@@ -71,7 +71,7 @@ function localDefaults(runtimeHostAlias: string): NodeJS.ProcessEnv {
     ENV: toolEnv.ENV ?? "development",
     SOURCE_DB_HOST: toolEnv.SOURCE_DB_HOST ?? runtimeHostAlias,
     JOB_RUNNER_BASE_URL:
-      toolEnv.JOB_RUNNER_BASE_URL ?? `http://${runtimeHostAlias}:3005`,
+      toolEnv.SEQUIN_JOB_RUNNER_BASE_URL ?? `http://${runtimeHostAlias}:3005`,
   };
 }
 
@@ -113,6 +113,7 @@ function assertSequinEnv(mode: Mode) {
     [
       `Missing tool environment variables for Sequin ${mode}: ${missing.join(", ")}`,
       "Copy tool/.env.example to tool/.env and set the missing values.",
+      "SEQUIN_JOB_RUNNER_BASE_URL is the URL Sequin uses from inside its container runtime.",
       "SEQUIN_WEBHOOK_SECRET must match package/job-runner/.env.",
     ].join("\n"),
   );

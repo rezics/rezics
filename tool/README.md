@@ -37,8 +37,11 @@ addition to the base topology. Production can pass `--prod` directly to
 `tool/external-services/sequin.ts` to omit the dev override.
 
 Docker local development defaults to `host.docker.internal`; Podman defaults to
-`host.containers.internal`. On Linux hosts with SELinux enforcing, the wrapper
-adds the `:Z` mount suffix for the read-only Sequin config bind mount.
+`host.containers.internal`. Override the container-facing job-runner callback
+with `SEQUIN_JOB_RUNNER_BASE_URL`; do not use `JOB_RUNNER_BASE_URL` in
+`tool/.env`, because host-side package services own that variable themselves.
+On Linux hosts with SELinux enforcing, the wrapper adds the `:Z` mount suffix
+for the read-only Sequin config bind mount.
 
 ## Deploy
 
