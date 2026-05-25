@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the Paraglide-based frontend i18n toolchain for Rezics: package structure, locale ownership, generated message runtime expectations, source file format, and the app/admin/UI synchronization rules. The toolchain compiles JSON message sources into per-locale message functions at build time so consumers import explicit, tree-shakable references rather than calling a runtime resolver. `@rezics/i18n` owns product/domain messages shared across app and admin; `@rezics/ui` owns generic component-internal messages; the app/admin shell owns the active-locale state and fans changes out to both runtimes.
+Defines the Paraglide-based frontend i18n toolchain for Rezics: package structure, locale ownership, generated message runtime expectations, source file format, and the app/admin/UI synchronization rules. The toolchain compiles JSON message sources into per-locale message functions at build time so consumers import explicit, tree-shakable references rather than calling a runtime resolver. `@rezics/i18n` owns product/domain messages shared across app and admin; `@rezics/ui` owns generic component-internal messages; the shared React i18n adapter owns the active-locale state and synchronizes registered package-local runtimes.
 
 ## Requirements
 
@@ -41,21 +41,79 @@ The app and admin frontends SHALL consume one shared product/domain i18n package
 - **THEN** both frontends SHALL resolve the label from the shared product/domain i18n package
 - **AND** neither frontend SHALL keep a duplicate local translation key for that shared label
 
-### Requirement: Active locale is shell-owned
+### Requirement: Active locale is adapter-owned
 
-The app/admin shell SHALL be the single owner of the active locale state. Package-local i18n runtimes SHALL receive the active locale from the shell and SHALL NOT independently infer locale from URL, cookies, localStorage, or browser language.
+The shared React i18n adapter SHALL own frontend active-locale state for app,
+admin, UI components, and Storybook. App/admin shells SHALL initialize the
+adapter, register package-local Paraglide runtimes, and invoke the adapter
+setter when users change language.
 
-#### Scenario: User changes language
+#### Scenario: User changes language through app shell
 
-- **WHEN** the user selects a supported language in an app/admin language control
-- **THEN** the shell SHALL update the active locale
-- **AND** the shell SHALL synchronize that locale into both the product/domain i18n runtime and the UI i18n runtime
+- **WHEN** the user selects `en` in an app language control
+- **THEN** the app SHALL call the shared adapter locale setter with `en`
+- **AND** the adapter SHALL synchronize the product/domain Paraglide runtime
+  and the UI Paraglide runtime
+- **AND** translated React components SHALL update through adapter
+  subscriptions
 
-#### Scenario: UI component renders after language change
+#### Scenario: Admin uses the same locale owner
 
-- **WHEN** the shell active locale changes from `zh-hant` to `en`
-- **THEN** a translated `@rezics/ui` component SHALL render its UI-owned text in English
-- **AND** app/admin product text SHALL render from the same active locale
+- **WHEN** the user selects `ja` in admin settings
+- **THEN** admin SHALL call the same adapter API used by app
+- **AND** admin product copy and imported UI package copy SHALL render in
+  Japanese
+
+### Requirement: React UI copy resolves through useMessage
+
+React UI copy in app, admin, and UI packages SHALL resolve generated Paraglide
+message functions through the shared `useMessage(messageBag)` hook. React
+render paths SHALL NOT call generated message functions directly unless the
+call is outside user-visible UI copy or explicitly exempted by tests or
+generated code boundaries.
+
+#### Scenario: App component renders product message
+
+- **WHEN** an app component renders a product/domain label
+- **THEN** it SHALL import the needed generated message functions explicitly
+- **AND** it SHALL render the label through `m.<message>()` from
+  `useMessage(messageBag)`
+
+#### Scenario: UI component renders UI package message
+
+- **WHEN** a UI package component renders component-internal copy
+- **THEN** it SHALL import generated UI message functions from the UI package
+- **AND** it SHALL render those messages through `useMessage(messageBag)`
+
+#### Scenario: Module-scope config stores message references
+
+- **WHEN** a module-scope navigation item, option list, or helper map needs a
+  translated label
+- **THEN** it SHALL store a generated message function or typed descriptor
+- **AND** the message SHALL be resolved through `useMessage()` during React
+  render
+
+### Requirement: React message imports are explicit
+
+Production React source SHALL import generated message functions by name and
+SHALL NOT import full generated message namespaces for user-visible UI copy.
+This preserves Paraglide message-level tree shaking and makes each message bag
+auditable.
+
+#### Scenario: Named imports are accepted
+
+- **WHEN** production React source imports `{ common_save }` from
+  `@rezics/i18n/messages`
+- **AND** it includes `common_save` in a local message bag passed to
+  `useMessage()`
+- **THEN** the callsite SHALL satisfy the i18n toolchain rules
+
+#### Scenario: Namespace imports are rejected in production React source
+
+- **WHEN** production React source imports `* as m` from generated messages and
+  renders `m.common_save()`
+- **THEN** convention checks SHALL flag the callsite
+- **AND** the code SHALL be migrated to named imports and `useMessage()`
 
 ### Requirement: Canonical locale behavior is preserved
 
@@ -159,22 +217,6 @@ The build pipeline SHALL compile Paraglide messages before any step that consume
 - **WHEN** CI runs TypeScript checks for any frontend package
 - **THEN** Paraglide compile SHALL run first
 - **AND** missing generated output SHALL NOT be a cause of CI failure
-
-### Requirement: Shell-level locale helper lives in the app/admin shell
-
-The helper that fans out a locale change to all Paraglide runtimes SHALL live in the app or admin shell (e.g. `package/app/src/app/`), not in `@rezics/i18n` or `@rezics/ui`. Neither `@rezics/i18n` nor `@rezics/ui` SHALL import from the other; both are leaves under the shell.
-
-#### Scenario: Shell synchronizes both runtimes
-
-- **WHEN** the shell calls `setRezicsLocale("en")`
-- **THEN** the helper SHALL invoke the `@rezics/i18n` locale setter and the `@rezics/ui` locale setter
-- **AND** the helper SHALL pass `{ reload: false }` to both setters so SPA navigation is preserved
-
-#### Scenario: I18n packages do not cross-import
-
-- **WHEN** `@rezics/i18n` and `@rezics/ui` package sources are inspected
-- **THEN** `@rezics/i18n` SHALL NOT import from `@rezics/ui`
-- **AND** `@rezics/ui` SHALL NOT import from `@rezics/i18n`
 
 ### Requirement: Legacy frontend translation API is removed
 
