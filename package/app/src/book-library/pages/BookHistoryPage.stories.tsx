@@ -12,7 +12,6 @@ import {
 } from "@/stories/fixtures/history";
 import { compareRevisionSlots } from "../models/historyCompare";
 import {
-  AuthorityPanel,
   CompareChange,
   RevisionTimeline,
   StructureTimeline,
@@ -114,14 +113,6 @@ export const StructureBatch: Story = {
         events={historyStructureEvents}
         actors={historyActors}
       />
-    </StoryShell>
-  ),
-};
-
-export const Authority: Story = {
-  render: () => (
-    <StoryShell>
-      <AuthorityPanel />
     </StoryShell>
   ),
 };

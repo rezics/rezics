@@ -20,7 +20,15 @@ interface NavigationListProps {
 }
 
 const itemBaseClass =
-  "flex items-center gap-3 w-full px-3 py-1 rounded-md text-left text-sm transition-colors hover:bg-surface-subtle";
+  "flex items-center gap-3 w-full px-3 py-1 rounded-md text-left text-sm transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus";
+
+function normalizePath(value: string) {
+  const normalized = value.startsWith("/") ? value : `/${value}`;
+  if (normalized.length > 1 && normalized.endsWith("/")) {
+    return normalized.slice(0, -1);
+  }
+  return normalized;
+}
 
 export const NavigationList = ({
   NAVIGATION,
@@ -44,7 +52,9 @@ export const NavigationList = ({
             </li>
           );
 
-        const isActive = pathname === `/${item.segment}`;
+        const normalizedPathname = normalizePath(pathname);
+        const itemPath = normalizePath(item.segment);
+        const isActive = normalizedPathname === itemPath;
         const hasChildren = !!item.children && item.children.length > 0;
         const isOpen = item.segment ? !!openItems[item.segment] : false;
         const Icon = item.icon;
@@ -55,11 +65,12 @@ export const NavigationList = ({
               <button
                 type="button"
                 className={cn(itemBaseClass, isActive && "bg-surface-subtle")}
+                aria-current={isActive ? "page" : undefined}
                 onClick={(event: any) =>
                   handleItemClick(event, item.segment, hasChildren)
                 }
               >
-                {Icon ? <Icon className="w-4 h-4" /> : null}
+                {Icon ? <Icon className="w-4 h-4" aria-hidden="true" /> : null}
                 <span className="flex-1 dark:text-light text-dark">
                   {item.title}
                 </span>
@@ -75,11 +86,12 @@ export const NavigationList = ({
                   "no-underline",
                   isActive && "bg-surface-subtle",
                 )}
+                aria-current={isActive ? "page" : undefined}
                 onClick={(event: any) =>
                   handleItemClick(event, item.segment, hasChildren)
                 }
               >
-                {Icon ? <Icon className="w-4 h-4" /> : null}
+                {Icon ? <Icon className="w-4 h-4" aria-hidden="true" /> : null}
                 <span className="flex-1 dark:text-light text-dark">
                   {item.title}
                 </span>
@@ -89,7 +101,8 @@ export const NavigationList = ({
             {hasChildren && item.segment && isOpen && (
               <ul className="list-none m-0 p-0">
                 {item.children?.map((child: any) => {
-                  const isChildActive = pathname === `/${child.segment}`;
+                  const isChildActive =
+                    normalizedPathname === normalizePath(child.segment);
                   const ChildIcon = child.icon;
                   return (
                     <li key={child.segment}>
@@ -100,11 +113,14 @@ export const NavigationList = ({
                           "pl-8 no-underline",
                           isChildActive && "bg-surface-subtle",
                         )}
+                        aria-current={isChildActive ? "page" : undefined}
                         onClick={(event: any) =>
                           handleItemClick(event, child.segment, false)
                         }
                       >
-                        {ChildIcon ? <ChildIcon className="w-4 h-4" /> : null}
+                        {ChildIcon ? (
+                          <ChildIcon className="w-4 h-4" aria-hidden="true" />
+                        ) : null}
                         <span className="flex-1 dark:text-light text-dark">
                           {child.title}
                         </span>

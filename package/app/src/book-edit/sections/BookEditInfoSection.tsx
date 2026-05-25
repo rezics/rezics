@@ -1,4 +1,4 @@
-import { historyQueries } from "@rezics/api";
+import { historyQueries, unitAuthorityQueries } from "@rezics/api";
 import {
   bookKeys,
   bookQueries,
@@ -7,6 +7,7 @@ import {
 } from "@rezics/api/book/book";
 import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
 import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
+import { getLockedFieldError } from "@rezics/api/react-query/errors";
 import {
   useDeleteTranslationMutation,
   useUpsertTranslationMutation,
@@ -17,10 +18,13 @@ import type {
   CreationMode,
   EditorialPatchSubmission,
   LicenseSlug,
+  UnitFieldLockDTO,
 } from "@rezics/contract";
 import {
   CreationMode as CreationModeValue,
   DEFAULT_LANGUAGE,
+  UNIT_FIELD_LOCK_ALL,
+  lockPathIntersectsPatchPath,
   mainMarkdownSource,
   markdownContentDoc,
   normalizeLanguage,
@@ -39,7 +43,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { ChevronDown as ExpandMore, Plus } from "lucide-react";
+import { ChevronDown as ExpandMore, LockKeyhole, Plus } from "lucide-react";
 import React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { EntityPicker } from "@/entity-picker";
@@ -64,6 +68,7 @@ import {
   isRestoreEditSubmitDisabled,
   withRestoreSource,
 } from "../models/restoreEdit";
+import { editorialPathLabel } from "@/unit/models/lockFieldLabels";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
@@ -99,6 +104,61 @@ function nullableString(value: unknown): string | null {
 
 function sameJson(left: unknown, right: unknown): boolean {
   return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+}
+
+function lockedFieldMessage(error: unknown) {
+  const locked = getLockedFieldError(error);
+  if (!locked) return null;
+  const paths =
+    locked.blockedPaths.length > 0
+      ? locked.blockedPaths.map(editorialPathLabel).join(", ")
+      : locked.message;
+  return m.authority_edit_form_locked_error({ paths });
+}
+
+function matchingLocks(
+  locks: readonly UnitFieldLockDTO[] | undefined,
+  paths: readonly string[],
+) {
+  if (!locks?.length) return [];
+  return locks.filter((lock) =>
+    paths.some((path) => lockPathIntersectsPatchPath(lock.path, path)),
+  );
+}
+
+function LockedFieldNotice({
+  locks,
+  paths,
+}: {
+  locks: readonly UnitFieldLockDTO[] | undefined;
+  paths: readonly string[];
+}) {
+  const matched = matchingLocks(locks, paths);
+  if (matched.length === 0) return null;
+
+  const allFieldsLocked = matched.some(
+    (lock) => lock.path === UNIT_FIELD_LOCK_ALL,
+  );
+
+  return (
+    <Alert>
+      <LockKeyhole className="size-4" aria-hidden="true" />
+      <AlertDescription>
+        <span className="block text-sm leading-ui">
+          {allFieldsLocked
+            ? m.authority_edit_form_all_locked_notice()
+            : m.authority_edit_form_locked_notice({
+                fields: matched
+                  .map((lock) => editorialPathLabel(lock.path))
+                  .join(", "),
+              })}
+        </span>
+        <span className="mt-1 block text-xs leading-dense text-text-secondary">
+          {m.authority_edit_form_privileged_notice()}
+        </span>
+      </AlertDescription>
+    </Alert>
+  );
 }
 
 const UpdateBookDialog: React.FC<{
@@ -173,6 +233,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   });
   const authorCreditsQuery = useQuery({
     ...creditAttributionQueries.byUnit(bookId ?? ""),
+    enabled: !newBook && !!bookId,
+  });
+  const fieldLocksQuery = useQuery({
+    ...unitAuthorityQueries.fieldLocks(bookId ?? ""),
     enabled: !newBook && !!bookId,
   });
   const [metadataState, setMetadataState] =
@@ -302,7 +366,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     onError: (err) => {
       setDialogState({
         title: m.page_book_edit_info_toast_update_failed_title(),
-        message: String(err || m.common_unknown_error()),
+        message:
+          lockedFieldMessage(err) ?? String(err || m.common_unknown_error()),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -314,7 +379,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     onError: (err) => {
       setDialogState({
         title: m.page_book_edit_info_toast_update_failed_title(),
-        message: String(err || m.common_unknown_error()),
+        message:
+          lockedFieldMessage(err) ?? String(err || m.common_unknown_error()),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -516,6 +582,24 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const resolvedPageTitle = pageTitle ?? m.page_book_edit_info_title();
   const sourceReleaseUnitId = editor.currentTranslation?.sourceReleaseUnitId;
   const hasAvailable = ALL_LANGUAGES.length > editor.existingLanguages.length;
+  const locks = fieldLocksQuery.data?.locks;
+  const selectedTranslationLockPaths = [
+    `translations.${editor.selectedLanguage}.title`,
+    `translations.${editor.selectedLanguage}.subtitle`,
+    `translations.${editor.selectedLanguage}.summary`,
+    `translations.${editor.selectedLanguage}.description`,
+  ];
+  const metadataLockPaths = [
+    "extension.isbn13",
+    "extension.coverUrl",
+    "extension.pageCount",
+    "extension.textLength",
+    "extension.formatKey",
+    "extension.isLicensed",
+    "extension.extra",
+    "unit.rating",
+    "unit.license",
+  ];
 
   return (
     <div className="mt-16 mx-auto max-w-3xl px-4 pb-16">
@@ -627,6 +711,11 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 hasAvailable={hasAvailable}
               />
 
+              <LockedFieldNotice
+                locks={locks}
+                paths={selectedTranslationLockPaths}
+              />
+
               {!editor.currentTranslation && (
                 <Alert>
                   <AlertDescription>
@@ -726,6 +815,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               }));
             }}
           />
+          <div className="mt-6">
+            <LockedFieldNotice locks={locks} paths={metadataLockPaths} />
+          </div>
         </section>
 
         <section>

@@ -1,10 +1,10 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-
-const BookHistoryPage = lazyRouteComponent(
-  () => import("@/book-library"),
-  "BookHistoryPage",
-);
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_mainLayout/book/$bookId/history/")({
-  component: BookHistoryPage,
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: "/book/$bookId/edit/history",
+      params,
+    });
+  },
 });

@@ -1,11 +1,5 @@
+import { historyQueries } from "@rezics/api";
 import {
-  historyQueries,
-  unitAuthorityQueries,
-  useRemoveUnitFieldLockMutation,
-  useUpsertUnitFieldLockMutation,
-} from "@rezics/api";
-import {
-  EDITORIAL_LOCK_PATH_OPTIONS,
   type HistoryActorResolution,
   type StructureEventDTO,
   type UnitRevisionDTO,
@@ -16,6 +10,7 @@ import {
   Link,
   useNavigate,
   useParams,
+  useRouterState,
   useSearch,
 } from "@tanstack/react-router";
 import {
@@ -23,22 +18,24 @@ import {
   CheckCircle2,
   ChevronDown,
   History,
-  LockKeyhole,
-  Plus,
   RotateCcw,
-  Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { editorialPathLabel, slotLabel } from "@/unit/models/lockFieldLabels";
 import {
   compareRevisionPathSnapshots,
   type DiffPart,
   type HistoryFieldChange,
 } from "../models/historyCompare";
 
-type HistoryTab = "editorial" | "structure" | "authority";
+type HistoryTab = "editorial" | "structure";
 
-export function BookHistoryPage() {
+export function BookHistoryPage({
+  editConsole = false,
+}: {
+  editConsole?: boolean;
+}) {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const [tab, setTab] = useState<HistoryTab>("editorial");
   const [restoreSequence, setRestoreSequence] = useState<number | null>(null);
@@ -106,18 +103,13 @@ export function BookHistoryPage() {
           >
             {m.history_tabs_structure()}
           </HistoryTabButton>
-          <HistoryTabButton
-            active={tab === "authority"}
-            onClick={() => setTab("authority")}
-          >
-            {m.history_tabs_authority()}
-          </HistoryTabButton>
         </div>
       </header>
 
       {tab === "editorial" ? (
         <RevisionTimeline
           bookId={bookId}
+          editConsole={editConsole}
           revisions={revisions}
           actors={actors}
           onRestore={setRestoreSequence}
@@ -126,7 +118,6 @@ export function BookHistoryPage() {
       {tab === "structure" ? (
         <StructureTimeline events={structureEvents} actors={actors} />
       ) : null}
-      {tab === "authority" ? <AuthorityPanel unitId={bookId} /> : null}
 
       {restoreSequence !== null ? (
         <section className="grid gap-3 rounded-md bg-surface-subtle p-4">
@@ -160,6 +151,14 @@ export function BookHistoryPage() {
   );
 }
 
+export function BookEditHistoryPage() {
+  return (
+    <main className="mx-auto mt-16 max-w-5xl px-4 pb-16">
+      <BookHistoryPage editConsole />
+    </main>
+  );
+}
+
 function HistoryTabButton({
   active,
   children,
@@ -189,11 +188,13 @@ function HistoryTabButton({
 export function RevisionTimeline({
   actors,
   bookId,
+  editConsole = false,
   onRestore,
   revisions,
 }: {
   actors: Record<string, HistoryActorResolution>;
   bookId: string;
+  editConsole?: boolean;
   onRestore: (sequence: number) => void;
   revisions: UnitRevisionDTO[];
 }) {
@@ -217,7 +218,11 @@ export function RevisionTimeline({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Link
-                  to="/book/$bookId/history/$sequence"
+                  to={
+                    editConsole
+                      ? "/book/$bookId/edit/history/$sequence"
+                      : "/book/$bookId/history/$sequence"
+                  }
                   params={{ bookId, sequence: String(revision.sequence) }}
                   className="text-sm font-medium leading-ui text-text-primary hover:text-text-brand"
                 >
@@ -230,7 +235,11 @@ export function RevisionTimeline({
               <div className="flex items-center gap-2">
                 {latestSequence ? (
                   <Link
-                    to="/book/$bookId/history/compare/$targetSequence"
+                    to={
+                      editConsole
+                        ? "/book/$bookId/edit/history/compare/$targetSequence"
+                        : "/book/$bookId/history/compare/$targetSequence"
+                    }
                     params={{
                       bookId,
                       targetSequence: String(compareTarget),
@@ -338,137 +347,6 @@ export function StructureTimeline({
   );
 }
 
-const CUSTOM_LOCK_PATH = "__custom__";
-
-export function AuthorityPanel({ unitId }: { unitId?: string }) {
-  const [selectedPath, setSelectedPath] = useState<string>(
-    EDITORIAL_LOCK_PATH_OPTIONS[1],
-  );
-  const [customPath, setCustomPath] = useState("");
-  const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const locksQuery = useQuery(unitAuthorityQueries.fieldLocks(unitId ?? ""));
-  const upsertLock = useUpsertUnitFieldLockMutation({
-    onSuccess: () => {
-      setError(null);
-      setReason("");
-    },
-    onError: (err) => setError(err.message),
-  });
-  const removeLock = useRemoveUnitFieldLockMutation({
-    onError: (err) => setError(err.message),
-  });
-  const effectivePath =
-    selectedPath === CUSTOM_LOCK_PATH ? customPath.trim() : selectedPath;
-
-  const createLock = () => {
-    if (!unitId || !effectivePath) return;
-    upsertLock.mutate({
-      unitId,
-      path: effectivePath,
-      reason: reason.trim() || null,
-    });
-  };
-
-  return (
-    <section className="grid gap-4 rounded-md bg-surface-subtle p-4 text-sm leading-ui text-text-secondary">
-      <div className="flex items-center gap-2 text-text-primary">
-        <LockKeyhole className="h-4 w-4" aria-hidden="true" />
-        <h3 className="font-medium">{m.history_authority_title()}</h3>
-      </div>
-      <p>{m.history_authority_visibility()}</p>
-      <p>{m.history_authority_references()}</p>
-      {unitId ? (
-        <div className="grid gap-3 border-t border-border-whisper pt-4">
-          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-            <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
-              Lock path
-              <select
-                className="rounded-md bg-surface-base px-3 py-2 text-sm leading-ui text-text-primary"
-                value={selectedPath}
-                onChange={(event) => setSelectedPath(event.currentTarget.value)}
-              >
-                {EDITORIAL_LOCK_PATH_OPTIONS.map((path) => (
-                  <option key={path} value={path}>
-                    {editorialPathLabel(path)} · {path}
-                  </option>
-                ))}
-                <option value={CUSTOM_LOCK_PATH}>Custom path</option>
-              </select>
-            </label>
-            <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
-              Reason
-              <input
-                className="rounded-md bg-surface-base px-3 py-2 text-sm leading-ui text-text-primary"
-                value={reason}
-                onChange={(event) => setReason(event.currentTarget.value)}
-              />
-            </label>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center gap-2 self-end rounded-md bg-brand-fill px-3 py-2 text-sm leading-ui text-text-on-brand disabled:opacity-50"
-              disabled={!effectivePath || upsertLock.isPending}
-              onClick={createLock}
-            >
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Lock
-            </button>
-          </div>
-          {selectedPath === CUSTOM_LOCK_PATH ? (
-            <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
-              Custom path
-              <input
-                className="rounded-md bg-surface-base px-3 py-2 font-mono text-sm leading-ui text-text-primary"
-                value={customPath}
-                onChange={(event) => setCustomPath(event.currentTarget.value)}
-                placeholder="translations.en.title"
-              />
-            </label>
-          ) : null}
-          {error ? (
-            <p className="text-sm leading-ui text-error-text">{error}</p>
-          ) : null}
-          {locksQuery.isLoading ? (
-            <p>{m.common_loading()}</p>
-          ) : locksQuery.data?.locks.length ? (
-            <ul className="grid gap-2">
-              {locksQuery.data.locks.map((lock) => (
-                <li
-                  key={lock.path}
-                  className="grid gap-2 rounded-md bg-surface-base p-3 md:grid-cols-[minmax(0,1fr)_auto]"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-text-primary">
-                      {editorialPathLabel(lock.path)}
-                    </p>
-                    <p className="truncate font-mono text-xs leading-dense text-text-tertiary">
-                      {lock.path}
-                    </p>
-                    {lock.reason ? <p className="mt-1">{lock.reason}</p> : null}
-                  </div>
-                  <button
-                    type="button"
-                    className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-subtle hover:text-text-primary disabled:opacity-50"
-                    disabled={removeLock.isPending}
-                    onClick={() =>
-                      removeLock.mutate({ unitId, path: lock.path })
-                    }
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden="true" />
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No locked paths.</p>
-          )}
-        </div>
-      ) : null}
-    </section>
-  );
-}
-
 export function BookRevisionPage() {
   const { bookId, sequence } = useParams({ strict: false }) as {
     bookId: string;
@@ -516,6 +394,13 @@ export function BookRevisionPage() {
 
   return (
     <section className="grid gap-6">
+      <Link
+        to="/book/$bookId/edit/history"
+        params={{ bookId }}
+        className="inline-flex w-fit items-center text-sm leading-ui text-text-secondary hover:text-text-primary"
+      >
+        {m.history_back_to_edit_history()}
+      </Link>
       <header className="grid gap-2">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
           {m.history_revision_title({ sequence: revision.sequence })}
@@ -540,6 +425,9 @@ export function BookRevisionComparePage() {
     base?: string;
     mode?: "split" | "unified";
   };
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
   const navigate = useNavigate();
   const target = Number(targetSequence);
   const baseFromSearch = Number(search.base);
@@ -593,8 +481,11 @@ export function BookRevisionComparePage() {
     target?: number;
   }) => {
     const nextTarget = next.target ?? target;
+    const editConsole = pathname.includes("/edit/history/");
     navigate({
-      to: "/book/$bookId/history/compare/$targetSequence",
+      to: editConsole
+        ? "/book/$bookId/edit/history/compare/$targetSequence"
+        : "/book/$bookId/history/compare/$targetSequence",
       params: { bookId, targetSequence: String(nextTarget) },
       search: {
         base: String(next.base ?? base),
@@ -614,6 +505,13 @@ export function BookRevisionComparePage() {
 
   return (
     <section className="grid gap-6">
+      <Link
+        to="/book/$bookId/edit/history"
+        params={{ bookId }}
+        className="inline-flex w-fit items-center text-sm leading-ui text-text-secondary hover:text-text-primary"
+      >
+        {m.history_back_to_edit_history()}
+      </Link>
       <header className="grid gap-2">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
           {m.history_compare_title({
@@ -1214,50 +1112,6 @@ function referenceLabel(reference: {
     return m.history_references_gone();
   }
   return m.history_references_unresolved();
-}
-
-function slotLabel(value: string) {
-  return value
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (char) => char.toUpperCase());
-}
-
-function editorialPathLabel(path: string) {
-  if (path === "*") return "Whole Unit";
-
-  const translationMatch = /^translations\.([^.]+)\.(.+)$/.exec(path);
-  if (translationMatch) {
-    const [, language, field] = translationMatch;
-    const [rootField, ...leafSegments] = field.split(".");
-    const rootLabel =
-      rootField === "title"
-        ? m.book_fields_title()
-        : rootField === "description"
-          ? m.book_description()
-          : slotLabel(rootField);
-    const fieldLabel =
-      leafSegments.length > 0
-        ? `${rootLabel} · ${leafSegments.join(".")}`
-        : rootLabel;
-    return `${language} ${fieldLabel}`;
-  }
-
-  const labels: Record<string, string> = {
-    "extension.coverUrl": m.book_fields_cover_url(),
-    "extension.isbn13": m.book_fields_isbn(),
-    "post.content.main.source": "Post content",
-    "credits.authors": "Authors",
-    "entity.avatar": m.entity_avatar_url(),
-    "entity.kind": "Entity kind",
-    "entity.verified": "Verified",
-    "unit.slug": "Slug",
-    "user.avatar": "Avatar",
-    "user.bio": m.book_author_info_bio_label(),
-    "user.description": m.common_description(),
-    "user.name": m.common_name(),
-  };
-
-  return labels[path] ?? path;
 }
 
 function fieldAnchor(value: string) {

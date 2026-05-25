@@ -1,4 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
+
+const BookRevisionComparePage = lazyRouteComponent(
+  () => import("@/book-library"),
+  "BookRevisionComparePage",
+);
 
 type CompareSearch = {
   base?: string;
@@ -6,17 +11,11 @@ type CompareSearch = {
 };
 
 export const Route = createFileRoute(
-  "/_mainLayout/book/$bookId/history/compare/$targetSequence",
+  "/book_/$bookId/edit/history/compare/$targetSequence",
 )({
+  component: BookRevisionComparePage,
   validateSearch: (raw: Record<string, unknown>): CompareSearch => ({
     base: typeof raw.base === "string" ? raw.base : undefined,
     mode: raw.mode === "split" || raw.mode === "unified" ? raw.mode : undefined,
   }),
-  beforeLoad: ({ params, search }) => {
-    throw redirect({
-      to: "/book/$bookId/edit/history/compare/$targetSequence",
-      params,
-      search,
-    });
-  },
 });
