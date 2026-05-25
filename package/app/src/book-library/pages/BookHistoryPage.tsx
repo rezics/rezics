@@ -10,7 +10,6 @@ import {
   Link,
   useNavigate,
   useParams,
-  useRouterState,
   useSearch,
 } from "@tanstack/react-router";
 import {
@@ -31,11 +30,7 @@ import {
 
 type HistoryTab = "editorial" | "structure";
 
-export function BookHistoryPage({
-  editConsole = false,
-}: {
-  editConsole?: boolean;
-}) {
+export function BookHistoryPage() {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const [tab, setTab] = useState<HistoryTab>("editorial");
   const [restoreSequence, setRestoreSequence] = useState<number | null>(null);
@@ -109,7 +104,6 @@ export function BookHistoryPage({
       {tab === "editorial" ? (
         <RevisionTimeline
           bookId={bookId}
-          editConsole={editConsole}
           revisions={revisions}
           actors={actors}
           onRestore={setRestoreSequence}
@@ -154,9 +148,13 @@ export function BookHistoryPage({
 export function BookEditHistoryPage() {
   return (
     <main className="mx-auto mt-16 max-w-5xl px-4 pb-16">
-      <BookHistoryPage editConsole />
+      <BookHistoryPage />
     </main>
   );
+}
+
+export function BookEditHistoryTimelinePage() {
+  return <BookHistoryPage />;
 }
 
 function HistoryTabButton({
@@ -188,13 +186,11 @@ function HistoryTabButton({
 export function RevisionTimeline({
   actors,
   bookId,
-  editConsole = false,
   onRestore,
   revisions,
 }: {
   actors: Record<string, HistoryActorResolution>;
   bookId: string;
-  editConsole?: boolean;
   onRestore: (sequence: number) => void;
   revisions: UnitRevisionDTO[];
 }) {
@@ -218,11 +214,7 @@ export function RevisionTimeline({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Link
-                  to={
-                    editConsole
-                      ? "/book/$bookId/edit/history/$sequence"
-                      : "/book/$bookId/history/$sequence"
-                  }
+                  to="/book/$bookId/edit/history/$sequence"
                   params={{ bookId, sequence: String(revision.sequence) }}
                   className="text-sm font-medium leading-ui text-text-primary hover:text-text-brand"
                 >
@@ -235,11 +227,7 @@ export function RevisionTimeline({
               <div className="flex items-center gap-2">
                 {latestSequence ? (
                   <Link
-                    to={
-                      editConsole
-                        ? "/book/$bookId/edit/history/compare/$targetSequence"
-                        : "/book/$bookId/history/compare/$targetSequence"
-                    }
+                    to="/book/$bookId/edit/history/compare/$targetSequence"
                     params={{
                       bookId,
                       targetSequence: String(compareTarget),
@@ -425,9 +413,6 @@ export function BookRevisionComparePage() {
     base?: string;
     mode?: "split" | "unified";
   };
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
   const navigate = useNavigate();
   const target = Number(targetSequence);
   const baseFromSearch = Number(search.base);
@@ -481,11 +466,8 @@ export function BookRevisionComparePage() {
     target?: number;
   }) => {
     const nextTarget = next.target ?? target;
-    const editConsole = pathname.includes("/edit/history/");
     navigate({
-      to: editConsole
-        ? "/book/$bookId/edit/history/compare/$targetSequence"
-        : "/book/$bookId/history/compare/$targetSequence",
+      to: "/book/$bookId/edit/history/compare/$targetSequence",
       params: { bookId, targetSequence: String(nextTarget) },
       search: {
         base: String(next.base ?? base),

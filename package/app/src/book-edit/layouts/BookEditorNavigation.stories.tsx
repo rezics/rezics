@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { NavigationList } from "@/core/components/navigation/NavigationList";
 import { historyBookId } from "@/stories/fixtures/history";
 import { withRouter } from "@/stories/decorators/withRouter";
-import { NAVIGATION } from "./BookEditorNavigation";
+import { createBookEditConsoleConfig } from "./bookEditConsoleConfig";
 
 const meta = {
   title: "Domain/Book/Edit/Sidebar Navigation",
@@ -15,11 +15,27 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+function bookConsoleNavigation() {
+  const config = createBookEditConsoleConfig(historyBookId);
+  return [
+    config.returnItem,
+    ...config.primaryItems,
+    ...(config.operationalItems ?? []),
+  ].map((item) => ({
+    kind: "item" as const,
+    title: item.label,
+    segment: item.href,
+    icon: item.icon,
+    activeMatch: item.activeMatch,
+    isActive: item.isActive,
+  }));
+}
+
 export const SidebarItems: Story = {
   render: () => (
     <nav className="w-72 rounded-md bg-surface-base p-3">
       <NavigationList
-        NAVIGATION={NAVIGATION(historyBookId)}
+        NAVIGATION={bookConsoleNavigation()}
         isMobile={false}
         pathname={`/book/${historyBookId}/edit/authority`}
         openItems={{}}

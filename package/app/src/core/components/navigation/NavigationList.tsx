@@ -30,6 +30,25 @@ function normalizePath(value: string) {
   return normalized;
 }
 
+function matchesNavigationItem(
+  pathname: string,
+  item: Extract<NavigationItem, { kind: "item" }>,
+) {
+  if (item.isActive?.(pathname)) return true;
+
+  const normalizedPathname = normalizePath(pathname);
+  const itemPath = normalizePath(item.segment);
+
+  if (item.activeMatch === "prefix") {
+    return (
+      normalizedPathname === itemPath ||
+      normalizedPathname.startsWith(`${itemPath}/`)
+    );
+  }
+
+  return normalizedPathname === itemPath;
+}
+
 export const NavigationList = ({
   NAVIGATION,
   isMobile,
@@ -53,8 +72,7 @@ export const NavigationList = ({
           );
 
         const normalizedPathname = normalizePath(pathname);
-        const itemPath = normalizePath(item.segment);
-        const isActive = normalizedPathname === itemPath;
+        const isActive = matchesNavigationItem(pathname, item);
         const hasChildren = !!item.children && item.children.length > 0;
         const isOpen = item.segment ? !!openItems[item.segment] : false;
         const Icon = item.icon;

@@ -19,6 +19,7 @@ export { BookDetailLayout } from "./pages/BookDetailLayout";
 export { BookCommunityPage } from "./pages/BookDiscussionPage";
 export {
   BookEditHistoryPage,
+  BookEditHistoryTimelinePage,
   BookHistoryPage,
   BookRevisionComparePage,
   BookRevisionPage,

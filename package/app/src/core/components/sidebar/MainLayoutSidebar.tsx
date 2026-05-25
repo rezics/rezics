@@ -1,7 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
-import useMeasure from "react-use-measure";
 import { cn } from "@/shared/utils/css-util";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { useLayoutStore } from "../../states/layoutStore";
@@ -32,7 +31,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleDrawerToggle = useLayoutStore((s) => s.toggleSidebar);
   const closeSidebar = useLayoutStore((s) => s.closeSidebar);
   const { toggleItem, openItems } = useLayoutStore();
-  const [refAbove, { height }] = useMeasure();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const handleSidebarClose = () => {
     if (isMobile) {
@@ -40,8 +38,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  // All hooks must run unconditionally and in the same order every render.
-  const heightBelow = `calc(100vh - ${height}px)`;
+  const hasChildren =
+    children !== null && children !== undefined && children !== false;
 
   const handleItemClick = (
     _event: any,
@@ -61,8 +59,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const sidebarInner = (
-    <>
-      <div ref={refAbove} className={sidebarHeaderClassName}>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className={cn("shrink-0", sidebarHeaderClassName)}>
         <MainSidebarMenuSection
           handleDrawerToggle={handleDrawerToggle}
           handleItemClick={handleItemClick}
@@ -73,8 +71,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           openItems={openItems}
         />
       </div>
-      <div style={{ height: heightBelow }}>{children}</div>
-    </>
+      {hasChildren ? <div className="min-h-0 flex-1">{children}</div> : null}
+    </div>
   );
 
   // Desktop: simple flex-based sidebar that pushes content by taking width.
@@ -84,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       onClose={handleSidebarClose}
       mode={isMobile ? "fixed" : "inline"}
       width={`${sidebarWidth}px`}
-      className={cn(sidebarClassName, "rounded-lg overflow-auto")}
+      className={cn(sidebarClassName, "rounded-lg overflow-hidden")}
       isDragging={isDragging}
     >
       {sidebarInner}

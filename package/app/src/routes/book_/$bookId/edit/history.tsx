@@ -1,10 +1,13 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-const BookEditHistoryPage = lazyRouteComponent(
-  () => import("@/book-library"),
-  "BookEditHistoryPage",
-);
+function BookEditHistoryOutlet() {
+  return (
+    <main className="mx-auto mt-16 max-w-5xl px-4 pb-16">
+      <Outlet />
+    </main>
+  );
+}
 
 export const Route = createFileRoute("/book_/$bookId/edit/history")({
-  component: BookEditHistoryPage,
+  component: BookEditHistoryOutlet,
 });

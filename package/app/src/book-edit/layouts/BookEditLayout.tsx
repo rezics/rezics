@@ -1,30 +1,34 @@
 import type React from "react";
 import type { ReactNode } from "react";
-import { Header } from "@/core/components/header/MainLayoutHeader.tsx";
-import { Sidebar } from "@/core/components/sidebar/MainLayoutSidebar.tsx";
+import { useRouterState } from "@tanstack/react-router";
+import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
 import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
-import { NAVIGATION } from "./BookEditorNavigation";
+import { BookEditChapterContext } from "./BookEditChapterContext";
+import {
+  createBookEditConsoleConfig,
+  getBookEditChapterContextId,
+} from "./bookEditConsoleConfig";
 
 export interface BookEditLayoutProps {
   children: ReactNode;
 }
 
 export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
-  const bookId: string | undefined = bookEditLayoutRoute.useParams().bookId;
+  const { bookId } = bookEditLayoutRoute.useParams();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const chapterId = getBookEditChapterContextId(pathname, bookId);
 
   return (
-    <div className="flex min-h-screen">
-      <Header />
-      <div id="book-edit-sidebar">
-        <Sidebar NAVIGATION={NAVIGATION(bookId || "")} />
-      </div>
-
-      <main
-        className="flex-grow pt-32 transition-all duration-300"
-        style={{ backgroundColor: "var(--colors-surface-canvas)" }}
-      >
-        {children}
-      </main>
-    </div>
+    <EditConsoleLayout
+      {...createBookEditConsoleConfig(bookId)}
+      sidebarId="book-edit-sidebar"
+      contextSlot={
+        chapterId ? (
+          <BookEditChapterContext bookId={bookId} chapterId={chapterId} />
+        ) : null
+      }
+    >
+      {children}
+    </EditConsoleLayout>
   );
 };
