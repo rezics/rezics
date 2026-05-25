@@ -22,7 +22,7 @@ import { Route as AdminUnitIndexRouteImport } from './routes/_admin/unit/index'
 import { Route as AdminSourceSiteIndexRouteImport } from './routes/_admin/source-site/index'
 import { Route as AdminShelfIndexRouteImport } from './routes/_admin/shelf/index'
 import { Route as AdminRealmIndexRouteImport } from './routes/_admin/realm/index'
-import { Route as AdminEntitiesIndexRouteImport } from './routes/_admin/entities/index'
+import { Route as AdminEntityIndexRouteImport } from './routes/_admin/entity/index'
 import { Route as AdminBookIndexRouteImport } from './routes/_admin/book/index'
 import { Route as AdminUserMeiliRouteImport } from './routes/_admin/user/meili'
 import { Route as AdminUserCreateRouteImport } from './routes/_admin/user/create'
@@ -33,7 +33,7 @@ import { Route as AdminUnitUnitIdRouteImport } from './routes/_admin/unit/$unitI
 import { Route as AdminTagLowScoreRouteImport } from './routes/_admin/tag/low-score'
 import { Route as AdminSourceSiteEntityUnitIdRouteImport } from './routes/_admin/source-site/$entityUnitId'
 import { Route as AdminMiscEchokvRouteImport } from './routes/_admin/misc/echokv'
-import { Route as AdminEntitiesUnitIdRouteImport } from './routes/_admin/entities/$unitId'
+import { Route as AdminEntityUnitIdRouteImport } from './routes/_admin/entity/$unitId'
 import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
 import { Route as AdminAuthStatusRouteImport } from './routes/_admin/auth/status'
@@ -105,9 +105,9 @@ const AdminRealmIndexRoute = AdminRealmIndexRouteImport.update({
   path: '/realm/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminEntitiesIndexRoute = AdminEntitiesIndexRouteImport.update({
-  id: '/entities/',
-  path: '/entities/',
+const AdminEntityIndexRoute = AdminEntityIndexRouteImport.update({
+  id: '/entity/',
+  path: '/entity/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBookIndexRoute = AdminBookIndexRouteImport.update({
@@ -161,9 +161,9 @@ const AdminMiscEchokvRoute = AdminMiscEchokvRouteImport.update({
   path: '/misc/echokv',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminEntitiesUnitIdRoute = AdminEntitiesUnitIdRouteImport.update({
-  id: '/entities/$unitId',
-  path: '/entities/$unitId',
+const AdminEntityUnitIdRoute = AdminEntityUnitIdRouteImport.update({
+  id: '/entity/$unitId',
+  path: '/entity/$unitId',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBookMeiliRoute = AdminBookMeiliRouteImport.update({
@@ -211,7 +211,7 @@ export interface FileRoutesByFullPath {
   '/auth/status': typeof AdminAuthStatusRoute
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
-  '/entities/$unitId': typeof AdminEntitiesUnitIdRoute
+  '/entity/$unitId': typeof AdminEntityUnitIdRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
   '/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/tag/low-score': typeof AdminTagLowScoreRoute
@@ -222,7 +222,7 @@ export interface FileRoutesByFullPath {
   '/user/create': typeof AdminUserCreateRoute
   '/user/meili': typeof AdminUserMeiliRoute
   '/book/': typeof AdminBookIndexRoute
-  '/entities/': typeof AdminEntitiesIndexRoute
+  '/entity/': typeof AdminEntityIndexRoute
   '/realm/': typeof AdminRealmIndexRoute
   '/shelf/': typeof AdminShelfIndexRoute
   '/source-site/': typeof AdminSourceSiteIndexRoute
@@ -243,7 +243,7 @@ export interface FileRoutesByTo {
   '/auth/status': typeof AdminAuthStatusRoute
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
-  '/entities/$unitId': typeof AdminEntitiesUnitIdRoute
+  '/entity/$unitId': typeof AdminEntityUnitIdRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
   '/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/tag/low-score': typeof AdminTagLowScoreRoute
@@ -254,7 +254,7 @@ export interface FileRoutesByTo {
   '/user/create': typeof AdminUserCreateRoute
   '/user/meili': typeof AdminUserMeiliRoute
   '/book': typeof AdminBookIndexRoute
-  '/entities': typeof AdminEntitiesIndexRoute
+  '/entity': typeof AdminEntityIndexRoute
   '/realm': typeof AdminRealmIndexRoute
   '/shelf': typeof AdminShelfIndexRoute
   '/source-site': typeof AdminSourceSiteIndexRoute
@@ -277,7 +277,7 @@ export interface FileRoutesById {
   '/_admin/auth/status': typeof AdminAuthStatusRoute
   '/_admin/auth/users': typeof AdminAuthUsersRoute
   '/_admin/book/meili': typeof AdminBookMeiliRoute
-  '/_admin/entities/$unitId': typeof AdminEntitiesUnitIdRoute
+  '/_admin/entity/$unitId': typeof AdminEntityUnitIdRoute
   '/_admin/misc/echokv': typeof AdminMiscEchokvRoute
   '/_admin/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/_admin/tag/low-score': typeof AdminTagLowScoreRoute
@@ -288,7 +288,7 @@ export interface FileRoutesById {
   '/_admin/user/create': typeof AdminUserCreateRoute
   '/_admin/user/meili': typeof AdminUserMeiliRoute
   '/_admin/book/': typeof AdminBookIndexRoute
-  '/_admin/entities/': typeof AdminEntitiesIndexRoute
+  '/_admin/entity/': typeof AdminEntityIndexRoute
   '/_admin/realm/': typeof AdminRealmIndexRoute
   '/_admin/shelf/': typeof AdminShelfIndexRoute
   '/_admin/source-site/': typeof AdminSourceSiteIndexRoute
@@ -311,7 +311,7 @@ export interface FileRouteTypes {
     | '/auth/status'
     | '/auth/users'
     | '/book/meili'
-    | '/entities/$unitId'
+    | '/entity/$unitId'
     | '/misc/echokv'
     | '/source-site/$entityUnitId'
     | '/tag/low-score'
@@ -322,7 +322,7 @@ export interface FileRouteTypes {
     | '/user/create'
     | '/user/meili'
     | '/book/'
-    | '/entities/'
+    | '/entity/'
     | '/realm/'
     | '/shelf/'
     | '/source-site/'
@@ -343,7 +343,7 @@ export interface FileRouteTypes {
     | '/auth/status'
     | '/auth/users'
     | '/book/meili'
-    | '/entities/$unitId'
+    | '/entity/$unitId'
     | '/misc/echokv'
     | '/source-site/$entityUnitId'
     | '/tag/low-score'
@@ -354,7 +354,7 @@ export interface FileRouteTypes {
     | '/user/create'
     | '/user/meili'
     | '/book'
-    | '/entities'
+    | '/entity'
     | '/realm'
     | '/shelf'
     | '/source-site'
@@ -376,7 +376,7 @@ export interface FileRouteTypes {
     | '/_admin/auth/status'
     | '/_admin/auth/users'
     | '/_admin/book/meili'
-    | '/_admin/entities/$unitId'
+    | '/_admin/entity/$unitId'
     | '/_admin/misc/echokv'
     | '/_admin/source-site/$entityUnitId'
     | '/_admin/tag/low-score'
@@ -387,7 +387,7 @@ export interface FileRouteTypes {
     | '/_admin/user/create'
     | '/_admin/user/meili'
     | '/_admin/book/'
-    | '/_admin/entities/'
+    | '/_admin/entity/'
     | '/_admin/realm/'
     | '/_admin/shelf/'
     | '/_admin/source-site/'
@@ -493,11 +493,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRealmIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/entities/': {
-      id: '/_admin/entities/'
-      path: '/entities'
-      fullPath: '/entities/'
-      preLoaderRoute: typeof AdminEntitiesIndexRouteImport
+    '/_admin/entity/': {
+      id: '/_admin/entity/'
+      path: '/entity'
+      fullPath: '/entity/'
+      preLoaderRoute: typeof AdminEntityIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/book/': {
@@ -570,11 +570,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMiscEchokvRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/entities/$unitId': {
-      id: '/_admin/entities/$unitId'
-      path: '/entities/$unitId'
-      fullPath: '/entities/$unitId'
-      preLoaderRoute: typeof AdminEntitiesUnitIdRouteImport
+    '/_admin/entity/$unitId': {
+      id: '/_admin/entity/$unitId'
+      path: '/entity/$unitId'
+      fullPath: '/entity/$unitId'
+      preLoaderRoute: typeof AdminEntityUnitIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/book/meili': {
@@ -635,7 +635,7 @@ interface AdminRouteChildren {
   AdminAuthStatusRoute: typeof AdminAuthStatusRoute
   AdminAuthUsersRoute: typeof AdminAuthUsersRoute
   AdminBookMeiliRoute: typeof AdminBookMeiliRoute
-  AdminEntitiesUnitIdRoute: typeof AdminEntitiesUnitIdRoute
+  AdminEntityUnitIdRoute: typeof AdminEntityUnitIdRoute
   AdminMiscEchokvRoute: typeof AdminMiscEchokvRoute
   AdminSourceSiteEntityUnitIdRoute: typeof AdminSourceSiteEntityUnitIdRoute
   AdminTagLowScoreRoute: typeof AdminTagLowScoreRoute
@@ -646,7 +646,7 @@ interface AdminRouteChildren {
   AdminUserCreateRoute: typeof AdminUserCreateRoute
   AdminUserMeiliRoute: typeof AdminUserMeiliRoute
   AdminBookIndexRoute: typeof AdminBookIndexRoute
-  AdminEntitiesIndexRoute: typeof AdminEntitiesIndexRoute
+  AdminEntityIndexRoute: typeof AdminEntityIndexRoute
   AdminRealmIndexRoute: typeof AdminRealmIndexRoute
   AdminShelfIndexRoute: typeof AdminShelfIndexRoute
   AdminSourceSiteIndexRoute: typeof AdminSourceSiteIndexRoute
@@ -667,7 +667,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuthStatusRoute: AdminAuthStatusRoute,
   AdminAuthUsersRoute: AdminAuthUsersRoute,
   AdminBookMeiliRoute: AdminBookMeiliRoute,
-  AdminEntitiesUnitIdRoute: AdminEntitiesUnitIdRoute,
+  AdminEntityUnitIdRoute: AdminEntityUnitIdRoute,
   AdminMiscEchokvRoute: AdminMiscEchokvRoute,
   AdminSourceSiteEntityUnitIdRoute: AdminSourceSiteEntityUnitIdRoute,
   AdminTagLowScoreRoute: AdminTagLowScoreRoute,
@@ -678,7 +678,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUserCreateRoute: AdminUserCreateRoute,
   AdminUserMeiliRoute: AdminUserMeiliRoute,
   AdminBookIndexRoute: AdminBookIndexRoute,
-  AdminEntitiesIndexRoute: AdminEntitiesIndexRoute,
+  AdminEntityIndexRoute: AdminEntityIndexRoute,
   AdminRealmIndexRoute: AdminRealmIndexRoute,
   AdminShelfIndexRoute: AdminShelfIndexRoute,
   AdminSourceSiteIndexRoute: AdminSourceSiteIndexRoute,

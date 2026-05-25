@@ -123,7 +123,7 @@ export default function EntityListPage() {
             variant="outline"
             render={(props) => (
               <Link
-                to="/entities/$unitId"
+                to="/entity/$unitId"
                 params={{ unitId: e.unitId }}
                 {...props}
               >

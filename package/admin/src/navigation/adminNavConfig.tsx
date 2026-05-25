@@ -118,13 +118,13 @@ export const adminNav = {
       id: "entities",
       label: m.admin_nav_entities,
       icon: <IdentityIcon fontSize="small" />,
-      to: "/entities",
+      to: "/entity",
     },
     {
-      id: "source-sites",
+      id: "source-site",
       label: () => "Source sites",
       icon: <NetworkIcon fontSize="small" />,
-      to: "/source-sites",
+      to: "/source-site",
     },
     {
       id: "authority",

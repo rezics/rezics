@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { Page } from "@/core/layouts/Page";
-import { Route } from "@/routes/_admin/entities/$unitId";
+import { Route } from "@/routes/_admin/entity/$unitId";
 import { Link } from "@/shared/ui/link";
 
 interface TranslationDraft {
@@ -225,7 +225,7 @@ export default function EntityEditPage() {
               variant="ghost"
               size="sm"
               render={(props) => (
-                <Link to="/entities" {...props}>
+                <Link to="/entity" {...props}>
                   <ArrowBackIcon className="size-4" />
                   {m.common_back()}
                 </Link>

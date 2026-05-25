@@ -465,7 +465,7 @@ export function SourceSiteDetail({ entityUnitId }: { entityUnitId: string }) {
                   size="sm"
                   render={(props) => (
                     <Link
-                      to="/entities/$unitId"
+                      to="/entity/$unitId"
                       params={{ unitId: sourceSite.entityUnitId }}
                       {...props}
                     >
@@ -549,7 +549,7 @@ export default function SourceSitesPage() {
                       variant="outline"
                       render={(props) => (
                         <Link
-                          to="/source-sites/$entityUnitId"
+                          to="/source-site/$entityUnitId"
                           params={{ entityUnitId: sourceSite.entityUnitId }}
                           {...props}
                         >
