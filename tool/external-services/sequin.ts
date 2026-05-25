@@ -5,17 +5,15 @@ const SCRIPT_DIR = path.dirname(Bun.main);
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
 const [, , command, subcommand, ...rest] = Bun.argv;
 
-const mappedArgs =
-  command === "config"
-    ? ["config", subcommand, ...rest].filter(Boolean)
-    : [command, ...([subcommand, ...rest].filter(Boolean) as string[])].filter(
-        Boolean,
-      );
-
 if (!command) {
   console.error("Usage: bun run tool/external-services/sequin.ts <command>");
   process.exit(1);
 }
+
+const mappedArgs =
+  command === "config"
+    ? ["config", ...(subcommand ? [subcommand] : []), ...rest]
+    : [command, ...(subcommand ? [subcommand] : []), ...rest];
 
 console.warn(
   "service:sequin:* is a compatibility alias. Prefer the unified service:* commands.",

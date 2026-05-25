@@ -112,7 +112,12 @@ function redactUrl(rawUrl: string) {
 
 function sourceConnectionLabel(args: Args) {
   const config = sourceConnectionConfig(args);
-  if ("connectionString" in config) return redactUrl(config.connectionString);
+  if (
+    "connectionString" in config &&
+    typeof config.connectionString === "string"
+  ) {
+    return redactUrl(config.connectionString);
+  }
   return `${config.user}@${config.host}:${config.port}/${config.database}`;
 }
 

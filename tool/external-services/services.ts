@@ -228,10 +228,12 @@ async function main() {
   } else if (parsed.command === "down") {
     runManagedCompose("down", ["down"]);
   } else if (parsed.command === "logs") {
-    runManagedCompose(
+    runManagedCompose("logs", [
       "logs",
-      ["logs", "-f", parsed.subcommand, ...parsed.args].filter(Boolean),
-    );
+      "-f",
+      ...(parsed.subcommand ? [parsed.subcommand] : []),
+      ...parsed.args,
+    ]);
   } else if (parsed.command === "ps") {
     runManagedCompose("ps", ["ps"]);
   } else if (parsed.command === "config") {
