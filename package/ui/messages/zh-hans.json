@@ -3,5 +3,7 @@
   "ui_password_help": "密码至少需要 8 个字符。",
   "ui_pagination_tips": "分页",
   "ui_password_show": "显示密码",
-  "ui_password_hide": "隐藏密码"
+  "ui_password_hide": "隐藏密码",
+  "ui_collapsible_show_more": "显示更多",
+  "ui_collapsible_show_less": "显示较少"
 }

@@ -14,7 +14,7 @@
 - [x] 2.3 Add a test proving a direct registered runtime `setLocale()` call updates the adapter locale and notifies subscribers exactly once.
 - [x] 2.4 Add React tests for `useMessage()` rerendering when locale changes.
 - [x] 2.5 Add type-level tests or compile fixtures proving `useMessage()` preserves generated message input requirements.
-- [x] 2.6 Add a bundle/tree-shaking fixture that imports `useMessage()` and one generated message, then verifies unrelated generated message text or keys are absent from the bundle.
+- [x] 2.6 Verify with a temporary bundle/tree-shaking fixture that imports `useMessage()` and one generated message, then confirms unrelated generated message text or keys are absent from the bundle.
 
 ## 3. App/Admin Bootstrap
 
@@ -38,20 +38,20 @@
 ## 5. App React Migration
 
 - [x] 5.1 Run a repo search for `import * as m from "@rezics/i18n/messages"` under `package/app/src/` and inventory production React callsites.
-- [ ] 5.2 Migrate app layout, header, footer, navigation, and core shared components to named message imports, module-scope message bags, and `useMessage()`.
-- [ ] 5.3 Migrate app route pages and feature sections to named message imports, module-scope message bags, and `useMessage()`.
-- [ ] 5.4 Migrate app dialog, form, toast, error, loading, empty-state, accessibility, placeholder, and tooltip copy to `useMessage()`.
-- [ ] 5.5 Convert app module-scope configs and option arrays that store localized strings to store generated message functions or descriptors, resolving them through `useMessage()` during render.
-- [ ] 5.6 Update app tests that asserted direct generated message calls so they initialize the adapter or use named message functions as appropriate.
+- [x] 5.2 Migrate app layout, header, footer, navigation, and core shared components to named message imports, module-scope message bags, and `useMessage()`.
+- [x] 5.3 Migrate app route pages and feature sections to named message imports, module-scope message bags, and `useMessage()`.
+- [x] 5.4 Migrate app dialog, form, toast, error, loading, empty-state, accessibility, placeholder, and tooltip copy to `useMessage()`.
+- [x] 5.5 Convert app module-scope configs and option arrays that store localized strings to store generated message functions or descriptors, resolving them through `useMessage()` during render.
+- [x] 5.6 Update app tests that asserted direct generated message calls so they initialize the adapter or use named message functions as appropriate.
 - [x] 5.7 Remove remaining production app direct generated message namespace imports after migration.
 
 ## 6. Admin React Migration
 
 - [x] 6.1 Run a repo search for `import * as m from "@rezics/i18n/messages"` under `package/admin/src/` and inventory production React callsites.
-- [ ] 6.2 Migrate admin layout, navigation, settings, auth, dashboard, and shared table/list components to named message imports, module-scope message bags, and `useMessage()`.
-- [ ] 6.3 Migrate admin feature pages for entity, unit, user, token, Meili, authority, JWT service, shelf, realm, and system health surfaces to `useMessage()`.
-- [ ] 6.4 Convert admin module-scope configs and option arrays that store localized strings to store generated message functions or descriptors, resolving them through `useMessage()` during render.
-- [ ] 6.5 Update admin tests that asserted direct generated message calls so they initialize the adapter or use named message functions as appropriate.
+- [x] 6.2 Migrate admin layout, navigation, settings, auth, dashboard, and shared table/list components to named message imports, module-scope message bags, and `useMessage()`.
+- [x] 6.3 Migrate admin feature pages for entity, unit, user, token, Meili, authority, JWT service, shelf, realm, and system health surfaces to `useMessage()`.
+- [x] 6.4 Convert admin module-scope configs and option arrays that store localized strings to store generated message functions or descriptors, resolving them through `useMessage()` during render.
+- [x] 6.5 Update admin tests that asserted direct generated message calls so they initialize the adapter or use named message functions as appropriate.
 - [x] 6.6 Remove remaining production admin direct generated message namespace imports after migration.
 
 ## 7. Conventions and Documentation

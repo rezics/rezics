@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import * as productMessages from "@rezics/i18n/messages";
+import { title } from "@rezics/i18n/messages";
 import { setLocale, subscribeLocale } from "@rezics/i18n/react";
 import { getLocale as getProductLocale } from "@rezics/i18n/runtime";
-import * as uiMessages from "@rezics/ui/i18n/messages";
+import { ui_password_label } from "@rezics/ui/i18n/messages";
 import { getLocale as getUiLocale } from "@rezics/ui/i18n/runtime";
 import { initI18n } from "./providers/i18n";
 
@@ -32,20 +32,20 @@ describe("app i18n bootstrap", () => {
 
     expect(getProductLocale()).toBe("en");
     expect(getUiLocale()).toBe("en");
-    expect(String(productMessages.title())).toBe("REZICS");
-    expect(String(uiMessages.ui_password_label())).toBe("Password");
+    expect(String(title())).toBe("REZICS");
+    expect(String(ui_password_label())).toBe("Password");
 
     setLocale("zh-hant");
 
     expect(getProductLocale()).toBe("zh-hant");
     expect(getUiLocale()).toBe("zh-hant");
-    expect(String(uiMessages.ui_password_label())).toBe("密碼");
+    expect(String(ui_password_label())).toBe("密碼");
 
     setLocale("ko");
 
     expect(getProductLocale()).toBe("ko");
     expect(getUiLocale()).toBe("ko");
-    expect(String(uiMessages.ui_password_label())).toBe("Password");
+    expect(String(ui_password_label())).toBe("Password");
   });
 
   test("notifies React locale subscribers", () => {

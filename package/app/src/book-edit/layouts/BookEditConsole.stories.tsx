@@ -1,4 +1,9 @@
-import * as m from "@rezics/i18n/messages";
+import {
+  book_edit_sidebar_history,
+  edit_console_chapter_context_back_to_chapters,
+  edit_console_chapter_context_label,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import { Separator } from "@rezics/ui/shadcn";
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite";
 import {
@@ -25,6 +30,12 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+const i18nMessages = {
+  book_edit_sidebar_history,
+  edit_console_chapter_context_back_to_chapters,
+  edit_console_chapter_context_label,
+};
 
 function withRouterAt(initialPath: string): Decorator {
   return (Story) => {
@@ -87,6 +98,8 @@ function SidebarFixture({
 }
 
 function ChapterContextPreview() {
+  const m = useMessage(i18nMessages);
+
   return (
     <div className="grid gap-2 rounded-md bg-surface-subtle p-3">
       <div className="flex items-center gap-2 text-xs font-medium leading-dense text-text-secondary">
@@ -103,9 +116,10 @@ function ChapterContextPreview() {
   );
 }
 
-export const SharedLayoutShell: Story = {
-  decorators: [withRouterAt(`/book/${historyBookId}/edit/history`)],
-  render: () => (
+function SharedLayoutShellPreview() {
+  const m = useMessage(i18nMessages);
+
+  return (
     <EditConsoleLayout {...createBookEditConsoleConfig(historyBookId)}>
       <section className="mx-auto max-w-3xl px-6 py-10">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
@@ -113,7 +127,12 @@ export const SharedLayoutShell: Story = {
         </h2>
       </section>
     </EditConsoleLayout>
-  ),
+  );
+}
+
+export const SharedLayoutShell: Story = {
+  decorators: [withRouterAt(`/book/${historyBookId}/edit/history`)],
+  render: () => <SharedLayoutShellPreview />,
 };
 
 export const ActiveHistoryNavigation: Story = {

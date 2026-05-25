@@ -1,4 +1,12 @@
-import * as m from "@rezics/i18n/messages";
+import {
+  admin_auth_email_status,
+  admin_auth_user_role,
+  admin_nav_users,
+  admin_story_invite,
+  admin_story_search_email_placeholder,
+  common_email,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
@@ -36,6 +44,15 @@ const rows = [
   { id: 4, email: "dora@rezics.local", role: "reader", status: "suspended" },
 ];
 
+const i18nMessages = {
+  admin_auth_email_status,
+  admin_auth_user_role,
+  admin_nav_users,
+  admin_story_invite,
+  admin_story_search_email_placeholder,
+  common_email,
+};
+
 function statusVariant(status: string) {
   switch (status) {
     case "active":
@@ -47,8 +64,10 @@ function statusVariant(status: string) {
   }
 }
 
-export const UsersTable: Story = {
-  render: () => (
+function UsersTablePreview() {
+  const m = useMessage(i18nMessages);
+
+  return (
     <div className="flex flex-col gap-6 max-w-[720px]">
       <div className="flex flex-row gap-4 items-center">
         <h2 className="flex-1 text-2xl font-bold">{m.admin_nav_users()}</h2>
@@ -84,5 +103,9 @@ export const UsersTable: Story = {
         </TableBody>
       </Table>
     </div>
-  ),
+  );
+}
+
+export const UsersTable: Story = {
+  render: () => <UsersTablePreview />,
 };

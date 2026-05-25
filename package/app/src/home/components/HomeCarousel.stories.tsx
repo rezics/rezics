@@ -1,4 +1,9 @@
-import * as m from "@rezics/i18n/messages";
+import {
+  home_story_autoplay_interval,
+  home_story_carousel_title,
+  home_story_current_settings,
+} from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
 import { BookCarousel } from "./HomeCarousel";
@@ -19,7 +24,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<Args>;
 
+const i18nMessages = {
+  home_story_autoplay_interval,
+  home_story_carousel_title,
+  home_story_current_settings,
+};
+
 function Render({ autoplayIntervalNum }: Args) {
+  const m = useMessage(i18nMessages);
+
   return (
     <div className="p-4 max-w-14/16 mx-auto">
       <h3 className="mb-4 text-lg font-semibold">

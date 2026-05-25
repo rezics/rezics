@@ -1,3 +1,4 @@
+import { useMessage } from "@rezics/i18n/react";
 import { Ellipsis } from "lucide-react";
 import type React from "react";
 import {
@@ -11,6 +12,10 @@ import {
 } from "react";
 
 import { cn } from "../../../shared/lib/utils";
+import {
+  ui_collapsible_show_less,
+  ui_collapsible_show_more,
+} from "#/paraglide/messages.js";
 
 export type CollapsibleProps = {
   children: React.ReactNode;
@@ -26,6 +31,11 @@ export type CollapsibleProps = {
 const FADE_MASK =
   "linear-gradient(to bottom, black 0%, black 40%, transparent 95%)";
 
+const collapsibleMessages = {
+  ui_collapsible_show_less,
+  ui_collapsible_show_more,
+};
+
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
@@ -33,15 +43,18 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   children,
   maxLines,
   alignToggle = "start",
-  showMoreLabel = "show more",
-  showLessLabel = "show less",
+  showMoreLabel,
+  showLessLabel,
   expanded: controlledExpanded,
   onExpandedChange,
   className,
 }) => {
+  const m = useMessage(collapsibleMessages);
   const isControlled = controlledExpanded !== undefined;
   const [internalExpanded, setInternalExpanded] = useState(false);
   const isExpanded = isControlled ? controlledExpanded : internalExpanded;
+  const resolvedShowMoreLabel = showMoreLabel ?? m.ui_collapsible_show_more();
+  const resolvedShowLessLabel = showLessLabel ?? m.ui_collapsible_show_less();
 
   const [isOverflowing, setIsOverflowing] = useState(true);
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -119,7 +132,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               )}
               style={{ font: "inherit", fontWeight: 500 }}
             >
-              {showLessLabel}
+              {resolvedShowLessLabel}
             </button>
           </>
         )}
@@ -135,7 +148,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
             onKeyDown={handleKeyDown}
             aria-expanded={isExpanded}
             aria-controls={contentId}
-            aria-label={showMoreLabel}
+            aria-label={resolvedShowMoreLabel}
             className="absolute inset-0 cursor-pointer focus:outline-none"
           />
           <span
