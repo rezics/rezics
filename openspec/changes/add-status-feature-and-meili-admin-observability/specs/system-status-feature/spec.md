@@ -132,39 +132,39 @@ CDC support.
 - **AND** the database CDC support item SHALL carry the degraded or unavailable
   state
 
-### Requirement: Status frontend feature boundary
+### Requirement: Admin status frontend boundary
 
-The frontend SHALL provide a `status` feature module that owns the status page,
-status overview card, status-specific hooks, status models, and status UI
-composition. The `home` feature SHALL NOT own status data fetching or status
-business logic.
+The admin frontend SHALL provide status UI that owns the status detail page or
+section, status overview card, status-specific hooks, status models, and status
+UI composition. The public app SHALL NOT expose status routes, footer links,
+home widgets, status data fetching, or status business logic for internal
+diagnostics.
 
-#### Scenario: Status feature exports overview card
+#### Scenario: Admin home renders overview card
 
-- **WHEN** another frontend feature needs a compact system status preview
-- **THEN** it SHALL import a `StatusOverviewCard` from the `status` feature
-- **AND** the preview SHALL navigate to the full status page when activated
+- **WHEN** an admin opens the admin dashboard
+- **THEN** the dashboard SHALL render a compact `StatusOverviewCard`
+- **AND** it SHALL replace the previous simple health strip rather than adding a
+  second status summary
 
-#### Scenario: Home remains a consumer
+#### Scenario: Public app has no status entry
 
-- **WHEN** the home page renders a status preview
-- **THEN** the home feature SHALL consume the status overview component through
-  the status feature public index
-- **AND** home SHALL NOT define its own status API hooks, status models, or
-  diagnostic logic
+- **WHEN** a public app user opens the public home page or footer
+- **THEN** the app SHALL NOT render a system status card or public status link
+- **AND** it SHALL NOT trigger internal status API calls from public app pages
 
 ### Requirement: Status page user interface
 
-The status page SHALL render a compact root/admin diagnostics interface with an
-overview summary, service links, service health grid, Meili status panel,
-Sequin/CDC/database panel, and queue status panel. The UI SHALL use design
-system tokens, accessible status text, non-color-only indicators, and
-Traditional Chinese user-facing copy unless the surrounding area uses a
-different established locale.
+The admin status page or detail section SHALL render a compact root/admin
+diagnostics interface with an overview summary, service links, service health
+grid, Meili status panel or navigation target, Sequin/CDC/database panel, and
+queue status panel. The UI SHALL use design system tokens, accessible status
+text, non-color-only indicators, and Traditional Chinese user-facing copy unless
+the surrounding admin area uses a different established locale.
 
 #### Scenario: Status page shows sections
 
-- **WHEN** a root/admin user opens the status page
+- **WHEN** an admin user opens the admin status detail surface
 - **THEN** the page SHALL show overview, service links, service health,
   Meili, Sequin/CDC/database, and queue status sections when data is available
 - **AND** unavailable sections SHALL render actionable empty/error states rather
@@ -180,13 +180,14 @@ different established locale.
 ### Requirement: Status overview card navigation
 
 The status overview card SHALL summarize overall system status and selected
-dependency counts in a compact card suitable for embedding in home or other
-dashboard surfaces. Activating the card SHALL navigate to the full status page.
+dependency counts in a compact card suitable for the admin dashboard.
+Activating the card SHALL navigate to the full admin status detail surface.
 
 #### Scenario: Card navigates to status page
 
-- **WHEN** a user activates the status overview card
-- **THEN** the app SHALL navigate to the configured status route
+- **WHEN** an admin activates the status overview card
+- **THEN** the admin app SHALL navigate to the configured admin status route or
+  detail surface
 - **AND** the route SHALL render the full status page subject to authorization
 
 #### Scenario: Card shows degraded dependencies
@@ -213,6 +214,6 @@ operator-facing summaries.
 #### Scenario: Browser does not call private services directly
 
 - **WHEN** the status page loads
-- **THEN** the browser SHALL call Rezics typed status APIs
+- **THEN** the admin browser app SHALL call Rezics typed status APIs
 - **AND** it SHALL NOT directly call private Meili, Sequin, database, or
   job-runner internal admin endpoints

@@ -32,35 +32,49 @@
 - [x] 4.3 Ensure browser clients only call Rezics server APIs and never call private Meili, Sequin, database, or job-runner internals directly.
 - [x] 4.4 Add type or unit tests for response normalization and query key stability.
 
-## 5. Status Frontend Feature
+## 5. Correct Erroneous Public App Integration
 
-- [x] 5.1 Create `package/app/src/diagnostic` with public `index.ts`, `models`, `hooks`, `components`, and `pages` boundaries following the app feature standard.
-- [x] 5.2 Add `StatusPage` with overview, service links, service health, Meili, Sequin/CDC/database, and queue sections.
-- [x] 5.3 Add `StatusOverviewCard` that summarizes overall state and navigates to the full status route when activated.
-- [x] 5.4 Ensure status indicators include non-color-only text or icon semantics for available, degraded, unavailable, and unknown states.
-- [x] 5.5 Use rezics design tokens and compact admin density; avoid bordered page-section chrome and raw colors.
-- [x] 5.6 Add Traditional Chinese UI copy for user-visible status labels and remediation summaries.
-- [x] 5.7 Add loading, empty, unavailable, and partial-error states for all major status page sections.
+- [ ] 5.1 Remove `package/app/src/diagnostic` and any public app status feature exports introduced by this change.
+- [ ] 5.2 Remove the public app status route under `package/app/src/routes` and regenerate the app route tree.
+- [ ] 5.3 Remove `StatusOverviewCard` from `package/app/src/home/pages/Home.tsx`; public app home must not import or render internal diagnostics.
+- [ ] 5.4 Remove the public app footer/navigation `/status` links introduced by this change.
+- [ ] 5.5 Verify public app pages do not call `useSystemStatusQuery`, `useMeiliStatusQuery`, or status API wrappers for internal diagnostics.
 
-## 6. Routing and Integration
+## 6. Admin System Status Frontend
 
-- [x] 6.1 Add a guarded status route in `package/app/src/routes` using the chosen path (`/status` or `/admin/status`).
-- [x] 6.2 Wire route-level authorization so non-root/non-admin users cannot access internal diagnostics.
-- [x] 6.3 Optionally embed `StatusOverviewCard` in an existing surface as a consumer without renaming or moving `home`.
-- [x] 6.4 Verify `package/app/src/home` does not define status hooks, status models, or diagnostic logic.
-- [x] 6.5 Update route generation and imports according to the repo's TanStack Router conventions.
+- [ ] 6.1 Add a `package/admin` status feature or module with public boundaries for models, hooks, components, and pages/sections.
+- [ ] 6.2 Add admin status query hooks that consume `@rezics/api` status clients and do not call Meili, Sequin, databases, or job-runner internals directly.
+- [ ] 6.3 Replace `package/admin/src/home/components/HealthStrip.tsx` usage with `StatusOverviewCard` on the admin dashboard.
+- [ ] 6.4 Add a full admin status detail route or detail section for service links, service health, Meili summary/navigation, Sequin/CDC/database, and queue status.
+- [ ] 6.5 Ensure admin status indicators include non-color-only text or icon semantics for available, degraded, unavailable, and unknown states.
+- [ ] 6.6 Use rezics/admin design tokens and compact admin density; avoid raw colors and duplicated page-section chrome.
+- [ ] 6.7 Add Traditional Chinese UI copy for user-visible status labels and remediation summaries.
+- [ ] 6.8 Add loading, empty, unavailable, and partial-error states for all major admin status sections.
+- [ ] 6.9 Update `package/admin` TanStack route generation and admin navigation according to the chosen route.
 
-## 7. Documentation and Operations
+## 7. Admin Meili Observability Split
 
-- [x] 7.1 Document required non-secret status URL environment variables and local defaults.
-- [x] 7.2 Update job-runner operations docs to point operators from manual Sequin/CDC checks to the new status page where applicable.
-- [x] 7.3 Document which status checks are read-only and which existing Meili operations remain destructive.
-- [x] 7.4 Add rollout notes for environments without Sequin or job-runner enabled.
+- [ ] 7.1 Refactor the existing `package/admin/src/meili/pages/MeiliPage.tsx` so it is no longer one monolithic page for health, operations, dangerous actions, and key management.
+- [ ] 7.2 Extract clearly named Meili operation sections/components for index initialization and full sync.
+- [ ] 7.3 Extract a separate Meili danger-zone section/component for delete/reset actions and confirmations.
+- [ ] 7.4 Extract a separate Meili key-management section/component.
+- [ ] 7.5 Add a read-only Meili observability surface backed by `/meili/status` for expected schema, live index statistics, settings drift, content/index counts, and recent tasks.
+- [ ] 7.6 Wire admin navigation/route structure so operators can reach Meili observability without mixing it into destructive controls.
+- [ ] 7.7 Preserve existing Meili admin mutation behavior and confirmations while moving UI code.
 
-## 8. Validation
+## 8. Documentation and Operations
 
-- [x] 8.1 Run targeted `bun test` suites for `package/search`, `package/server`, `package/api`, and status feature modules.
-- [x] 8.2 Run `bun run check:convention` and fix any feature-boundary or import convention issues.
-- [x] 8.3 Run `bun run format:check` or format changed files with Biome.
-- [x] 8.4 Verify TypeScript builds for affected packages.
-- [ ] 8.5 Manually verify the status page route after starting the relevant dev services, including a degraded dependency case.
+- [ ] 8.1 Update docs to point operators to the admin status surface, not a public app `/status` route.
+- [x] 8.2 Document required non-secret status URL environment variables and local defaults.
+- [ ] 8.3 Update job-runner operations docs to point operators from manual Sequin/CDC checks to the admin status surface where applicable.
+- [ ] 8.4 Document which status checks are read-only and which existing Meili operations remain destructive in the admin UI.
+- [x] 8.5 Add rollout notes for environments without Sequin or job-runner enabled.
+
+## 9. Validation
+
+- [ ] 9.1 Run targeted `bun test` suites for `package/search`, `package/server`, `package/api`, and affected `package/admin` modules.
+- [ ] 9.2 Run `bun run check:convention` and fix any feature-boundary or import convention issues.
+- [ ] 9.3 Run `bun run format:check` or format changed files with Biome.
+- [ ] 9.4 Verify TypeScript builds for affected packages, including `@rezics/admin`.
+- [ ] 9.5 Manually verify the admin status surface after starting the relevant dev services, including a degraded dependency case.
+- [ ] 9.6 Verify the public app no longer exposes or queries internal diagnostics.

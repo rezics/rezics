@@ -175,3 +175,28 @@ execution.
 - **THEN** the UI SHALL require an explicit confirmation step
 - **AND** the server SHALL still enforce root/admin authorization for the
   request
+
+### Requirement: Admin Meili UI is split by operator task
+
+The admin Meili frontend SHALL separate read-only observability from mutation
+and destructive operation surfaces. The existing admin Meili page MAY remain as
+the route shell, but schema/index/task observability SHALL NOT be added to a
+single monolithic page that also owns init, sync, delete/reset, and key
+management logic.
+
+#### Scenario: Observability is read-only and scannable
+
+- **WHEN** an admin opens the Meili observability surface
+- **THEN** the UI SHALL emphasize schema drift, live index statistics, content
+  counts, and recent task state
+- **AND** it SHALL NOT colocate destructive delete/reset controls in the same
+  immediate panel
+
+#### Scenario: Existing operations remain available
+
+- **WHEN** an admin needs index initialization, full sync, key management, or
+  destructive maintenance
+- **THEN** those actions SHALL remain available from clearly labeled admin
+  operation surfaces
+- **AND** destructive controls SHALL remain visually and structurally separated
+  from read-only observability

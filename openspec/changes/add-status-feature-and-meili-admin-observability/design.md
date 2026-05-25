@@ -9,11 +9,16 @@ Rezics currently has several operational surfaces:
   contract.
 - `@rezics/job-runner` exposes `/health`, `/ready`, Sequin webhook handling,
   and minimal queue admin APIs for queue counts and failed job operations.
+- `@rezics/admin` is the dedicated admin SPA. It already owns the admin
+  dashboard, admin navigation, auth status pages, and a large Meili operations
+  page under `package/admin/src/meili/pages/MeiliPage.tsx`.
 - `package/job-runner/docs/operations.md` documents Sequin, source database
   replication prerequisites, publication/slot checks, and rollback steps, but
   these checks are not available as a product status surface.
 - `package/app/src/home` owns the public home page and must not be renamed or
-  made responsible for operational diagnostics.
+  made responsible for operational diagnostics. A prior implementation placed a
+  status route and overview card in `package/app`; that placement is incorrect
+  for this change and must be removed.
 
 External references reinforce the intended scope:
 
@@ -31,10 +36,14 @@ External references reinforce the intended scope:
 
 **Goals:**
 
-- Introduce a `status` frontend feature that owns the status page and reusable
-  overview card.
-- Preserve the current home route and feature as-is; home may consume a status
-  overview component but does not own status logic.
+- Introduce admin status/observability UI in `package/admin`.
+- Replace the current admin dashboard `HealthStrip` with a richer
+  `StatusOverviewCard` that summarizes the system status API.
+- Preserve the public app home route and feature as-is; public app home must
+  not consume status components or trigger status API calls.
+- Split the existing admin Meili page so Meili operations, Meili
+  observability, and any index/search utilities have clear page/component
+  boundaries instead of living in a single oversized `MeiliPage`.
 - Centralize Meili expected schema metadata so runtime initialization and
   observability compare against the same definitions.
 - Provide read-only status aggregation for Rezics services, databases, queues,
@@ -45,9 +54,11 @@ External references reinforce the intended scope:
 
 **Non-Goals:**
 
-- Building a general-purpose admin console.
+- Building a new general-purpose admin console separate from `@rezics/admin`.
 - Replacing Meilisearch's own dashboard or Sequin's console.
 - Renaming `home`, moving the `/` route, or changing public home composition.
+- Adding a public app `/status` route, public footer status link, or public app
+  home status widget.
 - Changing public search result contracts.
 - Automating destructive CDC repair such as dropping publications or
   replication slots.
@@ -59,7 +70,7 @@ External references reinforce the intended scope:
 
 `meili-admin-observability` owns Meili-specific schema, index, stats, drift, and
 task behavior. `system-status-feature` owns cross-service status aggregation,
-URLs, page composition, and overview-card navigation.
+URLs, admin dashboard composition, and status-detail navigation.
 
 This keeps Meili details usable outside the status page, for example in future
 admin tooling or CLI diagnostics, while the status feature remains a consumer of
@@ -137,22 +148,47 @@ database URLs.
 Alternative considered: infer URLs from private connection strings or Docker
 compose files. That would be fragile and risks exposing sensitive values.
 
-### Decision: The `status` feature exports an overview card
+### Decision: Admin owns the status UI, not the public app
 
-The status UI should live in the singular `package/app/src/diagnostic` feature
-folder to satisfy the repo folder convention while keeping the public route and
-component names status-oriented. It should export:
+The status UI should live in `package/admin`, because Rezics already has a
+dedicated admin SPA for operational management and system monitoring. The public
+app must not expose a `/status` route, footer link, home widget, or
+`package/app/src/diagnostic` status feature for this change.
 
-- `StatusPage`
-- `StatusOverviewCard`
+The admin implementation should provide:
 
-The overview card summarizes top-level state and navigates to the status route
-when clicked. `home` can import the card from `@/diagnostic` without owning
-status logic or status-specific API calls.
+- a compact `StatusOverviewCard` rendered from the admin home/dashboard
+- a system status detail page or section for service links, service health,
+  Sequin/CDC/database checks, queue state, and cross-service summaries
+- Meili observability components that can be composed inside the admin Meili
+  area without being coupled to destructive Meili operations
 
-Alternative considered: place the card inside `home`. That would couple an
-operational widget to the public home feature and make later dashboard reuse
-harder.
+Alternative considered: keep the current `package/app/src/diagnostic`
+implementation and hide it behind route guards. That still creates a public-app
+route/entry surface, causes public app pages to carry admin diagnostics code,
+and can trigger status API calls from the wrong application.
+
+### Decision: Split the admin Meili area before adding observability
+
+The existing `package/admin/src/meili/pages/MeiliPage.tsx` combines health,
+index initialization, full sync, destructive delete/reset actions, and key
+management. Adding schema drift, live stats, counts, and recent task visibility
+to that same page would make it harder to scan and harder to guard risky
+actions.
+
+The admin Meili area should be split before observability is added. A practical
+target shape is:
+
+- `MeiliOverviewPage` or `MeiliPage` as a thin route/page shell
+- `MeiliOperationsSection` for init/sync actions
+- `MeiliDangerZoneSection` for delete/reset actions and confirmations
+- `MeiliKeyManagementSection` for key creation/list/delete
+- `MeiliObservabilityPage` or `MeiliObservabilitySection` for schema/index/task
+  status backed by `/meili/status`
+
+The exact file names may follow the admin package's local conventions, but the
+result should avoid one monolithic page that mixes read-only observability with
+destructive operations.
 
 ### Decision: Dangerous operations stay out of the first status page
 
@@ -180,8 +216,13 @@ blast radius before the observability model is proven.
 - [Status page encourages manual repair too early] → Start with read-only
   diagnostics and route existing risky operations through existing guarded
   admin endpoints.
-- [Home becomes visually cluttered] → Keep `StatusOverviewCard` compact and
-  optional; do not turn the home page into an admin dashboard.
+- [Admin dashboard becomes visually cluttered] → Replace the existing simple
+  `HealthStrip` with a compact status overview instead of adding another
+  dashboard strip beside it.
+- [Meili page becomes unmaintainable] → Split the current Meili page into
+  focused components/pages before adding observability details.
+- [Public app accidentally exposes internal diagnostics] → Remove the app
+  route, footer link, home card, and diagnostic feature from this change.
 
 ## Rollout Plan
 
@@ -190,21 +231,34 @@ blast radius before the observability model is proven.
 2. Add server-side Meili observability APIs and typed `@rezics/api` clients.
 3. Add system status aggregation APIs for services, URLs, queues, databases,
    and CDC support checks.
-4. Add the `status` frontend feature, route, and overview card.
-5. Optionally place the overview card in a suitable existing surface without
-   renaming or moving `home`.
-6. Verify with unit tests for schema/drift aggregation and focused component
-   tests for overview/status rendering.
+4. Remove the erroneous public-app status route, footer link, home card, and
+   `package/app/src/diagnostic` implementation.
+5. Add admin status UI in `package/admin`: replace the dashboard health strip
+   with `StatusOverviewCard` and add a detail route/section for the system
+   status summary.
+6. Split the admin Meili page into focused operation/key/danger/observability
+   sections or routes, then render Meili schema/index/task observability from
+   `/meili/status`.
+7. Verify with unit tests for schema/drift aggregation and focused admin
+   component tests for overview/status/Meili rendering.
 
 Rollback is low-risk because the change is additive. If a status check causes
 runtime issues, disable the affected query path or mark the dependency
 `unknown` while preserving existing search, home, and job-runner behavior.
 
+## Resolved Questions
+
+- The status frontend belongs in `package/admin`, not `package/app`.
+- The public app must not expose a `/status` route or render a status overview
+  card from home/footer.
+- The first admin dashboard integration should replace the existing
+  `HealthStrip` instead of adding a second summary widget.
+
 ## Open Questions
 
-- Should the first status route be `/status` guarded by root/admin, or
-  `/admin/status` to make the internal nature explicit in the path?
+- Which admin route should host the system detail page: `/status`, `/system`,
+  or a nested dashboard route?
+- Should Meili observability be a child route such as `/meili/observability` or
+  a tab/section inside `/meili` after the page is split?
 - Which auth service health endpoint should be considered canonical for the
   status page?
-- Should the first home integration render the overview card by default, or
-  should it be limited to root/admin users only?
