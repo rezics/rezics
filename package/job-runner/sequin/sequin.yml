@@ -1,3 +1,6 @@
+account:
+  name: rezics-book-library
+
 databases:
   - name: rezics-source
     hostname: ${SOURCE_DB_HOST}
@@ -26,7 +29,6 @@ databases:
           public."SubjectAttribution",
           public."RealmUnit",
           public."RealmTagApplication",
-          public."RealmTagUnit",
           public."ShelfUnit",
           public."Post",
           public."User",
@@ -59,7 +61,6 @@ sinks:
         - public.SubjectAttribution
         - public.RealmUnit
         - public.RealmTagApplication
-        - public.RealmTagUnit
         - public.ShelfUnit
         - public.Post
         - public.User
