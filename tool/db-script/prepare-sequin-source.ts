@@ -63,12 +63,16 @@ function usage(): never {
   console.log(
     [
       "Usage:",
+      "  bun run service:source:verify [--url=postgresql://...]",
+      "  bun run service:source:repair [--url=postgresql://...] [--force-active-slot]",
+      "",
+      "Legacy direct usage:",
       "  bun run tool/db-script/prepare-sequin-source.ts [--url=postgresql://...] [--apply --dev-reset] [--force-active-slot]",
       "",
       "Checks the source Postgres database used by Sequin CDC.",
       "",
-      "Default mode is read-only.",
-      "Use --apply --dev-reset in local development to:",
+      "Verification mode is read-only.",
+      "Repair mode is local-development scoped and runs with --apply --dev-reset to:",
       "  - ALTER SYSTEM wal_level=logical",
       "  - ensure max_replication_slots/max_wal_senders",
       "  - recreate rezics_sequin_pub_<ENV>",

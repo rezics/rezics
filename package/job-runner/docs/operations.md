@@ -6,18 +6,16 @@ Sequin CDC is started outside `@rezics/job-runner`:
 
 ```bash
 cp tool/.env.example tool/.env
-bun run service:sequin:up
-bun run service:sequin:health
-bun run service:sequin:logs
-bun run service:sequin:down
+bun run service:up
+bun run service:health
+bun run service:logs
+bun run service:down
 ```
 
-The wrapper loads `tool/.env`, chooses Podman or Docker compose
-deterministically, and mounts
-`package/job-runner/sequin/sequin.yml` into Sequin through
-`CONFIG_FILE_PATH=/config/sequin.yml`. The base compose file is production
-capable; the dev override exposes Sequin on `127.0.0.1:7376` and defaults host
-aliases for local Postgres and Bun services.
+The wrapper loads `tool/.env`, requires Docker Compose v2, and manages source
+PostgreSQL, Meilisearch, Sequin state PostgreSQL, Sequin Redis, and Sequin as
+one repo compose project. It mounts `package/job-runner/sequin/sequin.yml` into
+Sequin through `CONFIG_FILE_PATH=/config/sequin.yml`.
 
 `SEQUIN_WEBHOOK_SECRET` in `tool/.env` must match
 `package/job-runner/.env`.
@@ -34,7 +32,8 @@ The documented example values in `.env.example` are refused by the wrapper.
 ## Source Database Prerequisites
 
 The source Postgres database, not Sequin's state database, must allow logical
-replication.
+replication. The repo-managed source Postgres container starts with
+`wal_level=logical`, `max_replication_slots=10`, and `max_wal_senders=10`.
 
 ```sql
 SHOW wal_level;
@@ -204,24 +203,18 @@ Queue database expectations:
 
 ## Runtime Selection
 
-The Sequin wrapper chooses a runtime in this order:
-
-1. `CONTAINER_RUNTIME`, when set to `podman`, `podman-compose`, or `docker`.
-2. `podman compose`.
-3. `podman-compose`.
-4. `docker compose`.
-
-Docker local development uses `host.docker.internal`; Podman uses
-`host.containers.internal`. On Linux with SELinux enforcing, the wrapper applies
-`:Z` to the read-only config bind mount so rootless Podman can read
-`sequin.yml`.
+Repo-managed local services require Docker Compose v2 through `docker compose`.
+Podman, podman-compose, and docker-compose v1 are not supported by this managed
+workflow. User-managed services remain possible by configuring package env
+files manually, but the managed workflow does not discover, start, stop, or
+repair unrelated services.
 
 ## Verification
 
 Before enabling Sequin in a non-production environment:
 
 1. Confirm `wal_level=logical` and the replication role permissions.
-2. Start Sequin and confirm `bun run service:sequin:health` succeeds.
+2. Start managed services and confirm `bun run service:health` succeeds.
 3. Confirm `JOB_RUNNER_BASE_URL` reaches `@rezics/job-runner`.
 4. Confirm unauthorized `/webhooks/sequin` requests return 401.
 5. Change one search-affecting table and verify a search lane receives work.

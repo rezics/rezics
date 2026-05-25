@@ -14,14 +14,6 @@ loadDotenv({ path: path.join(TOOL_DIR, ".env"), override: false, quiet: true });
 
 export const env = createEnv({
   server: {
-    CONTAINER_RUNTIME: v.optional(
-      v.union([
-        v.literal("podman"),
-        v.literal("podman-compose"),
-        v.literal("docker"),
-      ]),
-    ),
-
     SEQUIN_HEALTH_URL: v.optional(v.string()),
 
     PG_PASSWORD: v.optional(v.string()),
@@ -30,12 +22,15 @@ export const env = createEnv({
     VAULT_KEY: v.optional(v.string()),
 
     ENV: v.optional(v.string()),
-    SOURCE_DB_HOST: v.optional(v.string()),
+    SOURCE_DB_PORT_PUBLISHED: v.optional(v.string()),
     SOURCE_DB_PORT: v.optional(v.string()),
     SOURCE_DB_NAME: v.optional(v.string()),
     SOURCE_DB_USER: v.optional(v.string()),
     SOURCE_DB_PASSWORD: v.optional(v.string()),
     SOURCE_DB_POOL_SIZE: v.optional(v.string()),
+    MEILI_PORT_PUBLISHED: v.optional(v.string()),
+    MEILI_MASTER_KEY: v.optional(v.string()),
+    SEQUIN_PORT_PUBLISHED: v.optional(v.string()),
 
     SEQUIN_JOB_RUNNER_BASE_URL: v.optional(v.string()),
     SEQUIN_WEBHOOK_SECRET: v.optional(v.string()),
@@ -54,7 +49,6 @@ const REQUIRED_SEQUIN_KEYS = [
 
 const REQUIRED_PROD_SEQUIN_KEYS = [
   "ENV",
-  "SOURCE_DB_HOST",
   "SEQUIN_JOB_RUNNER_BASE_URL",
 ] as const;
 

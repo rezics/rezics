@@ -64,15 +64,16 @@ cp tool/.env.example tool/.env
 openssl rand -base64 48 # SECRET_KEY_BASE
 openssl rand -base64 32 # VAULT_KEY
 
-bun run service:sequin:up
-bun run service:sequin:health
+bun run service:up
+bun run service:health
 ```
 
-The Sequin runtime uses Docker or Podman through `tool/external-services`. Its
-checked-in config delivers only to this service at `/webhooks/sequin` with the
-`x-internal-secret` value from `SEQUIN_WEBHOOK_SECRET`. It does not target
-`@rezics/history` directly; history ingestion is enqueued by the job-runner
-`history.outbox.ingest` worker lane.
+The managed runtime uses Docker Compose v2 through `tool/external-services`.
+It starts source PostgreSQL, Meilisearch, Sequin state services, and Sequin in
+one repo compose project. Its checked-in config delivers only to this service at
+`/webhooks/sequin` with the `x-internal-secret` value from
+`SEQUIN_WEBHOOK_SECRET`. It does not target `@rezics/history` directly; history
+ingestion is enqueued by the job-runner `history.outbox.ingest` worker lane.
 
 Tool-owned Sequin runtime settings live in `tool/.env`. The
 `SEQUIN_WEBHOOK_SECRET` value in `tool/.env` must match
@@ -101,7 +102,7 @@ same package.
 
 `all` and `http` require `SEQUIN_HEALTH_URL` to return 2xx during startup. This
 fails before webhook ingress is exposed and points operators at
-`bun run service:sequin:up`. `worker` skips the Sequin health check so it can
+`bun run service:up`. `worker` skips the Sequin health check so it can
 drain already-enqueued pg-boss jobs while Sequin is stopped or restarting.
 
 ## Producer Configuration

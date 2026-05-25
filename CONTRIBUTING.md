@@ -6,7 +6,7 @@ Library.Book (rezics-book-library) is a full-stack TypeScript monorepo using **B
 
 ## Development Setup
 
-**Prerequisites:** Bun, PostgreSQL, Meilisearch
+**Prerequisites:** Bun, Docker Compose v2 for repo-managed local services
 
 ```bash
 bun install
@@ -18,22 +18,34 @@ bun --filter=@rezics/history run dev # History service only (Elysia, port 3004)
 
 `bun run dev` starts application processes only. It does not provision external
 dependencies such as PostgreSQL, Meilisearch, Redis, object storage, or Sequin.
-Start any required external services first, then start the dependent application
-process. A service failing fast because an external dependency is unavailable is
-expected behavior when the error points at the missing service and setup
-command.
-
-Sequin CDC is managed explicitly through repo-level external-service scripts:
+For the repo-managed local path, start Docker Compose v2 services first:
 
 ```bash
-bun run service:sequin:up
-bun run service:sequin:health
-bun run service:sequin:logs
-bun run service:sequin:down
+bun run service:up
+bun run service:health
+bun run service:logs
+bun run service:down
 ```
 
+This starts the managed source PostgreSQL, Meilisearch, Sequin state
+PostgreSQL, Sequin Redis, and Sequin stack. The source PostgreSQL container is
+created with logical replication enabled and creates the local development
+databases on fresh volumes. User-managed external services remain possible by
+editing package env files manually, but `service:*` commands do not discover,
+start, stop, or repair unrelated services.
+
+If the managed source database comes from an old or manually modified volume,
+use `bun run service:source:verify` first. Reserve
+`bun run service:source:repair` for existing, external, or broken local source
+databases; it is not required for a fresh managed Docker volume.
+
+Start any other required external services first, then start the dependent
+application process. A service failing fast because an external dependency is
+unavailable is expected behavior when the error points at the missing service
+and setup command.
+
 The local dev layout keeps `@rezics/job-runner` eligible to auto-start. If its
-`http` or `all` role needs Sequin, start the Sequin runtime first or use
+`http` or `all` role needs Sequin, start the managed services first or use
 `JOB_RUNNER_ROLE=worker` for queue draining without webhook ingress.
 
 ## Conventions

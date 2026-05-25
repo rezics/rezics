@@ -1,0 +1,120 @@
+services:
+  source-postgres:
+    image: postgres:16
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_replication_slots=10
+      - -c
+      - max_wal_senders=10
+    environment:
+      POSTGRES_DB: rezics_booklib
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${SOURCE_DB_PASSWORD:-postgres}
+    ports:
+      - "${SOURCE_DB_PORT_PUBLISHED:-5432}:5432"
+    volumes:
+      - source-postgres-data:/var/lib/postgresql/data
+      - ./source-postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rezics_booklib"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.13
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-masterKey}
+      MEILI_NO_ANALYTICS: "true"
+    ports:
+      - "${MEILI_PORT_PUBLISHED:-7700}:7700"
+    volumes:
+      - meilisearch-data:/meili_data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://127.0.0.1:7700/health >/dev/null || wget -qO- http://127.0.0.1:7700/health >/dev/null",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  sequin:
+    image: sequin/sequin:v0.14.6
+    restart: unless-stopped
+    ports:
+      - "${SEQUIN_PORT_PUBLISHED:-7376}:7376"
+    environment:
+      PG_HOSTNAME: sequin-postgres
+      PG_PORT: "5432"
+      PG_DATABASE: sequin
+      PG_USERNAME: sequin
+      PG_PASSWORD: ${PG_PASSWORD?Set PG_PASSWORD for Sequin state Postgres}
+      PG_POOL_SIZE: ${PG_POOL_SIZE:-10}
+      REDIS_URL: redis://sequin-redis:6379
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE?Set SECRET_KEY_BASE for Sequin}
+      VAULT_KEY: ${VAULT_KEY?Set VAULT_KEY for Sequin}
+      CONFIG_FILE_PATH: /config/sequin.yml
+      ENV: ${ENV:-development}
+      SOURCE_DB_HOST: source-postgres
+      SOURCE_DB_PORT: "5432"
+      SOURCE_DB_NAME: ${SOURCE_DB_NAME:-rezics_booklib}
+      SOURCE_DB_USER: ${SOURCE_DB_USER:-postgres}
+      SOURCE_DB_PASSWORD: ${SOURCE_DB_PASSWORD:-postgres}
+      SOURCE_DB_POOL_SIZE: ${SOURCE_DB_POOL_SIZE:-10}
+      JOB_RUNNER_BASE_URL: ${SEQUIN_JOB_RUNNER_BASE_URL:-http://host.docker.internal:3005}
+      SEQUIN_WEBHOOK_SECRET: ${SEQUIN_WEBHOOK_SECRET?Set SEQUIN_WEBHOOK_SECRET for job-runner delivery}
+    volumes:
+      - ../../package/job-runner/sequin/sequin.yml:/config/sequin.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      source-postgres:
+        condition: service_healthy
+      sequin-postgres:
+        condition: service_healthy
+      sequin-redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:7376/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  sequin-postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sequin
+      POSTGRES_USER: sequin
+      POSTGRES_PASSWORD: ${PG_PASSWORD?Set PG_PASSWORD for Sequin state Postgres}
+    volumes:
+      - sequin-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sequin -d sequin"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  sequin-redis:
+    image: redis:7
+    restart: unless-stopped
+    volumes:
+      - sequin-redis-data:/data
+
+volumes:
+  source-postgres-data:
+  meilisearch-data:
+  sequin-postgres-data:
+  sequin-redis-data:
