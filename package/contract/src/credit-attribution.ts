@@ -4,6 +4,7 @@ import {
   creditAttributionRoleKeySchema,
 } from "./credit-attribution.roles";
 import { entityDTOSchema, entityKindKeySchema } from "./entity";
+import { externalKindKeySchema } from "./external-kind";
 import { unitTranslationDTOSchema, type unitTypeSchema } from "./unit";
 
 export {
@@ -142,12 +143,71 @@ export const creditAttributionRoleRegistry = {
 // CREDIT ATTRIBUTION DTO
 // ============================================================
 
+export const creditAttributionEvidenceSourceSiteSummarySchema = t.Object({
+  entityUnitId: t.String(),
+  key: t.String(),
+  entity: t.Optional(entityDTOSchema),
+});
+
+export const creditAttributionEvidenceSummarySchema = t.Object({
+  id: t.String(),
+  unitId: t.String(),
+  entityId: t.String(),
+  role: creditAttributionRoleKeySchema,
+  sourceRefId: t.String(),
+  sourceSiteEntityUnitId: t.String(),
+  externalKind: externalKindKeySchema,
+  externalId: t.String(),
+  canonicalUrl: t.String(),
+  originalUrl: t.Optional(t.Nullable(t.String())),
+  claimPath: t.Optional(t.Nullable(t.String())),
+  observedUrl: t.Optional(t.Nullable(t.String())),
+  observedAt: t.Union([t.String(), t.Date()]),
+  confidence: t.Optional(t.Nullable(t.Number({ minimum: 0, maximum: 1 }))),
+  sourceSite: t.Optional(creditAttributionEvidenceSourceSiteSummarySchema),
+});
+
+export type CreditAttributionEvidenceSummary =
+  (typeof creditAttributionEvidenceSummarySchema)["static"];
+
+export const createCreditAttributionEvidenceSchema = t.Object(
+  {
+    unitId: t.String(),
+    entityId: t.String(),
+    role: creditAttributionRoleKeySchema,
+    sourceRefId: t.String(),
+    claimPath: t.Optional(t.Nullable(t.String())),
+    observedUrl: t.Optional(t.Nullable(t.String())),
+    observedAt: t.Optional(t.Union([t.String(), t.Date()])),
+    confidence: t.Optional(t.Nullable(t.Number({ minimum: 0, maximum: 1 }))),
+  },
+  { additionalProperties: false },
+);
+
+export type CreateCreditAttributionEvidenceInput =
+  (typeof createCreditAttributionEvidenceSchema)["static"];
+
+export const updateCreditAttributionEvidenceSchema = t.Object(
+  {
+    sourceRefId: t.Optional(t.String()),
+    claimPath: t.Optional(t.Nullable(t.String())),
+    observedUrl: t.Optional(t.Nullable(t.String())),
+    observedAt: t.Optional(t.Union([t.String(), t.Date()])),
+    confidence: t.Optional(t.Nullable(t.Number({ minimum: 0, maximum: 1 }))),
+  },
+  { additionalProperties: false },
+);
+
+export type UpdateCreditAttributionEvidenceInput =
+  (typeof updateCreditAttributionEvidenceSchema)["static"];
+
 export const creditAttributionDTOSchema = t.Object({
   unitId: t.String(),
   entityId: t.String(),
   role: creditAttributionRoleKeySchema,
   sortOrder: t.Number(),
   entity: t.Optional(entityDTOSchema),
+  evidence: t.Optional(t.Array(creditAttributionEvidenceSummarySchema)),
 });
 
 export type CreditAttributionDTO =
@@ -202,6 +262,7 @@ export const creditAttributionBriefSchema = t.Object({
   role: creditAttributionRoleKeySchema,
   sortOrder: t.Optional(t.Number()),
   entity: t.Optional(creditAttributionBriefEntitySchema),
+  evidence: t.Optional(t.Array(creditAttributionEvidenceSummarySchema)),
 });
 
 export type CreditAttributionBrief =
