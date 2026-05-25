@@ -215,6 +215,7 @@ model Unit {
   // Credit attribution
   creditAttributions CreditAttribution[] @relation("CreditAttributedUnit")
   creditedAs         CreditAttribution[] @relation("CreditAttributionEntity")
+  externalRefs       UnitExternalRef[]   @relation("UnitExternalRefUnit")
 
   // Subject attribution
   subjectAttributions   SubjectAttribution[] @relation("SubjectAttributedUnit")
@@ -817,6 +818,48 @@ model Entity {
   eligibleSubjectRoles String[] @default([])
 
   unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  sourceSite SourceSite?
+}
+
+model SourceSite {
+  entityUnitId      String  @id @db.Uuid
+  key               String  @unique @db.VarChar(64)
+  crawlSupport      String  @db.VarChar(32)
+  crawlEnabled      Boolean @default(false)
+  crawlerAdapterKey String? @db.VarChar(64)
+  refRules          Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  entity       Entity            @relation(fields: [entityUnitId], references: [unitId], onDelete: Cascade)
+  externalRefs UnitExternalRef[]
+
+  @@index([crawlSupport, crawlEnabled])
+}
+
+model UnitExternalRef {
+  id                     String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  unitId                 String   @db.Uuid
+  sourceSiteEntityUnitId String   @db.Uuid
+  externalKind           String   @db.VarChar(64)
+  externalId             String
+  canonicalUrl           String
+  originalUrl            String?
+  firstSeenAt            DateTime @default(now())
+  lastSeenAt             DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unit       Unit                        @relation("UnitExternalRefUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  sourceSite SourceSite                  @relation(fields: [sourceSiteEntityUnitId], references: [entityUnitId], onDelete: Cascade)
+  evidence   CreditAttributionEvidence[]
+
+  @@unique([sourceSiteEntityUnitId, externalKind, externalId])
+  @@index([unitId, sourceSiteEntityUnitId, externalKind])
+  @@index([sourceSiteEntityUnitId, externalKind])
 }
 
 model Zone {
@@ -840,12 +883,34 @@ model CreditAttribution {
   role      String @db.VarChar(64)
   sortOrder Int    @default(0)
 
-  unit   Unit @relation("CreditAttributedUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  entity Unit @relation("CreditAttributionEntity", fields: [entityId], references: [id], onDelete: Cascade)
+  unit     Unit                        @relation("CreditAttributedUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  entity   Unit                        @relation("CreditAttributionEntity", fields: [entityId], references: [id], onDelete: Cascade)
+  evidence CreditAttributionEvidence[]
 
   @@id([unitId, entityId, role])
   @@index([entityId, role])
   @@index([unitId, role, sortOrder])
+}
+
+model CreditAttributionEvidence {
+  id          String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  unitId      String   @db.Uuid
+  entityId    String   @db.Uuid
+  role        String   @db.VarChar(64)
+  sourceRefId String   @db.Uuid
+  claimPath   String?
+  observedUrl String?
+  observedAt  DateTime @default(now())
+  confidence  Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creditAttribution CreditAttribution @relation(fields: [unitId, entityId, role], references: [unitId, entityId, role], onDelete: Cascade)
+  sourceRef         UnitExternalRef   @relation(fields: [sourceRefId], references: [id], onDelete: Cascade)
+
+  @@index([unitId, entityId, role])
+  @@index([sourceRefId])
 }
 
 model SubjectAttribution {
