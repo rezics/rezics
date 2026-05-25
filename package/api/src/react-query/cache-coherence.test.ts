@@ -16,7 +16,11 @@ const zh = {
 
 describe("translation cache coherence helpers", () => {
   test("appends a missing translation while preserving other fields", () => {
-    const detail = {
+    const detail: {
+      unitId: string;
+      isbn13: string;
+      translations: UnitTranslationDTO[];
+    } = {
       unitId: "book-1",
       isbn13: "9780000000000",
       translations: [zh],
@@ -47,7 +51,7 @@ describe("translation cache coherence helpers", () => {
       {
         unitId: "book-1",
         translations: [zh],
-      },
+      } as { unitId: string; translations: UnitTranslationDTO[] },
       {
         unitId: "book-1",
         language: "zh-hant",

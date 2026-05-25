@@ -1,6 +1,7 @@
 import type {
   CreditAttributionDTO,
   CreditAttributionRole,
+  CreateCreditAttributionEvidenceInput,
   LinkCreditAttributionInput,
 } from "@rezics/contract";
 import {
@@ -71,7 +72,35 @@ export function useUnlinkCreditAttributionMutation(
   });
 }
 
+export function useCreateCreditAttributionEvidenceMutation(
+  options?: Omit<
+    UseMutationOptions<
+      CreditAttributionDTO,
+      Error,
+      CreateCreditAttributionEvidenceInput
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateCreditAttributionEvidenceInput) =>
+      creditAttributionApi.createEvidence(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: creditAttributionKeys.byUnit(variables.unitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: bookKeys.detail(variables.unitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export const creditAttributionMutations = {
   useLink: useLinkCreditAttributionMutation,
   useUnlink: useUnlinkCreditAttributionMutation,
+  useCreateEvidence: useCreateCreditAttributionEvidenceMutation,
 };

@@ -1,6 +1,7 @@
 import type {
   CreditAttributionDTO,
   CreditAttributionRole,
+  CreateCreditAttributionEvidenceInput,
   LinkCreditAttributionInput,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -16,6 +17,15 @@ export const creditAttributionApi = {
     input: LinkCreditAttributionInput,
   ): Promise<CreditAttributionDTO> => {
     return apiFetch<CreditAttributionDTO>("/credit-attribution", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  createEvidence: async (
+    input: CreateCreditAttributionEvidenceInput,
+  ): Promise<CreditAttributionDTO> => {
+    return apiFetch<CreditAttributionDTO>("/credit-attribution/evidence", {
       method: "POST",
       body: JSON.stringify(input),
     });
