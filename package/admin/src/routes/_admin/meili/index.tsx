@@ -5,6 +5,6 @@ const MeiliPage = lazyRouteComponent(
   "MeiliPage",
 );
 
-export const Route = createFileRoute("/_admin/meili")({
+export const Route = createFileRoute("/_admin/meili/")({
   component: MeiliPage,
 });

@@ -158,9 +158,6 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                 <FooterLink href="/changelog">
                   {m.layout_footer_resources_changelog()}
                 </FooterLink>
-                <FooterLink href="/status">
-                  {m.layout_footer_resources_status()}
-                </FooterLink>
               </div>
             </nav>
 

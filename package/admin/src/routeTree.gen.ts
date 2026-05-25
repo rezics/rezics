@@ -13,8 +13,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin/index'
 import { Route as AdminTokenRouteImport } from './routes/_admin/token'
+import { Route as AdminStatusRouteImport } from './routes/_admin/status'
 import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
-import { Route as AdminMeiliRouteImport } from './routes/_admin/meili'
 import { Route as AdminJwtServicesRouteImport } from './routes/_admin/jwt-services'
 import { Route as AdminAuthorityRouteImport } from './routes/_admin/authority'
 import { Route as AdminUserIndexRouteImport } from './routes/_admin/user/index'
@@ -22,6 +22,7 @@ import { Route as AdminUnitIndexRouteImport } from './routes/_admin/unit/index'
 import { Route as AdminSourceSiteIndexRouteImport } from './routes/_admin/source-site/index'
 import { Route as AdminShelfIndexRouteImport } from './routes/_admin/shelf/index'
 import { Route as AdminRealmIndexRouteImport } from './routes/_admin/realm/index'
+import { Route as AdminMeiliIndexRouteImport } from './routes/_admin/meili/index'
 import { Route as AdminEntityIndexRouteImport } from './routes/_admin/entity/index'
 import { Route as AdminBookIndexRouteImport } from './routes/_admin/book/index'
 import { Route as AdminUserMeiliRouteImport } from './routes/_admin/user/meili'
@@ -33,6 +34,7 @@ import { Route as AdminUnitUnitIdRouteImport } from './routes/_admin/unit/$unitI
 import { Route as AdminTagLowScoreRouteImport } from './routes/_admin/tag/low-score'
 import { Route as AdminSourceSiteEntityUnitIdRouteImport } from './routes/_admin/source-site/$entityUnitId'
 import { Route as AdminMiscEchokvRouteImport } from './routes/_admin/misc/echokv'
+import { Route as AdminMeiliObservabilityRouteImport } from './routes/_admin/meili/observability'
 import { Route as AdminEntityUnitIdRouteImport } from './routes/_admin/entity/$unitId'
 import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
@@ -60,14 +62,14 @@ const AdminTokenRoute = AdminTokenRouteImport.update({
   path: '/token',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminStatusRoute = AdminStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMeiliRoute = AdminMeiliRouteImport.update({
-  id: '/meili',
-  path: '/meili',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminJwtServicesRoute = AdminJwtServicesRouteImport.update({
@@ -103,6 +105,11 @@ const AdminShelfIndexRoute = AdminShelfIndexRouteImport.update({
 const AdminRealmIndexRoute = AdminRealmIndexRouteImport.update({
   id: '/realm/',
   path: '/realm/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMeiliIndexRoute = AdminMeiliIndexRouteImport.update({
+  id: '/meili/',
+  path: '/meili/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEntityIndexRoute = AdminEntityIndexRouteImport.update({
@@ -161,6 +168,11 @@ const AdminMiscEchokvRoute = AdminMiscEchokvRouteImport.update({
   path: '/misc/echokv',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMeiliObservabilityRoute = AdminMeiliObservabilityRouteImport.update({
+  id: '/meili/observability',
+  path: '/meili/observability',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminEntityUnitIdRoute = AdminEntityUnitIdRouteImport.update({
   id: '/entity/$unitId',
   path: '/entity/$unitId',
@@ -202,8 +214,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/authority': typeof AdminAuthorityRoute
   '/jwt-services': typeof AdminJwtServicesRoute
-  '/meili': typeof AdminMeiliRoute
   '/settings': typeof AdminSettingsRoute
+  '/status': typeof AdminStatusRoute
   '/token': typeof AdminTokenRoute
   '/auth/email': typeof AdminAuthEmailRoute
   '/auth/jwt-services': typeof AdminAuthJwtServicesRoute
@@ -212,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
   '/entity/$unitId': typeof AdminEntityUnitIdRoute
+  '/meili/observability': typeof AdminMeiliObservabilityRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
   '/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/tag/low-score': typeof AdminTagLowScoreRoute
@@ -223,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/user/meili': typeof AdminUserMeiliRoute
   '/book/': typeof AdminBookIndexRoute
   '/entity/': typeof AdminEntityIndexRoute
+  '/meili/': typeof AdminMeiliIndexRoute
   '/realm/': typeof AdminRealmIndexRoute
   '/shelf/': typeof AdminShelfIndexRoute
   '/source-site/': typeof AdminSourceSiteIndexRoute
@@ -233,8 +247,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/authority': typeof AdminAuthorityRoute
   '/jwt-services': typeof AdminJwtServicesRoute
-  '/meili': typeof AdminMeiliRoute
   '/settings': typeof AdminSettingsRoute
+  '/status': typeof AdminStatusRoute
   '/token': typeof AdminTokenRoute
   '/': typeof AdminIndexRoute
   '/auth/email': typeof AdminAuthEmailRoute
@@ -244,6 +258,7 @@ export interface FileRoutesByTo {
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
   '/entity/$unitId': typeof AdminEntityUnitIdRoute
+  '/meili/observability': typeof AdminMeiliObservabilityRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
   '/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/tag/low-score': typeof AdminTagLowScoreRoute
@@ -255,6 +270,7 @@ export interface FileRoutesByTo {
   '/user/meili': typeof AdminUserMeiliRoute
   '/book': typeof AdminBookIndexRoute
   '/entity': typeof AdminEntityIndexRoute
+  '/meili': typeof AdminMeiliIndexRoute
   '/realm': typeof AdminRealmIndexRoute
   '/shelf': typeof AdminShelfIndexRoute
   '/source-site': typeof AdminSourceSiteIndexRoute
@@ -267,8 +283,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_admin/authority': typeof AdminAuthorityRoute
   '/_admin/jwt-services': typeof AdminJwtServicesRoute
-  '/_admin/meili': typeof AdminMeiliRoute
   '/_admin/settings': typeof AdminSettingsRoute
+  '/_admin/status': typeof AdminStatusRoute
   '/_admin/token': typeof AdminTokenRoute
   '/_admin/': typeof AdminIndexRoute
   '/_admin/auth/email': typeof AdminAuthEmailRoute
@@ -278,6 +294,7 @@ export interface FileRoutesById {
   '/_admin/auth/users': typeof AdminAuthUsersRoute
   '/_admin/book/meili': typeof AdminBookMeiliRoute
   '/_admin/entity/$unitId': typeof AdminEntityUnitIdRoute
+  '/_admin/meili/observability': typeof AdminMeiliObservabilityRoute
   '/_admin/misc/echokv': typeof AdminMiscEchokvRoute
   '/_admin/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
   '/_admin/tag/low-score': typeof AdminTagLowScoreRoute
@@ -289,6 +306,7 @@ export interface FileRoutesById {
   '/_admin/user/meili': typeof AdminUserMeiliRoute
   '/_admin/book/': typeof AdminBookIndexRoute
   '/_admin/entity/': typeof AdminEntityIndexRoute
+  '/_admin/meili/': typeof AdminMeiliIndexRoute
   '/_admin/realm/': typeof AdminRealmIndexRoute
   '/_admin/shelf/': typeof AdminShelfIndexRoute
   '/_admin/source-site/': typeof AdminSourceSiteIndexRoute
@@ -302,8 +320,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/authority'
     | '/jwt-services'
-    | '/meili'
     | '/settings'
+    | '/status'
     | '/token'
     | '/auth/email'
     | '/auth/jwt-services'
@@ -312,6 +330,7 @@ export interface FileRouteTypes {
     | '/auth/users'
     | '/book/meili'
     | '/entity/$unitId'
+    | '/meili/observability'
     | '/misc/echokv'
     | '/source-site/$entityUnitId'
     | '/tag/low-score'
@@ -323,6 +342,7 @@ export interface FileRouteTypes {
     | '/user/meili'
     | '/book/'
     | '/entity/'
+    | '/meili/'
     | '/realm/'
     | '/shelf/'
     | '/source-site/'
@@ -333,8 +353,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/authority'
     | '/jwt-services'
-    | '/meili'
     | '/settings'
+    | '/status'
     | '/token'
     | '/'
     | '/auth/email'
@@ -344,6 +364,7 @@ export interface FileRouteTypes {
     | '/auth/users'
     | '/book/meili'
     | '/entity/$unitId'
+    | '/meili/observability'
     | '/misc/echokv'
     | '/source-site/$entityUnitId'
     | '/tag/low-score'
@@ -355,6 +376,7 @@ export interface FileRouteTypes {
     | '/user/meili'
     | '/book'
     | '/entity'
+    | '/meili'
     | '/realm'
     | '/shelf'
     | '/source-site'
@@ -366,8 +388,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/_admin/authority'
     | '/_admin/jwt-services'
-    | '/_admin/meili'
     | '/_admin/settings'
+    | '/_admin/status'
     | '/_admin/token'
     | '/_admin/'
     | '/_admin/auth/email'
@@ -377,6 +399,7 @@ export interface FileRouteTypes {
     | '/_admin/auth/users'
     | '/_admin/book/meili'
     | '/_admin/entity/$unitId'
+    | '/_admin/meili/observability'
     | '/_admin/misc/echokv'
     | '/_admin/source-site/$entityUnitId'
     | '/_admin/tag/low-score'
@@ -388,6 +411,7 @@ export interface FileRouteTypes {
     | '/_admin/user/meili'
     | '/_admin/book/'
     | '/_admin/entity/'
+    | '/_admin/meili/'
     | '/_admin/realm/'
     | '/_admin/shelf/'
     | '/_admin/source-site/'
@@ -430,18 +454,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTokenRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/status': {
+      id: '/_admin/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof AdminStatusRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/settings': {
       id: '/_admin/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/meili': {
-      id: '/_admin/meili'
-      path: '/meili'
-      fullPath: '/meili'
-      preLoaderRoute: typeof AdminMeiliRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/jwt-services': {
@@ -491,6 +515,13 @@ declare module '@tanstack/react-router' {
       path: '/realm'
       fullPath: '/realm/'
       preLoaderRoute: typeof AdminRealmIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/meili/': {
+      id: '/_admin/meili/'
+      path: '/meili'
+      fullPath: '/meili/'
+      preLoaderRoute: typeof AdminMeiliIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/entity/': {
@@ -570,6 +601,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMiscEchokvRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/meili/observability': {
+      id: '/_admin/meili/observability'
+      path: '/meili/observability'
+      fullPath: '/meili/observability'
+      preLoaderRoute: typeof AdminMeiliObservabilityRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/entity/$unitId': {
       id: '/_admin/entity/$unitId'
       path: '/entity/$unitId'
@@ -625,8 +663,8 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAuthorityRoute: typeof AdminAuthorityRoute
   AdminJwtServicesRoute: typeof AdminJwtServicesRoute
-  AdminMeiliRoute: typeof AdminMeiliRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminStatusRoute: typeof AdminStatusRoute
   AdminTokenRoute: typeof AdminTokenRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAuthEmailRoute: typeof AdminAuthEmailRoute
@@ -636,6 +674,7 @@ interface AdminRouteChildren {
   AdminAuthUsersRoute: typeof AdminAuthUsersRoute
   AdminBookMeiliRoute: typeof AdminBookMeiliRoute
   AdminEntityUnitIdRoute: typeof AdminEntityUnitIdRoute
+  AdminMeiliObservabilityRoute: typeof AdminMeiliObservabilityRoute
   AdminMiscEchokvRoute: typeof AdminMiscEchokvRoute
   AdminSourceSiteEntityUnitIdRoute: typeof AdminSourceSiteEntityUnitIdRoute
   AdminTagLowScoreRoute: typeof AdminTagLowScoreRoute
@@ -647,6 +686,7 @@ interface AdminRouteChildren {
   AdminUserMeiliRoute: typeof AdminUserMeiliRoute
   AdminBookIndexRoute: typeof AdminBookIndexRoute
   AdminEntityIndexRoute: typeof AdminEntityIndexRoute
+  AdminMeiliIndexRoute: typeof AdminMeiliIndexRoute
   AdminRealmIndexRoute: typeof AdminRealmIndexRoute
   AdminShelfIndexRoute: typeof AdminShelfIndexRoute
   AdminSourceSiteIndexRoute: typeof AdminSourceSiteIndexRoute
@@ -657,8 +697,8 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuthorityRoute: AdminAuthorityRoute,
   AdminJwtServicesRoute: AdminJwtServicesRoute,
-  AdminMeiliRoute: AdminMeiliRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminStatusRoute: AdminStatusRoute,
   AdminTokenRoute: AdminTokenRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminAuthEmailRoute: AdminAuthEmailRoute,
@@ -668,6 +708,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuthUsersRoute: AdminAuthUsersRoute,
   AdminBookMeiliRoute: AdminBookMeiliRoute,
   AdminEntityUnitIdRoute: AdminEntityUnitIdRoute,
+  AdminMeiliObservabilityRoute: AdminMeiliObservabilityRoute,
   AdminMiscEchokvRoute: AdminMiscEchokvRoute,
   AdminSourceSiteEntityUnitIdRoute: AdminSourceSiteEntityUnitIdRoute,
   AdminTagLowScoreRoute: AdminTagLowScoreRoute,
@@ -679,6 +720,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUserMeiliRoute: AdminUserMeiliRoute,
   AdminBookIndexRoute: AdminBookIndexRoute,
   AdminEntityIndexRoute: AdminEntityIndexRoute,
+  AdminMeiliIndexRoute: AdminMeiliIndexRoute,
   AdminRealmIndexRoute: AdminRealmIndexRoute,
   AdminShelfIndexRoute: AdminShelfIndexRoute,
   AdminSourceSiteIndexRoute: AdminSourceSiteIndexRoute,

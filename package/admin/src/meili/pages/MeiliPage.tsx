@@ -10,31 +10,27 @@ import {
   AlertDescription,
   Badge,
   Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Separator,
+  buttonVariants,
 } from "@rezics/ui/shadcn";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { X as CloseIcon } from "lucide-react";
+import { BarChart3, X as CloseIcon } from "lucide-react";
 import { useState } from "react";
 import { Page } from "@/core/layouts/Page";
+import {
+  MeiliDangerZoneSection,
+  type MeiliDangerAction,
+} from "../components/MeiliDangerZoneSection";
+import { MeiliKeyManagementSection } from "../components/MeiliKeyManagementSection";
+import {
+  type MeiliAction,
+  MeiliOperationsSection,
+} from "../components/MeiliOperationsSection";
 
 type MessageState = {
   type: "success" | "error" | "info";
   text: string;
 } | null;
-
-const RESET_CONFIRMATION_TOKEN = "RESET";
 
 function messageClass(type: "success" | "error" | "info") {
   switch (type) {
@@ -57,6 +53,8 @@ function meiliDeleteConfirmLabel(key: MeiliKey) {
 export function MeiliPage() {
   const [message, setMessage] = useState<MessageState>(null);
   const [lastAdminKey, setLastAdminKey] = useState<string | null>(null);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetConfirmText, setResetConfirmText] = useState("");
 
   const { data: health, isLoading: isHealthLoading } = useQuery(
     meiliAdminQueries.health(),
@@ -68,7 +66,6 @@ export function MeiliPage() {
     refetch: refetchKeys,
   } = useQuery(meiliAdminQueries.keys());
 
-  // Index initialization
   const initContentMutation = meiliAdminMutations.useInitContentIndex({
     onSuccess: (res) => {
       setMessage({
@@ -129,7 +126,6 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  // Full sync
   const syncContentMutation = meiliAdminMutations.useSyncContent({
     onSuccess: () => {
       setMessage({
@@ -184,7 +180,6 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  // Dangerous operations
   const deleteAllContentMutation = meiliAdminMutations.useDeleteAllContent({
     onSuccess: (res) => {
       setMessage({
@@ -255,10 +250,6 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
-  const [resetDialogOpen, setResetDialogOpen] = useState(false);
-  const [resetConfirmText, setResetConfirmText] = useState("");
-
-  // Key management
   const createAdminKeyMutation = meiliAdminMutations.useCreateAdminKey({
     onSuccess: (res) => {
       const keyString =
@@ -293,6 +284,153 @@ export function MeiliPage() {
     deleteKeyMutation.mutate(key.uid);
   };
 
+  const initActions: MeiliAction[] = [
+    {
+      id: "content",
+      label: m.admin_meili_init_content_index(),
+      pendingLabel: m.admin_meili_initializing(),
+      isPending: initContentMutation.isPending,
+      onClick: () => initContentMutation.mutate(),
+    },
+    {
+      id: "feedbacks",
+      label: m.admin_meili_init_feedbacks_index(),
+      pendingLabel: m.admin_meili_initializing(),
+      isPending: initFeedbacksMutation.isPending,
+      onClick: () => initFeedbacksMutation.mutate(),
+    },
+    {
+      id: "users",
+      label: m.admin_meili_init_users_index(),
+      pendingLabel: m.admin_meili_initializing(),
+      isPending: initUsersMutation.isPending,
+      onClick: () => initUsersMutation.mutate(),
+    },
+    {
+      id: "posts",
+      label: m.admin_meili_init_posts_index(),
+      pendingLabel: m.admin_meili_initializing(),
+      isPending: initPostsMutation.isPending,
+      onClick: () => initPostsMutation.mutate(),
+    },
+    {
+      id: "realms",
+      label: m.admin_meili_init_realms_index(),
+      pendingLabel: m.admin_meili_initializing(),
+      isPending: initRealmsMutation.isPending,
+      onClick: () => initRealmsMutation.mutate(),
+    },
+    {
+      id: "entities",
+      label: m.admin_meili_init_entities_index(),
+      pendingLabel: m.admin_meili_initializing(),
+      isPending: initEntitiesMutation.isPending,
+      onClick: () => initEntitiesMutation.mutate(),
+    },
+  ];
+
+  const syncActions: MeiliAction[] = [
+    {
+      id: "content",
+      label: m.admin_meili_sync_all_content(),
+      pendingLabel: m.admin_meili_syncing(),
+      isPending: syncContentMutation.isPending,
+      onClick: () => syncContentMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "feedbacks",
+      label: m.admin_meili_sync_all_feedbacks(),
+      pendingLabel: m.admin_meili_syncing(),
+      isPending: syncFeedbacksMutation.isPending,
+      onClick: () => syncFeedbacksMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "users",
+      label: m.admin_meili_sync_all_users(),
+      pendingLabel: m.admin_meili_syncing(),
+      isPending: syncUsersMutation.isPending,
+      onClick: () => syncUsersMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "posts",
+      label: m.admin_meili_sync_all_posts(),
+      pendingLabel: m.admin_meili_syncing(),
+      isPending: syncPostsMutation.isPending,
+      onClick: () => syncPostsMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "realms",
+      label: m.admin_meili_sync_all_realms(),
+      pendingLabel: m.admin_meili_syncing(),
+      isPending: syncRealmsMutation.isPending,
+      onClick: () => syncRealmsMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "entities",
+      label: m.admin_meili_sync_all_entities(),
+      pendingLabel: m.admin_meili_syncing(),
+      isPending: syncEntitiesMutation.isPending,
+      onClick: () => syncEntitiesMutation.mutate(),
+      variant: "outline",
+    },
+  ];
+
+  const deleteActions: MeiliDangerAction[] = [
+    {
+      id: "content",
+      label: m.admin_meili_delete_all_content(),
+      pendingLabel: m.admin_meili_deleting(),
+      confirmLabel: m.admin_meili_delete_all_content_confirm(),
+      isPending: deleteAllContentMutation.isPending,
+      onConfirm: () => deleteAllContentMutation.mutate(),
+    },
+    {
+      id: "feedbacks",
+      label: m.admin_meili_delete_all_feedbacks(),
+      pendingLabel: m.admin_meili_deleting(),
+      confirmLabel: m.admin_meili_delete_all_feedbacks_confirm(),
+      isPending: deleteAllFeedbacksMutation.isPending,
+      onConfirm: () => deleteAllFeedbacksMutation.mutate(),
+    },
+    {
+      id: "users",
+      label: m.admin_meili_delete_all_users(),
+      pendingLabel: m.admin_meili_deleting(),
+      confirmLabel: m.admin_meili_delete_all_users_confirm(),
+      isPending: deleteAllUsersMutation.isPending,
+      onConfirm: () => deleteAllUsersMutation.mutate(),
+    },
+    {
+      id: "posts",
+      label: m.admin_meili_delete_all_posts(),
+      pendingLabel: m.admin_meili_deleting(),
+      confirmLabel: m.admin_meili_delete_all_posts_confirm(),
+      isPending: deleteAllPostsMutation.isPending,
+      onConfirm: () => deleteAllPostsMutation.mutate(),
+    },
+    {
+      id: "realms",
+      label: m.admin_meili_delete_all_realms(),
+      pendingLabel: m.admin_meili_deleting(),
+      confirmLabel: m.admin_meili_delete_all_realms_confirm(),
+      isPending: deleteAllRealmsMutation.isPending,
+      onConfirm: () => deleteAllRealmsMutation.mutate(),
+    },
+    {
+      id: "entities",
+      label: m.admin_meili_delete_all_entities(),
+      pendingLabel: m.admin_meili_deleting(),
+      confirmLabel: m.admin_meili_delete_all_entities_confirm(),
+      isPending: deleteAllEntitiesMutation.isPending,
+      onConfirm: () => deleteAllEntitiesMutation.mutate(),
+    },
+  ];
+
   return (
     <Page
       title={m.admin_meili_title()}
@@ -308,10 +446,11 @@ export function MeiliPage() {
             <div className="flex items-center gap-2 text-sm">
               <span>{m.admin_meili_status_label()}</span>
               <Badge
+                variant="outline"
                 className={
                   health?.status === "available"
-                    ? "bg-success-fill text-white"
-                    : "bg-warning-fill text-white"
+                    ? "border-border-whisper bg-surface-subtle text-success-text"
+                    : "border-border-whisper bg-surface-subtle text-warning-text"
                 }
               >
                 {health?.status ?? m.common_unknown()}
@@ -320,482 +459,62 @@ export function MeiliPage() {
           )}
         </div>
       }
+      actions={
+        <Link
+          to="/meili/observability"
+          className={buttonVariants({ variant: "outline", size: "sm" })}
+        >
+          <BarChart3 className="size-4" aria-hidden="true" />
+          狀態觀測
+        </Link>
+      }
     >
-      <div className="space-y-8">
-        {message && (
-          <Alert className="shadow-sm">
+      <div className="space-y-4">
+        {message ? (
+          <Alert>
             <AlertDescription
-              className={`flex flex-row items-center justify-between ${messageClass(message.type)}`}
+              className={`flex flex-row items-center justify-between gap-3 ${messageClass(message.type)}`}
             >
               <span>{message.text}</span>
               <Button
                 variant="ghost"
-                size="icon"
+                size="icon-sm"
                 aria-label={m.common_dismiss()}
                 onClick={() => setMessage(null)}
-                className="size-6"
               >
                 <CloseIcon className="size-4" />
               </Button>
             </AlertDescription>
           </Alert>
-        )}
+        ) : null}
 
-        <div className="flex flex-col gap-4">
-          {/* Index initialization */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {m.admin_meili_index_initialization_title()}
-              </CardTitle>
-              <CardDescription>
-                {m.admin_meili_index_initialization_description()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => initContentMutation.mutate()}
-                  disabled={initContentMutation.isPending}
-                >
-                  {initContentMutation.isPending
-                    ? m.admin_meili_initializing()
-                    : m.admin_meili_init_content_index()}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => initFeedbacksMutation.mutate()}
-                  disabled={initFeedbacksMutation.isPending}
-                >
-                  {initFeedbacksMutation.isPending
-                    ? m.admin_meili_initializing()
-                    : m.admin_meili_init_feedbacks_index()}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => initUsersMutation.mutate()}
-                  disabled={initUsersMutation.isPending}
-                >
-                  {initUsersMutation.isPending
-                    ? m.admin_meili_initializing()
-                    : m.admin_meili_init_users_index()}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => initPostsMutation.mutate()}
-                  disabled={initPostsMutation.isPending}
-                >
-                  {initPostsMutation.isPending
-                    ? m.admin_meili_initializing()
-                    : m.admin_meili_init_posts_index()}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => initRealmsMutation.mutate()}
-                  disabled={initRealmsMutation.isPending}
-                >
-                  {initRealmsMutation.isPending
-                    ? m.admin_meili_initializing()
-                    : m.admin_meili_init_realms_index()}
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => initEntitiesMutation.mutate()}
-                  disabled={initEntitiesMutation.isPending}
-                >
-                  {initEntitiesMutation.isPending
-                    ? m.admin_meili_initializing()
-                    : m.admin_meili_init_entities_index()}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <MeiliOperationsSection
+          initActions={initActions}
+          syncActions={syncActions}
+        />
 
-          {/* Full sync */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{m.admin_meili_full_sync_title()}</CardTitle>
-              <CardDescription>
-                {m.admin_meili_full_sync_description()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => syncContentMutation.mutate()}
-                  disabled={syncContentMutation.isPending}
-                >
-                  {syncContentMutation.isPending
-                    ? m.admin_meili_syncing()
-                    : m.admin_meili_sync_all_content()}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => syncFeedbacksMutation.mutate()}
-                  disabled={syncFeedbacksMutation.isPending}
-                >
-                  {syncFeedbacksMutation.isPending
-                    ? m.admin_meili_syncing()
-                    : m.admin_meili_sync_all_feedbacks()}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => syncUsersMutation.mutate()}
-                  disabled={syncUsersMutation.isPending}
-                >
-                  {syncUsersMutation.isPending
-                    ? m.admin_meili_syncing()
-                    : m.admin_meili_sync_all_users()}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => syncPostsMutation.mutate()}
-                  disabled={syncPostsMutation.isPending}
-                >
-                  {syncPostsMutation.isPending
-                    ? m.admin_meili_syncing()
-                    : m.admin_meili_sync_all_posts()}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => syncRealmsMutation.mutate()}
-                  disabled={syncRealmsMutation.isPending}
-                >
-                  {syncRealmsMutation.isPending
-                    ? m.admin_meili_syncing()
-                    : m.admin_meili_sync_all_realms()}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => syncEntitiesMutation.mutate()}
-                  disabled={syncEntitiesMutation.isPending}
-                >
-                  {syncEntitiesMutation.isPending
-                    ? m.admin_meili_syncing()
-                    : m.admin_meili_sync_all_entities()}
-                </Button>
-              </div>
-              <p className="text-xs text-text-secondary">
-                {m.admin_meili_sync_help()}
-              </p>
-            </CardContent>
-          </Card>
+        <MeiliDangerZoneSection
+          deleteActions={deleteActions}
+          resetDialogOpen={resetDialogOpen}
+          resetConfirmText={resetConfirmText}
+          isResetPending={resetAllIndexesMutation.isPending}
+          onResetDialogOpenChange={setResetDialogOpen}
+          onResetConfirmTextChange={setResetConfirmText}
+          onReset={() => resetAllIndexesMutation.mutate()}
+        />
 
-          {/* Dangerous operations */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {m.admin_meili_dangerous_operations_title()}
-              </CardTitle>
-              <CardDescription>
-                {m.admin_meili_dangerous_operations_description()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm font-semibold mb-1">
-                  {m.admin_meili_delete_all_documents_title()}
-                </p>
-                <p className="text-xs text-text-secondary block mb-2">
-                  {m.admin_meili_delete_all_documents_description()}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    className="bg-error-fill text-white"
-                    onClick={() => {
-                      const ok = window.confirm(
-                        m.admin_meili_delete_all_content_confirm(),
-                      );
-                      if (!ok) return;
-                      deleteAllContentMutation.mutate();
-                    }}
-                    disabled={deleteAllContentMutation.isPending}
-                  >
-                    {deleteAllContentMutation.isPending
-                      ? m.admin_meili_deleting()
-                      : m.admin_meili_delete_all_content()}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-error-fill text-white"
-                    onClick={() => {
-                      const ok = window.confirm(
-                        m.admin_meili_delete_all_feedbacks_confirm(),
-                      );
-                      if (!ok) return;
-                      deleteAllFeedbacksMutation.mutate();
-                    }}
-                    disabled={deleteAllFeedbacksMutation.isPending}
-                  >
-                    {deleteAllFeedbacksMutation.isPending
-                      ? m.admin_meili_deleting()
-                      : m.admin_meili_delete_all_feedbacks()}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-error-fill text-white"
-                    onClick={() => {
-                      const ok = window.confirm(
-                        m.admin_meili_delete_all_users_confirm(),
-                      );
-                      if (!ok) return;
-                      deleteAllUsersMutation.mutate();
-                    }}
-                    disabled={deleteAllUsersMutation.isPending}
-                  >
-                    {deleteAllUsersMutation.isPending
-                      ? m.admin_meili_deleting()
-                      : m.admin_meili_delete_all_users()}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-error-fill text-white"
-                    onClick={() => {
-                      const ok = window.confirm(
-                        m.admin_meili_delete_all_posts_confirm(),
-                      );
-                      if (!ok) return;
-                      deleteAllPostsMutation.mutate();
-                    }}
-                    disabled={deleteAllPostsMutation.isPending}
-                  >
-                    {deleteAllPostsMutation.isPending
-                      ? m.admin_meili_deleting()
-                      : m.admin_meili_delete_all_posts()}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-error-fill text-white"
-                    onClick={() => {
-                      const ok = window.confirm(
-                        m.admin_meili_delete_all_realms_confirm(),
-                      );
-                      if (!ok) return;
-                      deleteAllRealmsMutation.mutate();
-                    }}
-                    disabled={deleteAllRealmsMutation.isPending}
-                  >
-                    {deleteAllRealmsMutation.isPending
-                      ? m.admin_meili_deleting()
-                      : m.admin_meili_delete_all_realms()}
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-error-fill text-white"
-                    onClick={() => {
-                      const ok = window.confirm(
-                        m.admin_meili_delete_all_entities_confirm(),
-                      );
-                      if (!ok) return;
-                      deleteAllEntitiesMutation.mutate();
-                    }}
-                    disabled={deleteAllEntitiesMutation.isPending}
-                  >
-                    {deleteAllEntitiesMutation.isPending
-                      ? m.admin_meili_deleting()
-                      : m.admin_meili_delete_all_entities()}
-                  </Button>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <p className="text-sm font-semibold mb-1 text-error-text">
-                  {m.admin_meili_reset_everything_title()}
-                </p>
-                <p className="text-xs text-text-secondary block mb-2">
-                  {m.admin_meili_reset_everything_description()}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-error-text"
-                  onClick={() => setResetDialogOpen(true)}
-                  disabled={resetAllIndexesMutation.isPending}
-                >
-                  {resetAllIndexesMutation.isPending
-                    ? m.admin_meili_resetting()
-                    : m.admin_meili_reset_everything_title()}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Reset confirmation dialog */}
-          <Dialog
-            open={resetDialogOpen}
-            onOpenChange={(o) => {
-              if (!o) {
-                setResetDialogOpen(false);
-                setResetConfirmText("");
-              }
-            }}
-          >
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{m.admin_meili_reset_dialog_title()}</DialogTitle>
-                <DialogDescription>
-                  {m.admin_meili_reset_dialog_description()}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-2">
-                <p className="text-sm mb-2">
-                  {m.admin_meili_reset_type_to_confirm_prefix()}{" "}
-                  <strong>{RESET_CONFIRMATION_TOKEN}</strong>{" "}
-                  {m.admin_meili_reset_type_to_confirm_suffix()}
-                </p>
-                <Input
-                  autoFocus
-                  value={resetConfirmText}
-                  onChange={(e) => setResetConfirmText(e.target.value)}
-                  placeholder={RESET_CONFIRMATION_TOKEN}
-                />
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setResetDialogOpen(false);
-                    setResetConfirmText("");
-                  }}
-                >
-                  {m.common_cancel()}
-                </Button>
-                <Button
-                  className="bg-error-fill text-white"
-                  disabled={resetConfirmText !== RESET_CONFIRMATION_TOKEN}
-                  onClick={() => {
-                    resetAllIndexesMutation.mutate();
-                    setResetDialogOpen(false);
-                    setResetConfirmText("");
-                  }}
-                >
-                  {m.admin_meili_delete_all_indexes()}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Key management */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{m.admin_meili_key_management_title()}</CardTitle>
-            <CardDescription>
-              {m.admin_meili_key_management_description()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-warning-text"
-                onClick={() => createAdminKeyMutation.mutate()}
-                disabled={createAdminKeyMutation.isPending}
-              >
-                {createAdminKeyMutation.isPending
-                  ? m.admin_meili_creating()
-                  : m.admin_meili_create_admin_key()}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => refetchKeys()}
-                disabled={isKeysLoading}
-              >
-                {m.admin_meili_refresh_key_list()}
-              </Button>
-            </div>
-
-            {lastAdminKey && (
-              <div className="text-xs break-all space-y-1">
-                <div className="font-semibold text-warning-text">
-                  {m.admin_meili_latest_admin_key()}
-                </div>
-                <code className="px-2 py-1 rounded bg-surface-elevated">
-                  {lastAdminKey}
-                </code>
-              </div>
-            )}
-
-            <div className="border-t border-border-whisper pt-3">
-              <p className="text-sm font-semibold mb-2">
-                {m.admin_meili_existing_keys_title()}
-              </p>
-              {isKeysLoading ? (
-                <div className="flex items-center gap-2 text-sm text-text-secondary">
-                  <Spinner size="sm" />
-                  <span>{m.admin_meili_loading_keys()}</span>
-                </div>
-              ) : !keyList || keyList.results.length === 0 ? (
-                <p className="text-sm text-text-secondary">
-                  {m.admin_meili_no_keys_found()}
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-left text-xs">
-                    <thead className="border-b border-border-whisper text-text-secondary">
-                      <tr>
-                        <th className="py-1 pr-3">{m.common_uid()}</th>
-                        <th className="py-1 pr-3">{m.common_name()}</th>
-                        <th className="py-1 pr-3">{m.common_actions()}</th>
-                        <th className="py-1 pr-3">{m.common_indexes()}</th>
-                        <th className="py-1 pr-3">{m.common_expires()}</th>
-                        <th className="py-1 pr-3">{m.common_action()}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {keyList.results.map((key) => (
-                        <tr
-                          key={key.uid}
-                          className="border-b border-border-whisper"
-                        >
-                          <td className="py-1 pr-3 align-top font-mono text-[11px]">
-                            {key.uid}
-                          </td>
-                          <td className="py-1 pr-3 align-top text-[11px]">
-                            {key.name || "-"}
-                          </td>
-                          <td className="py-1 pr-3 align-top text-[11px]">
-                            {(key.actions || []).join(", ") || "-"}
-                          </td>
-                          <td className="py-1 pr-3 align-top text-[11px]">
-                            {(key.indexes || []).join(", ") || "-"}
-                          </td>
-                          <td className="py-1 pr-3 align-top text-[11px]">
-                            {key.expiresAt || m.common_never()}
-                          </td>
-                          <td className="py-1 pr-3 align-top">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-error-text"
-                              onClick={() => handleDeleteKey(key)}
-                              disabled={deleteKeyMutation.isPending}
-                            >
-                              {m.common_delete()}
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <MeiliKeyManagementSection
+          keyList={keyList}
+          lastAdminKey={lastAdminKey}
+          isKeysLoading={isKeysLoading}
+          isCreating={createAdminKeyMutation.isPending}
+          isDeleting={deleteKeyMutation.isPending}
+          onCreateAdminKey={() => createAdminKeyMutation.mutate()}
+          onRefreshKeys={() => {
+            void refetchKeys();
+          }}
+          onDeleteKey={handleDeleteKey}
+        />
       </div>
     </Page>
   );

@@ -1,6 +1,7 @@
 import * as m from "@rezics/i18n/messages";
 import {
   ShieldUser as AdminPanelSettingsOutlinedIcon,
+  Activity as ActivityIcon,
   BookMarked as CollectionsBookmarkIcon,
   LayoutDashboard as DashboardIcon,
   Mail as EmailOutlinedIcon,
@@ -44,6 +45,12 @@ export const adminNav = {
       label: m.admin_nav_dashboard,
       icon: <DashboardIcon fontSize="small" />,
       to: "/",
+    },
+    {
+      id: "status",
+      label: () => "系統狀態",
+      icon: <ActivityIcon fontSize="small" />,
+      to: "/status",
     },
     {
       id: "user",
@@ -205,10 +212,16 @@ export const adminNav = {
       icon: <ManageSearchOutlinedIcon fontSize="small" />,
       children: [
         {
-          id: "meili.search",
-          label: m.admin_nav_meili_search,
+          id: "meili.operations",
+          label: () => "操作",
           to: "/meili",
           icon: <ManageSearchOutlinedIcon fontSize="small" />,
+        },
+        {
+          id: "meili.observability",
+          label: () => "狀態觀測",
+          to: "/meili/observability",
+          icon: <ActivityIcon fontSize="small" />,
         },
       ],
     },

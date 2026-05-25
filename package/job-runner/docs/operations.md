@@ -136,8 +136,9 @@ Health endpoints:
 
 ## Internal Status Page
 
-Root/admin operators can use the Rezics app status page at `/status` after the
-main server is running. The page reads only the main server APIs:
+Root/admin operators can use the Rezics admin status page at `/status` after
+the main server and admin SPA are running. The public app does not expose an
+internal diagnostics route. The admin page reads only the main server APIs:
 
 - `GET /diagnostic/system`
 - `GET /meili/status`
@@ -167,22 +168,24 @@ Do not configure database URLs, passwords, API keys, or internal secrets as
 status link values. `JOB_RUNNER_INTERNAL_SECRET` and `MEILI_MASTER_KEY` remain
 server-only secrets and are never returned by status APIs.
 
-The status page replaces most manual spot checks during normal operations:
+The admin status page replaces most manual spot checks during normal operations:
 
 - Use the Sequin and CDC panels before running the publication/slot SQL below.
 - Use the queue panel before querying pg-boss directly.
-- Use the Meili panel before opening the Meilisearch dashboard for index drift
-  or failed tasks.
+- Use the Meili panel or the admin Meili status-observability route before
+  opening the Meilisearch dashboard for index drift or failed tasks.
 
-The page is diagnostic only. These checks are read-only: service health,
-Meilisearch health/version/stats/index settings/tasks, source DB `wal_level`,
-publication table membership, replication slot state/lag, job-runner
-health/readiness, queue counts, and failed job summaries.
+The admin status page and Meili observability route are diagnostic only. These
+checks are read-only: service health, Meilisearch health/version/stats/index
+settings/tasks, source DB `wal_level`, publication table membership,
+replication slot state/lag, job-runner health/readiness, queue counts, and
+failed job summaries.
 
 Existing Meili init/sync/delete/key endpoints keep their current root/admin
-guards. Init and sync operations may be useful repair follow-ups, but
-`deleteAll`, `resetAll`, key creation, and key deletion remain destructive or
-sensitive operations and must not be treated as status checks.
+guards in the admin Meili operations area. Init and sync operations may be
+useful repair follow-ups, but `deleteAll`, `resetAll`, key creation, and key
+deletion remain destructive or sensitive operations and must not be treated as
+status checks.
 
 Environments without Sequin or job-runner can leave the optional status URLs
 unset. The system status response will mark those sections `unknown` instead of

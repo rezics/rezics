@@ -10,8 +10,8 @@ import {
   Users as PeopleIcon,
 } from "lucide-react";
 import { Page } from "@/core/layouts/Page";
+import { StatusOverviewCard } from "@/system-health";
 import { ContentTrendChart } from "../components/chart/ContentTrendChart";
-import { HealthStrip } from "../components/HealthStrip";
 import { StatCard } from "../components/StatCard";
 
 export default function DashboardPage() {
@@ -77,10 +77,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="col-span-12">
-          <HealthStrip
-            server={stats.health.server}
-            meili={stats.health.meili}
-          />
+          <StatusOverviewCard />
         </div>
 
         <div className="col-span-12">
