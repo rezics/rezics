@@ -96,6 +96,53 @@ The system SHALL store external identities for Units in `UnitExternalRef`. Each 
 - **WHEN** another UnitExternalRef is created with the same source site, external kind, and external id
 - **THEN** the system SHALL reject the duplicate identity
 
+### Requirement: External kind is a shared vocabulary constrained per source
+
+The system SHALL define `externalKind` as a closed vocabulary in `@rezics/contract` and SHALL additionally require that each `externalKind` used on a UnitExternalRef is declared in the target SourceSite's reference rules. The system SHALL NOT validate `externalKind` against the referenced Unit's own kind.
+
+#### Scenario: Unknown external kind is rejected
+
+- **WHEN** a UnitExternalRef write uses an `externalKind` outside the contract vocabulary
+- **THEN** the system SHALL reject the write with a validation error
+
+#### Scenario: External kind not declared by the source is rejected
+
+- **GIVEN** a SourceSite whose reference rules declare only `externalKind = "book"`
+- **WHEN** a UnitExternalRef write uses `externalKind = "author"` for that source
+- **THEN** the system SHALL reject the write because no rule defines its URL template, match pattern, or crawler action
+
+#### Scenario: External kind incompatible with the Unit kind is accepted
+
+- **GIVEN** a publisher Entity Unit
+- **AND** a SourceSite whose rules declare `externalKind = "book"`
+- **WHEN** a UnitExternalRef write attaches `externalKind = "book"` to that Entity Unit
+- **THEN** the system SHALL accept the write
+- **AND** the system SHALL NOT validate `externalKind` against the Unit kind
+
+### Requirement: External reference URLs derive from source rules
+
+The system SHALL treat `(sourceSiteEntityUnitId, externalKind)` as the lookup key into the SourceSite reference rules. It SHALL derive a canonical URL from the matching rule's URL template and the external id, and it SHALL be able to parse an observed source URL into an external kind and external id using the rules' URL match patterns. The stored canonical URL SHALL be a cache; `externalKind` and `externalId` SHALL remain the source of truth.
+
+#### Scenario: Canonical URL is derived from the rule template
+
+- **GIVEN** a SourceSite rule for `externalKind = "book"` with URL template `https://book.qidian.com/info/{externalId}`
+- **WHEN** the system records `externalId = "123"`
+- **THEN** the canonical URL SHALL be `https://book.qidian.com/info/123`
+
+#### Scenario: Pasted source URL is parsed into kind and id
+
+- **GIVEN** a SourceSite whose rules define URL match patterns
+- **WHEN** an editor submits an observed source URL instead of selecting a kind
+- **THEN** the system SHALL infer the `externalKind` and `externalId` from the matching rule
+- **AND** explicit kind selection SHALL remain available as a fallback
+
+#### Scenario: Canonical URL is a cache over kind and id
+
+- **WHEN** the system stores a UnitExternalRef
+- **THEN** it SHALL persist `externalKind` and `externalId` as the source of truth
+- **AND** it SHALL store the canonical URL as a derived value
+- **AND** it SHALL store the original observed URL as-is when available
+
 ### Requirement: Credit attribution evidence links to existing credit rows
 
 The system SHALL store source evidence for credit attributions in `CreditAttributionEvidence`. Each evidence row SHALL reference an existing `CreditAttribution(unitId, entityId, role)` and an existing UnitExternalRef.

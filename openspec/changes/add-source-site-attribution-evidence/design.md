@@ -74,7 +74,27 @@ Suggested uniqueness:
 - `(sourceSiteEntityUnitId, externalKind, externalId)` is unique for source-issued ids.
 - `(unitId, sourceSiteEntityUnitId, externalKind)` may be unique when the source kind allows only one ref per Unit. If a source can expose multiple refs for the same kind, enforce multiplicity in service validation instead of a broad unique constraint.
 
-`externalKind` remains a string to avoid migrations for every new source shape, but public writes should validate it against source `refRules`.
+`externalKind` uses a global closed union defined in `@rezics/contract` (consistent with `entityKinds` and `creditAttributionRoles`). The DB column stays a string, so adding a new kind is a contract edit, not a migration; the union gives type safety, centralized labels, and cross-source queryability. Each SourceSite then declares the subset of kinds it supports in `refRules`. See "`externalKind` is the source resource type and rule lookup key" below.
+
+### `externalKind` is the source resource type and rule lookup key
+
+`externalKind` names the **source's** resource type (`book`, `author`, `publisher`, ...), not the local Unit kind. The local Unit already carries its own kind; `externalKind` captures the source ontology, which is what selects a rule.
+
+`(sourceSiteEntityUnitId, externalKind)` is the lookup key into `refRules`:
+
+- Forward: `canonicalUrl = interpolate(refRules[externalKind].urlTemplate, externalId)`.
+- Reverse: an observed URL is matched against each `refRules[*].urlMatchPattern` to infer `(externalKind, externalId)`. **Reverse parse is the primary authoring UX** — editors paste a source URL and the kind/id are derived; explicit kind selection is the fallback.
+
+Writes validate `externalKind` in two hard layers:
+
+1. Global: `externalKind` is in the union (`@rezics/contract`).
+2. Source: `externalKind` is present in that SourceSite's `refRules` (service).
+
+Both are integrity invariants: a kind absent from `refRules` has no `urlTemplate`, match pattern, or crawler action, so the ref would be unresolvable.
+
+`canonicalUrl` is a denormalized cache computed at write time from the rule; `externalKind` + `externalId` is the source of truth. `originalUrl` stores the observed URL as-is (tracking params, mirror domains).
+
+`externalKind` <-> `Unit.kind` compatibility is **not** validated server-side: any union + `refRules` kind may attach to any Unit. The contract exposes an advisory `suggestExternalKinds(unitKind, availableKinds)` helper (registry metadata, not validation) that admin/app UI use only to order and pre-select options — never to filter or disable. A server test asserts a non-suggested pairing is accepted, locking this layer soft.
 
 ### CreditAttributionEvidence is strict, not generic
 
@@ -148,11 +168,12 @@ Use existing shadcn primitives and `SafeLink` for outbound URLs. Do not use raw 
 ## Risks / Trade-offs
 
 - `refRules` JSON can become a hidden schema -> Mitigate with contract schemas, admin validation, and a rule that observed ids/URLs live only in `UnitExternalRef`.
-- Source `externalKind` vocabulary can drift -> Mitigate with per-source rule validation and centralized labels/helpers in `@rezics/contract`.
+- Source `externalKind` vocabulary can drift -> Mitigate with a global closed union plus centralized labels/helpers in `@rezics/contract`, with each source declaring its supported subset in `refRules`.
 - Evidence can disagree across sources -> Allow multiple evidence rows per credit attribution and keep canonical `CreditAttribution` separate from evidence.
 - Crawler status can be misunderstood -> Expose both support and enablement in admin UI and derive schedule eligibility explicitly.
 - UI preview can interfere with navigation -> Preserve direct navigation for no-evidence rows and provide explicit "View Entity" / "Open Source" actions when evidence exists.
 - Strict credit-only evidence may need future subject support -> Add `SubjectAttributionEvidence` later rather than weakening phase 1 referential integrity.
+- An `externalKind` may attach to an incompatible `Unit.kind` (e.g. a `book` kind on a publisher Entity), producing a meaningless derived URL -> Accepted trade-off: the server does not validate the pairing because a source-compatibility matrix would couple us to every source's ontology; URL-paste reverse parse and UI default selection steer correct usage, and mis-fills are low-frequency editor actions.
 
 ## Migration Plan
 
@@ -172,5 +193,4 @@ Rollback strategy:
 ## Open Questions
 
 - Should admin support per-rule crawl enablement in phase 1, or is SourceSite-level `crawlEnabled` enough until multiple external kinds are actively crawled?
-- Should `canonicalUrl` be required on `UnitExternalRef`, or can it be derived lazily from `refRules` when `externalId` and a template are present?
 - Should source-site keys be globally immutable after creation, or only admin-editable before any external refs exist?
