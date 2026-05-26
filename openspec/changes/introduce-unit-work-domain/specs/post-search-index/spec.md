@@ -39,3 +39,18 @@ views SHALL filter by `targetUnitId`.
 - **WHEN** the user switches the community feed to exact-release mode on `release-a`
 - **THEN** the feed SHALL include posts with `targetUnitId = release-a`
 - **AND** it SHALL exclude posts targeting sibling releases unless they also directly target `release-a`
+
+### Requirement: Work Merge Repairs Target Work Projection
+
+When a source work is merged into a target work, post search projections and
+work-domain feed queries SHALL converge on the target canonical work. Existing
+precise `targetUnitId` values SHALL remain unchanged.
+
+#### Scenario: Review projection moves to target work
+
+- **GIVEN** review `post-r` has `targetUnitId = release-a`
+- **AND** `release-a` belonged to source work `work-old`
+- **AND** `work-old` is merged into `work-new`
+- **WHEN** post search repair rebuilds `post-r`
+- **THEN** `targetUnitId` SHALL remain `release-a`
+- **AND** `targetWorkUnitId` SHALL equal `work-new`

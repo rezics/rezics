@@ -110,3 +110,53 @@
 - [ ] 12.6 Run `bun run check:convention`.
 - [ ] 12.7 Run `bun run format:check`.
 - [ ] 12.8 Run `openspec validate introduce-unit-work-domain --strict`.
+
+## 13. Creation Work Matching UX
+
+- [ ] 13.1 Add contract/API support for creation-time work matching using ordinary content search results with canonical work metadata.
+- [ ] 13.2 Update public catalog creation UI to prominently prompt users to search for existing works/releases before creating new release-aware content.
+- [ ] 13.3 Update personal creation UI to show quieter work-matching guidance through the work row help affordance.
+- [ ] 13.4 When a matched release already belongs to a work, bind the new release to the matched release's canonical work.
+- [ ] 13.5 When a matched release is standalone, support creating/reusing a hidden work domain for the matched release plus the new release.
+- [ ] 13.6 Show selected work context with same-work releases and work tag summary before or after binding confirmation.
+- [ ] 13.7 Add tests for public guidance, personal guidance, matched-work binding, standalone matched-release work creation, and work-context disambiguation.
+
+## 14. Library Metadata And USWN
+
+- [ ] 14.1 Extend library content DTO schemas to include derived `metadata.uswn`.
+- [ ] 14.2 Populate `metadata.uswn` from merge-resolved canonical work Unit id for release-aware Units.
+- [ ] 14.3 Return `metadata.uswn = null` for Units with no work domain.
+- [ ] 14.4 Ensure frontend metadata panels render server-provided USWN and do not compute merge resolution client-side.
+- [ ] 14.5 Add contract/API/app tests for USWN on release, standalone content, and merged work scenarios.
+
+## 15. Content Structure Terminology
+
+- [ ] 15.1 Add or update contract types so content structure DTOs expose `contentStructure` terminology where the concept is generic.
+- [ ] 15.2 Replace new/public `chapterId` usage with `contentUnitId` for materialized content node identity.
+- [ ] 15.3 Keep `targetUnitId` reserved for interactions and avoid using it as content-structure node identity.
+- [ ] 15.4 Audit `BookContentStructure` public contract names and either migrate them or document them as transitional implementation compatibility.
+- [ ] 15.5 Update frontend reader/editor call sites and tests to prefer `contentUnitId`.
+
+## 16. Admin Work Merge And Metadata Copy
+
+- [ ] 16.1 Add durable admin work merge operation schema or equivalent operation log with source work, target work, status, actor, reason, timestamps, and item-level progress.
+- [ ] 16.2 Add admin merge dry-run endpoint that previews release membership moves, language default conflicts, projection repair scope, and affected DTO/search/shelf behavior.
+- [ ] 16.3 Implement admin-only merge start/status/revert APIs.
+- [ ] 16.4 Migrate canonical release/content membership from source work to target work without deleting the source work Unit.
+- [ ] 16.5 Preserve source work non-membership metadata by default, including tags, aliases, external references, attribution, and history.
+- [ ] 16.6 Queue merge repair for active work domains, including content search, post search, shelf hydration/grouping, language defaults, and USWN DTO projection.
+- [ ] 16.7 Add optional metadata-copy operations for copying missing tags and aliases from source work to target work.
+- [ ] 16.8 Ensure metadata copy is independent from canonical merge, creates only missing target rows, leaves source rows unchanged, supports dry-run, and can be reverted for rows it created.
+- [ ] 16.9 Add admin UI for merge preview, conflict handling, progress, revert, and optional metadata-copy actions.
+- [ ] 16.10 Add tests for merge authorization, queued merge, source preservation, canonical resolution, revert, tag copy, alias copy, and duplicate suppression.
+
+## 17. Work-Domain Seed Fixtures
+
+- [ ] 17.1 Add `unit-work-domain` special factory scenario.
+- [ ] 17.2 Seed at least one hidden BOOK work with primary, translation, secondary, and hidden-by-default releases.
+- [ ] 17.3 Seed work-level tags, release-local tags, and inherited-tag search sync hooks for the fixture.
+- [ ] 17.4 Seed `UnitWorkLanguageDefault` rows for at least two languages.
+- [ ] 17.5 Seed reviews targeting different releases under the same work so work-domain feed aggregation can be verified.
+- [ ] 17.6 Seed a shelf containing multiple releases under the same work for grouped and expanded shelf rendering.
+- [ ] 17.7 Attach ISBN/source-site external reference fixtures to visible releases rather than hidden works.
+- [ ] 17.8 Emit special target report entries for the hidden work, primary release, translation release, hidden-by-default release, and shelf fixture.

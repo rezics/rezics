@@ -24,6 +24,22 @@ feeds must each rediscover the same work/release semantics in incompatible ways.
 - Add work-language default resolution so switching language on a release page
   selects the curated primary release for that work and language, not an
   arbitrary release.
+- Add derived `metadata.uswn` to library content DTOs. USWN is the Universal
+  Standard Work Number exposed to frontend/library consumers; it is not stored
+  in the database and resolves to the current canonical work Unit id, or `null`
+  when the Unit has no work domain.
+- Make ordinary content creation release-led. Public/personal creation flows
+  create visible releases and guide users to search for an existing work before
+  creating new content; standalone hidden work creation is reserved for admin
+  repair/maintenance surfaces.
+- Add admin-only work merge and optional metadata-copy operations. Work merge
+  migrates canonical release/content membership to the target work, preserves
+  the source work Unit and its non-membership metadata, and runs through queued
+  repair for active work domains. Optional tag/alias copy is explicit and
+  independent from canonical content migration.
+- Generalize book content identity language so content structures use
+  `contentUnitId` for chapter/content-unit identity instead of `chapterId`, and
+  keep `targetUnitId` reserved for interaction targets.
 - Add Meilisearch projections for inherited work tags and grouped release
   search. Tag filtering SHALL query denormalized `allTagIds` fields, while
   result presentation groups by work where appropriate.
@@ -42,8 +58,9 @@ feeds must each rediscover the same work/release semantics in incompatible ways.
 ### New Capabilities
 
 - `unit-work-domain`: Defines `UnitWork`, hidden work Units, release membership,
-  work-language defaults, work-domain interaction targeting, and work-domain
-  search projection requirements.
+  work-language defaults, work-domain interaction targeting, derived USWN
+  metadata, admin work merge, optional work metadata copy, and work-domain search
+  projection requirements.
 
 ### Modified Capabilities
 
@@ -66,15 +83,26 @@ feeds must each rediscover the same work/release semantics in incompatible ways.
   first and secondary releases available on demand.
 - `realm-post-junction`: Renames the realm membership model and related API
   language from `RealmUnit` to `UnitRealm`.
+- `content-creation-work-matching`: Adds creation-time work matching UX and API
+  behavior so users search ordinary content/release results before creating a
+  new release or work domain.
+- `library-content-metadata`: Adds derived `metadata.uswn` to library content
+  DTOs.
+- `content-structure`: Generalizes content structure terminology from
+  book/chapter-specific ids to `contentStructure` and `contentUnitId`.
+- `seed-factory-scenarios`: Adds work-domain seed fixtures covering
+  multi-release works, inherited tags, language defaults, grouped shelves,
+  release-specific reviews, and optional external references.
 
 ## Impact
 
 - Affected packages:
   - `package/server`: Prisma schema, migrations, work-link/unit services, post
-    targeting, shelf services, tag services, search sync enqueueing, and domain
-    APIs.
+    targeting, shelf services, tag services, work merge operations, metadata
+    copy operations, search sync enqueueing, and domain APIs.
   - `package/contract`: DTO schemas for Unit, UnitTranslation, content search,
-    post search, shelf/search result metadata, and work-domain contracts.
+    post search, shelf/search result metadata, library content metadata, and
+    work-domain contracts.
   - `package/search`: Meilisearch document builders, index settings,
     inherited-tag projection, grouped result helpers, and repair handlers.
   - `package/job-runner`: CDC/outbox routing and batch handlers for `UnitWork`,
@@ -82,11 +110,15 @@ feeds must each rediscover the same work/release semantics in incompatible ways.
   - `package/api`: API clients, query keys, mutations, and hooks for work-domain
     language defaults, grouped search, release selectors, and shelf hydration.
   - `package/app`: book detail routes, release selector, language switching,
-    community feed filters, search result rendering, and shelf rendering.
+    creation-time work matching UI, community feed filters, search result
+    rendering, USWN metadata rendering, content structure terminology, and shelf
+    rendering.
   - `package/admin`: admin repair/diagnostic surfaces for work-domain grouping,
     language defaults, and search projection drift.
 - Database impact:
   - Adds `UnitWork` and `UnitWorkLanguageDefault`.
+  - Adds admin work-merge operation state, or an equivalent durable operation
+    log, for async/revertible merge and optional metadata-copy jobs.
   - Renames `RealmUnit` to `UnitRealm` through a phased migration.
   - Adds or backfills `targetWorkUnitId` where needed for post/search/shelf
     projections.

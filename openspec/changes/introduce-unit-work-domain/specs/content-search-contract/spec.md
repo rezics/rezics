@@ -44,3 +44,18 @@ presentation SHALL be the default for ordinary content search.
 - **WHEN** a caller explicitly requests expanded release results
 - **THEN** the response SHALL be allowed to return multiple release documents for the same `searchGroupId`
 - **AND** each result SHALL still include its `workUnitId` and `searchGroupId`
+
+### Requirement: Search Metadata Uses Canonical Work After Merge
+
+Content search documents for release-aware Units SHALL use merge-resolved
+canonical work ids for `workUnitId` and `searchGroupId` after work merge repair
+has completed. During async merge repair, search MAY be temporarily stale, but
+repair jobs SHALL converge documents to the target canonical work.
+
+#### Scenario: Merged work groups under target
+
+- **GIVEN** source work `work-old` has been merged into target work `work-new`
+- **AND** release `release-a` was formerly grouped under `work-old`
+- **WHEN** the content search document for `release-a` is rebuilt
+- **THEN** `workUnitId` SHALL equal `work-new`
+- **AND** `searchGroupId` SHALL equal `work-new`

@@ -51,3 +51,18 @@ work projections for affected releases.
 - **WHEN** a work tag is changed and the release fan-out job has not completed
 - **THEN** content search MAY temporarily reflect the old tag projection
 - **AND** the queued repair job SHALL eventually rebuild affected release documents
+
+### Requirement: Creation Work Matching Uses Content Search
+
+Creation-time work matching SHALL use ordinary content search APIs to find
+candidate visible releases. Search results used for matching SHALL expose enough
+work-domain metadata for the caller to bind a new release to the candidate's
+canonical work and to preview existing same-work releases.
+
+#### Scenario: Matching search returns candidate work metadata
+
+- **WHEN** a creation surface searches for similar books
+- **THEN** the search API response SHALL include visible release results
+- **AND** each result that belongs to a work SHALL expose its canonical work id
+  or equivalent work-domain metadata
+- **AND** the UI SHALL be able to show sibling releases and tags before binding

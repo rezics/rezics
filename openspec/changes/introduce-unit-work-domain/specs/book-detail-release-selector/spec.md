@@ -33,3 +33,20 @@ surfaces.
 - **WHEN** the default release selector renders
 - **THEN** `release-rare` SHALL be hidden behind an expansion affordance or advanced filter
 - **AND** direct links to `release-rare` SHALL still resolve
+
+### Requirement: Work Context Shows Release List And Tags
+
+Surfaces that ask a user to confirm or inspect a work domain, including release
+selectors and creation-time work matching panels, SHALL show existing releases
+under the work and the work tag list or inherited tag summary. The work context
+label SHALL be derived from release context rather than requiring a separate
+public work title.
+
+#### Scenario: Work context panel gives enough disambiguation
+
+- **GIVEN** current work `work-x` has multiple releases and work-level tags
+- **WHEN** the release selector or creation matching panel displays `work-x`
+- **THEN** it SHALL show same-work releases
+- **AND** it SHALL show work-level tags or inherited tag summary
+- **AND** it SHALL not depend on a standalone public work title to disambiguate
+  the work

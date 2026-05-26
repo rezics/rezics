@@ -258,6 +258,94 @@ change owns the naming decision.
   order and visible secondary release selector.
 - **Risk: Work-level tags over-apply to release-specific searches** →
   Mitigation: store `ownTagIds`, `workTagIds`, and `allTagIds` separately so UI
+
+## Review Addendum: Creation, USWN, Merge, And Content Structure Decisions
+
+The review tightened several product decisions that are broader than the
+initial read/search design.
+
+### USWN Is Derived Library Metadata, Not Stored Identity
+
+Library content DTOs expose:
+
+```txt
+metadata.uswn: string | null
+```
+
+USWN means Universal Standard Work Number. It is a frontend/library metadata
+standard, not a new backend primary key, table, or stored column. In this
+change, `metadata.uswn` is derived from the merge-resolved canonical work Unit
+id:
+
+```txt
+release with work domain  -> metadata.uswn = canonical work Unit.id
+no work domain            -> metadata.uswn = null
+source work merged        -> metadata.uswn = target work Unit.id
+```
+
+The frontend renders the server-provided field and does not resolve work merges
+client-side.
+
+### Ordinary Creation Is Release-Led
+
+Ordinary public/personal content creation does not expose standalone hidden work
+creation. Creating a book means creating a visible release and attaching it to a
+work domain. The first release/original version may create a hidden work domain
+as part of the release-led flow, but hidden work creation by itself is reserved
+for admin repair and maintenance.
+
+Public creation should strongly prompt users to search for an existing work
+before creating a new release. Personal creation should use quieter guidance,
+for example a help affordance on the work row. The guidance should specifically
+call out translations, language versions, reprints, and platform/source variants
+as cases that should attach to an existing work.
+
+Work matching uses ordinary content search. Users search books/releases, not
+hidden works. Selecting a release that already belongs to a work binds the new
+release to that release's canonical work. Selecting a standalone release may
+create a hidden work domain containing both the matched release and the new
+release.
+
+### Hidden Work Labels Come From Release Context
+
+Hidden work Units should not require ordinary users to author a separate public
+work title. Public UI labels a work context from the primary release, release
+list context, aliases, or admin-only maintenance metadata. This keeps the work
+domain as infrastructure for grouping and avoids making it compete with visible
+releases as a catalog object.
+
+### Admin Work Merge Is Canonical Migration Plus Optional Metadata Copy
+
+Admin work merge is a repair operation:
+
+```txt
+source work W_old -> target work W_new
+```
+
+Merge migrates canonical release/content membership and projections to the
+target work. It does not delete the source work Unit. It also does not
+destructively merge all source-work metadata. Source work tags, aliases,
+external references, attribution, history, and similar non-membership evidence
+remain on the source work by default to preserve auditability and rollback
+options.
+
+For active works, merge is async and durable. It needs dry-run preview,
+item-level progress, resumability, and enough before-state to revert. The merge
+operation enqueues repair for content search, post search, shelf grouping,
+language defaults, and DTO metadata such as USWN.
+
+Metadata copy is separate from canonical merge. Admins may explicitly copy
+missing tags or aliases from source work to target work. Copy creates only rows
+that the target does not already have, leaves source rows unchanged, and can be
+run or reverted independently from content membership migration.
+
+### Content Structure Uses contentUnitId
+
+The change should stop expanding book/chapter-specific terminology into new
+public contracts. The generic concept is `contentStructure`; a materialized node
+identity is `contentUnitId`. For books, `contentUnitId` is the materialized
+chapter content Unit. `targetUnitId` remains interaction terminology for posts,
+reviews, ratings, and discussion targets.
   and ranking can distinguish inherited vs release-local matches.
 
 ## Migration Plan

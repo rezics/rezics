@@ -41,3 +41,19 @@ for users who need exact version rows.
 - **WHEN** the user switches the shelf to release-expanded mode
 - **THEN** the shelf SHALL show separate rows for `release-a` and `release-b`
 - **AND** each row SHALL preserve its shelf position or a deterministic grouped ordering rule
+
+### Requirement: Shelf Grouping Follows Canonical Work After Merge
+
+Shelf storage SHALL remain release-first during work merge. Work merge SHALL NOT
+rewrite raw shelf membership rows unless a separate explicit shelf operation
+requires it. Shelf hydration and grouped rendering SHALL resolve merged source
+works to the target canonical work after merge repair.
+
+#### Scenario: Shelf items group under target work after merge
+
+- **GIVEN** a shelf contains release `release-a`
+- **AND** `release-a` belonged to source work `work-old`
+- **AND** `work-old` has been merged into `work-new`
+- **WHEN** the shelf is hydrated in grouped mode after merge repair
+- **THEN** `release-a` SHALL group under `work-new`
+- **AND** the shelf row SHALL continue to reference `release-a`
