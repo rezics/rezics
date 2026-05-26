@@ -9,7 +9,7 @@ const BookEditLayout = lazyRouteComponent(
   "BookEditLayout",
 );
 
-export const Route = createFileRoute("/book_/$bookId/edit")({
+export const Route = createFileRoute("/_editor/book/$bookId/edit")({
   component: () => (
     <BookEditLayout>
       <Outlet />

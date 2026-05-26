@@ -1,5 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
-import { useCanEdit } from "@rezics/api/hooks";
+import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
 import {
   common_edit,
@@ -9,7 +9,9 @@ import {
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { Pencil } from "lucide-react";
 import type React from "react";
 import { useRef } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
@@ -19,7 +21,7 @@ import {
   type ReplyComposerHandle,
 } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
-import { TextLink } from "@/shared/ui/link";
+import { Link } from "@/shared/ui/link";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
 
 const i18nMessages = {
@@ -51,8 +53,8 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
     enabled: !!bookUnitId,
   });
 
-  const canEdit = useCanEdit({
-    resource: "post",
+  const editorEntry = useEditorEntry({
+    surface: "review",
     ownerUnit: { user: review?.author },
   });
 
@@ -66,11 +68,18 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
 
   return (
     <div className="flex flex-col gap-8">
-      {canEdit && (
+      {editorEntry.canEnter && (
         <div className="self-end">
-          <TextLink to="/review/$reviewId/edit" params={{ reviewId }}>
-            {m.common_edit()}
-          </TextLink>
+          <Link to="/review/$reviewId/edit" params={{ reviewId }}>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label={m.common_edit()}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       )}
 

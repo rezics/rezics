@@ -1,4 +1,4 @@
-import { useCanEdit } from "@rezics/api/hooks";
+import { useEditorEntry } from "@rezics/api/hooks";
 import type { BookDTO } from "@rezics/contract";
 import {
   book_hero_actions_add_to_shelf,
@@ -51,7 +51,11 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
 }) => {
   const m = useMessage(i18nMessages);
   const navigate = useNavigate();
-  const canEdit = useCanEdit({ resource: "book", ownerUnit: bookInfo });
+  const editorEntry = useEditorEntry({
+    surface: "book",
+    ownerUnit: bookInfo,
+    capabilities: ["content", "tag"],
+  });
   const bookId = bookInfo?.unitId ?? "";
 
   const share = useShareMenu({
@@ -114,7 +118,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {canEdit && (
+        {editorEntry.canEnter && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger

@@ -2,7 +2,7 @@ import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
 import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
-import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
+import { Route as bookEditLayoutRoute } from "@/routes/_editor/book/$bookId/edit/route";
 import { BookEditChapterContext } from "./BookEditChapterContext";
 import {
   createBookEditConsoleConfig,

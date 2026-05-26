@@ -14,7 +14,7 @@ import { useMemo, useRef, useState } from "react";
 import { BookTocJsonEditor } from "@/book-library/components/Chapter/BookTocJsonEditor";
 import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
+import { Route as bookEditLayoutRoute } from "@/routes/_editor/book/$bookId/edit/route";
 import {
   BookTocEditor,
   type BookTocEditorHandle,

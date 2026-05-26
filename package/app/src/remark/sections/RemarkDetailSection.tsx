@@ -1,4 +1,4 @@
-import { useCanEdit } from "@rezics/api/hooks";
+import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
 import {
   common_edit,
@@ -6,12 +6,14 @@ import {
   common_no_data,
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { Pencil } from "lucide-react";
 import type React from "react";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "@/post/sections/PostTreeSection";
-import { TextLink } from "@/shared/ui/link";
+import { Link } from "@/shared/ui/link";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
 
 const i18nMessages = {
@@ -30,8 +32,8 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   const m = useMessage(i18nMessages);
   const composerRef = useFocusReplyFromQuery();
   const { data: remark, isLoading } = useQuery(postQueries.detail(remarkId));
-  const canEdit = useCanEdit({
-    resource: "post",
+  const editorEntry = useEditorEntry({
+    surface: "remark",
     ownerUnit: { user: remark?.author },
   });
 
@@ -44,11 +46,18 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
 
   return (
     <div className="flex flex-col gap-8">
-      {canEdit && (
+      {editorEntry.canEnter && (
         <div className="self-end">
-          <TextLink to="/remark/$reviewId/edit" params={{ reviewId: remarkId }}>
-            {m.common_edit()}
-          </TextLink>
+          <Link to="/remark/$reviewId/edit" params={{ reviewId: remarkId }}>
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label={m.common_edit()}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       )}
       <RemarkDetail remark={remark} onReplyInvoke={handleReplyInvoke} />

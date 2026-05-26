@@ -5,6 +5,6 @@ const BookEditHistoryTimelinePage = lazyRouteComponent(
   "BookEditHistoryTimelinePage",
 );
 
-export const Route = createFileRoute("/book_/$bookId/edit/history/")({
+export const Route = createFileRoute("/_editor/book/$bookId/edit/history/")({
   component: BookEditHistoryTimelinePage,
 });

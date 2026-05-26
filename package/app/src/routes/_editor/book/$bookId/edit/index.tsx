@@ -7,7 +7,7 @@ const BookEditMainPage = lazyRouteComponent(
 
 type BookEditSearch = { lang?: string; restoreRevision?: string };
 
-export const Route = createFileRoute("/book_/$bookId/edit/")({
+export const Route = createFileRoute("/_editor/book/$bookId/edit/")({
   component: BookEditMainPage,
   validateSearch: (raw: Record<string, unknown>): BookEditSearch => ({
     lang: typeof raw.lang === "string" ? raw.lang : undefined,

@@ -19,7 +19,7 @@ import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { Route as excerptEditRoute } from "@/routes/_mainLayout/excerpt/$unitId/edit";
+import { Route as excerptEditRoute } from "@/routes/_editor/excerpt/$unitId/edit";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { ExcerptSourcePicker } from "../components/source/ExcerptSourcePicker";
 

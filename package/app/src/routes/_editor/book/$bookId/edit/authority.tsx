@@ -5,6 +5,6 @@ const BookAuthorityPage = lazyRouteComponent(
   "BookAuthorityPage",
 );
 
-export const Route = createFileRoute("/book_/$bookId/edit/authority")({
+export const Route = createFileRoute("/_editor/book/$bookId/edit/authority")({
   component: BookAuthorityPage,
 });

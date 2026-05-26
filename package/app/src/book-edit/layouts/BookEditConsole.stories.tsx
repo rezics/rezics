@@ -1,5 +1,7 @@
 import {
   book_edit_sidebar_history,
+  common_back,
+  common_edit,
   edit_console_chapter_context_back_to_chapters,
   edit_console_chapter_context_label,
 } from "@rezics/i18n/messages";
@@ -18,6 +20,7 @@ import { useMemo } from "react";
 import { NavigationList } from "@/core/components/navigation/NavigationList";
 import type { NavigationItem } from "@/core/components/navigation/navigation";
 import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
+import { createMinimalEditConsoleConfig } from "@/core/layouts/editConsoleConfig";
 import { historyBookId } from "@/stories/fixtures/history";
 import { createBookEditConsoleConfig } from "./bookEditConsoleConfig";
 
@@ -33,6 +36,8 @@ type Story = StoryObj<typeof meta>;
 
 const i18nMessages = {
   book_edit_sidebar_history,
+  common_back,
+  common_edit,
   edit_console_chapter_context_back_to_chapters,
   edit_console_chapter_context_label,
 };
@@ -130,9 +135,38 @@ function SharedLayoutShellPreview() {
   );
 }
 
+function MinimalLayoutShellPreview() {
+  const m = useMessage(i18nMessages);
+
+  return (
+    <EditConsoleLayout
+      {...createMinimalEditConsoleConfig({
+        returnLabel: m.common_back(),
+        returnHref: "/review/review-1",
+        editorLabel: m.common_edit(),
+        editorHref: "/review/review-1/edit",
+      })}
+    >
+      <section className="mx-auto max-w-3xl px-6 py-10">
+        <h2 className="text-lg font-medium leading-ui text-text-primary">
+          {m.common_edit()}
+        </h2>
+        <p className="mt-2 text-sm leading-body text-text-secondary">
+          A quiet draft waits for a careful revision.
+        </p>
+      </section>
+    </EditConsoleLayout>
+  );
+}
+
 export const SharedLayoutShell: Story = {
   decorators: [withRouterAt(`/book/${historyBookId}/edit/history`)],
   render: () => <SharedLayoutShellPreview />,
+};
+
+export const MinimalLayoutShell: Story = {
+  decorators: [withRouterAt("/review/review-1/edit")],
+  render: () => <MinimalLayoutShellPreview />,
 };
 
 export const ActiveHistoryNavigation: Story = {

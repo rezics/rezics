@@ -38,8 +38,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
 import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
-import { Route as bookEditChapterRoute } from "@/routes/book_/$bookId/edit/$chapterId";
-import { Route as bookEditLayoutRoute } from "@/routes/book_/$bookId/edit/route";
+import { Route as bookEditChapterRoute } from "@/routes/_editor/book/$bookId/edit/$chapterId";
+import { Route as bookEditLayoutRoute } from "@/routes/_editor/book/$bookId/edit/route";
 import {
   RezicsMarkdownEditor,
   type ViewMode,

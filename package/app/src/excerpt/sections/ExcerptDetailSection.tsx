@@ -1,4 +1,4 @@
-import { useCanEdit } from "@rezics/api/hooks";
+import { useEditorEntry } from "@rezics/api/hooks";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import {
   common_edit,
@@ -8,12 +8,14 @@ import {
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
+import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { Pencil } from "lucide-react";
 import type React from "react";
 import { PostListSection } from "@/post";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
-import { TextLink } from "@/shared/ui/link";
+import { Link } from "@/shared/ui/link";
 import { ExcerptDetail } from "../components/detail/ExcerptDetail";
 
 const i18nMessages = {
@@ -33,8 +35,8 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   const m = useMessage(i18nMessages);
   const composerRef = useFocusReplyFromQuery();
   const { data: excerpt, isLoading } = useQuery(unitQueries.detail(unitId));
-  const canEdit = useCanEdit({
-    resource: "unit",
+  const editorEntry = useEditorEntry({
+    surface: "excerpt",
     ownerUnit: { user: excerpt?.user },
   });
 
@@ -57,11 +59,18 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
     <div className="flex flex-col gap-8">
       <div className="flex items-center">
         {title && <h1 className="text-2xl font-bold">{title}</h1>}
-        {canEdit && (
+        {editorEntry.canEnter && (
           <div className="ml-auto">
-            <TextLink to="/excerpt/$unitId/edit" params={{ unitId }}>
-              {m.common_edit()}
-            </TextLink>
+            <Link to="/excerpt/$unitId/edit" params={{ unitId }}>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label={m.common_edit()}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         )}
       </div>

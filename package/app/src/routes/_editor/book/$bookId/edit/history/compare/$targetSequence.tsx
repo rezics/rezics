@@ -11,7 +11,7 @@ type CompareSearch = {
 };
 
 export const Route = createFileRoute(
-  "/book_/$bookId/edit/history/compare/$targetSequence",
+  "/_editor/book/$bookId/edit/history/compare/$targetSequence",
 )({
   component: BookRevisionComparePage,
   validateSearch: (raw: Record<string, unknown>): CompareSearch => ({

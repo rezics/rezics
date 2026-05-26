@@ -5,6 +5,6 @@ const BookEditChapterPage = lazyRouteComponent(
   "BookEditChapterPage",
 );
 
-export const Route = createFileRoute("/book_/$bookId/edit/$chapterId")({
+export const Route = createFileRoute("/_editor/book/$bookId/edit/$chapterId")({
   component: BookEditChapterPage,
 });

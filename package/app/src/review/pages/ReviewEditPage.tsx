@@ -22,7 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
-import { Route as reviewEditRoute } from "@/routes/_mainLayout/review/$reviewId/edit";
+import { Route as reviewEditRoute } from "@/routes/_editor/review/$reviewId/edit";
 
 const i18nMessages = {
   common_loading,

@@ -5,6 +5,6 @@ const BookEditTagPage = lazyRouteComponent(
   "BookEditTagPage",
 );
 
-export const Route = createFileRoute("/book_/$bookId/edit/tag")({
+export const Route = createFileRoute("/_editor/book/$bookId/edit/tag")({
   component: BookEditTagPage,
 });
