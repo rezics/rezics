@@ -17,6 +17,7 @@ import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 import type { FC } from "react";
 import FollowButton from "@/engagement/components/FollowButton";
 import { Link } from "@/shared/ui/link";
+import { ProfileStatLink } from "./ProfileOverviewCards";
 
 const i18nMessages = {
   profile_following,
@@ -103,13 +104,19 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
               @{user.slug}
             </span>
           )}
-          <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
-            <span>
-              <strong>{user.followersCount ?? 0}</strong> followers
+          <div className="mt-1 flex items-center gap-3 text-sm text-text-secondary">
+            <span className="min-w-0 truncate">
+              <strong className="font-medium text-text-primary">
+                {user.followersCount ?? 0}
+              </strong>{" "}
+              {m.profile_tab_followers()}
             </span>
-            <span>&middot;</span>
-            <span>
-              <strong>{user.followingsCount ?? 0}</strong> following
+            <span aria-hidden="true">&middot;</span>
+            <span className="min-w-0 truncate">
+              <strong className="font-medium text-text-primary">
+                {user.followingsCount ?? 0}
+              </strong>{" "}
+              {m.profile_following()}
             </span>
           </div>
           {user.bio && (
@@ -145,13 +152,19 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
           <p className="text-sm text-text-secondary max-w-xs">{user.bio}</p>
         )}
 
-        <div className="flex items-center gap-3 text-sm text-gray-500">
+        <div className="flex items-center gap-3 text-sm text-text-secondary">
           <span>
-            <strong>{user.followersCount ?? 0}</strong> followers
+            <strong className="font-medium text-text-primary">
+              {user.followersCount ?? 0}
+            </strong>{" "}
+            {m.profile_tab_followers()}
           </span>
-          <span>&middot;</span>
+          <span aria-hidden="true">&middot;</span>
           <span>
-            <strong>{user.followingsCount ?? 0}</strong> following
+            <strong className="font-medium text-text-primary">
+              {user.followingsCount ?? 0}
+            </strong>{" "}
+            {m.profile_following()}
           </span>
         </div>
 
@@ -173,26 +186,26 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         </div>
 
         {/* Stats — desktop only, shown in sidebar */}
-        <div className="w-full mt-4 flex flex-col gap-1">
+        <div className="w-full mt-4 flex flex-col gap-2">
           <span className="text-sm font-semibold mb-1">
             {m.profile_stats()}
           </span>
-          <StatLink
+          <ProfileStatLink
             label={m.profile_tab_shelves()}
             count={shelvesCountQuery.data?.total}
             to={`/user/${userId}/shelves`}
           />
-          <StatLink
+          <ProfileStatLink
             label={m.profile_tab_content()}
             count={reviewsCountQuery.data?.total}
             to={`/user/${userId}/content`}
           />
-          <StatLink
+          <ProfileStatLink
             label={m.profile_tab_followers()}
             count={user.followersCount ?? 0}
             to={`/user/${userId}/followers`}
           />
-          <StatLink
+          <ProfileStatLink
             label={m.profile_following()}
             count={user.followingsCount ?? 0}
             to={`/user/${userId}/followers?filter=following`}
@@ -202,18 +215,3 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
     </>
   );
 };
-
-const StatLink: FC<{
-  label: string;
-  count: number | undefined;
-  to: string;
-}> = ({ label, count, to }) => (
-  <Link to={to} className="no-underline">
-    <div className="flex items-center justify-between py-0.5 hover:bg-gray-50 rounded px-1">
-      <span className="text-sm text-text-primary">{label}</span>
-      <span className="text-sm font-medium text-text-secondary">
-        {count ?? "—"}
-      </span>
-    </div>
-  </Link>
-);

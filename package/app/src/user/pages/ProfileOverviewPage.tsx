@@ -17,9 +17,13 @@ import {
 import { useMessage } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
-import { Link } from "@/shared/ui/link";
 import { DescriptionBox } from "@/user/components/DescriptionBox";
 import { useProfileContext } from "@/user/components/ProfileLayout";
+import {
+  ProfileActivityCard,
+  ProfilePinnedItemCard,
+  ProfileStatLink,
+} from "@/user/components/ProfileOverviewCards";
 
 const i18nMessages = {
   common_pinned,
@@ -80,26 +84,30 @@ export const ProfileOverviewPage: FC = () => {
   return (
     <div className="flex flex-col gap-8 py-4">
       {/* Mobile stats — hidden on desktop (shown in sidebar) */}
-      <div className="md:hidden flex flex-wrap gap-4 text-sm">
-        <StatItem
+      <div className="grid grid-cols-2 gap-2 text-sm md:hidden">
+        <ProfileStatLink
           label={m.profile_tab_shelves()}
           count={shelvesCountQuery.data?.total}
           to={`/user/${userId}/shelves`}
+          variant="compact"
         />
-        <StatItem
+        <ProfileStatLink
           label={m.profile_tab_content()}
           count={reviewsCountQuery.data?.total}
           to={`/user/${userId}/content`}
+          variant="compact"
         />
-        <StatItem
+        <ProfileStatLink
           label={m.profile_tab_followers()}
           count={user.followersCount ?? 0}
           to={`/user/${userId}/followers`}
+          variant="compact"
         />
-        <StatItem
+        <ProfileStatLink
           label={m.profile_following()}
           count={user.followingsCount ?? 0}
           to={`/user/${userId}/followers?filter=following`}
+          variant="compact"
         />
       </div>
 
@@ -112,7 +120,11 @@ export const ProfileOverviewPage: FC = () => {
         {pinned.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {pinned.map((item: ContentSearchDocument) => (
-              <PinnedCard key={item.id} item={item} />
+              <ProfilePinnedItemCard
+                key={item.id}
+                item={item}
+                untitledLabel={m.common_untitled()}
+              />
             ))}
           </div>
         ) : (
@@ -130,7 +142,16 @@ export const ProfileOverviewPage: FC = () => {
         {recent.length > 0 ? (
           <div className="flex flex-col gap-2">
             {recent.map((item: ContentSearchDocument) => (
-              <ActivityItem key={item.id} item={item} />
+              <ProfileActivityCard
+                key={item.id}
+                item={item}
+                untitledLabel={m.common_untitled()}
+                dateLabel={
+                  item.updatedAt
+                    ? new Date(item.updatedAt).toLocaleDateString()
+                    : undefined
+                }
+              />
             ))}
           </div>
         ) : (
@@ -139,63 +160,6 @@ export const ProfileOverviewPage: FC = () => {
           </p>
         )}
       </div>
-    </div>
-  );
-};
-
-const StatItem: FC<{
-  label: string;
-  count: number | undefined;
-  to: string;
-}> = ({ label, count, to }) => (
-  <Link to={to} className="no-underline">
-    <span className="text-gray-500 hover:text-gray-700">
-      <strong className="text-gray-900">{count ?? "—"}</strong> {label}
-    </span>
-  </Link>
-);
-
-// MOCK: pinned card component
-const PinnedCard: FC<{ item: ContentSearchDocument }> = ({ item }) => {
-  const m = useMessage(i18nMessages);
-  const title =
-    item.translations?.[0]?.title ?? item.type ?? m.common_untitled();
-
-  return (
-    <Link
-      to="/unit/$unitId"
-      params={{ unitId: item.id }}
-      search={{ view: "auto" }}
-      className="no-underline"
-    >
-      <div className="border border-gray-200 rounded-lg p-3 hover:border-gray-400 transition-colors">
-        <span className="block text-xs uppercase text-text-secondary">
-          {item.type}
-        </span>
-        <span className="block text-sm font-medium mt-1 line-clamp-2 text-text-primary">
-          {title}
-        </span>
-      </div>
-    </Link>
-  );
-};
-
-// MOCK: activity item component
-const ActivityItem: FC<{ item: ContentSearchDocument }> = ({ item }) => {
-  const m = useMessage(i18nMessages);
-  const title =
-    item.translations?.[0]?.title ?? item.type ?? m.common_untitled();
-  const date = item.updatedAt
-    ? new Date(item.updatedAt).toLocaleDateString()
-    : "";
-
-  return (
-    <div className="flex items-center gap-3 py-1">
-      <span className="text-xs uppercase min-w-[60px] text-text-secondary">
-        {item.type}
-      </span>
-      <span className="text-sm flex-1 truncate text-text-primary">{title}</span>
-      <span className="text-xs text-text-secondary">{date}</span>
     </div>
   );
 };
