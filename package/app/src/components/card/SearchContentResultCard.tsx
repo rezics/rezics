@@ -74,7 +74,7 @@ export function SearchContentResultCard({
   user,
   ...props
 }: SearchContentResultCardProps) {
-const hasMedia = Boolean(thumbnailSlot || thumbnail?.src);
+  const hasMedia = Boolean(thumbnailSlot || thumbnail?.src);
   const hasUser = Boolean(user?.unitId);
   const hasAvatar = Boolean(
     hasUser || avatarSlot || avatar?.src || avatar?.fallback,
@@ -176,9 +176,7 @@ const hasMedia = Boolean(thumbnailSlot || thumbnail?.src);
                             {source}
                           </Link>
                         ) : (
-                          <span className="min-w-0 truncate">
-                            {source}
-                          </span>
+                          <span className="min-w-0 truncate">{source}</span>
                         )}
                       </>
                     ) : null}
@@ -194,12 +192,12 @@ const hasMedia = Boolean(thumbnailSlot || thumbnail?.src);
               style={clampStyle(titleLines)}
             >
               {titleHref ? (
-                  <Link
-                    to={titleHref}
-                    className="block text-text-primary no-underline underline-offset-4 decoration-current"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    {title}
+                <Link
+                  to={titleHref}
+                  className="block text-text-primary no-underline underline-offset-4 decoration-current"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  {title}
                 </Link>
               ) : (
                 title

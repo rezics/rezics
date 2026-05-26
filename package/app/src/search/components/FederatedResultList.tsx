@@ -1,16 +1,12 @@
 import type {
   ContentSearchDocument,
-  EntitySearchDocument,
   FederatedRankedHit,
   FederatedSearchResult,
   FederatedSingleItem,
   PostSearchDocument,
-  RealmSearchDocument,
   SearchCategory,
   SearchScope,
-  UserSearchDocument,
 } from "@rezics/contract";
-import { PostKind } from "@rezics/contract";
 import {
   common_loading,
   common_view_more,
@@ -21,125 +17,16 @@ import {
   search_origin_post,
   search_origin_realm,
   search_origin_user,
-  search_realm_members,
   search_results_summary,
 } from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
-import { Badge, Button } from "@rezics/ui/shadcn";
+import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
-import { ReviewCard } from "@/review/components/item/ReviewCard";
-import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { CATEGORY_LABELS } from "./permittedCategories";
-
-function pickTitle(titles: readonly string[] | null | undefined): string {
-  if (!titles || titles.length === 0) return "";
-  return titles[0] ?? "";
-}
-
-function ContentItemRow({ item }: { item: ContentSearchDocument }) {
-  const title = pickTitle(item.titles);
-  return (
-    <div className="flex items-start gap-3 py-3 border-b border-border-whisper last:border-b-0">
-      {item.coverUrl && (
-        <img
-          src={item.coverUrl}
-          alt={title}
-          className="w-16 h-20 object-cover rounded"
-        />
-      )}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{title || item.id}</p>
-        <p className="text-xs text-text-secondary">{item.type}</p>
-        {item.summaries[0] && (
-          <p className="text-sm text-text-secondary line-clamp-2 mt-1">
-            {item.summaries[0]}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function PostItemRow({ item }: { item: PostSearchDocument }) {
-  if (item.kind === PostKind.REVIEW) {
-    return (
-      <ReviewCard
-        review={mapPostSearchDocToPostDTO(item)}
-        className="border-b-0 py-0"
-      />
-    );
-  }
-
-  return (
-    <div className="py-3 border-b border-border-whisper last:border-b-0">
-      <p className="text-xs text-text-secondary">
-        {item.kind ?? search_origin_post()} ·{" "}
-        {item.authorName ?? item.authorUserId}
-      </p>
-      {item.contentText && (
-        <p className="text-sm line-clamp-3 mt-1">{item.contentText}</p>
-      )}
-    </div>
-  );
-}
-
-function RealmItemRow({ item }: { item: RealmSearchDocument }) {
-  const title = pickTitle(item.titles);
-  return (
-    <div className="py-3 border-b border-border-whisper last:border-b-0">
-      <p className="text-sm font-medium truncate">{title || item.id}</p>
-      <p className="text-xs text-text-secondary">
-        {search_realm_members({ count: item.memberCount })}
-      </p>
-    </div>
-  );
-}
-
-function UserItemRow({ item }: { item: UserSearchDocument }) {
-  return (
-    <div className="flex items-start gap-3 py-3 border-b border-border-whisper last:border-b-0">
-      {item.avatar && (
-        <img
-          src={item.avatar}
-          alt={item.name}
-          className="w-10 h-10 rounded-full"
-        />
-      )}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{item.name}</p>
-        {item.bio && (
-          <p className="text-xs text-text-secondary line-clamp-2">{item.bio}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function EntityItemRow({ item }: { item: EntitySearchDocument }) {
-  const title = pickTitle(item.titles);
-  return (
-    <div className="flex items-start gap-3 border-b border-border-whisper py-3 last:border-b-0">
-      <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-subtle text-xs text-text-secondary">
-        {item.avatar ? (
-          <img
-            src={item.avatar}
-            alt=""
-            className="size-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          (title || item.id).slice(0, 1).toUpperCase()
-        )}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{title || item.id}</p>
-        <p className="text-xs text-text-secondary">
-          {item.kind ?? search_origin_entity()}
-        </p>
-      </div>
-    </div>
-  );
-}
+import {
+  originBadge as renderOriginBadge,
+  renderFederatedSearchCard,
+} from "./searchResultCardAdapters";
 
 type ContentRowCategory = "books" | "shelves";
 type PostRowCategory = "reviews" | "excerpts" | "remarks" | "posts";
@@ -152,21 +39,6 @@ type ItemRowCategory =
   | RealmRowCategory
   | UserRowCategory
   | EntityRowCategory;
-
-function isContentSection(
-  category: SearchCategory,
-): category is ContentRowCategory {
-  return category === "books" || category === "shelves";
-}
-
-function isPostSection(category: SearchCategory): category is PostRowCategory {
-  return (
-    category === "reviews" ||
-    category === "excerpts" ||
-    category === "remarks" ||
-    category === "posts"
-  );
-}
 
 function originBadge(hit: FederatedRankedHit): string {
   const origin = hit._origin;
@@ -186,44 +58,17 @@ function originBadge(hit: FederatedRankedHit): string {
   return origin.indexUid;
 }
 
-function RankedHitRow({ hit }: { hit: FederatedRankedHit }) {
+function RankedHitCard({ hit }: { hit: FederatedRankedHit }) {
   const badge = originBadge(hit);
-  const indexUid = hit._origin.indexUid;
-  return (
-    <div className="py-3 border-b border-border-whisper last:border-b-0">
-      <Badge className="mb-1">{badge}</Badge>
-      {indexUid === "content" && (
-        <ContentItemRow item={hit as ContentSearchDocument} />
-      )}
-      {indexUid === "post" && <PostItemRow item={hit as PostSearchDocument} />}
-      {indexUid === "realm" && (
-        <RealmItemRow item={hit as RealmSearchDocument} />
-      )}
-      {indexUid === "user" && <UserItemRow item={hit as UserSearchDocument} />}
-      {indexUid === "entities" && (
-        <EntityItemRow item={hit as EntitySearchDocument} />
-      )}
-    </div>
+  return renderFederatedSearchCard(
+    hit._origin.category,
+    hit,
+    renderOriginBadge(badge),
   );
 }
 
 function renderSingleItem(category: SearchCategory, item: FederatedSingleItem) {
-  if (isContentSection(category)) {
-    return <ContentItemRow item={item as ContentSearchDocument} />;
-  }
-  if (isPostSection(category)) {
-    return <PostItemRow item={item as PostSearchDocument} />;
-  }
-  if (category === "realms") {
-    return <RealmItemRow item={item as RealmSearchDocument} />;
-  }
-  if (category === "users") {
-    return <UserItemRow item={item as UserSearchDocument} />;
-  }
-  if (category === "entities") {
-    return <EntityItemRow item={item as EntitySearchDocument} />;
-  }
-  return null;
+  return renderFederatedSearchCard(category, item);
 }
 
 export type FederatedResultListProps = {
@@ -289,7 +134,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
                 {common_view_more()}
               </Button>
             </header>
-            <div>
+            <div className="space-y-2">
               {section.items.map((item, idx) => (
                 <div key={(item as { id?: string }).id ?? idx}>
                   {renderSingleItem(category, item as FederatedSingleItem)}
@@ -314,9 +159,9 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
             ms: result.processingTimeMs,
           })}
         </p>
-        <div>
+        <div className="space-y-2">
           {result.hits.map((hit, idx) => (
-            <RankedHitRow key={(hit as { id?: string }).id ?? idx} hit={hit} />
+            <RankedHitCard key={(hit as { id?: string }).id ?? idx} hit={hit} />
           ))}
         </div>
       </div>
@@ -335,7 +180,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
           ms: result.processingTimeMs,
         })}
       </p>
-      <div>
+      <div className="space-y-2">
         {result.items.map((item, idx) => (
           <div key={(item as { id?: string }).id ?? idx}>
             {renderSingleItem(result.category, item)}
