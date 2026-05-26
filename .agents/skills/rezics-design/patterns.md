@@ -44,10 +44,12 @@ Use shadcn `<Card>` as the canonical card primitive. Choose the surface
 explicitly:
 
 - `surface="plain"`: flat feed/media/list item. No outer background, border, or
-  shadow.
-- `surface="contained"`: same page-color card with a whisper ring.
-- `surface="elevated"`: same-color/near-same-color media-rich recommendation or
-  article card with a soft `shadow-1`.
+  shadow; `interactive` reserves an outer tonal state layer and uses tighter
+  content padding.
+- `surface="contained"`: borderless tonal panel with no shadow; `interactive`
+  adds tonal hover.
+- `surface="elevated"`: same-color media-rich recommendation or article card
+  with calibrated `elevation={1..10}` shadow lift.
 
 ### ✅ DO — plain content-led card
 
@@ -70,8 +72,10 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 ### ✅ DO — elevated media/article card
 
 ```tsx
-<Card surface="elevated">
-  <img src={article.image} alt="" className="aspect-[16/9] w-full object-cover" />
+<Card surface="elevated" elevation={6} interactive>
+  <CardMedia>
+    <img src={article.image} alt="" className="aspect-[16/9] w-full object-cover" />
+  </CardMedia>
   <CardHeader>
     <CardTitle>{article.title}</CardTitle>
     <CardDescription>{article.meta}</CardDescription>
@@ -79,7 +83,8 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 </Card>
 ```
 
-Elevated cards keep the fill same-color/near-same-color and use a soft shadow.
+Elevated cards use `CardMedia` for flush media and the Card surface API for
+shadow/hover lift.
 Use them for recommendation/article/media cards, not for sections or admin
 panels.
 

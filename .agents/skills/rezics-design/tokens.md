@@ -143,14 +143,14 @@ UnoCSS / preset-wind4 follows Tailwind v4's `N × 4px` model (`p-2 = 8px`, `p-4 
 | ---------------------- | -------------- | -------------------------------------- |
 | (no shadow)            | `shadow-none`  | **Default for sections, panels, table rows, navs, and flat/contained cards.** |
 | `shadow-1`             | `shadow-sm`    | shadcn `<Card surface="elevated">` for media-rich recommendation/article cards; sticky bars and micro hover lift. |
-| `shadow-2`             | `shadow-md`    | Floating action menus and popovers when modal shadow is too heavy. |
+| `shadow-2`             | `shadow-md`    | Elevated interactive Card hover, floating action menus, and popovers when modal shadow is too heavy. |
 | `shadow-3`             | `shadow-lg`    | Reserved for exceptional floating surfaces. |
 | `shadow-modal`         | `shadow-modal` | **Modal-tier only**: `<Dialog>`, command palette, context menus, popovers over chapters. |
 
 **Hard rule**: sections, tables, navs, and generic panels **never** get a shadow.
-Cards may only use shadow through shadcn `<Card surface="elevated">`, which keeps
-the fill same-color/near-same-color and uses `shadow-1`. Do not hand-roll
-`shadow-md` card recipes.
+Cards may only use shadow through shadcn `<Card surface="elevated">`, which uses
+`shadow-1` by default and may lift to `shadow-2` on interactive hover. Do not
+hand-roll shadow card recipes.
 
 In dark mode, shadow opacities scale up (0.20–0.40) to remain visible against dark canvas. Already automatic.
 

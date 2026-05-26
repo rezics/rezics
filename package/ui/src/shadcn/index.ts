@@ -25,7 +25,9 @@ export {
   CardDescription,
   CardFooter,
   CardHeader,
+  CardMedia,
   CardTitle,
+  type CardElevation,
   type CardSurface,
 } from "./card";
 export {

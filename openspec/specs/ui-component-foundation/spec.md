@@ -64,35 +64,64 @@ The shadcn primitives consumed by the project SHALL be the ones exported from `@
 - **THEN** the import path SHALL be `@rezics/ui/shadcn` (or a subpath thereof, e.g. `@rezics/ui/shadcn/dialog` if the build supports subpath imports)
 - **AND** the import SHALL NOT bypass the rezics-ui re-export
 
-### Requirement: Vendored shadcn primitives are unmodified (Path P)
+### Requirement: shadcn primitive manual changes are documented
 
-Vendored shadcn primitives in `package/ui/src/shadcn/*.tsx` SHALL be sourced from the `base-luma` registry **as shipped**. There SHALL NOT be rezics-side edits to:
+Vendored shadcn primitives in `package/ui/src/shadcn/*.tsx` SHALL be sourced
+from the `base-luma` registry as shipped unless the primitive appears in the
+documented exception registry below.
+
+Non-exception shadcn primitives SHALL NOT receive rezics-side edits to:
 
 - Spacing values (padding, gap, min-height) inside vendored source.
-- Color token references (vendored primitives consume the values shadcn ships with; the rezics `--colors-*` cascade resolves through the same custom-property names shadcn uses).
+- Color token references (vendored primitives consume the values shadcn ships
+  with; the rezics `--colors-*` cascade resolves through the same custom-property
+  names shadcn uses).
 - Animation curves, durations, or easing.
 - Behavior, prop signatures, or ARIA wiring.
 
-The rezics design vocabulary (the closed nine-token `--padding-*` set defined in `complete-rezics-design-storybook/specs/design-system-density/spec.md`) applies to **rezics-authored** code only — `package/ui/src/primitive/`, `package/ui/src/composite/`, and app-level composites under `package/{admin,app,folio,editor}/src/`. Patching vendored shadcn primitives to consume rezics tokens SHALL NOT happen.
+The rezics design vocabulary (the closed nine-token `--padding-*` set defined in
+`complete-rezics-design-storybook/specs/design-system-density/spec.md`) applies
+to **rezics-authored** code only — `package/ui/src/primitive/`,
+`package/ui/src/composite/`, and app-level composites under
+`package/{admin,app,folio,editor}/src/`. Patching a non-exception vendored
+shadcn primitive to consume rezics tokens SHALL NOT happen.
 
-The exception list is explicit and finite: **`carousel.tsx`** and **`sidebar.tsx`** are documented Path-P exceptions, retaining their local customizations. Both files SHALL carry a top-of-file comment naming this Requirement and instructing readers not to run the shadcn CLI against them. Adding a third primitive to the exception list SHALL require an OpenSpec change updating this Requirement.
+The exception registry is the canonical list of shadcn primitives with permitted
+manual changes. Any new manual edit to a shadcn primitive SHALL either:
+
+1. fit inside the primitive's existing exception entry; or
+2. update this registry in the same change that introduces the edit.
+
+| File | Allowed manual changes | Required companion docs |
+| --- | --- | --- |
+| `package/ui/src/shadcn/card.tsx` | Rezics `surface="plain" \| "contained" \| "elevated"` API; `interactive` API for cursor/hover/focus treatment; `elevation={1..10}` API for elevated card calibration; `size` API; root `@container/card` query context; `CardMedia` slot; first/last media flush behavior; depth policy for card surfaces. | `package/ui/src/docs/pattern/card-surfaces.mdx`, `package/ui/src/docs/patterns.mdx`, and elevation/depth docs when shadow policy changes. |
+| `package/ui/src/shadcn/carousel.tsx` | Existing local carousel controls and Embla integration retained from the Path-P exception. | `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` Decision 2. |
+| `package/ui/src/shadcn/sidebar.tsx` | Existing local sidebar behavior, responsive state, and layout retained from the Path-P exception. | `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` Decision 2. |
 
 #### Scenario: Re-running the shadcn CLI on a non-exception primitive
 
-- **WHEN** `bunx shadcn@latest add <primitive>` is run for any primitive in `package/ui/src/shadcn/` other than `carousel` or `sidebar`
+- **WHEN** `bunx shadcn@latest add <primitive>` is run for any primitive in `package/ui/src/shadcn/` that is not listed in the exception registry
 - **THEN** the resulting source SHALL match the `base-luma` registry output byte-for-byte (modulo timestamp/header-comment differences shadcn writes)
 - **AND** there SHALL be no manually-edited diff between the CLI output and the committed file
 
-#### Scenario: Path-P boundary is enforced at review
+#### Scenario: Manual shadcn primitive edits are reviewed against the registry
 
-- **WHEN** a pull request edits `package/ui/src/shadcn/<primitive>.tsx` (where primitive is not `carousel` or `sidebar`) to consume a rezics token (`var(--padding-*)`, `var(--colors-*)` rezics-specific names, etc.)
+- **WHEN** a pull request edits `package/ui/src/shadcn/<primitive>.tsx`
+- **THEN** code review SHALL verify that the primitive is listed in the exception registry
+- **AND** the edit SHALL fit the allowed manual changes for that primitive
+- **AND** if the edit is a new kind of manual change, the pull request SHALL update the registry in this Requirement
+
+#### Scenario: Non-exception primitive edits are rejected
+
+- **WHEN** a pull request edits a shadcn primitive that is not listed in the exception registry
 - **THEN** code review SHALL block the merge
-- **AND** the contributor SHALL be redirected to either: (a) recalibrate the rezics token's value in `uno-config.ts` so the rezics-authored composite next door lands at the right rhythm; or (b) author a rezics-authored alternative primitive that lives in `package/ui/src/primitive/` or `package/ui/src/composite/`.
+- **AND** the contributor SHALL be redirected to either: (a) recalibrate the token value in `uno-config.ts` so the unmodified primitive resolves correctly; (b) author a rezics-owned primitive under `package/ui/src/primitive/` or `package/ui/src/composite/`; or (c) propose adding the primitive to this exception registry
 
-#### Scenario: Path-P exception primitives carry a comment
+#### Scenario: Exception primitives carry a comment
 
-- **WHEN** `package/ui/src/shadcn/carousel.tsx` or `package/ui/src/shadcn/sidebar.tsx` is opened
-- **THEN** the file SHALL contain a top-of-file comment naming the Path-P exception status and pointing to `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` Decision 2
+- **WHEN** a file listed in the exception registry is opened
+- **THEN** the file SHALL contain a top-of-file comment naming the exception status
+- **AND** the comment SHALL point readers to this Requirement or the companion design decision
 
 ### Requirement: shadcn primitive base is `@base-ui/react`
 

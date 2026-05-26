@@ -156,7 +156,7 @@ export function ChartAreaInteractive() {
   });
 
   return (
-    <Card surface="contained" className="@container/card">
+    <Card surface="contained">
       <CardHeader className="relative">
         <CardTitle>Total Visitors</CardTitle>
         <CardDescription>

@@ -8,7 +8,9 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
+  CardMedia,
   CardTitle,
+  type CardElevation,
 } from "./card";
 
 const meta = {
@@ -18,6 +20,10 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+const cardElevationLevels = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+] as const satisfies readonly CardElevation[];
 
 export const Default: Story = {
   render: () => (
@@ -60,7 +66,7 @@ export const Contained: Story = {
       </CardHeader>
       <CardContent>
         Use contained cards for panels and compact information groups that need
-        a quiet boundary on the page.
+        tonal separation without border chrome.
       </CardContent>
     </Card>
   ),
@@ -69,10 +75,10 @@ export const Contained: Story = {
 export const Elevated: Story = {
   render: () => (
     <Card surface="elevated" className="max-w-sm">
-      <div className="h-28 bg-surface-subtle" />
+      <CardMedia className="h-28 bg-surface-subtle" />
       <CardHeader>
         <CardTitle>Editors' picks</CardTitle>
-        <CardDescription>Same-color card with soft separation</CardDescription>
+        <CardDescription>Same-color media card</CardDescription>
       </CardHeader>
       <CardContent>
         Use elevated cards sparingly for media-rich recommendations, articles,
@@ -85,27 +91,49 @@ export const Elevated: Story = {
 export const SurfaceComparison: Story = {
   render: () => (
     <div className="grid max-w-4xl gap-4 bg-surface-canvas p-4 text-text-primary md:grid-cols-3">
-      <Card surface="plain">
-        <div className="h-24 rounded-md bg-surface-subtle" />
+      <Card surface="plain" interactive>
+        <CardMedia className="h-24 bg-surface-subtle" />
         <CardHeader>
           <CardTitle>Plain</CardTitle>
-          <CardDescription>Flat feed or media item</CardDescription>
+          <CardDescription>Inset state layer on hover</CardDescription>
         </CardHeader>
       </Card>
-      <Card surface="contained">
-        <div className="h-24 bg-surface-subtle" />
+      <Card surface="contained" interactive>
+        <CardMedia className="h-24 bg-surface-subtle" />
         <CardHeader>
           <CardTitle>Contained</CardTitle>
-          <CardDescription>Same-color card with ring</CardDescription>
+          <CardDescription>Tonal panel with hover lift</CardDescription>
         </CardHeader>
       </Card>
-      <Card surface="elevated">
-        <div className="h-24 bg-surface-subtle" />
+      <Card surface="elevated" interactive>
+        <CardMedia className="h-24 bg-surface-subtle" />
         <CardHeader>
           <CardTitle>Elevated</CardTitle>
-          <CardDescription>Media-rich feature card</CardDescription>
+          <CardDescription>Same-color card with shadow lift</CardDescription>
         </CardHeader>
       </Card>
+    </div>
+  ),
+};
+
+export const ElevatedScale: Story = {
+  render: () => (
+    <div className="grid max-w-6xl gap-4 bg-surface-canvas p-4 text-text-primary sm:grid-cols-2 lg:grid-cols-5">
+      {cardElevationLevels.map((level) => (
+        <Card
+          key={level}
+          elevation={level}
+          interactive
+          surface="elevated"
+          className="min-w-0"
+        >
+          <CardMedia className="h-20 bg-surface-subtle" />
+          <CardHeader>
+            <CardTitle>Level {level}</CardTitle>
+            <CardDescription>Same-color elevated card</CardDescription>
+          </CardHeader>
+        </Card>
+      ))}
     </div>
   ),
 };

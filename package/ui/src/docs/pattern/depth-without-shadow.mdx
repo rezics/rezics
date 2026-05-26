@@ -7,7 +7,13 @@ import { DepthDemo, Compare, Do, Dont } from "../tokens/_gallery";
 
 rezics communicates most depth through a **tonal surface ladder**, not through `box-shadow`. Each step in the ladder is a different background fill — canvas → base → elevated → subtle → sunken — and the contrast between adjacent fills is what signals the depth relationship. The system is mode-aware: light mode shifts warmer/cooler; dark mode shifts brighter/dimmer.
 
-Cards are the narrow exception: shadcn `<Card surface="elevated">` may use a soft `shadow-1` while keeping the fill same-color/near-same-color. Use that for media-rich recommendation/article cards only; use `surface="plain"` for flat feed/media items and `surface="contained"` for same-color ringed cards.
+Cards are the narrow exception: shadcn `<Card surface="elevated">` may use a
+same-color soft shadow for media-rich recommendation/article cards. Add
+`interactive` only when the card itself is clickable; that enables cursor,
+focus, and hover treatment. Use `surface="plain"` for flat feed/media items and
+`surface="contained"` for borderless tonal panels.
+`surface="elevated"` supports `elevation={1..10}` for calibration, but the
+chosen production level should stay in-flow, not modal-like.
 
 ## Live preview
 
@@ -29,7 +35,11 @@ Adjacent tiers are designed to be readable side-by-side. Skipping tiers (canvas 
 
 ## The shadow exceptions
 
-`shadow-1` is allowed on shadcn `<Card surface="elevated">` for same-color media cards. `shadow-modal` is reserved for **modal-tier** surfaces. It carries the visual weight of "this surface is overlaying everything else, click outside to dismiss," which is a different signal from ordinary in-flow depth.
+`shadow-1`/`shadow-2` are allowed on shadcn `<Card surface="elevated">` for
+media cards and their `interactive` hover state. `shadow-modal` is reserved for
+**modal-tier** surfaces. It carries the visual weight of "this surface is
+overlaying everything else, click outside to dismiss," which is a different
+signal from ordinary in-flow depth.
 
 ```tsx
 <Card surface="elevated">

@@ -57,9 +57,31 @@ The design system SHALL provide `success`, `warning`, `error`, and `info` semant
 - **WHEN** `--colors-success-text`, `--colors-warning-text`, `--colors-error-text`, `--colors-info-text` are referenced
 - **THEN** all four SHALL resolve to declared values verified against `--colors-background` for AA 4.5:1 in their respective mode
 
-### Requirement: Border-led depth, not shadow-led
+### Requirement: Tonal depth, not shadow-led
 
-Containment SHALL be expressed primarily via `--colors-border-whisper` (default surface boundary, 1px at 8% opacity), whitespace, and the shadcn Card surface API. Sections, table rows, navs, and generic panels SHALL NOT carry box-shadow. Cards SHALL use shadcn `<Card surface="plain" | "contained" | "elevated">`, SHALL use the small `rounded-md` card radius, and SHALL keep same-color/page-color fills rather than tonal card backgrounds. Only `surface="elevated"` MAY carry a soft `shadow-1`, and only for same-color/near-same-color media-rich recommendation or article cards. Heavier shadow tokens SHALL exist only for floating or modal-tier surfaces (dialogs, command palettes, context menus, popovers).
+Containment SHALL be expressed primarily via tonal surface fills, whitespace,
+`--colors-border-whisper` where a hairline boundary is semantically needed, and
+the shadcn Card surface API. Sections, table rows, navs, and generic panels
+SHALL NOT carry box-shadow. Cards SHALL use shadcn
+`<Card surface="plain" | "contained" | "elevated">`, SHALL use the small
+`rounded-md` card radius, and SHALL follow the surface contract:
+
+- `plain`: transparent, no border or shadow, with an outer tonal hover state only when interactive.
+- `contained`: tonal fill, no border or shadow, with tonal hover only when interactive.
+- `elevated`: same-color media-card shadow using the Card surface API and
+  `elevation={1..10}` calibration.
+
+Only `surface="elevated"` MAY carry card shadow, and only for media-rich
+recommendation or article cards. Heavier shadow tokens SHALL exist only for
+elevated card hover, floating surfaces, or modal-tier surfaces (dialogs, command
+palettes, context menus, popovers).
+
+Card hover, pointer cursor, and focus treatment SHALL be opt-in through the Card
+`interactive` API. Interactive `plain` cards SHALL reserve an outer tonal
+state-layer ring, so their content area is intentionally smaller than
+`contained` and `elevated` cards with the same outer dimensions.
+Interactive `plain` card content slots SHALL use tighter horizontal padding than
+`contained` and `elevated` to compensate for that outer state layer.
 
 #### Scenario: Whisper border is the default boundary
 
@@ -77,7 +99,8 @@ Containment SHALL be expressed primarily via `--colors-border-whisper` (default 
 - **WHEN** an inline card needs soft visual separation
 - **THEN** it SHALL use shadcn `<Card surface="elevated">`
 - **AND** it SHALL NOT hand-roll `shadow-sm`, `shadow-md`, or custom `box-shadow` classes outside the Card surface API
-- **AND** `shadow-2`, `shadow-3`, and `shadow-modal` SHALL remain reserved for floating or modal-tier surfaces
+- **AND** `shadow-2` SHALL only appear as the elevated Card hover state or on floating surfaces
+- **AND** `shadow-3` and `shadow-modal` SHALL remain reserved for floating or modal-tier surfaces
 
 ### Requirement: Typography uses Latin + CJK layered families
 

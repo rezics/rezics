@@ -81,9 +81,9 @@ Use shadcn `<Card>` as the canonical Rezics card primitive. Card semantics come 
 
 | Surface | Visual read | Use |
 | --- | --- | --- |
-| `plain` | Same as page, no outer border or shadow | Flat feed/media/list items |
-| `contained` | Same page-color surface with a whisper ring | Default panels and compact information cards |
-| `elevated` | Same-color/near-same-color fill with soft shadow | Media-rich recommendation and article cards |
+| `plain` | Same as page, no outer border or shadow; `interactive` reserves an outer hover state layer | Flat feed/media/list items |
+| `contained` | Tonal fill without border or shadow; `interactive` adds tonal hover | Default panels and compact information cards |
+| `elevated` | Same-color card with calibrated `elevation={1..10}` shadow; `interactive` adds hover lift | Media-rich recommendation and article cards |
 
 Image, title, author — that's the card. The cover art carries the visual weight. Whisper border for table-row separation is fine; it's containment, not chrome.
 
@@ -106,7 +106,6 @@ Image, title, author — that's the card. The cover art carries the visual weigh
         borderRadius: radius.lg,
         background: "var(--colors-surface-canvas)",
         boxShadow: "var(--shadow-1)",
-        border: "1px solid var(--colors-border-whisper)",
       }}
     >
       <div style={{ aspectRatio: "16/9", background: "var(--colors-surface-subtle)" }} />
@@ -153,8 +152,10 @@ Image, title, author — that's the card. The cover art carries the visual weigh
 </div>
 
 // Do — media-rich recommendation/article card
-<Card surface="elevated">
-  <img src={article.image} alt="" className="aspect-[16/9] w-full object-cover" />
+<Card surface="elevated" elevation={6} interactive>
+  <CardMedia>
+    <img src={article.image} alt="" className="aspect-[16/9] w-full object-cover" />
+  </CardMedia>
   <CardHeader>
     <CardTitle>{article.title}</CardTitle>
     <CardDescription>{article.categories.join(" · ")}</CardDescription>

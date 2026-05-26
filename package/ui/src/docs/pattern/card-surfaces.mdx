@@ -4,6 +4,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
+  CardMedia,
   CardTitle,
 } from "../../shadcn/card";
 
@@ -15,21 +16,40 @@ Rezics uses shadcn `<Card>` as the canonical card primitive. Card radius is
 small and consistent (`rounded-md`) so image content is not overly clipped.
 Large radius remains for modal and overlay surfaces.
 
-All in-flow card surfaces keep the page-color read:
+All in-flow card surfaces keep a restrained page-color read, but each surface
+has a distinct depth contract:
 
-- `plain`: no outer surface, for flat feed/media/list items.
-- `contained`: same background with a whisper ring, for ordinary panel cards.
-- `elevated`: same background with soft `shadow-1`, for media-rich articles and
+- `plain`: no outer chrome; interactive hover uses a Reddit-like tonal state
+  layer.
+- `contained`: tonal fill without border or shadow, for ordinary panel cards.
+- `elevated`: same-color card with shadow lift for media-rich articles and
   recommendations.
+
+Hover, pointer cursor, and focus treatment are opt-in through `interactive`.
+Static cards do not pretend to be clickable. Interactive `plain` cards reserve
+an outer state-layer ring, so their content area is intentionally smaller than
+`contained` and `elevated` at the same outer size.
+
+`elevated` accepts `elevation={1..10}` for visual calibration. Keep production
+choices low enough that the card still reads as in-flow content, not modal
+chrome.
+
+`Card` owns the named `@container/card` query context. Consumers can use
+`@[...]/card:` modifiers without repeating `className="@container/card"`.
+
+Media belongs flush to the card edge for `contained` and `elevated`. Use
+`CardMedia` for non-`img` media blocks so mocks, video, and composed artwork
+receive the same top-edge treatment as direct images. Interactive `plain` cards
+keep media inside their outer hover ring.
 
 export function MockImage({ tone = "warm" }) {
   const bg =
     tone === "cool"
-      ? "linear-gradient(135deg, #dbe3f1 0%, #f8f7f2 55%, #7fa6b8 100%)"
-      : "linear-gradient(135deg, #eadfca 0%, #f8f7f2 45%, #d47b63 100%)";
+      ? "linear-gradient(135deg, var(--colors-surface-sunken) 0%, var(--colors-surface-base) 55%, var(--colors-surface-elevated) 100%)"
+      : "linear-gradient(135deg, var(--colors-surface-subtle) 0%, var(--colors-surface-base) 45%, var(--colors-brand-container) 100%)";
 
   return (
-    <div
+    <CardMedia
       style={{
         aspectRatio: "16 / 9",
         background: bg,
@@ -68,7 +88,7 @@ export function MockImage({ tone = "warm" }) {
           transform: "rotate(-6deg)",
         }}
       />
-    </div>
+    </CardMedia>
   );
 }
 
@@ -80,7 +100,7 @@ export function SampleCard({
   tone,
 }) {
   return (
-    <Card surface={surface} className="max-w-xs">
+    <Card surface={surface} interactive className="max-w-xs">
       {withImage && <MockImage tone={tone} />}
       <CardHeader>
         <CardTitle>{title}</CardTitle>
@@ -88,8 +108,8 @@ export function SampleCard({
       </CardHeader>
       <CardContent>
         <p className="m-0 text-sm leading-ui text-text-secondary">
-          Same outer radius, same page-color read. The surface prop controls
-          only separation, not the card semantics.
+          Same outer radius and media rules. The surface prop controls depth;
+          interactive controls hover, cursor, and focus treatment.
         </p>
       </CardContent>
     </Card>
@@ -107,14 +127,14 @@ export function SampleCard({
     surface="contained"
     withImage
     title="Contained with image"
-    description="Whisper-ring card"
+    description="Tonal panel card"
     tone="cool"
   />
   <SampleCard
     surface="elevated"
     withImage
     title="Elevated with image"
-    description="Media-rich recommendation"
+    description="Same-color recommendation"
   />
   <SampleCard
     surface="plain"
@@ -137,7 +157,8 @@ export function SampleCard({
 ## Avoid
 
 Do not hand-roll a card by combining a different fill, large radius, and custom
-shadow. Pick the closest `surface` value instead.
+shadow. Pick the closest `surface` value and use `CardMedia` for flush media
+instead.
 
 <div className="max-w-xs rounded-2xl bg-surface-base p-4 shadow-md">
   <div className="aspect-[16/9] rounded-xl bg-surface-subtle" />
@@ -148,4 +169,7 @@ shadow. Pick the closest `surface` value instead.
 <Card surface="plain">...</Card>
 <Card surface="contained">...</Card>
 <Card surface="elevated">...</Card>
+<Card surface="elevated" elevation={6}>...</Card>
+<Card surface="contained" interactive>...</Card>
+<CardMedia>...</CardMedia>
 ```

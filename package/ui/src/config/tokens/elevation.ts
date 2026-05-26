@@ -1,6 +1,7 @@
 // Foundation v1 elevation tokens. Source: brief §7.
-// Default policy is flat with whisper borders. shadow-1 is allowed for
-// shadcn Card surface="elevated"; heavier shadows are for floating/modal tiers.
+// Default policy is flat with tonal separation. shadow-1/shadow-2 are allowed
+// for shadcn Card surface="elevated" and its interactive hover state; heavier
+// shadows are for floating/modal tiers.
 
 export const lightShadows = {
   none: "none",

@@ -39,7 +39,7 @@ Need a UI primitive?
 
 | Need                       | Recommendation                                                                          |
 | -------------------------- | --------------------------------------------------------------------------------------- |
-| Card surface               | shadcn `Card` family. Cards use `rounded-md` and same-color/page-color fills. Use `surface="plain"` for flat feed/media items, `contained` for whisper-ring cards, and `elevated` for same-color media-rich recommendation/article cards only. |
+| Card surface               | shadcn `Card` family. Cards use `rounded-md`. Use `surface="plain"` for flat feed/media items, `contained` for borderless tonal panels, `elevated` with calibrated `elevation={1..10}` for same-color media-rich recommendation/article cards only, `interactive` for cursor/hover/focus treatment, and `CardMedia` for flush media blocks. |
 | Divider                    | `<hr className="border-rezics-color-border" />`                                         |
 | Avatar                     | shadcn `Avatar` family                                                                  |
 | Badge / chip               | shadcn `Badge` (+ `Button size="icon"` with lucide `X` for removable)                   |

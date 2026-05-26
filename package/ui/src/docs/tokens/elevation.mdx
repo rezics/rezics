@@ -5,7 +5,15 @@ import { Grid, ElevationSample } from "./_gallery";
 
 # Elevation
 
-**Default policy is flat.** Surfaces separate via whitespace, whisper borders, or explicit card surface choices. Shadows are reserved for the modal tier, true float-above-canvas surfaces, and shadcn `<Card surface="elevated">` media cards. Source: `package/ui/src/config/tokens/elevation.ts`.
+**Default policy is flat.** Surfaces separate via whitespace, tonal fills, or
+explicit card surface choices. Shadows are reserved for the modal tier, true
+float-above-canvas surfaces, and shadcn `<Card surface="elevated">` media
+cards. Elevated Card hover lift is enabled only by `interactive`. Source:
+`package/ui/src/config/tokens/elevation.ts`.
+
+`Card surface="elevated"` exposes `elevation={1..10}` for card-specific
+calibration. The scale still resolves through the Card API; consumers should not
+hand-roll shadow utilities on card instances.
 
 This keeps the parchment-archive feel — the page is calm, layers are quiet, and elevation is something you only feel when it really means *I am temporarily on top*.
 
@@ -22,9 +30,9 @@ This keeps the parchment-archive feel — the page is calm, layers are quiet, an
 
 | Tier | Token | Use |
 | --- | --- | --- |
-| flat (default) | none | Sections, panels, table rows, `Card surface="plain"`, `Card surface="contained"` |
-| 1 | `--shadow-1` | `Card surface="elevated"` for media-rich recommendation/article cards; sticky bars and hover-lift micro affordance |
-| 2 | `--shadow-2` | Dropdowns, popovers, floating action menus |
+| flat (default) | none | Sections, table rows, `Card surface="plain"`, `Card surface="contained"` |
+| 1 | `--shadow-1` | `Card surface="elevated"` media-rich recommendation/article cards; sticky bars |
+| 2 | `--shadow-2` | Elevated interactive card hover, dropdowns, popovers, floating action menus |
 | 3 | `--shadow-3` | Exceptional floating surfaces |
 | modal | `--shadow-modal` | Modals, dialogs, full overlays |
 
