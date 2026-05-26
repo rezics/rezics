@@ -37,3 +37,13 @@ export const LocaleCJK: Story = {
 export const LocaleLatin: Story = {
   args: { post: postLatin },
 };
+
+export const Edited: Story = {
+  args: {
+    post: {
+      ...postFlat[0],
+      createdAt: "2026-05-01T00:00:00.000Z",
+      updatedAt: "2026-05-02T00:00:00.000Z",
+    },
+  },
+};

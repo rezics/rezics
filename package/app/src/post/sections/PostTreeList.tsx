@@ -15,6 +15,7 @@ export interface PostTreeListProps {
   focusPostUnitId?: string;
   highlightFocusedPost?: boolean;
   onReply?: (postUnitId: string) => void;
+  renderOverflowContent?: (post: PostDTO) => React.ReactNode;
 }
 
 export function PostTreeList({
@@ -26,6 +27,7 @@ export function PostTreeList({
   focusPostUnitId,
   highlightFocusedPost = false,
   onReply,
+  renderOverflowContent,
 }: PostTreeListProps) {
   const allUnitIds = useMemo(
     () => posts.map((p) => p.unitId).filter(Boolean) as string[],
@@ -143,6 +145,7 @@ export function PostTreeList({
           highlightedFocusPostUnitId={highlightedFocusPostUnitId}
           highlightedThreadUnitId={highlightedThreadUnitId}
           onReplyClick={handleReplyClick}
+          renderOverflowContent={renderOverflowContent}
           onComposerSubmitted={handleComposerSubmitted}
           onComposerDone={handleComposerDone}
           onThreadHoverChange={handleThreadHoverChange}

@@ -1,5 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
+import { common_edit } from "@rezics/i18n/messages";
+import { useMessage } from "@rezics/i18n/react";
+import { DropdownMenuItem } from "@rezics/ui/shadcn";
+import { Pencil } from "lucide-react";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { postFlat } from "@/stories/fixtures/post";
 import { PostReply } from "./PostReply";
@@ -26,4 +30,25 @@ export const Default: Story = {};
 
 export const Compact: Story = {
   args: { showAvatar: false },
+};
+
+export const OwnerVisibleEditOverflow: Story = {
+  render: () => {
+    const m = useMessage({ common_edit });
+    return (
+      <PostReply
+        post={{ ...postFlat[0], directReplyCount: 3 }}
+        overflowContent={
+          <DropdownMenuItem className="gap-2">
+            <Pencil size={16} strokeWidth={2} />
+            <span>{m.common_edit()}</span>
+          </DropdownMenuItem>
+        }
+      />
+    );
+  },
+};
+
+export const UnauthorizedHiddenEditOverflow: Story = {
+  render: () => <PostReply post={{ ...postFlat[0], directReplyCount: 3 }} />,
 };

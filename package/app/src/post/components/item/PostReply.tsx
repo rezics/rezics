@@ -12,6 +12,7 @@ import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
 interface PostReplyProps {
   post: PostDTO;
   onReply?: () => void;
+  overflowContent?: React.ReactNode;
   replyComposerSlot?: React.ReactNode;
   showAvatar?: boolean;
 }
@@ -19,6 +20,7 @@ interface PostReplyProps {
 export const PostReply: React.FC<PostReplyProps> = ({
   post,
   onReply,
+  overflowContent,
   replyComposerSlot,
   showAvatar = true,
 }) => {
@@ -40,6 +42,7 @@ export const PostReply: React.FC<PostReplyProps> = ({
           actions={postReplyRowActions}
           overflow={postReplyRowOverflow}
           onReplyInvoke={onReply}
+          overflowContent={overflowContent}
         />
         {replyComposerSlot}
       </div>

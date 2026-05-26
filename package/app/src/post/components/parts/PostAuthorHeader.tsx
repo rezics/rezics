@@ -2,15 +2,18 @@ import { contentDocMarkdownFallback, type PostDTO } from "@rezics/contract";
 import {
   post_anonymous_author,
   post_anonymous_avatar_alt,
+  post_metadata_edited,
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
 import { UserHoverPreview } from "@/user/components";
+import { isEditedTimestamp } from "../../models/postMetadata";
 
 const i18nMessages = {
   post_anonymous_author,
   post_anonymous_avatar_alt,
+  post_metadata_edited,
 };
 
 interface PostAuthorHeaderProps {
@@ -26,12 +29,14 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
   showAvatar = true,
   avatarClassName,
 }) => {
+  const m = useMessage(i18nMessages);
   const dateStr = post.createdAt
     ? new Date(String(post.createdAt)).toLocaleDateString()
     : "";
   const nameClass =
     size === "compact" ? "text-xs font-semibold" : "text-sm font-semibold";
   const author = post.author?.unitId ? post.author : undefined;
+  const edited = isEditedTimestamp(post.createdAt, post.updatedAt);
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents the parent post card click when nested author content is used.
@@ -60,7 +65,10 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
         />
       )}
       {dateStr && (
-        <span className="text-xs text-text-secondary">{dateStr}</span>
+        <span className="text-xs text-text-secondary">
+          {dateStr}
+          {edited ? ` · ${m.post_metadata_edited()}` : ""}
+        </span>
       )}
     </div>
   );

@@ -36,6 +36,7 @@ export interface PostTreeNodeProps {
   highlightedFocusPostUnitId?: string;
   highlightedThreadUnitId?: string;
   onReplyClick: (postUnitId: string) => void;
+  renderOverflowContent?: (post: PostDTO) => React.ReactNode;
   onComposerSubmitted: (parentPostUnitId: string, post: PostDTO) => void;
   onComposerDone: (postUnitId: string) => void;
   onThreadHoverChange: (postUnitId: string, hovered: boolean) => void;
@@ -52,6 +53,7 @@ export function PostTreeNode({
   highlightedFocusPostUnitId,
   highlightedThreadUnitId,
   onReplyClick,
+  renderOverflowContent,
   onComposerSubmitted,
   onComposerDone,
   onThreadHoverChange,
@@ -136,6 +138,7 @@ export function PostTreeNode({
             post={post}
             showAvatar
             onReply={() => onReplyClick(post.unitId)}
+            overflowContent={renderOverflowContent?.(post)}
             replyComposerSlot={
               composerOpen ? (
                 <ReplyComposer
@@ -189,6 +192,7 @@ export function PostTreeNode({
                 highlightedFocusPostUnitId={highlightedFocusPostUnitId}
                 highlightedThreadUnitId={highlightedThreadUnitId}
                 onReplyClick={onReplyClick}
+                renderOverflowContent={renderOverflowContent}
                 onComposerSubmitted={onComposerSubmitted}
                 onComposerDone={onComposerDone}
                 onThreadHoverChange={onThreadHoverChange}
