@@ -74,7 +74,7 @@ export function SearchContentResultCard({
   user,
   ...props
 }: SearchContentResultCardProps) {
-  const hasMedia = Boolean(thumbnailSlot || thumbnail?.src);
+const hasMedia = Boolean(thumbnailSlot || thumbnail?.src);
   const hasUser = Boolean(user?.unitId);
   const hasAvatar = Boolean(
     hasUser || avatarSlot || avatar?.src || avatar?.fallback,
@@ -87,7 +87,7 @@ export function SearchContentResultCard({
     <Card
       surface={surface}
       interactive={interactive}
-      className={cn("group w-full gap-0 py-0", className)}
+      className={cn("w-full gap-0 py-0", className)}
       {...props}
     >
       <article className="flex min-w-0 gap-4 p-3">
@@ -102,8 +102,6 @@ export function SearchContentResultCard({
                       size="compact"
                       showName={false}
                       avatarClassName="size-8"
-                      className="[&_a:hover]:underline [&_a:focus-visible]:underline"
-                      contentClassName="[&_[data-slot=popover-title]_a]:no-underline [&_[data-slot=popover-title]_a]:underline-offset-4 [&_[data-slot=popover-title]_a:hover]:underline [&_[data-slot=popover-title]_a:focus-visible]:underline"
                     />
                   ) : (
                     (avatarSlot ?? (
@@ -131,9 +129,7 @@ export function SearchContentResultCard({
                         user={user}
                         size="compact"
                         showAvatar={false}
-                        className="[&_[data-slot=popover-trigger]]:inline-block [&_[data-slot=popover-trigger]]:underline-offset-4 [&_[data-slot=popover-trigger]]:decoration-current [&_[data-slot=popover-trigger]:hover]:underline [&_[data-slot=popover-trigger]:focus-visible]:underline"
-                        nameClassName="inline-block min-w-0 truncate font-medium text-text-primary no-underline underline-offset-4 decoration-current group-hover:underline group-focus-within:underline hover:underline focus-visible:underline"
-                        contentClassName="[&_[data-slot=popover-title]_a]:no-underline [&_[data-slot=popover-title]_a]:underline-offset-4 [&_[data-slot=popover-title]_a:hover]:underline [&_[data-slot=popover-title]_a:focus-visible]:underline"
+                        nameClassName="inline-block min-w-0 truncate font-medium hover:[box-shadow:inset_0_-1px_0_currentColor] focus-visible:[box-shadow:inset_0_-1px_0_currentColor]"
                       />
                     ) : author ? (
                       <span className="min-w-0 truncate font-medium text-text-primary">
@@ -174,13 +170,13 @@ export function SearchContentResultCard({
                         {sourceHref ? (
                           <Link
                             to={sourceHref}
-                            className="inline-block min-w-0 max-w-full truncate text-text-tertiary no-underline underline-offset-4 decoration-current group-hover:underline group-focus-within:underline hover:underline focus-visible:underline"
+                            className="inline-block min-w-0 max-w-full truncate text-text-tertiary no-underline hover:[box-shadow:inset_0_-1px_0_currentColor] focus-visible:[box-shadow:inset_0_-1px_0_currentColor]"
                             onClick={(event) => event.stopPropagation()}
                           >
                             {source}
                           </Link>
                         ) : (
-                          <span className="min-w-0 truncate [&_a]:no-underline [&_a]:underline-offset-4 [&_a]:decoration-current [&_a:hover]:underline [&_a:focus-visible]:underline">
+                          <span className="min-w-0 truncate">
                             {source}
                           </span>
                         )}
