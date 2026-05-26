@@ -14,14 +14,15 @@ The target product model is release-first:
 Visible page / reading / shelf item / review target:
   Release Unit
 
-Hidden grouping / inherited search / shared community:
-  Work Unit through UnitWork
+Hidden grouping / inherited search / shared community/content:
+  Work Unit through UnitWork membership
 ```
 
 This means users normally open and interact with release Units. The hidden work
 Unit behaves like an aggregation domain, but it is not a normal user-facing book
-detail page. Work-level tags, aliases, community feeds, and language defaults
-are inherited or resolved by release pages through the `UnitWork` relation.
+detail page. Work-level tags, aliases, community feeds, shelves, posts,
+reviews, and other work-domain content are resolved through the `UnitWork`
+relation.
 
 The repo already has adjacent patterns:
 
@@ -36,8 +37,8 @@ The repo already has adjacent patterns:
 
 **Goals:**
 
-- Introduce `UnitWork` as the canonical relationship between visible release
-  Units and hidden work Units.
+- Introduce `UnitWork` as the canonical relationship between any
+  work-domain-participating Unit and hidden work Units.
 - Keep release Units first-class for pages, reading, shelves, reviews, posts,
   attribution, and content.
 - Let release search inherit work-level tags and work-level searchable text
@@ -46,9 +47,11 @@ The repo already has adjacent patterns:
   release documents at indexing time.
 - Group release search results by work so ordinary searches do not show every
   publisher/edition/translation as a top-level duplicate.
-- Resolve book language switching through curated work-language defaults.
-- Add `targetWorkUnitId` semantics so release-specific posts/reviews still
-  appear in the shared work-domain community feed.
+- Keep book language switching scoped to the current release's
+  `UnitTranslation` rows, and move same-work release discovery into the
+  Releases tab.
+- Register posts, reviews, shelves, and other work-domain content in
+  `UnitWork` so any same-work release can query shared content.
 - Rename `RealmUnit` to `UnitRealm` for naming consistency.
 - Define CDC/job-runner batch repair paths for work-tag fan-out and structural
   work-domain changes.
@@ -75,11 +78,11 @@ Add a work-specific relationship table named `UnitWork`.
 ```txt
 UnitWork
 ────────────────────────────────────────────
-unitId             visible release/member Unit
+unitId             member Unit participating in a work domain
 workUnitId         hidden work Unit
-role               PRIMARY | RELEASE | EDITION | TRANSLATION | VOLUME | DERIVED
+role               RELEASE | POST | REVIEW | SHELF | WIKI | GUIDE | DERIVED
 language           optional content language hint
-rank               work-local display rank
+position           optional work-local fractional index
 displayPolicy      PRIMARY | SECONDARY | HIDDEN_BY_DEFAULT
 createdAt
 updatedAt
@@ -89,11 +92,20 @@ updatedAt
 denormalized shortcut, but new behavior must read the relationship semantics
 from `UnitWork`.
 
+`UnitWork` is Unit-based, like `UnitTag` and `UnitRealm`. It is not a
+release-only work link and it is not a shelf/post-specific projection table.
+Releases, posts, reviews, shelves, wiki pages, guides, and future content types
+can all enter a work domain by creating `UnitWork` rows. Release membership is
+special only by invariant: a visible release belongs to at most one canonical
+work in v1. Content Units such as posts and shelves may belong to multiple work
+domains when their precise targets or contained Units cross works.
+
 Alternatives considered:
 
-- **Keep only `Unit.workUnitId`**: too weak for language defaults, rank,
-  display policy, role, and future migration. It also hides the relationship
-  behind a generic column name that call sites misuse.
+- **Keep only `Unit.workUnitId`**: too weak for multi-role work-domain
+  membership, content aggregation, position, display policy, and future
+  migration. It also hides the relationship behind a generic column name that
+  call sites misuse.
 - **Use `WorkDomain` / `WorkCluster`**: good conceptually, but naming pushes the
   system toward a new generic domain abstraction. `UnitWork` fits the existing
   `UnitTag` relationship style and is easier to enforce.
@@ -113,54 +125,61 @@ Release pages may show work-domain content:
 Release page
 ├─ release metadata/content
 ├─ inherited work tags
-├─ work-domain discussion feed by default
+├─ work-domain content/community feed by default
 ├─ exact-release filter
-└─ language switcher resolving through UnitWorkLanguageDefault
+├─ release-local language switcher
+└─ Releases tab for same-work release discovery
 ```
 
 Work Units may have admin/editor surfaces, but they are not the ordinary public
 book detail destination.
 
-### Add Work-Language Defaults Outside `UnitTranslation`
+### Keep Language Switching Release-Local
 
-Language switching is a product decision, not a translation text field. Add a
-dedicated default table:
+The book detail language switcher keeps its original semantic scope: it switches
+among `UnitTranslation` records on the current visible release. It does not
+select another release in the work domain and it does not use a work-language
+default table.
 
-```txt
-UnitWorkLanguageDefault
-────────────────────────────────────────────
-workUnitId
-language
-unitId             primary release for this work/language
-source             CURATED | SYSTEM | VOTE | FALLBACK
-createdAt
-updatedAt
-```
-
-Resolution order:
-
-1. User preference for `(viewer, workUnitId, language)`, if a later change adds
-   it.
-2. `UnitWorkLanguageDefault(workUnitId, language)`.
-3. Highest-ranked public `UnitWork` member that supports the language.
-4. Current release when no better same-work language target exists.
-5. No content state.
+When the current release lacks the viewer's desired language, the UI shows a
+missing-language option such as "not found in your language". Activating that
+option navigates to the Releases tab. The Releases tab lists same-work releases
+through `UnitWork(role = RELEASE)`, supports multi-select language filtering,
+defaults the filter to the viewer's preferred languages, provides an All option,
+and orders results by `UnitWork.position` fractional indexing.
 
 `UnitTranslation.sourceReleaseUnitId` is renamed to `sourceUnitId` and no longer
-owns language-default release selection.
+owns release selection. Release selection is an explicit Releases tab action.
 
-### Store Release Interactions Precisely, Aggregate Through `targetWorkUnitId`
+### Store Precise Targets, Aggregate Through `UnitWork`
 
-Posts, reviews, shelf projections, and search documents need both precise and
-folded targets:
+Posts, reviews, shelves, and other content need both precise target context and
+work-domain membership:
 
 ```txt
-targetUnitId      exact release/work/post target
-targetWorkUnitId  hidden work Unit for aggregation, if applicable
+targetUnitId      exact release/work/post target, when the content has one
+UnitWork          work-domain membership rows for aggregation, if applicable
 ```
 
-Default release pages show work-domain community content. Exact-release filters
-remain available by filtering `targetUnitId = currentReleaseId`.
+Default release pages show work-domain content by querying `UnitWork` rows for
+the current release's canonical work. Exact-release filters remain available by
+filtering `targetUnitId = currentReleaseId`.
+
+Normal content writes are cheap and synchronous:
+
+```txt
+create post targeting release-a
+├─ read UnitWork(release-a, role = RELEASE) -> work-x
+├─ create Post(targetUnitId = release-a)
+└─ create UnitWork(postUnitId, work-x, role = POST)
+```
+
+When release-b belongs to work-x, release-b does not query release-a. It queries
+work-x's content membership and receives posts, shelves, reviews, and other
+Units registered under the same work domain. Cards in work-domain feeds still
+render precise target context. If a feed item targets a release different from
+the current release, the card shows that target release's identifying metadata,
+matching search and shelf rendering semantics.
 
 ### Denormalize Inherited Work Tags Into Release Search Documents
 
@@ -177,8 +196,7 @@ ownTagLabels
 workTagLabels
 allTagLabels
 displayPolicy
-releaseRank
-primaryForLanguages
+position
 ```
 
 Tag filtering uses `allTagIds`, which makes work tag inheritance a normal
@@ -210,18 +228,18 @@ Events that enqueue release document rebuilds:
 - `UnitTag` changed on a hidden work Unit: rebuild all active release documents
   for that work.
 - `UnitTag` changed on a release Unit: rebuild that release document.
-- `UnitWork` inserted/updated/deleted: rebuild the affected release document and
-  relevant grouped search metadata.
-- `UnitWorkLanguageDefault` changed: patch/rebuild affected work members for
-  `primaryForLanguages`.
+- `UnitWork` inserted/updated/deleted: rebuild the affected Unit's search
+  document and relevant grouped search metadata.
 - Work alias/translation/searchable metadata changed: rebuild release documents
   inheriting those work fields.
-- Work merge/split/admin repair: enqueue a bounded batch repair job.
+- Release move or work merge/split/admin repair: enqueue a bounded batch repair
+  job that recalculates affected work-domain memberships and projections.
 
 Batch handlers should process work members in pages and be idempotent. The
-initial target limit is 200 release members per work; higher counts are allowed
-only through batch processing and diagnostics should flag unusually large work
-domains.
+initial target limit is 200 release members per work. Total work-domain
+membership can be much larger because posts, shelves, reviews, and other content
+also register in `UnitWork`. Public APIs must page by role/type and cursor, and
+diagnostics should flag unusually large work domains or repair scopes.
 
 ### Rename `RealmUnit` To `UnitRealm`
 
@@ -248,16 +266,23 @@ change owns the naming decision.
 - **Risk: Grouped search hides a release the user expected to see** →
   Mitigation: return collapsed alternatives and expand for explicit
   release-specific filters.
-- **Risk: `UnitWork` and `Unit.workUnitId` drift during migration** →
-  Mitigation: backfill, dual-read assertions, consistency checks, and a later
-  decision on whether `Unit.workUnitId` stays as a denormalized shortcut.
+- **Risk: release-only assumptions remain in work-domain code** →
+  Mitigation: make `UnitWork` role semantics explicit and test release,
+  post/review, shelf, and multi-work content membership separately.
 - **Risk: `RealmUnit` rename makes the change noisy** → Mitigation: keep it in
   its own task phase and avoid changing realm behavior beyond naming.
-- **Risk: Book language switching chooses a poor default release** →
-  Mitigation: make defaults curated and editable, with deterministic fallback
-  order and visible secondary release selector.
+- **Risk: users cannot find another language release from the language
+  switcher** → Mitigation: keep the switcher release-local but add a
+  missing-language option that jumps to the Releases tab with preferred
+  languages preselected.
 - **Risk: Work-level tags over-apply to release-specific searches** →
   Mitigation: store `ownTagIds`, `workTagIds`, and `allTagIds` separately so UI
+  and ranking can distinguish inherited vs release-local matches.
+- **Risk: release move or work merge corrupts historical work-domain
+  membership** → Mitigation: make these operations admin-only, previewable,
+  durable, async, resumable, and backed by repair jobs that recalculate
+  `UnitWork` memberships for affected posts, reviews, shelves, and search
+  projections.
 
 ## Review Addendum: Creation, USWN, Merge, And Content Structure Decisions
 
@@ -331,8 +356,8 @@ options.
 
 For active works, merge is async and durable. It needs dry-run preview,
 item-level progress, resumability, and enough before-state to revert. The merge
-operation enqueues repair for content search, post search, shelf grouping,
-language defaults, and DTO metadata such as USWN.
+operation enqueues repair for content search, post search, shelf work-domain
+membership, general work-domain membership, and DTO metadata such as USWN.
 
 Metadata copy is separate from canonical merge. Admins may explicitly copy
 missing tags or aliases from source work to target work. Copy creates only rows
@@ -346,27 +371,62 @@ public contracts. The generic concept is `contentStructure`; a materialized node
 identity is `contentUnitId`. For books, `contentUnitId` is the materialized
 chapter content Unit. `targetUnitId` remains interaction terminology for posts,
 reviews, ratings, and discussion targets.
-  and ranking can distinguish inherited vs release-local matches.
+
+## Review Addendum: Unit-Based Work Domain And Release UX
+
+Later discussion clarified that `UnitWork` is the work-domain membership index
+for all content, not just the release-to-work link.
+
+```txt
+UnitTag   = Unit belongs to tag/classification
+UnitRealm = Unit belongs to realm/feed
+UnitWork  = Unit belongs to work domain
+```
+
+This means every work-domain surface queries `UnitWork(workUnitId = currentWork)`
+by role/type. A release page for `release-b` does not inspect `release-a`
+directly; it resolves `release-b` to `work-x`, then queries all content Units
+registered under `work-x`. Precise target fields still matter for rendering.
+When a work-domain card targets `release-a` while the current page is
+`release-b`, the card renders `release-a` metadata so users can tell which
+release the item actually discusses.
+
+Release membership is constrained: a visible release normally belongs to one
+canonical work in v1. Other content can belong to multiple works. A post
+published under two cross-work release contexts, or a shelf that contains
+releases from multiple works, creates multiple `UnitWork` rows for the same
+content Unit.
+
+Normal content writes register work-domain membership at write time and do not
+require broad fan-out. The expensive and dangerous paths are release move and
+work merge, because they can invalidate historical content memberships. Those
+operations must be admin-only and repair-backed.
+
+The language switcher remains release-local. It switches the current release's
+`UnitTranslation` rows and does not navigate to another release. Missing
+language discovery lives in the Releases tab. That tab supports multi-select
+language filtering, defaults to the viewer's preferred languages, includes an
+All option, and orders same-work releases by `UnitWork.position` fractional
+indexing.
 
 ## Migration Plan
 
-1. Add contract types and Prisma models for `UnitWork` and
-   `UnitWorkLanguageDefault`.
+1. Add contract types and Prisma model for `UnitWork`.
 2. Backfill `UnitWork` from existing `Unit.workUnitId`.
 3. Add consistency checks that detect drift between `Unit.workUnitId` and
    `UnitWork`.
 4. Rename `RealmUnit` code/schema/API names to `UnitRealm` in a focused phase.
-5. Rename `UnitTranslation.sourceReleaseUnitId` to `sourceUnitId` and move
-   language default behavior to `UnitWorkLanguageDefault`.
-6. Add `targetWorkUnitId` projection to post/review creation and search sync.
+5. Rename `UnitTranslation.sourceReleaseUnitId` to `sourceUnitId`.
+6. Add `UnitWork` membership writes to post/review/shelf creation and update
+   paths where content enters or leaves a work domain.
 7. Extend search document contracts and Meilisearch filterable attributes.
 8. Implement inherited work tag/search projection and grouped result assembly.
-9. Add job-runner handlers for work-tag fan-out, `UnitWork` changes,
-   language-default changes, and repair/backfill jobs.
-10. Update book release selector and language switcher to resolve through
-    `UnitWorkLanguageDefault`.
-11. Update shelf rendering to store release Units and group by work when
-    rendering.
+9. Add job-runner handlers for work-tag fan-out, `UnitWork` changes, release
+   move, work merge, and repair/backfill jobs.
+10. Update book language switcher to remain release-local and add the
+    missing-language Releases tab affordance.
+11. Update the Releases tab and shelf rendering to use `UnitWork.position` and
+    precise target release context.
 12. Rebuild Meilisearch indexes and run drift repair diagnostics.
 
 Rollback strategy:
@@ -374,8 +434,8 @@ Rollback strategy:
 - Keep `Unit.workUnitId` populated during the first implementation phase.
 - Search can fall back to non-inherited release documents if inherited work
   fields are disabled.
-- UI can fall back to current release selector behavior if language defaults are
-  missing.
+- UI can fall back to current release selector behavior if the Releases tab is
+  incomplete.
 - The `RealmUnit` rename is not independently rollback-friendly after migration;
   schedule that phase only after the `UnitWork` design is accepted.
 
@@ -383,11 +443,10 @@ Rollback strategy:
 
 - Should hidden work Units have a dedicated status/visibility flag, or is
   visibility controlled only by route/search policy?
-- Should `UnitWork` support multiple work memberships for rare cross-over cases,
-  or should a release belong to exactly one work domain in v1?
 - Should `UnitWork.role = VOLUME` be introduced now, or deferred until the
   generalized book content graph proposal?
-- What ranking formula chooses the best release inside a grouped search result
-  when multiple releases match inherited work tags equally?
+- What scoring formula chooses the best release inside a grouped search result
+  when multiple releases match inherited work tags equally after
+  `UnitWork.position` and display policy are considered?
 - Should admin diagnostics enforce a hard warning threshold at 200 releases per
   work, or treat 200 as a planning estimate only?

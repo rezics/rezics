@@ -46,7 +46,8 @@ node identity field.
 
 ### Requirement: Migration Keeps Legacy Compatibility Explicit
 
-During migration, existing book-specific storage and helper names MAY remain as
+The system SHALL keep any legacy content-structure compatibility explicit during
+migration. Existing book-specific storage and helper names MAY remain as
 implementation details, but any remaining public `chapterId` or
 `BookContentStructure` contract names SHALL be treated as legacy compatibility
 and scheduled for replacement by `contentUnitId` and `contentStructure`.

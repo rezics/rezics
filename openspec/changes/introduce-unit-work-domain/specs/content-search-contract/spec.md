@@ -4,8 +4,14 @@
 
 Content search documents for release-aware Units SHALL include work-domain
 projection fields: `workUnitId`, `searchGroupId`, `ownTagIds`, `workTagIds`,
-`allTagIds`, `ownTagLabels`, `workTagLabels`, `allTagLabels`, `releaseRank`,
-`displayPolicy`, and `primaryForLanguages`.
+`allTagIds`, `ownTagLabels`, `workTagLabels`, `allTagLabels`, `position`, and
+`displayPolicy`.
+
+Content search documents for non-release Units that participate in work domains
+MAY expose generic work-domain membership fields derived from `UnitWork`, such
+as work ids and membership roles, analogous to existing Unit-based tag and realm
+fields. These fields SHALL be derived from `UnitWork`, not from shelf/post
+special-case projection columns.
 
 `allTagIds` SHALL contain the union of release-local tag ids and inherited
 work-level tag ids. `searchGroupId` SHALL equal `workUnitId` when present and

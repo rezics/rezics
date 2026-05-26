@@ -1,9 +1,9 @@
 ## 1. Schema And Contracts
 
-- [ ] 1.1 Add contract literals and DTO schemas for `UnitWork`, `UnitWorkRole`, `UnitWorkDisplayPolicy`, `UnitWorkLanguageDefault`, and work-domain search metadata in `package/contract`.
-- [ ] 1.2 Add Prisma models for `UnitWork` and `UnitWorkLanguageDefault` in `package/server/prisma/schema.prisma`.
-- [ ] 1.3 Add indexes for `UnitWork(workUnitId, rank)`, `UnitWork(unitId)`, `UnitWork(workUnitId, language)`, and `UnitWorkLanguageDefault(workUnitId, language)`.
-- [ ] 1.4 Add migration SQL to create `UnitWork` and `UnitWorkLanguageDefault`.
+- [ ] 1.1 Add contract literals and DTO schemas for `UnitWork`, `UnitWorkRole`, `UnitWorkDisplayPolicy`, and work-domain search metadata in `package/contract`.
+- [ ] 1.2 Add Prisma model for `UnitWork` in `package/server/prisma/schema.prisma`.
+- [ ] 1.3 Add indexes for `UnitWork(workUnitId, role, position, unitId)`, `UnitWork(workUnitId, role, createdAt, unitId)`, `UnitWork(unitId, role, workUnitId)`, and role-specific release uniqueness.
+- [ ] 1.4 Add migration SQL to create `UnitWork`.
 - [ ] 1.5 Backfill `UnitWork` from existing `Unit.workUnitId` values with idempotent conflict handling.
 - [ ] 1.6 Add consistency checks that detect drift between `Unit.workUnitId` and canonical `UnitWork` during the migration period.
 - [ ] 1.7 Rename `UnitTranslation.sourceReleaseUnitId` contract fields to `sourceUnitId`.
@@ -13,12 +13,12 @@
 ## 2. UnitWork Server Domain
 
 - [ ] 2.1 Create `package/server/src/unit-work/` with `.api.ts`, `.service.ts`, `.mapper.ts`, and `.types.ts` following backend domain conventions.
-- [ ] 2.2 Implement create/update/delete/list service methods for `UnitWork` memberships with same-type validation and no release-to-release nesting.
-- [ ] 2.3 Implement `UnitWorkLanguageDefault` read/write service methods with validation that defaults point to active members of the same work.
+- [ ] 2.2 Implement create/update/delete/list service methods for `UnitWork` memberships with role validation, release-only canonical uniqueness, and no release-to-release nesting.
+- [ ] 2.3 Implement work-domain membership reconciliation helpers for content Units that may belong to multiple works.
 - [ ] 2.4 Mount the UnitWork API from `package/server/src/index.ts`.
 - [ ] 2.5 Update existing work-link services so new writes create/update `UnitWork` and keep `Unit.workUnitId` synchronized during migration.
-- [ ] 2.6 Update release listing reads to use `UnitWork` and expose role, language, rank, and display policy.
-- [ ] 2.7 Add unit tests for membership creation, duplicate membership rejection, invalid work target rejection, and language default validation.
+- [ ] 2.6 Update release listing reads to use `UnitWork` and expose role, language, position, and display policy.
+- [ ] 2.7 Add unit tests for membership creation, duplicate release membership rejection, multi-work content membership, invalid work target rejection, and position ordering.
 
 ## 3. RealmUnit Rename
 
@@ -32,17 +32,17 @@
 
 ## 4. Interaction Target Projection
 
-- [ ] 4.1 Add `targetWorkUnitId` to post/review contract DTOs and list/search options where needed.
-- [ ] 4.2 Add database support or deterministic projection logic for `Post.targetWorkUnitId`.
-- [ ] 4.3 Update post creation/update services to derive `targetWorkUnitId` from the target Unit's active `UnitWork` membership.
-- [ ] 4.4 Update post list APIs to support work-domain feed queries by `targetWorkUnitId`.
+- [ ] 4.1 Add post/review contract DTOs and list/search options for work-domain feed queries backed by `UnitWork` membership.
+- [ ] 4.2 Add service support for registering post/review Units in `UnitWork` when they target release-aware Units.
+- [ ] 4.3 Update post creation/update services to derive `UnitWork` content memberships from the target Unit's active release work membership.
+- [ ] 4.4 Update post list APIs to support work-domain feed queries through `UnitWork(workUnitId, role)`.
 - [ ] 4.5 Preserve exact-release post/review queries by `targetUnitId`.
 - [ ] 4.6 Add tests for work-domain feed, exact-release feed, and standalone targets with no work domain.
 
 ## 5. Search Contracts And Index Settings
 
-- [ ] 5.1 Extend `ContentSearchDocument` with `workUnitId`, `searchGroupId`, `ownTagIds`, `workTagIds`, `allTagIds`, `ownTagLabels`, `workTagLabels`, `allTagLabels`, `releaseRank`, `displayPolicy`, and `primaryForLanguages`.
-- [ ] 5.2 Extend `PostSearchDocument` with `targetWorkUnitId`.
+- [ ] 5.1 Extend `ContentSearchDocument` with `workUnitId`, `searchGroupId`, `ownTagIds`, `workTagIds`, `allTagIds`, `ownTagLabels`, `workTagLabels`, `allTagLabels`, `position`, and `displayPolicy`.
+- [ ] 5.2 Extend post/content search metadata with generic work-domain membership fields derived from `UnitWork` where needed.
 - [ ] 5.3 Update Meilisearch filterable attributes for content and post indexes to include work-domain fields.
 - [ ] 5.4 Update search option schemas for grouped vs expanded release result presentation.
 - [ ] 5.5 Add contract tests for the new search document fields.
@@ -52,16 +52,16 @@
 - [ ] 6.1 Update `package/search/src/sync.ts` content document building to load `UnitWork` membership and inherited work tags.
 - [ ] 6.2 Populate `ownTagIds`, `workTagIds`, and `allTagIds` separately for release-aware documents.
 - [ ] 6.3 Populate `searchGroupId = workUnitId ?? unitId` for all content documents.
-- [ ] 6.4 Populate `releaseRank`, `displayPolicy`, and `primaryForLanguages` from `UnitWork` and `UnitWorkLanguageDefault`.
+- [ ] 6.4 Populate `position` and `displayPolicy` from `UnitWork`.
 - [ ] 6.5 Update content search service filtering so tag filters use `allTagIds`.
 - [ ] 6.6 Implement grouped result assembly that returns one default visible release per `searchGroupId` plus collapsed alternatives.
 - [ ] 6.7 Implement expanded release search mode for release-specific filters.
-- [ ] 6.8 Update post search sync to populate `targetWorkUnitId`.
+- [ ] 6.8 Update post search sync and work-domain feed search to use `UnitWork` membership.
 - [ ] 6.9 Add search tests covering inherited work tag matches, grouped same-work releases, expanded release mode, and exact-release post filtering.
 
 ## 7. CDC And Job-Runner Batch Repair
 
-- [ ] 7.1 Update CDC routing so `UnitWork` and `UnitWorkLanguageDefault` changes enqueue search projection jobs.
+- [ ] 7.1 Update CDC routing so `UnitWork` changes enqueue search projection jobs.
 - [ ] 7.2 Update `UnitTag` change handling so work-level tag changes enqueue rebuilds for all active `UnitWork` members.
 - [ ] 7.3 Update work translation/alias/searchable metadata change handling so affected release documents are rebuilt.
 - [ ] 7.4 Implement idempotent batch handlers for rebuilding all release documents under one work.
@@ -72,30 +72,30 @@
 ## 8. Book Detail And Language UX
 
 - [ ] 8.1 Update book detail route resolution so visible release Units are the ordinary public detail/read targets.
-- [ ] 8.2 Update the book language switcher to resolve through `UnitWorkLanguageDefault` with documented fallbacks.
-- [ ] 8.3 Update the release selector to list `UnitWork` members ordered by primary language defaults, rank, and display policy.
+- [ ] 8.2 Update the book language switcher to remain scoped to the current release's `UnitTranslation` rows and show a missing-language Releases tab affordance.
+- [ ] 8.3 Update the Releases tab to list `UnitWork(role = RELEASE)` members with multi-select language filtering, an All option, and `position` ordering.
 - [ ] 8.4 Add UI affordances for secondary and hidden-by-default releases without making them dominant.
 - [ ] 8.5 Update book content loading so the active visible release controls the content structure.
-- [ ] 8.6 Add frontend tests for language switching, missing language defaults, primary release ordering, and hidden-by-default release display.
+- [ ] 8.6 Add frontend tests for release-local language switching, missing-language Releases tab navigation, language filtering, position ordering, and hidden-by-default release display.
 
 ## 9. Community Feed UX
 
 - [ ] 9.1 Update release community tabs to show work-domain content by default when `UnitWork` membership exists.
 - [ ] 9.2 Add an exact-release filter that switches the feed to `targetUnitId = currentReleaseId`.
-- [ ] 9.3 Display precise target release context on work-domain feed items.
+- [ ] 9.3 Display precise target release context on work-domain feed items whenever the target release differs from the current release.
 - [ ] 9.4 Add tests for default work-domain feed rendering and exact-release filtering.
 
 ## 10. Shelf UX And Hydration
 
 - [ ] 10.1 Update shelf collection flows so release-aware collection stores the visible release Unit.
-- [ ] 10.2 Add shelf hydration support for resolving `UnitWork` grouping metadata.
-- [ ] 10.3 Update shelf rendering to group same-work releases by default.
-- [ ] 10.4 Add release-expanded shelf display mode.
-- [ ] 10.5 Add tests for collecting releases, grouped same-work rendering, and expanded release rendering.
+- [ ] 10.2 Add shelf membership reconciliation that registers shelf Units in `UnitWork(role = SHELF)` for every work represented by contained releases.
+- [ ] 10.3 Update work-domain shelf surfaces to render precise contained release context when it differs from the current release.
+- [ ] 10.4 Add release move/work merge repair for shelf work memberships.
+- [ ] 10.5 Add tests for collecting releases, multi-work shelf membership, membership recalculation, and work-domain shelf card target context.
 
 ## 11. Admin And Diagnostics
 
-- [ ] 11.1 Add admin visibility into hidden work Units, their `UnitWork` members, and language defaults.
+- [ ] 11.1 Add admin visibility into hidden work Units, their `UnitWork` members, roles, positions, and repair state.
 - [ ] 11.2 Add diagnostics for `UnitWork`/`Unit.workUnitId` drift during migration.
 - [ ] 11.3 Add diagnostics for search projection drift between work tags and release documents.
 - [ ] 11.4 Add warnings for unusually large work domains based on the configured release-count threshold.
@@ -140,11 +140,11 @@
 ## 16. Admin Work Merge And Metadata Copy
 
 - [ ] 16.1 Add durable admin work merge operation schema or equivalent operation log with source work, target work, status, actor, reason, timestamps, and item-level progress.
-- [ ] 16.2 Add admin merge dry-run endpoint that previews release membership moves, language default conflicts, projection repair scope, and affected DTO/search/shelf behavior.
+- [ ] 16.2 Add admin merge dry-run endpoint that previews release membership moves, work-domain membership repair scope, projection repair scope, and affected DTO/search/shelf behavior.
 - [ ] 16.3 Implement admin-only merge start/status/revert APIs.
 - [ ] 16.4 Migrate canonical release/content membership from source work to target work without deleting the source work Unit.
 - [ ] 16.5 Preserve source work non-membership metadata by default, including tags, aliases, external references, attribution, and history.
-- [ ] 16.6 Queue merge repair for active work domains, including content search, post search, shelf hydration/grouping, language defaults, and USWN DTO projection.
+- [ ] 16.6 Queue merge repair for active work domains, including content search, post search, `UnitWork` content membership, shelf membership, and USWN DTO projection.
 - [ ] 16.7 Add optional metadata-copy operations for copying missing tags and aliases from source work to target work.
 - [ ] 16.8 Ensure metadata copy is independent from canonical merge, creates only missing target rows, leaves source rows unchanged, supports dry-run, and can be reverted for rows it created.
 - [ ] 16.9 Add admin UI for merge preview, conflict handling, progress, revert, and optional metadata-copy actions.
@@ -155,7 +155,7 @@
 - [ ] 17.1 Add `unit-work-domain` special factory scenario.
 - [ ] 17.2 Seed at least one hidden BOOK work with primary, translation, secondary, and hidden-by-default releases.
 - [ ] 17.3 Seed work-level tags, release-local tags, and inherited-tag search sync hooks for the fixture.
-- [ ] 17.4 Seed `UnitWorkLanguageDefault` rows for at least two languages.
+- [ ] 17.4 Seed release-local `UnitTranslation` rows and same-work releases in multiple languages for language switcher and Releases tab coverage.
 - [ ] 17.5 Seed reviews targeting different releases under the same work so work-domain feed aggregation can be verified.
 - [ ] 17.6 Seed a shelf containing multiple releases under the same work for grouped and expanded shelf rendering.
 - [ ] 17.7 Attach ISBN/source-site external reference fixtures to visible releases rather than hidden works.

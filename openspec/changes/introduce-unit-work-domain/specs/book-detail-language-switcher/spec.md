@@ -1,53 +1,50 @@
 ## ADDED Requirements
 
-### Requirement: Book Language Switching Resolves Through UnitWork Defaults
+### Requirement: Book Language Switching Is Release-Local
 
-For release-aware books, changing language SHALL select a visible release in
-the same hidden work domain using `UnitWorkLanguageDefault` and deterministic
-fallbacks. It SHALL NOT treat every release translation as an equal top-level
-language candidate.
+For release-aware books, the detail-page language switcher SHALL switch only
+between `UnitTranslation` records that belong to the current visible release.
+It SHALL NOT navigate to a different same-work release, and it SHALL NOT
+automatically resolve another release for the requested language.
 
-#### Scenario: Switch to curated language default
+#### Scenario: Switch current release translation
 
-- **GIVEN** the current release belongs to `work-x`
-- **AND** `UnitWorkLanguageDefault(work-x, zh-hant) = release-zh`
-- **WHEN** the user switches the book language to `zh-hant`
-- **THEN** the page SHALL select or navigate to `release-zh`
+- **GIVEN** current release `release-a` has `UnitTranslation(release-a, en)`
+- **AND** it has `UnitTranslation(release-a, zh-hant)`
+- **WHEN** the user switches the book detail language to `zh-hant`
+- **THEN** the page SHALL render `release-a` using its `zh-hant` translation
+- **AND** the active release SHALL remain `release-a`
 
-#### Scenario: No language default falls back deterministically
+#### Scenario: Missing translation does not substitute another release
 
-- **GIVEN** no `UnitWorkLanguageDefault(work-x, de)` exists
-- **WHEN** the user switches to `de`
-- **THEN** the system SHALL attempt the documented fallback order
-- **AND** if no release supports `de`, the UI SHALL show a no-content state rather than selecting an arbitrary release
+- **GIVEN** current release `release-a` has no `UnitTranslation(release-a, de)`
+- **AND** same-work release `release-de` exists
+- **WHEN** the user requests German from the detail language switcher
+- **THEN** the page SHALL NOT silently navigate to `release-de`
+- **AND** it SHALL show the missing-language affordance described by this
+  capability
 
-### Requirement: Language Switcher Shows Primary Languages First
+### Requirement: Missing Language Affordance Opens Releases Tab
 
-The book language switcher SHALL present primary work-language releases first.
-Secondary releases in the same language SHALL be accessible through the release
-selector, not as duplicate top-level language choices.
+The language switcher SHALL include an affordance for the case where the current
+release does not provide the user's desired language. Activating that affordance
+SHALL navigate to the Releases tab for the current work, where the user can
+filter and choose another same-work release explicitly.
 
-#### Scenario: Multiple releases share language
+#### Scenario: Preferred language missing
 
-- **GIVEN** `work-x` has three Japanese releases
-- **AND** `UnitWorkLanguageDefault(work-x, ja) = release-ja-main`
+- **GIVEN** the viewer prefers `zh-hant`
+- **AND** current release `release-a` lacks a `zh-hant` translation
 - **WHEN** the language switcher renders
-- **THEN** Japanese SHALL appear once as a language option
-- **AND** selecting it SHALL resolve `release-ja-main`
+- **THEN** it SHALL include an option indicating the desired language was not
+  found for the current release
+- **AND** activating that option SHALL open the Releases tab with the viewer's
+  preferred languages selected by default
 
-### Requirement: Language Defaults Follow Canonical Work After Merge
+#### Scenario: Releases tab handles same-work discovery
 
-When a source work is merged into a target work, release language switching
-SHALL resolve through the target canonical work after merge repair completes.
-If source and target language defaults conflict, admin merge preview SHALL
-surface the conflict and the merge operation SHALL apply the selected target
-resolution.
-
-#### Scenario: Merged source release switches through target work
-
-- **GIVEN** release `release-a` belonged to source work `work-old`
-- **AND** `work-old` has been merged into `work-new`
-- **WHEN** the user switches language from `release-a`
-- **THEN** the language switcher SHALL resolve candidates from `work-new`
-- **AND** it SHALL NOT use stale defaults from `work-old` as the current
-  canonical work defaults
+- **GIVEN** current release `release-a` belongs to `work-x`
+- **WHEN** the missing-language option opens the Releases tab
+- **THEN** same-work release discovery SHALL be handled by
+  `UnitWork(work-x, role = RELEASE)` membership
+- **AND** selecting another release SHALL be an explicit user navigation action

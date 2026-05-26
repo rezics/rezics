@@ -2,7 +2,8 @@
 
 ### Requirement: Library DTOs Expose Derived USWN Metadata
 
-Library content DTOs, including book DTOs and future release-aware library
+The system SHALL expose derived USWN metadata on library content DTOs. Library
+content DTOs, including book DTOs and future release-aware library
 content DTOs, SHALL expose `metadata.uswn` as a derived field. USWN stands for
 Universal Standard Work Number. In this change, the value SHALL be the
 merge-resolved canonical work Unit id. The field SHALL NOT be stored as a

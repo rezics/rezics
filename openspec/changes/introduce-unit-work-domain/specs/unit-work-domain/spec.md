@@ -1,29 +1,43 @@
 ## ADDED Requirements
 
-### Requirement: UnitWork Defines Hidden Work Membership
+### Requirement: UnitWork Defines Unit-Based Work-Domain Membership
 
-The system SHALL introduce `UnitWork` as the canonical relationship that links
-a visible Unit to a hidden work Unit. The visible member Unit SHALL remain the
-normal user-facing catalog target. The hidden work Unit SHALL provide grouping,
-inherited discovery metadata, shared community aggregation, and language-default
-resolution.
+The system SHALL introduce `UnitWork` as the canonical Unit-based relationship
+that links any work-domain-participating Unit to a hidden work Unit. Visible
+release Units SHALL remain the normal user-facing catalog targets. Hidden work
+Units SHALL provide grouping, inherited discovery metadata, shared community
+aggregation, and work-domain content membership.
 
 `UnitWork` rows SHALL at minimum identify `unitId`, `workUnitId`, membership
-`role`, optional `language`, `rank`, `displayPolicy`, and timestamps. A visible
-release Unit SHALL belong to at most one hidden work Unit in v1.
+`role`, optional `language`, optional fractional-index `position`,
+`displayPolicy`, and timestamps.
+
+For `role = RELEASE`, a visible release Unit SHALL belong to at most one
+canonical hidden work Unit in v1. For content roles such as `POST`, `REVIEW`,
+`SHELF`, `WIKI`, or `GUIDE`, the same Unit MAY belong to multiple work domains
+when its precise targets or contained Units span multiple works.
 
 #### Scenario: Release belongs to hidden work
 
 - **WHEN** release Unit `release-a` is linked to hidden work Unit `work-x`
-- **THEN** a `UnitWork(unitId = release-a, workUnitId = work-x)` row SHALL exist
+- **THEN** a `UnitWork(unitId = release-a, workUnitId = work-x, role = RELEASE)` row SHALL exist
 - **AND** `release-a` SHALL remain the visible catalog page target
 - **AND** `work-x` SHALL be used for grouping and inherited discovery metadata
 
-#### Scenario: Duplicate work membership rejected
+#### Scenario: Duplicate release work membership rejected
 
 - **WHEN** a caller attempts to attach the same release Unit to two different work Units
-- **THEN** the system SHALL reject the second active `UnitWork` membership in v1
+- **THEN** the system SHALL reject the second active `role = RELEASE` `UnitWork` membership in v1
 - **AND** the release SHALL continue to resolve to exactly one work domain
+
+#### Scenario: Content belongs to multiple work domains
+
+- **GIVEN** post Unit `post-p` is published under release contexts from `work-a`
+  and `work-b`
+- **WHEN** work-domain membership is registered
+- **THEN** `UnitWork(post-p, work-a, role = POST)` SHALL exist
+- **AND** `UnitWork(post-p, work-b, role = POST)` SHALL also exist
+- **AND** this SHALL NOT violate the release-only uniqueness invariant
 
 ### Requirement: Hidden Work Units Are Not Ordinary Release Pages
 
@@ -36,7 +50,8 @@ work-level tags, aliases, attribution, and metadata used by members.
 #### Scenario: Public search does not render hidden work as normal book result
 
 - **WHEN** a content search matches a hidden book work Unit through its tags or aliases
-- **THEN** the public result SHALL render a visible `UnitWork` member release instead of the hidden work Unit
+- **THEN** the public result SHALL render a visible `role = RELEASE` `UnitWork`
+  member instead of the hidden work Unit
 - **AND** the hidden work Unit MAY be used as the result's grouping key
 
 #### Scenario: Admin can still inspect hidden work
@@ -45,74 +60,100 @@ work-level tags, aliases, attribution, and metadata used by members.
 - **THEN** the system MAY display the hidden work Unit and its `UnitWork` members
 - **AND** that surface SHALL be distinct from ordinary release reading/detail flows
 
-### Requirement: UnitWork Language Defaults
+### Requirement: UnitWork Drives Work-Domain Content Membership
 
-The system SHALL define work-language default rows that map
-`(workUnitId, language)` to the primary visible Unit for that language. Language
-defaults SHALL be used by release language switching and grouped search
-presentation. The default target Unit MUST be an active `UnitWork` member of the
-same `workUnitId`.
+The system SHALL register work-domain content through `UnitWork`. When a user
+creates or attaches content that participates in work-domain aggregation, the
+system SHALL derive one or more `UnitWork` memberships from the content's
+precise target Units or contained Units. The precise target SHALL remain on the
+feature-specific field such as `Post.targetUnitId`.
 
-#### Scenario: Language default resolves primary release
+#### Scenario: Review targets release and enters work domain
 
-- **GIVEN** `UnitWork(release-ja, work-x)` and `UnitWork(release-zh, work-x)` exist
-- **AND** `UnitWorkLanguageDefault(work-x, zh-hant) = release-zh`
-- **WHEN** the user switches the current release to `zh-hant`
-- **THEN** the system SHALL resolve `release-zh` as the primary release for that language
-
-#### Scenario: Default outside work rejected
-
-- **WHEN** a caller attempts to set `UnitWorkLanguageDefault(work-x, en) = release-y`
-- **AND** `release-y` is not an active `UnitWork` member of `work-x`
-- **THEN** the system SHALL reject the write
-
-### Requirement: UnitWork Drives Work-Domain Interaction Targeting
-
-The system SHALL use `UnitWork` to derive work-domain interaction targets.
-When a user creates release-specific content that participates in work-domain
-community aggregation, the system SHALL derive `targetWorkUnitId` from the
-target release's active `UnitWork` membership. The precise target SHALL remain
-the visible release Unit.
-
-#### Scenario: Review targets release and aggregates to work
-
-- **GIVEN** `UnitWork(release-a, work-x)` exists
+- **GIVEN** `UnitWork(release-a, work-x, role = RELEASE)` exists
 - **WHEN** a user creates a review whose precise target is `release-a`
 - **THEN** the review SHALL store or project `targetUnitId = release-a`
-- **AND** the review SHALL store or project `targetWorkUnitId = work-x`
+- **AND** the review Unit SHALL have `UnitWork(reviewUnitId, work-x, role = REVIEW)`
 
 #### Scenario: Standalone target has no work domain
 
 - **WHEN** a user creates a post targeting Unit `unit-y` with no active `UnitWork` membership
 - **THEN** the post SHALL keep `targetUnitId = unit-y`
-- **AND** `targetWorkUnitId` SHALL be null unless another explicit work-domain rule applies
+- **AND** the post SHALL NOT receive a work-domain `UnitWork` row unless another
+  explicit work-domain rule applies
+
+#### Scenario: Work-domain feed queries UnitWork
+
+- **GIVEN** releases `release-a` and `release-b` both have `role = RELEASE`
+  membership in `work-x`
+- **AND** `post-p` has `UnitWork(post-p, work-x, role = POST)`
+- **WHEN** a user opens the default community tab on `release-b`
+- **THEN** the feed SHALL query content registered under `work-x`
+- **AND** it SHALL include `post-p` without querying `release-a` directly
+
+#### Scenario: Feed card renders precise target release
+
+- **GIVEN** the current page is `release-b`
+- **AND** feed item `post-p` has `targetUnitId = release-a`
+- **WHEN** the card renders in the work-domain feed
+- **THEN** it SHALL display identifying metadata for `release-a`
+- **AND** it SHALL NOT imply that `post-p` precisely targets `release-b`
 
 ### Requirement: UnitWork Search Repair Is Asynchronous And Bounded
 
 Work-domain search projection changes SHALL be processed through CDC/outbox and
 job-runner batch handlers. User-facing mutations that change work tags,
-`UnitWork` membership, work aliases, or language defaults SHALL enqueue repair
-work and SHALL NOT synchronously rebuild every affected Meilisearch document in
-the request path.
+`UnitWork` membership, or work aliases SHALL enqueue repair work when needed and
+SHALL NOT synchronously rebuild every affected Meilisearch document in the
+request path.
 
 #### Scenario: Work tag update enqueues release fan-out
 
 - **GIVEN** hidden work `work-x` has 120 active member releases
 - **WHEN** a tag is added to `work-x`
-- **THEN** the mutation SHALL enqueue a search projection rebuild for members of `work-x`
+- **THEN** the mutation SHALL enqueue a search projection rebuild for release
+  members of `work-x`
 - **AND** the request SHALL NOT block on rebuilding all 120 Meilisearch documents
 
-#### Scenario: Release membership change rebuilds one release
+#### Scenario: Membership change rebuilds affected unit
 
-- **WHEN** `UnitWork(release-a, work-x)` is inserted or updated
+- **WHEN** `UnitWork(release-a, work-x, role = RELEASE)` is inserted or updated
 - **THEN** the system SHALL enqueue a rebuild for `release-a`'s search document
 - **AND** grouped search metadata for `work-x` SHALL be refreshed by the same job family
 
 #### Scenario: Large work domains are processed in batches
 
-- **WHEN** a work-domain repair job finds more member releases than one batch can process
+- **WHEN** a work-domain repair job finds more member Units than one batch can process
 - **THEN** the job SHALL process members in deterministic pages
 - **AND** the job SHALL be resumable and idempotent
+
+### Requirement: Release Move And Work Merge Recalculate Work Membership
+
+Release move and work merge operations SHALL be treated as high-risk admin
+operations because they can invalidate historical work-domain memberships for
+posts, reviews, shelves, and other content derived from affected releases. These
+operations SHALL run through previewable, durable, resumable repair flows that
+recalculate affected `UnitWork` memberships.
+
+#### Scenario: Release move repairs derived content membership
+
+- **GIVEN** `release-a` moves from `work-old` to `work-new`
+- **AND** post `post-p` targets `release-a`
+- **WHEN** release-move repair completes
+- **THEN** `post-p` SHALL no longer be registered under `work-old` solely because
+  of `release-a`
+- **AND** `UnitWork(post-p, work-new, role = POST)` SHALL exist
+- **AND** `post-p.targetUnitId` SHALL remain `release-a`
+
+#### Scenario: Shelf membership is recalculated rather than blindly removed
+
+- **GIVEN** shelf `shelf-s` contains `release-a` and `release-b`
+- **AND** both releases belonged to `work-old`
+- **WHEN** `release-a` moves to `work-new`
+- **THEN** repair SHALL keep `UnitWork(shelf-s, work-old, role = SHELF)` if
+  `release-b` still belongs to `work-old`
+- **AND** repair SHALL add `UnitWork(shelf-s, work-new, role = SHELF)` for
+  `release-a`
 
 ### Requirement: Hidden Work Creation Is Admin-Only Outside Release-Led Flows
 
@@ -156,19 +197,19 @@ metadata instead of asking ordinary users to author a separate work title.
 ### Requirement: Library Metadata USWN Resolves From Canonical Work
 
 For library content DTOs, the server SHALL derive `metadata.uswn` from the
-current canonical work domain. If a Unit belongs to a work, the field SHALL be
-the merge-resolved work Unit id. If a Unit has no work domain, the field SHALL
-be `null`. The field SHALL NOT be stored in the database.
+current canonical work domain. If a release Unit belongs to a work, the field
+SHALL be the merge-resolved work Unit id. If a Unit has no release work domain,
+the field SHALL be `null`. The field SHALL NOT be stored in the database.
 
 #### Scenario: Release returns work USWN
 
-- **GIVEN** `UnitWork(release-a, work-x)` exists
+- **GIVEN** `UnitWork(release-a, work-x, role = RELEASE)` exists
 - **WHEN** the server returns a library DTO for `release-a`
 - **THEN** `metadata.uswn` SHALL equal `work-x`
 
 #### Scenario: No work returns null USWN
 
-- **GIVEN** Unit `unit-y` has no work domain
+- **GIVEN** Unit `unit-y` has no release work domain
 - **WHEN** the server returns a library DTO for `unit-y`
 - **THEN** `metadata.uswn` SHALL be `null`
 
@@ -205,8 +246,8 @@ support revert.
 
 #### Scenario: Active work merge is queued
 
-- **GIVEN** source work `work-old` has many releases, posts, reviews, or search
-  projections
+- **GIVEN** source work `work-old` has many releases, posts, reviews, shelves,
+  or search projections
 - **WHEN** an admin starts a merge into `work-new`
 - **THEN** the request SHALL create or update a durable merge operation and
   enqueue the required migration/repair jobs
@@ -215,11 +256,12 @@ support revert.
 
 ### Requirement: Work Metadata Copy Is Optional And Independent
 
-Admins MAY copy missing metadata from a source work to a target work as an
-explicit operation independent from canonical work merge. In v1, metadata copy
-SHALL support work tags and aliases. The operation SHALL only create target rows
-that do not already exist, SHALL leave source rows unchanged, and SHALL support
-dry-run preview and revert for rows it creates.
+The system SHALL support optional metadata copy as an explicit operation
+independent from canonical work merge. Admins MAY copy missing metadata from a
+source work to a target work. In v1, metadata copy SHALL support work tags and
+aliases. The operation SHALL only create target rows that do not already exist,
+SHALL leave source rows unchanged, and SHALL support dry-run preview and revert
+for rows it creates.
 
 #### Scenario: Copy missing tags only
 

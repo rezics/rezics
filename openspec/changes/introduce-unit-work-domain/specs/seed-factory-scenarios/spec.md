@@ -18,9 +18,9 @@ admin merge target created by the scenario.
 ### Requirement: Work Domain Scenario Covers Inheritance And Grouping
 
 The `unit-work-domain` scenario SHALL seed data sufficient to exercise inherited
-work tags, release-local tags, language defaults, grouped content search,
-release-specific reviews aggregated by work, and shelf grouping of same-work
-releases.
+work tags, release-local tags, release-local translations, grouped content
+search, release-specific reviews aggregated by work, and shelf work-domain
+membership.
 
 #### Scenario: Inherited and local tags exist
 
@@ -28,11 +28,13 @@ releases.
 - **THEN** at least one tag SHALL be attached to the hidden work
 - **AND** at least one different tag SHALL be attached directly to a release
 
-#### Scenario: Language defaults exist
+#### Scenario: Release-local translations exist
 
 - **WHEN** the scenario creates releases in multiple languages
-- **THEN** it SHALL create `UnitWorkLanguageDefault` rows for at least two
-  languages
+- **THEN** at least one release SHALL have multiple `UnitTranslation` rows for
+  language-switcher verification
+- **AND** at least one same-work release in another language SHALL exist for
+  Releases tab filtering verification
 
 #### Scenario: Work-domain reviews exist
 
@@ -47,13 +49,15 @@ releases.
 - **WHEN** the scenario creates a shelf fixture
 - **THEN** the shelf SHALL contain at least two releases belonging to the same
   hidden work
-- **AND** the fixture SHALL be suitable for grouped and expanded shelf rendering
+- **AND** the shelf Unit SHALL have `UnitWork(..., role = SHELF)` membership in
+  that work domain
 
 ### Requirement: Work Domain Scenario Covers Source Identity
 
-The `unit-work-domain` scenario SHOULD attach at least one ISBN and one source
-site external reference to a visible release. ISBN and source references in this
-scenario SHALL identify releases, not hidden works.
+The `unit-work-domain` scenario SHALL cover source identity by attaching source
+identity data to visible releases. It SHOULD attach at least one ISBN and one
+source site external reference to a visible release. ISBN and source references
+in this scenario SHALL identify releases, not hidden works.
 
 #### Scenario: External reference attaches to release
 

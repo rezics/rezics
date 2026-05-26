@@ -24,7 +24,7 @@ successor), not only release-local `ownTagIds`.
 The content search API SHALL group ordinary release search results by
 `searchGroupId` by default. For each group, the API SHALL choose a primary
 visible result using release-specific match quality, language preference,
-`primaryForLanguages`, `releaseRank`, and `displayPolicy`.
+`UnitWork.position`, and `displayPolicy`.
 
 #### Scenario: Same work has many tag matches
 

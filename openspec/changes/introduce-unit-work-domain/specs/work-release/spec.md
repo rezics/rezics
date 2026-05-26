@@ -37,7 +37,7 @@ resolve membership through `UnitWork`.
 
 - **WHEN** the system lists releases for hidden work Unit `work-x`
 - **THEN** it SHALL read active `UnitWork` rows for `work-x`
-- **AND** it SHALL include rank, role, display policy, and language metadata from `UnitWork`
+- **AND** it SHALL include `position`, role, display policy, and language metadata from `UnitWork`
 
 ### Requirement: Release Nesting Remains Forbidden For Work Membership
 
@@ -80,8 +80,8 @@ of creating the first visible release for a work.
 Admin work merge SHALL canonicalize source-work releases under a target work
 without deleting the source work Unit. The operation SHALL preserve source-work
 non-membership metadata by default and SHALL update canonical work resolution so
-release pages, search grouping, language defaults, and library DTO metadata use
-the target work after merge completion.
+release pages, search grouping, work-domain content membership, and library DTO
+metadata use the target work after merge completion.
 
 #### Scenario: Source work redirects to target for public resolution
 
