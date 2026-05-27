@@ -1,13 +1,6 @@
 ---
 name: discuss-first
-description: >
-  Discuss-first workflow: analyze and propose a plan before editing any file,
-  then wait for explicit user approval before proceeding. Use this skill whenever
-  the user says "discuss first", "don't edit yet", "plan before you change anything",
-  "tell me your approach", "let's talk through this", or any variant indicating
-  they want to review a proposal before execution. Also trigger proactively for
-  complex refactors, multi-file changes, architectural decisions, or any edit
-  whose scope is ambiguous — suggest this workflow if the user hasn't already.
+description: Discuss and get approval before edits for ambiguous, architectural, or multi-file changes.
 ---
 
 # Discuss-First Workflow

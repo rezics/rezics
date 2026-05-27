@@ -1,11 +1,6 @@
 ---
 name: router-core/type-safety
-description: >-
-  Full type inference philosophy (never cast, never annotate inferred
-  values), Register module declaration, from narrowing on hooks and
-  Link, strict:false for shared components, getRouteApi for code-split
-  typed access, addChildren with object syntax for TS perf, LinkProps
-  and ValidateLinkOptions type utilities, as const satisfies pattern.
+description: Use for TanStack Router type inference, Register setup, typed hooks, and Link typing.
 type: sub-skill
 library: tanstack-router
 library_version: '1.166.2'

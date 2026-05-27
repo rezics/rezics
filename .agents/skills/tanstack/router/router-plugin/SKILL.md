@@ -1,10 +1,6 @@
 ---
 name: router-plugin
-description: >-
-  TanStack Router bundler plugin for route generation and automatic
-  code splitting. Supports Vite, Webpack, Rspack, and esbuild.
-  Configures autoCodeSplitting, routesDirectory, target framework,
-  and code split groupings.
+description: Use for TanStack Router bundler plugin configuration and route generation.
 type: core
 library: tanstack-router
 library_version: '1.166.2'

@@ -1,10 +1,6 @@
 ---
 name: virtual-file-routes
-description: >-
-  Programmatic route tree building as an alternative to filesystem
-  conventions: rootRoute, index, route, layout, physical,
-  defineVirtualSubtreeConfig. Use with TanStack Router plugin's
-  virtualRouteConfig option.
+description: Use for TanStack Router virtual file route configuration.
 type: core
 library: tanstack-router
 library_version: '1.161.4'

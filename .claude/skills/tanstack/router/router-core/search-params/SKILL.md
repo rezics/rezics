@@ -1,10 +1,6 @@
 ---
 name: router-core/search-params
-description: >-
-  validateSearch, search param validation with Zod/Valibot/ArkType adapters,
-  fallback(), search middlewares (retainSearchParams, stripSearchParams),
-  custom serialization (parseSearch, stringifySearch), search param
-  inheritance, loaderDeps for cache keys, reading and writing search params.
+description: Use for TanStack Router search param validation, serialization, inheritance, and updates.
 type: sub-skill
 library: tanstack-router
 library_version: '1.166.2'

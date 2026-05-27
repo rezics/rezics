@@ -1,18 +1,6 @@
 ---
 name: rezics-design
-description: >
-  rezics design system reference: brand identity (轮回红 #f4606c on warm parchment),
-  token library, typography rules, shadcn-or-custom component policy,
-  Apple-inspired borderless aesthetic, and do/don't patterns. Use this skill
-  whenever generating, modifying, or reviewing UI in rezics — JSX, CSS, UnoCSS
-  classes, theme tokens, color choices, typography, spacing, or component
-  selection. Trigger proactively any time UI styling decisions are being made,
-  even when the user hasn't named the skill: choosing colors, picking a
-  component (shadcn vs custom), naming a CSS variable, deciding card vs section
-  treatment, picking icons, writing copy. Also load when reviewing a PR for
-  visual consistency or when asked questions like "is this on-brand?", "what
-  color should this be?", "does this match our design system?". Skip only for
-  backend, infra, build, test, or non-visual work.
+description: Use for rezics UI design, JSX/CSS styling, tokens, typography, spacing, icons, and visual reviews.
 ---
 
 # rezics Design System — Foundation v1

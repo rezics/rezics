@@ -1,13 +1,6 @@
 ---
 name: git-worktree
-description: >
-  Manage the full lifecycle of git worktrees for parallel development. Use this skill when the user
-  asks to "create a worktree", "spin up a parallel branch", "start parallel work on X", "open a
-  sibling checkout", "merge a worktree back", "integrate the worktree branch", "clean up a worktree",
-  or "list worktrees". Three modes: create (spin up a new sibling worktree on a fresh branch),
-  merge (rebase + fast-forward back into the trunk by default, preserving full commit history),
-  and list/cleanup (inspect and remove worktrees). Always confirms the start point and integration
-  strategy with the user before executing destructive or history-altering commands.
+description: Create, merge, list, or clean up git worktrees for parallel development.
 ---
 
 # Git Worktree Skill

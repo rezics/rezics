@@ -1,10 +1,6 @@
 ---
 name: router-core
-description: >-
-  Framework-agnostic core concepts for TanStack Router: route trees,
-  createRouter, createRoute, createRootRoute, createRootRouteWithContext,
-  addChildren, Register type declaration, route matching, route sorting,
-  file naming conventions. Entry point for all router skills.
+description: Use for core TanStack Router concepts, route trees, router setup, and route matching.
 type: core
 library: tanstack-router
 library_version: '1.166.2'

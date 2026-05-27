@@ -1,6 +1,6 @@
 ---
 name: elysiajs
-description: Create backend with ElysiaJS, a type-safe, high-performance framework.
+description: Build backend APIs with ElysiaJS.
 ---
 
 # ElysiaJS Development Skill

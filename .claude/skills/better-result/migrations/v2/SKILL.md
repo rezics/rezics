@@ -1,6 +1,6 @@
 ---
 name: better-result-migrate-v2
-description: Migrate existing `better-result` TaggedError usage from v1 (class-based) to v2 (factory-based) API. Use only when the target code already uses `better-result` or the user explicitly requests this migration.
+description: Migrate existing better-result TaggedError code from v1 classes to v2 factories.
 ---
 
 # better-result v2 Migration

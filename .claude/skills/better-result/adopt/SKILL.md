@@ -1,6 +1,6 @@
 ---
 name: better-result-adopt
-description: Adopt `better-result` only for explicit opt-in work. In this repository, do not propose or introduce the library unless the user asks for it or the target code already uses it.
+description: Adopt better-result only when explicitly requested or already used nearby.
 ---
 
 # better-result Adoption

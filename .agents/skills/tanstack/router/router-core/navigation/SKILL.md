@@ -1,11 +1,6 @@
 ---
 name: router-core/navigation
-description: >-
-  Link component, useNavigate, Navigate component, router.navigate,
-  ToOptions/NavigateOptions/LinkOptions, from/to relative navigation,
-  activeOptions/activeProps, preloading (intent/viewport/render),
-  preloadDelay, navigation blocking (useBlocker, Block), createLink,
-  linkOptions helper, scroll restoration, MatchRoute.
+description: Use for TanStack Router Link, navigation APIs, preloading, blocking, and scroll behavior.
 type: sub-skill
 library: tanstack-router
 library_version: '1.166.2'

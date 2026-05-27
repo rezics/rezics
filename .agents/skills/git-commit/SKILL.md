@@ -1,12 +1,6 @@
 ---
 name: git-commit
-description: >
-  Generate well-formatted Git commit messages following conventional commit standards.
-  Use this skill whenever the user asks to commit changes, write a commit message, stage and commit,
-  or says anything like "commit this", "generate a commit", "what should my commit message be",
-  or "help me commit". Also trigger when the user is done with a coding task and naturally
-  needs to save their work. Auto-detects the commit type from staged changes but always allows
-  the user to override.
+description: Create conventional git commits and commit messages for repo changes.
 ---
 
 # Git Commit Message Skill

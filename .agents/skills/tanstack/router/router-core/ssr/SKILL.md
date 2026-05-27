@@ -1,12 +1,6 @@
 ---
 name: router-core/ssr
-description: >-
-  Non-streaming and streaming SSR, RouterClient/RouterServer,
-  renderRouterToString/renderRouterToStream, createRequestHandler,
-  defaultRenderHandler/defaultStreamHandler, HeadContent/Scripts
-  components, head route option (meta/links/styles/scripts),
-  ScriptOnce, automatic loader dehydration/hydration, memory
-  history on server, data serialization, document head management.
+description: Use for TanStack Router SSR, streaming, hydration, document head, and server rendering.
 type: sub-skill
 library: tanstack-router
 library_version: '1.166.2'

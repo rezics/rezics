@@ -1,10 +1,6 @@
 ---
 name: router-core/not-found-and-errors
-description: >-
-  notFound() function, notFoundComponent, defaultNotFoundComponent,
-  notFoundMode (fuzzy/root), errorComponent, CatchBoundary,
-  CatchNotFound, isNotFound, NotFoundRoute (deprecated), route
-  masking (mask option, createRouteMask, unmaskOnReload).
+description: Use for TanStack Router not-found handling, error boundaries, and route masking.
 type: sub-skill
 library: tanstack-router
 library_version: '1.166.2'

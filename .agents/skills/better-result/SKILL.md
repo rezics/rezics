@@ -1,6 +1,6 @@
 ---
 name: better-result
-description: Repository policy and guardrails for `better-result`. In this codebase, do not introduce `better-result` by default. Use it only when the user explicitly asks for it or when the code you are editing already depends on it.
+description: Repository guardrails for when better-result may be used in rezics.
 ---
 
 # better-result Policy
