@@ -95,10 +95,10 @@
 
 ## 11. Admin And Diagnostics
 
-- [ ] 11.1 Add admin visibility into hidden work Units, their `UnitWork` members, roles, positions, and repair state.
+- [x] 11.1 Add admin visibility into hidden work Units, their `UnitWork` members, roles, positions, and repair state.
 - [x] 11.2 Add diagnostics for `UnitWork`/`Unit.workUnitId` drift during migration.
-- [ ] 11.3 Add diagnostics for search projection drift between work tags and release documents.
-- [ ] 11.4 Add warnings for unusually large work domains based on the configured release-count threshold.
+- [x] 11.3 Add diagnostics for search projection drift between work tags and release documents.
+- [x] 11.4 Add warnings for unusually large work domains based on the configured release-count threshold.
 
 ## 12. Verification
 

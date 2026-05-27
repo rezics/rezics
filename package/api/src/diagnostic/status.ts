@@ -9,6 +9,8 @@ export type {
   CdcStatus,
   ExpectedMeiliIndexSchema,
   FailedJobSummary,
+  HiddenWorkDomainSummary,
+  LargeWorkDomainSummary,
   MeiliIndexStatus,
   MeiliStatusSummary,
   MeiliTaskSummary,
@@ -19,4 +21,7 @@ export type {
   StatusLink,
   StatusState,
   SystemStatusSummary,
+  WorkDomainDiagnostics,
+  WorkDomainMemberSummary,
+  WorkDomainProjectionDriftSummary,
 } from "./status.types";

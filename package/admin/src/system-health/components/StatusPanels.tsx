@@ -6,6 +6,7 @@ import type {
   StatusItem,
   StatusLink,
   SystemStatusSummary,
+  WorkDomainDiagnostics,
 } from "@rezics/api";
 import { Spinner } from "@rezics/ui";
 import {
@@ -27,6 +28,7 @@ import {
   ExternalLink,
   ListChecks,
   Search,
+  Workflow,
 } from "lucide-react";
 import type React from "react";
 import { AdminSafeLink } from "@/shared/ui/link";
@@ -421,6 +423,78 @@ export function QueuePanel({ queue }: { queue: QueueStatus }) {
   );
 }
 
+export function WorkDomainPanel({
+  workDomains,
+}: {
+  workDomains: WorkDomainDiagnostics;
+}) {
+  return (
+    <StatusCard
+      title="Work domains"
+      description="Hidden work Units, projection drift, and unusually large release groups."
+      icon={<Workflow className="size-4" aria-hidden="true" />}
+    >
+      <StatusItemRow item={workDomains.item} />
+      <div className="grid gap-2 text-xs text-text-secondary sm:grid-cols-3">
+        <span>hidden works：{workDomains.hiddenWorks.length}</span>
+        <span>projection drift：{workDomains.projectionDrift.length}</span>
+        <span>
+          large domains：{workDomains.largeDomains.length} / threshold{" "}
+          {workDomains.releaseCountThreshold}
+        </span>
+      </div>
+
+      {workDomains.hiddenWorks.length > 0 ? (
+        <div className="space-y-2">
+          <Separator />
+          <p className="text-sm font-medium leading-[1.4]">Hidden work Units</p>
+          {workDomains.hiddenWorks.slice(0, 5).map((work) => (
+            <div
+              key={work.workUnitId}
+              className="rounded-md border border-border-whisper bg-surface-subtle p-3 text-xs"
+            >
+              <p className="font-medium leading-[1.4]">{work.workUnitId}</p>
+              <p className="mt-1 text-text-secondary">
+                {work.status ?? "unknown"} · {work.visibility ?? "unknown"} ·
+                releases {work.releaseCount}
+              </p>
+              <p className="mt-1 truncate text-text-tertiary">
+                {work.members
+                  .slice(0, 6)
+                  .map(
+                    (member) =>
+                      `${member.role}:${member.position ?? "-"}:${member.displayPolicy ?? "-"}`,
+                  )
+                  .join(" · ")}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {workDomains.projectionDrift.length > 0 ? (
+        <div className="space-y-2">
+          <Separator />
+          <p className="text-sm font-medium leading-[1.4]">
+            Work-tag projection drift
+          </p>
+          {workDomains.projectionDrift.slice(0, 5).map((drift) => (
+            <div
+              key={`${drift.workUnitId}-${drift.releaseUnitId}`}
+              className="rounded-md border border-border-whisper bg-surface-subtle p-3 text-xs"
+            >
+              <p className="font-medium leading-[1.4]">{drift.releaseUnitId}</p>
+              <p className="mt-1 text-warning-text">
+                missing inherited tags：{drift.missingWorkTagCount}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </StatusCard>
+  );
+}
+
 export function SystemStatusPanels({
   summary,
   isLoading,
@@ -449,6 +523,7 @@ export function SystemStatusPanels({
         <CdcPanel cdc={summary.cdc} />
         <QueuePanel queue={summary.queue} />
       </div>
+      <WorkDomainPanel workDomains={summary.workDomains} />
     </div>
   );
 }

@@ -43,6 +43,7 @@ function queryClient(options?: {
   publicationTables?: string[];
   slotActive?: boolean;
   lagBytes?: number;
+  workDomainRows?: Record<string, unknown[]>;
 }) {
   return {
     $queryRawUnsafe: mock(async (query: string) => {
@@ -61,6 +62,15 @@ function queryClient(options?: {
             lag_bytes: options?.lagBytes ?? 0,
           },
         ];
+      }
+      if (query.includes("w.visibility <> 'PUBLIC'")) {
+        return options?.workDomainRows?.hiddenWorks ?? [];
+      }
+      if (query.includes("missingWorkTagCount")) {
+        return options?.workDomainRows?.projectionDrift ?? [];
+      }
+      if (query.includes("HAVING COUNT(*) > $1")) {
+        return options?.workDomainRows?.largeDomains ?? [];
       }
       return [];
     }),
@@ -197,6 +207,62 @@ describe("getSystemStatusSummary", () => {
       id: "job-1",
       commandKind: "search.content.sync",
       attemptCount: 3,
+    });
+  });
+
+  test("reports work-domain visibility, projection drift, and large domain warnings", async () => {
+    const { getSystemStatusSummary } = await import("./system-status.service");
+    const summary = await getSystemStatusSummary({
+      fetchImpl: (async () =>
+        jsonResponse({ status: "ok" })) as unknown as typeof fetch,
+      queryClient: queryClient({
+        workDomainRows: {
+          hiddenWorks: [
+            {
+              workUnitId: "work-1",
+              status: "PUBLISHED",
+              visibility: "PRIVATE",
+              releaseCount: 2,
+              members: [
+                {
+                  unitId: "release-1",
+                  role: "RELEASE",
+                  position: "a0",
+                  displayPolicy: "PRIMARY",
+                },
+              ],
+            },
+          ],
+          projectionDrift: [
+            {
+              workUnitId: "work-1",
+              releaseUnitId: "release-1",
+              missingWorkTagCount: 2,
+              missingWorkTagIds: ["tag-1", "tag-2"],
+            },
+          ],
+          largeDomains: [{ workUnitId: "work-1", releaseCount: 25 }],
+        },
+      }),
+      jobRunnerBaseUrl: undefined,
+      sequinHealthUrl: undefined,
+      workDomainReleaseCountThreshold: 20,
+      meiliSummary,
+    });
+
+    expect(summary.workDomains.item.status).toBe("degraded");
+    expect(summary.workDomains.hiddenWorks[0]?.members[0]).toMatchObject({
+      role: "RELEASE",
+      position: "a0",
+    });
+    expect(summary.workDomains.projectionDrift[0]).toMatchObject({
+      releaseUnitId: "release-1",
+      missingWorkTagCount: 2,
+    });
+    expect(summary.workDomains.largeDomains[0]).toEqual({
+      workUnitId: "work-1",
+      releaseCount: 25,
+      threshold: 20,
     });
   });
 });
