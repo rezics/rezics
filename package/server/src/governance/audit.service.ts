@@ -26,6 +26,35 @@ export class GovernanceAuditService {
     return mapStaffAuditLogToDTO(row);
   }
 
+  appendPrivilegedMutation(input: {
+    actorUserId: string;
+    action: string;
+    targetKind: string;
+    targetId: string;
+    reason: string;
+    correlationId: string;
+    decisionCode?: string;
+    before?: Record<string, unknown>;
+    after?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
+  }) {
+    return this.append({
+      actorUserId: input.actorUserId,
+      action: input.action,
+      targetKind: input.targetKind,
+      targetId: input.targetId,
+      decisionCode: input.decisionCode ?? "ALLOWED",
+      reason: input.reason,
+      requestId: input.correlationId,
+      before: input.before,
+      after: input.after,
+      metadata: {
+        ...(input.metadata ?? {}),
+        correlationId: input.correlationId,
+      },
+    });
+  }
+
   async list(options: GovernanceListOptions = {}) {
     const rows = await prisma.staffAuditLog.findMany({
       orderBy: { createdAt: "desc" },

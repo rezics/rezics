@@ -63,6 +63,11 @@ const revokeAuthSessionsForAuthUser = mock(async () => ({
   revokedSessions: 2,
 }));
 const broadcastMock = mock(async (_event: any) => ({ ok: true, persisted: 1 }));
+const staffAuditLogCreate = mock(async ({ data }: any) => ({
+  id: "audit-1",
+  ...data,
+  createdAt: new Date("2026-05-28T00:00:00.000Z"),
+}));
 
 Object.assign(prismaMock, {
   $transaction: transactionMock,
@@ -73,6 +78,9 @@ Object.assign(prismaMock, {
   },
   user: {
     findUnique: userFindUnique,
+  },
+  staffAuditLog: {
+    create: staffAuditLogCreate,
   },
 });
 
@@ -100,6 +108,7 @@ describe("GovernanceEnforcementService", () => {
       revokedSessions: 2,
     });
     broadcastMock.mockClear();
+    staffAuditLogCreate.mockClear();
   });
 
   test("projects BLOCKED from an active ban enforcement", async () => {
@@ -213,6 +222,15 @@ describe("GovernanceEnforcementService", () => {
       }),
     });
     expect(broadcastMock).not.toHaveBeenCalled();
+    expect(staffAuditLogCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        actorUserId: "staff-1",
+        action: "account.enforcement.applied",
+        targetKind: "account",
+        targetId: "user-1",
+        requestId: "case-1",
+      }),
+    });
   });
 
   test("notifies subjects for warning enforcement", async () => {
@@ -300,6 +318,15 @@ describe("GovernanceEnforcementService", () => {
       directRecipients: ["user-1"],
       actorId: "staff-2",
       extra: { enforcementId: "enforcement-1", state: "REVOKED" },
+    });
+    expect(staffAuditLogCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        actorUserId: "staff-2",
+        action: "account.enforcement.revoked",
+        targetKind: "account",
+        targetId: "user-1",
+        requestId: "case-1",
+      }),
     });
   });
 });

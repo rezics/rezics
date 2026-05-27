@@ -42,7 +42,7 @@
 
 ## 7. Staff Audit And Frontend Hints
 
-- [ ] 7.1 Add append-only audit service helpers requiring reason/correlation metadata for privileged mutations; migrate admin-sensitive operations to write audit logs.
+- [x] 7.1 Add append-only audit service helpers requiring reason/correlation metadata for privileged mutations; migrate admin-sensitive operations to write audit logs.
 - [ ] 7.2 Add audit list/detail APIs with redaction.
 - [ ] 7.3 Expose staff and realm capability hints in frontend auth/membership state for UI visibility only, never for authorization.
 

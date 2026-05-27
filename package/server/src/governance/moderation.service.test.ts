@@ -108,6 +108,11 @@ const realmModerationEventFindMany = mock(async () => [
 ]);
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const broadcastMock = mock(async (_event: any) => ({ ok: true, persisted: 1 }));
+const staffAuditLogCreate = mock(async ({ data }: any) => ({
+  id: "audit-1",
+  ...data,
+  createdAt: now,
+}));
 const moderationCaseRow = {
   id: "case-1",
   state: "NEW",
@@ -206,6 +211,9 @@ const transactionMock = mock(async (fn: any) =>
     realmMember: {
       delete: realmMemberDelete,
     },
+    staffAuditLog: {
+      create: staffAuditLogCreate,
+    },
   }),
 );
 
@@ -248,6 +256,9 @@ Object.assign(prismaMock, {
   feedback: {
     findUniqueOrThrow: feedbackFindUniqueOrThrow,
   },
+  staffAuditLog: {
+    create: staffAuditLogCreate,
+  },
 });
 
 mock.module("@/job/job-boundary", () => ({
@@ -284,6 +295,7 @@ describe("GovernanceModerationService content moderation state", () => {
     realmModerationEventFindMany.mockClear();
     enqueueMock.mockClear();
     broadcastMock.mockClear();
+    staffAuditLogCreate.mockClear();
     moderationCaseFindFirst.mockClear();
     moderationCaseFindMany.mockClear();
     moderationCaseFindUniqueOrThrow.mockClear();
@@ -494,6 +506,16 @@ describe("GovernanceModerationService content moderation state", () => {
           targetUnitId: "reply-1",
         },
         reversible: true,
+      }),
+    });
+    expect(staffAuditLogCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        actorUserId: "staff-1",
+        action: "content.moderation.state_changed",
+        targetKind: "content",
+        targetId: "reply-1",
+        reason: "abuse",
+        requestId: "case-1",
       }),
     });
   });
@@ -833,6 +855,15 @@ describe("GovernanceModerationService content moderation state", () => {
       actorId: "mod-1",
       extra: { queueItemId: "queue-1", linkedCaseId: "case-1" },
     });
+    expect(staffAuditLogCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        actorUserId: "mod-1",
+        action: "realm.moderation.escalated",
+        targetKind: "realm-moderation-queue",
+        targetId: "queue-1",
+        requestId: "case-1",
+      }),
+    });
   });
 
   test("lists moderation case events", async () => {
@@ -1083,6 +1114,15 @@ describe("GovernanceModerationService content moderation state", () => {
       directRecipients: ["reporter-1"],
       actorId: "staff-1",
       extra: { caseId: "case-1", state: "ACTIONED" },
+    });
+    expect(staffAuditLogCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        actorUserId: "staff-1",
+        action: "moderation.case.decided",
+        targetKind: "moderation-case",
+        targetId: "case-1",
+        requestId: "case-1",
+      }),
     });
     expect(broadcastMock).toHaveBeenCalledWith({
       kind: "moderation.appeal.updated",

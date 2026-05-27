@@ -3,6 +3,7 @@ import { Prisma, prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { AppError } from "../utils/errors";
+import { governanceAuditService } from "./audit.service";
 import {
   mapContentModerationStateToDTO,
   mapModerationCaseEventToDTO,
@@ -137,6 +138,12 @@ function notifyModeration(input: {
     actorId: input.actorUserId ?? null,
     extra: input.extra,
   }).catch(() => {});
+}
+
+function auditPrivilegedMutation(
+  input: Parameters<typeof governanceAuditService.appendPrivilegedMutation>[0],
+) {
+  governanceAuditService.appendPrivilegedMutation(input).catch(() => {});
 }
 
 function enqueueModeratedContentSearch(targetUnitId: string) {
@@ -357,6 +364,15 @@ export class GovernanceModerationService {
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
     });
+    auditPrivilegedMutation({
+      actorUserId: input.actorUserId,
+      action: "moderation.case.assigned",
+      targetKind: "moderation-case",
+      targetId: row.id,
+      reason: input.reason ?? "case assignment changed",
+      correlationId: row.id,
+      after: { assignedToUserId: row.assignedToUserId, state: row.state },
+    });
     return mapModerationCaseToDTO(row);
   }
 
@@ -448,6 +464,16 @@ export class GovernanceModerationService {
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
     });
+    auditPrivilegedMutation({
+      actorUserId: input.actorUserId,
+      action: "moderation.case.decided",
+      targetKind: "moderation-case",
+      targetId: row.id,
+      decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
+      reason: input.reason,
+      correlationId: row.id,
+      after: { state: row.state },
+    });
     return mapModerationCaseToDTO(row);
   }
 
@@ -480,6 +506,15 @@ export class GovernanceModerationService {
       sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
+    });
+    auditPrivilegedMutation({
+      actorUserId: input.actorUserId,
+      action: "moderation.case.appeal_requested",
+      targetKind: "moderation-case",
+      targetId: row.id,
+      reason: input.reason,
+      correlationId: row.id,
+      after: { state: row.state },
     });
     return mapModerationCaseToDTO(row);
   }
@@ -800,6 +835,17 @@ export class GovernanceModerationService {
         extra: { queueItemId: row.id, decisionKind: input.decisionKind },
       });
     }
+    auditPrivilegedMutation({
+      actorUserId: input.actorUserId,
+      action: "realm.moderation.decided",
+      targetKind: "realm-moderation-queue",
+      targetId: row.id,
+      decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
+      reason: input.reason,
+      correlationId: row.linkedCaseId ?? row.id,
+      after: { state: row.state, decisionKind: input.decisionKind },
+      metadata: { realmUnitId: input.realmUnitId },
+    });
     return mapRealmQueueItemToDTO(row);
   }
 
@@ -879,6 +925,16 @@ export class GovernanceModerationService {
       actorUserId: input.actorUserId,
       extra: { queueItemId: row.id, linkedCaseId: row.linkedCaseId },
     });
+    auditPrivilegedMutation({
+      actorUserId: input.actorUserId,
+      action: "realm.moderation.escalated",
+      targetKind: "realm-moderation-queue",
+      targetId: row.id,
+      reason: input.reason,
+      correlationId: row.linkedCaseId ?? row.id,
+      after: { state: row.state, linkedCaseId: row.linkedCaseId },
+      metadata: { realmUnitId: input.realmUnitId },
+    });
     return mapRealmQueueItemToDTO(row);
   }
 
@@ -945,6 +1001,15 @@ export class GovernanceModerationService {
           update: data,
         });
     await enqueueModeratedContentSearch(input.targetUnitId);
+    auditPrivilegedMutation({
+      actorUserId: input.decidedById ?? "",
+      action: "content.moderation.state_changed",
+      targetKind: "content",
+      targetId: input.targetUnitId,
+      reason: input.reason ?? "content moderation state changed",
+      correlationId: input.caseId ?? input.targetUnitId,
+      after: { state: row.state, caseId: row.caseId },
+    });
     return mapContentModerationStateToDTO(row);
   }
 
@@ -1054,6 +1119,17 @@ export class GovernanceModerationService {
           },
           update: data,
         });
+    auditPrivilegedMutation({
+      actorUserId: input.decidedById ?? "",
+      action: "realm.content.moderation.state_changed",
+      targetKind: "realm-content",
+      targetId: input.targetUnitId,
+      reason: input.reason ?? "realm content moderation state changed",
+      correlationId:
+        input.caseId ?? `${input.realmUnitId}:${input.targetUnitId}`,
+      after: { state: row.state, caseId: row.caseId },
+      metadata: { realmUnitId: input.realmUnitId },
+    });
     return mapRealmContentModerationToDTO(row);
   }
 
