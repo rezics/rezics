@@ -69,6 +69,7 @@ import { userApi, userBriefApi } from "./user";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
+import { workMaintenanceApi } from "./work-maintenance";
 import { zoneApi } from "./zone/zone.api";
 import "dotenv/config";
 
@@ -232,6 +233,7 @@ routeApp
   .use(historyOutboxAdminApi)
   .use(unitWorkMembershipApi)
   .use(workMembershipClaimApi)
+  .use(workMaintenanceApi)
   .use(translationSourceApi)
   .use(infraApi)
   .use(tagApi)
