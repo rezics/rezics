@@ -80,4 +80,6 @@ export {
   syncSingleRealm,
   syncSingleUser,
   syncUserSegment,
+  syncWorkDomainContentSegment,
+  syncWorkReleasesSegment,
 } from "./sync";

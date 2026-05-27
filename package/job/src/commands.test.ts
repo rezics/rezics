@@ -25,6 +25,28 @@ describe("@rezics/job command contract", () => {
     expect(v.parse(JobCommandSchema, command)).toEqual(command);
   });
 
+  test("validates work-domain search repair commands", () => {
+    const workCommand = createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
+      { targetId: "work-1", cursor: "release-1", limit: 50 },
+    );
+    const fullCommand = createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+      { cursor: "release-1", limit: 50 },
+    );
+
+    expect(workCommand.lane).toBe(JOB_LANES.searchSyncSlow);
+    expect(workCommand.idempotencyKey).toBe(
+      "search.content.syncWorkReleases:work-1:release-1",
+    );
+    expect(fullCommand.lane).toBe(JOB_LANES.maintenance);
+    expect(fullCommand.idempotencyKey).toBe(
+      "search.content.workDomainFullSync:all:release-1",
+    );
+    expect(v.parse(JobCommandSchema, workCommand)).toEqual(workCommand);
+    expect(v.parse(JobCommandSchema, fullCommand)).toEqual(fullCommand);
+  });
+
   test("validates history outbox ingest commands", () => {
     const command = createHistoryOutboxIngestCommand("outbox-1");
 

@@ -23,13 +23,23 @@ import { tagUnitInclude, unitTagInclude } from "./types";
 export const VISIBILITY_THRESHOLD = -100;
 
 function enqueueContentTagsSync(unitId: string) {
-  return serverJobProducer.enqueue(
-    createSearchCommand(
-      SEARCH_COMMAND_KINDS.contentPatchTags,
-      { unitId },
-      { type: "server", service: "tag" },
+  const source = { type: "server" as const, service: "tag" };
+  return Promise.all([
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentPatchTags,
+        { unitId },
+        source,
+      ),
     ),
-  );
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
+        { targetId: unitId },
+        source,
+      ),
+    ),
+  ]);
 }
 
 export class TagService {

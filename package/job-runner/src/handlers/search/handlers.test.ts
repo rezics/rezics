@@ -140,4 +140,176 @@ describe("search handlers", () => {
     expect(added.map((doc) => doc.id)).toEqual(["entity-1"]);
     expect(enqueued).toEqual(["search.entity.fullSync:entity-1"]);
   });
+
+  test("work-domain release fanout rebuilds a bounded segment", async () => {
+    const added: Array<Record<string, unknown>> = [];
+    const enqueued: string[] = [];
+    setSearchPrismaClient({
+      unit: {
+        findMany: async (args: any) => {
+          expect(args.where.workMemberships).toEqual({
+            some: { workUnitId: "work-1", role: "RELEASE" },
+          });
+          return [
+            {
+              id: "release-1",
+              type: "BOOK",
+              defaultLanguage: "en",
+              visibility: "PUBLIC",
+              rating: "GENERAL",
+              userId: "user-1",
+              createdAt: new Date("2026-01-01T00:00:00.000Z"),
+              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+              publishedAt: null,
+              translations: [{ language: "en", title: "Release One" }],
+              unitTags: [],
+              workMemberships: [
+                {
+                  workUnitId: "work-1",
+                  role: "RELEASE",
+                  position: "a",
+                  displayPolicy: "PRIMARY",
+                  work: { unitTags: [] },
+                },
+              ],
+              inRealms: [],
+              realmTagApplicationsAsTargetUnit: [],
+              creditAttributions: [],
+              book: { textLength: 100, isLicensed: false },
+            },
+            {
+              id: "release-2",
+              type: "BOOK",
+              defaultLanguage: "en",
+              visibility: "PUBLIC",
+              rating: "GENERAL",
+              userId: "user-1",
+              createdAt: new Date("2026-01-01T00:00:00.000Z"),
+              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+              publishedAt: null,
+              translations: [{ language: "en", title: "Release Two" }],
+              unitTags: [],
+              workMemberships: [
+                {
+                  workUnitId: "work-1",
+                  role: "RELEASE",
+                  position: "b",
+                  displayPolicy: "SECONDARY",
+                  work: { unitTags: [] },
+                },
+              ],
+              inRealms: [],
+              realmTagApplicationsAsTargetUnit: [],
+              creditAttributions: [],
+              book: { textLength: 100, isLicensed: false },
+            },
+          ];
+        },
+      },
+    } as never);
+
+    const handlers = createSearchHandlers({
+      addOrUpdateContent: async (documents: Array<Record<string, unknown>>) => {
+        added.push(...documents);
+      },
+    } as never);
+    const command = createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
+      { targetId: "work-1", limit: 1 },
+    );
+
+    await handlers[command.kind]?.(command, {
+      enqueue: async (next) => {
+        enqueued.push(`${next.kind}:${(next.payload as any).cursor}`);
+      },
+    });
+
+    expect(added.map((doc) => doc.id)).toEqual(["release-1"]);
+    expect(enqueued).toEqual(["search.content.syncWorkReleases:release-1"]);
+  });
+
+  test("work-domain full repair continues by release cursor", async () => {
+    const added: Array<Record<string, unknown>> = [];
+    const enqueued: string[] = [];
+    setSearchPrismaClient({
+      unit: {
+        findMany: async (args: any) => {
+          expect(args.where.workMemberships).toEqual({
+            some: { role: "RELEASE" },
+          });
+          return [
+            {
+              id: "release-1",
+              type: "BOOK",
+              defaultLanguage: "en",
+              visibility: "PUBLIC",
+              rating: "GENERAL",
+              userId: "user-1",
+              createdAt: new Date("2026-01-01T00:00:00.000Z"),
+              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+              publishedAt: null,
+              translations: [{ language: "en", title: "Release One" }],
+              unitTags: [],
+              workMemberships: [
+                {
+                  workUnitId: "work-1",
+                  role: "RELEASE",
+                  displayPolicy: "PRIMARY",
+                  work: { unitTags: [] },
+                },
+              ],
+              inRealms: [],
+              realmTagApplicationsAsTargetUnit: [],
+              creditAttributions: [],
+              book: { textLength: 100, isLicensed: false },
+            },
+            {
+              id: "release-2",
+              type: "BOOK",
+              defaultLanguage: "en",
+              visibility: "PUBLIC",
+              rating: "GENERAL",
+              userId: "user-1",
+              createdAt: new Date("2026-01-01T00:00:00.000Z"),
+              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+              publishedAt: null,
+              translations: [{ language: "en", title: "Release Two" }],
+              unitTags: [],
+              workMemberships: [
+                {
+                  workUnitId: "work-1",
+                  role: "RELEASE",
+                  displayPolicy: "SECONDARY",
+                  work: { unitTags: [] },
+                },
+              ],
+              inRealms: [],
+              realmTagApplicationsAsTargetUnit: [],
+              creditAttributions: [],
+              book: { textLength: 100, isLicensed: false },
+            },
+          ];
+        },
+      },
+    } as never);
+
+    const handlers = createSearchHandlers({
+      addOrUpdateContent: async (documents: Array<Record<string, unknown>>) => {
+        added.push(...documents);
+      },
+    } as never);
+    const command = createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+      { limit: 1 },
+    );
+
+    await handlers[command.kind]?.(command, {
+      enqueue: async (next) => {
+        enqueued.push(`${next.kind}:${(next.payload as any).cursor}`);
+      },
+    });
+
+    expect(added.map((doc) => doc.id)).toEqual(["release-1"]);
+    expect(enqueued).toEqual(["search.content.workDomainFullSync:release-1"]);
+  });
 });

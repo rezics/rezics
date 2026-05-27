@@ -110,12 +110,18 @@ describe("TagService tag writes", () => {
 
     await service.castVote("user-1", "unit-1", "tag-1", 1);
 
-    expect(enqueueMock).toHaveBeenCalledTimes(1);
-    expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({
-      kind: "search.content.patchTags",
-      payload: { unitId: "unit-1" },
-      source: { type: "server", service: "tag" },
-    });
+    expect(enqueueMock.mock.calls.map((call) => call[0])).toMatchObject([
+      {
+        kind: "search.content.patchTags",
+        payload: { unitId: "unit-1" },
+        source: { type: "server", service: "tag" },
+      },
+      {
+        kind: "search.content.syncWorkReleases",
+        payload: { targetId: "unit-1" },
+        source: { type: "server", service: "tag" },
+      },
+    ]);
   });
 });
 

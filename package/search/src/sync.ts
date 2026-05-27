@@ -216,7 +216,7 @@ async function runProgressSyncWithRetry(
   }
 }
 
-const contentInclude = {
+const contentInclude: any = {
   translations: true,
   aliases: {
     where: {
@@ -234,7 +234,7 @@ const contentInclude = {
         },
       },
     },
-    orderBy: [{ role: "asc" as const }, { createdAt: "asc" as const }],
+    orderBy: [{ role: "asc" }, { createdAt: "asc" }],
   },
   inRealms: true,
   realmTagApplicationsAsTargetUnit: true,
@@ -260,7 +260,7 @@ const contentInclude = {
   shelf: { include: { units: { select: { unitId: true } } } },
   link: true,
   post: true,
-} as const;
+};
 
 /**
  * Build a ContentSearchDocument from a Prisma unit with all relations included.
@@ -488,6 +488,62 @@ export async function syncContentSegment(
     where: {
       type: { in: INDEXABLE_TYPES },
       ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+    },
+    include: contentInclude,
+    orderBy: { id: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { id: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(units, limit, "id");
+  if (current.length > 0) {
+    await client.addOrUpdateContent(current.map(buildContentDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
+export async function syncWorkReleasesSegment(
+  client: SearchClient,
+  workUnitId: string,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const units: any[] = await getSearchPrismaClient().unit.findMany({
+    where: {
+      type: { in: INDEXABLE_TYPES },
+      ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+      workMemberships: {
+        some: {
+          workUnitId,
+          role: "RELEASE",
+        },
+      },
+    },
+    include: contentInclude,
+    orderBy: { id: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { id: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(units, limit, "id");
+  if (current.length > 0) {
+    await client.addOrUpdateContent(current.map(buildContentDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
+export async function syncWorkDomainContentSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const units: any[] = await getSearchPrismaClient().unit.findMany({
+    where: {
+      type: { in: INDEXABLE_TYPES },
+      ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+      workMemberships: {
+        some: { role: "RELEASE" },
+      },
     },
     include: contentInclude,
     orderBy: { id: "asc" },

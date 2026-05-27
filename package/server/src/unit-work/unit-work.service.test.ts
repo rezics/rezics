@@ -144,7 +144,20 @@ describe("UnitWorkService", () => {
       where: { id: "release-1" },
       data: { workUnitId: "work-1" },
     });
-    expect(enqueueMock).toHaveBeenCalledTimes(1);
+    expect(enqueueMock.mock.calls.map((call) => call[0])).toMatchObject([
+      {
+        kind: "search.content.sync",
+        payload: { unitId: "release-1" },
+      },
+      {
+        kind: "search.post.sync",
+        payload: { postId: "release-1" },
+      },
+      {
+        kind: "search.content.syncWorkReleases",
+        payload: { targetId: "work-1" },
+      },
+    ]);
   });
 
   test("rejects duplicate release membership in another work", async () => {
@@ -183,6 +196,32 @@ describe("UnitWorkService", () => {
         },
       ],
     );
+    expect(enqueueMock.mock.calls.map((call) => call[0])).toMatchObject([
+      {
+        kind: "search.content.sync",
+        payload: { unitId: "post-1" },
+      },
+      {
+        kind: "search.post.sync",
+        payload: { postId: "post-1" },
+      },
+      {
+        kind: "search.content.syncWorkReleases",
+        payload: { targetId: "work-1" },
+      },
+      {
+        kind: "search.content.sync",
+        payload: { unitId: "post-1" },
+      },
+      {
+        kind: "search.post.sync",
+        payload: { postId: "post-1" },
+      },
+      {
+        kind: "search.content.syncWorkReleases",
+        payload: { targetId: "work-2" },
+      },
+    ]);
   });
 
   test("rejects release-to-release nesting", async () => {

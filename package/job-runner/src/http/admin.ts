@@ -1,6 +1,12 @@
-import { JOB_LANE_VALUES } from "@rezics/job";
+import {
+  createSearchCommand,
+  JOB_LANE_VALUES,
+  SEARCH_COMMAND_KINDS,
+} from "@rezics/job";
 import { Elysia } from "elysia";
 import { isAuthorized } from "../auth";
+import { enqueueCommand } from "../queue/enqueue";
+import type { QueueLike } from "../queue/types";
 
 const JOB_STATES = [
   "created",
@@ -29,7 +35,7 @@ interface AdminDb {
 
 type RawJob = Record<string, unknown>;
 
-export interface AdminQueueLike {
+export interface AdminQueueLike extends Partial<QueueLike> {
   countStates?: () => Promise<{ queues?: Record<string, QueueStateCounts> }>;
   getDb?: () => AdminDb;
   getJobById?: (
@@ -185,6 +191,67 @@ export function createAdminApi(options: {
         ),
       };
     })
+    .post(
+      "/admin/search/content/:unitId/rebuild",
+      async ({ authorized, params, set }) => {
+        if (!authorized) return { status: "error", message: "Unauthorized" };
+        if (!options.queue.send) {
+          set.status = 503;
+          return { status: "error", message: "Queue does not support enqueue" };
+        }
+        const command = createSearchCommand(
+          SEARCH_COMMAND_KINDS.contentSync,
+          { unitId: params.unitId },
+          { type: "server", service: "job-runner-admin" },
+        );
+        return enqueueCommand(options.queue as QueueLike, command);
+      },
+    )
+    .post(
+      "/admin/search/work-domains/:workUnitId/rebuild",
+      async ({ authorized, params, query, set }) => {
+        if (!authorized) return { status: "error", message: "Unauthorized" };
+        if (!options.queue.send) {
+          set.status = 503;
+          return { status: "error", message: "Queue does not support enqueue" };
+        }
+        const limit =
+          typeof query.limit === "string"
+            ? Number.parseInt(query.limit, 10)
+            : undefined;
+        const command = createSearchCommand(
+          SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
+          {
+            targetId: params.workUnitId,
+            ...(Number.isFinite(limit) ? { limit } : {}),
+          },
+          { type: "server", service: "job-runner-admin" },
+        );
+        return enqueueCommand(options.queue as QueueLike, command);
+      },
+    )
+    .post(
+      "/admin/search/work-domains/rebuild-all",
+      async ({ authorized, query, set }) => {
+        if (!authorized) return { status: "error", message: "Unauthorized" };
+        if (!options.queue.send) {
+          set.status = 503;
+          return { status: "error", message: "Queue does not support enqueue" };
+        }
+        const limit =
+          typeof query.limit === "string"
+            ? Number.parseInt(query.limit, 10)
+            : undefined;
+        const command = createSearchCommand(
+          SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+          {
+            ...(Number.isFinite(limit) ? { limit } : {}),
+          },
+          { type: "server", service: "job-runner-admin" },
+        );
+        return enqueueCommand(options.queue as QueueLike, command);
+      },
+    )
     .get(
       "/admin/jobs/failed/:lane/:id",
       async ({ authorized, params, set }) => {

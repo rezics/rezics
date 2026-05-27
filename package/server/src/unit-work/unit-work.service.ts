@@ -17,14 +17,30 @@ import { unitWorkOrderBy } from "./unit-work.types";
 
 const RELEASE_ROLE = UnitWorkRole.RELEASE;
 
-async function enqueueWorkDomainProjectionSync(unitId: string) {
-  await serverJobProducer.enqueue(
-    createSearchCommand(
-      SEARCH_COMMAND_KINDS.contentPatchMetadata,
-      { targetId: unitId, fields: { workDomain: "true" } },
-      { type: "server", service: "unit-work" },
+async function enqueueWorkDomainProjectionSync(
+  unitId: string,
+  workUnitId: string,
+) {
+  const source = { type: "server" as const, service: "unit-work" };
+  await Promise.all([
+    serverJobProducer.enqueue(
+      createSearchCommand(SEARCH_COMMAND_KINDS.contentSync, { unitId }, source),
     ),
-  );
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.postSync,
+        { postId: unitId },
+        source,
+      ),
+    ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
+        { targetId: workUnitId },
+        source,
+      ),
+    ),
+  ]);
 }
 
 export class UnitWorkService {
@@ -99,7 +115,7 @@ export class UnitWorkService {
       return membership;
     });
 
-    await enqueueWorkDomainProjectionSync(input.unitId);
+    await enqueueWorkDomainProjectionSync(input.unitId, input.workUnitId);
     return row;
   }
 
@@ -119,7 +135,7 @@ export class UnitWorkService {
           : {}),
       },
     });
-    await enqueueWorkDomainProjectionSync(unitId);
+    await enqueueWorkDomainProjectionSync(unitId, workUnitId);
     return row;
   }
 
@@ -139,7 +155,7 @@ export class UnitWorkService {
         });
       }
     });
-    await enqueueWorkDomainProjectionSync(unitId);
+    await enqueueWorkDomainProjectionSync(unitId, workUnitId);
   }
 
   async reconcileContentMemberships(
@@ -174,7 +190,13 @@ export class UnitWorkService {
       ),
     );
 
-    if (rows.length > 0) await enqueueWorkDomainProjectionSync(unitId);
+    if (rows.length > 0) {
+      await Promise.all(
+        rows.map((row) =>
+          enqueueWorkDomainProjectionSync(row.unitId, row.workUnitId),
+        ),
+      );
+    }
     return rows;
   }
 

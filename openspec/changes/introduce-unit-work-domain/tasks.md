@@ -61,13 +61,13 @@
 
 ## 7. CDC And Job-Runner Batch Repair
 
-- [ ] 7.1 Update CDC routing so `UnitWork` changes enqueue search projection jobs.
-- [ ] 7.2 Update `UnitTag` change handling so work-level tag changes enqueue rebuilds for all active `UnitWork` members.
-- [ ] 7.3 Update work translation/alias/searchable metadata change handling so affected release documents are rebuilt.
-- [ ] 7.4 Implement idempotent batch handlers for rebuilding all release documents under one work.
-- [ ] 7.5 Add batching limits and cursor/resume state for work domains with many releases.
-- [ ] 7.6 Add admin/diagnostic repair entry points for rebuilding a single release, one work domain, and all work-domain projections.
-- [ ] 7.7 Add job-runner tests for fan-out from work tag changes, single-release rebuild from `UnitWork` changes, and resumable batch processing.
+- [x] 7.1 Update CDC routing so `UnitWork` changes enqueue search projection jobs.
+- [x] 7.2 Update `UnitTag` change handling so work-level tag changes enqueue rebuilds for all active `UnitWork` members.
+- [x] 7.3 Update work translation/alias/searchable metadata change handling so affected release documents are rebuilt.
+- [x] 7.4 Implement idempotent batch handlers for rebuilding all release documents under one work.
+- [x] 7.5 Add batching limits and cursor/resume state for work domains with many releases.
+- [x] 7.6 Add admin/diagnostic repair entry points for rebuilding a single release, one work domain, and all work-domain projections.
+- [x] 7.7 Add job-runner tests for fan-out from work tag changes, single-release rebuild from `UnitWork` changes, and resumable batch processing.
 
 ## 8. Book Detail And Language UX
 
