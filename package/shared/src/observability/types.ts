@@ -7,6 +7,7 @@ export type ServiceKey =
   | "auth"
   | "reaction"
   | "history"
+  | "ranking"
   | "notify"
   | "job-runner"
   | "preview";
