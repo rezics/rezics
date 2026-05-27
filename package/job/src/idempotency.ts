@@ -86,4 +86,6 @@ export const maintenanceIdempotency = {
       targetId,
       cursor,
     ),
+  seriesRepair: (operation: string, seriesUnitId: string) =>
+    createIdempotencyKey("maintenance.series", operation, seriesUnitId),
 };

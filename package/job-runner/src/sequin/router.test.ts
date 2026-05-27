@@ -126,6 +126,29 @@ describe("Sequin payload routing", () => {
     ]);
   });
 
+  test("routes content-structure node changes to Series repair and search sync", () => {
+    const messages = parseSequinPayload({
+      table: "ContentStructureNode",
+      action: "update",
+      record: { ownerUnitId: "series-1", contentUnitId: "release-1" },
+    });
+
+    expect(routeSequinMessages(messages)).toMatchObject([
+      {
+        kind: "maintenance.series.contentIndexRepair",
+        payload: { seriesUnitId: "series-1" },
+      },
+      {
+        kind: "maintenance.series.workProjectionRepair",
+        payload: { seriesUnitId: "series-1" },
+      },
+      {
+        kind: "search.content.sync",
+        payload: { unitId: "series-1" },
+      },
+    ]);
+  });
+
   test("ignores unknown tables", () => {
     const messages = parseSequinPayload({
       table: "Unknown",

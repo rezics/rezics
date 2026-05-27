@@ -2,8 +2,10 @@ import {
   type AnyJobCommand,
   type CommandSource,
   createHistoryOutboxIngestCommand,
+  createMaintenanceCommand,
   createRankingCommand,
   createSearchCommand,
+  MAINTENANCE_COMMAND_KINDS,
   RANKING_COMMAND_KINDS,
   SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
@@ -241,6 +243,29 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
           createSearchCommand(
             SEARCH_COMMAND_KINDS.contentPatchContainedUnitIds,
             { unitId: shelfId },
+            source,
+          ),
+        ]
+      : [];
+  }
+
+  if (table === "ContentStructureNode") {
+    const ownerUnitId = targetId(message, ["ownerUnitId", "owner_unit_id"]);
+    return ownerUnitId
+      ? [
+          createMaintenanceCommand(
+            MAINTENANCE_COMMAND_KINDS.seriesContentIndexRepair,
+            { seriesUnitId: ownerUnitId },
+            source,
+          ),
+          createMaintenanceCommand(
+            MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair,
+            { seriesUnitId: ownerUnitId },
+            source,
+          ),
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.contentSync,
+            { unitId: ownerUnitId },
             source,
           ),
         ]

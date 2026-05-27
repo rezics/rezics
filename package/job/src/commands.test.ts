@@ -73,6 +73,28 @@ describe("@rezics/job command contract", () => {
     expect(v.parse(JobCommandSchema, command)).toEqual(command);
   });
 
+  test("validates Series repair maintenance commands", () => {
+    const indexCommand = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.seriesContentIndexRepair,
+      { seriesUnitId: "series-1" },
+    );
+    const projectionCommand = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair,
+      { seriesUnitId: "series-1" },
+    );
+
+    expect(indexCommand.idempotencyKey).toBe(
+      "maintenance.series:contentIndex:series-1",
+    );
+    expect(projectionCommand.idempotencyKey).toBe(
+      "maintenance.series:workProjection:series-1",
+    );
+    expect(v.parse(JobCommandSchema, indexCommand)).toEqual(indexCommand);
+    expect(v.parse(JobCommandSchema, projectionCommand)).toEqual(
+      projectionCommand,
+    );
+  });
+
   test("validates ranking commands with stable target idempotency", () => {
     const command = createRankingCommand(RANKING_COMMAND_KINDS.invalidate, {
       unitId: "unit-1",

@@ -99,4 +99,106 @@ describe("maintenance handlers", () => {
       handlers[command.kind]?.(command, { enqueue: async () => undefined }),
     ).rejects.toThrow("Admin work merge runtime is not configured");
   });
+
+  test("repairs Series direct content index from release member nodes only", async () => {
+    const createManyCalls: unknown[] = [];
+    const handlers = createMaintenanceHandlers({
+      adminWorkMergeRuntime: {
+        prisma: {
+          series: {
+            findUnique: async () => ({ unitId: "series-1" }),
+          },
+          contentStructureNode: {
+            findMany: async () => [
+              { id: "node-1", contentUnitId: "release-1" },
+            ],
+          },
+          seriesContentIndex: {
+            deleteMany: async () => ({ count: 0 }),
+            createMany: async (args: unknown) => {
+              createManyCalls.push(args);
+              return { count: 1 };
+            },
+          },
+        } as any,
+        disconnect: async () => undefined,
+      },
+    });
+    const command = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.seriesContentIndexRepair,
+      { seriesUnitId: "series-1" },
+    );
+
+    const result = await handlers[command.kind]?.(command, {
+      enqueue: async () => undefined,
+    });
+
+    expect(result).toEqual({ indexedReleaseCount: 1 });
+    expect(createManyCalls).toEqual([
+      {
+        data: [
+          {
+            seriesUnitId: "series-1",
+            releaseUnitId: "release-1",
+            contentNodeId: "node-1",
+          },
+        ],
+        skipDuplicates: true,
+      },
+    ]);
+  });
+
+  test("repairs Series work projection and enqueues search rebuilds", async () => {
+    const enqueued: Array<{ kind: string; payload: unknown }> = [];
+    const upserts: unknown[] = [];
+    const handlers = createMaintenanceHandlers({
+      adminWorkMergeRuntime: {
+        prisma: {
+          series: {
+            findUnique: async () => ({ unitId: "series-1" }),
+          },
+          contentStructureNode: {
+            findMany: async () => [
+              {
+                contentUnit: {
+                  workMemberships: [{ workUnitId: "work-1" }],
+                },
+              },
+            ],
+          },
+          unitWork: {
+            deleteMany: async () => ({ count: 0 }),
+            upsert: async (args: unknown) => {
+              upserts.push(args);
+              return {};
+            },
+          },
+        } as any,
+        disconnect: async () => undefined,
+      },
+    });
+    const command = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair,
+      { seriesUnitId: "series-1" },
+    );
+
+    const result = await handlers[command.kind]?.(command, {
+      enqueue: async (next) => {
+        enqueued.push({ kind: next.kind, payload: next.payload });
+      },
+    });
+
+    expect(result).toEqual({
+      projectedWorkUnitIds: ["work-1"],
+      enqueued: 2,
+    });
+    expect(upserts).toHaveLength(1);
+    expect(enqueued).toEqual([
+      { kind: "search.content.sync", payload: { unitId: "series-1" } },
+      {
+        kind: "search.content.syncWorkReleases",
+        payload: { targetId: "work-1" },
+      },
+    ]);
+  });
 });

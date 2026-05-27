@@ -8,6 +8,8 @@ export const MAINTENANCE_COMMAND_KINDS = {
   replay: "maintenance.replay",
   searchDriftRepair: "maintenance.search.driftRepair",
   searchRebuildIndex: "maintenance.search.rebuildIndex",
+  seriesContentIndexRepair: "maintenance.series.contentIndexRepair",
+  seriesWorkProjectionRepair: "maintenance.series.workProjectionRepair",
   fanoutContinuation: "maintenance.fanout.continuation",
 } as const;
 
@@ -46,6 +48,10 @@ const RebuildIndexPayloadSchema = v.strictObject({
   limit: v.optional(v.number()),
 });
 
+const SeriesRepairPayloadSchema = v.strictObject({
+  seriesUnitId: v.string(),
+});
+
 const FanoutContinuationPayloadSchema = v.strictObject({
   fanout: v.string(),
   targetId: v.string(),
@@ -68,6 +74,16 @@ export const SearchRebuildIndexCommandSchema = commandSchema(
   JOB_LANES.maintenance,
   RebuildIndexPayloadSchema,
 );
+export const SeriesContentIndexRepairCommandSchema = commandSchema(
+  MAINTENANCE_COMMAND_KINDS.seriesContentIndexRepair,
+  JOB_LANES.maintenance,
+  SeriesRepairPayloadSchema,
+);
+export const SeriesWorkProjectionRepairCommandSchema = commandSchema(
+  MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair,
+  JOB_LANES.maintenance,
+  SeriesRepairPayloadSchema,
+);
 export const FanoutContinuationCommandSchema = commandSchema(
   MAINTENANCE_COMMAND_KINDS.fanoutContinuation,
   JOB_LANES.maintenance,
@@ -78,6 +94,8 @@ export const MaintenanceCommandSchema = v.union([
   ReplayCommandSchema,
   SearchDriftRepairCommandSchema,
   SearchRebuildIndexCommandSchema,
+  SeriesContentIndexRepairCommandSchema,
+  SeriesWorkProjectionRepairCommandSchema,
   FanoutContinuationCommandSchema,
 ]);
 
@@ -95,16 +113,28 @@ export function createMaintenanceCommand(
       : kind === MAINTENANCE_COMMAND_KINDS.searchRebuildIndex &&
           "index" in payload
         ? maintenanceIdempotency.rebuildIndex(payload.index, payload.cursor)
-        : kind === MAINTENANCE_COMMAND_KINDS.fanoutContinuation &&
-            "fanout" in payload
-          ? maintenanceIdempotency.fanoutContinuation(
-              payload.fanout,
-              payload.targetId,
-              payload.cursor,
+        : kind === MAINTENANCE_COMMAND_KINDS.seriesContentIndexRepair &&
+            "seriesUnitId" in payload
+          ? maintenanceIdempotency.seriesRepair(
+              "contentIndex",
+              payload.seriesUnitId,
             )
-          : "scope" in payload
-            ? maintenanceIdempotency.replay(payload.scope, payload.key)
-            : `${kind}:unknown`;
+          : kind === MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair &&
+              "seriesUnitId" in payload
+            ? maintenanceIdempotency.seriesRepair(
+                "workProjection",
+                payload.seriesUnitId,
+              )
+            : kind === MAINTENANCE_COMMAND_KINDS.fanoutContinuation &&
+                "fanout" in payload
+              ? maintenanceIdempotency.fanoutContinuation(
+                  payload.fanout,
+                  payload.targetId,
+                  payload.cursor,
+                )
+              : "scope" in payload
+                ? maintenanceIdempotency.replay(payload.scope, payload.key)
+                : `${kind}:unknown`;
 
   return v.parse(MaintenanceCommandSchema, {
     kind,

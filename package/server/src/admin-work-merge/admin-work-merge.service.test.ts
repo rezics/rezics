@@ -47,6 +47,14 @@ function resetState() {
       position: null,
       displayPolicy: "PRIMARY",
     },
+    {
+      unitId: "series-1",
+      workUnitId: "source-work",
+      role: "SERIES",
+      language: null,
+      position: null,
+      displayPolicy: "PRIMARY",
+    },
   ];
   unitTagRows = [
     { unitId: "source-work", tagUnitId: "tag-a", score: 4, voteCount: 2 },
@@ -267,6 +275,7 @@ describe("AdminWorkMergeService", () => {
     ]);
     expect(preview.contentMembershipMoves).toMatchObject([
       { unitId: "shelf-1", role: "SHELF", action: "dedupe" },
+      { unitId: "series-1", role: "SERIES", action: "move" },
     ]);
     expect(preview.legacyReleaseUnitIds).toEqual([]);
     expect(preview.metadataCopy.tags).toEqual({

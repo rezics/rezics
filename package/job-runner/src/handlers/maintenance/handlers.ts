@@ -126,6 +126,112 @@ function replayTargetFromKey(scope: string, key: string) {
   }
 }
 
+async function repairSeriesContentIndex(prisma: any, seriesUnitId: string) {
+  const series = await prisma.series.findUnique({
+    where: { unitId: seriesUnitId },
+    select: { unitId: true },
+  });
+  if (!series) return { indexedReleaseCount: 0, skipped: "not_series" };
+
+  const releaseNodes = await prisma.contentStructureNode.findMany({
+    where: {
+      ownerUnitId: seriesUnitId,
+      contentUnit: {
+        type: { in: ["BOOK", "GAME", "MEDIA"] },
+        workMemberships: { some: { role: "RELEASE" } },
+      },
+    },
+    select: {
+      id: true,
+      contentUnitId: true,
+    },
+    orderBy: [{ sortKey: "asc" }, { id: "asc" }],
+  });
+
+  await prisma.seriesContentIndex.deleteMany({ where: { seriesUnitId } });
+  const rows = releaseNodes
+    .filter((node: { contentUnitId: string | null }) => node.contentUnitId)
+    .map((node: { id: string; contentUnitId: string }) => ({
+      seriesUnitId,
+      releaseUnitId: node.contentUnitId,
+      contentNodeId: node.id,
+    }));
+  if (rows.length > 0) {
+    await prisma.seriesContentIndex.createMany({
+      data: rows,
+      skipDuplicates: true,
+    });
+  }
+  return { indexedReleaseCount: rows.length };
+}
+
+async function repairSeriesWorkProjection(prisma: any, seriesUnitId: string) {
+  const series = await prisma.series.findUnique({
+    where: { unitId: seriesUnitId },
+    select: { unitId: true },
+  });
+  if (!series) {
+    return { projectedWorkUnitIds: [], skipped: "not_series" };
+  }
+
+  const releaseNodes = await prisma.contentStructureNode.findMany({
+    where: {
+      ownerUnitId: seriesUnitId,
+      contentUnit: {
+        type: { in: ["BOOK", "GAME", "MEDIA"] },
+        workMemberships: { some: { role: "RELEASE" } },
+      },
+    },
+    select: {
+      contentUnit: {
+        select: {
+          workMemberships: {
+            where: { role: "RELEASE" },
+            select: { workUnitId: true },
+          },
+        },
+      },
+    },
+  });
+  const workUnitIds = [
+    ...new Set(
+      releaseNodes.flatMap(
+        (node: {
+          contentUnit?: { workMemberships?: { workUnitId: string }[] };
+        }) =>
+          node.contentUnit?.workMemberships?.map((row) => row.workUnitId) ?? [],
+      ),
+    ),
+  ];
+
+  await prisma.unitWork.deleteMany({
+    where: {
+      unitId: seriesUnitId,
+      role: "SERIES",
+      ...(workUnitIds.length > 0 ? { workUnitId: { notIn: workUnitIds } } : {}),
+    },
+  });
+  for (const workUnitId of workUnitIds) {
+    await prisma.unitWork.upsert({
+      where: {
+        unitId_workUnitId_role: {
+          unitId: seriesUnitId,
+          workUnitId,
+          role: "SERIES",
+        },
+      },
+      update: {},
+      create: {
+        unitId: seriesUnitId,
+        workUnitId,
+        role: "SERIES",
+        displayPolicy: "PRIMARY",
+      },
+    });
+  }
+  return { projectedWorkUnitIds: workUnitIds };
+}
+
 export function createMaintenanceHandlers(
   options: { adminWorkMergeRuntime?: AdminWorkMergeRuntime } = {},
 ) {
@@ -160,6 +266,50 @@ export function createMaintenanceHandlers(
         ),
       );
       return { enqueued: 1 };
+    },
+    [MAINTENANCE_COMMAND_KINDS.seriesContentIndexRepair]: async (command) => {
+      const maintenance = command as MaintenanceCommand;
+      if (!("seriesUnitId" in maintenance.payload)) return;
+      const prisma = options.adminWorkMergeRuntime?.prisma;
+      if (!prisma) {
+        throw new Error("Server Prisma runtime is not configured");
+      }
+      return repairSeriesContentIndex(prisma, maintenance.payload.seriesUnitId);
+    },
+    [MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair]: async (
+      command,
+      context,
+    ) => {
+      const maintenance = command as MaintenanceCommand;
+      if (!("seriesUnitId" in maintenance.payload)) return;
+      const prisma = options.adminWorkMergeRuntime?.prisma;
+      if (!prisma) {
+        throw new Error("Server Prisma runtime is not configured");
+      }
+      const result = await repairSeriesWorkProjection(
+        prisma,
+        maintenance.payload.seriesUnitId,
+      );
+      await context.enqueue(
+        createSearchCommand(
+          SEARCH_COMMAND_KINDS.contentSync,
+          { unitId: maintenance.payload.seriesUnitId },
+          maintenance.source,
+        ),
+      );
+      for (const workUnitId of result.projectedWorkUnitIds) {
+        await context.enqueue(
+          createSearchCommand(
+            SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
+            { targetId: workUnitId },
+            maintenance.source,
+          ),
+        );
+      }
+      return {
+        ...result,
+        enqueued: 1 + result.projectedWorkUnitIds.length,
+      };
     },
     [MAINTENANCE_COMMAND_KINDS.replay]: async (command, context) => {
       const maintenance = command as MaintenanceCommand;
