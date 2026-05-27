@@ -20,6 +20,9 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     status: unit.status,
     visibility: unit.visibility,
     rating: unit.rating,
+    aiDisclosureMode: unit.aiDisclosureMode,
+    aiDisclosureDetails:
+      (unit.aiDisclosureDetails as UnitDTO["aiDisclosureDetails"]) ?? undefined,
     licenseSlug: resolveStoredLicenseSlug(unit.licenseSlug),
     extra: (unit.extra as Record<string, unknown>) ?? undefined,
     createdAt: unit.createdAt,

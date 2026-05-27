@@ -1,4 +1,6 @@
 import type {
+  AiDisclosureDetails,
+  AiDisclosureMode,
   BookContentStructureResponse,
   BookListResponse,
   BookResponse,
@@ -8,6 +10,8 @@ import type {
   ScoreAggregateDTO,
 } from "@rezics/contract";
 import {
+  aiDisclosureDetailsSchema,
+  aiDisclosureModeSchema,
   bookListBodySchema,
   bookListQuerySchema,
   bookParamsSchema,
@@ -15,6 +19,7 @@ import {
   editorialPatchSubmissionSchema,
   hasPermissionToUpdateBook,
 } from "@rezics/contract";
+import { Value } from "@sinclair/typebox/value";
 import { Elysia, status, t } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapScoreAggregateToDTO } from "@/score/score.mapper";
@@ -221,6 +226,17 @@ export const bookApi = new Elysia({ prefix: "/book" })
           rating:
             typeof unit.rating === "string"
               ? (unit.rating as ContentRating)
+              : undefined,
+          aiDisclosureMode: Value.Check(
+            aiDisclosureModeSchema,
+            unit.aiDisclosureMode,
+          )
+            ? (unit.aiDisclosureMode as AiDisclosureMode)
+            : undefined,
+          aiDisclosureDetails:
+            unit.aiDisclosureDetails === null ||
+            Value.Check(aiDisclosureDetailsSchema, unit.aiDisclosureDetails)
+              ? (unit.aiDisclosureDetails as AiDisclosureDetails | null)
               : undefined,
           visibility:
             typeof unit.visibility === "string" ? unit.visibility : undefined,

@@ -12,6 +12,7 @@ import {
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import {
+  type AiDisclosureMode,
   type ContentRating,
   PostKind,
   prisma,
@@ -132,8 +133,17 @@ export class ChapterService {
   }
 
   async create(req: CreateChapterInput): Promise<ChapterPostWithRelations> {
-    const { userId, title, content, targetUnitId, coverUrl, status, rating } =
-      req;
+    const {
+      userId,
+      title,
+      content,
+      targetUnitId,
+      coverUrl,
+      status,
+      rating,
+      aiDisclosureMode,
+      aiDisclosureDetails,
+    } = req;
 
     const target = await prisma.unit.findUnique({
       where: { id: targetUnitId },
@@ -160,6 +170,12 @@ export class ChapterService {
           status: (status as UnitStatus) || UnitStatus.PUBLISHED,
           defaultLanguage: language,
           rating: (rating as ContentRating | undefined) ?? undefined,
+          aiDisclosureMode:
+            (aiDisclosureMode as AiDisclosureMode | undefined) ?? undefined,
+          aiDisclosureDetails:
+            aiDisclosureDetails === undefined
+              ? undefined
+              : ((aiDisclosureDetails ?? null) as Prisma.InputJsonValue),
           translations: {
             create: {
               language,
@@ -295,7 +311,16 @@ export class ChapterService {
     unitId: string,
     req: UpdateChapterInput,
   ): Promise<ChapterPostWithRelations> {
-    const { title, content, targetUnitId, coverUrl, status, rating } = req;
+    const {
+      title,
+      content,
+      targetUnitId,
+      coverUrl,
+      status,
+      rating,
+      aiDisclosureMode,
+      aiDisclosureDetails,
+    } = req;
 
     if (targetUnitId !== undefined && targetUnitId !== null) {
       const target = await prisma.unit.findUnique({
@@ -333,13 +358,27 @@ export class ChapterService {
         });
       }
 
-      if (status || rating !== undefined) {
+      if (
+        status ||
+        rating !== undefined ||
+        aiDisclosureMode !== undefined ||
+        aiDisclosureDetails !== undefined
+      ) {
         await tx.unit.update({
           where: { id: unitId },
           data: {
             ...(status ? { status: status as UnitStatus } : {}),
             ...(rating !== undefined
               ? { rating: rating as ContentRating }
+              : {}),
+            ...(aiDisclosureMode !== undefined
+              ? { aiDisclosureMode: aiDisclosureMode as AiDisclosureMode }
+              : {}),
+            ...(aiDisclosureDetails !== undefined
+              ? {
+                  aiDisclosureDetails: (aiDisclosureDetails ??
+                    null) as Prisma.InputJsonValue,
+                }
               : {}),
           },
         });

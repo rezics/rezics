@@ -50,6 +50,23 @@ const mockCreateNode = mock(async (_args: unknown) => ({ id: "" }));
 const mockUpdateNode = mock(async (_args: unknown) => ({ id: "" }));
 const mockDeleteManyNode = mock(async (_args: unknown) => ({ count: 0 }));
 const mockUpdateBook = mock(async (_args: unknown) => ({ unitId: "book-1" }));
+const mockFindUniqueBookForUpdate = mock(async (_args: unknown) => ({
+  isbn13: null,
+  publicationDate: null,
+  pageCount: null,
+  textLength: 0,
+  formatKey: null,
+  isLicensed: false,
+  extra: null,
+  unit: {
+    defaultLanguage: "en",
+    rating: "GENERAL",
+    aiDisclosureMode: "UNKNOWN",
+    aiDisclosureDetails: null,
+    visibility: "PUBLIC",
+    licenseSlug: null,
+  },
+}));
 const mockAllocateSequence = mock(async (_strings: TemplateStringsArray) => [
   { sequence: 1n },
 ]);
@@ -63,6 +80,8 @@ const mockCreateBook = mock(async (_args: unknown) => ({
     status: "PUBLISHED",
     visibility: "PUBLIC",
     rating: "GENERAL",
+    aiDisclosureMode: "UNKNOWN",
+    aiDisclosureDetails: null,
     defaultLanguage: "en",
     isLanguageNeutral: false,
     translations: [],
@@ -118,6 +137,7 @@ const mockTx = {
   book: {
     create: mockCreateBook,
     update: mockUpdateBook,
+    findUniqueOrThrow: mockFindUniqueBookForUpdate,
   },
   unit: {
     findUniqueOrThrow: mockFindUniqueUnit,
@@ -158,6 +178,7 @@ function resetMocks(): void {
   mockUpdateNode.mockClear();
   mockDeleteManyNode.mockClear();
   mockUpdateBook.mockClear();
+  mockFindUniqueBookForUpdate.mockClear();
   mockAllocateSequence.mockClear();
   mockCreateHistoryOutbox.mockClear();
   mockCreateBook.mockClear();
@@ -198,6 +219,41 @@ describe("BookService.create", () => {
       kind: "search.content.sync",
       payload: { unitId: "book-1" },
       source: { type: "server", service: "book" },
+    });
+  });
+
+  test("new books default AI disclosure to Prisma UNKNOWN when omitted", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.create({
+      userId: "user-1",
+      defaultLanguage: "en",
+      translations: [{ language: "en", title: "Book" }],
+    });
+
+    const createArgs = mockCreateBook.mock.calls[0]?.[0] as any;
+    expect(createArgs.data.unit.create.aiDisclosureMode).toBeUndefined();
+    expect(createArgs.data.unit.create.aiDisclosureDetails).toBeUndefined();
+  });
+
+  test("persists explicit AI disclosure without changing rating", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.create({
+      userId: "user-1",
+      defaultLanguage: "en",
+      rating: "GENERAL",
+      aiDisclosureMode: "AI_ORIGINATED",
+      aiDisclosureDetails: { provider: "OpenAI", reviewedByHuman: true },
+      translations: [{ language: "en", title: "Book" }],
+    });
+
+    const createArgs = mockCreateBook.mock.calls[0]?.[0] as any;
+    expect(createArgs.data.unit.create.rating).toBe("GENERAL");
+    expect(createArgs.data.unit.create.aiDisclosureMode).toBe("AI_ORIGINATED");
+    expect(createArgs.data.unit.create.aiDisclosureDetails).toEqual({
+      provider: "OpenAI",
+      reviewedByHuman: true,
     });
   });
 
@@ -321,6 +377,8 @@ describe("BookService.create", () => {
           status: "PUBLISHED",
           visibility: "PUBLIC",
           rating: "GENERAL",
+          aiDisclosureMode: "UNKNOWN",
+          aiDisclosureDetails: null,
           defaultLanguage: "en",
           isLanguageNeutral: false,
           translations: [],
@@ -385,6 +443,35 @@ describe("BookService.create", () => {
     ].sort();
 
     expect(createPaths.sort()).toEqual(editPaths);
+  });
+});
+
+describe("BookService.update", () => {
+  beforeEach(() => {
+    resetMocks();
+  });
+
+  test("updates AI disclosure without modifying rating", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.update("book-1", {
+      aiDisclosureMode: "MACHINE_GENERATED",
+      aiDisclosureDetails: { disclosedBy: "MODERATOR" },
+    });
+
+    const updateArgs = mockUpdateBook.mock.calls[0]?.[0] as any;
+    expect(updateArgs.data.unit.update).toMatchObject({
+      aiDisclosureMode: "MACHINE_GENERATED",
+      aiDisclosureDetails: { disclosedBy: "MODERATOR" },
+    });
+    expect(updateArgs.data.unit.update.rating).toBeUndefined();
+    expect(enqueueMock.mock.calls.at(-1)?.[0]).toMatchObject({
+      kind: "search.content.patchMetadata",
+      payload: {
+        targetId: "book-1",
+        fields: { aiDisclosureMode: "MACHINE_GENERATED" },
+      },
+    });
   });
 });
 

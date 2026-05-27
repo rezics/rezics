@@ -53,6 +53,14 @@ enum ContentRating {
   R_18G
 }
 
+enum AiDisclosureMode {
+  UNKNOWN
+  NONE
+  AI_ASSISTED
+  AI_ORIGINATED
+  MACHINE_GENERATED
+}
+
 enum UserUnitProgressStatus {
   BACKLOG
   ACTIVE
@@ -156,6 +164,11 @@ model Unit {
   status     UnitStatus     @default(DRAFT)
   visibility UnitVisibility @default(PUBLIC)
   rating     ContentRating  @default(GENERAL)
+
+  /// Declared AI involvement/provenance for this Unit's public-facing content.
+  /// Defaults to UNKNOWN because historical data must not imply a no-AI claim.
+  aiDisclosureMode    AiDisclosureMode @default(UNKNOWN)
+  aiDisclosureDetails Json?
 
   /// Publication license slug from the contract registry. Nullable for
   /// backward-compatible rollout; readers may treat null as the platform

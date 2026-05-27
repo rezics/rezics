@@ -11,6 +11,7 @@ import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import {
+  type AiDisclosureMode,
   type ContentRating,
   prisma,
   UnitStatus,
@@ -413,6 +414,14 @@ export class BookService {
               status: UnitStatus.PUBLISHED,
               visibility: (req.visibility as UnitVisibility) ?? undefined,
               licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
+              aiDisclosureMode:
+                (req.aiDisclosureMode as AiDisclosureMode | undefined) ??
+                undefined,
+              aiDisclosureDetails:
+                req.aiDisclosureDetails === undefined
+                  ? undefined
+                  : ((req.aiDisclosureDetails ??
+                      null) as Prisma.InputJsonValue),
               workUnitId: resolvedWorkUnitId,
               defaultLanguage: req.defaultLanguage ?? undefined,
               rating: (req.rating as ContentRating | undefined) ?? undefined,
@@ -518,6 +527,8 @@ export class BookService {
             select: {
               defaultLanguage: true,
               rating: true,
+              aiDisclosureMode: true,
+              aiDisclosureDetails: true,
               visibility: true,
               licenseSlug: true,
             },
@@ -585,6 +596,14 @@ export class BookService {
           unit: {
             update: {
               rating: (req.rating as ContentRating | undefined) ?? undefined,
+              aiDisclosureMode:
+                (req.aiDisclosureMode as AiDisclosureMode | undefined) ??
+                undefined,
+              aiDisclosureDetails:
+                req.aiDisclosureDetails === undefined
+                  ? undefined
+                  : ((req.aiDisclosureDetails ??
+                      null) as Prisma.InputJsonValue),
               visibility:
                 (req.visibility as UnitVisibility | undefined) ?? undefined,
               licenseSlug:
@@ -614,6 +633,8 @@ export class BookService {
     if (req.isLicensed !== undefined) patchFields.isLicensed = req.isLicensed;
     if (req.coverUrl !== undefined) patchFields.coverUrl = req.coverUrl;
     if (req.rating !== undefined) patchFields.rating = req.rating;
+    if (req.aiDisclosureMode !== undefined)
+      patchFields.aiDisclosureMode = req.aiDisclosureMode;
     if (req.visibility !== undefined) patchFields.visibility = req.visibility;
     if (req.licenseSlug !== undefined)
       patchFields.licenseSlug = req.licenseSlug;
@@ -695,6 +716,10 @@ export function buildBookCreatePatch(
 
   const unit: Record<string, unknown> = {};
   if (req.rating !== undefined) unit.rating = req.rating;
+  if (req.aiDisclosureMode !== undefined)
+    unit.aiDisclosureMode = req.aiDisclosureMode;
+  if (req.aiDisclosureDetails !== undefined)
+    unit.aiDisclosureDetails = req.aiDisclosureDetails;
   if (req.visibility !== undefined) unit.visibility = req.visibility;
   if (req.licenseSlug !== undefined) unit.license = req.licenseSlug;
 
@@ -742,6 +767,10 @@ export function mapBookUpdatePatchPaths(req: UpdateBookInput) {
     req.extra !== undefined ? "extension.extra" : undefined,
     req.coverUrl !== undefined ? "translations" : undefined,
     req.rating !== undefined ? "unit.rating" : undefined,
+    req.aiDisclosureMode !== undefined ? "unit.aiDisclosureMode" : undefined,
+    req.aiDisclosureDetails !== undefined
+      ? "unit.aiDisclosureDetails"
+      : undefined,
     req.visibility !== undefined ? "unit.visibility" : undefined,
     req.licenseSlug !== undefined ? "unit.license" : undefined,
   ]);
@@ -757,6 +786,8 @@ type CurrentBookMetadata = {
   extra: unknown;
   unit: {
     rating: string;
+    aiDisclosureMode: string;
+    aiDisclosureDetails: unknown;
     visibility: string;
     licenseSlug: string | null;
     defaultLanguage: string | null;
@@ -807,6 +838,14 @@ function mapBookEffectiveUpdatePatchPaths(
     hasOwn(req, "rating") && req.rating !== current.unit.rating
       ? "unit.rating"
       : undefined,
+    hasOwn(req, "aiDisclosureMode") &&
+    req.aiDisclosureMode !== current.unit.aiDisclosureMode
+      ? "unit.aiDisclosureMode"
+      : undefined,
+    hasOwn(req, "aiDisclosureDetails") &&
+    !sameJson(req.aiDisclosureDetails ?? null, current.unit.aiDisclosureDetails)
+      ? "unit.aiDisclosureDetails"
+      : undefined,
     hasOwn(req, "visibility") && req.visibility !== current.unit.visibility
       ? "unit.visibility"
       : undefined,
@@ -837,6 +876,10 @@ function buildBookUpdatePatchFromPaths(
 
   const unit: Record<string, unknown> = {};
   if (pathSet.has("unit.rating")) unit.rating = req.rating;
+  if (pathSet.has("unit.aiDisclosureMode"))
+    unit.aiDisclosureMode = req.aiDisclosureMode;
+  if (pathSet.has("unit.aiDisclosureDetails"))
+    unit.aiDisclosureDetails = req.aiDisclosureDetails;
   if (pathSet.has("unit.visibility")) unit.visibility = req.visibility;
   if (pathSet.has("unit.license")) unit.license = req.licenseSlug;
 

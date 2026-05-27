@@ -7,6 +7,7 @@ import { parseIdsCsv } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import {
+  type AiDisclosureMode,
   type ContentRating,
   prisma,
   UnitStatus,
@@ -264,6 +265,12 @@ export class UnitService {
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? false,
         rating: (input.rating as ContentRating | undefined) ?? undefined,
+        aiDisclosureMode:
+          (input.aiDisclosureMode as AiDisclosureMode | undefined) ?? undefined,
+        aiDisclosureDetails:
+          input.aiDisclosureDetails === undefined
+            ? undefined
+            : ((input.aiDisclosureDetails ?? null) as Prisma.InputJsonValue),
         licenseSlug: assertLicenseSlug(input.licenseSlug) ?? undefined,
         extra: (input.extra ?? null) as Prisma.InputJsonValue,
         publishedAt: input.publishedAt
@@ -302,6 +309,12 @@ export class UnitService {
         visibility:
           (input.visibility as UnitVisibility | undefined) ?? undefined,
         rating: (input.rating as ContentRating | undefined) ?? undefined,
+        aiDisclosureMode:
+          (input.aiDisclosureMode as AiDisclosureMode | undefined) ?? undefined,
+        aiDisclosureDetails:
+          input.aiDisclosureDetails === undefined
+            ? undefined
+            : ((input.aiDisclosureDetails ?? null) as Prisma.InputJsonValue),
         licenseSlug:
           input.licenseSlug === null
             ? null
@@ -321,6 +334,8 @@ export class UnitService {
 
     const patchFields: Record<string, any> = {};
     if (input.rating !== undefined) patchFields.rating = input.rating;
+    if (input.aiDisclosureMode !== undefined)
+      patchFields.aiDisclosureMode = input.aiDisclosureMode;
     if (input.visibility !== undefined)
       patchFields.visibility = input.visibility;
     if (input.licenseSlug !== undefined)

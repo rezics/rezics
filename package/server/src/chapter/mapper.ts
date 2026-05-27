@@ -44,6 +44,11 @@ export function mapChapterPostToDetailDTO(
     targetUnitId: post.targetUnitId ?? null,
     coverUrl: readCoverUrlFromExtra(translation?.extra) ?? null,
     rating: post.unit.rating,
+    aiDisclosureMode: post.unit.aiDisclosureMode,
+    aiDisclosureDetails:
+      (post.unit
+        .aiDisclosureDetails as ChapterDetailDTO["aiDisclosureDetails"]) ??
+      undefined,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
   };

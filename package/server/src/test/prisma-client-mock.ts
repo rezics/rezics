@@ -40,6 +40,14 @@ export const UnitVisibility = {
   PRIVATE: "PRIVATE",
 } as const;
 
+export const AiDisclosureMode = {
+  UNKNOWN: "UNKNOWN",
+  NONE: "NONE",
+  AI_ASSISTED: "AI_ASSISTED",
+  AI_ORIGINATED: "AI_ORIGINATED",
+  MACHINE_GENERATED: "MACHINE_GENERATED",
+} as const;
+
 export const UnitWorkDisplayPolicy = {
   PRIMARY: "PRIMARY",
   SECONDARY: "SECONDARY",
@@ -76,6 +84,7 @@ export const prismaClientMock = {
   UnitAliasStatus,
   UnitType,
   UnitVisibility,
+  AiDisclosureMode,
   UnitWorkDisplayPolicy,
   UnitWorkRole,
   UserUnitProgressStatus,

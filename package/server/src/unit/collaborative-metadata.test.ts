@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  isEditorialPathInScope,
   type RezicsSessionClaims,
   UnitAuthorityRoleKey,
 } from "@rezics/contract";
@@ -171,5 +172,12 @@ describe("editorial patch helpers", () => {
     expect(() =>
       assertEditorialPatchAllowed({ tags: { genre: ["xianxia"] } }),
     ).toThrow(AppError);
+  });
+
+  test("allows AI disclosure metadata in book editorial scope", () => {
+    expect(isEditorialPathInScope("book", "unit.aiDisclosureMode")).toBe(true);
+    expect(isEditorialPathInScope("book", "unit.aiDisclosureDetails")).toBe(
+      true,
+    );
   });
 });

@@ -12,6 +12,8 @@ function bookRow(overrides: Record<string, unknown> = {}) {
       status: "PUBLISHED",
       visibility: "PUBLIC",
       rating: "GENERAL",
+      aiDisclosureMode: "UNKNOWN",
+      aiDisclosureDetails: null,
       licenseSlug: null,
       defaultLanguage: "en",
       isLanguageNeutral: false,
@@ -64,5 +66,25 @@ describe("mapBaseBookToDTO", () => {
     const dto = mapBaseBookToDTO(bookRow());
 
     expect(dto.metadata?.uswn).toBeNull();
+  });
+
+  test("projects AI disclosure metadata independently from rating", () => {
+    const dto = mapBaseBookToDTO(
+      bookRow({
+        unit: {
+          ...bookRow().unit,
+          rating: "GENERAL",
+          aiDisclosureMode: "MACHINE_GENERATED",
+          aiDisclosureDetails: { provider: "OpenAI", reviewedByHuman: true },
+        },
+      }),
+    );
+
+    expect(dto.rating).toBe("GENERAL");
+    expect(dto.aiDisclosureMode).toBe("MACHINE_GENERATED");
+    expect(dto.aiDisclosureDetails).toEqual({
+      provider: "OpenAI",
+      reviewedByHuman: true,
+    });
   });
 });

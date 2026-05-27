@@ -59,6 +59,9 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     status: unit.status,
     visibility: unit.visibility,
     rating: unit.rating,
+    aiDisclosureMode: unit.aiDisclosureMode,
+    aiDisclosureDetails:
+      (unit.aiDisclosureDetails as BookDTO["aiDisclosureDetails"]) ?? undefined,
     licenseSlug: resolveStoredLicenseSlug(unit.licenseSlug),
     defaultLanguage: (unit.defaultLanguage as Language) ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,
