@@ -3,11 +3,11 @@ import type {
   RealmListResponse,
   RealmMemberDTO,
   RealmTagApplicationDTO,
-  RealmUnitDTO,
+  UnitRealmDTO,
 } from "@rezics/contract";
 import {
   addRealmTagApplicationSchema,
-  addRealmUnitSchema,
+  addUnitRealmSchema,
   BasicAdminPermission,
   createRealmSchema,
   hasPermissionToUpdateUnit,
@@ -373,7 +373,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   // --- Content feed routes ---
   .post(
     "/:unitId/content",
-    async ({ params, body, identity, set }): Promise<RealmUnitDTO> => {
+    async ({ params, body, identity, set }): Promise<UnitRealmDTO> => {
       const target = await unitService.getByUnitId(params.unitId);
       if (
         !hasPermissionToUpdateUnit(
@@ -387,12 +387,12 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           "Forbidden: you do not have permission to add content to this realm",
         );
       }
-      return realmService.addRealmUnit(params.unitId, body.unitId);
+      return realmService.addUnitRealm(params.unitId, body.unitId);
     },
     {
       requireLogin: true,
       params: realmParamsSchema,
-      body: addRealmUnitSchema,
+      body: addUnitRealmSchema,
       detail: {
         summary: "Add unit to realm content feed",
         description: "Add a unit to the realm's content feed",
@@ -416,7 +416,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           "Forbidden: you do not have permission to remove content from this realm",
         );
       }
-      await realmService.removeRealmUnit(params.unitId, params.contentUnitId);
+      await realmService.removeUnitRealm(params.unitId, params.contentUnitId);
       return { message: "Content removed from realm" };
     },
     {
@@ -482,8 +482,8 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     async ({ params, identity, set }): Promise<{ message: string }> => {
       // Pin/delete is restricted to platform admin or `Realm.owner`.
       if (!BasicAdminPermission(identity.permission)) {
-        const realmUnit = await unitService.getByUnitId(params.unitId);
-        if (!realmUnit?.userId || realmUnit.userId !== identity.userId) {
+        const realm = await unitService.getByUnitId(params.unitId);
+        if (!realm?.userId || realm.userId !== identity.userId) {
           set.status = 403;
           throw new Error(
             "Forbidden: only platform admin or realm owner may delete realm tags",

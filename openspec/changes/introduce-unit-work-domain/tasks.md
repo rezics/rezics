@@ -22,13 +22,13 @@
 
 ## 3. RealmUnit Rename
 
-- [ ] 3.1 Rename Prisma model and generated references from `RealmUnit` to `UnitRealm`.
-- [ ] 3.2 Rename server service/API/mapper/type references from `realmUnit`/`RealmUnit` to `unitRealm`/`UnitRealm` without changing realm behavior.
-- [ ] 3.3 Rename contract DTOs and request/response fields that explicitly name the relationship.
-- [ ] 3.4 Rename `package/api` query keys, clients, and hooks that reference `RealmUnit`.
-- [ ] 3.5 Rename frontend/admin call sites and tests that reference `RealmUnit`.
-- [ ] 3.6 Run `rg "RealmUnit|realmUnit"` and remove or intentionally document any remaining compatibility references.
-- [ ] 3.7 Add focused regression tests proving realm feed membership and cross-posting behavior did not change.
+- [x] 3.1 Rename Prisma model and generated references from `RealmUnit` to `UnitRealm`.
+- [x] 3.2 Rename server service/API/mapper/type references from `realmUnit`/`RealmUnit` to `unitRealm`/`UnitRealm` without changing realm behavior.
+- [x] 3.3 Rename contract DTOs and request/response fields that explicitly name the relationship.
+- [x] 3.4 Rename `package/api` query keys, clients, and hooks that reference `RealmUnit`.
+- [x] 3.5 Rename frontend/admin call sites and tests that reference `RealmUnit`.
+- [x] 3.6 Run `rg "RealmUnit|realmUnit"` and remove or intentionally document any remaining compatibility references.
+- [x] 3.7 Add focused regression tests proving realm feed membership and cross-posting behavior did not change.
 
 ## 4. Interaction Target Projection
 

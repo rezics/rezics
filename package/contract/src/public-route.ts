@@ -76,7 +76,7 @@ export const publicUserUnitIdRouteParamsSchema = t.Object({
  *
  * Resolves only `Unit.id` where `type = REALM`.
  */
-export const publicRealmUnitIdRouteParamsSchema = t.Object({
+export const publicRealmIdRouteParamsSchema = t.Object({
   unitId: t.String({ format: "uuid" }),
 });
 
@@ -178,8 +178,8 @@ export type PublicEntitySlugRouteParams =
 
 export type PublicUserUnitIdRouteParams =
   (typeof publicUserUnitIdRouteParamsSchema)["static"];
-export type PublicRealmUnitIdRouteParams =
-  (typeof publicRealmUnitIdRouteParamsSchema)["static"];
+export type PublicRealmIdRouteParams =
+  (typeof publicRealmIdRouteParamsSchema)["static"];
 export type PublicTagUnitIdRouteParams =
   (typeof publicTagUnitIdRouteParamsSchema)["static"];
 export type PublicZoneUnitIdRouteParams =

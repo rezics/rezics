@@ -753,7 +753,7 @@ export async function patchContentRealmIds(
     await client.deleteContent([unitId]);
     return;
   }
-  const inRealms = await getSearchPrismaClient().realmUnit.findMany({
+  const inRealms = await getSearchPrismaClient().unitRealm.findMany({
     where: { unitId },
   });
 

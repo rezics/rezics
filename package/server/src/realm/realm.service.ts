@@ -3,7 +3,7 @@ import type {
   RealmDTO,
   RealmListQuery,
   RealmMemberDTO,
-  RealmUnitDTO,
+  UnitRealmDTO,
   UpdateRealmInput,
 } from "@rezics/contract";
 import { parseIdsCsv, validateSlug } from "@rezics/contract";
@@ -24,7 +24,7 @@ import {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
   mapRealmToDTO,
-  mapRealmUnitToDTO,
+  mapUnitRealmToDTO,
 } from "./realm.mapper";
 import { filterRealmExtraPublic } from "./realm-extra.service";
 import {
@@ -492,22 +492,22 @@ export class RealmService {
 
   // --- Content feed ---
 
-  async addRealmUnit(
+  async addUnitRealm(
     realmUnitId: string,
     unitId: string,
-  ): Promise<RealmUnitDTO> {
-    const row = await prisma.realmUnit.create({
+  ): Promise<UnitRealmDTO> {
+    const row = await prisma.unitRealm.create({
       data: { realmUnitId, unitId },
     });
     await Promise.all([
       enqueueContentSearch(SEARCH_COMMAND_KINDS.contentPatchRealmIds, unitId),
       this.patchPostRealmIds(unitId),
     ]);
-    return mapRealmUnitToDTO(row);
+    return mapUnitRealmToDTO(row);
   }
 
-  async removeRealmUnit(realmUnitId: string, unitId: string): Promise<void> {
-    await prisma.realmUnit.delete({
+  async removeUnitRealm(realmUnitId: string, unitId: string): Promise<void> {
+    await prisma.unitRealm.delete({
       where: {
         realmUnitId_unitId: { realmUnitId, unitId },
       },
@@ -531,7 +531,7 @@ export class RealmService {
    * membership check and passes through the actor's userId.
    * Realms apply existing global tags only: `realmUnitId` must be REALM and
    * `tagUnitId` must be TAG. This does not mint a realm-local tag and does not
-   * require RealmUnit(realmUnitId, unitId).
+   * require UnitRealm(realmUnitId, unitId).
    *
    * - First call: writes the RealmTagApplication (score=1, voteCount=1) and a +1
    *   RealmTagApplicationVote.

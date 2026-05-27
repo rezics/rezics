@@ -57,7 +57,7 @@ export const ContentSearchDocumentSchema = t.Object({
   workUnitIds: t.Array(t.String()),
   workRoles: t.Array(unitWorkRoleSchema),
 
-  // Filterable: realm system (from RealmUnit)
+  // Filterable: realm system (from UnitRealm)
   realmIds: t.Array(t.String()),
 
   // Filterable: realm-tag system (from RealmTagApplication). Values are machine

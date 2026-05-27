@@ -38,11 +38,11 @@ async function canMutateRealmTagApplication(
   realmUnitId: string,
 ): Promise<boolean> {
   if (BasicAdminPermission(actorPermission as any)) return true;
-  const realmUnit = await prisma.unit.findUnique({
+  const realm = await prisma.unit.findUnique({
     where: { id: realmUnitId },
     select: { userId: true },
   });
-  return realmUnit?.userId != null && realmUnit.userId === actorUserId;
+  return realm?.userId != null && realm.userId === actorUserId;
 }
 
 export const realmTagApplicationApi = new Elysia({

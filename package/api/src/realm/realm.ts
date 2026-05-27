@@ -30,7 +30,7 @@ export { realmKeys } from "./realm.keys";
 export {
   realmMutations,
   useAddRealmTagApplicationMutation,
-  useAddRealmUnitMutation,
+  useAddUnitRealmMutation,
   useCastRealmTagApplicationVoteMutation,
   useCreateRealmMutation,
   useCreateRealmTagApplicationMutation,
@@ -43,7 +43,7 @@ export {
   usePatchRealmTagApplicationMutation,
   useRemoveMemberMutation,
   useRemoveRealmTagApplicationMutation,
-  useRemoveRealmUnitMutation,
+  useRemoveUnitRealmMutation,
   useUnmuteRealmMutation,
   useUpdateMemberRoleMutation,
   useUpdateRealmMutation,
@@ -63,7 +63,7 @@ export {
 // Types
 export type {
   AddRealmTagApplicationInput,
-  AddRealmUnitInput,
+  AddUnitRealmInput,
   CreateRealmInput,
   JoinRealmInput,
   RealmDTO,
@@ -74,7 +74,7 @@ export type {
   RealmResponse,
   RealmSortOption,
   RealmTagApplicationDTO,
-  RealmUnitDTO,
+  UnitRealmDTO,
   RealmView,
   UpdateMemberRoleInput,
   UpdateRealmInput,

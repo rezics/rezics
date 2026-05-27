@@ -5,7 +5,7 @@ export {
   mapRealmTagApplicationToDTO,
   mapRealmTagContextToDTO,
   mapRealmToDTO,
-  mapRealmUnitToDTO,
+  mapUnitRealmToDTO,
 } from "./realm.mapper";
 export {
   REALM_TAG_VISIBILITY_THRESHOLD,

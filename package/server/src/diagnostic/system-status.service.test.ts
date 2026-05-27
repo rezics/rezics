@@ -104,7 +104,7 @@ describe("getSystemStatusSummary", () => {
           "UnitAlias",
           "CreditAttribution",
           "SubjectAttribution",
-          "RealmUnit",
+          "UnitRealm",
           "RealmTagApplication",
           "RealmTagUnit",
           "ShelfUnit",

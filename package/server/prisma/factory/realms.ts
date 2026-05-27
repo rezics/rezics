@@ -95,7 +95,7 @@ export async function seedRealms(
       if (workIds.length > 0) {
         const realmWorkCount = randomInt(2, Math.min(15, workIds.length));
         const selectedWorks = pickN(workIds, realmWorkCount);
-        await ctx.prisma.realmUnit.createMany({
+        await ctx.prisma.unitRealm.createMany({
           data: selectedWorks.map((workId) => ({
             realmUnitId: unit.id,
             unitId: workId,

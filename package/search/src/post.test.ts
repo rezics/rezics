@@ -21,7 +21,7 @@ function setServerEnvForSearchTests() {
 }
 
 describe("buildPostDocument", () => {
-  test("includes realmIds from RealmUnit rows", async () => {
+  test("includes realmIds from UnitRealm rows", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({

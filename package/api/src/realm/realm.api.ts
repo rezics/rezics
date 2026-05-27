@@ -2,13 +2,13 @@
  * Realm API client functions
  * Direct API communication layer
  *
- * Realms include membership management, content (RealmUnit),
+ * Realms include membership management, content (UnitRealm),
  * and scoped tag classification (RealmTagApplication).
  */
 
 import type {
   AddRealmTagApplicationInput,
-  AddRealmUnitInput,
+  AddUnitRealmInput,
   CastRealmTagApplicationVoteInput,
   CreateRealmInput,
   CreateRealmTagApplicationInput,
@@ -21,7 +21,7 @@ import type {
   RealmTagContextDTO,
   RealmTagContextReadResponse,
   RealmTagContextUpdateResponse,
-  RealmUnitDTO,
+  UnitRealmDTO,
   UpdateMemberRoleInput,
   UpdateRealmInput,
   UpdateRealmTagContextInput,
@@ -188,16 +188,16 @@ export const realmApi = {
     );
   },
 
-  // ---- Content management (RealmUnit) ----
+  // ---- Content management (UnitRealm) ----
 
   /**
    * Add a unit to a realm's content feed
    */
   addUnit: async (
     realmUnitId: string,
-    input: AddRealmUnitInput,
-  ): Promise<RealmUnitDTO> => {
-    return apiFetch<RealmUnitDTO>(`/realm/${realmUnitId}/content`, {
+    input: AddUnitRealmInput,
+  ): Promise<UnitRealmDTO> => {
+    return apiFetch<UnitRealmDTO>(`/realm/${realmUnitId}/content`, {
       method: "POST",
       body: JSON.stringify(input),
     });

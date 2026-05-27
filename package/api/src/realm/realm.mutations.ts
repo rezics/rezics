@@ -4,7 +4,7 @@
 
 import type {
   AddRealmTagApplicationInput,
-  AddRealmUnitInput,
+  AddUnitRealmInput,
   CastRealmTagApplicationVoteInput,
   CreateRealmInput,
   CreateRealmTagApplicationInput,
@@ -15,7 +15,7 @@ import type {
   RealmTagApplicationDTO,
   RealmTagContextDTO,
   RealmTagContextUpdateResponse,
-  RealmUnitDTO,
+  UnitRealmDTO,
   UpdateMemberRoleInput,
   UpdateRealmInput,
   UpdateRealmTagContextInput,
@@ -278,12 +278,12 @@ export function useRemoveMemberMutation(
 /**
  * Mutation for adding a unit to a realm
  */
-export function useAddRealmUnitMutation(
+export function useAddUnitRealmMutation(
   options?: Omit<
     UseMutationOptions<
-      RealmUnitDTO,
+      UnitRealmDTO,
       Error,
-      { realmUnitId: string; input: AddRealmUnitInput }
+      { realmUnitId: string; input: AddUnitRealmInput }
     >,
     "mutationFn"
   >,
@@ -306,7 +306,7 @@ export function useAddRealmUnitMutation(
 /**
  * Mutation for removing a unit from a realm
  */
-export function useRemoveRealmUnitMutation(
+export function useRemoveUnitRealmMutation(
   options?: Omit<
     UseMutationOptions<
       { message: string },
@@ -586,8 +586,8 @@ export const realmMutations = {
   useUnmute: useUnmuteRealmMutation,
   useUpdateMemberRole: useUpdateMemberRoleMutation,
   useRemoveMember: useRemoveMemberMutation,
-  useAddUnit: useAddRealmUnitMutation,
-  useRemoveUnit: useRemoveRealmUnitMutation,
+  useAddUnit: useAddUnitRealmMutation,
+  useRemoveUnit: useRemoveUnitRealmMutation,
   useAddTagApplication: useAddRealmTagApplicationMutation,
   useRemoveTagApplication: useRemoveRealmTagApplicationMutation,
   useCreateRealmTagApplication: useCreateRealmTagApplicationMutation,

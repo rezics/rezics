@@ -57,7 +57,7 @@ const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const transactionMock = mock(async (fn: any) =>
   fn({
     unit: { findUnique: unitFindUniqueMock },
-    realmUnit: {
+    unitRealm: {
       create: realmUnitCreateMock,
       delete: realmUnitDeleteMock,
       findMany: realmUnitFindManyMock,
@@ -91,7 +91,7 @@ installPrismaClientMock();
 Object.assign(prismaMock, {
   $transaction: transactionMock,
   unit: { findUnique: unitFindUniqueMock },
-  realmUnit: {
+  unitRealm: {
     create: realmUnitCreateMock,
     delete: realmUnitDeleteMock,
     findMany: realmUnitFindManyMock,
@@ -262,7 +262,7 @@ describe("RealmService.createRealmTagApplication", () => {
 
   beforeEach(resetWriteMocks);
 
-  test("creates RealmTagApplication without creating RealmUnit", async () => {
+  test("creates RealmTagApplication without creating UnitRealm", async () => {
     await service.createRealmTagApplication(
       "user-1",
       "realm-1",
@@ -373,13 +373,13 @@ describe("RealmService.deleteRealmTagApplication", () => {
   });
 });
 
-describe("RealmService.removeRealmUnit", () => {
+describe("RealmService.removeUnitRealm", () => {
   const service = new RealmService();
 
   beforeEach(resetWriteMocks);
 
   test("does not delete RealmTagApplication rows when removing feed membership", async () => {
-    await service.removeRealmUnit("realm-1", "unit-1");
+    await service.removeUnitRealm("realm-1", "unit-1");
 
     expect(realmUnitDeleteMock).toHaveBeenCalledTimes(1);
     expect(realmTagApplicationDeleteMock).not.toHaveBeenCalled();

@@ -12,7 +12,7 @@ const realmUnitFindManyMock = mock(async () => [
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 
 Object.assign(prismaMock, {
-  realmUnit: {
+  unitRealm: {
     create: realmUnitCreateMock,
     delete: realmUnitDeleteMock,
     findMany: realmUnitFindManyMock,
@@ -27,7 +27,7 @@ mock.module("@/job/job-boundary", () => ({
 
 const { RealmService } = await import("./realm.service");
 
-describe("RealmUnit post search sync", () => {
+describe("UnitRealm post search sync", () => {
   const service = new RealmService();
 
   beforeEach(() => {
@@ -41,8 +41,8 @@ describe("RealmUnit post search sync", () => {
     enqueueMock.mockClear();
   });
 
-  test("adding a RealmUnit patches the post realmIds field", async () => {
-    await service.addRealmUnit("realm-1", "post-1");
+  test("adding a UnitRealm patches the post realmIds field", async () => {
+    await service.addUnitRealm("realm-1", "post-1");
 
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
       "search.content.patchRealmIds",
@@ -50,10 +50,10 @@ describe("RealmUnit post search sync", () => {
     ]);
   });
 
-  test("removing a RealmUnit patches the post realmIds field", async () => {
+  test("removing a UnitRealm patches the post realmIds field", async () => {
     realmUnitFindManyMock.mockResolvedValueOnce([{ realmUnitId: "realm-2" }]);
 
-    await service.removeRealmUnit("realm-1", "post-1");
+    await service.removeUnitRealm("realm-1", "post-1");
 
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
       "search.content.patchRealmIds",

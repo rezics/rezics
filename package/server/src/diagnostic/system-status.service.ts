@@ -24,7 +24,7 @@ const ROUTED_SEQUIN_TABLES = [
   "UnitAlias",
   "CreditAttribution",
   "SubjectAttribution",
-  "RealmUnit",
+  "UnitRealm",
   "RealmTagApplication",
   "RealmTagUnit",
   "ShelfUnit",

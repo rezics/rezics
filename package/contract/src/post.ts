@@ -107,7 +107,7 @@ export const postListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   /** Target Unit ID for reply/thread targets. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
-  /** Realm Unit ID to list posts through the RealmUnit junction. */
+  /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
@@ -147,7 +147,7 @@ export const postListBodySchema = t.Object({
   ...listPostBodyBase.properties,
   /** Target Unit ID for reply/thread targets. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
-  /** Realm Unit ID to list posts through the RealmUnit junction. */
+  /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
@@ -210,7 +210,7 @@ export type PostResponse = (typeof postResponseSchema)["static"];
 export const createPostSchema = t.Object({
   targetUnitId: t.Optional(t.String()),
   /**
-   * Realm Unit IDs that create RealmUnit junction rows in the same transaction
+   * Realm Unit IDs that create UnitRealm junction rows in the same transaction
    * as the Post.
    */
   realmUnitIds: t.Optional(t.Array(t.String())),

@@ -162,7 +162,7 @@ export class PostService {
     };
   }
 
-  /** List posts associated with a realm through the RealmUnit junction. */
+  /** List posts associated with a realm through the UnitRealm junction. */
   async byRealm(
     realmUnitId: string,
     opts: Omit<PostListQuery, "realmUnitId" | "targetUnitId"> = {},
@@ -395,7 +395,7 @@ export class PostService {
         const createdAt = new Date();
         await Promise.all(
           realmIdsToWrite.map((realmUnitId) =>
-            tx.realmUnit.create({
+            tx.unitRealm.create({
               data: {
                 realmUnitId,
                 unitId: created.unitId,

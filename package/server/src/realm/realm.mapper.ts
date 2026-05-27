@@ -3,14 +3,14 @@ import type {
   RealmMemberDTO,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
-  RealmUnitDTO,
+  UnitRealmDTO,
   UnitTranslationDTO,
 } from "@rezics/contract";
 import type {
   RealmMember,
   RealmTagApplication,
   RealmTagContext,
-  RealmUnit,
+  UnitRealm,
 } from "#/prisma/client";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { RealmListSelected, RealmWithRelations } from "./types";
@@ -59,7 +59,7 @@ export function mapRealmMemberToDTO(row: RealmMember): RealmMemberDTO {
   };
 }
 
-export function mapRealmUnitToDTO(row: RealmUnit): RealmUnitDTO {
+export function mapUnitRealmToDTO(row: UnitRealm): UnitRealmDTO {
   return {
     realmUnitId: row.realmUnitId,
     unitId: row.unitId,

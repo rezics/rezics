@@ -219,8 +219,8 @@ model Unit {
   tagVotesAsTag  TagVote[] @relation("TagVoteTag")
 
   // Realm organization
-  realmContent RealmUnit[] @relation("RealmContent")
-  inRealms     RealmUnit[] @relation("UnitInRealm")
+  realmContent UnitRealm[] @relation("RealmContent")
+  inRealms     UnitRealm[] @relation("UnitInRealm")
 
   // Realm-scoped tag classification. The realm side is exposed through
   // `Realm`; Unit keeps only the global tag, target content, and context
@@ -732,7 +732,7 @@ model RealmMember {
  * ANCHOR REALM ORGANIZATION
  */
 
-model RealmUnit {
+model UnitRealm {
   realmUnitId String   @db.Uuid
   unitId      String   @db.Uuid
   createdAt   DateTime @default(now())
@@ -760,7 +760,7 @@ model RealmTagApplication {
   updatedAt DateTime @updatedAt
 
   /// A realm-scoped application of an existing global TAG Unit to any target Unit.
-  /// This does not create a realm-scoped tag and does not require the target to be posted into the realm via RealmUnit.
+  /// This does not create a realm-scoped tag and does not require the target to be posted into the realm via UnitRealm.
   realm      Realm                     @relation("RealmTagApplicationRealm", fields: [realmUnitId], references: [unitId], onDelete: Cascade)
   appliedTag Unit                      @relation("RealmTagApplicationAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
   targetUnit Unit                      @relation("RealmTagApplicationTargetUnit", fields: [unitId], references: [id], onDelete: Cascade)

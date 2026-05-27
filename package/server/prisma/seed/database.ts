@@ -28,7 +28,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   // Group 3: Realm + shelf + tag junction
   await prisma.shelfUnitRelation.deleteMany();
   await Promise.all([
-    prisma.realmUnit.deleteMany(),
+    prisma.unitRealm.deleteMany(),
     prisma.realmMember.deleteMany(),
     prisma.shelfUnit.deleteMany(),
     prisma.unitTag.deleteMany(),

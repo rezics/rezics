@@ -134,7 +134,7 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       : [];
   }
 
-  if (table === "RealmUnit") {
+  if (table === "UnitRealm") {
     const unitId = targetId(message, ["unitId", "unit_id"]);
     return unitId
       ? [

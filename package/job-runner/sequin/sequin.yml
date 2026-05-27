@@ -27,7 +27,7 @@ databases:
           public."UnitAlias",
           public."CreditAttribution",
           public."SubjectAttribution",
-          public."RealmUnit",
+          public."UnitRealm",
           public."RealmTagApplication",
           public."ShelfUnit",
           public."Post",
@@ -59,7 +59,7 @@ sinks:
         - public.UnitAlias
         - public.CreditAttribution
         - public.SubjectAttribution
-        - public.RealmUnit
+        - public.UnitRealm
         - public.RealmTagApplication
         - public.ShelfUnit
         - public.Post

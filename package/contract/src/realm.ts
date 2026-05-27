@@ -100,16 +100,16 @@ export type RealmMemberDTO = (typeof realmMemberDTOSchema)["static"];
 // ============================================================
 
 /**
- * RealmUnit is community/feed membership for a Unit in a realm. It is not
+ * UnitRealm is community/feed membership for a Unit in a realm. It is not
  * semantic tagging and is not a prerequisite for RealmTagApplication.
  */
-export const realmUnitDTOSchema = t.Object({
+export const unitRealmDTOSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
-export type RealmUnitDTO = (typeof realmUnitDTOSchema)["static"];
+export type UnitRealmDTO = (typeof unitRealmDTOSchema)["static"];
 
 // ============================================================
 // REALM TAG UNIT DTO (scoped classification)
@@ -118,7 +118,7 @@ export type RealmUnitDTO = (typeof realmUnitDTOSchema)["static"];
 /**
  * RealmTagApplication records a realm-scoped application of an existing global TAG
  * Unit to a target Unit. It does not create a realm-local tag and does not
- * require the target Unit to appear in the realm feed through RealmUnit.
+ * require the target Unit to appear in the realm feed through UnitRealm.
  */
 export const realmTagApplicationDTOSchema = t.Object({
   realmUnitId: t.String(),
@@ -414,11 +414,11 @@ export type RealmMemberParams = (typeof realmMemberParamsSchema)["static"];
 // REALM CONTENT MANAGEMENT
 // ============================================================
 
-export const addRealmUnitSchema = t.Object({
+export const addUnitRealmSchema = t.Object({
   unitId: t.String(),
 });
 
-export type AddRealmUnitInput = (typeof addRealmUnitSchema)["static"];
+export type AddUnitRealmInput = (typeof addUnitRealmSchema)["static"];
 
 export const addRealmTagApplicationSchema = t.Object({
   tagUnitId: t.String(),

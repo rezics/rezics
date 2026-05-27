@@ -7,7 +7,7 @@
 
 import type {
   AddRealmTagApplicationInput,
-  AddRealmUnitInput,
+  AddUnitRealmInput,
   CreateRealmInput,
   JoinRealmInput,
   RealmDTO,
@@ -16,7 +16,7 @@ import type {
   RealmMemberDTO,
   RealmResponse,
   RealmTagApplicationDTO,
-  RealmUnitDTO,
+  UnitRealmDTO,
   RemoveRealmTagApplicationInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,
@@ -25,7 +25,7 @@ import type {
 // Re-export contract types
 export type {
   AddRealmTagApplicationInput,
-  AddRealmUnitInput,
+  AddUnitRealmInput,
   CreateRealmInput,
   JoinRealmInput,
   RealmDTO,
@@ -34,7 +34,7 @@ export type {
   RealmMemberDTO,
   RealmResponse,
   RealmTagApplicationDTO,
-  RealmUnitDTO,
+  UnitRealmDTO,
   RemoveRealmTagApplicationInput,
   UpdateMemberRoleInput,
   UpdateRealmInput,

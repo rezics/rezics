@@ -245,7 +245,7 @@ async function ensureRealmTagApplication(
 /**
  * Seed realm taxonomy examples that protect the product model:
  * realms are community spaces, global TAG Units are shared vocabulary, and
- * RealmTagApplication remains independent from RealmUnit feed membership.
+ * RealmTagApplication remains independent from UnitRealm feed membership.
  */
 export async function seedRealmTaxonomy(
   prisma: PrismaClient,
@@ -328,7 +328,7 @@ export async function seedRealmTaxonomy(
     "A non-feed target that the realm can still classify.",
   );
 
-  await prisma.realmUnit.upsert({
+  await prisma.unitRealm.upsert({
     where: {
       realmUnitId_unitId: {
         realmUnitId: communityRealmId,

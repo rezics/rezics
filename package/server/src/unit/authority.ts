@@ -257,8 +257,8 @@ export async function assertCanEditUnitFields(
  * Authority predicate per unit-authority spec / design D3.
  *
  * Returns true if caller is the unit owner, a system admin, or a
- * moderator+ of any Realm whose `RealmUnit` rows reference this unit.
- * Resolves with a single indexed JOIN against `RealmUnit × RealmMember`.
+ * moderator+ of any Realm whose `UnitRealm` rows reference this unit.
+ * Resolves with a single indexed JOIN against `UnitRealm × RealmMember`.
  */
 export async function hasAuthorityOver(
   caller: RezicsSessionClaims | null,
@@ -270,7 +270,7 @@ export async function hasAuthorityOver(
   if (isAdminRole(caller)) return true;
   if (await verifyAdminFromDb(caller.userId)) return true;
 
-  const containingRealms = await prisma.realmUnit.findMany({
+  const containingRealms = await prisma.unitRealm.findMany({
     where: { unitId: unit.id },
     select: { realmUnitId: true },
   });

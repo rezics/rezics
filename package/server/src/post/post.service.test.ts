@@ -73,7 +73,7 @@ const transactionMock = mock(async (fn: any) =>
       findUniqueOrThrow: postFindUniqueOrThrowMock,
       findFirst: postFindFirstMock,
     },
-    realmUnit: { create: realmUnitCreateMock },
+    unitRealm: { create: realmUnitCreateMock },
     unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
     unitTranslation: { findMany: unitTranslationFindManyMock },
     book: { findUnique: bookFindUniqueMock },
@@ -104,7 +104,7 @@ Object.assign(prismaMock, {
     findUniqueOrThrow: postFindUniqueOrThrowMock,
     findFirst: postFindFirstMock,
   },
-  realmUnit: { create: realmUnitCreateMock },
+  unitRealm: { create: realmUnitCreateMock },
   unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
   user: { findUnique: userFindUniqueMock },
 });
@@ -204,7 +204,7 @@ describe("PostService.create realm/tag junction writes", () => {
     ]);
   });
 
-  test("creates RealmUnit rows for one realm", async () => {
+  test("creates UnitRealm rows for one realm", async () => {
     resetMocks();
 
     await service.create(
@@ -219,7 +219,7 @@ describe("PostService.create realm/tag junction writes", () => {
     });
   });
 
-  test("creates RealmUnit rows for three realms", async () => {
+  test("creates UnitRealm rows for three realms", async () => {
     resetMocks();
 
     await service.create(
@@ -257,7 +257,7 @@ describe("PostService.create realm/tag junction writes", () => {
     ]);
   });
 
-  test("creates RealmUnit and UnitTag rows in the same transaction", async () => {
+  test("creates UnitRealm and UnitTag rows in the same transaction", async () => {
     resetMocks();
 
     await service.create(
@@ -308,7 +308,7 @@ describe("PostService.create realm/tag junction writes", () => {
 describe("PostService.byRealm", () => {
   const service = new PostService();
 
-  test("filters through RealmUnit and returns empty result", async () => {
+  test("filters through UnitRealm and returns empty result", async () => {
     resetMocks();
     postFindManyMock.mockResolvedValueOnce([]);
     postCountMock.mockResolvedValueOnce(0);
