@@ -106,7 +106,7 @@
 - [ ] 12.2 Run `bun --filter=@rezics/server test` for unit-work, post, shelf, tag, and realm rename coverage.
 - [ ] 12.3 Run `bun --filter=@rezics/search test` for inherited tag and grouped search behavior.
 - [ ] 12.4 Run `bun --filter=@rezics/api test` for API clients and query keys.
-- [ ] 12.5 Run targeted app tests for book detail, release selector, language switcher, community feed, and shelf rendering.
+- [x] 12.5 Run targeted app tests for book detail, release selector, language switcher, community feed, and shelf rendering.
 - [x] 12.6 Run `bun run check:convention`.
 - [x] 12.7 Run `bun run format:check`.
 - [x] 12.8 Run `openspec validate introduce-unit-work-domain --strict`.
