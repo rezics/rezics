@@ -138,13 +138,19 @@ function RealmQueueList({ items }: { items: RealmModerationQueueItemDTO[] }) {
   );
 }
 
-export function StaffConsolePage() {
+export function StaffConsolePage({
+  initialRealmUnitId = "",
+  initialAccountUserId = "",
+}: {
+  initialRealmUnitId?: string;
+  initialAccountUserId?: string;
+} = {}) {
   const { status, allowed } = useStaffConsoleAccess();
   const [stateFilter, setStateFilter] = useState("all");
   const [assignmentFilter, setAssignmentFilter] = useState("all");
   const [targetFilter, setTargetFilter] = useState("");
-  const [realmUnitId, setRealmUnitId] = useState("");
-  const [accountUserId, setAccountUserId] = useState("");
+  const [realmUnitId, setRealmUnitId] = useState(initialRealmUnitId);
+  const [accountUserId, setAccountUserId] = useState(initialAccountUserId);
 
   const casesQuery = useQuery({
     ...governanceCaseListQuery({ limit: 50 }),

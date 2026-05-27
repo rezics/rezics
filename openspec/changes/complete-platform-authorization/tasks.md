@@ -50,7 +50,7 @@
 
 - [x] 8.1 Add `@rezics/api` clients and TanStack Query hooks for cases, enforcement, capability grants, policy-denial metadata, and audit.
 - [x] 8.2 Add `package/app/src/staff/` feature with routes for moderation queue, case detail, account safety, and audit timeline; guard non-staff with forbidden states.
-- [ ] 8.3 Add focused UI tests or Storybook stories for queue empty/loading/error/denied/action states.
+- [x] 8.3 Add focused UI tests or Storybook stories for queue empty/loading/error/denied/action states.
 
 ## 9. Verification
 
