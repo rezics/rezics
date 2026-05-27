@@ -39,16 +39,11 @@ maintenance metadata.
   organized by content structure.
 - Provide contract, server, search, API-client, job-runner, and admin work
   required for production-ready GAME/MEDIA data.
-- Document series as a deferred design choice with two candidate paths.
 - Leave frontend implementation narrow: data readiness and route/page direction
   only. Future pages should follow the current book detail pattern.
 
 **Non-Goals:**
 
-- Do not implement series in this change.
-- Do not introduce `UnitType.SERIES` in this change.
-- Do not use ordinary personal shelf semantics as the committed series model in
-  this change.
 - Do not store system requirement raw text in `UnitTranslation.extra`.
 - Do not make hidden work Units visible public GAME/MEDIA detail pages.
 - Do not build importers for IGDB, Steam, TMDB, IMDb, or PCGamingWiki in this
@@ -170,50 +165,6 @@ Alternatives considered:
 - **Fully normalize CPU/GPU tables now**: premature. Slugs provide a stable seam
   for future hardware catalog integration without blocking this backend.
 
-### Series Is Deferred With Two Candidate Paths
-
-Series is needed for book series, movie series, and game series, but it is a
-separate product capability and should not block GAME/MEDIA backend readiness.
-This change records two paths:
-
-#### Path A: Shelf-Based Series
-
-Use `Unit(type = SHELF)` with `Shelf.kindKey = "series"` as the ordered
-collection substrate.
-
-```txt
-Series shelf
-├─ UnitTranslation title/description
-├─ ShelfUnit ordered members
-└─ automatic UnitWork(SHELF) membership from contained releases
-```
-
-If a series shelf contains a release, existing `UnitWork` reconciliation makes
-the shelf visible inside that release's work domain. No extra relation is
-needed.
-
-This path reuses the existing ordered collection model and avoids adding
-`UnitType.SERIES`. It must, however, distinguish catalog/editor-owned series
-from ordinary user shelves.
-
-#### Path B: Series Unit With Content Structure
-
-Introduce a future `UnitType.SERIES` or series-like library Unit and store
-ordered members through `contentStructure`.
-
-```txt
-Series Unit
-└─ contentStructure
-   ├─ entry -> work/release Unit
-   └─ entry -> work/release Unit
-```
-
-This gives series a first-class content identity and can model richer hierarchy,
-but it adds a new Unit type and another editing surface.
-
-This change does not choose between the paths. It only requires GAME/MEDIA
-backend code to avoid assumptions that would block either path later.
-
 ### Frontend Direction Mirrors Book Detail
 
 Future GAME/MEDIA detail pages should use the same broad structure as the book
@@ -247,8 +198,6 @@ or other domain media component when available.
 - **Risk: Existing game/media seed data loses platform/rating filters during
   migration** → Mitigation: backfill string keys into Entities before dropping
   legacy columns/tables.
-- **Risk: Series design leaks into this change** → Mitigation: keep series as a
-  documented follow-up and add only non-blocking constraints here.
 - **Risk: Episode/DLC structure is implemented as counts again** → Mitigation:
   specs require Units plus content structure for canonical part identity.
 - **Risk: Hidden work Units accidentally receive public titles/pages** →
@@ -288,6 +237,3 @@ Rollback strategy:
   or should public writes require source evidence?
 - Should rating Entities store normalized minimum age/region metadata in
   `Entity.extra` or in a dedicated rating extension table?
-- Which series path should be proposed in a later change:
-  `Shelf(kindKey = "series")` or a first-class Series Unit with
-  `contentStructure`?

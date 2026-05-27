@@ -57,17 +57,11 @@
 - [ ] 7.3 Add drift diagnostics for legacy platform/rating rows, missing platform Entities, missing age-rating Entities, and search projection mismatch.
 - [ ] 7.4 Document import-source expectations for IGDB, Steam, TMDB, IMDb, and PCGamingWiki without implementing crawlers/importers.
 
-## 8. Series Follow-Up Documentation
+## 8. Verification
 
-- [ ] 8.1 Keep series unimplemented in this change and verify no `UnitType.SERIES` or series API is introduced.
-- [ ] 8.2 Add developer documentation or design notes summarizing the two deferred paths: `Shelf(kindKey = "series")` and future Series Unit with `contentStructure`.
-- [ ] 8.3 Verify GAME/MEDIA services do not depend on either series path and remain compatible with both.
-
-## 9. Verification
-
-- [ ] 9.1 Run targeted contract tests for GAME/MEDIA schemas and system requirements.
-- [ ] 9.2 Run targeted server tests for game/media services, migrations, and APIs.
-- [ ] 9.3 Run targeted search tests for projection and filters.
-- [ ] 9.4 Run `bun run check:convention` and fix any repo convention violations introduced by the change.
-- [ ] 9.5 Run `bun run format:check` or format changed files with Biome.
-- [ ] 9.6 Run a repo-wide search for removed legacy names such as `GamePlatform`, `platformKey`, and `ageRatingKey` and migrate remaining internal callsites intentionally.
+- [ ] 8.1 Run targeted contract tests for GAME/MEDIA schemas and system requirements.
+- [ ] 8.2 Run targeted server tests for game/media services, migrations, and APIs.
+- [ ] 8.3 Run targeted search tests for projection and filters.
+- [ ] 8.4 Run `bun run check:convention` and fix any repo convention violations introduced by the change.
+- [ ] 8.5 Run `bun run format:check` or format changed files with Biome.
+- [ ] 8.6 Run a repo-wide search for removed legacy names such as `GamePlatform`, `platformKey`, and `ageRatingKey` and migrate remaining internal callsites intentionally.

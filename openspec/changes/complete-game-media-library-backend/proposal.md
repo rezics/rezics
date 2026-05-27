@@ -35,11 +35,6 @@ while supporting game- and media-specific structured facts.
 - Add backend APIs/services for creating, reading, updating, searching, and
   repairing GAME and MEDIA release data using the same layering and contract
   boundaries as existing library content.
-- Keep series as a deliberate follow-up. This proposal documents two candidate
-  paths, but does not implement either:
-  - `Shelf(kindKey = "series")` as the ordered collection substrate; or
-  - a future Series Unit type whose members are organized through
-    `contentStructure`.
 - Frontend scope is limited to contract and data-readiness plus basic route
   integration guidance. Full GAME/MEDIA detail pages should follow the current
   book detail pattern: hero plus multi-tab layout, with the hero structure kept
@@ -63,9 +58,6 @@ while supporting game- and media-specific structured facts.
 - `game-media-library-backend`: Defines the complete GAME/MEDIA library backend
   surface: release-first work-domain usage, metadata ownership, DTO/search/API
   behavior, and frontend integration expectations.
-- `series-library-content-options`: Captures the deferred series design space
-  and the two candidate paths without committing this change to implementation.
-
 ### Modified Capabilities
 
 - `type-extension-game`: Replaces legacy platform, age-rating, and work/release
@@ -120,5 +112,3 @@ while supporting game- and media-specific structured facts.
     `introduce-unit-work-domain` backfill into `UnitWork`.
   - Existing `GamePlatform.platformKey` rows and `Game.ageRatingKey` values are
     migrated to seeded or imported Entities and subject relations.
-  - Series remains intentionally unimplemented; existing shelves continue to
-    work as normal shelves.
