@@ -34,24 +34,28 @@ function statusNumber(status: unknown, fallback = 200): number {
 }
 
 export function elysiaObservability(config: ObservabilityConfig): Elysia {
-  return new Elysia({ name: `observability:${config.service.key}` })
-    .trace(async ({ onHandle, context, set }) => {
-      onHandle(({ begin, onStop }) => {
-        onStop(({ end }) => {
-          const route = context.route === "unknown" ? undefined : context.route;
-          const event = createRequestTimingEvent({
-            config,
-            method: context.request.method,
-            route,
-            path: requestPath(context.request),
-            status: statusNumber(set.status),
-            durationMs: end - begin,
-            requestId: requestId(context.request),
-          });
+  const startedAt = new WeakMap<Request, number>();
 
-          console[event.level](formatRequestTimingEvent(event, config));
-        });
+  return new Elysia({ name: `observability:${config.service.key}` })
+    .onRequest(({ request }) => {
+      startedAt.set(request, performance.now());
+    })
+    .onAfterResponse(({ request, route, set }) => {
+      const begin = startedAt.get(request);
+      const durationMs =
+        typeof begin === "number" ? performance.now() - begin : 0;
+      startedAt.delete(request);
+      const event = createRequestTimingEvent({
+        config,
+        method: request.method,
+        route: route === "unknown" ? undefined : route,
+        path: requestPath(request),
+        status: statusNumber(set.status),
+        durationMs,
+        requestId: requestId(request),
       });
+
+      console[event.level](formatRequestTimingEvent(event, config));
     })
     .onError(({ code, error, request, set }) => {
       const event = createErrorLogEvent({
@@ -65,5 +69,6 @@ export function elysiaObservability(config: ObservabilityConfig): Elysia {
       });
 
       console.error(formatErrorLogEvent(event, config));
-    });
+    })
+    .as("global");
 }
