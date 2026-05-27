@@ -6,22 +6,26 @@ Mature references split these responsibilities. Discourse treats categories and 
 
 ## Target Design
 
-### Governance Boundary
+> **Scope:** this change is the realm community **product**. The realm authorization
+> mechanism — realm policy actions (`realm.rules.update`, `realm.member.role.update`,
+> `realm.queue.decide`, `realm.content.pin/lock`, `realm.report.escalate`), the
+> role/capability model, the moderation queue/decision/escalation engine, content
+> lock/archive/hide state, and audit — is defined in `complete-platform-authorization`
+> and consumed here. Sections below describe how the product surfaces use that engine.
 
-Realm governance is scoped to a realm:
+### Governance Boundary (consumed from the foundation)
+
+Realm governance is scoped to a realm; the foundation enforces it:
 
 ```txt
-Global staff policy
-└─ can override/escalate across realms
-
-Realm owner/admin/moderator policy
-└─ can manage members, rules, tags, queue, and content only inside that realm
-
-Regular member/lurker policy
-└─ can read/post/react depending on realm visibility, rules, and account state
+Global staff policy            └─ can override/escalate across realms (audited)
+Realm owner/admin/moderator    └─ manage members, rules, tags, queue, content in that realm only
+Regular member/lurker          └─ read/post/react per realm visibility, rules, and account state
 ```
 
-The server exposes realm action policies such as `realm.rules.update`, `realm.member.role.update`, `realm.queue.decide`, `realm.content.pin`, `realm.content.lock`, and `realm.report.escalate`.
+Realm capability subsets (e.g., queue-only vs. tag-only moderators) and the role
+hierarchy/last-owner invariants come from the foundation's `capability-grants` and
+`realm-governance-policy`. This change does not redefine them.
 
 ### Realm Management Console
 
@@ -37,16 +41,20 @@ The server exposes realm action policies such as `realm.rules.update`, `realm.me
 
 This is not `package/admin`. Operators may still see realm diagnostics in `package/admin`, but community moderation lives in the public app product context.
 
-### Moderation Workflow
+### Moderation Workflow (engine in the foundation; UI here)
 
-Realm reports create realm moderation items and optionally site-wide moderation cases:
+The realm report → queue → decision → escalation engine and the realm decision set
+(hide-from-realm, remove-from-feed, lock, archive, warn, mute-in-realm, remove/ban-from-realm,
+reject, duplicate, escalate) live in the foundation's `realm-moderation-workflow`, and
+per-node realm tombstones use its `content-moderation-overlay`. Site-wide account actions
+are governed by the foundation's `account-safety-enforcement`. This change provides the
+moderator-facing **Moderation tab** and console surfaces that drive those APIs.
 
 ```txt
-report -> realm queue item -> mod decision
-                         \-> escalate -> site moderation case
+report -> realm queue item -> mod decision           (foundation)
+                         \-> escalate -> site case    (foundation)
+   ▲ surfaced by the realm Moderation tab / console   (this change)
 ```
-
-Realm decisions include hide from realm, remove from realm feed, lock thread, archive thread, warn member, mute member in realm, remove member, ban member from realm, reject report, duplicate, or escalate. Site-wide account actions remain governed by `complete-site-governance-permissions`.
 
 ### Community Lifecycle
 
