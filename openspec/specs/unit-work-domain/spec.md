@@ -225,13 +225,15 @@ references, attribution, or history.
 
 For active work domains, merge SHALL run as a durable async operation with
 dry-run preview, item-level progress, resumability, and enough before-state to
-support revert.
+support revert. The start request SHALL create or update an operation and
+enqueue execution; it SHALL NOT synchronously move every membership in the
+request transaction.
 
 #### Scenario: Merge moves release membership to target
 
 - **GIVEN** releases `release-a` and `release-b` belong to source work
   `work-old`
-- **WHEN** an admin merges `work-old` into target work `work-new`
+- **WHEN** an admin merge operation from `work-old` to `work-new` completes
 - **THEN** canonical membership for `release-a` and `release-b` SHALL resolve to
   `work-new`
 - **AND** source work `work-old` SHALL remain in the database
@@ -253,17 +255,31 @@ support revert.
 - **WHEN** an admin starts a merge into `work-new`
 - **THEN** the request SHALL create or update a durable merge operation and
   enqueue the required migration/repair jobs
-- **AND** the request SHALL NOT synchronously rewrite every affected projection
-  before returning
+- **AND** the request SHALL NOT synchronously rewrite every affected membership
+  or projection before returning
+- **AND** operation status SHALL reflect queued/running/completed/failed
+  execution states
+
+#### Scenario: Merge execution is resumable
+
+- **GIVEN** a merge operation has processed some membership moves
+- **WHEN** the worker is interrupted
+- **THEN** the persisted item-level progress SHALL allow the next worker run to
+  resume without repeating completed moves unsafely
+- **AND** revert SHALL have enough before-state to restore completed moves
 
 ### Requirement: Work Metadata Copy Is Optional And Independent
 
-The system SHALL support optional metadata copy as an explicit operation
-independent from canonical work merge. Admins MAY copy missing metadata from a
-source work to a target work. In v1, metadata copy SHALL support work tags and
-aliases. The operation SHALL only create target rows that do not already exist,
-SHALL leave source rows unchanged, and SHALL support dry-run preview and revert
-for rows it creates.
+Work metadata copy SHALL be an explicit operation independent from canonical
+work merge. Admins MAY copy missing metadata from a source work to a target work
+without moving canonical membership, and MAY run canonical membership merge
+without copying metadata. In v1, metadata copy SHALL support work tags and
+aliases.
+
+Metadata copy SHALL create only rows missing from the target, SHALL preserve
+source rows, SHALL support dry-run preview, and SHALL be revertible for rows it
+created. For active merge operations, requested metadata copy SHALL run through
+the same durable async operation machinery as membership moves.
 
 #### Scenario: Copy missing tags only
 
@@ -280,3 +296,11 @@ for rows it creates.
 - **WHEN** an admin later chooses to copy missing aliases
 - **THEN** the alias copy operation SHALL be allowed without re-running
   canonical membership migration
+
+#### Scenario: Metadata copy runs in queued operation
+
+- **GIVEN** an admin starts merge with `copyMissingTags` or
+  `copyMissingAliases`
+- **WHEN** the operation executes
+- **THEN** metadata copy SHALL be processed through durable operation progress
+- **AND** created tag or alias rows SHALL be recorded for revert
