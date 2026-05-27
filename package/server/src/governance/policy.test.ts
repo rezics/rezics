@@ -6,6 +6,7 @@ describe("governance policy", () => {
     expect(
       decide({
         actorUserId: "staff-1",
+        permission: { role: "ADMIN" },
         action: "account.ban",
         capabilities: [
           { capability: "account.ban", scope: { kind: "global" } },
@@ -18,10 +19,35 @@ describe("governance policy", () => {
     expect(
       decide({
         actorUserId: "staff-1",
+        permission: { role: "ADMIN" },
         action: "account.ban",
         capabilities: [],
       }),
     ).toMatchObject({ allowed: false, code: "MISSING_CAPABILITY" });
+  });
+
+  test("denies staff-plane actions without a staff role tier", () => {
+    expect(
+      decide({
+        actorUserId: "user-1",
+        permission: { role: "USER" },
+        action: "account.ban",
+        capabilities: [
+          { capability: "account.ban", scope: { kind: "global" } },
+        ],
+      }),
+    ).toMatchObject({ allowed: false, code: "INSUFFICIENT_ROLE" });
+  });
+
+  test("root implicitly holds all staff capabilities", () => {
+    expect(
+      decide({
+        actorUserId: "root-1",
+        permission: { role: "ROOT" },
+        action: "account.ban",
+        capabilities: [],
+      }),
+    ).toMatchObject({ allowed: true, code: "ALLOWED" });
   });
 
   test("denies content creation under active silence enforcement", () => {

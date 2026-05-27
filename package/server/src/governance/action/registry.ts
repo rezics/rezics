@@ -18,6 +18,7 @@ export type GovernanceActionDefinition = {
   family: GovernanceActionFamily;
   requiredCapability?: Capability;
   realmScoped?: boolean;
+  staffOnly?: boolean;
 };
 
 export const governanceActionDefinitions = [

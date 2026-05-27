@@ -15,30 +15,36 @@ export const accountActionDefinitions = [
     action: accountPolicyActions.warn,
     requiredCapability: "account.warn",
     family: "account",
+    staffOnly: true,
   },
   {
     action: accountPolicyActions.silence,
     requiredCapability: "account.silence",
     family: "account",
+    staffOnly: true,
   },
   {
     action: accountPolicyActions.suspend,
     requiredCapability: "account.suspend",
     family: "account",
+    staffOnly: true,
   },
   {
     action: accountPolicyActions.ban,
     requiredCapability: "account.ban",
     family: "account",
+    staffOnly: true,
   },
   {
     action: accountPolicyActions.unblock,
     requiredCapability: "account.ban",
     family: "account",
+    staffOnly: true,
   },
   {
     action: accountPolicyActions.rateLimit,
     requiredCapability: "account.rate_limit",
     family: "account",
+    staffOnly: true,
   },
 ] as const satisfies readonly GovernanceActionDefinition[];

@@ -40,6 +40,16 @@ function capabilityMatches(input: PolicyInput, required: Capability) {
 }
 
 export function decide(input: PolicyInput): PolicyDecision {
+  const definition = governanceActionDefinitionByAction.get(input.action);
+
+  if (
+    definition?.staffOnly &&
+    input.permission?.role !== "ADMIN" &&
+    input.permission?.role !== "ROOT"
+  ) {
+    return decision(false, "INSUFFICIENT_ROLE", "staff role is required");
+  }
+
   if (input.activeEnforcement?.activeKinds.includes("ban")) {
     return decision(false, "BLOCKED_ACCOUNT", "active ban enforcement");
   }
@@ -55,7 +65,6 @@ export function decide(input: PolicyInput): PolicyDecision {
     return decision(false, "ENFORCEMENT_ACTIVE", "active content enforcement");
   }
 
-  const definition = governanceActionDefinitionByAction.get(input.action);
   if (
     definition?.realmScoped &&
     input.target?.realmUnitId &&

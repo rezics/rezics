@@ -10,4 +10,5 @@ export * from "./governance.api";
 export * from "./governance.mapper";
 export * from "./moderation.service";
 export * from "./policy";
+export * from "./route-policy.service";
 export * from "./types";

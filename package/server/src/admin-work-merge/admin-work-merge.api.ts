@@ -9,16 +9,34 @@ import {
   adminWorkMergeRequestSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro, isAdminRole, verifyAdminFromDb } from "@/middleware";
+import { governanceRoutePolicyService, sitePolicyActions } from "@/governance";
+import { authMacro } from "@/middleware";
 import { mapAdminWorkMergeOperation } from "./admin-work-merge.mapper";
 import { adminWorkMergeService } from "./admin-work-merge.service";
 
-async function assertAdmin(identity: any, status: any) {
-  if (!isAdminRole(identity)) {
-    return status(403, "Forbidden: Admin role required");
+async function assertRepairPolicy(input: {
+  identity: any;
+  status: any;
+  sourceWorkUnitId?: string;
+  targetWorkUnitId?: string;
+  operationId?: string;
+}) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: sitePolicyActions.repairRun,
+    target: {
+      kind: input.operationId ? "work-merge-operation" : "work-merge",
+      id: input.operationId
+        ? input.operationId
+        : `${input.sourceWorkUnitId}:${input.targetWorkUnitId}`,
+    },
+  });
+  if (!decision.allowed) {
+    return input.status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
   }
-  const isAdmin = await verifyAdminFromDb(identity.userId);
-  if (!isAdmin) return status(403, "Forbidden: Admin role required");
 }
 
 export const adminWorkMergeApi = new Elysia({ prefix: "/admin/work-merge" })
@@ -30,7 +48,12 @@ export const adminWorkMergeApi = new Elysia({ prefix: "/admin/work-merge" })
       identity,
       status,
     }): Promise<AdminWorkMergePreview | string> => {
-      const denied = await assertAdmin(identity, status);
+      const denied = await assertRepairPolicy({
+        identity,
+        status,
+        sourceWorkUnitId: body.sourceWorkUnitId,
+        targetWorkUnitId: body.targetWorkUnitId,
+      });
       if (denied) return denied;
       return adminWorkMergeService.preview(body);
     },
@@ -54,7 +77,12 @@ export const adminWorkMergeApi = new Elysia({ prefix: "/admin/work-merge" })
       identity,
       status,
     }): Promise<AdminWorkMergeOperation | string> => {
-      const denied = await assertAdmin(identity, status);
+      const denied = await assertRepairPolicy({
+        identity,
+        status,
+        sourceWorkUnitId: body.sourceWorkUnitId,
+        targetWorkUnitId: body.targetWorkUnitId,
+      });
       if (denied) return denied;
       const row = await adminWorkMergeService.start(body, identity.userId);
       return mapAdminWorkMergeOperation(row);
@@ -79,7 +107,11 @@ export const adminWorkMergeApi = new Elysia({ prefix: "/admin/work-merge" })
       identity,
       status,
     }): Promise<AdminWorkMergeOperation | string> => {
-      const denied = await assertAdmin(identity, status);
+      const denied = await assertRepairPolicy({
+        identity,
+        status,
+        operationId: params.operationId,
+      });
       if (denied) return denied;
       const row = await adminWorkMergeService.get(params.operationId);
       return mapAdminWorkMergeOperation(row);
@@ -104,7 +136,11 @@ export const adminWorkMergeApi = new Elysia({ prefix: "/admin/work-merge" })
       identity,
       status,
     }): Promise<AdminWorkMergeOperation | string> => {
-      const denied = await assertAdmin(identity, status);
+      const denied = await assertRepairPolicy({
+        identity,
+        status,
+        operationId: params.operationId,
+      });
       if (denied) return denied;
       const row = await adminWorkMergeService.revert(
         params.operationId,

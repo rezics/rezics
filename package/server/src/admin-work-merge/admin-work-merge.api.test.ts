@@ -1,13 +1,21 @@
 import { describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "../test/prisma-client-mock";
 
 let currentIdentity = {
   sub: "user-1",
   userId: "user-1",
   permission: { role: "USER" },
 };
-let dbAdmin = false;
+let policyAllowed = false;
+const decideForIdentityMock = mock(async () => ({
+  allowed: policyAllowed,
+  code: policyAllowed ? "ALLOWED" : "MISSING_CAPABILITY",
+  safeMessage: policyAllowed ? "Allowed" : "Denied by policy",
+}));
 
 installPrismaClientMock();
 
@@ -32,14 +40,39 @@ mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
     resolve: () => ({ identity: currentIdentity }),
   }),
-  isAdminRole: (identity: { permission?: { role?: string } } | null) =>
-    identity?.permission?.role === "ADMIN" ||
-    identity?.permission?.role === "ROOT",
-  verifyAdminFromDb: async () => dbAdmin,
+}));
+
+mock.module("@/governance", () => ({
+  governanceRoutePolicyService: {
+    decideForIdentity: decideForIdentityMock,
+  },
+  sitePolicyActions: {
+    repairRun: "operation.repair.run",
+  },
+}));
+
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: { enqueue: mock(async () => ({ status: "created" })) },
+}));
+
+mock.module("@/utils/errors", () => ({
+  AppError: class AppError extends Error {
+    statusCode: number;
+    code?: string;
+
+    constructor(message: string, statusCode = 400, code?: string) {
+      super(message);
+      this.statusCode = statusCode;
+      this.code = code;
+    }
+  },
 }));
 
 describe("adminWorkMergeApi", () => {
-  test("denies non-admin callers", async () => {
+  test("denies policy-rejected callers", async () => {
+    policyAllowed = false;
+    decideForIdentityMock.mockClear();
+
     const { adminWorkMergeApi } = await import("./admin-work-merge.api");
     const response = await adminWorkMergeApi.handle(
       new Request("http://localhost/admin/work-merge/preview", {
@@ -53,17 +86,27 @@ describe("adminWorkMergeApi", () => {
     );
 
     expect(response.status).toBe(403);
+    expect(await response.text()).toBe("Denied by policy");
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "operation.repair.run",
+      target: {
+        kind: "work-merge",
+        id: "source-work:target-work",
+      },
+    });
     expect(unitFindUnique).not.toHaveBeenCalled();
   });
 
-  test("allows database-confirmed admin callers", async () => {
+  test("allows policy-approved callers", async () => {
     currentIdentity = {
       sub: "admin-1",
       userId: "admin-1",
       permission: { role: "ADMIN" },
     };
-    dbAdmin = true;
+    policyAllowed = true;
     unitFindUnique.mockClear();
+    decideForIdentityMock.mockClear();
 
     const { adminWorkMergeApi } = await import("./admin-work-merge.api");
     const response = await adminWorkMergeApi.handle(
@@ -78,6 +121,7 @@ describe("adminWorkMergeApi", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalled();
     expect(unitFindUnique).toHaveBeenCalled();
   });
 });
