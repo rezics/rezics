@@ -9,7 +9,7 @@
 ## 2. Policy Engine (One Engine, Two Scopes)
 
 - [x] 2.1 Create `package/server/src/governance/` with policy, capability, enforcement, moderation, audit, mapper, API, and types modules following domain conventions.
-- [ ] 2.2 Implement named policy action families for content, realm, account, case, audit, staff console, and operational repair actions, with `Permission` and capability grants as inputs.
+- [x] 2.2 Implement named policy action families for content, realm, account, case, audit, staff console, and operational repair actions, with `Permission` and capability grants as inputs.
 - [ ] 2.3 Implement capability-grant resolution for the staff plane and the realm plane through one mechanism (scope-aware).
 - [ ] 2.4 Migrate high-risk routes from inline checks to policy decisions: post delete/restore, realm member role/capability changes, report decisions, account enforcement, role changes, repair actions.
 - [ ] 2.5 Add policy tests by action family for allow / deny / blocked-account / missing-resource / cross-realm / capability-scope cases.

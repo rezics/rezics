@@ -4,29 +4,7 @@ import type {
   PolicyDecision,
   PolicyInput,
 } from "@rezics/contract";
-
-const actionCapabilityMap: Partial<Record<PolicyInput["action"], Capability>> =
-  {
-    "account.warn": "account.warn",
-    "account.silence": "account.silence",
-    "account.suspend": "account.suspend",
-    "account.ban": "account.ban",
-    "account.rate_limit": "account.rate_limit",
-    "case.triage": "moderation.case.triage",
-    "case.assign": "moderation.case.assign",
-    "case.decide": "moderation.case.decide",
-    "case.escalate": "moderation.case.escalate",
-    "case.reverse": "moderation.case.reverse",
-    "queue.site.decide": "queue.site.decide",
-    "queue.realm.decide": "queue.realm.decide",
-    "content.delete": "content.takedown",
-    "content.takedown": "content.takedown",
-    "content.lock": "content.lock",
-    "content.archive": "content.archive",
-    "content.restore": "content.restore",
-    "tag.curate": "tag.curate",
-    "audit.read": "audit.read",
-  };
+import { governanceActionDefinitionByAction } from "./action/registry";
 
 function decision(
   allowed: boolean,
@@ -45,6 +23,8 @@ function decision(
 }
 
 function capabilityMatches(input: PolicyInput, required: Capability) {
+  if (input.permission?.role === "ROOT") return true;
+
   const allCapabilities = [
     ...input.capabilities,
     ...(input.realmMembership?.capabilities ?? []),
@@ -75,9 +55,25 @@ export function decide(input: PolicyInput): PolicyDecision {
     return decision(false, "ENFORCEMENT_ACTIVE", "active content enforcement");
   }
 
-  const required = actionCapabilityMap[input.action];
-  if (required && !capabilityMatches(input, required)) {
-    return decision(false, "MISSING_CAPABILITY", `missing ${required}`);
+  const definition = governanceActionDefinitionByAction.get(input.action);
+  if (
+    definition?.realmScoped &&
+    input.target?.realmUnitId &&
+    input.realmMembership?.realmUnitId &&
+    input.target.realmUnitId !== input.realmMembership.realmUnitId
+  ) {
+    return decision(false, "CROSS_REALM_DENIED", "realm scope mismatch");
+  }
+
+  if (
+    definition?.requiredCapability &&
+    !capabilityMatches(input, definition.requiredCapability)
+  ) {
+    return decision(
+      false,
+      "MISSING_CAPABILITY",
+      `missing ${definition.requiredCapability}`,
+    );
   }
 
   if (

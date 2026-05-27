@@ -1,6 +1,7 @@
 export * from "./action/account";
 export * from "./action/content";
 export * from "./action/realm";
+export * from "./action/registry";
 export * from "./action/site";
 export * from "./audit.service";
 export * from "./capability.service";
