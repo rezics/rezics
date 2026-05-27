@@ -7,6 +7,7 @@ import {
 import { useEffect } from "react";
 import { collectionApi, shelfApi } from "./shelf.api";
 import {
+  type ShelfContainmentFilters,
   collectionKeys,
   normalizeCollectionIds,
   shelfKeys,
@@ -19,6 +20,29 @@ export const shelfListQuery = (filters?: ShelfFilters) =>
   queryOptions({
     queryKey: shelfKeys.list(filters),
     queryFn: () => shelfApi.list(filters),
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const shelvesContainingUnitQuery = (
+  unitId: string,
+  filters?: ShelfContainmentFilters,
+) =>
+  queryOptions({
+    queryKey: shelfKeys.containingUnit(unitId, filters),
+    queryFn: () => shelfApi.list({ ...filters, containsUnitId: unitId }),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const shelvesContainingWorkQuery = (
+  workUnitId: string,
+  filters?: ShelfContainmentFilters,
+) =>
+  queryOptions({
+    queryKey: shelfKeys.containingWork(workUnitId, filters),
+    queryFn: () =>
+      shelfApi.list({ ...filters, containsWorkUnitId: workUnitId }),
+    enabled: !!workUnitId,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -133,6 +157,8 @@ export function useCollectionStatusHydration(
 
 export const shelfQueries = {
   list: shelfListQuery,
+  containingUnit: shelvesContainingUnitQuery,
+  containingWork: shelvesContainingWorkQuery,
   detail: shelfDetailQuery,
   byUser: shelvesByUserQuery,
   mine: userShelvesQuery,

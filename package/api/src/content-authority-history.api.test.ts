@@ -8,6 +8,7 @@ import { historyKeys } from "./history/history.keys";
 import { postApi } from "./post/post.api";
 import { postKeys } from "./post/post.keys";
 import { ApiError, getLockedFieldError } from "./react-query/errors";
+import { shelfKeys } from "./shelf/shelf.keys";
 
 const fetchMock = mock();
 
@@ -227,6 +228,20 @@ describe("content authority and history API clients", () => {
     expect(postKeys.byWork("work-1", { limit: 5 })).toEqual([
       "posts",
       "work",
+      "work-1",
+      { limit: 5 },
+    ]);
+    expect(shelfKeys.containingUnit("release-1", { limit: 5 })).toEqual([
+      "shelves",
+      "list",
+      "containsUnit",
+      "release-1",
+      { limit: 5 },
+    ]);
+    expect(shelfKeys.containingWork("work-1", { limit: 5 })).toEqual([
+      "shelves",
+      "list",
+      "containsWorkUnit",
       "work-1",
       { limit: 5 },
     ]);
