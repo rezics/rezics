@@ -108,6 +108,13 @@ export const capabilityGrantDTOSchema = t.Object({
 
 export type CapabilityGrantDTO = (typeof capabilityGrantDTOSchema)["static"];
 
+export const grantCapabilitySchema = t.Object({
+  capability: capabilitySchema,
+  expiresAt: t.Optional(t.Nullable(t.String())),
+});
+
+export type GrantCapabilityInput = (typeof grantCapabilitySchema)["static"];
+
 export const moderationCaseStates = [
   "new",
   "triaged",

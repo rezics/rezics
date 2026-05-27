@@ -1,8 +1,10 @@
 import {
   activeAccountEnforcementSummarySchema,
   accountEnforcementDTOSchema,
+  capabilityGrantDTOSchema,
   capabilityHintSchema,
   createAccountEnforcementSchema,
+  grantCapabilitySchema,
   moderationCaseDTOSchema,
   policyDecisionSchema,
   policyInputSchema,
@@ -13,6 +15,7 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole, verifyAdminFromDb } from "@/middleware";
 import { accountPolicyActions } from "./action/account";
+import { realmPolicyActions } from "./action/realm";
 import { sitePolicyActions } from "./action/site";
 import { governanceAuditService } from "./audit.service";
 import { governanceCapabilityService } from "./capability.service";
@@ -99,6 +102,100 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       detail: {
         summary: "Resolve current-user governance capability hints",
         tags: ["Governance"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/members/:userId/capabilities",
+    async ({ params, body, identity, status }) => {
+      const realmMembership =
+        await governanceCapabilityService.realmMembershipForPolicy(
+          params.realmUnitId,
+          identity.userId,
+        );
+      const decision = await governanceRoutePolicyService.decideForIdentity({
+        identity,
+        action: realmPolicyActions.memberCapabilityChange,
+        realmMembership,
+        target: {
+          kind: "realm-member-capability",
+          id: params.userId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (!decision.allowed) {
+        return status(
+          403,
+          decision.safeMessage ?? "Forbidden: policy denied this action",
+        );
+      }
+      return governanceCapabilityService.grantRealmCapability({
+        realmUnitId: params.realmUnitId,
+        userId: params.userId,
+        capability: body.capability,
+        ...(body.expiresAt !== undefined ? { expiresAt: body.expiresAt } : {}),
+        grantedById: identity.userId,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), userId: t.String() }),
+      body: grantCapabilitySchema,
+      response: {
+        200: capabilityGrantDTOSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Grant a realm member capability",
+        tags: ["Governance", "Realms"],
+      },
+    },
+  )
+  .delete(
+    "/realms/:realmUnitId/members/:userId/capabilities/:capability",
+    async ({ params, identity, status }) => {
+      const realmMembership =
+        await governanceCapabilityService.realmMembershipForPolicy(
+          params.realmUnitId,
+          identity.userId,
+        );
+      const decision = await governanceRoutePolicyService.decideForIdentity({
+        identity,
+        action: realmPolicyActions.memberCapabilityChange,
+        realmMembership,
+        target: {
+          kind: "realm-member-capability",
+          id: params.userId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (!decision.allowed) {
+        return status(
+          403,
+          decision.safeMessage ?? "Forbidden: policy denied this action",
+        );
+      }
+      return governanceCapabilityService.revokeRealmCapability({
+        realmUnitId: params.realmUnitId,
+        userId: params.userId,
+        capability: params.capability as never,
+        revokedById: identity.userId,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({
+        realmUnitId: t.String(),
+        userId: t.String(),
+        capability: t.String(),
+      }),
+      response: {
+        200: t.Array(capabilityGrantDTOSchema),
+        403: t.String(),
+      },
+      detail: {
+        summary: "Revoke a realm member capability",
+        tags: ["Governance", "Realms"],
       },
     },
   )

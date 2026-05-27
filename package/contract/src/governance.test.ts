@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import {
   accountEnforcementDTOSchema,
   createAccountEnforcementSchema,
+  grantCapabilitySchema,
   moderationCaseDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
@@ -182,5 +183,20 @@ describe("governance contract registry", () => {
         metadata: { caseId: "case-1" },
       }),
     ).toBe(true);
+  });
+
+  test("capability grant command contract validates", () => {
+    expect(
+      Value.Check(grantCapabilitySchema, {
+        capability: "queue.realm.decide",
+        expiresAt: "2026-05-29T00:00:00.000Z",
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(grantCapabilitySchema, {
+        capability: "queue.realm.destroy",
+      }),
+    ).toBe(false);
   });
 });
