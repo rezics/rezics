@@ -2,14 +2,20 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   accountEnforcementDTOSchema,
+  appealModerationCaseSchema,
+  assignModerationCaseSchema,
   contentModerationDecisionSchema,
   contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
+  createModerationCaseFromFeedbackSchema,
+  decideModerationCaseSchema,
+  duplicateModerationCaseSchema,
   grantCapabilitySchema,
   moderationCaseDTOSchema,
   realmContentModerationDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
+  triageModerationCaseSchema,
   unblockAccountEnforcementSchema,
 } from "./governance";
 import {
@@ -278,6 +284,44 @@ describe("governance contract registry", () => {
       Value.Check(unblockAccountEnforcementSchema, {
         reason: "appeal approved",
         metadata: { caseId: "case-1" },
+      }),
+    ).toBe(true);
+  });
+
+  test("moderation case command contracts validate", () => {
+    expect(
+      Value.Check(createModerationCaseFromFeedbackSchema, {
+        severity: "medium",
+        metadata: { source: "report" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(duplicateModerationCaseSchema, {
+        duplicateOfCaseId: "case-parent",
+        reason: "same target and facts",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(assignModerationCaseSchema, {
+        assignedToUserId: "staff-2",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(triageModerationCaseSchema, {
+        severity: "high",
+        assignedToUserId: null,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(decideModerationCaseSchema, {
+        state: "actioned",
+        reason: "policy violation confirmed",
+        decision: { allowed: true, code: "ALLOWED" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(appealModerationCaseSchema, {
+        reason: "appeal received",
       }),
     ).toBe(true);
   });

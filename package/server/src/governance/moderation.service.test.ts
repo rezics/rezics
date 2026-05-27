@@ -71,8 +71,87 @@ const realmQueueCreate = mock(async ({ data }: any) => ({
   updatedAt: now,
 }));
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
+const moderationCaseRow = {
+  id: "case-1",
+  state: "NEW",
+  severity: null,
+  reporterUserId: "reporter-1",
+  subjectUserId: null,
+  targetKind: "unit",
+  targetId: "post-1",
+  targetUnitId: "post-1",
+  realmUnitId: null,
+  sourceFeedbackId: "feedback-1",
+  assignedToUserId: null,
+  duplicateOfCaseId: null,
+  reason: "reported",
+  safeSummary: null,
+  metadata: null,
+  createdAt: now,
+  updatedAt: now,
+};
+const moderationCaseFindFirst = mock(async (): Promise<any> => null);
+const moderationCaseFindMany = mock(async () => [moderationCaseRow]);
+const moderationCaseFindUniqueOrThrow = mock(async () => moderationCaseRow);
+const moderationCaseCreate = mock(async ({ data }: any) => ({
+  ...moderationCaseRow,
+  ...data,
+  id: "case-1",
+  createdAt: now,
+  updatedAt: now,
+}));
+const moderationCaseUpdate = mock(async ({ data }: any) => ({
+  ...moderationCaseRow,
+  ...data,
+  updatedAt: now,
+}));
+const moderationCaseEventCreate = mock(async ({ data }: any) => ({
+  id: "event-1",
+  ...data,
+  createdAt: now,
+}));
+const moderationCaseEventFindMany = mock(async () => [
+  {
+    id: "event-1",
+    caseId: "case-1",
+    actorUserId: "staff-1",
+    eventType: "case.created_from_report",
+    decision: null,
+    decisionCode: null,
+    reason: "reported",
+    before: null,
+    after: null,
+    reversible: false,
+    createdAt: now,
+  },
+]);
+const feedbackFindUniqueOrThrow = mock(async () => ({
+  id: "feedback-1",
+  userId: "reporter-1",
+  unitId: "post-1",
+  url: null,
+  content: "reported",
+  type: "REPORT",
+  resolved: false,
+  resolvedAt: null,
+  createdAt: now,
+  updatedAt: now,
+}));
+const transactionMock = mock(async (fn: any) =>
+  fn({
+    moderationCase: {
+      create: moderationCaseCreate,
+      findUniqueOrThrow: moderationCaseFindUniqueOrThrow,
+      update: moderationCaseUpdate,
+    },
+    moderationCaseEvent: {
+      create: moderationCaseEventCreate,
+    },
+  }),
+);
 
 Object.assign(prismaMock, {
+  $transaction: transactionMock,
   contentModerationState: {
     findMany: contentModerationFindMany,
     findUnique: contentModerationFindUnique,
@@ -90,6 +169,17 @@ Object.assign(prismaMock, {
   },
   realmModerationQueueItem: {
     create: realmQueueCreate,
+  },
+  moderationCase: {
+    findFirst: moderationCaseFindFirst,
+    findMany: moderationCaseFindMany,
+    findUniqueOrThrow: moderationCaseFindUniqueOrThrow,
+  },
+  moderationCaseEvent: {
+    findMany: moderationCaseEventFindMany,
+  },
+  feedback: {
+    findUniqueOrThrow: feedbackFindUniqueOrThrow,
   },
 });
 
@@ -111,6 +201,15 @@ describe("GovernanceModerationService content moderation state", () => {
     unitRealmDelete.mockClear();
     realmQueueCreate.mockClear();
     enqueueMock.mockClear();
+    moderationCaseFindFirst.mockClear();
+    moderationCaseFindMany.mockClear();
+    moderationCaseFindUniqueOrThrow.mockClear();
+    moderationCaseCreate.mockClear();
+    moderationCaseUpdate.mockClear();
+    moderationCaseEventCreate.mockClear();
+    moderationCaseEventFindMany.mockClear();
+    feedbackFindUniqueOrThrow.mockClear();
+    transactionMock.mockClear();
   });
 
   test("upserts global content moderation state", async () => {
@@ -343,6 +442,236 @@ describe("GovernanceModerationService content moderation state", () => {
       id: "queue-1",
       realmUnitId: "realm-1",
       target: { kind: "content-owner-delegation", id: "reply-1" },
+    });
+  });
+
+  test("lists moderation case events", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.listCaseEvents("case-1", {
+      offset: 5,
+      limit: 10,
+    });
+
+    expect(moderationCaseEventFindMany).toHaveBeenCalledWith({
+      where: { caseId: "case-1" },
+      orderBy: { createdAt: "asc" },
+      skip: 5,
+      take: 10,
+    });
+    expect(result).toEqual([
+      {
+        id: "event-1",
+        caseId: "case-1",
+        actorUserId: "staff-1",
+        eventType: "case.created_from_report",
+        decision: null,
+        reason: "reported",
+        before: undefined,
+        after: undefined,
+        reversible: false,
+        createdAt: "2026-05-28T00:00:00.000Z",
+      },
+    ]);
+  });
+
+  test("creates moderation cases from report feedback and records an event", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.createCaseFromFeedback({
+      feedbackId: "feedback-1",
+      actorUserId: "staff-1",
+      severity: "high",
+      reason: "policy review needed",
+      safeSummary: "Reported post",
+      metadata: { source: "report" },
+    });
+
+    expect(moderationCaseFindFirst).toHaveBeenCalledWith({
+      where: { sourceFeedbackId: "feedback-1" },
+      orderBy: { createdAt: "asc" },
+    });
+    expect(feedbackFindUniqueOrThrow).toHaveBeenCalledWith({
+      where: { id: "feedback-1" },
+    });
+    expect(moderationCaseCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        state: "NEW",
+        severity: "high",
+        reporterUserId: "reporter-1",
+        targetKind: "unit",
+        targetId: "post-1",
+        targetUnitId: "post-1",
+        sourceFeedbackId: "feedback-1",
+        reason: "policy review needed",
+        safeSummary: "Reported post",
+        metadata: { source: "report", feedbackType: "REPORT" },
+      }),
+    });
+    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        caseId: "case-1",
+        actorUserId: "staff-1",
+        eventType: "case.created_from_report",
+        reason: "policy review needed",
+        after: { sourceFeedbackId: "feedback-1", targetUnitId: "post-1" },
+      }),
+    });
+    expect(result).toMatchObject({
+      id: "case-1",
+      state: "new",
+      severity: "high",
+      reporterUserId: "reporter-1",
+      target: { kind: "unit", id: "post-1" },
+    });
+  });
+
+  test("returns the existing moderation case for duplicate report feedback", async () => {
+    moderationCaseFindFirst.mockResolvedValueOnce({
+      ...moderationCaseRow,
+      id: "case-existing",
+    });
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.createCaseFromFeedback({
+      feedbackId: "feedback-1",
+      actorUserId: "staff-1",
+    });
+
+    expect(result.id).toBe("case-existing");
+    expect(feedbackFindUniqueOrThrow).not.toHaveBeenCalled();
+    expect(moderationCaseCreate).not.toHaveBeenCalled();
+    expect(moderationCaseEventCreate).not.toHaveBeenCalled();
+  });
+
+  test("links duplicate cases and records before and after state", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.duplicateCase({
+      caseId: "case-1",
+      duplicateOfCaseId: "case-root",
+      actorUserId: "staff-1",
+      reason: "same target",
+    });
+
+    expect(moderationCaseUpdate).toHaveBeenCalledWith({
+      where: { id: "case-1" },
+      data: {
+        state: "DUPLICATE",
+        duplicateOfCaseId: "case-root",
+        reason: "same target",
+      },
+    });
+    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        caseId: "case-1",
+        actorUserId: "staff-1",
+        eventType: "case.duplicate_linked",
+        reason: "same target",
+        before: { state: "NEW", duplicateOfCaseId: null },
+        after: { state: "DUPLICATE", duplicateOfCaseId: "case-root" },
+      }),
+    });
+    expect(result).toMatchObject({
+      id: "case-1",
+      state: "duplicate",
+      duplicateOfCaseId: "case-root",
+    });
+  });
+
+  test("assigns and triages moderation cases", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await governanceModerationService.assignCase({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      assignedToUserId: "staff-2",
+      reason: "handoff",
+    });
+    await governanceModerationService.triageCase({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      severity: "medium",
+      assignedToUserId: null,
+      reason: "needs review",
+      safeSummary: "Public summary",
+    });
+
+    expect(moderationCaseUpdate.mock.calls[0]?.[0]).toEqual({
+      where: { id: "case-1" },
+      data: { state: "ASSIGNED", assignedToUserId: "staff-2" },
+    });
+    expect(moderationCaseUpdate.mock.calls[1]?.[0]).toEqual({
+      where: { id: "case-1" },
+      data: {
+        state: "TRIAGED",
+        severity: "medium",
+        assignedToUserId: null,
+        reason: "needs review",
+        safeSummary: "Public summary",
+      },
+    });
+    expect(
+      moderationCaseEventCreate.mock.calls.map(
+        (call) => call[0].data.eventType,
+      ),
+    ).toEqual(["case.assigned", "case.triaged"]);
+  });
+
+  test("records decisions and appeal requests as case events", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await governanceModerationService.decideCase({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      state: "actioned",
+      reason: "violation confirmed",
+      decision: { allowed: true, code: "ALLOWED" },
+    });
+    await governanceModerationService.appealCase({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      reason: "appeal received",
+    });
+
+    expect(moderationCaseUpdate.mock.calls[0]?.[0]).toEqual({
+      where: { id: "case-1" },
+      data: { state: "ACTIONED", reason: "violation confirmed" },
+    });
+    expect(moderationCaseUpdate.mock.calls[1]?.[0]).toEqual({
+      where: { id: "case-1" },
+      data: { state: "NEW" },
+    });
+    expect(moderationCaseEventCreate.mock.calls[0]?.[0]).toEqual({
+      data: expect.objectContaining({
+        eventType: "case.decided",
+        reason: "violation confirmed",
+        decision: { allowed: true, code: "ALLOWED" },
+        decisionCode: "ALLOWED",
+        reversible: true,
+        before: { state: "NEW" },
+        after: { state: "ACTIONED" },
+      }),
+    });
+    expect(moderationCaseEventCreate.mock.calls[1]?.[0]).toEqual({
+      data: expect.objectContaining({
+        eventType: "case.appeal_requested",
+        reason: "appeal received",
+        before: { state: "NEW" },
+        after: { state: "NEW" },
+      }),
     });
   });
 });

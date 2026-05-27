@@ -181,6 +181,80 @@ export const moderationCaseEventDTOSchema = t.Object({
 export type ModerationCaseEventDTO =
   (typeof moderationCaseEventDTOSchema)["static"];
 
+export const createModerationCaseFromFeedbackSchema = t.Object(
+  {
+    severity: t.Optional(t.Nullable(t.String())),
+    reason: t.Optional(t.Nullable(t.String())),
+    safeSummary: t.Optional(t.Nullable(t.String())),
+    metadata: t.Optional(auditMetadataSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type CreateModerationCaseFromFeedbackInput =
+  (typeof createModerationCaseFromFeedbackSchema)["static"];
+
+export const duplicateModerationCaseSchema = t.Object(
+  {
+    duplicateOfCaseId: t.String(),
+    reason: t.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export type DuplicateModerationCaseInput =
+  (typeof duplicateModerationCaseSchema)["static"];
+
+export const assignModerationCaseSchema = t.Object(
+  {
+    assignedToUserId: t.Nullable(t.String()),
+    reason: t.Optional(t.Nullable(t.String())),
+  },
+  { additionalProperties: false },
+);
+
+export type AssignModerationCaseInput =
+  (typeof assignModerationCaseSchema)["static"];
+
+export const triageModerationCaseSchema = t.Object(
+  {
+    severity: t.Optional(t.Nullable(t.String())),
+    assignedToUserId: t.Optional(t.Nullable(t.String())),
+    reason: t.Optional(t.Nullable(t.String())),
+    safeSummary: t.Optional(t.Nullable(t.String())),
+  },
+  { additionalProperties: false },
+);
+
+export type TriageModerationCaseInput =
+  (typeof triageModerationCaseSchema)["static"];
+
+export const decideModerationCaseSchema = t.Object(
+  {
+    state: t.Union([
+      t.Literal("actioned"),
+      t.Literal("resolved"),
+      t.Literal("rejected"),
+    ]),
+    reason: t.String({ minLength: 1 }),
+    decision: t.Optional(decisionSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type DecideModerationCaseInput =
+  (typeof decideModerationCaseSchema)["static"];
+
+export const appealModerationCaseSchema = t.Object(
+  {
+    reason: t.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export type AppealModerationCaseInput =
+  (typeof appealModerationCaseSchema)["static"];
+
 export const realmModerationQueueStates = [
   "new",
   "reviewing",

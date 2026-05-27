@@ -110,6 +110,52 @@ const requestOwnerDelegationMock = mock(async () => ({
   createdAt: "2026-05-28T00:00:00.000Z",
   updatedAt: "2026-05-28T00:00:00.000Z",
 }));
+const moderationCaseRow = {
+  id: "case-1",
+  state: "new",
+  severity: "medium",
+  reporterUserId: "reporter-1",
+  subjectUserId: null,
+  target: { kind: "unit", id: "post-1", realmUnitId: null },
+  sourceFeedbackId: "feedback-1",
+  assignedToUserId: null,
+  duplicateOfCaseId: null,
+  reason: "reported",
+  safeSummary: null,
+  createdAt: "2026-05-28T00:00:00.000Z",
+  updatedAt: "2026-05-28T00:00:00.000Z",
+};
+const moderationCaseEventRow = {
+  id: "event-1",
+  caseId: "case-1",
+  actorUserId: "staff-1",
+  eventType: "case.created_from_report",
+  decision: null,
+  reason: "reported",
+  reversible: false,
+  createdAt: "2026-05-28T00:00:00.000Z",
+};
+const listCaseEventsMock = mock(async () => [moderationCaseEventRow]);
+const createCaseFromFeedbackMock = mock(async () => moderationCaseRow);
+const duplicateCaseMock = mock(async () => ({
+  ...moderationCaseRow,
+  state: "duplicate",
+  duplicateOfCaseId: "case-root",
+}));
+const assignCaseMock = mock(async () => ({
+  ...moderationCaseRow,
+  state: "assigned",
+  assignedToUserId: "staff-2",
+}));
+const triageCaseMock = mock(async () => ({
+  ...moderationCaseRow,
+  state: "triaged",
+}));
+const decideCaseMock = mock(async () => ({
+  ...moderationCaseRow,
+  state: "actioned",
+}));
+const appealCaseMock = mock(async () => moderationCaseRow);
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -151,6 +197,13 @@ mock.module("./moderation.service", () => ({
   governanceModerationService: {
     listCases: mock(async () => []),
     getCase: mock(async () => null),
+    listCaseEvents: listCaseEventsMock,
+    createCaseFromFeedback: createCaseFromFeedbackMock,
+    duplicateCase: duplicateCaseMock,
+    assignCase: assignCaseMock,
+    triageCase: triageCaseMock,
+    decideCase: decideCaseMock,
+    appealCase: appealCaseMock,
     listRealmQueue: mock(async () => []),
     tombstoneGlobal: tombstoneGlobalMock,
     restoreGlobal: restoreGlobalMock,
@@ -183,6 +236,13 @@ describe("governanceApi account enforcement", () => {
     restoreInRealmMock.mockClear();
     removeRootFromRealmMock.mockClear();
     requestOwnerDelegationMock.mockClear();
+    listCaseEventsMock.mockClear();
+    createCaseFromFeedbackMock.mockClear();
+    duplicateCaseMock.mockClear();
+    assignCaseMock.mockClear();
+    triageCaseMock.mockClear();
+    decideCaseMock.mockClear();
+    appealCaseMock.mockClear();
   });
 
   test("checks audit policy before reading enforcement summaries", async () => {
@@ -485,5 +545,167 @@ describe("governanceApi account enforcement", () => {
       decidedById: "staff-1",
       reason: "please remove",
     });
+  });
+
+  test("creates moderation cases from report feedback through case triage policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/cases/from-feedback/feedback-1",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            severity: "medium",
+            reason: "reported",
+            metadata: { source: "report" },
+          }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "case.triage",
+      target: { kind: "feedback", id: "feedback-1" },
+    });
+    expect(createCaseFromFeedbackMock).toHaveBeenCalledWith({
+      feedbackId: "feedback-1",
+      actorUserId: "staff-1",
+      severity: "medium",
+      reason: "reported",
+      metadata: { source: "report" },
+    });
+  });
+
+  test("lists moderation case events through case triage policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/cases/case-1/events?limit=10"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "case.triage",
+      target: { kind: "moderation-case", id: "case-1" },
+    });
+    expect(listCaseEventsMock).toHaveBeenCalledWith("case-1", {
+      limit: 10,
+    });
+  });
+
+  test("links duplicate moderation cases through case triage policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/cases/case-1/duplicate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          duplicateOfCaseId: "case-root",
+          reason: "same target",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(duplicateCaseMock).toHaveBeenCalledWith({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      duplicateOfCaseId: "case-root",
+      reason: "same target",
+    });
+  });
+
+  test("assigns moderation cases through case assign policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/cases/case-1/assign", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          assignedToUserId: "staff-2",
+          reason: "handoff",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "case.assign",
+      target: { kind: "moderation-case", id: "case-1" },
+    });
+    expect(assignCaseMock).toHaveBeenCalledWith({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      assignedToUserId: "staff-2",
+      reason: "handoff",
+    });
+  });
+
+  test("triages, decides, and appeals moderation cases through case policies", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    await governanceApi.handle(
+      new Request("http://localhost/governance/cases/case-1/triage", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ severity: "high", reason: "urgent" }),
+      }),
+    );
+    await governanceApi.handle(
+      new Request("http://localhost/governance/cases/case-1/decision", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          state: "actioned",
+          reason: "violation confirmed",
+          decision: { allowed: true, code: "ALLOWED" },
+        }),
+      }),
+    );
+    await governanceApi.handle(
+      new Request("http://localhost/governance/cases/case-1/appeal", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ reason: "appeal received" }),
+      }),
+    );
+
+    expect(triageCaseMock).toHaveBeenCalledWith({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      severity: "high",
+      reason: "urgent",
+    });
+    expect(decideCaseMock).toHaveBeenCalledWith({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      state: "actioned",
+      reason: "violation confirmed",
+      decision: { allowed: true, code: "ALLOWED" },
+    });
+    expect(appealCaseMock).toHaveBeenCalledWith({
+      caseId: "case-1",
+      actorUserId: "staff-1",
+      reason: "appeal received",
+    });
+    const policyActions = (
+      decideForIdentityMock.mock.calls as unknown as Array<[{ action: string }]>
+    ).map(([input]) => input.action);
+    expect(policyActions).toEqual(
+      expect.arrayContaining(["case.triage", "case.decide", "case.reverse"]),
+    );
   });
 });

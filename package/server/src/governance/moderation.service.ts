@@ -1,9 +1,10 @@
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { prisma } from "#/prisma/client";
+import { Prisma, prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "../utils/errors";
 import {
   mapContentModerationStateToDTO,
+  mapModerationCaseEventToDTO,
   mapModerationCaseToDTO,
   mapRealmContentModerationToDTO,
   mapRealmQueueItemToDTO,
@@ -27,8 +28,36 @@ type ModerationDecisionInput = {
   metadata?: Record<string, unknown>;
 };
 
+type CaseEventInput = {
+  caseId: string;
+  actorUserId: string;
+  eventType: string;
+  reason?: string | null;
+  decision?: Record<string, unknown> | null;
+  decisionCode?: string | null;
+  before?: Record<string, unknown> | null;
+  after?: Record<string, unknown> | null;
+  reversible?: boolean;
+};
+
 function toPrismaState(input: ContentModerationStateInput["state"]) {
   return input.toUpperCase() as Uppercase<ContentModerationStateInput["state"]>;
+}
+
+function cleanJsonObject(
+  input: Record<string, unknown>,
+): Prisma.InputJsonObject {
+  return Object.fromEntries(
+    Object.entries(input).filter(([, value]) => value !== undefined),
+  ) as Prisma.InputJsonObject;
+}
+
+function jsonOrUndefined(
+  input: Record<string, unknown> | null | undefined,
+): Prisma.InputJsonValue | typeof Prisma.JsonNull | undefined {
+  if (input === undefined) return undefined;
+  if (input === null) return Prisma.JsonNull;
+  return cleanJsonObject(input);
 }
 
 function contentModerationData(input: ContentModerationStateInput) {
@@ -92,6 +121,268 @@ export class GovernanceModerationService {
   async getCase(caseId: string) {
     const row = await prisma.moderationCase.findUniqueOrThrow({
       where: { id: caseId },
+    });
+    return mapModerationCaseToDTO(row);
+  }
+
+  async listCaseEvents(caseId: string, options: GovernanceListOptions = {}) {
+    const rows = await prisma.moderationCaseEvent.findMany({
+      where: { caseId },
+      orderBy: { createdAt: "asc" },
+      skip: options.offset ?? 0,
+      take: options.limit ?? 50,
+    });
+    return rows.map(mapModerationCaseEventToDTO);
+  }
+
+  private async createCaseEvent(tx: any, input: CaseEventInput) {
+    return tx.moderationCaseEvent.create({
+      data: {
+        caseId: input.caseId,
+        actorUserId: input.actorUserId,
+        eventType: input.eventType,
+        reason: input.reason ?? null,
+        decision: jsonOrUndefined(input.decision),
+        decisionCode: input.decisionCode ?? null,
+        before: jsonOrUndefined(input.before),
+        after: jsonOrUndefined(input.after),
+        reversible: input.reversible ?? false,
+      },
+    });
+  }
+
+  async createCaseFromFeedback(input: {
+    feedbackId: string;
+    actorUserId: string;
+    severity?: string | null;
+    reason?: string | null;
+    safeSummary?: string | null;
+    metadata?: Record<string, unknown>;
+  }) {
+    const existing = await prisma.moderationCase.findFirst({
+      where: { sourceFeedbackId: input.feedbackId },
+      orderBy: { createdAt: "asc" },
+    });
+    if (existing) return mapModerationCaseToDTO(existing);
+
+    const feedback = await prisma.feedback.findUniqueOrThrow({
+      where: { id: input.feedbackId },
+    });
+
+    const row = await prisma.$transaction(async (tx) => {
+      const created = await tx.moderationCase.create({
+        data: {
+          state: "NEW",
+          severity: input.severity ?? null,
+          reporterUserId: feedback.userId,
+          targetKind: feedback.unitId ? "unit" : "feedback",
+          targetId: feedback.unitId ?? feedback.id,
+          targetUnitId: feedback.unitId ?? null,
+          sourceFeedbackId: feedback.id,
+          reason: input.reason ?? feedback.content ?? null,
+          safeSummary: input.safeSummary ?? null,
+          metadata: cleanJsonObject({
+            ...(input.metadata ?? {}),
+            feedbackUrl: feedback.url ?? undefined,
+            feedbackType: feedback.type,
+          }),
+        },
+      });
+      await this.createCaseEvent(tx, {
+        caseId: created.id,
+        actorUserId: input.actorUserId,
+        eventType: "case.created_from_report",
+        reason: input.reason ?? feedback.content ?? null,
+        after: {
+          sourceFeedbackId: feedback.id,
+          targetUnitId: feedback.unitId,
+        },
+      });
+      return created;
+    });
+
+    return mapModerationCaseToDTO(row);
+  }
+
+  async duplicateCase(input: {
+    caseId: string;
+    duplicateOfCaseId: string;
+    actorUserId: string;
+    reason: string;
+  }) {
+    const row = await prisma.$transaction(async (tx) => {
+      const before = await tx.moderationCase.findUniqueOrThrow({
+        where: { id: input.caseId },
+      });
+      const updated = await tx.moderationCase.update({
+        where: { id: input.caseId },
+        data: {
+          state: "DUPLICATE",
+          duplicateOfCaseId: input.duplicateOfCaseId,
+          reason: input.reason,
+        },
+      });
+      await this.createCaseEvent(tx, {
+        caseId: input.caseId,
+        actorUserId: input.actorUserId,
+        eventType: "case.duplicate_linked",
+        reason: input.reason,
+        before: {
+          state: before.state,
+          duplicateOfCaseId: before.duplicateOfCaseId,
+        },
+        after: {
+          state: updated.state,
+          duplicateOfCaseId: updated.duplicateOfCaseId,
+        },
+      });
+      return updated;
+    });
+    return mapModerationCaseToDTO(row);
+  }
+
+  async assignCase(input: {
+    caseId: string;
+    actorUserId: string;
+    assignedToUserId: string | null;
+    reason?: string | null;
+  }) {
+    const row = await prisma.$transaction(async (tx) => {
+      const before = await tx.moderationCase.findUniqueOrThrow({
+        where: { id: input.caseId },
+      });
+      const updated = await tx.moderationCase.update({
+        where: { id: input.caseId },
+        data: {
+          state: input.assignedToUserId ? "ASSIGNED" : before.state,
+          assignedToUserId: input.assignedToUserId,
+        },
+      });
+      await this.createCaseEvent(tx, {
+        caseId: input.caseId,
+        actorUserId: input.actorUserId,
+        eventType: "case.assigned",
+        reason: input.reason ?? null,
+        before: {
+          assignedToUserId: before.assignedToUserId,
+          state: before.state,
+        },
+        after: {
+          assignedToUserId: updated.assignedToUserId,
+          state: updated.state,
+        },
+      });
+      return updated;
+    });
+    return mapModerationCaseToDTO(row);
+  }
+
+  async triageCase(input: {
+    caseId: string;
+    actorUserId: string;
+    severity?: string | null;
+    assignedToUserId?: string | null;
+    reason?: string | null;
+    safeSummary?: string | null;
+  }) {
+    const row = await prisma.$transaction(async (tx) => {
+      const before = await tx.moderationCase.findUniqueOrThrow({
+        where: { id: input.caseId },
+      });
+      const updated = await tx.moderationCase.update({
+        where: { id: input.caseId },
+        data: {
+          state: "TRIAGED",
+          severity: input.severity ?? before.severity,
+          assignedToUserId:
+            input.assignedToUserId === undefined
+              ? before.assignedToUserId
+              : input.assignedToUserId,
+          reason: input.reason ?? before.reason,
+          safeSummary: input.safeSummary ?? before.safeSummary,
+        },
+      });
+      await this.createCaseEvent(tx, {
+        caseId: input.caseId,
+        actorUserId: input.actorUserId,
+        eventType: "case.triaged",
+        reason: input.reason ?? null,
+        before: {
+          state: before.state,
+          severity: before.severity,
+          assignedToUserId: before.assignedToUserId,
+        },
+        after: {
+          state: updated.state,
+          severity: updated.severity,
+          assignedToUserId: updated.assignedToUserId,
+        },
+      });
+      return updated;
+    });
+    return mapModerationCaseToDTO(row);
+  }
+
+  async decideCase(input: {
+    caseId: string;
+    actorUserId: string;
+    state: "actioned" | "resolved" | "rejected";
+    reason: string;
+    decision?: Record<string, unknown>;
+  }) {
+    const nextState = input.state.toUpperCase() as
+      | "ACTIONED"
+      | "RESOLVED"
+      | "REJECTED";
+    const row = await prisma.$transaction(async (tx) => {
+      const before = await tx.moderationCase.findUniqueOrThrow({
+        where: { id: input.caseId },
+      });
+      const updated = await tx.moderationCase.update({
+        where: { id: input.caseId },
+        data: {
+          state: nextState,
+          reason: input.reason,
+        },
+      });
+      await this.createCaseEvent(tx, {
+        caseId: input.caseId,
+        actorUserId: input.actorUserId,
+        eventType: "case.decided",
+        reason: input.reason,
+        decision: input.decision ?? null,
+        decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
+        reversible: nextState === "ACTIONED",
+        before: { state: before.state },
+        after: { state: updated.state },
+      });
+      return updated;
+    });
+    return mapModerationCaseToDTO(row);
+  }
+
+  async appealCase(input: {
+    caseId: string;
+    actorUserId: string;
+    reason: string;
+  }) {
+    const row = await prisma.$transaction(async (tx) => {
+      const before = await tx.moderationCase.findUniqueOrThrow({
+        where: { id: input.caseId },
+      });
+      const updated = await tx.moderationCase.update({
+        where: { id: input.caseId },
+        data: { state: "NEW" },
+      });
+      await this.createCaseEvent(tx, {
+        caseId: input.caseId,
+        actorUserId: input.actorUserId,
+        eventType: "case.appeal_requested",
+        reason: input.reason,
+        before: { state: before.state },
+        after: { state: updated.state },
+      });
+      return updated;
     });
     return mapModerationCaseToDTO(row);
   }

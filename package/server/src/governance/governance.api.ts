@@ -1,18 +1,25 @@
 import {
   activeAccountEnforcementSummarySchema,
   accountEnforcementDTOSchema,
+  appealModerationCaseSchema,
+  assignModerationCaseSchema,
   capabilityGrantDTOSchema,
   capabilityHintSchema,
   contentModerationDecisionSchema,
   contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
+  createModerationCaseFromFeedbackSchema,
+  decideModerationCaseSchema,
+  duplicateModerationCaseSchema,
   grantCapabilitySchema,
+  moderationCaseEventDTOSchema,
   moderationCaseDTOSchema,
   policyDecisionSchema,
   policyInputSchema,
   realmContentModerationDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
+  triageModerationCaseSchema,
   unblockAccountEnforcementSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -591,6 +598,194 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       response: { 200: moderationCaseDTOSchema, 403: t.String() },
       detail: {
         summary: "Read a moderation case",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .get(
+    "/cases/:caseId/events",
+    async ({ params, query, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.caseTriage,
+        target: { kind: "moderation-case", id: params.caseId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.listCaseEvents(params.caseId, query);
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ caseId: t.String() }),
+      query: listQuerySchema,
+      response: {
+        200: t.Array(moderationCaseEventDTOSchema),
+        403: t.String(),
+      },
+      detail: {
+        summary: "List moderation case events",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/cases/from-feedback/:feedbackId",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.caseTriage,
+        target: { kind: "feedback", id: params.feedbackId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.createCaseFromFeedback({
+        ...body,
+        feedbackId: params.feedbackId,
+        actorUserId: identity.userId,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ feedbackId: t.String() }),
+      body: createModerationCaseFromFeedbackSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Create moderation case from report feedback",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/cases/:caseId/duplicate",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.caseTriage,
+        target: { kind: "moderation-case", id: params.caseId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.duplicateCase({
+        caseId: params.caseId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ caseId: t.String() }),
+      body: duplicateModerationCaseSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Mark a moderation case as duplicate",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/cases/:caseId/assign",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.caseAssign,
+        target: { kind: "moderation-case", id: params.caseId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.assignCase({
+        caseId: params.caseId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ caseId: t.String() }),
+      body: assignModerationCaseSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Assign a moderation case",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/cases/:caseId/triage",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.caseTriage,
+        target: { kind: "moderation-case", id: params.caseId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.triageCase({
+        caseId: params.caseId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ caseId: t.String() }),
+      body: triageModerationCaseSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Triage a moderation case",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/cases/:caseId/decision",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.caseDecide,
+        target: { kind: "moderation-case", id: params.caseId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.decideCase({
+        caseId: params.caseId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ caseId: t.String() }),
+      body: decideModerationCaseSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Record a moderation case decision",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/cases/:caseId/appeal",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.caseReverse,
+        target: { kind: "moderation-case", id: params.caseId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.appealCase({
+        caseId: params.caseId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ caseId: t.String() }),
+      body: appealModerationCaseSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Request moderation case appeal",
         tags: ["Governance", "Staff"],
       },
     },
