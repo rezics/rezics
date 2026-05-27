@@ -57,6 +57,26 @@ export const accountEnforcementDTOSchema = t.Object({
 export type AccountEnforcementDTO =
   (typeof accountEnforcementDTOSchema)["static"];
 
+export const createAccountEnforcementSchema = t.Object({
+  kind: accountEnforcementKindSchema,
+  reason: t.String({ minLength: 1 }),
+  safeMessage: t.Optional(t.Nullable(t.String())),
+  expiresAt: t.Optional(t.Nullable(t.String())),
+  metadata: t.Optional(auditMetadataSchema),
+});
+
+export type CreateAccountEnforcementInput =
+  (typeof createAccountEnforcementSchema)["static"];
+
+export const unblockAccountEnforcementSchema = t.Object({
+  reason: t.String({ minLength: 1 }),
+  safeMessage: t.Optional(t.Nullable(t.String())),
+  metadata: t.Optional(auditMetadataSchema),
+});
+
+export type UnblockAccountEnforcementInput =
+  (typeof unblockAccountEnforcementSchema)["static"];
+
 export const activeAccountEnforcementSummarySchema = t.Object({
   targetUserId: t.String(),
   activeKinds: t.Array(accountEnforcementKindSchema),

@@ -2,9 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   accountEnforcementDTOSchema,
+  createAccountEnforcementSchema,
   moderationCaseDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
+  unblockAccountEnforcementSchema,
 } from "./governance";
 import {
   capabilitySchema,
@@ -152,6 +154,32 @@ describe("governance contract registry", () => {
         before: { state: "active" },
         after: { state: "banned" },
         createdAt: "2026-05-28T00:00:00.000Z",
+      }),
+    ).toBe(true);
+  });
+
+  test("account enforcement command contracts validate", () => {
+    expect(
+      Value.Check(createAccountEnforcementSchema, {
+        kind: "silence",
+        reason: "spam",
+        safeMessage: "Posting is temporarily restricted.",
+        expiresAt: "2026-05-29T00:00:00.000Z",
+        metadata: { caseId: "case-1" },
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(createAccountEnforcementSchema, {
+        kind: "deleted",
+        reason: "spam",
+      }),
+    ).toBe(false);
+
+    expect(
+      Value.Check(unblockAccountEnforcementSchema, {
+        reason: "appeal approved",
+        metadata: { caseId: "case-1" },
       }),
     ).toBe(true);
   });

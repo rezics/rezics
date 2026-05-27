@@ -34,6 +34,7 @@ mock.module("@/middleware", () => ({
   }),
   isAdminRole: mock(() => false),
   tryResolveIdentity: mock(async () => null),
+  verifyAdminFromDb: mock(async () => false),
 }));
 
 mock.module("@/governance", () => ({
