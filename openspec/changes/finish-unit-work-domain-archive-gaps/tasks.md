@@ -1,40 +1,53 @@
-## 1. Content Structure Identity Cutover
+## 1. Generic Content-Structure Schema
 
-- [x] 1.1 Replace reader/editor-facing `chapterUnitId` progress payloads with `contentUnitId`; keep legacy parsing only as documented compatibility.
-- [x] 1.2 Rename local reader/editor variables that carry materialized content Unit identity from `chapterId` / `chapterUnitId` to `contentUnitId` where they are not route-compatibility names.
-- [x] 1.3 Audit public contract exports for `BookContentStructure` and `chapterUnitId`; either remove them from new call sites or document each remaining name as transitional compatibility.
-- [x] 1.4 Add contract and app tests for saving progress with `contentUnitId` and for legacy `chapterUnitId` read compatibility.
+- [ ] 1.1 Add Prisma models for `ContentStructure` and `ContentStructureNode` keyed by `ownerUnitId`.
+- [ ] 1.2 Rename the node identity column from `chapterUnitId` semantics to `contentUnitId`.
+- [ ] 1.3 Preserve existing normalized tree behavior: parent links, LexoRank `sortKey`, non-unique content-unit references, per-node timestamps, rating/noContent/title cache fields, and cascade/delete semantics.
+- [ ] 1.4 Add migrations/backfill from `BookContentStructure` / `BookContentStructureNode` to generic tables.
+- [ ] 1.5 Add drift/parity checks proving generic rows reconstruct the same book trees before compatibility cleanup.
 
-## 2. Releases Tab And Language Flow
+## 2. Generic Server Domain
 
-- [x] 2.1 Add a first-class book detail Releases tab/route.
-- [x] 2.2 Move same-work release listing, position ordering, display policy treatment, and multi-select language filtering into the Releases tab.
-- [x] 2.3 Change missing-language affordances to navigate to the Releases tab, not the overview/info page hash.
-- [x] 2.4 Default the Releases tab language filter from viewer preferences when available, with an All option.
-- [x] 2.5 Add route/component tests for the missing-language navigation and Releases tab filtering/order behavior.
+- [ ] 2.1 Create `package/server/src/content-structure/` with `.api.ts`, `.service.ts`, `.mapper.ts`, and `.types.ts`.
+- [ ] 2.2 Move tree assembly, path parsing/resolution, diff planning, and batch save logic out of the book domain.
+- [ ] 2.3 Expose generic read/update APIs by `ownerUnitId`.
+- [ ] 2.4 Keep book content-structure endpoints as compatibility wrappers over the generic service.
+- [ ] 2.5 Update history event writing so generic mutations emit generic content-structure payloads and book-specific event names remain compatibility only.
 
-## 3. Work-Domain Community Surfaces
+## 3. Book/Chapter Adapter
 
-- [x] 3.1 Update review tab previews and hero review/stat/count queries to use a work-domain feed when the current release has `UnitWork(role = RELEASE)` membership.
-- [x] 3.2 Preserve exact-release review/post filtering where the UI explicitly chooses "this release".
-- [x] 3.3 Render target release context on work-domain review/post cards when the precise `targetUnitId` differs from the current release.
-- [x] 3.4 Add app/API tests covering default work-domain reviews and exact-release filtering.
+- [ ] 3.1 Refactor chapter materialization to resolve generic `ContentStructureNode` rows by `ownerUnitId` path.
+- [ ] 3.2 Keep book-specific materialization responsible for creating `Unit(type=POST)` + `Post(kind=CHAPTER)`.
+- [ ] 3.3 Change materialization responses to expose canonical `contentUnitId`, with `chapterUnitId` only as documented compatibility.
+- [ ] 3.4 Update chapter rename/content propagation to update generic `ContentStructureNode(contentUnitId)` rows.
+- [ ] 3.5 Preserve `Book.chapterCount` recalculation for readable book content-structure nodes.
 
-## 4. Hidden Work Public Navigation
+## 4. Contracts And API Clients
 
-- [x] 4.1 Audit app navigation that uses `workUnitId` as a public route param.
-- [x] 4.2 Replace hidden-work destinations with visible release destinations selected from grouped search metadata, primary release membership, or collapsed alternatives.
-- [x] 4.3 Add regression tests so public search/home/result cards do not navigate ordinary users to hidden work Units.
+- [ ] 4.1 Add generic content-structure DTO schemas/types in `package/contract`.
+- [ ] 4.2 Re-export or alias book-named DTOs only where compatibility is required.
+- [ ] 4.3 Add `package/api` generic content-structure client/query keys/mutations.
+- [ ] 4.4 Convert internal app/api imports that do not need book-specific semantics to generic names.
+- [ ] 4.5 Keep `targetUnitId` reserved for interactions; content-structure node identity must remain `contentUnitId`.
 
-## 5. Canonical UnitWork Reads
+## 5. Seeds, Factories, And Cross-Domain Consumers
 
-- [x] 5.1 Replace remaining release/work sibling lookup call sites that use only `BookDTO.workUnitId` with canonical `workMembership.workUnitId` fallback logic.
-- [x] 5.2 Update general Unit list filtering that claims work-domain semantics to read through `UnitWork` instead of direct `Unit.workUnitId`.
-- [x] 5.3 Verify work-link migration compatibility paths still keep `Unit.workUnitId` synchronized but do not become the canonical read path.
+- [ ] 5.1 Update book factories/seeds to write generic content-structure rows.
+- [ ] 5.2 Provide helper APIs for game/media/series fixtures to create content-structure nodes for release parts or series members.
+- [ ] 5.3 Update seed reports and fixture docs to use `ownerUnitId` / `contentUnitId` terminology.
 
-## 6. Verification
+## 6. Admin Work Merge Async Execution
 
-- [x] 6.1 Run targeted contract tests for progress/content-structure compatibility.
-- [x] 6.2 Run targeted server tests for UnitWork canonical reads and work-domain post/review feeds.
-- [x] 6.3 Run targeted app tests for Releases tab, language missing flow, review/hero community previews, and hidden-work navigation.
-- [x] 6.4 Run `openspec validate finish-unit-work-domain-archive-gaps --strict`.
+- [ ] 6.1 Change admin work merge start to create a durable operation and enqueue execution instead of synchronously moving memberships in the request path.
+- [ ] 6.2 Add job-runner handlers that process membership moves, legacy release sync, optional metadata copy, and repair enqueueing in resumable batches.
+- [ ] 6.3 Persist item-level progress and enough before-state for revert as each batch completes.
+- [ ] 6.4 Ensure operation status reflects queued/running/completed/failed states after repair commands are enqueued.
+- [ ] 6.5 Keep dry-run preview synchronous, but make active merge execution async/resumable.
+
+## 7. Verification
+
+- [ ] 7.1 Run targeted contract tests for generic content-structure DTOs and compatibility aliases.
+- [ ] 7.2 Run targeted server tests for generic tree read/write/path resolution, book wrappers, chapter materialization, and history events.
+- [ ] 7.3 Run migration/parity tests for existing book content-structure rows.
+- [ ] 7.4 Run job-runner/server tests for queued admin work merge execution and resumability.
+- [ ] 7.5 Run `openspec validate finish-unit-work-domain-archive-gaps --strict`.
