@@ -1,6 +1,16 @@
 import type { PostSearchOptions, PostSearchResult } from "@rezics/contract";
 import { searchClient } from "../search-client";
 
+const COMMENT_RANKING_SORTS = new Set([
+  "commentHotScore",
+  "commentTopScore",
+  "commentQualityScore",
+]);
+
+function hasSiblingCommentScope(opts: PostSearchOptions) {
+  return Boolean(opts.parentPostUnitId || typeof opts.depth === "number");
+}
+
 export async function searchPosts(
   opts: PostSearchOptions,
 ): Promise<PostSearchResult> {
@@ -52,6 +62,12 @@ export async function searchPosts(
 
   const sort: string[] = [];
   if (opts.sort?.field && opts.sort.field !== "relevance") {
+    if (
+      COMMENT_RANKING_SORTS.has(opts.sort.field) &&
+      !hasSiblingCommentScope(opts)
+    ) {
+      throw new Error("Comment ranking sorts require a sibling scope filter");
+    }
     const order = opts.sort.order ?? "desc";
     sort.push(`${opts.sort.field}:${order}`);
   } else if (!q) {

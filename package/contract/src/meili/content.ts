@@ -84,6 +84,11 @@ export const ContentSearchDocumentSchema = t.Object({
   createdAt: t.String(),
   updatedAt: t.String(),
   publishedAt: t.Union([t.String(), t.Null()]),
+  hotScore: t.Number(),
+  topScore: t.Number(),
+  trendingScore: t.Number(),
+  qualityScore: t.Number(),
+  rankUpdatedAt: t.Union([t.String(), t.Null()]),
 
   // Result display fields
   defaultLanguage: t.Union([languageSchema, t.Null()]),
@@ -148,6 +153,10 @@ export const ContentSearchOptionsSchema = t.Object({
         t.Literal("createdAt"),
         t.Literal("updatedAt"),
         t.Literal("publishedAt"),
+        t.Literal("hotScore"),
+        t.Literal("topScore"),
+        t.Literal("trendingScore"),
+        t.Literal("qualityScore"),
         t.Literal("relevance"),
       ]),
       order: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),

@@ -127,6 +127,7 @@ export function isPublicIndexableContentUnit(
         type: string;
         status: string;
         visibility: string;
+        workUnitId?: string | null;
       }
     | null
     | undefined,
@@ -426,6 +427,11 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
         ? unit.publishedAt.toISOString()
         : unit.publishedAt
       : null,
+    hotScore: 0,
+    topScore: 0,
+    trendingScore: 0,
+    qualityScore: 0,
+    rankUpdatedAt: null,
     defaultLanguage: unit.defaultLanguage ?? null,
     coverUrl,
     userId: unit.userId ?? null,
@@ -904,6 +910,47 @@ export async function patchContentContainedUnitIds(
   });
   const containedUnitIds = units.map((u) => u.unitId);
   await patchContentIfEligible(client, shelfId, { containedUnitIds });
+}
+
+export type ContentRankingPatch = {
+  hotScore: number;
+  topScore: number;
+  trendingScore: number;
+  qualityScore: number;
+  rankUpdatedAt: string | null;
+};
+
+export type PostRankingPatch = ContentRankingPatch;
+
+export type CommentRankingPatch = {
+  commentHotScore: number;
+  commentTopScore: number;
+  commentQualityScore: number;
+  commentRankUpdatedAt: string | null;
+};
+
+export async function patchContentRankingFields(
+  client: SearchClient,
+  unitId: string,
+  fields: ContentRankingPatch,
+) {
+  await patchContentIfEligible(client, unitId, fields);
+}
+
+export async function patchPostRankingFields(
+  client: SearchClient,
+  unitId: string,
+  fields: PostRankingPatch,
+) {
+  await patchPostFields(client, unitId, fields);
+}
+
+export async function patchCommentRankingFields(
+  client: SearchClient,
+  unitId: string,
+  fields: CommentRankingPatch,
+) {
+  await patchPostFields(client, unitId, fields);
 }
 
 // ANCHOR: Post partial sync functions
@@ -1434,6 +1481,15 @@ export function buildPostDocument(post: any): PostSearchDocument {
       post.updatedAt instanceof Date
         ? post.updatedAt.toISOString()
         : post.updatedAt,
+    hotScore: 0,
+    topScore: 0,
+    trendingScore: 0,
+    qualityScore: 0,
+    rankUpdatedAt: null,
+    commentHotScore: 0,
+    commentTopScore: 0,
+    commentQualityScore: 0,
+    commentRankUpdatedAt: null,
     targetUnitId: post.targetUnitId ?? null,
     rootTargetUnitId: post.rootTargetUnitId ?? null,
     rootTargetUnitType: post.rootTargetUnitType ?? null,
