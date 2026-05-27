@@ -80,6 +80,8 @@ const mockCreateBook = mock(async (_args: unknown) => ({
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
 }));
+const mockFindManyBook = mock(async (_args: unknown) => []);
+const mockCountBook = mock(async (_args: unknown) => 0);
 const mockUpdateContainer = mock(async (_args: unknown) => ({
   bookUnitId: "book-1",
   createdAt: new Date(),
@@ -126,6 +128,8 @@ Object.assign(prismaMock, {
   },
   book: {
     create: mockCreateBook,
+    findMany: mockFindManyBook,
+    count: mockCountBook,
   },
 });
 
@@ -138,6 +142,8 @@ function resetMocks(): void {
   mockAllocateSequence.mockClear();
   mockCreateHistoryOutbox.mockClear();
   mockCreateBook.mockClear();
+  mockFindManyBook.mockClear();
+  mockCountBook.mockClear();
   mockUpdateContainer.mockClear();
   mockFindContainer.mockClear();
   mockTransaction.mockClear();
@@ -264,6 +270,53 @@ describe("BookService.create", () => {
     ].sort();
 
     expect(createPaths.sort()).toEqual(editPaths);
+  });
+});
+
+describe("BookService.list", () => {
+  beforeEach(() => {
+    resetMocks();
+  });
+
+  test("filters releases through UnitWork membership", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.list({ workUnitId: "work-1", limit: 10 });
+
+    expect(mockFindManyBook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          AND: [
+            {
+              unit: {
+                workMemberships: {
+                  some: {
+                    workUnitId: "work-1",
+                    role: "RELEASE",
+                  },
+                },
+              },
+            },
+          ],
+        },
+      }),
+    );
+    expect(mockCountBook).toHaveBeenCalledWith({
+      where: {
+        AND: [
+          {
+            unit: {
+              workMemberships: {
+                some: {
+                  workUnitId: "work-1",
+                  role: "RELEASE",
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
   });
 });
 

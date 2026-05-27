@@ -148,9 +148,18 @@ export class BookService {
       });
     }
 
-    // Filter by workUnitId
+    // Filter release membership by canonical UnitWork relation.
     if (options.workUnitId?.trim()) {
-      andWhere.push({ unit: { workUnitId: options.workUnitId } });
+      andWhere.push({
+        unit: {
+          workMemberships: {
+            some: {
+              workUnitId: options.workUnitId,
+              role: "RELEASE",
+            },
+          },
+        },
+      });
     }
 
     // Filter by visibility

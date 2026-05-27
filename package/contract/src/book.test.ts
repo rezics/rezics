@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import {
   bookContentStructureDTOSchema,
   bookContentStructureNodeSchema,
+  bookDTOSchema,
 } from "./book";
 
 describe("bookContentStructureNodeSchema", () => {
@@ -97,5 +98,24 @@ describe("bookContentStructureNodeSchema", () => {
     };
 
     expect(Value.Check(bookContentStructureDTOSchema, value)).toBe(true);
+  });
+});
+
+describe("bookDTOSchema", () => {
+  test("accepts release work membership metadata", () => {
+    expect(
+      Value.Check(bookDTOSchema, {
+        unitId: "release-1",
+        workUnitId: "work-1",
+        workMembership: {
+          unitId: "release-1",
+          workUnitId: "work-1",
+          role: "RELEASE",
+          language: "en",
+          position: "a0",
+          displayPolicy: "PRIMARY",
+        },
+      }),
+    ).toBe(true);
   });
 });

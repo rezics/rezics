@@ -47,6 +47,7 @@ function mapTranslation(
  */
 export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
   const unit = book.unit;
+  const workMembership = unit.workMemberships?.[0];
 
   return {
     unitId: book.unitId,
@@ -73,6 +74,20 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
 
     // Translation layer
     translations: unit.translations?.map(mapTranslation) ?? [],
+
+    // Work-domain release membership
+    workMembership: workMembership
+      ? {
+          unitId: workMembership.unitId,
+          workUnitId: workMembership.workUnitId,
+          role: workMembership.role,
+          language: workMembership.language,
+          position: workMembership.position,
+          displayPolicy: workMembership.displayPolicy,
+          createdAt: workMembership.createdAt,
+          updatedAt: workMembership.updatedAt,
+        }
+      : undefined,
 
     // Credit attribution
     creditAttributions: (unit.creditAttributions?.map((a) => {

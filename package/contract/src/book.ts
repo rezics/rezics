@@ -12,6 +12,7 @@ import {
   publicUserSchema,
   unitTranslationDTOSchema,
 } from "./unit";
+import { unitWorkDTOSchema } from "./unit-work";
 
 // ============================================================
 // BOOK EXTRA SCHEMA
@@ -52,6 +53,9 @@ export const bookDTOSchema = t.Object({
 
   // Translation layer
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
+
+  // Work-domain release membership
+  workMembership: t.Optional(t.Nullable(unitWorkDTOSchema)),
 
   // Credit attribution
   creditAttributions: t.Optional(t.Array(creditAttributionBriefSchema)),

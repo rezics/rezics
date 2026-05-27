@@ -17,7 +17,7 @@
 - [x] 2.3 Implement work-domain membership reconciliation helpers for content Units that may belong to multiple works.
 - [x] 2.4 Mount the UnitWork API from `package/server/src/index.ts`.
 - [x] 2.5 Update existing work-link services so new writes create/update `UnitWork` and keep `Unit.workUnitId` synchronized during migration.
-- [ ] 2.6 Update release listing reads to use `UnitWork` and expose role, language, position, and display policy.
+- [x] 2.6 Update release listing reads to use `UnitWork` and expose role, language, position, and display policy.
 - [x] 2.7 Add unit tests for membership creation, duplicate release membership rejection, multi-work content membership, invalid work target rejection, and position ordering.
 
 ## 3. RealmUnit Rename
