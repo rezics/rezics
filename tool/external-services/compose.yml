@@ -1,6 +1,6 @@
 services:
   source-postgres:
-    image: postgres:16
+    image: postgres:18.4-trixie
     restart: unless-stopped
     command:
       - postgres
@@ -27,7 +27,7 @@ services:
       start_period: 10s
 
   meilisearch:
-    image: getmeili/meilisearch:v1.13
+    image: getmeili/meilisearch:v1.45.0
     restart: unless-stopped
     environment:
       MEILI_ENV: development
@@ -83,7 +83,7 @@ services:
       sequin-postgres:
         condition: service_healthy
       sequin-redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:7376/health >/dev/null"]
       interval: 10s
@@ -92,7 +92,7 @@ services:
       start_period: 30s
 
   sequin-postgres:
-    image: postgres:16
+    image: postgres:18.4-trixie
     restart: unless-stopped
     environment:
       POSTGRES_DB: sequin
@@ -108,13 +108,45 @@ services:
       start_period: 10s
 
   sequin-redis:
-    image: redis:7
+    image: redis:8.8-m03-alpine3.23
     restart: unless-stopped
     volumes:
       - sequin-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  clickstack:
+    image: hyperdx/hyperdx-all-in-one:2.27.0
+    profiles: ["observability"]
+    restart: unless-stopped
+    ports:
+      - "${CLICKSTACK_UI_PORT_PUBLISHED:-8080}:8080"
+    volumes:
+      - clickstack-data:/data
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.153.0
+    profiles: ["observability"]
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yml"]
+    environment:
+      CLICKSTACK_OTLP_ENDPOINT: ${CLICKSTACK_OTLP_ENDPOINT:-http://clickstack:4318}
+      CLICKSTACK_API_KEY: ${CLICKSTACK_API_KEY:-}
+    ports:
+      - "${OTEL_GRPC_PORT_PUBLISHED:-4317}:4317"
+      - "${OTEL_HTTP_PORT_PUBLISHED:-4318}:4318"
+    volumes:
+      - ./otel-collector.yml:/etc/otelcol-contrib/config.yml:ro
+    depends_on:
+      - clickstack
 
 volumes:
   source-postgres-data:
   meilisearch-data:
   sequin-postgres-data:
   sequin-redis-data:
+  clickstack-data:

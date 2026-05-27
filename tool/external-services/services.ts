@@ -39,7 +39,7 @@ function usage(): never {
       "  down                    Stop the managed stack",
       "  logs [service...]       Follow managed stack logs",
       "  ps                      Show managed stack services",
-      "  health                  Check source Postgres, Meilisearch, Sequin state Postgres, and Sequin",
+      "  health                  Check source Postgres, Meilisearch, Sequin state Postgres, Sequin Redis, and Sequin",
       "  config [plan]           Render the Docker Compose plan",
       "  config apply            Recreate Sequin so package/job-runner/sequin/sequin.yml is applied",
       "  source:verify           Verify source Postgres CDC readiness",
@@ -170,6 +170,7 @@ async function checkHealth() {
     "-d",
     "sequin",
   ]);
+  execHealth("Sequin Redis", "sequin-redis", ["redis-cli", "ping"]);
   await fetchHealth(
     "Sequin",
     toolEnv.SEQUIN_HEALTH_URL ?? DEFAULT_SEQUIN_HEALTH_URL,
