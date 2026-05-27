@@ -14,6 +14,8 @@ export {
   createFactorySeriesMemberStructure,
   ensureFactoryContentStructure,
 } from "./content-structure";
+export { buildFactorySeriesVerificationPlan } from "./series";
+export type { FactorySeriesVerificationInput } from "./series";
 export type { FactoryContentStructureNodeInput } from "./content-structure";
 export {
   FACTORY_SCENARIO_NAMES,

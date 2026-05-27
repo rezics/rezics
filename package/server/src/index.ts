@@ -43,6 +43,7 @@ import {
   realmTagContextApi,
 } from "./realm";
 import { scoreApi } from "./score/score.api";
+import { seriesApi } from "./series-unit";
 import { collectionApi, shelfApi } from "./shelf";
 import { slugApi } from "./slug";
 import { sourceSiteApi } from "./source-site";
@@ -239,6 +240,7 @@ routeApp
   .use(lowScoreTagsAdminApi)
   .use(translationGroupApi)
   .use(scoreApi)
+  .use(seriesApi)
   .use(reactionBoundaryApi)
   .use(profileReactionHistoryApi)
   .use(dispatchApi)

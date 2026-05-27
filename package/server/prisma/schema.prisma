@@ -21,6 +21,7 @@ enum UnitType {
   TAG
   REALM
   SHELF
+  SERIES
   IMAGE
   VIDEO
   QUOTE
@@ -81,6 +82,7 @@ enum UnitWorkRole {
   POST
   REVIEW
   SHELF
+  SERIES
   WIKI
   GUIDE
   DERIVED
@@ -210,6 +212,7 @@ model Unit {
   media  Media?
   post   Post?
   shelf  Shelf?
+  series Series?
   realm  Realm?
   link   Link?
   entity Entity?
@@ -237,6 +240,7 @@ model Unit {
   creditAttributions CreditAttribution[] @relation("CreditAttributedUnit")
   creditedAs         CreditAttribution[] @relation("CreditAttributionEntity")
   externalRefs       UnitExternalRef[]   @relation("UnitExternalRefUnit")
+  seriesContentIndexesAsRelease SeriesContentIndex[] @relation("SeriesContentIndexRelease")
 
   // Subject attribution
   subjectAttributions   SubjectAttribution[] @relation("SubjectAttributedUnit")
@@ -546,6 +550,7 @@ model ContentStructureNode {
   parent      ContentStructureNode?  @relation("ContentStructureNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
   children    ContentStructureNode[] @relation("ContentStructureNodeChildren")
   contentUnit Unit?                  @relation("ContentStructureNodeContent", fields: [contentUnitId], references: [id], onDelete: SetNull)
+  seriesContentIndex SeriesContentIndex?
 
   @@index([ownerUnitId, parentId, sortKey])
   @@index([contentUnitId])
@@ -730,6 +735,49 @@ model ShelfUnitRelation {
   @@index([shelfId, childUnitId])
   @@index([childUnitId, role])
   @@index([parentUnitId, role])
+}
+
+/**
+ * ANCHOR SERIES EXTENSION
+ */
+
+model Series {
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  /// Public-knowledge grouping kind. Contract values are defined by
+  /// SeriesKind in @rezics/contract.
+  kindKey String @db.VarChar(64)
+  extra   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  directReleaseIndexRows SeriesContentIndex[]
+
+  @@index([kindKey])
+  @@index([updatedAt(sort: Desc)])
+}
+
+/// Direct lookup projection from counted release member nodes in generic
+/// ContentStructure. This model intentionally stores no path, depth, ordering,
+/// hierarchy, Work Unit, inherited-membership, or work-domain source fields.
+model SeriesContentIndex {
+  seriesUnitId String @db.Uuid
+  releaseUnitId String @db.Uuid
+  contentNodeId String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  series     Series               @relation(fields: [seriesUnitId], references: [unitId], onDelete: Cascade)
+  releaseUnit Unit                @relation("SeriesContentIndexRelease", fields: [releaseUnitId], references: [id], onDelete: Cascade)
+  contentNode ContentStructureNode @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
+
+  @@id([seriesUnitId, releaseUnitId, contentNodeId])
+  @@unique([contentNodeId])
+  @@index([seriesUnitId, releaseUnitId])
+  @@index([releaseUnitId, seriesUnitId])
 }
 
 /**
