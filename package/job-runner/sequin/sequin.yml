@@ -31,9 +31,31 @@ databases:
           public."RealmTagApplication",
           public."ShelfUnit",
           public."Post",
+          public."ScoreEntry",
+          public."ScoreAggregate",
           public."User",
           public."UserUnitProgress",
           public."Feedback";
+    await_database:
+      timeout_ms: 30000
+      interval_ms: 3000
+  - name: rezics-reaction
+    hostname: ${REACTION_DB_HOST}
+    port: ${REACTION_DB_PORT:-5432}
+    database: ${REACTION_DB_NAME:-reaction}
+    username: ${REACTION_DB_USER:-postgres}
+    password: ${REACTION_DB_PASSWORD}
+    pool_size: ${REACTION_DB_POOL_SIZE:-5}
+    slot:
+      name: rezics_reaction_sequin_slot_${ENV:-development}
+      create_if_not_exists: true
+    publication:
+      name: rezics_reaction_sequin_pub_${ENV:-development}
+      create_if_not_exists: true
+      init_sql: |
+        CREATE PUBLICATION rezics_reaction_sequin_pub_${ENV:-development}
+        FOR TABLE
+          public."ReactionSummary";
     await_database:
       timeout_ms: 30000
       interval_ms: 3000
@@ -63,9 +85,22 @@ sinks:
         - public.RealmTagApplication
         - public.ShelfUnit
         - public.Post
+        - public.ScoreEntry
+        - public.ScoreAggregate
         - public.User
         - public.UserUnitProgress
         - public.Feedback
+    destination:
+      type: webhook
+      http_endpoint: job-runner
+      http_endpoint_path: /webhooks/sequin
+      batch: false
+
+  - name: rezics-reaction-job-runner-webhook
+    database: rezics-reaction
+    source:
+      include_tables:
+        - public.ReactionSummary
     destination:
       type: webhook
       http_endpoint: job-runner

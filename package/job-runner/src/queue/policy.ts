@@ -34,6 +34,15 @@ export const LANE_POLICIES: Record<JobLane, QueueSendOptions> = {
     retentionSeconds: 30 * 24 * 60 * 60,
     deadLetter: `${JOB_LANES.maintenance}${DEAD_LETTER_SUFFIX}`,
   },
+  [JOB_LANES.ranking]: {
+    retryLimit: 5,
+    retryDelay: 60,
+    expireInSeconds: 30 * 60,
+    retentionSeconds: 14 * 24 * 60 * 60,
+    deadLetter: `${JOB_LANES.ranking}${DEAD_LETTER_SUFFIX}`,
+    policy: "short",
+    singletonSeconds: 5 * 60,
+  },
 };
 
 export function queueOptionsForCommand(
@@ -42,7 +51,12 @@ export function queueOptionsForCommand(
   const base = LANE_POLICIES[command.lane];
   if (!base)
     throw new Error(`No queue policy configured for lane ${command.lane}`);
-  if (command.lane !== JOB_LANES.searchSyncSlow) return base;
+  if (
+    command.lane !== JOB_LANES.searchSyncSlow &&
+    command.lane !== JOB_LANES.ranking
+  ) {
+    return base;
+  }
 
   return {
     ...base,

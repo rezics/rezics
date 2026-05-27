@@ -173,8 +173,9 @@ describe("job-runner HTTP app", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       status: "ok",
-      enqueued: 2,
+      enqueued: 3,
       results: [
+        { kind: "ranking.invalidate", status: "coalesced" },
         { kind: "search.content.delete", status: "coalesced" },
         { kind: "search.content.syncWorkReleases", status: "coalesced" },
       ],

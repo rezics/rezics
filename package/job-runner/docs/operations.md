@@ -87,6 +87,8 @@ The checked-in config intentionally omits `initial_backfill`. Operators may add
 it per environment for the first sink creation only, typically for
 `HistoryOutbox` so in-flight outbox rows reach `history.outbox.ingest`. Search
 projection backfill should use existing maintenance rebuild jobs instead.
+Ranking projection backfill should use `ranking.fullSync` after Meili sortable
+settings have been applied.
 
 ## Delivery Semantics
 

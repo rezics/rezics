@@ -2,7 +2,9 @@ import {
   type AnyJobCommand,
   type CommandSource,
   createHistoryOutboxIngestCommand,
+  createRankingCommand,
   createSearchCommand,
+  RANKING_COMMAND_KINDS,
   SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
 import type { SequinMessage } from "./types";
@@ -45,6 +47,11 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
     const unitId = targetId(message);
     if (!unitId) return [];
     return [
+      createRankingCommand(
+        RANKING_COMMAND_KINDS.invalidate,
+        { unitId, reason: "Unit CDC" },
+        source,
+      ),
       createSearchCommand(
         isDelete
           ? SEARCH_COMMAND_KINDS.contentDelete
@@ -186,8 +193,20 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
 
   if (table === "UnitRealm") {
     const unitId = targetId(message, ["unitId", "unit_id"]);
+    const realmUnitId = targetId(message, ["realmUnitId", "realm_unit_id"]);
     return unitId
       ? [
+          createRankingCommand(
+            RANKING_COMMAND_KINDS.invalidate,
+            {
+              unitId,
+              scope: realmUnitId
+                ? { kind: "realm", id: realmUnitId }
+                : undefined,
+              reason: "UnitRealm CDC",
+            },
+            source,
+          ),
           createSearchCommand(
             SEARCH_COMMAND_KINDS.contentPatchRealmIds,
             { unitId },
@@ -232,6 +251,11 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
     const postId = targetId(message, ["unitId", "unit_id", "id"]);
     if (!postId) return [];
     return [
+      createRankingCommand(
+        RANKING_COMMAND_KINDS.invalidate,
+        { unitId: postId, rankKind: "post", reason: "Post CDC" },
+        source,
+      ),
       createSearchCommand(
         isDelete
           ? SEARCH_COMMAND_KINDS.postDelete
@@ -273,11 +297,47 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
     const unitId = targetId(message, ["unitId", "unit_id"]);
     return userId && unitId
       ? [
+          createRankingCommand(
+            RANKING_COMMAND_KINDS.invalidate,
+            { unitId, rankKind: "content", reason: "UserUnitProgress CDC" },
+            source,
+          ),
           createSearchCommand(
             isDelete
               ? SEARCH_COMMAND_KINDS.progressRemove
               : SEARCH_COMMAND_KINDS.progressSync,
             { userId, unitId },
+            source,
+          ),
+        ]
+      : [];
+  }
+
+  if (table === "ScoreEntry" || table === "ScoreAggregate") {
+    const unitId = targetId(message, ["unitId", "unit_id"]);
+    const realm = targetId(message, ["realm"]);
+    return unitId
+      ? [
+          createRankingCommand(
+            RANKING_COMMAND_KINDS.invalidate,
+            {
+              unitId,
+              scope: realm ? { kind: "realm", id: realm } : undefined,
+              reason: `${table} CDC`,
+            },
+            source,
+          ),
+        ]
+      : [];
+  }
+
+  if (table === "ReactionSummary") {
+    const unitId = targetId(message, ["targetId", "target_id"]);
+    return unitId
+      ? [
+          createRankingCommand(
+            RANKING_COMMAND_KINDS.invalidate,
+            { unitId, reason: "ReactionSummary CDC" },
             source,
           ),
         ]

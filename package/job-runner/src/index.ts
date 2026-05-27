@@ -18,6 +18,10 @@ import {
   type HistoryRuntime,
 } from "./handlers/history/runtime";
 import {
+  createRankingRuntime,
+  type RankingRuntime,
+} from "./handlers/ranking/runtime";
+import {
   createSearchRuntime,
   type SearchRuntime,
 } from "./handlers/search/runtime";
@@ -52,6 +56,7 @@ let app: ReturnType<typeof createJobRunnerApp> | undefined;
 let searchRuntime: SearchRuntime | undefined;
 let historyRuntime: HistoryRuntime | undefined;
 let adminWorkMergeRuntime: AdminWorkMergeRuntime | undefined;
+let rankingRuntime: RankingRuntime | undefined;
 
 if (role === "all" || role === "worker" || role === "http") {
   boss = await createBoss();
@@ -75,12 +80,17 @@ if ((role === "all" || role === "worker") && boss) {
   adminWorkMergeRuntime = createAdminWorkMergeRuntime({
     serverDatabaseUrl: env.SERVER_DATABASE_URL,
   });
+  rankingRuntime = createRankingRuntime({
+    rankingBaseUrl: env.RANKING_BASE_URL,
+    rankingInternalSecret: env.RANKING_INTERNAL_SECRET,
+  });
   await registerWorkers(
     boss as never,
     createJobHandlers({
       searchClient: searchRuntime.client,
       historyConsumer: historyRuntime.consumer,
       adminWorkMergeRuntime,
+      rankingDispatcher: rankingRuntime,
     }),
   );
 }
@@ -109,6 +119,7 @@ async function shutdown() {
   await searchRuntime?.disconnect();
   await historyRuntime?.disconnect();
   await adminWorkMergeRuntime?.disconnect();
+  await rankingRuntime?.disconnect();
   await boss?.stop({ graceful: true, timeout: 30_000 });
   app?.server?.stop();
 }

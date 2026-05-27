@@ -71,6 +71,44 @@ describe("Sequin payload routing", () => {
     ]);
   });
 
+  test("routes main database rank-relevant rows to ranking invalidations", () => {
+    const messages = parseSequinPayload({
+      table: "Post",
+      action: "update",
+      record: { unitId: "post-1", replyCount: 3 },
+    });
+
+    expect(routeSequinMessages(messages)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "ranking.invalidate",
+          lane: "ranking",
+          payload: {
+            unitId: "post-1",
+            rankKind: "post",
+            reason: "Post CDC",
+          },
+        }),
+      ]),
+    );
+  });
+
+  test("routes ReactionSummary changes to ranking invalidations", () => {
+    const messages = parseSequinPayload({
+      table: "ReactionSummary",
+      action: "delete",
+      record: { targetId: "unit-1", reaction: "like" },
+    });
+
+    expect(routeSequinMessages(messages)).toMatchObject([
+      {
+        kind: "ranking.invalidate",
+        lane: "ranking",
+        payload: { unitId: "unit-1", reason: "ReactionSummary CDC" },
+      },
+    ]);
+  });
+
   test("routes work metadata changes to release projection rebuilds", () => {
     const messages = parseSequinPayload({
       table: "UnitTranslation",

@@ -13,6 +13,8 @@ export const env = createEnv({
     JOB_DATABASE_URL: v.string(),
     SERVER_DATABASE_URL: v.string(),
     HISTORY_DATABASE_URL: v.string(),
+    RANKING_BASE_URL: v.optional(v.string()),
+    RANKING_INTERNAL_SECRET: v.optional(v.string()),
     MEILI_HOST: v.string(),
     MEILI_MASTER_KEY: v.string(),
     JOB_RUNNER_INTERNAL_SECRET: v.string(),
