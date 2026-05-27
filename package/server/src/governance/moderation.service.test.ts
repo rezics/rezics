@@ -107,6 +107,7 @@ const realmModerationEventFindMany = mock(async () => [
   },
 ]);
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
+const broadcastMock = mock(async (_event: any) => ({ ok: true, persisted: 1 }));
 const moderationCaseRow = {
   id: "case-1",
   state: "NEW",
@@ -255,6 +256,10 @@ mock.module("@/job/job-boundary", () => ({
   },
 }));
 
+mock.module("@/notify-boundary/notify-boundary.client", () => ({
+  broadcast: broadcastMock,
+}));
+
 describe("GovernanceModerationService content moderation state", () => {
   beforeEach(() => {
     contentModerationFindUnique.mockClear();
@@ -278,6 +283,7 @@ describe("GovernanceModerationService content moderation state", () => {
     realmModerationEventCreate.mockClear();
     realmModerationEventFindMany.mockClear();
     enqueueMock.mockClear();
+    broadcastMock.mockClear();
     moderationCaseFindFirst.mockClear();
     moderationCaseFindMany.mockClear();
     moderationCaseFindUniqueOrThrow.mockClear();
@@ -666,6 +672,13 @@ describe("GovernanceModerationService content moderation state", () => {
       realmUnitId: "realm-1",
       state: "new",
     });
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.report.updated",
+      sourceUnitId: "post-1",
+      directRecipients: ["reporter-1"],
+      actorId: "mod-1",
+      extra: { queueItemId: "queue-1", state: "NEW" },
+    });
   });
 
   test("creates realm queue items from feedback and reuses duplicates", async () => {
@@ -758,6 +771,13 @@ describe("GovernanceModerationService content moderation state", () => {
       }),
     });
     expect(result).toMatchObject({ state: "actioned" });
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.report.updated",
+      sourceUnitId: "post-1",
+      directRecipients: ["reporter-1"],
+      actorId: "mod-1",
+      extra: { queueItemId: "queue-1", state: "ACTIONED" },
+    });
   });
 
   test("escalates realm queue items into site moderation cases", async () => {
@@ -805,6 +825,13 @@ describe("GovernanceModerationService content moderation state", () => {
     expect(result).toMatchObject({
       state: "escalated",
       linkedCaseId: "case-1",
+    });
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.escalation.updated",
+      sourceUnitId: "post-1",
+      directRecipients: ["reporter-1"],
+      actorId: "mod-1",
+      extra: { queueItemId: "queue-1", linkedCaseId: "case-1" },
     });
   });
 
@@ -890,6 +917,13 @@ describe("GovernanceModerationService content moderation state", () => {
       severity: "high",
       reporterUserId: "reporter-1",
       target: { kind: "unit", id: "post-1" },
+    });
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.report.updated",
+      sourceUnitId: "post-1",
+      directRecipients: ["reporter-1"],
+      actorId: "staff-1",
+      extra: { caseId: "case-1", state: "NEW" },
     });
   });
 
@@ -989,6 +1023,13 @@ describe("GovernanceModerationService content moderation state", () => {
         (call) => call[0].data.eventType,
       ),
     ).toEqual(["case.assigned", "case.triaged"]);
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.case.assigned",
+      sourceUnitId: "post-1",
+      directRecipients: ["staff-2"],
+      actorId: "staff-1",
+      extra: { caseId: "case-1", state: "ASSIGNED" },
+    });
   });
 
   test("records decisions and appeal requests as case events", async () => {
@@ -1035,6 +1076,20 @@ describe("GovernanceModerationService content moderation state", () => {
         before: { state: "NEW" },
         after: { state: "NEW" },
       }),
+    });
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.report.updated",
+      sourceUnitId: "post-1",
+      directRecipients: ["reporter-1"],
+      actorId: "staff-1",
+      extra: { caseId: "case-1", state: "ACTIONED" },
+    });
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.appeal.updated",
+      sourceUnitId: "post-1",
+      directRecipients: ["reporter-1"],
+      actorId: "staff-1",
+      extra: { caseId: "case-1", state: "NEW" },
     });
   });
 });

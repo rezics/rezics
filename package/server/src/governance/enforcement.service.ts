@@ -4,6 +4,7 @@ import type {
   UnblockAccountEnforcementInput,
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
+import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { revokeAuthSessionsForAuthUser } from "../auth-boundary/auth-internal.client";
 import { mapAccountEnforcementToDTO } from "./governance.mapper";
 import type { GovernanceListOptions } from "./types";
@@ -19,6 +20,21 @@ const enforcementKindMap: Record<AccountEnforcementKind, any> = {
 
 function enforcementReversible(kind: AccountEnforcementKind) {
   return kind !== "warning";
+}
+
+function notifyEnforcement(input: {
+  kind: "moderation.subject.warning" | "moderation.appeal.updated";
+  targetUserId: string;
+  actorUserId?: string | null;
+  extra?: Record<string, unknown>;
+}) {
+  broadcast({
+    kind: input.kind,
+    sourceUnitId: input.targetUserId,
+    directRecipients: [input.targetUserId],
+    actorId: input.actorUserId ?? null,
+    extra: input.extra,
+  }).catch(() => {});
 }
 
 function basePermissionRole(permission: unknown) {
@@ -160,6 +176,14 @@ export class GovernanceEnforcementService {
       }
       return created;
     });
+    if (input.kind === "warning") {
+      notifyEnforcement({
+        kind: "moderation.subject.warning",
+        targetUserId: input.targetUserId,
+        actorUserId: input.decidedById,
+        extra: { enforcementId: row.id, reason: input.reason },
+      });
+    }
     return mapAccountEnforcementToDTO(row);
   }
 
@@ -315,6 +339,14 @@ export class GovernanceEnforcementService {
       ),
     );
 
+    for (const row of rows) {
+      notifyEnforcement({
+        kind: "moderation.appeal.updated",
+        targetUserId,
+        actorUserId: input.revokedById,
+        extra: { enforcementId: row.id, state: row.state },
+      });
+    }
     return rows.map(mapAccountEnforcementToDTO);
   }
 }

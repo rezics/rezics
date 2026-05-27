@@ -41,6 +41,26 @@ export const KIND_REGISTRY = {
   "unit.tagged": { aggregatable: true, category: "unit" },
   "item.added": { aggregatable: true, category: "item" },
   "item.removed": { aggregatable: true, category: "item" },
+  "moderation.report.updated": {
+    aggregatable: false,
+    category: "moderation",
+  },
+  "moderation.subject.warning": {
+    aggregatable: false,
+    category: "moderation",
+  },
+  "moderation.case.assigned": {
+    aggregatable: false,
+    category: "moderation",
+  },
+  "moderation.appeal.updated": {
+    aggregatable: false,
+    category: "moderation",
+  },
+  "moderation.escalation.updated": {
+    aggregatable: false,
+    category: "moderation",
+  },
 } as const satisfies Record<
   string,
   { aggregatable: boolean; category: string }

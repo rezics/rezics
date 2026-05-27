@@ -1,6 +1,7 @@
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
+import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { AppError } from "../utils/errors";
 import {
   mapContentModerationStateToDTO,
@@ -114,6 +115,28 @@ function realmQueueStateForDecision(kind: RealmQueueDecisionKind) {
   if (kind === "duplicate") return "DUPLICATE";
   if (kind === "escalate") return "ESCALATED";
   return "ACTIONED";
+}
+
+function notifyModeration(input: {
+  kind:
+    | "moderation.report.updated"
+    | "moderation.subject.warning"
+    | "moderation.case.assigned"
+    | "moderation.appeal.updated"
+    | "moderation.escalation.updated";
+  recipientUserId?: string | null;
+  sourceUnitId?: string | null;
+  actorUserId?: string | null;
+  extra?: Record<string, unknown>;
+}) {
+  if (!input.recipientUserId || !input.sourceUnitId) return;
+  broadcast({
+    kind: input.kind,
+    sourceUnitId: input.sourceUnitId,
+    directRecipients: [input.recipientUserId],
+    actorId: input.actorUserId ?? null,
+    extra: input.extra,
+  }).catch(() => {});
 }
 
 function enqueueModeratedContentSearch(targetUnitId: string) {
@@ -247,6 +270,13 @@ export class GovernanceModerationService {
       return created;
     });
 
+    notifyModeration({
+      kind: "moderation.report.updated",
+      recipientUserId: row.reporterUserId,
+      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      actorUserId: input.actorUserId,
+      extra: { caseId: row.id, state: row.state },
+    });
     return mapModerationCaseToDTO(row);
   }
 
@@ -319,6 +349,13 @@ export class GovernanceModerationService {
         },
       });
       return updated;
+    });
+    notifyModeration({
+      kind: "moderation.case.assigned",
+      recipientUserId: row.assignedToUserId,
+      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      actorUserId: input.actorUserId,
+      extra: { caseId: row.id, state: row.state },
     });
     return mapModerationCaseToDTO(row);
   }
@@ -404,6 +441,13 @@ export class GovernanceModerationService {
       });
       return updated;
     });
+    notifyModeration({
+      kind: "moderation.report.updated",
+      recipientUserId: row.reporterUserId,
+      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      actorUserId: input.actorUserId,
+      extra: { caseId: row.id, state: row.state },
+    });
     return mapModerationCaseToDTO(row);
   }
 
@@ -429,6 +473,13 @@ export class GovernanceModerationService {
         after: { state: updated.state },
       });
       return updated;
+    });
+    notifyModeration({
+      kind: "moderation.appeal.updated",
+      recipientUserId: row.reporterUserId,
+      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      actorUserId: input.actorUserId,
+      extra: { caseId: row.id, state: row.state },
     });
     return mapModerationCaseToDTO(row);
   }
@@ -533,6 +584,13 @@ export class GovernanceModerationService {
         },
       });
       return created;
+    });
+    notifyModeration({
+      kind: "moderation.report.updated",
+      recipientUserId: row.reporterUserId,
+      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      actorUserId: input.actorUserId,
+      extra: { queueItemId: row.id, state: row.state },
     });
     return mapRealmQueueItemToDTO(row);
   }
@@ -726,6 +784,22 @@ export class GovernanceModerationService {
       const targetUnitId = row.targetUnitId;
       if (targetUnitId) await enqueueRealmMembershipSearch(targetUnitId);
     }
+    notifyModeration({
+      kind: "moderation.report.updated",
+      recipientUserId: row.reporterUserId,
+      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      actorUserId: input.actorUserId,
+      extra: { queueItemId: row.id, state: row.state },
+    });
+    if (input.decisionKind === "warn") {
+      notifyModeration({
+        kind: "moderation.subject.warning",
+        recipientUserId: row.subjectUserId,
+        sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+        actorUserId: input.actorUserId,
+        extra: { queueItemId: row.id, decisionKind: input.decisionKind },
+      });
+    }
     return mapRealmQueueItemToDTO(row);
   }
 
@@ -797,6 +871,13 @@ export class GovernanceModerationService {
         },
       });
       return updated;
+    });
+    notifyModeration({
+      kind: "moderation.escalation.updated",
+      recipientUserId: row.reporterUserId,
+      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      actorUserId: input.actorUserId,
+      extra: { queueItemId: row.id, linkedCaseId: row.linkedCaseId },
     });
     return mapRealmQueueItemToDTO(row);
   }

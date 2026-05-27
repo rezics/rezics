@@ -62,6 +62,7 @@ const revokeAuthSessionsForAuthUser = mock(async () => ({
   ok: true,
   revokedSessions: 2,
 }));
+const broadcastMock = mock(async (_event: any) => ({ ok: true, persisted: 1 }));
 
 Object.assign(prismaMock, {
   $transaction: transactionMock,
@@ -79,6 +80,10 @@ mock.module("../auth-boundary/auth-internal.client", () => ({
   revokeAuthSessionsForAuthUser,
 }));
 
+mock.module("@/notify-boundary/notify-boundary.client", () => ({
+  broadcast: broadcastMock,
+}));
+
 describe("GovernanceEnforcementService", () => {
   beforeEach(() => {
     accountEnforcementFindMany.mockClear();
@@ -94,6 +99,7 @@ describe("GovernanceEnforcementService", () => {
       ok: true,
       revokedSessions: 2,
     });
+    broadcastMock.mockClear();
   });
 
   test("projects BLOCKED from an active ban enforcement", async () => {
@@ -206,6 +212,27 @@ describe("GovernanceEnforcementService", () => {
         reversible: true,
       }),
     });
+    expect(broadcastMock).not.toHaveBeenCalled();
+  });
+
+  test("notifies subjects for warning enforcement", async () => {
+    const { governanceEnforcementService } = await import(
+      "./enforcement.service"
+    );
+
+    await governanceEnforcementService.warn("user-1", {
+      reason: "rule reminder",
+      decidedById: "staff-1",
+      decisionCode: "ALLOWED",
+    });
+
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.subject.warning",
+      sourceUnitId: "user-1",
+      directRecipients: ["user-1"],
+      actorId: "staff-1",
+      extra: { enforcementId: "enforcement-1", reason: "rule reminder" },
+    });
   });
 
   test("records case events when account enforcement is revoked", async () => {
@@ -266,6 +293,13 @@ describe("GovernanceEnforcementService", () => {
         },
         reversible: false,
       }),
+    });
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "moderation.appeal.updated",
+      sourceUnitId: "user-1",
+      directRecipients: ["user-1"],
+      actorId: "staff-2",
+      extra: { enforcementId: "enforcement-1", state: "REVOKED" },
     });
   });
 });
