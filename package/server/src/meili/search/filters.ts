@@ -54,8 +54,32 @@ const POST_CATEGORY_TO_KIND: Record<
   posts: "POST",
 };
 
+const POST_CATEGORY_TO_WORK_ROLE: Record<
+  NonNullable<PostBuildOpts["postCategory"]>,
+  "POST" | "REVIEW"
+> = {
+  reviews: "REVIEW",
+  excerpts: "POST",
+  remarks: "POST",
+  posts: "POST",
+};
+
 function quoteList(values: readonly string[]): string {
   return values.map((v) => `"${v}"`).join(", ");
+}
+
+function resolveBookScope(
+  scope: SearchScope,
+): { mode: "exact"; unitId: string } | { mode: "work"; workUnitId: string } {
+  if (
+    scope.kind === "book" &&
+    scope.scopeMode !== "exact" &&
+    scope.workUnitId?.trim()
+  ) {
+    return { mode: "work", workUnitId: scope.workUnitId };
+  }
+  if (scope.kind === "book") return { mode: "exact", unitId: scope.unitId };
+  throw new Error("resolveBookScope requires a book scope");
 }
 
 // ANCHOR: buildContentFilter
@@ -90,7 +114,13 @@ export function buildContentFilter(
 
   // 2. Scope filter
   if (scope.kind === "book") {
-    filter.push(`containedUnitIds = "${scope.unitId}"`);
+    const bookScope = resolveBookScope(scope);
+    if (bookScope.mode === "work" && opts.contentSubtype === "shelves") {
+      filter.push(`workUnitIds = "${bookScope.workUnitId}"`);
+      filter.push(`workRoles = "SHELF"`);
+    } else if (bookScope.mode === "exact") {
+      filter.push(`containedUnitIds = "${bookScope.unitId}"`);
+    }
   } else if (scope.kind === "realm") {
     filter.push(`realmIds = "${scope.realmId}"`);
   } else if (scope.kind === "user") {
@@ -185,7 +215,17 @@ export function buildPostFilter(
 
   // 2. Scope filter
   if (scope.kind === "book") {
-    filter.push(`rootTargetUnitId = "${scope.unitId}"`);
+    const bookScope = resolveBookScope(scope);
+    if (bookScope.mode === "work") {
+      filter.push(`workUnitIds = "${bookScope.workUnitId}"`);
+      if (opts.postCategory) {
+        filter.push(
+          `workRoles = "${POST_CATEGORY_TO_WORK_ROLE[opts.postCategory]}"`,
+        );
+      }
+    } else {
+      filter.push(`rootTargetUnitId = "${bookScope.unitId}"`);
+    }
   } else if (scope.kind === "realm") {
     filter.push(`realmIds = "${scope.realmId}"`);
   } else if (scope.kind === "user") {

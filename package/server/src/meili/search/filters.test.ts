@@ -29,6 +29,45 @@ describe("buildContentFilter", () => {
     expect(filter).toContain('containedUnitIds = "b-1"');
   });
 
+  test("book work scope with shelves subtype emits work-domain shelf filters", () => {
+    const scope: SearchScope = {
+      kind: "book",
+      unitId: "release-1",
+      workUnitId: "work-1",
+    };
+    const filter = buildContentFilter(
+      emptyQuery,
+      scope,
+      {},
+      {
+        contentSubtype: "shelves",
+      },
+    );
+    expect(filter).toContain('type = "SHELF"');
+    expect(filter).toContain('workUnitIds = "work-1"');
+    expect(filter).toContain('workRoles = "SHELF"');
+    expect(filter).not.toContain('containedUnitIds = "release-1"');
+  });
+
+  test("book exact scope with work id still emits containedUnitIds", () => {
+    const scope: SearchScope = {
+      kind: "book",
+      unitId: "release-1",
+      workUnitId: "work-1",
+      scopeMode: "exact",
+    };
+    const filter = buildContentFilter(
+      emptyQuery,
+      scope,
+      {},
+      {
+        contentSubtype: "shelves",
+      },
+    );
+    expect(filter).toContain('containedUnitIds = "release-1"');
+    expect(filter).not.toContain('workUnitIds = "work-1"');
+  });
+
   test("realm scope emits realmIds filter", () => {
     const scope: SearchScope = { kind: "realm", realmId: "r-7" };
     const filter = buildContentFilter(emptyQuery, scope);
@@ -108,6 +147,35 @@ describe("buildPostFilter", () => {
   test("book scope emits rootTargetUnitId", () => {
     const filter = buildPostFilter(emptyQuery, { kind: "book", unitId: "b-2" });
     expect(filter).toContain('rootTargetUnitId = "b-2"');
+  });
+
+  test("book work scope emits work-domain post filters", () => {
+    const filter = buildPostFilter(
+      emptyQuery,
+      { kind: "book", unitId: "release-1", workUnitId: "work-1" },
+      {},
+      { postCategory: "reviews" },
+    );
+    expect(filter).toContain('kind = "REVIEW"');
+    expect(filter).toContain('workUnitIds = "work-1"');
+    expect(filter).toContain('workRoles = "REVIEW"');
+    expect(filter).not.toContain('rootTargetUnitId = "release-1"');
+  });
+
+  test("book work scope uses POST role for remark and excerpt post categories", () => {
+    for (const postCategory of ["remarks", "excerpts"] as const) {
+      const filter = buildPostFilter(
+        emptyQuery,
+        { kind: "book", unitId: "release-1", workUnitId: "work-1" },
+        {},
+        { postCategory },
+      );
+      expect(filter).toContain(
+        `kind = "${postCategory === "remarks" ? "REMARK" : "EXCERPT"}"`,
+      );
+      expect(filter).toContain('workUnitIds = "work-1"');
+      expect(filter).toContain('workRoles = "POST"');
+    }
   });
 
   test("realm scope emits realmIds", () => {
