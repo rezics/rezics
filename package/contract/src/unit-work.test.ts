@@ -36,6 +36,19 @@ describe("unit work contract schemas", () => {
     ).toBe(true);
   });
 
+  test("accepts derived Series work-domain membership DTOs", () => {
+    expect(
+      Value.Check(unitWorkDTOSchema, {
+        unitId: "series-1",
+        workUnitId: "work-1",
+        role: "SERIES",
+        language: null,
+        position: null,
+        displayPolicy: "PRIMARY",
+      }),
+    ).toBe(true);
+  });
+
   test("rejects unknown membership roles", () => {
     expect(Value.Check(unitWorkRoleSchema, "COMMENT")).toBe(false);
   });

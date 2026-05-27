@@ -5,6 +5,12 @@ export const unitWorkRoleValues = [
   "POST",
   "REVIEW",
   "SHELF",
+  /**
+   * Derived Series work-domain projection. A Series receives this role only
+   * from direct release member nodes through each release's canonical
+   * UnitWork(role = RELEASE); nested Series references are not expanded.
+   */
+  "SERIES",
   "WIKI",
   "GUIDE",
   "DERIVED",
