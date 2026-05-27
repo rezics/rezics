@@ -116,3 +116,29 @@ Per-user age-rating opt-ins SHALL be stored at the JSON path `User.settings.cont
 - **WHEN** the client sends an update
 - **THEN** the request SHALL NOT include `GENERAL` or `R_15` in the `optedInRatings` array
 - **AND** the server SHALL reject any request that attempts to store them with a validation error
+
+### Requirement: Content rating is independent from AI disclosure
+
+The system SHALL keep `ContentRating` semantics independent from AI disclosure
+semantics. `ContentRating` SHALL continue to represent audience suitability at
+the catalog/discovery layer, while `AiDisclosureMode` SHALL represent declared
+AI involvement/provenance.
+
+No system component SHALL derive, modify, broaden, restrict, or validate a
+Unit's `rating` based solely on its `aiDisclosureMode`. Allowed-rating set
+derivation SHALL remain based only on baseline ratings and user rating opt-ins.
+
+#### Scenario: AI disclosure does not affect rating persistence
+
+- **GIVEN** a Unit with `rating = GENERAL`
+- **WHEN** the maintainer updates `aiDisclosureMode = MACHINE_GENERATED`
+- **THEN** the Unit's `rating` SHALL remain `GENERAL`
+- **AND** the system SHALL NOT require a rating update
+
+#### Scenario: Rating filters ignore AI disclosure unless explicitly requested
+
+- **GIVEN** a caller whose allowed rating set is `{GENERAL, R_15}`
+- **AND** a Unit with `rating = GENERAL` and `aiDisclosureMode = MACHINE_GENERATED`
+- **WHEN** the caller performs a discovery query without an AI disclosure filter
+- **THEN** the Unit SHALL be evaluated against the allowed rating set as `GENERAL`
+- **AND** the Unit SHALL NOT be excluded because it is machine-generated
