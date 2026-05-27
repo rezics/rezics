@@ -36,6 +36,9 @@ mock.module("@/governance", () => ({
   governanceRoutePolicyService: {
     decideForIdentity: decideForIdentityMock,
   },
+  realmPolicyActions: {
+    memberRoleChange: "realm.member.role.change",
+  },
   sitePolicyActions: {
     auditRead: "audit.read",
     queueDecide: "queue.site.decide",

@@ -19,6 +19,7 @@ import {
   updateRealmSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
+import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { mapRealmTagApplicationToDTO } from "./realm.mapper";
@@ -26,6 +27,53 @@ import { realmService } from "./realm.service";
 
 /** Realm roles that can moderate (update members, manage tags). */
 const MODERATOR_ROLES = ["owner", "admin", "moderator"];
+
+function realmRoleCapabilities(actorMember: RealmMemberDTO | null) {
+  if (!actorMember || !MODERATOR_ROLES.includes(actorMember.roleKey)) {
+    return [];
+  }
+
+  return [
+    {
+      capability: "queue.realm.decide" as const,
+      scope: {
+        kind: "realm" as const,
+        realmUnitId: actorMember.realmUnitId,
+      },
+    },
+  ];
+}
+
+async function assertRealmMemberRolePolicy(input: {
+  identity: any;
+  status: any;
+  actorMember: RealmMemberDTO | null;
+  realmUnitId: string;
+  targetUserId: string;
+}) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: realmPolicyActions.memberRoleChange,
+    realmMembership: input.actorMember
+      ? {
+          realmUnitId: input.actorMember.realmUnitId,
+          role: input.actorMember.roleKey as never,
+          capabilities: realmRoleCapabilities(input.actorMember),
+        }
+      : null,
+    target: {
+      kind: "realm-member",
+      id: input.targetUserId,
+      realmUnitId: input.realmUnitId,
+    },
+  });
+  if (!decision.allowed) {
+    return input.status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
 
 export const realmApi = new Elysia({ prefix: "/realm" })
   .use(authMacro)
@@ -268,22 +316,24 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .put(
     "/:unitId/members/:userId",
-    async ({ params, body, identity, set }): Promise<RealmMemberDTO> => {
-      // Moderator+ can update member roles
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<RealmMemberDTO | string> => {
       const actorMember = await realmService.getMember(
         params.unitId,
         identity.userId,
       );
-      if (
-        !actorMember ||
-        (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
-          !BasicAdminPermission(identity.permission))
-      ) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to update member roles",
-        );
-      }
+      const denied = await assertRealmMemberRolePolicy({
+        identity,
+        status,
+        actorMember,
+        realmUnitId: params.unitId,
+        targetUserId: params.userId,
+      });
+      if (denied) return denied;
       return realmService.updateMemberRole(
         params.unitId,
         params.userId,
@@ -294,9 +344,13 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       requireLogin: true,
       params: t.Object({ unitId: t.String(), userId: t.String() }),
       body: updateMemberRoleSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Update member role",
-        description: "Update a member's role (moderator+ only)",
+        description: "Update a member's role",
         tags: ["Realms"],
       },
     },

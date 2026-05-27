@@ -1,6 +1,7 @@
 import type {
   PolicyAction,
   PolicyDecision,
+  PolicyInput,
   PolicyTargetRef,
   RezicsSessionClaims,
 } from "@rezics/contract";
@@ -13,6 +14,7 @@ export class GovernanceRoutePolicyService {
     identity: RezicsSessionClaims;
     action: PolicyAction;
     target?: PolicyTargetRef;
+    realmMembership?: PolicyInput["realmMembership"];
   }): Promise<PolicyDecision> {
     const [capabilities, activeEnforcement] = await Promise.all([
       governanceCapabilityService.resolveForUser(input.identity.userId),
@@ -25,6 +27,7 @@ export class GovernanceRoutePolicyService {
       action: input.action,
       capabilities,
       activeEnforcement,
+      realmMembership: input.realmMembership,
       target: input.target ?? null,
     });
   }
