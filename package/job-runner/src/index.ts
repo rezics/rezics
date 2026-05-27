@@ -4,6 +4,10 @@ import { createJobRunnerApp } from "./app";
 import { env } from "./env";
 import { createJobHandlers } from "./handlers";
 import {
+  createAdminWorkMergeRuntime,
+  type AdminWorkMergeRuntime,
+} from "./handlers/admin-work-merge/runtime";
+import {
   createHistoryRuntime,
   type HistoryRuntime,
 } from "./handlers/history/runtime";
@@ -22,6 +26,7 @@ let boss: Awaited<ReturnType<typeof createBoss>> | undefined;
 let app: ReturnType<typeof createJobRunnerApp> | undefined;
 let searchRuntime: SearchRuntime | undefined;
 let historyRuntime: HistoryRuntime | undefined;
+let adminWorkMergeRuntime: AdminWorkMergeRuntime | undefined;
 
 if (role === "all" || role === "worker" || role === "http") {
   boss = await createBoss();
@@ -42,11 +47,15 @@ if ((role === "all" || role === "worker") && boss) {
     serverDatabaseUrl: env.SERVER_DATABASE_URL,
     historyDatabaseUrl: env.HISTORY_DATABASE_URL,
   });
+  adminWorkMergeRuntime = createAdminWorkMergeRuntime({
+    serverDatabaseUrl: env.SERVER_DATABASE_URL,
+  });
   await registerWorkers(
     boss as never,
     createJobHandlers({
       searchClient: searchRuntime.client,
       historyConsumer: historyRuntime.consumer,
+      adminWorkMergeRuntime,
     }),
   );
 }
@@ -67,6 +76,7 @@ if ((role === "all" || role === "http") && boss) {
 async function shutdown() {
   await searchRuntime?.disconnect();
   await historyRuntime?.disconnect();
+  await adminWorkMergeRuntime?.disconnect();
   await boss?.stop({ graceful: true, timeout: 30_000 });
   app?.server?.stop();
 }

@@ -9,6 +9,13 @@ export type {
   FactoryScenarioName,
 } from "./scenarios";
 export {
+  createFactoryContentStructureNodes,
+  createFactoryReleasePartStructure,
+  createFactorySeriesMemberStructure,
+  ensureFactoryContentStructure,
+} from "./content-structure";
+export type { FactoryContentStructureNodeInput } from "./content-structure";
+export {
   FACTORY_SCENARIO_NAMES,
   FACTORY_SCENARIOS,
   runFactoryScenarios,

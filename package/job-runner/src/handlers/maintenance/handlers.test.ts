@@ -83,4 +83,20 @@ describe("maintenance handlers", () => {
       },
     ]);
   });
+
+  test("admin work merge fanout requires the admin runtime", async () => {
+    const handlers = createMaintenanceHandlers();
+    const command = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.fanoutContinuation,
+      {
+        fanout: "admin-work-merge.execute",
+        targetId: "operation-1",
+        cursor: "start",
+      },
+    );
+
+    await expect(
+      handlers[command.kind]?.(command, { enqueue: async () => undefined }),
+    ).rejects.toThrow("Admin work merge runtime is not configured");
+  });
 });

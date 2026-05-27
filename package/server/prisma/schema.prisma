@@ -121,7 +121,7 @@ enum PostKind {
   /**
    * A chapter of the book named by `targetUnitId` (a Unit of type=BOOK).
    * Content lives in `Post.content`; cover (optional) lives in `UnitTranslation.extra.coverUrl`.
-   * Order is governed by `BookContentStructureNode` rows.
+   * Order is governed by `ContentStructureNode` rows.
    */
   CHAPTER
   /**

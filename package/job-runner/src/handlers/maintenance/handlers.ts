@@ -5,6 +5,8 @@ import {
   type MaintenanceCommand,
   SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
+import type { AdminWorkMergeRuntime } from "../admin-work-merge/runtime";
+import { executeAdminWorkMerge } from "../admin-work-merge/handlers";
 import type { HandlerContext, JobHandler } from "../../worker";
 
 function searchSyncKindForTarget(targetType: string) {
@@ -124,7 +126,9 @@ function replayTargetFromKey(scope: string, key: string) {
   }
 }
 
-export function createMaintenanceHandlers() {
+export function createMaintenanceHandlers(
+  options: { adminWorkMergeRuntime?: AdminWorkMergeRuntime } = {},
+) {
   return {
     [MAINTENANCE_COMMAND_KINDS.searchDriftRepair]: async (command, context) => {
       const maintenance = command as MaintenanceCommand;
@@ -173,7 +177,23 @@ export function createMaintenanceHandlers() {
       );
       return { enqueued, mode: "current-state" };
     },
-    [MAINTENANCE_COMMAND_KINDS.fanoutContinuation]: async () => {
+    [MAINTENANCE_COMMAND_KINDS.fanoutContinuation]: async (
+      command,
+      context,
+    ) => {
+      const maintenance = command as MaintenanceCommand;
+      if (!("fanout" in maintenance.payload)) return { status: "accepted" };
+      if (maintenance.payload.fanout === "admin-work-merge.execute") {
+        if (!options.adminWorkMergeRuntime) {
+          throw new Error("Admin work merge runtime is not configured");
+        }
+        return executeAdminWorkMerge(
+          options.adminWorkMergeRuntime.prisma,
+          maintenance.payload.targetId,
+          maintenance,
+          context,
+        );
+      }
       return { status: "accepted" };
     },
   } satisfies Partial<Record<AnyJobCommand["kind"], JobHandler>>;

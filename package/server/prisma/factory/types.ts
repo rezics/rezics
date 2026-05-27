@@ -76,7 +76,7 @@ export interface ChapterPlan {
   unitProbability: number;
   /**
    * Probability that a materialized chapter receives an additional
-   * BookContentStructureNode row in the same book (multi-link fixture).
+   * ContentStructureNode row in the same ownerUnitId structure (multi-link fixture).
    * Defaults to 0 so existing seeds are unaffected.
    */
   multiLinkChapterProbability?: number;

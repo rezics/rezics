@@ -16,6 +16,7 @@ import type {
 import { CreationMode as CreationModeValue } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
+import { contentStructureApi } from "../content-structure/content-structure.api";
 import type { BookFilters } from "./book.types";
 
 /**
@@ -51,9 +52,12 @@ export const bookApi = {
   getContentStructure: async (
     bookUnitId: string,
   ): Promise<BookContentStructureResponse> => {
-    return apiFetch<BookContentStructureResponse>(
-      `/book/${bookUnitId}/content-structure`,
-    );
+    const structure = await contentStructureApi.get(bookUnitId);
+    return {
+      ...structure,
+      bookUnitId: structure.ownerUnitId,
+      ownerUnitId: structure.ownerUnitId,
+    };
   },
 
   /**
@@ -63,13 +67,12 @@ export const bookApi = {
     bookUnitId: string,
     nodes: BookContentStructureItem[],
   ): Promise<BookContentStructureResponse> => {
-    return apiFetch<BookContentStructureResponse>(
-      `/book/${bookUnitId}/content-structure`,
-      {
-        method: "PUT",
-        body: JSON.stringify(nodes),
-      },
-    );
+    const structure = await contentStructureApi.update(bookUnitId, nodes);
+    return {
+      ...structure,
+      bookUnitId: structure.ownerUnitId,
+      ownerUnitId: structure.ownerUnitId,
+    };
   },
 
   /**

@@ -147,7 +147,7 @@ export async function runFactorySeed(
   );
   done();
 
-  done = stepTimer("Step 10: Chapters + BookContentStructureNode rows");
+  done = stepTimer("Step 10: Chapters + ContentStructureNode rows");
   const bookUnitMap = new Map<string, string>();
   for (const book of books) {
     const unit = await ctx.prisma.unit.findUnique({
