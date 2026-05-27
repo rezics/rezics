@@ -156,6 +156,11 @@ export type BookResponse = (typeof bookResponseSchema)["static"];
 export const createBookSchema = t.Object({
   userId: t.Optional(t.String()),
   creationMode: t.Optional(creationModeSchema),
+  workMatch: t.Optional(
+    t.Object({
+      releaseUnitId: t.String(),
+    }),
+  ),
   defaultLanguage: t.Optional(languageSchema),
   isbn13: t.Optional(t.String()),
   publicationDate: t.Optional(t.Union([t.String(), t.Date()])),

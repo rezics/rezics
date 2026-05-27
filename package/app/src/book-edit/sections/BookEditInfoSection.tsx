@@ -7,6 +7,7 @@ import {
 } from "@rezics/api/book/book";
 import { creditAttributionQueries } from "@rezics/api/credit-attribution/credit-attribution";
 import { useEntityAttributionBatchMutation } from "@rezics/api/entity-attribution/entity-attribution";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { getLockedFieldError } from "@rezics/api/react-query/errors";
 import {
   useDeleteTranslationMutation,
@@ -14,6 +15,7 @@ import {
 } from "@rezics/api/unit/unit.mutations";
 import type {
   ContentRating,
+  ContentSearchDocument,
   CreateBookInput,
   CreationMode,
   EditorialPatchSubmission,
@@ -72,11 +74,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Input,
   Separator,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { ChevronDown as ExpandMore, LockKeyhole, Plus } from "lucide-react";
+import {
+  ChevronDown as ExpandMore,
+  LockKeyhole,
+  Plus,
+  Search,
+} from "lucide-react";
 import React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { EntityPicker } from "@/entity-picker";
@@ -102,6 +110,11 @@ import {
   isRestoreEditSubmitDisabled,
   withRestoreSource,
 } from "../models/restoreEdit";
+import {
+  contentSearchTitle,
+  creationWorkMatchCopy,
+  resolveCreationWorkMatchContext,
+} from "../models/creationWorkMatch";
 
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
@@ -225,6 +238,132 @@ const UpdateBookDialog: React.FC<{
   );
 };
 
+function WorkMatchPanel({
+  creationMode,
+  searchTerm,
+  onSearchTermChange,
+  result,
+  isLoading,
+  selected,
+  onSelect,
+}: {
+  creationMode: CreationMode;
+  searchTerm: string;
+  onSearchTermChange: (value: string) => void;
+  result: ContentSearchDocument[];
+  isLoading: boolean;
+  selected: ContentSearchDocument | null;
+  onSelect: (value: ContentSearchDocument | null) => void;
+}) {
+  const copy = creationWorkMatchCopy(creationMode);
+  const selectedContext = selected
+    ? resolveCreationWorkMatchContext(selected)
+    : null;
+
+  return (
+    <section>
+      <div className={copy.prominent ? "mb-4" : "mb-3"}>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {copy.title}
+        </h3>
+        <p className="mt-2 text-sm leading-ui text-text-secondary">
+          {copy.description}
+        </p>
+      </div>
+      <Separator className="mb-6" />
+
+      <div className="space-y-4">
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-text-tertiary"
+            aria-hidden="true"
+          />
+          <Input
+            value={searchTerm}
+            onChange={(event) => onSearchTermChange(event.target.value)}
+            placeholder="Search title, alias, author, tag"
+            className="pl-9"
+          />
+        </div>
+
+        {selectedContext ? (
+          <Alert>
+            <AlertDescription>
+              <span className="block text-sm font-medium leading-ui text-text-primary">
+                Selected: {selectedContext.title}
+              </span>
+              <span className="mt-1 block text-xs leading-dense text-text-secondary">
+                {selectedContext.workUnitId
+                  ? `Canonical work ${selectedContext.workUnitId}; ${selectedContext.sameWorkReleaseCount} same-work release(s).`
+                  : "Standalone release; submit will create or reuse a hidden work domain."}
+              </span>
+              {selectedContext.workTagSummary.length > 0 ? (
+                <span className="mt-1 block text-xs leading-dense text-text-secondary">
+                  Work tags: {selectedContext.workTagSummary.join(", ")}
+                </span>
+              ) : null}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-3"
+                onClick={() => onSelect(null)}
+              >
+                Clear match
+              </Button>
+            </AlertDescription>
+          </Alert>
+        ) : null}
+
+        {searchTerm.trim().length >= 2 ? (
+          <div className="space-y-2">
+            {isLoading ? (
+              <p className="text-sm leading-ui text-text-secondary">
+                Searching...
+              </p>
+            ) : null}
+            {!isLoading && result.length === 0 ? (
+              <p className="text-sm leading-ui text-text-secondary">
+                No existing release matched this search.
+              </p>
+            ) : null}
+            {result.map((item) =>
+              (() => {
+                const context = resolveCreationWorkMatchContext(item);
+                return (
+                  <button
+                    type="button"
+                    key={item.id}
+                    className="w-full rounded-md border border-border-whisper bg-surface-subtle p-4 text-left transition-colors hover:bg-surface-elevated"
+                    onClick={() => onSelect(item)}
+                  >
+                    <span className="block text-sm font-medium leading-ui text-text-primary">
+                      {context.title}
+                    </span>
+                    <span className="mt-1 block text-xs leading-dense text-text-secondary">
+                      {context.workUnitId
+                        ? `${context.sameWorkReleaseCount} same-work release(s)`
+                        : "Standalone release"}
+                      {item.languages.length > 0
+                        ? ` - ${item.languages.join(", ")}`
+                        : ""}
+                    </span>
+                    {item.allTagLabels.length > 0 ? (
+                      <span className="mt-1 block text-xs leading-dense text-text-tertiary">
+                        {item.allTagLabels.slice(0, 8).join(", ")}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })(),
+            )}
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
 export interface BookEditMainPageProps {
   newBook?: boolean;
   pageTitle?: string;
@@ -286,6 +425,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const [creationMode, setCreationMode] = React.useState<CreationMode>(
     CreationModeValue.WIKI,
   );
+  const [workMatchSearch, setWorkMatchSearch] = React.useState("");
+  const [selectedWorkMatch, setSelectedWorkMatch] =
+    React.useState<ContentSearchDocument | null>(null);
 
   const editor = useBookTranslationEditor(data);
 
@@ -424,6 +566,15 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     affectedDetailKeys: () => (bookId ? [bookKeys.detail(bookId)] : []),
   });
   const batchAuthorMutation = useEntityAttributionBatchMutation();
+  const workMatchQuery = useQuery({
+    ...contentSearchQueryOptions({
+      keyword: workMatchSearch.trim(),
+      type: "BOOK",
+      releasePresentation: "grouped",
+      limit: 6,
+    }),
+    enabled: newBook && workMatchSearch.trim().length >= 2,
+  });
 
   async function handleSubmit() {
     const draft = editor.currentDraft;
@@ -443,6 +594,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         extra: metadataState?.extra,
         defaultLanguage: DEFAULT_LANGUAGE,
         creationMode,
+        workMatch: selectedWorkMatch
+          ? { releaseUnitId: selectedWorkMatch.id }
+          : undefined,
         translations: [
           {
             language:
@@ -725,6 +879,18 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               </button>
             </div>
           </section>
+        )}
+
+        {newBook && (
+          <WorkMatchPanel
+            creationMode={creationMode}
+            searchTerm={workMatchSearch}
+            onSearchTermChange={setWorkMatchSearch}
+            result={workMatchQuery.data?.items ?? []}
+            isLoading={workMatchQuery.isFetching}
+            selected={selectedWorkMatch}
+            onSelect={setSelectedWorkMatch}
+          />
         )}
 
         {/* Translation: language bar + per-language fields + sync actions */}

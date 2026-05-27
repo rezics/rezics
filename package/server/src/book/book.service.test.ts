@@ -80,6 +80,16 @@ const mockCreateBook = mock(async (_args: unknown) => ({
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
 }));
+const mockFindUniqueUnit = mock(async (_args: unknown) => ({
+  id: "matched-release-1",
+  type: "BOOK",
+  workUnitId: "work-1",
+  translations: [{ language: "en", title: "Matched Release" }],
+  workMemberships: [{ workUnitId: "work-1" }],
+}));
+const mockUpdateUnit = mock(async (_args: unknown) => ({ id: "unit-1" }));
+const mockCreateUnitWork = mock(async (_args: unknown) => ({}));
+const mockUpsertUnitWork = mock(async (_args: unknown) => ({}));
 const mockFindManyBook = mock(async (_args: unknown) => []);
 const mockCountBook = mock(async (_args: unknown) => 0);
 const mockUpdateContainer = mock(async (_args: unknown) => ({
@@ -107,6 +117,14 @@ const mockTx = {
   book: {
     create: mockCreateBook,
     update: mockUpdateBook,
+  },
+  unit: {
+    findUniqueOrThrow: mockFindUniqueUnit,
+    update: mockUpdateUnit,
+  },
+  unitWork: {
+    create: mockCreateUnitWork,
+    upsert: mockUpsertUnitWork,
   },
   historyOutbox: {
     create: mockCreateHistoryOutbox,
@@ -142,6 +160,10 @@ function resetMocks(): void {
   mockAllocateSequence.mockClear();
   mockCreateHistoryOutbox.mockClear();
   mockCreateBook.mockClear();
+  mockFindUniqueUnit.mockClear();
+  mockUpdateUnit.mockClear();
+  mockCreateUnitWork.mockClear();
+  mockUpsertUnitWork.mockClear();
   mockFindManyBook.mockClear();
   mockCountBook.mockClear();
   mockUpdateContainer.mockClear();
@@ -249,6 +271,98 @@ describe("BookService.create", () => {
       extension: { pageCount: 200 },
       translations: { en: { title: "Personal Book" } },
     });
+  });
+
+  test("binds a new release to a matched release's existing work", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.create({
+      userId: "user-1",
+      defaultLanguage: "en",
+      workMatch: { releaseUnitId: "matched-release-1" },
+      translations: [{ language: "en", title: "New Release" }],
+    });
+
+    const createArgs = mockCreateBook.mock.calls[0]?.[0] as any;
+    expect(mockFindUniqueUnit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "matched-release-1" },
+      }),
+    );
+    expect(createArgs.data.unit.create.workUnitId).toBe("work-1");
+    expect(mockUpsertUnitWork).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          unitId: "book-1",
+          workUnitId: "work-1",
+          role: "RELEASE",
+        }),
+      }),
+    );
+  });
+
+  test("creates a hidden work domain when the matched release is standalone", async () => {
+    mockFindUniqueUnit.mockResolvedValueOnce({
+      id: "matched-release-1",
+      type: "BOOK",
+      workUnitId: null,
+      translations: [{ language: "en", title: "Standalone" }],
+      workMemberships: [],
+    });
+    mockCreateBook
+      .mockResolvedValueOnce({ unitId: "hidden-work-1" } as any)
+      .mockResolvedValueOnce({
+        unitId: "book-1",
+        unit: {
+          id: "book-1",
+          userId: undefined,
+          workUnitId: "hidden-work-1",
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          rating: "GENERAL",
+          defaultLanguage: "en",
+          isLanguageNeutral: false,
+          translations: [],
+          creditAttributions: [],
+          publishedAt: null,
+        },
+        isbn13: null,
+        publicationDate: null,
+        pageCount: null,
+        textLength: 0,
+        chapterCount: 0,
+        formatKey: null,
+        isLicensed: false,
+        extra: null,
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      } as any);
+    const { bookService } = await import("./book.service");
+
+    await bookService.create({
+      userId: "user-1",
+      defaultLanguage: "en",
+      workMatch: { releaseUnitId: "matched-release-1" },
+      translations: [{ language: "en", title: "New Release" }],
+    });
+
+    const hiddenCreateArgs = mockCreateBook.mock.calls[0]?.[0] as any;
+    const releaseCreateArgs = mockCreateBook.mock.calls[1]?.[0] as any;
+    expect(hiddenCreateArgs.data.unit.create.visibility).toBe("PRIVATE");
+    expect(mockCreateUnitWork).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          unitId: "matched-release-1",
+          workUnitId: "hidden-work-1",
+          role: "RELEASE",
+        }),
+      }),
+    );
+    expect(mockUpdateUnit).toHaveBeenCalledWith({
+      where: { id: "matched-release-1" },
+      data: { workUnitId: "hidden-work-1" },
+    });
+    expect(releaseCreateArgs.data.unit.create.workUnitId).toBe("hidden-work-1");
   });
 
   test("create and edit projections produce identical editorial leaf paths", async () => {

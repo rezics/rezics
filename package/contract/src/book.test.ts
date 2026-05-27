@@ -4,6 +4,7 @@ import {
   bookContentStructureDTOSchema,
   bookContentStructureNodeSchema,
   bookDTOSchema,
+  createBookSchema,
 } from "./book";
 
 describe("bookContentStructureNodeSchema", () => {
@@ -115,6 +116,19 @@ describe("bookDTOSchema", () => {
           position: "a0",
           displayPolicy: "PRIMARY",
         },
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("createBookSchema", () => {
+  test("accepts creation-time work matching", () => {
+    expect(
+      Value.Check(createBookSchema, {
+        creationMode: "wiki",
+        defaultLanguage: "en",
+        workMatch: { releaseUnitId: "release-1" },
+        translations: [{ language: "en", title: "New Release" }],
       }),
     ).toBe(true);
   });

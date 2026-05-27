@@ -113,13 +113,13 @@
 
 ## 13. Creation Work Matching UX
 
-- [ ] 13.1 Add contract/API support for creation-time work matching using ordinary content search results with canonical work metadata.
-- [ ] 13.2 Update public catalog creation UI to prominently prompt users to search for existing works/releases before creating new release-aware content.
-- [ ] 13.3 Update personal creation UI to show quieter work-matching guidance through the work row help affordance.
-- [ ] 13.4 When a matched release already belongs to a work, bind the new release to the matched release's canonical work.
-- [ ] 13.5 When a matched release is standalone, support creating/reusing a hidden work domain for the matched release plus the new release.
-- [ ] 13.6 Show selected work context with same-work releases and work tag summary before or after binding confirmation.
-- [ ] 13.7 Add tests for public guidance, personal guidance, matched-work binding, standalone matched-release work creation, and work-context disambiguation.
+- [x] 13.1 Add contract/API support for creation-time work matching using ordinary content search results with canonical work metadata.
+- [x] 13.2 Update public catalog creation UI to prominently prompt users to search for existing works/releases before creating new release-aware content.
+- [x] 13.3 Update personal creation UI to show quieter work-matching guidance through the work row help affordance.
+- [x] 13.4 When a matched release already belongs to a work, bind the new release to the matched release's canonical work.
+- [x] 13.5 When a matched release is standalone, support creating/reusing a hidden work domain for the matched release plus the new release.
+- [x] 13.6 Show selected work context with same-work releases and work tag summary before or after binding confirmation.
+- [x] 13.7 Add tests for public guidance, personal guidance, matched-work binding, standalone matched-release work creation, and work-context disambiguation.
 
 ## 14. Library Metadata And USWN
 
