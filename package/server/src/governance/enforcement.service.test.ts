@@ -24,6 +24,39 @@ const accountEnforcementCreate = mock(async ({ data }: any) => ({
   createdAt: new Date("2026-05-28T00:00:00.000Z"),
   updatedAt: new Date("2026-05-28T00:00:00.000Z"),
 }));
+const accountEnforcementUpdate = mock(async ({ data, where }: any) => ({
+  id: where.id,
+  targetUserId: "user-1",
+  kind: "BAN",
+  state: data.state,
+  reason: "abuse",
+  safeMessage: data.safeMessage,
+  decidedById: "staff-1",
+  decisionCode: "ALLOWED",
+  startsAt: new Date("2026-05-28T00:00:00.000Z"),
+  expiresAt: null,
+  revokedAt: data.revokedAt,
+  auditLogId: null,
+  metadata: data.metadata,
+  createdAt: new Date("2026-05-28T00:00:00.000Z"),
+  updatedAt: new Date("2026-05-28T00:00:00.000Z"),
+}));
+const moderationCaseEventCreate = mock(async ({ data }: any) => ({
+  id: "event-1",
+  ...data,
+  createdAt: new Date("2026-05-28T00:00:00.000Z"),
+}));
+const transactionMock = mock(async (fn: any) =>
+  fn({
+    accountEnforcement: {
+      create: accountEnforcementCreate,
+      update: accountEnforcementUpdate,
+    },
+    moderationCaseEvent: {
+      create: moderationCaseEventCreate,
+    },
+  }),
+);
 const userFindUnique = mock(async () => ({ authUserId: "auth-user-1" }));
 const revokeAuthSessionsForAuthUser = mock(async () => ({
   ok: true,
@@ -31,9 +64,11 @@ const revokeAuthSessionsForAuthUser = mock(async () => ({
 }));
 
 Object.assign(prismaMock, {
+  $transaction: transactionMock,
   accountEnforcement: {
     findMany: accountEnforcementFindMany,
     create: accountEnforcementCreate,
+    update: accountEnforcementUpdate,
   },
   user: {
     findUnique: userFindUnique,
@@ -49,6 +84,9 @@ describe("GovernanceEnforcementService", () => {
     accountEnforcementFindMany.mockClear();
     accountEnforcementFindMany.mockResolvedValue([]);
     accountEnforcementCreate.mockClear();
+    accountEnforcementUpdate.mockClear();
+    moderationCaseEventCreate.mockClear();
+    transactionMock.mockClear();
     userFindUnique.mockClear();
     userFindUnique.mockResolvedValue({ authUserId: "auth-user-1" });
     revokeAuthSessionsForAuthUser.mockClear();
@@ -137,6 +175,97 @@ describe("GovernanceEnforcementService", () => {
           revokedSessions: 2,
         },
       },
+    });
+  });
+
+  test("records case events for reversible account enforcement decisions", async () => {
+    const { governanceEnforcementService } = await import(
+      "./enforcement.service"
+    );
+
+    await governanceEnforcementService.silence("user-1", {
+      reason: "spam",
+      decidedById: "staff-1",
+      decisionCode: "ALLOWED",
+      caseId: "case-1",
+    });
+
+    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        caseId: "case-1",
+        actorUserId: "staff-1",
+        eventType: "account.enforcement.applied",
+        decisionCode: "ALLOWED",
+        reason: "spam",
+        after: {
+          targetUserId: "user-1",
+          enforcementId: "enforcement-1",
+          kind: "SILENCE",
+          state: "ACTIVE",
+        },
+        reversible: true,
+      }),
+    });
+  });
+
+  test("records case events when account enforcement is revoked", async () => {
+    accountEnforcementFindMany.mockResolvedValueOnce([
+      {
+        id: "enforcement-1",
+        targetUserId: "user-1",
+        kind: "BAN",
+        state: "ACTIVE",
+        reason: "abuse",
+        safeMessage: null,
+        decidedById: "staff-1",
+        decisionCode: "ALLOWED",
+        startsAt: new Date("2026-05-28T00:00:00.000Z"),
+        expiresAt: null,
+        revokedAt: null,
+        auditLogId: null,
+        metadata: null,
+        createdAt: new Date("2026-05-28T00:00:00.000Z"),
+        updatedAt: new Date("2026-05-28T00:00:00.000Z"),
+      },
+    ]);
+    const { governanceEnforcementService } = await import(
+      "./enforcement.service"
+    );
+
+    await governanceEnforcementService.unblock("user-1", {
+      reason: "appeal approved",
+      revokedById: "staff-2",
+      caseId: "case-1",
+    });
+
+    expect(accountEnforcementUpdate).toHaveBeenCalledWith({
+      where: { id: "enforcement-1" },
+      data: expect.objectContaining({
+        state: "REVOKED",
+        revokedById: "staff-2",
+        metadata: { unblockReason: "appeal approved" },
+      }),
+    });
+    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        caseId: "case-1",
+        actorUserId: "staff-2",
+        eventType: "account.enforcement.revoked",
+        reason: "appeal approved",
+        before: {
+          targetUserId: "user-1",
+          enforcementId: "enforcement-1",
+          kind: "BAN",
+          state: "ACTIVE",
+        },
+        after: {
+          targetUserId: "user-1",
+          enforcementId: "enforcement-1",
+          kind: "BAN",
+          state: "REVOKED",
+        },
+        reversible: false,
+      }),
     });
   });
 });

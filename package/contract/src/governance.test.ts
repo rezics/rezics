@@ -269,6 +269,7 @@ describe("governance contract registry", () => {
         reason: "spam",
         safeMessage: "Posting is temporarily restricted.",
         expiresAt: "2026-05-29T00:00:00.000Z",
+        caseId: "case-1",
         metadata: { caseId: "case-1" },
       }),
     ).toBe(true);
@@ -283,6 +284,7 @@ describe("governance contract registry", () => {
     expect(
       Value.Check(unblockAccountEnforcementSchema, {
         reason: "appeal approved",
+        caseId: "case-1",
         metadata: { caseId: "case-1" },
       }),
     ).toBe(true);

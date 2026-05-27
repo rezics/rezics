@@ -70,6 +70,31 @@ function contentModerationData(input: ContentModerationStateInput) {
   };
 }
 
+function contentModerationEventType(input: {
+  state: ContentModerationStateInput["state"];
+  realmUnitId?: string | null;
+}) {
+  const prefix = input.realmUnitId ? "realm_content" : "content";
+  if (input.state === "visible") return `${prefix}.restored`;
+  if (input.state === "hidden") return `${prefix}.hidden`;
+  if (input.state === "tombstoned") return `${prefix}.tombstoned`;
+  return `${prefix}.state_changed`;
+}
+
+function contentModerationEventSummary(input: {
+  state?: string | null;
+  reason?: string | null;
+  targetUnitId: string;
+  realmUnitId?: string | null;
+}) {
+  return cleanJsonObject({
+    state: input.state,
+    reason: input.reason,
+    targetUnitId: input.targetUnitId,
+    realmUnitId: input.realmUnitId ?? undefined,
+  });
+}
+
 function enqueueModeratedContentSearch(targetUnitId: string) {
   return Promise.all([
     serverJobProducer.enqueue(
@@ -420,16 +445,57 @@ export class GovernanceModerationService {
 
   async setGlobalContentState(input: ContentModerationStateInput) {
     const data = contentModerationData(input);
-    const row = await prisma.contentModerationState.upsert({
-      where: { targetUnitId: input.targetUnitId },
-      create: {
-        targetUnitId: input.targetUnitId,
-        ...data,
-      },
-      update: data,
-    });
+    const row = input.caseId
+      ? await prisma.$transaction(async (tx) => {
+          const before = await tx.contentModerationState.findUnique({
+            where: { targetUnitId: input.targetUnitId },
+          });
+          const updated = await tx.contentModerationState.upsert({
+            where: { targetUnitId: input.targetUnitId },
+            create: {
+              targetUnitId: input.targetUnitId,
+              ...data,
+            },
+            update: data,
+          });
+          await this.createCaseEvent(tx, {
+            caseId: input.caseId as string,
+            actorUserId: input.decidedById ?? "",
+            eventType: contentModerationEventType({ state: input.state }),
+            reason: input.reason ?? null,
+            before: before
+              ? contentModerationEventSummary({
+                  state: before.state,
+                  reason: before.reason,
+                  targetUnitId: input.targetUnitId,
+                })
+              : null,
+            after: contentModerationEventSummary({
+              state: updated.state,
+              reason: updated.reason,
+              targetUnitId: input.targetUnitId,
+            }),
+            reversible: input.state !== "visible",
+          });
+          return updated;
+        })
+      : await prisma.contentModerationState.upsert({
+          where: { targetUnitId: input.targetUnitId },
+          create: {
+            targetUnitId: input.targetUnitId,
+            ...data,
+          },
+          update: data,
+        });
     await enqueueModeratedContentSearch(input.targetUnitId);
     return mapContentModerationStateToDTO(row);
+  }
+
+  async hideGlobal(input: ModerationDecisionInput) {
+    return this.setGlobalContentState({
+      ...input,
+      state: "hidden",
+    });
   }
 
   async tombstoneGlobal(input: ModerationDecisionInput) {
@@ -467,21 +533,78 @@ export class GovernanceModerationService {
     input: ContentModerationStateInput & { realmUnitId: string },
   ) {
     const data = contentModerationData(input);
-    const row = await prisma.realmContentModeration.upsert({
-      where: {
-        realmUnitId_targetUnitId: {
-          realmUnitId: input.realmUnitId,
-          targetUnitId: input.targetUnitId,
-        },
-      },
-      create: {
-        realmUnitId: input.realmUnitId,
-        targetUnitId: input.targetUnitId,
-        ...data,
-      },
-      update: data,
-    });
+    const row = input.caseId
+      ? await prisma.$transaction(async (tx) => {
+          const before = await tx.realmContentModeration.findUnique({
+            where: {
+              realmUnitId_targetUnitId: {
+                realmUnitId: input.realmUnitId,
+                targetUnitId: input.targetUnitId,
+              },
+            },
+          });
+          const updated = await tx.realmContentModeration.upsert({
+            where: {
+              realmUnitId_targetUnitId: {
+                realmUnitId: input.realmUnitId,
+                targetUnitId: input.targetUnitId,
+              },
+            },
+            create: {
+              realmUnitId: input.realmUnitId,
+              targetUnitId: input.targetUnitId,
+              ...data,
+            },
+            update: data,
+          });
+          await this.createCaseEvent(tx, {
+            caseId: input.caseId as string,
+            actorUserId: input.decidedById ?? "",
+            eventType: contentModerationEventType({
+              state: input.state,
+              realmUnitId: input.realmUnitId,
+            }),
+            reason: input.reason ?? null,
+            before: before
+              ? contentModerationEventSummary({
+                  state: before.state,
+                  reason: before.reason,
+                  targetUnitId: input.targetUnitId,
+                  realmUnitId: input.realmUnitId,
+                })
+              : null,
+            after: contentModerationEventSummary({
+              state: updated.state,
+              reason: updated.reason,
+              targetUnitId: input.targetUnitId,
+              realmUnitId: input.realmUnitId,
+            }),
+            reversible: input.state !== "visible",
+          });
+          return updated;
+        })
+      : await prisma.realmContentModeration.upsert({
+          where: {
+            realmUnitId_targetUnitId: {
+              realmUnitId: input.realmUnitId,
+              targetUnitId: input.targetUnitId,
+            },
+          },
+          create: {
+            realmUnitId: input.realmUnitId,
+            targetUnitId: input.targetUnitId,
+            ...data,
+          },
+          update: data,
+        });
     return mapRealmContentModerationToDTO(row);
+  }
+
+  async hideInRealm(input: ModerationDecisionInput & { realmUnitId: string }) {
+    return this.setRealmContentOverlay({
+      ...input,
+      state: "hidden",
+    });
   }
 
   async tombstoneInRealm(

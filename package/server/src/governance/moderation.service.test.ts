@@ -46,6 +46,7 @@ const realmContentModerationFindMany = mock(async () => [
     updatedAt: now,
   },
 ]);
+const realmContentModerationFindUnique = mock(async (): Promise<any> => null);
 const postFindUnique = mock(
   async (): Promise<{ parentPostUnitId: string | null }> => ({
     parentPostUnitId: null,
@@ -147,6 +148,14 @@ const transactionMock = mock(async (fn: any) =>
     moderationCaseEvent: {
       create: moderationCaseEventCreate,
     },
+    contentModerationState: {
+      findUnique: contentModerationFindUnique,
+      upsert: contentModerationUpsert,
+    },
+    realmContentModeration: {
+      findUnique: realmContentModerationFindUnique,
+      upsert: realmContentModerationUpsert,
+    },
   }),
 );
 
@@ -158,6 +167,7 @@ Object.assign(prismaMock, {
     upsert: contentModerationUpsert,
   },
   realmContentModeration: {
+    findUnique: realmContentModerationFindUnique,
     findMany: realmContentModerationFindMany,
     upsert: realmContentModerationUpsert,
   },
@@ -192,8 +202,11 @@ mock.module("@/job/job-boundary", () => ({
 describe("GovernanceModerationService content moderation state", () => {
   beforeEach(() => {
     contentModerationFindUnique.mockClear();
+    contentModerationFindUnique.mockResolvedValue(null);
     contentModerationFindMany.mockClear();
     contentModerationUpsert.mockClear();
+    realmContentModerationFindUnique.mockClear();
+    realmContentModerationFindUnique.mockResolvedValue(null);
     realmContentModerationFindMany.mockClear();
     realmContentModerationUpsert.mockClear();
     postFindUnique.mockClear();
@@ -372,6 +385,102 @@ describe("GovernanceModerationService content moderation state", () => {
         update: expect.objectContaining({ state: "VISIBLE" }),
       }),
     );
+  });
+
+  test("records case event history for global content hide decisions", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await governanceModerationService.hideGlobal({
+      targetUnitId: "reply-1",
+      decidedById: "staff-1",
+      reason: "abuse",
+      caseId: "case-1",
+    });
+
+    expect(contentModerationFindUnique).toHaveBeenCalledWith({
+      where: { targetUnitId: "reply-1" },
+    });
+    expect(contentModerationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          state: "HIDDEN",
+          caseId: "case-1",
+          reason: "abuse",
+        }),
+      }),
+    );
+    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        caseId: "case-1",
+        actorUserId: "staff-1",
+        eventType: "content.hidden",
+        reason: "abuse",
+        before: undefined,
+        after: {
+          state: "HIDDEN",
+          reason: "abuse",
+          targetUnitId: "reply-1",
+        },
+        reversible: true,
+      }),
+    });
+  });
+
+  test("records case event history for realm content restore decisions", async () => {
+    realmContentModerationFindUnique.mockResolvedValueOnce({
+      realmUnitId: "realm-1",
+      targetUnitId: "reply-1",
+      state: "HIDDEN",
+      decidedById: "mod-1",
+      caseId: "case-1",
+      reason: "off-topic",
+      metadata: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await governanceModerationService.restoreInRealm({
+      realmUnitId: "realm-1",
+      targetUnitId: "reply-1",
+      decidedById: "mod-2",
+      reason: "appeal approved",
+      caseId: "case-1",
+    });
+
+    expect(realmContentModerationFindUnique).toHaveBeenCalledWith({
+      where: {
+        realmUnitId_targetUnitId: {
+          realmUnitId: "realm-1",
+          targetUnitId: "reply-1",
+        },
+      },
+    });
+    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        caseId: "case-1",
+        actorUserId: "mod-2",
+        eventType: "realm_content.restored",
+        reason: "appeal approved",
+        before: {
+          state: "HIDDEN",
+          reason: "off-topic",
+          targetUnitId: "reply-1",
+          realmUnitId: "realm-1",
+        },
+        after: {
+          state: "VISIBLE",
+          reason: "appeal approved",
+          targetUnitId: "reply-1",
+          realmUnitId: "realm-1",
+        },
+        reversible: false,
+      }),
+    });
   });
 
   test("realm feed removal uses junction drop for roots", async () => {

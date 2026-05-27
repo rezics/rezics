@@ -85,11 +85,19 @@ const realmOverlayRow = {
   updatedAt: "2026-05-28T00:00:00.000Z",
 };
 const tombstoneGlobalMock = mock(async () => contentStateRow);
+const hideGlobalMock = mock(async () => ({
+  ...contentStateRow,
+  state: "hidden",
+}));
 const restoreGlobalMock = mock(async () => ({
   ...contentStateRow,
   state: "visible",
 }));
 const tombstoneInRealmMock = mock(async () => realmOverlayRow);
+const hideInRealmMock = mock(async () => ({
+  ...realmOverlayRow,
+  state: "hidden",
+}));
 const restoreInRealmMock = mock(async () => ({
   ...realmOverlayRow,
   state: "visible",
@@ -205,8 +213,10 @@ mock.module("./moderation.service", () => ({
     decideCase: decideCaseMock,
     appealCase: appealCaseMock,
     listRealmQueue: mock(async () => []),
+    hideGlobal: hideGlobalMock,
     tombstoneGlobal: tombstoneGlobalMock,
     restoreGlobal: restoreGlobalMock,
+    hideInRealm: hideInRealmMock,
     tombstoneInRealm: tombstoneInRealmMock,
     restoreInRealm: restoreInRealmMock,
     removeRootFromRealm: removeRootFromRealmMock,
@@ -230,8 +240,10 @@ describe("governanceApi account enforcement", () => {
     realmMembershipForPolicyMock.mockClear();
     grantRealmCapabilityMock.mockClear();
     revokeRealmCapabilityMock.mockClear();
+    hideGlobalMock.mockClear();
     tombstoneGlobalMock.mockClear();
     restoreGlobalMock.mockClear();
+    hideInRealmMock.mockClear();
     tombstoneInRealmMock.mockClear();
     restoreInRealmMock.mockClear();
     removeRootFromRealmMock.mockClear();
@@ -439,6 +451,27 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
+  test("globally hides content through content policy with case context", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/content/reply-1/hide", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ reason: "abuse", caseId: "case-1" }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(hideGlobalMock).toHaveBeenCalledWith({
+      targetUnitId: "reply-1",
+      decidedById: "staff-1",
+      reason: "abuse",
+      caseId: "case-1",
+    });
+  });
+
   test("does not pass attempted body edits into moderation decisions", async () => {
     policyAllowed = true;
 
@@ -502,6 +535,31 @@ describe("governanceApi account enforcement", () => {
       targetUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "off-topic",
+    });
+  });
+
+  test("realm hides content through realm queue policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/content/reply-1/hide",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason: "off-topic", caseId: "case-1" }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(hideInRealmMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      targetUnitId: "reply-1",
+      decidedById: "staff-1",
+      reason: "off-topic",
+      caseId: "case-1",
     });
   });
 

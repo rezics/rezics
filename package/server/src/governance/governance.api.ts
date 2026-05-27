@@ -389,6 +389,33 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
     },
   )
   .post(
+    "/content/:targetUnitId/hide",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: contentPolicyActions.takedown,
+        target: { kind: "content", id: params.targetUnitId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.hideGlobal({
+        targetUnitId: params.targetUnitId,
+        decidedById: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: contentModerationStateDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Globally hide content",
+        tags: ["Governance", "Content"],
+      },
+    },
+  )
+  .post(
     "/content/:targetUnitId/tombstone",
     async ({ params, body, identity, status }) => {
       const denied = await assertGovernancePolicy({
@@ -439,6 +466,39 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       detail: {
         summary: "Restore global content moderation state",
         tags: ["Governance", "Content"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/content/:targetUnitId/hide",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: realmPolicyActions.queueDecide,
+        target: {
+          kind: "realm-content",
+          id: params.targetUnitId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.hideInRealm({
+        realmUnitId: params.realmUnitId,
+        targetUnitId: params.targetUnitId,
+        decidedById: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: realmContentModerationDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Hide content in one realm",
+        tags: ["Governance", "Realms", "Content"],
       },
     },
   )

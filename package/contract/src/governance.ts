@@ -62,6 +62,7 @@ export const createAccountEnforcementSchema = t.Object({
   reason: t.String({ minLength: 1 }),
   safeMessage: t.Optional(t.Nullable(t.String())),
   expiresAt: t.Optional(t.Nullable(t.String())),
+  caseId: t.Optional(t.Nullable(t.String())),
   metadata: t.Optional(auditMetadataSchema),
 });
 
@@ -71,6 +72,7 @@ export type CreateAccountEnforcementInput =
 export const unblockAccountEnforcementSchema = t.Object({
   reason: t.String({ minLength: 1 }),
   safeMessage: t.Optional(t.Nullable(t.String())),
+  caseId: t.Optional(t.Nullable(t.String())),
   metadata: t.Optional(auditMetadataSchema),
 });
 

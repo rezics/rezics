@@ -17,6 +17,10 @@ const enforcementKindMap: Record<AccountEnforcementKind, any> = {
   trust_restriction: "TRUST_RESTRICTION",
 };
 
+function enforcementReversible(kind: AccountEnforcementKind) {
+  return kind !== "warning";
+}
+
 function basePermissionRole(permission: unknown) {
   const role =
     permission &&
@@ -85,6 +89,7 @@ export class GovernanceEnforcementService {
     decisionCode: string;
     safeMessage?: string | null;
     expiresAt?: Date | null;
+    caseId?: string | null;
     metadata?: Record<string, unknown>;
   }) {
     let metadata = input.metadata;
@@ -122,17 +127,38 @@ export class GovernanceEnforcementService {
       }
     }
 
-    const row = await prisma.accountEnforcement.create({
-      data: {
-        targetUserId: input.targetUserId,
-        kind: enforcementKindMap[input.kind],
-        reason: input.reason,
-        safeMessage: input.safeMessage ?? null,
-        decidedById: input.decidedById,
-        decisionCode: input.decisionCode,
-        expiresAt: input.expiresAt ?? null,
-        metadata: metadata as never,
-      },
+    const row = await prisma.$transaction(async (tx: any) => {
+      const created = await tx.accountEnforcement.create({
+        data: {
+          targetUserId: input.targetUserId,
+          kind: enforcementKindMap[input.kind],
+          reason: input.reason,
+          safeMessage: input.safeMessage ?? null,
+          decidedById: input.decidedById,
+          decisionCode: input.decisionCode,
+          expiresAt: input.expiresAt ?? null,
+          metadata: metadata as never,
+        },
+      });
+      if (input.caseId) {
+        await tx.moderationCaseEvent.create({
+          data: {
+            caseId: input.caseId,
+            actorUserId: input.decidedById,
+            eventType: "account.enforcement.applied",
+            decisionCode: input.decisionCode,
+            reason: input.reason,
+            after: {
+              targetUserId: input.targetUserId,
+              enforcementId: created.id,
+              kind: created.kind,
+              state: created.state,
+            } as never,
+            reversible: enforcementReversible(input.kind),
+          },
+        });
+      }
+      return created;
     });
     return mapAccountEnforcementToDTO(row);
   }
@@ -152,6 +178,7 @@ export class GovernanceEnforcementService {
       decidedById: input.decidedById,
       decisionCode: input.decisionCode,
       expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
+      caseId: input.caseId,
       metadata: input.metadata,
     });
   }
@@ -239,25 +266,51 @@ export class GovernanceEnforcementService {
       orderBy: { createdAt: "desc" },
     });
 
-    const rows = await Promise.all(
-      activeRows.map((row) =>
-        prisma.accountEnforcement.update({
-          where: { id: row.id },
-          data: {
-            state: "REVOKED",
-            revokedAt: now,
-            revokedById: input.revokedById,
-            safeMessage: input.safeMessage ?? row.safeMessage,
-            metadata: {
-              ...(row.metadata &&
-              typeof row.metadata === "object" &&
-              !Array.isArray(row.metadata)
-                ? row.metadata
-                : {}),
-              unblockReason: input.reason,
-              ...(input.metadata ?? {}),
-            } as never,
-          },
+    const rows = await prisma.$transaction((tx: any) =>
+      Promise.all(
+        activeRows.map(async (row) => {
+          const updated = await tx.accountEnforcement.update({
+            where: { id: row.id },
+            data: {
+              state: "REVOKED",
+              revokedAt: now,
+              revokedById: input.revokedById,
+              safeMessage: input.safeMessage ?? row.safeMessage,
+              metadata: {
+                ...(row.metadata &&
+                typeof row.metadata === "object" &&
+                !Array.isArray(row.metadata)
+                  ? row.metadata
+                  : {}),
+                unblockReason: input.reason,
+                ...(input.metadata ?? {}),
+              } as never,
+            },
+          });
+          if (input.caseId) {
+            await tx.moderationCaseEvent.create({
+              data: {
+                caseId: input.caseId,
+                actorUserId: input.revokedById,
+                eventType: "account.enforcement.revoked",
+                reason: input.reason,
+                before: {
+                  targetUserId,
+                  enforcementId: row.id,
+                  kind: row.kind,
+                  state: row.state,
+                } as never,
+                after: {
+                  targetUserId,
+                  enforcementId: updated.id,
+                  kind: updated.kind,
+                  state: updated.state,
+                } as never,
+                reversible: false,
+              },
+            });
+          }
+          return updated;
         }),
       ),
     );
