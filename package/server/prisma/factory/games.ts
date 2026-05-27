@@ -6,7 +6,6 @@ import {
 import type { Prisma } from "../generated/client.js";
 import { UnitStatus, UnitType } from "../generated/client.js";
 import { flushCreditAttributionsAndTags } from "./books.js";
-import { PLATFORM_KEYS } from "./data.js";
 import { generateGameExtra, generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import type { CreatedEntity, CreatedUnit, CreatedUser } from "./types.js";
@@ -37,7 +36,6 @@ export async function seedGames(
     async () => {
       const author = faker.helpers.arrayElement(users);
       const translations = generateTranslations(UnitType.GAME);
-      const platforms = pickN([...PLATFORM_KEYS], randomInt(1, 4));
 
       const unit = await ctx.prisma.unit.create({
         data: {
@@ -58,22 +56,7 @@ export async function seedGames(
               versionLabel: randomBoolean(0.5)
                 ? `v${randomInt(1, 5)}.${randomInt(0, 9)}`
                 : null,
-              ageRatingKey: faker.helpers.arrayElement([
-                "E",
-                "T",
-                "M",
-                "AO",
-                null,
-              ]),
               extra: generateGameExtra(),
-              platforms: {
-                createMany: {
-                  data: platforms.map((p, i) => ({
-                    platformKey: p,
-                    sortOrder: i,
-                  })),
-                },
-              },
             },
           },
           translations: {

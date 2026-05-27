@@ -575,6 +575,7 @@ model Game {
 
   releaseDate  DateTime?
   versionLabel String?
+  /// Legacy import field. New writes use UnitTag rating TAG Units; retained only until legacy backfill and read migration are complete.
   ageRatingKey String?   @db.VarChar(32)
   isLicensed   Boolean   @default(false)
 
@@ -587,6 +588,7 @@ model Game {
   systemRequirements GameSystemRequirement[]
 }
 
+/// Legacy platform junction. New writes use SubjectAttribution(role = "available_on") to platform Entity Units; retained only for backfill.
 model GamePlatform {
   gameUnitId  String @db.Uuid
   platformKey String @db.VarChar(64)

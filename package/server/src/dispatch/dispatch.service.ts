@@ -145,9 +145,6 @@ export class DispatchService {
           ...(data.versionLabel !== undefined && {
             versionLabel: data.versionLabel as string,
           }),
-          ...(data.ageRatingKey !== undefined && {
-            ageRatingKey: data.ageRatingKey as string,
-          }),
           ...(data.isLicensed !== undefined && {
             isLicensed: data.isLicensed as boolean,
           }),
@@ -174,9 +171,6 @@ export class DispatchService {
             }),
             ...(data.versionLabel !== undefined && {
               versionLabel: data.versionLabel as string,
-            }),
-            ...(data.ageRatingKey !== undefined && {
-              ageRatingKey: data.ageRatingKey as string,
             }),
             ...(data.isLicensed !== undefined && {
               isLicensed: data.isLicensed as boolean,
