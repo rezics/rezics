@@ -43,7 +43,7 @@ export async function notifySystemAndEmail(
   };
 
   const isPendingWithDedup =
-    kind === SystemEmailKind.WORK_LINK_CLAIM_PENDING &&
+    kind === SystemEmailKind.WORK_MEMBERSHIP_CLAIM_PENDING &&
     claimerUserId !== null &&
     workUnitId !== null;
 

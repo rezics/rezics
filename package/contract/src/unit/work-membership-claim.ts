@@ -24,7 +24,7 @@ export const claimStatusSchema = t.Union([
 // CLAIM DTO
 // ============================================================
 
-export const workLinkClaimDTOSchema = t.Object({
+export const workMembershipClaimDTOSchema = t.Object({
   id: t.String(),
   releaseUnitId: t.String(),
   workUnitId: t.String(),
@@ -36,59 +36,60 @@ export const workLinkClaimDTOSchema = t.Object({
   resolvedBy: t.Optional(t.Nullable(t.String())),
 });
 
-export type WorkLinkClaimDTO = (typeof workLinkClaimDTOSchema)["static"];
+export type WorkMembershipClaimDTO =
+  (typeof workMembershipClaimDTOSchema)["static"];
 
 // ============================================================
 // LIST (inbox)
 // ============================================================
 
-export const workLinkClaimListPathParamsSchema = t.Object({
+export const workMembershipClaimListPathParamsSchema = t.Object({
   workUnitId: t.String(),
 });
 
-export type WorkLinkClaimListPathParams =
-  (typeof workLinkClaimListPathParamsSchema)["static"];
+export type WorkMembershipClaimListPathParams =
+  (typeof workMembershipClaimListPathParamsSchema)["static"];
 
-export const workLinkClaimListQuerySchema = t.Object({
+export const workMembershipClaimListQuerySchema = t.Object({
   status: t.Optional(claimStatusSchema),
 });
 
-export type WorkLinkClaimListQuery =
-  (typeof workLinkClaimListQuerySchema)["static"];
+export type WorkMembershipClaimListQuery =
+  (typeof workMembershipClaimListQuerySchema)["static"];
 
-export const workLinkClaimListResponseSchema = t.Object({
-  claims: t.Array(workLinkClaimDTOSchema),
+export const workMembershipClaimListResponseSchema = t.Object({
+  claims: t.Array(workMembershipClaimDTOSchema),
 });
 
-export type WorkLinkClaimListResponse =
-  (typeof workLinkClaimListResponseSchema)["static"];
+export type WorkMembershipClaimListResponse =
+  (typeof workMembershipClaimListResponseSchema)["static"];
 
 // ============================================================
 // CLAIM ACTION PATH PARAMS (approve / reject / withdraw)
 // ============================================================
 
-export const workLinkClaimActionPathParamsSchema = t.Object({
+export const workMembershipClaimActionPathParamsSchema = t.Object({
   claimId: t.String(),
 });
 
-export type WorkLinkClaimActionPathParams =
-  (typeof workLinkClaimActionPathParamsSchema)["static"];
+export type WorkMembershipClaimActionPathParams =
+  (typeof workMembershipClaimActionPathParamsSchema)["static"];
 
 // ============================================================
 // REJECT BODY
 // ============================================================
 
-export const workLinkClaimRejectBodySchema = t.Object({
+export const workMembershipClaimRejectBodySchema = t.Object({
   reason: t.Optional(t.String({ maxLength: 1000 })),
 });
 
-export type WorkLinkClaimRejectBody =
-  (typeof workLinkClaimRejectBodySchema)["static"];
+export type WorkMembershipClaimRejectBody =
+  (typeof workMembershipClaimRejectBodySchema)["static"];
 
 // ============================================================
 // CLAIM RESPONSE (single-row, used by approve/reject/withdraw)
 // ============================================================
 
-export const workLinkClaimResponseSchema = workLinkClaimDTOSchema;
-export type WorkLinkClaimResponse =
-  (typeof workLinkClaimResponseSchema)["static"];
+export const workMembershipClaimResponseSchema = workMembershipClaimDTOSchema;
+export type WorkMembershipClaimResponse =
+  (typeof workMembershipClaimResponseSchema)["static"];

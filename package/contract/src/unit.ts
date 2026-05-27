@@ -53,8 +53,8 @@ export const unitTypeSchema = t.Union([
 
 /**
  * Unit types where cross-user contribution to a Work's Releases is permitted
- * without an explicit work-side approval step. Used by the work-link service
- * to short-circuit the WorkLinkClaim flow for catalog-style content.
+ * without an explicit work-side approval step. Used by the UnitWork membership service
+ * to short-circuit the membership claim flow for catalog-style content.
  */
 export const WIKI_TYPES = ["BOOK", "GAME", "MEDIA"] as const;
 

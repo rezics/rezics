@@ -25,8 +25,8 @@ const PENDING_TEMPLATES: Record<
   (p: PendingPayload) => KindRender
 > = {
   en: ({ workTitle, releaseSummary }) => ({
-    systemBody: `Someone wants to link a release${releaseSummary ? ` (${releaseSummary})` : ""} to your work${workTitle ? ` "${workTitle}"` : ""}.`,
-    emailSubject: "New work-link claim awaiting review",
+    systemBody: `Someone wants to add a release${releaseSummary ? ` (${releaseSummary})` : ""} to your work${workTitle ? ` "${workTitle}"` : ""}.`,
+    emailSubject: "New work membership claim awaiting review",
     emailText: `A new claim is waiting for review${workTitle ? ` on "${workTitle}"` : ""}. Visit your inbox to approve or reject it.`,
   }),
   "zh-hans": ({ workTitle, releaseSummary }) => ({
@@ -56,9 +56,9 @@ const APPROVED_TEMPLATES: Record<
   (p: ApprovedPayload) => KindRender
 > = {
   en: ({ workTitle }) => ({
-    systemBody: `Your link request${workTitle ? ` to "${workTitle}"` : ""} was approved.`,
-    emailSubject: "Your work-link claim was approved",
-    emailText: `Good news — your link request${workTitle ? ` to "${workTitle}"` : ""} has been approved.`,
+    systemBody: `Your work membership request${workTitle ? ` to "${workTitle}"` : ""} was approved.`,
+    emailSubject: "Your work membership claim was approved",
+    emailText: `Good news — your work membership request${workTitle ? ` to "${workTitle}"` : ""} has been approved.`,
   }),
   "zh-hans": ({ workTitle }) => ({
     systemBody: `你的关联请求${workTitle ? `（${workTitle}）` : ""}已通过。`,
@@ -71,9 +71,9 @@ const APPROVED_TEMPLATES: Record<
     emailText: `好消息——你的關聯請求${workTitle ? `（${workTitle}）` : ""}已通過審核。`,
   }),
   ja: ({ workTitle }) => ({
-    systemBody: `あなたのワークリンク申請${workTitle ? `（${workTitle}）` : ""}が承認されました。`,
-    emailSubject: "ワークリンク申請が承認されました",
-    emailText: `あなたのワークリンク申請${workTitle ? `（${workTitle}）` : ""}が承認されました。`,
+    systemBody: `あなたの作品メンバーシップ申請${workTitle ? `（${workTitle}）` : ""}が承認されました。`,
+    emailSubject: "作品メンバーシップ申請が承認されました",
+    emailText: `あなたの作品メンバーシップ申請${workTitle ? `（${workTitle}）` : ""}が承認されました。`,
   }),
   de: ({ workTitle }) => ({
     systemBody: `Deine Verknüpfungsanfrage${workTitle ? ` zu „${workTitle}“` : ""} wurde genehmigt.`,
@@ -87,9 +87,9 @@ const REJECTED_TEMPLATES: Record<
   (p: RejectedPayload) => KindRender
 > = {
   en: ({ workTitle, rejectReason }) => ({
-    systemBody: `Your link request${workTitle ? ` to "${workTitle}"` : ""} was rejected${rejectReason ? `: ${rejectReason}` : ""}.`,
-    emailSubject: "Your work-link claim was rejected",
-    emailText: `Your link request${workTitle ? ` to "${workTitle}"` : ""} was rejected${rejectReason ? `. Reason: ${rejectReason}` : ""}.`,
+    systemBody: `Your work membership request${workTitle ? ` to "${workTitle}"` : ""} was rejected${rejectReason ? `: ${rejectReason}` : ""}.`,
+    emailSubject: "Your work membership claim was rejected",
+    emailText: `Your work membership request${workTitle ? ` to "${workTitle}"` : ""} was rejected${rejectReason ? `. Reason: ${rejectReason}` : ""}.`,
   }),
   "zh-hans": ({ workTitle, rejectReason }) => ({
     systemBody: `你的关联请求${workTitle ? `（${workTitle}）` : ""}被拒绝${rejectReason ? `：${rejectReason}` : ""}。`,
@@ -102,9 +102,9 @@ const REJECTED_TEMPLATES: Record<
     emailText: `你的關聯請求${workTitle ? `（${workTitle}）` : ""}未通過${rejectReason ? `。原因：${rejectReason}` : ""}。`,
   }),
   ja: ({ workTitle, rejectReason }) => ({
-    systemBody: `あなたのワークリンク申請${workTitle ? `（${workTitle}）` : ""}は却下されました${rejectReason ? `：${rejectReason}` : ""}。`,
-    emailSubject: "ワークリンク申請が却下されました",
-    emailText: `あなたのワークリンク申請${workTitle ? `（${workTitle}）` : ""}は却下されました${rejectReason ? `。理由：${rejectReason}` : ""}。`,
+    systemBody: `あなたの作品メンバーシップ申請${workTitle ? `（${workTitle}）` : ""}は却下されました${rejectReason ? `：${rejectReason}` : ""}。`,
+    emailSubject: "作品メンバーシップ申請が却下されました",
+    emailText: `あなたの作品メンバーシップ申請${workTitle ? `（${workTitle}）` : ""}は却下されました${rejectReason ? `。理由：${rejectReason}` : ""}。`,
   }),
   de: ({ workTitle, rejectReason }) => ({
     systemBody: `Deine Verknüpfungsanfrage${workTitle ? ` zu „${workTitle}“` : ""} wurde abgelehnt${rejectReason ? `: ${rejectReason}` : ""}.`,

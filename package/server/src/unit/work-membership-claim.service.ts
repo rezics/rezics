@@ -1,14 +1,14 @@
 import {
   type RezicsSessionClaims,
   SystemEmailKind,
-  type WorkLinkClaimDTO,
+  type WorkMembershipClaimDTO,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { prisma, UnitWorkDisplayPolicy, UnitWorkRole } from "#/prisma/client";
 import { notifySystemAndEmail } from "@/notify-boundary/notify-boundary.client";
 import { hasAuthorityOver } from "./authority";
 
-export class WorkLinkClaimError extends Error {
+export class WorkMembershipClaimError extends Error {
   constructor(
     public code:
       | "CLAIM_NOT_FOUND"
@@ -19,7 +19,7 @@ export class WorkLinkClaimError extends Error {
     public httpStatus: 400 | 403 | 404 | 409,
   ) {
     super(message);
-    this.name = "WorkLinkClaimError";
+    this.name = "WorkMembershipClaimError";
   }
 }
 
@@ -49,7 +49,7 @@ const claimSelect = {
   resolvedBy: true,
 } satisfies Prisma.WorkLinkClaimSelect;
 
-function toDTO(row: ClaimRow): WorkLinkClaimDTO {
+function toDTO(row: ClaimRow): WorkMembershipClaimDTO {
   return {
     id: row.id,
     releaseUnitId: row.releaseUnitId,
@@ -73,21 +73,25 @@ function toDTO(row: ClaimRow): WorkLinkClaimDTO {
 export async function listByWork(
   caller: RezicsSessionClaims,
   workUnitId: string,
-  status?: WorkLinkClaimDTO["status"],
-): Promise<WorkLinkClaimDTO[]> {
+  status?: WorkMembershipClaimDTO["status"],
+): Promise<WorkMembershipClaimDTO[]> {
   const workUnit = await prisma.unit.findUnique({
     where: { id: workUnitId },
     select: { id: true, userId: true },
   });
   if (!workUnit) {
-    throw new WorkLinkClaimError("CLAIM_NOT_FOUND", "Work unit not found", 404);
+    throw new WorkMembershipClaimError(
+      "CLAIM_NOT_FOUND",
+      "Work unit not found",
+      404,
+    );
   }
   const authorized = await hasAuthorityOver(caller, {
     id: workUnit.id,
     userId: workUnit.userId,
   });
   if (!authorized) {
-    throw new WorkLinkClaimError(
+    throw new WorkMembershipClaimError(
       "FORBIDDEN",
       "Caller lacks authority over the work unit",
       403,
@@ -120,7 +124,11 @@ async function loadClaimAndWork(claimId: string): Promise<{
     },
   });
   if (!claim) {
-    throw new WorkLinkClaimError("CLAIM_NOT_FOUND", "Claim not found", 404);
+    throw new WorkMembershipClaimError(
+      "CLAIM_NOT_FOUND",
+      "Claim not found",
+      404,
+    );
   }
   const { workUnit, releaseUnit, ...rest } = claim;
   return {
@@ -131,7 +139,7 @@ async function loadClaimAndWork(claimId: string): Promise<{
 }
 
 /**
- * Approve a PENDING claim: sets `Unit.workUnitId` on the release and marks
+ * Approve a PENDING claim: creates release UnitWork membership and marks
  * the claim APPROVED. Caller must have authority over the work-side unit.
  *
  * Returns the updated claim DTO.
@@ -139,10 +147,10 @@ async function loadClaimAndWork(claimId: string): Promise<{
 export async function approve(
   caller: RezicsSessionClaims,
   claimId: string,
-): Promise<WorkLinkClaimDTO> {
+): Promise<WorkMembershipClaimDTO> {
   const { claim, workUserId } = await loadClaimAndWork(claimId);
   if (claim.status !== "PENDING") {
-    throw new WorkLinkClaimError(
+    throw new WorkMembershipClaimError(
       "INVALID_STATUS",
       "Only PENDING claims can be approved",
       409,
@@ -153,19 +161,31 @@ export async function approve(
     userId: workUserId,
   });
   if (!authorized) {
-    throw new WorkLinkClaimError(
+    throw new WorkMembershipClaimError(
       "FORBIDDEN",
       "Caller lacks authority over the work unit",
       403,
     );
   }
 
-  const [, updated] = await prisma.$transaction([
-    prisma.unit.update({
-      where: { id: claim.releaseUnitId },
-      data: { workUnitId: claim.workUnitId },
-    }),
-    prisma.workLinkClaim.update({
+  const updated = await prisma.$transaction(async (tx) => {
+    await tx.unitWork.upsert({
+      where: {
+        unitId_workUnitId_role: {
+          unitId: claim.releaseUnitId,
+          workUnitId: claim.workUnitId,
+          role: UnitWorkRole.RELEASE,
+        },
+      },
+      update: { displayPolicy: UnitWorkDisplayPolicy.PRIMARY },
+      create: {
+        unitId: claim.releaseUnitId,
+        workUnitId: claim.workUnitId,
+        role: UnitWorkRole.RELEASE,
+        displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
+      },
+    });
+    return tx.workLinkClaim.update({
       where: { id: claimId },
       data: {
         status: "APPROVED",
@@ -173,12 +193,12 @@ export async function approve(
         resolvedBy: caller.userId,
       },
       select: claimSelect,
-    }),
-  ]);
+    });
+  });
 
   void notifySystemAndEmail({
     userId: claim.claimerUserId,
-    kind: SystemEmailKind.WORK_LINK_CLAIM_APPROVED,
+    kind: SystemEmailKind.WORK_MEMBERSHIP_CLAIM_APPROVED,
     payload: {
       claimId: claim.id,
       workUnitId: claim.workUnitId,
@@ -197,10 +217,10 @@ export async function reject(
   caller: RezicsSessionClaims,
   claimId: string,
   reason?: string,
-): Promise<WorkLinkClaimDTO> {
+): Promise<WorkMembershipClaimDTO> {
   const { claim, workUserId } = await loadClaimAndWork(claimId);
   if (claim.status !== "PENDING") {
-    throw new WorkLinkClaimError(
+    throw new WorkMembershipClaimError(
       "INVALID_STATUS",
       "Only PENDING claims can be rejected",
       409,
@@ -211,7 +231,7 @@ export async function reject(
     userId: workUserId,
   });
   if (!authorized) {
-    throw new WorkLinkClaimError(
+    throw new WorkMembershipClaimError(
       "FORBIDDEN",
       "Caller lacks authority over the work unit",
       403,
@@ -230,7 +250,7 @@ export async function reject(
 
   void notifySystemAndEmail({
     userId: claim.claimerUserId,
-    kind: SystemEmailKind.WORK_LINK_CLAIM_REJECTED,
+    kind: SystemEmailKind.WORK_MEMBERSHIP_CLAIM_REJECTED,
     payload: {
       claimId: claim.id,
       workUnitId: claim.workUnitId,
@@ -248,17 +268,17 @@ export async function reject(
 export async function withdraw(
   caller: RezicsSessionClaims,
   claimId: string,
-): Promise<WorkLinkClaimDTO> {
+): Promise<WorkMembershipClaimDTO> {
   const { claim } = await loadClaimAndWork(claimId);
   if (claim.status !== "PENDING") {
-    throw new WorkLinkClaimError(
+    throw new WorkMembershipClaimError(
       "INVALID_STATUS",
       "Only PENDING claims can be withdrawn",
       409,
     );
   }
   if (claim.claimerUserId !== caller.userId) {
-    throw new WorkLinkClaimError(
+    throw new WorkMembershipClaimError(
       "FORBIDDEN",
       "Only the original claimer may withdraw a claim",
       403,
