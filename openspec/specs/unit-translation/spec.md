@@ -65,28 +65,6 @@ When resolving display text for a Unit, the system SHALL attempt lookup in this 
 - THEN the system SHALL NOT automatically try `"zh-hans"` as a script-affinity fallback
 - AND the system SHALL fall back to the unit default, then `"en"`, then first available
 
-### Requirement: sourceReleaseUnitId links work translations to their source release
-
-The `sourceReleaseUnitId` field on UnitTranslation is optional and SHALL only be meaningful for work unit translations. When set, it indicates which release unit provides the content for that language, enabling navigation from a work's translation to the release that supplies it.
-
-#### Scenario: Work translation with sourceReleaseUnitId
-
-- GIVEN a work Unit "work-1" with a release Unit "release-en" providing English content
-- WHEN the UnitTranslation for `(unitId = "work-1", language = "en")` is created with `sourceReleaseUnitId = "release-en"`
-- THEN a client reading the work's English translation can follow `sourceReleaseUnitId` to navigate to the release unit "release-en"
-
-#### Scenario: Release unit translation has no sourceReleaseUnitId
-
-- GIVEN a release Unit "release-en"
-- WHEN inspecting its UnitTranslation records
-- THEN `sourceReleaseUnitId` SHALL be null because releases are themselves the content source
-
-#### Scenario: Standalone unit has no sourceReleaseUnitId
-
-- GIVEN a standalone Unit (neither work nor release) of type `POST`
-- WHEN inspecting its UnitTranslation records
-- THEN `sourceReleaseUnitId` SHALL be null
-
 ### Requirement: UnitSupportLanguage tracks actual content availability
 
 UnitSupportLanguage records, identified by composite key `(unitId, language)`, indicate which languages a unit's content actually supports. Each record has `isPrimary` (boolean) and `sortOrder` (integer) fields. This is distinct from having a UnitTranslation: a unit may have a translation label in many languages but only support content in a subset.
@@ -243,34 +221,40 @@ When resolving a unit's cover URL for a requested language, the system SHALL reu
 
 ### Requirement: sourceReleaseUnitId links work translations to their source release
 
-The `sourceReleaseUnitId` field on `UnitTranslation` is optional and SHALL only be meaningful for **work unit translations in the work/release model** (BOOK, GAME, MEDIA). When set, it indicates which release unit provides the content for that language, enabling navigation from a work's translation to the release that supplies it.
+The system SHALL replace the `sourceReleaseUnitId` field on UnitTranslation with
+`sourceUnitId`. The `sourceUnitId` field is optional and SHALL identify the
+Unit that supplied or justified a translation's display/content source when
+such provenance is needed. It SHALL NOT own release selection, language
+switching, or same-work release navigation.
 
-`sourceReleaseUnitId` SHALL NOT be used by POST or any other Unit type outside the work/release model. Parallel POST translations are linked via the separate `TranslationGroup` mechanism defined in the `post-parallel-translation` capability; the two mechanisms are mutually exclusive per Unit.
+Existing `sourceReleaseUnitId` data SHALL be migrated to `sourceUnitId` without
+changing the referenced Unit ids.
 
-#### Scenario: Work translation with sourceReleaseUnitId
+#### Scenario: Work translation with sourceUnitId
 
-- GIVEN a work Unit "work-1" with a release Unit "release-en" providing English content
-- WHEN the UnitTranslation for `(unitId = "work-1", language = "en")` is created with `sourceReleaseUnitId = "release-en"`
-- THEN a client reading the work's English translation can follow `sourceReleaseUnitId` to navigate to the release unit "release-en"
+- GIVEN a hidden work Unit "work-1" with a release Unit "release-en" providing English display/content source data
+- WHEN the UnitTranslation for `(unitId = "work-1", language = "en")` is created with `sourceUnitId = "release-en"`
+- THEN a client reading the work's English translation can follow `sourceUnitId` to inspect the source Unit when needed
+- AND the field SHALL NOT imply that "release-en" is the navigation target for English release selection
 
-#### Scenario: Release unit translation has no sourceReleaseUnitId
+#### Scenario: Release unit translation has no sourceUnitId by default
 
 - GIVEN a release Unit "release-en"
 - WHEN inspecting its UnitTranslation records
-- THEN `sourceReleaseUnitId` SHALL be null because releases are themselves the content source
+- THEN `sourceUnitId` SHALL be null by default because releases are themselves the display/content source
 
-#### Scenario: Standalone non-POST unit has no sourceReleaseUnitId
+#### Scenario: Standalone unit has no sourceUnitId
 
-- GIVEN a standalone Unit (neither work nor release) of type other than POST
+- GIVEN a standalone Unit (neither hidden work nor release member) of type `POST`
 - WHEN inspecting its UnitTranslation records
-- THEN `sourceReleaseUnitId` SHALL be null
+- THEN `sourceUnitId` SHALL be null unless explicit provenance is recorded by a feature-specific rule
 
-#### Scenario: POST unit never uses sourceReleaseUnitId
+#### Scenario: Existing sourceReleaseUnitId data is migrated
 
-- GIVEN a Unit of type `POST`, whether standalone or participating in a `TranslationGroup`
-- WHEN inspecting its `UnitTranslation` records
-- THEN `sourceReleaseUnitId` SHALL be null on every row
-- AND the system SHALL NOT treat `sourceReleaseUnitId` as a navigation hint for POST translations
+- GIVEN an existing UnitTranslation row with `sourceReleaseUnitId = "release-ja"`
+- WHEN the migration runs
+- THEN the resulting row SHALL expose `sourceUnitId = "release-ja"`
+- AND `sourceReleaseUnitId` SHALL no longer be part of the contract DTO
 
 ### Requirement: UnitTranslation.sourceReleaseUnitId points to the canonical release for a language
 
@@ -392,3 +376,19 @@ UnitTranslation SHALL remain the authoritative language-specific display text fo
 - **WHEN** a search query matches `unit-1` through the alias
 - **THEN** the search result display title SHALL still be resolved from UnitTranslation
 - **AND** the alias SHALL NOT replace the title unless a UI explicitly renders matched alias context
+
+### Requirement: Translation Records Do Not Select Releases
+
+`UnitTranslation` records SHALL store language-specific display text and
+optional provenance only. They SHALL NOT select another release for language
+switching, same-work release discovery, or work-domain feed presentation.
+
+#### Scenario: Language switch ignores translation sourceUnitId
+
+- **GIVEN** a work translation has `sourceUnitId = release-a`
+- **AND** same-work release `release-b` also supports the same language
+- **WHEN** the user opens the current release's language switcher
+- **THEN** the switcher SHALL consider only the current release's own
+  `UnitTranslation` rows
+- **AND** it SHALL NOT treat `sourceUnitId = release-a` as a release selection
+  default

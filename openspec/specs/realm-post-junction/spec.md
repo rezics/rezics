@@ -6,7 +6,7 @@ Defines that `RealmUnit` is the single source of truth for post-realm membership
 
 ## Requirements
 
-### Requirement: RealmUnit is the single source of truth for post-realm membership
+### Requirement: UnitRealm is the single source of truth for post-realm membership
 
 The system SHALL track post-realm membership exclusively through the `RealmUnit` junction table. The `Post` table SHALL NOT carry any direct foreign key to a realm. Specifically, the previously-existing column `Post.realmUnitId`, the relation `Post.realm` (`@relation("PostRealm")` on Post side), and the relation `Unit.realmPosts` (`@relation("PostRealm")` on Unit side) SHALL be removed from the Prisma schema. After removal, the only mechanism by which a post is associated with a realm feed/community SHALL be one or more `RealmUnit(realmUnitId, unitId)` rows.
 
@@ -134,3 +134,28 @@ The change SHALL NOT skip phases. Phase D SHALL be irreversible without re-intro
 - **THEN** `Post.realmUnitId` SHALL be dropped
 - **AND** the `@relation("PostRealm")` Prisma relation SHALL be removed from both `Post` and `Unit` models
 - **AND** all production reads after this point SHALL go exclusively through `RealmUnit`
+
+### Requirement: UnitRealm Replaces RealmUnit Naming
+
+The realm membership relationship SHALL be named `UnitRealm` in schema, server
+code, contract DTOs, API parameters, frontend query keys, and documentation.
+The relationship semantics remain the same: it represents Unit membership in a
+realm feed/community and does not represent semantic tagging.
+
+#### Scenario: Schema uses UnitRealm
+
+- **WHEN** the Prisma schema is inspected after the migration
+- **THEN** the realm membership model SHALL be named `UnitRealm`
+- **AND** no model named `RealmUnit` SHALL remain
+
+#### Scenario: API uses unitRealm naming
+
+- **WHEN** a developer reads realm feed or cross-posting API contracts
+- **THEN** parameter and DTO names SHALL use `unitRealm` / `unitRealms` terminology where the relationship is named
+- **AND** behavior SHALL remain equivalent to the previous `RealmUnit` relationship
+
+#### Scenario: No behavior change from rename
+
+- **GIVEN** a post belongs to realm `realm-a` through the renamed relationship
+- **WHEN** the realm feed is queried
+- **THEN** the post SHALL appear exactly as it did before the rename
