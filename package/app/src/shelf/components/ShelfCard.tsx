@@ -11,7 +11,7 @@ import {
   shelf_untitled,
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
-import { Card, CardContent } from "@rezics/ui/shadcn";
+import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
@@ -93,6 +93,13 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
             {shelf.user?.name || m.common_anonymous()}
           </span>
         </div>
+        {shelf.matchedUnit?.unitId && (
+          <div className="mt-2">
+            <Badge variant="outline" className="max-w-full truncate">
+              {shelf.matchedUnit.title ?? shelf.matchedUnit.unitId}
+            </Badge>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

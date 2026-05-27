@@ -7,6 +7,7 @@ import type {
   ShelfDetailDTO,
   ShelfDTO,
   ShelfListQuery,
+  ShelfMatchedUnitDTO,
   ShelfSummaryDTO,
   ShelfUnitBatchOp,
   ShelfUnitBatchResult,
@@ -26,6 +27,8 @@ import {
   prisma,
   UnitStatus,
   UnitType,
+  UnitWorkDisplayPolicy,
+  UnitWorkRole,
   UnitVisibility,
 } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
@@ -69,6 +72,29 @@ async function enqueueContainedUnitIdsSync(shelfId: string): Promise<void> {
       { type: "server", service: "shelf" },
     ),
   );
+}
+
+async function enqueueShelfWorkDomainProjectionSync(
+  shelfId: string,
+  workUnitId: string,
+): Promise<void> {
+  const source = { type: "server" as const, service: "shelf" };
+  await Promise.all([
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentSync,
+        { unitId: shelfId },
+        source,
+      ),
+    ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
+        { targetId: workUnitId },
+        source,
+      ),
+    ),
+  ]);
 }
 
 type Tx = Prisma.TransactionClient;
@@ -123,6 +149,66 @@ async function deleteShelfUnit(
   return deleted.count;
 }
 
+export async function reconcileShelfWorkMemberships(
+  shelfId: string,
+): Promise<void> {
+  const contained = await prisma.shelfUnit.findMany({
+    where: { shelfId },
+    select: { unitId: true },
+  });
+  const containedUnitIds = [...new Set(contained.map((row) => row.unitId))];
+
+  const releaseMemberships =
+    containedUnitIds.length > 0
+      ? await prisma.unitWork.findMany({
+          where: {
+            unitId: { in: containedUnitIds },
+            role: UnitWorkRole.RELEASE,
+          },
+          select: { workUnitId: true },
+          distinct: ["workUnitId"],
+        })
+      : [];
+  const desiredWorkUnitIds = releaseMemberships.map((row) => row.workUnitId);
+
+  await prisma.unitWork.deleteMany({
+    where: {
+      unitId: shelfId,
+      role: UnitWorkRole.SHELF,
+      ...(desiredWorkUnitIds.length > 0
+        ? { workUnitId: { notIn: desiredWorkUnitIds } }
+        : {}),
+    },
+  });
+
+  for (const workUnitId of desiredWorkUnitIds) {
+    await prisma.unitWork.upsert({
+      where: {
+        unitId_workUnitId_role: {
+          unitId: shelfId,
+          workUnitId,
+          role: UnitWorkRole.SHELF,
+        },
+      },
+      update: {},
+      create: {
+        unitId: shelfId,
+        workUnitId,
+        role: UnitWorkRole.SHELF,
+        displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
+      },
+    });
+  }
+
+  if (desiredWorkUnitIds.length > 0) {
+    await Promise.all(
+      desiredWorkUnitIds.map((workUnitId) =>
+        enqueueShelfWorkDomainProjectionSync(shelfId, workUnitId),
+      ),
+    );
+  }
+}
+
 function getSeedTagIdSet(): Set<string> {
   const ids = new Set<string>();
   for (const name of SEED_TAG_NAMES as readonly SeedTagName[]) {
@@ -143,7 +229,20 @@ function assertOnlySeedTags(ids: readonly string[]): void {
 }
 
 export class ShelfService {
-  private buildWhere(options: ShelfListQuery): Prisma.ShelfWhereInput {
+  private async resolveContainsWorkUnitId(
+    containsUnitId: string | undefined,
+  ): Promise<string | null> {
+    if (!containsUnitId?.trim()) return null;
+    const membership = await prisma.unitWork.findFirst({
+      where: { unitId: containsUnitId, role: UnitWorkRole.RELEASE },
+      select: { workUnitId: true },
+    });
+    return membership?.workUnitId ?? null;
+  }
+
+  private async buildWhere(
+    options: ShelfListQuery,
+  ): Promise<Prisma.ShelfWhereInput> {
     const and: Prisma.ShelfWhereInput[] = [
       { unit: { type: UnitType.SHELF, ...publicUnitEligibilityWhere } },
     ];
@@ -156,10 +255,27 @@ export class ShelfService {
       and.push({ kindKey: options.kindKey });
     }
 
-    if (options.containsUnitId?.trim()) {
-      and.push({
-        units: { some: { unitId: options.containsUnitId } },
-      });
+    const containsUnitId = options.containsUnitId?.trim();
+    if (containsUnitId) {
+      const workUnitId = await this.resolveContainsWorkUnitId(containsUnitId);
+      if (workUnitId) {
+        and.push({
+          OR: [
+            { units: { some: { unitId: containsUnitId } } },
+            {
+              unit: {
+                workMemberships: {
+                  some: { workUnitId, role: UnitWorkRole.SHELF },
+                },
+              },
+            },
+          ],
+        });
+      } else {
+        and.push({
+          units: { some: { unitId: containsUnitId } },
+        });
+      }
     }
 
     const idList = parseIdsCsv(options.ids);
@@ -186,7 +302,7 @@ export class ShelfService {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const hasCursor = Boolean(options.cursor?.unitId);
     const skipNum = hasCursor ? 1 : (options.start ?? 0);
-    const where = this.buildWhere(options);
+    const where = await this.buildWhere(options);
     const orderBy = this.buildOrderBy(options);
 
     const [rows, total] = await Promise.all([
@@ -202,7 +318,72 @@ export class ShelfService {
     ]);
 
     const hydratedRows = await hydrateUnitOwnerUserSlugs(rows);
-    return { shelves: hydratedRows.map(mapShelfListRowToDTO), total };
+    const matchedByShelfId = await this.getMatchedUnitsByShelfId(
+      hydratedRows.map((row) => row.unitId),
+      options.containsUnitId?.trim(),
+    );
+    return {
+      shelves: hydratedRows.map((row) =>
+        mapShelfListRowToDTO(row, matchedByShelfId.get(row.unitId)),
+      ),
+      total,
+    };
+  }
+
+  private async getMatchedUnitsByShelfId(
+    shelfIds: string[],
+    containsUnitId: string | undefined,
+  ): Promise<Map<string, ShelfMatchedUnitDTO>> {
+    const out = new Map<string, ShelfMatchedUnitDTO>();
+    if (shelfIds.length === 0 || !containsUnitId) return out;
+
+    const workUnitId = await this.resolveContainsWorkUnitId(containsUnitId);
+    const releaseRows = workUnitId
+      ? await prisma.unitWork.findMany({
+          where: { workUnitId, role: UnitWorkRole.RELEASE },
+          select: {
+            unitId: true,
+            unit: {
+              select: {
+                defaultLanguage: true,
+                translations: { select: { language: true, title: true } },
+              },
+            },
+          },
+        })
+      : [];
+    const releaseIds = [
+      containsUnitId,
+      ...releaseRows.map((row) => row.unitId),
+    ];
+    const releaseById = new Map(releaseRows.map((row) => [row.unitId, row]));
+
+    const shelfUnits = await prisma.shelfUnit.findMany({
+      where: { shelfId: { in: shelfIds }, unitId: { in: releaseIds } },
+      orderBy: { position: "asc" },
+      select: { shelfId: true, unitId: true, kind: true },
+    });
+
+    for (const row of shelfUnits) {
+      if (out.has(row.shelfId) && row.unitId !== containsUnitId) continue;
+      const release = releaseById.get(row.unitId);
+      const translations = release?.unit?.translations ?? [];
+      const title =
+        translations.find(
+          (tr) => tr.language === release?.unit?.defaultLanguage,
+        )?.title ??
+        translations[0]?.title ??
+        null;
+      out.set(row.shelfId, {
+        unitId: row.unitId,
+        kind: row.kind as ShelfMatchedUnitDTO["kind"],
+        title,
+        workUnitId,
+      });
+      if (row.unitId === containsUnitId) continue;
+    }
+
+    return out;
   }
 
   async listUserShelves(userId: string): Promise<ShelfSummaryDTO[]> {
@@ -534,6 +715,7 @@ export class ShelfService {
     });
 
     await enqueueContainedUnitIdsSync(shelfId);
+    await reconcileShelfWorkMemberships(shelfId);
     return mapShelfUnitToDTO(row);
   }
 
@@ -542,6 +724,7 @@ export class ShelfService {
       await deleteShelfUnit(tx, shelfId, unitId);
     });
     await enqueueContainedUnitIdsSync(shelfId);
+    await reconcileShelfWorkMemberships(shelfId);
   }
 
   async reorderUnit(
@@ -722,6 +905,7 @@ export class ShelfService {
     });
 
     if (didCreateChild) await enqueueContainedUnitIdsSync(shelfId);
+    if (didCreateChild) await reconcileShelfWorkMemberships(shelfId);
     return mapShelfUnitRelationToDTO(relation);
   }
 
@@ -804,6 +988,7 @@ export class ShelfService {
     });
 
     if (didCreate) await enqueueContainedUnitIdsSync(shelfId);
+    if (didCreate) await reconcileShelfWorkMemberships(shelfId);
   }
 
   async applyBatch(
@@ -1110,6 +1295,7 @@ export class ShelfService {
 
     if (mutated) {
       await enqueueContainedUnitIdsSync(shelfId);
+      await reconcileShelfWorkMemberships(shelfId);
     }
 
     return results;
@@ -1134,6 +1320,7 @@ export class ShelfService {
     });
     if (result.count > 0) {
       await enqueueContainedUnitIdsSync(shelfId);
+      await reconcileShelfWorkMemberships(shelfId);
     }
     return { deleted: result.count };
   }

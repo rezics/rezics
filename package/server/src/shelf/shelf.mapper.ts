@@ -1,6 +1,7 @@
 import type {
   ShelfDetailDTO,
   ShelfDTO,
+  ShelfMatchedUnitDTO,
   ShelfSummaryDTO,
   ShelfUnitDTO,
   ShelfUnitKind,
@@ -103,7 +104,10 @@ export function mapShelfDetailToDTO(
   };
 }
 
-export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
+export function mapShelfListRowToDTO(
+  row: ShelfListSelected,
+  matchedUnit?: ShelfMatchedUnitDTO | null,
+): ShelfDTO {
   return {
     unitId: row.unitId,
     slug: row.unit?.slug ?? undefined,
@@ -119,6 +123,7 @@ export function mapShelfListRowToDTO(row: ShelfListSelected): ShelfDTO {
     ),
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     itemCount: row.itemCount,
+    matchedUnit: matchedUnit ?? undefined,
     translations: (row.unit?.translations ??
       []) as unknown as ShelfDTO["translations"],
     createdAt: row.createdAt,

@@ -85,6 +85,15 @@ export const shelfUnitRelationDTOSchema = t.Object({
 export type ShelfUnitRelationDTO =
   (typeof shelfUnitRelationDTOSchema)["static"];
 
+export const shelfMatchedUnitDTOSchema = t.Object({
+  unitId: t.String(),
+  kind: shelfUnitKindSchema,
+  title: t.Optional(t.Nullable(t.String())),
+  workUnitId: t.Optional(t.Nullable(t.String())),
+});
+
+export type ShelfMatchedUnitDTO = (typeof shelfMatchedUnitDTOSchema)["static"];
+
 // ============================================================
 // SHELF DTO
 // ============================================================
@@ -101,6 +110,7 @@ export const shelfDTOSchema = t.Object({
   coverUrl: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(shelfExtraSchema)),
   itemCount: t.Optional(t.Number()),
+  matchedUnit: t.Optional(t.Nullable(shelfMatchedUnitDTOSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   units: t.Optional(t.Array(shelfUnitDTOSchema)),
   relations: t.Optional(t.Array(shelfUnitRelationDTOSchema)),

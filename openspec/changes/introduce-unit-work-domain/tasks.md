@@ -87,11 +87,11 @@
 
 ## 10. Shelf UX And Hydration
 
-- [ ] 10.1 Update shelf collection flows so release-aware collection stores the visible release Unit.
-- [ ] 10.2 Add shelf membership reconciliation that registers shelf Units in `UnitWork(role = SHELF)` for every work represented by contained releases.
-- [ ] 10.3 Update work-domain shelf surfaces to render precise contained release context when it differs from the current release.
-- [ ] 10.4 Add release move/work merge repair for shelf work memberships.
-- [ ] 10.5 Add tests for collecting releases, multi-work shelf membership, membership recalculation, and work-domain shelf card target context.
+- [x] 10.1 Update shelf collection flows so release-aware collection stores the visible release Unit.
+- [x] 10.2 Add shelf membership reconciliation that registers shelf Units in `UnitWork(role = SHELF)` for every work represented by contained releases.
+- [x] 10.3 Update work-domain shelf surfaces to render precise contained release context when it differs from the current release.
+- [x] 10.4 Add release move/work merge repair for shelf work memberships.
+- [x] 10.5 Add tests for collecting releases, multi-work shelf membership, membership recalculation, and work-domain shelf card target context.
 
 ## 11. Admin And Diagnostics
 
