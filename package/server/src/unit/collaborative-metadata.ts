@@ -14,7 +14,7 @@ import {
 } from "./history-outbox";
 
 export type CollaborativeMetadataTx = HistoryOutboxWriter & {
-  unit: {
+  unit?: {
     findUniqueOrThrow(input: {
       where: { id: string };
       select: { id: true; userId: true };
@@ -25,6 +25,21 @@ export type CollaborativeMetadataTx = HistoryOutboxWriter & {
   };
   unitFieldLock: {
     findMany(input: unknown): Promise<Array<{ path: string }>>;
+  };
+  staffAuditLog?: {
+    create(input: {
+      data: {
+        actorUserId: string;
+        action: string;
+        targetKind: string;
+        targetId: string;
+        decisionCode: string;
+        reason: string;
+        before?: unknown;
+        after?: unknown;
+        metadata?: unknown;
+      };
+    }): Promise<unknown>;
   };
 };
 
@@ -52,6 +67,9 @@ export async function assertCanEditCollaborativeMetadata(
   patchPaths: readonly string[],
   options: { verifyAdmin?: (userId: string) => Promise<boolean> } = {},
 ): Promise<void> {
+  if (!tx.unit) {
+    throw new Error("Collaborative metadata authority requires Unit access.");
+  }
   const unit = await tx.unit.findUniqueOrThrow({
     where: { id: unitId },
     select: { id: true, userId: true },
@@ -300,7 +318,41 @@ export async function writeEditorialMetadataHistory(
   },
 ): Promise<void> {
   assertEditorialPatchAllowed(input.patch);
-  if (collectPatchLeafPaths(input.patch).length === 0) return;
+  const patchPaths = collectPatchLeafPaths(input.patch);
+  if (patchPaths.length === 0) return;
+
+  const isCreationMessage = input.message.endsWith(".create");
+  if (!isCreationMessage && tx.unit && tx.staffAuditLog) {
+    const unit = await tx.unit.findUniqueOrThrow({
+      where: { id: input.unitId },
+      select: { id: true, userId: true },
+    });
+    if (unit.userId && unit.userId !== input.actorUserId) {
+      await tx.staffAuditLog.create({
+        data: {
+          actorUserId: input.actorUserId,
+          action: "content.editorial.cross_owner_update",
+          targetKind: "unit",
+          targetId: input.unitId,
+          decisionCode: "ALLOWED",
+          reason: input.message,
+          before: {
+            ownerUserId: unit.userId,
+            patchPaths,
+          },
+          after: {
+            patch: input.patch,
+          },
+          metadata: {
+            message: input.message,
+            ...(input.restoreSource
+              ? { restoreSource: input.restoreSource }
+              : {}),
+          },
+        },
+      });
+    }
+  }
 
   await writeSequencedHistoryOutbox(tx, {
     unitId: input.unitId,

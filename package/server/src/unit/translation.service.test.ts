@@ -59,6 +59,9 @@ function freshMocks() {
     unitFieldLock: {
       findMany: mock(async () => []),
     },
+    staffAuditLog: {
+      create: mock(async (args: any) => args.data),
+    },
     unitTranslation: {
       findUnique: mock(async () => previous),
       upsert: mock(async ({ update }: any) => ({ ...previous, ...update })),
@@ -105,6 +108,7 @@ describe("TranslationService history patches", () => {
       select: { id: true, userId: true },
     });
     expect(tx.historyOutbox.create).toHaveBeenCalledTimes(1);
+    expect(tx.staffAuditLog.create).not.toHaveBeenCalled();
     expect(historyArgs.data.payload.revision.patch).toEqual({
       translations: { "zh-hant": { title: "New title" } },
     });
@@ -156,5 +160,45 @@ describe("TranslationService history patches", () => {
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
       "search.realm.patchTranslations",
     ]);
+  });
+
+  test("cross-owner translation edits write staff audit and revision history", async () => {
+    const { tx } = freshMocks();
+    tx.unit.findUniqueOrThrow.mockResolvedValue({
+      id: "book-1",
+      userId: "owner-1",
+    });
+    const { translationService } = await import("./translation.service");
+
+    await translationService.upsertTranslation(
+      "book-1",
+      "zh-hant",
+      {
+        title: "New title",
+        subtitle: "Same subtitle",
+        summary: "Same summary",
+        description: { type: "doc", content: [] },
+      },
+      { userId: "staff-1", permission: { role: "ROOT" } } as any,
+    );
+
+    expect(tx.historyOutbox.create).toHaveBeenCalledTimes(1);
+    expect(tx.staffAuditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        actorUserId: "staff-1",
+        action: "content.editorial.cross_owner_update",
+        targetKind: "unit",
+        targetId: "book-1",
+        decisionCode: "ALLOWED",
+        reason: "unit.translation.upsert",
+        before: {
+          ownerUserId: "owner-1",
+          patchPaths: ["translations.zh-hant.title"],
+        },
+        after: {
+          patch: { translations: { "zh-hant": { title: "New title" } } },
+        },
+      }),
+    });
   });
 });

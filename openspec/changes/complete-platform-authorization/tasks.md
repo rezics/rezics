@@ -31,7 +31,7 @@
 ## 5. Editorial / Moderation Boundary
 
 - [x] 5.1 Ensure no moderation action rewrites a content body; body edits route through the editorial/authority system for all actors including `ROOT`.
-- [ ] 5.2 Implement ownership-based history scope: cross-owner edits always write a staff audit entry (with before/after) plus a revision when the content type maintains one; self-edits keep their type's normal behavior.
+- [x] 5.2 Implement ownership-based history scope: cross-owner edits always write a staff audit entry (with before/after) plus a revision when the content type maintains one; self-edits keep their type's normal behavior.
 
 ## 6. Moderation Cases, Realm Workflow, Escalation
 
