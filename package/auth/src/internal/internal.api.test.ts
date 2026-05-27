@@ -240,4 +240,33 @@ describe("auth internal registration lifecycle", () => {
       data: { name: "reader" },
     });
   });
+
+  test("revokes all sessions for a main-requested auth user", async () => {
+    userFindUnique.mockResolvedValueOnce({ id: "auth-user-1" });
+    deleteMany.mockResolvedValueOnce({ count: 2 });
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/users/revoke-sessions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({
+          authUserId: "auth-user-1",
+          reason: "account ban",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      revokedSessions: 2,
+    });
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { userId: "auth-user-1" },
+    });
+  });
 });

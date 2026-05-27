@@ -157,6 +157,41 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
     },
   )
   .post(
+    "/users/revoke-sessions",
+    async ({ body, set }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: body.authUserId },
+        select: { id: true },
+      });
+
+      if (!user) {
+        set.status = 404;
+        return {
+          success: false,
+          error: {
+            code: "AUTH_USER_NOT_FOUND",
+            message: "Auth user was not found",
+          },
+        };
+      }
+
+      const deleted = await prisma.session.deleteMany({
+        where: { userId: user.id },
+      });
+
+      return {
+        success: true,
+        revokedSessions: deleted.count,
+      };
+    },
+    {
+      body: t.Object({
+        authUserId: t.String(),
+        reason: t.Optional(t.String()),
+      }),
+    },
+  )
+  .post(
     "/registration/cleanup-stale",
     async ({ body }) => {
       const olderThanHours = body.olderThanHours ?? 24 * 7;

@@ -4,6 +4,7 @@ import type {
   UnblockAccountEnforcementInput,
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
+import { revokeAuthSessionsForAuthUser } from "../auth-boundary/auth-internal.client";
 import { mapAccountEnforcementToDTO } from "./governance.mapper";
 import type { GovernanceListOptions } from "./types";
 
@@ -86,6 +87,41 @@ export class GovernanceEnforcementService {
     expiresAt?: Date | null;
     metadata?: Record<string, unknown>;
   }) {
+    let metadata = input.metadata;
+    if (input.kind === "ban") {
+      const user = await prisma.user.findUnique({
+        where: { unitId: input.targetUserId },
+        select: { authUserId: true },
+      });
+      if (user?.authUserId) {
+        const revocation = await revokeAuthSessionsForAuthUser({
+          authUserId: user.authUserId,
+          reason: input.reason,
+        });
+        metadata = {
+          ...(metadata ?? {}),
+          authBoundary: {
+            sessionRevocation: {
+              attempted: true,
+              ok: revocation.ok,
+              revokedSessions: revocation.revokedSessions,
+            },
+          },
+        };
+      } else {
+        metadata = {
+          ...(metadata ?? {}),
+          authBoundary: {
+            sessionRevocation: {
+              attempted: false,
+              ok: null,
+              revokedSessions: null,
+            },
+          },
+        };
+      }
+    }
+
     const row = await prisma.accountEnforcement.create({
       data: {
         targetUserId: input.targetUserId,
@@ -95,7 +131,7 @@ export class GovernanceEnforcementService {
         decidedById: input.decidedById,
         decisionCode: input.decisionCode,
         expiresAt: input.expiresAt ?? null,
-        metadata: input.metadata as never,
+        metadata: metadata as never,
       },
     });
     return mapAccountEnforcementToDTO(row);

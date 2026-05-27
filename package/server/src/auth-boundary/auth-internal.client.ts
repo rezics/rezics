@@ -45,3 +45,34 @@ export async function projectSlugToAuth(input: {
 
   return response.ok;
 }
+
+export async function revokeAuthSessionsForAuthUser(input: {
+  authUserId: string;
+  reason: string;
+}): Promise<{ ok: boolean; revokedSessions: number | null }> {
+  const url = new URL(
+    "/internal/users/revoke-sessions",
+    getInternalAuthBaseUrl(),
+  );
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) return { ok: false, revokedSessions: null };
+
+  const body = (await response.json()) as {
+    success?: boolean;
+    revokedSessions?: number;
+  };
+
+  return {
+    ok: body.success === true,
+    revokedSessions:
+      typeof body.revokedSessions === "number" ? body.revokedSessions : null,
+  };
+}
