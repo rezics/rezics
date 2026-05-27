@@ -33,6 +33,11 @@ chapter-specific `chapterId` and `chapterUnitId` language in contracts, backend
 storage, service code, API clients, and UI work. For book chapters,
 `contentUnitId` points to the materialized chapter content Unit.
 
+Generic content-structure contracts, service responses, write inputs, mappers,
+and history operation payloads SHALL NOT expose `chapterId` or `chapterUnitId`.
+Book/chapter adapters MAY keep local route params or compatibility names only
+when the surrounding surface is explicitly book-specific.
+
 `targetUnitId` SHALL remain reserved for interaction targets such as posts,
 reviews, ratings, and comments. It SHALL NOT be reused as the content-structure
 node identity field.
@@ -55,27 +60,37 @@ node identity field.
 - **AND** content structure DTOs and storage SHALL use `contentUnitId` only to
   identify the content node's Unit
 
+#### Scenario: Generic response omits chapterUnitId
+
+- **WHEN** a client reads `/content-structure/:ownerUnitId`
+- **THEN** every returned node SHALL use `contentUnitId` for linked content Unit
+  identity
+- **AND** the response SHALL NOT include `chapterUnitId`
+
 ### Requirement: Migration Keeps Legacy Compatibility Explicit
 
-The system SHALL keep any legacy content-structure compatibility explicit
-during migration. Existing book-specific APIs, route params, and helper names
-MAY remain as compatibility wrappers, but any remaining public `chapterId`,
-`chapterUnitId`, or `BookContentStructure` contract names SHALL be treated as
-legacy compatibility and scheduled for replacement by `contentUnitId` and
-`contentStructure`.
+The system SHALL keep legacy content-structure compatibility only at
+book-specific adapter boundaries that still need URL or product-surface
+compatibility. Existing book routes and helper names MAY remain temporarily
+when they are explicitly documented as adapters over generic content-structure
+storage. Generic contracts, service boundaries, storage models, and reusable
+app/API helpers SHALL use `contentStructure`, `ownerUnitId`, and
+`contentUnitId`.
 
-#### Scenario: Legacy field is documented or removed
+#### Scenario: Legacy field is removed from generic contracts
 
-- **WHEN** a contract or frontend DTO still exposes `chapterUnitId`
-- **THEN** the implementation SHALL either remove it in favor of
-  `contentUnitId` or document it as transitional compatibility
-- **AND** new call sites SHALL prefer `contentUnitId`
+- **WHEN** a generic content-structure contract or frontend DTO describes node
+  identity
+- **THEN** it SHALL expose `contentUnitId`
+- **AND** it SHALL NOT expose `chapterUnitId`
 
 #### Scenario: Legacy book endpoint is compatibility wrapper
 
 - **WHEN** a legacy `/book/:bookUnitId/content-structure` endpoint remains
 - **THEN** it SHALL be documented as a compatibility wrapper
 - **AND** it SHALL delegate to generic content-structure storage
+- **AND** internal callers that do not require book-specific compatibility SHALL
+  use generic content-structure clients instead
 
 ### Requirement: Generic ContentStructure Backend Model
 
@@ -130,9 +145,13 @@ and non-unique content-unit references.
 ### Requirement: Generic ContentStructure Service Owns Tree Operations
 
 The system SHALL provide a backend content-structure domain that owns generic
-tree assembly, path parsing, path resolution, diff planning, batch save, and
-history event writing. Book services MAY expose compatibility wrappers, but
-generic tree mutation logic SHALL NOT remain owned by the book domain.
+tree assembly, path parsing/resolution, diff planning, batch save, and history
+event writing. Book services MAY expose compatibility wrappers, but generic tree
+mutation logic SHALL NOT remain owned by the book domain.
+
+Generic tree operations SHALL accept and return `contentUnitId` only for linked
+content Unit identity. They SHALL NOT synthesize `chapterUnitId` aliases in
+generic mapper output or operation planning.
 
 #### Scenario: Generic owner read returns content structure
 
@@ -149,11 +168,20 @@ generic tree mutation logic SHALL NOT remain owned by the book domain.
   content-structure service
 - **AND** no separate `BookContentStructure` storage path SHALL be maintained
 
+#### Scenario: Generic write rejects chapterUnitId-only identity
+
+- **WHEN** a generic content-structure update receives a node identity through
+  `chapterUnitId` without `contentUnitId`
+- **THEN** the generic service SHALL reject the payload or require the caller to
+  use a book compatibility adapter
+- **AND** canonical writes SHALL persist only `contentUnitId`
+
 ### Requirement: ContentStructure History Is Generic
 
 Content-structure mutations SHALL record generic structure history events.
-Book-specific event names such as `book.contentStructure.batch` MAY remain only
-as compatibility aliases while consumers migrate.
+Book-specific event names such as `book.contentStructure.batch` MAY be displayed
+for pre-cutover legacy rows, but new canonical writes SHALL use generic
+content-structure event names and payload fields.
 
 #### Scenario: Generic structure edit records generic event
 
@@ -162,6 +190,7 @@ as compatibility aliases while consumers migrate.
 - **THEN** the history payload SHALL identify the owner Unit
 - **AND** the event type SHALL use generic content-structure terminology
 - **AND** node link/unlink payloads SHALL use `contentUnitId`
+- **AND** node link/unlink payloads SHALL NOT include chapter-specific aliases
 
 ### Requirement: Existing BookContentStructure Data Migrates To Generic Storage
 
