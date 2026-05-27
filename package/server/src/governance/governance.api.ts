@@ -3,11 +3,14 @@ import {
   accountEnforcementDTOSchema,
   capabilityGrantDTOSchema,
   capabilityHintSchema,
+  contentModerationDecisionSchema,
+  contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
   grantCapabilitySchema,
   moderationCaseDTOSchema,
   policyDecisionSchema,
   policyInputSchema,
+  realmContentModerationDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
   unblockAccountEnforcementSchema,
@@ -15,6 +18,7 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole, verifyAdminFromDb } from "@/middleware";
 import { accountPolicyActions } from "./action/account";
+import { contentPolicyActions } from "./action/content";
 import { realmPolicyActions } from "./action/realm";
 import { sitePolicyActions } from "./action/site";
 import { governanceAuditService } from "./audit.service";
@@ -77,6 +81,34 @@ async function assertGovernancePolicy(
   },
 ) {
   const decision = await decideGovernancePolicy(input);
+  if (!decision.allowed) {
+    return input.status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
+
+async function assertRealmGovernancePolicy(input: {
+  identity: any;
+  status: any;
+  realmUnitId: string;
+  action: Parameters<
+    typeof governanceRoutePolicyService.decideForIdentity
+  >[0]["action"];
+  target: { kind: string; id: string; realmUnitId: string };
+}) {
+  const realmMembership =
+    await governanceCapabilityService.realmMembershipForPolicy(
+      input.realmUnitId,
+      input.identity.userId,
+    );
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: input.action,
+    realmMembership,
+    target: input.target,
+  });
   if (!decision.allowed) {
     return input.status(
       403,
@@ -319,6 +351,213 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       detail: {
         summary: "Unblock an account",
         tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .get(
+    "/content/:targetUnitId/moderation",
+    async ({ params, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.auditRead,
+        target: { kind: "content-moderation", id: params.targetUnitId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.getGlobalContentState(
+        params.targetUnitId,
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ targetUnitId: t.String() }),
+      response: {
+        200: t.Nullable(contentModerationStateDTOSchema),
+        403: t.String(),
+      },
+      detail: {
+        summary: "Read global content moderation state",
+        tags: ["Governance", "Content"],
+      },
+    },
+  )
+  .post(
+    "/content/:targetUnitId/tombstone",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: contentPolicyActions.takedown,
+        target: { kind: "content", id: params.targetUnitId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.tombstoneGlobal({
+        targetUnitId: params.targetUnitId,
+        decidedById: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: contentModerationStateDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Globally tombstone content",
+        tags: ["Governance", "Content"],
+      },
+    },
+  )
+  .post(
+    "/content/:targetUnitId/restore",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: contentPolicyActions.restore,
+        target: { kind: "content", id: params.targetUnitId },
+      });
+      if (denied) return denied;
+      return governanceModerationService.restoreGlobal({
+        targetUnitId: params.targetUnitId,
+        decidedById: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: contentModerationStateDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Restore global content moderation state",
+        tags: ["Governance", "Content"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/content/:targetUnitId/tombstone",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: realmPolicyActions.queueDecide,
+        target: {
+          kind: "realm-content",
+          id: params.targetUnitId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.tombstoneInRealm({
+        realmUnitId: params.realmUnitId,
+        targetUnitId: params.targetUnitId,
+        decidedById: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: realmContentModerationDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Tombstone content in one realm",
+        tags: ["Governance", "Realms", "Content"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/content/:targetUnitId/restore",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: contentPolicyActions.restore,
+        target: {
+          kind: "realm-content",
+          id: params.targetUnitId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.restoreInRealm({
+        realmUnitId: params.realmUnitId,
+        targetUnitId: params.targetUnitId,
+        decidedById: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: realmContentModerationDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Restore content in one realm",
+        tags: ["Governance", "Realms", "Content"],
+      },
+    },
+  )
+  .delete(
+    "/realms/:realmUnitId/feed/:targetUnitId",
+    async ({ params, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: realmPolicyActions.queueDecide,
+        target: {
+          kind: "realm-feed-root",
+          id: params.targetUnitId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.removeRootFromRealm(params);
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
+      response: { 200: t.Object({ message: t.String() }), 403: t.String() },
+      detail: {
+        summary: "Remove a top-level content root from a realm feed",
+        tags: ["Governance", "Realms", "Content"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/content/:targetUnitId/owner-delegation",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: realmPolicyActions.queueDecide,
+        target: {
+          kind: "realm-content-owner-delegation",
+          id: params.targetUnitId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.requestOwnerDelegation({
+        realmUnitId: params.realmUnitId,
+        targetUnitId: params.targetUnitId,
+        decidedById: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Request owner delegation for realm content removal",
+        tags: ["Governance", "Realms", "Content"],
       },
     },
   )

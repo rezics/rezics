@@ -65,6 +65,51 @@ const grantRealmCapabilityMock = mock(async () => capabilityGrantRow);
 const revokeRealmCapabilityMock = mock(async () => [
   { ...capabilityGrantRow, state: "revoked", revokedByUserId: "staff-1" },
 ]);
+const contentStateRow = {
+  targetUnitId: "reply-1",
+  state: "tombstoned",
+  decidedByUserId: "staff-1",
+  caseId: null,
+  reason: "abuse",
+  createdAt: "2026-05-28T00:00:00.000Z",
+  updatedAt: "2026-05-28T00:00:00.000Z",
+};
+const realmOverlayRow = {
+  realmUnitId: "realm-1",
+  targetUnitId: "reply-1",
+  state: "tombstoned",
+  decidedByUserId: "staff-1",
+  caseId: null,
+  reason: "off-topic",
+  createdAt: "2026-05-28T00:00:00.000Z",
+  updatedAt: "2026-05-28T00:00:00.000Z",
+};
+const tombstoneGlobalMock = mock(async () => contentStateRow);
+const restoreGlobalMock = mock(async () => ({
+  ...contentStateRow,
+  state: "visible",
+}));
+const tombstoneInRealmMock = mock(async () => realmOverlayRow);
+const restoreInRealmMock = mock(async () => ({
+  ...realmOverlayRow,
+  state: "visible",
+}));
+const removeRootFromRealmMock = mock(async () => ({
+  message: "Content removed from realm feed",
+}));
+const requestOwnerDelegationMock = mock(async () => ({
+  id: "queue-1",
+  realmUnitId: "realm-1",
+  state: "new",
+  target: {
+    kind: "content-owner-delegation",
+    id: "reply-1",
+    realmUnitId: "realm-1",
+  },
+  reason: "please remove",
+  createdAt: "2026-05-28T00:00:00.000Z",
+  updatedAt: "2026-05-28T00:00:00.000Z",
+}));
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -107,6 +152,12 @@ mock.module("./moderation.service", () => ({
     listCases: mock(async () => []),
     getCase: mock(async () => null),
     listRealmQueue: mock(async () => []),
+    tombstoneGlobal: tombstoneGlobalMock,
+    restoreGlobal: restoreGlobalMock,
+    tombstoneInRealm: tombstoneInRealmMock,
+    restoreInRealm: restoreInRealmMock,
+    removeRootFromRealm: removeRootFromRealmMock,
+    requestOwnerDelegation: requestOwnerDelegationMock,
   },
 }));
 
@@ -126,6 +177,12 @@ describe("governanceApi account enforcement", () => {
     realmMembershipForPolicyMock.mockClear();
     grantRealmCapabilityMock.mockClear();
     revokeRealmCapabilityMock.mockClear();
+    tombstoneGlobalMock.mockClear();
+    restoreGlobalMock.mockClear();
+    tombstoneInRealmMock.mockClear();
+    restoreInRealmMock.mockClear();
+    removeRootFromRealmMock.mockClear();
+    requestOwnerDelegationMock.mockClear();
   });
 
   test("checks audit policy before reading enforcement summaries", async () => {
@@ -294,6 +351,116 @@ describe("governanceApi account enforcement", () => {
       userId: "user-2",
       capability: "queue.realm.decide",
       revokedById: "staff-1",
+    });
+  });
+
+  test("globally tombstones content through content policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/content/reply-1/tombstone", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ reason: "abuse" }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "content.takedown",
+      target: { kind: "content", id: "reply-1" },
+    });
+    expect(tombstoneGlobalMock).toHaveBeenCalledWith({
+      targetUnitId: "reply-1",
+      decidedById: "staff-1",
+      reason: "abuse",
+    });
+  });
+
+  test("realm tombstones content through realm queue policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/content/reply-1/tombstone",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason: "off-topic" }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "queue.realm.decide",
+      realmMembership: {
+        realmUnitId: "realm-1",
+        role: "moderator",
+        capabilities: [
+          {
+            capability: "queue.realm.decide",
+            scope: { kind: "realm", realmUnitId: "realm-1" },
+          },
+        ],
+      },
+      target: {
+        kind: "realm-content",
+        id: "reply-1",
+        realmUnitId: "realm-1",
+      },
+    });
+    expect(tombstoneInRealmMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      targetUnitId: "reply-1",
+      decidedById: "staff-1",
+      reason: "off-topic",
+    });
+  });
+
+  test("removes top-level content from realm feed through junction-drop path", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/realms/realm-1/feed/post-1", {
+        method: "DELETE",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(removeRootFromRealmMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      targetUnitId: "post-1",
+    });
+    expect(tombstoneInRealmMock).not.toHaveBeenCalled();
+  });
+
+  test("creates owner delegation queue item through realm policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/content/reply-1/owner-delegation",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason: "please remove" }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(requestOwnerDelegationMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      targetUnitId: "reply-1",
+      decidedById: "staff-1",
+      reason: "please remove",
     });
   });
 });

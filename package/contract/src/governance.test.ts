@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   accountEnforcementDTOSchema,
+  contentModerationDecisionSchema,
   contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
   grantCapabilitySchema,
@@ -174,6 +175,14 @@ describe("governance contract registry", () => {
   });
 
   test("content moderation state DTOs validate", () => {
+    expect(
+      Value.Check(contentModerationDecisionSchema, {
+        reason: "off-topic",
+        caseId: "case-1",
+        metadata: { source: "realm-queue" },
+      }),
+    ).toBe(true);
+
     expect(
       Value.Check(contentModerationStateDTOSchema, {
         targetUnitId: "reply-1",

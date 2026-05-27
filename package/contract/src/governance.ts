@@ -312,6 +312,15 @@ export const realmContentModerationDTOSchema = t.Object({
 export type RealmContentModerationDTO =
   (typeof realmContentModerationDTOSchema)["static"];
 
+export const contentModerationDecisionSchema = t.Object({
+  reason: t.String({ minLength: 1 }),
+  caseId: t.Optional(t.Nullable(t.String())),
+  metadata: t.Optional(auditMetadataSchema),
+});
+
+export type ContentModerationDecisionInput =
+  (typeof contentModerationDecisionSchema)["static"];
+
 export const staffAuditLogDTOSchema = t.Object({
   id: t.String(),
   actorUserId: t.String(),

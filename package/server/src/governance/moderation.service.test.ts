@@ -46,6 +46,30 @@ const realmContentModerationFindMany = mock(async () => [
     updatedAt: now,
   },
 ]);
+const postFindUnique = mock(
+  async (): Promise<{ parentPostUnitId: string | null }> => ({
+    parentPostUnitId: null,
+  }),
+);
+const unitRealmDelete = mock(async () => undefined);
+const realmQueueCreate = mock(async ({ data }: any) => ({
+  id: "queue-1",
+  realmUnitId: data.realmUnitId,
+  state: data.state,
+  reporterUserId: null,
+  subjectUserId: null,
+  targetKind: data.targetKind,
+  targetId: data.targetId,
+  targetUnitId: data.targetUnitId,
+  sourceFeedbackId: null,
+  linkedCaseId: null,
+  assignedToUserId: data.assignedToUserId,
+  reason: data.reason,
+  safeSummary: null,
+  metadata: data.metadata,
+  createdAt: now,
+  updatedAt: now,
+}));
 
 Object.assign(prismaMock, {
   contentModerationState: {
@@ -57,6 +81,15 @@ Object.assign(prismaMock, {
     findMany: realmContentModerationFindMany,
     upsert: realmContentModerationUpsert,
   },
+  post: {
+    findUnique: postFindUnique,
+  },
+  unitRealm: {
+    delete: unitRealmDelete,
+  },
+  realmModerationQueueItem: {
+    create: realmQueueCreate,
+  },
 });
 
 describe("GovernanceModerationService content moderation state", () => {
@@ -66,6 +99,10 @@ describe("GovernanceModerationService content moderation state", () => {
     contentModerationUpsert.mockClear();
     realmContentModerationFindMany.mockClear();
     realmContentModerationUpsert.mockClear();
+    postFindUnique.mockClear();
+    postFindUnique.mockResolvedValue({ parentPostUnitId: null });
+    unitRealmDelete.mockClear();
+    realmQueueCreate.mockClear();
   });
 
   test("upserts global content moderation state", async () => {
@@ -192,6 +229,102 @@ describe("GovernanceModerationService content moderation state", () => {
       realmUnitId: "realm-1",
       targetUnitId: "reply-1",
       state: "tombstoned",
+    });
+  });
+
+  test("restore helpers keep reversible visible state rows", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await governanceModerationService.restoreGlobal({
+      targetUnitId: "reply-1",
+      decidedById: "staff-1",
+      reason: "appeal approved",
+    });
+    await governanceModerationService.restoreInRealm({
+      realmUnitId: "realm-1",
+      targetUnitId: "reply-1",
+      decidedById: "mod-1",
+      reason: "appeal approved",
+    });
+
+    expect(contentModerationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({ state: "VISIBLE" }),
+      }),
+    );
+    expect(realmContentModerationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({ state: "VISIBLE" }),
+      }),
+    );
+  });
+
+  test("realm feed removal uses junction drop for roots", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await expect(
+      governanceModerationService.removeRootFromRealm({
+        realmUnitId: "realm-1",
+        targetUnitId: "post-1",
+      }),
+    ).resolves.toEqual({ message: "Content removed from realm feed" });
+
+    expect(unitRealmDelete).toHaveBeenCalledWith({
+      where: {
+        realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
+      },
+    });
+    expect(realmContentModerationUpsert).not.toHaveBeenCalled();
+  });
+
+  test("realm feed removal rejects reply nodes", async () => {
+    postFindUnique.mockResolvedValueOnce({ parentPostUnitId: "post-1" });
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await expect(
+      governanceModerationService.removeRootFromRealm({
+        realmUnitId: "realm-1",
+        targetUnitId: "reply-1",
+      }),
+    ).rejects.toThrow("Realm feed removal only applies to thread roots");
+
+    expect(unitRealmDelete).not.toHaveBeenCalled();
+  });
+
+  test("owner delegation creates a realm queue item instead of state mutation", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.requestOwnerDelegation({
+      realmUnitId: "realm-1",
+      targetUnitId: "reply-1",
+      decidedById: "mod-1",
+      reason: "please remove",
+    });
+
+    expect(realmQueueCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        realmUnitId: "realm-1",
+        state: "NEW",
+        targetKind: "content-owner-delegation",
+        targetId: "reply-1",
+        targetUnitId: "reply-1",
+        assignedToUserId: "mod-1",
+        reason: "please remove",
+        metadata: { ownerDelegation: true },
+      }),
+    });
+    expect(result).toMatchObject({
+      id: "queue-1",
+      realmUnitId: "realm-1",
+      target: { kind: "content-owner-delegation", id: "reply-1" },
     });
   });
 });

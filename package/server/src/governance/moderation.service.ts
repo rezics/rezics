@@ -1,4 +1,5 @@
 import { prisma } from "#/prisma/client";
+import { AppError } from "../utils/errors";
 import {
   mapContentModerationStateToDTO,
   mapModerationCaseToDTO,
@@ -13,6 +14,14 @@ type ContentModerationStateInput = {
   decidedById?: string | null;
   caseId?: string | null;
   reason?: string | null;
+  metadata?: Record<string, unknown>;
+};
+
+type ModerationDecisionInput = {
+  targetUnitId: string;
+  decidedById: string;
+  reason: string;
+  caseId?: string | null;
   metadata?: Record<string, unknown>;
 };
 
@@ -91,6 +100,20 @@ export class GovernanceModerationService {
     return mapContentModerationStateToDTO(row);
   }
 
+  async tombstoneGlobal(input: ModerationDecisionInput) {
+    return this.setGlobalContentState({
+      ...input,
+      state: "tombstoned",
+    });
+  }
+
+  async restoreGlobal(input: ModerationDecisionInput) {
+    return this.setGlobalContentState({
+      ...input,
+      state: "visible",
+    });
+  }
+
   async listRealmContentOverlays(input: {
     realmUnitId: string;
     targetUnitIds: string[];
@@ -127,6 +150,71 @@ export class GovernanceModerationService {
       update: data,
     });
     return mapRealmContentModerationToDTO(row);
+  }
+
+  async tombstoneInRealm(
+    input: ModerationDecisionInput & { realmUnitId: string },
+  ) {
+    return this.setRealmContentOverlay({
+      ...input,
+      state: "tombstoned",
+    });
+  }
+
+  async restoreInRealm(
+    input: ModerationDecisionInput & { realmUnitId: string },
+  ) {
+    return this.setRealmContentOverlay({
+      ...input,
+      state: "visible",
+    });
+  }
+
+  async removeRootFromRealm(input: {
+    realmUnitId: string;
+    targetUnitId: string;
+  }) {
+    const post = await prisma.post.findUnique({
+      where: { unitId: input.targetUnitId },
+      select: { parentPostUnitId: true },
+    });
+    if (post?.parentPostUnitId) {
+      throw new AppError(
+        400,
+        "Realm feed removal only applies to thread roots",
+      );
+    }
+
+    await prisma.unitRealm.delete({
+      where: {
+        realmUnitId_unitId: {
+          realmUnitId: input.realmUnitId,
+          unitId: input.targetUnitId,
+        },
+      },
+    });
+    return { message: "Content removed from realm feed" };
+  }
+
+  async requestOwnerDelegation(
+    input: ModerationDecisionInput & { realmUnitId: string },
+  ) {
+    const row = await prisma.realmModerationQueueItem.create({
+      data: {
+        realmUnitId: input.realmUnitId,
+        state: "NEW",
+        targetKind: "content-owner-delegation",
+        targetId: input.targetUnitId,
+        targetUnitId: input.targetUnitId,
+        assignedToUserId: input.decidedById,
+        reason: input.reason,
+        metadata: {
+          ...(input.metadata ?? {}),
+          ownerDelegation: true,
+        } as never,
+      },
+    });
+    return mapRealmQueueItemToDTO(row);
   }
 }
 
