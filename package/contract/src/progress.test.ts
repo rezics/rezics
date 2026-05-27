@@ -40,7 +40,6 @@ describe("progress contract schemas", () => {
           bookUnitId: "book-1",
           path: [2, 4, 0],
           contentUnitId: "chapter-1",
-          chapterUnitId: "chapter-1",
         },
         addTimeMs: 1000,
         extra: { paused: { reasonPostUnitIds: ["post-1"] } },
@@ -84,7 +83,7 @@ describe("progress contract schemas", () => {
         chapterUnitId: "chapter-1",
         offset: 0.42,
       }),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       Value.Check(unitLastPositionSchema, {
         kind: "contentStructurePath",

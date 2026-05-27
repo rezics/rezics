@@ -34,12 +34,12 @@ describe("BookContentStructure occurrence helpers", () => {
     expect(materializedOrPathId(routeB!)).toBe("chapter-shared");
   });
 
-  test("falls back to legacy chapterUnitId while reading transitional payloads", () => {
+  test("uses contentUnitId as the only materialized node identity", () => {
     const tree = withBookContentStructureOccurrences([
-      { title: "Legacy", chapterUnitId: "chapter-legacy" },
+      { title: "Canonical", contentUnitId: "chapter-content" },
     ]);
 
-    expect(contentUnitIdForNode(tree[0]!)).toBe("chapter-legacy");
-    expect(materializedOrPathId(tree[0]!)).toBe("chapter-legacy");
+    expect(contentUnitIdForNode(tree[0]!)).toBe("chapter-content");
+    expect(materializedOrPathId(tree[0]!)).toBe("chapter-content");
   });
 });

@@ -29,7 +29,6 @@ export function buildContentStructureTree(
     };
     if (row.contentUnitId) {
       item.contentUnitId = row.contentUnitId;
-      item.chapterUnitId = row.contentUnitId;
     }
     if (row.noContent) item.noContent = row.noContent;
     if (row.rating) item.rating = row.rating;

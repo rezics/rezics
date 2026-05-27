@@ -46,7 +46,7 @@ type ActiveProgressModalProps = {
 function lastPositionChapterId(
   lp: UnitLastPosition | null | undefined,
 ): string | undefined {
-  if (lp?.kind === "chapter") return lp.chapterUnitId;
+  if (lp?.kind === "chapter") return lp.contentUnitId;
   return undefined;
 }
 
@@ -63,20 +63,20 @@ export function ActiveProgressModal({
   const [progressPct, setProgressPct] = useState<number>(
     Math.round((initialProgress ?? 0) * 100),
   );
-  const [chapterUnitId, setChapterUnitId] = useState<string | undefined>(
+  const [contentUnitId, setContentUnitId] = useState<string | undefined>(
     lastPositionChapterId(initialLastPosition),
   );
 
   useEffect(() => {
     if (open) {
       setProgressPct(Math.round((initialProgress ?? 0) * 100));
-      setChapterUnitId(lastPositionChapterId(initialLastPosition));
+      setContentUnitId(lastPositionChapterId(initialLastPosition));
     }
   }, [open, initialProgress, initialLastPosition]);
 
   const handleSave = () => {
-    const lastPosition: UnitLastPosition | null = chapterUnitId
-      ? { kind: "chapter", chapterUnitId }
+    const lastPosition: UnitLastPosition | null = contentUnitId
+      ? { kind: "chapter", contentUnitId }
       : null;
     onSave({
       progress: Math.max(0, Math.min(100, progressPct)) / 100,
@@ -115,8 +115,8 @@ export function ActiveProgressModal({
             <Label>{m.progress_status_active_modal_chapter_label()}</Label>
             <ChapterPicker
               bookUnitId={bookUnitId}
-              value={chapterUnitId}
-              onChange={setChapterUnitId}
+              value={contentUnitId}
+              onChange={setContentUnitId}
             />
           </div>
         </div>

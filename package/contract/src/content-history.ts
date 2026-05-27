@@ -70,8 +70,6 @@ export const contentStructureNodeSnapshotSchema = t.Object({
   nodeId: t.String(),
   title: t.String(),
   contentUnitId: t.Optional(t.Nullable(t.String())),
-  /** @deprecated Use contentUnitId. */
-  chapterUnitId: t.Optional(t.Nullable(t.String())),
   noContent: t.Optional(t.Boolean()),
   rating: t.Optional(t.Nullable(t.String())),
 });
@@ -113,18 +111,12 @@ export const contentStructureNodeLinkOperationSchema = t.Object({
   nodeId: t.String(),
   beforeContentUnitId: t.Optional(t.Nullable(t.String())),
   afterContentUnitId: t.Optional(t.String()),
-  /** @deprecated Use beforeContentUnitId. */
-  beforeChapterUnitId: t.Optional(t.Nullable(t.String())),
-  /** @deprecated Use afterContentUnitId. */
-  afterChapterUnitId: t.String(),
 });
 
 export const contentStructureNodeUnlinkOperationSchema = t.Object({
   op: t.Literal("node.unlink"),
   nodeId: t.String(),
   beforeContentUnitId: t.Optional(t.String()),
-  /** @deprecated Use beforeContentUnitId. */
-  beforeChapterUnitId: t.String(),
 });
 
 export const contentStructureBulkReplaceOperationSchema = t.Object({
@@ -147,12 +139,12 @@ export const contentStructureBatchOperationSchema = t.Union([
 export type ContentStructureBatchOperation =
   (typeof contentStructureBatchOperationSchema)["static"];
 
-export const bookContentStructureBatchPayloadSchema = t.Object({
+export const contentStructureBatchPayloadSchema = t.Object({
   operations: t.Array(contentStructureBatchOperationSchema),
 });
 
-export type BookContentStructureBatchPayload =
-  (typeof bookContentStructureBatchPayloadSchema)["static"];
+export type ContentStructureBatchPayload =
+  (typeof contentStructureBatchPayloadSchema)["static"];
 
 export const structureEventPayloadSchema = t.Object({
   unitId: t.String(),
@@ -167,18 +159,18 @@ export const structureEventPayloadSchema = t.Object({
 export type StructureEventPayload =
   (typeof structureEventPayloadSchema)["static"];
 
-export const bookContentStructureBatchEventPayloadSchema = t.Object({
+export const contentStructureBatchEventPayloadSchema = t.Object({
   unitId: t.String(),
   sequence: t.Number(),
   actorUserId: t.String(),
-  eventType: t.Literal("book.contentStructure.batch"),
+  eventType: t.Literal("contentStructure.content.batch"),
   changedFieldKeys: t.Array(t.String()),
-  payload: bookContentStructureBatchPayloadSchema,
+  payload: contentStructureBatchPayloadSchema,
   message: t.Optional(t.Nullable(t.String())),
 });
 
-export type BookContentStructureBatchEventPayload =
-  (typeof bookContentStructureBatchEventPayloadSchema)["static"];
+export type ContentStructureBatchEventPayload =
+  (typeof contentStructureBatchEventPayloadSchema)["static"];
 
 export const historyDisplayResolutionStatusSchema = t.Union([
   t.Literal("OK"),

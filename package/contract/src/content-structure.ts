@@ -6,8 +6,6 @@ export const contentStructureNodeSchema: ReturnType<typeof t.Recursive> =
     t.Object({
       title: t.String(),
       contentUnitId: t.Optional(t.String()),
-      /** @deprecated Use contentUnitId. */
-      chapterUnitId: t.Optional(t.String()),
       noContent: t.Optional(t.Boolean()),
       rating: t.Optional(contentRatingSchema),
       children: t.Optional(t.Array(self)),
@@ -21,8 +19,6 @@ export type ContentStructurePath = number[];
 export interface ContentStructureItem {
   title: string;
   contentUnitId?: string;
-  /** @deprecated Transitional compatibility for book content-structure clients. */
-  chapterUnitId?: string;
   noContent?: boolean;
   rating?: ContentRating;
   children?: ContentStructureItem[];

@@ -664,7 +664,7 @@ describe("RevisionService", () => {
         unitId: "unit-1",
         sequence: 1,
         actorUserId: "user-1",
-        eventType: "book.contentStructure.node.update",
+        eventType: "contentStructure.content.node.update",
         changedFieldKeys: ["translations.en.title"],
         payload: { nodeId: "node-1" },
         message: null,
@@ -740,8 +740,8 @@ describe("RevisionService", () => {
         unitId: "unit-1",
         sequence: 1,
         actorUserId: "user-1",
-        eventType: "book.contentStructure.batch",
-        changedFieldKeys: ["book.contentStructure"],
+        eventType: "contentStructure.content.batch",
+        changedFieldKeys: ["contentStructure"],
         payload: {
           operations: [
             {
@@ -764,7 +764,7 @@ describe("RevisionService", () => {
     const event = await service.getStructureEvent({
       unitId: "unit-1",
       sequence: 1,
-      eventType: "book.contentStructure.batch",
+      eventType: "contentStructure.content.batch",
     });
 
     expect(page.events).toHaveLength(1);
@@ -776,6 +776,51 @@ describe("RevisionService", () => {
           nodeId: "node-1",
           before: { title: "Before" },
           after: { title: "Captured" },
+        },
+      ],
+    });
+  });
+
+  test("legacy book content-structure batch events remain readable", async () => {
+    const db = dbStub();
+    const service = new RevisionService(db as never);
+
+    await service.insertStructureEvent({
+      payload: {
+        unitId: "unit-1",
+        sequence: 2,
+        actorUserId: "user-1",
+        eventType: "book.contentStructure.batch",
+        changedFieldKeys: ["book.contentStructure"],
+        payload: {
+          operations: [
+            {
+              op: "node.update",
+              nodeId: "legacy-node",
+              before: { title: "Before" },
+              after: { title: "Legacy" },
+            },
+          ],
+        },
+        message: "Legacy pre-cutover row",
+      },
+      createdAt: new Date("2026-05-19T00:00:00.000Z"),
+    });
+
+    const event = await service.getStructureEvent({
+      unitId: "unit-1",
+      sequence: 2,
+      eventType: "book.contentStructure.batch",
+    });
+
+    expect(event?.eventType).toBe("book.contentStructure.batch");
+    expect(event?.payload).toEqual({
+      operations: [
+        {
+          op: "node.update",
+          nodeId: "legacy-node",
+          before: { title: "Before" },
+          after: { title: "Legacy" },
         },
       ],
     });

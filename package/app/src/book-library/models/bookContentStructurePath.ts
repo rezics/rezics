@@ -41,9 +41,9 @@ export function materializedOrPathId(
 }
 
 export function contentUnitIdForNode(
-  node: Pick<BookContentStructureItem, "contentUnitId" | "chapterUnitId">,
+  node: Pick<BookContentStructureItem, "contentUnitId">,
 ): string | undefined {
-  return node.contentUnitId ?? node.chapterUnitId;
+  return node.contentUnitId;
 }
 
 export function withBookContentStructureOccurrences(

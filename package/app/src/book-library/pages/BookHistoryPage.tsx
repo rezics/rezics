@@ -88,7 +88,7 @@ export function BookHistoryPage() {
   });
   const structureQuery = useQuery({
     ...historyQueries.structureEventTimeline(bookId, {
-      eventType: "book.contentStructure.batch",
+      eventType: "contentStructure.content.batch",
       includePayload: true,
       limit: 30,
     }),

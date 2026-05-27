@@ -152,7 +152,7 @@ describe("HistoryOutboxConsumer", () => {
         unitId: "unit-1",
         sequence: 2,
         actorUserId: "user-1",
-        eventType: "book.contentStructure.node.update",
+        eventType: "contentStructure.content.node.update",
         changedFieldKeys: ["translations.en.title"],
         payload: { nodeId: "node-1", title: "Captured" },
         message: null,

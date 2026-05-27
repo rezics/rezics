@@ -123,7 +123,6 @@ export const BookReadChapterPage: React.FC = () => {
       title: title ?? "",
       path: emptyChapterPath,
       contentUnitId: emptyContentUnitId,
-      chapterUnitId: emptyChapter?.chapterUnitId,
     });
   };
 

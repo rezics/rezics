@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
-  bookContentStructureBatchEventPayloadSchema,
-  bookContentStructureBatchPayloadSchema,
+  contentStructureBatchEventPayloadSchema,
+  contentStructureBatchPayloadSchema,
   editorialPatchSchema,
   editorialPatchSubmissionSchema,
   editorialRevisionPayloadSchema,
@@ -15,7 +15,7 @@ import {
 } from "./content-history";
 
 describe("content history contracts", () => {
-  test("accepts typed BookContentStructure batch operations", () => {
+  test("accepts typed ContentStructure batch operations", () => {
     const payload = {
       operations: [
         {
@@ -41,7 +41,6 @@ describe("content history contracts", () => {
             nodeId: "node-2",
             title: "Deleted",
             contentUnitId: "chapter-2",
-            chapterUnitId: "chapter-2",
             noContent: false,
             rating: null,
           },
@@ -53,14 +52,11 @@ describe("content history contracts", () => {
           nodeId: "node-3",
           beforeContentUnitId: null,
           afterContentUnitId: "chapter-3",
-          beforeChapterUnitId: null,
-          afterChapterUnitId: "chapter-3",
         },
         {
           op: "node.unlink",
           nodeId: "node-3",
           beforeContentUnitId: "chapter-3",
-          beforeChapterUnitId: "chapter-3",
         },
         {
           op: "bulk.replace",
@@ -71,16 +67,14 @@ describe("content history contracts", () => {
       ],
     };
 
-    expect(Value.Check(bookContentStructureBatchPayloadSchema, payload)).toBe(
-      true,
-    );
+    expect(Value.Check(contentStructureBatchPayloadSchema, payload)).toBe(true);
     expect(
-      Value.Check(bookContentStructureBatchEventPayloadSchema, {
+      Value.Check(contentStructureBatchEventPayloadSchema, {
         unitId: "book-1",
         sequence: 7,
         actorUserId: "user-1",
-        eventType: "book.contentStructure.batch",
-        changedFieldKeys: ["book.contentStructure"],
+        eventType: "contentStructure.content.batch",
+        changedFieldKeys: ["contentStructure"],
         payload,
         message: "Restructure",
       }),
@@ -89,7 +83,7 @@ describe("content history contracts", () => {
 
   test("rejects unknown structure batch operations", () => {
     expect(
-      Value.Check(bookContentStructureBatchPayloadSchema, {
+      Value.Check(contentStructureBatchPayloadSchema, {
         operations: [{ op: "node.rename", nodeId: "node-1" }],
       }),
     ).toBe(false);

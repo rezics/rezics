@@ -7,7 +7,7 @@ import {
 
 export type EnsureChapterUnitInput = Pick<
   BookContentStructureOccurrence,
-  "contentUnitId" | "chapterUnitId" | "path" | "title"
+  "contentUnitId" | "path" | "title"
 >;
 
 export function useEnsureChapterUnit(bookUnitId: string) {

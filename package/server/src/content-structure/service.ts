@@ -212,7 +212,6 @@ function nodeSnapshot(
     nodeId: row.id,
     title: row.title,
     contentUnitId: row.contentUnitId,
-    chapterUnitId: row.contentUnitId,
     noContent: row.noContent,
     rating: row.rating,
   };
@@ -323,7 +322,6 @@ export function planContentStructureOperations(
           op: "node.unlink",
           nodeId: plan.id,
           beforeContentUnitId,
-          beforeChapterUnitId: beforeContentUnitId,
         });
       }
       if (afterContentUnitId) {
@@ -332,8 +330,6 @@ export function planContentStructureOperations(
           nodeId: plan.id,
           beforeContentUnitId,
           afterContentUnitId,
-          beforeChapterUnitId: beforeContentUnitId,
-          afterChapterUnitId: afterContentUnitId,
         });
       }
     }
@@ -375,7 +371,7 @@ function planSubmittedContentStructureTree(
         title: node.title,
         noContent: node.noContent === true,
         rating: (node.rating as ContentRating | undefined) ?? null,
-        contentUnitId: node.contentUnitId ?? node.chapterUnitId ?? null,
+        contentUnitId: node.contentUnitId ?? null,
       });
       if (node.children && node.children.length > 0) {
         visit(node.children, id);

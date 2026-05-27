@@ -2,7 +2,7 @@ import type { SeedPreset } from "@rezics/server/prisma/factory";
 
 /**
  * Multi-link TOC preset. Seeds one or two small books where a sizeable share
- * of materialized chapters receive an additional BookContentStructureNode row
+ * of materialized chapters receive an additional ContentStructureNode row
  * inside the same book — exercising the "preface appears at top level and
  * again inside an appendix" pattern and the multi-link contract end-to-end
  * (no manual SQL required).

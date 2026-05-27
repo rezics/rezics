@@ -70,7 +70,6 @@ export type Chapter = {
   id: string | number;
   title: string;
   contentUnitId?: string;
-  chapterUnitId?: string;
   path?: number[];
   occurrenceId?: string;
   nodeId?: string;
@@ -322,7 +321,6 @@ export const BookTocEditor = forwardRef<
       const chapterUnitId = await ensureChapterUnit({
         title: chapter.title,
         contentUnitId,
-        chapterUnitId: chapter.chapterUnitId,
         path: chapter.path ?? [],
       });
       navigate({
