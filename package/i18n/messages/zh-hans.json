@@ -1900,5 +1900,7 @@
   "realm_feed_sort_hot": "热门",
   "profile_reactions_given": "已给出",
   "profile_reactions_received": "收到的",
-  "book_chapter_label": "章节"
+  "book_chapter_label": "章节",
+  "release_scope_all_releases": "所有版本",
+  "release_scope_this_release": "此版本"
 }

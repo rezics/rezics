@@ -13,16 +13,27 @@ const i18nMessages = {
 
 interface RemarkListSectionProps {
   targetUnitId: string;
+  workUnitId?: string;
   limit?: number;
 }
 
 export const RemarkListSection: React.FC<RemarkListSectionProps> = ({
   targetUnitId,
+  workUnitId,
   limit = 20,
 }) => {
   const m = useMessage(i18nMessages);
   const { data, isLoading, error } = useQuery({
-    ...postQueries.byTarget(targetUnitId, { kind: PostKind.REMARK, limit }),
+    ...postQueries.list(
+      workUnitId
+        ? {
+            workUnitId,
+            kind: PostKind.REMARK,
+            workRoles: ["POST"],
+            limit,
+          }
+        : { targetUnitId, kind: PostKind.REMARK, limit },
+    ),
     enabled: !!targetUnitId,
   });
 

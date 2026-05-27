@@ -28,9 +28,13 @@ type Review = PostDTO;
 
 export interface ReviewsPageProps {
   bookUnitId?: string;
+  workUnitId?: string;
 }
 
-export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
+export const ReviewsPage: React.FC<ReviewsPageProps> = ({
+  bookUnitId,
+  workUnitId,
+}) => {
   const m = useMessage(i18nMessages);
   const ref = useRef<UniversalPaginatorHandle>(null);
   const targetUnitId = bookUnitId ?? "";
@@ -46,7 +50,15 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
 
   const { data, isLoading } = usePostSearchQuery({
     kind,
-    targetUnitId: targetUnitId || undefined,
+    ...(workUnitId
+      ? {
+          workUnitId,
+          workRoles: [kind === "REVIEW" ? "REVIEW" : "POST"] as (
+            | "REVIEW"
+            | "POST"
+          )[],
+        }
+      : { targetUnitId: targetUnitId || undefined }),
     keyword: keyword || undefined,
     offset: start,
     limit: EXTERNAL_PAGE_SIZE,
@@ -123,7 +135,10 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
         }
       >
         {(currentPageItems: Review[]) => (
-          <ReviewList reviews={currentPageItems} showTargetWork={!bookUnitId} />
+          <ReviewList
+            reviews={currentPageItems}
+            showTargetWork={Boolean(workUnitId)}
+          />
         )}
       </UniversalPaginator>
     </div>

@@ -1900,5 +1900,7 @@
   "realm_feed_sort_hot": "인기",
   "profile_reactions_given": "주어진",
   "profile_reactions_received": "받았다",
-  "book_chapter_label": "장"
+  "book_chapter_label": "장",
+  "release_scope_all_releases": "모든 판본",
+  "release_scope_this_release": "이 판본"
 }

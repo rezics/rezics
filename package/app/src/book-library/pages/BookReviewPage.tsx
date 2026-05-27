@@ -33,16 +33,20 @@ export const BookReviewPage: React.FC = () => {
   const workUnitId = releaseWorkUnitId(bookInfo);
 
   const { data: reviewsData } = useQuery({
-    ...(workUnitId
-      ? postQueries.byWork(workUnitId, {
-          kind: PostKind.REVIEW,
-          workRoles: ["REVIEW"],
-          limit: REVIEW_PREVIEW_LIMIT,
-        })
-      : postQueries.byTarget(bookId, {
-          kind: PostKind.REVIEW,
-          limit: REVIEW_PREVIEW_LIMIT,
-        })),
+    ...postQueries.list(
+      workUnitId
+        ? {
+            workUnitId,
+            kind: PostKind.REVIEW,
+            workRoles: ["REVIEW"],
+            limit: REVIEW_PREVIEW_LIMIT,
+          }
+        : {
+            targetUnitId: bookId,
+            kind: PostKind.REVIEW,
+            limit: REVIEW_PREVIEW_LIMIT,
+          },
+    ),
     enabled: Boolean(bookId),
   });
 
@@ -78,6 +82,7 @@ export const BookReviewPage: React.FC = () => {
 
       <ShelfByBookPreview
         bookId={bookInfo.unitId || ""}
+        workUnitId={workUnitId}
         title={title}
         shelfNumber={SHELF_PREVIEW_LIMIT}
       />

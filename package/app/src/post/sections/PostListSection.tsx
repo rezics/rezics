@@ -1,4 +1,4 @@
-import { postQueries, postsByTargetQuery } from "@rezics/api/post/post";
+import { postQueries } from "@rezics/api/post/post";
 import type { PostKind, PostListQuery } from "@rezics/contract";
 import { discussion_empty } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
@@ -41,13 +41,19 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
     limit,
     parentPostUnitId: undefined,
   };
-  const query = workUnitId
-    ? postQueries.byWork(workUnitId, filters)
-    : postsByTargetQuery(targetUnitId ?? "", {
-        kind,
-        limit,
-        parentPostUnitId: undefined,
-      });
+  const query = postQueries.list(
+    workUnitId
+      ? {
+          workUnitId,
+          ...filters,
+        }
+      : {
+          targetUnitId: targetUnitId ?? "",
+          kind,
+          limit,
+          parentPostUnitId: undefined,
+        },
+  );
   const { data, isLoading } = useQuery(query);
   const posts = data?.posts ?? [];
 

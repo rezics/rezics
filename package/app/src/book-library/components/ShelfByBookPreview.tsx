@@ -18,18 +18,21 @@ const i18nMessages = {
 export function ShelfByBookPreview({
   title,
   bookId,
+  workUnitId,
   shelfNumber = 12,
 }: {
   title: string;
   bookId?: string;
+  workUnitId?: string;
   shelfNumber?: number;
 }) {
   const m = useMessage(i18nMessages);
   const { data, isLoading, error } = useQuery({
-    ...shelfQueries.list({
-      containsUnitId: bookId,
-      limit: shelfNumber,
-    }),
+    ...shelfQueries.list(
+      workUnitId
+        ? { containsWorkUnitId: workUnitId, limit: shelfNumber }
+        : { containsUnitId: bookId, limit: shelfNumber },
+    ),
     enabled: !!bookId,
   });
 

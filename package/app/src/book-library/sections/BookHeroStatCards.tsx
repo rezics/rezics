@@ -55,17 +55,24 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
 }) => {
   const m = useMessage(i18nMessages);
   const { data: reviewData } = useQuery({
-    ...(workUnitId
-      ? postQueries.byWork(workUnitId, {
-          kind: PostKind.REVIEW,
-          workRoles: ["REVIEW"],
-          limit: 1,
-        })
-      : postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 })),
+    ...postQueries.list(
+      workUnitId
+        ? {
+            workUnitId,
+            kind: PostKind.REVIEW,
+            workRoles: ["REVIEW"],
+            limit: 1,
+          }
+        : { targetUnitId: bookId, kind: PostKind.REVIEW, limit: 1 },
+    ),
     enabled: Boolean(bookId),
   });
   const { data: shelfData } = useQuery({
-    ...shelfQueries.list({ containsUnitId: bookId, limit: 1 }),
+    ...shelfQueries.list(
+      workUnitId
+        ? { containsWorkUnitId: workUnitId, limit: 1 }
+        : { containsUnitId: bookId, limit: 1 },
+    ),
     enabled: Boolean(bookId),
   });
   const { data: tagsData } = useQuery({

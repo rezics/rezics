@@ -1,7 +1,10 @@
+import { bookQueries } from "@rezics/api/book/book";
 import { excerpt_excerpts_title } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
+import { useQuery } from "@tanstack/react-query";
+import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
 import { ExcerptList } from "@/excerpt";
 import { Route as excerptByBookRoute } from "@/routes/_mainLayout/excerpt/book/$bookId";
 import UnitsPage from "@/unit/pages/UnitsPage";
@@ -14,13 +17,23 @@ const i18nMessages = {
 export function ExcerptByBookPage() {
   const m = useMessage(i18nMessages);
   const { bookId } = excerptByBookRoute.useParams();
+  const { data: bookInfo } = useQuery({
+    ...bookQueries.detail(bookId),
+    enabled: Boolean(bookId),
+  });
+  const workUnitId = releaseWorkUnitId(bookInfo);
   return (
     <div className="mt-16 mx-auto max-w-4xl w-11/12">
       <ArrowForwardIcon size={16}>
         <AccentBarWithText text={m.excerpt_excerpts_title()} />
       </ArrowForwardIcon>
       <ExcerptNewPage bookUnitId={bookId || ""} />
-      <UnitsPage type="QUOTE" targetUnitId={bookId || ""} mode="single">
+      <UnitsPage
+        type="QUOTE"
+        targetUnitId={bookId || ""}
+        workUnitId={workUnitId}
+        mode="single"
+      >
         {(units: any[]) => <ExcerptList units={units} />}
       </UnitsPage>
     </div>

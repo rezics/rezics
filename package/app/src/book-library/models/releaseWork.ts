@@ -15,6 +15,29 @@ export function releaseWorkUnitId(
   );
 }
 
+export type ReleaseScopeMode = "work" | "exact";
+
+export interface ReleaseScope {
+  unitId: string;
+  workUnitId?: string;
+  scopeMode: ReleaseScopeMode;
+}
+
+export function resolveReleaseScope(
+  bookInfo:
+    | Pick<BookDTO, "unitId" | "workMembership" | "workUnitId">
+    | null
+    | undefined,
+  scopeMode: ReleaseScopeMode = "work",
+): ReleaseScope | null {
+  if (!bookInfo?.unitId) return null;
+  const workUnitId = releaseWorkUnitId(bookInfo);
+  if (scopeMode === "work" && workUnitId) {
+    return { unitId: bookInfo.unitId, workUnitId, scopeMode: "work" };
+  }
+  return { unitId: bookInfo.unitId, scopeMode: "exact" };
+}
+
 export function releaseLanguage(
   release: Pick<BookDTO, "defaultLanguage" | "translations" | "workMembership">,
 ): string {

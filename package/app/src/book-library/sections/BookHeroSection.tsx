@@ -119,13 +119,16 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   // Lifted review query — drives both the centre review card and the dynamic
   // right-column layout. React Query dedupes with the child component.
   const { data: reviewData } = useQuery({
-    ...(workUnitId
-      ? postQueries.byWork(workUnitId, {
-          kind: PostKind.REVIEW,
-          workRoles: ["REVIEW"],
-          limit: 1,
-        })
-      : postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 })),
+    ...postQueries.list(
+      workUnitId
+        ? {
+            workUnitId,
+            kind: PostKind.REVIEW,
+            workRoles: ["REVIEW"],
+            limit: 1,
+          }
+        : { targetUnitId: bookId, kind: PostKind.REVIEW, limit: 1 },
+    ),
     enabled: Boolean(bookId),
   });
   const hasReview = (reviewData?.posts?.length ?? 0) > 0;

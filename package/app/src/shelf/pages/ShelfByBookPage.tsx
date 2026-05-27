@@ -1,3 +1,4 @@
+import { bookQueries } from "@rezics/api/book/book";
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
 import {
   common_load_more,
@@ -8,7 +9,9 @@ import {
 import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
 import { ShelfCard } from "../components/ShelfCard";
 
 const i18nMessages = {
@@ -20,13 +23,27 @@ const i18nMessages = {
 
 interface ShelfByBookPageProps {
   bookId: string;
+  scopeMode?: "work" | "exact";
 }
 
-export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
+export function ShelfByBookPage({
+  bookId,
+  scopeMode = "work",
+}: ShelfByBookPageProps) {
   const m = useMessage(i18nMessages);
+  const { data: bookInfo } = useQuery({
+    ...bookQueries.detail(bookId),
+    enabled: Boolean(bookId),
+  });
+  const workUnitId =
+    scopeMode === "work" ? releaseWorkUnitId(bookInfo) : undefined;
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery(
-      shelfInfiniteListQuery({ containsUnitId: bookId, limit: 50 }),
+      shelfInfiniteListQuery(
+        workUnitId
+          ? { containsWorkUnitId: workUnitId, limit: 50 }
+          : { containsUnitId: bookId, limit: 50 },
+      ),
     );
 
   const shelves = data?.pages.flatMap((page) => page.shelves) ?? [];

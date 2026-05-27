@@ -1900,5 +1900,7 @@
   "realm_feed_sort_hot": "熱い",
   "profile_reactions_given": "与えられた",
   "profile_reactions_received": "受け取った",
-  "book_chapter_label": "章"
+  "book_chapter_label": "章",
+  "release_scope_all_releases": "すべての版",
+  "release_scope_this_release": "この版"
 }

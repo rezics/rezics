@@ -7,6 +7,7 @@ import {
   filterReleasesByLanguages,
   hasMissingReleaseLanguages,
   releaseLanguages,
+  resolveReleaseScope,
   releaseWorkUnitId,
   sortWorkReleases,
 } from "./releaseWork";
@@ -58,6 +59,32 @@ describe("release work helpers", () => {
         },
       } as BookDTO),
     ).toBe("canonical-work");
+  });
+
+  test("resolves release pages to work-domain scope by default", () => {
+    expect(
+      resolveReleaseScope(release("release-1", { workUnitId: "work-1" })),
+    ).toEqual({
+      unitId: "release-1",
+      workUnitId: "work-1",
+      scopeMode: "work",
+    });
+  });
+
+  test("resolves exact release scope for standalone releases or explicit exact mode", () => {
+    expect(resolveReleaseScope(release("standalone-1"))).toEqual({
+      unitId: "standalone-1",
+      scopeMode: "exact",
+    });
+    expect(
+      resolveReleaseScope(
+        release("release-1", { workUnitId: "work-1" }),
+        "exact",
+      ),
+    ).toEqual({
+      unitId: "release-1",
+      scopeMode: "exact",
+    });
   });
 
   test("sorts by display policy, position, then unit id", () => {

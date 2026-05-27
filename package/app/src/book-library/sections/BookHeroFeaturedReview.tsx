@@ -55,16 +55,20 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   // MOCK: should sort by reaction count once postsByTarget supports it.
   // For now, take the most recent review.
   const { data, isLoading } = useQuery({
-    ...(workUnitId
-      ? postQueries.byWork(workUnitId, {
-          kind: PostKind.REVIEW,
-          workRoles: ["REVIEW"],
-          limit: 1,
-        })
-      : postQueries.byTarget(bookId, {
-          kind: PostKind.REVIEW,
-          limit: 1,
-        })),
+    ...postQueries.list(
+      workUnitId
+        ? {
+            workUnitId,
+            kind: PostKind.REVIEW,
+            workRoles: ["REVIEW"],
+            limit: 1,
+          }
+        : {
+            targetUnitId: bookId,
+            kind: PostKind.REVIEW,
+            limit: 1,
+          },
+    ),
     enabled: Boolean(bookId),
   });
 
