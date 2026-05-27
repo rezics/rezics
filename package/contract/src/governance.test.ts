@@ -182,6 +182,12 @@ describe("governance contract registry", () => {
         metadata: { source: "realm-queue" },
       }),
     ).toBe(true);
+    expect(
+      Value.Check(contentModerationDecisionSchema, {
+        reason: "off-topic",
+        content: { body: "moderation must not edit bodies" },
+      }),
+    ).toBe(false);
 
     expect(
       Value.Check(contentModerationStateDTOSchema, {

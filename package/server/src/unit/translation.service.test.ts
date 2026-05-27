@@ -100,6 +100,10 @@ describe("TranslationService history patches", () => {
     );
 
     const historyArgs = (tx.historyOutbox.create as any).mock.calls[0]?.[0];
+    expect(tx.unit.findUniqueOrThrow).toHaveBeenCalledWith({
+      where: { id: "book-1" },
+      select: { id: true, userId: true },
+    });
     expect(tx.historyOutbox.create).toHaveBeenCalledTimes(1);
     expect(historyArgs.data.payload.revision.patch).toEqual({
       translations: { "zh-hant": { title: "New title" } },

@@ -64,6 +64,9 @@ const queryRawMock = mock(async (): Promise<any[]> => [{ sequence: 1n }]);
 const historyOutboxCreateMock = mock(async (args: any) => args.data);
 const userFindUniqueMock = mock(async () => null);
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
+const assertCanEditCollaborativeMetadataMock = mock(async () => undefined);
+const collectPatchLeafPathsMock = mock(() => []);
+const writeEditorialMetadataHistoryMock = mock(async () => undefined);
 const transactionMock = mock(async (fn: any) =>
   fn({
     $queryRaw: queryRawMock,
@@ -127,9 +130,9 @@ mock.module("@/job/job-boundary", () => ({
 }));
 
 mock.module("@/unit/collaborative-metadata", () => ({
-  assertCanEditCollaborativeMetadata: mock(() => undefined),
-  collectPatchLeafPaths: mock(() => []),
-  writeEditorialMetadataHistory: mock(async () => undefined),
+  assertCanEditCollaborativeMetadata: assertCanEditCollaborativeMetadataMock,
+  collectPatchLeafPaths: collectPatchLeafPathsMock,
+  writeEditorialMetadataHistory: writeEditorialMetadataHistoryMock,
 }));
 
 mock.module("@/unit/publication-policy", () => ({
@@ -205,6 +208,9 @@ function resetMocks() {
   historyOutboxCreateMock.mockClear();
   userFindUniqueMock.mockClear();
   enqueueMock.mockClear();
+  assertCanEditCollaborativeMetadataMock.mockClear();
+  collectPatchLeafPathsMock.mockClear();
+  writeEditorialMetadataHistoryMock.mockClear();
   transactionMock.mockClear();
 }
 
@@ -744,6 +750,10 @@ describe("PostService wiki posts", () => {
     userId: "actor-1",
     permission: { role: "USER" },
   } as any;
+  const rootActor = {
+    userId: "root-1",
+    permission: { role: "ROOT" },
+  } as any;
 
   test("wiki creation uses rezics-wiki ownership and records author", async () => {
     resetMocks();
@@ -787,6 +797,28 @@ describe("PostService wiki posts", () => {
     expect(unitFieldLockFindManyMock).toHaveBeenCalledTimes(1);
     expect(postUpdateMock).toHaveBeenCalledTimes(1);
     expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("ROOT wiki content edit still routes through collaborative authority", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
+      kind: "WIKI",
+      content: content("original"),
+    }));
+
+    await service.update(
+      "wiki-post-1",
+      { content: content("edited") },
+      rootActor,
+    );
+
+    expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledWith(
+      expect.anything(),
+      rootActor,
+      "wiki-post-1",
+      ["post.content.main"],
+    );
+    expect(writeEditorialMetadataHistoryMock).toHaveBeenCalledTimes(1);
   });
 
   test("wiki content source patch uses path-based lock and history", async () => {

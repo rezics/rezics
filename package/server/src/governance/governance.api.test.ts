@@ -379,6 +379,29 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
+  test("does not pass attempted body edits into moderation decisions", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/content/reply-1/tombstone", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          reason: "abuse",
+          content: { body: "do not rewrite from moderation" },
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(tombstoneGlobalMock).toHaveBeenCalledWith({
+      targetUnitId: "reply-1",
+      decidedById: "staff-1",
+      reason: "abuse",
+    });
+  });
+
   test("realm tombstones content through realm queue policy", async () => {
     policyAllowed = true;
 
