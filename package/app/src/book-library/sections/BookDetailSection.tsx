@@ -1,3 +1,4 @@
+import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import {
   page_book_tabs_community,
@@ -7,6 +8,7 @@ import {
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
 import {
+  Button,
   Select,
   SelectContent,
   SelectItem,
@@ -16,11 +18,16 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { useBookLanguage } from "../hooks/useBookLanguage";
+import {
+  hasMissingReleaseLanguages,
+  releaseWorkUnitId,
+} from "../models/releaseWork";
 
 const i18nMessages = {
   page_book_tabs_community,
@@ -65,10 +72,20 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const activeTab = useActiveTabRoute();
   const [selectedLang, setSelectedLang] = useBookLanguage(bookId, bookInfo);
+  const workUnitId = releaseWorkUnitId(bookInfo);
+
+  const { data: releaseList } = useQuery({
+    ...bookQueries.list({ workUnitId, limit: 100 }),
+    enabled: Boolean(workUnitId),
+  });
 
   const availableLanguages = useMemo(
     () => (bookInfo?.translations ?? []).map((tr) => tr.language as string),
     [bookInfo?.translations],
+  );
+  const hasMissingReleaseLanguage = hasMissingReleaseLanguages(
+    availableLanguages,
+    releaseList?.books ?? [],
   );
 
   const handleTabChange = (newValue: string) => {
@@ -132,6 +149,24 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                 ))}
               </SelectContent>
             </Select>
+          )}
+
+          {hasMissingReleaseLanguage && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="flex-shrink-0"
+              onClick={() =>
+                navigate({
+                  to: "/book/$bookId/info",
+                  params: { bookId },
+                  hash: "releases",
+                })
+              }
+            >
+              Releases
+            </Button>
           )}
         </div>
 

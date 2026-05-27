@@ -71,12 +71,12 @@
 
 ## 8. Book Detail And Language UX
 
-- [ ] 8.1 Update book detail route resolution so visible release Units are the ordinary public detail/read targets.
-- [ ] 8.2 Update the book language switcher to remain scoped to the current release's `UnitTranslation` rows and show a missing-language Releases tab affordance.
-- [ ] 8.3 Update the Releases tab to list `UnitWork(role = RELEASE)` members with multi-select language filtering, an All option, and `position` ordering.
-- [ ] 8.4 Add UI affordances for secondary and hidden-by-default releases without making them dominant.
-- [ ] 8.5 Update book content loading so the active visible release controls the content structure.
-- [ ] 8.6 Add frontend tests for release-local language switching, missing-language Releases tab navigation, language filtering, position ordering, and hidden-by-default release display.
+- [x] 8.1 Update book detail route resolution so visible release Units are the ordinary public detail/read targets.
+- [x] 8.2 Update the book language switcher to remain scoped to the current release's `UnitTranslation` rows and show a missing-language Releases tab affordance.
+- [x] 8.3 Update the Releases tab to list `UnitWork(role = RELEASE)` members with multi-select language filtering, an All option, and `position` ordering.
+- [x] 8.4 Add UI affordances for secondary and hidden-by-default releases without making them dominant.
+- [x] 8.5 Update book content loading so the active visible release controls the content structure.
+- [x] 8.6 Add frontend tests for release-local language switching, missing-language Releases tab navigation, language filtering, position ordering, and hidden-by-default release display.
 
 ## 9. Community Feed UX
 

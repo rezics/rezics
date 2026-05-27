@@ -12,7 +12,7 @@ import { bookLanguageAtom } from "../states/bookDetailAtoms";
  * ordered preference list, falling back to the unit's default language,
  * the platform fallback, then the first available translation.
  */
-function resolveInitialLanguage(
+export function resolveInitialBookLanguage(
   preferredLanguages: readonly string[],
   bookInfo: BookDTO | null | undefined,
 ): string {
@@ -42,6 +42,26 @@ function resolveInitialLanguage(
   return available[0]!;
 }
 
+function availableBookLanguages(
+  bookInfo: BookDTO | null | undefined,
+): string[] {
+  return (bookInfo?.translations ?? [])
+    .map((tr) => tr.language as unknown as string)
+    .filter(Boolean);
+}
+
+export function resolveSelectedBookLanguage(
+  preferredLanguages: readonly string[],
+  bookInfo: BookDTO | null | undefined,
+  stored: string | null | undefined,
+): string {
+  const available = availableBookLanguages(bookInfo);
+  if (stored && (available.length === 0 || available.includes(stored))) {
+    return stored;
+  }
+  return resolveInitialBookLanguage(preferredLanguages, bookInfo);
+}
+
 /**
  * Per-book language selection.
  *
@@ -68,12 +88,10 @@ export function useBookLanguage(
     [settings?.preferredLanguages],
   );
 
-  const resolved = useMemo(
-    () => resolveInitialLanguage(preferredLanguages, bookInfo),
-    [preferredLanguages, bookInfo],
+  const selectedLang = useMemo(
+    () => resolveSelectedBookLanguage(preferredLanguages, bookInfo, stored),
+    [preferredLanguages, bookInfo, stored],
   );
-
-  const selectedLang = stored ?? resolved;
 
   const setSelectedLang = useCallback(
     (lang: string) => setStored(lang),

@@ -18,6 +18,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
+import { releaseLanguage, releaseWorkUnitId } from "../models/releaseWork";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
 const i18nMessages = {
@@ -32,6 +33,8 @@ export type ReleaseOption = {
   title: string;
   language: string;
   isOfficial: boolean;
+  position?: string | null;
+  displayPolicy?: string | null;
 };
 
 export type ReleaseSelectorProps = {
@@ -56,15 +59,22 @@ function buildOfficialReleaseMap(
 
 export function sortReleases(
   releases: ReleaseOption[],
-  currentLang: string,
+  _currentLang: string,
 ): ReleaseOption[] {
-  const groupRank = (lang: string) => (lang === currentLang ? 0 : 1);
   const officialRank = (isOfficial: boolean) => (isOfficial ? 0 : 1);
+  const displayRank = (policy: string | null | undefined) => {
+    if (policy === "PRIMARY") return 0;
+    if (policy === "SECONDARY") return 1;
+    return 2;
+  };
   return [...releases].sort((a, b) => {
-    const g = groupRank(a.language) - groupRank(b.language);
-    if (g !== 0) return g;
-    if (a.language !== b.language) return a.language.localeCompare(b.language);
-    return officialRank(a.isOfficial) - officialRank(b.isOfficial);
+    const display = displayRank(a.displayPolicy) - displayRank(b.displayPolicy);
+    if (display !== 0) return display;
+    const position = (a.position ?? "").localeCompare(b.position ?? "");
+    if (position !== 0) return position;
+    const rank = officialRank(a.isOfficial) - officialRank(b.isOfficial);
+    if (rank !== 0) return rank;
+    return a.unitId.localeCompare(b.unitId);
   });
 }
 
@@ -80,7 +90,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
   onSelect,
 }) => {
   const m = useMessage(i18nMessages);
-  const workUnitId = bookInfo.workUnitId ?? undefined;
+  const workUnitId = releaseWorkUnitId(bookInfo);
 
   const { data: releaseList } = useQuery({
     ...bookQueries.list({ workUnitId, limit: 50 }),
@@ -98,10 +108,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
     // Ensure the current book is always present even if not returned.
     const seen = new Set<string>();
     for (const r of releases) {
-      const lang =
-        (r.defaultLanguage as string | undefined) ??
-        r.translations?.[0]?.language ??
-        "";
+      const lang = releaseLanguage(r);
       list.push({
         unitId: r.unitId,
         title:
@@ -112,6 +119,8 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
           )?.title ?? m.book_release_untitled(),
         language: String(lang),
         isOfficial: officialByLang.get(String(lang)) === r.unitId,
+        position: r.workMembership?.position,
+        displayPolicy: r.workMembership?.displayPolicy,
       });
       seen.add(r.unitId);
     }
@@ -130,6 +139,8 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
           officialByLang.get(
             (bookInfo.defaultLanguage as string | undefined) ?? selectedLang,
           ) === bookInfo.unitId,
+        position: bookInfo.workMembership?.position,
+        displayPolicy: bookInfo.workMembership?.displayPolicy,
       });
     }
     return sortReleases(list, selectedLang);
@@ -162,10 +173,16 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
                 {opt.isOfficial && (
                   <Badge
                     variant="outline"
-                    className="text-brand-fill border-brand-fill"
+                    className="border-brand-fill text-text-brand"
                   >
                     {m.realm_official()}
                   </Badge>
+                )}
+                {opt.displayPolicy === "SECONDARY" && (
+                  <Badge variant="secondary">Secondary</Badge>
+                )}
+                {opt.displayPolicy === "HIDDEN_BY_DEFAULT" && (
+                  <Badge variant="secondary">Hidden</Badge>
                 )}
               </div>
             </SelectItem>
