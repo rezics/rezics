@@ -60,6 +60,7 @@ describe("content authority and history API clients", () => {
     } as never);
     await postApi.updateWikiContent("post-1", edited);
     await postApi.getWikiByTarget("book-1", { limit: 5 });
+    await postApi.getByWork("work-1", { limit: 5, workRoles: ["POST"] });
 
     expect(
       JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string),
@@ -74,6 +75,9 @@ describe("content authority and history API clients", () => {
     });
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
       "http://api.example/post/list?limit=5&targetUnitId=book-1&kind=WIKI",
+    );
+    expect(fetchMock.mock.calls[3]?.[0]).toBe(
+      "http://api.example/post/list?workUnitId=work-1&limit=5&workRoles=%5B%22POST%22%5D",
     );
   });
 
@@ -204,6 +208,12 @@ describe("content authority and history API clients", () => {
       "target",
       "book-1",
       "wiki",
+      { limit: 5 },
+    ]);
+    expect(postKeys.byWork("work-1", { limit: 5 })).toEqual([
+      "posts",
+      "work",
+      "work-1",
       { limit: 5 },
     ]);
   });

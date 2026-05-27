@@ -122,6 +122,17 @@ export const postsByRealmQuery = (realmUnitId: string, filters?: PostFilters) =>
   });
 
 /**
+ * Query options for getting posts within a work domain.
+ */
+export const postsByWorkQuery = (workUnitId: string, filters?: PostFilters) =>
+  queryOptions({
+    queryKey: postKeys.byWork(workUnitId, filters),
+    queryFn: () => postApi.getByWork(workUnitId, filters),
+    enabled: !!workUnitId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+/**
  * Infinite query options for paginated post list
  */
 export const postInfiniteListQuery = (filters?: Omit<PostFilters, "start">) =>
@@ -152,5 +163,6 @@ export const postQueries = {
   subtree: postSubtreeQuery,
   replies: postRepliesQuery,
   byRealm: postsByRealmQuery,
+  byWork: postsByWorkQuery,
   infiniteList: postInfiniteListQuery,
 };

@@ -37,6 +37,7 @@ export {
   postsByAuthorQuery,
   postsByRealmQuery,
   postsByTargetQuery,
+  postsByWorkQuery,
   postThreadQuery,
   wikiPostsByTargetQuery,
 } from "./post.queries";

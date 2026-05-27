@@ -80,10 +80,10 @@
 
 ## 9. Community Feed UX
 
-- [ ] 9.1 Update release community tabs to show work-domain content by default when `UnitWork` membership exists.
-- [ ] 9.2 Add an exact-release filter that switches the feed to `targetUnitId = currentReleaseId`.
-- [ ] 9.3 Display precise target release context on work-domain feed items whenever the target release differs from the current release.
-- [ ] 9.4 Add tests for default work-domain feed rendering and exact-release filtering.
+- [x] 9.1 Update release community tabs to show work-domain content by default when `UnitWork` membership exists.
+- [x] 9.2 Add an exact-release filter that switches the feed to `targetUnitId = currentReleaseId`.
+- [x] 9.3 Display precise target release context on work-domain feed items whenever the target release differs from the current release.
+- [x] 9.4 Add tests for default work-domain feed rendering and exact-release filtering.
 
 ## 10. Shelf UX And Hydration
 
