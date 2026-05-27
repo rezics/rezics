@@ -91,6 +91,12 @@ function composeEnv(): NodeJS.ProcessEnv {
     SECRET_KEY_BASE: toolEnv.SECRET_KEY_BASE ?? SECRET_KEY_BASE_EXAMPLE,
     VAULT_KEY: toolEnv.VAULT_KEY ?? VAULT_KEY_EXAMPLE,
     SOURCE_DB_PASSWORD: toolEnv.SOURCE_DB_PASSWORD ?? "postgres",
+    REACTION_DB_HOST: toolEnv.REACTION_DB_HOST ?? "source-postgres",
+    REACTION_DB_PORT: toolEnv.REACTION_DB_PORT ?? "5432",
+    REACTION_DB_NAME: toolEnv.REACTION_DB_NAME ?? "reaction",
+    REACTION_DB_USER: toolEnv.REACTION_DB_USER ?? "postgres",
+    REACTION_DB_PASSWORD:
+      toolEnv.REACTION_DB_PASSWORD ?? toolEnv.SOURCE_DB_PASSWORD ?? "postgres",
     MEILI_MASTER_KEY: toolEnv.MEILI_MASTER_KEY ?? "masterKey",
     SEQUIN_WEBHOOK_SECRET:
       toolEnv.SEQUIN_WEBHOOK_SECRET ?? "change-me-sequin-webhook-secret",

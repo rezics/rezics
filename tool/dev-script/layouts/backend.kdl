@@ -28,6 +28,12 @@ tab name="reaction" {
     }
 }
 
+tab name="ranking" {
+    pane command="bun" cwd="../../../package/ranking" start_suspended=false {
+        args "dev"
+    }
+}
+
 tab name="notify" {
     pane command="bun" cwd="../../../package/notify" start_suspended=false {
         args "dev"

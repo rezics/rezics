@@ -3,6 +3,7 @@ export const PRISMA_PACKAGES = [
   "auth",
   "notify",
   "reaction",
+  "ranking",
   "history",
 ] as const;
 
