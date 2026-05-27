@@ -110,4 +110,18 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
       }),
     ).toBe(true);
   });
+
+  test("documents exact shelf containment and work-domain option names", () => {
+    expect(
+      Value.Check(ContentSearchOptionsSchema, {
+        containedUnitIds: ["release-1"],
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(ContentSearchOptionsSchema, {
+        workUnitId: "work-1",
+        workRoles: ["SHELF"],
+      }),
+    ).toBe(true);
+  });
 });

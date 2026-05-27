@@ -167,11 +167,12 @@ export type ShelfDetailDTO = (typeof shelfDetailDTOSchema)["static"];
 // SHELF LIST/QUERY
 // ============================================================
 
-export const shelfListQuerySchema = t.Object({
+const shelfListCommonProperties = {
   ...listGetQueryBase.properties,
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   containsUnitId: t.Optional(t.String()),
+  containsWorkUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
@@ -187,15 +188,14 @@ export const shelfListQuerySchema = t.Object({
     }),
   ),
   limit: paginationLimitSchema,
-});
+};
 
-export type ShelfListQuery = (typeof shelfListQuerySchema)["static"];
-
-export const shelfListBodySchema = t.Object({
+const shelfListBodyCommonProperties = {
   ...listPostBodyBase.properties,
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   containsUnitId: t.Optional(t.String()),
+  containsWorkUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
@@ -211,9 +211,23 @@ export const shelfListBodySchema = t.Object({
     }),
   ),
   limit: paginationLimitSchema,
-});
+};
+
+export const shelfListQuerySchema = t.Object(shelfListCommonProperties);
+
+export type ShelfListQuery = (typeof shelfListQuerySchema)["static"];
+
+export const shelfListBodySchema = t.Object(shelfListBodyCommonProperties);
 
 export type ShelfListBody = (typeof shelfListBodySchema)["static"];
+
+export function hasAmbiguousShelfListScopeFilters(
+  value: Pick<ShelfListQuery, "containsUnitId" | "containsWorkUnitId">,
+): boolean {
+  return Boolean(
+    value.containsUnitId?.trim() && value.containsWorkUnitId?.trim(),
+  );
+}
 
 export const shelfListResponseSchema = t.Object({
   shelves: t.Array(shelfDTOSchema),

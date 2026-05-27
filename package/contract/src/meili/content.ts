@@ -137,6 +137,7 @@ export const ContentSearchOptionsSchema = t.Object({
   workUnitId: t.Optional(t.String()),
   searchGroupId: t.Optional(t.String()),
   workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
+  containedUnitIds: t.Optional(t.Array(t.String())),
   seriesUnitIds: t.Optional(t.Array(t.String())),
   seriesKindKeys: t.Optional(t.Array(t.String())),
   releasePresentation: t.Optional(

@@ -60,5 +60,12 @@ describe("PostSearchDocumentSchema work-domain fields", () => {
         targetUnitId: "release-1",
       }),
     ).toBe(true);
+    expect(
+      Value.Check(PostSearchOptionsSchema, {
+        rootTargetUnitId: "release-1",
+        workUnitId: "work-1",
+        workRoles: ["REVIEW"],
+      }),
+    ).toBe(true);
   });
 });
