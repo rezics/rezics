@@ -116,7 +116,12 @@ const visibleUnitTagsInclude = {
 async function isContentPatchEligible(unitId: string): Promise<boolean> {
   const unit = await getSearchPrismaClient().unit.findUnique({
     where: { id: unitId },
-    select: { type: true, status: true, visibility: true },
+    select: {
+      type: true,
+      status: true,
+      visibility: true,
+      workMembers: { where: { role: "RELEASE" }, select: { unitId: true } },
+    },
   });
   return isPublicIndexableContentUnit(unit);
 }
@@ -128,6 +133,7 @@ export function isPublicIndexableContentUnit(
         status: string;
         visibility: string;
         workUnitId?: string | null;
+        workMembers?: readonly unknown[];
       }
     | null
     | undefined,
@@ -136,7 +142,8 @@ export function isPublicIndexableContentUnit(
     unit &&
       INDEXABLE_TYPES.includes(unit.type as any) &&
       unit.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
-      unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility,
+      unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility &&
+      (unit.workMembers?.length ?? 0) === 0,
   );
 }
 
@@ -236,6 +243,10 @@ const contentInclude: any = {
     },
     orderBy: [{ role: "asc" }, { createdAt: "asc" }],
   },
+  workMembers: {
+    where: { role: "RELEASE" },
+    select: { unitId: true },
+  },
   inRealms: true,
   realmTagApplicationsAsTargetUnit: true,
   creditAttributions: {
@@ -258,6 +269,19 @@ const contentInclude: any = {
   game: { include: { platforms: true } },
   media: true,
   shelf: { include: { units: { select: { unitId: true } } } },
+  seriesContentIndexesAsRelease: {
+    include: {
+      series: {
+        include: {
+          unit: {
+            include: {
+              translations: true,
+            },
+          },
+        },
+      },
+    },
+  },
   link: true,
   post: true,
 };
@@ -317,6 +341,26 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     (membership) => membership.workUnitId,
   );
   const workRoles = workMemberships.map((membership) => membership.role);
+  const directSeriesRows: any[] = unit.seriesContentIndexesAsRelease ?? [];
+  const seriesUnitIds = [
+    ...new Set(directSeriesRows.map((row) => row.seriesUnitId)),
+  ];
+  const seriesKindKeys = [
+    ...new Set(
+      directSeriesRows
+        .map((row) => row.series?.kindKey)
+        .filter(isNonEmptyString),
+    ),
+  ];
+  const seriesTitles = [
+    ...new Set(
+      directSeriesRows
+        .flatMap((row) =>
+          (row.series?.unit?.translations ?? []).map((tr: any) => tr.title),
+        )
+        .filter(isNonEmptyString),
+    ),
+  ];
 
   // Realms
   const realmIds = inRealms.map((r: any) => r.realmUnitId);
@@ -405,6 +449,9 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     displayPolicy: releaseMembership?.displayPolicy ?? null,
     workUnitIds,
     workRoles,
+    seriesUnitIds,
+    seriesKindKeys,
+    seriesTitles,
     realmIds,
     realmTagKeys,
     languages,
@@ -464,6 +511,7 @@ export async function syncAllContent(client: SearchClient) {
       where: {
         type: { in: INDEXABLE_TYPES },
         ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+        NOT: { workMembers: { some: { role: "RELEASE" } } },
       },
       include: contentInclude,
       orderBy: { id: "asc" },
@@ -494,6 +542,7 @@ export async function syncContentSegment(
     where: {
       type: { in: INDEXABLE_TYPES },
       ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+      NOT: { workMembers: { some: { role: "RELEASE" } } },
     },
     include: contentInclude,
     orderBy: { id: "asc" },
@@ -665,7 +714,8 @@ export async function syncSingleContent(client: SearchClient, unitId: string) {
     !unit ||
     !INDEXABLE_TYPES.includes(unit.type as any) ||
     unit.status !== PUBLIC_ELIGIBLE_UNIT_WHERE.status ||
-    unit.visibility !== PUBLIC_ELIGIBLE_UNIT_WHERE.visibility
+    unit.visibility !== PUBLIC_ELIGIBLE_UNIT_WHERE.visibility ||
+    (unit.workMembers?.length ?? 0) > 0
   ) {
     await client.deleteContent([unitId]);
     return;

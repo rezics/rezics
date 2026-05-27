@@ -273,6 +273,48 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.workRoles).toEqual(["RELEASE"]);
   });
 
+  test("projects direct Series metadata without nested expansion", async () => {
+    setServerEnvForSearchTests();
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "release-1",
+      type: "BOOK",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [{ language: "en", title: "Release", extra: null }],
+      unitTags: [],
+      workMemberships: [{ workUnitId: "work-1", role: "RELEASE" }],
+      seriesContentIndexesAsRelease: [
+        {
+          seriesUnitId: "series-1",
+          releaseUnitId: "release-1",
+          contentNodeId: "node-1",
+          series: {
+            kindKey: "book_series",
+            unit: {
+              translations: [{ language: "en", title: "Direct Series" }],
+            },
+          },
+        },
+      ],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      subjectAttributions: [],
+      book: { textLength: 100, isLicensed: false },
+    });
+
+    expect(doc.seriesUnitIds).toEqual(["series-1"]);
+    expect(doc.seriesKindKeys).toEqual(["book_series"]);
+    expect(doc.seriesTitles).toEqual(["Direct Series"]);
+  });
+
   test("buildPostDocument projects UnitWork membership fields", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
@@ -501,6 +543,19 @@ describe("public content indexing eligibility", () => {
         workUnitId: "work-1",
       }),
     ).toBe(true);
+  });
+
+  test("rejects hidden Work Units that aggregate releases", async () => {
+    setServerEnvForSearchTests();
+    const { isPublicIndexableContentUnit } = await import("./sync");
+    expect(
+      isPublicIndexableContentUnit({
+        type: "BOOK",
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        workMembers: [{ unitId: "release-1" }],
+      }),
+    ).toBe(false);
   });
 
   test("rejects private and deleted post backing Units", async () => {

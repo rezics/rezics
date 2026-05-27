@@ -35,6 +35,9 @@ const baseContentDocument = {
   displayPolicy: "PRIMARY",
   workUnitIds: ["work-1"],
   workRoles: ["RELEASE"],
+  seriesUnitIds: [],
+  seriesKindKeys: [],
+  seriesTitles: [],
   realmIds: [],
   realmTagKeys: [],
   languages: ["en"],
@@ -82,6 +85,9 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         displayPolicy: null,
         workUnitIds: [],
         workRoles: [],
+        seriesUnitIds: ["series-1"],
+        seriesKindKeys: ["book_series"],
+        seriesTitles: ["Series"],
       }),
     ).toBe(true);
   });
@@ -98,6 +104,8 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         releasePresentation: "expanded",
         workUnitId: "work-1",
         workRoles: ["RELEASE"],
+        seriesUnitIds: ["series-1"],
+        seriesKindKeys: ["book_series"],
         aiDisclosureModes: ["AI_ASSISTED"],
       }),
     ).toBe(true);

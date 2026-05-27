@@ -57,6 +57,11 @@ export const ContentSearchDocumentSchema = t.Object({
   workUnitIds: t.Array(t.String()),
   workRoles: t.Array(unitWorkRoleSchema),
 
+  // Direct public Series metadata projected from SeriesContentIndex rows.
+  seriesUnitIds: t.Array(t.String()),
+  seriesKindKeys: t.Array(t.String()),
+  seriesTitles: t.Array(t.String()),
+
   // Filterable: realm system (from UnitRealm)
   realmIds: t.Array(t.String()),
 
@@ -132,6 +137,8 @@ export const ContentSearchOptionsSchema = t.Object({
   workUnitId: t.Optional(t.String()),
   searchGroupId: t.Optional(t.String()),
   workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
+  seriesUnitIds: t.Optional(t.Array(t.String())),
+  seriesKindKeys: t.Optional(t.Array(t.String())),
   releasePresentation: t.Optional(
     t.Union([t.Literal("grouped"), t.Literal("expanded")]),
   ),
