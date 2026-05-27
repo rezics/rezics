@@ -243,8 +243,9 @@ model Unit {
   seriesContentIndexesAsRelease SeriesContentIndex[] @relation("SeriesContentIndexRelease")
 
   // Subject attribution
-  subjectAttributions   SubjectAttribution[] @relation("SubjectAttributedUnit")
-  subjectOfAttributions SubjectAttribution[] @relation("SubjectAttributionEntity")
+  subjectAttributions             SubjectAttribution[]       @relation("SubjectAttributedUnit")
+  subjectOfAttributions           SubjectAttribution[]       @relation("SubjectAttributionEntity")
+  gameSystemRequirementPlatforms  GameSystemRequirement[]    @relation("GameSystemRequirementPlatformEntity")
 
   // Engagement (reactions moved to @rezics/reaction service)
 
@@ -582,7 +583,8 @@ model Game {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  platforms GamePlatform[]
+  platforms          GamePlatform[]
+  systemRequirements GameSystemRequirement[]
 }
 
 model GamePlatform {
@@ -594,6 +596,29 @@ model GamePlatform {
 
   @@id([gameUnitId, platformKey])
   @@index([platformKey, gameUnitId])
+}
+
+model GameSystemRequirement {
+  id               String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  gameUnitId       String   @db.Uuid
+  platformEntityId String?  @db.Uuid
+  tier             String   @db.VarChar(32)
+  language         String?  @db.VarChar(16)
+  sourceRefId      String?  @db.Uuid
+  hardware         Json
+  rawText          String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  game           Game             @relation(fields: [gameUnitId], references: [unitId], onDelete: Cascade)
+  platformEntity Unit?            @relation("GameSystemRequirementPlatformEntity", fields: [platformEntityId], references: [id], onDelete: SetNull)
+  sourceRef      UnitExternalRef? @relation("GameSystemRequirementSourceRef", fields: [sourceRefId], references: [id], onDelete: SetNull)
+
+  @@index([gameUnitId])
+  @@index([platformEntityId])
+  @@index([tier])
+  @@index([sourceRefId])
+  @@index([gameUnitId, platformEntityId, tier, sourceRefId])
 }
 
 /**
@@ -1000,9 +1025,10 @@ model UnitExternalRef {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  unit       Unit                        @relation("UnitExternalRefUnit", fields: [unitId], references: [id], onDelete: Cascade)
-  sourceSite SourceSite                  @relation(fields: [sourceSiteEntityUnitId], references: [entityUnitId], onDelete: Cascade)
-  evidence   CreditAttributionEvidence[]
+  unit                   Unit                        @relation("UnitExternalRefUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  sourceSite             SourceSite                  @relation(fields: [sourceSiteEntityUnitId], references: [entityUnitId], onDelete: Cascade)
+  evidence               CreditAttributionEvidence[]
+  gameSystemRequirements GameSystemRequirement[]    @relation("GameSystemRequirementSourceRef")
 
   @@unique([sourceSiteEntityUnitId, externalKind, externalId])
   @@index([unitId, sourceSiteEntityUnitId, externalKind])
