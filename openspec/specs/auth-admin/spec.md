@@ -1,5 +1,9 @@
-## ADDED Requirements
+# auth-admin Specification
 
+## Purpose
+
+Defines auth-service administrative user management, role, ban, session, impersonation, and JWT identity behavior.
+## Requirements
 ### Requirement: Admin plugin integration
 The auth service SHALL integrate the better-auth `admin` plugin in `src/auth/instance.ts`, enabling administrative user management endpoints under `/api/auth/admin/*`.
 
@@ -120,3 +124,14 @@ The JWT plugin configuration in `src/auth/instance.ts` SHALL include `id`, optio
 - **THEN** the JWT payload SHALL contain `id`
 - **AND** it SHALL include `slug` when the user profile has one
 - **AND** it SHALL include `role` when the user record has one
+
+### Requirement: Auth admin enforcement integrates with main-server governance
+
+Auth admin ban, unban, session revocation, role change, and impersonation flows SHALL emit or be wrapped by main-server governance audit events when initiated from Rezics staff workflows.
+
+#### Scenario: Session revocation from case decision is linked
+
+- **WHEN** a moderation decision revokes a user's sessions
+- **THEN** the auth operation SHALL complete through the auth boundary
+- **AND** the moderation case and staff audit log SHALL link to the auth-side action result
+

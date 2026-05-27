@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines the Elysia macro guards used by the main server to authenticate requests via JWT. `requireLogin` validates the member `rezics-session-token`; the profile setup guard validates `rezics-profile-setup-token`. Identity is resolved from JWT claims without database lookups, and only `unitId` is trusted for identity; `permission.role` is a rejection-only hint that must be re-verified against the database before granting access.
-
 ## Requirements
-
 ### Requirement: requireLogin guard plugin
 
 Server SHALL provide `requireLogin` as Elysia macro within auth macro plugin. The macro SHALL verify the request's member `rezics-session-token` against the server's own JWKS and SHALL reject profile setup tokens. It SHALL resolve an `identity` object with `{ unitId: string, permission: Permission }` from member token claims, where `Permission` is `{ role: TokenPermissionRole }`. No database lookup is performed. Only `unitId` is trusted for identity; `permission.role` is a rejection-only hint.
@@ -55,3 +53,14 @@ Route files SHALL use per-route macro flags (`requireLogin: true`) in route opti
 
 - **WHEN** a route requires resource ownership verification
 - **THEN** the route uses `requireLogin: true` and checks `identity.unitId === resource.unitId` in the handler body (unitId is trusted, no DB lookup needed for identity)
+
+### Requirement: Privileged route guards use policy decisions
+
+Server routes that mutate shared content, realm roles, reports, account enforcement, roles, audit-sensitive resources, or operational repair state SHALL call a named policy action before executing the mutation.
+
+#### Scenario: Route records denied privileged action
+
+- **WHEN** a caller fails a privileged policy check
+- **THEN** the route SHALL return a consistent authorization error
+- **AND** security-sensitive denied attempts SHALL be eligible for audit or abuse-rate tracking
+

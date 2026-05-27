@@ -1,5 +1,9 @@
-## ADDED Requirements
+# frontend-server-permission Specification
 
+## Purpose
+
+Defines how frontend code reads main-server permission state from server-issued session claims.
+## Requirements
 ### Requirement: useServerPermission hook exposes server permission
 
 `@rezics/api` SHALL export a `useServerPermission()` hook that returns `Permission | null`. The hook SHALL derive its value from the `rezics-session-token`'s `permission` claim. It SHALL return `null` when no valid session token exists (unauthenticated state).
@@ -57,3 +61,13 @@ The `useServerRole()` hook in `realm/model/` SHALL be removed. All consumers SHA
 
 - **WHEN** the session token is removed (logout or expiry)
 - **THEN** the store's `permission` field is `null`
+
+### Requirement: Frontend exposes staff capability hints only
+
+Frontend auth state MAY expose global staff capability hints for navigation and UI visibility, but all privileged data fetches and mutations SHALL be authorized by server policy.
+
+#### Scenario: Hidden button does not imply authorization
+
+- **WHEN** a user tampers with the client to call a hidden staff mutation
+- **THEN** the server SHALL still reject the request unless policy allows it
+
