@@ -53,24 +53,59 @@ const postFindUnique = mock(
   }),
 );
 const unitRealmDelete = mock(async () => undefined);
-const realmQueueCreate = mock(async ({ data }: any) => ({
+const realmMemberDelete = mock(async () => undefined);
+const realmQueueRow = {
   id: "queue-1",
-  realmUnitId: data.realmUnitId,
-  state: data.state,
-  reporterUserId: null,
-  subjectUserId: null,
-  targetKind: data.targetKind,
-  targetId: data.targetId,
-  targetUnitId: data.targetUnitId,
-  sourceFeedbackId: null,
+  realmUnitId: "realm-1",
+  state: "NEW",
+  reporterUserId: "reporter-1",
+  subjectUserId: "subject-1",
+  targetKind: "unit",
+  targetId: "post-1",
+  targetUnitId: "post-1",
+  sourceFeedbackId: "feedback-1",
   linkedCaseId: null,
-  assignedToUserId: data.assignedToUserId,
-  reason: data.reason,
+  assignedToUserId: null,
+  reason: "reported",
   safeSummary: null,
-  metadata: data.metadata,
+  metadata: null,
+  createdAt: now,
+  updatedAt: now,
+};
+const realmQueueCreate = mock(async ({ data }: any) => ({
+  ...realmQueueRow,
+  ...data,
   createdAt: now,
   updatedAt: now,
 }));
+const realmQueueFindMany = mock(async () => [realmQueueRow]);
+const realmQueueFindFirst = mock(async (): Promise<any> => null);
+const realmQueueFindUniqueOrThrow = mock(async () => realmQueueRow);
+const realmQueueUpdate = mock(async ({ data }: any) => ({
+  ...realmQueueRow,
+  ...data,
+  updatedAt: now,
+}));
+const realmModerationEventCreate = mock(async ({ data }: any) => ({
+  id: "realm-event-1",
+  ...data,
+  createdAt: now,
+}));
+const realmModerationEventFindMany = mock(async () => [
+  {
+    id: "realm-event-1",
+    queueItemId: "queue-1",
+    realmUnitId: "realm-1",
+    actorUserId: "mod-1",
+    decisionKind: "hide_from_realm",
+    decision: null,
+    decisionCode: null,
+    reason: "off-topic",
+    before: null,
+    after: null,
+    createdAt: now,
+  },
+]);
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const moderationCaseRow = {
   id: "case-1",
@@ -156,6 +191,20 @@ const transactionMock = mock(async (fn: any) =>
       findUnique: realmContentModerationFindUnique,
       upsert: realmContentModerationUpsert,
     },
+    realmModerationQueueItem: {
+      create: realmQueueCreate,
+      findUniqueOrThrow: realmQueueFindUniqueOrThrow,
+      update: realmQueueUpdate,
+    },
+    realmModerationEvent: {
+      create: realmModerationEventCreate,
+    },
+    unitRealm: {
+      delete: unitRealmDelete,
+    },
+    realmMember: {
+      delete: realmMemberDelete,
+    },
   }),
 );
 
@@ -179,6 +228,13 @@ Object.assign(prismaMock, {
   },
   realmModerationQueueItem: {
     create: realmQueueCreate,
+    findMany: realmQueueFindMany,
+    findFirst: realmQueueFindFirst,
+    findUniqueOrThrow: realmQueueFindUniqueOrThrow,
+    update: realmQueueUpdate,
+  },
+  realmModerationEvent: {
+    findMany: realmModerationEventFindMany,
   },
   moderationCase: {
     findFirst: moderationCaseFindFirst,
@@ -212,7 +268,15 @@ describe("GovernanceModerationService content moderation state", () => {
     postFindUnique.mockClear();
     postFindUnique.mockResolvedValue({ parentPostUnitId: null });
     unitRealmDelete.mockClear();
+    realmMemberDelete.mockClear();
     realmQueueCreate.mockClear();
+    realmQueueFindMany.mockClear();
+    realmQueueFindFirst.mockClear();
+    realmQueueFindFirst.mockResolvedValue(null);
+    realmQueueFindUniqueOrThrow.mockClear();
+    realmQueueUpdate.mockClear();
+    realmModerationEventCreate.mockClear();
+    realmModerationEventFindMany.mockClear();
     enqueueMock.mockClear();
     moderationCaseFindFirst.mockClear();
     moderationCaseFindMany.mockClear();
@@ -551,6 +615,196 @@ describe("GovernanceModerationService content moderation state", () => {
       id: "queue-1",
       realmUnitId: "realm-1",
       target: { kind: "content-owner-delegation", id: "reply-1" },
+    });
+  });
+
+  test("creates realm queue items with an intake event", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.createRealmQueueItem({
+      realmUnitId: "realm-1",
+      actorUserId: "mod-1",
+      reporterUserId: "reporter-1",
+      subjectUserId: "subject-1",
+      targetKind: "unit",
+      targetId: "post-1",
+      targetUnitId: "post-1",
+      reason: "reported",
+    });
+
+    expect(realmQueueCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        realmUnitId: "realm-1",
+        state: "NEW",
+        reporterUserId: "reporter-1",
+        subjectUserId: "subject-1",
+        targetKind: "unit",
+        targetId: "post-1",
+        targetUnitId: "post-1",
+        reason: "reported",
+      }),
+    });
+    expect(realmModerationEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        queueItemId: "queue-1",
+        realmUnitId: "realm-1",
+        actorUserId: "mod-1",
+        decisionKind: null,
+        reason: "reported",
+        after: {
+          state: "NEW",
+          targetKind: "unit",
+          targetId: "post-1",
+          targetUnitId: "post-1",
+        },
+      }),
+    });
+    expect(result).toMatchObject({
+      id: "queue-1",
+      realmUnitId: "realm-1",
+      state: "new",
+    });
+  });
+
+  test("creates realm queue items from feedback and reuses duplicates", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await governanceModerationService.createRealmQueueItemFromFeedback({
+      realmUnitId: "realm-1",
+      feedbackId: "feedback-1",
+      actorUserId: "mod-1",
+    });
+
+    expect(realmQueueFindFirst).toHaveBeenCalledWith({
+      where: { realmUnitId: "realm-1", sourceFeedbackId: "feedback-1" },
+      orderBy: { createdAt: "asc" },
+    });
+    expect(feedbackFindUniqueOrThrow).toHaveBeenCalledWith({
+      where: { id: "feedback-1" },
+    });
+    expect(realmQueueCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        realmUnitId: "realm-1",
+        reporterUserId: "reporter-1",
+        targetKind: "unit",
+        targetId: "post-1",
+        targetUnitId: "post-1",
+        sourceFeedbackId: "feedback-1",
+        reason: "reported",
+      }),
+    });
+
+    realmQueueFindFirst.mockResolvedValueOnce({
+      ...realmQueueRow,
+      id: "queue-existing",
+    });
+    const existing =
+      await governanceModerationService.createRealmQueueItemFromFeedback({
+        realmUnitId: "realm-1",
+        feedbackId: "feedback-1",
+        actorUserId: "mod-1",
+      });
+    expect(existing.id).toBe("queue-existing");
+  });
+
+  test("decides realm queue items with local sanctions and events", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.decideRealmQueueItem({
+      realmUnitId: "realm-1",
+      queueItemId: "queue-1",
+      actorUserId: "mod-1",
+      decisionKind: "hide_from_realm",
+      reason: "off-topic",
+    });
+
+    expect(realmQueueUpdate).toHaveBeenCalledWith({
+      where: { id: "queue-1" },
+      data: expect.objectContaining({
+        state: "ACTIONED",
+        reason: "off-topic",
+      }),
+    });
+    expect(realmContentModerationUpsert).toHaveBeenCalledWith({
+      where: {
+        realmUnitId_targetUnitId: {
+          realmUnitId: "realm-1",
+          targetUnitId: "post-1",
+        },
+      },
+      create: expect.objectContaining({
+        state: "HIDDEN",
+        decidedById: "mod-1",
+      }),
+      update: expect.objectContaining({
+        state: "HIDDEN",
+        decidedById: "mod-1",
+      }),
+    });
+    expect(realmModerationEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        queueItemId: "queue-1",
+        realmUnitId: "realm-1",
+        actorUserId: "mod-1",
+        decisionKind: "hide_from_realm",
+        reason: "off-topic",
+        after: expect.objectContaining({ state: "ACTIONED" }),
+      }),
+    });
+    expect(result).toMatchObject({ state: "actioned" });
+  });
+
+  test("escalates realm queue items into site moderation cases", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.escalateRealmQueueItem({
+      realmUnitId: "realm-1",
+      queueItemId: "queue-1",
+      actorUserId: "mod-1",
+      reason: "site review needed",
+      safeSummary: "Escalated report",
+    });
+
+    expect(moderationCaseCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        state: "ESCALATED",
+        reporterUserId: "reporter-1",
+        subjectUserId: "subject-1",
+        targetKind: "unit",
+        targetId: "post-1",
+        targetUnitId: "post-1",
+        realmUnitId: "realm-1",
+        sourceFeedbackId: "feedback-1",
+        reason: "site review needed",
+        safeSummary: "Escalated report",
+      }),
+    });
+    expect(realmQueueUpdate).toHaveBeenCalledWith({
+      where: { id: "queue-1" },
+      data: expect.objectContaining({
+        state: "ESCALATED",
+        linkedCaseId: "case-1",
+        reason: "site review needed",
+      }),
+    });
+    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        caseId: "case-1",
+        actorUserId: "mod-1",
+        eventType: "case.escalated_from_realm_queue",
+      }),
+    });
+    expect(result).toMatchObject({
+      state: "escalated",
+      linkedCaseId: "case-1",
     });
   });
 

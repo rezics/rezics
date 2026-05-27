@@ -118,6 +118,43 @@ const requestOwnerDelegationMock = mock(async () => ({
   createdAt: "2026-05-28T00:00:00.000Z",
   updatedAt: "2026-05-28T00:00:00.000Z",
 }));
+const realmQueueRow = {
+  id: "queue-1",
+  realmUnitId: "realm-1",
+  state: "new",
+  reporterUserId: "reporter-1",
+  subjectUserId: "subject-1",
+  target: { kind: "unit", id: "post-1", realmUnitId: "realm-1" },
+  sourceFeedbackId: "feedback-1",
+  linkedCaseId: null,
+  assignedToUserId: null,
+  reason: "reported",
+  safeSummary: null,
+  createdAt: "2026-05-28T00:00:00.000Z",
+  updatedAt: "2026-05-28T00:00:00.000Z",
+};
+const realmEventRow = {
+  id: "realm-event-1",
+  queueItemId: "queue-1",
+  realmUnitId: "realm-1",
+  actorUserId: "mod-1",
+  decisionKind: "hide_from_realm",
+  decision: null,
+  reason: "off-topic",
+  createdAt: "2026-05-28T00:00:00.000Z",
+};
+const createRealmQueueItemMock = mock(async () => realmQueueRow);
+const createRealmQueueItemFromFeedbackMock = mock(async () => realmQueueRow);
+const listRealmQueueEventsMock = mock(async () => [realmEventRow]);
+const decideRealmQueueItemMock = mock(async () => ({
+  ...realmQueueRow,
+  state: "actioned",
+}));
+const escalateRealmQueueItemMock = mock(async () => ({
+  ...realmQueueRow,
+  state: "escalated",
+  linkedCaseId: "case-1",
+}));
 const moderationCaseRow = {
   id: "case-1",
   state: "new",
@@ -221,6 +258,11 @@ mock.module("./moderation.service", () => ({
     restoreInRealm: restoreInRealmMock,
     removeRootFromRealm: removeRootFromRealmMock,
     requestOwnerDelegation: requestOwnerDelegationMock,
+    createRealmQueueItem: createRealmQueueItemMock,
+    createRealmQueueItemFromFeedback: createRealmQueueItemFromFeedbackMock,
+    listRealmQueueEvents: listRealmQueueEventsMock,
+    decideRealmQueueItem: decideRealmQueueItemMock,
+    escalateRealmQueueItem: escalateRealmQueueItemMock,
   },
 }));
 
@@ -248,6 +290,11 @@ describe("governanceApi account enforcement", () => {
     restoreInRealmMock.mockClear();
     removeRootFromRealmMock.mockClear();
     requestOwnerDelegationMock.mockClear();
+    createRealmQueueItemMock.mockClear();
+    createRealmQueueItemFromFeedbackMock.mockClear();
+    listRealmQueueEventsMock.mockClear();
+    decideRealmQueueItemMock.mockClear();
+    escalateRealmQueueItemMock.mockClear();
     listCaseEventsMock.mockClear();
     createCaseFromFeedbackMock.mockClear();
     duplicateCaseMock.mockClear();
@@ -603,6 +650,127 @@ describe("governanceApi account enforcement", () => {
       decidedById: "staff-1",
       reason: "please remove",
     });
+  });
+
+  test("creates realm queue items through realm queue policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/realms/realm-1/queue", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          targetKind: "unit",
+          targetId: "post-1",
+          targetUnitId: "post-1",
+          reason: "reported",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(createRealmQueueItemMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      actorUserId: "staff-1",
+      targetKind: "unit",
+      targetId: "post-1",
+      targetUnitId: "post-1",
+      reason: "reported",
+    });
+  });
+
+  test("creates realm queue items from feedback", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/queue/from-feedback/feedback-1",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason: "reported" }),
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(createRealmQueueItemFromFeedbackMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      feedbackId: "feedback-1",
+      actorUserId: "staff-1",
+      reason: "reported",
+    });
+  });
+
+  test("lists realm queue events through realm queue policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/queue/queue-1/events?limit=10",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(listRealmQueueEventsMock).toHaveBeenCalledWith(
+      "realm-1",
+      "queue-1",
+      {
+        limit: 10,
+      },
+    );
+  });
+
+  test("decides and escalates realm queue items through realm policies", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/queue/queue-1/decision",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            decisionKind: "hide_from_realm",
+            reason: "off-topic",
+          }),
+        },
+      ),
+    );
+    await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/queue/queue-1/escalate",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason: "site review needed" }),
+        },
+      ),
+    );
+
+    expect(decideRealmQueueItemMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      queueItemId: "queue-1",
+      actorUserId: "staff-1",
+      decisionKind: "hide_from_realm",
+      reason: "off-topic",
+    });
+    expect(escalateRealmQueueItemMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      queueItemId: "queue-1",
+      actorUserId: "staff-1",
+      reason: "site review needed",
+    });
+    const policyActions = (
+      decideForIdentityMock.mock.calls as unknown as Array<[{ action: string }]>
+    ).map(([input]) => input.action);
+    expect(policyActions).toEqual(
+      expect.arrayContaining(["queue.realm.decide", "realm.report.escalate"]),
+    );
   });
 
   test("creates moderation cases from report feedback through case triage policy", async () => {

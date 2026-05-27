@@ -8,8 +8,12 @@ import {
   contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
   createModerationCaseFromFeedbackSchema,
+  createRealmModerationQueueItemFromFeedbackSchema,
+  createRealmModerationQueueItemSchema,
   decideModerationCaseSchema,
+  decideRealmModerationQueueItemSchema,
   duplicateModerationCaseSchema,
+  escalateRealmModerationQueueItemSchema,
   grantCapabilitySchema,
   moderationCaseDTOSchema,
   realmContentModerationDTOSchema,
@@ -324,6 +328,37 @@ describe("governance contract registry", () => {
     expect(
       Value.Check(appealModerationCaseSchema, {
         reason: "appeal received",
+      }),
+    ).toBe(true);
+  });
+
+  test("realm moderation queue command contracts validate", () => {
+    expect(
+      Value.Check(createRealmModerationQueueItemSchema, {
+        reporterUserId: "reporter-1",
+        subjectUserId: "subject-1",
+        targetKind: "unit",
+        targetId: "post-1",
+        targetUnitId: "post-1",
+        reason: "reported",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(createRealmModerationQueueItemFromFeedbackSchema, {
+        reason: "reported",
+        metadata: { source: "feedback" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(decideRealmModerationQueueItemSchema, {
+        decisionKind: "hide_from_realm",
+        reason: "off-topic",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(escalateRealmModerationQueueItemSchema, {
+        reason: "site review needed",
+        caseId: "case-1",
       }),
     ).toBe(true);
   });

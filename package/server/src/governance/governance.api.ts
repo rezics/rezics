@@ -9,14 +9,19 @@ import {
   contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
   createModerationCaseFromFeedbackSchema,
+  createRealmModerationQueueItemFromFeedbackSchema,
+  createRealmModerationQueueItemSchema,
   decideModerationCaseSchema,
+  decideRealmModerationQueueItemSchema,
   duplicateModerationCaseSchema,
+  escalateRealmModerationQueueItemSchema,
   grantCapabilitySchema,
   moderationCaseEventDTOSchema,
   moderationCaseDTOSchema,
   policyDecisionSchema,
   policyInputSchema,
   realmContentModerationDTOSchema,
+  realmModerationEventDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
   triageModerationCaseSchema,
@@ -871,6 +876,175 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       detail: {
         summary: "List realm moderation queue items",
         tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/queue",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: realmPolicyActions.queueDecide,
+        target: {
+          kind: "realm-moderation-queue",
+          id: params.realmUnitId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.createRealmQueueItem({
+        realmUnitId: params.realmUnitId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String() }),
+      body: createRealmModerationQueueItemSchema,
+      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Create a realm moderation queue item",
+        tags: ["Governance", "Realms", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/queue/from-feedback/:feedbackId",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: realmPolicyActions.queueDecide,
+        target: {
+          kind: "realm-feedback",
+          id: params.feedbackId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.createRealmQueueItemFromFeedback({
+        realmUnitId: params.realmUnitId,
+        feedbackId: params.feedbackId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), feedbackId: t.String() }),
+      body: createRealmModerationQueueItemFromFeedbackSchema,
+      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Create a realm moderation queue item from feedback",
+        tags: ["Governance", "Realms", "Staff"],
+      },
+    },
+  )
+  .get(
+    "/realms/:realmUnitId/queue/:queueItemId/events",
+    async ({ params, query, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: realmPolicyActions.queueDecide,
+        target: {
+          kind: "realm-moderation-queue",
+          id: params.queueItemId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.listRealmQueueEvents(
+        params.realmUnitId,
+        params.queueItemId,
+        query,
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), queueItemId: t.String() }),
+      query: listQuerySchema,
+      response: {
+        200: t.Array(realmModerationEventDTOSchema),
+        403: t.String(),
+      },
+      detail: {
+        summary: "List realm moderation queue events",
+        tags: ["Governance", "Realms", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/queue/:queueItemId/decision",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action:
+          body.decisionKind === "escalate"
+            ? realmPolicyActions.reportEscalate
+            : realmPolicyActions.queueDecide,
+        target: {
+          kind: "realm-moderation-queue",
+          id: params.queueItemId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.decideRealmQueueItem({
+        realmUnitId: params.realmUnitId,
+        queueItemId: params.queueItemId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), queueItemId: t.String() }),
+      body: decideRealmModerationQueueItemSchema,
+      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Decide a realm moderation queue item",
+        tags: ["Governance", "Realms", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/queue/:queueItemId/escalate",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: realmPolicyActions.reportEscalate,
+        target: {
+          kind: "realm-moderation-queue",
+          id: params.queueItemId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.escalateRealmQueueItem({
+        realmUnitId: params.realmUnitId,
+        queueItemId: params.queueItemId,
+        actorUserId: identity.userId,
+        ...body,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), queueItemId: t.String() }),
+      body: escalateRealmModerationQueueItemSchema,
+      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Escalate a realm moderation queue item to site staff",
+        tags: ["Governance", "Realms", "Staff"],
       },
     },
   )

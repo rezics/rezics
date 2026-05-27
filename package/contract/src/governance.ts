@@ -340,6 +340,65 @@ export const realmModerationEventDTOSchema = t.Object({
 export type RealmModerationEventDTO =
   (typeof realmModerationEventDTOSchema)["static"];
 
+export const createRealmModerationQueueItemSchema = t.Object(
+  {
+    reporterUserId: t.Optional(t.Nullable(t.String())),
+    subjectUserId: t.Optional(t.Nullable(t.String())),
+    targetKind: t.String(),
+    targetId: t.String(),
+    targetUnitId: t.Optional(t.Nullable(t.String())),
+    sourceFeedbackId: t.Optional(t.Nullable(t.String())),
+    assignedToUserId: t.Optional(t.Nullable(t.String())),
+    reason: t.Optional(t.Nullable(t.String())),
+    safeSummary: t.Optional(t.Nullable(t.String())),
+    metadata: t.Optional(auditMetadataSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type CreateRealmModerationQueueItemInput =
+  (typeof createRealmModerationQueueItemSchema)["static"];
+
+export const createRealmModerationQueueItemFromFeedbackSchema = t.Object(
+  {
+    assignedToUserId: t.Optional(t.Nullable(t.String())),
+    reason: t.Optional(t.Nullable(t.String())),
+    safeSummary: t.Optional(t.Nullable(t.String())),
+    metadata: t.Optional(auditMetadataSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type CreateRealmModerationQueueItemFromFeedbackInput =
+  (typeof createRealmModerationQueueItemFromFeedbackSchema)["static"];
+
+export const decideRealmModerationQueueItemSchema = t.Object(
+  {
+    decisionKind: realmModerationDecisionKindSchema,
+    reason: t.String({ minLength: 1 }),
+    duplicateOfQueueItemId: t.Optional(t.Nullable(t.String())),
+    linkedCaseId: t.Optional(t.Nullable(t.String())),
+    decision: t.Optional(decisionSchema),
+    metadata: t.Optional(auditMetadataSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type DecideRealmModerationQueueItemInput =
+  (typeof decideRealmModerationQueueItemSchema)["static"];
+
+export const escalateRealmModerationQueueItemSchema = t.Object(
+  {
+    reason: t.String({ minLength: 1 }),
+    caseId: t.Optional(t.Nullable(t.String())),
+    safeSummary: t.Optional(t.Nullable(t.String())),
+  },
+  { additionalProperties: false },
+);
+
+export type EscalateRealmModerationQueueItemInput =
+  (typeof escalateRealmModerationQueueItemSchema)["static"];
+
 export const contentModerationStateKinds = [
   "visible",
   "hidden",

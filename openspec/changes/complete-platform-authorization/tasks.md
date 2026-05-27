@@ -37,7 +37,7 @@
 
 - [x] 6.1 Implement report-to-case creation, duplicate-linking, and case list/detail/assign/triage/decision/appeal APIs.
 - [x] 6.2 Implement content hide/restore and account-enforcement decisions with event history and reversal eligibility.
-- [ ] 6.3 Implement realm queue intake, realm decisions/local sanctions, and escalation that creates or links a site moderation case.
+- [x] 6.3 Implement realm queue intake, realm decisions/local sanctions, and escalation that creates or links a site moderation case.
 - [ ] 6.4 Add notification hooks for reporter updates, subject warnings, assignment, appeal outcomes, and escalation results.
 
 ## 7. Staff Audit And Frontend Hints

@@ -7,6 +7,7 @@ import {
   mapModerationCaseEventToDTO,
   mapModerationCaseToDTO,
   mapRealmContentModerationToDTO,
+  mapRealmModerationEventToDTO,
   mapRealmQueueItemToDTO,
 } from "./governance.mapper";
 import type { GovernanceListOptions } from "./types";
@@ -39,6 +40,19 @@ type CaseEventInput = {
   after?: Record<string, unknown> | null;
   reversible?: boolean;
 };
+
+type RealmQueueDecisionKind =
+  | "hide_from_realm"
+  | "remove_from_feed"
+  | "lock"
+  | "archive"
+  | "warn"
+  | "mute_in_realm"
+  | "remove_member"
+  | "ban_from_realm"
+  | "reject"
+  | "duplicate"
+  | "escalate";
 
 function toPrismaState(input: ContentModerationStateInput["state"]) {
   return input.toUpperCase() as Uppercase<ContentModerationStateInput["state"]>;
@@ -93,6 +107,13 @@ function contentModerationEventSummary(input: {
     targetUnitId: input.targetUnitId,
     realmUnitId: input.realmUnitId ?? undefined,
   });
+}
+
+function realmQueueStateForDecision(kind: RealmQueueDecisionKind) {
+  if (kind === "reject") return "REJECTED";
+  if (kind === "duplicate") return "DUPLICATE";
+  if (kind === "escalate") return "ESCALATED";
+  return "ACTIONED";
 }
 
 function enqueueModeratedContentSearch(targetUnitId: string) {
@@ -423,6 +444,361 @@ export class GovernanceModerationService {
       take: options.limit ?? 50,
     });
     return rows.map(mapRealmQueueItemToDTO);
+  }
+
+  async listRealmQueueEvents(
+    realmUnitId: string,
+    queueItemId: string,
+    options: GovernanceListOptions = {},
+  ) {
+    const rows = await prisma.realmModerationEvent.findMany({
+      where: { realmUnitId, queueItemId },
+      orderBy: { createdAt: "asc" },
+      skip: options.offset ?? 0,
+      take: options.limit ?? 50,
+    });
+    return rows.map(mapRealmModerationEventToDTO);
+  }
+
+  private async createRealmQueueEvent(
+    tx: any,
+    input: {
+      queueItemId: string;
+      realmUnitId: string;
+      actorUserId: string;
+      decisionKind?: RealmQueueDecisionKind | null;
+      decision?: Record<string, unknown> | null;
+      decisionCode?: string | null;
+      reason?: string | null;
+      before?: Record<string, unknown> | null;
+      after?: Record<string, unknown> | null;
+    },
+  ) {
+    return tx.realmModerationEvent.create({
+      data: {
+        queueItemId: input.queueItemId,
+        realmUnitId: input.realmUnitId,
+        actorUserId: input.actorUserId,
+        decisionKind: input.decisionKind ?? null,
+        decision: jsonOrUndefined(input.decision),
+        decisionCode: input.decisionCode ?? null,
+        reason: input.reason ?? null,
+        before: jsonOrUndefined(input.before),
+        after: jsonOrUndefined(input.after),
+      },
+    });
+  }
+
+  async createRealmQueueItem(input: {
+    realmUnitId: string;
+    actorUserId: string;
+    reporterUserId?: string | null;
+    subjectUserId?: string | null;
+    targetKind: string;
+    targetId: string;
+    targetUnitId?: string | null;
+    sourceFeedbackId?: string | null;
+    assignedToUserId?: string | null;
+    reason?: string | null;
+    safeSummary?: string | null;
+    metadata?: Record<string, unknown>;
+  }) {
+    const row = await prisma.$transaction(async (tx) => {
+      const created = await tx.realmModerationQueueItem.create({
+        data: {
+          realmUnitId: input.realmUnitId,
+          state: "NEW",
+          reporterUserId: input.reporterUserId ?? null,
+          subjectUserId: input.subjectUserId ?? null,
+          targetKind: input.targetKind,
+          targetId: input.targetId,
+          targetUnitId: input.targetUnitId ?? null,
+          sourceFeedbackId: input.sourceFeedbackId ?? null,
+          assignedToUserId: input.assignedToUserId ?? null,
+          reason: input.reason ?? null,
+          safeSummary: input.safeSummary ?? null,
+          metadata: (input.metadata ?? undefined) as never,
+        },
+      });
+      await this.createRealmQueueEvent(tx, {
+        queueItemId: created.id,
+        realmUnitId: input.realmUnitId,
+        actorUserId: input.actorUserId,
+        reason: input.reason ?? null,
+        after: {
+          state: created.state,
+          targetKind: created.targetKind,
+          targetId: created.targetId,
+          targetUnitId: created.targetUnitId,
+        },
+      });
+      return created;
+    });
+    return mapRealmQueueItemToDTO(row);
+  }
+
+  async createRealmQueueItemFromFeedback(input: {
+    realmUnitId: string;
+    feedbackId: string;
+    actorUserId: string;
+    assignedToUserId?: string | null;
+    reason?: string | null;
+    safeSummary?: string | null;
+    metadata?: Record<string, unknown>;
+  }) {
+    const existing = await prisma.realmModerationQueueItem.findFirst({
+      where: {
+        realmUnitId: input.realmUnitId,
+        sourceFeedbackId: input.feedbackId,
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    if (existing) return mapRealmQueueItemToDTO(existing);
+
+    const feedback = await prisma.feedback.findUniqueOrThrow({
+      where: { id: input.feedbackId },
+    });
+    return this.createRealmQueueItem({
+      realmUnitId: input.realmUnitId,
+      actorUserId: input.actorUserId,
+      reporterUserId: feedback.userId,
+      targetKind: feedback.unitId ? "unit" : "feedback",
+      targetId: feedback.unitId ?? feedback.id,
+      targetUnitId: feedback.unitId ?? null,
+      sourceFeedbackId: feedback.id,
+      assignedToUserId: input.assignedToUserId,
+      reason: input.reason ?? feedback.content ?? null,
+      safeSummary: input.safeSummary,
+      metadata: cleanJsonObject({
+        ...(input.metadata ?? {}),
+        feedbackType: feedback.type,
+        feedbackUrl: feedback.url ?? undefined,
+      }),
+    });
+  }
+
+  async decideRealmQueueItem(input: {
+    realmUnitId: string;
+    queueItemId: string;
+    actorUserId: string;
+    decisionKind: RealmQueueDecisionKind;
+    reason: string;
+    duplicateOfQueueItemId?: string | null;
+    linkedCaseId?: string | null;
+    decision?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
+  }) {
+    const row = await prisma.$transaction(async (tx) => {
+      const before = await tx.realmModerationQueueItem.findUniqueOrThrow({
+        where: { id: input.queueItemId },
+      });
+      const nextState = realmQueueStateForDecision(input.decisionKind);
+      const updated = await tx.realmModerationQueueItem.update({
+        where: { id: input.queueItemId },
+        data: {
+          state: nextState,
+          linkedCaseId: input.linkedCaseId ?? before.linkedCaseId,
+          reason: input.reason,
+          metadata: cleanJsonObject({
+            ...(before.metadata &&
+            typeof before.metadata === "object" &&
+            !Array.isArray(before.metadata)
+              ? before.metadata
+              : {}),
+            ...(input.metadata ?? {}),
+            duplicateOfQueueItemId: input.duplicateOfQueueItemId ?? undefined,
+          }) as never,
+        },
+      });
+
+      if (input.decisionKind === "hide_from_realm" && before.targetUnitId) {
+        await tx.realmContentModeration.upsert({
+          where: {
+            realmUnitId_targetUnitId: {
+              realmUnitId: input.realmUnitId,
+              targetUnitId: before.targetUnitId,
+            },
+          },
+          create: {
+            realmUnitId: input.realmUnitId,
+            targetUnitId: before.targetUnitId,
+            state: "HIDDEN",
+            decidedById: input.actorUserId,
+            reason: input.reason,
+          },
+          update: {
+            state: "HIDDEN",
+            decidedById: input.actorUserId,
+            reason: input.reason,
+          },
+        });
+      }
+      if (input.decisionKind === "lock" && before.targetUnitId) {
+        await tx.realmContentModeration.upsert({
+          where: {
+            realmUnitId_targetUnitId: {
+              realmUnitId: input.realmUnitId,
+              targetUnitId: before.targetUnitId,
+            },
+          },
+          create: {
+            realmUnitId: input.realmUnitId,
+            targetUnitId: before.targetUnitId,
+            state: "LOCKED",
+            decidedById: input.actorUserId,
+            reason: input.reason,
+          },
+          update: {
+            state: "LOCKED",
+            decidedById: input.actorUserId,
+            reason: input.reason,
+          },
+        });
+      }
+      if (input.decisionKind === "archive" && before.targetUnitId) {
+        await tx.realmContentModeration.upsert({
+          where: {
+            realmUnitId_targetUnitId: {
+              realmUnitId: input.realmUnitId,
+              targetUnitId: before.targetUnitId,
+            },
+          },
+          create: {
+            realmUnitId: input.realmUnitId,
+            targetUnitId: before.targetUnitId,
+            state: "ARCHIVED",
+            decidedById: input.actorUserId,
+            reason: input.reason,
+          },
+          update: {
+            state: "ARCHIVED",
+            decidedById: input.actorUserId,
+            reason: input.reason,
+          },
+        });
+      }
+      if (input.decisionKind === "remove_from_feed" && before.targetUnitId) {
+        await tx.unitRealm.delete({
+          where: {
+            realmUnitId_unitId: {
+              realmUnitId: input.realmUnitId,
+              unitId: before.targetUnitId,
+            },
+          },
+        });
+      }
+      if (
+        (input.decisionKind === "remove_member" ||
+          input.decisionKind === "ban_from_realm") &&
+        before.subjectUserId
+      ) {
+        await tx.realmMember.delete({
+          where: {
+            realmUnitId_userId: {
+              realmUnitId: input.realmUnitId,
+              userId: before.subjectUserId,
+            },
+          },
+        });
+      }
+
+      await this.createRealmQueueEvent(tx, {
+        queueItemId: input.queueItemId,
+        realmUnitId: input.realmUnitId,
+        actorUserId: input.actorUserId,
+        decisionKind: input.decisionKind,
+        decision: input.decision ?? null,
+        decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
+        reason: input.reason,
+        before: {
+          state: before.state,
+          linkedCaseId: before.linkedCaseId,
+        },
+        after: {
+          state: updated.state,
+          linkedCaseId: updated.linkedCaseId,
+          duplicateOfQueueItemId: input.duplicateOfQueueItemId ?? undefined,
+        },
+      });
+      return updated;
+    });
+    if (input.decisionKind === "remove_from_feed") {
+      const targetUnitId = row.targetUnitId;
+      if (targetUnitId) await enqueueRealmMembershipSearch(targetUnitId);
+    }
+    return mapRealmQueueItemToDTO(row);
+  }
+
+  async escalateRealmQueueItem(input: {
+    realmUnitId: string;
+    queueItemId: string;
+    actorUserId: string;
+    reason: string;
+    caseId?: string | null;
+    safeSummary?: string | null;
+  }) {
+    const row = await prisma.$transaction(async (tx) => {
+      const queue = await tx.realmModerationQueueItem.findUniqueOrThrow({
+        where: { id: input.queueItemId },
+      });
+      let caseId = input.caseId ?? queue.linkedCaseId;
+      if (!caseId) {
+        const moderationCase = await tx.moderationCase.create({
+          data: {
+            state: "ESCALATED",
+            severity: null,
+            reporterUserId: queue.reporterUserId,
+            subjectUserId: queue.subjectUserId,
+            targetKind: queue.targetKind,
+            targetId: queue.targetId,
+            targetUnitId: queue.targetUnitId,
+            realmUnitId: input.realmUnitId,
+            sourceFeedbackId: queue.sourceFeedbackId,
+            reason: input.reason,
+            safeSummary: input.safeSummary ?? queue.safeSummary,
+            metadata: { escalatedFromRealmQueueItemId: queue.id } as never,
+          },
+        });
+        caseId = moderationCase.id;
+        await this.createCaseEvent(tx, {
+          caseId,
+          actorUserId: input.actorUserId,
+          eventType: "case.escalated_from_realm_queue",
+          reason: input.reason,
+          after: {
+            realmUnitId: input.realmUnitId,
+            queueItemId: queue.id,
+          },
+          reversible: false,
+        });
+      }
+      const updated = await tx.realmModerationQueueItem.update({
+        where: { id: input.queueItemId },
+        data: {
+          state: "ESCALATED",
+          linkedCaseId: caseId,
+          reason: input.reason,
+          safeSummary: input.safeSummary ?? queue.safeSummary,
+        },
+      });
+      await this.createRealmQueueEvent(tx, {
+        queueItemId: input.queueItemId,
+        realmUnitId: input.realmUnitId,
+        actorUserId: input.actorUserId,
+        decisionKind: "escalate",
+        reason: input.reason,
+        before: {
+          state: queue.state,
+          linkedCaseId: queue.linkedCaseId,
+        },
+        after: {
+          state: updated.state,
+          linkedCaseId: updated.linkedCaseId,
+        },
+      });
+      return updated;
+    });
+    return mapRealmQueueItemToDTO(row);
   }
 
   async getGlobalContentState(targetUnitId: string) {
