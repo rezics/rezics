@@ -1,5 +1,4 @@
 import {
-  BasicAdminPermission,
   createFeedbackSchema,
   type FeedbackDTO,
   type FeedbackListResponse,
@@ -7,9 +6,32 @@ import {
   feedbackListQuerySchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
+import { governanceRoutePolicyService, sitePolicyActions } from "@/governance";
 import { authMacro } from "@/middleware";
 import { feedbackService } from "./feedback.service";
 import { mapFeedbackToDTO } from "./mapper";
+
+async function assertFeedbackPolicy(input: {
+  identity: any;
+  status: any;
+  action: (typeof sitePolicyActions)[keyof typeof sitePolicyActions];
+  target: {
+    kind: string;
+    id: string;
+  };
+}) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: input.action,
+    target: input.target,
+  });
+  if (!decision.allowed) {
+    return input.status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
 
 export const feedbackApi = new Elysia({ prefix: "/feedback" })
   .use(authMacro)
@@ -56,13 +78,20 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
   )
   .get(
     "/by-user/:userId",
-    async ({ params, query, identity, set }): Promise<FeedbackListResponse> => {
-      const isAdmin = BasicAdminPermission(identity.permission);
-      if (!isAdmin && identity.userId !== params.userId) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you can only query feedback for your own userId",
-        );
+    async ({
+      params,
+      query,
+      identity,
+      status,
+    }): Promise<FeedbackListResponse | string> => {
+      if (identity.userId !== params.userId) {
+        const denied = await assertFeedbackPolicy({
+          identity,
+          status,
+          action: sitePolicyActions.auditRead,
+          target: { kind: "feedback-user", id: params.userId },
+        });
+        if (denied) return denied;
       }
 
       const { userId: _ignoredUserId, ...rest } = query as any;
@@ -76,29 +105,41 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
       requireLogin: true,
       params: t.Object({ userId: t.String() }),
       query: feedbackListQuerySchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "List feedbacks by userId",
-        description:
-          "List feedbacks for a specific userId. Non-admins can only access their own userId.",
+        description: "List feedbacks for a specific userId.",
         tags: ["Feedback", "Admin"],
       },
     },
   )
   .get(
     "/list",
-    async ({ query, identity, set }): Promise<FeedbackListResponse> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to list all feedbacks",
-        );
-      }
+    async ({
+      query,
+      identity,
+      status,
+    }): Promise<FeedbackListResponse | string> => {
+      const denied = await assertFeedbackPolicy({
+        identity,
+        status,
+        action: sitePolicyActions.auditRead,
+        target: { kind: "feedback-list", id: "all" },
+      });
+      if (denied) return denied;
       const result = await feedbackService.list(query as any);
       return { ...result, items: result.items.map(mapFeedbackToDTO) };
     },
     {
       requireLogin: true,
       query: feedbackListQuerySchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "List feedbacks (admin)",
         description:
@@ -109,13 +150,18 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
   )
   .post(
     "/list",
-    async ({ body, identity, set }): Promise<FeedbackListResponse> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to list all feedbacks",
-        );
-      }
+    async ({
+      body,
+      identity,
+      status,
+    }): Promise<FeedbackListResponse | string> => {
+      const denied = await assertFeedbackPolicy({
+        identity,
+        status,
+        action: sitePolicyActions.auditRead,
+        target: { kind: "feedback-list", id: "all" },
+      });
+      if (denied) return denied;
       const result = await feedbackService.list({
         ...body,
         ids: body.ids?.join(","),
@@ -125,6 +171,10 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
     {
       requireLogin: true,
       body: feedbackListBodySchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "List feedbacks (admin, POST)",
         description:
@@ -135,19 +185,24 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
   )
   .get(
     "/:id",
-    async ({ params, identity, set }): Promise<FeedbackDTO> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to get feedback details",
-        );
-      }
+    async ({ params, identity, status }): Promise<FeedbackDTO | string> => {
+      const denied = await assertFeedbackPolicy({
+        identity,
+        status,
+        action: sitePolicyActions.auditRead,
+        target: { kind: "feedback", id: params.id },
+      });
+      if (denied) return denied;
       const feedback = await feedbackService.getById(params.id);
       return mapFeedbackToDTO(feedback);
     },
     {
       requireLogin: true,
       params: t.Object({ id: t.String() }),
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Get feedback (admin)",
         description: "Admin-only endpoint to get a feedback by id.",
@@ -157,13 +212,19 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
   )
   .patch(
     "/:id/resolve",
-    async ({ params, body, identity, set }): Promise<FeedbackDTO> => {
-      if (!BasicAdminPermission(identity.permission)) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to update feedback status",
-        );
-      }
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<FeedbackDTO | string> => {
+      const denied = await assertFeedbackPolicy({
+        identity,
+        status,
+        action: sitePolicyActions.queueDecide,
+        target: { kind: "feedback", id: params.id },
+      });
+      if (denied) return denied;
       const resolved = (body as { resolved: boolean }).resolved;
       const feedback = await feedbackService.setResolved(params.id, resolved);
       return mapFeedbackToDTO(feedback);
@@ -174,6 +235,10 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
       body: t.Object({
         resolved: t.Boolean(),
       }),
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Set feedback resolved state (admin)",
         description:
