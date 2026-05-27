@@ -42,6 +42,10 @@ function capabilityMatches(input: PolicyInput, required: Capability) {
 export function decide(input: PolicyInput): PolicyDecision {
   const definition = governanceActionDefinitionByAction.get(input.action);
 
+  if (input.context?.missingResource === true) {
+    return decision(false, "MISSING_RESOURCE", "target resource is missing");
+  }
+
   if (
     definition?.staffOnly &&
     input.permission?.role !== "ADMIN" &&

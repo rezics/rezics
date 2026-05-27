@@ -11,12 +11,12 @@
 - [x] 2.1 Create `package/server/src/governance/` with policy, capability, enforcement, moderation, audit, mapper, API, and types modules following domain conventions.
 - [x] 2.2 Implement named policy action families for content, realm, account, case, audit, staff console, and operational repair actions, with `Permission` and capability grants as inputs.
 - [x] 2.3 Implement capability-grant resolution for the staff plane and the realm plane through one mechanism (scope-aware).
-- [ ] 2.4 Migrate high-risk routes from inline checks to policy decisions: post delete/restore, realm member role/capability changes, report decisions, account enforcement, role changes, repair actions.
-- [ ] 2.5 Add policy tests by action family for allow / deny / blocked-account / missing-resource / cross-realm / capability-scope cases.
+- [x] 2.4 Migrate high-risk routes from inline checks to policy decisions: post delete/restore, realm member role/capability changes, report decisions, account enforcement, role changes, repair actions.
+- [x] 2.5 Add policy tests by action family for allow / deny / blocked-account / missing-resource / cross-realm / capability-scope cases.
 
 ## 3. Account Enforcement And Auth Boundary
 
-- [ ] 3.1 Implement warning, silence, suspension, ban, unblock, and rate/trust restriction service methods.
+- [x] 3.1 Implement warning, silence, suspension, ban, unblock, and rate/trust restriction service methods.
 - [ ] 3.2 Make blocked status derive from active enforcement (single source of truth); retain only a derived projection for transport compatibility.
 - [ ] 3.3 Integrate ban/unban/session revocation with `package/auth` through existing auth-boundary patterns and emit boundary events.
 - [ ] 3.4 Apply enforcement to create post, reply, realm creation, DM send, tag vote, and reaction policy checks; add reconciliation diagnostics for auth vs. main-server state.
