@@ -1,0 +1,63 @@
+## 1. Contracts And Schema
+
+- [ ] 1.1 Add policy action literals, `Decision` DTOs (allow/deny, reason, safeMessage, auditCode), capability keys, account enforcement DTOs, moderation case + realm queue DTOs, and staff audit DTOs in `package/contract`.
+- [ ] 1.2 Add Prisma models for moderation cases, case/realm-queue events, account enforcement records, capability grants (staff + realm), content moderation state + `RealmContentModeration` overlay, and staff audit logs in `package/server/prisma/schema.prisma`.
+- [ ] 1.3 Add migrations and indexes for queue filtering (state, severity, realm, assignment, target, subject, time) and for overlay lookup by `(realmUnitId, targetUnitId)`.
+- [ ] 1.4 Backfill existing `Feedback(REPORT)` rows into moderation case sources without deleting feedback rows.
+- [ ] 1.5 Ensure the realm member contract can carry a capability subset (do not foreclose with a single fixed-width `roleKey`).
+
+## 2. Policy Engine (One Engine, Two Scopes)
+
+- [ ] 2.1 Create `package/server/src/governance/` with policy, capability, enforcement, moderation, audit, mapper, API, and types modules following domain conventions.
+- [ ] 2.2 Implement named policy action families for content, realm, account, case, audit, staff console, and operational repair actions, with `Permission` and capability grants as inputs.
+- [ ] 2.3 Implement capability-grant resolution for the staff plane and the realm plane through one mechanism (scope-aware).
+- [ ] 2.4 Migrate high-risk routes from inline checks to policy decisions: post delete/restore, realm member role/capability changes, report decisions, account enforcement, role changes, repair actions.
+- [ ] 2.5 Add policy tests by action family for allow / deny / blocked-account / missing-resource / cross-realm / capability-scope cases.
+
+## 3. Account Enforcement And Auth Boundary
+
+- [ ] 3.1 Implement warning, silence, suspension, ban, unblock, and rate/trust restriction service methods.
+- [ ] 3.2 Make blocked status derive from active enforcement (single source of truth); retain only a derived projection for transport compatibility.
+- [ ] 3.3 Integrate ban/unban/session revocation with `package/auth` through existing auth-boundary patterns and emit boundary events.
+- [ ] 3.4 Apply enforcement to create post, reply, realm creation, DM send, tag vote, and reaction policy checks; add reconciliation diagnostics for auth vs. main-server state.
+
+## 4. Content Moderation Model
+
+- [ ] 4.1 Implement global content moderation state on the content node and the sparse realm overlay keyed by `(realmUnitId, targetUnitId)`.
+- [ ] 4.2 Serve a realm-agnostic thread payload plus a bounded per-`(realm, node-set)` overlay set as separately cacheable sources; resolve render-side by applying global state first, then the realm overlay, with tombstones keeping the node and child replies reachable. Enforce confidential exclusions (global removal, member-only/private, age gating) server-side, never via client masking.
+- [ ] 4.3 Implement realm-scoped vs. global tombstone, restore/reversal, junction-drop on roots (top-level feed removal, pagination-stable), and the owner-delegation soft/fallback path.
+- [ ] 4.4 Exclude globally-removed content from search (backend projection on global state + junction); verify realm-A overlay never affects realm B, the global object, or search; verify reply stubs keep pagination stable.
+
+## 5. Editorial / Moderation Boundary
+
+- [ ] 5.1 Ensure no moderation action rewrites a content body; body edits route through the editorial/authority system for all actors including `ROOT`.
+- [ ] 5.2 Implement ownership-based history scope: cross-owner edits always write a staff audit entry (with before/after) plus a revision when the content type maintains one; self-edits keep their type's normal behavior.
+
+## 6. Moderation Cases, Realm Workflow, Escalation
+
+- [ ] 6.1 Implement report-to-case creation, duplicate-linking, and case list/detail/assign/triage/decision/appeal APIs.
+- [ ] 6.2 Implement content hide/restore and account-enforcement decisions with event history and reversal eligibility.
+- [ ] 6.3 Implement realm queue intake, realm decisions/local sanctions, and escalation that creates or links a site moderation case.
+- [ ] 6.4 Add notification hooks for reporter updates, subject warnings, assignment, appeal outcomes, and escalation results.
+
+## 7. Staff Audit And Frontend Hints
+
+- [ ] 7.1 Add append-only audit service helpers requiring reason/correlation metadata for privileged mutations; migrate admin-sensitive operations to write audit logs.
+- [ ] 7.2 Add audit list/detail APIs with redaction.
+- [ ] 7.3 Expose staff and realm capability hints in frontend auth/membership state for UI visibility only, never for authorization.
+
+## 8. Site Staff Console (package/app)
+
+- [ ] 8.1 Add `@rezics/api` clients and TanStack Query hooks for cases, enforcement, capability grants, policy-denial metadata, and audit.
+- [ ] 8.2 Add `package/app/src/staff/` feature with routes for moderation queue, case detail, account safety, and audit timeline; guard non-staff with forbidden states.
+- [ ] 8.3 Add focused UI tests or Storybook stories for queue empty/loading/error/denied/action states.
+
+## 9. Verification
+
+- [ ] 9.1 Run `bun --filter=@rezics/contract test`.
+- [ ] 9.2 Run targeted `package/server` governance, policy, post, realm, feedback, and auth-boundary tests.
+- [ ] 9.3 Run targeted `package/api` tests for governance clients/hooks.
+- [ ] 9.4 Run targeted `package/app` tests or Storybook checks for staff console routes.
+- [ ] 9.5 Run `bun run check:convention`.
+- [ ] 9.6 Run `bun run format:check`.
+- [ ] 9.7 Run `openspec validate complete-platform-authorization --strict`.

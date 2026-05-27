@@ -75,7 +75,7 @@ Work/release matching aligns with `introduce-unit-work-domain` but does not depe
 
 ### Engagement
 
-Engagement is consistent across cards and detail pages: reaction, comment/reply, shelf/save, follow/subscribe, share, report, and DM are placed where context supports them. Safety/report entry points create moderation cases from `complete-site-governance-permissions`.
+Engagement is consistent across cards and detail pages: reaction, comment/reply, shelf/save, follow/subscribe, share, report, and DM are placed where context supports them. Safety/report entry points create moderation cases from `complete-platform-authorization`.
 
 ### Quality States
 

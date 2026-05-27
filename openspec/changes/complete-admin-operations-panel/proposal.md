@@ -9,7 +9,7 @@
 - Complete content and data administration for Units, books, media/games, entities, shelves, tags, realms, source-site attribution, work/release domains, history, and search projection repair.
 - Complete auth/account operations across auth-server users, main-server users, sessions, bans, roles, JWT services, tokens, impersonation controls, and audit links.
 - Add observability and repair surfaces for Meilisearch, job-runner queues, Sequin/CDC, history outbox, sync drift, seed/dev fixtures, and system status.
-- Integrate governance oversight from `complete-site-governance-permissions` as operator-level visibility and override tools, not day-to-day realm moderation.
+- Integrate governance oversight from `complete-platform-authorization` as operator-level visibility and override tools, not day-to-day realm moderation.
 - Do not depend on `introduce-api-unit-store`; use existing admin API clients, `@rezics/contract`, `@rezics/api`, and package-specific admin domains.
 
 ## Capabilities
