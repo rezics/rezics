@@ -8,6 +8,9 @@ Realm is Rezics' community boundary, but current realm behavior is closer to dis
 - Give realm owners/admins/moderators a product-side management console under realm routes, not under `package/admin`.
 - Add realm-scoped reports and moderator decisions that can be escalated to the site-wide moderation case system from `complete-site-governance-permissions`.
 - Expand realm feeds from a list of `UnitRealm`/post membership into a community experience: pinned items, locked/archived threads, announcements, sort/filter presets, member-only areas, and moderator context.
+- Reuse existing realm community infrastructure for rules, pins, and tags: `Realm.extra.rule`, `Realm.extra.pinboard`, `Realm.extra.announcement`, `Realm.extra.tagTree`, `UnitTranslation`, the pinboard feature, and existing carousel primitives remain the product foundations.
+- Add product UI design requirements for the realm Feed default tab, About tab, rule acknowledgement surfaces, pinboard carousel cards, Moderation tab, and the tag tab's flat/grouped/tree display modes.
+- Extend realm metadata and management surfaces so all major realm-owned text remains multilingual through `UnitTranslation` or explicitly modeled translation entries rather than raw single-language labels.
 - Add role-granting safeguards so realm owners cannot silently create site staff and site staff cannot accidentally mutate realm-specific governance without policy/audit.
 - Use existing Realm, RealmMember, UnitRealm, Post, RealmTag, Subscription, Notification, search, and history infrastructure; do not depend on `introduce-api-unit-store`.
 - **BREAKING**: realm management UI and APIs SHALL move from ad hoc owner/admin checks to explicit realm governance actions.
@@ -33,6 +36,6 @@ Realm is Rezics' community boundary, but current realm behavior is closer to dis
 ## Impact
 
 - Affected packages: `package/contract`, `package/server`, `package/api`, `package/app`, `package/search`, `package/notification`, `package/job-runner`, and seed fixtures.
-- Database impact: add realm rule, mod action, realm report source, member state, announcement/pin/lock/archive metadata, and moderation audit fields; reuse/link site-wide moderation cases where escalation is needed.
-- UI impact: `package/app` gains realm management sections for rules, members, queue, pinned content, and settings using Rezics design-system density and `@rezics/ui` primitives.
+- Database impact: add only the governance state not already represented by existing infrastructure: rule acknowledgement/version policy, mod action/report/queue state, member state, lock/archive/hide metadata, and moderation audit fields. Rule content and pinboard ordering reuse Realm extra and Unit/Post/UnitTranslation primitives unless a spec explicitly documents a new normalized field.
+- UI impact: `package/app` gains realm Feed, About, rule, member, Moderation, pinboard, tag, and settings surfaces using Rezics design-system rhythm, `@rezics/ui` primitives, and the existing carousel/pinboard foundations.
 - Migration/backward compatibility: existing realm owners/admins/moderators retain equivalent permissions; existing member rows default to active state; existing feeds remain visible under default filters.
