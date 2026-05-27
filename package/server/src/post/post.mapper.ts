@@ -3,10 +3,25 @@ import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { PostWithRelations } from "./types";
 
+function moderationState(post: PostWithRelations) {
+  return post.unit.contentModerationState?.state.toLowerCase() as
+    | PostDTO["globalModerationState"]
+    | undefined;
+}
+
+function contentHiddenByGlobalModeration(post: PostWithRelations) {
+  return ["HIDDEN", "TOMBSTONED", "ARCHIVED"].includes(
+    post.unit.contentModerationState?.state ?? "",
+  );
+}
+
 /**
  * Map a PostWithRelations (Prisma result) to the public PostDTO.
  */
 export function mapPostToDTO(post: PostWithRelations): PostDTO {
+  const globalModerationState = moderationState(post);
+  const contentHidden = contentHiddenByGlobalModeration(post);
+
   return {
     unitId: post.unitId,
     authorUserId: post.authorUserId,
@@ -14,14 +29,15 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     targetUnitId: post.targetUnitId ?? null,
     workUnitIds: (post.unit.workMemberships ?? []).map((row) => row.workUnitId),
     workRoles: (post.unit.workMemberships ?? []).map((row) => row.role),
-    content: post.content as PostDTO["content"],
+    content: contentHidden ? null : (post.content as PostDTO["content"]),
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,
     kind: post.kind ?? null,
     status: post.unit.status,
     visibility: post.unit.visibility,
     licenseSlug: resolveStoredLicenseSlug(post.unit.licenseSlug),
-    isTombstone: post.unit.status === "DELETED",
+    globalModerationState,
+    isTombstone: post.unit.status === "DELETED" || contentHidden,
     scoreEntryId: post.scoreEntryId ?? null,
     depth: post.depth,
     sortPath: post.sortPath ?? null,

@@ -24,7 +24,7 @@
 ## 4. Content Moderation Model
 
 - [x] 4.1 Implement global content moderation state on the content node and the sparse realm overlay keyed by `(realmUnitId, targetUnitId)`.
-- [ ] 4.2 Serve a realm-agnostic thread payload plus a bounded per-`(realm, node-set)` overlay set as separately cacheable sources; resolve render-side by applying global state first, then the realm overlay, with tombstones keeping the node and child replies reachable. Enforce confidential exclusions (global removal, member-only/private, age gating) server-side, never via client masking.
+- [x] 4.2 Serve a realm-agnostic thread payload plus a bounded per-`(realm, node-set)` overlay set as separately cacheable sources; resolve render-side by applying global state first, then the realm overlay, with tombstones keeping the node and child replies reachable. Enforce confidential exclusions (global removal, member-only/private, age gating) server-side, never via client masking.
 - [ ] 4.3 Implement realm-scoped vs. global tombstone, restore/reversal, junction-drop on roots (top-level feed removal, pagination-stable), and the owner-delegation soft/fallback path.
 - [ ] 4.4 Exclude globally-removed content from search (backend projection on global state + junction); verify realm-A overlay never affects realm B, the global object, or search; verify reply stubs keep pagination stable.
 

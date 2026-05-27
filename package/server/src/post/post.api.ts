@@ -5,7 +5,10 @@ import {
   isBlocked,
   PostKind,
   type PostListResponse,
+  type PostModerationOverlayResponse,
   type PostResponse,
+  postModerationOverlayRequestSchema,
+  postModerationOverlayResponseSchema,
   postListBodySchema,
   postListQuerySchema,
   postListResponseSchema,
@@ -14,6 +17,7 @@ import {
 import { Elysia, t } from "elysia";
 import {
   contentPolicyActions,
+  governanceModerationService,
   governanceRoutePolicyService,
 } from "@/governance";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
@@ -123,6 +127,32 @@ export const postApi = new Elysia({ prefix: "/post" })
         description:
           "List posts with filters and pagination. Public callers see only published posts; admins have full access.",
         tags: ["Posts"],
+      },
+    },
+  )
+  .post(
+    "/moderation-overlays",
+    async ({ body }): Promise<PostModerationOverlayResponse> => {
+      const targetUnitIds = [...new Set(body.targetUnitIds)];
+      const [globalStates, realmOverlays] = await Promise.all([
+        governanceModerationService.listGlobalContentStates(targetUnitIds),
+        body.realmUnitId
+          ? governanceModerationService.listRealmContentOverlays({
+              realmUnitId: body.realmUnitId,
+              targetUnitIds,
+            })
+          : [],
+      ]);
+      return { globalStates, realmOverlays };
+    },
+    {
+      body: postModerationOverlayRequestSchema,
+      response: postModerationOverlayResponseSchema,
+      detail: {
+        summary: "Get post moderation overlays",
+        description:
+          "Return global moderation state and bounded realm overlay rows for the requested post node ids.",
+        tags: ["Posts", "Governance"],
       },
     },
   )

@@ -11,6 +11,7 @@ export const postInclude = {
       workMemberships: {
         select: { workUnitId: true, role: true },
       },
+      contentModerationState: true,
     },
   },
 } satisfies Prisma.PostInclude;

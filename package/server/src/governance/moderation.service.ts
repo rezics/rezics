@@ -67,6 +67,17 @@ export class GovernanceModerationService {
     return row ? mapContentModerationStateToDTO(row) : null;
   }
 
+  async listGlobalContentStates(targetUnitIds: string[]) {
+    const ids = [...new Set(targetUnitIds)];
+    if (ids.length === 0) return [];
+
+    const rows = await prisma.contentModerationState.findMany({
+      where: { targetUnitId: { in: ids } },
+      orderBy: { updatedAt: "desc" },
+    });
+    return rows.map(mapContentModerationStateToDTO);
+  }
+
   async setGlobalContentState(input: ContentModerationStateInput) {
     const data = contentModerationData(input);
     const row = await prisma.contentModerationState.upsert({

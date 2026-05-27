@@ -1,6 +1,15 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
-import { mapPostToDTO } from "./post.mapper";
+
+mock.module("@/unit/publication-policy", () => ({
+  resolveStoredLicenseSlug: mock((slug: string | null) => slug),
+}));
+
+mock.module("@/utils/sanitizeUser", () => ({
+  mapPublicUser: mock((user: unknown) => user),
+}));
+
+const { mapPostToDTO } = await import("./post.mapper");
 
 describe("mapPostToDTO", () => {
   test("serializes a known author USER slug", () => {
@@ -78,5 +87,46 @@ describe("mapPostToDTO", () => {
     );
     expect(typeof dto.author?.description).toBe("object");
     expect(dto.author?.description).not.toBe("Generated profile");
+  });
+
+  test("nulls globally hidden content while preserving the node", () => {
+    const dto = mapPostToDTO({
+      unitId: "reply-1",
+      authorUserId: "user-1",
+      targetUnitId: null,
+      content: markdownContentDoc("Hidden reply"),
+      rootPostUnitId: "post-1",
+      parentPostUnitId: "post-1",
+      kind: "POST",
+      scoreEntryId: null,
+      depth: 1,
+      sortPath: "0001",
+      replyCount: 1,
+      directReplyCount: 1,
+      lastReplyAt: null,
+      isLocked: false,
+      extra: null,
+      createdAt: new Date("2026-01-01T00:00:00Z"),
+      updatedAt: new Date("2026-01-01T00:00:00Z"),
+      unit: {
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        licenseSlug: null,
+        contentModerationState: {
+          state: "TOMBSTONED",
+        },
+        user: {
+          unitId: "user-1",
+          slug: "alice",
+          name: "Alice",
+          avatar: null,
+        },
+      },
+    } as any);
+
+    expect(dto.content).toBeNull();
+    expect(dto.globalModerationState).toBe("tombstoned");
+    expect(dto.isTombstone).toBe(true);
+    expect(dto.replyCount).toBe(1);
   });
 });

@@ -21,6 +21,29 @@ const getByUnitIdMock = mock(async () => ({
 }));
 const createMock = mock(async () => ({ unitId: "created-post-1" }));
 const deleteMock = mock(async () => undefined);
+const listGlobalContentStatesMock = mock(async () => [
+  {
+    targetUnitId: "reply-1",
+    state: "hidden",
+    decidedByUserId: null,
+    caseId: null,
+    reason: "abuse",
+    createdAt: "2026-05-28T00:00:00.000Z",
+    updatedAt: "2026-05-28T00:00:00.000Z",
+  },
+]);
+const listRealmContentOverlaysMock = mock(async () => [
+  {
+    realmUnitId: "realm-1",
+    targetUnitId: "reply-1",
+    state: "tombstoned",
+    decidedByUserId: null,
+    caseId: null,
+    reason: "off-topic",
+    createdAt: "2026-05-28T00:00:00.000Z",
+    updatedAt: "2026-05-28T00:00:00.000Z",
+  },
+]);
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -38,6 +61,10 @@ mock.module("@/governance", () => ({
   },
   governanceRoutePolicyService: {
     decideForIdentity: decideForIdentityMock,
+  },
+  governanceModerationService: {
+    listGlobalContentStates: listGlobalContentStatesMock,
+    listRealmContentOverlays: listRealmContentOverlaysMock,
   },
   realmPolicyActions: {
     memberRoleChange: "realm.member.role.change",
@@ -75,9 +102,60 @@ describe("postApi", () => {
     };
     policyAllowed = false;
     decideForIdentityMock.mockClear();
+    listGlobalContentStatesMock.mockClear();
+    listRealmContentOverlaysMock.mockClear();
     createMock.mockClear();
     getByUnitIdMock.mockClear();
     deleteMock.mockClear();
+  });
+
+  test("serves bounded moderation overlay sets for rendered post nodes", async () => {
+    const { postApi } = await import("./post.api");
+    const response = await postApi.handle(
+      new Request("http://localhost/post/moderation-overlays", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          realmUnitId: "realm-1",
+          targetUnitIds: ["reply-1", "reply-1", "reply-2"],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      globalStates: [
+        {
+          targetUnitId: "reply-1",
+          state: "hidden",
+          decidedByUserId: null,
+          caseId: null,
+          reason: "abuse",
+          createdAt: "2026-05-28T00:00:00.000Z",
+          updatedAt: "2026-05-28T00:00:00.000Z",
+        },
+      ],
+      realmOverlays: [
+        {
+          realmUnitId: "realm-1",
+          targetUnitId: "reply-1",
+          state: "tombstoned",
+          decidedByUserId: null,
+          caseId: null,
+          reason: "off-topic",
+          createdAt: "2026-05-28T00:00:00.000Z",
+          updatedAt: "2026-05-28T00:00:00.000Z",
+        },
+      ],
+    });
+    expect(listGlobalContentStatesMock).toHaveBeenCalledWith([
+      "reply-1",
+      "reply-2",
+    ]);
+    expect(listRealmContentOverlaysMock).toHaveBeenCalledWith({
+      realmUnitId: "realm-1",
+      targetUnitIds: ["reply-1", "reply-2"],
+    });
   });
 
   test("denies post creation rejected by policy", async () => {

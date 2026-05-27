@@ -20,6 +20,11 @@ import {
   realmMemberRoleSchema,
   wouldRemoveLastRealmOwner,
 } from "./permission";
+import {
+  postModerationOverlayRequestSchema,
+  postModerationOverlayResponseSchema,
+  postDTOSchema,
+} from "./post";
 import { realmMemberDTOSchema } from "./realm";
 
 describe("governance contract registry", () => {
@@ -191,6 +196,47 @@ describe("governance contract registry", () => {
         reason: "off-topic",
         createdAt: "2026-05-28T00:00:00.000Z",
         updatedAt: "2026-05-28T00:00:00.000Z",
+      }),
+    ).toBe(true);
+  });
+
+  test("post moderation overlay contracts validate", () => {
+    expect(
+      Value.Check(postDTOSchema, {
+        unitId: "reply-1",
+        authorUserId: "user-1",
+        content: null,
+        globalModerationState: "tombstoned",
+        isTombstone: true,
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(postModerationOverlayRequestSchema, {
+        realmUnitId: "realm-1",
+        targetUnitIds: ["reply-1", "reply-2"],
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(postModerationOverlayResponseSchema, {
+        globalStates: [
+          {
+            targetUnitId: "reply-1",
+            state: "hidden",
+            createdAt: "2026-05-28T00:00:00.000Z",
+            updatedAt: "2026-05-28T00:00:00.000Z",
+          },
+        ],
+        realmOverlays: [
+          {
+            realmUnitId: "realm-1",
+            targetUnitId: "reply-2",
+            state: "tombstoned",
+            createdAt: "2026-05-28T00:00:00.000Z",
+            updatedAt: "2026-05-28T00:00:00.000Z",
+          },
+        ],
       }),
     ).toBe(true);
   });

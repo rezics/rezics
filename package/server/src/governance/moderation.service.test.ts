@@ -14,6 +14,18 @@ const contentModerationUpsert = mock(async ({ create, update }: any) => ({
   updatedAt: now,
 }));
 const contentModerationFindUnique = mock(async () => null);
+const contentModerationFindMany = mock(async () => [
+  {
+    targetUnitId: "reply-1",
+    state: "HIDDEN",
+    decidedById: "staff-1",
+    caseId: null,
+    reason: "abuse",
+    metadata: null,
+    createdAt: now,
+    updatedAt: now,
+  },
+]);
 const realmContentModerationUpsert = mock(async ({ create, update }: any) => ({
   realmUnitId: create?.realmUnitId ?? "realm-1",
   targetUnitId: create?.targetUnitId ?? "reply-1",
@@ -37,6 +49,7 @@ const realmContentModerationFindMany = mock(async () => [
 
 Object.assign(prismaMock, {
   contentModerationState: {
+    findMany: contentModerationFindMany,
     findUnique: contentModerationFindUnique,
     upsert: contentModerationUpsert,
   },
@@ -49,6 +62,7 @@ Object.assign(prismaMock, {
 describe("GovernanceModerationService content moderation state", () => {
   beforeEach(() => {
     contentModerationFindUnique.mockClear();
+    contentModerationFindMany.mockClear();
     contentModerationUpsert.mockClear();
     realmContentModerationFindMany.mockClear();
     realmContentModerationUpsert.mockClear();
@@ -86,6 +100,30 @@ describe("GovernanceModerationService content moderation state", () => {
       decidedByUserId: "staff-1",
       reason: "abuse",
     });
+  });
+
+  test("lists global content states bounded to requested node ids", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    const result = await governanceModerationService.listGlobalContentStates([
+      "reply-1",
+      "reply-1",
+      "reply-2",
+    ]);
+
+    expect(contentModerationFindMany).toHaveBeenCalledWith({
+      where: { targetUnitId: { in: ["reply-1", "reply-2"] } },
+      orderBy: { updatedAt: "desc" },
+    });
+    expect(result).toMatchObject([
+      {
+        targetUnitId: "reply-1",
+        state: "hidden",
+        decidedByUserId: "staff-1",
+      },
+    ]);
   });
 
   test("lists realm overlays bounded to requested node ids", async () => {

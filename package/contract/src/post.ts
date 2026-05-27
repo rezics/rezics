@@ -1,6 +1,11 @@
 import { t } from "elysia";
 import { creationModeSchema } from "./content-authority";
 import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
+import {
+  contentModerationStateDTOSchema,
+  contentModerationStateKindSchema,
+  realmContentModerationDTOSchema,
+} from "./governance";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
@@ -87,6 +92,9 @@ export const postDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  globalModerationState: t.Optional(
+    t.Nullable(contentModerationStateKindSchema),
+  ),
   isTombstone: t.Optional(t.Boolean()),
   depth: t.Optional(t.Number()),
   sortPath: t.Optional(t.Nullable(t.String())),
@@ -200,6 +208,22 @@ export const postListResponseSchema = t.Object({
 });
 
 export type PostListResponse = (typeof postListResponseSchema)["static"];
+
+export const postModerationOverlayRequestSchema = t.Object({
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  targetUnitIds: t.Array(t.String()),
+});
+
+export type PostModerationOverlayRequest =
+  (typeof postModerationOverlayRequestSchema)["static"];
+
+export const postModerationOverlayResponseSchema = t.Object({
+  globalStates: t.Array(contentModerationStateDTOSchema),
+  realmOverlays: t.Array(realmContentModerationDTOSchema),
+});
+
+export type PostModerationOverlayResponse =
+  (typeof postModerationOverlayResponseSchema)["static"];
 
 // ============================================================
 // POST PARAMS/RESPONSE
