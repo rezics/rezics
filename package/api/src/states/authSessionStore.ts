@@ -1,4 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
+import { governanceApi } from "@rezics/api/governance/governance.api";
 import {
   clearAuthPresence,
   hasAuthPresence,
@@ -53,12 +54,23 @@ export async function hydrateAuthSessionState(options?: {
 
   try {
     const serverState = await authApi.getSessionState();
+    const hasMemberSession = Boolean(
+      serverState.authAccountState.canAcquireMemberToken ||
+        serverState.authAccountState.registrationComplete,
+    );
+    const governanceCapabilities = hasMemberSession
+      ? await governanceApi
+          .capabilityHints()
+          .then((response) => response.capabilities)
+          .catch(() => [])
+      : [];
     const sessionState: AuthSessionSnapshot = {
       session: serverState.session ?? null,
       user: serverState.user ?? null,
       authAccountState: serverState.authAccountState,
       rezicsUserId: serverState.rezicsUserId ?? null,
       rezicsPermission: serverState.rezicsPermission ?? null,
+      governanceCapabilities,
     };
 
     useAuthSessionStore.getState().setSessionState(sessionState);

@@ -1,6 +1,8 @@
 import type {
   AuthSession,
   AuthUser,
+  CapabilityHint,
+  CapabilityScope,
   GetSessionStateResponse,
   Permission,
 } from "@rezics/contract";
@@ -23,6 +25,7 @@ export type AuthSessionSnapshot = {
   authAccountState: GetSessionStateResponse["authAccountState"];
   rezicsUserId?: GetSessionStateResponse["rezicsUserId"] | null;
   rezicsPermission?: GetSessionStateResponse["rezicsPermission"] | null;
+  governanceCapabilities?: CapabilityHint[];
 };
 
 export type AuthSessionAuthState = {
@@ -35,6 +38,7 @@ export type AuthSessionAuthState = {
 export type RezicsSessionState = {
   userId: string | null;
   permission: Permission | null;
+  governanceCapabilities: CapabilityHint[];
   hasMemberSession: boolean;
   hasProfileSetupSession: boolean;
   mainUserExists: boolean;
@@ -152,6 +156,10 @@ export function deriveAuthSessionState(
     rezics: {
       userId: hasMemberSession ? (snapshot?.rezicsUserId ?? null) : null,
       permission,
+      // UI visibility hints only. Server policy remains the source of truth.
+      governanceCapabilities: hasMemberSession
+        ? (snapshot?.governanceCapabilities ?? [])
+        : [],
       hasMemberSession,
       hasProfileSetupSession,
       mainUserExists,
@@ -190,3 +198,23 @@ export const selectCanFetchUserProfile = (state: AuthSessionDerivedState) =>
 
 export const selectIsMemberReady = (state: AuthSessionDerivedState) =>
   state.rezics.hasMemberSession && state.registration.complete;
+
+export const selectGovernanceCapabilityHints = (
+  state: AuthSessionDerivedState,
+) => state.rezics.governanceCapabilities;
+
+export function hasGovernanceCapabilityHint(
+  state: AuthSessionDerivedState,
+  capability: CapabilityHint["capability"],
+  scope?: CapabilityScope,
+) {
+  return state.rezics.governanceCapabilities.some((hint) => {
+    if (hint.capability !== capability) return false;
+    if (!scope) return true;
+    if (hint.scope.kind !== scope.kind) return false;
+    if (scope.kind === "realm") {
+      return hint.scope.realmUnitId === scope.realmUnitId;
+    }
+    return true;
+  });
+}

@@ -49,11 +49,15 @@ export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
   };
 }
 
-export function mapRealmMemberToDTO(row: RealmMember): RealmMemberDTO {
+export function mapRealmMemberToDTO(
+  row: RealmMember,
+  options?: Pick<RealmMemberDTO, "capabilities">,
+): RealmMemberDTO {
   return {
     realmUnitId: row.realmUnitId,
     userId: row.userId,
     roleKey: row.roleKey,
+    ...(options?.capabilities ? { capabilities: options.capabilities } : {}),
     joinedAt: row.joinedAt,
     updatedAt: row.updatedAt,
   };

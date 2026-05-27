@@ -145,9 +145,10 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
   .get(
     "/capability-hints/me",
     async ({ identity }) => ({
-      capabilities: await governanceCapabilityService.resolveForUser(
-        identity.userId,
-      ),
+      capabilities: await governanceCapabilityService.resolveHintsForIdentity({
+        userId: identity.userId,
+        permission: identity.permission,
+      }),
     }),
     {
       requireLogin: true,

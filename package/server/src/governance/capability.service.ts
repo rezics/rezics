@@ -2,7 +2,9 @@ import type {
   Capability,
   CapabilityHint,
   GrantCapabilityInput,
+  Permission,
 } from "@rezics/contract";
+import { capabilityKeys } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { mapRealmGrantToCapabilityDTO } from "./governance.mapper";
 
@@ -15,6 +17,20 @@ function isActiveGrant(row: { state: string; expiresAt: Date | null }) {
 const realmCapabilityRoles = new Set(["owner", "admin", "moderator"]);
 
 export class GovernanceCapabilityService {
+  async resolveHintsForIdentity(input: {
+    userId: string;
+    permission?: Permission | null;
+  }): Promise<CapabilityHint[]> {
+    if (input.permission?.role === "ROOT") {
+      return capabilityKeys.map((capability) => ({
+        capability,
+        scope: { kind: "global" as const },
+      }));
+    }
+
+    return this.resolveForUser(input.userId);
+  }
+
   async resolveForUser(userId: string): Promise<CapabilityHint[]> {
     const [staffGrants, realmGrants] = await Promise.all([
       prisma.staffGrant.findMany({ where: { userId } }),

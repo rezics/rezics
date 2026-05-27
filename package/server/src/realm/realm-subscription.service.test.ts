@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "../test/prisma-client-mock";
 
 installPrismaClientMock();
 
@@ -78,6 +81,8 @@ afterEach(() => {
   delete prismaMock.realmMember;
   delete prismaMock.realm;
   delete prismaMock.subscription;
+  delete prismaMock.staffGrant;
+  delete prismaMock.realmCapabilityGrant;
   delete prismaMock.unit;
 });
 
@@ -202,5 +207,49 @@ describe("realmService.unmuteRealm", () => {
     await realmService.unmuteRealm(REALM, USER);
     expect(prismaMock.subscription.create).toHaveBeenCalledTimes(0);
     expect(prismaMock.unit.update).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe("realmService.getMember", () => {
+  test("returns UI-only realm capability hints with membership", async () => {
+    prismaMock.realmMember = {
+      findUnique: mock(async () => ({
+        realmUnitId: REALM,
+        userId: USER,
+        roleKey: "moderator",
+        joinedAt: new Date("2026-05-28T00:00:00.000Z"),
+        updatedAt: new Date("2026-05-28T00:00:00.000Z"),
+      })),
+    };
+    prismaMock.staffGrant = {
+      findMany: mock(async () => []),
+    };
+    prismaMock.realmCapabilityGrant = {
+      findMany: mock(async () => [
+        {
+          capability: "tag.curate",
+          realmUnitId: REALM,
+          state: "ACTIVE",
+          expiresAt: null,
+        },
+      ]),
+    };
+
+    await expect(realmService.getMember(REALM, USER)).resolves.toMatchObject({
+      realmUnitId: REALM,
+      userId: USER,
+      roleKey: "moderator",
+      capabilities: [
+        {
+          capability: "queue.realm.decide",
+          scope: { kind: "realm", realmUnitId: REALM },
+        },
+        {
+          capability: "tag.curate",
+          scope: { kind: "realm", realmUnitId: REALM },
+          expiresAt: null,
+        },
+      ],
+    });
   });
 });

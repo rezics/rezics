@@ -1,8 +1,13 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import type { GetSessionStateResponse } from "@rezics/contract";
+import type { CapabilityHint, GetSessionStateResponse } from "@rezics/contract";
 
 let presence = false;
 const getSessionStateMock = mock();
+const capabilityHintsMock = mock(
+  async (): Promise<{ capabilities: CapabilityHint[] }> => ({
+    capabilities: [],
+  }),
+);
 
 mock.module("@rezics/api/react-query/authPresence", () => ({
   hasAuthPresence: () => presence,
@@ -14,6 +19,12 @@ mock.module("@rezics/api/react-query/authPresence", () => ({
 mock.module("@rezics/api/auth/auth.api", () => ({
   authApi: {
     getSessionState: getSessionStateMock,
+  },
+}));
+
+mock.module("@rezics/api/governance/governance.api", () => ({
+  governanceApi: {
+    capabilityHints: capabilityHintsMock,
   },
 }));
 
@@ -120,6 +131,8 @@ describe("authSessionStore", () => {
   beforeEach(async () => {
     presence = false;
     getSessionStateMock.mockReset();
+    capabilityHintsMock.mockReset();
+    capabilityHintsMock.mockResolvedValue({ capabilities: [] });
     const { clearAuthSessionState } = await import("./authSessionStore");
     clearAuthSessionState();
   });
@@ -144,6 +157,7 @@ describe("authSessionStore", () => {
       rezics: {
         userId: "user-1",
         permission: { role: "MEMBER" },
+        governanceCapabilities: [],
         hasMemberSession: true,
         mainUserExists: true,
       },
@@ -165,6 +179,12 @@ describe("authSessionStore", () => {
         role: "owner",
       },
       rezicsPermission: { role: "ROOT" },
+      governanceCapabilities: [
+        {
+          capability: "audit.read",
+          scope: { kind: "global" },
+        },
+      ],
     });
 
     expect(useAuthSessionStore.getState()).toMatchObject({
@@ -173,8 +193,59 @@ describe("authSessionStore", () => {
       },
       rezics: {
         permission: { role: "ROOT" },
+        governanceCapabilities: [
+          {
+            capability: "audit.read",
+            scope: { kind: "global" },
+          },
+        ],
       },
     });
+  });
+
+  test("hydrates UI-only governance capability hints for member sessions", async () => {
+    presence = true;
+    getSessionStateMock.mockResolvedValueOnce(readySession);
+    capabilityHintsMock.mockResolvedValueOnce({
+      capabilities: [
+        {
+          capability: "audit.read",
+          scope: { kind: "global" },
+        },
+        {
+          capability: "queue.realm.decide",
+          scope: { kind: "realm", realmUnitId: "realm-1" },
+        },
+      ],
+    });
+
+    const { hydrateAuthSessionState, useAuthSessionStore } = await import(
+      "./authSessionStore"
+    );
+    const { hasGovernanceCapabilityHint, selectGovernanceCapabilityHints } =
+      await import("./authSessionModel");
+
+    await hydrateAuthSessionState();
+    const state = useAuthSessionStore.getState();
+
+    expect(capabilityHintsMock).toHaveBeenCalledTimes(1);
+    expect(selectGovernanceCapabilityHints(state)).toEqual([
+      {
+        capability: "audit.read",
+        scope: { kind: "global" },
+      },
+      {
+        capability: "queue.realm.decide",
+        scope: { kind: "realm", realmUnitId: "realm-1" },
+      },
+    ]);
+    expect(hasGovernanceCapabilityHint(state, "audit.read")).toBe(true);
+    expect(
+      hasGovernanceCapabilityHint(state, "queue.realm.decide", {
+        kind: "realm",
+        realmUnitId: "realm-1",
+      }),
+    ).toBe(true);
   });
 
   test("derives pending verification from auth account state", async () => {
@@ -198,6 +269,7 @@ describe("authSessionStore", () => {
         needsVerification: true,
       },
     });
+    expect(capabilityHintsMock).not.toHaveBeenCalled();
   });
 
   test("derives profile setup session separately from member session", async () => {

@@ -74,4 +74,26 @@ describe("GovernanceCapabilityService", () => {
       where: { userId: "user-1" },
     });
   });
+
+  test("exposes root staff capability hints without requiring persisted grants", async () => {
+    const { governanceCapabilityService } = await import(
+      "./capability.service"
+    );
+
+    const hints = await governanceCapabilityService.resolveHintsForIdentity({
+      userId: "root-1",
+      permission: { role: "ROOT" },
+    });
+
+    expect(hints).toContainEqual({
+      capability: "audit.read",
+      scope: { kind: "global" },
+    });
+    expect(hints).toContainEqual({
+      capability: "account.ban",
+      scope: { kind: "global" },
+    });
+    expect(prismaMock.staffGrant.findMany).not.toHaveBeenCalled();
+    expect(prismaMock.realmCapabilityGrant.findMany).not.toHaveBeenCalled();
+  });
 });

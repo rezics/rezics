@@ -11,6 +11,7 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma, RealmTagApplication } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { governanceCapabilityService } from "@/governance/capability.service";
 import { serverJobProducer } from "@/job/job-boundary";
 
 /** Score at or below this threshold hides a RealmTagApplication from regular users. */
@@ -487,7 +488,16 @@ export class RealmService {
         realmUnitId_userId: { realmUnitId, userId },
       },
     });
-    return member ? mapRealmMemberToDTO(member) : null;
+    if (!member) return null;
+
+    const policyMembership =
+      await governanceCapabilityService.realmMembershipForPolicy(
+        realmUnitId,
+        userId,
+      );
+    return mapRealmMemberToDTO(member, {
+      capabilities: policyMembership?.capabilities ?? [],
+    });
   }
 
   // --- Content feed ---
