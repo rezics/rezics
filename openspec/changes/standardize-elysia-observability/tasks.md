@@ -60,9 +60,9 @@
 - [x] 7.1 Run formatter and convention checks for changed files.
 - [x] 7.2 Run targeted unit tests for the shared observability helpers.
 - [ ] 7.3 Start each instrumented Elysia service in development mode and verify startup banner output, OpenAPI URL output where enabled, and request timing output.
-- [ ] 7.4 Start at least one instrumented service in production-like mode and verify JSON request/error logs are valid newline-delimited JSON without ANSI escape sequences.
-- [ ] 7.5 Start the repo-managed local external-services stack from fresh volumes and verify source PostgreSQL, Meilisearch, Sequin state PostgreSQL, Sequin Redis, and Sequin health.
-- [ ] 7.6 Verify source PostgreSQL starts with logical replication settings required by Sequin after the PostgreSQL 18.4 update.
-- [ ] 7.7 Verify Meilisearch index initialization and seed sync still work after the Meilisearch image update.
-- [ ] 7.8 Verify OpenTelemetry export against the local Collector/ClickStack smoke setup if that configuration is implemented in this change.
+- [x] 7.4 Start at least one instrumented service in production-like mode and verify JSON request/error logs are valid newline-delimited JSON without ANSI escape sequences.
+- [x] 7.5 Start the repo-managed local external-services stack from fresh volumes and verify source PostgreSQL, Meilisearch, Sequin state PostgreSQL, Sequin Redis, and Sequin health.
+- [x] 7.6 Verify source PostgreSQL starts with logical replication settings required by Sequin after the PostgreSQL 18.4 update.
+- [x] 7.7 Verify Meilisearch index initialization and seed sync still work after the Meilisearch image update.
+- [x] 7.8 Verify OpenTelemetry export against the local Collector/ClickStack smoke setup if that configuration is implemented in this change.
 - [x] 7.9 Run `bun run check:convention` and any targeted package tests affected by service entrypoint or local service changes.
