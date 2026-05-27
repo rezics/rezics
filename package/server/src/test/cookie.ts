@@ -24,6 +24,5 @@ const app = new Elysia()
 app.listen(8083);
 
 console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
-  `\n🔗 Swagger UI: http://${app.server?.hostname}:${app.server?.port}/swagger`,
+  `Cookie test server started\n  Service: http://${app.server?.hostname}:${app.server?.port}\n  Swagger: http://${app.server?.hostname}:${app.server?.port}/swagger`,
 );

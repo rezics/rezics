@@ -1,5 +1,12 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
+import {
+  createObservabilityConfig,
+  createTelemetryConfig,
+  elysiaObservability,
+  initializeOpenTelemetry,
+  logStartupBanner,
+} from "@rezics/shared/observability";
 import { Elysia } from "elysia";
 import { dmApi } from "./dm/dm.api";
 import { env } from "./env";
@@ -29,8 +36,35 @@ function isRezicsOrigin(origin: string | undefined): boolean {
 }
 
 const port = env.PORT ? Number(env.PORT) : 3002;
+const observability = createObservabilityConfig(
+  {
+    key: "notify",
+    displayName: "Notify Service",
+    environment: env.NODE_ENV ?? "development",
+    port,
+    openApiPath: "/openapi",
+    healthPath: "/health",
+  },
+  {
+    nodeEnv: env.NODE_ENV,
+    logFormat: env.OBSERVABILITY_LOG_FORMAT,
+    color: env.OBSERVABILITY_COLOR,
+    slowRequestThresholdMs: env.OBSERVABILITY_SLOW_REQUEST_MS,
+    telemetryMode: env.OBSERVABILITY_TELEMETRY,
+    otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  },
+);
+
+await initializeOpenTelemetry(
+  createTelemetryConfig(observability.service, {
+    nodeEnv: env.NODE_ENV,
+    telemetryMode: env.OBSERVABILITY_TELEMETRY,
+    otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  }),
+);
 
 const app = new Elysia()
+  .use(elysiaObservability(observability))
   .use(
     cors({
       origin: isDev
@@ -92,8 +126,4 @@ const app = new Elysia()
   });
 
 app.listen(port);
-
-console.log(
-  `🔔 Notify service is running at http://${app.server?.hostname}:${app.server?.port}`,
-  `\n🔗 OpenAPI documentation: http://${app.server?.hostname}:${app.server?.port}/openapi`,
-);
+logStartupBanner(observability);

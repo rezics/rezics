@@ -26,6 +26,26 @@ export const env = createEnv({
     /** Server HTTP listen port. */
     PORT: v.optional(v.string()),
 
+    /** Observability log output mode: local text or newline-delimited JSON. */
+    OBSERVABILITY_LOG_FORMAT: v.optional(
+      v.union([v.literal("local"), v.literal("json")]),
+    ),
+    /** Enables ANSI color for local observability output. */
+    OBSERVABILITY_COLOR: v.optional(v.string()),
+    /** Slow HTTP request threshold in milliseconds. */
+    OBSERVABILITY_SLOW_REQUEST_MS: v.optional(v.string()),
+    /** OpenTelemetry mode: auto, disabled, enabled, or required. */
+    OBSERVABILITY_TELEMETRY: v.optional(
+      v.union([
+        v.literal("auto"),
+        v.literal("disabled"),
+        v.literal("enabled"),
+        v.literal("required"),
+      ]),
+    ),
+    /** OTLP HTTP traces endpoint. When omitted, telemetry export is disabled. */
+    OTEL_EXPORTER_OTLP_ENDPOINT: v.optional(v.string()),
+
     /**
      * SMTP host. When unset, the email transport is a no-op stub that logs
      * the rendered message instead of delivering — useful in dev/CI.

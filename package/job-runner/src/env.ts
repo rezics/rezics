@@ -19,6 +19,20 @@ export const env = createEnv({
     SEQUIN_WEBHOOK_SECRET: v.string(),
     SEQUIN_HEALTH_URL: v.optional(v.string()),
     PORT: v.optional(v.string()),
+    OBSERVABILITY_LOG_FORMAT: v.optional(
+      v.union([v.literal("local"), v.literal("json")]),
+    ),
+    OBSERVABILITY_COLOR: v.optional(v.string()),
+    OBSERVABILITY_SLOW_REQUEST_MS: v.optional(v.string()),
+    OBSERVABILITY_TELEMETRY: v.optional(
+      v.union([
+        v.literal("auto"),
+        v.literal("disabled"),
+        v.literal("enabled"),
+        v.literal("required"),
+      ]),
+    ),
+    OTEL_EXPORTER_OTLP_ENDPOINT: v.optional(v.string()),
     JOB_RUNNER_ROLE: v.fallback(
       v.union([v.literal("all"), v.literal("http"), v.literal("worker")]),
       "all",

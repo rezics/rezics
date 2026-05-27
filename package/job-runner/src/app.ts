@@ -1,5 +1,9 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
+import {
+  elysiaObservability,
+  type ObservabilityConfig,
+} from "@rezics/shared/observability";
 import { Elysia } from "elysia";
 import { createAdminApi } from "./http/admin";
 import { createEnqueueApi } from "./http/enqueue";
@@ -11,8 +15,15 @@ export function createJobRunnerApp(options: {
   internalSecret: string;
   sequinWebhookSecret: string;
   readiness?: () => Promise<boolean> | boolean;
+  observability?: ObservabilityConfig;
 }) {
-  return new Elysia()
+  const app = new Elysia();
+
+  if (options.observability) {
+    app.use(elysiaObservability(options.observability));
+  }
+
+  return app
     .use(
       cors({
         origin: false,

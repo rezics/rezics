@@ -1,5 +1,12 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
+import {
+  createObservabilityConfig,
+  createTelemetryConfig,
+  elysiaObservability,
+  initializeOpenTelemetry,
+  logStartupBanner,
+} from "@rezics/shared/observability";
 import { adminEmailApi } from "./admin/email.api";
 import { coreInstance } from "./core";
 import { env } from "./env";
@@ -10,28 +17,38 @@ import { wellKnownApi } from "./well-known/well-known.api";
 const isDev = env.NODE_ENV === "development";
 
 const app = coreInstance();
+const port = Number(env.PORT);
+const observability = createObservabilityConfig(
+  {
+    key: "auth",
+    displayName: "Auth Service",
+    environment: env.NODE_ENV ?? "development",
+    port,
+    openApiPath: isDev ? "/openapi" : undefined,
+    healthPath: "/health",
+  },
+  {
+    nodeEnv: env.NODE_ENV,
+    logFormat: env.OBSERVABILITY_LOG_FORMAT,
+    color: env.OBSERVABILITY_COLOR,
+    slowRequestThresholdMs: env.OBSERVABILITY_SLOW_REQUEST_MS,
+    telemetryMode: env.OBSERVABILITY_TELEMETRY,
+    otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  },
+);
+
+await initializeOpenTelemetry(
+  createTelemetryConfig(observability.service, {
+    nodeEnv: env.NODE_ENV,
+    telemetryMode: env.OBSERVABILITY_TELEMETRY,
+    otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  }),
+);
+
+app.use(elysiaObservability(observability));
 
 if (isDev) {
-  await import("./utils/logger-hook");
-  app
-    .use(openapi({ exclude: { staticFile: false } }))
-    .trace(async ({ onHandle, context }) => {
-      // 监听 handle 阶段
-      onHandle(({ begin, onStop }) => {
-        const { route, params, request } = context;
-
-        onStop(({ end }) => {
-          console.log(
-            `[${request.method}] ${route} took ${end - begin}ms`,
-            "params:",
-            params,
-          );
-        });
-      });
-    })
-    .onError(({ code, error, set }) => {
-      console.log("[Error] ", code, error, set);
-    });
+  app.use(openapi({ exclude: { staticFile: false } }));
 }
 
 const devOrigins = [
@@ -72,11 +89,5 @@ app
   .use(authOpenApiRouter)
   .get("/health", () => ({ status: "ok" }));
 
-console.log("env.PORT", env.PORT);
-const port = Number(env.PORT);
 app.listen(port);
-
-console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
-  `\n🔗 Openapi UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
-);
+logStartupBanner(observability);

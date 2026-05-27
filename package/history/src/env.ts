@@ -14,6 +14,20 @@ export const env = createEnv({
     SERVER_DATABASE_URL: v.string(),
     HISTORY_INTERNAL_SECRET: v.string(),
     PORT: v.optional(v.string()),
+    OBSERVABILITY_LOG_FORMAT: v.optional(
+      v.union([v.literal("local"), v.literal("json")]),
+    ),
+    OBSERVABILITY_COLOR: v.optional(v.string()),
+    OBSERVABILITY_SLOW_REQUEST_MS: v.optional(v.string()),
+    OBSERVABILITY_TELEMETRY: v.optional(
+      v.union([
+        v.literal("auto"),
+        v.literal("disabled"),
+        v.literal("enabled"),
+        v.literal("required"),
+      ]),
+    ),
+    OTEL_EXPORTER_OTLP_ENDPOINT: v.optional(v.string()),
     HISTORY_QUEUE_INGESTION_ENABLED: v.fallback(v.string(), "true"),
     HISTORY_OUTBOX_POLLER_FALLBACK: v.optional(v.string()),
     HISTORY_OUTBOX_POLL_MS: v.optional(v.string()),

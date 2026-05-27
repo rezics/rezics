@@ -1,5 +1,12 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
+import {
+  createObservabilityConfig,
+  createTelemetryConfig,
+  elysiaObservability,
+  initializeOpenTelemetry,
+  logStartupBanner,
+} from "@rezics/shared/observability";
 import { Elysia } from "elysia";
 import { env } from "./env";
 import { createDefaultHistoryOutboxConsumer } from "./outbox";
@@ -11,6 +18,33 @@ import "dotenv/config";
 const isDev = (env.NODE_ENV ?? "development") !== "production";
 const port = env.PORT ? Number(env.PORT) : 3004;
 const outboxIntervalMs = Number(env.HISTORY_OUTBOX_POLL_MS ?? 2000);
+const observability = createObservabilityConfig(
+  {
+    key: "history",
+    displayName: "History Service",
+    environment: env.NODE_ENV ?? "development",
+    port,
+    openApiPath: "/openapi",
+    healthPath: "/health",
+    readyPath: "/ready",
+  },
+  {
+    nodeEnv: env.NODE_ENV,
+    logFormat: env.OBSERVABILITY_LOG_FORMAT,
+    color: env.OBSERVABILITY_COLOR,
+    slowRequestThresholdMs: env.OBSERVABILITY_SLOW_REQUEST_MS,
+    telemetryMode: env.OBSERVABILITY_TELEMETRY,
+    otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  },
+);
+
+await initializeOpenTelemetry(
+  createTelemetryConfig(observability.service, {
+    nodeEnv: env.NODE_ENV,
+    telemetryMode: env.OBSERVABILITY_TELEMETRY,
+    otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  }),
+);
 
 const devOrigins = [
   "http://localhost:35001",
@@ -21,6 +55,7 @@ const devOrigins = [
 const prodOrigins = ["https://book.rezics.com", "https://rezics.com"];
 
 export const app = new Elysia()
+  .use(elysiaObservability(observability))
   .use(
     cors({
       origin: isDev ? devOrigins : prodOrigins,
@@ -96,7 +131,4 @@ const stopOutbox = () => {
 process.on("SIGTERM", stopOutbox);
 process.on("SIGINT", stopOutbox);
 
-console.log(
-  `History service is running at http://${app.server?.hostname}:${app.server?.port}`,
-  `\nOpenAPI documentation: http://${app.server?.hostname}:${app.server?.port}/openapi`,
-);
+logStartupBanner(observability);

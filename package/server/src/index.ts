@@ -1,5 +1,12 @@
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
+import {
+  createObservabilityConfig,
+  createTelemetryConfig,
+  elysiaObservability,
+  initializeOpenTelemetry,
+  logStartupBanner,
+} from "@rezics/shared/observability";
 import { Elysia } from "elysia";
 import { Prisma } from "#/prisma/client";
 import { adminWorkMergeApi } from "./admin-work-merge";
@@ -50,8 +57,8 @@ import {
   translationSourceApi,
   unitApi,
   unitAuthorityApi,
-  workLinkApi,
-  workLinkClaimApi,
+  unitWorkMembershipApi,
+  workMembershipClaimApi,
 } from "./unit";
 import { unitWorkApi } from "./unit-work";
 import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
@@ -64,30 +71,42 @@ import { wellKnownApi } from "./well-known/well-known.api";
 import { zoneApi } from "./zone/zone.api";
 import "dotenv/config";
 
-const { isProd, isDev } = getProdState();
+const { isDev } = getProdState();
 
 const app = new Elysia();
+const port = env.PORT ? Number(env.PORT) : 3000;
+const observability = createObservabilityConfig(
+  {
+    key: "server",
+    displayName: "Main Server",
+    environment: env.NODE_ENV ?? "development",
+    port,
+    openApiPath: isDev ? "/openapi" : undefined,
+    healthPath: "/health",
+  },
+  {
+    nodeEnv: env.NODE_ENV,
+    logFormat: env.OBSERVABILITY_LOG_FORMAT,
+    color: env.OBSERVABILITY_COLOR,
+    slowRequestThresholdMs: env.OBSERVABILITY_SLOW_REQUEST_MS,
+    telemetryMode: env.OBSERVABILITY_TELEMETRY,
+    otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  },
+);
+
+await initializeOpenTelemetry(
+  createTelemetryConfig(observability.service, {
+    nodeEnv: env.NODE_ENV,
+    telemetryMode: env.OBSERVABILITY_TELEMETRY,
+    otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  }),
+);
+
+app.use(elysiaObservability(observability));
 
 if (isDev) {
-  await import("./utils/logger-hook");
-  app
-    .use(openapi({ exclude: { staticFile: false } }))
-    .trace(async ({ onHandle, context }) => {
-      onHandle(({ begin, onStop }) => {
-        const { route, params, request } = context;
-
-        onStop(({ end }) => {
-          console.log(
-            `[${request.method}] ${route} took ${end - begin}ms`,
-            "params:",
-            params,
-          );
-        });
-      });
-    });
+  app.use(openapi({ exclude: { staticFile: false } }));
 }
-
-const port = env.PORT ? Number(env.PORT) : 3000;
 
 // Bootstrap server-local JWT service for signing rezics-session-tokens
 const serverJwksUrl = `http://localhost:${port}/.well-known/jwks.json`;
@@ -210,8 +229,8 @@ routeApp
   .use(unitAliasVoteApi)
   .use(unitAuthorityApi)
   .use(historyOutboxAdminApi)
-  .use(workLinkApi)
-  .use(workLinkClaimApi)
+  .use(unitWorkMembershipApi)
+  .use(workMembershipClaimApi)
   .use(translationSourceApi)
   .use(infraApi)
   .use(tagApi)
@@ -243,8 +262,4 @@ await initSlugScopesCache();
 await Promise.all([initDefaultRealmCache(), initSeedTagsCache()]);
 
 app.listen(port);
-
-console.log(
-  `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,
-  `\n🔗 Openapi UI: http://${app.server?.hostname}:${app.server?.port}/openapi`,
-);
+logStartupBanner(observability);

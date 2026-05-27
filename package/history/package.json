@@ -49,6 +49,7 @@
     "@prisma/client": "^7.8.0",
     "@rezics/contract": "workspace:*",
     "@rezics/server": "workspace:*",
+    "@rezics/shared": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "dotenv": "^17.2.3",
     "elysia": "^1.4.22",
