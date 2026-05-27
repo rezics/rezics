@@ -1,5 +1,5 @@
 /**
- * Base36 LexoRank sortKey generation for BookContentStructureNode sibling
+ * Base36 LexoRank sortKey generation for ContentStructureNode sibling
  * ordering. See `openspec/specs/type-extension-book/spec.md` (Requirement:
  * Sibling ordering uses LexoRank sortKey) for invariants.
  *

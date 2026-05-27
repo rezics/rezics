@@ -329,7 +329,7 @@ export class BookService {
 
   /**
    * Get content structure by bookUnitId. Reads all node rows for the book and
-   * assembles them server-side into the nested `BookContentStructureItem[]` wire shape.
+   * assembles them server-side into the legacy `BookContentStructureItem[]` wire shape.
    */
   async getContentStructureByBookUnitId(
     bookUnitId: string,
@@ -625,7 +625,7 @@ export class BookService {
   /**
    * Update content structure (diff-based TOC save).
    *
-   * Walks the submitted tree, diffs against current BookContentStructureNode
+   * Walks the submitted tree, diffs against current ContentStructureNode
    * rows, and applies the minimum set of INSERT / UPDATE / DELETE in a single
    * transaction. Preserves existing `sortKey` values when sibling order is
    * unchanged so a no-op save produces zero row mutations. The container

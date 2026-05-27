@@ -4,7 +4,7 @@ import { publicUserSelect } from "@/utils/sanitizeUser";
 /**
  * Chapter is a Post(kind=CHAPTER) backed by Unit(type=POST).
  * Title and cover live in UnitTranslation (cover under extra.coverUrl).
- * Content lives in Post.content. Order lives in BookContentStructure.
+ * Content lives in Post.content. Order lives in ContentStructure.
  */
 export const chapterPostInclude = {
   unit: {

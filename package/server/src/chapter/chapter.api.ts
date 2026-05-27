@@ -83,9 +83,9 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
         200: chapterMaterializationResponseSchema,
       },
       detail: {
-        summary: "Materialize chapter by BookContentStructure path",
+        summary: "Materialize chapter by content structure path",
         description:
-          "Create or return the materialized chapter Unit for a BookContentStructure path",
+          "Create or return the materialized chapter Unit for a content structure path",
         tags: ["Chapters"],
       },
     },

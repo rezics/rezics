@@ -21,7 +21,7 @@ const mockTranslationUpdate = mock(async () => ({}));
 const mockTranslationCreate = mock(async () => ({}));
 const mockNodeUpdateMany = mock(async () => ({ count: 0 }));
 const mockNodeFindMany = mock(
-  async (_args: unknown): Promise<Array<{ bookUnitId: string }>> => [],
+  async (_args: unknown): Promise<Array<{ ownerUnitId: string }>> => [],
 );
 const mockContainerUpdateMany = mock(async () => ({ count: 0 }));
 const mockFindBookForTarget = mock(async () => ({ type: UnitType.BOOK }));
@@ -44,11 +44,11 @@ const mockTx = {
     update: mockTranslationUpdate,
     create: mockTranslationCreate,
   },
-  bookContentStructureNode: {
+  contentStructureNode: {
     updateMany: mockNodeUpdateMany,
     findMany: mockNodeFindMany,
   },
-  bookContentStructure: {
+  contentStructure: {
     updateMany: mockContainerUpdateMany,
   },
 };
@@ -109,7 +109,7 @@ describe("ChapterService.update propagation", () => {
 
     expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
     const args = firstArg(mockNodeUpdateMany);
-    expect(args.where).toEqual({ chapterUnitId: "ch-1" });
+    expect(args.where).toEqual({ contentUnitId: "ch-1" });
     expect(args.data.updatedAt).toBeInstanceOf(Date);
     expect(args.data.title).toBeUndefined();
     expect(mockContainerUpdateMany).not.toHaveBeenCalled();
@@ -124,16 +124,16 @@ describe("ChapterService.update propagation", () => {
 
     expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
     expect(firstArg(mockNodeUpdateMany).where).toEqual({
-      chapterUnitId: "ch-1",
+      contentUnitId: "ch-1",
     });
     expect(mockContainerUpdateMany).not.toHaveBeenCalled();
   });
 
   test("title rename on a multi-link chapter updates title on every linked node and bumps each affected book's container once", async () => {
     mockNodeFindMany.mockResolvedValue([
-      { bookUnitId: "book-1" },
-      { bookUnitId: "book-1" },
-      { bookUnitId: "book-2" },
+      { ownerUnitId: "book-1" },
+      { ownerUnitId: "book-1" },
+      { ownerUnitId: "book-2" },
     ]);
 
     const { chapterService } = await import("./chapter.service");
@@ -142,13 +142,13 @@ describe("ChapterService.update propagation", () => {
 
     expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
     const updateArgs = firstArg(mockNodeUpdateMany);
-    expect(updateArgs.where).toEqual({ chapterUnitId: "ch-1" });
+    expect(updateArgs.where).toEqual({ contentUnitId: "ch-1" });
     expect(updateArgs.data.title).toBe("Renamed");
     expect(updateArgs.data.updatedAt).toBeInstanceOf(Date);
 
     expect(mockContainerUpdateMany).toHaveBeenCalledTimes(1);
     const containerArgs = firstArg(mockContainerUpdateMany);
-    expect(new Set(containerArgs.where.bookUnitId.in)).toEqual(
+    expect(new Set(containerArgs.where.ownerUnitId.in)).toEqual(
       new Set(["book-1", "book-2"]),
     );
   });

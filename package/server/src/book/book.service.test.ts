@@ -17,10 +17,10 @@ mock.module("@/infra/infra-users", () => ({
 
 interface FakeRow {
   id: string;
-  bookUnitId: string;
+  ownerUnitId: string;
   parentId: string | null;
   sortKey: string;
-  chapterUnitId: string | null;
+  contentUnitId: string | null;
   title: string;
   noContent: boolean;
   rating: string | null;
@@ -33,8 +33,8 @@ function makeRow(
     Pick<FakeRow, "id" | "parentId" | "sortKey" | "title">,
 ): FakeRow {
   return {
-    bookUnitId: "book-1",
-    chapterUnitId: null,
+    ownerUnitId: "book-1",
+    contentUnitId: null,
     noContent: false,
     rating: null,
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
@@ -93,25 +93,26 @@ const mockUpsertUnitWork = mock(async (_args: unknown) => ({}));
 const mockFindManyBook = mock(async (_args: unknown) => []);
 const mockCountBook = mock(async (_args: unknown) => 0);
 const mockUpdateContainer = mock(async (_args: unknown) => ({
-  bookUnitId: "book-1",
+  ownerUnitId: "book-1",
   createdAt: new Date(),
   updatedAt: new Date(),
 }));
 const mockFindContainer = mock(async (_args: unknown) => ({
-  bookUnitId: "book-1",
+  ownerUnitId: "book-1",
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
 }));
 
 const mockTx = {
   $queryRaw: mockAllocateSequence,
-  bookContentStructureNode: {
+  contentStructureNode: {
     findMany: mockFindNodeRows,
     create: mockCreateNode,
     update: mockUpdateNode,
     deleteMany: mockDeleteManyNode,
   },
-  bookContentStructure: {
+  contentStructure: {
+    upsert: mock(async () => ({})),
     update: mockUpdateContainer,
   },
   book: {
@@ -138,10 +139,10 @@ const mockTransaction = mock(async (fn: (tx: unknown) => unknown) =>
 installPrismaClientMock();
 Object.assign(prismaMock, {
   $transaction: mockTransaction,
-  bookContentStructure: {
+  contentStructure: {
     findUniqueOrThrow: mockFindContainer,
   },
-  bookContentStructureNode: {
+  contentStructureNode: {
     findMany: mockFindNodeRows,
   },
   book: {
@@ -438,7 +439,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
   beforeEach(() => {
     resetMocks();
     mockFindContainer.mockResolvedValue({
-      bookUnitId: "book-1",
+      ownerUnitId: "book-1",
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     });
@@ -622,7 +623,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
         id: "n-existing",
         parentId: null,
         sortKey: "g",
-        chapterUnitId: "ch-1",
+        contentUnitId: "ch-1",
         title: "Preface",
       }),
     ];
@@ -636,7 +637,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
 
     expect(mockCreateNode).toHaveBeenCalledTimes(1);
     const createArgs = mockCreateNode.mock.calls[0]?.[0] as any;
-    expect(createArgs.data.chapterUnitId).toBe("ch-1");
+    expect(createArgs.data.contentUnitId).toBe("ch-1");
     expect(mockUpdateNode).not.toHaveBeenCalled();
     expect(mockUpdateBook).toHaveBeenCalledWith({
       where: { unitId: "book-1" },
@@ -694,7 +695,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
         parentId: null,
         sortKey: "g",
         title: "A",
-        chapterUnitId: "chapter-a",
+        contentUnitId: "chapter-a",
       }),
     ];
     mockFindNodeRows.mockResolvedValue(existing);
