@@ -70,6 +70,7 @@ const realmQueueCreate = mock(async ({ data }: any) => ({
   createdAt: now,
   updatedAt: now,
 }));
+const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 
 Object.assign(prismaMock, {
   contentModerationState: {
@@ -92,6 +93,12 @@ Object.assign(prismaMock, {
   },
 });
 
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: enqueueMock,
+  },
+}));
+
 describe("GovernanceModerationService content moderation state", () => {
   beforeEach(() => {
     contentModerationFindUnique.mockClear();
@@ -103,6 +110,7 @@ describe("GovernanceModerationService content moderation state", () => {
     postFindUnique.mockResolvedValue({ parentPostUnitId: null });
     unitRealmDelete.mockClear();
     realmQueueCreate.mockClear();
+    enqueueMock.mockClear();
   });
 
   test("upserts global content moderation state", async () => {
@@ -137,6 +145,10 @@ describe("GovernanceModerationService content moderation state", () => {
       decidedByUserId: "staff-1",
       reason: "abuse",
     });
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.content.sync",
+      "search.post.sync",
+    ]);
   });
 
   test("lists global content states bounded to requested node ids", async () => {
@@ -230,6 +242,8 @@ describe("GovernanceModerationService content moderation state", () => {
       targetUnitId: "reply-1",
       state: "tombstoned",
     });
+    expect(contentModerationUpsert).not.toHaveBeenCalled();
+    expect(enqueueMock).not.toHaveBeenCalled();
   });
 
   test("restore helpers keep reversible visible state rows", async () => {
@@ -279,6 +293,10 @@ describe("GovernanceModerationService content moderation state", () => {
       },
     });
     expect(realmContentModerationUpsert).not.toHaveBeenCalled();
+    expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
+      "search.content.patchRealmIds",
+      "search.post.sync",
+    ]);
   });
 
   test("realm feed removal rejects reply nodes", async () => {

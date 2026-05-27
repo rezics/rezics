@@ -1,4 +1,6 @@
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { prisma } from "#/prisma/client";
+import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "../utils/errors";
 import {
   mapContentModerationStateToDTO,
@@ -37,6 +39,44 @@ function contentModerationData(input: ContentModerationStateInput) {
     reason: input.reason ?? null,
     metadata: input.metadata as never,
   };
+}
+
+function enqueueModeratedContentSearch(targetUnitId: string) {
+  return Promise.all([
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentSync,
+        { unitId: targetUnitId },
+        { type: "server", service: "governance" },
+      ),
+    ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.postSync,
+        { postId: targetUnitId },
+        { type: "server", service: "governance" },
+      ),
+    ),
+  ]);
+}
+
+function enqueueRealmMembershipSearch(targetUnitId: string) {
+  return Promise.all([
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.contentPatchRealmIds,
+        { unitId: targetUnitId },
+        { type: "server", service: "governance" },
+      ),
+    ),
+    serverJobProducer.enqueue(
+      createSearchCommand(
+        SEARCH_COMMAND_KINDS.postSync,
+        { postId: targetUnitId },
+        { type: "server", service: "governance" },
+      ),
+    ),
+  ]);
 }
 
 export class GovernanceModerationService {
@@ -97,6 +137,7 @@ export class GovernanceModerationService {
       },
       update: data,
     });
+    await enqueueModeratedContentSearch(input.targetUnitId);
     return mapContentModerationStateToDTO(row);
   }
 
@@ -193,6 +234,7 @@ export class GovernanceModerationService {
         },
       },
     });
+    await enqueueRealmMembershipSearch(input.targetUnitId);
     return { message: "Content removed from realm feed" };
   }
 

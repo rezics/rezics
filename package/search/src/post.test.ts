@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
 
 function setServerEnvForSearchTests() {
@@ -545,6 +545,35 @@ describe("public content indexing eligibility", () => {
     ).toBe(true);
   });
 
+  test("rejects globally removed content states", async () => {
+    setServerEnvForSearchTests();
+    const { isPublicIndexableContentUnit, isPublicIndexablePostUnit } =
+      await import("./sync");
+
+    expect(
+      isPublicIndexableContentUnit({
+        type: "BOOK",
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        contentModerationState: { state: "TOMBSTONED" },
+      }),
+    ).toBe(false);
+    expect(
+      isPublicIndexablePostUnit({
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        contentModerationState: { state: "HIDDEN" },
+      }),
+    ).toBe(false);
+    expect(
+      isPublicIndexablePostUnit({
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        contentModerationState: { state: "LOCKED" },
+      }),
+    ).toBe(true);
+  });
+
   test("rejects hidden Work Units that aggregate releases", async () => {
     setServerEnvForSearchTests();
     const { isPublicIndexableContentUnit } = await import("./sync");
@@ -579,5 +608,101 @@ describe("public content indexing eligibility", () => {
         visibility: "PUBLIC",
       }),
     ).toBe(false);
+  });
+});
+
+describe("search sync global moderation projection", () => {
+  test("syncSingleContent deletes globally tombstoned content", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchPrismaClient, syncSingleContent } = await import("./sync");
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const addOrUpdateContent = mock(async (_docs: any[]) => undefined);
+
+    setSearchPrismaClient({
+      unit: {
+        findUnique: mock(async () => ({
+          id: "book-1",
+          type: "BOOK",
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          contentModerationState: { state: "TOMBSTONED" },
+          workMembers: [],
+        })),
+      },
+    } as any);
+
+    await syncSingleContent(
+      { deleteContent, addOrUpdateContent } as any,
+      "book-1",
+    );
+
+    expect(deleteContent).toHaveBeenCalledWith(["book-1"]);
+    expect(addOrUpdateContent).not.toHaveBeenCalled();
+  });
+
+  test("syncSinglePost deletes globally hidden posts", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchPrismaClient, syncSinglePost } = await import("./sync");
+    const deletePosts = mock(async (_ids: string[]) => undefined);
+    const addOrUpdatePosts = mock(async (_docs: any[]) => undefined);
+
+    setSearchPrismaClient({
+      post: {
+        findUnique: mock(async () => ({
+          unitId: "post-1",
+          unit: {
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            contentModerationState: { state: "HIDDEN" },
+          },
+        })),
+      },
+    } as any);
+
+    await syncSinglePost({ deletePosts, addOrUpdatePosts } as any, "post-1");
+
+    expect(deletePosts).toHaveBeenCalledWith(["post-1"]);
+    expect(addOrUpdatePosts).not.toHaveBeenCalled();
+  });
+
+  test("realm id patches project junction state without reading realm overlays", async () => {
+    setServerEnvForSearchTests();
+    const { patchContentRealmIds, setSearchPrismaClient } = await import(
+      "./sync"
+    );
+    const patchContent = mock(async (_docs: any[]) => undefined);
+    const deleteContent = mock(async (_ids: string[]) => undefined);
+    const realmContentModerationFindMany = mock(async () => {
+      throw new Error("realm overlays must not affect search projection");
+    });
+
+    setSearchPrismaClient({
+      unit: {
+        findUnique: mock(async () => ({
+          type: "BOOK",
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          contentModerationState: null,
+          workMembers: [],
+        })),
+      },
+      unitRealm: {
+        findMany: mock(async () => [{ realmUnitId: "realm-b" }]),
+      },
+      realmContentModeration: {
+        findMany: realmContentModerationFindMany,
+      },
+    } as any);
+
+    await patchContentRealmIds(
+      { patchContent, deleteContent } as any,
+      "post-1",
+    );
+
+    expect(patchContent).toHaveBeenCalledWith([
+      { id: "post-1", realmIds: ["realm-b"] },
+    ]);
+    expect(deleteContent).not.toHaveBeenCalled();
+    expect(realmContentModerationFindMany).not.toHaveBeenCalled();
   });
 });

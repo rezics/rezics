@@ -8,6 +8,7 @@ import type {
 } from "@rezics/contract";
 import { mainMarkdownSource, readCoverUrlFromExtra } from "@rezics/contract";
 import {
+  type Prisma,
   type PrismaClient,
   UnitType,
 } from "@rezics/server/prisma/generated/client";
@@ -103,6 +104,27 @@ const PUBLIC_ELIGIBLE_UNIT_WHERE = {
   visibility: "PUBLIC",
 } as const;
 
+const SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES = [
+  "HIDDEN",
+  "TOMBSTONED",
+  "ARCHIVED",
+  "REMOVED",
+] as string[];
+
+function publicSearchableUnitWhere(): Prisma.UnitWhereInput {
+  return {
+    ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+    OR: [
+      { contentModerationState: null },
+      {
+        contentModerationState: {
+          state: { notIn: SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES as any },
+        },
+      },
+    ],
+  };
+}
+
 const visibleUnitTagsInclude = {
   where: {
     OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
@@ -120,6 +142,7 @@ async function isContentPatchEligible(unitId: string): Promise<boolean> {
       type: true,
       status: true,
       visibility: true,
+      contentModerationState: { select: { state: true } },
       workMembers: { where: { role: "RELEASE" }, select: { unitId: true } },
     },
   });
@@ -132,6 +155,7 @@ export function isPublicIndexableContentUnit(
         type: string;
         status: string;
         visibility: string;
+        contentModerationState?: { state: string } | null;
         workUnitId?: string | null;
         workMembers?: readonly unknown[];
       }
@@ -143,6 +167,9 @@ export function isPublicIndexableContentUnit(
       INDEXABLE_TYPES.includes(unit.type as any) &&
       unit.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
       unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility &&
+      !SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
+        unit.contentModerationState?.state as any,
+      ) &&
       (unit.workMembers?.length ?? 0) === 0,
   );
 }
@@ -152,6 +179,7 @@ export function isPublicIndexablePostUnit(
     | {
         status: string;
         visibility: string;
+        contentModerationState?: { state: string } | null;
       }
     | null
     | undefined,
@@ -159,7 +187,10 @@ export function isPublicIndexablePostUnit(
   return Boolean(
     unit &&
       unit.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
-      unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility,
+      unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility &&
+      !SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
+        unit.contentModerationState?.state as any,
+      ),
   );
 }
 
@@ -248,6 +279,7 @@ const contentInclude: any = {
     select: { unitId: true },
   },
   inRealms: true,
+  contentModerationState: true,
   realmTagApplicationsAsTargetUnit: true,
   creditAttributions: {
     include: {
@@ -510,7 +542,7 @@ export async function syncAllContent(client: SearchClient) {
     const units: any[] = await getSearchPrismaClient().unit.findMany({
       where: {
         type: { in: INDEXABLE_TYPES },
-        ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+        ...publicSearchableUnitWhere(),
         NOT: { workMembers: { some: { role: "RELEASE" } } },
       },
       include: contentInclude,
@@ -541,7 +573,7 @@ export async function syncContentSegment(
   const units: any[] = await getSearchPrismaClient().unit.findMany({
     where: {
       type: { in: INDEXABLE_TYPES },
-      ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+      ...publicSearchableUnitWhere(),
       NOT: { workMembers: { some: { role: "RELEASE" } } },
     },
     include: contentInclude,
@@ -566,7 +598,7 @@ export async function syncWorkReleasesSegment(
   const units: any[] = await getSearchPrismaClient().unit.findMany({
     where: {
       type: { in: INDEXABLE_TYPES },
-      ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+      ...publicSearchableUnitWhere(),
       workMemberships: {
         some: {
           workUnitId,
@@ -595,7 +627,7 @@ export async function syncWorkDomainContentSegment(
   const units: any[] = await getSearchPrismaClient().unit.findMany({
     where: {
       type: { in: INDEXABLE_TYPES },
-      ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+      ...publicSearchableUnitWhere(),
       workMemberships: {
         some: { role: "RELEASE" },
       },
@@ -715,6 +747,9 @@ export async function syncSingleContent(client: SearchClient, unitId: string) {
     !INDEXABLE_TYPES.includes(unit.type as any) ||
     unit.status !== PUBLIC_ELIGIBLE_UNIT_WHERE.status ||
     unit.visibility !== PUBLIC_ELIGIBLE_UNIT_WHERE.visibility ||
+    SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
+      (unit as any).contentModerationState?.state,
+    ) ||
     (unit.workMembers?.length ?? 0) > 0
   ) {
     await client.deleteContent([unitId]);
@@ -1016,7 +1051,7 @@ export async function patchPostsAuthor(
     const posts = await getSearchPrismaClient().post.findMany({
       where: {
         authorUserId: userId,
-        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+        unit: publicSearchableUnitWhere(),
       },
       select: { unitId: true },
       orderBy: { unitId: "asc" },
@@ -1043,11 +1078,18 @@ export async function syncPostsByAuthorSegment(
   const rows: any[] = await getSearchPrismaClient().post.findMany({
     where: {
       authorUserId: userId,
-      unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+      unit: publicSearchableUnitWhere(),
     },
     include: {
       ...postIncludeForSync,
-      unit: { include: { user: true, inRealms: true, workMemberships: true } },
+      unit: {
+        include: {
+          user: true,
+          inRealms: true,
+          workMemberships: true,
+          contentModerationState: true,
+        },
+      },
     },
     orderBy: { unitId: "asc" },
     take: limit + 1,
@@ -1096,7 +1138,7 @@ export async function patchPostsTarget(
     const posts = await getSearchPrismaClient().post.findMany({
       where: {
         targetUnitId,
-        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+        unit: publicSearchableUnitWhere(),
       },
       select: { unitId: true },
       orderBy: { unitId: "asc" },
@@ -1152,7 +1194,7 @@ export async function patchPostsTargetSegment(
   const rows: any[] = await getSearchPrismaClient().post.findMany({
     where: {
       targetUnitId,
-      unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+      unit: publicSearchableUnitWhere(),
     },
     select: { unitId: true },
     orderBy: { unitId: "asc" },
@@ -1181,7 +1223,15 @@ export async function patchPostFields(
 ) {
   const post = await getSearchPrismaClient().post.findUnique({
     where: { unitId },
-    select: { unit: { select: { status: true, visibility: true } } },
+    select: {
+      unit: {
+        select: {
+          status: true,
+          visibility: true,
+          contentModerationState: { select: { state: true } },
+        },
+      },
+    },
   });
   if (!post || !isPublicIndexablePostUnit(post.unit)) {
     await client.deletePosts([unitId]);
@@ -1474,6 +1524,7 @@ const postIncludeForSync = {
       user: true,
       inRealms: true,
       workMemberships: true,
+      contentModerationState: true,
     },
   },
   targetUnit: {
@@ -1569,7 +1620,14 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
     where: { unitId },
     include: {
       ...postIncludeForSync,
-      unit: { include: { user: true, inRealms: true, workMemberships: true } },
+      unit: {
+        include: {
+          user: true,
+          inRealms: true,
+          workMemberships: true,
+          contentModerationState: true,
+        },
+      },
     },
   });
 
@@ -1594,12 +1652,17 @@ export async function syncAllPosts(client: SearchClient) {
 
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
-        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+        unit: publicSearchableUnitWhere(),
       },
       include: {
         ...postIncludeForSync,
         unit: {
-          include: { user: true, inRealms: true, workMemberships: true },
+          include: {
+            user: true,
+            inRealms: true,
+            workMemberships: true,
+            contentModerationState: true,
+          },
         },
       },
       orderBy: { unitId: "asc" },
@@ -1628,11 +1691,18 @@ export async function syncPostSegment(
   const limit = segmentLimit(options);
   const posts: any[] = await getSearchPrismaClient().post.findMany({
     where: {
-      unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+      unit: publicSearchableUnitWhere(),
     },
     include: {
       ...postIncludeForSync,
-      unit: { include: { user: true, inRealms: true, workMemberships: true } },
+      unit: {
+        include: {
+          user: true,
+          inRealms: true,
+          workMemberships: true,
+          contentModerationState: true,
+        },
+      },
     },
     orderBy: { unitId: "asc" },
     take: limit + 1,
@@ -1653,7 +1723,7 @@ export async function syncAllPostRealmIds(client: SearchClient) {
   while (true) {
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
-        unit: { status: "PUBLISHED" },
+        unit: publicSearchableUnitWhere(),
       },
       select: {
         unitId: true,
@@ -1697,7 +1767,7 @@ export async function syncPostRealmIdsSegment(
   const limit = segmentLimit(options);
   const rows: any[] = await getSearchPrismaClient().post.findMany({
     where: {
-      unit: { status: "PUBLISHED" },
+      unit: publicSearchableUnitWhere(),
     },
     select: {
       unitId: true,
@@ -1737,7 +1807,7 @@ export async function syncAllContainedUnitIds(client: SearchClient) {
     const shelves: any[] = await getSearchPrismaClient().unit.findMany({
       where: {
         type: "SHELF",
-        ...PUBLIC_ELIGIBLE_UNIT_WHERE,
+        ...publicSearchableUnitWhere(),
       },
       select: {
         id: true,
@@ -1780,7 +1850,7 @@ export async function syncAllPostRootTargets(client: SearchClient) {
   while (true) {
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
-        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+        unit: publicSearchableUnitWhere(),
       },
       select: {
         unitId: true,
@@ -1817,7 +1887,7 @@ export async function syncPostRootTargetsSegment(
   const limit = segmentLimit(options);
   const rows: any[] = await getSearchPrismaClient().post.findMany({
     where: {
-      unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+      unit: publicSearchableUnitWhere(),
     },
     select: {
       unitId: true,
@@ -1850,12 +1920,17 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         authorUserId: userId,
-        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+        unit: publicSearchableUnitWhere(),
       },
       include: {
         ...postIncludeForSync,
         unit: {
-          include: { user: true, inRealms: true, workMemberships: true },
+          include: {
+            user: true,
+            inRealms: true,
+            workMemberships: true,
+            contentModerationState: true,
+          },
         },
       },
       orderBy: { unitId: "asc" },
@@ -1887,12 +1962,17 @@ export async function syncPostsByTarget(
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         targetUnitId,
-        unit: { ...PUBLIC_ELIGIBLE_UNIT_WHERE },
+        unit: publicSearchableUnitWhere(),
       },
       include: {
         ...postIncludeForSync,
         unit: {
-          include: { user: true, inRealms: true, workMemberships: true },
+          include: {
+            user: true,
+            inRealms: true,
+            workMemberships: true,
+            contentModerationState: true,
+          },
         },
       },
       orderBy: { unitId: "asc" },
