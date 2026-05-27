@@ -108,6 +108,7 @@ describe("bookDTOSchema", () => {
       Value.Check(bookDTOSchema, {
         unitId: "release-1",
         workUnitId: "work-1",
+        metadata: { uswn: "work-1" },
         workMembership: {
           unitId: "release-1",
           workUnitId: "work-1",
@@ -116,6 +117,15 @@ describe("bookDTOSchema", () => {
           position: "a0",
           displayPolicy: "PRIMARY",
         },
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts null USWN for standalone content", () => {
+    expect(
+      Value.Check(bookDTOSchema, {
+        unitId: "standalone-1",
+        metadata: { uswn: null },
       }),
     ).toBe(true);
   });

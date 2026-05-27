@@ -123,11 +123,11 @@
 
 ## 14. Library Metadata And USWN
 
-- [ ] 14.1 Extend library content DTO schemas to include derived `metadata.uswn`.
-- [ ] 14.2 Populate `metadata.uswn` from merge-resolved canonical work Unit id for release-aware Units.
-- [ ] 14.3 Return `metadata.uswn = null` for Units with no work domain.
-- [ ] 14.4 Ensure frontend metadata panels render server-provided USWN and do not compute merge resolution client-side.
-- [ ] 14.5 Add contract/API/app tests for USWN on release, standalone content, and merged work scenarios.
+- [x] 14.1 Extend library content DTO schemas to include derived `metadata.uswn`.
+- [x] 14.2 Populate `metadata.uswn` from merge-resolved canonical work Unit id for release-aware Units.
+- [x] 14.3 Return `metadata.uswn = null` for Units with no work domain.
+- [x] 14.4 Ensure frontend metadata panels render server-provided USWN and do not compute merge resolution client-side.
+- [x] 14.5 Add contract/API/app tests for USWN on release, standalone content, and merged work scenarios.
 
 ## 15. Content Structure Terminology
 

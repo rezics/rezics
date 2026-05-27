@@ -12,6 +12,7 @@ import {
 import { useMessage } from "@rezics/i18n/react";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
+import { resolveMetadataPanelUswn } from "../../models/bookMetadata";
 
 const i18nMessages = {
   book_fields_chapter_count,
@@ -40,9 +41,11 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   const publicationLicenseLabel = bookInfo.licenseSlug
     ? licenseLabel(bookInfo.licenseSlug as LicenseSlug)
     : undefined;
+  const uswn = resolveMetadataPanelUswn(bookInfo);
 
   const items = (
     <div className="flex flex-col gap-2">
+      {uswn && <p className="text-sm">USWN：{uswn}</p>}
       {bookInfo?.isbn13 && (
         <p className="text-sm">
           {m.book_fields_isbn()}：{bookInfo.isbn13}

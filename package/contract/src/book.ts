@@ -33,6 +33,11 @@ export const bookDTOSchema = t.Object({
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
   workUnitId: t.Optional(t.Nullable(t.String())),
+  metadata: t.Optional(
+    t.Object({
+      uswn: t.Union([t.String(), t.Null()]),
+    }),
+  ),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
