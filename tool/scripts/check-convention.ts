@@ -33,6 +33,9 @@
  * - R15 server-search-producers     — runtime server code must enqueue search
  *                                   side effects instead of importing Meili sync
  *                                   wrappers directly.
+ * - R16 content-work-cutover         — legacy Unit.workUnitId, generic
+ *                                   chapterUnitId, and BookContentStructure
+ *                                   references stay out of new runtime code.
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -165,7 +168,8 @@ type Rule =
   | "R12"
   | "R13"
   | "R14"
-  | "R15";
+  | "R15"
+  | "R16";
 
 interface Violation {
   rule: Rule;
@@ -189,6 +193,7 @@ const SPEC_LINK: Record<Rule, string> = {
   R13: "openspec/changes/make-ui-package-standalone/specs/ui-package-autonomy/spec.md",
   R14: "openspec/specs/i18n-toolchain/spec.md",
   R15: "openspec/changes/introduce-job-runner-sync-infrastructure/specs/meili-partial-sync/spec.md",
+  R16: "openspec/changes/cleanup-unit-work-content-structure-schema/specs/content-structure/spec.md",
 };
 
 // ─── Path utilities ─────────────────────────────────────────────────────────
@@ -1134,6 +1139,78 @@ function scanServerMeiliSyncImports(candidateFiles: string[]): Violation[] {
   return violations;
 }
 
+// ─── R16: content/work schema cutover ──────────────────────────────────────
+
+const R16_RUNTIME_LEGACY_PATTERNS: Array<{
+  pattern: RegExp;
+  message: string;
+}> = [
+  {
+    pattern: /\bUnit\.workUnitId\b|\bunit\.workUnitId\b/,
+    message:
+      "Runtime code must not read or write legacy Unit.workUnitId; use UnitWork(role=RELEASE) membership.",
+  },
+  {
+    pattern: /\bchapterUnitId\b/,
+    message:
+      "Generic runtime code must not use chapterUnitId; use contentUnitId or keep conversion inside book/chapter adapters.",
+  },
+  {
+    pattern: /\bBookContentStructure[A-Za-z]*\b/,
+    message:
+      "Generic runtime code must not use BookContentStructure names; use ContentStructure or a clearly book-specific adapter.",
+  },
+];
+
+function isR16AllowedPath(relPath: string): boolean {
+  if (!/^package\/[^/]+\/src\//.test(relPath)) return true;
+  if (/\.(?:test|spec|stories)\.tsx?$/.test(relPath)) return true;
+  if (relPath.startsWith("package/server/src/book/")) return true;
+  if (relPath.startsWith("package/server/src/chapter/")) return true;
+  if (relPath.startsWith("package/server/src/unit/work-link")) return true;
+  if (relPath.startsWith("package/app/src/book-library/")) return true;
+  if (relPath.startsWith("package/app/src/book-edit/")) return true;
+  if (relPath.startsWith("package/app/src/book-read/")) return true;
+  if (relPath.startsWith("package/api/src/book/")) return true;
+  if (relPath.startsWith("package/api/src/chapter/")) return true;
+  if (relPath.startsWith("package/contract/src/book.ts")) return true;
+  if (relPath.startsWith("package/contract/src/chapter.ts")) return true;
+  if (relPath.startsWith("package/contract/src/progress.ts")) return true;
+  return false;
+}
+
+function scanContentWorkCutover(candidateFiles: string[]): Violation[] {
+  const violations: Violation[] = [];
+
+  for (const filePath of candidateFiles) {
+    const relPath = relative(REPO_ROOT, filePath).replace(/\\/g, "/");
+    if (isR16AllowedPath(relPath)) continue;
+
+    let content: string;
+    try {
+      content = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]!;
+      for (const rule of R16_RUNTIME_LEGACY_PATTERNS) {
+        if (!rule.pattern.test(line)) continue;
+        violations.push({
+          rule: "R16",
+          path: `${relPath}:${i + 1}`,
+          message: rule.message,
+          spec: SPEC_LINK.R16,
+        });
+      }
+    }
+  }
+
+  return violations;
+}
+
 // ─── Snapshot baseline ──────────────────────────────────────────────────────
 
 interface ViolationSnapshot {
@@ -1167,6 +1244,7 @@ function buildSnapshot(violations: Violation[]): ViolationSnapshot {
     R13: 0,
     R14: 0,
     R15: 0,
+    R16: 0,
   };
   const keys: string[] = [];
   for (const violation of violations) {
@@ -1264,15 +1342,31 @@ function main() {
     ...scanUiPackageAutonomy(tsAndTsxFiles),
     ...scanFrontendI18nLocales(),
     ...scanServerMeiliSyncImports(tsAndTsxFiles),
+    ...scanContentWorkCutover(tsAndTsxFiles),
   ];
   const currentSnapshot = buildSnapshot(violations);
 
   if (isSnapshotUpdate) {
     saveSnapshot(currentSnapshot);
-    const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14, R15 } =
-      currentSnapshot.byRule;
+    const {
+      R1,
+      R2,
+      R3,
+      R4,
+      R5,
+      R6,
+      R7,
+      R9,
+      R10,
+      R11,
+      R12,
+      R13,
+      R14,
+      R15,
+      R16,
+    } = currentSnapshot.byRule;
     console.log(
-      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12} R13=${R13} R14=${R14} R15=${R15})`,
+      `Snapshot updated: ${currentSnapshot.total} violations (R1=${R1} R2=${R2} R3=${R3} R4=${R4} R5=${R5} R6=${R6} R7=${R7} R9=${R9} R10=${R10} R11=${R11} R12=${R12} R13=${R13} R14=${R14} R15=${R15} R16=${R16})`,
     );
     process.exit(0);
   }
@@ -1289,13 +1383,13 @@ function main() {
   }
 
   const baselineTotal = baselineSnapshot?.total ?? 0;
-  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14, R15 } =
+  const { R1, R2, R3, R4, R5, R6, R7, R9, R10, R11, R12, R13, R14, R15, R16 } =
     currentSnapshot.byRule;
   console.log(
     `check:convention — ${violations.length} violation(s) (baseline ${baselineTotal}):`,
   );
   console.log(
-    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}  R13=${R13}  R14=${R14}  R15=${R15}`,
+    `  R1=${R1}  R2=${R2}  R3=${R3}  R4=${R4}  R5=${R5}  R6=${R6}  R7=${R7}  R9=${R9}  R10=${R10}  R11=${R11}  R12=${R12}  R13=${R13}  R14=${R14}  R15=${R15}  R16=${R16}`,
   );
 
   if (newViolations.length > 0) {
