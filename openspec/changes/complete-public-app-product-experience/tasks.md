@@ -4,11 +4,12 @@
 - [ ] 1.2 Remove test/demo routes from production navigation and create-menu entries.
 - [ ] 1.3 Define navigation config for discovery, library, community, create, and personal areas.
 - [ ] 1.4 Add route-level loading, denied, not-found, unauthenticated, and error state conventions.
+- [ ] 1.5 Align realm navigation with Feed default, About, and moderator-only Moderation tabs from `complete-realm-community-governance`.
 
 ## 2. Dashboard And Continuity
 
 - [ ] 2.1 Add dashboard contract/API summary DTOs for progress, shelves, realms, notifications, DMs, drafts, activity, and safety status.
-- [ ] 2.2 Implement server aggregation using existing domain services without duplicating business logic.
+- [ ] 2.2 Implement server aggregation using existing domain services without duplicating business logic or forcing dashboard pages to scatter unrelated domain requests.
 - [ ] 2.3 Add `@rezics/api` dashboard hooks and query keys.
 - [ ] 2.4 Add `package/app/src/dashboard/` feature with page, sections, models, hooks, and components.
 - [ ] 2.5 Add tests or stories for partial failure, empty user, active reader, active community member, and safety-status states.
@@ -16,7 +17,7 @@
 ## 3. Discovery And Detail Journeys
 
 - [ ] 3.1 Upgrade home modules for discovery and signed-in continuation.
-- [ ] 3.2 Upgrade search filters, grouped release result presentation, query-state routing, and result actions.
+- [ ] 3.2 Upgrade search filters, grouped release result presentation, query-state routing, and result actions using stable Unit/Entity/Realm ids with localized labels.
 - [ ] 3.3 Upgrade book/entity/tag/profile/detail surfaces to expose inspect, collect, follow, discuss, contribute, report, and share actions where policy allows.
 - [ ] 3.4 Add cache invalidation for collect/follow/reaction/progress actions across detail, dashboard, profile, and search cards.
 
@@ -32,7 +33,7 @@
 - [ ] 5.1 Add a unified create entry flow that routes to type-specific creation features.
 - [ ] 5.2 Add existing work/entity/tag/realm search steps where relevant.
 - [ ] 5.3 Add draft save/recover, preview, validation, publish/submit, and post-submit next-action behavior.
-- [ ] 5.4 Ensure creation features use `@rezics/contract`, `@rezics/api`, and editor primitives rather than app-local DTO copies.
+- [ ] 5.4 Ensure creation features use `@rezics/contract`, `@rezics/api`, UnitTranslation language controls, and editor primitives rather than app-local DTO copies.
 - [ ] 5.5 Add tests for draft recovery, validation failure, policy denial, successful publish, and work matching.
 
 ## 6. Engagement And Inbox

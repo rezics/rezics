@@ -12,7 +12,7 @@ The app SHALL provide a signed-in dashboard showing continue reading, shelves, j
 
 ### Requirement: Dashboard uses typed aggregate data
 
-Dashboard data SHALL be loaded through typed `@rezics/api` hooks and SHALL not duplicate DTO definitions in app code.
+Dashboard data SHALL be loaded through typed `@rezics/api` hooks and SHALL not duplicate DTO definitions in app code. Where dashboard sections combine multiple domains, the server SHOULD expose dashboard-specific summary DTOs instead of requiring the page to scatter unrelated domain requests and rebuild business rules client-side.
 
 #### Scenario: Dashboard API partially fails
 

@@ -189,6 +189,11 @@ The hero layout should stay close to the current book pattern. The book review
 preview area can become a trailer carousel, screenshot carousel, clip carousel,
 or other domain media component when available.
 
+Domain media assets used by those future pages must not become raw URL columns
+on `Game` or `Media`. They should be sourced from existing Unit/ContentDoc,
+UnitExternalRef, attribution, or future typed media-asset contracts, and rendered
+through existing Rezics carousel primitives in the app.
+
 ## Risks / Trade-offs
 
 - **Risk: Entity-backed platforms feel heavier than string keys** → Mitigation:

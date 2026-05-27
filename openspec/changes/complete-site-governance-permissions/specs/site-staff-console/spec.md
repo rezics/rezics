@@ -2,7 +2,7 @@
 
 ### Requirement: Product-side staff console is separate from package/admin
 
-`package/app` SHALL provide staff-only community operations routes for moderation queues, case detail, account safety, and staff audit timelines. These routes SHALL NOT replace `package/admin` operational panels.
+`package/app` SHALL provide staff-only community operations routes for moderation queues, case detail, account safety, and staff audit timelines. These routes SHALL NOT replace `package/admin` operational panels. The staff console SHALL use product-side Rezics app density and safe/redacted DTOs rather than admin operations table density by default.
 
 #### Scenario: Staff opens moderation queue
 

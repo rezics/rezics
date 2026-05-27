@@ -4,6 +4,11 @@
 
 The admin panel SHALL provide operator views for Unit, book, media, game, entity, tag, shelf, realm, source-site attribution, work/release, and history-related content operations.
 
+Admin content operations SHALL preserve shared metadata boundaries. Localized
+titles, summaries, descriptions, and covers SHALL continue to flow through
+UnitTranslation/editor patterns; admin pages SHALL NOT introduce admin-only
+localized title fields or bypass normal UnitTranslation resolution.
+
 #### Scenario: Admin searches all Units
 
 - **WHEN** an admin searches by unit id, slug, title, type, owner, status, or visibility

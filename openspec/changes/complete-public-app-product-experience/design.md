@@ -20,6 +20,12 @@ First visit
 
 Every major content type gets a clear user task: inspect, save, discuss, contribute, report, and share where applicable.
 
+The public homepage remains a usable discovery/continuation surface, not a
+marketing landing page. Signed-out users should immediately see browsable
+library/community content and search entry points. Signed-in users may be routed
+to, or prominently offered, the personal dashboard, but home and dashboard have
+distinct jobs: home is public discovery; dashboard is private continuity.
+
 ### Route And Navigation Model
 
 Navigation is grouped by user intent:
@@ -31,6 +37,11 @@ Navigation is grouped by user intent:
 - Me: profile, settings, notifications, drafts, moderation/status messages.
 
 Existing demo/test routes are not production navigation entries.
+
+Realm navigation must align with `complete-realm-community-governance`: realm
+detail defaults to Feed, stable community information lives in About, and
+moderator-only work enters through Moderation rather than a standalone Queue
+tab.
 
 ### Personal Dashboard
 
@@ -53,6 +64,7 @@ Creation flows use existing editor and Unit infrastructure. They should be guide
 
 - choose content type;
 - search for existing work/entity/tag/realm;
+- choose or add the relevant UnitTranslation language for display metadata;
 - validate metadata and language;
 - save draft;
 - preview;

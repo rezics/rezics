@@ -11,12 +11,18 @@ The app SHALL provide guided creation flows with type selection, existing-work/e
 
 ### Requirement: Creation uses shared contracts and editor infrastructure
 
-Creation flows SHALL use `@rezics/contract`, `@rezics/api`, existing editor primitives, Unit attribution, tags, and work-domain matching where applicable.
+Creation flows SHALL use `@rezics/contract`, `@rezics/api`, existing editor primitives, UnitTranslation language controls, Unit attribution, tags, and work-domain matching where applicable.
 
 #### Scenario: App does not duplicate DTO
 
 - **WHEN** a creation form needs book metadata
 - **THEN** it SHALL consume typed API/contract schemas rather than defining app-local DTO copies
+
+#### Scenario: User creates localized metadata
+
+- **WHEN** a user creates or edits display metadata for a Unit-backed object
+- **THEN** the form SHALL write the selected UnitTranslation language
+- **AND** it SHALL NOT store localized title/summary/description in feature-local fields
 
 ### Requirement: Policy-aware publish states are visible
 

@@ -94,7 +94,9 @@ Frontend GAME and MEDIA detail pages SHALL follow the current book detail
 pattern at the product-structure level: a hero region followed by multiple
 tabs. The hero layout SHALL stay broadly consistent with the book hero, while
 domain-specific media such as trailer, clip, screenshot, or poster carousels
-MAY replace book-specific review preview content.
+MAY replace book-specific review preview content. Domain media assets SHALL NOT
+be stored as raw URL columns on `Game` or `Media`; pages SHALL consume existing
+Unit/ContentDoc/UnitExternalRef-backed data or future typed media-asset DTOs.
 
 #### Scenario: Game detail uses hero plus tabs
 
