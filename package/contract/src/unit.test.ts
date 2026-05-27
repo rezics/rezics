@@ -1,0 +1,83 @@
+import { describe, expect, test } from "bun:test";
+import { Value } from "@sinclair/typebox/value";
+import {
+  AiDisclosureMode,
+  aiDisclosureDetailsSchema,
+  aiDisclosureModeSchema,
+  createUnitSchema,
+  unitDTOSchema,
+  updateUnitSchema,
+} from "./unit";
+
+describe("AiDisclosureMode", () => {
+  test("accepts exactly the shared canonical disclosure modes", () => {
+    expect(Object.values(AiDisclosureMode)).toEqual([
+      "UNKNOWN",
+      "NONE",
+      "AI_ASSISTED",
+      "AI_ORIGINATED",
+      "MACHINE_GENERATED",
+    ]);
+
+    for (const mode of Object.values(AiDisclosureMode)) {
+      expect(Value.Check(aiDisclosureModeSchema, mode)).toBe(true);
+    }
+  });
+
+  test("rejects unsupported disclosure modes", () => {
+    expect(Value.Check(aiDisclosureModeSchema, "AI_RISKY")).toBe(false);
+  });
+});
+
+describe("aiDisclosureDetailsSchema", () => {
+  test("accepts supported optional detail fields", () => {
+    expect(
+      Value.Check(aiDisclosureDetailsSchema, {
+        model: "gpt-5",
+        provider: "OpenAI",
+        reviewedByHuman: true,
+        disclosedBy: "USER",
+        sourceStandard: "SELF_DECLARED",
+      }),
+    ).toBe(true);
+  });
+
+  test("rejects unsupported detail keys and values", () => {
+    expect(
+      Value.Check(aiDisclosureDetailsSchema, {
+        provider: "OpenAI",
+        confidence: 0.8,
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(aiDisclosureDetailsSchema, {
+        disclosedBy: "BOT",
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("Unit AI disclosure DTO/input schemas", () => {
+  test("accept disclosure fields in Unit-facing responses and writes", () => {
+    expect(
+      Value.Check(unitDTOSchema, {
+        id: "unit-1",
+        type: "BOOK",
+        aiDisclosureMode: "AI_ASSISTED",
+        aiDisclosureDetails: { sourceStandard: "C2PA" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(createUnitSchema, {
+        type: "BOOK",
+        aiDisclosureMode: "NONE",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(updateUnitSchema, {
+        aiDisclosureMode: "AI_ORIGINATED",
+        aiDisclosureDetails: null,
+      }),
+    ).toBe(true);
+  });
+});

@@ -4,7 +4,7 @@ import { TagRefSchema } from "../common/tag-ref";
 import { contentDocSchema } from "../content-doc";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";
-import { contentRatingSchema } from "../unit";
+import { aiDisclosureModeSchema, contentRatingSchema } from "../unit";
 import { unitWorkDisplayPolicySchema, unitWorkRoleSchema } from "../unit-work";
 
 // ANCHOR: Content Search Document
@@ -70,6 +70,7 @@ export const ContentSearchDocumentSchema = t.Object({
   // Filterable: metadata
   languages: t.Array(t.String()),
   rating: contentRatingSchema,
+  aiDisclosureMode: aiDisclosureModeSchema,
   visibility: t.String(),
   isLicensed: t.Boolean(),
 
@@ -133,6 +134,7 @@ export const ContentSearchOptionsSchema = t.Object({
   realmTagIds: t.Optional(t.Array(t.String())),
   languages: t.Optional(t.Array(t.String())),
   ratings: t.Optional(t.Array(contentRatingSchema)),
+  aiDisclosureModes: t.Optional(t.Array(aiDisclosureModeSchema)),
   isLicensed: t.Optional(t.Boolean()),
   textLength: t.Optional(
     t.Object({

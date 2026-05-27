@@ -100,6 +100,56 @@ export const contentRatingSchema = t.Union([
 ]);
 
 // ============================================================
+// AI DISCLOSURE
+// ============================================================
+
+export const AiDisclosureMode = {
+  UNKNOWN: "UNKNOWN",
+  NONE: "NONE",
+  AI_ASSISTED: "AI_ASSISTED",
+  AI_ORIGINATED: "AI_ORIGINATED",
+  MACHINE_GENERATED: "MACHINE_GENERATED",
+} as const;
+
+export type AiDisclosureMode =
+  (typeof AiDisclosureMode)[keyof typeof AiDisclosureMode];
+
+export const aiDisclosureModeSchema = t.Union([
+  t.Literal("UNKNOWN"),
+  t.Literal("NONE"),
+  t.Literal("AI_ASSISTED"),
+  t.Literal("AI_ORIGINATED"),
+  t.Literal("MACHINE_GENERATED"),
+]);
+
+export const aiDisclosureSourceSchema = t.Union([
+  t.Literal("USER"),
+  t.Literal("MODERATOR"),
+  t.Literal("SYSTEM"),
+  t.Literal("IMPORT"),
+]);
+
+export const aiDisclosureSourceStandardSchema = t.Union([
+  t.Literal("C2PA"),
+  t.Literal("IPTC"),
+  t.Literal("SELF_DECLARED"),
+  t.Literal("OTHER"),
+]);
+
+export const aiDisclosureDetailsSchema = t.Object(
+  {
+    model: t.Optional(t.String()),
+    provider: t.Optional(t.String()),
+    reviewedByHuman: t.Optional(t.Boolean()),
+    disclosedBy: t.Optional(aiDisclosureSourceSchema),
+    sourceStandard: t.Optional(aiDisclosureSourceStandardSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type AiDisclosureDetails = (typeof aiDisclosureDetailsSchema)["static"];
+
+// ============================================================
 // PUBLIC USER (shared across contracts)
 // ============================================================
 
@@ -181,6 +231,8 @@ export const baseUnitSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -303,6 +355,8 @@ export const createUnitSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   publishedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -327,6 +381,8 @@ export const updateUnitSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),

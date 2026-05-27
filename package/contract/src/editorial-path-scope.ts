@@ -9,6 +9,8 @@ export const editorialPathScope = {
   book: {
     exact: [
       "unit.rating",
+      "unit.aiDisclosureMode",
+      "unit.aiDisclosureDetails",
       "unit.visibility",
       "unit.license",
       "extension.isbn13",

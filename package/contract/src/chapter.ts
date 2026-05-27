@@ -2,7 +2,11 @@ import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
-import { contentRatingSchema } from "./unit";
+import {
+  aiDisclosureDetailsSchema,
+  aiDisclosureModeSchema,
+  contentRatingSchema,
+} from "./unit";
 
 // ============================================================
 // CHAPTER CONTRACTS
@@ -32,6 +36,8 @@ export const chapterDetailSchema = t.Object({
   targetUnitId: t.Optional(t.Nullable(t.String())),
   coverUrl: t.Optional(t.Nullable(t.String())),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -158,6 +164,8 @@ export const createChapterSchema = t.Object({
   coverUrl: t.Optional(t.String()),
   status: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
 });
 
 export type CreateChapterInput = (typeof createChapterSchema)["static"];
@@ -169,6 +177,8 @@ export const updateChapterSchema = t.Object({
   coverUrl: t.Optional(t.Nullable(t.String())),
   status: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
 });
 
 export type UpdateChapterInput = (typeof updateChapterSchema)["static"];

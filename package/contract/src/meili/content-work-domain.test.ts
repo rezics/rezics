@@ -39,6 +39,7 @@ const baseContentDocument = {
   realmTagKeys: [],
   languages: ["en"],
   rating: "GENERAL",
+  aiDisclosureMode: "UNKNOWN",
   visibility: "PUBLIC",
   isLicensed: false,
   postKind: null,
@@ -71,6 +72,7 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         ownTagLabels: [],
         workTagLabels: [],
         allTagLabels: [],
+        aiDisclosureMode: "AI_ASSISTED",
         position: null,
         displayPolicy: null,
         workUnitIds: [],
@@ -91,6 +93,7 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         releasePresentation: "expanded",
         workUnitId: "work-1",
         workRoles: ["RELEASE"],
+        aiDisclosureModes: ["AI_ASSISTED"],
       }),
     ).toBe(true);
   });

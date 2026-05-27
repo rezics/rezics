@@ -5,7 +5,9 @@ import {
   bookContentStructureNodeSchema,
   bookDTOSchema,
   createBookSchema,
+  updateBookSchema,
 } from "./book";
+import { aiDisclosureDetailsSchema } from "./unit";
 
 describe("bookContentStructureNodeSchema", () => {
   test("accepts an unmaterialized node without id", () => {
@@ -139,6 +141,17 @@ describe("bookDTOSchema", () => {
       }),
     ).toBe(true);
   });
+
+  test("accepts Unit-level AI disclosure metadata", () => {
+    expect(
+      Value.Check(bookDTOSchema, {
+        unitId: "book-1",
+        rating: "GENERAL",
+        aiDisclosureMode: "MACHINE_GENERATED",
+        aiDisclosureDetails: { disclosedBy: "MODERATOR" },
+      }),
+    ).toBe(true);
+  });
 });
 
 describe("createBookSchema", () => {
@@ -151,5 +164,24 @@ describe("createBookSchema", () => {
         translations: [{ language: "en", title: "New Release" }],
       }),
     ).toBe(true);
+  });
+
+  test("accepts AI disclosure fields and rejects unsupported details", () => {
+    expect(
+      Value.Check(createBookSchema, {
+        defaultLanguage: "en",
+        aiDisclosureMode: "AI_ASSISTED",
+        aiDisclosureDetails: { provider: "OpenAI" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(updateBookSchema, {
+        aiDisclosureMode: "AI_ASSISTED",
+        aiDisclosureDetails: { confidence: 0.9 },
+      }),
+    ).toBe(false);
+    expect(Value.Check(aiDisclosureDetailsSchema, { confidence: 0.9 })).toBe(
+      false,
+    );
   });
 });

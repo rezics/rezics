@@ -14,6 +14,8 @@ import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import {
+  aiDisclosureDetailsSchema,
+  aiDisclosureModeSchema,
   contentRatingSchema,
   publicUserSchema,
   unitTranslationDTOSchema,
@@ -47,6 +49,8 @@ export const bookDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
@@ -182,6 +186,8 @@ export const createBookSchema = t.Object({
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   coverUrl: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   visibility: t.Optional(t.String()),
   workUnitId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -212,6 +218,8 @@ export const updateBookSchema = t.Object({
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   coverUrl: t.Optional(t.Nullable(t.String())),
   rating: t.Optional(contentRatingSchema),
+  aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
+  aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   visibility: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });
