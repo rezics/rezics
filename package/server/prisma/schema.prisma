@@ -146,16 +146,16 @@ enum PostKind {
  */
 
 model Unit {
-  id         String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  type       UnitType
-  slug       String?
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  type      UnitType
+  slug      String?
   /// Slug-namespace key. Points at the placeholder Unit for one of the five
   /// named scopes (user / realm / tag / zone / entity) for top-level slugs, or
   /// at an owner Unit's id for owner-scoped sub-resources (e.g. shelves under
   /// a user). NOT NULL, no FK constraint declared (matches the polymorphic-
   /// shaped-column convention used by ShelfUnit / ShelfItem).
-  slugScope String  @db.Uuid
-  userId    String? @db.Uuid
+  slugScope String   @db.Uuid
+  userId    String?  @db.Uuid
 
   defaultLanguage   String? @db.VarChar(16)
   /// Language-independent units (e.g. TAG). When true, the unit bypasses
@@ -189,10 +189,10 @@ model Unit {
   publishedAt DateTime?
 
   // Cross-user work-release claim flow (see WorkLinkClaim).
-  releaseClaims WorkLinkClaim[] @relation("WorkLinkClaimRelease")
-  workClaims    WorkLinkClaim[] @relation("WorkLinkClaimWork")
-  workMemberships UnitWork[] @relation("UnitWorkMember")
-  workMembers     UnitWork[] @relation("UnitWorkWork")
+  releaseClaims   WorkLinkClaim[] @relation("WorkLinkClaimRelease")
+  workClaims      WorkLinkClaim[] @relation("WorkLinkClaimWork")
+  workMemberships UnitWork[]      @relation("UnitWorkMember")
+  workMembers     UnitWork[]      @relation("UnitWorkWork")
 
   // Owner/creator
   user User? @relation("UnitForUser", fields: [userId], references: [unitId])
@@ -237,9 +237,9 @@ model Unit {
   realmTagContextsAsContent        RealmTagContext[]     @relation("RealmTagContextContent")
 
   // Credit attribution
-  creditAttributions CreditAttribution[] @relation("CreditAttributedUnit")
-  creditedAs         CreditAttribution[] @relation("CreditAttributionEntity")
-  externalRefs       UnitExternalRef[]   @relation("UnitExternalRefUnit")
+  creditAttributions            CreditAttribution[]  @relation("CreditAttributedUnit")
+  creditedAs                    CreditAttribution[]  @relation("CreditAttributionEntity")
+  externalRefs                  UnitExternalRef[]    @relation("UnitExternalRefUnit")
   seriesContentIndexesAsRelease SeriesContentIndex[] @relation("SeriesContentIndexRelease")
 
   // Subject attribution
@@ -261,6 +261,13 @@ model Unit {
   subscribers       Subscription[] @relation("SubscriptionTarget")
   subscriptionsMade Subscription[] @relation("SubscriptionSubscriber")
 
+  staffCapabilityGrantRealms StaffGrant[]               @relation("StaffGrantRealm")
+  moderationCaseTargets      ModerationCase[]           @relation("ModerationCaseTargetUnit")
+  moderationCaseRealms       ModerationCase[]           @relation("ModerationCaseRealm")
+  realmQueueTargets          RealmModerationQueueItem[] @relation("RealmModerationQueueTargetUnit")
+  contentModerationState     ContentModerationState?
+  realmModerationTargets     RealmContentModeration[]   @relation("RealmContentModerationTargetUnit")
+
   // Collaborative authority and history capture.
   collaborators UnitCollaborator[]
   fieldLocks    UnitFieldLock[]
@@ -269,7 +276,7 @@ model Unit {
 
   // Inverse of ContentStructure.ownerUnitId — every generic content tree
   // owned by this Unit.
-  ownedContentStructure ContentStructure?
+  ownedContentStructure          ContentStructure?
   // Inverse of ContentStructureNode.contentUnitId — every content-structure
   // node that references this Unit as concrete content.
   contentStructureNodesAsContent ContentStructureNode[] @relation("ContentStructureNodeContent")
@@ -436,11 +443,11 @@ model WorkLinkClaim {
  * content aggregation.
  */
 model UnitWork {
-  unitId     String                @db.Uuid
-  workUnitId String                @db.Uuid
-  role       UnitWorkRole
-  language   String?               @db.VarChar(16)
-  position   String?               @db.VarChar(64)
+  unitId        String                @db.Uuid
+  workUnitId    String                @db.Uuid
+  role          UnitWorkRole
+  language      String?               @db.VarChar(16)
+  position      String?               @db.VarChar(64)
   displayPolicy UnitWorkDisplayPolicy @default(PRIMARY)
 
   createdAt DateTime @default(now())
@@ -463,29 +470,29 @@ model UnitWork {
  * and item-level progress.
  */
 model AdminWorkMergeOperation {
-  id                 String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  sourceWorkUnitId   String   @db.Uuid
-  targetWorkUnitId   String   @db.Uuid
-  status             String   @default("QUEUED") @db.VarChar(32)
-  actorUserId        String   @db.Uuid
-  reason             String?
-  copyTagsRequested  Boolean  @default(false)
-  copyAliasesRequested Boolean @default(false)
-  itemProgress       Json     @default("{}")
-  movedMemberships   Json     @default("[]")
-  movedLegacyReleaseUnitIds String[] @default([])
-  createdTagKeys     String[] @default([])
-  createdAliasIds    String[] @default([])
-  repairUnitIds      String[] @default([])
-  repairCommandCount Int      @default(0)
-  errorMessage       String?
-  revertedAt         DateTime?
-  revertedByUserId   String?  @db.Uuid
+  id                        String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  sourceWorkUnitId          String    @db.Uuid
+  targetWorkUnitId          String    @db.Uuid
+  status                    String    @default("QUEUED") @db.VarChar(32)
+  actorUserId               String    @db.Uuid
+  reason                    String?
+  copyTagsRequested         Boolean   @default(false)
+  copyAliasesRequested      Boolean   @default(false)
+  itemProgress              Json      @default("{}")
+  movedMemberships          Json      @default("[]")
+  movedLegacyReleaseUnitIds String[]  @default([])
+  createdTagKeys            String[]  @default([])
+  createdAliasIds           String[]  @default([])
+  repairUnitIds             String[]  @default([])
+  repairCommandCount        Int       @default(0)
+  errorMessage              String?
+  revertedAt                DateTime?
+  revertedByUserId          String?   @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  actor     User  @relation("AdminWorkMergeActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
+  actor      User  @relation("AdminWorkMergeActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
   revertedBy User? @relation("AdminWorkMergeRevertedBy", fields: [revertedByUserId], references: [unitId], onDelete: SetNull)
 
   @@index([sourceWorkUnitId, status, createdAt])
@@ -546,10 +553,10 @@ model ContentStructureNode {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  container   ContentStructure       @relation("ContentStructureContainer", fields: [ownerUnitId], references: [ownerUnitId], onDelete: Cascade)
-  parent      ContentStructureNode?  @relation("ContentStructureNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
-  children    ContentStructureNode[] @relation("ContentStructureNodeChildren")
-  contentUnit Unit?                  @relation("ContentStructureNodeContent", fields: [contentUnitId], references: [id], onDelete: SetNull)
+  container          ContentStructure       @relation("ContentStructureContainer", fields: [ownerUnitId], references: [ownerUnitId], onDelete: Cascade)
+  parent             ContentStructureNode?  @relation("ContentStructureNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children           ContentStructureNode[] @relation("ContentStructureNodeChildren")
+  contentUnit        Unit?                  @relation("ContentStructureNodeContent", fields: [contentUnitId], references: [id], onDelete: SetNull)
   seriesContentIndex SeriesContentIndex?
 
   @@index([ownerUnitId, parentId, sortKey])
@@ -763,15 +770,15 @@ model Series {
 /// ContentStructure. This model intentionally stores no path, depth, ordering,
 /// hierarchy, Work Unit, inherited-membership, or work-domain source fields.
 model SeriesContentIndex {
-  seriesUnitId String @db.Uuid
+  seriesUnitId  String @db.Uuid
   releaseUnitId String @db.Uuid
   contentNodeId String @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  series     Series               @relation(fields: [seriesUnitId], references: [unitId], onDelete: Cascade)
-  releaseUnit Unit                @relation("SeriesContentIndexRelease", fields: [releaseUnitId], references: [id], onDelete: Cascade)
+  series      Series               @relation(fields: [seriesUnitId], references: [unitId], onDelete: Cascade)
+  releaseUnit Unit                 @relation("SeriesContentIndexRelease", fields: [releaseUnitId], references: [id], onDelete: Cascade)
   contentNode ContentStructureNode @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
 
   @@id([seriesUnitId, releaseUnitId, contentNodeId])
@@ -801,8 +808,11 @@ model Realm {
 
   /// Realm is a subreddit-like community space, not a tag or classifier.
   /// It owns membership and community metadata; realm-scoped tag classification lives in RealmTagApplication and RealmTagContext.
-  tagApplications RealmTagApplication[] @relation("RealmTagApplicationRealm")
-  tagContexts     RealmTagContext[]
+  tagApplications      RealmTagApplication[]      @relation("RealmTagApplicationRealm")
+  tagContexts          RealmTagContext[]
+  capabilityGrants     RealmCapabilityGrant[]
+  moderationQueueItems RealmModerationQueueItem[]
+  moderationOverlays   RealmContentModeration[]
 }
 
 model RealmMember {
@@ -813,7 +823,8 @@ model RealmMember {
   joinedAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  realm Realm @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  realm            Realm                  @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  capabilityGrants RealmCapabilityGrant[]
 
   @@id([realmUnitId, userId])
   @@index([userId])
@@ -1103,19 +1114,38 @@ model User {
   units     Unit[]     @relation("UnitForUser")
   apiTokens ApiToken[]
 
-  workLinkClaimsAsClaimer  WorkLinkClaim[]    @relation("WorkLinkClaimClaimer")
-  workLinkClaimsAsResolver WorkLinkClaim[]    @relation("WorkLinkClaimResolver")
-  unitProgress             UserUnitProgress[]
-  unitCollaborations       UnitCollaborator[] @relation("UnitCollaboratorUser")
-  unitCollaboratorsAdded   UnitCollaborator[] @relation("UnitCollaboratorAddedBy")
-  unitFieldLocksCreated    UnitFieldLock[]    @relation("UnitFieldLockLockedBy")
-  historyOutboxAuthored    HistoryOutbox[]    @relation("HistoryOutboxActor")
-  historyOutboxProcessed   HistoryOutbox[]    @relation("HistoryOutboxProcessor")
-  unitAliasesCreated       UnitAlias[]        @relation("UnitAliasCreatedBy")
-  unitAliasesUpdated       UnitAlias[]        @relation("UnitAliasUpdatedBy")
-  unitAliasVotes           UnitAliasVote[]    @relation("UnitAliasVoteUser")
-  adminWorkMergesCreated   AdminWorkMergeOperation[] @relation("AdminWorkMergeActor")
-  adminWorkMergesReverted  AdminWorkMergeOperation[] @relation("AdminWorkMergeRevertedBy")
+  workLinkClaimsAsClaimer         WorkLinkClaim[]            @relation("WorkLinkClaimClaimer")
+  workLinkClaimsAsResolver        WorkLinkClaim[]            @relation("WorkLinkClaimResolver")
+  unitProgress                    UserUnitProgress[]
+  unitCollaborations              UnitCollaborator[]         @relation("UnitCollaboratorUser")
+  unitCollaboratorsAdded          UnitCollaborator[]         @relation("UnitCollaboratorAddedBy")
+  unitFieldLocksCreated           UnitFieldLock[]            @relation("UnitFieldLockLockedBy")
+  historyOutboxAuthored           HistoryOutbox[]            @relation("HistoryOutboxActor")
+  historyOutboxProcessed          HistoryOutbox[]            @relation("HistoryOutboxProcessor")
+  unitAliasesCreated              UnitAlias[]                @relation("UnitAliasCreatedBy")
+  unitAliasesUpdated              UnitAlias[]                @relation("UnitAliasUpdatedBy")
+  unitAliasVotes                  UnitAliasVote[]            @relation("UnitAliasVoteUser")
+  adminWorkMergesCreated          AdminWorkMergeOperation[]  @relation("AdminWorkMergeActor")
+  adminWorkMergesReverted         AdminWorkMergeOperation[]  @relation("AdminWorkMergeRevertedBy")
+  staffGrantsReceived             StaffGrant[]               @relation("StaffGrantUser")
+  staffGrantsCreated              StaffGrant[]               @relation("StaffGrantGrantedBy")
+  staffGrantsRevoked              StaffGrant[]               @relation("StaffGrantRevokedBy")
+  realmGrantsCreated              RealmCapabilityGrant[]     @relation("RealmCapabilityGrantGrantedBy")
+  realmGrantsRevoked              RealmCapabilityGrant[]     @relation("RealmCapabilityGrantRevokedBy")
+  accountEnforcements             AccountEnforcement[]       @relation("AccountEnforcementTarget")
+  accountEnforcementsDecided      AccountEnforcement[]       @relation("AccountEnforcementDecidedBy")
+  accountEnforcementsRevoked      AccountEnforcement[]       @relation("AccountEnforcementRevokedBy")
+  moderationCasesReported         ModerationCase[]           @relation("ModerationCaseReporter")
+  moderationCasesSubject          ModerationCase[]           @relation("ModerationCaseSubject")
+  moderationCasesAssigned         ModerationCase[]           @relation("ModerationCaseAssignedTo")
+  moderationCaseEvents            ModerationCaseEvent[]      @relation("ModerationCaseEventActor")
+  realmQueueReports               RealmModerationQueueItem[] @relation("RealmModerationQueueReporter")
+  realmQueueSubjects              RealmModerationQueueItem[] @relation("RealmModerationQueueSubject")
+  realmQueueAssignments           RealmModerationQueueItem[] @relation("RealmModerationQueueAssignedTo")
+  realmModerationEvents           RealmModerationEvent[]     @relation("RealmModerationEventActor")
+  contentModerationDecisions      ContentModerationState[]   @relation("ContentModerationStateDecidedBy")
+  realmContentModerationDecisions RealmContentModeration[]   @relation("RealmContentModerationDecidedBy")
+  staffAuditLogs                  StaffAuditLog[]            @relation("StaffAuditLogActor")
 
   @@index([email])
 }
@@ -1356,6 +1386,9 @@ model Feedback {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 
+  moderationCases ModerationCase[]           @relation("ModerationCaseSourceFeedback")
+  realmQueueItems RealmModerationQueueItem[] @relation("RealmModerationQueueSourceFeedback")
+
   @@index([userId])
   @@index([unitId])
   @@index([type])
@@ -1367,6 +1400,326 @@ enum FeedbackType {
   BUG
   FEATURE
   OTHER
+}
+
+enum GovernanceGrantState {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum AccountEnforcementKind {
+  WARNING
+  SILENCE
+  SUSPENSION
+  BAN
+  RATE_LIMIT
+  TRUST_RESTRICTION
+}
+
+enum AccountEnforcementState {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum ModerationCaseState {
+  NEW
+  TRIAGED
+  ASSIGNED
+  ACTIONED
+  RESOLVED
+  DUPLICATE
+  REJECTED
+  ESCALATED
+}
+
+enum RealmModerationQueueState {
+  NEW
+  REVIEWING
+  ACTIONED
+  RESOLVED
+  DUPLICATE
+  REJECTED
+  ESCALATED
+}
+
+enum ContentModerationStateKind {
+  VISIBLE
+  HIDDEN
+  TOMBSTONED
+  LOCKED
+  ARCHIVED
+  REMOVED
+}
+
+model StaffGrant {
+  id          String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  userId      String               @db.Uuid
+  capability  String               @db.VarChar(96)
+  scopeKind   String               @default("global") @db.VarChar(32)
+  realmUnitId String?              @db.Uuid
+  state       GovernanceGrantState @default(ACTIVE)
+  grantedById String               @db.Uuid
+  revokedById String?              @db.Uuid
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  user      User  @relation("StaffGrantUser", fields: [userId], references: [unitId], onDelete: Cascade)
+  realm     Unit? @relation("StaffGrantRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
+  grantedBy User  @relation("StaffGrantGrantedBy", fields: [grantedById], references: [unitId], onDelete: Restrict)
+  revokedBy User? @relation("StaffGrantRevokedBy", fields: [revokedById], references: [unitId], onDelete: SetNull)
+
+  @@index([userId, state, expiresAt])
+  @@index([capability, scopeKind, realmUnitId])
+  @@index([grantedById, createdAt])
+  @@index([revokedById])
+}
+
+model RealmCapabilityGrant {
+  id          String               @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  realmUnitId String               @db.Uuid
+  userId      String               @db.Uuid
+  capability  String               @db.VarChar(96)
+  state       GovernanceGrantState @default(ACTIVE)
+  grantedById String               @db.Uuid
+  revokedById String?              @db.Uuid
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  realmMember RealmMember @relation(fields: [realmUnitId, userId], references: [realmUnitId, userId], onDelete: Cascade)
+  realm       Realm       @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  grantedBy   User        @relation("RealmCapabilityGrantGrantedBy", fields: [grantedById], references: [unitId], onDelete: Restrict)
+  revokedBy   User?       @relation("RealmCapabilityGrantRevokedBy", fields: [revokedById], references: [unitId], onDelete: SetNull)
+
+  @@index([realmUnitId, userId, state])
+  @@index([realmUnitId, capability, state])
+  @@index([userId, capability, state])
+  @@index([grantedById, createdAt])
+  @@index([revokedById])
+}
+
+model AccountEnforcement {
+  id           String                  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  targetUserId String                  @db.Uuid
+  kind         AccountEnforcementKind
+  state        AccountEnforcementState @default(ACTIVE)
+  reason       String
+  safeMessage  String?
+  decidedById  String                  @db.Uuid
+  decisionCode String                  @db.VarChar(64)
+  startsAt     DateTime                @default(now())
+  expiresAt    DateTime?
+  revokedAt    DateTime?
+  revokedById  String?                 @db.Uuid
+  auditLogId   String?                 @db.Uuid
+  metadata     Json?
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  targetUser User  @relation("AccountEnforcementTarget", fields: [targetUserId], references: [unitId], onDelete: Cascade)
+  decidedBy  User  @relation("AccountEnforcementDecidedBy", fields: [decidedById], references: [unitId], onDelete: Restrict)
+  revokedBy  User? @relation("AccountEnforcementRevokedBy", fields: [revokedById], references: [unitId], onDelete: SetNull)
+
+  @@index([targetUserId, state, kind, expiresAt])
+  @@index([kind, state, createdAt])
+  @@index([decidedById, createdAt])
+  @@index([revokedById])
+  @@index([auditLogId])
+}
+
+model ModerationCase {
+  id                String              @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  state             ModerationCaseState @default(NEW)
+  severity          String?             @db.VarChar(32)
+  reporterUserId    String?             @db.Uuid
+  subjectUserId     String?             @db.Uuid
+  targetKind        String              @db.VarChar(64)
+  targetId          String              @db.VarChar(128)
+  targetUnitId      String?             @db.Uuid
+  realmUnitId       String?             @db.Uuid
+  sourceFeedbackId  String?             @db.Uuid
+  assignedToUserId  String?             @db.Uuid
+  duplicateOfCaseId String?             @db.Uuid
+  reason            String?
+  safeSummary       String?
+  metadata          Json?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  reporter       User?            @relation("ModerationCaseReporter", fields: [reporterUserId], references: [unitId], onDelete: SetNull)
+  subject        User?            @relation("ModerationCaseSubject", fields: [subjectUserId], references: [unitId], onDelete: SetNull)
+  targetUnit     Unit?            @relation("ModerationCaseTargetUnit", fields: [targetUnitId], references: [id], onDelete: SetNull)
+  realm          Unit?            @relation("ModerationCaseRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
+  sourceFeedback Feedback?        @relation("ModerationCaseSourceFeedback", fields: [sourceFeedbackId], references: [id], onDelete: SetNull)
+  assignedTo     User?            @relation("ModerationCaseAssignedTo", fields: [assignedToUserId], references: [unitId], onDelete: SetNull)
+  duplicateOf    ModerationCase?  @relation("ModerationCaseDuplicates", fields: [duplicateOfCaseId], references: [id], onDelete: SetNull)
+  duplicates     ModerationCase[] @relation("ModerationCaseDuplicates")
+
+  events                 ModerationCaseEvent[]
+  realmQueueItems        RealmModerationQueueItem[]
+  contentStates          ContentModerationState[]
+  realmContentModeration RealmContentModeration[]
+
+  @@index([state, severity, createdAt])
+  @@index([realmUnitId, state, createdAt])
+  @@index([assignedToUserId, state, createdAt])
+  @@index([targetKind, targetId])
+  @@index([targetUnitId, state])
+  @@index([subjectUserId, state, createdAt])
+  @@index([reporterUserId, createdAt])
+  @@index([sourceFeedbackId])
+  @@index([duplicateOfCaseId])
+}
+
+model ModerationCaseEvent {
+  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  caseId       String   @db.Uuid
+  actorUserId  String   @db.Uuid
+  eventType    String   @db.VarChar(64)
+  decision     Json?
+  decisionCode String?  @db.VarChar(64)
+  reason       String?
+  before       Json?
+  after        Json?
+  reversible   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  case  ModerationCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actor User           @relation("ModerationCaseEventActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
+
+  @@index([caseId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([decisionCode, createdAt])
+}
+
+model RealmModerationQueueItem {
+  id               String                    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  realmUnitId      String                    @db.Uuid
+  state            RealmModerationQueueState @default(NEW)
+  reporterUserId   String?                   @db.Uuid
+  subjectUserId    String?                   @db.Uuid
+  targetKind       String                    @db.VarChar(64)
+  targetId         String                    @db.VarChar(128)
+  targetUnitId     String?                   @db.Uuid
+  sourceFeedbackId String?                   @db.Uuid
+  linkedCaseId     String?                   @db.Uuid
+  assignedToUserId String?                   @db.Uuid
+  reason           String?
+  safeSummary      String?
+  metadata         Json?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+
+  targetRealm    Realm                  @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  reporter       User?                  @relation("RealmModerationQueueReporter", fields: [reporterUserId], references: [unitId], onDelete: SetNull)
+  subject        User?                  @relation("RealmModerationQueueSubject", fields: [subjectUserId], references: [unitId], onDelete: SetNull)
+  targetUnit     Unit?                  @relation("RealmModerationQueueTargetUnit", fields: [targetUnitId], references: [id], onDelete: SetNull)
+  sourceFeedback Feedback?              @relation("RealmModerationQueueSourceFeedback", fields: [sourceFeedbackId], references: [id], onDelete: SetNull)
+  linkedCase     ModerationCase?        @relation(fields: [linkedCaseId], references: [id], onDelete: SetNull)
+  assignedTo     User?                  @relation("RealmModerationQueueAssignedTo", fields: [assignedToUserId], references: [unitId], onDelete: SetNull)
+  events         RealmModerationEvent[]
+
+  @@index([realmUnitId, state, createdAt])
+  @@index([realmUnitId, assignedToUserId, state, createdAt], map: "RealmModerationQueueItem_realmUnitId_assignedToUserId_state_idx")
+  @@index([targetKind, targetId])
+  @@index([targetUnitId, state])
+  @@index([subjectUserId, state, createdAt])
+  @@index([reporterUserId, createdAt])
+  @@index([sourceFeedbackId])
+  @@index([linkedCaseId])
+}
+
+model RealmModerationEvent {
+  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  queueItemId  String   @db.Uuid
+  realmUnitId  String   @db.Uuid
+  actorUserId  String   @db.Uuid
+  decisionKind String?  @db.VarChar(64)
+  decision     Json?
+  decisionCode String?  @db.VarChar(64)
+  reason       String?
+  before       Json?
+  after        Json?
+  createdAt    DateTime @default(now())
+
+  queueItem RealmModerationQueueItem @relation(fields: [queueItemId], references: [id], onDelete: Cascade)
+  actor     User                     @relation("RealmModerationEventActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
+
+  @@index([queueItemId, createdAt])
+  @@index([realmUnitId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([decisionKind, createdAt])
+}
+
+model ContentModerationState {
+  targetUnitId String                     @id @db.Uuid
+  state        ContentModerationStateKind @default(VISIBLE)
+  decidedById  String?                    @db.Uuid
+  caseId       String?                    @db.Uuid
+  reason       String?
+  metadata     Json?
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+
+  targetUnit Unit            @relation(fields: [targetUnitId], references: [id], onDelete: Cascade)
+  decidedBy  User?           @relation("ContentModerationStateDecidedBy", fields: [decidedById], references: [unitId], onDelete: SetNull)
+  case       ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
+  @@index([state, updatedAt])
+  @@index([decidedById, updatedAt])
+  @@index([caseId])
+}
+
+model RealmContentModeration {
+  realmUnitId  String                     @db.Uuid
+  targetUnitId String                     @db.Uuid
+  state        ContentModerationStateKind
+  decidedById  String?                    @db.Uuid
+  caseId       String?                    @db.Uuid
+  reason       String?
+  metadata     Json?
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+
+  realm      Realm           @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  targetUnit Unit            @relation("RealmContentModerationTargetUnit", fields: [targetUnitId], references: [id], onDelete: Cascade)
+  decidedBy  User?           @relation("RealmContentModerationDecidedBy", fields: [decidedById], references: [unitId], onDelete: SetNull)
+  case       ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
+  @@id([realmUnitId, targetUnitId])
+  @@index([realmUnitId, state, updatedAt])
+  @@index([targetUnitId, state])
+  @@index([decidedById, updatedAt])
+  @@index([caseId])
+}
+
+model StaffAuditLog {
+  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  actorUserId  String   @db.Uuid
+  action       String   @db.VarChar(128)
+  targetKind   String   @db.VarChar(64)
+  targetId     String   @db.VarChar(128)
+  decisionCode String   @db.VarChar(64)
+  requestId    String?  @db.VarChar(128)
+  reason       String
+  before       Json?
+  after        Json?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  actor User @relation("StaffAuditLogActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
+
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+  @@index([targetKind, targetId, createdAt])
+  @@index([decisionCode, createdAt])
+  @@index([requestId])
 }
 
 model JwtService {
