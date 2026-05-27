@@ -12,6 +12,7 @@ describe("factory scenarios", () => {
       "large-content-tree",
       "large-history",
       "complex-shelf",
+      "unit-work-domain",
     ]);
 
     for (const name of FACTORY_SCENARIO_NAMES) {

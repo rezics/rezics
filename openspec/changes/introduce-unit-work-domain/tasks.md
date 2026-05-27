@@ -152,11 +152,11 @@
 
 ## 17. Work-Domain Seed Fixtures
 
-- [ ] 17.1 Add `unit-work-domain` special factory scenario.
-- [ ] 17.2 Seed at least one hidden BOOK work with primary, translation, secondary, and hidden-by-default releases.
-- [ ] 17.3 Seed work-level tags, release-local tags, and inherited-tag search sync hooks for the fixture.
-- [ ] 17.4 Seed release-local `UnitTranslation` rows and same-work releases in multiple languages for language switcher and Releases tab coverage.
-- [ ] 17.5 Seed reviews targeting different releases under the same work so work-domain feed aggregation can be verified.
-- [ ] 17.6 Seed a shelf containing multiple releases under the same work for grouped and expanded shelf rendering.
-- [ ] 17.7 Attach ISBN/source-site external reference fixtures to visible releases rather than hidden works.
-- [ ] 17.8 Emit special target report entries for the hidden work, primary release, translation release, hidden-by-default release, and shelf fixture.
+- [x] 17.1 Add `unit-work-domain` special factory scenario.
+- [x] 17.2 Seed at least one hidden BOOK work with primary, translation, secondary, and hidden-by-default releases.
+- [x] 17.3 Seed work-level tags, release-local tags, and inherited-tag search sync hooks for the fixture.
+- [x] 17.4 Seed release-local `UnitTranslation` rows and same-work releases in multiple languages for language switcher and Releases tab coverage.
+- [x] 17.5 Seed reviews targeting different releases under the same work so work-domain feed aggregation can be verified.
+- [x] 17.6 Seed a shelf containing multiple releases under the same work for grouped and expanded shelf rendering.
+- [x] 17.7 Attach ISBN/source-site external reference fixtures to visible releases rather than hidden works.
+- [x] 17.8 Emit special target report entries for the hidden work, primary release, translation release, hidden-by-default release, and shelf fixture.
