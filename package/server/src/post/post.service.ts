@@ -304,7 +304,9 @@ export class PostService {
       scoreEntryId,
       extra,
     } = input;
-    const realmIdsToWrite = [...new Set(realmUnitIds ?? [])];
+    const realmIdsToWrite = parentPostUnitId
+      ? []
+      : [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
     let targetUnitTypeFromChapterCheck: string | null = null;

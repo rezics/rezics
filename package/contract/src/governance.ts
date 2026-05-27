@@ -264,6 +264,54 @@ export const realmModerationEventDTOSchema = t.Object({
 export type RealmModerationEventDTO =
   (typeof realmModerationEventDTOSchema)["static"];
 
+export const contentModerationStateKinds = [
+  "visible",
+  "hidden",
+  "tombstoned",
+  "locked",
+  "archived",
+] as const;
+
+export const contentModerationStateKindSchema = t.Union([
+  t.Literal("visible"),
+  t.Literal("hidden"),
+  t.Literal("tombstoned"),
+  t.Literal("locked"),
+  t.Literal("archived"),
+]);
+
+export type ContentModerationStateKind =
+  (typeof contentModerationStateKindSchema)["static"];
+
+export const contentModerationStateDTOSchema = t.Object({
+  targetUnitId: t.String(),
+  state: contentModerationStateKindSchema,
+  decidedByUserId: t.Optional(t.Nullable(t.String())),
+  caseId: t.Optional(t.Nullable(t.String())),
+  reason: t.Optional(t.Nullable(t.String())),
+  metadata: t.Optional(auditMetadataSchema),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+});
+
+export type ContentModerationStateDTO =
+  (typeof contentModerationStateDTOSchema)["static"];
+
+export const realmContentModerationDTOSchema = t.Object({
+  realmUnitId: t.String(),
+  targetUnitId: t.String(),
+  state: contentModerationStateKindSchema,
+  decidedByUserId: t.Optional(t.Nullable(t.String())),
+  caseId: t.Optional(t.Nullable(t.String())),
+  reason: t.Optional(t.Nullable(t.String())),
+  metadata: t.Optional(auditMetadataSchema),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+});
+
+export type RealmContentModerationDTO =
+  (typeof realmContentModerationDTOSchema)["static"];
+
 export const staffAuditLogDTOSchema = t.Object({
   id: t.String(),
   actorUserId: t.String(),

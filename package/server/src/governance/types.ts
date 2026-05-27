@@ -1,8 +1,10 @@
 import type {
   AccountEnforcement,
+  ContentModerationState,
   ModerationCase,
   ModerationCaseEvent,
   RealmCapabilityGrant,
+  RealmContentModeration,
   RealmModerationEvent,
   RealmModerationQueueItem,
   StaffAuditLog,
@@ -12,6 +14,8 @@ import type {
 export type StaffGrantRow = StaffGrant;
 export type RealmCapabilityGrantRow = RealmCapabilityGrant;
 export type AccountEnforcementRow = AccountEnforcement;
+export type ContentModerationStateRow = ContentModerationState;
+export type RealmContentModerationRow = RealmContentModeration;
 export type ModerationCaseRow = ModerationCase;
 export type ModerationCaseEventRow = ModerationCaseEvent;
 export type RealmModerationQueueItemRow = RealmModerationQueueItem;

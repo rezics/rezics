@@ -3,18 +3,23 @@ import type {
   AccountEnforcementKind,
   AccountEnforcementState,
   CapabilityGrantDTO,
+  ContentModerationStateDTO,
+  ContentModerationStateKind,
   ModerationCaseDTO,
   ModerationCaseEventDTO,
   ModerationCaseState,
   RealmModerationEventDTO,
   RealmModerationQueueItemDTO,
+  RealmContentModerationDTO,
   StaffAuditLogDTO,
 } from "@rezics/contract";
 import type {
   AccountEnforcementRow,
+  ContentModerationStateRow,
   ModerationCaseEventRow,
   ModerationCaseRow,
   RealmCapabilityGrantRow,
+  RealmContentModerationRow,
   RealmModerationEventRow,
   RealmModerationQueueItemRow,
   StaffAuditLogRow,
@@ -168,6 +173,37 @@ export function mapRealmModerationEventToDTO(
     before: (row.before as Record<string, unknown> | null) ?? undefined,
     after: (row.after as Record<string, unknown> | null) ?? undefined,
     createdAt: row.createdAt.toISOString(),
+  };
+}
+
+export function mapContentModerationStateToDTO(
+  row: ContentModerationStateRow,
+): ContentModerationStateDTO {
+  return {
+    targetUnitId: row.targetUnitId,
+    state: lower<ContentModerationStateKind>(row.state),
+    decidedByUserId: row.decidedById,
+    caseId: row.caseId,
+    reason: row.reason,
+    metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+export function mapRealmContentModerationToDTO(
+  row: RealmContentModerationRow,
+): RealmContentModerationDTO {
+  return {
+    realmUnitId: row.realmUnitId,
+    targetUnitId: row.targetUnitId,
+    state: lower<ContentModerationStateKind>(row.state),
+    decidedByUserId: row.decidedById,
+    caseId: row.caseId,
+    reason: row.reason,
+    metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
   };
 }
 

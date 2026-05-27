@@ -2,9 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   accountEnforcementDTOSchema,
+  contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
   grantCapabilitySchema,
   moderationCaseDTOSchema,
+  realmContentModerationDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
   unblockAccountEnforcementSchema,
@@ -162,6 +164,33 @@ describe("governance contract registry", () => {
         before: { state: "active" },
         after: { state: "banned" },
         createdAt: "2026-05-28T00:00:00.000Z",
+      }),
+    ).toBe(true);
+  });
+
+  test("content moderation state DTOs validate", () => {
+    expect(
+      Value.Check(contentModerationStateDTOSchema, {
+        targetUnitId: "reply-1",
+        state: "hidden",
+        decidedByUserId: "staff-1",
+        caseId: "case-1",
+        reason: "abuse",
+        metadata: { source: "case" },
+        createdAt: "2026-05-28T00:00:00.000Z",
+        updatedAt: "2026-05-28T00:00:00.000Z",
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(realmContentModerationDTOSchema, {
+        realmUnitId: "realm-1",
+        targetUnitId: "reply-1",
+        state: "tombstoned",
+        decidedByUserId: "mod-1",
+        reason: "off-topic",
+        createdAt: "2026-05-28T00:00:00.000Z",
+        updatedAt: "2026-05-28T00:00:00.000Z",
       }),
     ).toBe(true);
   });

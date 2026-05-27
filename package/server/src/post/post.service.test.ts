@@ -4,7 +4,10 @@ import {
   isEditorialPathInScope,
   markdownContentDoc,
 } from "@rezics/contract";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "../test/prisma-client-mock";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -121,6 +124,21 @@ mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {
     enqueue: enqueueMock,
   },
+}));
+
+mock.module("@/unit/collaborative-metadata", () => ({
+  assertCanEditCollaborativeMetadata: mock(() => undefined),
+  collectPatchLeafPaths: mock(() => []),
+  writeEditorialMetadataHistory: mock(async () => undefined),
+}));
+
+mock.module("@/unit/publication-policy", () => ({
+  publicUnitEligibilityWhere: mock(() => ({})),
+}));
+
+mock.module("@/utils/userSlugHydration", () => ({
+  hydrateUnitOwnerUserSlugRow: mock((row: unknown) => row),
+  hydrateUnitOwnerUserSlugs: mock((rows: unknown) => rows),
 }));
 
 mock.module("@/meili/post/sync", () => ({
@@ -626,6 +644,30 @@ describe("PostService.create rootTargetUnit derivation", () => {
     expect(data.rootTargetUnitId).toBe("book-B");
     expect(data.rootTargetUnitType).toBe("BOOK");
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  test("reply does not create independent UnitRealm placement rows", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "parent-1",
+      rootPostUnitId: "root-1",
+      depth: 0,
+      sortPath: "0001",
+      isLocked: false,
+      rootTargetUnitId: null,
+      rootTargetUnitType: null,
+    });
+
+    await service.create(
+      {
+        content: content("reply"),
+        parentPostUnitId: "parent-1",
+        realmUnitIds: ["realm-1"],
+      },
+      "user-1",
+    );
+
+    expect(realmUnitCreateMock).not.toHaveBeenCalled();
   });
 
   test("nested reply still inherits root target from its parent", async () => {
