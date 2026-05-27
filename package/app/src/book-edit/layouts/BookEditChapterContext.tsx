@@ -21,15 +21,17 @@ const i18nMessages = {
 
 interface BookEditChapterContextProps {
   bookId: string;
-  chapterId: string;
+  contentUnitId: string;
 }
 
 export function BookEditChapterContext({
   bookId,
-  chapterId,
+  contentUnitId,
 }: BookEditChapterContextProps) {
   const m = useMessage(i18nMessages);
-  const { data, isError, isPending } = useQuery(chapterDetailQuery(chapterId));
+  const { data, isError, isPending } = useQuery(
+    chapterDetailQuery(contentUnitId),
+  );
   const title =
     data && "title" in data && typeof data.title === "string" ? data.title : "";
 

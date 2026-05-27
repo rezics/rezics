@@ -90,6 +90,7 @@ import { Route as MainLayoutInboxDmConversationIdRouteImport } from './routes/_m
 import { Route as MainLayoutExcerptBookBookIdRouteImport } from './routes/_mainLayout/excerpt/book/$bookId'
 import { Route as MainLayoutBookBookIdSearchRouteImport } from './routes/_mainLayout/book/$bookId/search'
 import { Route as MainLayoutBookBookIdReviewRouteImport } from './routes/_mainLayout/book/$bookId/review'
+import { Route as MainLayoutBookBookIdReleasesRouteImport } from './routes/_mainLayout/book/$bookId/releases'
 import { Route as MainLayoutBookBookIdInfoRouteImport } from './routes/_mainLayout/book/$bookId/info'
 import { Route as MainLayoutBookBookIdDiscussionRouteImport } from './routes/_mainLayout/book/$bookId/discussion'
 import { Route as MainLayoutBookBookIdContentRouteImport } from './routes/_mainLayout/book/$bookId/content'
@@ -576,6 +577,12 @@ const MainLayoutBookBookIdReviewRoute =
     path: '/review',
     getParentRoute: () => MainLayoutBookBookIdRouteRoute,
   } as any)
+const MainLayoutBookBookIdReleasesRoute =
+  MainLayoutBookBookIdReleasesRouteImport.update({
+    id: '/releases',
+    path: '/releases',
+    getParentRoute: () => MainLayoutBookBookIdRouteRoute,
+  } as any)
 const MainLayoutBookBookIdInfoRoute =
   MainLayoutBookBookIdInfoRouteImport.update({
     id: '/info',
@@ -883,6 +890,7 @@ export interface FileRoutesByFullPath {
   '/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
   '/book/$bookId/discussion': typeof MainLayoutBookBookIdDiscussionRoute
   '/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
+  '/book/$bookId/releases': typeof MainLayoutBookBookIdReleasesRoute
   '/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
@@ -998,6 +1006,7 @@ export interface FileRoutesByTo {
   '/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
   '/book/$bookId/discussion': typeof MainLayoutBookBookIdDiscussionRoute
   '/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
+  '/book/$bookId/releases': typeof MainLayoutBookBookIdReleasesRoute
   '/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
@@ -1123,6 +1132,7 @@ export interface FileRoutesById {
   '/_mainLayout/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
   '/_mainLayout/book/$bookId/discussion': typeof MainLayoutBookBookIdDiscussionRoute
   '/_mainLayout/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
+  '/_mainLayout/book/$bookId/releases': typeof MainLayoutBookBookIdReleasesRoute
   '/_mainLayout/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/_mainLayout/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
   '/_mainLayout/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
@@ -1249,6 +1259,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/content'
     | '/book/$bookId/discussion'
     | '/book/$bookId/info'
+    | '/book/$bookId/releases'
     | '/book/$bookId/review'
     | '/book/$bookId/search'
     | '/excerpt/book/$bookId'
@@ -1364,6 +1375,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/content'
     | '/book/$bookId/discussion'
     | '/book/$bookId/info'
+    | '/book/$bookId/releases'
     | '/book/$bookId/review'
     | '/book/$bookId/search'
     | '/excerpt/book/$bookId'
@@ -1488,6 +1500,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/book/$bookId/content'
     | '/_mainLayout/book/$bookId/discussion'
     | '/_mainLayout/book/$bookId/info'
+    | '/_mainLayout/book/$bookId/releases'
     | '/_mainLayout/book/$bookId/review'
     | '/_mainLayout/book/$bookId/search'
     | '/_mainLayout/excerpt/book/$bookId'
@@ -2136,6 +2149,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutBookBookIdReviewRouteImport
       parentRoute: typeof MainLayoutBookBookIdRouteRoute
     }
+    '/_mainLayout/book/$bookId/releases': {
+      id: '/_mainLayout/book/$bookId/releases'
+      path: '/releases'
+      fullPath: '/book/$bookId/releases'
+      preLoaderRoute: typeof MainLayoutBookBookIdReleasesRouteImport
+      parentRoute: typeof MainLayoutBookBookIdRouteRoute
+    }
     '/_mainLayout/book/$bookId/info': {
       id: '/_mainLayout/book/$bookId/info'
       path: '/info'
@@ -2516,6 +2536,7 @@ interface MainLayoutBookBookIdRouteRouteChildren {
   MainLayoutBookBookIdContentRoute: typeof MainLayoutBookBookIdContentRoute
   MainLayoutBookBookIdDiscussionRoute: typeof MainLayoutBookBookIdDiscussionRoute
   MainLayoutBookBookIdInfoRoute: typeof MainLayoutBookBookIdInfoRoute
+  MainLayoutBookBookIdReleasesRoute: typeof MainLayoutBookBookIdReleasesRoute
   MainLayoutBookBookIdReviewRoute: typeof MainLayoutBookBookIdReviewRoute
   MainLayoutBookBookIdSearchRoute: typeof MainLayoutBookBookIdSearchRoute
   MainLayoutBookBookIdIndexRoute: typeof MainLayoutBookBookIdIndexRoute
@@ -2526,6 +2547,7 @@ const MainLayoutBookBookIdRouteRouteChildren: MainLayoutBookBookIdRouteRouteChil
     MainLayoutBookBookIdContentRoute: MainLayoutBookBookIdContentRoute,
     MainLayoutBookBookIdDiscussionRoute: MainLayoutBookBookIdDiscussionRoute,
     MainLayoutBookBookIdInfoRoute: MainLayoutBookBookIdInfoRoute,
+    MainLayoutBookBookIdReleasesRoute: MainLayoutBookBookIdReleasesRoute,
     MainLayoutBookBookIdReviewRoute: MainLayoutBookBookIdReviewRoute,
     MainLayoutBookBookIdSearchRoute: MainLayoutBookBookIdSearchRoute,
     MainLayoutBookBookIdIndexRoute: MainLayoutBookBookIdIndexRoute,

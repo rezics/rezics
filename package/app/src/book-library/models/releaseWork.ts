@@ -44,6 +44,15 @@ export function hasMissingReleaseLanguages(
   return releaseLanguages(releases).some((language) => !current.has(language));
 }
 
+export function defaultReleaseLanguageFilters(
+  preferredLanguage: string | null | undefined,
+  availableLanguages: readonly string[],
+): string[] {
+  return preferredLanguage && availableLanguages.includes(preferredLanguage)
+    ? [preferredLanguage]
+    : [];
+}
+
 function displayPolicyRank(policy: string | null | undefined): number {
   if (policy === "PRIMARY") return 0;
   if (policy === "SECONDARY") return 1;

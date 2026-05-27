@@ -120,9 +120,18 @@ export function buildUnitWhereClause(
     .filter(Boolean);
   if (userList.length > 0) andWhere.push({ userId: { in: userList } });
 
-  // Filter by workUnitId
+  // Filter release-aware work membership through canonical UnitWork. The legacy
+  // Unit.workUnitId column remains synchronized for migration compatibility,
+  // but list semantics should read UnitWork.
   if (options.workUnitId?.trim()) {
-    andWhere.push({ workUnitId: options.workUnitId });
+    andWhere.push({
+      workMemberships: {
+        some: {
+          workUnitId: options.workUnitId,
+          role: "RELEASE",
+        },
+      },
+    });
   }
 
   // Filter by language (translations must have this language)

@@ -14,6 +14,7 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { ShelfByBookPreview } from "../components/ShelfByBookPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
+import { releaseWorkUnitId } from "../models/releaseWork";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
@@ -29,12 +30,19 @@ export const BookReviewPage: React.FC = () => {
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
+  const workUnitId = releaseWorkUnitId(bookInfo);
 
   const { data: reviewsData } = useQuery({
-    ...postQueries.byTarget(bookId, {
+    ...(workUnitId
+      ? postQueries.byWork(workUnitId, {
+          kind: PostKind.REVIEW,
+          workRoles: ["REVIEW"],
+          limit: REVIEW_PREVIEW_LIMIT,
+        })
+      : postQueries.byTarget(bookId, {
       kind: PostKind.REVIEW,
       limit: REVIEW_PREVIEW_LIMIT,
-    }),
+        })),
     enabled: Boolean(bookId),
   });
 
@@ -94,7 +102,7 @@ export const BookReviewPage: React.FC = () => {
             Write a Review
           </Button>
         </div>
-        <ReviewList reviews={reviews} showTargetWork={false} />
+        <ReviewList reviews={reviews} showTargetWork={Boolean(workUnitId)} />
       </div>
     </div>
   );

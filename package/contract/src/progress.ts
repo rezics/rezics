@@ -53,7 +53,9 @@ export type ContentStructurePathLastPosition =
 export const chapterLastPositionSchema = t.Object(
   {
     kind: t.Literal("chapter"),
-    chapterUnitId: t.String(),
+    contentUnitId: t.String(),
+    /** @deprecated Read-only compatibility for legacy clients. */
+    chapterUnitId: t.Optional(t.String()),
     offset: t.Optional(t.Number({ minimum: 0 })),
   },
   { additionalProperties: false },
@@ -61,9 +63,20 @@ export const chapterLastPositionSchema = t.Object(
 
 export type ChapterLastPosition = (typeof chapterLastPositionSchema)["static"];
 
+const legacyChapterLastPositionSchema = t.Object(
+  {
+    kind: t.Literal("chapter"),
+    /** @deprecated Use contentUnitId. */
+    chapterUnitId: t.String(),
+    offset: t.Optional(t.Number({ minimum: 0 })),
+  },
+  { additionalProperties: false },
+);
+
 export const unitLastPositionSchema = t.Union([
   contentStructurePathLastPositionSchema,
   chapterLastPositionSchema,
+  legacyChapterLastPositionSchema,
 ]);
 
 export type UnitLastPosition = (typeof unitLastPositionSchema)["static"];

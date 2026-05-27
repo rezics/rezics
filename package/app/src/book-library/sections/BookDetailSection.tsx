@@ -5,6 +5,7 @@ import {
   page_book_tabs_content,
   page_book_tabs_overview,
   page_book_tabs_review_shelf,
+  book_otherEditions,
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
 import {
@@ -34,11 +35,13 @@ const i18nMessages = {
   page_book_tabs_content,
   page_book_tabs_overview,
   page_book_tabs_review_shelf,
+  book_otherEditions,
 };
 
 const TAB_ROUTES = [
   "info",
   "review",
+  "releases",
   "content",
   "discussion",
   "history",
@@ -117,6 +120,9 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                 <TabsTrigger value="review" className="flex-none snap-start">
                   {m.page_book_tabs_review_shelf()}
                 </TabsTrigger>
+                <TabsTrigger value="releases" className="flex-none snap-start">
+                  {m.book_otherEditions()}
+                </TabsTrigger>
                 <TabsTrigger value="content" className="flex-none snap-start">
                   {m.page_book_tabs_content()}
                 </TabsTrigger>
@@ -159,9 +165,8 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
               className="flex-shrink-0"
               onClick={() =>
                 navigate({
-                  to: "/book/$bookId/info",
+                  to: "/book/$bookId/releases",
                   params: { bookId },
-                  hash: "releases",
                 })
               }
             >

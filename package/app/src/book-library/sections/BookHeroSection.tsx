@@ -28,6 +28,7 @@ import {
 } from "@/shared/utils/translation-helpers";
 import { SourceEvidencePreview } from "../components/SourceEvidencePreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
+import { releaseWorkUnitId } from "../models/releaseWork";
 import { BookHeroActionBar } from "./BookHeroActionBar";
 import { BookHeroCountLinks } from "./BookHeroCountLinks";
 import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
@@ -92,6 +93,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
     bookId?: string;
   };
   const bookId = routeBookId ?? bookInfo?.unitId ?? "";
+  const workUnitId = releaseWorkUnitId(bookInfo);
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
 
   const selectedTranslation = getTranslation(
@@ -117,7 +119,13 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   // Lifted review query — drives both the centre review card and the dynamic
   // right-column layout. React Query dedupes with the child component.
   const { data: reviewData } = useQuery({
-    ...postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 }),
+    ...(workUnitId
+      ? postQueries.byWork(workUnitId, {
+          kind: PostKind.REVIEW,
+          workRoles: ["REVIEW"],
+          limit: 1,
+        })
+      : postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 })),
     enabled: Boolean(bookId),
   });
   const hasReview = (reviewData?.posts?.length ?? 0) > 0;
@@ -213,7 +221,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
 
             {hasReview && (
               <div className="flex-1 min-w-0 rounded-xl p-6 bg-white/10 flex">
-                <BookHeroFeaturedReview bookId={bookId} />
+                <BookHeroFeaturedReview bookId={bookId} workUnitId={workUnitId} />
               </div>
             )}
 
@@ -224,7 +232,11 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
                   : "w-full lg:flex-1 lg:max-w-[360px]"
               }
             >
-              <BookHeroStatCards bookId={bookId} cardKeys={statCardKeys} />
+              <BookHeroStatCards
+                bookId={bookId}
+                workUnitId={workUnitId}
+                cardKeys={statCardKeys}
+              />
             </div>
           </div>
 
@@ -301,7 +313,11 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
                 </div>
               )}
 
-              <BookHeroCountLinks bookId={bookId} excludeKeys={statCardKeys} />
+              <BookHeroCountLinks
+                bookId={bookId}
+                workUnitId={workUnitId}
+                excludeKeys={statCardKeys}
+              />
             </div>
 
             <div className="lg:w-[260px] lg:flex-shrink-0">

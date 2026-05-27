@@ -21,6 +21,7 @@ const i18nMessages = {
 
 interface BookHeroCountLinksProps {
   bookId: string;
+  workUnitId?: string;
   /** Stat keys already shown as big-icon cards above; suppressed from the link row. */
   excludeKeys?: BookHeroStatKey[];
 }
@@ -34,11 +35,18 @@ type CountLink = {
 
 export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
   bookId,
+  workUnitId,
   excludeKeys = [],
 }) => {
   const m = useMessage(i18nMessages);
   const { data: reviewData } = useQuery({
-    ...postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 }),
+    ...(workUnitId
+      ? postQueries.byWork(workUnitId, {
+          kind: PostKind.REVIEW,
+          workRoles: ["REVIEW"],
+          limit: 1,
+        })
+      : postQueries.byTarget(bookId, { kind: PostKind.REVIEW, limit: 1 })),
     enabled: Boolean(bookId),
   });
   const { data: shelfData } = useQuery({

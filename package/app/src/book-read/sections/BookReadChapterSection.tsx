@@ -56,6 +56,9 @@ const i18nMessages = {
 export const BookReadChapterPage: React.FC = () => {
   const m = useMessage(i18nMessages);
   const { bookId, chapterId } = bookReadLayoutRoute.useParams();
+  // `$chapterId` is retained for URL compatibility; it carries a materialized
+  // content Unit id in current reader/editor code.
+  const contentUnitId = chapterId;
   const search = bookReadLayoutRoute.useSearch();
   const navigate = useNavigate();
   const [chapterDiscussionUnitId, setChapterDiscussionUnitId] = useState<
@@ -65,12 +68,12 @@ export const BookReadChapterPage: React.FC = () => {
     "content" | "review" | "discussion" | "progress" | null
   >(null);
   const emptyChapterPath =
-    chapterId === EMPTY_CHAPTER_ROUTE_ID
+    contentUnitId === EMPTY_CHAPTER_ROUTE_ID
       ? decodeBookContentStructurePath(search.path)
       : null;
 
   const { data, isPending, error, isError } = useQuery({
-    ...chapterDetailQuery(chapterId),
+    ...chapterDetailQuery(contentUnitId),
     enabled: !emptyChapterPath,
   });
   const { data: bookInfo } = useQuery({
@@ -128,10 +131,10 @@ export const BookReadChapterPage: React.FC = () => {
     if (!bookId) return;
     setPendingChapterAction("content");
     try {
-      const chapterUnitId = await ensureEmptyChapterUnit();
+      const ensuredContentUnitId = await ensureEmptyChapterUnit();
       navigate({
         to: "/book/$bookId/edit/$chapterId",
-        params: { bookId, chapterId: chapterUnitId },
+        params: { bookId, chapterId: ensuredContentUnitId },
       });
     } finally {
       setPendingChapterAction(null);
@@ -141,10 +144,10 @@ export const BookReadChapterPage: React.FC = () => {
   const handleReviewEmptyChapter = async () => {
     setPendingChapterAction("review");
     try {
-      const chapterUnitId = await ensureEmptyChapterUnit();
+      const ensuredContentUnitId = await ensureEmptyChapterUnit();
       navigate({
         to: "/review/new/$bookUnitId",
-        params: { bookUnitId: chapterUnitId },
+        params: { bookUnitId: ensuredContentUnitId },
       });
     } finally {
       setPendingChapterAction(null);
@@ -154,8 +157,8 @@ export const BookReadChapterPage: React.FC = () => {
   const handleDiscussEmptyChapter = async () => {
     setPendingChapterAction("discussion");
     try {
-      const chapterUnitId = await ensureEmptyChapterUnit();
-      setChapterDiscussionUnitId(chapterUnitId);
+      const ensuredContentUnitId = await ensureEmptyChapterUnit();
+      setChapterDiscussionUnitId(ensuredContentUnitId);
     } finally {
       setPendingChapterAction(null);
     }
@@ -164,12 +167,12 @@ export const BookReadChapterPage: React.FC = () => {
   const handleSaveChapterProgress = async () => {
     setPendingChapterAction("progress");
     try {
-      const chapterUnitId = await ensureEmptyChapterUnit();
-      await progressApi.updateUnitProgress(chapterUnitId, {
+      const ensuredContentUnitId = await ensureEmptyChapterUnit();
+      await progressApi.updateUnitProgress(ensuredContentUnitId, {
         status: "ACTIVE",
         lastPosition: {
           kind: "chapter",
-          chapterUnitId,
+          contentUnitId: ensuredContentUnitId,
         },
       });
     } finally {
@@ -184,14 +187,14 @@ export const BookReadChapterPage: React.FC = () => {
     <div className="w-11/12 mx-auto p-4">
       <div className="flex items-center gap-2 mb-2">
         <h1 className="text-2xl font-bold">{title}</h1>
-        {canEdit && bookId && chapterId && !emptyChapterPath && (
+        {canEdit && bookId && contentUnitId && !emptyChapterPath && (
           <Button
             type="button"
             size="icon"
             variant="ghost"
             aria-label={m.common_edit()}
             onClick={() =>
-              navigate({ to: `/book/${bookId}/edit/${chapterId}` })
+              navigate({ to: `/book/${bookId}/edit/${contentUnitId}` })
             }
           >
             <EditOutlined className="w-4 h-4" />

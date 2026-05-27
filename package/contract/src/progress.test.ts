@@ -74,6 +74,13 @@ describe("progress contract schemas", () => {
     expect(
       Value.Check(chapterLastPositionSchema, {
         kind: "chapter",
+        contentUnitId: "content-1",
+        offset: 0.42,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(unitLastPositionSchema, {
+        kind: "chapter",
         chapterUnitId: "chapter-1",
         offset: 0.42,
       }),
@@ -88,7 +95,7 @@ describe("progress contract schemas", () => {
     expect(
       Value.Check(unitLastPositionSchema, {
         kind: "chapter",
-        chapterUnitId: "chapter-1",
+        contentUnitId: "content-1",
         offset: -0.1,
       }),
     ).toBe(false);

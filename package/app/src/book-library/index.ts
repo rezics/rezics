@@ -28,6 +28,7 @@ export {
 export { BookHomePage } from "./pages/BookHomePage";
 /** Book library list page. */
 export { BookLibPage } from "./pages/BookLibPage";
+export { BookReleasesPage } from "./pages/BookReleasesPage";
 export { BookReviewPage } from "./pages/BookReviewPage";
 
 // ============================================================================

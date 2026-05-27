@@ -34,15 +34,11 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
 
   const handleMoreClick = () => {
     const first = items[0];
-    if (first?.workUnitId) {
+    if (first?.id) {
       navigate({
         to: "/excerpt/book/$bookId",
-        params: { bookId: first.workUnitId },
+        params: { bookId: first.id },
       });
-      return;
-    }
-    if (first?.id) {
-      navigate({ to: "/excerpt/$unitId", params: { unitId: first.id } });
       return;
     }
     navigate({ to: "/review" });

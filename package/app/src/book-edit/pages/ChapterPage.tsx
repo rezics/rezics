@@ -56,17 +56,17 @@ const i18nMessages = {
 
 function updateContentStructureNodeTitle(
   nodes: BookContentStructureItem[],
-  chapterUnitId: string,
+  contentUnitId: string,
   title: string,
 ): BookContentStructureItem[] {
   return nodes.map((node) => ({
     ...node,
-    ...(contentUnitIdForNode(node) === chapterUnitId ? { title } : {}),
+    ...(contentUnitIdForNode(node) === contentUnitId ? { title } : {}),
     ...(node.children
       ? {
           children: updateContentStructureNodeTitle(
             node.children,
-            chapterUnitId,
+            contentUnitId,
             title,
           ),
         }
@@ -81,13 +81,16 @@ export const BookEditChapterPage: React.FC = () => {
   const m = useMessage(i18nMessages);
   const { bookId } = bookEditLayoutRoute.useParams();
   const { chapterId } = bookEditChapterRoute.useParams();
+  // `$chapterId` is a legacy route param name; current logic treats it as the
+  // materialized content Unit id for this content-structure node.
+  const contentUnitId = chapterId;
   // Load chapter detail
   const {
     data,
     isPending: isLoading,
     isError,
     error,
-  } = useQuery(chapterDetailQuery(chapterId));
+  } = useQuery(chapterDetailQuery(contentUnitId));
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -136,7 +139,7 @@ export const BookEditChapterPage: React.FC = () => {
   const handleSubmit = useCallback(async () => {
     if (isInvalid) return;
     await updateMutation.mutateAsync({
-      unitId: chapterId,
+      unitId: contentUnitId,
       input: {
         title,
         content: markdownContentDoc(content),
@@ -150,7 +153,7 @@ export const BookEditChapterPage: React.FC = () => {
         bookUnitId: bookId,
         nodes: updateContentStructureNodeTitle(
           contentStructure.nodes,
-          chapterId,
+          contentUnitId,
           title,
         ),
       });
@@ -158,7 +161,7 @@ export const BookEditChapterPage: React.FC = () => {
   }, [
     isInvalid,
     updateMutation,
-    chapterId,
+    contentUnitId,
     title,
     content,
     queryClient,
@@ -257,7 +260,7 @@ export const BookEditChapterPage: React.FC = () => {
       <EditChapterDialog
         open={editDialogOpen}
         onClose={() => setEditDialogOpen(false)}
-        chapter={data ? { id: chapterId, title, children: [] } : null}
+        chapter={data ? { id: contentUnitId, title, children: [] } : null}
         onSave={({ title: newTitle, status }) => {
           setTitle(newTitle);
           // TODO: persist status change via API
@@ -271,9 +274,9 @@ export const BookEditChapterPage: React.FC = () => {
         movingNode={
           data
             ? {
-                id: chapterId,
-                chapterUnitId: chapterId,
-                occurrenceId: chapterId,
+                id: contentUnitId,
+                contentUnitId,
+                occurrenceId: contentUnitId,
                 path: [],
                 title,
                 children: [],

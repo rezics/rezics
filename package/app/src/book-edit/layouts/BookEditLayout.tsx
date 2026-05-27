@@ -16,15 +16,18 @@ export interface BookEditLayoutProps {
 export const BookEditLayout: React.FC<BookEditLayoutProps> = ({ children }) => {
   const { bookId } = bookEditLayoutRoute.useParams();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const chapterId = getBookEditChapterContextId(pathname, bookId);
+  const contentUnitId = getBookEditChapterContextId(pathname, bookId);
 
   return (
     <EditConsoleLayout
       {...createBookEditConsoleConfig(bookId)}
       sidebarId="book-edit-sidebar"
       contextSlot={
-        chapterId ? (
-          <BookEditChapterContext bookId={bookId} chapterId={chapterId} />
+        contentUnitId ? (
+          <BookEditChapterContext
+            bookId={bookId}
+            contentUnitId={contentUnitId}
+          />
         ) : null
       }
     >

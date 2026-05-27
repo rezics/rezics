@@ -15,6 +15,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
 
 const i18nMessages = {
@@ -39,11 +40,9 @@ export const SetSourceReleaseControl: React.FC<
   SetSourceReleaseControlProps
 > = ({ book, language, currentSourceReleaseUnitId }) => {
   const m = useMessage(i18nMessages);
-  const siblingFilter = book.workUnitId
-    ? { workUnitId: book.workUnitId }
-    : { workUnitId: book.unitId };
+  const canonicalWorkUnitId = releaseWorkUnitId(book) ?? book.unitId;
   const { data: siblings } = useQuery({
-    ...bookQueries.list({ ...siblingFilter, limit: 50 }),
+    ...bookQueries.list({ workUnitId: canonicalWorkUnitId, limit: 50 }),
     enabled: Boolean(book.unitId),
   });
 

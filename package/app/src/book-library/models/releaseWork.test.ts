@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { BookDTO } from "@rezics/contract";
 import {
   ALL_RELEASE_LANGUAGES,
+  defaultReleaseLanguageFilters,
   filterReleasesByLanguage,
   filterReleasesByLanguages,
   hasMissingReleaseLanguages,
@@ -107,5 +108,11 @@ describe("release work helpers", () => {
     ).toEqual(["en-1", "ja-1"]);
     expect(hasMissingReleaseLanguages(["en"], releases)).toBe(true);
     expect(hasMissingReleaseLanguages(["en", "ja"], releases)).toBe(false);
+  });
+
+  test("defaults release filters from viewer language only when available", () => {
+    expect(defaultReleaseLanguageFilters("ja", ["en", "ja"])).toEqual(["ja"]);
+    expect(defaultReleaseLanguageFilters("zh-Hant", ["en", "ja"])).toEqual([]);
+    expect(defaultReleaseLanguageFilters(null, ["en", "ja"])).toEqual([]);
   });
 });
