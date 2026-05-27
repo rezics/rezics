@@ -18,6 +18,7 @@ export * from "./entity";
 export * from "./entity-attribution";
 export * from "./external-kind";
 export * from "./feedback";
+export * from "./governance";
 export * from "./infra";
 export * from "./jwt-service";
 export * from "./language";

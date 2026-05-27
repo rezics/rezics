@@ -1,10 +1,10 @@
 ## 1. Contracts And Schema
 
-- [ ] 1.1 Add policy action literals, `Decision` DTOs (allow/deny, reason, safeMessage, auditCode), capability keys, account enforcement DTOs, moderation case + realm queue DTOs, and staff audit DTOs in `package/contract`.
+- [x] 1.1 Add policy action literals, `Decision` DTOs (allow/deny, reason, safeMessage, auditCode), capability keys, account enforcement DTOs, moderation case + realm queue DTOs, and staff audit DTOs in `package/contract`.
 - [ ] 1.2 Add Prisma models for moderation cases, case/realm-queue events, account enforcement records, capability grants (staff + realm), content moderation state + `RealmContentModeration` overlay, and staff audit logs in `package/server/prisma/schema.prisma`.
 - [ ] 1.3 Add migrations and indexes for queue filtering (state, severity, realm, assignment, target, subject, time) and for overlay lookup by `(realmUnitId, targetUnitId)`.
 - [ ] 1.4 Backfill existing `Feedback(REPORT)` rows into moderation case sources without deleting feedback rows.
-- [ ] 1.5 Ensure the realm member contract can carry a capability subset (do not foreclose with a single fixed-width `roleKey`).
+- [x] 1.5 Ensure the realm member contract can carry a capability subset (do not foreclose with a single fixed-width `roleKey`).
 
 ## 2. Policy Engine (One Engine, Two Scopes)
 

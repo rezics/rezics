@@ -3,6 +3,7 @@ import { contentDocWriteSchema } from "./content-doc";
 import { languageSchema } from "./language";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
+import { capabilityHintSchema } from "./permission/capability";
 import { realmExtraSchema } from "./realm/realm-extra";
 import { unitTagDTOSchema } from "./tag";
 import {
@@ -89,6 +90,7 @@ export const realmMemberDTOSchema = t.Object({
   userId: t.String(),
   user: t.Optional(publicUserSchema),
   roleKey: t.String(),
+  capabilities: t.Optional(t.Array(capabilityHintSchema)),
   joinedAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
