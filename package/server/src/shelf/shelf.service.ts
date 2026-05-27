@@ -229,17 +229,6 @@ function assertOnlySeedTags(ids: readonly string[]): void {
 }
 
 export class ShelfService {
-  private async resolveContainsWorkUnitId(
-    containsUnitId: string | undefined,
-  ): Promise<string | null> {
-    if (!containsUnitId?.trim()) return null;
-    const membership = await prisma.unitWork.findFirst({
-      where: { unitId: containsUnitId, role: UnitWorkRole.RELEASE },
-      select: { workUnitId: true },
-    });
-    return membership?.workUnitId ?? null;
-  }
-
   private async buildWhere(
     options: ShelfListQuery,
   ): Promise<Prisma.ShelfWhereInput> {
@@ -256,26 +245,27 @@ export class ShelfService {
     }
 
     const containsUnitId = options.containsUnitId?.trim();
+    const containsWorkUnitId = options.containsWorkUnitId?.trim();
+    if (containsUnitId && containsWorkUnitId) {
+      throw new AppError(400, "ambiguous-shelf-containment-filter");
+    }
     if (containsUnitId) {
-      const workUnitId = await this.resolveContainsWorkUnitId(containsUnitId);
-      if (workUnitId) {
-        and.push({
-          OR: [
-            { units: { some: { unitId: containsUnitId } } },
-            {
-              unit: {
-                workMemberships: {
-                  some: { workUnitId, role: UnitWorkRole.SHELF },
-                },
-              },
+      and.push({
+        units: { some: { unitId: containsUnitId } },
+      });
+    }
+
+    if (containsWorkUnitId) {
+      and.push({
+        unit: {
+          workMemberships: {
+            some: {
+              workUnitId: containsWorkUnitId,
+              role: UnitWorkRole.SHELF,
             },
-          ],
-        });
-      } else {
-        and.push({
-          units: { some: { unitId: containsUnitId } },
-        });
-      }
+          },
+        },
+      });
     }
 
     const idList = parseIdsCsv(options.ids);
@@ -320,7 +310,10 @@ export class ShelfService {
     const hydratedRows = await hydrateUnitOwnerUserSlugs(rows);
     const matchedByShelfId = await this.getMatchedUnitsByShelfId(
       hydratedRows.map((row) => row.unitId),
-      options.containsUnitId?.trim(),
+      {
+        containsUnitId: options.containsUnitId?.trim(),
+        containsWorkUnitId: options.containsWorkUnitId?.trim(),
+      },
     );
     return {
       shelves: hydratedRows.map((row) =>
@@ -332,17 +325,22 @@ export class ShelfService {
 
   private async getMatchedUnitsByShelfId(
     shelfIds: string[],
-    containsUnitId: string | undefined,
+    filters: {
+      containsUnitId?: string;
+      containsWorkUnitId?: string;
+    },
   ): Promise<Map<string, ShelfMatchedUnitDTO>> {
     const out = new Map<string, ShelfMatchedUnitDTO>();
-    if (shelfIds.length === 0 || !containsUnitId) return out;
+    if (shelfIds.length === 0) return out;
 
-    const workUnitId = await this.resolveContainsWorkUnitId(containsUnitId);
-    const releaseRows = workUnitId
+    const containsUnitId = filters.containsUnitId?.trim();
+    const containsWorkUnitId = filters.containsWorkUnitId?.trim();
+    const releaseRows = containsWorkUnitId
       ? await prisma.unitWork.findMany({
-          where: { workUnitId, role: UnitWorkRole.RELEASE },
+          where: { workUnitId: containsWorkUnitId, role: UnitWorkRole.RELEASE },
           select: {
             unitId: true,
+            workUnitId: true,
             unit: {
               select: {
                 defaultLanguage: true,
@@ -351,11 +349,27 @@ export class ShelfService {
             },
           },
         })
-      : [];
-    const releaseIds = [
-      containsUnitId,
-      ...releaseRows.map((row) => row.unitId),
-    ];
+      : containsUnitId
+        ? await prisma.unitWork.findMany({
+            where: { unitId: containsUnitId, role: UnitWorkRole.RELEASE },
+            select: {
+              unitId: true,
+              workUnitId: true,
+              unit: {
+                select: {
+                  defaultLanguage: true,
+                  translations: { select: { language: true, title: true } },
+                },
+              },
+            },
+          })
+        : [];
+    const releaseIds = containsWorkUnitId
+      ? releaseRows.map((row) => row.unitId)
+      : containsUnitId
+        ? [containsUnitId]
+        : [];
+    if (releaseIds.length === 0) return out;
     const releaseById = new Map(releaseRows.map((row) => [row.unitId, row]));
 
     const shelfUnits = await prisma.shelfUnit.findMany({
@@ -378,7 +392,7 @@ export class ShelfService {
         unitId: row.unitId,
         kind: row.kind as ShelfMatchedUnitDTO["kind"],
         title,
-        workUnitId,
+        workUnitId: containsWorkUnitId ?? release?.workUnitId ?? null,
       });
       if (row.unitId === containsUnitId) continue;
     }

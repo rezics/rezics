@@ -16,6 +16,7 @@ import {
   cleanupShelfOrphansSchema,
   createShelfSchema,
   ensureSystemShelfBodySchema,
+  hasAmbiguousShelfListScopeFilters,
   hasPermissionToDeleteShelf,
   hasPermissionToUpdateShelf,
   reorderShelfUnitSchema,
@@ -175,6 +176,9 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .get(
     "/list",
     async ({ query }): Promise<ShelfListResponse> => {
+      if (hasAmbiguousShelfListScopeFilters(query)) {
+        throw new AppError(400, "ambiguous-shelf-containment-filter");
+      }
       const { shelves, total } = await shelfService.list(query as any);
       return { shelves, total };
     },
@@ -190,6 +194,9 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   .post(
     "/list",
     async ({ body }): Promise<ShelfListResponse> => {
+      if (hasAmbiguousShelfListScopeFilters(body)) {
+        throw new AppError(400, "ambiguous-shelf-containment-filter");
+      }
       const { shelves, total } = await shelfService.list({
         ...body,
         ids: body.ids?.join(","),

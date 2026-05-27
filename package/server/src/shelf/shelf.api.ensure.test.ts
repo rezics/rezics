@@ -48,6 +48,7 @@ mock.module("@/unit/unit.service", () => ({
 mock.module("./shelf.service", () => ({
   shelfService: {
     listUserShelves: async () => [],
+    list: mock(async () => ({ shelves: [], total: 0 })),
   },
 }));
 
@@ -186,5 +187,39 @@ describe("POST /shelf/system/ensure", () => {
     expect(res.status).toBeGreaterThanOrEqual(400);
     expect(res.status).toBeLessThan(500);
     expect(ensureSystemShelfMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET/POST /shelf/list scope validation", () => {
+  test("GET rejects ambiguous exact and work-domain containment filters", async () => {
+    const app = await makeApp();
+
+    const res = await app.handle(
+      new Request(
+        "http://localhost/shelf/list?containsUnitId=release-1&containsWorkUnitId=work-1&limit=20",
+      ),
+    );
+
+    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(res.status).toBeLessThan(500);
+  });
+
+  test("POST rejects ambiguous exact and work-domain containment filters", async () => {
+    const app = await makeApp();
+
+    const res = await app.handle(
+      new Request("http://localhost/shelf/list", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          containsUnitId: "release-1",
+          containsWorkUnitId: "work-1",
+          limit: 20,
+        }),
+      }),
+    );
+
+    expect(res.status).toBeGreaterThanOrEqual(400);
+    expect(res.status).toBeLessThan(500);
   });
 });

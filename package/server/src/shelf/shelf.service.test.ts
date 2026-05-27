@@ -49,6 +49,32 @@ function makeShelfUnitRow(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function makeShelfListRow(overrides: Record<string, unknown> = {}) {
+  return {
+    unitId: "shelf-1",
+    kindKey: "custom",
+    extra: null,
+    itemCount: 1,
+    createdAt: new Date("2026-05-27T00:00:00.000Z"),
+    updatedAt: new Date("2026-05-27T00:00:00.000Z"),
+    unit: {
+      id: "shelf-1",
+      slug: "shelf",
+      userId: null,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      licenseSlug: null,
+      defaultLanguage: "en",
+      createdAt: new Date("2026-05-27T00:00:00.000Z"),
+      updatedAt: new Date("2026-05-27T00:00:00.000Z"),
+      user: null,
+      translations: [],
+      unitTags: [],
+    },
+    ...overrides,
+  };
+}
+
 describe("ShelfService", () => {
   test("list filters public discovery by published public shelves containing the target Unit", async () => {
     let findManyArgs: any;
@@ -79,6 +105,99 @@ describe("ShelfService", () => {
         },
         { units: { some: { unitId: "book-1" } } },
       ],
+    });
+  });
+
+  test("list filters work-domain containment through shelf UnitWork", async () => {
+    let findManyArgs: any;
+    Object.assign(prismaMock, {
+      shelf: {
+        findMany: async (args: any) => {
+          findManyArgs = args;
+          return [];
+        },
+        count: async () => 0,
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.list({ containsWorkUnitId: "work-1", limit: 10 });
+
+    expect(findManyArgs.where).toMatchObject({
+      AND: [
+        {
+          unit: {
+            type: "SHELF",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+          },
+        },
+        {
+          unit: {
+            workMemberships: {
+              some: {
+                workUnitId: "work-1",
+                role: "SHELF",
+              },
+            },
+          },
+        },
+      ],
+    });
+  });
+
+  test("list rejects ambiguous exact and work-domain containment filters", async () => {
+    const { shelfService } = await import("./shelf.service");
+
+    await expect(
+      shelfService.list({
+        containsUnitId: "release-1",
+        containsWorkUnitId: "work-1",
+        limit: 10,
+      }),
+    ).rejects.toThrow("ambiguous-shelf-containment-filter");
+  });
+
+  test("list hydrates the matched contained release for work-domain results", async () => {
+    Object.assign(prismaMock, {
+      shelf: {
+        findMany: async () => [makeShelfListRow()],
+        count: async () => 1,
+      },
+      unitWork: {
+        findMany: async () => [
+          {
+            unitId: "release-2",
+            workUnitId: "work-1",
+            unit: {
+              defaultLanguage: "en",
+              translations: [{ language: "en", title: "Sibling Release" }],
+            },
+          },
+        ],
+      },
+      shelfUnit: {
+        findMany: async () => [
+          {
+            shelfId: "shelf-1",
+            unitId: "release-2",
+            kind: "book",
+          },
+        ],
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const result = await shelfService.list({
+      containsWorkUnitId: "work-1",
+      limit: 10,
+    });
+
+    expect(result.shelves[0]?.matchedUnit).toEqual({
+      unitId: "release-2",
+      kind: "book",
+      title: "Sibling Release",
+      workUnitId: "work-1",
     });
   });
 
