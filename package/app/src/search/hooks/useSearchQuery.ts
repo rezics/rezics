@@ -101,6 +101,8 @@ export function mergeAppend(
   }
 
   if (patch.ratings !== undefined) next.ratings = patch.ratings;
+  if (patch.aiDisclosureModes !== undefined)
+    next.aiDisclosureModes = patch.aiDisclosureModes;
   if (patch.isLicensed !== undefined) next.isLicensed = patch.isLicensed;
   if (patch.sort !== undefined) next.sort = patch.sort;
   if (patch.textLength !== undefined) next.textLength = patch.textLength;
@@ -155,6 +157,8 @@ export function mergeEffective(
   if (out.languages.length === 0) delete out.languages;
 
   if (user.ratings !== undefined) out.ratings = user.ratings;
+  if (user.aiDisclosureModes !== undefined)
+    out.aiDisclosureModes = user.aiDisclosureModes;
   if (user.isLicensed !== undefined) out.isLicensed = user.isLicensed;
   if (user.sort !== undefined) out.sort = user.sort;
   if (user.textLength !== undefined) out.textLength = user.textLength;

@@ -130,11 +130,16 @@ export function buildContentFilter(
     filter.push(`rating IN [${quoteList(effectiveRatings)}]`);
   }
 
-  // 7. License
+  // 7. AI disclosure
+  if (query.aiDisclosureModes?.length) {
+    filter.push(`aiDisclosureMode IN [${quoteList(query.aiDisclosureModes)}]`);
+  }
+
+  // 8. License
   if (query.isLicensed === true) filter.push("isLicensed = true");
   else if (query.isLicensed === false) filter.push("isLicensed = false");
 
-  // 8. Text length
+  // 9. Text length
   if (query.textLength) {
     if (typeof query.textLength.min === "number") {
       filter.push(`textLength >= ${query.textLength.min}`);
@@ -144,7 +149,7 @@ export function buildContentFilter(
     }
   }
 
-  // 9. Visibility — content search is always public-only.
+  // 10. Visibility — content search is always public-only.
   filter.push('visibility = "PUBLIC"');
 
   return filter;

@@ -50,6 +50,17 @@ describe("buildContentFilter", () => {
     expect(filter).toContain('rating IN ["GENERAL"]');
   });
 
+  test("AI disclosure filter is independent from allowed rating derivation", () => {
+    const filter = buildContentFilter(
+      { aiDisclosureModes: ["AI_ASSISTED"] },
+      { kind: "global" },
+      { allowedRatings: ["GENERAL", "R_15"] },
+    );
+
+    expect(filter).toContain('aiDisclosureMode IN ["AI_ASSISTED"]');
+    expect(filter).toContain('rating IN ["GENERAL", "R_15"]');
+  });
+
   test("languages list emits per-language clauses", () => {
     const filter = buildContentFilter(
       { languages: ["en", "ja"] },

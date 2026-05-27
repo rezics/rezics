@@ -47,6 +47,20 @@ describe("parseSearchString", () => {
     });
   });
 
+  test("parses and serializes AI disclosure filters separately from rating", () => {
+    const parsed = parseSearchString(
+      "rating:GENERAL ai:ai-assisted ai:machine",
+    );
+
+    expect(parsed.ratings).toEqual(["GENERAL"]);
+    expect(parsed.aiDisclosureModes).toEqual([
+      "AI_ASSISTED",
+      "MACHINE_GENERATED",
+    ]);
+    expect(serializeSearchString(parsed)).toContain("ai:AI_ASSISTED");
+    expect(serializeSearchString(parsed)).toContain("ai:MACHINE_GENERATED");
+  });
+
   test("parses multiple types", () => {
     const result = parseSearchString("type:book type:game test");
     expect(result).toEqual({

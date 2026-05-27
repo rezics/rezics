@@ -221,7 +221,10 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
 
             {hasReview && (
               <div className="flex-1 min-w-0 rounded-xl p-6 bg-white/10 flex">
-                <BookHeroFeaturedReview bookId={bookId} workUnitId={workUnitId} />
+                <BookHeroFeaturedReview
+                  bookId={bookId}
+                  workUnitId={workUnitId}
+                />
               </div>
             )}
 

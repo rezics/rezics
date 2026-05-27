@@ -16,6 +16,7 @@ import {
 import type {
   ContentRating,
   ContentSearchDocument,
+  AiDisclosureMode,
   CreateBookInput,
   CreationMode,
   EditorialPatchSubmission,
@@ -474,6 +475,14 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         (nullableString(unitPatch.rating ?? bookExtension.rating) as
           | ContentRating
           | undefined) ?? data.rating,
+      aiDisclosureMode:
+        (nullableString(
+          unitPatch.aiDisclosureMode ?? bookExtension.aiDisclosureMode,
+        ) as AiDisclosureMode | undefined) ?? data.aiDisclosureMode,
+      aiDisclosureDetails:
+        asRecordOrNull(
+          unitPatch.aiDisclosureDetails ?? bookExtension.aiDisclosureDetails,
+        ) ?? data.aiDisclosureDetails,
       extra: asRecordOrNull(bookExtension.extra) ?? data.extra,
     });
 
@@ -587,6 +596,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         textLength: metadataState?.textLength,
         formatKey: metadataState?.formatKey ?? undefined,
         rating: metadataState?.rating,
+        aiDisclosureMode: metadataState?.aiDisclosureMode,
+        aiDisclosureDetails: metadataState?.aiDisclosureDetails,
         isLicensed: metadataState?.isLicensed,
         licenseSlug: resolvePublicationLicenseDefault({
           explicitSelection: metadataState?.licenseSlug,
@@ -669,6 +680,13 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         extensionPatch.extra = metadataState.extra ?? null;
       if (metadataState.rating !== data.rating)
         unitPatch.rating = metadataState.rating;
+      if (metadataState.aiDisclosureMode !== data.aiDisclosureMode)
+        unitPatch.aiDisclosureMode = metadataState.aiDisclosureMode;
+      if (
+        !sameJson(metadataState.aiDisclosureDetails, data.aiDisclosureDetails)
+      )
+        unitPatch.aiDisclosureDetails =
+          metadataState.aiDisclosureDetails ?? null;
       if (metadataState.licenseSlug !== data.licenseSlug)
         unitPatch.license = metadataState.licenseSlug ?? null;
     }
@@ -785,6 +803,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     "extension.isLicensed",
     "extension.extra",
     "unit.rating",
+    "unit.aiDisclosureMode",
+    "unit.aiDisclosureDetails",
     "unit.license",
   ];
 

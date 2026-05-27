@@ -1,6 +1,7 @@
-import type { BookDTO, LicenseSlug } from "@rezics/contract";
+import type { AiDisclosureMode, BookDTO, LicenseSlug } from "@rezics/contract";
 import { licenseLabel } from "@rezics/i18n";
 import {
+  book_fields_ai_disclosure,
   book_fields_chapter_count,
   book_fields_format,
   book_fields_isbn,
@@ -10,11 +11,14 @@ import {
   book_info_panel_title,
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
+import { AiDisclosureBadge } from "@rezics/ui";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
+import { aiDisclosureLabel } from "@/unit/models/aiDisclosureLabels";
 import { resolveMetadataPanelUswn } from "../../models/bookMetadata";
 
 const i18nMessages = {
+  book_fields_ai_disclosure,
   book_fields_chapter_count,
   book_fields_format,
   book_fields_isbn,
@@ -42,6 +46,8 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
     ? licenseLabel(bookInfo.licenseSlug as LicenseSlug)
     : undefined;
   const uswn = resolveMetadataPanelUswn(bookInfo);
+  const aiDisclosureMode =
+    (bookInfo.aiDisclosureMode as AiDisclosureMode | undefined) ?? "UNKNOWN";
 
   const items = (
     <div className="flex flex-col gap-2">
@@ -74,6 +80,13 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
           {m.book_fields_publication_license()}：{publicationLicenseLabel}
         </p>
       )}
+      <div className="flex items-center gap-2 text-sm">
+        <span>{m.book_fields_ai_disclosure()}：</span>
+        <AiDisclosureBadge
+          mode={aiDisclosureMode}
+          label={aiDisclosureLabel(aiDisclosureMode)}
+        />
+      </div>
     </div>
   );
 

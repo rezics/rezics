@@ -40,8 +40,8 @@ export const BookReviewPage: React.FC = () => {
           limit: REVIEW_PREVIEW_LIMIT,
         })
       : postQueries.byTarget(bookId, {
-      kind: PostKind.REVIEW,
-      limit: REVIEW_PREVIEW_LIMIT,
+          kind: PostKind.REVIEW,
+          limit: REVIEW_PREVIEW_LIMIT,
         })),
     enabled: Boolean(bookId),
   });

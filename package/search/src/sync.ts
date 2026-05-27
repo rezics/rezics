@@ -409,6 +409,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     realmTagKeys,
     languages,
     rating: unit.rating ?? "GENERAL",
+    aiDisclosureMode: unit.aiDisclosureMode ?? "UNKNOWN",
     visibility: unit.visibility ?? "PUBLIC",
     isLicensed,
     postKind,

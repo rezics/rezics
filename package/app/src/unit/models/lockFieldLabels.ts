@@ -16,6 +16,7 @@ import {
   authority_path_slug,
   book_author_info_bio_label,
   book_description,
+  book_fields_ai_disclosure,
   book_fields_cover_url,
   book_fields_isbn,
   book_fields_title,
@@ -85,6 +86,8 @@ export function editorialPathLabel(path: string) {
   const labels: Record<string, string> = {
     "extension.coverUrl": book_fields_cover_url(),
     "extension.isbn13": book_fields_isbn(),
+    "unit.aiDisclosureMode": book_fields_ai_disclosure(),
+    "unit.aiDisclosureDetails": book_fields_ai_disclosure(),
     "post.content": authority_path_post_content(),
     "post.content.main": authority_path_post_main(),
     "post.content.main.source": authority_path_post_source(),

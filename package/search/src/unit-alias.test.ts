@@ -25,6 +25,7 @@ const baseUnit = {
   defaultLanguage: "en",
   visibility: "PUBLIC",
   rating: "GENERAL",
+  aiDisclosureMode: "UNKNOWN",
   userId: "user-1",
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),

@@ -1,4 +1,9 @@
-import type { BookDTO, ContentRating, LicenseSlug } from "@rezics/contract";
+import type {
+  AiDisclosureMode,
+  BookDTO,
+  ContentRating,
+  LicenseSlug,
+} from "@rezics/contract";
 import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   LICENSE_SLUGS,
@@ -6,6 +11,7 @@ import {
 import { licenseLabel } from "@rezics/i18n";
 import {
   book_fields_cover_url,
+  book_fields_ai_disclosure,
   book_fields_isbn,
   book_fields_page_count,
   book_fields_publication_license,
@@ -16,7 +22,7 @@ import {
   common_url_placeholder,
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
-import { RatingSelector } from "@rezics/ui";
+import { AiDisclosureSelector, RatingSelector } from "@rezics/ui";
 import {
   Checkbox,
   Select,
@@ -31,10 +37,12 @@ import {
 } from "@rezics/ui/shadcn";
 import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
+import { aiDisclosureLabelMap } from "@/unit/models/aiDisclosureLabels";
 import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
 
 const i18nMessages = {
   book_fields_cover_url,
+  book_fields_ai_disclosure,
   book_fields_isbn,
   book_fields_page_count,
   book_fields_publication_license,
@@ -118,6 +126,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   const currentLicense =
     (value?.licenseSlug as LicenseSlug | null | undefined) ??
     DEFAULT_PUBLICATION_LICENSE_SLUG;
+  const aiDisclosureLabels = aiDisclosureLabelMap();
 
   return (
     <div className="flex flex-col gap-6">
@@ -202,6 +211,18 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
             value={(value?.rating as ContentRating | undefined) ?? "GENERAL"}
             onChange={(rating) => onChange?.({ rating })}
             label={m.book_fields_rating()}
+            disabled={disabled}
+          />
+        </div>
+        <div className="max-w-xs">
+          <AiDisclosureSelector
+            value={
+              (value?.aiDisclosureMode as AiDisclosureMode | undefined) ??
+              "UNKNOWN"
+            }
+            onChange={(aiDisclosureMode) => onChange?.({ aiDisclosureMode })}
+            label={m.book_fields_ai_disclosure()}
+            labels={aiDisclosureLabels}
             disabled={disabled}
           />
         </div>

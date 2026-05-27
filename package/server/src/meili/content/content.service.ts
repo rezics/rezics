@@ -144,6 +144,13 @@ export async function searchContent(
     filter.push(`rating IN [${ratingList}]`);
   }
 
+  if (opts.aiDisclosureModes?.length) {
+    const disclosureList = opts.aiDisclosureModes
+      .map((mode) => `"${mode}"`)
+      .join(", ");
+    filter.push(`aiDisclosureMode IN [${disclosureList}]`);
+  }
+
   // Licensed filter
   if (opts.isLicensed === true) {
     filter.push("isLicensed = true");

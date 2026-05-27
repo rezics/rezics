@@ -59,6 +59,7 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "realmTagKeys",
       "languages",
       "rating",
+      "aiDisclosureMode",
       "visibility",
       "isLicensed",
       "textLength",

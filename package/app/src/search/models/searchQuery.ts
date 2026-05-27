@@ -1,4 +1,9 @@
-import type { ContentRating, PostKind, SearchQuery } from "@rezics/contract";
+import type {
+  AiDisclosureMode,
+  ContentRating,
+  PostKind,
+  SearchQuery,
+} from "@rezics/contract";
 
 const KIND_TOKENS: Record<string, PostKind> = {
   review: "REVIEW",
@@ -29,6 +34,22 @@ const RATING_TOKENS: Record<string, ContentRating> = {
   "r-18g": "R_18G",
 };
 
+const AI_DISCLOSURE_TOKENS: Record<string, AiDisclosureMode> = {
+  unknown: "UNKNOWN",
+  none: "NONE",
+  no_ai: "NONE",
+  "no-ai": "NONE",
+  assisted: "AI_ASSISTED",
+  ai_assisted: "AI_ASSISTED",
+  "ai-assisted": "AI_ASSISTED",
+  originated: "AI_ORIGINATED",
+  ai_originated: "AI_ORIGINATED",
+  "ai-originated": "AI_ORIGINATED",
+  machine: "MACHINE_GENERATED",
+  machine_generated: "MACHINE_GENERATED",
+  "machine-generated": "MACHINE_GENERATED",
+};
+
 const TAG_REGEX = /\[([^\]]+)\]/g;
 const FILTER_REGEX = /(\w+):("[^"]*"|\S+)/g;
 
@@ -40,6 +61,7 @@ const FILTER_REGEX = /(\w+):("[^"]*"|\S+)/g;
  *   type:value      → content type
  *   lang:value      → language
  *   rating:tier     → rating tier (GENERAL, R_15, R_18, R_18G; repeatable)
+ *   ai:value        → AI disclosure mode (UNKNOWN, NONE, AI_ASSISTED, AI_ORIGINATED, MACHINE_GENERATED; repeatable)
  *   licensed:yes|no → licensed toggle
  *   in:slug         → realm scope
  *   sort:value      → sort order
@@ -81,6 +103,17 @@ export function parseSearchString(input: string): SearchQuery {
         const tier = RATING_TOKENS[rawValue.toLowerCase()];
         if (tier) {
           result.ratings = [...(result.ratings ?? []), tier];
+        }
+        break;
+      }
+      case "ai":
+      case "aidisclosure": {
+        const mode = AI_DISCLOSURE_TOKENS[rawValue.toLowerCase()];
+        if (mode) {
+          result.aiDisclosureModes = [
+            ...(result.aiDisclosureModes ?? []),
+            mode,
+          ];
         }
         break;
       }
@@ -142,6 +175,12 @@ export function serializeSearchString(query: SearchQuery): string {
   if (query.ratings?.length) {
     for (const tier of query.ratings) {
       parts.push(`rating:${tier}`);
+    }
+  }
+
+  if (query.aiDisclosureModes?.length) {
+    for (const mode of query.aiDisclosureModes) {
+      parts.push(`ai:${mode}`);
     }
   }
 

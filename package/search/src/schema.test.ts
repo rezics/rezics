@@ -16,6 +16,7 @@ describe("expected Meilisearch work-domain settings", () => {
         "position",
         "workUnitIds",
         "workRoles",
+        "aiDisclosureMode",
       ]),
     );
   });

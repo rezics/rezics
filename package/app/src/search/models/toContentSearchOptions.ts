@@ -51,6 +51,10 @@ export function toContentSearchOptions(
     opts.ratings = query.ratings;
   }
 
+  if (query.aiDisclosureModes?.length) {
+    opts.aiDisclosureModes = query.aiDisclosureModes;
+  }
+
   if (query.isLicensed !== undefined) {
     opts.isLicensed = query.isLicensed;
   }
