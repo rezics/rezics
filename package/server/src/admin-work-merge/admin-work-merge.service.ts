@@ -3,7 +3,12 @@ import type {
   AdminWorkMergePreview,
   AdminWorkMergeRequest,
 } from "@rezics/contract";
-import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import {
+  createMaintenanceCommand,
+  createSearchCommand,
+  MAINTENANCE_COMMAND_KINDS,
+  SEARCH_COMMAND_KINDS,
+} from "@rezics/job";
 import { prisma, UnitWorkRole } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
@@ -193,84 +198,134 @@ export class AdminWorkMergeService {
     const copyTags = Boolean(input.options?.copyMissingTags);
     const copyAliases = Boolean(input.options?.copyMissingAliases);
 
-    const operation = await prisma.$transaction(async (tx) => {
-      const row = await tx.adminWorkMergeOperation.create({
-        data: {
-          sourceWorkUnitId: input.sourceWorkUnitId,
-          targetWorkUnitId: input.targetWorkUnitId,
-          status: "RUNNING",
-          actorUserId,
-          reason: input.reason?.trim() || null,
-          copyTagsRequested: copyTags,
-          copyAliasesRequested: copyAliases,
-          itemProgress: {
-            plannedMembershipMoves:
-              preview.releaseMembershipMoves.length +
-              preview.contentMembershipMoves.length,
-            plannedLegacyReleaseMoves: preview.legacyReleaseUnitIds.length,
-            plannedTagCopies: copyTags
-              ? preview.metadataCopy.tags.missing.length
-              : 0,
-            plannedAliasCopies: copyAliases
-              ? preview.metadataCopy.aliases.missing.length
-              : 0,
-          },
+    const operation = await prisma.adminWorkMergeOperation.create({
+      data: {
+        sourceWorkUnitId: input.sourceWorkUnitId,
+        targetWorkUnitId: input.targetWorkUnitId,
+        status: "QUEUED",
+        actorUserId,
+        reason: input.reason?.trim() || null,
+        copyTagsRequested: copyTags,
+        copyAliasesRequested: copyAliases,
+        repairUnitIds: preview.repairScope.contentSearchUnitIds,
+        itemProgress: {
+          plannedMembershipMoves:
+            preview.releaseMembershipMoves.length +
+            preview.contentMembershipMoves.length,
+          plannedLegacyReleaseMoves: preview.legacyReleaseUnitIds.length,
+          plannedTagCopies: copyTags
+            ? preview.metadataCopy.tags.missing.length
+            : 0,
+          plannedAliasCopies: copyAliases
+            ? preview.metadataCopy.aliases.missing.length
+            : 0,
         },
-      });
-
-      const movedMemberships = await this.applyMembershipMoves(tx, [
-        ...preview.releaseMembershipMoves,
-        ...preview.contentMembershipMoves,
-      ]);
-      await tx.unit.updateMany({
-        where: { id: { in: preview.legacyReleaseUnitIds } },
-        data: { workUnitId: input.targetWorkUnitId },
-      });
-
-      const createdTagKeys = copyTags
-        ? await this.copyMissingTags(
-            tx,
-            input.sourceWorkUnitId,
-            input.targetWorkUnitId,
-          )
-        : [];
-      const createdAliasIds = copyAliases
-        ? await this.copyMissingAliases(
-            tx,
-            input.sourceWorkUnitId,
-            input.targetWorkUnitId,
-            actorUserId,
-          )
-        : [];
-
-      return tx.adminWorkMergeOperation.update({
-        where: { id: row.id },
-        data: {
-          status: "COMPLETED",
-          movedMemberships,
-          movedLegacyReleaseUnitIds: preview.legacyReleaseUnitIds,
-          createdTagKeys,
-          createdAliasIds,
-          repairUnitIds: preview.repairScope.contentSearchUnitIds,
-          itemProgress: {
-            membershipMovesCompleted: movedMemberships.length,
-            legacyReleaseMovesCompleted: preview.legacyReleaseUnitIds.length,
-            tagCopiesCreated: createdTagKeys.length,
-            aliasCopiesCreated: createdAliasIds.length,
-          },
-        },
-      });
+      },
     });
 
-    const commandCount = await enqueueMergeRepair(
-      preview.repairScope.contentSearchUnitIds,
-      [input.sourceWorkUnitId, input.targetWorkUnitId],
+    await serverJobProducer.enqueue(
+      createMaintenanceCommand(
+        MAINTENANCE_COMMAND_KINDS.fanoutContinuation,
+        {
+          fanout: "admin-work-merge.execute",
+          targetId: operation.id,
+          cursor: "start",
+        },
+        source,
+      ),
     );
 
-    return prisma.adminWorkMergeOperation.update({
-      where: { id: operation.id },
-      data: { repairCommandCount: commandCount },
+    return operation;
+  }
+
+  async execute(operationId: string) {
+    const current = await this.get(operationId);
+    if (!["QUEUED", "RUNNING", "FAILED"].includes(current.status)) {
+      return current;
+    }
+
+    await prisma.adminWorkMergeOperation.update({
+      where: { id: operationId },
+      data: { status: "RUNNING", errorMessage: null },
     });
+
+    try {
+      const input: AdminWorkMergeRequest = {
+        sourceWorkUnitId: current.sourceWorkUnitId,
+        targetWorkUnitId: current.targetWorkUnitId,
+        reason: current.reason,
+        options: {
+          copyMissingTags: current.copyTagsRequested,
+          copyMissingAliases: current.copyAliasesRequested,
+        },
+      };
+      const preview = await this.preview(input);
+
+      const operation = await prisma.$transaction(async (tx) => {
+        const movedMemberships = await this.applyMembershipMoves(tx, [
+          ...preview.releaseMembershipMoves,
+          ...preview.contentMembershipMoves,
+        ]);
+        await tx.unit.updateMany({
+          where: { id: { in: preview.legacyReleaseUnitIds } },
+          data: { workUnitId: current.targetWorkUnitId },
+        });
+
+        const createdTagKeys = current.copyTagsRequested
+          ? await this.copyMissingTags(
+              tx,
+              current.sourceWorkUnitId,
+              current.targetWorkUnitId,
+            )
+          : [];
+        const createdAliasIds = current.copyAliasesRequested
+          ? await this.copyMissingAliases(
+              tx,
+              current.sourceWorkUnitId,
+              current.targetWorkUnitId,
+              current.actorUserId,
+            )
+          : [];
+
+        return tx.adminWorkMergeOperation.update({
+          where: { id: operationId },
+          data: {
+            status: "RUNNING",
+            movedMemberships,
+            movedLegacyReleaseUnitIds: preview.legacyReleaseUnitIds,
+            createdTagKeys,
+            createdAliasIds,
+            repairUnitIds: preview.repairScope.contentSearchUnitIds,
+            itemProgress: {
+              ...(current.itemProgress as Record<string, unknown>),
+              membershipMovesCompleted: movedMemberships.length,
+              legacyReleaseMovesCompleted: preview.legacyReleaseUnitIds.length,
+              tagCopiesCreated: createdTagKeys.length,
+              aliasCopiesCreated: createdAliasIds.length,
+            },
+          },
+        });
+      });
+
+      const commandCount = await enqueueMergeRepair(operation.repairUnitIds, [
+        current.sourceWorkUnitId,
+        current.targetWorkUnitId,
+      ]);
+
+      return prisma.adminWorkMergeOperation.update({
+        where: { id: operationId },
+        data: { status: "COMPLETED", repairCommandCount: commandCount },
+      });
+    } catch (error) {
+      return prisma.adminWorkMergeOperation.update({
+        where: { id: operationId },
+        data: {
+          status: "FAILED",
+          errorMessage:
+            error instanceof Error ? error.message : "Unknown merge failure",
+        },
+      });
+    }
   }
 
   async get(operationId: string) {
