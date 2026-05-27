@@ -12,6 +12,7 @@ import {
 } from "@/session/jwt/jwt.service";
 import { mapUserToDTO } from "@/user/models/mapper";
 import { userService } from "@/user/service/user.service";
+import { governanceEnforcementService } from "../governance/enforcement.service";
 import {
   fetchVerifiedRegistrationFacts,
   projectSlugToAuth,
@@ -543,14 +544,14 @@ export async function completeProfileSetupFromMain(
       });
     }
 
-    const dbPermission = activated.permission as
-      | { role?: string[] }
-      | null
-      | undefined;
-    const role = dbPermission?.role?.[0] ?? "MEMBER";
+    const projectedPermission =
+      await governanceEnforcementService.projectedPermissionForUser(
+        activated.unitId,
+        activated.permission,
+      );
     const token = await signRezicsSessionToken({
       userId: activated.unitId,
-      permission: { role },
+      permission: projectedPermission,
     });
 
     const headers = new Headers();
@@ -604,12 +605,11 @@ export async function getMainAwareAuthSessionState(
   const mainUserExists = Boolean(mainUser);
   const memberReady = mainUser?.slug != null;
   const registrationComplete = emailVerified && memberReady;
-  const dbPermission = mainUser?.permission as
-    | { role?: string[] }
-    | null
-    | undefined;
   const rezicsPermission = registrationComplete
-    ? { role: dbPermission?.role?.[0] ?? "MEMBER" }
+    ? await governanceEnforcementService.projectedPermissionForUser(
+        mainUser.unitId,
+        mainUser.permission,
+      )
     : null;
   const readinessStatus = !emailVerified
     ? "pending-verification"
@@ -708,14 +708,14 @@ export async function refreshMainSessionFromAuth(
     );
   }
 
-  const dbPermission = user.permission as
-    | { role?: string[] }
-    | null
-    | undefined;
-  const role = dbPermission?.role?.[0] ?? "MEMBER";
+  const permission =
+    await governanceEnforcementService.projectedPermissionForUser(
+      user.unitId,
+      user.permission,
+    );
   const token = await signRezicsSessionToken({
     userId: user.unitId,
-    permission: { role },
+    permission,
   });
 
   const headers = new Headers();
@@ -724,7 +724,7 @@ export async function refreshMainSessionFromAuth(
     {
       authenticated: true,
       userId: user.unitId,
-      role,
+      role: permission.role,
     },
     200,
     headers,

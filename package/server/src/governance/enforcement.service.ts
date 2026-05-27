@@ -16,6 +16,23 @@ const enforcementKindMap: Record<AccountEnforcementKind, any> = {
   trust_restriction: "TRUST_RESTRICTION",
 };
 
+function basePermissionRole(permission: unknown) {
+  const role =
+    permission &&
+    typeof permission === "object" &&
+    "role" in permission &&
+    Array.isArray((permission as { role?: unknown }).role)
+      ? ((permission as { role: string[] }).role[0] ?? "MEMBER")
+      : permission &&
+          typeof permission === "object" &&
+          "role" in permission &&
+          typeof (permission as { role?: unknown }).role === "string"
+        ? (permission as { role: string }).role
+        : "MEMBER";
+
+  return role === "BLOCKED" ? "MEMBER" : role;
+}
+
 export class GovernanceEnforcementService {
   async activeSummary(targetUserId: string) {
     const now = new Date();
@@ -37,6 +54,15 @@ export class GovernanceEnforcementService {
       activeKinds,
       strongestKind: activeKinds[0] ?? null,
       expiresAt: rows[0]?.expiresAt?.toISOString() ?? null,
+    };
+  }
+
+  async projectedPermissionForUser(userId: string, storedPermission: unknown) {
+    const active = await this.activeSummary(userId);
+    return {
+      role: active.activeKinds.includes("ban")
+        ? "BLOCKED"
+        : basePermissionRole(storedPermission),
     };
   }
 

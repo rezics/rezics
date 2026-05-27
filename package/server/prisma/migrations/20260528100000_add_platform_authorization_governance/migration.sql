@@ -61,6 +61,50 @@ CREATE TABLE "AccountEnforcement" (
   CONSTRAINT "AccountEnforcement_pkey" PRIMARY KEY ("id")
 );
 
+INSERT INTO "AccountEnforcement" (
+  "targetUserId",
+  "kind",
+  "state",
+  "reason",
+  "safeMessage",
+  "decidedById",
+  "decisionCode",
+  "metadata"
+)
+SELECT
+  u."unitId",
+  'BAN',
+  'ACTIVE',
+  'Backfilled from legacy BLOCKED permission.',
+  'This account is restricted.',
+  u."unitId",
+  'BLOCKED_ACCOUNT',
+  jsonb_build_object('source', 'legacy-permission-blocked')
+FROM "User" u
+WHERE u."permission" IS NOT NULL
+  AND (
+    (u."permission"::jsonb->'role' ? 'BLOCKED')
+    OR u."permission"::jsonb->>'role' = 'BLOCKED'
+  )
+  AND NOT EXISTS (
+    SELECT 1
+    FROM "AccountEnforcement" existing
+    WHERE existing."targetUserId" = u."unitId"
+      AND existing."kind" = 'BAN'
+      AND existing."state" = 'ACTIVE'
+      AND (existing."expiresAt" IS NULL OR existing."expiresAt" > now())
+  );
+
+UPDATE "User"
+SET "permission" = jsonb_set("permission"::jsonb, '{role}', '["MEMBER"]'::jsonb)
+WHERE "permission" IS NOT NULL
+  AND "permission"::jsonb->'role' ? 'BLOCKED';
+
+UPDATE "User"
+SET "permission" = jsonb_set("permission"::jsonb, '{role}', '"MEMBER"'::jsonb)
+WHERE "permission" IS NOT NULL
+  AND "permission"::jsonb->>'role' = 'BLOCKED';
+
 CREATE TABLE "ModerationCase" (
   "id" UUID NOT NULL DEFAULT uuidv7(),
   "state" "ModerationCaseState" NOT NULL DEFAULT 'NEW',

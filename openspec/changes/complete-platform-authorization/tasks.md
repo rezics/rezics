@@ -17,7 +17,7 @@
 ## 3. Account Enforcement And Auth Boundary
 
 - [x] 3.1 Implement warning, silence, suspension, ban, unblock, and rate/trust restriction service methods.
-- [ ] 3.2 Make blocked status derive from active enforcement (single source of truth); retain only a derived projection for transport compatibility.
+- [x] 3.2 Make blocked status derive from active enforcement (single source of truth); retain only a derived projection for transport compatibility.
 - [ ] 3.3 Integrate ban/unban/session revocation with `package/auth` through existing auth-boundary patterns and emit boundary events.
 - [ ] 3.4 Apply enforcement to create post, reply, realm creation, DM send, tag vote, and reaction policy checks; add reconciliation diagnostics for auth vs. main-server state.
 
