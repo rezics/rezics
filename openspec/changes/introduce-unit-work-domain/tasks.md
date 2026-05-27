@@ -41,11 +41,11 @@
 
 ## 5. Search Contracts And Index Settings
 
-- [ ] 5.1 Extend `ContentSearchDocument` with `workUnitId`, `searchGroupId`, `ownTagIds`, `workTagIds`, `allTagIds`, `ownTagLabels`, `workTagLabels`, `allTagLabels`, `position`, and `displayPolicy`.
-- [ ] 5.2 Extend post/content search metadata with generic work-domain membership fields derived from `UnitWork` where needed.
-- [ ] 5.3 Update Meilisearch filterable attributes for content and post indexes to include work-domain fields.
-- [ ] 5.4 Update search option schemas for grouped vs expanded release result presentation.
-- [ ] 5.5 Add contract tests for the new search document fields.
+- [x] 5.1 Extend `ContentSearchDocument` with `workUnitId`, `searchGroupId`, `ownTagIds`, `workTagIds`, `allTagIds`, `ownTagLabels`, `workTagLabels`, `allTagLabels`, `position`, and `displayPolicy`.
+- [x] 5.2 Extend post/content search metadata with generic work-domain membership fields derived from `UnitWork` where needed.
+- [x] 5.3 Update Meilisearch filterable attributes for content and post indexes to include work-domain fields.
+- [x] 5.4 Update search option schemas for grouped vs expanded release result presentation.
+- [x] 5.5 Add contract tests for the new search document fields.
 
 ## 6. Search Projection And Grouping
 

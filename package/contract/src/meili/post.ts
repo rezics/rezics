@@ -1,5 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
+import { unitWorkRoleSchema } from "../unit-work";
 
 // ANCHOR: Post Search Document
 
@@ -21,6 +22,8 @@ export const PostSearchDocumentSchema = t.Object({
   rootTargetUnitId: t.Union([t.String(), t.Null()]),
   rootTargetUnitType: t.Union([t.String(), t.Null()]),
   realmIds: t.Array(t.String()),
+  workUnitIds: t.Array(t.String()),
+  workRoles: t.Array(unitWorkRoleSchema),
   rootPostUnitId: t.Union([t.String(), t.Null()]),
   parentPostUnitId: t.Union([t.String(), t.Null()]),
   authorUserId: t.String(),
@@ -55,6 +58,8 @@ export const PostSearchOptionsSchema = t.Object({
   rootTargetUnitId: t.Optional(t.String()),
   rootTargetUnitType: t.Optional(t.String()),
   realmUnitId: t.Optional(t.String()),
+  workUnitId: t.Optional(t.String()),
+  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   authorUserId: t.Optional(t.String()),
   rootPostUnitId: t.Optional(t.String()),
   parentPostUnitId: t.Optional(t.String()),

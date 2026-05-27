@@ -5,6 +5,7 @@ import { contentDocSchema } from "../content-doc";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";
 import { contentRatingSchema } from "../unit";
+import { unitWorkDisplayPolicySchema, unitWorkRoleSchema } from "../unit-work";
 
 // ANCHOR: Content Search Document
 
@@ -39,6 +40,22 @@ export const ContentSearchDocumentSchema = t.Object({
   // Filterable: tag system (from UnitTag)
   tagIds: t.Array(t.String()),
   tagScores: t.Record(t.String(), t.Number()),
+
+  // Filterable/display: work-domain projection (from UnitWork + inherited UnitTag)
+  workUnitId: t.Union([t.String(), t.Null()]),
+  searchGroupId: t.String(),
+  ownTagIds: t.Array(t.String()),
+  workTagIds: t.Array(t.String()),
+  allTagIds: t.Array(t.String()),
+  ownTagLabels: t.Array(t.String()),
+  workTagLabels: t.Array(t.String()),
+  allTagLabels: t.Array(t.String()),
+  position: t.Union([t.String(), t.Null()]),
+  displayPolicy: t.Union([unitWorkDisplayPolicySchema, t.Null()]),
+
+  // Generic work-domain memberships for non-release content.
+  workUnitIds: t.Array(t.String()),
+  workRoles: t.Array(unitWorkRoleSchema),
 
   // Filterable: realm system (from RealmUnit)
   realmIds: t.Array(t.String()),
@@ -101,6 +118,13 @@ export const ContentSearchOptionsSchema = t.Object({
   postKind: t.Optional(t.Array(postKindLiterals)),
   tags: t.Optional(t.Array(TagRefSchema)),
   tagIds: t.Optional(t.Array(t.String())),
+  allTagIds: t.Optional(t.Array(t.String())),
+  workUnitId: t.Optional(t.String()),
+  searchGroupId: t.Optional(t.String()),
+  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
+  releasePresentation: t.Optional(
+    t.Union([t.Literal("grouped"), t.Literal("expanded")]),
+  ),
   realmId: t.Optional(t.String()),
   realmTagIds: t.Optional(t.Array(t.String())),
   languages: t.Optional(t.Array(t.String())),
