@@ -18,7 +18,28 @@ const GAME_PLATFORMS = [
   { slug: "nintendo-switch", title: "Nintendo Switch" },
   { slug: "ios", title: "iOS" },
   { slug: "android", title: "Android" },
+  { slug: "web", title: "Web" },
 ] as const;
+
+type GamePlatformSlug = (typeof GAME_PLATFORMS)[number]["slug"];
+
+const LEGACY_PLATFORM_MAP: Record<string, readonly GamePlatformSlug[]> = {
+  PC: ["windows"],
+  PS5: ["playstation"],
+  PS4: ["playstation"],
+  XBOX_SERIES: ["xbox"],
+  XBOX_ONE: ["xbox"],
+  SWITCH: ["nintendo-switch"],
+  MOBILE: ["ios", "android"],
+  WEB: ["web"],
+} as const;
+
+const LEGACY_AGE_RATING_MAP: Record<string, RatingTagSlug> = {
+  E: "esrb-everyone",
+  T: "esrb-teen",
+  M: "esrb-mature",
+  AO: "esrb-adults-only",
+} as const;
 
 const RATING_TAG_TITLES = {
   "esrb-everyone": "ESRB Everyone",
@@ -215,8 +236,73 @@ async function ensureRatingTag(
 }
 
 export interface GameMediaTaxonomySeedResult {
-  platformEntityIds: Record<(typeof GAME_PLATFORMS)[number]["slug"], string>;
+  platformEntityIds: Record<GamePlatformSlug, string>;
   ratingTagIds: Record<RatingTagSlug, string>;
+}
+
+async function backfillLegacyGamePlatforms(
+  prisma: PrismaClient,
+  platformEntityIds: Record<GamePlatformSlug, string>,
+): Promise<number> {
+  const rows = await prisma.gamePlatform.findMany({
+    select: { gameUnitId: true, platformKey: true, sortOrder: true },
+  });
+  const data = rows.flatMap((row) =>
+    (LEGACY_PLATFORM_MAP[row.platformKey] ?? []).map((slug, offset) => ({
+      unitId: row.gameUnitId,
+      entityId: platformEntityIds[slug],
+      role: "available_on",
+      sortOrder: row.sortOrder + offset,
+    })),
+  );
+
+  if (data.length === 0) {
+    return 0;
+  }
+
+  const result = await prisma.subjectAttribution.createMany({
+    data,
+    skipDuplicates: true,
+  });
+  return result.count;
+}
+
+async function backfillLegacyGameRatings(
+  prisma: PrismaClient,
+  ratingTagIds: Record<RatingTagSlug, string>,
+): Promise<number> {
+  const rows = await prisma.game.findMany({
+    where: { ageRatingKey: { not: null } },
+    select: { unitId: true, ageRatingKey: true },
+  });
+  const data = rows.flatMap((row) => {
+    const slug = row.ageRatingKey
+      ? LEGACY_AGE_RATING_MAP[row.ageRatingKey]
+      : undefined;
+    if (!slug) {
+      return [];
+    }
+
+    return [
+      {
+        unitId: row.unitId,
+        tagUnitId: ratingTagIds[slug],
+        score: 0,
+        voteCount: 0,
+        pinned: true,
+      },
+    ];
+  });
+
+  if (data.length === 0) {
+    return 0;
+  }
+
+  const result = await prisma.unitTag.createMany({
+    data,
+    skipDuplicates: true,
+  });
+  return result.count;
 }
 
 export async function seedGameMediaTaxonomy(
@@ -240,6 +326,18 @@ export async function seedGameMediaTaxonomy(
   for (const slug of RATING_TAGS) {
     ratingTagIds[slug] = await ensureRatingTag(prisma, slugScopes.tag, slug);
   }
+
+  const platformBackfillCount = await backfillLegacyGamePlatforms(
+    prisma,
+    platformEntityIds,
+  );
+  const ratingBackfillCount = await backfillLegacyGameRatings(
+    prisma,
+    ratingTagIds,
+  );
+  console.log(
+    `[Seed]   Backfilled ${platformBackfillCount} platform relation(s) and ${ratingBackfillCount} rating tag relation(s).`,
+  );
 
   return { platformEntityIds, ratingTagIds };
 }
