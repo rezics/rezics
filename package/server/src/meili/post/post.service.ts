@@ -22,6 +22,18 @@ export async function searchPosts(
   if (opts.realmUnitId) {
     filter.push(`realmIds = "${opts.realmUnitId}"`);
   }
+  if (opts.workUnitId) {
+    filter.push(`workUnitIds = "${opts.workUnitId}"`);
+  }
+  if (opts.workRoles?.length) {
+    if (opts.workRoles.length === 1) {
+      filter.push(`workRoles = "${opts.workRoles[0]}"`);
+    } else {
+      filter.push(
+        `workRoles IN [${opts.workRoles.map((role) => `"${role}"`).join(", ")}]`,
+      );
+    }
+  }
   if (opts.authorUserId) {
     filter.push(`authorUserId = "${opts.authorUserId}"`);
   }

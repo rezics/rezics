@@ -93,6 +93,10 @@ export const ContentSearchDocumentSchema = t.Object({
   linkUrl: t.Optional(t.Union([t.String(), t.Null()])),
   linkSiteName: t.Optional(t.Union([t.String(), t.Null()])),
 
+  // Grouped release search display fields
+  collapsedAlternativeUnitIds: t.Optional(t.Array(t.String())),
+  collapsedAlternatives: t.Optional(t.Array(t.Any())),
+
   // Structured translations for language-aware rendering
   translations: t.Optional(
     t.Array(

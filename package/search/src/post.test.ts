@@ -214,6 +214,88 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.realmTagKeys).toEqual(["realm-1:tag-1"]);
   });
 
+  test("projects inherited work tags and release grouping fields", async () => {
+    setServerEnvForSearchTests();
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "release-1",
+      type: "BOOK",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [{ language: "en", title: "Release", extra: null }],
+      unitTags: [
+        {
+          tagUnitId: "tag-own",
+          score: 1,
+          tag: { translations: [{ title: "Own" }] },
+        },
+      ],
+      workMemberships: [
+        {
+          workUnitId: "work-1",
+          role: "RELEASE",
+          position: "a0",
+          displayPolicy: "PRIMARY",
+          work: {
+            unitTags: [
+              {
+                tagUnitId: "tag-work",
+                score: 2,
+                tag: { translations: [{ title: "Work" }] },
+              },
+            ],
+          },
+        },
+      ],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      book: { textLength: 100, isLicensed: false },
+    });
+
+    expect(doc.workUnitId).toBe("work-1");
+    expect(doc.searchGroupId).toBe("work-1");
+    expect(doc.ownTagIds).toEqual(["tag-own"]);
+    expect(doc.workTagIds).toEqual(["tag-work"]);
+    expect(doc.allTagIds).toEqual(["tag-own", "tag-work"]);
+    expect(doc.ownTagLabels).toEqual(["Own"]);
+    expect(doc.workTagLabels).toEqual(["Work"]);
+    expect(doc.allTagLabels).toEqual(["Own", "Work"]);
+    expect(doc.position).toBe("a0");
+    expect(doc.displayPolicy).toBe("PRIMARY");
+    expect(doc.workUnitIds).toEqual(["work-1"]);
+    expect(doc.workRoles).toEqual(["RELEASE"]);
+  });
+
+  test("buildPostDocument projects UnitWork membership fields", async () => {
+    setServerEnvForSearchTests();
+    const { buildPostDocument } = await import("./sync");
+
+    const doc = buildPostDocument({
+      unitId: "post-1",
+      content: { type: "doc", content: [] },
+      kind: "REVIEW",
+      depth: 0,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      unit: {
+        user: null,
+        inRealms: [],
+        workMemberships: [{ workUnitId: "work-1", role: "REVIEW" }],
+      },
+      scoreEntry: null,
+    });
+
+    expect(doc.workUnitIds).toEqual(["work-1"]);
+    expect(doc.workRoles).toEqual(["REVIEW"]);
+  });
+
   test("projects main markdown and ignores slot text for runtime v1", async () => {
     setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
@@ -392,7 +474,7 @@ describe("public content indexing eligibility", () => {
     ).toBe(true);
   });
 
-  test("rejects private, deleted, and release Units", async () => {
+  test("rejects private and deleted Units while accepting releases", async () => {
     setServerEnvForSearchTests();
     const { isPublicIndexableContentUnit } = await import("./sync");
     expect(
@@ -418,7 +500,7 @@ describe("public content indexing eligibility", () => {
         visibility: "PUBLIC",
         workUnitId: "work-1",
       }),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   test("rejects private and deleted post backing Units", async () => {

@@ -103,6 +103,16 @@ const PUBLIC_ELIGIBLE_UNIT_WHERE = {
   visibility: "PUBLIC",
 } as const;
 
+const visibleUnitTagsInclude = {
+  where: {
+    OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
+  },
+  include: {
+    tag: { include: { translations: true } },
+  },
+  orderBy: { score: "desc" as const },
+} as const;
+
 async function isContentPatchEligible(unitId: string): Promise<boolean> {
   const unit = await getSearchPrismaClient().unit.findUnique({
     where: { id: unitId },
@@ -124,7 +134,6 @@ export function isPublicIndexableContentUnit(
 ): boolean {
   return Boolean(
     unit &&
-      unit.workUnitId == null &&
       INDEXABLE_TYPES.includes(unit.type as any) &&
       unit.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
       unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility,
@@ -216,14 +225,16 @@ const contentInclude = {
     },
     orderBy: [{ pinned: "desc" as const }, { score: "desc" as const }],
   } as any,
-  unitTags: {
-    where: {
-      OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
-    },
+  unitTags: visibleUnitTagsInclude,
+  workMemberships: {
     include: {
-      tag: { include: { translations: true } },
+      work: {
+        include: {
+          unitTags: visibleUnitTagsInclude,
+        },
+      },
     },
-    orderBy: { score: "desc" as const },
+    orderBy: [{ role: "asc" as const }, { createdAt: "asc" as const }],
   },
   inRealms: true,
   realmTagApplicationsAsTargetUnit: true,
@@ -260,6 +271,13 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const unitTags: any[] = (unit.unitTags ?? []).filter(
     isSearchVisibleScoredRow,
   );
+  const workMemberships: any[] = unit.workMemberships ?? [];
+  const releaseMembership =
+    workMemberships.find((membership) => membership.role === "RELEASE") ?? null;
+  const workUnitId = releaseMembership?.workUnitId ?? unit.workUnitId ?? null;
+  const workTagRows: any[] = (releaseMembership?.work?.unitTags ?? []).filter(
+    isSearchVisibleScoredRow,
+  );
   const inRealms: any[] = unit.inRealms ?? [];
   const realmTagApplicationsAsTargetUnit: any[] =
     unit.realmTagApplicationsAsTargetUnit ?? [];
@@ -289,6 +307,16 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
       .filter(Boolean);
     tagLabels.push(...labels);
   }
+  const workTagIds = workTagRows.map((ut: any) => ut.tagUnitId);
+  const workTagLabels = workTagRows.flatMap((ut: any) =>
+    (ut.tag?.translations ?? []).map((t: any) => t.title).filter(Boolean),
+  );
+  const allTagIds = [...new Set([...tagIds, ...workTagIds])];
+  const allTagLabels = [...new Set([...tagLabels, ...workTagLabels])];
+  const workUnitIds = workMemberships.map(
+    (membership) => membership.workUnitId,
+  );
+  const workRoles = workMemberships.map((membership) => membership.role);
 
   // Realms
   const realmIds = inRealms.map((r: any) => r.realmUnitId);
@@ -365,6 +393,18 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     aliasValues,
     tagIds,
     tagScores,
+    workUnitId,
+    searchGroupId: workUnitId ?? unit.id,
+    ownTagIds: tagIds,
+    workTagIds,
+    allTagIds,
+    ownTagLabels: tagLabels,
+    workTagLabels,
+    allTagLabels,
+    position: releaseMembership?.position ?? null,
+    displayPolicy: releaseMembership?.displayPolicy ?? null,
+    workUnitIds,
+    workRoles,
     realmIds,
     realmTagKeys,
     languages,
@@ -416,7 +456,6 @@ export async function syncAllContent(client: SearchClient) {
 
     const units: any[] = await getSearchPrismaClient().unit.findMany({
       where: {
-        workUnitId: null,
         type: { in: INDEXABLE_TYPES },
         ...PUBLIC_ELIGIBLE_UNIT_WHERE,
       },
@@ -447,7 +486,6 @@ export async function syncContentSegment(
   const limit = segmentLimit(options);
   const units: any[] = await getSearchPrismaClient().unit.findMany({
     where: {
-      workUnitId: null,
       type: { in: INDEXABLE_TYPES },
       ...PUBLIC_ELIGIBLE_UNIT_WHERE,
     },
@@ -563,7 +601,6 @@ export async function syncSingleContent(client: SearchClient, unitId: string) {
   // If unit doesn't exist or doesn't qualify, remove from index
   if (
     !unit ||
-    unit.workUnitId != null ||
     !INDEXABLE_TYPES.includes(unit.type as any) ||
     unit.status !== PUBLIC_ELIGIBLE_UNIT_WHERE.status ||
     unit.visibility !== PUBLIC_ELIGIBLE_UNIT_WHERE.visibility
@@ -857,7 +894,7 @@ export async function syncPostsByAuthorSegment(
     },
     include: {
       ...postIncludeForSync,
-      unit: { include: { user: true, inRealms: true } },
+      unit: { include: { user: true, inRealms: true, workMemberships: true } },
     },
     orderBy: { unitId: "asc" },
     take: limit + 1,
@@ -1283,6 +1320,7 @@ const postIncludeForSync = {
     include: {
       user: true,
       inRealms: true,
+      workMemberships: true,
     },
   },
   targetUnit: {
@@ -1299,6 +1337,7 @@ const postIncludeForSync = {
 export function buildPostDocument(post: any): PostSearchDocument {
   const user = post.unit?.user;
   const inRealms: any[] = post.unit?.inRealms ?? [];
+  const workMemberships: any[] = post.unit?.workMemberships ?? [];
   const targetUnit = post.targetUnit;
   const scoreEntry = post.scoreEntry;
 
@@ -1343,6 +1382,8 @@ export function buildPostDocument(post: any): PostSearchDocument {
     rootTargetUnitId: post.rootTargetUnitId ?? null,
     rootTargetUnitType: post.rootTargetUnitType ?? null,
     realmIds: inRealms.map((realm) => realm.realmUnitId),
+    workUnitIds: workMemberships.map((membership) => membership.workUnitId),
+    workRoles: workMemberships.map((membership) => membership.role),
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,
     authorUserId: post.authorUserId,
@@ -1366,7 +1407,7 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
     where: { unitId },
     include: {
       ...postIncludeForSync,
-      unit: { include: { user: true, inRealms: true } },
+      unit: { include: { user: true, inRealms: true, workMemberships: true } },
     },
   });
 
@@ -1395,7 +1436,9 @@ export async function syncAllPosts(client: SearchClient) {
       },
       include: {
         ...postIncludeForSync,
-        unit: { include: { user: true, inRealms: true } },
+        unit: {
+          include: { user: true, inRealms: true, workMemberships: true },
+        },
       },
       orderBy: { unitId: "asc" },
       take: BATCH_SIZE,
@@ -1427,7 +1470,7 @@ export async function syncPostSegment(
     },
     include: {
       ...postIncludeForSync,
-      unit: { include: { user: true, inRealms: true } },
+      unit: { include: { user: true, inRealms: true, workMemberships: true } },
     },
     orderBy: { unitId: "asc" },
     take: limit + 1,
@@ -1649,7 +1692,9 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
       },
       include: {
         ...postIncludeForSync,
-        unit: { include: { user: true, inRealms: true } },
+        unit: {
+          include: { user: true, inRealms: true, workMemberships: true },
+        },
       },
       orderBy: { unitId: "asc" },
       take: BATCH_SIZE,
@@ -1684,7 +1729,9 @@ export async function syncPostsByTarget(
       },
       include: {
         ...postIncludeForSync,
-        unit: { include: { user: true, inRealms: true } },
+        unit: {
+          include: { user: true, inRealms: true, workMemberships: true },
+        },
       },
       orderBy: { unitId: "asc" },
       take: BATCH_SIZE,

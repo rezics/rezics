@@ -5,6 +5,36 @@ import type {
 import { resolveSlugRefs } from "../../shared/slug-ref";
 import { searchClient } from "../search-client";
 
+function displayRank(item: any): number {
+  if (item.displayPolicy === "PRIMARY") return 0;
+  if (item.displayPolicy === "SECONDARY") return 1;
+  return 2;
+}
+
+function groupReleaseHits(items: any[]): any[] {
+  const groups = new Map<string, any[]>();
+  for (const item of items) {
+    const groupId = item.searchGroupId ?? item.id;
+    groups.set(groupId, [...(groups.get(groupId) ?? []), item]);
+  }
+
+  return [...groups.values()].map((group) => {
+    const sorted = [...group].sort((left, right) => {
+      const rank = displayRank(left) - displayRank(right);
+      if (rank !== 0) return rank;
+      return String(left.position ?? "").localeCompare(
+        String(right.position ?? ""),
+      );
+    });
+    const [visible, ...alternatives] = sorted;
+    return {
+      ...visible,
+      collapsedAlternativeUnitIds: alternatives.map((item) => item.id),
+      collapsedAlternatives: alternatives,
+    };
+  });
+}
+
 /**
  * Search the unified content index with typed options.
  */
@@ -53,11 +83,31 @@ export async function searchContent(
   if (opts.tags?.length) {
     const resolvedTagIds = await resolveSlugRefs(opts.tags);
     for (const tagId of resolvedTagIds) {
-      filter.push(`tagIds = "${tagId}"`);
+      filter.push(`allTagIds = "${tagId}"`);
+    }
+  } else if (opts.allTagIds?.length) {
+    for (const tagId of opts.allTagIds) {
+      filter.push(`allTagIds = "${tagId}"`);
     }
   } else if (opts.tagIds?.length) {
     for (const tagId of opts.tagIds) {
-      filter.push(`tagIds = "${tagId}"`);
+      filter.push(`allTagIds = "${tagId}"`);
+    }
+  }
+
+  if (opts.workUnitId) {
+    filter.push(`workUnitId = "${opts.workUnitId}"`);
+  }
+  if (opts.searchGroupId) {
+    filter.push(`searchGroupId = "${opts.searchGroupId}"`);
+  }
+  if (opts.workRoles?.length) {
+    if (opts.workRoles.length === 1) {
+      filter.push(`workRoles = "${opts.workRoles[0]}"`);
+    } else {
+      filter.push(
+        `workRoles IN [${opts.workRoles.map((role) => `"${role}"`).join(", ")}]`,
+      );
     }
   }
 
@@ -113,17 +163,21 @@ export async function searchContent(
 
   const limit = opts.limit ?? 20;
   const offset = opts.offset ?? 0;
+  const grouped = opts.releasePresentation === "grouped";
 
   const resp = await searchClient.contentIndex.search(q, {
     offset,
-    limit,
+    limit: grouped ? limit * 3 : limit,
     filter: filter.length > 0 ? filter : undefined,
     sort: sort.length > 0 ? sort : undefined,
   });
+  const items = grouped
+    ? groupReleaseHits(resp.hits as any[]).slice(0, limit)
+    : (resp.hits as any[]);
 
   return {
-    items: resp.hits as any[],
-    total: resp.estimatedTotalHits ?? resp.hits.length,
+    items,
+    total: grouped ? items.length : (resp.estimatedTotalHits ?? items.length),
     processingTimeMs: resp.processingTimeMs,
     query: resp.query ?? q,
   };

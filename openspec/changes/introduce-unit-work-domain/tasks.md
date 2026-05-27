@@ -49,15 +49,15 @@
 
 ## 6. Search Projection And Grouping
 
-- [ ] 6.1 Update `package/search/src/sync.ts` content document building to load `UnitWork` membership and inherited work tags.
-- [ ] 6.2 Populate `ownTagIds`, `workTagIds`, and `allTagIds` separately for release-aware documents.
-- [ ] 6.3 Populate `searchGroupId = workUnitId ?? unitId` for all content documents.
-- [ ] 6.4 Populate `position` and `displayPolicy` from `UnitWork`.
-- [ ] 6.5 Update content search service filtering so tag filters use `allTagIds`.
-- [ ] 6.6 Implement grouped result assembly that returns one default visible release per `searchGroupId` plus collapsed alternatives.
-- [ ] 6.7 Implement expanded release search mode for release-specific filters.
-- [ ] 6.8 Update post search sync and work-domain feed search to use `UnitWork` membership.
-- [ ] 6.9 Add search tests covering inherited work tag matches, grouped same-work releases, expanded release mode, and exact-release post filtering.
+- [x] 6.1 Update `package/search/src/sync.ts` content document building to load `UnitWork` membership and inherited work tags.
+- [x] 6.2 Populate `ownTagIds`, `workTagIds`, and `allTagIds` separately for release-aware documents.
+- [x] 6.3 Populate `searchGroupId = workUnitId ?? unitId` for all content documents.
+- [x] 6.4 Populate `position` and `displayPolicy` from `UnitWork`.
+- [x] 6.5 Update content search service filtering so tag filters use `allTagIds`.
+- [x] 6.6 Implement grouped result assembly that returns one default visible release per `searchGroupId` plus collapsed alternatives.
+- [x] 6.7 Implement expanded release search mode for release-specific filters.
+- [x] 6.8 Update post search sync and work-domain feed search to use `UnitWork` membership.
+- [x] 6.9 Add search tests covering inherited work tag matches, grouped same-work releases, expanded release mode, and exact-release post filtering.
 
 ## 7. CDC And Job-Runner Batch Repair
 
