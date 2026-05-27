@@ -64,11 +64,17 @@ initial deployment happens to run on the same machine.
   - database infrastructure;
   - search infrastructure;
   - CDC infrastructure;
+  - observability infrastructure (opt-in);
   - proxy;
   - backend HTTP services;
   - workers;
   - one-shot migrations;
   - Cloudflare static frontends.
+- Integrate the runtime services and patterns introduced by the now-applied
+  `standardize-elysia-observability` and `introduce-ranking-service` changes:
+  the `@rezics/ranking` HTTP service and its dedicated ranking worker, the shared
+  `@rezics/shared` observability helpers, a second Sequin CDC source for the
+  reaction database, and an opt-in self-hosted observability analysis backend.
 
 ## Scope
 
@@ -87,9 +93,16 @@ Affected packages and areas:
 - `package/history`: Docker image, compiled cluster entrypoint, healthcheck,
   migration job, production env contract.
 - `package/job-runner`: Docker image, HTTP and worker deployment roles,
-  explicit worker concurrency, healthcheck, production env contract.
-- `package/preview`: production classification and Dockerization if retained as
-  a backend Elysia runtime service.
+  explicit worker concurrency, healthcheck, production env contract; second
+  Sequin CDC source (reaction database) for ranking invalidations.
+- `package/ranking`: Docker image, compiled cluster entrypoint, healthcheck,
+  migration job, production env contract; internal-only HTTP service with a
+  rebuildable projection database plus read access to the main server database
+  and Meilisearch. A dedicated ranking worker role consumes the ranking job lane.
+- `package/shared`: shared observability helpers (`src/observability/*`) are a
+  build input for every backend image; production telemetry env contract.
+- `package/preview`: classified as non-production tooling and excluded from the
+  first production service set.
 - `tool/external-services`: documentation/spec boundary updates only for its
   local-development purpose.
 - New deployment assets under an implementation-chosen deploy/tooling location
@@ -115,7 +128,13 @@ Affected packages and areas:
 - Backend package services gain production images and compiled Linux runtime
   entrypoints. Existing local development commands remain available.
 - Production deploys move from mutable host builds and direct file copying to
-  immutable image tags and declarative deployment units.
+  immutable image tags and declarative deployment units. Orchestration uses
+  Kamal over a GHCR image registry instead of hand-written deploy scripts; this
+  replaces the existing systemd + SSH/rsync `tool/deploy-script` path and the
+  `master`-triggered `deploy.yml` workflow.
+- Backend service databases start as one self-hosted PostgreSQL instance with a
+  database per service, addressed through explicit per-service connection URLs so
+  any database can move to its own instance or a managed provider later.
 - Production infrastructure can initially run on one host while preserving the
   ability to move database, search, CDC, workers, or proxy to separate hosts by
   changing endpoints and deployment targets.

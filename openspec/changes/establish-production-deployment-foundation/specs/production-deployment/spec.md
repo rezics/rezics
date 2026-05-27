@@ -3,20 +3,23 @@
 ### Requirement: Production deployment units are independently deployable
 
 Production deployment SHALL separate durable infrastructure, search
-infrastructure, CDC infrastructure, proxy, backend HTTP services, workers,
-migration jobs, and static frontends into independently deployable units.
-Production deployment MUST NOT require a single monolithic Docker Compose
-project that contains all infrastructure and application services.
+infrastructure, CDC infrastructure, observability infrastructure, proxy, backend
+HTTP services, workers, migration jobs, and static frontends into independently
+deployable units. Each backend HTTP service and each worker role SHALL be its own
+independently deployable unit. Production deployment MUST NOT require a single
+monolithic Docker Compose project that contains all infrastructure and
+application services.
 
 #### Scenario: Same host uses separate deployment units
 
 - **WHEN** production infrastructure and application services are placed on the
   same host
 - **THEN** database infrastructure, search infrastructure, CDC infrastructure,
-  proxy, backend HTTP services, workers, migration jobs, and static frontends
-  SHALL remain separate deployment units
-- **AND** updating backend HTTP services SHALL NOT require recreating database,
-  search, CDC, or proxy services
+  observability infrastructure, proxy, each backend HTTP service, each worker
+  role, migration jobs, and static frontends SHALL remain separate deployment
+  units
+- **AND** updating one backend HTTP service SHALL NOT require recreating other
+  HTTP services, database, search, CDC, or proxy services
 
 #### Scenario: Service moves to another host
 
@@ -29,17 +32,16 @@ project that contains all infrastructure and application services.
 
 ### Requirement: Backend runtime services are Dockerized
 
-Every package-owned backend runtime service selected for production execution
-SHALL have a production Docker image built from the monorepo and published with
-an immutable source revision tag. Library-only packages SHALL NOT be deployed as
-standalone runtime images.
+Each package-owned backend runtime service SHALL have a production Docker image
+built from the monorepo and published with an immutable source revision tag.
+Library-only packages SHALL NOT be deployed as standalone runtime images.
 
 #### Scenario: Backend service image is built
 
 - **WHEN** a production release builds backend artifacts
 - **THEN** runtime services including `package/server`, `package/auth`,
-  `package/notify`, `package/reaction`, `package/history`, and
-  `package/job-runner` SHALL produce Docker images
+  `package/notify`, `package/reaction`, `package/history`, `package/job-runner`,
+  and `package/ranking` SHALL produce Docker images
 - **AND** each image SHALL be tagged with the git revision used to build it
 
 #### Scenario: Library package is not deployed directly
@@ -86,6 +88,14 @@ designed for clustered execution.
 - **AND** its worker role SHALL expose explicit concurrency or replica controls
 - **AND** scaling the worker role SHALL NOT require redeploying backend HTTP
   services
+
+#### Scenario: Ranking worker is deployed separately
+
+- **WHEN** the ranking job lane is deployed to production
+- **THEN** it SHALL run as a dedicated worker role separate from the
+  `job-runner` worker role
+- **AND** its replica/concurrency SHALL be configurable independently
+- **AND** ranking recompute load SHALL NOT block other job lanes' workers
 
 ### Requirement: Frontend applications deploy to Cloudflare static hosting
 
@@ -197,6 +207,58 @@ serve its intended production role.
 - **THEN** it SHALL verify that the worker role can connect to required queue,
   database, search, or CDC dependencies
 - **AND** failed dependency readiness SHALL fail the deployment
+
+### Requirement: Internal-only services are not publicly routed
+
+Backend services that are only consumed by other internal services SHALL NOT be
+exposed through the public proxy and SHALL NOT receive public CORS origins. The
+ranking service is internal-only and reachable only from internal callers.
+
+#### Scenario: Ranking service is deployed
+
+- **WHEN** the ranking service is deployed to production
+- **THEN** it SHALL be reachable only from internal callers such as the job
+  runner via an explicit internal service URL
+- **AND** it SHALL NOT be routed through the public proxy or granted public CORS
+  origins
+
+### Requirement: Ranking projection database is rebuildable
+
+The ranking database SHALL be treated as a rebuildable projection store. Its
+recovery path SHALL be a full ranking backfill/recompute rather than a database
+restore, and it SHALL NOT require the same durability guarantees as authoritative
+service databases.
+
+#### Scenario: Ranking data is lost or reset
+
+- **WHEN** ranking projection data is lost, reset, or rolled back
+- **THEN** recovery SHALL repopulate it by recomputing from signal sources and
+  re-syncing Meilisearch ranking fields
+- **AND** the release SHALL NOT depend on a point-in-time restore of the ranking
+  database
+
+### Requirement: Production telemetry export is opt-in
+
+Self-hosted observability analysis infrastructure SHALL be a separate, optional
+deployment unit. Application services MUST run without it. When no OTLP export
+endpoint is configured, services SHALL still emit structured logs to their
+container log stream.
+
+#### Scenario: Observability backend is not deployed
+
+- **WHEN** production runs without the observability infrastructure unit
+- **THEN** backend services SHALL start and serve traffic normally
+- **AND** they SHALL emit structured JSON logs to the container log stream
+- **AND** OTLP export SHALL be disabled rather than failing the service
+
+#### Scenario: Observability backend is deployed
+
+- **WHEN** the observability infrastructure unit is deployed and the OTLP
+  endpoint is configured
+- **THEN** backend services SHALL export traces/logs/metrics over OTLP to the
+  collector
+- **AND** enabling or updating it SHALL be a separate deployment target from
+  application services
 
 ### Requirement: Production runbooks document operations
 
