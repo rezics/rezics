@@ -52,6 +52,17 @@ const listQuerySchema = t.Object({
   limit: t.Optional(t.Number()),
 });
 
+const auditListQuerySchema = t.Object({
+  offset: t.Optional(t.Number()),
+  limit: t.Optional(t.Number()),
+  actorUserId: t.Optional(t.String()),
+  action: t.Optional(t.String()),
+  targetKind: t.Optional(t.String()),
+  targetId: t.Optional(t.String()),
+  decisionCode: t.Optional(t.String()),
+  requestId: t.Optional(t.String()),
+});
+
 function accountEnforcementAction(kind: string) {
   switch (kind) {
     case "warning":
@@ -1051,16 +1062,49 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
   .get(
     "/audit",
     async ({ query, identity, status }) => {
-      const denied = await assertStaff(identity, status);
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.auditRead,
+        target: { kind: "staff-audit-log", id: "list" },
+      });
       if (denied) return denied;
       return governanceAuditService.list(query);
     },
     {
       requireLogin: true,
-      query: listQuerySchema,
+      query: auditListQuerySchema,
       response: { 200: t.Array(staffAuditLogDTOSchema), 403: t.String() },
       detail: {
         summary: "List staff audit records",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .get(
+    "/audit/:auditLogId",
+    async ({ params, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.auditRead,
+        target: { kind: "staff-audit-log", id: params.auditLogId },
+      });
+      if (denied) return denied;
+
+      const auditLog = await governanceAuditService.get(params.auditLogId);
+      return auditLog ?? status(404, "Audit log not found");
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ auditLogId: t.String() }),
+      response: {
+        200: staffAuditLogDTOSchema,
+        403: t.String(),
+        404: t.String(),
+      },
+      detail: {
+        summary: "Read a staff audit record",
         tags: ["Governance", "Staff"],
       },
     },

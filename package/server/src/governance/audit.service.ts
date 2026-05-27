@@ -1,6 +1,40 @@
 import { Prisma, prisma } from "#/prisma/client";
 import { mapStaffAuditLogToDTO } from "./governance.mapper";
-import type { GovernanceListOptions } from "./types";
+import type { StaffAuditLogDTO } from "@rezics/contract";
+import type { GovernanceAuditListOptions } from "./types";
+
+const REDACTED = "[REDACTED]";
+const SENSITIVE_KEY_PATTERN =
+  /(?:password|passcode|secret|token|credential|private[_-]?note|stack(?:trace)?|raw[_-]?credential)/i;
+
+function redactAuditValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redactAuditValue);
+  if (!value || typeof value !== "object") return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+      key,
+      SENSITIVE_KEY_PATTERN.test(key) ? REDACTED : redactAuditValue(nested),
+    ]),
+  );
+}
+
+function redactAuditMetadata(
+  value: StaffAuditLogDTO["metadata"],
+): StaffAuditLogDTO["metadata"] {
+  return value === undefined
+    ? undefined
+    : (redactAuditValue(value) as StaffAuditLogDTO["metadata"]);
+}
+
+function redactStaffAuditLog(dto: StaffAuditLogDTO): StaffAuditLogDTO {
+  return {
+    ...dto,
+    before: redactAuditMetadata(dto.before),
+    after: redactAuditMetadata(dto.after),
+    metadata: redactAuditMetadata(dto.metadata),
+  };
+}
 
 export class GovernanceAuditService {
   async append(input: {
@@ -55,13 +89,26 @@ export class GovernanceAuditService {
     });
   }
 
-  async list(options: GovernanceListOptions = {}) {
+  async list(options: GovernanceAuditListOptions = {}) {
     const rows = await prisma.staffAuditLog.findMany({
+      where: {
+        ...(options.actorUserId ? { actorUserId: options.actorUserId } : {}),
+        ...(options.action ? { action: options.action } : {}),
+        ...(options.targetKind ? { targetKind: options.targetKind } : {}),
+        ...(options.targetId ? { targetId: options.targetId } : {}),
+        ...(options.decisionCode ? { decisionCode: options.decisionCode } : {}),
+        ...(options.requestId ? { requestId: options.requestId } : {}),
+      },
       orderBy: { createdAt: "desc" },
       skip: options.offset ?? 0,
       take: options.limit ?? 50,
     });
-    return rows.map(mapStaffAuditLogToDTO);
+    return rows.map((row) => redactStaffAuditLog(mapStaffAuditLogToDTO(row)));
+  }
+
+  async get(id: string) {
+    const row = await prisma.staffAuditLog.findUnique({ where: { id } });
+    return row ? redactStaffAuditLog(mapStaffAuditLogToDTO(row)) : null;
   }
 }
 

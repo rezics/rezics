@@ -39,6 +39,22 @@ const activeSummaryMock = mock(async () => ({
 const listMock = mock(async () => [enforcementRow]);
 const applyMock = mock(async () => enforcementRow);
 const unblockMock = mock(async () => [{ ...enforcementRow, state: "revoked" }]);
+const auditRow = {
+  id: "audit-1",
+  actorUserId: "staff-1",
+  action: "session.revoke",
+  targetKind: "session",
+  targetId: "session-1",
+  decisionCode: "ALLOWED",
+  requestId: "req-1",
+  reason: "compromised session",
+  before: { state: "active" },
+  after: { state: "revoked" },
+  metadata: { sessionId: "session-1" },
+  createdAt: "2026-05-28T00:00:00.000Z",
+};
+const listAuditMock = mock(async () => [auditRow]);
+const getAuditMock = mock(async () => auditRow);
 const realmMembershipForPolicyMock = mock(async () => ({
   realmUnitId: "realm-1",
   role: "moderator",
@@ -226,7 +242,10 @@ mock.module("./enforcement.service", () => ({
 }));
 
 mock.module("./audit.service", () => ({
-  governanceAuditService: { list: mock(async () => []) },
+  governanceAuditService: {
+    list: listAuditMock,
+    get: getAuditMock,
+  },
 }));
 
 mock.module("./capability.service", () => ({
@@ -279,6 +298,8 @@ describe("governanceApi account enforcement", () => {
     listMock.mockClear();
     applyMock.mockClear();
     unblockMock.mockClear();
+    listAuditMock.mockClear();
+    getAuditMock.mockClear();
     realmMembershipForPolicyMock.mockClear();
     grantRealmCapabilityMock.mockClear();
     revokeRealmCapabilityMock.mockClear();
@@ -319,6 +340,49 @@ describe("governanceApi account enforcement", () => {
       target: { kind: "account-enforcement", id: "user-2" },
     });
     expect(activeSummaryMock).toHaveBeenCalledWith("user-2");
+  });
+
+  test("checks audit policy before listing audit records", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/audit?action=session.revoke&targetKind=session&targetId=session-1&requestId=req-1",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual([auditRow]);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "audit.read",
+      target: { kind: "staff-audit-log", id: "list" },
+    });
+    expect(listAuditMock).toHaveBeenCalledWith({
+      action: "session.revoke",
+      targetKind: "session",
+      targetId: "session-1",
+      requestId: "req-1",
+    });
+  });
+
+  test("checks audit policy before reading audit detail", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/audit/audit-1"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(auditRow);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "audit.read",
+      target: { kind: "staff-audit-log", id: "audit-1" },
+    });
+    expect(getAuditMock).toHaveBeenCalledWith("audit-1");
   });
 
   test("denies enforcement creation rejected by policy", async () => {

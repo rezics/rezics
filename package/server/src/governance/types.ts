@@ -26,3 +26,12 @@ export type GovernanceListOptions = {
   offset?: number;
   limit?: number;
 };
+
+export type GovernanceAuditListOptions = GovernanceListOptions & {
+  actorUserId?: string;
+  action?: string;
+  targetKind?: string;
+  targetId?: string;
+  decisionCode?: string;
+  requestId?: string;
+};
