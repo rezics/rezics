@@ -2,6 +2,10 @@ import type { SeedTagName, TagGroupIds } from "@rezics/contract";
 import type { PrismaClient } from "#/prisma/generated/client";
 import { seedDefaultRealm } from "./seed-default-realm";
 import {
+  type GameMediaTaxonomySeedResult,
+  seedGameMediaTaxonomy,
+} from "./seed-game-media-taxonomy";
+import {
   type RealmTaxonomySeedResult,
   seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
@@ -15,6 +19,10 @@ export {
 } from "./seed-realm-taxonomy";
 export { type SlugScopesMap, seedSlugScopes } from "./seed-slug-scopes";
 export { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
+export {
+  type GameMediaTaxonomySeedResult,
+  seedGameMediaTaxonomy,
+} from "./seed-game-media-taxonomy";
 
 export interface SeedInfraResult {
   slugScopes: SlugScopesMap;
@@ -22,6 +30,7 @@ export interface SeedInfraResult {
   defaultRealmId: string;
   realmTaxonomy: RealmTaxonomySeedResult;
   searchTagIds: TagGroupIds;
+  gameMediaTaxonomy: GameMediaTaxonomySeedResult;
 }
 
 /**
@@ -44,6 +53,14 @@ export async function seedInfra(
     defaultRealmId,
     slugScopes,
   );
+  const gameMediaTaxonomy = await seedGameMediaTaxonomy(prisma, slugScopes);
   const searchTagIds = await seedSearchTagIds(prisma, slugScopes);
-  return { slugScopes, tagMap, defaultRealmId, realmTaxonomy, searchTagIds };
+  return {
+    slugScopes,
+    tagMap,
+    defaultRealmId,
+    realmTaxonomy,
+    searchTagIds,
+    gameMediaTaxonomy,
+  };
 }

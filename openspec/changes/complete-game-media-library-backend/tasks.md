@@ -9,8 +9,8 @@
 ## 2. Database And Migration
 
 - [x] 2.1 Add Prisma models and migration SQL for `GameSystemRequirement` with indexes for `gameUnitId`, `platformEntityId`, `tier`, and `sourceRefId`.
-- [ ] 2.2 Seed or migration-create initial platform Entities for common game platforms such as Windows, macOS, Linux, Steam, Steam Deck, PlayStation, Xbox, Nintendo Switch, iOS, and Android.
-- [ ] 2.3 Seed external rating tags (`RATING_TAGS`) as TAG Units with multilingual labels for common game/media rating systems (ESRB, PEGI, CERO, MPAA film, TV).
+- [x] 2.2 Seed or migration-create initial platform Entities for common game platforms such as Windows, macOS, Linux, Steam, Steam Deck, PlayStation, Xbox, Nintendo Switch, iOS, and Android.
+- [x] 2.3 Seed external rating tags (`RATING_TAGS`) as TAG Units with multilingual labels for common game/media rating systems (ESRB, PEGI, CERO, MPAA film, TV).
 - [ ] 2.4 Backfill existing `GamePlatform.platformKey` rows into platform Entity `SubjectAttribution(role = "available_on")` rows.
 - [ ] 2.5 Backfill existing `Game.ageRatingKey` values into the matching rating tag via `UnitTag`.
 - [ ] 2.6 Remove, quarantine, or mark legacy `GamePlatform` and `Game.ageRatingKey` behavior after backfill tests pass.
