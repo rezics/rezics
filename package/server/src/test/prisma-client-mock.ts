@@ -40,6 +40,22 @@ export const UnitVisibility = {
   PRIVATE: "PRIVATE",
 } as const;
 
+export const UnitWorkDisplayPolicy = {
+  PRIMARY: "PRIMARY",
+  SECONDARY: "SECONDARY",
+  HIDDEN_BY_DEFAULT: "HIDDEN_BY_DEFAULT",
+} as const;
+
+export const UnitWorkRole = {
+  RELEASE: "RELEASE",
+  POST: "POST",
+  REVIEW: "REVIEW",
+  SHELF: "SHELF",
+  WIKI: "WIKI",
+  GUIDE: "GUIDE",
+  DERIVED: "DERIVED",
+} as const;
+
 export const UserUnitProgressStatus = {
   BACKLOG: "BACKLOG",
   ACTIVE: "ACTIVE",
@@ -60,6 +76,8 @@ export const prismaClientMock = {
   UnitAliasStatus,
   UnitType,
   UnitVisibility,
+  UnitWorkDisplayPolicy,
+  UnitWorkRole,
   UserUnitProgressStatus,
 };
 

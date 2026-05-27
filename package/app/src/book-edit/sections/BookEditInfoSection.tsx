@@ -552,7 +552,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
   function handleAddTranslation(params: {
     language: string;
-    sourceReleaseUnitId: string | null;
+    sourceUnitId: string | null;
   }) {
     if (!bookId) return;
     upsertTranslationMutation.mutate(
@@ -560,7 +560,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         unitId: bookId,
         language: params.language,
         input: {
-          sourceReleaseUnitId: params.sourceReleaseUnitId ?? undefined,
+          sourceUnitId: params.sourceUnitId ?? undefined,
         },
       },
       {
@@ -613,7 +613,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     );
 
   const resolvedPageTitle = pageTitle ?? page_book_edit_info_title();
-  const sourceReleaseUnitId = editor.currentTranslation?.sourceReleaseUnitId;
+  const sourceUnitId = editor.currentTranslation?.sourceUnitId;
   const hasAvailable = ALL_LANGUAGES.length > editor.existingLanguages.length;
   const locks = fieldLocksQuery.data?.locks;
   const selectedTranslationLockPaths = [
@@ -783,10 +783,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               <SetSourceReleaseControl
                 book={data}
                 language={editor.selectedLanguage}
-                currentSourceReleaseUnitId={sourceReleaseUnitId}
+                currentSourceReleaseUnitId={sourceUnitId}
               />
 
-              {editor.isDirty && sourceReleaseUnitId && (
+              {editor.isDirty && sourceUnitId && (
                 <Alert>
                   <AlertDescription>
                     {page_book_edit_info_translation_diverge_warning()}
@@ -795,7 +795,7 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               )}
 
               <TranslationSyncActions
-                sourceReleaseUnitId={sourceReleaseUnitId}
+                sourceUnitId={sourceUnitId}
                 language={editor.selectedLanguage}
                 onSync={(draft: TranslationDraft) =>
                   editor.replaceDraft(editor.selectedLanguage, draft)

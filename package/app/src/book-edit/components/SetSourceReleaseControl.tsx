@@ -32,7 +32,7 @@ export interface SetSourceReleaseControlProps {
 
 /**
  * Inline control that lets the user wire (or unwire) the current language's
- * `sourceReleaseUnitId`. Available even when no source is set yet — that's how
+ * `sourceUnitId`. Available even when no source is set yet — that's how
  * a user gets a sync target onto an existing translation.
  */
 export const SetSourceReleaseControl: React.FC<
@@ -66,7 +66,7 @@ export const SetSourceReleaseControl: React.FC<
           mutation.mutate({
             workId: book.unitId,
             lang: language,
-            body: { sourceReleaseUnitId: v === NO_SOURCE ? null : v },
+            body: { sourceUnitId: v === NO_SOURCE ? null : v },
           })
         }
         disabled={mutation.isPending}

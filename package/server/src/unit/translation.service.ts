@@ -79,10 +79,8 @@ export class TranslationService {
               : (data.description as Prisma.InputJsonValue)
             : undefined,
         extra: (nextExtra ?? null) as Prisma.InputJsonValue,
-        sourceReleaseUnitId:
-          "sourceReleaseUnitId" in data
-            ? (data.sourceReleaseUnitId ?? undefined)
-            : undefined,
+        sourceUnitId:
+          "sourceUnitId" in data ? (data.sourceUnitId ?? undefined) : undefined,
       };
       const patchPaths = mapActualTranslationPatchPaths(
         data,
@@ -118,10 +116,7 @@ export class TranslationService {
             hasOwn(data, "extra") && data.extra !== undefined
               ? (nextExtra as Prisma.InputJsonValue)
               : undefined,
-          sourceReleaseUnitId:
-            "sourceReleaseUnitId" in data
-              ? data.sourceReleaseUnitId
-              : undefined,
+          sourceUnitId: "sourceUnitId" in data ? data.sourceUnitId : undefined,
         },
       });
       didMutate = true;

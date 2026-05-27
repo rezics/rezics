@@ -129,7 +129,7 @@ export const unitTranslationDTOSchema = t.Object({
   summary: t.Optional(t.Nullable(t.String())),
   description: t.Optional(t.Nullable(contentDocSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
-  sourceReleaseUnitId: t.Optional(t.Nullable(t.String())),
+  sourceUnitId: t.Optional(t.Nullable(t.String())),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -315,7 +315,7 @@ export const createUnitSchema = t.Object({
         summary: t.Optional(t.String()),
         description: t.Optional(contentDocWriteSchema),
         extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
-        sourceReleaseUnitId: t.Optional(t.String()),
+        sourceUnitId: t.Optional(t.String()),
       }),
     ),
   ),
@@ -348,7 +348,7 @@ export const createTranslationSchema = t.Object({
   summary: t.Optional(t.String()),
   description: t.Optional(contentDocWriteSchema),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
-  sourceReleaseUnitId: t.Optional(t.String()),
+  sourceUnitId: t.Optional(t.String()),
 });
 
 export type CreateTranslationInput = (typeof createTranslationSchema)["static"];
@@ -359,7 +359,7 @@ export const updateTranslationSchema = t.Object({
   summary: t.Optional(t.Nullable(t.String())),
   description: t.Optional(t.Nullable(contentDocWriteSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
-  sourceReleaseUnitId: t.Optional(t.Nullable(t.String())),
+  sourceUnitId: t.Optional(t.Nullable(t.String())),
 });
 
 export type UpdateTranslationInput = (typeof updateTranslationSchema)["static"];

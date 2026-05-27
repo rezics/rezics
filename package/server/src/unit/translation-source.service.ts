@@ -23,11 +23,11 @@ export class TranslationSourceError extends Error {
 }
 
 /**
- * Set or clear `UnitTranslation.sourceReleaseUnitId` for `(workId, lang)`.
+ * Set or clear `UnitTranslation.sourceUnitId` for `(workId, lang)`.
  *
  * Validations (per `unit-translation` spec):
  * - workUnit must exist and be a work (`workUnitId === null`)
- * - sourceReleaseUnitId, if set, must reference a release of this work
+ * - sourceUnitId, if set, must reference a release of this work
  *   (`releaseUnit.workUnitId === workId`)
  * - caller must have authority over the work
  *
@@ -37,7 +37,7 @@ export async function setTranslationSource(
   caller: RezicsSessionClaims,
   workId: string,
   language: string,
-  sourceReleaseUnitId: string | null,
+  sourceUnitId: string | null,
 ): Promise<TranslationSourceResponse> {
   const workUnit = await prisma.unit.findUnique({
     where: { id: workId },
@@ -70,15 +70,15 @@ export async function setTranslationSource(
     );
   }
 
-  if (sourceReleaseUnitId !== null) {
+  if (sourceUnitId !== null) {
     const release = await prisma.unit.findUnique({
-      where: { id: sourceReleaseUnitId },
+      where: { id: sourceUnitId },
       select: { workUnitId: true },
     });
     if (!release || release.workUnitId !== workId) {
       throw new TranslationSourceError(
         "RELEASE_NOT_OF_WORK",
-        "sourceReleaseUnitId must reference a release of this work",
+        "sourceUnitId must reference a release of this work",
         400,
       );
     }
@@ -87,19 +87,19 @@ export async function setTranslationSource(
   const create: Prisma.UnitTranslationCreateInput = {
     unit: { connect: { id: workId } },
     language,
-    sourceReleaseUnitId,
+    sourceUnitId,
   };
 
   const updated = await prisma.unitTranslation.upsert({
     where: { unitId_language: { unitId: workId, language } },
     create,
-    update: { sourceReleaseUnitId },
-    select: { unitId: true, language: true, sourceReleaseUnitId: true },
+    update: { sourceUnitId },
+    select: { unitId: true, language: true, sourceUnitId: true },
   });
 
   return {
     unitId: updated.unitId,
     language: updated.language as Language,
-    sourceReleaseUnitId: updated.sourceReleaseUnitId,
+    sourceUnitId: updated.sourceUnitId,
   };
 }

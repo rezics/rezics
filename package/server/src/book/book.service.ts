@@ -299,7 +299,7 @@ export class BookService {
         summary: tr.summary ?? undefined,
         description: nullableContentDocJson(tr.description),
         extra: (nextExtra ?? null) as Prisma.InputJsonValue,
-        sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+        sourceUnitId: tr.sourceUnitId ?? undefined,
       };
     });
 
@@ -674,7 +674,7 @@ export function buildBookCreatePatch(
               coverUrl: req.coverUrl ?? null,
             }
           : tr.extra,
-      sourceReleaseUnitId: tr.sourceReleaseUnitId,
+      sourceUnitId: tr.sourceUnitId,
     };
     const paths = mapActualTranslationPatchPaths(input, null, tr.language);
     const patch = translationPatchFromPaths(tr.language, input, paths)

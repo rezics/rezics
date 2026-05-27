@@ -36,7 +36,7 @@ function mapTranslation(
     summary: tr.summary ?? undefined,
     description: tr.description as UnitTranslationDTO["description"],
     extra: (tr.extra as Record<string, unknown>) ?? undefined,
-    sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+    sourceUnitId: tr.sourceUnitId ?? undefined,
     createdAt: tr.createdAt,
     updatedAt: tr.updatedAt,
   };
@@ -98,7 +98,7 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
             summary: tr.summary ?? undefined,
             description: tr.description as UnitTranslationDTO["description"],
             extra: (tr.extra as Record<string, unknown>) ?? undefined,
-            sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+            sourceUnitId: tr.sourceUnitId ?? undefined,
             createdAt: tr.createdAt,
             updatedAt: tr.updatedAt,
           })),

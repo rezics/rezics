@@ -46,8 +46,7 @@ function buildOfficialReleaseMap(
 ): Map<string, string> {
   const map = new Map<string, string>();
   for (const tr of translations ?? []) {
-    const release = (tr as { sourceReleaseUnitId?: string | null })
-      .sourceReleaseUnitId;
+    const release = (tr as { sourceUnitId?: string | null }).sourceUnitId;
     if (tr.language && release) {
       map.set(tr.language as string, release);
     }

@@ -51,6 +51,7 @@ import {
   workLinkApi,
   workLinkClaimApi,
 } from "./unit";
+import { unitWorkApi } from "./unit-work";
 import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
 import { unitExternalRefApi } from "./unit-external-ref";
 import { uploadApi } from "./upload";
@@ -201,6 +202,7 @@ routeApp
   .use(meiliApi)
   .use(federatedSearchApi)
   .use(unitApi)
+  .use(unitWorkApi)
   .use(unitAliasApi)
   .use(unitAliasVoteApi)
   .use(unitAuthorityApi)

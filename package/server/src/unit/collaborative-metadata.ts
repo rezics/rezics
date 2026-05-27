@@ -87,9 +87,7 @@ export function mapTranslationPatchPaths(
     input.summary !== undefined ? `${prefix}.summary` : undefined,
     input.description !== undefined ? `${prefix}.description` : undefined,
     input.extra !== undefined ? `${prefix}.extra` : undefined,
-    input.sourceReleaseUnitId !== undefined
-      ? `${prefix}.sourceReleaseUnitId`
-      : undefined,
+    input.sourceUnitId !== undefined ? `${prefix}.sourceUnitId` : undefined,
   ]);
 }
 
@@ -112,7 +110,7 @@ export type TranslationPatchInput = {
   summary?: unknown;
   description?: unknown;
   extra?: unknown;
-  sourceReleaseUnitId?: unknown;
+  sourceUnitId?: unknown;
 };
 
 export type PreviousTranslationState = {
@@ -121,7 +119,7 @@ export type PreviousTranslationState = {
   summary?: string | null;
   description?: unknown;
   extra?: unknown;
-  sourceReleaseUnitId?: string | null;
+  sourceUnitId?: string | null;
 };
 
 export function mapActualTranslationPatchPaths(
@@ -151,10 +149,9 @@ export function mapActualTranslationPatchPaths(
     hasOwn(input, "extra") && !sameJson(input.extra ?? null, previous.extra)
       ? `${prefix}.extra`
       : undefined,
-    hasOwn(input, "sourceReleaseUnitId") &&
-    (input.sourceReleaseUnitId ?? null) !==
-      (previous.sourceReleaseUnitId ?? null)
-      ? `${prefix}.sourceReleaseUnitId`
+    hasOwn(input, "sourceUnitId") &&
+    (input.sourceUnitId ?? null) !== (previous.sourceUnitId ?? null)
+      ? `${prefix}.sourceUnitId`
       : undefined,
   ]);
 }

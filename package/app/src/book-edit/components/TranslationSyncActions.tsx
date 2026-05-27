@@ -35,7 +35,7 @@ const i18nMessages = {
 
 export interface TranslationSyncActionsProps {
   /** Source release unit id this language is wired to. Falsy disables actions. */
-  sourceReleaseUnitId: string | null | undefined;
+  sourceUnitId: string | null | undefined;
   /** Currently selected language. */
   language: string;
   /** Called with a fresh draft to overwrite the local form. */
@@ -43,13 +43,13 @@ export interface TranslationSyncActionsProps {
 }
 
 /**
- * Shown when the current language's translation has a `sourceReleaseUnitId`.
+ * Shown when the current language's translation has a `sourceUnitId`.
  * Offers two actions: pull the source release's fields into the form (purely
  * client-side prefill — caller saves explicitly), and navigate to the source
  * release's edit page.
  */
 export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
-  sourceReleaseUnitId,
+  sourceUnitId,
   language,
   onSync,
 }) => {
@@ -57,11 +57,11 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   const navigate = useNavigate();
 
   const { data: sourceBook, isFetching } = useQuery({
-    ...bookQueries.detail(sourceReleaseUnitId ?? ""),
-    enabled: Boolean(sourceReleaseUnitId),
+    ...bookQueries.detail(sourceUnitId ?? ""),
+    enabled: Boolean(sourceUnitId),
   });
 
-  if (!sourceReleaseUnitId) return null;
+  if (!sourceUnitId) return null;
 
   const sourceTranslation = getTranslation(
     (sourceBook as BookDTO | undefined)?.translations,
@@ -85,7 +85,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
       (sourceBook as BookDTO | undefined)?.translations,
       language,
       (sourceBook as BookDTO | undefined)?.defaultLanguage ?? undefined,
-    )?.title ?? sourceReleaseUnitId;
+    )?.title ?? sourceUnitId;
 
   return (
     <div className="flex flex-col gap-2">
@@ -125,7 +125,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
           onClick={() =>
             navigate({
               to: "/book/$bookId/edit",
-              params: { bookId: sourceReleaseUnitId },
+              params: { bookId: sourceUnitId },
               search: { lang: language },
             })
           }

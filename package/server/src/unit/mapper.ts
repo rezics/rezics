@@ -50,7 +50,7 @@ export function mapTranslationToDTO(
     summary: translation.summary ?? undefined,
     description: translation.description as UnitTranslationDTO["description"],
     extra: (translation.extra as Record<string, unknown>) ?? undefined,
-    sourceReleaseUnitId: translation.sourceReleaseUnitId ?? undefined,
+    sourceUnitId: translation.sourceUnitId ?? undefined,
     createdAt: translation.createdAt,
     updatedAt: translation.updatedAt,
   };

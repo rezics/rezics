@@ -18,13 +18,13 @@ export type TranslationSourcePathParams =
 // ============================================================
 
 /**
- * Sets `UnitTranslation.sourceReleaseUnitId` for `(workId, lang)`. The
+ * Sets `UnitTranslation.sourceUnitId` for `(workId, lang)`. The
  * caller MUST have authority over the work. If the row does not exist, it
- * is created with only `sourceReleaseUnitId` set; existing `title`,
+ * is created with only `sourceUnitId` set; existing `title`,
  * `subtitle`, `summary`, `description` fields are left untouched.
  */
 export const translationSourceBodySchema = t.Object({
-  sourceReleaseUnitId: t.Nullable(t.String()),
+  sourceUnitId: t.Nullable(t.String()),
 });
 
 export type TranslationSourceBody =
@@ -37,7 +37,7 @@ export type TranslationSourceBody =
 export const translationSourceResponseSchema = t.Object({
   unitId: t.String(),
   language: languageSchema,
-  sourceReleaseUnitId: t.Nullable(t.String()),
+  sourceUnitId: t.Nullable(t.String()),
 });
 
 export type TranslationSourceResponse =

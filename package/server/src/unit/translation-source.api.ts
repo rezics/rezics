@@ -27,7 +27,7 @@ export const translationSourceApi = new Elysia({ prefix: "/unit" })
           identity,
           params.unitId,
           params.lang,
-          body.sourceReleaseUnitId,
+          body.sourceUnitId,
         );
       } catch (error) {
         if (error instanceof TranslationSourceError) {
@@ -47,7 +47,7 @@ export const translationSourceApi = new Elysia({ prefix: "/unit" })
       detail: {
         summary: "Set or clear the translation source for a work",
         description:
-          "PATCH /unit/:unitId/translations/:lang/source — `:unitId` is a work Unit. Sets `UnitTranslation.sourceReleaseUnitId` for the given (workUnitId, lang). Validates that the source is a release of this work and that the caller has authority. Existing translation fields are not touched.",
+          "PATCH /unit/:unitId/translations/:lang/source — `:unitId` is a work Unit. Sets `UnitTranslation.sourceUnitId` for the given (workUnitId, lang). Validates that the source is a release of this work and that the caller has authority. Existing translation fields are not touched.",
         tags: ["Units", "Translations"],
       },
     },

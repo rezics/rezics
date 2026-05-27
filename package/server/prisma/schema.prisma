@@ -68,6 +68,22 @@ enum ClaimStatus {
   WITHDRAWN
 }
 
+enum UnitWorkRole {
+  RELEASE
+  POST
+  REVIEW
+  SHELF
+  WIKI
+  GUIDE
+  DERIVED
+}
+
+enum UnitWorkDisplayPolicy {
+  PRIMARY
+  SECONDARY
+  HIDDEN_BY_DEFAULT
+}
+
 enum UnitAliasKind {
   COMMON
   ABBREVIATION
@@ -170,6 +186,8 @@ model Unit {
   // Cross-user work-release claim flow (see WorkLinkClaim).
   releaseClaims WorkLinkClaim[] @relation("WorkLinkClaimRelease")
   workClaims    WorkLinkClaim[] @relation("WorkLinkClaimWork")
+  workMemberships UnitWork[] @relation("UnitWorkMember")
+  workMembers     UnitWork[] @relation("UnitWorkWork")
 
   // Owner/creator
   user User? @relation("UnitForUser", fields: [userId], references: [unitId])
@@ -302,8 +320,8 @@ model UnitTranslation {
   description Json?
   extra       Json?
 
-  // For works: which release provides content in this language
-  sourceReleaseUnitId String? @db.Uuid
+  // Optional provenance Unit for the translation's display/content source.
+  sourceUnitId String? @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -400,6 +418,32 @@ model WorkLinkClaim {
   @@index([workUnitId, status])
   @@index([claimerUserId, status])
   @@index([releaseUnitId, status])
+}
+
+/**
+ * ANCHOR UNIT WORK DOMAIN
+ * Canonical relation between any Unit participating in a work domain and the
+ * hidden work Unit that owns grouping, inherited discovery metadata, and shared
+ * content aggregation.
+ */
+model UnitWork {
+  unitId     String                @db.Uuid
+  workUnitId String                @db.Uuid
+  role       UnitWorkRole
+  language   String?               @db.VarChar(16)
+  position   String?               @db.VarChar(64)
+  displayPolicy UnitWorkDisplayPolicy @default(PRIMARY)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unit Unit @relation("UnitWorkMember", fields: [unitId], references: [id], onDelete: Cascade)
+  work Unit @relation("UnitWorkWork", fields: [workUnitId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, workUnitId, role])
+  @@index([workUnitId, role, position, unitId])
+  @@index([workUnitId, role, createdAt, unitId])
+  @@index([unitId, role, workUnitId])
 }
 
 /**

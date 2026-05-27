@@ -174,7 +174,7 @@ export const createBookSchema = t.Object({
         summary: t.Optional(t.String()),
         description: t.Optional(contentDocWriteSchema),
         extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
-        sourceReleaseUnitId: t.Optional(t.String()),
+        sourceUnitId: t.Optional(t.String()),
       }),
     ),
   ),

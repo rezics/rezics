@@ -22,7 +22,7 @@ export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
       summary: tr.summary ?? undefined,
       description: tr.description as UnitTranslationDTO["description"],
       extra: (tr.extra as Record<string, unknown>) ?? undefined,
-      sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+      sourceUnitId: tr.sourceUnitId ?? undefined,
       createdAt: tr.createdAt,
       updatedAt: tr.updatedAt,
     })),

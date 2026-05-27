@@ -36,7 +36,7 @@ function makeSubjectRow(overrides: Record<string, any> = {}) {
           summary: null,
           description: null,
           extra: null,
-          sourceReleaseUnitId: null,
+          sourceUnitId: null,
           createdAt: now,
           updatedAt: now,
         },

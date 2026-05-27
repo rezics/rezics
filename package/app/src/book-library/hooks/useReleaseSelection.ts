@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Resolve the official release `unitId` for a given language from a book's
- * `translations[]`. The translation's `sourceReleaseUnitId` is the
+ * `translations[]`. The translation's `sourceUnitId` is the
  * translation-designated release.
  */
 function getOfficialRelease(
@@ -13,7 +13,7 @@ function getOfficialRelease(
   const translation = bookInfo?.translations?.find(
     (tr) => tr.language === language,
   );
-  return translation?.sourceReleaseUnitId ?? undefined;
+  return translation?.sourceUnitId ?? undefined;
 }
 
 /**

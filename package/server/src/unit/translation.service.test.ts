@@ -43,7 +43,7 @@ const previous = {
   summary: "Same summary",
   description: { type: "doc", content: [] },
   extra: null,
-  sourceReleaseUnitId: null,
+  sourceUnitId: null,
 };
 
 function freshMocks() {

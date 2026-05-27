@@ -56,7 +56,7 @@ function entityUnit(entityId: string, title = entityId) {
         summary: null,
         description: null,
         extra: null,
-        sourceReleaseUnitId: null,
+        sourceUnitId: null,
         createdAt: now,
         updatedAt: now,
       },

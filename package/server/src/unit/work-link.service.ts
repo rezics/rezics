@@ -2,6 +2,7 @@ import type { RezicsSessionClaims } from "@rezics/contract";
 import { SystemEmailKind, WIKI_TYPES, type WikiType } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { notifySystemAndEmail } from "@/notify-boundary/notify-boundary.client";
+import { unitWorkService } from "@/unit-work";
 import { hasAuthorityOver } from "./authority";
 
 export interface WorkLinkResult {
@@ -65,6 +66,9 @@ export async function applyWorkLink(
 
   if (workUnitId === null) {
     await prisma.$transaction([
+      prisma.unitWork.deleteMany({
+        where: { unitId: releaseId, role: "RELEASE" },
+      }),
       prisma.unit.update({
         where: { id: releaseId },
         data: { workUnitId: null },
@@ -106,9 +110,12 @@ export async function applyWorkLink(
   const isWikiType = WIKI_TYPE_SET.has(workUnit.type as WikiType);
 
   if (workAuthorized || isWikiType) {
-    await prisma.unit.update({
-      where: { id: releaseId },
-      data: { workUnitId },
+    await unitWorkService.create({
+      unitId: releaseId,
+      workUnitId,
+      role: "RELEASE",
+      language: null,
+      displayPolicy: "PRIMARY",
     });
     return {
       status: "LINKED",

@@ -1,24 +1,24 @@
 ## 1. Schema And Contracts
 
-- [ ] 1.1 Add contract literals and DTO schemas for `UnitWork`, `UnitWorkRole`, `UnitWorkDisplayPolicy`, and work-domain search metadata in `package/contract`.
-- [ ] 1.2 Add Prisma model for `UnitWork` in `package/server/prisma/schema.prisma`.
-- [ ] 1.3 Add indexes for `UnitWork(workUnitId, role, position, unitId)`, `UnitWork(workUnitId, role, createdAt, unitId)`, `UnitWork(unitId, role, workUnitId)`, and role-specific release uniqueness.
-- [ ] 1.4 Add migration SQL to create `UnitWork`.
-- [ ] 1.5 Backfill `UnitWork` from existing `Unit.workUnitId` values with idempotent conflict handling.
-- [ ] 1.6 Add consistency checks that detect drift between `Unit.workUnitId` and canonical `UnitWork` during the migration period.
-- [ ] 1.7 Rename `UnitTranslation.sourceReleaseUnitId` contract fields to `sourceUnitId`.
-- [ ] 1.8 Add migration/backfill for `UnitTranslation.sourceReleaseUnitId -> sourceUnitId`.
-- [ ] 1.9 Run `rg "sourceReleaseUnitId"` and migrate all server, contract, api, app, search, notify, and test call sites.
+- [x] 1.1 Add contract literals and DTO schemas for `UnitWork`, `UnitWorkRole`, `UnitWorkDisplayPolicy`, and work-domain search metadata in `package/contract`.
+- [x] 1.2 Add Prisma model for `UnitWork` in `package/server/prisma/schema.prisma`.
+- [x] 1.3 Add indexes for `UnitWork(workUnitId, role, position, unitId)`, `UnitWork(workUnitId, role, createdAt, unitId)`, `UnitWork(unitId, role, workUnitId)`, and role-specific release uniqueness.
+- [x] 1.4 Add migration SQL to create `UnitWork`.
+- [x] 1.5 Backfill `UnitWork` from existing `Unit.workUnitId` values with idempotent conflict handling.
+- [x] 1.6 Add consistency checks that detect drift between `Unit.workUnitId` and canonical `UnitWork` during the migration period.
+- [x] 1.7 Rename `UnitTranslation.sourceReleaseUnitId` contract fields to `sourceUnitId`.
+- [x] 1.8 Add migration/backfill for `UnitTranslation.sourceReleaseUnitId -> sourceUnitId`.
+- [x] 1.9 Run `rg "sourceReleaseUnitId"` and migrate all server, contract, api, app, search, notify, and test call sites.
 
 ## 2. UnitWork Server Domain
 
-- [ ] 2.1 Create `package/server/src/unit-work/` with `.api.ts`, `.service.ts`, `.mapper.ts`, and `.types.ts` following backend domain conventions.
-- [ ] 2.2 Implement create/update/delete/list service methods for `UnitWork` memberships with role validation, release-only canonical uniqueness, and no release-to-release nesting.
-- [ ] 2.3 Implement work-domain membership reconciliation helpers for content Units that may belong to multiple works.
-- [ ] 2.4 Mount the UnitWork API from `package/server/src/index.ts`.
-- [ ] 2.5 Update existing work-link services so new writes create/update `UnitWork` and keep `Unit.workUnitId` synchronized during migration.
+- [x] 2.1 Create `package/server/src/unit-work/` with `.api.ts`, `.service.ts`, `.mapper.ts`, and `.types.ts` following backend domain conventions.
+- [x] 2.2 Implement create/update/delete/list service methods for `UnitWork` memberships with role validation, release-only canonical uniqueness, and no release-to-release nesting.
+- [x] 2.3 Implement work-domain membership reconciliation helpers for content Units that may belong to multiple works.
+- [x] 2.4 Mount the UnitWork API from `package/server/src/index.ts`.
+- [x] 2.5 Update existing work-link services so new writes create/update `UnitWork` and keep `Unit.workUnitId` synchronized during migration.
 - [ ] 2.6 Update release listing reads to use `UnitWork` and expose role, language, position, and display policy.
-- [ ] 2.7 Add unit tests for membership creation, duplicate release membership rejection, multi-work content membership, invalid work target rejection, and position ordering.
+- [x] 2.7 Add unit tests for membership creation, duplicate release membership rejection, multi-work content membership, invalid work target rejection, and position ordering.
 
 ## 3. RealmUnit Rename
 
@@ -96,20 +96,20 @@
 ## 11. Admin And Diagnostics
 
 - [ ] 11.1 Add admin visibility into hidden work Units, their `UnitWork` members, roles, positions, and repair state.
-- [ ] 11.2 Add diagnostics for `UnitWork`/`Unit.workUnitId` drift during migration.
+- [x] 11.2 Add diagnostics for `UnitWork`/`Unit.workUnitId` drift during migration.
 - [ ] 11.3 Add diagnostics for search projection drift between work tags and release documents.
 - [ ] 11.4 Add warnings for unusually large work domains based on the configured release-count threshold.
 
 ## 12. Verification
 
-- [ ] 12.1 Run `bun --filter=@rezics/contract test` or the package's targeted contract test command.
+- [x] 12.1 Run `bun --filter=@rezics/contract test` or the package's targeted contract test command.
 - [ ] 12.2 Run `bun --filter=@rezics/server test` for unit-work, post, shelf, tag, and realm rename coverage.
 - [ ] 12.3 Run `bun --filter=@rezics/search test` for inherited tag and grouped search behavior.
 - [ ] 12.4 Run `bun --filter=@rezics/api test` for API clients and query keys.
 - [ ] 12.5 Run targeted app tests for book detail, release selector, language switcher, community feed, and shelf rendering.
-- [ ] 12.6 Run `bun run check:convention`.
-- [ ] 12.7 Run `bun run format:check`.
-- [ ] 12.8 Run `openspec validate introduce-unit-work-domain --strict`.
+- [x] 12.6 Run `bun run check:convention`.
+- [x] 12.7 Run `bun run format:check`.
+- [x] 12.8 Run `openspec validate introduce-unit-work-domain --strict`.
 
 ## 13. Creation Work Matching UX
 

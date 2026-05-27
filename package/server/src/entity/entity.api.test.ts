@@ -93,7 +93,7 @@ function entityRow(unitId = "entity-1", slug: string | null = null) {
           summary: null,
           description: null,
           extra: null,
-          sourceReleaseUnitId: null,
+          sourceUnitId: null,
           createdAt: now,
           updatedAt: now,
         },

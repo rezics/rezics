@@ -270,7 +270,7 @@ export class UnitService {
                   summary: tr.summary ?? undefined,
                   description: nullableContentDocJson(tr.description),
                   extra: (tr.extra ?? null) as Prisma.InputJsonValue,
-                  sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+                  sourceUnitId: tr.sourceUnitId ?? undefined,
                 })),
               }
             : undefined,

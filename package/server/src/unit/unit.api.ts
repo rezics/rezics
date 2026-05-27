@@ -325,10 +325,10 @@ export const unitApi = new Elysia({ prefix: "/unit" })
               !Array.isArray(translationPatch.extra))
               ? (translationPatch.extra as Record<string, unknown> | null)
               : undefined,
-          sourceReleaseUnitId:
-            translationPatch.sourceReleaseUnitId === null ||
-            typeof translationPatch.sourceReleaseUnitId === "string"
-              ? translationPatch.sourceReleaseUnitId
+          sourceUnitId:
+            translationPatch.sourceUnitId === null ||
+            typeof translationPatch.sourceUnitId === "string"
+              ? translationPatch.sourceUnitId
               : undefined,
         } as UpdateTranslationInput,
         identity,

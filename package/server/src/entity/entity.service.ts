@@ -201,7 +201,7 @@ export class EntityService {
                   summary: true,
                   description: true,
                   extra: true,
-                  sourceReleaseUnitId: true,
+                  sourceUnitId: true,
                 },
               },
             },
@@ -457,7 +457,7 @@ type CurrentEntityMetadata = {
       summary?: string | null;
       description?: unknown;
       extra?: unknown;
-      sourceReleaseUnitId?: string | null;
+      sourceUnitId?: string | null;
     }>;
   };
 };

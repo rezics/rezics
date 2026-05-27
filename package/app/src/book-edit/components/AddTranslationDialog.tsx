@@ -45,10 +45,7 @@ export interface AddTranslationDialogProps {
   book: BookDTO | null | undefined;
   existingLanguages: string[];
   onClose: () => void;
-  onSubmit: (params: {
-    language: string;
-    sourceReleaseUnitId: string | null;
-  }) => void;
+  onSubmit: (params: { language: string; sourceUnitId: string | null }) => void;
 }
 
 const ALL_LANGS = Object.values(LANGUAGES);
@@ -65,8 +62,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
   const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
   const firstAvailableLanguage = available[0] ?? "";
   const [language, setLanguage] = useState<string>(firstAvailableLanguage);
-  const [sourceReleaseUnitId, setSourceReleaseUnitId] =
-    useState<string>(NO_SOURCE);
+  const [sourceUnitId, setSourceReleaseUnitId] = useState<string>(NO_SOURCE);
 
   useEffect(() => {
     if (open) {
@@ -93,8 +89,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
     if (!language) return;
     onSubmit({
       language,
-      sourceReleaseUnitId:
-        sourceReleaseUnitId === NO_SOURCE ? null : sourceReleaseUnitId,
+      sourceUnitId: sourceUnitId === NO_SOURCE ? null : sourceUnitId,
     });
   };
 
@@ -137,7 +132,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
               {m.page_book_edit_info_translation_add_dialog_source_release()}
             </Label>
             <Select
-              value={sourceReleaseUnitId}
+              value={sourceUnitId}
               onValueChange={(v) => setSourceReleaseUnitId(v)}
             >
               <SelectTrigger id="add-trans-source" className="w-full">

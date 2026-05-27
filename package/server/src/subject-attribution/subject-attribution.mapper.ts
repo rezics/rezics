@@ -16,7 +16,7 @@ function mapTranslations(translations: any[] | undefined) {
     summary: tr.summary ?? undefined,
     description: tr.description ?? undefined,
     extra: (tr.extra as Record<string, unknown>) ?? undefined,
-    sourceReleaseUnitId: tr.sourceReleaseUnitId ?? undefined,
+    sourceUnitId: tr.sourceUnitId ?? undefined,
     createdAt: tr.createdAt,
     updatedAt: tr.updatedAt,
   }));
