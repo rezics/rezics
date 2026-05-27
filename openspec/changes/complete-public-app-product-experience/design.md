@@ -101,3 +101,29 @@ All production routes define loading, empty, error, denied, not-found, unauthent
 4. Upgrade creation workflows and draft/preview/publish lifecycle.
 5. Integrate engagement, notification, safety, and report actions.
 6. Add quality-state coverage, seed scenarios, and story/test coverage for critical flows.
+
+## Contract Lock-in (resolved for implementation)
+
+Depends on `complete-platform-authorization` (publish-policy states, DM/report
+permission) and `complete-realm-community-governance` (realm navigation
+structure); softly on `complete-game-media-library-backend` (game/media
+browsing). Build after those land. Contract-first throughout — no app-local DTO
+copies. See `implement_goal.md` (Phase 6). Contracts to pin:
+
+- **`DashboardSummary` DTO + server endpoint** — server-side aggregation of
+  progress, shelves, realms, notifications, DMs, drafts, activity, and safety
+  status, with per-section partial-success fields so the UI renders available
+  sections when one source fails. Aggregation happens on the server reusing
+  existing domain services; the client must **not** scatter and re-aggregate.
+- **Direct messaging contract** — thread + message DTOs and a server API; DM is a
+  net-new feature, permission-gated by the foundation's policy engine.
+- **Search release grouping** — extend `package/contract/src/search` with
+  work-grouped (`workUnitId`) result facets; grouping is done server/Meili-side.
+- **Policy-aware creation** — creation forms read the foundation's
+  `PolicyDecision` to render publish-denial states (silenced/banned) rather than
+  optimistic success.
+- **Cache-invalidation key map** — define `@rezics/api` QueryKey namespaces so
+  collect/follow/reaction/progress mutations invalidate detail + dashboard +
+  profile + search consistently.
+- **Cleanup** — remove `test`/`test02`/`test03`/`test-links` from production
+  navigation/routing.

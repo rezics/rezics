@@ -204,3 +204,49 @@ metadata, reason, before/after summary, and correlation id.
 4. Implement moderation case + realm workflow APIs and escalation linkage.
 5. Integrate auth ban/session operations through explicit boundary calls and audit events.
 6. Add the site staff console and migrate remaining privileged route checks; add convention checks for unreviewed inline staff authorization.
+
+## Contract Lock-in (resolved for implementation)
+
+This change is the foundation that gates `complete-realm-community-governance`,
+`complete-admin-operations-panel`, and `complete-public-app-product-experience`.
+The following contracts MUST be pinned before the policy engine is written, so
+downstream changes do not inherit ambiguity. See `implement_goal.md` (Phase 1).
+
+- **Capability registry** — `package/contract/src/permission/capability.ts`: a
+  closed, namespaced key list plus a `Capability` type. Initial keys:
+  `account.warn|silence|suspend|ban|rate_limit`,
+  `moderation.case.triage|assign|decide|escalate|reverse`,
+  `queue.site.decide`, `queue.realm.decide`,
+  `content.takedown|lock|archive|restore`, `tag.curate`, `audit.read`.
+- **Decision codes** — `package/contract/src/permission/decision.ts`: a
+  `DecisionCode` enum shared by policy output and audit, e.g. `ALLOWED`,
+  `MISSING_CAPABILITY`, `ENFORCEMENT_ACTIVE`, `BLOCKED_ACCOUNT`,
+  `CROSS_REALM_DENIED`, `LAST_OWNER_PROTECTED`, `RATE_LIMITED`, `NOT_MEMBER`.
+- **Realm role hierarchy** — a typed `RealmMemberRole`
+  (`owner > admin > moderator > member`) plus an ordering helper and a
+  last-owner-protection invariant. `RealmMember.roleKey` remains the storage
+  column; this gives it a contract.
+- **Policy I/O** — `PolicyInput` (actor id, resolved capabilities, active
+  enforcement, realm membership/role, target ref) → `PolicyDecision`
+  (`allowed`, `code: DecisionCode`, audit metadata). The engine exposes a single
+  `decide(input)` entry.
+- **Schema models (additive Prisma)** — `StaffGrant`, `RealmCapabilityGrant`,
+  `AccountEnforcement` (+ a derived account-status projection), `ModerationCase`,
+  `ModerationCaseEvent`, `RealmModerationQueueItem`, `RealmModerationEvent`,
+  `ContentModerationState`, `RealmContentModeration`, `StaffAuditLog`.
+- **Case-source link** — model `ModerationCase ↔ Feedback` as an explicit
+  relation (a `ModerationCase.sourceFeedbackId` FK for v1; a `CaseSource`
+  junction only if multi-source is needed). Backfill existing `Feedback(REPORT)`.
+- **`BLOCKED` migration** — `Permission.role = BLOCKED` is downgraded to a
+  derived projection of `AccountEnforcement`. Ship a migration converting
+  existing BLOCKED users into the equivalent enforcement record.
+- **Auth↔server boundary protocol** — define the event shape, delivery mechanism
+  (durable queue/outbox preferred over webhook/poll), and reconciliation query
+  for the split where `package/auth` owns identity/ban and `package/server` owns
+  community enforcement. Implemented through `package/server/src/auth-boundary/`.
+- **Frontend permission hints DTO** — non-authoritative capability hints for UI
+  affordances; every real decision stays server-side.
+- **Domain placement** — the engine lives in `package/server/src/governance/`
+  (a domain, not a new workspace package). Policy actions are split into
+  `actions/account.ts`, `actions/content.ts`, `actions/realm.ts` to avoid a
+  monolithic policy file; a convention check flags policy files over ~500 lines.

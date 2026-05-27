@@ -224,3 +224,27 @@ Search indexes include realm visibility and lifecycle state so archived/hidden c
 4. Expand realm management routes in `package/app`.
 5. Update feed, composer, search, and notification behavior.
 6. Add seed scenarios for public, private, moderated, and high-traffic realms.
+
+## Contract Lock-in (resolved for implementation)
+
+Depends on `complete-platform-authorization` (consumes its policy engine,
+capability hints, queues, content-moderation state, and audit). Build only after
+that change is archived. See `implement_goal.md` (Phase 4). Product-layer
+contracts to pin:
+
+- **`RealmMember.state` ownership** — resolve the proposal/design mismatch:
+  `state` (active/muted/removed/banned/pending) is a **product-layer column on
+  `RealmMember`** owned here; policy *enforcement* of those states (who may post,
+  etc.) is owned by the foundation. Coordinate the backfill-to-`active` migration
+  with the foundation's member-state work so there is one migration, not two.
+- **`Realm.extra.tagView`** — config schema (`flat` | `grouped` | `tree` plus
+  allow-viewer-switch) in `package/contract/src/realm/realm-extra.ts`.
+- **Rule version + acknowledgement DTO** — rule `Unit` reference + version number
+  + per-user acceptance; acceptance is locale-invariant (a locale switch does not
+  invalidate an accepted version). Rule content resolves through
+  `UnitTranslation`; no parallel `RealmRule` content model.
+- **`realm-membership-me` DTO** — current-user membership state + capability hints
+  (from the foundation) + rule-acceptance metadata.
+- **Pinboard** — reuse the ordered `Realm.extra.pinboard` Unit-id list and
+  existing realm-extra append/remove/reorder/cleanup primitives; no new pin
+  model.

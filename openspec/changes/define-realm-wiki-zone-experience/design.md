@@ -154,3 +154,31 @@ Rollback is straightforward before schema migrations ship. After `LABEL` and wor
 - Should work realm context writes be global-admin-only in v1, or can verified realm owners request/claim official context?
 - Should release-level work realm overrides ship in v1 or remain a documented future extension?
 - What exact quality signal defines "stub" wiki pages: missing main content, short body, missing translation group coverage, or explicit tag/field?
+
+## Contract Lock-in (resolved for implementation)
+
+This change is delivered in two phases against a single change: a foundation
+slice (data model + server + contracts) lands first, then the feature slice
+(UI/seed/tests). Archive only after the feature slice. See `implement_goal.md`
+(Phases 3 and 7). Foundation contracts to pin:
+
+- **`UnitType.LABEL`** — new enum value for reusable multilingual labels; excluded
+  from catalog search. No extension table (Unit + `UnitTranslation` only).
+- **`WorkRealmContext`** — a new top-level Prisma table (not `Realm.extra`, not
+  `UnitWork` JSON): `(workUnitId, realmUnitId, role, priority, locale?,
+  releaseUnitId?, audit timestamps)`. Uniqueness spans the
+  role/locale/release-override dimensions; indexes on `workUnitId` and
+  `realmUnitId`.
+- **`wikiZoneUnitId → Realm` persistence** — store on `Realm.extra` as a typed
+  key (`Realm.extra.wikiZoneUnitId`) for v1 (no schema migration, consistent with
+  the existing realm-extra pattern); promote to a column only if querying by it
+  becomes hot.
+- **Zone wiki config** — Typebox schemas extending `Zone` JSON for `filters`,
+  `navigation`, `homepage`, `theme`, with unknown-field rejection and
+  service-level validation on persist. No new `RealmWikiPage` table: wiki pages
+  are `PostKind.WIKI` Units in `UnitRealm`; language variants are parallel WIKI
+  Units grouped by `TranslationGroup`.
+- **`unit-work-domain` delta** — this change carries a delta to the canonical
+  `openspec/specs/unit-work-domain` (already landed); it consumes
+  `UnitWork(role = RELEASE)` to resolve a release's default wiki realm, it does
+  not redefine the capability.

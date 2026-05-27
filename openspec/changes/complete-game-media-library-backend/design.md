@@ -305,3 +305,26 @@ Rollback strategy:
 - Resolved: external age ratings are catalog tags (not Entities); franchise
   grouping is `Series(kind = "franchise")` (not an Entity kind); worldview is
   `Entity(kind = "universe")` attached through the `setting` role.
+
+## Contract Lock-in (resolved for implementation)
+
+Reuses existing primitives — only one new table. See `implement_goal.md`
+(Phase 2).
+
+- **Entity kinds** — extend `entityKinds` in
+  `package/contract/src/entity.ts:13` with `game_platform` and `universe`.
+- **Subject roles** — extend `subjectAttributionRoles` in
+  `package/contract/src/subject-attribution.roles.ts:3` with `available_on`.
+- **`GameSystemRequirement`** — new Prisma model + contract: `gameUnitId`,
+  optional `platformEntityId`, `tier` (`minimum` | `recommended`), optional
+  `language`, optional `sourceRefId`, JSON hardware slugs
+  (cpu/gpu/memory/vram/storage/os/graphicsApi), optional raw source text;
+  indexes on `gameUnitId`, `platformEntityId`, `tier`, `sourceRefId`. This is the
+  only new model — platforms reuse `Entity(game_platform)` +
+  `SubjectAttribution(available_on)`, ratings reuse `UnitTag`.
+- **Decision (recommended default):** public-authored system requirements
+  REQUIRE a `sourceRefId` in v1 (evidence-backed); admin/authority writes may
+  omit it. Confirm during apply.
+- **Decision (recommended default):** keep `episodeCount`/`seasonCount` as
+  optional read-only DTO fields once `ContentStructure` is canonical, marked
+  derived; do not remove them in this change.

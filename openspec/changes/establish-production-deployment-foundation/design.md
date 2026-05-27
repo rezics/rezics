@@ -388,3 +388,21 @@ Rollback:
 - Orchestration tool: **Kamal**. Secret store: **SOPS + age**. Postgres topology:
   **single instance, database-per-service**. Dockerfile: **shared base + thin
   per-service**.
+
+## Contract Lock-in (resolved for implementation)
+
+Independent infrastructure — depends on no other active change; deploys all of
+them. No `@rezics/contract` work, but these service-boundary prerequisites gate
+image builds and must land first. See `implement_goal.md` (Phase 8).
+
+- **Ranking cluster entrypoint** — add `package/ranking/src/cluster.ts` plus a
+  `WORKERS` env var (ranking currently only calls `app.listen`). Blocks the
+  ranking Docker image.
+- **Health endpoints** — add `/health` + `/ready` to `server`, `auth`, `notify`,
+  `reaction`, `history` (only `ranking` has one today). Blocks healthchecks.
+- **Ranking internal-only** — remove public CORS / public proxy route; expose via
+  an internal `RANKING_BASE_URL` only.
+- **Per-unit env schemas** — SOPS-managed per-unit env MUST extend the existing
+  per-package `@t3-oss/env-core` + Valibot `env.ts`, not replace them.
+- **Observability env names** — reconcile the `OBSERVABILITY_*` env var names
+  against the parameter names in `package/shared/src/observability/config.ts`.
