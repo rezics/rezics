@@ -40,9 +40,14 @@ mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
     resolve: () => ({ identity: currentIdentity }),
   }),
+  isAdminRole: mock(() => false),
+  tryResolveIdentity: mock(async () => null),
 }));
 
 mock.module("@/governance", () => ({
+  contentPolicyActions: {
+    delete: "content.delete",
+  },
   governanceRoutePolicyService: {
     decideForIdentity: decideForIdentityMock,
   },

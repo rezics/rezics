@@ -1,8 +1,8 @@
 import {
   createPostSchema,
   editorialPatchSubmissionSchema,
-  hasPermissionToDeletePost,
   hasPermissionToUpdatePost,
+  isBlocked,
   PostKind,
   type PostListResponse,
   type PostResponse,
@@ -11,7 +11,11 @@ import {
   postListResponseSchema,
   postParamsSchema,
 } from "@rezics/contract";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
+import {
+  contentPolicyActions,
+  governanceRoutePolicyService,
+} from "@/governance";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import {
   applySparsePatch,
@@ -19,6 +23,30 @@ import {
 } from "@/unit/collaborative-metadata";
 import { mapPostToDTO } from "./post.mapper";
 import { postService } from "./post.service";
+
+async function assertPostDeletePolicy(input: {
+  identity: any;
+  status: any;
+  target: any;
+}) {
+  if (isBlocked(input.identity.permission)) {
+    return input.status(403, "Forbidden: blocked users cannot delete posts");
+  }
+
+  if (input.target.unit?.user?.unitId === input.identity.userId) return;
+
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: contentPolicyActions.delete,
+    target: { kind: "post", id: input.target.unitId },
+  });
+  if (!decision.allowed) {
+    return input.status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
 
 export const postApi = new Elysia({ prefix: "/post" })
   .use(authMacro)
@@ -182,26 +210,28 @@ export const postApi = new Elysia({ prefix: "/post" })
   )
   .delete(
     "/:unitId",
-    async ({ params, identity, set }): Promise<{ message: string }> => {
+    async ({
+      params,
+      identity,
+      status,
+    }): Promise<{ message: string } | string> => {
       const target = await postService.getByUnitId(params.unitId);
-      if (
-        !hasPermissionToDeletePost(
-          identity.permission,
-          identity.userId,
-          target.unit as any,
-        )
-      ) {
-        set.status = 403;
-        throw new Error(
-          "Forbidden: you do not have permission to delete this post",
-        );
-      }
+      const denied = await assertPostDeletePolicy({
+        identity,
+        status,
+        target,
+      });
+      if (denied) return denied;
       await postService.delete(params.unitId);
       return { message: "Post deleted successfully" };
     },
     {
       requireLogin: true,
       params: postParamsSchema,
+      response: {
+        200: t.Object({ message: t.String() }),
+        403: t.String(),
+      },
       detail: {
         summary: "Delete post",
         description: "Delete a post by unit ID",
