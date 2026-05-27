@@ -8,6 +8,7 @@ import {
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { prisma } from "#/prisma/client";
+import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro } from "@/middleware";
 import { mapRealmTagApplicationToDTO } from "./realm.mapper";
 import { realmService } from "./realm.service";
@@ -45,6 +46,30 @@ async function canMutateRealmTagApplication(
   return realm?.userId != null && realm.userId === actorUserId;
 }
 
+async function assertRealmTagVotePolicy(input: {
+  identity: any;
+  set: any;
+  realmUnitId: string;
+  unitId: string;
+  tagUnitId: string;
+}) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: realmPolicyActions.tagVote,
+    target: {
+      kind: "realm-tag-vote",
+      id: `${input.realmUnitId}:${input.unitId}:${input.tagUnitId}`,
+      realmUnitId: input.realmUnitId,
+    },
+  });
+  if (!decision.allowed) {
+    input.set.status = 403;
+    throw new Error(
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
+
 export const realmTagApplicationApi = new Elysia({
   prefix: "/realm-tag-applications",
 })
@@ -54,6 +79,13 @@ export const realmTagApplicationApi = new Elysia({
   .post(
     "/",
     async ({ body, identity, set }): Promise<RealmTagApplicationDTO> => {
+      await assertRealmTagVotePolicy({
+        identity,
+        set,
+        realmUnitId: body.realmUnitId,
+        unitId: body.unitId,
+        tagUnitId: body.tagUnitId,
+      });
       const allowed = await ensureRealmMembership(
         identity.permission,
         identity.userId,
@@ -167,6 +199,13 @@ export const realmTagApplicationVoteApi = new Elysia({
   .post(
     "/",
     async ({ body, identity, set }): Promise<{ message: string }> => {
+      await assertRealmTagVotePolicy({
+        identity,
+        set,
+        realmUnitId: body.realmUnitId,
+        unitId: body.unitId,
+        tagUnitId: body.tagUnitId,
+      });
       const allowed = await ensureRealmMembership(
         identity.permission,
         identity.userId,

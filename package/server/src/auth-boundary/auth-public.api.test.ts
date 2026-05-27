@@ -716,6 +716,72 @@ describe("main auth public boundary", () => {
     );
   });
 
+  test("session state reports auth-main reconciliation diagnostics", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      unitId: "main-user",
+      userId: "main-user",
+      slug: "reader",
+      authUserId: "auth-user",
+      permission: { role: ["MEMBER"] },
+    });
+    unitFindUnique.mockResolvedValueOnce({ slug: "reader", type: "USER" });
+    setFetch(async () =>
+      Response.json({
+        session: {
+          id: "session-1",
+          token: "opaque",
+          userId: "auth-user",
+        },
+        user: {
+          id: "auth-user",
+          email: "reader@example.com",
+          emailVerified: true,
+        },
+        authAccountState: {
+          email: "reader@example.com",
+          mainUserExists: false,
+          registrationComplete: false,
+          readinessStatus: "needs-main-setup",
+        },
+      }),
+    );
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/get-session-state", {
+        headers: {
+          cookie: "better-auth.session_token=opaque",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      authBoundaryDiagnostics: {
+        reconciliation: [
+          {
+            code: "AUTH_MAIN_USER_EXISTS_MISMATCH",
+            severity: "warning",
+            authValue: false,
+            mainValue: true,
+          },
+          {
+            code: "AUTH_MAIN_REGISTRATION_COMPLETE_MISMATCH",
+            severity: "warning",
+            authValue: false,
+            mainValue: true,
+          },
+          {
+            code: "AUTH_MAIN_READINESS_STATUS_MISMATCH",
+            severity: "warning",
+            authValue: "needs-main-setup",
+            mainValue: "member-ready",
+          },
+        ],
+      },
+    });
+  });
+
   test("refresh rejects invalid auth session without setting main session cookie", async () => {
     setFetch(async () =>
       Response.json(

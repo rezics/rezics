@@ -1,6 +1,10 @@
 import { createSchema, deleteQuerySchema } from "@rezics/contract/reaction";
 import { Elysia } from "elysia";
 import { prisma } from "#/prisma/client";
+import {
+  contentPolicyActions,
+  governanceRoutePolicyService,
+} from "@/governance";
 import { authMacro } from "@/middleware";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { createReaction, removeReaction } from "./reaction-boundary.client";
@@ -9,8 +13,20 @@ export const reactionBoundaryApi = new Elysia({ prefix: "/reaction" })
   .use(authMacro)
   .post(
     "/",
-    async ({ body, identity, set }) => {
+    async ({ body, identity, set, status }) => {
       const userId = identity.userId;
+      const decision = await governanceRoutePolicyService.decideForIdentity({
+        identity,
+        action: contentPolicyActions.reactionCreate,
+        target: { kind: "reaction", id: body.targetId },
+      });
+      if (!decision.allowed) {
+        return status(
+          403,
+          decision.safeMessage ?? "Forbidden: policy denied this action",
+        );
+      }
+
       const result = await createReaction(userId, body.targetId, body.reaction);
 
       set.status = result.created ? 201 : 200;

@@ -66,6 +66,29 @@ describe("governance policy", () => {
     ).toMatchObject({ allowed: false, code: "ENFORCEMENT_ACTIVE" });
   });
 
+  test("denies community mutation actions under active silence enforcement", () => {
+    for (const action of [
+      "realm.create",
+      "dm.send",
+      "tag.vote",
+      "reaction.create",
+    ] as const) {
+      expect(
+        decide({
+          actorUserId: "user-1",
+          action,
+          capabilities: [],
+          activeEnforcement: {
+            targetUserId: "user-1",
+            activeKinds: ["silence"],
+            strongestKind: "silence",
+            expiresAt: null,
+          },
+        }),
+      ).toMatchObject({ allowed: false, code: "ENFORCEMENT_ACTIVE" });
+    }
+  });
+
   test("denies actions against missing resources", () => {
     expect(
       decide({

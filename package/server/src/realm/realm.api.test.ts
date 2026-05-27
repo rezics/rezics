@@ -27,6 +27,18 @@ const updateMemberRoleMock = mock(async (_realmUnitId, userId, roleKey) => ({
   joinedAt: new Date("2026-05-28T00:00:00.000Z"),
   updatedAt: new Date("2026-05-28T00:00:00.000Z"),
 }));
+const createRealmMock = mock(async () => ({
+  unitId: "realm-created",
+  isPublic: true,
+}));
+const createRealmTagApplicationMock = mock(async () => ({
+  realmUnitId: "realm-1",
+  unitId: "unit-1",
+  tagUnitId: "tag-1",
+  score: 1,
+  voteCount: 1,
+  pinned: false,
+}));
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -45,7 +57,9 @@ mock.module("@/governance", () => ({
     decideForIdentity: decideForIdentityMock,
   },
   realmPolicyActions: {
+    create: "realm.create",
     memberRoleChange: "realm.member.role.change",
+    tagVote: "tag.vote",
   },
   sitePolicyActions: {
     auditRead: "audit.read",
@@ -64,6 +78,8 @@ mock.module("./realm.mapper", () => ({
 
 mock.module("./realm.service", () => ({
   realmService: {
+    create: createRealmMock,
+    createRealmTagApplication: createRealmTagApplicationMock,
     getMember: getMemberMock,
     updateMemberRole: updateMemberRoleMock,
   },
@@ -78,8 +94,54 @@ describe("realmApi", () => {
     };
     policyAllowed = false;
     decideForIdentityMock.mockClear();
+    createRealmMock.mockClear();
+    createRealmTagApplicationMock.mockClear();
     getMemberMock.mockClear();
     updateMemberRoleMock.mockClear();
+  });
+
+  test("denies realm creation rejected by policy", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ isPublic: true }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.text()).toBe("Denied by policy");
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "realm.create",
+      target: { kind: "realm", id: "new" },
+    });
+    expect(createRealmMock).not.toHaveBeenCalled();
+  });
+
+  test("denies realm tag creation-as-vote rejected by policy", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/tags", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ unitId: "unit-1", tagUnitId: "tag-1" }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.text()).toContain("Denied by policy");
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "tag.vote",
+      target: {
+        kind: "realm-tag-vote",
+        id: "realm-1:unit-1:tag-1",
+        realmUnitId: "realm-1",
+      },
+    });
+    expect(createRealmTagApplicationMock).not.toHaveBeenCalled();
   });
 
   test("denies member role updates rejected by policy", async () => {

@@ -75,6 +75,44 @@ async function assertRealmMemberRolePolicy(input: {
   }
 }
 
+async function assertRealmCreatePolicy(input: { identity: any; status: any }) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: realmPolicyActions.create,
+    target: { kind: "realm", id: "new" },
+  });
+  if (!decision.allowed) {
+    return input.status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
+
+async function assertRealmTagVotePolicy(input: {
+  identity: any;
+  set: any;
+  realmUnitId: string;
+  unitId: string;
+  tagUnitId: string;
+}) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: realmPolicyActions.tagVote,
+    target: {
+      kind: "realm-tag-vote",
+      id: `${input.realmUnitId}:${input.unitId}:${input.tagUnitId}`,
+      realmUnitId: input.realmUnitId,
+    },
+  });
+  if (!decision.allowed) {
+    input.set.status = 403;
+    throw new Error(
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
+
 export const realmApi = new Elysia({ prefix: "/realm" })
   .use(authMacro)
   .get(
@@ -206,12 +244,18 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .post(
     "/",
-    async ({ body, identity }): Promise<RealmDTO> => {
+    async ({ body, identity, status }): Promise<RealmDTO | string> => {
+      const denied = await assertRealmCreatePolicy({ identity, status });
+      if (denied) return denied;
       return realmService.create(body, identity.userId);
     },
     {
       requireLogin: true,
       body: createRealmSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Create realm",
         description: "Create a new realm (creator becomes owner)",
@@ -495,6 +539,13 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       identity,
       set,
     }): Promise<RealmTagApplicationDTO> => {
+      await assertRealmTagVotePolicy({
+        identity,
+        set,
+        realmUnitId: params.unitId,
+        unitId: body.unitId,
+        tagUnitId: body.tagUnitId,
+      });
       // Any realm member may add a tag inside a realm; creation acts as a
       // vote. Pin/delete is restricted to admin/realm-owner via the
       // separate `/realm-tag-applications` route.

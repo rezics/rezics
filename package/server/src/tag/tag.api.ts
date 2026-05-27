@@ -20,11 +20,30 @@ import {
   updateTagSchema,
 } from "@rezics/contract";
 import { Elysia, status, t } from "elysia";
+import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro, tryResolveIdentity, verifyAdminFromDb } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { mapTagUnitToDTO, mapUnitTagToDTO } from "./tag.mapper";
 import { tagService, VISIBILITY_THRESHOLD } from "./tag.service";
 import { getTagContext } from "./tag-context.service";
+
+async function assertTagVotePolicy(input: {
+  identity: any;
+  unitId: string;
+  tagUnitId: string;
+}) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: realmPolicyActions.tagVote,
+    target: { kind: "tag-vote", id: `${input.unitId}:${input.tagUnitId}` },
+  });
+  if (!decision.allowed) {
+    return status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
 
 export const tagApi = new Elysia({ prefix: "/tag" })
   .use(authMacro)
@@ -251,6 +270,8 @@ export const tagApi = new Elysia({ prefix: "/tag" })
     "/vote",
     async ({ body, identity }) => {
       const { tagUnitId, unitId, value } = body as CastTagVoteInput;
+      const denied = await assertTagVotePolicy({ identity, unitId, tagUnitId });
+      if (denied) return denied;
       await tagService.castVote(identity.userId, unitId, tagUnitId, value);
       return { message: "Vote cast successfully" };
     },

@@ -8,6 +8,7 @@ export const contentPolicyActions = {
   lock: "content.lock",
   archive: "content.archive",
   restore: "content.restore",
+  reactionCreate: "reaction.create",
 } as const satisfies Record<string, PolicyAction>;
 
 export const contentActionDefinitions = [
@@ -38,6 +39,10 @@ export const contentActionDefinitions = [
   {
     action: contentPolicyActions.restore,
     requiredCapability: "content.restore",
+    family: "content",
+  },
+  {
+    action: contentPolicyActions.reactionCreate,
     family: "content",
   },
 ] as const satisfies readonly GovernanceActionDefinition[];

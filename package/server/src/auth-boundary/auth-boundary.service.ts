@@ -51,6 +51,17 @@ type AuthBoundarySessionStateResponse = {
   };
 };
 
+type AuthMainReconciliationDiagnostic = {
+  code:
+    | "AUTH_MAIN_USER_EXISTS_MISMATCH"
+    | "AUTH_MAIN_REGISTRATION_COMPLETE_MISMATCH"
+    | "AUTH_MAIN_READINESS_STATUS_MISMATCH"
+    | "MAIN_USER_AUTH_LINK_MISMATCH";
+  severity: "warning";
+  authValue: unknown;
+  mainValue: unknown;
+};
+
 function getInternalAuthBaseUrl(): string {
   return env.AUTH_INTERNAL_BASE_URL;
 }
@@ -278,6 +289,68 @@ async function findMainUserForAuthUser(authUserId: string): Promise<{
     slug: unit?.slug ?? null,
     permission: user.permission,
   };
+}
+
+function buildAuthMainReconciliationDiagnostics(input: {
+  authUserId: string;
+  sessionState: AuthBoundarySessionStateResponse;
+  mainUser: Awaited<ReturnType<typeof findMainUserForAuthUser>>;
+  mainUserExists: boolean;
+  registrationComplete: boolean;
+  readinessStatus: string;
+}): AuthMainReconciliationDiagnostic[] {
+  const diagnostics: AuthMainReconciliationDiagnostic[] = [];
+  const authState = input.sessionState.authAccountState;
+
+  if (
+    typeof authState?.mainUserExists === "boolean" &&
+    authState.mainUserExists !== input.mainUserExists
+  ) {
+    diagnostics.push({
+      code: "AUTH_MAIN_USER_EXISTS_MISMATCH",
+      severity: "warning",
+      authValue: authState.mainUserExists,
+      mainValue: input.mainUserExists,
+    });
+  }
+
+  if (
+    typeof authState?.registrationComplete === "boolean" &&
+    authState.registrationComplete !== input.registrationComplete
+  ) {
+    diagnostics.push({
+      code: "AUTH_MAIN_REGISTRATION_COMPLETE_MISMATCH",
+      severity: "warning",
+      authValue: authState.registrationComplete,
+      mainValue: input.registrationComplete,
+    });
+  }
+
+  if (
+    typeof authState?.readinessStatus === "string" &&
+    authState.readinessStatus !== input.readinessStatus
+  ) {
+    diagnostics.push({
+      code: "AUTH_MAIN_READINESS_STATUS_MISMATCH",
+      severity: "warning",
+      authValue: authState.readinessStatus,
+      mainValue: input.readinessStatus,
+    });
+  }
+
+  if (
+    input.mainUser?.authUserId &&
+    input.mainUser.authUserId !== input.authUserId
+  ) {
+    diagnostics.push({
+      code: "MAIN_USER_AUTH_LINK_MISMATCH",
+      severity: "warning",
+      authValue: input.authUserId,
+      mainValue: input.mainUser.authUserId,
+    });
+  }
+
+  return diagnostics;
 }
 
 async function fetchAuthSessionState(request: Request) {
@@ -616,6 +689,14 @@ export async function getMainAwareAuthSessionState(
     : memberReady
       ? "member-ready"
       : "needs-main-setup";
+  const reconciliationDiagnostics = buildAuthMainReconciliationDiagnostics({
+    authUserId,
+    sessionState,
+    mainUser,
+    mainUserExists,
+    registrationComplete,
+    readinessStatus,
+  });
 
   return jsonResponse(
     {
@@ -642,6 +723,9 @@ export async function getMainAwareAuthSessionState(
           requiresEmailVerification: !emailVerified,
           requiresMainAccountSetup: emailVerified && !memberReady,
         },
+      },
+      authBoundaryDiagnostics: {
+        reconciliation: reconciliationDiagnostics,
       },
     },
     200,

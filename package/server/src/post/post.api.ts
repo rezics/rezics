@@ -48,6 +48,32 @@ async function assertPostDeletePolicy(input: {
   }
 }
 
+async function assertPostCreatePolicy(input: {
+  body: {
+    parentPostUnitId?: string;
+    targetUnitId?: string;
+    realmUnitIds?: string[];
+  };
+  identity: any;
+  status: any;
+}) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: contentPolicyActions.create,
+    target: {
+      kind: input.body.parentPostUnitId ? "post-reply" : "post",
+      id: input.body.parentPostUnitId ?? input.body.targetUnitId ?? "new",
+      realmUnitId: input.body.realmUnitIds?.[0] ?? null,
+    },
+  });
+  if (!decision.allowed) {
+    return input.status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
+
 export const postApi = new Elysia({ prefix: "/post" })
   .use(authMacro)
   .get(
@@ -130,13 +156,19 @@ export const postApi = new Elysia({ prefix: "/post" })
   )
   .post(
     "/",
-    async ({ body, identity }): Promise<PostResponse> => {
+    async ({ body, identity, status }): Promise<PostResponse | string> => {
+      const denied = await assertPostCreatePolicy({ body, identity, status });
+      if (denied) return denied;
       const post = await postService.create(body, identity.userId);
       return mapPostToDTO(post);
     },
     {
       requireLogin: true,
       body: createPostSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
       detail: {
         summary: "Create post",
         description:

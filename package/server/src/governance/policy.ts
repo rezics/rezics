@@ -6,6 +6,14 @@ import type {
 } from "@rezics/contract";
 import { governanceActionDefinitionByAction } from "./action/registry";
 
+const enforcementRestrictedActions = new Set([
+  "content.create",
+  "realm.create",
+  "dm.send",
+  "tag.vote",
+  "reaction.create",
+]);
+
 function decision(
   allowed: boolean,
   code: DecisionCode,
@@ -64,9 +72,9 @@ export function decide(input: PolicyInput): PolicyDecision {
         kind,
       ),
     ) &&
-    input.action.startsWith("content.")
+    enforcementRestrictedActions.has(input.action)
   ) {
-    return decision(false, "ENFORCEMENT_ACTIVE", "active content enforcement");
+    return decision(false, "ENFORCEMENT_ACTIVE", "active action enforcement");
   }
 
   if (

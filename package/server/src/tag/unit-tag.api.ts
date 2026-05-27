@@ -8,9 +8,28 @@ import {
   unitTagPathParamsSchema,
 } from "@rezics/contract";
 import { Elysia, status } from "elysia";
+import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapUnitTagToDTO } from "./tag.mapper";
 import { tagService, VISIBILITY_THRESHOLD } from "./tag.service";
+
+async function assertTagVotePolicy(input: {
+  identity: any;
+  unitId: string;
+  tagUnitId: string;
+}) {
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: realmPolicyActions.tagVote,
+    target: { kind: "tag-vote", id: `${input.unitId}:${input.tagUnitId}` },
+  });
+  if (!decision.allowed) {
+    return status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
 
 export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
   .use(authMacro)
@@ -18,7 +37,13 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
   // POST /unit-tags — creation-as-vote (login)
   .post(
     "/",
-    async ({ body, identity }): Promise<UnitTagDTO> => {
+    async ({ body, identity }) => {
+      const denied = await assertTagVotePolicy({
+        identity,
+        unitId: body.unitId,
+        tagUnitId: body.tagUnitId,
+      });
+      if (denied) return denied;
       const row = await tagService.createUnitTag(
         identity.userId,
         body.unitId,
@@ -86,7 +111,13 @@ export const tagVoteApi = new Elysia({ prefix: "/tag-votes" })
   // POST /tag-votes — explicit vote action (login)
   .post(
     "/",
-    async ({ body, identity }): Promise<{ message: string }> => {
+    async ({ body, identity }) => {
+      const denied = await assertTagVotePolicy({
+        identity,
+        unitId: body.unitId,
+        tagUnitId: body.tagUnitId,
+      });
+      if (denied) return denied;
       await tagService.castVote(
         identity.userId,
         body.unitId,

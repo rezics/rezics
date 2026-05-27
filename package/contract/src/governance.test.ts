@@ -12,6 +12,7 @@ import {
 import {
   capabilitySchema,
   decisionCodeSchema,
+  policyActionSchema,
   policyInputSchema,
   realmMemberRoleAtLeast,
   realmMemberRoleSchema,
@@ -28,6 +29,12 @@ describe("governance contract registry", () => {
     expect(Value.Check(decisionCodeSchema, "ALLOWED")).toBe(true);
     expect(Value.Check(decisionCodeSchema, "MISSING_CAPABILITY")).toBe(true);
     expect(Value.Check(decisionCodeSchema, "LEAK_INTERNAL_REASON")).toBe(false);
+
+    expect(Value.Check(policyActionSchema, "realm.create")).toBe(true);
+    expect(Value.Check(policyActionSchema, "dm.send")).toBe(true);
+    expect(Value.Check(policyActionSchema, "reaction.create")).toBe(true);
+    expect(Value.Check(policyActionSchema, "tag.vote")).toBe(true);
+    expect(Value.Check(policyActionSchema, "reaction.destroy")).toBe(false);
   });
 
   test("policy input carries resolved capabilities and active enforcement", () => {

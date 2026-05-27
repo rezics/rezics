@@ -1,6 +1,7 @@
 import { dmSendBodySchema } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { prisma } from "#/prisma/client";
+import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro } from "@/middleware";
 import { sendDm } from "./notify-boundary.client";
 
@@ -32,6 +33,18 @@ export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
     if (senderId === recipientId) {
       set.status = 400;
       return { error: "Cannot send a message to yourself" };
+    }
+
+    const decision = await governanceRoutePolicyService.decideForIdentity({
+      identity,
+      action: realmPolicyActions.dmSend,
+      target: { kind: "direct-message", id: recipientId },
+    });
+    if (!decision.allowed) {
+      set.status = 403;
+      return {
+        error: decision.safeMessage ?? "Forbidden: policy denied this action",
+      };
     }
 
     // Permission gate: sender must have a Subscription(sender -> recipient)
