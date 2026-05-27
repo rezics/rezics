@@ -260,8 +260,14 @@ model Unit {
   historyClock  UnitHistoryClock?
   historyOutbox HistoryOutbox[]
 
-  // Inverse of BookContentStructureNode.chapterUnitId — every BookContentStructure
-  // node that references this Unit as its materialized chapter.
+  // Inverse of ContentStructure.ownerUnitId — every generic content tree
+  // owned by this Unit.
+  ownedContentStructure ContentStructure?
+  // Inverse of ContentStructureNode.contentUnitId — every content-structure
+  // node that references this Unit as concrete content.
+  contentStructureNodesAsContent ContentStructureNode[] @relation("ContentStructureNodeContent")
+  // Legacy inverse retained only for compatibility while old migrations/tests
+  // still reference BookContentStructureNode.
   contentStructureNodesAsChapter BookContentStructureNode[] @relation("BookContentStructureNodeChapter")
 
   @@unique([slugScope, slug])
@@ -518,6 +524,44 @@ model BookContentStructure {
 
   book         Book                       @relation(fields: [bookUnitId], references: [unitId], onDelete: Cascade)
   contentNodes BookContentStructureNode[] @relation("BookContentStructureContainer")
+}
+
+model ContentStructure {
+  ownerUnitId String   @id @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner        Unit                   @relation(fields: [ownerUnitId], references: [id], onDelete: Cascade)
+  contentNodes ContentStructureNode[] @relation("ContentStructureContainer")
+
+  @@index([updatedAt(sort: Desc)])
+}
+
+/// Normalized one-row-per-node storage for a generic ContentStructure tree.
+/// Sibling order is determined by lexicographic `sortKey` within an
+/// `(ownerUnitId, parentId)` group. `contentUnitId` is intentionally
+/// non-unique because the same content Unit MAY be referenced from multiple
+/// nodes.
+model ContentStructureNode {
+  id            String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  ownerUnitId   String         @db.Uuid
+  parentId      String?        @db.Uuid
+  sortKey       String
+  contentUnitId String?        @db.Uuid
+  title         String
+  noContent     Boolean        @default(false)
+  rating        ContentRating?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  container   ContentStructure       @relation("ContentStructureContainer", fields: [ownerUnitId], references: [ownerUnitId], onDelete: Cascade)
+  parent      ContentStructureNode?  @relation("ContentStructureNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children    ContentStructureNode[] @relation("ContentStructureNodeChildren")
+  contentUnit Unit?                  @relation("ContentStructureNodeContent", fields: [contentUnitId], references: [id], onDelete: SetNull)
+
+  @@index([ownerUnitId, parentId, sortKey])
+  @@index([contentUnitId])
+  @@index([ownerUnitId, updatedAt(sort: Desc)])
 }
 
 /// Normalized one-row-per-node storage for a BookContentStructure tree.

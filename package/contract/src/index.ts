@@ -10,6 +10,7 @@ export * from "./common";
 export * from "./content-authority";
 export * from "./content-doc";
 export * from "./content-history";
+export * from "./content-structure";
 export * from "./credit-attribution";
 export * from "./dispatch";
 export * from "./editorial-path-scope";

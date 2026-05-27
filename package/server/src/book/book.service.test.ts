@@ -308,7 +308,7 @@ describe("BookService.create", () => {
       workUnitId: null,
       translations: [{ language: "en", title: "Standalone" }],
       workMemberships: [],
-    });
+    } as any);
     mockCreateBook
       .mockResolvedValueOnce({ unitId: "hidden-work-1" } as any)
       .mockResolvedValueOnce({

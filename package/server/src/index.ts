@@ -6,6 +6,7 @@ import { adminWorkMergeApi } from "./admin-work-merge";
 import { authPublicApi } from "./auth-boundary";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
+import { contentStructureApi } from "./content-structure";
 import { creditAttributionApi } from "./credit-attribution";
 import { statusApi } from "./diagnostic";
 import { dispatchApi } from "./dispatch";
@@ -178,6 +179,7 @@ routeApp
   .use(authPublicApi)
   .use(wellKnownApi)
   .use(bookApi)
+  .use(contentStructureApi)
   .use(chapterApi)
   .use(postApi)
   .use(progressApi)

@@ -2,17 +2,12 @@ import type {
   BookContentStructureItem,
   BookContentStructureResponse,
   BookListQuery,
-  ContentStructureBatchOperation,
   CreateBookInput,
   EditorialPatchSubmission,
   RezicsSessionClaims,
   UpdateBookInput,
 } from "@rezics/contract";
-import {
-  HistoryOutboxPayloadKind,
-  parseIdsCsv,
-  withCoverUrl,
-} from "@rezics/contract";
+import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import {
@@ -37,20 +32,13 @@ import {
   uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
-import {
-  buildStructureEventPayload,
-  writeSequencedHistoryOutbox,
-} from "@/unit/history-outbox";
+import { contentStructureService } from "@/content-structure";
+import { countReadableContentStructureItems } from "@/content-structure/types";
 import { assertLicenseSlug } from "@/unit/publication-policy";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
-import {
-  buildTree,
-  countReadableBookContentStructureItems,
-} from "./book-content-structure";
-import { between, firstKey } from "./lexorank";
 import type { BookWithRelations } from "./types";
 import { bookInclude } from "./types";
 
@@ -163,10 +151,10 @@ async function resolveWorkMatch(
       },
       textLength: 0,
       chapterCount: 0,
-      contentStructure: { create: {} },
     },
     select: { unitId: true },
   });
+  await contentStructureService.ensureForOwner(tx, hiddenWork.unitId);
 
   await tx.unitWork.create({
     data: {
@@ -346,22 +334,14 @@ export class BookService {
   async getContentStructureByBookUnitId(
     bookUnitId: string,
   ): Promise<BookContentStructureResponse> {
-    const [container, nodeRows] = await Promise.all([
-      prisma.bookContentStructure.findUniqueOrThrow({
-        where: { bookUnitId },
-        select: { bookUnitId: true, createdAt: true, updatedAt: true },
-      }),
-      prisma.bookContentStructureNode.findMany({
-        where: { bookUnitId },
-        orderBy: [{ parentId: "asc" }, { sortKey: "asc" }],
-      }),
-    ]);
-    const nodes = buildTree(nodeRows);
+    const structure =
+      await contentStructureService.getByOwnerUnitId(bookUnitId);
     return {
-      bookUnitId: container.bookUnitId,
-      nodes,
-      createdAt: container.createdAt,
-      updatedAt: container.updatedAt,
+      bookUnitId: structure.ownerUnitId,
+      ownerUnitId: structure.ownerUnitId,
+      nodes: structure.nodes,
+      createdAt: structure.createdAt,
+      updatedAt: structure.updatedAt,
     };
   }
 
@@ -463,12 +443,10 @@ export class BookService {
           formatKey: req.formatKey ?? undefined,
           isLicensed: req.isLicensed ?? false,
           extra: (req.extra ?? null) as Prisma.InputJsonValue,
-          contentStructure: {
-            create: {},
-          },
         },
         include: bookInclude,
       });
+      await contentStructureService.ensureForOwner(tx, created.unitId);
 
       if (resolvedWorkUnitId) {
         await tx.unitWork.upsert({
@@ -658,111 +636,26 @@ export class BookService {
     submitted: BookContentStructureItem[],
     options: { actorUserId?: string; message?: string | null } = {},
   ): Promise<BookContentStructureResponse> {
-    await prisma.$transaction(async (tx) => {
-      const actorUserId =
-        options.actorUserId ?? (await resolveRezicsWikiUserId());
-      const current = await tx.bookContentStructureNode.findMany({
-        where: { bookUnitId: unitId },
-        select: {
-          id: true,
-          parentId: true,
-          sortKey: true,
-          chapterUnitId: true,
-          title: true,
-          noContent: true,
-          rating: true,
-        },
-      });
-
-      const currentById = new Map(current.map((row) => [row.id, row]));
-      const planned = planSubmittedTree(submitted, currentById);
-      const operations = planContentStructureOperations(current, planned);
-      const submittedIds = new Set(planned.map((p) => p.id));
-      const chapterCount = countReadableBookContentStructureItems(submitted);
-
-      let mutated = false;
-
-      const toDelete = current
-        .map((row) => row.id)
-        .filter((id) => !submittedIds.has(id));
-      if (toDelete.length > 0) {
-        await tx.bookContentStructureNode.deleteMany({
-          where: { id: { in: toDelete } },
-        });
-        mutated = true;
-      }
-
-      for (const plan of planned) {
-        const existing = currentById.get(plan.id);
-        if (!existing) {
-          await tx.bookContentStructureNode.create({
-            data: {
-              id: plan.id,
-              bookUnitId: unitId,
-              parentId: plan.parentId,
-              sortKey: plan.sortKey,
-              chapterUnitId: plan.chapterUnitId ?? null,
-              title: plan.title,
-              noContent: plan.noContent,
-              rating: plan.rating ?? null,
-            },
-          });
-          mutated = true;
-          continue;
-        }
-
-        if (
-          existing.parentId !== plan.parentId ||
-          existing.sortKey !== plan.sortKey ||
-          (existing.chapterUnitId ?? null) !== (plan.chapterUnitId ?? null) ||
-          existing.title !== plan.title ||
-          existing.noContent !== plan.noContent ||
-          (existing.rating ?? null) !== (plan.rating ?? null)
-        ) {
-          await tx.bookContentStructureNode.update({
-            where: { id: plan.id },
-            data: {
-              parentId: plan.parentId,
-              sortKey: plan.sortKey,
-              chapterUnitId: plan.chapterUnitId ?? null,
-              title: plan.title,
-              noContent: plan.noContent,
-              rating: plan.rating ?? null,
-            },
-          });
-          mutated = true;
-        }
-      }
-
-      if (mutated) {
-        await tx.bookContentStructure.update({
-          where: { bookUnitId: unitId },
-          data: { updatedAt: new Date() },
-        });
+    const response = await contentStructureService.update(unitId, submitted, {
+      actorUserId: options.actorUserId,
+      message: options.message,
+      eventType: "contentStructure.content.batch",
+      changedFieldKeys: ["contentStructure"],
+      afterMutate: async (tx, { submitted: next }) => {
+        const chapterCount = countReadableContentStructureItems(next);
         await tx.book.update({
           where: { unitId },
           data: { chapterCount },
         });
-        await writeSequencedHistoryOutbox(tx, {
-          unitId,
-          actorUserId,
-          buildPayload: (sequence) => ({
-            kind: HistoryOutboxPayloadKind.STRUCTURE_EVENT,
-            event: buildStructureEventPayload({
-              unitId,
-              sequence,
-              actorUserId,
-              eventType: "book.contentStructure.batch",
-              changedFieldKeys: ["book.contentStructure"],
-              payload: { operations },
-              message: options.message ?? null,
-            }),
-          }),
-        });
-      }
+      },
     });
-
-    return this.getContentStructureByBookUnitId(unitId);
+    return {
+      bookUnitId: response.ownerUnitId,
+      ownerUnitId: response.ownerUnitId,
+      nodes: response.nodes,
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+    };
   }
 
   /**
@@ -970,254 +863,4 @@ function sameDateValue(
   const normalize = (value: string | Date | null) =>
     value == null ? null : new Date(value).toISOString();
   return normalize(left) === normalize(right);
-}
-
-// ---------------------------------------------------------------------------
-// TOC save planning
-// ---------------------------------------------------------------------------
-
-interface PlannedNode {
-  id: string;
-  parentId: string | null;
-  sortKey: string;
-  title: string;
-  noContent: boolean;
-  rating: ContentRating | null;
-  chapterUnitId: string | null;
-}
-
-interface ExistingRow {
-  id: string;
-  parentId: string | null;
-  sortKey: string;
-  chapterUnitId: string | null;
-  title: string;
-  noContent: boolean;
-  rating: ContentRating | null;
-}
-
-function nodeSnapshot(row: ExistingRow | PlannedNode) {
-  return {
-    nodeId: row.id,
-    title: row.title,
-    contentUnitId: row.chapterUnitId,
-    chapterUnitId: row.chapterUnitId,
-    noContent: row.noContent,
-    rating: row.rating,
-  };
-}
-
-function nodePlacement(row: ExistingRow | PlannedNode) {
-  return {
-    parentId: row.parentId,
-    sortKey: row.sortKey,
-  };
-}
-
-function countDescendants(
-  nodeId: string,
-  rowsByParentId: ReadonlyMap<string | null, readonly ExistingRow[]>,
-): number {
-  const children = rowsByParentId.get(nodeId) ?? [];
-  return children.reduce(
-    (total, child) => total + 1 + countDescendants(child.id, rowsByParentId),
-    0,
-  );
-}
-
-export function planContentStructureOperations(
-  current: readonly ExistingRow[],
-  planned: readonly PlannedNode[],
-): ContentStructureBatchOperation[] {
-  const currentById = new Map(current.map((row) => [row.id, row]));
-  const plannedById = new Map(planned.map((row) => [row.id, row]));
-  const rowsByParentId = new Map<string | null, ExistingRow[]>();
-  for (const row of current) {
-    const siblings = rowsByParentId.get(row.parentId) ?? [];
-    siblings.push(row);
-    rowsByParentId.set(row.parentId, siblings);
-  }
-
-  const operations: ContentStructureBatchOperation[] = [];
-
-  for (const row of current) {
-    if (plannedById.has(row.id)) continue;
-    operations.push({
-      op: "node.delete",
-      node: nodeSnapshot(row),
-      placement: nodePlacement(row),
-      descendantCount: countDescendants(row.id, rowsByParentId),
-    });
-  }
-
-  for (const plan of planned) {
-    const existing = currentById.get(plan.id);
-    if (!existing) {
-      operations.push({
-        op: "node.create",
-        node: nodeSnapshot(plan),
-        placement: nodePlacement(plan),
-      });
-      continue;
-    }
-
-    const beforeUpdate: Partial<ReturnType<typeof nodeSnapshot>> = {};
-    const afterUpdate: Partial<ReturnType<typeof nodeSnapshot>> = {};
-    if (existing.title !== plan.title) {
-      beforeUpdate.title = existing.title;
-      afterUpdate.title = plan.title;
-    }
-    if (existing.noContent !== plan.noContent) {
-      beforeUpdate.noContent = existing.noContent;
-      afterUpdate.noContent = plan.noContent;
-    }
-    if ((existing.rating ?? null) !== (plan.rating ?? null)) {
-      beforeUpdate.rating = existing.rating;
-      afterUpdate.rating = plan.rating;
-    }
-    if (Object.keys(afterUpdate).length > 0) {
-      operations.push({
-        op: "node.update",
-        nodeId: plan.id,
-        before: beforeUpdate,
-        after: afterUpdate,
-      });
-    }
-
-    if (
-      existing.parentId !== plan.parentId ||
-      existing.sortKey !== plan.sortKey
-    ) {
-      operations.push({
-        op: "node.move",
-        nodeId: plan.id,
-        before: nodePlacement(existing),
-        after: nodePlacement(plan),
-      });
-    }
-
-    const beforeChapterUnitId = existing.chapterUnitId ?? null;
-    const afterChapterUnitId = plan.chapterUnitId ?? null;
-    if (beforeChapterUnitId !== afterChapterUnitId) {
-      if (beforeChapterUnitId) {
-        operations.push({
-          op: "node.unlink",
-          nodeId: plan.id,
-          beforeContentUnitId: beforeChapterUnitId,
-          beforeChapterUnitId,
-        });
-      }
-      if (afterChapterUnitId) {
-        operations.push({
-          op: "node.link",
-          nodeId: plan.id,
-          beforeContentUnitId: beforeChapterUnitId,
-          afterContentUnitId: afterChapterUnitId,
-          beforeChapterUnitId,
-          afterChapterUnitId,
-        });
-      }
-    }
-  }
-
-  return operations;
-}
-
-/**
- * Walk the submitted tree DFS, assigning ids to nodes without one and
- * allocating `sortKey` values that preserve existing rows' keys when sibling
- * ordering hasn't changed. Returns a flat list of planned rows.
- *
- * A child's `parentId` is its in-tree parent id (the id we just assigned for
- * the parent), regardless of any client-supplied `parentId` — this guards
- * against cycles or malformed submissions.
- */
-function planSubmittedTree(
-  submitted: readonly BookContentStructureItem[],
-  existingById: ReadonlyMap<string, ExistingRow>,
-): PlannedNode[] {
-  const out: PlannedNode[] = [];
-  // Track id reuse to avoid two submitted nodes claiming the same row.
-  const claimedIds = new Set<string>();
-
-  function visit(
-    siblings: readonly BookContentStructureItem[],
-    parentId: string | null,
-  ): void {
-    const ids: string[] = siblings.map((node) => {
-      const claimed = node.id && !claimedIds.has(node.id) ? node.id : undefined;
-      const fresh =
-        claimed && existingById.has(claimed)
-          ? claimed
-          : (claimed ?? generateNodeId());
-      claimedIds.add(fresh);
-      return fresh;
-    });
-
-    const sortKeys = allocateSortKeys(siblings, ids, parentId, existingById);
-
-    for (let i = 0; i < siblings.length; i++) {
-      const node = siblings[i]!;
-      const id = ids[i]!;
-      const sortKey = sortKeys[i]!;
-      out.push({
-        id,
-        parentId,
-        sortKey,
-        title: node.title,
-        noContent: node.noContent === true,
-        rating: (node.rating as ContentRating | undefined) ?? null,
-        chapterUnitId: node.contentUnitId ?? node.chapterUnitId ?? null,
-      });
-      if (node.children && node.children.length > 0) {
-        visit(node.children, id);
-      }
-    }
-  }
-
-  visit(submitted, null);
-  return out;
-}
-
-function allocateSortKeys(
-  siblings: readonly BookContentStructureItem[],
-  assignedIds: readonly string[],
-  parentId: string | null,
-  existingById: ReadonlyMap<string, ExistingRow>,
-): string[] {
-  const existingKeys: (string | null)[] = assignedIds.map((id, i) => {
-    const node = siblings[i]!;
-    if (!node.id) return null;
-    const existing = existingById.get(id);
-    if (!existing || existing.parentId !== parentId) return null;
-    return existing.sortKey;
-  });
-
-  const result: string[] = [];
-  for (let i = 0; i < siblings.length; i++) {
-    const prev = result[i - 1] ?? null;
-    const candidate = existingKeys[i] ?? null;
-
-    if (candidate !== null && (prev === null || candidate > prev)) {
-      result.push(candidate);
-      continue;
-    }
-
-    let upper: string | null = null;
-    for (let j = i + 1; j < siblings.length; j++) {
-      const e = existingKeys[j] ?? null;
-      if (e !== null && (prev === null || e > prev)) {
-        upper = e;
-        break;
-      }
-    }
-    const fresh =
-      prev === null && upper === null ? firstKey() : between(prev, upper);
-    result.push(fresh);
-  }
-  return result;
-}
-
-function generateNodeId(): string {
-  return crypto.randomUUID();
 }

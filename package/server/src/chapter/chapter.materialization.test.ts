@@ -13,10 +13,10 @@ const updatedContentStructureAt = new Date("2026-05-06T00:00:01.000Z");
 
 interface FakeNodeRow {
   id: string;
-  bookUnitId: string;
+  ownerUnitId: string;
   parentId: string | null;
   sortKey: string;
-  chapterUnitId: string | null;
+  contentUnitId: string | null;
   title: string;
   noContent: boolean;
   rating: string | null;
@@ -29,8 +29,8 @@ function nodeRow(
     Pick<FakeNodeRow, "id" | "parentId" | "sortKey" | "title">,
 ): FakeNodeRow {
   return {
-    bookUnitId: "book-1",
-    chapterUnitId: null,
+    ownerUnitId: "book-1",
+    contentUnitId: null,
     noContent: false,
     rating: null,
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
@@ -49,7 +49,7 @@ const mockCreateUnit = mock(async () => ({ id: "chapter-new" }));
 const mockCreatePost = mock(async () => ({ unitId: "chapter-new" }));
 const mockUpdateBook = mock(async (_args: unknown) => ({ unitId: "book-1" }));
 const mockFindContentStructure = mock(async () => ({
-  bookUnitId: "book-1",
+  ownerUnitId: "book-1",
   updatedAt: bookContentStructureUpdatedAt,
 }));
 const mockFindNodeRows = mock(
@@ -80,11 +80,11 @@ const mockTransaction = mock(async (fn: (tx: unknown) => unknown) =>
     book: {
       update: mockUpdateBook,
     },
-    bookContentStructure: {
+    contentStructure: {
       findUniqueOrThrow: mockFindContentStructure,
       update: mockUpdateContentStructure,
     },
-    bookContentStructureNode: {
+    contentStructureNode: {
       findMany: mockFindNodeRows,
       update: mockUpdateNode,
     },
@@ -121,7 +121,7 @@ describe("ChapterService.materializeByBookPath", () => {
     mockCreateUnit.mockResolvedValue({ id: "chapter-new" });
     mockCreatePost.mockResolvedValue({ unitId: "chapter-new" });
     mockFindContentStructure.mockResolvedValue({
-      bookUnitId: "book-1",
+      ownerUnitId: "book-1",
       updatedAt: bookContentStructureUpdatedAt,
     });
     mockFindNodeRows.mockResolvedValue([
@@ -177,12 +177,13 @@ describe("ChapterService.materializeByBookPath", () => {
     });
     expect(firstArg(mockUpdateNode)).toEqual({
       where: { id: "n-1" },
-      data: { chapterUnitId: "chapter-new" },
+      data: { contentUnitId: "chapter-new" },
     });
     expect(mockUpdateBook).not.toHaveBeenCalled();
     expect(result).toEqual({
       bookUnitId: "book-1",
       path: [0],
+      contentUnitId: "chapter-new",
       chapterUnitId: "chapter-new",
       alreadyMaterialized: false,
       bookContentStructureUpdatedAt: updatedContentStructureAt,
@@ -196,7 +197,7 @@ describe("ChapterService.materializeByBookPath", () => {
         parentId: null,
         sortKey: "g",
         title: "Chapter One",
-        chapterUnitId: "chapter-existing",
+        contentUnitId: "chapter-existing",
       }),
     ]);
 
@@ -216,6 +217,7 @@ describe("ChapterService.materializeByBookPath", () => {
     expect(result).toEqual({
       bookUnitId: "book-1",
       path: [0],
+      contentUnitId: "chapter-existing",
       chapterUnitId: "chapter-existing",
       alreadyMaterialized: true,
       bookContentStructureUpdatedAt,
@@ -278,7 +280,7 @@ describe("ChapterService.materializeByBookPath", () => {
     expect(mockUpdateNode).not.toHaveBeenCalled();
   });
 
-  test("concurrent materialization is idempotent: re-reads after lock and sees existing chapterUnitId", async () => {
+  test("concurrent materialization is idempotent: re-reads after lock and sees existing contentUnitId", async () => {
     const events: string[] = [];
     mockQueryRaw.mockImplementation(async () => {
       events.push("lock");
@@ -291,7 +293,7 @@ describe("ChapterService.materializeByBookPath", () => {
           parentId: null,
           sortKey: "g",
           title: "Chapter One",
-          chapterUnitId: "chapter-existing",
+          contentUnitId: "chapter-existing",
         }),
       ];
     });
@@ -305,6 +307,7 @@ describe("ChapterService.materializeByBookPath", () => {
 
     expect(events).toEqual(["lock", "read-rows"]);
     expect(mockCreateUnit).not.toHaveBeenCalled();
+    expect(result.contentUnitId).toBe("chapter-existing");
     expect(result.chapterUnitId).toBe("chapter-existing");
     expect(result.alreadyMaterialized).toBe(true);
   });

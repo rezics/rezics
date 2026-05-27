@@ -1,13 +1,19 @@
 import { t } from "elysia";
 import { creationModeSchema } from "./content-authority";
 import { contentDocWriteSchema } from "./content-doc";
+import {
+  contentStructureDTOSchema,
+  contentStructureNodeSchema,
+  type ContentStructureItem,
+  type ContentStructurePath,
+  type ContentStructureResponse,
+} from "./content-structure";
 import { creditAttributionBriefSchema } from "./credit-attribution";
 import { languageSchema } from "./language";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import {
-  type ContentRating,
   contentRatingSchema,
   publicUserSchema,
   unitTranslationDTOSchema,
@@ -216,29 +222,7 @@ export type UpdateBookInput = (typeof updateBookSchema)["static"];
 // BOOK CONTENT STRUCTURE / CHAPTER TREE TYPES
 // ============================================================
 
-export const bookContentStructureNodeSchema: ReturnType<typeof t.Recursive> =
-  t.Recursive((self) =>
-    t.Object({
-      title: t.String(),
-      contentUnitId: t.Optional(t.String()),
-      /** @deprecated Use contentUnitId. */
-      chapterUnitId: t.Optional(t.String()),
-      noContent: t.Optional(t.Boolean()),
-      rating: t.Optional(contentRatingSchema),
-      children: t.Optional(t.Array(self)),
-      /**
-       * BookContentStructureNode row id. Populated by the server on reads. On
-       * writes the server uses it to identify the existing row; nodes
-       * submitted without `id` are treated as new and inserted.
-       */
-      id: t.Optional(t.String()),
-      /**
-       * Per-node last-updated timestamp (ISO 8601), populated by the server on
-       * reads. Ignored by the server on writes.
-       */
-      updatedAt: t.Optional(t.String()),
-    }),
-  );
+export const bookContentStructureNodeSchema = contentStructureNodeSchema;
 
 /**
  * Path to a node occurrence in the current BookContentStructure forest.
@@ -247,50 +231,23 @@ export const bookContentStructureNodeSchema: ReturnType<typeof t.Recursive> =
  * A path locates a node in the current JSON structure only; it is not a stable
  * global identity and may become stale after TOC edits or reordering.
  */
-export type BookContentStructurePath = number[];
+export type BookContentStructurePath = ContentStructurePath;
 
-export interface BookContentStructureItem {
-  title: string;
-  /**
-   * Materialized content Unit id. Optional and intentionally non-unique inside
-   * one BookContentStructure because multiple node occurrences may point at the
-   * same Unit.
-   */
-  contentUnitId?: string;
-  /**
-   * @deprecated Transitional compatibility for BookContentStructure clients.
-   * Prefer contentUnitId for materialized content node identity.
-   */
-  chapterUnitId?: string;
-  noContent?: boolean;
-  rating?: ContentRating;
-  children?: BookContentStructureItem[];
-  /**
-   * BookContentStructureNode row id. Populated by the server on reads. On
-   * writes the server uses it to identify the existing row; nodes submitted
-   * without `id` are treated as new and inserted.
-   */
-  id?: string;
-  /**
-   * Per-node last-updated timestamp (ISO 8601), populated by the server on
-   * reads. Ignored by the server on writes.
-   */
-  updatedAt?: string;
-}
+export type BookContentStructureItem = ContentStructureItem;
 
 export const bookContentStructureDTOSchema = t.Object({
   bookUnitId: t.String(),
-  nodes: t.Array(bookContentStructureNodeSchema),
-  createdAt: t.Union([t.String(), t.Date()]),
-  updatedAt: t.Union([t.String(), t.Date()]),
+  ownerUnitId: t.Optional(t.String()),
+  nodes: contentStructureDTOSchema.properties.nodes,
+  createdAt: contentStructureDTOSchema.properties.createdAt,
+  updatedAt: contentStructureDTOSchema.properties.updatedAt,
 });
 
 export type BookContentStructureDTO =
   (typeof bookContentStructureDTOSchema)["static"];
 
-export interface BookContentStructureResponse {
+export interface BookContentStructureResponse
+  extends Omit<ContentStructureResponse, "ownerUnitId"> {
   bookUnitId: string;
-  nodes: BookContentStructureItem[];
-  createdAt: Date;
-  updatedAt: Date;
+  ownerUnitId?: string;
 }

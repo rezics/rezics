@@ -68,15 +68,14 @@ async function createNamedBook(
       licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
       defaultLanguage: DEFAULT_LANGUAGE,
       publishedAt: new Date(),
-      book: {
-        create: { textLength: 120000, contentStructure: { create: {} } },
-      },
+      book: { create: { textLength: 120000 } },
       translations: { create: { language: DEFAULT_LANGUAGE, title } },
       supportLanguages: {
         create: { language: DEFAULT_LANGUAGE, isPrimary: true },
       },
     },
   });
+  await ctx.prisma.contentStructure.create({ data: { ownerUnitId: id } });
   return id;
 }
 
@@ -156,7 +155,6 @@ async function createWorkDomainBookUnit(
   const unitId = randomUUID();
   await ctx.prisma.book.create({
     data: {
-      unitId,
       unit: {
         create: {
           id: unitId,
@@ -190,9 +188,9 @@ async function createWorkDomainBookUnit(
       textLength: input.textLength ?? 90000,
       chapterCount: 0,
       formatKey: "ebook",
-      contentStructure: { create: {} },
     },
   });
+  await ctx.prisma.contentStructure.create({ data: { ownerUnitId: unitId } });
   return unitId;
 }
 

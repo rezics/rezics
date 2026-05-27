@@ -35,10 +35,12 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   ]);
 
   // Group 4: Extension children
-  // BookContentStructureNode rows hold FKs to BookContentStructure; delete
-  // them first so the parent delete in this group doesn't trip a constraint.
+  // ContentStructureNode rows hold FKs to ContentStructure; legacy
+  // BookContentStructure compatibility rows are still cleared while present.
+  await prisma.contentStructureNode.deleteMany();
   await prisma.bookContentStructureNode.deleteMany();
   await Promise.all([
+    prisma.contentStructure.deleteMany(),
     prisma.bookContentStructure.deleteMany(),
     prisma.gamePlatform.deleteMany(),
   ]);

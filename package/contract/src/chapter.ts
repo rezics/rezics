@@ -138,6 +138,8 @@ export type ChapterMaterializationRequest =
 export const chapterMaterializationResponseSchema = t.Object({
   bookUnitId: t.String(),
   path: t.Array(t.Number()),
+  contentUnitId: t.String(),
+  /** @deprecated Use contentUnitId. */
   chapterUnitId: t.String(),
   alreadyMaterialized: t.Boolean(),
   bookContentStructureUpdatedAt: t.Union([t.String(), t.Date()]),
