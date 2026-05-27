@@ -139,16 +139,16 @@
 
 ## 16. Admin Work Merge And Metadata Copy
 
-- [ ] 16.1 Add durable admin work merge operation schema or equivalent operation log with source work, target work, status, actor, reason, timestamps, and item-level progress.
-- [ ] 16.2 Add admin merge dry-run endpoint that previews release membership moves, work-domain membership repair scope, projection repair scope, and affected DTO/search/shelf behavior.
-- [ ] 16.3 Implement admin-only merge start/status/revert APIs.
-- [ ] 16.4 Migrate canonical release/content membership from source work to target work without deleting the source work Unit.
-- [ ] 16.5 Preserve source work non-membership metadata by default, including tags, aliases, external references, attribution, and history.
-- [ ] 16.6 Queue merge repair for active work domains, including content search, post search, `UnitWork` content membership, shelf membership, and USWN DTO projection.
-- [ ] 16.7 Add optional metadata-copy operations for copying missing tags and aliases from source work to target work.
-- [ ] 16.8 Ensure metadata copy is independent from canonical merge, creates only missing target rows, leaves source rows unchanged, supports dry-run, and can be reverted for rows it created.
-- [ ] 16.9 Add admin UI for merge preview, conflict handling, progress, revert, and optional metadata-copy actions.
-- [ ] 16.10 Add tests for merge authorization, queued merge, source preservation, canonical resolution, revert, tag copy, alias copy, and duplicate suppression.
+- [x] 16.1 Add durable admin work merge operation schema or equivalent operation log with source work, target work, status, actor, reason, timestamps, and item-level progress.
+- [x] 16.2 Add admin merge dry-run endpoint that previews release membership moves, work-domain membership repair scope, projection repair scope, and affected DTO/search/shelf behavior.
+- [x] 16.3 Implement admin-only merge start/status/revert APIs.
+- [x] 16.4 Migrate canonical release/content membership from source work to target work without deleting the source work Unit.
+- [x] 16.5 Preserve source work non-membership metadata by default, including tags, aliases, external references, attribution, and history.
+- [x] 16.6 Queue merge repair for active work domains, including content search, post search, `UnitWork` content membership, shelf membership, and USWN DTO projection.
+- [x] 16.7 Add optional metadata-copy operations for copying missing tags and aliases from source work to target work.
+- [x] 16.8 Ensure metadata copy is independent from canonical merge, creates only missing target rows, leaves source rows unchanged, supports dry-run, and can be reverted for rows it created.
+- [x] 16.9 Add admin UI for merge preview, conflict handling, progress, revert, and optional metadata-copy actions.
+- [x] 16.10 Add tests for merge authorization, queued merge, source preservation, canonical resolution, revert, tag copy, alias copy, and duplicate suppression.
 
 ## 17. Work-Domain Seed Fixtures
 

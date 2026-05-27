@@ -447,6 +447,44 @@ model UnitWork {
 }
 
 /**
+ * ANCHOR ADMIN WORK MERGE
+ * Durable audit and revert log for admin-only work-domain canonical merges.
+ * The source work Unit is preserved; this row records moved memberships,
+ * legacy release pointers, optional metadata copies, repair enqueue counts,
+ * and item-level progress.
+ */
+model AdminWorkMergeOperation {
+  id                 String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  sourceWorkUnitId   String   @db.Uuid
+  targetWorkUnitId   String   @db.Uuid
+  status             String   @default("QUEUED") @db.VarChar(32)
+  actorUserId        String   @db.Uuid
+  reason             String?
+  copyTagsRequested  Boolean  @default(false)
+  copyAliasesRequested Boolean @default(false)
+  itemProgress       Json     @default("{}")
+  movedMemberships   Json     @default("[]")
+  movedLegacyReleaseUnitIds String[] @default([])
+  createdTagKeys     String[] @default([])
+  createdAliasIds    String[] @default([])
+  repairUnitIds      String[] @default([])
+  repairCommandCount Int      @default(0)
+  errorMessage       String?
+  revertedAt         DateTime?
+  revertedByUserId   String?  @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  actor     User  @relation("AdminWorkMergeActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
+  revertedBy User? @relation("AdminWorkMergeRevertedBy", fields: [revertedByUserId], references: [unitId], onDelete: SetNull)
+
+  @@index([sourceWorkUnitId, status, createdAt])
+  @@index([targetWorkUnitId, status, createdAt])
+  @@index([actorUserId, createdAt])
+}
+
+/**
  * ANCHOR BOOK EXTENSION
  */
 
@@ -1022,6 +1060,8 @@ model User {
   unitAliasesCreated       UnitAlias[]        @relation("UnitAliasCreatedBy")
   unitAliasesUpdated       UnitAlias[]        @relation("UnitAliasUpdatedBy")
   unitAliasVotes           UnitAliasVote[]    @relation("UnitAliasVoteUser")
+  adminWorkMergesCreated   AdminWorkMergeOperation[] @relation("AdminWorkMergeActor")
+  adminWorkMergesReverted  AdminWorkMergeOperation[] @relation("AdminWorkMergeRevertedBy")
 
   @@index([email])
 }

@@ -2,6 +2,7 @@ import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { Prisma } from "#/prisma/client";
+import { adminWorkMergeApi } from "./admin-work-merge";
 import { authPublicApi } from "./auth-boundary";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
@@ -228,6 +229,7 @@ routeApp
   .use(jwtServiceAdminApi)
   .use(statusApi)
   .use(statsAdminApi)
+  .use(adminWorkMergeApi)
   .use(uploadApi)
   .use(dmBoundaryApi)
   .get("/", () => "Hello Elysia")

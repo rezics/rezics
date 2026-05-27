@@ -5,6 +5,7 @@ export {
   type LicenseSlug,
   type UnitPublicationMetadata,
 } from "@rezics/contract";
+export * from "./admin-work-merge/admin-work-merge";
 export * from "./credit-attribution/credit-attribution";
 export * from "./diagnostic/status";
 export * from "./entity-attribution/entity-attribution";

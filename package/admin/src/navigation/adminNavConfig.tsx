@@ -26,6 +26,7 @@ import {
 } from "@rezics/i18n/messages";
 import {
   Activity as ActivityIcon,
+  GitMerge as AccountTreeIcon,
   ShieldUser as AdminPanelSettingsOutlinedIcon,
   BookMarked as CollectionsBookmarkIcon,
   LayoutDashboard as DashboardIcon,
@@ -151,6 +152,12 @@ export const adminNav = {
           label: i18nMessages.admin_nav_create,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/create",
+        },
+        {
+          id: "unit.work-merge",
+          label: () => "Work merge",
+          icon: <AccountTreeIcon fontSize="small" />,
+          to: "/unit/work-merge",
         },
       ],
     },
