@@ -4,12 +4,14 @@ import {
   createHistoryOutboxIngestCommand,
   createIdempotencyKey,
   createMaintenanceCommand,
+  createRankingCommand,
   createSearchCommand,
   HISTORY_COMMAND_KINDS,
   JOB_LANES,
   JobCommandSchema,
   jobTags,
   MAINTENANCE_COMMAND_KINDS,
+  RANKING_COMMAND_KINDS,
   SEARCH_COMMAND_KINDS,
 } from ".";
 
@@ -68,6 +70,22 @@ describe("@rezics/job command contract", () => {
     expect(command.idempotencyKey).toBe(
       "maintenance.search.rebuildIndex:content:unit-1",
     );
+    expect(v.parse(JobCommandSchema, command)).toEqual(command);
+  });
+
+  test("validates ranking commands with stable target idempotency", () => {
+    const command = createRankingCommand(RANKING_COMMAND_KINDS.invalidate, {
+      unitId: "unit-1",
+      scope: { kind: "realm", id: "realm-1" },
+      rankKind: "post",
+    });
+
+    expect(command.kind).toBe("ranking.invalidate");
+    expect(command.lane).toBe(JOB_LANES.ranking);
+    expect(command.idempotencyKey).toBe(
+      "ranking.invalidate:unit-1:realm:realm-1:post",
+    );
+    expect(command.tags).toContain("domain:ranking");
     expect(v.parse(JobCommandSchema, command)).toEqual(command);
   });
 

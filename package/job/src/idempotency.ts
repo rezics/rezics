@@ -41,6 +41,33 @@ export const historyIdempotency = {
     createIdempotencyKey("history.outbox.ingest", outboxId),
 };
 
+export type RankingIdempotencyScope = {
+  kind: string;
+  id?: string | null;
+};
+
+export const rankingIdempotency = {
+  target: (
+    kind: string,
+    unitId: string,
+    scope?: RankingIdempotencyScope,
+    rankKind?: string,
+  ) =>
+    createIdempotencyKey(
+      kind,
+      unitId,
+      scope?.kind,
+      scope?.id ?? (scope ? "global" : undefined),
+      rankKind,
+    ),
+  patchServing: (target: string, rankKind?: string) =>
+    createIdempotencyKey("ranking.patchServing", target, rankKind),
+  fullSync: (cursor?: string | null, rankKind?: string) =>
+    createIdempotencyKey("ranking.fullSync", cursor, rankKind),
+  viewBucketFlush: (cursor?: string | null) =>
+    createIdempotencyKey("ranking.viewBucketFlush", cursor),
+};
+
 export const maintenanceIdempotency = {
   driftRepair: (targetType: string, targetId: string) =>
     createIdempotencyKey(

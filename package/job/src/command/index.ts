@@ -4,14 +4,20 @@ import {
   type MaintenanceCommand,
   MaintenanceCommandSchema,
 } from "./maintenance";
+import { type RankingCommand, RankingCommandSchema } from "./ranking";
 import { type SearchCommand, SearchCommandSchema } from "./search";
 
-export type AnyJobCommand = SearchCommand | HistoryCommand | MaintenanceCommand;
+export type AnyJobCommand =
+  | SearchCommand
+  | HistoryCommand
+  | MaintenanceCommand
+  | RankingCommand;
 
 export const JobCommandSchema = v.union([
   SearchCommandSchema,
   HistoryCommandSchema,
   MaintenanceCommandSchema,
+  RankingCommandSchema,
 ]);
 
 export function parseJobCommand(input: unknown): AnyJobCommand {
@@ -25,4 +31,5 @@ export function safeParseJobCommand(input: unknown) {
 export * from "./common";
 export * from "./history";
 export * from "./maintenance";
+export * from "./ranking";
 export * from "./search";

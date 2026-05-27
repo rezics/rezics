@@ -3,6 +3,7 @@ export const JOB_LANES = {
   searchSyncSlow: "search.sync.slow",
   historyIngest: "history.ingest",
   maintenance: "maintenance",
+  ranking: "ranking",
 } as const;
 
 export const JOB_LANE_VALUES = Object.values(JOB_LANES);
