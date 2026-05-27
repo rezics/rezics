@@ -22,6 +22,7 @@ import { entityApi } from "./entity";
 import { entityAttributionApi } from "./entity-attribution";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
+import { governanceApi } from "./governance";
 import { historyProxyApi, historyResolutionApi } from "./history";
 import { initDefaultRealmCache } from "./infra/default-realm";
 import { infraApi } from "./infra/infra.api";
@@ -249,6 +250,7 @@ routeApp
   .use(tokenApi)
   .use(echoKvApi)
   .use(feedbackApi)
+  .use(governanceApi)
   .use(historyProxyApi)
   .use(historyResolutionApi)
   .use(jwtServiceAdminApi)
