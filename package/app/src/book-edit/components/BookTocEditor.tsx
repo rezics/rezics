@@ -33,7 +33,10 @@ import type {
 } from "react-arborist";
 import { Tree, type TreeApi } from "react-arborist";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
-import type { BookContentStructureOccurrence } from "@/book-library/models/bookContentStructurePath";
+import {
+  contentUnitIdForNode,
+  type BookContentStructureOccurrence,
+} from "@/book-library/models/bookContentStructurePath";
 import {
   findAndAddChild,
   findAndDelete,
@@ -66,6 +69,7 @@ const i18nMessages = {
 export type Chapter = {
   id: string | number;
   title: string;
+  contentUnitId?: string;
   chapterUnitId?: string;
   path?: number[];
   occurrenceId?: string;
@@ -308,7 +312,8 @@ export const BookTocEditor = forwardRef<
   /** Navigate to the chapter content editor page. */
   const handleNavigateToChapter = useCallback(
     async (chapter: Chapter) => {
-      if (!chapter.chapterUnitId && !chapter.path) {
+      const contentUnitId = contentUnitIdForNode(chapter);
+      if (!contentUnitId && !chapter.path) {
         showAlert(
           "Cannot open a chapter before the table of contents is saved.",
         );
@@ -316,6 +321,7 @@ export const BookTocEditor = forwardRef<
       }
       const chapterUnitId = await ensureChapterUnit({
         title: chapter.title,
+        contentUnitId,
         chapterUnitId: chapter.chapterUnitId,
         path: chapter.path ?? [],
       });
@@ -416,8 +422,9 @@ export const BookTocEditor = forwardRef<
           return next;
         }
         if (ids.has(String(node.id))) {
-          if (node.chapterUnitId) {
-            materializedChapterIds.push(node.chapterUnitId);
+          const contentUnitId = contentUnitIdForNode(node);
+          if (contentUnitId) {
+            materializedChapterIds.push(contentUnitId);
           }
           next.rating = rating;
         }
@@ -446,12 +453,13 @@ export const BookTocEditor = forwardRef<
 
     async function collect(nodes: Chapter[]) {
       for (const node of nodes) {
-        if (node.chapterUnitId && !ratingByChapterId.has(node.chapterUnitId)) {
+        const contentUnitId = contentUnitIdForNode(node);
+        if (contentUnitId && !ratingByChapterId.has(contentUnitId)) {
           const chapter = await queryClient.ensureQueryData(
-            chapterDetailQuery(node.chapterUnitId),
+            chapterDetailQuery(contentUnitId),
           );
           ratingByChapterId.set(
-            node.chapterUnitId,
+            contentUnitId,
             chapter.rating as ContentRating | undefined,
           );
         }
@@ -465,8 +473,9 @@ export const BookTocEditor = forwardRef<
         if (node.children) {
           next.children = rewrite(node.children);
         }
-        if (node.chapterUnitId) {
-          const chapterRating = ratingByChapterId.get(node.chapterUnitId);
+        const contentUnitId = contentUnitIdForNode(node);
+        if (contentUnitId) {
+          const chapterRating = ratingByChapterId.get(contentUnitId);
           if (chapterRating === undefined || chapterRating === bookRating) {
             delete next.rating;
           } else {

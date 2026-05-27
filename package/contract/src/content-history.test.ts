@@ -40,6 +40,7 @@ describe("content history contracts", () => {
           node: {
             nodeId: "node-2",
             title: "Deleted",
+            contentUnitId: "chapter-2",
             chapterUnitId: "chapter-2",
             noContent: false,
             rating: null,
@@ -50,12 +51,15 @@ describe("content history contracts", () => {
         {
           op: "node.link",
           nodeId: "node-3",
+          beforeContentUnitId: null,
+          afterContentUnitId: "chapter-3",
           beforeChapterUnitId: null,
           afterChapterUnitId: "chapter-3",
         },
         {
           op: "node.unlink",
           nodeId: "node-3",
+          beforeContentUnitId: "chapter-3",
           beforeChapterUnitId: "chapter-3",
         },
         {

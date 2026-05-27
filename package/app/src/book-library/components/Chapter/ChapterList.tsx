@@ -25,6 +25,7 @@ import { Link } from "@/shared/ui/link";
 import {
   type BookContentStructureOccurrence,
   EMPTY_CHAPTER_ROUTE_ID,
+  contentUnitIdForNode,
   encodeBookContentStructurePath,
   materializedOrPathId,
   withBookContentStructureOccurrences,
@@ -63,16 +64,17 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   // const displayName = isTruncated ? `${name.slice(0, TRUNCATE_LEN)}…` : name;
   const isTruncated = true;
   const displayName = name;
+  const contentUnitId = contentUnitIdForNode(node);
 
   const content = (
     <Link
       to="/book/$bookId/read/$chapterId"
       params={{
         bookId,
-        chapterId: node.chapterUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
+        chapterId: contentUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
       }}
       search={
-        node.chapterUnitId
+        contentUnitId
           ? { path: undefined, title: undefined }
           : {
               path: encodeBookContentStructurePath(node.path),

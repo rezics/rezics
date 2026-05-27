@@ -1,21 +1,22 @@
 import { describe, expect, test } from "bun:test";
 import {
+  contentUnitIdForNode,
   findBookContentStructureOccurrence,
   materializedOrPathId,
   withBookContentStructureOccurrences,
 } from "./bookContentStructurePath";
 
 describe("BookContentStructure occurrence helpers", () => {
-  test("handles mixed groups, unmaterialized nodes, materialized nodes, and repeated chapterUnitId values", () => {
+  test("handles mixed groups, unmaterialized nodes, materialized nodes, and repeated contentUnitId values", () => {
     const tree = withBookContentStructureOccurrences([
       {
         title: "Volume 1",
         children: [
           { title: "Empty Chapter" },
-          { title: "Route A", chapterUnitId: "chapter-shared" },
+          { title: "Route A", contentUnitId: "chapter-shared" },
         ],
       },
-      { title: "Route B", chapterUnitId: "chapter-shared" },
+      { title: "Route B", contentUnitId: "chapter-shared" },
     ]);
 
     const group = findBookContentStructureOccurrence(tree, [0]);
@@ -25,11 +26,20 @@ describe("BookContentStructure occurrence helpers", () => {
 
     expect(group?.occurrenceId).toBe("path:0");
     expect(empty?.occurrenceId).toBe("path:0.0");
-    expect(empty?.chapterUnitId).toBeUndefined();
-    expect(routeA?.chapterUnitId).toBe("chapter-shared");
-    expect(routeB?.chapterUnitId).toBe("chapter-shared");
+    expect(contentUnitIdForNode(empty!)).toBeUndefined();
+    expect(contentUnitIdForNode(routeA!)).toBe("chapter-shared");
+    expect(contentUnitIdForNode(routeB!)).toBe("chapter-shared");
     expect(materializedOrPathId(empty!)).toBe("path:0.0");
     expect(materializedOrPathId(routeA!)).toBe("chapter-shared");
     expect(materializedOrPathId(routeB!)).toBe("chapter-shared");
+  });
+
+  test("falls back to legacy chapterUnitId while reading transitional payloads", () => {
+    const tree = withBookContentStructureOccurrences([
+      { title: "Legacy", chapterUnitId: "chapter-legacy" },
+    ]);
+
+    expect(contentUnitIdForNode(tree[0]!)).toBe("chapter-legacy");
+    expect(materializedOrPathId(tree[0]!)).toBe("chapter-legacy");
   });
 });

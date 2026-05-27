@@ -14,7 +14,16 @@ describe("bookContentStructureNodeSchema", () => {
     ).toBe(true);
   });
 
-  test("accepts a materialized node with chapterUnitId", () => {
+  test("accepts a materialized node with contentUnitId", () => {
+    expect(
+      Value.Check(bookContentStructureNodeSchema, {
+        title: "Chapter One",
+        contentUnitId: "content-1",
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts legacy materialized node with chapterUnitId", () => {
     expect(
       Value.Check(bookContentStructureNodeSchema, {
         title: "Chapter One",
@@ -76,6 +85,7 @@ describe("bookContentStructureNodeSchema", () => {
         {
           id: "node-2",
           title: "Chapter Two",
+          contentUnitId: "chapter-2",
           chapterUnitId: "chapter-2",
           updatedAt: "2026-05-18T12:00:01.000Z",
         },

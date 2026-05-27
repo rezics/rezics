@@ -131,11 +131,11 @@
 
 ## 15. Content Structure Terminology
 
-- [ ] 15.1 Add or update contract types so content structure DTOs expose `contentStructure` terminology where the concept is generic.
-- [ ] 15.2 Replace new/public `chapterId` usage with `contentUnitId` for materialized content node identity.
-- [ ] 15.3 Keep `targetUnitId` reserved for interactions and avoid using it as content-structure node identity.
-- [ ] 15.4 Audit `BookContentStructure` public contract names and either migrate them or document them as transitional implementation compatibility.
-- [ ] 15.5 Update frontend reader/editor call sites and tests to prefer `contentUnitId`.
+- [x] 15.1 Add or update contract types so content structure DTOs expose `contentStructure` terminology where the concept is generic.
+- [x] 15.2 Replace new/public `chapterId` usage with `contentUnitId` for materialized content node identity.
+- [x] 15.3 Keep `targetUnitId` reserved for interactions and avoid using it as content-structure node identity.
+- [x] 15.4 Audit `BookContentStructure` public contract names and either migrate them or document them as transitional implementation compatibility.
+- [x] 15.5 Update frontend reader/editor call sites and tests to prefer `contentUnitId`.
 
 ## 16. Admin Work Merge And Metadata Copy
 

@@ -6,6 +6,7 @@ import type { NodeRendererProps } from "react-arborist";
 import { Link } from "@/shared/ui/link";
 import {
   EMPTY_CHAPTER_ROUTE_ID,
+  contentUnitIdForNode,
   encodeBookContentStructurePath,
 } from "../../models/bookContentStructurePath";
 import type { Chapter } from "./ChapterArborist";
@@ -20,6 +21,7 @@ export const createChapterArboristNode = (bookId: string) => {
   }: NodeRendererProps<Chapter>) {
     const hasChildren = !!(node.children && node.children.length > 0);
     const isSelected = node.state.isSelected;
+    const contentUnitId = contentUnitIdForNode(node.data);
 
     return (
       <div
@@ -40,10 +42,10 @@ export const createChapterArboristNode = (bookId: string) => {
               to="/book/$bookId/read/$chapterId"
               params={{
                 bookId,
-                chapterId: node.data.chapterUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
+                chapterId: contentUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
               }}
               search={
-                node.data.chapterUnitId
+                contentUnitId
                   ? { path: undefined, title: undefined }
                   : {
                       path: encodeBookContentStructurePath(node.data.path),

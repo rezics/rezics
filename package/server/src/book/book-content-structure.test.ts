@@ -89,6 +89,21 @@ describe("buildTree", () => {
     expect(tree[0]!.updatedAt).toBe(ts.toISOString());
   });
 
+  test("exposes contentUnitId alongside transitional chapterUnitId", () => {
+    const tree = buildTree([
+      row({
+        id: "n-1",
+        parentId: null,
+        sortKey: "g",
+        title: "Chapter",
+        chapterUnitId: "content-1",
+      }),
+    ]);
+
+    expect(tree[0]!.contentUnitId).toBe("content-1");
+    expect(tree[0]!.chapterUnitId).toBe("content-1");
+  });
+
   test("omits rating when row's rating is null and includes it when non-null", () => {
     const rows = [
       row({ id: "n-1", parentId: null, sortKey: "g", title: "A" }),

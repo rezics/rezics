@@ -37,7 +37,10 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EditChapterDialog } from "@/book-edit/components/EditChapterDialog";
 import { MoveToParentDialog } from "@/book-edit/components/MoveToParentDialog";
-import { withBookContentStructureOccurrences } from "@/book-library/models/bookContentStructurePath";
+import {
+  contentUnitIdForNode,
+  withBookContentStructureOccurrences,
+} from "@/book-library/models/bookContentStructurePath";
 import { Route as bookEditChapterRoute } from "@/routes/_editor/book/$bookId/edit/$chapterId";
 import { Route as bookEditLayoutRoute } from "@/routes/_editor/book/$bookId/edit/route";
 import {
@@ -58,7 +61,7 @@ function updateContentStructureNodeTitle(
 ): BookContentStructureItem[] {
   return nodes.map((node) => ({
     ...node,
-    ...(node.chapterUnitId === chapterUnitId ? { title } : {}),
+    ...(contentUnitIdForNode(node) === chapterUnitId ? { title } : {}),
     ...(node.children
       ? {
           children: updateContentStructureNodeTitle(

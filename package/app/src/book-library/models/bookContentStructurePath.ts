@@ -37,7 +37,13 @@ export function occurrenceIdForPath(path: number[]): string {
 export function materializedOrPathId(
   node: BookContentStructureOccurrence,
 ): string {
-  return node.chapterUnitId ?? node.occurrenceId;
+  return contentUnitIdForNode(node) ?? node.occurrenceId;
+}
+
+export function contentUnitIdForNode(
+  node: Pick<BookContentStructureItem, "contentUnitId" | "chapterUnitId">,
+): string | undefined {
+  return node.contentUnitId ?? node.chapterUnitId;
 }
 
 export function withBookContentStructureOccurrences(

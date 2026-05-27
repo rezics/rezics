@@ -533,6 +533,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
         node: {
           nodeId: "n-child-1",
           title: "C1",
+          contentUnitId: null,
           chapterUnitId: null,
           noContent: false,
           rating: null,
@@ -545,6 +546,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
         node: {
           nodeId: "n-child-2",
           title: "C2",
+          contentUnitId: null,
           chapterUnitId: null,
           noContent: false,
           rating: null,
@@ -614,7 +616,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
     });
   });
 
-  test("submitting two nodes with the same chapterUnitId creates both rows", async () => {
+  test("submitting two nodes with the same contentUnitId creates both rows", async () => {
     const existing: FakeRow[] = [
       makeRow({
         id: "n-existing",
@@ -628,8 +630,8 @@ describe("BookService.updateContentStructure (diff-based)", () => {
 
     const { bookService } = await import("./book.service");
     await bookService.updateContentStructure("book-1", [
-      { id: "n-existing", title: "Preface", chapterUnitId: "ch-1" },
-      { title: "Preface (in appendix)", chapterUnitId: "ch-1" },
+      { id: "n-existing", title: "Preface", contentUnitId: "ch-1" },
+      { title: "Preface (in appendix)", contentUnitId: "ch-1" },
     ]);
 
     expect(mockCreateNode).toHaveBeenCalledTimes(1);
@@ -656,7 +658,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
         {
           id: "n-a",
           title: "A",
-          children: [{ id: "n-b", title: "B", chapterUnitId: "chapter-b" }],
+          children: [{ id: "n-b", title: "B", contentUnitId: "chapter-b" }],
         },
       ],
       { actorUserId: "user-1", message: "Move B under A" },
@@ -678,6 +680,8 @@ describe("BookService.updateContentStructure (diff-based)", () => {
     expect(operations[1]).toEqual({
       op: "node.link",
       nodeId: "n-b",
+      beforeContentUnitId: null,
+      afterContentUnitId: "chapter-b",
       beforeChapterUnitId: null,
       afterChapterUnitId: "chapter-b",
     });
@@ -704,6 +708,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       {
         op: "node.unlink",
         nodeId: "n-a",
+        beforeContentUnitId: "chapter-a",
         beforeChapterUnitId: "chapter-a",
       },
     ]);

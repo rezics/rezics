@@ -111,6 +111,7 @@ export function CreateChapterDialog({
 
       const newNode: Chapter = {
         id: result.unitId,
+        contentUnitId: result.unitId,
         chapterUnitId: result.unitId,
         occurrenceId: result.unitId,
         path: [],

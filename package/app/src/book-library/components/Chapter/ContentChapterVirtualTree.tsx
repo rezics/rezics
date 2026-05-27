@@ -25,6 +25,7 @@ import { cn } from "@/shared/utils/css-util";
 import {
   type BookContentStructureOccurrence,
   EMPTY_CHAPTER_ROUTE_ID,
+  contentUnitIdForNode,
   encodeBookContentStructurePath,
 } from "../../models/bookContentStructurePath";
 
@@ -51,6 +52,7 @@ function createContentChapterNode(bookId: string) {
   }: NodeRendererProps<ContentChapter>) {
     const hasChildren = Boolean(node.children?.length);
     const isSelected = node.state.isSelected;
+    const contentUnitId = contentUnitIdForNode(node.data);
 
     const title = (
       <div className="min-w-0 flex-1">
@@ -88,10 +90,10 @@ function createContentChapterNode(bookId: string) {
             to="/book/$bookId/read/$chapterId"
             params={{
               bookId,
-              chapterId: node.data.chapterUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
+              chapterId: contentUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
             }}
             search={
-              node.data.chapterUnitId
+              contentUnitId
                 ? { path: undefined, title: undefined }
                 : {
                     path: encodeBookContentStructurePath(node.data.path),

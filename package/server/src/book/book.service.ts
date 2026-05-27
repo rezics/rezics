@@ -1000,6 +1000,7 @@ function nodeSnapshot(row: ExistingRow | PlannedNode) {
   return {
     nodeId: row.id,
     title: row.title,
+    contentUnitId: row.chapterUnitId,
     chapterUnitId: row.chapterUnitId,
     noContent: row.noContent,
     rating: row.rating,
@@ -1102,6 +1103,7 @@ export function planContentStructureOperations(
         operations.push({
           op: "node.unlink",
           nodeId: plan.id,
+          beforeContentUnitId: beforeChapterUnitId,
           beforeChapterUnitId,
         });
       }
@@ -1109,6 +1111,8 @@ export function planContentStructureOperations(
         operations.push({
           op: "node.link",
           nodeId: plan.id,
+          beforeContentUnitId: beforeChapterUnitId,
+          afterContentUnitId: afterChapterUnitId,
           beforeChapterUnitId,
           afterChapterUnitId,
         });
@@ -1163,7 +1167,7 @@ function planSubmittedTree(
         title: node.title,
         noContent: node.noContent === true,
         rating: (node.rating as ContentRating | undefined) ?? null,
-        chapterUnitId: node.chapterUnitId ?? null,
+        chapterUnitId: node.contentUnitId ?? node.chapterUnitId ?? null,
       });
       if (node.children && node.children.length > 0) {
         visit(node.children, id);

@@ -40,6 +40,8 @@ export const contentStructurePathLastPositionSchema = t.Object(
     kind: t.Literal("contentStructurePath"),
     bookUnitId: t.String(),
     path: t.Array(t.Integer({ minimum: 0 })),
+    contentUnitId: t.Optional(t.String()),
+    /** @deprecated Use contentUnitId. */
     chapterUnitId: t.Optional(t.String()),
   },
   { additionalProperties: false },

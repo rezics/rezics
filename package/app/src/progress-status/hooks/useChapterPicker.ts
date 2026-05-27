@@ -2,6 +2,7 @@ import { bookQueries } from "@rezics/api/book/book.queries";
 import type { BookContentStructureItem } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { contentUnitIdForNode } from "@/book-library/models/bookContentStructurePath";
 
 export type ChapterPickerOption = {
   chapterUnitId: string;
@@ -23,9 +24,10 @@ function flatten(
   if (!nodes) return;
   for (const node of nodes) {
     const nextTrail = [...trail, node.title];
-    if (node.chapterUnitId && !node.noContent) {
+    const contentUnitId = contentUnitIdForNode(node);
+    if (contentUnitId && !node.noContent) {
       acc.push({
-        chapterUnitId: node.chapterUnitId,
+        chapterUnitId: contentUnitId,
         label: nextTrail.join(" › "),
         depth,
       });

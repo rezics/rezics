@@ -69,6 +69,8 @@ export type EditorialRevisionPayload =
 export const contentStructureNodeSnapshotSchema = t.Object({
   nodeId: t.String(),
   title: t.String(),
+  contentUnitId: t.Optional(t.Nullable(t.String())),
+  /** @deprecated Use contentUnitId. */
   chapterUnitId: t.Optional(t.Nullable(t.String())),
   noContent: t.Optional(t.Boolean()),
   rating: t.Optional(t.Nullable(t.String())),
@@ -109,13 +111,19 @@ export const contentStructureNodeDeleteOperationSchema = t.Object({
 export const contentStructureNodeLinkOperationSchema = t.Object({
   op: t.Literal("node.link"),
   nodeId: t.String(),
+  beforeContentUnitId: t.Optional(t.Nullable(t.String())),
+  afterContentUnitId: t.Optional(t.String()),
+  /** @deprecated Use beforeContentUnitId. */
   beforeChapterUnitId: t.Optional(t.Nullable(t.String())),
+  /** @deprecated Use afterContentUnitId. */
   afterChapterUnitId: t.String(),
 });
 
 export const contentStructureNodeUnlinkOperationSchema = t.Object({
   op: t.Literal("node.unlink"),
   nodeId: t.String(),
+  beforeContentUnitId: t.Optional(t.String()),
+  /** @deprecated Use beforeContentUnitId. */
   beforeChapterUnitId: t.String(),
 });
 

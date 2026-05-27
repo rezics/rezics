@@ -220,6 +220,8 @@ export const bookContentStructureNodeSchema: ReturnType<typeof t.Recursive> =
   t.Recursive((self) =>
     t.Object({
       title: t.String(),
+      contentUnitId: t.Optional(t.String()),
+      /** @deprecated Use contentUnitId. */
       chapterUnitId: t.Optional(t.String()),
       noContent: t.Optional(t.Boolean()),
       rating: t.Optional(contentRatingSchema),
@@ -250,9 +252,14 @@ export type BookContentStructurePath = number[];
 export interface BookContentStructureItem {
   title: string;
   /**
-   * Materialized Chapter Unit id. Optional and intentionally non-unique inside
+   * Materialized content Unit id. Optional and intentionally non-unique inside
    * one BookContentStructure because multiple node occurrences may point at the
    * same Unit.
+   */
+  contentUnitId?: string;
+  /**
+   * @deprecated Transitional compatibility for BookContentStructure clients.
+   * Prefer contentUnitId for materialized content node identity.
    */
   chapterUnitId?: string;
   noContent?: boolean;

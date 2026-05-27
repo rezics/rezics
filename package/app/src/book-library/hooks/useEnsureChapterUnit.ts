@@ -1,10 +1,13 @@
 import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
 import { useCallback } from "react";
-import type { BookContentStructureOccurrence } from "../models/bookContentStructurePath";
+import {
+  contentUnitIdForNode,
+  type BookContentStructureOccurrence,
+} from "../models/bookContentStructurePath";
 
 export type EnsureChapterUnitInput = Pick<
   BookContentStructureOccurrence,
-  "chapterUnitId" | "path" | "title"
+  "contentUnitId" | "chapterUnitId" | "path" | "title"
 >;
 
 export function useEnsureChapterUnit(bookUnitId: string) {
@@ -12,7 +15,8 @@ export function useEnsureChapterUnit(bookUnitId: string) {
 
   return useCallback(
     async (chapter: EnsureChapterUnitInput): Promise<string> => {
-      if (chapter.chapterUnitId) return chapter.chapterUnitId;
+      const contentUnitId = contentUnitIdForNode(chapter);
+      if (contentUnitId) return contentUnitId;
       if (!chapter.path) {
         throw new Error(
           "Cannot materialize a chapter without a BookContentStructure path",

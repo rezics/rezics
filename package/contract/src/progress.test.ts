@@ -39,6 +39,7 @@ describe("progress contract schemas", () => {
           kind: "contentStructurePath",
           bookUnitId: "book-1",
           path: [2, 4, 0],
+          contentUnitId: "chapter-1",
           chapterUnitId: "chapter-1",
         },
         addTimeMs: 1000,
@@ -67,6 +68,7 @@ describe("progress contract schemas", () => {
         kind: "contentStructurePath",
         bookUnitId: "book-1",
         path: [0, 2],
+        contentUnitId: "content-1",
       }),
     ).toBe(true);
     expect(

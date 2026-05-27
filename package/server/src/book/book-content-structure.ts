@@ -93,7 +93,10 @@ export function buildTree(
       title: row.title,
       updatedAt: row.updatedAt.toISOString(),
     };
-    if (row.chapterUnitId) item.chapterUnitId = row.chapterUnitId;
+    if (row.chapterUnitId) {
+      item.contentUnitId = row.chapterUnitId;
+      item.chapterUnitId = row.chapterUnitId;
+    }
     if (row.noContent) item.noContent = row.noContent;
     if (row.rating) item.rating = row.rating;
     const children = childrenByParent.get(row.id);

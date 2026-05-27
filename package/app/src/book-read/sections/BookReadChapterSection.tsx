@@ -28,6 +28,7 @@ import type React from "react";
 import { useState } from "react";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
 import {
+  contentUnitIdForNode,
   decodeBookContentStructurePath,
   EMPTY_CHAPTER_ROUTE_ID,
   findBookContentStructureOccurrence,
@@ -94,6 +95,9 @@ export const BookReadChapterPage: React.FC = () => {
     : null;
   const title = emptyChapter?.title ?? search.title ?? data?.title;
   const chapterHtml = md.render(contentDocMarkdownFallback(data?.content));
+  const emptyContentUnitId = emptyChapter
+    ? contentUnitIdForNode(emptyChapter)
+    : undefined;
 
   const handleSaveBookPosition = () => {
     if (!bookId || !emptyChapterPath) return;
@@ -103,9 +107,7 @@ export const BookReadChapterPage: React.FC = () => {
         kind: "contentStructurePath",
         bookUnitId: bookId,
         path: emptyChapterPath,
-        ...(emptyChapter?.chapterUnitId
-          ? { chapterUnitId: emptyChapter.chapterUnitId }
-          : {}),
+        ...(emptyContentUnitId ? { contentUnitId: emptyContentUnitId } : {}),
       },
     });
   };
@@ -117,6 +119,7 @@ export const BookReadChapterPage: React.FC = () => {
     return ensureChapterUnit({
       title: title ?? "",
       path: emptyChapterPath,
+      contentUnitId: emptyContentUnitId,
       chapterUnitId: emptyChapter?.chapterUnitId,
     });
   };
