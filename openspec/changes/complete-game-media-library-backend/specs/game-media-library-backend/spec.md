@@ -28,9 +28,13 @@ selection, aliases, or admin-only maintenance metadata.
 GAME and MEDIA backends SHALL store each metadata category in the correct shared
 system. Display text and covers SHALL live in `UnitTranslation`. Creator,
 publisher, studio, cast, and crew SHALL live in `CreditAttribution`. Platforms,
-age ratings, characters, worlds, franchises, and other subject classifications
-SHALL live in `SubjectAttribution`. Source ids SHALL live in `UnitExternalRef`.
-Editable long-form wiki or infobox content SHALL live in `ContentDoc`.
+characters, and worlds SHALL live in `SubjectAttribution`; worlds attach as
+`Entity(kind = "universe")` through the `setting` role. External official
+age/content ratings SHALL live in the `TAGS` registry as catalog tags applied
+through `UnitTag`, NOT as subjects. Franchise grouping SHALL be modeled as
+`Series(kind = "franchise")`, NOT as a subject. Source ids SHALL live in
+`UnitExternalRef`. Editable long-form wiki or infobox content SHALL live in
+`ContentDoc`.
 
 #### Scenario: Game developer is credit attribution
 
@@ -50,12 +54,12 @@ Editable long-form wiki or infobox content SHALL live in `ContentDoc`.
 - **THEN** the platform SHALL be represented by an Entity-backed subject relation
 - **AND** the backend SHALL NOT write a string platform key to the Game row
 
-### Requirement: Platform and age-rating Entities are reusable catalog subjects
+### Requirement: Platforms are reusable Entity-backed catalog subjects
 
-The system SHALL represent game/media platforms and age ratings as ENTITY Units.
-Public write paths SHALL use registered subject roles such as `available_on` and
-`age_rating` and SHALL validate Entity subject eligibility through the existing
-SubjectAttribution rules.
+The system SHALL represent game/media platforms as ENTITY Units of
+`kind = "game_platform"`. Public write paths SHALL use the registered
+`available_on` subject role and SHALL validate Entity subject eligibility
+through the existing SubjectAttribution rules.
 
 #### Scenario: Query games available on platform Entity
 
@@ -63,11 +67,28 @@ SubjectAttribution rules.
 - **WHEN** a client queries GAME releases available on `platform-ps5`
 - **THEN** the server SHALL filter by the Entity-backed platform subject relation
 
-#### Scenario: Query media by age rating Entity
+### Requirement: External age ratings are catalog tags
 
-- **GIVEN** age-rating Entity `rating-tv-14`
+External official age/content ratings SHALL be modeled as catalog tags, not as
+Entities or subjects. Each rating value SHALL be a tag Unit identified by a
+board-prefixed flat slug in the `TAGS` registry (for example `esrb-teen`,
+`pegi-12`, `cero-b`, `mpaa-r`, `tv-14`), enumerated as a class by the
+`RATING_TAGS` contract constant, and applied to a release through `UnitTag`.
+External age ratings SHALL be independent of the internal `ContentRating` axis
+(`Unit.rating`) and SHALL NOT gate access.
+
+#### Scenario: Apply an external rating to a release
+
+- **WHEN** a GAME release is rated PEGI 12
+- **THEN** the rating SHALL be applied as the `pegi-12` rating tag through `UnitTag`
+- **AND** no age-rating Entity or `age_rating` subject relation SHALL be created
+- **AND** the release's `Unit.rating` (ContentRating) SHALL be unaffected
+
+#### Scenario: Query media by external rating tag
+
+- **GIVEN** the rating tag `tv-14`
 - **WHEN** a client queries MEDIA releases with that rating
-- **THEN** the server SHALL filter by the Entity-backed age-rating subject relation
+- **THEN** the server SHALL filter by the rating tag through the existing tag filter
 
 ### Requirement: External source identity stays in UnitExternalRef
 

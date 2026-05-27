@@ -96,34 +96,93 @@ Media release
 they remain temporarily, they are summary metadata only and must not be used as
 the source of truth for episode/season identity.
 
-### Platforms And Age Ratings Are Entity-Backed
+### Platforms Are Entity-Backed
 
-String keys are not enough for platforms or ratings because both need display
-names, aliases, external refs, evidence, source-site mappings, and search
-projection.
+String keys are not enough for platforms because they need display names,
+aliases, external refs, evidence, source-site mappings, and search projection.
 
 ```txt
 Entity(kind = game_platform)
   examples: Windows, Steam, Steam Deck, PlayStation 5, Nintendo Switch
 
 SubjectAttribution(gameUnitId, platformEntityId, role = available_on)
-
-Entity(kind = age_rating)
-  examples: ESRB Teen, PEGI 12, CERO B, TV-14, R
-
-SubjectAttribution(unitId, ageRatingEntityId, role = age_rating)
 ```
 
-These relations are projected into search documents as Entity ids and resolved
-display labels through normal Unit translation fallback.
+`game_platform` is added to the contract entity kind registry and `available_on`
+is added to the subject role registry (kind hint: `game_platform`). These
+relations are projected into search documents as Entity ids and resolved display
+labels through normal Unit translation fallback.
 
 Alternatives considered:
 
 - **Keep `GamePlatform` and add a registry**: still produces a parallel mini
   identity system without translations, aliases, or external refs.
-- **Use tags for platforms and ratings**: tags are classification vocabulary,
-  but platform/rating records need source-specific identity and richer
-  metadata. Entity-backed subject relations fit the existing attribution model.
+- **Use tags for platforms**: a platform record needs source-specific identity,
+  aliases, and external refs, so an Entity-backed subject relation fits better
+  than classification vocabulary.
+
+### External Age Ratings Are Catalog Tags, Not Entities
+
+External official age/content ratings (ESRB, PEGI, CERO, MPAA, TV Parental
+Guidelines) are classification vocabulary, not identity-bearing subjects. They
+carry no per-value aliases or external refs the way platforms do, and they must
+not stand up a second rating system beside the existing `ContentRating` axis
+(`Unit.rating`), which stays the internal maturity/discovery gate.
+
+```txt
+TAGS registry (board-prefixed flat slugs)
+  esrb-teen, esrb-mature, pegi-12, pegi-18, cero-b, mpaa-r, tv-14, ...
+
+UnitTag(unitId = release, tagUnitId = ratingTagUnit)
+
+RATING_TAGS  // contract const enumerating the rating tag slugs as a class
+```
+
+`ContentRating` (`Unit.rating`) is the ordered internal gate; rating tags are
+unordered external classifications for display and exact-match faceting. The two
+axes are independent and SHALL NOT be conflated.
+
+Alternatives considered:
+
+- **`Entity(kind = age_rating)` + `SubjectAttribution(role = age_rating)`**:
+  rejected. It builds a parallel rating system in the entity/subject layer next
+  to `ContentRating`, and a board rating value carries no identity richer than a
+  classification label.
+- **Fold external ratings into `ContentRating`**: rejected. ESRB/PEGI do not map
+  losslessly onto the four-tier internal gate; they are a different axis.
+
+### Worldview Is An Entity Kind; Franchise Is A Series
+
+A worldview / shared fictional universe (世界觀) is a taggable subject: a
+standalone or non-series work can declare it is "set in" a universe without
+being a counted member of any Series. It is added as `Entity(kind = "universe")`
+and attached through the existing `setting` subject role.
+
+```txt
+Entity(kind = universe)
+SubjectAttribution(unitId = work, entityId = universe, role = setting)
+```
+
+`universe` intentionally names the same concept as the Series `universe` kind at
+a different structural layer: a Series `universe` is a curated, release-first
+collection (with content structure and derived `UnitWork(role = SERIES)`), while
+an Entity `universe` is a taggable subject usable on works that are not Series
+members.
+
+Franchise grouping is NOT given an Entity kind. A franchise is a brand / IP /
+commercial grouping, which is exactly what `Series(kind = "franchise")` already
+models; "belongs to a franchise" is the same assertion as "is a member of the
+franchise Series," so it needs no separate in-fiction subject. Loose association
+uses a non-counted Series structural node or the existing `organization` /
+`studio` / `label` entities.
+
+Alternatives considered:
+
+- **Attribute worlds against `concept`/`location` Entities**: rejected;
+  `concept`/`location` misrepresent a shared universe, so a dedicated `universe`
+  kind is correct.
+- **Add `Entity(kind = franchise)`**: rejected. It creates a third overlapping
+  home (Series franchise + Entity franchise + org entity) for one fact.
 
 ### System Requirements Use A Dedicated Table
 
@@ -201,8 +260,8 @@ through existing Rezics carousel primitives in the app.
 - **Risk: System requirement parsing is unreliable** → Mitigation: preserve
   raw source text and make structured fields partial and source-evidenced.
 - **Risk: Existing game/media seed data loses platform/rating filters during
-  migration** → Mitigation: backfill string keys into Entities before dropping
-  legacy columns/tables.
+  migration** → Mitigation: backfill platform keys into Entities and rating keys
+  into rating tags before dropping legacy columns/tables.
 - **Risk: Episode/DLC structure is implemented as counts again** → Mitigation:
   specs require Units plus content structure for canonical part identity.
 - **Risk: Hidden work Units accidentally receive public titles/pages** →
@@ -211,16 +270,19 @@ through existing Rezics carousel primitives in the app.
 
 ## Migration Plan
 
-1. Wait for `introduce-unit-work-domain` to land or implement this change on top
-   of its `UnitWork`, `sourceUnitId`, `contentStructure`, and USWN contracts.
-2. Add contract schemas for system requirements, platform/rating relation DTOs,
-   and GAME/MEDIA library metadata.
+1. Build on the landed `introduce-unit-work-domain` foundation (`UnitWork`,
+   `sourceUnitId`, `contentStructure`, USWN). Land after
+   `clarify-release-vs-work-list-scopes` so GAME/MEDIA list/search adopt its
+   exact-vs-work-domain naming.
+2. Add contract schemas for system requirements, platform relation DTOs,
+   `RATING_TAGS`, and GAME/MEDIA library metadata; register `game_platform` /
+   `universe` entity kinds and the `available_on` subject role.
 3. Add `GameSystemRequirement` storage.
-4. Seed or import initial platform and age-rating Entities.
+4. Seed initial platform Entities; seed external rating tags (`RATING_TAGS`) as
+   TAG Units with multilingual labels.
 5. Backfill `GamePlatform.platformKey` to platform Entities and
    `SubjectAttribution(role = available_on)`.
-6. Backfill `Game.ageRatingKey` to age-rating Entities and
-   `SubjectAttribution(role = age_rating)`.
+6. Backfill `Game.ageRatingKey` to the matching rating tag via `UnitTag`.
 7. Update server mappers/services/APIs to read Entity-backed relations and
    system requirement rows.
 8. Update search document builders and filterable attributes.
@@ -240,5 +302,6 @@ Rollback strategy:
 - Which hardware catalog source should seed the first CPU/GPU slug set?
 - Should system requirements allow user-authored rows without a `sourceRefId`,
   or should public writes require source evidence?
-- Should rating Entities store normalized minimum age/region metadata in
-  `Entity.extra` or in a dedicated rating extension table?
+- Resolved: external age ratings are catalog tags (not Entities); franchise
+  grouping is `Series(kind = "franchise")` (not an Entity kind); worldview is
+  `Entity(kind = "universe")` attached through the `setting` role.

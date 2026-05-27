@@ -35,8 +35,9 @@ The Game extension table SHALL contain only language-neutral game-release facts.
 Title, subtitle, summary, description, and cover SHALL be stored in
 `UnitTranslation`. Author, developer, publisher, designer, composer, and other
 creator or production credits SHALL be stored in `CreditAttribution`. Platforms
-and age ratings SHALL be stored as Entity-backed `SubjectAttribution` rows.
-System requirements SHALL be stored in dedicated game system requirement rows.
+SHALL be stored as Entity-backed `SubjectAttribution` rows. External official
+age ratings SHALL be stored as catalog tags through `UnitTag`. System
+requirements SHALL be stored in dedicated game system requirement rows.
 
 The Game table SHALL NOT hold `coverUrl`, `coverAssetUnitId`, `ageRatingKey`,
 platform keys, developer, publisher, or system requirement text columns.
@@ -70,10 +71,11 @@ inherited discovery metadata and shared work-domain content. Work Units SHALL
 not be treated as ordinary public game detail pages and SHALL not require
 public titles.
 
-`Unit.workUnitId` MAY exist during migration as a denormalized shortcut, but
-new behavior SHALL resolve canonical work membership from
-`UnitWork(role = RELEASE)`. `UnitTranslation.sourceUnitId` MAY record provenance
-for hidden work translations, but it SHALL NOT select release navigation.
+GAME work membership SHALL be resolved from `UnitWork(role = RELEASE)`; the
+landed `introduce-unit-work-domain` foundation already removed legacy
+`Unit.workUnitId` as a membership source. `UnitTranslation.sourceUnitId` MAY
+record provenance for hidden work translations, but it SHALL NOT select release
+navigation.
 
 #### Scenario: Create a game release in a work domain
 

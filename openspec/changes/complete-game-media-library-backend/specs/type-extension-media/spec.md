@@ -13,9 +13,10 @@ cascade-delete the Media record. The system uses a single Media table with
 The Media table SHALL NOT hold a cover URL, IMAGE-unit reference column,
 episode identity, season identity, cast, crew, studio, age-rating string, or
 source-specific id column. Display text and cover URLs SHALL be stored in
-`UnitTranslation`. Credits SHALL be stored in `CreditAttribution`. Age ratings
-and subject classifications SHALL be stored in Entity-backed
-`SubjectAttribution`. Source ids SHALL be stored in `UnitExternalRef`.
+`UnitTranslation`. Credits SHALL be stored in `CreditAttribution`. Subject
+classifications SHALL be stored in `SubjectAttribution`. External official age
+ratings SHALL be stored as catalog tags through `UnitTag`, not as subjects.
+Source ids SHALL be stored in `UnitExternalRef`.
 
 #### Scenario: Create a Media extension with kindKey
 
@@ -110,10 +111,11 @@ inherited discovery metadata and shared work-domain content. Work Units SHALL
 not be treated as ordinary public media detail pages and SHALL not require
 public titles.
 
-`Unit.workUnitId` MAY exist during migration as a denormalized shortcut, but
-new behavior SHALL resolve canonical work membership from
-`UnitWork(role = RELEASE)`. `UnitTranslation.sourceUnitId` MAY record provenance
-for hidden work translations, but it SHALL NOT select release navigation.
+MEDIA work membership SHALL be resolved from `UnitWork(role = RELEASE)`; the
+landed `introduce-unit-work-domain` foundation already removed legacy
+`Unit.workUnitId` as a membership source. `UnitTranslation.sourceUnitId` MAY
+record provenance for hidden work translations, but it SHALL NOT select release
+navigation.
 
 #### Scenario: Create a director's cut as a release
 

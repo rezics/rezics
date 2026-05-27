@@ -4,9 +4,9 @@
 
 Content search documents for GAME and MEDIA release Units SHALL include typed
 metadata needed for filtering and result rendering. At minimum, GAME documents
-SHALL expose platform Entity ids, age-rating Entity ids, release date,
+SHALL expose platform Entity ids, external rating tag ids, release date,
 version label, and system-requirement summary fields when available. MEDIA
-documents SHALL expose kind key, age-rating Entity ids, release date, runtime
+documents SHALL expose kind key, external rating tag ids, release date, runtime
 summary, and content-structure availability fields when available.
 
 #### Scenario: Game document includes platform Entity ids
@@ -18,15 +18,16 @@ summary, and content-structure availability fields when available.
 #### Scenario: Media document includes kind and rating ids
 
 - **WHEN** a MEDIA release is indexed
-- **THEN** its content search document SHALL include `kindKey` and age-rating Entity ids when available
+- **THEN** its content search document SHALL include `kindKey` and external rating tag ids when available
 - **AND** clients SHALL be able to render or filter from those projected fields
 
-### Requirement: Search options support Entity-backed platform and age-rating filters
+### Requirement: Search options support platform Entity and rating tag filters
 
-The content search contract SHALL provide filters for platform Entity ids and
-age-rating Entity ids. These filters SHALL apply to GAME and MEDIA documents as
-appropriate and SHALL be expressed in terms of Unit/Entity ids, not raw labels
-or legacy string keys.
+The content search contract SHALL provide a filter for platform Entity ids and
+SHALL route age-rating filtering through the existing tag filter over external
+rating tags. Platform filters SHALL be expressed in terms of Unit/Entity ids and
+rating filters in terms of rating tag Units, not raw labels or legacy string
+keys. No dedicated age-rating Entity filter SHALL be added.
 
 #### Scenario: Filter games by platform Entity
 
@@ -34,11 +35,11 @@ or legacy string keys.
 - **THEN** the request SHALL be valid
 - **AND** the server SHALL be able to filter GAME documents by that Entity id
 
-#### Scenario: Filter media by age-rating Entity
+#### Scenario: Filter media by rating tag
 
-- **WHEN** a client submits a content search with an age-rating Entity id
+- **WHEN** a client submits a content search with the `tv-14` rating tag
 - **THEN** the request SHALL be valid
-- **AND** the server SHALL be able to filter MEDIA documents by that Entity id
+- **AND** the server SHALL be able to filter MEDIA documents by that rating tag through the existing tag filter
 
 ### Requirement: Search documents preserve work grouping for game and media
 
