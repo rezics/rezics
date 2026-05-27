@@ -6,6 +6,7 @@ export const subjectAttributionRoles = [
   "appears",
   "about",
   "setting",
+  "available_on",
   "source_work",
   "canonical_wiki_page",
   "related_subject",

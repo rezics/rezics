@@ -22,6 +22,7 @@ export const SearchQuerySchema = t.Object({
   kind: t.Optional(postKindLiterals),
   languages: t.Optional(t.Array(t.String())),
   ratings: t.Optional(t.Array(contentRatingSchema)),
+  platformEntityIds: t.Optional(t.Array(t.String())),
   aiDisclosureModes: t.Optional(t.Array(aiDisclosureModeSchema)),
   isLicensed: t.Optional(t.Boolean()),
   realm: t.Optional(SlugRefSchema),

@@ -1,10 +1,10 @@
 ## 1. Contract Schemas
 
-- [ ] 1.1 Add contract schemas for GameSystemRequirement DTOs, structured hardware requirement JSON, create/update inputs, and list filters in `package/contract`.
-- [ ] 1.2 Add contract fields for GAME/MEDIA platform Entity ids, age-rating Entity ids, system-requirement summaries, and media content-structure availability in library content DTOs.
-- [ ] 1.3 Add a `platformEntityIds` content search option, route age-rating filtering through the existing tag filter (rating tag Units), and update search result metadata schemas for GAME/MEDIA.
-- [ ] 1.4 Extend contract registries: add the `available_on` subject role and the `game_platform` + `universe` entity kinds (with EntityPicker eligibility hints), add `universe` to the `setting` role hints, and add a `RATING_TAGS` constant enumerating board-prefixed rating tag slugs. Do not add an `age_rating` entity kind or subject role.
-- [ ] 1.5 Add contract tests for system requirement validation, search option validation, and DTO serialization.
+- [x] 1.1 Add contract schemas for GameSystemRequirement DTOs, structured hardware requirement JSON, create/update inputs, and list filters in `package/contract`.
+- [x] 1.2 Add contract fields for GAME/MEDIA platform Entity ids, age-rating Entity ids, system-requirement summaries, and media content-structure availability in library content DTOs.
+- [x] 1.3 Add a `platformEntityIds` content search option, route age-rating filtering through the existing tag filter (rating tag Units), and update search result metadata schemas for GAME/MEDIA.
+- [x] 1.4 Extend contract registries: add the `available_on` subject role and the `game_platform` + `universe` entity kinds (with EntityPicker eligibility hints), add `universe` to the `setting` role hints, and add a `RATING_TAGS` constant enumerating board-prefixed rating tag slugs. Do not add an `age_rating` entity kind or subject role.
+- [x] 1.5 Add contract tests for system requirement validation, search option validation, and DTO serialization.
 
 ## 2. Database And Migration
 

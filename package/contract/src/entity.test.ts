@@ -12,6 +12,8 @@ describe("entity kind registry schemas", () => {
   test("accept registered entity kind keys", () => {
     expect(Value.Check(entityKindKeySchema, "person")).toBe(true);
     expect(Value.Check(entityKindKeySchema, "organization")).toBe(true);
+    expect(Value.Check(entityKindKeySchema, "game_platform")).toBe(true);
+    expect(Value.Check(entityKindKeySchema, "universe")).toBe(true);
   });
 
   test("reject unregistered entity kind keys", () => {

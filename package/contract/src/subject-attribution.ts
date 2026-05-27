@@ -39,8 +39,13 @@ export const subjectAttributionRoleRegistry = {
   },
   setting: {
     key: "setting",
-    entityKindHints: ["location", "faction", "event", "concept"],
+    entityKindHints: ["location", "faction", "event", "concept", "universe"],
     group: "setting",
+  },
+  available_on: {
+    key: "available_on",
+    entityKindHints: ["game_platform"],
+    group: "availability",
   },
   source_work: {
     key: "source_work",
@@ -71,6 +76,7 @@ export const subjectAttributionRoleRegistry = {
     group:
       | "character"
       | "appearance"
+      | "availability"
       | "topic"
       | "setting"
       | "source"

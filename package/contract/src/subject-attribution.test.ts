@@ -47,4 +47,16 @@ describe("subject attribution role registry schemas", () => {
       "primary_character",
     );
   });
+
+  test("GAME/MEDIA subject roles expose platform and universe hints", () => {
+    expect(Value.Check(subjectAttributionRoleKeySchema, "available_on")).toBe(
+      true,
+    );
+    expect(
+      subjectAttributionRoleRegistry.available_on.entityKindHints,
+    ).toContain("game_platform");
+    expect(subjectAttributionRoleRegistry.setting.entityKindHints).toContain(
+      "universe",
+    );
+  });
 });

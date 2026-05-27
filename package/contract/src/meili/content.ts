@@ -2,6 +2,7 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 import { TagRefSchema } from "../common/tag-ref";
 import { contentDocSchema } from "../content-doc";
+import { gameSystemRequirementSummarySchema } from "../game-media";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";
 import { aiDisclosureModeSchema, contentRatingSchema } from "../unit";
@@ -61,6 +62,16 @@ export const ContentSearchDocumentSchema = t.Object({
   seriesUnitIds: t.Array(t.String()),
   seriesKindKeys: t.Array(t.String()),
   seriesTitles: t.Array(t.String()),
+
+  // GAME/MEDIA release metadata.
+  platformEntityIds: t.Optional(t.Array(t.String())),
+  ratingTagUnitIds: t.Optional(t.Array(t.String())),
+  gameSystemRequirementSummaries: t.Optional(
+    t.Array(gameSystemRequirementSummarySchema),
+  ),
+  mediaKindKey: t.Optional(t.Union([t.String(), t.Null()])),
+  mediaRuntimeMinutes: t.Optional(t.Union([t.Number(), t.Null()])),
+  mediaContentStructureAvailable: t.Optional(t.Boolean()),
 
   // Filterable: realm system (from UnitRealm)
   realmIds: t.Array(t.String()),
@@ -140,6 +151,7 @@ export const ContentSearchOptionsSchema = t.Object({
   containedUnitIds: t.Optional(t.Array(t.String())),
   seriesUnitIds: t.Optional(t.Array(t.String())),
   seriesKindKeys: t.Optional(t.Array(t.String())),
+  platformEntityIds: t.Optional(t.Array(t.String())),
   releasePresentation: t.Optional(
     t.Union([t.Literal("grouped"), t.Literal("expanded")]),
   ),

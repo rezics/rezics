@@ -23,6 +23,8 @@ export const entityKinds = [
   "artifact",
   "event",
   "concept",
+  "game_platform",
+  "universe",
 ] as const;
 
 export type EntityKind = (typeof entityKinds)[number];
@@ -63,6 +65,12 @@ export const entityKindRegistry = {
   },
   concept: {
     key: "concept",
+  },
+  game_platform: {
+    key: "game_platform",
+  },
+  universe: {
+    key: "universe",
   },
 } as const satisfies Record<
   EntityKind,
