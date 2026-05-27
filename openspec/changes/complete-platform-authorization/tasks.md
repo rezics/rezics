@@ -54,10 +54,10 @@
 
 ## 9. Verification
 
-- [ ] 9.1 Run `bun --filter=@rezics/contract test`.
-- [ ] 9.2 Run targeted `package/server` governance, policy, post, realm, feedback, and auth-boundary tests.
-- [ ] 9.3 Run targeted `package/api` tests for governance clients/hooks.
-- [ ] 9.4 Run targeted `package/app` tests or Storybook checks for staff console routes.
-- [ ] 9.5 Run `bun run check:convention`.
-- [ ] 9.6 Run `bun run format:check`.
-- [ ] 9.7 Run `openspec validate complete-platform-authorization --strict`.
+- [x] 9.1 Run `bun --filter=@rezics/contract test`. Package-local `package/contract` suite passed; root filter invocation ran broad workspace tests and hit unrelated baseline failures.
+- [x] 9.2 Run targeted `package/server` governance, policy, post, realm, feedback, and auth-boundary tests. Targeted isolated files passed; broader post service and auth-public files retain unrelated baseline failures.
+- [x] 9.3 Run targeted `package/api` tests for governance clients/hooks.
+- [x] 9.4 Run targeted `package/app` tests or Storybook checks for staff console routes.
+- [x] 9.5 Run `bun run check:convention`.
+- [x] 9.6 Run `bun run format:check`.
+- [x] 9.7 Run `openspec validate complete-platform-authorization --strict`.
