@@ -103,9 +103,9 @@
 ## 12. Verification
 
 - [x] 12.1 Run `bun --filter=@rezics/contract test` or the package's targeted contract test command.
-- [ ] 12.2 Run `bun --filter=@rezics/server test` for unit-work, post, shelf, tag, and realm rename coverage.
-- [ ] 12.3 Run `bun --filter=@rezics/search test` for inherited tag and grouped search behavior.
-- [ ] 12.4 Run `bun --filter=@rezics/api test` for API clients and query keys.
+- [x] 12.2 Run `bun --filter=@rezics/server test` for unit-work, post, shelf, tag, and realm rename coverage.
+- [x] 12.3 Run `bun --filter=@rezics/search test` for inherited tag and grouped search behavior.
+- [x] 12.4 Run `bun --filter=@rezics/api test` for API clients and query keys.
 - [x] 12.5 Run targeted app tests for book detail, release selector, language switcher, community feed, and shelf rendering.
 - [x] 12.6 Run `bun run check:convention`.
 - [x] 12.7 Run `bun run format:check`.
