@@ -5,6 +5,7 @@ import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { publicUserSchema } from "./unit";
+import { unitWorkRoleSchema } from "./unit-work";
 
 // ============================================================
 // POST KIND
@@ -77,6 +78,8 @@ export const postDTOSchema = t.Object({
   author: t.Optional(publicUserSchema),
   targetUnitId: t.Optional(t.Nullable(t.String())),
   realmUnitId: t.Optional(t.Nullable(t.String())),
+  workUnitIds: t.Optional(t.Array(t.String())),
+  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   content: t.Optional(t.Nullable(contentDocSchema)),
   rootPostUnitId: t.Optional(t.Nullable(t.String())),
   parentPostUnitId: t.Optional(t.Nullable(t.String())),
@@ -109,6 +112,10 @@ export const postListQuerySchema = t.Object({
   targetUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
+  /** Work Unit ID to list posts through UnitWork membership. */
+  workUnitId: t.Optional(t.String()),
+  /** UnitWork roles to include when querying a work-domain feed. */
+  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
   rootPostUnitId: t.Optional(t.String()),
@@ -149,6 +156,10 @@ export const postListBodySchema = t.Object({
   targetUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
+  /** Work Unit ID to list posts through UnitWork membership. */
+  workUnitId: t.Optional(t.String()),
+  /** UnitWork roles to include when querying a work-domain feed. */
+  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
   rootPostUnitId: t.Optional(t.String()),

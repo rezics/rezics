@@ -46,6 +46,8 @@ const realmUnitCreateMock = mock(async (args: any) => {
   }
   return args.data;
 });
+const unitWorkFindManyMock = mock(async (): Promise<any[]> => []);
+const unitWorkUpsertMock = mock(async (args: any) => args.create);
 const unitTagCreateMock = mock(async (args: any) => args.data);
 const unitTagFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationFindManyMock = mock(async (): Promise<any[]> => []);
@@ -74,6 +76,7 @@ const transactionMock = mock(async (fn: any) =>
       findFirst: postFindFirstMock,
     },
     unitRealm: { create: realmUnitCreateMock },
+    unitWork: { findMany: unitWorkFindManyMock, upsert: unitWorkUpsertMock },
     unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
     unitTranslation: { findMany: unitTranslationFindManyMock },
     book: { findUnique: bookFindUniqueMock },
@@ -105,6 +108,7 @@ Object.assign(prismaMock, {
     findFirst: postFindFirstMock,
   },
   unitRealm: { create: realmUnitCreateMock },
+  unitWork: { findMany: unitWorkFindManyMock, upsert: unitWorkUpsertMock },
   unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
   user: { findUnique: userFindUniqueMock },
 });
@@ -167,6 +171,9 @@ function resetMocks() {
   postFindUniqueOrThrowMock.mockClear();
   postFindFirstMock.mockClear();
   realmUnitCreateMock.mockClear();
+  unitWorkFindManyMock.mockClear();
+  unitWorkFindManyMock.mockResolvedValue([]);
+  unitWorkUpsertMock.mockClear();
   unitTagCreateMock.mockClear();
   unitTagFindManyMock.mockClear();
   unitTranslationFindManyMock.mockClear();
@@ -274,6 +281,58 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(unitTagCreateMock).toHaveBeenCalledTimes(1);
   });
 
+  test("registers review posts in target release work domains", async () => {
+    resetMocks();
+    unitWorkFindManyMock.mockResolvedValueOnce([{ workUnitId: "work-1" }]);
+
+    await service.create(
+      {
+        content: content("review"),
+        targetUnitId: "release-1",
+        kind: "REVIEW",
+      },
+      "user-1",
+    );
+
+    expect(unitWorkFindManyMock).toHaveBeenCalledWith({
+      where: {
+        unitId: "release-1",
+        role: "RELEASE",
+      },
+      select: { workUnitId: true },
+      distinct: ["workUnitId"],
+    });
+    expect(unitWorkUpsertMock).toHaveBeenCalledWith({
+      where: {
+        unitId_workUnitId_role: {
+          unitId: "post-1",
+          workUnitId: "work-1",
+          role: "REVIEW",
+        },
+      },
+      update: {},
+      create: {
+        unitId: "post-1",
+        workUnitId: "work-1",
+        role: "REVIEW",
+        displayPolicy: "PRIMARY",
+      },
+    });
+  });
+
+  test("does not register UnitWork rows for standalone targets", async () => {
+    resetMocks();
+    unitWorkFindManyMock.mockResolvedValueOnce([]);
+
+    await service.create(
+      { content: content("remark"), targetUnitId: "standalone-1" },
+      "user-1",
+    );
+
+    expect(unitWorkFindManyMock).toHaveBeenCalledTimes(1);
+    expect(unitWorkUpsertMock).not.toHaveBeenCalled();
+  });
+
   test("rejects invalid tag ids with 400", async () => {
     resetMocks();
     unitFindManyMock.mockResolvedValueOnce([{ id: "tag-1" }]);
@@ -318,6 +377,38 @@ describe("PostService.byRealm", () => {
     expect(result).toEqual({ posts: [], total: 0 });
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
       some: { realmUnitId: "realm-1" },
+    });
+  });
+
+  test("filters through UnitWork for work-domain feeds", async () => {
+    resetMocks();
+
+    await service.list({ workUnitId: "work-1", workRoles: ["REVIEW"] });
+
+    expect(firstPostFindManyArgs().where.unit.workMemberships).toEqual({
+      some: {
+        workUnitId: "work-1",
+        role: { in: ["REVIEW"] },
+      },
+    });
+  });
+
+  test("preserves targetUnitId as an exact-release filter with work domains", async () => {
+    resetMocks();
+
+    await service.list({
+      targetUnitId: "release-1",
+      workUnitId: "work-1",
+      workRoles: ["POST", "REVIEW"],
+    });
+
+    const where = firstPostFindManyArgs().where;
+    expect(where.targetUnitId).toBe("release-1");
+    expect(where.unit.workMemberships).toEqual({
+      some: {
+        workUnitId: "work-1",
+        role: { in: ["POST", "REVIEW"] },
+      },
     });
   });
 

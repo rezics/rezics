@@ -14,6 +14,8 @@ import {
   prisma,
   UnitStatus,
   UnitType,
+  UnitWorkDisplayPolicy,
+  UnitWorkRole,
 } from "#/prisma/client";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { serverJobProducer } from "@/job/job-boundary";
@@ -61,6 +63,12 @@ function enqueuePostFields(unitId: string, fields: Record<string, unknown>) {
   );
 }
 
+function postKindToWorkRole(kind: PostKindEnum | undefined): UnitWorkRole {
+  if (kind === PostKindEnum.REVIEW) return UnitWorkRole.REVIEW;
+  if (kind === PostKindEnum.WIKI) return UnitWorkRole.WIKI;
+  return UnitWorkRole.POST;
+}
+
 export class PostService {
   /**
    * List posts with support for flat and threaded modes.
@@ -93,6 +101,7 @@ export class PostService {
         : { unit: { ...publicUnitEligibilityWhere } };
 
     if (query.targetUnitId) where.targetUnitId = query.targetUnitId;
+    this.applyWorkDomainFilter(where, query.workUnitId, query.workRoles);
     if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
     if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
     if (query.authorUserId) where.authorUserId = query.authorUserId;
@@ -211,6 +220,7 @@ export class PostService {
     };
 
     if (opts.rootPostUnitId) where.rootPostUnitId = opts.rootPostUnitId;
+    this.applyWorkDomainFilter(where, opts.workUnitId, opts.workRoles);
     if (opts.parentPostUnitId) where.parentPostUnitId = opts.parentPostUnitId;
     if (opts.authorUserId) where.authorUserId = opts.authorUserId;
     if (opts.kind) where.kind = opts.kind;
@@ -436,6 +446,15 @@ export class PostService {
               },
             }),
           ),
+        );
+      }
+
+      if (targetUnitId) {
+        await this.registerTargetWorkMemberships(
+          tx,
+          created.unitId,
+          targetUnitId,
+          postKindToWorkRole(kind),
         );
       }
 
@@ -706,6 +725,65 @@ export class PostService {
       .split(",")
       .map((id: string) => id.trim())
       .filter(Boolean);
+  }
+
+  private applyWorkDomainFilter(
+    where: Prisma.PostWhereInput,
+    workUnitId?: string,
+    workRoles?: PostListQuery["workRoles"],
+  ) {
+    if (!workUnitId) return;
+
+    const roles = workRoles?.length
+      ? (workRoles as UnitWorkRole[])
+      : [UnitWorkRole.POST, UnitWorkRole.REVIEW, UnitWorkRole.WIKI];
+
+    where.unit = {
+      ...(where.unit && !Array.isArray(where.unit) ? where.unit : {}),
+      workMemberships: {
+        some: {
+          workUnitId,
+          role: { in: roles },
+        },
+      },
+    };
+  }
+
+  private async registerTargetWorkMemberships(
+    tx: Prisma.TransactionClient,
+    unitId: string,
+    targetUnitId: string,
+    role: UnitWorkRole,
+  ) {
+    const releaseMemberships = await tx.unitWork.findMany({
+      where: {
+        unitId: targetUnitId,
+        role: UnitWorkRole.RELEASE,
+      },
+      select: { workUnitId: true },
+      distinct: ["workUnitId"],
+    });
+
+    await Promise.all(
+      releaseMemberships.map((membership) =>
+        tx.unitWork.upsert({
+          where: {
+            unitId_workUnitId_role: {
+              unitId,
+              workUnitId: membership.workUnitId,
+              role,
+            },
+          },
+          update: {},
+          create: {
+            unitId,
+            workUnitId: membership.workUnitId,
+            role,
+            displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
+          },
+        }),
+      ),
+    );
   }
 }
 

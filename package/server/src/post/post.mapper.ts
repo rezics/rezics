@@ -12,6 +12,8 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     authorUserId: post.authorUserId,
     author: mapPublicUser(post.unit.user),
     targetUnitId: post.targetUnitId ?? null,
+    workUnitIds: (post.unit.workMemberships ?? []).map((row) => row.workUnitId),
+    workRoles: (post.unit.workMemberships ?? []).map((row) => row.role),
     content: post.content as PostDTO["content"],
     rootPostUnitId: post.rootPostUnitId ?? null,
     parentPostUnitId: post.parentPostUnitId ?? null,

@@ -23,9 +23,9 @@ import type { PostFilters } from "./post.types";
 export const postApi = {
   /**
    * List posts with optional filters
-   * Supports: targetUnitId, realmUnitId, rootPostUnitId, parentPostUnitId,
-   * subtreeRootPostUnitId, authorUserId, kind, mode, maxDepth, sort, start,
-   * cursor, limit
+   * Supports: targetUnitId, realmUnitId, workUnitId, workRoles,
+   * rootPostUnitId, parentPostUnitId, subtreeRootPostUnitId, authorUserId,
+   * kind, mode, maxDepth, sort, start, cursor, limit
    */
   list: async (filters?: PostFilters): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(`/post/list${buildQueryString(filters)}`);
@@ -112,6 +112,18 @@ export const postApi = {
   ): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(
       `/post/list${buildQueryString({ realmUnitId, ...filters })}`,
+    );
+  },
+
+  /**
+   * Get posts within a work domain while preserving targetUnitId as exact target filtering.
+   */
+  getByWork: async (
+    workUnitId: string,
+    filters?: PostFilters,
+  ): Promise<PostListResponse> => {
+    return apiFetch<PostListResponse>(
+      `/post/list${buildQueryString({ workUnitId, ...filters })}`,
     );
   },
 

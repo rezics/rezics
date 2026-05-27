@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
-import { excerptSourceSchema } from "./post";
+import {
+  postDTOSchema,
+  postListQuerySchema,
+  excerptSourceSchema,
+} from "./post";
 
 describe("excerptSourceSchema", () => {
   test("unit mode passes", () => {
@@ -49,5 +53,32 @@ describe("excerptSourceSchema", () => {
   test("unknown mode fails", () => {
     const v = { mode: "bogus", title: "x" };
     expect(Value.Check(excerptSourceSchema, v)).toBe(false);
+  });
+});
+
+describe("post work-domain contract fields", () => {
+  test("accepts work-domain DTO metadata", () => {
+    expect(
+      Value.Check(postDTOSchema, {
+        unitId: "post-1",
+        authorUserId: "user-1",
+        targetUnitId: "release-1",
+        realmUnitId: null,
+        workUnitIds: ["work-1"],
+        workRoles: ["REVIEW"],
+        content: null,
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts work-domain list filters while targetUnitId remains exact", () => {
+    expect(
+      Value.Check(postListQuerySchema, {
+        targetUnitId: "release-1",
+        workUnitId: "work-1",
+        workRoles: ["POST", "REVIEW"],
+        limit: 20,
+      }),
+    ).toBe(true);
   });
 });

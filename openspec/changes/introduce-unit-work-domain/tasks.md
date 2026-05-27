@@ -32,12 +32,12 @@
 
 ## 4. Interaction Target Projection
 
-- [ ] 4.1 Add post/review contract DTOs and list/search options for work-domain feed queries backed by `UnitWork` membership.
-- [ ] 4.2 Add service support for registering post/review Units in `UnitWork` when they target release-aware Units.
-- [ ] 4.3 Update post creation/update services to derive `UnitWork` content memberships from the target Unit's active release work membership.
-- [ ] 4.4 Update post list APIs to support work-domain feed queries through `UnitWork(workUnitId, role)`.
-- [ ] 4.5 Preserve exact-release post/review queries by `targetUnitId`.
-- [ ] 4.6 Add tests for work-domain feed, exact-release feed, and standalone targets with no work domain.
+- [x] 4.1 Add post/review contract DTOs and list/search options for work-domain feed queries backed by `UnitWork` membership.
+- [x] 4.2 Add service support for registering post/review Units in `UnitWork` when they target release-aware Units.
+- [x] 4.3 Update post creation/update services to derive `UnitWork` content memberships from the target Unit's active release work membership.
+- [x] 4.4 Update post list APIs to support work-domain feed queries through `UnitWork(workUnitId, role)`.
+- [x] 4.5 Preserve exact-release post/review queries by `targetUnitId`.
+- [x] 4.6 Add tests for work-domain feed, exact-release feed, and standalone targets with no work domain.
 
 ## 5. Search Contracts And Index Settings
 
