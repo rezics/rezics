@@ -16,7 +16,6 @@ const unitFindUniqueMock = mock(async ({ where }: any): Promise<any> => {
     return {
       id: "work-1",
       type: "BOOK",
-      workUnitId: null,
       status: "PUBLISHED",
     };
   }
@@ -24,7 +23,6 @@ const unitFindUniqueMock = mock(async ({ where }: any): Promise<any> => {
     return {
       id: "work-2",
       type: "BOOK",
-      workUnitId: null,
       status: "PUBLISHED",
     };
   }
@@ -32,7 +30,6 @@ const unitFindUniqueMock = mock(async ({ where }: any): Promise<any> => {
     return {
       id: "nested-release",
       type: "BOOK",
-      workUnitId: "work-1",
       status: "PUBLISHED",
     };
   }
@@ -119,7 +116,7 @@ describe("UnitWorkService", () => {
     transactionMock.mockClear();
   });
 
-  test("creates release membership and syncs Unit.workUnitId", async () => {
+  test("creates release membership through UnitWork only", async () => {
     await service.create({
       unitId: "release-1",
       workUnitId: "work-1",
@@ -140,10 +137,7 @@ describe("UnitWorkService", () => {
         },
       }),
     );
-    expect(unitUpdateMock).toHaveBeenCalledWith({
-      where: { id: "release-1" },
-      data: { workUnitId: "work-1" },
-    });
+    expect(unitUpdateMock).not.toHaveBeenCalled();
     expect(enqueueMock.mock.calls.map((call) => call[0])).toMatchObject([
       {
         kind: "search.content.sync",
@@ -161,9 +155,9 @@ describe("UnitWorkService", () => {
   });
 
   test("rejects duplicate release membership in another work", async () => {
-    unitWorkFindFirstMock.mockImplementationOnce(async () => ({
-      workUnitId: "work-2",
-    }));
+    unitWorkFindFirstMock.mockImplementation(async ({ where }: any) =>
+      where.unitId === "release-1" ? { workUnitId: "work-2" } : null,
+    );
 
     await expect(
       service.create({
@@ -225,6 +219,10 @@ describe("UnitWorkService", () => {
   });
 
   test("rejects release-to-release nesting", async () => {
+    unitWorkFindFirstMock.mockImplementation(async ({ where }: any) =>
+      where.unitId === "nested-release" ? { workUnitId: "work-1" } : null,
+    );
+
     await expect(
       service.create({
         unitId: "release-1",

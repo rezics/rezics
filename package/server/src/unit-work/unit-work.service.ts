@@ -105,13 +105,6 @@ export class UnitWorkService {
         },
       });
 
-      if (role === RELEASE_ROLE) {
-        await tx.unit.update({
-          where: { id: input.unitId },
-          data: { workUnitId: input.workUnitId },
-        });
-      }
-
       return membership;
     });
 
@@ -148,12 +141,6 @@ export class UnitWorkService {
       await tx.unitWork.delete({
         where: { unitId_workUnitId_role: { unitId, workUnitId, role } },
       });
-      if (role === RELEASE_ROLE) {
-        await tx.unit.update({
-          where: { id: unitId },
-          data: { workUnitId: null },
-        });
-      }
     });
     await enqueueWorkDomainProjectionSync(unitId, workUnitId);
   }
@@ -200,25 +187,6 @@ export class UnitWorkService {
     return rows;
   }
 
-  async getReleaseDrift(): Promise<
-    Array<{
-      unitId: string | null;
-      legacyWorkUnitId: string | null;
-      unitWorkWorkUnitId: string | null;
-      status: string;
-    }>
-  > {
-    return prisma.$queryRaw`
-      SELECT
-        "unitId",
-        "legacyWorkUnitId",
-        "unitWorkWorkUnitId",
-        "status"
-      FROM "UnitWorkReleaseDrift"
-      ORDER BY "unitId" ASC NULLS LAST
-    `;
-  }
-
   private async assertValidMembership(
     unitId: string,
     workUnitId: string,
@@ -237,7 +205,7 @@ export class UnitWorkService {
       }),
       prisma.unit.findUnique({
         where: { id: workUnitId },
-        select: { id: true, type: true, workUnitId: true, status: true },
+        select: { id: true, type: true, status: true },
       }),
     ]);
 
@@ -249,11 +217,6 @@ export class UnitWorkService {
         code: "work_unit_not_found",
       });
     }
-    if (workUnit.workUnitId !== null) {
-      throw new AppError(400, "Work Unit cannot itself be a release", {
-        code: "unit_work_nested_release",
-      });
-    }
     if (role === RELEASE_ROLE && unit.type !== workUnit.type) {
       throw new AppError(400, "Release and work Unit types must match", {
         code: "unit_work_type_mismatch",
@@ -263,6 +226,17 @@ export class UnitWorkService {
       throw new AppError(400, "Deleted Unit cannot be used as a work domain", {
         code: "unit_work_deleted_work",
       });
+    }
+    if (role === RELEASE_ROLE) {
+      const workUnitReleaseMembership = await prisma.unitWork.findFirst({
+        where: { unitId: workUnitId, role: RELEASE_ROLE },
+        select: { workUnitId: true },
+      });
+      if (workUnitReleaseMembership) {
+        throw new AppError(400, "Work Unit cannot itself be a release", {
+          code: "unit_work_nested_release",
+        });
+      }
     }
   }
 }

@@ -152,9 +152,8 @@ model Unit {
   /// at an owner Unit's id for owner-scoped sub-resources (e.g. shelves under
   /// a user). NOT NULL, no FK constraint declared (matches the polymorphic-
   /// shaped-column convention used by ShelfUnit / ShelfItem).
-  slugScope  String   @db.Uuid
-  workUnitId String?  @db.Uuid
-  userId     String?  @db.Uuid
+  slugScope String  @db.Uuid
+  userId    String? @db.Uuid
 
   defaultLanguage   String? @db.VarChar(16)
   /// Language-independent units (e.g. TAG). When true, the unit bypasses
@@ -186,15 +185,6 @@ model Unit {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   publishedAt DateTime?
-
-  /**
-   * Self-relation: work/release.
-   * Work and Release are parallel entities. Work (a) is the version selected by Rezics.
-   * UnitTranslation caches translations derived from the Release version, while the actual content still comes from the Release (chapters, etc.).
-   * A Release can also produce translated Releases. Work should still point to Work (a).
-   */
-  work     Unit?  @relation("WorkRelease", fields: [workUnitId], references: [id], onDelete: SetNull)
-  releases Unit[] @relation("WorkRelease")
 
   // Cross-user work-release claim flow (see WorkLinkClaim).
   releaseClaims WorkLinkClaim[] @relation("WorkLinkClaimRelease")
@@ -283,7 +273,6 @@ model Unit {
   @@unique([slugScope, slug])
   @@unique([translationGroupId, defaultLanguage])
   @@index([type, status, createdAt])
-  @@index([workUnitId])
   @@index([userId, createdAt])
   @@index([status, visibility])
   @@index([defaultLanguage])

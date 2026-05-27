@@ -13,6 +13,8 @@ import {
   UnitStatus,
   type UnitType,
   type UnitVisibility,
+  UnitWorkDisplayPolicy,
+  UnitWorkRole,
 } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { pickSlugScope } from "@/infra/slug-scopes";
@@ -121,9 +123,7 @@ export function buildUnitWhereClause(
     .filter(Boolean);
   if (userList.length > 0) andWhere.push({ userId: { in: userList } });
 
-  // Filter release-aware work membership through canonical UnitWork. The legacy
-  // Unit.workUnitId column remains synchronized for migration compatibility,
-  // but list semantics should read UnitWork.
+  // Filter release-aware work membership through canonical UnitWork.
   if (options.workUnitId?.trim()) {
     andWhere.push({
       workMemberships: {
@@ -254,44 +254,59 @@ export class UnitService {
   /** Create a Unit with optional translations */
   async create(input: CreateUnitInput): Promise<UnitWithRelations> {
     const type = input.type as UnitType;
-    const unit = await prisma.unit.create({
-      data: {
-        userId: input.userId,
-        type,
-        slugScope: pickSlugScope(type, input.userId),
-        status: (input.status as UnitStatus) ?? UnitStatus.DRAFT,
-        visibility: (input.visibility as UnitVisibility) ?? undefined,
-        workUnitId: input.workUnitId ?? undefined,
-        defaultLanguage: input.defaultLanguage ?? undefined,
-        isLanguageNeutral: input.isLanguageNeutral ?? false,
-        rating: (input.rating as ContentRating | undefined) ?? undefined,
-        aiDisclosureMode:
-          (input.aiDisclosureMode as AiDisclosureMode | undefined) ?? undefined,
-        aiDisclosureDetails:
-          input.aiDisclosureDetails === undefined
-            ? undefined
-            : ((input.aiDisclosureDetails ?? null) as Prisma.InputJsonValue),
-        licenseSlug: assertLicenseSlug(input.licenseSlug) ?? undefined,
-        extra: (input.extra ?? null) as Prisma.InputJsonValue,
-        publishedAt: input.publishedAt
-          ? new Date(input.publishedAt as any)
-          : undefined,
-        translations:
-          input.translations && input.translations.length > 0
-            ? {
-                create: input.translations.map((tr) => ({
-                  language: tr.language,
-                  title: tr.title ?? undefined,
-                  subtitle: tr.subtitle ?? undefined,
-                  summary: tr.summary ?? undefined,
-                  description: nullableContentDocJson(tr.description),
-                  extra: (tr.extra ?? null) as Prisma.InputJsonValue,
-                  sourceUnitId: tr.sourceUnitId ?? undefined,
-                })),
-              }
+    const unit = await prisma.$transaction(async (tx) => {
+      const created = await tx.unit.create({
+        data: {
+          userId: input.userId,
+          type,
+          slugScope: pickSlugScope(type, input.userId),
+          status: (input.status as UnitStatus) ?? UnitStatus.DRAFT,
+          visibility: (input.visibility as UnitVisibility) ?? undefined,
+          defaultLanguage: input.defaultLanguage ?? undefined,
+          isLanguageNeutral: input.isLanguageNeutral ?? false,
+          rating: (input.rating as ContentRating | undefined) ?? undefined,
+          aiDisclosureMode:
+            (input.aiDisclosureMode as AiDisclosureMode | undefined) ??
+            undefined,
+          aiDisclosureDetails:
+            input.aiDisclosureDetails === undefined
+              ? undefined
+              : ((input.aiDisclosureDetails ?? null) as Prisma.InputJsonValue),
+          licenseSlug: assertLicenseSlug(input.licenseSlug) ?? undefined,
+          extra: (input.extra ?? null) as Prisma.InputJsonValue,
+          publishedAt: input.publishedAt
+            ? new Date(input.publishedAt as any)
             : undefined,
-      },
-      include: unitInclude,
+          translations:
+            input.translations && input.translations.length > 0
+              ? {
+                  create: input.translations.map((tr) => ({
+                    language: tr.language,
+                    title: tr.title ?? undefined,
+                    subtitle: tr.subtitle ?? undefined,
+                    summary: tr.summary ?? undefined,
+                    description: nullableContentDocJson(tr.description),
+                    extra: (tr.extra ?? null) as Prisma.InputJsonValue,
+                    sourceUnitId: tr.sourceUnitId ?? undefined,
+                  })),
+                }
+              : undefined,
+        },
+      });
+      if (input.workUnitId) {
+        await tx.unitWork.create({
+          data: {
+            unitId: created.id,
+            workUnitId: input.workUnitId,
+            role: UnitWorkRole.RELEASE,
+            displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
+          },
+        });
+      }
+      return tx.unit.findUniqueOrThrow({
+        where: { id: created.id },
+        include: unitInclude,
+      });
     });
     await enqueueContentCommand(SEARCH_COMMAND_KINDS.contentSync, unit.id);
     return hydrateUnitOwnerUserSlugRow(unit as UnitWithRelations);
@@ -321,7 +336,6 @@ export class UnitService {
             : (assertLicenseSlug(input.licenseSlug) ?? undefined),
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? undefined,
-        workUnitId: input.workUnitId,
         extra: (input.extra ?? undefined) as Prisma.InputJsonValue | undefined,
         publishedAt: input.publishedAt
           ? new Date(input.publishedAt as any)
@@ -331,6 +345,24 @@ export class UnitService {
       },
       include: unitInclude,
     });
+
+    if (input.workUnitId !== undefined) {
+      await prisma.$transaction(async (tx) => {
+        await tx.unitWork.deleteMany({
+          where: { unitId, role: UnitWorkRole.RELEASE },
+        });
+        if (input.workUnitId) {
+          await tx.unitWork.create({
+            data: {
+              unitId,
+              workUnitId: input.workUnitId,
+              role: UnitWorkRole.RELEASE,
+              displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
+            },
+          });
+        }
+      });
+    }
 
     const patchFields: Record<string, any> = {};
     if (input.rating !== undefined) patchFields.rating = input.rating;

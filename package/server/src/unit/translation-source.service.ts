@@ -26,9 +26,9 @@ export class TranslationSourceError extends Error {
  * Set or clear `UnitTranslation.sourceUnitId` for `(workId, lang)`.
  *
  * Validations (per `unit-translation` spec):
- * - workUnit must exist and be a work (`workUnitId === null`)
+ * - workUnit must exist
  * - sourceUnitId, if set, must reference a release of this work
- *   (`releaseUnit.workUnitId === workId`)
+ *   through `UnitWork(role = RELEASE)`
  * - caller must have authority over the work
  *
  * Existing `title/subtitle/summary/description` fields are left untouched.
@@ -41,7 +41,7 @@ export async function setTranslationSource(
 ): Promise<TranslationSourceResponse> {
   const workUnit = await prisma.unit.findUnique({
     where: { id: workId },
-    select: { id: true, userId: true, workUnitId: true },
+    select: { id: true, userId: true },
   });
   if (!workUnit) {
     throw new TranslationSourceError(
@@ -50,14 +50,6 @@ export async function setTranslationSource(
       404,
     );
   }
-  if (workUnit.workUnitId !== null) {
-    throw new TranslationSourceError(
-      "NOT_A_WORK",
-      "Target unit is a release, not a work",
-      400,
-    );
-  }
-
   const authorized = await hasAuthorityOver(caller, {
     id: workUnit.id,
     userId: workUnit.userId,
@@ -73,9 +65,15 @@ export async function setTranslationSource(
   if (sourceUnitId !== null) {
     const release = await prisma.unit.findUnique({
       where: { id: sourceUnitId },
-      select: { workUnitId: true },
+      select: {
+        workMemberships: {
+          where: { workUnitId: workId, role: "RELEASE" },
+          select: { workUnitId: true },
+          take: 1,
+        },
+      },
     });
-    if (!release || release.workUnitId !== workId) {
+    if (!release || release.workMemberships.length === 0) {
       throw new TranslationSourceError(
         "RELEASE_NOT_OF_WORK",
         "sourceUnitId must reference a release of this work",

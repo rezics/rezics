@@ -102,7 +102,6 @@ async function resolveWorkMatch(
     select: {
       id: true,
       type: true,
-      workUnitId: true,
       translations: {
         select: { language: true, title: true, subtitle: true, summary: true },
         orderBy: { language: "asc" },
@@ -120,8 +119,7 @@ async function resolveWorkMatch(
     throw new Error(`Matched release is not a book: ${matchedReleaseUnitId}`);
   }
 
-  const existingWorkUnitId =
-    matched.workMemberships[0]?.workUnitId ?? matched.workUnitId ?? null;
+  const existingWorkUnitId = matched.workMemberships[0]?.workUnitId ?? null;
   if (existingWorkUnitId) {
     return { workUnitId: existingWorkUnitId, affectedUnitIds: [] };
   }
@@ -166,11 +164,6 @@ async function resolveWorkMatch(
       displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
     },
   });
-  await tx.unit.update({
-    where: { id: matchedReleaseUnitId },
-    data: { workUnitId: hiddenWork.unitId },
-  });
-
   return {
     workUnitId: hiddenWork.unitId,
     affectedUnitIds: [matchedReleaseUnitId, hiddenWork.unitId],
@@ -422,7 +415,6 @@ export class BookService {
                   ? undefined
                   : ((req.aiDisclosureDetails ??
                       null) as Prisma.InputJsonValue),
-              workUnitId: resolvedWorkUnitId,
               defaultLanguage: req.defaultLanguage ?? undefined,
               rating: (req.rating as ContentRating | undefined) ?? undefined,
               extra: undefined,

@@ -101,21 +101,6 @@ export const unitWorkApi = new Elysia({ prefix: "/unit-work" })
         tags: ["UnitWork"],
       },
     },
-  )
-  .get(
-    "/diagnostics/release-drift",
-    async (): Promise<{
-      drift: Awaited<ReturnType<typeof unitWorkService.getReleaseDrift>>;
-    }> => {
-      const drift = await unitWorkService.getReleaseDrift();
-      return { drift };
-    },
-    {
-      detail: {
-        summary: "List Unit.workUnitId and UnitWork release drift",
-        tags: ["UnitWork", "Diagnostics"],
-      },
-    },
   );
 
 export type UnitWorkApi = typeof unitWorkApi;

@@ -72,7 +72,6 @@ export class AdminWorkMergeService {
     const [
       sourceMemberships,
       targetMemberships,
-      legacyReleases,
       sourceTags,
       targetTags,
       sourceAliases,
@@ -85,11 +84,6 @@ export class AdminWorkMergeService {
       prisma.unitWork.findMany({
         where: { workUnitId: input.targetWorkUnitId },
         select: { unitId: true, role: true },
-      }),
-      prisma.unit.findMany({
-        where: { workUnitId: input.sourceWorkUnitId },
-        select: { id: true },
-        orderBy: { id: "asc" },
       }),
       prisma.unitTag.findMany({
         where: { unitId: input.sourceWorkUnitId },
@@ -135,7 +129,6 @@ export class AdminWorkMergeService {
       ...moves
         .filter((row) => row.role === UnitWorkRole.RELEASE)
         .map((row) => row.unitId),
-      ...legacyReleases.map((row) => row.id),
     ]);
     const contentMembershipUnitIds = unique(
       moves
@@ -157,7 +150,7 @@ export class AdminWorkMergeService {
       contentMembershipMoves: moves.filter(
         (row) => row.role !== UnitWorkRole.RELEASE,
       ),
-      legacyReleaseUnitIds: legacyReleases.map((row) => row.id),
+      legacyReleaseUnitIds: [],
       metadataCopy: {
         tags: {
           missing: sourceTagIds.filter((id) => !targetTagIds.has(id)),
@@ -266,11 +259,6 @@ export class AdminWorkMergeService {
           ...preview.releaseMembershipMoves,
           ...preview.contentMembershipMoves,
         ]);
-        await tx.unit.updateMany({
-          where: { id: { in: preview.legacyReleaseUnitIds } },
-          data: { workUnitId: current.targetWorkUnitId },
-        });
-
         const createdTagKeys = current.copyTagsRequested
           ? await this.copyMissingTags(
               tx,
@@ -355,14 +343,6 @@ export class AdminWorkMergeService {
         await this.revertMembershipMove(tx, move);
       }
 
-      await tx.unit.updateMany({
-        where: {
-          id: { in: current.movedLegacyReleaseUnitIds },
-          workUnitId: current.targetWorkUnitId,
-        },
-        data: { workUnitId: current.sourceWorkUnitId },
-      });
-
       const tagKeys = current.createdTagKeys
         .map(parseTagKey)
         .filter((key): key is { unitId: string; tagUnitId: string } =>
@@ -416,11 +396,11 @@ export class AdminWorkMergeService {
     const [sourceWork, targetWork] = await Promise.all([
       prisma.unit.findUnique({
         where: { id: sourceWorkUnitId },
-        select: { id: true, workUnitId: true },
+        select: { id: true },
       }),
       prisma.unit.findUnique({
         where: { id: targetWorkUnitId },
-        select: { id: true, workUnitId: true },
+        select: { id: true },
       }),
     ]);
 
@@ -428,15 +408,6 @@ export class AdminWorkMergeService {
       throw new AppError(404, "Source or target work Unit not found", {
         code: "admin_work_merge_work_not_found",
       });
-    }
-    if (sourceWork.workUnitId || targetWork.workUnitId) {
-      throw new AppError(
-        400,
-        "Work merge endpoints require standalone work Units",
-        {
-          code: "admin_work_merge_release_as_work",
-        },
-      );
     }
   }
 

@@ -346,7 +346,7 @@ describe("BookService.create", () => {
         where: { id: "matched-release-1" },
       }),
     );
-    expect(createArgs.data.unit.create.workUnitId).toBe("work-1");
+    expect(createArgs.data.unit.create.workUnitId).toBeUndefined();
     expect(mockUpsertUnitWork).toHaveBeenCalledWith(
       expect.objectContaining({
         create: expect.objectContaining({
@@ -373,7 +373,6 @@ describe("BookService.create", () => {
         unit: {
           id: "book-1",
           userId: undefined,
-          workUnitId: "hidden-work-1",
           status: "PUBLISHED",
           visibility: "PUBLIC",
           rating: "GENERAL",
@@ -417,11 +416,8 @@ describe("BookService.create", () => {
         }),
       }),
     );
-    expect(mockUpdateUnit).toHaveBeenCalledWith({
-      where: { id: "matched-release-1" },
-      data: { workUnitId: "hidden-work-1" },
-    });
-    expect(releaseCreateArgs.data.unit.create.workUnitId).toBe("hidden-work-1");
+    expect(mockUpdateUnit).not.toHaveBeenCalled();
+    expect(releaseCreateArgs.data.unit.create.workUnitId).toBeUndefined();
   });
 
   test("create and edit projections produce identical editorial leaf paths", async () => {
@@ -622,7 +618,6 @@ describe("BookService.updateContentStructure (diff-based)", () => {
           nodeId: "n-child-1",
           title: "C1",
           contentUnitId: null,
-          chapterUnitId: null,
           noContent: false,
           rating: null,
         },
@@ -635,7 +630,6 @@ describe("BookService.updateContentStructure (diff-based)", () => {
           nodeId: "n-child-2",
           title: "C2",
           contentUnitId: null,
-          chapterUnitId: null,
           noContent: false,
           rating: null,
         },
@@ -770,8 +764,6 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       nodeId: "n-b",
       beforeContentUnitId: null,
       afterContentUnitId: "chapter-b",
-      beforeChapterUnitId: null,
-      afterChapterUnitId: "chapter-b",
     });
   });
 
@@ -797,7 +789,6 @@ describe("BookService.updateContentStructure (diff-based)", () => {
         op: "node.unlink",
         nodeId: "n-a",
         beforeContentUnitId: "chapter-a",
-        beforeChapterUnitId: "chapter-a",
       },
     ]);
   });

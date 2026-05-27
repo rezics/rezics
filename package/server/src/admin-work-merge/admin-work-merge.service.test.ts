@@ -17,10 +17,10 @@ let operationRows: any[] = [];
 
 function resetState() {
   unitRows.clear();
-  unitRows.set("source-work", { id: "source-work", workUnitId: null });
-  unitRows.set("target-work", { id: "target-work", workUnitId: null });
-  unitRows.set("release-1", { id: "release-1", workUnitId: "source-work" });
-  unitRows.set("release-2", { id: "release-2", workUnitId: "source-work" });
+  unitRows.set("source-work", { id: "source-work" });
+  unitRows.set("target-work", { id: "target-work" });
+  unitRows.set("release-1", { id: "release-1" });
+  unitRows.set("release-2", { id: "release-2" });
 
   unitWorkRows = [
     {
@@ -268,7 +268,7 @@ describe("AdminWorkMergeService", () => {
     expect(preview.contentMembershipMoves).toMatchObject([
       { unitId: "shelf-1", role: "SHELF", action: "dedupe" },
     ]);
-    expect(preview.legacyReleaseUnitIds).toEqual(["release-1", "release-2"]);
+    expect(preview.legacyReleaseUnitIds).toEqual([]);
     expect(preview.metadataCopy.tags).toEqual({
       missing: ["tag-a"],
       duplicates: ["tag-b"],
@@ -277,10 +277,7 @@ describe("AdminWorkMergeService", () => {
       missing: ["alias a"],
       duplicates: ["alias b"],
     });
-    expect(preview.repairScope.uswnReleaseUnitIds).toEqual([
-      "release-1",
-      "release-2",
-    ]);
+    expect(preview.repairScope.uswnReleaseUnitIds).toEqual(["release-1"]);
   });
 
   test("starts and reverts a merge without deleting source metadata", async () => {
@@ -288,7 +285,7 @@ describe("AdminWorkMergeService", () => {
       "./admin-work-merge.service"
     );
 
-    const operation = await adminWorkMergeService.start(
+    const queued = await adminWorkMergeService.start(
       {
         sourceWorkUnitId: "source-work",
         targetWorkUnitId: "target-work",
@@ -297,12 +294,13 @@ describe("AdminWorkMergeService", () => {
       },
       "admin-1",
     );
+    expect(queued.status).toBe("QUEUED");
+
+    const operation = await adminWorkMergeService.execute(queued.id);
 
     expect(operation.status).toBe("COMPLETED");
     expect(operation.createdTagKeys).toEqual(["target-work:tag-a"]);
     expect(operation.createdAliasIds).toEqual(["created-alias-3"]);
-    expect(unitRows.get("release-1")?.workUnitId).toBe("target-work");
-    expect(unitRows.get("release-2")?.workUnitId).toBe("target-work");
     expect(
       unitWorkRows.find(
         (row) => row.unitId === "release-1" && row.workUnitId === "target-work",
@@ -326,8 +324,6 @@ describe("AdminWorkMergeService", () => {
     );
 
     expect(reverted.status).toBe("REVERTED");
-    expect(unitRows.get("release-1")?.workUnitId).toBe("source-work");
-    expect(unitRows.get("release-2")?.workUnitId).toBe("source-work");
     expect(
       unitWorkRows.find(
         (row) => row.unitId === "shelf-1" && row.workUnitId === "source-work",

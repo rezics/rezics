@@ -116,7 +116,7 @@ const visibleUnitTagsInclude = {
 async function isContentPatchEligible(unitId: string): Promise<boolean> {
   const unit = await getSearchPrismaClient().unit.findUnique({
     where: { id: unitId },
-    select: { type: true, status: true, visibility: true, workUnitId: true },
+    select: { type: true, status: true, visibility: true },
   });
   return isPublicIndexableContentUnit(unit);
 }
@@ -127,7 +127,6 @@ export function isPublicIndexableContentUnit(
         type: string;
         status: string;
         visibility: string;
-        workUnitId?: string | null;
       }
     | null
     | undefined,
@@ -274,7 +273,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const workMemberships: any[] = unit.workMemberships ?? [];
   const releaseMembership =
     workMemberships.find((membership) => membership.role === "RELEASE") ?? null;
-  const workUnitId = releaseMembership?.workUnitId ?? unit.workUnitId ?? null;
+  const workUnitId = releaseMembership?.workUnitId ?? null;
   const workTagRows: any[] = (releaseMembership?.work?.unitTags ?? []).filter(
     isSearchVisibleScoredRow,
   );

@@ -48,13 +48,13 @@ function mapTranslation(
 export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
   const unit = book.unit;
   const workMembership = unit.workMemberships?.[0];
-  const uswn = workMembership?.workUnitId ?? unit.workUnitId ?? null;
+  const uswn = workMembership?.workUnitId ?? null;
 
   return {
     unitId: book.unitId,
     userId: unit.userId,
     user: mapPublicUser(unit.user),
-    workUnitId: unit.workUnitId ?? undefined,
+    workUnitId: workMembership?.workUnitId ?? undefined,
     metadata: { uswn },
     status: unit.status,
     visibility: unit.visibility,

@@ -283,22 +283,16 @@ export async function executeAdminWorkMerge(
   });
 
   try {
-    const [sourceMemberships, targetMemberships, legacyReleases] =
-      await Promise.all([
-        prisma.unitWork.findMany({
-          where: { workUnitId: operation.sourceWorkUnitId },
-          orderBy: [{ role: "asc" }, { unitId: "asc" }],
-        }),
-        prisma.unitWork.findMany({
-          where: { workUnitId: operation.targetWorkUnitId },
-          select: { unitId: true, role: true },
-        }),
-        prisma.unit.findMany({
-          where: { workUnitId: operation.sourceWorkUnitId },
-          select: { id: true },
-          orderBy: { id: "asc" },
-        }),
-      ]);
+    const [sourceMemberships, targetMemberships] = await Promise.all([
+      prisma.unitWork.findMany({
+        where: { workUnitId: operation.sourceWorkUnitId },
+        orderBy: [{ role: "asc" }, { unitId: "asc" }],
+      }),
+      prisma.unitWork.findMany({
+        where: { workUnitId: operation.targetWorkUnitId },
+        select: { unitId: true, role: true },
+      }),
+    ]);
 
     const targetKeys = new Set(
       targetMemberships.map((row) => `${row.unitId}:${row.role}`),
@@ -313,7 +307,7 @@ export async function executeAdminWorkMerge(
 
     await updateProgress(prisma, operationId, {
       plannedMembershipMoves: plannedMoves.length,
-      plannedLegacyReleaseMoves: legacyReleases.length,
+      plannedLegacyReleaseMoves: 0,
     });
 
     const movedKeys = new Set(
@@ -326,27 +320,7 @@ export async function executeAdminWorkMerge(
       movedKeys.add(key);
     }
 
-    const legacyReleaseIds = legacyReleases.map((row) => row.id);
-    const movedLegacy = unique([
-      ...operation.movedLegacyReleaseUnitIds,
-      ...legacyReleaseIds,
-    ]);
-    if (legacyReleaseIds.length > 0) {
-      await prisma.unit.updateMany({
-        where: { id: { in: legacyReleaseIds } },
-        data: { workUnitId: operation.targetWorkUnitId },
-      });
-      await prisma.adminWorkMergeOperation.update({
-        where: { id: operationId },
-        data: {
-          movedLegacyReleaseUnitIds: movedLegacy,
-          itemProgress: progressJson({
-            ...readProgress(operation),
-            legacyReleaseMovesCompleted: movedLegacy.length,
-          }),
-        },
-      });
-    }
+    const movedLegacy: string[] = [];
 
     const latest = await prisma.adminWorkMergeOperation.findUniqueOrThrow({
       where: { id: operationId },
@@ -366,7 +340,6 @@ export async function executeAdminWorkMerge(
       operation.sourceWorkUnitId,
       operation.targetWorkUnitId,
       ...plannedMoves.map((row) => row.unitId),
-      ...legacyReleaseIds,
     ]);
     const repairCommandCount = await enqueueRepair(
       command,
