@@ -192,7 +192,6 @@ export function RealmPage({
             </span>
           )}
         </div>
-        <RuleSection postUnitId={realm.extra?.rule ?? null} />
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-4">
@@ -210,6 +209,7 @@ export function RealmPage({
         <TabsContent value="feed">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
             <div className="flex min-w-0 flex-col gap-4">
+              <RuleSection postUnitId={realm.extra?.rule ?? null} />
               <div className="flex flex-col gap-3">
                 <RealmFeedSortSwitcher
                   value={feedSort}
