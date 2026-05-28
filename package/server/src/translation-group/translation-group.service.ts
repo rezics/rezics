@@ -20,6 +20,16 @@ function enqueuePostSync(postId: string) {
   );
 }
 
+function enqueueContentSync(unitId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentSync,
+      { unitId },
+      { type: "server", service: "translation-group" },
+    ),
+  );
+}
+
 export class TranslationGroupService {
   /**
    * Attach a new POST translation to (the group containing) an existing POST.
@@ -64,6 +74,7 @@ export class TranslationGroupService {
 
     const result = await prisma.$transaction(async (tx) => {
       let groupId = existing.translationGroupId;
+      const contentUnitIdsToSync = new Set<string>();
 
       if (!groupId) {
         const group = await tx.translationGroup.create({
@@ -76,6 +87,7 @@ export class TranslationGroupService {
           where: { id: existing.id },
           data: { translationGroupId: groupId },
         });
+        contentUnitIdsToSync.add(existing.id);
 
         await tx.unitSupportLanguage.upsert({
           where: {
@@ -132,11 +144,21 @@ export class TranslationGroupService {
           supportedLanguages: { push: input.language },
         },
       });
+      contentUnitIdsToSync.add(newUnit.id);
 
-      return { newUnitId: newUnit.id, groupId };
+      return {
+        newUnitId: newUnit.id,
+        groupId,
+        contentUnitIdsToSync: [...contentUnitIdsToSync],
+      };
     });
 
-    await enqueuePostSync(result.newUnitId);
+    await Promise.all([
+      enqueuePostSync(result.newUnitId),
+      ...result.contentUnitIdsToSync.map((unitId) =>
+        enqueueContentSync(unitId),
+      ),
+    ]);
 
     return result;
   }
@@ -189,7 +211,7 @@ export class TranslationGroupService {
       });
     });
 
-    await enqueuePostSync(unitId);
+    await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
   }
 
   /**

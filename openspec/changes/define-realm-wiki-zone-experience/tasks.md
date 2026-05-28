@@ -60,7 +60,7 @@
 - [x] 6.2 Ensure content search/index documents expose or can join translation group identifiers needed by wiki Zone sections.
 - [x] 6.3 Add entity subject filters needed for wiki Zone entity collection sections.
 - [x] 6.4 Add tag and realm tag filters needed for tag collection sections.
-- [ ] 6.5 Add bounded repair jobs or sync hooks when work realm context, UnitRealm membership, wiki tags, subject attribution, or translation groups change.
+- [x] 6.5 Add bounded repair jobs or sync hooks when work realm context, UnitRealm membership, wiki tags, subject attribution, or translation groups change.
 - [x] 6.6 Add search tests for realm-scoped wiki listing, translation group filtering, and permission-safe hidden/private wiki exclusion.
 
 ## 7. Frontend Realm Surfaces
