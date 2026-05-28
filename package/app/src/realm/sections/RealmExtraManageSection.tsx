@@ -26,6 +26,7 @@ import type {
 } from "@rezics/contract";
 import {
   common_clear,
+  common_cancel,
   common_delete,
   common_disabled,
   common_down,
@@ -91,6 +92,12 @@ import {
 } from "@rezics/i18n/messages";
 import {
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   Input,
   Label,
   Select,
@@ -917,6 +924,9 @@ function TagTreeEditor({
   const [headerLabel, setHeaderLabel] = useState("");
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(
+    null,
+  );
   const setValue = useSetRealmExtraValueMutation();
   const searchTerm = search.trim();
   const { data: searchData } = useQuery(tagQueries.search(searchTerm));
@@ -963,6 +973,16 @@ function TagTreeEditor({
       setError(message);
       toast.error(message);
     }
+  };
+
+  const pendingDeleteNode =
+    pendingDeleteIndex === null ? null : (nodes[pendingDeleteIndex] ?? null);
+  const confirmDeleteNode = () => {
+    if (pendingDeleteIndex === null) return;
+    setNodes((current) =>
+      current.filter((_, index) => index !== pendingDeleteIndex),
+    );
+    setPendingDeleteIndex(null);
   };
 
   return (
@@ -1019,9 +1039,7 @@ function TagTreeEditor({
               type="button"
               size="sm"
               variant="destructive"
-              onClick={() =>
-                setNodes((current) => current.filter((_, i) => i !== index))
-              }
+              onClick={() => setPendingDeleteIndex(index)}
             >
               {common_delete()}
             </Button>
@@ -1088,6 +1106,32 @@ function TagTreeEditor({
           {realm_save_tag_tree()}
         </Button>
       </div>
+
+      <Dialog
+        open={pendingDeleteIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteIndex(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete tag tree item?</DialogTitle>
+            <DialogDescription>
+              {pendingDeleteNode
+                ? `This removes "${nodeLabel(pendingDeleteNode)}" from the tag tab tree. Save the tag tree to publish the change.`
+                : "This removes the selected tag tree item. Save the tag tree to publish the change."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPendingDeleteIndex(null)}>
+              {common_cancel()}
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteNode}>
+              {common_delete()}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

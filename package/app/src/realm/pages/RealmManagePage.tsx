@@ -29,6 +29,7 @@ import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PinboardAdminSection } from "@/pinboard";
 import { unitHref } from "@/shared/ui/link";
 import {
@@ -58,7 +59,12 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const m = useMessage(i18nMessages);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
+  const {
+    data: realm,
+    error: realmError,
+    isError: realmIsError,
+    isLoading,
+  } = useQuery(realmDetailQuery(realmId));
   const { data: membership, isLoading: membershipLoading } = useQuery(
     myRealmMembershipQuery(realmId),
   );
@@ -176,8 +182,38 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
     );
   }
 
+  if (realmIsError) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-8">
+        <QueryErrorDisplay error={realmError} />
+      </div>
+    );
+  }
+
+  if (!realm) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-8">
+        <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
+          Realm settings are unavailable for this realm.
+        </div>
+      </div>
+    );
+  }
+
   if (!allowed) {
-    return null;
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 py-8">
+        <div className="rounded-md bg-surface-subtle p-6">
+          <h1 className="text-lg font-semibold leading-ui text-text-primary">
+            Realm management unavailable
+          </h1>
+          <p className="mt-2 text-sm leading-body text-text-secondary">
+            You need owner, moderator, or staff permissions to manage this
+            realm.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const isDefaultRealm = realmId === getDefaultRealmId();
