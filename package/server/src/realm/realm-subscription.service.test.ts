@@ -483,6 +483,33 @@ describe("realmService.acknowledgeCurrentRule", () => {
   });
 });
 
+describe("realmService.getRulePolicy", () => {
+  test("returns the current rule reference and gates", async () => {
+    const updatedAt = new Date("2026-05-28T00:00:00.000Z");
+    prismaMock.realm = {
+      findUnique: mock(async () => ({
+        unitId: REALM,
+        extra: { rule: "rule-unit-1" },
+        ruleVersion: 3,
+        ruleRequireOnJoin: true,
+        ruleRequireOnPost: false,
+        ruleRequireOnUpdate: true,
+        rulePolicyUpdatedAt: updatedAt,
+      })),
+    };
+
+    await expect(realmService.getRulePolicy(REALM)).resolves.toEqual({
+      realmUnitId: REALM,
+      ruleUnitId: "rule-unit-1",
+      version: 3,
+      requireOnJoin: true,
+      requireOnPost: false,
+      requireOnUpdate: true,
+      updatedAt,
+    });
+  });
+});
+
 describe("realmService.updateRulePolicy", () => {
   test("updates the rule reference and acknowledgement gates", async () => {
     const updatedAt = new Date("2026-05-28T00:00:00.000Z");

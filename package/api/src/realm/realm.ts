@@ -58,6 +58,7 @@ export {
   realmInfiniteListQuery,
   realmListQuery,
   realmQueries,
+  realmRulePolicyQuery,
   realmSearchQuery,
   realmTagContextQuery,
 } from "./realm.queries";

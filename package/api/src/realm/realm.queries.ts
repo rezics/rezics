@@ -66,6 +66,13 @@ export const myRealmMembershipQuery = (realmUnitId: string) =>
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+export const realmRulePolicyQuery = (realmUnitId: string) =>
+  queryOptions({
+    queryKey: realmKeys.rules(realmUnitId),
+    queryFn: () => realmApi.getRulePolicy(realmUnitId),
+    staleTime: 1000 * 60 * 5,
+  });
+
 /**
  * Combined query options export
  */
@@ -102,5 +109,6 @@ export const realmQueries = {
   mine: myRealmsQuery,
   byMember: realmsByMemberQuery,
   myMembership: myRealmMembershipQuery,
+  rulePolicy: realmRulePolicyQuery,
   tagContext: realmTagContextQuery,
 };

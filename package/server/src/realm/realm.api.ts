@@ -769,6 +769,29 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       },
     },
   )
+  .get(
+    "/:unitId/rules",
+    async ({ params, status }): Promise<RealmRuleReferenceDTO | string> => {
+      try {
+        return await realmService.getRulePolicy(params.unitId);
+      } catch {
+        return status(404, "Realm not found");
+      }
+    },
+    {
+      params: realmParamsSchema,
+      response: {
+        200: t.Any(),
+        404: t.String(),
+      },
+      detail: {
+        summary: "Get realm rule policy",
+        description:
+          "Read the realm's current rule Unit reference, version, and acknowledgement requirements",
+        tags: ["Realms"],
+      },
+    },
+  )
   .post(
     "/:unitId/rules",
     async ({

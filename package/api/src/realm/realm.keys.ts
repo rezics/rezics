@@ -36,6 +36,12 @@ export const realmKeys = {
     [...realmKeys.all(), "members", realmUnitId] as const,
 
   /**
+   * Keys for realm rule policy reads
+   */
+  rules: (realmUnitId: string) =>
+    [...realmKeys.all(), "rules", realmUnitId] as const,
+
+  /**
    * Keys for realm content invalidation
    */
   units: (realmUnitId: string) =>

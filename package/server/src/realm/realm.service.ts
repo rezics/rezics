@@ -691,6 +691,34 @@ export class RealmService {
     };
   }
 
+  async getRulePolicy(realmUnitId: string): Promise<RealmRuleReferenceDTO> {
+    const row = await prisma.realm.findUnique({
+      where: { unitId: realmUnitId },
+      select: {
+        unitId: true,
+        extra: true,
+        ruleVersion: true,
+        ruleRequireOnJoin: true,
+        ruleRequireOnPost: true,
+        ruleRequireOnUpdate: true,
+        rulePolicyUpdatedAt: true,
+      },
+    });
+    if (!row) {
+      throw new Error("Realm not found");
+    }
+
+    return {
+      realmUnitId: row.unitId,
+      ruleUnitId: getRuleUnitIdFromExtra(row.extra),
+      version: row.ruleVersion,
+      requireOnJoin: row.ruleRequireOnJoin,
+      requireOnPost: row.ruleRequireOnPost,
+      requireOnUpdate: row.ruleRequireOnUpdate,
+      updatedAt: row.rulePolicyUpdatedAt ?? undefined,
+    };
+  }
+
   async updateRulePolicy(
     caller: RezicsSessionClaims,
     realmUnitId: string,

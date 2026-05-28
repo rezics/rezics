@@ -242,6 +242,12 @@ export const realmApi = {
     );
   },
 
+  getRulePolicy: async (
+    realmUnitId: string,
+  ): Promise<RealmRuleReferenceDTO> => {
+    return apiFetch<RealmRuleReferenceDTO>(`/realm/${realmUnitId}/rules`);
+  },
+
   updateRulePolicy: async (
     realmUnitId: string,
     input: UpdateRealmRulePolicyInput,

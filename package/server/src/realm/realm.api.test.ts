@@ -51,6 +51,14 @@ const updateRulePolicyMock = mock(async () => ({
   requireOnPost: false,
   requireOnUpdate: true,
 }));
+const getRulePolicyMock = mock(async () => ({
+  realmUnitId: "realm-1",
+  ruleUnitId: "rule-unit-1",
+  version: 2,
+  requireOnJoin: true,
+  requireOnPost: false,
+  requireOnUpdate: true,
+}));
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -95,6 +103,7 @@ mock.module("./realm.service", () => ({
     create: createRealmMock,
     createRealmTagApplication: createRealmTagApplicationMock,
     appendCommunityList: appendCommunityListMock,
+    getRulePolicy: getRulePolicyMock,
     getMember: getMemberMock,
     updateRulePolicy: updateRulePolicyMock,
     updateMemberRole: updateMemberRoleMock,
@@ -113,6 +122,7 @@ describe("realmApi", () => {
     createRealmMock.mockClear();
     createRealmTagApplicationMock.mockClear();
     appendCommunityListMock.mockClear();
+    getRulePolicyMock.mockClear();
     updateRulePolicyMock.mockClear();
     getMemberMock.mockClear();
     updateMemberRoleMock.mockClear();
@@ -265,6 +275,22 @@ describe("realmApi", () => {
       "pinboard",
       "unit-1",
     );
+  });
+
+  test("reads rule policy without privileged policy decision", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/rules"),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      realmUnitId: "realm-1",
+      ruleUnitId: "rule-unit-1",
+      version: 2,
+    });
+    expect(getRulePolicyMock).toHaveBeenCalledWith("realm-1");
+    expect(decideForIdentityMock).not.toHaveBeenCalled();
   });
 
   test("denies rule policy updates rejected by policy", async () => {

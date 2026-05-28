@@ -285,6 +285,9 @@ export function useUpdateRealmRulePolicyMutation(
         queryKey: realmKeys.detail(variables.realmUnitId),
       });
       queryClient.invalidateQueries({
+        queryKey: realmKeys.rules(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({
         queryKey: realmKeys.members(variables.realmUnitId),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
