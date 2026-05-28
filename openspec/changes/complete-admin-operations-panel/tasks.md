@@ -25,7 +25,7 @@
 ## 4. Data Integrity And Repair
 
 - [x] 4.1 Add admin APIs and clients for dry-run drift checks and repair jobs.
-- [ ] 4.2 Add repair surfaces for search projections, history outbox, work-domain membership, slugs/aliases, source-site attribution, and denormalized counters.
+- [x] 4.2 Add repair surfaces for search projections, history outbox, work-domain membership, slugs/aliases, source-site attribution, and denormalized counters.
 - [ ] 4.3 Route long-running repair through job-runner or durable operation state with progress, retries, and safe failures.
 - [ ] 4.4 Add audit logs for repair start, retry, cancel, completion, and failure.
 

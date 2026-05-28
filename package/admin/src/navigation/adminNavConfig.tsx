@@ -24,6 +24,7 @@ import {
 import {
   Activity as ActivityIcon,
   GitMerge as AccountTreeIcon,
+  Wrench as BuildIcon,
   ShieldUser as AdminPanelSettingsOutlinedIcon,
   BookMarked as CollectionsBookmarkIcon,
   LayoutDashboard as DashboardIcon,
@@ -253,6 +254,12 @@ export const adminNav = {
           label: () => "狀態觀測",
           to: "/meili/observability",
           icon: <ActivityIcon fontSize="small" />,
+        },
+        {
+          id: "search.repair",
+          label: () => "Repair jobs",
+          icon: <BuildIcon fontSize="small" />,
+          to: "/repair",
         },
         {
           id: "search.unit-meili",
