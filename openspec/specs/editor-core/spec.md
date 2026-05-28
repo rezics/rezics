@@ -1,4 +1,16 @@
-## ADDED Requirements
+# editor-core Specification
+
+## Purpose
+
+Defines the core CodeMirror 6 editor runtime that hosts all editing
+capabilities in the app: the `EditorPlugin` interface, the
+`createEditor` factory, the `<Editor />` React component, the
+`useEditor` hook, and the `EditorContext` for cross-component access.
+The core also owns three-layer keybinding resolution, the theme
+extension wrapper, and the fixed-height behavior that lets editors
+participate in resizable container layouts.
+
+## Requirements
 
 ### Requirement: Plugin interface contract
 The system SHALL define an `EditorPlugin` interface with the following fields: `name` (string, required), `extensions` (CM6 Extension or Extension array, optional), `keybindings` (KeyBinding array, optional), and `toolbar` (ToolbarItem array, optional). Plugin factories SHALL be functions returning an `EditorPlugin`.

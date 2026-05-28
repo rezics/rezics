@@ -1,4 +1,15 @@
-## ADDED Requirements
+# editor-cosmos-coverage Specification
+
+## Purpose
+
+Defines the React Cosmos fixture coverage that the editor package SHALL
+provide for visual review of the markdown editor, its preview pane, its
+toolbar, and the underlying plugin contracts. The fixtures document
+expected behavior across view modes, fullscreen, content shapes, and
+plugin combinations so reviewers can validate editor changes without
+running the full app.
+
+## Requirements
 
 ### Requirement: Markdown editor core fixtures
 

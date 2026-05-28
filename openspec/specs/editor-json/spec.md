@@ -1,4 +1,15 @@
-## ADDED Requirements
+# editor-json Specification
+
+## Purpose
+
+Defines the editor plugin set for editing JSON documents: a `json()`
+language/highlighting plugin, a `formatJson` command, a `jsonLint()`
+plugin for real-time parse errors, default keybindings, default
+toolbar items, and a bundled `jsonFull()` preset. The capability also
+owns how invalid JSON interacts with formatting (no-op + lint
+diagnostic).
+
+## Requirements
 
 ### Requirement: JSON syntax highlighting
 The system SHALL provide a `json()` plugin that enables JSON syntax highlighting using `@codemirror/lang-json`. The highlighting SHALL cover strings, numbers, booleans, null, property keys, brackets, and colons.

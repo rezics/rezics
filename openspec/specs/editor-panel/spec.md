@@ -1,4 +1,15 @@
-## ADDED Requirements
+# editor-panel Specification
+
+## Purpose
+
+Defines the `@rezics/ui` action-bar pieces that sit below an editor:
+the generic `EditorPanel` (left/right action slots), the composed
+`RezicsMarkdownEditor` wrapper (markdown editor + panel + image
+upload + submit/cancel), the composed `RezicsJsonEditor` wrapper (JSON
+editor + format + submit/cancel), and the `EditorView` ref plumbing
+that lets panel buttons dispatch commands into the underlying editor.
+
+## Requirements
 
 ### Requirement: EditorPanel component
 

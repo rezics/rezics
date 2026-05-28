@@ -1,4 +1,16 @@
-## ADDED Requirements
+# editor-scroll-sync Specification
+
+## Purpose
+
+Defines the bidirectional, line-based scroll synchronization between
+the CodeMirror editor and the markdown preview pane in dual-column
+view mode. The capability owns the source-line mapping, the loop
+prevention that keeps one pane's sync from triggering the other, the
+post-re-render scroll restoration that survives content edits, and
+the `useScrollSync` hook that encapsulates listener setup and
+teardown.
+
+## Requirements
 
 ### Requirement: Bidirectional line-based scroll sync in dual mode
 

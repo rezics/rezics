@@ -1,4 +1,15 @@
-## ADDED Requirements
+# editor-markdown Specification
+
+## Purpose
+
+Defines the editor plugin set for editing Markdown documents: a
+`markdown()` language/highlighting plugin, the formatting commands
+(`toggleBold`, `toggleItalic`, headings, lists, link/image/table
+inserters), the default keybindings, the default toolbar layout, and
+the bundled `markdownFull()` preset that composes mention, emoji, and
+preview sub-features when requested.
+
+## Requirements
 
 ### Requirement: Markdown syntax highlighting
 The system SHALL provide a `markdown()` plugin that enables Markdown syntax highlighting using `@codemirror/lang-markdown` and `@lezer/markdown`. The highlighting SHALL cover headings, bold, italic, code blocks, links, lists, blockquotes, and inline code.

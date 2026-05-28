@@ -1,4 +1,14 @@
-## ADDED Requirements
+# editor-image-insert Specification
+
+## Purpose
+
+Defines the `insertImageUrl(view, url, alt?)` command exported from
+`@rezics/editor` (and its `/markdown` subpath) that inserts a markdown
+image at the editor cursor or replaces the active selection. The
+capability owns the insertion behavior and the export surface; image
+upload UI and remote storage are out of scope.
+
+## Requirements
 
 ### Requirement: insertImageUrl command
 

@@ -112,19 +112,19 @@ For each of the 124 specs below, apply this edit recipe:
 
 Group the work into batches by prefix so each PR/commit stays reviewable.
 
-### B1. Batch: `editor-*` (8 files)
+### B1. Batch: `editor-*` (11 files) — done 2026-05-28
 
-- [ ] `editor-core`
-- [ ] `editor-cosmos-coverage`
-- [ ] `editor-emoji`
-- [ ] `editor-image-insert`
-- [ ] `editor-json`
-- [ ] `editor-markdown`
-- [ ] `editor-markdown-preview`
-- [ ] `editor-mention`
-- [ ] `editor-panel`
-- [ ] `editor-scroll-sync`
-- [ ] `editor-toolbar`
+- [x] `editor-core`
+- [x] `editor-cosmos-coverage`
+- [x] `editor-emoji`
+- [x] `editor-image-insert`
+- [x] `editor-json`
+- [x] `editor-markdown`
+- [x] `editor-markdown-preview`
+- [x] `editor-mention`
+- [x] `editor-panel`
+- [x] `editor-scroll-sync`
+- [x] `editor-toolbar`
 
 ### B2. Batch: `folio-*` (7 files)
 

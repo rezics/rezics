@@ -1,4 +1,16 @@
-## ADDED Requirements
+# editor-mention Specification
+
+## Purpose
+
+Defines the `@`-trigger mention plugin: when the user types `@` after
+whitespace/punctuation/line start, an autocomplete dropdown queries a
+consumer-supplied async data source and inserts the chosen mention
+into the document. The capability owns the trigger detection, the
+keyboard navigation contract, the default and custom insertion
+formats, and the optional custom item renderer; it does not own any
+application-specific data fetching.
+
+## Requirements
 
 ### Requirement: @-trigger mention autocomplete
 The system SHALL provide a `mention()` plugin that activates an autocomplete dropdown when the user types `@` preceded by a whitespace character, punctuation, or the start of a line. The plugin SHALL query a consumer-provided async data source with the text following `@` as the search query.

@@ -1,4 +1,15 @@
-## ADDED Requirements
+# editor-markdown-preview Specification
+
+## Purpose
+
+Defines the live Markdown preview pane that renders the editor's
+content as HTML via a `markdown-it` pipeline. The capability owns the
+side-by-side / toggle modes, debounced re-render, the
+`preserveFormatting` plugin that retains Rezics whitespace semantics,
+the preview toolbar items, and the `data-source-line` attribute
+injection that the scroll-sync plugin depends on.
+
+## Requirements
 
 ### Requirement: Markdown preview panel
 The system SHALL provide a `preview()` plugin that renders a live HTML preview of the editor's Markdown content. The preview SHALL be rendered using a `markdown-it` pipeline. The preview panel SHALL be implemented as a CM6 panel and support two modes: side-by-side (panel beside the editor) and toggle (panel replaces the editor content).

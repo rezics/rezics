@@ -1,4 +1,15 @@
-## ADDED Requirements
+# editor-toolbar Specification
+
+## Purpose
+
+Defines the `ToolbarItem` contract that editor plugins contribute and
+the two toolbar variants that render those items: the CM6 panel
+variant (rendered inside the EditorView DOM via `showPanel`) and the
+React variant (rendered outside the editor, communicating through
+`EditorContext`). The capability also owns the active-state contract
+and the disabled (`toolbar={false}`) configuration.
+
+## Requirements
 
 ### Requirement: ToolbarItem definition
 The system SHALL define a `ToolbarItem` type with fields: `name` (string), `label` (string), `icon` (optional, string or ReactNode), `action` (Command function receiving EditorView), `isActive` (optional, function receiving EditorState returning boolean), and `group` (optional, string for visual grouping). A separator SHALL be representable as a string literal `"|"`.

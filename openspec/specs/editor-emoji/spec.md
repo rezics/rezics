@@ -1,4 +1,14 @@
-## ADDED Requirements
+# editor-emoji Specification
+
+## Purpose
+
+Provides the editor plugin that wires an emoji toolbar button into the
+editor and lets a consumer supply its own picker UI. The plugin owns
+the open/close state, the cursor/selection insertion behavior, and the
+auto-close-on-scroll interaction; it does not bundle any emoji data or
+picker component.
+
+## Requirements
 
 ### Requirement: Emoji insertion plugin
 The system SHALL provide an `emoji()` plugin that manages emoji insertion into the editor. The plugin SHALL provide a toolbar button and an open/close state for a consumer-provided emoji picker UI.
