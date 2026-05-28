@@ -64,6 +64,7 @@ interface TxOps {
   memberFindUnique?: ReturnType<typeof mock>;
   realmUpdate?: ReturnType<typeof mock>;
   realmFindUnique?: ReturnType<typeof mock>;
+  ruleAckFindUnique?: ReturnType<typeof mock>;
   subFindUnique?: ReturnType<typeof mock>;
   subCreate?: ReturnType<typeof mock>;
   subDelete?: ReturnType<typeof mock>;
@@ -90,6 +91,9 @@ function installTx(ops: TxOps) {
   prismaMock.realm = {
     update: ops.realmUpdate ?? mock(async () => ({ memberCount: 1 })),
     findUnique: ops.realmFindUnique ?? mock(async () => ({ memberCount: 0 })),
+  };
+  prismaMock.realmRuleAcknowledgement = {
+    findUnique: ops.ruleAckFindUnique ?? mock(async () => null),
   };
   prismaMock.subscription = {
     findUnique: ops.subFindUnique ?? mock(async () => null),
@@ -147,6 +151,45 @@ describe("realmService.joinRealm", () => {
     expect(prismaMock.realm.update).toHaveBeenCalledTimes(1); // memberCount++ still
     expect(prismaMock.subscription.create).toHaveBeenCalledTimes(0); // no new sub
     expect(prismaMock.unit.update).toHaveBeenCalledTimes(0); // subscriberCount NOT bumped
+  });
+
+  test("requires current rule acknowledgement before joining when configured", async () => {
+    installTx({
+      realmFindUnique: mock(async () => ({
+        extra: { rule: "rule-unit-1" },
+        ruleVersion: 2,
+        ruleRequireOnJoin: true,
+        joinRequiresApproval: false,
+      })),
+      ruleAckFindUnique: mock(async () => null),
+    });
+
+    await expect(realmService.joinRealm(REALM, USER)).rejects.toThrow(
+      "Realm rules must be acknowledged before joining",
+    );
+    expect(prismaMock.realmMember.create).not.toHaveBeenCalled();
+  });
+
+  test("creates pending membership when join approval is required", async () => {
+    installTx({
+      realmFindUnique: mock(async () => ({
+        extra: {},
+        ruleVersion: 1,
+        ruleRequireOnJoin: false,
+        joinRequiresApproval: true,
+      })),
+    });
+
+    await realmService.joinRealm(REALM, USER);
+
+    expect(prismaMock.realmMember.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          state: "PENDING",
+          onboardingCompletedAt: null,
+        }),
+      }),
+    );
   });
 });
 

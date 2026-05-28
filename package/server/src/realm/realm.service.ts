@@ -353,11 +353,42 @@ export class RealmService {
     roleKey?: string,
   ): Promise<RealmMemberDTO> {
     const { member } = await prisma.$transaction(async (tx) => {
+      const realmPolicy = await tx.realm.findUnique({
+        where: { unitId: realmUnitId },
+        select: {
+          extra: true,
+          ruleVersion: true,
+          ruleRequireOnJoin: true,
+          joinRequiresApproval: true,
+        },
+      });
+      const ruleUnitId = getRuleUnitIdFromExtra(realmPolicy?.extra ?? null);
+      if (realmPolicy?.ruleRequireOnJoin && ruleUnitId) {
+        const acknowledgement = await tx.realmRuleAcknowledgement.findUnique({
+          where: {
+            realmUnitId_ruleUnitId_version_userId: {
+              realmUnitId,
+              ruleUnitId,
+              version: realmPolicy.ruleVersion,
+              userId,
+            },
+          },
+          select: { realmUnitId: true },
+        });
+        if (!acknowledgement) {
+          throw new Error("Realm rules must be acknowledged before joining");
+        }
+      }
+
       const member = await tx.realmMember.create({
         data: {
           realmUnitId,
           userId,
           roleKey: roleKey ?? "member",
+          state: realmPolicy?.joinRequiresApproval ? "PENDING" : "ACTIVE",
+          onboardingCompletedAt: realmPolicy?.joinRequiresApproval
+            ? null
+            : new Date(),
         },
       });
 
