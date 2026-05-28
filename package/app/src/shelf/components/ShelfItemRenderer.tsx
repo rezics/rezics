@@ -10,11 +10,12 @@ import type {
   UnitDTO,
   UnitTagDTO,
 } from "@rezics/contract";
-import { contentDocMarkdownFallback } from "@rezics/contract";
+import { contentDocMarkdownFallback, isLibraryKind } from "@rezics/contract";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { HorizontalBookCard } from "@/book-library/components/item/HorizontalBookCard";
 import { BookCard } from "@/book-library/components/item/VerticalBookCard";
+import { aspectRatioForKind } from "@/bookshelf-view";
 import { ExcerptCard } from "@/excerpt/components/item/ExcerptCard";
 import { PostCard } from "@/post";
 import { ReviewCard } from "@/review/components/item/ReviewCard";
@@ -53,6 +54,25 @@ function renderUnit(
   },
 ): React.ReactNode {
   const { unit, data } = enriched;
+
+  // Bookshelf (cover grid) view: render library kinds as cover-only cards and
+  // silently skip non-library kinds. Layout/columns are owned by the grid
+  // container; each item just renders a kind-aspect cover.
+  if (viewMode === "bookshelf") {
+    if (!isLibraryKind(unit.kind)) return null;
+    const book = data as BookDTO | undefined;
+    return (
+      <BookCard
+        title={book?.translations?.[0]?.title ?? unit.unitId}
+        author={book ? getBookAuthorName(book) || undefined : undefined}
+        coverUrl={book?.coverUrl ?? ""}
+        href={`/book/${unit.unitId}`}
+        showTitle
+        aspectRatio={aspectRatioForKind(unit.kind)}
+      />
+    );
+  }
+
   switch (unit.kind) {
     case "book": {
       const book = data as BookDTO | undefined;

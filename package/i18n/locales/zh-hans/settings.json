@@ -170,5 +170,6 @@
   "profile_follow": "跟随",
   "profile_followers_count": "{count}关注者",
   "profile_reactions_given": "已给出",
-  "profile_reactions_received": "收到的"
+  "profile_reactions_received": "收到的",
+  "bookshelf_use_my_settings": "使用我的设置"
 }
