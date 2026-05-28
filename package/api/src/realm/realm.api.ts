@@ -16,6 +16,7 @@ import type {
   PatchRealmTagApplicationInput,
   RealmListResponse,
   RealmMemberDTO,
+  RealmMembershipMeDTO,
   RealmResponse,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
@@ -113,8 +114,8 @@ export const realmApi = {
    */
   getMyMembership: async (
     realmUnitId: string,
-  ): Promise<RealmMemberDTO | null> => {
-    return apiFetch<RealmMemberDTO | null>(`/realm/${realmUnitId}/members/me`);
+  ): Promise<RealmMembershipMeDTO> => {
+    return apiFetch<RealmMembershipMeDTO>(`/realm/${realmUnitId}/members/me`);
   },
 
   /**

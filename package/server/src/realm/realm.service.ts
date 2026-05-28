@@ -3,6 +3,7 @@ import type {
   RealmDTO,
   RealmListQuery,
   RealmMemberDTO,
+  RealmMembershipMeDTO,
   UnitRealmDTO,
   UpdateRealmInput,
 } from "@rezics/contract";
@@ -75,6 +76,12 @@ function enqueueRealmMetadata(unitId: string, fields: Record<string, unknown>) {
       { type: "server", service: "realm" },
     ),
   );
+}
+
+function getRuleUnitIdFromExtra(extra: Prisma.JsonValue | null): string | null {
+  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
+  const rule = (extra as Record<string, unknown>).rule;
+  return typeof rule === "string" && rule.length > 0 ? rule : null;
 }
 
 export class RealmService {
@@ -519,6 +526,67 @@ export class RealmService {
     return mapRealmMemberToDTO(member, {
       capabilities: policyMembership?.capabilities ?? [],
     });
+  }
+
+  async getMembershipMe(
+    realmUnitId: string,
+    userId: string,
+  ): Promise<RealmMembershipMeDTO> {
+    const [member, realm, latestAcknowledgement] = await Promise.all([
+      this.getMember(realmUnitId, userId),
+      prisma.realm.findUnique({
+        where: { unitId: realmUnitId },
+        select: {
+          extra: true,
+          ruleVersion: true,
+          ruleRequireOnJoin: true,
+          ruleRequireOnPost: true,
+          ruleRequireOnUpdate: true,
+        },
+      }),
+      prisma.realmRuleAcknowledgement.findFirst({
+        where: { realmUnitId, userId },
+        orderBy: [{ acceptedAt: "desc" }, { version: "desc" }],
+      }),
+    ]);
+
+    const currentRuleUnitId = getRuleUnitIdFromExtra(realm?.extra ?? null);
+    const requiredVersion = currentRuleUnitId
+      ? (realm?.ruleVersion ?? null)
+      : null;
+    const requiresAcknowledgement = Boolean(
+      currentRuleUnitId &&
+        (realm?.ruleRequireOnJoin ||
+          realm?.ruleRequireOnPost ||
+          realm?.ruleRequireOnUpdate),
+    );
+    const acceptedCurrentRule = Boolean(
+      currentRuleUnitId &&
+        latestAcknowledgement?.ruleUnitId === currentRuleUnitId &&
+        requiredVersion !== null &&
+        latestAcknowledgement.version >= requiredVersion,
+    );
+
+    return {
+      realmUnitId,
+      userId,
+      member,
+      roleKey: member?.roleKey ?? null,
+      state: member?.state ?? null,
+      muted: member?.state === "muted",
+      banned: member?.state === "banned",
+      capabilities: member?.capabilities ?? [],
+      ruleAcknowledgement: {
+        currentRuleUnitId,
+        requiredVersion,
+        acceptedRuleUnitId: latestAcknowledgement?.ruleUnitId ?? null,
+        acceptedVersion: latestAcknowledgement?.version ?? null,
+        acceptedAt: latestAcknowledgement?.acceptedAt ?? null,
+        acceptedLanguage: latestAcknowledgement?.acceptedLanguage ?? null,
+        acknowledgementRequired:
+          requiresAcknowledgement && !acceptedCurrentRule,
+      },
+    };
   }
 
   // --- Content feed ---

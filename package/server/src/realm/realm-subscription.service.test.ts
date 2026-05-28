@@ -83,6 +83,7 @@ afterEach(() => {
   delete prismaMock.subscription;
   delete prismaMock.staffGrant;
   delete prismaMock.realmCapabilityGrant;
+  delete prismaMock.realmRuleAcknowledgement;
   delete prismaMock.unit;
 });
 
@@ -250,6 +251,103 @@ describe("realmService.getMember", () => {
           expiresAt: null,
         },
       ],
+    });
+  });
+});
+
+describe("realmService.getMembershipMe", () => {
+  test("returns state, capability hints, and stale rule acknowledgement metadata", async () => {
+    prismaMock.realmMember = {
+      findUnique: mock(async () => ({
+        realmUnitId: REALM,
+        userId: USER,
+        roleKey: "member",
+        state: "MUTED",
+        joinedAt: new Date("2026-05-28T00:00:00.000Z"),
+        updatedAt: new Date("2026-05-28T00:00:00.000Z"),
+      })),
+    };
+    prismaMock.staffGrant = {
+      findMany: mock(async () => []),
+    };
+    prismaMock.realmCapabilityGrant = {
+      findMany: mock(async () => []),
+    };
+    prismaMock.realm = {
+      findUnique: mock(async () => ({
+        extra: { rule: "rule-unit-2" },
+        ruleVersion: 1,
+        ruleRequireOnJoin: false,
+        ruleRequireOnPost: true,
+        ruleRequireOnUpdate: true,
+      })),
+    };
+    prismaMock.realmRuleAcknowledgement = {
+      findFirst: mock(async () => ({
+        realmUnitId: REALM,
+        ruleUnitId: "rule-unit-1",
+        version: 4,
+        userId: USER,
+        acceptedAt: new Date("2026-05-28T00:00:00.000Z"),
+        acceptedLanguage: "en",
+      })),
+    };
+
+    await expect(
+      realmService.getMembershipMe(REALM, USER),
+    ).resolves.toMatchObject({
+      realmUnitId: REALM,
+      userId: USER,
+      roleKey: "member",
+      state: "muted",
+      muted: true,
+      banned: false,
+      ruleAcknowledgement: {
+        currentRuleUnitId: "rule-unit-2",
+        requiredVersion: 1,
+        acceptedRuleUnitId: "rule-unit-1",
+        acceptedVersion: 4,
+        acceptedLanguage: "en",
+        acknowledgementRequired: true,
+      },
+    });
+  });
+
+  test("returns non-member metadata without requiring acknowledgement when no rule is configured", async () => {
+    prismaMock.realmMember = {
+      findUnique: mock(async () => null),
+    };
+    prismaMock.realm = {
+      findUnique: mock(async () => ({
+        extra: {},
+        ruleVersion: 1,
+        ruleRequireOnJoin: false,
+        ruleRequireOnPost: false,
+        ruleRequireOnUpdate: true,
+      })),
+    };
+    prismaMock.realmRuleAcknowledgement = {
+      findFirst: mock(async () => null),
+    };
+
+    await expect(
+      realmService.getMembershipMe(REALM, USER),
+    ).resolves.toMatchObject({
+      realmUnitId: REALM,
+      userId: USER,
+      member: null,
+      roleKey: null,
+      state: null,
+      muted: false,
+      banned: false,
+      capabilities: [],
+      ruleAcknowledgement: {
+        currentRuleUnitId: null,
+        requiredVersion: null,
+        acceptedRuleUnitId: null,
+        acceptedVersion: null,
+        acknowledgementRequired: false,
+      },
     });
   });
 });

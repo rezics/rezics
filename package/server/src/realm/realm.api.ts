@@ -2,6 +2,7 @@ import type {
   RealmDTO,
   RealmListResponse,
   RealmMemberDTO,
+  RealmMembershipMeDTO,
   RealmTagApplicationDTO,
   UnitRealmDTO,
 } from "@rezics/contract";
@@ -333,8 +334,8 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   // --- Membership routes ---
   .get(
     "/:unitId/members/me",
-    async ({ params, identity }): Promise<RealmMemberDTO | null> => {
-      return realmService.getMember(params.unitId, identity.userId);
+    async ({ params, identity }): Promise<RealmMembershipMeDTO> => {
+      return realmService.getMembershipMe(params.unitId, identity.userId);
     },
     {
       requireLogin: true,
@@ -342,7 +343,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       detail: {
         summary: "Get my membership",
         description:
-          "Get the current user's membership and role in a realm, or null if not a member",
+          "Get the current user's membership, capability hints, and rule acknowledgement state in a realm",
         tags: ["Realms"],
       },
     },

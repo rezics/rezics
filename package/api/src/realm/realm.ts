@@ -71,6 +71,7 @@ export type {
   RealmFormData,
   RealmListResponse,
   RealmMemberDTO,
+  RealmMembershipMeDTO,
   RealmResponse,
   RealmSortOption,
   RealmTagApplicationDTO,
