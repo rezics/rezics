@@ -43,6 +43,14 @@ const appendCommunityListMock = mock(async () => ({
   ok: true,
   unitIds: ["unit-1"],
 }));
+const updateRulePolicyMock = mock(async () => ({
+  realmUnitId: "realm-1",
+  ruleUnitId: "rule-unit-1",
+  version: 2,
+  requireOnJoin: true,
+  requireOnPost: false,
+  requireOnUpdate: true,
+}));
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -64,6 +72,7 @@ mock.module("@/governance", () => ({
     contentPin: "content.pin",
     create: "realm.create",
     memberRoleChange: "realm.member.role.change",
+    rulesUpdate: "realm.rules.update",
     tagVote: "tag.vote",
   },
   sitePolicyActions: {
@@ -87,6 +96,7 @@ mock.module("./realm.service", () => ({
     createRealmTagApplication: createRealmTagApplicationMock,
     appendCommunityList: appendCommunityListMock,
     getMember: getMemberMock,
+    updateRulePolicy: updateRulePolicyMock,
     updateMemberRole: updateMemberRoleMock,
   },
 }));
@@ -103,6 +113,7 @@ describe("realmApi", () => {
     createRealmMock.mockClear();
     createRealmTagApplicationMock.mockClear();
     appendCommunityListMock.mockClear();
+    updateRulePolicyMock.mockClear();
     getMemberMock.mockClear();
     updateMemberRoleMock.mockClear();
   });
@@ -253,6 +264,63 @@ describe("realmApi", () => {
       "realm-1",
       "pinboard",
       "unit-1",
+    );
+  });
+
+  test("denies rule policy updates rejected by policy", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/rules", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ruleUnitId: "rule-unit-1", version: 2 }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.text()).toBe("Denied by policy");
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "realm.rules.update",
+      realmMembership: {
+        realmUnitId: "realm-1",
+        role: "moderator",
+        capabilities: [],
+      },
+      target: {
+        kind: "realm-rules",
+        id: "realm-1",
+        realmUnitId: "realm-1",
+      },
+    });
+    expect(updateRulePolicyMock).not.toHaveBeenCalled();
+  });
+
+  test("allows rule policy updates approved by policy", async () => {
+    policyAllowed = true;
+
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/rules", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          ruleUnitId: "rule-unit-1",
+          version: 2,
+          requireOnJoin: true,
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(updateRulePolicyMock).toHaveBeenCalledWith(
+      currentIdentity,
+      "realm-1",
+      {
+        ruleUnitId: "rule-unit-1",
+        version: 2,
+        requireOnJoin: true,
+      },
     );
   });
 });

@@ -7,6 +7,7 @@ import type {
   RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
+  RealmRuleReferenceDTO,
   RealmTagApplicationDTO,
   UnitRealmDTO,
 } from "@rezics/contract";
@@ -27,6 +28,7 @@ import {
   realmListQuerySchema,
   realmParamsSchema,
   updateMemberRoleSchema,
+  updateRealmRulePolicySchema,
   updateRealmSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -147,6 +149,39 @@ async function assertRealmContentPinPolicy(input: {
     target: {
       kind: "realm-content-list",
       id: input.targetId,
+      realmUnitId: input.realmUnitId,
+    },
+  });
+  if (!decision.allowed) {
+    return input.status(
+      403,
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
+
+async function assertRealmRulesUpdatePolicy(input: {
+  identity: any;
+  status: any;
+  realmUnitId: string;
+}) {
+  const actorMember = await realmService.getMember(
+    input.realmUnitId,
+    input.identity.userId,
+  );
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: realmPolicyActions.rulesUpdate,
+    realmMembership: actorMember
+      ? {
+          realmUnitId: actorMember.realmUnitId,
+          role: actorMember.roleKey as never,
+          capabilities: actorMember.capabilities ?? [],
+        }
+      : null,
+    target: {
+      kind: "realm-rules",
+      id: input.realmUnitId,
       realmUnitId: input.realmUnitId,
     },
   });
@@ -730,6 +765,38 @@ export const realmApi = new Elysia({ prefix: "/realm" })
         summary: "Get my membership",
         description:
           "Get the current user's membership, capability hints, and rule acknowledgement state in a realm",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/rules",
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<RealmRuleReferenceDTO | string> => {
+      const denied = await assertRealmRulesUpdatePolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+      });
+      if (denied) return denied;
+      return realmService.updateRulePolicy(identity, params.unitId, body);
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      body: updateRealmRulePolicySchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
+      detail: {
+        summary: "Update realm rule policy",
+        description:
+          "Update the realm's current rule Unit reference, version, and acknowledgement requirements",
         tags: ["Realms"],
       },
     },

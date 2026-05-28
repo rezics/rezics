@@ -3,6 +3,7 @@ import type { GovernanceActionDefinition } from "./registry";
 
 export const realmPolicyActions = {
   create: "realm.create",
+  rulesUpdate: "realm.rules.update",
   queueDecide: "queue.realm.decide",
   memberRoleChange: "realm.member.role.change",
   memberCapabilityChange: "realm.member.capability.change",
@@ -17,6 +18,12 @@ export const realmActionDefinitions = [
   {
     action: realmPolicyActions.create,
     family: "realm",
+  },
+  {
+    action: realmPolicyActions.rulesUpdate,
+    requiredCapability: "queue.realm.decide",
+    family: "realm",
+    realmScoped: true,
   },
   {
     action: realmPolicyActions.queueDecide,

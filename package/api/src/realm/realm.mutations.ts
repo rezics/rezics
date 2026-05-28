@@ -15,11 +15,13 @@ import type {
   RealmMemberDTO,
   RealmResponse,
   RealmRuleAcknowledgementDTO,
+  RealmRuleReferenceDTO,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
   RealmTagContextUpdateResponse,
   UnitRealmDTO,
   UpdateMemberRoleInput,
+  UpdateRealmRulePolicyInput,
   UpdateRealmInput,
   UpdateRealmTagContextInput,
 } from "@rezics/contract";
@@ -256,6 +258,34 @@ export function useAcknowledgeRealmRulesMutation(
       });
       queryClient.invalidateQueries({
         queryKey: realmKeys.detail(variables.realmUnitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useUpdateRealmRulePolicyMutation(
+  options?: Omit<
+    UseMutationOptions<
+      RealmRuleReferenceDTO,
+      Error,
+      { realmUnitId: string; input: UpdateRealmRulePolicyInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, input }) =>
+      realmApi.updateRulePolicy(realmUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.detail(variables.realmUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: realmKeys.members(variables.realmUnitId),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -797,6 +827,7 @@ export const realmMutations = {
   useMute: useMuteRealmMutation,
   useUnmute: useUnmuteRealmMutation,
   useAcknowledgeRules: useAcknowledgeRealmRulesMutation,
+  useUpdateRulePolicy: useUpdateRealmRulePolicyMutation,
   useUpdateMemberRole: useUpdateMemberRoleMutation,
   useRemoveMember: useRemoveMemberMutation,
   useAddUnit: useAddUnitRealmMutation,

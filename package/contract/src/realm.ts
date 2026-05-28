@@ -153,6 +153,17 @@ export const acknowledgeRealmRuleSchema = t.Object({
 export type AcknowledgeRealmRuleInput =
   (typeof acknowledgeRealmRuleSchema)["static"];
 
+export const updateRealmRulePolicySchema = t.Object({
+  ruleUnitId: t.Optional(t.Nullable(t.String())),
+  version: t.Optional(t.Number()),
+  requireOnJoin: t.Optional(t.Boolean()),
+  requireOnPost: t.Optional(t.Boolean()),
+  requireOnUpdate: t.Optional(t.Boolean()),
+});
+
+export type UpdateRealmRulePolicyInput =
+  (typeof updateRealmRulePolicySchema)["static"];
+
 export const realmRuleAcknowledgementStatusSchema = t.Object({
   currentRuleUnitId: t.Nullable(t.String()),
   requiredVersion: t.Nullable(t.Number()),

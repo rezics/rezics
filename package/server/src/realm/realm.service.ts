@@ -9,8 +9,10 @@ import type {
   RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
+  RealmRuleReferenceDTO,
   RezicsSessionClaims,
   UnitRealmDTO,
+  UpdateRealmRulePolicyInput,
   UpdateRealmInput,
 } from "@rezics/contract";
 import { parseIdsCsv, validateSlug } from "@rezics/contract";
@@ -38,11 +40,13 @@ import {
 } from "./realm.mapper";
 import {
   appendToList,
+  clearSingleExtraKey,
   filterRealmExtraPublic,
   readListAdmin,
   readListPublic,
   removeFromList,
   reorderList,
+  setSingleExtraKey,
 } from "./realm-extra.service";
 import {
   type RealmWithRelations,
@@ -684,6 +688,66 @@ export class RealmService {
       userId: row.userId,
       acceptedAt: row.acceptedAt,
       acceptedLanguage: row.acceptedLanguage,
+    };
+  }
+
+  async updateRulePolicy(
+    caller: RezicsSessionClaims,
+    realmUnitId: string,
+    input: UpdateRealmRulePolicyInput,
+  ): Promise<RealmRuleReferenceDTO> {
+    if (input.ruleUnitId !== undefined) {
+      if (input.ruleUnitId) {
+        await setSingleExtraKey(caller, realmUnitId, "rule", input.ruleUnitId);
+      } else {
+        await clearSingleExtraKey(caller, realmUnitId, "rule");
+      }
+    }
+
+    const row = await prisma.realm.update({
+      where: { unitId: realmUnitId },
+      data: {
+        ruleVersion: input.version,
+        ruleRequireOnJoin: input.requireOnJoin,
+        ruleRequireOnPost: input.requireOnPost,
+        ruleRequireOnUpdate: input.requireOnUpdate,
+        rulePolicyUpdatedAt: new Date(),
+      },
+      select: {
+        unitId: true,
+        extra: true,
+        ruleVersion: true,
+        ruleRequireOnJoin: true,
+        ruleRequireOnPost: true,
+        ruleRequireOnUpdate: true,
+        rulePolicyUpdatedAt: true,
+      },
+    });
+
+    await governanceAuditService.appendPrivilegedMutation({
+      actorUserId: caller.userId,
+      action: realmPolicyActions.rulesUpdate,
+      targetKind: "realm-rules",
+      targetId: realmUnitId,
+      reason: "Realm rule policy update",
+      correlationId: crypto.randomUUID(),
+      metadata: {
+        ruleUnitId: getRuleUnitIdFromExtra(row.extra),
+        version: row.ruleVersion,
+        requireOnJoin: row.ruleRequireOnJoin,
+        requireOnPost: row.ruleRequireOnPost,
+        requireOnUpdate: row.ruleRequireOnUpdate,
+      },
+    });
+
+    return {
+      realmUnitId: row.unitId,
+      ruleUnitId: getRuleUnitIdFromExtra(row.extra),
+      version: row.ruleVersion,
+      requireOnJoin: row.ruleRequireOnJoin,
+      requireOnPost: row.ruleRequireOnPost,
+      requireOnUpdate: row.ruleRequireOnUpdate,
+      updatedAt: row.rulePolicyUpdatedAt ?? undefined,
     };
   }
 

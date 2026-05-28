@@ -185,6 +185,30 @@ describe("governance policy", () => {
       decide({
         actorUserId: "moderator-1",
         permission: { role: "USER" },
+        action: "realm.rules.update",
+        capabilities: [],
+        realmMembership: {
+          realmUnitId: "realm-1",
+          role: "moderator",
+          capabilities: [
+            {
+              capability: "queue.realm.decide",
+              scope: { kind: "realm", realmUnitId: "realm-1" },
+            },
+          ],
+        },
+        target: {
+          kind: "realm-rules",
+          id: "realm-1",
+          realmUnitId: "realm-1",
+        },
+      }),
+    ).toMatchObject({ allowed: true, code: "ALLOWED" });
+
+    expect(
+      decide({
+        actorUserId: "moderator-1",
+        permission: { role: "USER" },
         action: "realm.member.capability.change",
         capabilities: [],
         realmMembership: {

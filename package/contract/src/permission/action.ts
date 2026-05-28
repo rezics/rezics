@@ -22,6 +22,7 @@ export const policyActionKeys = [
   "content.archive",
   "content.restore",
   "realm.create",
+  "realm.rules.update",
   "realm.member.role.change",
   "realm.member.capability.change",
   "realm.report.escalate",

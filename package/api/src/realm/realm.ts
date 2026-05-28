@@ -46,6 +46,7 @@ export {
   useRemoveUnitRealmMutation,
   useUnmuteRealmMutation,
   useUpdateMemberRoleMutation,
+  useUpdateRealmRulePolicyMutation,
   useUpdateRealmMutation,
   useUpdateRealmTagContextMutation,
 } from "./realm.mutations";
@@ -77,11 +78,13 @@ export type {
   RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
+  RealmRuleReferenceDTO,
   RealmResponse,
   RealmSortOption,
   RealmTagApplicationDTO,
   UnitRealmDTO,
   RealmView,
   UpdateMemberRoleInput,
+  UpdateRealmRulePolicyInput,
   UpdateRealmInput,
 } from "./realm.types";

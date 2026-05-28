@@ -15,6 +15,8 @@ const reorderListMock = mock(async (_caller, _realmId, _key, unitIds) => ({
   unitIds,
 }));
 const removeFromListMock = mock(async () => ({ unitIds: ["unit-2"] }));
+const setSingleExtraKeyMock = mock(async () => undefined);
+const clearSingleExtraKeyMock = mock(async () => undefined);
 const auditPrivilegedMutationMock = mock(async () => ({ id: "audit-1" }));
 mock.module("@/meili/realm/sync", () => ({
   patchRealmMemberCountToMeili: mock(async () => undefined),
@@ -46,6 +48,8 @@ mock.module("./realm-extra.service", () => ({
   readListPublic: mock(async () => ["unit-1"]),
   removeFromList: removeFromListMock,
   reorderList: reorderListMock,
+  setSingleExtraKey: setSingleExtraKeyMock,
+  clearSingleExtraKey: clearSingleExtraKeyMock,
 }));
 
 import { realmService } from "./realm.service";
@@ -110,6 +114,8 @@ afterEach(() => {
   appendToListMock.mockClear();
   reorderListMock.mockClear();
   removeFromListMock.mockClear();
+  setSingleExtraKeyMock.mockClear();
+  clearSingleExtraKeyMock.mockClear();
   auditPrivilegedMutationMock.mockClear();
   delete prismaMock.$transaction;
   delete prismaMock.realmMember;
@@ -474,6 +480,106 @@ describe("realmService.acknowledgeCurrentRule", () => {
         },
       }),
     );
+  });
+});
+
+describe("realmService.updateRulePolicy", () => {
+  test("updates the rule reference and acknowledgement gates", async () => {
+    const updatedAt = new Date("2026-05-28T00:00:00.000Z");
+    prismaMock.realm = {
+      update: mock(async () => ({
+        unitId: REALM,
+        extra: { rule: "rule-unit-2" },
+        ruleVersion: 4,
+        ruleRequireOnJoin: true,
+        ruleRequireOnPost: true,
+        ruleRequireOnUpdate: false,
+        rulePolicyUpdatedAt: updatedAt,
+      })),
+    };
+
+    await expect(
+      realmService.updateRulePolicy(currentIdentity, REALM, {
+        ruleUnitId: "rule-unit-2",
+        version: 4,
+        requireOnJoin: true,
+        requireOnPost: true,
+        requireOnUpdate: false,
+      }),
+    ).resolves.toEqual({
+      realmUnitId: REALM,
+      ruleUnitId: "rule-unit-2",
+      version: 4,
+      requireOnJoin: true,
+      requireOnPost: true,
+      requireOnUpdate: false,
+      updatedAt,
+    });
+
+    expect(setSingleExtraKeyMock).toHaveBeenCalledWith(
+      currentIdentity,
+      REALM,
+      "rule",
+      "rule-unit-2",
+    );
+    expect(prismaMock.realm.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId: REALM },
+        data: expect.objectContaining({
+          ruleVersion: 4,
+          ruleRequireOnJoin: true,
+          ruleRequireOnPost: true,
+          ruleRequireOnUpdate: false,
+          rulePolicyUpdatedAt: expect.any(Date),
+        }),
+      }),
+    );
+    expect(auditPrivilegedMutationMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: USER,
+        action: "realm.rules.update",
+        targetKind: "realm-rules",
+        targetId: REALM,
+        metadata: expect.objectContaining({
+          ruleUnitId: "rule-unit-2",
+          version: 4,
+          requireOnJoin: true,
+          requireOnPost: true,
+          requireOnUpdate: false,
+        }),
+      }),
+    );
+  });
+
+  test("clears the rule reference when ruleUnitId is null", async () => {
+    prismaMock.realm = {
+      update: mock(async () => ({
+        unitId: REALM,
+        extra: {},
+        ruleVersion: 5,
+        ruleRequireOnJoin: false,
+        ruleRequireOnPost: false,
+        ruleRequireOnUpdate: true,
+        rulePolicyUpdatedAt: null,
+      })),
+    };
+
+    await expect(
+      realmService.updateRulePolicy(currentIdentity, REALM, {
+        ruleUnitId: null,
+      }),
+    ).resolves.toMatchObject({
+      realmUnitId: REALM,
+      ruleUnitId: null,
+      version: 5,
+    });
+
+    expect(clearSingleExtraKeyMock).toHaveBeenCalledWith(
+      currentIdentity,
+      REALM,
+      "rule",
+    );
+    expect(setSingleExtraKeyMock).not.toHaveBeenCalled();
   });
 });
 

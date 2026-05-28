@@ -20,11 +20,13 @@ import type {
   RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
+  RealmRuleReferenceDTO,
   RealmResponse,
   RealmTagApplicationDTO,
   UnitRealmDTO,
   RemoveRealmTagApplicationInput,
   UpdateMemberRoleInput,
+  UpdateRealmRulePolicyInput,
   UpdateRealmInput,
 } from "@rezics/contract";
 
@@ -44,11 +46,13 @@ export type {
   RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
+  RealmRuleReferenceDTO,
   RealmResponse,
   RealmTagApplicationDTO,
   UnitRealmDTO,
   RemoveRealmTagApplicationInput,
   UpdateMemberRoleInput,
+  UpdateRealmRulePolicyInput,
   UpdateRealmInput,
 };
 

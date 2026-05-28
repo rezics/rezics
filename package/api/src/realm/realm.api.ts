@@ -22,6 +22,7 @@ import type {
   RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
+  RealmRuleReferenceDTO,
   RealmResponse,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
@@ -29,6 +30,7 @@ import type {
   RealmTagContextUpdateResponse,
   UnitRealmDTO,
   UpdateMemberRoleInput,
+  UpdateRealmRulePolicyInput,
   UpdateRealmInput,
   UpdateRealmTagContextInput,
 } from "@rezics/contract";
@@ -238,6 +240,16 @@ export const realmApi = {
         body: JSON.stringify(input ?? {}),
       },
     );
+  },
+
+  updateRulePolicy: async (
+    realmUnitId: string,
+    input: UpdateRealmRulePolicyInput,
+  ): Promise<RealmRuleReferenceDTO> => {
+    return apiFetch<RealmRuleReferenceDTO>(`/realm/${realmUnitId}/rules`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
   },
 
   /**
