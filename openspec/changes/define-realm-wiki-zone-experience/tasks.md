@@ -86,7 +86,7 @@
 
 - [x] 9.1 Implement navigation rendering for Entity, Tag, TranslationGroup, Unit link, external link, LABEL heading, and manual translated label items.
 - [x] 9.2 Implement i18n resolution for Entity, Tag, LABEL Unit, Unit, and manual translation map labels.
-- [ ] 9.3 Implement best-language link resolution for TranslationGroup navigation items.
+- [x] 9.3 Implement best-language link resolution for TranslationGroup navigation items.
 - [x] 9.4 Implement `entityCollection` homepage section with entity kind, subject role, work context, realm context, sort, and limit options.
 - [x] 9.5 Implement `tagCollection` homepage section using Tag Unit translations and realm tag visibility.
 - [x] 9.6 Implement `translationGroupCollection` homepage section using best-language WIKI Post selection.

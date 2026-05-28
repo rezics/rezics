@@ -1,6 +1,7 @@
 import type {
   Language,
   UnitDTO,
+  BestLanguageWikiPostDTO,
   WikiZoneHomepageData,
   WikiZoneHomepageItem,
   WikiZoneHomepageSectionData,
@@ -9,6 +10,7 @@ import type {
   WikiZoneNavigation,
   WikiZoneNavigationItem,
 } from "@rezics/contract";
+import { bestLanguageWikiPostsQuery } from "@rezics/api/translation-group";
 import {
   common_loading,
   common_open,
@@ -20,7 +22,7 @@ import { useLocale, useMessage } from "@rezics/i18n/react";
 import { unitDetailQuery } from "@rezics/api/unit";
 import { EmptyState, SafeLink, Spinner } from "@rezics/ui";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { KeywordInput, useSearchQuery } from "@/search";
@@ -144,6 +146,18 @@ function collectNavigationUnitIds(navigation: WikiZoneNavigation | undefined) {
   return [...ids];
 }
 
+function collectNavigationTranslationGroupIds(
+  navigation: WikiZoneNavigation | undefined,
+) {
+  const ids = new Set<string>();
+  for (const section of navigation?.sections ?? []) {
+    for (const item of section.items) {
+      if (item.kind === "translationGroup") ids.add(item.translationGroupId);
+    }
+  }
+  return [...ids];
+}
+
 function navigationItemFallback(item: WikiZoneNavigationItem) {
   if (item.kind === "entity") return item.entityId;
   if (item.kind === "tag") return item.tagUnitId;
@@ -177,7 +191,10 @@ function navigationItemLabel(
 function translationGroupHref(
   translationGroupId: string,
   homepageData: WikiZoneHomepageData | null | undefined,
+  bestWikiPosts: Map<string, BestLanguageWikiPostDTO>,
 ) {
+  const resolved = bestWikiPosts.get(translationGroupId);
+  if (resolved) return `/post/${resolved.unitId}`;
   for (const section of homepageData?.sections ?? []) {
     const match = section.items.find(
       (item) =>
@@ -192,12 +209,17 @@ function translationGroupHref(
 function navigationItemHref(
   item: WikiZoneNavigationItem,
   homepageData: WikiZoneHomepageData | null | undefined,
+  bestWikiPosts: Map<string, BestLanguageWikiPostDTO>,
 ) {
   if (item.kind === "entity") return `/entity/${item.entityId}`;
   if (item.kind === "tag") return `/tag/${item.tagUnitId}`;
   if (item.kind === "unit") return `/unit/${item.unitId}`;
   if (item.kind === "translationGroup") {
-    return translationGroupHref(item.translationGroupId, homepageData);
+    return translationGroupHref(
+      item.translationGroupId,
+      homepageData,
+      bestWikiPosts,
+    );
   }
   if (item.kind === "external" || item.kind === "manualLink") return item.href;
   return null;
@@ -217,9 +239,16 @@ function WikiNavigation({
     () => collectNavigationUnitIds(navigation),
     [navigation],
   );
+  const translationGroupIds = useMemo(
+    () => collectNavigationTranslationGroupIds(navigation),
+    [navigation],
+  );
   const unitResults = useQueries({
     queries: unitIds.map((unitId) => unitDetailQuery(unitId)),
   });
+  const bestWikiPostsResult = useQuery(
+    bestLanguageWikiPostsQuery(translationGroupIds, [locale]),
+  );
   const units = useMemo(
     () =>
       new Map(
@@ -228,6 +257,16 @@ function WikiNavigation({
         ),
       ),
     [unitIds, unitResults],
+  );
+  const bestWikiPosts = useMemo(
+    () =>
+      new Map(
+        (bestWikiPostsResult.data?.posts ?? []).map((post) => [
+          post.translationGroupId,
+          post,
+        ]),
+      ),
+    [bestWikiPostsResult.data?.posts],
   );
   const sections = navigation?.sections ?? [];
 
@@ -250,7 +289,11 @@ function WikiNavigation({
               const label =
                 navigationItemLabel(item, units, locale) ??
                 navigationItemFallback(item);
-              const href = navigationItemHref(item, homepageData);
+              const href = navigationItemHref(
+                item,
+                homepageData,
+                bestWikiPosts,
+              );
 
               if (item.kind === "labelHeading") {
                 return (

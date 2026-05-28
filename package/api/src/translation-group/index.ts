@@ -5,4 +5,7 @@ export {
   useAttachTranslation,
   useDetachTranslation,
 } from "./translation-group.mutations";
-export { translationGroupSiblingsQuery } from "./translation-group.queries";
+export {
+  bestLanguageWikiPostsQuery,
+  translationGroupSiblingsQuery,
+} from "./translation-group.queries";

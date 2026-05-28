@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { contentDocWriteSchema } from "./content-doc";
-import { languageSchema } from "./language";
+import { type Language, languageSchema } from "./language";
 
 export const translationGroupSchema = t.Object({
   id: t.String(),
@@ -35,6 +35,39 @@ export const translationGroupSiblingsSchema = t.Object({
 
 export type TranslationGroupSiblingsResponse =
   (typeof translationGroupSiblingsSchema)["static"];
+
+export const bestLanguageWikiPostsRequestSchema = t.Object(
+  {
+    translationGroupIds: t.Array(t.String()),
+    preferredLanguages: t.Optional(t.Array(languageSchema)),
+  },
+  { additionalProperties: false },
+);
+
+export type BestLanguageWikiPostsRequest = {
+  translationGroupIds: string[];
+  preferredLanguages?: Language[];
+};
+
+export const bestLanguageWikiPostSchema = t.Object({
+  translationGroupId: t.String(),
+  unitId: t.String(),
+  defaultLanguage: t.Nullable(languageSchema),
+});
+
+export type BestLanguageWikiPostDTO = {
+  translationGroupId: string;
+  unitId: string;
+  defaultLanguage: Language | null;
+};
+
+export const bestLanguageWikiPostsResponseSchema = t.Object({
+  posts: t.Array(bestLanguageWikiPostSchema),
+});
+
+export type BestLanguageWikiPostsResponse = {
+  posts: BestLanguageWikiPostDTO[];
+};
 
 export const attachTranslationResponseSchema = t.Object({
   newUnitId: t.String(),

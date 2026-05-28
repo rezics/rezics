@@ -1,6 +1,8 @@
 import type {
   AttachTranslationInput,
   AttachTranslationResponse,
+  BestLanguageWikiPostsRequest,
+  BestLanguageWikiPostsResponse,
   TranslationGroupSiblingsResponse,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -22,4 +24,15 @@ export const translationGroupApi = {
     apiFetch<{ message: string }>(`/unit/${unitId}/translation-group`, {
       method: "DELETE",
     }),
+
+  bestLanguageWikiPosts: (
+    input: BestLanguageWikiPostsRequest,
+  ): Promise<BestLanguageWikiPostsResponse> =>
+    apiFetch<BestLanguageWikiPostsResponse>(
+      "/translation-group/wiki-posts/best",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    ),
 };

@@ -2,6 +2,10 @@ import {
   type AttachTranslationResponse,
   attachTranslationResponseSchema,
   attachTranslationSchema,
+  bestLanguageWikiPostsRequestSchema,
+  type BestLanguageWikiPostsResponse,
+  bestLanguageWikiPostsResponseSchema,
+  normalizeLanguage,
   type TranslationGroupSiblingsResponse,
   translationGroupParamsSchema,
   translationGroupSiblingsSchema,
@@ -27,6 +31,33 @@ export const translationGroupApi = new Elysia({ prefix: "/translation-group" })
         summary: "List translation siblings",
         description:
           "Return parallel-translation sibling Units of the given POST and the group's supportedLanguages. If the unit has no group, returns an empty result with groupId = null.",
+        tags: ["TranslationGroup"],
+      },
+    },
+  )
+  .post(
+    "/wiki-posts/best",
+    async ({ body }): Promise<BestLanguageWikiPostsResponse> => {
+      const posts = await translationGroupService.resolveBestLanguageWikiPosts({
+        translationGroupIds: body.translationGroupIds,
+        preferredLanguages: body.preferredLanguages,
+      });
+      return {
+        posts: posts.map((post) => ({
+          ...post,
+          defaultLanguage: post.defaultLanguage
+            ? normalizeLanguage(post.defaultLanguage)
+            : null,
+        })),
+      };
+    },
+    {
+      body: bestLanguageWikiPostsRequestSchema,
+      response: bestLanguageWikiPostsResponseSchema,
+      detail: {
+        summary: "Resolve best-language wiki posts",
+        description:
+          "Return one published WIKI Post Unit per TranslationGroup, preferring requested languages when available.",
         tags: ["TranslationGroup"],
       },
     },
