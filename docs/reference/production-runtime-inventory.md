@@ -153,3 +153,21 @@ Spec-assumption corrections surfaced by this inventory:
 - There is **no** separate `job-runner-http` / `job-runner-worker` binary — the split is the `JOB_RUNNER_ROLE` env switch on one image. Kamal should run two roles off the same image rather than two build targets.
 - There is **no** standalone `ranking-worker` today. Ranking is a single internal HTTP service; ranking jobs are dispatched through `job-runner`'s ranking runtime. A dedicated `ranking-worker` role (task 2.4) would be net-new.
 - `notify` and `reaction` have **no in-code default port**; deployment env must set `PORT` explicitly for them.
+- **`job-runner`'s `build:linux` is currently broken.** It bundles `@rezics/history` source that does `import("#/prisma/client")`; Bun's `--compile` bundler resolves that package-local `#` subpath against the entry package (`job-runner`) rather than `history`, so the compile fails (reproduces with a plain local `build:linux`, independent of Docker). The six other backend images build; job-runner's Dockerfile is written and correct but cannot produce a binary until the cross-package `#/prisma/client` self-imports in `server`/`history` are made portable. Tracked under deployment tasks 2.5/2.6.
+
+## Image Build Status
+
+Verified locally (`docker build` from repo root, after building `docker/base.Dockerfile`):
+
+| Image | Builds | Boots (no real DB) | Notes |
+|---|---|---|---|
+| reaction | ✓ | ✓ `/health` 200 | self-contained schema |
+| notify | ✓ | ✓ `/health` 200 | self-contained schema |
+| history | ✓ | ✓ `/health` + `/ready` 200 | cross-schema (server client) |
+| auth | ✓ | ✓ `/health` 200 | cluster entry |
+| ranking | ✓ | ✓ `/health` 200 | cross-schema, internal-only |
+| server | ✓ | binary runs, needs Postgres | eager DB at boot |
+| job-runner | ✗ (upstream) | — | blocked by the `#/prisma/client` bundling gap above |
+
+Runtime images are ~75–77 MB (slim Debian + the self-contained compiled
+binary; engineless Prisma 7 means no query engine to ship).
