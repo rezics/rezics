@@ -26,6 +26,7 @@ enum UnitType {
   VIDEO
   QUOTE
   LINK
+  LABEL
   ENTITY
   ZONE
   /// Type-extension marker for User rows. `User.unitId` equals the corresponding `Unit.id`.
@@ -193,6 +194,9 @@ model Unit {
   workClaims      WorkLinkClaim[] @relation("WorkLinkClaimWork")
   workMemberships UnitWork[]      @relation("UnitWorkMember")
   workMembers     UnitWork[]      @relation("UnitWorkWork")
+  workRealmContextsAsWork    WorkRealmContext[] @relation("WorkRealmContextWork")
+  workRealmContextsAsRealm   WorkRealmContext[] @relation("WorkRealmContextRealm")
+  workRealmContextsAsRelease WorkRealmContext[] @relation("WorkRealmContextRelease")
 
   // Owner/creator
   user User? @relation("UnitForUser", fields: [userId], references: [unitId])
@@ -461,6 +465,29 @@ model UnitWork {
   @@index([workUnitId, role, position, unitId])
   @@index([workUnitId, role, createdAt, unitId])
   @@index([unitId, role, workUnitId])
+}
+
+model WorkRealmContext {
+  id            String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  workUnitId    String  @db.Uuid
+  realmUnitId   String  @db.Uuid
+  role          String  @db.VarChar(32)
+  priority      Int     @default(0)
+  locale        String? @db.VarChar(16)
+  releaseUnitId String? @db.Uuid
+
+  createdByUserId String? @db.Uuid
+  updatedByUserId String? @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  work        Unit  @relation("WorkRealmContextWork", fields: [workUnitId], references: [id], onDelete: Cascade)
+  realm       Unit  @relation("WorkRealmContextRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
+  releaseUnit Unit? @relation("WorkRealmContextRelease", fields: [releaseUnitId], references: [id], onDelete: SetNull)
+
+  @@index([workUnitId, role, priority, id])
+  @@index([realmUnitId, role, priority, id])
+  @@index([releaseUnitId, role])
 }
 
 /**
@@ -1044,6 +1071,7 @@ model Zone {
   filters  Json
   template String @db.VarChar(64)
   styling  Json?
+  wiki     Json?
 
   startsAt DateTime?
   endsAt   DateTime?

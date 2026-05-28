@@ -8,9 +8,12 @@ export const workRealmContextRoleValues = [
   "archive",
 ] as const;
 
-export const workRealmContextRoleSchema = t.Union(
-  workRealmContextRoleValues.map((value) => t.Literal(value)),
-);
+export const workRealmContextRoleSchema = t.Union([
+  t.Literal("official"),
+  t.Literal("community"),
+  t.Literal("language"),
+  t.Literal("archive"),
+]);
 
 export type WorkRealmContextRole =
   (typeof workRealmContextRoleSchema)["static"];

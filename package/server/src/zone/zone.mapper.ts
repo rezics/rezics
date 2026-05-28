@@ -1,5 +1,6 @@
 import {
   mainMarkdownSource,
+  type WikiZoneConfig,
   type ZoneDTO,
   type ZoneFilters,
 } from "@rezics/contract";
@@ -24,6 +25,7 @@ export function mapZoneToDTO(zone: ZoneWithRelations, lang?: string): ZoneDTO {
     filters: zone.filters as ZoneFilters,
     template: zone.template,
     styling: (zone.styling as Record<string, unknown>) ?? null,
+    wiki: (zone.wiki as WikiZoneConfig | null) ?? null,
     startsAt: zone.startsAt?.toISOString() ?? null,
     endsAt: zone.endsAt?.toISOString() ?? null,
   };

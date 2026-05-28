@@ -13,23 +13,23 @@
 
 ## 2. Database And Prisma Model
 
-- [ ] 2.1 Add LABEL to the Prisma Unit type enum or equivalent persisted Unit type definition.
-- [ ] 2.2 Add a work realm context model/table keyed by work Unit and realm Unit with role, priority, optional locale, optional release override, and audit timestamps.
-- [ ] 2.3 Add database constraints or service-level validation ensuring `workUnitId` resolves to a hidden work-capable Unit and `realmUnitId` resolves to a REALM Unit.
-- [ ] 2.4 Add uniqueness constraints for deterministic work realm context rows, including role/locale/release override dimensions.
-- [ ] 2.5 Extend Zone persistence to store typed wiki config without breaking existing Zone rows.
-- [ ] 2.6 Generate Prisma client for server package and verify existing model imports compile.
-- [ ] 2.7 Add migration notes or seed-safe defaults so existing Zones and realms do not require immediate wiki config.
+- [x] 2.1 Add LABEL to the Prisma Unit type enum or equivalent persisted Unit type definition.
+- [x] 2.2 Add a work realm context model/table keyed by work Unit and realm Unit with role, priority, optional locale, optional release override, and audit timestamps.
+- [x] 2.3 Add database constraints or service-level validation ensuring `workUnitId` resolves to a hidden work-capable Unit and `realmUnitId` resolves to a REALM Unit.
+- [x] 2.4 Add uniqueness constraints for deterministic work realm context rows, including role/locale/release override dimensions.
+- [x] 2.5 Extend Zone persistence to store typed wiki config without breaking existing Zone rows.
+- [x] 2.6 Generate Prisma client for server package and verify existing model imports compile.
+- [x] 2.7 Add migration notes or seed-safe defaults so existing Zones and realms do not require immediate wiki config.
 
 ## 3. Server Services
 
-- [ ] 3.1 Implement a LABEL-aware Unit creation/update path that allows UnitTranslation but no extension table.
+- [x] 3.1 Implement a LABEL-aware Unit creation/update path that allows UnitTranslation but no extension table.
 - [ ] 3.2 Ensure LABEL Units are excluded from ordinary catalog/content queries unless explicitly requested by label management or picker code.
-- [ ] 3.3 Implement WorkRealmContext service create, update, delete, get, and list operations.
-- [ ] 3.4 Implement validation that ordinary users cannot create official work realm context rows.
-- [ ] 3.5 Implement deterministic work realm context resolution by release Unit through UnitWork.
-- [ ] 3.6 Implement conflict detection for equal-priority official work realm contexts.
-- [ ] 3.7 Extend Zone service validation to parse and persist wiki filters, navigation, homepage, and theme config.
+- [x] 3.3 Implement WorkRealmContext service create, update, delete, get, and list operations.
+- [x] 3.4 Implement validation that ordinary users cannot create official work realm context rows.
+- [x] 3.5 Implement deterministic work realm context resolution by release Unit through UnitWork.
+- [x] 3.6 Implement conflict detection for equal-priority official work realm contexts.
+- [x] 3.7 Extend Zone service validation to parse and persist wiki filters, navigation, homepage, and theme config.
 - [ ] 3.8 Add validation that wiki Zone config references valid realm, Entity, Tag, TranslationGroup, Unit, and LABEL ids where applicable.
 - [ ] 3.9 Add validation that wiki Zone manual labels include explicit translations when no LABEL/Entity/Tag/Unit reference supplies display text.
 - [ ] 3.10 Add helper service for best-language WIKI Post selection from TranslationGroup ids.
@@ -38,9 +38,9 @@
 
 ## 4. Server APIs
 
-- [ ] 4.1 Add WorkRealmContext Elysia routes with request/response schemas from `@rezics/contract`.
-- [ ] 4.2 Add read route for resolving a release Unit's wiki realm context through UnitWork.
-- [ ] 4.3 Extend Zone create/update/read routes to include wiki config fields.
+- [x] 4.1 Add WorkRealmContext Elysia routes with request/response schemas from `@rezics/contract`.
+- [x] 4.2 Add read route for resolving a release Unit's wiki realm context through UnitWork.
+- [x] 4.3 Extend Zone create/update/read routes to include wiki config fields.
 - [ ] 4.4 Add or extend realm detail API output to expose configured wiki Zone id and viewer capability metadata.
 - [ ] 4.5 Add wiki Zone homepage data endpoint or extend Zone resolution to include enough typed section hydration data.
 - [ ] 4.6 Add tests for forbidden work realm context writes, invalid realm targets, invalid label references, and malformed wiki config.
@@ -123,7 +123,7 @@
 
 ## 13. Tests And Verification
 
-- [ ] 13.1 Run contract tests for UnitType, WorkRealmContext, Zone wiki config, navigation, homepage, and theme schemas.
+- [x] 13.1 Run contract tests for UnitType, WorkRealmContext, Zone wiki config, navigation, homepage, and theme schemas.
 - [ ] 13.2 Run server tests for LABEL creation, WorkRealmContext permissions, Zone config validation, TranslationGroup best-language resolution, and realm wiki queries.
 - [ ] 13.3 Run API client tests or type checks for new query/mutation surfaces.
 - [ ] 13.4 Run frontend component tests or stories for Realm Wiki tab, wiki Zone templates, navigation, homepage sections, and management forms.
@@ -131,5 +131,5 @@
 - [ ] 13.6 Run `bun run format:check`.
 - [ ] 13.7 Run `bun run check:convention`.
 - [ ] 13.8 Run affected package tests with Bun filters where available.
-- [ ] 13.9 Run `openspec validate define-realm-wiki-zone-experience --strict`.
+- [x] 13.9 Run `openspec validate define-realm-wiki-zone-experience --strict`.
 - [ ] 13.10 Document manual verification URLs for realm Wiki tab, wiki Zone homepage, release wiki context, and Zone management after `bun run dev`.

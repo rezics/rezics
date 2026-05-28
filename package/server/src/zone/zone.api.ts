@@ -1,4 +1,4 @@
-import { ZoneFiltersSchema } from "@rezics/contract";
+import { wikiZoneConfigSchema, ZoneFiltersSchema } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole } from "@/middleware";
 import { mapZoneToDTO } from "./zone.mapper";
@@ -80,6 +80,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         filters: body.filters,
         template: body.template,
         styling: body.styling,
+        wiki: body.wiki,
         startsAt: body.startsAt ? new Date(body.startsAt) : null,
         endsAt: body.endsAt ? new Date(body.endsAt) : null,
       });
@@ -100,6 +101,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         filters: ZoneFiltersSchema,
         template: t.String(),
         styling: t.Optional(t.Object({})),
+        wiki: t.Optional(t.Union([wikiZoneConfigSchema, t.Null()])),
         startsAt: t.Optional(t.String()),
         endsAt: t.Optional(t.String()),
       }),
@@ -124,6 +126,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         filters: body.filters,
         template: body.template,
         styling: body.styling,
+        wiki: body.wiki,
         startsAt:
           body.startsAt !== undefined
             ? body.startsAt
@@ -147,6 +150,7 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         filters: t.Optional(ZoneFiltersSchema),
         template: t.Optional(t.String()),
         styling: t.Optional(t.Union([t.Object({}), t.Null()])),
+        wiki: t.Optional(t.Union([wikiZoneConfigSchema, t.Null()])),
         startsAt: t.Optional(t.Union([t.String(), t.Null()])),
         endsAt: t.Optional(t.Union([t.String(), t.Null()])),
       }),

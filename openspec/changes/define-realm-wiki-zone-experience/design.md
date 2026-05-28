@@ -146,6 +146,12 @@ Wiki Zone homepage section
 7. Add seed fixtures for at least one work with an official realm, wiki Zone, labels, entity sections, tag sections, translation group featured pages, and theme presets.
 8. Backfill is optional: existing realms/zones continue without wiki Zone configuration until configured.
 
+Foundation migration note: `LABEL` is additive on `UnitType`, `Zone.wiki` is
+nullable, and `WorkRealmContext` starts empty. Existing Zone and Realm rows
+therefore require no immediate backfill; seed fixtures may opt in by writing
+`Realm.extra.wikiZoneUnitId` and Zone wiki config after the foundation schema is
+available.
+
 Rollback is straightforward before schema migrations ship. After `LABEL` and work realm context schema changes ship, rollback should leave unused rows in place or hide related UI; no existing catalog content must be rewritten.
 
 ## Open Questions

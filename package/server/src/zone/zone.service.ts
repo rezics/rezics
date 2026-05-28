@@ -1,6 +1,7 @@
 import {
   type Language,
   markdownContentDoc,
+  type WikiZoneConfig,
   type ZoneFilters,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
@@ -75,6 +76,7 @@ export class ZoneService {
     filters: ZoneFilters;
     template: string;
     styling?: Record<string, unknown> | null;
+    wiki?: WikiZoneConfig | null;
     startsAt?: Date | null;
     endsAt?: Date | null;
   }): Promise<ZoneWithRelations> {
@@ -99,6 +101,7 @@ export class ZoneService {
         filters: input.filters as Prisma.InputJsonValue,
         template: input.template,
         styling: (input.styling ?? null) as Prisma.InputJsonValue,
+        wiki: (input.wiki ?? null) as Prisma.InputJsonValue,
         startsAt: input.startsAt ?? null,
         endsAt: input.endsAt ?? null,
       },
@@ -114,6 +117,7 @@ export class ZoneService {
       filters?: ZoneFilters;
       template?: string;
       styling?: Record<string, unknown> | null;
+      wiki?: WikiZoneConfig | null;
       startsAt?: Date | null;
       endsAt?: Date | null;
     },
@@ -129,6 +133,10 @@ export class ZoneService {
         styling:
           input.styling !== undefined
             ? (input.styling as Prisma.InputJsonValue)
+            : undefined,
+        wiki:
+          input.wiki !== undefined
+            ? (input.wiki as Prisma.InputJsonValue)
             : undefined,
         startsAt: input.startsAt !== undefined ? input.startsAt : undefined,
         endsAt: input.endsAt !== undefined ? input.endsAt : undefined,
