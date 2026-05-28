@@ -6,6 +6,7 @@ import type {
   CreateModerationCaseFromFeedbackInput,
   CreateRealmModerationQueueItemFromFeedbackInput,
   CreateRealmModerationQueueItemInput,
+  ContentModerationDecisionInput,
   DecideModerationCaseInput,
   DecideRealmModerationQueueItemInput,
   DuplicateModerationCaseInput,
@@ -21,6 +22,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { realmKeys } from "../realm/realm.keys";
+import { postKeys } from "../post/post.keys";
 import { governanceApi } from "./governance.api";
 import { governanceKeys } from "./governance.keys";
 
@@ -73,6 +75,22 @@ export function invalidateRealmQueueQueries(
       ],
     });
   }
+}
+
+export function invalidateRealmContentModerationQueries(
+  queryClient: Pick<QueryClient, "invalidateQueries">,
+  realmUnitId: string,
+  targetUnitId: string,
+) {
+  queryClient.invalidateQueries({
+    queryKey: governanceKeys.realmContentModeration(realmUnitId, targetUnitId),
+  });
+  queryClient.invalidateQueries({
+    queryKey: postKeys.byRealms(realmUnitId),
+  });
+  queryClient.invalidateQueries({
+    queryKey: postKeys.moderationOverlays(realmUnitId, [targetUnitId]),
+  });
 }
 
 export function useApplyAccountEnforcementMutation(
@@ -432,6 +450,157 @@ export function useEscalateRealmQueueItemMutation(
   });
 }
 
+export function useHideRealmContentMutation(
+  options?: Omit<
+    UseMutationOptions<
+      Awaited<ReturnType<typeof governanceApi.hideRealmContent>>,
+      Error,
+      {
+        realmUnitId: string;
+        targetUnitId: string;
+        input: ContentModerationDecisionInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
+      governanceApi.hideRealmContent(realmUnitId, targetUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateRealmContentModerationQueries(
+        queryClient,
+        variables.realmUnitId,
+        variables.targetUnitId,
+      );
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useTombstoneRealmContentMutation(
+  options?: Omit<
+    UseMutationOptions<
+      Awaited<ReturnType<typeof governanceApi.tombstoneRealmContent>>,
+      Error,
+      {
+        realmUnitId: string;
+        targetUnitId: string;
+        input: ContentModerationDecisionInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
+      governanceApi.tombstoneRealmContent(realmUnitId, targetUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateRealmContentModerationQueries(
+        queryClient,
+        variables.realmUnitId,
+        variables.targetUnitId,
+      );
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useRestoreRealmContentMutation(
+  options?: Omit<
+    UseMutationOptions<
+      Awaited<ReturnType<typeof governanceApi.restoreRealmContent>>,
+      Error,
+      {
+        realmUnitId: string;
+        targetUnitId: string;
+        input: ContentModerationDecisionInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
+      governanceApi.restoreRealmContent(realmUnitId, targetUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateRealmContentModerationQueries(
+        queryClient,
+        variables.realmUnitId,
+        variables.targetUnitId,
+      );
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useRemoveRealmFeedRootMutation(
+  options?: Omit<
+    UseMutationOptions<
+      Awaited<ReturnType<typeof governanceApi.removeRealmFeedRoot>>,
+      Error,
+      { realmUnitId: string; targetUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, targetUnitId }) =>
+      governanceApi.removeRealmFeedRoot(realmUnitId, targetUnitId),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: postKeys.byRealms(variables.realmUnitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useRequestRealmContentOwnerDelegationMutation(
+  options?: Omit<
+    UseMutationOptions<
+      Awaited<
+        ReturnType<typeof governanceApi.requestRealmContentOwnerDelegation>
+      >,
+      Error,
+      {
+        realmUnitId: string;
+        targetUnitId: string;
+        input: ContentModerationDecisionInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
+      governanceApi.requestRealmContentOwnerDelegation(
+        realmUnitId,
+        targetUnitId,
+        input,
+      ),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateRealmQueueQueries(queryClient, variables.realmUnitId, data.id);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export const governanceMutations = {
   useApplyEnforcement: useApplyAccountEnforcementMutation,
   useUnblockEnforcement: useUnblockAccountEnforcementMutation,
@@ -448,4 +617,10 @@ export const governanceMutations = {
     useCreateRealmQueueItemFromFeedbackMutation,
   useDecideRealmQueueItem: useDecideRealmQueueItemMutation,
   useEscalateRealmQueueItem: useEscalateRealmQueueItemMutation,
+  useHideRealmContent: useHideRealmContentMutation,
+  useTombstoneRealmContent: useTombstoneRealmContentMutation,
+  useRestoreRealmContent: useRestoreRealmContentMutation,
+  useRemoveRealmFeedRoot: useRemoveRealmFeedRootMutation,
+  useRequestRealmContentOwnerDelegation:
+    useRequestRealmContentOwnerDelegationMutation,
 };

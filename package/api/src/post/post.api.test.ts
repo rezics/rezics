@@ -35,6 +35,37 @@ describe("post wiki API helpers", () => {
     );
   });
 
+  test("requests moderation overlays for rendered post nodes", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ globalStates: [], realmOverlays: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await postApi.getModerationOverlays({
+      realmUnitId: "realm-1",
+      targetUnitIds: ["post-2", "post-1"],
+    });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://api.example/post/moderation-overlays",
+    );
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: "POST" });
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
+      realmUnitId: "realm-1",
+      targetUnitIds: ["post-2", "post-1"],
+    });
+    expect(
+      postKeys.moderationOverlays("realm-1", ["post-2", "post-1"]),
+    ).toEqual([
+      "posts",
+      "moderation-overlays",
+      "realm-1",
+      ["post-1", "post-2"],
+    ]);
+  });
+
   test("builds stable realm wiki keys", () => {
     expect(postKeys.wikiByRealm("realm-1", { limit: 20 })).toEqual([
       "posts",

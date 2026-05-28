@@ -5,6 +5,7 @@ import {
   invalidateGovernanceCaseQueries,
   invalidateGovernanceEnforcementQueries,
   invalidateRealmCapabilityQueries,
+  invalidateRealmContentModerationQueries,
   invalidateRealmQueueQueries,
 } from "./governance.mutations";
 import { governanceKeys } from "./governance.keys";
@@ -69,6 +70,20 @@ describe("governanceApi", () => {
     await governanceApi.grantRealmCapability("realm/1", "user/1", {
       capability: "queue.realm.decide",
     });
+    await governanceApi.tombstoneRealmContent("realm/1", "post/1", {
+      reason: "spam",
+    });
+    await governanceApi.restoreRealmContent("realm/1", "post/1", {
+      reason: "appeal accepted",
+    });
+    await governanceApi.removeRealmFeedRoot("realm/1", "post/1");
+    await governanceApi.requestRealmContentOwnerDelegation(
+      "realm/1",
+      "post/1",
+      {
+        reason: "owner review",
+      },
+    );
 
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
       "http://api.example/governance/enforcement/user%2F1",
@@ -82,6 +97,19 @@ describe("governanceApi", () => {
     );
     expect(fetchMock.mock.calls[3]?.[0]).toBe(
       "http://api.example/governance/realms/realm%2F1/members/user%2F1/capabilities",
+    );
+    expect(fetchMock.mock.calls[4]?.[0]).toBe(
+      "http://api.example/governance/realms/realm%2F1/content/post%2F1/tombstone",
+    );
+    expect(fetchMock.mock.calls[5]?.[0]).toBe(
+      "http://api.example/governance/realms/realm%2F1/content/post%2F1/restore",
+    );
+    expect(fetchMock.mock.calls[6]?.[0]).toBe(
+      "http://api.example/governance/realms/realm%2F1/feed/post%2F1",
+    );
+    expect(fetchMock.mock.calls[6]?.[1]).toMatchObject({ method: "DELETE" });
+    expect(fetchMock.mock.calls[7]?.[0]).toBe(
+      "http://api.example/governance/realms/realm%2F1/content/post%2F1/owner-delegation",
     );
   });
 
@@ -107,6 +135,7 @@ describe("governanceApi", () => {
     invalidateGovernanceEnforcementQueries(queryClient, "user-1");
     invalidateRealmCapabilityQueries(queryClient, "realm-1");
     invalidateRealmQueueQueries(queryClient, "realm-1", "queue-1");
+    invalidateRealmContentModerationQueries(queryClient, "realm-1", "post-1");
 
     expect(
       (queryClient.invalidateQueries.mock.calls as any[]).map(
@@ -130,6 +159,18 @@ describe("governanceApi", () => {
           "queue-1",
         ],
       },
+      {
+        queryKey: [
+          "governance",
+          "realms",
+          "realm-1",
+          "content",
+          "post-1",
+          "moderation",
+        ],
+      },
+      { queryKey: ["posts", "realm", "realm-1"] },
+      { queryKey: ["posts", "moderation-overlays", "realm-1", ["post-1"]] },
     ]);
   });
 });

@@ -83,6 +83,16 @@ export const postKeys = {
     realmUnitId: string,
     filters?: Omit<PostFilters, "kind" | "realmUnitId">,
   ) => [...postKeys.byRealms(realmUnitId), "wiki", filters ?? null] as const,
+  moderationOverlays: (
+    realmUnitId: string | null | undefined,
+    targetUnitIds: string[],
+  ) =>
+    [
+      ...postKeys.all(),
+      "moderation-overlays",
+      realmUnitId ?? null,
+      [...targetUnitIds].sort(),
+    ] as const,
 
   /**
    * Keys for work-domain scoped queries.

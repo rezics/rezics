@@ -38,6 +38,19 @@ export const governanceKeys = {
     ] as const,
   contentModeration: (targetUnitId: string) =>
     [...governanceKeys.all(), "content", targetUnitId, "moderation"] as const,
+  realmContent: (realmUnitId: string, targetUnitId: string) =>
+    [
+      ...governanceKeys.all(),
+      "realms",
+      realmUnitId,
+      "content",
+      targetUnitId,
+    ] as const,
+  realmContentModeration: (realmUnitId: string, targetUnitId: string) =>
+    [
+      ...governanceKeys.realmContent(realmUnitId, targetUnitId),
+      "moderation",
+    ] as const,
   audit: () => [...governanceKeys.all(), "audit"] as const,
   auditList: (query?: GovernanceAuditListQuery) =>
     [...governanceKeys.audit(), "list", query] as const,

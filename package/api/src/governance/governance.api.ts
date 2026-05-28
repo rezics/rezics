@@ -342,6 +342,16 @@ export const governanceApi = {
     );
   },
 
+  removeRealmFeedRoot: async (
+    realmUnitId: string,
+    targetUnitId: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/feed/${encodePathPart(targetUnitId)}`,
+      { method: "DELETE" },
+    );
+  },
+
   hideRealmContent: async (
     realmUnitId: string,
     targetUnitId: string,
@@ -349,6 +359,48 @@ export const governanceApi = {
   ): Promise<RealmContentModerationDTO> => {
     return apiFetch<RealmContentModerationDTO>(
       `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/hide`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  tombstoneRealmContent: async (
+    realmUnitId: string,
+    targetUnitId: string,
+    input: ContentModerationDecisionInput,
+  ): Promise<RealmContentModerationDTO> => {
+    return apiFetch<RealmContentModerationDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/tombstone`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  restoreRealmContent: async (
+    realmUnitId: string,
+    targetUnitId: string,
+    input: ContentModerationDecisionInput,
+  ): Promise<RealmContentModerationDTO> => {
+    return apiFetch<RealmContentModerationDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/restore`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  requestRealmContentOwnerDelegation: async (
+    realmUnitId: string,
+    targetUnitId: string,
+    input: ContentModerationDecisionInput,
+  ): Promise<RealmModerationQueueItemDTO> => {
+    return apiFetch<RealmModerationQueueItemDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/owner-delegation`,
       {
         method: "POST",
         body: JSON.stringify(input),

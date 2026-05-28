@@ -9,6 +9,8 @@ import type {
   CreatePostInput,
   EditorialPatchSubmission,
   PostListResponse,
+  PostModerationOverlayRequest,
+  PostModerationOverlayResponse,
   PostResponse,
   UpdatePostInput,
 } from "@rezics/contract";
@@ -143,6 +145,18 @@ export const postApi = {
     filters?: Omit<PostFilters, "kind" | "realmUnitId">,
   ): Promise<PostListResponse> => {
     return postApi.listWiki({ ...filters, realmUnitId });
+  },
+
+  getModerationOverlays: async (
+    input: PostModerationOverlayRequest,
+  ): Promise<PostModerationOverlayResponse> => {
+    return apiFetch<PostModerationOverlayResponse>(
+      "/post/moderation-overlays",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
   },
 
   /**

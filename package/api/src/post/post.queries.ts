@@ -132,6 +132,18 @@ export const wikiPostsByRealmQuery = (
     staleTime: 1000 * 60 * 2,
   });
 
+export const postModerationOverlaysQuery = (
+  targetUnitIds: string[],
+  realmUnitId?: string | null,
+) =>
+  queryOptions({
+    queryKey: postKeys.moderationOverlays(realmUnitId, targetUnitIds),
+    queryFn: () =>
+      postApi.getModerationOverlays({ realmUnitId, targetUnitIds }),
+    enabled: targetUnitIds.length > 0,
+    staleTime: 1000 * 30,
+  });
+
 /**
  * Query options for getting posts within a work domain.
  */
@@ -175,6 +187,7 @@ export const postQueries = {
   replies: postRepliesQuery,
   byRealm: postsByRealmQuery,
   wikiByRealm: wikiPostsByRealmQuery,
+  moderationOverlays: postModerationOverlaysQuery,
   byWork: postsByWorkQuery,
   infiniteList: postInfiniteListQuery,
 };
