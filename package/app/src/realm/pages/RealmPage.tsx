@@ -42,6 +42,7 @@ import { RealmContentFeed } from "../components/RealmContentFeed";
 import { RealmMemberList } from "../components/RealmMemberList";
 import { RealmMuteButton } from "../components/RealmMuteButton";
 import { RealmTagManager } from "../components/RealmTagManager";
+import { RealmWikiTab } from "../components/RealmWikiTab";
 import { canManageRealm } from "../models/canManageRealm";
 import { AboutSection } from "../sections/AboutSection";
 import { BannerSection } from "../sections/BannerSection";
@@ -85,7 +86,7 @@ export function RealmPage({
   const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const permission = useServerPermission();
-  const [tab, setTab] = useState<"feed" | "tags" | "members">("feed");
+  const [tab, setTab] = useState<"feed" | "wiki" | "tags" | "members">("feed");
   const [composerOpen, setComposerOpen] = useState(false);
 
   const showManage = canManageRealm({
@@ -110,6 +111,8 @@ export function RealmPage({
   const title = translation?.title ?? m.realm_untitled();
   const description = contentDocMarkdownFallback(translation?.description);
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
+  const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
+  const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
@@ -170,6 +173,7 @@ export function RealmPage({
       >
         <TabsList>
           <TabsTrigger value="feed">{m.realm_tab_feed()}</TabsTrigger>
+          {showWikiTab && <TabsTrigger value="wiki">Wiki</TabsTrigger>}
           <TabsTrigger value="tags">{m.realm_tab_tags()}</TabsTrigger>
           <TabsTrigger value="members">{m.realm_tab_members()}</TabsTrigger>
         </TabsList>
@@ -200,6 +204,15 @@ export function RealmPage({
             </aside>
           </div>
         </TabsContent>
+        {showWikiTab && (
+          <TabsContent value="wiki">
+            <RealmWikiTab
+              realmId={realmId}
+              wikiZoneUnitId={wikiZoneUnitId}
+              canManage={showManage}
+            />
+          </TabsContent>
+        )}
         <TabsContent value="tags">
           <RealmTagManager realmId={realmId} />
         </TabsContent>

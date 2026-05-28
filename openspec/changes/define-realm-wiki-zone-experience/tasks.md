@@ -65,12 +65,12 @@
 
 ## 7. Frontend Realm Surfaces
 
-- [ ] 7.1 Add a Wiki tab to the realm detail tab model when wiki functionality is enabled.
-- [ ] 7.2 Implement the realm Wiki tab as a uniform app-themed list/search surface for WIKI Post Units sent to the realm.
-- [ ] 7.3 Add top-of-tab localized action linking to the configured wiki Zone when present.
-- [ ] 7.4 Add moderator/owner setup state when the realm has no configured wiki Zone and the viewer can manage it.
-- [ ] 7.5 Ensure the realm Wiki tab does not apply Zone theme tokens.
-- [ ] 7.6 Add empty, loading, error, and permission states for the realm Wiki tab.
+- [x] 7.1 Add a Wiki tab to the realm detail tab model when wiki functionality is enabled.
+- [x] 7.2 Implement the realm Wiki tab as a uniform app-themed list/search surface for WIKI Post Units sent to the realm.
+- [x] 7.3 Add top-of-tab localized action linking to the configured wiki Zone when present.
+- [x] 7.4 Add moderator/owner setup state when the realm has no configured wiki Zone and the viewer can manage it.
+- [x] 7.5 Ensure the realm Wiki tab does not apply Zone theme tokens.
+- [x] 7.6 Add empty, loading, error, and permission states for the realm Wiki tab.
 
 ## 8. Frontend Zone Templates
 
