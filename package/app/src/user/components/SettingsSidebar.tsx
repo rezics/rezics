@@ -9,6 +9,7 @@ const i18nMessages = {
   settings_nav_tokens: () => getI18nRuntime().i18n.t("settings:nav_tokens"),
   settings_nav_preferences: () =>
     getI18nRuntime().i18n.t("settings:nav_preferences"),
+  settings_nav_library: () => getI18nRuntime().i18n.t("settings:nav_library"),
   settings_nav_entities: () => getI18nRuntime().i18n.t("settings:nav_entities"),
 } as const;
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -17,6 +18,7 @@ import {
   Mail as EmailIcon,
   IdCard as IdentityIcon,
   Key as KeyIcon,
+  Library as LibraryIcon,
   Link as LinkIcon,
   ShieldCheck as SecurityIcon,
   SlidersHorizontal as TuneIcon,
@@ -49,6 +51,11 @@ const SETTINGS_NAV = [
     label: i18nMessages.settings_nav_preferences,
     path: "preferences",
     icon: TuneIcon,
+  },
+  {
+    label: i18nMessages.settings_nav_library,
+    path: "library",
+    icon: LibraryIcon,
   },
 ] as const;
 

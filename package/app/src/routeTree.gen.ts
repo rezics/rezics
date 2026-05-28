@@ -119,6 +119,7 @@ import { Route as MainLayoutUserMeSettingTokensRouteImport } from './routes/_mai
 import { Route as MainLayoutUserMeSettingSecurityRouteImport } from './routes/_mainLayout/user/me/setting/security'
 import { Route as MainLayoutUserMeSettingProfileRouteImport } from './routes/_mainLayout/user/me/setting/profile'
 import { Route as MainLayoutUserMeSettingPreferencesRouteImport } from './routes/_mainLayout/user/me/setting/preferences'
+import { Route as MainLayoutUserMeSettingLibraryRouteImport } from './routes/_mainLayout/user/me/setting/library'
 import { Route as MainLayoutUserMeSettingConnectionsRouteImport } from './routes/_mainLayout/user/me/setting/connections'
 import { Route as MainLayoutUserMeSettingAccountRouteImport } from './routes/_mainLayout/user/me/setting/account'
 import { Route as MainLayoutUserMeEntityNewRouteImport } from './routes/_mainLayout/user/me/entity/new'
@@ -752,6 +753,12 @@ const MainLayoutUserMeSettingPreferencesRoute =
     path: '/preferences',
     getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
+const MainLayoutUserMeSettingLibraryRoute =
+  MainLayoutUserMeSettingLibraryRouteImport.update({
+    id: '/library',
+    path: '/library',
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
+  } as any)
 const MainLayoutUserMeSettingConnectionsRoute =
   MainLayoutUserMeSettingConnectionsRouteImport.update({
     id: '/connections',
@@ -976,6 +983,7 @@ export interface FileRoutesByFullPath {
   '/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
   '/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/user/me/setting/library': typeof MainLayoutUserMeSettingLibraryRoute
   '/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
   '/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
@@ -1094,6 +1102,7 @@ export interface FileRoutesByTo {
   '/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
   '/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/user/me/setting/library': typeof MainLayoutUserMeSettingLibraryRoute
   '/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
   '/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
@@ -1226,6 +1235,7 @@ export interface FileRoutesById {
   '/_mainLayout/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/_mainLayout/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
   '/_mainLayout/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/_mainLayout/user/me/setting/library': typeof MainLayoutUserMeSettingLibraryRoute
   '/_mainLayout/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
   '/_mainLayout/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/_mainLayout/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
@@ -1357,6 +1367,7 @@ export interface FileRouteTypes {
     | '/user/me/entity/new'
     | '/user/me/setting/account'
     | '/user/me/setting/connections'
+    | '/user/me/setting/library'
     | '/user/me/setting/preferences'
     | '/user/me/setting/profile'
     | '/user/me/setting/security'
@@ -1475,6 +1486,7 @@ export interface FileRouteTypes {
     | '/user/me/entity/new'
     | '/user/me/setting/account'
     | '/user/me/setting/connections'
+    | '/user/me/setting/library'
     | '/user/me/setting/preferences'
     | '/user/me/setting/profile'
     | '/user/me/setting/security'
@@ -1606,6 +1618,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/me/entity/new'
     | '/_mainLayout/user/me/setting/account'
     | '/_mainLayout/user/me/setting/connections'
+    | '/_mainLayout/user/me/setting/library'
     | '/_mainLayout/user/me/setting/preferences'
     | '/_mainLayout/user/me/setting/profile'
     | '/_mainLayout/user/me/setting/security'
@@ -2405,6 +2418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserMeSettingPreferencesRouteImport
       parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
+    '/_mainLayout/user/me/setting/library': {
+      id: '/_mainLayout/user/me/setting/library'
+      path: '/library'
+      fullPath: '/user/me/setting/library'
+      preLoaderRoute: typeof MainLayoutUserMeSettingLibraryRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
+    }
     '/_mainLayout/user/me/setting/connections': {
       id: '/_mainLayout/user/me/setting/connections'
       path: '/connections'
@@ -2642,6 +2662,7 @@ const MainLayoutBookBookIdRouteRouteWithChildren =
 interface MainLayoutUserMeSettingRouteRouteChildren {
   MainLayoutUserMeSettingAccountRoute: typeof MainLayoutUserMeSettingAccountRoute
   MainLayoutUserMeSettingConnectionsRoute: typeof MainLayoutUserMeSettingConnectionsRoute
+  MainLayoutUserMeSettingLibraryRoute: typeof MainLayoutUserMeSettingLibraryRoute
   MainLayoutUserMeSettingPreferencesRoute: typeof MainLayoutUserMeSettingPreferencesRoute
   MainLayoutUserMeSettingProfileRoute: typeof MainLayoutUserMeSettingProfileRoute
   MainLayoutUserMeSettingSecurityRoute: typeof MainLayoutUserMeSettingSecurityRoute
@@ -2654,6 +2675,7 @@ const MainLayoutUserMeSettingRouteRouteChildren: MainLayoutUserMeSettingRouteRou
     MainLayoutUserMeSettingAccountRoute: MainLayoutUserMeSettingAccountRoute,
     MainLayoutUserMeSettingConnectionsRoute:
       MainLayoutUserMeSettingConnectionsRoute,
+    MainLayoutUserMeSettingLibraryRoute: MainLayoutUserMeSettingLibraryRoute,
     MainLayoutUserMeSettingPreferencesRoute:
       MainLayoutUserMeSettingPreferencesRoute,
     MainLayoutUserMeSettingProfileRoute: MainLayoutUserMeSettingProfileRoute,

@@ -171,5 +171,17 @@
   "profile_followers_count": "{count}Follower",
   "profile_reactions_given": "Gegeben",
   "profile_reactions_received": "Erhalten",
-  "bookshelf_use_my_settings": "Meine Einstellungen verwenden"
+  "bookshelf_use_my_settings": "Meine Einstellungen verwenden",
+  "nav_library": "Bibliotheksanzeige",
+  "library_title": "Bücherregal-Raster",
+  "library_description": "Wähle, wie viele Cover pro Zeile bei welcher Bildschirmbreite erscheinen und ob Titel unter den Covern angezeigt werden.",
+  "library_show_title": "Titel unter Covern anzeigen",
+  "library_columns": "Spalten",
+  "library_reset": "Auf Standard zurücksetzen",
+  "library_saved": "Gespeichert",
+  "library_bp_mobile": "Mobil",
+  "library_bp_small": "Klein",
+  "library_bp_medium": "Mittel",
+  "library_bp_large": "Groß",
+  "library_bp_wide": "Breit"
 }

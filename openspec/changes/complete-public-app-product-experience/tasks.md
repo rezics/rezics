@@ -65,7 +65,7 @@
 - [ ] 8.2 Surface an activity timeline on profile using existing reaction/post/shelf events; respect privacy.
 - [ ] 8.3 Add settings sub-pages for blocked users, data export, and account deletion entry points.
 - [ ] 8.4 Detail notification-preference UI (per-kind toggles) on `settings/preferences`; persist through typed mutation.
-- [ ] 8.5 Add a library-display preference sub-page that edits `userSettings.library.bookshelf` (breakpoint columns + showTitle) with a reset-to-default action; persist through the typed userSettings mutation.
+- [x] 8.5 Add a library-display preference sub-page that edits `userSettings.library.bookshelf` (breakpoint columns + showTitle) with a reset-to-default action; persist through the typed userSettings mutation.
 
 ## 9. Quality, A11y, i18n, Responsive
 

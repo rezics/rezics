@@ -171,5 +171,17 @@
   "profile_followers_count": "{count}명 팔로워",
   "profile_reactions_given": "주어진",
   "profile_reactions_received": "받았다",
-  "bookshelf_use_my_settings": "내 설정 사용"
+  "bookshelf_use_my_settings": "내 설정 사용",
+  "nav_library": "라이브러리 표시",
+  "library_title": "책장 그리드",
+  "library_description": "각 화면 너비에서 한 줄에 표시할 표지 수와 표지 아래 제목 표시 여부를 선택합니다.",
+  "library_show_title": "표지 아래 제목 표시",
+  "library_columns": "열 수",
+  "library_reset": "기본값으로 재설정",
+  "library_saved": "저장됨",
+  "library_bp_mobile": "모바일",
+  "library_bp_small": "작게",
+  "library_bp_medium": "보통",
+  "library_bp_large": "크게",
+  "library_bp_wide": "넓게"
 }

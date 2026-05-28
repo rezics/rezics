@@ -171,5 +171,17 @@
   "profile_followers_count": "{count}關注者",
   "profile_reactions_given": "已給出",
   "profile_reactions_received": "收到的",
-  "bookshelf_use_my_settings": "使用我的設定"
+  "bookshelf_use_my_settings": "使用我的設定",
+  "nav_library": "書庫顯示",
+  "library_title": "書架網格",
+  "library_description": "選擇各螢幕寬度下每列顯示的封面數量，以及是否在封面下方顯示標題。",
+  "library_show_title": "在封面下方顯示標題",
+  "library_columns": "欄數",
+  "library_reset": "重設為預設值",
+  "library_saved": "已儲存",
+  "library_bp_mobile": "手機",
+  "library_bp_small": "小",
+  "library_bp_medium": "中",
+  "library_bp_large": "大",
+  "library_bp_wide": "寬"
 }

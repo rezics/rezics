@@ -171,5 +171,17 @@
   "profile_followers_count": "{count} followers",
   "profile_reactions_given": "Given",
   "profile_reactions_received": "Received",
-  "bookshelf_use_my_settings": "Use my settings"
+  "bookshelf_use_my_settings": "Use my settings",
+  "nav_library": "Library display",
+  "library_title": "Bookshelf grid",
+  "library_description": "Choose how many covers per row at each screen size, and whether titles appear under covers.",
+  "library_show_title": "Show titles under covers",
+  "library_columns": "Columns",
+  "library_reset": "Reset to default",
+  "library_saved": "Saved",
+  "library_bp_mobile": "Mobile",
+  "library_bp_small": "Small",
+  "library_bp_medium": "Medium",
+  "library_bp_large": "Large",
+  "library_bp_wide": "Wide"
 }

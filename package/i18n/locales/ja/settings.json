@@ -171,5 +171,17 @@
   "profile_followers_count": "{count}人のフォロワー",
   "profile_reactions_given": "与えられた",
   "profile_reactions_received": "受け取った",
-  "bookshelf_use_my_settings": "自分の設定を使用"
+  "bookshelf_use_my_settings": "自分の設定を使用",
+  "nav_library": "ライブラリ表示",
+  "library_title": "本棚グリッド",
+  "library_description": "各画面幅で1行あたりに表示する表紙の数と、表紙の下にタイトルを表示するかを選びます。",
+  "library_show_title": "表紙の下にタイトルを表示",
+  "library_columns": "列数",
+  "library_reset": "既定値に戻す",
+  "library_saved": "保存しました",
+  "library_bp_mobile": "モバイル",
+  "library_bp_small": "小",
+  "library_bp_medium": "中",
+  "library_bp_large": "大",
+  "library_bp_wide": "ワイド"
 }
