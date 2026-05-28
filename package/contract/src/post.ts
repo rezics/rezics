@@ -126,6 +126,18 @@ export const postListQuerySchema = t.Object({
   workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
+  /** Moderator realm feed lifecycle filter. Regular callers are always visible-only. */
+  realmLifecycleState: t.Optional(
+    t.Union([
+      t.Literal("visible"),
+      t.Literal("hidden"),
+      t.Literal("tombstoned"),
+      t.Literal("locked"),
+      t.Literal("archived"),
+      t.Literal("removed"),
+      t.Literal("all"),
+    ]),
+  ),
   rootPostUnitId: t.Optional(t.String()),
   /** Post Unit ID to use as the anchor for descendant subtree queries. */
   subtreeRootPostUnitId: t.Optional(t.String()),
@@ -170,6 +182,18 @@ export const postListBodySchema = t.Object({
   workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
+  /** Moderator realm feed lifecycle filter. Regular callers are always visible-only. */
+  realmLifecycleState: t.Optional(
+    t.Union([
+      t.Literal("visible"),
+      t.Literal("hidden"),
+      t.Literal("tombstoned"),
+      t.Literal("locked"),
+      t.Literal("archived"),
+      t.Literal("removed"),
+      t.Literal("all"),
+    ]),
+  ),
   rootPostUnitId: t.Optional(t.String()),
   /** Post Unit ID to use as the anchor for descendant subtree queries. */
   subtreeRootPostUnitId: t.Optional(t.String()),

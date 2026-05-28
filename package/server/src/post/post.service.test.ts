@@ -639,6 +639,43 @@ describe("PostService.byRealm", () => {
     ).toBeUndefined();
   });
 
+  test("admin realm feed can filter archived lifecycle overlays", async () => {
+    resetMocks();
+
+    await service.byRealm(
+      "realm-1",
+      { realmLifecycleState: "archived" },
+      { isAdmin: true },
+    );
+
+    expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
+      some: { realmUnitId: "realm-1" },
+    });
+    expect(firstPostFindManyArgs().where.unit.realmModerationTargets).toEqual({
+      some: {
+        realmUnitId: "realm-1",
+        state: "ARCHIVED",
+      },
+    });
+  });
+
+  test("admin realm feed can filter visible lifecycle rows", async () => {
+    resetMocks();
+
+    await service.byRealm(
+      "realm-1",
+      { realmLifecycleState: "visible" },
+      { isAdmin: true },
+    );
+
+    expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
+      some: { realmUnitId: "realm-1", state: "VISIBLE" },
+    });
+    expect(
+      firstPostFindManyArgs().where.unit.realmModerationTargets,
+    ).toBeUndefined();
+  });
+
   test("filters through UnitWork for work-domain feeds", async () => {
     resetMocks();
 

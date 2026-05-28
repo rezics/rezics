@@ -77,8 +77,17 @@ describe("post work-domain contract fields", () => {
         targetUnitId: "release-1",
         workUnitId: "work-1",
         workRoles: ["POST", "REVIEW"],
+        realmLifecycleState: "archived",
         limit: 20,
       }),
     ).toBe(true);
+
+    expect(
+      Value.Check(postListQuerySchema, {
+        realmUnitId: "realm-1",
+        realmLifecycleState: "quarantined",
+        limit: 20,
+      }),
+    ).toBe(false);
   });
 });

@@ -90,6 +90,13 @@ const REALM_REPLY_BLOCKING_MODERATION_STATES = [
   "REMOVED",
 ] as const;
 
+function realmLifecycleStateFilter(
+  state: PostListQuery["realmLifecycleState"],
+) {
+  if (!state || state === "all") return undefined;
+  return state.toUpperCase();
+}
+
 export class PostService {
   /**
    * List posts with support for flat and threaded modes.
@@ -202,6 +209,7 @@ export class PostService {
     const skipNum = opts.start ?? 0;
     const sort = opts.sort === "top" || opts.sort === "hot" ? opts.sort : "new";
     const tagIds = this.normalizeTagIds(opts.tagIds);
+    const lifecycleState = realmLifecycleStateFilter(opts.realmLifecycleState);
 
     const where: Prisma.PostWhereInput = {
       unit: {
@@ -209,21 +217,34 @@ export class PostService {
         inRealms: {
           some: {
             realmUnitId,
-            ...(options?.isAdmin ? {} : { state: "VISIBLE" as const }),
+            ...(options?.isAdmin
+              ? lifecycleState && lifecycleState === "VISIBLE"
+                ? { state: lifecycleState as any }
+                : {}
+              : { state: "VISIBLE" as const }),
           },
         },
-        ...(options?.isAdmin
-          ? {}
-          : {
+        ...(options?.isAdmin && lifecycleState && lifecycleState !== "VISIBLE"
+          ? {
               realmModerationTargets: {
-                none: {
+                some: {
                   realmUnitId,
-                  state: {
-                    in: REALM_FEED_EXCLUDED_MODERATION_STATES as any,
-                  },
+                  state: lifecycleState as any,
                 },
               },
-            }),
+            }
+          : options?.isAdmin
+            ? {}
+            : {
+                realmModerationTargets: {
+                  none: {
+                    realmUnitId,
+                    state: {
+                      in: REALM_FEED_EXCLUDED_MODERATION_STATES as any,
+                    },
+                  },
+                },
+              }),
         ...(tagIds.length > 0
           ? {
               OR: [
