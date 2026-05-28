@@ -6,7 +6,11 @@ import type {
   RealmSearchDocument,
   UserSearchDocument,
 } from "@rezics/contract";
-import { mainMarkdownSource, readCoverUrlFromExtra } from "@rezics/contract";
+import {
+  mainMarkdownSource,
+  RATING_TAGS,
+  readCoverUrlFromExtra,
+} from "@rezics/contract";
 import {
   type Prisma,
   type PrismaClient,
@@ -56,6 +60,20 @@ function pickCoverUrlFromTranslations(
     if (url) return url;
   }
   return null;
+}
+
+function toIsoString(value: unknown): string | null {
+  if (!value) return null;
+  return value instanceof Date ? value.toISOString() : String(value);
+}
+
+function mapGameSystemRequirementSummary(row: any) {
+  return {
+    platformEntityId: row.platformEntityId ?? null,
+    tier: row.tier,
+    language: row.language ?? null,
+    hardware: row.hardware,
+  };
 }
 
 const BATCH_SIZE = 5000;
@@ -110,6 +128,7 @@ const SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES = [
   "ARCHIVED",
   "REMOVED",
 ] as string[];
+const RATING_TAG_SLUGS = new Set<string>(RATING_TAGS);
 
 function publicSearchableUnitWhere(): Prisma.UnitWhereInput {
   return {
@@ -298,8 +317,20 @@ const contentInclude: any = {
     orderBy: { sortOrder: "asc" as const },
   },
   book: true,
-  game: { include: { platforms: true } },
+  game: {
+    include: {
+      systemRequirements: {
+        orderBy: [
+          { platformEntityId: "asc" as const },
+          { tier: "asc" as const },
+        ],
+      },
+    },
+  },
   media: true,
+  ownedContentStructure: {
+    select: { id: true },
+  },
   shelf: { include: { units: { select: { unitId: true } } } },
   seriesContentIndexesAsRelease: {
     include: {
@@ -428,6 +459,24 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const subjectRoles = [
     ...new Set(subjectAttributions.map((a: any) => a.role).filter(Boolean)),
   ];
+  const platformEntityIds =
+    unit.type === "GAME"
+      ? subjectAttributions
+          .filter((a: any) => a.role === "available_on")
+          .map((a: any) => a.entityId)
+      : undefined;
+  const ratingTagUnitIds =
+    unit.type === "GAME" || unit.type === "MEDIA"
+      ? unitTags
+          .filter((ut: any) => RATING_TAG_SLUGS.has(ut.tag?.slug))
+          .map((ut: any) => ut.tagUnitId)
+      : undefined;
+  const gameSystemRequirementSummaries =
+    unit.type === "GAME"
+      ? (unit.game?.systemRequirements ?? []).map(
+          mapGameSystemRequirementSummary,
+        )
+      : undefined;
 
   // Type extension fields
   const ext = unit.book ?? unit.game ?? unit.media ?? null;
@@ -444,6 +493,22 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   // Post kind + book textLength for search filters
   const postKind = unit.post?.kind ?? null;
   const textLength = unit.book?.textLength ?? null;
+  const gameReleaseDate =
+    unit.type === "GAME" ? toIsoString(unit.game?.releaseDate) : undefined;
+  const gameVersionLabel =
+    unit.type === "GAME" ? (unit.game?.versionLabel ?? null) : undefined;
+  const mediaReleaseDate =
+    unit.type === "MEDIA" ? toIsoString(unit.media?.releaseDate) : undefined;
+  const mediaKindKey =
+    unit.type === "MEDIA" ? (unit.media?.kindKey ?? null) : undefined;
+  const mediaRuntimeMinutes =
+    unit.type === "MEDIA" ? (unit.media?.runtimeMinutes ?? null) : undefined;
+  const mediaEpisodeCount =
+    unit.type === "MEDIA" ? (unit.media?.episodeCount ?? null) : undefined;
+  const mediaSeasonCount =
+    unit.type === "MEDIA" ? (unit.media?.seasonCount ?? null) : undefined;
+  const mediaContentStructureAvailable =
+    unit.type === "MEDIA" ? Boolean(unit.ownedContentStructure) : undefined;
 
   // Shelf membership: list of unit ids contained in this shelf (SHELF type only)
   const containedUnitIds: string[] | undefined =
@@ -465,6 +530,21 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     subjectEntityIds,
     subjectKinds,
     subjectRoles,
+    ...(platformEntityIds !== undefined ? { platformEntityIds } : {}),
+    ...(ratingTagUnitIds !== undefined ? { ratingTagUnitIds } : {}),
+    ...(gameSystemRequirementSummaries !== undefined
+      ? { gameSystemRequirementSummaries }
+      : {}),
+    ...(gameReleaseDate !== undefined ? { gameReleaseDate } : {}),
+    ...(gameVersionLabel !== undefined ? { gameVersionLabel } : {}),
+    ...(mediaKindKey !== undefined ? { mediaKindKey } : {}),
+    ...(mediaReleaseDate !== undefined ? { mediaReleaseDate } : {}),
+    ...(mediaRuntimeMinutes !== undefined ? { mediaRuntimeMinutes } : {}),
+    ...(mediaEpisodeCount !== undefined ? { mediaEpisodeCount } : {}),
+    ...(mediaSeasonCount !== undefined ? { mediaSeasonCount } : {}),
+    ...(mediaContentStructureAvailable !== undefined
+      ? { mediaContentStructureAvailable }
+      : {}),
     tagLabels,
     aliasValues,
     tagIds,

@@ -111,6 +111,12 @@ export async function searchContent(
     }
   }
 
+  if (opts.platformEntityIds?.length) {
+    for (const platformEntityId of opts.platformEntityIds) {
+      filter.push(`platformEntityIds = "${platformEntityId}"`);
+    }
+  }
+
   // Realm filter
   if (opts.realmId) {
     filter.push(`realmIds = "${opts.realmId}"`);

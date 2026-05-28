@@ -80,4 +80,97 @@ describe("ranking search projections", () => {
     expect(post.commentHotScore).toBe(0);
     expect(post.commentRankUpdatedAt).toBeNull();
   });
+
+  test("content document builder projects GAME and MEDIA metadata", async () => {
+    setServerEnvForSearchTests();
+    const { buildContentDocument } = await import("./sync");
+
+    const game = buildContentDocument({
+      id: "game-1",
+      type: "GAME",
+      translations: [],
+      aliases: [],
+      unitTags: [
+        {
+          tagUnitId: "tag-esrb-teen",
+          score: 0,
+          pinned: true,
+          tag: { slug: "esrb-teen", translations: [] },
+        },
+      ],
+      workMemberships: [{ role: "RELEASE", workUnitId: "work-1" }],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      subjectAttributions: [
+        { role: "available_on", entityId: "platform-windows" },
+        { role: "setting", entityId: "universe-1" },
+      ],
+      game: {
+        releaseDate: new Date("2024-03-15T00:00:00.000Z"),
+        versionLabel: "Definitive Edition",
+        systemRequirements: [
+          {
+            platformEntityId: "platform-windows",
+            tier: "minimum",
+            language: "en",
+            hardware: { cpuSlugs: ["cpu:intel-core-i5"] },
+          },
+        ],
+      },
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      publishedAt: null,
+      defaultLanguage: null,
+    });
+    const media = buildContentDocument({
+      id: "media-1",
+      type: "MEDIA",
+      translations: [],
+      aliases: [],
+      unitTags: [
+        {
+          tagUnitId: "tag-tv-14",
+          score: 0,
+          pinned: true,
+          tag: { slug: "tv-14", translations: [] },
+        },
+      ],
+      workMemberships: [],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      subjectAttributions: [],
+      media: {
+        kindKey: "movie",
+        releaseDate: "2024-04-01T00:00:00.000Z",
+        runtimeMinutes: 120,
+        episodeCount: null,
+        seasonCount: null,
+      },
+      ownedContentStructure: { id: "structure-1" },
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      publishedAt: null,
+      defaultLanguage: null,
+    });
+
+    expect(game.platformEntityIds).toEqual(["platform-windows"]);
+    expect(game.ratingTagUnitIds).toEqual(["tag-esrb-teen"]);
+    expect(game.gameReleaseDate).toBe("2024-03-15T00:00:00.000Z");
+    expect(game.gameVersionLabel).toBe("Definitive Edition");
+    expect(game.gameSystemRequirementSummaries).toEqual([
+      {
+        platformEntityId: "platform-windows",
+        tier: "minimum",
+        language: "en",
+        hardware: { cpuSlugs: ["cpu:intel-core-i5"] },
+      },
+    ]);
+    expect(media.ratingTagUnitIds).toEqual(["tag-tv-14"]);
+    expect(media.mediaKindKey).toBe("movie");
+    expect(media.mediaReleaseDate).toBe("2024-04-01T00:00:00.000Z");
+    expect(media.mediaRuntimeMinutes).toBe(120);
+    expect(media.mediaContentStructureAvailable).toBe(true);
+  });
 });

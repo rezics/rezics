@@ -29,12 +29,12 @@
 
 ## 4. Search And Job Runner
 
-- [ ] 4.1 Update `package/search` content document builders to project GAME platform Entity ids, external rating tag ids, release metadata, and system requirement summaries.
-- [ ] 4.2 Update MEDIA search projection for kind key, external rating tag ids, runtime summary, release metadata, and content-structure availability.
-- [ ] 4.3 Update Meilisearch filterable/sortable attributes for new GAME/MEDIA projected fields.
-- [ ] 4.4 Update server content search API filters to apply `platformEntityIds` and route age-rating filtering through the existing rating tag filter.
+- [x] 4.1 Update `package/search` content document builders to project GAME platform Entity ids, external rating tag ids, release metadata, and system requirement summaries.
+- [x] 4.2 Update MEDIA search projection for kind key, external rating tag ids, runtime summary, release metadata, and content-structure availability.
+- [x] 4.3 Update Meilisearch filterable/sortable attributes for new GAME/MEDIA projected fields.
+- [x] 4.4 Update server content search API filters to apply `platformEntityIds` and route age-rating filtering through the existing rating tag filter.
 - [ ] 4.5 Add job-runner repair paths for platform/rating backfill drift and GAME/MEDIA search document rebuilds.
-- [ ] 4.6 Add search tests covering platform filter, rating tag filter, work grouping, and GAME/MEDIA result metadata.
+- [x] 4.6 Add search tests covering platform filter, rating tag filter, work grouping, and GAME/MEDIA result metadata.
 - [ ] 4.7 Adopt the exact-vs-work-domain list/search naming from `clarify-release-vs-work-list-scopes` (`*UnitId`/`containsUnitId` exact, `*WorkUnitId`/`containsWorkUnitId` work-domain) in GAME/MEDIA surfaces, and reuse `containsReleaseUnitId`/`relatedWorkUnitId` for Series/franchise lookups.
 
 ## 5. Content Structure Integration

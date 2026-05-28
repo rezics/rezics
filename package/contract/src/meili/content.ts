@@ -69,8 +69,13 @@ export const ContentSearchDocumentSchema = t.Object({
   gameSystemRequirementSummaries: t.Optional(
     t.Array(gameSystemRequirementSummarySchema),
   ),
+  gameReleaseDate: t.Optional(t.Union([t.String(), t.Null()])),
+  gameVersionLabel: t.Optional(t.Union([t.String(), t.Null()])),
   mediaKindKey: t.Optional(t.Union([t.String(), t.Null()])),
+  mediaReleaseDate: t.Optional(t.Union([t.String(), t.Null()])),
   mediaRuntimeMinutes: t.Optional(t.Union([t.Number(), t.Null()])),
+  mediaEpisodeCount: t.Optional(t.Union([t.Number(), t.Null()])),
+  mediaSeasonCount: t.Optional(t.Union([t.Number(), t.Null()])),
   mediaContentStructureAvailable: t.Optional(t.Boolean()),
 
   // Filterable: realm system (from UnitRealm)

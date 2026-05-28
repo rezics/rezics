@@ -18,7 +18,18 @@ describe("expected Meilisearch work-domain settings", () => {
         "workRoles",
         "seriesUnitIds",
         "seriesKindKeys",
+        "platformEntityIds",
+        "ratingTagUnitIds",
+        "mediaKindKey",
+        "mediaContentStructureAvailable",
         "aiDisclosureMode",
+      ]),
+    );
+    expect(content.sortableAttributes).toEqual(
+      expect.arrayContaining([
+        "gameReleaseDate",
+        "mediaReleaseDate",
+        "mediaRuntimeMinutes",
       ]),
     );
   });

@@ -34,15 +34,17 @@ describe("searchContent work-domain behavior", () => {
 
   test("filters tags through allTagIds and supports work-domain filters", async () => {
     await searchContent({
-      tagIds: ["tag-1"],
+      tagIds: ["tag-esrb-teen"],
       workUnitId: "work-1",
       workRoles: ["RELEASE"],
+      platformEntityIds: ["platform-windows"],
     });
 
     expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
-      'allTagIds = "tag-1"',
+      'allTagIds = "tag-esrb-teen"',
       'workUnitId = "work-1"',
       'workRoles = "RELEASE"',
+      'platformEntityIds = "platform-windows"',
       'visibility = "PUBLIC"',
     ]);
   });
