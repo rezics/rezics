@@ -13,10 +13,6 @@ import { Route as MainLayoutRouteImport } from './routes/_mainLayout'
 import { Route as EditorRouteImport } from './routes/_editor'
 import { Route as MainLayoutIndexRouteImport } from './routes/_mainLayout/index'
 import { Route as MainLayoutThemeSwitchRouteImport } from './routes/_mainLayout/theme-switch'
-import { Route as MainLayoutTest03RouteImport } from './routes/_mainLayout/test03'
-import { Route as MainLayoutTest02RouteImport } from './routes/_mainLayout/test02'
-import { Route as MainLayoutTestLinksRouteImport } from './routes/_mainLayout/test-links'
-import { Route as MainLayoutTestRouteImport } from './routes/_mainLayout/test'
 import { Route as MainLayoutResetPasswordRouteImport } from './routes/_mainLayout/reset-password'
 import { Route as MainLayoutRegisterRouteImport } from './routes/_mainLayout/register'
 import { Route as MainLayoutNoticeRouteImport } from './routes/_mainLayout/notice'
@@ -111,6 +107,7 @@ import { Route as MainLayoutTagDomainUnitIdRouteRouteImport } from './routes/_ma
 import { Route as MainLayoutTagBookBookIdRouteRouteImport } from './routes/_mainLayout/tag/book/$bookId/route'
 import { Route as EditorBookBookIdEditRouteRouteImport } from './routes/_editor/book/$bookId/edit/route'
 import { Route as BookBookIdReadChapterIdIndexRouteImport } from './routes/book_/$bookId/read/$chapterId/index'
+import { Route as BookBookIdNodeNodeIdIndexRouteImport } from './routes/book_/$bookId/node/$nodeId/index'
 import { Route as MainLayoutUserMeSettingIndexRouteImport } from './routes/_mainLayout/user/me/setting/index'
 import { Route as MainLayoutUserMeEntityIndexRouteImport } from './routes/_mainLayout/user/me/entity/index'
 import { Route as MainLayoutTagDomainUnitIdIndexRouteImport } from './routes/_mainLayout/tag/domain/$unitId/index'
@@ -156,26 +153,6 @@ const MainLayoutIndexRoute = MainLayoutIndexRouteImport.update({
 const MainLayoutThemeSwitchRoute = MainLayoutThemeSwitchRouteImport.update({
   id: '/theme-switch',
   path: '/theme-switch',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
-const MainLayoutTest03Route = MainLayoutTest03RouteImport.update({
-  id: '/test03',
-  path: '/test03',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
-const MainLayoutTest02Route = MainLayoutTest02RouteImport.update({
-  id: '/test02',
-  path: '/test02',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
-const MainLayoutTestLinksRoute = MainLayoutTestLinksRouteImport.update({
-  id: '/test-links',
-  path: '/test-links',
-  getParentRoute: () => MainLayoutRoute,
-} as any)
-const MainLayoutTestRoute = MainLayoutTestRouteImport.update({
-  id: '/test',
-  path: '/test',
   getParentRoute: () => MainLayoutRoute,
 } as any)
 const MainLayoutResetPasswordRoute = MainLayoutResetPasswordRouteImport.update({
@@ -703,6 +680,12 @@ const BookBookIdReadChapterIdIndexRoute =
     path: '/',
     getParentRoute: () => BookBookIdReadChapterIdRouteRoute,
   } as any)
+const BookBookIdNodeNodeIdIndexRoute =
+  BookBookIdNodeNodeIdIndexRouteImport.update({
+    id: '/book_/$bookId/node/$nodeId/',
+    path: '/book/$bookId/node/$nodeId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MainLayoutUserMeSettingIndexRoute =
   MainLayoutUserMeSettingIndexRouteImport.update({
     id: '/',
@@ -878,10 +861,6 @@ export interface FileRoutesByFullPath {
   '/notice': typeof MainLayoutNoticeRoute
   '/register': typeof MainLayoutRegisterRoute
   '/reset-password': typeof MainLayoutResetPasswordRoute
-  '/test': typeof MainLayoutTestRoute
-  '/test-links': typeof MainLayoutTestLinksRoute
-  '/test02': typeof MainLayoutTest02Route
-  '/test03': typeof MainLayoutTest03Route
   '/theme-switch': typeof MainLayoutThemeSwitchRoute
   '/book/$bookId': typeof MainLayoutBookBookIdRouteRouteWithChildren
   '/user/me': typeof MainLayoutUserMeRouteRouteWithChildren
@@ -992,6 +971,7 @@ export interface FileRoutesByFullPath {
   '/tag/domain/$unitId/': typeof MainLayoutTagDomainUnitIdIndexRoute
   '/user/me/entity/': typeof MainLayoutUserMeEntityIndexRoute
   '/user/me/setting/': typeof MainLayoutUserMeSettingIndexRoute
+  '/book/$bookId/node/$nodeId/': typeof BookBookIdNodeNodeIdIndexRoute
   '/book/$bookId/read/$chapterId/': typeof BookBookIdReadChapterIdIndexRoute
   '/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
@@ -1008,10 +988,6 @@ export interface FileRoutesByTo {
   '/notice': typeof MainLayoutNoticeRoute
   '/register': typeof MainLayoutRegisterRoute
   '/reset-password': typeof MainLayoutResetPasswordRoute
-  '/test': typeof MainLayoutTestRoute
-  '/test-links': typeof MainLayoutTestLinksRoute
-  '/test02': typeof MainLayoutTest02Route
-  '/test03': typeof MainLayoutTest03Route
   '/theme-switch': typeof MainLayoutThemeSwitchRoute
   '/book/new': typeof MainLayoutBookNewRoute
   '/book/search': typeof MainLayoutBookSearchRoute
@@ -1111,6 +1087,7 @@ export interface FileRoutesByTo {
   '/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdIndexRoute
   '/user/me/entity': typeof MainLayoutUserMeEntityIndexRoute
   '/user/me/setting': typeof MainLayoutUserMeSettingIndexRoute
+  '/book/$bookId/node/$nodeId': typeof BookBookIdNodeNodeIdIndexRoute
   '/book/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdIndexRoute
   '/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
@@ -1129,10 +1106,6 @@ export interface FileRoutesById {
   '/_mainLayout/notice': typeof MainLayoutNoticeRoute
   '/_mainLayout/register': typeof MainLayoutRegisterRoute
   '/_mainLayout/reset-password': typeof MainLayoutResetPasswordRoute
-  '/_mainLayout/test': typeof MainLayoutTestRoute
-  '/_mainLayout/test-links': typeof MainLayoutTestLinksRoute
-  '/_mainLayout/test02': typeof MainLayoutTest02Route
-  '/_mainLayout/test03': typeof MainLayoutTest03Route
   '/_mainLayout/theme-switch': typeof MainLayoutThemeSwitchRoute
   '/_mainLayout/': typeof MainLayoutIndexRoute
   '/_mainLayout/book/$bookId': typeof MainLayoutBookBookIdRouteRouteWithChildren
@@ -1244,6 +1217,7 @@ export interface FileRoutesById {
   '/_mainLayout/tag/domain/$unitId/': typeof MainLayoutTagDomainUnitIdIndexRoute
   '/_mainLayout/user/me/entity/': typeof MainLayoutUserMeEntityIndexRoute
   '/_mainLayout/user/me/setting/': typeof MainLayoutUserMeSettingIndexRoute
+  '/book_/$bookId/node/$nodeId/': typeof BookBookIdNodeNodeIdIndexRoute
   '/book_/$bookId/read/$chapterId/': typeof BookBookIdReadChapterIdIndexRoute
   '/_editor/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/_editor/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
@@ -1262,10 +1236,6 @@ export interface FileRouteTypes {
     | '/notice'
     | '/register'
     | '/reset-password'
-    | '/test'
-    | '/test-links'
-    | '/test02'
-    | '/test03'
     | '/theme-switch'
     | '/book/$bookId'
     | '/user/me'
@@ -1376,6 +1346,7 @@ export interface FileRouteTypes {
     | '/tag/domain/$unitId/'
     | '/user/me/entity/'
     | '/user/me/setting/'
+    | '/book/$bookId/node/$nodeId/'
     | '/book/$bookId/read/$chapterId/'
     | '/book/$bookId/edit/history/$sequence'
     | '/post/$rootPostUnitId/continue/$unitId/edit'
@@ -1392,10 +1363,6 @@ export interface FileRouteTypes {
     | '/notice'
     | '/register'
     | '/reset-password'
-    | '/test'
-    | '/test-links'
-    | '/test02'
-    | '/test03'
     | '/theme-switch'
     | '/book/new'
     | '/book/search'
@@ -1495,6 +1462,7 @@ export interface FileRouteTypes {
     | '/tag/domain/$unitId'
     | '/user/me/entity'
     | '/user/me/setting'
+    | '/book/$bookId/node/$nodeId'
     | '/book/$bookId/read/$chapterId'
     | '/book/$bookId/edit/history/$sequence'
     | '/post/$rootPostUnitId/continue/$unitId/edit'
@@ -1512,10 +1480,6 @@ export interface FileRouteTypes {
     | '/_mainLayout/notice'
     | '/_mainLayout/register'
     | '/_mainLayout/reset-password'
-    | '/_mainLayout/test'
-    | '/_mainLayout/test-links'
-    | '/_mainLayout/test02'
-    | '/_mainLayout/test03'
     | '/_mainLayout/theme-switch'
     | '/_mainLayout/'
     | '/_mainLayout/book/$bookId'
@@ -1627,6 +1591,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/tag/domain/$unitId/'
     | '/_mainLayout/user/me/entity/'
     | '/_mainLayout/user/me/setting/'
+    | '/book_/$bookId/node/$nodeId/'
     | '/book_/$bookId/read/$chapterId/'
     | '/_editor/book/$bookId/edit/history/$sequence'
     | '/_editor/post/$rootPostUnitId/continue/$unitId/edit'
@@ -1641,6 +1606,7 @@ export interface RootRouteChildren {
   EditorRoute: typeof EditorRouteWithChildren
   MainLayoutRoute: typeof MainLayoutRouteWithChildren
   BookBookIdReadChapterIdRouteRoute: typeof BookBookIdReadChapterIdRouteRouteWithChildren
+  BookBookIdNodeNodeIdIndexRoute: typeof BookBookIdNodeNodeIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1671,34 +1637,6 @@ declare module '@tanstack/react-router' {
       path: '/theme-switch'
       fullPath: '/theme-switch'
       preLoaderRoute: typeof MainLayoutThemeSwitchRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
-    '/_mainLayout/test03': {
-      id: '/_mainLayout/test03'
-      path: '/test03'
-      fullPath: '/test03'
-      preLoaderRoute: typeof MainLayoutTest03RouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
-    '/_mainLayout/test02': {
-      id: '/_mainLayout/test02'
-      path: '/test02'
-      fullPath: '/test02'
-      preLoaderRoute: typeof MainLayoutTest02RouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
-    '/_mainLayout/test-links': {
-      id: '/_mainLayout/test-links'
-      path: '/test-links'
-      fullPath: '/test-links'
-      preLoaderRoute: typeof MainLayoutTestLinksRouteImport
-      parentRoute: typeof MainLayoutRoute
-    }
-    '/_mainLayout/test': {
-      id: '/_mainLayout/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof MainLayoutTestRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/reset-password': {
@@ -2359,6 +2297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookBookIdReadChapterIdIndexRouteImport
       parentRoute: typeof BookBookIdReadChapterIdRouteRoute
     }
+    '/book_/$bookId/node/$nodeId/': {
+      id: '/book_/$bookId/node/$nodeId/'
+      path: '/book/$bookId/node/$nodeId'
+      fullPath: '/book/$bookId/node/$nodeId/'
+      preLoaderRoute: typeof BookBookIdNodeNodeIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_mainLayout/user/me/setting/': {
       id: '/_mainLayout/user/me/setting/'
       path: '/'
@@ -2832,10 +2777,6 @@ interface MainLayoutRouteChildren {
   MainLayoutNoticeRoute: typeof MainLayoutNoticeRoute
   MainLayoutRegisterRoute: typeof MainLayoutRegisterRoute
   MainLayoutResetPasswordRoute: typeof MainLayoutResetPasswordRoute
-  MainLayoutTestRoute: typeof MainLayoutTestRoute
-  MainLayoutTestLinksRoute: typeof MainLayoutTestLinksRoute
-  MainLayoutTest02Route: typeof MainLayoutTest02Route
-  MainLayoutTest03Route: typeof MainLayoutTest03Route
   MainLayoutThemeSwitchRoute: typeof MainLayoutThemeSwitchRoute
   MainLayoutIndexRoute: typeof MainLayoutIndexRoute
   MainLayoutBookBookIdRouteRoute: typeof MainLayoutBookBookIdRouteRouteWithChildren
@@ -2898,10 +2839,6 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutNoticeRoute: MainLayoutNoticeRoute,
   MainLayoutRegisterRoute: MainLayoutRegisterRoute,
   MainLayoutResetPasswordRoute: MainLayoutResetPasswordRoute,
-  MainLayoutTestRoute: MainLayoutTestRoute,
-  MainLayoutTestLinksRoute: MainLayoutTestLinksRoute,
-  MainLayoutTest02Route: MainLayoutTest02Route,
-  MainLayoutTest03Route: MainLayoutTest03Route,
   MainLayoutThemeSwitchRoute: MainLayoutThemeSwitchRoute,
   MainLayoutIndexRoute: MainLayoutIndexRoute,
   MainLayoutBookBookIdRouteRoute: MainLayoutBookBookIdRouteRouteWithChildren,
@@ -2986,6 +2923,7 @@ const rootRouteChildren: RootRouteChildren = {
   MainLayoutRoute: MainLayoutRouteWithChildren,
   BookBookIdReadChapterIdRouteRoute:
     BookBookIdReadChapterIdRouteRouteWithChildren,
+  BookBookIdNodeNodeIdIndexRoute: BookBookIdNodeNodeIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

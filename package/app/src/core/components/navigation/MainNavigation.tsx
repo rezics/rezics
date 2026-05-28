@@ -1,15 +1,9 @@
 // NAVIGATION.tsx
 
 import {
-  IconNumber3 as Looks3OutlinedIcon,
-  IconNumber1 as LooksOneOutlinedIcon,
-  IconNumber2 as LooksTwoOutlinedIcon,
-} from "@tabler/icons-react";
-import {
   CircleUser as AccountCircleOutlinedIcon,
   FileText as ArticleOutlinedIcon,
   LayoutDashboard as DashboardOutlinedIcon,
-  CircleAlert as ErrorOutlineOutlinedIcon,
   MessageCircleQuestion as FeedbackOutlinedIcon,
   Users as GroupsOutlinedIcon,
   UserCheck as HowToRegOutlinedIcon,
@@ -22,7 +16,6 @@ import {
   ListPlus as PlaylistAddOutlinedIcon,
   FilePlus as PostAddOutlinedIcon,
   MessageSquareText as RateReviewOutlinedIcon,
-  FlaskConical as ScienceOutlinedIcon,
   Headset as SupportAgentOutlinedIcon,
 } from "lucide-react";
 import type { NavigationItem } from "./navigation";
@@ -141,38 +134,6 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
           segment: "/theme-switch",
           title: "Theme Switch",
           icon: PaletteOutlinedIcon,
-        },
-        {
-          kind: "item",
-          segment: "/test",
-          title: "Test Suite",
-          icon: ScienceOutlinedIcon,
-          children: [
-            {
-              kind: "item",
-              segment: "/test",
-              title: "Test 01",
-              icon: LooksOneOutlinedIcon,
-            },
-            {
-              kind: "item",
-              segment: "/test02",
-              title: "Test 02",
-              icon: LooksTwoOutlinedIcon,
-            },
-            {
-              kind: "item",
-              segment: "/test03",
-              title: "Test 03",
-              icon: Looks3OutlinedIcon,
-            },
-          ],
-        },
-        {
-          kind: "item",
-          segment: "/test/404",
-          title: "404 Page",
-          icon: ErrorOutlineOutlinedIcon,
         },
       ];
 
