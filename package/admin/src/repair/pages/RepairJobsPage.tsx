@@ -192,7 +192,7 @@ export default function RepairJobsPage() {
   });
   const startMutation = useAdminRepairJobStartMutation({
     onSuccess: (job) => {
-      setMessage(`${job.id} queued with status ${job.status}.`);
+      setMessage(`${job.id} ${job.status}. ${job.safeSummary}`);
     },
   });
 

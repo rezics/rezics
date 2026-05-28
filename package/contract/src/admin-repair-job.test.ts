@@ -48,6 +48,15 @@ describe("admin repair job contracts", () => {
         safeSummary: "Queued for repair.",
         auditLogId: null,
         dryRunId: "dryrun-1",
+        queuedOperations: [
+          {
+            jobId: "job-1",
+            lane: "maintenance",
+            kind: "maintenance.search.rebuildIndex",
+            status: "created",
+            idempotencyKey: "maintenance:search:content",
+          },
+        ],
         createdAt: "2026-05-28T00:00:00.000Z",
         updatedAt: "2026-05-28T00:00:00.000Z",
       }),

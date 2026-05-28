@@ -55,6 +55,21 @@ export const adminRepairJobDryRunSchema = t.Object({
 export type AdminRepairJobDryRun =
   (typeof adminRepairJobDryRunSchema)["static"];
 
+export const adminRepairJobQueuedOperationSchema = t.Object({
+  jobId: t.Optional(t.Nullable(t.String())),
+  lane: t.String(),
+  kind: t.String(),
+  status: t.Union([
+    t.Literal("created"),
+    t.Literal("coalesced"),
+    t.Literal("retried"),
+  ]),
+  idempotencyKey: t.Optional(t.Nullable(t.String())),
+});
+
+export type AdminRepairJobQueuedOperation =
+  (typeof adminRepairJobQueuedOperationSchema)["static"];
+
 export const adminRepairJobSchema = t.Object({
   id: t.String(),
   scope: adminRepairJobScopeSchema,
@@ -66,6 +81,14 @@ export const adminRepairJobSchema = t.Object({
   safeSummary: t.String(),
   auditLogId: t.Optional(t.Nullable(t.String())),
   dryRunId: t.Optional(t.Nullable(t.String())),
+  queuedOperations: t.Optional(t.Array(adminRepairJobQueuedOperationSchema)),
+  failure: t.Optional(
+    t.Nullable(
+      t.Object({
+        safeMessage: t.String(),
+      }),
+    ),
+  ),
   createdAt: t.String(),
   updatedAt: t.String(),
 });

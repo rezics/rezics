@@ -2,6 +2,7 @@ export type {
   AdminRepairJob,
   AdminRepairJobDryRun,
   AdminRepairJobDryRunRequest,
+  AdminRepairJobQueuedOperation,
   AdminRepairJobScope,
   AdminRepairJobStartRequest,
   AdminRepairJobStatus,
