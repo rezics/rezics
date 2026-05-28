@@ -128,6 +128,12 @@ const SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES = [
   "ARCHIVED",
   "REMOVED",
 ] as string[];
+const SEARCH_EXCLUDED_REALM_CONTENT_STATES = new Set([
+  "HIDDEN",
+  "TOMBSTONED",
+  "ARCHIVED",
+  "REMOVED",
+]);
 const RATING_TAG_SLUGS = new Set<string>(RATING_TAGS);
 
 function publicSearchableUnitWhere(): Prisma.UnitWhereInput {
@@ -222,6 +228,32 @@ function isSearchVisibleScoredRow(row: {
   return row.score > VISIBILITY_THRESHOLD || row.pinned === true;
 }
 
+function realmIdsForSearch(unit: any): string[] {
+  const blockedRealmIds = new Set(
+    (unit?.realmModerationTargets ?? [])
+      .filter((overlay: any) =>
+        SEARCH_EXCLUDED_REALM_CONTENT_STATES.has(overlay.state),
+      )
+      .map((overlay: any) => overlay.realmUnitId),
+  );
+
+  return (unit?.inRealms ?? [])
+    .filter((realm: any) => !realm.state || realm.state === "VISIBLE")
+    .map((realm: any) => realm.realmUnitId)
+    .filter((realmUnitId: string) => !blockedRealmIds.has(realmUnitId));
+}
+
+const realmSearchProjectionSelect = {
+  inRealms: {
+    where: { state: "VISIBLE" },
+    select: { realmUnitId: true, state: true },
+    orderBy: { realmUnitId: "asc" as const },
+  },
+  realmModerationTargets: {
+    select: { realmUnitId: true, state: true },
+  },
+} as const;
+
 async function patchContentIfEligible(
   client: SearchClient,
   unitId: string,
@@ -297,7 +329,7 @@ const contentInclude: any = {
     where: { role: "RELEASE" },
     select: { unitId: true },
   },
-  inRealms: true,
+  ...realmSearchProjectionSelect,
   contentModerationState: true,
   realmTagApplicationsAsTargetUnit: true,
   creditAttributions: {
@@ -365,7 +397,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const workTagRows: any[] = (releaseMembership?.work?.unitTags ?? []).filter(
     isSearchVisibleScoredRow,
   );
-  const inRealms: any[] = unit.inRealms ?? [];
   const realmTagApplicationsAsTargetUnit: any[] =
     unit.realmTagApplicationsAsTargetUnit ?? [];
   const creditAttributions: any[] = unit.creditAttributions ?? [];
@@ -426,7 +457,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   ];
 
   // Realms
-  const realmIds = inRealms.map((r: any) => r.realmUnitId);
+  const realmIds = realmIdsForSearch(unit);
   const translationGroupId = unit.translationGroupId ?? null;
 
   // Realm-tag compound keys
@@ -1043,11 +1074,17 @@ export async function patchContentRealmIds(
     await client.deleteContent([unitId]);
     return;
   }
-  const inRealms = await getSearchPrismaClient().unitRealm.findMany({
-    where: { unitId },
-  });
+  const [inRealms, realmModerationTargets] = await Promise.all([
+    getSearchPrismaClient().unitRealm.findMany({
+      where: { unitId, state: "VISIBLE" },
+    }),
+    getSearchPrismaClient().realmContentModeration.findMany({
+      where: { targetUnitId: unitId },
+      select: { realmUnitId: true, state: true },
+    }),
+  ]);
 
-  const realmIds = inRealms.map((r: any) => r.realmUnitId);
+  const realmIds = realmIdsForSearch({ inRealms, realmModerationTargets });
   await patchContentIfEligible(client, unitId, { realmIds });
 }
 
@@ -1191,7 +1228,7 @@ export async function syncPostsByAuthorSegment(
       unit: {
         include: {
           user: true,
-          inRealms: true,
+          ...realmSearchProjectionSelect,
           workMemberships: true,
           contentModerationState: true,
         },
@@ -1628,7 +1665,7 @@ const postIncludeForSync = {
   unit: {
     include: {
       user: true,
-      inRealms: true,
+      ...realmSearchProjectionSelect,
       workMemberships: true,
       contentModerationState: true,
     },
@@ -1646,7 +1683,6 @@ const postIncludeForSync = {
 
 export function buildPostDocument(post: any): PostSearchDocument {
   const user = post.unit?.user;
-  const inRealms: any[] = post.unit?.inRealms ?? [];
   const workMemberships: any[] = post.unit?.workMemberships ?? [];
   const targetUnit = post.targetUnit;
   const scoreEntry = post.scoreEntry;
@@ -1700,7 +1736,7 @@ export function buildPostDocument(post: any): PostSearchDocument {
     targetUnitId: post.targetUnitId ?? null,
     rootTargetUnitId: post.rootTargetUnitId ?? null,
     rootTargetUnitType: post.rootTargetUnitType ?? null,
-    realmIds: inRealms.map((realm) => realm.realmUnitId),
+    realmIds: realmIdsForSearch(post.unit),
     workUnitIds: workMemberships.map((membership) => membership.workUnitId),
     workRoles: workMemberships.map((membership) => membership.role),
     rootPostUnitId: post.rootPostUnitId ?? null,
@@ -1729,7 +1765,7 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
       unit: {
         include: {
           user: true,
-          inRealms: true,
+          ...realmSearchProjectionSelect,
           workMemberships: true,
           contentModerationState: true,
         },
@@ -1765,7 +1801,7 @@ export async function syncAllPosts(client: SearchClient) {
         unit: {
           include: {
             user: true,
-            inRealms: true,
+            ...realmSearchProjectionSelect,
             workMemberships: true,
             contentModerationState: true,
           },
@@ -1804,7 +1840,7 @@ export async function syncPostSegment(
       unit: {
         include: {
           user: true,
-          inRealms: true,
+          ...realmSearchProjectionSelect,
           workMemberships: true,
           contentModerationState: true,
         },
@@ -1836,8 +1872,12 @@ export async function syncAllPostRealmIds(client: SearchClient) {
         unit: {
           select: {
             inRealms: {
-              select: { realmUnitId: true },
+              where: { state: "VISIBLE" },
+              select: { realmUnitId: true, state: true },
               orderBy: { realmUnitId: "asc" },
+            },
+            realmModerationTargets: {
+              select: { realmUnitId: true, state: true },
             },
           },
         },
@@ -1853,9 +1893,7 @@ export async function syncAllPostRealmIds(client: SearchClient) {
     await client.patchPosts(
       posts.map((post) => ({
         id: post.unitId,
-        realmIds: (post.unit?.inRealms ?? []).map(
-          (row: any) => row.realmUnitId,
-        ),
+        realmIds: realmIdsForSearch(post.unit),
       })),
     );
 
@@ -1880,8 +1918,12 @@ export async function syncPostRealmIdsSegment(
       unit: {
         select: {
           inRealms: {
-            select: { realmUnitId: true },
+            where: { state: "VISIBLE" },
+            select: { realmUnitId: true, state: true },
             orderBy: { realmUnitId: "asc" },
+          },
+          realmModerationTargets: {
+            select: { realmUnitId: true, state: true },
           },
         },
       },
@@ -1896,9 +1938,7 @@ export async function syncPostRealmIdsSegment(
     await client.patchPosts(
       current.map((post) => ({
         id: post.unitId,
-        realmIds: (post.unit?.inRealms ?? []).map(
-          (row: any) => row.realmUnitId,
-        ),
+        realmIds: realmIdsForSearch(post.unit),
       })),
     );
   }
@@ -2033,7 +2073,7 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
         unit: {
           include: {
             user: true,
-            inRealms: true,
+            ...realmSearchProjectionSelect,
             workMemberships: true,
             contentModerationState: true,
           },
@@ -2075,7 +2115,7 @@ export async function syncPostsByTarget(
         unit: {
           include: {
             user: true,
-            inRealms: true,
+            ...realmSearchProjectionSelect,
             workMemberships: true,
             contentModerationState: true,
           },

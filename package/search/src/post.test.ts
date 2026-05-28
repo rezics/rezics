@@ -21,7 +21,7 @@ function setServerEnvForSearchTests() {
 }
 
 describe("buildPostDocument", () => {
-  test("includes realmIds from UnitRealm rows", async () => {
+  test("includes only visible non-hidden realmIds from UnitRealm rows", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
@@ -43,14 +43,22 @@ describe("buildPostDocument", () => {
       scoreEntryId: null,
       unit: {
         user: { name: "Alice", slug: "alice", avatar: null },
-        inRealms: [{ realmUnitId: "realm-1" }, { realmUnitId: "realm-2" }],
+        inRealms: [
+          { realmUnitId: "realm-1", state: "VISIBLE" },
+          { realmUnitId: "realm-2", state: "VISIBLE" },
+          { realmUnitId: "realm-3", state: "ARCHIVED" },
+        ],
+        realmModerationTargets: [
+          { realmUnitId: "realm-2", state: "ARCHIVED" },
+          { realmUnitId: "realm-4", state: "LOCKED" },
+        ],
       },
       targetUnit: null,
       scoreEntry: null,
       extra: null,
     });
 
-    expect(doc.realmIds).toEqual(["realm-1", "realm-2"]);
+    expect(doc.realmIds).toEqual(["realm-1"]);
   });
 
   test("projects translationGroupId for wiki grouping filters", async () => {
@@ -719,16 +727,17 @@ describe("search sync global moderation projection", () => {
     expect(addOrUpdatePosts).not.toHaveBeenCalled();
   });
 
-  test("realm id patches project junction state without reading realm overlays", async () => {
+  test("realm id patches exclude hidden realm overlays", async () => {
     setServerEnvForSearchTests();
     const { patchContentRealmIds, setSearchPrismaClient } = await import(
       "./sync"
     );
     const patchContent = mock(async (_docs: any[]) => undefined);
     const deleteContent = mock(async (_ids: string[]) => undefined);
-    const realmContentModerationFindMany = mock(async () => {
-      throw new Error("realm overlays must not affect search projection");
-    });
+    const realmContentModerationFindMany = mock(async () => [
+      { realmUnitId: "realm-a", state: "LOCKED" },
+      { realmUnitId: "realm-b", state: "ARCHIVED" },
+    ]);
 
     setSearchPrismaClient({
       unit: {
@@ -741,7 +750,10 @@ describe("search sync global moderation projection", () => {
         })),
       },
       unitRealm: {
-        findMany: mock(async () => [{ realmUnitId: "realm-b" }]),
+        findMany: mock(async () => [
+          { realmUnitId: "realm-a", state: "VISIBLE" },
+          { realmUnitId: "realm-b", state: "VISIBLE" },
+        ]),
       },
       realmContentModeration: {
         findMany: realmContentModerationFindMany,
@@ -754,9 +766,12 @@ describe("search sync global moderation projection", () => {
     );
 
     expect(patchContent).toHaveBeenCalledWith([
-      { id: "post-1", realmIds: ["realm-b"] },
+      { id: "post-1", realmIds: ["realm-a"] },
     ]);
     expect(deleteContent).not.toHaveBeenCalled();
-    expect(realmContentModerationFindMany).not.toHaveBeenCalled();
+    expect(realmContentModerationFindMany).toHaveBeenCalledWith({
+      where: { targetUnitId: "post-1" },
+      select: { realmUnitId: true, state: true },
+    });
   });
 });
