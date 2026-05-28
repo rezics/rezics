@@ -3,6 +3,7 @@ import type {
   RealmTagViewStyle,
   TagTreeNode,
 } from "@rezics/contract";
+import { useLocale } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -27,11 +28,19 @@ const viewLabels: Record<RealmTagViewStyle, string> = {
   tree: "Tree",
 };
 
-function nodeLabel(node: TagTreeNode) {
-  return node.label?.trim() || node.tagId?.slice(0, 8) || "Untitled";
+function nodeLabel(node: TagTreeNode, language: string) {
+  const translations = node.labelTranslations?.translations;
+  const fallbackLanguage = node.labelTranslations?.fallbackLanguage;
+  return (
+    translations?.[language] ??
+    (fallbackLanguage ? translations?.[fallbackLanguage] : undefined) ??
+    node.label?.trim() ??
+    node.tagId?.slice(0, 8) ??
+    "Untitled"
+  );
 }
 
-function collectTags(nodes: TagTreeNode[] | undefined) {
+function collectTags(nodes: TagTreeNode[] | undefined, language: string) {
   const entries: TagEntry[] = [];
 
   const visit = (
@@ -41,7 +50,7 @@ function collectTags(nodes: TagTreeNode[] | undefined) {
   ) => {
     for (const item of items) {
       if (item.disabled) continue;
-      const label = nodeLabel(item);
+      const label = nodeLabel(item, language);
       const nextGroup = depth === 0 ? label : groupLabel;
       if (item.tagId) {
         entries.push({
@@ -81,7 +90,11 @@ export const RealmTagManager: React.FC<RealmTagManagerProps> = ({
   tagTree,
   tagView,
 }) => {
-  const entries = useMemo(() => collectTags(tagTree), [tagTree]);
+  const locale = useLocale();
+  const entries = useMemo(
+    () => collectTags(tagTree, locale),
+    [locale, tagTree],
+  );
   const [selectedView, setSelectedView] = useState<RealmTagViewStyle>(
     tagView?.defaultStyle ?? "flat",
   );

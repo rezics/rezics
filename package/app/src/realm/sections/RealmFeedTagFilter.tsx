@@ -1,4 +1,5 @@
 import type { TagTreeNode } from "@rezics/contract";
+import { useLocale } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useMemo } from "react";
@@ -14,7 +15,22 @@ type TagChip = {
   label: string;
 };
 
-function collectTags(nodes: TagTreeNode[] | undefined): TagChip[] {
+function nodeLabel(node: TagTreeNode, language: string) {
+  const translations = node.labelTranslations?.translations;
+  const fallbackLanguage = node.labelTranslations?.fallbackLanguage;
+  return (
+    translations?.[language] ??
+    (fallbackLanguage ? translations?.[fallbackLanguage] : undefined) ??
+    node.label?.trim() ??
+    node.tagId?.slice(0, 8) ??
+    "Untitled"
+  );
+}
+
+function collectTags(
+  nodes: TagTreeNode[] | undefined,
+  language: string,
+): TagChip[] {
   const chips: TagChip[] = [];
 
   const visit = (items: TagTreeNode[]) => {
@@ -22,7 +38,7 @@ function collectTags(nodes: TagTreeNode[] | undefined): TagChip[] {
       if (item.tagId && !item.disabled) {
         chips.push({
           tagId: item.tagId,
-          label: item.label?.trim() || item.tagId.slice(0, 8),
+          label: nodeLabel(item, language),
         });
       }
       if (item.children?.length) visit(item.children);
@@ -38,7 +54,8 @@ export const RealmFeedTagFilter: React.FC<RealmFeedTagFilterProps> = ({
   selectedTagIds,
   onChange,
 }) => {
-  const chips = useMemo(() => collectTags(tagTree), [tagTree]);
+  const locale = useLocale();
+  const chips = useMemo(() => collectTags(tagTree, locale), [locale, tagTree]);
   const selected = useMemo(() => new Set(selectedTagIds), [selectedTagIds]);
 
   if (chips.length === 0) return null;

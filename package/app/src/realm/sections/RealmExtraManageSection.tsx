@@ -4,10 +4,13 @@ import {
 } from "@rezics/api/realm/realm-extra.mutations";
 import { tagQueries } from "@rezics/api/tag/tag";
 import { unitApi, unitQueries } from "@rezics/api/unit/unit";
+import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import { useCreateWorkRealmContext } from "@rezics/api/work-realm-context/work-realm-context";
 import { useUpdateZone, zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import {
+  contentDocMarkdownFallback,
   DEFAULT_LANGUAGE,
+  markdownContentDoc,
   normalizeLanguage,
   workRealmContextRoleValues,
 } from "@rezics/contract";
@@ -90,6 +93,7 @@ import {
   realm_work_context_work_placeholder,
   tag_search_placeholder,
 } from "@rezics/i18n/messages";
+import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import {
   Button,
   Dialog,
@@ -107,7 +111,7 @@ import {
   SelectValue,
   Textarea,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -922,6 +926,7 @@ function TagTreeEditor({
 }) {
   const [nodes, setNodes] = useState<TagTreeNode[]>(initialValue ?? []);
   const [headerLabel, setHeaderLabel] = useState("");
+  const [labelLanguage, setLabelLanguage] = useState<string>(DEFAULT_LANGUAGE);
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(
@@ -945,6 +950,32 @@ function TagTreeEditor({
   const updateNode = (index: number, next: TagTreeNode) => {
     setNodes((current) =>
       current.map((node, nodeIndex) => (nodeIndex === index ? next : node)),
+    );
+  };
+
+  const updateNodeLabelTranslation = (
+    index: number,
+    language: string,
+    value: string,
+  ) => {
+    const normalized = normalizeLanguage(language) ?? DEFAULT_LANGUAGE;
+    setNodes((current) =>
+      current.map((node, nodeIndex) => {
+        if (nodeIndex !== index) return node;
+        const translations = {
+          ...(node.labelTranslations?.translations ?? {}),
+        };
+        if (value.trim()) translations[normalized] = value;
+        else delete translations[normalized];
+        return {
+          ...node,
+          labelTranslations: {
+            translations,
+            fallbackLanguage:
+              node.labelTranslations?.fallbackLanguage ?? normalized,
+          },
+        };
+      }),
     );
   };
 
@@ -997,17 +1028,41 @@ function TagTreeEditor({
       </div>
 
       <div className="flex flex-col gap-2">
+        <div className="max-w-40">
+          <Label htmlFor="realm-tag-tree-label-language">Label language</Label>
+          <Input
+            id="realm-tag-tree-label-language"
+            value={labelLanguage}
+            onChange={(event) => setLabelLanguage(event.target.value)}
+          />
+        </div>
         {nodes.map((node, index) => (
           <div
             key={nodeKey(node)}
-            className="flex flex-wrap items-center gap-2"
+            className="grid gap-2 rounded-sm bg-surface-base p-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto_auto_auto]"
           >
             <Input
               value={nodeLabel(node)}
               onChange={(event) =>
                 updateNode(index, { ...node, label: event.target.value })
               }
-              className="min-w-48 flex-1"
+              className="min-w-0"
+            />
+            <Input
+              value={
+                node.labelTranslations?.translations[
+                  normalizeLanguage(labelLanguage) ?? DEFAULT_LANGUAGE
+                ] ?? ""
+              }
+              onChange={(event) =>
+                updateNodeLabelTranslation(
+                  index,
+                  labelLanguage,
+                  event.target.value,
+                )
+              }
+              className="min-w-0"
+              placeholder={`Label (${normalizeLanguage(labelLanguage) ?? DEFAULT_LANGUAGE})`}
             />
             <Button
               type="button"
@@ -1208,6 +1263,7 @@ function SlotPicker({
           {common_selected_id({ id: selected })}
         </p>
       )}
+      {selected ? <RealmSlotTranslationEditor unitId={selected} /> : null}
       <div className="flex justify-end gap-2">
         {error && (
           <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
@@ -1223,6 +1279,84 @@ function SlotPicker({
           {common_save()}
         </Button>
       </div>
+    </div>
+  );
+}
+
+function RealmSlotTranslationEditor({ unitId }: { unitId: string }) {
+  const queryClient = useQueryClient();
+  const detailQuery = useQuery(unitDetailQuery(unitId));
+  const initial = useMemo<TranslationEditorEntry[]>(() => {
+    if (!detailQuery.data?.translations?.length) {
+      return [{ language: DEFAULT_LANGUAGE }];
+    }
+    return detailQuery.data.translations.map((translation) => ({
+      language: translation.language,
+      title: translation.title ?? "",
+      subtitle: translation.subtitle ?? "",
+      summary: translation.summary ?? "",
+      description: contentDocMarkdownFallback(translation.description),
+    }));
+  }, [detailQuery.data?.translations]);
+  const [drafts, setDrafts] = useState<TranslationEditorEntry[]>(initial);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDrafts(initial);
+  }, [initial]);
+
+  const save = async () => {
+    setSaving(true);
+    setError(null);
+    try {
+      for (const draft of drafts) {
+        const language = normalizeLanguage(draft.language);
+        if (!language) continue;
+        await unitApi.upsertTranslation(unitId, language, {
+          title: draft.title ?? null,
+          subtitle: draft.subtitle ?? null,
+          summary: draft.summary ?? null,
+          description: markdownContentDoc(draft.description ?? ""),
+        });
+      }
+      await queryClient.invalidateQueries({
+        queryKey: unitDetailQuery(unitId).queryKey,
+      });
+      toast.success("Translations saved.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      toast.error(message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-md bg-surface-base p-3">
+      <h4 className="text-sm font-medium leading-ui text-text-primary">
+        Translations
+      </h4>
+      {detailQuery.isLoading ? (
+        <div className="mt-3 h-24 rounded-sm bg-surface-subtle" />
+      ) : detailQuery.isError ? (
+        <p className="mt-3 text-sm leading-body text-error-text">
+          Unable to load translations.
+        </p>
+      ) : (
+        <div className="mt-3 flex flex-col gap-3">
+          <TranslationEditor translations={drafts} onChange={setDrafts} />
+          {error ? (
+            <p className="text-sm leading-body text-error-text">{error}</p>
+          ) : null}
+          <div className="flex justify-end">
+            <Button type="button" onClick={save} disabled={saving}>
+              {common_save()}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
