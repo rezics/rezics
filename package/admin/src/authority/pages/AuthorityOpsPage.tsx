@@ -1,5 +1,5 @@
-import { apiFetch } from "@rezics/api/react-query/http";
 import {
+  unitAuthorityApi,
   unitAuthorityQueries,
   useRemoveUnitCollaboratorMutation,
   useRemoveUnitFieldLockMutation,
@@ -131,12 +131,8 @@ export default function AuthorityOpsPage() {
     setError(null);
     setMessage(null);
     try {
-      const result = await apiFetch<{ retried: number }>(
-        "/admin/history-outbox/retry-failed",
-        {
-          method: "POST",
-          body: JSON.stringify(unitId ? { unitId } : {}),
-        },
+      const result = await unitAuthorityApi.retryFailedHistoryOutbox(
+        unitId ? { unitId } : {},
       );
       setMessage(m.admin_authority_retry_queued({ count: result.retried }));
     } catch (err) {

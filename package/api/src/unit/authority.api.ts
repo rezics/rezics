@@ -56,4 +56,11 @@ export const unitAuthorityApi = {
       { method: "DELETE" },
     );
   },
+
+  retryFailedHistoryOutbox(input: { unitId?: string }) {
+    return apiFetch<{ retried: number }>("/admin/history-outbox/retry-failed", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
 };
