@@ -1,15 +1,15 @@
 ## 1. Contract And Shared Types
 
-- [ ] 1.1 Add `UnitType.LABEL` to `@rezics/contract` Unit type schemas and exported type unions.
-- [ ] 1.2 Add contract tests proving LABEL is accepted as a Unit type and rejected where a domain-specific type is required.
-- [ ] 1.3 Add work realm context role schemas for `official`, `community`, `language`, and `archive`.
-- [ ] 1.4 Add WorkRealmContext DTO, create/update request schemas, list response schemas, and conflict/error DTOs.
-- [ ] 1.5 Add wiki Zone filter schemas covering realm id, post kind WIKI, tags, entity subject filters, languages, and translation group references.
-- [ ] 1.6 Add wiki Zone navigation schemas for entity, tag, translation group, Unit link, external link, LABEL-backed heading, and manual translated label items.
-- [ ] 1.7 Add wiki Zone homepage schemas for `entityCollection`, `tagCollection`, `translationGroupCollection`, `recentWiki`, `updatedWiki`, `stubWiki`, and `manualLinks`.
-- [ ] 1.8 Add wiki Zone theme schemas for palette, media, chrome, wiki layout, built-in template slugs, and homepage template slugs.
-- [ ] 1.9 Add schema tests rejecting arbitrary CSS, raw single-language manual labels, unknown wiki config fields, and unsupported template slugs where strict validation applies.
-- [ ] 1.10 Export all new contract schemas from `package/contract/src/index.ts` and verify public imports compile.
+- [x] 1.1 Add `UnitType.LABEL` to `@rezics/contract` Unit type schemas and exported type unions.
+- [x] 1.2 Add contract tests proving LABEL is accepted as a Unit type and rejected where a domain-specific type is required.
+- [x] 1.3 Add work realm context role schemas for `official`, `community`, `language`, and `archive`.
+- [x] 1.4 Add WorkRealmContext DTO, create/update request schemas, list response schemas, and conflict/error DTOs.
+- [x] 1.5 Add wiki Zone filter schemas covering realm id, post kind WIKI, tags, entity subject filters, languages, and translation group references.
+- [x] 1.6 Add wiki Zone navigation schemas for entity, tag, translation group, Unit link, external link, LABEL-backed heading, and manual translated label items.
+- [x] 1.7 Add wiki Zone homepage schemas for `entityCollection`, `tagCollection`, `translationGroupCollection`, `recentWiki`, `updatedWiki`, `stubWiki`, and `manualLinks`.
+- [x] 1.8 Add wiki Zone theme schemas for palette, media, chrome, wiki layout, built-in template slugs, and homepage template slugs.
+- [x] 1.9 Add schema tests rejecting arbitrary CSS, raw single-language manual labels, unknown wiki config fields, and unsupported template slugs where strict validation applies.
+- [x] 1.10 Export all new contract schemas from `package/contract/src/index.ts` and verify public imports compile.
 
 ## 2. Database And Prisma Model
 

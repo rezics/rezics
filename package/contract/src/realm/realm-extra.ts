@@ -103,6 +103,12 @@ export const realmExtraSchema = t.Object(
      * realm. Created Units store their selected license explicitly.
      */
     defaultLicenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+
+    /**
+     * Optional Zone Unit id for the realm's themed wiki portal. The realm Wiki
+     * tab remains app-themed and links into this Zone when configured.
+     */
+    wikiZoneUnitId: t.Optional(t.Nullable(t.String())),
   },
   { additionalProperties: true },
 );

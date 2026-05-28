@@ -6,7 +6,9 @@ import {
   aiDisclosureModeSchema,
   createUnitSchema,
   unitDTOSchema,
+  unitTypeSchema,
   updateUnitSchema,
+  wikiTypeSchema,
 } from "./unit";
 
 describe("AiDisclosureMode", () => {
@@ -79,5 +81,22 @@ describe("Unit AI disclosure DTO/input schemas", () => {
         aiDisclosureDetails: null,
       }),
     ).toBe(true);
+  });
+});
+
+describe("UnitType", () => {
+  test("accepts LABEL as a base Unit type", () => {
+    expect(Value.Check(unitTypeSchema, "LABEL")).toBe(true);
+    expect(
+      Value.Check(createUnitSchema, {
+        type: "LABEL",
+        defaultLanguage: "en",
+        translations: [{ language: "en", title: "Characters" }],
+      }),
+    ).toBe(true);
+  });
+
+  test("rejects LABEL where a work-capable catalog type is required", () => {
+    expect(Value.Check(wikiTypeSchema, "LABEL")).toBe(false);
   });
 });
