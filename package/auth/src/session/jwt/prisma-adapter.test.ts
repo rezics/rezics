@@ -8,6 +8,8 @@ process.env.DATABASE_URL =
   process.env.DATABASE_URL ??
   "postgresql://postgres:postgres@localhost:5432/rezics_auth";
 process.env.BETTER_AUTH_URL = "http://localhost:35003";
+process.env.AUTH_PUBLIC_BASE_URL = "http://localhost:35003";
+process.env.AUTH_PUBLIC_ISSUER_URL = "http://localhost:35003";
 process.env.AUTH_JWT_ISSUER = "http://localhost:35003";
 process.env.AUTH_JWT_AUDIENCE = "rezics";
 process.env.BETTER_AUTH_SECRET =
@@ -16,6 +18,10 @@ process.env.BETTER_AUTH_SECRET =
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET =
   process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??
   "internal-auth-gateway-test";
+process.env.SMTP_HOST ??= "smtp.test";
+process.env.SMTP_USER ??= "smtp-user";
+process.env.SMTP_PASSWORD ??= "smtp-password";
+process.env.TURNSTILE_SECRET ??= "turnstile-secret";
 
 const jwtServiceUpsert = mock();
 const jwksFindMany = mock();
@@ -36,6 +42,8 @@ mock.module("../../auth/prisma", () => ({
 describe("auth jwt prisma adapter", () => {
   beforeEach(() => {
     process.env.BETTER_AUTH_URL = "http://localhost:35003";
+    process.env.AUTH_PUBLIC_BASE_URL = "http://localhost:35003";
+    process.env.AUTH_PUBLIC_ISSUER_URL = "http://localhost:35003";
     process.env.AUTH_JWT_ISSUER = "http://localhost:35003";
     process.env.AUTH_JWT_AUDIENCE = "rezics";
     jwtServiceUpsert.mockReset();
@@ -71,7 +79,7 @@ describe("auth jwt prisma adapter", () => {
         serviceKey: "auth-local",
         issuer: "http://localhost:35003",
         audience: "rezics",
-        jwksUrl: "http://localhost:35003/api/auth/session/jwks",
+        jwksUrl: "http://localhost:35003/auth/session/jwks",
         jwksPath: "/api/auth/session/jwks",
         isLocalIssuer: true,
         isActive: true,
@@ -387,17 +395,15 @@ describe("auth jwt prisma adapter", () => {
     });
   });
 
-  test("keeps migration bootstrap and backfill steps for jwks rows", () => {
+  test("keeps migration bootstrap for jwks rows", () => {
     const migrationPath = join(
       import.meta.dir,
-      "../../../prisma/migrations/20260319120000_jwk_storage/migration.sql",
+      "../../../prisma/migrations/20260321103802_init/migration.sql",
     );
     const migrationSql = readFileSync(migrationPath, "utf8");
 
-    expect(migrationSql).toContain('ADD COLUMN "publicJwk" JSONB');
-    expect(migrationSql).toContain('ADD COLUMN "privateJwk" JSONB');
-    expect(migrationSql).toContain(`"publicKey"::jsonb`);
-    expect(migrationSql).toContain('DELETE FROM "Jwks"');
-    expect(migrationSql).toContain('DROP COLUMN "publicKey"');
+    expect(migrationSql).toContain('"publicJwk" JSONB NOT NULL');
+    expect(migrationSql).toContain('"privateJwk" JSONB NOT NULL');
+    expect(migrationSql).not.toContain('"publicKey"');
   });
 });

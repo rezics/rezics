@@ -10,7 +10,7 @@ function readJson(path: string): Record<string, unknown> {
 
 function contractLanguages(): string[] {
   const source = readFileSync(
-    join(REPO_ROOT, "package/contract/src/language.ts"),
+    join(REPO_ROOT, "package/contract/src/language-core.ts"),
     "utf8",
   );
   const match = source.match(

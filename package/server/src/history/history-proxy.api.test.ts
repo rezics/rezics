@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "../test/prisma-client-mock";
 
 mock.module("@/env", () => ({
   env: { HISTORY_BASE_URL: "http://history.example" },

@@ -1,5 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "../test/prisma-client-mock";
 
 installPrismaClientMock();
 
@@ -25,12 +28,26 @@ function resetPrisma() {
   for (const key of Object.keys(prismaMock)) delete prismaMock[key];
   enqueueMock.mockClear();
   cleanupReactionsMock.mockClear();
-  prismaMock.unit = {
+  const unit = {
     create: mock(async () => ({ id: "unit-1" })),
     update: mock(async () => ({ id: "unit-1" })),
     delete: mock(async () => ({})),
     findMany: mock(async () => []),
+    findUnique: mock(async () => ({ slug: "unit-1" })),
+    findUniqueOrThrow: mock(async () => ({ id: "unit-1" })),
   };
+  prismaMock.unit = {
+    ...unit,
+  };
+  prismaMock.$transaction = mock(async (cb: any) =>
+    cb({
+      unit,
+      unitWork: {
+        create: mock(async () => ({})),
+        deleteMany: mock(async () => ({})),
+      },
+    }),
+  );
 }
 
 describe("UnitService search job producers", () => {

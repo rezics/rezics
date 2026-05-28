@@ -46,8 +46,8 @@
 ## 7. Verification
 
 - [ ] 7.1 Run `bun --filter=@rezics/contract test`.
-- [ ] 7.2 Run targeted `package/server` admin/diagnostic/governance/search/history tests.
-- [ ] 7.3 Run targeted `package/auth` admin/JWT/session tests.
+- [x] 7.2 Run targeted `package/server` admin/diagnostic/governance/search/history tests.
+- [x] 7.3 Run targeted `package/auth` admin/JWT/session tests.
 - [x] 7.4 Run targeted `package/api` admin client/hook tests.
 - [x] 7.5 Run targeted `package/admin` route/page tests or Storybook checks.
 - [x] 7.6 Run `bun run check:convention`.

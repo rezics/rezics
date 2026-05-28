@@ -49,6 +49,7 @@ const baseSearchDocument = {
   seriesKindKeys: [],
   seriesTitles: [],
   realmIds: [],
+  translationGroupId: null,
   realmTagKeys: [],
   languages: ["en"],
   rating: "GENERAL",
