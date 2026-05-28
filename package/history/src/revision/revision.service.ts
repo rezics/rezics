@@ -45,7 +45,7 @@ type LegacyEditorialRevisionPayload = Omit<
 let defaultDbPromise: Promise<HistoryDb> | null = null;
 
 async function getDefaultDb(): Promise<HistoryDb> {
-  defaultDbPromise ??= import("#/prisma/client").then(
+  defaultDbPromise ??= import("../../prisma/client").then(
     ({ prisma }) => prisma as unknown as HistoryDb,
   );
   return defaultDbPromise;
