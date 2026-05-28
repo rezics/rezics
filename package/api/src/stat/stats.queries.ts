@@ -8,3 +8,10 @@ export const adminStatsQueryOptions = () =>
     queryFn: () => adminStatsApi.getStats(),
     staleTime: 60_000,
   });
+
+export const adminDashboardSummaryQueryOptions = () =>
+  queryOptions({
+    queryKey: adminStatsKeys.dashboardSummary(),
+    queryFn: () => adminStatsApi.getDashboardSummary(),
+    staleTime: 30_000,
+  });
