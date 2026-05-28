@@ -61,7 +61,7 @@ const SETTINGS_NAV = [
 const EXTRA_NAV = [
   {
     label: i18nMessages.settings_nav_entities,
-    to: "/user/me/entities",
+    to: "/user/me/entity",
     icon: IdentityIcon,
   },
 ] as const;

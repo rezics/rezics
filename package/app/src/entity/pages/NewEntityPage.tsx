@@ -149,7 +149,7 @@ export function NewEntityPage() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => void navigate({ to: "/user/me/entities" })}
+            onClick={() => void navigate({ to: "/user/me/entity" })}
           >
             {m.common_cancel()}
           </Button>

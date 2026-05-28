@@ -56,7 +56,7 @@ export function MyEntitiesPage() {
         <h1 className="text-2xl font-semibold text-text-primary">
           {m.entity_my_entities()}
         </h1>
-        <Link to="/user/me/entities/new">
+        <Link to="/user/me/entity/new">
           <Button>{m.entity_new_button()}</Button>
         </Link>
       </div>
@@ -66,7 +66,7 @@ export function MyEntitiesPage() {
           <p className="text-sm text-text-secondary">
             {m.entity_empty_owned()}
           </p>
-          <Link to="/user/me/entities/new" className="mt-3 inline-block">
+          <Link to="/user/me/entity/new" className="mt-3 inline-block">
             <Button>{m.entity_declare()}</Button>
           </Link>
         </div>
