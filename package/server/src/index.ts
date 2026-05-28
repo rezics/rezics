@@ -9,6 +9,7 @@ import {
 } from "@rezics/shared/observability";
 import { Elysia } from "elysia";
 import { Prisma } from "#/prisma/client";
+import { accountOperationsAdminApi } from "./admin-account";
 import { adminWorkMergeApi } from "./admin-work-merge";
 import { authPublicApi } from "./auth-boundary";
 import { bookApi } from "./book";
@@ -260,6 +261,7 @@ routeApp
   .use(jwtServiceAdminApi)
   .use(statusApi)
   .use(statsAdminApi)
+  .use(accountOperationsAdminApi)
   .use(adminWorkMergeApi)
   .use(uploadApi)
   .use(dmBoundaryApi)

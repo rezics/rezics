@@ -29,3 +29,54 @@ export const setRoleBodySchema = t.Object({
   role: t.String(),
 });
 export type SetRoleBody = (typeof setRoleBodySchema)["static"];
+
+export const authMainServerReconciliationWarningSchema = t.Object({
+  code: t.Union([
+    t.Literal("missing-main-profile"),
+    t.Literal("missing-auth-link"),
+    t.Literal("email-drift"),
+  ]),
+  severity: t.Union([
+    t.Literal("info"),
+    t.Literal("warning"),
+    t.Literal("error"),
+  ]),
+  message: t.String(),
+  suggestedAction: t.Optional(t.String()),
+});
+export type AuthMainServerReconciliationWarning =
+  (typeof authMainServerReconciliationWarningSchema)["static"];
+
+export const adminAuthUserAccountSummaryRequestSchema = t.Object({
+  authUserIds: t.Array(t.String()),
+});
+export type AdminAuthUserAccountSummaryRequest =
+  (typeof adminAuthUserAccountSummaryRequestSchema)["static"];
+
+export const adminAuthUserAccountSummarySchema = t.Object({
+  authUserId: t.String(),
+  mainUser: t.Optional(
+    t.Object({
+      unitId: t.String(),
+      slug: t.Optional(t.String()),
+      name: t.Optional(t.String()),
+      email: t.Optional(t.String()),
+      role: t.Optional(t.Array(t.String())),
+    }),
+  ),
+  accountEnforcement: t.Object({
+    activeCount: t.Number(),
+    activeKinds: t.Array(t.String()),
+    strongestKind: t.Optional(t.String()),
+    expiresAt: t.Optional(t.Nullable(t.String())),
+  }),
+  reconciliationWarnings: t.Array(authMainServerReconciliationWarningSchema),
+});
+export type AdminAuthUserAccountSummary =
+  (typeof adminAuthUserAccountSummarySchema)["static"];
+
+export const adminAuthUserAccountSummaryResponseSchema = t.Object({
+  summaries: t.Array(adminAuthUserAccountSummarySchema),
+});
+export type AdminAuthUserAccountSummaryResponse =
+  (typeof adminAuthUserAccountSummaryResponseSchema)["static"];

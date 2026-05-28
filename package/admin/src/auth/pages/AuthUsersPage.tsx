@@ -5,6 +5,8 @@ import {
   useAdminUnbanUserMutation,
 } from "@rezics/api/auth/auth.mutations";
 import { authQueries } from "@rezics/api/auth/auth.queries";
+import { accountOperationsQueries } from "@rezics/api/account-operation/account-operation";
+import type { AdminAuthUserAccountSummary } from "@rezics/contract";
 import {
   admin_auth_actions_title,
   admin_auth_role_admin,
@@ -54,6 +56,7 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
+import { Link } from "@/shared/ui/link";
 
 const i18nMessages = {
   admin_auth_actions_title,
@@ -92,8 +95,23 @@ type AuthUser = {
   email: string;
   role: string;
   banned: boolean;
+  emailVerified?: boolean;
+  sessions?: unknown[];
+  sessionCount?: number;
   createdAt: string;
 };
+
+function formatMainUser(summary?: AdminAuthUserAccountSummary) {
+  const mainUser = summary?.mainUser;
+  if (!mainUser) return null;
+  return mainUser.slug ? `@${mainUser.slug}` : mainUser.unitId;
+}
+
+function getSessionCount(user: AuthUser): number | null {
+  if (typeof user.sessionCount === "number") return user.sessionCount;
+  if (Array.isArray(user.sessions)) return user.sessions.length;
+  return null;
+}
 
 export default function AuthUsersPage() {
   const m = useMessage(i18nMessages);
@@ -115,6 +133,21 @@ export default function AuthUsersPage() {
   const users = (usersQuery.data?.users ?? []) as AuthUser[];
   const total = users.length;
   const paginatedUsers = users.slice(page * limit, (page + 1) * limit);
+  const visibleAuthUserIds = React.useMemo(
+    () => paginatedUsers.map((user) => user.id),
+    [paginatedUsers],
+  );
+  const accountSummaryQuery = useQuery(
+    accountOperationsQueries.authUserSummary(visibleAuthUserIds),
+  );
+  const accountSummariesByAuthId = React.useMemo(() => {
+    return new Map(
+      (accountSummaryQuery.data?.summaries ?? []).map((summary) => [
+        summary.authUserId,
+        summary,
+      ]),
+    );
+  }, [accountSummaryQuery.data?.summaries]);
 
   const columns = React.useMemo(() => {
     const cols: PaginatedColumn<AuthUser>[] = [
@@ -176,6 +209,112 @@ export default function AuthUsersPage() {
               {m.common_active()}
             </Badge>
           ),
+      },
+      {
+        id: "mainUser",
+        header: "Main profile",
+        minWidth: 220,
+        cell: (u) => {
+          const summary = accountSummariesByAuthId.get(u.id);
+          const label = formatMainUser(summary);
+          if (!summary) {
+            return (
+              <span className="text-sm text-text-tertiary">Loading...</span>
+            );
+          }
+          if (!summary.mainUser || !label) {
+            return (
+              <Badge variant="outline" className="text-warning-text">
+                Missing profile
+              </Badge>
+            );
+          }
+          return (
+            <div className="flex flex-col gap-0.5">
+              <Link
+                to="/user/$userId"
+                params={{ userId: summary.mainUser.unitId }}
+                className="text-sm font-medium text-text-primary"
+              >
+                {label}
+              </Link>
+              {summary.mainUser.email ? (
+                <span className="text-xs text-text-secondary">
+                  {summary.mainUser.email}
+                </span>
+              ) : null}
+            </div>
+          );
+        },
+      },
+      {
+        id: "sessions",
+        header: "Sessions",
+        minWidth: 120,
+        cell: (u) => {
+          const count = getSessionCount(u);
+          return (
+            <Link to="/auth/sessions" className="text-sm text-text-secondary">
+              {count === null ? "View sessions" : count.toLocaleString()}
+            </Link>
+          );
+        },
+      },
+      {
+        id: "enforcement",
+        header: "Enforcement",
+        minWidth: 170,
+        cell: (u) => {
+          const summary = accountSummariesByAuthId.get(u.id);
+          const enforcement = summary?.accountEnforcement;
+          if (!summary || !enforcement) {
+            return (
+              <span className="text-sm text-text-tertiary">Loading...</span>
+            );
+          }
+          if (enforcement.activeCount === 0) {
+            return <span className="text-sm text-text-secondary">None</span>;
+          }
+          return (
+            <div className="flex flex-col gap-1">
+              <Badge className="bg-error-fill text-white">
+                {enforcement.strongestKind ?? "ACTIVE"}
+              </Badge>
+              <span className="text-xs text-text-secondary">
+                {enforcement.activeKinds.join(", ")}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        id: "warnings",
+        header: "Reconciliation",
+        minWidth: 220,
+        cell: (u) => {
+          const warnings =
+            accountSummariesByAuthId.get(u.id)?.reconciliationWarnings ?? [];
+          if (warnings.length === 0) {
+            return <span className="text-sm text-text-secondary">OK</span>;
+          }
+          return (
+            <div className="flex flex-col gap-1">
+              {warnings.map((item) => (
+                <Badge
+                  key={item.code}
+                  variant="outline"
+                  className={
+                    item.severity === "error"
+                      ? "text-error-text"
+                      : "text-warning-text"
+                  }
+                >
+                  {item.suggestedAction ?? item.message}
+                </Badge>
+              ))}
+            </div>
+          );
+        },
       },
       {
         id: "createdAt",
@@ -254,6 +393,7 @@ export default function AuthUsersPage() {
     m.common_email,
     m.common_id,
     m.common_remove,
+    accountSummariesByAuthId,
   ]);
 
   return (
@@ -263,6 +403,12 @@ export default function AuthUsersPage() {
     >
       <Card>
         <CardContent>
+          {accountSummaryQuery.isError ? (
+            <p className="mb-4 text-sm text-warning-text">
+              Account enrichment failed; auth-owned controls are still
+              available.
+            </p>
+          ) : null}
           {usersQuery.isLoading ? (
             <div className="flex justify-center py-12">
               <Spinner />
