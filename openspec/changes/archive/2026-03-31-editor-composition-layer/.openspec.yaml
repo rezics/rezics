@@ -1,4 +1,0 @@
-schema: app-feature
-name: editor-composition-layer
-description: Add a src/editor/ composition layer to @rezics/editor that exports ready-to-use MarkdownEditor, JsonEditor, and CodeEditor components
-status: proposing
