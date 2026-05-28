@@ -126,10 +126,10 @@
 - [x] 13.1 Run contract tests for UnitType, WorkRealmContext, Zone wiki config, navigation, homepage, and theme schemas.
 - [x] 13.2 Run server tests for LABEL creation, WorkRealmContext permissions, Zone config validation, TranslationGroup best-language resolution, and realm wiki queries.
 - [x] 13.3 Run API client tests or type checks for new query/mutation surfaces.
-- [ ] 13.4 Run frontend component tests or stories for Realm Wiki tab, wiki Zone templates, navigation, homepage sections, and management forms.
+- [x] 13.4 Run frontend component tests or stories for Realm Wiki tab, wiki Zone templates, navigation, homepage sections, and management forms.
 - [x] 13.5 Run search/index tests for realm-scoped wiki listing and subject/tag/translation group filters.
 - [x] 13.6 Run `bun run format:check`.
 - [x] 13.7 Run `bun run check:convention`.
 - [x] 13.8 Run affected package tests with Bun filters where available.
 - [x] 13.9 Run `openspec validate define-realm-wiki-zone-experience --strict`.
-- [ ] 13.10 Document manual verification URLs for realm Wiki tab, wiki Zone homepage, release wiki context, and Zone management after `bun run dev`.
+- [x] 13.10 Document manual verification URLs for realm Wiki tab, wiki Zone homepage, release wiki context, and Zone management after `bun run dev`.
