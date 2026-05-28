@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   wikiZoneConfigSchema,
+  wikiZoneHomepageDataSchema,
   wikiZoneHomepageSchema,
   wikiZoneNavigationSchema,
   wikiZoneThemeSchema,
@@ -113,5 +114,57 @@ describe("wiki Zone contract schemas", () => {
         sections: [],
       }),
     ).toBe(false);
+  });
+
+  test("validates hydrated homepage section data", () => {
+    expect(
+      Value.Check(wikiZoneHomepageDataSchema, {
+        template: "wiki-classic-home",
+        sections: [
+          {
+            section: {
+              id: "featured",
+              kind: "translationGroupCollection",
+              translationGroupIds: ["tg-main-page"],
+            },
+            items: [
+              {
+                kind: "wikiPost",
+                unitId: "wiki-zh",
+                translationGroupId: "tg-main-page",
+                language: "zh-hant",
+                title: "主頁",
+                summary: null,
+                createdAt: "2026-05-28T00:00:00.000Z",
+                updatedAt: "2026-05-28T00:00:00.000Z",
+              },
+            ],
+          },
+          {
+            section: {
+              id: "manual",
+              kind: "manualLinks",
+              links: [
+                {
+                  kind: "manualLink",
+                  href: "/wiki",
+                  label: { translations: { en: "Wiki" } },
+                },
+              ],
+            },
+            items: [
+              {
+                kind: "navigationItem",
+                item: {
+                  kind: "manualLink",
+                  href: "/wiki",
+                  label: { translations: { en: "Wiki" } },
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    ).toBe(true);
   });
 });

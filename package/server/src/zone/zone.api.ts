@@ -28,6 +28,13 @@ function resolvePublicZone(
   return mapZoneToDTO(zone);
 }
 
+function preferredLanguages(query: { languages?: string }) {
+  return query.languages
+    ?.split(",")
+    .map((language) => language.trim())
+    .filter(Boolean);
+}
+
 export const zoneApi = new Elysia({ prefix: "/zone" })
   .use(authMacro)
 
@@ -43,6 +50,34 @@ export const zoneApi = new Elysia({ prefix: "/zone" })
         summary: "Get zone by slug (typed)",
         description:
           "Look up a zone by its slug (404 if slug resolves to a non-zone unit)",
+        tags: ["Zones"],
+      },
+    },
+  )
+
+  .get(
+    "/:unitId/homepage",
+    async ({ params, query, set }) => {
+      const zone = await zoneService.getByUnitId(params.unitId);
+      const resolved = resolvePublicZone(zone, set);
+      if ("error" in resolved) return resolved;
+
+      const data = await zoneService.getWikiHomepageData(params.unitId, {
+        preferredLanguages: preferredLanguages(query),
+      });
+      if (!data) {
+        set.status = 404;
+        return { error: { code: "NOT_FOUND", message: "Wiki Zone not found" } };
+      }
+      return data;
+    },
+    {
+      params: t.Object({ unitId: t.String({ minLength: 1 }) }),
+      query: t.Object({ languages: t.Optional(t.String()) }),
+      detail: {
+        summary: "Get wiki zone homepage data",
+        description:
+          "Resolve typed homepage section data for a public wiki Zone",
         tags: ["Zones"],
       },
     },

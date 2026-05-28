@@ -1,4 +1,9 @@
-import type { WikiZoneConfig, ZoneDTO, ZoneFilters } from "@rezics/contract";
+import type {
+  WikiZoneConfig,
+  WikiZoneHomepageData,
+  ZoneDTO,
+  ZoneFilters,
+} from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 
 export type CreateZoneInput = {
@@ -32,6 +37,18 @@ export const zoneApi = {
 
   get: async (unitId: string): Promise<ZoneDTO> => {
     return apiFetch<ZoneDTO>(`/zone/${encodeURIComponent(unitId)}`);
+  },
+
+  getHomepage: async (
+    unitId: string,
+    languages?: string[],
+  ): Promise<WikiZoneHomepageData> => {
+    const query = languages?.length
+      ? `?languages=${encodeURIComponent(languages.join(","))}`
+      : "";
+    return apiFetch<WikiZoneHomepageData>(
+      `/zone/${encodeURIComponent(unitId)}/homepage${query}`,
+    );
   },
 
   create: async (input: CreateZoneInput): Promise<ZoneDTO> => {

@@ -33,8 +33,8 @@
 - [x] 3.8 Add validation that wiki Zone config references valid realm, Entity, Tag, TranslationGroup, Unit, and LABEL ids where applicable.
 - [x] 3.9 Add validation that wiki Zone manual labels include explicit translations when no LABEL/Entity/Tag/Unit reference supplies display text.
 - [x] 3.10 Add helper service for best-language WIKI Post selection from TranslationGroup ids.
-- [ ] 3.11 Add helper queries for wiki Zone section hydration: entity collections, tag collections, translation group collections, recent wiki, updated wiki, and stub wiki.
-- [ ] 3.12 Ensure wiki section queries respect Unit visibility, realm membership, realm moderation lifecycle, and viewer permissions.
+- [x] 3.11 Add helper queries for wiki Zone section hydration: entity collections, tag collections, translation group collections, recent wiki, updated wiki, and stub wiki.
+- [x] 3.12 Ensure wiki section queries respect Unit visibility, realm membership, realm moderation lifecycle, and viewer permissions.
 
 ## 4. Server APIs
 
@@ -42,7 +42,7 @@
 - [x] 4.2 Add read route for resolving a release Unit's wiki realm context through UnitWork.
 - [x] 4.3 Extend Zone create/update/read routes to include wiki config fields.
 - [x] 4.4 Add or extend realm detail API output to expose configured wiki Zone id and viewer capability metadata.
-- [ ] 4.5 Add wiki Zone homepage data endpoint or extend Zone resolution to include enough typed section hydration data.
+- [x] 4.5 Add wiki Zone homepage data endpoint or extend Zone resolution to include enough typed section hydration data.
 - [x] 4.6 Add tests for forbidden work realm context writes, invalid realm targets, invalid label references, and malformed wiki config.
 - [ ] 4.7 Add tests proving repost/reference behavior does not create UnitRealm membership for the original wiki Unit.
 
@@ -124,12 +124,12 @@
 ## 13. Tests And Verification
 
 - [x] 13.1 Run contract tests for UnitType, WorkRealmContext, Zone wiki config, navigation, homepage, and theme schemas.
-- [ ] 13.2 Run server tests for LABEL creation, WorkRealmContext permissions, Zone config validation, TranslationGroup best-language resolution, and realm wiki queries.
+- [x] 13.2 Run server tests for LABEL creation, WorkRealmContext permissions, Zone config validation, TranslationGroup best-language resolution, and realm wiki queries.
 - [x] 13.3 Run API client tests or type checks for new query/mutation surfaces.
 - [ ] 13.4 Run frontend component tests or stories for Realm Wiki tab, wiki Zone templates, navigation, homepage sections, and management forms.
 - [x] 13.5 Run search/index tests for realm-scoped wiki listing and subject/tag/translation group filters.
-- [ ] 13.6 Run `bun run format:check`.
-- [ ] 13.7 Run `bun run check:convention`.
-- [ ] 13.8 Run affected package tests with Bun filters where available.
+- [x] 13.6 Run `bun run format:check`.
+- [x] 13.7 Run `bun run check:convention`.
+- [x] 13.8 Run affected package tests with Bun filters where available.
 - [x] 13.9 Run `openspec validate define-realm-wiki-zone-experience --strict`.
 - [ ] 13.10 Document manual verification URLs for realm Wiki tab, wiki Zone homepage, release wiki context, and Zone management after `bun run dev`.

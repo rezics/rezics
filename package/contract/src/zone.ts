@@ -336,6 +336,62 @@ export const wikiZoneConfigSchema = t.Object(
 
 export type WikiZoneConfig = Static<typeof wikiZoneConfigSchema>;
 
+export const wikiZoneHomepageEntityItemSchema = t.Object({
+  kind: t.Literal("entity"),
+  entityUnitId: t.String(),
+  entityKind: t.Union([t.String(), t.Null()]),
+  title: t.Union([t.String(), t.Null()]),
+  summary: t.Union([t.String(), t.Null()]),
+});
+
+export const wikiZoneHomepageTagItemSchema = t.Object({
+  kind: t.Literal("tag"),
+  tagUnitId: t.String(),
+  title: t.Union([t.String(), t.Null()]),
+  summary: t.Union([t.String(), t.Null()]),
+});
+
+export const wikiZoneHomepageWikiPostItemSchema = t.Object({
+  kind: t.Literal("wikiPost"),
+  unitId: t.String(),
+  translationGroupId: t.Union([t.String(), t.Null()]),
+  language: t.Union([languageSchema, t.Null()]),
+  title: t.Union([t.String(), t.Null()]),
+  summary: t.Union([t.String(), t.Null()]),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+});
+
+export const wikiZoneHomepageNavigationItemSchema = t.Object({
+  kind: t.Literal("navigationItem"),
+  item: wikiZoneNavigationItemSchema,
+});
+
+export const wikiZoneHomepageItemSchema = t.Union([
+  wikiZoneHomepageEntityItemSchema,
+  wikiZoneHomepageTagItemSchema,
+  wikiZoneHomepageWikiPostItemSchema,
+  wikiZoneHomepageNavigationItemSchema,
+]);
+
+export type WikiZoneHomepageItem = Static<typeof wikiZoneHomepageItemSchema>;
+
+export const wikiZoneHomepageSectionDataSchema = t.Object({
+  section: wikiZoneHomepageSectionSchema,
+  items: t.Array(wikiZoneHomepageItemSchema),
+});
+
+export type WikiZoneHomepageSectionData = Static<
+  typeof wikiZoneHomepageSectionDataSchema
+>;
+
+export const wikiZoneHomepageDataSchema = t.Object({
+  template: wikiHomepageTemplateSlugSchema,
+  sections: t.Array(wikiZoneHomepageSectionDataSchema),
+});
+
+export type WikiZoneHomepageData = Static<typeof wikiZoneHomepageDataSchema>;
+
 // ANCHOR: Zone DTO
 
 export const ZoneDTOSchema = t.Object({

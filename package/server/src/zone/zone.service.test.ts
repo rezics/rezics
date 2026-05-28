@@ -16,11 +16,68 @@ const unitRows = new Map<string, { id: string; type: string }>([
   ["unit-1", { id: "unit-1", type: "POST" }],
   ["image-1", { id: "image-1", type: "IMAGE" }],
 ]);
+const hydratedUnitRows = new Map<string, any>([
+  [
+    "wiki-en",
+    {
+      id: "wiki-en",
+      type: "POST",
+      translationGroupId: "tg-1",
+      defaultLanguage: "en",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-02T00:00:00.000Z"),
+      translations: [{ language: "en", title: "English Wiki", summary: null }],
+      post: { kind: "WIKI", content: null },
+    },
+  ],
+  [
+    "wiki-zh",
+    {
+      id: "wiki-zh",
+      type: "POST",
+      translationGroupId: "tg-1",
+      defaultLanguage: "zh-hant",
+      createdAt: new Date("2026-01-03T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-04T00:00:00.000Z"),
+      translations: [
+        { language: "zh-hant", title: "Traditional Wiki", summary: "Summary" },
+      ],
+      post: { kind: "WIKI", content: null },
+    },
+  ],
+  [
+    "tag-1",
+    {
+      id: "tag-1",
+      type: "TAG",
+      translations: [{ language: "en", title: "Lore", summary: null }],
+    },
+  ],
+  [
+    "entity-1",
+    {
+      id: "entity-1",
+      type: "ENTITY",
+      translations: [{ language: "en", title: "Aster", summary: null }],
+      entity: { kind: "character" },
+    },
+  ],
+]);
 const translationGroupRows = new Set(["tg-1"]);
 
 const unitFindManyMock = mock(async ({ where }: any): Promise<any[]> => {
+  if (where.translationGroupId?.in) {
+    return [...hydratedUnitRows.values()].filter((row) =>
+      where.translationGroupId.in.includes(row.translationGroupId),
+    );
+  }
+  if (!where.id?.in) {
+    return [...hydratedUnitRows.values()].filter((row) => row.type === "POST");
+  }
   const ids = where.id.in as string[];
   return ids.flatMap((id) => {
+    const hydrated = hydratedUnitRows.get(id);
+    if (hydrated) return [hydrated];
     const row = unitRows.get(id);
     return row ? [row] : [];
   });
@@ -43,6 +100,58 @@ const zoneUpdateMock = mock(
     unit: { translations: [] },
   }),
 );
+const zoneFindUniqueMock = mock(
+  async (): Promise<any> => ({
+    unitId: "zone-1",
+    filters: {},
+    template: "default",
+    styling: null,
+    wiki: {
+      filters: { realmUnitId: "realm-1" },
+      homepage: {
+        template: "wiki-classic-home",
+        sections: [
+          {
+            id: "featured",
+            kind: "translationGroupCollection",
+            translationGroupIds: ["tg-1"],
+          },
+          { id: "tags", kind: "tagCollection", tagUnitIds: ["tag-1"] },
+          {
+            id: "characters",
+            kind: "entityCollection",
+            entityKinds: ["character"],
+            subjectRoles: ["primary_character"],
+          },
+          { id: "recent", kind: "recentWiki", limit: 1 },
+          {
+            id: "manual",
+            kind: "manualLinks",
+            links: [
+              {
+                kind: "manualLink",
+                href: "/wiki",
+                label: { translations: { en: "Wiki" } },
+              },
+            ],
+          },
+        ],
+      },
+    },
+    startsAt: null,
+    endsAt: null,
+    unit: { translations: [] },
+  }),
+);
+const subjectAttributionFindManyMock = mock(
+  async (): Promise<any[]> => [
+    {
+      entityId: "entity-1",
+      sortOrder: 0,
+      entity: hydratedUnitRows.get("entity-1"),
+    },
+  ],
+);
 
 installPrismaClientMock();
 Object.assign(prismaMock, {
@@ -53,7 +162,11 @@ Object.assign(prismaMock, {
     findMany: translationGroupFindManyMock,
   },
   zone: {
+    findUnique: zoneFindUniqueMock,
     update: zoneUpdateMock,
+  },
+  subjectAttribution: {
+    findMany: subjectAttributionFindManyMock,
   },
 });
 
@@ -61,6 +174,12 @@ mock.module("@/unit", () => ({
   unitService: {
     create: mock(async () => ({ id: "zone-1" })),
     setSlug: mock(async () => undefined),
+  },
+}));
+
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: mock(async () => undefined),
   },
 }));
 
@@ -92,6 +211,8 @@ describe("ZoneService wiki config validation", () => {
     unitFindManyMock.mockClear();
     translationGroupFindManyMock.mockClear();
     zoneUpdateMock.mockClear();
+    zoneFindUniqueMock.mockClear();
+    subjectAttributionFindManyMock.mockClear();
   });
 
   test("persists wiki config when references are valid", async () => {
@@ -185,5 +306,39 @@ describe("ZoneService wiki config validation", () => {
     ).rejects.toThrow("Wiki Zone manual labels require translations");
 
     expect(zoneUpdateMock).not.toHaveBeenCalled();
+  });
+
+  test("hydrates wiki homepage sections with public section queries", async () => {
+    const data = await service.getWikiHomepageData("zone-1", {
+      preferredLanguages: ["zh-hant", "en"],
+    });
+
+    expect(data?.template).toBe("wiki-classic-home");
+    expect(data?.sections.map((section) => section.section.id)).toEqual([
+      "featured",
+      "tags",
+      "characters",
+      "recent",
+      "manual",
+    ]);
+    expect(data?.sections[0]?.items[0]).toMatchObject({
+      kind: "wikiPost",
+      unitId: "wiki-zh",
+      title: "Traditional Wiki",
+    });
+    expect(data?.sections[1]?.items[0]).toMatchObject({
+      kind: "tag",
+      tagUnitId: "tag-1",
+      title: "Lore",
+    });
+    expect(data?.sections[2]?.items[0]).toMatchObject({
+      kind: "entity",
+      entityUnitId: "entity-1",
+      entityKind: "character",
+      title: "Aster",
+    });
+    expect(data?.sections[4]?.items[0]).toMatchObject({
+      kind: "navigationItem",
+    });
   });
 });

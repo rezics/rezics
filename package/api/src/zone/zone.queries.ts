@@ -18,7 +18,19 @@ export const zoneByUnitIdQueryOptions = (unitId: string) =>
     staleTime: 1000 * 60 * 10,
   });
 
+export const zoneHomepageByUnitIdQueryOptions = (
+  unitId: string,
+  languages: readonly string[] = [],
+) =>
+  queryOptions({
+    queryKey: zoneKeys.homepageByUnitId(unitId, languages),
+    queryFn: () => zoneApi.getHomepage(unitId, [...languages]),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 5,
+  });
+
 export const zoneQueries = {
   detail: zoneQueryOptions,
   byUnitId: zoneByUnitIdQueryOptions,
+  homepageByUnitId: zoneHomepageByUnitIdQueryOptions,
 };

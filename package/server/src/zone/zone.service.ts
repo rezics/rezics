@@ -1,6 +1,9 @@
 import {
   type Language,
+  mainMarkdownSource,
   markdownContentDoc,
+  type WikiZoneHomepageData,
+  type WikiZoneHomepageItem,
   type WikiZoneHomepageSection,
   type WikiZoneNavigationItem,
   type WikiZoneTranslatedLabel,
@@ -11,6 +14,7 @@ import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { unitService } from "@/unit";
 import { AppError } from "@/utils/errors";
+import { translationGroupService } from "../translation-group/translation-group.service";
 
 const zoneInclude = {
   unit: {
@@ -26,8 +30,108 @@ export type ZoneWithRelations = Prisma.ZoneGetPayload<{
 
 type UnitRef = { id: string; type: UnitType };
 
+const WIKI_HOMEPAGE_DEFAULT_TEMPLATE = "wiki-classic-home";
+const WIKI_SECTION_DEFAULT_LIMIT = 12;
+const WIKI_EXCLUDED_MODERATION_STATES = [
+  "HIDDEN",
+  "TOMBSTONED",
+  "ARCHIVED",
+  "REMOVED",
+] as const;
+
+type TranslatedUnitRow = {
+  id: string;
+  defaultLanguage?: string | null;
+  translationGroupId?: string | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  translations?: Array<{
+    language?: string | null;
+    title?: string | null;
+    summary?: string | null;
+    description?: unknown;
+  }>;
+  post?: { content?: unknown } | null;
+  entity?: { kind?: string | null } | null;
+};
+
 function pushIfPresent(target: Set<string>, value: string | null | undefined) {
   if (value) target.add(value);
+}
+
+function sectionLimit(section: { limit?: number }): number {
+  return Math.min(
+    Math.max(section.limit ?? WIKI_SECTION_DEFAULT_LIMIT, 1),
+    100,
+  );
+}
+
+function preferredTranslation(
+  row: TranslatedUnitRow,
+  preferredLanguages: readonly string[] = [],
+) {
+  const translations = row.translations ?? [];
+  return (
+    preferredLanguages
+      .map((language) => translations.find((tr) => tr.language === language))
+      .find(Boolean) ??
+    (row.defaultLanguage
+      ? translations.find((tr) => tr.language === row.defaultLanguage)
+      : undefined) ??
+    translations[0] ??
+    null
+  );
+}
+
+function toIsoString(value: Date | string | undefined): string {
+  if (!value) return new Date(0).toISOString();
+  return value instanceof Date ? value.toISOString() : value;
+}
+
+function mapUnitToWikiPostItem(
+  row: TranslatedUnitRow,
+  preferredLanguages: readonly string[] = [],
+): WikiZoneHomepageItem {
+  const translation = preferredTranslation(row, preferredLanguages);
+  return {
+    kind: "wikiPost",
+    unitId: row.id,
+    translationGroupId: row.translationGroupId ?? null,
+    language: (translation?.language ??
+      row.defaultLanguage ??
+      null) as Language | null,
+    title: translation?.title ?? null,
+    summary: translation?.summary ?? null,
+    createdAt: toIsoString(row.createdAt),
+    updatedAt: toIsoString(row.updatedAt),
+  };
+}
+
+function mapUnitToTagItem(
+  row: TranslatedUnitRow,
+  preferredLanguages: readonly string[] = [],
+): WikiZoneHomepageItem {
+  const translation = preferredTranslation(row, preferredLanguages);
+  return {
+    kind: "tag",
+    tagUnitId: row.id,
+    title: translation?.title ?? null,
+    summary: translation?.summary ?? null,
+  };
+}
+
+function mapUnitToEntityItem(
+  row: TranslatedUnitRow,
+  preferredLanguages: readonly string[] = [],
+): WikiZoneHomepageItem {
+  const translation = preferredTranslation(row, preferredLanguages);
+  return {
+    kind: "entity",
+    entityUnitId: row.id,
+    entityKind: row.entity?.kind ?? null,
+    title: translation?.title ?? null,
+    summary: translation?.summary ?? null,
+  };
 }
 
 function assertTranslatedLabel(label: WikiZoneTranslatedLabel | undefined) {
@@ -375,6 +479,241 @@ export class ZoneService {
     });
 
     return zone;
+  }
+
+  private wikiVisibleUnitWhere(realmUnitId: string): Prisma.UnitWhereInput {
+    return {
+      type: UnitType.POST,
+      status: UnitStatus.PUBLISHED,
+      visibility: "PUBLIC",
+      post: { kind: "WIKI" },
+      inRealms: { some: { realmUnitId } },
+      OR: [
+        { contentModerationState: null },
+        {
+          contentModerationState: {
+            state: { notIn: WIKI_EXCLUDED_MODERATION_STATES as any },
+          },
+        },
+      ],
+      realmModerationTargets: {
+        none: {
+          realmUnitId,
+          state: { in: WIKI_EXCLUDED_MODERATION_STATES as any },
+        },
+      },
+    };
+  }
+
+  private async hydrateWikiPostSection(input: {
+    realmUnitId: string;
+    section: WikiZoneHomepageSection;
+    preferredLanguages?: string[];
+    mode: "recent" | "updated" | "stub";
+  }): Promise<WikiZoneHomepageItem[]> {
+    const limit = sectionLimit(input.section);
+    const rows = await prisma.unit.findMany({
+      where: this.wikiVisibleUnitWhere(input.realmUnitId),
+      include: { translations: true, post: true },
+      orderBy:
+        input.mode === "recent"
+          ? [{ createdAt: "desc" }, { id: "asc" }]
+          : [{ updatedAt: "desc" }, { id: "asc" }],
+      take: input.mode === "stub" ? limit * 3 : limit,
+    });
+
+    const filtered =
+      input.mode !== "stub"
+        ? rows
+        : rows.filter((row) => {
+            const source = mainMarkdownSource(row.post?.content);
+            if (input.section.kind !== "stubWiki") return false;
+            if (input.section.predicate === "missing-body") return !source;
+            return !source || source.length < 500;
+          });
+
+    return filtered
+      .slice(0, limit)
+      .map((row) => mapUnitToWikiPostItem(row, input.preferredLanguages));
+  }
+
+  private async hydrateTranslationGroupSection(input: {
+    realmUnitId: string;
+    section: Extract<
+      WikiZoneHomepageSection,
+      { kind: "translationGroupCollection" }
+    >;
+    preferredLanguages?: string[];
+  }): Promise<WikiZoneHomepageItem[]> {
+    const best = await translationGroupService.resolveBestLanguageWikiPosts({
+      translationGroupIds: input.section.translationGroupIds,
+      preferredLanguages: input.preferredLanguages,
+    });
+    const unitIds = best.map((row) => row.unitId);
+    if (unitIds.length === 0) return [];
+
+    const rows = await prisma.unit.findMany({
+      where: {
+        ...this.wikiVisibleUnitWhere(input.realmUnitId),
+        id: { in: unitIds },
+      },
+      include: { translations: true, post: true },
+    });
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    return unitIds.flatMap((unitId) => {
+      const row = byId.get(unitId);
+      return row ? [mapUnitToWikiPostItem(row, input.preferredLanguages)] : [];
+    });
+  }
+
+  private async hydrateTagSection(input: {
+    section: Extract<WikiZoneHomepageSection, { kind: "tagCollection" }>;
+    preferredLanguages?: string[];
+  }): Promise<WikiZoneHomepageItem[]> {
+    const tagUnitIds = [
+      ...new Set([
+        ...(input.section.tagUnitIds ?? []),
+        ...(input.section.realmTagUnitIds ?? []),
+      ]),
+    ];
+    if (tagUnitIds.length === 0) return [];
+
+    const rows = await prisma.unit.findMany({
+      where: {
+        id: { in: tagUnitIds },
+        type: UnitType.TAG,
+        status: { not: UnitStatus.DELETED },
+      },
+      include: { translations: true },
+    });
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    return tagUnitIds.flatMap((tagUnitId) => {
+      const row = byId.get(tagUnitId);
+      return row ? [mapUnitToTagItem(row, input.preferredLanguages)] : [];
+    });
+  }
+
+  private async hydrateEntitySection(input: {
+    realmUnitId: string;
+    section: Extract<WikiZoneHomepageSection, { kind: "entityCollection" }>;
+    preferredLanguages?: string[];
+  }): Promise<WikiZoneHomepageItem[]> {
+    const realmUnitId = input.section.realmUnitId ?? input.realmUnitId;
+    const rows = await prisma.subjectAttribution.findMany({
+      where: {
+        ...(input.section.subjectRoles?.length
+          ? { role: { in: input.section.subjectRoles } }
+          : {}),
+        unit: {
+          ...this.wikiVisibleUnitWhere(realmUnitId),
+          ...(input.section.workUnitId
+            ? {
+                workMemberships: {
+                  some: { workUnitId: input.section.workUnitId },
+                },
+              }
+            : {}),
+        },
+        entity: {
+          type: UnitType.ENTITY,
+          status: { not: UnitStatus.DELETED },
+          ...(input.section.entityKinds?.length
+            ? { entity: { kind: { in: input.section.entityKinds } } }
+            : {}),
+        },
+      },
+      include: {
+        entity: {
+          include: {
+            translations: true,
+            entity: true,
+          },
+        },
+      },
+      orderBy: [{ sortOrder: "asc" }, { entityId: "asc" }],
+      take: sectionLimit(input.section) * 3,
+    });
+
+    const items: WikiZoneHomepageItem[] = [];
+    const seen = new Set<string>();
+    for (const row of rows) {
+      if (seen.has(row.entityId)) continue;
+      seen.add(row.entityId);
+      items.push(mapUnitToEntityItem(row.entity, input.preferredLanguages));
+      if (items.length >= sectionLimit(input.section)) break;
+    }
+    return items;
+  }
+
+  private async hydrateHomepageSection(input: {
+    realmUnitId: string;
+    section: WikiZoneHomepageSection;
+    preferredLanguages?: string[];
+  }): Promise<WikiZoneHomepageItem[]> {
+    switch (input.section.kind) {
+      case "translationGroupCollection":
+        return this.hydrateTranslationGroupSection({
+          realmUnitId: input.realmUnitId,
+          section: input.section,
+          preferredLanguages: input.preferredLanguages,
+        });
+      case "tagCollection":
+        return this.hydrateTagSection({
+          section: input.section,
+          preferredLanguages: input.preferredLanguages,
+        });
+      case "entityCollection":
+        return this.hydrateEntitySection({
+          realmUnitId: input.realmUnitId,
+          section: input.section,
+          preferredLanguages: input.preferredLanguages,
+        });
+      case "recentWiki":
+        return this.hydrateWikiPostSection({ ...input, mode: "recent" });
+      case "updatedWiki":
+        return this.hydrateWikiPostSection({ ...input, mode: "updated" });
+      case "stubWiki":
+        return this.hydrateWikiPostSection({ ...input, mode: "stub" });
+      case "manualLinks":
+        return input.section.links.map((item) => ({
+          kind: "navigationItem",
+          item,
+        }));
+    }
+  }
+
+  async getWikiHomepageData(
+    unitId: string,
+    input: { preferredLanguages?: string[] } = {},
+  ): Promise<WikiZoneHomepageData | null> {
+    const zone = await this.getByUnitId(unitId);
+    const wiki = zone?.wiki as WikiZoneConfig | null;
+    if (!zone || !wiki) return null;
+
+    const homepage = wiki.homepage;
+    if (!homepage) {
+      return {
+        template:
+          wiki.theme?.homepageTemplate ?? WIKI_HOMEPAGE_DEFAULT_TEMPLATE,
+        sections: [],
+      };
+    }
+
+    const sections = await Promise.all(
+      homepage.sections.map(async (section) => ({
+        section,
+        items: await this.hydrateHomepageSection({
+          realmUnitId: wiki.filters.realmUnitId,
+          section,
+          preferredLanguages: input.preferredLanguages,
+        }),
+      })),
+    );
+
+    return {
+      template: homepage.template,
+      sections,
+    };
   }
 
   async delete(unitId: string): Promise<void> {

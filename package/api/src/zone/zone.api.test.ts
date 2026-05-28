@@ -74,6 +74,32 @@ describe("zoneApi", () => {
       "unit",
       "zone-1",
     ]);
+    expect(zoneKeys.homepageByUnitId("zone-1", ["zh-Hant"])).toEqual([
+      "zones",
+      "detail",
+      "unit",
+      "zone-1",
+      "homepage",
+      ["zh-Hant"],
+    ]);
+  });
+
+  test("fetches wiki homepage data with language preferences", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          template: "wiki-classic-home",
+          sections: [],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    await zoneApi.getHomepage("zone-1", ["zh-Hant", "en"]);
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://api.example/zone/zone-1/homepage?languages=zh-Hant%2Cen",
+    );
   });
 
   test("invalidates zone detail queries", () => {
