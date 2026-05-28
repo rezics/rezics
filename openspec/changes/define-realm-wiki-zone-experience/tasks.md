@@ -32,7 +32,7 @@
 - [x] 3.7 Extend Zone service validation to parse and persist wiki filters, navigation, homepage, and theme config.
 - [ ] 3.8 Add validation that wiki Zone config references valid realm, Entity, Tag, TranslationGroup, Unit, and LABEL ids where applicable.
 - [ ] 3.9 Add validation that wiki Zone manual labels include explicit translations when no LABEL/Entity/Tag/Unit reference supplies display text.
-- [ ] 3.10 Add helper service for best-language WIKI Post selection from TranslationGroup ids.
+- [x] 3.10 Add helper service for best-language WIKI Post selection from TranslationGroup ids.
 - [ ] 3.11 Add helper queries for wiki Zone section hydration: entity collections, tag collections, translation group collections, recent wiki, updated wiki, and stub wiki.
 - [ ] 3.12 Ensure wiki section queries respect Unit visibility, realm membership, realm moderation lifecycle, and viewer permissions.
 

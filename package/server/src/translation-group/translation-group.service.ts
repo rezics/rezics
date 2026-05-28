@@ -5,6 +5,7 @@ import { AppError } from "@/utils/errors";
 import { mapSiblingToDTO } from "./translation-group.mapper";
 import {
   type AttachTranslationInput,
+  type BestLanguageWikiPost,
   type TranslationGroupSiblingsResult,
   translationGroupSiblingInclude,
 } from "./translation-group.types";
@@ -244,6 +245,79 @@ export class TranslationGroupService {
       select: { supportedLanguages: true },
     });
     return group?.supportedLanguages ?? [];
+  }
+
+  /**
+   * Select one WIKI Post Unit per TranslationGroup. Exact preferred-language
+   * matches win in caller order; otherwise the oldest published sibling is the
+   * deterministic fallback.
+   */
+  async resolveBestLanguageWikiPosts(input: {
+    translationGroupIds: string[];
+    preferredLanguages?: string[];
+  }): Promise<BestLanguageWikiPost[]> {
+    const groupIds = [...new Set(input.translationGroupIds)].filter(Boolean);
+    if (groupIds.length === 0) return [];
+
+    const preferred = input.preferredLanguages ?? [];
+    const preferredRank = new Map(
+      preferred.map((language, index) => [language, index]),
+    );
+
+    const rows = await prisma.unit.findMany({
+      where: {
+        translationGroupId: { in: groupIds },
+        type: UnitType.POST,
+        status: UnitStatus.PUBLISHED,
+        post: { kind: "WIKI" },
+      },
+      select: {
+        id: true,
+        translationGroupId: true,
+        defaultLanguage: true,
+      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    });
+
+    const byGroup = new Map<
+      string,
+      BestLanguageWikiPost & { rank: number; sourceIndex: number }
+    >();
+
+    rows.forEach((row, sourceIndex) => {
+      if (!row.translationGroupId) return;
+      const rank =
+        row.defaultLanguage && preferredRank.has(row.defaultLanguage)
+          ? preferredRank.get(row.defaultLanguage)!
+          : Number.POSITIVE_INFINITY;
+      const current = byGroup.get(row.translationGroupId);
+      if (
+        current &&
+        (current.rank < rank ||
+          (current.rank === rank && current.sourceIndex < sourceIndex))
+      ) {
+        return;
+      }
+      byGroup.set(row.translationGroupId, {
+        translationGroupId: row.translationGroupId,
+        unitId: row.id,
+        defaultLanguage: row.defaultLanguage,
+        rank,
+        sourceIndex,
+      });
+    });
+
+    return groupIds.flatMap((translationGroupId) => {
+      const match = byGroup.get(translationGroupId);
+      if (!match) return [];
+      return [
+        {
+          translationGroupId: match.translationGroupId,
+          unitId: match.unitId,
+          defaultLanguage: match.defaultLanguage,
+        },
+      ];
+    });
   }
 
   /**

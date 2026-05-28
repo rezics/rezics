@@ -148,7 +148,7 @@ describe("WorkRealmContextService", () => {
   });
 
   test("rejects workUnitId when it is itself a release", async () => {
-    unitWorkFindFirstMock.mockImplementation(async ({ where }: any) =>
+    (unitWorkFindFirstMock as any).mockImplementation(async ({ where }: any) =>
       where.unitId === "work-1" && where.role === "RELEASE"
         ? { workUnitId: "parent-work" }
         : null,
@@ -166,7 +166,7 @@ describe("WorkRealmContextService", () => {
   });
 
   test("resolves release context through UnitWork and reports official conflicts", async () => {
-    unitWorkFindFirstMock.mockImplementation(async ({ where }: any) =>
+    (unitWorkFindFirstMock as any).mockImplementation(async ({ where }: any) =>
       where.unitId === "release-1" && where.role === "RELEASE"
         ? { workUnitId: "work-1" }
         : null,

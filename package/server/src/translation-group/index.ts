@@ -6,6 +6,7 @@ export {
 } from "./translation-group.service";
 export type {
   AttachTranslationInput,
+  BestLanguageWikiPost,
   TranslationGroupSibling,
   TranslationGroupSiblingDTO,
   TranslationGroupSiblingsResult,

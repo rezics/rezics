@@ -26,3 +26,9 @@ export type TranslationGroupSiblingsResult = {
   supportedLanguages: string[];
   siblings: TranslationGroupSiblingDTO[];
 };
+
+export type BestLanguageWikiPost = {
+  translationGroupId: string;
+  unitId: string;
+  defaultLanguage: string | null;
+};
