@@ -21,6 +21,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { collectionApi, shelfApi } from "./shelf.api";
 import { collectionKeys, shelfKeys } from "./shelf.keys";
 
@@ -29,6 +30,7 @@ function invalidateShelfCollections(
 ) {
   queryClient.invalidateQueries({ queryKey: shelfKeys.lists() });
   queryClient.invalidateQueries({ queryKey: shelfKeys.mine() });
+  void invalidateForCacheDomain(queryClient, "collect");
 }
 
 function invalidateShelfDetail(

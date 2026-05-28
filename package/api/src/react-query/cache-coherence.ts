@@ -1,6 +1,91 @@
 import type { UnitTranslationDTO } from "@rezics/contract";
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 
+// ============================================================
+// MUTATION → QUERY NAMESPACE COHERENCE MAP
+// ============================================================
+//
+// A single source of truth declaring which query-key namespaces each
+// mutation domain must invalidate so detail, dashboard, profile, search,
+// realm-feed, and the per-book node-completion list stay consistent after
+// a write. Mutations route their `onSuccess` invalidation through
+// `invalidateForCacheDomain` instead of hand-listing keys, so adding a new
+// cross-cutting surface only requires editing this map.
+
+/** Root query-key prefix per logical surface. Invalidation is by prefix. */
+export const CACHE_NAMESPACE_ROOTS = {
+  detail: ["books"],
+  dashboard: ["dashboard"],
+  profile: ["users"],
+  search: ["search"],
+  realmFeed: ["realms"],
+  realmMembership: ["realms"],
+  bookNodeCompletionList: ["progress", "nodeCompletion"],
+  progress: ["progress"],
+  shelves: ["shelves"],
+  collection: ["collection"],
+  reactions: ["reactions"],
+  subscription: ["subscription"],
+  notifications: ["notifications"],
+  dm: ["dm"],
+  drafts: ["drafts"],
+} as const satisfies Record<string, readonly (string | number)[]>;
+
+export type CacheNamespace = keyof typeof CACHE_NAMESPACE_ROOTS;
+
+/** A mutation surface that triggers cross-cutting cache invalidation. */
+export type CacheMutationDomain =
+  | "collect"
+  | "follow"
+  | "reaction"
+  | "progress"
+  | "node-completion"
+  | "draft"
+  | "dm"
+  | "realm-membership"
+  | "report";
+
+/**
+ * Each mutation domain maps to the set of query-key namespaces it must
+ * invalidate. `progress` invalidates the same surfaces as `node-completion`
+ * minus the per-book node-completion list (a `UserUnitProgress` write does
+ * not change per-node rows).
+ */
+export const CACHE_COHERENCE_MAP = {
+  collect: ["detail", "dashboard", "profile", "search", "shelves", "collection"],
+  follow: ["detail", "dashboard", "profile", "subscription"],
+  reaction: ["detail", "dashboard", "profile", "realmFeed", "search"],
+  progress: ["detail", "dashboard", "profile", "progress"],
+  "node-completion": [
+    "detail",
+    "dashboard",
+    "profile",
+    "progress",
+    "bookNodeCompletionList",
+  ],
+  draft: ["dashboard", "drafts"],
+  dm: ["dashboard", "dm"],
+  "realm-membership": ["dashboard", "profile", "realmFeed", "realmMembership"],
+  report: ["dashboard", "notifications"],
+} as const satisfies Record<CacheMutationDomain, readonly CacheNamespace[]>;
+
+/**
+ * Invalidate every query namespace declared for `domain`. Call from a
+ * mutation's `onSuccess`. Over-invalidation by prefix is intentional: it
+ * keeps the declared surfaces fresh without per-key bookkeeping.
+ */
+export function invalidateForCacheDomain(
+  queryClient: QueryClient,
+  domain: CacheMutationDomain,
+): Promise<void> {
+  const namespaces = CACHE_COHERENCE_MAP[domain];
+  return Promise.all(
+    namespaces.map((ns) =>
+      queryClient.invalidateQueries({ queryKey: CACHE_NAMESPACE_ROOTS[ns] }),
+    ),
+  ).then(() => undefined);
+}
+
 export type TranslationPatch = Pick<UnitTranslationDTO, "language"> &
   Partial<UnitTranslationDTO>;
 

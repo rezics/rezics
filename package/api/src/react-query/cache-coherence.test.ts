@@ -2,6 +2,9 @@ import { describe, expect, test } from "bun:test";
 import type { UnitTranslationDTO } from "@rezics/contract";
 import { QueryClient } from "@tanstack/react-query";
 import {
+  CACHE_COHERENCE_MAP,
+  CACHE_NAMESPACE_ROOTS,
+  invalidateForCacheDomain,
   patchTranslationDetailQueries,
   preserveCachedTranslations,
   removeCachedTranslation,
@@ -146,5 +149,44 @@ describe("translation cache coherence helpers", () => {
     );
 
     expect(calls).toEqual(['cancel:["books","detail","book-1"]', "title:New"]);
+  });
+});
+
+describe("mutation → query namespace coherence map", () => {
+  test("every declared mutation domain maps to ≥1 known namespace", () => {
+    for (const [domain, namespaces] of Object.entries(CACHE_COHERENCE_MAP)) {
+      expect(namespaces.length).toBeGreaterThan(0);
+      for (const ns of namespaces) {
+        expect(CACHE_NAMESPACE_ROOTS).toHaveProperty(ns);
+      }
+    }
+  });
+
+  test("node-completion invalidates dashboard and per-book node-completion list", () => {
+    const namespaces = CACHE_COHERENCE_MAP["node-completion"];
+    expect(namespaces).toContain("dashboard");
+    expect(namespaces).toContain("bookNodeCompletionList");
+  });
+
+  test("progress invalidates dashboard but NOT the per-book node-completion list", () => {
+    const namespaces = CACHE_COHERENCE_MAP.progress;
+    expect(namespaces).toContain("dashboard");
+    expect(namespaces).not.toContain("bookNodeCompletionList");
+  });
+
+  test("invalidateForCacheDomain invalidates each declared namespace root", async () => {
+    const invalidated: unknown[] = [];
+    const fakeClient = {
+      invalidateQueries: ({ queryKey }: { queryKey: unknown }) => {
+        invalidated.push(queryKey);
+        return Promise.resolve();
+      },
+    } as unknown as QueryClient;
+
+    await invalidateForCacheDomain(fakeClient, "node-completion");
+
+    for (const ns of CACHE_COHERENCE_MAP["node-completion"]) {
+      expect(invalidated).toContainEqual(CACHE_NAMESPACE_ROOTS[ns]);
+    }
   });
 });

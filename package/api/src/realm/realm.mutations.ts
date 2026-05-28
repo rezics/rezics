@@ -30,6 +30,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { tagKeys } from "../tag/tag.keys";
 import { realmApi } from "./realm.api";
 import { realmExtraKeys } from "./realm-extra.keys";
@@ -150,7 +151,7 @@ export function useJoinRealmMutation(
       queryClient.invalidateQueries({
         queryKey: realmKeys.detail(variables.realmUnitId),
       });
-      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
+      void invalidateForCacheDomain(queryClient, "realm-membership");
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -177,7 +178,7 @@ export function useLeaveRealmMutation(
       queryClient.invalidateQueries({
         queryKey: realmKeys.detail(realmUnitId),
       });
-      queryClient.invalidateQueries({ queryKey: realmKeys.mine() });
+      void invalidateForCacheDomain(queryClient, "realm-membership");
       options?.onSuccess?.(data, realmUnitId, onMutateResult, context);
     },
   });

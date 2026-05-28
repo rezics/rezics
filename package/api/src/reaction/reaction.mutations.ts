@@ -13,6 +13,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { reactionApi } from "./reaction.api";
 import { reactionKeys } from "./reaction.keys";
 import type {
@@ -191,9 +192,11 @@ export function useCreateReactionMutation(
       options?.onError?.(error, variables, context, mutationCtx);
     },
     onSuccess: (data, variables, context, mutationCtx) => {
-      // No page-wide invalidate. The optimistic delta has already landed in
-      // every affected batch cache; if a future refetch reveals a different
-      // server count, React Query will reconcile naturally on next refetch.
+      // The optimistic delta already landed in every affected reaction batch
+      // cache, so reaction summaries are not invalidated here. Cross-cutting
+      // surfaces (detail/dashboard/profile/realm-feed/search) still refresh
+      // through the coherence map so activity and counts stay consistent.
+      void invalidateForCacheDomain(queryClient, "reaction");
       options?.onSuccess?.(data, variables, context, mutationCtx);
     },
   });

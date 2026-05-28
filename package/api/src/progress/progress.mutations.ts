@@ -8,6 +8,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { progressApi } from "./progress.api";
 import { progressKeys } from "./progress.keys";
 
@@ -26,7 +27,7 @@ export function useUpdateUnitProgress(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(progressKeys.unit(unitId), data);
-      queryClient.invalidateQueries({ queryKey: progressKeys.lists() });
+      void invalidateForCacheDomain(queryClient, "progress");
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -46,7 +47,7 @@ export function useDeleteUnitProgress(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(progressKeys.unit(unitId), null);
-      queryClient.invalidateQueries({ queryKey: progressKeys.lists() });
+      void invalidateForCacheDomain(queryClient, "progress");
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -66,7 +67,7 @@ export function useToggleNodeCompletion(
       progressApi.toggleNodeCompletion(unitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: progressKeys.unit(unitId) });
+      void invalidateForCacheDomain(queryClient, "node-completion");
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

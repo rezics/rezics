@@ -4,6 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { subscriptionApi } from "./subscription.api";
 import { subscriptionKeys } from "./subscription.keys";
 
@@ -14,6 +15,7 @@ function invalidateForTarget(
   qc.invalidateQueries({ queryKey: subscriptionKeys.check(targetUnitId) });
   qc.invalidateQueries({ queryKey: subscriptionKeys.count(targetUnitId) });
   qc.invalidateQueries({ queryKey: subscriptionKeys.all() });
+  void invalidateForCacheDomain(qc, "follow");
 }
 
 export function useSubscribeMutation(
