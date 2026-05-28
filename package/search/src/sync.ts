@@ -239,6 +239,7 @@ function realmIdsForSearch(unit: any): string[] {
 
   return (unit?.inRealms ?? [])
     .filter((realm: any) => !realm.state || realm.state === "VISIBLE")
+    .filter((realm: any) => realm.realm?.realm?.isPublic !== false)
     .map((realm: any) => realm.realmUnitId)
     .filter((realmUnitId: string) => !blockedRealmIds.has(realmUnitId));
 }
@@ -246,7 +247,17 @@ function realmIdsForSearch(unit: any): string[] {
 const realmSearchProjectionSelect = {
   inRealms: {
     where: { state: "VISIBLE" },
-    select: { realmUnitId: true, state: true },
+    select: {
+      realmUnitId: true,
+      state: true,
+      realm: {
+        select: {
+          realm: {
+            select: { isPublic: true },
+          },
+        },
+      },
+    },
     orderBy: { realmUnitId: "asc" as const },
   },
   realmModerationTargets: {
@@ -1077,6 +1088,15 @@ export async function patchContentRealmIds(
   const [inRealms, realmModerationTargets] = await Promise.all([
     getSearchPrismaClient().unitRealm.findMany({
       where: { unitId, state: "VISIBLE" },
+      include: {
+        realm: {
+          select: {
+            realm: {
+              select: { isPublic: true },
+            },
+          },
+        },
+      },
     }),
     getSearchPrismaClient().realmContentModeration.findMany({
       where: { targetUnitId: unitId },
@@ -1871,14 +1891,7 @@ export async function syncAllPostRealmIds(client: SearchClient) {
         unitId: true,
         unit: {
           select: {
-            inRealms: {
-              where: { state: "VISIBLE" },
-              select: { realmUnitId: true, state: true },
-              orderBy: { realmUnitId: "asc" },
-            },
-            realmModerationTargets: {
-              select: { realmUnitId: true, state: true },
-            },
+            ...realmSearchProjectionSelect,
           },
         },
       },
@@ -1917,14 +1930,7 @@ export async function syncPostRealmIdsSegment(
       unitId: true,
       unit: {
         select: {
-          inRealms: {
-            where: { state: "VISIBLE" },
-            select: { realmUnitId: true, state: true },
-            orderBy: { realmUnitId: "asc" },
-          },
-          realmModerationTargets: {
-            select: { realmUnitId: true, state: true },
-          },
+          ...realmSearchProjectionSelect,
         },
       },
     },

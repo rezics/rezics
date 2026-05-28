@@ -47,6 +47,11 @@ describe("buildPostDocument", () => {
           { realmUnitId: "realm-1", state: "VISIBLE" },
           { realmUnitId: "realm-2", state: "VISIBLE" },
           { realmUnitId: "realm-3", state: "ARCHIVED" },
+          {
+            realmUnitId: "realm-private",
+            state: "VISIBLE",
+            realm: { realm: { isPublic: false } },
+          },
         ],
         realmModerationTargets: [
           { realmUnitId: "realm-2", state: "ARCHIVED" },
@@ -751,8 +756,21 @@ describe("search sync global moderation projection", () => {
       },
       unitRealm: {
         findMany: mock(async () => [
-          { realmUnitId: "realm-a", state: "VISIBLE" },
-          { realmUnitId: "realm-b", state: "VISIBLE" },
+          {
+            realmUnitId: "realm-a",
+            state: "VISIBLE",
+            realm: { realm: { isPublic: true } },
+          },
+          {
+            realmUnitId: "realm-b",
+            state: "VISIBLE",
+            realm: { realm: { isPublic: true } },
+          },
+          {
+            realmUnitId: "realm-private",
+            state: "VISIBLE",
+            realm: { realm: { isPublic: false } },
+          },
         ]),
       },
       realmContentModeration: {
