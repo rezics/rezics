@@ -641,7 +641,7 @@ export function useRemoveRealmTagApplicationMutation(
 
 /**
  * Create a RealmTagApplication (creation-as-vote, any realm member).
- * POST /realm-tag-applications
+ * POST /realm-tag-application
  */
 export function useCreateRealmTagApplicationMutation(
   options?: Omit<
@@ -671,7 +671,7 @@ export function useCreateRealmTagApplicationMutation(
 
 /**
  * Pin/unpin or reposition a RealmTagApplication (admin or realm owner).
- * PATCH /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId
+ * PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId
  */
 export function usePatchRealmTagApplicationMutation(
   options?: Omit<
@@ -706,7 +706,7 @@ export function usePatchRealmTagApplicationMutation(
 
 /**
  * Delete a RealmTagApplication (admin or realm owner).
- * DELETE /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId
+ * DELETE /realm-tag-application/:realmUnitId/:unitId/:tagUnitId
  */
 export function useDeleteRealmTagApplicationMutation(
   options?: Omit<
@@ -736,7 +736,7 @@ export function useDeleteRealmTagApplicationMutation(
 
 /**
  * Cast a RealmTagApplicationVote (membership-checked, retained on member exit).
- * POST /realm-tag-application-votes
+ * POST /realm-tag-application-vote
  */
 export function useCastRealmTagApplicationVoteMutation(
   options?: Omit<

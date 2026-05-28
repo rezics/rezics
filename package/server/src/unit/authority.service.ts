@@ -195,7 +195,7 @@ export class UnitAuthorityService {
         details: {
           offendingPath: input.path,
           useApi: input.path.startsWith("realmTagApplications")
-            ? "/realm-tag-applications"
+            ? "/realm-tag-application"
             : "/tags",
         },
       });

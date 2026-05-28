@@ -404,12 +404,12 @@ export const realmApi = {
 
   /**
    * Create a RealmTagApplication (creation-as-vote, any realm member).
-   * POST /realm-tag-applications
+   * POST /realm-tag-application
    */
   createRealmTagApplication: async (
     input: CreateRealmTagApplicationInput,
   ): Promise<RealmTagApplicationDTO> => {
-    return apiFetch<RealmTagApplicationDTO>(`/realm-tag-applications`, {
+    return apiFetch<RealmTagApplicationDTO>(`/realm-tag-application`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -417,7 +417,7 @@ export const realmApi = {
 
   /**
    * Pin/unpin or reposition a RealmTagApplication (admin or realm owner).
-   * PATCH /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId
+   * PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId
    */
   patchRealmTagApplication: async (
     realmUnitId: string,
@@ -426,7 +426,7 @@ export const realmApi = {
     input: PatchRealmTagApplicationInput,
   ): Promise<RealmTagApplicationDTO> => {
     return apiFetch<RealmTagApplicationDTO>(
-      `/realm-tag-applications/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
+      `/realm-tag-application/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
         unitId,
       )}/${encodeURIComponent(tagUnitId)}`,
       {
@@ -438,7 +438,7 @@ export const realmApi = {
 
   /**
    * Delete a RealmTagApplication (admin or realm owner).
-   * DELETE /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId
+   * DELETE /realm-tag-application/:realmUnitId/:unitId/:tagUnitId
    */
   deleteRealmTagApplication: async (
     realmUnitId: string,
@@ -446,7 +446,7 @@ export const realmApi = {
     tagUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/realm-tag-applications/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
+      `/realm-tag-application/${encodeURIComponent(realmUnitId)}/${encodeURIComponent(
         unitId,
       )}/${encodeURIComponent(tagUnitId)}`,
       { method: "DELETE" },
@@ -455,12 +455,12 @@ export const realmApi = {
 
   /**
    * Cast a RealmTagApplicationVote (membership-checked, retained when member leaves).
-   * POST /realm-tag-application-votes
+   * POST /realm-tag-application-vote
    */
   castRealmTagApplicationVote: async (
     input: CastRealmTagApplicationVoteInput,
   ): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/realm-tag-application-votes`, {
+    return apiFetch<{ message: string }>(`/realm-tag-application-vote`, {
       method: "POST",
       body: JSON.stringify(input),
     });

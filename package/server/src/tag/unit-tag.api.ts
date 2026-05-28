@@ -31,10 +31,10 @@ async function assertTagVotePolicy(input: {
   }
 }
 
-export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
+export const unitTagApi = new Elysia({ prefix: "/unit-tag" })
   .use(authMacro)
 
-  // POST /unit-tags — creation-as-vote (login)
+  // POST /unit-tag — creation-as-vote (login)
   .post(
     "/",
     async ({ body, identity }) => {
@@ -64,7 +64,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
     },
   )
 
-  // PATCH /unit-tags/:unitId/:tagUnitId — pin / position (admin or unit owner)
+  // PATCH /unit-tag/:unitId/:tagUnitId — pin / position (admin or unit owner)
   .patch(
     "/:unitId/:tagUnitId",
     async ({ params, body, identity }): Promise<UnitTagDTO> => {
@@ -87,7 +87,7 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
     },
   )
 
-  // DELETE /unit-tags/:unitId/:tagUnitId — delete (admin or unit owner)
+  // DELETE /unit-tag/:unitId/:tagUnitId — delete (admin or unit owner)
   .delete(
     "/:unitId/:tagUnitId",
     async ({ params, identity }): Promise<{ message: string }> => {
@@ -105,10 +105,10 @@ export const unitTagApi = new Elysia({ prefix: "/unit-tags" })
     },
   );
 
-export const tagVoteApi = new Elysia({ prefix: "/tag-votes" })
+export const tagVoteApi = new Elysia({ prefix: "/tag-vote" })
   .use(authMacro)
 
-  // POST /tag-votes — explicit vote action (login)
+  // POST /tag-vote — explicit vote action (login)
   .post(
     "/",
     async ({ body, identity }) => {
@@ -139,11 +139,11 @@ export const tagVoteApi = new Elysia({ prefix: "/tag-votes" })
   );
 
 export const lowScoreTagsAdminApi = new Elysia({
-  prefix: "/admin/low-score-tags",
+  prefix: "/admin/low-score-tag",
 })
   .use(authMacro)
 
-  // GET /admin/low-score-tags — admin discovery
+  // GET /admin/low-score-tag — admin discovery
   .get(
     "/",
     async ({ headers, query, set }) => {

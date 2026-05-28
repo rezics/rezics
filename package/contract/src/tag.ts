@@ -31,7 +31,7 @@ export const createUnitTagSchema = t.Object({
 
 export type CreateUnitTagInput = (typeof createUnitTagSchema)["static"];
 
-/** Body for PATCH /unit-tags/:unitId/:tagUnitId */
+/** Body for PATCH /unit-tag/:unitId/:tagUnitId */
 export const patchUnitTagSchema = t.Object({
   pinned: t.Optional(t.Boolean()),
   position: t.Optional(t.Nullable(t.String())),

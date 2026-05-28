@@ -66,7 +66,7 @@ describe("tag vote APIs", () => {
   test("denies explicit tag votes rejected by policy", async () => {
     const { tagVoteApi } = await import("./unit-tag.api");
     const response = await tagVoteApi.handle(
-      new Request("http://localhost/tag-votes/", {
+      new Request("http://localhost/tag-vote/", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -90,7 +90,7 @@ describe("tag vote APIs", () => {
   test("denies unit-tag creation-as-vote rejected by policy", async () => {
     const { unitTagApi } = await import("./unit-tag.api");
     const response = await unitTagApi.handle(
-      new Request("http://localhost/unit-tags/", {
+      new Request("http://localhost/unit-tag/", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ unitId: "unit-1", tagUnitId: "tag-1" }),

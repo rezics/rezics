@@ -292,7 +292,7 @@ describe("PATCH /entity/:unitId editorial governance", () => {
     };
     expect(body.detail).toMatchObject({
       offendingPath: "realmTagApplications.featured",
-      useApi: "/realm-tag-applications",
+      useApi: "/realm-tag-application",
     });
     expect((prismaMock.$transaction as any).mock.calls.length).toBe(0);
   });

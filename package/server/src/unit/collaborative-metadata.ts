@@ -301,7 +301,7 @@ export function assertEditorialPatchAllowed(patch: Record<string, unknown>) {
     details: {
       offendingPath,
       useApi: offendingPath.startsWith("realmTagApplications")
-        ? "/realm-tag-applications"
+        ? "/realm-tag-application"
         : "/tags",
     },
   });

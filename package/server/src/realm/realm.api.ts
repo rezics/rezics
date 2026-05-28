@@ -1098,7 +1098,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       });
       // Any realm member may add a tag inside a realm; creation acts as a
       // vote. Pin/delete is restricted to admin/realm-owner via the
-      // separate `/realm-tag-applications` route.
+      // separate `/realm-tag-application` route.
       const isAdmin = BasicAdminPermission(identity.permission);
       if (!isAdmin) {
         const actorMember = await realmService.getMember(
@@ -1127,7 +1127,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       detail: {
         summary: "Add realm-tag-application",
         description:
-          "Add a realm-tag-application link. Membership-checked; creation acts as a +1 RealmTagApplicationVote. Pin/delete uses /realm-tag-applications.",
+          "Add a realm-tag-application link. Membership-checked; creation acts as a +1 RealmTagApplicationVote. Pin/delete uses /realm-tag-application.",
         tags: ["Realms"],
       },
     },

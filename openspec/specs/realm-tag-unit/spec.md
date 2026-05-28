@@ -156,14 +156,14 @@ RealmTagApplication SHALL contain the following additional fields beyond its `(r
 
 ### Requirement: Any realm member can create a RealmTagApplication
 
-Any authenticated user who is a current member of `realmUnitId` SHALL be able to create a RealmTagApplication record by sending a `POST /realm-tag-applications` request. The request SHALL validate that `realmUnitId` references a REALM Unit and `tagUnitId` references an existing global TAG Unit. The first creator's request creates the row, writes their `+1` RealmTagApplicationVote, and idempotently contributes their ordinary global `TagVote` for `(unitId, tagUnitId)`. Subsequent calls by other members append their `+1` RealmTagApplicationVote and idempotently contribute their global `TagVote`. Repeated calls by the same member are idempotent. Realm membership SHALL be verified at write time.
+Any authenticated user who is a current member of `realmUnitId` SHALL be able to create a RealmTagApplication record by sending a `POST /realm-tag-application` request. The request SHALL validate that `realmUnitId` references a REALM Unit and `tagUnitId` references an existing global TAG Unit. The first creator's request creates the row, writes their `+1` RealmTagApplicationVote, and idempotently contributes their ordinary global `TagVote` for `(unitId, tagUnitId)`. Subsequent calls by other members append their `+1` RealmTagApplicationVote and idempotently contribute their global `TagVote`. Repeated calls by the same member are idempotent. Realm membership SHALL be verified at write time.
 
 #### Scenario: Regular member creates a realm tag application
 
 - **GIVEN** "user-1" is a regular member (not a moderator or owner) of "realm-1"
 - **AND** "realm-1" is a REALM Unit
 - **AND** "tag-1" is a TAG Unit
-- **WHEN** "user-1" sends `POST /realm-tag-applications` for `(realm-1, unit-1, tag-1)`
+- **WHEN** "user-1" sends `POST /realm-tag-application` for `(realm-1, unit-1, tag-1)`
 - **THEN** the system SHALL create the RealmTagApplication row
 - **AND** the system SHALL create a `+1` RealmTagApplicationVote row for "user-1"
 - **AND** the system SHALL create or preserve the user's global `TagVote(user-1, unit-1, tag-1, +1)`
@@ -172,7 +172,7 @@ Any authenticated user who is a current member of `realmUnitId` SHALL be able to
 #### Scenario: Non-member is denied
 
 - **GIVEN** "user-x" is NOT a member of "realm-1"
-- **WHEN** "user-x" sends `POST /realm-tag-applications` for `(realm-1, unit-1, tag-1)`
+- **WHEN** "user-x" sends `POST /realm-tag-application` for `(realm-1, unit-1, tag-1)`
 - **THEN** the system SHALL deny the operation with an authorization error
 - **AND** no RealmTagApplication, RealmTagApplicationVote, or global TagVote row SHALL be created for this request
 
@@ -180,7 +180,7 @@ Any authenticated user who is a current member of `realmUnitId` SHALL be able to
 
 - **GIVEN** "user-1" is a member of "realm-1"
 - **AND** `book-1` exists as a BOOK Unit
-- **WHEN** "user-1" sends `POST /realm-tag-applications` with `tagUnitId = "book-1"`
+- **WHEN** "user-1" sends `POST /realm-tag-application` with `tagUnitId = "book-1"`
 - **THEN** the system SHALL reject the operation with a validation error
 - **AND** no RealmTagApplication row SHALL be created
 
@@ -278,7 +278,7 @@ The system SHALL expose an admin-only endpoint that lists RealmTagApplication ro
 
 ### Requirement: RealmTagApplication and UnitTag have fully independent lifecycles
 
-A RealmTagApplication row and the corresponding UnitTag row (if any) SHALL remain independently deletable and independently authoritative for their own score layer. Deleting a UnitTag SHALL NOT delete or modify any RealmTagApplication row that references the same `(unitId, tagUnitId)`. Deleting a RealmTagApplication SHALL NOT delete or modify any UnitTag row that references the same `(unitId, tagUnitId)`. There SHALL be no foreign key from RealmTagApplication to UnitTag. However, the standard `POST /realm-tag-applications` write path SHALL idempotently contribute the caller's ordinary global `TagVote` and update or create the corresponding UnitTag aggregate according to global tag vote rules.
+A RealmTagApplication row and the corresponding UnitTag row (if any) SHALL remain independently deletable and independently authoritative for their own score layer. Deleting a UnitTag SHALL NOT delete or modify any RealmTagApplication row that references the same `(unitId, tagUnitId)`. Deleting a RealmTagApplication SHALL NOT delete or modify any UnitTag row that references the same `(unitId, tagUnitId)`. There SHALL be no foreign key from RealmTagApplication to UnitTag. However, the standard `POST /realm-tag-application` write path SHALL idempotently contribute the caller's ordinary global `TagVote` and update or create the corresponding UnitTag aggregate according to global tag vote rules.
 
 #### Scenario: Deleting a RealmTagApplication does not affect UnitTag
 
@@ -411,11 +411,11 @@ The schema-facing model, contract DTOs, API routes, API clients, services, mappe
 
 ### Requirement: RealmTagApplication routes replace RealmTagUnit routes
 
-The server SHALL expose realm-scoped tag application mutation routes under `/realm-tag-applications`. The old `/realm-tag-units` route prefix SHALL NOT remain as a compatibility alias.
+The server SHALL expose realm-scoped tag application mutation routes under `/realm-tag-application`. The old `/realm-tag-units` route prefix SHALL NOT remain as a compatibility alias.
 
 #### Scenario: Create application through new route
 
-- **WHEN** a realm member sends a valid create request to `POST /realm-tag-applications`
+- **WHEN** a realm member sends a valid create request to `POST /realm-tag-application`
 - **THEN** the server SHALL create or update the realm tag application using the existing creation-as-vote semantics
 
 #### Scenario: Old route is not retained

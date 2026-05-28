@@ -175,7 +175,7 @@ export function useCastTagVoteMutation(
 
 /**
  * Create a UnitTag (creation-as-vote, idempotent per user).
- * POST /unit-tags
+ * POST /unit-tag
  */
 export function useCreateUnitTagMutation(
   options?: Omit<
@@ -200,7 +200,7 @@ export function useCreateUnitTagMutation(
 
 /**
  * Pin/unpin or reposition a UnitTag (admin or unit owner).
- * PATCH /unit-tags/:unitId/:tagUnitId
+ * PATCH /unit-tag/:unitId/:tagUnitId
  */
 export function usePatchUnitTagMutation(
   options?: Omit<
@@ -230,7 +230,7 @@ export function usePatchUnitTagMutation(
 
 /**
  * Delete a UnitTag (admin or unit owner).
- * DELETE /unit-tags/:unitId/:tagUnitId
+ * DELETE /unit-tag/:unitId/:tagUnitId
  */
 export function useDeleteUnitTagMutation(
   options?: Omit<

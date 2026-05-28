@@ -359,7 +359,7 @@ export const createRealmTagApplicationSchema = t.Object({
 export type CreateRealmTagApplicationInput =
   (typeof createRealmTagApplicationSchema)["static"];
 
-/** Body for PATCH /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId */
+/** Body for PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId */
 export const patchRealmTagApplicationSchema = t.Object({
   pinned: t.Optional(t.Boolean()),
   position: t.Optional(t.Nullable(t.String())),

@@ -71,11 +71,11 @@ async function assertRealmTagVotePolicy(input: {
 }
 
 export const realmTagApplicationApi = new Elysia({
-  prefix: "/realm-tag-applications",
+  prefix: "/realm-tag-application",
 })
   .use(authMacro)
 
-  // POST /realm-tag-applications — creation-as-vote (any realm member)
+  // POST /realm-tag-application — creation-as-vote (any realm member)
   .post(
     "/",
     async ({ body, identity, set }): Promise<RealmTagApplicationDTO> => {
@@ -117,7 +117,7 @@ export const realmTagApplicationApi = new Elysia({
     },
   )
 
-  // PATCH /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId — pin / position (admin or realm owner)
+  // PATCH /realm-tag-application/:realmUnitId/:unitId/:tagUnitId — pin / position (admin or realm owner)
   .patch(
     "/:realmUnitId/:unitId/:tagUnitId",
     async ({
@@ -156,7 +156,7 @@ export const realmTagApplicationApi = new Elysia({
     },
   )
 
-  // DELETE /realm-tag-applications/:realmUnitId/:unitId/:tagUnitId — delete (admin or realm owner)
+  // DELETE /realm-tag-application/:realmUnitId/:unitId/:tagUnitId — delete (admin or realm owner)
   .delete(
     "/:realmUnitId/:unitId/:tagUnitId",
     async ({ params, identity, set }): Promise<{ message: string }> => {
@@ -191,11 +191,11 @@ export const realmTagApplicationApi = new Elysia({
   );
 
 export const realmTagApplicationVoteApi = new Elysia({
-  prefix: "/realm-tag-application-votes",
+  prefix: "/realm-tag-application-vote",
 })
   .use(authMacro)
 
-  // POST /realm-tag-application-votes — explicit vote (membership-checked)
+  // POST /realm-tag-application-vote — explicit vote (membership-checked)
   .post(
     "/",
     async ({ body, identity, set }): Promise<{ message: string }> => {

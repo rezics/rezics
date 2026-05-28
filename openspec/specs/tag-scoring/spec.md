@@ -122,7 +122,7 @@ TagVote SHALL have a composite primary key of `(userId, unitId, tagUnitId)`. It 
 
 ### Requirement: Score recalculation aggregates votes only
 
-The `score` on a UnitTag record SHALL equal the sum of all `TagVote.value` entries for that `(unitId, tagUnitId)` pair. The `voteCount` SHALL equal the total number of TagVote records for that pair. RealmTagUnit rows SHALL NOT contribute directly to UnitTag.score; any contribution from a realm tagging action arrives via the client-side double-write path that issues a separate `POST /unit-tags`, which inserts an ordinary TagVote on behalf of the calling user.
+The `score` on a UnitTag record SHALL equal the sum of all `TagVote.value` entries for that `(unitId, tagUnitId)` pair. The `voteCount` SHALL equal the total number of TagVote records for that pair. RealmTagUnit rows SHALL NOT contribute directly to UnitTag.score; any contribution from a realm tagging action arrives via the client-side double-write path that issues a separate `POST /unit-tag`, which inserts an ordinary TagVote on behalf of the calling user.
 
 #### Scenario: Score reflects aggregate votes only
 
@@ -157,7 +157,7 @@ When retrieving the tags for a unit, the system SHALL place all `pinned = true` 
 
 ### Requirement: Any user can propose a tag on a unit
 
-Any authenticated user SHALL be able to propose a tag on a unit by sending a `POST /unit-tags` request. The first proposer's request creates the UnitTag row and writes their `+1` TagVote (resulting in `score = 1`); subsequent proposers' requests append their `+1` TagVote and increment the row by 1. Repeated calls by the same user are idempotent.
+Any authenticated user SHALL be able to propose a tag on a unit by sending a `POST /unit-tag` request. The first proposer's request creates the UnitTag row and writes their `+1` TagVote (resulting in `score = 1`); subsequent proposers' requests append their `+1` TagVote and increment the row by 1. Repeated calls by the same user are idempotent.
 
 #### Scenario: User proposes a new tag on a unit
 
@@ -175,37 +175,37 @@ Any authenticated user SHALL be able to propose a tag on a unit by sending a `PO
 
 ### Requirement: Creating a UnitTag row writes the creator's first +1 TagVote
 
-When a `POST /unit-tags` request creates a UnitTag row that did not previously exist, the system MUST atomically insert a `TagVote` row of `(userId = caller, unitId, tagUnitId, value = +1)`. The newly created UnitTag row SHALL therefore have `score = 1` and `voteCount = 1`.
+When a `POST /unit-tag` request creates a UnitTag row that did not previously exist, the system MUST atomically insert a `TagVote` row of `(userId = caller, unitId, tagUnitId, value = +1)`. The newly created UnitTag row SHALL therefore have `score = 1` and `voteCount = 1`.
 
 #### Scenario: First-time create initializes vote and score
 
 - **GIVEN** no UnitTag exists for `(unit-1, tag-1)`
 - **AND** caller "user-1" is authenticated
-- **WHEN** "user-1" sends `POST /unit-tags` for `(unit-1, tag-1)`
+- **WHEN** "user-1" sends `POST /unit-tag` for `(unit-1, tag-1)`
 - **THEN** a UnitTag row SHALL be created with `score = 1`, `voteCount = 1`, `pinned = false`, `position = null`
 - **AND** a TagVote row SHALL be created with `(user-1, unit-1, tag-1, +1)`
 
 ### Requirement: A subsequent UnitTag create by another user behaves as a +1 vote on the existing row
 
-When a `POST /unit-tags` request targets `(unitId, tagUnitId)` for which a UnitTag already exists, and the caller has not previously cast a TagVote on that pair, the system MUST insert a `TagVote` row of value `+1` from the caller and increment the existing UnitTag's `score` and `voteCount` by 1.
+When a `POST /unit-tag` request targets `(unitId, tagUnitId)` for which a UnitTag already exists, and the caller has not previously cast a TagVote on that pair, the system MUST insert a `TagVote` row of value `+1` from the caller and increment the existing UnitTag's `score` and `voteCount` by 1.
 
 #### Scenario: Second user proposes the same tag
 
 - **GIVEN** UnitTag `(unit-1, tag-1)` exists with `score = 1`, `voteCount = 1`
 - **AND** caller "user-2" is authenticated and has no prior TagVote on this pair
-- **WHEN** "user-2" sends `POST /unit-tags` for `(unit-1, tag-1)`
+- **WHEN** "user-2" sends `POST /unit-tag` for `(unit-1, tag-1)`
 - **THEN** a TagVote row SHALL be created with `(user-2, unit-1, tag-1, +1)`
 - **AND** the UnitTag row SHALL be updated to `score = 2`, `voteCount = 2`
 - **AND** no duplicate UnitTag SHALL be created
 
 ### Requirement: Repeated UnitTag create by the same user is idempotent
 
-When a `POST /unit-tags` request targets a pair on which the caller already holds a TagVote, the system MUST treat the request as a no-op for vote insertion: it SHALL NOT create a duplicate vote and SHALL NOT increment `score` or `voteCount`. The endpoint SHALL return success with the current UnitTag state.
+When a `POST /unit-tag` request targets a pair on which the caller already holds a TagVote, the system MUST treat the request as a no-op for vote insertion: it SHALL NOT create a duplicate vote and SHALL NOT increment `score` or `voteCount`. The endpoint SHALL return success with the current UnitTag state.
 
 #### Scenario: User retries a create they already performed
 
 - **GIVEN** "user-1" previously created UnitTag `(unit-1, tag-1)`, producing a TagVote row
-- **WHEN** "user-1" sends `POST /unit-tags` for the same pair again
+- **WHEN** "user-1" sends `POST /unit-tag` for the same pair again
 - **THEN** the system SHALL return success
 - **AND** no additional TagVote row SHALL be inserted
 - **AND** UnitTag `score` and `voteCount` SHALL be unchanged
@@ -228,7 +228,7 @@ If `Unit.userId IS NULL`, only platform administrators SHALL hold pin and delete
 #### Scenario: Platform admin deletes a UnitTag
 
 - **GIVEN** UnitTag `(unit-1, tag-1)` exists
-- **WHEN** a platform administrator sends `DELETE /unit-tags/unit-1/tag-1`
+- **WHEN** a platform administrator sends `DELETE /unit-tag/unit-1/tag-1`
 - **THEN** the row SHALL be removed
 - **AND** all TagVote rows for `(unit-1, tag-1)` SHALL also be removed
 

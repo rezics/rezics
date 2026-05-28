@@ -86,37 +86,37 @@ Once a RealmTagApplicationVote record has been created, it SHALL persist regardl
 
 ### Requirement: Creating a RealmTagApplication row writes the creator's first +1 RealmTagApplicationVote
 
-When a `POST /realm-tag-applications` request creates a RealmTagApplication row that did not previously exist, the system MUST atomically insert a `RealmTagApplicationVote` row of `(realmUnitId, tagUnitId, unitId, userId = caller, value = +1)`. The newly created RealmTagApplication row SHALL therefore have `score = 1` and `voteCount = 1`.
+When a `POST /realm-tag-application` request creates a RealmTagApplication row that did not previously exist, the system MUST atomically insert a `RealmTagApplicationVote` row of `(realmUnitId, tagUnitId, unitId, userId = caller, value = +1)`. The newly created RealmTagApplication row SHALL therefore have `score = 1` and `voteCount = 1`.
 
 #### Scenario: First-time create initializes vote and score
 
 - **GIVEN** no RealmTagApplication exists for `(realm-1, tag-1, unit-1)`
 - **AND** caller "user-1" is a member of "realm-1"
-- **WHEN** "user-1" sends `POST /realm-tag-applications` for `(realm-1, unit-1, tag-1)`
+- **WHEN** "user-1" sends `POST /realm-tag-application` for `(realm-1, unit-1, tag-1)`
 - **THEN** a RealmTagApplication row SHALL be created with `score = 1`, `voteCount = 1`, `pinned = false`, `position = null`
 - **AND** a RealmTagApplicationVote row SHALL be created with `(realm-1, tag-1, unit-1, user-1, +1)`
 
 ### Requirement: A subsequent create by another member behaves as a +1 vote on the existing row
 
-When a `POST /realm-tag-applications` request targets a `(realmUnitId, tagUnitId, unitId)` application for which a RealmTagApplication already exists, and the caller has not previously cast a vote on that application, the system MUST insert a RealmTagApplicationVote row of value `+1` from the caller and increment the existing RealmTagApplication's `score` and `voteCount` by 1.
+When a `POST /realm-tag-application` request targets a `(realmUnitId, tagUnitId, unitId)` application for which a RealmTagApplication already exists, and the caller has not previously cast a vote on that application, the system MUST insert a RealmTagApplicationVote row of value `+1` from the caller and increment the existing RealmTagApplication's `score` and `voteCount` by 1.
 
 #### Scenario: Second member tags the same triple
 
 - **GIVEN** RealmTagApplication `(realm-1, tag-1, unit-1)` exists with `score = 1`, `voteCount = 1`
 - **AND** caller "user-2" is a member of "realm-1" and has no prior RealmTagApplicationVote on this application
-- **WHEN** "user-2" sends `POST /realm-tag-applications` for `(realm-1, unit-1, tag-1)`
+- **WHEN** "user-2" sends `POST /realm-tag-application` for `(realm-1, unit-1, tag-1)`
 - **THEN** a RealmTagApplicationVote row SHALL be created with `(realm-1, tag-1, unit-1, user-2, +1)`
 - **AND** the RealmTagApplication row SHALL be updated to `score = 2`, `voteCount = 2`
 - **AND** no duplicate RealmTagApplication SHALL be created
 
 ### Requirement: Repeated create by the same member is idempotent
 
-When a `POST /realm-tag-applications` request targets an application on which the caller already holds a RealmTagApplicationVote, the system MUST treat the request as a no-op for vote insertion: it SHALL NOT create a duplicate vote row and SHALL NOT increment `score` or `voteCount`. The endpoint SHALL return success with the current RealmTagApplication state. The global TagVote contribution owned by the same request path SHALL also remain idempotent.
+When a `POST /realm-tag-application` request targets an application on which the caller already holds a RealmTagApplicationVote, the system MUST treat the request as a no-op for vote insertion: it SHALL NOT create a duplicate vote row and SHALL NOT increment `score` or `voteCount`. The endpoint SHALL return success with the current RealmTagApplication state. The global TagVote contribution owned by the same request path SHALL also remain idempotent.
 
 #### Scenario: Member retries a create they already performed
 
 - **GIVEN** "user-1" previously created RealmTagApplication `(realm-1, tag-1, unit-1)`, producing a RealmTagApplicationVote row
-- **WHEN** "user-1" sends `POST /realm-tag-applications` for the same application again
+- **WHEN** "user-1" sends `POST /realm-tag-application` for the same application again
 - **THEN** the system SHALL return success
 - **AND** no additional RealmTagApplicationVote row SHALL be inserted
 - **AND** RealmTagApplication `score` and `voteCount` SHALL be unchanged
@@ -146,6 +146,6 @@ The vote model, DTOs, routes, service methods, and tests SHALL use `RealmTagAppl
 
 #### Scenario: Vote route uses application vocabulary
 
-- **WHEN** a member casts a vote through `POST /realm-tag-application-votes`
+- **WHEN** a member casts a vote through `POST /realm-tag-application-vote`
 - **THEN** the vote SHALL be applied to the matching `RealmTagApplication`
 - **AND** the old `/realm-tag-votes` route prefix SHALL NOT remain mounted

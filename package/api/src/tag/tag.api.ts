@@ -159,10 +159,10 @@ export const tagApi = {
 
   /**
    * Create a UnitTag (creation-as-vote, idempotent per user).
-   * POST /unit-tags
+   * POST /unit-tag
    */
   createUnitTag: async (input: CreateUnitTagInput): Promise<UnitTagDTO> => {
-    return apiFetch<UnitTagDTO>(`/unit-tags`, {
+    return apiFetch<UnitTagDTO>(`/unit-tag`, {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -170,7 +170,7 @@ export const tagApi = {
 
   /**
    * Pin/unpin or reposition a UnitTag (admin or unit owner).
-   * PATCH /unit-tags/:unitId/:tagUnitId
+   * PATCH /unit-tag/:unitId/:tagUnitId
    */
   patchUnitTag: async (
     unitId: string,
@@ -178,7 +178,7 @@ export const tagApi = {
     input: PatchUnitTagInput,
   ): Promise<UnitTagDTO> => {
     return apiFetch<UnitTagDTO>(
-      `/unit-tags/${encodeURIComponent(unitId)}/${encodeURIComponent(
+      `/unit-tag/${encodeURIComponent(unitId)}/${encodeURIComponent(
         tagUnitId,
       )}`,
       {
@@ -190,14 +190,14 @@ export const tagApi = {
 
   /**
    * Delete a UnitTag (admin or unit owner).
-   * DELETE /unit-tags/:unitId/:tagUnitId
+   * DELETE /unit-tag/:unitId/:tagUnitId
    */
   deleteUnitTag: async (
     unitId: string,
     tagUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/unit-tags/${encodeURIComponent(unitId)}/${encodeURIComponent(
+      `/unit-tag/${encodeURIComponent(unitId)}/${encodeURIComponent(
         tagUnitId,
       )}`,
       { method: "DELETE" },
@@ -206,13 +206,13 @@ export const tagApi = {
 
   /**
    * Admin discovery: list UnitTag/RealmTagApplication rows at or below a score threshold.
-   * GET /admin/low-score-tags
+   * GET /admin/low-score-tag
    */
   listLowScoreTags: async (
     query?: LowScoreTagsQuery,
   ): Promise<LowScoreTagsResponse> => {
     return apiFetch<LowScoreTagsResponse>(
-      `/admin/low-score-tags${buildQueryString(query)}`,
+      `/admin/low-score-tag${buildQueryString(query)}`,
     );
   },
 };
