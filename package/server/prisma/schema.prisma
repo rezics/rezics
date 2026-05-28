@@ -566,11 +566,10 @@ model ContentStructure {
   @@index([updatedAt(sort: Desc)])
 }
 
-/// Normalized one-row-per-node storage for a generic ContentStructure tree.
-/// Sibling order is determined by lexicographic `sortKey` within an
-/// `(ownerUnitId, parentId)` group. `contentUnitId` is intentionally
-/// non-unique because the same content Unit MAY be referenced from multiple
-/// nodes.
+/// One row per node in a ContentStructure tree.
+/// - `id`: globally unique node identity.
+/// - `contentUnitId`: not unique; the same Unit can be referenced by many nodes.
+/// - `sortKey`: orders siblings within each `(ownerUnitId, parentId)` group.
 model ContentStructureNode {
   id            String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
   ownerUnitId   String         @db.Uuid

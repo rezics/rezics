@@ -163,6 +163,24 @@ copies. See `implement_goal.md` (Phase 6). Contracts to pin:
 - **Cleanup** — remove `test`/`test02`/`test03`/`test-links` route files from
   `routes/_mainLayout/` and any references in `core/components/create-menu/` and
   the sidebar/navigation config.
+- **Bookshelf shelf view + viewer config** — extend `ShelfView` in
+  `package/api/src/shelf/shelf.types.ts` with `"bookshelf"`. In
+  `package/contract/src/` add `bookshelfViewConfigSchema`
+  (`{ breakpoints: Array<{ minWidthPx: number; columns: number }>, showTitle: boolean }`),
+  `DEFAULT_BOOKSHELF_CONFIG`, `LIBRARY_KINDS = ["book", "game", "media"]`, and
+  per-kind aspect-ratio constants (kept independent even when values coincide so
+  individual kinds can change without breaking the others). Extend
+  `userSettingsSchema` in `package/contract/src/user.ts` with
+  `library: { bookshelf?: BookshelfViewConfig }`. App work lives in a new
+  `package/app/src/bookshelf-view/` feature (config resolution URL →
+  viewer-settings → default, responsive CSS-grid component, desktop-only hover
+  preview panel, and a "use my settings" reset). Extend `BookCard` with
+  `showTitle?: boolean` and `aspectRatio?: number` props; route the
+  `ShelfItemRenderer` `bookshelf` branch through this feature and silently skip
+  non-library kinds. The dashboard library section is a composition of the
+  user's shelves rendered with this view and the readable filter
+  (`isLicensed === true` for books) applied by default; standalone shelf
+  surfaces expose the filter as opt-in.
 
 ## Out of scope (open as separate changes)
 

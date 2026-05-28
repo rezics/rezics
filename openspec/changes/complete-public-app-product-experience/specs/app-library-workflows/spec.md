@@ -27,3 +27,14 @@ Release-aware pages SHALL show exact release context and work-wide alternatives 
 
 - **WHEN** a release has same-work alternatives
 - **THEN** the detail page SHALL expose a releases area with language and edition filters
+
+### Requirement: Library surfaces support a readable-content filter
+
+Library and shelf surfaces SHALL support filtering to items the platform can serve for reading. For books, the filter SHALL be `isLicensed === true`; without a license the platform cannot present the full text and users can only review or discuss the item. The dashboard library section SHALL apply this filter by default, while standalone shelf pages SHALL expose it as an opt-in toggle so users can still see their full collection.
+
+#### Scenario: User toggles readable filter on shelf page
+
+- **GIVEN** a shelf with a mix of licensed and unlicensed books
+- **WHEN** the user enables the readable filter on the shelf page
+- **THEN** only books with `isLicensed === true` SHALL render
+- **AND** disabling the filter SHALL restore the full list
