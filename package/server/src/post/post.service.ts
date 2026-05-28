@@ -82,6 +82,14 @@ const REALM_FEED_EXCLUDED_MODERATION_STATES = [
   "REMOVED",
 ] as const;
 
+const REALM_REPLY_BLOCKING_MODERATION_STATES = [
+  "HIDDEN",
+  "TOMBSTONED",
+  "LOCKED",
+  "ARCHIVED",
+  "REMOVED",
+] as const;
+
 export class PostService {
   /**
    * List posts with support for flat and threaded modes.
@@ -370,6 +378,29 @@ export class PostService {
     }
   }
 
+  private assertRealmReplyLifecycleAllowed(input: {
+    realmUnitIds: string[];
+    overlays: { realmUnitId: string; state: string }[];
+  }) {
+    const realmUnitIds = new Set(input.realmUnitIds);
+    const blocking = input.overlays.find(
+      (overlay) =>
+        realmUnitIds.has(overlay.realmUnitId) &&
+        REALM_REPLY_BLOCKING_MODERATION_STATES.includes(overlay.state as any),
+    );
+    if (!blocking) return;
+
+    if (blocking.state === "LOCKED") {
+      throw new Error("Cannot reply to locked realm content");
+    }
+    if (blocking.state === "ARCHIVED") {
+      throw new Error("Cannot reply to archived realm content");
+    }
+    throw new Error(
+      `Cannot reply to realm content in moderation state ${blocking.state.toLowerCase()}`,
+    );
+  }
+
   /**
    * Create a post with tree handling.
    *
@@ -391,12 +422,10 @@ export class PostService {
       scoreEntryId,
       extra,
     } = input;
-    const realmIdsToWrite = parentPostUnitId
+    let realmIdsToWrite = parentPostUnitId
       ? []
       : [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
-
-    await this.assertRealmPostAllowed(realmIdsToWrite, authorUserId);
 
     let targetUnitTypeFromChapterCheck: string | null = null;
     if (kind === PostKindEnum.CHAPTER) {
@@ -434,6 +463,16 @@ export class PostService {
           isLocked: true,
           rootTargetUnitId: true,
           rootTargetUnitType: true,
+          unit: {
+            select: {
+              inRealms: {
+                select: { realmUnitId: true, state: true },
+              },
+              realmModerationTargets: {
+                select: { realmUnitId: true, state: true },
+              },
+            },
+          },
         },
       });
 
@@ -442,6 +481,35 @@ export class PostService {
       }
 
       rootPostUnitId = parent.rootPostUnitId ?? parent.unitId;
+      realmIdsToWrite = parent.unit.inRealms
+        .filter((realm) => realm.state === "VISIBLE")
+        .map((realm) => realm.realmUnitId);
+      this.assertRealmReplyLifecycleAllowed({
+        realmUnitIds: realmIdsToWrite,
+        overlays: parent.unit.realmModerationTargets,
+      });
+      if (rootPostUnitId !== parent.unitId && realmIdsToWrite.length > 0) {
+        const root = await prisma.post.findUnique({
+          where: { unitId: rootPostUnitId },
+          select: {
+            isLocked: true,
+            unit: {
+              select: {
+                realmModerationTargets: {
+                  select: { realmUnitId: true, state: true },
+                },
+              },
+            },
+          },
+        });
+        if (root?.isLocked) {
+          throw new Error("Cannot reply to a locked post");
+        }
+        this.assertRealmReplyLifecycleAllowed({
+          realmUnitIds: realmIdsToWrite,
+          overlays: root?.unit.realmModerationTargets ?? [],
+        });
+      }
       depth = parent.depth + 1;
       sortPath = await this.generateSortPath(parentPostUnitId);
       rootTargetUnitId = parent.rootTargetUnitId ?? null;
@@ -458,6 +526,8 @@ export class PostService {
         rootTargetUnitType = target?.type ?? null;
       }
     }
+
+    await this.assertRealmPostAllowed(realmIdsToWrite, authorUserId);
 
     const post = await prisma.$transaction(async (tx) => {
       const ownerUserId =

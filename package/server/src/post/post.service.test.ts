@@ -40,6 +40,10 @@ const postFindUniqueOrThrowMock = mock(
     isLocked: false,
     rootTargetUnitId: null,
     rootTargetUnitType: null,
+    unit: {
+      inRealms: [],
+      realmModerationTargets: [],
+    },
   }),
 );
 const postFindFirstMock = mock(async () => null);
@@ -425,6 +429,95 @@ describe("PostService.create realm/tag junction writes", () => {
         "user-1",
       ),
     ).rejects.toThrow("Cannot post to realm while membership state is muted");
+    expect(transactionMock).not.toHaveBeenCalled();
+  });
+
+  test("inherits parent realm rows for replies", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "parent-1",
+      rootPostUnitId: "parent-1",
+      depth: 0,
+      sortPath: "0001",
+      isLocked: false,
+      rootTargetUnitId: null,
+      rootTargetUnitType: null,
+      unit: {
+        inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
+        realmModerationTargets: [],
+      },
+    });
+
+    await service.create(
+      { content: content("reply"), parentPostUnitId: "parent-1" },
+      "user-1",
+    );
+
+    expect(realmUnitCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          realmUnitId: "realm-1",
+          unitId: "post-1",
+        }),
+      }),
+    );
+  });
+
+  test("blocks realm replies until required rules are acknowledged", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "parent-1",
+      rootPostUnitId: "parent-1",
+      depth: 0,
+      sortPath: "0001",
+      isLocked: false,
+      rootTargetUnitId: null,
+      rootTargetUnitType: null,
+      unit: {
+        inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
+        realmModerationTargets: [],
+      },
+    });
+    realmFindManyMock.mockResolvedValueOnce([
+      {
+        unitId: "realm-1",
+        extra: { rule: "rule-unit-1" },
+        ruleVersion: 2,
+        ruleRequireOnPost: true,
+      },
+    ]);
+
+    await expect(
+      service.create(
+        { content: content("reply"), parentPostUnitId: "parent-1" },
+        "user-1",
+      ),
+    ).rejects.toThrow("Realm rules must be acknowledged before posting");
+    expect(transactionMock).not.toHaveBeenCalled();
+  });
+
+  test("blocks replies to locked realm content", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "parent-1",
+      rootPostUnitId: "parent-1",
+      depth: 0,
+      sortPath: "0001",
+      isLocked: false,
+      rootTargetUnitId: null,
+      rootTargetUnitType: null,
+      unit: {
+        inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
+        realmModerationTargets: [{ realmUnitId: "realm-1", state: "LOCKED" }],
+      },
+    });
+
+    await expect(
+      service.create(
+        { content: content("reply"), parentPostUnitId: "parent-1" },
+        "user-1",
+      ),
+    ).rejects.toThrow("Cannot reply to locked realm content");
     expect(transactionMock).not.toHaveBeenCalled();
   });
 
