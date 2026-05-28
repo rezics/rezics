@@ -19,6 +19,7 @@ export function mapZoneToDTO(zone: ZoneWithRelations, lang?: string): ZoneDTO {
     translations[0];
 
   return {
+    unitId: zone.unitId,
     slug: zone.unit?.slug ?? "",
     name: translation?.title ?? "",
     description: mainMarkdownSource(translation?.description) ?? null,

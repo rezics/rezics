@@ -1,14 +1,22 @@
+import { zoneHomepageByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import {
   zone_loading,
   zone_not_found,
   zone_not_found_description,
 } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useLocale, useMessage } from "@rezics/i18n/react";
 import { useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useZone } from "../hooks/useZone";
 import { BookZoneTemplate } from "../templates/book";
 import { DefaultZoneTemplate } from "../templates/default";
+import {
+  WikiClassicZoneTemplate,
+  WikiDatabaseZoneTemplate,
+  WikiMediaZoneTemplate,
+  WikiMinimalZoneTemplate,
+} from "../templates/wiki";
 
 const i18nMessages = {
   zone_loading,
@@ -19,6 +27,10 @@ const i18nMessages = {
 const templates: Record<string, React.FC<any>> = {
   default: DefaultZoneTemplate,
   book: BookZoneTemplate,
+  "wiki-classic": WikiClassicZoneTemplate,
+  "wiki-media": WikiMediaZoneTemplate,
+  "wiki-database": WikiDatabaseZoneTemplate,
+  "wiki-minimal": WikiMinimalZoneTemplate,
 };
 
 export type ZoneHomePageProps = {
@@ -27,8 +39,12 @@ export type ZoneHomePageProps = {
 
 export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
   const m = useMessage(i18nMessages);
+  const locale = useLocale();
   const { zone, isLoading, error } = useZone(slug);
   const navigate = useNavigate();
+  const homepageQuery = useQuery(
+    zoneHomepageByUnitIdQueryOptions(zone?.unitId ?? "", [locale]),
+  );
 
   if (isLoading) {
     return (
@@ -47,7 +63,8 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
     );
   }
 
-  const Template = templates[zone.template] ?? templates.default!;
+  const templateKey = zone.wiki?.theme?.template ?? zone.template;
+  const Template = templates[templateKey] ?? templates.default!;
 
   const handleSearch = (keyword: string) => {
     navigate({
@@ -59,7 +76,12 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
 
   return (
     <div className="max-w-8xl mx-auto px-4 py-8">
-      <Template zone={zone} onSearch={handleSearch} />
+      <Template
+        zone={zone}
+        homepageData={homepageQuery.data}
+        homepageLoading={homepageQuery.isLoading}
+        onSearch={handleSearch}
+      />
     </div>
   );
 };

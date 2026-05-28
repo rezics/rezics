@@ -74,25 +74,25 @@
 
 ## 8. Frontend Zone Templates
 
-- [ ] 8.1 Add wiki Zone template components for `wiki-classic`, `wiki-media`, `wiki-database`, and `wiki-minimal`.
-- [ ] 8.2 Add homepage templates for `wiki-classic-home`, `wiki-media-home`, `wiki-database-home`, and `wiki-minimal-home`.
-- [ ] 8.3 Implement safe fallback behavior for unknown or missing wiki templates.
-- [ ] 8.4 Implement token application scoped to the Zone page boundary.
-- [ ] 8.5 Implement banner/logo/background media fallbacks for missing or invalid media.
-- [ ] 8.6 Implement accessible navigation controls for desktop and mobile.
-- [ ] 8.7 Verify Zone templates import feature sections through public feature exports rather than private paths.
+- [x] 8.1 Add wiki Zone template components for `wiki-classic`, `wiki-media`, `wiki-database`, and `wiki-minimal`.
+- [x] 8.2 Add homepage templates for `wiki-classic-home`, `wiki-media-home`, `wiki-database-home`, and `wiki-minimal-home`.
+- [x] 8.3 Implement safe fallback behavior for unknown or missing wiki templates.
+- [x] 8.4 Implement token application scoped to the Zone page boundary.
+- [x] 8.5 Implement banner/logo/background media fallbacks for missing or invalid media.
+- [x] 8.6 Implement accessible navigation controls for desktop and mobile.
+- [x] 8.7 Verify Zone templates import feature sections through public feature exports rather than private paths.
 
 ## 9. Frontend Wiki Navigation And Homepage Sections
 
-- [ ] 9.1 Implement navigation rendering for Entity, Tag, TranslationGroup, Unit link, external link, LABEL heading, and manual translated label items.
-- [ ] 9.2 Implement i18n resolution for Entity, Tag, LABEL Unit, Unit, and manual translation map labels.
+- [x] 9.1 Implement navigation rendering for Entity, Tag, TranslationGroup, Unit link, external link, LABEL heading, and manual translated label items.
+- [x] 9.2 Implement i18n resolution for Entity, Tag, LABEL Unit, Unit, and manual translation map labels.
 - [ ] 9.3 Implement best-language link resolution for TranslationGroup navigation items.
-- [ ] 9.4 Implement `entityCollection` homepage section with entity kind, subject role, work context, realm context, sort, and limit options.
-- [ ] 9.5 Implement `tagCollection` homepage section using Tag Unit translations and realm tag visibility.
-- [ ] 9.6 Implement `translationGroupCollection` homepage section using best-language WIKI Post selection.
-- [ ] 9.7 Implement `recentWiki`, `updatedWiki`, and `stubWiki` homepage sections.
-- [ ] 9.8 Implement `manualLinks` homepage section with validated translated labels.
-- [ ] 9.9 Add section-level empty-state policies so one empty section does not break the homepage.
+- [x] 9.4 Implement `entityCollection` homepage section with entity kind, subject role, work context, realm context, sort, and limit options.
+- [x] 9.5 Implement `tagCollection` homepage section using Tag Unit translations and realm tag visibility.
+- [x] 9.6 Implement `translationGroupCollection` homepage section using best-language WIKI Post selection.
+- [x] 9.7 Implement `recentWiki`, `updatedWiki`, and `stubWiki` homepage sections.
+- [x] 9.8 Implement `manualLinks` homepage section with validated translated labels.
+- [x] 9.9 Add section-level empty-state policies so one empty section does not break the homepage.
 - [ ] 9.10 Add responsive layout checks for navigation, cards, tables, and infobox-heavy sections.
 
 ## 10. Release And Work Integration

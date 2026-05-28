@@ -395,6 +395,7 @@ export type WikiZoneHomepageData = Static<typeof wikiZoneHomepageDataSchema>;
 // ANCHOR: Zone DTO
 
 export const ZoneDTOSchema = t.Object({
+  unitId: t.String(),
   slug: t.String(),
   name: t.String(),
   description: t.Optional(t.Union([t.String(), t.Null()])),

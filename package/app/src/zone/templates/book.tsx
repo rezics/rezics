@@ -5,8 +5,7 @@ import {
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
 import type React from "react";
-import { KeywordInput } from "@/search/components/primitive";
-import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { KeywordInput, useSearchQuery } from "@/search";
 import type { ZoneTemplateProps } from "./types";
 
 const i18nMessages = {

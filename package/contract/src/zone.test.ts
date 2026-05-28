@@ -6,6 +6,7 @@ import {
   wikiZoneHomepageSchema,
   wikiZoneNavigationSchema,
   wikiZoneThemeSchema,
+  ZoneDTOSchema,
 } from "./zone";
 
 describe("wiki Zone contract schemas", () => {
@@ -164,6 +165,18 @@ describe("wiki Zone contract schemas", () => {
             ],
           },
         ],
+      }),
+    ).toBe(true);
+  });
+
+  test("zone DTO carries its Unit id for follow-up data loading", () => {
+    expect(
+      Value.Check(ZoneDTOSchema, {
+        unitId: "zone-1",
+        slug: "wiki",
+        name: "Wiki",
+        filters: {},
+        template: "wiki-classic",
       }),
     ).toBe(true);
   });

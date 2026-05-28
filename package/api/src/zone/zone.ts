@@ -13,6 +13,7 @@ export {
 } from "./zone.mutations";
 export {
   zoneByUnitIdQueryOptions,
+  zoneHomepageByUnitIdQueryOptions,
   zoneQueries,
   zoneQueryOptions,
 } from "./zone.queries";
