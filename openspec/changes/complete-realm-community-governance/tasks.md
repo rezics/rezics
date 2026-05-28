@@ -30,7 +30,7 @@
 - [ ] 4.2 Add feature modules for rules, members, moderation queue, queue detail, pins/announcements, tag curation, settings, and ownership flows, driving the foundation's realm governance APIs.
 - [x] 4.3 Add `@rezics/api` hooks and query keys for the realm community + foundation realm governance APIs.
 - [ ] 4.4 Add UI states for loading, empty, denied, error, and destructive confirmation flows using Rezics design-system primitives.
-- [ ] 4.5 Add targeted tests or Storybook stories for moderator, owner, global staff override, member, pending, muted, and banned states.
+- [x] 4.5 Add targeted tests or Storybook stories for moderator, owner, global staff override, member, pending, muted, and banned states.
 - [ ] 4.6 Add realm i18n editing for metadata, rules, about content, pinboard-created entries, and tagTree/group labels using the shared UnitTranslation editor/resolution patterns.
 - [x] 4.7 Add tag tab display preference controls for `flat`, `grouped`, and `tree`, including realm creation defaults.
 
