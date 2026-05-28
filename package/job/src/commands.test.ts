@@ -36,6 +36,10 @@ describe("@rezics/job command contract", () => {
       SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
       { cursor: "release-1", limit: 50 },
     );
+    const gameMediaCommand = createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentGameMediaFullSync,
+      { cursor: "game-1", limit: 50 },
+    );
 
     expect(workCommand.lane).toBe(JOB_LANES.searchSyncSlow);
     expect(workCommand.idempotencyKey).toBe(
@@ -45,8 +49,35 @@ describe("@rezics/job command contract", () => {
     expect(fullCommand.idempotencyKey).toBe(
       "search.content.workDomainFullSync:all:release-1",
     );
+    expect(gameMediaCommand.lane).toBe(JOB_LANES.maintenance);
+    expect(gameMediaCommand.idempotencyKey).toBe(
+      "search.content.gameMediaFullSync:all:game-1",
+    );
     expect(v.parse(JobCommandSchema, workCommand)).toEqual(workCommand);
     expect(v.parse(JobCommandSchema, fullCommand)).toEqual(fullCommand);
+    expect(v.parse(JobCommandSchema, gameMediaCommand)).toEqual(
+      gameMediaCommand,
+    );
+  });
+
+  test("validates GAME/MEDIA search drift repair targets", () => {
+    const platformCommand = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchDriftRepair,
+      { targetType: "game-media-platforms", targetId: "all" },
+    );
+    const ratingCommand = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchDriftRepair,
+      { targetType: "game-media-ratings", targetId: "all" },
+    );
+
+    expect(platformCommand.idempotencyKey).toBe(
+      "maintenance.search.driftRepair:game-media-platforms:all",
+    );
+    expect(ratingCommand.idempotencyKey).toBe(
+      "maintenance.search.driftRepair:game-media-ratings:all",
+    );
+    expect(v.parse(JobCommandSchema, platformCommand)).toEqual(platformCommand);
+    expect(v.parse(JobCommandSchema, ratingCommand)).toEqual(ratingCommand);
   });
 
   test("validates history outbox ingest commands", () => {

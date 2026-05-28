@@ -33,7 +33,7 @@
 - [x] 4.2 Update MEDIA search projection for kind key, external rating tag ids, runtime summary, release metadata, and content-structure availability.
 - [x] 4.3 Update Meilisearch filterable/sortable attributes for new GAME/MEDIA projected fields.
 - [x] 4.4 Update server content search API filters to apply `platformEntityIds` and route age-rating filtering through the existing rating tag filter.
-- [ ] 4.5 Add job-runner repair paths for platform/rating backfill drift and GAME/MEDIA search document rebuilds.
+- [x] 4.5 Add job-runner repair paths for platform/rating backfill drift and GAME/MEDIA search document rebuilds.
 - [x] 4.6 Add search tests covering platform filter, rating tag filter, work grouping, and GAME/MEDIA result metadata.
 - [ ] 4.7 Adopt the exact-vs-work-domain list/search naming from `clarify-release-vs-work-list-scopes` (`*UnitId`/`containsUnitId` exact, `*WorkUnitId`/`containsWorkUnitId` work-domain) in GAME/MEDIA surfaces, and reuse `containsReleaseUnitId`/`relatedWorkUnitId` for Series/franchise lookups.
 

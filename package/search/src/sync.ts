@@ -725,6 +725,30 @@ export async function syncWorkDomainContentSegment(
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }
 
+export async function syncGameMediaContentSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const units: any[] = await getSearchPrismaClient().unit.findMany({
+    where: {
+      type: { in: [UnitType.GAME, UnitType.MEDIA] },
+      ...publicSearchableUnitWhere(),
+      NOT: { workMembers: { some: { role: "RELEASE" } } },
+    },
+    include: contentInclude,
+    orderBy: { id: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { id: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(units, limit, "id");
+  if (current.length > 0) {
+    await client.addOrUpdateContent(current.map(buildContentDocument));
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
 // ANCHOR: Progress sync functions
 
 export async function syncProgress(

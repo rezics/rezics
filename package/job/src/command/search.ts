@@ -18,6 +18,7 @@ export const SEARCH_COMMAND_KINDS = {
   contentPatchContainedUnitIds: "search.content.patchContainedUnitIds",
   contentSyncWorkReleases: "search.content.syncWorkReleases",
   contentWorkDomainFullSync: "search.content.workDomainFullSync",
+  contentGameMediaFullSync: "search.content.gameMediaFullSync",
   contentFullSync: "search.content.fullSync",
 
   postSync: "search.post.sync",
@@ -147,6 +148,11 @@ export const ContentSyncWorkReleasesCommandSchema = commandSchema(
 );
 export const ContentWorkDomainFullSyncCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+  JOB_LANES.maintenance,
+  FullSyncPayloadSchema,
+);
+export const ContentGameMediaFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.contentGameMediaFullSync,
   JOB_LANES.maintenance,
   FullSyncPayloadSchema,
 );
@@ -331,6 +337,7 @@ export const SearchCommandSchema = v.union([
   ContentPatchContainedUnitIdsCommandSchema,
   ContentSyncWorkReleasesCommandSchema,
   ContentWorkDomainFullSyncCommandSchema,
+  ContentGameMediaFullSyncCommandSchema,
   ContentFullSyncCommandSchema,
   PostSyncCommandSchema,
   PostDeleteCommandSchema,

@@ -66,6 +66,7 @@ export {
   syncContentSegment,
   syncEntitySegment,
   syncFeedbackSegment,
+  syncGameMediaContentSegment,
   syncPostRealmIdsSegment,
   syncPostRootTargetsSegment,
   syncPostSegment,

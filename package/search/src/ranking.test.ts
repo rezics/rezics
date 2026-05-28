@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 
 function setServerEnvForSearchTests() {
   process.env.DATABASE_URL ??=
@@ -172,5 +172,49 @@ describe("ranking search projections", () => {
     expect(media.mediaReleaseDate).toBe("2024-04-01T00:00:00.000Z");
     expect(media.mediaRuntimeMinutes).toBe(120);
     expect(media.mediaContentStructureAvailable).toBe(true);
+  });
+
+  test("GAME/MEDIA segment sync only rebuilds game and media documents", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchPrismaClient, syncGameMediaContentSegment } = await import(
+      "./sync"
+    );
+    const rows = [
+      {
+        id: "game-1",
+        type: "GAME",
+        translations: [],
+        aliases: [],
+        unitTags: [],
+        workMemberships: [],
+        inRealms: [],
+        realmTagApplicationsAsTargetUnit: [],
+        creditAttributions: [],
+        subjectAttributions: [],
+        game: {},
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+        publishedAt: null,
+        defaultLanguage: null,
+      },
+      { id: "media-1", type: "MEDIA" },
+    ];
+    const findMany = mock(async () => rows);
+    const addOrUpdateContent = mock(async (_docs: unknown[]) => undefined);
+    setSearchPrismaClient({ unit: { findMany } } as never);
+
+    const result = await syncGameMediaContentSegment(
+      { addOrUpdateContent } as never,
+      { limit: 1 },
+    );
+
+    const findManyArgs = (findMany as any).mock.calls[0]?.[0];
+    expect(findManyArgs.where.type).toEqual({
+      in: ["GAME", "MEDIA"],
+    });
+    expect(addOrUpdateContent.mock.calls[0]?.[0]).toEqual([
+      expect.objectContaining({ id: "game-1", type: "GAME" }),
+    ]);
+    expect(result).toEqual({ processed: 1, nextCursor: "game-1" });
   });
 });

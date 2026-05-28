@@ -30,6 +30,8 @@ const DriftRepairPayloadSchema = v.strictObject({
     v.literal("user"),
     v.literal("feedback"),
     v.literal("progress"),
+    v.literal("game-media-platforms"),
+    v.literal("game-media-ratings"),
   ]),
   targetId: v.string(),
 });
