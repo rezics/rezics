@@ -1,4 +1,15 @@
-## ADDED Requirements
+# shelf-seed-tags Specification
+
+## Purpose
+
+Defines the seed contract for content-type Tag Units (`book`, `game`,
+`media`, `post`, `link`) and the UnitTag rows that attach them to
+seeded shelves: deterministic UUIDv5 ids and deterministic positions
+so seeds match across environments, pinned-with-low-position
+prominence (no artificial score boost), and idempotent re-runs that
+preserve pin status and ordering.
+
+## Requirements
 
 ### Requirement: Seed Tag Units for core content types
 

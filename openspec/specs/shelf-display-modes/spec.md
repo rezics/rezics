@@ -1,4 +1,15 @@
-## ADDED Requirements
+# shelf-display-modes Specification
+
+## Purpose
+
+Defines the four shelf-detail view modes (`nested`, `flat`, `masonry`,
+`unit`), how each derives its stream from `ShelfUnit[]` plus
+`ShelfUnitRelation[]`, and the rules for how root and attachment
+units render under each mode. Also owns the default mode, the
+`sortPrimeOnly` switch in flat mode, and the multi-parent rendering
+rule that keeps a shared child consistent across every parent card.
+
+## Requirements
 
 ### Requirement: Shelf view-mode enum
 

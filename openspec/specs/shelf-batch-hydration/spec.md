@@ -1,4 +1,15 @@
-## ADDED Requirements
+# shelf-batch-hydration Specification
+
+## Purpose
+
+Defines how the frontend hydrates a page of `ShelfUnit[]` results:
+items are grouped by their `kind`-to-list-endpoint mapping, one batch
+list API call is issued per endpoint (with attachment children folded
+into the same batches), and individual results seed the TanStack
+Query detail cache for reuse across other features. Items whose kind
+has no list endpoint fall back to a generic card.
+
+## Requirements
 
 ### Requirement: Frontend groups shelf items by kind-to-endpoint for batch hydration
 

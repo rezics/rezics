@@ -1,4 +1,16 @@
-## ADDED Requirements
+# shelf-item-unit-junction Specification
+
+## Purpose
+
+Defines the `ShelfUnitRelation` model that describes attachment edges
+between `ShelfUnit` rows in the same shelf. Owns the field set, the
+composite primary key that allows multi-parent attachment, the
+cascade-on-delete semantics through `(shelfId, unitId)` foreign keys
+to `ShelfUnit`, the index set that supports children-by-parent and
+root-detection queries, and the rule that the relation describes
+attachment only — never manual ordering.
+
+## Requirements
 
 ### Requirement: ShelfUnitRelation describes shelf-unit attachment edges
 

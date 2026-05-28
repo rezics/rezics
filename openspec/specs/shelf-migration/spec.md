@@ -1,4 +1,16 @@
-## ADDED Requirements
+# shelf-migration Specification
+
+## Purpose
+
+Defines the shelf-product surface that the legacy bookmark-era pages
+migrated into: the `/shelf` landing page (curated/trending listings),
+the `/shelf/search` page (Meilisearch full-text + tag filter +
+pagination), and the `/shelf/:shelfId` detail page (metadata from
+`translations[]`, items, view-mode switching). Scope is the page-level
+behavior; the underlying data model and view-mode logic live in
+sibling shelf specs.
+
+## Requirements
 
 ### Requirement: Shelf landing page displays curated and trending shelves
 The `/shelf` route SHALL render a landing page that presents curated and trending shelves to support shelf discovery. The page SHALL fetch shelf listings through `shelfApi.list()` and render each result using shelf cards.

@@ -1,4 +1,16 @@
-## ADDED Requirements
+# shelf-structure Specification
+
+## Purpose
+
+Defines the `ShelfUnit` model that owns shelf containment and manual
+ordering: the exact field set, the composite primary key
+`(shelfId, unitId)`, the fractional-index `position` column that
+backs append/drag-drop reorder, and the density-rebalancing window
+that fires when a generated key would grow past the length
+threshold. Also enforces the `shelfId` column naming so the model
+name and column name don't collide.
+
+## Requirements
 
 ### Requirement: ShelfUnit is a sortable shelf-contained unit
 

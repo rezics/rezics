@@ -1,4 +1,15 @@
-## ADDED Requirements
+# shelf-item-kind Specification
+
+## Purpose
+
+Defines the `ShelfUnit.kind` discriminator that lets the frontend
+choose the right render component for a shelf item without first
+hydrating the referenced Unit. Owns the kind derivation rule
+(Unit type, plus `Post.kind` for POST units), the
+write-time-only computation contract, and the `ShelfUnitKind` union
+exported from the shared contract package.
+
+## Requirements
 
 ### Requirement: ShelfUnit kind render discriminator
 

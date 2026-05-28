@@ -1,4 +1,16 @@
-## ADDED Requirements
+# shelf-collection Specification
+
+## Purpose
+
+Defines the Shelf system as the single collection surface that
+replaces the legacy Bookmark model. Owns the default per-user
+Favorites shelf, the favorite-toggle endpoint (with review →
+auto-collect-work semantics), multi-shelf collection in one
+operation, attachment relations (`role='tag'` / `role='review'`),
+order via fractional `position`, and the API contracts that the
+collection modal and heart button consume.
+
+## Requirements
 
 ### Requirement: Shelf replaces Bookmark as the collection mechanism
 

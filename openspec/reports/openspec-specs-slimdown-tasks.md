@@ -136,16 +136,16 @@ Group the work into batches by prefix so each PR/commit stays reviewable.
 - [x] `folio-plugin-txt`
 - [x] `folio-tree-navigation`
 
-### B3. Batch: `shelf-*` (8 files)
+### B3. Batch: `shelf-*` (8 files) — done 2026-05-28
 
-- [ ] `shelf-batch-hydration`
-- [ ] `shelf-collection`
-- [ ] `shelf-display-modes`
-- [ ] `shelf-item-kind`
-- [ ] `shelf-item-unit-junction`
-- [ ] `shelf-migration`
-- [ ] `shelf-seed-tags`
-- [ ] `shelf-structure`
+- [x] `shelf-batch-hydration`
+- [x] `shelf-collection`
+- [x] `shelf-display-modes`
+- [x] `shelf-item-kind`
+- [x] `shelf-item-unit-junction`
+- [x] `shelf-migration`
+- [x] `shelf-seed-tags`
+- [x] `shelf-structure`
 
 ### B4. Batch: `auth-*` / `jwt-*` / `independent-auth-*` (8 files)
 
