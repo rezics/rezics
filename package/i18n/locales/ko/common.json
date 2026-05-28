@@ -137,5 +137,11 @@
   "reset": "다시 놓기",
   "status": "상태",
   "all": "모두",
-  "game_library_title": "게임 라이브러리"
+  "game_library_title": "게임 라이브러리",
+  "policy_denied_title": "사용할 수 없는 작업",
+  "policy_denied_missing_capability": "이 작업을 수행할 권한이 없습니다.",
+  "policy_denied_enforcement_active": "계정에 제재 조치가 활성화된 동안에는 이 작업이 제한됩니다.",
+  "policy_denied_blocked_account": "이 작업에 대해 계정이 차단되었습니다.",
+  "policy_denied_rate_limited": "너무 자주 시도하고 있습니다. 나중에 다시 시도해 주세요.",
+  "policy_denied_generic": "이 작업은 현재 사용할 수 없습니다."
 }

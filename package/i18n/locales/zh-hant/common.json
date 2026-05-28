@@ -137,5 +137,11 @@
   "reset": "重置",
   "status": "地位",
   "all": "全部",
-  "game_library_title": "遊戲庫"
+  "game_library_title": "遊戲庫",
+  "policy_denied_title": "操作不可用",
+  "policy_denied_missing_capability": "你沒有執行此操作的權限。",
+  "policy_denied_enforcement_active": "在你的帳戶存在生效的管理措施期間，此操作受限。",
+  "policy_denied_blocked_account": "你的帳戶已被禁止執行此操作。",
+  "policy_denied_rate_limited": "你的操作過於頻繁，請稍後再試。",
+  "policy_denied_generic": "此操作目前不可用。"
 }

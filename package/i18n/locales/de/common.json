@@ -137,5 +137,11 @@
   "reset": "Zurücksetzen",
   "status": "Status",
   "all": "Alle",
-  "game_library_title": "Spielbibliothek"
+  "game_library_title": "Spielbibliothek",
+  "policy_denied_title": "Aktion nicht verfügbar",
+  "policy_denied_missing_capability": "Du hast keine Berechtigung dafür.",
+  "policy_denied_enforcement_active": "Diese Aktion ist eingeschränkt, solange eine Moderationsmaßnahme für dein Konto aktiv ist.",
+  "policy_denied_blocked_account": "Dein Konto ist für diese Aktion gesperrt.",
+  "policy_denied_rate_limited": "Du machst das zu oft. Bitte versuche es später erneut.",
+  "policy_denied_generic": "Diese Aktion ist derzeit nicht verfügbar."
 }

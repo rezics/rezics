@@ -137,5 +137,11 @@
   "reset": "Reset",
   "status": "Status",
   "all": "All",
-  "game_library_title": "Game Library"
+  "game_library_title": "Game Library",
+  "policy_denied_title": "Action not available",
+  "policy_denied_missing_capability": "You don't have permission to do this.",
+  "policy_denied_enforcement_active": "This action is restricted while a moderation action is active on your account.",
+  "policy_denied_blocked_account": "Your account is blocked from this action.",
+  "policy_denied_rate_limited": "You're doing that too often. Please try again later.",
+  "policy_denied_generic": "This action isn't available right now."
 }

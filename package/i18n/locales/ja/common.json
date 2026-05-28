@@ -137,5 +137,11 @@
   "reset": "リセット",
   "status": "状態",
   "all": "全て",
-  "game_library_title": "ゲームライブラリ"
+  "game_library_title": "ゲームライブラリ",
+  "policy_denied_title": "この操作は利用できません",
+  "policy_denied_missing_capability": "この操作を行う権限がありません。",
+  "policy_denied_enforcement_active": "アカウントにモデレーション措置が有効な間、この操作は制限されます。",
+  "policy_denied_blocked_account": "あなたのアカウントはこの操作をブロックされています。",
+  "policy_denied_rate_limited": "操作が頻繁すぎます。しばらくしてからもう一度お試しください。",
+  "policy_denied_generic": "この操作は現在利用できません。"
 }
