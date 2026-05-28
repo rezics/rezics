@@ -29,6 +29,7 @@ export const UnitType = {
   LINK: "LINK",
   ENTITY: "ENTITY",
   ZONE: "ZONE",
+  LABEL: "LABEL",
 } as const;
 
 export const UnitAliasStatus = {

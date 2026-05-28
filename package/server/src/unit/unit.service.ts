@@ -93,6 +93,7 @@ export function buildUnitWhereClause(
     .filter(Boolean);
   if (typeList.length > 0)
     andWhere.push({ type: { in: typeList as UnitType[] } });
+  else andWhere.push({ NOT: { type: "LABEL" as UnitType } });
 
   // Exclude types
   const excludeTypeList = (options.excludeTypes ?? "")

@@ -24,14 +24,14 @@
 ## 3. Server Services
 
 - [x] 3.1 Implement a LABEL-aware Unit creation/update path that allows UnitTranslation but no extension table.
-- [ ] 3.2 Ensure LABEL Units are excluded from ordinary catalog/content queries unless explicitly requested by label management or picker code.
+- [x] 3.2 Ensure LABEL Units are excluded from ordinary catalog/content queries unless explicitly requested by label management or picker code.
 - [x] 3.3 Implement WorkRealmContext service create, update, delete, get, and list operations.
 - [x] 3.4 Implement validation that ordinary users cannot create official work realm context rows.
 - [x] 3.5 Implement deterministic work realm context resolution by release Unit through UnitWork.
 - [x] 3.6 Implement conflict detection for equal-priority official work realm contexts.
 - [x] 3.7 Extend Zone service validation to parse and persist wiki filters, navigation, homepage, and theme config.
-- [ ] 3.8 Add validation that wiki Zone config references valid realm, Entity, Tag, TranslationGroup, Unit, and LABEL ids where applicable.
-- [ ] 3.9 Add validation that wiki Zone manual labels include explicit translations when no LABEL/Entity/Tag/Unit reference supplies display text.
+- [x] 3.8 Add validation that wiki Zone config references valid realm, Entity, Tag, TranslationGroup, Unit, and LABEL ids where applicable.
+- [x] 3.9 Add validation that wiki Zone manual labels include explicit translations when no LABEL/Entity/Tag/Unit reference supplies display text.
 - [x] 3.10 Add helper service for best-language WIKI Post selection from TranslationGroup ids.
 - [ ] 3.11 Add helper queries for wiki Zone section hydration: entity collections, tag collections, translation group collections, recent wiki, updated wiki, and stub wiki.
 - [ ] 3.12 Ensure wiki section queries respect Unit visibility, realm membership, realm moderation lifecycle, and viewer permissions.
