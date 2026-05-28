@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import {
   createSearchCommand,
+  JOB_LANES,
   JOB_LANE_VALUES,
   SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
+import { resolveWorkerLanes } from "./lanes";
 import type { WorkerQueueLike } from "./queue/types";
 import { registerWorkers } from "./worker";
 
@@ -35,6 +37,24 @@ describe("worker dispatch", () => {
 
     expect(worked).toEqual(JOB_LANE_VALUES);
     expect(handled).toBe(true);
+  });
+
+  test("subscribes only to the lanes it is scoped to", async () => {
+    const worked: string[] = [];
+    const queue: WorkerQueueLike = {
+      async createQueue() {},
+      async send() {
+        return "job-2";
+      },
+      async stop() {},
+      async work(name) {
+        worked.push(name);
+      },
+    };
+
+    await registerWorkers(queue, {}, resolveWorkerLanes("ranking"));
+
+    expect(worked).toEqual([JOB_LANES.ranking]);
   });
 
   test("fails unknown commands with actionable error", async () => {

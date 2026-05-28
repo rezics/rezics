@@ -9,6 +9,7 @@ import {
 import { createJobRunnerApp } from "./app";
 import { env } from "./env";
 import { createJobHandlers } from "./handlers";
+import { resolveWorkerLanes } from "./lanes";
 import {
   createAdminWorkMergeRuntime,
   type AdminWorkMergeRuntime,
@@ -31,6 +32,7 @@ import { registerWorkers } from "./worker";
 
 const port = env.PORT ? Number(env.PORT) : 3005;
 const role = env.JOB_RUNNER_ROLE;
+const workerLanes = resolveWorkerLanes(env.JOB_WORKER_LANES);
 const observability = createObservabilityConfig(
   {
     key: "job-runner",
@@ -92,6 +94,7 @@ if ((role === "all" || role === "worker") && boss) {
       adminWorkMergeRuntime,
       rankingDispatcher: rankingRuntime,
     }),
+    workerLanes,
   );
 }
 

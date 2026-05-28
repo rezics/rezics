@@ -39,6 +39,10 @@ export const env = createEnv({
       v.union([v.literal("all"), v.literal("http"), v.literal("worker")]),
       "all",
     ),
+    JOB_WORKER_LANES: v.fallback(
+      v.union([v.literal("all"), v.literal("default"), v.literal("ranking")]),
+      "all",
+    ),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

@@ -127,7 +127,14 @@ in-code fallbacks; everything else must be supplied.
 | `RANKING_FULL_SYNC_LIMIT` | — | — | — |
 | `PORT` | — | — | `3006` |
 
-### `job-runner-http` / `job-runner-worker` (internal; same image, role-switched)
+### `job-runner-http` / `job-runner-worker` / `ranking-worker` (internal; same image, role-switched)
+
+All three units run the **same** `job-runner` image; they differ only by
+`JOB_RUNNER_ROLE` and `JOB_WORKER_LANES`:
+
+- `job-runner-http`: `JOB_RUNNER_ROLE=http` — HTTP intake (Sequin webhooks, enqueue API), no lanes.
+- `job-runner-worker`: `JOB_RUNNER_ROLE=worker`, `JOB_WORKER_LANES=default` — consumes every lane except `ranking`.
+- `ranking-worker`: `JOB_RUNNER_ROLE=worker`, `JOB_WORKER_LANES=ranking` — consumes only the `ranking` lane, so ranking recompute bursts cannot starve sync/search/history/maintenance lanes. Scaled independently.
 
 | Variable | Req | Secret | Default |
 |---|---|---|---|
@@ -137,10 +144,11 @@ in-code fallbacks; everything else must be supplied.
 | `MEILI_MASTER_KEY` | ✓ | ✓ | — |
 | `JOB_RUNNER_INTERNAL_SECRET` | ✓ | ✓ | — |
 | `SEQUIN_WEBHOOK_SECRET` | ✓ | ✓ | — |
-| `RANKING_BASE_URL` | — | — | — |
-| `RANKING_INTERNAL_SECRET` | — | ✓ | — |
+| `RANKING_BASE_URL` | — (✓ for `ranking-worker`) | — | — |
+| `RANKING_INTERNAL_SECRET` | — (✓ for `ranking-worker`) | ✓ | — |
 | `SEQUIN_HEALTH_URL` | — | — | — |
 | `JOB_RUNNER_ROLE` | — | — | `all` (`http` / `worker` per role unit) |
+| `JOB_WORKER_LANES` | — | — | `all` (`default` / `ranking` per worker unit) |
 | `PORT` | — | — | `3005` |
 
 ## Shared Observability (all backend units)

@@ -1,6 +1,7 @@
 import {
   type AnyJobCommand,
   JOB_LANE_VALUES,
+  type JobLane,
   parseJobCommand,
 } from "@rezics/job";
 import { enqueueCommand } from "./queue/enqueue";
@@ -26,8 +27,9 @@ export function createUnknownCommandError(command: AnyJobCommand) {
 export async function registerWorkers(
   queue: WorkerQueueLike,
   handlers: Partial<Record<AnyJobCommand["kind"], JobHandler>>,
+  lanes: readonly JobLane[] = JOB_LANE_VALUES,
 ) {
-  for (const lane of JOB_LANE_VALUES) {
+  for (const lane of lanes) {
     await queue.work(lane, async (jobOrJobs) => {
       const jobs = Array.isArray(jobOrJobs) ? jobOrJobs : [jobOrJobs];
       return Promise.all(jobs.map((job) => processJob(queue, handlers, job)));
