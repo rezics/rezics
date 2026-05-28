@@ -266,6 +266,8 @@ model Unit {
   subscribers       Subscription[] @relation("SubscriptionTarget")
   subscriptionsMade Subscription[] @relation("SubscriptionSubscriber")
 
+  realmRuleAcknowledgements RealmRuleAcknowledgement[] @relation("RealmRuleAcknowledgementRuleUnit")
+
   staffCapabilityGrantRealms StaffGrant[]               @relation("StaffGrantRealm")
   moderationCaseTargets      ModerationCase[]           @relation("ModerationCaseTargetUnit")
   moderationCaseRealms       ModerationCase[]           @relation("ModerationCaseRealm")
@@ -855,10 +857,21 @@ model Realm {
 
   extra Json?
 
+  /// Versioned rule policy for the POST Unit referenced by Realm.extra.rule.
+  ruleVersion         Int       @default(1)
+  ruleRequireOnJoin   Boolean   @default(false)
+  ruleRequireOnPost   Boolean   @default(false)
+  ruleRequireOnUpdate Boolean   @default(true)
+  rulePolicyUpdatedAt DateTime?
+
+  /// When true, new joins are stored as pending until a realm moderator approves them.
+  joinRequiresApproval Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  members RealmMember[]
+  members              RealmMember[]
+  ruleAcknowledgements RealmRuleAcknowledgement[]
 
   /// Realm is a subreddit-like community space, not a tag or classifier.
   /// It owns membership and community metadata; realm-scoped tag classification lives in RealmTagApplication and RealmTagContext.
@@ -870,12 +883,14 @@ model Realm {
 }
 
 model RealmMember {
-  realmUnitId String @db.Uuid
-  userId      String @db.Uuid
-  roleKey     String @db.VarChar(32)
+  realmUnitId String           @db.Uuid
+  userId      String           @db.Uuid
+  roleKey     String           @db.VarChar(32)
+  state       RealmMemberState @default(ACTIVE)
 
-  joinedAt  DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  onboardingCompletedAt DateTime?
+  joinedAt              DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   realm            Realm                  @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
   capabilityGrants RealmCapabilityGrant[]
@@ -883,6 +898,25 @@ model RealmMember {
   @@id([realmUnitId, userId])
   @@index([userId])
   @@index([realmUnitId, roleKey])
+  @@index([realmUnitId, state])
+}
+
+model RealmRuleAcknowledgement {
+  realmUnitId      String   @db.Uuid
+  ruleUnitId       String   @db.Uuid
+  version          Int
+  userId           String   @db.Uuid
+  acceptedLanguage String?  @db.VarChar(16)
+  acceptedAt       DateTime @default(now())
+  createdAt        DateTime @default(now())
+
+  realm    Realm @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
+  ruleUnit Unit  @relation("RealmRuleAcknowledgementRuleUnit", fields: [ruleUnitId], references: [id], onDelete: Cascade)
+  user     User  @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+
+  @@id([realmUnitId, ruleUnitId, version, userId])
+  @@index([userId, acceptedAt])
+  @@index([realmUnitId, userId, acceptedAt])
 }
 
 /**
@@ -890,9 +924,10 @@ model RealmMember {
  */
 
 model UnitRealm {
-  realmUnitId String   @db.Uuid
-  unitId      String   @db.Uuid
-  createdAt   DateTime @default(now())
+  realmUnitId String                     @db.Uuid
+  unitId      String                     @db.Uuid
+  state       ContentModerationStateKind @default(VISIBLE)
+  createdAt   DateTime                   @default(now())
 
   /// Community/feed membership for a target Unit in a realm.
   /// This junction is not semantic tagging and is not a prerequisite or owner relation for RealmTagApplication.
@@ -902,6 +937,7 @@ model UnitRealm {
   @@id([realmUnitId, unitId])
   @@index([unitId])
   @@index([realmUnitId, createdAt])
+  @@index([realmUnitId, state, createdAt])
 }
 
 model RealmTagApplication {
@@ -1201,6 +1237,7 @@ model User {
   realmModerationEvents           RealmModerationEvent[]     @relation("RealmModerationEventActor")
   contentModerationDecisions      ContentModerationState[]   @relation("ContentModerationStateDecidedBy")
   realmContentModerationDecisions RealmContentModeration[]   @relation("RealmContentModerationDecidedBy")
+  realmRuleAcknowledgements       RealmRuleAcknowledgement[]
   staffAuditLogs                  StaffAuditLog[]            @relation("StaffAuditLogActor")
 
   @@index([email])
@@ -1507,6 +1544,14 @@ enum ContentModerationStateKind {
   LOCKED
   ARCHIVED
   REMOVED
+}
+
+enum RealmMemberState {
+  ACTIVE
+  PENDING
+  MUTED
+  REMOVED
+  BANNED
 }
 
 model StaffGrant {

@@ -1,6 +1,7 @@
 import type {
   RealmDTO,
   RealmMemberDTO,
+  RealmMemberState,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
   UnitRealmDTO,
@@ -14,6 +15,12 @@ import type {
 } from "#/prisma/client";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { RealmListSelected, RealmWithRelations } from "./types";
+
+function lower<T extends string>(
+  value: string | null | undefined,
+): T | undefined {
+  return value?.toLowerCase() as T | undefined;
+}
 
 export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
   return {
@@ -57,6 +64,7 @@ export function mapRealmMemberToDTO(
     realmUnitId: row.realmUnitId,
     userId: row.userId,
     roleKey: row.roleKey,
+    state: lower<RealmMemberState>(row.state) ?? "active",
     ...(options?.capabilities ? { capabilities: options.capabilities } : {}),
     joinedAt: row.joinedAt,
     updatedAt: row.updatedAt,
