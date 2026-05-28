@@ -151,6 +151,26 @@ Production sets `OBSERVABILITY_LOG_FORMAT=json`; `OTEL_EXPORTER_OTLP_ENDPOINT`
 + `OBSERVABILITY_TELEMETRY=enabled` only when the `infra-observability` unit is
 deployed.
 
+## Frontend Public Config (Cloudflare, build-time)
+
+`package/app` and `package/admin` are static Vite SPAs deployed to Cloudflare
+Pages (no Docker, no SSR). Their `VITE_*` values are **build-time** public
+config — inlined into the bundle, never secret. Set them as Cloudflare build
+environment variables; rebuild to change them.
+
+| App | Variable | Points at |
+|---|---|---|
+| app | `VITE_API_URL` | public `server` |
+| app | `VITE_NOTIFY_BASE_URL` | public `notify` |
+| app | `VITE_REACTION_SERVICE_URL` | public `reaction` |
+| app | `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile **site** key (public) |
+| admin | `VITE_API_URL` | public `server` |
+| admin | `VITE_AUTH_ADMIN_URL` | `auth` admin surface |
+| admin | `VITE_REACTION_SERVICE_URL` | public `reaction` |
+
+`ranking` is internal-only and is never a frontend endpoint. Deploy backends
+before frontends so the API contract a new bundle expects already exists.
+
 ## Migration Jobs
 
 One-shot jobs reuse their service's `*_DATABASE_URL` (secret) and run

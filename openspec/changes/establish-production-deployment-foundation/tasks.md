@@ -62,11 +62,11 @@
 
 ## 8. Cloudflare Static Frontends
 
-- [ ] 8.1 Add Cloudflare deployment configuration for `package/app` static Vite output.
-- [ ] 8.2 Add Cloudflare deployment configuration for `package/admin` static Vite output.
-- [ ] 8.3 Define production frontend env (`VITE_*`) for API, auth, reaction, and notify endpoints consumed by `package/app` and `package/admin` (ranking is internal-only and not a frontend endpoint).
+- [x] 8.1 Add Cloudflare deployment configuration for `package/app` static Vite output.
+- [x] 8.2 Add Cloudflare deployment configuration for `package/admin` static Vite output.
+- [x] 8.3 Define production frontend env (`VITE_*`) for API, auth, reaction, and notify endpoints consumed by `package/app` and `package/admin` (ranking is internal-only and not a frontend endpoint).
 - [ ] 8.4 Add release workflow steps to build and deploy both frontends without Docker images.
-- [ ] 8.5 Verify generated static outputs do not require SSR runtime services, and document the backend-before-frontend deploy order for contract forward-compatibility.
+- [x] 8.5 Verify generated static outputs do not require SSR runtime services, and document the backend-before-frontend deploy order for contract forward-compatibility.
 
 ## 9. Local External Services Boundary
 
