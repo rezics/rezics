@@ -26,14 +26,15 @@ as editorial cleanup, not as behavior proposals.
 
 ### A1. Delete self-declared retired specs
 
-- [ ] `openspec/specs/auth-organization/` — file states "This capability has
-      been retired."
-- [ ] `openspec/specs/exchange-auto-provision/` — file states "This
-      capability has been retired."
+- [x] `openspec/specs/auth-organization/` — deleted 2026-05-28. File stated
+      "This capability has been retired." No active references in
+      `openspec/changes/`.
+- [x] `openspec/specs/exchange-auto-provision/` — deleted 2026-05-28. File
+      stated "This capability has been retired." No active references in
+      `openspec/changes/`.
 
-Verification: confirm nothing in `openspec/changes/` references these names
-as an active dependency (historical references in archived changes are
-fine).
+Verification: confirmed via `grep -r` that nothing in `openspec/changes/`
+references these names as an active dependency.
 
 ### A2. Sweep phrase-match candidates
 
@@ -42,36 +43,52 @@ capability is genuinely active or a leftover. Delete the retired ones; for
 the rest, copy their actual status into the comment of this task so the next
 reader can skip them.
 
-- [ ] `development-stage-compatibility` — Purpose is about a rule, not a
-      retirement; likely keep.
-- [ ] `engagement-subscription`
-- [ ] `attribution`
-- [ ] `app-search-feature`
-- [ ] `api-cache-coherence`
-- [ ] `cross-site-auth-presence`
-- [ ] `dispatch-token-session`
-- [ ] `convention-enforcement`
-- [ ] `auth-token-lifecycle-provider`
-- [ ] `database-reset-preserve`
-- [ ] `content-search-contract`
-- [ ] `jwt-service-cache`
-- [ ] `cors-policy-plugin`
-- [ ] `content-sync`
-- [ ] `direct-messaging`
-- [ ] `elysia-observability`
-- [ ] `engagement-reaction-bar`
-- [ ] `entity-attribution-batch-editing`
-- [ ] `realm-extra-pinboard-keys`
-- [ ] `history-reference-resolution`
-- [ ] `realm-tag-context`
-- [ ] `realm-join-rule-consent`
-- [ ] `profile-sync`
-- [ ] `server-user-cache`
-- [ ] `email-verification-gate`
-- [ ] `app-entity-feature-architecture`
-- [ ] `admin-auth-api-client`
-- [ ] `default-realm-infra-bootstrap`
-- [ ] `content-search-api`
+Statuses recorded 2026-05-28 after reading each Purpose paragraph and
+scanning for `has been retired` / `DEPRECATED` / `## Status` markers.
+
+- [x] `development-stage-compatibility` — KEEP. Purpose defines an active
+      rule about internal forwarding surfaces; 1 active requirement.
+- [x] `engagement-subscription` — KEEP. Active capability owning the
+      unified Subscription edge model; 8 requirements.
+- [x] `attribution` — KEEP. Active attribution junction model; 12
+      requirements. (Phase C will merge with `unified-attribution`.)
+- [x] `app-search-feature` — KEEP. Active search feature entry point;
+      26 requirements. "(which has been removed)" refers to one internal
+      type, not the capability.
+- [x] `api-cache-coherence` — KEEP. Active capability; 5 requirements.
+- [x] `cross-site-auth-presence` — KEEP. Active auth-presence cookie
+      capability referenced by `exchange-auto-provision` retirement note.
+- [x] `dispatch-token-session` — KEEP. Active capability; 2 requirements.
+- [x] `convention-enforcement` — KEEP. Active capability; 9 requirements.
+- [x] `auth-token-lifecycle-provider` — KEEP. Active capability; 7
+      requirements.
+- [x] `database-reset-preserve` — KEEP. Active capability; 4 requirements.
+- [x] `content-search-contract` — KEEP. Active capability; 17 requirements.
+- [x] `jwt-service-cache` — KEEP. Active capability; 6 requirements.
+- [x] `cors-policy-plugin` — DELETED 2026-05-28. Self-declared DEPRECATED
+      status; all requirements removed; superseded by
+      `elysiajs-cors-integration`. No active references.
+- [x] `content-sync` — KEEP. Active capability; 13 requirements.
+- [x] `direct-messaging` — KEEP. Active capability; 7 requirements.
+- [x] `elysia-observability` — KEEP. Active capability; 9 requirements.
+- [x] `engagement-reaction-bar` — KEEP. Active capability; 10 requirements.
+- [x] `entity-attribution-batch-editing` — KEEP. Active capability; 4
+      requirements.
+- [x] `realm-extra-pinboard-keys` — KEEP. Active capability; 9 requirements.
+- [x] `history-reference-resolution` — KEEP. Active capability; 4
+      requirements.
+- [x] `realm-tag-context` — KEEP for Phase A. Active capability; 15
+      requirements. (Phase D4 may fold into `realm-tag-governance`.)
+- [x] `realm-join-rule-consent` — KEEP. Active capability; 4 requirements.
+- [x] `profile-sync` — KEEP. Active capability; 2 requirements.
+- [x] `server-user-cache` — KEEP. Active capability; 6 requirements.
+- [x] `email-verification-gate` — KEEP. Active capability; 2 requirements.
+- [x] `app-entity-feature-architecture` — KEEP. Active capability; 5
+      requirements.
+- [x] `admin-auth-api-client` — KEEP. Active capability; 18 requirements.
+- [x] `default-realm-infra-bootstrap` — KEEP for Phase A. Active capability;
+      6 requirements. (Phase D8 will fold into single `default-realm`.)
+- [x] `content-search-api` — KEEP. Active capability; 21 requirements.
 
 For any that turn out retired, also grep `openspec/changes/` for live
 references before deleting.
@@ -444,7 +461,11 @@ the suggested targets — they are starting points, not decrees.
 | Phase | Status | Spec count after | Date completed |
 |---|---|---|---|
 | Baseline | — | 317 | 2026-05-28 |
-| A | not started | — | — |
+| A | done | 314 | 2026-05-28 |
 | B | not started | — | — |
 | C | not started | — | — |
 | D | not started | — | — |
+
+Phase A reduction: 3 capabilities removed (`auth-organization`,
+`exchange-auto-provision`, `cors-policy-plugin`). Requirement count:
+2240 → 2239.
