@@ -250,6 +250,31 @@ describe("PostService.create realm/tag junction writes", () => {
     });
   });
 
+  test("realm-scoped wiki references do not add UnitRealm rows to the original wiki Unit", async () => {
+    resetMocks();
+    unitFindUniqueMock.mockResolvedValueOnce({ type: "POST" });
+
+    await service.create(
+      {
+        content: content("see the wiki page"),
+        targetUnitId: "wiki-original-1",
+        realmUnitIds: ["realm-1"],
+      },
+      "user-1",
+    );
+
+    expect(realmUnitCreateMock).toHaveBeenCalledTimes(1);
+    expect(realmUnitCreateMock.mock.calls[0]?.[0].data).toMatchObject({
+      realmUnitId: "realm-1",
+      unitId: "post-1",
+    });
+    expect(
+      realmUnitCreateMock.mock.calls.some(
+        (call) => call[0].data.unitId === "wiki-original-1",
+      ),
+    ).toBe(false);
+  });
+
   test("creates UnitRealm rows for three realms", async () => {
     resetMocks();
 
