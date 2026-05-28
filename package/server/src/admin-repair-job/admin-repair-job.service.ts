@@ -2,6 +2,8 @@ import type {
   AdminRepairJob,
   AdminRepairJobDryRun,
   AdminRepairJobDryRunRequest,
+  AdminRepairJobOperationRequest,
+  AdminRepairJobOperationResponse,
   AdminRepairJobQueuedOperation,
   AdminRepairJobStartRequest,
 } from "@rezics/contract";
@@ -14,6 +16,7 @@ import {
 } from "@rezics/job";
 import { getSystemStatusSummary } from "@/diagnostic";
 import { env } from "@/env";
+import { governanceAuditService } from "@/governance/audit.service";
 import { type JobProducer, serverJobProducer } from "@/job/job-boundary";
 
 type RepairJobProducer = Pick<JobProducer, "enqueue">;
@@ -23,6 +26,7 @@ type AdminRepairJobServiceOptions = {
   fetchImpl: typeof fetch;
   jobRunnerBaseUrl?: string;
   internalSecret?: string;
+  auditService: Pick<typeof governanceAuditService, "appendPrivilegedMutation">;
 };
 
 const SEARCH_INDEX_REBUILD_TARGETS = {
@@ -122,6 +126,60 @@ async function retryFailedJob(
   };
 }
 
+async function discardFailedJob(
+  options: AdminRepairJobServiceOptions,
+  input: AdminRepairJobOperationRequest,
+): Promise<AdminRepairJobQueuedOperation> {
+  if (!options.jobRunnerBaseUrl || !options.internalSecret) {
+    throw new Error("Job runner admin endpoints are not configured.");
+  }
+
+  const response = await options.fetchImpl(
+    jobRunnerUrl(
+      options.jobRunnerBaseUrl,
+      `/admin/jobs/failed/${encodeURIComponent(input.lane)}/${encodeURIComponent(input.jobId)}/discard`,
+    ),
+    {
+      method: "POST",
+      headers: { "x-internal-secret": options.internalSecret },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Failed job cancel returned HTTP ${response.status}.`);
+  }
+
+  return {
+    jobId: input.jobId,
+    lane: input.lane,
+    kind: "job-runner.failed.cancel",
+    status: "cancelled",
+    idempotencyKey: null,
+  };
+}
+
+async function appendRepairAudit(
+  options: AdminRepairJobServiceOptions,
+  input: {
+    actorUserId?: string;
+    action: string;
+    targetId: string;
+    reason: string;
+    correlationId: string;
+    metadata?: Record<string, unknown>;
+  },
+) {
+  if (!input.actorUserId) return null;
+  return options.auditService.appendPrivilegedMutation({
+    actorUserId: input.actorUserId,
+    action: input.action,
+    targetKind: "admin-repair-job",
+    targetId: input.targetId,
+    reason: input.reason,
+    correlationId: input.correlationId,
+    metadata: input.metadata,
+  });
+}
+
 function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
   return {
     async dryRun(
@@ -169,10 +227,25 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
       };
     },
 
-    async start(input: AdminRepairJobStartRequest): Promise<AdminRepairJob> {
+    async start(
+      input: AdminRepairJobStartRequest & { actorUserId?: string },
+    ): Promise<AdminRepairJob> {
       const now = nowIso();
       const targetIds = input.targetIds?.filter(Boolean) ?? [];
       const queuedOperations: AdminRepairJobQueuedOperation[] = [];
+      const correlationId = crypto.randomUUID();
+      const startAudit = await appendRepairAudit(options, {
+        actorUserId: input.actorUserId,
+        action: "repair.start",
+        targetId: input.scope,
+        reason: input.reason,
+        correlationId,
+        metadata: {
+          scope: input.scope,
+          dryRunId: input.dryRunId ?? null,
+          targetCount: targetIds.length,
+        },
+      });
 
       try {
         if (input.scope === "search") {
@@ -194,7 +267,20 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
           }
         } else if (input.scope === "history-outbox") {
           for (const target of targetIds) {
-            queuedOperations.push(await retryFailedJob(options, target));
+            const operation = await retryFailedJob(options, target);
+            queuedOperations.push(operation);
+            await appendRepairAudit(options, {
+              actorUserId: input.actorUserId,
+              action: "repair.retry",
+              targetId: operation.jobId ?? target,
+              reason: input.reason,
+              correlationId,
+              metadata: {
+                scope: input.scope,
+                lane: operation.lane,
+                jobId: operation.jobId,
+              },
+            });
           }
         } else if (input.scope === "work-domain") {
           if (targetIds.length === 0) {
@@ -221,13 +307,26 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
             }
           }
         } else {
+          const failureAudit = await appendRepairAudit(options, {
+            actorUserId: input.actorUserId,
+            action: "repair.failure",
+            targetId: input.scope,
+            reason: input.reason,
+            correlationId,
+            metadata: {
+              scope: input.scope,
+              dryRunId: input.dryRunId ?? null,
+              safeMessage:
+                "This repair scope is contract-visible but execution is not implemented.",
+            },
+          });
           return {
             id: buildId("repair"),
             scope: input.scope,
             status: "failed",
             progress: { completed: 0, total: targetIds.length },
             safeSummary: `${input.scope} repairs do not have a durable job-runner command yet. No mutation was queued.`,
-            auditLogId: null,
+            auditLogId: failureAudit?.id ?? startAudit?.id ?? null,
             dryRunId: input.dryRunId ?? null,
             queuedOperations: [],
             failure: {
@@ -239,6 +338,19 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
           };
         }
 
+        const completionAudit = await appendRepairAudit(options, {
+          actorUserId: input.actorUserId,
+          action: "repair.completion",
+          targetId: queuedOperations[0]?.jobId ?? input.scope,
+          reason: input.reason,
+          correlationId,
+          metadata: {
+            scope: input.scope,
+            dryRunId: input.dryRunId ?? null,
+            queuedOperations,
+          },
+        });
+
         return {
           id: queuedOperations[0]?.jobId ?? buildId("repair"),
           scope: input.scope,
@@ -248,7 +360,7 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
             total: queuedOperations.length,
           },
           safeSummary: `${queuedOperations.length} durable repair operation(s) queued. Job-runner retry policy will handle transient failures.`,
-          auditLogId: null,
+          auditLogId: startAudit?.id ?? completionAudit?.id ?? null,
           dryRunId: input.dryRunId ?? null,
           queuedOperations,
           createdAt: now,
@@ -256,6 +368,19 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
         };
       } catch (error) {
         const safeMessage = safeFailureMessage(error);
+        const failureAudit = await appendRepairAudit(options, {
+          actorUserId: input.actorUserId,
+          action: "repair.failure",
+          targetId: input.scope,
+          reason: input.reason,
+          correlationId,
+          metadata: {
+            scope: input.scope,
+            dryRunId: input.dryRunId ?? null,
+            safeMessage,
+            queuedOperations,
+          },
+        });
         return {
           id: buildId("repair"),
           scope: input.scope,
@@ -265,7 +390,7 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
             total: targetIds.length,
           },
           safeSummary: safeMessage,
-          auditLogId: null,
+          auditLogId: failureAudit?.id ?? startAudit?.id ?? null,
           dryRunId: input.dryRunId ?? null,
           queuedOperations,
           failure: { safeMessage },
@@ -273,6 +398,49 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
           updatedAt: now,
         };
       }
+    },
+
+    async retryOperation(
+      input: AdminRepairJobOperationRequest & { actorUserId?: string },
+    ): Promise<AdminRepairJobOperationResponse> {
+      const correlationId = crypto.randomUUID();
+      const operation = await retryFailedJob(
+        options,
+        `${input.lane}:${input.jobId}`,
+      );
+      const audit = await appendRepairAudit(options, {
+        actorUserId: input.actorUserId,
+        action: "repair.retry",
+        targetId: input.jobId,
+        reason: input.reason,
+        correlationId,
+        metadata: { lane: input.lane, jobId: input.jobId },
+      });
+      return {
+        operation,
+        auditLogId: audit?.id ?? null,
+        safeSummary: "Repair operation retry requested.",
+      };
+    },
+
+    async cancelOperation(
+      input: AdminRepairJobOperationRequest & { actorUserId?: string },
+    ): Promise<AdminRepairJobOperationResponse> {
+      const correlationId = crypto.randomUUID();
+      const operation = await discardFailedJob(options, input);
+      const audit = await appendRepairAudit(options, {
+        actorUserId: input.actorUserId,
+        action: "repair.cancel",
+        targetId: input.jobId,
+        reason: input.reason,
+        correlationId,
+        metadata: { lane: input.lane, jobId: input.jobId },
+      });
+      return {
+        operation,
+        auditLogId: audit?.id ?? null,
+        safeSummary: "Repair operation cancel requested.",
+      };
     },
   };
 }
@@ -282,6 +450,7 @@ export const adminRepairJobService = createAdminRepairJobService({
   fetchImpl: fetch,
   jobRunnerBaseUrl: env.JOB_RUNNER_BASE_URL,
   internalSecret: env.JOB_RUNNER_INTERNAL_SECRET,
+  auditService: governanceAuditService,
 });
 
 export { createAdminRepairJobService };

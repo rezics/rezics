@@ -63,12 +63,31 @@ export const adminRepairJobQueuedOperationSchema = t.Object({
     t.Literal("created"),
     t.Literal("coalesced"),
     t.Literal("retried"),
+    t.Literal("cancelled"),
   ]),
   idempotencyKey: t.Optional(t.Nullable(t.String())),
 });
 
 export type AdminRepairJobQueuedOperation =
   (typeof adminRepairJobQueuedOperationSchema)["static"];
+
+export const adminRepairJobOperationRequestSchema = t.Object({
+  lane: t.String(),
+  jobId: t.String(),
+  reason: t.String({ minLength: 3 }),
+});
+
+export type AdminRepairJobOperationRequest =
+  (typeof adminRepairJobOperationRequestSchema)["static"];
+
+export const adminRepairJobOperationResponseSchema = t.Object({
+  operation: adminRepairJobQueuedOperationSchema,
+  auditLogId: t.Optional(t.Nullable(t.String())),
+  safeSummary: t.String(),
+});
+
+export type AdminRepairJobOperationResponse =
+  (typeof adminRepairJobOperationResponseSchema)["static"];
 
 export const adminRepairJobSchema = t.Object({
   id: t.String(),

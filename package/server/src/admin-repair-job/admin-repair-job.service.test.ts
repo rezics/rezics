@@ -31,6 +31,21 @@ mock.module("@/job/job-boundary", () => ({
   },
 }));
 
+mock.module("@/governance/audit.service", () => ({
+  governanceAuditService: {
+    appendPrivilegedMutation: mock(async () => ({ id: "audit-default" })),
+  },
+}));
+
+function auditService(calls: any[] = []) {
+  return {
+    appendPrivilegedMutation: mock(async (input: any) => {
+      calls.push(input);
+      return { id: `audit-${calls.length}` };
+    }),
+  };
+}
+
 describe("adminRepairJobService", () => {
   beforeEach(() => {
     mock.restore();
@@ -57,6 +72,7 @@ describe("adminRepairJobService", () => {
       fetchImpl: fetch,
       jobRunnerBaseUrl: "http://jobs",
       internalSecret: "secret",
+      auditService: auditService(),
     });
 
     const job = await service.start({
@@ -79,6 +95,7 @@ describe("adminRepairJobService", () => {
   });
 
   test("routes failed history outbox targets to job-runner retry", async () => {
+    const auditCalls: any[] = [];
     const fetchImpl = mock(async (url: string, init?: RequestInit) => {
       expect(url).toBe("http://jobs/admin/jobs/failed/search/job-1/retry");
       expect(init?.method).toBe("POST");
@@ -97,12 +114,14 @@ describe("adminRepairJobService", () => {
       fetchImpl: fetchImpl as unknown as typeof fetch,
       jobRunnerBaseUrl: "http://jobs",
       internalSecret: "secret",
+      auditService: auditService(auditCalls),
     });
 
     const job = await service.start({
       scope: "history-outbox",
       targetIds: ["search:job-1"],
       reason: "retry failed job",
+      actorUserId: "user-1",
     });
 
     expect(job.status).toBe("pending");
@@ -114,6 +133,11 @@ describe("adminRepairJobService", () => {
         status: "retried",
         idempotencyKey: null,
       },
+    ]);
+    expect(auditCalls.map((call) => call.action)).toEqual([
+      "repair.start",
+      "repair.retry",
+      "repair.completion",
     ]);
   });
 
@@ -128,6 +152,7 @@ describe("adminRepairJobService", () => {
         }),
       },
       fetchImpl: fetch,
+      auditService: auditService(),
     });
 
     const job = await service.start({
@@ -139,5 +164,52 @@ describe("adminRepairJobService", () => {
     expect(job.status).toBe("failed");
     expect(job.queuedOperations).toEqual([]);
     expect(job.failure?.safeMessage).toContain("not implemented");
+  });
+
+  test("audits explicit repair operation retry and cancel", async () => {
+    const auditCalls: any[] = [];
+    const urls: string[] = [];
+    const fetchImpl = mock(async (url: string) => {
+      urls.push(url);
+      return new Response(JSON.stringify({ status: "ok" }), { status: 200 });
+    });
+    const { createAdminRepairJobService } = await import(
+      "./admin-repair-job.service"
+    );
+    const service = createAdminRepairJobService({
+      jobProducer: {
+        enqueue: mock(async () => {
+          throw new Error("unexpected enqueue");
+        }),
+      },
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      jobRunnerBaseUrl: "http://jobs",
+      internalSecret: "secret",
+      auditService: auditService(auditCalls),
+    });
+
+    const retry = await service.retryOperation({
+      lane: "maintenance",
+      jobId: "job-1",
+      reason: "retry repair job",
+      actorUserId: "user-1",
+    });
+    const cancel = await service.cancelOperation({
+      lane: "maintenance",
+      jobId: "job-2",
+      reason: "cancel repair job",
+      actorUserId: "user-1",
+    });
+
+    expect(urls).toEqual([
+      "http://jobs/admin/jobs/failed/maintenance/job-1/retry",
+      "http://jobs/admin/jobs/failed/maintenance/job-2/discard",
+    ]);
+    expect(retry.operation.status).toBe("retried");
+    expect(cancel.operation.status).toBe("cancelled");
+    expect(auditCalls.map((call) => call.action)).toEqual([
+      "repair.retry",
+      "repair.cancel",
+    ]);
   });
 });

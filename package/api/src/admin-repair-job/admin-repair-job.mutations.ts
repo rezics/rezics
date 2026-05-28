@@ -2,6 +2,8 @@ import type {
   AdminRepairJob,
   AdminRepairJobDryRun,
   AdminRepairJobDryRunRequest,
+  AdminRepairJobOperationRequest,
+  AdminRepairJobOperationResponse,
   AdminRepairJobStartRequest,
 } from "@rezics/contract";
 import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
@@ -35,7 +37,41 @@ export function useAdminRepairJobStartMutation(
   });
 }
 
+export function useAdminRepairJobRetryOperationMutation(
+  options?: Omit<
+    UseMutationOptions<
+      AdminRepairJobOperationResponse,
+      Error,
+      AdminRepairJobOperationRequest
+    >,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: (input) => adminRepairJobApi.retryOperation(input),
+    ...options,
+  });
+}
+
+export function useAdminRepairJobCancelOperationMutation(
+  options?: Omit<
+    UseMutationOptions<
+      AdminRepairJobOperationResponse,
+      Error,
+      AdminRepairJobOperationRequest
+    >,
+    "mutationFn"
+  >,
+) {
+  return useMutation({
+    mutationFn: (input) => adminRepairJobApi.cancelOperation(input),
+    ...options,
+  });
+}
+
 export const adminRepairJobMutations = {
   dryRun: useAdminRepairJobDryRunMutation,
   start: useAdminRepairJobStartMutation,
+  retryOperation: useAdminRepairJobRetryOperationMutation,
+  cancelOperation: useAdminRepairJobCancelOperationMutation,
 };

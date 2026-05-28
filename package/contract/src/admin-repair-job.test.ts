@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   adminRepairJobDryRunSchema,
+  adminRepairJobOperationRequestSchema,
+  adminRepairJobOperationResponseSchema,
   adminRepairJobSchema,
   adminRepairJobStartRequestSchema,
 } from "./admin-repair-job";
@@ -59,6 +61,29 @@ describe("admin repair job contracts", () => {
         ],
         createdAt: "2026-05-28T00:00:00.000Z",
         updatedAt: "2026-05-28T00:00:00.000Z",
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts repair operation retry and cancel contracts", () => {
+    expect(
+      Value.Check(adminRepairJobOperationRequestSchema, {
+        lane: "maintenance",
+        jobId: "job-1",
+        reason: "retry failed repair",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(adminRepairJobOperationResponseSchema, {
+        operation: {
+          jobId: "job-1",
+          lane: "maintenance",
+          kind: "job-runner.failed.retry",
+          status: "retried",
+          idempotencyKey: null,
+        },
+        auditLogId: "audit-1",
+        safeSummary: "Repair operation retried.",
       }),
     ).toBe(true);
   });

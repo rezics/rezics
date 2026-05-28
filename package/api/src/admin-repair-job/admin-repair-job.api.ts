@@ -2,6 +2,8 @@ import type {
   AdminRepairJob,
   AdminRepairJobDryRun,
   AdminRepairJobDryRunRequest,
+  AdminRepairJobOperationRequest,
+  AdminRepairJobOperationResponse,
   AdminRepairJobStartRequest,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
@@ -19,5 +21,25 @@ export const adminRepairJobApi = {
       method: "POST",
       body: JSON.stringify(input),
     });
+  },
+
+  retryOperation(input: AdminRepairJobOperationRequest) {
+    return apiFetch<AdminRepairJobOperationResponse>(
+      "/admin/repair-job/operation/retry",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  cancelOperation(input: AdminRepairJobOperationRequest) {
+    return apiFetch<AdminRepairJobOperationResponse>(
+      "/admin/repair-job/operation/cancel",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
   },
 };
