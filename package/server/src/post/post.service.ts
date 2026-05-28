@@ -69,6 +69,12 @@ function postKindToWorkRole(kind: PostKindEnum | undefined): UnitWorkRole {
   return UnitWorkRole.POST;
 }
 
+function readRealmRuleUnitId(extra: Prisma.JsonValue | null): string | null {
+  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
+  const rule = (extra as Record<string, unknown>).rule;
+  return typeof rule === "string" && rule.length > 0 ? rule : null;
+}
+
 export class PostService {
   /**
    * List posts with support for flat and threaded modes.
@@ -283,6 +289,65 @@ export class PostService {
     return hydrateUnitOwnerUserSlugRow(post as PostWithRelations);
   }
 
+  private async assertRealmPostAllowed(
+    realmUnitIds: string[],
+    userId: string,
+  ): Promise<void> {
+    if (realmUnitIds.length === 0) return;
+
+    const [realms, memberships, acknowledgements] = await Promise.all([
+      prisma.realm.findMany({
+        where: { unitId: { in: realmUnitIds } },
+        select: {
+          unitId: true,
+          extra: true,
+          ruleVersion: true,
+          ruleRequireOnPost: true,
+        },
+      }),
+      prisma.realmMember.findMany({
+        where: { realmUnitId: { in: realmUnitIds }, userId },
+        select: { realmUnitId: true, state: true },
+      }),
+      prisma.realmRuleAcknowledgement.findMany({
+        where: { realmUnitId: { in: realmUnitIds }, userId },
+        select: { realmUnitId: true, ruleUnitId: true, version: true },
+      }),
+    ]);
+
+    const memberByRealm = new Map(
+      memberships.map((member) => [member.realmUnitId, member]),
+    );
+    const acknowledgementKeys = new Set(
+      acknowledgements.map(
+        (ack) => `${ack.realmUnitId}:${ack.ruleUnitId}:${ack.version}`,
+      ),
+    );
+
+    for (const realm of realms) {
+      const memberState = memberByRealm.get(realm.unitId)?.state;
+      if (
+        memberState &&
+        ["PENDING", "MUTED", "REMOVED", "BANNED"].includes(memberState)
+      ) {
+        throw new Error(
+          `Cannot post to realm while membership state is ${memberState.toLowerCase()}`,
+        );
+      }
+
+      const ruleUnitId = readRealmRuleUnitId(realm.extra);
+      if (
+        realm.ruleRequireOnPost &&
+        ruleUnitId &&
+        !acknowledgementKeys.has(
+          `${realm.unitId}:${ruleUnitId}:${realm.ruleVersion}`,
+        )
+      ) {
+        throw new Error("Realm rules must be acknowledged before posting");
+      }
+    }
+  }
+
   /**
    * Create a post with tree handling.
    *
@@ -308,6 +373,8 @@ export class PostService {
       ? []
       : [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
+
+    await this.assertRealmPostAllowed(realmIdsToWrite, authorUserId);
 
     let targetUnitTypeFromChapterCheck: string | null = null;
     if (kind === PostKindEnum.CHAPTER) {

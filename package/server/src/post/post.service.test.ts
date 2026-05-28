@@ -43,6 +43,19 @@ const postFindUniqueOrThrowMock = mock(
   }),
 );
 const postFindFirstMock = mock(async () => null);
+const realmFindManyMock = mock(
+  async (args: any): Promise<any[]> =>
+    (args.where.unitId.in as string[]).map((unitId) => ({
+      unitId,
+      extra: {},
+      ruleVersion: 1,
+      ruleRequireOnPost: false,
+    })),
+);
+const realmMemberFindManyMock = mock(async (): Promise<any[]> => []);
+const realmRuleAcknowledgementFindManyMock = mock(
+  async (): Promise<any[]> => [],
+);
 const realmUnitCreateMock = mock(async (args: any) => {
   if (args.data.realmUnitId === "missing-realm") {
     throw new Error("Foreign key failed");
@@ -81,6 +94,11 @@ const transactionMock = mock(async (fn: any) =>
       findUniqueOrThrow: postFindUniqueOrThrowMock,
       findFirst: postFindFirstMock,
     },
+    realm: { findMany: realmFindManyMock },
+    realmMember: { findMany: realmMemberFindManyMock },
+    realmRuleAcknowledgement: {
+      findMany: realmRuleAcknowledgementFindManyMock,
+    },
     unitRealm: { create: realmUnitCreateMock },
     unitWork: { findMany: unitWorkFindManyMock, upsert: unitWorkUpsertMock },
     unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
@@ -114,6 +132,11 @@ Object.assign(prismaMock, {
     findFirst: postFindFirstMock,
   },
   unitRealm: { create: realmUnitCreateMock },
+  realm: { findMany: realmFindManyMock },
+  realmMember: { findMany: realmMemberFindManyMock },
+  realmRuleAcknowledgement: {
+    findMany: realmRuleAcknowledgementFindManyMock,
+  },
   unitWork: { findMany: unitWorkFindManyMock, upsert: unitWorkUpsertMock },
   unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
   user: { findUnique: userFindUniqueMock },
@@ -191,6 +214,19 @@ function resetMocks() {
   postFindUniqueMock.mockClear();
   postFindUniqueOrThrowMock.mockClear();
   postFindFirstMock.mockClear();
+  realmFindManyMock.mockClear();
+  realmFindManyMock.mockImplementation(async (args: any) =>
+    (args.where.unitId.in as string[]).map((unitId) => ({
+      unitId,
+      extra: {},
+      ruleVersion: 1,
+      ruleRequireOnPost: false,
+    })),
+  );
+  realmMemberFindManyMock.mockClear();
+  realmMemberFindManyMock.mockResolvedValue([]);
+  realmRuleAcknowledgementFindManyMock.mockClear();
+  realmRuleAcknowledgementFindManyMock.mockResolvedValue([]);
   realmUnitCreateMock.mockClear();
   unitWorkFindManyMock.mockClear();
   unitWorkFindManyMock.mockResolvedValue([]);
@@ -328,6 +364,68 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(transactionMock).toHaveBeenCalledTimes(1);
     expect(realmUnitCreateMock).toHaveBeenCalledTimes(1);
     expect(unitTagCreateMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("blocks realm post creation until required rules are acknowledged", async () => {
+    resetMocks();
+    realmFindManyMock.mockResolvedValueOnce([
+      {
+        unitId: "realm-1",
+        extra: { rule: "rule-unit-1" },
+        ruleVersion: 2,
+        ruleRequireOnPost: true,
+      },
+    ]);
+
+    await expect(
+      service.create(
+        { content: content("hello"), realmUnitIds: ["realm-1"] },
+        "user-1",
+      ),
+    ).rejects.toThrow("Realm rules must be acknowledged before posting");
+    expect(transactionMock).not.toHaveBeenCalled();
+    expect(realmUnitCreateMock).not.toHaveBeenCalled();
+  });
+
+  test("allows realm post creation after required rule acknowledgement", async () => {
+    resetMocks();
+    realmFindManyMock.mockResolvedValueOnce([
+      {
+        unitId: "realm-1",
+        extra: { rule: "rule-unit-1" },
+        ruleVersion: 2,
+        ruleRequireOnPost: true,
+      },
+    ]);
+    realmRuleAcknowledgementFindManyMock.mockResolvedValueOnce([
+      {
+        realmUnitId: "realm-1",
+        ruleUnitId: "rule-unit-1",
+        version: 2,
+      },
+    ]);
+
+    await service.create(
+      { content: content("hello"), realmUnitIds: ["realm-1"] },
+      "user-1",
+    );
+
+    expect(realmUnitCreateMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("blocks realm post creation for restricted member states", async () => {
+    resetMocks();
+    realmMemberFindManyMock.mockResolvedValueOnce([
+      { realmUnitId: "realm-1", state: "MUTED" },
+    ]);
+
+    await expect(
+      service.create(
+        { content: content("hello"), realmUnitIds: ["realm-1"] },
+        "user-1",
+      ),
+    ).rejects.toThrow("Cannot post to realm while membership state is muted");
+    expect(transactionMock).not.toHaveBeenCalled();
   });
 
   test("registers review posts in target release work domains", async () => {
