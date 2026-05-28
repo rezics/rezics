@@ -435,74 +435,109 @@ Each cluster gets its own short merge note (which sources collapse into
 which survivor) before any file is moved. Don't execute D tasks blindly from
 the suggested targets — they are starting points, not decrees.
 
-### D1. `reaction-*` (8 → 4)
+### D1. `reaction-*` (8 → 4) — done 2026-05-28
 
-- [ ] Write merge plan: which of the 8 specs collapse into
-      `reaction-api` / `reaction-hydration` / `reaction-history` /
-      `reaction-notification`.
-- [ ] Execute merge. Delete dropped source files.
-- [ ] Candidate sources to fold:
+- [x] Created `openspec/specs/reaction-api/` and folded in
       `reaction-auth`, `reaction-crud`, `reaction-internal-api`,
-      `reaction-summary`, `reaction-user-state` → `reaction-api`.
+      `reaction-summary`, `reaction-user-state` under
+      `## Authentication` / `## CRUD operations` / `## Internal API` /
+      `## Summary endpoints` / `## User state endpoints` subsections.
+      `reaction-hydration`, `reaction-history`, and
+      `reaction-notification` were kept as separate specs as planned.
+      Source dirs deleted.
 
-### D2. `editor-*` (13 → 3–4)
+### D2. `editor-*` (13 → 4) — done 2026-05-28
 
-- [ ] Write merge plan: distinguish editor *core* from plugins from
-      toolbar from image flow.
-- [ ] Candidate plugin-bucket sources:
-      `editor-emoji`, `editor-mention`, `editor-json`, `editor-markdown`,
-      `editor-markdown-preview`, `editor-scroll-sync`,
-      `editor-cosmos-coverage` → `editor-plugins`.
+- [x] Created `openspec/specs/editor-plugins/` and folded in
+      `editor-emoji`, `editor-mention`, `editor-json`,
+      `editor-markdown`, `editor-markdown-preview`,
+      `editor-scroll-sync`, `editor-cosmos-coverage` under per-plugin
+      subsections. `editor-core`, `editor-toolbar`,
+      `editor-image-insert`, `editor-panel` were kept. Source dirs
+      deleted.
 
-### D3. `folio-*` (7 → 2)
+### D3. `folio-*` (7 → 2) — done 2026-05-28
 
-- [ ] Candidates:
+- [x] Expanded `openspec/specs/folio-core/` to absorb
       `folio-gesture`, `folio-ghost-snapshot`, `folio-pagination`,
-      `folio-tree-navigation` → fold into `folio-core` (or
-      `folio-runtime`).
-      `folio-plugin-epub`, `folio-plugin-txt` → `folio-plugins`.
+      `folio-tree-navigation` under `## Gestures` /
+      `## Ghost snapshots` / `## Pagination` / `## Tree navigation`
+      (the original core requirements went under
+      `## Runtime types and component contract`). Created
+      `openspec/specs/folio-plugins/` from
+      `folio-plugin-epub` + `folio-plugin-txt`. Source dirs deleted.
 
-### D4. `realm-tag*` (5 → 2)
+### D4. `realm-tag*` (5 → 2) — done 2026-05-28
 
-- [ ] Candidates:
-      `realm-tag-unit` keeps the data-model spec.
+- [x] Kept `realm-tag-unit` as the data-model spec. Created
+      `openspec/specs/realm-tag-governance/` and folded in
       `realm-tag-context`, `realm-tag-interpretation-context`,
-      `realm-tag-vote`, `realm-taxonomy-seed-support` → fold into
-      `realm-tag-governance` (or a similar consolidated name).
+      `realm-tag-vote`, `realm-taxonomy-seed-support` under
+      `## Tag context endpoint` / `## Pair-level interpretation` /
+      `## Tag votes` / `## Seed data invariants`. Source dirs deleted.
 
-### D5. `shelf-*` editor concerns (11 → 5–6)
+### D5. `shelf-*` editor concerns (6 → 2) — done 2026-05-28
 
-- [ ] Candidates:
-      `shelf-batch-hydration`, `shelf-items-batch-mutation`,
-      `shelf-items-editor`, `shelf-item-kind`, `shelf-item-unit-junction`,
-      `shelf-structure` → fold into a smaller set of `shelf-items` /
-      `shelf-editor` specs.
+- [x] Split the editor cluster between
+      `openspec/specs/shelf-items/` (data layer:
+      `shelf-structure`, `shelf-item-kind`,
+      `shelf-item-unit-junction`, `shelf-batch-hydration`) and
+      `openspec/specs/shelf-editor/` (UI write path:
+      `shelf-items-editor`, `shelf-items-batch-mutation`). The other
+      shelf specs (`shelf-collection`, `shelf-discussion`,
+      `shelf-display-modes`, `shelf-migration`, `shelf-seed-tags`)
+      were kept. Source dirs deleted.
 
-### D6. `profile-*-tab` (5 → 1)
+### D6. `profile-*-tab` (5 → 1) — done 2026-05-28
 
-- [ ] Fold `profile-content-tab`, `profile-followers-tab`,
+- [x] Created `openspec/specs/profile-tabs/` and folded
+      `profile-content-tab`, `profile-followers-tab`,
       `profile-reactions-tab`, `profile-realms-tab`,
-      `profile-shelves-tab` into a single `profile-tabs` spec, with each
-      tab as a top-level requirement block. Keep `profile-tab-layout` as
-      the layout spec.
+      `profile-shelves-tab` into per-tab subsections. Kept
+      `profile-tab-layout` as the layout spec. Source dirs deleted.
 
-### D7. `seed-*` (7 → 3)
+### D7. `seed-*` (7 → 3) — done 2026-05-28
 
-- [ ] Candidates: `seed-engine` (factory + interactive editor +
-      performance batch), `seed-presets` (preset library + plan modes),
-      `seed-distribution` (power law + zone).
+- [x] Created three destinations:
+      - `openspec/specs/seed-engine/` — `seed-factory-scenarios`,
+        `seed-interactive-editor`, `seed-performance-batch`.
+      - `openspec/specs/seed-presets/` — `seed-preset-library`,
+        `seed-plan-modes` (plan/mode types live with presets because
+        presets bundle `{ mode, plan }`).
+      - `openspec/specs/seed-distribution/` —
+        `seed-power-law-distribution`, `seed-zone`.
+      Source dirs deleted.
 
-### D8. `default-realm-*` (3 → 1)
+### D8. `default-realm-*` (3 → 1) — done 2026-05-28
 
-- [ ] Fold `default-realm-auto-join`, `default-realm-contract`,
-      `default-realm-infra-bootstrap` into a single `default-realm` spec
-      with separate requirement blocks.
+- [x] Created `openspec/specs/default-realm/` with
+      `## Contract definition` / `## Infra bootstrap` /
+      `## Auto-join` subsections folding in `default-realm-contract`,
+      `default-realm-infra-bootstrap`, `default-realm-auto-join`.
+      Source dirs deleted.
 
-### D9. Final pass
+### D9. Final pass — done 2026-05-28
 
-- [ ] After D1–D8, rerun the §7 methodology counts and the cluster scan.
-      Identify any new over-decomposed clusters that surface and decide
-      whether to continue.
+- [x] Catalog counts after Phase D:
+      - Capability directories: **281** (was 313 after Phase C,
+        baseline 317).
+      - Total `### Requirement:` headings: **2215** (was 2240
+        baseline; net loss reflects the de-duplicated requirements in
+        Phase C and the editorial drops in Phase B's `## REMOVED`
+        sweep).
+      - All specs start with `# <name> Specification` and contain
+        a `## Purpose` section before any `### Requirement:` block.
+      - Cluster scan did not surface a new over-decomposed cluster
+        large enough to justify another consolidation pass. The
+        remaining clusters with ≥5 specs (`auth-*`, `content-*`,
+        `realm-*`, `unit-*`, `admin-*`, `entity-*`, `settings-*`)
+        are each made up of genuinely distinct concerns after this
+        pass; pushing further would lose meaningful boundaries.
+- [x] Relaxed `openspec/config.yaml`'s spec format rule so
+      consolidated specs can use topical `##` subsections grouping
+      `### Requirement:` blocks instead of a single `## Requirements`
+      heading. Single-topic specs still SHOULD use one
+      `## Requirements` heading.
 
 ---
 
@@ -514,7 +549,7 @@ the suggested targets — they are starting points, not decrees.
 | A | done | 314 | 2026-05-28 |
 | B | done | 314 | 2026-05-28 |
 | C | done | 313 | 2026-05-28 |
-| D | not started | — | — |
+| D | done | 281 | 2026-05-28 |
 
 Phase B was editorial — no specs were added or deleted, so the spec
 count is unchanged. Every spec now starts with
@@ -526,6 +561,15 @@ Phase C reduced the catalog by one (`unified-attribution` folded into
 `attribution`). The other three pairs/clusters audited (`jwt-service-*`
 ×2, JWT/token quartet) were kept as parallel or layered specs after
 inspection rather than merged on intuition.
+
+Phase D consolidated eight over-decomposed clusters (default-realm,
+profile tabs, folio, reactions, editor plugins, realm-tag governance,
+seed, shelf editor concerns) for a net reduction of 32 specs (313 →
+281, ~10%) while preserving every requirement body and scenario. The
+config rule for spec format was relaxed to allow topical `##`
+subsections under `## Purpose` so the consolidated specs can group
+related requirements without a useless single `## Requirements`
+heading.
 
 Phase A reduction: 3 capabilities removed (`auth-organization`,
 `exchange-auto-provision`, `cors-policy-plugin`). Requirement count:
