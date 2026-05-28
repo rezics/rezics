@@ -137,13 +137,9 @@ key is referenced.
 - **THEN** the i18next runtime SHALL accept `ko`
 - **AND** every loaded namespace SHALL refetch its `ko` JSON
 
-### Requirement: Generated Paraglide artifacts are removed
+### Requirement: Generated Paraglide artifacts SHALL be removed
 
-The `@inlang/paraglide-js` dependency, `project.inlang/` directories,
-`src/paraglide/` generated outputs, and `i18n:compile` build scripts
-SHALL be removed from the repository after the migration. Frontend
-packages SHALL NOT contain any reference to generated Paraglide message
-functions.
+Generated Paraglide artifacts SHALL NOT remain in the repository after the migration. The `@inlang/paraglide-js` dependency, `project.inlang/` directories, `src/paraglide/` generated outputs, and `i18n:compile` build scripts SHALL be removed. Frontend packages SHALL NOT contain any reference to generated Paraglide message functions.
 
 #### Scenario: Repository is inspected after migration
 
@@ -153,16 +149,9 @@ functions.
 - **AND** `@inlang/paraglide-js` SHALL NOT appear in any `package.json`
 - **AND** no `i18n:compile` script SHALL appear in any `package.json`
 
-### Requirement: Contract domain enums resolve labels through `@rezics/i18n` helpers
+### Requirement: Contract domain enums SHALL resolve labels through `@rezics/i18n` helpers
 
-Backend-driven discriminator keys for contract domain enums (entity
-kind, license, subject attribution role, credit role, and any future
-contract enum that ships with a displayable label) SHALL resolve their
-localized label through hand-written maps in `@rezics/i18n` guarded by
-`satisfies Record<EnumKey, () => string>`. Each map entry SHALL return
-the result of `i18next.t('<ns>:<key>')` for the appropriate namespace.
-The `i18nKey` field SHALL NOT exist on `@rezics/contract` domain
-definitions; message identity belongs to `@rezics/i18n`, not contract.
+Contract domain enum labels SHALL resolve through hand-written maps in `@rezics/i18n`, not through `i18nKey` fields on `@rezics/contract` definitions. Backend-driven discriminator keys for contract domain enums (entity kind, license, subject attribution role, credit role, and any future contract enum that ships with a displayable label) SHALL resolve their localized label through hand-written maps in `@rezics/i18n` guarded by `satisfies Record<EnumKey, () => string>`. Each map entry SHALL return the result of `i18next.t('<ns>:<key>')` for the appropriate namespace. The `i18nKey` field SHALL NOT exist on `@rezics/contract` domain definitions; message identity belongs to `@rezics/i18n`, not contract.
 
 #### Scenario: Rendering an entity kind label
 

@@ -1,12 +1,8 @@
 ## MODIFIED Requirements
 
-### Requirement: UI package may use neutral i18n React adapter
+### Requirement: UI package SHALL use the shared neutral i18n React adapter
 
-`@rezics/ui` MAY import `@rezics/i18n/react` for active-locale
-subscriptions and translation lookup. That adapter subpath SHALL
-remain neutral: it SHALL NOT import app/admin shell code, routers,
-API clients, namespace JSON files, or `@rezics/ui/locales/*`
-modules.
+`@rezics/ui` SHALL use the shared neutral `@rezics/i18n/react` adapter for active-locale subscriptions and translation lookup, and SHALL NOT introduce a competing i18n runtime. That adapter subpath SHALL remain neutral: it SHALL NOT import app/admin shell code, routers, API clients, namespace JSON files, or `@rezics/ui/locales/*` modules.
 
 #### Scenario: UI component imports the adapter
 
