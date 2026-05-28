@@ -160,5 +160,7 @@
   "create_book": "Book",
   "create_shelf": "Shelf",
   "create_realm": "Realm",
-  "create_entity": "Entity"
+  "create_entity": "Entity",
+  "home_continuation_title": "Pick up where you left off",
+  "home_view_dashboard": "View your dashboard"
 }

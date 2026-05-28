@@ -160,5 +160,7 @@
   "create_book": "书籍",
   "create_shelf": "书架",
   "create_realm": "领域",
-  "create_entity": "实体"
+  "create_entity": "实体",
+  "home_continuation_title": "继续您的阅读",
+  "home_view_dashboard": "查看您的仪表板"
 }

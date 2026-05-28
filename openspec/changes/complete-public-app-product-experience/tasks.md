@@ -12,7 +12,7 @@
 - [x] 2.2 Add `package/server/src/dashboard/` (api/service/types) that fans out to existing domain services and tolerates per-section failure without failing the whole response. The continue-reading aggregator SHALL join `UserUnitProgress` with `ContentStructureNode` (for `lastReadNodeTitle`) and aggregate `UserContentNodeProgress` per book (for `chaptersCompleted`) plus a count of non-deleted nodes (for `chaptersTotal`) in a single fan-out, not per-card client roundtrips.
 - [x] 2.3 Add `package/api/src/dashboard/` typed hooks + query keys; register invalidation participation in cache-coherence map.
 - [x] 2.4 Add `package/app/src/dashboard/` feature (page, sections per `DashboardSummary` slot, models, hooks, components) following `package/app/docs/feature standard.md`.
-- [ ] 2.5 Mount `routes/_mainLayout/u/me/dashboard.tsx`; link from `home/sections/LibraryCardsSection` and the new personal nav.
+- [x] 2.5 Mount `routes/_mainLayout/u/me/dashboard.tsx`; link from `home/sections/LibraryCardsSection` and the new personal nav.
 - [ ] 2.6 Add stories/tests for partial-success rendering, empty new user, active reader, active community member, and active safety/enforcement notice states.
 
 ## 3. Cache-Coherence Map
@@ -23,7 +23,7 @@
 
 ## 4. Discovery, Search, Detail
 
-- [ ] 4.1 Upgrade `home/sections/*` and `home/pages/Home.tsx` so signed-out users see discovery and signed-in users see continuation (continue reading, shelves, realms) without scattering dashboard logic.
+- [x] 4.1 Upgrade `home/sections/*` and `home/pages/Home.tsx` so signed-out users see discovery and signed-in users see continuation (continue reading, shelves, realms) without scattering dashboard logic.
 - [ ] 4.2 In `routes/_mainLayout/search/index.tsx`, add explicit filter-chip UI (type / realm / work-grouping) backed by stable Unit/Entity/Realm ids; persist query state in the URL.
 - [x] 4.3 Add local-only search-history affordance on the search route (no server contract).
 - [ ] 4.4 In book/entity/tag/profile detail surfaces, expose inspect, collect, follow, discuss, contribute, report (via new `ReportAction`), share, and DM (via new `DMAction`) where policy allows.

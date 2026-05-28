@@ -6,6 +6,7 @@ import { useIsMobile } from "@/shared/utils/use-media-query";
 import { BookCarousel } from "../components/HomeCarousel";
 import { ActiveRealmsSection } from "../sections/ActiveRealmsSection";
 import { AnnouncementBarSection } from "../sections/AnnouncementBarSection";
+import { HomeContinuationSection } from "../sections/HomeContinuationSection";
 import { LibraryCardsSection } from "../sections/LibraryCardsSection";
 import { NewBookSection } from "../sections/NewBookSection";
 import { TrendingReviews } from "../sections/TrendingReviewsSection";
@@ -40,6 +41,7 @@ export const Home: React.FC<HomeProps> = () => {
         </div>
       </section>
 
+      <HomeContinuationSection />
       <LibraryCardsSection />
       <ActiveRealmsSection />
       <AnnouncementBarSection />

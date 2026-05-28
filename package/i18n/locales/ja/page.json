@@ -160,5 +160,7 @@
   "create_book": "書籍",
   "create_shelf": "本棚",
   "create_realm": "レルム",
-  "create_entity": "エンティティ"
+  "create_entity": "エンティティ",
+  "home_continuation_title": "続きから読む",
+  "home_view_dashboard": "ダッシュボードを見る"
 }

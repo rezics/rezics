@@ -9,8 +9,8 @@ export const dashboardSummaryQuery = () =>
     staleTime: 1000 * 30,
   });
 
-export function useDashboardSummary() {
-  return useQuery(dashboardSummaryQuery());
+export function useDashboardSummary(options?: { enabled?: boolean }) {
+  return useQuery({ ...dashboardSummaryQuery(), enabled: options?.enabled });
 }
 
 export const dashboardQueries = {

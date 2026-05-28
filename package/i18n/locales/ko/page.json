@@ -160,5 +160,7 @@
   "create_book": "도서",
   "create_shelf": "서재",
   "create_realm": "렐름",
-  "create_entity": "엔티티"
+  "create_entity": "엔티티",
+  "home_continuation_title": "이어서 읽기",
+  "home_view_dashboard": "대시보드 보기"
 }
