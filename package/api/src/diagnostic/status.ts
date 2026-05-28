@@ -10,6 +10,7 @@ export type {
   ExpectedMeiliIndexSchema,
   FailedJobSummary,
   HiddenWorkDomainSummary,
+  HistoryOutboxStatus,
   LargeWorkDomainSummary,
   MeiliIndexStatus,
   MeiliStatusSummary,
