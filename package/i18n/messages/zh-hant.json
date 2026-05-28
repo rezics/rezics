@@ -1700,6 +1700,7 @@
   "realm_wiki_zone_label_picker_description": "搜尋或建立 LABEL Unit，並插入導覽標題或首頁區塊標題。",
   "realm_wiki_zone_label_search_placeholder": "搜尋 LABEL Unit",
   "realm_wiki_zone_label_title_placeholder": "新 LABEL 標題",
+  "realm_wiki_zone_low_contrast": "主題文字色需要與背景色和表面色至少達到 4.5:1 對比度。",
   "realm_wiki_zone_navigation_json": "導覽 JSON",
   "realm_wiki_zone_saved": "Wiki 分區已儲存",
   "realm_wiki_zone_template": "分區模板",

@@ -57,6 +57,7 @@ import {
   realm_wiki_zone_homepage_sections_json,
   realm_wiki_zone_homepage_template,
   realm_wiki_zone_invalid_json,
+  realm_wiki_zone_low_contrast,
   realm_wiki_zone_label_create,
   realm_wiki_zone_label_created,
   realm_wiki_zone_label_homepage,
@@ -167,6 +168,37 @@ function parseJsonField<T>(value: string, fallback: T): T {
   const trimmed = value.trim();
   if (!trimmed) return fallback;
   return JSON.parse(trimmed) as T;
+}
+
+function hexToRgb(value: string): [number, number, number] | null {
+  const hex = value.trim().replace(/^#/, "");
+  if (!/^[0-9a-f]{6}$/i.test(hex)) return null;
+  return [
+    Number.parseInt(hex.slice(0, 2), 16),
+    Number.parseInt(hex.slice(2, 4), 16),
+    Number.parseInt(hex.slice(4, 6), 16),
+  ];
+}
+
+function relativeLuminance([r, g, b]: [number, number, number]) {
+  const channel = (value: number) => {
+    const normalized = value / 255;
+    return normalized <= 0.03928
+      ? normalized / 12.92
+      : ((normalized + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+function hasLowContrast(foreground: string, background: string) {
+  const fg = hexToRgb(foreground);
+  const bg = hexToRgb(background);
+  if (!fg || !bg) return false;
+  const fgLum = relativeLuminance(fg);
+  const bgLum = relativeLuminance(bg);
+  const lighter = Math.max(fgLum, bgLum);
+  const darker = Math.min(fgLum, bgLum);
+  return (lighter + 0.05) / (darker + 0.05) < 4.5;
 }
 
 export const RealmExtraManageSection: React.FC<
@@ -530,6 +562,14 @@ function WikiZoneConfigEditor({
       if (surface.trim()) palette.surface = surface.trim();
       if (text.trim()) palette.text = text.trim();
       if (accent.trim()) palette.accent = accent.trim();
+      if (
+        palette.text &&
+        ((palette.background &&
+          hasLowContrast(palette.text, palette.background)) ||
+          (palette.surface && hasLowContrast(palette.text, palette.surface)))
+      ) {
+        throw new Error(realm_wiki_zone_low_contrast());
+      }
 
       const nextTheme: WikiZoneTheme = {
         template,

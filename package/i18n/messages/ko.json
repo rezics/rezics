@@ -1700,6 +1700,7 @@
   "realm_wiki_zone_label_picker_description": "LABEL Unit을 검색하거나 만들어 탐색 제목 또는 홈페이지 섹션 제목에 삽입합니다.",
   "realm_wiki_zone_label_search_placeholder": "LABEL Unit 검색",
   "realm_wiki_zone_label_title_placeholder": "새 LABEL 제목",
+  "realm_wiki_zone_low_contrast": "테마 텍스트 색상은 배경 및 표면 색상과 최소 4.5:1 대비가 필요합니다.",
   "realm_wiki_zone_navigation_json": "탐색 JSON",
   "realm_wiki_zone_saved": "Wiki 영역이 저장되었습니다.",
   "realm_wiki_zone_template": "영역 템플릿",

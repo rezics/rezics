@@ -1700,6 +1700,7 @@
   "realm_wiki_zone_label_picker_description": "Suchen oder erstellen Sie LABEL-Units und fügen Sie sie in Navigationsüberschriften oder Startseitenabschnittstitel ein.",
   "realm_wiki_zone_label_search_placeholder": "LABEL-Units suchen",
   "realm_wiki_zone_label_title_placeholder": "Neuer LABEL-Titel",
+  "realm_wiki_zone_low_contrast": "Die Textfarbe des Themes benötigt mindestens 4,5:1 Kontrast zu Hintergrund- und Oberflächenfarben.",
   "realm_wiki_zone_navigation_json": "Navigation JSON",
   "realm_wiki_zone_saved": "Wiki-Zone gespeichert",
   "realm_wiki_zone_template": "Zonenvorlage",

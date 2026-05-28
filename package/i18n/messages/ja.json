@@ -1700,6 +1700,7 @@
   "realm_wiki_zone_label_picker_description": "LABEL Unit を検索または作成し、ナビゲーション見出しやホームページセクションタイトルに挿入します。",
   "realm_wiki_zone_label_search_placeholder": "LABEL Unit を検索",
   "realm_wiki_zone_label_title_placeholder": "新しい LABEL タイトル",
+  "realm_wiki_zone_low_contrast": "テーマのテキスト色は、背景色およびサーフェス色に対して 4.5:1 以上のコントラストが必要です。",
   "realm_wiki_zone_navigation_json": "ナビゲーション JSON",
   "realm_wiki_zone_saved": "Wiki ゾーンが保存されました",
   "realm_wiki_zone_template": "ゾーンテンプレート",
