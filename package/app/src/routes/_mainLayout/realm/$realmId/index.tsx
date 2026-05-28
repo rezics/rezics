@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_mainLayout/realm/$realmId/")({
     const sort =
       search.sort === "top" || search.sort === "hot" ? search.sort : "new";
     const tab =
-      search.tab === "wiki" || search.tab === "tags" || search.tab === "members"
+      search.tab === "wiki" ||
+      search.tab === "tags" ||
+      search.tab === "members" ||
+      search.tab === "moderation"
         ? search.tab
         : "feed";
     return {

@@ -51,6 +51,7 @@ import {
   RealmFeedSortSwitcher,
 } from "../sections/RealmFeedSortSwitcher";
 import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
+import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 import { RuleSection } from "../sections/RuleSection";
 
 const i18nMessages = {
@@ -67,7 +68,7 @@ const i18nMessages = {
   realm_untitled,
 };
 
-export type RealmPageTab = "feed" | "wiki" | "tags" | "members";
+export type RealmPageTab = "feed" | "wiki" | "tags" | "members" | "moderation";
 
 interface RealmPageProps {
   realmId: string;
@@ -123,7 +124,12 @@ export function RealmPage({
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
   const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
   const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
-  const activeTab = localTab === "wiki" && !showWikiTab ? "feed" : localTab;
+  const showModerationTab = showManage;
+  const activeTab =
+    (localTab === "wiki" && !showWikiTab) ||
+    (localTab === "moderation" && !showModerationTab)
+      ? "feed"
+      : localTab;
   const handleTabChange = (value: string) => {
     const next = value as RealmPageTab;
     if (onTabChange) onTabChange(next);
@@ -188,6 +194,9 @@ export function RealmPage({
           {showWikiTab && <TabsTrigger value="wiki">Wiki</TabsTrigger>}
           <TabsTrigger value="tags">{m.realm_tab_tags()}</TabsTrigger>
           <TabsTrigger value="members">{m.realm_tab_members()}</TabsTrigger>
+          {showModerationTab ? (
+            <TabsTrigger value="moderation">Moderation</TabsTrigger>
+          ) : null}
         </TabsList>
 
         <TabsContent value="feed">
@@ -235,6 +244,11 @@ export function RealmPage({
         <TabsContent value="members">
           <RealmMemberList realmId={realmId} />
         </TabsContent>
+        {showModerationTab ? (
+          <TabsContent value="moderation">
+            <RealmModerationQueueSection realmUnitId={realmId} />
+          </TabsContent>
+        ) : null}
       </Tabs>
 
       <Dialog open={composerOpen} onOpenChange={setComposerOpen}>
