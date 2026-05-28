@@ -5,6 +5,7 @@ import {
   myRealmMembershipQuery,
   realmDetailQuery,
   realmKeys,
+  useDeleteRealmMutation,
   useUpdateRealmMutation,
 } from "@rezics/api/realm/realm";
 import { unitApi } from "@rezics/api/unit/unit";
@@ -12,6 +13,7 @@ import {
   contentDocMarkdownFallback,
   DEFAULT_LANGUAGE,
   markdownContentDoc,
+  type RealmDTO,
 } from "@rezics/contract";
 import {
   common_add,
@@ -25,10 +27,22 @@ import {
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
-import { Button, Input, Label, Textarea } from "@rezics/ui/shadcn";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Textarea,
+} from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PinboardAdminSection } from "@/pinboard";
 import { unitHref } from "@/shared/ui/link";
@@ -86,6 +100,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const [saving, setSaving] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [draftLanguages, setDraftLanguages] = useState<string[]>([]);
+  const canDeleteRealm =
+    membership?.roleKey === "owner" ||
+    membership?.roleKey === "admin" ||
+    permission?.role === "ROOT";
   const editableLanguages = useMemo(
     () => [
       ...existingLanguages,
@@ -255,6 +273,11 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         />
         <RealmModerationQueueSection realmUnitId={realmId} />
         <RealmExtraManageSection realmId={realmId} extra={realm?.extra} />
+        <RealmOwnershipSection
+          realm={realm}
+          canDelete={canDeleteRealm}
+          onDeleted={() => navigate({ to: "/realm" })}
+        />
         <div className="flex flex-row justify-end gap-4">
           <Button
             variant="ghost"
@@ -286,6 +309,72 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         submitLabel={m.common_add()}
       />
     </div>
+  );
+}
+
+function RealmOwnershipSection({
+  realm,
+  canDelete,
+  onDeleted,
+}: {
+  realm: RealmDTO;
+  canDelete: boolean;
+  onDeleted: () => void;
+}) {
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const deleteRealm = useDeleteRealmMutation({
+    onSuccess: () => {
+      toast.success("Realm deleted.");
+      onDeleted();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  return (
+    <section className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
+      <div>
+        <h2 className="text-lg font-semibold leading-ui text-text-primary">
+          Ownership
+        </h2>
+        <p className="mt-1 text-sm leading-body text-text-secondary">
+          Owner {realm.user?.name ?? realm.userId ?? "Unknown owner"}
+        </p>
+      </div>
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button
+          type="button"
+          variant="destructive"
+          disabled={!canDelete}
+          onClick={() => setDeleteOpen(true)}
+        >
+          Delete realm
+        </Button>
+      </div>
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this realm?</DialogTitle>
+            <DialogDescription>
+              This permanently removes the realm and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteRealm.isPending}
+              onClick={() => deleteRealm.mutate(realm.unitId)}
+            >
+              Delete realm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </section>
   );
 }
 

@@ -11,7 +11,7 @@
 
 ## 2. Server Realm Community Behavior
 
-- [ ] 2.1 Add or extend the realm domain with rules, lifecycle, pin/announcement, and membership-metadata modules that call the foundation's realm policy for authorization.
+- [x] 2.1 Add or extend the realm domain with rules, lifecycle, pin/announcement, and membership-metadata modules that call the foundation's realm policy for authorization.
 - [x] 2.2 Implement rules CRUD around `Realm.extra.rule`, POST rule Unit/UnitTranslation/source rule Posts, localized rule resolution, acknowledgement identity/version metadata, and posting/join enforcement.
 - [x] 2.3 Implement pin and announcement product wrappers over the existing realm-extra list primitives, invoking foundation policy/audit for privileged changes.
 - [x] 2.4 Expose current-user membership + capability metadata for realm UI via `GET /realms/:unitId/members/me`, sourcing capability hints from the foundation.
@@ -27,7 +27,7 @@
 ## 4. Package App Realm Console
 
 - [x] 4.1 Add realm management routes under `package/app/src/routes/_mainLayout/r/$realmSlug` or the existing realm route convention.
-- [ ] 4.2 Add feature modules for rules, members, moderation queue, queue detail, pins/announcements, tag curation, settings, and ownership flows, driving the foundation's realm governance APIs.
+- [x] 4.2 Add feature modules for rules, members, moderation queue, queue detail, pins/announcements, tag curation, settings, and ownership flows, driving the foundation's realm governance APIs.
 - [x] 4.3 Add `@rezics/api` hooks and query keys for the realm community + foundation realm governance APIs.
 - [x] 4.4 Add UI states for loading, empty, denied, error, and destructive confirmation flows using Rezics design-system primitives.
 - [x] 4.5 Add targeted tests or Storybook stories for moderator, owner, global staff override, member, pending, muted, and banned states.
