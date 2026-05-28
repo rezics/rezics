@@ -1,6 +1,7 @@
 // Re-export all contracts
 
 export * from "./account-registration";
+export * from "./admin-repair-job";
 export * from "./admin-work-merge";
 export * from "./admin-stats";
 export * from "./auth";

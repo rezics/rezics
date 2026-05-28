@@ -1,0 +1,73 @@
+import { t } from "elysia";
+
+export const adminRepairJobScopeSchema = t.Union([
+  t.Literal("search"),
+  t.Literal("history-outbox"),
+  t.Literal("work-domain"),
+  t.Literal("slug"),
+  t.Literal("attribution"),
+  t.Literal("source-site"),
+  t.Literal("counters"),
+]);
+
+export type AdminRepairJobScope = (typeof adminRepairJobScopeSchema)["static"];
+
+export const adminRepairJobStatusSchema = t.Union([
+  t.Literal("pending"),
+  t.Literal("running"),
+  t.Literal("succeeded"),
+  t.Literal("failed"),
+  t.Literal("cancelled"),
+]);
+
+export type AdminRepairJobStatus =
+  (typeof adminRepairJobStatusSchema)["static"];
+
+export const adminRepairJobDryRunRequestSchema = t.Object({
+  scope: adminRepairJobScopeSchema,
+  targetIds: t.Optional(t.Array(t.String())),
+  reason: t.Optional(t.Nullable(t.String())),
+});
+
+export type AdminRepairJobDryRunRequest =
+  (typeof adminRepairJobDryRunRequestSchema)["static"];
+
+export const adminRepairJobStartRequestSchema = t.Object({
+  scope: adminRepairJobScopeSchema,
+  targetIds: t.Optional(t.Array(t.String())),
+  dryRunId: t.Optional(t.Nullable(t.String())),
+  reason: t.String({ minLength: 3 }),
+});
+
+export type AdminRepairJobStartRequest =
+  (typeof adminRepairJobStartRequestSchema)["static"];
+
+export const adminRepairJobDryRunSchema = t.Object({
+  id: t.String(),
+  dryRun: t.Literal(true),
+  scope: adminRepairJobScopeSchema,
+  affectedCount: t.Number(),
+  sampleTargets: t.Array(t.String()),
+  warnings: t.Array(t.String()),
+  generatedAt: t.String(),
+});
+
+export type AdminRepairJobDryRun =
+  (typeof adminRepairJobDryRunSchema)["static"];
+
+export const adminRepairJobSchema = t.Object({
+  id: t.String(),
+  scope: adminRepairJobScopeSchema,
+  status: adminRepairJobStatusSchema,
+  progress: t.Object({
+    completed: t.Number(),
+    total: t.Number(),
+  }),
+  safeSummary: t.String(),
+  auditLogId: t.Optional(t.Nullable(t.String())),
+  dryRunId: t.Optional(t.Nullable(t.String())),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+});
+
+export type AdminRepairJob = (typeof adminRepairJobSchema)["static"];

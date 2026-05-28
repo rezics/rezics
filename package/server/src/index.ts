@@ -10,6 +10,7 @@ import {
 import { Elysia } from "elysia";
 import { Prisma } from "#/prisma/client";
 import { accountOperationsAdminApi } from "./admin-account";
+import { adminRepairJobApi } from "./admin-repair-job";
 import { adminWorkMergeApi } from "./admin-work-merge";
 import { authPublicApi } from "./auth-boundary";
 import { bookApi } from "./book";
@@ -262,6 +263,7 @@ routeApp
   .use(statusApi)
   .use(statsAdminApi)
   .use(accountOperationsAdminApi)
+  .use(adminRepairJobApi)
   .use(adminWorkMergeApi)
   .use(uploadApi)
   .use(dmBoundaryApi)
