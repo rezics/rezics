@@ -15,7 +15,7 @@
 - [ ] 2.2 Implement rules CRUD around `Realm.extra.rule`, POST rule Unit/UnitTranslation/source rule Posts, localized rule resolution, acknowledgement identity/version metadata, and posting/join enforcement.
 - [x] 2.3 Implement pin and announcement product wrappers over the existing realm-extra list primitives, invoking foundation policy/audit for privileged changes.
 - [x] 2.4 Expose current-user membership + capability metadata for realm UI via `GET /realms/:unitId/members/me`, sourcing capability hints from the foundation.
-- [ ] 2.5 Add tests for rule acknowledgement, member-only/preview behavior, pin/announcement product flows, and membership metadata.
+- [x] 2.5 Add tests for rule acknowledgement, member-only/preview behavior, pin/announcement product flows, and membership metadata.
 
 ## 3. Feed, Search, Notifications
 

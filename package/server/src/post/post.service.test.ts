@@ -56,6 +56,13 @@ const realmFindManyMock = mock(
       ruleRequireOnPost: false,
     })),
 );
+const realmFindUniqueMock = mock(
+  async (): Promise<any> => ({
+    isPublic: true,
+    unit: { userId: "owner-1" },
+    members: [],
+  }),
+);
 const realmMemberFindManyMock = mock(async (): Promise<any[]> => []);
 const realmRuleAcknowledgementFindManyMock = mock(
   async (): Promise<any[]> => [],
@@ -98,7 +105,7 @@ const transactionMock = mock(async (fn: any) =>
       findUniqueOrThrow: postFindUniqueOrThrowMock,
       findFirst: postFindFirstMock,
     },
-    realm: { findMany: realmFindManyMock },
+    realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
     realmMember: { findMany: realmMemberFindManyMock },
     realmRuleAcknowledgement: {
       findMany: realmRuleAcknowledgementFindManyMock,
@@ -136,7 +143,7 @@ Object.assign(prismaMock, {
     findFirst: postFindFirstMock,
   },
   unitRealm: { create: realmUnitCreateMock },
-  realm: { findMany: realmFindManyMock },
+  realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
   realmMember: { findMany: realmMemberFindManyMock },
   realmRuleAcknowledgement: {
     findMany: realmRuleAcknowledgementFindManyMock,
@@ -227,6 +234,12 @@ function resetMocks() {
       ruleRequireOnPost: false,
     })),
   );
+  realmFindUniqueMock.mockClear();
+  realmFindUniqueMock.mockResolvedValue({
+    isPublic: true,
+    unit: { userId: "owner-1" },
+    members: [],
+  });
   realmMemberFindManyMock.mockClear();
   realmMemberFindManyMock.mockResolvedValue([]);
   realmRuleAcknowledgementFindManyMock.mockClear();
@@ -624,6 +637,64 @@ describe("PostService.byRealm", () => {
         state: { in: ["HIDDEN", "TOMBSTONED", "ARCHIVED", "REMOVED"] },
       },
     });
+  });
+
+  test("regular callers cannot read private realm feeds without membership", async () => {
+    resetMocks();
+    realmFindUniqueMock.mockResolvedValueOnce({
+      isPublic: false,
+      unit: { userId: "owner-1" },
+      members: [],
+    });
+
+    const result = await service.byRealm("realm-1");
+
+    expect(result).toEqual({ posts: [], total: 0 });
+    expect(postFindManyMock).not.toHaveBeenCalled();
+    expect(postCountMock).not.toHaveBeenCalled();
+  });
+
+  test("active members can read private realm feeds", async () => {
+    resetMocks();
+    realmFindUniqueMock.mockResolvedValueOnce({
+      isPublic: false,
+      unit: { userId: "owner-1" },
+      members: [{ state: "ACTIVE" }],
+    });
+
+    await service.byRealm("realm-1", {}, { viewerUserId: "member-1" });
+
+    expect(postFindManyMock).toHaveBeenCalledTimes(1);
+    expect(realmFindUniqueMock).toHaveBeenCalledWith({
+      where: { unitId: "realm-1" },
+      select: {
+        isPublic: true,
+        unit: { select: { userId: true } },
+        members: {
+          where: { userId: "member-1" },
+          select: { state: true },
+          take: 1,
+        },
+      },
+    });
+  });
+
+  test("pending members only get the private realm preview shell", async () => {
+    resetMocks();
+    realmFindUniqueMock.mockResolvedValueOnce({
+      isPublic: false,
+      unit: { userId: "owner-1" },
+      members: [{ state: "PENDING" }],
+    });
+
+    const result = await service.byRealm(
+      "realm-1",
+      {},
+      { viewerUserId: "member-1" },
+    );
+
+    expect(result).toEqual({ posts: [], total: 0 });
+    expect(postFindManyMock).not.toHaveBeenCalled();
   });
 
   test("admin realm feed can include non-visible lifecycle states", async () => {

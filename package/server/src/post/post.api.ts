@@ -120,6 +120,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       const { posts, total } = query.realmUnitId
         ? await postService.byRealm(query.realmUnitId, query, {
             isAdmin: admin,
+            viewerUserId: identity?.userId,
           })
         : await postService.list(query, {
             isAdmin: admin,
@@ -176,6 +177,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       const { posts, total } = body.realmUnitId
         ? await postService.byRealm(body.realmUnitId, query, {
             isAdmin: admin,
+            viewerUserId: identity?.userId,
           })
         : await postService.list(query, { isAdmin: admin });
       return { posts: posts.map(mapPostToDTO), total };

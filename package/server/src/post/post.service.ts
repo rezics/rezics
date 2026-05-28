@@ -203,13 +203,17 @@ export class PostService {
   async byRealm(
     realmUnitId: string,
     opts: Omit<PostListQuery, "realmUnitId" | "targetUnitId"> = {},
-    options?: { isAdmin?: boolean },
+    options?: { isAdmin?: boolean; viewerUserId?: string | null },
   ): Promise<{ posts: PostWithRelations[]; total: number }> {
     const limitNum = Math.max(1, Math.min(Number(opts.limit ?? 50), 200));
     const skipNum = opts.start ?? 0;
     const sort = opts.sort === "top" || opts.sort === "hot" ? opts.sort : "new";
     const tagIds = this.normalizeTagIds(opts.tagIds);
     const lifecycleState = realmLifecycleStateFilter(opts.realmLifecycleState);
+
+    if (!(await this.canReadRealmFeed(realmUnitId, options))) {
+      return { posts: [], total: 0 };
+    }
 
     const where: Prisma.PostWhereInput = {
       unit: {
@@ -318,6 +322,36 @@ export class PostService {
       posts: await hydrateUnitOwnerUserSlugs(posts as PostWithRelations[]),
       total,
     };
+  }
+
+  private async canReadRealmFeed(
+    realmUnitId: string,
+    options?: { isAdmin?: boolean; viewerUserId?: string | null },
+  ): Promise<boolean> {
+    if (options?.isAdmin) return true;
+
+    const realm = await prisma.realm.findUnique({
+      where: { unitId: realmUnitId },
+      select: {
+        isPublic: true,
+        unit: { select: { userId: true } },
+        members: options?.viewerUserId
+          ? {
+              where: { userId: options.viewerUserId },
+              select: { state: true },
+              take: 1,
+            }
+          : false,
+      },
+    });
+    if (!realm) return false;
+    if (realm.isPublic) return true;
+    if (realm.unit.userId && realm.unit.userId === options?.viewerUserId) {
+      return true;
+    }
+
+    const memberState = realm.members?.[0]?.state;
+    return memberState === "ACTIVE" || memberState === "MUTED";
   }
 
   /** Get a single post by unit ID. */
