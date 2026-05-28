@@ -10,6 +10,7 @@ import {
   accountOperationsQueries,
   useStartAuthUserImpersonationMutation,
 } from "@rezics/api/account-operation/account-operation";
+import { useUnblockAccountEnforcementMutation } from "@rezics/api/governance/governance";
 import type { AdminAuthUserAccountSummary } from "@rezics/contract";
 import {
   admin_auth_actions_title,
@@ -35,7 +36,7 @@ import {
   common_remove,
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
+import { SafeLink, Spinner } from "@rezics/ui";
 import {
   Badge,
   Button,
@@ -144,6 +145,25 @@ export default function AuthUsersPage() {
     auditLogId: null,
     error: null,
   });
+  const [overrideDialog, setOverrideDialog] = React.useState<{
+    open: boolean;
+    user: AuthUser | null;
+    targetUserId: string | null;
+    activeKinds: string[];
+    expiresAt: string | null;
+    reason: string;
+    error: string | null;
+    resultCount: number | null;
+  }>({
+    open: false,
+    user: null,
+    targetUserId: null,
+    activeKinds: [],
+    expiresAt: null,
+    reason: "",
+    error: null,
+    resultCount: null,
+  });
 
   const usersQuery = useQuery(authQueries.adminUsers());
   const banMutation = useAdminBanUserMutation();
@@ -151,6 +171,7 @@ export default function AuthUsersPage() {
   const setRoleMutation = useAdminSetRoleMutation();
   const removeMutation = useAdminRemoveUserMutation();
   const impersonateMutation = useStartAuthUserImpersonationMutation();
+  const unblockEnforcementMutation = useUnblockAccountEnforcementMutation();
 
   const users = (usersQuery.data?.users ?? []) as AuthUser[];
   const total = users.length;
@@ -347,66 +368,95 @@ export default function AuthUsersPage() {
       {
         id: "actions",
         header: m.admin_auth_actions_title(),
-        minWidth: 300,
-        cell: (u) => (
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() =>
-                setImpersonationDialog({
-                  open: true,
-                  user: u,
-                  reason: "",
-                  durationSeconds: 900,
-                  auditLogId: null,
-                  error: null,
-                })
-              }
-            >
-              Impersonate
-            </Button>
-            {u.banned ? (
+        minWidth: 380,
+        cell: (u) => {
+          const summary = accountSummariesByAuthId.get(u.id);
+          const enforcement = summary?.accountEnforcement;
+          const canOverride =
+            Boolean(summary?.mainUser?.unitId) &&
+            Boolean(enforcement && enforcement.activeCount > 0);
+
+          return (
+            <div className="flex flex-wrap gap-1">
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => unbanMutation.mutate({ userId: u.id })}
+                onClick={() =>
+                  setImpersonationDialog({
+                    open: true,
+                    user: u,
+                    reason: "",
+                    durationSeconds: 900,
+                    auditLogId: null,
+                    error: null,
+                  })
+                }
               >
-                {m.admin_auth_users_unban()}
+                Impersonate
               </Button>
-            ) : (
+              {canOverride ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-warning-text"
+                  onClick={() =>
+                    setOverrideDialog({
+                      open: true,
+                      user: u,
+                      targetUserId: summary?.mainUser?.unitId ?? null,
+                      activeKinds: enforcement?.activeKinds ?? [],
+                      expiresAt: enforcement?.expiresAt ?? null,
+                      reason: "",
+                      error: null,
+                      resultCount: null,
+                    })
+                  }
+                >
+                  Override
+                </Button>
+              ) : null}
+              {u.banned ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => unbanMutation.mutate({ userId: u.id })}
+                >
+                  {m.admin_auth_users_unban()}
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-warning-text"
+                  onClick={() => banMutation.mutate({ userId: u.id })}
+                >
+                  {m.admin_auth_users_ban()}
+                </Button>
+              )}
               <Button
                 size="sm"
                 variant="outline"
-                className="text-warning-text"
-                onClick={() => banMutation.mutate({ userId: u.id })}
+                className="text-error-text"
+                onClick={() =>
+                  setConfirmDialog({
+                    open: true,
+                    title: m.admin_auth_users_remove_title(),
+                    message: m.admin_auth_users_remove_description({
+                      name: u.name,
+                      email: u.email,
+                    }),
+                    onConfirm: () => {
+                      removeMutation.mutate({ userId: u.id });
+                      setConfirmDialog((prev) => ({ ...prev, open: false }));
+                    },
+                  })
+                }
               >
-                {m.admin_auth_users_ban()}
+                {m.common_remove()}
               </Button>
-            )}
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-error-text"
-              onClick={() =>
-                setConfirmDialog({
-                  open: true,
-                  title: m.admin_auth_users_remove_title(),
-                  message: m.admin_auth_users_remove_description({
-                    name: u.name,
-                    email: u.email,
-                  }),
-                  onConfirm: () => {
-                    removeMutation.mutate({ userId: u.id });
-                    setConfirmDialog((prev) => ({ ...prev, open: false }));
-                  },
-                })
-              }
-            >
-              {m.common_remove()}
-            </Button>
-          </div>
-        ),
+            </div>
+          );
+        },
       },
     ];
     return cols;
@@ -502,6 +552,115 @@ export default function AuthUsersPage() {
       </Dialog>
 
       <Dialog
+        open={overrideDialog.open}
+        onOpenChange={(open) =>
+          setOverrideDialog((prev) => ({ ...prev, open }))
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Override account enforcement</DialogTitle>
+            <DialogDescription>
+              {overrideDialog.user
+                ? `${overrideDialog.user.email} (${overrideDialog.targetUserId ?? "missing profile"})`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {overrideDialog.error ? (
+              <p className="text-sm text-error-text">{overrideDialog.error}</p>
+            ) : null}
+            {overrideDialog.resultCount !== null ? (
+              <div className="rounded-md bg-success-fill/10 p-3 text-sm text-success-text">
+                Revoked {overrideDialog.resultCount} active enforcement record
+                {overrideDialog.resultCount === 1 ? "" : "s"}.
+              </div>
+            ) : null}
+            <div className="rounded-md bg-surface-subtle p-3 text-sm leading-[1.4]">
+              <p className="font-medium">Impact preview</p>
+              <p className="mt-1 text-text-secondary">
+                Revokes active governance enforcement for the linked main
+                profile. Current active kinds:{" "}
+                {overrideDialog.activeKinds.length
+                  ? overrideDialog.activeKinds.join(", ")
+                  : "none"}
+                .
+              </p>
+              <p className="mt-1 text-text-secondary">
+                Expiration:{" "}
+                {overrideDialog.expiresAt
+                  ? fmtDate(overrideDialog.expiresAt)
+                  : "none"}
+                . Auth-service ban state is not changed by this override.
+              </p>
+              <p className="mt-1 text-text-secondary">
+                The server re-checks account unblock policy and writes a staff
+                audit entry for each revoked enforcement record.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="enforcement-override-reason">Reason</Label>
+              <Textarea
+                id="enforcement-override-reason"
+                value={overrideDialog.reason}
+                onChange={(event) =>
+                  setOverrideDialog((prev) => ({
+                    ...prev,
+                    reason: event.target.value,
+                  }))
+                }
+                placeholder="audit reason"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setOverrideDialog((prev) => ({ ...prev, open: false }))
+              }
+            >
+              {m.common_cancel()}
+            </Button>
+            <Button
+              disabled={
+                !overrideDialog.targetUserId ||
+                overrideDialog.reason.trim().length === 0 ||
+                overrideDialog.resultCount !== null ||
+                unblockEnforcementMutation.isPending
+              }
+              onClick={async () => {
+                if (!overrideDialog.targetUserId) return;
+                try {
+                  const result = await unblockEnforcementMutation.mutateAsync({
+                    targetUserId: overrideDialog.targetUserId,
+                    input: { reason: overrideDialog.reason.trim() },
+                  });
+                  await accountSummaryQuery.refetch();
+                  setOverrideDialog((prev) => ({
+                    ...prev,
+                    resultCount: result.length,
+                    error: null,
+                  }));
+                } catch (error) {
+                  setOverrideDialog((prev) => ({
+                    ...prev,
+                    error:
+                      error instanceof Error
+                        ? error.message
+                        : "Enforcement override failed",
+                  }));
+                }
+              }}
+            >
+              {m.common_confirm()}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
         open={impersonationDialog.open}
         onOpenChange={(open) =>
           setImpersonationDialog((prev) => ({ ...prev, open }))
@@ -525,16 +684,14 @@ export default function AuthUsersPage() {
             {impersonationDialog.auditLogId ? (
               <div className="rounded-md bg-success-fill/10 p-3 text-sm text-success-text">
                 <p>Impersonation session started.</p>
-                <a
+                <SafeLink
                   className="mt-1 inline-flex font-medium underline underline-offset-2"
                   href={`/staff/audit?action=impersonation.start&targetKind=auth-user&targetId=${encodeURIComponent(
                     impersonationDialog.user?.id ?? "",
                   )}`}
-                  target="_blank"
-                  rel="noreferrer"
                 >
                   Audit log: {impersonationDialog.auditLogId}
-                </a>
+                </SafeLink>
               </div>
             ) : null}
             <div className="space-y-2">

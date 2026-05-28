@@ -41,7 +41,7 @@
 
 - [x] 6.1 Add admin governance overview for site-wide cases, escalations, enforcement, policy exceptions, and audit summaries.
 - [x] 6.2 Keep realm day-to-day queue routes in `package/app` and link only escalated/operator-relevant items into admin.
-- [ ] 6.3 Add override actions with policy authorization, reason capture, impact preview, and audit.
+- [x] 6.3 Add override actions with policy authorization, reason capture, impact preview, and audit.
 
 ## 7. Verification
 
