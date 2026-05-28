@@ -20,28 +20,25 @@ import {
   common_created,
   common_edit,
   common_no,
-  common_search,
   common_slug,
   common_type,
   common_unit_id,
   common_unverified,
   common_yes,
 } from "@rezics/i18n/messages";
-import { Spinner } from "@rezics/ui";
 import {
   Button,
-  Card,
-  CardContent,
   Input,
   Label,
-  Separator,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@rezics/ui/shadcn";
-import { Search as SearchIcon } from "lucide-react";
 import React from "react";
-import {
-  type PaginatedColumn,
-  PaginatedTable,
-} from "@/components/table/PaginatedTable";
+import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
+import { type PaginatedColumn } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 
@@ -162,27 +159,20 @@ export default function EntityListPage() {
       title={admin_entity_list_title()}
       description={admin_entity_list_description()}
     >
-      <Card>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-            <div className="flex-1 flex flex-col gap-1">
-              <Label htmlFor="entity-search" className="text-xs">
-                {admin_entity_search_title()}
-              </Label>
-              <Input
-                id="entity-search"
-                placeholder={admin_entity_search_placeholder()}
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setPage(0);
-                    setQuery(q.trim());
-                  }
-                }}
-              />
-            </div>
-            <div className="flex flex-col gap-1 sm:w-40">
+      <SearchablePaginatedTableCard<EntityDTO>
+        searchInputId="entity-search"
+        searchLabel={admin_entity_search_title()}
+        searchPlaceholder={admin_entity_search_placeholder()}
+        errorLabel={admin_entity_failed_load_list()}
+        q={q}
+        onQChange={setQ}
+        onSearch={() => {
+          setPage(0);
+          setQuery(q.trim());
+        }}
+        filters={
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="flex flex-col gap-1">
               <Label htmlFor="entity-kind" className="text-xs">
                 {common_type()}
               </Label>
@@ -200,63 +190,44 @@ export default function EntityListPage() {
               <Label htmlFor="entity-verified" className="text-xs">
                 {admin_entity_verified()}
               </Label>
-              <select
-                id="entity-verified"
+              <Select
                 value={verifiedFilter}
-                onChange={(e) => {
-                  setVerifiedFilter(e.target.value as VerifiedFilter);
+                onValueChange={(value) => {
+                  setVerifiedFilter(value as VerifiedFilter);
                   setPage(0);
                 }}
-                className="h-9 rounded-md border border-border-whisper bg-transparent px-2 text-sm"
               >
-                <option value="all">
-                  {admin_entity_verified_filter_all()}
-                </option>
-                <option value="true">{admin_entity_verified()}</option>
-                <option value="false">{common_unverified()}</option>
-              </select>
+                <SelectTrigger id="entity-verified">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    {admin_entity_verified_filter_all()}
+                  </SelectItem>
+                  <SelectItem value="true">
+                    {admin_entity_verified()}
+                  </SelectItem>
+                  <SelectItem value="false">{common_unverified()}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={common_search()}
-              onClick={() => {
-                setPage(0);
-                setQuery(q.trim());
-              }}
-              className="self-end sm:self-center"
-            >
-              <SearchIcon className="size-4" />
-            </Button>
           </div>
-
-          <Separator className="my-4" />
-
-          {listQuery.isLoading ? (
-            <div className="flex justify-center py-12">
-              <Spinner />
-            </div>
-          ) : listQuery.isError ? (
-            <p className="text-sm text-error-text">
-              {admin_entity_failed_load_list()}
-            </p>
-          ) : (
-            <PaginatedTable<EntityDTO>
-              columns={columns}
-              rows={entities}
-              getRowId={(e) => e.unitId}
-              count={total}
-              page={page}
-              rowsPerPage={limit}
-              onPageChange={(nextPage) => setPage(nextPage)}
-              onRowsPerPageChange={(next) => {
-                setLimit(next);
-                setPage(0);
-              }}
-            />
-          )}
-        </CardContent>
-      </Card>
+        }
+        isLoading={listQuery.isLoading}
+        isError={listQuery.isError}
+        error={listQuery.error}
+        columns={columns}
+        rows={entities}
+        getRowId={(e) => e.unitId}
+        count={total}
+        page={page}
+        rowsPerPage={limit}
+        onPageChange={(nextPage) => setPage(nextPage)}
+        onRowsPerPageChange={(next) => {
+          setLimit(next);
+          setPage(0);
+        }}
+      />
     </Page>
   );
 }
