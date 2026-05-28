@@ -6,6 +6,9 @@
   "license": "MIT",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "scripts": {
+    "test": "bun test src"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
