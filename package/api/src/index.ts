@@ -10,6 +10,7 @@ export * from "./admin-repair-job/admin-repair-job";
 export * from "./admin-work-merge/admin-work-merge";
 export * from "./credit-attribution/credit-attribution";
 export * from "./content-structure/content-structure";
+export * from "./dashboard";
 export * from "./diagnostic/status";
 export * from "./entity-attribution/entity-attribution";
 export * from "./game-system-requirement/game-system-requirement";
