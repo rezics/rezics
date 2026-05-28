@@ -170,4 +170,28 @@ export const jwtServiceAdminApi = new Elysia({ prefix: "/admin/jwt-services" })
         tags: ["Admin", "JWT Service"],
       },
     },
+  )
+  .post(
+    "/:serviceKey/rotate",
+    async ({ params, identity, status }) => {
+      if (identity.permission.role !== "ROOT") {
+        return status(403, "Forbidden: Root role required");
+      }
+      const isRoot = await verifyRootFromDb(identity.userId);
+      if (!isRoot) return status(403, "Forbidden: Root role required");
+
+      return await jwtServiceAdminService.rotate(params.serviceKey);
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ serviceKey: t.String() }),
+      response: {
+        200: jwtServiceDTOSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Rotate a local JWT service signing key",
+        tags: ["Admin", "JWT Service"],
+      },
+    },
   );

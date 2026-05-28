@@ -1,6 +1,7 @@
 import {
   useActivateJwtServiceMutation,
   useDeactivateJwtServiceMutation,
+  useRotateJwtServiceMutation,
   useUpdateJwtServiceMutation,
 } from "@rezics/api/jwt-service/jwt-service.mutations";
 import { jwtServiceQueries } from "@rezics/api/jwt-service/jwt-service.queries";
@@ -42,8 +43,12 @@ export const JwtServicesPage: FC = () => {
   const updateMutation = useUpdateJwtServiceMutation();
   const activateMutation = useActivateJwtServiceMutation();
   const deactivateMutation = useDeactivateJwtServiceMutation();
+  const rotateMutation = useRotateJwtServiceMutation();
 
   const [updating, setUpdating] = useState(false);
+  const [updatingServiceKey, setUpdatingServiceKey] = useState<string | null>(
+    null,
+  );
   const [editingService, setEditingService] = useState<JwtServiceDTO | null>(
     null,
   );
@@ -77,6 +82,7 @@ export const JwtServicesPage: FC = () => {
     setUpdatingError(null);
     try {
       setUpdating(true);
+      setUpdatingServiceKey(serviceKey);
       const updated = await activateMutation.mutateAsync(serviceKey);
       setEditingService(updated);
     } catch (err) {
@@ -85,6 +91,7 @@ export const JwtServicesPage: FC = () => {
       );
     } finally {
       setUpdating(false);
+      setUpdatingServiceKey(null);
     }
   };
 
@@ -92,6 +99,7 @@ export const JwtServicesPage: FC = () => {
     setUpdatingError(null);
     try {
       setUpdating(true);
+      setUpdatingServiceKey(serviceKey);
       const updated = await deactivateMutation.mutateAsync(serviceKey);
       setEditingService(updated);
     } catch (err) {
@@ -100,6 +108,24 @@ export const JwtServicesPage: FC = () => {
       );
     } finally {
       setUpdating(false);
+      setUpdatingServiceKey(null);
+    }
+  };
+
+  const handleRotate = async (serviceKey: string) => {
+    setUpdatingError(null);
+    try {
+      setUpdating(true);
+      setUpdatingServiceKey(serviceKey);
+      const updated = await rotateMutation.mutateAsync(serviceKey);
+      setEditingService((current) =>
+        current?.serviceKey === serviceKey ? updated : current,
+      );
+    } catch (err) {
+      setUpdatingError((err as Error)?.message ?? "Failed to rotate key");
+    } finally {
+      setUpdating(false);
+      setUpdatingServiceKey(null);
     }
   };
 
@@ -126,7 +152,14 @@ export const JwtServicesPage: FC = () => {
       )}
 
       {!isLoading && !error && services.length > 0 && (
-        <JwtServiceTable services={services} onEdit={handleEdit} />
+        <JwtServiceTable
+          services={services}
+          onEdit={handleEdit}
+          onActivate={handleActivate}
+          onDeactivate={handleDeactivate}
+          onRotate={handleRotate}
+          updatingServiceKey={updatingServiceKey}
+        />
       )}
 
       <JwtServiceEditDialog

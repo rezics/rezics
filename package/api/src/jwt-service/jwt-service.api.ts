@@ -8,7 +8,7 @@ import { apiFetch } from "../react-query/http";
 
 export const jwtServiceApi = {
   list: async (): Promise<JwtServiceListResponse> => {
-    return apiFetch<JwtServiceListResponse>("/admin/jwt-services");
+    return apiFetch<JwtServiceListResponse>("/admin/jwt-services/list");
   },
 
   fetch: async (serviceKey: string): Promise<JwtServiceDTO> => {
@@ -44,5 +44,11 @@ export const jwtServiceApi = {
       `/admin/jwt-services/${serviceKey}/deactivate`,
       { method: "POST" },
     );
+  },
+
+  rotate: async (serviceKey: string): Promise<JwtServiceDTO> => {
+    return apiFetch<JwtServiceDTO>(`/admin/jwt-services/${serviceKey}/rotate`, {
+      method: "POST",
+    });
   },
 };

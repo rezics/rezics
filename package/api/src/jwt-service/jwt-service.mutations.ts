@@ -95,9 +95,29 @@ export function useDeactivateJwtServiceMutation(
   });
 }
 
+export function useRotateJwtServiceMutation(
+  options?: Omit<
+    UseMutationOptions<JwtServiceDTO, Error, string>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (serviceKey: string) => jwtServiceApi.rotate(serviceKey),
+    ...options,
+    onSuccess: (data, serviceKey, onMutateResult, context) => {
+      queryClient.setQueryData(jwtServiceKeys.detail(serviceKey), data);
+      queryClient.invalidateQueries({ queryKey: jwtServiceKeys.lists() });
+      options?.onSuccess?.(data, serviceKey, onMutateResult, context);
+    },
+  });
+}
+
 export const jwtServiceMutations = {
   useCreate: useCreateJwtServiceMutation,
   useUpdate: useUpdateJwtServiceMutation,
   useActivate: useActivateJwtServiceMutation,
   useDeactivate: useDeactivateJwtServiceMutation,
+  useRotate: useRotateJwtServiceMutation,
 };

@@ -181,4 +181,32 @@ export const jwtServiceAdminRouter = new Elysia({
         tags: ["Admin", "JWT Service"],
       },
     },
+  )
+  .post(
+    "/:serviceKey/rotate",
+    async ({ request, params, set }) => {
+      await requireOwnerSession(request);
+      try {
+        return await authJwtServiceAdminService.rotate(params.serviceKey);
+      } catch (error) {
+        if (
+          error &&
+          typeof error === "object" &&
+          "code" in error &&
+          (error as { code: string }).code === "P2025"
+        ) {
+          set.status = 404;
+          throw new Error(`JwtService not found: ${params.serviceKey}`);
+        }
+        throw error;
+      }
+    },
+    {
+      params: t.Object({ serviceKey: t.String() }),
+      response: jwtServiceDTOSchema,
+      detail: {
+        summary: "Rotate an auth JWT service signing key",
+        tags: ["Admin", "JWT Service"],
+      },
+    },
   );

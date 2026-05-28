@@ -3,7 +3,9 @@ import type {
   JwtServiceDTO,
   UpdateJwtServiceInput,
 } from "@rezics/contract";
-import { prisma } from "../auth/prisma";
+import { defaultJwtCryptoProvider } from "@rezics/jwt";
+import { type Prisma, prisma } from "#prisma/client";
+import { getAuthJwksGracePeriodSeconds } from "../session/jwt/options";
 
 function mapToDTO(record: {
   id: string;
@@ -94,5 +96,51 @@ export const authJwtServiceAdminService = {
       data: { isActive: false },
     });
     return mapToDTO(record);
+  },
+
+  async rotate(serviceKey: string): Promise<JwtServiceDTO> {
+    const service = await prisma.jwtService.findUnique({
+      where: { serviceKey },
+    });
+    if (!service) {
+      throw new Error(`JwtService not found: ${serviceKey}`);
+    }
+    if (!service.isLocalIssuer) {
+      throw new Error(`JwtService is not a local issuer: ${serviceKey}`);
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(
+      now.getTime() + getAuthJwksGracePeriodSeconds() * 1000,
+    );
+    const keyPair = await defaultJwtCryptoProvider.generateKey();
+    const kid = `jwt-${now.toISOString()}`;
+
+    await prisma.$transaction([
+      prisma.jwks.updateMany({
+        where: {
+          jwtServiceId: service.id,
+          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+        },
+        data: { expiresAt },
+      }),
+      prisma.jwks.create({
+        data: {
+          id: kid,
+          jwtServiceId: service.id,
+          publicJwk: {
+            ...keyPair.publicJwk,
+            kid,
+          } as unknown as Prisma.InputJsonValue,
+          privateJwk: {
+            ...keyPair.privateJwk,
+            kid,
+          } as unknown as Prisma.InputJsonValue,
+          alg: "ES256",
+        },
+      }),
+    ]);
+
+    return mapToDTO(service);
   },
 };

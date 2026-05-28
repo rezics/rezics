@@ -77,4 +77,11 @@ export const authJwtServiceApi = {
       { method: "POST" },
     );
   },
+
+  rotate: async (serviceKey: string): Promise<JwtServiceDTO> => {
+    return authAdminFetch<JwtServiceDTO>(
+      `/admin/jwt-services/${serviceKey}/rotate`,
+      { method: "POST" },
+    );
+  },
 };

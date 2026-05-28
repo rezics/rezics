@@ -2,7 +2,9 @@ import type { JwtServiceDTO } from "@rezics/contract";
 import {
   admin_auth_actions_title,
   admin_auth_email_status,
+  admin_jwt_activate,
   admin_jwt_audience,
+  admin_jwt_deactivate,
   admin_jwt_issuer,
   admin_jwt_local,
   admin_jwt_local_issuer,
@@ -27,13 +29,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
-import { Pencil as EditOutlinedIcon } from "lucide-react";
+import { Pencil as EditOutlinedIcon, Power, RotateCw } from "lucide-react";
 import type { FC } from "react";
 
 const i18nMessages = {
   admin_auth_actions_title,
   admin_auth_email_status,
+  admin_jwt_activate,
   admin_jwt_audience,
+  admin_jwt_deactivate,
   admin_jwt_issuer,
   admin_jwt_local,
   admin_jwt_local_issuer,
@@ -47,9 +51,20 @@ const i18nMessages = {
 type Props = {
   services: JwtServiceDTO[];
   onEdit: (service: JwtServiceDTO) => void;
+  onActivate?: (serviceKey: string) => void | Promise<void>;
+  onDeactivate?: (serviceKey: string) => void | Promise<void>;
+  onRotate?: (serviceKey: string) => void | Promise<void>;
+  updatingServiceKey?: string | null;
 };
 
-export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
+export const JwtServiceTable: FC<Props> = ({
+  services,
+  onEdit,
+  onActivate,
+  onDeactivate,
+  onRotate,
+  updatingServiceKey,
+}) => {
   const m = useMessage(i18nMessages);
   return (
     <TooltipProvider>
@@ -95,23 +110,95 @@ export const JwtServiceTable: FC<Props> = ({ services, onEdit }) => {
                     <Badge variant="secondary">{m.common_inactive()}</Badge>
                   )}
                 </TableCell>
-                <TableCell className="text-right">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={(props) => (
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => onEdit(service)}
-                          aria-label={m.common_edit()}
-                          {...props}
-                        >
-                          <EditOutlinedIcon className="size-4" />
-                        </Button>
-                      )}
-                    />
-                    <TooltipContent>{m.common_edit()}</TooltipContent>
-                  </Tooltip>
+                <TableCell>
+                  <div className="flex justify-end gap-1">
+                    {onRotate && service.isLocalIssuer ? (
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={(props) => (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => onRotate(service.serviceKey)}
+                              aria-label="Rotate"
+                              disabled={
+                                updatingServiceKey === service.serviceKey
+                              }
+                              {...props}
+                            >
+                              <RotateCw className="size-4" />
+                            </Button>
+                          )}
+                        />
+                        <TooltipContent>Rotate signing key</TooltipContent>
+                      </Tooltip>
+                    ) : null}
+                    {service.isActive ? (
+                      onDeactivate ? (
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={(props) => (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="text-warning-text"
+                                onClick={() => onDeactivate(service.serviceKey)}
+                                aria-label="Deactivate"
+                                disabled={
+                                  updatingServiceKey === service.serviceKey
+                                }
+                                {...props}
+                              >
+                                <Power className="size-4" />
+                              </Button>
+                            )}
+                          />
+                          <TooltipContent>
+                            {m.admin_jwt_deactivate()}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null
+                    ) : onActivate ? (
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={(props) => (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-success-text"
+                              onClick={() => onActivate(service.serviceKey)}
+                              aria-label="Activate"
+                              disabled={
+                                updatingServiceKey === service.serviceKey
+                              }
+                              {...props}
+                            >
+                              <Power className="size-4" />
+                            </Button>
+                          )}
+                        />
+                        <TooltipContent>
+                          {m.admin_jwt_activate()}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : null}
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={(props) => (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => onEdit(service)}
+                            aria-label={m.common_edit()}
+                            {...props}
+                          >
+                            <EditOutlinedIcon className="size-4" />
+                          </Button>
+                        )}
+                      />
+                      <TooltipContent>{m.common_edit()}</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

@@ -11,6 +11,7 @@ export {
   useActivateJwtServiceMutation,
   useCreateJwtServiceMutation,
   useDeactivateJwtServiceMutation,
+  useRotateJwtServiceMutation,
   useUpdateJwtServiceMutation,
 } from "./jwt-service.mutations";
 export {
