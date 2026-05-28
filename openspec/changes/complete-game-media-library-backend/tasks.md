@@ -35,13 +35,13 @@
 - [x] 4.4 Update server content search API filters to apply `platformEntityIds` and route age-rating filtering through the existing rating tag filter.
 - [x] 4.5 Add job-runner repair paths for platform/rating backfill drift and GAME/MEDIA search document rebuilds.
 - [x] 4.6 Add search tests covering platform filter, rating tag filter, work grouping, and GAME/MEDIA result metadata.
-- [ ] 4.7 Adopt the exact-vs-work-domain list/search naming from `clarify-release-vs-work-list-scopes` (`*UnitId`/`containsUnitId` exact, `*WorkUnitId`/`containsWorkUnitId` work-domain) in GAME/MEDIA surfaces, and reuse `containsReleaseUnitId`/`relatedWorkUnitId` for Series/franchise lookups.
+- [x] 4.7 Adopt the exact-vs-work-domain list/search naming from `clarify-release-vs-work-list-scopes` (`*UnitId`/`containsUnitId` exact, `*WorkUnitId`/`containsWorkUnitId` work-domain) in GAME/MEDIA surfaces, and reuse `containsReleaseUnitId`/`relatedWorkUnitId` for Series/franchise lookups.
 
 ## 5. Content Structure Integration
 
-- [ ] 5.1 Update GAME/MEDIA content-structure mappers so DLC, expansions, seasons, episodes, volumes, and specials are represented as Units through `contentUnitId`.
-- [ ] 5.2 Remove or demote code paths that treat `episodeCount`, `seasonCount`, or future part-count fields as canonical part identity.
-- [ ] 5.3 Add tests that a game DLC Unit and media episode Unit can be listed through release content structure and targeted through `targetUnitId` interactions.
+- [x] 5.1 Update GAME/MEDIA content-structure mappers so DLC, expansions, seasons, episodes, volumes, and specials are represented as Units through `contentUnitId`.
+- [x] 5.2 Remove or demote code paths that treat `episodeCount`, `seasonCount`, or future part-count fields as canonical part identity.
+- [x] 5.3 Add tests that a game DLC Unit and media episode Unit can be listed through release content structure and targeted through `targetUnitId` interactions.
 
 ## 6. API Client And Frontend Readiness
 

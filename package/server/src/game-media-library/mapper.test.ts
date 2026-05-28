@@ -41,6 +41,25 @@ describe("GAME/MEDIA library mappers", () => {
           { entityId: "platform-windows" },
           { entityId: "platform-steam" },
         ],
+        ownedContentStructure: {
+          ownerUnitId: "game-1",
+          createdAt: now,
+          updatedAt: now,
+          contentNodes: [
+            {
+              id: "node-dlc",
+              ownerUnitId: "game-1",
+              parentId: null,
+              sortKey: "a0",
+              contentUnitId: "dlc-1",
+              title: "Expansion",
+              noContent: false,
+              rating: null,
+              createdAt: now,
+              updatedAt: now,
+            },
+          ],
+        },
       }),
       systemRequirements: [
         {
@@ -59,6 +78,7 @@ describe("GAME/MEDIA library mappers", () => {
       "platform-steam",
     ]);
     expect(dto.game.ageRatingTagUnitIds).toEqual(["tag-esrb-teen"]);
+    expect(dto.contentStructure?.nodes[0]?.contentUnitId).toBe("dlc-1");
     expect(dto.game.systemRequirementSummaries).toEqual([
       {
         platformEntityId: "platform-windows",

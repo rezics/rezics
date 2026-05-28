@@ -53,6 +53,7 @@ export function mapGameLibraryContentToDTO(
 ): GameLibraryContentDTO {
   const membership = releaseMembership(row.unit);
   const workUnitId = membership?.workUnitId ?? null;
+  const contentStructure = row.unit.ownedContentStructure;
 
   return {
     unitId: row.unitId,
@@ -69,6 +70,14 @@ export function mapGameLibraryContentToDTO(
           displayPolicy: membership.displayPolicy as any,
           createdAt: membership.createdAt,
           updatedAt: membership.updatedAt,
+        }
+      : null,
+    contentStructure: contentStructure
+      ? {
+          ownerUnitId: contentStructure.ownerUnitId,
+          nodes: buildContentStructureTree(contentStructure.contentNodes),
+          createdAt: contentStructure.createdAt,
+          updatedAt: contentStructure.updatedAt,
         }
       : null,
     game: {

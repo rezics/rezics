@@ -173,6 +173,7 @@ export const gameLibraryContentDTOSchema = t.Object({
   ),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   workMembership: t.Optional(t.Nullable(unitWorkDTOSchema)),
+  contentStructure: t.Optional(t.Nullable(contentStructureDTOSchema)),
   game: gameLibraryContentMetadataSchema,
 });
 

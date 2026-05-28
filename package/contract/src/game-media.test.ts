@@ -130,6 +130,12 @@ describe("GAME/MEDIA contract schemas", () => {
         unitId: "game-1",
         workUnitId: "work-1",
         metadata: { uswn: "work-1" },
+        contentStructure: {
+          ownerUnitId: "game-1",
+          nodes: [{ title: "Expansion", contentUnitId: "dlc-1" }],
+          createdAt: "2026-05-28T00:00:00.000Z",
+          updatedAt: "2026-05-28T00:00:00.000Z",
+        },
         game: {
           platformEntityIds: ["platform-steam"],
           ageRatingTagUnitIds: ["tag-esrb-teen"],

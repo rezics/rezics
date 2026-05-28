@@ -17,6 +17,11 @@ export const gameLibraryInclude = {
           tag: { select: { id: true, slug: true } },
         },
       },
+      ownedContentStructure: {
+        include: {
+          contentNodes: true,
+        },
+      },
     },
   },
   systemRequirements: {

@@ -4,6 +4,7 @@ import {
   contentStructureDTOSchema,
   contentStructureNodeSchema,
 } from "./content-structure";
+import { postListQuerySchema } from "./post";
 
 describe("contentStructure schemas", () => {
   test("accept generic ownerUnitId and contentUnitId shape", () => {
@@ -31,5 +32,22 @@ describe("contentStructure schemas", () => {
           .properties,
       ),
     ).not.toContain("targetUnitId");
+  });
+
+  test("part interactions target the part Unit outside content structure", () => {
+    expect(
+      Value.Check(contentStructureDTOSchema, {
+        ownerUnitId: "game-1",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        nodes: [{ title: "DLC", contentUnitId: "dlc-1" }],
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(postListQuerySchema, {
+        targetUnitId: "dlc-1",
+        limit: 20,
+      }),
+    ).toBe(true);
   });
 });
