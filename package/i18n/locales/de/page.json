@@ -154,5 +154,11 @@
   "dashboard_empty_continue": "Noch nichts begonnen — fang an zu lesen, um es hier zu sehen.",
   "dashboard_empty_shelves": "Du hast noch keine Regale erstellt.",
   "dashboard_empty_realms": "Du bist noch keinem Realm beigetreten.",
-  "dashboard_chapters_progress": "{{completed}} / {{total}} Kapitel"
+  "dashboard_chapters_progress": "{{completed}} / {{total}} Kapitel",
+  "create_title": "Erstellen",
+  "create_subtitle": "Wähle aus, was du erstellen möchtest.",
+  "create_book": "Buch",
+  "create_shelf": "Regal",
+  "create_realm": "Realm",
+  "create_entity": "Entität"
 }

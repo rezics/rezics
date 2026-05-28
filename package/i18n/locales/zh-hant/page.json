@@ -154,5 +154,11 @@
   "dashboard_empty_continue": "還沒有正在閱讀的內容——開始閱讀後會顯示在這裡。",
   "dashboard_empty_shelves": "你還沒有建立任何書架。",
   "dashboard_empty_realms": "你還沒有加入任何領域。",
-  "dashboard_chapters_progress": "{{completed}} / {{total}} 章"
+  "dashboard_chapters_progress": "{{completed}} / {{total}} 章",
+  "create_title": "建立",
+  "create_subtitle": "選擇你想建立的內容。",
+  "create_book": "書籍",
+  "create_shelf": "書架",
+  "create_realm": "領域",
+  "create_entity": "實體"
 }

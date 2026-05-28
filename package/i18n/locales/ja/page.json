@@ -154,5 +154,11 @@
   "dashboard_empty_continue": "まだ読書中の作品はありません。読み始めるとここに表示されます。",
   "dashboard_empty_shelves": "本棚はまだ作成されていません。",
   "dashboard_empty_realms": "まだレルムに参加していません。",
-  "dashboard_chapters_progress": "{{completed}} / {{total}} 章"
+  "dashboard_chapters_progress": "{{completed}} / {{total}} 章",
+  "create_title": "作成",
+  "create_subtitle": "作成したいものを選択してください。",
+  "create_book": "書籍",
+  "create_shelf": "本棚",
+  "create_realm": "レルム",
+  "create_entity": "エンティティ"
 }

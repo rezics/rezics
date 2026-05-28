@@ -154,5 +154,11 @@
   "dashboard_empty_continue": "아직 진행 중인 작품이 없습니다. 읽기 시작하면 여기에 표시됩니다.",
   "dashboard_empty_shelves": "아직 만든 서재가 없습니다.",
   "dashboard_empty_realms": "아직 참여한 렐름이 없습니다.",
-  "dashboard_chapters_progress": "{{completed}} / {{total}} 챕터"
+  "dashboard_chapters_progress": "{{completed}} / {{total}} 챕터",
+  "create_title": "만들기",
+  "create_subtitle": "만들고 싶은 항목을 선택하세요.",
+  "create_book": "도서",
+  "create_shelf": "서재",
+  "create_realm": "렐름",
+  "create_entity": "엔티티"
 }

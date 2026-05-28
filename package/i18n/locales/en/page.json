@@ -154,5 +154,11 @@
   "dashboard_empty_continue": "Nothing in progress yet — start reading to see it here.",
   "dashboard_empty_shelves": "You haven't created any shelves yet.",
   "dashboard_empty_realms": "You haven't joined any realms yet.",
-  "dashboard_chapters_progress": "{{completed}} / {{total}} chapters"
+  "dashboard_chapters_progress": "{{completed}} / {{total}} chapters",
+  "create_title": "Create",
+  "create_subtitle": "Choose what you'd like to create.",
+  "create_book": "Book",
+  "create_shelf": "Shelf",
+  "create_realm": "Realm",
+  "create_entity": "Entity"
 }
