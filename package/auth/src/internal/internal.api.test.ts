@@ -22,6 +22,18 @@ const userUpdate = mock(async () => ({ id: "auth-user-1", name: "reader" }));
 const userDelete = mock(async () => ({ id: "auth-user-1" }));
 const userDeleteMany = mock(async () => ({ count: 1 }));
 const deleteMany = mock(async () => ({ count: 1 }));
+const sessionFindMany = mock(async () => [
+  {
+    id: "session-1",
+    userId: "auth-user-1",
+    expiresAt: new Date("2026-06-28T00:00:00.000Z"),
+    ipAddress: "203.0.113.10",
+    userAgent: "Mozilla/5.0",
+    impersonatedBy: null,
+    createdAt: new Date("2026-05-28T00:00:00.000Z"),
+    updatedAt: new Date("2026-05-28T00:00:00.000Z"),
+  },
+]);
 const transaction = mock(async (operations: Promise<unknown>[]) =>
   Promise.all(operations),
 );
@@ -35,7 +47,7 @@ mock.module("../auth/prisma", () => ({
       delete: userDelete,
       deleteMany: userDeleteMany,
     },
-    session: { deleteMany },
+    session: { deleteMany, findMany: sessionFindMany },
     account: { deleteMany },
     verification: { deleteMany },
     oAuthAccessToken: { deleteMany },
@@ -67,6 +79,7 @@ describe("auth internal registration lifecycle", () => {
     userUpdate.mockClear();
     userDeleteMany.mockClear();
     deleteMany.mockClear();
+    sessionFindMany.mockClear();
     transaction.mockClear();
   });
 
@@ -267,6 +280,66 @@ describe("auth internal registration lifecycle", () => {
     });
     expect(deleteMany).toHaveBeenCalledWith({
       where: { userId: "auth-user-1" },
+    });
+  });
+
+  test("lists safe session metadata for a main-requested auth user", async () => {
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/users/list-sessions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({ authUserId: "auth-user-1" }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      sessions: [
+        {
+          id: "session-1",
+          authUserId: "auth-user-1",
+          createdAt: "2026-05-28T00:00:00.000Z",
+          updatedAt: "2026-05-28T00:00:00.000Z",
+          expiresAt: "2026-06-28T00:00:00.000Z",
+          ipAddress: "203.0.113.10",
+          userAgent: "Mozilla/5.0",
+          impersonatedBy: null,
+        },
+      ],
+    });
+  });
+
+  test("revokes one session for a main-requested auth user", async () => {
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/users/revoke-session", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({
+          authUserId: "auth-user-1",
+          sessionId: "session-1",
+          reason: "operator review",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      revokedSessions: 1,
+    });
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { id: "session-1", userId: "auth-user-1" },
     });
   });
 });

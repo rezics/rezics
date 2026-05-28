@@ -3,4 +3,6 @@ export const accountOperationsKeys = {
   authUsers: () => [...accountOperationsKeys.all(), "auth-users"] as const,
   authUserSummary: (authUserIds: string[]) =>
     [...accountOperationsKeys.authUsers(), "summary", authUserIds] as const,
+  authUserSessions: (authUserId: string) =>
+    [...accountOperationsKeys.authUsers(), "sessions", authUserId] as const,
 } as const;

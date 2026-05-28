@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
-import { adminAuthUserAccountSummaryResponseSchema } from "./admin";
+import {
+  adminAuthUserAccountSummaryResponseSchema,
+  adminAuthUserSessionsResponseSchema,
+} from "./admin";
 
 describe("auth admin contracts", () => {
   test("accepts main-server account summary enrichment", () => {
@@ -39,6 +42,25 @@ describe("auth admin contracts", () => {
                   "Materialize or reconcile the main user profile.",
               },
             ],
+          },
+        ],
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts safe auth session metadata without raw tokens", () => {
+    expect(
+      Value.Check(adminAuthUserSessionsResponseSchema, {
+        sessions: [
+          {
+            id: "session-1",
+            authUserId: "auth-user-1",
+            createdAt: "2026-05-28T00:00:00.000Z",
+            updatedAt: "2026-05-28T00:00:00.000Z",
+            expiresAt: "2026-06-28T00:00:00.000Z",
+            ipAddress: "203.0.113.10",
+            userAgent: "Mozilla/5.0",
+            impersonatedBy: null,
           },
         ],
       }),

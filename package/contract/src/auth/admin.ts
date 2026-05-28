@@ -80,3 +80,50 @@ export const adminAuthUserAccountSummaryResponseSchema = t.Object({
 });
 export type AdminAuthUserAccountSummaryResponse =
   (typeof adminAuthUserAccountSummaryResponseSchema)["static"];
+
+export const adminAuthSessionSchema = t.Object({
+  id: t.String(),
+  authUserId: t.String(),
+  createdAt: t.String(),
+  updatedAt: t.String(),
+  expiresAt: t.String(),
+  ipAddress: t.Optional(t.Nullable(t.String())),
+  userAgent: t.Optional(t.Nullable(t.String())),
+  impersonatedBy: t.Optional(t.Nullable(t.String())),
+});
+export type AdminAuthSession = (typeof adminAuthSessionSchema)["static"];
+
+export const adminAuthUserSessionsRequestSchema = t.Object({
+  authUserId: t.String({ minLength: 1 }),
+});
+export type AdminAuthUserSessionsRequest =
+  (typeof adminAuthUserSessionsRequestSchema)["static"];
+
+export const adminAuthUserSessionsResponseSchema = t.Object({
+  sessions: t.Array(adminAuthSessionSchema),
+});
+export type AdminAuthUserSessionsResponse =
+  (typeof adminAuthUserSessionsResponseSchema)["static"];
+
+export const adminRevokeAuthSessionRequestSchema = t.Object({
+  authUserId: t.String({ minLength: 1 }),
+  sessionId: t.String({ minLength: 1 }),
+  reason: t.String({ minLength: 1 }),
+});
+export type AdminRevokeAuthSessionRequest =
+  (typeof adminRevokeAuthSessionRequestSchema)["static"];
+
+export const adminRevokeAuthUserSessionsRequestSchema = t.Object({
+  authUserId: t.String({ minLength: 1 }),
+  reason: t.String({ minLength: 1 }),
+});
+export type AdminRevokeAuthUserSessionsRequest =
+  (typeof adminRevokeAuthUserSessionsRequestSchema)["static"];
+
+export const adminAuthSessionMutationResponseSchema = t.Object({
+  success: t.Boolean(),
+  revokedSessions: t.Number(),
+  auditLogId: t.Optional(t.String()),
+});
+export type AdminAuthSessionMutationResponse =
+  (typeof adminAuthSessionMutationResponseSchema)["static"];

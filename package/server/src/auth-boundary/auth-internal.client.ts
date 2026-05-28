@@ -1,4 +1,7 @@
-import type { VerifiedRegistrationFacts } from "@rezics/contract";
+import type {
+  AdminAuthSession,
+  VerifiedRegistrationFacts,
+} from "@rezics/contract";
 import { env } from "@/env";
 
 function getInternalAuthBaseUrl(): string {
@@ -52,6 +55,67 @@ export async function revokeAuthSessionsForAuthUser(input: {
 }): Promise<{ ok: boolean; revokedSessions: number | null }> {
   const url = new URL(
     "/internal/users/revoke-sessions",
+    getInternalAuthBaseUrl(),
+  );
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) return { ok: false, revokedSessions: null };
+
+  const body = (await response.json()) as {
+    success?: boolean;
+    revokedSessions?: number;
+  };
+
+  return {
+    ok: body.success === true,
+    revokedSessions:
+      typeof body.revokedSessions === "number" ? body.revokedSessions : null,
+  };
+}
+
+export async function listAuthSessionsForAuthUser(input: {
+  authUserId: string;
+}): Promise<{ ok: boolean; sessions: AdminAuthSession[] }> {
+  const url = new URL(
+    "/internal/users/list-sessions",
+    getInternalAuthBaseUrl(),
+  );
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) return { ok: false, sessions: [] };
+
+  const body = (await response.json()) as {
+    success?: boolean;
+    sessions?: AdminAuthSession[];
+  };
+
+  return {
+    ok: body.success === true,
+    sessions: Array.isArray(body.sessions) ? body.sessions : [],
+  };
+}
+
+export async function revokeAuthSessionForAuthUser(input: {
+  authUserId: string;
+  sessionId: string;
+  reason: string;
+}): Promise<{ ok: boolean; revokedSessions: number | null }> {
+  const url = new URL(
+    "/internal/users/revoke-session",
     getInternalAuthBaseUrl(),
   );
   const response = await fetch(url, {

@@ -157,6 +157,96 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
     },
   )
   .post(
+    "/users/list-sessions",
+    async ({ body, set }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: body.authUserId },
+        select: { id: true },
+      });
+
+      if (!user) {
+        set.status = 404;
+        return {
+          success: false,
+          error: {
+            code: "AUTH_USER_NOT_FOUND",
+            message: "Auth user was not found",
+          },
+        };
+      }
+
+      const sessions = await prisma.session.findMany({
+        where: { userId: user.id, expiresAt: { gt: new Date() } },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          userId: true,
+          expiresAt: true,
+          ipAddress: true,
+          userAgent: true,
+          impersonatedBy: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return {
+        success: true,
+        sessions: sessions.map((session) => ({
+          id: session.id,
+          authUserId: session.userId,
+          createdAt: session.createdAt.toISOString(),
+          updatedAt: session.updatedAt.toISOString(),
+          expiresAt: session.expiresAt.toISOString(),
+          ipAddress: session.ipAddress,
+          userAgent: session.userAgent,
+          impersonatedBy: session.impersonatedBy,
+        })),
+      };
+    },
+    {
+      body: t.Object({
+        authUserId: t.String(),
+      }),
+    },
+  )
+  .post(
+    "/users/revoke-session",
+    async ({ body, set }) => {
+      const user = await prisma.user.findUnique({
+        where: { id: body.authUserId },
+        select: { id: true },
+      });
+
+      if (!user) {
+        set.status = 404;
+        return {
+          success: false,
+          error: {
+            code: "AUTH_USER_NOT_FOUND",
+            message: "Auth user was not found",
+          },
+        };
+      }
+
+      const deleted = await prisma.session.deleteMany({
+        where: { id: body.sessionId, userId: user.id },
+      });
+
+      return {
+        success: true,
+        revokedSessions: deleted.count,
+      };
+    },
+    {
+      body: t.Object({
+        authUserId: t.String(),
+        sessionId: t.String(),
+        reason: t.Optional(t.String()),
+      }),
+    },
+  )
+  .post(
     "/users/revoke-sessions",
     async ({ body, set }) => {
       const user = await prisma.user.findUnique({
