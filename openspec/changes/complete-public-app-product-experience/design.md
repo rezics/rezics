@@ -70,6 +70,8 @@ The signed-in dashboard aggregates:
 
 This should be a composed API surface where server aggregation is useful, not a client-side scatter of unrelated requests.
 
+The continue-reading section, the shelf cards' progress hint, the profile reading tab, and the book detail progress chip all consume the same fact-source pair: `UserUnitProgress` (book-level status, `lastReadNodeId`, `lastReadAnchor`) and `UserContentNodeProgress` (per-node completion, manually toggled at `/book/:bookId/node/:nodeId`). Server aggregators SHALL join these once and expose denormalized counters (`chaptersCompleted/chaptersTotal`) plus a resolved chapter title for `lastReadNodeId`; the app SHALL NOT recompute either by fetching TOCs and node-completion lists per card.
+
 ### Creation Workflows
 
 Creation flows use existing editor and Unit infrastructure. They should be guided and recoverable:
@@ -130,6 +132,19 @@ copies. See `implement_goal.md` (Phase 6). Contracts to pin:
   on the server reusing existing domain services; the client must **not** scatter
   and re-aggregate. App folder is `package/app/src/dashboard/` following the
   feature-standard layout, mounted at `routes/_mainLayout/u/me/dashboard.tsx`.
+  The `continue-reading` section item DTO SHALL carry: `bookUnitId`, `bookTitle`,
+  `bookCoverUrl?`, `lastReadNodeId` (nullable), `lastReadNodeTitle` (server-resolved
+  via TOC lookup, nullable when `lastReadNodeId` is null or the node has been
+  hard-deleted), `lastReadAnchorText?` (the `lastReadAnchor.text` value when
+  present, truncated to <=200 chars), `chaptersCompleted`, `chaptersTotal`
+  (both server-aggregated; `chaptersTotal` counts non-deleted
+  `ContentStructureNode` rows whose `contentUnitId` is non-null, i.e. nodes the
+  user can mark as read), and `resumeRoute` (one of
+  `{ kind: "node", bookId, nodeId }` when `lastReadNodeId` is non-null and the
+  referenced node is non-deleted, `{ kind: "chapter", bookId, chapterId }` as
+  fallback when the book Unit is chapter-shaped with no TOC, or `{ kind: "book", bookId }`
+  when neither applies). The client SHALL navigate using `resumeRoute` without
+  re-deriving the URL.
 - **Direct messaging contract** — already lives in `package/contract/src/notify/dm.ts`
   with server in `package/notify/src/dm/` (notify owns realtime). This change
   extends it with read-receipts, typing-indicator, and block/unblock-peer fields,
@@ -148,9 +163,15 @@ copies. See `implement_goal.md` (Phase 6). Contracts to pin:
   creation entries.
 - **Cache-invalidation key map** — `package/api/src/react-query/cache-coherence.ts`
   exists as a framework; this change adds a central map declaring which
-  namespaces each mutation domain (collect/follow/reaction/progress/draft/dm/
-  realm-membership/report) must invalidate across detail + dashboard + profile +
-  search + realm-feed.
+  namespaces each mutation domain (collect/follow/reaction/progress/
+  node-completion/draft/dm/realm-membership/report) must invalidate across
+  detail + dashboard + profile + search + realm-feed. The `node-completion`
+  domain (toggle from `POST /me/units/:unitId/node-completion`) SHALL invalidate
+  the dashboard continue-reading + library sections, the profile reading tab,
+  the book detail progress hint, and the per-book node-completion list
+  consumed by the TOC sidebar checkmarks. The `progress` domain SHALL invalidate
+  the same surfaces minus the per-book node-completion list (since
+  `UserUnitProgress` writes do not affect per-node rows).
 - **Engagement action closure** — add `ReportAction` and `DMAction` to
   `package/app/src/engagement/components/`. `ReportAction` **must not** reuse
   `package/app/src/feedback/` (that is product feedback, not moderation report);
@@ -158,8 +179,18 @@ copies. See `implement_goal.md` (Phase 6). Contracts to pin:
   to decide visibility/disabled state.
 - **Notification deep-link routing** — `NotificationCard` routes per `kindKey`
   (reply → thread + anchor, follow → profile, moderation outcome →
-  authorization-appropriate detail). Contract: extend
+  authorization-appropriate detail, TOC event → node route). Contract: extend
   `package/contract/src/notification/` items with `target: { route, params, anchor? }`.
+  When the originating event carries a `nodeId` (chapter-scoped TOC operations,
+  per-node completion reminders, restore notifications), the server SHALL emit
+  `target.route = "/book/:bookId/node/:nodeId"` with `params: { bookId, nodeId }`
+  so the link preserves multi-link TOC disambiguation. When the originating
+  event only has a chapter Unit id (chapter-scoped post replies, reactions,
+  moderation on the chapter Unit), the server SHALL emit
+  `target.route = "/book/:bookId/read/:chapterId"` when the book Unit context is
+  known, or `target.route = "/chapter/:contentUnitId"` when no book Unit context
+  applies. The selection rule mirrors the link-selection policy in
+  `app-product-navigation`.
 - **Cleanup** — remove `test`/`test02`/`test03`/`test-links` route files from
   `routes/_mainLayout/` and any references in `core/components/create-menu/` and
   the sidebar/navigation config.

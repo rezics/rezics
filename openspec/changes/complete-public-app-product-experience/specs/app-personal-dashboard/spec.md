@@ -6,9 +6,11 @@ The app SHALL provide a signed-in dashboard showing continue reading, shelves, j
 
 #### Scenario: User resumes reading
 
-- **GIVEN** a user has reading progress on a book release
+- **GIVEN** a user has a `UserUnitProgress` row for a book release with a non-null `lastReadNodeId`
 - **WHEN** they open their dashboard
-- **THEN** the continue reading section SHALL show the book and last position
+- **THEN** the continue reading section SHALL show the book, the chapter title resolved from the TOC for `lastReadNodeId`, and (when present) a short preview of `lastReadAnchor.text`
+- **AND** the resume link SHALL navigate to `/book/:bookId/node/:nodeId` using `lastReadNodeId` so multi-link TOC entries remain disambiguated
+- **AND** when the row has no `lastReadNodeId` (legacy or first-time entry without a node), the resume link MAY fall back to `/book/:bookId/read/:chapterId` or the book detail page
 
 ### Requirement: Dashboard uses typed aggregate data
 

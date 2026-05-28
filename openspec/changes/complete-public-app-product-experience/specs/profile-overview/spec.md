@@ -28,3 +28,21 @@ Profile SHALL provide an activity timeline aggregating the user's public reactio
 - **WHEN** a user's past content has been removed or hidden by moderation
 - **THEN** the timeline SHALL omit those entries
 - **AND** SHALL NOT leak the deletion as a gap or count discrepancy
+
+### Requirement: Profile reading tab reflects per-node completion fact source
+
+The profile reading tab SHALL render the target user's reading state from server-aggregated DTOs that join `UserUnitProgress` (status, `lastReadNodeId`, `lastReadAnchor`) with `UserContentNodeProgress` (per-book `chaptersCompleted` aggregation) and the per-book non-deleted node count (`chaptersTotal`). The tab SHALL NOT scatter per-book client roundtrips to fetch TOC or raw node-completion rows. Privacy gating SHALL apply at the DTO layer; entries about books or chapters hidden by privacy or moderation SHALL be omitted server-side rather than filtered client-side.
+
+#### Scenario: Reading tab shows in-progress books with chapter counters
+
+- **GIVEN** the target user has `UserUnitProgress` rows in `ACTIVE` status for several books, each with non-zero `UserContentNodeProgress` rows
+- **WHEN** a viewer with permission opens the target user's reading tab
+- **THEN** the tab SHALL list each active book with its `chaptersCompleted/chaptersTotal` counter and the `lastReadNodeId`-resolved chapter title
+- **AND** activating an entry SHALL navigate to `/book/:bookId/node/:nodeId` using the target user's `lastReadNodeId` (read-only context: viewing where they left off, not writing the viewer's own progress)
+
+#### Scenario: Privacy-hidden books are omitted server-side
+
+- **GIVEN** the target user has marked some shelf entries private
+- **WHEN** a non-privileged viewer opens the target user's reading tab
+- **THEN** the server-aggregated DTO SHALL omit the private entries entirely
+- **AND** the visible chapter-completion counters SHALL NOT include the hidden entries' contributions

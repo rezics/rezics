@@ -33,3 +33,24 @@ When policy requires review, rule acknowledgement, or account remediation, creat
 - **WHEN** a silenced user attempts to publish a post
 - **THEN** the UI SHALL show a safe denial state returned by the server
 - **AND** no optimistic publish success SHALL be shown
+
+### Requirement: Empty-node placeholder is a recognized chapter creation entry
+
+The "Create chapter" CTA rendered by the empty-node placeholder at `/book/:bookId/node/:nodeId` (specified by `type-extension-book`) SHALL be a recognized chapter creation entry alongside the unified `/create` route and any in-editor add-chapter affordance. A unified creation entry list (sidebar create menu, `/create` index, drafts surface) SHALL NOT remove or suppress this inline CTA, because it is the only entry that creates a chapter at a specific TOC position without forcing the author to navigate through a TOC picker.
+
+Invoking the CTA SHALL materialize the chapter Unit via the existing materialization endpoint by `nodeId` (no path serialization) and SHALL reuse the editor primitives required by the "Creation uses shared contracts and editor infrastructure" requirement above.
+
+#### Scenario: Author creates a chapter from the empty-node placeholder
+
+- **GIVEN** an editor-permitted user opens `/book/:bookId/node/:nodeId` for a node whose `contentUnitId` is null and `isDeleted` is false
+- **WHEN** the user activates the "Create chapter" CTA
+- **THEN** the system SHALL materialize the chapter Unit and set `node.contentUnitId`
+- **AND** the user SHALL land in a chapter editor surface for the newly materialized Unit
+- **AND** the unified creation menu / `/create` route SHALL still list the empty-node CTA as a valid chapter creation entry in any documentation or contributor-facing inventory
+
+#### Scenario: Reader without edit permission sees no Create chapter affordance
+
+- **GIVEN** a reader without edit permission on the book
+- **WHEN** they open `/book/:bookId/node/:nodeId` for an empty node
+- **THEN** the placeholder SHALL describe the empty state without a Create chapter CTA
+- **AND** no materialization request SHALL be triggered

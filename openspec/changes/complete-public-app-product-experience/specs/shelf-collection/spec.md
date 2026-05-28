@@ -2,12 +2,19 @@
 
 ### Requirement: Shelf collection supports complete library workflows
 
-Shelf collection behavior SHALL support add, remove, reorder, status/progress context, work/release-aware display, and dashboard/profile integration.
+Shelf collection behavior SHALL support add, remove, reorder, status/progress context, work/release-aware display, and dashboard/profile integration. For book items, the per-card progress hint SHALL surface the user's `UserUnitProgress.status`, the `chaptersCompleted/chaptersTotal` count derived from `UserContentNodeProgress`, and the `lastReadNodeId`-resolved chapter title when present. These values SHALL come from server-aggregated DTOs (e.g. `DashboardSummary`, shelf list responses) so cards do not need to fetch per-book TOC and node-completion rows separately.
 
 #### Scenario: User reorders shelf item
 
 - **WHEN** a user reorders items on their shelf
 - **THEN** the order SHALL persist and remain stable after reload
+
+#### Scenario: Bookshelf hover preview shows reading progress
+
+- **GIVEN** a book card in `bookshelf` view on a pointer device
+- **WHEN** the viewer hovers the card
+- **THEN** the side preview panel SHALL display the `chaptersCompleted/chaptersTotal` count and the last-read chapter title for the viewer when progress data exists
+- **AND** when the viewer has no progress for that book the panel SHALL omit the progress line rather than render a zero/empty placeholder
 
 ## ADDED Requirements
 

@@ -2,12 +2,24 @@
 
 ### Requirement: Production routes define complete UI states
 
-Each production route SHALL define loading, empty, error, denied, not-found, unauthenticated, and success states appropriate to its data and permissions.
+Each production route SHALL define loading, empty, error, denied, not-found, unauthenticated, and success states appropriate to its data and permissions. Reading routes (`/book/:bookId/node/:nodeId`, `/book/:bookId/read/:chapterId`) SHALL additionally define **deleted-node placeholder** (rendered when `node.isDeleted = true` or the referenced chapter Unit `status = DELETED`) and **empty-node placeholder** (rendered when the node exists, is not deleted, and has `contentUnitId = null`) states. Both placeholders SHALL meet the same token, a11y, focus, and i18n requirements as other production states; neither SHALL be implemented as a generic error or not-found view.
 
 #### Scenario: Search has no results
 
 - **WHEN** search returns no results
 - **THEN** the page SHALL render a helpful empty state with next actions instead of a blank area
+
+#### Scenario: Deleted-node placeholder meets quality bar
+
+- **WHEN** a user opens `/book/:bookId/node/:nodeId` for a soft-deleted node
+- **THEN** the page SHALL render a deleted-node placeholder that names the node, explains the deletion state, and (for users with edit permission) exposes a restore CTA
+- **AND** the placeholder SHALL use Rezics tokens, app density, accessible status text, Traditional Chinese copy, and SHALL NOT communicate state by color alone
+
+#### Scenario: Empty-node placeholder meets quality bar
+
+- **WHEN** a user opens `/book/:bookId/node/:nodeId` for a non-deleted node whose `contentUnitId` is null
+- **THEN** the page SHALL render an empty-node placeholder that names the node, explains that no chapter content exists yet, and (for users with edit permission) exposes a "Create chapter" CTA
+- **AND** the placeholder SHALL use Rezics tokens, app density, accessible status text, Traditional Chinese copy, and SHALL NOT communicate state by color alone
 
 ### Requirement: Public app UI follows Rezics design rules
 

@@ -8,8 +8,8 @@
 
 ## 2. Dashboard
 
-- [ ] 2.1 Add `package/contract/src/dashboard.ts` with `DashboardSummary` (sections: continue-reading, shelves, realms, notifications, dms, drafts, activity, safety) and per-section `{ ok } | { error: { code, retryable } }` wrapper.
-- [ ] 2.2 Add `package/server/src/dashboard/` (api/service/types) that fans out to existing domain services and tolerates per-section failure without failing the whole response.
+- [ ] 2.1 Add `package/contract/src/dashboard.ts` with `DashboardSummary` (sections: continue-reading, shelves, realms, notifications, dms, drafts, activity, safety) and per-section `{ ok } | { error: { code, retryable } }` wrapper. The continue-reading item SHALL include `bookUnitId`, `bookTitle`, `bookCoverUrl?`, `lastReadNodeId`, `lastReadNodeTitle` (server-resolved from TOC), `lastReadAnchorText?`, `chaptersCompleted`, `chaptersTotal`, and a discriminated `resumeRoute` (`{ kind: "node" | "chapter" | "book", ... }`) so the client navigates without re-deriving the URL.
+- [ ] 2.2 Add `package/server/src/dashboard/` (api/service/types) that fans out to existing domain services and tolerates per-section failure without failing the whole response. The continue-reading aggregator SHALL join `UserUnitProgress` with `ContentStructureNode` (for `lastReadNodeTitle`) and aggregate `UserContentNodeProgress` per book (for `chaptersCompleted`) plus a count of non-deleted nodes (for `chaptersTotal`) in a single fan-out, not per-card client roundtrips.
 - [ ] 2.3 Add `package/api/src/dashboard/` typed hooks + query keys; register invalidation participation in cache-coherence map.
 - [ ] 2.4 Add `package/app/src/dashboard/` feature (page, sections per `DashboardSummary` slot, models, hooks, components) following `package/app/docs/feature standard.md`.
 - [ ] 2.5 Mount `routes/_mainLayout/u/me/dashboard.tsx`; link from `home/sections/LibraryCardsSection` and the new personal nav.
@@ -17,9 +17,9 @@
 
 ## 3. Cache-Coherence Map
 
-- [ ] 3.1 In `package/api/src/react-query/cache-coherence.ts`, declare a typed map keyed by mutation domain (`collect`, `follow`, `reaction`, `progress`, `draft`, `dm`, `realm-membership`, `report`) → set of query-key namespaces to invalidate (detail / dashboard / profile / search / realm-feed).
-- [ ] 3.2 Refactor `package/api/src/{reaction,subscription,shelf,progress,realm}/*.mutations.ts` to route invalidation through the map.
-- [ ] 3.3 Add a test asserting each declared mutation domain has at least one corresponding `useQuery` namespace registered.
+- [ ] 3.1 In `package/api/src/react-query/cache-coherence.ts`, declare a typed map keyed by mutation domain (`collect`, `follow`, `reaction`, `progress`, `node-completion`, `draft`, `dm`, `realm-membership`, `report`) → set of query-key namespaces to invalidate (detail / dashboard / profile / search / realm-feed / book-node-completion-list).
+- [ ] 3.2 Refactor `package/api/src/{reaction,subscription,shelf,progress,realm}/*.mutations.ts` to route invalidation through the map; ensure the `useToggleNodeCompletion` hook routes through the `node-completion` domain entry and invalidates the per-book node-completion list namespace used by the TOC sidebar.
+- [ ] 3.3 Add a test asserting each declared mutation domain has at least one corresponding `useQuery` namespace registered, and asserting `node-completion` invalidates both the dashboard continue-reading namespace and the per-book node-completion list namespace.
 
 ## 4. Discovery, Search, Detail
 
@@ -48,12 +48,13 @@
 - [ ] 6.4 Build a shared policy-aware form helper that reads `PolicyDecision` codes (`MISSING_CAPABILITY`/`ENFORCEMENT_ACTIVE`/`BLOCKED_ACCOUNT`/`RATE_LIMITED`) from mutation responses and renders inline denial states instead of toast errors.
 - [ ] 6.5 Apply the helper to review/post/remark/shelf/realm creation forms; ensure forms use `@rezics/contract`, `@rezics/api`, UnitTranslation language controls, and editor primitives (no app-local DTO copies).
 - [ ] 6.6 Add tests for draft listing/recover, validation failure, policy denial (silenced/banned), successful publish, and work matching.
+- [ ] 6.7 Document the empty-node placeholder "Create chapter" CTA (`/book/:bookId/node/:nodeId`) as a recognized chapter creation entry in the unified creation menu / contributor inventory; ensure `routes/_mainLayout/create/index.tsx` does not duplicate or hide it and that the materialization-by-nodeId code path (`useEnsureChapterUnit` accepting `nodeId`) is reused without forking a separate flow.
 
 ## 7. Engagement, Notifications, DM, Report
 
 - [ ] 7.1 Add `engagement/components/ReportAction.tsx` backed by governance/moderation report endpoints; **do not** reuse `feedback/FeedbackDialog`. Story + tests for unauthenticated, allowed, rate-limited, and submitted states.
 - [ ] 7.2 Add `engagement/components/DMAction.tsx` that consults policy to disable/hide when DM is not allowed; integrate from profile and notifications.
-- [ ] 7.3 Extend `package/contract/src/notification/` items with `target: { route, params, anchor? }` so notification cards can deep-link without re-deriving routes client-side.
+- [ ] 7.3 Extend `package/contract/src/notification/` items with `target: { route, params, anchor? }` so notification cards can deep-link without re-deriving routes client-side. Server emitters SHALL pick `target.route` per the link-selection policy in `app-product-navigation`: `/book/:bookId/node/:nodeId` when the event has `nodeId`, `/book/:bookId/read/:chapterId` when only the chapter Unit id is known in a book context, `/chapter/:contentUnitId` for chapter-only context.
 - [ ] 7.4 Update `inbox/components/NotificationCard.tsx` to route per `kindKey` (reply → thread + anchor, follow → profile, moderation outcome → authorization-appropriate detail, realm event → realm tab).
 - [ ] 7.5 Extend `package/contract/src/notify/dm.ts` with read-receipts, typing-indicator, and block/unblock-peer fields; wire into `inbox/sections/ConversationThreadSection.tsx`.
 - [ ] 7.6 Surface block/unblock-peer in profile DM action and in DM thread header.
