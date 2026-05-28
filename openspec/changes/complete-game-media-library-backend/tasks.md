@@ -60,9 +60,9 @@
 
 ## 8. Verification
 
-- [ ] 8.1 Run targeted contract tests for GAME/MEDIA schemas and system requirements.
-- [ ] 8.2 Run targeted server tests for game/media services, migrations, and APIs.
-- [ ] 8.3 Run targeted search tests for projection and filters.
-- [ ] 8.4 Run `bun run check:convention` and fix any repo convention violations introduced by the change.
-- [ ] 8.5 Run `bun run format:check` or format changed files with Biome.
-- [ ] 8.6 Run a repo-wide search for removed legacy names such as `GamePlatform`, `platformKey`, and `ageRatingKey` and migrate remaining internal callsites intentionally.
+- [x] 8.1 Run targeted contract tests for GAME/MEDIA schemas and system requirements.
+- [x] 8.2 Run targeted server tests for game/media services, migrations, and APIs.
+- [x] 8.3 Run targeted search tests for projection and filters.
+- [x] 8.4 Run `bun run check:convention` and fix any repo convention violations introduced by the change.
+- [x] 8.5 Run `bun run format:check` or format changed files with Biome.
+- [x] 8.6 Run a repo-wide search for removed legacy names such as `GamePlatform`, `platformKey`, and `ageRatingKey` and migrate remaining internal callsites intentionally.
