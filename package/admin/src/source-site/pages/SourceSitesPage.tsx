@@ -15,6 +15,8 @@ import {
   externalKindRegistry,
   externalKinds,
   isValidSourceRefRules,
+  type SourceSiteCrawlSupport,
+  sourceSiteCrawlSupportValues,
   type SourceSiteDTO,
   type SourceSiteRefRule,
   suggestExternalKinds,
@@ -37,8 +39,11 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Save, Search, Trash2 } from "lucide-react";
 import * as React from "react";
+import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
+import type { PaginatedColumn } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
+import { fmtDate } from "@/utils/format";
 
 const EMPTY_RULE: SourceSiteRefRule = {
   externalKind: "book",
@@ -54,6 +59,18 @@ function getTitle(sourceSite?: SourceSiteDTO | null) {
   return (
     translations?.[0]?.title || sourceSite?.entity?.slug || sourceSite?.key
   );
+}
+
+type CrawlEnabledFilter = "all" | "true" | "false";
+
+function optionalFilter(value: string) {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function optionalBoolean(value: CrawlEnabledFilter) {
+  if (value === "all") return undefined;
+  return value === "true";
 }
 
 function RuleEditor({
@@ -517,8 +534,106 @@ export function SourceSiteDetail({ entityUnitId }: { entityUnitId: string }) {
 export default function SourceSitesPage() {
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");
-  const sourceSites = useSourceSiteList({ q: query || undefined, limit: 50 });
+  const [keyFilter, setKeyFilter] = React.useState("");
+  const [crawlSupport, setCrawlSupport] = React.useState<
+    SourceSiteCrawlSupport | "all"
+  >("all");
+  const [crawlEnabled, setCrawlEnabled] =
+    React.useState<CrawlEnabledFilter>("all");
+  const [page, setPage] = React.useState(0);
+  const [limit, setLimit] = React.useState(20);
+  const sourceSites = useSourceSiteList({
+    q: optionalFilter(query),
+    key: optionalFilter(keyFilter),
+    crawlSupport: crawlSupport === "all" ? undefined : crawlSupport,
+    crawlEnabled: optionalBoolean(crawlEnabled),
+    page: page + 1,
+    limit,
+  });
   const rows = sourceSites.data?.sourceSites ?? [];
+  const total = sourceSites.data?.total ?? 0;
+
+  const columns = React.useMemo<PaginatedColumn<SourceSiteDTO>[]>(
+    () => [
+      {
+        id: "entityUnitId",
+        header: "Entity Unit ID",
+        minWidth: 220,
+        cell: (sourceSite) => (
+          <span className="text-sm font-mono text-text-secondary">
+            {sourceSite.entityUnitId}
+          </span>
+        ),
+      },
+      {
+        id: "title",
+        header: "Title",
+        minWidth: 220,
+        cell: (sourceSite) => (
+          <span className="text-sm font-medium">{getTitle(sourceSite)}</span>
+        ),
+      },
+      {
+        id: "key",
+        header: "Key",
+        minWidth: 160,
+        cell: (sourceSite) => (
+          <span className="text-sm font-mono">{sourceSite.key}</span>
+        ),
+      },
+      {
+        id: "crawlSupport",
+        header: "Crawl support",
+        minWidth: 140,
+        cell: (sourceSite) => sourceSite.crawlSupport,
+      },
+      {
+        id: "crawlEnabled",
+        header: "Crawl enabled",
+        minWidth: 120,
+        cell: (sourceSite) => (sourceSite.crawlEnabled ? "Yes" : "No"),
+      },
+      {
+        id: "rules",
+        header: "Rules",
+        minWidth: 90,
+        cell: (sourceSite) => sourceSite.refRules.length,
+      },
+      {
+        id: "createdAt",
+        header: "Created",
+        minWidth: 170,
+        cell: (sourceSite) => fmtDate(sourceSite.createdAt),
+      },
+      {
+        id: "updatedAt",
+        header: "Updated",
+        minWidth: 170,
+        cell: (sourceSite) => fmtDate(sourceSite.updatedAt),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        minWidth: 120,
+        cell: (sourceSite) => (
+          <Button
+            size="sm"
+            variant="outline"
+            render={(props) => (
+              <Link
+                to="/source-site/$entityUnitId"
+                params={{ entityUnitId: sourceSite.entityUnitId }}
+                {...props}
+              >
+                Edit
+              </Link>
+            )}
+          />
+        ),
+      },
+    ],
+    [],
+  );
 
   return (
     <Page
@@ -526,72 +641,99 @@ export default function SourceSitesPage() {
       description="Entity-bound source configuration and reference rules."
     >
       <div className="flex flex-col gap-4">
-        <Card>
-          <CardContent>
-            <div className="flex gap-2">
-              <Input
-                aria-label="Search source sites"
-                value={q}
-                onChange={(event) => setQ(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") setQuery(q.trim());
-                }}
-                placeholder="Search key or Entity title"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Search"
-                onClick={() => setQuery(q.trim())}
-              >
-                <Search className="size-4" />
-              </Button>
+        <SearchablePaginatedTableCard<SourceSiteDTO>
+          searchInputId="source-site-search"
+          searchPlaceholder="Search key or entity title"
+          q={q}
+          onQChange={setQ}
+          onSearch={() => {
+            setPage(0);
+            setQuery(q.trim());
+          }}
+          filters={
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor="source-site-filter-key" className="text-xs">
+                  Key
+                </Label>
+                <Input
+                  id="source-site-filter-key"
+                  value={keyFilter}
+                  onChange={(event) => {
+                    setKeyFilter(event.target.value);
+                    setPage(0);
+                  }}
+                  placeholder="internal key"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label
+                  htmlFor="source-site-filter-crawl-support"
+                  className="text-xs"
+                >
+                  Crawl support
+                </Label>
+                <Select
+                  value={crawlSupport}
+                  onValueChange={(value) => {
+                    setCrawlSupport(value as SourceSiteCrawlSupport | "all");
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger id="source-site-filter-crawl-support">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {sourceSiteCrawlSupportValues.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label
+                  htmlFor="source-site-filter-crawl-enabled"
+                  className="text-xs"
+                >
+                  Crawl enabled
+                </Label>
+                <Select
+                  value={crawlEnabled}
+                  onValueChange={(value) => {
+                    setCrawlEnabled(value as CrawlEnabledFilter);
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger id="source-site-filter-crawl-enabled">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <Separator className="my-4" />
-            {sourceSites.isLoading ? (
-              <div className="flex justify-center py-8">
-                <Spinner />
-              </div>
-            ) : (
-              <div className="divide-y divide-border-whisper">
-                {rows.map((sourceSite) => (
-                  <div
-                    key={sourceSite.entityUnitId}
-                    className="grid gap-2 py-3 md:grid-cols-[1fr_auto]"
-                  >
-                    <div className="min-w-0">
-                      <div className="font-medium leading-normal">
-                        {getTitle(sourceSite)}
-                      </div>
-                      <div className="mt-1 text-xs font-mono text-text-secondary">
-                        {sourceSite.key} · {sourceSite.entityUnitId}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      render={(props) => (
-                        <Link
-                          to="/source-site/$entityUnitId"
-                          params={{ entityUnitId: sourceSite.entityUnitId }}
-                          {...props}
-                        >
-                          Edit
-                        </Link>
-                      )}
-                    />
-                  </div>
-                ))}
-                {!rows.length ? (
-                  <p className="py-6 text-sm text-text-secondary">
-                    No source sites found.
-                  </p>
-                ) : null}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          }
+          isLoading={sourceSites.isLoading}
+          isError={sourceSites.isError}
+          error={sourceSites.error}
+          columns={columns}
+          rows={rows}
+          getRowId={(sourceSite) => sourceSite.entityUnitId}
+          count={total}
+          page={page}
+          rowsPerPage={limit}
+          onPageChange={(nextPage) => setPage(nextPage)}
+          onRowsPerPageChange={(next) => {
+            setLimit(next);
+            setPage(0);
+          }}
+        />
 
         <Card>
           <CardContent>
