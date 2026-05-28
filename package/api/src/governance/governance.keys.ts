@@ -24,6 +24,8 @@ export const governanceKeys = {
     [...governanceKeys.all(), "realms", realmUnitId, "queue"] as const,
   realmQueueList: (realmUnitId: string, query?: GovernanceListQuery) =>
     [...governanceKeys.realmQueue(realmUnitId), "list", query] as const,
+  realmQueueEscalated: (query?: GovernanceListQuery) =>
+    [...governanceKeys.all(), "realm-queue", "escalated", query] as const,
   realmQueueEvents: (
     realmUnitId: string,
     queueItemId: string,

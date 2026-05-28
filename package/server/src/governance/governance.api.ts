@@ -646,6 +646,26 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
     },
   )
   .get(
+    "/realm-queue/escalated",
+    async ({ query, identity, status }) => {
+      const denied = await assertStaff(identity, status);
+      if (denied) return denied;
+      return governanceModerationService.listEscalatedRealmQueue(query);
+    },
+    {
+      requireLogin: true,
+      query: listQuerySchema,
+      response: {
+        200: t.Array(realmModerationQueueItemDTOSchema),
+        403: t.String(),
+      },
+      detail: {
+        summary: "List escalated realm moderation queue items",
+        tags: ["Governance", "Staff", "Realms"],
+      },
+    },
+  )
+  .get(
     "/cases",
     async ({ query, identity, status }) => {
       const denied = await assertStaff(identity, status);

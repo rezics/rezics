@@ -243,6 +243,14 @@ export const governanceApi = {
     );
   },
 
+  listEscalatedRealmQueue: async (
+    query?: GovernanceListQuery,
+  ): Promise<RealmModerationQueueItemDTO[]> => {
+    return apiFetch<RealmModerationQueueItemDTO[]>(
+      `/governance/realm-queue/escalated${buildQueryString(query)}`,
+    );
+  },
+
   createRealmQueueItem: async (
     realmUnitId: string,
     input: CreateRealmModerationQueueItemInput,

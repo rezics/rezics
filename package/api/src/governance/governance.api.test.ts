@@ -33,6 +33,7 @@ describe("governanceApi", () => {
   test("builds staff case and audit read requests", async () => {
     await governanceApi.listCases({ offset: 5, limit: 10 });
     await governanceApi.getCase("case/1");
+    await governanceApi.listEscalatedRealmQueue({ limit: 8 });
     await governanceApi.listAudit({
       action: "session.revoke",
       targetKind: "session",
@@ -47,9 +48,12 @@ describe("governanceApi", () => {
       "http://api.example/governance/cases/case%2F1",
     );
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
-      "http://api.example/governance/audit?action=session.revoke&targetKind=session&targetId=session-1",
+      "http://api.example/governance/realm-queue/escalated?limit=8",
     );
     expect(fetchMock.mock.calls[3]?.[0]).toBe(
+      "http://api.example/governance/audit?action=session.revoke&targetKind=session&targetId=session-1",
+    );
+    expect(fetchMock.mock.calls[4]?.[0]).toBe(
       "http://api.example/governance/audit/audit%2F1",
     );
   });
@@ -125,6 +129,12 @@ describe("governanceApi", () => {
       "audit",
       "list",
       { action: "session.revoke" },
+    ]);
+    expect(governanceKeys.realmQueueEscalated({ limit: 8 })).toEqual([
+      "governance",
+      "realm-queue",
+      "escalated",
+      { limit: 8 },
     ]);
 
     const queryClient = {

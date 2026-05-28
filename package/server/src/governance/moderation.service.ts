@@ -532,6 +532,16 @@ export class GovernanceModerationService {
     return rows.map(mapRealmQueueItemToDTO);
   }
 
+  async listEscalatedRealmQueue(options: GovernanceListOptions = {}) {
+    const rows = await prisma.realmModerationQueueItem.findMany({
+      where: { state: "ESCALATED" },
+      orderBy: { updatedAt: "desc" },
+      skip: options.offset ?? 0,
+      take: options.limit ?? 50,
+    });
+    return rows.map(mapRealmQueueItemToDTO);
+  }
+
   async listRealmQueueEvents(
     realmUnitId: string,
     queueItemId: string,

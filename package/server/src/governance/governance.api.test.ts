@@ -161,6 +161,9 @@ const realmEventRow = {
 };
 const createRealmQueueItemMock = mock(async () => realmQueueRow);
 const createRealmQueueItemFromFeedbackMock = mock(async () => realmQueueRow);
+const listEscalatedRealmQueueMock = mock(async () => [
+  { ...realmQueueRow, state: "escalated", linkedCaseId: "case-1" },
+]);
 const listRealmQueueEventsMock = mock(async () => [realmEventRow]);
 const decideRealmQueueItemMock = mock(async () => ({
   ...realmQueueRow,
@@ -279,6 +282,7 @@ mock.module("./moderation.service", () => ({
     requestOwnerDelegation: requestOwnerDelegationMock,
     createRealmQueueItem: createRealmQueueItemMock,
     createRealmQueueItemFromFeedback: createRealmQueueItemFromFeedbackMock,
+    listEscalatedRealmQueue: listEscalatedRealmQueueMock,
     listRealmQueueEvents: listRealmQueueEventsMock,
     decideRealmQueueItem: decideRealmQueueItemMock,
     escalateRealmQueueItem: escalateRealmQueueItemMock,
@@ -313,6 +317,7 @@ describe("governanceApi account enforcement", () => {
     requestOwnerDelegationMock.mockClear();
     createRealmQueueItemMock.mockClear();
     createRealmQueueItemFromFeedbackMock.mockClear();
+    listEscalatedRealmQueueMock.mockClear();
     listRealmQueueEventsMock.mockClear();
     decideRealmQueueItemMock.mockClear();
     escalateRealmQueueItemMock.mockClear();
@@ -766,6 +771,16 @@ describe("governanceApi account enforcement", () => {
       actorUserId: "staff-1",
       reason: "reported",
     });
+  });
+
+  test("lists only escalated realm queue items for staff oversight", async () => {
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/realm-queue/escalated?limit=8"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(listEscalatedRealmQueueMock).toHaveBeenCalledWith({ limit: 8 });
   });
 
   test("lists realm queue events through realm queue policy", async () => {

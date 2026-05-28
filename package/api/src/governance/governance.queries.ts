@@ -77,6 +77,15 @@ export const governanceRealmQueueListQuery = (
     staleTime: 1000 * 30,
   });
 
+export const governanceEscalatedRealmQueueQuery = (
+  query?: GovernanceListQuery,
+) =>
+  queryOptions({
+    queryKey: governanceKeys.realmQueueEscalated(query),
+    queryFn: () => governanceApi.listEscalatedRealmQueue(query),
+    staleTime: 1000 * 30,
+  });
+
 export const governanceRealmQueueEventsQuery = (
   realmUnitId: string,
   queueItemId: string,
@@ -122,6 +131,7 @@ export const governanceQueries = {
   caseDetail: governanceCaseDetailQuery,
   caseEvents: governanceCaseEventsQuery,
   realmQueueList: governanceRealmQueueListQuery,
+  escalatedRealmQueue: governanceEscalatedRealmQueueQuery,
   realmQueueEvents: governanceRealmQueueEventsQuery,
   contentModeration: governanceContentModerationQuery,
   auditList: governanceAuditListQuery,

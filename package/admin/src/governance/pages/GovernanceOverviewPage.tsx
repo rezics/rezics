@@ -7,6 +7,7 @@ import {
 import type {
   DecisionCode,
   ModerationCaseDTO,
+  RealmModerationQueueItemDTO,
   StaffAuditLogDTO,
 } from "@rezics/contract";
 import {
@@ -168,6 +169,63 @@ function RecentCasesTable({ cases }: { cases: ModerationCaseDTO[] }) {
             <TableRow>
               <TableCell colSpan={5} className="py-6 text-center text-sm">
                 No moderation cases found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function RealmEscalationsTable({
+  items,
+}: {
+  items: RealmModerationQueueItemDTO[];
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <Table className="text-sm">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Queue Item</TableHead>
+            <TableHead>Realm</TableHead>
+            <TableHead>Target</TableHead>
+            <TableHead>Case</TableHead>
+            <TableHead>Updated</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.length ? (
+            items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell className="max-w-[220px]">
+                  <div className="truncate font-medium">{item.id}</div>
+                  <div className="truncate text-xs text-text-secondary">
+                    {item.safeSummary ?? item.reason ?? "Escalated to staff"}
+                  </div>
+                </TableCell>
+                <TableCell className="max-w-[180px]">
+                  <span className="truncate font-mono text-xs">
+                    {item.realmUnitId}
+                  </span>
+                </TableCell>
+                <TableCell className="max-w-[220px]">
+                  <div className="truncate">{item.target.kind}</div>
+                  <div className="truncate text-xs text-text-secondary">
+                    {item.target.id}
+                  </div>
+                </TableCell>
+                <TableCell>{item.linkedCaseId ?? "-"}</TableCell>
+                <TableCell className="whitespace-nowrap text-xs text-text-secondary">
+                  {formatDate(item.updatedAt)}
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} className="py-6 text-center text-sm">
+                No escalated realm queue items.
               </TableCell>
             </TableRow>
           )}
@@ -361,6 +419,9 @@ export default function GovernanceOverviewPage() {
   const recentCasesQuery = useSuspenseQuery(
     governanceQueries.caseList({ limit: 10 }),
   );
+  const escalatedRealmQueueQuery = useSuspenseQuery(
+    governanceQueries.escalatedRealmQueue({ limit: 8 }),
+  );
   const auditQuery = useQuery(governanceQueries.auditList({ limit: 10 }));
   const policyExceptionQuery = useQueries({
     queries: policyExceptionCodes.map((decisionCode) =>
@@ -386,12 +447,6 @@ export default function GovernanceOverviewPage() {
             <Link to="/authority">
               <FileClock className="size-4" />
               Authority
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link to="/realm">
-              <Gavel className="size-4" />
-              Realm queues
             </Link>
           </Button>
         </div>
@@ -461,6 +516,32 @@ export default function GovernanceOverviewPage() {
         </div>
 
         <PolicyExceptionPanel query={policyExceptionQuery} />
+
+        <Card surface="contained">
+          <CardHeader className="p-4 pb-2">
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="text-base leading-[1.4]">
+                Realm Escalations
+              </CardTitle>
+              <Badge
+                variant={
+                  escalatedRealmQueueQuery.data.length
+                    ? "destructive"
+                    : "outline"
+                }
+              >
+                {escalatedRealmQueueQuery.data.length} operator-relevant
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-2">
+            <p className="mb-3 text-sm leading-[1.4] text-text-secondary">
+              Ordinary realm queue work remains in the app realm console. Admin
+              lists only escalated queue items that need site staff visibility.
+            </p>
+            <RealmEscalationsTable items={escalatedRealmQueueQuery.data} />
+          </CardContent>
+        </Card>
 
         <Card surface="contained">
           <CardHeader className="p-4 pb-2">
