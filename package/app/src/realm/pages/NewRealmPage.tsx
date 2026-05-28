@@ -1,5 +1,9 @@
 import { useCreateRealmMutation } from "@rezics/api/realm/realm";
-import { DEFAULT_LANGUAGE, markdownContentDoc } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  markdownContentDoc,
+  type RealmTagViewStyle,
+} from "@rezics/contract";
 import {
   common_create,
   common_description,
@@ -7,7 +11,17 @@ import {
   realm_new_title,
 } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
-import { Button, Input, Label } from "@rezics/ui/shadcn";
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { unitHref } from "@/shared/ui/link";
@@ -25,6 +39,8 @@ export function NewRealmPage() {
   const createMutation = useCreateRealmMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [tagViewStyle, setTagViewStyle] = useState<RealmTagViewStyle>("flat");
+  const [allowTagViewSwitch, setAllowTagViewSwitch] = useState(true);
 
   const handleCreate = () => {
     createMutation.mutate(
@@ -38,6 +54,12 @@ export function NewRealmPage() {
               : null,
           },
         ],
+        extra: {
+          tagView: {
+            defaultStyle: tagViewStyle,
+            allowViewerSwitch: allowTagViewSwitch,
+          },
+        },
       },
       {
         onSuccess: (data) =>
@@ -68,14 +90,47 @@ export function NewRealmPage() {
           <Label htmlFor="new-realm-description">
             {m.common_description()}
           </Label>
-          <textarea
+          <Textarea
             id="new-realm-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
+        <section className="flex flex-col gap-3">
+          <div>
+            <h2 className="text-base font-semibold leading-ui text-text-primary">
+              Tags tab view
+            </h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="new-realm-tag-view-style">Default view</Label>
+              <Select
+                value={tagViewStyle}
+                onValueChange={(value) =>
+                  setTagViewStyle(value as RealmTagViewStyle)
+                }
+              >
+                <SelectTrigger id="new-realm-tag-view-style">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="flat">Flat</SelectItem>
+                  <SelectItem value="grouped">Grouped</SelectItem>
+                  <SelectItem value="tree">Tree</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              type="button"
+              variant={allowTagViewSwitch ? "secondary" : "outline"}
+              onClick={() => setAllowTagViewSwitch((value) => !value)}
+            >
+              {allowTagViewSwitch ? "Viewer switch on" : "Viewer switch off"}
+            </Button>
+          </div>
+        </section>
         <div className="flex flex-row justify-end">
           <Button
             onClick={handleCreate}
