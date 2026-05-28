@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --filter=@rezics/i18n run compile && bun --filter=@rezics/ui run i18n:compile && vite",
-    "build": "bun --filter=@rezics/i18n run compile && bun --filter=@rezics/ui run i18n:compile && vite build",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6010 --no-open",
     "build-storybook": "storybook build -o storybook-static"

@@ -1,5 +1,6 @@
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { rezicsI18nLocales } from "@rezics/i18n/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import errorOverlay from "@visulima/vite-overlay";
 import react from "@vitejs/plugin-react";
@@ -33,6 +34,7 @@ export default defineConfig(({ mode }) => {
         forwardedConsoleMethods: ["error", "warn", "log"],
         showBallonButton: true,
       }),
+      rezicsI18nLocales(),
     ],
     build: {
       // sourcemap: true, // Enable sourcemap for production build for debugging tools like Sentry

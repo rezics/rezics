@@ -36,7 +36,7 @@
     "check:convention": "bun run tool/scripts/check-convention.ts",
     "check:tokens": "bun run tool/scripts/check-tokens.ts",
     "knip": "knip",
-    "i18n:compile": "bun --filter=@rezics/i18n run compile && bun --filter=@rezics/ui run i18n:compile",
+    "check:i18n": "bun run tool/scripts/i18n/check-i18n.ts",
     "storybook:host": "storybook dev -p 6006 --no-open",
     "storybook:host:quiet": "storybook dev -p 6006 --no-open --quiet --loglevel error",
     "storybook:banner": "bun run tool/scripts/storybook-banner.ts",
@@ -45,7 +45,7 @@
     "build-storybook:host": "storybook build -o storybook-static",
     "build-storybook:all": "concurrently -n host,ui,editor,folio,admin,app -c blue,cyan,magenta,green,yellow,red \"bun run build-storybook:host\" \"bun --filter=@rezics/ui run build-storybook\" \"bun --filter=@rezics/editor run build-storybook\" \"bun --filter=@rezics/folio run build-storybook\" \"bun --filter=@rezics/admin run build-storybook\" \"bun --filter=@rezics/app run build-storybook\"",
     "build-storybook": "bun run build-storybook:all",
-    "postinstall": "bun run i18n:compile && lefthook install || true"
+    "postinstall": "lefthook install || true"
   },
   "workspaces": [
     "package/*"
