@@ -183,6 +183,37 @@ const homepageData: WikiZoneHomepageData = {
   ],
 };
 
+const responsiveHomepageData: WikiZoneHomepageData = {
+  template: "wiki-database-home",
+  sections: [
+    {
+      section: {
+        id: "long-card-grid",
+        kind: "manualLinks",
+        title: {
+          translations: { en: "Card grid with long localized labels" },
+          fallbackLanguage: LANGUAGES.EN,
+        },
+      },
+      items: Array.from({ length: 9 }, (_, index) => ({
+        kind: "wikiPost",
+        unitId: `responsive-card-${index + 1}`,
+        title: `Chronology checkpoint ${index + 1}: unusually long archive title that should clamp rather than resize the grid`,
+        summary:
+          "Dense wiki card summary used to exercise wrapping, row rhythm, and multi-column fallbacks across mobile, tablet, and desktop widths.",
+      })),
+    },
+    {
+      section: {
+        id: "empty-hidden",
+        kind: "stubWiki",
+        emptyState: "hide",
+      },
+      items: [],
+    },
+  ],
+};
+
 function zoneWith(
   template: NonNullable<ZoneDTO["wiki"]>["theme"]["template"],
   homepageTemplate: WikiZoneHomepageData["template"],
@@ -242,6 +273,94 @@ function Seeded({ children }: { children: ReactNode }) {
   return <div className="p-6">{children}</div>;
 }
 
+function ResponsiveEvidenceContent() {
+  return (
+    <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <section className="min-w-0">
+        <h2 className="mb-3 text-lg font-medium leading-ui text-text-primary">
+          Table-heavy source index
+        </h2>
+        <div className="min-w-0 overflow-x-auto rounded-md border border-border-subtle">
+          <table className="w-full min-w-150 border-collapse text-left text-sm leading-ui">
+            <thead className="bg-surface-muted text-text-secondary">
+              <tr>
+                <th className="px-3 py-2 font-medium">Source</th>
+                <th className="px-3 py-2 font-medium">Timeline marker</th>
+                <th className="px-3 py-2 font-medium">Verification note</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-subtle">
+              {["Primary script", "Archive scan", "Translator note"].map(
+                (source, index) => (
+                  <tr key={source}>
+                    <td className="px-3 py-2 text-text-primary">{source}</td>
+                    <td className="px-3 py-2 text-text-secondary">
+                      Chapter {index + 3}, scene {index + 12}
+                    </td>
+                    <td className="px-3 py-2 text-text-secondary">
+                      Long table text stays horizontally scrollable on narrow
+                      viewports instead of forcing the wiki shell wider.
+                    </td>
+                  </tr>
+                ),
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside className="min-w-0 rounded-md border border-border-subtle bg-surface-muted p-4">
+        <h2 className="text-base font-medium leading-ui text-text-primary">
+          Infobox stack
+        </h2>
+        <dl className="mt-3 grid gap-3 text-sm leading-ui">
+          {[
+            ["First appearance", "Glass City, archival edition"],
+            ["Affiliation", "Municipal Index Office"],
+            ["Known aliases", "Rin of the North Ledger"],
+            ["Status", "Disputed across language editions"],
+            ["Related entries", "Timeline, Archive faction, City gates"],
+          ].map(([term, description]) => (
+            <div
+              key={term}
+              className="grid min-w-0 grid-cols-[7rem_minmax(0,1fr)] gap-3"
+            >
+              <dt className="text-text-tertiary">{term}</dt>
+              <dd className="min-w-0 text-text-primary">{description}</dd>
+            </div>
+          ))}
+        </dl>
+      </aside>
+    </div>
+  );
+}
+
+function ResponsiveFrame({
+  label,
+  widthClass,
+}: {
+  label: string;
+  widthClass: string;
+}) {
+  return (
+    <section className="min-w-0">
+      <h2 className="mb-3 text-sm font-medium leading-ui text-text-secondary">
+        {label}
+      </h2>
+      <div
+        className={`${widthClass} max-w-full overflow-hidden rounded-md border border-border-subtle bg-surface-canvas`}
+      >
+        <WikiDatabaseZoneTemplate
+          zone={zoneWith("wiki-database", "wiki-database-home")}
+          homepageData={responsiveHomepageData}
+        >
+          <ResponsiveEvidenceContent />
+        </WikiDatabaseZoneTemplate>
+      </div>
+    </section>
+  );
+}
+
 const meta = {
   title: "Domain/Zone/WikiTemplates",
   decorators: [withRouter],
@@ -290,6 +409,18 @@ export const MinimalTopNavigation: Story = {
         zone={zoneWith("wiki-minimal", "wiki-minimal-home", "top")}
         homepageData={homepageWith("wiki-minimal-home")}
       />
+    </Seeded>
+  ),
+};
+
+export const ResponsiveLayoutChecks: Story = {
+  render: () => (
+    <Seeded>
+      <div className="flex flex-col gap-8">
+        <ResponsiveFrame label="Mobile width: 360px" widthClass="w-90" />
+        <ResponsiveFrame label="Tablet width: 768px" widthClass="w-192" />
+        <ResponsiveFrame label="Desktop width: 1184px" widthClass="w-296" />
+      </div>
     </Seeded>
   ),
 };

@@ -93,7 +93,7 @@
 - [x] 9.7 Implement `recentWiki`, `updatedWiki`, and `stubWiki` homepage sections.
 - [x] 9.8 Implement `manualLinks` homepage section with validated translated labels.
 - [x] 9.9 Add section-level empty-state policies so one empty section does not break the homepage.
-- [ ] 9.10 Add responsive layout checks for navigation, cards, tables, and infobox-heavy sections.
+- [x] 9.10 Add responsive layout checks for navigation, cards, tables, and infobox-heavy sections.
 
 ## 10. Release And Work Integration
 

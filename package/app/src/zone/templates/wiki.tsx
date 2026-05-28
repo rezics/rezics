@@ -465,6 +465,7 @@ function WikiZoneTemplateBase({
   homepageData,
   homepageLoading,
   onSearch,
+  children,
   variant,
 }: ZoneTemplateProps & { variant: WikiTemplateVariant }) {
   const m = useMessage(i18nMessages);
@@ -547,6 +548,9 @@ function WikiZoneTemplateBase({
                 variant={resolvedHomepageVariant}
               />
             )}
+            {children ? (
+              <div className="mt-8 min-w-0 overflow-x-auto">{children}</div>
+            ) : null}
           </main>
         </div>
       </div>

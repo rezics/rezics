@@ -34,6 +34,13 @@ The wiki Zone slugs are deterministic in the factory scenario:
 Confirm each page renders navigation, translated labels, homepage sections,
 empty-section behavior, and scoped theme styling.
 
+### Responsive Wiki Layout Checks
+
+- Storybook: `Domain/Zone/WikiTemplates/ResponsiveLayoutChecks`
+- Confirm the 360px, 768px, and 1184px frames keep navigation reachable, card
+  grids wrapped, wide tables horizontally scrollable inside the content column,
+  and infobox-heavy sections contained without widening the wiki shell.
+
 ### Release Wiki Context
 
 - `http://localhost:5173/book/<Wiki Zone release unitId>`
