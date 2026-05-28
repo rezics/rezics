@@ -22,7 +22,7 @@
 - [x] 3.3 Encode the Bun + Prisma constraints: run `prisma generate` in a Node-capable stage, supply a dummy `DATABASE_URL` at build (never a real secret), `bun install --ignore-scripts`, and copy the generated Prisma client + query engine into the runtime image.
 - [x] 3.4 Ensure ranking's image includes `@rezics/server`'s generated Prisma client (main-DB read) and that all images run as a non-root user on a slim/distroless runtime.
 - [x] 3.5 Add image healthchecks for each runtime service.
-- [ ] 3.6 Build all backend images in CI and verify each starts far enough to pass its healthcheck with test env.
+- [x] 3.6 Build all backend images in CI and verify each starts far enough to pass its healthcheck with test env.
 
 ## 4. Deployment Units and Kamal Orchestration
 
@@ -53,19 +53,19 @@
 
 ## 7. Release Automation
 
-- [ ] 7.1 Add CI steps for Bun install, repo checks, targeted tests, and backend production builds.
-- [ ] 7.2 Add CI steps to build and publish backend images to GHCR with immutable git-SHA tags; trigger image builds on push to `dev`.
-- [ ] 7.3 Add a production deploy workflow that runs `kamal deploy` behind a GitHub Environment approval (manual/tag-gated dispatch), with health verification and rollback by previous image tag.
-- [ ] 7.4 Add worker rollout/scaling for `job-runner-worker` and `ranking-worker` independent from backend HTTP services.
-- [ ] 7.5 Add explicit manual or separately approved targets for infrastructure and `infra-observability` unit changes.
-- [ ] 7.6 Ensure release logs show image tags, migration status, rollout targets, and healthcheck results.
+- [x] 7.1 Add CI steps for Bun install, repo checks, targeted tests, and backend production builds.
+- [x] 7.2 Add CI steps to build and publish backend images to GHCR with immutable git-SHA tags; trigger image builds on push to `dev`.
+- [x] 7.3 Add a production deploy workflow that runs `kamal deploy` behind a GitHub Environment approval (manual/tag-gated dispatch), with health verification and rollback by previous image tag.
+- [x] 7.4 Add worker rollout/scaling for `job-runner-worker` and `ranking-worker` independent from backend HTTP services.
+- [x] 7.5 Add explicit manual or separately approved targets for infrastructure and `infra-observability` unit changes.
+- [x] 7.6 Ensure release logs show image tags, migration status, rollout targets, and healthcheck results.
 
 ## 8. Cloudflare Static Frontends
 
 - [x] 8.1 Add Cloudflare deployment configuration for `package/app` static Vite output.
 - [x] 8.2 Add Cloudflare deployment configuration for `package/admin` static Vite output.
 - [x] 8.3 Define production frontend env (`VITE_*`) for API, auth, reaction, and notify endpoints consumed by `package/app` and `package/admin` (ranking is internal-only and not a frontend endpoint).
-- [ ] 8.4 Add release workflow steps to build and deploy both frontends without Docker images.
+- [x] 8.4 Add release workflow steps to build and deploy both frontends without Docker images.
 - [x] 8.5 Verify generated static outputs do not require SSR runtime services, and document the backend-before-frontend deploy order for contract forward-compatibility.
 
 ## 9. Local External Services Boundary
