@@ -45,9 +45,9 @@
 
 ## 6. Env and Secret Management
 
-- [ ] 6.1 Add per-deployment-unit env schemas listing required values, defaults, owners, and secret/non-secret classification (including the shared observability contract).
+- [x] 6.1 Add per-deployment-unit env schemas listing required values, defaults, owners, and secret/non-secret classification (including the shared observability contract).
 - [ ] 6.2 Set up SOPS + age: encrypted per-unit env files committed to the repo, decrypted at deploy with an age key held by the CI runner/host, surfaced to Kamal as its secrets source.
-- [ ] 6.3 Keep frontend public config (`VITE_*`) as build-time Cloudflare variables; ensure no secrets are baked into static assets.
+- [x] 6.3 Keep frontend public config (`VITE_*`) as build-time Cloudflare variables; ensure no secrets are baked into static assets.
 - [ ] 6.4 Add validation that fails deployment before mutating services when required env values are missing.
 - [ ] 6.5 Document age-key bootstrap, rotation, and break-glass recovery.
 

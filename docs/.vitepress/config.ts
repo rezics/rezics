@@ -25,6 +25,10 @@ export default defineConfig({
             text: "Production Runtime Inventory",
             link: "/reference/production-runtime-inventory",
           },
+          {
+            text: "Production Env and Secrets",
+            link: "/reference/production-env-and-secrets",
+          },
         ],
       },
     ],
