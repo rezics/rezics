@@ -4,7 +4,7 @@
 - [ ] 1.2 Audit remaining `routes/_mainLayout/` entries and classify as production / staff / unauthenticated; gate staff-only routes via policy hints.
 - [ ] 1.3 Define a single navigation config grouping discovery, library, community, create, and personal (`u/me/dashboard`, `u/me/drafts`, settings, inbox) sections.
 - [ ] 1.4 Add route-level loading, denied, not-found, unauthenticated, and error boundaries via shared helpers, so feature pages do not redefine them.
-- [ ] 1.5 Align realm tabs with Feed default, About, and moderator-only Moderation per `complete-realm-community-governance`; confirm `routes/_mainLayout/realm/$realmId/index.tsx` matches.
+- [x] 1.5 Align realm tabs with Feed default, About, and moderator-only Moderation per `complete-realm-community-governance`; confirm `routes/_mainLayout/realm/$realmId/index.tsx` matches.
 
 ## 2. Dashboard
 
@@ -78,7 +78,7 @@
 
 ## 10. Verification
 
-- [ ] 10.1 `bun --filter=@rezics/contract test`
+- [x] 10.1 `bun --filter=@rezics/contract test`
 - [ ] 10.2 Targeted `@rezics/server` tests for dashboard, draft listing, and report endpoints.
 - [ ] 10.3 Targeted `@rezics/notify` tests for DM read-receipt / typing / block flows.
 - [ ] 10.4 Targeted `@rezics/api` tests for new hooks, query keys, and cache-coherence map.
