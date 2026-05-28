@@ -94,6 +94,13 @@ export const gameSystemRequirementDTOSchema = t.Object({
 export type GameSystemRequirementDTO =
   (typeof gameSystemRequirementDTOSchema)["static"];
 
+export const gameSystemRequirementParamsSchema = t.Object({
+  id: t.String(),
+});
+
+export type GameSystemRequirementParams =
+  (typeof gameSystemRequirementParamsSchema)["static"];
+
 export const createGameSystemRequirementSchema = t.Object({
   gameUnitId: t.String(),
   platformEntityId: t.Optional(t.Nullable(t.String())),
@@ -129,6 +136,13 @@ export const gameSystemRequirementListFiltersSchema = t.Object({
 
 export type GameSystemRequirementListFilters =
   (typeof gameSystemRequirementListFiltersSchema)["static"];
+
+export const gameSystemRequirementListResponseSchema = t.Object({
+  requirements: t.Array(gameSystemRequirementDTOSchema),
+});
+
+export type GameSystemRequirementListResponse =
+  (typeof gameSystemRequirementListResponseSchema)["static"];
 
 export const gameLibraryContentMetadataSchema = t.Object({
   platformEntityIds: t.Array(t.String()),

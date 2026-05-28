@@ -22,6 +22,7 @@ import { entityApi } from "./entity";
 import { entityAttributionApi } from "./entity-attribution";
 import { env } from "./env";
 import { feedbackApi } from "./feedback";
+import { gameSystemRequirementApi } from "./game-system-requirement";
 import { governanceApi } from "./governance";
 import { historyProxyApi, historyResolutionApi } from "./history";
 import { initDefaultRealmCache } from "./infra/default-realm";
@@ -219,6 +220,7 @@ routeApp
   .use(entityAttributionApi)
   .use(sourceSiteApi)
   .use(unitExternalRefApi)
+  .use(gameSystemRequirementApi)
   .use(entityApi)
   .use(slugApi)
   .use(subscriptionApi)
