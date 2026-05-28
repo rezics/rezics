@@ -48,9 +48,9 @@
 
 ## 5. API Client And Query Keys
 
-- [ ] 5.1 Add typed API client methods for WorkRealmContext CRUD/list/resolve operations.
-- [ ] 5.2 Add TanStack Query keys and hooks for work realm context resolution from release pages.
-- [ ] 5.3 Extend Zone API client methods and hooks to include wiki config and wiki homepage data.
+- [x] 5.1 Add typed API client methods for WorkRealmContext CRUD/list/resolve operations.
+- [x] 5.2 Add TanStack Query keys and hooks for work realm context resolution from release pages.
+- [x] 5.3 Extend Zone API client methods and hooks to include wiki config and wiki homepage data.
 - [ ] 5.4 Add realm wiki list query helpers scoped by realm Unit id and PostKind.WIKI.
 - [ ] 5.5 Add mutation invalidation for Zone wiki config updates, realm detail wiki Zone updates, and work realm context updates.
 
@@ -125,7 +125,7 @@
 
 - [x] 13.1 Run contract tests for UnitType, WorkRealmContext, Zone wiki config, navigation, homepage, and theme schemas.
 - [ ] 13.2 Run server tests for LABEL creation, WorkRealmContext permissions, Zone config validation, TranslationGroup best-language resolution, and realm wiki queries.
-- [ ] 13.3 Run API client tests or type checks for new query/mutation surfaces.
+- [x] 13.3 Run API client tests or type checks for new query/mutation surfaces.
 - [ ] 13.4 Run frontend component tests or stories for Realm Wiki tab, wiki Zone templates, navigation, homepage sections, and management forms.
 - [ ] 13.5 Run search/index tests for realm-scoped wiki listing and subject/tag/translation group filters.
 - [ ] 13.6 Run `bun run format:check`.

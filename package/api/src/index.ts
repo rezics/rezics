@@ -29,4 +29,5 @@ export * from "./unit/unit";
 export * from "./unit-alias-record/unit-alias";
 export * from "./unit-external-ref/unit-external-ref";
 export * from "./work-maintenance/work-maintenance";
-export { zoneApi, zoneKeys, zoneQueries, zoneQueryOptions } from "./zone/zone";
+export * from "./work-realm-context/work-realm-context";
+export * from "./zone/zone";

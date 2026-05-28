@@ -10,6 +10,15 @@ export const zoneQueryOptions = (slug: string) =>
     staleTime: 1000 * 60 * 10,
   });
 
+export const zoneByUnitIdQueryOptions = (unitId: string) =>
+  queryOptions({
+    queryKey: zoneKeys.byUnitId(unitId),
+    queryFn: () => zoneApi.get(unitId),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 10,
+  });
+
 export const zoneQueries = {
   detail: zoneQueryOptions,
+  byUnitId: zoneByUnitIdQueryOptions,
 };
