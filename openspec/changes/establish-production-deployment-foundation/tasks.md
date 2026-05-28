@@ -1,10 +1,10 @@
 ## 1. Runtime Inventory
 
-- [ ] 1.1 Inventory production runtime packages in `package/*/package.json`, classify each package as static frontend, backend HTTP service, worker role, migration owner, or library-only.
-- [ ] 1.2 Document service ports, required env variables, health endpoints, Prisma schema ownership, and external dependencies for `package/server`, `package/auth`, `package/notify`, `package/reaction`, `package/history`, `package/job-runner`, and `package/ranking`.
-- [ ] 1.3 Document the shared observability env contract from `@rezics/shared` (`OBSERVABILITY_LOG_FORMAT`, `OBSERVABILITY_COLOR`, `OBSERVABILITY_SLOW_REQUEST_MS`, `OBSERVABILITY_TELEMETRY`, `OTEL_EXPORTER_OTLP_ENDPOINT`) as required per-service production values.
-- [ ] 1.4 Record `package/preview` as non-production tooling, excluded from the first production service set.
-- [ ] 1.5 Identify current gaps in production health/readiness endpoints and graceful shutdown for each backend runtime service (note: only `ranking` exposes `/ranking/ready` today).
+- [x] 1.1 Inventory production runtime packages in `package/*/package.json`, classify each package as static frontend, backend HTTP service, worker role, migration owner, or library-only.
+- [x] 1.2 Document service ports, required env variables, health endpoints, Prisma schema ownership, and external dependencies for `package/server`, `package/auth`, `package/notify`, `package/reaction`, `package/history`, `package/job-runner`, and `package/ranking`.
+- [x] 1.3 Document the shared observability env contract from `@rezics/shared` (`OBSERVABILITY_LOG_FORMAT`, `OBSERVABILITY_COLOR`, `OBSERVABILITY_SLOW_REQUEST_MS`, `OBSERVABILITY_TELEMETRY`, `OTEL_EXPORTER_OTLP_ENDPOINT`) as required per-service production values.
+- [x] 1.4 Record `package/preview` as non-production tooling, excluded from the first production service set.
+- [x] 1.5 Identify current gaps in production health/readiness endpoints and graceful shutdown for each backend runtime service (note: only `ranking` exposes `/ranking/ready` today).
 
 ## 2. Backend Build and Runtime Entry Points
 

@@ -21,6 +21,10 @@ export default defineConfig({
         items: [
           { text: "Tools", link: "/reference/tools" },
           { text: "TanStack Router", link: "/reference/tanstack-router" },
+          {
+            text: "Production Runtime Inventory",
+            link: "/reference/production-runtime-inventory",
+          },
         ],
       },
     ],
