@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import {
   adminAuthUserAccountSummaryResponseSchema,
   adminAuthUserSessionsResponseSchema,
+  adminStartAuthImpersonationResponseSchema,
 } from "./admin";
 
 describe("auth admin contracts", () => {
@@ -63,6 +64,19 @@ describe("auth admin contracts", () => {
             impersonatedBy: null,
           },
         ],
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts audited impersonation start metadata", () => {
+    expect(
+      Value.Check(adminStartAuthImpersonationResponseSchema, {
+        success: true,
+        targetAuthUserId: "auth-user-1",
+        startedAt: "2026-05-28T00:00:00.000Z",
+        expiresAt: "2026-05-28T00:15:00.000Z",
+        durationSeconds: 900,
+        auditLogId: "audit-1",
       }),
     ).toBe(true);
   });

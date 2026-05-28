@@ -124,6 +124,12 @@ export const authApi = {
     return authFetch<GetSessionStateResponse>("/auth/get-session-state");
   },
 
+  refreshMainSession: async (): Promise<unknown> => {
+    return authFetch<unknown>("/auth/session/refresh", {
+      method: "POST",
+    });
+  },
+
   getToken: async (): Promise<AuthTokenResponse> => {
     return authFetch<AuthTokenResponse>("/auth/token");
   },

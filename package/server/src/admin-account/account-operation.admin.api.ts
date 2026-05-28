@@ -6,14 +6,21 @@ import {
   adminAuthUserSessionsResponseSchema,
   adminRevokeAuthSessionRequestSchema,
   adminRevokeAuthUserSessionsRequestSchema,
+  adminStartAuthImpersonationRequestSchema,
+  adminStartAuthImpersonationResponseSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro, verifyAdminFromDb } from "@/middleware/permission";
+import {
+  authMacro,
+  verifyAdminFromDb,
+  verifyRootFromDb,
+} from "@/middleware/permission";
 import {
   getAuthUserAccountSummaries,
   listAuthUserSessions,
   revokeAuthUserSession,
   revokeAuthUserSessions,
+  startAuthUserImpersonation,
 } from "./account-operation.service";
 
 async function assertAdmin(identity: any, status: any) {
@@ -25,6 +32,14 @@ async function assertAdmin(identity: any, status: any) {
   }
   const isAdmin = await verifyAdminFromDb(identity.userId);
   if (!isAdmin) return status(403, "Forbidden: Admin role required");
+}
+
+async function assertRoot(identity: any, status: any) {
+  if (identity.permission.role !== "ROOT") {
+    return status(403, "Forbidden: Root role required");
+  }
+  const isRoot = await verifyRootFromDb(identity.userId);
+  if (!isRoot) return status(403, "Forbidden: Root role required");
 }
 
 export const accountOperationsAdminApi = new Elysia({
@@ -122,6 +137,35 @@ export const accountOperationsAdminApi = new Elysia({
       },
       detail: {
         summary: "Revoke all sessions for an auth user with staff audit",
+        tags: ["Admin", "Account Operations"],
+      },
+    },
+  )
+  .post(
+    "/auth-users/impersonate",
+    async ({ body, identity, set, status }) => {
+      const forbidden = await assertRoot(identity, status);
+      if (forbidden) return forbidden;
+
+      const result = await startAuthUserImpersonation({
+        ...body,
+        actorUserId: identity.userId,
+      });
+      set.headers["set-cookie"] = result.authSessionCookie;
+      const { authSessionCookie: _authSessionCookie, ...response } = result;
+      return response;
+    },
+    {
+      requireLogin: true,
+      body: adminStartAuthImpersonationRequestSchema,
+      response: {
+        200: adminStartAuthImpersonationResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Start owner-only auth user impersonation",
+        description:
+          "Creates a short-lived impersonation auth session, captures a staff audit reason, and sets the auth session cookie for the admin browser.",
         tags: ["Admin", "Account Operations"],
       },
     },

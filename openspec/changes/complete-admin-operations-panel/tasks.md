@@ -11,7 +11,7 @@
 - [x] 2.1 Expand auth users page with main-user linkage, role, ban/session state, enforcement summary, and reconciliation warnings.
 - [x] 2.2 Expand sessions page with revoke, revoke-all, safe device metadata, and audit reason capture.
 - [x] 2.3 Integrate JWT service pages into platform security navigation and add rotation/activate/deactivate controls.
-- [ ] 2.4 Add impersonation controls with owner-only policy, duration display, reason capture, and audit link.
+- [x] 2.4 Add impersonation controls with owner-only policy, duration display, reason capture, and audit link.
 - [ ] 2.5 Add tests/stories for banned user, missing main profile, owner-only JWT operation, and impersonation denied states.
 
 ## 3. Content Operations

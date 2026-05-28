@@ -5,13 +5,17 @@ import type {
   AdminAuthUserSessionsResponse,
   AdminRevokeAuthSessionRequest,
   AdminRevokeAuthUserSessionsRequest,
+  AdminStartAuthImpersonationRequest,
+  AdminStartAuthImpersonationResponse,
   AuthMainServerReconciliationWarning,
 } from "@rezics/contract";
 import {
   listAuthSessionsForAuthUser,
   revokeAuthSessionForAuthUser,
   revokeAuthSessionsForAuthUser,
+  startAuthImpersonationSession,
 } from "@/auth-boundary/auth-internal.client";
+import { env } from "@/env";
 import { governanceAuditService } from "@/governance/audit.service";
 import { prisma } from "#/prisma/client";
 
@@ -23,6 +27,8 @@ const ENFORCEMENT_STRENGTH = [
   "SUSPENSION",
   "BAN",
 ] as const;
+const AUTH_SESSION_COOKIE_NAME = "better-auth.session_token";
+const DEFAULT_IMPERSONATION_SECONDS = 15 * 60;
 
 function warning(
   input: AuthMainServerReconciliationWarning,
@@ -211,5 +217,76 @@ export async function revokeAuthUserSessions(
     success: result.ok,
     revokedSessions: result.revokedSessions ?? 0,
     ...(auditLogId ? { auditLogId } : {}),
+  };
+}
+
+export function buildAuthImpersonationCookie(input: {
+  token: string;
+  durationSeconds: number;
+}) {
+  const secure =
+    env.NODE_ENV === "production" ||
+    env.AUTH_PUBLIC_ISSUER_URL.startsWith("https://");
+  const parts = [
+    `${AUTH_SESSION_COOKIE_NAME}=${encodeURIComponent(input.token)}`,
+    "Path=/auth",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${input.durationSeconds}`,
+  ];
+  if (env.NODE_ENV === "production") parts.push("Domain=.rezics.com");
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
+}
+
+export async function startAuthUserImpersonation(
+  input: AdminStartAuthImpersonationRequest & { actorUserId: string },
+): Promise<
+  AdminStartAuthImpersonationResponse & { authSessionCookie: string }
+> {
+  const durationSeconds =
+    input.durationSeconds ?? DEFAULT_IMPERSONATION_SECONDS;
+  const actor = await prisma.user.findUnique({
+    where: { unitId: input.actorUserId },
+    select: { authUserId: true },
+  });
+  if (!actor?.authUserId) {
+    throw new Error("Actor has no linked auth user for impersonation.");
+  }
+
+  const result = await startAuthImpersonationSession({
+    actorAuthUserId: actor.authUserId,
+    targetAuthUserId: input.targetAuthUserId,
+    reason: input.reason,
+    durationSeconds,
+  });
+  if (!result.ok || !result.session) {
+    throw new Error("Auth impersonation session could not be created.");
+  }
+
+  const auditLog = await appendSessionAudit({
+    actorUserId: input.actorUserId,
+    action: "impersonation.start",
+    targetKind: "auth-user",
+    targetId: input.targetAuthUserId,
+    reason: input.reason,
+    metadata: {
+      durationSeconds,
+      authSessionId: result.session.id,
+      actorAuthUserId: actor.authUserId,
+    },
+  });
+
+  return {
+    success: true,
+    targetAuthUserId: input.targetAuthUserId,
+    startedAt: result.session.startedAt,
+    expiresAt: result.session.expiresAt,
+    durationSeconds,
+    auditLogId: auditLog.id,
+    authSessionCookie: buildAuthImpersonationCookie({
+      token: result.session.token,
+      durationSeconds,
+    }),
   };
 }

@@ -140,3 +140,42 @@ export async function revokeAuthSessionForAuthUser(input: {
       typeof body.revokedSessions === "number" ? body.revokedSessions : null,
   };
 }
+
+export type AuthImpersonationSession = {
+  id: string;
+  token: string;
+  authUserId: string;
+  impersonatedBy: string | null;
+  startedAt: string;
+  expiresAt: string;
+  durationSeconds: number;
+};
+
+export async function startAuthImpersonationSession(input: {
+  actorAuthUserId: string;
+  targetAuthUserId: string;
+  reason: string;
+  durationSeconds: number;
+}): Promise<{ ok: boolean; session: AuthImpersonationSession | null }> {
+  const url = new URL("/internal/users/impersonate", getInternalAuthBaseUrl());
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-internal-secret": env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET,
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) return { ok: false, session: null };
+
+  const body = (await response.json()) as {
+    success?: boolean;
+    session?: AuthImpersonationSession;
+  };
+
+  return {
+    ok: body.success === true,
+    session: body.session ?? null,
+  };
+}

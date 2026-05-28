@@ -7,6 +7,7 @@ let currentIdentity = {
   permission: { role: "USER" },
 };
 let dbAdmin = false;
+let dbRoot = false;
 
 const getAuthUserAccountSummaries = mock(async () => [
   {
@@ -49,12 +50,23 @@ const revokeAuthUserSessions = mock(async () => ({
   revokedSessions: 2,
   auditLogId: "audit-2",
 }));
+const startAuthUserImpersonation = mock(async () => ({
+  success: true,
+  targetAuthUserId: "auth-user-1",
+  startedAt: "2026-05-28T00:00:00.000Z",
+  expiresAt: "2026-05-28T00:15:00.000Z",
+  durationSeconds: 900,
+  auditLogId: "audit-impersonation-1",
+  authSessionCookie:
+    "better-auth.session_token=impersonation-token; Path=/auth; HttpOnly; SameSite=Lax; Max-Age=900",
+}));
 
 mock.module("@/middleware/permission", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
     resolve: () => ({ identity: currentIdentity }),
   }),
   verifyAdminFromDb: async () => dbAdmin,
+  verifyRootFromDb: async () => dbRoot,
 }));
 
 mock.module("./account-operation.service", () => ({
@@ -62,6 +74,7 @@ mock.module("./account-operation.service", () => ({
   listAuthUserSessions,
   revokeAuthUserSession,
   revokeAuthUserSessions,
+  startAuthUserImpersonation,
 }));
 
 describe("accountOperationsAdminApi", () => {
@@ -173,6 +186,53 @@ describe("accountOperationsAdminApi", () => {
       sessionId: "session-1",
       reason: "operator review",
       actorUserId: "admin-1",
+    });
+  });
+
+  test("requires root and sets auth cookie when starting impersonation", async () => {
+    currentIdentity = {
+      sub: "root-1",
+      userId: "root-1",
+      permission: { role: "ROOT" },
+    };
+    dbRoot = true;
+    startAuthUserImpersonation.mockClear();
+
+    const { accountOperationsAdminApi } = await import(
+      "./account-operation.admin.api"
+    );
+    const response = await accountOperationsAdminApi.handle(
+      new Request(
+        "http://localhost/admin/account-operation/auth-users/impersonate",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            targetAuthUserId: "auth-user-1",
+            reason: "support review",
+            durationSeconds: 900,
+          }),
+          headers: { "content-type": "application/json" },
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("set-cookie")).toContain(
+      "better-auth.session_token=impersonation-token",
+    );
+    expect(await response.json()).toEqual({
+      success: true,
+      targetAuthUserId: "auth-user-1",
+      startedAt: "2026-05-28T00:00:00.000Z",
+      expiresAt: "2026-05-28T00:15:00.000Z",
+      durationSeconds: 900,
+      auditLogId: "audit-impersonation-1",
+    });
+    expect(startAuthUserImpersonation).toHaveBeenCalledWith({
+      targetAuthUserId: "auth-user-1",
+      reason: "support review",
+      durationSeconds: 900,
+      actorUserId: "root-1",
     });
   });
 });

@@ -4,8 +4,12 @@ import {
   useAdminSetRoleMutation,
   useAdminUnbanUserMutation,
 } from "@rezics/api/auth/auth.mutations";
+import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import { accountOperationsQueries } from "@rezics/api/account-operation/account-operation";
+import {
+  accountOperationsQueries,
+  useStartAuthUserImpersonationMutation,
+} from "@rezics/api/account-operation/account-operation";
 import type { AdminAuthUserAccountSummary } from "@rezics/contract";
 import {
   admin_auth_actions_title,
@@ -43,11 +47,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
@@ -123,12 +129,28 @@ export default function AuthUsersPage() {
     message: string;
     onConfirm: () => void;
   }>({ open: false, title: "", message: "", onConfirm: () => {} });
+  const [impersonationDialog, setImpersonationDialog] = React.useState<{
+    open: boolean;
+    user: AuthUser | null;
+    reason: string;
+    durationSeconds: number;
+    auditLogId: string | null;
+    error: string | null;
+  }>({
+    open: false,
+    user: null,
+    reason: "",
+    durationSeconds: 900,
+    auditLogId: null,
+    error: null,
+  });
 
   const usersQuery = useQuery(authQueries.adminUsers());
   const banMutation = useAdminBanUserMutation();
   const unbanMutation = useAdminUnbanUserMutation();
   const setRoleMutation = useAdminSetRoleMutation();
   const removeMutation = useAdminRemoveUserMutation();
+  const impersonateMutation = useStartAuthUserImpersonationMutation();
 
   const users = (usersQuery.data?.users ?? []) as AuthUser[];
   const total = users.length;
@@ -325,9 +347,25 @@ export default function AuthUsersPage() {
       {
         id: "actions",
         header: m.admin_auth_actions_title(),
-        minWidth: 200,
+        minWidth: 300,
         cell: (u) => (
           <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                setImpersonationDialog({
+                  open: true,
+                  user: u,
+                  reason: "",
+                  durationSeconds: 900,
+                  auditLogId: null,
+                  error: null,
+                })
+              }
+            >
+              Impersonate
+            </Button>
             {u.banned ? (
               <Button
                 size="sm"
@@ -459,6 +497,131 @@ export default function AuthUsersPage() {
             >
               {m.common_confirm()}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={impersonationDialog.open}
+        onOpenChange={(open) =>
+          setImpersonationDialog((prev) => ({ ...prev, open }))
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Start impersonation</DialogTitle>
+            <DialogDescription>
+              {impersonationDialog.user
+                ? `${impersonationDialog.user.email} (${impersonationDialog.user.id})`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {impersonationDialog.error ? (
+              <p className="text-sm text-error-text">
+                {impersonationDialog.error}
+              </p>
+            ) : null}
+            {impersonationDialog.auditLogId ? (
+              <div className="rounded-md bg-success-fill/10 p-3 text-sm text-success-text">
+                <p>Impersonation session started.</p>
+                <a
+                  className="mt-1 inline-flex font-medium underline underline-offset-2"
+                  href={`/staff/audit?action=impersonation.start&targetKind=auth-user&targetId=${encodeURIComponent(
+                    impersonationDialog.user?.id ?? "",
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Audit log: {impersonationDialog.auditLogId}
+                </a>
+              </div>
+            ) : null}
+            <div className="space-y-2">
+              <Label htmlFor="impersonation-duration">Duration</Label>
+              <Select
+                value={String(impersonationDialog.durationSeconds)}
+                onValueChange={(value) =>
+                  setImpersonationDialog((prev) => ({
+                    ...prev,
+                    durationSeconds: Number(value),
+                  }))
+                }
+              >
+                <SelectTrigger id="impersonation-duration">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="900">15 minutes</SelectItem>
+                  <SelectItem value="1800">30 minutes</SelectItem>
+                  <SelectItem value="3600">60 minutes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="impersonation-reason">Reason</Label>
+              <Textarea
+                id="impersonation-reason"
+                value={impersonationDialog.reason}
+                onChange={(event) =>
+                  setImpersonationDialog((prev) => ({
+                    ...prev,
+                    reason: event.target.value,
+                  }))
+                }
+                placeholder="audit reason"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setImpersonationDialog((prev) => ({ ...prev, open: false }))
+              }
+            >
+              {m.common_cancel()}
+            </Button>
+            <Button
+              disabled={
+                !impersonationDialog.user ||
+                Boolean(impersonationDialog.auditLogId) ||
+                impersonationDialog.reason.trim().length === 0 ||
+                impersonateMutation.isPending
+              }
+              onClick={async () => {
+                if (!impersonationDialog.user) return;
+                try {
+                  const result = await impersonateMutation.mutateAsync({
+                    targetAuthUserId: impersonationDialog.user.id,
+                    reason: impersonationDialog.reason.trim(),
+                    durationSeconds: impersonationDialog.durationSeconds,
+                  });
+                  await authApi.refreshMainSession();
+                  setImpersonationDialog((prev) => ({
+                    ...prev,
+                    auditLogId: result.auditLogId,
+                    error: null,
+                  }));
+                } catch (error) {
+                  setImpersonationDialog((prev) => ({
+                    ...prev,
+                    error:
+                      error instanceof Error
+                        ? error.message
+                        : "Impersonation failed",
+                  }));
+                }
+              }}
+            >
+              Start
+            </Button>
+            {impersonationDialog.auditLogId ? (
+              <Button onClick={() => window.location.assign("/")}>
+                Continue
+              </Button>
+            ) : null}
           </DialogFooter>
         </DialogContent>
       </Dialog>

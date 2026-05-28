@@ -34,6 +34,14 @@ const sessionFindMany = mock(async () => [
     updatedAt: new Date("2026-05-28T00:00:00.000Z"),
   },
 ]);
+const sessionCreate = mock(async () => ({
+  id: "session-impersonation-1",
+  token: "impersonation-token",
+  userId: "target-auth-user-1",
+  impersonatedBy: "actor-auth-user-1",
+  createdAt: new Date("2026-05-28T00:00:00.000Z"),
+  expiresAt: new Date("2026-05-28T00:15:00.000Z"),
+}));
 const transaction = mock(async (operations: Promise<unknown>[]) =>
   Promise.all(operations),
 );
@@ -47,7 +55,7 @@ mock.module("../auth/prisma", () => ({
       delete: userDelete,
       deleteMany: userDeleteMany,
     },
-    session: { deleteMany, findMany: sessionFindMany },
+    session: { create: sessionCreate, deleteMany, findMany: sessionFindMany },
     account: { deleteMany },
     verification: { deleteMany },
     oAuthAccessToken: { deleteMany },
@@ -79,6 +87,7 @@ describe("auth internal registration lifecycle", () => {
     userUpdate.mockClear();
     userDeleteMany.mockClear();
     deleteMany.mockClear();
+    sessionCreate.mockClear();
     sessionFindMany.mockClear();
     transaction.mockClear();
   });
@@ -340,6 +349,54 @@ describe("auth internal registration lifecycle", () => {
     });
     expect(deleteMany).toHaveBeenCalledWith({
       where: { id: "session-1", userId: "auth-user-1" },
+    });
+  });
+
+  test("creates an owner impersonation session for a main-requested auth user", async () => {
+    userFindUnique
+      .mockResolvedValueOnce({ id: "actor-auth-user-1", role: "owner" })
+      .mockResolvedValueOnce({
+        id: "target-auth-user-1",
+        role: "user",
+        banned: false,
+      });
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/users/impersonate", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({
+          actorAuthUserId: "actor-auth-user-1",
+          targetAuthUserId: "target-auth-user-1",
+          reason: "support review",
+          durationSeconds: 900,
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      success: true,
+      session: {
+        id: "session-impersonation-1",
+        token: "impersonation-token",
+        authUserId: "target-auth-user-1",
+        impersonatedBy: "actor-auth-user-1",
+        startedAt: "2026-05-28T00:00:00.000Z",
+        expiresAt: "2026-05-28T00:15:00.000Z",
+        durationSeconds: 900,
+      },
+    });
+    expect(sessionCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        userId: "target-auth-user-1",
+        impersonatedBy: "actor-auth-user-1",
+      }),
+      select: expect.any(Object),
     });
   });
 });

@@ -4,6 +4,7 @@ export {
   accountOperationsMutations,
   useRevokeAuthUserSessionMutation,
   useRevokeAuthUserSessionsMutation,
+  useStartAuthUserImpersonationMutation,
 } from "./account-operation.mutations";
 export {
   accountOperationsQueries,

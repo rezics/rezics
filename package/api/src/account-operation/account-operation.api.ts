@@ -6,6 +6,8 @@ import type {
   AdminAuthUserSessionsResponse,
   AdminRevokeAuthSessionRequest,
   AdminRevokeAuthUserSessionsRequest,
+  AdminStartAuthImpersonationRequest,
+  AdminStartAuthImpersonationResponse,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 
@@ -48,6 +50,17 @@ export const accountOperationsApi = {
   ): Promise<AdminAuthSessionMutationResponse> => {
     return apiFetch<AdminAuthSessionMutationResponse>(
       "/admin/account-operation/auth-users/sessions/revoke-all",
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+  startAuthUserImpersonation: async (
+    input: AdminStartAuthImpersonationRequest,
+  ): Promise<AdminStartAuthImpersonationResponse> => {
+    return apiFetch<AdminStartAuthImpersonationResponse>(
+      "/admin/account-operation/auth-users/impersonate",
       {
         method: "POST",
         body: JSON.stringify(input),

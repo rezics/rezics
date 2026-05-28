@@ -29,7 +29,14 @@ export function useRevokeAuthUserSessionsMutation() {
   });
 }
 
+export function useStartAuthUserImpersonationMutation() {
+  return useMutation({
+    mutationFn: accountOperationsApi.startAuthUserImpersonation,
+  });
+}
+
 export const accountOperationsMutations = {
   useRevokeAuthUserSession: useRevokeAuthUserSessionMutation,
   useRevokeAuthUserSessions: useRevokeAuthUserSessionsMutation,
+  useStartAuthUserImpersonation: useStartAuthUserImpersonationMutation,
 };

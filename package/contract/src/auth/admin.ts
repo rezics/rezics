@@ -127,3 +127,22 @@ export const adminAuthSessionMutationResponseSchema = t.Object({
 });
 export type AdminAuthSessionMutationResponse =
   (typeof adminAuthSessionMutationResponseSchema)["static"];
+
+export const adminStartAuthImpersonationRequestSchema = t.Object({
+  targetAuthUserId: t.String({ minLength: 1 }),
+  reason: t.String({ minLength: 1 }),
+  durationSeconds: t.Optional(t.Number({ minimum: 60, maximum: 3600 })),
+});
+export type AdminStartAuthImpersonationRequest =
+  (typeof adminStartAuthImpersonationRequestSchema)["static"];
+
+export const adminStartAuthImpersonationResponseSchema = t.Object({
+  success: t.Boolean(),
+  targetAuthUserId: t.String(),
+  startedAt: t.String(),
+  expiresAt: t.String(),
+  durationSeconds: t.Number(),
+  auditLogId: t.String(),
+});
+export type AdminStartAuthImpersonationResponse =
+  (typeof adminStartAuthImpersonationResponseSchema)["static"];

@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { randomUUID } from "node:crypto";
 import { prisma } from "../auth/prisma";
 import { env } from "../env";
 
@@ -153,6 +154,104 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
       body: t.Object({
         authUserId: t.String(),
         slug: t.String({ minLength: 1 }),
+      }),
+    },
+  )
+  .post(
+    "/users/impersonate",
+    async ({ body, set }) => {
+      const [actor, target] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: body.actorAuthUserId },
+          select: { id: true, role: true },
+        }),
+        prisma.user.findUnique({
+          where: { id: body.targetAuthUserId },
+          select: { id: true, role: true, banned: true },
+        }),
+      ]);
+
+      if (!actor) {
+        set.status = 404;
+        return {
+          success: false,
+          error: {
+            code: "ACTOR_AUTH_USER_NOT_FOUND",
+            message: "Actor auth user was not found",
+          },
+        };
+      }
+      if (actor.role !== "owner") {
+        set.status = 403;
+        return {
+          success: false,
+          error: {
+            code: "OWNER_REQUIRED",
+            message: "Only auth owners may start impersonation.",
+          },
+        };
+      }
+      if (!target) {
+        set.status = 404;
+        return {
+          success: false,
+          error: {
+            code: "TARGET_AUTH_USER_NOT_FOUND",
+            message: "Target auth user was not found",
+          },
+        };
+      }
+      if (target.banned) {
+        set.status = 409;
+        return {
+          success: false,
+          error: {
+            code: "TARGET_AUTH_USER_BANNED",
+            message: "Banned auth users cannot be impersonated.",
+          },
+        };
+      }
+
+      const now = new Date();
+      const durationSeconds = body.durationSeconds ?? 900;
+      const expiresAt = new Date(now.getTime() + durationSeconds * 1000);
+      const token = `${randomUUID()}${randomUUID()}`;
+      const session = await prisma.session.create({
+        data: {
+          userId: target.id,
+          token,
+          expiresAt,
+          impersonatedBy: actor.id,
+        },
+        select: {
+          id: true,
+          token: true,
+          userId: true,
+          expiresAt: true,
+          impersonatedBy: true,
+          createdAt: true,
+        },
+      });
+
+      return {
+        success: true,
+        session: {
+          id: session.id,
+          token: session.token,
+          authUserId: session.userId,
+          impersonatedBy: session.impersonatedBy,
+          startedAt: session.createdAt.toISOString(),
+          expiresAt: session.expiresAt.toISOString(),
+          durationSeconds,
+        },
+      };
+    },
+    {
+      body: t.Object({
+        actorAuthUserId: t.String(),
+        targetAuthUserId: t.String(),
+        reason: t.String({ minLength: 1 }),
+        durationSeconds: t.Optional(t.Number({ minimum: 60, maximum: 3600 })),
       }),
     },
   )
