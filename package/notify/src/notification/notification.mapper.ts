@@ -1,5 +1,6 @@
 import type { NotificationItem } from "@rezics/contract";
 import type { Notification } from "#/prisma/client";
+import { buildNotificationTarget } from "./notification.target";
 
 type AggregatedRow = {
   kind: string;
@@ -27,6 +28,7 @@ export function mapToAggregatedItems(
       extra: row.extra,
       read: row.allRead,
       latestAt: row.latestAt.toISOString(),
+      target: buildNotificationTarget(row.kind, row.extra),
     });
   }
 
@@ -40,6 +42,7 @@ export function mapToAggregatedItems(
       extra: row.extra,
       read: row.read,
       latestAt: row.createdAt.toISOString(),
+      target: buildNotificationTarget(row.kind, row.extra),
     });
   }
 
