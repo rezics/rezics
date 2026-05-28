@@ -76,8 +76,7 @@ export const continueReadingItemSchema = t.Object({
   resumeRoute: resumeRouteSchema,
 });
 
-export type ContinueReadingItem =
-  (typeof continueReadingItemSchema)["static"];
+export type ContinueReadingItem = (typeof continueReadingItemSchema)["static"];
 
 // ------------------------------------------------------------
 // lightweight per-section card summaries
@@ -123,10 +122,9 @@ export const dashboardSafetySchema = t.Object({
   enforcementActive: t.Boolean(),
   accountBlocked: t.Boolean(),
   pendingReportsAgainstUser: t.Integer({ minimum: 0 }),
-  notices: t.Array(
-    t.Object({ code: t.String(), message: t.String() }),
-    { maxItems: 10 },
-  ),
+  notices: t.Array(t.Object({ code: t.String(), message: t.String() }), {
+    maxItems: 10,
+  }),
 });
 
 // ------------------------------------------------------------
@@ -169,8 +167,7 @@ export type DashboardRealmSummary =
   (typeof dashboardRealmSummarySchema)["static"];
 export type DashboardNotificationSummary =
   (typeof dashboardNotificationSummarySchema)["static"];
-export type DashboardDmSummary =
-  (typeof dashboardDmSummarySchema)["static"];
+export type DashboardDmSummary = (typeof dashboardDmSummarySchema)["static"];
 export type DashboardActivityItem =
   (typeof dashboardActivityItemSchema)["static"];
 export type DashboardSafety = (typeof dashboardSafetySchema)["static"];

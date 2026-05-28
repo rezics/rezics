@@ -52,7 +52,14 @@ export type CacheMutationDomain =
  * not change per-node rows).
  */
 export const CACHE_COHERENCE_MAP = {
-  collect: ["detail", "dashboard", "profile", "search", "shelves", "collection"],
+  collect: [
+    "detail",
+    "dashboard",
+    "profile",
+    "search",
+    "shelves",
+    "collection",
+  ],
   follow: ["detail", "dashboard", "profile", "subscription"],
   reaction: ["detail", "dashboard", "profile", "realmFeed", "search"],
   progress: ["detail", "dashboard", "profile", "progress"],

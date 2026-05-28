@@ -16,8 +16,7 @@ export const bookshelfBreakpointSchema = t.Object({
   columns: t.Integer({ minimum: 1, maximum: 24 }),
 });
 
-export type BookshelfBreakpoint =
-  (typeof bookshelfBreakpointSchema)["static"];
+export type BookshelfBreakpoint = (typeof bookshelfBreakpointSchema)["static"];
 
 export const bookshelfViewConfigSchema = t.Object({
   /**
@@ -29,8 +28,7 @@ export const bookshelfViewConfigSchema = t.Object({
   showTitle: t.Boolean(),
 });
 
-export type BookshelfViewConfig =
-  (typeof bookshelfViewConfigSchema)["static"];
+export type BookshelfViewConfig = (typeof bookshelfViewConfigSchema)["static"];
 
 /** Baseline grid: scales from 3 columns on phones to 8 on wide desktops. */
 export const DEFAULT_BOOKSHELF_CONFIG: BookshelfViewConfig = {
