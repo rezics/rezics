@@ -17,6 +17,7 @@ import { Route as AdminStatusRouteImport } from './routes/_admin/status'
 import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
 import { Route as AdminRepairRouteImport } from './routes/_admin/repair'
 import { Route as AdminJwtServicesRouteImport } from './routes/_admin/jwt-services'
+import { Route as AdminGovernanceRouteImport } from './routes/_admin/governance'
 import { Route as AdminAuthorityRouteImport } from './routes/_admin/authority'
 import { Route as AdminUserIndexRouteImport } from './routes/_admin/user/index'
 import { Route as AdminUnitIndexRouteImport } from './routes/_admin/unit/index'
@@ -82,6 +83,11 @@ const AdminRepairRoute = AdminRepairRouteImport.update({
 const AdminJwtServicesRoute = AdminJwtServicesRouteImport.update({
   id: '/jwt-services',
   path: '/jwt-services',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGovernanceRoute = AdminGovernanceRouteImport.update({
+  id: '/governance',
+  path: '/governance',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAuthorityRoute = AdminAuthorityRouteImport.update({
@@ -225,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
   '/login': typeof LoginRoute
   '/authority': typeof AdminAuthorityRoute
+  '/governance': typeof AdminGovernanceRoute
   '/jwt-services': typeof AdminJwtServicesRoute
   '/repair': typeof AdminRepairRoute
   '/settings': typeof AdminSettingsRoute
@@ -260,6 +267,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/authority': typeof AdminAuthorityRoute
+  '/governance': typeof AdminGovernanceRoute
   '/jwt-services': typeof AdminJwtServicesRoute
   '/repair': typeof AdminRepairRoute
   '/settings': typeof AdminSettingsRoute
@@ -298,6 +306,7 @@ export interface FileRoutesById {
   '/_admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/_admin/authority': typeof AdminAuthorityRoute
+  '/_admin/governance': typeof AdminGovernanceRoute
   '/_admin/jwt-services': typeof AdminJwtServicesRoute
   '/_admin/repair': typeof AdminRepairRoute
   '/_admin/settings': typeof AdminSettingsRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/authority'
+    | '/governance'
     | '/jwt-services'
     | '/repair'
     | '/settings'
@@ -372,6 +382,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/authority'
+    | '/governance'
     | '/jwt-services'
     | '/repair'
     | '/settings'
@@ -409,6 +420,7 @@ export interface FileRouteTypes {
     | '/_admin'
     | '/login'
     | '/_admin/authority'
+    | '/_admin/governance'
     | '/_admin/jwt-services'
     | '/_admin/repair'
     | '/_admin/settings'
@@ -504,6 +516,13 @@ declare module '@tanstack/react-router' {
       path: '/jwt-services'
       fullPath: '/jwt-services'
       preLoaderRoute: typeof AdminJwtServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/governance': {
+      id: '/_admin/governance'
+      path: '/governance'
+      fullPath: '/governance'
+      preLoaderRoute: typeof AdminGovernanceRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/authority': {
@@ -700,6 +719,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAuthorityRoute: typeof AdminAuthorityRoute
+  AdminGovernanceRoute: typeof AdminGovernanceRoute
   AdminJwtServicesRoute: typeof AdminJwtServicesRoute
   AdminRepairRoute: typeof AdminRepairRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -736,6 +756,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuthorityRoute: AdminAuthorityRoute,
+  AdminGovernanceRoute: AdminGovernanceRoute,
   AdminJwtServicesRoute: AdminJwtServicesRoute,
   AdminRepairRoute: AdminRepairRoute,
   AdminSettingsRoute: AdminSettingsRoute,

@@ -26,6 +26,7 @@ import {
   GitMerge as AccountTreeIcon,
   Wrench as BuildIcon,
   ShieldUser as AdminPanelSettingsOutlinedIcon,
+  ShieldAlert as ShieldAlertIcon,
   BookMarked as CollectionsBookmarkIcon,
   LayoutDashboard as DashboardIcon,
   Mail as EmailOutlinedIcon,
@@ -224,6 +225,12 @@ export const adminNav = {
       label: () => "Governance",
       icon: <ShieldCheckIcon fontSize="small" />,
       children: [
+        {
+          id: "governance.overview",
+          label: () => "Overview",
+          icon: <ShieldAlertIcon fontSize="small" />,
+          to: "/governance",
+        },
         {
           id: "governance.authority",
           label: i18nMessages.admin_nav_authority,

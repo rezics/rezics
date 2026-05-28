@@ -11,8 +11,8 @@ import type {
 import { searchClient } from "@/meili/search-client";
 
 const ADMIN_ROUTES = {
-  audit: "/realm",
-  governance: "/realm",
+  audit: "/governance",
+  governance: "/governance",
   history: "/status",
   queue: "/status",
   search: "/meili",
