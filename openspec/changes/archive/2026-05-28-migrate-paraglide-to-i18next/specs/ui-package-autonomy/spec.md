@@ -1,23 +1,4 @@
-## MODIFIED Requirements
-
-### Requirement: UI package SHALL use the shared neutral i18n React adapter
-
-`@rezics/ui` SHALL use the shared neutral `@rezics/i18n/react` adapter for active-locale subscriptions and translation lookup, and SHALL NOT introduce a competing i18n runtime. That adapter subpath SHALL remain neutral: it SHALL NOT import app/admin shell code, routers, API clients, namespace JSON files, or `@rezics/ui/locales/*` modules.
-
-#### Scenario: UI component imports the adapter
-
-- **WHEN** a reusable UI component needs dynamic localization for
-  component-internal copy
-- **THEN** it MAY import `useTranslation` re-exported from
-  `@rezics/i18n/react`
-- **AND** it SHALL reference keys via `t('ui:<key>')`
-
-#### Scenario: UI package avoids product namespaces
-
-- **WHEN** source under `package/ui/src/` is inspected
-- **THEN** it SHALL NOT call `useTranslation('<ns>')` for any
-  namespace other than `'ui'` (or aggregate hooks that include `'ui'`)
-- **AND** it SHALL NOT import app/admin locale helpers
+## ADDED Requirements
 
 ### Requirement: UI package ships per-locale ES modules
 
@@ -55,6 +36,27 @@ imports the requested locale's module and calls
   modules via dynamic import code splitting
 - **AND** locale modules for other locales SHALL NOT appear in the
   consumer's production bundle
+
+## MODIFIED Requirements
+
+### Requirement: UI package may use neutral i18n React adapter
+
+`@rezics/ui` SHALL use the shared neutral `@rezics/i18n/react` adapter for active-locale subscriptions and translation lookup, and SHALL NOT introduce a competing i18n runtime. That adapter subpath SHALL remain neutral: it SHALL NOT import app/admin shell code, routers, API clients, namespace JSON files, or `@rezics/ui/locales/*` modules.
+
+#### Scenario: UI component imports the adapter
+
+- **WHEN** a reusable UI component needs dynamic localization for
+  component-internal copy
+- **THEN** it MAY import `useTranslation` re-exported from
+  `@rezics/i18n/react`
+- **AND** it SHALL reference keys via `t('ui:<key>')`
+
+#### Scenario: UI package avoids product namespaces
+
+- **WHEN** source under `package/ui/src/` is inspected
+- **THEN** it SHALL NOT call `useTranslation('<ns>')` for any
+  namespace other than `'ui'` (or aggregate hooks that include `'ui'`)
+- **AND** it SHALL NOT import app/admin locale helpers
 
 ### Requirement: Core UI export surfaces avoid host runtime imports
 

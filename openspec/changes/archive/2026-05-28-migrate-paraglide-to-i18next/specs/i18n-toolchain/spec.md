@@ -1,4 +1,4 @@
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Frontend i18n runtime
 
@@ -23,64 +23,6 @@ shared runtime and re-export `i18next`, the React provider, and
 - **THEN** it SHALL call `useTranslation('ui')` against the shared
   i18next instance
 - **AND** it SHALL NOT initialize a separate i18next instance
-
-### Requirement: Translation source files use JSON
-
-Frontend translation source files SHALL be JSON files served as static
-assets from `public/locales/{lng}/{ns}.json`. JSON5, JSONC, YAML, and
-custom translation source formats SHALL NOT be introduced by this
-change.
-
-#### Scenario: Translation source file extension
-
-- **WHEN** translation source files are added for product, domain, or
-  UI component messages
-- **THEN** the files SHALL use the `.json` extension
-- **AND** every file SHALL be a valid JSON object whose values are
-  strings or ICU template strings
-
-### Requirement: App and admin share product/domain namespaces
-
-The app and admin frontends SHALL consume the same set of product/domain
-namespace JSON files served from `public/locales/{lng}/{ns}.json`. Admin
-SHALL additionally load the `admin` namespace, which SHALL NOT be loaded
-by app.
-
-#### Scenario: Shared product label appears in app and admin
-
-- **WHEN** app and admin both render the same product/domain label
-- **THEN** both frontends SHALL resolve the label from the same
-  namespace JSON file
-- **AND** neither frontend SHALL keep a duplicate local translation key
-  for that shared label
-
-#### Scenario: Admin-only namespace is isolated
-
-- **WHEN** the app frontend boots
-- **THEN** it SHALL NOT request `/locales/<lng>/admin.json`
-- **AND** the admin namespace SHALL be loaded only by the admin frontend
-
-### Requirement: Active locale is adapter-owned
-
-The shared React i18n adapter SHALL own frontend active-locale state for
-app, admin, UI components, and Storybook. App/admin shells SHALL
-initialize the i18next instance, register UI locale bundles, and call
-`i18next.changeLanguage(locale)` when users change language.
-
-#### Scenario: User changes language through app shell
-
-- **WHEN** the user selects `en` in an app language control
-- **THEN** the app SHALL call `i18next.changeLanguage('en')`
-- **AND** every already-loaded namespace SHALL refetch its `en` version
-- **AND** translated React components SHALL update through
-  `react-i18next` subscriptions without page reload
-
-#### Scenario: Admin uses the same locale owner
-
-- **WHEN** the user selects `ja` in admin settings
-- **THEN** admin SHALL call the same `changeLanguage` API used by app
-- **AND** admin product copy, admin-only namespace copy, and imported
-  UI package copy SHALL render in Japanese
 
 ### Requirement: React UI copy resolves through useTranslation
 
@@ -110,33 +52,6 @@ of namespace JSON files into React render paths SHALL NOT be used.
 - **AND** the message SHALL be resolved through `t(key)` during React
   render
 
-### Requirement: Canonical locale behavior is preserved
-
-The frontend UI toolchain SHALL use the canonical locale set `zh-hant`,
-`zh-hans`, `en`, `ja`, `de`, and `ko`; the default locale is `zh-hant`.
-Frontend UI callsites SHALL NOT provide runtime fallback strings for
-missing messages; namespace catalog completeness is required before a
-key is referenced.
-
-#### Scenario: Default locale
-
-- **WHEN** a frontend shell initializes without a persisted language
-  preference
-- **THEN** the active locale SHALL be `zh-hant`
-
-#### Scenario: Complete catalog replaces fallback strings
-
-- **WHEN** frontend source renders UI copy through `t('<ns>:<key>')`
-- **THEN** the corresponding key SHALL exist in every supported locale's
-  JSON file for that namespace
-- **AND** the rendering callsite SHALL NOT pass a fallback string
-
-#### Scenario: Korean locale is supported
-
-- **WHEN** a frontend shell sets the active locale to `ko`
-- **THEN** the i18next runtime SHALL accept `ko`
-- **AND** every loaded namespace SHALL refetch its `ko` JSON
-
 ### Requirement: Generated Paraglide artifacts SHALL be removed
 
 Generated Paraglide artifacts SHALL NOT remain in the repository after the migration. The `@inlang/paraglide-js` dependency, `project.inlang/` directories, `src/paraglide/` generated outputs, and `i18n:compile` build scripts SHALL be removed. Frontend packages SHALL NOT contain any reference to generated Paraglide message functions.
@@ -148,39 +63,6 @@ Generated Paraglide artifacts SHALL NOT remain in the repository after the migra
 - **AND** no `src/paraglide/` directory SHALL exist
 - **AND** `@inlang/paraglide-js` SHALL NOT appear in any `package.json`
 - **AND** no `i18n:compile` script SHALL appear in any `package.json`
-
-### Requirement: Contract domain enums SHALL resolve labels through `@rezics/i18n` helpers
-
-Contract domain enum labels SHALL resolve through hand-written maps in `@rezics/i18n`, not through `i18nKey` fields on `@rezics/contract` definitions. Backend-driven discriminator keys for contract domain enums (entity kind, license, subject attribution role, credit role, and any future contract enum that ships with a displayable label) SHALL resolve their localized label through hand-written maps in `@rezics/i18n` guarded by `satisfies Record<EnumKey, () => string>`. Each map entry SHALL return the result of `i18next.t('<ns>:<key>')` for the appropriate namespace. The `i18nKey` field SHALL NOT exist on `@rezics/contract` domain definitions; message identity belongs to `@rezics/i18n`, not contract.
-
-#### Scenario: Rendering an entity kind label
-
-- **WHEN** a frontend component needs to display the label for an entity
-  whose `kind` is `"person"`
-- **THEN** the component SHALL call `entityKindLabel(entity.kind)` from
-  `@rezics/i18n`
-- **AND** the helper SHALL resolve the label via
-  `i18next.t('entity:kind_person')` or the equivalent
-  namespace-qualified key
-- **AND** the component SHALL NOT read an `i18nKey` field from the
-  contract object
-
-#### Scenario: Adding a new entity kind
-
-- **WHEN** a new discriminator value is added to a contract domain enum
-- **THEN** the corresponding `<enum>Label` map in `@rezics/i18n` SHALL
-  be updated in the same change
-- **AND** TypeScript SHALL flag the omission via
-  `satisfies Record<EnumKey, () => string>` if the map is not updated
-
-#### Scenario: Contract is inspected for embedded message keys
-
-- **WHEN** source under `package/contract/src/` is inspected after the
-  migration
-- **THEN** no `i18nKey` field SHALL appear on contract domain
-  definitions
-- **AND** no contract source file SHALL import from `@rezics/i18n` or
-  from any i18next runtime
 
 ### Requirement: Dynamic translation keys are typed maps
 
@@ -268,6 +150,126 @@ spec. The bootstrap namespace set SHALL be passed to `i18next.init`'s
 - **WHEN** `i18next.init` is configured
 - **THEN** the `load` option SHALL be `'currentOnly'`
 - **AND** the runtime SHALL NOT eagerly fetch fallback-chain locales
+
+## MODIFIED Requirements
+
+### Requirement: Translation source files use JSON
+
+Frontend translation source files SHALL be JSON files served as static
+assets from `public/locales/{lng}/{ns}.json`. JSON5, JSONC, YAML, and
+custom translation source formats SHALL NOT be introduced by this
+change.
+
+#### Scenario: Translation source file extension
+
+- **WHEN** translation source files are added for product, domain, or
+  UI component messages
+- **THEN** the files SHALL use the `.json` extension
+- **AND** every file SHALL be a valid JSON object whose values are
+  strings or ICU template strings
+
+### Requirement: App and admin share product/domain messages
+
+The app and admin frontends SHALL consume the same set of product/domain
+namespace JSON files served from `public/locales/{lng}/{ns}.json`. Admin
+SHALL additionally load the `admin` namespace, which SHALL NOT be loaded
+by app.
+
+#### Scenario: Shared product label appears in app and admin
+
+- **WHEN** app and admin both render the same product/domain label
+- **THEN** both frontends SHALL resolve the label from the same
+  namespace JSON file
+- **AND** neither frontend SHALL keep a duplicate local translation key
+  for that shared label
+
+#### Scenario: Admin-only namespace is isolated
+
+- **WHEN** the app frontend boots
+- **THEN** it SHALL NOT request `/locales/<lng>/admin.json`
+- **AND** the admin namespace SHALL be loaded only by the admin frontend
+
+### Requirement: Active locale is adapter-owned
+
+The shared React i18n adapter SHALL own frontend active-locale state for
+app, admin, UI components, and Storybook. App/admin shells SHALL
+initialize the i18next instance, register UI locale bundles, and call
+`i18next.changeLanguage(locale)` when users change language.
+
+#### Scenario: User changes language through app shell
+
+- **WHEN** the user selects `en` in an app language control
+- **THEN** the app SHALL call `i18next.changeLanguage('en')`
+- **AND** every already-loaded namespace SHALL refetch its `en` version
+- **AND** translated React components SHALL update through
+  `react-i18next` subscriptions without page reload
+
+#### Scenario: Admin uses the same locale owner
+
+- **WHEN** the user selects `ja` in admin settings
+- **THEN** admin SHALL call the same `changeLanguage` API used by app
+- **AND** admin product copy, admin-only namespace copy, and imported
+  UI package copy SHALL render in Japanese
+
+### Requirement: Canonical locale behavior is preserved
+
+The frontend UI toolchain SHALL use the canonical locale set `zh-hant`,
+`zh-hans`, `en`, `ja`, `de`, and `ko`; the default locale is `zh-hant`.
+Frontend UI callsites SHALL NOT provide runtime fallback strings for
+missing messages; namespace catalog completeness is required before a
+key is referenced.
+
+#### Scenario: Default locale
+
+- **WHEN** a frontend shell initializes without a persisted language
+  preference
+- **THEN** the active locale SHALL be `zh-hant`
+
+#### Scenario: Complete catalog replaces fallback strings
+
+- **WHEN** frontend source renders UI copy through `t('<ns>:<key>')`
+- **THEN** the corresponding key SHALL exist in every supported locale's
+  JSON file for that namespace
+- **AND** the rendering callsite SHALL NOT pass a fallback string
+
+#### Scenario: Korean locale is supported
+
+- **WHEN** a frontend shell sets the active locale to `ko`
+- **THEN** the i18next runtime SHALL accept `ko`
+- **AND** every loaded namespace SHALL refetch its `ko` JSON
+
+### Requirement: Contract domain enums resolve labels through `@rezics/i18n` helpers
+
+Contract domain enum labels SHALL resolve through hand-written maps in `@rezics/i18n`, not through `i18nKey` fields on `@rezics/contract` definitions. Backend-driven discriminator keys for contract domain enums (entity kind, license, subject attribution role, credit role, and any future contract enum that ships with a displayable label) SHALL resolve their localized label through hand-written maps in `@rezics/i18n` guarded by `satisfies Record<EnumKey, () => string>`. Each map entry SHALL return the result of `i18next.t('<ns>:<key>')` for the appropriate namespace. The `i18nKey` field SHALL NOT exist on `@rezics/contract` domain definitions; message identity belongs to `@rezics/i18n`, not contract.
+
+#### Scenario: Rendering an entity kind label
+
+- **WHEN** a frontend component needs to display the label for an entity
+  whose `kind` is `"person"`
+- **THEN** the component SHALL call `entityKindLabel(entity.kind)` from
+  `@rezics/i18n`
+- **AND** the helper SHALL resolve the label via
+  `i18next.t('entity:kind_person')` or the equivalent
+  namespace-qualified key
+- **AND** the component SHALL NOT read an `i18nKey` field from the
+  contract object
+
+#### Scenario: Adding a new entity kind
+
+- **WHEN** a new discriminator value is added to a contract domain enum
+- **THEN** the corresponding `<enum>Label` map in `@rezics/i18n` SHALL
+  be updated in the same change
+- **AND** TypeScript SHALL flag the omission via
+  `satisfies Record<EnumKey, () => string>` if the map is not updated
+
+#### Scenario: Contract is inspected for embedded message keys
+
+- **WHEN** source under `package/contract/src/` is inspected after the
+  migration
+- **THEN** no `i18nKey` field SHALL appear on contract domain
+  definitions
+- **AND** no contract source file SHALL import from `@rezics/i18n` or
+  from any i18next runtime
 
 ## REMOVED Requirements
 
@@ -360,7 +362,7 @@ files under `public/locales/`.
 
 ### Requirement: Admin uses the shared product i18n catalog
 
-**Reason**: Reformulated in `App and admin share product/domain namespaces`
+**Reason**: Reformulated in `App and admin share product/domain messages`
 above.
 
 **Migration**: None.

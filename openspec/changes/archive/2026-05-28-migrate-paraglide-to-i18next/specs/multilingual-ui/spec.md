@@ -72,7 +72,7 @@ Chinese or English display text.
   Traditional Chinese resolved through `t('common:tags')` and
   `t('search:...')`
 
-### Requirement: All six locale folders contain complete namespace files
+### Requirement: All six locale files contain keys for homepage and search strings
 
 Every supported locale SHALL have a folder under `public/locales/`
 containing a JSON file for every namespace in the canonical

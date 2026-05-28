@@ -1,28 +1,4 @@
-## MODIFIED Requirements
-
-### Requirement: Shared React locale store
-
-The React i18n adapter SHALL provide a single active-locale store shared
-by app, admin, UI components, and Storybook. The store SHALL be the
-shared `i18next` instance owned by `@rezics/i18n`, accessed by React
-components via the `I18nextProvider` rooted at each app/admin shell.
-The adapter SHALL validate all locale writes through the canonical
-language registry before delegating to `i18next.changeLanguage`.
-
-#### Scenario: Component observes language change
-
-- **WHEN** a React component uses `useTranslation('<ns>')` and the
-  active locale changes from `zh-hant` to `en`
-- **THEN** the component SHALL re-render from the new locale snapshot
-- **AND** no full page reload SHALL be required
-
-#### Scenario: Invalid locale is rejected
-
-- **WHEN** a caller attempts to set the active locale to `en-US`
-- **THEN** the adapter SHALL reject or normalize the value according to
-  the canonical language registry
-- **AND** `i18next.changeLanguage` SHALL only be invoked with a
-  canonical Rezics language code
+## ADDED Requirements
 
 ### Requirement: Translation binding via useTranslation
 
@@ -53,28 +29,6 @@ hook argument and SHALL resolve keys via the returned `t` function.
 - **AND** the rendered string SHALL substitute interpolation values
   according to i18next semantics
 
-### Requirement: Adapter does not import namespace JSON
-
-The React i18n adapter source SHALL NOT statically import any
-namespace JSON file. All translation resources SHALL reach the
-runtime through the HTTP backend (for app/admin namespaces) or
-through `i18next.addResourceBundle` (for the UI package's locale
-bundles).
-
-#### Scenario: Adapter source is inspected
-
-- **WHEN** source for `@rezics/i18n/react` is inspected
-- **THEN** it SHALL NOT import any JSON file under
-  `public/locales/`
-- **AND** it SHALL NOT import any `@rezics/ui/locales/*` module
-
-#### Scenario: Unused namespace remains unfetched
-
-- **WHEN** an app boots and only the bootstrap namespaces are used
-  on first paint
-- **THEN** no HTTP fetch SHALL be issued for non-bootstrap namespace
-  JSON files until a component requests them
-
 ### Requirement: UI locale bundles register via addResourceBundle
 
 The adapter SHALL accept package-owned locale bundles registered via
@@ -100,6 +54,54 @@ backend.
   bundle in place
 - **AND** `@rezics/ui` components SHALL re-render with Japanese copy
   without remount
+
+## MODIFIED Requirements
+
+### Requirement: Shared React locale store
+
+The React i18n adapter SHALL provide a single active-locale store shared
+by app, admin, UI components, and Storybook. The store SHALL be the
+shared `i18next` instance owned by `@rezics/i18n`, accessed by React
+components via the `I18nextProvider` rooted at each app/admin shell.
+The adapter SHALL validate all locale writes through the canonical
+language registry before delegating to `i18next.changeLanguage`.
+
+#### Scenario: Component observes language change
+
+- **WHEN** a React component uses `useTranslation('<ns>')` and the
+  active locale changes from `zh-hant` to `en`
+- **THEN** the component SHALL re-render from the new locale snapshot
+- **AND** no full page reload SHALL be required
+
+#### Scenario: Invalid locale is rejected
+
+- **WHEN** a caller attempts to set the active locale to `en-US`
+- **THEN** the adapter SHALL reject or normalize the value according to
+  the canonical language registry
+- **AND** `i18next.changeLanguage` SHALL only be invoked with a
+  canonical Rezics language code
+
+### Requirement: Adapter does not import generated messages
+
+The React i18n adapter source SHALL NOT statically import any
+namespace JSON file. All translation resources SHALL reach the
+runtime through the HTTP backend (for app/admin namespaces) or
+through `i18next.addResourceBundle` (for the UI package's locale
+bundles).
+
+#### Scenario: Adapter source is inspected
+
+- **WHEN** source for `@rezics/i18n/react` is inspected
+- **THEN** it SHALL NOT import any JSON file under
+  `public/locales/`
+- **AND** it SHALL NOT import any `@rezics/ui/locales/*` module
+
+#### Scenario: Unused namespace remains unfetched
+
+- **WHEN** an app boots and only the bootstrap namespaces are used
+  on first paint
+- **THEN** no HTTP fetch SHALL be issued for non-bootstrap namespace
+  JSON files until a component requests them
 
 ### Requirement: UI package components remain dynamically localized
 
