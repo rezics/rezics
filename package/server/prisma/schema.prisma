@@ -579,18 +579,23 @@ model ContentStructureNode {
   title         String
   noContent     Boolean        @default(false)
   rating        ContentRating?
+  isDeleted     Boolean        @default(false)
+  deletedAt     DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
-  container          ContentStructure       @relation("ContentStructureContainer", fields: [ownerUnitId], references: [ownerUnitId], onDelete: Cascade)
-  parent             ContentStructureNode?  @relation("ContentStructureNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
-  children           ContentStructureNode[] @relation("ContentStructureNodeChildren")
-  contentUnit        Unit?                  @relation("ContentStructureNodeContent", fields: [contentUnitId], references: [id], onDelete: SetNull)
-  seriesContentIndex SeriesContentIndex?
+  container            ContentStructure          @relation("ContentStructureContainer", fields: [ownerUnitId], references: [ownerUnitId], onDelete: Cascade)
+  parent               ContentStructureNode?     @relation("ContentStructureNodeChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children             ContentStructureNode[]    @relation("ContentStructureNodeChildren")
+  contentUnit          Unit?                     @relation("ContentStructureNodeContent", fields: [contentUnitId], references: [id], onDelete: SetNull)
+  seriesContentIndex   SeriesContentIndex?
+  userProgressLastNode UserUnitProgress[]        @relation("UserUnitProgressLastNode")
+  userNodeProgress     UserContentNodeProgress[]
 
-  @@index([ownerUnitId, parentId, sortKey])
+  @@index([ownerUnitId, parentId, sortKey, isDeleted])
   @@index([contentUnitId])
   @@index([ownerUnitId, updatedAt(sort: Desc)])
+  @@index([ownerUnitId, isDeleted, updatedAt(sort: Desc)])
 }
 
 /**
@@ -1208,6 +1213,7 @@ model User {
   workLinkClaimsAsClaimer         WorkLinkClaim[]            @relation("WorkLinkClaimClaimer")
   workLinkClaimsAsResolver        WorkLinkClaim[]            @relation("WorkLinkClaimResolver")
   unitProgress                    UserUnitProgress[]
+  contentNodeProgress             UserContentNodeProgress[]
   unitCollaborations              UnitCollaborator[]         @relation("UnitCollaboratorUser")
   unitCollaboratorsAdded          UnitCollaborator[]         @relation("UnitCollaboratorAddedBy")
   unitFieldLocksCreated           UnitFieldLock[]            @relation("UnitFieldLockLockedBy")
@@ -1352,19 +1358,34 @@ model UserUnitProgress {
   isDeleted      Boolean                @default(false)
   completedCount Int                    @default(0)
   totalTimeMs    BigInt                 @default(0)
-  lastPosition   Json?
+  lastReadNodeId String?                @db.Uuid
+  lastReadAnchor Json?
   extra          Json?
 
   firstSeenAt DateTime @default(now())
   lastSeenAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
-  unit Unit @relation("ProgressUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  user         User                  @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+  unit         Unit                  @relation("ProgressUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  lastReadNode ContentStructureNode? @relation("UserUnitProgressLastNode", fields: [lastReadNodeId], references: [id], onDelete: SetNull)
 
   @@id([userId, unitId])
   @@index([userId, lastSeenAt(sort: Desc)])
   @@index([unitId, status])
   @@index([userId, isDeleted, lastSeenAt(sort: Desc)])
+  @@index([lastReadNodeId])
+}
+
+model UserContentNodeProgress {
+  userId      String   @db.Uuid
+  nodeId      String   @db.Uuid
+  completedAt DateTime @default(now())
+
+  user User                 @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+  node ContentStructureNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, nodeId])
+  @@index([nodeId])
 }
 
 /**

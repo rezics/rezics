@@ -125,6 +125,23 @@ export class ProgressService {
           ? (existing?.completedCount ?? 0) + 1
           : undefined;
 
+    if (input.lastReadNodeId) {
+      const node = await prisma.contentStructureNode.findUnique({
+        where: { id: input.lastReadNodeId },
+        select: { isDeleted: true, ownerUnitId: true },
+      });
+      if (!node) {
+        throw new AppError(404, "lastReadNodeId does not reference a node", {
+          code: "content_structure_node_not_found",
+        });
+      }
+      if (node.isDeleted) {
+        throw new AppError(409, "lastReadNodeId targets a deleted node", {
+          code: "content_structure_node_deleted",
+        });
+      }
+    }
+
     const createData: Prisma.UserUnitProgressCreateInput = {
       user: { connect: { unitId: userId } },
       unit: { connect: { id: unitId } },
@@ -135,7 +152,13 @@ export class ProgressService {
         completedCount ??
         (coercedStatus === UserUnitProgressStatus.COMPLETED ? 1 : 0),
       totalTimeMs: addTimeMs,
-      lastPosition: (input.lastPosition ?? null) as Prisma.InputJsonValue,
+      ...(input.lastReadNodeId
+        ? { lastReadNode: { connect: { id: input.lastReadNodeId } } }
+        : {}),
+      lastReadAnchor:
+        input.lastReadAnchor !== undefined
+          ? ((input.lastReadAnchor ?? null) as Prisma.InputJsonValue)
+          : undefined,
       extra:
         input.extra !== undefined
           ? ((input.extra ?? null) as Prisma.InputJsonValue)
@@ -150,9 +173,15 @@ export class ProgressService {
       ...(input.progress !== undefined ? { progress: input.progress } : {}),
       ...(coercedStatus !== undefined ? { status: coercedStatus } : {}),
       ...(completedCount !== undefined ? { completedCount } : {}),
-      ...(input.lastPosition !== undefined
+      ...(input.lastReadNodeId !== undefined
+        ? input.lastReadNodeId === null
+          ? { lastReadNode: { disconnect: true } }
+          : { lastReadNode: { connect: { id: input.lastReadNodeId } } }
+        : {}),
+      ...(input.lastReadAnchor !== undefined
         ? {
-            lastPosition: (input.lastPosition ?? null) as Prisma.InputJsonValue,
+            lastReadAnchor: (input.lastReadAnchor ??
+              null) as Prisma.InputJsonValue,
           }
         : {}),
       ...(input.extra !== undefined
@@ -251,6 +280,47 @@ export class ProgressService {
       userId,
       unitId,
     );
+  }
+
+  async toggleNodeCompletion(
+    userId: string,
+    bookUnitId: string,
+    nodeId: string,
+    isCompleted: boolean,
+  ): Promise<void> {
+    const node = await prisma.contentStructureNode.findUnique({
+      where: { id: nodeId },
+      select: { ownerUnitId: true, isDeleted: true },
+    });
+    if (!node) {
+      throw new AppError(404, "Content structure node not found", {
+        code: "content_structure_node_not_found",
+      });
+    }
+    if (node.ownerUnitId !== bookUnitId) {
+      throw new AppError(
+        422,
+        "Node does not belong to the specified book Unit",
+        { code: "content_structure_node_cross_book" },
+      );
+    }
+    if (node.isDeleted) {
+      throw new AppError(409, "Cannot mark a deleted node as completed", {
+        code: "content_structure_node_deleted",
+      });
+    }
+
+    if (isCompleted) {
+      await prisma.userContentNodeProgress.upsert({
+        where: { userId_nodeId: { userId, nodeId } },
+        create: { userId, nodeId },
+        update: {},
+      });
+    } else {
+      await prisma.userContentNodeProgress.deleteMany({
+        where: { userId, nodeId },
+      });
+    }
   }
 
   async progressStats(unitId: string): Promise<UnitProgressStatsResponse> {

@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { contentUnitIdForNode } from "@/book-library/models/bookContentStructurePath";
 
 export type ChapterPickerOption = {
+  nodeId: string;
   contentUnitId: string;
   label: string;
   depth: number;
@@ -25,8 +26,9 @@ function flatten(
   for (const node of nodes) {
     const nextTrail = [...trail, node.title];
     const contentUnitId = contentUnitIdForNode(node);
-    if (contentUnitId && !node.noContent) {
+    if (contentUnitId && !node.noContent && node.id) {
       acc.push({
+        nodeId: node.id,
         contentUnitId,
         label: nextTrail.join(" › "),
         depth,

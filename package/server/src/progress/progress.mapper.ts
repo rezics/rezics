@@ -1,10 +1,20 @@
 import {
   PROGRESS_EXTRA_KNOWN_KEYS,
+  type LastReadAnchor,
   type ProgressExtra,
-  type UnitLastPosition,
   type UnitProgressRowDTO,
 } from "@rezics/contract";
 import type { UserUnitProgress } from "#/prisma/client";
+
+function sanitizeAnchor(raw: unknown): LastReadAnchor | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw !== "object" || Array.isArray(raw)) return null;
+  const text = (raw as { text?: unknown }).text;
+  if (typeof text !== "string" || text.length === 0 || text.length > 200) {
+    return null;
+  }
+  return { text };
+}
 
 function sanitizeExtra(raw: unknown): ProgressExtra | null {
   if (raw === null || raw === undefined) return null;
@@ -39,7 +49,8 @@ export function mapProgressToDTO(row: UserUnitProgress): UnitProgressRowDTO {
     isDeleted: row.isDeleted,
     completedCount: row.completedCount,
     totalTimeMs: Number(row.totalTimeMs),
-    lastPosition: (row.lastPosition as UnitLastPosition | null) ?? null,
+    lastReadNodeId: row.lastReadNodeId ?? null,
+    lastReadAnchor: sanitizeAnchor(row.lastReadAnchor),
     firstSeenAt: row.firstSeenAt.toISOString(),
     lastSeenAt: row.lastSeenAt.toISOString(),
     extra: sanitizeExtra(row.extra),

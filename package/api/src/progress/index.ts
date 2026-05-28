@@ -3,6 +3,7 @@ export { progressKeys } from "./progress.keys";
 export {
   progressMutations,
   useDeleteUnitProgress,
+  useToggleNodeCompletion,
   useUpdateUnitProgress,
 } from "./progress.mutations";
 export {

@@ -432,11 +432,11 @@ export class ChapterService {
       // structure-shape field per D6).
       if (title !== undefined) {
         const affected = await tx.contentStructureNode.findMany({
-          where: { contentUnitId: unitId },
+          where: { contentUnitId: unitId, isDeleted: false },
           select: { ownerUnitId: true },
         });
         await tx.contentStructureNode.updateMany({
-          where: { contentUnitId: unitId },
+          where: { contentUnitId: unitId, isDeleted: false },
           data: { title, updatedAt: new Date() },
         });
         const ownerUnitIds = Array.from(

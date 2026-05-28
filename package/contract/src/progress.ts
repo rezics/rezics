@@ -35,36 +35,22 @@ export const userUnitProgressStatusSchema = t.Union([
 export type UserUnitProgressStatus =
   (typeof userUnitProgressStatusSchema)["static"];
 
-export const contentStructurePathLastPositionSchema = t.Object(
+export const lastReadAnchorSchema = t.Object(
   {
-    kind: t.Literal("contentStructurePath"),
-    bookUnitId: t.String(),
-    path: t.Array(t.Integer({ minimum: 0 })),
-    contentUnitId: t.Optional(t.String()),
+    text: t.String({ minLength: 1, maxLength: 200 }),
   },
   { additionalProperties: false },
 );
 
-export type ContentStructurePathLastPosition =
-  (typeof contentStructurePathLastPositionSchema)["static"];
+export type LastReadAnchor = (typeof lastReadAnchorSchema)["static"];
 
-export const chapterLastPositionSchema = t.Object(
-  {
-    kind: t.Literal("chapter"),
-    contentUnitId: t.String(),
-    offset: t.Optional(t.Number({ minimum: 0 })),
-  },
-  { additionalProperties: false },
-);
+export const nodeCompletionToggleBodySchema = t.Object({
+  nodeId: t.String(),
+  isCompleted: t.Boolean(),
+});
 
-export type ChapterLastPosition = (typeof chapterLastPositionSchema)["static"];
-
-export const unitLastPositionSchema = t.Union([
-  contentStructurePathLastPositionSchema,
-  chapterLastPositionSchema,
-]);
-
-export type UnitLastPosition = (typeof unitLastPositionSchema)["static"];
+export type NodeCompletionToggleBody =
+  (typeof nodeCompletionToggleBodySchema)["static"];
 
 export const progressExtraSchema = t.Object(
   {
@@ -92,7 +78,8 @@ export const unitProgressUpsertBodySchema = t.Object({
   progress: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
   status: t.Optional(userUnitProgressStatusSchema),
   completedCount: t.Optional(t.Integer({ minimum: 0 })),
-  lastPosition: t.Optional(t.Nullable(unitLastPositionSchema)),
+  lastReadNodeId: t.Optional(t.Nullable(t.String())),
+  lastReadAnchor: t.Optional(t.Nullable(lastReadAnchorSchema)),
   addTimeMs: t.Optional(t.Integer({ minimum: 0 })),
   extra: t.Optional(t.Nullable(progressExtraSchema)),
 });
@@ -114,7 +101,8 @@ export const unitProgressRowDTOSchema = t.Object({
   isDeleted: t.Boolean(),
   completedCount: t.Number({ minimum: 0 }),
   totalTimeMs: t.Number({ minimum: 0 }),
-  lastPosition: t.Nullable(unitLastPositionSchema),
+  lastReadNodeId: t.Nullable(t.String()),
+  lastReadAnchor: t.Nullable(lastReadAnchorSchema),
   firstSeenAt: t.String(),
   lastSeenAt: t.String(),
   extra: t.Nullable(progressExtraSchema),

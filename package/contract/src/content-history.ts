@@ -104,6 +104,15 @@ export const contentStructureNodeDeleteOperationSchema = t.Object({
   node: contentStructureNodeSnapshotSchema,
   placement: contentStructureNodePlacementSchema,
   descendantCount: t.Number(),
+  softDelete: t.Optional(t.Boolean()),
+  promotedChildIds: t.Optional(t.Array(t.String())),
+});
+
+export const contentStructureNodeRestoreOperationSchema = t.Object({
+  op: t.Literal("node.restore"),
+  nodeId: t.String(),
+  placement: contentStructureNodePlacementSchema,
+  fallbackToRoot: t.Boolean(),
 });
 
 export const contentStructureNodeLinkOperationSchema = t.Object({
@@ -131,6 +140,7 @@ export const contentStructureBatchOperationSchema = t.Union([
   contentStructureNodeUpdateOperationSchema,
   contentStructureNodeMoveOperationSchema,
   contentStructureNodeDeleteOperationSchema,
+  contentStructureNodeRestoreOperationSchema,
   contentStructureNodeLinkOperationSchema,
   contentStructureNodeUnlinkOperationSchema,
   contentStructureBulkReplaceOperationSchema,

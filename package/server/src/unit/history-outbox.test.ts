@@ -183,4 +183,50 @@ describe("history outbox helpers", () => {
       title: "Captured node",
     });
   });
+
+  test("structure payloads carry softDelete and node.restore operations", () => {
+    const softDelete = buildStructureEventPayload({
+      unitId: "book-1",
+      sequence: 5n,
+      actorUserId: "user-1",
+      eventType: "contentStructure.node.delete",
+      changedFieldKeys: ["contentStructure"],
+      payload: {
+        operations: [
+          {
+            op: "node.delete",
+            node: { nodeId: "n-1", title: "Doomed" },
+            placement: { parentId: null, sortKey: "g" },
+            descendantCount: 0,
+            softDelete: true,
+            promotedChildIds: ["c-1"],
+          },
+        ],
+      },
+    });
+    const restore = buildStructureEventPayload({
+      unitId: "book-1",
+      sequence: 6n,
+      actorUserId: "user-1",
+      eventType: "contentStructure.node.restore",
+      changedFieldKeys: ["contentStructure"],
+      payload: {
+        operations: [
+          {
+            op: "node.restore",
+            nodeId: "n-1",
+            placement: { parentId: null, sortKey: "g" },
+            fallbackToRoot: true,
+          },
+        ],
+      },
+    });
+
+    expect((softDelete.payload as any).operations[0].softDelete).toBe(true);
+    expect((softDelete.payload as any).operations[0].promotedChildIds).toEqual([
+      "c-1",
+    ]);
+    expect((restore.payload as any).operations[0].op).toBe("node.restore");
+    expect((restore.payload as any).operations[0].fallbackToRoot).toBe(true);
+  });
 });

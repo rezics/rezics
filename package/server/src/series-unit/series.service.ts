@@ -268,6 +268,7 @@ export class SeriesService {
       prisma.contentStructureNode.findMany({
         where: {
           ownerUnitId: seriesUnitId,
+          isDeleted: false,
           contentUnit: { type: UnitType.SERIES },
         },
         select: { contentUnitId: true },
@@ -336,6 +337,7 @@ export class SeriesService {
     const releaseNodes = await tx.contentStructureNode.findMany({
       where: {
         ownerUnitId: seriesUnitId,
+        isDeleted: false,
         contentUnit: {
           type: { in: RELEASE_UNIT_TYPES },
           workMemberships: { some: { role: RELEASE_ROLE } },

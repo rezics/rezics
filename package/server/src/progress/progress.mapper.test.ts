@@ -11,7 +11,8 @@ const baseRow = {
   isDeleted: false,
   completedCount: 0,
   totalTimeMs: 0n,
-  lastPosition: null,
+  lastReadNodeId: null,
+  lastReadAnchor: null,
   firstSeenAt: new Date("2026-01-01T00:00:00.000Z"),
   lastSeenAt: new Date("2026-01-01T00:00:00.000Z"),
   extra: null,
@@ -61,5 +62,41 @@ describe("mapProgressToDTO", () => {
     expect(mapProgressToDTO(row).extra).toEqual({
       dropped: { reasonPostUnitIds: ["post-x"] },
     });
+  });
+
+  test("propagates lastReadNodeId and sanitized lastReadAnchor", () => {
+    const dto = mapProgressToDTO({
+      ...baseRow,
+      lastReadNodeId: "node-1",
+      lastReadAnchor: {
+        text: "Resume",
+      } as unknown as UserUnitProgress["lastReadAnchor"],
+    });
+    expect(dto.lastReadNodeId).toBe("node-1");
+    expect(dto.lastReadAnchor).toEqual({ text: "Resume" });
+  });
+
+  test("rejects malformed lastReadAnchor (empty / too long / no text)", () => {
+    const empty = mapProgressToDTO({
+      ...baseRow,
+      lastReadAnchor: {
+        text: "",
+      } as unknown as UserUnitProgress["lastReadAnchor"],
+    });
+    expect(empty.lastReadAnchor).toBeNull();
+    const tooLong = mapProgressToDTO({
+      ...baseRow,
+      lastReadAnchor: {
+        text: "x".repeat(201),
+      } as unknown as UserUnitProgress["lastReadAnchor"],
+    });
+    expect(tooLong.lastReadAnchor).toBeNull();
+    const wrongShape = mapProgressToDTO({
+      ...baseRow,
+      lastReadAnchor: {
+        foo: "bar",
+      } as unknown as UserUnitProgress["lastReadAnchor"],
+    });
+    expect(wrongShape.lastReadAnchor).toBeNull();
   });
 });

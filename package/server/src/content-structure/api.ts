@@ -61,4 +61,25 @@ export const contentStructureApi = new Elysia({
         tags: ["Content Structure"],
       },
     },
+  )
+  .post(
+    "/:ownerUnitId/restore",
+    async ({ params, body, identity }) => {
+      await contentStructureService.restoreNodes(
+        params.ownerUnitId,
+        body.nodeIds,
+        { actorUserId: identity.userId },
+      );
+      return { message: "Nodes restored" };
+    },
+    {
+      requireLogin: true,
+      params: ownerParamsSchema,
+      body: t.Object({ nodeIds: t.Array(t.String()) }),
+      response: t.Object({ message: t.String() }),
+      detail: {
+        summary: "Restore soft-deleted content structure nodes",
+        tags: ["Content Structure"],
+      },
+    },
   );

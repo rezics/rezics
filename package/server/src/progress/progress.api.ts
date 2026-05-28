@@ -1,4 +1,5 @@
 import {
+  nodeCompletionToggleBodySchema,
   unitProgressListQuerySchema,
   unitProgressListResponseSchema,
   unitProgressParamsSchema,
@@ -91,6 +92,28 @@ export const progressApi = new Elysia()
       response: t.Object({ message: t.String() }),
       detail: {
         summary: "Delete my unit progress",
+        tags: ["Progress"],
+      },
+    },
+  )
+  .post(
+    "/me/units/:unitId/node-completion",
+    async ({ params, body, identity }) => {
+      await progressService.toggleNodeCompletion(
+        identity.userId,
+        params.unitId,
+        body.nodeId,
+        body.isCompleted,
+      );
+      return { message: "Node completion updated" };
+    },
+    {
+      requireLogin: true,
+      params: unitProgressParamsSchema,
+      body: nodeCompletionToggleBodySchema,
+      response: t.Object({ message: t.String() }),
+      detail: {
+        summary: "Toggle completion of a content structure node",
         tags: ["Progress"],
       },
     },

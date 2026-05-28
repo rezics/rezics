@@ -1,6 +1,11 @@
 import type { ContentStructureItem } from "@rezics/contract";
 import type { ContentStructureNodeRow } from "./types";
 
+// soft delete: callers MUST filter isDeleted = false before invoking
+// buildContentStructureTree or resolveContentStructurePath. The mapper does not
+// re-check that invariant; passing in tombstoned rows will silently include
+// them in the resulting tree.
+
 export function buildContentStructureTree(
   rows: readonly ContentStructureNodeRow[],
 ): ContentStructureItem[] {

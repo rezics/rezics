@@ -208,11 +208,11 @@ The materialization operation SHALL be addressed by `bookUnitId` and a `BookCont
 - THEN the system SHALL render the node metadata
 - AND the system SHALL NOT create a Chapter Unit until the user performs an action that requires Unit identity
 
-#### Scenario: Book-level progress stores path without materialization
+#### Scenario: Book-level progress stores node FK without materialization
 
-- GIVEN a user is reading a node at path `[2, 0]` with `chapterUnitId = NULL`
+- GIVEN a user is reading a `ContentStructureNode` with `contentUnitId = NULL`
 - WHEN the system updates book-level progress for the parent Book Unit
-- THEN the system MAY store the serialized path in the book Unit progress row's `lastPosition`
+- THEN the system MAY store the node id in the book Unit progress row's `lastReadNodeId`
 - AND the system SHALL NOT create a Chapter Unit only to store that book-level position
 
 ### Requirement: Materialization rejects stale BookContentStructure paths

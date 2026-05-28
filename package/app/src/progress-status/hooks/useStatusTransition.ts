@@ -7,11 +7,7 @@ import {
   useAddShelfUnitMutation,
   useRemoveShelfUnitMutation,
 } from "@rezics/api/shelf/shelf.mutations";
-import type {
-  ProgressExtra,
-  UnitLastPosition,
-  UserUnitProgressStatus,
-} from "@rezics/contract";
+import type { ProgressExtra, UserUnitProgressStatus } from "@rezics/contract";
 import {
   common_retry,
   progress_status_toast_both_failed,
@@ -29,7 +25,7 @@ import {
 export type StatusTransitionPayload = {
   to: UserUnitProgressStatus;
   progress?: number;
-  lastPosition?: UnitLastPosition | null;
+  lastReadNodeId?: string | null;
   extra?: ProgressExtra | null;
   completedCount?: number;
 };
@@ -147,7 +143,7 @@ export function useStatusTransition(
         await updateProgress.mutateAsync({
           status: payload.to,
           progress: payload.progress,
-          lastPosition: payload.lastPosition,
+          lastReadNodeId: payload.lastReadNodeId,
           extra: payload.extra,
           completedCount: payload.completedCount,
         });

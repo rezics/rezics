@@ -1,4 +1,3 @@
-import type { UnitLastPosition } from "@rezics/contract";
 import {
   common_cancel,
   common_save,
@@ -34,27 +33,20 @@ type ActiveProgressModalProps = {
   open: boolean;
   bookUnitId: string;
   initialProgress?: number;
-  initialLastPosition?: UnitLastPosition | null;
+  initialLastReadNodeId?: string | null;
   onCancel: () => void;
   onSave: (payload: {
     progress: number;
-    lastPosition: UnitLastPosition | null;
+    lastReadNodeId: string | null;
   }) => void;
   isPending?: boolean;
 };
-
-function lastPositionChapterId(
-  lp: UnitLastPosition | null | undefined,
-): string | undefined {
-  if (lp?.kind === "chapter") return lp.contentUnitId;
-  return undefined;
-}
 
 export function ActiveProgressModal({
   open,
   bookUnitId,
   initialProgress = 0,
-  initialLastPosition = null,
+  initialLastReadNodeId = null,
   onCancel,
   onSave,
   isPending,
@@ -63,24 +55,21 @@ export function ActiveProgressModal({
   const [progressPct, setProgressPct] = useState<number>(
     Math.round((initialProgress ?? 0) * 100),
   );
-  const [contentUnitId, setContentUnitId] = useState<string | undefined>(
-    lastPositionChapterId(initialLastPosition),
+  const [nodeId, setNodeId] = useState<string | undefined>(
+    initialLastReadNodeId ?? undefined,
   );
 
   useEffect(() => {
     if (open) {
       setProgressPct(Math.round((initialProgress ?? 0) * 100));
-      setContentUnitId(lastPositionChapterId(initialLastPosition));
+      setNodeId(initialLastReadNodeId ?? undefined);
     }
-  }, [open, initialProgress, initialLastPosition]);
+  }, [open, initialProgress, initialLastReadNodeId]);
 
   const handleSave = () => {
-    const lastPosition: UnitLastPosition | null = contentUnitId
-      ? { kind: "chapter", contentUnitId }
-      : null;
     onSave({
       progress: Math.max(0, Math.min(100, progressPct)) / 100,
-      lastPosition,
+      lastReadNodeId: nodeId ?? null,
     });
   };
 
@@ -115,8 +104,8 @@ export function ActiveProgressModal({
             <Label>{m.progress_status_active_modal_chapter_label()}</Label>
             <ChapterPicker
               bookUnitId={bookUnitId}
-              value={contentUnitId}
-              onChange={setContentUnitId}
+              value={nodeId}
+              onChange={setNodeId}
             />
           </div>
         </div>

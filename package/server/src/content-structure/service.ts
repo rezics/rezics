@@ -7,6 +7,7 @@ import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma, type ContentRating } from "#/prisma/client";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
+import { AppError } from "@/utils/errors";
 import {
   buildStructureEventPayload,
   writeSequencedHistoryOutbox,
@@ -36,6 +37,26 @@ type SaveOptions = {
   ) => Promise<void>;
 };
 
+type SoftDeleteOptions = {
+  actorUserId?: string;
+  message?: string | null;
+  eventType?: string;
+};
+
+type RestoreOptions = SoftDeleteOptions;
+
+const EXISTING_ROW_SELECT = {
+  id: true,
+  parentId: true,
+  sortKey: true,
+  contentUnitId: true,
+  title: true,
+  noContent: true,
+  rating: true,
+  isDeleted: true,
+  deletedAt: true,
+} as const;
+
 export class ContentStructureService {
   async getByOwnerUnitId(
     ownerUnitId: string,
@@ -46,7 +67,7 @@ export class ContentStructureService {
         select: { ownerUnitId: true, createdAt: true, updatedAt: true },
       }),
       prisma.contentStructureNode.findMany({
-        where: { ownerUnitId },
+        where: { ownerUnitId, isDeleted: false },
         orderBy: [{ parentId: "asc" }, { sortKey: "asc" }],
       }),
     ]);
@@ -79,32 +100,43 @@ export class ContentStructureService {
       await this.ensureForOwner(tx, ownerUnitId);
       const actorUserId =
         options.actorUserId ?? (await resolveRezicsWikiUserId());
-      const current = await tx.contentStructureNode.findMany({
+      const allRows = await tx.contentStructureNode.findMany({
         where: { ownerUnitId },
-        select: {
-          id: true,
-          parentId: true,
-          sortKey: true,
-          contentUnitId: true,
-          title: true,
-          noContent: true,
-          rating: true,
-        },
+        select: EXISTING_ROW_SELECT,
       });
+      const current = allRows.filter((row) => !row.isDeleted);
+      const deletedById = new Map(
+        allRows.filter((row) => row.isDeleted).map((row) => [row.id, row]),
+      );
+
+      for (const node of submitted) {
+        rejectResurrectedIds(node, deletedById);
+      }
 
       const currentById = new Map(current.map((row) => [row.id, row]));
       const planned = planSubmittedContentStructureTree(submitted, currentById);
-      const operations = planContentStructureOperations(current, planned);
       const submittedIds = new Set(planned.map((p) => p.id));
-      let mutated = false;
-
-      const toDelete = current
+      const removedIds = current
         .map((row) => row.id)
         .filter((id) => !submittedIds.has(id));
-      if (toDelete.length > 0) {
-        await tx.contentStructureNode.deleteMany({
-          where: { id: { in: toDelete } },
-        });
+      const promotedChildIds = new Set<string>();
+      for (const row of current) {
+        if (row.parentId && removedIds.includes(row.parentId)) {
+          if (!removedIds.includes(row.id)) {
+            promotedChildIds.add(row.id);
+          }
+        }
+      }
+
+      const operations = planContentStructureOperations(
+        current,
+        planned,
+        promotedChildIds,
+      );
+      let mutated = false;
+
+      if (removedIds.length > 0) {
+        await softDeleteNodesInTx(tx, ownerUnitId, removedIds);
         mutated = true;
       }
 
@@ -180,6 +212,161 @@ export class ContentStructureService {
     return this.getByOwnerUnitId(ownerUnitId);
   }
 
+  async softDeleteNodes(
+    ownerUnitId: string,
+    nodeIds: readonly string[],
+    options: SoftDeleteOptions = {},
+  ): Promise<void> {
+    const targetIds = [...new Set(nodeIds)];
+    if (targetIds.length === 0) return;
+    await prisma.$transaction(async (tx) => {
+      const actorUserId =
+        options.actorUserId ?? (await resolveRezicsWikiUserId());
+      const targets = await tx.contentStructureNode.findMany({
+        where: { ownerUnitId, id: { in: targetIds } },
+        select: EXISTING_ROW_SELECT,
+      });
+      const aliveTargets = targets.filter((row) => !row.isDeleted);
+      if (aliveTargets.length === 0) return;
+      const aliveTargetIds = aliveTargets.map((row) => row.id);
+
+      const promotedChildren = await tx.contentStructureNode.findMany({
+        where: {
+          ownerUnitId,
+          isDeleted: false,
+          parentId: { in: aliveTargetIds },
+          id: { notIn: aliveTargetIds },
+        },
+        select: { id: true },
+      });
+      const promotedChildIds = promotedChildren.map((row) => row.id);
+
+      await softDeleteNodesInTx(tx, ownerUnitId, aliveTargetIds);
+      await tx.contentStructure.update({
+        where: { ownerUnitId },
+        data: { updatedAt: new Date() },
+      });
+
+      await writeSequencedHistoryOutbox(tx, {
+        unitId: ownerUnitId,
+        actorUserId,
+        buildPayload: (sequence) => ({
+          kind: HistoryOutboxPayloadKind.STRUCTURE_EVENT,
+          event: buildStructureEventPayload({
+            unitId: ownerUnitId,
+            sequence,
+            actorUserId,
+            eventType: options.eventType ?? "contentStructure.node.delete",
+            changedFieldKeys: ["contentStructure"],
+            payload: {
+              ownerUnitId,
+              operations: aliveTargets.map((row) => ({
+                op: "node.delete" as const,
+                node: {
+                  nodeId: row.id,
+                  title: row.title,
+                  contentUnitId: row.contentUnitId,
+                  noContent: row.noContent,
+                  rating: row.rating,
+                },
+                placement: { parentId: row.parentId, sortKey: row.sortKey },
+                descendantCount: 0,
+                softDelete: true,
+                promotedChildIds,
+              })),
+            },
+            message: options.message ?? null,
+          }),
+        }),
+      });
+    });
+  }
+
+  async restoreNodes(
+    ownerUnitId: string,
+    nodeIds: readonly string[],
+    options: RestoreOptions = {},
+  ): Promise<void> {
+    const targetIds = [...new Set(nodeIds)];
+    if (targetIds.length === 0) return;
+    await prisma.$transaction(async (tx) => {
+      const actorUserId =
+        options.actorUserId ?? (await resolveRezicsWikiUserId());
+      const candidates = await tx.contentStructureNode.findMany({
+        where: { ownerUnitId, id: { in: targetIds } },
+        select: EXISTING_ROW_SELECT,
+      });
+      const deletedTargets = candidates.filter((row) => row.isDeleted);
+      if (deletedTargets.length === 0) return;
+
+      const parentIds = [
+        ...new Set(
+          deletedTargets
+            .map((row) => row.parentId)
+            .filter((id): id is string => id !== null),
+        ),
+      ];
+      const parents =
+        parentIds.length === 0
+          ? []
+          : await tx.contentStructureNode.findMany({
+              where: { id: { in: parentIds } },
+              select: { id: true, isDeleted: true },
+            });
+      const parentById = new Map(parents.map((row) => [row.id, row]));
+
+      const operations: ContentStructureBatchOperation[] = [];
+      for (const target of deletedTargets) {
+        const originalParent = target.parentId
+          ? parentById.get(target.parentId)
+          : null;
+        const fallbackToRoot =
+          target.parentId !== null &&
+          (!originalParent || originalParent.isDeleted);
+        const restoredParentId = fallbackToRoot ? null : target.parentId;
+        await tx.contentStructureNode.update({
+          where: { id: target.id },
+          data: {
+            isDeleted: false,
+            deletedAt: null,
+            parentId: restoredParentId,
+          },
+        });
+        operations.push({
+          op: "node.restore",
+          nodeId: target.id,
+          placement: {
+            parentId: restoredParentId,
+            sortKey: target.sortKey,
+          },
+          fallbackToRoot,
+        });
+      }
+
+      await tx.contentStructure.update({
+        where: { ownerUnitId },
+        data: { updatedAt: new Date() },
+      });
+
+      await writeSequencedHistoryOutbox(tx, {
+        unitId: ownerUnitId,
+        actorUserId,
+        buildPayload: (sequence) => ({
+          kind: HistoryOutboxPayloadKind.STRUCTURE_EVENT,
+          event: buildStructureEventPayload({
+            unitId: ownerUnitId,
+            sequence,
+            actorUserId,
+            eventType: options.eventType ?? "contentStructure.node.restore",
+            changedFieldKeys: ["contentStructure"],
+            payload: { ownerUnitId, operations },
+            message: options.message ?? null,
+          }),
+        }),
+      });
+    });
+  }
+
   async getNodeByPath(
     tx: Prisma.TransactionClient,
     ownerUnitId: string,
@@ -193,7 +380,7 @@ export class ContentStructureService {
       select: { ownerUnitId: true, updatedAt: true },
     });
     const nodeRows = await tx.contentStructureNode.findMany({
-      where: { ownerUnitId },
+      where: { ownerUnitId, isDeleted: false },
       orderBy: [{ parentId: "asc" }, { sortKey: "asc" }],
     });
     return {
@@ -204,6 +391,45 @@ export class ContentStructureService {
 }
 
 export const contentStructureService = new ContentStructureService();
+
+async function softDeleteNodesInTx(
+  tx: Prisma.TransactionClient,
+  ownerUnitId: string,
+  nodeIds: readonly string[],
+): Promise<void> {
+  if (nodeIds.length === 0) return;
+  await tx.contentStructureNode.updateMany({
+    where: {
+      ownerUnitId,
+      isDeleted: false,
+      parentId: { in: [...nodeIds] },
+      id: { notIn: [...nodeIds] },
+    },
+    data: { parentId: null },
+  });
+  await tx.contentStructureNode.updateMany({
+    where: { ownerUnitId, id: { in: [...nodeIds] }, isDeleted: false },
+    data: { isDeleted: true, deletedAt: new Date() },
+  });
+}
+
+function rejectResurrectedIds(
+  node: ContentStructureItem,
+  deletedById: ReadonlyMap<string, unknown>,
+): void {
+  if (node.id && deletedById.has(node.id)) {
+    throw new AppError(
+      409,
+      `Content structure node ${node.id} is deleted and cannot be updated`,
+      { code: "content_structure_node_deleted" },
+    );
+  }
+  if (node.children) {
+    for (const child of node.children) {
+      rejectResurrectedIds(child, deletedById);
+    }
+  }
+}
 
 function nodeSnapshot(
   row: ExistingContentStructureRow | PlannedContentStructureNode,
@@ -243,6 +469,7 @@ function countDescendants(
 export function planContentStructureOperations(
   current: readonly ExistingContentStructureRow[],
   planned: readonly PlannedContentStructureNode[],
+  promotedChildIds: ReadonlySet<string> = new Set(),
 ): ContentStructureBatchOperation[] {
   const currentById = new Map(current.map((row) => [row.id, row]));
   const plannedById = new Map(planned.map((row) => [row.id, row]));
@@ -265,6 +492,11 @@ export function planContentStructureOperations(
       node: nodeSnapshot(row),
       placement: nodePlacement(row),
       descendantCount: countDescendants(row.id, rowsByParentId),
+      softDelete: true,
+      promotedChildIds: [...promotedChildIds].filter((id) => {
+        const child = currentById.get(id);
+        return child?.parentId === row.id;
+      }),
     });
   }
 

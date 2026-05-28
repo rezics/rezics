@@ -20,7 +20,7 @@ const i18nMessages = {
 type ChapterPickerProps = {
   bookUnitId: string;
   value?: string;
-  onChange: (contentUnitId: string | undefined) => void;
+  onChange: (nodeId: string | undefined) => void;
   disabled?: boolean;
 };
 
@@ -54,7 +54,7 @@ export function ChapterPicker({
           {m.progress_status_chapter_picker_none()}
         </SelectItem>
         {options.map((opt) => (
-          <SelectItem key={opt.contentUnitId} value={opt.contentUnitId}>
+          <SelectItem key={opt.nodeId} value={opt.nodeId}>
             {opt.label}
           </SelectItem>
         ))}

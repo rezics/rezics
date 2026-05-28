@@ -130,7 +130,7 @@ export function BookProgressStatusSection({
           status: "ACTIVE",
           draft: {
             progress: progress.data?.progress ?? 0,
-            lastPosition: progress.data?.lastPosition ?? null,
+            lastReadNodeId: progress.data?.lastReadNodeId ?? null,
           },
         });
         return;
@@ -160,14 +160,11 @@ export function BookProgressStatusSection({
   }, [removeProgress]);
 
   const handleActiveSave = useCallback(
-    async (payload: {
-      progress: number;
-      lastPosition: import("@rezics/contract").UnitLastPosition | null;
-    }) => {
+    async (payload: { progress: number; lastReadNodeId: string | null }) => {
       await transition({
         to: "ACTIVE",
         progress: payload.progress,
-        lastPosition: payload.lastPosition,
+        lastReadNodeId: payload.lastReadNodeId,
       });
       closeModal();
     },
@@ -319,7 +316,7 @@ export function BookProgressStatusSection({
         open={modal.kind === "active"}
         bookUnitId={bookUnitId}
         initialProgress={modal.draft.progress}
-        initialLastPosition={modal.draft.lastPosition}
+        initialLastReadNodeId={modal.draft.lastReadNodeId}
         onCancel={closeModal}
         onSave={handleActiveSave}
         isPending={isPending}

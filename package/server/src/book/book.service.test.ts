@@ -24,6 +24,8 @@ interface FakeRow {
   title: string;
   noContent: boolean;
   rating: string | null;
+  isDeleted: boolean;
+  deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +39,8 @@ function makeRow(
     contentUnitId: null,
     noContent: false,
     rating: null,
+    isDeleted: false,
+    deletedAt: null,
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
     updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     ...partial,
@@ -49,6 +53,7 @@ const mockFindNodeRows = mock(
 const mockCreateNode = mock(async (_args: unknown) => ({ id: "" }));
 const mockUpdateNode = mock(async (_args: unknown) => ({ id: "" }));
 const mockDeleteManyNode = mock(async (_args: unknown) => ({ count: 0 }));
+const mockUpdateManyNode = mock(async (_args: unknown) => ({ count: 0 }));
 const mockUpdateBook = mock(async (_args: unknown) => ({ unitId: "book-1" }));
 const mockFindUniqueBookForUpdate = mock(async (_args: unknown) => ({
   isbn13: null,
@@ -128,6 +133,7 @@ const mockTx = {
     findMany: mockFindNodeRows,
     create: mockCreateNode,
     update: mockUpdateNode,
+    updateMany: mockUpdateManyNode,
     deleteMany: mockDeleteManyNode,
   },
   contentStructure: {
@@ -177,6 +183,7 @@ function resetMocks(): void {
   mockCreateNode.mockClear();
   mockUpdateNode.mockClear();
   mockDeleteManyNode.mockClear();
+  mockUpdateManyNode.mockClear();
   mockUpdateBook.mockClear();
   mockFindUniqueBookForUpdate.mockClear();
   mockAllocateSequence.mockClear();
@@ -578,7 +585,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
     ]);
   });
 
-  test("delete subtree issues a single deleteMany covering all omitted ids", async () => {
+  test("delete subtree soft-deletes targets and never hard-deletes", async () => {
     const existing: FakeRow[] = [
       makeRow({ id: "n-root", parentId: null, sortKey: "g", title: "Root" }),
       makeRow({
@@ -601,42 +608,24 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       { id: "n-root", title: "Root" },
     ]);
 
-    expect(mockDeleteManyNode).toHaveBeenCalledTimes(1);
-    const deleteArgs = mockDeleteManyNode.mock.calls[0]?.[0] as any;
-    expect(new Set(deleteArgs.where.id.in)).toEqual(
+    expect(mockDeleteManyNode).not.toHaveBeenCalled();
+    expect(mockUpdateManyNode).toHaveBeenCalledTimes(2);
+    const softDeleteArgs = mockUpdateManyNode.mock.calls[1]?.[0] as any;
+    expect(new Set(softDeleteArgs.where.id.in)).toEqual(
       new Set(["n-child-1", "n-child-2"]),
     );
+    expect(softDeleteArgs.data.isDeleted).toBe(true);
     expect(mockUpdateContainer).toHaveBeenCalledTimes(1);
     expect(mockUpdateBook).toHaveBeenCalledWith({
       where: { unitId: "book-1" },
       data: { chapterCount: 1 },
     });
-    expect(latestStructureHistoryOperations()).toEqual([
-      {
-        op: "node.delete",
-        node: {
-          nodeId: "n-child-1",
-          title: "C1",
-          contentUnitId: null,
-          noContent: false,
-          rating: null,
-        },
-        placement: { parentId: "n-root", sortKey: "g" },
-        descendantCount: 0,
-      },
-      {
-        op: "node.delete",
-        node: {
-          nodeId: "n-child-2",
-          title: "C2",
-          contentUnitId: null,
-          noContent: false,
-          rating: null,
-        },
-        placement: { parentId: "n-root", sortKey: "n" },
-        descendantCount: 0,
-      },
-    ]);
+    const ops = latestStructureHistoryOperations();
+    expect(ops).toHaveLength(2);
+    for (const op of ops) {
+      expect(op.op).toBe("node.delete");
+      expect(op.softDelete).toBe(true);
+    }
   });
 
   test("insert new sibling produces one INSERT with sortKey between neighbors", async () => {

@@ -16,6 +16,8 @@ export interface ContentStructureNodeRow {
   title: string;
   noContent: boolean;
   rating: ContentRating | null;
+  isDeleted: boolean;
+  deletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -30,16 +32,17 @@ export interface PlannedContentStructureNode {
   contentUnitId: string | null;
 }
 
-export type ExistingContentStructureRow = Pick<
-  PlannedContentStructureNode,
-  | "id"
-  | "parentId"
-  | "sortKey"
-  | "contentUnitId"
-  | "title"
-  | "noContent"
-  | "rating"
->;
+export interface ExistingContentStructureRow {
+  id: string;
+  parentId: string | null;
+  sortKey: string;
+  contentUnitId: string | null;
+  title: string;
+  noContent: boolean;
+  rating: ContentRating | null;
+  isDeleted: boolean;
+  deletedAt: Date | null;
+}
 
 export function countReadableContentStructureItems(
   nodes: readonly ContentStructureItem[],

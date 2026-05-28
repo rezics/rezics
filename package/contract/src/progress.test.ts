@@ -1,11 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
-  chapterLastPositionSchema,
-  contentStructurePathLastPositionSchema,
+  lastReadAnchorSchema,
+  nodeCompletionToggleBodySchema,
   progressExtraSchema,
   SYSTEM_SHELF_KIND_KEYS,
-  unitLastPositionSchema,
   unitProgressListResponseSchema,
   unitProgressRowDTOSchema,
   unitProgressUpsertBodySchema,
@@ -35,12 +34,8 @@ describe("progress contract schemas", () => {
         progress: 0.5,
         status: "ACTIVE",
         completedCount: 2,
-        lastPosition: {
-          kind: "contentStructurePath",
-          bookUnitId: "book-1",
-          path: [2, 4, 0],
-          contentUnitId: "chapter-1",
-        },
+        lastReadNodeId: "node-1",
+        lastReadAnchor: { text: "Chapter opening" },
         addTimeMs: 1000,
         extra: { paused: { reasonPostUnitIds: ["post-1"] } },
       }),
@@ -56,47 +51,41 @@ describe("progress contract schemas", () => {
     ).toBe(false);
     expect(
       Value.Check(unitProgressUpsertBodySchema, {
-        lastPosition: "chapter-1#0.5",
+        lastReadAnchor: { text: "" },
       }),
     ).toBe(false);
   });
 
-  test("validates typed last-position variants", () => {
+  test("lastReadAnchor enforces text bounds and rejects unknown keys", () => {
+    expect(Value.Check(lastReadAnchorSchema, { text: "hello" })).toBe(true);
+    expect(Value.Check(lastReadAnchorSchema, { text: "" })).toBe(false);
+    expect(Value.Check(lastReadAnchorSchema, { text: "x".repeat(201) })).toBe(
+      false,
+    );
+    expect(Value.Check(lastReadAnchorSchema, { text: "ok", extra: 1 })).toBe(
+      false,
+    );
+    expect(Value.Check(lastReadAnchorSchema, {})).toBe(false);
+  });
+
+  test("nodeCompletionToggleBody requires nodeId and isCompleted", () => {
     expect(
-      Value.Check(contentStructurePathLastPositionSchema, {
-        kind: "contentStructurePath",
-        bookUnitId: "book-1",
-        path: [0, 2],
-        contentUnitId: "content-1",
+      Value.Check(nodeCompletionToggleBodySchema, {
+        nodeId: "node-1",
+        isCompleted: true,
       }),
     ).toBe(true);
     expect(
-      Value.Check(chapterLastPositionSchema, {
-        kind: "chapter",
-        contentUnitId: "content-1",
-        offset: 0.42,
+      Value.Check(nodeCompletionToggleBodySchema, {
+        nodeId: "node-1",
+        isCompleted: false,
       }),
     ).toBe(true);
+    expect(Value.Check(nodeCompletionToggleBodySchema, { nodeId: "n-1" })).toBe(
+      false,
+    );
     expect(
-      Value.Check(unitLastPositionSchema, {
-        kind: "chapter",
-        chapterUnitId: "chapter-1",
-        offset: 0.42,
-      }),
-    ).toBe(false);
-    expect(
-      Value.Check(unitLastPositionSchema, {
-        kind: "contentStructurePath",
-        bookUnitId: "book-1",
-        path: [-1],
-      }),
-    ).toBe(false);
-    expect(
-      Value.Check(unitLastPositionSchema, {
-        kind: "chapter",
-        contentUnitId: "content-1",
-        offset: -0.1,
-      }),
+      Value.Check(nodeCompletionToggleBodySchema, { isCompleted: true }),
     ).toBe(false);
   });
 
@@ -109,7 +98,8 @@ describe("progress contract schemas", () => {
       isDeleted: false,
       completedCount: 1,
       totalTimeMs: 123,
-      lastPosition: null,
+      lastReadNodeId: null,
+      lastReadAnchor: null,
       firstSeenAt: "2026-01-01T00:00:00.000Z",
       lastSeenAt: "2026-01-02T00:00:00.000Z",
       extra: null,
@@ -120,6 +110,14 @@ describe("progress contract schemas", () => {
       Value.Check(unitProgressListResponseSchema, {
         rows: [row],
         nextCursor: null,
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(unitProgressRowDTOSchema, {
+        ...row,
+        lastReadNodeId: "node-1",
+        lastReadAnchor: { text: "Resume here" },
       }),
     ).toBe(true);
   });

@@ -142,7 +142,10 @@ describe("ChapterService.update propagation", () => {
 
     expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
     const updateArgs = firstArg(mockNodeUpdateMany);
-    expect(updateArgs.where).toEqual({ contentUnitId: "ch-1" });
+    expect(updateArgs.where).toEqual({
+      contentUnitId: "ch-1",
+      isDeleted: false,
+    });
     expect(updateArgs.data.title).toBe("Renamed");
     expect(updateArgs.data.updatedAt).toBeInstanceOf(Date);
 

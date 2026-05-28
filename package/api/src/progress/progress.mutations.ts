@@ -1,4 +1,5 @@
 import type {
+  NodeCompletionToggleBody,
   UnitProgressRowDTO,
   UnitProgressUpsertBody,
 } from "@rezics/contract";
@@ -51,7 +52,28 @@ export function useDeleteUnitProgress(
   });
 }
 
+export function useToggleNodeCompletion(
+  unitId: string,
+  options?: Omit<
+    UseMutationOptions<{ message: string }, Error, NodeCompletionToggleBody>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: NodeCompletionToggleBody) =>
+      progressApi.toggleNodeCompletion(unitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({ queryKey: progressKeys.unit(unitId) });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export const progressMutations = {
   useUpdateUnitProgress,
   useDeleteUnitProgress,
+  useToggleNodeCompletion,
 };

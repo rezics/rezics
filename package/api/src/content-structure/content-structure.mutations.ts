@@ -35,6 +35,29 @@ export function useUpdateContentStructureMutation(
   });
 }
 
+export function useRestoreContentStructureNodes(
+  ownerUnitId: string,
+  options?: Omit<
+    UseMutationOptions<{ message: string }, Error, string[]>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (nodeIds: string[]) =>
+      contentStructureApi.restore(ownerUnitId, nodeIds),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: contentStructureKeys.detail(ownerUnitId),
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export const contentStructureMutations = {
   useUpdate: useUpdateContentStructureMutation,
+  useRestore: useRestoreContentStructureNodes,
 };

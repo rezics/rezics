@@ -1,4 +1,5 @@
 import type {
+  NodeCompletionToggleBody,
   UnitProgressListQuery,
   UnitProgressListResponse,
   UnitProgressRowDTO,
@@ -44,5 +45,18 @@ export const progressApi = {
     return apiFetch<{ message: string }>(`/me/units/${unitId}/progress`, {
       method: "DELETE",
     });
+  },
+
+  toggleNodeCompletion: async (
+    unitId: string,
+    input: NodeCompletionToggleBody,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/me/units/${unitId}/node-completion`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
   },
 };

@@ -103,15 +103,10 @@ export const BookReadChapterPage: React.FC = () => {
     : undefined;
 
   const handleSaveBookPosition = () => {
-    if (!bookId || !emptyChapterPath) return;
+    if (!bookId || !emptyChapterPath || !emptyChapter?.id) return;
     updateBookProgress.mutate({
       status: "ACTIVE",
-      lastPosition: {
-        kind: "contentStructurePath",
-        bookUnitId: bookId,
-        path: emptyChapterPath,
-        ...(emptyContentUnitId ? { contentUnitId: emptyContentUnitId } : {}),
-      },
+      lastReadNodeId: emptyChapter.id,
     });
   };
 
@@ -164,15 +159,13 @@ export const BookReadChapterPage: React.FC = () => {
   };
 
   const handleSaveChapterProgress = async () => {
+    if (!bookId || !emptyChapter?.id) return;
     setPendingChapterAction("progress");
     try {
-      const ensuredContentUnitId = await ensureEmptyChapterUnit();
-      await progressApi.updateUnitProgress(ensuredContentUnitId, {
+      await ensureEmptyChapterUnit();
+      await progressApi.updateUnitProgress(bookId, {
         status: "ACTIVE",
-        lastPosition: {
-          kind: "chapter",
-          contentUnitId: ensuredContentUnitId,
-        },
+        lastReadNodeId: emptyChapter.id,
       });
     } finally {
       setPendingChapterAction(null);

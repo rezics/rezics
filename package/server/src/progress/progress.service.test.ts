@@ -13,7 +13,8 @@ const baseRow = {
   isDeleted: false,
   completedCount: 0,
   totalTimeMs: 0n,
-  lastPosition: null,
+  lastReadNodeId: null,
+  lastReadAnchor: null,
   firstSeenAt: new Date("2026-01-01T00:00:00.000Z"),
   lastSeenAt: new Date("2026-01-01T00:00:00.000Z"),
   extra: null,
@@ -23,6 +24,11 @@ const mockUpsert = mock(async () => baseRow);
 const mockFindUnique = mock(async (): Promise<any> => baseRow);
 const mockFindMany = mock(async () => [] as (typeof baseRow)[]);
 const mockUpdateMany = mock(async () => ({ count: 0 }));
+const mockNodeFindUnique = mock(async (_args: unknown): Promise<any> => null);
+const mockNodeProgressUpsert = mock(async (_args: unknown) => ({}));
+const mockNodeProgressDeleteMany = mock(async (_args: unknown) => ({
+  count: 0,
+}));
 const enqueueMock = mock(async (_command: any) => ({
   status: "created" as const,
 }));
@@ -54,6 +60,13 @@ Object.assign(prismaMock, {
     findMany: mockFindMany,
     updateMany: mockUpdateMany,
   },
+  contentStructureNode: {
+    findUnique: mockNodeFindUnique,
+  },
+  userContentNodeProgress: {
+    upsert: mockNodeProgressUpsert,
+    deleteMany: mockNodeProgressDeleteMany,
+  },
 });
 
 mock.module("@/meili/search-client", () => ({
@@ -70,11 +83,15 @@ describe("ProgressService", () => {
     mockFindUnique.mockClear();
     mockFindMany.mockClear();
     mockUpdateMany.mockClear();
+    mockNodeFindUnique.mockClear();
+    mockNodeProgressUpsert.mockClear();
+    mockNodeProgressDeleteMany.mockClear();
     enqueueMock.mockClear();
     mockProgressSearch.mockClear();
     mockUpsert.mockResolvedValue(baseRow);
     mockFindUnique.mockResolvedValue(baseRow);
     mockFindMany.mockResolvedValue([]);
+    mockNodeFindUnique.mockResolvedValue(null);
     mockProgressSearch.mockResolvedValue({
       estimatedTotalHits: 0,
       hits: [],
@@ -96,7 +113,8 @@ describe("ProgressService", () => {
     expect(args.create.isDeleted).toBe(false);
     expect(args.create.completedCount).toBe(0);
     expect(args.create.totalTimeMs).toBe(2500n);
-    expect(args.create.lastPosition).toBeNull();
+    expect(args.create.lastReadNode).toBeUndefined();
+    expect(args.create.lastReadAnchor).toBeUndefined();
     expect(args.update.totalTimeMs).toEqual({ increment: 2500n });
     expect(enqueueMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -121,26 +139,42 @@ describe("ProgressService", () => {
     expect(update.totalTimeMs).toEqual({ increment: 100n });
     expect(update.status).toBeUndefined();
     expect(update.completedCount).toBeUndefined();
-    expect(update.lastPosition).toBeUndefined();
+    expect(update.lastReadNode).toBeUndefined();
+    expect(update.lastReadAnchor).toBeUndefined();
     expect(update.extra).toBeUndefined();
   });
 
-  test("persists typed JSON lastPosition values", async () => {
+  test("persists lastReadNodeId via Prisma relation connect", async () => {
+    mockNodeFindUnique.mockResolvedValue({
+      isDeleted: false,
+      ownerUnitId: "book-1",
+    });
     const { progressService } = await import("./progress.service");
-    const lastPosition = {
-      kind: "contentStructurePath" as const,
-      bookUnitId: "book-1",
-      path: [0, 2],
-      chapterUnitId: "chapter-1",
-    };
 
     await progressService.upsert("user-1", "book-1", {
-      lastPosition,
+      lastReadNodeId: "node-1",
+      lastReadAnchor: { text: "Opening" },
     });
 
     const args = firstArg(mockUpsert);
-    expect(args.create.lastPosition).toEqual(lastPosition);
-    expect(args.update.lastPosition).toEqual(lastPosition);
+    expect(args.create.lastReadNode).toEqual({ connect: { id: "node-1" } });
+    expect(args.create.lastReadAnchor).toEqual({ text: "Opening" });
+    expect(args.update.lastReadNode).toEqual({ connect: { id: "node-1" } });
+    expect(args.update.lastReadAnchor).toEqual({ text: "Opening" });
+  });
+
+  test("rejects upserts whose lastReadNodeId points to a deleted node", async () => {
+    mockNodeFindUnique.mockResolvedValue({
+      isDeleted: true,
+      ownerUnitId: "book-1",
+    });
+    const { progressService } = await import("./progress.service");
+    await expect(
+      progressService.upsert("user-1", "book-1", {
+        lastReadNodeId: "node-deleted",
+      }),
+    ).rejects.toThrow(/deleted/i);
+    expect(mockUpsert).not.toHaveBeenCalled();
   });
 
   test("rejects invalid progress and negative addTimeMs", async () => {
@@ -311,6 +345,72 @@ describe("ProgressService", () => {
     expect(args.take).toBe(2);
     expect(result.rows).toHaveLength(1);
     expect(result.nextCursor).toBeTruthy();
+  });
+
+  test("toggleNodeCompletion (on) upserts a progress row", async () => {
+    mockNodeFindUnique.mockResolvedValue({
+      ownerUnitId: "book-1",
+      isDeleted: false,
+    });
+    const { progressService } = await import("./progress.service");
+
+    await progressService.toggleNodeCompletion(
+      "user-1",
+      "book-1",
+      "node-1",
+      true,
+    );
+
+    expect(mockNodeProgressUpsert).toHaveBeenCalledWith({
+      where: { userId_nodeId: { userId: "user-1", nodeId: "node-1" } },
+      create: { userId: "user-1", nodeId: "node-1" },
+      update: {},
+    });
+    expect(mockNodeProgressDeleteMany).not.toHaveBeenCalled();
+  });
+
+  test("toggleNodeCompletion (off) deletes the progress row", async () => {
+    mockNodeFindUnique.mockResolvedValue({
+      ownerUnitId: "book-1",
+      isDeleted: false,
+    });
+    const { progressService } = await import("./progress.service");
+
+    await progressService.toggleNodeCompletion(
+      "user-1",
+      "book-1",
+      "node-1",
+      false,
+    );
+
+    expect(mockNodeProgressDeleteMany).toHaveBeenCalledWith({
+      where: { userId: "user-1", nodeId: "node-1" },
+    });
+    expect(mockNodeProgressUpsert).not.toHaveBeenCalled();
+  });
+
+  test("toggleNodeCompletion rejects deleted nodes (409)", async () => {
+    mockNodeFindUnique.mockResolvedValue({
+      ownerUnitId: "book-1",
+      isDeleted: true,
+    });
+    const { progressService } = await import("./progress.service");
+    await expect(
+      progressService.toggleNodeCompletion("user-1", "book-1", "node-1", true),
+    ).rejects.toThrow(/deleted/i);
+    expect(mockNodeProgressUpsert).not.toHaveBeenCalled();
+  });
+
+  test("toggleNodeCompletion rejects cross-book nodes (422)", async () => {
+    mockNodeFindUnique.mockResolvedValue({
+      ownerUnitId: "other-book",
+      isDeleted: false,
+    });
+    const { progressService } = await import("./progress.service");
+    await expect(
+      progressService.toggleNodeCompletion("user-1", "book-1", "node-1", true),
+    ).rejects.toThrow(/book/i);
+    expect(mockNodeProgressUpsert).not.toHaveBeenCalled();
   });
 
   test("progressStats reads Meilisearch facets and fills missing buckets", async () => {

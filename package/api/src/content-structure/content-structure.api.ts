@@ -23,4 +23,17 @@ export const contentStructureApi = {
       },
     );
   },
+
+  restore: async (
+    ownerUnitId: string,
+    nodeIds: string[],
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/content-structure/${ownerUnitId}/restore`,
+      {
+        method: "POST",
+        body: JSON.stringify({ nodeIds }),
+      },
+    );
+  },
 };

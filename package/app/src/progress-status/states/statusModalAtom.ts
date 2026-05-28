@@ -1,7 +1,4 @@
-import type {
-  UnitLastPosition,
-  UserUnitProgressStatus,
-} from "@rezics/contract";
+import type { UserUnitProgressStatus } from "@rezics/contract";
 import { atom } from "jotai";
 import type { ReasonPostVisibility } from "../hooks/useReasonPostMutations";
 
@@ -14,7 +11,7 @@ export type StatusModalKind =
 
 export type StatusModalDraft = {
   progress?: number;
-  lastPosition?: UnitLastPosition | null;
+  lastReadNodeId?: string | null;
   body?: string;
   visibility?: ReasonPostVisibility;
 };
