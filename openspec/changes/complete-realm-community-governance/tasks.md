@@ -26,7 +26,7 @@
 
 ## 4. Package App Realm Console
 
-- [ ] 4.1 Add realm management routes under `package/app/src/routes/_mainLayout/r/$realmSlug` or the existing realm route convention.
+- [x] 4.1 Add realm management routes under `package/app/src/routes/_mainLayout/r/$realmSlug` or the existing realm route convention.
 - [ ] 4.2 Add feature modules for rules, members, moderation queue, queue detail, pins/announcements, tag curation, settings, and ownership flows, driving the foundation's realm governance APIs.
 - [x] 4.3 Add `@rezics/api` hooks and query keys for the realm community + foundation realm governance APIs.
 - [ ] 4.4 Add UI states for loading, empty, denied, error, and destructive confirmation flows using Rezics design-system primitives.

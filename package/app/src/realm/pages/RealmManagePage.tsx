@@ -37,6 +37,7 @@ import {
 } from "@/unit";
 import { canManageRealm } from "../models/canManageRealm";
 import { RealmExtraManageSection } from "../sections/RealmExtraManageSection";
+import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 
 const i18nMessages = {
   common_add,
@@ -182,7 +183,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const isDefaultRealm = realmId === getDefaultRealmId();
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-6">
+    <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <h1 className="mb-6 text-2xl font-semibold">{m.realm_manage()}</h1>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
@@ -216,6 +217,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
           realmUnitId={realmId}
           isDefaultRealm={isDefaultRealm}
         />
+        <RealmModerationQueueSection realmUnitId={realmId} />
         <RealmExtraManageSection realmId={realmId} extra={realm?.extra} />
         <div className="flex flex-row justify-end gap-4">
           <Button

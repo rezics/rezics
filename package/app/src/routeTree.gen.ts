@@ -90,6 +90,7 @@ import { Route as MainLayoutReviewBookBookIdRouteImport } from './routes/_mainLa
 import { Route as MainLayoutRemarkBookBookIdRouteImport } from './routes/_mainLayout/remark/book/$bookId'
 import { Route as MainLayoutRealmRealmIdSearchRouteImport } from './routes/_mainLayout/realm/$realmId/search'
 import { Route as MainLayoutRealmRealmIdManageRouteImport } from './routes/_mainLayout/realm/$realmId/manage'
+import { Route as MainLayoutRRealmSlugManageRouteImport } from './routes/_mainLayout/r/$realmSlug/manage'
 import { Route as MainLayoutInboxDmConversationIdRouteImport } from './routes/_mainLayout/inbox/dm/$conversationId'
 import { Route as MainLayoutExcerptBookBookIdRouteImport } from './routes/_mainLayout/excerpt/book/$bookId'
 import { Route as MainLayoutBookBookIdSearchRouteImport } from './routes/_mainLayout/book/$bookId/search'
@@ -579,6 +580,12 @@ const MainLayoutRealmRealmIdManageRoute =
     path: '/realm/$realmId/manage',
     getParentRoute: () => MainLayoutRoute,
   } as any)
+const MainLayoutRRealmSlugManageRoute =
+  MainLayoutRRealmSlugManageRouteImport.update({
+    id: '/manage',
+    path: '/manage',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
 const MainLayoutInboxDmConversationIdRoute =
   MainLayoutInboxDmConversationIdRouteImport.update({
     id: '/inbox/dm/$conversationId',
@@ -923,6 +930,7 @@ export interface FileRoutesByFullPath {
   '/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
+  '/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
   '/realm/$realmId/manage': typeof MainLayoutRealmRealmIdManageRoute
   '/realm/$realmId/search': typeof MainLayoutRealmRealmIdSearchRoute
   '/remark/book/$bookId': typeof MainLayoutRemarkBookBookIdRoute
@@ -1043,6 +1051,7 @@ export interface FileRoutesByTo {
   '/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
+  '/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
   '/realm/$realmId/manage': typeof MainLayoutRealmRealmIdManageRoute
   '/realm/$realmId/search': typeof MainLayoutRealmRealmIdSearchRoute
   '/remark/book/$bookId': typeof MainLayoutRemarkBookBookIdRoute
@@ -1173,6 +1182,7 @@ export interface FileRoutesById {
   '/_mainLayout/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
   '/_mainLayout/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/_mainLayout/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
+  '/_mainLayout/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
   '/_mainLayout/realm/$realmId/manage': typeof MainLayoutRealmRealmIdManageRoute
   '/_mainLayout/realm/$realmId/search': typeof MainLayoutRealmRealmIdSearchRoute
   '/_mainLayout/remark/book/$bookId': typeof MainLayoutRemarkBookBookIdRoute
@@ -1304,6 +1314,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/search'
     | '/excerpt/book/$bookId'
     | '/inbox/dm/$conversationId'
+    | '/r/$realmSlug/manage'
     | '/realm/$realmId/manage'
     | '/realm/$realmId/search'
     | '/remark/book/$bookId'
@@ -1424,6 +1435,7 @@ export interface FileRouteTypes {
     | '/book/$bookId/search'
     | '/excerpt/book/$bookId'
     | '/inbox/dm/$conversationId'
+    | '/r/$realmSlug/manage'
     | '/realm/$realmId/manage'
     | '/realm/$realmId/search'
     | '/remark/book/$bookId'
@@ -1553,6 +1565,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/book/$bookId/search'
     | '/_mainLayout/excerpt/book/$bookId'
     | '/_mainLayout/inbox/dm/$conversationId'
+    | '/_mainLayout/r/$realmSlug/manage'
     | '/_mainLayout/realm/$realmId/manage'
     | '/_mainLayout/realm/$realmId/search'
     | '/_mainLayout/remark/book/$bookId'
@@ -2199,6 +2212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutRealmRealmIdManageRouteImport
       parentRoute: typeof MainLayoutRoute
     }
+    '/_mainLayout/r/$realmSlug/manage': {
+      id: '/_mainLayout/r/$realmSlug/manage'
+      path: '/manage'
+      fullPath: '/r/$realmSlug/manage'
+      preLoaderRoute: typeof MainLayoutRRealmSlugManageRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
     '/_mainLayout/inbox/dm/$conversationId': {
       id: '/_mainLayout/inbox/dm/$conversationId'
       path: '/inbox/dm/$conversationId'
@@ -2693,10 +2713,12 @@ const MainLayoutUserMeRouteRouteWithChildren =
   )
 
 interface MainLayoutRRealmSlugRouteChildren {
+  MainLayoutRRealmSlugManageRoute: typeof MainLayoutRRealmSlugManageRoute
   MainLayoutRRealmSlugShelfSlugRoute: typeof MainLayoutRRealmSlugShelfSlugRoute
 }
 
 const MainLayoutRRealmSlugRouteChildren: MainLayoutRRealmSlugRouteChildren = {
+  MainLayoutRRealmSlugManageRoute: MainLayoutRRealmSlugManageRoute,
   MainLayoutRRealmSlugShelfSlugRoute: MainLayoutRRealmSlugShelfSlugRoute,
 }
 
