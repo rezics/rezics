@@ -145,6 +145,20 @@ export class RealmService {
 
   // --- Realm CRUD ---
 
+  private async resolveViewerCapabilities(
+    realmUnitId: string,
+    viewerUserId?: string | null,
+  ) {
+    if (!viewerUserId) return [];
+
+    const policyMembership =
+      await governanceCapabilityService.realmMembershipForPolicy(
+        realmUnitId,
+        viewerUserId,
+      );
+    return policyMembership?.capabilities ?? [];
+  }
+
   async list(
     options: RealmListQuery = {},
   ): Promise<{ realms: RealmDTO[]; total: number }> {
@@ -179,7 +193,10 @@ export class RealmService {
     };
   }
 
-  async getByUnitId(unitId: string): Promise<RealmDTO> {
+  async getByUnitId(
+    unitId: string,
+    viewerUserId?: string | null,
+  ): Promise<RealmDTO> {
     const row = await prisma.realm.findFirstOrThrow({
       where: { unitId },
       include: realmInclude,
@@ -188,6 +205,10 @@ export class RealmService {
     return {
       ...dto,
       extra: await filterRealmExtraPublic(dto.extra),
+      viewerCapabilities: await this.resolveViewerCapabilities(
+        unitId,
+        viewerUserId,
+      ),
     };
   }
 

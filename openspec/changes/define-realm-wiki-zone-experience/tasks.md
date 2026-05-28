@@ -41,7 +41,7 @@
 - [x] 4.1 Add WorkRealmContext Elysia routes with request/response schemas from `@rezics/contract`.
 - [x] 4.2 Add read route for resolving a release Unit's wiki realm context through UnitWork.
 - [x] 4.3 Extend Zone create/update/read routes to include wiki config fields.
-- [ ] 4.4 Add or extend realm detail API output to expose configured wiki Zone id and viewer capability metadata.
+- [x] 4.4 Add or extend realm detail API output to expose configured wiki Zone id and viewer capability metadata.
 - [ ] 4.5 Add wiki Zone homepage data endpoint or extend Zone resolution to include enough typed section hydration data.
 - [ ] 4.6 Add tests for forbidden work realm context writes, invalid realm targets, invalid label references, and malformed wiki config.
 - [ ] 4.7 Add tests proving repost/reference behavior does not create UnitRealm membership for the original wiki Unit.

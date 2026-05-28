@@ -161,13 +161,18 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     async ({
       params,
       set,
+      headers,
     }): Promise<RealmDTO | { error: { code: string; message: string } }> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
       const unit = await unitService.getBySlug("realm", params.slug);
       if (!unit || unit.type !== "REALM") {
         set.status = 404;
         return { error: { code: "NOT_FOUND", message: "Realm not found" } };
       }
-      return realmService.getByUnitId(unit.id);
+      return realmService.getByUnitId(unit.id, identity?.userId);
     },
     {
       params: t.Object({ slug: t.String({ minLength: 1 }) }),
@@ -181,8 +186,12 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .get(
     "/:unitId",
-    async ({ params }): Promise<RealmDTO> => {
-      return realmService.getByUnitId(params.unitId);
+    async ({ params, headers }): Promise<RealmDTO> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      return realmService.getByUnitId(params.unitId, identity?.userId);
     },
     {
       params: realmParamsSchema,

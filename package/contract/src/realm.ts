@@ -74,6 +74,7 @@ export const realmDTOSchema = t.Object({
   isOfficial: t.Boolean(),
   memberCount: t.Number(),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
+  viewerCapabilities: t.Optional(t.Array(capabilityHintSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
