@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines that `RealmUnit` is the single source of truth for post-realm membership. The `Post` table SHALL NOT carry any direct foreign key to a realm; `Post.realmUnitId`, `Post.realm`, and `Unit.realmPosts` are removed. Cross-posting is supported by writing multiple `RealmUnit` rows. The `createPost` service accepts `realmUnitIds: string[]` and writes both the `Post` and the `RealmUnit` rows in one transaction. A four-phase migration (dual-write, backfill, drop-legacy-write, drop-column) preserves data through the transition.
-
 ## Requirements
-
 ### Requirement: UnitRealm is the single source of truth for post-realm membership
 
 The system SHALL track post-realm membership exclusively through the `RealmUnit` junction table. The `Post` table SHALL NOT carry any direct foreign key to a realm. Specifically, the previously-existing column `Post.realmUnitId`, the relation `Post.realm` (`@relation("PostRealm")` on Post side), and the relation `Unit.realmPosts` (`@relation("PostRealm")` on Unit side) SHALL be removed from the Prisma schema. After removal, the only mechanism by which a post is associated with a realm feed/community SHALL be one or more `RealmUnit(realmUnitId, unitId)` rows.
@@ -159,3 +157,19 @@ realm feed/community and does not represent semantic tagging.
 - **GIVEN** a post belongs to realm `realm-a` through the renamed relationship
 - **WHEN** the realm feed is queried
 - **THEN** the post SHALL appear exactly as it did before the rename
+
+### Requirement: Wiki posts use UnitRealm for sent realm membership
+WIKI Post Units SHALL use the existing UnitRealm relationship for realm membership. The relationship semantics are the same as other sent content: membership means the Unit belongs to that realm's content set.
+
+#### Scenario: Wiki sent to realm uses UnitRealm
+- **WHEN** a wiki post is sent to a realm
+- **THEN** the system SHALL write a UnitRealm row for the wiki Unit and realm Unit
+
+### Requirement: Repost creates a separate Unit
+Forwarding or reposting wiki content for discussion SHALL create a separate post/repost Unit that references the original wiki Unit. This SHALL NOT be modeled as UnitRealm membership on the original wiki unless the user explicitly sends the original wiki to the realm.
+
+#### Scenario: Repost leaves original UnitRealm unchanged
+- **WHEN** a repost references wiki Unit `wiki-a`
+- **THEN** the repost Unit MAY have its own UnitRealm rows
+- **AND** `wiki-a` SHALL keep its existing UnitRealm rows unchanged
+

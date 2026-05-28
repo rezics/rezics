@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines `PostKind.WIKI`, a collaborative post kind that reuses the existing `Unit(type=POST)` and `Post` primitives rather than a separate wiki-page model. Wiki posts route through the collaborative authority gate using `post.content` / `post.content.main` as field keys, emit history through the same transactional outbox as other collaborative edits, and expose a wiki-aware editor and timeline UI. Ordinary post kinds (`POST`, `REVIEW`, `REMARK`, `REPLY`, `EXCERPT`, `CHAPTER`) remain author/owner-controlled, and `Post.isLocked` retains its existing thread-lock semantics distinct from `UnitFieldLock`.
-
 ## Requirements
-
 ### Requirement: Wiki post kind
 The contract SHALL define `PostKind.WIKI` for collaborative wiki-style post content. Wiki posts SHALL use the existing `Unit(type=POST)` and `Post` model rather than a separate wiki page model.
 
@@ -121,3 +119,21 @@ Wiki post detail surfaces SHALL expose a history link that loads the wiki post's
 - **WHEN** a wiki post has `Post.isLocked = true` but no `UnitFieldLock("post.content")` or `UnitFieldLock("post.content.main")`
 - **THEN** reply creation MAY be blocked by thread-lock rules
 - **AND** wiki content editing SHALL still be controlled by `UnitFieldLock` and collaborative authority rules
+
+### Requirement: Wiki translations use TranslationGroup
+Parallel language variants of the same wiki page SHALL be represented as separate WIKI Post Units grouped by TranslationGroup. Wiki page body translations SHALL NOT be modeled as UnitTranslation rows on a single wiki Unit.
+
+#### Scenario: Wiki page has parallel translations
+- **GIVEN** English and Japanese wiki pages describe the same Entity
+- **WHEN** the pages are linked as translations
+- **THEN** each language variant SHALL remain a separate WIKI Post Unit
+- **AND** the variants SHALL share a TranslationGroup
+
+### Requirement: Featured wiki references use TranslationGroup by default
+Wiki navigation and homepage configuration SHALL reference TranslationGroup ids when the intended link is a multilingual wiki page. A specific wiki Unit id SHALL be used only when the configuration intentionally targets one language-specific Unit.
+
+#### Scenario: Homepage stores translation group
+- **WHEN** a manager features the Artoria wiki page on a wiki Zone homepage
+- **THEN** the configuration SHOULD store the Artoria wiki TranslationGroup id
+- **AND** rendering SHALL select the viewer's best language wiki Unit
+
