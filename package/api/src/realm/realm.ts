@@ -62,6 +62,7 @@ export {
 } from "./realm.queries";
 // Types
 export type {
+  AcknowledgeRealmRuleInput,
   AddRealmTagApplicationInput,
   AddUnitRealmInput,
   CreateRealmInput,
@@ -72,6 +73,7 @@ export type {
   RealmListResponse,
   RealmMemberDTO,
   RealmMembershipMeDTO,
+  RealmRuleAcknowledgementDTO,
   RealmResponse,
   RealmSortOption,
   RealmTagApplicationDTO,

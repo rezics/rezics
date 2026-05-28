@@ -146,6 +146,13 @@ export const realmRuleAcknowledgementDTOSchema = t.Object({
 export type RealmRuleAcknowledgementDTO =
   (typeof realmRuleAcknowledgementDTOSchema)["static"];
 
+export const acknowledgeRealmRuleSchema = t.Object({
+  acceptedLanguage: t.Optional(t.Nullable(languageSchema)),
+});
+
+export type AcknowledgeRealmRuleInput =
+  (typeof acknowledgeRealmRuleSchema)["static"];
+
 export const realmRuleAcknowledgementStatusSchema = t.Object({
   currentRuleUnitId: t.Nullable(t.String()),
   requiredVersion: t.Nullable(t.Number()),

@@ -1,9 +1,11 @@
 import type {
+  AcknowledgeRealmRuleInput,
   CreateRealmInput,
   RealmDTO,
   RealmListQuery,
   RealmMemberDTO,
   RealmMembershipMeDTO,
+  RealmRuleAcknowledgementDTO,
   UnitRealmDTO,
   UpdateRealmInput,
 } from "@rezics/contract";
@@ -586,6 +588,52 @@ export class RealmService {
         acknowledgementRequired:
           requiresAcknowledgement && !acceptedCurrentRule,
       },
+    };
+  }
+
+  async acknowledgeCurrentRule(
+    realmUnitId: string,
+    userId: string,
+    input: AcknowledgeRealmRuleInput = {},
+  ): Promise<RealmRuleAcknowledgementDTO> {
+    const realm = await prisma.realm.findUnique({
+      where: { unitId: realmUnitId },
+      select: { extra: true, ruleVersion: true },
+    });
+    const ruleUnitId = getRuleUnitIdFromExtra(realm?.extra ?? null);
+    if (!realm || !ruleUnitId) {
+      throw new Error("Realm does not have a current rule Unit");
+    }
+
+    const row = await prisma.realmRuleAcknowledgement.upsert({
+      where: {
+        realmUnitId_ruleUnitId_version_userId: {
+          realmUnitId,
+          ruleUnitId,
+          version: realm.ruleVersion,
+          userId,
+        },
+      },
+      create: {
+        realmUnitId,
+        ruleUnitId,
+        version: realm.ruleVersion,
+        userId,
+        acceptedLanguage: input.acceptedLanguage ?? null,
+      },
+      update: {
+        acceptedAt: new Date(),
+        acceptedLanguage: input.acceptedLanguage ?? null,
+      },
+    });
+
+    return {
+      realmUnitId: row.realmUnitId,
+      ruleUnitId: row.ruleUnitId,
+      version: row.version,
+      userId: row.userId,
+      acceptedAt: row.acceptedAt,
+      acceptedLanguage: row.acceptedLanguage,
     };
   }
 

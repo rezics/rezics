@@ -6,6 +6,7 @@
  */
 
 import type {
+  AcknowledgeRealmRuleInput,
   AddRealmTagApplicationInput,
   AddUnitRealmInput,
   CreateRealmInput,
@@ -15,6 +16,7 @@ import type {
   RealmListResponse,
   RealmMemberDTO,
   RealmMembershipMeDTO,
+  RealmRuleAcknowledgementDTO,
   RealmResponse,
   RealmTagApplicationDTO,
   UnitRealmDTO,
@@ -25,6 +27,7 @@ import type {
 
 // Re-export contract types
 export type {
+  AcknowledgeRealmRuleInput,
   AddRealmTagApplicationInput,
   AddUnitRealmInput,
   CreateRealmInput,
@@ -34,6 +37,7 @@ export type {
   RealmListResponse,
   RealmMemberDTO,
   RealmMembershipMeDTO,
+  RealmRuleAcknowledgementDTO,
   RealmResponse,
   RealmTagApplicationDTO,
   UnitRealmDTO,

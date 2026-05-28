@@ -7,6 +7,7 @@
  */
 
 import type {
+  AcknowledgeRealmRuleInput,
   AddRealmTagApplicationInput,
   AddUnitRealmInput,
   CastRealmTagApplicationVoteInput,
@@ -17,6 +18,7 @@ import type {
   RealmListResponse,
   RealmMemberDTO,
   RealmMembershipMeDTO,
+  RealmRuleAcknowledgementDTO,
   RealmResponse,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
@@ -116,6 +118,22 @@ export const realmApi = {
     realmUnitId: string,
   ): Promise<RealmMembershipMeDTO> => {
     return apiFetch<RealmMembershipMeDTO>(`/realm/${realmUnitId}/members/me`);
+  },
+
+  /**
+   * Acknowledge the current rules for a realm
+   */
+  acknowledgeRules: async (
+    realmUnitId: string,
+    input?: AcknowledgeRealmRuleInput,
+  ): Promise<RealmRuleAcknowledgementDTO> => {
+    return apiFetch<RealmRuleAcknowledgementDTO>(
+      `/realm/${realmUnitId}/rules/acknowledgement`,
+      {
+        method: "POST",
+        body: JSON.stringify(input ?? {}),
+      },
+    );
   },
 
   /**

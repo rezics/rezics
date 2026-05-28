@@ -3,10 +3,12 @@ import type {
   RealmListResponse,
   RealmMemberDTO,
   RealmMembershipMeDTO,
+  RealmRuleAcknowledgementDTO,
   RealmTagApplicationDTO,
   UnitRealmDTO,
 } from "@rezics/contract";
 import {
+  acknowledgeRealmRuleSchema,
   addRealmTagApplicationSchema,
   addUnitRealmSchema,
   BasicAdminPermission,
@@ -344,6 +346,40 @@ export const realmApi = new Elysia({ prefix: "/realm" })
         summary: "Get my membership",
         description:
           "Get the current user's membership, capability hints, and rule acknowledgement state in a realm",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/rules/acknowledgement",
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<RealmRuleAcknowledgementDTO | string> => {
+      try {
+        return await realmService.acknowledgeCurrentRule(
+          params.unitId,
+          identity.userId,
+          body,
+        );
+      } catch {
+        return status(400, "Realm does not have a current rule Unit");
+      }
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      body: acknowledgeRealmRuleSchema,
+      response: {
+        200: t.Any(),
+        400: t.String(),
+      },
+      detail: {
+        summary: "Acknowledge current realm rules",
+        description:
+          "Record the current user's acknowledgement of the rule Unit and version configured for this realm",
         tags: ["Realms"],
       },
     },

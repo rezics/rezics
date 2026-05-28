@@ -351,3 +351,51 @@ describe("realmService.getMembershipMe", () => {
     });
   });
 });
+
+describe("realmService.acknowledgeCurrentRule", () => {
+  test("upserts acknowledgement for current rule unit and version", async () => {
+    const acceptedAt = new Date("2026-05-28T00:00:00.000Z");
+    prismaMock.realm = {
+      findUnique: mock(async () => ({
+        extra: { rule: "rule-unit-1" },
+        ruleVersion: 3,
+      })),
+    };
+    prismaMock.realmRuleAcknowledgement = {
+      upsert: mock(async () => ({
+        realmUnitId: REALM,
+        ruleUnitId: "rule-unit-1",
+        version: 3,
+        userId: USER,
+        acceptedAt,
+        acceptedLanguage: "ja",
+      })),
+    };
+
+    await expect(
+      realmService.acknowledgeCurrentRule(REALM, USER, {
+        acceptedLanguage: "ja",
+      }),
+    ).resolves.toEqual({
+      realmUnitId: REALM,
+      ruleUnitId: "rule-unit-1",
+      version: 3,
+      userId: USER,
+      acceptedAt,
+      acceptedLanguage: "ja",
+    });
+
+    expect(prismaMock.realmRuleAcknowledgement.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          realmUnitId_ruleUnitId_version_userId: {
+            realmUnitId: REALM,
+            ruleUnitId: "rule-unit-1",
+            version: 3,
+            userId: USER,
+          },
+        },
+      }),
+    );
+  });
+});
