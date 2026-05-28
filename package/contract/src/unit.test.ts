@@ -6,6 +6,8 @@ import {
   aiDisclosureModeSchema,
   createUnitSchema,
   unitDTOSchema,
+  unitListBodySchema,
+  unitListQuerySchema,
   unitTypeSchema,
   updateUnitSchema,
   wikiTypeSchema,
@@ -98,5 +100,25 @@ describe("UnitType", () => {
 
   test("rejects LABEL where a work-capable catalog type is required", () => {
     expect(Value.Check(wikiTypeSchema, "LABEL")).toBe(false);
+  });
+});
+
+describe("Unit list filters", () => {
+  test("accepts structured admin operation lookup filters", () => {
+    const filters = {
+      q: "dune",
+      id: "unit-1",
+      slug: "dune",
+      title: "Dune",
+      type: "BOOK",
+      userId: "owner-1",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      start: 0,
+      limit: 20,
+    };
+
+    expect(Value.Check(unitListQuerySchema, filters)).toBe(true);
+    expect(Value.Check(unitListBodySchema, filters)).toBe(true);
   });
 });

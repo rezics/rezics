@@ -75,12 +75,39 @@ export function buildUnitWhereClause(
 ): Prisma.UnitWhereInput {
   const andWhere: Prisma.UnitWhereInput[] = [];
 
-  // Text search: search in UnitTranslation title.
+  // Text search: search common operator lookup fields.
   if (options.q?.trim()) {
+    const q = options.q.trim();
+    andWhere.push({
+      OR: [
+        { id: { contains: q, mode: "insensitive" } },
+        { slug: { contains: q, mode: "insensitive" } },
+        {
+          translations: {
+            some: {
+              title: { contains: q, mode: "insensitive" },
+            },
+          },
+        },
+      ],
+    });
+  }
+
+  if (options.id?.trim()) {
+    andWhere.push({ id: { contains: options.id.trim(), mode: "insensitive" } });
+  }
+
+  if (options.slug?.trim()) {
+    andWhere.push({
+      slug: { contains: options.slug.trim(), mode: "insensitive" },
+    });
+  }
+
+  if (options.title?.trim()) {
     andWhere.push({
       translations: {
         some: {
-          title: { contains: options.q, mode: "insensitive" },
+          title: { contains: options.title.trim(), mode: "insensitive" },
         },
       },
     });

@@ -261,6 +261,9 @@ export type UnitDTO = (typeof unitDTOSchema)["static"];
 export const unitListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   q: t.Optional(t.String()),
+  id: t.Optional(t.String()),
+  slug: t.Optional(t.String()),
+  title: t.Optional(t.String()),
   type: t.Optional(t.String()),
   types: t.Optional(t.String()),
   excludeTypes: t.Optional(t.String()),
@@ -297,6 +300,9 @@ export type UnitListQuery = (typeof unitListQuerySchema)["static"];
 export const unitListBodySchema = t.Object({
   ...listPostBodyBase.properties,
   q: t.Optional(t.String()),
+  id: t.Optional(t.String()),
+  slug: t.Optional(t.String()),
+  title: t.Optional(t.String()),
   type: t.Optional(t.String()),
   types: t.Optional(t.String()),
   excludeTypes: t.Optional(t.String()),
