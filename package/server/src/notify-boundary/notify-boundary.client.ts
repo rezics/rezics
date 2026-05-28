@@ -45,6 +45,7 @@ export type BroadcastEvent = {
   kind: string;
   sourceUnitId: string;
   directRecipients?: string[];
+  directOnly?: boolean;
   actorId?: string | null;
   extra?: unknown;
 };
@@ -108,6 +109,8 @@ export async function resolveRecipients(
   },
 ): Promise<string[]> {
   const set = new Set(event.directRecipients ?? []);
+  if (event.directOnly) return Array.from(set);
+
   const subscriptionMatches = await deps.findSubscriptionMatches(
     event.sourceUnitId,
     event.kind,

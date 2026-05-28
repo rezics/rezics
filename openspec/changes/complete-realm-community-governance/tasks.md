@@ -22,7 +22,7 @@
 - [ ] 3.1 Update realm feed APIs to support lifecycle filters, hidden/moderator views, member-only behavior, and composition with the `Realm.extra.pinboard` source, rendering moderation state from the foundation's content-moderation model.
 - [x] 3.2 Update post creation/reply APIs to enforce realm rules and consume the foundation's lock/archive, member-state, and account-enforcement decisions.
 - [x] 3.3 Update search projections so hidden/member-only/archived realm content does not leak (aligned with the foundation's overlay/tombstone resolution).
-- [ ] 3.4 Add product notifications for rule updates and join approval; moderation-decision/assignment/escalation notifications are emitted by the foundation.
+- [x] 3.4 Add product notifications for rule updates and join approval; moderation-decision/assignment/escalation notifications are emitted by the foundation.
 
 ## 4. Package App Realm Console
 

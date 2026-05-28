@@ -25,6 +25,7 @@ import { governanceAuditService } from "@/governance/audit.service";
 import { governanceCapabilityService } from "@/governance/capability.service";
 import { realmPolicyActions } from "@/governance/action/realm";
 import { serverJobProducer } from "@/job/job-boundary";
+import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapPostToDTO } from "@/post/post.mapper";
 import { postInclude } from "@/post/types";
 import { mapTranslationToDTO } from "@/unit/mapper";
@@ -114,7 +115,54 @@ function communityListTargetKind(key: RealmCommunityListKey) {
   return key === "pinboard" ? "realm-pinboard" : "realm-announcement";
 }
 
+const REALM_JOIN_APPROVAL_ROLES = ["owner", "admin", "moderator"] as const;
+
+function notifyRealmRuleUpdated(input: {
+  actorUserId: string;
+  realmUnitId: string;
+  ruleUnitId: string | null;
+  version: number;
+}) {
+  void broadcast({
+    kind: "realm.rules.updated",
+    sourceUnitId: input.realmUnitId,
+    actorId: input.actorUserId,
+    extra: {
+      ruleUnitId: input.ruleUnitId,
+      version: input.version,
+    },
+  }).catch(() => {});
+}
+
 export class RealmService {
+  private async notifyJoinApprovalRequested(input: {
+    realmUnitId: string;
+    requesterUserId: string;
+  }): Promise<void> {
+    const recipients = await prisma.realmMember.findMany({
+      where: {
+        realmUnitId: input.realmUnitId,
+        state: "ACTIVE",
+        roleKey: { in: [...REALM_JOIN_APPROVAL_ROLES] },
+        NOT: { userId: input.requesterUserId },
+      },
+      select: { userId: true },
+    });
+    const directRecipients = recipients.map((recipient) => recipient.userId);
+    if (directRecipients.length === 0) return;
+
+    void broadcast({
+      kind: "realm.join.requested",
+      sourceUnitId: input.realmUnitId,
+      directRecipients,
+      directOnly: true,
+      actorId: input.requesterUserId,
+      extra: {
+        memberUserId: input.requesterUserId,
+      },
+    }).catch(() => {});
+  }
+
   private async assertRealmAndTagTypes(
     realmUnitId: string,
     tagUnitId: string,
@@ -436,6 +484,12 @@ export class RealmService {
       SEARCH_COMMAND_KINDS.realmPatchMemberCount,
       realmUnitId,
     );
+    if (member.state === "PENDING") {
+      await this.notifyJoinApprovalRequested({
+        realmUnitId,
+        requesterUserId: userId,
+      });
+    }
 
     return mapRealmMemberToDTO(member);
   }
@@ -713,7 +767,7 @@ export class RealmService {
       throw new Error("Realm not found");
     }
 
-    return {
+    const result = {
       realmUnitId: row.unitId,
       ruleUnitId: getRuleUnitIdFromExtra(row.extra),
       version: row.ruleVersion,
@@ -722,6 +776,7 @@ export class RealmService {
       requireOnUpdate: row.ruleRequireOnUpdate,
       updatedAt: row.rulePolicyUpdatedAt ?? undefined,
     };
+    return result;
   }
 
   async resolveRule(
@@ -827,7 +882,7 @@ export class RealmService {
       },
     });
 
-    return {
+    const result = {
       realmUnitId: row.unitId,
       ruleUnitId: getRuleUnitIdFromExtra(row.extra),
       version: row.ruleVersion,
@@ -836,6 +891,13 @@ export class RealmService {
       requireOnUpdate: row.ruleRequireOnUpdate,
       updatedAt: row.rulePolicyUpdatedAt ?? undefined,
     };
+    notifyRealmRuleUpdated({
+      actorUserId: caller.userId,
+      realmUnitId,
+      ruleUnitId: result.ruleUnitId,
+      version: result.version,
+    });
+    return result;
   }
 
   async readCommunityList(

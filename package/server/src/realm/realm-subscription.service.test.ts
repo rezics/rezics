@@ -18,6 +18,7 @@ const removeFromListMock = mock(async () => ({ unitIds: ["unit-2"] }));
 const setSingleExtraKeyMock = mock(async () => undefined);
 const clearSingleExtraKeyMock = mock(async () => undefined);
 const auditPrivilegedMutationMock = mock(async () => ({ id: "audit-1" }));
+const broadcastMock = mock(async (_event: any) => ({ ok: true }));
 mock.module("@/meili/realm/sync", () => ({
   patchRealmMemberCountToMeili: mock(async () => undefined),
   patchRealmMetadataToMeili: mock(async () => undefined),
@@ -40,6 +41,9 @@ mock.module("@/governance/audit.service", () => ({
   governanceAuditService: {
     appendPrivilegedMutation: auditPrivilegedMutationMock,
   },
+}));
+mock.module("@/notify-boundary/notify-boundary.client", () => ({
+  broadcast: broadcastMock,
 }));
 mock.module("./realm-extra.service", () => ({
   appendToList: appendToListMock,
@@ -65,6 +69,7 @@ const currentIdentity = {
 interface TxOps {
   memberCreate?: ReturnType<typeof mock>;
   memberDelete?: ReturnType<typeof mock>;
+  memberFindMany?: ReturnType<typeof mock>;
   memberFindUnique?: ReturnType<typeof mock>;
   realmUpdate?: ReturnType<typeof mock>;
   realmFindUnique?: ReturnType<typeof mock>;
@@ -88,6 +93,7 @@ function installTx(ops: TxOps) {
         roleKey: "member",
       })),
     delete: ops.memberDelete ?? mock(async () => ({})),
+    findMany: ops.memberFindMany ?? mock(async () => []),
     findUnique:
       ops.memberFindUnique ??
       mock(async () => ({ realmUnitId: REALM, userId: USER })),
@@ -117,6 +123,7 @@ afterEach(() => {
   setSingleExtraKeyMock.mockClear();
   clearSingleExtraKeyMock.mockClear();
   auditPrivilegedMutationMock.mockClear();
+  broadcastMock.mockClear();
   delete prismaMock.$transaction;
   delete prismaMock.realmMember;
   delete prismaMock.realm;
@@ -180,6 +187,16 @@ describe("realmService.joinRealm", () => {
 
   test("creates pending membership when join approval is required", async () => {
     installTx({
+      memberCreate: mock(async () => ({
+        realmUnitId: REALM,
+        userId: USER,
+        roleKey: "member",
+        state: "PENDING",
+      })),
+      memberFindMany: mock(async () => [
+        { userId: "owner-1" },
+        { userId: "moderator-1" },
+      ]),
       realmFindUnique: mock(async () => ({
         extra: {},
         ruleVersion: 1,
@@ -198,6 +215,14 @@ describe("realmService.joinRealm", () => {
         }),
       }),
     );
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "realm.join.requested",
+      sourceUnitId: REALM,
+      directRecipients: ["owner-1", "moderator-1"],
+      directOnly: true,
+      actorId: USER,
+      extra: { memberUserId: USER },
+    });
   });
 });
 
@@ -668,6 +693,15 @@ describe("realmService.updateRulePolicy", () => {
         }),
       }),
     );
+    expect(broadcastMock).toHaveBeenCalledWith({
+      kind: "realm.rules.updated",
+      sourceUnitId: REALM,
+      actorId: USER,
+      extra: {
+        ruleUnitId: "rule-unit-2",
+        version: 4,
+      },
+    });
   });
 
   test("clears the rule reference when ruleUnitId is null", async () => {

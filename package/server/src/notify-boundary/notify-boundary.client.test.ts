@@ -62,6 +62,14 @@ describe("resolveRecipients", () => {
     expect(recipients.sort()).toEqual(["a", "b"]);
   });
 
+  test("directOnly skips subscription matches", async () => {
+    const recipients = await resolveRecipients(
+      evt({ directOnly: true, directRecipients: ["a", "b"] }),
+      { findSubscriptionMatches: async () => ["sub-1"] },
+    );
+    expect(recipients.sort()).toEqual(["a", "b"]);
+  });
+
   test("dedupes duplicate direct recipients", async () => {
     const recipients = await resolveRecipients(
       evt({ directRecipients: ["a", "a", "b"] }),

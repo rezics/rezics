@@ -38,6 +38,8 @@ export const KIND_REGISTRY = {
   "post.review": { aggregatable: false, category: "post" },
   "announcement.new": { aggregatable: false, category: "announcement" },
   "member.joined": { aggregatable: true, category: "member" },
+  "realm.rules.updated": { aggregatable: true, category: "realm" },
+  "realm.join.requested": { aggregatable: false, category: "realm" },
   "unit.tagged": { aggregatable: true, category: "unit" },
   "item.added": { aggregatable: true, category: "item" },
   "item.removed": { aggregatable: true, category: "item" },
