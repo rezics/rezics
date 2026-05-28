@@ -12,7 +12,7 @@
 ## 2. Server Realm Community Behavior
 
 - [ ] 2.1 Add or extend the realm domain with rules, lifecycle, pin/announcement, and membership-metadata modules that call the foundation's realm policy for authorization.
-- [ ] 2.2 Implement rules CRUD around `Realm.extra.rule`, POST rule Unit/UnitTranslation/source rule Posts, localized rule resolution, acknowledgement identity/version metadata, and posting/join enforcement.
+- [x] 2.2 Implement rules CRUD around `Realm.extra.rule`, POST rule Unit/UnitTranslation/source rule Posts, localized rule resolution, acknowledgement identity/version metadata, and posting/join enforcement.
 - [x] 2.3 Implement pin and announcement product wrappers over the existing realm-extra list primitives, invoking foundation policy/audit for privileged changes.
 - [x] 2.4 Expose current-user membership + capability metadata for realm UI via `GET /realms/:unitId/members/me`, sourcing capability hints from the foundation.
 - [x] 2.5 Add tests for rule acknowledgement, member-only/preview behavior, pin/announcement product flows, and membership metadata.
