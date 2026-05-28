@@ -1,0 +1,105 @@
+import { describe, expect, test } from "bun:test";
+import {
+  mapGameLibraryContentToDTO,
+  mapMediaLibraryContentToDTO,
+} from "./mapper";
+
+const now = new Date("2026-05-28T00:00:00.000Z");
+
+function unitBase(overrides: Record<string, unknown> = {}) {
+  return {
+    translations: [],
+    workMemberships: [
+      {
+        unitId: "release-1",
+        workUnitId: "work-1",
+        role: "RELEASE",
+        language: "en",
+        position: "a0",
+        displayPolicy: "PRIMARY",
+        createdAt: now,
+        updatedAt: now,
+      },
+    ],
+    unitTags: [
+      {
+        tagUnitId: "tag-esrb-teen",
+        tag: { id: "tag-esrb-teen", slug: "esrb-teen" },
+      },
+      { tagUnitId: "tag-genre", tag: { id: "tag-genre", slug: "rpg" } },
+    ],
+    ...overrides,
+  };
+}
+
+describe("GAME/MEDIA library mappers", () => {
+  test("maps GAME platform Entities, rating tags, requirements, and USWN", () => {
+    const dto = mapGameLibraryContentToDTO({
+      unitId: "game-1",
+      unit: unitBase({
+        subjectAttributions: [
+          { entityId: "platform-windows" },
+          { entityId: "platform-steam" },
+        ],
+      }),
+      systemRequirements: [
+        {
+          platformEntityId: "platform-windows",
+          tier: "minimum",
+          language: "en",
+          hardware: { memory: "8 GB" },
+        },
+      ],
+    } as any);
+
+    expect(dto.workUnitId).toBe("work-1");
+    expect(dto.metadata?.uswn).toBe("work-1");
+    expect(dto.game.platformEntityIds).toEqual([
+      "platform-windows",
+      "platform-steam",
+    ]);
+    expect(dto.game.ageRatingTagUnitIds).toEqual(["tag-esrb-teen"]);
+    expect(dto.game.systemRequirementSummaries).toEqual([
+      {
+        platformEntityId: "platform-windows",
+        tier: "minimum",
+        language: "en",
+        hardware: { memory: "8 GB" },
+      },
+    ]);
+  });
+
+  test("maps MEDIA rating tags and content-structure availability", () => {
+    const dto = mapMediaLibraryContentToDTO({
+      unitId: "media-1",
+      runtimeMinutes: 24,
+      kindKey: "episode",
+      unit: unitBase({
+        ownedContentStructure: {
+          ownerUnitId: "media-1",
+          createdAt: now,
+          updatedAt: now,
+          contentNodes: [
+            {
+              id: "node-1",
+              ownerUnitId: "media-1",
+              parentId: null,
+              sortKey: "a0",
+              contentUnitId: "episode-1",
+              title: "Episode 1",
+              noContent: false,
+              rating: null,
+              createdAt: now,
+              updatedAt: now,
+            },
+          ],
+        },
+      }),
+    } as any);
+
+    expect(dto.workUnitId).toBe("work-1");
+    expect(dto.media.ageRatingTagUnitIds).toEqual(["tag-esrb-teen"]);
+    expect(dto.media.contentStructureAvailable).toBe(true);
+    expect(dto.contentStructure?.nodes[0]?.contentUnitId).toBe("episode-1");
+  });
+});

@@ -3,6 +3,7 @@ import { DispatchType, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { env } from "@/env";
+import { gameMediaLibraryService } from "@/game-media-library";
 import type { DispatchConfig } from "./dispatch.types";
 
 async function persistCoverUrlToTranslation(
@@ -90,6 +91,10 @@ export class DispatchService {
         result.unitId,
         data.coverUrl as string | null | undefined,
       );
+      await gameMediaLibraryService.appendGameMetadataRelations(result.unitId, {
+        platformEntityIds: data.platformEntityIds as string[] | undefined,
+        ageRatingTagUnitIds: data.ageRatingTagUnitIds as string[] | undefined,
+      });
       return { unitId: result.unitId };
     }
 
@@ -126,6 +131,10 @@ export class DispatchService {
       unit.id,
       data.coverUrl as string | null | undefined,
     );
+    await gameMediaLibraryService.appendGameMetadataRelations(unit.id, {
+      platformEntityIds: data.platformEntityIds as string[] | undefined,
+      ageRatingTagUnitIds: data.ageRatingTagUnitIds as string[] | undefined,
+    });
     return { unitId: unit.id };
   }
 

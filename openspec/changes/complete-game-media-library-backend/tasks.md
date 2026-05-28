@@ -19,9 +19,9 @@
 ## 3. Server Domain Services
 
 - [x] 3.1 Add `game-system-requirement` service, mapper, types, and API modules under `package/server/src` following existing domain naming conventions.
-- [ ] 3.2 Update game service/mapper behavior to read/write Entity-backed platform subject relations and rating tags (`UnitTag`) instead of `GamePlatform` or `ageRatingKey`.
-- [ ] 3.3 Update media service/mapper behavior to expose rating tags and content-structure availability.
-- [ ] 3.4 Update GAME/MEDIA read paths to resolve canonical work membership from `UnitWork(role = RELEASE)` and derived `metadata.uswn`.
+- [x] 3.2 Update game service/mapper behavior to read/write Entity-backed platform subject relations and rating tags (`UnitTag`) instead of `GamePlatform` or `ageRatingKey`.
+- [x] 3.3 Update media service/mapper behavior to expose rating tags and content-structure availability.
+- [x] 3.4 Update GAME/MEDIA read paths to resolve canonical work membership from `UnitWork(role = RELEASE)` and derived `metadata.uswn`.
 - [ ] 3.5 Ensure GAME/MEDIA creation and update flows keep titles, descriptions, and covers in `UnitTranslation` and keep credits in `CreditAttribution`.
 - [ ] 3.6 Add server-side validation that game system requirement raw text is stored only in requirement rows, not in `UnitTranslation.extra`.
 - [ ] 3.7 Mount new or updated domain APIs from `package/server/src/index.ts`.
