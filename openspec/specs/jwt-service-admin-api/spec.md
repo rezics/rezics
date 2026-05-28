@@ -2,14 +2,13 @@
 
 ## Purpose
 
-Defines the server-owned admin HTTP API for `JwtService` records:
-list, fetch, create, patch (mutable fields only), activate, and
-deactivate, each gated to the `ROOT` role and serving as the
-authoritative metadata source for JWT verification. Owns the
-write-DB-then-invalidate-cache ordering rule that keeps mutations
-consistent for the cache layer. **Phase C target**: compare with
-`auth-jwt-service-admin-api`; the older one will be deleted after
-confirming requirements survived.
+Defines the server-owned admin HTTP API for `JwtService` records on
+the **main server**: list, fetch, create, patch (mutable fields only),
+activate, and deactivate, each gated to the `ROOT` role and serving as
+the authoritative metadata source for server-side JWT verification.
+Owns the write-DB-then-invalidate-cache ordering rule that keeps
+mutations consistent for the cache layer. The parallel auth-service
+admin API is owned by `auth-jwt-service-admin-api`.
 
 ## Requirements
 

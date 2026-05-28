@@ -2,13 +2,13 @@
 
 ## Purpose
 
-Defines the admin dashboard's "JWT Services" UI: a `ROOT`/owner-only
-list page, the per-record detail/edit view, the activate/deactivate
-controls that wrap the admin API, and the TanStack Query cache
-invalidation rule that keeps the UI consistent after mutations.
-Module layout follows the existing admin feature pattern.
-**Phase C target**: compare with `admin-auth-jwt-service-ui`; the
-older one will be deleted after confirming requirements survived.
+Defines the admin dashboard's "JWT Services" UI for **main-server**
+JWT records: a `ROOT`/owner-only list page, the per-record
+detail/edit view, the activate/deactivate controls that wrap the
+admin API, and the TanStack Query cache invalidation rule that keeps
+the UI consistent after mutations. Module layout follows the
+existing admin feature pattern. The parallel auth-service admin UI
+is owned by `admin-auth-jwt-service-ui`.
 
 ## Requirements
 

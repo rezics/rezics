@@ -4,17 +4,95 @@
 
 Defines `CreditAttribution`, the unit-to-entity credit junction
 keyed by `(unitId, entityId, role)` with a `sortOrder`. Owns the
-contract credit-role registry (stable key, i18n label,
-applicable Unit types, prominence hint), the service-layer rule
-that link writes validate each Entity's `eligibleCreditRoles`,
-the storage of `role` as a free string (no DB enum) gated by
-registry validation, the verification that the `User.unitId`
-rename leaves attribution-adjacent FK resolution intact, the
+junction model (composite PK, cascade delete on both FK sides),
+the link/unlink service that triggers Meilisearch content sync,
+the retrieval path that returns each Entity's `translations[]`
+(consumed by `bookQueries.detail()` so the frontend resolves
+names per language without extra round-trips), the contract DTOs
+(`CreditAttributionDTO`, `LinkAttributionInput`, per-type role
+constant arrays such as `bookRoles`), the contract credit-role
+registry (stable key, i18n label, applicable Unit types,
+prominence hint), the service-layer rule that link writes
+validate each Entity's `eligibleCreditRoles`, the storage of
+`role` as a free string (no DB enum) gated by registry
+validation, the verification that the `User.unitId` rename
+leaves attribution-adjacent FK resolution intact, the
 reservation of attribution for creator/production credits (not
-subject indexing), and the `setCredits` batch reconciliation that
-emits a single editorial history revision.
+subject indexing), and the `setCredits` batch reconciliation
+that emits a single editorial history revision.
 
 ## Requirements
+
+### Requirement: CreditAttribution is a Unit-to-Unit junction
+
+The `CreditAttribution` model SHALL be a junction table linking a content Unit (`unitId`) to an Entity Unit (`entityId`) with a `role` string and `sortOrder` integer. The composite primary key SHALL be `(unitId, entityId, role)`. Both foreign keys SHALL reference `Unit.id` with cascade delete.
+
+#### Scenario: Create an attribution
+
+- **WHEN** a CreditAttribution is created with `unitId = "book-1"`, `entityId = "entity-1"`, `role = "author"`, `sortOrder = 0`
+- **THEN** the record SHALL be persisted with composite PK `(book-1, entity-1, author)`
+
+#### Scenario: Cascade delete from content unit
+
+- **WHEN** a Unit (book) with credit attributions is deleted
+- **THEN** all CreditAttribution rows where `unitId` matches SHALL be cascade-deleted
+
+#### Scenario: Cascade delete from entity unit
+
+- **WHEN** a Unit (entity) with credit attributions is deleted
+- **THEN** all CreditAttribution rows where `entityId` matches SHALL be cascade-deleted
+
+### Requirement: CreditAttribution link and unlink service trigger Meilisearch sync
+
+The server SHALL provide methods to link and unlink credit attributions. Linking SHALL create a CreditAttribution row. Unlinking SHALL delete by composite PK. Both operations SHALL trigger Meilisearch content sync for the affected unit so search documents stay aligned with credit state.
+
+#### Scenario: Link an attribution
+
+- **WHEN** `linkCreditAttribution({ unitId: "book-1", entityId: "entity-1", role: "author", sortOrder: 0 })` is called
+- **THEN** a CreditAttribution row SHALL be created
+- **AND** Meilisearch content sync SHALL be triggered for `"book-1"`
+
+#### Scenario: Unlink an attribution
+
+- **WHEN** `unlinkCreditAttribution("book-1", "entity-1", "author")` is called
+- **THEN** the CreditAttribution row SHALL be deleted
+- **AND** Meilisearch content sync SHALL be triggered for `"book-1"`
+
+### Requirement: Retrieve credit attributions for a unit with entity translations
+
+The server SHALL provide a method to retrieve all credit attributions for a given unit, including each linked Entity's resolved `translations[]`. Results SHALL be grouped by role and ordered by `sortOrder` ascending within each role. `bookQueries.detail()` SHALL include the same shape in its response so the frontend can resolve entity names and bios per language without additional API calls.
+
+#### Scenario: Book detail response includes entity translations
+
+- **WHEN** a client fetches book detail via `bookQueries.detail(bookId)`
+- **THEN** the response `attributions[]` SHALL include each entity's `translations[]` array
+
+#### Scenario: Author name resolved by selected language
+
+- **GIVEN** a book has a CreditAttribution with `role = "author"` pointing to entity "entity-1"
+- **AND** entity-1 has translations: `[{language: "ja", name: "村上春樹"}, {language: "en", name: "Haruki Murakami"}]`
+- **WHEN** the book detail page renders with selected language `"en"`
+- **THEN** the author name SHALL display as "Haruki Murakami"
+
+#### Scenario: Author name falls back when selected language unavailable
+
+- **GIVEN** entity-1 has translations only for `"ja"`
+- **WHEN** the selected language is `"en"`
+- **THEN** the system SHALL fall back through the translation resolution chain and display the Japanese name
+
+### Requirement: Credit attribution contract DTOs
+
+The `@rezics/contract` package SHALL export `CreditAttributionDTO` (`unitId`, `entityId`, `role`, `sortOrder`, optional embedded `entity` reference), `LinkAttributionInput` (`unitId`, `entityId`, `role`, optional `sortOrder`), and per-content-type role constant arrays (e.g. `bookRoles`, `gameRoles`).
+
+#### Scenario: CreditAttributionDTO includes embedded entity
+
+- **WHEN** a CreditAttributionDTO is serialized with entity included
+- **THEN** it SHALL contain `unitId`, `entityId`, `role`, `sortOrder`, and an `entity` object with translated name and kind
+
+#### Scenario: Role constants are exported
+
+- **WHEN** importing `bookRoles` from `@rezics/contract`
+- **THEN** it SHALL be an array including `"author"`, `"translator"`, `"illustrator"`, `"editor"`, `"publisher"`
 
 ### Requirement: Credit attribution link validates Entity eligibility
 

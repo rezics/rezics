@@ -360,31 +360,72 @@ targets).
 For each pair, list both sets of requirements, ensure every one survives in
 the chosen canonical spec, then delete the loser.
 
-### C1. JWT service admin API
+### C1. JWT service admin API — kept both 2026-05-28
 
-- [ ] Compare `jwt-service-admin-api/spec.md` against
-      `auth-jwt-service-admin-api/spec.md`. If all requirements from the
-      former exist in the latter, delete `jwt-service-admin-api/`.
+- [x] Compared `jwt-service-admin-api/spec.md` against
+      `auth-jwt-service-admin-api/spec.md`. **Conclusion: not duplicates.**
+      `jwt-service-admin-api` defines `/admin/jwt-services` on the
+      **main server** (ROOT role); `auth-jwt-service-admin-api` defines
+      `/api/auth/admin/jwt-services` on the **auth service** (owner
+      role). They are parallel admin surfaces, one per service, sharing
+      the same DTO schema by design. Updated `jwt-service-admin-api`'s
+      Purpose to call out the "main server" scope and remove the
+      "Phase C target — will be deleted" hint.
 
-### C2. JWT service admin UI
+### C2. JWT service admin UI — kept both 2026-05-28
 
-- [ ] Compare `jwt-service-admin-ui/spec.md` against
-      `admin-auth-jwt-service-ui/spec.md`. If all requirements from the
-      former exist in the latter, delete `jwt-service-admin-ui/`.
+- [x] Compared `jwt-service-admin-ui/spec.md` against
+      `admin-auth-jwt-service-ui/spec.md`. **Conclusion: not duplicates.**
+      `jwt-service-admin-ui` covers the dashboard's main-server JWT
+      records list/detail/activate/deactivate, including the explicit
+      "Auth JWT Services menu entry SHALL NOT be visible to non-owners"
+      callout that references the parallel auth UI. The other spec
+      owns the auth-service equivalent, including direct auth-service
+      base URL communication and rotation confirmation. Updated
+      `jwt-service-admin-ui`'s Purpose for the same reason as C1.
 
-### C3. Attribution
+### C3. Attribution — merged 2026-05-28
 
-- [ ] Compare `attribution/spec.md` against `unified-attribution/spec.md`.
-      They overlap on the Attribution junction model. Decide direction:
-      keep `attribution` (shorter name) and fold `unified-attribution`'s
-      requirements in, then delete `unified-attribution/`.
+- [x] Folded `unified-attribution`'s requirements into `attribution`
+      and deleted `openspec/specs/unified-attribution/`. The merge
+      added cascade-delete scenarios on both FK sides, the
+      Meilisearch-sync-on-link/unlink contract, the
+      retrieve-with-translations service path (and the
+      `bookQueries.detail()` translations-included clause), and the
+      `CreditAttributionDTO` / `LinkAttributionInput` / `bookRoles`
+      contract DTO requirement. The free-form-role scenario from
+      `unified-attribution` was intentionally dropped because the
+      `attribution` spec's registry-validation rule is the newer
+      decision and supersedes it. `attribution` retains its
+      `CreditAttribution` naming.
 
-### C4. JWT audience / token
+### C4. JWT audience / token — audited, keeping all four 2026-05-28
 
-- [ ] Audit overlap between `unified-jwt-audience`,
-      `unified-access-token`, `server-access-token`,
-      `token-refresh-registry`. Do not merge yet — produce a one-page note
-      and add concrete merge tasks to this file if overlap exists.
+- [x] Audited overlap among `unified-jwt-audience`,
+      `unified-access-token`, `server-access-token`, and
+      `token-refresh-registry`. **Conclusion: layered, not duplicate.**
+      Each owns a distinct concern of the same architecture:
+      - `unified-jwt-audience` — `aud` claim policy (`rezics` default,
+        env override, bootstrap upsert).
+      - `unified-access-token` — cross-service architectural rule that
+        `rezics-session-token` is the sole bearer credential and the
+        `x-auth-session-token` header MUST NOT appear anywhere
+        (CORS allowedHeaders, request headers, refresh flows).
+      - `server-access-token` — main-server-side issuance schema:
+        claims (`sub`, `userId`, `permission.role`, `iss`, `exp`,
+        `iat`), ES256 / JWKS signing, 15-minute TTL, the
+        role-as-rejection-hint rule, the bearer convention split
+        between `/token` + `/dispatch` (API tokens) and everything
+        else (session tokens).
+      - `token-refresh-registry` — frontend `AuthProvider` registry,
+        constrained to a single `REZICS_SESSION` entry refreshed via
+        the cookie boundary, with the non-retryable transition to
+        anonymous when the auth cookie is rejected.
+      The four cover different layers (audience claim / cross-service
+      principle / server-side issuance / frontend refresh client) and
+      remain small and focused. Merging would create a single
+      catch-all "token" spec with no clear ownership boundary, so no
+      merge is recommended. No follow-up tasks added.
 
 ---
 
@@ -472,7 +513,7 @@ the suggested targets — they are starting points, not decrees.
 | Baseline | — | 317 | 2026-05-28 |
 | A | done | 314 | 2026-05-28 |
 | B | done | 314 | 2026-05-28 |
-| C | not started | — | — |
+| C | done | 313 | 2026-05-28 |
 | D | not started | — | — |
 
 Phase B was editorial — no specs were added or deleted, so the spec
@@ -480,6 +521,11 @@ count is unchanged. Every spec now starts with
 `# <name> Specification`, has a `## Purpose` section, and uses a single
 `## Requirements` heading. `openspec/config.yaml` codifies the new
 format under `rules.specs`.
+
+Phase C reduced the catalog by one (`unified-attribution` folded into
+`attribution`). The other three pairs/clusters audited (`jwt-service-*`
+×2, JWT/token quartet) were kept as parallel or layered specs after
+inspection rather than merged on intuition.
 
 Phase A reduction: 3 capabilities removed (`auth-organization`,
 `exchange-auto-provision`, `cors-policy-plugin`). Requirement count:
