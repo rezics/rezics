@@ -45,7 +45,7 @@
 
 ## 7. Verification
 
-- [ ] 7.1 Run `bun --filter=@rezics/contract test`.
+- [x] 7.1 Run `bun --filter=@rezics/contract test`.
   - Package-scoped `bun --filter=@rezics/contract run test` passes; the exact native `bun --filter=@rezics/contract test` invocation still runs the broad repo test set and fails on unrelated shared-process/module-alias baseline failures.
 - [x] 7.2 Run targeted `package/server` admin/diagnostic/governance/search/history tests.
 - [x] 7.3 Run targeted `package/auth` admin/JWT/session tests.

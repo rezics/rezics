@@ -1,5 +1,11 @@
-## ADDED Requirements
+# auth-jwt-service-admin-api Specification
 
+## Purpose
+
+Defines owner-only auth-service APIs for listing, reading, creating, updating,
+activating, and deactivating JWT service records, including cache invalidation
+and shared DTO shape requirements.
+## Requirements
 ### Requirement: List all JWT service records on auth service
 
 The auth service SHALL expose `GET /api/auth/admin/jwt-services` that returns all `JwtService` records from the auth database. The endpoint SHALL require `owner` role authorization via better-auth access control.
@@ -83,3 +89,13 @@ The auth JWT service admin API SHALL use the same `JwtServiceDTO`, `CreateJwtSer
 #### Scenario: Response shape matches server API
 - **WHEN** the auth service returns a JWT service record
 - **THEN** the response body SHALL conform to the `JwtServiceDTO` schema defined in `@rezics/contract`
+
+### Requirement: JWT service admin API exposes operator-safe summaries
+
+JWT service admin APIs SHALL expose safe metadata needed by the admin operations panel while redacting secrets and private key material.
+
+#### Scenario: API returns JWT service detail
+
+- **WHEN** the admin panel requests JWT service detail
+- **THEN** the response SHALL include service status and key metadata
+- **AND** SHALL NOT include private key material

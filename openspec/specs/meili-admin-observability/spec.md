@@ -11,9 +11,7 @@ normalizing failures into safe status items. Existing init, sync, key, and
 delete operations remain protected by root/admin authorization, and the admin
 Meili frontend separates read-only observability from mutation and destructive
 operation surfaces.
-
 ## Requirements
-
 ### Requirement: Expected Meili schema registry
 
 The system SHALL expose a structured expected Meilisearch schema registry for
@@ -214,3 +212,12 @@ management logic.
   operation surfaces
 - **AND** destructive controls SHALL remain visually and structurally separated
   from read-only observability
+
+### Requirement: Meili observability links to repair workflows
+
+Meili admin pages SHALL show index health, document counts, settings, last sync metadata, drift checks, and links to dry-run or queued repair workflows.
+
+#### Scenario: Admin sees index drift
+
+- **WHEN** drift is detected for the content index
+- **THEN** the Meili page SHALL show affected scope and a repair entry point

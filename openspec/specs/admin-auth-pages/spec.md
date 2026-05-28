@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines the admin-side auth pages and route surfaces in `@rezics/admin`: the admin login page (talking to the auth server), the admin auth guard (role-based via `useAuthStore`), the auth users and sessions management pages, the auth route definitions and sidebar navigation, the env-var contract for the auth URL, and the page-layout conventions consistent with the shadcn-or-custom UI policy.
-
 ## Requirements
-
 ### Requirement: Admin login page uses auth server
 The login page at `/login` (`package/admin/src/user/pages/LoginPage.tsx`) SHALL use `useSignInMutation()` from `@rezics/api/auth/auth.mutations`. On successful sign-in, it SHALL read the freshly persisted JWT via `getToken()`/`parseJwt()`, verify the payload role is `admin` or `owner`, hydrate `useAuthStore`, then navigate to the redirect target.
 
@@ -144,3 +142,12 @@ Admin pages SHALL follow the existing layout patterns and component conventions,
 
 - **WHEN** any admin page renders
 - **THEN** it SHALL use compact-density UnoCSS classes (`p-4`–`p-6` containers, smaller text scales) per the design-system voice rules for admin
+
+### Requirement: Auth pages are part of account operations
+
+Admin auth users, sessions, status, and JWT service pages SHALL be grouped under account/platform security operations with consistent filters, tables, audit-aware actions, and reconciliation warnings.
+
+#### Scenario: Admin opens auth users
+
+- **WHEN** an admin opens the auth users page
+- **THEN** the page SHALL show role, ban/session state, main-user linkage, enforcement summary, and available account actions

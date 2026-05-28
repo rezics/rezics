@@ -10,9 +10,7 @@ detail page, the dashboard status overview card, and all status data fetching;
 the public app exposes no status routes or internal diagnostics. Internal
 status surfaces redact secrets, connection strings, and raw stack traces and
 present only operator-facing summaries.
-
 ## Requirements
-
 ### Requirement: Internal system status API
 
 The system SHALL provide a root/admin-only status API that aggregates safe
@@ -230,3 +228,12 @@ operator-facing summaries.
 - **THEN** the admin browser app SHALL call Rezics typed status APIs
 - **AND** it SHALL NOT directly call private Meili, Sequin, database, or
   job-runner internal admin endpoints
+
+### Requirement: System status is integrated into operations dashboard
+
+The system status feature SHALL remain its own safe API/page, and the admin dashboard SHALL embed its summary as one operational signal alongside queues, search drift, governance, and audit summaries.
+
+#### Scenario: Status degraded on dashboard
+
+- **WHEN** system status reports degraded CDC support
+- **THEN** the admin dashboard SHALL show the degraded status and link to the full status panel

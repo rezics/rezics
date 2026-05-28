@@ -1,5 +1,11 @@
-## ADDED Requirements
+# admin-auth-jwt-service-ui Specification
 
+## Purpose
+
+Defines the admin UI surfaces for auth-side JWT service management, including
+service lists, detail views, activate/deactivate controls, direct auth-service
+communication, query invalidation, and module structure.
+## Requirements
 ### Requirement: Auth JWT services page in admin dashboard
 
 The admin dashboard SHALL include an "Auth JWT Services" page accessible from the navigation menu. The page SHALL display all `JwtService` records from the auth service in a table with columns for serviceKey, issuer, audience, isLocalIssuer, and isActive status.
@@ -51,3 +57,12 @@ The auth JWT services module SHALL follow the existing admin feature structure: 
 #### Scenario: Module structure matches existing patterns
 - **WHEN** the auth JWT services module is added to `package/admin`
 - **THEN** it SHALL include a route definition, a page component, and a navigation entry consistent with existing admin modules
+
+### Requirement: JWT service UI is part of platform security operations
+
+JWT service admin UI SHALL present service health, active keys, rotation status, consumers, safe failure summaries, and audited activate/deactivate/rotate actions.
+
+#### Scenario: Owner rotates JWT service
+
+- **WHEN** an owner rotates a JWT service
+- **THEN** the action SHALL require confirmation and SHALL not expose private key material in the browser

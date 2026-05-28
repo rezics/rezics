@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines the admin-only surfaces for managing ENTITY units: a global index at `/admin/entities` listing every entity regardless of owner, and an edit page at `/admin/entities/:unitId` that is the sole place where the `verified` flag and the canonical `slug` can be mutated. The admin page wires both controls through `EntityService.update`, enforces the `verified` → `slug` ordering in the UI, and also supports `UnitTranslation` editing as part of the same atomic payload.
-
 ## Requirements
-
 ### Requirement: /admin/entities lists all entities with admin-relevant fields
 
 The admin route `/admin/entities` SHALL render a paginated index of all Entity units in the system, regardless of `Unit.userId`. Each row SHALL display at minimum: `unitId`, primary title, `kind`, `verified`, `slug` (if set), `createdAt`, and a link to the entity's admin edit page. The list SHALL support filtering by `verified` and `kind`, and text search across translation titles via the Meili `entities` index.
@@ -62,3 +60,12 @@ The admin edit page SHALL allow admins to add, update, and remove `UnitTranslati
 - **AND** submits the change
 - **THEN** a new UnitTranslation row SHALL be persisted for that entity in ja
 - **AND** the new translation SHALL appear in EntityPicker queries searching the Japanese title
+
+### Requirement: Entity admin participates in content operations
+
+Entity admin index and detail pages SHALL follow the shared admin content operation patterns for filters, table density, authority actions, audit reason capture, and repair links.
+
+#### Scenario: Entity authority action requires reason
+
+- **WHEN** an admin changes verified status or canonical slug
+- **THEN** the UI SHALL capture a reason when audit policy requires it

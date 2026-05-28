@@ -1,5 +1,13 @@
-## ADDED Requirements
+# admin-account-operations Specification
 
+## Purpose
+
+Defines operator account operations in `package/admin`, including unified
+auth-server and main-server account state, reconciliation warnings, guarded
+session controls, impersonation controls, account enforcement, and JWT security
+operation visibility.
+
+## Requirements
 ### Requirement: Admin account operations unify auth and main user state
 
 The admin panel SHALL show auth user state, main user Unit/profile linkage, global roles, account enforcement, sessions, bans, and reconciliation warnings.
