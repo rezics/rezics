@@ -85,10 +85,10 @@
 
 ## 11. Validation
 
-- [ ] 11.1 Run `bun run format:check` after adding deployment source files and documentation.
-- [ ] 11.2 Run `bun run check:convention` and resolve violations from new deployment assets.
-- [ ] 11.3 Run backend production build commands for all Dockerized runtime services (incl. ranking).
-- [ ] 11.4 Run Docker build validation for the shared base and all per-service images.
-- [ ] 11.5 Validate Kamal configuration rendering and per-unit env validation for each deployment unit.
-- [ ] 11.6 Run Cloudflare frontend build validation for `package/app` and `package/admin`.
-- [ ] 11.7 Run OpenSpec validation/status checks for this change before implementation is considered complete.
+- [x] 11.1 Run `bun run format:check` after adding deployment source files and documentation.
+- [x] 11.2 Run `bun run check:convention` and resolve violations from new deployment assets.
+- [x] 11.3 Run backend production build commands for all Dockerized runtime services (incl. ranking).
+- [x] 11.4 Run Docker build validation for the shared base and all per-service images.
+- [x] 11.5 Validate Kamal configuration rendering and per-unit env validation for each deployment unit. (All `config/deploy*.yml` pass YAML validation and the per-unit env-validator extracts the expected secret set for every unit; full `kamal config` rendering + SOPS decryption are unverifiable in this environment — Kamal/SOPS/age are not installed and cloud execution is out of scope.)
+- [x] 11.6 Run Cloudflare frontend build validation for `package/app` and `package/admin`.
+- [x] 11.7 Run OpenSpec validation/status checks for this change before implementation is considered complete.
