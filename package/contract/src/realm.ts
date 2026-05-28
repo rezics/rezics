@@ -86,17 +86,93 @@ export type RealmDTO = (typeof realmDTOSchema)["static"];
 // REALM MEMBER DTO
 // ============================================================
 
+export const realmMemberStateValues = [
+  "active",
+  "pending",
+  "muted",
+  "removed",
+  "banned",
+] as const;
+
+export const realmMemberStateSchema = t.Union([
+  t.Literal("active"),
+  t.Literal("pending"),
+  t.Literal("muted"),
+  t.Literal("removed"),
+  t.Literal("banned"),
+]);
+
+export type RealmMemberState = (typeof realmMemberStateSchema)["static"];
+
 export const realmMemberDTOSchema = t.Object({
   realmUnitId: t.String(),
   userId: t.String(),
   user: t.Optional(publicUserSchema),
   roleKey: t.String(),
+  state: t.Optional(realmMemberStateSchema),
   capabilities: t.Optional(t.Array(capabilityHintSchema)),
   joinedAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
 export type RealmMemberDTO = (typeof realmMemberDTOSchema)["static"];
+
+// ============================================================
+// REALM RULE ACKNOWLEDGEMENT DTO
+// ============================================================
+
+export const realmRuleReferenceDTOSchema = t.Object({
+  realmUnitId: t.String(),
+  ruleUnitId: t.Nullable(t.String()),
+  version: t.Nullable(t.Number()),
+  requireOnJoin: t.Optional(t.Boolean()),
+  requireOnPost: t.Optional(t.Boolean()),
+  requireOnUpdate: t.Optional(t.Boolean()),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type RealmRuleReferenceDTO =
+  (typeof realmRuleReferenceDTOSchema)["static"];
+
+export const realmRuleAcknowledgementDTOSchema = t.Object({
+  realmUnitId: t.String(),
+  ruleUnitId: t.String(),
+  version: t.Number(),
+  userId: t.String(),
+  acceptedAt: t.Union([t.String(), t.Date()]),
+  acceptedLanguage: t.Optional(t.Nullable(languageSchema)),
+});
+
+export type RealmRuleAcknowledgementDTO =
+  (typeof realmRuleAcknowledgementDTOSchema)["static"];
+
+export const realmRuleAcknowledgementStatusSchema = t.Object({
+  currentRuleUnitId: t.Nullable(t.String()),
+  requiredVersion: t.Nullable(t.Number()),
+  acceptedRuleUnitId: t.Optional(t.Nullable(t.String())),
+  acceptedVersion: t.Optional(t.Nullable(t.Number())),
+  acceptedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
+  acceptedLanguage: t.Optional(t.Nullable(languageSchema)),
+  acknowledgementRequired: t.Boolean(),
+});
+
+export type RealmRuleAcknowledgementStatus =
+  (typeof realmRuleAcknowledgementStatusSchema)["static"];
+
+export const realmMembershipMeDTOSchema = t.Object({
+  realmUnitId: t.String(),
+  userId: t.String(),
+  member: t.Nullable(realmMemberDTOSchema),
+  roleKey: t.Nullable(t.String()),
+  state: t.Nullable(realmMemberStateSchema),
+  muted: t.Boolean(),
+  banned: t.Boolean(),
+  capabilities: t.Array(capabilityHintSchema),
+  ruleAcknowledgement: realmRuleAcknowledgementStatusSchema,
+});
+
+export type RealmMembershipMeDTO =
+  (typeof realmMembershipMeDTOSchema)["static"];
 
 // ============================================================
 // REALM UNIT DTO (content feed)

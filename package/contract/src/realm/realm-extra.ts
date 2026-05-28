@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 
 export const realmRuleExtraNote =
@@ -9,6 +10,36 @@ export const realmBannerExtraNote =
   "Banner source for the realm, either a Post Unit reference or a direct image URL.";
 export const realmTagTreeExtraNote =
   "Ordered tag picker tree used as a realm posting UX hint; it does not constrain tagging.";
+
+export const realmTagViewStyleValues = ["flat", "grouped", "tree"] as const;
+
+export const realmTagViewStyleSchema = t.Union([
+  t.Literal("flat"),
+  t.Literal("grouped"),
+  t.Literal("tree"),
+]);
+
+export type RealmTagViewStyle = (typeof realmTagViewStyleSchema)["static"];
+
+export const realmTagViewSchema = t.Object(
+  {
+    defaultStyle: realmTagViewStyleSchema,
+    allowViewerSwitch: t.Boolean(),
+  },
+  { additionalProperties: false },
+);
+
+export type RealmTagView = (typeof realmTagViewSchema)["static"];
+
+export const realmTagTreeLabelSchema = t.Object(
+  {
+    translations: t.Record(t.String(), t.String()),
+    fallbackLanguage: t.Optional(languageSchema),
+  },
+  { additionalProperties: false },
+);
+
+export type RealmTagTreeLabel = (typeof realmTagTreeLabelSchema)["static"];
 
 // ============================================================
 // REALM EXTRA — typed shape of `Realm.extra`
@@ -32,6 +63,8 @@ export const tagTreeNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
     t.Object({
       tagId: t.Optional(t.String()),
       label: t.Optional(t.String()),
+      labelUnitId: t.Optional(t.String()),
+      labelTranslations: t.Optional(realmTagTreeLabelSchema),
       disabled: t.Optional(t.Boolean()),
       children: t.Optional(t.Array(self)),
     }),
@@ -40,6 +73,8 @@ export const tagTreeNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
 export type TagTreeNode = {
   tagId?: string;
   label?: string;
+  labelUnitId?: string;
+  labelTranslations?: RealmTagTreeLabel;
   disabled?: boolean;
   children?: TagTreeNode[];
 };
@@ -97,6 +132,12 @@ export const realmExtraSchema = t.Object(
      * constrain tagging.
      */
     tagTree: t.Optional(t.Array(tagTreeNodeSchema)),
+
+    /**
+     * Preferred realm Tags tab navigation style. New realms default to flat
+     * when this preference is absent.
+     */
+    tagView: t.Optional(realmTagViewSchema),
 
     /**
      * Advisory default Unit publication license for composer prefill in this

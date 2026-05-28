@@ -4,10 +4,10 @@
 
 ## 1. Contracts And Schema
 
-- [ ] 1.1 Add realm community product DTOs in `package/contract`: rules content references, acknowledgement identity/version metadata, and tag tab display preference. (Realm action literals, member state, queue/decision/sanction, and lock/archive DTOs come from the foundation.)
+- [x] 1.1 Add realm community product DTOs in `package/contract`: rules content references, acknowledgement identity/version metadata, and tag tab display preference. (Realm action literals, member state, queue/decision/sanction, and lock/archive DTOs come from the foundation.)
 - [ ] 1.2 Add Prisma fields for rule acknowledgement/version policy, rule content references, member-onboarding flags, and typed `Realm.extra.tagView`. Reuse `Realm.extra.rule`, `Realm.extra.pinboard`, and `Realm.extra.announcement` unless a spec requires a normalized replacement.
 - [ ] 1.3 Backfill existing `RealmMember` rows to active state and existing feed rows to default lifecycle state (coordinated with the foundation's member-state migration).
-- [ ] 1.4 Extend contract shapes for tag tab display preference (`flat`/`grouped`/`tree`, viewer switching) and the multilingual tagTree/group label strategy.
+- [x] 1.4 Extend contract shapes for tag tab display preference (`flat`/`grouped`/`tree`, viewer switching) and the multilingual tagTree/group label strategy.
 
 ## 2. Server Realm Community Behavior
 
