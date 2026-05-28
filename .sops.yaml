@@ -1,0 +1,15 @@
+# SOPS creation rules for production secrets.
+#
+# Encrypted per-unit env files live at config/secrets/<unit>.enc.env and are
+# committed to the repo. They are decrypted at deploy time with an age key held
+# by the CI runner / operator (SOPS_AGE_KEY or SOPS_AGE_KEY_FILE).
+#
+# Replace the placeholder recipient below with your real age PUBLIC key
+# (`age-keygen` → `public key: age1...`). Re-encrypt existing files after any
+# recipient change with `sops updatekeys config/secrets/<unit>.enc.env`.
+creation_rules:
+  - path_regex: config/secrets/.*\.enc\.env$
+    # Values only — keeps env KEY names readable in diffs, encrypts secrets.
+    encrypted_regex: "^(?!#).*"
+    age: >-
+      age1REPLACE_WITH_YOUR_PRODUCTION_AGE_PUBLIC_KEY

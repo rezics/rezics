@@ -1,0 +1,29 @@
+# reaction — reaction service (proxied; frontend reaction endpoint).
+#   kamal deploy -d reaction --version <sha> --skip-push
+service: rezics-reaction
+image: rezics/rezics-reaction
+
+builder:
+  dockerfile: docker/reaction.Dockerfile
+
+servers:
+  web:
+    - 203.0.113.10
+
+proxy:
+  ssl: true
+  host: reaction.rezics.example
+  app_port: 3003
+  healthcheck:
+    path: /health
+    interval: 5
+
+env:
+  clear:
+    PORT: "3003"
+    SERVER_JWKS_URL: http://rezics-server:3000/.well-known/jwks.json
+    SERVER_ISSUER: rezics-server
+    REACTION_TYPES: like,dislike
+  secret:
+    - REACTION_DATABASE_URL
+    - REACTION_INTERNAL_SECRET

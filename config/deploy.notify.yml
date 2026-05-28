@@ -1,0 +1,28 @@
+# notify — notification service (proxied; frontend SSE/notify endpoint).
+#   kamal deploy -d notify --version <sha> --skip-push
+service: rezics-notify
+image: rezics/rezics-notify
+
+builder:
+  dockerfile: docker/notify.Dockerfile
+
+servers:
+  web:
+    - 203.0.113.10
+
+proxy:
+  ssl: true
+  host: notify.rezics.example
+  app_port: 3002
+  healthcheck:
+    path: /health
+    interval: 5
+
+env:
+  clear:
+    PORT: "3002"
+    SERVER_JWKS_URL: http://rezics-server:3000/.well-known/jwks.json
+    SERVER_ISSUER: rezics-server
+  secret:
+    - NOTIFY_DATABASE_URL
+    - NOTIFY_INTERNAL_SECRET

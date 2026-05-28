@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# Top-level production deploy sequencer.
+#
+# Strings the split deployment units together in dependency order with a single
+# invocation: infrastructure -> env validation -> migrations -> backend services
+# -> workers. Each step is also runnable on its own (see the functions below).
+#
+#   bin/deploy <git-sha>            # full sequence at the given image revision
+#   bin/deploy <git-sha> services   # only (re)deploy backend HTTP services
+#   bin/deploy <git-sha> workers    # only (re)deploy worker roles
+#
+# Images are expected to already exist in GHCR (built/pushed by CI on push to
+# `dev`); deploy pulls the immutable tag and never rebuilds (`--skip-push`).
+set -euo pipefail
+
+VERSION="${1:?usage: bin/deploy <git-sha> [phase]}"
+PHASE="${2:-all}"
+
+REGISTRY="ghcr.io/rezics"
+HOST="${DEPLOY_HOST:-203.0.113.10}"
+SSH_USER="${DEPLOY_SSH_USER:-deploy}"
+
+# Backend HTTP service units, in rollout order (server first: issues JWKS).
+SERVICES=(server auth notify reaction history ranking)
+# Schema-owning units whose migrations run before service rollout.
+MIGRATIONS=(auth server notify reaction history ranking)
+
+log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
+
+deploy_unit() {
+  local unit="$1"
+  log "deploy ${unit} @ ${VERSION}"
+  kamal deploy -d "${unit}" --version "${VERSION}" --skip-push
+}
+
+# --- Phase: infrastructure ------------------------------------------------
+# Accessories are independently bootable units; boot/upgrade is a manual,
+# separately-approved step and is NOT part of a routine app deploy.
+boot_infra() {
+  log "boot infrastructure accessories (idempotent)"
+  # Boot without a destination so accessory container names stay stable
+  # (`rezics-<accessory>`) regardless of which service unit is deployed.
+  for acc in postgres meilisearch sequin-postgres sequin-redis sequin; do
+    kamal accessory boot "${acc}" || true
+  done
+}
+
+# --- Phase: env validation gate -------------------------------------------
+validate_env() {
+  log "validate required secrets for every unit (pre-mutation gate)"
+  bun config/validate-deploy-env.ts all
+}
+
+# --- Phase: migrations ----------------------------------------------------
+# One-shot jobs from the build-stage migrate image of the SAME revision. The
+# slim runtime images carry only the compiled binary, so migrations run from
+# `ghcr.io/rezics/rezics-<unit>-migrate:<sha>` (built with `--target build`).
+# A failure here aborts before any runtime service is touched.
+run_migration() {
+  local unit="$1" cmd="$2"
+  log "migrate ${unit}"
+  # shellcheck disable=SC2029
+  ssh "${SSH_USER}@${HOST}" \
+    "docker pull ${REGISTRY}/rezics-${unit}-migrate:${VERSION} && \
+     docker run --rm --network kamal --env-file /etc/rezics/${unit}.migrate.env \
+       ${REGISTRY}/rezics-${unit}-migrate:${VERSION} ${cmd}"
+}
+
+run_migrations() {
+  for unit in "${MIGRATIONS[@]}"; do
+    run_migration "${unit}" "bun run --cwd package/${unit} prisma:deploy"
+  done
+  # job-runner owns no schema: ensure the pg-boss queue database instead.
+  run_migration "job-runner" "bun run --cwd package/job-runner db:ensure"
+}
+
+# --- Phase: services + workers --------------------------------------------
+deploy_services() {
+  for unit in "${SERVICES[@]}"; do deploy_unit "${unit}"; done
+}
+
+deploy_workers() {
+  # HTTP intake first (Sequin delivers to it), then the two independent worker
+  # units (default lanes, then the dedicated ranking lane).
+  deploy_unit job-runner
+  deploy_unit job-runner-worker
+  deploy_unit ranking-worker
+}
+
+# --- Phase: ranking Meili backfill ----------------------------------------
+# After ranking schema / index-settings changes, repopulate ranking fields on
+# Meili documents by enqueuing a `ranking.fullSync` job (consumed by the
+# ranking-worker lane). Idempotent — safe to run every release. Requires a
+# tunnel/route to the internal job-runner enqueue endpoint and
+# JOB_RUNNER_INTERNAL_SECRET in the environment.
+ranking_backfill() {
+  log "ranking Meili full-sync backfill (enqueue ranking.fullSync)"
+  bun run --cwd package/job-runner scripts/enqueue-ranking-fullsync.ts || \
+    log "ranking backfill skipped (run scripts/enqueue-ranking-fullsync.ts manually)"
+}
+
+case "${PHASE}" in
+  all)
+    validate_env
+    boot_infra
+    run_migrations
+    deploy_services
+    deploy_workers
+    ranking_backfill
+    ;;
+  infra) boot_infra ;;
+  validate) validate_env ;;
+  migrations) validate_env && run_migrations ;;
+  services) deploy_services ;;
+  workers) deploy_workers ;;
+  backfill) ranking_backfill ;;
+  *) echo "unknown phase: ${PHASE}" >&2; exit 2 ;;
+esac
+
+log "deploy phase '${PHASE}' complete"

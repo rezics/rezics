@@ -51,6 +51,14 @@ coverage/
 **/.vitepress/dist/
 **/.vitepress/cache/
 
+# Secrets — commit only SOPS-encrypted *.enc.env (never plaintext) and never the
+# age PRIVATE key. Encrypt in place with `sops -e -i config/secrets/<unit>.enc.env`.
+config/secrets/*.dec.env
+config/secrets/*.plain.env
+*.agekey
+age-key.txt
+sops-age.key
+
 # Project-specific
 .VSCodeCounter/
 example-gitignore/

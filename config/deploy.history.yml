@@ -1,0 +1,30 @@
+# history — reading-history service (internal; called server-to-server only).
+# Routed through kamal-proxy on an internal host (no public DNS / CORS); not a
+# frontend endpoint.
+#   kamal deploy -d history --version <sha> --skip-push
+service: rezics-history
+image: rezics/rezics-history
+
+builder:
+  dockerfile: docker/history.Dockerfile
+
+servers:
+  web:
+    - 203.0.113.10
+
+proxy:
+  ssl: false
+  host: history.internal
+  app_port: 3004
+  healthcheck:
+    path: /health
+    interval: 5
+
+env:
+  clear:
+    PORT: "3004"
+    HISTORY_QUEUE_INGESTION_ENABLED: "true"
+  secret:
+    - HISTORY_DATABASE_URL
+    - SERVER_DATABASE_URL
+    - HISTORY_INTERNAL_SECRET

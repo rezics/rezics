@@ -26,29 +26,29 @@
 
 ## 4. Deployment Units and Kamal Orchestration
 
-- [ ] 4.1 Adopt Kamal as the deployment orchestrator; add base Kamal configuration targeting GHCR images and SSH access to the production host.
-- [ ] 4.2 Define deployment units at per-service granularity: `infra-db`, `infra-search`, `infra-cdc`, `infra-observability` (opt-in), `proxy` (kamal-proxy), each services-api service, each worker role, and migration jobs.
-- [ ] 4.3 Configure each unit with explicit service endpoints in env/config so same-host placement does not rely on a monolithic compose network.
-- [ ] 4.4 Add Kamal app/role definitions for backend HTTP services `server`, `auth`, `notify`, `reaction`, `history`, and `ranking` (ranking internal-only: no public proxy route, no public CORS).
-- [ ] 4.5 Add worker role definitions for `job-runner-worker` and `ranking-worker`, scalable independently from HTTP services.
-- [ ] 4.6 Configure `kamal-proxy` for TLS and health-gated zero-downtime swaps; define public vs internal routing (server/auth public, notify/reaction/history proxied, ranking + workers internal).
+- [x] 4.1 Adopt Kamal as the deployment orchestrator; add base Kamal configuration targeting GHCR images and SSH access to the production host.
+- [x] 4.2 Define deployment units at per-service granularity: `infra-db`, `infra-search`, `infra-cdc`, `infra-observability` (opt-in), `proxy` (kamal-proxy), each services-api service, each worker role, and migration jobs.
+- [x] 4.3 Configure each unit with explicit service endpoints in env/config so same-host placement does not rely on a monolithic compose network.
+- [x] 4.4 Add Kamal app/role definitions for backend HTTP services `server`, `auth`, `notify`, `reaction`, `history`, and `ranking` (ranking internal-only: no public proxy route, no public CORS).
+- [x] 4.5 Add worker role definitions for `job-runner-worker` and `ranking-worker`, scalable independently from HTTP services.
+- [x] 4.6 Configure `kamal-proxy` for TLS and health-gated zero-downtime swaps; define public vs internal routing (server/auth public, notify/reaction/history proxied, ranking + workers internal).
 - [ ] 4.7 Configure `infra-cdc` (Sequin) for two source databases — main and reaction — with their publications, and document replication-slot lag monitoring.
-- [ ] 4.8 Define the top-level deploy sequence (infra → migrations → services → workers) and confirm a single invocation strings the units together in dependency order.
+- [x] 4.8 Define the top-level deploy sequence (infra → migrations → services → workers) and confirm a single invocation strings the units together in dependency order.
 
 ## 5. Migration Jobs
 
-- [ ] 5.1 Add one-shot migration job definitions for `package/auth`, `package/server`, `package/notify`, `package/reaction`, `package/history`, and `package/ranking`.
-- [ ] 5.2 Add job database preparation/schema validation for `package/job-runner`.
-- [ ] 5.3 Ensure migration jobs run from the target image revision and fail before runtime service rollout on error.
-- [ ] 5.4 Add a one-shot ranking Meili backfill/full-sync step that runs after ranking-relevant schema or index-settings changes.
+- [x] 5.1 Add one-shot migration job definitions for `package/auth`, `package/server`, `package/notify`, `package/reaction`, `package/history`, and `package/ranking`.
+- [x] 5.2 Add job database preparation/schema validation for `package/job-runner`.
+- [x] 5.3 Ensure migration jobs run from the target image revision and fail before runtime service rollout on error.
+- [x] 5.4 Add a one-shot ranking Meili backfill/full-sync step that runs after ranking-relevant schema or index-settings changes.
 - [ ] 5.5 Document migration order, forward-compatibility expectations, and rollback limitations (ranking recovers by recompute, not DB restore).
 
 ## 6. Env and Secret Management
 
 - [x] 6.1 Add per-deployment-unit env schemas listing required values, defaults, owners, and secret/non-secret classification (including the shared observability contract).
-- [ ] 6.2 Set up SOPS + age: encrypted per-unit env files committed to the repo, decrypted at deploy with an age key held by the CI runner/host, surfaced to Kamal as its secrets source.
+- [x] 6.2 Set up SOPS + age: encrypted per-unit env files committed to the repo, decrypted at deploy with an age key held by the CI runner/host, surfaced to Kamal as its secrets source.
 - [x] 6.3 Keep frontend public config (`VITE_*`) as build-time Cloudflare variables; ensure no secrets are baked into static assets.
-- [ ] 6.4 Add validation that fails deployment before mutating services when required env values are missing.
+- [x] 6.4 Add validation that fails deployment before mutating services when required env values are missing.
 - [ ] 6.5 Document age-key bootstrap, rotation, and break-glass recovery.
 
 ## 7. Release Automation
