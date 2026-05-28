@@ -1,4 +1,17 @@
-## ADDED Requirements
+# es256-jwks-jwt-verification Specification
+
+## Purpose
+
+Defines the ES256 + JWKS contract that core Rezics services use to
+issue and verify JWTs: one active private signing key per server
+(with `kid`), the canonical + compatibility JWKS endpoints, the
+offline verification contract that resolves issuer/audience/JWKS
+from `getJwtService(serviceKey)` (not env), the unknown-`kid`
+refresh-once-then-retry behavior, the key-rotation safety window of
+`token_ttl * 2`, and the JWKS endpoint sourcing keys from the
+DB-backed cache.
+
+## Requirements
 
 ### Requirement: ES256 token signing model
 Each issuing service SHALL sign JWTs using ES256 with exactly one active private signing key per server, SHALL include `kid` in token headers, and SHALL use the same active key for every JWT token type that server issues.

@@ -1,4 +1,17 @@
-## ADDED Requirements
+# jwt-service-admin-api Specification
+
+## Purpose
+
+Defines the server-owned admin HTTP API for `JwtService` records:
+list, fetch, create, patch (mutable fields only), activate, and
+deactivate, each gated to the `ROOT` role and serving as the
+authoritative metadata source for JWT verification. Owns the
+write-DB-then-invalidate-cache ordering rule that keeps mutations
+consistent for the cache layer. **Phase C target**: compare with
+`auth-jwt-service-admin-api`; the older one will be deleted after
+confirming requirements survived.
+
+## Requirements
 
 ### Requirement: List all JWT service records
 

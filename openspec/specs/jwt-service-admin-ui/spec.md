@@ -1,4 +1,16 @@
-## ADDED Requirements
+# jwt-service-admin-ui Specification
+
+## Purpose
+
+Defines the admin dashboard's "JWT Services" UI: a `ROOT`/owner-only
+list page, the per-record detail/edit view, the activate/deactivate
+controls that wrap the admin API, and the TanStack Query cache
+invalidation rule that keeps the UI consistent after mutations.
+Module layout follows the existing admin feature pattern.
+**Phase C target**: compare with `admin-auth-jwt-service-ui`; the
+older one will be deleted after confirming requirements survived.
+
+## Requirements
 
 ### Requirement: JWT services list page in admin dashboard
 

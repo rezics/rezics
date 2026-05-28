@@ -1,4 +1,16 @@
-## ADDED Requirements
+# shared-jwt-rotation Specification
+
+## Purpose
+
+Defines the `package/jwt` shared package contract: storage-agnostic
+type definitions for key rotation (scoped by `jwtServiceId`), the
+default rotation/check/grace-period intervals, the rotation engine
+that orchestrates active-key selection and JWKS publication, the
+jose-based verification helpers (with explicit configuration, no
+env reads), and the framework-adapter separation that keeps Elysia /
+Better Auth integration out of the core rotation logic.
+
+## Requirements
 
 ### Requirement: Shared JWT package provides storage-agnostic rotation contracts
 The system SHALL provide a shared package at `package/jwt` that defines explicit type

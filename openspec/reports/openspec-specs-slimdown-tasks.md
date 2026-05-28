@@ -147,17 +147,17 @@ Group the work into batches by prefix so each PR/commit stays reviewable.
 - [x] `shelf-seed-tags`
 - [x] `shelf-structure`
 
-### B4. Batch: `auth-*` / `jwt-*` / `independent-auth-*` (8 files)
+### B4. Batch: `auth-*` / `jwt-*` / `independent-auth-*` (9 files) — done 2026-05-28
 
-- [ ] `auth-openapi-routes`
-- [ ] `auth-token-lifecycle-provider`
-- [ ] `independent-auth-server`
-- [ ] `jwt-service-admin-api` *(but see Phase C — likely delete instead)*
-- [ ] `jwt-service-admin-ui` *(but see Phase C — likely delete instead)*
-- [ ] `jwt-service-cache`
-- [ ] `shared-jwt-rotation`
-- [ ] `unified-jwt-audience`
-- [ ] `es256-jwks-jwt-verification`
+- [x] `auth-openapi-routes`
+- [x] `auth-token-lifecycle-provider` *(was MODIFIED-only; folded into Requirements)*
+- [x] `independent-auth-server`
+- [x] `jwt-service-admin-api` *(but see Phase C — likely delete instead)*
+- [x] `jwt-service-admin-ui` *(but see Phase C — likely delete instead)*
+- [x] `jwt-service-cache`
+- [x] `shared-jwt-rotation`
+- [x] `unified-jwt-audience`
+- [x] `es256-jwks-jwt-verification`
 
 ### B5. Batch: `content-*` (4 files)
 

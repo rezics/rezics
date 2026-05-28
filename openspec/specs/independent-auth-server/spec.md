@@ -1,4 +1,17 @@
-## ADDED Requirements
+# independent-auth-server Specification
+
+## Purpose
+
+Defines `package/auth` as a standalone authentication service:
+Better Auth owns session handling while JWT/JWKS concerns are
+isolated under session ownership, runtime configuration is t3-env
+validated (with fail-fast), the auth Prisma schema owns identity
+(`User` + `UserProfile` + organization plugin tables) on its own
+`rezics_auth` database, and downstream services depend on published
+contracts and locally persisted JWT metadata rather than on
+auth-internal helpers.
+
+## Requirements
 
 ### Requirement: Independent auth service boundary
 The system SHALL provide a standalone authentication service in `package/auth` where Better Auth owns session handling, JWT and JWKS concerns are modularized under session ownership, and downstream services depend on published contracts and public endpoints rather than auth-internal verification helpers.

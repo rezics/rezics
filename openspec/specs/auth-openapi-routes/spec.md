@@ -1,4 +1,16 @@
-## ADDED Requirements
+# auth-openapi-routes Specification
+
+## Purpose
+
+Defines the explicit Elysia routes the auth router SHALL declare so
+the generated OpenAPI spec documents the auth surface end-to-end:
+sign-in / sign-up / sign-out, session and JWKS, revoke-session, and
+the admin plugin endpoints. Every route SHALL declare body/response
+schemas plus `detail` metadata (summary, description, tags) and
+delegate execution to `auth.handler(request)`. Public surface SHALL
+NOT expose internal auth-session JWT acquisition.
+
+## Requirements
 
 ### Requirement: Documented sign-in route
 The auth router SHALL define an explicit `POST /sign-in/email` Elysia route with `body` schema (email, password), `response` schema (user object, session, token), and `detail` (summary, description, tags: `['Authentication']`). The handler SHALL delegate to `auth.handler(request)`.

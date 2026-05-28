@@ -1,4 +1,17 @@
-## ADDED Requirements
+# jwt-service-cache Specification
+
+## Purpose
+
+Defines `getJwtService(serviceKey)` as the sole runtime entry point
+for reading JWT service metadata: a read-through cache with TTL,
+entries that carry the full `JwtService` record plus active `Jwks`
+rows (including private key material), per-key explicit invalidation
+on every write, the write-DB-then-invalidate ordering rule that
+keeps concurrent readers consistent, and the
+`bootstrapJwtServiceRecord` upsert that seeds rows once from env
+variables on first boot.
+
+## Requirements
 
 ### Requirement: Single entry point for JWT service metadata
 

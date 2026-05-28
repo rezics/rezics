@@ -1,4 +1,18 @@
-## MODIFIED Requirements
+# auth-token-lifecycle-provider Specification
+
+## Purpose
+
+Defines the frontend `AuthProvider` that manages the lifecycle of the
+browser `REZICS_SESSION` token via the cookie-boundary
+`POST /auth/session/refresh` endpoint: which tokens it owns, when it
+proactively refreshes, how it reacts to retryable vs non-retryable
+failures, how it recovers on visibility change, and what it
+explicitly does not do (no user provisioning, no Zustand/Jotai
+state, no localStorage bearer for browser API calls). Also defines
+how `authSessionStore` hydrates the `permission` field from the
+refreshed token claims.
+
+## Requirements
 
 ### Requirement: AuthProvider accepts a configurable token array
 

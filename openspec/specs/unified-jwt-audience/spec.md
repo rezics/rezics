@@ -1,4 +1,16 @@
-## ADDED Requirements
+# unified-jwt-audience Specification
+
+## Purpose
+
+Defines `rezics` as the shared default JWT audience for all core
+services (auth and main server), the env-variable override mechanism
+for non-default configurations, and the rule that token purpose
+(identity vs session vs context) is distinguished by transport
+header and `NormalizedTokenName` rather than by audience
+differentiation. `bootstrapJwtServiceRecord` updates existing rows
+on restart so deployments converge on the unified audience.
+
+## Requirements
 
 ### Requirement: Default audience is `rezics` for all core services
 
