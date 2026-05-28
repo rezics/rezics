@@ -27,11 +27,11 @@
 - [ ] 4.2 In `routes/_mainLayout/search/index.tsx`, add explicit filter-chip UI (type / realm / work-grouping) backed by stable Unit/Entity/Realm ids; persist query state in the URL.
 - [x] 4.3 Add local-only search-history affordance on the search route (no server contract).
 - [ ] 4.4 In book/entity/tag/profile detail surfaces, expose inspect, collect, follow, discuss, contribute, report (via new `ReportAction`), share, and DM (via new `DMAction`) where policy allows.
-- [ ] 4.5 Wire collect/follow/reaction/progress mutations through the cache-coherence map so detail/dashboard/profile/search cards refresh consistently.
+- [x] 4.5 Wire collect/follow/reaction/progress mutations through the cache-coherence map so detail/dashboard/profile/search cards refresh consistently.
 
 ## 5. Library And Reading
 
-- [ ] 5.1 Confirm shelf add/remove/reorder paths persist via typed API mutations and use the cache-coherence map.
+- [x] 5.1 Confirm shelf add/remove/reorder paths persist via typed API mutations and use the cache-coherence map.
 - [ ] 5.2 Surface reading progress on reader, detail, dashboard, profile/library consistently.
 - [ ] 5.3 Integrate work/release browsing on detail (release picker + language/edition filters) without depending on `introduce-api-unit-store`.
 - [ ] 5.4 Add tests for shelf persistence, reorder stability, progress update fan-out, continue-reading, same-work release switching, and standalone content.
