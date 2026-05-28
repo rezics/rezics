@@ -1,4 +1,16 @@
-## ADDED Requirements
+# content-rating Specification
+
+## Purpose
+
+Defines the `ContentRating` enum (`GENERAL`, `R_15`, `R_18`,
+`R_18G`) shared across DB, contract, and frontend, with `R_18` /
+`R_18G` as siblings rather than an ordered pair. Owns the rule that
+each Unit's rating is a maintainer-asserted label on its own row
+(no derivation from children), the per-chapter rating contract, and
+the rule that the system synthesizes any "at-or-below tier" check at
+the point of use rather than baking it into the schema.
+
+## Requirements
 
 ### Requirement: ContentRating enum definition
 

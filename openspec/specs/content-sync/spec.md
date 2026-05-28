@@ -1,4 +1,16 @@
-## ADDED Requirements
+# content-sync Specification
+
+## Purpose
+
+Defines the synchronization that keeps the Meilisearch `content`
+index aligned with the post-unit-architecture schema: the full
+reindex operation (cursor-paginated, deletes-then-rebuilds), the
+read mapping from `UnitTranslation` / `PersonCredit` / `OrgCredit` /
+`UnitTag` / `RealmUnit` / `RealmTagUnit` / `Unit.rating` into the
+search document, and the incremental upsert/remove path that runs
+on Unit mutation when qualification changes.
+
+## Requirements
 
 ### Requirement: Full reindex syncs all qualifying units
 

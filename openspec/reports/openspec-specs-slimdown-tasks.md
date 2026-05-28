@@ -159,12 +159,12 @@ Group the work into batches by prefix so each PR/commit stays reviewable.
 - [x] `unified-jwt-audience`
 - [x] `es256-jwks-jwt-verification`
 
-### B5. Batch: `content-*` (4 files)
+### B5. Batch: `content-*` (4 files) — done 2026-05-28
 
-- [ ] `content-index`
-- [ ] `content-rating`
-- [ ] `content-search-translations`
-- [ ] `content-sync`
+- [x] `content-index`
+- [x] `content-rating`
+- [x] `content-search-translations`
+- [x] `content-sync`
 
 ### B6. Batch: `book-*` / `homepage-*` (3 files)
 

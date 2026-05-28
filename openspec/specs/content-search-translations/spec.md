@@ -1,4 +1,17 @@
-## ADDED Requirements
+# content-search-translations Specification
+
+## Purpose
+
+Defines the structured `translations` field on `ContentSearchDocument`
+that backs language-aware rendering, alongside the existing flat
+`titles[]` / `descriptions[]` arrays used for Meilisearch full-text
+search. Owns the `buildContentDocument()` sync rule that maps each
+Prisma `UnitTranslation`, the rule that credits resolve from the
+unified `Attribution` table, the frontend hook contract that uses
+`translations` to populate DTOs, the legacy-document fallback, and
+the canonical-language-code invariant.
+
+## Requirements
 
 ### Requirement: ContentSearchDocument includes structured translations for rendering
 

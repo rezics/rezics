@@ -1,4 +1,16 @@
-## ADDED Requirements
+# content-index Specification
+
+## Purpose
+
+Defines the unified Meilisearch `content` index that replaces the
+per-type `books` / `units` / `readlists` indexes. Owns the rules for
+which Units are indexed (work units and standalone Shelves where
+published + public), the document shape (denormalized translation
+arrays, independent realm/tag fields, full searchable surface), and
+the lifecycle/sync invariants that keep the index consistent with
+Unit state changes.
+
+## Requirements
 
 ### Requirement: Unified content index replaces per-type indexes
 
