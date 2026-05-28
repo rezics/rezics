@@ -15,20 +15,13 @@ import {
   admin_unit_no_title,
   common_actions,
   common_created,
-  common_search,
   common_title,
   common_unit_id,
   common_updated,
   common_user,
 } from "@rezics/i18n/messages";
-import { Spinner } from "@rezics/ui";
 import {
   Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
-  Separator,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -36,13 +29,9 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
-import { Search as SearchIcon } from "lucide-react";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
-import {
-  type PaginatedColumn,
-  PaginatedTable,
-} from "@/components/table/PaginatedTable";
+import type { PaginatedColumn } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
@@ -217,99 +206,35 @@ export default function BooksPage() {
           : admin_book_list_description()
       }
     >
-      {isMeiliMode ? (
-        <SearchablePaginatedTableCard<BookDTO>
-          searchPlaceholder={admin_book_meili_search_placeholder()}
-          q={q}
-          onQChange={setQ}
-          onSearch={() => {
-            setPage(0);
-            setQuery(q.trim());
-          }}
-          isLoading={meiliQuery.isLoading}
-          isError={meiliQuery.isError}
-          error={meiliQuery.error}
-          columns={columns}
-          rows={books}
-          getRowId={(b) => b.unitId}
-          count={typeof total === "number" ? total : 0}
-          page={page}
-          rowsPerPage={limit}
-          onPageChange={(nextPage) => setPage(nextPage)}
-          onRowsPerPageChange={(next) => {
-            setLimit(next);
-            setPage(0);
-          }}
-        />
-      ) : (
-        <Card>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-              <div className="flex-1 flex flex-col gap-1">
-                <Label htmlFor="book-search" className="text-xs">
-                  {common_search()}
-                </Label>
-                <Input
-                  id="book-search"
-                  placeholder={admin_book_search_placeholder()}
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setPage(0);
-                      setQuery(q.trim());
-                    }
-                  }}
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={common_search()}
-                onClick={() => {
-                  setPage(0);
-                  setQuery(q.trim());
-                }}
-                className="self-end sm:self-center"
-              >
-                <SearchIcon className="size-4" />
-              </Button>
-            </div>
-            <Separator className="my-4" />
-
-            {(isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading) ? (
-              <div className="flex justify-center py-12">
-                <Spinner />
-              </div>
-            ) : (isMeiliMode ? meiliQuery.isError : normalQuery.isError) ? (
-              <div>
-                <p className="text-sm text-error-text">
-                  {admin_book_failed_load_list()}
-                </p>
-                {(isMeiliMode ? meiliQuery.error : normalQuery.error) ? (
-                  <p className="text-xs text-error-text">
-                    {String(isMeiliMode ? meiliQuery.error : normalQuery.error)}
-                  </p>
-                ) : null}
-              </div>
-            ) : (
-              <PaginatedTable<BookDTO>
-                columns={columns}
-                rows={books}
-                getRowId={(b) => b.unitId}
-                count={typeof total === "number" ? total : 0}
-                page={page}
-                rowsPerPage={limit}
-                onPageChange={(nextPage) => setPage(nextPage)}
-                onRowsPerPageChange={(next) => {
-                  setLimit(next);
-                  setPage(0);
-                }}
-              />
-            )}
-          </CardContent>
-        </Card>
-      )}
+      <SearchablePaginatedTableCard<BookDTO>
+        searchInputId="book-search"
+        searchPlaceholder={
+          isMeiliMode
+            ? admin_book_meili_search_placeholder()
+            : admin_book_search_placeholder()
+        }
+        errorLabel={admin_book_failed_load_list()}
+        q={q}
+        onQChange={setQ}
+        onSearch={() => {
+          setPage(0);
+          setQuery(q.trim());
+        }}
+        isLoading={isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading}
+        isError={isMeiliMode ? meiliQuery.isError : normalQuery.isError}
+        error={isMeiliMode ? meiliQuery.error : normalQuery.error}
+        columns={columns}
+        rows={books}
+        getRowId={(b) => b.unitId}
+        count={typeof total === "number" ? total : 0}
+        page={page}
+        rowsPerPage={limit}
+        onPageChange={(nextPage) => setPage(nextPage)}
+        onRowsPerPageChange={(next) => {
+          setLimit(next);
+          setPage(0);
+        }}
+      />
     </Page>
   );
 }

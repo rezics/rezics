@@ -22,25 +22,13 @@ import {
   common_updated,
   common_user,
 } from "@rezics/i18n/messages";
-import { Spinner } from "@rezics/ui";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Input,
-  Label,
-  Separator,
-} from "@rezics/ui/shadcn";
+import { Badge, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
-import { Plus as AddIcon, Search as SearchIcon } from "lucide-react";
+import { Plus as AddIcon } from "lucide-react";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
-import {
-  type PaginatedColumn,
-  PaginatedTable,
-} from "@/components/table/PaginatedTable";
+import type { PaginatedColumn } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
@@ -191,120 +179,43 @@ export default function UnitsPage() {
           : admin_unit_list_description()
       }
     >
-      {isMeiliMode ? (
-        <SearchablePaginatedTableCard<UnitDTO>
-          searchPlaceholder={admin_unit_search_placeholder()}
-          q={q}
-          onQChange={setQ}
-          onSearch={() => {
-            setPage(0);
-            setQuery(q.trim());
-          }}
-          toolbarRight={
-            <Button
-              className="whitespace-nowrap"
-              render={(props) => (
-                <Link to="/unit/create" {...props}>
-                  <AddIcon className="size-4" />
-                  {common_create()}
-                </Link>
-              )}
-            />
-          }
-          isLoading={meiliQuery.isLoading}
-          isError={meiliQuery.isError}
-          error={meiliQuery.error}
-          columns={columns}
-          rows={units}
-          getRowId={(u) => u.id}
-          count={typeof total === "number" ? total : 0}
-          page={page}
-          rowsPerPage={limit}
-          onPageChange={(nextPage) => setPage(nextPage)}
-          onRowsPerPageChange={(next) => {
-            setLimit(next);
-            setPage(0);
-          }}
-        />
-      ) : (
-        <Card>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-              <div className="flex-1 flex flex-col gap-1">
-                <Label htmlFor="unit-search" className="text-xs">
-                  {admin_unit_search_label()}
-                </Label>
-                <Input
-                  id="unit-search"
-                  placeholder={admin_unit_search_placeholder()}
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setPage(0);
-                      setQuery(q.trim());
-                    }
-                  }}
-                />
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={common_search()}
-                onClick={() => {
-                  setPage(0);
-                  setQuery(q.trim());
-                }}
-                className="self-end sm:self-center"
-              >
-                <SearchIcon className="size-4" />
-              </Button>
-              <Button
-                className="whitespace-nowrap"
-                render={(props) => (
-                  <Link to="/unit/create" {...props}>
-                    <AddIcon className="size-4" />
-                    {common_create()}
-                  </Link>
-                )}
-              />
-            </div>
-
-            <Separator className="my-4" />
-
-            {normalQuery.isLoading ? (
-              <div className="flex justify-center py-12">
-                <Spinner />
-              </div>
-            ) : normalQuery.isError ? (
-              <div>
-                <p className="text-sm text-error-text">
-                  {admin_unit_failed_load_list()}
-                </p>
-                {normalQuery.error ? (
-                  <p className="text-xs text-error-text">
-                    {String(normalQuery.error)}
-                  </p>
-                ) : null}
-              </div>
-            ) : (
-              <PaginatedTable<UnitDTO>
-                columns={columns}
-                rows={units}
-                getRowId={(u) => u.id}
-                count={typeof total === "number" ? total : 0}
-                page={page}
-                rowsPerPage={limit}
-                onPageChange={(nextPage) => setPage(nextPage)}
-                onRowsPerPageChange={(next) => {
-                  setLimit(next);
-                  setPage(0);
-                }}
-              />
+      <SearchablePaginatedTableCard<UnitDTO>
+        searchInputId="unit-search"
+        searchLabel={isMeiliMode ? common_search() : admin_unit_search_label()}
+        searchPlaceholder={admin_unit_search_placeholder()}
+        errorLabel={admin_unit_failed_load_list()}
+        q={q}
+        onQChange={setQ}
+        onSearch={() => {
+          setPage(0);
+          setQuery(q.trim());
+        }}
+        toolbarRight={
+          <Button
+            className="whitespace-nowrap"
+            render={(props) => (
+              <Link to="/unit/create" {...props}>
+                <AddIcon className="size-4" />
+                {common_create()}
+              </Link>
             )}
-          </CardContent>
-        </Card>
-      )}
+          />
+        }
+        isLoading={isMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading}
+        isError={isMeiliMode ? meiliQuery.isError : normalQuery.isError}
+        error={isMeiliMode ? meiliQuery.error : normalQuery.error}
+        columns={columns}
+        rows={units}
+        getRowId={(u) => u.id}
+        count={typeof total === "number" ? total : 0}
+        page={page}
+        rowsPerPage={limit}
+        onPageChange={(nextPage) => setPage(nextPage)}
+        onRowsPerPageChange={(next) => {
+          setLimit(next);
+          setPage(0);
+        }}
+      />
     </Page>
   );
 }

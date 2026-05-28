@@ -3,7 +3,7 @@
 - [x] 1.1 Audit existing `package/admin/src/routes` and feature directories.
 - [x] 1.2 Define navigation groups for dashboard, content, accounts, governance, search/sync, and system operations.
 - [x] 1.3 Implement dashboard summary contracts/API for system status, queues, search drift, governance counts, audit, and repair warnings.
-- [ ] 1.4 Normalize admin page layout, table/filter/search/pagination/action patterns with compact Rezics admin density.
+- [x] 1.4 Normalize admin page layout, table/filter/search/pagination/action patterns with compact Rezics admin density.
 - [ ] 1.5 Add route guards and role/capability checks for root/admin/owner-only operations.
 
 ## 2. Account Operations

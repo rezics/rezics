@@ -10,7 +10,7 @@ import {
   Separator,
 } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
-import type React from "react";
+import React from "react";
 import {
   type PaginatedColumn,
   PaginatedTable,
@@ -24,11 +24,14 @@ const i18nMessages = {
 export function SearchablePaginatedTableCard<T>({
   title,
   description,
+  errorLabel,
   searchLabel = i18nMessages.common_search(),
   searchPlaceholder,
+  searchInputId,
   q,
   onQChange,
   onSearch,
+  filters,
   toolbarRight,
   isLoading,
   isError,
@@ -44,11 +47,14 @@ export function SearchablePaginatedTableCard<T>({
 }: {
   title?: string;
   description?: string;
+  errorLabel?: string;
   searchLabel?: string;
   searchPlaceholder?: string;
+  searchInputId?: string;
   q: string;
   onQChange: (next: string) => void;
   onSearch: () => void;
+  filters?: React.ReactNode;
   toolbarRight?: React.ReactNode;
   isLoading: boolean;
   isError: boolean;
@@ -63,22 +69,29 @@ export function SearchablePaginatedTableCard<T>({
   onRowsPerPageChange: (nextRowsPerPage: number) => void;
 }) {
   const m = useMessage(i18nMessages);
+  const fallbackSearchId = React.useId();
+  const inputId = searchInputId ?? fallbackSearchId;
+
   return (
     <>
-      {title ? <h2 className="text-xl font-extrabold mb-2">{title}</h2> : null}
+      {title ? (
+        <h2 className="mb-2 text-base font-semibold leading-[1.4]">{title}</h2>
+      ) : null}
       {description ? (
-        <p className="text-sm text-text-secondary mb-4">{description}</p>
+        <p className="mb-4 text-sm leading-[1.4] text-text-secondary">
+          {description}
+        </p>
       ) : null}
 
-      <Card>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-            <div className="flex-1 flex flex-col gap-1">
-              <Label htmlFor="search-input" className="text-xs">
+      <Card surface="contained" size="sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row">
+            <div className="flex flex-1 flex-col gap-1">
+              <Label htmlFor={inputId} className="text-xs leading-[1.3]">
                 {searchLabel}
               </Label>
               <Input
-                id="search-input"
+                id={inputId}
                 placeholder={searchPlaceholder}
                 value={q}
                 onChange={(e) => onQChange(e.target.value)}
@@ -96,8 +109,14 @@ export function SearchablePaginatedTableCard<T>({
             >
               <SearchIcon className="size-4" />
             </Button>
-            {toolbarRight}
+            {toolbarRight ? (
+              <div className="flex shrink-0 items-end gap-2 sm:items-center">
+                {toolbarRight}
+              </div>
+            ) : null}
           </div>
+
+          {filters ? <div className="mt-3">{filters}</div> : null}
 
           <Separator className="my-4" />
 
@@ -108,7 +127,7 @@ export function SearchablePaginatedTableCard<T>({
           ) : isError ? (
             <div>
               <p className="text-sm text-error-text">
-                {m.common_failed_to_load()}
+                {errorLabel ?? m.common_failed_to_load()}
               </p>
               {error ? (
                 <p className="text-xs text-error-text">{String(error)}</p>

@@ -12,12 +12,12 @@ export function Page({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto w-full max-w-lg">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+    <div className="mx-auto w-full max-w-screen-xl">
+      <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div className="min-w-0">
-          <h1 className="text-xl font-extrabold leading-tight">{title}</h1>
+          <h1 className="text-xl font-semibold leading-[1.4]">{title}</h1>
           {description ? (
-            <div className="text-sm text-text-secondary mt-1">
+            <div className="mt-1 text-sm leading-[1.4] text-text-secondary">
               {description}
             </div>
           ) : null}
