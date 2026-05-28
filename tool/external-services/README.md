@@ -1,5 +1,13 @@
 # External Services
 
+> **Local development only.** This Docker Compose project is a developer
+> convenience for running source PostgreSQL, Meilisearch, Sequin (+ its state
+> Postgres/Redis), and the optional observability stack on one machine. It is
+> **not** the production deployment boundary and **not** a production topology.
+> Production is deployed as independent units with Kamal + SOPS over GHCR — see
+> [`config/README.md`](../../config/README.md) and the runbooks under `docs/`.
+> The local single-project layout does not imply how production is split.
+
 The managed local stack uses exact image tags for reproducibility:
 
 | Service | Image |

@@ -32,7 +32,7 @@
 - [x] 4.4 Add Kamal app/role definitions for backend HTTP services `server`, `auth`, `notify`, `reaction`, `history`, and `ranking` (ranking internal-only: no public proxy route, no public CORS).
 - [x] 4.5 Add worker role definitions for `job-runner-worker` and `ranking-worker`, scalable independently from HTTP services.
 - [x] 4.6 Configure `kamal-proxy` for TLS and health-gated zero-downtime swaps; define public vs internal routing (server/auth public, notify/reaction/history proxied, ranking + workers internal).
-- [ ] 4.7 Configure `infra-cdc` (Sequin) for two source databases — main and reaction — with their publications, and document replication-slot lag monitoring.
+- [x] 4.7 Configure `infra-cdc` (Sequin) for two source databases — main and reaction — with their publications, and document replication-slot lag monitoring.
 - [x] 4.8 Define the top-level deploy sequence (infra → migrations → services → workers) and confirm a single invocation strings the units together in dependency order.
 
 ## 5. Migration Jobs
@@ -41,7 +41,7 @@
 - [x] 5.2 Add job database preparation/schema validation for `package/job-runner`.
 - [x] 5.3 Ensure migration jobs run from the target image revision and fail before runtime service rollout on error.
 - [x] 5.4 Add a one-shot ranking Meili backfill/full-sync step that runs after ranking-relevant schema or index-settings changes.
-- [ ] 5.5 Document migration order, forward-compatibility expectations, and rollback limitations (ranking recovers by recompute, not DB restore).
+- [x] 5.5 Document migration order, forward-compatibility expectations, and rollback limitations (ranking recovers by recompute, not DB restore).
 
 ## 6. Env and Secret Management
 
@@ -49,7 +49,7 @@
 - [x] 6.2 Set up SOPS + age: encrypted per-unit env files committed to the repo, decrypted at deploy with an age key held by the CI runner/host, surfaced to Kamal as its secrets source.
 - [x] 6.3 Keep frontend public config (`VITE_*`) as build-time Cloudflare variables; ensure no secrets are baked into static assets.
 - [x] 6.4 Add validation that fails deployment before mutating services when required env values are missing.
-- [ ] 6.5 Document age-key bootstrap, rotation, and break-glass recovery.
+- [x] 6.5 Document age-key bootstrap, rotation, and break-glass recovery.
 
 ## 7. Release Automation
 
@@ -70,18 +70,18 @@
 
 ## 9. Local External Services Boundary
 
-- [ ] 9.1 Update `tool/external-services` documentation to state the compose project is local-development only.
-- [ ] 9.2 Ensure production deployment docs do not reference `tool/external-services/compose.yml` (or its local `otel-collector.yml`) as a production deployment plan.
-- [ ] 9.3 Re-baseline this change's `external-services-docker` delta against the now-applied `standardize-elysia-observability` change (pinned image baselines, local OTel Collector, reaction DB source) so the spec does not regress.
-- [ ] 9.4 Preserve existing local external-services commands and validate they still start, stop, report health, and stream logs for development.
+- [x] 9.1 Update `tool/external-services` documentation to state the compose project is local-development only.
+- [x] 9.2 Ensure production deployment docs do not reference `tool/external-services/compose.yml` (or its local `otel-collector.yml`) as a production deployment plan.
+- [x] 9.3 Re-baseline this change's `external-services-docker` delta against the now-applied `standardize-elysia-observability` change (pinned image baselines, local OTel Collector, reaction DB source) so the spec does not regress.
+- [x] 9.4 Preserve existing local external-services commands and validate they still start, stop, report health, and stream logs for development.
 
 ## 10. Operations Documentation
 
-- [ ] 10.1 Add a production bootstrap runbook: host prep, GHCR credentials, age key, PostgreSQL instance + per-service databases, Meili, Sequin (two sources), kamal-proxy, and the opt-in observability unit.
-- [ ] 10.2 Add a release runbook: image promotion, migration jobs, `kamal deploy` rollout, ranking Meili backfill, Cloudflare deployment, and health checks.
-- [ ] 10.3 Add a rollback runbook: Cloudflare rollback, Kamal image rollback, worker rollback, infrastructure rollback boundaries, and ranking recompute recovery.
-- [ ] 10.4 Add a troubleshooting runbook: logs (JSON + OTLP), failed healthchecks, migration failures, proxy routing, replication-slot lag for both CDC sources, and worker queue readiness.
-- [ ] 10.5 Cross-link production deployment docs from the repo developer/deployment documentation.
+- [x] 10.1 Add a production bootstrap runbook: host prep, GHCR credentials, age key, PostgreSQL instance + per-service databases, Meili, Sequin (two sources), kamal-proxy, and the opt-in observability unit.
+- [x] 10.2 Add a release runbook: image promotion, migration jobs, `kamal deploy` rollout, ranking Meili backfill, Cloudflare deployment, and health checks.
+- [x] 10.3 Add a rollback runbook: Cloudflare rollback, Kamal image rollback, worker rollback, infrastructure rollback boundaries, and ranking recompute recovery.
+- [x] 10.4 Add a troubleshooting runbook: logs (JSON + OTLP), failed healthchecks, migration failures, proxy routing, replication-slot lag for both CDC sources, and worker queue readiness.
+- [x] 10.5 Cross-link production deployment docs from the repo developer/deployment documentation.
 
 ## 11. Validation
 
