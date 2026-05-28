@@ -1,5 +1,11 @@
-## ADDED Requirements
+# content-search-contract Specification
 
+## Purpose
+
+Defines shared contract schemas and DTOs for content search documents, search
+options, search results, facets, and index metadata consumed by backend and
+frontend packages.
+## Requirements
 ### Requirement: ContentSearchDocument type is defined in @rezics/contract
 
 The `@rezics/contract` package SHALL export a `ContentSearchDocument` interface that defines the shape of a document in the Meilisearch content index. This type SHALL be shared across backend (sync, search API) and frontend (result rendering).
@@ -75,7 +81,60 @@ Affected files:
 - **WHEN** the Meilisearch response does not include `estimatedTotalHits`
 - **THEN** the returned `total` falls back to `resp.hits.length`
 
-## ADDED Requirements
+### Requirement: Content search documents project game and media metadata
+
+Content search documents for GAME and MEDIA release Units SHALL include typed
+metadata needed for filtering and result rendering. At minimum, GAME documents
+SHALL expose platform Entity ids, external rating tag ids, release date,
+version label, and system-requirement summary fields when available. MEDIA
+documents SHALL expose kind key, external rating tag ids, release date, runtime
+summary, and content-structure availability fields when available.
+
+#### Scenario: Game document includes platform Entity ids
+
+- **WHEN** a GAME release is indexed
+- **THEN** its content search document SHALL include the Entity ids for supported platforms
+- **AND** platform filters SHALL NOT depend on legacy string platform keys
+
+#### Scenario: Media document includes kind and rating ids
+
+- **WHEN** a MEDIA release is indexed
+- **THEN** its content search document SHALL include `kindKey` and external rating tag ids when available
+- **AND** clients SHALL be able to render or filter from those projected fields
+
+### Requirement: Search options support platform Entity and rating tag filters
+
+The content search contract SHALL provide a filter for platform Entity ids and
+SHALL route age-rating filtering through the existing tag filter over external
+rating tags. Platform filters SHALL be expressed in terms of Unit/Entity ids and
+rating filters in terms of rating tag Units, not raw labels or legacy string
+keys. No dedicated age-rating Entity filter SHALL be added.
+
+#### Scenario: Filter games by platform Entity
+
+- **WHEN** a client submits a content search with a PlayStation 5 platform Entity id
+- **THEN** the request SHALL be valid
+- **AND** the server SHALL be able to filter GAME documents by that Entity id
+
+#### Scenario: Filter media by rating tag
+
+- **WHEN** a client submits a content search with the `tv-14` rating tag
+- **THEN** the request SHALL be valid
+- **AND** the server SHALL be able to filter MEDIA documents by that rating tag through the existing tag filter
+
+### Requirement: Search documents preserve work grouping for game and media
+
+GAME and MEDIA search documents SHALL preserve the work-grouping fields defined
+by the work-domain search contract. Grouping SHALL use the canonical
+`UnitWork(role = RELEASE)` work id when present, and standalone releases SHALL
+group by their own Unit id.
+
+#### Scenario: Same-work game releases group together
+
+- **GIVEN** two GAME releases belong to the same hidden work through `UnitWork`
+- **WHEN** both releases are indexed
+- **THEN** their search documents SHALL share the same search group id
+- **AND** ordinary search result assembly MAY collapse them into one grouped result
 
 ### Requirement: ContentSearchOptions supports SlugRef tags
 
@@ -135,8 +194,6 @@ The `@rezics/contract` package SHALL export a `ZoneDTO` Typebox schema represent
 - **WHEN** a client fetches a zone by slug
 - **THEN** the response body SHALL conform to `ZoneDTO`
 
-## MODIFIED Requirements
-
 ### Requirement: ContentSearchOptions type is defined in @rezics/contract
 
 The `@rezics/contract` package SHALL export a `ContentSearchOptions` interface that defines the input shape for content search queries. This type SHALL be used by the server search endpoint and the frontend API client. The schema SHALL include a `tags` field of type `SlugRef[]` alongside the existing `tagIds` field. When both `tags` and `tagIds` are present in a request, `tags` SHALL take precedence.
@@ -173,8 +230,6 @@ The schema SHALL expose a `ratings?: ContentRating[]` field for set-based rating
 - **WHEN** the `ContentSearchOptions` type is inspected
 - **THEN** it SHALL NOT contain a property named `nsfw`
 
-## MODIFIED Requirements
-
 ### Requirement: BookDTO does not embed tag display data
 
 `BookDTO` SHALL NOT contain a `tags` field with embedded tag labels or scores. Tag display data for a book is fetched independently via `tagQueries.list({ unitId })` (scored junction data) and the batch translation query (multilingual labels). The `scoredTagBriefSchema` type SHALL be removed from `@rezics/contract`.
@@ -199,8 +254,6 @@ The schema SHALL expose a `ratings?: ContentRating[]` field for set-based rating
 - **WHEN** the migration is applied
 - **THEN** all call sites SHALL be replaced with `tagQueries.list({ unitId })` + `tagQueries.batchTranslations(tagUnitIds, lang)`
 - **AND** `getBookTagLabels()` SHALL be removed from `translation-helpers.ts`
-
-## ADDED Requirements
 
 ### Requirement: Alias matches behave as ordinary search text matches
 Content search SHALL allow alias-derived fields to match free-text keyword queries. A match through a pinned alias SHALL NOT receive special ranking treatment solely because the alias is pinned.

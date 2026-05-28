@@ -1,5 +1,10 @@
-## Requirements
+# subject-attribution Specification
 
+## Purpose
+
+Defines subject attribution links between Units and Entity subjects, including
+role semantics, eligibility, source evidence, and indexing behavior.
+## Requirements
 ### Requirement: SubjectAttribution links Units to Entity subjects
 
 The system SHALL provide a `SubjectAttribution` model that links a target Unit (`unitId`) to an Entity Unit (`entityId`) with a free-form `role` string. The relation SHALL represent subject indexing such as characters, factions, families, locations, artifacts, events, concepts, canonical wiki pages, and related setting objects. Both `unitId` and `entityId` SHALL reference `Unit.id`, and `entityId` SHALL refer to a Unit with `type = ENTITY`.
@@ -145,3 +150,29 @@ Subject attribution changes made through entity attribution batch editing SHALL 
 - **WHEN** a user locally removes one character, adds another character, reorders the character list, and saves once
 - **THEN** the server SHALL write one editorial history revision for the changed subject role path
 - **AND** the revision content SHALL represent the final ordered subject set including any submitted weights
+
+### Requirement: Platform availability and worldview subject roles
+
+The subject attribution role registry SHALL include the `available_on` role for
+platform availability, with an Entity kind hint of `game_platform`. The existing
+`setting` role SHALL additionally hint the `universe` Entity kind so worldview
+subjects can be attached to works.
+
+The registry SHALL NOT include an `age_rating` subject role; external age ratings
+are catalog tags, not subjects.
+
+#### Scenario: Platform uses available_on role
+
+- **WHEN** a GAME release is linked to a `game_platform` Entity with `role = "available_on"` and the role is registered
+- **THEN** the SubjectAttribution SHALL be persisted with `role = "available_on"`
+
+#### Scenario: Worldview uses setting role
+
+- **WHEN** a work is linked to a `universe` Entity with `role = "setting"`
+- **THEN** the SubjectAttribution SHALL be persisted with `role = "setting"`
+
+#### Scenario: Age rating subject role is rejected
+
+- **WHEN** a caller attempts to create a SubjectAttribution with `role = "age_rating"`
+- **THEN** the request SHALL be rejected because `age_rating` is not a registered subject role
+
