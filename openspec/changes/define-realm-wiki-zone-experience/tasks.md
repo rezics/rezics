@@ -113,13 +113,13 @@
 
 ## 12. Seeds And Fixtures
 
-- [ ] 12.1 Add seed data for a work with visible releases and an official realm context.
-- [ ] 12.2 Add seed data for a realm with WIKI Post Units sent through UnitRealm.
-- [ ] 12.3 Add seed data for wiki TranslationGroups with at least two language variants.
-- [ ] 12.4 Add seed data for character/location/faction Entities and work/release SubjectAttribution rows.
-- [ ] 12.5 Add seed data for LABEL Units used by wiki navigation and homepage sections.
-- [ ] 12.6 Add seed wiki Zones for `wiki-classic`, `wiki-media`, `wiki-database`, and `wiki-minimal` theme presets.
-- [ ] 12.7 Add seed scenarios for empty/stub/recent/updated wiki sections.
+- [x] 12.1 Add seed data for a work with visible releases and an official realm context.
+- [x] 12.2 Add seed data for a realm with WIKI Post Units sent through UnitRealm.
+- [x] 12.3 Add seed data for wiki TranslationGroups with at least two language variants.
+- [x] 12.4 Add seed data for character/location/faction Entities and work/release SubjectAttribution rows.
+- [x] 12.5 Add seed data for LABEL Units used by wiki navigation and homepage sections.
+- [x] 12.6 Add seed wiki Zones for `wiki-classic`, `wiki-media`, `wiki-database`, and `wiki-minimal` theme presets.
+- [x] 12.7 Add seed scenarios for empty/stub/recent/updated wiki sections.
 
 ## 13. Tests And Verification
 

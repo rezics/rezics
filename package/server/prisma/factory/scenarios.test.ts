@@ -13,6 +13,7 @@ describe("factory scenarios", () => {
       "large-history",
       "complex-shelf",
       "unit-work-domain",
+      "wiki-zone-experience",
     ]);
 
     for (const name of FACTORY_SCENARIO_NAMES) {
