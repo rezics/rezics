@@ -17,11 +17,11 @@
 
 ## 3. Docker Images
 
-- [ ] 3.1 Add a shared multi-stage base image for Bun workspace install, with build context at the repo root and aggressive `.dockerignore`.
-- [ ] 3.2 Add thin per-service Dockerfiles for `server`, `auth`, `notify`, `reaction`, `history`, `job-runner`, and `ranking` that compile and package only their artifact.
-- [ ] 3.3 Encode the Bun + Prisma constraints: run `prisma generate` in a Node-capable stage, supply a dummy `DATABASE_URL` at build (never a real secret), `bun install --ignore-scripts`, and copy the generated Prisma client + query engine into the runtime image.
-- [ ] 3.4 Ensure ranking's image includes `@rezics/server`'s generated Prisma client (main-DB read) and that all images run as a non-root user on a slim/distroless runtime.
-- [ ] 3.5 Add image healthchecks for each runtime service.
+- [x] 3.1 Add a shared multi-stage base image for Bun workspace install, with build context at the repo root and aggressive `.dockerignore`.
+- [x] 3.2 Add thin per-service Dockerfiles for `server`, `auth`, `notify`, `reaction`, `history`, `job-runner`, and `ranking` that compile and package only their artifact.
+- [x] 3.3 Encode the Bun + Prisma constraints: run `prisma generate` in a Node-capable stage, supply a dummy `DATABASE_URL` at build (never a real secret), `bun install --ignore-scripts`, and copy the generated Prisma client + query engine into the runtime image.
+- [x] 3.4 Ensure ranking's image includes `@rezics/server`'s generated Prisma client (main-DB read) and that all images run as a non-root user on a slim/distroless runtime.
+- [x] 3.5 Add image healthchecks for each runtime service.
 - [ ] 3.6 Build all backend images in CI and verify each starts far enough to pass its healthcheck with test env.
 
 ## 4. Deployment Units and Kamal Orchestration
