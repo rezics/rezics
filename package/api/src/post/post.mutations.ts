@@ -96,6 +96,11 @@ export function useCreateWikiPostMutation(
           queryKey: postKeys.byTargets(variables.targetUnitId),
         });
       }
+      for (const realmUnitId of variables.realmUnitIds ?? []) {
+        queryClient.invalidateQueries({
+          queryKey: postKeys.byRealms(realmUnitId),
+        });
+      }
       queryClient.setQueryData(postKeys.detail(data.unitId), data);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

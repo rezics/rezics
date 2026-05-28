@@ -121,6 +121,17 @@ export const postsByRealmQuery = (realmUnitId: string, filters?: PostFilters) =>
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
+export const wikiPostsByRealmQuery = (
+  realmUnitId: string,
+  filters?: Omit<PostFilters, "kind" | "realmUnitId">,
+) =>
+  queryOptions({
+    queryKey: postKeys.wikiByRealm(realmUnitId, filters),
+    queryFn: () => postApi.getWikiByRealm(realmUnitId, filters),
+    enabled: !!realmUnitId,
+    staleTime: 1000 * 60 * 2,
+  });
+
 /**
  * Query options for getting posts within a work domain.
  */
@@ -163,6 +174,7 @@ export const postQueries = {
   subtree: postSubtreeQuery,
   replies: postRepliesQuery,
   byRealm: postsByRealmQuery,
+  wikiByRealm: wikiPostsByRealmQuery,
   byWork: postsByWorkQuery,
   infiniteList: postInfiniteListQuery,
 };

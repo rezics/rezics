@@ -79,6 +79,10 @@ export const postKeys = {
     [...postKeys.all(), "realm", realmUnitId] as const,
   byRealm: (realmUnitId: string, filters?: PostFilters) =>
     [...postKeys.byRealms(realmUnitId), filters ?? null] as const,
+  wikiByRealm: (
+    realmUnitId: string,
+    filters?: Omit<PostFilters, "kind" | "realmUnitId">,
+  ) => [...postKeys.byRealms(realmUnitId), "wiki", filters ?? null] as const,
 
   /**
    * Keys for work-domain scoped queries.

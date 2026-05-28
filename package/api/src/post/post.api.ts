@@ -138,6 +138,13 @@ export const postApi = {
     return postApi.listWiki({ ...filters, targetUnitId });
   },
 
+  getWikiByRealm: async (
+    realmUnitId: string,
+    filters?: Omit<PostFilters, "kind" | "realmUnitId">,
+  ): Promise<PostListResponse> => {
+    return postApi.listWiki({ ...filters, realmUnitId });
+  },
+
   /**
    * Create new post
    */
