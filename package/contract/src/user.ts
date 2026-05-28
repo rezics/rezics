@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { bookshelfViewConfigSchema } from "./bookshelf";
 import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
@@ -132,6 +133,13 @@ export const OPT_IN_RATINGS: readonly ContentRating[] = ["R_18", "R_18G"];
 /** Always-on baseline ratings available to every caller, signed in or not. */
 export const BASELINE_RATINGS: readonly ContentRating[] = ["GENERAL", "R_15"];
 
+/** Library-surface display preferences (bookshelf grid, etc.). */
+export const librarySettingsSchema = t.Object({
+  bookshelf: t.Optional(bookshelfViewConfigSchema),
+});
+
+export type LibrarySettings = (typeof librarySettingsSchema)["static"];
+
 export const userSettingsSchema = t.Object({
   realmTagPreferences: t.Optional(
     t.Record(t.String(), realmTagPreferenceSchema),
@@ -139,6 +147,7 @@ export const userSettingsSchema = t.Object({
   preferredLanguages: t.Optional(t.Array(t.String())),
   content: t.Optional(contentPreferenceSchema),
   publishing: t.Optional(publishingPreferenceSchema),
+  library: t.Optional(librarySettingsSchema),
 });
 
 export type UserSettings = (typeof userSettingsSchema)["static"];
