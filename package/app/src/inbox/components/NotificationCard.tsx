@@ -1,9 +1,12 @@
 import type { NotificationItem } from "@rezics/contract";
 import { Badge } from "@rezics/ui/shadcn";
+import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
+import { resolveNotificationHref } from "../models/notificationTarget";
 
 export interface NotificationCardProps {
   item: NotificationItem;
+  /** Invoked on activation (e.g. mark-as-read); navigation happens via target. */
   onClick?: () => void;
 }
 
@@ -54,16 +57,15 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
         ? "Someone"
         : `${actorCount} people`;
 
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors",
-        "hover:bg-surface-subtle focus:bg-surface-subtle focus:outline-none",
-        item.read ? "" : "bg-surface-subtle/40",
-      )}
-    >
+  const href = resolveNotificationHref(item);
+  const className = cn(
+    "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors",
+    "hover:bg-surface-subtle focus:bg-surface-subtle focus:outline-none",
+    item.read ? "" : "bg-surface-subtle/40",
+  );
+
+  const body = (
+    <>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium text-foreground">{actorSummary}</span>
@@ -89,6 +91,23 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
           className="mt-2 size-2 shrink-0 rounded-full bg-primary"
         />
       )}
+    </>
+  );
+
+  // When the server resolved a deep-link target, the card navigates there and
+  // still marks itself read on activation; otherwise it is a plain mark-read
+  // button.
+  if (href) {
+    return (
+      <Link to={href} onClick={onClick} className={className}>
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {body}
     </button>
   );
 }
