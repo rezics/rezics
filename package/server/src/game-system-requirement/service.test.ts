@@ -35,7 +35,10 @@ function freshMocks() {
       })),
     },
     unitExternalRef: {
-      findUniqueOrThrow: mock(async () => ({ id: "source-ref-1" })),
+      findUniqueOrThrow: mock(async () => ({
+        id: "source-ref-1",
+        unitId: "game-1",
+      })),
     },
     gameSystemRequirement: {
       findMany: mock(async () => [row]),
@@ -98,6 +101,7 @@ describe("GameSystemRequirementService", () => {
     expect(prismaMock.unitExternalRef.findUniqueOrThrow).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: "source-ref-1" },
+        select: { id: true, unitId: true },
       }),
     );
     expect(prismaMock.gameSystemRequirement.create).toHaveBeenCalledWith(
@@ -129,6 +133,25 @@ describe("GameSystemRequirementService", () => {
         hardware: {},
       }),
     ).rejects.toThrow(/game_platform/);
+  });
+
+  test("rejects requirement source refs for another unit", async () => {
+    freshMocks();
+    prismaMock.unitExternalRef.findUniqueOrThrow = mock(async () => ({
+      id: "source-ref-1",
+      unitId: "other-game",
+    }));
+    const { gameSystemRequirementService } = await import("./service");
+
+    await expect(
+      gameSystemRequirementService.create({
+        gameUnitId: "game-1",
+        platformEntityId: "platform-windows",
+        tier: "minimum",
+        sourceRefId: "source-ref-1",
+        hardware: {},
+      }),
+    ).rejects.toThrow(/same game Unit/);
   });
 
   test("maps storage rows to contract DTOs", () => {

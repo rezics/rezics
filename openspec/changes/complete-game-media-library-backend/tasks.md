@@ -54,9 +54,9 @@
 ## 7. Admin And Import Readiness
 
 - [ ] 7.1 Add admin-facing read/list endpoints or service methods for platform Entities, external rating tags, and system requirement rows.
-- [ ] 7.2 Add source evidence handling so imported requirements can reference `UnitExternalRef` records.
+- [x] 7.2 Add source evidence handling so imported requirements can reference `UnitExternalRef` records.
 - [ ] 7.3 Add drift diagnostics for legacy platform/rating rows, missing platform Entities, missing rating tags, and search projection mismatch.
-- [ ] 7.4 Document import-source expectations for IGDB, Steam, TMDB, IMDb, and PCGamingWiki without implementing crawlers/importers.
+- [x] 7.4 Document import-source expectations for IGDB, Steam, TMDB, IMDb, and PCGamingWiki without implementing crawlers/importers.
 
 ## 8. Verification
 

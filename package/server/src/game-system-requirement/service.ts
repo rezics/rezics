@@ -36,15 +36,28 @@ async function assertPlatformEntity(
   }
 }
 
-async function assertSourceRef(sourceRefId: string | null | undefined) {
+async function assertSourceRef(
+  gameUnitId: string,
+  sourceRefId: string | null | undefined,
+) {
   if (!sourceRefId) {
     return;
   }
 
-  await prisma.unitExternalRef.findUniqueOrThrow({
+  const sourceRef = await prisma.unitExternalRef.findUniqueOrThrow({
     where: { id: sourceRefId },
-    select: { id: true },
+    select: { id: true, unitId: true },
   });
+  if (sourceRef.unitId !== gameUnitId) {
+    throw new AppError(
+      400,
+      "Game system requirement sourceRefId must reference the same game Unit",
+      {
+        code: "game_requirement_source_ref_unit_mismatch",
+        details: { gameUnitId, sourceRefId, sourceRefUnitId: sourceRef.unitId },
+      },
+    );
+  }
 }
 
 export class GameSystemRequirementService {
@@ -79,7 +92,7 @@ export class GameSystemRequirementService {
   async create(input: CreateGameSystemRequirementInput) {
     await assertGameExists(input.gameUnitId);
     await assertPlatformEntity(input.platformEntityId);
-    await assertSourceRef(input.sourceRefId);
+    await assertSourceRef(input.gameUnitId, input.sourceRefId);
 
     return prisma.gameSystemRequirement.create({
       data: {
@@ -100,7 +113,11 @@ export class GameSystemRequirementService {
       await assertPlatformEntity(input.platformEntityId);
     }
     if (input.sourceRefId !== undefined) {
-      await assertSourceRef(input.sourceRefId);
+      const current = await prisma.gameSystemRequirement.findUniqueOrThrow({
+        where: { id },
+        select: { gameUnitId: true },
+      });
+      await assertSourceRef(current.gameUnitId, input.sourceRefId);
     }
 
     return prisma.gameSystemRequirement.update({
