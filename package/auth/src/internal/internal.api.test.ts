@@ -399,4 +399,66 @@ describe("auth internal registration lifecycle", () => {
       select: expect.any(Object),
     });
   });
+
+  test("denies impersonation when the actor is not an owner", async () => {
+    userFindUnique
+      .mockResolvedValueOnce({ id: "actor-auth-user-1", role: "admin" })
+      .mockResolvedValueOnce({
+        id: "target-auth-user-1",
+        role: "user",
+        banned: false,
+      });
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/users/impersonate", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({
+          actorAuthUserId: "actor-auth-user-1",
+          targetAuthUserId: "target-auth-user-1",
+          reason: "support review",
+          durationSeconds: 900,
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect((await response.json()).error.code).toBe("OWNER_REQUIRED");
+    expect(sessionCreate).not.toHaveBeenCalled();
+  });
+
+  test("denies impersonation of banned auth users", async () => {
+    userFindUnique
+      .mockResolvedValueOnce({ id: "actor-auth-user-1", role: "owner" })
+      .mockResolvedValueOnce({
+        id: "target-auth-user-1",
+        role: "user",
+        banned: true,
+      });
+    const { authInternalApi } = await import("./internal.api");
+
+    const response = await authInternalApi.handle(
+      new Request("http://localhost/internal/users/impersonate", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-internal-secret": "internal-test-secret",
+        },
+        body: JSON.stringify({
+          actorAuthUserId: "actor-auth-user-1",
+          targetAuthUserId: "target-auth-user-1",
+          reason: "support review",
+          durationSeconds: 900,
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(409);
+    expect((await response.json()).error.code).toBe("TARGET_AUTH_USER_BANNED");
+    expect(sessionCreate).not.toHaveBeenCalled();
+  });
 });

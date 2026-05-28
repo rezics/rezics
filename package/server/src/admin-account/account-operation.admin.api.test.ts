@@ -126,6 +126,68 @@ describe("accountOperationsAdminApi", () => {
     });
   });
 
+  test("returns missing main profile reconciliation warnings", async () => {
+    currentIdentity = {
+      sub: "admin-1",
+      userId: "admin-1",
+      permission: { role: "ADMIN" },
+    };
+    dbAdmin = true;
+    getAuthUserAccountSummaries.mockResolvedValueOnce([
+      {
+        authUserId: "auth-user-2",
+        accountEnforcement: {
+          activeCount: 0,
+          activeKinds: [],
+        },
+        reconciliationWarnings: [
+          {
+            code: "missing-main-profile",
+            severity: "warning",
+            message: "Auth user has no linked main-server profile.",
+            suggestedAction: "Materialize or reconcile the main user profile.",
+          },
+        ],
+      },
+    ]);
+
+    const { accountOperationsAdminApi } = await import(
+      "./account-operation.admin.api"
+    );
+    const response = await accountOperationsAdminApi.handle(
+      new Request(
+        "http://localhost/admin/account-operation/auth-users/summary",
+        {
+          method: "POST",
+          body: JSON.stringify({ authUserIds: ["auth-user-2"] }),
+          headers: { "content-type": "application/json" },
+        },
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      summaries: [
+        {
+          authUserId: "auth-user-2",
+          accountEnforcement: {
+            activeCount: 0,
+            activeKinds: [],
+          },
+          reconciliationWarnings: [
+            {
+              code: "missing-main-profile",
+              severity: "warning",
+              message: "Auth user has no linked main-server profile.",
+              suggestedAction:
+                "Materialize or reconcile the main user profile.",
+            },
+          ],
+        },
+      ],
+    });
+  });
+
   test("allows admins to list safe session metadata", async () => {
     currentIdentity = {
       sub: "admin-1",
@@ -234,5 +296,37 @@ describe("accountOperationsAdminApi", () => {
       durationSeconds: 900,
       actorUserId: "root-1",
     });
+  });
+
+  test("denies impersonation for non-root admins without starting a session", async () => {
+    currentIdentity = {
+      sub: "admin-1",
+      userId: "admin-1",
+      permission: { role: "ADMIN" },
+    };
+    dbRoot = false;
+    startAuthUserImpersonation.mockClear();
+
+    const { accountOperationsAdminApi } = await import(
+      "./account-operation.admin.api"
+    );
+    const response = await accountOperationsAdminApi.handle(
+      new Request(
+        "http://localhost/admin/account-operation/auth-users/impersonate",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            targetAuthUserId: "auth-user-1",
+            reason: "support review",
+            durationSeconds: 900,
+          }),
+          headers: { "content-type": "application/json" },
+        },
+      ),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.text()).toBe("Forbidden: Root role required");
+    expect(startAuthUserImpersonation).not.toHaveBeenCalled();
   });
 });
