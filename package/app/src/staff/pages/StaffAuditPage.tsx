@@ -23,11 +23,19 @@ import {
   useStaffConsoleAccess,
 } from "./shared";
 
-export function StaffAuditPage() {
+export function StaffAuditPage({
+  initialAction = "",
+  initialTargetKind = "",
+  initialTargetId = "",
+}: {
+  initialAction?: string;
+  initialTargetKind?: string;
+  initialTargetId?: string;
+} = {}) {
   const { status, allowed } = useStaffConsoleAccess();
-  const [action, setAction] = useState("");
-  const [targetKind, setTargetKind] = useState("");
-  const [targetId, setTargetId] = useState("");
+  const [action, setAction] = useState(initialAction);
+  const [targetKind, setTargetKind] = useState(initialTargetKind);
+  const [targetId, setTargetId] = useState(initialTargetId);
 
   const query = useMemo(
     () => ({

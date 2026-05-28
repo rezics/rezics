@@ -1,6 +1,29 @@
 import { StaffConsolePage } from "@/staff";
 import { createFileRoute } from "@tanstack/react-router";
 
+type StaffConsoleSearch = {
+  realmUnitId?: string;
+  accountUserId?: string;
+};
+
 export const Route = createFileRoute("/_mainLayout/staff/")({
-  component: StaffConsolePage,
+  validateSearch: (search: Record<string, unknown>): StaffConsoleSearch => ({
+    realmUnitId:
+      typeof search.realmUnitId === "string" ? search.realmUnitId : undefined,
+    accountUserId:
+      typeof search.accountUserId === "string"
+        ? search.accountUserId
+        : undefined,
+  }),
+  component: StaffConsoleRoute,
 });
+
+function StaffConsoleRoute() {
+  const search = Route.useSearch();
+  return (
+    <StaffConsolePage
+      initialRealmUnitId={search.realmUnitId}
+      initialAccountUserId={search.accountUserId}
+    />
+  );
+}
