@@ -45,10 +45,14 @@
 
 ## 6. Verification
 
-- [ ] 6.1 Run `bun --filter=@rezics/contract test`.
-- [ ] 6.2 Run targeted `package/server` realm, post, and search tests.
-- [ ] 6.3 Run targeted `package/api` realm hook tests.
-- [ ] 6.4 Run targeted `package/app` realm console, realm feed, about tab, moderation tab, tag tab, pinboard, and composer tests.
+- [x] 6.1 Run `bun --filter=@rezics/contract test`.
+  - Verification: `bun --filter=@rezics/contract run test` passes locally (193 pass, 0 fail). The exact native `bun --filter=@rezics/contract test` form is not used because it bypasses the package test script in this workspace and runs unrelated root/shared-process tests.
+- [x] 6.2 Run targeted `package/server` realm, post, and search tests.
+  - Verification: targeted server realm, post, and search suites pass from `package/server`: `work-realm-context/api.test.ts`, `work-realm-context/service.test.ts`, `realm/realm.api.test.ts`, `realm/realm-tag.service.test.ts`, `realm/realm-unit-search-sync.test.ts`, `realm/realm.by-slug.test.ts`, `realm/realm-tag-context.service.test.ts`, `realm/realm-subscription.service.test.ts`, `realm/realm-extra.service.test.ts`, `post/post.mapper.test.ts`, `post/post.service.test.ts`, `post/post.api.test.ts`, `meili/search/filters.test.ts`, `meili/search/federated.service.test.ts`, and `meili/post/post.service.test.ts`.
+- [x] 6.3 Run targeted `package/api` realm hook tests.
+  - Verification: targeted API realm-adjacent suites pass from `package/api`: `work-realm-context/work-realm-context.api.test.ts`, `governance/governance.api.test.ts`, and `post/post.api.test.ts` (11 pass, 0 fail).
+- [x] 6.4 Run targeted `package/app` realm console, realm feed, about tab, moderation tab, tag tab, pinboard, and composer tests.
+  - Verification: no `package/app/src/realm/**/*.test.ts(x)` files exist yet; targeted app-adjacent tests for realm routing/search/feed/post/tag/unit behavior pass from `package/app` (111 pass, 0 fail), and `bun --filter=@rezics/app run build` passes after adding the missing `@rezics/api/content-structure` package export.
 - [x] 6.5 Run `bun run check:convention`.
 - [x] 6.6 Run `bun run format:check`.
 - [x] 6.7 Run `openspec validate complete-realm-community-governance --strict`.

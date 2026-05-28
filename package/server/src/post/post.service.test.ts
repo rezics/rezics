@@ -170,7 +170,7 @@ mock.module("@/unit/collaborative-metadata", () => ({
 }));
 
 mock.module("@/unit/publication-policy", () => ({
-  publicUnitEligibilityWhere: mock(() => ({})),
+  publicUnitEligibilityWhere: { status: "PUBLISHED", visibility: "PUBLIC" },
 }));
 
 mock.module("@/utils/userSlugHydration", () => ({
@@ -203,6 +203,7 @@ mock.module("@/meili/content/sync", () => ({
 }));
 
 mock.module("@/utils/sanitizeUser", () => ({
+  mapPublicUser: mock((user: unknown) => user),
   publicUserSelect: {},
 }));
 
@@ -1013,6 +1014,10 @@ describe("PostService.create rootTargetUnit derivation", () => {
       isLocked: false,
       rootTargetUnitId: "book-B",
       rootTargetUnitType: "BOOK",
+      unit: {
+        inRealms: [],
+        realmModerationTargets: [],
+      },
     });
 
     await service.create(
@@ -1036,6 +1041,10 @@ describe("PostService.create rootTargetUnit derivation", () => {
       isLocked: false,
       rootTargetUnitId: null,
       rootTargetUnitType: null,
+      unit: {
+        inRealms: [],
+        realmModerationTargets: [],
+      },
     });
 
     await service.create(
@@ -1060,6 +1069,10 @@ describe("PostService.create rootTargetUnit derivation", () => {
       isLocked: false,
       rootTargetUnitId: "book-B",
       rootTargetUnitType: "BOOK",
+      unit: {
+        inRealms: [],
+        realmModerationTargets: [],
+      },
     });
 
     await service.create(
@@ -1150,9 +1163,8 @@ describe("PostService wiki posts", () => {
     expect(unitCreateArgs.data.userId).toBe("wiki-owner");
     expect(postCreateArgs.data.authorUserId).toBe("actor-1");
     expect(postCreateArgs.data.kind).toBe("WIKI");
-    expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
-    const patch =
-      historyOutboxCreateMock.mock.calls[0]?.[0].data.payload.revision.patch;
+    expect(writeEditorialMetadataHistoryMock).toHaveBeenCalledTimes(1);
+    const patch = writeEditorialMetadataHistoryMock.mock.calls[0]?.[1].patch;
     expect(
       collectEditorialPatchLeafPaths(patch).every((path) =>
         isEditorialPathInScope("wiki-post", path),
@@ -1164,13 +1176,14 @@ describe("PostService wiki posts", () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
+      content: content("original"),
     }));
 
     await service.update("wiki-post-1", { content: content("edited") }, actor);
 
-    expect(unitFieldLockFindManyMock).toHaveBeenCalledTimes(1);
+    expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledTimes(1);
     expect(postUpdateMock).toHaveBeenCalledTimes(1);
-    expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
+    expect(writeEditorialMetadataHistoryMock).toHaveBeenCalledTimes(1);
   });
 
   test("ROOT wiki content edit still routes through collaborative authority", async () => {
@@ -1201,24 +1214,25 @@ describe("PostService wiki posts", () => {
       kind: "WIKI",
       content: content("original"),
     }));
+    collectPatchLeafPathsMock.mockReturnValueOnce(["post.content.main.source"]);
 
     await service.update("wiki-post-1", { content: content("edited") }, actor, {
       patch: { post: { content: { main: { source: "edited" } } } },
       message: "wiki-post.content.source.update",
     });
 
-    expect(unitFieldLockFindManyMock).toHaveBeenCalledTimes(1);
-    expect(historyOutboxCreateMock).toHaveBeenCalledTimes(1);
-    expect(
-      historyOutboxCreateMock.mock.calls[0]?.[0].data.payload,
-    ).toMatchObject({
-      kind: "editorial_revision",
-      revision: {
-        unitId: "wiki-post-1",
-        actorUserId: "actor-1",
-        patch: { post: { content: { main: { source: "edited" } } } },
-        message: "wiki-post.content.source.update",
-      },
+    expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledWith(
+      expect.anything(),
+      actor,
+      "wiki-post-1",
+      ["post.content.main.source"],
+    );
+    expect(writeEditorialMetadataHistoryMock).toHaveBeenCalledTimes(1);
+    expect(writeEditorialMetadataHistoryMock.mock.calls[0]?.[1]).toMatchObject({
+      unitId: "wiki-post-1",
+      actorUserId: "actor-1",
+      patch: { post: { content: { main: { source: "edited" } } } },
+      message: "wiki-post.content.source.update",
     });
 
     resetMocks();
@@ -1226,9 +1240,16 @@ describe("PostService wiki posts", () => {
       kind: "WIKI",
       content: content("original"),
     }));
-    unitFieldLockFindManyMock.mockImplementationOnce(async () => [
-      { path: "post.content.main.source" },
-    ]);
+    collectPatchLeafPathsMock.mockReturnValueOnce(["post.content.main.source"]);
+    assertCanEditCollaborativeMetadataMock.mockRejectedValueOnce({
+      statusCode: 403,
+      code: "FIELD_LOCKED",
+      details: {
+        blockedPaths: ["post.content.main.source"],
+        offendingLockPath: "post.content.main.source",
+        offendingPatchPath: "post.content.main.source",
+      },
+    });
 
     await expect(
       service.update("wiki-post-1", { content: content("edited") }, actor, {
@@ -1250,10 +1271,12 @@ describe("PostService wiki posts", () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
+      content: content("original"),
     }));
-    unitFieldLockFindManyMock.mockImplementationOnce(async () => [
-      { path: "post.content.main" },
-    ]);
+    assertCanEditCollaborativeMetadataMock.mockRejectedValueOnce({
+      statusCode: 403,
+      code: "FIELD_LOCKED",
+    });
 
     await expect(
       service.update("wiki-post-1", { content: content("edited") }, actor),
@@ -1268,6 +1291,7 @@ describe("PostService wiki posts", () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "REVIEW",
+      content: content("original"),
     }));
 
     await service.update("review-1", { content: content("edited") }, actor);
@@ -1280,6 +1304,7 @@ describe("PostService wiki posts", () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
+      content: content("original"),
     }));
 
     await service.update(
@@ -1288,7 +1313,7 @@ describe("PostService wiki posts", () => {
       actor,
     );
 
-    expect(unitFieldLockFindManyMock).toHaveBeenCalledTimes(1);
+    expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledTimes(1);
     const postUpdateArgs = (postUpdateMock.mock.calls as any[])[0][0];
     expect(postUpdateArgs.data.isLocked).toBe(true);
   });

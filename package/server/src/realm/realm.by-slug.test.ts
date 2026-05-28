@@ -35,7 +35,7 @@ class UnitServiceStub {}
 mock.module("@/unit/unit.service", () => ({
   UnitService: UnitServiceStub,
   unitService: {
-    getBySlug: async (slug: string) => {
+    getBySlug: async (_scope: string, slug: string) => {
       if (slug === "rezics") return { id: "realm-1", type: "REALM" };
       if (slug === "book") return { id: "tag-1", type: "TAG" };
       return null;

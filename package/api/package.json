@@ -46,6 +46,10 @@
       "types": "./src/translation-group/index.ts",
       "default": "./src/translation-group/index.ts"
     },
+    "./content-structure": {
+      "types": "./src/content-structure/content-structure.ts",
+      "default": "./src/content-structure/content-structure.ts"
+    },
     "./slug": {
       "types": "./src/slug/index.ts",
       "default": "./src/slug/index.ts"
