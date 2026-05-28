@@ -4,6 +4,18 @@ The app has broad surface area: routes for home, book, search, realms, reviews, 
 
 The product gap is continuity. A user can land on pages, but the app does not yet guarantee complete flows: discover something, evaluate it, add it to a shelf, read/track progress, review/comment, join related communities, receive actionable notifications, continue later, and manage their identity/preferences.
 
+Concrete app-side gaps confirmed by inspection of `package/app/src/`:
+
+- No `dashboard/` feature folder, no dashboard route, no `DashboardSummary` contract.
+- `engagement/components/` has ReactionBar / ShelfAction / ShareAction / FollowButton / ReplyAction, but **no `ReportAction` and no `DMAction`**. The existing `feedback/` feature is product feedback, not moderation report.
+- No unified `routes/_mainLayout/create/` entry; `book/new.tsx`, `shelf/new.tsx`, `review/new` are scattered with no shared draft layer.
+- No drafts management surface (no `drafts/` feature, no `u/me/drafts` route).
+- `routes/_mainLayout/test.tsx`, `test02.tsx`, `test03.tsx`, `test-links.tsx` still mounted in production.
+- `inbox/components/NotificationCard.tsx` exists but does not route per notification kind; reply/follow/moderation entries are visually rendered without deep navigation.
+- `package/api/src/react-query/cache-coherence.ts` has scaffolding but no central map binding mutation domains to the namespaces they must invalidate.
+- `book-read/` is reader-shaped but minimal (only `ChapterPage` + `BookReadChapterSection`); a real reader belongs in a separate change.
+- `CompleteRegistrationPage` finishes account but no product onboarding.
+
 ## Target Design
 
 ### Product Journey
@@ -110,20 +122,57 @@ structure); softly on `complete-game-media-library-backend` (game/media
 browsing). Build after those land. Contract-first throughout — no app-local DTO
 copies. See `implement_goal.md` (Phase 6). Contracts to pin:
 
-- **`DashboardSummary` DTO + server endpoint** — server-side aggregation of
+- **`DashboardSummary` DTO + server endpoint** — new `package/contract/src/dashboard.ts`
+  and `package/server/src/dashboard/` domain. Server-side aggregation of
   progress, shelves, realms, notifications, DMs, drafts, activity, and safety
-  status, with per-section partial-success fields so the UI renders available
-  sections when one source fails. Aggregation happens on the server reusing
-  existing domain services; the client must **not** scatter and re-aggregate.
-- **Direct messaging contract** — thread + message DTOs and a server API; DM is a
-  net-new feature, permission-gated by the foundation's policy engine.
-- **Search release grouping** — extend `package/contract/src/search` with
-  work-grouped (`workUnitId`) result facets; grouping is done server/Meili-side.
-- **Policy-aware creation** — creation forms read the foundation's
-  `PolicyDecision` to render publish-denial states (silenced/banned) rather than
-  optimistic success.
-- **Cache-invalidation key map** — define `@rezics/api` QueryKey namespaces so
-  collect/follow/reaction/progress mutations invalidate detail + dashboard +
-  profile + search consistently.
-- **Cleanup** — remove `test`/`test02`/`test03`/`test-links` from production
-  navigation/routing.
+  status, with per-section partial-success fields (`{ ok: T } | { error: { code, retryable } }`)
+  so the UI renders available sections when one source fails. Aggregation happens
+  on the server reusing existing domain services; the client must **not** scatter
+  and re-aggregate. App folder is `package/app/src/dashboard/` following the
+  feature-standard layout, mounted at `routes/_mainLayout/u/me/dashboard.tsx`.
+- **Direct messaging contract** — already lives in `package/contract/src/notify/dm.ts`
+  with server in `package/notify/src/dm/` (notify owns realtime). This change
+  extends it with read-receipts, typing-indicator, and block/unblock-peer fields,
+  all permission-gated by Phase 1's policy engine. Group DM is out of scope.
+- **`DraftMetadata` contract + drafts feature** — new `package/contract/src/draft.ts`
+  for cross-type draft listing (review/post/remark/wiki/shelf-description). Server
+  reuses existing per-type draft storage; the contract provides the unified
+  listing/recovery surface consumed by dashboard and `u/me/drafts`.
+- **Search release grouping** — already in `package/contract/src/search/scope.ts`
+  (`workUnitId` + scope mode). App work this change adds: explicit filter-chip UI
+  on the search route, type/realm/work-grouping filter persistence in URL query.
+- **Policy-aware creation forms** — a shared form helper that reads `PolicyDecision`
+  from mutation responses and renders publish-denial states
+  (`MISSING_CAPABILITY`/`ENFORCEMENT_ACTIVE`/`BLOCKED_ACCOUNT`/`RATE_LIMITED`)
+  inline, not as toast errors. Applied to review, post, remark, shelf, realm
+  creation entries.
+- **Cache-invalidation key map** — `package/api/src/react-query/cache-coherence.ts`
+  exists as a framework; this change adds a central map declaring which
+  namespaces each mutation domain (collect/follow/reaction/progress/draft/dm/
+  realm-membership/report) must invalidate across detail + dashboard + profile +
+  search + realm-feed.
+- **Engagement action closure** — add `ReportAction` and `DMAction` to
+  `package/app/src/engagement/components/`. `ReportAction` **must not** reuse
+  `package/app/src/feedback/` (that is product feedback, not moderation report);
+  it targets governance/moderation report endpoints. `DMAction` consults policy
+  to decide visibility/disabled state.
+- **Notification deep-link routing** — `NotificationCard` routes per `kindKey`
+  (reply → thread + anchor, follow → profile, moderation outcome →
+  authorization-appropriate detail). Contract: extend
+  `package/contract/src/notification/` items with `target: { route, params, anchor? }`.
+- **Cleanup** — remove `test`/`test02`/`test03`/`test-links` route files from
+  `routes/_mainLayout/` and any references in `core/components/create-menu/` and
+  the sidebar/navigation config.
+
+## Out of scope (open as separate changes)
+
+- **`introduce-app-onboarding-flow`** — first-login product onboarding
+  (language → tag/realm interest → first shelf). Current `CompleteRegistrationPage`
+  only completes the account, not the product introduction.
+- **`introduce-app-reader-experience`** — `package/app/src/book-read/` currently
+  has only `ChapterPage` + `BookReadChapterSection`. Bookmarks, highlights,
+  notes, font/theme preferences, TOC, and chapter navigation belong in a
+  dedicated reader change so this one does not balloon.
+- **`introduce-content-sharing`** (optional) — OG image generation, canonical
+  share URLs, external embed widgets. Not on the core journey; defer unless a
+  Phase 6 surface demands it.

@@ -16,6 +16,7 @@
 
 ## Section 2
 - [ ] award 支持兩種獎勵點數和現金獎勵
+- [ ] 支持轉發機制, 利用 targetUnit 添加一個 unit 類型，以及一個 post 模型，但是 post 不是必選的，然後 editor 區域也要擴展，允許用戶 以轉發/轉發批註的方式進行評論，通過 Model框選擇嗎？業界方案是？
 - [ ] https://www.usebruno.com/
 - [ ] realm联合封禁名单，就是将block list作为一级公民，最好可以订阅多个block list，但是这样必然也带来性能问题，要如何处理呢。 目的就是讓用戶或者realm可以訂閱多個block list，最好能隨時啓用block list(對於user)，讓生態真正做到爲每一個人服務，就是不會說整個平臺被任何風向帶歪。
 - [ ] 編輯器也有問題，回覆了也無法成功

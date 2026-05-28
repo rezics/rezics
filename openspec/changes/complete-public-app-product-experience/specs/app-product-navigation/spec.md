@@ -28,3 +28,13 @@ Realm detail navigation SHALL default to Feed, expose About for stable community
 - **WHEN** a visitor navigates to a realm
 - **THEN** the Feed tab SHALL be the initial active tab
 - **AND** moderator-only Moderation entries SHALL be hidden
+
+### Requirement: Personal navigation surfaces dashboard and drafts
+
+The personal navigation area SHALL include entries for the signed-in dashboard and the drafts management surface in addition to profile, settings, and inbox.
+
+#### Scenario: Signed-in user opens personal navigation
+
+- **WHEN** a signed-in user opens the personal navigation area
+- **THEN** entries for dashboard and drafts SHALL be visible
+- **AND** activating each SHALL route to `u/me/dashboard` and `u/me/drafts` respectively

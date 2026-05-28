@@ -1,61 +1,81 @@
-## 1. Product Inventory And Route Structure
+## 1. Route Inventory And Cleanup
 
-- [ ] 1.1 Audit `package/app/src/routes` and classify production, staff, diagnostics, and test/demo routes.
-- [ ] 1.2 Remove test/demo routes from production navigation and create-menu entries.
-- [ ] 1.3 Define navigation config for discovery, library, community, create, and personal areas.
-- [ ] 1.4 Add route-level loading, denied, not-found, unauthenticated, and error state conventions.
-- [ ] 1.5 Align realm navigation with Feed default, About, and moderator-only Moderation tabs from `complete-realm-community-governance`.
+- [ ] 1.1 Delete `routes/_mainLayout/test.tsx`, `test02.tsx`, `test03.tsx`, `test-links.tsx` and any references in `core/components/create-menu/` and sidebar/navigation config.
+- [ ] 1.2 Audit remaining `routes/_mainLayout/` entries and classify as production / staff / unauthenticated; gate staff-only routes via policy hints.
+- [ ] 1.3 Define a single navigation config grouping discovery, library, community, create, and personal (`u/me/dashboard`, `u/me/drafts`, settings, inbox) sections.
+- [ ] 1.4 Add route-level loading, denied, not-found, unauthenticated, and error boundaries via shared helpers, so feature pages do not redefine them.
+- [ ] 1.5 Align realm tabs with Feed default, About, and moderator-only Moderation per `complete-realm-community-governance`; confirm `routes/_mainLayout/realm/$realmId/index.tsx` matches.
 
-## 2. Dashboard And Continuity
+## 2. Dashboard
 
-- [ ] 2.1 Add dashboard contract/API summary DTOs for progress, shelves, realms, notifications, DMs, drafts, activity, and safety status.
-- [ ] 2.2 Implement server aggregation using existing domain services without duplicating business logic or forcing dashboard pages to scatter unrelated domain requests.
-- [ ] 2.3 Add `@rezics/api` dashboard hooks and query keys.
-- [ ] 2.4 Add `package/app/src/dashboard/` feature with page, sections, models, hooks, and components.
-- [ ] 2.5 Add tests or stories for partial failure, empty user, active reader, active community member, and safety-status states.
+- [ ] 2.1 Add `package/contract/src/dashboard.ts` with `DashboardSummary` (sections: continue-reading, shelves, realms, notifications, dms, drafts, activity, safety) and per-section `{ ok } | { error: { code, retryable } }` wrapper.
+- [ ] 2.2 Add `package/server/src/dashboard/` (api/service/types) that fans out to existing domain services and tolerates per-section failure without failing the whole response.
+- [ ] 2.3 Add `package/api/src/dashboard/` typed hooks + query keys; register invalidation participation in cache-coherence map.
+- [ ] 2.4 Add `package/app/src/dashboard/` feature (page, sections per `DashboardSummary` slot, models, hooks, components) following `package/app/docs/feature standard.md`.
+- [ ] 2.5 Mount `routes/_mainLayout/u/me/dashboard.tsx`; link from `home/sections/LibraryCardsSection` and the new personal nav.
+- [ ] 2.6 Add stories/tests for partial-success rendering, empty new user, active reader, active community member, and active safety/enforcement notice states.
 
-## 3. Discovery And Detail Journeys
+## 3. Cache-Coherence Map
 
-- [ ] 3.1 Upgrade home modules for discovery and signed-in continuation.
-- [ ] 3.2 Upgrade search filters, grouped release result presentation, query-state routing, and result actions using stable Unit/Entity/Realm ids with localized labels.
-- [ ] 3.3 Upgrade book/entity/tag/profile/detail surfaces to expose inspect, collect, follow, discuss, contribute, report, and share actions where policy allows.
-- [ ] 3.4 Add cache invalidation for collect/follow/reaction/progress actions across detail, dashboard, profile, and search cards.
+- [ ] 3.1 In `package/api/src/react-query/cache-coherence.ts`, declare a typed map keyed by mutation domain (`collect`, `follow`, `reaction`, `progress`, `draft`, `dm`, `realm-membership`, `report`) → set of query-key namespaces to invalidate (detail / dashboard / profile / search / realm-feed).
+- [ ] 3.2 Refactor `package/api/src/{reaction,subscription,shelf,progress,realm}/*.mutations.ts` to route invalidation through the map.
+- [ ] 3.3 Add a test asserting each declared mutation domain has at least one corresponding `useQuery` namespace registered.
 
-## 4. Library And Reading
+## 4. Discovery, Search, Detail
 
-- [ ] 4.1 Complete shelf add/remove/reorder flows and stable user library routes.
-- [ ] 4.2 Complete reading progress display and update flows across reader/detail/dashboard/profile.
-- [ ] 4.3 Integrate work/release browsing from `introduce-unit-work-domain` without depending on `introduce-api-unit-store`.
-- [ ] 4.4 Add tests for shelf persistence, progress update, continue reading, same-work release browsing, and standalone content.
+- [ ] 4.1 Upgrade `home/sections/*` and `home/pages/Home.tsx` so signed-out users see discovery and signed-in users see continuation (continue reading, shelves, realms) without scattering dashboard logic.
+- [ ] 4.2 In `routes/_mainLayout/search/index.tsx`, add explicit filter-chip UI (type / realm / work-grouping) backed by stable Unit/Entity/Realm ids; persist query state in the URL.
+- [ ] 4.3 Add local-only search-history affordance on the search route (no server contract).
+- [ ] 4.4 In book/entity/tag/profile detail surfaces, expose inspect, collect, follow, discuss, contribute, report (via new `ReportAction`), share, and DM (via new `DMAction`) where policy allows.
+- [ ] 4.5 Wire collect/follow/reaction/progress mutations through the cache-coherence map so detail/dashboard/profile/search cards refresh consistently.
 
-## 5. Creation Workflows
+## 5. Library And Reading
 
-- [ ] 5.1 Add a unified create entry flow that routes to type-specific creation features.
-- [ ] 5.2 Add existing work/entity/tag/realm search steps where relevant.
-- [ ] 5.3 Add draft save/recover, preview, validation, publish/submit, and post-submit next-action behavior.
-- [ ] 5.4 Ensure creation features use `@rezics/contract`, `@rezics/api`, UnitTranslation language controls, and editor primitives rather than app-local DTO copies.
-- [ ] 5.5 Add tests for draft recovery, validation failure, policy denial, successful publish, and work matching.
+- [ ] 5.1 Confirm shelf add/remove/reorder paths persist via typed API mutations and use the cache-coherence map.
+- [ ] 5.2 Surface reading progress on reader, detail, dashboard, profile/library consistently.
+- [ ] 5.3 Integrate work/release browsing on detail (release picker + language/edition filters) without depending on `introduce-api-unit-store`.
+- [ ] 5.4 Add tests for shelf persistence, reorder stability, progress update fan-out, continue-reading, same-work release switching, and standalone content.
 
-## 6. Engagement And Inbox
+## 6. Creation Workflows
 
-- [ ] 6.1 Standardize reaction, reply, shelf/save, follow/subscribe, share, report, and DM action components.
-- [ ] 6.2 Update notification feed entries with route targets and action-specific states.
-- [ ] 6.3 Integrate DM entry from profile and notifications with permission checks.
-- [ ] 6.4 Add report entry points backed by governance/moderation APIs.
+- [ ] 6.1 Add `routes/_mainLayout/create/index.tsx` as a unified type-selection entry that routes to existing `book/new`, `shelf/new`, `review/new`, `post/...`, `remark/...`, `realm/...` flows.
+- [ ] 6.2 Add `package/contract/src/draft.ts` (`DraftMetadata` for review/post/remark/wiki/shelf-description) and a server listing/recover endpoint that reuses existing per-type draft storage.
+- [ ] 6.3 Add `package/app/src/drafts/` feature and `routes/_mainLayout/u/me/drafts.tsx`; link from dashboard.
+- [ ] 6.4 Build a shared policy-aware form helper that reads `PolicyDecision` codes (`MISSING_CAPABILITY`/`ENFORCEMENT_ACTIVE`/`BLOCKED_ACCOUNT`/`RATE_LIMITED`) from mutation responses and renders inline denial states instead of toast errors.
+- [ ] 6.5 Apply the helper to review/post/remark/shelf/realm creation forms; ensure forms use `@rezics/contract`, `@rezics/api`, UnitTranslation language controls, and editor primitives (no app-local DTO copies).
+- [ ] 6.6 Add tests for draft listing/recover, validation failure, policy denial (silenced/banned), successful publish, and work matching.
 
-## 7. Quality, Localization, Accessibility
+## 7. Engagement, Notifications, DM, Report
 
-- [ ] 7.1 Audit production routes for loading/empty/error/denied/not-found/unauthenticated states.
-- [ ] 7.2 Add missing Traditional Chinese message keys and avoid hardcoded app copy where the i18n catalog is expected.
-- [ ] 7.3 Verify app pages use Rezics design tokens, `SafeLink`, shared UI primitives, and app density.
-- [ ] 7.4 Add responsive checks for dashboard, search, detail, shelf, profile, settings, and creation pages.
+- [ ] 7.1 Add `engagement/components/ReportAction.tsx` backed by governance/moderation report endpoints; **do not** reuse `feedback/FeedbackDialog`. Story + tests for unauthenticated, allowed, rate-limited, and submitted states.
+- [ ] 7.2 Add `engagement/components/DMAction.tsx` that consults policy to disable/hide when DM is not allowed; integrate from profile and notifications.
+- [ ] 7.3 Extend `package/contract/src/notification/` items with `target: { route, params, anchor? }` so notification cards can deep-link without re-deriving routes client-side.
+- [ ] 7.4 Update `inbox/components/NotificationCard.tsx` to route per `kindKey` (reply → thread + anchor, follow → profile, moderation outcome → authorization-appropriate detail, realm event → realm tab).
+- [ ] 7.5 Extend `package/contract/src/notify/dm.ts` with read-receipts, typing-indicator, and block/unblock-peer fields; wire into `inbox/sections/ConversationThreadSection.tsx`.
+- [ ] 7.6 Surface block/unblock-peer in profile DM action and in DM thread header.
 
-## 8. Verification
+## 8. Profile, Settings
 
-- [ ] 8.1 Run `bun --filter=@rezics/contract test`.
-- [ ] 8.2 Run targeted `package/server` tests for dashboard and journey APIs.
-- [ ] 8.3 Run targeted `package/api` tests for hooks/query keys.
-- [ ] 8.4 Run targeted `package/app` tests or Storybook checks for dashboard, search, detail, shelf, creation, notification, profile, and settings flows.
-- [ ] 8.5 Run `bun run check:convention`.
-- [ ] 8.6 Run `bun run format:check`.
-- [ ] 8.7 Run `openspec validate complete-public-app-product-experience --strict`.
+- [ ] 8.1 Add follower / following list sub-pages under profile (route + sections), backed by existing subscription API.
+- [ ] 8.2 Surface an activity timeline on profile using existing reaction/post/shelf events; respect privacy.
+- [ ] 8.3 Add settings sub-pages for blocked users, data export, and account deletion entry points.
+- [ ] 8.4 Detail notification-preference UI (per-kind toggles) on `settings/preferences`; persist through typed mutation.
+
+## 9. Quality, A11y, i18n, Responsive
+
+- [ ] 9.1 Confirm each production route defines loading / empty / error / denied / not-found / unauthenticated states.
+- [ ] 9.2 Apply WCAG 2.1 AA expectations across new components: keyboard navigation, visible focus, screen-reader labels, reduced-motion respect; no state communicated by color alone.
+- [ ] 9.3 Define and apply responsive breakpoints across dashboard, search, detail, shelf, profile, settings, creation, inbox.
+- [ ] 9.4 Add offline retry affordance to mutations that the user explicitly triggered (collect, follow, react, send DM).
+- [ ] 9.5 Add missing Traditional Chinese message keys; avoid hardcoded copy where i18n is expected.
+- [ ] 9.6 Verify app pages use Rezics design tokens, `SafeLink`, shared UI primitives, and app density.
+
+## 10. Verification
+
+- [ ] 10.1 `bun --filter=@rezics/contract test`
+- [ ] 10.2 Targeted `@rezics/server` tests for dashboard, draft listing, and report endpoints.
+- [ ] 10.3 Targeted `@rezics/notify` tests for DM read-receipt / typing / block flows.
+- [ ] 10.4 Targeted `@rezics/api` tests for new hooks, query keys, and cache-coherence map.
+- [ ] 10.5 Targeted `@rezics/app` tests / Storybook for dashboard, search, detail, shelf, creation, drafts, notification deep-link, ReportAction, DMAction, profile (follower/timeline), and settings (blocked/export/deletion) flows.
+- [ ] 10.6 `bun run check:convention`, `bun run check:tokens`, `bun run format:check`, `bun run knip`.
+- [ ] 10.7 `openspec validate complete-public-app-product-experience --strict`.
