@@ -1,5 +1,12 @@
 import { apiFetch } from "@rezics/api/react-query/http";
-import { unitAuthorityQueries } from "@rezics/api/unit/unit";
+import {
+  unitAuthorityQueries,
+  useRemoveUnitCollaboratorMutation,
+  useRemoveUnitFieldLockMutation,
+  useUpsertUnitCollaboratorMutation,
+  useUpsertUnitFieldLockMutation,
+} from "@rezics/api/unit/unit";
+import { UnitAuthorityRoleKey } from "@rezics/contract";
 import {
   admin_authority_description,
   admin_authority_empty_help,
@@ -29,7 +36,13 @@ import {
   CardContent,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Separator,
+  Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { RotateCcw as RetryIcon, Search as SearchIcon } from "lucide-react";
@@ -56,6 +69,8 @@ const i18nMessages = {
   common_unit_id,
 };
 
+const authorityRoles = Object.values(UnitAuthorityRoleKey);
+
 function fmtDate(v?: string | Date) {
   if (!v) return "";
   const d = typeof v === "string" ? new Date(v) : v;
@@ -70,6 +85,11 @@ export default function AuthorityOpsPage() {
   const [message, setMessage] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [retrying, setRetrying] = React.useState(false);
+  const [collaboratorUserId, setCollaboratorUserId] = React.useState("");
+  const [collaboratorRole, setCollaboratorRole] =
+    React.useState<UnitAuthorityRoleKey>(UnitAuthorityRoleKey.EDITOR);
+  const [lockPath, setLockPath] = React.useState("");
+  const [lockReason, setLockReason] = React.useState("");
 
   const fieldLocksQuery = useQuery({
     ...unitAuthorityQueries.fieldLocks(unitId),
@@ -78,6 +98,25 @@ export default function AuthorityOpsPage() {
   const collaboratorsQuery = useQuery({
     ...unitAuthorityQueries.collaborators(unitId),
     enabled: !!unitId,
+  });
+  const upsertCollaborator = useUpsertUnitCollaboratorMutation({
+    onSuccess: () => {
+      setMessage("Collaborator authority updated.");
+      setCollaboratorUserId("");
+    },
+  });
+  const removeCollaborator = useRemoveUnitCollaboratorMutation({
+    onSuccess: () => setMessage("Collaborator authority removed."),
+  });
+  const upsertFieldLock = useUpsertUnitFieldLockMutation({
+    onSuccess: () => {
+      setMessage("Field lock updated.");
+      setLockPath("");
+      setLockReason("");
+    },
+  });
+  const removeFieldLock = useRemoveUnitFieldLockMutation({
+    onSuccess: () => setMessage("Field lock removed."),
   });
 
   function onSearch(e: React.FormEvent) {
@@ -106,6 +145,83 @@ export default function AuthorityOpsPage() {
       );
     } finally {
       setRetrying(false);
+    }
+  }
+
+  async function submitCollaborator(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+    const targetUserId = collaboratorUserId.trim();
+    if (!unitId) {
+      setError("Search for a Unit before changing authority.");
+      return;
+    }
+    if (!targetUserId) {
+      setError("Collaborator user id is required.");
+      return;
+    }
+    try {
+      await upsertCollaborator.mutateAsync({
+        unitId,
+        userId: targetUserId,
+        roleKey: collaboratorRole,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authority update failed.");
+    }
+  }
+
+  async function submitFieldLock(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setMessage(null);
+    const path = lockPath.trim();
+    const reason = lockReason.trim();
+    if (!unitId) {
+      setError("Search for a Unit before changing authority.");
+      return;
+    }
+    if (!path) {
+      setError("Field lock path is required.");
+      return;
+    }
+    if (reason.length < 3) {
+      setError("Field lock reason must explain the operator action.");
+      return;
+    }
+    try {
+      await upsertFieldLock.mutateAsync({
+        unitId,
+        path,
+        reason,
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Field lock update failed.",
+      );
+    }
+  }
+
+  async function handleRemoveCollaborator(userId: string) {
+    setError(null);
+    setMessage(null);
+    try {
+      await removeCollaborator.mutateAsync({ unitId, userId });
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Collaborator removal failed.",
+      );
+    }
+  }
+
+  async function handleRemoveFieldLock(path: string) {
+    setError(null);
+    setMessage(null);
+    try {
+      await removeFieldLock.mutateAsync({ unitId, path });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Field unlock failed.");
     }
   }
 
@@ -167,88 +283,226 @@ export default function AuthorityOpsPage() {
               {m.admin_authority_empty_help()}
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <section className="flex flex-col gap-3">
-                <h3 className="text-base font-semibold">
-                  {m.admin_unit_field_locks_title()}
-                </h3>
-                {fieldLocksQuery.isLoading ? (
-                  <div className="flex justify-center py-4">
-                    <Spinner />
-                  </div>
-                ) : fieldLocksQuery.isError ? (
-                  <p className="text-sm text-error-text">
-                    {m.admin_unit_field_locks_failed_load()}
-                  </p>
-                ) : fieldLocksQuery.data?.locks.length ? (
-                  <div className="flex flex-col gap-2">
-                    {fieldLocksQuery.data.locks.map((lock) => (
-                      <div
-                        key={lock.path}
-                        className="border-b border-border-whisper py-2"
-                      >
-                        <p className="text-sm font-medium">{lock.path}</p>
-                        <p className="text-xs text-text-secondary">
-                          {m.admin_unit_field_lock_locked_by({
-                            userId: lock.lockedById,
-                            date: fmtDate(lock.createdAt),
-                          })}
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <Card surface="contained">
+                  <CardContent>
+                    <form
+                      onSubmit={submitCollaborator}
+                      className="flex flex-col gap-3"
+                    >
+                      <div>
+                        <h3 className="text-base font-semibold">
+                          Collaborator authority
+                        </h3>
+                        <p className="mt-1 text-sm text-text-secondary">
+                          Grants or changes a user role on this Unit. Impact:
+                          the user receives the selected editorial authority for
+                          collaborative surfaces.
                         </p>
-                        {lock.reason ? (
-                          <p className="text-xs text-text-secondary">
-                            {lock.reason}
-                          </p>
-                        ) : null}
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-text-secondary">
-                    {m.admin_unit_field_locks_empty()}
-                  </p>
-                )}
-              </section>
+                      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px]">
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor="authority-collaborator-user">
+                            User ID
+                          </Label>
+                          <Input
+                            id="authority-collaborator-user"
+                            value={collaboratorUserId}
+                            onChange={(event) =>
+                              setCollaboratorUserId(event.target.value)
+                            }
+                            placeholder="target user id"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Label htmlFor="authority-collaborator-role">
+                            Role
+                          </Label>
+                          <Select
+                            value={collaboratorRole}
+                            onValueChange={(value) =>
+                              setCollaboratorRole(value as UnitAuthorityRoleKey)
+                            }
+                          >
+                            <SelectTrigger id="authority-collaborator-role">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {authorityRoles.map((role) => (
+                                <SelectItem key={role} value={role}>
+                                  {role}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={upsertCollaborator.isPending}
+                      >
+                        Apply collaborator role
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
 
-              <section className="flex flex-col gap-3">
-                <h3 className="text-base font-semibold">
-                  {m.admin_unit_collaborators_title()}
-                </h3>
-                {collaboratorsQuery.isLoading ? (
-                  <div className="flex justify-center py-4">
-                    <Spinner />
-                  </div>
-                ) : collaboratorsQuery.isError ? (
-                  <p className="text-sm text-error-text">
-                    {m.admin_unit_collaborators_failed_load()}
-                  </p>
-                ) : collaboratorsQuery.data?.collaborators.length ? (
-                  <div className="flex flex-col gap-2">
-                    {collaboratorsQuery.data.collaborators.map(
-                      (collaborator) => (
+                <Card surface="contained">
+                  <CardContent>
+                    <form
+                      onSubmit={submitFieldLock}
+                      className="flex flex-col gap-3"
+                    >
+                      <div>
+                        <h3 className="text-base font-semibold">
+                          Field lock authority
+                        </h3>
+                        <p className="mt-1 text-sm text-text-secondary">
+                          Locks a field path from normal edits. Impact: matching
+                          edit patches are rejected until an operator removes
+                          the lock.
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Label htmlFor="authority-lock-path">Field path</Label>
+                        <Input
+                          id="authority-lock-path"
+                          value={lockPath}
+                          onChange={(event) => setLockPath(event.target.value)}
+                          placeholder="translations.en.title or *"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Label htmlFor="authority-lock-reason">
+                          Audit reason
+                        </Label>
+                        <Textarea
+                          id="authority-lock-reason"
+                          value={lockReason}
+                          onChange={(event) =>
+                            setLockReason(event.target.value)
+                          }
+                          rows={3}
+                          placeholder="why this field requires operator lock"
+                        />
+                      </div>
+                      <Button
+                        type="submit"
+                        disabled={upsertFieldLock.isPending}
+                      >
+                        Apply field lock
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <section className="flex flex-col gap-3">
+                  <h3 className="text-base font-semibold">
+                    {m.admin_unit_field_locks_title()}
+                  </h3>
+                  {fieldLocksQuery.isLoading ? (
+                    <div className="flex justify-center py-4">
+                      <Spinner />
+                    </div>
+                  ) : fieldLocksQuery.isError ? (
+                    <p className="text-sm text-error-text">
+                      {m.admin_unit_field_locks_failed_load()}
+                    </p>
+                  ) : fieldLocksQuery.data?.locks.length ? (
+                    <div className="flex flex-col gap-2">
+                      {fieldLocksQuery.data.locks.map((lock) => (
                         <div
-                          key={collaborator.userId}
+                          key={lock.path}
                           className="border-b border-border-whisper py-2"
                         >
-                          <p className="text-sm font-medium">
-                            {collaborator.userId}
-                          </p>
+                          <p className="text-sm font-medium">{lock.path}</p>
                           <p className="text-xs text-text-secondary">
-                            {m.admin_unit_collaborator_added_by({
-                              role: collaborator.roleKey,
-                              userId: collaborator.addedById,
-                              date: fmtDate(collaborator.createdAt),
+                            {m.admin_unit_field_lock_locked_by({
+                              userId: lock.lockedById,
+                              date: fmtDate(lock.createdAt),
                             })}
                           </p>
+                          {lock.reason ? (
+                            <p className="text-xs text-text-secondary">
+                              {lock.reason}
+                            </p>
+                          ) : null}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="mt-2"
+                            disabled={removeFieldLock.isPending}
+                            onClick={() => handleRemoveFieldLock(lock.path)}
+                          >
+                            Remove lock
+                          </Button>
                         </div>
-                      ),
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm text-text-secondary">
-                    {m.admin_unit_collaborators_empty()}
-                  </p>
-                )}
-              </section>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-text-secondary">
+                      {m.admin_unit_field_locks_empty()}
+                    </p>
+                  )}
+                </section>
+
+                <section className="flex flex-col gap-3">
+                  <h3 className="text-base font-semibold">
+                    {m.admin_unit_collaborators_title()}
+                  </h3>
+                  {collaboratorsQuery.isLoading ? (
+                    <div className="flex justify-center py-4">
+                      <Spinner />
+                    </div>
+                  ) : collaboratorsQuery.isError ? (
+                    <p className="text-sm text-error-text">
+                      {m.admin_unit_collaborators_failed_load()}
+                    </p>
+                  ) : collaboratorsQuery.data?.collaborators.length ? (
+                    <div className="flex flex-col gap-2">
+                      {collaboratorsQuery.data.collaborators.map(
+                        (collaborator) => (
+                          <div
+                            key={collaborator.userId}
+                            className="border-b border-border-whisper py-2"
+                          >
+                            <p className="text-sm font-medium">
+                              {collaborator.userId}
+                            </p>
+                            <p className="text-xs text-text-secondary">
+                              {m.admin_unit_collaborator_added_by({
+                                role: collaborator.roleKey,
+                                userId: collaborator.addedById,
+                                date: fmtDate(collaborator.createdAt),
+                              })}
+                            </p>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="mt-2"
+                              disabled={removeCollaborator.isPending}
+                              onClick={() =>
+                                handleRemoveCollaborator(collaborator.userId)
+                              }
+                            >
+                              Remove collaborator
+                            </Button>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-text-secondary">
+                      {m.admin_unit_collaborators_empty()}
+                    </p>
+                  )}
+                </section>
+              </div>
             </div>
           )}
         </CardContent>
