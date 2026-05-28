@@ -4,6 +4,7 @@ import { languageSchema } from "./language";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import { capabilityHintSchema } from "./permission/capability";
+import { postDTOSchema } from "./post";
 import { realmExtraSchema } from "./realm/realm-extra";
 import { unitTagDTOSchema } from "./tag";
 import {
@@ -133,6 +134,28 @@ export const realmRuleReferenceDTOSchema = t.Object({
 
 export type RealmRuleReferenceDTO =
   (typeof realmRuleReferenceDTOSchema)["static"];
+
+export const realmRuleResolvedDTOSchema = t.Object({
+  realmUnitId: t.String(),
+  ruleUnitId: t.Nullable(t.String()),
+  version: t.Nullable(t.Number()),
+  requireOnJoin: t.Optional(t.Boolean()),
+  requireOnPost: t.Optional(t.Boolean()),
+  requireOnUpdate: t.Optional(t.Boolean()),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  requestedLanguage: t.Optional(t.Nullable(languageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  translation: t.Optional(t.Nullable(unitTranslationDTOSchema)),
+  sourceRulePostUnitId: t.Optional(t.Nullable(t.String())),
+  sourceRulePost: t.Optional(t.Nullable(postDTOSchema)),
+});
+
+export type RealmRuleResolvedDTO =
+  (typeof realmRuleResolvedDTOSchema)["static"];
+
+export const resolveRealmRuleQuerySchema = t.Object({
+  language: t.Optional(languageSchema),
+});
 
 export const realmRuleAcknowledgementDTOSchema = t.Object({
   realmUnitId: t.String(),

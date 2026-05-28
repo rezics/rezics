@@ -23,6 +23,7 @@ import type {
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
   RealmRuleReferenceDTO,
+  RealmRuleResolvedDTO,
   RealmResponse,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
@@ -246,6 +247,15 @@ export const realmApi = {
     realmUnitId: string,
   ): Promise<RealmRuleReferenceDTO> => {
     return apiFetch<RealmRuleReferenceDTO>(`/realm/${realmUnitId}/rules`);
+  },
+
+  resolveRule: async (
+    realmUnitId: string,
+    language?: string,
+  ): Promise<RealmRuleResolvedDTO> => {
+    return apiFetch<RealmRuleResolvedDTO>(
+      `/realm/${realmUnitId}/rules/resolved${buildQueryString({ language })}`,
+    );
   },
 
   updateRulePolicy: async (

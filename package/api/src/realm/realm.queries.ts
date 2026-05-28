@@ -73,6 +73,16 @@ export const realmRulePolicyQuery = (realmUnitId: string) =>
     staleTime: 1000 * 60 * 5,
   });
 
+export const realmRuleResolvedQuery = (
+  realmUnitId: string,
+  language?: string,
+) =>
+  queryOptions({
+    queryKey: realmKeys.ruleResolved(realmUnitId, language),
+    queryFn: () => realmApi.resolveRule(realmUnitId, language),
+    staleTime: 1000 * 60 * 5,
+  });
+
 /**
  * Combined query options export
  */
@@ -110,5 +120,6 @@ export const realmQueries = {
   byMember: realmsByMemberQuery,
   myMembership: myRealmMembershipQuery,
   rulePolicy: realmRulePolicyQuery,
+  ruleResolved: realmRuleResolvedQuery,
   tagContext: realmTagContextQuery,
 };

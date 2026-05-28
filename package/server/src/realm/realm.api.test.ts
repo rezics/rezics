@@ -59,6 +59,24 @@ const getRulePolicyMock = mock(async () => ({
   requireOnPost: false,
   requireOnUpdate: true,
 }));
+const resolveRuleMock = mock(async () => ({
+  realmUnitId: "realm-1",
+  ruleUnitId: "rule-unit-1",
+  version: 2,
+  requestedLanguage: "ja",
+  resolvedLanguage: "ja",
+  translation: {
+    unitId: "rule-unit-1",
+    language: "ja",
+    title: "ルール",
+    sourceUnitId: "rule-post-ja",
+  },
+  sourceRulePostUnitId: "rule-post-ja",
+  sourceRulePost: {
+    unitId: "rule-post-ja",
+    authorUserId: "owner-1",
+  },
+}));
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -105,6 +123,7 @@ mock.module("./realm.service", () => ({
     appendCommunityList: appendCommunityListMock,
     getRulePolicy: getRulePolicyMock,
     getMember: getMemberMock,
+    resolveRule: resolveRuleMock,
     updateRulePolicy: updateRulePolicyMock,
     updateMemberRole: updateMemberRoleMock,
   },
@@ -123,6 +142,7 @@ describe("realmApi", () => {
     createRealmTagApplicationMock.mockClear();
     appendCommunityListMock.mockClear();
     getRulePolicyMock.mockClear();
+    resolveRuleMock.mockClear();
     updateRulePolicyMock.mockClear();
     getMemberMock.mockClear();
     updateMemberRoleMock.mockClear();
@@ -290,6 +310,23 @@ describe("realmApi", () => {
       version: 2,
     });
     expect(getRulePolicyMock).toHaveBeenCalledWith("realm-1");
+    expect(decideForIdentityMock).not.toHaveBeenCalled();
+  });
+
+  test("resolves localized rule content without privileged policy decision", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/rules/resolved?language=ja"),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      realmUnitId: "realm-1",
+      requestedLanguage: "ja",
+      resolvedLanguage: "ja",
+      sourceRulePostUnitId: "rule-post-ja",
+    });
+    expect(resolveRuleMock).toHaveBeenCalledWith("realm-1", "ja");
     expect(decideForIdentityMock).not.toHaveBeenCalled();
   });
 

@@ -10,6 +10,7 @@ import type {
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
   RealmRuleReferenceDTO,
+  RealmRuleResolvedDTO,
   RezicsSessionClaims,
   UnitRealmDTO,
   UpdateRealmRulePolicyInput,
@@ -24,6 +25,10 @@ import { governanceAuditService } from "@/governance/audit.service";
 import { governanceCapabilityService } from "@/governance/capability.service";
 import { realmPolicyActions } from "@/governance/action/realm";
 import { serverJobProducer } from "@/job/job-boundary";
+import { mapPostToDTO } from "@/post/post.mapper";
+import { postInclude } from "@/post/types";
+import { mapTranslationToDTO } from "@/unit/mapper";
+import { translationService } from "@/unit/translation.service";
 
 /** Score at or below this threshold hides a RealmTagApplication from regular users. */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
@@ -716,6 +721,60 @@ export class RealmService {
       requireOnPost: row.ruleRequireOnPost,
       requireOnUpdate: row.ruleRequireOnUpdate,
       updatedAt: row.rulePolicyUpdatedAt ?? undefined,
+    };
+  }
+
+  async resolveRule(
+    realmUnitId: string,
+    language?: string,
+  ): Promise<RealmRuleResolvedDTO> {
+    const policy = await this.getRulePolicy(realmUnitId);
+    if (!policy.ruleUnitId) {
+      return {
+        ...policy,
+        requestedLanguage: language ?? null,
+        resolvedLanguage: null,
+        translation: null,
+        sourceRulePostUnitId: null,
+        sourceRulePost: null,
+      };
+    }
+
+    const ruleUnit = await prisma.unit.findUnique({
+      where: { id: policy.ruleUnitId },
+      select: { id: true, type: true, defaultLanguage: true },
+    });
+    if (!ruleUnit || ruleUnit.type !== UnitType.POST) {
+      return {
+        ...policy,
+        requestedLanguage: language ?? null,
+        resolvedLanguage: null,
+        translation: null,
+        sourceRulePostUnitId: null,
+        sourceRulePost: null,
+      };
+    }
+
+    const translation = await translationService.resolveTranslation(
+      policy.ruleUnitId,
+      language,
+      ruleUnit.defaultLanguage ?? undefined,
+    );
+    const sourceRulePostUnitId = translation?.sourceUnitId ?? null;
+    const sourceRulePost = sourceRulePostUnitId
+      ? await prisma.post.findUnique({
+          where: { unitId: sourceRulePostUnitId },
+          include: postInclude,
+        })
+      : null;
+
+    return {
+      ...policy,
+      requestedLanguage: language ?? null,
+      resolvedLanguage: translation?.language ?? null,
+      translation: translation ? mapTranslationToDTO(translation) : null,
+      sourceRulePostUnitId,
+      sourceRulePost: sourceRulePost ? mapPostToDTO(sourceRulePost) : null,
     };
   }
 

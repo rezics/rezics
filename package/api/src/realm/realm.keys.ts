@@ -40,6 +40,10 @@ export const realmKeys = {
    */
   rules: (realmUnitId: string) =>
     [...realmKeys.all(), "rules", realmUnitId] as const,
+  ruleResolveds: (realmUnitId: string) =>
+    [...realmKeys.rules(realmUnitId), "resolved"] as const,
+  ruleResolved: (realmUnitId: string, language?: string) =>
+    [...realmKeys.ruleResolveds(realmUnitId), language ?? null] as const,
 
   /**
    * Keys for realm content invalidation

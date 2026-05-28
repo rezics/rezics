@@ -8,6 +8,7 @@ import type {
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
   RealmRuleReferenceDTO,
+  RealmRuleResolvedDTO,
   RealmTagApplicationDTO,
   UnitRealmDTO,
 } from "@rezics/contract";
@@ -27,6 +28,7 @@ import {
   realmListBodySchema,
   realmListQuerySchema,
   realmParamsSchema,
+  resolveRealmRuleQuerySchema,
   updateMemberRoleSchema,
   updateRealmRulePolicySchema,
   updateRealmSchema,
@@ -765,6 +767,34 @@ export const realmApi = new Elysia({ prefix: "/realm" })
         summary: "Get my membership",
         description:
           "Get the current user's membership, capability hints, and rule acknowledgement state in a realm",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
+    "/:unitId/rules/resolved",
+    async ({
+      params,
+      query,
+      status,
+    }): Promise<RealmRuleResolvedDTO | string> => {
+      try {
+        return await realmService.resolveRule(params.unitId, query.language);
+      } catch {
+        return status(404, "Realm not found");
+      }
+    },
+    {
+      params: realmParamsSchema,
+      query: resolveRealmRuleQuerySchema,
+      response: {
+        200: t.Any(),
+        404: t.String(),
+      },
+      detail: {
+        summary: "Resolve current realm rule",
+        description:
+          "Resolve the current realm rule Unit to the best UnitTranslation and optional source rule Post for display",
         tags: ["Realms"],
       },
     },

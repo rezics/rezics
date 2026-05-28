@@ -59,6 +59,7 @@ export {
   realmListQuery,
   realmQueries,
   realmRulePolicyQuery,
+  realmRuleResolvedQuery,
   realmSearchQuery,
   realmTagContextQuery,
 } from "./realm.queries";
@@ -80,6 +81,7 @@ export type {
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
   RealmRuleReferenceDTO,
+  RealmRuleResolvedDTO,
   RealmResponse,
   RealmSortOption,
   RealmTagApplicationDTO,

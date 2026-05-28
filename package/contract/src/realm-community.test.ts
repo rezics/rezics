@@ -1,11 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { markdownContentDoc } from "./content-doc";
 import {
   realmMembershipMeDTOSchema,
   realmMemberDTOSchema,
   realmRuleAcknowledgementDTOSchema,
   realmRuleAcknowledgementStatusSchema,
   realmRuleReferenceDTOSchema,
+  realmRuleResolvedDTOSchema,
 } from "./realm";
 import { realmExtraSchema } from "./realm/realm-extra";
 
@@ -97,6 +99,28 @@ describe("realm community contract schemas", () => {
         acceptedAt: "2026-05-28T00:00:00.000Z",
         acceptedLanguage: "ja",
         acknowledgementRequired: true,
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(realmRuleResolvedDTOSchema, {
+        realmUnitId: "realm-1",
+        ruleUnitId: "rule-unit-2",
+        version: 3,
+        requestedLanguage: "ja",
+        resolvedLanguage: "en",
+        translation: {
+          unitId: "rule-unit-2",
+          language: "en",
+          title: "Realm rules",
+          sourceUnitId: "rule-post-en",
+        },
+        sourceRulePostUnitId: "rule-post-en",
+        sourceRulePost: {
+          unitId: "rule-post-en",
+          authorUserId: "owner-1",
+          content: markdownContentDoc("Follow the rules"),
+        },
       }),
     ).toBe(true);
   });

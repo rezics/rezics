@@ -125,6 +125,8 @@ afterEach(() => {
   delete prismaMock.realmCapabilityGrant;
   delete prismaMock.realmRuleAcknowledgement;
   delete prismaMock.unit;
+  delete prismaMock.unitTranslation;
+  delete prismaMock.post;
 });
 
 describe("realmService.joinRealm", () => {
@@ -506,6 +508,96 @@ describe("realmService.getRulePolicy", () => {
       requireOnPost: false,
       requireOnUpdate: true,
       updatedAt,
+    });
+  });
+});
+
+describe("realmService.resolveRule", () => {
+  test("resolves the requested translation and source rule post", async () => {
+    const now = new Date("2026-05-28T00:00:00.000Z");
+    prismaMock.realm = {
+      findUnique: mock(async () => ({
+        unitId: REALM,
+        extra: { rule: "rule-unit-1" },
+        ruleVersion: 3,
+        ruleRequireOnJoin: true,
+        ruleRequireOnPost: false,
+        ruleRequireOnUpdate: true,
+        rulePolicyUpdatedAt: now,
+      })),
+    };
+    prismaMock.unit = {
+      findUnique: mock(async () => ({
+        id: "rule-unit-1",
+        type: "POST",
+        defaultLanguage: "en",
+      })),
+    };
+    prismaMock.unitTranslation = {
+      findUnique: mock(async () => ({
+        unitId: "rule-unit-1",
+        language: "ja",
+        title: "ルール",
+        subtitle: null,
+        summary: null,
+        description: null,
+        extra: null,
+        sourceUnitId: "rule-post-ja",
+        createdAt: now,
+        updatedAt: now,
+      })),
+    };
+    prismaMock.post = {
+      findUnique: mock(async () => ({
+        unitId: "rule-post-ja",
+        authorUserId: USER,
+        targetUnitId: null,
+        content: { type: "doc", content: [] },
+        rootPostUnitId: "rule-post-ja",
+        parentPostUnitId: null,
+        kind: "POST",
+        scoreEntryId: null,
+        depth: 0,
+        sortPath: null,
+        replyCount: 0,
+        directReplyCount: 0,
+        lastReplyAt: null,
+        isLocked: false,
+        extra: null,
+        createdAt: now,
+        updatedAt: now,
+        unit: {
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          licenseSlug: null,
+          workMemberships: [],
+          contentModerationState: null,
+          user: {
+            unitId: USER,
+            slug: "owner",
+            name: "Owner",
+            avatar: null,
+          },
+        },
+      })),
+    };
+
+    await expect(realmService.resolveRule(REALM, "ja")).resolves.toMatchObject({
+      realmUnitId: REALM,
+      ruleUnitId: "rule-unit-1",
+      requestedLanguage: "ja",
+      resolvedLanguage: "ja",
+      translation: {
+        unitId: "rule-unit-1",
+        language: "ja",
+        title: "ルール",
+        sourceUnitId: "rule-post-ja",
+      },
+      sourceRulePostUnitId: "rule-post-ja",
+      sourceRulePost: {
+        unitId: "rule-post-ja",
+        authorUserId: USER,
+      },
     });
   });
 });
