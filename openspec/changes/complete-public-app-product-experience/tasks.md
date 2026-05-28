@@ -1,6 +1,6 @@
 ## 1. Route Inventory And Cleanup
 
-- [ ] 1.1 Delete `routes/_mainLayout/test.tsx`, `test02.tsx`, `test03.tsx`, `test-links.tsx` and any references in `core/components/create-menu/` and sidebar/navigation config.
+- [x] 1.1 Delete `routes/_mainLayout/test.tsx`, `test02.tsx`, `test03.tsx`, `test-links.tsx` and any references in `core/components/create-menu/` and sidebar/navigation config.
 - [ ] 1.2 Audit remaining `routes/_mainLayout/` entries and classify as production / staff / unauthenticated; gate staff-only routes via policy hints.
 - [ ] 1.3 Define a single navigation config grouping discovery, library, community, create, and personal (`u/me/dashboard`, `u/me/drafts`, settings, inbox) sections.
 - [ ] 1.4 Add route-level loading, denied, not-found, unauthenticated, and error boundaries via shared helpers, so feature pages do not redefine them.
@@ -8,24 +8,24 @@
 
 ## 2. Dashboard
 
-- [ ] 2.1 Add `package/contract/src/dashboard.ts` with `DashboardSummary` (sections: continue-reading, shelves, realms, notifications, dms, drafts, activity, safety) and per-section `{ ok } | { error: { code, retryable } }` wrapper. The continue-reading item SHALL include `bookUnitId`, `bookTitle`, `bookCoverUrl?`, `lastReadNodeId`, `lastReadNodeTitle` (server-resolved from TOC), `lastReadAnchorText?`, `chaptersCompleted`, `chaptersTotal`, and a discriminated `resumeRoute` (`{ kind: "node" | "chapter" | "book", ... }`) so the client navigates without re-deriving the URL.
-- [ ] 2.2 Add `package/server/src/dashboard/` (api/service/types) that fans out to existing domain services and tolerates per-section failure without failing the whole response. The continue-reading aggregator SHALL join `UserUnitProgress` with `ContentStructureNode` (for `lastReadNodeTitle`) and aggregate `UserContentNodeProgress` per book (for `chaptersCompleted`) plus a count of non-deleted nodes (for `chaptersTotal`) in a single fan-out, not per-card client roundtrips.
-- [ ] 2.3 Add `package/api/src/dashboard/` typed hooks + query keys; register invalidation participation in cache-coherence map.
-- [ ] 2.4 Add `package/app/src/dashboard/` feature (page, sections per `DashboardSummary` slot, models, hooks, components) following `package/app/docs/feature standard.md`.
+- [x] 2.1 Add `package/contract/src/dashboard.ts` with `DashboardSummary` (sections: continue-reading, shelves, realms, notifications, dms, drafts, activity, safety) and per-section `{ ok } | { error: { code, retryable } }` wrapper. The continue-reading item SHALL include `bookUnitId`, `bookTitle`, `bookCoverUrl?`, `lastReadNodeId`, `lastReadNodeTitle` (server-resolved from TOC), `lastReadAnchorText?`, `chaptersCompleted`, `chaptersTotal`, and a discriminated `resumeRoute` (`{ kind: "node" | "chapter" | "book", ... }`) so the client navigates without re-deriving the URL.
+- [x] 2.2 Add `package/server/src/dashboard/` (api/service/types) that fans out to existing domain services and tolerates per-section failure without failing the whole response. The continue-reading aggregator SHALL join `UserUnitProgress` with `ContentStructureNode` (for `lastReadNodeTitle`) and aggregate `UserContentNodeProgress` per book (for `chaptersCompleted`) plus a count of non-deleted nodes (for `chaptersTotal`) in a single fan-out, not per-card client roundtrips.
+- [x] 2.3 Add `package/api/src/dashboard/` typed hooks + query keys; register invalidation participation in cache-coherence map.
+- [x] 2.4 Add `package/app/src/dashboard/` feature (page, sections per `DashboardSummary` slot, models, hooks, components) following `package/app/docs/feature standard.md`.
 - [ ] 2.5 Mount `routes/_mainLayout/u/me/dashboard.tsx`; link from `home/sections/LibraryCardsSection` and the new personal nav.
 - [ ] 2.6 Add stories/tests for partial-success rendering, empty new user, active reader, active community member, and active safety/enforcement notice states.
 
 ## 3. Cache-Coherence Map
 
-- [ ] 3.1 In `package/api/src/react-query/cache-coherence.ts`, declare a typed map keyed by mutation domain (`collect`, `follow`, `reaction`, `progress`, `node-completion`, `draft`, `dm`, `realm-membership`, `report`) → set of query-key namespaces to invalidate (detail / dashboard / profile / search / realm-feed / book-node-completion-list).
-- [ ] 3.2 Refactor `package/api/src/{reaction,subscription,shelf,progress,realm}/*.mutations.ts` to route invalidation through the map; ensure the `useToggleNodeCompletion` hook routes through the `node-completion` domain entry and invalidates the per-book node-completion list namespace used by the TOC sidebar.
-- [ ] 3.3 Add a test asserting each declared mutation domain has at least one corresponding `useQuery` namespace registered, and asserting `node-completion` invalidates both the dashboard continue-reading namespace and the per-book node-completion list namespace.
+- [x] 3.1 In `package/api/src/react-query/cache-coherence.ts`, declare a typed map keyed by mutation domain (`collect`, `follow`, `reaction`, `progress`, `node-completion`, `draft`, `dm`, `realm-membership`, `report`) → set of query-key namespaces to invalidate (detail / dashboard / profile / search / realm-feed / book-node-completion-list).
+- [x] 3.2 Refactor `package/api/src/{reaction,subscription,shelf,progress,realm}/*.mutations.ts` to route invalidation through the map; ensure the `useToggleNodeCompletion` hook routes through the `node-completion` domain entry and invalidates the per-book node-completion list namespace used by the TOC sidebar.
+- [x] 3.3 Add a test asserting each declared mutation domain has at least one corresponding `useQuery` namespace registered, and asserting `node-completion` invalidates both the dashboard continue-reading namespace and the per-book node-completion list namespace.
 
 ## 4. Discovery, Search, Detail
 
 - [ ] 4.1 Upgrade `home/sections/*` and `home/pages/Home.tsx` so signed-out users see discovery and signed-in users see continuation (continue reading, shelves, realms) without scattering dashboard logic.
 - [ ] 4.2 In `routes/_mainLayout/search/index.tsx`, add explicit filter-chip UI (type / realm / work-grouping) backed by stable Unit/Entity/Realm ids; persist query state in the URL.
-- [ ] 4.3 Add local-only search-history affordance on the search route (no server contract).
+- [x] 4.3 Add local-only search-history affordance on the search route (no server contract).
 - [ ] 4.4 In book/entity/tag/profile detail surfaces, expose inspect, collect, follow, discuss, contribute, report (via new `ReportAction`), share, and DM (via new `DMAction`) where policy allows.
 - [ ] 4.5 Wire collect/follow/reaction/progress mutations through the cache-coherence map so detail/dashboard/profile/search cards refresh consistently.
 
@@ -35,14 +35,14 @@
 - [ ] 5.2 Surface reading progress on reader, detail, dashboard, profile/library consistently.
 - [ ] 5.3 Integrate work/release browsing on detail (release picker + language/edition filters) without depending on `introduce-api-unit-store`.
 - [ ] 5.4 Add tests for shelf persistence, reorder stability, progress update fan-out, continue-reading, same-work release switching, and standalone content.
-- [ ] 5.5 Add bookshelf contract surface: extend `ShelfView` in `package/api/src/shelf/shelf.types.ts` with `"bookshelf"`; add `bookshelfViewConfigSchema`, `DEFAULT_BOOKSHELF_CONFIG`, `LIBRARY_KINDS`, and per-kind aspect-ratio constants in `package/contract/src/`; extend `userSettingsSchema` in `package/contract/src/user.ts` with `library.bookshelf`.
-- [ ] 5.6 Add `package/app/src/bookshelf-view/` feature (resolveBookshelfConfig, BookshelfGrid, BookshelfHoverPanel, UseMySettingsButton); extend `BookCard` with `showTitle?` and `aspectRatio?` props; route the `bookshelf` branch in `package/app/src/shelf/components/ShelfItemRenderer.tsx` through this feature and silently skip non-library kinds.
+- [x] 5.5 Add bookshelf contract surface: extend `ShelfView` in `package/api/src/shelf/shelf.types.ts` with `"bookshelf"`; add `bookshelfViewConfigSchema`, `DEFAULT_BOOKSHELF_CONFIG`, `LIBRARY_KINDS`, and per-kind aspect-ratio constants in `package/contract/src/`; extend `userSettingsSchema` in `package/contract/src/user.ts` with `library.bookshelf`.
+- [x] 5.6 Add `package/app/src/bookshelf-view/` feature (resolveBookshelfConfig, BookshelfGrid, BookshelfHoverPanel, UseMySettingsButton); extend `BookCard` with `showTitle?` and `aspectRatio?` props; route the `bookshelf` branch in `package/app/src/shelf/components/ShelfItemRenderer.tsx` through this feature and silently skip non-library kinds.
 - [ ] 5.7 Apply the readable filter (`isLicensed === true`) by default in the dashboard library section and expose it as an opt-in toggle on standalone shelf pages; ensure non-book library kinds (`game`, `media`) are unaffected.
 - [ ] 5.8 Add stories/tests: bookshelf grid breakpoint resolution (URL → viewer settings → default), "use my settings" reset, desktop-only hover preview (no preview on touch, tap navigates to detail), mixed-content shelf silently filtering non-library kinds, and readable filter toggle behavior.
 
 ## 6. Creation Workflows
 
-- [ ] 6.1 Add `routes/_mainLayout/create/index.tsx` as a unified type-selection entry that routes to existing `book/new`, `shelf/new`, `review/new`, `post/...`, `remark/...`, `realm/...` flows.
+- [x] 6.1 Add `routes/_mainLayout/create/index.tsx` as a unified type-selection entry that routes to existing `book/new`, `shelf/new`, `review/new`, `post/...`, `remark/...`, `realm/...` flows.
 - [ ] 6.2 Add `package/contract/src/draft.ts` (`DraftMetadata` for review/post/remark/wiki/shelf-description) and a server listing/recover endpoint that reuses existing per-type draft storage.
 - [ ] 6.3 Add `package/app/src/drafts/` feature and `routes/_mainLayout/u/me/drafts.tsx`; link from dashboard.
 - [ ] 6.4 Build a shared policy-aware form helper that reads `PolicyDecision` codes (`MISSING_CAPABILITY`/`ENFORCEMENT_ACTIVE`/`BLOCKED_ACCOUNT`/`RATE_LIMITED`) from mutation responses and renders inline denial states instead of toast errors.
