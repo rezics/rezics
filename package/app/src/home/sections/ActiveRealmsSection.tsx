@@ -1,9 +1,5 @@
 import { realmListQuery } from "@rezics/api/realm/realm";
-import {
-  page_home_sections_active_realms_more,
-  page_home_sections_active_realms_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import { buttonVariants } from "@rezics/ui/shadcn";
@@ -13,14 +9,9 @@ import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RealmCard } from "@/realm/components/RealmCard";
 
-const i18nMessages = {
-  page_home_sections_active_realms_more,
-  page_home_sections_active_realms_title,
-};
-
 export const ActiveRealmsSection: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery(
+  const { t } = useTranslation(["page"]);
+const { data, isLoading, error } = useQuery(
     realmListQuery({
       isPublic: true,
       sort: { field: "memberCount", order: "desc" },
@@ -38,10 +29,10 @@ export const ActiveRealmsSection: React.FC = () => {
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">
-          {m.page_home_sections_active_realms_title()}
+          {t("page:home_sections_active_realms_title")}
         </h2>
         <Link to="/realm" className={buttonVariants({ variant: "ghost" })}>
-          {m.page_home_sections_active_realms_more()}
+          {t("page:home_sections_active_realms_more")}
         </Link>
       </div>
       {isLoading ? (
@@ -54,7 +45,7 @@ export const ActiveRealmsSection: React.FC = () => {
               itemKey={(realm) => realm.unitId}
               itemClassName="pl-4 basis-[86%] xsm:basis-[62%]"
               showArrows={false}
-              ariaLabel={m.page_home_sections_active_realms_title()}
+              ariaLabel={t("page:home_sections_active_realms_title")}
               renderItem={(realm) => <RealmCard realm={realm} />}
             />
           </div>

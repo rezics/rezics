@@ -4,23 +4,7 @@ import {
   contentDocMarkdownFallback,
   markdownContentDoc,
 } from "@rezics/contract";
-import {
-  admin_user_avatar_url_label,
-  admin_user_bio_label,
-  admin_user_description_label,
-  admin_user_edit_description,
-  admin_user_edit_title,
-  admin_user_email_display,
-  admin_user_failed_to_load,
-  admin_user_keep_password_help,
-  admin_user_name_label,
-  admin_user_new_password_label,
-  admin_user_update_failed,
-  common_back,
-  common_save,
-  common_saving,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -39,26 +23,9 @@ import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/user/$userId";
 import { Link } from "@/shared/ui/link";
 
-const i18nMessages = {
-  admin_user_avatar_url_label,
-  admin_user_bio_label,
-  admin_user_description_label,
-  admin_user_edit_description,
-  admin_user_edit_title,
-  admin_user_email_display,
-  admin_user_failed_to_load,
-  admin_user_keep_password_help,
-  admin_user_name_label,
-  admin_user_new_password_label,
-  admin_user_update_failed,
-  common_back,
-  common_save,
-  common_saving,
-};
-
 export default function UserEditPage() {
-  const m = useMessage(i18nMessages);
-  const { userId } = Route.useParams();
+  const { t } = useTranslation(["admin", "common"]);
+const { userId } = Route.useParams();
   const [error, setError] = React.useState<string | null>(null);
 
   const detailQuery = useQuery(userQueries.adminDetail(userId));
@@ -66,7 +33,7 @@ export default function UserEditPage() {
   const updateMutation = userMutations.useAdminUpdate({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : m.admin_user_update_failed(),
+        err instanceof Error ? err.message : t("admin:user_update_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -108,8 +75,8 @@ export default function UserEditPage() {
 
   return (
     <Page
-      title={m.admin_user_edit_title()}
-      description={m.admin_user_edit_description({ userId })}
+      title={t("admin:user_edit_title")}
+      description={t("admin:user_edit_description", { userId })}
     >
       <Card>
         <CardContent>
@@ -120,7 +87,7 @@ export default function UserEditPage() {
               render={(props) => (
                 <Link to="/user" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  {m.common_back()}
+                  {t("common:back")}
                 </Link>
               )}
             />
@@ -136,7 +103,7 @@ export default function UserEditPage() {
           ) : detailQuery.isError ? (
             <Alert>
               <AlertDescription className="text-error-text">
-                {m.admin_user_failed_to_load()}
+                {t("admin:user_failed_to_load")}
               </AlertDescription>
             </Alert>
           ) : (
@@ -150,7 +117,7 @@ export default function UserEditPage() {
               ) : null}
 
               <p className="text-sm text-text-secondary mb-4">
-                {m.admin_user_email_display()}{" "}
+                {t("admin:user_email_display")}{" "}
                 <strong>{detailQuery.data?.email ?? "-"}</strong>
               </p>
 
@@ -158,7 +125,7 @@ export default function UserEditPage() {
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="uep-name">
-                      {m.admin_user_name_label()}
+                      {t("admin:user_name_label")}
                     </Label>
                     <Input
                       id="uep-name"
@@ -168,7 +135,7 @@ export default function UserEditPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="uep-avatar">
-                      {m.admin_user_avatar_url_label()}
+                      {t("admin:user_avatar_url_label")}
                     </Label>
                     <Input
                       id="uep-avatar"
@@ -177,7 +144,7 @@ export default function UserEditPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <Label htmlFor="uep-bio">{m.admin_user_bio_label()}</Label>
+                    <Label htmlFor="uep-bio">{t("admin:user_bio_label")}</Label>
                     <textarea
                       id="uep-bio"
                       value={bio}
@@ -188,7 +155,7 @@ export default function UserEditPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="uep-description">
-                      {m.admin_user_description_label()}
+                      {t("admin:user_description_label")}
                     </Label>
                     <textarea
                       id="uep-description"
@@ -200,7 +167,7 @@ export default function UserEditPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="uep-password">
-                      {m.admin_user_new_password_label()}
+                      {t("admin:user_new_password_label")}
                     </Label>
                     <Input
                       id="uep-password"
@@ -209,7 +176,7 @@ export default function UserEditPage() {
                       type="password"
                     />
                     <p className="text-xs text-text-secondary">
-                      {m.admin_user_keep_password_help()}
+                      {t("admin:user_keep_password_help")}
                     </p>
                   </div>
 
@@ -217,8 +184,8 @@ export default function UserEditPage() {
                     <Button type="submit" disabled={updateMutation.isPending}>
                       <SaveIcon className="size-4" />
                       {updateMutation.isPending
-                        ? m.common_saving()
-                        : m.common_save()}
+                        ? t("common:saving")
+                        : t("common:save")}
                     </Button>
                   </div>
                 </div>

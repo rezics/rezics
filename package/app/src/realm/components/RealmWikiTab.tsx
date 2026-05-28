@@ -1,12 +1,6 @@
 import { postQueries } from "@rezics/api/post/post";
 import { zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
-import {
-  common_loading,
-  common_open,
-  realm_content_empty_title,
-  realm_manage,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -14,13 +8,6 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink, Settings } from "lucide-react";
 import { PostCard } from "@/post";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-
-const i18nMessages = {
-  common_loading,
-  common_open,
-  realm_content_empty_title,
-  realm_manage,
-};
 
 interface RealmWikiTabProps {
   realmId: string;
@@ -33,8 +20,8 @@ export function RealmWikiTab({
   wikiZoneUnitId,
   canManage,
 }: RealmWikiTabProps) {
-  const m = useMessage(i18nMessages);
-  const wikiPostsQuery = useQuery(
+  const { t } = useTranslation(["common", "entity"]);
+const wikiPostsQuery = useQuery(
     postQueries.wikiByRealm(realmId, {
       sort: { field: "updatedAt", order: "desc" },
       limit: 24,
@@ -50,12 +37,12 @@ export function RealmWikiTab({
         {wikiPostsQuery.isLoading ? (
           <div className="flex items-center gap-2 py-8 text-sm leading-ui text-text-secondary">
             <Spinner size="sm" />
-            <span>{m.common_loading()}</span>
+            <span>{t("common:loading")}</span>
           </div>
         ) : wikiPostsQuery.error ? (
           <QueryErrorDisplay error={wikiPostsQuery.error} />
         ) : posts.length === 0 ? (
-          <EmptyState title={m.realm_content_empty_title()} />
+          <EmptyState title={t("entity:realm_content_empty_title")} />
         ) : (
           <div>
             {posts.map((post) => (
@@ -82,12 +69,12 @@ export function RealmWikiTab({
                 <Link to="/z/$slug" params={{ slug: zoneSlug }}>
                   <Button size="sm" className="w-full gap-2">
                     <ExternalLink className="h-4 w-4" />
-                    {m.common_open()}
+                    {t("common:open")}
                   </Button>
                 </Link>
               ) : (
                 <Button size="sm" className="w-full" disabled>
-                  {zoneQuery.isLoading ? m.common_loading() : m.common_open()}
+                  {zoneQuery.isLoading ? t("common:loading") : t("common:open")}
                 </Button>
               )}
             </CardContent>
@@ -107,7 +94,7 @@ export function RealmWikiTab({
               <Link to="/realm/$realmId/manage" params={{ realmId }}>
                 <Button size="sm" variant="outline" className="w-full gap-2">
                   <Settings className="h-4 w-4" />
-                  {m.realm_manage()}
+                  {t("entity:realm_manage")}
                 </Button>
               </Link>
             </CardContent>

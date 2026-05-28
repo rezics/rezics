@@ -1,12 +1,4 @@
-import {
-  common_cancel,
-  common_save,
-  progress_status_active_modal_chapter_label,
-  progress_status_active_modal_description,
-  progress_status_active_modal_progress_label,
-  progress_status_active_modal_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -19,15 +11,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import { ChapterPicker } from "./ChapterPicker";
-
-const i18nMessages = {
-  common_cancel,
-  common_save,
-  progress_status_active_modal_chapter_label,
-  progress_status_active_modal_description,
-  progress_status_active_modal_progress_label,
-  progress_status_active_modal_title,
-};
 
 type ActiveProgressModalProps = {
   open: boolean;
@@ -51,8 +34,8 @@ export function ActiveProgressModal({
   onSave,
   isPending,
 }: ActiveProgressModalProps) {
-  const m = useMessage(i18nMessages);
-  const [progressPct, setProgressPct] = useState<number>(
+  const { t } = useTranslation(["common", "community"]);
+const [progressPct, setProgressPct] = useState<number>(
     Math.round((initialProgress ?? 0) * 100),
   );
   const [nodeId, setNodeId] = useState<string | undefined>(
@@ -77,16 +60,16 @@ export function ActiveProgressModal({
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{m.progress_status_active_modal_title()}</DialogTitle>
+          <DialogTitle>{t("community:progress_status_active_modal_title")}</DialogTitle>
           <DialogDescription>
-            {m.progress_status_active_modal_description()}
+            {t("community:progress_status_active_modal_description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="progress-status-pct">
-              {m.progress_status_active_modal_progress_label()} · {progressPct}%
+              {t("community:progress_status_active_modal_progress_label")} · {progressPct}%
             </Label>
             <input
               id="progress-status-pct"
@@ -101,7 +84,7 @@ export function ActiveProgressModal({
           </div>
 
           <div className="grid gap-2">
-            <Label>{m.progress_status_active_modal_chapter_label()}</Label>
+            <Label>{t("community:progress_status_active_modal_chapter_label")}</Label>
             <ChapterPicker
               bookUnitId={bookUnitId}
               value={nodeId}
@@ -112,10 +95,10 @@ export function ActiveProgressModal({
 
         <DialogFooter>
           <Button type="button" variant="ghost" onClick={onCancel}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button type="button" onClick={handleSave} disabled={isPending}>
-            {m.common_save()}
+            {t("common:save")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,10 +1,4 @@
-import {
-  common_more_actions,
-  common_reply,
-  common_share,
-  shelf_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   DropdownMenu,
@@ -20,13 +14,6 @@ import {
 } from "lucide-react";
 import type React from "react";
 import type { Action, EngagementSize } from "../types";
-
-const i18nMessages = {
-  common_more_actions,
-  common_reply,
-  common_share,
-  shelf_title,
-};
 
 export type OverflowMenuProps = {
   items: Action[];
@@ -69,8 +56,8 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
   onInvoke,
   children,
 }) => {
-  const m = useMessage(i18nMessages);
-  const visible = items.filter(
+  const { t } = useTranslation(["common"]);
+const visible = items.filter(
     (token) => DESCRIPTORS[token] !== undefined,
   ) as Action[];
 
@@ -89,7 +76,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
           <Button
             variant="ghost"
             size={size === "lg" ? "default" : "sm"}
-            aria-label={m.common_more_actions()}
+            aria-label={t("common:more_actions")}
             className="text-text-secondary"
             onClick={(event) => event.stopPropagation()}
             {...props}

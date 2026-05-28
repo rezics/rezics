@@ -1,20 +1,5 @@
 import type { JwtServiceDTO } from "@rezics/contract";
-import {
-  admin_auth_actions_title,
-  admin_auth_email_status,
-  admin_jwt_activate,
-  admin_jwt_audience,
-  admin_jwt_deactivate,
-  admin_jwt_issuer,
-  admin_jwt_local,
-  admin_jwt_local_issuer,
-  admin_jwt_remote,
-  admin_jwt_service_key,
-  common_active,
-  common_edit,
-  common_inactive,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
@@ -31,22 +16,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Pencil as EditOutlinedIcon, Power, RotateCw } from "lucide-react";
 import type { FC } from "react";
-
-const i18nMessages = {
-  admin_auth_actions_title,
-  admin_auth_email_status,
-  admin_jwt_activate,
-  admin_jwt_audience,
-  admin_jwt_deactivate,
-  admin_jwt_issuer,
-  admin_jwt_local,
-  admin_jwt_local_issuer,
-  admin_jwt_remote,
-  admin_jwt_service_key,
-  common_active,
-  common_edit,
-  common_inactive,
-};
 
 type Props = {
   services: JwtServiceDTO[];
@@ -65,20 +34,20 @@ export const JwtServiceTable: FC<Props> = ({
   onRotate,
   updatingServiceKey,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["admin", "common"]);
+return (
     <TooltipProvider>
       <div className="rounded-md border border-border-whisper">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{m.admin_jwt_service_key()}</TableHead>
-              <TableHead>{m.admin_jwt_issuer()}</TableHead>
-              <TableHead>{m.admin_jwt_audience()}</TableHead>
-              <TableHead>{m.admin_jwt_local_issuer()}</TableHead>
-              <TableHead>{m.admin_auth_email_status()}</TableHead>
+              <TableHead>{t("admin:jwt_service_key")}</TableHead>
+              <TableHead>{t("admin:jwt_issuer")}</TableHead>
+              <TableHead>{t("admin:jwt_audience")}</TableHead>
+              <TableHead>{t("admin:jwt_local_issuer")}</TableHead>
+              <TableHead>{t("admin:auth_email_status")}</TableHead>
               <TableHead className="text-right">
-                {m.admin_auth_actions_title()}
+                {t("admin:auth_actions_title")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -95,19 +64,19 @@ export const JwtServiceTable: FC<Props> = ({
                 <TableCell>
                   {service.isLocalIssuer ? (
                     <Badge className="bg-info-fill text-white">
-                      {m.admin_jwt_local()}
+                      {t("admin:jwt_local")}
                     </Badge>
                   ) : (
-                    <Badge variant="outline">{m.admin_jwt_remote()}</Badge>
+                    <Badge variant="outline">{t("admin:jwt_remote")}</Badge>
                   )}
                 </TableCell>
                 <TableCell>
                   {service.isActive ? (
                     <Badge className="bg-success-fill text-white">
-                      {m.common_active()}
+                      {t("common:active")}
                     </Badge>
                   ) : (
-                    <Badge variant="secondary">{m.common_inactive()}</Badge>
+                    <Badge variant="secondary">{t("common:inactive")}</Badge>
                   )}
                 </TableCell>
                 <TableCell>
@@ -154,7 +123,7 @@ export const JwtServiceTable: FC<Props> = ({
                             )}
                           />
                           <TooltipContent>
-                            {m.admin_jwt_deactivate()}
+                            {t("admin:jwt_deactivate")}
                           </TooltipContent>
                         </Tooltip>
                       ) : null
@@ -178,7 +147,7 @@ export const JwtServiceTable: FC<Props> = ({
                           )}
                         />
                         <TooltipContent>
-                          {m.admin_jwt_activate()}
+                          {t("admin:jwt_activate")}
                         </TooltipContent>
                       </Tooltip>
                     ) : null}
@@ -189,14 +158,14 @@ export const JwtServiceTable: FC<Props> = ({
                             size="icon"
                             variant="ghost"
                             onClick={() => onEdit(service)}
-                            aria-label={m.common_edit()}
+                            aria-label={t("common:edit")}
                             {...props}
                           >
                             <EditOutlinedIcon className="size-4" />
                           </Button>
                         )}
                       />
-                      <TooltipContent>{m.common_edit()}</TooltipContent>
+                      <TooltipContent>{t("common:edit")}</TooltipContent>
                     </Tooltip>
                   </div>
                 </TableCell>

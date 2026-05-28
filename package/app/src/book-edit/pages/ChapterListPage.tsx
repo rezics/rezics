@@ -1,12 +1,7 @@
 import { bookContentStructureQuery } from "@rezics/api/book/book";
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { ContentRating } from "@rezics/contract";
-import {
-  book_edit_toc_management_title,
-  common_edit,
-  common_loading,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type React from "react";
@@ -21,15 +16,9 @@ import {
   type Chapter,
 } from "../components/BookTocEditor";
 
-const i18nMessages = {
-  book_edit_toc_management_title,
-  common_edit,
-  common_loading,
-};
-
 export const BookEditChapterListPage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const { bookId } = bookEditLayoutRoute.useParams();
+  const { t } = useTranslation(["book", "common"]);
+const { bookId } = bookEditLayoutRoute.useParams();
   const queryClient = useQueryClient();
   const editorRef = useRef<BookTocEditorHandle | null>(null);
   const [tab, setTab] = useState<"editor" | "json">("editor");
@@ -63,7 +52,7 @@ export const BookEditChapterListPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="mt-4 mx-auto max-w-2xl px-4">
-        <div className="text-muted-foreground">{m.common_loading()}</div>
+        <div className="text-muted-foreground">{t("common:loading")}</div>
       </div>
     );
   }
@@ -79,7 +68,7 @@ export const BookEditChapterListPage: React.FC = () => {
   return (
     <div className="mx-auto flex h-[calc(100dvh-8rem)] max-w-2xl flex-col px-4 pb-4">
       <h2 className="text-lg font-semibold mb-2">
-        {m.book_edit_toc_management_title()}
+        {t("book:edit_toc_management_title")}
       </h2>
 
       <Tabs
@@ -88,7 +77,7 @@ export const BookEditChapterListPage: React.FC = () => {
         className="min-h-0 flex-1"
       >
         <TabsList className="flex-none">
-          <TabsTrigger value="editor">{m.common_edit()}</TabsTrigger>
+          <TabsTrigger value="editor">{t("common:edit")}</TabsTrigger>
           <TabsTrigger value="json">JSON</TabsTrigger>
         </TabsList>
         <TabsContent value="editor" className="min-h-0">

@@ -1,6 +1,5 @@
 import type { EntityDTO } from "@rezics/contract";
-import { entity_edit } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Select,
@@ -21,10 +20,6 @@ import { EntityAvatar } from "./EntityAvatar";
 import { EntityKindBadge } from "./EntityKindBadge";
 import { EntityVerifiedIcon } from "./EntityVerifiedIcon";
 
-const i18nMessages = {
-  entity_edit,
-};
-
 interface EntityHeroProps {
   entity: EntityDTO;
   language: string;
@@ -38,8 +33,8 @@ export function EntityHero({
   onLanguageChange,
   canEdit = false,
 }: EntityHeroProps) {
-  const m = useMessage(i18nMessages);
-  const title = getEntityPrimaryTitle(entity, language);
+  const { t } = useTranslation(["entity"]);
+const title = getEntityPrimaryTitle(entity, language);
   const tr = getEntityTranslation(entity, language);
   const languages = getEntityLanguages(entity);
 
@@ -53,7 +48,7 @@ export function EntityHero({
           <EntityVerifiedIcon verified={entity.verified} />
           {canEdit ? (
             <Link to="/entity/$unitId/edit" params={{ unitId: entity.unitId }}>
-              <Button variant="ghost" size="icon" aria-label={m.entity_edit()}>
+              <Button variant="ghost" size="icon" aria-label={t("entity:edit")}>
                 <Pencil data-icon="icon" />
               </Button>
             </Link>

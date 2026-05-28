@@ -17,26 +17,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useReorderRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
-import {
-  pinboard_reorder_conflict,
-  pinboard_reorder_drag_handle,
-  pinboard_reorder_error,
-  pinboard_reorder_list,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { GripVertical as DragIndicatorRoundedIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 import { PinboardEntryCard } from "./PinboardEntryCard";
-
-const i18nMessages = {
-  pinboard_reorder_conflict,
-  pinboard_reorder_drag_handle,
-  pinboard_reorder_error,
-  pinboard_reorder_list,
-};
 
 interface SortableRowProps {
   entry: PinboardEntryView;
@@ -46,8 +33,8 @@ interface SortableRowProps {
 }
 
 function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
-  const m = useMessage(i18nMessages);
-  const {
+  const { t } = useTranslation(["entity"]);
+const {
     attributes,
     listeners,
     setNodeRef,
@@ -77,7 +64,7 @@ function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
             className="cursor-grab touch-none"
             {...attributes}
             {...listeners}
-            aria-label={m.pinboard_reorder_drag_handle({
+            aria-label={t("entity:pinboard_reorder_drag_handle", {
               title: entry.title ?? entry.unitId,
             })}
           >
@@ -109,8 +96,8 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
   onDelete,
   onConflict,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [working, setWorking] = useState<string[] | null>(null);
+  const { t } = useTranslation(["entity"]);
+const [working, setWorking] = useState<string[] | null>(null);
   const ids = useMemo(
     () => working ?? entries.map((e) => e.unitId),
     [entries, working],
@@ -148,10 +135,10 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
         onError: (err) => {
           const message = err instanceof Error ? err.message : String(err);
           if (/409|conflict/i.test(message)) {
-            toast.error(m.pinboard_reorder_conflict());
+            toast.error(t("entity:pinboard_reorder_conflict"));
             onConflict?.();
           } else {
-            toast.error(m.pinboard_reorder_error({ error: message }));
+            toast.error(t("entity:pinboard_reorder_error", { error: message }));
           }
           setWorking(null);
         },
@@ -172,7 +159,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <ul
           className="flex flex-col gap-2"
-          aria-label={m.pinboard_reorder_list()}
+          aria-label={t("entity:pinboard_reorder_list")}
         >
           {ids.map((id) => {
             const entry = byId.get(id);

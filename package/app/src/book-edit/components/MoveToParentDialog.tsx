@@ -1,12 +1,4 @@
-import {
-  book_chapter_move_dialog_moving,
-  book_chapter_move_dialog_no_results,
-  book_chapter_move_dialog_search_placeholder,
-  book_chapter_move_dialog_title,
-  common_cancel,
-  common_ok,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -24,15 +16,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
-
-const i18nMessages = {
-  book_chapter_move_dialog_moving,
-  book_chapter_move_dialog_no_results,
-  book_chapter_move_dialog_search_placeholder,
-  book_chapter_move_dialog_title,
-  common_cancel,
-  common_ok,
-};
 
 interface MoveToParentDialogProps {
   open: boolean;
@@ -160,8 +143,8 @@ export function MoveToParentDialog({
   movingNode,
   onConfirm,
 }: MoveToParentDialogProps) {
-  const m = useMessage(i18nMessages);
-  const [search, setSearch] = useState("");
+  const { t } = useTranslation(["book", "common"]);
+const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | number | null>(null);
 
   const excludeIds = useMemo(
@@ -191,19 +174,19 @@ export function MoveToParentDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xs">
         <DialogHeader>
-          <DialogTitle>{m.book_chapter_move_dialog_title()}</DialogTitle>
+          <DialogTitle>{t("book:chapter_move_dialog_title")}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3 min-h-[320px]">
           {movingNode && (
             <p className="text-sm text-text-secondary mb-1">
-              {m.book_chapter_move_dialog_moving()}{" "}
+              {t("book:chapter_move_dialog_moving")}{" "}
               <strong>{movingNode.title}</strong>
             </p>
           )}
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-text-tertiary" />
             <Input
-              placeholder={m.book_chapter_move_dialog_search_placeholder()}
+              placeholder={t("book:chapter_move_dialog_search_placeholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               autoFocus
@@ -216,7 +199,7 @@ export function MoveToParentDialog({
           >
             {filteredTree.length === 0 ? (
               <div className="flex items-center justify-center h-full text-muted-foreground text-sm py-12">
-                {m.book_chapter_move_dialog_no_results()}
+                {t("book:chapter_move_dialog_no_results")}
               </div>
             ) : (
               filteredTree.map((node) => (
@@ -233,10 +216,10 @@ export function MoveToParentDialog({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button onClick={handleConfirm} disabled={selectedId === null}>
-            {m.common_ok()}
+            {t("common:ok")}
           </Button>
         </DialogFooter>
       </DialogContent>

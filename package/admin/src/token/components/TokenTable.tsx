@@ -1,19 +1,5 @@
 import type { ApiTokenDTO } from "@rezics/contract";
-import {
-  admin_auth_actions_title,
-  admin_auth_user_name,
-  admin_token_never,
-  admin_token_no_scopes,
-  admin_token_revoked,
-  admin_token_scopes,
-  common_created,
-  common_edit,
-  common_expires,
-  common_no,
-  common_revoke,
-  common_yes,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
@@ -31,21 +17,6 @@ import {
 import { Pencil as EditIcon } from "lucide-react";
 import type { FC } from "react";
 
-const i18nMessages = {
-  admin_auth_actions_title,
-  admin_auth_user_name,
-  admin_token_never,
-  admin_token_no_scopes,
-  admin_token_revoked,
-  admin_token_scopes,
-  common_created,
-  common_edit,
-  common_expires,
-  common_no,
-  common_revoke,
-  common_yes,
-};
-
 interface TokenTableProps {
   tokens: ApiTokenDTO[];
   revokingIds: Record<string, boolean>;
@@ -62,12 +33,12 @@ export const TokenTable: FC<TokenTableProps> = ({
   onRevoke,
   onEdit,
 }) => {
-  const m = useMessage(i18nMessages);
-  const renderScopes = (scopes?: Record<string, string[]>) => {
+  const { t } = useTranslation(["admin", "common"]);
+const renderScopes = (scopes?: Record<string, string[]>) => {
     if (!scopes || Object.keys(scopes).length === 0) {
       return (
         <Badge variant="outline" className="text-xs">
-          {m.admin_token_no_scopes()}
+          {t("admin:token_no_scopes")}
         </Badge>
       );
     }
@@ -93,13 +64,13 @@ export const TokenTable: FC<TokenTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{m.admin_auth_user_name()}</TableHead>
-            <TableHead>{m.admin_token_scopes()}</TableHead>
-            <TableHead>{m.common_created()}</TableHead>
-            <TableHead>{m.common_expires()}</TableHead>
-            <TableHead>{m.admin_token_revoked()}</TableHead>
+            <TableHead>{t("admin:auth_user_name")}</TableHead>
+            <TableHead>{t("admin:token_scopes")}</TableHead>
+            <TableHead>{t("common:created")}</TableHead>
+            <TableHead>{t("common:expires")}</TableHead>
+            <TableHead>{t("admin:token_revoked")}</TableHead>
             <TableHead className="text-right">
-              {m.admin_auth_actions_title()}
+              {t("admin:auth_actions_title")}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -114,10 +85,10 @@ export const TokenTable: FC<TokenTableProps> = ({
               <TableCell>
                 {t.expiresAt
                   ? new Date(t.expiresAt).toLocaleString()
-                  : m.admin_token_never()}
+                  : t("admin:token_never")}
               </TableCell>
               <TableCell>
-                {t.revoked ? m.common_yes() : m.common_no()}
+                {t.revoked ? t("common:yes") : t("common:no")}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex flex-row gap-2 justify-end">
@@ -132,11 +103,11 @@ export const TokenTable: FC<TokenTableProps> = ({
                           {...props}
                         >
                           <EditIcon className="size-4" />
-                          {m.common_edit()}
+                          {t("common:edit")}
                         </Button>
                       )}
                     />
-                    <TooltipContent>{m.common_edit()}</TooltipContent>
+                    <TooltipContent>{t("common:edit")}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger
@@ -149,11 +120,11 @@ export const TokenTable: FC<TokenTableProps> = ({
                           disabled={(t.revoked ?? false) || !!revokingIds[t.id]}
                           {...props}
                         >
-                          {m.common_revoke()}
+                          {t("common:revoke")}
                         </Button>
                       )}
                     />
-                    <TooltipContent>{m.common_revoke()}</TooltipContent>
+                    <TooltipContent>{t("common:revoke")}</TooltipContent>
                   </Tooltip>
                 </div>
               </TableCell>

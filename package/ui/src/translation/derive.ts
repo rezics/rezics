@@ -1,9 +1,10 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 /**
  * `deriveTitleSummary` extracts a (title, summary) pair from a free-form body.
  *
  * - Title: first non-empty line, stripped of common Markdown heading/quote
  *   prefixes, capped at 80 characters.
- * - Summary: the next chunk of text after the title (skipping empty lines),
+ * - Summary: the next chunk of text after the getI18nRuntime().i18n.t("book:title", skipping empty lines),
  *   joined into a single line and capped at 200 characters.
  *
  * Returns `undefined` for either field when the body offers nothing usable;

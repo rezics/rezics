@@ -1,15 +1,10 @@
 import type { SearchQuery } from "@rezics/contract";
-import { accessibility_search } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import type { QueryMiddleware } from "../../hooks/useSearchQuery";
-
-const i18nMessages = {
-  accessibility_search,
-};
 
 export type KeywordInputProps = {
   value: string;
@@ -32,8 +27,8 @@ export const KeywordInput: React.FC<KeywordInputProps> = ({
   placeholder,
   label,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [local, setLocal] = useState(value);
+  const { t } = useTranslation(["common"]);
+const [local, setLocal] = useState(value);
 
   const commit = () => {
     const trimmed = local.trim();
@@ -73,7 +68,7 @@ export const KeywordInput: React.FC<KeywordInputProps> = ({
         variant="ghost"
         className="text-text-brand"
         onClick={commit}
-        aria-label={m.accessibility_search()}
+        aria-label={t("common:accessibility_search")}
       >
         <SearchIcon />
       </Button>

@@ -1,13 +1,8 @@
-import { accessibility_search } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { TextSearchInputBase } from "./TextSearchInputBase";
-
-const i18nMessages = {
-  accessibility_search,
-};
 
 export const TextSearchInputWithIcon = ({
   onSearch,
@@ -18,8 +13,8 @@ export const TextSearchInputWithIcon = ({
   defaultValue: { keyword: string };
   placeholder?: string;
 }) => {
-  const m = useMessage(i18nMessages);
-  const [value, setValue] = useState(defaultValue);
+  const { t } = useTranslation(["common"]);
+const [value, setValue] = useState(defaultValue);
 
   return (
     <div className="flex items-center gap-2">
@@ -34,7 +29,7 @@ export const TextSearchInputWithIcon = ({
         size="icon"
         variant="ghost"
         className="text-text-brand"
-        aria-label={m.accessibility_search()}
+        aria-label={t("common:accessibility_search")}
         onClick={() => onSearch(value.keyword ?? "")}
       >
         <SearchIcon />

@@ -1,10 +1,5 @@
 import { zoneHomepageByUnitIdQueryOptions } from "@rezics/api/zone/zone";
-import {
-  zone_loading,
-  zone_not_found,
-  zone_not_found_description,
-} from "@rezics/i18n/messages";
-import { useLocale, useMessage } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -17,12 +12,6 @@ import {
   WikiMediaZoneTemplate,
   WikiMinimalZoneTemplate,
 } from "../templates/wiki";
-
-const i18nMessages = {
-  zone_loading,
-  zone_not_found,
-  zone_not_found_description,
-};
 
 const templates: Record<string, React.FC<any>> = {
   default: DefaultZoneTemplate,
@@ -38,8 +27,8 @@ export type ZoneHomePageProps = {
 };
 
 export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
-  const m = useMessage(i18nMessages);
-  const locale = useLocale();
+  const { t } = useTranslation(["search"]);
+const locale = useLocale();
   const { zone, isLoading, error } = useZone(slug);
   const navigate = useNavigate();
   const homepageQuery = useQuery(
@@ -49,7 +38,7 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <p className="text-text-secondary">{m.zone_loading()}</p>
+        <p className="text-text-secondary">{t("search:zone_loading")}</p>
       </div>
     );
   }
@@ -57,8 +46,8 @@ export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
   if (error || !zone) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-semibold mb-2">{m.zone_not_found()}</h2>
-        <p className="text-text-secondary">{m.zone_not_found_description()}</p>
+        <h2 className="text-2xl font-semibold mb-2">{t("search:zone_not_found")}</h2>
+        <p className="text-text-secondary">{t("search:zone_not_found_description")}</p>
       </div>
     );
   }

@@ -1,12 +1,4 @@
-import {
-  auth_error_passwords_mismatch,
-  auth_flow_already_have_account,
-  auth_flow_sign_in_instead,
-  auth_register,
-  common_email,
-  common_loading,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
 import {
@@ -27,15 +19,6 @@ import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { resolvePostAuthDestination } from "../models/authRedirect";
 import { register } from "../models/handler.ts";
 import { validateEmail, validatePassword } from "../models/validate.ts";
-
-const i18nMessages = {
-  auth_error_passwords_mismatch,
-  auth_flow_already_have_account,
-  auth_flow_sign_in_instead,
-  auth_register,
-  common_email,
-  common_loading,
-};
 
 interface RegisterData {
   email: string;
@@ -59,8 +42,8 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   onClose,
   onLoginClick,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation(["auth", "common"]);
+const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<RegisterData>({
     email: "",
@@ -90,7 +73,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
       validateData = validatePassword(confirm);
       if (!validateData.valid) throw new Error(validateData.error ?? "");
       if (password !== confirm) {
-        throw new Error(m.auth_error_passwords_mismatch());
+        throw new Error(t("auth:error_passwords_mismatch"));
       }
 
       await register(email, password);
@@ -129,7 +112,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         </Alert>
       )}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="register-email">{m.common_email()}</Label>
+        <Label htmlFor="register-email">{t("common:email")}</Label>
         <Input
           id="register-email"
           name="email"
@@ -154,9 +137,9 @@ export const RegisterPage: FC<RegisterPageProps> = ({
         }}
       />
       <div>
-        {m.auth_flow_already_have_account()}&nbsp;
+        {t("auth:flow_already_have_account")}&nbsp;
         <TextButton onClick={handleLoginClickInternal}>
-          {m.auth_flow_sign_in_instead()}
+          {t("auth:flow_sign_in_instead")}
         </TextButton>
       </div>
       <SocialAuthButtons mode="register" />
@@ -166,14 +149,14 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   const actions = (
     <>
       <Button type="button" disabled={loading} onClick={handleSubmit}>
-        {loading ? m.common_loading() : m.auth_register()}
+        {loading ? t("common:loading") : t("auth:register")}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title={m.auth_register()}
+      title={t("auth:register")}
       content={content}
       actions={actions}
     />

@@ -1,9 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
-import {
-  review_open_review_page,
-  review_target_work_label,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Tooltip,
   TooltipContent,
@@ -20,18 +16,13 @@ import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { reviewCardActions, reviewPolicy } from "../../models/reviewPolicy";
 
-const i18nMessages = {
-  review_open_review_page,
-  review_target_work_label,
-};
-
 interface ReviewRatingBadgeProps {
   review: PostDTO;
 }
 
 const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
-  const m = useMessage(i18nMessages);
-  const rating = (review.extra as { rating?: number } | null)?.rating;
+  const { t } = useTranslation(["community"]);
+const rating = (review.extra as { rating?: number } | null)?.rating;
 
   return (
     <TooltipProvider>
@@ -53,7 +44,7 @@ const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
           )}
         />
         <TooltipContent side="top">
-          {m.review_open_review_page()}
+          {t("community:review_open_review_page")}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -92,8 +83,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   targetWork,
   showTargetWork = true,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["community"]);
+const navigate = useNavigate();
 
   const reviewTitle = (review.extra as any)?.title as string | undefined;
   const reviewTargetWork = showTargetWork
@@ -139,7 +130,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
         {reviewTargetWork && (
           <div className="flex min-w-0 items-center gap-1 text-xs leading-dense text-text-secondary">
-            <span className="shrink-0">{m.review_target_work_label()}</span>
+            <span className="shrink-0">{t("community:review_target_work_label")}</span>
             <TextLink
               to="/book/$bookId"
               params={{ bookId: reviewTargetWork.unitId }}

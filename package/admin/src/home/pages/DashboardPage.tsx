@@ -3,18 +3,7 @@ import {
   adminDashboardSummaryQueryOptions,
   adminStatsQueryOptions,
 } from "@rezics/api/stat/stats.queries";
-import {
-  admin_dashboard_comments,
-  admin_dashboard_content_created_30d,
-  admin_dashboard_description,
-  admin_dashboard_history_failed,
-  admin_dashboard_history_pending,
-  admin_dashboard_title,
-  admin_dashboard_total_books,
-  admin_dashboard_total_users,
-  admin_dashboard_unresolved_feedback,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -33,18 +22,6 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { ContentTrendChart } from "../components/chart/ContentTrendChart";
 import { StatCard } from "../components/StatCard";
-
-const i18nMessages = {
-  admin_dashboard_comments,
-  admin_dashboard_content_created_30d,
-  admin_dashboard_description,
-  admin_dashboard_history_failed,
-  admin_dashboard_history_pending,
-  admin_dashboard_title,
-  admin_dashboard_total_books,
-  admin_dashboard_total_users,
-  admin_dashboard_unresolved_feedback,
-};
 
 type DashboardStatus = AdminDashboardSummary["system"]["status"];
 
@@ -237,42 +214,42 @@ function DashboardOperationsSummary({
 }
 
 export default function DashboardPage() {
-  const m = useMessage(i18nMessages);
-  const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());
+  const { t } = useTranslation(["admin"]);
+const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());
   const { data: dashboardSummary } = useSuspenseQuery(
     adminDashboardSummaryQueryOptions(),
   );
 
   return (
     <Page
-      title={m.admin_dashboard_title()}
-      description={m.admin_dashboard_description()}
+      title={t("admin:dashboard_title")}
+      description={t("admin:dashboard_description")}
     >
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label={m.admin_dashboard_total_users()}
+            label={t("admin:dashboard_total_users")}
             value={stats.counts.users}
             icon={<PeopleIcon />}
           />
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label={m.admin_dashboard_total_books()}
+            label={t("admin:dashboard_total_books")}
             value={stats.counts.books}
             icon={<MenuBookIcon />}
           />
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label={m.admin_dashboard_comments()}
+            label={t("admin:dashboard_comments")}
             value={stats.counts.comments}
             icon={<CommentIcon />}
           />
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label={m.admin_dashboard_unresolved_feedback()}
+            label={t("admin:dashboard_unresolved_feedback")}
             value={stats.counts.unresolvedFeedback}
             icon={<FeedbackIcon />}
             color={
@@ -284,14 +261,14 @@ export default function DashboardPage() {
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label={m.admin_dashboard_history_pending()}
+            label={t("admin:dashboard_history_pending")}
             value={stats.counts.historyOutboxPending}
             icon={<HistoryIcon />}
           />
         </div>
         <div className="col-span-12 sm:col-span-6 md:col-span-3">
           <StatCard
-            label={m.admin_dashboard_history_failed()}
+            label={t("admin:dashboard_history_failed")}
             value={stats.counts.historyOutboxFailed}
             icon={<HistoryIcon />}
             color={
@@ -310,7 +287,7 @@ export default function DashboardPage() {
           <Card>
             <CardContent>
               <h3 className="text-sm font-extrabold mb-2">
-                {m.admin_dashboard_content_created_30d()}
+                {t("admin:dashboard_content_created_30d")}
               </h3>
               <div style={{ height: 320 }}>
                 <ContentTrendChart trend={stats.contentTrend} />

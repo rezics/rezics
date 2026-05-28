@@ -1,10 +1,4 @@
 import {
-  search_sort_newest,
-  search_sort_publication_date,
-  search_sort_recently_updated,
-  search_sort_relevance,
-} from "@rezics/i18n/messages";
-import {
   Label,
   Select,
   SelectContent,
@@ -13,13 +7,6 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import type React from "react";
-
-const i18nMessages = {
-  search_sort_newest,
-  search_sort_publication_date,
-  search_sort_recently_updated,
-  search_sort_relevance,
-};
 
 export const SORT_OPTIONS = [
   { value: "relevance", label: i18nMessages.search_sort_relevance },

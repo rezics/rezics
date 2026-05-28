@@ -1,9 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
-import {
-  book_editionFallback,
-  book_otherEditions,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -26,14 +22,9 @@ import {
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
-const i18nMessages = {
-  book_editionFallback,
-  book_otherEditions,
-};
-
 export const BookReleasesPage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const { bookId } = useParams({ strict: false }) as { bookId: string };
+  const { t } = useTranslation(["book"]);
+const { bookId } = useParams({ strict: false }) as { bookId: string };
   const { data } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
@@ -81,7 +72,7 @@ export const BookReleasesPage: React.FC = () => {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <AccentBarWithText text={m.book_otherEditions()} />
+        <AccentBarWithText text={t("book:otherEditions")} />
         <div className="flex flex-row flex-wrap gap-2 sm:justify-end">
           <Button
             type="button"
@@ -114,7 +105,7 @@ export const BookReleasesPage: React.FC = () => {
               release.translations,
               selectedLang,
               release.defaultLanguage ?? undefined,
-            )?.title ?? m.book_editionFallback();
+            )?.title ?? t("book:editionFallback");
           const isCurrent = release.unitId === bookInfo.unitId;
           const policy = release.workMembership?.displayPolicy;
           return (

@@ -4,19 +4,7 @@ import {
 } from "@rezics/api/translation-group";
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { mainMarkdownSource } from "@rezics/contract";
-import {
-  common_created_at,
-  common_loading,
-  common_no_data,
-  common_updated_at,
-  pages_unit_page,
-  post_add_translation_prompt,
-  unit_meta_data,
-  unit_no_content,
-  unit_no_metadata,
-  user_open_profile,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { MarkdownContent } from "@rezics/ui/composite/content/MarkdownContent.tsx";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import {
@@ -35,19 +23,6 @@ import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { TextLink, unitHref } from "@/shared/ui/link";
 import { PostLanguageSwitcher } from "../components/PostLanguageSwitcher";
 
-const i18nMessages = {
-  common_created_at,
-  common_loading,
-  common_no_data,
-  common_updated_at,
-  pages_unit_page,
-  post_add_translation_prompt,
-  unit_meta_data,
-  unit_no_content,
-  unit_no_metadata,
-  user_open_profile,
-};
-
 function formatMetadataValue(value: unknown): string {
   if (value === null || value === undefined) return "-";
 
@@ -64,8 +39,8 @@ function formatMetadataValue(value: unknown): string {
 }
 
 export function UnitPageById({ unitId }: { unitId: string }) {
-  const m = useMessage(i18nMessages);
-  const {
+  const { t } = useTranslation(["book", "common", "community", "settings"]);
+const {
     data: unit,
     isLoading,
     error,
@@ -81,7 +56,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   if (isLoading) {
     return (
       <div className="mt-8 text-center text-sm text-gray-500">
-        {m.common_loading()}
+        {t("common:loading")}
       </div>
     );
   }
@@ -93,7 +68,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   if (!unit) {
     return (
       <div className="mt-8 text-center text-sm text-gray-500">
-        {m.common_no_data()}
+        {t("common:no_data")}
       </div>
     );
   }
@@ -107,7 +82,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   // MOCK: client-side gate until permissions are finalized for translation attach.
   const canAddTranslation = isPost;
   const handleAddTranslation = () => {
-    const lang = window.prompt(m.post_add_translation_prompt() ?? "");
+    const lang = window.prompt(t("community:post_add_translation_prompt") ?? "");
     if (!lang) return;
     attach.mutate({
       unitId: unit.id,
@@ -120,7 +95,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
       {/* ANCHOR Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold">{title || m.pages_unit_page()}</h1>
+          <h1 className="text-3xl font-bold">{title || t("book:pages_unit_page")}</h1>
           <p className="text-xs sm:text-sm break-all text-text-secondary">
             ID: {unit.id}
           </p>
@@ -166,7 +141,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
                         </TextLink>
                       )}
                     />
-                    <TooltipContent>{m.user_open_profile()}</TooltipContent>
+                    <TooltipContent>{t("settings:user_open_profile")}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
                 <span className="text-xs text-text-secondary">
@@ -179,12 +154,12 @@ export function UnitPageById({ unitId }: { unitId: string }) {
           <div className="text-xs space-y-0.5 sm:text-right">
             {unit.createdAt && (
               <div>
-                {m.common_created_at()}: {String(unit.createdAt)}
+                {t("common:created_at")}: {String(unit.createdAt)}
               </div>
             )}
             {unit.updatedAt && (
               <div>
-                {m.common_updated_at()}: {String(unit.updatedAt)}
+                {t("common:updated_at")}: {String(unit.updatedAt)}
               </div>
             )}
           </div>
@@ -212,7 +187,7 @@ export function UnitPageById({ unitId }: { unitId: string }) {
           {content ? (
             <MarkdownContent content={content} />
           ) : (
-            <p className="text-sm text-text-secondary">{m.unit_no_content()}</p>
+            <p className="text-sm text-text-secondary">{t("book:unit_no_content")}</p>
           )}
         </div>
       </div>
@@ -221,11 +196,11 @@ export function UnitPageById({ unitId }: { unitId: string }) {
       <div className="mt-16">
         <div className="flex items-center gap-2 mb-4">
           <AccentBar />
-          <h2 className="text-lg font-bold">{m.unit_meta_data()}</h2>
+          <h2 className="text-lg font-bold">{t("book:unit_meta_data")}</h2>
         </div>
 
         {metadataEntries.length === 0 ? (
-          <p className="text-sm text-text-secondary">{m.unit_no_metadata()}</p>
+          <p className="text-sm text-text-secondary">{t("book:unit_no_metadata")}</p>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {metadataEntries.map(([key, value]) => (

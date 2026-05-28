@@ -2,19 +2,7 @@ import { postQueries } from "@rezics/api/post/post";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";
-import {
-  book_hero_kind_book,
-  book_hero_meta_author,
-  book_hero_meta_chapter_count,
-  book_hero_meta_co_author,
-  book_hero_meta_editor,
-  book_hero_meta_illustrator,
-  book_hero_meta_length_chars,
-  book_hero_meta_producer,
-  book_hero_meta_publisher,
-  book_hero_meta_translator,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -35,19 +23,6 @@ import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
 import { BookHeroScoreBlock } from "./BookHeroScoreBlock";
 import { BookHeroStatCards, type BookHeroStatKey } from "./BookHeroStatCards";
 import { BookYourScoreBlock } from "./BookYourScoreBlock";
-
-const i18nMessages = {
-  book_hero_kind_book,
-  book_hero_meta_chapter_count,
-  book_hero_meta_length_chars,
-  book_hero_meta_author,
-  book_hero_meta_co_author,
-  book_hero_meta_editor,
-  book_hero_meta_illustrator,
-  book_hero_meta_producer,
-  book_hero_meta_publisher,
-  book_hero_meta_translator,
-};
 
 type Book = BookDTO;
 
@@ -88,8 +63,8 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   rating,
   ratingCount = 0,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { bookId: routeBookId } = useParams({ strict: false }) as {
+  const { t } = useTranslation(["book"]);
+const { bookId: routeBookId } = useParams({ strict: false }) as {
     bookId?: string;
   };
   const bookId = routeBookId ?? bookInfo?.unitId ?? "";
@@ -141,18 +116,18 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
     : ["reviews", "shelves", "tags"];
 
   const briefParts: BriefPart[] = [
-    { id: "kind", text: m.book_hero_kind_book() },
+    { id: "kind", text: t("book:hero_kind_book") },
   ];
   if (typeof bookInfo?.chapterCount === "number") {
     briefParts.push({
       id: "chapters",
-      text: m.book_hero_meta_chapter_count({ count: bookInfo.chapterCount }),
+      text: t("book:hero_meta_chapter_count", { count: bookInfo.chapterCount }),
     });
   }
   if (typeof bookInfo?.textLength === "number" && bookInfo.textLength > 0) {
     briefParts.push({
       id: "length",
-      text: m.book_hero_meta_length_chars({ count: bookInfo.textLength }),
+      text: t("book:hero_meta_length_chars", { count: bookInfo.textLength }),
     });
   }
   if (bookInfo?.isbn13) {

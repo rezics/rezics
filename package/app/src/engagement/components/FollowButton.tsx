@@ -3,12 +3,7 @@ import {
   useSubscribeMutation,
   useUnsubscribeMutation,
 } from "@rezics/api/subscription/subscription";
-import {
-  profile_follow,
-  profile_followers_count,
-  profile_following,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Tooltip,
@@ -21,12 +16,6 @@ import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
-
-const i18nMessages = {
-  profile_follow,
-  profile_followers_count,
-  profile_following,
-};
 
 type ButtonVariant =
   | "default"
@@ -68,8 +57,8 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   fullWidth = false,
   className,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["settings"]);
+const navigate = useNavigate();
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
   const authSessionLoading = useAuthSessionStore(
     (state) => state.status === "loading",
@@ -145,7 +134,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     }
   };
 
-  const label = isFollowing ? m.profile_following() : m.profile_follow();
+  const label = isFollowing ? t("settings:profile_following") : t("settings:profile_follow");
 
   const button = (
     <Button
@@ -165,7 +154,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
 
   const followersText =
     showFollowersText && typeof localFollowers === "number"
-      ? m.profile_followers_count({ count: localFollowers })
+      ? t("settings:profile_followers_count", { count: localFollowers })
       : null;
 
   if (!followersText) {

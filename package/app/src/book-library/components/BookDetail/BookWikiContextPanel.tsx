@@ -2,23 +2,12 @@ import { realmDetailQuery } from "@rezics/api/realm/realm";
 import { workRealmContextByReleaseQueryOptions } from "@rezics/api/work-realm-context/work-realm-context";
 import { zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import type { BookDTO, RealmDTO, WorkRealmContextDTO } from "@rezics/contract";
-import {
-  common_loading,
-  common_open,
-  realm_official,
-} from "@rezics/i18n/messages";
-import { useLocale, useMessage } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { Link } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-
-const i18nMessages = {
-  common_loading,
-  common_open,
-  realm_official,
-};
 
 type WikiContextOption = {
   context: WorkRealmContextDTO;
@@ -40,8 +29,8 @@ export function BookWikiContextPanel({
 }: {
   bookInfo: Pick<BookDTO, "unitId">;
 }) {
-  const m = useMessage(i18nMessages);
-  const locale = useLocale();
+  const { t } = useTranslation(["common", "entity"]);
+const locale = useLocale();
   const contextQuery = useQuery(
     workRealmContextByReleaseQueryOptions(bookInfo.unitId, {
       locale,
@@ -55,17 +44,17 @@ export function BookWikiContextPanel({
       ? [
           {
             context: contextData.official,
-            label: m.realm_official(),
+            label: t("entity:realm_official"),
           },
         ]
       : []),
     ...(contextData?.language ?? []).map((context) => ({
       context,
-      label: contextLabel(context, m.realm_official()),
+      label: contextLabel(context, t("entity:realm_official")),
     })),
     ...(contextData?.community ?? []).map((context) => ({
       context,
-      label: contextLabel(context, m.realm_official()),
+      label: contextLabel(context, t("entity:realm_official")),
     })),
   ];
   const realmIds = [
@@ -112,7 +101,7 @@ export function BookWikiContextPanel({
 
         {contextQuery.isLoading ? (
           <p className="text-sm leading-ui text-text-secondary">
-            {m.common_loading()}
+            {t("common:loading")}
           </p>
         ) : contextData?.conflicts.length ? (
           <p className="text-sm leading-body text-text-secondary">
@@ -158,7 +147,7 @@ export function BookWikiContextPanel({
                           className="w-full gap-2"
                         >
                           <ExternalLink className="h-4 w-4" />
-                          {m.common_open()}
+                          {t("common:open")}
                         </Button>
                       </Link>
                     )}

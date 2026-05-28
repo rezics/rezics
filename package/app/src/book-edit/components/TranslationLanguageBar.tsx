@@ -1,17 +1,6 @@
-import {
-  page_book_edit_info_translation_add_button,
-  page_book_edit_info_translation_default_badge,
-  page_book_edit_info_translation_language_label,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { UnitTranslationLanguageBar } from "@/unit";
-
-const i18nMessages = {
-  page_book_edit_info_translation_add_button,
-  page_book_edit_info_translation_default_badge,
-  page_book_edit_info_translation_language_label,
-};
 
 export interface TranslationLanguageBarProps {
   existingLanguages: string[];
@@ -30,8 +19,8 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
   onAddClick,
   hasAvailable,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["page"]);
+return (
     <UnitTranslationLanguageBar
       existingLanguages={existingLanguages}
       selectedLanguage={selectedLanguage}
@@ -39,9 +28,9 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
       onSelect={onSelect}
       onAddClick={onAddClick}
       hasAvailable={hasAvailable}
-      label={m.page_book_edit_info_translation_language_label()}
-      addLabel={m.page_book_edit_info_translation_add_button()}
-      defaultLabel={m.page_book_edit_info_translation_default_badge()}
+      label={t("page:book_edit_info_translation_language_label")}
+      addLabel={t("page:book_edit_info_translation_add_button")}
+      defaultLabel={t("page:book_edit_info_translation_default_badge")}
     />
   );
 };

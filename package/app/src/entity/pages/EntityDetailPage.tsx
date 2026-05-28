@@ -1,15 +1,7 @@
 import { entityDetailQueryOptions, useEntity } from "@rezics/api/entity";
 import { useServerPermission } from "@rezics/api/hooks";
 import { BasicAdminPermission } from "@rezics/contract";
-import {
-  entity_no_content,
-  entity_not_found,
-  entity_not_found_description,
-  entity_tab_about,
-  entity_tab_overview,
-  entity_tab_works,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useState } from "react";
@@ -19,15 +11,6 @@ import { getEntityLanguages, getEntityTranslation } from "../models/types";
 import { AboutTab, hasAboutData } from "../sections/AboutTab";
 import { hasOverviewData, OverviewTab } from "../sections/OverviewTab";
 import { WorksTab } from "../sections/WorksTab";
-
-const i18nMessages = {
-  entity_no_content,
-  entity_not_found,
-  entity_not_found_description,
-  entity_tab_about,
-  entity_tab_overview,
-  entity_tab_works,
-};
 
 /*
  * AWARDS_TAB: uncomment when an awards data source lands.
@@ -50,8 +33,8 @@ interface EntityDetailPageProps {
 }
 
 export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
-  const m = useMessage(i18nMessages);
-  const { data: entity, isLoading, error } = useEntity(unitId);
+  const { t } = useTranslation(["entity"]);
+const { data: entity, isLoading, error } = useEntity(unitId);
   const permission = useServerPermission();
 
   // Hooks must run unconditionally — call works hook with current id regardless
@@ -77,10 +60,10 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
         <h1 className="text-lg font-semibold text-text-primary">
-          {m.entity_not_found()}
+          {t("entity:not_found")}
         </h1>
         <p className="mt-2 text-sm text-text-secondary">
-          {m.entity_not_found_description()}
+          {t("entity:not_found_description")}
         </p>
       </div>
     );
@@ -165,7 +148,7 @@ export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
         </Tabs>
       ) : (
         <p className="mt-8 text-sm text-text-secondary">
-          {tr?.summary ?? m.entity_no_content()}
+          {tr?.summary ?? t("entity:no_content")}
         </p>
       )}
     </div>

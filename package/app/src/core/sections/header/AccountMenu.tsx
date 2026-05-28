@@ -1,10 +1,4 @@
-import {
-  app_account_menu_aria_label,
-  auth_logout,
-  navigation_profile,
-  navigation_settings,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
   AvatarFallback,
@@ -28,20 +22,13 @@ import { logout } from "@/user/models/handler";
 import { useUserProfileStore } from "@/user/states";
 import { MiscMenuItems } from "../../components/header/MiscMenuItems";
 
-const i18nMessages = {
-  app_account_menu_aria_label,
-  auth_logout,
-  navigation_profile,
-  navigation_settings,
-};
-
 export type AccountMenuProps = {
   onLogout?: () => void;
 };
 
 export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["auth", "shell"]);
+const navigate = useNavigate();
   const clearProfile = useUserProfileStore((state) => state.clearProfile);
   const user = useUserProfileStore((state) => state.user);
   const handleLogout = () => {
@@ -59,7 +46,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={m.app_account_menu_aria_label()}
+            aria-label={t("shell:app_account_menu_aria_label")}
             aria-haspopup="true"
             className="h-10 min-w-10 rounded-md bg-transparent hover:bg-muted aria-expanded:bg-muted"
             {...props}
@@ -92,7 +79,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
               {...props}
             >
               <PersonIcon className="w-4 h-4" />
-              <span>{m.navigation_profile()}</span>
+              <span>{t("shell:navigation_profile")}</span>
             </Link>
           )}
         />
@@ -104,7 +91,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
               {...props}
             >
               <SettingsIcon className="w-4 h-4" />
-              <span>{m.navigation_settings()}</span>
+              <span>{t("shell:navigation_settings")}</span>
             </Link>
           )}
         />
@@ -112,7 +99,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogoutIcon className="w-4 h-4" />
-          <span>{m.auth_logout()}</span>
+          <span>{t("auth:logout")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

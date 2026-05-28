@@ -1,13 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { type BookDTO, mainMarkdownSource } from "@rezics/contract";
-import {
-  page_book_edit_info_translation_source_label,
-  page_book_edit_info_translation_source_no_match,
-  page_book_edit_info_translation_source_open_button,
-  page_book_edit_info_translation_source_sync_button,
-  page_book_edit_info_translation_source_sync_tooltip,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Tooltip,
@@ -24,14 +17,6 @@ import {
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
-
-const i18nMessages = {
-  page_book_edit_info_translation_source_label,
-  page_book_edit_info_translation_source_no_match,
-  page_book_edit_info_translation_source_open_button,
-  page_book_edit_info_translation_source_sync_button,
-  page_book_edit_info_translation_source_sync_tooltip,
-};
 
 export interface TranslationSyncActionsProps {
   /** Source release unit id this language is wired to. Falsy disables actions. */
@@ -53,8 +38,8 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   language,
   onSync,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["page"]);
+const navigate = useNavigate();
 
   const { data: sourceBook, isFetching } = useQuery({
     ...bookQueries.detail(sourceUnitId ?? ""),
@@ -90,7 +75,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   return (
     <div className="flex flex-col gap-2">
       <span className="text-xs text-text-secondary">
-        {m.page_book_edit_info_translation_source_label()}: {sourceTitle}
+        {t("page:book_edit_info_translation_source_label")}: {sourceTitle}
       </span>
       <div className="flex flex-row gap-2 flex-wrap">
         <TooltipProvider>
@@ -105,15 +90,15 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
                     disabled={!sourceTranslation || isFetching}
                   >
                     <SyncIcon className="w-4 h-4 mr-2" />
-                    {m.page_book_edit_info_translation_source_sync_button()}
+                    {t("page:book_edit_info_translation_source_sync_button")}
                   </Button>
                 </span>
               )}
             />
             <TooltipContent>
               {sourceTranslation
-                ? m.page_book_edit_info_translation_source_sync_tooltip()
-                : m.page_book_edit_info_translation_source_no_match({
+                ? t("page:book_edit_info_translation_source_sync_tooltip")
+                : t("page:book_edit_info_translation_source_no_match", {
                     lang: language,
                   })}
             </TooltipContent>
@@ -131,7 +116,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
           }
         >
           <LaunchIcon className="w-4 h-4 mr-2" />
-          {m.page_book_edit_info_translation_source_open_button()}
+          {t("page:book_edit_info_translation_source_open_button")}
         </Button>
       </div>
     </div>

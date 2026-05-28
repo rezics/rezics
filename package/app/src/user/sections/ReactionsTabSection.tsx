@@ -2,10 +2,6 @@ import {
   useGivenReactionsInfinite,
   useReceivedReactionsInfinite,
 } from "@rezics/api/reaction/reaction.queries";
-import {
-  profile_reactions_given,
-  profile_reactions_received,
-} from "@rezics/i18n/messages";
 import type { FC } from "react";
 import { useState } from "react";
 import {
@@ -14,11 +10,6 @@ import {
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 import { ReactionList } from "@/user/components/ReactionList";
-
-const i18nMessages = {
-  profile_reactions_given,
-  profile_reactions_received,
-};
 
 type Mode = "given" | "received";
 

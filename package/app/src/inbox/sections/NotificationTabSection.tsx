@@ -2,23 +2,12 @@ import {
   useMarkAsReadMutation,
   useNotifications,
 } from "@rezics/api/notification";
-import {
-  common_loading,
-  notifications_empty,
-  notifications_load_failed,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { NotificationCard } from "../components/NotificationCard.tsx";
 
-const i18nMessages = {
-  common_loading,
-  notifications_empty,
-  notifications_load_failed,
-};
-
 export function NotificationTabSection() {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, isError } = useNotifications(1, 10);
+  const { t } = useTranslation(["common", "settings"]);
+const { data, isLoading, isError } = useNotifications(1, 10);
   const markAsRead = useMarkAsReadMutation();
 
   const items = data?.items ?? [];
@@ -27,17 +16,17 @@ export function NotificationTabSection() {
     <div className="flex w-full max-w-sm flex-col gap-1 p-2">
       {isLoading && (
         <p className="px-2 py-4 text-sm text-muted-foreground">
-          {m.common_loading()}
+          {t("common:loading")}
         </p>
       )}
       {isError && (
         <p className="px-2 py-4 text-sm text-destructive">
-          {m.notifications_load_failed()}
+          {t("settings:notifications_load_failed")}
         </p>
       )}
       {!isLoading && !isError && items.length === 0 && (
         <p className="px-2 py-4 text-sm text-muted-foreground">
-          {m.notifications_empty()}
+          {t("settings:notifications_empty")}
         </p>
       )}
       {items.map((item) => (

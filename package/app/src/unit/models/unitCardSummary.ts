@@ -13,9 +13,9 @@ import {
   mainMarkdownSource,
   readCoverUrlFromExtra,
 } from "@rezics/contract";
-import { unit_untitled } from "@rezics/i18n/messages";
 import { getTranslation } from "../../shared/utils/translation-helpers";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type UnitCardAuthor = PublicUser;
 
 export interface UnitCardTranslationMeta {
@@ -96,7 +96,7 @@ export function unitDtoToUnitCardSummary(
     text(translation?.title) ??
     text(options.fallbackTitle) ??
     text(unitId) ??
-    unit_untitled();
+    getI18nRuntime().i18n.t("book:unit_untitled");
   const imageUrl =
     text(unit.coverUrl) ??
     readCoverUrlFromExtra(translation?.extra) ??

@@ -5,14 +5,7 @@ import {
   creditAttributionRoles,
 } from "@rezics/contract";
 import { creditRoleLabel } from "@rezics/i18n";
-import {
-  book_actions_add_credit,
-  book_actions_remove_credit,
-  book_empty_credit_attributions,
-  common_loading,
-  common_save_changes,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Save, Trash2 } from "lucide-react";
@@ -30,14 +23,6 @@ import {
 } from "@/entity";
 import { EntityPicker } from "@/entity-picker";
 
-const i18nMessages = {
-  book_actions_add_credit,
-  book_actions_remove_credit,
-  book_empty_credit_attributions,
-  common_loading,
-  common_save_changes,
-};
-
 interface BookCreditAttributionEditorProps {
   bookUnitId: string;
   disabled?: boolean;
@@ -53,8 +38,8 @@ export function BookCreditAttributionEditor({
   bookUnitId,
   disabled,
 }: BookCreditAttributionEditorProps) {
-  const m = useMessage(i18nMessages);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const { t } = useTranslation(["book", "common"]);
+const [pickerOpen, setPickerOpen] = useState(false);
   const [queue, setQueue] = useState(() => createEntityAttributionEditQueue());
 
   const creditQuery = useQuery(creditAttributionQueries.byUnit(bookUnitId));
@@ -120,7 +105,7 @@ export function BookCreditAttributionEditor({
           onClick={handleSave}
         >
           <Save className="size-4" />
-          {m.common_save_changes()}
+          {t("common:save_changes")}
         </Button>
         <Button
           type="button"
@@ -129,12 +114,12 @@ export function BookCreditAttributionEditor({
           onClick={() => setPickerOpen(true)}
         >
           <Plus className="size-4" />
-          {m.book_actions_add_credit()}
+          {t("book:actions_add_credit")}
         </Button>
       </div>
 
       {creditQuery.isLoading ? (
-        <p className="text-sm text-text-secondary">{m.common_loading()}</p>
+        <p className="text-sm text-text-secondary">{t("common:loading")}</p>
       ) : visibleCredits.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {visibleCredits.map((credit) => {
@@ -153,7 +138,7 @@ export function BookCreditAttributionEditor({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  aria-label={m.book_actions_remove_credit()}
+                  aria-label={t("book:actions_remove_credit")}
                   disabled={disabled || batchMutation.isPending}
                   onClick={() => {
                     setQueue((current) =>
@@ -173,7 +158,7 @@ export function BookCreditAttributionEditor({
         </ul>
       ) : (
         <p className="text-sm text-text-secondary">
-          {m.book_empty_credit_attributions()}
+          {t("book:empty_credit_attributions")}
         </p>
       )}
 

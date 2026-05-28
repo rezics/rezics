@@ -9,16 +9,7 @@ import type {
   CreateApiTokenInput,
   UpdateApiTokenInput,
 } from "@rezics/contract";
-import {
-  admin_token_create_button,
-  admin_token_create_failed,
-  admin_token_empty,
-  admin_token_revoke_confirm,
-  admin_token_revoke_failed,
-  admin_token_title,
-  admin_token_update_failed,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -32,16 +23,6 @@ import {
   TokenTable,
 } from "../components";
 
-const i18nMessages = {
-  admin_token_create_button,
-  admin_token_create_failed,
-  admin_token_empty,
-  admin_token_revoke_confirm,
-  admin_token_revoke_failed,
-  admin_token_title,
-  admin_token_update_failed,
-};
-
 /**
  * TokenPage - 管理当前用户的 API tokens
  * - 列表展示
@@ -50,8 +31,8 @@ const i18nMessages = {
  * - 撤销 token
  */
 export const TokenPage: FC = () => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery(tokenQueries.list());
+  const { t } = useTranslation(["admin"]);
+const { data, isLoading, error } = useQuery(tokenQueries.list());
 
   const [tokens, setTokens] = useState<ApiTokenDTO[]>([]);
 
@@ -86,7 +67,7 @@ export const TokenPage: FC = () => {
       setOpenCreate(false);
     } catch (err) {
       setCreatingError(
-        (err as Error)?.message ?? m.admin_token_create_failed(),
+        (err as Error)?.message ?? t("admin:token_create_failed"),
       );
     } finally {
       setCreating(false);
@@ -108,7 +89,7 @@ export const TokenPage: FC = () => {
       setEditingToken(null);
     } catch (err) {
       setUpdatingError(
-        (err as Error)?.message ?? m.admin_token_update_failed(),
+        (err as Error)?.message ?? t("admin:token_update_failed"),
       );
     } finally {
       setUpdating(false);
@@ -116,12 +97,12 @@ export const TokenPage: FC = () => {
   };
 
   const handleRevoke = async (id: string) => {
-    if (!confirm(m.admin_token_revoke_confirm())) return;
+    if (!confirm(t("admin:token_revoke_confirm"))) return;
     try {
       setRevokingIds((s) => ({ ...s, [id]: true }));
       await revokeMutation.mutateAsync(id);
     } catch (err) {
-      alert((err as Error)?.message ?? m.admin_token_revoke_failed());
+      alert((err as Error)?.message ?? t("admin:token_revoke_failed"));
     } finally {
       setRevokingIds((s) => ({ ...s, [id]: false }));
     }
@@ -129,10 +110,10 @@ export const TokenPage: FC = () => {
 
   return (
     <Page
-      title={m.admin_token_title()}
+      title={t("admin:token_title")}
       actions={
         <Button onClick={() => setOpenCreate(true)}>
-          {m.admin_token_create_button()}
+          {t("admin:token_create_button")}
         </Button>
       }
     >
@@ -153,7 +134,7 @@ export const TokenPage: FC = () => {
       {!isLoading && !error && tokens.length === 0 && (
         <div className="flex items-center justify-center h-40">
           <p className="text-base text-text-secondary">
-            {m.admin_token_empty()}
+            {t("admin:token_empty")}
           </p>
         </div>
       )}

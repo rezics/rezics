@@ -1,25 +1,6 @@
 import type { EntityDTO } from "@rezics/contract";
-import {
-  common_no,
-  common_translation,
-  common_yes,
-  entity_kind_label,
-  entity_no_details_available,
-  entity_slug_label,
-  entity_verified,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { getEntityTranslation } from "../models/types";
-
-const i18nMessages = {
-  common_no,
-  common_translation,
-  common_yes,
-  entity_kind_label,
-  entity_no_details_available,
-  entity_slug_label,
-  entity_verified,
-};
 
 interface AboutTabProps {
   entity: EntityDTO;
@@ -27,28 +8,28 @@ interface AboutTabProps {
 }
 
 export function AboutTab({ entity, language }: AboutTabProps) {
-  const m = useMessage(i18nMessages);
-  const tr = getEntityTranslation(entity, language);
+  const { t } = useTranslation(["common", "entity"]);
+const tr = getEntityTranslation(entity, language);
   const items: Array<{ label: string; value: string }> = [];
 
   if (entity.kind)
-    items.push({ label: m.entity_kind_label(), value: entity.kind });
+    items.push({ label: t("entity:kind_label"), value: entity.kind });
   if (entity.verified !== undefined) {
     items.push({
-      label: m.entity_verified(),
-      value: entity.verified ? m.common_yes() : m.common_no(),
+      label: t("entity:verified"),
+      value: entity.verified ? t("common:yes") : t("common:no"),
     });
   }
   if (entity.slug)
-    items.push({ label: m.entity_slug_label(), value: entity.slug });
+    items.push({ label: t("entity:slug_label"), value: entity.slug });
   if (tr?.language) {
-    items.push({ label: m.common_translation(), value: tr.language });
+    items.push({ label: t("common:translation"), value: tr.language });
   }
 
   if (items.length === 0) {
     return (
       <p className="text-sm text-text-secondary">
-        {m.entity_no_details_available()}
+        {t("entity:no_details_available")}
       </p>
     );
   }

@@ -1,12 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
-import {
-  book_chapter_search_term_placeholder,
-  common_collapse_all,
-  common_expand_all,
-  common_loading,
-  common_search,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -15,14 +8,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { withBookContentStructureOccurrences } from "../../models/bookContentStructurePath";
 import type { ChapterArboristRefHandle } from "./ChapterArborist";
 import { ChapterArborist } from "./ChapterArborist";
-
-const i18nMessages = {
-  book_chapter_search_term_placeholder,
-  common_collapse_all,
-  common_expand_all,
-  common_loading,
-  common_search,
-};
 
 /** Props for LinearChapterList component. */
 interface LinearChapterListProps {
@@ -45,8 +30,8 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   width = 300,
   height = 300,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery(
+  const { t } = useTranslation(["book", "common"]);
+const { data, isLoading, error } = useQuery(
     bookQueries.contentStructure(bookId),
   );
 
@@ -62,7 +47,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   const arboristRef = useRef<ChapterArboristRefHandle | null>(null);
 
   if (!bookId) return null;
-  if (isLoading) return <div>{m.common_loading()}</div>;
+  if (isLoading) return <div>{t("common:loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   return (
@@ -75,26 +60,26 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
               size="sm"
               onClick={() => arboristRef.current?.expandAll()}
             >
-              {m.common_expand_all()}
+              {t("common:expand_all")}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => arboristRef.current?.collapseAll()}
             >
-              {m.common_collapse_all()}
+              {t("common:collapse_all")}
             </Button>
           </div>
 
           <div className="flex flex-col gap-1 w-full">
-            <Label htmlFor="chapter-search">{m.common_search()}</Label>
+            <Label htmlFor="chapter-search">{t("common:search")}</Label>
             <Input
               id="chapter-search"
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchTerm(e.target.value)
               }
-              placeholder={m.book_chapter_search_term_placeholder()}
+              placeholder={t("book:chapter_search_term_placeholder")}
               className="w-full"
             />
           </div>

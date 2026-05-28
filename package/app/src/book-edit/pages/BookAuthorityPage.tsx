@@ -10,34 +10,7 @@ import {
   EDITORIAL_LOCK_PATH_OPTIONS,
   UNIT_FIELD_LOCK_ALL,
 } from "@rezics/contract";
-import {
-  authority_all_fields_description,
-  authority_all_fields_locked,
-  authority_all_fields_title,
-  authority_all_fields_unlocked,
-  authority_current_locks_title,
-  authority_custom_path_description,
-  authority_custom_path_label,
-  authority_custom_path_option,
-  authority_custom_path_required,
-  authority_custom_path_title,
-  authority_field_covered_badge,
-  authority_field_covered_description,
-  authority_field_locked_badge,
-  authority_lock_action,
-  authority_lock_field_action,
-  authority_lock_path_label,
-  authority_no_locks,
-  authority_page_description,
-  authority_page_title,
-  authority_readonly_notice,
-  authority_reason_label,
-  authority_remove_lock_action,
-  authority_remove_lock_label,
-  authority_unlock_field_action,
-  common_loading,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import {
@@ -54,34 +27,6 @@ import {
   editorialPathLabel,
   lockMatchesPath,
 } from "@/unit/models/lockFieldLabels";
-
-const i18nMessages = {
-  authority_all_fields_description,
-  authority_all_fields_locked,
-  authority_all_fields_title,
-  authority_all_fields_unlocked,
-  authority_current_locks_title,
-  authority_custom_path_description,
-  authority_custom_path_label,
-  authority_custom_path_option,
-  authority_custom_path_required,
-  authority_custom_path_title,
-  authority_field_covered_badge,
-  authority_field_covered_description,
-  authority_field_locked_badge,
-  authority_lock_action,
-  authority_lock_field_action,
-  authority_lock_path_label,
-  authority_no_locks,
-  authority_page_description,
-  authority_page_title,
-  authority_readonly_notice,
-  authority_reason_label,
-  authority_remove_lock_action,
-  authority_remove_lock_label,
-  authority_unlock_field_action,
-  common_loading,
-};
 
 const CUSTOM_LOCK_PATH = "__custom__";
 
@@ -115,8 +60,8 @@ export function BookAuthorityPanel({
   initialLocks?: UnitFieldLockDTO[];
   unitId?: string;
 }) {
-  const m = useMessage(i18nMessages);
-  const [selectedPath, setSelectedPath] = useState<string>(
+  const { t } = useTranslation(["common", "editor"]);
+const [selectedPath, setSelectedPath] = useState<string>(
     EDITORIAL_LOCK_PATH_OPTIONS[1],
   );
   const [customPath, setCustomPath] = useState("");
@@ -148,13 +93,13 @@ export function BookAuthorityPanel({
     selectedPath === CUSTOM_LOCK_PATH ? customPath.trim() : selectedPath;
   const customPathError =
     selectedPath === CUSTOM_LOCK_PATH && customPath.trim().length === 0
-      ? m.authority_custom_path_required()
+      ? t("editor:authority_custom_path_required")
       : null;
 
   const upsert = (path: string) => {
     if (!unitId && !demoMode) return;
     if (!path.trim()) {
-      setError(m.authority_custom_path_required());
+      setError(t("editor:authority_custom_path_required"));
       return;
     }
 
@@ -212,17 +157,17 @@ export function BookAuthorityPanel({
         <div className="flex items-center gap-2 text-text-primary">
           <LockKeyhole className="h-5 w-5" aria-hidden="true" />
           <h1 className="text-2xl font-medium leading-ui">
-            {m.authority_page_title()}
+            {t("editor:authority_page_title")}
           </h1>
         </div>
         <p className="max-w-3xl leading-body">
-          {m.authority_page_description()}
+          {t("editor:authority_page_description")}
         </p>
       </header>
 
       {canManageLocks === false ? (
         <p className="rounded-md bg-surface-subtle px-4 py-3 text-sm leading-ui text-text-secondary">
-          {m.authority_readonly_notice()}
+          {t("editor:authority_readonly_notice")}
         </p>
       ) : null}
 
@@ -230,10 +175,10 @@ export function BookAuthorityPanel({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="grid gap-1">
             <h2 className="text-base font-medium leading-ui text-text-primary">
-              {m.authority_all_fields_title()}
+              {t("editor:authority_all_fields_title")}
             </h2>
             <p className="max-w-2xl text-sm leading-ui text-text-secondary">
-              {m.authority_all_fields_description()}
+              {t("editor:authority_all_fields_description")}
             </p>
             <p className="font-mono text-xs leading-dense text-text-tertiary">
               {UNIT_FIELD_LOCK_ALL}
@@ -257,8 +202,8 @@ export function BookAuthorityPanel({
                 <ShieldOff className="h-4 w-4" aria-hidden="true" />
               )}
               {allFieldsLocked
-                ? m.authority_all_fields_locked()
-                : m.authority_all_fields_unlocked()}
+                ? t("editor:authority_all_fields_locked")
+                : t("editor:authority_all_fields_unlocked")}
             </button>
           ) : null}
         </div>
@@ -270,7 +215,7 @@ export function BookAuthorityPanel({
       </section>
 
       {locksQuery.isLoading ? (
-        <p>{m.common_loading()}</p>
+        <p>{t("common:loading")}</p>
       ) : locksQuery.error ? (
         <QueryErrorDisplay error={locksQuery.error} />
       ) : (
@@ -309,14 +254,14 @@ export function BookAuthorityPanel({
       {showMutationControls ? (
         <section className="grid gap-3 border-t border-border-whisper pt-6">
           <h2 className="text-base font-medium leading-ui text-text-primary">
-            {m.authority_custom_path_title()}
+            {t("editor:authority_custom_path_title")}
           </h2>
           <p className="max-w-3xl text-sm leading-ui text-text-secondary">
-            {m.authority_custom_path_description()}
+            {t("editor:authority_custom_path_description")}
           </p>
           <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
             <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
-              {m.authority_lock_path_label()}
+              {t("editor:authority_lock_path_label")}
               <select
                 className="rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary"
                 value={selectedPath}
@@ -328,12 +273,12 @@ export function BookAuthorityPanel({
                   </option>
                 ))}
                 <option value={CUSTOM_LOCK_PATH}>
-                  {m.authority_custom_path_option()}
+                  {t("editor:authority_custom_path_option")}
                 </option>
               </select>
             </label>
             <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
-              {m.authority_reason_label()}
+              {t("editor:authority_reason_label")}
               <input
                 className="rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary"
                 value={reason}
@@ -351,12 +296,12 @@ export function BookAuthorityPanel({
               onClick={() => upsert(effectivePath)}
             >
               <Plus className="h-4 w-4" aria-hidden="true" />
-              {m.authority_lock_action()}
+              {t("editor:authority_lock_action")}
             </button>
           </div>
           {selectedPath === CUSTOM_LOCK_PATH ? (
             <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
-              {m.authority_custom_path_label()}
+              {t("editor:authority_custom_path_label")}
               <input
                 className="rounded-md bg-surface-subtle px-3 py-2 font-mono text-sm leading-ui text-text-primary"
                 value={customPath}
@@ -377,7 +322,7 @@ export function BookAuthorityPanel({
       {locks.length > 0 ? (
         <section className="grid gap-3 border-t border-border-whisper pt-6">
           <h2 className="text-base font-medium leading-ui text-text-primary">
-            {m.authority_current_locks_title()}
+            {t("editor:authority_current_locks_title")}
           </h2>
           <ul className="grid gap-2">
             {locks.map((lock) => (
@@ -397,7 +342,7 @@ export function BookAuthorityPanel({
                 {showMutationControls ? (
                   <button
                     type="button"
-                    aria-label={m.authority_remove_lock_label({
+                    aria-label={t("editor:authority_remove_lock_label", {
                       path: lock.path,
                     })}
                     className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm leading-ui text-text-secondary hover:bg-surface-base hover:text-text-primary disabled:opacity-50"
@@ -405,7 +350,7 @@ export function BookAuthorityPanel({
                     onClick={() => remove(lock.path)}
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
-                    {m.authority_remove_lock_action()}
+                    {t("editor:authority_remove_lock_action")}
                   </button>
                 ) : null}
               </li>
@@ -414,7 +359,7 @@ export function BookAuthorityPanel({
         </section>
       ) : (
         <p className="rounded-md bg-surface-subtle px-4 py-3">
-          {m.authority_no_locks()}
+          {t("editor:authority_no_locks")}
         </p>
       )}
     </section>
@@ -438,8 +383,8 @@ function FieldLockRow({
   path: string;
   showMutationControls: boolean;
 }) {
-  const m = useMessage(i18nMessages);
-  const locked = Boolean(lock);
+  const { t } = useTranslation(["common", "editor"]);
+const locked = Boolean(lock);
   const covered = allFieldsLocked && !locked;
 
   return (
@@ -451,12 +396,12 @@ function FieldLockRow({
           </p>
           {locked ? (
             <span className="rounded-full bg-surface-base px-2 py-0.5 text-xs leading-dense text-text-secondary">
-              {m.authority_field_locked_badge()}
+              {t("editor:authority_field_locked_badge")}
             </span>
           ) : null}
           {covered ? (
             <span className="rounded-full bg-surface-base px-2 py-0.5 text-xs leading-dense text-text-secondary">
-              {m.authority_field_covered_badge()}
+              {t("editor:authority_field_covered_badge")}
             </span>
           ) : null}
         </div>
@@ -465,7 +410,7 @@ function FieldLockRow({
         </p>
         {covered ? (
           <p className="mt-1 text-xs leading-dense text-text-secondary">
-            {m.authority_field_covered_description()}
+            {t("editor:authority_field_covered_description")}
           </p>
         ) : null}
         {lock?.reason ? (
@@ -487,8 +432,8 @@ function FieldLockRow({
           onClick={locked ? onRemove : onUpsert}
         >
           {locked
-            ? m.authority_unlock_field_action()
-            : m.authority_lock_field_action()}
+            ? t("editor:authority_unlock_field_action")
+            : t("editor:authority_lock_field_action")}
         </button>
       ) : null}
     </li>

@@ -14,6 +14,8 @@ import {
   type Language,
   DEFAULT_LANGUAGE,
 } from "@rezics/contract/language-core";
+
+const SUPPORTED_LANGUAGES = Object.values(LANGUAGES) as Language[];
 import i18next, { type i18n } from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import HttpBackend from "i18next-http-backend";
@@ -71,15 +73,21 @@ export function createI18nRuntime(
     instance.use(plugin);
   }
 
-  const ready = instance.init({
-    supportedLngs: [...LANGUAGES],
+  const initPromise = instance.init({
+    supportedLngs: SUPPORTED_LANGUAGES,
     fallbackLng: DEFAULT_LANGUAGE,
     defaultNS: DEFAULT_NAMESPACE,
     ns: [...BOOTSTRAP_NAMESPACES],
     load: "currentOnly",
     nonExplicitSupportedLngs: false,
     lng: options.initialLocale,
-    interpolation: { escapeValue: false },
+    interpolation: {
+      // Preserve the existing Paraglide-style `{name}` placeholders so the
+      // translation JSON does not need a global rewrite.
+      prefix: "{",
+      suffix: "}",
+      escapeValue: false,
+    },
     backend: {
       loadPath: options.loadPath ?? LOCALE_FETCH_PATH,
       requestOptions: { cache: "default" },
@@ -92,7 +100,9 @@ export function createI18nRuntime(
     react: {
       useSuspense: true,
     },
-  });
+  } as Parameters<i18n["init"]>[0]);
+
+  const ready = initPromise.then(() => instance);
 
   // Surface the canonical namespace list so consumers can request lazy loads
   // ahead of time (e.g. on route prefetch).
@@ -111,8 +121,9 @@ export function createI18nRuntime(
     }
   });
 
-  sharedRuntime = { i18n: instance, ready };
-  return sharedRuntime;
+  const runtime: RezicsI18nRuntime = { i18n: instance, ready };
+  sharedRuntime = runtime;
+  return runtime;
 }
 
 export function getI18nRuntime(): RezicsI18nRuntime {
@@ -129,3 +140,26 @@ export function resetI18nRuntimeForTests(): void {
 }
 
 export type { Language };
+
+/**
+ * Return the text direction (`"ltr" | "rtl"`) for a given locale. Falls back
+ * to `"ltr"` for unknown codes. Used by the app shell to set
+ * `<html dir="...">` when the active locale changes.
+ */
+export function getTextDirection(locale?: string): "ltr" | "rtl" {
+  const lng = locale ?? "en";
+  try {
+    const intl = new Intl.Locale(lng);
+    // `textInfo.direction` is available in modern engines via the
+    // `direction` extension of `Intl.Locale`. Fall back to `"ltr"` if the
+    // runtime does not expose it.
+    const dir = (
+      intl as Intl.Locale & {
+        textInfo?: { direction: "ltr" | "rtl" };
+      }
+    ).textInfo?.direction;
+    return dir ?? "ltr";
+  } catch {
+    return "ltr";
+  }
+}

@@ -1,11 +1,7 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries, postSubtreeQuery } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
-import {
-  common_edit,
-  post_back_to_original_thread,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -18,14 +14,9 @@ import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { PostTreeList } from "../sections/PostTreeList";
 
-const i18nMessages = {
-  common_edit,
-  post_back_to_original_thread,
-};
-
 export const ContinueThreadPage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common", "community"]);
+const navigate = useNavigate();
   const { rootPostUnitId, unitId } = useParams({ strict: false }) as {
     rootPostUnitId: string;
     unitId: string;
@@ -50,7 +41,7 @@ export const ContinueThreadPage: React.FC = () => {
       <div className="mb-4">
         <Link to="/post/$rootPostUnitId" params={{ rootPostUnitId }}>
           <span className="text-xs text-text-brand">
-            {m.post_back_to_original_thread()}
+            {t("community:post_back_to_original_thread")}
           </span>
         </Link>
       </div>
@@ -62,7 +53,7 @@ export const ContinueThreadPage: React.FC = () => {
                 type="button"
                 size="icon"
                 variant="ghost"
-                aria-label={m.common_edit()}
+                aria-label={t("common:edit")}
                 onClick={() =>
                   navigate({
                     to: "/post/$rootPostUnitId/continue/$unitId/edit",

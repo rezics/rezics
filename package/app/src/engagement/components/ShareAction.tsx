@@ -1,9 +1,4 @@
-import {
-  common_copy_link,
-  common_share,
-  common_share_via,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   DropdownMenu,
@@ -17,12 +12,6 @@ import { cn } from "@/shared/utils/css-util";
 import { useShareMenu } from "../hooks/useShareMenu";
 import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
-
-const i18nMessages = {
-  common_copy_link,
-  common_share,
-  common_share_via,
-};
 
 export type ShareActionProps = {
   /** Override the size from context. Rarely needed; prefer setting on the bar. */
@@ -49,8 +38,8 @@ export const ShareAction: React.FC<ShareActionProps> = ({
   href,
   title,
 }) => {
-  const m = useMessage(i18nMessages);
-  const ctx = useReactionBarContext();
+  const { t } = useTranslation(["common"]);
+const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const isPill = ctx.variant === "pill";
   const { canWebShare, handleCopy, handleWebShare } = useShareMenu({
@@ -81,7 +70,7 @@ export const ShareAction: React.FC<ShareActionProps> = ({
             {...props}
           >
             <Share2 size={sizeToIconPx(size)} strokeWidth={2} />
-            {m.common_share()}
+            {t("common:share")}
           </Button>
         )}
       />
@@ -90,11 +79,11 @@ export const ShareAction: React.FC<ShareActionProps> = ({
         onClick={(event) => event.stopPropagation()}
       >
         <DropdownMenuItem onClick={handleCopy}>
-          {m.common_copy_link()}
+          {t("common:copy_link")}
         </DropdownMenuItem>
         {canWebShare && (
           <DropdownMenuItem onClick={handleWebShare}>
-            {m.common_share_via()}
+            {t("common:share_via")}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

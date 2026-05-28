@@ -1,8 +1,7 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
-import { common_edit } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useSearch } from "@tanstack/react-router";
@@ -14,8 +13,8 @@ import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "../sections/PostTreeSection";
 
 export const PostThreadPage: React.FC = () => {
-  const m = useMessage({ common_edit });
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common"]);
+const navigate = useNavigate();
   const { rootPostUnitId } = useParams({ strict: false }) as {
     rootPostUnitId: string;
   };
@@ -41,7 +40,7 @@ export const PostThreadPage: React.FC = () => {
                 type="button"
                 size="icon"
                 variant="ghost"
-                aria-label={m.common_edit()}
+                aria-label={t("common:edit")}
                 onClick={() =>
                   navigate({
                     to: "/post/$rootPostUnitId/edit",

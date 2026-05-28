@@ -1,20 +1,6 @@
 import { useCreateTokenMutation } from "@rezics/api/token/token.mutations";
 import type { ApiTokenScopes } from "@rezics/contract";
-import {
-  common_cancel,
-  common_creating,
-  common_done,
-  common_scopes,
-  settings_tokens_copy,
-  settings_tokens_created_title,
-  settings_tokens_created_warning,
-  settings_tokens_expiration_optional,
-  settings_tokens_generate,
-  settings_tokens_generate_action,
-  settings_tokens_name_label,
-  settings_tokens_name_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -30,21 +16,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Check as CheckIcon, Copy as ContentCopyIcon } from "lucide-react";
 import { type FC, useState } from "react";
-
-const i18nMessages = {
-  common_cancel,
-  common_creating,
-  common_done,
-  common_scopes,
-  settings_tokens_copy,
-  settings_tokens_created_title,
-  settings_tokens_created_warning,
-  settings_tokens_expiration_optional,
-  settings_tokens_generate,
-  settings_tokens_generate_action,
-  settings_tokens_name_label,
-  settings_tokens_name_placeholder,
-};
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },
@@ -65,8 +36,8 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
   open,
   onClose,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [name, setName] = useState("");
+  const { t } = useTranslation(["common", "settings"]);
+const [name, setName] = useState("");
   const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
   const [expiresAt, setExpiresAt] = useState("");
   const [rawToken, setRawToken] = useState<string | null>(null);
@@ -128,11 +99,11 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
       <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
         <DialogContent className="sm:max-w-[640px]">
           <DialogHeader>
-            <DialogTitle>{m.settings_tokens_created_title()}</DialogTitle>
+            <DialogTitle>{t("settings:tokens_created_title")}</DialogTitle>
           </DialogHeader>
           <Alert className="mb-4 text-warning-text">
             <AlertDescription>
-              {m.settings_tokens_created_warning()}
+              {t("settings:tokens_created_warning")}
             </AlertDescription>
           </Alert>
           <div className="flex items-center gap-2 p-3 rounded bg-surface-subtle font-mono text-sm break-all">
@@ -142,7 +113,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
               variant="ghost"
               className="h-8 w-8"
               onClick={handleCopy}
-              aria-label={m.settings_tokens_copy()}
+              aria-label={t("settings:tokens_copy")}
             >
               {copied ? (
                 <CheckIcon className="w-4 h-4 text-success-text" />
@@ -152,7 +123,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
             </Button>
           </div>
           <DialogFooter>
-            <Button onClick={handleClose}>{m.common_done()}</Button>
+            <Button onClick={handleClose}>{t("common:done")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -163,7 +134,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
       <DialogContent className="sm:max-w-[640px]">
         <DialogHeader>
-          <DialogTitle>{m.settings_tokens_generate()}</DialogTitle>
+          <DialogTitle>{t("settings:tokens_generate")}</DialogTitle>
         </DialogHeader>
         {createToken.error && (
           <Alert variant="destructive" className="mb-4">
@@ -172,18 +143,18 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
         )}
         <div className="space-y-4 pt-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="token-name">{m.settings_tokens_name_label()}</Label>
+            <Label htmlFor="token-name">{t("settings:tokens_name_label")}</Label>
             <Input
               id="token-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder={m.settings_tokens_name_placeholder()}
+              placeholder={t("settings:tokens_name_placeholder")}
             />
           </div>
 
           <div>
-            <p className="text-sm font-medium mb-2">{m.common_scopes()}</p>
+            <p className="text-sm font-medium mb-2">{t("common:scopes")}</p>
             <div className="flex flex-col gap-2">
               {AVAILABLE_SCOPES.map((s) => (
                 <div key={s.label} className="flex items-center gap-2">
@@ -200,7 +171,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="token-expiry">
-              {m.settings_tokens_expiration_optional()}
+              {t("settings:tokens_expiration_optional")}
             </Label>
             <Input
               id="token-expiry"
@@ -212,15 +183,15 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={handleClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button
             onClick={handleCreate}
             disabled={!name || createToken.isPending}
           >
             {createToken.isPending
-              ? m.common_creating()
-              : m.settings_tokens_generate_action()}
+              ? t("common:creating")
+              : t("settings:tokens_generate_action")}
           </Button>
         </DialogFooter>
       </DialogContent>

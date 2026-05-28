@@ -1,31 +1,14 @@
 import { useCreateShelfMutation } from "@rezics/api/shelf/shelf.mutations";
 import { DEFAULT_LANGUAGE, markdownContentDoc } from "@rezics/contract";
-import {
-  common_create,
-  shelf_content_type_label,
-  shelf_cover_url_label,
-  shelf_description_label,
-  shelf_new_title,
-  shelf_title_label,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 
-const i18nMessages = {
-  common_create,
-  shelf_content_type_label,
-  shelf_cover_url_label,
-  shelf_description_label,
-  shelf_new_title,
-  shelf_title_label,
-};
-
 export function NewShelfPage() {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common", "entity"]);
+const navigate = useNavigate();
   const createMutation = useCreateShelfMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -60,11 +43,11 @@ export function NewShelfPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{m.shelf_new_title()}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("entity:shelf_new_title")}</h1>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-shelf-title">{m.shelf_title_label()}</Label>
+          <Label htmlFor="new-shelf-title">{t("entity:shelf_title_label")}</Label>
           <Input
             id="new-shelf-title"
             value={title}
@@ -73,7 +56,7 @@ export function NewShelfPage() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="new-shelf-description">
-            {m.shelf_description_label()}
+            {t("entity:shelf_description_label")}
           </Label>
           <textarea
             id="new-shelf-description"
@@ -84,7 +67,7 @@ export function NewShelfPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-shelf-cover">{m.shelf_cover_url_label()}</Label>
+          <Label htmlFor="new-shelf-cover">{t("entity:shelf_cover_url_label")}</Label>
           <Input
             id="new-shelf-cover"
             value={coverUrl}
@@ -92,7 +75,7 @@ export function NewShelfPage() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label>{m.shelf_content_type_label()}</Label>
+          <Label>{t("entity:shelf_content_type_label")}</Label>
           <SeedTagChipGroup
             value={pinnedTagIds}
             onChange={setPinnedTagIds}
@@ -104,7 +87,7 @@ export function NewShelfPage() {
             onClick={handleCreate}
             disabled={!title || createMutation.isPending}
           >
-            {m.common_create()}
+            {t("common:create")}
           </Button>
         </div>
       </div>

@@ -1,24 +1,11 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { markdownContentDoc, PostKind, SCORE_MAX } from "@rezics/contract";
-import {
-  common_submitting,
-  remark_compose_placeholder,
-  remark_form_rating,
-  remark_submit,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-
-const i18nMessages = {
-  common_submitting,
-  remark_compose_placeholder,
-  remark_form_rating,
-  remark_submit,
-};
 
 interface RemarkInlineFormProps {
   bookUnitId: string;
@@ -29,8 +16,8 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   bookUnitId,
   onSuccess,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation(["common", "page"]);
+const [expanded, setExpanded] = useState(false);
   const [body, setBody] = useState("");
   const [score, setScore] = useState<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -87,7 +74,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
     return (
       <div ref={wrapperRef}>
         <Input
-          placeholder={m.remark_compose_placeholder()}
+          placeholder={t("page:remark_compose_placeholder")}
           onFocus={handleExpand}
           onClick={handleExpand}
         />
@@ -102,7 +89,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
           value={score}
           onChange={setScore}
           max={SCORE_MAX}
-          aria-label={m.remark_form_rating()}
+          aria-label={t("page:remark_form_rating")}
         />
       </div>
       <RezicsMarkdownEditor
@@ -112,7 +99,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         submitLabel={
-          postMutation.isPending ? m.common_submitting() : m.remark_submit()
+          postMutation.isPending ? t("common:submitting") : t("page:remark_submit")
         }
       />
     </div>

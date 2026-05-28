@@ -12,31 +12,7 @@ import {
   contentDocMarkdownFallback,
   shelfCoverImageSpec,
 } from "@rezics/contract";
-import {
-  common_next,
-  common_prev,
-  shelf_by_author,
-  shelf_cleanup_orphans,
-  shelf_controls_sort_by,
-  shelf_controls_view,
-  shelf_cover_alt,
-  shelf_edit_action,
-  shelf_empty_items,
-  shelf_items_count,
-  shelf_items_load_failed,
-  shelf_orphan_count,
-  shelf_sort_manual,
-  shelf_sort_manual_reversed,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-  shelf_sort_prime_only,
-  shelf_sort_title_az,
-  shelf_sort_title_za,
-  shelf_title,
-  shelf_view_list,
-  shelf_view_nested,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button, Checkbox, DropdownMenuItem, Label } from "@rezics/ui/shadcn";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -59,31 +35,6 @@ import {
   type ShelfStreamEntry,
 } from "../models/shelfStream";
 import { ShelfDiscussionSection } from "../sections/ShelfDiscussionSection";
-
-const i18nMessages = {
-  common_next,
-  common_prev,
-  shelf_by_author,
-  shelf_cleanup_orphans,
-  shelf_controls_sort_by,
-  shelf_controls_view,
-  shelf_cover_alt,
-  shelf_edit_action,
-  shelf_empty_items,
-  shelf_items_count,
-  shelf_items_load_failed,
-  shelf_orphan_count,
-  shelf_sort_prime_only,
-  shelf_title,
-  shelf_sort_manual,
-  shelf_sort_manual_reversed,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-  shelf_sort_title_az,
-  shelf_sort_title_za,
-  shelf_view_list,
-  shelf_view_nested,
-};
 
 interface ShelfPageProps {
   unitId: string;
@@ -130,8 +81,8 @@ function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
 }
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common", "entity"]);
+const navigate = useNavigate();
   const [viewModeOverride, setViewModeOverride] = useState<{
     unitId: string;
     value: ShelfView | undefined;
@@ -168,7 +119,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     [itemsData?.pages],
   );
   const translation = shelf ? getTranslation(shelf.translations) : undefined;
-  const title = translation?.title ?? m.shelf_title();
+  const title = translation?.title ?? t("entity:shelf_title");
   const description = contentDocMarkdownFallback(translation?.description);
 
   const savedViewMode = normalizePersistedViewMode(
@@ -292,7 +243,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
         >
           <img
             src={shelf.coverUrl}
-            alt={m.shelf_cover_alt({ title })}
+            alt={t("entity:shelf_cover_alt", { title })}
             className="h-full w-full object-cover"
           />
           <div
@@ -321,10 +272,10 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               )}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
                 <span>
-                  {m.shelf_items_count({ count: shelf?.itemCount ?? 0 })}
+                  {t("entity:shelf_items_count", { count: shelf?.itemCount ?? 0 })}
                 </span>
                 {shelf?.user?.name && (
-                  <span>{m.shelf_by_author({ name: shelf.user.name })}</span>
+                  <span>{t("entity:shelf_by_author", { name: shelf.user.name })}</span>
                 )}
               </div>
             </div>
@@ -339,7 +290,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                     onClick={handleEditShelf}
                   >
                     <EditIcon className="h-4 w-4" />
-                    {m.shelf_edit_action()}
+                    {t("entity:shelf_edit_action")}
                   </Button>
                 )}
                 {reactionPost && (
@@ -355,7 +306,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                           className="gap-2"
                         >
                           <EditIcon className="h-4 w-4" />
-                          <span>{m.shelf_edit_action()}</span>
+                          <span>{t("entity:shelf_edit_action")}</span>
                         </DropdownMenuItem>
                       ) : null
                     }
@@ -379,10 +330,10 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               )}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
                 <span>
-                  {m.shelf_items_count({ count: shelf?.itemCount ?? 0 })}
+                  {t("entity:shelf_items_count", { count: shelf?.itemCount ?? 0 })}
                 </span>
                 {shelf?.user?.name && (
-                  <span>{m.shelf_by_author({ name: shelf.user.name })}</span>
+                  <span>{t("entity:shelf_by_author", { name: shelf.user.name })}</span>
                 )}
               </div>
             </div>
@@ -397,7 +348,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                     onClick={handleEditShelf}
                   >
                     <EditIcon className="h-4 w-4" />
-                    {m.shelf_edit_action()}
+                    {t("entity:shelf_edit_action")}
                   </Button>
                 )}
                 {reactionPost && (
@@ -413,7 +364,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                           className="gap-2"
                         >
                           <EditIcon className="h-4 w-4" />
-                          <span>{m.shelf_edit_action()}</span>
+                          <span>{t("entity:shelf_edit_action")}</span>
                         </DropdownMenuItem>
                       ) : null
                     }
@@ -433,8 +384,8 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
               viewOptions={VIEW_OPTIONS}
               onSortChange={setSortState}
               onViewChange={(value) => setViewModeOverride({ unitId, value })}
-              sortHeading={m.shelf_controls_sort_by()}
-              viewHeading={m.shelf_controls_view()}
+              sortHeading={t("entity:shelf_controls_sort_by")}
+              viewHeading={t("entity:shelf_controls_view")}
             />
             {showSortScopeToggle && (
               <Label className="flex min-w-0 items-center gap-2 text-sm">
@@ -445,14 +396,14 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                   }
                 />
                 <span className="whitespace-nowrap">
-                  {m.shelf_sort_prime_only()}
+                  {t("entity:shelf_sort_prime_only")}
                 </span>
               </Label>
             )}
             {hydration.orphanUnitIds.length > 0 && (
               <>
                 <span className="text-xs text-warning-text">
-                  {m.shelf_orphan_count({
+                  {t("entity:shelf_orphan_count", {
                     count: hydration.orphanUnitIds.length,
                   })}
                 </span>
@@ -468,7 +419,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                       })
                     }
                   >
-                    {m.shelf_cleanup_orphans()}
+                    {t("entity:shelf_cleanup_orphans")}
                   </Button>
                 )}
               </>
@@ -482,11 +433,11 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         ) : isItemsError ? (
           <p className="py-8 text-center text-error">
-            {m.shelf_items_load_failed()}
+            {t("entity:shelf_items_load_failed")}
           </p>
         ) : visibleStream.length === 0 ? (
           <p className="py-8 text-center text-text-secondary">
-            {m.shelf_empty_items()}
+            {t("entity:shelf_empty_items")}
           </p>
         ) : effectiveViewMode === "masonry" ? (
           <div className={MASONRY_COLUMN_CLASS}>
@@ -526,7 +477,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 }))
               }
             >
-              {m.common_prev()}
+              {t("common:prev")}
             </Button>
             <span className="text-sm text-text-secondary">
               {page} / {totalPages}
@@ -545,7 +496,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 }))
               }
             >
-              {m.common_next()}
+              {t("common:next")}
             </Button>
           </div>
         )}

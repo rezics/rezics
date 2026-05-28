@@ -1,16 +1,11 @@
 import type { UnitTagDTO } from "@rezics/contract";
-import { tag_empty } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useState } from "react";
 import { unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { TagDetailCard } from "./TagCards";
-
-const i18nMessages = {
-  tag_empty,
-};
 
 interface SingleTagChipProps {
   tag: UnitTagDTO;
@@ -68,8 +63,8 @@ export const TagList: React.FC<{
   className?: string;
   autoSelectFirst?: boolean;
 }> = ({ tags, className, autoSelectFirst }) => {
-  const m = useMessage(i18nMessages);
-  const [activeId, setActiveId] = useState<string | null>(
+  const { t } = useTranslation(["community"]);
+const [activeId, setActiveId] = useState<string | null>(
     autoSelectFirst && tags.length > 0 ? tags[0].tagUnitId : null,
   );
   const activeTag = tags.find((t) => t.tagUnitId === activeId) || null;
@@ -91,7 +86,7 @@ export const TagList: React.FC<{
   if (tags.length === 0) {
     return (
       <div className={className}>
-        <p className="text-sm text-text-secondary">{m.tag_empty()}</p>
+        <p className="text-sm text-text-secondary">{t("community:tag_empty")}</p>
       </div>
     );
   }

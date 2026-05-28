@@ -1,19 +1,6 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import {
-  common_edit,
-  common_email,
-  engagement_bookmark,
-  profile_tab_followers,
-  profile_tab_reactions,
-  settings_profile_bio,
-  user_id_label,
-  user_joined_on,
-  user_navigation_label,
-  user_no_bio_available,
-  user_not_found,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
   AvatarFallback,
@@ -32,20 +19,6 @@ import { useUserProfileStore } from "@/user/states";
 import { UserError, UserLoading } from "./UserState";
 import { UserUnitsPage } from "./UserUnitsPage";
 
-const i18nMessages = {
-  common_edit,
-  common_email,
-  engagement_bookmark,
-  profile_tab_followers,
-  profile_tab_reactions,
-  settings_profile_bio,
-  user_id_label,
-  user_joined_on,
-  user_navigation_label,
-  user_no_bio_available,
-  user_not_found,
-};
-
 export interface UserProfilePageProps {
   userId: string;
   isCurrentUser?: boolean;
@@ -61,8 +34,8 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   isCurrentUser = false,
   onEditClick,
 }) => {
-  const m = useMessage(i18nMessages);
-  const currentUser = useUserProfileStore((state) => state.user);
+  const { t } = useTranslation(["common", "community", "settings"]);
+const currentUser = useUserProfileStore((state) => state.user);
   const meQuery = useQuery({
     ...userQueries.me(),
     enabled: isCurrentUser,
@@ -89,7 +62,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p>{m.user_not_found()}</p>
+        <p>{t("settings:user_not_found")}</p>
       </div>
     );
   }
@@ -113,7 +86,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               <div>
                 {user.joinDate && (
                   <p className="text-sm text-text-secondary">
-                    {m.user_joined_on({
+                    {t("settings:user_joined_on", {
                       date: new Date(user.joinDate).toLocaleDateString(),
                     })}
                   </p>
@@ -137,7 +110,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
               currentUser?.permission?.role?.includes("ADMIN") ? (
                 <Button onClick={onEditClick}>
                   <EditIcon className="w-4 h-4 mr-2" />
-                  {m.common_edit()}
+                  {t("common:edit")}
                 </Button>
               ) : null}
             </div>
@@ -147,7 +120,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             {user.unitId && (
               <div className="mb-4">
                 <h6 className="text-base font-semibold mb-2">
-                  {m.user_id_label()}
+                  {t("settings:user_id_label")}
                 </h6>
                 <p className="text-sm text-text-secondary">{user.unitId}</p>
               </div>
@@ -155,7 +128,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             {user.email && (
               <div className="mb-4">
                 <h6 className="text-base font-semibold mb-2">
-                  {m.common_email()}
+                  {t("common:email")}
                 </h6>
                 <p className="text-sm text-text-secondary">{user.email}</p>
               </div>
@@ -163,14 +136,14 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
             {user.bio && (
               <div className="mb-4">
                 <h6 className="text-base font-semibold mb-2">
-                  {m.settings_profile_bio()}
+                  {t("settings:profile_bio")}
                 </h6>
                 <p className="text-base">{user.bio}</p>
               </div>
             )}
             {!user.bio && (
               <p className="text-sm text-text-secondary italic">
-                {m.user_no_bio_available()}
+                {t("settings:user_no_bio_available")}
               </p>
             )}
           </div>
@@ -180,21 +153,21 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
         <Card surface="contained" className="mt-4">
           <CardContent>
             <h6 className="text-lg font-semibold inline-block">
-              {m.user_navigation_label()}
+              {t("settings:user_navigation_label")}
             </h6>
             <Link to={`/user/me/bookmark`}>
               <Button variant="ghost" className="text-text-brand">
-                {m.engagement_bookmark()}
+                {t("community:engagement_bookmark")}
               </Button>
             </Link>
             <Link to={`/user/me/follow`}>
               <Button variant="ghost" className="text-text-brand">
-                {m.profile_tab_followers()}
+                {t("settings:profile_tab_followers")}
               </Button>
             </Link>
             <Link to={`/user/me/reaction`}>
               <Button variant="ghost" className="text-text-brand">
-                {m.profile_tab_reactions()}
+                {t("settings:profile_tab_reactions")}
               </Button>
             </Link>
           </CardContent>

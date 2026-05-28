@@ -8,19 +8,7 @@ import {
   subjectAttributionRoleRegistry,
 } from "@rezics/contract";
 import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
-import {
-  entity_picker_create_named,
-  entity_picker_create_new,
-  entity_picker_description,
-  entity_picker_errors_credit_role_required,
-  entity_picker_filters_all,
-  entity_picker_filters_credit_role,
-  entity_picker_filters_subject_role,
-  entity_picker_no_matches_create,
-  entity_picker_search_placeholder,
-  entity_picker_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -43,19 +31,6 @@ import { useMemo, useState } from "react";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { EntityInlineCreateForm } from "./EntityInlineCreateForm";
 import { EntityResultRow } from "./EntityResultRow";
-
-const i18nMessages = {
-  entity_picker_create_named,
-  entity_picker_create_new,
-  entity_picker_description,
-  entity_picker_errors_credit_role_required,
-  entity_picker_filters_all,
-  entity_picker_filters_credit_role,
-  entity_picker_filters_subject_role,
-  entity_picker_no_matches_create,
-  entity_picker_search_placeholder,
-  entity_picker_title,
-};
 
 const ALL_CREDIT_ROLES = "all";
 const ALL_SUBJECT_ROLES = "all";
@@ -109,8 +84,8 @@ export function EntityPicker({
   lockedSubjectRole,
   requireCreditRoleForSelect = false,
 }: EntityPickerProps) {
-  const m = useMessage(i18nMessages);
-  const [query, setQuery] = useState("");
+  const { t } = useTranslation(["entity"]);
+const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [creditRoleFilter, setCreditRoleFilter] =
     useState<CreditRoleFilterValue>(lockedCreditRole ?? ALL_CREDIT_ROLES);
@@ -168,7 +143,7 @@ export function EntityPicker({
 
   const handleSelect = (unitId: string) => {
     if (requireCreditRoleForSelect && !activeCreditRole) {
-      setSelectionError(m.entity_picker_errors_credit_role_required());
+      setSelectionError(t("entity:picker_errors_credit_role_required"));
       return;
     }
 
@@ -199,8 +174,8 @@ export function EntityPicker({
     >
       <DialogContent className="max-w-xl gap-0 overflow-hidden p-0">
         <DialogHeader className="border-b border-border-whisper p-4">
-          <DialogTitle>{m.entity_picker_title()}</DialogTitle>
-          <DialogDescription>{m.entity_picker_description()}</DialogDescription>
+          <DialogTitle>{t("entity:picker_title")}</DialogTitle>
+          <DialogDescription>{t("entity:picker_description")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex gap-2 p-3">
@@ -222,10 +197,10 @@ export function EntityPicker({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>
-                    {m.entity_picker_filters_credit_role()}
+                    {t("entity:picker_filters_credit_role")}
                   </SelectLabel>
                   <SelectItem value={ALL_CREDIT_ROLES}>
-                    {m.entity_picker_filters_all()}
+                    {t("entity:picker_filters_all")}
                   </SelectItem>
                   {creditRoleOptions.map((role) => (
                     <SelectItem key={role} value={role}>
@@ -254,10 +229,10 @@ export function EntityPicker({
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>
-                    {m.entity_picker_filters_subject_role()}
+                    {t("entity:picker_filters_subject_role")}
                   </SelectLabel>
                   <SelectItem value={ALL_SUBJECT_ROLES}>
-                    {m.entity_picker_filters_all()}
+                    {t("entity:picker_filters_all")}
                   </SelectItem>
                   {subjectRoleOptions.map((role) => (
                     <SelectItem key={role} value={role}>
@@ -274,7 +249,7 @@ export function EntityPicker({
               setQuery(e.target.value);
               setSelectionError(null);
             }}
-            placeholder={m.entity_picker_search_placeholder()}
+            placeholder={t("entity:picker_search_placeholder")}
             autoFocus
             className="min-w-0 flex-1"
           />
@@ -289,7 +264,7 @@ export function EntityPicker({
 
           {!isFetching && debouncedQuery && orderedResults.length === 0 ? (
             <p className="px-3 py-4 text-center text-sm text-text-secondary">
-              {m.entity_picker_no_matches_create()}
+              {t("entity:picker_no_matches_create")}
             </p>
           ) : null}
 
@@ -316,7 +291,7 @@ export function EntityPicker({
               onClick={() => {
                 if (requireCreditRoleForSelect && !activeCreditRole) {
                   setSelectionError(
-                    m.entity_picker_errors_credit_role_required(),
+                    t("entity:picker_errors_credit_role_required"),
                   );
                   return;
                 }
@@ -325,8 +300,8 @@ export function EntityPicker({
             >
               <Plus className="mr-2 h-4 w-4" />
               {query.trim()
-                ? m.entity_picker_create_named({ name: query.trim() })
-                : m.entity_picker_create_new()}
+                ? t("entity:picker_create_named", { name: query.trim() })
+                : t("entity:picker_create_new")}
             </Button>
           )}
         </div>

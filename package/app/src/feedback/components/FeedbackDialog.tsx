@@ -1,6 +1,5 @@
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
-import { feedback_submit } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +9,6 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import FeedbackForm from "./FeedbackForm";
-
-const i18nMessages = {
-  feedback_submit,
-};
 
 type FeedbackDialogProps = {
   open: boolean;
@@ -30,8 +25,8 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
   onClose,
   defaultValues,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["community"]);
+return (
     <Dialog
       open={open}
       onOpenChange={(o) => {
@@ -40,7 +35,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{m.feedback_submit()}</DialogTitle>
+          <DialogTitle>{t("community:feedback_submit")}</DialogTitle>
         </DialogHeader>
         <Separator />
         <div className="pt-2">

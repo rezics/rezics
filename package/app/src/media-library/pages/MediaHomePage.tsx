@@ -1,11 +1,5 @@
-import { media_library_title } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
-
-const i18nMessages = {
-  media_library_title,
-};
-
+import { useTranslation } from "@rezics/i18n/react";
 export const MediaHomePage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  return <div>{m.media_library_title()}</div>;
+  const { t } = useTranslation(["shell"]);
+return <div>{t("shell:media_library_title")}</div>;
 };

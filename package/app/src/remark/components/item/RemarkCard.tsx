@@ -1,6 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
-import { remark_open_remark_page } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Tooltip,
   TooltipContent,
@@ -20,17 +19,13 @@ import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { remarkCardActions, remarkPolicy } from "../../models/remarkPolicy";
 
-const i18nMessages = {
-  remark_open_remark_page,
-};
-
 interface RemarkRatingBadgeProps {
   remark: PostDTO;
 }
 
 const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
-  const m = useMessage(i18nMessages);
-  const rating = (remark.extra as { rating?: number } | null)?.rating;
+  const { t } = useTranslation(["page"]);
+const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
   const dateStr = remark.createdAt
     ? new Date(String(remark.createdAt)).toLocaleDateString()
@@ -60,7 +55,7 @@ const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
           )}
         />
         <TooltipContent side="top">
-          {m.remark_open_remark_page()}
+          {t("page:remark_open_remark_page")}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

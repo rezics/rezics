@@ -2,18 +2,7 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import { useCurrentUserId } from "@rezics/api/hooks";
 import { markdownContentDoc } from "@rezics/contract";
-import {
-  auth_flow_onboarding_sign_in_first,
-  book_chapter_content_required,
-  book_chapter_create_failed,
-  book_chapter_title_content_required,
-  book_edit_chapter_title,
-  book_edit_create_chapter,
-  common_create,
-  common_required,
-  common_submitting,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Dialog,
   DialogContent,
@@ -25,18 +14,6 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import type { Chapter } from "./ChapterArborist";
-
-const i18nMessages = {
-  auth_flow_onboarding_sign_in_first,
-  book_chapter_content_required,
-  book_chapter_create_failed,
-  book_chapter_title_content_required,
-  book_edit_chapter_title,
-  book_edit_create_chapter,
-  common_create,
-  common_required,
-  common_submitting,
-};
 
 interface CreateChapterDialogProps {
   open: boolean;
@@ -59,8 +36,8 @@ export function CreateChapterDialog({
   bookUnitId,
   currentEditParentId,
 }: CreateChapterDialogProps) {
-  const m = useMessage(i18nMessages);
-  const userId = useCurrentUserId();
+  const { t } = useTranslation(["auth", "book", "common"]);
+const userId = useCurrentUserId();
   const { show } = useAlertStore();
 
   const [title, setTitle] = useState("");
@@ -77,7 +54,7 @@ export function CreateChapterDialog({
   const createMutation = useCreateChapterMutation({
     onError: (error) => {
       show(
-        m.book_chapter_create_failed({
+        t("book:chapter_create_failed", {
           error: error instanceof Error ? error.message : String(error),
         }),
       );
@@ -92,12 +69,12 @@ export function CreateChapterDialog({
   async function handleSubmit() {
     if (!open) return;
     if (isInvalid) {
-      show(m.book_chapter_title_content_required());
+      show(t("book:chapter_title_content_required"));
       return;
     }
 
     if (!userId) {
-      show(m.auth_flow_onboarding_sign_in_first());
+      show(t("auth:flow_onboarding_sign_in_first"));
       return;
     }
 
@@ -133,11 +110,11 @@ export function CreateChapterDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{m.book_edit_create_chapter()}</DialogTitle>
+          <DialogTitle>{t("book:edit_create_chapter")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="chapter-title">{m.book_edit_chapter_title()}</Label>
+            <Label htmlFor="chapter-title">{t("book:edit_chapter_title")}</Label>
             <Input
               id="chapter-title"
               value={title}
@@ -151,7 +128,7 @@ export function CreateChapterDialog({
                   : "text-sm text-text-secondary"
               }
             >
-              {!title.trim() ? m.common_required() : " "}
+              {!title.trim() ? t("common:required") : " "}
             </p>
           </div>
           <div className="min-h-[300px]">
@@ -162,13 +139,13 @@ export function CreateChapterDialog({
               onCancel={onClose}
               submitLabel={
                 createMutation.isPending
-                  ? m.common_submitting()
-                  : m.common_create()
+                  ? t("common:submitting")
+                  : t("common:create")
               }
             />
             {!content.trim() && (
               <div className="text-sm text-error-text mt-2">
-                {m.book_chapter_content_required()}
+                {t("book:chapter_content_required")}
               </div>
             )}
           </div>

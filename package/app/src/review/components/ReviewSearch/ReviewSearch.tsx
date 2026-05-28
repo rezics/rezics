@@ -1,10 +1,5 @@
 import type { SearchQuery } from "@rezics/contract";
-import {
-  review_search_placeholder,
-  search_input_tags_hint,
-  search_input_tags_label,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import {
   AppliedFilterChips,
@@ -12,12 +7,6 @@ import {
   TagPicker,
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
-
-const i18nMessages = {
-  review_search_placeholder,
-  search_input_tags_hint,
-  search_input_tags_label,
-};
 
 export type ReviewSearchProps = {
   query: UseSearchQueryReturn["query"];
@@ -38,8 +27,8 @@ export const ReviewSearch: React.FC<ReviewSearchProps> = ({
   middleware,
   keywordPlaceholder,
 }) => {
-  const m = useMessage(i18nMessages);
-  const keyword = bind("keyword");
+  const { t } = useTranslation(["community", "search"]);
+const keyword = bind("keyword");
   const tags = bind("tags");
 
   const rendered: (keyof SearchQuery)[] = ["keyword", "tags"];
@@ -52,13 +41,13 @@ export const ReviewSearch: React.FC<ReviewSearchProps> = ({
         onPatch={(p) => patch(p)}
         onSubmit={onSubmit}
         middleware={middleware}
-        placeholder={keywordPlaceholder ?? m.review_search_placeholder()}
+        placeholder={keywordPlaceholder ?? t("community:review_search_placeholder")}
       />
       <TagPicker
         value={tags.value ?? []}
         onChange={(v) => tags.onChange(v.length ? v : undefined)}
-        label={m.search_input_tags_label()}
-        placeholder={m.search_input_tags_hint()}
+        label={t("search:input_tags_label")}
+        placeholder={t("search:input_tags_hint")}
       />
       <AppliedFilterChips
         query={query}

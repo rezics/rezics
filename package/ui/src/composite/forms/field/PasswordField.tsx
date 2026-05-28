@@ -1,22 +1,9 @@
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Eye as Visibility, EyeOff as VisibilityOff } from "lucide-react";
 import React, { type FC, useState } from "react";
-import {
-  ui_password_help,
-  ui_password_hide,
-  ui_password_label,
-  ui_password_show,
-} from "#/paraglide/messages.js";
 import { Button } from "#/shadcn/button";
 import { Input } from "#/shadcn/input";
 import { Label } from "#/shadcn/label";
-
-const passwordFieldMessages = {
-  ui_password_help,
-  ui_password_hide,
-  ui_password_label,
-  ui_password_show,
-};
 
 interface PasswordFieldProps {
   name?: string;
@@ -44,13 +31,12 @@ export const PasswordField: FC<PasswordFieldProps> = ({
   required = true,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const m = useMessage(passwordFieldMessages);
-
-  const inputName = name ?? "password";
-  const help = helperText ?? m.ui_password_help();
-  const labelText = label ?? m.ui_password_label();
-  const showLabel = visibilityLabels?.show ?? m.ui_password_show();
-  const hideLabel = visibilityLabels?.hide ?? m.ui_password_hide();
+  const { t } = useTranslation(["ui"]);
+const inputName = name ?? "password";
+  const help = helperText ?? t("ui:password_help");
+  const labelText = label ?? t("ui:password_label");
+  const showLabel = visibilityLabels?.show ?? t("ui:password_show");
+  const hideLabel = visibilityLabels?.hide ?? t("ui:password_hide");
 
   return (
     <div className={`flex flex-col gap-1 ${className ?? ""}`}>

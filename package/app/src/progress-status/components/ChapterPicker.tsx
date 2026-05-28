@@ -1,8 +1,4 @@
-import {
-  progress_status_chapter_picker_none,
-  progress_status_chapter_picker_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Select,
   SelectContent,
@@ -11,11 +7,6 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import { useChapterPicker } from "../hooks/useChapterPicker";
-
-const i18nMessages = {
-  progress_status_chapter_picker_none,
-  progress_status_chapter_picker_placeholder,
-};
 
 type ChapterPickerProps = {
   bookUnitId: string;
@@ -32,8 +23,8 @@ export function ChapterPicker({
   onChange,
   disabled,
 }: ChapterPickerProps) {
-  const m = useMessage(i18nMessages);
-  const { options, isLoading } = useChapterPicker(bookUnitId);
+  const { t } = useTranslation(["community"]);
+const { options, isLoading } = useChapterPicker(bookUnitId);
 
   return (
     <Select
@@ -46,12 +37,12 @@ export function ChapterPicker({
     >
       <SelectTrigger>
         <SelectValue
-          placeholder={m.progress_status_chapter_picker_placeholder()}
+          placeholder={t("community:progress_status_chapter_picker_placeholder")}
         />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={NONE_VALUE}>
-          {m.progress_status_chapter_picker_none()}
+          {t("community:progress_status_chapter_picker_none")}
         </SelectItem>
         {options.map((opt) => (
           <SelectItem key={opt.nodeId} value={opt.nodeId}>

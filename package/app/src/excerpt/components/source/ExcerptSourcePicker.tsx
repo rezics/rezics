@@ -1,28 +1,11 @@
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { ExcerptSource } from "@rezics/contract";
-import {
-  common_clear,
-  excerpt_form_linked_unit,
-  excerpt_form_raw_url,
-  excerpt_form_source_title,
-  excerpt_form_source_url,
-  excerpt_form_use_this,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { type Candidate, UnitPicker } from "@/unit";
-
-const i18nMessages = {
-  common_clear,
-  excerpt_form_linked_unit,
-  excerpt_form_raw_url,
-  excerpt_form_source_title,
-  excerpt_form_source_url,
-  excerpt_form_use_this,
-};
 
 interface ExcerptSourcePickerProps {
   value?: ExcerptSource;
@@ -41,8 +24,8 @@ export function ExcerptSourcePicker({
   error,
   language,
 }: ExcerptSourcePickerProps) {
-  const m = useMessage(i18nMessages);
-  const title = value?.title ?? "";
+  const { t } = useTranslation(["common", "community"]);
+const title = value?.title ?? "";
   const linkedUnitId = value?.mode === "unit" ? value.unitId : undefined;
   const urlValue = value?.mode === "url" ? value.url : "";
   const titlePristineRef = useRef<boolean>(true);
@@ -105,7 +88,7 @@ export function ExcerptSourcePicker({
         <div className="flex items-center justify-between gap-2 p-2 rounded border border-border-whisper bg-surface-elevated">
           <div className="flex flex-col min-w-0">
             <span className="text-xs text-text-secondary">
-              {m.excerpt_form_linked_unit()}
+              {t("community:excerpt_form_linked_unit")}
             </span>
             <span className="text-sm truncate">
               {linkedUnitTitle ?? linkedUnitId}
@@ -118,7 +101,7 @@ export function ExcerptSourcePicker({
             onClick={handleClear}
             disabled={disabled}
           >
-            {m.common_clear()}
+            {t("common:clear")}
           </Button>
         </div>
       )}
@@ -127,7 +110,7 @@ export function ExcerptSourcePicker({
         workContextUnitId={targetUnitId}
         language={language}
         inputId="excerpt-source-url"
-        label={m.excerpt_form_source_url()}
+        label={t("community:excerpt_form_source_url")}
         renderItemAction={(candidate) => (
           <Button
             type="button"
@@ -136,14 +119,14 @@ export function ExcerptSourcePicker({
             disabled={disabled}
             onClick={() => handlePickCandidate(candidate)}
           >
-            {m.excerpt_form_use_this()}
+            {t("community:excerpt_form_use_this")}
           </Button>
         )}
       />
 
       <div className="flex flex-col gap-1">
         <Label htmlFor="excerpt-source-raw-url">
-          {m.excerpt_form_raw_url()}
+          {t("community:excerpt_form_raw_url")}
         </Label>
         <Input
           id="excerpt-source-raw-url"
@@ -159,7 +142,7 @@ export function ExcerptSourcePicker({
       {value && (
         <div className="flex flex-col gap-1">
           <Label htmlFor="excerpt-source-title">
-            {m.excerpt_form_source_title()}
+            {t("community:excerpt_form_source_title")}
           </Label>
           <Input
             id="excerpt-source-title"

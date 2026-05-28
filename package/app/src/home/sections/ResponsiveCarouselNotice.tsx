@@ -1,22 +1,11 @@
-import {
-  page_home_hero_kicker,
-  page_home_hero_subtitle,
-  page_home_hero_title_highlight,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useEffect, useRef, useState } from "react";
 import { BookCarousel } from "../components/HomeCarousel";
 import { NoticeBoard } from "./NoticeBoard";
 
-const i18nMessages = {
-  page_home_hero_kicker,
-  page_home_hero_subtitle,
-  page_home_hero_title_highlight,
-};
-
 export function ResponsiveCarouselNotice() {
-  const m = useMessage(i18nMessages);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation(["page"]);
+const containerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);
   const [isWide, setIsWide] = useState(window.innerWidth >= 1200);
@@ -56,16 +45,16 @@ export function ResponsiveCarouselNotice() {
       <div ref={carouselRef} className={`${isWide ? "w-2/3" : "w-full"}`}>
         <div className="space-y-2 mb-4">
           <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">
-            {m.page_home_hero_kicker()}
+            {t("page:home_hero_kicker")}
           </p>
           <h1 className="text-2xl font-semibold leading-snug">
             <span className="text-primary">
               {" "}
-              {m.page_home_hero_title_highlight()}
+              {t("page:home_hero_title_highlight")}
             </span>
           </h1>
           <p className="text-xs text-muted-foreground">
-            {m.page_home_hero_subtitle()}
+            {t("page:home_hero_subtitle")}
           </p>
         </div>
         <BookCarousel autoplayIntervalNum={3000} />

@@ -1,12 +1,6 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import {
-  user_list_title,
-  user_no_bio,
-  user_none_found,
-  user_search_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
   AvatarFallback,
@@ -23,13 +17,6 @@ import type { FC } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { UserError, UserLoading } from "./UserState";
 
-const i18nMessages = {
-  user_list_title,
-  user_no_bio,
-  user_none_found,
-  user_search_placeholder,
-};
-
 export interface UserListPageProps {
   onUserClick?: (unitId: string) => void;
 }
@@ -39,8 +26,8 @@ export interface UserListPageProps {
  * 显示所有用户，支持搜索和分页
  */
 export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
-  const m = useMessage(i18nMessages);
-  const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
+  const { t } = useTranslation(["settings"]);
+const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -93,13 +80,13 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <h3 className="text-3xl font-bold mb-8">{m.user_list_title()}</h3>
+      <h3 className="text-3xl font-bold mb-8">{t("settings:user_list_title")}</h3>
 
       <div className="mb-8 relative">
         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
         <Input
           className="pl-10"
-          placeholder={m.user_search_placeholder()}
+          placeholder={t("settings:user_search_placeholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -111,7 +98,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
 
       {!isLoading && !error && users.length === 0 && (
         <div className="flex items-center justify-center h-64">
-          <h6 className="text-lg text-text-secondary">{m.user_none_found()}</h6>
+          <h6 className="text-lg text-text-secondary">{t("settings:user_none_found")}</h6>
         </div>
       )}
 
@@ -148,7 +135,7 @@ export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
                   )}
                   {!user.bio && (
                     <p className="text-sm text-text-secondary italic">
-                      {m.user_no_bio()}
+                      {t("settings:user_no_bio")}
                     </p>
                   )}
                 </CardContent>

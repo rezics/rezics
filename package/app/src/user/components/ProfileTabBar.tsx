@@ -1,24 +1,7 @@
-import {
-  profile_tab_content,
-  profile_tab_followers,
-  profile_tab_overview,
-  profile_tab_reactions,
-  profile_tab_realms,
-  profile_tab_shelves,
-} from "@rezics/i18n/messages";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";
 import { unitHref } from "@/shared/ui/link";
-
-const i18nMessages = {
-  profile_tab_content,
-  profile_tab_followers,
-  profile_tab_overview,
-  profile_tab_reactions,
-  profile_tab_realms,
-  profile_tab_shelves,
-};
 
 const PROFILE_TABS = [
   { label: i18nMessages.profile_tab_overview, path: "" },

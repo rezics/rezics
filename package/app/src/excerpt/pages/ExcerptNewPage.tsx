@@ -3,34 +3,15 @@ import { useCurrentUserId } from "@rezics/api/hooks";
 import { useCreateUnitMutation } from "@rezics/api/unit/unit.mutations";
 import type { UnitFormData } from "@rezics/api/unit/unit.types";
 import { markdownContentDoc } from "@rezics/contract";
-import {
-  auth_flow_onboarding_sign_in_first,
-  common_submit,
-  common_submitting,
-  excerpt_book_unit_id,
-  excerpt_create_failed,
-  excerpt_created_success,
-  excerpt_new_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { CooldownButton } from "@rezics/ui/composite/button/CooldownButton.tsx";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useState } from "react";
 import { ExcerptEditPage } from "./ExcerptEditPage";
 
-const i18nMessages = {
-  auth_flow_onboarding_sign_in_first,
-  common_submit,
-  common_submitting,
-  excerpt_book_unit_id,
-  excerpt_create_failed,
-  excerpt_created_success,
-  excerpt_new_title,
-};
-
 export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
-  const m = useMessage(i18nMessages);
-  const [excerptData, setExcerptData] = useState<UnitFormData>(
+  const { t } = useTranslation(["auth", "common", "community"]);
+const [excerptData, setExcerptData] = useState<UnitFormData>(
     {} as UnitFormData,
   );
   const { show } = useAlertStore();
@@ -38,18 +19,18 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
 
   const { mutate, isPending } = useCreateUnitMutation({
     onSuccess: (data) => {
-      show(m.excerpt_created_success());
+      show(t("community:excerpt_created_success"));
       console.log("create excerpt success", data);
     },
     onError: (error) => {
-      show(m.excerpt_create_failed({ error: String(error) }));
+      show(t("community:excerpt_create_failed", { error: String(error) }));
       console.error("create excerpt failed", error);
     },
   });
 
   function handleSave() {
     if (!userId) {
-      show(m.auth_flow_onboarding_sign_in_first());
+      show(t("auth:flow_onboarding_sign_in_first"));
       return;
     }
     const translation = excerptData.translations?.[0];
@@ -73,9 +54,9 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">{m.excerpt_new_title()}</h1>
+        <h1 className="text-xl font-semibold">{t("community:excerpt_new_title")}</h1>
         <div className="flex flex-col gap-1 mt-4">
-          <Label htmlFor="book-unit-id">{m.excerpt_book_unit_id()}</Label>
+          <Label htmlFor="book-unit-id">{t("community:excerpt_book_unit_id")}</Label>
           <Input
             id="book-unit-id"
             className="w-full"
@@ -97,7 +78,7 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
             onClick={handleSave}
             disabled={isPending}
           >
-            {isPending ? m.common_submitting() : m.common_submit()}
+            {isPending ? t("common:submitting") : t("common:submit")}
           </CooldownButton>
         </div>
       </div>

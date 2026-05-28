@@ -1,12 +1,6 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import {
-  common_load_failed,
-  common_loading,
-  tag_title,
-  tag_view_all,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMatchRoute } from "@tanstack/react-router";
@@ -14,16 +8,9 @@ import { Route as tagBookRoute } from "@/routes/_mainLayout/tag/book/$bookId/rou
 import { TextLink } from "@/shared/ui/link";
 import { TagWrapper } from "../components/TagWrapper";
 
-const i18nMessages = {
-  common_load_failed,
-  common_loading,
-  tag_title,
-  tag_view_all,
-};
-
 export function TagByBookPage() {
-  const m = useMessage(i18nMessages);
-  const { bookId } = tagBookRoute.useParams();
+  const { t } = useTranslation(["common", "community"]);
+const { bookId } = tagBookRoute.useParams();
   const pageSize = 30;
   const {
     data: listData,
@@ -45,10 +32,10 @@ export function TagByBookPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <AccentBarWithText text={m.tag_title()} />
+      <AccentBarWithText text={t("community:tag_title")} />
 
-      {isLoading && <div>{m.common_loading()}</div>}
-      {error && <div>{m.common_load_failed()}</div>}
+      {isLoading && <div>{t("common:loading")}</div>}
+      {error && <div>{t("common:load_failed")}</div>}
 
       {!isLoading && !error && (
         <div className="mt-4">
@@ -64,7 +51,7 @@ export function TagByBookPage() {
         <div className="mt-4">
           <TextLink to="/tag/book/$bookId/tag" params={{ bookId }}>
             <span className="text-primary-600 hover:underline">
-              {m.tag_view_all({ count: total })}
+              {t("community:tag_view_all", { count: total })}
             </span>
           </TextLink>
         </div>
@@ -74,8 +61,8 @@ export function TagByBookPage() {
 }
 
 export function TagByBookFullPage() {
-  const m = useMessage(i18nMessages);
-  const matchRoute = useMatchRoute();
+  const { t } = useTranslation(["common", "community"]);
+const matchRoute = useMatchRoute();
   const withDomain = matchRoute({
     to: "/tag/book/$bookId/tag/$domainId",
     fuzzy: false,
@@ -105,10 +92,10 @@ export function TagByBookFullPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <AccentBarWithText text={m.tag_title()} />
+      <AccentBarWithText text={t("community:tag_title")} />
 
-      {isLoading && <div>{m.common_loading()}</div>}
-      {error && <div>{m.common_load_failed()}</div>}
+      {isLoading && <div>{t("common:loading")}</div>}
+      {error && <div>{t("common:load_failed")}</div>}
 
       {!isLoading && !error && (
         <div className="mt-4">

@@ -1,27 +1,24 @@
-import { registerParaglideRuntime, setLocale } from "@rezics/i18n/react";
+import { createI18nRuntime } from "@rezics/i18n/runtime";
+import { setLocale } from "@rezics/i18n/react";
 import {
   basePreviewParameters,
   localeGlobalTypes,
   themeGlobalTypes,
   withRezicsTheme,
 } from "@rezics/storybook-config/preview";
-import * as uiRuntime from "@rezics/ui/i18n/runtime";
+import { registerUiLocale } from "@rezics/ui/i18n";
 import type { Decorator, Preview } from "@storybook/react-vite";
 
 import "virtual:uno.css";
 
-let runtimeRegistered = false;
-
-function ensureUiRuntimeRegistered() {
-  if (runtimeRegistered) return;
-  registerParaglideRuntime(uiRuntime);
-  runtimeRegistered = true;
-}
+const runtime = createI18nRuntime();
 
 const withUiLocale: Decorator = (Story, context) => {
   const locale = context.globals.locale ?? "zh-hant";
-  ensureUiRuntimeRegistered();
-  setLocale(locale);
+  void runtime.ready.then(async () => {
+    await registerUiLocale(runtime.i18n, locale);
+    await setLocale(locale);
+  });
   document.documentElement.lang = locale;
   return <Story />;
 };

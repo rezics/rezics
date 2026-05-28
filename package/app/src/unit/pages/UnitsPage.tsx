@@ -1,12 +1,6 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { contentDocMarkdownFallback, type UnitDTO } from "@rezics/contract";
-import {
-  unit_open_content_page,
-  unit_type_tabs_label,
-  unit_untitled_content,
-  units_search_placeholder,
-} from "@rezics/i18n/messages";
-import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
+import { type ReactiveMessageBag, useTranslation } from "@rezics/i18n/react";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -29,13 +23,6 @@ import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
-
-const i18nMessages = {
-  unit_open_content_page,
-  unit_type_tabs_label,
-  unit_untitled_content,
-  units_search_placeholder,
-};
 
 type UnitsMessages = ReactiveMessageBag<typeof i18nMessages>;
 
@@ -64,11 +51,11 @@ function defaultChildren(units: Unit[], m: UnitsMessages) {
                       </Link>
                     )}
                   />
-                  <TooltipContent>{m.unit_open_content_page()}</TooltipContent>
+                  <TooltipContent>{t("book:unit_open_content_page")}</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <p className="text-base font-semibold truncate mb-1">
-                {item.translations?.[0]?.title || m.unit_untitled_content()}
+                {item.translations?.[0]?.title || t("book:unit_untitled_content")}
               </p>
             </div>
             {item.translations?.[0]?.description && (
@@ -120,8 +107,8 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   workUnitId,
   children,
 }) => {
-  const m = useMessage(i18nMessages);
-  const ref = useRef<UniversalPaginatorHandle>(null);
+  const { t } = useTranslation(["book"]);
+const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
   const routerSearch = useRouterState({
     select: (s) => s.location.search ?? "",
@@ -253,12 +240,12 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
             <KeywordInput
               value={keywordBind.value ?? ""}
               onChange={(v) => keywordBind.onChange(v)}
-              placeholder={m.units_search_placeholder()}
+              placeholder={t("book:units_search_placeholder")}
             />
             {!isSingle && (
               <div className="mt-4 mb-4 border-b border-border-whisper">
                 <Tabs value={tab} onValueChange={(v) => setTab(v)}>
-                  <TabsList aria-label={m.unit_type_tabs_label()}>
+                  <TabsList aria-label={t("book:unit_type_tabs_label")}>
                     {types.map((t) => (
                       <TabsTrigger key={t} value={t}>
                         {t}

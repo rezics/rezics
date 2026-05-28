@@ -1,18 +1,7 @@
-import {
-  zone_book_content_placeholder,
-  zone_books_title,
-  zone_search_books_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { KeywordInput, useSearchQuery } from "@/search";
 import type { ZoneTemplateProps } from "./types";
-
-const i18nMessages = {
-  zone_book_content_placeholder,
-  zone_books_title,
-  zone_search_books_placeholder,
-};
 
 /**
  * Book-oriented zone homepage template.
@@ -23,8 +12,8 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
   zone,
   onSearch,
 }) => {
-  const m = useMessage(i18nMessages);
-  const search = useSearchQuery({});
+  const { t } = useTranslation(["search"]);
+const search = useSearchQuery({});
   const keywordBind = search.bind("keyword");
   const bgImage = (zone.styling as Record<string, unknown> | null)?.bgImage as
     | string
@@ -58,16 +47,16 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           onSubmit={() => onSearch?.(search.query.keyword ?? "")}
-          placeholder={m.zone_search_books_placeholder({ name: zone.name })}
+          placeholder={t("search:zone_search_books_placeholder", { name: zone.name })}
         />
       </div>
 
       {/* Book sections */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">{m.zone_books_title()}</h2>
+        <h2 className="text-lg font-semibold mb-4">{t("search:zone_books_title")}</h2>
         {/* MOCK: book listing sections with zone.filters pre-applied will be wired here */}
         <p className="text-text-secondary">
-          {m.zone_book_content_placeholder()}
+          {t("search:zone_book_content_placeholder")}
         </p>
       </div>
     </div>

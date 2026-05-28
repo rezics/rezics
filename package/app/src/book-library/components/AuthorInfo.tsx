@@ -1,12 +1,5 @@
 import { mainMarkdownSource, type PublicUser } from "@rezics/contract";
-import {
-  book_author_avatar_alt,
-  book_author_info_author_line,
-  book_author_info_bio_label,
-  book_author_info_description_label,
-  common_edit,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EditButtonFloatRightShow } from "@rezics/ui/composite/button/EditButtonFloatRight.tsx";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
@@ -16,14 +9,6 @@ import type React from "react";
 import { FollowButton } from "@/engagement/components/FollowButton.tsx";
 import { unitHref } from "@/shared/ui/link";
 import { useIsMobile } from "@/shared/utils/use-media-query.ts";
-
-const i18nMessages = {
-  book_author_avatar_alt,
-  book_author_info_author_line,
-  book_author_info_bio_label,
-  book_author_info_description_label,
-  common_edit,
-};
 
 // --------- Types ---------
 export type Author = PublicUser;
@@ -48,8 +33,8 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
-  const m = useMessage(i18nMessages);
-  const description = mainMarkdownSource(author.description);
+  const { t } = useTranslation(["book", "common"]);
+const description = mainMarkdownSource(author.description);
 
   return (
     <div>
@@ -62,18 +47,18 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
         })}
       >
         <AccentBarWithText
-          text={m.book_author_info_author_line({ name: author?.name ?? "" })}
+          text={t("book:author_info_author_line", { name: author?.name ?? "" })}
         />
       </ArrowForwardIcon>
       {showEditButton && (
-        <EditButtonFloatRightShow onClick={onEdit} text={m.common_edit()} />
+        <EditButtonFloatRightShow onClick={onEdit} text={t("common:edit")} />
       )}
       <div className="flex items-start gap-4 px-4 pt-8">
         {/* Left: Avatar + Follow */}
         <div className="flex flex-col items-center w-24 flex-shrink-0">
           <LazyLoadImage
             src={author.avatar || ""}
-            alt={m.book_author_avatar_alt({ name: author.name ?? "" })}
+            alt={t("book:author_avatar_alt", { name: author.name ?? "" })}
             className="w-24 h-24 rounded object-cover shadow-lg"
           />
           <div className="mt-3 w-full">
@@ -110,8 +95,8 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
   showEditButton,
   onEdit,
 }) => {
-  const m = useMessage(i18nMessages);
-  const description = mainMarkdownSource(author.description);
+  const { t } = useTranslation(["book", "common"]);
+const description = mainMarkdownSource(author.description);
 
   return (
     <div>
@@ -126,13 +111,13 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
             })}
           >
             <AccentBarWithText
-              text={m.book_author_info_author_line({
+              text={t("book:author_info_author_line", {
                 name: author?.name ?? "",
               })}
             />
           </ArrowForwardIcon>
           {showEditButton && (
-            <EditButtonFloatRightShow onClick={onEdit} text={m.common_edit()} />
+            <EditButtonFloatRightShow onClick={onEdit} text={t("common:edit")} />
           )}
         </div>
 
@@ -144,7 +129,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
                 <LazyLoadImage
                   src={author.avatar || ""}
                   className="max-w-full max-h-full object-contain rounded"
-                  alt={m.book_author_avatar_alt({ name: author.name ?? "" })}
+                  alt={t("book:author_avatar_alt", { name: author.name ?? "" })}
                 />
                 <div className="mt-2 w-full">
                   <FollowButton
@@ -162,11 +147,11 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
               {/* Right text */}
               <div className="flex-1 !text-md">
                 <p>
-                  {m.book_author_info_bio_label()}:{author.bio}
+                  {t("book:author_info_bio_label")}:{author.bio}
                 </p>
                 <br />
                 <p>
-                  {m.book_author_info_description_label()}:{description}
+                  {t("book:author_info_description_label")}:{description}
                 </p>
               </div>
             </div>

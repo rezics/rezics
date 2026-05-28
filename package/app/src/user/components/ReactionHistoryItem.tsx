@@ -2,11 +2,7 @@ import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
 } from "@rezics/api/reaction/reaction.types";
-import {
-  reactions_deleted_content,
-  reactions_reacted_with,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import {
   Bookmark,
@@ -20,11 +16,6 @@ import {
 } from "lucide-react";
 import type { FC } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
-
-const i18nMessages = {
-  reactions_deleted_content,
-  reactions_reacted_with,
-};
 
 const REACTION_ICONS: Record<string, LucideIcon> = {
   like: ThumbsUp,
@@ -63,8 +54,8 @@ type ReceivedProps = {
 export type ReactionHistoryItemProps = GivenProps | ReceivedProps;
 
 export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
-  const m = useMessage(i18nMessages);
-  const { mode, item } = props;
+  const { t } = useTranslation(["community"]);
+const { mode, item } = props;
   const Icon = reactionIconFor(item.reaction);
   const timestamp = formatTimestamp(item.createdAt);
   const target = item.target;
@@ -85,7 +76,7 @@ export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
             <ReceivedActor actor={props.item.actor} />
           ) : (
             <span className="text-text-secondary">
-              {m.reactions_reacted_with()}
+              {t("community:reactions_reacted_with")}
             </span>
           )}
           <span className="text-text-primary capitalize">{item.reaction}</span>
@@ -105,7 +96,7 @@ export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
           </SafeLink>
         ) : (
           <span className="text-sm text-text-tertiary italic">
-            {m.reactions_deleted_content()}
+            {t("community:reactions_deleted_content")}
           </span>
         )}
       </div>

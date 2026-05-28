@@ -1,22 +1,6 @@
 import { type RealmDTO, realmQueries } from "@rezics/api/realm/realm";
 import type { UnitTranslationDTO } from "@rezics/contract";
 import {
-  admin_auth_actions_title,
-  admin_realm_description,
-  admin_realm_title,
-  admin_unit_no_title,
-  common_all,
-  common_created,
-  common_edit,
-  common_no,
-  common_slug,
-  common_title,
-  common_unit_id,
-  common_updated,
-  common_user,
-  common_yes,
-} from "@rezics/i18n/messages";
-import {
   Button,
   Input,
   Label,
@@ -34,11 +18,12 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 type BooleanFilter = "all" | "true" | "false";
 
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
-  if (!translations?.length) return admin_unit_no_title();
-  return translations[0]?.title?.trim() || admin_unit_no_title();
+  if (!translations?.length) return getI18nRuntime().i18n.t("admin:unit_no_title");
+  return translations[0]?.title?.trim() || getI18nRuntime().i18n.t("admin:unit_no_title");
 }
 
 function optionalFilter(value: string) {
@@ -89,7 +74,7 @@ export default function RealmsPage() {
     () => [
       {
         id: "unitId",
-        header: common_unit_id(),
+        header: getI18nRuntime().i18n.t("common:unit_id"),
         minWidth: 220,
         cell: (realm) => (
           <span className="text-sm font-mono text-text-secondary">
@@ -99,7 +84,7 @@ export default function RealmsPage() {
       },
       {
         id: "title",
-        header: common_title(),
+        header: getI18nRuntime().i18n.t("common:title"),
         minWidth: 220,
         cell: (realm) => (
           <span className="text-sm font-medium">
@@ -109,7 +94,7 @@ export default function RealmsPage() {
       },
       {
         id: "slug",
-        header: common_slug(),
+        header: getI18nRuntime().i18n.t("common:slug"),
         minWidth: 160,
         cell: (realm) => (
           <span className="text-sm font-mono">{realm.slug ?? "-"}</span>
@@ -117,7 +102,7 @@ export default function RealmsPage() {
       },
       {
         id: "user",
-        header: common_user(),
+        header: getI18nRuntime().i18n.t("common:user"),
         minWidth: 200,
         cell: (realm) => (
           <div className="flex flex-col">
@@ -138,7 +123,7 @@ export default function RealmsPage() {
         minWidth: 100,
         cell: (realm) => (
           <span className="text-sm">
-            {realm.isPublic ? common_yes() : common_no()}
+            {realm.isPublic ? getI18nRuntime().i18n.t("common:yes") : getI18nRuntime().i18n.t("common:no")}
           </span>
         ),
       },
@@ -148,7 +133,7 @@ export default function RealmsPage() {
         minWidth: 100,
         cell: (realm) => (
           <span className="text-sm">
-            {realm.isOfficial ? common_yes() : common_no()}
+            {realm.isOfficial ? getI18nRuntime().i18n.t("common:yes") : getI18nRuntime().i18n.t("common:no")}
           </span>
         ),
       },
@@ -160,19 +145,19 @@ export default function RealmsPage() {
       },
       {
         id: "createdAt",
-        header: common_created(),
+        header: getI18nRuntime().i18n.t("common:created"),
         minWidth: 170,
         cell: (realm) => fmtDate(realm.createdAt),
       },
       {
         id: "updatedAt",
-        header: common_updated(),
+        header: getI18nRuntime().i18n.t("common:updated"),
         minWidth: 170,
         cell: (realm) => fmtDate(realm.updatedAt),
       },
       {
         id: "actions",
-        header: admin_auth_actions_title(),
+        header: getI18nRuntime().i18n.t("admin:auth_actions_title"),
         minWidth: 120,
         cell: (realm) => (
           <Button
@@ -184,7 +169,7 @@ export default function RealmsPage() {
                 params={{ unitId: realm.unitId }}
                 {...props}
               >
-                {common_edit()}
+                {getI18nRuntime().i18n.t("common:edit")}
               </Link>
             )}
           />
@@ -195,7 +180,7 @@ export default function RealmsPage() {
   );
 
   return (
-    <Page title={admin_realm_title()} description={admin_realm_description()}>
+    <Page title={getI18nRuntime().i18n.t("admin:realm_title")} description={getI18nRuntime().i18n.t("admin:realm_description")}>
       <SearchablePaginatedTableCard<RealmDTO>
         searchInputId="realm-search"
         searchPlaceholder="title, slug, or keyword"
@@ -209,7 +194,7 @@ export default function RealmsPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col gap-1">
               <Label htmlFor="realm-filter-ids" className="text-xs">
-                {common_unit_id()}
+                {getI18nRuntime().i18n.t("common:unit_id")}
               </Label>
               <Input
                 id="realm-filter-ids"
@@ -223,7 +208,7 @@ export default function RealmsPage() {
             </div>
             <div className="flex flex-col gap-1">
               <Label htmlFor="realm-filter-user" className="text-xs">
-                {common_user()}
+                {getI18nRuntime().i18n.t("common:user")}
               </Label>
               <Input
                 id="realm-filter-user"
@@ -250,9 +235,9 @@ export default function RealmsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{common_all()}</SelectItem>
-                  <SelectItem value="true">{common_yes()}</SelectItem>
-                  <SelectItem value="false">{common_no()}</SelectItem>
+                  <SelectItem value="all">{getI18nRuntime().i18n.t("common:all")}</SelectItem>
+                  <SelectItem value="true">{getI18nRuntime().i18n.t("common:yes")}</SelectItem>
+                  <SelectItem value="false">{getI18nRuntime().i18n.t("common:no")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -271,9 +256,9 @@ export default function RealmsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{common_all()}</SelectItem>
-                  <SelectItem value="true">{common_yes()}</SelectItem>
-                  <SelectItem value="false">{common_no()}</SelectItem>
+                  <SelectItem value="all">{getI18nRuntime().i18n.t("common:all")}</SelectItem>
+                  <SelectItem value="true">{getI18nRuntime().i18n.t("common:yes")}</SelectItem>
+                  <SelectItem value="false">{getI18nRuntime().i18n.t("common:no")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -7,16 +7,6 @@ import type {
   SearchCategory,
   UserSearchDocument,
 } from "@rezics/contract";
-import {
-  common_reply,
-  entity_verified,
-  profile_followers_count,
-  search_origin_entity,
-  search_origin_post,
-  search_origin_realm,
-  search_origin_user,
-  search_realm_members,
-} from "@rezics/i18n/messages";
 import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 import {
@@ -26,6 +16,7 @@ import {
 import { contentHref } from "../models/contentDestination";
 import { unitHref } from "@/shared/ui/link";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 type ContentCategory = "books" | "shelves";
 type PostCategory = "reviews" | "excerpts" | "remarks" | "posts";
 type CardBadge = React.ReactNode;
@@ -106,13 +97,13 @@ function targetHref(item: PostSearchDocument): string | undefined {
 function postMeta(item: PostSearchDocument): React.ReactNode {
   return compactParts([
     item.scoreValue !== null ? item.scoreValue : null,
-    item.replyCount > 0 ? `${item.replyCount} ${common_reply()}` : null,
+    item.replyCount > 0 ? `${item.replyCount} ${getI18nRuntime().i18n.t("common:reply")}` : null,
     formatDate(item.updatedAt),
   ]);
 }
 
 function profileMeta(count: number | null | undefined) {
-  return count == null ? undefined : profile_followers_count({ count });
+  return count == null ? undefined : getI18nRuntime().i18n.t("settings:profile_followers_count", { count });
 }
 
 export function renderContentSearchCard(
@@ -184,7 +175,7 @@ export function renderPostSearchCard(
         avatar: item.authorAvatar,
       }}
       time={formatDate(item.updatedAt)}
-      kind={badge ?? item.kind ?? search_origin_post()}
+      kind={badge ?? item.kind ?? getI18nRuntime().i18n.t("search:origin_post")}
       source={targetTitle || undefined}
       sourceHref={targetHref(item)}
       body={item.contentText ?? undefined}
@@ -211,11 +202,11 @@ export function renderRealmSearchCard(
 
   return (
     <SearchContentResultCard
-      kind={badge ?? search_origin_realm()}
+      kind={badge ?? getI18nRuntime().i18n.t("search:origin_realm")}
       title={title}
       titleHref={unitHref({ type: "REALM", unitId: item.id, slug: null })}
       body={description || undefined}
-      meta={search_realm_members({ count: item.memberCount })}
+      meta={getI18nRuntime().i18n.t("search:realm_members", { count: item.memberCount })}
     />
   );
 }
@@ -236,7 +227,7 @@ export function renderUserSearchCard(
         followersCount: item.followersCount,
         followingsCount: item.followingsCount,
       }}
-      kind={badge ?? search_origin_user()}
+      kind={badge ?? getI18nRuntime().i18n.t("search:origin_user")}
       body={item.bio ?? item.descriptionText ?? undefined}
       meta={profileMeta(item.followersCount)}
     />
@@ -255,7 +246,7 @@ export function renderEntitySearchCard(
 
   return (
     <SearchContentResultCard
-      kind={badge ?? item.kind ?? search_origin_entity()}
+      kind={badge ?? item.kind ?? getI18nRuntime().i18n.t("search:origin_entity")}
       avatar={{
         src: item.avatar,
         alt: title,
@@ -268,7 +259,7 @@ export function renderEntitySearchCard(
         slug: item.slug,
       })}
       body={summary || undefined}
-      meta={compactParts([item.kind, item.verified ? entity_verified() : null])}
+      meta={compactParts([item.kind, item.verified ? getI18nRuntime().i18n.t("entity:verified") : null])}
     />
   );
 }

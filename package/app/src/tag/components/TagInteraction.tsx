@@ -5,19 +5,7 @@ import type {
   BookDTO,
   UnitTagDTO,
 } from "@rezics/contract";
-import {
-  common_close,
-  common_edit,
-  tag_clear,
-  tag_downvote,
-  tag_score,
-  tag_search_selected,
-  tag_search_this,
-  tag_selected_count,
-  tag_upvote,
-  tag_votes,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Popover, PopoverContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import {
@@ -33,19 +21,6 @@ import { useNavigateToTagSearch } from "@/search/hooks/useNavigateToTagSearch";
 import type { InjectedTag } from "@/search/models/injectedTags";
 import { cn } from "@/shared/utils/css-util";
 import { useTagInteractionReducer } from "../hooks/useTagInteractionReducer";
-
-const i18nMessages = {
-  common_close,
-  common_edit,
-  tag_clear,
-  tag_downvote,
-  tag_score,
-  tag_search_selected,
-  tag_search_this,
-  tag_selected_count,
-  tag_upvote,
-  tag_votes,
-};
 
 const TAG_CHIP_SELECTOR = '[data-tag-chip="true"]';
 
@@ -105,8 +80,8 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   onSearchTags,
   className,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [state, dispatch] = useTagInteractionReducer();
+  const { t } = useTranslation(["common", "community"]);
+const [state, dispatch] = useTagInteractionReducer();
   const defaultNavigate = useNavigateToTagSearch();
   const navigateToTagSearch = onSearchTags ?? defaultNavigate;
   const voteMutation = useCastTagVoteMutation();
@@ -272,7 +247,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
               <Button
                 size="icon"
                 variant="ghost"
-                aria-label={m.common_close()}
+                aria-label={t("common:close")}
                 onClick={() => dispatch({ type: "CLOSE_PREVIEW" })}
               >
                 <CloseIcon className="h-4 w-4" />
@@ -287,10 +262,10 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
 
             <div className="mt-3 flex items-center gap-3 text-sm opacity-70">
               <span>
-                {m.tag_score()}: {previewTag.score}
+                {t("community:tag_score")}: {previewTag.score}
               </span>
               <span>
-                {m.tag_votes()}: {previewTag.voteCount}
+                {t("community:tag_votes")}: {previewTag.voteCount}
               </span>
             </div>
 
@@ -302,7 +277,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                 disabled={voteMutation.isPending}
               >
                 <ThumbUpOutlinedIcon className="h-4 w-4 mr-1" />
-                {m.tag_upvote()}
+                {t("community:tag_upvote")}
               </Button>
               <Button
                 size="sm"
@@ -311,7 +286,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                 disabled={voteMutation.isPending}
               >
                 <ThumbDownOutlinedIcon className="h-4 w-4 mr-1" />
-                {m.tag_downvote()}
+                {t("community:tag_downvote")}
               </Button>
             </div>
 
@@ -322,7 +297,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                 onClick={() => handleSearchSingle(previewTag.tagUnitId)}
               >
                 <SearchIcon className="h-4 w-4 mr-1" />
-                {m.tag_search_this()}
+                {t("community:tag_search_this")}
               </Button>
               {canEditTags && (
                 <Button
@@ -334,7 +309,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
                   }
                 >
                   <EditOutlinedIcon className="h-4 w-4 mr-1" />
-                  {m.common_edit()}
+                  {t("common:edit")}
                 </Button>
               )}
             </div>
@@ -345,7 +320,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
       {state.selected.length > 0 && (
         <div className="mt-3 p-2 flex items-center justify-between gap-2 rounded-md border border-border-whisper bg-surface-elevated">
           <p className="text-sm px-1">
-            {m.tag_selected_count({ count: state.selected.length })}
+            {t("community:tag_selected_count", { count: state.selected.length })}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -353,11 +328,11 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
               variant="ghost"
               onClick={() => dispatch({ type: "DESELECT_ALL" })}
             >
-              {m.tag_clear()}
+              {t("community:tag_clear")}
             </Button>
             <Button size="sm" onClick={handleSearchMulti}>
               <SearchIcon className="h-4 w-4 mr-1" />
-              {m.tag_search_selected()}
+              {t("community:tag_search_selected")}
             </Button>
           </div>
         </div>

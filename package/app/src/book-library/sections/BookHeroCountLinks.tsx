@@ -2,22 +2,11 @@ import { postQueries } from "@rezics/api/post/post";
 import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { PostKind } from "@rezics/contract";
-import {
-  book_hero_count_links_reviews,
-  book_hero_count_links_shelves,
-  book_hero_count_links_tags,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
 import type { BookHeroStatKey } from "./BookHeroStatCards";
-
-const i18nMessages = {
-  book_hero_count_links_reviews,
-  book_hero_count_links_shelves,
-  book_hero_count_links_tags,
-};
 
 interface BookHeroCountLinksProps {
   bookId: string;
@@ -38,8 +27,8 @@ export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
   workUnitId,
   excludeKeys = [],
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data: reviewData } = useQuery({
+  const { t } = useTranslation(["book"]);
+const { data: reviewData } = useQuery({
     ...postQueries.list(
       workUnitId
         ? {
@@ -74,19 +63,19 @@ export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
       key: "reviews",
       to: "/review/book/$bookId",
       count: reviewCount,
-      label: m.book_hero_count_links_reviews({ count: reviewCount }),
+      label: t("book:hero_count_links_reviews", { count: reviewCount }),
     },
     {
       key: "shelves",
       to: "/shelf/book/$bookId",
       count: shelfCount,
-      label: m.book_hero_count_links_shelves({ count: shelfCount }),
+      label: t("book:hero_count_links_shelves", { count: shelfCount }),
     },
     {
       key: "tags",
       to: "/tag/book/$bookId",
       count: tagCount,
-      label: m.book_hero_count_links_tags({ count: tagCount }),
+      label: t("book:hero_count_links_tags", { count: tagCount }),
     },
   ];
 

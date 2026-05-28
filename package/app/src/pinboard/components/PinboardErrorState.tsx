@@ -1,19 +1,8 @@
-import {
-  common_retry,
-  pinboard_error_description,
-  pinboard_error_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { CircleAlert as ErrorOutlineRoundedIcon } from "lucide-react";
 import type React from "react";
-
-const i18nMessages = {
-  common_retry,
-  pinboard_error_description,
-  pinboard_error_title,
-};
 
 interface PinboardErrorStateProps {
   message?: string;
@@ -24,16 +13,16 @@ export const PinboardErrorState: React.FC<PinboardErrorStateProps> = ({
   message,
   onRetry,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["common", "entity"]);
+return (
     <EmptyState
       icon={<ErrorOutlineRoundedIcon className="h-9 w-9 text-error-text" />}
-      title={m.pinboard_error_title()}
-      description={message ?? m.pinboard_error_description()}
+      title={t("entity:pinboard_error_title")}
+      description={message ?? t("entity:pinboard_error_description")}
       action={
         onRetry ? (
           <Button variant="outline" size="sm" onClick={onRetry}>
-            {m.common_retry()}
+            {t("common:retry")}
           </Button>
         ) : undefined
       }

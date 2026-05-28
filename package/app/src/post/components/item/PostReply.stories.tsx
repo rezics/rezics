@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import { common_edit } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
 import { Pencil } from "lucide-react";
 import { withRouter } from "@/stories/decorators/withRouter";
@@ -34,14 +33,14 @@ export const Compact: Story = {
 
 export const OwnerVisibleEditOverflow: Story = {
   render: () => {
-    const m = useMessage({ common_edit });
-    return (
+    const { t } = useTranslation(["common"]);
+return (
       <PostReply
         post={{ ...postFlat[0], directReplyCount: 3 }}
         overflowContent={
           <DropdownMenuItem className="gap-2">
             <Pencil size={16} strokeWidth={2} />
-            <span>{m.common_edit()}</span>
+            <span>{t("common:edit")}</span>
           </DropdownMenuItem>
         }
       />

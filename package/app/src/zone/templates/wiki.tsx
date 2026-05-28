@@ -11,14 +11,7 @@ import type {
   WikiZoneNavigationItem,
 } from "@rezics/contract";
 import { bestLanguageWikiPostsQuery } from "@rezics/api/translation-group";
-import {
-  common_loading,
-  common_open,
-  realm_content_empty_title,
-  search_empty_title,
-  zone_search_placeholder,
-} from "@rezics/i18n/messages";
-import { useLocale, useMessage } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { unitDetailQuery } from "@rezics/api/unit";
 import { EmptyState, SafeLink, Spinner } from "@rezics/ui";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
@@ -27,14 +20,6 @@ import type React from "react";
 import { useMemo } from "react";
 import { KeywordInput, useSearchQuery } from "@/search";
 import type { ZoneTemplateProps } from "./types";
-
-const i18nMessages = {
-  common_loading,
-  common_open,
-  realm_content_empty_title,
-  search_empty_title,
-  zone_search_placeholder,
-};
 
 type WikiTemplateVariant = "classic" | "media" | "database" | "minimal";
 
@@ -400,11 +385,11 @@ function WikiHomepageSections({
   data?: WikiZoneHomepageData | null;
   variant: WikiTemplateVariant;
 }) {
-  const m = useMessage(i18nMessages);
-  const locale = useLocale();
+  const { t } = useTranslation(["common", "entity", "search"]);
+const locale = useLocale();
   const sections = data?.sections ?? [];
   if (sections.length === 0) {
-    return <EmptyState title={m.realm_content_empty_title()} />;
+    return <EmptyState title={t("entity:realm_content_empty_title")} />;
   }
 
   return (
@@ -419,7 +404,7 @@ function WikiHomepageSections({
               </h2>
             </div>
             {items.length === 0 ? (
-              <EmptyState title={m.search_empty_title()} />
+              <EmptyState title={t("search:empty_title")} />
             ) : (
               <div className={gridClass(variant)}>
                 {items.map((item, index) => {
@@ -437,7 +422,7 @@ function WikiHomepageSections({
                           {href && (
                             <SafeLink href={href}>
                               <Button size="sm" variant="ghost">
-                                {m.common_open()}
+                                {t("common:open")}
                               </Button>
                             </SafeLink>
                           )}
@@ -468,8 +453,8 @@ function WikiZoneTemplateBase({
   children,
   variant,
 }: ZoneTemplateProps & { variant: WikiTemplateVariant }) {
-  const m = useMessage(i18nMessages);
-  const search = useSearchQuery({});
+  const { t } = useTranslation(["common", "entity", "search"]);
+const search = useSearchQuery({});
   const keywordBind = search.bind("keyword");
   const theme = zone.wiki?.theme;
   const resolvedHomepageVariant =
@@ -510,7 +495,7 @@ function WikiZoneTemplateBase({
               value={keywordBind.value ?? ""}
               onChange={(value) => keywordBind.onChange(value)}
               onSubmit={() => onSearch?.(search.query.keyword ?? "")}
-              placeholder={m.zone_search_placeholder({ name: zone.name })}
+              placeholder={t("search:zone_search_placeholder", { name: zone.name })}
             />
           </div>
         </header>
@@ -540,7 +525,7 @@ function WikiZoneTemplateBase({
             {homepageLoading ? (
               <div className="flex items-center gap-2 py-8 text-sm leading-ui text-text-secondary">
                 <Spinner size="sm" />
-                <span>{m.common_loading()}</span>
+                <span>{t("common:loading")}</span>
               </div>
             ) : (
               <WikiHomepageSections

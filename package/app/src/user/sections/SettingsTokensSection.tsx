@@ -4,24 +4,7 @@ import {
 } from "@rezics/api/token/token.mutations";
 import { tokenQueries } from "@rezics/api/token/token.queries";
 import type { ApiTokenDTO, ApiTokenScopes } from "@rezics/contract";
-import {
-  common_cancel,
-  common_revoke,
-  common_save,
-  common_saving,
-  common_scopes,
-  settings_tokens_description,
-  settings_tokens_edit_title,
-  settings_tokens_empty,
-  settings_tokens_expiration_date,
-  settings_tokens_generate,
-  settings_tokens_name_label,
-  settings_tokens_revoke_description,
-  settings_tokens_revoke_title,
-  settings_tokens_revoking,
-  settings_tokens_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -44,24 +27,6 @@ import { SettingsSection } from "@/user/components/SettingsSection";
 import { TokenCreateDialog } from "@/user/components/TokenCreateDialog";
 import { TokenListItem } from "@/user/components/TokenListItem";
 import { useRequireAuth } from "@/user/pages/useAuth";
-
-const i18nMessages = {
-  common_cancel,
-  common_revoke,
-  common_save,
-  common_saving,
-  common_scopes,
-  settings_tokens_description,
-  settings_tokens_edit_title,
-  settings_tokens_empty,
-  settings_tokens_expiration_date,
-  settings_tokens_generate,
-  settings_tokens_name_label,
-  settings_tokens_revoke_description,
-  settings_tokens_revoke_title,
-  settings_tokens_revoking,
-  settings_tokens_title,
-};
 
 const AVAILABLE_SCOPES = [
   { domain: "user", perm: "read", label: "user:read" },
@@ -94,8 +59,8 @@ function setToScopes(set: Set<string>): ApiTokenScopes {
 }
 
 export const SettingsTokensSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  useRequireAuth();
+  const { t } = useTranslation(["common", "settings"]);
+useRequireAuth();
 
   const { data, isLoading } = useQuery(tokenQueries.list());
   const updateToken = useUpdateTokenMutation();
@@ -155,14 +120,14 @@ export const SettingsTokensSection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title={m.settings_tokens_title()}
-        description={m.settings_tokens_description()}
+        title={t("settings:tokens_title")}
+        description={t("settings:tokens_description")}
         divider={false}
       >
         <div className="mb-4">
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <AddIcon className="w-4 h-4 mr-1" />
-            {m.settings_tokens_generate()}
+            {t("settings:tokens_generate")}
           </Button>
         </div>
 
@@ -185,7 +150,7 @@ export const SettingsTokensSection: FC = () => {
           </div>
         ) : (
           <p className="text-sm text-text-secondary">
-            {m.settings_tokens_empty()}
+            {t("settings:tokens_empty")}
           </p>
         )}
       </SettingsSection>
@@ -199,7 +164,7 @@ export const SettingsTokensSection: FC = () => {
       <Dialog open={!!editToken} onOpenChange={(o) => !o && setEditToken(null)}>
         <DialogContent className="sm:max-w-[640px]">
           <DialogHeader>
-            <DialogTitle>{m.settings_tokens_edit_title()}</DialogTitle>
+            <DialogTitle>{t("settings:tokens_edit_title")}</DialogTitle>
           </DialogHeader>
           {updateToken.error && (
             <Alert variant="destructive" className="mb-4">
@@ -209,7 +174,7 @@ export const SettingsTokensSection: FC = () => {
           <div className="space-y-4 pt-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="edit-token-name">
-                {m.settings_tokens_name_label()}
+                {t("settings:tokens_name_label")}
               </Label>
               <Input
                 id="edit-token-name"
@@ -219,7 +184,7 @@ export const SettingsTokensSection: FC = () => {
               />
             </div>
             <div>
-              <p className="text-sm font-medium mb-2">{m.common_scopes()}</p>
+              <p className="text-sm font-medium mb-2">{t("common:scopes")}</p>
               <div className="flex flex-col gap-2">
                 {AVAILABLE_SCOPES.map((s) => (
                   <div key={s.label} className="flex items-center gap-2">
@@ -235,7 +200,7 @@ export const SettingsTokensSection: FC = () => {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="edit-token-expiry">
-                {m.settings_tokens_expiration_date()}
+                {t("settings:tokens_expiration_date")}
               </Label>
               <Input
                 id="edit-token-expiry"
@@ -247,13 +212,13 @@ export const SettingsTokensSection: FC = () => {
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setEditToken(null)}>
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button
               onClick={handleSaveEdit}
               disabled={!editName || updateToken.isPending}
             >
-              {updateToken.isPending ? m.common_saving() : m.common_save()}
+              {updateToken.isPending ? t("common:saving") : t("common:save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -263,12 +228,12 @@ export const SettingsTokensSection: FC = () => {
       <Dialog open={!!revokeId} onOpenChange={(o) => !o && setRevokeId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{m.settings_tokens_revoke_title()}</DialogTitle>
+            <DialogTitle>{t("settings:tokens_revoke_title")}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm">{m.settings_tokens_revoke_description()}</p>
+          <p className="text-sm">{t("settings:tokens_revoke_description")}</p>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRevokeId(null)}>
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -276,8 +241,8 @@ export const SettingsTokensSection: FC = () => {
               disabled={revokeToken.isPending}
             >
               {revokeToken.isPending
-                ? m.settings_tokens_revoking()
-                : m.common_revoke()}
+                ? t("settings:tokens_revoking")
+                : t("common:revoke")}
             </Button>
           </DialogFooter>
         </DialogContent>

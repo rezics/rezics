@@ -1,23 +1,6 @@
 import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
-import {
-  common_loading,
-  common_next_page,
-  common_no_data,
-  common_page_of,
-  common_previous_page,
-  profile_search_content_placeholder,
-  profile_sort_most_replies,
-  search_category_excerpts,
-  search_category_posts,
-  search_category_remarks,
-  search_category_reviews,
-  search_empty_title,
-  shelf_controls_sort_by,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -30,24 +13,6 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-
-const i18nMessages = {
-  common_loading,
-  common_next_page,
-  common_no_data,
-  common_page_of,
-  common_previous_page,
-  profile_search_content_placeholder,
-  search_empty_title,
-  shelf_controls_sort_by,
-  profile_sort_most_replies,
-  search_category_excerpts,
-  search_category_posts,
-  search_category_remarks,
-  search_category_reviews,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-};
 
 const KIND_CHIP_LABEL = {
   REVIEW: i18nMessages.search_category_reviews,
@@ -63,8 +28,8 @@ const SORT_OPTION_LABEL = {
 } as const satisfies Record<string, () => string>;
 
 export const ContentTabSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  const { userId } = useProfileContext();
+  const { t } = useTranslation(["common", "entity", "search", "settings"]);
+const { userId } = useProfileContext();
   const [kind, setKind] = useState("REVIEW");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -90,11 +55,11 @@ export const ContentTabSection: FC = () => {
 
   const filterConfig: FilterBarConfig = {
     showSearch: true,
-    searchPlaceholder: m.profile_search_content_placeholder(),
+    searchPlaceholder: t("settings:profile_search_content_placeholder"),
     dropdowns: [
       {
         key: "sort",
-        label: m.shelf_controls_sort_by(),
+        label: t("entity:shelf_controls_sort_by"),
         options: Object.entries(SORT_OPTION_LABEL).map(([value, label]) => ({
           value,
           label: label(),
@@ -140,11 +105,11 @@ export const ContentTabSection: FC = () => {
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          {m.common_loading()}
+          {t("common:loading")}
         </p>
       ) : posts.length === 0 ? (
         <EmptyState
-          title={filters.q ? m.search_empty_title() : m.common_no_data()}
+          title={filters.q ? t("search:empty_title") : t("common:no_data")}
         />
       ) : (
         <>
@@ -163,10 +128,10 @@ export const ContentTabSection: FC = () => {
                 onClick={() => setOffset(Math.max(0, offset - limit))}
                 disabled={offset === 0}
               >
-                {m.common_previous_page()}
+                {t("common:previous_page")}
               </Button>
               <span className="text-sm text-text-secondary">
-                {m.common_page_of({ page: currentPage + 1, total: totalPages })}
+                {t("common:page_of", { page: currentPage + 1, total: totalPages })}
               </span>
               <Button
                 type="button"
@@ -175,7 +140,7 @@ export const ContentTabSection: FC = () => {
                 onClick={() => setOffset(offset + limit)}
                 disabled={currentPage + 1 >= totalPages}
               >
-                {m.common_next_page()}
+                {t("common:next_page")}
               </Button>
             </div>
           )}

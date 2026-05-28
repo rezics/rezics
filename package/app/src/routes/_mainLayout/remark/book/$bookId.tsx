@@ -1,14 +1,9 @@
 import { bookQueries } from "@rezics/api/book/book";
-import { search_category_remarks } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
 import { RemarkListSection } from "@/remark";
-
-const i18nMessages = {
-  search_category_remarks,
-};
 
 export const Route = createFileRoute("/_mainLayout/remark/book/$bookId")({
   validateSearch: (
@@ -22,8 +17,8 @@ export const Route = createFileRoute("/_mainLayout/remark/book/$bookId")({
         : undefined,
   }),
   component: () => {
-    const m = useMessage(i18nMessages);
-    const { bookId } = Route.useParams();
+    const { t } = useTranslation(["search"]);
+const { bookId } = Route.useParams();
     const { scope } = Route.useSearch();
     const { data: bookInfo } = useQuery({
       ...bookQueries.detail(bookId),
@@ -34,7 +29,7 @@ export const Route = createFileRoute("/_mainLayout/remark/book/$bookId")({
     return (
       <div className="mx-auto w-full max-w-lg px-4 py-6">
         <h2 className="text-xl font-semibold mb-6">
-          {m.search_category_remarks()}
+          {t("search:category_remarks")}
         </h2>
         <RemarkListSection
           targetUnitId={bookId}

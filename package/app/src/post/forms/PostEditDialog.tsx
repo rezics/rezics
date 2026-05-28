@@ -9,14 +9,7 @@ import {
   markdownContentDoc,
   PostKind,
 } from "@rezics/contract";
-import {
-  common_cancel,
-  common_edit,
-  common_save,
-  common_saving,
-  post_edit_wiki_post,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -30,14 +23,6 @@ import {
 import type React from "react";
 import { useState } from "react";
 
-const i18nMessages = {
-  common_cancel,
-  common_edit,
-  common_save,
-  common_saving,
-  post_edit_wiki_post,
-};
-
 interface PostEditDialogProps {
   post: PostDTO;
   open: boolean;
@@ -49,8 +34,8 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   open,
   onClose,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
+  const { t } = useTranslation(["common", "community"]);
+const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isWikiPost = post.kind === PostKind.WIKI;
 
@@ -96,7 +81,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isWikiPost ? m.post_edit_wiki_post() : m.common_edit()}
+            {isWikiPost ? t("community:post_edit_wiki_post") : t("common:edit")}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3 pt-2">
@@ -114,13 +99,13 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={activeMutation.isPending || !text.trim()}
           >
-            {activeMutation.isPending ? m.common_saving() : m.common_save()}
+            {activeMutation.isPending ? t("common:saving") : t("common:save")}
           </Button>
         </DialogFooter>
       </DialogContent>

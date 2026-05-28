@@ -1,31 +1,14 @@
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
-import {
-  common_load_more,
-  common_loading,
-  common_search,
-  shelf_empty_yet,
-  shelf_list_title,
-  shelf_new_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ShelfCard } from "../components/ShelfCard";
 
-const i18nMessages = {
-  common_load_more,
-  common_loading,
-  common_search,
-  shelf_empty_yet,
-  shelf_list_title,
-  shelf_new_title,
-};
-
 export function ShelfListPage() {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common", "entity"]);
+const navigate = useNavigate();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery(
       shelfInfiniteListQuery({
@@ -39,16 +22,16 @@ export function ShelfListPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="mb-6 flex flex-row items-center justify-between">
-        <h1 className="text-2xl font-semibold">{m.shelf_list_title()}</h1>
+        <h1 className="text-2xl font-semibold">{t("entity:shelf_list_title")}</h1>
         <div className="flex flex-row gap-2">
           <Button
             variant="ghost"
             onClick={() => navigate({ to: "/shelf/search" })}
           >
-            {m.common_search()}
+            {t("common:search")}
           </Button>
           <Button onClick={() => navigate({ to: "/shelf/new" })}>
-            {m.shelf_new_title()}
+            {t("entity:shelf_new_title")}
           </Button>
         </div>
       </div>
@@ -59,7 +42,7 @@ export function ShelfListPage() {
         </div>
       ) : shelves.length === 0 ? (
         <p className="py-8 text-center text-text-secondary">
-          {m.shelf_empty_yet()}
+          {t("entity:shelf_empty_yet")}
         </p>
       ) : (
         <>
@@ -75,7 +58,7 @@ export function ShelfListPage() {
                 disabled={isFetchingNextPage}
                 onClick={() => void fetchNextPage()}
               >
-                {isFetchingNextPage ? m.common_loading() : m.common_load_more()}
+                {isFetchingNextPage ? t("common:loading") : t("common:load_more")}
               </Button>
             </div>
           )}

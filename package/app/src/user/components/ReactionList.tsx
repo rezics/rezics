@@ -2,33 +2,12 @@ import type {
   ReactionHistoryGivenItem,
   ReactionHistoryReceivedItem,
 } from "@rezics/api/reaction/reaction.types";
-import {
-  common_end_of_list,
-  common_load_more,
-  common_retry,
-  reactions_empty_given,
-  reactions_empty_given_description,
-  reactions_empty_received,
-  reactions_empty_received_description,
-  reactions_load_failed,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { Sparkles } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { ReactionHistoryItem } from "./ReactionHistoryItem";
-
-const i18nMessages = {
-  common_end_of_list,
-  common_load_more,
-  common_retry,
-  reactions_empty_given,
-  reactions_empty_given_description,
-  reactions_empty_received,
-  reactions_empty_received_description,
-  reactions_load_failed,
-};
 
 interface ReactionListGivenProps {
   mode: "given";
@@ -57,8 +36,8 @@ export type ReactionListProps =
   | ReactionListReceivedProps;
 
 export function ReactionList(props: ReactionListProps) {
-  const m = useMessage(i18nMessages);
-  const {
+  const { t } = useTranslation(["common", "community"]);
+const {
     mode,
     items,
     isLoading,
@@ -95,11 +74,11 @@ export function ReactionList(props: ReactionListProps) {
   if (error && items.length === 0) {
     return (
       <EmptyState
-        title={m.reactions_load_failed()}
+        title={t("community:reactions_load_failed")}
         description={error.message}
         action={
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            {m.common_retry()}
+            {t("common:retry")}
           </Button>
         }
       />
@@ -111,13 +90,13 @@ export function ReactionList(props: ReactionListProps) {
       <EmptyState
         title={
           mode === "given"
-            ? m.reactions_empty_given()
-            : m.reactions_empty_received()
+            ? t("community:reactions_empty_given")
+            : t("community:reactions_empty_received")
         }
         description={
           mode === "given"
-            ? m.reactions_empty_given_description()
-            : m.reactions_empty_received_description()
+            ? t("community:reactions_empty_given_description")
+            : t("community:reactions_empty_received_description")
         }
         icon={<Sparkles width={28} height={28} />}
       />
@@ -148,13 +127,13 @@ export function ReactionList(props: ReactionListProps) {
               onClick={() => fetchNextPage()}
               className="text-text-secondary"
             >
-              {m.common_load_more()}
+              {t("common:load_more")}
             </Button>
           )}
         </div>
       ) : (
         <p className="text-xs text-text-tertiary text-center py-6">
-          {m.common_end_of_list()}
+          {t("common:end_of_list")}
         </p>
       )}
     </div>

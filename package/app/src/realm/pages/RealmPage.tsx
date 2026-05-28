@@ -4,20 +4,7 @@ import {
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
 import { contentDocMarkdownFallback, type TagTreeNode } from "@rezics/contract";
-import {
-  realm_join_to_post,
-  realm_manage,
-  realm_member_count,
-  realm_not_found,
-  realm_official,
-  realm_post_in_realm,
-  realm_public,
-  realm_tab_feed,
-  realm_tab_members,
-  realm_tab_tags,
-  realm_untitled,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -55,20 +42,6 @@ import { RealmAboutTab } from "../sections/RealmAboutTab";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 import { RuleSection } from "../sections/RuleSection";
 
-const i18nMessages = {
-  realm_join_to_post,
-  realm_manage,
-  realm_member_count,
-  realm_not_found,
-  realm_official,
-  realm_post_in_realm,
-  realm_public,
-  realm_tab_feed,
-  realm_tab_members,
-  realm_tab_tags,
-  realm_untitled,
-};
-
 export type RealmPageTab =
   | "feed"
   | "wiki"
@@ -96,8 +69,8 @@ export function RealmPage({
   onFeedSortChange,
   onFeedTagIdsChange,
 }: RealmPageProps) {
-  const m = useMessage(i18nMessages);
-  const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
+  const { t } = useTranslation(["entity"]);
+const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const permission = useServerPermission();
   const [localTab, setLocalTab] = useState<RealmPageTab>(tab ?? "feed");
@@ -122,11 +95,11 @@ export function RealmPage({
   }
 
   if (!realm) {
-    return <p className="py-8 text-text-secondary">{m.realm_not_found()}</p>;
+    return <p className="py-8 text-text-secondary">{t("entity:realm_not_found")}</p>;
   }
 
   const translation = getTranslation(realm.translations);
-  const title = translation?.title ?? m.realm_untitled();
+  const title = translation?.title ?? t("entity:realm_untitled");
   const description = contentDocMarkdownFallback(translation?.description);
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
   const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
@@ -155,7 +128,7 @@ export function RealmPage({
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label={m.realm_manage()}
+                  aria-label={t("entity:realm_manage")}
                 >
                   <Settings className="h-4 w-4" />
                 </Button>
@@ -165,11 +138,11 @@ export function RealmPage({
           <div className="flex items-center gap-2">
             {isMember ? (
               <Button size="sm" onClick={() => setComposerOpen(true)}>
-                {m.realm_post_in_realm()}
+                {t("entity:realm_post_in_realm")}
               </Button>
             ) : (
               <Button size="sm" variant="outline" disabled>
-                {m.realm_join_to_post()}
+                {t("entity:realm_join_to_post")}
               </Button>
             )}
             <JoinButton realmId={realmId} />
@@ -181,14 +154,14 @@ export function RealmPage({
         )}
         <div className="flex flex-row gap-4">
           <span className="text-xs text-text-secondary">
-            {m.realm_member_count({ count: realm.memberCount ?? 0 })}
+            {t("entity:realm_member_count", { count: realm.memberCount ?? 0 })}
           </span>
           {realm.isPublic && (
-            <span className="text-xs text-text-brand">{m.realm_public()}</span>
+            <span className="text-xs text-text-brand">{t("entity:realm_public")}</span>
           )}
           {realm.isOfficial && (
             <span className="text-xs text-text-secondary">
-              {m.realm_official()}
+              {t("entity:realm_official")}
             </span>
           )}
         </div>
@@ -196,11 +169,11 @@ export function RealmPage({
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-4">
         <TabsList>
-          <TabsTrigger value="feed">{m.realm_tab_feed()}</TabsTrigger>
+          <TabsTrigger value="feed">{t("entity:realm_tab_feed")}</TabsTrigger>
           {showWikiTab && <TabsTrigger value="wiki">Wiki</TabsTrigger>}
-          <TabsTrigger value="tags">{m.realm_tab_tags()}</TabsTrigger>
+          <TabsTrigger value="tags">{t("entity:realm_tab_tags")}</TabsTrigger>
           <TabsTrigger value="about">About</TabsTrigger>
-          <TabsTrigger value="members">{m.realm_tab_members()}</TabsTrigger>
+          <TabsTrigger value="members">{t("entity:realm_tab_members")}</TabsTrigger>
           {showModerationTab ? (
             <TabsTrigger value="moderation">Moderation</TabsTrigger>
           ) : null}
@@ -279,7 +252,7 @@ export function RealmPage({
       <Dialog open={composerOpen} onOpenChange={setComposerOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{m.realm_post_in_realm()}</DialogTitle>
+            <DialogTitle>{t("entity:realm_post_in_realm")}</DialogTitle>
           </DialogHeader>
           <RuleSection
             realmUnitId={realmId}

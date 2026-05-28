@@ -1,14 +1,8 @@
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { scoreQueries } from "@rezics/api/score/score";
-import { score_no_ratings, score_ratings_count } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-
-const i18nMessages = {
-  score_no_ratings,
-  score_ratings_count,
-};
 
 interface ScoreOverviewProps {
   unitId: string;
@@ -19,15 +13,15 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   unitId,
   realm = getDefaultRealmId() ?? "default",
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data: aggregates } = useQuery(scoreQueries.aggregates(unitId));
+  const { t } = useTranslation(["community"]);
+const { data: aggregates } = useQuery(scoreQueries.aggregates(unitId));
 
   const aggregate =
     aggregates?.find((a) => a.realm === realm) ?? aggregates?.[0];
 
   if (!aggregate) {
     return (
-      <p className="text-sm text-text-secondary">{m.score_no_ratings()}</p>
+      <p className="text-sm text-text-secondary">{t("community:score_no_ratings")}</p>
     );
   }
 
@@ -50,7 +44,7 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
           {average.toFixed(1)}
         </div>
         <div className="text-xs text-text-secondary">
-          {m.score_ratings_count({ count: aggregate.totalCount })}
+          {t("community:score_ratings_count", { count: aggregate.totalCount })}
         </div>
       </div>
 

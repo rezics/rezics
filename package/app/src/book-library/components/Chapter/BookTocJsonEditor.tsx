@@ -1,18 +1,12 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookContentStructureItem } from "@rezics/contract";
-import { book_toc_disabled, common_loading } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-
-const i18nMessages = {
-  book_toc_disabled,
-  common_loading,
-};
 
 /** Props for BookTocJsonEditor component. */
 interface BookTocJsonEditorProps {
@@ -33,8 +27,8 @@ type BookTocJsonData = {
 export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
   bookId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery(
+  const { t } = useTranslation(["book", "common"]);
+const { data, isLoading, error } = useQuery(
     bookQueries.contentStructure(bookId),
   );
 
@@ -50,13 +44,13 @@ export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
     console.log(value);
   }
 
-  if (isLoading) return <div>{m.common_loading()}</div>;
+  if (isLoading) return <div>{t("common:loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div>
       <Alert variant="destructive" className="mb-2">
-        <AlertDescription>{m.book_toc_disabled()}</AlertDescription>
+        <AlertDescription>{t("book:toc_disabled")}</AlertDescription>
       </Alert>
       <RezicsJsonEditor
         value={JSON.stringify(jsonData, null, 2)}

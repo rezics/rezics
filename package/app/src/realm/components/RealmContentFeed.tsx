@@ -1,8 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind, type PostListQuery } from "@rezics/contract";
-import { realm_content_empty_title } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -15,10 +14,6 @@ import {
 } from "@/review/components/item/ReviewCard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
-
-const i18nMessages = {
-  realm_content_empty_title,
-};
 
 interface RealmContentFeedProps {
   realmId: string;
@@ -33,8 +28,8 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   tagIds = [],
   realmLifecycleState,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data, error, isError, isLoading } = useQuery(
+  const { t } = useTranslation(["entity"]);
+const { data, error, isError, isLoading } = useQuery(
     postQueries.byRealm(realmId, {
       sort,
       ...(tagIds.length > 0 ? { tagIds } : {}),
@@ -89,7 +84,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   }
 
   if (posts.length === 0) {
-    return <EmptyState title={m.realm_content_empty_title()} />;
+    return <EmptyState title={t("entity:realm_content_empty_title")} />;
   }
 
   return (

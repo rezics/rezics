@@ -1,20 +1,23 @@
 import type { EntityKind } from "@rezics/contract";
-import * as m from "../paraglide/messages.js";
 
-const ENTITY_KIND_MESSAGE = {
-  person: m.entity_kind_person,
-  organization: m.entity_kind_organization,
-  circle: m.entity_kind_circle,
-  studio: m.entity_kind_studio,
-  label: m.entity_kind_label,
-  character: m.entity_kind_character,
-  faction: m.entity_kind_faction,
-  family: m.entity_kind_family,
-  location: m.entity_kind_location,
-  artifact: m.entity_kind_artifact,
-  event: m.entity_kind_event,
-  concept: m.entity_kind_concept,
-} as const satisfies Record<EntityKind, () => string>;
+import { getI18nRuntime } from "../runtime.ts";
+
+const ENTITY_KIND_KEY = {
+  person: "entity:kind_person",
+  organization: "entity:kind_organization",
+  circle: "entity:kind_circle",
+  studio: "entity:kind_studio",
+  label: "entity:kind_label",
+  character: "entity:kind_character",
+  faction: "entity:kind_faction",
+  family: "entity:kind_family",
+  location: "entity:kind_location",
+  artifact: "entity:kind_artifact",
+  event: "entity:kind_event",
+  concept: "entity:kind_concept",
+  game_platform: "entity:kind_game_platform",
+  universe: "entity:kind_universe",
+} as const satisfies Record<EntityKind, `entity:${string}`>;
 
 export const entityKindLabel = (kind: EntityKind): string =>
-  ENTITY_KIND_MESSAGE[kind]();
+  getI18nRuntime().i18n.t(ENTITY_KIND_KEY[kind]);

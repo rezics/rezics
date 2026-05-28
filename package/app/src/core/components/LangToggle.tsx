@@ -1,5 +1,5 @@
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
-import { setLocale } from "@rezics/i18n/react";
+import { setLocale, useTranslation } from "@rezics/i18n/react";
 import {
   DropdownMenu,
   DropdownMenuContent,

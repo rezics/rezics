@@ -1,15 +1,4 @@
-import {
-  admin_token_domain,
-  admin_token_permission,
-  admin_token_remove_domain,
-  admin_token_remove_permission,
-  admin_token_scope_custom,
-  admin_token_scope_custom_domain,
-  admin_token_scopes_default_help,
-  admin_token_scopes_title,
-  common_add,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
@@ -28,18 +17,6 @@ import {
 } from "lucide-react";
 import type { FC } from "react";
 import { useState } from "react";
-
-const i18nMessages = {
-  admin_token_domain,
-  admin_token_permission,
-  admin_token_remove_domain,
-  admin_token_remove_permission,
-  admin_token_scope_custom,
-  admin_token_scope_custom_domain,
-  admin_token_scopes_default_help,
-  admin_token_scopes_title,
-  common_add,
-};
 
 interface ScopesEditorProps {
   scopes: Record<string, string[]>;
@@ -65,8 +42,8 @@ const PREDEFINED_PERMISSIONS = ["read", "write", "delete", "admin"];
  * ScopesEditor - 编辑 API token 权限 (scopes) 的组件
  */
 export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
-  const m = useMessage(i18nMessages);
-  const [newDomain, setNewDomain] = useState("");
+  const { t } = useTranslation(["admin", "common"]);
+const [newDomain, setNewDomain] = useState("");
   const [newPermission, setNewPermission] = useState("");
   const [customDomain, setCustomDomain] = useState("");
 
@@ -104,7 +81,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
 
   return (
     <div>
-      <p className="mb-2 font-medium text-sm">{m.admin_token_scopes_title()}</p>
+      <p className="mb-2 font-medium text-sm">{t("admin:token_scopes_title")}</p>
 
       {/* 显示当前 scopes */}
       {Object.keys(scopes).length > 0 && (
@@ -122,7 +99,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
                       {perm}
                       <button
                         type="button"
-                        aria-label={m.admin_token_remove_permission({
+                        aria-label={t("admin:token_remove_permission", {
                           permission: perm,
                         })}
                         onClick={() => removeScope(domain, perm)}
@@ -138,7 +115,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
                   variant="ghost"
                   className="text-error-text size-8"
                   onClick={() => removeDomain(domain)}
-                  aria-label={m.admin_token_remove_domain()}
+                  aria-label={t("admin:token_remove_domain")}
                 >
                   <DeleteIcon className="size-4" />
                 </Button>
@@ -151,7 +128,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
       {/* 添加新 scope */}
       <div className="flex flex-row gap-2 items-end flex-wrap">
         <div className="flex flex-col gap-1">
-          <Label className="text-xs">{m.admin_token_domain()}</Label>
+          <Label className="text-xs">{t("admin:token_domain")}</Label>
           <Select
             value={newDomain}
             onValueChange={(value) => {
@@ -159,7 +136,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
             }}
           >
             <SelectTrigger size="sm" className="min-w-30">
-              <SelectValue placeholder={m.admin_token_domain()} />
+              <SelectValue placeholder={t("admin:token_domain")} />
             </SelectTrigger>
             <SelectContent>
               {PREDEFINED_DOMAINS.map((d) => (
@@ -168,7 +145,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
                 </SelectItem>
               ))}
               <SelectItem value="custom">
-                {m.admin_token_scope_custom()}
+                {t("admin:token_scope_custom")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -177,7 +154,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
         {newDomain === "custom" && (
           <div className="flex flex-col gap-1">
             <Label className="text-xs">
-              {m.admin_token_scope_custom_domain()}
+              {t("admin:token_scope_custom_domain")}
             </Label>
             <Input
               value={customDomain}
@@ -188,7 +165,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
         )}
 
         <div className="flex flex-col gap-1">
-          <Label className="text-xs">{m.admin_token_permission()}</Label>
+          <Label className="text-xs">{t("admin:token_permission")}</Label>
           <Select
             value={newPermission}
             onValueChange={(value) => {
@@ -196,7 +173,7 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
             }}
           >
             <SelectTrigger size="sm" className="min-w-30">
-              <SelectValue placeholder={m.admin_token_permission()} />
+              <SelectValue placeholder={t("admin:token_permission")} />
             </SelectTrigger>
             <SelectContent>
               {PREDEFINED_PERMISSIONS.map((p) => (
@@ -219,13 +196,13 @@ export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
           }
         >
           <AddIcon className="size-4" />
-          {m.common_add()}
+          {t("common:add")}
         </Button>
       </div>
 
       {Object.keys(scopes).length === 0 && (
         <p className="text-sm text-text-secondary mt-2">
-          {m.admin_token_scopes_default_help()}
+          {t("admin:token_scopes_default_help")}
         </p>
       )}
     </div>

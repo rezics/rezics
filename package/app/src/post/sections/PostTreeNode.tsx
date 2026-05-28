@@ -1,9 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
-import {
-  post_collapse_thread,
-  post_continue_thread,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { TextLink } from "@/shared/ui/link";
 import { PostReply } from "../components/item/PostReply";
@@ -19,11 +15,6 @@ import {
   RAIL_TOP_PX,
   TOGGLE_TOP_PX,
 } from "./postTreeLayout";
-
-const i18nMessages = {
-  post_collapse_thread,
-  post_continue_thread,
-};
 
 export interface PostTreeNodeProps {
   node: PostTreeNodeModel;
@@ -58,8 +49,8 @@ export function PostTreeNode({
   onComposerDone,
   onThreadHoverChange,
 }: PostTreeNodeProps) {
-  const m = useMessage(i18nMessages);
-  const { post } = node;
+  const { t } = useTranslation(["community"]);
+const { post } = node;
   const collapsed = isCollapsed(post.unitId);
   const hasVisibleChildren = node.children.length > 0 && !collapsed;
   const hasThreadChildren =
@@ -95,7 +86,7 @@ export function PostTreeNode({
           {hasVisibleChildren ? (
             <button
               type="button"
-              aria-label={m.post_collapse_thread()}
+              aria-label={t("community:post_collapse_thread")}
               className="absolute z-10 -translate-x-1/2 cursor-pointer appearance-none border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
               style={{
                 left: `${AVATAR_CENTER_PX}px`,
@@ -166,7 +157,7 @@ export function PostTreeNode({
               }}
             >
               <span className="text-xs text-text-brand">
-                {m.post_continue_thread()}
+                {t("community:post_continue_thread")}
               </span>
             </TextLink>
           </div>

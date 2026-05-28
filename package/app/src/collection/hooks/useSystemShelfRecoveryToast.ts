@@ -3,10 +3,6 @@ import {
   useSystemShelfRecovery,
 } from "@rezics/api/shelf";
 import type { SystemShelfKindKey } from "@rezics/contract";
-import {
-  shelf_system_recoveryRetry,
-  shelf_system_recoveryToast,
-} from "@rezics/i18n/messages";
 import { toast } from "sonner";
 import { systemShelfKindLabel } from "@/shelf/models/systemShelfLabel";
 

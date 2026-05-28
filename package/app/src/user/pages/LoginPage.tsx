@@ -1,12 +1,4 @@
-import {
-  auth_flow_create_account,
-  auth_flow_forgot_password,
-  auth_flow_new_to_app,
-  auth_login,
-  common_email,
-  common_loading,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
 import {
@@ -29,15 +21,6 @@ import { resolvePostAuthDestination } from "../models/authRedirect";
 import { login } from "../models/handler";
 import { validateEmail } from "../models/validate";
 
-const i18nMessages = {
-  auth_flow_create_account,
-  auth_flow_forgot_password,
-  auth_flow_new_to_app,
-  auth_login,
-  common_email,
-  common_loading,
-};
-
 interface LoginData {
   email: string;
   password: string;
@@ -59,8 +42,8 @@ export const LoginPage: FC<LoginPageProps> = ({
   onClose,
   onRegisterClick,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation(["auth", "common"]);
+const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<LoginData>({
     email: "",
@@ -121,7 +104,7 @@ export const LoginPage: FC<LoginPageProps> = ({
         </Alert>
       )}
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="login-email">{m.common_email()}</Label>
+        <Label htmlFor="login-email">{t("common:email")}</Label>
         <Input
           id="login-email"
           name="email"
@@ -140,13 +123,13 @@ export const LoginPage: FC<LoginPageProps> = ({
         }}
       />
       <div>
-        {m.auth_flow_new_to_app()}&nbsp;
+        {t("auth:flow_new_to_app")}&nbsp;
         <TextButton onClick={handleRegisterClick}>
-          {m.auth_flow_create_account()}
+          {t("auth:flow_create_account")}
         </TextButton>
         <br />
         <TextLink to="/reset-password">
-          {m.auth_flow_forgot_password()}
+          {t("auth:flow_forgot_password")}
         </TextLink>
       </div>
       <SocialAuthButtons mode="login" />
@@ -161,14 +144,14 @@ export const LoginPage: FC<LoginPageProps> = ({
         disabled={loading}
         onClick={handleSubmit}
       >
-        {loading ? m.common_loading() : m.auth_login()}
+        {loading ? t("common:loading") : t("auth:login")}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title={m.auth_login()}
+      title={t("auth:login")}
       content={content}
       actions={actions}
     />

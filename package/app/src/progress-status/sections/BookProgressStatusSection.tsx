@@ -1,16 +1,6 @@
 import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
-import {
-  book_hero_actions_mark_as_read,
-  book_hero_actions_read_again,
-  book_hero_actions_start_reading,
-  book_hero_actions_want_to_read,
-} from "@rezics/i18n/messages";
-import {
-  type ReactiveMessageBag,
-  useLocale,
-  useMessage,
-} from "@rezics/i18n/react";
+import { type ReactiveMessageBag, useLocale, useTranslation } from "@rezics/i18n/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
@@ -36,13 +26,6 @@ import {
   openStatusModalAtom,
   statusModalAtom,
 } from "../states/statusModalAtom";
-
-const i18nMessages = {
-  book_hero_actions_mark_as_read,
-  book_hero_actions_read_again,
-  book_hero_actions_start_reading,
-  book_hero_actions_want_to_read,
-};
 
 type ProgressMessages = ReactiveMessageBag<typeof i18nMessages>;
 
@@ -70,27 +53,27 @@ function getDefaultPrimaryAction(
   if (!status) {
     return {
       status: "BACKLOG",
-      label: m.book_hero_actions_want_to_read(),
+      label: t("book:hero_actions_want_to_read"),
     };
   }
 
   if (status === "ACTIVE") {
     return {
       status: "COMPLETED",
-      label: m.book_hero_actions_mark_as_read(),
+      label: t("book:hero_actions_mark_as_read"),
     };
   }
 
   if (status === "COMPLETED") {
     return {
       status: "COMPLETED",
-      label: m.book_hero_actions_read_again(),
+      label: t("book:hero_actions_read_again"),
     };
   }
 
   return {
     status: "ACTIVE",
-    label: m.book_hero_actions_start_reading(),
+    label: t("book:hero_actions_start_reading"),
   };
 }
 
@@ -98,8 +81,8 @@ export function BookProgressStatusSection({
   bookUnitId,
 }: BookProgressStatusSectionProps) {
   const language = useLocale();
-  const m = useMessage(i18nMessages);
-  const progress = useUnitProgress(bookUnitId);
+  const { t } = useTranslation(["book"]);
+const progress = useUnitProgress(bookUnitId);
   const currentStatus: UserUnitProgressStatus | null =
     progress.data?.status ?? null;
 

@@ -5,8 +5,7 @@ import {
 } from "@rezics/api/hooks";
 import { postThreadQuery } from "@rezics/api/post/post";
 import type { PostDTO } from "@rezics/contract";
-import { common_edit } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -39,8 +38,8 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   highlightFocusedPost,
   onReply,
 }) => {
-  const m = useMessage({ common_edit });
-  const permission = useServerPermission();
+  const { t } = useTranslation(["common"]);
+const permission = useServerPermission();
   const actorUserId = useCurrentUserId();
   const [editingPost, setEditingPost] = useState<PostDTO | null>(null);
   const { data, isLoading } = useQuery(
@@ -70,7 +69,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
         }}
       >
         <Pencil size={16} strokeWidth={2} />
-        <span>{m.common_edit()}</span>
+        <span>{t("common:edit")}</span>
       </DropdownMenuItem>
     );
   };

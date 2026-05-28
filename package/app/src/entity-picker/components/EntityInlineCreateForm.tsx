@@ -12,48 +12,13 @@ import {
   subjectAttributionRoles,
 } from "@rezics/contract";
 import { creditRoleLabel, subjectRoleLabel } from "@rezics/i18n";
-import {
-  common_cancel,
-  common_create,
-  common_creating,
-  common_language,
-  entity_add_role,
-  entity_avatar_placeholder,
-  entity_avatar_url,
-  entity_create_failed,
-  entity_credit_eligibility,
-  entity_kind_label,
-  entity_subject_eligibility,
-  entity_title_label,
-  entity_title_placeholder,
-  entity_title_required,
-  language_code_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { type FormEvent, useMemo, useState } from "react";
 import {
   suggestCreditEligibility,
   suggestSubjectEligibility,
 } from "../models/eligibilitySuggestions";
-
-const i18nMessages = {
-  common_cancel,
-  common_create,
-  common_creating,
-  common_language,
-  entity_add_role,
-  entity_avatar_placeholder,
-  entity_avatar_url,
-  entity_create_failed,
-  entity_credit_eligibility,
-  entity_kind_label,
-  entity_subject_eligibility,
-  entity_title_label,
-  entity_title_placeholder,
-  entity_title_required,
-  language_code_placeholder,
-};
 
 interface EntityInlineCreateFormProps {
   initialTitle?: string;
@@ -76,8 +41,8 @@ export function EntityInlineCreateForm({
   onCreated,
   onCancel,
 }: EntityInlineCreateFormProps) {
-  const m = useMessage(i18nMessages);
-  const [title, setTitle] = useState(initialTitle);
+  const { t } = useTranslation(["common", "entity", "shell"]);
+const [title, setTitle] = useState(initialTitle);
   const [language, setLanguage] = useState(initialLanguage);
   const [kind, setKind] = useState<EntityKind>(kindHint ?? entityKinds[0]);
   const [eligibleCreditRoles, setEligibleCreditRoles] = useState<
@@ -109,7 +74,7 @@ export function EntityInlineCreateForm({
 
   const mutation = useCreateEntity({
     onSuccess: (entity) => onCreated(entity.unitId),
-    onError: (err) => setError(err.message || m.entity_create_failed()),
+    onError: (err) => setError(err.message || t("entity:create_failed")),
   });
 
   const handleSubmit = (e: FormEvent) => {
@@ -117,7 +82,7 @@ export function EntityInlineCreateForm({
     setError(null);
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
-      setError(m.entity_title_required());
+      setError(t("entity:title_required"));
       return;
     }
     const trimmedLang = language.trim() || "en";
@@ -141,29 +106,29 @@ export function EntityInlineCreateForm({
       className="flex flex-col gap-3 border-t border-border-whisper p-4"
     >
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="entity-inline-title">{m.entity_title_label()}</Label>
+        <Label htmlFor="entity-inline-title">{t("entity:title_label")}</Label>
         <Input
           id="entity-inline-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder={m.entity_title_placeholder()}
+          placeholder={t("entity:title_placeholder")}
           autoFocus
           required
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-inline-language">{m.common_language()}</Label>
+          <Label htmlFor="entity-inline-language">{t("common:language")}</Label>
           <Input
             id="entity-inline-language"
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            placeholder={m.language_code_placeholder()}
+            placeholder={t("shell:language_code_placeholder")}
             required
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-inline-kind">{m.entity_kind_label()}</Label>
+          <Label htmlFor="entity-inline-kind">{t("entity:kind_label")}</Label>
           <select
             id="entity-inline-kind"
             value={kind}
@@ -188,16 +153,16 @@ export function EntityInlineCreateForm({
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="entity-inline-avatar">{m.entity_avatar_url()}</Label>
+        <Label htmlFor="entity-inline-avatar">{t("entity:avatar_url")}</Label>
         <Input
           id="entity-inline-avatar"
           value={avatar}
           onChange={(e) => setAvatar(e.target.value)}
-          placeholder={m.entity_avatar_placeholder()}
+          placeholder={t("entity:avatar_placeholder")}
         />
       </div>
       <EligibilityRoleEditor
-        label={m.entity_credit_eligibility()}
+        label={t("entity:credit_eligibility")}
         roles={eligibleCreditRoles}
         availableRoles={availableCreditRoles}
         getLabel={creditRoleLabel}
@@ -211,7 +176,7 @@ export function EntityInlineCreateForm({
         }
       />
       <EligibilityRoleEditor
-        label={m.entity_subject_eligibility()}
+        label={t("entity:subject_eligibility")}
         roles={eligibleSubjectRoles}
         availableRoles={availableSubjectRoles}
         getLabel={subjectRoleLabel}
@@ -228,11 +193,11 @@ export function EntityInlineCreateForm({
       <div className="flex justify-end gap-2">
         {onCancel ? (
           <Button type="button" variant="ghost" onClick={onCancel}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
         ) : null}
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? m.common_creating() : m.common_create()}
+          {mutation.isPending ? t("common:creating") : t("common:create")}
         </Button>
       </div>
     </form>
@@ -256,8 +221,8 @@ function EligibilityRoleEditor<Role extends string>({
   onAdd,
   onRemove,
 }: EligibilityRoleEditorProps<Role>) {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["common", "entity", "shell"]);
+return (
     <div className="flex flex-col gap-2">
       <Label>{label}</Label>
       <div className="flex flex-wrap gap-2">
@@ -283,7 +248,7 @@ function EligibilityRoleEditor<Role extends string>({
           }}
           className="h-9 rounded-md border border-border-whisper bg-surface-canvas px-2 text-sm text-text-primary"
         >
-          <option value="">{m.entity_add_role()}</option>
+          <option value="">{t("entity:add_role")}</option>
           {availableRoles.map((role) => (
             <option key={role} value={role}>
               {getLabel(role)}

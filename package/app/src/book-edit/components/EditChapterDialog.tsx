@@ -1,15 +1,5 @@
 import type { ContentRating } from "@rezics/contract";
-import {
-  book_chapter_edit_dialog_status,
-  book_chapter_edit_dialog_title,
-  book_chapter_status_archived,
-  book_chapter_status_draft,
-  book_chapter_status_published,
-  book_fields_title,
-  common_cancel,
-  common_save,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";
 import {
   Button,
@@ -28,17 +18,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useState } from "react";
 import type { Chapter } from "./BookTocEditor";
-
-const i18nMessages = {
-  book_chapter_edit_dialog_status,
-  book_chapter_edit_dialog_title,
-  book_fields_title,
-  common_cancel,
-  common_save,
-  book_chapter_status_archived,
-  book_chapter_status_draft,
-  book_chapter_status_published,
-};
 
 // MOCK: publish statuses — replace with contract enum when backend is ready
 const PUBLISH_STATUSES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
@@ -67,8 +46,8 @@ export function EditChapterDialog({
   chapter,
   onSave,
 }: EditChapterDialogProps) {
-  const m = useMessage(i18nMessages);
-  const [title, setTitle] = useState("");
+  const { t } = useTranslation(["book", "common"]);
+const [title, setTitle] = useState("");
   const [status, setStatus] = useState<PublishStatus>("DRAFT");
   const [rating, setRating] = useState<ContentRating>("GENERAL");
 
@@ -91,11 +70,11 @@ export function EditChapterDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xs">
         <DialogHeader>
-          <DialogTitle>{m.book_chapter_edit_dialog_title()}</DialogTitle>
+          <DialogTitle>{t("book:chapter_edit_dialog_title")}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-5 pt-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="edit-chapter-title">{m.book_fields_title()}</Label>
+            <Label htmlFor="edit-chapter-title">{t("book:fields_title")}</Label>
             <Input
               id="edit-chapter-title"
               value={title}
@@ -106,7 +85,7 @@ export function EditChapterDialog({
           </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor="edit-chapter-status">
-              {m.book_chapter_edit_dialog_status()}
+              {t("book:chapter_edit_dialog_status")}
             </Label>
             <Select
               value={status}
@@ -128,10 +107,10 @@ export function EditChapterDialog({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button onClick={handleSave} disabled={!title.trim()}>
-            {m.common_save()}
+            {t("common:save")}
           </Button>
         </DialogFooter>
       </DialogContent>

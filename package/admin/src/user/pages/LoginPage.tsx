@@ -1,13 +1,4 @@
-import {
-  admin_user_admin_login_description,
-  admin_user_admin_login_title,
-  admin_user_login_failed,
-  admin_user_login_signing_in,
-  auth_login,
-  common_email,
-  common_password,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -22,16 +13,6 @@ import { useState } from "react";
 import { Route } from "@/routes/login";
 import { adminLogin } from "@/user/models/handler";
 
-const i18nMessages = {
-  admin_user_admin_login_description,
-  admin_user_admin_login_title,
-  admin_user_login_failed,
-  admin_user_login_signing_in,
-  auth_login,
-  common_email,
-  common_password,
-};
-
 function normalizeRedirect(to?: string) {
   if (!to) return "/";
   if (to.startsWith("/") && !to.startsWith("//")) return to;
@@ -39,8 +20,8 @@ function normalizeRedirect(to?: string) {
 }
 
 export default function LoginPage() {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["admin", "auth", "common"]);
+const navigate = useNavigate();
   const { redirect: redirectTo } = Route.useSearch();
 
   const [email, setEmail] = useState("");
@@ -60,7 +41,7 @@ export default function LoginPage() {
       });
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : m.admin_user_login_failed();
+        err instanceof Error ? err.message : t("admin:user_login_failed");
       setError(message);
     } finally {
       setSubmitting(false);
@@ -71,10 +52,10 @@ export default function LoginPage() {
     <div className="mx-auto w-full max-w-sm py-16 px-4">
       <div className="bg-surface-elevated rounded-lg p-6">
         <h1 className="text-xl font-extrabold mb-2">
-          {m.admin_user_admin_login_title()}
+          {t("admin:user_admin_login_title")}
         </h1>
         <p className="text-sm text-text-secondary mb-4">
-          {m.admin_user_admin_login_description()}
+          {t("admin:user_admin_login_description")}
         </p>
 
         {error && (
@@ -87,7 +68,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="email">{m.common_email()}</Label>
+            <Label htmlFor="email">{t("common:email")}</Label>
             <Input
               id="email"
               type="email"
@@ -98,7 +79,7 @@ export default function LoginPage() {
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="password">{m.common_password()}</Label>
+            <Label htmlFor="password">{t("common:password")}</Label>
             <Input
               id="password"
               type="password"
@@ -118,10 +99,10 @@ export default function LoginPage() {
             {submitting ? (
               <span className="inline-flex items-center gap-2">
                 <Spinner size="sm" />
-                {m.admin_user_login_signing_in()}
+                {t("admin:user_login_signing_in")}
               </span>
             ) : (
-              m.auth_login()
+              t("auth:login")
             )}
           </Button>
         </form>

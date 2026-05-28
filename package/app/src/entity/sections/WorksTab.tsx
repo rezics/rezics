@@ -1,26 +1,20 @@
-import { entity_loading_works, entity_no_works } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useEntityWorks } from "../hooks/useEntityWorks";
-
-const i18nMessages = {
-  entity_loading_works,
-  entity_no_works,
-};
 
 interface WorksTabProps {
   entityUnitId: string;
 }
 
 export function WorksTab({ entityUnitId }: WorksTabProps) {
-  const m = useMessage(i18nMessages);
-  const { works, isLoading } = useEntityWorks(entityUnitId);
+  const { t } = useTranslation(["entity"]);
+const { works, isLoading } = useEntityWorks(entityUnitId);
   if (isLoading) {
     return (
-      <p className="text-sm text-text-secondary">{m.entity_loading_works()}</p>
+      <p className="text-sm text-text-secondary">{t("entity:loading_works")}</p>
     );
   }
   if (works.length === 0) {
-    return <p className="text-sm text-text-secondary">{m.entity_no_works()}</p>;
+    return <p className="text-sm text-text-secondary">{t("entity:no_works")}</p>;
   }
   return (
     <ul className="flex flex-col gap-2">

@@ -1,6 +1,5 @@
 import type { EntityDTO, UnitTranslationDTO } from "@rezics/contract";
-import { entity_untitled } from "@rezics/i18n/messages";
-
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 /**
  * Pure selectors for the Entity feature. No React, no hooks — safe to call
  * from any layer.
@@ -24,7 +23,7 @@ export function getEntityPrimaryTitle(
   language?: string,
 ): string {
   const tr = getEntityTranslation(entity, language);
-  return tr?.title?.trim() || entity_untitled();
+  return tr?.title?.trim() || getI18nRuntime().i18n.t("entity:untitled");
 }
 
 export function getEntityLanguages(

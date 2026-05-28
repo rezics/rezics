@@ -1,11 +1,5 @@
 import type { ContentRating } from "@rezics/contract";
-import {
-  book_chapter_bulk_rating_description,
-  book_chapter_bulk_rating_title,
-  common_apply,
-  common_cancel,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";
 import {
   Button,
@@ -15,13 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-
-const i18nMessages = {
-  book_chapter_bulk_rating_description,
-  book_chapter_bulk_rating_title,
-  common_apply,
-  common_cancel,
-};
 
 interface BulkRatingDialogProps {
   open: boolean;
@@ -40,25 +27,25 @@ export function BulkRatingDialog({
   onChange,
   onConfirm,
 }: BulkRatingDialogProps) {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["book", "common"]);
+return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xs">
         <DialogHeader>
-          <DialogTitle>{m.book_chapter_bulk_rating_title()}</DialogTitle>
+          <DialogTitle>{t("book:chapter_bulk_rating_title")}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 pt-4">
           <p className="text-sm text-text-secondary">
-            {m.book_chapter_bulk_rating_description({ count })}
+            {t("book:chapter_bulk_rating_description", { count })}
           </p>
           <RatingSelector value={value} onChange={onChange} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button onClick={onConfirm} disabled={count === 0}>
-            {m.common_apply()}
+            {t("common:apply")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -6,25 +6,6 @@ import type {
 } from "@rezics/api/feedback/feedback.types";
 import { buildMeiliFeedbackQuery } from "@rezics/api/meili/meili.queries";
 import {
-  common_confirm,
-  feedback_created_time,
-  feedback_item_id,
-  feedback_load_failed,
-  feedback_mark_resolved,
-  feedback_resolve_confirm,
-  feedback_resolve_success,
-  feedback_resolved_time,
-  feedback_status_resolved,
-  feedback_status_unresolved,
-  feedback_type_bug,
-  feedback_type_feature,
-  feedback_type_other,
-  feedback_type_report,
-  feedback_unit_id,
-  feedback_updated_time,
-  feedback_user_id,
-} from "@rezics/i18n/messages";
-import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
 } from "@rezics/ui/composite/pagination/Pagination.tsx";
@@ -52,6 +33,7 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Link, AppSafeLink as SafeLink } from "@/shared/ui/link";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type FeedbackResolvedFilter = boolean | undefined;
 
 export type FeedbackListProps = {
@@ -77,13 +59,13 @@ const EXTERNAL_PAGE_SIZE = 50;
 const getFeedbackTypeLabel = (type: FeedbackDTO["type"]) => {
   switch (type) {
     case "BUG":
-      return feedback_type_bug();
+      return getI18nRuntime().i18n.t("community:feedback_type_bug");
     case "FEATURE":
-      return feedback_type_feature();
+      return getI18nRuntime().i18n.t("community:feedback_type_feature");
     case "REPORT":
-      return feedback_type_report();
+      return getI18nRuntime().i18n.t("community:feedback_type_report");
     case "OTHER":
-      return feedback_type_other();
+      return getI18nRuntime().i18n.t("community:feedback_type_other");
   }
 };
 
@@ -128,7 +110,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
 
   const handleResolve = (id: string) => {
     resolveMutation.mutate({ id, resolved: true });
-    showAlert(feedback_resolve_success());
+    showAlert(getI18nRuntime().i18n.t("community:feedback_resolve_success"));
   };
 
   const activeResult =
@@ -217,7 +199,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
     <div>
       {isError && (
         <p className="text-sm text-error-text px-2 py-1">
-          {feedback_load_failed()}
+          {getI18nRuntime().i18n.t("community:feedback_load_failed")}
         </p>
       )}
 
@@ -248,22 +230,22 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                         {getFeedbackTypeLabel(item.type)}
                       </Badge>
                       <p className="text-sm font-medium">
-                        {feedback_item_id({ id: item.id })}
+                        {getI18nRuntime().i18n.t("community:feedback_item_id", { id: item.id })}
                       </p>
                       {item.unitId && (
                         <Badge variant="outline">
-                          {feedback_unit_id({ id: item.unitId })}
+                          {getI18nRuntime().i18n.t("community:feedback_unit_id", { id: item.unitId })}
                         </Badge>
                       )}
                       {item.resolved ? (
                         <Badge className="bg-success-fill text-white inline-flex items-center gap-1">
                           <DoneIcon className="h-3 w-3" />
-                          {feedback_status_resolved()}
+                          {getI18nRuntime().i18n.t("community:feedback_status_resolved")}
                         </Badge>
                       ) : (
                         <Badge className="bg-warning-fill text-white inline-flex items-center gap-1">
                           <HourglassEmptyIcon className="h-3 w-3" />
-                          {feedback_status_unresolved()}
+                          {getI18nRuntime().i18n.t("community:feedback_status_unresolved")}
                         </Badge>
                       )}
                     </div>
@@ -280,7 +262,7 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                                       size="icon"
                                       variant="ghost"
                                       disabled={resolveMutation.isPending}
-                                      aria-label={feedback_mark_resolved()}
+                                      aria-label={getI18nRuntime().i18n.t("community:feedback_mark_resolved")}
                                     >
                                       <CheckCircleOutlineIcon className="h-4 w-4" />
                                     </Button>
@@ -289,18 +271,18 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                               }
                             />
                             <TooltipContent>
-                              {feedback_mark_resolved()}
+                              {getI18nRuntime().i18n.t("community:feedback_mark_resolved")}
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                         <PopoverContent>
                           <div className="flex flex-col gap-4 p-4">
                             <div className="text-base font-medium">
-                              {feedback_resolve_confirm()}
+                              {getI18nRuntime().i18n.t("community:feedback_resolve_confirm")}
                             </div>
 
                             <Button onClick={() => handleResolve(item.id)}>
-                              {common_confirm()}
+                              {getI18nRuntime().i18n.t("common:confirm")}
                             </Button>
                           </div>
                         </PopoverContent>
@@ -309,20 +291,20 @@ const FeedbackList: React.FC<FeedbackListProps> = ({
                   </div>
 
                   <div className="flex flex-row gap-4 text-xs text-text-secondary mb-1 flex-wrap">
-                    <span>{feedback_user_id({ id: item.userId })}</span>
+                    <span>{getI18nRuntime().i18n.t("community:feedback_user_id", { id: item.userId })}</span>
                     <span>
-                      {feedback_created_time({
+                      {getI18nRuntime().i18n.t("community:feedback_created_time", {
                         value: new Date(item.createdAt).toLocaleString(),
                       })}
                     </span>
                     <span>
-                      {feedback_updated_time({
+                      {getI18nRuntime().i18n.t("community:feedback_updated_time", {
                         value: new Date(item.updatedAt).toLocaleString(),
                       })}
                     </span>
                     {item.resolvedAt && (
                       <span>
-                        {feedback_resolved_time({
+                        {getI18nRuntime().i18n.t("community:feedback_resolved_time", {
                           value: new Date(item.resolvedAt).toLocaleString(),
                         })}
                       </span>

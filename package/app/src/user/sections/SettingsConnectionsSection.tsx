@@ -1,11 +1,7 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
 import type { AuthProvider } from "@rezics/contract";
-import {
-  settings_connections_description,
-  settings_connections_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -14,11 +10,6 @@ import { ProviderCard } from "@/user/components/ProviderCard";
 import { providerIcons } from "@/user/components/providerIcons";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
-
-const i18nMessages = {
-  settings_connections_description,
-  settings_connections_title,
-};
 
 const PROVIDERS: { id: AuthProvider["id"]; name: string }[] = [
   { id: "google", name: "Google" },
@@ -29,8 +20,8 @@ const PROVIDERS: { id: AuthProvider["id"]; name: string }[] = [
 ];
 
 export const SettingsConnectionsSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  useRequireAuth();
+  const { t } = useTranslation(["settings"]);
+useRequireAuth();
 
   const { data: sessionState, isLoading } = useQuery(
     authQueries.sessionState(),
@@ -66,8 +57,8 @@ export const SettingsConnectionsSection: FC = () => {
 
   return (
     <SettingsSection
-      title={m.settings_connections_title()}
-      description={m.settings_connections_description()}
+      title={t("settings:connections_title")}
+      description={t("settings:connections_description")}
       divider={false}
     >
       {PROVIDERS.map((provider, i) => (

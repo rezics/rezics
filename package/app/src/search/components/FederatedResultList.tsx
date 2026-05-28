@@ -7,18 +7,6 @@ import type {
   SearchCategory,
   SearchScope,
 } from "@rezics/contract";
-import {
-  common_loading,
-  common_view_more,
-  search_category_shelves,
-  search_empty_title,
-  search_origin_book,
-  search_origin_entity,
-  search_origin_post,
-  search_origin_realm,
-  search_origin_user,
-  search_results_summary,
-} from "@rezics/i18n/messages";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -28,6 +16,7 @@ import {
   renderFederatedSearchCard,
 } from "./searchResultCardAdapters";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 type ContentRowCategory = "books" | "shelves";
 type PostRowCategory = "reviews" | "excerpts" | "remarks" | "posts";
 type RealmRowCategory = "realms";
@@ -45,16 +34,16 @@ function originBadge(hit: FederatedRankedHit): string {
   if (origin.indexUid === "content") {
     const doc = hit as ContentSearchDocument & { _origin: typeof origin };
     return doc.type === "SHELF"
-      ? search_category_shelves()
-      : search_origin_book();
+      ? getI18nRuntime().i18n.t("search:category_shelves")
+      : getI18nRuntime().i18n.t("search:origin_book");
   }
   if (origin.indexUid === "post") {
     const doc = hit as PostSearchDocument & { _origin: typeof origin };
-    return doc.kind ?? search_origin_post();
+    return doc.kind ?? getI18nRuntime().i18n.t("search:origin_post");
   }
-  if (origin.indexUid === "realm") return search_origin_realm();
-  if (origin.indexUid === "user") return search_origin_user();
-  if (origin.indexUid === "entities") return search_origin_entity();
+  if (origin.indexUid === "realm") return getI18nRuntime().i18n.t("search:origin_realm");
+  if (origin.indexUid === "user") return getI18nRuntime().i18n.t("search:origin_user");
+  if (origin.indexUid === "entities") return getI18nRuntime().i18n.t("search:origin_entity");
   return origin.indexUid;
 }
 
@@ -86,13 +75,13 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
   if (isLoading) {
     return (
       <div className="py-12 text-center">
-        <p className="text-text-secondary">{common_loading()}</p>
+        <p className="text-text-secondary">{getI18nRuntime().i18n.t("common:loading")}</p>
       </div>
     );
   }
 
   if (!result) {
-    return <EmptyState title={search_empty_title()} />;
+    return <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />;
   }
 
   if (result.kind === "grouped") {
@@ -112,7 +101,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
     const visible = sectionEntries.filter(([, sec]) => sec.totalHits > 0);
     if (visible.length === 0) {
-      return <EmptyState title={search_empty_title()} />;
+      return <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />;
     }
 
     return (
@@ -131,7 +120,7 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
                 size="sm"
                 onClick={() => onCategoryChange(category)}
               >
-                {common_view_more()}
+                {getI18nRuntime().i18n.t("common:view_more")}
               </Button>
             </header>
             <div className="space-y-2">
@@ -149,12 +138,12 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
   if (result.kind === "ranked") {
     if (result.hits.length === 0) {
-      return <EmptyState title={search_empty_title()} />;
+      return <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />;
     }
     return (
       <div>
         <p className="mb-2 text-xs text-text-secondary">
-          {search_results_summary({
+          {getI18nRuntime().i18n.t("search:results_summary", {
             count: result.totalHits,
             ms: result.processingTimeMs,
           })}
@@ -170,12 +159,12 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
   // single
   if (result.items.length === 0) {
-    return <EmptyState title={search_empty_title()} />;
+    return <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />;
   }
   return (
     <div>
       <p className="mb-2 text-xs text-text-secondary">
-        {search_results_summary({
+        {getI18nRuntime().i18n.t("search:results_summary", {
           count: result.totalHits,
           ms: result.processingTimeMs,
         })}

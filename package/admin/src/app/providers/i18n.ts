@@ -1,18 +1,16 @@
-import {
-  initI18n as initAdapterI18n,
-  registerParaglideRuntime,
-} from "@rezics/i18n/react";
-import * as productRuntime from "@rezics/i18n/runtime";
-import * as uiRuntime from "@rezics/ui/i18n/runtime";
+import { createI18nRuntime } from "@rezics/i18n/runtime";
+import { registerUiLocale } from "@rezics/ui/i18n";
 
-let runtimesRegistered = false;
+const runtime = createI18nRuntime();
 
-export function initI18n() {
-  if (!runtimesRegistered) {
-    registerParaglideRuntime(productRuntime);
-    registerParaglideRuntime(uiRuntime);
-    runtimesRegistered = true;
-  }
+export const i18nReady = runtime.ready.then(async () => {
+  await registerUiLocale(runtime.i18n, runtime.i18n.language);
+  runtime.i18n.on("languageChanged", (lng) => {
+    void registerUiLocale(runtime.i18n, lng);
+  });
+  return runtime;
+});
 
-  initAdapterI18n();
+export function initI18n(): Promise<unknown> {
+  return i18nReady;
 }

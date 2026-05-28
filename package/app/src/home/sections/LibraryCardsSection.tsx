@@ -1,10 +1,4 @@
-import {
-  page_home_sections_library_cards_book_library,
-  page_home_sections_library_cards_coming_soon,
-  page_home_sections_library_cards_game_library,
-  page_home_sections_library_cards_media_library,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import {
@@ -13,13 +7,6 @@ import {
   Gamepad2 as SportsEsportsOutlinedIcon,
 } from "lucide-react";
 import type React from "react";
-
-const i18nMessages = {
-  page_home_sections_library_cards_coming_soon,
-  page_home_sections_library_cards_book_library,
-  page_home_sections_library_cards_game_library,
-  page_home_sections_library_cards_media_library,
-};
 
 const libraries = [
   {
@@ -51,8 +38,8 @@ const LIBRARY_CARD_TITLE = {
 } as const satisfies Record<LibraryKey, () => string>;
 
 export const LibraryCardsSection: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const renderLibraryCard = (lib: (typeof libraries)[number]) => (
+  const { t } = useTranslation(["page"]);
+const renderLibraryCard = (lib: (typeof libraries)[number]) => (
     <Link key={lib.key} to={lib.to} className="min-w-0">
       <Card size="sm" surface="contained" className="h-full">
         <CardContent className="px-2 sm:px-4">
@@ -69,7 +56,7 @@ export const LibraryCardsSection: React.FC = () => {
               </h6>
               {!lib.active && (
                 <Badge variant="outline" className="text-xs">
-                  {m.page_home_sections_library_cards_coming_soon()}
+                  {t("page:home_sections_library_cards_coming_soon")}
                 </Badge>
               )}
             </div>

@@ -1,26 +1,7 @@
 import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import {
-  admin_user_actions,
-  admin_user_failed_to_load_users,
-  admin_user_join_date,
-  admin_user_list_description,
-  admin_user_list_meili_description,
-  admin_user_list_meili_title,
-  admin_user_list_title,
-  admin_user_name_label,
-  admin_user_rezics_email_label,
-  admin_user_roles,
-  admin_user_search_action,
-  admin_user_search_placeholder,
-  admin_user_slug,
-  admin_user_user_id,
-  common_create,
-  common_edit,
-  common_search,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -41,26 +22,6 @@ import {
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 
-const i18nMessages = {
-  admin_user_actions,
-  admin_user_failed_to_load_users,
-  admin_user_join_date,
-  admin_user_list_description,
-  admin_user_list_meili_description,
-  admin_user_list_meili_title,
-  admin_user_list_title,
-  admin_user_name_label,
-  admin_user_rezics_email_label,
-  admin_user_roles,
-  admin_user_search_action,
-  admin_user_search_placeholder,
-  admin_user_slug,
-  admin_user_user_id,
-  common_create,
-  common_edit,
-  common_search,
-};
-
 function fmtDate(v?: string | Date) {
   if (!v) return "";
   const d = typeof v === "string" ? new Date(v) : v;
@@ -69,8 +30,8 @@ function fmtDate(v?: string | Date) {
 }
 
 export default function UserListPage() {
-  const m = useMessage(i18nMessages);
-  const matchRoute = useMatchRoute();
+  const { t } = useTranslation(["admin", "common"]);
+const matchRoute = useMatchRoute();
   const isMeiliMode = Boolean(matchRoute({ to: "/user/meili" }));
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");
@@ -111,13 +72,13 @@ export default function UserListPage() {
     const cols: PaginatedColumn<UserDTO>[] = [
       {
         id: "userId",
-        header: m.admin_user_user_id(),
+        header: t("admin:user_user_id"),
         minWidth: 220,
         cell: (u) => <span className="text-sm font-mono">{u.unitId}</span>,
       },
       {
         id: "email",
-        header: m.admin_user_rezics_email_label(),
+        header: t("admin:user_rezics_email_label"),
         minWidth: 240,
         cell: (u) => (
           <span className="text-sm whitespace-nowrap">{u.email ?? "-"}</span>
@@ -125,7 +86,7 @@ export default function UserListPage() {
       },
       {
         id: "name",
-        header: m.admin_user_name_label(),
+        header: t("admin:user_name_label"),
         minWidth: 160,
         cell: (u) => (
           <span className="text-sm font-bold whitespace-nowrap">{u.name}</span>
@@ -133,7 +94,7 @@ export default function UserListPage() {
       },
       {
         id: "slug",
-        header: m.admin_user_slug(),
+        header: t("admin:user_slug"),
         minWidth: 160,
         cell: (u) => (
           <span className="text-sm whitespace-nowrap">
@@ -143,7 +104,7 @@ export default function UserListPage() {
       },
       {
         id: "roles",
-        header: m.admin_user_roles(),
+        header: t("admin:user_roles"),
         minWidth: 220,
         cell: (u) => (
           <span className="text-sm whitespace-nowrap">
@@ -153,13 +114,13 @@ export default function UserListPage() {
       },
       {
         id: "joinDate",
-        header: m.admin_user_join_date(),
+        header: t("admin:user_join_date"),
         minWidth: 170,
         cell: (u) => fmtDate(u.joinDate),
       },
       {
         id: "actions",
-        header: m.admin_user_actions(),
+        header: t("admin:user_actions"),
         minWidth: 120,
         cell: (u) => (
           <Button
@@ -167,7 +128,7 @@ export default function UserListPage() {
             variant="outline"
             render={(props) => (
               <Link to="/user/$userId" params={{ userId: u.unitId }} {...props}>
-                {m.common_edit()}
+                {t("common:edit")}
               </Link>
             )}
           />
@@ -190,13 +151,13 @@ export default function UserListPage() {
     <Page
       title={
         isMeiliMode
-          ? m.admin_user_list_meili_title()
-          : m.admin_user_list_title()
+          ? t("admin:user_list_meili_title")
+          : t("admin:user_list_title")
       }
       description={
         isMeiliMode
-          ? m.admin_user_list_meili_description()
-          : m.admin_user_list_description()
+          ? t("admin:user_list_meili_description")
+          : t("admin:user_list_description")
       }
     >
       <Card>
@@ -204,11 +165,11 @@ export default function UserListPage() {
           <div className="flex flex-col sm:flex-row gap-3 items-stretch">
             <div className="flex-1 flex flex-col gap-1">
               <Label htmlFor="user-search" className="text-xs">
-                {m.common_search()}
+                {t("common:search")}
               </Label>
               <Input
                 id="user-search"
-                placeholder={m.admin_user_search_placeholder()}
+                placeholder={t("admin:user_search_placeholder")}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
@@ -222,7 +183,7 @@ export default function UserListPage() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label={m.admin_user_search_action()}
+              aria-label={t("admin:user_search_action")}
               onClick={() => {
                 setPage(0);
                 setQuery(q.trim());
@@ -236,7 +197,7 @@ export default function UserListPage() {
               render={(props) => (
                 <Link to="/user/create" {...props}>
                   <AddIcon className="size-4" />
-                  {m.common_create()}
+                  {t("common:create")}
                 </Link>
               )}
             />
@@ -250,7 +211,7 @@ export default function UserListPage() {
             </div>
           ) : (isMeiliMode ? meiliQuery.isError : listQuery.isError) ? (
             <p className="text-sm text-error-text">
-              {m.admin_user_failed_to_load_users()}
+              {t("admin:user_failed_to_load_users")}
             </p>
           ) : (
             <PaginatedTable<UserDTO>

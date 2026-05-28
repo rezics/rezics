@@ -5,14 +5,7 @@ import {
   type PostDTO,
   SCORE_MAX,
 } from "@rezics/contract";
-import {
-  common_cancel,
-  common_edit,
-  common_save,
-  common_saving,
-  remark_form_rating,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -25,14 +18,6 @@ import {
 import type React from "react";
 import { useState } from "react";
 
-const i18nMessages = {
-  common_cancel,
-  common_edit,
-  common_save,
-  common_saving,
-  remark_form_rating,
-};
-
 interface RemarkEditDialogProps {
   remark: PostDTO;
   open: boolean;
@@ -44,8 +29,8 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   open,
   onClose,
 }) => {
-  const m = useMessage(i18nMessages);
-  const initialRating = (remark.extra as { rating?: number } | null)?.rating;
+  const { t } = useTranslation(["common", "page"]);
+const initialRating = (remark.extra as { rating?: number } | null)?.rating;
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,
   );
@@ -85,7 +70,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
     >
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{m.common_edit()}</DialogTitle>
+          <DialogTitle>{t("common:edit")}</DialogTitle>
         </DialogHeader>
         <div className="pt-2">
           <div className="flex flex-col gap-4">
@@ -93,7 +78,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
               value={score}
               onChange={setScore}
               max={SCORE_MAX}
-              aria-label={m.remark_form_rating()}
+              aria-label={t("page:remark_form_rating")}
             />
             <textarea
               value={text}
@@ -105,13 +90,13 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={updateMutation.isPending || !text.trim()}
           >
-            {updateMutation.isPending ? m.common_saving() : m.common_save()}
+            {updateMutation.isPending ? t("common:saving") : t("common:save")}
           </Button>
         </DialogFooter>
       </DialogContent>

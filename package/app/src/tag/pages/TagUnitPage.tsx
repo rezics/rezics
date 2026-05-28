@@ -1,30 +1,19 @@
 import { tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import {
-  common_load_failed,
-  tag_loading,
-  tag_unit_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { Route as tagUnitRoute } from "@/routes/_mainLayout/tag/$unitId";
 import { TagDetailCard } from "../components/TagCards";
 
-const i18nMessages = {
-  common_load_failed,
-  tag_loading,
-  tag_unit_title,
-};
-
 export function TagUnitPage() {
-  const m = useMessage(i18nMessages);
-  const { unitId } = tagUnitRoute.useParams();
+  const { t } = useTranslation(["common", "community"]);
+const { unitId } = tagUnitRoute.useParams();
   const { data, isLoading, error } = useQuery(tagQueries.detail(unitId));
   if (isLoading) {
     return (
       <div className="w-11/12 mx-auto mt-16">
-        <div className="text-sm text-gray-500">{m.tag_loading()}</div>
+        <div className="text-sm text-gray-500">{t("community:tag_loading")}</div>
       </div>
     );
   }
@@ -32,14 +21,14 @@ export function TagUnitPage() {
     return (
       <div className="w-11/12 mx-auto mt-16">
         <div className="text-sm text-red-600">
-          {m.common_load_failed()}: {String((error as any)?.message ?? error)}
+          {t("common:load_failed")}: {String((error as any)?.message ?? error)}
         </div>
       </div>
     );
   }
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <AccentBarWithText text={m.tag_unit_title({ id: unitId })} />
+      <AccentBarWithText text={t("community:tag_unit_title", { id: unitId })} />
       <div className="mt-4">
         <TagDetailCard tag={data as UnitTagDTO} />
       </div>

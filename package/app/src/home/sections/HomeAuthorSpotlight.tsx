@@ -1,17 +1,12 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO, PublicUser } from "@rezics/contract";
-import { page_home_sections_author_spotlight } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-
-const i18nMessages = {
-  page_home_sections_author_spotlight,
-};
 
 type Book = BookDTO;
 
@@ -30,8 +25,8 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   limit = 24,
   maxAuthors = 12,
 }) => {
-  const m = useMessage(i18nMessages);
-  const resolvedTitle = title ?? m.page_home_sections_author_spotlight();
+  const { t } = useTranslation(["page"]);
+const resolvedTitle = title ?? t("page:home_sections_author_spotlight");
 
   const { data, isLoading, error } = useQuery(
     bookQueries.list({ start: 0, limit }),

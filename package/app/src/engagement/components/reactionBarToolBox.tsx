@@ -1,5 +1,4 @@
-import { common_open, common_share } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   FacebookIcon,
   InstagramIcon,
@@ -9,11 +8,6 @@ import {
 import { Button, Dialog, DialogContent, DialogFooter } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-
-const i18nMessages = {
-  common_open,
-  common_share,
-};
 
 export type ReactionBarToolBoxProps = {
   open: boolean;
@@ -28,8 +22,8 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   itemUrl,
   itemText = "Source: REZICS",
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common"]);
+const navigate = useNavigate();
   const origin = window?.location?.origin;
   const itemFullUrl = origin + itemUrl;
 
@@ -54,11 +48,11 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
             variant="outline"
             className="w-full"
           >
-            {m.common_open()}
+            {t("common:open")}
           </Button>
         </div>
         <div className="mt-2">
-          <div>{m.common_share()}</div>
+          <div>{t("common:share")}</div>
           <div>{itemUrl}</div>
           <div className="flex items-center gap-2 mt-2">
             <a

@@ -1,20 +1,5 @@
 import { feedbackListQuery } from "@rezics/api/feedback/feedback.queries";
-import {
-  common_status,
-  common_view,
-  feedback_admin_title,
-  feedback_new,
-  feedback_search_label,
-  feedback_search_placeholder,
-  feedback_status_resolved,
-  feedback_status_unresolved,
-  feedback_user_id_placeholder,
-  feedback_view_mine,
-  feedback_view_user,
-  search_category_all,
-  user_id_label,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Input,
@@ -30,25 +15,9 @@ import React from "react";
 import FeedbackDrawer from "../components/FeedbackDrawer";
 import FeedbackList from "../components/FeedbackList";
 
-const i18nMessages = {
-  common_status,
-  common_view,
-  feedback_admin_title,
-  feedback_new,
-  feedback_search_label,
-  feedback_search_placeholder,
-  feedback_status_resolved,
-  feedback_status_unresolved,
-  feedback_user_id_placeholder,
-  feedback_view_mine,
-  feedback_view_user,
-  search_category_all,
-  user_id_label,
-};
-
 export const FeedbackAdminPage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const [open, setOpen] = React.useState(false);
+  const { t } = useTranslation(["common", "community", "search", "settings"]);
+const [open, setOpen] = React.useState(false);
   const [type, setType] = React.useState<"all" | "mine" | "user">("all");
   const [userId, setUserId] = React.useState<string>("");
   const [search, setSearch] = React.useState<string>("");
@@ -65,26 +34,26 @@ export const FeedbackAdminPage: React.FC = () => {
   return (
     <div className="max-w-8xl mx-auto p-4">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-        <h1 className="text-xl font-bold">{m.feedback_admin_title()}</h1>
-        <Button onClick={() => setOpen(true)}>{m.feedback_new()}</Button>
+        <h1 className="text-xl font-bold">{t("community:feedback_admin_title")}</h1>
+        <Button onClick={() => setOpen(true)}>{t("community:feedback_new")}</Button>
       </div>
 
       <div className="pb-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex flex-col gap-1 flex-1">
             <Label htmlFor="admin-feedback-search">
-              {m.feedback_search_label()}
+              {t("community:feedback_search_label")}
             </Label>
             <Input
               id="admin-feedback-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={m.feedback_search_placeholder()}
+              placeholder={t("community:feedback_search_placeholder")}
             />
           </div>
 
           <div className="flex flex-col gap-1 w-32">
-            <Label htmlFor="admin-feedback-resolved">{m.common_status()}</Label>
+            <Label htmlFor="admin-feedback-resolved">{t("common:status")}</Label>
             <Select
               value={resolvedFilter}
               onValueChange={(v) =>
@@ -95,12 +64,12 @@ export const FeedbackAdminPage: React.FC = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{m.search_category_all()}</SelectItem>
+                <SelectItem value="all">{t("search:category_all")}</SelectItem>
                 <SelectItem value="unresolved">
-                  {m.feedback_status_unresolved()}
+                  {t("community:feedback_status_unresolved")}
                 </SelectItem>
                 <SelectItem value="resolved">
-                  {m.feedback_status_resolved()}
+                  {t("community:feedback_status_resolved")}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -108,7 +77,7 @@ export const FeedbackAdminPage: React.FC = () => {
 
           <div className="flex flex-row gap-4 min-w-[300px]">
             <div className="flex flex-col gap-1 w-32">
-              <Label htmlFor="admin-feedback-view">{m.common_view()}</Label>
+              <Label htmlFor="admin-feedback-view">{t("common:view")}</Label>
               <Select
                 value={type}
                 onValueChange={(v) => setType(v as "all" | "mine" | "user")}
@@ -117,9 +86,9 @@ export const FeedbackAdminPage: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{m.search_category_all()}</SelectItem>
-                  <SelectItem value="mine">{m.feedback_view_mine()}</SelectItem>
-                  <SelectItem value="user">{m.feedback_view_user()}</SelectItem>
+                  <SelectItem value="all">{t("search:category_all")}</SelectItem>
+                  <SelectItem value="mine">{t("community:feedback_view_mine")}</SelectItem>
+                  <SelectItem value="user">{t("community:feedback_view_user")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -127,13 +96,13 @@ export const FeedbackAdminPage: React.FC = () => {
             {type === "user" && (
               <div className="flex flex-col gap-1 flex-1">
                 <Label htmlFor="admin-feedback-user-id">
-                  {m.user_id_label()}
+                  {t("settings:user_id_label")}
                 </Label>
                 <Input
                   id="admin-feedback-user-id"
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
-                  placeholder={m.feedback_user_id_placeholder()}
+                  placeholder={t("community:feedback_user_id_placeholder")}
                 />
               </div>
             )}

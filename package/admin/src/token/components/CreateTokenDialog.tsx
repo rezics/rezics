@@ -1,14 +1,5 @@
 import type { CreateApiTokenInput } from "@rezics/contract";
-import {
-  admin_token_create_dialog_title,
-  admin_token_creating,
-  admin_token_default_name,
-  admin_token_expires_at_optional,
-  admin_token_token_name,
-  common_cancel,
-  common_create,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -24,16 +15,6 @@ import {
 import type { FC } from "react";
 import { useState } from "react";
 import { ScopesEditor } from "./ScopesEditor";
-
-const i18nMessages = {
-  admin_token_create_dialog_title,
-  admin_token_creating,
-  admin_token_default_name,
-  admin_token_expires_at_optional,
-  admin_token_token_name,
-  common_cancel,
-  common_create,
-};
 
 interface CreateTokenDialogProps {
   open: boolean;
@@ -53,14 +34,14 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
   creating,
   error,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [name, setName] = useState("");
+  const { t } = useTranslation(["admin", "common"]);
+const [name, setName] = useState("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [scopes, setScopes] = useState<Record<string, string[]>>({});
 
   const handleCreate = async () => {
     const input: CreateApiTokenInput = {
-      name: name || m.admin_token_default_name(),
+      name: name || t("admin:token_default_name"),
       ...(expiresAt ? { expiresAt } : {}),
       ...(Object.keys(scopes).length > 0 ? { scopes } : {}),
     };
@@ -78,11 +59,11 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
     <Dialog open={open} onOpenChange={(o) => (o ? null : handleClose())}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{m.admin_token_create_dialog_title()}</DialogTitle>
+          <DialogTitle>{t("admin:token_create_dialog_title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="ctd-name">{m.admin_token_token_name()}</Label>
+            <Label htmlFor="ctd-name">{t("admin:token_token_name")}</Label>
             <Input
               id="ctd-name"
               value={name}
@@ -91,7 +72,7 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
           </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor="ctd-exp">
-              {m.admin_token_expires_at_optional()}
+              {t("admin:token_expires_at_optional")}
             </Label>
             <Input
               id="ctd-exp"
@@ -111,10 +92,10 @@ export const CreateTokenDialog: FC<CreateTokenDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button onClick={handleCreate} disabled={creating}>
-            {creating ? m.admin_token_creating() : m.common_create()}
+            {creating ? t("admin:token_creating") : t("common:create")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -7,20 +7,7 @@ import {
   PostKind,
   type TagTreeNode,
 } from "@rezics/contract";
-import {
-  auth_login,
-  common_cancel,
-  common_reply,
-  page_shelf_searching,
-  post_composer_invalid_configuration,
-  post_composer_post,
-  post_composer_posting,
-  post_reply_placeholder,
-  post_tag_picker_no_matches,
-  shelf_discussion_signInPrompt,
-  tag_search_this,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -35,20 +22,6 @@ import {
 } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
-
-const i18nMessages = {
-  auth_login,
-  common_cancel,
-  common_reply,
-  page_shelf_searching,
-  post_composer_invalid_configuration,
-  post_composer_post,
-  post_composer_posting,
-  post_reply_placeholder,
-  post_tag_picker_no_matches,
-  shelf_discussion_signInPrompt,
-  tag_search_this,
-};
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -141,8 +114,8 @@ function RealmPostTagPicker({
   selectedTagIds: string[];
   onSelectedTagIdsChange: (tagIds: string[]) => void;
 }) {
-  const m = useMessage(i18nMessages);
-  const [searchTerm, setSearchTerm] = useState("");
+  const { t } = useTranslation(["auth", "common", "community", "entity", "page"]);
+const [searchTerm, setSearchTerm] = useState("");
   const firstRealmId = realmUnitIds.length === 1 ? realmUnitIds[0] : undefined;
   const { data: realm } = useQuery({
     ...realmQueries.detail(firstRealmId ?? ""),
@@ -261,13 +234,13 @@ function RealmPostTagPicker({
         <Input
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder={m.tag_search_this()}
+          placeholder={t("community:tag_search_this")}
         />
         {trimmedSearch && (
           <div className="flex flex-wrap gap-2">
             {isSearching ? (
               <span className="text-sm leading-ui text-text-secondary">
-                {m.page_shelf_searching()}
+                {t("page:shelf_searching")}
               </span>
             ) : searchResults.length > 0 ? (
               searchResults.map((tag) => (
@@ -284,7 +257,7 @@ function RealmPostTagPicker({
               ))
             ) : (
               <span className="text-sm leading-ui text-text-secondary">
-                {m.post_tag_picker_no_matches()}
+                {t("community:post_tag_picker_no_matches")}
               </span>
             )}
           </div>
@@ -298,11 +271,11 @@ export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
   ReplyComposerProps
 >(function ReplyComposer(props, ref) {
-  const m = useMessage(i18nMessages);
-  const authGuard = useAuthGuard();
+  const { t } = useTranslation(["auth", "common", "community", "entity", "page"]);
+const authGuard = useAuthGuard();
   const {
     mode,
-    placeholder = m.post_reply_placeholder(),
+    placeholder = t("community:post_reply_placeholder"),
     autoFocus = false,
     onSubmitted,
     onCancelled,
@@ -412,7 +385,7 @@ export const ReplyComposer = forwardRef<
   if (invalidMode) {
     return (
       <div className="rounded-md bg-error-fill/10 p-3 text-sm leading-ui text-error-text">
-        {m.post_composer_invalid_configuration()}
+        {t("community:post_composer_invalid_configuration")}
       </div>
     );
   }
@@ -439,10 +412,10 @@ export const ReplyComposer = forwardRef<
       <>
         <div className="flex items-center justify-between gap-4 rounded-md bg-surface-subtle p-4">
           <p className="text-sm leading-ui text-text-secondary">
-            {m.shelf_discussion_signInPrompt()}
+            {t("entity:shelf_discussion_signInPrompt")}
           </p>
           <Button size="sm" onClick={authGuard.openLogin}>
-            {m.auth_login()}
+            {t("auth:login")}
           </Button>
         </div>
         {authGuard.AuthModal({})}
@@ -474,7 +447,7 @@ export const ReplyComposer = forwardRef<
           onClick={handleCancel}
           disabled={mutation.isPending}
         >
-          {m.common_cancel()}
+          {t("common:cancel")}
         </Button>
         <Button
           size="sm"
@@ -482,10 +455,10 @@ export const ReplyComposer = forwardRef<
           disabled={mutation.isPending || !body.trim()}
         >
           {mutation.isPending
-            ? m.post_composer_posting()
+            ? t("community:post_composer_posting")
             : isRealmPostMode
-              ? m.post_composer_post()
-              : m.common_reply()}
+              ? t("community:post_composer_post")
+              : t("common:reply")}
         </Button>
       </div>
       {authGuard.AuthModal({})}

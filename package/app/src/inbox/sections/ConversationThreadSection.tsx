@@ -4,28 +4,11 @@ import {
   useMessages,
   useSendDmMutation,
 } from "@rezics/api/dm/dm";
-import {
-  inbox_message_label,
-  inbox_message_placeholder,
-  inbox_messages_empty,
-  inbox_messages_load_failed,
-  inbox_messages_loading,
-  inbox_send,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { type FC, type FormEvent, useEffect, useRef, useState } from "react";
 import { useAuthSessionStore } from "@/user/states";
-
-const i18nMessages = {
-  inbox_message_label,
-  inbox_message_placeholder,
-  inbox_messages_empty,
-  inbox_messages_load_failed,
-  inbox_messages_loading,
-  inbox_send,
-};
 
 interface ConversationThreadSectionProps {
   conversationId: string;
@@ -46,8 +29,8 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   conversationId,
   peerId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, isError } = useMessages(conversationId);
+  const { t } = useTranslation(["community"]);
+const { data, isLoading, isError } = useMessages(conversationId);
   const sendMutation = useSendDmMutation();
   const queryClient = useQueryClient();
   const myUnitId = useAuthSessionStore((s) => s.rezics.userId) ?? undefined;
@@ -86,17 +69,17 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {isLoading && (
           <p className="text-sm text-text-secondary">
-            {m.inbox_messages_loading()}
+            {t("community:inbox_messages_loading")}
           </p>
         )}
         {isError && (
           <p className="text-sm text-destructive">
-            {m.inbox_messages_load_failed()}
+            {t("community:inbox_messages_load_failed")}
           </p>
         )}
         {!isLoading && !isError && messages.length === 0 && (
           <p className="text-sm text-text-secondary">
-            {m.inbox_messages_empty()}
+            {t("community:inbox_messages_empty")}
           </p>
         )}
         <ol className="flex flex-col gap-2">
@@ -129,8 +112,8 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
         <Input
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder={m.inbox_message_placeholder()}
-          aria-label={m.inbox_message_label()}
+          placeholder={t("community:inbox_message_placeholder")}
+          aria-label={t("community:inbox_message_label")}
           disabled={sendMutation.isPending}
         />
         <Button
@@ -138,7 +121,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
           size="sm"
           disabled={sendMutation.isPending || draft.trim().length === 0}
         >
-          {m.inbox_send()}
+          {t("community:inbox_send")}
         </Button>
       </form>
     </div>

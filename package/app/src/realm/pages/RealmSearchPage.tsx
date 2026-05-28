@@ -4,22 +4,11 @@ import {
   type RealmDTO,
   type RealmSearchDocument,
 } from "@rezics/contract";
-import {
-  realm_none_found,
-  realm_search_placeholder,
-  realm_search_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { RealmCard } from "../components/RealmCard";
-
-const i18nMessages = {
-  realm_none_found,
-  realm_search_placeholder,
-  realm_search_title,
-};
 
 function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
   return {
@@ -41,8 +30,8 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
 }
 
 export function RealmSearchPage() {
-  const m = useMessage(i18nMessages);
-  const search = useSearchQuery({});
+  const { t } = useTranslation(["entity"]);
+const search = useSearchQuery({});
   const keyword = search.query.keyword ?? "";
   const keywordBind = search.bind("keyword");
 
@@ -55,12 +44,12 @@ export function RealmSearchPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{m.realm_search_title()}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("entity:realm_search_title")}</h1>
       <div className="mb-6">
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
-          placeholder={m.realm_search_placeholder()}
+          placeholder={t("entity:realm_search_placeholder")}
         />
       </div>
       {isLoading ? (
@@ -69,7 +58,7 @@ export function RealmSearchPage() {
         </div>
       ) : hasKeyword && realms.length === 0 ? (
         <p className="py-8 text-center text-text-secondary">
-          {m.realm_none_found()}
+          {t("entity:realm_none_found")}
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

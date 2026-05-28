@@ -9,19 +9,7 @@ import {
   LICENSE_SLUGS,
 } from "@rezics/contract";
 import { licenseLabel } from "@rezics/i18n";
-import {
-  book_fields_cover_url,
-  book_fields_ai_disclosure,
-  book_fields_isbn,
-  book_fields_page_count,
-  book_fields_publication_license,
-  book_fields_rating,
-  book_fields_text_length,
-  book_flags_licensed,
-  book_tooltips_licensed,
-  common_url_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AiDisclosureSelector, RatingSelector } from "@rezics/ui";
 import {
   Checkbox,
@@ -39,19 +27,6 @@ import { Info as InfoOutlined } from "lucide-react";
 import type React from "react";
 import { aiDisclosureLabelMap } from "@/unit/models/aiDisclosureLabels";
 import { BookCreditAttributionEditor } from "./BookCreditAttributionEditor";
-
-const i18nMessages = {
-  book_fields_cover_url,
-  book_fields_ai_disclosure,
-  book_fields_isbn,
-  book_fields_page_count,
-  book_fields_publication_license,
-  book_fields_rating,
-  book_fields_text_length,
-  book_flags_licensed,
-  book_tooltips_licensed,
-  common_url_placeholder,
-};
 
 function TooltipIconTrigger(props: Record<string, unknown>) {
   const { ref: _ref, ...triggerProps } = props;
@@ -118,8 +93,8 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   onChange,
   disabled,
 }) => {
-  const m = useMessage(i18nMessages);
-  const currentIsbn = value?.isbn13 ?? "";
+  const { t } = useTranslation(["book", "common"]);
+const currentIsbn = value?.isbn13 ?? "";
   const currentCoverUrl = value?.coverUrl ?? "";
   const currentPageCount = value?.pageCount ?? "";
   const currentTextLength = value?.textLength ?? "";
@@ -134,7 +109,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-isbn">
-            {m.book_fields_isbn()}
+            {t("book:fields_isbn")}
           </label>
           <input
             id="book-isbn"
@@ -146,14 +121,14 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-cover">
-            {m.book_fields_cover_url()}
+            {t("book:fields_cover_url")}
           </label>
           <input
             id="book-cover"
             value={currentCoverUrl}
             onChange={(e) => onChange?.({ coverUrl: e.target.value })}
             disabled={disabled}
-            placeholder={m.common_url_placeholder()}
+            placeholder={t("common:url_placeholder")}
             className="w-full border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors disabled:opacity-50"
           />
         </div>
@@ -163,7 +138,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-pagecount">
-            {m.book_fields_page_count()}
+            {t("book:fields_page_count")}
           </label>
           <input
             id="book-pagecount"
@@ -180,7 +155,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
         <div className="space-y-1">
           <label className="text-sm" htmlFor="book-textlength">
-            {m.book_fields_text_length()}
+            {t("book:fields_text_length")}
           </label>
           <input
             id="book-textlength"
@@ -210,7 +185,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
           <RatingSelector
             value={(value?.rating as ContentRating | undefined) ?? "GENERAL"}
             onChange={(rating) => onChange?.({ rating })}
-            label={m.book_fields_rating()}
+            label={t("book:fields_rating")}
             disabled={disabled}
           />
         </div>
@@ -221,15 +196,15 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
               "UNKNOWN"
             }
             onChange={(aiDisclosureMode) => onChange?.({ aiDisclosureMode })}
-            label={m.book_fields_ai_disclosure()}
+            label={t("book:fields_ai_disclosure")}
             labels={aiDisclosureLabels}
             disabled={disabled}
           />
         </div>
         <div className="flex flex-wrap gap-8">
           <FlagWithTooltip
-            label={m.book_flags_licensed()}
-            tooltip={m.book_tooltips_licensed()}
+            label={t("book:flags_licensed")}
+            tooltip={t("book:tooltips_licensed")}
             checked={value?.isLicensed ?? false}
             onCheckedChange={(checked) => onChange?.({ isLicensed: !!checked })}
             disabled={disabled}
@@ -237,7 +212,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
         </div>
         <div className="max-w-xs space-y-1">
           <label className="text-sm" htmlFor="book-publication-license">
-            {m.book_fields_publication_license()}
+            {t("book:fields_publication_license")}
           </label>
           <Select
             value={currentLicense}
@@ -264,17 +239,17 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
 };
 
 export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["book", "common"]);
+return (
     <div className="flex items-center gap-1 whitespace-nowrap">
-      <span>{m.book_flags_licensed()}</span>
+      <span>{t("book:flags_licensed")}</span>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger
             render={(props) => <TooltipIconTrigger {...props} />}
           />
           <TooltipContent>
-            {tooltipTitle ?? m.book_tooltips_licensed()}
+            {tooltipTitle ?? t("book:tooltips_licensed")}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

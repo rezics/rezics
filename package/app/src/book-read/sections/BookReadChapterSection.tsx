@@ -4,21 +4,7 @@ import { chapterDetailQuery } from "@rezics/api/chapter/chapter";
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentDocMarkdownFallback } from "@rezics/contract";
 import { createRezicsRenderer } from "@rezics/editor/markdown";
-import {
-  book_read_chapter_actions_content,
-  book_read_chapter_actions_discuss,
-  book_read_chapter_actions_preparing,
-  book_read_chapter_actions_progress,
-  book_read_chapter_actions_review,
-  book_read_chapter_actions_saving,
-  book_read_empty_chapter_actions_hint,
-  book_read_empty_chapter_description,
-  book_read_position_save,
-  book_read_position_saving,
-  common_edit,
-  common_loading,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { handleExternalLinkClick } from "@rezics/ui/link/handleExternalLinkClick.ts";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -38,24 +24,9 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostListSection, ReplyComposer } from "@/post";
 import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapterId/route";
 
-const i18nMessages = {
-  book_read_chapter_actions_content,
-  book_read_chapter_actions_discuss,
-  book_read_chapter_actions_preparing,
-  book_read_chapter_actions_progress,
-  book_read_chapter_actions_review,
-  book_read_chapter_actions_saving,
-  book_read_empty_chapter_actions_hint,
-  book_read_empty_chapter_description,
-  book_read_position_save,
-  book_read_position_saving,
-  common_edit,
-  common_loading,
-};
-
 export const BookReadChapterPage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const { bookId, chapterId } = bookReadLayoutRoute.useParams();
+  const { t } = useTranslation(["book", "common"]);
+const { bookId, chapterId } = bookReadLayoutRoute.useParams();
   // `$chapterId` is retained for URL compatibility; it carries a materialized
   // content Unit id in current reader/editor code.
   const contentUnitId = chapterId;
@@ -172,7 +143,7 @@ export const BookReadChapterPage: React.FC = () => {
     }
   };
 
-  if (!emptyChapterPath && isPending) return <div>{m.common_loading()}</div>;
+  if (!emptyChapterPath && isPending) return <div>{t("common:loading")}</div>;
   if (isError) return <QueryErrorDisplay error={error} />;
 
   return (
@@ -184,7 +155,7 @@ export const BookReadChapterPage: React.FC = () => {
             type="button"
             size="icon"
             variant="ghost"
-            aria-label={m.common_edit()}
+            aria-label={t("common:edit")}
             onClick={() =>
               navigate({ to: `/book/${bookId}/edit/${contentUnitId}` })
             }
@@ -195,8 +166,8 @@ export const BookReadChapterPage: React.FC = () => {
       </div>
       {emptyChapterPath ? (
         <div className="max-w-prose text-text-secondary leading-relaxed">
-          <p>{m.book_read_empty_chapter_description()}</p>
-          <p className="mt-3">{m.book_read_empty_chapter_actions_hint()}</p>
+          <p>{t("book:read_empty_chapter_description")}</p>
+          <p className="mt-3">{t("book:read_empty_chapter_actions_hint")}</p>
           <Button
             type="button"
             variant="outline"
@@ -205,8 +176,8 @@ export const BookReadChapterPage: React.FC = () => {
             disabled={updateBookProgress.isPending}
           >
             {updateBookProgress.isPending
-              ? m.book_read_position_saving()
-              : m.book_read_position_save()}
+              ? t("book:read_position_saving")
+              : t("book:read_position_save")}
           </Button>
           <div className="mt-5 flex flex-wrap gap-2">
             {canEdit && (
@@ -217,8 +188,8 @@ export const BookReadChapterPage: React.FC = () => {
                 disabled={pendingChapterAction !== null}
               >
                 {pendingChapterAction === "content"
-                  ? m.book_read_chapter_actions_preparing()
-                  : m.book_read_chapter_actions_content()}
+                  ? t("book:read_chapter_actions_preparing")
+                  : t("book:read_chapter_actions_content")}
               </Button>
             )}
             <Button
@@ -228,8 +199,8 @@ export const BookReadChapterPage: React.FC = () => {
               disabled={pendingChapterAction !== null}
             >
               {pendingChapterAction === "review"
-                ? m.book_read_chapter_actions_preparing()
-                : m.book_read_chapter_actions_review()}
+                ? t("book:read_chapter_actions_preparing")
+                : t("book:read_chapter_actions_review")}
             </Button>
             <Button
               type="button"
@@ -238,8 +209,8 @@ export const BookReadChapterPage: React.FC = () => {
               disabled={pendingChapterAction !== null}
             >
               {pendingChapterAction === "discussion"
-                ? m.book_read_chapter_actions_preparing()
-                : m.book_read_chapter_actions_discuss()}
+                ? t("book:read_chapter_actions_preparing")
+                : t("book:read_chapter_actions_discuss")}
             </Button>
             <Button
               type="button"
@@ -248,8 +219,8 @@ export const BookReadChapterPage: React.FC = () => {
               disabled={pendingChapterAction !== null}
             >
               {pendingChapterAction === "progress"
-                ? m.book_read_chapter_actions_saving()
-                : m.book_read_chapter_actions_progress()}
+                ? t("book:read_chapter_actions_saving")
+                : t("book:read_chapter_actions_progress")}
             </Button>
           </div>
           {chapterDiscussionUnitId && (

@@ -1,7 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book.queries";
 import type { BookContentStructureItem } from "@rezics/contract";
-import { book_toc, common_loading } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import {
   Button,
@@ -34,11 +33,6 @@ import {
   ContentChapterVirtualTree,
   type ContentChapterVirtualTreeHandle,
 } from "./ContentChapterVirtualTree";
-
-const i18nMessages = {
-  book_toc,
-  common_loading,
-};
 
 export type BookTocTreeHandle = {
   expandAll: () => void;
@@ -363,8 +357,8 @@ export interface ChapterListProps {
  * Fetches chapter data and renders using BookTocTreeView.
  */
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery(bookQueries.contentStructure(id));
+  const { t } = useTranslation(["book", "common"]);
+const { data, isLoading, error } = useQuery(bookQueries.contentStructure(id));
 
   const bookTocTree: BookContentStructureItem[] = useMemo(
     () => data?.nodes ?? [],
@@ -377,13 +371,13 @@ export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
 
   const treeRef = React.useRef<ContentChapterVirtualTreeHandle>(null);
 
-  if (isLoading) return <div>{m.common_loading()}</div>;
+  if (isLoading) return <div>{t("common:loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div className="flex min-h-0 flex-col gap-4">
       <div className="flex items-center justify-between">
-        <AccentBarWithText text={m.book_toc()} />
+        <AccentBarWithText text={t("book:toc")} />
       </div>
 
       <ContentChapterVirtualTree

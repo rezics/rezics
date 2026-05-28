@@ -1,18 +1,4 @@
 import type { SearchCategory, SearchScope } from "@rezics/contract";
-import {
-  search_category_all,
-  search_category_books,
-  search_category_entities,
-  search_category_excerpts,
-  search_category_mixed,
-  search_category_posts,
-  search_category_realms,
-  search_category_remarks,
-  search_category_reviews,
-  search_category_shelves,
-  search_category_users,
-} from "@rezics/i18n/messages";
-
 export const ALL_CATEGORIES: readonly SearchCategory[] = [
   "all",
   "mixed",

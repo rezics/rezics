@@ -1,11 +1,4 @@
 import type { ContentRating } from "@rezics/contract";
-import {
-  rating_tier_GENERAL,
-  rating_tier_R_15,
-  rating_tier_R_18,
-  rating_tier_R_18G,
-} from "@rezics/i18n/messages";
-
 const RATING_TIER_LABEL = {
   GENERAL: rating_tier_GENERAL,
   R_15: rating_tier_R_15,

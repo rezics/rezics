@@ -5,8 +5,7 @@ import type {
   SearchQuery,
   SearchScope,
 } from "@rezics/contract";
-import { accessibility_search } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useMemo } from "react";
 import {
   AdvancedSearch,
@@ -16,10 +15,6 @@ import {
 import { useInjectedTags } from "../hooks/useInjectedTags";
 import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";
-
-const i18nMessages = {
-  accessibility_search,
-};
 
 export { isSearchCategory } from "../models/category";
 
@@ -54,8 +49,8 @@ export function FederatedSearchPage({
   initialCategory = "all",
   onCategoryChange,
 }: FederatedSearchPageProps) {
-  const m = useMessage(i18nMessages);
-  const injectedTags = useInjectedTags();
+  const { t } = useTranslation(["common"]);
+const injectedTags = useInjectedTags();
 
   const initial = useMemo<SearchQuery>(() => {
     const base: SearchQuery = initialQuery ?? {};
@@ -94,7 +89,7 @@ export function FederatedSearchPage({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-2xl font-bold">{m.accessibility_search()}</h1>
+      <h1 className="text-2xl font-bold">{t("common:accessibility_search")}</h1>
       <SearchCategoryNav
         scope={scope}
         value={search.category}

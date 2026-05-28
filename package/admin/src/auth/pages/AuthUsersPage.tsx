@@ -12,30 +12,7 @@ import {
 } from "@rezics/api/account-operation/account-operation";
 import { useUnblockAccountEnforcementMutation } from "@rezics/api/governance/governance";
 import type { AdminAuthUserAccountSummary } from "@rezics/contract";
-import {
-  admin_auth_actions_title,
-  admin_auth_role_admin,
-  admin_auth_role_owner,
-  admin_auth_role_user,
-  admin_auth_user_name,
-  admin_auth_user_role,
-  admin_auth_users_ban,
-  admin_auth_users_banned,
-  admin_auth_users_description,
-  admin_auth_users_failed_load,
-  admin_auth_users_remove_description,
-  admin_auth_users_remove_title,
-  admin_auth_users_title,
-  admin_auth_users_unban,
-  common_active,
-  common_cancel,
-  common_confirm,
-  common_created,
-  common_email,
-  common_id,
-  common_remove,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { SafeLink, Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -64,30 +41,6 @@ import {
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
-
-const i18nMessages = {
-  admin_auth_actions_title,
-  admin_auth_role_admin,
-  admin_auth_role_owner,
-  admin_auth_role_user,
-  admin_auth_user_name,
-  admin_auth_user_role,
-  admin_auth_users_ban,
-  admin_auth_users_banned,
-  admin_auth_users_description,
-  admin_auth_users_failed_load,
-  admin_auth_users_remove_description,
-  admin_auth_users_remove_title,
-  admin_auth_users_title,
-  admin_auth_users_unban,
-  common_active,
-  common_cancel,
-  common_confirm,
-  common_created,
-  common_email,
-  common_id,
-  common_remove,
-};
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -121,8 +74,8 @@ function getSessionCount(user: AuthUser): number | null {
 }
 
 export default function AuthUsersPage() {
-  const m = useMessage(i18nMessages);
-  const [page, setPage] = React.useState(0);
+  const { t } = useTranslation(["admin", "common"]);
+const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
   const [confirmDialog, setConfirmDialog] = React.useState<{
     open: boolean;
@@ -196,13 +149,13 @@ export default function AuthUsersPage() {
     const cols: PaginatedColumn<AuthUser>[] = [
       {
         id: "id",
-        header: m.common_id(),
+        header: t("common:id"),
         minWidth: 220,
         cell: (u) => <span className="text-sm font-mono">{u.id}</span>,
       },
       {
         id: "name",
-        header: m.admin_auth_user_name(),
+        header: t("admin:auth_user_name"),
         minWidth: 160,
         cell: (u) => (
           <span className="text-sm font-bold whitespace-nowrap">{u.name}</span>
@@ -210,7 +163,7 @@ export default function AuthUsersPage() {
       },
       {
         id: "email",
-        header: m.common_email(),
+        header: t("common:email"),
         minWidth: 240,
         cell: (u) => (
           <span className="text-sm whitespace-nowrap">{u.email}</span>
@@ -218,7 +171,7 @@ export default function AuthUsersPage() {
       },
       {
         id: "role",
-        header: m.admin_auth_user_role(),
+        header: t("admin:auth_user_role"),
         minWidth: 140,
         cell: (u) => (
           <Select
@@ -231,25 +184,25 @@ export default function AuthUsersPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="user">{m.admin_auth_role_user()}</SelectItem>
-              <SelectItem value="admin">{m.admin_auth_role_admin()}</SelectItem>
-              <SelectItem value="owner">{m.admin_auth_role_owner()}</SelectItem>
+              <SelectItem value="user">{t("admin:auth_role_user")}</SelectItem>
+              <SelectItem value="admin">{t("admin:auth_role_admin")}</SelectItem>
+              <SelectItem value="owner">{t("admin:auth_role_owner")}</SelectItem>
             </SelectContent>
           </Select>
         ),
       },
       {
         id: "banned",
-        header: m.admin_auth_users_banned(),
+        header: t("admin:auth_users_banned"),
         minWidth: 100,
         cell: (u) =>
           u.banned ? (
             <Badge className="bg-error-fill text-white">
-              {m.admin_auth_users_banned()}
+              {t("admin:auth_users_banned")}
             </Badge>
           ) : (
             <Badge className="bg-success-fill text-white">
-              {m.common_active()}
+              {t("common:active")}
             </Badge>
           ),
       },
@@ -361,13 +314,13 @@ export default function AuthUsersPage() {
       },
       {
         id: "createdAt",
-        header: m.common_created(),
+        header: t("common:created"),
         minWidth: 170,
         cell: (u) => fmtDate(u.createdAt),
       },
       {
         id: "actions",
-        header: m.admin_auth_actions_title(),
+        header: t("admin:auth_actions_title"),
         minWidth: 380,
         cell: (u) => {
           const summary = accountSummariesByAuthId.get(u.id);
@@ -421,7 +374,7 @@ export default function AuthUsersPage() {
                   variant="outline"
                   onClick={() => unbanMutation.mutate({ userId: u.id })}
                 >
-                  {m.admin_auth_users_unban()}
+                  {t("admin:auth_users_unban")}
                 </Button>
               ) : (
                 <Button
@@ -430,7 +383,7 @@ export default function AuthUsersPage() {
                   className="text-warning-text"
                   onClick={() => banMutation.mutate({ userId: u.id })}
                 >
-                  {m.admin_auth_users_ban()}
+                  {t("admin:auth_users_ban")}
                 </Button>
               )}
               <Button
@@ -440,8 +393,8 @@ export default function AuthUsersPage() {
                 onClick={() =>
                   setConfirmDialog({
                     open: true,
-                    title: m.admin_auth_users_remove_title(),
-                    message: m.admin_auth_users_remove_description({
+                    title: t("admin:auth_users_remove_title"),
+                    message: t("admin:auth_users_remove_description", {
                       name: u.name,
                       email: u.email,
                     }),
@@ -452,7 +405,7 @@ export default function AuthUsersPage() {
                   })
                 }
               >
-                {m.common_remove()}
+                {t("common:remove")}
               </Button>
             </div>
           );
@@ -486,8 +439,8 @@ export default function AuthUsersPage() {
 
   return (
     <Page
-      title={m.admin_auth_users_title()}
-      description={m.admin_auth_users_description()}
+      title={t("admin:auth_users_title")}
+      description={t("admin:auth_users_description")}
     >
       <Card>
         <CardContent>
@@ -503,7 +456,7 @@ export default function AuthUsersPage() {
             </div>
           ) : usersQuery.isError ? (
             <p className="text-sm text-error-text">
-              {m.admin_auth_users_failed_load()}
+              {t("admin:auth_users_failed_load")}
             </p>
           ) : (
             <PaginatedTable<AuthUser>
@@ -539,13 +492,13 @@ export default function AuthUsersPage() {
                 setConfirmDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button
               className="bg-error-fill text-white"
               onClick={confirmDialog.onConfirm}
             >
-              {m.common_confirm()}
+              {t("common:confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -621,7 +574,7 @@ export default function AuthUsersPage() {
                 setOverrideDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button
               disabled={
@@ -654,7 +607,7 @@ export default function AuthUsersPage() {
                 }
               }}
             >
-              {m.common_confirm()}
+              {t("common:confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -738,7 +691,7 @@ export default function AuthUsersPage() {
                 setImpersonationDialog((prev) => ({ ...prev, open: false }))
               }
             >
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button
               disabled={

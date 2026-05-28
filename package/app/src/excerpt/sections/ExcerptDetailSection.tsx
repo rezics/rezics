@@ -1,12 +1,6 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import { unitQueries } from "@rezics/api/unit/unit.queries";
-import {
-  common_edit,
-  common_loading,
-  excerpt_not_found,
-  review_comments,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -18,13 +12,6 @@ import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { Link } from "@/shared/ui/link";
 import { ExcerptDetail } from "../components/detail/ExcerptDetail";
 
-const i18nMessages = {
-  common_edit,
-  common_loading,
-  excerpt_not_found,
-  review_comments,
-};
-
 interface ExcerptDetailSectionProps {
   unitId: string;
 }
@@ -32,19 +19,19 @@ interface ExcerptDetailSectionProps {
 export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   unitId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const composerRef = useFocusReplyFromQuery();
+  const { t } = useTranslation(["common", "community"]);
+const composerRef = useFocusReplyFromQuery();
   const { data: excerpt, isLoading } = useQuery(unitQueries.detail(unitId));
   const editorEntry = useEditorEntry({
     surface: "excerpt",
     ownerUnit: { user: excerpt?.user },
   });
 
-  if (isLoading) return <div>{m.common_loading()}</div>;
+  if (isLoading) return <div>{t("common:loading")}</div>;
   if (!excerpt?.id) {
     return (
       <div className="text-center py-16 text-error-text">
-        {m.excerpt_not_found()}
+        {t("community:excerpt_not_found")}
       </div>
     );
   }
@@ -66,7 +53,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
                 type="button"
                 size="icon"
                 variant="ghost"
-                aria-label={m.common_edit()}
+                aria-label={t("common:edit")}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -80,7 +67,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
       <div className="mt-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <AccentBar />
-          <h2 className="text-xl font-bold">{m.review_comments()}</h2>
+          <h2 className="text-xl font-bold">{t("community:review_comments")}</h2>
         </div>
         <ReplyComposer
           ref={composerRef}

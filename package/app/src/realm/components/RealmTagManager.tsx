@@ -3,7 +3,7 @@ import type {
   RealmTagViewStyle,
   TagTreeNode,
 } from "@rezics/contract";
-import { useLocale } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";

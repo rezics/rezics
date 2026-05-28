@@ -1,21 +1,5 @@
 import { userMutations } from "@rezics/api/user/user.mutations";
-import {
-  admin_user_avatar_url_label,
-  admin_user_bio_label,
-  admin_user_create_description,
-  admin_user_create_failed,
-  admin_user_create_note,
-  admin_user_create_title,
-  admin_user_creating,
-  admin_user_password_min_help,
-  admin_user_rezics_email_label,
-  admin_user_slug_help,
-  admin_user_slug_label,
-  common_back,
-  common_create,
-  common_password,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -32,26 +16,9 @@ import React from "react";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 
-const i18nMessages = {
-  admin_user_avatar_url_label,
-  admin_user_bio_label,
-  admin_user_create_description,
-  admin_user_create_failed,
-  admin_user_create_note,
-  admin_user_create_title,
-  admin_user_creating,
-  admin_user_password_min_help,
-  admin_user_rezics_email_label,
-  admin_user_slug_help,
-  admin_user_slug_label,
-  common_back,
-  common_create,
-  common_password,
-};
-
 export default function UserCreatePage() {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["admin", "common"]);
+const navigate = useNavigate();
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -63,7 +30,7 @@ export default function UserCreatePage() {
   const createMutation = userMutations.useAdminCreate({
     onError: (err: unknown) =>
       setError(
-        err instanceof Error ? err.message : m.admin_user_create_failed(),
+        err instanceof Error ? err.message : t("admin:user_create_failed"),
       ),
   });
 
@@ -82,8 +49,8 @@ export default function UserCreatePage() {
 
   return (
     <Page
-      title={m.admin_user_create_title()}
-      description={m.admin_user_create_description()}
+      title={t("admin:user_create_title")}
+      description={t("admin:user_create_description")}
     >
       <Card>
         <CardContent>
@@ -94,7 +61,7 @@ export default function UserCreatePage() {
               render={(props) => (
                 <Link to="/user" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  {m.common_back()}
+                  {t("common:back")}
                 </Link>
               )}
             />
@@ -115,7 +82,7 @@ export default function UserCreatePage() {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
                 <Label htmlFor="ucp-email">
-                  {m.admin_user_rezics_email_label()}
+                  {t("admin:user_rezics_email_label")}
                 </Label>
                 <Input
                   id="ucp-email"
@@ -126,7 +93,7 @@ export default function UserCreatePage() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-password">{m.common_password()}</Label>
+                <Label htmlFor="ucp-password">{t("common:password")}</Label>
                 <Input
                   id="ucp-password"
                   value={password}
@@ -135,11 +102,11 @@ export default function UserCreatePage() {
                   type="password"
                 />
                 <p className="text-xs text-text-secondary">
-                  {m.admin_user_password_min_help()}
+                  {t("admin:user_password_min_help")}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-slug">{m.admin_user_slug_label()}</Label>
+                <Label htmlFor="ucp-slug">{t("admin:user_slug_label")}</Label>
                 <Input
                   id="ucp-slug"
                   value={slug}
@@ -147,12 +114,12 @@ export default function UserCreatePage() {
                   required
                 />
                 <p className="text-xs text-text-secondary">
-                  {m.admin_user_slug_help()}
+                  {t("admin:user_slug_help")}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="ucp-avatar">
-                  {m.admin_user_avatar_url_label()}
+                  {t("admin:user_avatar_url_label")}
                 </Label>
                 <Input
                   id="ucp-avatar"
@@ -161,7 +128,7 @@ export default function UserCreatePage() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucp-bio">{m.admin_user_bio_label()}</Label>
+                <Label htmlFor="ucp-bio">{t("admin:user_bio_label")}</Label>
                 <textarea
                   id="ucp-bio"
                   value={bio}
@@ -175,12 +142,12 @@ export default function UserCreatePage() {
                 <Button type="submit" disabled={createMutation.isPending}>
                   <SaveIcon className="size-4" />
                   {createMutation.isPending
-                    ? m.admin_user_creating()
-                    : m.common_create()}
+                    ? t("admin:user_creating")
+                    : t("common:create")}
                 </Button>
               </div>
               <p className="text-xs text-text-secondary">
-                {m.admin_user_create_note()}
+                {t("admin:user_create_note")}
               </p>
             </div>
           </form>

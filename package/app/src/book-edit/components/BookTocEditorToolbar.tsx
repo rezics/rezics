@@ -1,18 +1,4 @@
-import {
-  book_edit_add_chapter_to_last_volume,
-  book_edit_collapse_all,
-  book_edit_exit_selection_mode,
-  book_edit_exit_sorting_mode,
-  book_edit_expand_all,
-  book_edit_rate_selected,
-  book_edit_resync_index_overrides,
-  book_edit_search_chapters_placeholder,
-  book_edit_select_chapters,
-  book_edit_set_rating_for_selected,
-  book_edit_sorting_mode,
-  common_new,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Tooltip,
@@ -31,21 +17,6 @@ import {
   ChevronsUpDown as UnfoldMore,
 } from "lucide-react";
 import type React from "react";
-
-const i18nMessages = {
-  book_edit_add_chapter_to_last_volume,
-  book_edit_collapse_all,
-  book_edit_exit_selection_mode,
-  book_edit_exit_sorting_mode,
-  book_edit_expand_all,
-  book_edit_rate_selected,
-  book_edit_resync_index_overrides,
-  book_edit_search_chapters_placeholder,
-  book_edit_select_chapters,
-  book_edit_set_rating_for_selected,
-  book_edit_sorting_mode,
-  common_new,
-};
 
 interface BookTocEditorToolbarProps {
   searchTerm: string;
@@ -76,8 +47,8 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
   onBulkSetRating,
   onResyncOverrides,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["book", "common"]);
+return (
     <TooltipProvider>
       <div className="flex items-center gap-2 pb-3">
         <div className="relative flex-1">
@@ -90,7 +61,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               onSearchChange(e.target.value)
             }
-            placeholder={m.book_edit_search_chapters_placeholder()}
+            placeholder={t("book:edit_search_chapters_placeholder")}
             className="w-full pl-12 h-12 border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors"
           />
         </div>
@@ -108,7 +79,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
               </Button>
             )}
           />
-          <TooltipContent>{m.book_edit_expand_all()}</TooltipContent>
+          <TooltipContent>{t("book:edit_expand_all")}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -124,7 +95,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
               </Button>
             )}
           />
-          <TooltipContent>{m.book_edit_collapse_all()}</TooltipContent>
+          <TooltipContent>{t("book:edit_collapse_all")}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -143,8 +114,8 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
           />
           <TooltipContent>
             {isSortingMode
-              ? m.book_edit_exit_sorting_mode()
-              : m.book_edit_sorting_mode()}
+              ? t("book:edit_exit_sorting_mode")
+              : t("book:edit_sorting_mode")}
           </TooltipContent>
         </Tooltip>
 
@@ -164,8 +135,8 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
           />
           <TooltipContent>
             {isSelectionMode
-              ? m.book_edit_exit_selection_mode()
-              : m.book_edit_select_chapters()}
+              ? t("book:edit_exit_selection_mode")
+              : t("book:edit_select_chapters")}
           </TooltipContent>
         </Tooltip>
 
@@ -183,7 +154,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
                   >
                     <LabelIcon className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">
-                      {m.book_edit_rate_selected({
+                      {t("book:edit_rate_selected", {
                         count: selectedCount > 0 ? `(${selectedCount})` : "",
                       })}
                     </span>
@@ -192,7 +163,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
               )}
             />
             <TooltipContent>
-              {m.book_edit_set_rating_for_selected()}
+              {t("book:edit_set_rating_for_selected")}
             </TooltipContent>
           </Tooltip>
         )}
@@ -211,7 +182,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
             )}
           />
           <TooltipContent>
-            {m.book_edit_resync_index_overrides()}
+            {t("book:edit_resync_index_overrides")}
           </TooltipContent>
         </Tooltip>
 
@@ -225,12 +196,12 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
                 {...props}
               >
                 <Add className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">{m.common_new()}</span>
+                <span className="hidden sm:inline">{t("common:new")}</span>
               </Button>
             )}
           />
           <TooltipContent>
-            {m.book_edit_add_chapter_to_last_volume()}
+            {t("book:edit_add_chapter_to_last_volume")}
           </TooltipContent>
         </Tooltip>
       </div>

@@ -1,22 +1,17 @@
-import { book_description } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import type React from "react";
 import type { BookDescriptionProps } from "./types";
 
-const i18nMessages = {
-  book_description,
-};
-
 export const BookDescription: React.FC<BookDescriptionProps> = ({
   description,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["book"]);
+return (
     <div>
       <div>
         <div className="flex mb-4">
-          <AccentBarWithText text={m.book_description()} />
+          <AccentBarWithText text={t("book:description")} />
         </div>{" "}
         <p className="whitespace-pre-line text-base">{description}</p>
       </div>{" "}

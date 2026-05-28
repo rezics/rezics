@@ -6,27 +6,6 @@ import type {
 } from "@rezics/contract";
 import { entityKindLabel } from "@rezics/i18n";
 import {
-  admin_auth_actions_title,
-  admin_entity_failed_load_list,
-  admin_entity_kind_filter_placeholder,
-  admin_entity_list_description,
-  admin_entity_list_title,
-  admin_entity_primary_title,
-  admin_entity_search_placeholder,
-  admin_entity_search_title,
-  admin_entity_verified,
-  admin_entity_verified_filter_all,
-  admin_unit_no_title,
-  common_created,
-  common_edit,
-  common_no,
-  common_slug,
-  common_type,
-  common_unit_id,
-  common_unverified,
-  common_yes,
-} from "@rezics/i18n/messages";
-import {
   Button,
   Input,
   Label,
@@ -42,6 +21,7 @@ import { type PaginatedColumn } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 function fmtDate(v?: string | Date) {
   if (!v) return "-";
   const d = typeof v === "string" ? new Date(v) : v;
@@ -50,8 +30,8 @@ function fmtDate(v?: string | Date) {
 }
 
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
-  if (!translations || translations.length === 0) return admin_unit_no_title();
-  return translations[0]?.title?.trim() || admin_unit_no_title();
+  if (!translations || translations.length === 0) return getI18nRuntime().i18n.t("admin:unit_no_title");
+  return translations[0]?.title?.trim() || getI18nRuntime().i18n.t("admin:unit_no_title");
 }
 
 type VerifiedFilter = "all" | "true" | "false";
@@ -80,7 +60,7 @@ export default function EntityListPage() {
     () => [
       {
         id: "unitId",
-        header: common_unit_id(),
+        header: getI18nRuntime().i18n.t("common:unit_id"),
         minWidth: 220,
         cell: (e) => (
           <span className="text-sm font-mono text-text-secondary">
@@ -90,7 +70,7 @@ export default function EntityListPage() {
       },
       {
         id: "title",
-        header: admin_entity_primary_title(),
+        header: getI18nRuntime().i18n.t("admin:entity_primary_title"),
         minWidth: 200,
         cell: (e) => (
           <span className="text-sm font-medium">
@@ -100,7 +80,7 @@ export default function EntityListPage() {
       },
       {
         id: "kind",
-        header: common_type(),
+        header: getI18nRuntime().i18n.t("common:type"),
         minWidth: 120,
         cell: (e) => (
           <span className="text-sm text-text-secondary">
@@ -110,29 +90,29 @@ export default function EntityListPage() {
       },
       {
         id: "verified",
-        header: admin_entity_verified(),
+        header: getI18nRuntime().i18n.t("admin:entity_verified"),
         minWidth: 100,
         cell: (e) => (
           <span className="text-sm">
-            {e.verified ? common_yes() : common_no()}
+            {e.verified ? getI18nRuntime().i18n.t("common:yes") : getI18nRuntime().i18n.t("common:no")}
           </span>
         ),
       },
       {
         id: "slug",
-        header: common_slug(),
+        header: getI18nRuntime().i18n.t("common:slug"),
         minWidth: 160,
         cell: (e) => <span className="text-sm font-mono">{e.slug ?? "-"}</span>,
       },
       {
         id: "createdAt",
-        header: common_created(),
+        header: getI18nRuntime().i18n.t("common:created"),
         minWidth: 170,
         cell: (e) => fmtDate(e.createdAt),
       },
       {
         id: "actions",
-        header: admin_auth_actions_title(),
+        header: getI18nRuntime().i18n.t("admin:auth_actions_title"),
         minWidth: 120,
         cell: (e) => (
           <Button
@@ -144,7 +124,7 @@ export default function EntityListPage() {
                 params={{ unitId: e.unitId }}
                 {...props}
               >
-                {common_edit()}
+                {getI18nRuntime().i18n.t("common:edit")}
               </Link>
             )}
           />
@@ -156,14 +136,14 @@ export default function EntityListPage() {
 
   return (
     <Page
-      title={admin_entity_list_title()}
-      description={admin_entity_list_description()}
+      title={getI18nRuntime().i18n.t("admin:entity_list_title")}
+      description={getI18nRuntime().i18n.t("admin:entity_list_description")}
     >
       <SearchablePaginatedTableCard<EntityDTO>
         searchInputId="entity-search"
-        searchLabel={admin_entity_search_title()}
-        searchPlaceholder={admin_entity_search_placeholder()}
-        errorLabel={admin_entity_failed_load_list()}
+        searchLabel={getI18nRuntime().i18n.t("admin:entity_search_title")}
+        searchPlaceholder={getI18nRuntime().i18n.t("admin:entity_search_placeholder")}
+        errorLabel={getI18nRuntime().i18n.t("admin:entity_failed_load_list")}
         q={q}
         onQChange={setQ}
         onSearch={() => {
@@ -174,11 +154,11 @@ export default function EntityListPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col gap-1">
               <Label htmlFor="entity-kind" className="text-xs">
-                {common_type()}
+                {getI18nRuntime().i18n.t("common:type")}
               </Label>
               <Input
                 id="entity-kind"
-                placeholder={admin_entity_kind_filter_placeholder()}
+                placeholder={getI18nRuntime().i18n.t("admin:entity_kind_filter_placeholder")}
                 value={kind}
                 onChange={(e) => {
                   setKind(e.target.value);
@@ -188,7 +168,7 @@ export default function EntityListPage() {
             </div>
             <div className="flex flex-col gap-1 sm:w-40">
               <Label htmlFor="entity-verified" className="text-xs">
-                {admin_entity_verified()}
+                {getI18nRuntime().i18n.t("admin:entity_verified")}
               </Label>
               <Select
                 value={verifiedFilter}
@@ -202,12 +182,12 @@ export default function EntityListPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">
-                    {admin_entity_verified_filter_all()}
+                    {getI18nRuntime().i18n.t("admin:entity_verified_filter_all")}
                   </SelectItem>
                   <SelectItem value="true">
-                    {admin_entity_verified()}
+                    {getI18nRuntime().i18n.t("admin:entity_verified")}
                   </SelectItem>
-                  <SelectItem value="false">{common_unverified()}</SelectItem>
+                  <SelectItem value="false">{getI18nRuntime().i18n.t("common:unverified")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

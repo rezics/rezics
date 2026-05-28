@@ -2,15 +2,7 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { useCreateChapterMutation } from "@rezics/api/chapter/chapter.mutations";
 import { useCurrentUserId } from "@rezics/api/hooks";
 import { type ContentRating, markdownContentDoc } from "@rezics/contract";
-import {
-  book_chapter_content_required,
-  book_edit_chapter_title,
-  book_edit_create_chapter,
-  common_create,
-  common_creating,
-  common_required,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";
 import {
   Dialog,
@@ -23,15 +15,6 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import type { Chapter } from "./BookTocEditor";
-
-const i18nMessages = {
-  book_chapter_content_required,
-  book_edit_chapter_title,
-  book_edit_create_chapter,
-  common_create,
-  common_creating,
-  common_required,
-};
 
 interface CreateChapterDialogProps {
   open: boolean;
@@ -56,8 +39,8 @@ export function CreateChapterDialog({
   bookRating,
   currentEditParentId,
 }: CreateChapterDialogProps) {
-  const m = useMessage(i18nMessages);
-  const userId = useCurrentUserId();
+  const { t } = useTranslation(["book", "common"]);
+const userId = useCurrentUserId();
   const { show } = useAlertStore();
 
   const [title, setTitle] = useState("");
@@ -130,12 +113,12 @@ export function CreateChapterDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{m.book_edit_create_chapter()}</DialogTitle>
+          <DialogTitle>{t("book:edit_create_chapter")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-4 border-t border-border-whisper">
           <div className="flex flex-col gap-1">
             <Label htmlFor="create-chapter-title">
-              {m.book_edit_chapter_title()}
+              {t("book:edit_chapter_title")}
             </Label>
             <Input
               id="create-chapter-title"
@@ -144,7 +127,7 @@ export function CreateChapterDialog({
               className={!title.trim() ? "border-border-error" : ""}
             />
             {!title.trim() && (
-              <p className="text-xs text-error-text">{m.common_required()}</p>
+              <p className="text-xs text-error-text">{t("common:required")}</p>
             )}
           </div>
           <div className="max-w-xs">
@@ -158,13 +141,13 @@ export function CreateChapterDialog({
               onCancel={onClose}
               submitLabel={
                 createMutation.isPending
-                  ? m.common_creating()
-                  : m.common_create()
+                  ? t("common:creating")
+                  : t("common:create")
               }
             />
             {!content.trim() && (
               <div className="text-sm text-destructive mt-2">
-                {m.book_chapter_content_required()}
+                {t("book:chapter_content_required")}
               </div>
             )}
           </div>

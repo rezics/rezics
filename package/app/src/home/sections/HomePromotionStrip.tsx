@@ -1,16 +1,5 @@
-import {
-  page_home_sections_promotion_item_1,
-  page_home_sections_promotion_item_2,
-  page_home_sections_promotion_item_3,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
-
-const i18nMessages = {
-  page_home_sections_promotion_item_1,
-  page_home_sections_promotion_item_2,
-  page_home_sections_promotion_item_3,
-};
 
 export type HomePromotionStripProps = {
   items?: { text: string; href?: string }[];
@@ -23,11 +12,11 @@ export type HomePromotionStripProps = {
 export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
   items,
 }) => {
-  const m = useMessage(i18nMessages);
-  const resolvedItems = items ?? [
-    { text: m.page_home_sections_promotion_item_1() },
-    { text: m.page_home_sections_promotion_item_2() },
-    { text: m.page_home_sections_promotion_item_3() },
+  const { t } = useTranslation(["page"]);
+const resolvedItems = items ?? [
+    { text: t("page:home_sections_promotion_item_1") },
+    { text: t("page:home_sections_promotion_item_2") },
+    { text: t("page:home_sections_promotion_item_3") },
   ];
 
   return (

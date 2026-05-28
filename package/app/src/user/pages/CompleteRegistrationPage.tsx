@@ -1,41 +1,6 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import {
-  auth_flow_complete_registration_intro,
-  auth_flow_complete_registration_title,
-  auth_flow_onboarding_sign_in_first,
-  auth_flow_pause_registration,
-  auth_flow_pause_registration_confirm,
-  auth_flow_registration_complete_redirecting,
-  auth_flow_setup_display_name,
-  auth_flow_setup_slug_available,
-  auth_flow_setup_slug_checking,
-  auth_flow_setup_slug_invalid,
-  auth_flow_setup_slug_label,
-  auth_flow_setup_slug_short,
-  auth_flow_setup_slug_taken,
-  auth_flow_setup_submit,
-  auth_flow_setup_title,
-  auth_flow_verify_checking_state,
-  auth_flow_verify_code_expires,
-  auth_flow_verify_code_incomplete,
-  auth_flow_verify_code_sent_to,
-  auth_flow_verify_complete_widget,
-  auth_flow_verify_intro_prefix,
-  auth_flow_verify_intro_suffix,
-  auth_flow_verify_resend_code,
-  auth_flow_verify_resend_cooldown,
-  auth_flow_verify_send_code,
-  auth_flow_verify_sending_code,
-  auth_flow_verify_sent,
-  auth_flow_verify_submit_code,
-  auth_flow_verify_title,
-  auth_flow_verify_widget_loading,
-  auth_login,
-  auth_logout,
-  common_loading,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import {
@@ -71,42 +36,6 @@ import { OtpInput } from "../components/OtpInput";
 import { Layout } from "../layouts/Layout";
 import { logout } from "../models/handler";
 import { useAuth } from "./useAuth";
-
-const i18nMessages = {
-  auth_flow_complete_registration_intro,
-  auth_flow_complete_registration_title,
-  auth_flow_onboarding_sign_in_first,
-  auth_flow_pause_registration,
-  auth_flow_pause_registration_confirm,
-  auth_flow_registration_complete_redirecting,
-  auth_flow_setup_display_name,
-  auth_flow_setup_slug_available,
-  auth_flow_setup_slug_checking,
-  auth_flow_setup_slug_invalid,
-  auth_flow_setup_slug_label,
-  auth_flow_setup_slug_short,
-  auth_flow_setup_slug_taken,
-  auth_flow_setup_submit,
-  auth_flow_setup_title,
-  auth_flow_verify_checking_state,
-  auth_flow_verify_code_expires,
-  auth_flow_verify_code_incomplete,
-  auth_flow_verify_code_sent_to,
-  auth_flow_verify_complete_widget,
-  auth_flow_verify_intro_prefix,
-  auth_flow_verify_intro_suffix,
-  auth_flow_verify_resend_code,
-  auth_flow_verify_resend_cooldown,
-  auth_flow_verify_send_code,
-  auth_flow_verify_sending_code,
-  auth_flow_verify_sent,
-  auth_flow_verify_submit_code,
-  auth_flow_verify_title,
-  auth_flow_verify_widget_loading,
-  auth_login,
-  auth_logout,
-  common_loading,
-};
 
 function deriveSlugFromName(name: string): string {
   return name
@@ -183,8 +112,8 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
 // --- Step 2: Account Setup Form ---
 
 function IdentityStep({ onComplete }: { onComplete: () => void }) {
-  const m = useMessage(i18nMessages);
-  const auth = useAuth();
+  const { t } = useTranslation(["auth", "common"]);
+const auth = useAuth();
   const [displayName, setDisplayName] = useState(
     auth.authAccountState?.email?.split("@")[0] ?? "",
   );
@@ -215,11 +144,11 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
 
   const slugError = useMemo(() => {
     if (slug.length === 0) return undefined;
-    if (slug.length < 6) return m.auth_flow_setup_slug_short();
+    if (slug.length < 6) return t("auth:flow_setup_slug_short");
     if (slugCheck && !slugCheck.available) {
       return slugCheck.reason === "taken"
-        ? m.auth_flow_setup_slug_taken()
-        : m.auth_flow_setup_slug_invalid({ reason: slugCheck.reason ?? "" });
+        ? t("auth:flow_setup_slug_taken")
+        : t("auth:flow_setup_slug_invalid", { reason: slugCheck.reason ?? "" });
     }
     return undefined;
   }, [
@@ -255,9 +184,9 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
   };
 
   const slugHelper = checkingSlug
-    ? m.auth_flow_setup_slug_checking()
+    ? t("auth:flow_setup_slug_checking")
     : (slugError ??
-      (slugCheck?.available ? m.auth_flow_setup_slug_available() : undefined));
+      (slugCheck?.available ? t("auth:flow_setup_slug_available") : undefined));
 
   return (
     <div className="flex flex-col gap-4">
@@ -268,7 +197,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
       )}
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="reg-username">{m.auth_flow_setup_display_name()}</Label>
+        <Label htmlFor="reg-username">{t("auth:flow_setup_display_name")}</Label>
         <Input
           id="reg-username"
           value={displayName}
@@ -278,7 +207,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="reg-slug">{m.auth_flow_setup_slug_label()}</Label>
+        <Label htmlFor="reg-slug">{t("auth:flow_setup_slug_label")}</Label>
         <Input
           id="reg-slug"
           value={slug}
@@ -301,7 +230,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
       </div>
 
       <Button disabled={!canSubmit} onClick={handleSubmit} className="w-full">
-        {loading ? m.common_loading() : m.auth_flow_setup_submit()}
+        {loading ? t("common:loading") : t("auth:flow_setup_submit")}
       </Button>
     </div>
   );
@@ -316,8 +245,8 @@ function EmailVerificationStep({
   email: string;
   onComplete: () => void;
 }) {
-  const m = useMessage(i18nMessages);
-  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation(["auth", "common"]);
+const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
   const [error, setError] = useState<string>();
   const [otpCode, setOtpCode] = useState("");
@@ -379,14 +308,14 @@ function EmailVerificationStep({
     setMessage(undefined);
     try {
       if (!turnstileToken) {
-        throw new Error(m.auth_flow_verify_complete_widget());
+        throw new Error(t("auth:flow_verify_complete_widget"));
       }
       await authApi.sendVerificationOTP({
         email,
         type: "email-verification",
         ...(turnstileToken && { turnstileToken }),
       });
-      setMessage(m.auth_flow_verify_sent());
+      setMessage(t("auth:flow_verify_sent"));
       setCodeSent(true);
       const end = Date.now() + 60_000;
       setCooldownEnd(end);
@@ -400,7 +329,7 @@ function EmailVerificationStep({
 
   const handleVerifyCode = async () => {
     if (otpCode.length !== 6) {
-      setError(m.auth_flow_verify_code_incomplete());
+      setError(t("auth:flow_verify_code_incomplete"));
       return;
     }
     setLoading(true);
@@ -439,8 +368,8 @@ function EmailVerificationStep({
       )}
 
       <p className="text-base">
-        {m.auth_flow_verify_intro_prefix()} <strong>{email}</strong>{" "}
-        {m.auth_flow_verify_intro_suffix()}
+        {t("auth:flow_verify_intro_prefix")} <strong>{email}</strong>{" "}
+        {t("auth:flow_verify_intro_suffix")}
       </p>
 
       <Turnstile
@@ -464,7 +393,7 @@ function EmailVerificationStep({
         loadingComponent={
           <div className="flex items-center gap-3">
             <Spinner size="sm" />
-            <p className="text-sm">{m.auth_flow_verify_widget_loading()}</p>
+            <p className="text-sm">{t("auth:flow_verify_widget_loading")}</p>
           </div>
         }
       />
@@ -481,23 +410,23 @@ function EmailVerificationStep({
       >
         {loading && <Spinner size="sm" />}
         {loading
-          ? m.auth_flow_verify_sending_code()
+          ? t("auth:flow_verify_sending_code")
           : codeSent
             ? cooldownRemaining > 0
-              ? m.auth_flow_verify_resend_cooldown({
+              ? t("auth:flow_verify_resend_cooldown", {
                   seconds: cooldownRemaining,
                 })
-              : m.auth_flow_verify_resend_code()
-            : m.auth_flow_verify_send_code()}
+              : t("auth:flow_verify_resend_code")
+            : t("auth:flow_verify_send_code")}
       </Button>
 
       <Separator />
 
       {codeSent && (
         <p className="text-sm text-text-secondary">
-          {m.auth_flow_verify_code_sent_to()} <strong>{email}</strong>
+          {t("auth:flow_verify_code_sent_to")} <strong>{email}</strong>
           {" — "}
-          {m.auth_flow_verify_code_expires()}
+          {t("auth:flow_verify_code_expires")}
         </p>
       )}
 
@@ -508,7 +437,7 @@ function EmailVerificationStep({
         onClick={handleVerifyCode}
         className="w-full"
       >
-        {m.auth_flow_verify_submit_code()}
+        {t("auth:flow_verify_submit_code")}
       </Button>
     </div>
   );
@@ -517,8 +446,8 @@ function EmailVerificationStep({
 // --- Main Page ---
 
 export const CompleteRegistrationPage: FC = () => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["auth", "common"]);
+const navigate = useNavigate();
   const auth = useAuth();
   const [justCompletedEmail, setJustCompletedEmail] = useState(false);
   const [pauseConfirming, setPauseConfirming] = useState(false);
@@ -680,21 +609,21 @@ export const CompleteRegistrationPage: FC = () => {
       onClick={handlePauseRegistration}
     >
       {pausing
-        ? m.common_loading()
+        ? t("common:loading")
         : pauseConfirming
-          ? m.auth_flow_pause_registration_confirm()
-          : m.auth_flow_pause_registration()}
+          ? t("auth:flow_pause_registration_confirm")
+          : t("auth:flow_pause_registration")}
     </Button>
   );
 
   if (checkingAuthSession && !auth.authAccountState) {
     return (
       <Layout
-        title={m.auth_flow_complete_registration_title()}
+        title={t("auth:flow_complete_registration_title")}
         content={
           <div className="flex items-center gap-3 text-sm text-text-secondary">
             <Spinner size="sm" />
-            <span>{m.auth_flow_verify_checking_state()}</span>
+            <span>{t("auth:flow_verify_checking_state")}</span>
           </div>
         }
         actions={pauseRegistrationButton}
@@ -706,12 +635,12 @@ export const CompleteRegistrationPage: FC = () => {
   if (!auth.authenticated && !auth.authAccountState) {
     return (
       <Layout
-        title={m.auth_flow_complete_registration_title()}
+        title={t("auth:flow_complete_registration_title")}
         content={
           <div className="flex flex-col gap-4">
             <Alert>
               <AlertDescription>
-                {m.auth_flow_onboarding_sign_in_first()}
+                {t("auth:flow_onboarding_sign_in_first")}
               </AlertDescription>
             </Alert>
             {pauseError && (
@@ -724,7 +653,7 @@ export const CompleteRegistrationPage: FC = () => {
         actions={
           <div className="flex flex-wrap justify-end gap-2">
             <Button onClick={() => navigate({ to: "/login" })}>
-              {m.auth_login()}
+              {t("auth:login")}
             </Button>
           </div>
         }
@@ -735,7 +664,7 @@ export const CompleteRegistrationPage: FC = () => {
   const steps: StepDefinition[] = [
     {
       id: "email",
-      label: m.auth_flow_verify_title(),
+      label: t("auth:flow_verify_title"),
       optional: emailVerified
         ? `${email}${trustedProvider ? ` (verified by ${trustedProvider})` : ""}`
         : undefined,
@@ -747,7 +676,7 @@ export const CompleteRegistrationPage: FC = () => {
     },
     {
       id: "account",
-      label: m.auth_flow_setup_title(),
+      label: t("auth:flow_setup_title"),
       optional: mainUserExists && auth.user?.slug ? auth.user.slug : undefined,
       completed: effectiveRegistrationStage === "complete",
       active: activeStep === 1 && !materializing,
@@ -757,11 +686,11 @@ export const CompleteRegistrationPage: FC = () => {
 
   return (
     <Layout
-      title={m.auth_flow_complete_registration_title()}
+      title={t("auth:flow_complete_registration_title")}
       content={
         <div className="flex flex-col gap-4">
           <p className="text-sm text-text-secondary">
-            {m.auth_flow_complete_registration_intro()}
+            {t("auth:flow_complete_registration_intro")}
           </p>
 
           <VerticalStepper steps={steps} />
@@ -769,7 +698,7 @@ export const CompleteRegistrationPage: FC = () => {
           {materializing && (
             <div className="flex items-center gap-3 text-sm text-text-secondary">
               <Spinner size="sm" />
-              <span>{m.auth_flow_verify_checking_state()}</span>
+              <span>{t("auth:flow_verify_checking_state")}</span>
             </div>
           )}
 
@@ -789,7 +718,7 @@ export const CompleteRegistrationPage: FC = () => {
             <Alert className="text-success-text">
               <CheckCircleIcon className="w-4 h-4" />
               <AlertDescription>
-                {m.auth_flow_registration_complete_redirecting()}
+                {t("auth:flow_registration_complete_redirecting")}
               </AlertDescription>
             </Alert>
           )}
@@ -798,7 +727,7 @@ export const CompleteRegistrationPage: FC = () => {
       actions={
         mainUserExists ? (
           <Button variant="ghost" onClick={handleLogout}>
-            {m.auth_logout()}
+            {t("auth:logout")}
           </Button>
         ) : (
           pauseRegistrationButton

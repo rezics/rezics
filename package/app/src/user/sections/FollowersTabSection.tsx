@@ -1,16 +1,6 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import {
-  common_loading,
-  common_next_page,
-  common_page_of,
-  common_previous_page,
-  profile_following,
-  profile_no_followers,
-  profile_no_following,
-  profile_tab_followers,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -22,20 +12,9 @@ import {
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 
-const i18nMessages = {
-  common_loading,
-  common_next_page,
-  common_page_of,
-  common_previous_page,
-  profile_following,
-  profile_no_followers,
-  profile_no_following,
-  profile_tab_followers,
-};
-
 export const FollowersTabSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  const { user, userId, isCurrentUser } = useProfileContext();
+  const { t } = useTranslation(["common", "settings"]);
+const { user, userId, isCurrentUser } = useProfileContext();
   const [filter, setFilter] = useState("followers");
   const [page, setPage] = useState(1);
   const limit = 20;
@@ -43,12 +22,12 @@ export const FollowersTabSection: FC = () => {
   const chips: ChipDefinition[] = [
     {
       value: "followers",
-      label: m.profile_tab_followers(),
+      label: t("settings:profile_tab_followers"),
       count: user.followersCount ?? 0,
     },
     {
       value: "following",
-      label: m.profile_following(),
+      label: t("settings:profile_following"),
       count: user.followingsCount ?? 0,
     },
   ];
@@ -89,13 +68,13 @@ export const FollowersTabSection: FC = () => {
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          {m.common_loading()}
+          {t("common:loading")}
         </p>
       ) : users.length === 0 ? (
         <p className="text-sm text-text-secondary py-12 text-center">
           {filter === "followers"
-            ? m.profile_no_followers()
-            : m.profile_no_following()}
+            ? t("settings:profile_no_followers")
+            : t("settings:profile_no_following")}
         </p>
       ) : (
         <>
@@ -118,10 +97,10 @@ export const FollowersTabSection: FC = () => {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
-                {m.common_previous_page()}
+                {t("common:previous_page")}
               </Button>
               <span className="text-sm text-text-secondary">
-                {m.common_page_of({ page, total: totalPages })}
+                {t("common:page_of", { page, total: totalPages })}
               </span>
               <Button
                 type="button"
@@ -130,7 +109,7 @@ export const FollowersTabSection: FC = () => {
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= totalPages}
               >
-                {m.common_next_page()}
+                {t("common:next_page")}
               </Button>
             </div>
           )}

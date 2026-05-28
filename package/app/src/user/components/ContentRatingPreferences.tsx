@@ -1,17 +1,7 @@
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
-import {
-  common_cancel,
-  settings_content_rating_always_on,
-  settings_content_rating_description_R_18,
-  settings_content_rating_description_R_18G,
-  settings_content_rating_opt_in_modal_body,
-  settings_content_rating_opt_in_modal_confirm,
-  settings_content_rating_opt_in_modal_title,
-  settings_content_rating_saved,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingBadge } from "@rezics/ui";
 import {
   Alert,
@@ -28,17 +18,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
 
-const i18nMessages = {
-  common_cancel,
-  settings_content_rating_always_on,
-  settings_content_rating_opt_in_modal_body,
-  settings_content_rating_opt_in_modal_confirm,
-  settings_content_rating_opt_in_modal_title,
-  settings_content_rating_saved,
-  settings_content_rating_description_R_18,
-  settings_content_rating_description_R_18G,
-};
-
 type OptInRating = "R_18" | "R_18G";
 const OPT_IN_RATINGS: OptInRating[] = ["R_18", "R_18G"];
 const BASELINE_RATINGS: ContentRating[] = ["GENERAL", "R_15"];
@@ -49,8 +28,8 @@ const OPT_IN_RATING_DESCRIPTION = {
 } as const satisfies Record<OptInRating, () => string>;
 
 export const ContentRatingPreferences: FC = () => {
-  const m = useMessage(i18nMessages);
-  const { data: settings } = useQuery(userQueries.settings());
+  const { t } = useTranslation(["common", "settings"]);
+const { data: settings } = useQuery(userQueries.settings());
   const updateSettings = useUpdateSettingsMutation();
 
   const optedIn: OptInRating[] =
@@ -93,7 +72,7 @@ export const ContentRatingPreferences: FC = () => {
       {saved && (
         <Alert className="mb-3 text-success-text">
           <AlertDescription>
-            {m.settings_content_rating_saved()}
+            {t("settings:content_rating_saved")}
           </AlertDescription>
         </Alert>
       )}
@@ -106,7 +85,7 @@ export const ContentRatingPreferences: FC = () => {
               <span className="flex flex-row items-center gap-2">
                 <RatingBadge rating={rating} />
                 <span className="text-sm text-text-secondary">
-                  {m.settings_content_rating_always_on()}
+                  {t("settings:content_rating_always_on")}
                 </span>
               </span>
             </div>
@@ -142,20 +121,20 @@ export const ContentRatingPreferences: FC = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {m.settings_content_rating_opt_in_modal_title()}
+              {t("settings:content_rating_opt_in_modal_title")}
             </DialogTitle>
             <DialogDescription>
-              {m.settings_content_rating_opt_in_modal_body({
+              {t("settings:content_rating_opt_in_modal_body", {
                 rating: confirming ?? "",
               })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConfirming(null)}>
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button onClick={confirmOptIn}>
-              {m.settings_content_rating_opt_in_modal_confirm()}
+              {t("settings:content_rating_opt_in_modal_confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

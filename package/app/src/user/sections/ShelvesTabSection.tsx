@@ -4,19 +4,7 @@ import {
   SYSTEM_SHELF_KIND_KEYS,
   type SystemShelfKindKey,
 } from "@rezics/contract";
-import {
-  common_loading,
-  search_category_all,
-  shelf_controls_sort_by,
-  shelf_empty_yet,
-  shelf_items_count,
-  shelf_no_search_matches,
-  shelf_search_placeholder,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-  shelf_untitled,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
 import { Link } from "@/shared/ui/link";
@@ -27,19 +15,6 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-
-const i18nMessages = {
-  common_loading,
-  search_category_all,
-  shelf_controls_sort_by,
-  shelf_empty_yet,
-  shelf_items_count,
-  shelf_no_search_matches,
-  shelf_search_placeholder,
-  shelf_untitled,
-  shelf_sort_newest,
-  shelf_sort_oldest,
-};
 
 function isSystemKindKey(
   kindKey: string | null | undefined,
@@ -55,8 +30,8 @@ const SORT_OPTION_LABEL = {
 } as const satisfies Record<string, () => string>;
 
 export const ShelvesTabSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  const { user, userId, isCurrentUser } = useProfileContext();
+  const { t } = useTranslation(["common", "entity", "search"]);
+const { user, userId, isCurrentUser } = useProfileContext();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -80,7 +55,7 @@ export const ShelvesTabSection: FC = () => {
       if (s.kindKey) kindSet.add(s.kindKey);
     }
     const chips: ChipDefinition[] = [
-      { value: "all", label: m.search_category_all() },
+      { value: "all", label: t("search:category_all") },
     ];
     for (const k of kindSet) {
       const label =
@@ -108,11 +83,11 @@ export const ShelvesTabSection: FC = () => {
 
   const filterConfig: FilterBarConfig = {
     showSearch: true,
-    searchPlaceholder: m.shelf_search_placeholder(),
+    searchPlaceholder: t("entity:shelf_search_placeholder"),
     dropdowns: [
       {
         key: "sort",
-        label: m.shelf_controls_sort_by(),
+        label: t("entity:shelf_controls_sort_by"),
         options: Object.entries(SORT_OPTION_LABEL).map(([value, label]) => ({
           value,
           label: label(),
@@ -139,11 +114,11 @@ export const ShelvesTabSection: FC = () => {
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          {m.common_loading()}
+          {t("common:loading")}
         </p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          {filters.q ? m.shelf_no_search_matches() : m.shelf_empty_yet()}
+          {filters.q ? t("entity:shelf_no_search_matches") : t("entity:shelf_empty_yet")}
         </p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -166,8 +141,8 @@ const ShelfCard: FC<{
   isOwnerView: boolean;
   userSlug?: string;
 }> = ({ shelf, isOwnerView, userSlug }) => {
-  const m = useMessage(i18nMessages);
-  const dbTitle = shelf.translations?.[0]?.title ?? m.shelf_untitled();
+  const { t } = useTranslation(["common", "entity", "search"]);
+const dbTitle = shelf.translations?.[0]?.title ?? t("entity:shelf_untitled");
   const systemKindKey = isSystemKindKey(shelf.kindKey) ? shelf.kindKey : null;
   const isSystemShelf = systemKindKey !== null;
   const title =
@@ -189,7 +164,7 @@ const ShelfCard: FC<{
       </span>
       <div className="flex items-center justify-between mt-auto pt-2">
         <span className="text-xs text-text-secondary">
-          {m.shelf_items_count({ count: itemCount })}
+          {t("entity:shelf_items_count", { count: itemCount })}
         </span>
         {shelf.kindKey && (
           <span className="text-xs text-text-secondary">{shelf.kindKey}</span>

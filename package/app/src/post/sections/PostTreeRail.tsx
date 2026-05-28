@@ -1,5 +1,4 @@
-import { post_collapse_thread } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import type { PostTreeNodeModel } from "../models/postTreeRails";
 import {
@@ -12,10 +11,6 @@ import {
   TERMINAL_RAIL_HEIGHT_PX,
   THREAD_INDENT_PX,
 } from "./postTreeLayout";
-
-const i18nMessages = {
-  post_collapse_thread,
-};
 
 interface PostTreeRailProps {
   childrenNodes: PostTreeNodeModel[];
@@ -36,8 +31,8 @@ export function PostTreeRail({
   onRailToggle,
   renderChild,
 }: PostTreeRailProps) {
-  const m = useMessage(i18nMessages);
-  const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
+  const { t } = useTranslation(["community"]);
+const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
   const lineLeftPx = railCenterLeftPx - RAIL_STROKE_PX / 2;
   const railLeftPx = railCenterLeftPx - RAIL_HITBOX_PX / 2;
   const branchWidthPx = THREAD_INDENT_PX;
@@ -50,7 +45,7 @@ export function PostTreeRail({
       {canIndentChildren ? (
         <button
           type="button"
-          aria-label={m.post_collapse_thread()}
+          aria-label={t("community:post_collapse_thread")}
           className="absolute z-10 cursor-pointer appearance-none border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-brand-fill focus-visible:outline-offset-1"
           style={{
             left: `${railLeftPx}px`,

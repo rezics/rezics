@@ -1,19 +1,4 @@
-import {
-  admin_meili_dangerous_operations_description,
-  admin_meili_dangerous_operations_title,
-  admin_meili_delete_all_documents_description,
-  admin_meili_delete_all_documents_title,
-  admin_meili_delete_all_indexes,
-  admin_meili_reset_dialog_description,
-  admin_meili_reset_dialog_title,
-  admin_meili_reset_everything_description,
-  admin_meili_reset_everything_title,
-  admin_meili_reset_type_to_confirm_prefix,
-  admin_meili_reset_type_to_confirm_suffix,
-  admin_meili_resetting,
-  common_cancel,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Card,
@@ -30,22 +15,6 @@ import {
   Input,
   Separator,
 } from "@rezics/ui/shadcn";
-
-const i18nMessages = {
-  admin_meili_dangerous_operations_description,
-  admin_meili_dangerous_operations_title,
-  admin_meili_delete_all_documents_description,
-  admin_meili_delete_all_documents_title,
-  admin_meili_delete_all_indexes,
-  admin_meili_reset_dialog_description,
-  admin_meili_reset_dialog_title,
-  admin_meili_reset_everything_description,
-  admin_meili_reset_everything_title,
-  admin_meili_reset_type_to_confirm_prefix,
-  admin_meili_reset_type_to_confirm_suffix,
-  admin_meili_resetting,
-  common_cancel,
-};
 
 export interface MeiliDangerAction {
   id: string;
@@ -75,23 +44,23 @@ export function MeiliDangerZoneSection({
   onResetConfirmTextChange: (value: string) => void;
   onReset: () => void;
 }) {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["admin", "common"]);
+return (
     <>
       <Card className="border-border-whisper bg-surface-base">
         <CardHeader>
-          <CardTitle>{m.admin_meili_dangerous_operations_title()}</CardTitle>
+          <CardTitle>{t("admin:meili_dangerous_operations_title")}</CardTitle>
           <CardDescription>
-            {m.admin_meili_dangerous_operations_description()}
+            {t("admin:meili_dangerous_operations_description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <p className="mb-1 text-sm font-semibold leading-[1.4]">
-              {m.admin_meili_delete_all_documents_title()}
+              {t("admin:meili_delete_all_documents_title")}
             </p>
             <p className="mb-2 block text-xs leading-[1.4] text-text-secondary">
-              {m.admin_meili_delete_all_documents_description()}
+              {t("admin:meili_delete_all_documents_description")}
             </p>
             <div className="flex flex-wrap gap-2">
               {deleteActions.map((action) => (
@@ -117,10 +86,10 @@ export function MeiliDangerZoneSection({
 
           <div>
             <p className="mb-1 text-sm font-semibold leading-[1.4] text-error-text">
-              {m.admin_meili_reset_everything_title()}
+              {t("admin:meili_reset_everything_title")}
             </p>
             <p className="mb-2 block text-xs leading-[1.4] text-text-secondary">
-              {m.admin_meili_reset_everything_description()}
+              {t("admin:meili_reset_everything_description")}
             </p>
             <Button
               variant="outline"
@@ -130,8 +99,8 @@ export function MeiliDangerZoneSection({
               disabled={isResetPending}
             >
               {isResetPending
-                ? m.admin_meili_resetting()
-                : m.admin_meili_reset_everything_title()}
+                ? t("admin:meili_resetting")
+                : t("admin:meili_reset_everything_title")}
             </Button>
           </div>
         </CardContent>
@@ -146,16 +115,16 @@ export function MeiliDangerZoneSection({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{m.admin_meili_reset_dialog_title()}</DialogTitle>
+            <DialogTitle>{t("admin:meili_reset_dialog_title")}</DialogTitle>
             <DialogDescription>
-              {m.admin_meili_reset_dialog_description()}
+              {t("admin:meili_reset_dialog_description")}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-2">
             <p className="mb-2 text-sm leading-[1.4]">
-              {m.admin_meili_reset_type_to_confirm_prefix()}{" "}
+              {t("admin:meili_reset_type_to_confirm_prefix")}{" "}
               <strong>{RESET_CONFIRMATION_TOKEN}</strong>{" "}
-              {m.admin_meili_reset_type_to_confirm_suffix()}
+              {t("admin:meili_reset_type_to_confirm_suffix")}
             </p>
             <Input
               autoFocus
@@ -172,7 +141,7 @@ export function MeiliDangerZoneSection({
                 onResetConfirmTextChange("");
               }}
             >
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button
               variant="outline"
@@ -184,7 +153,7 @@ export function MeiliDangerZoneSection({
                 onResetConfirmTextChange("");
               }}
             >
-              {m.admin_meili_delete_all_indexes()}
+              {t("admin:meili_delete_all_indexes")}
             </Button>
           </DialogFooter>
         </DialogContent>

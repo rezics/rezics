@@ -1,7 +1,6 @@
 import type { EditableResource } from "@rezics/api/hooks";
 import { useCanEdit } from "@rezics/api/hooks";
-import { common_edit } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Tooltip,
@@ -12,10 +11,6 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as Edit } from "lucide-react";
 import { cn } from "@/shared/utils/css-util";
-
-const i18nMessages = {
-  common_edit,
-};
 
 interface MiniAdminActionBarProps {
   editionURL: string;
@@ -30,8 +25,8 @@ export function MiniAdminActionBar({
   userId,
   resource = "post",
 }: MiniAdminActionBarProps) {
-  const m = useMessage(i18nMessages);
-  const canEdit = useCanEdit({
+  const { t } = useTranslation(["common"]);
+const canEdit = useCanEdit({
     resource,
     ownerUnit: userId ? { user: { unitId: userId } } : undefined,
   });
@@ -49,7 +44,7 @@ export function MiniAdminActionBar({
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label={m.common_edit()}
+                aria-label={t("common:edit")}
                 onClick={() => {
                   navigate({ to: editionURL });
                 }}
@@ -60,7 +55,7 @@ export function MiniAdminActionBar({
               </Button>
             )}
           />
-          <TooltipContent side="top">{m.common_edit()}</TooltipContent>
+          <TooltipContent side="top">{t("common:edit")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </span>

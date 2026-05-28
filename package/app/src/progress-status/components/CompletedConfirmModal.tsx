@@ -1,10 +1,4 @@
-import {
-  common_cancel,
-  common_confirm,
-  progress_status_completed_modal_description,
-  progress_status_completed_modal_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -15,13 +9,6 @@ import {
   DialogTitle,
 } from "@rezics/ui/shadcn";
 import { useEffect, useRef, useState } from "react";
-
-const i18nMessages = {
-  common_cancel,
-  common_confirm,
-  progress_status_completed_modal_description,
-  progress_status_completed_modal_title,
-};
 
 type CompletedConfirmModalProps = {
   open: boolean;
@@ -48,8 +35,8 @@ export function CompletedConfirmModal({
   onConfirm,
   isPending,
 }: CompletedConfirmModalProps) {
-  const m = useMessage(i18nMessages);
-  const [displayCount, setDisplayCount] = useState(currentCount);
+  const { t } = useTranslation(["common", "community"]);
+const [displayCount, setDisplayCount] = useState(currentCount);
   const [badgeFading, setBadgeFading] = useState(false);
   const [animating, setAnimating] = useState(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -99,9 +86,9 @@ export function CompletedConfirmModal({
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{m.progress_status_completed_modal_title()}</DialogTitle>
+          <DialogTitle>{t("community:progress_status_completed_modal_title")}</DialogTitle>
           <DialogDescription>
-            {m.progress_status_completed_modal_description()}
+            {t("community:progress_status_completed_modal_description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -130,14 +117,14 @@ export function CompletedConfirmModal({
             onClick={onCancel}
             disabled={animating}
           >
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button
             type="button"
             onClick={handleConfirm}
             disabled={isPending || animating}
           >
-            {m.common_confirm()}
+            {t("common:confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

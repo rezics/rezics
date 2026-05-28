@@ -1,9 +1,0 @@
-{
-  "ui_password_label": "パスワード",
-  "ui_password_help": "パスワードは8文字以上で入力してください。",
-  "ui_pagination_tips": "ページネーション",
-  "ui_password_show": "Show password",
-  "ui_password_hide": "Hide password",
-  "ui_collapsible_show_more": "もっと表示",
-  "ui_collapsible_show_less": "表示を減らす"
-}

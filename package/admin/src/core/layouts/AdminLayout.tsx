@@ -1,26 +1,17 @@
-import {
-  admin_layout_open_menu,
-  admin_layout_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Sheet, SheetContent } from "@rezics/ui/shadcn";
 import { Menu as MenuIcon } from "lucide-react";
 import React from "react";
 import { AdminNav } from "@/navigation/AdminNav";
 import { adminNav } from "@/navigation/adminNavConfig";
 
-const i18nMessages = {
-  admin_layout_open_menu,
-  admin_layout_title,
-};
-
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const m = useMessage(i18nMessages);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { t } = useTranslation(["admin"]);
+const [mobileOpen, setMobileOpen] = React.useState(false);
   const drawerWidth = adminNav.drawerWidth;
 
   const drawer = (
@@ -34,13 +25,13 @@ export default function AdminLayout({
           <Button
             variant="ghost"
             size="icon"
-            aria-label={m.admin_layout_open_menu()}
+            aria-label={t("admin:layout_open_menu")}
             className="md:hidden"
             onClick={() => setMobileOpen(true)}
           >
             <MenuIcon />
           </Button>
-          <h2 className="text-lg font-bold">{m.admin_layout_title()}</h2>
+          <h2 className="text-lg font-bold">{t("admin:layout_title")}</h2>
           <div className="flex-1" />
         </div>
       </header>

@@ -1,33 +1,20 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentDocMarkdownFallback, type ShelfDTO } from "@rezics/contract";
-import {
-  common_edit,
-  shelf_by_author,
-  shelf_items_count,
-  shelf_untitled,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditOutlined } from "lucide-react";
 import type React from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
-const i18nMessages = {
-  common_edit,
-  shelf_by_author,
-  shelf_items_count,
-  shelf_untitled,
-};
-
 interface SingleShelfProps {
   shelf: ShelfDTO;
 }
 
 export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
-  const m = useMessage(i18nMessages);
-  const translation = getTranslation(shelf.translations);
-  const title = translation?.title ?? m.shelf_untitled();
+  const { t } = useTranslation(["common", "entity"]);
+const translation = getTranslation(shelf.translations);
+  const title = translation?.title ?? t("entity:shelf_untitled");
   const description = contentDocMarkdownFallback(translation?.description);
   const navigate = useNavigate();
   const canEdit = useCanEdit({ resource: "shelf", ownerUnit: shelf });
@@ -43,7 +30,7 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
           <Button
             variant="ghost"
             size="icon"
-            aria-label={m.common_edit()}
+            aria-label={t("common:edit")}
             onClick={() => navigate({ to: `/shelf/${shelfId}/edit` })}
             className="h-7 w-7"
           >
@@ -56,11 +43,11 @@ export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
       )}
       <div className="mt-2">
         <span className="text-xs text-text-secondary">
-          {m.shelf_items_count({ count: itemsCount })}
+          {t("entity:shelf_items_count", { count: itemsCount })}
         </span>
         {shelf.user?.name && (
           <span className="ml-4 text-xs text-text-secondary">
-            {m.shelf_by_author({ name: shelf.user.name })}
+            {t("entity:shelf_by_author", { name: shelf.user.name })}
           </span>
         )}
       </div>

@@ -1,12 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
-import {
-  book_release_current,
-  book_release_label,
-  book_release_untitled,
-  realm_official,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Select,
@@ -20,13 +14,6 @@ import type React from "react";
 import { useMemo } from "react";
 import { releaseLanguage, releaseWorkUnitId } from "../models/releaseWork";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-
-const i18nMessages = {
-  book_release_current,
-  book_release_label,
-  book_release_untitled,
-  realm_official,
-};
 
 export type ReleaseOption = {
   unitId: string;
@@ -89,8 +76,8 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
   selectedReleaseUnitId,
   onSelect,
 }) => {
-  const m = useMessage(i18nMessages);
-  const workUnitId = releaseWorkUnitId(bookInfo);
+  const { t } = useTranslation(["book", "entity"]);
+const workUnitId = releaseWorkUnitId(bookInfo);
 
   const { data: releaseList } = useQuery({
     ...bookQueries.list({ workUnitId, limit: 50 }),
@@ -116,7 +103,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
             r.translations,
             selectedLang,
             r.defaultLanguage ?? undefined,
-          )?.title ?? m.book_release_untitled(),
+          )?.title ?? t("book:release_untitled"),
         language: String(lang),
         isOfficial: officialByLang.get(String(lang)) === r.unitId,
         position: r.workMembership?.position,
@@ -132,7 +119,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
             bookInfo.translations,
             selectedLang,
             bookInfo.defaultLanguage ?? undefined,
-          )?.title ?? m.book_release_current(),
+          )?.title ?? t("book:release_current"),
         language:
           (bookInfo.defaultLanguage as string | undefined) ?? selectedLang,
         isOfficial:
@@ -158,7 +145,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
   return (
     <div className="flex flex-row items-center gap-2">
       <span className="text-sm text-text-secondary">
-        {m.book_release_label()}
+        {t("book:release_label")}
       </span>
       <Select value={selectedReleaseUnitId} onValueChange={(v) => onSelect(v)}>
         <SelectTrigger className="min-w-[260px]">
@@ -175,7 +162,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
                     variant="outline"
                     className="border-brand-fill text-text-brand"
                   >
-                    {m.realm_official()}
+                    {t("entity:realm_official")}
                   </Badge>
                 )}
                 {opt.displayPolicy === "SECONDARY" && (

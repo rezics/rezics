@@ -1,9 +1,4 @@
-import {
-  page_home_sections_trending_excerpt_empty,
-  page_home_sections_trending_excerpt_more,
-  page_home_sections_trending_excerpt_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
@@ -11,12 +6,6 @@ import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalExcerptCarousel } from "@/excerpt/components/list/HorizontalExcerptCarousel";
 import { useHomeExcerpts } from "./hooks/hooks";
-
-const i18nMessages = {
-  page_home_sections_trending_excerpt_empty,
-  page_home_sections_trending_excerpt_more,
-  page_home_sections_trending_excerpt_title,
-};
 
 export type TrendingExcerptSectionProps = {
   title?: string;
@@ -27,9 +16,9 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
   title,
   limit = 8,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
-  const resolvedTitle = title ?? m.page_home_sections_trending_excerpt_title();
+  const { t } = useTranslation(["page"]);
+const navigate = useNavigate();
+  const resolvedTitle = title ?? t("page:home_sections_trending_excerpt_title");
   const { items, isLoading, error } = useHomeExcerpts(limit);
 
   const handleMoreClick = () => {
@@ -58,7 +47,7 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
         <Button variant="ghost" onClick={handleMoreClick}>
-          {m.page_home_sections_trending_excerpt_more()}
+          {t("page:home_sections_trending_excerpt_more")}
         </Button>
       </div>
 
@@ -66,7 +55,7 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
 
       {!isLoading && !items.length && (
         <p className="text-sm text-text-secondary">
-          {m.page_home_sections_trending_excerpt_empty()}
+          {t("page:home_sections_trending_excerpt_empty")}
         </p>
       )}
 

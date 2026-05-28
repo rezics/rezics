@@ -1,15 +1,6 @@
 import { authApi, authQueries } from "@rezics/api/auth/auth";
 import type { AuthProvider } from "@rezics/contract";
-import {
-  auth_flow_continue_with_provider,
-  auth_flow_providers_divider,
-  auth_flow_providers_github,
-  auth_flow_providers_google,
-  auth_flow_providers_microsoft,
-  auth_flow_providers_telegram,
-  auth_flow_providers_twitter,
-} from "@rezics/i18n/messages";
-import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
+import { type ReactiveMessageBag, useTranslation } from "@rezics/i18n/react";
 import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import {
   Alert,
@@ -22,16 +13,6 @@ import { type FC, useMemo, useState } from "react";
 import { buildOAuthCallbackTargets } from "../models/authRedirect";
 import { providerIcons } from "./providerIcons";
 
-const i18nMessages = {
-  auth_flow_continue_with_provider,
-  auth_flow_providers_divider,
-  auth_flow_providers_github,
-  auth_flow_providers_google,
-  auth_flow_providers_microsoft,
-  auth_flow_providers_telegram,
-  auth_flow_providers_twitter,
-};
-
 type SocialAuthMessages = ReactiveMessageBag<typeof i18nMessages>;
 
 // TODO 横条文字应该居中一点，更美观
@@ -42,15 +23,15 @@ function formatProviderLabel(
 ): string {
   switch (providerId) {
     case "github":
-      return m.auth_flow_providers_github();
+      return t("auth:flow_providers_github");
     case "google":
-      return m.auth_flow_providers_google();
+      return t("auth:flow_providers_google");
     case "microsoft":
-      return m.auth_flow_providers_microsoft();
+      return t("auth:flow_providers_microsoft");
     case "telegram":
-      return m.auth_flow_providers_telegram();
+      return t("auth:flow_providers_telegram");
     case "twitter":
-      return m.auth_flow_providers_twitter();
+      return t("auth:flow_providers_twitter");
     default:
       return providerId;
   }
@@ -66,8 +47,8 @@ const OPTIMISTIC_PROVIDER: AuthProvider = {
 export const SocialAuthButtons: FC<{
   mode: "login" | "register";
 }> = ({ mode }) => {
-  const m = useMessage(i18nMessages);
-  const [error, setError] = useState<string>();
+  const { t } = useTranslation(["auth"]);
+const [error, setError] = useState<string>();
   const [providerLoading, setProviderLoading] = useState<string>();
   const { data, isLoading } = useQuery(authQueries.providers());
 
@@ -121,7 +102,7 @@ export const SocialAuthButtons: FC<{
         label={
           isCompact
             ? formatProviderLabel(provider.id, m)
-            : m.auth_flow_continue_with_provider({
+            : t("auth:flow_continue_with_provider", {
                 provider: formatProviderLabel(provider.id, m),
               })
         }
@@ -135,7 +116,7 @@ export const SocialAuthButtons: FC<{
       <div className="relative flex items-center">
         <Separator className="flex-1" />
         <span className="px-3 text-sm text-text-secondary">
-          {m.auth_flow_providers_divider()}
+          {t("auth:flow_providers_divider")}
         </span>
         <Separator className="flex-1" />
       </div>

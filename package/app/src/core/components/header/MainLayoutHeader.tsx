@@ -1,5 +1,4 @@
-import { common_logo_alt } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useRouterState } from "@tanstack/react-router";
 import React from "react";
 import { AuthenticatedSection } from "@/core/sections/header/AuthenticatedSection.tsx";
@@ -11,10 +10,6 @@ import { useAuth } from "@/user/pages/useAuth";
 import { useLayoutStore } from "../../states/layoutStore.ts";
 import { DrawerToggler } from "./DrawerToggler.tsx";
 import { HeaderSearch } from "./HeaderSearch.tsx";
-
-const i18nMessages = {
-  common_logo_alt,
-};
 
 interface HeaderProps {
   isDragging?: boolean;
@@ -28,8 +23,8 @@ export const Header: React.FC<HeaderProps> = React.memo(
     layoutType = "type-b",
     disableDrawerToggle = false,
   }) => {
-    const m = useMessage(i18nMessages);
-    const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
+    const { t } = useTranslation(["common"]);
+const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
     const drawerWidth = useLayoutStore((s) => s.drawerWidth);
     const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
 
@@ -73,7 +68,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
           <Link to="/" className="flex items-center gap-2 shrink-0">
             {!isHomePage && (
               <div className="w-10 h-10 inline-flex items-center justify-center rounded-md bg-transparent overflow-hidden">
-                <img src="/logo.svg" alt={m.common_logo_alt()} />
+                <img src="/logo.svg" alt={t("common:logo_alt")} />
               </div>
             )}
             <h1 className="text-3xl font-bold text-brand-fill m-0">REZICS</h1>

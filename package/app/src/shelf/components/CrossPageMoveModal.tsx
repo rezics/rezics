@@ -1,5 +1,4 @@
-import { common_cancel, shelf_move_to_page_title } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -8,11 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-
-const i18nMessages = {
-  common_cancel,
-  shelf_move_to_page_title,
-};
 
 interface CrossPageMoveModalProps {
   open: boolean;
@@ -29,13 +23,13 @@ export function CrossPageMoveModal({
   currentPage,
   onPick,
 }: CrossPageMoveModalProps) {
-  const m = useMessage(i18nMessages);
-  const pages = Array.from({ length: Math.max(pageCount, 1) }, (_, i) => i + 1);
+  const { t } = useTranslation(["common", "entity"]);
+const pages = Array.from({ length: Math.max(pageCount, 1) }, (_, i) => i + 1);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{m.shelf_move_to_page_title()}</DialogTitle>
+          <DialogTitle>{t("entity:shelf_move_to_page_title")}</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-5 gap-2 py-2">
           {pages.map((p) => (
@@ -52,7 +46,7 @@ export function CrossPageMoveModal({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
         </DialogFooter>
       </DialogContent>

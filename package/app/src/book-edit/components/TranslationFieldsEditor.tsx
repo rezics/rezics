@@ -1,20 +1,7 @@
-import {
-  book_description,
-  book_fields_title,
-  page_book_edit_info_translation_fields_subtitle,
-  page_book_edit_info_translation_fields_summary,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import type { TranslationDraft } from "../hooks/useBookTranslationEditor";
-
-const i18nMessages = {
-  book_description,
-  book_fields_title,
-  page_book_edit_info_translation_fields_subtitle,
-  page_book_edit_info_translation_fields_summary,
-};
 
 export interface TranslationFieldsEditorProps {
   draft: TranslationDraft;
@@ -29,12 +16,12 @@ export interface TranslationFieldsEditorProps {
 export const TranslationFieldsEditor: React.FC<
   TranslationFieldsEditorProps
 > = ({ draft, onChange, disabled, afterTitleSlot }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["book", "page"]);
+return (
     <div className="flex flex-col gap-5">
       <div className="space-y-1">
         <label className="text-sm" htmlFor="tr-title">
-          {m.book_fields_title()}
+          {t("book:fields_title")}
         </label>
         <input
           id="tr-title"
@@ -48,7 +35,7 @@ export const TranslationFieldsEditor: React.FC<
 
       <div className="space-y-1">
         <label className="text-sm" htmlFor="tr-subtitle">
-          {m.page_book_edit_info_translation_fields_subtitle()}
+          {t("page:book_edit_info_translation_fields_subtitle")}
         </label>
         <input
           id="tr-subtitle"
@@ -61,7 +48,7 @@ export const TranslationFieldsEditor: React.FC<
 
       <div className="space-y-1">
         <label className="text-sm" htmlFor="tr-summary">
-          {m.page_book_edit_info_translation_fields_summary()}
+          {t("page:book_edit_info_translation_fields_summary")}
         </label>
         <input
           id="tr-summary"
@@ -73,7 +60,7 @@ export const TranslationFieldsEditor: React.FC<
       </div>
 
       <div className="space-y-1">
-        <span className="text-sm">{m.book_description()}</span>
+        <span className="text-sm">{t("book:description")}</span>
         <RezicsMarkdownEditor
           value={draft.description}
           onChange={(value) => onChange("description", value)}

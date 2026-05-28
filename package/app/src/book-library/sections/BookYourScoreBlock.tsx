@@ -6,18 +6,7 @@ import {
   useUpsertScoreMutation,
 } from "@rezics/api/score/score";
 import { SCORE_MAX } from "@rezics/contract";
-import {
-  book_hero_your_score_dialog_edit,
-  book_hero_your_score_dialog_rate,
-  book_hero_your_score_label,
-  book_hero_your_score_rate,
-  book_hero_your_score_remove,
-  book_hero_your_score_sign_in,
-  common_cancel,
-  common_saving,
-  common_submit,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -36,18 +25,6 @@ import { Star } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 
-const i18nMessages = {
-  book_hero_your_score_dialog_edit,
-  book_hero_your_score_dialog_rate,
-  book_hero_your_score_label,
-  book_hero_your_score_rate,
-  book_hero_your_score_remove,
-  book_hero_your_score_sign_in,
-  common_cancel,
-  common_saving,
-  common_submit,
-};
-
 interface BookYourScoreBlockProps {
   bookUnitId: string;
   realmId?: string;
@@ -57,8 +34,8 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
   bookUnitId,
   realmId = getDefaultRealmId() ?? "default",
 }) => {
-  const m = useMessage(i18nMessages);
-  const userId = useCurrentUserId();
+  const { t } = useTranslation(["book", "common"]);
+const userId = useCurrentUserId();
   const isAuthed = Boolean(userId);
 
   const { data: userScores } = useQuery({
@@ -118,7 +95,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
             style={{ color: "var(--colors-brand-fill)" }}
           />
           <span className="text-base font-medium text-brand-fill">
-            {m.book_hero_your_score_rate()}
+            {t("book:hero_your_score_rate")}
           </span>
         </>
       )}
@@ -128,7 +105,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
   const trigger = (
     <div className="flex flex-col items-center gap-1">
       <span className="text-xs font-bold tracking-[0.12em] uppercase text-white/65">
-        {m.book_hero_your_score_label()}
+        {t("book:hero_your_score_label")}
       </span>
       {button}
     </div>
@@ -144,7 +121,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
             <TooltipTrigger
               render={(props) => <span {...props}>{trigger}</span>}
             />
-            <TooltipContent>{m.book_hero_your_score_sign_in()}</TooltipContent>
+            <TooltipContent>{t("book:hero_your_score_sign_in")}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       )}
@@ -159,8 +136,8 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
           <DialogHeader>
             <DialogTitle>
               {currentValue
-                ? m.book_hero_your_score_dialog_edit()
-                : m.book_hero_your_score_dialog_rate()}
+                ? t("book:hero_your_score_dialog_edit")
+                : t("book:hero_your_score_dialog_rate")}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col items-center gap-3 pt-2">
@@ -169,7 +146,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
               size="lg"
               value={draft}
               onChange={(v) => setDraft(v)}
-              aria-label={m.book_hero_your_score_dialog_rate()}
+              aria-label={t("book:hero_your_score_dialog_rate")}
             />
             <span className="text-sm text-text-secondary tabular-nums">
               {draft ? `${draft} / ${SCORE_MAX}` : "—"}
@@ -183,7 +160,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
                 disabled={isPending}
                 className="mr-auto"
               >
-                {m.book_hero_your_score_remove()}
+                {t("book:hero_your_score_remove")}
               </Button>
             )}
             <Button
@@ -191,13 +168,13 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
               onClick={() => setOpen(false)}
               disabled={isPending}
             >
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={isPending || draft == null || draft < 1}
             >
-              {isPending ? m.common_saving() : m.common_submit()}
+              {isPending ? t("common:saving") : t("common:submit")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,16 +1,4 @@
-import {
-  search_filter_asc,
-  search_filter_desc,
-  search_filter_favorites,
-  search_filter_month_votes,
-  search_filter_recommendation,
-  search_filter_relevance,
-  search_filter_time,
-  search_filter_total_votes,
-  search_filter_week_votes,
-  search_filter_word_count,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import {
   Button,
@@ -25,19 +13,6 @@ import {
   ArrowUp as ArrowUpward,
 } from "lucide-react";
 import type React from "react";
-
-const i18nMessages = {
-  search_filter_asc,
-  search_filter_desc,
-  search_filter_month_votes,
-  search_filter_recommendation,
-  search_filter_total_votes,
-  search_filter_week_votes,
-  search_filter_favorites,
-  search_filter_relevance,
-  search_filter_time,
-  search_filter_word_count,
-};
 
 export type BookLibSortKey =
   | "relevance"
@@ -62,8 +37,8 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
   sortOrder,
   onSortChange,
 }) => {
-  const m = useMessage(i18nMessages);
-  const handleSecondaryMenuSelect = (key: string) => () => {
+  const { t } = useTranslation(["search"]);
+const handleSecondaryMenuSelect = (key: string) => () => {
     console.log(key);
   };
 
@@ -91,7 +66,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
             render={(props) => (
               <Button variant="ghost" {...props}>
                 <span className="text-sm">
-                  {m.search_filter_recommendation()}
+                  {t("search:filter_recommendation")}
                 </span>
                 <ArrowDropDownIcon className="ml-1" size={16} />
               </Button>
@@ -99,13 +74,13 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           />
           <DropdownMenuContent>
             <DropdownMenuItem onClick={handleSecondaryMenuSelect("weekVotes")}>
-              {m.search_filter_week_votes()}
+              {t("search:filter_week_votes")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleSecondaryMenuSelect("monthVotes")}>
-              {m.search_filter_month_votes()}
+              {t("search:filter_month_votes")}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleSecondaryMenuSelect("totalVotes")}>
-              {m.search_filter_total_votes()}
+              {t("search:filter_total_votes")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -118,7 +93,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           className="normal-case"
         >
           <ArrowDownward />
-          &nbsp; {m.search_filter_desc()}
+          &nbsp; {t("search:filter_desc")}
         </Button>
         <Button
           variant={sortOrder === "asc" ? "secondary" : "ghost"}
@@ -127,7 +102,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
           className="ml-2 normal-case"
         >
           <ArrowUpward />
-          &nbsp; {m.search_filter_asc()}
+          &nbsp; {t("search:filter_asc")}
         </Button>
       </div>
     </div>

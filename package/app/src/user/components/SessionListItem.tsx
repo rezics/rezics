@@ -1,12 +1,7 @@
-import { settings_security_unknown_device } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { Monitor as ComputerIcon } from "lucide-react";
 import type { FC } from "react";
-
-const i18nMessages = {
-  settings_security_unknown_device,
-};
 
 interface SessionListItemProps {
   session: {
@@ -45,10 +40,10 @@ export const SessionListItem: FC<SessionListItemProps> = ({
   onRevoke,
   revoking,
 }) => {
-  const m = useMessage(i18nMessages);
-  const userAgent = parseUserAgent(
+  const { t } = useTranslation(["settings"]);
+const userAgent = parseUserAgent(
     session.userAgent,
-    m.settings_security_unknown_device(),
+    t("settings:security_unknown_device"),
   );
   const createdAt = session.createdAt
     ? new Date(session.createdAt).toLocaleDateString(undefined, {

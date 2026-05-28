@@ -16,31 +16,7 @@ import type {
   RealmTagApplicationDTO,
   UnitTagDTO,
 } from "@rezics/contract";
-import {
-  admin_tag_low_score_description,
-  admin_tag_low_score_empty,
-  admin_tag_low_score_failed_load,
-  admin_tag_low_score_title,
-  admin_tag_pin,
-  admin_tag_realm_filter_label,
-  admin_tag_realm_filter_placeholder,
-  admin_tag_scope_global,
-  admin_tag_scope_realm,
-  admin_tag_threshold_label,
-  admin_tag_unpin,
-  common_actions,
-  common_apply,
-  common_delete,
-  common_pinned,
-  common_realm,
-  common_scope,
-  common_score,
-  common_tag,
-  common_unit,
-  common_votes,
-  common_yes,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -70,38 +46,13 @@ import {
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 
-const i18nMessages = {
-  admin_tag_low_score_description,
-  admin_tag_low_score_empty,
-  admin_tag_low_score_failed_load,
-  admin_tag_low_score_title,
-  admin_tag_pin,
-  admin_tag_realm_filter_label,
-  admin_tag_realm_filter_placeholder,
-  admin_tag_scope_global,
-  admin_tag_scope_realm,
-  admin_tag_threshold_label,
-  admin_tag_unpin,
-  common_actions,
-  common_apply,
-  common_delete,
-  common_pinned,
-  common_realm,
-  common_scope,
-  common_score,
-  common_tag,
-  common_unit,
-  common_votes,
-  common_yes,
-};
-
 type Row =
   | ({ kind: "global" } & UnitTagDTO)
   | ({ kind: "realm" } & RealmTagApplicationDTO);
 
 export default function LowScoreTagsPage() {
-  const m = useMessage(i18nMessages);
-  const [scope, setScope] = React.useState<LowScoreTagsScope>("global");
+  const { t } = useTranslation(["admin", "common"]);
+const [scope, setScope] = React.useState<LowScoreTagsScope>("global");
   const [thresholdInput, setThresholdInput] = React.useState("-100");
   const [realmInput, setRealmInput] = React.useState("");
   const [appliedRealm, setAppliedRealm] = React.useState("");
@@ -210,7 +161,7 @@ export default function LowScoreTagsPage() {
     const base: PaginatedColumn<Row>[] = [
       {
         id: "scope",
-        header: m.common_scope(),
+        header: t("common:scope"),
         minWidth: 90,
         cell: (r) => <span className="text-xs font-mono">{r.kind}</span>,
       },
@@ -218,7 +169,7 @@ export default function LowScoreTagsPage() {
         ? [
             {
               id: "realm",
-              header: m.common_realm(),
+              header: t("common:realm"),
               minWidth: 220,
               cell: (r: Row) =>
                 r.kind === "realm" ? (
@@ -229,19 +180,19 @@ export default function LowScoreTagsPage() {
         : []),
       {
         id: "unit",
-        header: m.common_unit(),
+        header: t("common:unit"),
         minWidth: 220,
         cell: (r) => <span className="text-sm font-mono">{r.unitId}</span>,
       },
       {
         id: "tag",
-        header: m.common_tag(),
+        header: t("common:tag"),
         minWidth: 220,
         cell: (r) => <span className="text-sm font-mono">{r.tagUnitId}</span>,
       },
       {
         id: "score",
-        header: m.common_score(),
+        header: t("common:score"),
         minWidth: 90,
         cell: (r) => (
           <span className="text-sm font-mono font-semibold text-error-text">
@@ -251,19 +202,19 @@ export default function LowScoreTagsPage() {
       },
       {
         id: "voteCount",
-        header: m.common_votes(),
+        header: t("common:votes"),
         minWidth: 80,
         cell: (r) => <span className="text-sm font-mono">{r.voteCount}</span>,
       },
       {
         id: "pinned",
-        header: m.common_pinned(),
+        header: t("common:pinned"),
         minWidth: 80,
-        cell: (r) => (r.pinned ? m.common_yes() : "-"),
+        cell: (r) => (r.pinned ? t("common:yes") : "-"),
       },
       {
         id: "actions",
-        header: m.common_actions(),
+        header: t("common:actions"),
         minWidth: 130,
         cell: (r) => (
           <TooltipProvider>
@@ -282,7 +233,7 @@ export default function LowScoreTagsPage() {
                           : patchRealmTagApplication.isPending
                       }
                       aria-label={
-                        r.pinned ? m.admin_tag_unpin() : m.admin_tag_pin()
+                        r.pinned ? t("admin:tag_unpin") : t("admin:tag_pin")
                       }
                       {...props}
                     >
@@ -295,7 +246,7 @@ export default function LowScoreTagsPage() {
                   )}
                 />
                 <TooltipContent>
-                  {r.pinned ? m.admin_tag_unpin() : m.admin_tag_pin()}
+                  {r.pinned ? t("admin:tag_unpin") : t("admin:tag_pin")}
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -311,14 +262,14 @@ export default function LowScoreTagsPage() {
                           ? deleteUnitTag.isPending
                           : deleteRealmTagApplication.isPending
                       }
-                      aria-label={m.common_delete()}
+                      aria-label={t("common:delete")}
                       {...props}
                     >
                       <Trash2 size={18} />
                     </Button>
                   )}
                 />
-                <TooltipContent>{m.common_delete()}</TooltipContent>
+                <TooltipContent>{t("common:delete")}</TooltipContent>
               </Tooltip>
             </div>
           </TooltipProvider>
@@ -350,14 +301,14 @@ export default function LowScoreTagsPage() {
 
   return (
     <Page
-      title={m.admin_tag_low_score_title()}
-      description={m.admin_tag_low_score_description()}
+      title={t("admin:tag_low_score_title")}
+      description={t("admin:tag_low_score_description")}
     >
       <Card>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-3 items-stretch">
             <div className="flex flex-col gap-1 min-w-[140px]">
-              <Label className="text-xs">{m.common_scope()}</Label>
+              <Label className="text-xs">{t("common:scope")}</Label>
               <Select
                 value={scope}
                 onValueChange={(v) => {
@@ -370,17 +321,17 @@ export default function LowScoreTagsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="global">
-                    {m.admin_tag_scope_global()}
+                    {t("admin:tag_scope_global")}
                   </SelectItem>
                   <SelectItem value="realm">
-                    {m.admin_tag_scope_realm()}
+                    {t("admin:tag_scope_realm")}
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex flex-col gap-1 w-40">
               <Label htmlFor="lst-threshold" className="text-xs">
-                {m.admin_tag_threshold_label()}
+                {t("admin:tag_threshold_label")}
               </Label>
               <Input
                 id="lst-threshold"
@@ -393,11 +344,11 @@ export default function LowScoreTagsPage() {
             {scope === "realm" ? (
               <div className="flex-1 flex flex-col gap-1">
                 <Label htmlFor="lst-realm" className="text-xs">
-                  {m.admin_tag_realm_filter_label()}
+                  {t("admin:tag_realm_filter_label")}
                 </Label>
                 <Input
                   id="lst-realm"
-                  placeholder={m.admin_tag_realm_filter_placeholder()}
+                  placeholder={t("admin:tag_realm_filter_placeholder")}
                   value={realmInput}
                   onChange={(e) => setRealmInput(e.target.value)}
                   className="h-8"
@@ -405,7 +356,7 @@ export default function LowScoreTagsPage() {
               </div>
             ) : null}
             <div className="flex items-end">
-              <Button onClick={handleApplyFilters}>{m.common_apply()}</Button>
+              <Button onClick={handleApplyFilters}>{t("common:apply")}</Button>
             </div>
           </div>
 
@@ -418,7 +369,7 @@ export default function LowScoreTagsPage() {
           ) : query.isError ? (
             <Alert>
               <AlertDescription className="text-error-text">
-                {m.admin_tag_low_score_failed_load({
+                {t("admin:tag_low_score_failed_load", {
                   error: String(query.error),
                 })}
               </AlertDescription>
@@ -426,7 +377,7 @@ export default function LowScoreTagsPage() {
           ) : rows.length === 0 ? (
             <Alert>
               <AlertDescription className="text-info-text">
-                {m.admin_tag_low_score_empty({
+                {t("admin:tag_low_score_empty", {
                   threshold: appliedThreshold,
                 })}
               </AlertDescription>

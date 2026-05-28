@@ -1,20 +1,15 @@
-import { settings_title } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Outlet } from "@tanstack/react-router";
 import type { FC } from "react";
 import { SettingsSidebar } from "./SettingsSidebar";
 import { SettingsTabBar } from "./SettingsTabBar";
 
-const i18nMessages = {
-  settings_title,
-};
-
 export const SettingsShell: FC = () => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["settings"]);
+return (
     <div className="w-full max-w-6xl mx-auto pb-12">
       <h5 className="text-xl font-semibold px-4 pt-8 pb-4">
-        {m.settings_title()}
+        {t("settings:title")}
       </h5>
 
       {/* Mobile: horizontal tabs */}

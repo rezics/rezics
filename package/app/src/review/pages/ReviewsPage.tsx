@@ -1,13 +1,7 @@
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
-import {
-  book_remark,
-  review_search_placeholder,
-  review_short_review,
-  review_tabs_label,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { UniversalPaginator, type UniversalPaginatorHandle } from "@rezics/ui";
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -16,13 +10,6 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
-
-const i18nMessages = {
-  book_remark,
-  review_search_placeholder,
-  review_short_review,
-  review_tabs_label,
-};
 
 type Review = PostDTO;
 
@@ -35,8 +22,8 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
   bookUnitId,
   workUnitId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const ref = useRef<UniversalPaginatorHandle>(null);
+  const { t } = useTranslation(["book", "community"]);
+const ref = useRef<UniversalPaginatorHandle>(null);
   const targetUnitId = bookUnitId ?? "";
   const EXTERNAL_PAGE_SIZE = 50;
   const [start, setStart] = useState<number>(0);
@@ -111,7 +98,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
                 resetPagination();
               }}
               onSubmit={() => setStart(0)}
-              placeholder={m.review_search_placeholder()}
+              placeholder={t("community:review_search_placeholder")}
             />
             <div className="mb-4 mt-4 border-b border-border-whisper">
               <Tabs
@@ -121,13 +108,13 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
                   resetPagination();
                   setStart(0);
                 }}
-                aria-label={m.review_tabs_label()}
+                aria-label={t("community:review_tabs_label")}
               >
                 <TabsList>
                   <TabsTrigger value="review">
-                    {m.review_short_review()}
+                    {t("community:review_short_review")}
                   </TabsTrigger>
-                  <TabsTrigger value="remark">{m.book_remark()}</TabsTrigger>
+                  <TabsTrigger value="remark">{t("book:remark")}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>

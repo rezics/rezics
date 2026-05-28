@@ -1,8 +1,7 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
-import { page_home_carousel_alert_parse_failed } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
 import { useEmblaAutoplay } from "@rezics/ui/primitive/carousel/use-embla-autoplay.ts";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
@@ -17,10 +16,6 @@ import React, { useEffect, useState } from "react";
 import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
 import { useIsMobile } from "@/shared/utils/use-media-query";
-
-const i18nMessages = {
-  page_home_carousel_alert_parse_failed,
-};
 
 type ProductType = {
   cover?: string;
@@ -113,8 +108,8 @@ interface BookCarouselProps {
 export const BookCarousel: React.FC<BookCarouselProps> = ({
   autoplayIntervalNum = 3000,
 }) => {
-  const m = useMessage(i18nMessages);
-  const maxHeightClass = "max-h-[250px]";
+  const { t } = useTranslation(["page"]);
+const maxHeightClass = "max-h-[250px]";
 
   const { data } = useQuery(echoKvGetQuery("home_carousel"));
   type CarouselProduct = {
@@ -135,7 +130,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
       setProducts(parseEchoKVResponse<CarouselProduct[]>(data) ?? []);
     } catch (error) {
       showAlert(
-        m.page_home_carousel_alert_parse_failed({ error: String(error) }),
+        t("page:home_carousel_alert_parse_failed", { error: String(error) }),
       );
     }
   }, [data, showAlert, m.page_home_carousel_alert_parse_failed]);

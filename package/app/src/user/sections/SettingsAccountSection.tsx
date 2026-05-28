@@ -5,34 +5,7 @@ import {
   useVerifyEmailContractMutation,
 } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
-import {
-  common_cancel,
-  settings_account_change_rezics_email_description,
-  settings_account_change_rezics_email_title,
-  settings_account_delete_confirm_prefix,
-  settings_account_delete_confirm_suffix,
-  settings_account_delete_my_account,
-  settings_account_delete_title,
-  settings_account_delete_warning,
-  settings_account_deleting,
-  settings_account_new_rezics_email,
-  settings_account_pending_verification,
-  settings_account_rezics_email_code_sent,
-  settings_account_rezics_email_description,
-  settings_account_rezics_email_empty,
-  settings_account_rezics_email_title,
-  settings_account_rezics_email_verified,
-  settings_account_send_code,
-  settings_account_send_verification_code,
-  settings_account_sending,
-  settings_account_unverified,
-  settings_account_verification_code,
-  settings_account_verification_code_sent,
-  settings_account_verified,
-  settings_account_verify,
-  settings_account_verifying,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -54,37 +27,9 @@ import { DangerZone } from "@/user/components/DangerZone";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
-const i18nMessages = {
-  common_cancel,
-  settings_account_change_rezics_email_description,
-  settings_account_change_rezics_email_title,
-  settings_account_delete_confirm_prefix,
-  settings_account_delete_confirm_suffix,
-  settings_account_delete_my_account,
-  settings_account_delete_title,
-  settings_account_delete_warning,
-  settings_account_deleting,
-  settings_account_new_rezics_email,
-  settings_account_pending_verification,
-  settings_account_rezics_email_code_sent,
-  settings_account_rezics_email_description,
-  settings_account_rezics_email_empty,
-  settings_account_rezics_email_title,
-  settings_account_rezics_email_verified,
-  settings_account_send_code,
-  settings_account_send_verification_code,
-  settings_account_sending,
-  settings_account_unverified,
-  settings_account_verification_code,
-  settings_account_verification_code_sent,
-  settings_account_verified,
-  settings_account_verify,
-  settings_account_verifying,
-};
-
 export const SettingsAccountSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  useRequireAuth();
+  const { t } = useTranslation(["common", "settings"]);
+useRequireAuth();
   const { data: emailState, isLoading } = useQuery(
     userQueries.emailVerification(),
   );
@@ -120,7 +65,7 @@ export const SettingsAccountSection: FC = () => {
       {
         onSuccess: (response) => {
           if (response.success) {
-            setEmailSuccess(m.settings_account_rezics_email_code_sent());
+            setEmailSuccess(t("settings:account_rezics_email_code_sent"));
             setNewEmail("");
           }
         },
@@ -139,7 +84,7 @@ export const SettingsAccountSection: FC = () => {
       {
         onSuccess: (response) => {
           if (response.success) {
-            setEmailSuccess(m.settings_account_rezics_email_verified());
+            setEmailSuccess(t("settings:account_rezics_email_verified"));
             setVerificationCode("");
           }
         },
@@ -161,12 +106,12 @@ export const SettingsAccountSection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title={m.settings_account_rezics_email_title()}
-        description={m.settings_account_rezics_email_description()}
+        title={t("settings:account_rezics_email_title")}
+        description={t("settings:account_rezics_email_description")}
       >
         <div className="flex items-center gap-2 mb-4">
           <p className="text-base">
-            {currentEmail || m.settings_account_rezics_email_empty()}
+            {currentEmail || t("settings:account_rezics_email_empty")}
           </p>
           {isVerified ? (
             <Badge
@@ -174,18 +119,18 @@ export const SettingsAccountSection: FC = () => {
               className="text-success-text flex items-center gap-1"
             >
               <VerifiedIcon className="w-3 h-3" />
-              {m.settings_account_verified()}
+              {t("settings:account_verified")}
             </Badge>
           ) : (
             <Badge variant="outline" className="text-warning-text">
-              {m.settings_account_unverified()}
+              {t("settings:account_unverified")}
             </Badge>
           )}
         </div>
 
         {pendingEmail && pendingEmail !== currentEmail && (
           <p className="text-sm text-text-secondary mb-3">
-            {m.settings_account_pending_verification({ email: pendingEmail })}
+            {t("settings:account_pending_verification", { email: pendingEmail })}
           </p>
         )}
 
@@ -199,15 +144,15 @@ export const SettingsAccountSection: FC = () => {
           >
             {requestEmailVerification.isPending && <Spinner size="sm" />}
             {requestEmailVerification.isPending
-              ? m.settings_account_sending()
-              : m.settings_account_send_verification_code()}
+              ? t("settings:account_sending")
+              : t("settings:account_send_verification_code")}
           </Button>
         )}
 
         {requestEmailVerification.data?.success && (
           <Alert className="mt-2 text-success-text" aria-live="polite">
             <AlertDescription>
-              {m.settings_account_verification_code_sent()}
+              {t("settings:account_verification_code_sent")}
             </AlertDescription>
           </Alert>
         )}
@@ -221,8 +166,8 @@ export const SettingsAccountSection: FC = () => {
       </SettingsSection>
 
       <SettingsSection
-        title={m.settings_account_change_rezics_email_title()}
-        description={m.settings_account_change_rezics_email_description()}
+        title={t("settings:account_change_rezics_email_title")}
+        description={t("settings:account_change_rezics_email_description")}
       >
         {emailSuccess && (
           <Alert className="mb-4 text-success-text" aria-live="polite">
@@ -232,7 +177,7 @@ export const SettingsAccountSection: FC = () => {
         <form onSubmit={handleChangeEmail} className="flex items-end gap-3">
           <div className="flex-1 flex flex-col gap-1.5">
             <Label htmlFor="new-email">
-              {m.settings_account_new_rezics_email()}
+              {t("settings:account_new_rezics_email")}
             </Label>
             <Input
               id="new-email"
@@ -250,8 +195,8 @@ export const SettingsAccountSection: FC = () => {
           >
             {requestEmailVerification.isPending && <Spinner size="sm" />}
             {requestEmailVerification.isPending
-              ? m.settings_account_sending()
-              : m.settings_account_send_code()}
+              ? t("settings:account_sending")
+              : t("settings:account_send_code")}
           </Button>
         </form>
         {(pendingEmail || currentEmail) && (
@@ -261,7 +206,7 @@ export const SettingsAccountSection: FC = () => {
           >
             <div className="flex-1 flex flex-col gap-1.5">
               <Label htmlFor="verification-code">
-                {m.settings_account_verification_code()}
+                {t("settings:account_verification_code")}
               </Label>
               <Input
                 id="verification-code"
@@ -280,8 +225,8 @@ export const SettingsAccountSection: FC = () => {
               }
             >
               {verifyEmailContract.isPending
-                ? m.settings_account_verifying()
-                : m.settings_account_verify()}
+                ? t("settings:account_verifying")
+                : t("settings:account_verify")}
             </Button>
           </form>
         )}
@@ -294,13 +239,13 @@ export const SettingsAccountSection: FC = () => {
         )}
       </SettingsSection>
 
-      <DangerZone description={m.settings_account_delete_warning()}>
+      <DangerZone description={t("settings:account_delete_warning")}>
         <Button
           variant="outline"
           className="text-error-text"
           onClick={() => setDeleteOpen(true)}
         >
-          {m.settings_account_delete_title()}
+          {t("settings:account_delete_title")}
         </Button>
 
         <Dialog
@@ -309,12 +254,12 @@ export const SettingsAccountSection: FC = () => {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{m.settings_account_delete_title()}</DialogTitle>
+              <DialogTitle>{t("settings:account_delete_title")}</DialogTitle>
             </DialogHeader>
             <p className="text-sm mb-4">
-              {m.settings_account_delete_confirm_prefix()}{" "}
+              {t("settings:account_delete_confirm_prefix")}{" "}
               <strong>{user?.slug}</strong>{" "}
-              {m.settings_account_delete_confirm_suffix()}
+              {t("settings:account_delete_confirm_suffix")}
             </p>
             <Input
               placeholder={user?.slug}
@@ -329,7 +274,7 @@ export const SettingsAccountSection: FC = () => {
             )}
             <DialogFooter>
               <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-                {m.common_cancel()}
+                {t("common:cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -337,8 +282,8 @@ export const SettingsAccountSection: FC = () => {
                 onClick={handleDeleteAccount}
               >
                 {deleteMe.isPending
-                  ? m.settings_account_deleting()
-                  : m.settings_account_delete_my_account()}
+                  ? t("settings:account_deleting")
+                  : t("settings:account_delete_my_account")}
               </Button>
             </DialogFooter>
           </DialogContent>

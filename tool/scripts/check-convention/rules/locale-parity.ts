@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
@@ -21,15 +21,6 @@ function contractLanguages(): string[] {
   return [...match[1].matchAll(/:\s*["']([^"']+)["']/g)].map((m) => m[1]!);
 }
 
-function inlangLocales(pkg: "i18n" | "ui"): string[] {
-  const settings = readJson(
-    join(REPO_ROOT, `package/${pkg}/project.inlang/settings.json`),
-  ) as { locales?: unknown };
-  return Array.isArray(settings.locales)
-    ? settings.locales.filter((v): v is string => typeof v === "string")
-    : [];
-}
-
 function diff(actual: string[], expected: string[]) {
   return {
     missing: expected.filter((v) => !actual.includes(v)),
@@ -37,60 +28,92 @@ function diff(actual: string[], expected: string[]) {
   };
 }
 
+function listNamespaces(localeDir: string): string[] {
+  if (!existsSync(localeDir)) return [];
+  return readdirSync(localeDir)
+    .filter((name) => name.endsWith(".json"))
+    .map((name) => name.replace(/\.json$/, ""))
+    .sort();
+}
+
 export const localeParityRule: RuleScanner = {
   scan() {
     const violations: Violation[] = [];
     const langs = contractLanguages();
+    const baseLocale = "en";
 
-    for (const pkg of ["i18n", "ui"] as const) {
-      const locales = inlangLocales(pkg);
-      const localeDiff = diff(locales, langs);
-      if (localeDiff.missing.length || localeDiff.extra.length) {
-        violations.push({
-          rule: "R14",
-          path: `package/${pkg}/project.inlang/settings.json`,
-          message: `Paraglide locale list must match contract LANGUAGES (missing: ${localeDiff.missing.join(", ") || "none"}; extra: ${localeDiff.extra.join(", ") || "none"})`,
-          spec: SPEC,
-        });
-      }
-
-      const messagesDir = join(REPO_ROOT, `package/${pkg}/messages`);
-      const basePath = join(messagesDir, "en.json");
-      const baseMessages = existsSync(basePath)
-        ? (readJson(basePath) as Record<string, unknown>)
-        : null;
-
-      if (!baseMessages) {
-        violations.push({
-          rule: "R14",
-          path: `package/${pkg}/messages/en.json`,
-          message: "Base locale message file is missing",
-          spec: SPEC,
-        });
-        continue;
-      }
-
-      const baseKeys = Object.keys(baseMessages);
-      for (const locale of langs) {
-        const localePath = join(messagesDir, `${locale}.json`);
-        const relLocalePath = relative(REPO_ROOT, localePath);
-        if (!existsSync(localePath)) {
+    // 1. The shared product/admin tree lives at `package/i18n/locales/<lng>/<ns>.json`.
+    const sharedRoot = join(REPO_ROOT, "package/i18n/locales");
+    if (!existsSync(sharedRoot) || !statSync(sharedRoot).isDirectory()) {
+      violations.push({
+        rule: "R14",
+        path: "package/i18n/locales",
+        message: "Shared i18n locale tree is missing",
+        spec: SPEC,
+      });
+    } else {
+      const baseDir = join(sharedRoot, baseLocale);
+      const baseNamespaces = listNamespaces(baseDir);
+      for (const lng of langs) {
+        const lngDir = join(sharedRoot, lng);
+        if (!existsSync(lngDir)) {
           violations.push({
             rule: "R14",
-            path: relLocalePath,
-            message: "Supported locale message file is missing",
+            path: relative(REPO_ROOT, lngDir),
+            message: "Supported locale folder is missing",
             spec: SPEC,
           });
           continue;
         }
-
-        const localeMessages = readJson(localePath) as Record<string, unknown>;
-        const keyDiff = diff(Object.keys(localeMessages), baseKeys);
-        if (keyDiff.missing.length || keyDiff.extra.length) {
+        const lngNamespaces = listNamespaces(lngDir);
+        const nsDiff = diff(lngNamespaces, baseNamespaces);
+        if (nsDiff.missing.length || nsDiff.extra.length) {
           violations.push({
             rule: "R14",
-            path: relLocalePath,
-            message: `Message keys must match package/${pkg}/messages/en.json exactly (missing: ${keyDiff.missing.slice(0, 12).join(", ") || "none"}${keyDiff.missing.length > 12 ? ", ..." : ""}; extra: ${keyDiff.extra.slice(0, 12).join(", ") || "none"}${keyDiff.extra.length > 12 ? ", ..." : ""})`,
+            path: relative(REPO_ROOT, lngDir),
+            message: `Namespace files must match package/i18n/locales/${baseLocale} (missing: ${nsDiff.missing.join(", ") || "none"}; extra: ${nsDiff.extra.join(", ") || "none"})`,
+            spec: SPEC,
+          });
+        }
+        for (const ns of baseNamespaces) {
+          if (!lngNamespaces.includes(ns)) continue;
+          const baseKeys = Object.keys(
+            readJson(join(baseDir, `${ns}.json`)) as Record<string, unknown>,
+          );
+          const lngKeys = Object.keys(
+            readJson(join(lngDir, `${ns}.json`)) as Record<string, unknown>,
+          );
+          const keyDiff = diff(lngKeys, baseKeys);
+          if (keyDiff.missing.length || keyDiff.extra.length) {
+            violations.push({
+              rule: "R14",
+              path: relative(REPO_ROOT, join(lngDir, `${ns}.json`)),
+              message: `Keys must match the ${baseLocale} ${ns} namespace (missing: ${keyDiff.missing.slice(0, 8).join(", ") || "none"}${keyDiff.missing.length > 8 ? ", ..." : ""}; extra: ${keyDiff.extra.slice(0, 8).join(", ") || "none"}${keyDiff.extra.length > 8 ? ", ..." : ""})`,
+              spec: SPEC,
+            });
+          }
+        }
+      }
+    }
+
+    // 2. UI per-locale ES modules at `package/ui/locales/<lng>.ts` must mirror
+    //    the English UI bundle's key set.
+    const uiRoot = join(REPO_ROOT, "package/ui/locales");
+    if (!existsSync(uiRoot)) {
+      violations.push({
+        rule: "R14",
+        path: "package/ui/locales",
+        message: "UI locale modules are missing",
+        spec: SPEC,
+      });
+    } else {
+      for (const lng of langs) {
+        const path = join(uiRoot, `${lng}.ts`);
+        if (!existsSync(path)) {
+          violations.push({
+            rule: "R14",
+            path: relative(REPO_ROOT, path),
+            message: "UI locale module is missing",
             spec: SPEC,
           });
         }

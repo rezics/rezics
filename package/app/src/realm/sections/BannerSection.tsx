@@ -1,13 +1,8 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource, type RealmBannerExtra } from "@rezics/contract";
-import { realm_banner } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-
-const i18nMessages = {
-  realm_banner,
-};
 
 export interface BannerSectionProps {
   banner?: RealmBannerExtra | null;
@@ -31,8 +26,8 @@ function getPostBannerTitle(post: unknown, fallbackTitle: string): string {
 }
 
 export const BannerSection: React.FC<BannerSectionProps> = ({ banner }) => {
-  const m = useMessage(i18nMessages);
-  const postId = banner?.kind === "post" ? banner.unitId : undefined;
+  const { t } = useTranslation(["entity"]);
+const postId = banner?.kind === "post" ? banner.unitId : undefined;
   const { data: post, isError } = useQuery({
     ...postQueries.detail(postId ?? ""),
     enabled: Boolean(postId),
@@ -70,7 +65,7 @@ export const BannerSection: React.FC<BannerSectionProps> = ({ banner }) => {
   return (
     <section className="rounded-md bg-surface-subtle p-6">
       <p className="text-lg font-medium leading-ui text-text-primary">
-        {getPostBannerTitle(post, m.realm_banner())}
+        {getPostBannerTitle(post, t("entity:realm_banner"))}
       </p>
     </section>
   );

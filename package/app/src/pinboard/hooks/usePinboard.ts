@@ -15,7 +15,7 @@ import {
 } from "@rezics/api/realm/realm-extra.queries";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import { mainMarkdownSource } from "@rezics/contract";
-import { useLocale } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getTranslation } from "@/shared/utils/translation-helpers";

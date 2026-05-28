@@ -1,20 +1,9 @@
 import { contentDocMarkdownFallback, type PostDTO } from "@rezics/contract";
-import {
-  post_anonymous_author,
-  post_anonymous_avatar_alt,
-  post_metadata_edited,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
 import { UserHoverPreview } from "@/user/components";
 import { isEditedTimestamp } from "../../models/postMetadata";
-
-const i18nMessages = {
-  post_anonymous_author,
-  post_anonymous_avatar_alt,
-  post_metadata_edited,
-};
 
 interface PostAuthorHeaderProps {
   post: PostDTO;
@@ -29,8 +18,8 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
   showAvatar = true,
   avatarClassName,
 }) => {
-  const m = useMessage(i18nMessages);
-  const dateStr = post.createdAt
+  const { t } = useTranslation(["community"]);
+const dateStr = post.createdAt
     ? new Date(String(post.createdAt)).toLocaleDateString()
     : "";
   const nameClass =
@@ -67,7 +56,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
       {dateStr && (
         <span className="text-xs text-text-secondary">
           {dateStr}
-          {edited ? ` · ${m.post_metadata_edited()}` : ""}
+          {edited ? ` · ${t("community:post_metadata_edited")}` : ""}
         </span>
       )}
     </div>
@@ -83,8 +72,8 @@ export function PostAuthorAvatar({
   size?: "compact" | "default";
   className?: string;
 }) {
-  const m = useMessage(i18nMessages);
-  const author = post.author?.unitId ? post.author : undefined;
+  const { t } = useTranslation(["community"]);
+const author = post.author?.unitId ? post.author : undefined;
   const avatarClassName = [size === "compact" ? "size-8" : "size-9", className]
     .filter(Boolean)
     .join(" ");
@@ -105,7 +94,7 @@ export function PostAuthorAvatar({
 
   return (
     <Avatar className={avatarClassName}>
-      <AvatarImage alt={m.post_anonymous_avatar_alt()} />
+      <AvatarImage alt={t("community:post_anonymous_avatar_alt")} />
       <AvatarFallback>?</AvatarFallback>
     </Avatar>
   );
@@ -124,8 +113,8 @@ function AnonymousAuthor({
   showAvatar,
   avatarClassName,
 }: AnonymousAuthorProps) {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["community"]);
+return (
     <span className="inline-flex min-w-0 items-center gap-2">
       {showAvatar ? (
         <Avatar
@@ -133,11 +122,11 @@ function AnonymousAuthor({
             .filter(Boolean)
             .join(" ")}
         >
-          <AvatarImage alt={m.post_anonymous_avatar_alt()} />
+          <AvatarImage alt={t("community:post_anonymous_avatar_alt")} />
           <AvatarFallback>?</AvatarFallback>
         </Avatar>
       ) : null}
-      <span className={nameClassName}>{m.post_anonymous_author()}</span>
+      <span className={nameClassName}>{t("community:post_anonymous_author")}</span>
     </span>
   );
 }

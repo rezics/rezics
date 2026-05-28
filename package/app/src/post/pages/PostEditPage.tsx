@@ -9,27 +9,12 @@ import {
   markdownContentDoc,
   PostKind,
 } from "@rezics/contract";
-import {
-  common_cancel,
-  common_loading,
-  common_save,
-  common_saving,
-  post_edit_wiki_post,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-
-const i18nMessages = {
-  common_cancel,
-  common_loading,
-  common_save,
-  common_saving,
-  post_edit_wiki_post,
-};
 
 export interface PostEditPageProps {
   postUnitId: string;
@@ -37,8 +22,8 @@ export interface PostEditPageProps {
 }
 
 export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common", "community"]);
+const navigate = useNavigate();
   const {
     data: post,
     isLoading,
@@ -87,7 +72,7 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
     });
   };
 
-  if (isLoading) return <div>{m.common_loading()}</div>;
+  if (isLoading) return <div>{t("common:loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
   if (!post) return null;
 
@@ -100,7 +85,7 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
       ) : null}
       {isWikiPost ? (
         <h1 className="text-lg font-medium leading-ui text-text-primary">
-          {m.post_edit_wiki_post()}
+          {t("community:post_edit_wiki_post")}
         </h1>
       ) : null}
       <textarea
@@ -111,13 +96,13 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
       />
       <div className="flex justify-end gap-2">
         <Button variant="ghost" onClick={() => navigate({ to: returnTo })}>
-          {m.common_cancel()}
+          {t("common:cancel")}
         </Button>
         <Button
           onClick={handleSubmit}
           disabled={activeMutation.isPending || !text.trim()}
         >
-          {activeMutation.isPending ? m.common_saving() : m.common_save()}
+          {activeMutation.isPending ? t("common:saving") : t("common:save")}
         </Button>
       </div>
     </section>

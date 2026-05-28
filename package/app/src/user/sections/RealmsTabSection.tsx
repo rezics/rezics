@@ -1,17 +1,6 @@
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
-import {
-  common_created,
-  common_loading,
-  profile_realms_joined,
-  profile_realms_load_failed,
-  profile_realms_none_created,
-  profile_realms_none_joined,
-  realm_member_count,
-  realm_official,
-  realm_private,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { type FC, useState } from "react";
@@ -21,18 +10,6 @@ import {
   InnerFilterPanel,
 } from "@/user/components/InnerFilterPanel";
 import { useProfileContext } from "@/user/components/ProfileLayout";
-
-const i18nMessages = {
-  common_loading,
-  profile_realms_load_failed,
-  profile_realms_none_created,
-  profile_realms_none_joined,
-  realm_member_count,
-  realm_official,
-  realm_private,
-  common_created,
-  profile_realms_joined,
-};
 
 const FILTER_CHIP_LABEL = {
   joined: i18nMessages.profile_realms_joined,
@@ -65,8 +42,8 @@ function mapJoinedRealmToListItem(realm: RealmDTO): RealmListItemModel {
 }
 
 export const RealmsTabSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  const { userId } = useProfileContext();
+  const { t } = useTranslation(["common", "entity", "settings"]);
+const { userId } = useProfileContext();
   const [filter, setFilter] = useState("joined");
 
   const joinedQuery = useQuery({
@@ -89,7 +66,7 @@ export const RealmsTabSection: FC = () => {
     activeQuery.error instanceof Error
       ? activeQuery.error.message
       : activeQuery.error
-        ? m.profile_realms_load_failed()
+        ? t("settings:profile_realms_load_failed")
         : null;
 
   const joinedRealms =
@@ -100,8 +77,8 @@ export const RealmsTabSection: FC = () => {
   const realms = filter === "joined" ? joinedRealms : createdRealms;
   const emptyMessage =
     filter === "joined"
-      ? m.profile_realms_none_joined()
-      : m.profile_realms_none_created();
+      ? t("settings:profile_realms_none_joined")
+      : t("settings:profile_realms_none_created");
   const filterChips: ChipDefinition[] = Object.entries(FILTER_CHIP_LABEL).map(
     ([value, label]) => ({
       value,
@@ -119,7 +96,7 @@ export const RealmsTabSection: FC = () => {
 
       {isLoading ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          {m.common_loading()}
+          {t("common:loading")}
         </p>
       ) : errorMessage ? (
         <p className="text-sm text-error-text py-12 text-center">
@@ -141,8 +118,8 @@ export const RealmsTabSection: FC = () => {
 };
 
 const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["common", "entity", "settings"]);
+return (
     <Link
       to={unitHref({
         type: "REALM",
@@ -160,11 +137,11 @@ const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
               </span>
               {realm.isOfficial && (
                 <Badge variant="outline" className="text-text-brand">
-                  {m.realm_official()}
+                  {t("entity:realm_official")}
                 </Badge>
               )}
               {!realm.isPublic && (
-                <Badge variant="outline">{m.realm_private()}</Badge>
+                <Badge variant="outline">{t("entity:realm_private")}</Badge>
               )}
             </div>
             {realm.description && (
@@ -174,7 +151,7 @@ const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
             )}
           </div>
           <span className="text-sm text-text-secondary shrink-0">
-            {m.realm_member_count({ count: realm.memberCount })}
+            {t("entity:realm_member_count", { count: realm.memberCount })}
           </span>
         </div>
       </div>

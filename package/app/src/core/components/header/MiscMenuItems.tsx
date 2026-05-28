@@ -1,6 +1,5 @@
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
-import { layout_header_toggle_language } from "@rezics/i18n/messages";
-import { setLocale, useMessage } from "@rezics/i18n/react";
+import { setLocale, useTranslation } from "@rezics/i18n/react";
 import {
   DropdownMenuItem,
   DropdownMenuSub,
@@ -10,22 +9,18 @@ import {
 import { Languages as LanguageIcon } from "lucide-react";
 import { ThemeToggler } from "./ThemeToggler";
 
-const i18nMessages = {
-  layout_header_toggle_language,
-};
-
 const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
 
 export function MiscMenuItems() {
-  const m = useMessage(i18nMessages);
-  const changeLang = (lang: Language) => setLocale(lang);
+  const { t } = useTranslation(["shell"]);
+const changeLang = (lang: Language) => setLocale(lang);
 
   return (
     <>
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>
           <LanguageIcon className="w-4 h-4" />
-          <span>{m.layout_header_toggle_language()}</span>
+          <span>{t("shell:layout_header_toggle_language")}</span>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
           {LANGUAGE_OPTIONS.map((language) => (

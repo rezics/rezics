@@ -1,19 +1,5 @@
 import { type ShelfDTO, shelfQueries } from "@rezics/api/shelf/shelf";
 import type { UnitTranslationDTO } from "@rezics/contract";
-import {
-  admin_auth_actions_title,
-  admin_shelf_description,
-  admin_shelf_title,
-  admin_unit_no_title,
-  common_created,
-  common_edit,
-  common_slug,
-  common_status,
-  common_title,
-  common_unit_id,
-  common_updated,
-  common_user,
-} from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
@@ -23,9 +9,10 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
-  if (!translations?.length) return admin_unit_no_title();
-  return translations[0]?.title?.trim() || admin_unit_no_title();
+  if (!translations?.length) return getI18nRuntime().i18n.t("admin:unit_no_title");
+  return translations[0]?.title?.trim() || getI18nRuntime().i18n.t("admin:unit_no_title");
 }
 
 function optionalFilter(value: string) {
@@ -63,7 +50,7 @@ export default function ShelvesPage() {
     () => [
       {
         id: "unitId",
-        header: common_unit_id(),
+        header: getI18nRuntime().i18n.t("common:unit_id"),
         minWidth: 220,
         cell: (shelf) => (
           <span className="text-sm font-mono text-text-secondary">
@@ -73,7 +60,7 @@ export default function ShelvesPage() {
       },
       {
         id: "title",
-        header: common_title(),
+        header: getI18nRuntime().i18n.t("common:title"),
         minWidth: 220,
         cell: (shelf) => (
           <span className="text-sm font-medium">
@@ -83,7 +70,7 @@ export default function ShelvesPage() {
       },
       {
         id: "slug",
-        header: common_slug(),
+        header: getI18nRuntime().i18n.t("common:slug"),
         minWidth: 160,
         cell: (shelf) => (
           <span className="text-sm font-mono">{shelf.slug ?? "-"}</span>
@@ -97,7 +84,7 @@ export default function ShelvesPage() {
       },
       {
         id: "user",
-        header: common_user(),
+        header: getI18nRuntime().i18n.t("common:user"),
         minWidth: 200,
         cell: (shelf) => (
           <div className="flex flex-col">
@@ -114,7 +101,7 @@ export default function ShelvesPage() {
       },
       {
         id: "status",
-        header: common_status(),
+        header: getI18nRuntime().i18n.t("common:status"),
         minWidth: 120,
         cell: (shelf) => shelf.status ?? "-",
       },
@@ -132,19 +119,19 @@ export default function ShelvesPage() {
       },
       {
         id: "createdAt",
-        header: common_created(),
+        header: getI18nRuntime().i18n.t("common:created"),
         minWidth: 170,
         cell: (shelf) => fmtDate(shelf.createdAt),
       },
       {
         id: "updatedAt",
-        header: common_updated(),
+        header: getI18nRuntime().i18n.t("common:updated"),
         minWidth: 170,
         cell: (shelf) => fmtDate(shelf.updatedAt),
       },
       {
         id: "actions",
-        header: admin_auth_actions_title(),
+        header: getI18nRuntime().i18n.t("admin:auth_actions_title"),
         minWidth: 120,
         cell: (shelf) => (
           <Button
@@ -156,7 +143,7 @@ export default function ShelvesPage() {
                 params={{ unitId: shelf.unitId }}
                 {...props}
               >
-                {common_edit()}
+                {getI18nRuntime().i18n.t("common:edit")}
               </Link>
             )}
           />
@@ -167,7 +154,7 @@ export default function ShelvesPage() {
   );
 
   return (
-    <Page title={admin_shelf_title()} description={admin_shelf_description()}>
+    <Page title={getI18nRuntime().i18n.t("admin:shelf_title")} description={getI18nRuntime().i18n.t("admin:shelf_description")}>
       <SearchablePaginatedTableCard<ShelfDTO>
         searchInputId="shelf-search"
         searchPlaceholder="unit id or CSV"
@@ -181,7 +168,7 @@ export default function ShelvesPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col gap-1">
               <Label htmlFor="shelf-filter-user" className="text-xs">
-                {common_user()}
+                {getI18nRuntime().i18n.t("common:user")}
               </Label>
               <Input
                 id="shelf-filter-user"

@@ -8,12 +8,6 @@ import {
   useRemoveShelfUnitMutation,
 } from "@rezics/api/shelf/shelf.mutations";
 import type { ProgressExtra, UserUnitProgressStatus } from "@rezics/contract";
-import {
-  common_retry,
-  progress_status_toast_both_failed,
-  progress_status_toast_progress_failed,
-  progress_status_toast_shelf_failed,
-} from "@rezics/i18n/messages";
 import { useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import {
@@ -22,6 +16,7 @@ import {
   type ShelfOp,
 } from "../models/transition";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type StatusTransitionPayload = {
   to: UserUnitProgressStatus;
   progress?: number;
@@ -76,7 +71,7 @@ export function useStatusTransition(
       if (inFlightRetries.current.has(retryKey)) return;
       toast.error(message(), {
         action: {
-          label: common_retry(),
+          label: getI18nRuntime().i18n.t("common:retry"),
           onClick: () => {
             if (inFlightRetries.current.has(retryKey)) return;
             inFlightRetries.current.add(retryKey);

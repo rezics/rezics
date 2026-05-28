@@ -1,18 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { shelf_back_to_shelf, shelf_edit_title } from "@rezics/i18n/messages";
 import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
 import { createMinimalEditConsoleConfig } from "@/core/layouts/editConsoleConfig";
 import { ShelfEditPage } from "@/shelf/pages/ShelfEditPage";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 export const Route = createFileRoute("/_editor/shelf/$shelfId/edit")({
   component: () => {
     const { shelfId } = Route.useParams();
     return (
       <EditConsoleLayout
         {...createMinimalEditConsoleConfig({
-          returnLabel: shelf_back_to_shelf(),
+          returnLabel: getI18nRuntime().i18n.t("entity:shelf_back_to_shelf"),
           returnHref: `/shelf/${shelfId}`,
-          editorLabel: shelf_edit_title(),
+          editorLabel: getI18nRuntime().i18n.t("entity:shelf_edit_title"),
           editorHref: `/shelf/${shelfId}/edit`,
         })}
       >

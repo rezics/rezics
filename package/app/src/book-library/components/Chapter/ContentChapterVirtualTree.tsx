@@ -1,13 +1,3 @@
-import {
-  book_chapter_label,
-  book_chapter_section_label,
-  book_edit_search_chapters_placeholder,
-  common_collapse,
-  common_collapse_all,
-  common_expand,
-  common_expand_all,
-  common_search,
-} from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import type React from "react";
@@ -29,6 +19,7 @@ import {
   encodeBookContentStructurePath,
 } from "../../models/bookContentStructurePath";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 const CONTENT_ROW_HEIGHT = 64;
 const MIN_TREE_HEIGHT = 320;
 const VIEWPORT_HEIGHT_GAP = 96;
@@ -60,7 +51,7 @@ function createContentChapterNode(bookId: string) {
           {node.data.title}
         </span>
         <span className="mt-1 block truncate text-xs leading-dense text-text-tertiary">
-          {hasChildren ? book_chapter_section_label() : book_chapter_label()}
+          {hasChildren ? getI18nRuntime().i18n.t("book:chapter_section_label") : getI18nRuntime().i18n.t("book:chapter_label")}
         </span>
       </div>
     );
@@ -109,7 +100,7 @@ function createContentChapterNode(bookId: string) {
             <button
               type="button"
               className="flex size-7 flex-none items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-surface-elevated hover:text-text-primary"
-              aria-label={node.isOpen ? common_collapse() : common_expand()}
+              aria-label={node.isOpen ? getI18nRuntime().i18n.t("common:collapse") : getI18nRuntime().i18n.t("common:expand")}
               onClick={(event) => {
                 event.stopPropagation();
                 node.toggle();
@@ -156,7 +147,7 @@ export const ContentChapterVirtualTree = forwardRef<
     <div className="flex min-h-0 flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <Label htmlFor="chapter-content-search">{common_search()}</Label>
+          <Label htmlFor="chapter-content-search">{getI18nRuntime().i18n.t("common:search")}</Label>
           <div className="flex h-9 items-center gap-2 rounded-3xl bg-input/50 px-3 focus-within:ring-3 focus-within:ring-ring/30">
             <Search className="size-4 flex-none text-text-tertiary" />
             <Input
@@ -165,7 +156,7 @@ export const ContentChapterVirtualTree = forwardRef<
               onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchTerm(event.target.value)
               }
-              placeholder={book_edit_search_chapters_placeholder()}
+              placeholder={getI18nRuntime().i18n.t("book:edit_search_chapters_placeholder")}
               className="h-full flex-1 border-0 bg-transparent px-0 py-0 focus-visible:ring-0"
             />
           </div>
@@ -177,14 +168,14 @@ export const ContentChapterVirtualTree = forwardRef<
             size="sm"
             onClick={() => treeRef.current?.openAll()}
           >
-            {common_expand_all()}
+            {getI18nRuntime().i18n.t("common:expand_all")}
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => treeRef.current?.closeAll()}
           >
-            {common_collapse_all()}
+            {getI18nRuntime().i18n.t("common:collapse_all")}
           </Button>
         </div>
       </div>

@@ -2,25 +2,6 @@ import { type BookDTO, bookQueries } from "@rezics/api/book/book";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { BookListResponse } from "@rezics/contract";
 import {
-  admin_book_credits,
-  admin_book_edit_unit,
-  admin_book_failed_load_list,
-  admin_book_isbn13,
-  admin_book_list_description,
-  admin_book_list_meili_description,
-  admin_book_list_meili_title,
-  admin_book_list_title,
-  admin_book_meili_search_placeholder,
-  admin_book_search_placeholder,
-  admin_unit_no_title,
-  common_actions,
-  common_created,
-  common_title,
-  common_unit_id,
-  common_updated,
-  common_user,
-} from "@rezics/i18n/messages";
-import {
   Button,
   Tooltip,
   TooltipContent,
@@ -36,15 +17,16 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 /** Extract the best title from the translations array. */
 function extractTitle(book: BookDTO): string {
   const translations = book.translations;
-  if (!translations?.length) return admin_unit_no_title();
+  if (!translations?.length) return getI18nRuntime().i18n.t("admin:unit_no_title");
   // Prefer default language match, fall back to first translation
   const primary =
     translations.find((t) => t.language === (book as any).defaultLanguage) ??
     translations[0];
-  return primary?.title || admin_unit_no_title();
+  return primary?.title || getI18nRuntime().i18n.t("admin:unit_no_title");
 }
 
 /** Format credit attribution into a readable string. */
@@ -104,13 +86,13 @@ export default function BooksPage() {
     const cols: PaginatedColumn<BookDTO>[] = [
       {
         id: "unitId",
-        header: common_unit_id(),
+        header: getI18nRuntime().i18n.t("common:unit_id"),
         minWidth: 220,
         cell: (b) => <span className="text-sm font-mono">{b.unitId}</span>,
       },
       {
         id: "title",
-        header: common_title(),
+        header: getI18nRuntime().i18n.t("common:title"),
         minWidth: 260,
         cell: (b) => (
           <span className="text-sm font-bold whitespace-nowrap">
@@ -120,13 +102,13 @@ export default function BooksPage() {
       },
       {
         id: "isbn13",
-        header: admin_book_isbn13(),
+        header: getI18nRuntime().i18n.t("admin:book_isbn13"),
         minWidth: 160,
         cell: (b) => b.isbn13 || "-",
       },
       {
         id: "credits",
-        header: admin_book_credits(),
+        header: getI18nRuntime().i18n.t("admin:book_credits"),
         minWidth: 260,
         cell: (b) => (
           <TooltipProvider>
@@ -148,7 +130,7 @@ export default function BooksPage() {
       },
       {
         id: "user",
-        header: common_user(),
+        header: getI18nRuntime().i18n.t("common:user"),
         minWidth: 200,
         cell: (b) => (
           <div className="flex flex-col">
@@ -165,19 +147,19 @@ export default function BooksPage() {
       },
       {
         id: "createdAt",
-        header: common_created(),
+        header: getI18nRuntime().i18n.t("common:created"),
         minWidth: 170,
         cell: (b) => fmtDate(b.createdAt),
       },
       {
         id: "updatedAt",
-        header: common_updated(),
+        header: getI18nRuntime().i18n.t("common:updated"),
         minWidth: 170,
         cell: (b) => fmtDate(b.updatedAt),
       },
       {
         id: "actions",
-        header: common_actions(),
+        header: getI18nRuntime().i18n.t("common:actions"),
         minWidth: 140,
         cell: (b) => (
           <Button
@@ -185,7 +167,7 @@ export default function BooksPage() {
             variant="outline"
             render={(props) => (
               <Link to="/unit/$unitId" params={{ unitId: b.unitId }} {...props}>
-                {admin_book_edit_unit()}
+                {getI18nRuntime().i18n.t("admin:book_edit_unit")}
               </Link>
             )}
           />
@@ -198,22 +180,22 @@ export default function BooksPage() {
   return (
     <Page
       title={
-        isMeiliMode ? admin_book_list_meili_title() : admin_book_list_title()
+        isMeiliMode ? getI18nRuntime().i18n.t("admin:book_list_meili_title") : getI18nRuntime().i18n.t("admin:book_list_title")
       }
       description={
         isMeiliMode
-          ? admin_book_list_meili_description()
-          : admin_book_list_description()
+          ? getI18nRuntime().i18n.t("admin:book_list_meili_description")
+          : getI18nRuntime().i18n.t("admin:book_list_description")
       }
     >
       <SearchablePaginatedTableCard<BookDTO>
         searchInputId="book-search"
         searchPlaceholder={
           isMeiliMode
-            ? admin_book_meili_search_placeholder()
-            : admin_book_search_placeholder()
+            ? getI18nRuntime().i18n.t("admin:book_meili_search_placeholder")
+            : getI18nRuntime().i18n.t("admin:book_search_placeholder")
         }
-        errorLabel={admin_book_failed_load_list()}
+        errorLabel={getI18nRuntime().i18n.t("admin:book_failed_load_list")}
         q={q}
         onQChange={setQ}
         onSearch={() => {

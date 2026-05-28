@@ -1,25 +1,12 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { shelfInfiniteListQuery } from "@rezics/api/shelf";
-import {
-  common_load_more,
-  common_loading,
-  shelf_containing_this_book_title,
-  shelf_none_for_this_book,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
 import { ShelfCard } from "../components/ShelfCard";
-
-const i18nMessages = {
-  common_load_more,
-  common_loading,
-  shelf_containing_this_book_title,
-  shelf_none_for_this_book,
-};
 
 interface ShelfByBookPageProps {
   bookId: string;
@@ -30,8 +17,8 @@ export function ShelfByBookPage({
   bookId,
   scopeMode = "work",
 }: ShelfByBookPageProps) {
-  const m = useMessage(i18nMessages);
-  const { data: bookInfo } = useQuery({
+  const { t } = useTranslation(["common", "entity"]);
+const { data: bookInfo } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
   });
@@ -51,7 +38,7 @@ export function ShelfByBookPage({
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <h1 className="mb-6 text-2xl font-semibold">
-        {m.shelf_containing_this_book_title()}
+        {t("entity:shelf_containing_this_book_title")}
       </h1>
 
       {isLoading ? (
@@ -60,7 +47,7 @@ export function ShelfByBookPage({
         </div>
       ) : shelves.length === 0 ? (
         <p className="py-8 text-center text-text-secondary">
-          {m.shelf_none_for_this_book()}
+          {t("entity:shelf_none_for_this_book")}
         </p>
       ) : (
         <>
@@ -76,7 +63,7 @@ export function ShelfByBookPage({
                 disabled={isFetchingNextPage}
                 onClick={() => void fetchNextPage()}
               >
-                {isFetchingNextPage ? m.common_loading() : m.common_load_more()}
+                {isFetchingNextPage ? t("common:loading") : t("common:load_more")}
               </Button>
             </div>
           )}

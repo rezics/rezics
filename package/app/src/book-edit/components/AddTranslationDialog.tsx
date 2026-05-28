@@ -1,16 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
-import {
-  common_cancel,
-  page_book_edit_info_translation_add_dialog_language,
-  page_book_edit_info_translation_add_dialog_no_source,
-  page_book_edit_info_translation_add_dialog_source_release,
-  page_book_edit_info_translation_add_dialog_source_release_help,
-  page_book_edit_info_translation_add_dialog_submit,
-  page_book_edit_info_translation_add_dialog_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -31,16 +22,6 @@ import { useEffect, useState } from "react";
 import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
 
-const i18nMessages = {
-  common_cancel,
-  page_book_edit_info_translation_add_dialog_language,
-  page_book_edit_info_translation_add_dialog_no_source,
-  page_book_edit_info_translation_add_dialog_source_release,
-  page_book_edit_info_translation_add_dialog_source_release_help,
-  page_book_edit_info_translation_add_dialog_submit,
-  page_book_edit_info_translation_add_dialog_title,
-};
-
 export interface AddTranslationDialogProps {
   open: boolean;
   book: BookDTO | null | undefined;
@@ -59,8 +40,8 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const m = useMessage(i18nMessages);
-  const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
+  const { t } = useTranslation(["common", "page"]);
+const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
   const firstAvailableLanguage = available[0] ?? "";
   const [language, setLanguage] = useState<string>(firstAvailableLanguage);
   const [sourceUnitId, setSourceReleaseUnitId] = useState<string>(NO_SOURCE);
@@ -97,13 +78,13 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>
-            {m.page_book_edit_info_translation_add_dialog_title()}
+            {t("page:book_edit_info_translation_add_dialog_title")}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-6 mt-2">
           <div className="flex flex-col gap-1">
             <Label htmlFor="add-trans-language">
-              {m.page_book_edit_info_translation_add_dialog_language()}
+              {t("page:book_edit_info_translation_add_dialog_language")}
             </Label>
             <Select
               value={language}
@@ -128,7 +109,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
 
           <div className="flex flex-col gap-1">
             <Label htmlFor="add-trans-source">
-              {m.page_book_edit_info_translation_add_dialog_source_release()}
+              {t("page:book_edit_info_translation_add_dialog_source_release")}
             </Label>
             <Select
               value={sourceUnitId}
@@ -140,7 +121,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
               <SelectContent>
                 <SelectItem value={NO_SOURCE}>
                   <span className="text-text-secondary">
-                    {m.page_book_edit_info_translation_add_dialog_no_source()}
+                    {t("page:book_edit_info_translation_add_dialog_no_source")}
                   </span>
                 </SelectItem>
                 {candidates.map((b) => (
@@ -151,16 +132,16 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
               </SelectContent>
             </Select>
             <p className="text-sm text-text-secondary">
-              {m.page_book_edit_info_translation_add_dialog_source_release_help()}
+              {t("page:book_edit_info_translation_add_dialog_source_release_help")}
             </p>
           </div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={!language}>
-            {m.page_book_edit_info_translation_add_dialog_submit()}
+            {t("page:book_edit_info_translation_add_dialog_submit")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -19,23 +19,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import { LANGUAGE_META, LANGUAGES, type Language } from "@rezics/contract";
-import {
-  common_add,
-  settings_preferences_add_language,
-  settings_preferences_content_rating_description,
-  settings_preferences_content_rating_title,
-  settings_preferences_drag_handle,
-  settings_preferences_language_description,
-  settings_preferences_language_empty,
-  settings_preferences_language_saved,
-  settings_preferences_language_title,
-  settings_preferences_realm_tags_description,
-  settings_preferences_realm_tags_empty,
-  settings_preferences_realm_tags_meta,
-  settings_preferences_realm_tags_title,
-  settings_preferences_remove_language,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -54,23 +38,6 @@ import { ContentRatingPreferences } from "@/user/components/ContentRatingPrefere
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
-const i18nMessages = {
-  common_add,
-  settings_preferences_add_language,
-  settings_preferences_content_rating_description,
-  settings_preferences_content_rating_title,
-  settings_preferences_drag_handle,
-  settings_preferences_language_description,
-  settings_preferences_language_empty,
-  settings_preferences_language_saved,
-  settings_preferences_language_title,
-  settings_preferences_realm_tags_description,
-  settings_preferences_realm_tags_empty,
-  settings_preferences_realm_tags_meta,
-  settings_preferences_realm_tags_title,
-  settings_preferences_remove_language,
-};
-
 const SUPPORTED_LANGUAGES = Object.values(LANGUAGES);
 
 function getLanguageLabel(code: string): string {
@@ -88,8 +55,8 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
   onRemove,
   disabled,
 }) => {
-  const m = useMessage(i18nMessages);
-  const {
+  const { t } = useTranslation(["common", "settings"]);
+const {
     attributes,
     listeners,
     setNodeRef,
@@ -117,7 +84,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
         className="h-7 w-7 cursor-grab touch-none"
         {...attributes}
         {...listeners}
-        aria-label={m.settings_preferences_drag_handle()}
+        aria-label={t("settings:preferences_drag_handle")}
       >
         <GripVerticalIcon size={14} />
       </Button>
@@ -129,7 +96,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
         className="h-7 w-7"
         onClick={() => onRemove(code)}
         disabled={disabled}
-        aria-label={m.settings_preferences_remove_language({ code })}
+        aria-label={t("settings:preferences_remove_language", { code })}
       >
         <XIcon size={14} />
       </Button>
@@ -138,8 +105,8 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
 };
 
 export const SettingsPreferencesSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  useRequireAuth();
+  const { t } = useTranslation(["common", "settings"]);
+useRequireAuth();
 
   const { data: settings, isLoading: settingsLoading } = useQuery(
     userQueries.settings(),
@@ -204,20 +171,20 @@ export const SettingsPreferencesSection: FC = () => {
   return (
     <div>
       <SettingsSection
-        title={m.settings_preferences_language_title()}
-        description={m.settings_preferences_language_description()}
+        title={t("settings:preferences_language_title")}
+        description={t("settings:preferences_language_description")}
       >
         {langSuccess && (
           <Alert className="mb-3 text-success-text">
             <AlertDescription>
-              {m.settings_preferences_language_saved()}
+              {t("settings:preferences_language_saved")}
             </AlertDescription>
           </Alert>
         )}
 
         {preferredLangs.length === 0 ? (
           <p className="text-sm text-text-secondary mb-4">
-            {m.settings_preferences_language_empty()}
+            {t("settings:preferences_language_empty")}
           </p>
         ) : (
           <DndContext
@@ -249,7 +216,7 @@ export const SettingsPreferencesSection: FC = () => {
             <Select value={addPick} onValueChange={setAddPick}>
               <SelectTrigger className="min-w-[220px] h-9">
                 <SelectValue
-                  placeholder={m.settings_preferences_add_language()}
+                  placeholder={t("settings:preferences_add_language")}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -266,22 +233,22 @@ export const SettingsPreferencesSection: FC = () => {
               onClick={() => handleAddLang(addPick)}
               disabled={!addPick || updateSettings.isPending}
             >
-              {m.common_add()}
+              {t("common:add")}
             </Button>
           </div>
         )}
       </SettingsSection>
 
       <SettingsSection
-        title={m.settings_preferences_content_rating_title()}
-        description={m.settings_preferences_content_rating_description()}
+        title={t("settings:preferences_content_rating_title")}
+        description={t("settings:preferences_content_rating_description")}
       >
         <ContentRatingPreferences />
       </SettingsSection>
 
       <SettingsSection
-        title={m.settings_preferences_realm_tags_title()}
-        description={m.settings_preferences_realm_tags_description()}
+        title={t("settings:preferences_realm_tags_title")}
+        description={t("settings:preferences_realm_tags_description")}
         divider={false}
       >
         {settings?.realmTagPreferences &&
@@ -292,7 +259,7 @@ export const SettingsPreferencesSection: FC = () => {
                 <div key={realm} className="flex items-center gap-2">
                   <span className="text-sm font-medium">{realm}</span>
                   <span className="text-xs text-text-secondary">
-                    {m.settings_preferences_realm_tags_meta({
+                    {t("settings:preferences_realm_tags_meta", {
                       max: pref.maxDisplay,
                       realms: pref.realmIds.join(", "),
                     })}
@@ -303,7 +270,7 @@ export const SettingsPreferencesSection: FC = () => {
           </div>
         ) : (
           <p className="text-sm text-text-secondary">
-            {m.settings_preferences_realm_tags_empty()}
+            {t("settings:preferences_realm_tags_empty")}
           </p>
         )}
       </SettingsSection>

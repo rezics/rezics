@@ -1,83 +1,92 @@
 # @rezics/i18n
 
-Shared product and domain translations for Rezics frontends.
+Shared product and domain translations for Rezics frontends. The runtime is
+`i18next` + `react-i18next` with namespace-scoped lazy loading.
 
-## Paraglide
+## Layout
 
-- Edit source messages in `messages/{locale}.json`.
-- Run `bun --filter=@rezics/i18n run compile` after changing messages.
-- Import product messages by name from `@rezics/i18n/messages` or helpers from
-  `@rezics/i18n`.
-- Do not edit `src/paraglide/` by hand.
-- React UI copy must bind explicit message bags through `@rezics/i18n/react`:
+- Source translations live under `package/i18n/locales/{locale}/{ns}.json`.
+- Namespaces follow `openspec/specs/i18n-namespace-architecture/spec.md`:
+  `common`, `shell`, `auth` (bootstrap); `book`, `page`, `entity`,
+  `community`, `search`, `settings`, `editor`, `admin` (route-lazy); `ui`
+  (bundled with `@rezics/ui`).
+- Vite serves the tree at `/locales/<lng>/<ns>.json` via the
+  `rezicsI18nLocales()` plugin from `@rezics/i18n/vite`.
+
+## Bootstrap
+
+App and admin mount the shared runtime once at the React root:
 
 ```tsx
-import { common_save } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { RezicsI18nProvider } from "@rezics/i18n/react";
 
-const messages = { common_save };
+export default function App() {
+  return (
+    <RezicsI18nProvider>
+      <Suspense fallback={null}>
+        <Router />
+      </Suspense>
+    </RezicsI18nProvider>
+  );
+}
+```
+
+The provider triggers a parallel fetch of the bootstrap namespaces
+(`common`, `shell`, `auth`) for the detected locale and suspends the React
+tree until they resolve.
+
+## Translation in components
+
+```tsx
+import { useTranslation } from "@rezics/i18n/react";
 
 export function SaveButton() {
-  const m = useMessage(messages);
-  return <button>{m.common_save()}</button>;
+  const { t } = useTranslation(["common"]);
+  return <button>{t("common:save")}</button>;
 }
 ```
 
-- App/admin bootstrap must register Paraglide runtimes before React renders:
+For dynamic slugs, dispatch through a typed `<slug>:` map:
 
 ```ts
-import { initI18n, registerParaglideRuntime } from "@rezics/i18n/react";
-import * as productRuntime from "@rezics/i18n/runtime";
-import * as uiRuntime from "@rezics/ui/i18n/runtime";
+const PROVIDER_KEY = {
+  github: "auth:flow_providers_github",
+  google: "auth:flow_providers_google",
+} as const satisfies Record<AuthProviderSlug, `auth:${string}`>;
 
-registerParaglideRuntime(productRuntime);
-registerParaglideRuntime(uiRuntime);
-initI18n();
+export const providerLabel = (provider: AuthProviderSlug): string =>
+  getI18nRuntime().i18n.t(PROVIDER_KEY[provider]);
 ```
 
-- `@rezics/i18n/react` is a neutral adapter. It must not import generated
-  message catalogs, UI package code, routers, API clients, or app/admin shell
-  modules.
-- Named imports and module-scope message bags keep Paraglide output
-  tree-shakeable. Do not import `* as m` from generated message catalogs in
-  production React code, and do not introduce global message registries.
-- Do not use runtime string-key resolvers, fallback string arguments, or
-  `useTranslation().t(...)` for UI copy.
+## Contract enum labels
 
-## Contract Enum Labels
-
-Contract packages expose discriminator keys, not translation keys. Display labels
-live here as explicit maps:
+Contract definitions stay free of translation keys. Labels live here as
+typed maps that resolve via i18next:
 
 ```ts
-const ENTITY_KIND_MESSAGE = {
-  person: m.entity_kind_person,
-} as const satisfies Record<EntityKind, () => string>;
+const ENTITY_KIND_KEY = {
+  person: "entity:kind_person",
+} as const satisfies Record<EntityKind, `entity:${string}`>;
 
-export const entityKindLabel = (kind: EntityKind) =>
-  ENTITY_KIND_MESSAGE[kind]();
+export const entityKindLabel = (kind: EntityKind): string =>
+  getI18nRuntime().i18n.t(ENTITY_KIND_KEY[kind]);
 ```
 
-For any new displayable contract enum, add messages for all six supported UI
-locales (`zh-hant`, `zh-hans`, `en`, `ja`, `de`, and `ko`) and a
-`<enum>Label(key)` helper guarded with `satisfies Record<EnumKey, () => string>`.
-Do not use dynamic Paraglide access such as `m[runtimeKey]()`.
+When adding a displayable contract enum, add entries for every supported
+locale and a `<enum>Label(key)` helper guarded with `satisfies` so missing
+entries are caught at type-check time.
 
-## Dynamic Slug Labels
+## Locale switching
 
-When a runtime slug selects one label from a known set, normalize it to a typed
-union and dispatch through a static slug-to-function map:
+Use `setLocale(locale)` from `@rezics/i18n/react`. It calls
+`i18next.changeLanguage`, fetches every loaded namespace's copy for the
+new locale, and persists the selection to
+`localStorage['rezics-locale']`. No reload or remount is required.
 
-```ts
-const PROVIDER_LABEL = {
-  github: m.auth_flow_providers_github,
-  google: m.auth_flow_providers_google,
-} as const satisfies Record<AuthProviderSlug, () => string>;
+## Adding a key
 
-export function providerLabel(provider: AuthProviderSlug) {
-  return PROVIDER_LABEL[provider]();
-}
-```
-
-Shared domain slug maps belong in this package. Feature-local UI slug maps can
-stay near their feature, but they must use the same explicit map pattern.
+1. Add the key to `package/i18n/locales/en/<ns>.json` and every other
+   locale file.
+2. Reference it from React with `t('<ns>:<key>')`.
+3. Run `bun run check:i18n` to catch missing entries or unused keys
+   before commit; the same check runs in lefthook pre-commit.

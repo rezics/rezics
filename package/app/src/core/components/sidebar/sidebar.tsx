@@ -1,13 +1,8 @@
-import { app_close_sidebar_aria_label } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { X } from "lucide-react";
 import type React from "react";
 import { useEffect } from "react";
 import { cn } from "@/shared/utils/css-util";
-
-const i18nMessages = {
-  app_close_sidebar_aria_label,
-};
 
 // --- 类型定义 ---
 export type SidebarMode = "fixed" | "inline";
@@ -31,8 +26,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   children,
   isDragging = false,
 }) => {
-  const m = useMessage(i18nMessages);
-  // handle escape key
+  const { t } = useTranslation(["shell"]);
+// handle escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (mode === "fixed" && isOpen && e.key === "Escape") {
@@ -76,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               type="button"
               onClick={onClose}
               className="absolute top-4 right-4 p-1 rounded-md transition-colors"
-              aria-label={m.app_close_sidebar_aria_label()}
+              aria-label={t("shell:app_close_sidebar_aria_label")}
             >
               <X size={20} className="text-slate-500" />
             </button>

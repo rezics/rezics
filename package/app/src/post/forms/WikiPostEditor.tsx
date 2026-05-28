@@ -8,21 +8,10 @@ import {
   markdownContentDoc,
   type PostDTO,
 } from "@rezics/contract";
-import {
-  common_cancel,
-  common_save,
-  common_saving,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-
-const i18nMessages = {
-  common_cancel,
-  common_save,
-  common_saving,
-};
 
 export interface WikiPostEditorProps {
   targetUnitId?: string;
@@ -37,8 +26,8 @@ export function WikiPostEditor({
   onSaved,
   onCancel,
 }: WikiPostEditorProps) {
-  const m = useMessage(i18nMessages);
-  const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
+  const { t } = useTranslation(["common"]);
+const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const resize = useMemo(
     () => ({ height: 220, minHeight: 140, maxHeight: 520 }),
@@ -91,7 +80,7 @@ export function WikiPostEditor({
             onClick={onCancel}
             disabled={activeMutation.isPending}
           >
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
         ) : null}
         <Button
@@ -99,7 +88,7 @@ export function WikiPostEditor({
           onClick={handleSave}
           disabled={activeMutation.isPending || !body.trim()}
         >
-          {activeMutation.isPending ? m.common_saving() : m.common_save()}
+          {activeMutation.isPending ? t("common:saving") : t("common:save")}
         </Button>
       </div>
     </div>

@@ -1,15 +1,10 @@
 import type { TagRef } from "@rezics/contract";
-import { tag_clear } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input, Label } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useTagSuggest } from "../../hooks/useTagSuggest";
-
-const i18nMessages = {
-  tag_clear,
-};
 
 export type TagPickerProps = {
   value: TagRef[];
@@ -29,8 +24,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   label,
   placeholder,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [inputValue, setInputValue] = useState("");
+  const { t } = useTranslation(["community"]);
+const [inputValue, setInputValue] = useState("");
   const { suggestions } = useTagSuggest(inputValue);
 
   const commit = (raw: string) => {
@@ -109,7 +104,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                 size="icon"
                 variant="ghost"
                 className="h-4 w-4 p-0"
-                aria-label={m.tag_clear()}
+                aria-label={t("community:tag_clear")}
                 onClick={() => removeTag(tagIdentity(tag))}
               >
                 <CloseIcon size={12} />

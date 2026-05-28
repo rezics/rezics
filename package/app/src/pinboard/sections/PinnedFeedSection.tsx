@@ -1,19 +1,10 @@
-import {
-  pinboard_pinned_heading,
-  pinboard_pinned_region,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
 import type React from "react";
 import { PinboardEntryCard } from "../components/PinboardEntryCard";
 import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { usePinboardList } from "../hooks/usePinboard";
-
-const i18nMessages = {
-  pinboard_pinned_heading,
-  pinboard_pinned_region,
-};
 
 const PINNED_ITEM_CLASS =
   "pl-4 basis-[90%] @sm:basis-[70%] @md:basis-[52%] @lg:basis-[44%] @xl:basis-[36%]";
@@ -33,8 +24,8 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   realmUnitId,
   linkFor,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { entries, isLoading, isError, refetch } = usePinboardList({
+  const { t } = useTranslation(["entity"]);
+const { entries, isLoading, isError, refetch } = usePinboardList({
     realmUnitId,
     pinboardKey: "pinboard",
   });
@@ -58,16 +49,16 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   if (entries.length === 0) return null;
 
   return (
-    <section className="mb-4" aria-label={m.pinboard_pinned_region()}>
+    <section className="mb-4" aria-label={t("entity:pinboard_pinned_region")}>
       <p className="px-1 text-xs font-medium uppercase leading-ui text-text-secondary">
-        {m.pinboard_pinned_heading()}
+        {t("entity:pinboard_pinned_heading")}
       </p>
       <DomainCarousel
         items={entries}
         itemKey={(entry) => entry.unitId}
         itemClassName={PINNED_ITEM_CLASS}
         className="mt-2"
-        ariaLabel={m.pinboard_pinned_region()}
+        ariaLabel={t("entity:pinboard_pinned_region")}
         renderItem={(entry) => (
           <PinboardEntryCard
             entry={entry}

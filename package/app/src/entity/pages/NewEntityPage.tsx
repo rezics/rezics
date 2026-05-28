@@ -1,23 +1,7 @@
 import { useCreateEntity } from "@rezics/api/entity";
 import type { CreateEntityInput, EntityKind } from "@rezics/contract";
 import { CreationMode, entityKinds } from "@rezics/contract";
-import {
-  common_cancel,
-  common_creating,
-  common_language,
-  entity_avatar_person_placeholder,
-  entity_avatar_url,
-  entity_create,
-  entity_create_failed,
-  entity_kind_label,
-  entity_new_description,
-  entity_new_title,
-  entity_title_label,
-  entity_title_placeholder,
-  entity_title_required,
-  language_code_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
@@ -27,26 +11,9 @@ import {
 } from "@/entity-picker/models/eligibilitySuggestions";
 import { unitHref } from "@/shared/ui/link";
 
-const i18nMessages = {
-  common_cancel,
-  common_creating,
-  common_language,
-  entity_avatar_person_placeholder,
-  entity_avatar_url,
-  entity_create,
-  entity_create_failed,
-  entity_kind_label,
-  entity_new_description,
-  entity_new_title,
-  entity_title_label,
-  entity_title_placeholder,
-  entity_title_required,
-  language_code_placeholder,
-};
-
 export function NewEntityPage() {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common", "entity", "shell"]);
+const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("en");
   const [kind, setKind] = useState<EntityKind>(entityKinds[0]);
@@ -63,7 +30,7 @@ export function NewEntityPage() {
         }),
       });
     },
-    onError: (err) => setError(err.message || m.entity_create_failed()),
+    onError: (err) => setError(err.message || t("entity:create_failed")),
   });
 
   const handleSubmit = (e: FormEvent) => {
@@ -71,7 +38,7 @@ export function NewEntityPage() {
     setError(null);
     const trimmed = title.trim();
     if (!trimmed) {
-      setError(m.entity_title_required());
+      setError(t("entity:title_required"));
       return;
     }
     const payload: CreateEntityInput = {
@@ -88,37 +55,37 @@ export function NewEntityPage() {
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-semibold text-text-primary">
-        {m.entity_new_title()}
+        {t("entity:new_title")}
       </h1>
       <p className="mb-6 text-sm text-text-secondary">
-        {m.entity_new_description()}
+        {t("entity:new_description")}
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-title">{m.entity_title_label()}</Label>
+          <Label htmlFor="entity-title">{t("entity:title_label")}</Label>
           <Input
             id="entity-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder={m.entity_title_placeholder()}
+            placeholder={t("entity:title_placeholder")}
             required
             autoFocus
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="entity-language">{m.common_language()}</Label>
+            <Label htmlFor="entity-language">{t("common:language")}</Label>
             <Input
               id="entity-language"
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              placeholder={m.language_code_placeholder()}
+              placeholder={t("shell:language_code_placeholder")}
               required
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="entity-kind">{m.entity_kind_label()}</Label>
+            <Label htmlFor="entity-kind">{t("entity:kind_label")}</Label>
             <select
               id="entity-kind"
               value={kind}
@@ -134,12 +101,12 @@ export function NewEntityPage() {
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="entity-avatar">{m.entity_avatar_url()}</Label>
+          <Label htmlFor="entity-avatar">{t("entity:avatar_url")}</Label>
           <Input
             id="entity-avatar"
             value={avatar}
             onChange={(e) => setAvatar(e.target.value)}
-            placeholder={m.entity_avatar_person_placeholder()}
+            placeholder={t("entity:avatar_person_placeholder")}
           />
         </div>
 
@@ -151,10 +118,10 @@ export function NewEntityPage() {
             variant="ghost"
             onClick={() => void navigate({ to: "/user/me/entity" })}
           >
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? m.common_creating() : m.entity_create()}
+            {mutation.isPending ? t("common:creating") : t("entity:create")}
           </Button>
         </div>
       </form>

@@ -5,18 +5,7 @@ import {
   useUpdatePostMutation,
 } from "@rezics/api/post/post";
 import { mainMarkdownSource, markdownContentDoc } from "@rezics/contract";
-import {
-  common_loading,
-  common_submit,
-  common_submitting,
-  review_edit_title,
-  review_messages_delete_success,
-  review_messages_failed_load,
-  review_messages_rating_range_error,
-  review_messages_update_success,
-  review_validation_min_chars,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -24,21 +13,9 @@ import { useEffect, useState } from "react";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 import { Route as reviewEditRoute } from "@/routes/_editor/review/$reviewId/edit";
 
-const i18nMessages = {
-  common_loading,
-  common_submit,
-  common_submitting,
-  review_edit_title,
-  review_messages_delete_success,
-  review_messages_failed_load,
-  review_messages_rating_range_error,
-  review_messages_update_success,
-  review_validation_min_chars,
-};
-
 export function ReviewEditPageContainer() {
-  const m = useMessage(i18nMessages);
-  const { reviewId } = reviewEditRoute.useParams();
+  const { t } = useTranslation(["common", "community"]);
+const { reviewId } = reviewEditRoute.useParams();
   const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
   const navigate = useNavigate();
   const [reviewData, setReviewData] = useState<ReviewEditState>({
@@ -66,7 +43,7 @@ export function ReviewEditPageContainer() {
 
   const { mutate, isPending } = useUpdatePostMutation({
     onSuccess: () => {
-      show(m.review_messages_update_success());
+      show(t("community:review_messages_update_success"));
     },
     onError: (error) => {
       show(String(error));
@@ -75,7 +52,7 @@ export function ReviewEditPageContainer() {
 
   const { mutate: deletePostMutation } = useDeletePostMutation({
     onSuccess: () => {
-      show(m.review_messages_delete_success());
+      show(t("community:review_messages_delete_success"));
     },
     onError: (error) => {
       show(String(error));
@@ -84,13 +61,13 @@ export function ReviewEditPageContainer() {
 
   function handleSave() {
     if ((reviewData.contentSource?.length ?? 0) < 200) {
-      show(m.review_validation_min_chars());
+      show(t("community:review_validation_min_chars"));
       return;
     }
 
     if (reviewData._editRating) {
       if (reviewData._editRating > 10 || reviewData._editRating < 0) {
-        show(m.review_messages_rating_range_error());
+        show(t("community:review_messages_rating_range_error"));
         return;
       }
     }
@@ -114,7 +91,7 @@ export function ReviewEditPageContainer() {
   function handleDelete() {
     deletePostMutation(reviewId, {
       onSuccess: () => {
-        show(m.review_messages_delete_success());
+        show(t("community:review_messages_delete_success"));
         navigate({ to: `/review/book/${reviewData.targetUnitId ?? ""}` });
       },
       onError: (error) => {
@@ -124,22 +101,22 @@ export function ReviewEditPageContainer() {
   }
 
   if (isLoading) {
-    return <div>{m.common_loading()}</div>;
+    return <div>{t("common:loading")}</div>;
   }
 
   if (isError || !data) {
-    return <div>{m.review_messages_failed_load()}</div>;
+    return <div>{t("community:review_messages_failed_load")}</div>;
   }
 
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">{m.review_edit_title()}</h1>
+        <h1 className="text-xl font-semibold">{t("community:review_edit_title")}</h1>
         <ReviewForm
           data={reviewData}
           setData={setReviewData}
           onSubmit={handleSave}
-          submitLabel={isPending ? m.common_submitting() : m.common_submit()}
+          submitLabel={isPending ? t("common:submitting") : t("common:submit")}
           extraActions={<DeleteButton onDelete={handleDelete} />}
         />
       </div>

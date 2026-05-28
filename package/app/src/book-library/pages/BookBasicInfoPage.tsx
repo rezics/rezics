@@ -1,13 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { mainMarkdownSource } from "@rezics/contract";
-import {
-  book_editionFallback,
-  book_excerpts,
-  book_fields_tags,
-  book_remark,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { WorkReleaseNav } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
@@ -33,13 +27,6 @@ import { releaseWorkUnitId } from "../models/releaseWork";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
-const i18nMessages = {
-  book_editionFallback,
-  book_excerpts,
-  book_fields_tags,
-  book_remark,
-};
-
 interface BookWorkReleaseNavProps {
   workUnitId: string;
   currentUnitId: string;
@@ -49,8 +36,8 @@ const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
   workUnitId,
   currentUnitId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data } = useQuery({
+  const { t } = useTranslation(["book"]);
+const { data } = useQuery({
     ...bookQueries.list({ workUnitId, limit: 10 }),
     enabled: Boolean(workUnitId),
   });
@@ -65,8 +52,8 @@ const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
     <WorkReleaseNav
       releases={releases}
       currentUnitId={currentUnitId}
-      heading={m.book_editionFallback()}
-      emptyLabel={m.book_editionFallback()}
+      heading={t("book:editionFallback")}
+      emptyLabel={t("book:editionFallback")}
       renderLink={(release, children) => (
         <Link
           key={release.unitId}
@@ -81,8 +68,8 @@ const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
 };
 
 export const BookBasicInfoPage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const { bookId } = useParams({ strict: false }) as { bookId: string };
+  const { t } = useTranslation(["book"]);
+const { bookId } = useParams({ strict: false }) as { bookId: string };
   const { data } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
@@ -141,7 +128,7 @@ export const BookBasicInfoPage: React.FC = () => {
         <>
           <Separator />
           <div>
-            <AccentBarWithText text={m.book_fields_tags()} />
+            <AccentBarWithText text={t("book:fields_tags")} />
             <div className="mt-2">
               <TagInteraction
                 tags={unitTags}
@@ -159,7 +146,7 @@ export const BookBasicInfoPage: React.FC = () => {
 
       <div>
         <ArrowForwardIcon size={16} to={`/excerpt/book/${bookInfo.unitId}`}>
-          <AccentBarWithText text={m.book_excerpts()} />
+          <AccentBarWithText text={t("book:excerpts")} />
         </ArrowForwardIcon>
       </div>
       <ExcerptPreview id={bookInfo.unitId || ""} />
@@ -172,7 +159,7 @@ export const BookBasicInfoPage: React.FC = () => {
             size={16}
             to={`/review/book/${bookInfo.unitId}?tab=remark`}
           >
-            <AccentBarWithText text={m.book_remark()} />
+            <AccentBarWithText text={t("book:remark")} />
           </ArrowForwardIcon>
         </div>
         <div className="mt-3 mb-4">

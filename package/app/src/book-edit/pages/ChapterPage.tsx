@@ -12,12 +12,7 @@ import {
   mainMarkdownSource,
   markdownContentDoc,
 } from "@rezics/contract";
-import {
-  chapter_metadata,
-  chapter_move_volume,
-  placeholders_chapter_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -48,12 +43,6 @@ import {
   type ViewMode,
 } from "@/shared/ui/RezicsMarkdownEditor";
 
-const i18nMessages = {
-  chapter_metadata,
-  chapter_move_volume,
-  placeholders_chapter_title,
-};
-
 function updateContentStructureNodeTitle(
   nodes: BookContentStructureItem[],
   contentUnitId: string,
@@ -78,8 +67,8 @@ function updateContentStructureNodeTitle(
  * TODO Chapter List 换成 Tree 模式之后，编辑还没有校验
  */
 export const BookEditChapterPage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const { bookId } = bookEditLayoutRoute.useParams();
+  const { t } = useTranslation(["book", "editor"]);
+const { bookId } = bookEditLayoutRoute.useParams();
   const { chapterId } = bookEditChapterRoute.useParams();
   // `$chapterId` is a legacy route param name; current logic treats it as the
   // materialized content Unit id for this content-structure node.
@@ -210,7 +199,7 @@ export const BookEditChapterPage: React.FC = () => {
       <div className="flex items-center gap-2 mb-4">
         <Input
           id="chapter-title"
-          placeholder={m.placeholders_chapter_title()}
+          placeholder={t("editor:placeholders_chapter_title")}
           className={`flex-1 text-xl font-semibold border-0 border-b shadow-none rounded-none ${
             !title.trim() ? "border-border-error" : "border-border-defined"
           }`}
@@ -233,7 +222,7 @@ export const BookEditChapterPage: React.FC = () => {
               }}
             >
               <AccountTree className="w-4 h-4 mr-2" />
-              {m.chapter_move_volume()}
+              {t("book:chapter_move_volume")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
@@ -241,7 +230,7 @@ export const BookEditChapterPage: React.FC = () => {
               }}
             >
               <Settings className="w-4 h-4 mr-2" />
-              {m.chapter_metadata()}
+              {t("book:chapter_metadata")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,14 +1,6 @@
 import { postQueries } from "@rezics/api/post/post";
 import { mainMarkdownSource, type PostDTO, PostKind } from "@rezics/contract";
-import {
-  book_hero_featured_review_empty_body,
-  book_hero_featured_review_empty_quote,
-  book_hero_featured_review_read_full,
-  book_hero_featured_review_score_label,
-  book_hero_featured_review_unknown_author,
-  book_hero_featured_review_write_cta,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import {
   Avatar,
@@ -19,15 +11,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
-
-const i18nMessages = {
-  book_hero_featured_review_empty_body,
-  book_hero_featured_review_empty_quote,
-  book_hero_featured_review_read_full,
-  book_hero_featured_review_score_label,
-  book_hero_featured_review_unknown_author,
-  book_hero_featured_review_write_cta,
-};
 
 interface BookHeroFeaturedReviewProps {
   bookId: string;
@@ -51,8 +34,8 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   bookId,
   workUnitId,
 }) => {
-  const m = useMessage(i18nMessages);
-  // MOCK: should sort by reaction count once postsByTarget supports it.
+  const { t } = useTranslation(["book"]);
+// MOCK: should sort by reaction count once postsByTarget supports it.
   // For now, take the most recent review.
   const { data, isLoading } = useQuery({
     ...postQueries.list(
@@ -101,7 +84,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
           style={{ fontSize: "1.125rem" }}
         >
           {QUOTE_OPEN}
-          {m.book_hero_featured_review_empty_quote()}
+          {t("book:hero_featured_review_empty_quote")}
           {QUOTE_CLOSE}
         </p>
         <Link
@@ -109,7 +92,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
           params={{ bookId }}
           className="text-sm text-white/70 hover:text-white underline-offset-4 hover:underline"
         >
-          {m.book_hero_featured_review_write_cta()}
+          {t("book:hero_featured_review_write_cta")}
         </Link>
       </div>
     );
@@ -131,7 +114,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
         }}
       >
         {QUOTE_OPEN}
-        {body || m.book_hero_featured_review_empty_body()}
+        {body || t("book:hero_featured_review_empty_body")}
         {QUOTE_CLOSE}
       </p>
 
@@ -143,7 +126,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
           </Avatar>
         )}
         <span className="text-sm font-medium">
-          {author?.name ?? m.book_hero_featured_review_unknown_author()}
+          {author?.name ?? t("book:hero_featured_review_unknown_author")}
         </span>
         {score != null && (
           <div className="ml-1">
@@ -152,7 +135,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
               onChange={() => {}}
               readOnly
               size="sm"
-              aria-label={m.book_hero_featured_review_score_label()}
+              aria-label={t("book:hero_featured_review_score_label")}
             />
           </div>
         )}
@@ -163,7 +146,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
         params={{ bookId }}
         className="text-sm text-white/80 hover:text-white underline-offset-4 hover:underline self-start"
       >
-        {m.book_hero_featured_review_read_full()}
+        {t("book:hero_featured_review_read_full")}
       </Link>
     </div>
   );

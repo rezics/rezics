@@ -8,19 +8,13 @@ import {
   type PostDTO,
   type RealmRuleResolvedDTO,
 } from "@rezics/contract";
-import { common_view, realm_rules_title } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { RealmRuleDialog } from "./RealmRuleDialog";
-
-const i18nMessages = {
-  common_view,
-  realm_rules_title,
-};
 
 interface RealmRuleSummaryCardProps {
   realmUnitId: string;
@@ -62,8 +56,8 @@ export function RealmRuleSummaryCard({
   fallbackPostUnitId,
   empty = "hidden",
 }: RealmRuleSummaryCardProps) {
-  const m = useMessage(i18nMessages);
-  const [open, setOpen] = useState(false);
+  const { t } = useTranslation(["common", "entity"]);
+const [open, setOpen] = useState(false);
   const resolvedQuery = useQuery(realmRuleResolvedQuery(realmUnitId));
   const postUnitId =
     resolvedQuery.data?.sourceRulePostUnitId ??
@@ -105,7 +99,7 @@ export function RealmRuleSummaryCard({
 
   if (!content) {
     return empty === "state" ? (
-      <EmptyState title={m.realm_rules_title()} />
+      <EmptyState title={t("entity:realm_rules_title")} />
     ) : null;
   }
 
@@ -117,7 +111,7 @@ export function RealmRuleSummaryCard({
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-text-tertiary" aria-hidden />
               <h2 className="text-sm font-medium leading-ui text-text-primary">
-                {m.realm_rules_title()}
+                {t("entity:realm_rules_title")}
               </h2>
             </div>
             {preview ? (
@@ -133,7 +127,7 @@ export function RealmRuleSummaryCard({
             )}
           </div>
           <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-            {m.common_view()}
+            {t("common:view")}
           </Button>
         </div>
         <RealmRuleDialog open={open} content={content} onOpenChange={setOpen} />

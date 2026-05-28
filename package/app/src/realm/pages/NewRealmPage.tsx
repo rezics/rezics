@@ -4,13 +4,7 @@ import {
   markdownContentDoc,
   type RealmTagViewStyle,
 } from "@rezics/contract";
-import {
-  common_create,
-  common_description,
-  common_name,
-  realm_new_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Input,
@@ -26,16 +20,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { unitHref } from "@/shared/ui/link";
 
-const i18nMessages = {
-  common_create,
-  common_description,
-  common_name,
-  realm_new_title,
-};
-
 export function NewRealmPage() {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common", "entity"]);
+const navigate = useNavigate();
   const createMutation = useCreateRealmMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -76,10 +63,10 @@ export function NewRealmPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{m.realm_new_title()}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("entity:realm_new_title")}</h1>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-realm-name">{m.common_name()}</Label>
+          <Label htmlFor="new-realm-name">{t("common:name")}</Label>
           <Input
             id="new-realm-name"
             value={title}
@@ -88,7 +75,7 @@ export function NewRealmPage() {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="new-realm-description">
-            {m.common_description()}
+            {t("common:description")}
           </Label>
           <Textarea
             id="new-realm-description"
@@ -136,7 +123,7 @@ export function NewRealmPage() {
             onClick={handleCreate}
             disabled={!title || createMutation.isPending}
           >
-            {m.common_create()}
+            {t("common:create")}
           </Button>
         </div>
       </div>

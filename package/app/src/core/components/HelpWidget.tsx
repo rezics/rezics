@@ -1,5 +1,4 @@
-import { app_help_aria_label, app_help_feedback } from "@rezics/i18n/messages";
-import { type ReactiveMessageBag, useMessage } from "@rezics/i18n/react";
+import { type ReactiveMessageBag, useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import {
   Plus as AddIcon,
@@ -9,11 +8,6 @@ import {
 import * as React from "react";
 import FeedbackDialog from "@/feedback/components/FeedbackDialog";
 import { cn } from "@/shared/utils/css-util";
-
-const i18nMessages = {
-  app_help_aria_label,
-  app_help_feedback,
-};
 
 type HelpMessages = ReactiveMessageBag<typeof i18nMessages>;
 
@@ -36,7 +30,7 @@ function getDefaultHelpActions(m: HelpMessages): HelpFabAction[] {
   return [
     {
       id: "feedback",
-      label: m.app_help_feedback(),
+      label: t("shell:app_help_feedback"),
       icon: <ReportProblemIcon className="w-4 h-4" />,
     },
   ];
@@ -52,12 +46,12 @@ export const HelpFab: React.FC<HelpFabProps> = ({
   visible = true,
   enterDelayMs = 0,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [open, setOpen] = React.useState(false);
+  const { t } = useTranslation(["shell"]);
+const [open, setOpen] = React.useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = React.useState(false);
 
   const list = actions ?? getDefaultHelpActions(m);
-  const resolvedAriaLabel = ariaLabel ?? m.app_help_aria_label();
+  const resolvedAriaLabel = ariaLabel ?? t("shell:app_help_aria_label");
   if (!list.length) return null;
 
   const handleToggle = () => {

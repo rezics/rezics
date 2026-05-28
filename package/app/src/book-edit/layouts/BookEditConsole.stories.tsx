@@ -1,11 +1,4 @@
-import {
-  book_edit_sidebar_history,
-  common_back,
-  common_edit,
-  edit_console_chapter_context_back_to_chapters,
-  edit_console_chapter_context_label,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Separator } from "@rezics/ui/shadcn";
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite";
 import {
@@ -33,14 +26,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-const i18nMessages = {
-  book_edit_sidebar_history,
-  common_back,
-  common_edit,
-  edit_console_chapter_context_back_to_chapters,
-  edit_console_chapter_context_label,
-};
 
 function withRouterAt(initialPath: string): Decorator {
   return (Story) => {
@@ -103,32 +88,30 @@ function SidebarFixture({
 }
 
 function ChapterContextPreview() {
-  const m = useMessage(i18nMessages);
-
-  return (
+  const { t } = useTranslation(["book", "common", "settings"]);
+return (
     <div className="grid gap-2 rounded-md bg-surface-subtle p-3">
       <div className="flex items-center gap-2 text-xs font-medium leading-dense text-text-secondary">
         <BookOpenText className="h-4 w-4" aria-hidden="true" />
-        {m.edit_console_chapter_context_label()}
+        {t("settings:edit_console_chapter_context_label")}
       </div>
       <p className="text-sm font-medium leading-ui text-text-primary">
         Chapter 12: A quiet archive
       </p>
       <p className="text-xs leading-dense text-text-secondary">
-        {m.edit_console_chapter_context_back_to_chapters()}
+        {t("settings:edit_console_chapter_context_back_to_chapters")}
       </p>
     </div>
   );
 }
 
 function SharedLayoutShellPreview() {
-  const m = useMessage(i18nMessages);
-
-  return (
+  const { t } = useTranslation(["book", "common", "settings"]);
+return (
     <EditConsoleLayout {...createBookEditConsoleConfig(historyBookId)}>
       <section className="mx-auto max-w-3xl px-6 py-10">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          {m.book_edit_sidebar_history()}
+          {t("book:edit_sidebar_history")}
         </h2>
       </section>
     </EditConsoleLayout>
@@ -136,20 +119,19 @@ function SharedLayoutShellPreview() {
 }
 
 function MinimalLayoutShellPreview() {
-  const m = useMessage(i18nMessages);
-
-  return (
+  const { t } = useTranslation(["book", "common", "settings"]);
+return (
     <EditConsoleLayout
       {...createMinimalEditConsoleConfig({
-        returnLabel: m.common_back(),
+        returnLabel: t("common:back"),
         returnHref: "/review/review-1",
-        editorLabel: m.common_edit(),
+        editorLabel: t("common:edit"),
         editorHref: "/review/review-1/edit",
       })}
     >
       <section className="mx-auto max-w-3xl px-6 py-10">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          {m.common_edit()}
+          {t("common:edit")}
         </h2>
         <p className="mt-2 text-sm leading-body text-text-secondary">
           A quiet draft waits for a careful revision.

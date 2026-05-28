@@ -1,12 +1,5 @@
 import type { PostDTO } from "@rezics/contract";
-import {
-  common_cancel,
-  common_close,
-  realm_agree_and_join,
-  realm_joining,
-  realm_rules_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -17,14 +10,6 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { PostBodyMarkdown } from "@/post";
-
-const i18nMessages = {
-  common_cancel,
-  common_close,
-  realm_agree_and_join,
-  realm_joining,
-  realm_rules_title,
-};
 
 export interface RealmRuleDialogProps {
   open: boolean;
@@ -45,24 +30,24 @@ export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
   onOpenChange,
   onAgree,
 }) => {
-  const m = useMessage(i18nMessages);
-  const body = content ?? post?.content;
+  const { t } = useTranslation(["common", "entity"]);
+const body = content ?? post?.content;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{m.realm_rules_title()}</DialogTitle>
+          <DialogTitle>{t("entity:realm_rules_title")}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto">
           <PostBodyMarkdown content={body} clamp={false} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            {joining ? m.common_cancel() : m.common_close()}
+            {joining ? t("common:cancel") : t("common:close")}
           </Button>
           {joining && (
             <Button onClick={onAgree} disabled={joinPending}>
-              {joinPending ? m.realm_joining() : m.realm_agree_and_join()}
+              {joinPending ? t("entity:realm_joining") : t("entity:realm_agree_and_join")}
             </Button>
           )}
         </DialogFooter>

@@ -6,19 +6,7 @@ import {
   type UpdateUser,
   type UserDTO,
 } from "@rezics/contract";
-import {
-  common_cancel,
-  common_description,
-  common_nickname,
-  common_save,
-  entity_avatar_url,
-  settings_profile_about_help,
-  settings_profile_avatar_help,
-  settings_profile_bio,
-  settings_profile_edit_title,
-  user_load_failed,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import {
@@ -41,19 +29,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as UserEditRoute } from "@/routes/_mainLayout/user/$userId/edit";
 import { UserLoading } from "./UserState";
 
-const i18nMessages = {
-  common_cancel,
-  common_description,
-  common_nickname,
-  common_save,
-  entity_avatar_url,
-  settings_profile_about_help,
-  settings_profile_avatar_help,
-  settings_profile_bio,
-  settings_profile_edit_title,
-  user_load_failed,
-};
-
 export interface UserEditPageProps {
   onCancel?: () => void;
   onSuccess?: (user: UserDTO) => void;
@@ -73,8 +48,8 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   onSuccess,
   userId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
+  const { t } = useTranslation(["common", "entity", "settings"]);
+const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
   const resolvedUserId = userId ?? routeMatch?.params.userId;
   const [user, setUser] = useState<UserDTO | null>(null);
   const {
@@ -157,7 +132,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-error-text">{m.user_load_failed()}</p>
+        <p className="text-error-text">{t("settings:user_load_failed")}</p>
       </div>
     );
   }
@@ -177,7 +152,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
               </AvatarFallback>
             </Avatar>
             <h4 className="text-2xl font-semibold">
-              {m.settings_profile_edit_title()}
+              {t("settings:profile_edit_title")}
             </h4>
           </div>
           <form onSubmit={handleSubmit}>
@@ -191,7 +166,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
             )}
             <div className="space-y-4">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="user-edit-name">{m.common_nickname()}</Label>
+                <Label htmlFor="user-edit-name">{t("common:nickname")}</Label>
                 <Input
                   id="user-edit-name"
                   value={formData.name ?? ""}
@@ -201,7 +176,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="user-edit-avatar">
-                  {m.entity_avatar_url()}
+                  {t("entity:avatar_url")}
                 </Label>
                 <Input
                   id="user-edit-avatar"
@@ -209,12 +184,12 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   onChange={(e) => handleChange("avatar", e.target.value)}
                 />
                 <p className="text-xs text-text-secondary">
-                  {m.settings_profile_avatar_help()}
+                  {t("settings:profile_avatar_help")}
                 </p>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="user-edit-bio">
-                  {m.settings_profile_bio()}
+                  {t("settings:profile_bio")}
                 </Label>
                 <textarea
                   id="user-edit-bio"
@@ -224,12 +199,12 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   rows={4}
                 />
                 <p className="text-xs text-text-secondary">
-                  {m.settings_profile_about_help()}
+                  {t("settings:profile_about_help")}
                 </p>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="user-edit-description">
-                  {m.common_description()}
+                  {t("common:description")}
                 </Label>
                 <textarea
                   id="user-edit-description"
@@ -239,7 +214,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   rows={4}
                 />
                 <p className="text-xs text-text-secondary">
-                  {m.settings_profile_about_help()}
+                  {t("settings:profile_about_help")}
                 </p>
               </div>
               <PasswordField
@@ -259,7 +234,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                     disabled={saving}
                   >
                     <CancelIcon className="w-4 h-4 mr-2" />
-                    {m.common_cancel()}
+                    {t("common:cancel")}
                   </Button>
                 )}
                 <Button type="submit" disabled={saving}>
@@ -268,7 +243,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
                   ) : (
                     <>
                       <SaveIcon className="w-4 h-4 mr-2" />
-                      {m.common_save()}
+                      {t("common:save")}
                     </>
                   )}
                 </Button>

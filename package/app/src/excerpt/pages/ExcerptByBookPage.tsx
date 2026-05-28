@@ -1,6 +1,5 @@
 import { bookQueries } from "@rezics/api/book/book";
-import { excerpt_excerpts_title } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -10,13 +9,9 @@ import { Route as excerptByBookRoute } from "@/routes/_mainLayout/excerpt/book/$
 import UnitsPage from "@/unit/pages/UnitsPage";
 import { ExcerptNewPage } from "./ExcerptNewPage";
 
-const i18nMessages = {
-  excerpt_excerpts_title,
-};
-
 export function ExcerptByBookPage() {
-  const m = useMessage(i18nMessages);
-  const { bookId } = excerptByBookRoute.useParams();
+  const { t } = useTranslation(["community"]);
+const { bookId } = excerptByBookRoute.useParams();
   const { data: bookInfo } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
@@ -25,7 +20,7 @@ export function ExcerptByBookPage() {
   return (
     <div className="mt-16 mx-auto max-w-4xl w-11/12">
       <ArrowForwardIcon size={16}>
-        <AccentBarWithText text={m.excerpt_excerpts_title()} />
+        <AccentBarWithText text={t("community:excerpt_excerpts_title")} />
       </ArrowForwardIcon>
       <ExcerptNewPage bookUnitId={bookId || ""} />
       <UnitsPage

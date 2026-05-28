@@ -1,15 +1,6 @@
-import {
-  post_collapse_thread,
-  post_expand_thread,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useThreadingHover } from "./ThreadingContext";
-
-const i18nMessages = {
-  post_collapse_thread,
-  post_expand_thread,
-};
 
 export interface ThreadingRailProps {
   isCollapsed?: boolean;
@@ -52,8 +43,8 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
   useSharedHover = true,
   onHoverChange,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { hovered, setHovered } = useThreadingHover();
+  const { t } = useTranslation(["community"]);
+const { hovered, setHovered } = useThreadingHover();
 
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -148,7 +139,7 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
         <button
           type="button"
           aria-label={
-            isCollapsed ? m.post_expand_thread() : m.post_collapse_thread()
+            isCollapsed ? t("community:post_expand_thread") : t("community:post_collapse_thread")
           }
           onClick={handleClick}
           onMouseEnter={() => handleHoverChange(true)}

@@ -1,8 +1,4 @@
-import {
-  app_create_menu_aria_label,
-  common_create,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   DropdownMenu,
@@ -14,14 +10,9 @@ import type React from "react";
 import { useState } from "react";
 import { CreateMenuItem } from "./CreateMenuItem";
 
-const i18nMessages = {
-  app_create_menu_aria_label,
-  common_create,
-};
-
 export const CreateMenu: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const [open, setOpen] = useState(false);
+  const { t } = useTranslation(["common", "shell"]);
+const [open, setOpen] = useState(false);
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
@@ -31,11 +22,11 @@ export const CreateMenu: React.FC = () => {
             variant="ghost"
             size="sm"
             className="h-9 rounded-full gap-1 bg-transparent px-2 md:h-10 md:px-4"
-            aria-label={m.app_create_menu_aria_label()}
+            aria-label={t("shell:app_create_menu_aria_label")}
             {...props}
           >
             <AddIcon className="w-5 h-5" />
-            <span className="hidden md:inline">{m.common_create()}</span>
+            <span className="hidden md:inline">{t("common:create")}</span>
           </Button>
         )}
       />

@@ -1,8 +1,4 @@
-import {
-  app_document_title_account_settings,
-  app_document_title_library,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import type { ReactNode } from "react";
@@ -23,18 +19,13 @@ import { Header } from "../components/header/MainLayoutHeader";
 import { NAVIGATION } from "../components/navigation/MainNavigation";
 import { Sidebar } from "../components/sidebar/MainLayoutSidebar";
 
-const i18nMessages = {
-  app_document_title_account_settings,
-  app_document_title_library,
-};
-
 export interface MainLayoutProps {
   children: ReactNode;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const m = useMessage(i18nMessages);
-  useSyncUserProfile();
+  const { t } = useTranslation(["shell"]);
+useSyncUserProfile();
   const navigate = useNavigate();
   const location = useLocation();
   const pendingRegistration = useAuthSessionStore(
@@ -66,7 +57,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
       <div className="min-h-screen bg-surface-canvas">
         <Helmet>
-          <title>{m.app_document_title_account_settings()}</title>
+          <title>{t("shell:app_document_title_account_settings")}</title>
         </Helmet>
         {children}
       </div>
@@ -76,7 +67,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>{m.app_document_title_library()}</title>
+        <title>{t("shell:app_document_title_library")}</title>
       </Helmet>
 
       <Header />

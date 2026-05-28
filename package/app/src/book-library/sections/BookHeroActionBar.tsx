@@ -1,13 +1,6 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import type { BookDTO } from "@rezics/contract";
-import {
-  book_hero_actions_add_to_shelf,
-  book_hero_actions_edit_details,
-  common_copy_link,
-  common_share,
-  common_share_via,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   DropdownMenu,
@@ -29,14 +22,6 @@ import type React from "react";
 import { useShareMenu } from "@/engagement/hooks/useShareMenu";
 import { BookProgressStatusSection } from "@/progress-status";
 
-const i18nMessages = {
-  book_hero_actions_add_to_shelf,
-  book_hero_actions_edit_details,
-  common_copy_link,
-  common_share,
-  common_share_via,
-};
-
 interface BookHeroActionBarProps {
   bookInfo: BookDTO;
   shareTitle?: string;
@@ -49,8 +34,8 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   bookInfo,
   shareTitle,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["book", "common"]);
+const navigate = useNavigate();
   const editorEntry = useEditorEntry({
     surface: "book",
     ownerUnit: bookInfo,
@@ -84,7 +69,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
         }}
       >
         <BookmarkAddOutlined className="w-4 h-4 mr-2" />
-        {m.book_hero_actions_add_to_shelf()}
+        {t("book:hero_actions_add_to_shelf")}
       </Button>
 
       {bookId ? <BookProgressStatusSection bookUnitId={bookId} /> : null}
@@ -102,17 +87,17 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
                 {...props}
               >
                 <IosShareOutlined className="w-4 h-4 mr-2" />
-                {m.common_share()}
+                {t("common:share")}
               </Button>
             )}
           />
           <DropdownMenuContent onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem onClick={share.handleCopy}>
-              {m.common_copy_link()}
+              {t("common:copy_link")}
             </DropdownMenuItem>
             {share.canWebShare && (
               <DropdownMenuItem onClick={share.handleWebShare}>
-                {m.common_share_via()}
+                {t("common:share_via")}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
@@ -127,7 +112,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
                     type="button"
                     size="icon"
                     variant="outline"
-                    aria-label={m.book_hero_actions_edit_details()}
+                    aria-label={t("book:hero_actions_edit_details")}
                     {...props}
                     onClick={handleEdit}
                     className={ghostHeroClass}
@@ -137,7 +122,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
                 )}
               />
               <TooltipContent side="top">
-                {m.book_hero_actions_edit_details()}
+                {t("book:hero_actions_edit_details")}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

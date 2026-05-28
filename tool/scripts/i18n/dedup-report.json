@@ -216,7 +216,7 @@
       "callSites": {
         "app": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -295,7 +295,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -511,7 +511,7 @@
       "callSites": {
         "admin": 6
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -548,7 +548,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -565,7 +565,7 @@
       "callSites": {
         "admin": 12
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -583,7 +583,7 @@
         "admin": 1,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -598,7 +598,7 @@
         "book"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -616,7 +616,7 @@
         "admin": 3,
         "app": 5
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -669,7 +669,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -685,7 +685,7 @@
       "callSites": {
         "admin": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -720,11 +720,11 @@
       "callSites": {
         "app": 50
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
-      "value": "More →",
+      "value": "More \u2192",
       "keys": [
         "page_home_sections_new_book_more",
         "page_home_sections_trending_book_more",
@@ -736,7 +736,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -769,7 +769,7 @@
         "book"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -784,7 +784,7 @@
         "book"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -838,7 +838,7 @@
         "app": 8,
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -893,7 +893,7 @@
         "admin": 5,
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -910,7 +910,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -926,7 +926,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -941,7 +941,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -957,7 +957,7 @@
       "callSites": {
         "app": 7
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -973,7 +973,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -989,7 +989,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1005,7 +1005,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1021,7 +1021,7 @@
       "callSites": {
         "admin": 5
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1037,7 +1037,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1053,7 +1053,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1068,7 +1068,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1082,7 +1082,7 @@
         "review"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1098,7 +1098,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1112,7 +1112,7 @@
         "entity"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1126,7 +1126,7 @@
         "navigation"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1141,7 +1141,7 @@
       "callSites": {
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1156,7 +1156,7 @@
       "callSites": {
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1170,7 +1170,7 @@
         "history"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1187,7 +1187,7 @@
         "app": 3,
         "admin": 5
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1202,7 +1202,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1217,7 +1217,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1232,7 +1232,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1246,7 +1246,7 @@
         "entity"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1260,7 +1260,7 @@
         "review"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1275,7 +1275,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1288,7 +1288,7 @@
         "book"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1304,7 +1304,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1320,7 +1320,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1337,7 +1337,7 @@
         "app": 3,
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1351,7 +1351,7 @@
         "book"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1367,7 +1367,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1383,7 +1383,7 @@
       "callSites": {
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1398,7 +1398,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1414,7 +1414,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1430,7 +1430,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1446,7 +1446,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1462,7 +1462,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1478,7 +1478,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1495,7 +1495,7 @@
         "app": 7,
         "admin": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1512,11 +1512,11 @@
         "admin": 1,
         "app": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
-      "value": "Creating…",
+      "value": "Creating\u2026",
       "keys": [
         "admin_token_creating",
         "admin_user_creating"
@@ -1527,7 +1527,7 @@
       "callSites": {
         "admin": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1541,7 +1541,7 @@
         "review"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1555,7 +1555,7 @@
         "review"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1569,7 +1569,7 @@
         "review"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1583,7 +1583,7 @@
         "review"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1597,7 +1597,7 @@
         "authority"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1613,7 +1613,7 @@
       "callSites": {
         "app": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1628,7 +1628,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1643,7 +1643,7 @@
       "callSites": {
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1660,7 +1660,7 @@
         "app": 4,
         "admin": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1676,7 +1676,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1689,7 +1689,7 @@
         "dm"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1706,7 +1706,7 @@
         "app": 23,
         "admin": 6
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1723,7 +1723,7 @@
         "admin": 3,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1739,7 +1739,7 @@
       "callSites": {
         "app": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1754,7 +1754,7 @@
       "callSites": {
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1768,7 +1768,7 @@
         "book"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1785,7 +1785,7 @@
         "app": 5,
         "admin": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1800,7 +1800,7 @@
       "callSites": {
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1817,7 +1817,7 @@
         "admin": 2,
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1833,7 +1833,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1849,7 +1849,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1866,7 +1866,7 @@
         "admin": 1,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1882,7 +1882,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1896,7 +1896,7 @@
         "page"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1910,7 +1910,7 @@
         "entity"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1925,7 +1925,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1941,7 +1941,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1957,7 +1957,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1973,7 +1973,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -1987,7 +1987,7 @@
         "realm"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2004,7 +2004,7 @@
         "admin": 1,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2018,7 +2018,7 @@
         "book"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2035,7 +2035,7 @@
         "admin": 1,
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2050,7 +2050,7 @@
       "callSites": {
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2066,7 +2066,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2083,7 +2083,7 @@
         "app": 1,
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2099,7 +2099,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2114,7 +2114,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2130,7 +2130,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2147,7 +2147,7 @@
         "admin": 4,
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2163,7 +2163,7 @@
       "callSites": {
         "admin": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2179,7 +2179,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2196,7 +2196,7 @@
         "admin": 1,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2211,7 +2211,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2225,7 +2225,7 @@
         "shelf"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2241,7 +2241,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2257,7 +2257,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2273,7 +2273,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2290,7 +2290,7 @@
         "admin": 2,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2306,7 +2306,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2322,7 +2322,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2337,7 +2337,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2350,7 +2350,7 @@
         "page"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2366,7 +2366,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2382,7 +2382,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2397,7 +2397,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2411,7 +2411,7 @@
         "progress"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2427,7 +2427,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2444,7 +2444,7 @@
         "app": 2,
         "admin": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2460,7 +2460,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2477,7 +2477,7 @@
         "admin": 1,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2491,7 +2491,7 @@
         "entity"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2506,7 +2506,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2522,7 +2522,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2537,7 +2537,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2553,7 +2553,7 @@
       "callSites": {
         "admin": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2567,7 +2567,7 @@
         "entity"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2583,7 +2583,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2596,7 +2596,7 @@
         "search"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2613,7 +2613,7 @@
         "app": 1,
         "admin": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2628,7 +2628,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2641,7 +2641,7 @@
         "history"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2656,7 +2656,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2671,7 +2671,7 @@
       "callSites": {
         "admin": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2687,7 +2687,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2703,7 +2703,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2720,7 +2720,7 @@
         "admin": 3,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2737,7 +2737,7 @@
         "admin": 1,
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2754,7 +2754,7 @@
         "admin": 2,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2770,7 +2770,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2786,7 +2786,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2801,7 +2801,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2814,7 +2814,7 @@
         "page"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2830,7 +2830,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2846,7 +2846,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2861,7 +2861,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2876,7 +2876,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2891,7 +2891,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2905,7 +2905,7 @@
         "entity"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2922,7 +2922,7 @@
         "app": 3,
         "admin": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2938,7 +2938,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2953,7 +2953,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2967,7 +2967,7 @@
         "entity"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2984,7 +2984,7 @@
         "admin": 5,
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -2998,7 +2998,7 @@
         "entity"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3014,7 +3014,7 @@
       "callSites": {
         "app": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3030,7 +3030,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3046,7 +3046,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3062,7 +3062,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3078,7 +3078,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3091,7 +3091,7 @@
         "admin"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3105,7 +3105,7 @@
         "book"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3121,7 +3121,7 @@
       "callSites": {
         "admin": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3134,7 +3134,7 @@
         "admin"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3150,7 +3150,7 @@
       "callSites": {
         "app": 2
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3166,7 +3166,7 @@
       "callSites": {
         "app": 5
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3182,7 +3182,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3196,7 +3196,7 @@
         "search"
       ],
       "callSites": {},
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3213,7 +3213,7 @@
         "admin": 1,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3229,7 +3229,7 @@
       "callSites": {
         "app": 3
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3245,7 +3245,7 @@
       "callSites": {
         "app": 4
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3262,7 +3262,7 @@
         "admin": 2,
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     },
     {
@@ -3278,7 +3278,7 @@
       "callSites": {
         "app": 1
       },
-      "classification": "semantic",
+      "classification": "accidental",
       "reviewer": null
     }
   ]

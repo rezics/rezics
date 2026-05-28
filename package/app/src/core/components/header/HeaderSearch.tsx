@@ -1,7 +1,6 @@
 import { realmDetailQuery } from "@rezics/api/realm/realm";
 import { userQueries } from "@rezics/api/user/user";
-import { accessibility_search } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
   AvatarFallback,
@@ -19,10 +18,6 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import { useIsMobile } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
 import { buildHeaderSubmitPath } from "./buildHeaderSubmitPath";
-
-const i18nMessages = {
-  accessibility_search,
-};
 
 type HeaderSearchScope =
   | { kind: "general" }
@@ -127,8 +122,8 @@ function useHeaderSearchPresentation(pathname: string) {
 }
 
 export function HeaderSearch({ className }: { className?: string }) {
-  const m = useMessage(i18nMessages);
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { t } = useTranslation(["common"]);
+const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isMobile = useIsMobile();
   const isHomePage = pathname === "/";
   const presentation = useHeaderSearchPresentation(pathname);
@@ -147,7 +142,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         size="icon"
         variant="ghost"
         className={cn("h-9 w-9 shrink-0 text-text-primary", className)}
-        aria-label={m.accessibility_search()}
+        aria-label={t("common:accessibility_search")}
         onClick={submit}
       >
         <SearchIcon className="h-5 w-5" />
@@ -198,7 +193,7 @@ export function HeaderSearch({ className }: { className?: string }) {
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder={presentation.placeholder}
-        aria-label={m.accessibility_search()}
+        aria-label={t("common:accessibility_search")}
         className="h-9 min-w-0 flex-1 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
       />
     </form>

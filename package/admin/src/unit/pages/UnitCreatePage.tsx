@@ -1,28 +1,6 @@
 import { unitMutations } from "@rezics/api/unit/unit.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
-import {
-  admin_auth_email_status,
-  admin_auth_user_id,
-  admin_token_creating,
-  admin_unit_create_description,
-  admin_unit_create_failed,
-  admin_unit_create_tip,
-  admin_unit_create_title,
-  admin_unit_default_language,
-  admin_unit_default_language_help,
-  admin_unit_initial_translation,
-  admin_unit_primary_user_help,
-  admin_unit_status_placeholder,
-  admin_unit_title_help,
-  admin_unit_type_placeholder,
-  common_back,
-  common_create,
-  common_language_code_placeholder,
-  common_summary,
-  common_title,
-  common_type,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -40,32 +18,9 @@ import React from "react";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 
-const i18nMessages = {
-  admin_auth_email_status,
-  admin_auth_user_id,
-  admin_token_creating,
-  admin_unit_create_description,
-  admin_unit_create_failed,
-  admin_unit_create_tip,
-  admin_unit_create_title,
-  admin_unit_default_language,
-  admin_unit_default_language_help,
-  admin_unit_initial_translation,
-  admin_unit_primary_user_help,
-  admin_unit_status_placeholder,
-  admin_unit_title_help,
-  admin_unit_type_placeholder,
-  common_back,
-  common_create,
-  common_language_code_placeholder,
-  common_summary,
-  common_title,
-  common_type,
-};
-
 export default function UnitCreatePage() {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["admin", "common"]);
+const navigate = useNavigate();
   const [error, setError] = React.useState<string | null>(null);
 
   const meQuery = useQuery(userQueries.me());
@@ -86,7 +41,7 @@ export default function UnitCreatePage() {
   const createMutation = unitMutations.useCreate({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : m.admin_unit_create_failed(),
+        err instanceof Error ? err.message : t("admin:unit_create_failed"),
       ),
   });
 
@@ -115,8 +70,8 @@ export default function UnitCreatePage() {
 
   return (
     <Page
-      title={m.admin_unit_create_title()}
-      description={m.admin_unit_create_description()}
+      title={t("admin:unit_create_title")}
+      description={t("admin:unit_create_description")}
     >
       <Card>
         <CardContent>
@@ -127,7 +82,7 @@ export default function UnitCreatePage() {
               render={(props) => (
                 <Link to="/unit" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  {m.common_back()}
+                  {t("common:back")}
                 </Link>
               )}
             />
@@ -147,7 +102,7 @@ export default function UnitCreatePage() {
           <form onSubmit={onSubmit}>
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-userId">{m.admin_auth_user_id()}</Label>
+                <Label htmlFor="ucpu-userId">{t("admin:auth_user_id")}</Label>
                 <Input
                   id="ucpu-userId"
                   value={userId}
@@ -155,62 +110,62 @@ export default function UnitCreatePage() {
                   required
                 />
                 <p className="text-xs text-text-secondary">
-                  {m.admin_unit_primary_user_help()}
+                  {t("admin:unit_primary_user_help")}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-type">{m.common_type()}</Label>
+                <Label htmlFor="ucpu-type">{t("common:type")}</Label>
                 <Input
                   id="ucpu-type"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                   required
-                  placeholder={m.admin_unit_type_placeholder()}
+                  placeholder={t("admin:unit_type_placeholder")}
                 />
               </div>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="ucpu-status">
-                  {m.admin_auth_email_status()}
+                  {t("admin:auth_email_status")}
                 </Label>
                 <Input
                   id="ucpu-status"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  placeholder={m.admin_unit_status_placeholder()}
+                  placeholder={t("admin:unit_status_placeholder")}
                 />
               </div>
               <div className="flex flex-col gap-1">
                 <Label htmlFor="ucpu-lang">
-                  {m.admin_unit_default_language()}
+                  {t("admin:unit_default_language")}
                 </Label>
                 <Input
                   id="ucpu-lang"
                   value={defaultLanguage}
                   onChange={(e) => setDefaultLanguage(e.target.value)}
-                  placeholder={m.common_language_code_placeholder()}
+                  placeholder={t("common:language_code_placeholder")}
                 />
                 <p className="text-xs text-text-secondary">
-                  {m.admin_unit_default_language_help()}
+                  {t("admin:unit_default_language_help")}
                 </p>
               </div>
 
               <Separator />
               <p className="text-xs font-semibold text-text-secondary">
-                {m.admin_unit_initial_translation()}
+                {t("admin:unit_initial_translation")}
               </p>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-tt">{m.common_title()}</Label>
+                <Label htmlFor="ucpu-tt">{t("common:title")}</Label>
                 <Input
                   id="ucpu-tt"
                   value={translationTitle}
                   onChange={(e) => setTranslationTitle(e.target.value)}
                 />
                 <p className="text-xs text-text-secondary">
-                  {m.admin_unit_title_help()}
+                  {t("admin:unit_title_help")}
                 </p>
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="ucpu-ts">{m.common_summary()}</Label>
+                <Label htmlFor="ucpu-ts">{t("common:summary")}</Label>
                 <textarea
                   id="ucpu-ts"
                   value={translationSummary}
@@ -224,12 +179,12 @@ export default function UnitCreatePage() {
                 <Button type="submit" disabled={createMutation.isPending}>
                   <SaveIcon className="size-4" />
                   {createMutation.isPending
-                    ? m.admin_token_creating()
-                    : m.common_create()}
+                    ? t("admin:token_creating")
+                    : t("common:create")}
                 </Button>
               </div>
               <p className="text-xs text-text-secondary">
-                {m.admin_unit_create_tip()}
+                {t("admin:unit_create_tip")}
               </p>
             </div>
           </form>

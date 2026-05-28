@@ -1,5 +1,4 @@
-import { common_search } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Input,
   Select,
@@ -9,10 +8,6 @@ import {
   SelectValue,
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
-
-const i18nMessages = {
-  common_search,
-};
 
 export interface FilterDropdownConfig {
   key: string;
@@ -39,12 +34,12 @@ export const FilterBar: FC<FilterBarProps> = ({
   onChange,
   className,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["common"]);
+return (
     <div className={`flex flex-wrap items-center gap-3 ${className ?? ""}`}>
       {config.showSearch && (
         <Input
-          placeholder={config.searchPlaceholder ?? m.common_search()}
+          placeholder={config.searchPlaceholder ?? t("common:search")}
           value={values.q ?? ""}
           onChange={(e) => onChange("q", e.target.value)}
           className="min-w-[180px] flex-1 md:flex-none h-9"

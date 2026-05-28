@@ -1,19 +1,10 @@
 import { shelfQueries } from "@rezics/api/shelf/shelf";
-import {
-  common_loading,
-  shelf_includes_book_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
-
-const i18nMessages = {
-  common_loading,
-  shelf_includes_book_title,
-};
 
 export function ShelfByBookPreview({
   title,
@@ -26,8 +17,8 @@ export function ShelfByBookPreview({
   workUnitId?: string;
   shelfNumber?: number;
 }) {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery({
+  const { t } = useTranslation(["common", "entity"]);
+const { data, isLoading, error } = useQuery({
     ...shelfQueries.list(
       workUnitId
         ? { containsWorkUnitId: workUnitId, limit: shelfNumber }
@@ -37,14 +28,14 @@ export function ShelfByBookPreview({
   });
 
   if (isLoading) {
-    return <div>{m.common_loading()}</div>;
+    return <div>{t("common:loading")}</div>;
   }
   if (error) return <QueryErrorDisplay error={error} />;
 
   return (
     <div className="@container">
       <ArrowForwardIcon size={16} to={`/shelf/book/${bookId}`}>
-        <AccentBarWithText text={m.shelf_includes_book_title({ title })} />
+        <AccentBarWithText text={t("entity:shelf_includes_book_title", { title })} />
       </ArrowForwardIcon>
       <div className="mb-4" />
       <HorizontalShelfCarousel

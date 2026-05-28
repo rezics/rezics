@@ -1,11 +1,7 @@
 import { bookKeys, bookQueries } from "@rezics/api/book/book";
 import { useSetTranslationSourceMutation } from "@rezics/api/unit/translation-source.mutations";
 import type { BookDTO } from "@rezics/contract";
-import {
-  page_book_edit_info_translation_set_source_label,
-  page_book_edit_info_translation_set_source_none,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Select,
   SelectContent,
@@ -17,11 +13,6 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
 import { getBookTitle } from "@/shared/utils/translation-helpers";
-
-const i18nMessages = {
-  page_book_edit_info_translation_set_source_label,
-  page_book_edit_info_translation_set_source_none,
-};
 
 const NO_SOURCE = "__none__";
 
@@ -39,8 +30,8 @@ export interface SetSourceReleaseControlProps {
 export const SetSourceReleaseControl: React.FC<
   SetSourceReleaseControlProps
 > = ({ book, language, currentSourceReleaseUnitId }) => {
-  const m = useMessage(i18nMessages);
-  const canonicalWorkUnitId = releaseWorkUnitId(book) ?? book.unitId;
+  const { t } = useTranslation(["page"]);
+const canonicalWorkUnitId = releaseWorkUnitId(book) ?? book.unitId;
   const { data: siblings } = useQuery({
     ...bookQueries.list({ workUnitId: canonicalWorkUnitId, limit: 50 }),
     enabled: Boolean(book.unitId),
@@ -57,7 +48,7 @@ export const SetSourceReleaseControl: React.FC<
   return (
     <div className="flex flex-row items-center gap-2 flex-wrap">
       <span className="text-xs text-text-secondary">
-        {m.page_book_edit_info_translation_set_source_label()}
+        {t("page:book_edit_info_translation_set_source_label")}
       </span>
       <Select
         value={currentSourceReleaseUnitId ?? NO_SOURCE}
@@ -76,7 +67,7 @@ export const SetSourceReleaseControl: React.FC<
         <SelectContent>
           <SelectItem value={NO_SOURCE}>
             <span className="text-text-secondary">
-              {m.page_book_edit_info_translation_set_source_none()}
+              {t("page:book_edit_info_translation_set_source_none")}
             </span>
           </SelectItem>
           {candidates.map((b) => (

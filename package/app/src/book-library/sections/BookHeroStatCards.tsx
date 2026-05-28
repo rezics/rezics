@@ -2,12 +2,7 @@ import { postQueries } from "@rezics/api/post/post";
 import { shelfQueries } from "@rezics/api/shelf/shelf";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { PostKind } from "@rezics/contract";
-import {
-  book_hero_stat_reviews,
-  book_hero_stat_shelves,
-  book_hero_stat_tags,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import {
   BookMarked as CollectionsBookmarkOutlined,
@@ -16,12 +11,6 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
-
-const i18nMessages = {
-  book_hero_stat_reviews,
-  book_hero_stat_shelves,
-  book_hero_stat_tags,
-};
 
 interface BookHeroStatCardsProps {
   bookId: string;
@@ -53,8 +42,8 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
   workUnitId,
   cardKeys = DEFAULT_STAT_CARD_KEYS,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data: reviewData } = useQuery({
+  const { t } = useTranslation(["book"]);
+const { data: reviewData } = useQuery({
     ...postQueries.list(
       workUnitId
         ? {
@@ -97,21 +86,21 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
       key: "reviews",
       icon: <RateReviewOutlined size={36} />,
       count: reviewCount,
-      label: m.book_hero_stat_reviews(),
+      label: t("book:hero_stat_reviews"),
       to: "/review/book/$bookId",
     },
     {
       key: "shelves",
       icon: <CollectionsBookmarkOutlined size={36} />,
       count: shelfCount,
-      label: m.book_hero_stat_shelves(),
+      label: t("book:hero_stat_shelves"),
       to: "/shelf/book/$bookId",
     },
     {
       key: "tags",
       icon: <LocalOfferOutlined size={36} />,
       count: tagCount,
-      label: m.book_hero_stat_tags(),
+      label: t("book:hero_stat_tags"),
       to: "/tag/book/$bookId",
     },
   ];

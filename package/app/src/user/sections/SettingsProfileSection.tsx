@@ -5,20 +5,7 @@ import {
   markdownContentDoc,
   type UpdateUser,
 } from "@rezics/contract";
-import {
-  common_description,
-  common_username,
-  entity_avatar_url,
-  settings_profile_avatar_placeholder,
-  settings_profile_bio,
-  settings_profile_bio_placeholder,
-  settings_profile_description,
-  settings_profile_display_name,
-  settings_profile_save,
-  settings_profile_title,
-  settings_profile_updated,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -37,20 +24,6 @@ import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { SettingsSection } from "@/user/components/SettingsSection";
 import { useRequireAuth } from "@/user/pages/useAuth";
 
-const i18nMessages = {
-  common_description,
-  common_username,
-  entity_avatar_url,
-  settings_profile_avatar_placeholder,
-  settings_profile_bio,
-  settings_profile_bio_placeholder,
-  settings_profile_description,
-  settings_profile_display_name,
-  settings_profile_save,
-  settings_profile_title,
-  settings_profile_updated,
-};
-
 type SettingsProfileFormData = Omit<
   UpdateUser,
   "avatar" | "bio" | "description" | "name"
@@ -62,8 +35,8 @@ type SettingsProfileFormData = Omit<
 };
 
 export const SettingsProfileSection: FC = () => {
-  const m = useMessage(i18nMessages);
-  useRequireAuth();
+  const { t } = useTranslation(["common", "entity", "settings"]);
+useRequireAuth();
 
   const { data: user, isLoading } = useQuery(userQueries.me());
   const [formData, setFormData] = useState<SettingsProfileFormData>({
@@ -120,12 +93,12 @@ export const SettingsProfileSection: FC = () => {
   return (
     <form onSubmit={handleSubmit}>
       <SettingsSection
-        title={m.settings_profile_title()}
-        description={m.settings_profile_description()}
+        title={t("settings:profile_title")}
+        description={t("settings:profile_description")}
       >
         {success && (
           <Alert className="mb-4 text-success-text">
-            <AlertDescription>{m.settings_profile_updated()}</AlertDescription>
+            <AlertDescription>{t("settings:profile_updated")}</AlertDescription>
           </Alert>
         )}
         {updateMe.error && (
@@ -145,12 +118,12 @@ export const SettingsProfileSection: FC = () => {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 flex flex-col gap-1.5">
-            <Label htmlFor="avatar-url">{m.entity_avatar_url()}</Label>
+            <Label htmlFor="avatar-url">{t("entity:avatar_url")}</Label>
             <Input
               id="avatar-url"
               value={formData.avatar}
               onChange={(e) => handleChange("avatar", e.target.value)}
-              placeholder={m.settings_profile_avatar_placeholder()}
+              placeholder={t("settings:profile_avatar_placeholder")}
             />
           </div>
         </div>
@@ -158,7 +131,7 @@ export const SettingsProfileSection: FC = () => {
         <div className="space-y-6">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="display-name">
-              {m.settings_profile_display_name()}
+              {t("settings:profile_display_name")}
             </Label>
             <Input
               id="display-name"
@@ -171,27 +144,27 @@ export const SettingsProfileSection: FC = () => {
           {user?.slug && (
             <div>
               <p className="text-xs text-text-secondary">
-                {m.common_username()}
+                {t("common:username")}
               </p>
               <p className="text-sm mt-1">@{user.slug}</p>
             </div>
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="bio">{m.settings_profile_bio()}</Label>
+            <Label htmlFor="bio">{t("settings:profile_bio")}</Label>
             <textarea
               id="bio"
               value={formData.bio}
               onChange={(e) => handleChange("bio", e.target.value)}
               rows={2}
-              placeholder={m.settings_profile_bio_placeholder()}
+              placeholder={t("settings:profile_bio_placeholder")}
               className="w-full rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-fill"
             />
           </div>
 
           <div>
             <p className="text-xs text-text-secondary mb-2 block">
-              {m.common_description()}
+              {t("common:description")}
             </p>
             <RezicsMarkdownEditor
               value={formData.description ?? ""}
@@ -208,7 +181,7 @@ export const SettingsProfileSection: FC = () => {
           ) : (
             <SaveIcon className="w-4 h-4 mr-2" />
           )}
-          {m.settings_profile_save()}
+          {t("settings:profile_save")}
         </Button>
       </div>
     </form>

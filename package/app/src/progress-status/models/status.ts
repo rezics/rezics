@@ -1,12 +1,4 @@
 import type { UserUnitProgressStatus } from "@rezics/contract";
-import {
-  book_hero_actions_dropped,
-  book_hero_actions_paused,
-  book_hero_actions_read,
-  book_hero_actions_reading,
-  book_hero_actions_want_to_read,
-} from "@rezics/i18n/messages";
-
 export type ReadStatus = UserUnitProgressStatus;
 
 export const READ_STATUS_VALUES = [

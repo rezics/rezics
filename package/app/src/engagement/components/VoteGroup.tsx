@@ -1,6 +1,5 @@
 import { useReactionData } from "@rezics/api/reaction/reaction";
-import { tag_downvote, tag_upvote } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import type React from "react";
@@ -8,11 +7,6 @@ import { cn } from "@/shared/utils/css-util";
 import { useVoteController } from "../hooks/useVoteController";
 import type { EngagementSize } from "../types";
 import { useReactionBarContext } from "./ReactionBarContext";
-
-const i18nMessages = {
-  tag_downvote,
-  tag_upvote,
-};
 
 export type VoteGroupProps = {
   targetUnitId: string;
@@ -54,8 +48,8 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
   targetUnitId,
   size: sizeProp,
 }) => {
-  const m = useMessage(i18nMessages);
-  const ctx = useReactionBarContext();
+  const { t } = useTranslation(["community"]);
+const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const variant = ctx.variant;
   const { summary, userReactions, isHydrated } = useReactionData(targetUnitId);
@@ -107,7 +101,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
         variant="ghost"
         size="icon"
         onClick={handleUp}
-        aria-label={m.tag_upvote()}
+        aria-label={t("community:tag_upvote")}
         className={cn(
           buttonSizeClass,
           "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",
@@ -133,7 +127,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
         variant="ghost"
         size="icon"
         onClick={handleDown}
-        aria-label={m.tag_downvote()}
+        aria-label={t("community:tag_downvote")}
         className={cn(
           buttonSizeClass,
           "h-auto w-auto hover:bg-black/10 dark:hover:bg-white/10",

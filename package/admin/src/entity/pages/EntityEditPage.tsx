@@ -6,41 +6,7 @@ import {
   markdownContentDoc,
   validateSlug,
 } from "@rezics/contract";
-import {
-  admin_entity_avatar_placeholder,
-  admin_entity_avatar_url,
-  admin_entity_edit_description,
-  admin_entity_edit_title,
-  admin_entity_failed_load,
-  admin_entity_remove_translation,
-  admin_entity_slug_help_disabled,
-  admin_entity_slug_help_enabled,
-  admin_entity_slug_invalid,
-  admin_entity_slug_invalid_short,
-  admin_entity_slug_placeholder,
-  admin_entity_slug_requires_verified,
-  admin_entity_translation_index,
-  admin_entity_translations_empty,
-  admin_entity_unverified_slug_disabled,
-  admin_entity_verified,
-  admin_entity_verified_slug_allowed,
-  admin_unit_translations,
-  admin_unit_update_failed,
-  book_description,
-  common_add_translation,
-  common_back,
-  common_language,
-  common_language_code_placeholder,
-  common_none,
-  common_save,
-  common_saving,
-  common_slug,
-  common_subtitle,
-  common_summary,
-  common_title,
-  common_type,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -64,41 +30,6 @@ import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/entity/$unitId";
 import { Link } from "@/shared/ui/link";
 
-const i18nMessages = {
-  admin_entity_avatar_placeholder,
-  admin_entity_avatar_url,
-  admin_entity_edit_description,
-  admin_entity_edit_title,
-  admin_entity_failed_load,
-  admin_entity_remove_translation,
-  admin_entity_slug_help_disabled,
-  admin_entity_slug_help_enabled,
-  admin_entity_slug_invalid,
-  admin_entity_slug_invalid_short,
-  admin_entity_slug_placeholder,
-  admin_entity_slug_requires_verified,
-  admin_entity_translation_index,
-  admin_entity_translations_empty,
-  admin_entity_unverified_slug_disabled,
-  admin_entity_verified,
-  admin_entity_verified_slug_allowed,
-  admin_unit_translations,
-  admin_unit_update_failed,
-  book_description,
-  common_add_translation,
-  common_back,
-  common_language,
-  common_language_code_placeholder,
-  common_none,
-  common_save,
-  common_saving,
-  common_slug,
-  common_subtitle,
-  common_summary,
-  common_title,
-  common_type,
-};
-
 interface TranslationDraft {
   _draftId: string;
   language: string;
@@ -119,15 +50,15 @@ function createTranslationDraft(
 }
 
 export default function EntityEditPage() {
-  const m = useMessage(i18nMessages);
-  const { unitId } = Route.useParams();
+  const { t } = useTranslation(["admin", "book", "common"]);
+const { unitId } = Route.useParams();
   const entityQuery = useEntity(unitId);
   const [error, setError] = React.useState<string | null>(null);
 
   const updateMutation = useUpdateEntity({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : m.admin_unit_update_failed(),
+        err instanceof Error ? err.message : t("admin:unit_update_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -204,11 +135,11 @@ export default function EntityEditPage() {
 
     const wantsSlug = slugInput.trim() !== (entityQuery.data?.slug ?? "");
     if (wantsSlug && slugInput.trim() && !verified) {
-      setError(m.admin_entity_slug_requires_verified());
+      setError(t("admin:entity_slug_requires_verified"));
       return;
     }
     if (wantsSlug && slugInput.trim() && !slugValidation.ok) {
-      setError(m.admin_entity_slug_invalid({ reason: slugError ?? "" }));
+      setError(t("admin:entity_slug_invalid", { reason: slugError ?? "" }));
       return;
     }
 
@@ -255,7 +186,7 @@ export default function EntityEditPage() {
 
   if (entityQuery.isLoading) {
     return (
-      <Page title={m.admin_entity_edit_title()} description={unitId}>
+      <Page title={t("admin:entity_edit_title")} description={unitId}>
         <Card>
           <CardContent>
             <div className="flex justify-center py-12">
@@ -269,12 +200,12 @@ export default function EntityEditPage() {
 
   if (entityQuery.isError || !entityQuery.data) {
     return (
-      <Page title={m.admin_entity_edit_title()} description={unitId}>
+      <Page title={t("admin:entity_edit_title")} description={unitId}>
         <Card>
           <CardContent>
             <Alert>
               <AlertDescription className="text-error-text">
-                {m.admin_entity_failed_load()}
+                {t("admin:entity_failed_load")}
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -285,8 +216,8 @@ export default function EntityEditPage() {
 
   return (
     <Page
-      title={m.admin_entity_edit_title()}
-      description={m.admin_entity_edit_description({ unitId })}
+      title={t("admin:entity_edit_title")}
+      description={t("admin:entity_edit_description", { unitId })}
     >
       <Card>
         <CardContent>
@@ -297,7 +228,7 @@ export default function EntityEditPage() {
               render={(props) => (
                 <Link to="/entity" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  {m.common_back()}
+                  {t("common:back")}
                 </Link>
               )}
             />
@@ -318,14 +249,14 @@ export default function EntityEditPage() {
             <div className="flex flex-col gap-6">
               <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="entity-kind">{m.common_type()}</Label>
+                  <Label htmlFor="entity-kind">{t("common:type")}</Label>
                   <select
                     id="entity-kind"
                     value={kind}
                     onChange={(e) => setKind(e.target.value as EntityKind | "")}
                     className="h-9 rounded-md border border-border-whisper bg-transparent px-2 text-sm"
                   >
-                    <option value="">{m.common_none()}</option>
+                    <option value="">{t("common:none")}</option>
                     {entityKinds.map((k) => (
                       <option key={k} value={k}>
                         {k}
@@ -334,7 +265,7 @@ export default function EntityEditPage() {
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label>{m.admin_entity_verified()}</Label>
+                  <Label>{t("admin:entity_verified")}</Label>
                   <div className="flex items-center gap-3 h-9">
                     <Checkbox
                       checked={verified}
@@ -343,39 +274,39 @@ export default function EntityEditPage() {
                     />
                     <span className="text-sm text-text-secondary">
                       {verified
-                        ? m.admin_entity_verified_slug_allowed()
-                        : m.admin_entity_unverified_slug_disabled()}
+                        ? t("admin:entity_verified_slug_allowed")
+                        : t("admin:entity_unverified_slug_disabled")}
                     </span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
                   <Label htmlFor="entity-avatar">
-                    {m.admin_entity_avatar_url()}
+                    {t("admin:entity_avatar_url")}
                   </Label>
                   <Input
                     id="entity-avatar"
                     value={avatar}
                     onChange={(e) => setAvatar(e.target.value)}
-                    placeholder={m.admin_entity_avatar_placeholder()}
+                    placeholder={t("admin:entity_avatar_placeholder")}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <Label htmlFor="entity-slug">{m.common_slug()}</Label>
+                  <Label htmlFor="entity-slug">{t("common:slug")}</Label>
                   <Input
                     id="entity-slug"
                     value={slugInput}
                     onChange={(e) => setSlugInput(e.target.value)}
-                    placeholder={m.admin_entity_slug_placeholder()}
+                    placeholder={t("admin:entity_slug_placeholder")}
                     disabled={!verified}
                   />
                   <p className="text-xs text-text-secondary">
                     {verified
-                      ? m.admin_entity_slug_help_enabled()
-                      : m.admin_entity_slug_help_disabled()}
+                      ? t("admin:entity_slug_help_enabled")
+                      : t("admin:entity_slug_help_disabled")}
                   </p>
                   {slugInput.trim() && !slugValidation.ok ? (
                     <p className="text-xs text-error-text">
-                      {m.admin_entity_slug_invalid_short({
+                      {t("admin:entity_slug_invalid_short", {
                         reason: slugValidation.reason,
                       })}
                     </p>
@@ -388,7 +319,7 @@ export default function EntityEditPage() {
               <section className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-semibold">
-                    {m.admin_unit_translations()}
+                    {t("admin:unit_translations")}
                   </h3>
                   <Button
                     type="button"
@@ -397,12 +328,12 @@ export default function EntityEditPage() {
                     onClick={handleAddTranslation}
                   >
                     <AddIcon className="size-4" />
-                    {m.common_add_translation()}
+                    {t("common:add_translation")}
                   </Button>
                 </div>
                 {translations.length === 0 ? (
                   <p className="text-sm text-text-secondary">
-                    {m.admin_entity_translations_empty()}
+                    {t("admin:entity_translations_empty")}
                   </p>
                 ) : (
                   translations.map((tr, index) =>
@@ -413,7 +344,7 @@ export default function EntityEditPage() {
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-sm font-medium text-text-secondary">
-                            {m.admin_entity_translation_index({
+                            {t("admin:entity_translation_index", {
                               index: String(index + 1),
                             })}
                           </span>
@@ -421,7 +352,7 @@ export default function EntityEditPage() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            aria-label={m.admin_entity_remove_translation()}
+                            aria-label={t("admin:entity_remove_translation")}
                             onClick={() => handleRemoveTranslation(index)}
                           >
                             <TrashIcon className="size-4 text-text-secondary" />
@@ -429,7 +360,7 @@ export default function EntityEditPage() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
                           <div className="flex flex-col gap-1.5">
-                            <Label>{m.common_language()}</Label>
+                            <Label>{t("common:language")}</Label>
                             <Input
                               value={tr.language}
                               onChange={(e) =>
@@ -439,11 +370,11 @@ export default function EntityEditPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder={m.common_language_code_placeholder()}
+                              placeholder={t("common:language_code_placeholder")}
                             />
                           </div>
                           <div className="flex flex-col gap-1.5 sm:col-span-2">
-                            <Label>{m.common_title()}</Label>
+                            <Label>{t("common:title")}</Label>
                             <Input
                               value={tr.title ?? ""}
                               onChange={(e) =>
@@ -456,7 +387,7 @@ export default function EntityEditPage() {
                             />
                           </div>
                           <div className="flex flex-col gap-1.5 sm:col-span-3">
-                            <Label>{m.common_subtitle()}</Label>
+                            <Label>{t("common:subtitle")}</Label>
                             <Input
                               value={tr.subtitle ?? ""}
                               onChange={(e) =>
@@ -469,7 +400,7 @@ export default function EntityEditPage() {
                             />
                           </div>
                           <div className="flex flex-col gap-1.5 sm:col-span-3">
-                            <Label>{m.common_summary()}</Label>
+                            <Label>{t("common:summary")}</Label>
                             <textarea
                               rows={2}
                               value={tr.summary ?? ""}
@@ -484,7 +415,7 @@ export default function EntityEditPage() {
                             />
                           </div>
                           <div className="flex flex-col gap-1.5 sm:col-span-3">
-                            <Label>{m.book_description()}</Label>
+                            <Label>{t("book:description")}</Label>
                             <textarea
                               rows={4}
                               value={tr.description ?? ""}
@@ -517,8 +448,8 @@ export default function EntityEditPage() {
                 >
                   <SaveIcon className="size-4" />
                   {updateMutation.isPending
-                    ? m.common_saving()
-                    : m.common_save()}
+                    ? t("common:saving")
+                    : t("common:save")}
                 </Button>
               </div>
             </div>

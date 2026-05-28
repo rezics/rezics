@@ -6,16 +6,7 @@ import {
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
 import { PostKind, UnitType } from "@rezics/contract";
-import {
-  profile_search_content_placeholder,
-  profile_unit_tabs_label,
-  search_category_books,
-  search_category_excerpts,
-  search_category_remarks,
-  search_category_reviews,
-  search_category_shelves,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -37,16 +28,6 @@ import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
 
-const i18nMessages = {
-  profile_search_content_placeholder,
-  profile_unit_tabs_label,
-  search_category_books,
-  search_category_excerpts,
-  search_category_remarks,
-  search_category_reviews,
-  search_category_shelves,
-};
-
 export interface UserUnitsPageProps {
   userId: string;
 }
@@ -66,8 +47,8 @@ type TabKey = "shelf" | "review" | "remark" | "excerpt" | "book";
 const EXTERNAL_PAGE_SIZE = 50;
 
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
-  const m = useMessage(i18nMessages);
-  const ref = useRef<UniversalPaginatorHandle>(null);
+  const { t } = useTranslation(["search", "settings"]);
+const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
 
   const [tab, setTab] = useState<TabKey>("shelf");
@@ -303,29 +284,29 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
-          placeholder={m.profile_search_content_placeholder()}
+          placeholder={t("settings:profile_search_content_placeholder")}
         />
         <div className="border-b border-border-whisper mt-4 mb-4">
           <Tabs
             value={tab}
             onValueChange={(v) => setTab(v as TabKey)}
-            aria-label={m.profile_unit_tabs_label()}
+            aria-label={t("settings:profile_unit_tabs_label")}
           >
             <TabsList>
               <TabsTrigger value="shelf">
-                {m.search_category_shelves()}
+                {t("search:category_shelves")}
               </TabsTrigger>
               <TabsTrigger value="review">
-                {m.search_category_reviews()}
+                {t("search:category_reviews")}
               </TabsTrigger>
               <TabsTrigger value="book">
-                {m.search_category_books()}
+                {t("search:category_books")}
               </TabsTrigger>
               <TabsTrigger value="remark">
-                {m.search_category_remarks()}
+                {t("search:category_remarks")}
               </TabsTrigger>
               <TabsTrigger value="excerpt">
-                {m.search_category_excerpts()}
+                {t("search:category_excerpts")}
               </TabsTrigger>
             </TabsList>
           </Tabs>

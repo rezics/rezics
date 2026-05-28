@@ -1,11 +1,5 @@
-import { game_library_title } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
-
-const i18nMessages = {
-  game_library_title,
-};
-
+import { useTranslation } from "@rezics/i18n/react";
 export const GameHomePage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  return <div>{m.game_library_title()}</div>;
+  const { t } = useTranslation(["common"]);
+return <div>{t("common:game_library_title")}</div>;
 };

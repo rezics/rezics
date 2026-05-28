@@ -1,12 +1,4 @@
-import {
-  admin_auth_email_status,
-  admin_auth_user_role,
-  admin_nav_users,
-  admin_story_invite,
-  admin_story_search_email_placeholder,
-  common_email,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
@@ -44,15 +36,6 @@ const rows = [
   { id: 4, email: "dora@rezics.local", role: "reader", status: "suspended" },
 ];
 
-const i18nMessages = {
-  admin_auth_email_status,
-  admin_auth_user_role,
-  admin_nav_users,
-  admin_story_invite,
-  admin_story_search_email_placeholder,
-  common_email,
-};
-
 function statusVariant(status: string) {
   switch (status) {
     case "active":
@@ -65,24 +48,23 @@ function statusVariant(status: string) {
 }
 
 function UsersTablePreview() {
-  const m = useMessage(i18nMessages);
-
-  return (
+  const { t } = useTranslation(["admin", "common"]);
+return (
     <div className="flex flex-col gap-6 max-w-[720px]">
       <div className="flex flex-row gap-4 items-center">
-        <h2 className="flex-1 text-2xl font-bold">{m.admin_nav_users()}</h2>
+        <h2 className="flex-1 text-2xl font-bold">{t("admin:nav_users")}</h2>
         <Input
-          placeholder={m.admin_story_search_email_placeholder()}
+          placeholder={t("admin:story_search_email_placeholder")}
           className="min-w-[220px] h-8"
         />
-        <Button size="sm">{m.admin_story_invite()}</Button>
+        <Button size="sm">{t("admin:story_invite")}</Button>
       </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{m.common_email()}</TableHead>
-            <TableHead>{m.admin_auth_user_role()}</TableHead>
-            <TableHead>{m.admin_auth_email_status()}</TableHead>
+            <TableHead>{t("common:email")}</TableHead>
+            <TableHead>{t("admin:auth_user_role")}</TableHead>
+            <TableHead>{t("admin:auth_email_status")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

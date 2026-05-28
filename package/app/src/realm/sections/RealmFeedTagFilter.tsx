@@ -1,5 +1,5 @@
 import type { TagTreeNode } from "@rezics/contract";
-import { useLocale } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useMemo } from "react";

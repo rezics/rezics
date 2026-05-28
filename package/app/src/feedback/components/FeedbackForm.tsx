@@ -1,20 +1,6 @@
 import { useCreateFeedbackMutation } from "@rezics/api/feedback/feedback.mutations";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
-import {
-  common_reset,
-  common_submitting,
-  feedback_content_label,
-  feedback_content_placeholder,
-  feedback_content_required,
-  feedback_submit,
-  feedback_submit_failed,
-  feedback_type_bug,
-  feedback_type_feature,
-  feedback_type_label,
-  feedback_type_other,
-  feedback_type_report,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Input,
@@ -28,21 +14,6 @@ import {
 import { useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useState } from "react";
-
-const i18nMessages = {
-  common_reset,
-  common_submitting,
-  feedback_content_label,
-  feedback_content_placeholder,
-  feedback_content_required,
-  feedback_submit,
-  feedback_submit_failed,
-  feedback_type_label,
-  feedback_type_bug,
-  feedback_type_feature,
-  feedback_type_other,
-  feedback_type_report,
-};
 
 type FeedbackFormProps = {
   defaultValues?: Partial<CreateFeedbackInput>;
@@ -63,8 +34,8 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   defaultValues,
   onSubmitted,
 }) => {
-  const m = useMessage(i18nMessages);
-  const locationKey = useRouterState({
+  const { t } = useTranslation(["common", "community"]);
+const locationKey = useRouterState({
     select: (s) => `${s.location.pathname}${s.location.search ?? ""}`,
   });
   const [form, setForm] = useState<CreateFeedbackInput>({
@@ -120,7 +91,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <Label htmlFor="feedback-type">{m.feedback_type_label()}</Label>
+          <Label htmlFor="feedback-type">{t("community:feedback_type_label")}</Label>
           <Select
             value={form.type ?? "BUG"}
             onValueChange={(v) => handleChange("type", v)}
@@ -139,10 +110,10 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label htmlFor="feedback-content">{m.feedback_content_label()}</Label>
+          <Label htmlFor="feedback-content">{t("community:feedback_content_label")}</Label>
           <textarea
             id="feedback-content"
-            placeholder={m.feedback_content_placeholder()}
+            placeholder={t("community:feedback_content_placeholder")}
             rows={4}
             value={form.content}
             onChange={(e) => handleChange("content", e.target.value)}
@@ -154,23 +125,23 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
           />
           {errors.content && (
             <p className="text-sm text-error-text">
-              {m.feedback_content_required()}
+              {t("community:feedback_content_required")}
             </p>
           )}
         </div>
 
         {createMutation.status === "error" && (
-          <p className="text-error-text">{m.feedback_submit_failed()}</p>
+          <p className="text-error-text">{t("community:feedback_submit_failed")}</p>
         )}
 
         <div className="flex flex-row gap-4 justify-end">
           <Button variant="outline" type="button" onClick={resetForm}>
-            {m.common_reset()}
+            {t("common:reset")}
           </Button>
           <Button type="submit" disabled={createMutation.status === "pending"}>
             {createMutation.status === "pending"
-              ? m.common_submitting()
-              : m.feedback_submit()}
+              ? t("common:submitting")
+              : t("community:feedback_submit")}
           </Button>
         </div>
       </div>

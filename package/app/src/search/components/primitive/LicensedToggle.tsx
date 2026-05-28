@@ -1,12 +1,7 @@
-import { search_tooltips_licensed } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Checkbox } from "@rezics/ui/shadcn";
 import type React from "react";
 import { IsLicensedInfo } from "@/book-edit/components/Metadata/BookMetadataEditor";
-
-const i18nMessages = {
-  search_tooltips_licensed,
-};
 
 export type LicensedToggleProps = {
   value: boolean | undefined;
@@ -17,15 +12,15 @@ export const LicensedToggle: React.FC<LicensedToggleProps> = ({
   value,
   onChange,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["search"]);
+return (
     <div className="m-0 inline-flex items-center gap-2">
       <Checkbox
         checked={!!value}
         onCheckedChange={(checked) => onChange(checked === true || undefined)}
-        aria-label={m.search_tooltips_licensed()}
+        aria-label={t("search:tooltips_licensed")}
       />
-      <IsLicensedInfo tooltipTitle={m.search_tooltips_licensed()} />
+      <IsLicensedInfo tooltipTitle={t("search:tooltips_licensed")} />
     </div>
   );
 };

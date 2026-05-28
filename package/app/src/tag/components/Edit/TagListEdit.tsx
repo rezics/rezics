@@ -4,19 +4,7 @@ import {
   useDetachTagMutation,
 } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import {
-  common_add,
-  common_error,
-  common_loading,
-  common_search_failed,
-  common_unlink,
-  shelf_view_list,
-  tag_empty,
-  tag_no_matching,
-  tag_search_and_add,
-  tag_search_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -29,19 +17,6 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { SingleTagChip } from "../TagList";
-
-const i18nMessages = {
-  common_add,
-  common_error,
-  common_loading,
-  common_search_failed,
-  common_unlink,
-  shelf_view_list,
-  tag_empty,
-  tag_no_matching,
-  tag_search_and_add,
-  tag_search_placeholder,
-};
 
 /**
  * TagListEdit - now uses UnitTagDTO (scored tags) instead of old TagDetailDTO.
@@ -56,8 +31,8 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   objectUnitId,
   className,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error, refetch } = useQuery(
+  const { t } = useTranslation(["common", "community", "entity"]);
+const { data, isLoading, error, refetch } = useQuery(
     tagQueries.forUnit(objectUnitId),
   );
   const list: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
@@ -121,7 +96,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
                 onClick={() => onDetach(t)}
                 disabled={detachMutation.isPending}
               >
-                {m.common_unlink()}
+                {t("common:unlink")}
               </Button>
             </div>
           </div>
@@ -141,23 +116,23 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
             if (v) setView(v as "list" | "grouped");
           }}
         >
-          <ToggleGroupItem value="list">{m.shelf_view_list()}</ToggleGroupItem>
+          <ToggleGroupItem value="list">{t("entity:shelf_view_list")}</ToggleGroupItem>
         </ToggleGroup>
       </div>
 
       {isLoading && (
         <div className="flex items-center gap-2 text-sm text-text-secondary">
-          <Spinner size="sm" /> {m.common_loading()}
+          <Spinner size="sm" /> {t("common:loading")}
         </div>
       )}
       {error && (
         <div className="text-sm text-error-text">
-          {m.common_error()}: {String((error as any)?.message ?? error)}
+          {t("common:error")}: {String((error as any)?.message ?? error)}
         </div>
       )}
 
       {!isLoading && !error && list.length === 0 && (
-        <div className="text-sm text-text-secondary">{m.tag_empty()}</div>
+        <div className="text-sm text-text-secondary">{t("community:tag_empty")}</div>
       )}
 
       {!isLoading && !error && renderListView()}
@@ -165,11 +140,11 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
       {/* Search and attach existing tags */}
       <div className="mt-8 pt-4 border-t border-border-whisper">
         <div className="text-sm font-semibold text-text-primary mb-2">
-          {m.tag_search_and_add()}
+          {t("community:tag_search_and_add")}
         </div>
         <div className="flex items-center gap-2 mb-3">
           <Input
-            placeholder={m.tag_search_placeholder()}
+            placeholder={t("community:tag_search_placeholder")}
             className="w-full"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -178,13 +153,13 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
         </div>
         {searchError && (
           <div className="text-xs text-error-text mb-2">
-            {m.common_search_failed()}:{" "}
+            {t("common:search_failed")}:{" "}
             {String((searchError as any)?.message ?? searchError)}
           </div>
         )}
         {searchTerm && !isSearching && searchResults.length === 0 && (
           <div className="text-xs text-text-secondary">
-            {m.tag_no_matching()}
+            {t("community:tag_no_matching")}
           </div>
         )}
         {searchResults.length > 0 && (
@@ -201,7 +176,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
                   onClick={() => handleAttach(t.tagUnitId)}
                   disabled={attachMutation.isPending}
                 >
-                  {m.common_add()}
+                  {t("common:add")}
                 </Button>
               </div>
             ))}

@@ -1,5 +1,4 @@
-import { auth_login, auth_register } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -8,14 +7,9 @@ import { LoginModal } from "@/user/pages/LoginPage";
 import { RegisterModal } from "@/user/pages/RegisterPage";
 import { MoreHorizMenu } from "../../components/header/MoreHorizMenu";
 
-const i18nMessages = {
-  auth_login,
-  auth_register,
-};
-
 const LoginPrompt = () => {
-  const m = useMessage(i18nMessages);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const { t } = useTranslation(["auth"]);
+const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const isMobile = useIsMobile();
 
@@ -26,7 +20,7 @@ const LoginPrompt = () => {
         className="h-10 rounded-full border border-border-whisper bg-transparent px-4"
         render={(props) => (
           <Link to="/login" {...props}>
-            {m.auth_login()}
+            {t("auth:login")}
           </Link>
         )}
       />
@@ -40,14 +34,14 @@ const LoginPrompt = () => {
         className="h-10 rounded-full border border-border-whisper bg-transparent px-4"
         onClick={() => setLoginModalOpen(true)}
       >
-        {m.auth_login()}
+        {t("auth:login")}
       </Button>
       <Button
         variant="outline"
         className="h-10 rounded-full border-border-whisper bg-transparent px-4"
         onClick={() => setRegisterModalOpen(true)}
       >
-        {m.auth_register()}
+        {t("auth:register")}
       </Button>
 
       <LoginModal

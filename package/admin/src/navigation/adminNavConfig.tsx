@@ -1,27 +1,4 @@
 import {
-  admin_nav_auth,
-  admin_nav_auth_email_templates,
-  admin_nav_auth_jwt_services,
-  admin_nav_auth_status,
-  admin_nav_authority,
-  admin_nav_books,
-  admin_nav_create,
-  admin_nav_dashboard,
-  admin_nav_echokv,
-  admin_nav_entities,
-  admin_nav_jwt_services,
-  admin_nav_low_score,
-  admin_nav_meili,
-  admin_nav_meili_search,
-  admin_nav_realms,
-  admin_nav_sessions,
-  admin_nav_settings,
-  admin_nav_shelves,
-  admin_nav_token,
-  admin_nav_units,
-  admin_nav_users,
-} from "@rezics/i18n/messages";
-import {
   Activity as ActivityIcon,
   GitMerge as AccountTreeIcon,
   Wrench as BuildIcon,
@@ -45,30 +22,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 
-const i18nMessages = {
-  admin_nav_auth,
-  admin_nav_auth_email_templates,
-  admin_nav_auth_jwt_services,
-  admin_nav_auth_status,
-  admin_nav_authority,
-  admin_nav_books,
-  admin_nav_create,
-  admin_nav_dashboard,
-  admin_nav_echokv,
-  admin_nav_entities,
-  admin_nav_jwt_services,
-  admin_nav_low_score,
-  admin_nav_meili,
-  admin_nav_meili_search,
-  admin_nav_realms,
-  admin_nav_sessions,
-  admin_nav_settings,
-  admin_nav_shelves,
-  admin_nav_token,
-  admin_nav_units,
-  admin_nav_users,
-};
-
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type AdminNavItem = {
   id: string;
   label: () => string;
@@ -115,7 +69,7 @@ export const adminNav = {
         {
           id: "content.unit-create",
           label: () =>
-            `${i18nMessages.admin_nav_units()} · ${i18nMessages.admin_nav_create()}`,
+            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_units")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_create")}`,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/create",
         },
@@ -183,7 +137,7 @@ export const adminNav = {
         {
           id: "accounts.user-create",
           label: () =>
-            `${i18nMessages.admin_nav_users()} · ${i18nMessages.admin_nav_create()}`,
+            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_users")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_create")}`,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user/create",
         },
@@ -271,21 +225,21 @@ export const adminNav = {
         {
           id: "search.unit-meili",
           label: () =>
-            `${i18nMessages.admin_nav_units()} · ${i18nMessages.admin_nav_meili_search()}`,
+            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_units")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/meili",
         },
         {
           id: "search.book-meili",
           label: () =>
-            `${i18nMessages.admin_nav_books()} · ${i18nMessages.admin_nav_meili_search()}`,
+            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_books")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book/meili",
         },
         {
           id: "search.user-meili",
           label: () =>
-            `${i18nMessages.admin_nav_users()} · ${i18nMessages.admin_nav_meili_search()}`,
+            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_users")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user/meili",
         },

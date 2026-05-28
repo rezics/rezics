@@ -4,14 +4,9 @@ import {
   SEED_TAG_TITLES,
   type SeedTagName,
 } from "@rezics/contract";
-import { shelf_content_type_tags_legend } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import { useMemo } from "react";
-
-const i18nMessages = {
-  shelf_content_type_tags_legend,
-};
 
 export interface SeedTagChipGroupProps {
   value: string[];
@@ -24,8 +19,8 @@ export function SeedTagChipGroup({
   onChange,
   disabled = false,
 }: SeedTagChipGroupProps) {
-  const m = useMessage(i18nMessages);
-  const chips = useMemo(
+  const { t } = useTranslation(["entity"]);
+const chips = useMemo(
     () =>
       SEED_TAG_NAMES.map((name) => {
         const tagId = getSeedTagId(name);
@@ -49,7 +44,7 @@ export function SeedTagChipGroup({
 
   return (
     <fieldset className="flex flex-wrap gap-2">
-      <legend className="sr-only">{m.shelf_content_type_tags_legend()}</legend>
+      <legend className="sr-only">{t("entity:shelf_content_type_tags_legend")}</legend>
       {chips.map(({ name, tagId, label }) => {
         const isSelected = selected.has(tagId);
         return (

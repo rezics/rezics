@@ -1,31 +1,4 @@
-import {
-  common_logo_alt,
-  layout_footer_brand_description,
-  layout_footer_brand_slogan,
-  layout_footer_copyright,
-  layout_footer_legal_contact,
-  layout_footer_legal_privacy,
-  layout_footer_legal_terms,
-  layout_footer_newsletter_description,
-  layout_footer_newsletter_email_aria,
-  layout_footer_newsletter_email_placeholder,
-  layout_footer_newsletter_submit,
-  layout_footer_newsletter_title,
-  layout_footer_product_aria,
-  layout_footer_product_discover,
-  layout_footer_product_reviews,
-  layout_footer_product_search,
-  layout_footer_product_shelves,
-  layout_footer_product_title,
-  layout_footer_resources_api,
-  layout_footer_resources_aria,
-  layout_footer_resources_changelog,
-  layout_footer_resources_docs,
-  layout_footer_resources_title,
-  layout_footer_social_github,
-  layout_footer_social_telegram,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { GithubIcon, TelegramIcon } from "@rezics/icons";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import {
@@ -38,34 +11,6 @@ import {
   TooltipTrigger,
 } from "@rezics/ui/shadcn";
 import type React from "react";
-
-const i18nMessages = {
-  common_logo_alt,
-  layout_footer_brand_description,
-  layout_footer_brand_slogan,
-  layout_footer_copyright,
-  layout_footer_legal_contact,
-  layout_footer_legal_privacy,
-  layout_footer_legal_terms,
-  layout_footer_newsletter_description,
-  layout_footer_newsletter_email_aria,
-  layout_footer_newsletter_email_placeholder,
-  layout_footer_newsletter_submit,
-  layout_footer_newsletter_title,
-  layout_footer_product_aria,
-  layout_footer_product_discover,
-  layout_footer_product_reviews,
-  layout_footer_product_search,
-  layout_footer_product_shelves,
-  layout_footer_product_title,
-  layout_footer_resources_api,
-  layout_footer_resources_aria,
-  layout_footer_resources_changelog,
-  layout_footer_resources_docs,
-  layout_footer_resources_title,
-  layout_footer_social_github,
-  layout_footer_social_telegram,
-};
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -91,8 +36,8 @@ function FooterLink({
 }
 
 export function MainLayoutFooter({ className }: { className?: string }) {
-  const m = useMessage(i18nMessages);
-  const year = new Date().getFullYear();
+  const { t } = useTranslation(["common", "shell"]);
+const year = new Date().getFullYear();
 
   return (
     <footer
@@ -109,7 +54,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               <div className="flex items-center gap-2 mt-2">
                 <LazyLoadImage
                   src="/logo.svg"
-                  alt={m.common_logo_alt()}
+                  alt={t("common:logo_alt")}
                   className="w-11 h-12"
                 />
                 <h6 className="text-base font-extrabold tracking-[0.2px] m-0">
@@ -117,9 +62,9 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                 </h6>
               </div>
               <p className="text-sm text-text-secondary mt-3">
-                {m.layout_footer_brand_description()}
+                {t("shell:layout_footer_brand_description")}
                 <br />
-                {m.layout_footer_brand_slogan()}
+                {t("shell:layout_footer_brand_slogan")}
               </p>
 
               <TooltipProvider>
@@ -130,7 +75,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={m.layout_footer_social_github()}
+                          aria-label={t("shell:layout_footer_social_github")}
                           className="text-text-brand"
                           render={
                             <a
@@ -145,7 +90,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                       }
                     />
                     <TooltipContent>
-                      {m.layout_footer_social_github()}
+                      {t("shell:layout_footer_social_github")}
                     </TooltipContent>
                   </Tooltip>
 
@@ -155,7 +100,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={m.layout_footer_social_telegram()}
+                          aria-label={t("shell:layout_footer_social_telegram")}
                           className="text-text-brand"
                           render={
                             <a
@@ -170,7 +115,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
                       }
                     />
                     <TooltipContent>
-                      {m.layout_footer_social_telegram()}
+                      {t("shell:layout_footer_social_telegram")}
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -179,49 +124,49 @@ export function MainLayoutFooter({ className }: { className?: string }) {
 
             {/* Navigation */}
             <nav
-              aria-label={m.layout_footer_product_aria()}
+              aria-label={t("shell:layout_footer_product_aria")}
               className="md:col-span-1"
             >
-              <SectionTitle>{m.layout_footer_product_title()}</SectionTitle>
+              <SectionTitle>{t("shell:layout_footer_product_title")}</SectionTitle>
               <div className="flex flex-col gap-1">
                 <FooterLink href="/book">
-                  {m.layout_footer_product_discover()}
+                  {t("shell:layout_footer_product_discover")}
                 </FooterLink>
                 <FooterLink href="/shelf">
-                  {m.layout_footer_product_shelves()}
+                  {t("shell:layout_footer_product_shelves")}
                 </FooterLink>
                 <FooterLink href="/review">
-                  {m.layout_footer_product_reviews()}
+                  {t("shell:layout_footer_product_reviews")}
                 </FooterLink>
                 <FooterLink href="/unit">
-                  {m.layout_footer_product_search()}
+                  {t("shell:layout_footer_product_search")}
                 </FooterLink>
               </div>
             </nav>
 
             <nav
-              aria-label={m.layout_footer_resources_aria()}
+              aria-label={t("shell:layout_footer_resources_aria")}
               className="md:col-span-1"
             >
-              <SectionTitle>{m.layout_footer_resources_title()}</SectionTitle>
+              <SectionTitle>{t("shell:layout_footer_resources_title")}</SectionTitle>
               <div className="flex flex-col gap-1">
                 <FooterLink href="/docs">
-                  {m.layout_footer_resources_docs()}
+                  {t("shell:layout_footer_resources_docs")}
                 </FooterLink>
                 <FooterLink href="/api">
-                  {m.layout_footer_resources_api()}
+                  {t("shell:layout_footer_resources_api")}
                 </FooterLink>
                 <FooterLink href="/changelog">
-                  {m.layout_footer_resources_changelog()}
+                  {t("shell:layout_footer_resources_changelog")}
                 </FooterLink>
               </div>
             </nav>
 
             {/* Newsletter */}
             <div className="md:col-span-1">
-              <SectionTitle>{m.layout_footer_newsletter_title()}</SectionTitle>
+              <SectionTitle>{t("shell:layout_footer_newsletter_title")}</SectionTitle>
               <p className="text-sm text-text-secondary mb-3">
-                {m.layout_footer_newsletter_description()}
+                {t("shell:layout_footer_newsletter_description")}
               </p>
               <form
                 className="flex flex-col sm:flex-row gap-2"
@@ -229,12 +174,12 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               >
                 <Input
                   type="email"
-                  placeholder={m.layout_footer_newsletter_email_placeholder()}
-                  aria-label={m.layout_footer_newsletter_email_aria()}
+                  placeholder={t("shell:layout_footer_newsletter_email_placeholder")}
+                  aria-label={t("shell:layout_footer_newsletter_email_aria")}
                   className="h-9"
                 />
                 <Button type="submit" disabled>
-                  {m.layout_footer_newsletter_submit()}
+                  {t("shell:layout_footer_newsletter_submit")}
                 </Button>
               </form>
             </div>
@@ -246,7 +191,7 @@ export function MainLayoutFooter({ className }: { className?: string }) {
         {/* Bottom bar */}
         <div className="py-8 flex items-center justify-between flex-wrap gap-y-3">
           <p className="text-xs text-text-secondary m-0">
-            {m.layout_footer_copyright({ year })}
+            {t("shell:layout_footer_copyright", { year })}
           </p>
 
           <div className="flex flex-row items-center gap-4">
@@ -254,19 +199,19 @@ export function MainLayoutFooter({ className }: { className?: string }) {
               href="/privacy"
               className="text-xs text-text-secondary hover:underline"
             >
-              {m.layout_footer_legal_privacy()}
+              {t("shell:layout_footer_legal_privacy")}
             </a>
             <a
               href="/terms"
               className="text-xs text-text-secondary hover:underline"
             >
-              {m.layout_footer_legal_terms()}
+              {t("shell:layout_footer_legal_terms")}
             </a>
             <a
               href="/contact"
               className="text-xs text-text-secondary hover:underline"
             >
-              {m.layout_footer_legal_contact()}
+              {t("shell:layout_footer_legal_contact")}
             </a>
           </div>
         </div>

@@ -1,13 +1,6 @@
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
-import {
-  profile_follow_info_description,
-  profile_follow_info_title,
-  user_cannot_resolve,
-  user_cannot_resolve_description,
-  user_empty,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -31,14 +24,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { unitHref } from "@/shared/ui/link";
 import { useUserProfileStore } from "@/user/states";
 
-const i18nMessages = {
-  profile_follow_info_description,
-  profile_follow_info_title,
-  user_cannot_resolve,
-  user_cannot_resolve_description,
-  user_empty,
-};
-
 type SimpleUser = Omit<UserDTO, "email">;
 
 type FollowInfoPageProps = {
@@ -50,11 +35,11 @@ const ITEMS_PER_PAGE = 20;
 const EXTERNAL_ITEMS_PER_PAGE = 20;
 
 function FollowUserList({ users }: { users: SimpleUser[] }) {
-  const m = useMessage(i18nMessages);
-  if (users.length === 0) {
+  const { t } = useTranslation(["settings"]);
+if (users.length === 0) {
     return (
       <div className="py-16 text-center text-text-secondary">
-        {m.user_empty()}
+        {t("settings:user_empty")}
       </div>
     );
   }
@@ -89,8 +74,8 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   unitId,
   isCurrentUser = false,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["settings"]);
+const navigate = useNavigate();
   const currentUser = useUserProfileStore((state) => state.user);
   const resolvedUnitId = useMemo(
     () => unitId || (isCurrentUser ? currentUser?.unitId : unitId),
@@ -160,9 +145,9 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   if (!resolvedUnitId) {
     return (
       <div className="w-full max-w-3xl mx-auto mt-32 text-center">
-        <h6 className="text-base font-semibold">{m.user_cannot_resolve()}</h6>
+        <h6 className="text-base font-semibold">{t("settings:user_cannot_resolve")}</h6>
         <p className="text-sm text-text-secondary">
-          {m.user_cannot_resolve_description()}
+          {t("settings:user_cannot_resolve_description")}
         </p>
       </div>
     );
@@ -181,10 +166,10 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
       <div className="flex items-center justify-between">
         <div className="mb-4">
           <h5 className="text-xl font-bold mb-2">
-            {m.profile_follow_info_title()}
+            {t("settings:profile_follow_info_title")}
           </h5>
           <p className="text-sm text-text-secondary">
-            {m.profile_follow_info_description()}
+            {t("settings:profile_follow_info_description")}
           </p>
         </div>
         <Button

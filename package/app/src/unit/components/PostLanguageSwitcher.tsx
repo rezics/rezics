@@ -1,14 +1,8 @@
 import { LANGUAGE_META, type Language } from "@rezics/contract";
-import { post_add_translation, post_languages } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Skeleton } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus as AddIcon } from "lucide-react";
-
-const i18nMessages = {
-  post_add_translation,
-  post_languages,
-};
 
 type Sibling = {
   unitId: string;
@@ -40,8 +34,8 @@ export function PostLanguageSwitcher({
   canAddTranslation,
   onAddTranslation,
 }: PostLanguageSwitcherProps) {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["community"]);
+const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -60,7 +54,7 @@ export function PostLanguageSwitcher({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs text-text-secondary">{m.post_languages()}</span>
+      <span className="text-xs text-text-secondary">{t("community:post_languages")}</span>
       <div className="flex flex-wrap items-center gap-2">
         {orderedSiblings.map((sibling) => {
           const isCurrent = sibling.unitId === currentUnitId;
@@ -100,7 +94,7 @@ export function PostLanguageSwitcher({
             className="gap-1"
           >
             <AddIcon className="h-4 w-4" />
-            {m.post_add_translation()}
+            {t("community:post_add_translation")}
           </Button>
         )}
       </div>

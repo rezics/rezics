@@ -173,10 +173,17 @@ function transformFile(
     }
   }
 
-  // Replace `<varName>.<key>(...)` calls.
+  // Replace `<varName>.<key>(...)` calls. We probe whether the call is
+  // empty (`m.key()`) or has args (`m.key(<args>)`) by capturing the
+  // characters after `(` up to the next non-whitespace. If that next
+  // character is `)`, the call is empty and we consume it; otherwise we
+  // insert a comma so the user's args become i18next options.
   for (const varName of callsByVar.keys()) {
-    const callRe = new RegExp(`\\b${varName}\\.(\\w+)\\s*\\(`, "g");
-    next = next.replace(callRe, (whole, key: string) => {
+    const callRe = new RegExp(
+      `\\b${varName}\\.(\\w+)\\s*\\(\\s*(\\)?)`,
+      "g",
+    );
+    next = next.replace(callRe, (whole, key: string, closer: string) => {
       const mapped = lookup(keyMap, key);
       if (!mapped) {
         report.unknownKeys.push({ file: path, key });
@@ -185,10 +192,10 @@ function transformFile(
       callsByVar.get(varName)!.add(key);
       report.rewrittenCalls += 1;
       changed = true;
-      return `t("${mapped.ns}:${mapped.key}"`;
+      const literal = `"${mapped.ns}:${mapped.key}"`;
+      if (closer === ")") return `t(${literal})`;
+      return `t(${literal}, `;
     });
-    // Handle 0-arg calls without input — they look like `t("ns:key")` already
-    // because the regex consumed `(`. The closing `)` is unchanged.
   }
 
   // Compute namespace set per binding from collected calls.
@@ -237,15 +244,14 @@ function transformFile(
     return `import { ${Array.from(names).sort().join(", ")} } from "@rezics/i18n/react";\n`;
   });
   if (!hasReactImport && (useMessageBindings.length > 0 || callsByVar.size > 0)) {
-    // Insert a fresh import at the top, after the last existing import.
-    const lastImportEnd = (() => {
-      const re = /^import[^\n]*\n/gm;
-      let last = 0;
-      for (const m of next.matchAll(re)) {
-        last = m.index! + m[0].length;
-      }
-      return last;
-    })();
+    // Insert a fresh import after the END of the last top-level
+    // `import ... from "...";` statement (which may span multiple lines for
+    // `import { … }` shapes).
+    const importEndRe = /^import\b[\s\S]*?from\s+["'][^"']+["'];?\s*\n/gm;
+    let lastImportEnd = 0;
+    for (const m of next.matchAll(importEndRe)) {
+      lastImportEnd = m.index! + m[0].length;
+    }
     next =
       next.slice(0, lastImportEnd) +
       `import { useTranslation } from "@rezics/i18n/react";\n` +

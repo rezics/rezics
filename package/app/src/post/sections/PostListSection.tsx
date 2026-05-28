@@ -1,7 +1,6 @@
 import { postQueries } from "@rezics/api/post/post";
 import type { PostKind, PostListQuery } from "@rezics/contract";
-import { discussion_empty } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -9,10 +8,6 @@ import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { resolvePostTargetReleaseLabel } from "@/book-library/models/communityFeed";
 import { PostCard } from "../components/item/PostCard";
-
-const i18nMessages = {
-  discussion_empty,
-};
 
 interface PostListSectionProps {
   targetUnitId?: string;
@@ -33,8 +28,8 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
   kind,
   limit = 20,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["community"]);
+const navigate = useNavigate();
   const filters = {
     workRoles,
     kind,
@@ -67,7 +62,7 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
 
   if (posts.length === 0) {
     return (
-      <p className="text-sm text-text-secondary py-4">{m.discussion_empty()}</p>
+      <p className="text-sm text-text-secondary py-4">{t("community:discussion_empty")}</p>
     );
   }
 

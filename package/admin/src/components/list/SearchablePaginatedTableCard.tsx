@@ -1,5 +1,4 @@
-import { common_failed_to_load, common_search } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -16,16 +15,12 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 
-const i18nMessages = {
-  common_failed_to_load,
-  common_search,
-};
-
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 export function SearchablePaginatedTableCard<T>({
   title,
   description,
   errorLabel,
-  searchLabel = i18nMessages.common_search(),
+  searchLabel = i18nMessages.getI18nRuntime().i18n.t("common:search"),
   searchPlaceholder,
   searchInputId,
   q,
@@ -68,8 +63,8 @@ export function SearchablePaginatedTableCard<T>({
   onPageChange: (nextPage: number) => void;
   onRowsPerPageChange: (nextRowsPerPage: number) => void;
 }) {
-  const m = useMessage(i18nMessages);
-  const fallbackSearchId = React.useId();
+  const { t } = useTranslation(["common"]);
+const fallbackSearchId = React.useId();
   const inputId = searchInputId ?? fallbackSearchId;
 
   return (
@@ -103,7 +98,7 @@ export function SearchablePaginatedTableCard<T>({
             <Button
               variant="ghost"
               size="icon"
-              aria-label={m.common_search()}
+              aria-label={t("common:search")}
               onClick={onSearch}
               className="self-end sm:self-center"
             >
@@ -127,7 +122,7 @@ export function SearchablePaginatedTableCard<T>({
           ) : isError ? (
             <div>
               <p className="text-sm text-error-text">
-                {errorLabel ?? m.common_failed_to_load()}
+                {errorLabel ?? t("common:failed_to_load")}
               </p>
               {error ? (
                 <p className="text-xs text-error-text">{String(error)}</p>

@@ -4,20 +4,7 @@ import {
   useRevokeAuthUserSessionsMutation,
 } from "@rezics/api/account-operation/account-operation";
 import type { AdminAuthSession } from "@rezics/contract";
-import {
-  admin_auth_actions_title,
-  admin_auth_sessions_description,
-  admin_auth_sessions_failed_load,
-  admin_auth_sessions_revoke_description,
-  admin_auth_sessions_revoke_title,
-  admin_auth_sessions_title,
-  common_cancel,
-  common_created,
-  common_expires,
-  common_revoke,
-  common_user_agent,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -40,20 +27,6 @@ import {
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
-
-const i18nMessages = {
-  admin_auth_actions_title,
-  admin_auth_sessions_description,
-  admin_auth_sessions_failed_load,
-  admin_auth_sessions_revoke_description,
-  admin_auth_sessions_revoke_title,
-  admin_auth_sessions_title,
-  common_cancel,
-  common_created,
-  common_expires,
-  common_revoke,
-  common_user_agent,
-};
 
 function fmtDate(v?: string | Date) {
   if (!v) return "";
@@ -92,8 +65,8 @@ function toSession(row: AdminAuthSession): AuthSession {
 }
 
 export default function AuthSessionsPage() {
-  const m = useMessage(i18nMessages);
-  const [page, setPage] = React.useState(0);
+  const { t } = useTranslation(["admin", "common"]);
+const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
   const [authUserIdInput, setAuthUserIdInput] = React.useState("");
   const [authUserId, setAuthUserId] = React.useState("");
@@ -133,13 +106,13 @@ export default function AuthSessionsPage() {
       },
       {
         id: "createdAt",
-        header: m.common_created(),
+        header: t("common:created"),
         minWidth: 170,
         cell: (s) => fmtDate(s.createdAt),
       },
       {
         id: "expiresAt",
-        header: m.common_expires(),
+        header: t("common:expires"),
         minWidth: 170,
         cell: (s) => fmtDate(s.expiresAt),
       },
@@ -155,7 +128,7 @@ export default function AuthSessionsPage() {
       },
       {
         id: "userAgent",
-        header: m.common_user_agent(),
+        header: t("common:user_agent"),
         minWidth: 300,
         cell: (s) => (
           <span className="text-sm whitespace-nowrap overflow-hidden text-ellipsis inline-block max-w-[300px]">
@@ -165,7 +138,7 @@ export default function AuthSessionsPage() {
       },
       {
         id: "actions",
-        header: m.admin_auth_actions_title(),
+        header: t("admin:auth_actions_title"),
         minWidth: 120,
         cell: (s) => (
           <Button
@@ -181,7 +154,7 @@ export default function AuthSessionsPage() {
               })
             }
           >
-            {m.common_revoke()}
+            {t("common:revoke")}
           </Button>
         ),
       },
@@ -197,8 +170,8 @@ export default function AuthSessionsPage() {
 
   return (
     <Page
-      title={m.admin_auth_sessions_title()}
-      description={m.admin_auth_sessions_description()}
+      title={t("admin:auth_sessions_title")}
+      description={t("admin:auth_sessions_description")}
     >
       <Card>
         <CardContent className="space-y-4">
@@ -250,7 +223,7 @@ export default function AuthSessionsPage() {
             </div>
           ) : sessionsQuery.isError ? (
             <p className="text-sm text-error-text">
-              {m.admin_auth_sessions_failed_load()}
+              {t("admin:auth_sessions_failed_load")}
             </p>
           ) : (
             <PaginatedTable<AuthSession>
@@ -276,11 +249,11 @@ export default function AuthSessionsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{m.admin_auth_sessions_revoke_title()}</DialogTitle>
+            <DialogTitle>{t("admin:auth_sessions_revoke_title")}</DialogTitle>
             <DialogDescription>
               {confirmDialog.mode === "all"
                 ? "Revoke every active session for this auth user."
-                : m.admin_auth_sessions_revoke_description()}
+                : t("admin:auth_sessions_revoke_description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
@@ -310,7 +283,7 @@ export default function AuthSessionsPage() {
                 })
               }
             >
-              {m.common_cancel()}
+              {t("common:cancel")}
             </Button>
             <Button
               className="bg-error-fill text-white"
@@ -339,7 +312,7 @@ export default function AuthSessionsPage() {
                 });
               }}
             >
-              {m.common_revoke()}
+              {t("common:revoke")}
             </Button>
           </DialogFooter>
         </DialogContent>

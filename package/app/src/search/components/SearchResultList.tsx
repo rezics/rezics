@@ -2,21 +2,10 @@ import type {
   ContentSearchDocument,
   ContentSearchResult,
 } from "@rezics/contract";
-import {
-  common_loading,
-  search_empty_title,
-  search_results_summary,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import type React from "react";
 import { renderContentSearchCard } from "./searchResultCardAdapters";
-
-const i18nMessages = {
-  common_loading,
-  search_empty_title,
-  search_results_summary,
-};
 
 export type SearchResultListProps = {
   result?: ContentSearchResult;
@@ -38,23 +27,23 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
   preferredLanguage,
   renderItem,
 }) => {
-  const m = useMessage(i18nMessages);
-  if (isLoading) {
+  const { t } = useTranslation(["common", "search"]);
+if (isLoading) {
     return (
       <div className="py-12 text-center">
-        <p className="text-text-secondary">{m.common_loading()}</p>
+        <p className="text-text-secondary">{t("common:loading")}</p>
       </div>
     );
   }
 
   if (!result || result.items.length === 0) {
-    return <EmptyState title={m.search_empty_title()} />;
+    return <EmptyState title={t("search:empty_title")} />;
   }
 
   return (
     <div>
       <p className="mb-2 block text-xs text-text-secondary">
-        {m.search_results_summary({
+        {t("search:results_summary", {
           count: result.total,
           ms: result.processingTimeMs,
         })}

@@ -1,9 +1,5 @@
 import type { AdminStatsResponse } from "@rezics/contract";
-import {
-  admin_dashboard_comments,
-  admin_nav_books,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   BarElement,
   CategoryScale,
@@ -14,11 +10,6 @@ import {
 } from "chart.js";
 import { useMemo } from "react";
 import { Bar } from "react-chartjs-2";
-
-const i18nMessages = {
-  admin_dashboard_comments,
-  admin_nav_books,
-};
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -39,8 +30,8 @@ function readCssVar(name: string, fallback: string): string {
 }
 
 export function ContentTrendChart({ trend }: ContentTrendChartProps) {
-  const m = useMessage(i18nMessages);
-  const isDark =
+  const { t } = useTranslation(["admin"]);
+const isDark =
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");
 
@@ -60,12 +51,12 @@ export function ContentTrendChart({ trend }: ContentTrendChartProps) {
       labels: trend.map((d) => d.date.slice(5)),
       datasets: [
         {
-          label: m.admin_nav_books(),
+          label: t("admin:nav_books"),
           data: trend.map((d) => d.books),
           backgroundColor: primary,
         },
         {
-          label: m.admin_dashboard_comments(),
+          label: t("admin:dashboard_comments"),
           data: trend.map((d) => d.comments),
           backgroundColor: secondary,
         },

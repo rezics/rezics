@@ -1,27 +1,10 @@
 import { useRemoveRealmExtraMutation } from "@rezics/api/realm/realm-extra.mutations";
-import {
-  common_dismiss,
-  pinboard_stale_cleanup,
-  pinboard_stale_cleanup_done,
-  pinboard_stale_cleanup_partial,
-  pinboard_stale_description,
-  pinboard_stale_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, AlertTitle, Button } from "@rezics/ui/shadcn";
 import { Brush as CleaningServicesRoundedIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { PinboardListKey } from "../models/types";
-
-const i18nMessages = {
-  common_dismiss,
-  pinboard_stale_cleanup,
-  pinboard_stale_cleanup_done,
-  pinboard_stale_cleanup_partial,
-  pinboard_stale_description,
-  pinboard_stale_title,
-};
 
 interface StaleIdsBannerProps {
   realmUnitId: string;
@@ -36,8 +19,8 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   staleIds,
   onCleaned,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [dismissed, setDismissed] = useState(false);
+  const { t } = useTranslation(["common", "entity"]);
+const [dismissed, setDismissed] = useState(false);
   const [working, setWorking] = useState(false);
   const remove = useRemoveRealmExtraMutation();
 
@@ -60,10 +43,10 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
     setWorking(false);
     if (failed > 0) {
       toast.error(
-        m.pinboard_stale_cleanup_partial({ failed, total: staleIds.length }),
+        t("entity:pinboard_stale_cleanup_partial", { failed, total: staleIds.length }),
       );
     } else {
-      toast.success(m.pinboard_stale_cleanup_done());
+      toast.success(t("entity:pinboard_stale_cleanup_done"));
       onCleaned?.();
     }
   };
@@ -75,9 +58,9 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <AlertTitle>{m.pinboard_stale_title()}</AlertTitle>
+          <AlertTitle>{t("entity:pinboard_stale_title")}</AlertTitle>
           <AlertDescription>
-            {m.pinboard_stale_description({ count: staleIds.length })}
+            {t("entity:pinboard_stale_description", { count: staleIds.length })}
           </AlertDescription>
         </div>
         <div className="flex flex-row gap-2 shrink-0">
@@ -88,7 +71,7 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
             disabled={working}
           >
             <CleaningServicesRoundedIcon className="h-4 w-4 mr-1" />
-            {m.pinboard_stale_cleanup()}
+            {t("entity:pinboard_stale_cleanup")}
           </Button>
           <Button
             size="sm"
@@ -96,7 +79,7 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
             onClick={() => setDismissed(true)}
             disabled={working}
           >
-            {m.common_dismiss()}
+            {t("common:dismiss")}
           </Button>
         </div>
       </div>

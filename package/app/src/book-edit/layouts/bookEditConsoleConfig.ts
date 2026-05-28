@@ -1,12 +1,4 @@
 import {
-  book_edit_sidebar_authority,
-  book_edit_sidebar_back_to_book,
-  book_edit_sidebar_chapters,
-  book_edit_sidebar_history,
-  book_edit_sidebar_main,
-  book_edit_sidebar_tags,
-} from "@rezics/i18n/messages";
-import {
   ShieldCheck as AuthorityIcon,
   LayoutDashboard as DashboardIcon,
   FileText as DescriptionIcon,
@@ -14,6 +6,7 @@ import {
 } from "lucide-react";
 import type { EditConsoleLayoutProps } from "@/core/layouts/EditConsoleLayout";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 const BOOK_EDIT_RESERVED_SEGMENTS = new Set([
   "authority",
   "chapter",
@@ -56,23 +49,23 @@ export function createBookEditConsoleConfig(
 
   return {
     returnItem: {
-      label: book_edit_sidebar_back_to_book(),
+      label: getI18nRuntime().i18n.t("book:edit_sidebar_back_to_book"),
       href: bookBase,
       icon: DashboardIcon,
     },
     primaryItems: [
       {
-        label: book_edit_sidebar_main(),
+        label: getI18nRuntime().i18n.t("book:edit_sidebar_main"),
         href: editBase,
         icon: DescriptionIcon,
       },
       {
-        label: book_edit_sidebar_tags(),
+        label: getI18nRuntime().i18n.t("book:edit_sidebar_tags"),
         href: `${editBase}/tag`,
         icon: DescriptionIcon,
       },
       {
-        label: book_edit_sidebar_chapters(),
+        label: getI18nRuntime().i18n.t("book:edit_sidebar_chapters"),
         href: `${editBase}/chapter`,
         icon: DescriptionIcon,
         isActive: (pathname) =>
@@ -82,12 +75,12 @@ export function createBookEditConsoleConfig(
     ],
     operationalItems: [
       {
-        label: book_edit_sidebar_authority(),
+        label: getI18nRuntime().i18n.t("book:edit_sidebar_authority"),
         href: `${editBase}/authority`,
         icon: AuthorityIcon,
       },
       {
-        label: book_edit_sidebar_history(),
+        label: getI18nRuntime().i18n.t("book:edit_sidebar_history"),
         href: `${editBase}/history`,
         icon: HistoryIcon,
         activeMatch: "prefix",

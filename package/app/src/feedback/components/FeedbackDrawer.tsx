@@ -1,6 +1,5 @@
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
-import { feedback_submit } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Separator,
   Sheet,
@@ -10,10 +9,6 @@ import {
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import FeedbackForm from "./FeedbackForm";
-
-const i18nMessages = {
-  feedback_submit,
-};
 
 type FeedbackDrawerProps = {
   open: boolean;
@@ -30,8 +25,8 @@ const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
   onClose,
   defaultValues,
 }) => {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["community"]);
+return (
     <Sheet
       open={open}
       onOpenChange={(o) => {
@@ -43,7 +38,7 @@ const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
         className="w-[min(520px,100vw)] p-0 sm:max-w-none"
       >
         <SheetHeader className="px-4 py-3">
-          <SheetTitle>{m.feedback_submit()}</SheetTitle>
+          <SheetTitle>{t("community:feedback_submit")}</SheetTitle>
         </SheetHeader>
         <Separator />
         <div className="p-4">

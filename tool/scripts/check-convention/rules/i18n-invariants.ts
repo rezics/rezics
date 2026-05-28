@@ -5,27 +5,18 @@ import type { RuleScanner, Violation } from "../core/types";
 
 const SPEC = "openspec/specs/i18n-toolchain/spec.md";
 
-const dynamicMessagePattern =
-  /\bm\s*\[\s*(?!["'][A-Za-z0-9_.-]+["'])|const\s+\{[^}]+\}\s*=\s*m\b/;
-const generatedMessageNamespaceImportPattern =
-  /import\s+\*\s+as\s+\w+\s+from\s+["'](?:@rezics\/i18n\/messages|@rezics\/ui\/i18n\/messages|[^"']*paraglide\/messages(?:\.js)?)["']/;
-const adapterGeneratedMessageImportPattern =
-  /from\s+["'](?:@rezics\/i18n\/messages|@rezics\/ui\/i18n\/messages|[^"']*paraglide\/messages(?:\.js)?)["']/;
-const i18nKeyCallPattern = /\bt\s*\([^)]*\.i18nKey\b/;
+// `t(variableExpression)` — bare identifier, not a typed map lookup — is the
+// dynamic-key anti-pattern. Bracketed indexing (`t(MAP[slug])`) is the
+// blessed pattern and SHALL NOT be flagged.
+const dynamicTranslateKeyPattern = /\bt\(\s*[A-Za-z_]\w*\s*[,)]/;
+const dynamicTemplateKeyPattern = /\bt\(\s*`[^`]*\$\{[^`]*`/;
 const contractI18nKeyPattern = /\bi18nKey\s*:/;
 const frontendSourcePattern =
   /^package\/(?:app|admin|ui|editor|folio)\/src\/.*\.(?:ts|tsx)$/;
-const legacyUseTranslationPattern =
-  /from\s+["']@rezics\/i18n\/react["'][\s\S]*?\buseTranslation\b|\buseTranslation\s*\(/;
-const legacyTranslatePattern =
-  /from\s+["']@rezics\/i18n["'][\s\S]*?\btranslate\b|\btranslate\s*\(/;
-const legacyFallbackPattern = /\bt\s*\(\s*["'][^"']+["']\s*,\s*["'][^"']+["']/;
-const i18nextRuntimePattern =
-  /from\s+["'](?:react-i18next|i18next)["']|require\(\s*["'](?:react-i18next|i18next)["']\s*\)/;
-const uiCopyNullishFallbackPattern =
-  /\bm\.[A-Za-z0-9_]+\([^)]*\)\s*(?:\?\?|\|\|)\s*["'][^"']*[A-Za-z][^"']*["']/;
-const adminLocalLocalePattern =
-  /from\s+["']@\/locale(?:\/[^"']*)?["']|from\s+["'][^"']*src\/locale(?:\/[^"']*)?["']/;
+const fallbackTranslatePattern =
+  /\bt\s*\(\s*["'][^"']*:[^"']+["']\s*,\s*["'][^"']+["']\s*\)/;
+const legacyParagildeImportPattern =
+  /from\s+["'](?:@rezics\/i18n\/messages|@rezics\/ui\/i18n\/messages|@rezics\/ui\/i18n\/runtime|[^"']*paraglide\/messages(?:\.js)?|[^"']*paraglide\/runtime(?:\.js)?)["']/;
 
 function shouldScan(relPath: string): boolean {
   if (/\.(?:test|spec)\.tsx?$/.test(relPath)) return false;
@@ -41,117 +32,43 @@ export function scanI18nSourceForTest(
 ): Violation[] {
   const violations: Violation[] = [];
 
-  if (
-    source.includes("paraglide/messages") &&
-    dynamicMessagePattern.test(source)
-  ) {
-    violations.push({
-      rule: "R11",
-      path: relPath,
-      message:
-        "generated Paraglide messages must be referenced statically; route dynamic discriminators through explicit label maps",
-      spec: SPEC,
-    });
-  }
-
-  if (
-    frontendSourcePattern.test(relPath) &&
-    !relPath.endsWith(".stories.tsx") &&
-    generatedMessageNamespaceImportPattern.test(source)
-  ) {
-    violations.push({
-      rule: "R11",
-      path: relPath,
-      message:
-        "production React source must import generated messages by name and bind them through useMessage(messageBag)",
-      spec: SPEC,
-    });
-  }
-
-  if (
-    relPath === "package/i18n/src/react.ts" &&
-    adapterGeneratedMessageImportPattern.test(source)
-  ) {
-    violations.push({
-      rule: "R11",
-      path: relPath,
-      message:
-        "@rezics/i18n/react must stay neutral and must not import generated message catalogs",
-      spec: SPEC,
-    });
-  }
-
-  if (i18nKeyCallPattern.test(source)) {
-    violations.push({
-      rule: "R12",
-      path: relPath,
-      message:
-        "`t(*.i18nKey)` is forbidden; use @rezics/i18n label helpers instead",
-      spec: SPEC,
-    });
-  }
-
   if (frontendSourcePattern.test(relPath)) {
-    if (
-      relPath.startsWith("package/admin/src/locale/") ||
-      (relPath.startsWith("package/admin/src/") &&
-        adminLocalLocalePattern.test(source))
-    ) {
+    if (legacyParagildeImportPattern.test(source)) {
       violations.push({
-        rule: "R12",
+        rule: "R11",
         path: relPath,
         message:
-          "admin-local locale files/imports are forbidden; use generated @rezics/i18n messages or shared label helpers",
+          "Paraglide-generated message modules are removed; resolve copy through useTranslation('<ns>') or typed label helpers in @rezics/i18n",
         spec: SPEC,
       });
     }
 
-    if (i18nextRuntimePattern.test(source)) {
+    if (dynamicTranslateKeyPattern.test(source)) {
       violations.push({
         rule: "R12",
         path: relPath,
         message:
-          "react-i18next/i18next runtime usage is forbidden for frontend UI copy; use generated Paraglide functions",
+          "dynamic `t(variable)` is forbidden; dispatch through a `satisfies Record<Slug, '<ns>:${string}'>` map and call `t(MAP[slug])`",
         spec: SPEC,
       });
     }
 
-    if (legacyUseTranslationPattern.test(source)) {
+    if (dynamicTemplateKeyPattern.test(source)) {
       violations.push({
         rule: "R12",
         path: relPath,
         message:
-          "`useTranslation().t(...)` is forbidden for frontend UI copy; import generated Paraglide functions or use useLocale for locale state",
+          "template-literal i18next keys are forbidden; use a typed slug-to-key map",
         spec: SPEC,
       });
     }
 
-    if (legacyTranslatePattern.test(source)) {
+    if (fallbackTranslatePattern.test(source)) {
       violations.push({
         rule: "R12",
         path: relPath,
         message:
-          "`translate(...)` is forbidden for frontend UI copy; import generated Paraglide functions or typed label helpers",
-        spec: SPEC,
-      });
-    }
-
-    if (legacyFallbackPattern.test(source)) {
-      violations.push({
-        rule: "R12",
-        path: relPath,
-        message:
-          "fallback string translation calls are forbidden; add the message to the JSON catalog and call the generated function",
-        spec: SPEC,
-      });
-    }
-
-    if (uiCopyNullishFallbackPattern.test(source)) {
-      violations.push({
-        rule: "R12",
-        path: relPath,
-        message:
-          "static UI copy fallbacks with ?? or || are forbidden; add catalog entries and call generated message functions",
+          "string-literal fallback as the second arg of `t(...)` is forbidden; add the missing key to the namespace JSON instead",
         spec: SPEC,
       });
     }

@@ -1,14 +1,4 @@
-import {
-  common_first_page,
-  common_go,
-  common_go_to_page,
-  common_last_page,
-  common_next_page,
-  common_pagination_range,
-  common_previous_page,
-  common_rows_per_page,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Input,
@@ -32,17 +22,6 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import React from "react";
-
-const i18nMessages = {
-  common_first_page,
-  common_go,
-  common_go_to_page,
-  common_last_page,
-  common_next_page,
-  common_pagination_range,
-  common_previous_page,
-  common_rows_per_page,
-};
 
 export type PaginatedColumn<T> = {
   id: string;
@@ -79,8 +58,8 @@ export function PaginatedTable<T>({
   enablePageJump?: boolean;
   className?: string;
 }) {
-  const m = useMessage(i18nMessages);
-  const totalPages = rowsPerPage > 0 ? Math.ceil(count / rowsPerPage) : 0;
+  const { t } = useTranslation(["common"]);
+const totalPages = rowsPerPage > 0 ? Math.ceil(count / rowsPerPage) : 0;
   const [pageInput, setPageInput] = React.useState(() => String(page + 1));
 
   React.useEffect(() => {
@@ -162,7 +141,7 @@ export function PaginatedTable<T>({
 
       <div className="flex items-center justify-between flex-wrap gap-2 mt-2 px-2 py-1">
         <div className="flex items-center gap-2 text-sm text-text-secondary">
-          <span>{m.common_rows_per_page()}</span>
+          <span>{t("common:rows_per_page")}</span>
           <Select
             value={String(rowsPerPage)}
             onValueChange={(v) => onRowsPerPageChange(Number(v))}
@@ -179,7 +158,7 @@ export function PaginatedTable<T>({
             </SelectContent>
           </Select>
           <span>
-            {m.common_pagination_range({
+            {t("common:pagination_range", {
               from: fromRow,
               to: toRow,
               count,
@@ -188,7 +167,7 @@ export function PaginatedTable<T>({
           <Button
             variant="ghost"
             size="icon"
-            aria-label={m.common_first_page()}
+            aria-label={t("common:first_page")}
             disabled={page <= 0 || !totalPages}
             onClick={() => onPageChange(0)}
           >
@@ -197,7 +176,7 @@ export function PaginatedTable<T>({
           <Button
             variant="ghost"
             size="icon"
-            aria-label={m.common_previous_page()}
+            aria-label={t("common:previous_page")}
             disabled={page <= 0 || !totalPages}
             onClick={() => onPageChange(page - 1)}
           >
@@ -206,7 +185,7 @@ export function PaginatedTable<T>({
           <Button
             variant="ghost"
             size="icon"
-            aria-label={m.common_next_page()}
+            aria-label={t("common:next_page")}
             disabled={!totalPages || page + 1 >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
@@ -215,7 +194,7 @@ export function PaginatedTable<T>({
           <Button
             variant="ghost"
             size="icon"
-            aria-label={m.common_last_page()}
+            aria-label={t("common:last_page")}
             disabled={!totalPages || page + 1 >= totalPages}
             onClick={() => onPageChange(Math.max(totalPages - 1, 0))}
           >
@@ -226,7 +205,7 @@ export function PaginatedTable<T>({
         {enablePageJump ? (
           <div className="flex flex-row gap-2 items-center px-2 py-1">
             <span className="text-sm text-text-secondary">
-              {m.common_go_to_page()}
+              {t("common:go_to_page")}
             </span>
             <Input
               value={pageInput}
@@ -240,7 +219,7 @@ export function PaginatedTable<T>({
               }}
               inputMode="numeric"
               pattern="[0-9]*"
-              aria-label={m.common_go_to_page()}
+              aria-label={t("common:go_to_page")}
               className="w-24 h-8 text-sm"
               disabled={!totalPages}
             />
@@ -253,7 +232,7 @@ export function PaginatedTable<T>({
               onClick={commitPageInput}
               disabled={!totalPages}
             >
-              {m.common_go()}
+              {t("common:go")}
             </Button>
           </div>
         ) : null}

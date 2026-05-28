@@ -3,39 +3,7 @@ import {
   hydrateAuthSessionState,
   useAuthSessionStore,
 } from "@rezics/api/states";
-import {
-  admin_auth_action_hydrate,
-  admin_auth_action_hydrate_completed,
-  admin_auth_action_logout_completed,
-  admin_auth_actions_title,
-  admin_auth_cookie_session,
-  admin_auth_failed,
-  admin_auth_identity,
-  admin_auth_main_user_exists,
-  admin_auth_member_session,
-  admin_auth_missing_session,
-  admin_auth_needs_main_setup,
-  admin_auth_refresh_session,
-  admin_auth_registration_complete,
-  admin_auth_registration_stage,
-  admin_auth_rehydrate_session_description,
-  admin_auth_server_permission,
-  admin_auth_session_id,
-  admin_auth_session_store,
-  admin_auth_status_description,
-  admin_auth_status_hydration,
-  admin_auth_status_title,
-  admin_auth_user_email,
-  admin_auth_user_id,
-  admin_auth_user_name,
-  admin_auth_user_role,
-  auth_logout,
-  common_active,
-  common_no,
-  common_none,
-  common_yes,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -55,49 +23,16 @@ import { useState } from "react";
 import { Page } from "@/core/layouts/Page";
 import { adminLogout } from "@/user/models/handler";
 
-const i18nMessages = {
-  admin_auth_action_hydrate,
-  admin_auth_action_hydrate_completed,
-  admin_auth_action_logout_completed,
-  admin_auth_actions_title,
-  admin_auth_cookie_session,
-  admin_auth_failed,
-  admin_auth_identity,
-  admin_auth_main_user_exists,
-  admin_auth_member_session,
-  admin_auth_missing_session,
-  admin_auth_needs_main_setup,
-  admin_auth_refresh_session,
-  admin_auth_registration_complete,
-  admin_auth_registration_stage,
-  admin_auth_rehydrate_session_description,
-  admin_auth_server_permission,
-  admin_auth_session_id,
-  admin_auth_session_store,
-  admin_auth_status_description,
-  admin_auth_status_hydration,
-  admin_auth_status_title,
-  admin_auth_user_email,
-  admin_auth_user_id,
-  admin_auth_user_name,
-  admin_auth_user_role,
-  auth_logout,
-  common_active,
-  common_no,
-  common_none,
-  common_yes,
-};
-
 type SessionStatus = "active" | "missing";
 
 function StatusBadge({ status }: { status: SessionStatus }) {
-  const m = useMessage(i18nMessages);
-  const map = {
+  const { t } = useTranslation(["admin", "auth", "common"]);
+const map = {
     active: {
-      label: m.common_active(),
+      label: t("common:active"),
       className: "bg-success-fill text-white",
     },
-    missing: { label: m.admin_auth_missing_session(), className: "" },
+    missing: { label: t("admin:auth_missing_session"), className: "" },
   } as const;
   const { label, className } = map[status];
   return (
@@ -119,8 +54,8 @@ function SessionRefreshCard({
   onRefresh: () => Promise<void>;
   refreshLabel: string;
 }) {
-  const m = useMessage(i18nMessages);
-  const [loading, setLoading] = useState(false);
+  const { t } = useTranslation(["admin", "auth", "common"]);
+const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const permission = useAuthSessionStore((s) => s.rezics.permission);
@@ -134,7 +69,7 @@ function SessionRefreshCard({
       await onRefresh();
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : m.admin_auth_failed());
+      setError(err instanceof Error ? err.message : t("admin:auth_failed"));
     } finally {
       setLoading(false);
     }
@@ -149,7 +84,7 @@ function SessionRefreshCard({
           <StatusBadge status={status} />
         </div>
         <p className="text-sm text-text-secondary">
-          {m.admin_auth_rehydrate_session_description()}
+          {t("admin:auth_rehydrate_session_description")}
         </p>
         <div className="mt-4">
           <Button
@@ -172,7 +107,7 @@ function SessionRefreshCard({
         {success && (
           <Alert className="mt-2">
             <AlertDescription className="text-success-text">
-              {m.admin_auth_action_hydrate_completed()}
+              {t("admin:auth_action_hydrate_completed")}
             </AlertDescription>
           </Alert>
         )}
@@ -182,8 +117,8 @@ function SessionRefreshCard({
 }
 
 function SessionStoreCard() {
-  const m = useMessage(i18nMessages);
-  const status = useAuthSessionStore((s) => s.status);
+  const { t } = useTranslation(["admin", "auth", "common"]);
+const status = useAuthSessionStore((s) => s.status);
   const hasAuthIdentity = useAuthSessionStore((s) => s.auth.hasIdentity);
   const hasMemberSession = useAuthSessionStore(
     (s) => s.rezics.hasMemberSession,
@@ -202,36 +137,36 @@ function SessionStoreCard() {
   const error = useAuthSessionStore((s) => s.error);
 
   const rows: [string, React.ReactNode][] = [
-    [m.admin_auth_status_hydration(), status],
-    [m.admin_auth_identity(), hasAuthIdentity ? m.common_yes() : m.common_no()],
+    [t("admin:auth_status_hydration"), status],
+    [t("admin:auth_identity"), hasAuthIdentity ? t("common:yes") : t("common:no")],
     [
-      m.admin_auth_member_session(),
-      hasMemberSession ? m.common_yes() : m.common_no(),
+      t("admin:auth_member_session"),
+      hasMemberSession ? t("common:yes") : t("common:no"),
     ],
-    [m.admin_auth_registration_stage(), registrationStage],
+    [t("admin:auth_registration_stage"), registrationStage],
     [
-      m.admin_auth_server_permission(),
+      t("admin:auth_server_permission"),
       <Badge key="perm" variant="secondary">
-        {permission?.role ?? m.common_none()}
+        {permission?.role ?? t("common:none")}
       </Badge>,
     ],
     [
-      m.admin_auth_main_user_exists(),
-      mainUserExists ? m.common_yes() : m.common_no(),
+      t("admin:auth_main_user_exists"),
+      mainUserExists ? t("common:yes") : t("common:no"),
     ],
     [
-      m.admin_auth_needs_main_setup(),
-      needsMainSetup ? m.common_yes() : m.common_no(),
+      t("admin:auth_needs_main_setup"),
+      needsMainSetup ? t("common:yes") : t("common:no"),
     ],
     [
-      m.admin_auth_registration_complete(),
-      registrationComplete ? m.common_yes() : m.common_no(),
+      t("admin:auth_registration_complete"),
+      registrationComplete ? t("common:yes") : t("common:no"),
     ],
-    [m.admin_auth_user_id(), user?.id ?? "-"],
-    [m.admin_auth_user_name(), user?.name ?? "-"],
-    [m.admin_auth_user_email(), user?.email ?? "-"],
-    [m.admin_auth_user_role(), user?.role ?? "-"],
-    [m.admin_auth_session_id(), session?.id ?? "-"],
+    [t("admin:auth_user_id"), user?.id ?? "-"],
+    [t("admin:auth_user_name"), user?.name ?? "-"],
+    [t("admin:auth_user_email"), user?.email ?? "-"],
+    [t("admin:auth_user_role"), user?.role ?? "-"],
+    [t("admin:auth_session_id"), session?.id ?? "-"],
   ];
 
   return (
@@ -240,7 +175,7 @@ function SessionStoreCard() {
         <div className="flex items-center gap-2 mb-4">
           <ShieldUser className="size-4" />
           <h3 className="text-base font-bold">
-            {m.admin_auth_session_store()}
+            {t("admin:auth_session_store")}
           </h3>
         </div>
         <Table className="text-sm">
@@ -268,8 +203,8 @@ function SessionStoreCard() {
 }
 
 function ActionsCard() {
-  const m = useMessage(i18nMessages);
-  const [loading, setLoading] = useState<string | null>(null);
+  const { t } = useTranslation(["admin", "auth", "common"]);
+const [loading, setLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     message: string;
@@ -284,13 +219,13 @@ function ActionsCard() {
         type: "success",
         message:
           key === "Hydrate"
-            ? m.admin_auth_action_hydrate_completed()
-            : m.admin_auth_action_logout_completed(),
+            ? t("admin:auth_action_hydrate_completed")
+            : t("admin:auth_action_logout_completed"),
       });
     } catch (err) {
       setFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : m.admin_auth_failed(),
+        message: err instanceof Error ? err.message : t("admin:auth_failed"),
       });
     } finally {
       setLoading(null);
@@ -301,7 +236,7 @@ function ActionsCard() {
     <Card>
       <CardContent>
         <h3 className="text-base font-bold mb-4">
-          {m.admin_auth_actions_title()}
+          {t("admin:auth_actions_title")}
         </h3>
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -313,7 +248,7 @@ function ActionsCard() {
             }
           >
             {loading === "Hydrate" ? <Spinner size="sm" /> : null}
-            {m.admin_auth_action_hydrate()}
+            {t("admin:auth_action_hydrate")}
           </Button>
           <Separator orientation="vertical" className="h-6" />
           <Button
@@ -324,7 +259,7 @@ function ActionsCard() {
             className="text-error-text"
           >
             {loading === "Logout" ? <Spinner size="sm" /> : null}
-            {m.auth_logout()}
+            {t("auth:logout")}
           </Button>
         </div>
         {feedback && (
@@ -346,21 +281,21 @@ function ActionsCard() {
 }
 
 export default function AuthStatusPage() {
-  const m = useMessage(i18nMessages);
-  return (
+  const { t } = useTranslation(["admin", "auth", "common"]);
+return (
     <Page
-      title={m.admin_auth_status_title()}
-      description={m.admin_auth_status_description()}
+      title={t("admin:auth_status_title")}
+      description={t("admin:auth_status_description")}
     >
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12 md:col-span-6">
           <SessionRefreshCard
-            title={m.admin_auth_cookie_session()}
+            title={t("admin:auth_cookie_session")}
             onRefresh={async () => {
               await queryAccessToken({ requirePresence: false });
               await hydrateAuthSessionState({ requirePresence: false });
             }}
-            refreshLabel={m.admin_auth_refresh_session()}
+            refreshLabel={t("admin:auth_refresh_session")}
           />
         </div>
         <div className="col-span-12 md:col-span-6">

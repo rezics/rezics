@@ -1,13 +1,6 @@
 import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitDTO } from "@rezics/contract";
-import {
-  unit_picker_browse_panel,
-  unit_picker_no_sub_units,
-  unit_picker_parse_error,
-  unit_picker_url_label,
-  unit_picker_url_placeholder,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -16,14 +9,6 @@ import { type ReactNode, useState } from "react";
 import { useUnitCandidates } from "../../hooks/useUnitCandidates";
 import type { Candidate } from "../../models/types";
 import { UnitCandidateRow } from "./UnitCandidateRow";
-
-const i18nMessages = {
-  unit_picker_browse_panel,
-  unit_picker_no_sub_units,
-  unit_picker_parse_error,
-  unit_picker_url_label,
-  unit_picker_url_placeholder,
-};
 
 export interface UnitPickerProps {
   workContextUnitId?: string;
@@ -44,8 +29,8 @@ export function UnitPicker({
   label,
   placeholder,
 }: UnitPickerProps) {
-  const m = useMessage(i18nMessages);
-  const [input, setInput] = useState(initialInput ?? "");
+  const { t } = useTranslation(["book"]);
+const [input, setInput] = useState(initialInput ?? "");
   const { resolved, parseError } = useUnitCandidates(input);
 
   const fieldId = inputId ?? "unit-picker-input";
@@ -53,12 +38,12 @@ export function UnitPicker({
   return (
     <div className="flex flex-col gap-2 border-b border-border-whisper pb-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor={fieldId}>{label ?? m.unit_picker_url_label()}</Label>
+        <Label htmlFor={fieldId}>{label ?? t("book:unit_picker_url_label")}</Label>
         <Input
           id={fieldId}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={placeholder ?? m.unit_picker_url_placeholder()}
+          placeholder={placeholder ?? t("book:unit_picker_url_placeholder")}
         />
       </div>
 
@@ -79,7 +64,7 @@ export function UnitPicker({
 
       {parseError && (
         <p className="text-xs text-text-secondary">
-          {m.unit_picker_parse_error()}
+          {t("book:unit_picker_parse_error")}
         </p>
       )}
 
@@ -105,8 +90,8 @@ function BrowsePanel({
   language,
   renderItemAction,
 }: BrowsePanelProps) {
-  const m = useMessage(i18nMessages);
-  const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation(["book"]);
+const [expanded, setExpanded] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     ...unitQueries.list({ workUnitId: workContextUnitId, limit: 100 }),
@@ -129,7 +114,7 @@ function BrowsePanel({
             (expanded ? "rotate-180" : "rotate-0")
           }
         />
-        <span>{m.unit_picker_browse_panel()}</span>
+        <span>{t("book:unit_picker_browse_panel")}</span>
       </button>
       {expanded && (
         <div className="pt-2">
@@ -137,7 +122,7 @@ function BrowsePanel({
           {error && <p className="text-xs text-error-text">{String(error)}</p>}
           {!isLoading && !error && units.length === 0 && (
             <p className="text-xs text-text-secondary">
-              {m.unit_picker_no_sub_units()}
+              {t("book:unit_picker_no_sub_units")}
             </p>
           )}
           <ul className="flex flex-col">

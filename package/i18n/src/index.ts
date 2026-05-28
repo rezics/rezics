@@ -1,8 +1,2 @@
 export * from "./labels/index.ts";
-export * as m from "./paraglide/messages.js";
-export {
-  baseLocale,
-  getLocale,
-  locales,
-  setLocale,
-} from "./paraglide/runtime.js";
+export * from "./namespaces.ts";

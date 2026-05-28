@@ -1,32 +1,11 @@
 import type { AiDisclosureMode, BookDTO, LicenseSlug } from "@rezics/contract";
 import { licenseLabel } from "@rezics/i18n";
-import {
-  book_fields_ai_disclosure,
-  book_fields_chapter_count,
-  book_fields_format,
-  book_fields_isbn,
-  book_fields_page_count,
-  book_fields_publication_license,
-  book_fields_text_length,
-  book_info_panel_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AiDisclosureBadge } from "@rezics/ui";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
 import { aiDisclosureLabel } from "@/unit/models/aiDisclosureLabels";
 import { resolveMetadataPanelUswn } from "../../models/bookMetadata";
-
-const i18nMessages = {
-  book_fields_ai_disclosure,
-  book_fields_chapter_count,
-  book_fields_format,
-  book_fields_isbn,
-  book_fields_page_count,
-  book_fields_publication_license,
-  book_fields_text_length,
-  book_info_panel_title,
-};
 
 export type MetadataPanelProps = {
   bookInfo: BookDTO;
@@ -41,8 +20,8 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   bookInfo,
   variant = "panel",
 }) => {
-  const m = useMessage(i18nMessages);
-  const publicationLicenseLabel = bookInfo.licenseSlug
+  const { t } = useTranslation(["book"]);
+const publicationLicenseLabel = bookInfo.licenseSlug
     ? licenseLabel(bookInfo.licenseSlug as LicenseSlug)
     : undefined;
   const uswn = resolveMetadataPanelUswn(bookInfo);
@@ -54,34 +33,34 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
       {uswn && <p className="text-sm">USWN：{uswn}</p>}
       {bookInfo?.isbn13 && (
         <p className="text-sm">
-          {m.book_fields_isbn()}：{bookInfo.isbn13}
+          {t("book:fields_isbn")}：{bookInfo.isbn13}
         </p>
       )}
       <p className="text-sm">
-        {m.book_fields_text_length()}：{bookInfo?.textLength ?? 0}
+        {t("book:fields_text_length")}：{bookInfo?.textLength ?? 0}
       </p>
       {typeof bookInfo?.chapterCount === "number" && (
         <p className="text-sm">
-          {m.book_fields_chapter_count()}：{bookInfo.chapterCount}
+          {t("book:fields_chapter_count")}：{bookInfo.chapterCount}
         </p>
       )}
       {bookInfo?.pageCount != null && (
         <p className="text-sm">
-          {m.book_fields_page_count()}：{bookInfo.pageCount}
+          {t("book:fields_page_count")}：{bookInfo.pageCount}
         </p>
       )}
       {bookInfo?.formatKey && (
         <p className="text-sm">
-          {m.book_fields_format()}：{bookInfo.formatKey}
+          {t("book:fields_format")}：{bookInfo.formatKey}
         </p>
       )}
       {publicationLicenseLabel && (
         <p className="text-sm">
-          {m.book_fields_publication_license()}：{publicationLicenseLabel}
+          {t("book:fields_publication_license")}：{publicationLicenseLabel}
         </p>
       )}
       <div className="flex items-center gap-2 text-sm">
-        <span>{m.book_fields_ai_disclosure()}：</span>
+        <span>{t("book:fields_ai_disclosure")}：</span>
         <AiDisclosureBadge
           mode={aiDisclosureMode}
           label={aiDisclosureLabel(aiDisclosureMode)}
@@ -94,7 +73,7 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
     return (
       <div>
         <h3 className="text-sm font-semibold mb-2">
-          {m.book_info_panel_title()}
+          {t("book:info_panel_title")}
         </h3>
         {items}
       </div>
@@ -104,7 +83,7 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   return (
     <div className="bg-surface-elevated p-4 border border-border-whisper rounded-md">
       <h3 className="text-base font-semibold mb-2">
-        {m.book_info_panel_title()}
+        {t("book:info_panel_title")}
       </h3>
       <Separator className="mb-4" />
       {items}

@@ -1,20 +1,9 @@
-import {
-  auth_login,
-  shelf_discussion_composer_placeholder,
-  shelf_discussion_signInPrompt,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { PostListSection, ReplyComposer } from "@/post";
 import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";
-
-const i18nMessages = {
-  auth_login,
-  shelf_discussion_composer_placeholder,
-  shelf_discussion_signInPrompt,
-};
 
 interface ShelfDiscussionSectionProps {
   shelfUnitId: string;
@@ -24,8 +13,8 @@ interface ShelfDiscussionSectionProps {
 export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
   shelfUnitId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { isAuthenticated } = useAuth();
+  const { t } = useTranslation(["auth", "entity"]);
+const { isAuthenticated } = useAuth();
   const auth = useAuthModal("login");
 
   return (
@@ -34,7 +23,7 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
         <ReplyComposer
           mode="progressive"
           targetUnitId={shelfUnitId}
-          placeholder={m.shelf_discussion_composer_placeholder()}
+          placeholder={t("entity:shelf_discussion_composer_placeholder")}
         />
       ) : (
         <div
@@ -44,10 +33,10 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
           }}
         >
           <p className="text-sm text-text-secondary">
-            {m.shelf_discussion_signInPrompt()}
+            {t("entity:shelf_discussion_signInPrompt")}
           </p>
           <Button size="sm" onClick={auth.openLogin}>
-            {m.auth_login()}
+            {t("auth:login")}
           </Button>
           {auth.AuthModal({})}
         </div>

@@ -1,16 +1,4 @@
-import {
-  common_apply,
-  common_cancel,
-  common_close,
-  common_reset,
-  theme_customizer_current_accent,
-  theme_customizer_custom_color,
-  theme_customizer_hex_format,
-  theme_customizer_preset_colors,
-  theme_customizer_static_theme,
-  theme_customizer_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -32,19 +20,6 @@ import {
 import type React from "react";
 import { useState } from "react";
 import { useAppStore } from "@/app/states/appStore";
-
-const i18nMessages = {
-  common_apply,
-  common_cancel,
-  common_close,
-  common_reset,
-  theme_customizer_current_accent,
-  theme_customizer_custom_color,
-  theme_customizer_hex_format,
-  theme_customizer_preset_colors,
-  theme_customizer_static_theme,
-  theme_customizer_title,
-};
 
 const BRAND_DEFAULT_COLOR = "#f4606c";
 
@@ -80,8 +55,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   open,
   onClose,
 }) => {
-  const m = useMessage(i18nMessages);
-  const customColor = useAppStore((state: any) => state.customColor);
+  const { t } = useTranslation(["common", "shell"]);
+const customColor = useAppStore((state: any) => state.customColor);
   const setCustomColor = useAppStore((state: any) => state.setCustomColor);
 
   const [selectedColor, setSelectedColor] = useState(
@@ -127,13 +102,13 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PaletteIcon className="h-5 w-5" />
-              <DialogTitle>{m.theme_customizer_title()}</DialogTitle>
+              <DialogTitle>{t("shell:theme_customizer_title")}</DialogTitle>
             </div>
             <Button
               size="icon"
               variant="ghost"
               onClick={onClose}
-              aria-label={m.common_close()}
+              aria-label={t("common:close")}
             >
               <CloseIcon className="h-4 w-4" />
             </Button>
@@ -144,7 +119,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
           {/* 当前颜色预览 */}
           <div>
             <p className="text-sm font-medium mb-2">
-              {m.theme_customizer_current_accent()}
+              {t("shell:theme_customizer_current_accent")}
             </p>
             <div className="flex items-center gap-4">
               <div
@@ -156,7 +131,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                   {selectedColor.toUpperCase()}
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {m.theme_customizer_static_theme()}
+                  {t("shell:theme_customizer_static_theme")}
                 </p>
               </div>
             </div>
@@ -165,7 +140,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
           {/* 预设颜色 */}
           <div>
             <p className="text-sm font-medium mb-2">
-              {m.theme_customizer_preset_colors()}
+              {t("shell:theme_customizer_preset_colors")}
             </p>
             <div className="grid grid-cols-6 gap-2">
               {PRESET_COLORS.map((color) => (
@@ -197,7 +172,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
           {/* 自定义十六进制颜色 */}
           <div>
             <p className="text-sm font-medium mb-2">
-              {m.theme_customizer_custom_color()}
+              {t("shell:theme_customizer_custom_color")}
             </p>
             <div className="flex items-center gap-2">
               {customHex && /^#[0-9A-F]{6}$/i.test(customHex) && (
@@ -214,7 +189,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
               />
             </div>
             <p className="text-sm text-text-secondary mt-1">
-              {m.theme_customizer_hex_format()}
+              {t("shell:theme_customizer_hex_format")}
             </p>
           </div>
         </div>
@@ -222,12 +197,12 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
         <DialogFooter>
           <Button variant="ghost" onClick={handleReset} className="gap-1">
             <RefreshIcon className="h-4 w-4" />
-            {m.common_reset()}
+            {t("common:reset")}
           </Button>
           <Button variant="ghost" onClick={onClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
-          <Button onClick={handleApply}>{m.common_apply()}</Button>
+          <Button onClick={handleApply}>{t("common:apply")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -236,8 +211,8 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
 
 // 快速主题切换按钮组件
 export const ThemeQuickToggle: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const [open, setOpen] = useState(false);
+  const { t } = useTranslation(["common", "shell"]);
+const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -250,14 +225,14 @@ export const ThemeQuickToggle: React.FC = () => {
                 variant="ghost"
                 onClick={() => setOpen(true)}
                 className="!text-white"
-                aria-label={m.theme_customizer_title()}
+                aria-label={t("shell:theme_customizer_title")}
                 {...props}
               >
                 <PaletteIcon className="h-5 w-5" />
               </Button>
             )}
           />
-          <TooltipContent>{m.theme_customizer_title()}</TooltipContent>
+          <TooltipContent>{t("shell:theme_customizer_title")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       <ThemeCustomizer open={open} onClose={() => setOpen(false)} />

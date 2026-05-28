@@ -1,11 +1,6 @@
 import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { PostKind } from "@rezics/contract";
-import {
-  review_search_empty_title,
-  review_search_placeholder,
-  review_search_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useState } from "react";
 import { ReviewList } from "@/review/components/list/ReviewList";
@@ -13,15 +8,9 @@ import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDT
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 
-const i18nMessages = {
-  review_search_empty_title,
-  review_search_placeholder,
-  review_search_title,
-};
-
 export function ReviewSearchPage() {
-  const m = useMessage(i18nMessages);
-  const search = useSearchQuery({});
+  const { t } = useTranslation(["community"]);
+const search = useSearchQuery({});
   const [start, setStart] = useState(0);
   const limit = 20;
   const keyword = search.query.keyword ?? "";
@@ -38,14 +27,14 @@ export function ReviewSearchPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{m.review_search_title()}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("community:review_search_title")}</h1>
 
       <div className="mb-6">
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           onSubmit={() => setStart(0)}
-          placeholder={m.review_search_placeholder()}
+          placeholder={t("community:review_search_placeholder")}
         />
       </div>
 
@@ -54,7 +43,7 @@ export function ReviewSearchPage() {
           <Spinner />
         </div>
       ) : reviews.length === 0 ? (
-        <EmptyState title={m.review_search_empty_title()} />
+        <EmptyState title={t("community:review_search_empty_title")} />
       ) : (
         <ReviewList reviews={reviews} />
       )}

@@ -15,17 +15,7 @@ import {
   markdownContentDoc,
   type RealmDTO,
 } from "@rezics/contract";
-import {
-  common_add,
-  common_add_translation,
-  common_cancel,
-  common_description,
-  common_language,
-  common_name,
-  common_save,
-  realm_manage,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -54,24 +44,13 @@ import { canManageRealm } from "../models/canManageRealm";
 import { RealmExtraManageSection } from "../sections/RealmExtraManageSection";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 
-const i18nMessages = {
-  common_add,
-  common_add_translation,
-  common_cancel,
-  common_description,
-  common_language,
-  common_name,
-  common_save,
-  realm_manage,
-};
-
 interface RealmManagePageProps {
   realmId: string;
 }
 
 export function RealmManagePage({ realmId }: RealmManagePageProps) {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["common", "entity"]);
+const navigate = useNavigate();
   const queryClient = useQueryClient();
   const {
     data: realm,
@@ -238,7 +217,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{m.realm_manage()}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("entity:realm_manage")}</h1>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <UnitTranslationLanguageBar
@@ -246,12 +225,12 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
             selectedLanguage={selectedLanguage}
             onSelect={setSelectedLanguage}
             onAddClick={() => setAddOpen(true)}
-            label={m.common_language()}
-            addLabel={m.common_add_translation()}
+            label={t("common:language")}
+            addLabel={t("common:add_translation")}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="realm-name">{m.common_name()}</Label>
+          <Label htmlFor="realm-name">{t("common:name")}</Label>
           <Input
             id="realm-name"
             value={title}
@@ -259,7 +238,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="realm-description">{m.common_description()}</Label>
+          <Label htmlFor="realm-description">{t("common:description")}</Label>
           <Textarea
             id="realm-description"
             value={description}
@@ -291,10 +270,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
               })
             }
           >
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
-            {m.common_save()}
+            {t("common:save")}
           </Button>
         </div>
       </div>
@@ -303,10 +282,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         existingLanguages={editableLanguages}
         onClose={() => setAddOpen(false)}
         onSubmit={handleAddLanguage}
-        title={m.common_add_translation()}
-        languageLabel={m.common_language()}
-        cancelLabel={m.common_cancel()}
-        submitLabel={m.common_add()}
+        title={t("common:add_translation")}
+        languageLabel={t("common:language")}
+        cancelLabel={t("common:cancel")}
+        submitLabel={t("common:add")}
       />
     </div>
   );

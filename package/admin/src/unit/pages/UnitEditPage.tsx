@@ -22,74 +22,7 @@ import {
   type UnitAuthorityRoleKey as UnitAuthorityRoleKeyType,
 } from "@rezics/contract";
 import { entityKindLabel, subjectRoleLabel } from "@rezics/i18n";
-import {
-  admin_auth_email_status,
-  admin_auth_user_id,
-  admin_auth_user_role,
-  admin_unit_collaborator_added_by,
-  admin_unit_collaborator_removal_failed,
-  admin_unit_collaborator_remove,
-  admin_unit_collaborator_required,
-  admin_unit_collaborator_update_failed,
-  admin_unit_collaborators_description,
-  admin_unit_collaborators_empty,
-  admin_unit_collaborators_failed_load,
-  admin_unit_collaborators_title,
-  admin_unit_default_language,
-  admin_unit_edit_description,
-  admin_unit_edit_title,
-  admin_unit_entity_fallback,
-  admin_unit_extra_json,
-  admin_unit_extra_json_invalid,
-  admin_unit_failed_load,
-  admin_unit_field,
-  admin_unit_field_lock_locked_by,
-  admin_unit_field_lock_removal_failed,
-  admin_unit_field_lock_remove,
-  admin_unit_field_lock_update_failed,
-  admin_unit_field_locks_description,
-  admin_unit_field_locks_empty,
-  admin_unit_field_locks_failed_load,
-  admin_unit_field_locks_title,
-  admin_unit_locked_reason,
-  admin_unit_no_title,
-  admin_unit_no_translations,
-  admin_unit_optional,
-  admin_unit_optional_moderation_note,
-  admin_unit_order,
-  admin_unit_sort_order_invalid,
-  admin_unit_status_placeholder,
-  admin_unit_subject_attribution_empty,
-  admin_unit_subject_attribution_failed_load,
-  admin_unit_subject_attribution_remove,
-  admin_unit_subject_attributions_description,
-  admin_unit_subject_attributions_title,
-  admin_unit_subject_entity_id,
-  admin_unit_subject_entity_placeholder,
-  admin_unit_subject_link_failed,
-  admin_unit_subject_required,
-  admin_unit_subject_unlink_failed,
-  admin_unit_subtitle_label,
-  admin_unit_translations,
-  admin_unit_translations_help,
-  admin_unit_update_failed,
-  admin_unit_user_unit_id,
-  admin_unit_user_unit_placeholder,
-  admin_unit_visibility,
-  admin_unit_visibility_placeholder,
-  admin_unit_weight,
-  admin_unit_weight_invalid,
-  common_add,
-  common_back,
-  common_created,
-  common_link,
-  common_lock,
-  common_save,
-  common_saving,
-  common_type,
-  common_updated,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -112,74 +45,6 @@ import React from "react";
 import { Page } from "@/core/layouts/Page";
 import { Route } from "@/routes/_admin/unit/$unitId";
 import { Link } from "@/shared/ui/link";
-
-const i18nMessages = {
-  admin_auth_email_status,
-  admin_auth_user_id,
-  admin_auth_user_role,
-  admin_unit_collaborator_added_by,
-  admin_unit_collaborator_removal_failed,
-  admin_unit_collaborator_remove,
-  admin_unit_collaborator_required,
-  admin_unit_collaborator_update_failed,
-  admin_unit_collaborators_description,
-  admin_unit_collaborators_empty,
-  admin_unit_collaborators_failed_load,
-  admin_unit_collaborators_title,
-  admin_unit_default_language,
-  admin_unit_edit_description,
-  admin_unit_edit_title,
-  admin_unit_entity_fallback,
-  admin_unit_extra_json,
-  admin_unit_extra_json_invalid,
-  admin_unit_failed_load,
-  admin_unit_field,
-  admin_unit_field_lock_locked_by,
-  admin_unit_field_lock_removal_failed,
-  admin_unit_field_lock_remove,
-  admin_unit_field_lock_update_failed,
-  admin_unit_field_locks_description,
-  admin_unit_field_locks_empty,
-  admin_unit_field_locks_failed_load,
-  admin_unit_field_locks_title,
-  admin_unit_locked_reason,
-  admin_unit_no_title,
-  admin_unit_no_translations,
-  admin_unit_optional,
-  admin_unit_optional_moderation_note,
-  admin_unit_order,
-  admin_unit_sort_order_invalid,
-  admin_unit_status_placeholder,
-  admin_unit_subject_attribution_empty,
-  admin_unit_subject_attribution_failed_load,
-  admin_unit_subject_attribution_remove,
-  admin_unit_subject_attributions_description,
-  admin_unit_subject_attributions_title,
-  admin_unit_subject_entity_id,
-  admin_unit_subject_entity_placeholder,
-  admin_unit_subject_link_failed,
-  admin_unit_subject_required,
-  admin_unit_subject_unlink_failed,
-  admin_unit_subtitle_label,
-  admin_unit_translations,
-  admin_unit_translations_help,
-  admin_unit_update_failed,
-  admin_unit_user_unit_id,
-  admin_unit_user_unit_placeholder,
-  admin_unit_visibility,
-  admin_unit_visibility_placeholder,
-  admin_unit_weight,
-  admin_unit_weight_invalid,
-  common_add,
-  common_back,
-  common_created,
-  common_link,
-  common_lock,
-  common_save,
-  common_saving,
-  common_type,
-  common_updated,
-};
 
 const lockPathOptions = [
   UNIT_FIELD_LOCK_ALL,
@@ -215,8 +80,8 @@ function toJsonText(value: unknown) {
 }
 
 export default function UnitEditPage() {
-  const m = useMessage(i18nMessages);
-  const { unitId } = Route.useParams();
+  const { t } = useTranslation(["admin", "common"]);
+const { unitId } = Route.useParams();
   const [error, setError] = React.useState<string | null>(null);
 
   const detailQuery = useQuery(unitQueries.detail(unitId));
@@ -229,14 +94,14 @@ export default function UnitEditPage() {
   const updateMutation = unitMutations.useUpdate({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : m.admin_unit_update_failed(),
+        err instanceof Error ? err.message : t("admin:unit_update_failed"),
       ),
     onSuccess: () => setError(null),
   });
   const linkSubjectMutation = useLinkSubjectAttributionMutation({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : m.admin_unit_subject_link_failed(),
+        err instanceof Error ? err.message : t("admin:unit_subject_link_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -245,7 +110,7 @@ export default function UnitEditPage() {
       setError(
         err instanceof Error
           ? err.message
-          : m.admin_unit_subject_unlink_failed(),
+          : t("admin:unit_subject_unlink_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -254,7 +119,7 @@ export default function UnitEditPage() {
       setError(
         err instanceof Error
           ? err.message
-          : m.admin_unit_field_lock_update_failed(),
+          : t("admin:unit_field_lock_update_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -263,7 +128,7 @@ export default function UnitEditPage() {
       setError(
         err instanceof Error
           ? err.message
-          : m.admin_unit_field_lock_removal_failed(),
+          : t("admin:unit_field_lock_removal_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -272,7 +137,7 @@ export default function UnitEditPage() {
       setError(
         err instanceof Error
           ? err.message
-          : m.admin_unit_collaborator_update_failed(),
+          : t("admin:unit_collaborator_update_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -281,7 +146,7 @@ export default function UnitEditPage() {
       setError(
         err instanceof Error
           ? err.message
-          : m.admin_unit_collaborator_removal_failed(),
+          : t("admin:unit_collaborator_removal_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -319,7 +184,7 @@ export default function UnitEditPage() {
       try {
         extra = JSON.parse(trimmedExtra);
       } catch {
-        setError(m.admin_unit_extra_json_invalid());
+        setError(t("admin:unit_extra_json_invalid"));
         return;
       }
     }
@@ -345,15 +210,15 @@ export default function UnitEditPage() {
       : undefined;
 
     if (!subjectEntityId.trim()) {
-      setError(m.admin_unit_subject_required());
+      setError(t("admin:unit_subject_required"));
       return;
     }
     if (Number.isNaN(parsedSortOrder)) {
-      setError(m.admin_unit_sort_order_invalid());
+      setError(t("admin:unit_sort_order_invalid"));
       return;
     }
     if (parsedWeight !== undefined && Number.isNaN(parsedWeight)) {
-      setError(m.admin_unit_weight_invalid());
+      setError(t("admin:unit_weight_invalid"));
       return;
     }
 
@@ -392,7 +257,7 @@ export default function UnitEditPage() {
     e.preventDefault();
     setError(null);
     if (!collaboratorUserId.trim()) {
-      setError(m.admin_unit_collaborator_required());
+      setError(t("admin:unit_collaborator_required"));
       return;
     }
     await upsertCollaboratorMutation.mutateAsync({
@@ -414,8 +279,8 @@ export default function UnitEditPage() {
 
   return (
     <Page
-      title={m.admin_unit_edit_title()}
-      description={m.admin_unit_edit_description({ unitId })}
+      title={t("admin:unit_edit_title")}
+      description={t("admin:unit_edit_description", { unitId })}
     >
       <Card>
         <CardContent>
@@ -426,7 +291,7 @@ export default function UnitEditPage() {
               render={(props) => (
                 <Link to="/unit" {...props}>
                   <ArrowBackIcon className="size-4" />
-                  {m.common_back()}
+                  {t("common:back")}
                 </Link>
               )}
             />
@@ -443,7 +308,7 @@ export default function UnitEditPage() {
             <div>
               <Alert>
                 <AlertDescription className="text-error-text">
-                  {m.admin_unit_failed_load()}
+                  {t("admin:unit_failed_load")}
                 </AlertDescription>
               </Alert>
               {detailQuery.error ? (
@@ -467,23 +332,23 @@ export default function UnitEditPage() {
                   ID: <strong>{detailQuery.data?.id ?? "-"}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {m.admin_auth_user_id()}:{" "}
+                  {t("admin:auth_user_id")}:{" "}
                   <strong>{detailQuery.data?.userId ?? "-"}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {m.common_type()}:{" "}
+                  {t("common:type")}:{" "}
                   <strong>{detailQuery.data?.type ?? "-"}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {m.admin_unit_default_language()}:{" "}
+                  {t("admin:unit_default_language")}:{" "}
                   <strong>{detailQuery.data?.defaultLanguage ?? "-"}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {m.common_created()}:{" "}
+                  {t("common:created")}:{" "}
                   <strong>{fmtDate(detailQuery.data?.createdAt)}</strong>
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {m.common_updated()}:{" "}
+                  {t("common:updated")}:{" "}
                   <strong>{fmtDate(detailQuery.data?.updatedAt)}</strong>
                 </p>
               </div>
@@ -492,7 +357,7 @@ export default function UnitEditPage() {
               {detailQuery.data?.translations?.length ? (
                 <div className="flex flex-col gap-2 mb-6">
                   <p className="text-xs font-semibold text-text-secondary">
-                    {m.admin_unit_translations()}
+                    {t("admin:unit_translations")}
                   </p>
                   {detailQuery.data.translations.map((tr) => (
                     <div
@@ -500,11 +365,11 @@ export default function UnitEditPage() {
                       className="pl-4 border-l-2 border-border-whisper"
                     >
                       <p className="text-sm font-semibold">
-                        [{tr.language}] {tr.title || m.admin_unit_no_title()}
+                        [{tr.language}] {tr.title || t("admin:unit_no_title")}
                       </p>
                       {tr.subtitle ? (
                         <p className="text-xs text-text-secondary">
-                          {m.admin_unit_subtitle_label({
+                          {t("admin:unit_subtitle_label", {
                             subtitle: tr.subtitle,
                           })}
                         </p>
@@ -517,12 +382,12 @@ export default function UnitEditPage() {
                     </div>
                   ))}
                   <p className="text-xs text-text-secondary">
-                    {m.admin_unit_translations_help()}
+                    {t("admin:unit_translations_help")}
                   </p>
                 </div>
               ) : (
                 <p className="text-sm text-text-secondary mb-4">
-                  {m.admin_unit_no_translations()}
+                  {t("admin:unit_no_translations")}
                 </p>
               )}
 
@@ -531,10 +396,10 @@ export default function UnitEditPage() {
               <section className="flex flex-col gap-3 mb-6">
                 <div className="flex flex-col gap-1">
                   <h3 className="text-base font-semibold">
-                    {m.admin_unit_subject_attributions_title()}
+                    {t("admin:unit_subject_attributions_title")}
                   </h3>
                   <p className="text-xs text-text-secondary">
-                    {m.admin_unit_subject_attributions_description()}
+                    {t("admin:unit_subject_attributions_description")}
                   </p>
                 </div>
 
@@ -544,7 +409,7 @@ export default function UnitEditPage() {
                   </div>
                 ) : subjectQuery.isError ? (
                   <p className="text-sm text-error-text">
-                    {m.admin_unit_subject_attribution_failed_load()}
+                    {t("admin:unit_subject_attribution_failed_load")}
                   </p>
                 ) : subjectQuery.data?.length ? (
                   <div className="flex flex-col gap-2">
@@ -580,7 +445,7 @@ export default function UnitEditPage() {
                               {subjectRoleLabel(subject.role)} ·{" "}
                               {subject.entity?.kind
                                 ? entityKindLabel(subject.entity.kind)
-                                : m.admin_unit_entity_fallback()}{" "}
+                                : t("admin:unit_entity_fallback")}{" "}
                               · order {subject.sortOrder}
                               {subject.weight != null
                                 ? ` · weight ${subject.weight}`
@@ -592,7 +457,7 @@ export default function UnitEditPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          aria-label={m.admin_unit_subject_attribution_remove()}
+                          aria-label={t("admin:unit_subject_attribution_remove")}
                           disabled={unlinkSubjectMutation.isPending}
                           onClick={async () => {
                             await unlinkSubjectMutation.mutateAsync({
@@ -610,7 +475,7 @@ export default function UnitEditPage() {
                   </div>
                 ) : (
                   <p className="text-sm text-text-secondary">
-                    {m.admin_unit_subject_attribution_empty()}
+                    {t("admin:unit_subject_attribution_empty")}
                   </p>
                 )}
 
@@ -620,18 +485,18 @@ export default function UnitEditPage() {
                 >
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="subject-entity-id">
-                      {m.admin_unit_subject_entity_id()}
+                      {t("admin:unit_subject_entity_id")}
                     </Label>
                     <Input
                       id="subject-entity-id"
                       value={subjectEntityId}
                       onChange={(e) => setSubjectEntityId(e.target.value)}
-                      placeholder={m.admin_unit_subject_entity_placeholder()}
+                      placeholder={t("admin:unit_subject_entity_placeholder")}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="subject-role">
-                      {m.admin_auth_user_role()}
+                      {t("admin:auth_user_role")}
                     </Label>
                     <select
                       id="subject-role"
@@ -653,7 +518,7 @@ export default function UnitEditPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="subject-sort-order">
-                      {m.admin_unit_order()}
+                      {t("admin:unit_order")}
                     </Label>
                     <Input
                       id="subject-sort-order"
@@ -663,13 +528,13 @@ export default function UnitEditPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="subject-weight">
-                      {m.admin_unit_weight()}
+                      {t("admin:unit_weight")}
                     </Label>
                     <Input
                       id="subject-weight"
                       value={subjectWeight}
                       onChange={(e) => setSubjectWeight(e.target.value)}
-                      placeholder={m.admin_unit_optional()}
+                      placeholder={t("admin:unit_optional")}
                     />
                   </div>
                   <Button
@@ -678,7 +543,7 @@ export default function UnitEditPage() {
                     disabled={linkSubjectMutation.isPending}
                   >
                     <PlusIcon className="size-4" />
-                    {m.common_link()}
+                    {t("common:link")}
                   </Button>
                 </form>
               </section>
@@ -689,10 +554,10 @@ export default function UnitEditPage() {
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
                     <h3 className="text-base font-semibold">
-                      {m.admin_unit_field_locks_title()}
+                      {t("admin:unit_field_locks_title")}
                     </h3>
                     <p className="text-xs text-text-secondary">
-                      {m.admin_unit_field_locks_description()}
+                      {t("admin:unit_field_locks_description")}
                     </p>
                   </div>
 
@@ -702,7 +567,7 @@ export default function UnitEditPage() {
                     </div>
                   ) : fieldLocksQuery.isError ? (
                     <p className="text-sm text-error-text">
-                      {m.admin_unit_field_locks_failed_load()}
+                      {t("admin:unit_field_locks_failed_load")}
                     </p>
                   ) : fieldLocksQuery.data?.locks.length ? (
                     <div className="flex flex-col gap-2">
@@ -716,7 +581,7 @@ export default function UnitEditPage() {
                               {lock.path}
                             </p>
                             <p className="text-xs text-text-secondary">
-                              {m.admin_unit_field_lock_locked_by({
+                              {t("admin:unit_field_lock_locked_by", {
                                 userId: lock.lockedById,
                                 date: fmtDate(lock.createdAt),
                               })}
@@ -731,7 +596,7 @@ export default function UnitEditPage() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            aria-label={m.admin_unit_field_lock_remove()}
+                            aria-label={t("admin:unit_field_lock_remove")}
                             disabled={removeFieldLockMutation.isPending}
                             onClick={() =>
                               onRemoveFieldLock({
@@ -747,7 +612,7 @@ export default function UnitEditPage() {
                     </div>
                   ) : (
                     <p className="text-sm text-text-secondary">
-                      {m.admin_unit_field_locks_empty()}
+                      {t("admin:unit_field_locks_empty")}
                     </p>
                   )}
 
@@ -757,7 +622,7 @@ export default function UnitEditPage() {
                   >
                     <div className="flex flex-col gap-1">
                       <Label htmlFor="field-lock-path">
-                        {m.admin_unit_field()}
+                        {t("admin:unit_field")}
                       </Label>
                       <select
                         id="field-lock-path"
@@ -774,13 +639,13 @@ export default function UnitEditPage() {
                     </div>
                     <div className="flex flex-col gap-1">
                       <Label htmlFor="field-lock-reason">
-                        {m.admin_unit_locked_reason()}
+                        {t("admin:unit_locked_reason")}
                       </Label>
                       <Input
                         id="field-lock-reason"
                         value={lockReason}
                         onChange={(e) => setLockReason(e.target.value)}
-                        placeholder={m.admin_unit_optional_moderation_note()}
+                        placeholder={t("admin:unit_optional_moderation_note")}
                       />
                     </div>
                     <Button
@@ -789,7 +654,7 @@ export default function UnitEditPage() {
                       disabled={upsertFieldLockMutation.isPending}
                     >
                       <PlusIcon className="size-4" />
-                      {m.common_lock()}
+                      {t("common:lock")}
                     </Button>
                   </form>
                 </div>
@@ -797,10 +662,10 @@ export default function UnitEditPage() {
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
                     <h3 className="text-base font-semibold">
-                      {m.admin_unit_collaborators_title()}
+                      {t("admin:unit_collaborators_title")}
                     </h3>
                     <p className="text-xs text-text-secondary">
-                      {m.admin_unit_collaborators_description()}
+                      {t("admin:unit_collaborators_description")}
                     </p>
                   </div>
 
@@ -810,7 +675,7 @@ export default function UnitEditPage() {
                     </div>
                   ) : collaboratorsQuery.isError ? (
                     <p className="text-sm text-error-text">
-                      {m.admin_unit_collaborators_failed_load()}
+                      {t("admin:unit_collaborators_failed_load")}
                     </p>
                   ) : collaboratorsQuery.data?.collaborators.length ? (
                     <div className="flex flex-col gap-2">
@@ -825,7 +690,7 @@ export default function UnitEditPage() {
                                 {collaborator.userId}
                               </p>
                               <p className="text-xs text-text-secondary">
-                                {m.admin_unit_collaborator_added_by({
+                                {t("admin:unit_collaborator_added_by", {
                                   role: collaborator.roleKey,
                                   userId: collaborator.addedById,
                                   date: fmtDate(collaborator.createdAt),
@@ -836,7 +701,7 @@ export default function UnitEditPage() {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              aria-label={m.admin_unit_collaborator_remove()}
+                              aria-label={t("admin:unit_collaborator_remove")}
                               disabled={removeCollaboratorMutation.isPending}
                               onClick={() =>
                                 onRemoveCollaborator({
@@ -853,7 +718,7 @@ export default function UnitEditPage() {
                     </div>
                   ) : (
                     <p className="text-sm text-text-secondary">
-                      {m.admin_unit_collaborators_empty()}
+                      {t("admin:unit_collaborators_empty")}
                     </p>
                   )}
 
@@ -863,18 +728,18 @@ export default function UnitEditPage() {
                   >
                     <div className="flex flex-col gap-1">
                       <Label htmlFor="collaborator-user-id">
-                        {m.admin_unit_user_unit_id()}
+                        {t("admin:unit_user_unit_id")}
                       </Label>
                       <Input
                         id="collaborator-user-id"
                         value={collaboratorUserId}
                         onChange={(e) => setCollaboratorUserId(e.target.value)}
-                        placeholder={m.admin_unit_user_unit_placeholder()}
+                        placeholder={t("admin:unit_user_unit_placeholder")}
                       />
                     </div>
                     <div className="flex flex-col gap-1">
                       <Label htmlFor="collaborator-role">
-                        {m.admin_auth_user_role()}
+                        {t("admin:auth_user_role")}
                       </Label>
                       <select
                         id="collaborator-role"
@@ -899,7 +764,7 @@ export default function UnitEditPage() {
                       disabled={upsertCollaboratorMutation.isPending}
                     >
                       <PlusIcon className="size-4" />
-                      {m.common_add()}
+                      {t("common:add")}
                     </Button>
                   </form>
                 </div>
@@ -911,29 +776,29 @@ export default function UnitEditPage() {
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="uep-status">
-                      {m.admin_auth_email_status()}
+                      {t("admin:auth_email_status")}
                     </Label>
                     <Input
                       id="uep-status"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
-                      placeholder={m.admin_unit_status_placeholder()}
+                      placeholder={t("admin:unit_status_placeholder")}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="uep-visibility">
-                      {m.admin_unit_visibility()}
+                      {t("admin:unit_visibility")}
                     </Label>
                     <Input
                       id="uep-visibility"
                       value={visibility}
                       onChange={(e) => setVisibility(e.target.value)}
-                      placeholder={m.admin_unit_visibility_placeholder()}
+                      placeholder={t("admin:unit_visibility_placeholder")}
                     />
                   </div>
                   <div className="flex flex-col gap-1">
                     <Label htmlFor="uep-extra">
-                      {m.admin_unit_extra_json()}
+                      {t("admin:unit_extra_json")}
                     </Label>
                     <textarea
                       id="uep-extra"
@@ -949,8 +814,8 @@ export default function UnitEditPage() {
                     <Button type="submit" disabled={updateMutation.isPending}>
                       <SaveIcon className="size-4" />
                       {updateMutation.isPending
-                        ? m.common_saving()
-                        : m.common_save()}
+                        ? t("common:saving")
+                        : t("common:save")}
                     </Button>
                   </div>
                 </div>

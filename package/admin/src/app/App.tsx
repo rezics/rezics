@@ -1,30 +1,35 @@
 import "github-markdown-css/github-markdown-light.css";
 import { AuthProvider } from "@rezics/api/providers";
-import { useLocale, useMessage } from "@rezics/i18n/react";
+import {
+  RezicsI18nProvider,
+  useLocale,
+  useTranslation,
+} from "@rezics/i18n/react";
 import { getTextDirection } from "@rezics/i18n/runtime";
 import { ExternalLinkModal } from "@rezics/ui";
 import { RouterProvider } from "@tanstack/react-router";
-import { type ReactNode, StrictMode, useEffect, useRef } from "react";
+import {
+  type ReactNode,
+  StrictMode,
+  Suspense,
+  useEffect,
+  useRef,
+} from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
 import { router } from "@/router";
 import { WindowAlert } from "./components/WindowAlert";
 import { PersistentSettingsLoader } from "./providers/PersistentSettingsLoader";
+import "./providers/i18n";
 import { ReactQueryProvider } from "./providers/react-query";
 import { useAppInit } from "./providers/useAppInit";
 import { useAppStore } from "./states/appStore";
 
 import "virtual:uno.css";
 import "@rezics/ui/config/base.css";
-import { app_error_boundary_message } from "@rezics/i18n/messages";
-
-const i18nMessages = {
-  app_error_boundary_message,
-};
-
 function AppProviders({ children }: { children: ReactNode }) {
-  const m = useMessage(i18nMessages);
-  const themeMode = useAppStore((s) => s.theme);
+  const { t } = useTranslation(["shell"]);
+const themeMode = useAppStore((s) => s.theme);
 
   useAppInit();
 
@@ -34,7 +39,7 @@ function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <StrictMode>
-      <ErrorBoundary fallback={<div>{m.app_error_boundary_message()}</div>}>
+      <ErrorBoundary fallback={<div>{t("shell:app_error_boundary_message")}</div>}>
         <HelmetProvider>
           <PersistentSettingsLoader />
           <ReactQueryProvider>
@@ -51,9 +56,13 @@ function AppProviders({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <AppProviders>
-      <LocalizedRouterProvider />
-    </AppProviders>
+    <RezicsI18nProvider>
+      <Suspense fallback={null}>
+        <AppProviders>
+          <LocalizedRouterProvider />
+        </AppProviders>
+      </Suspense>
+    </RezicsI18nProvider>
   );
 }
 

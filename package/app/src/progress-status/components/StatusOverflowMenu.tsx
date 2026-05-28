@@ -1,8 +1,4 @@
-import {
-  progress_status_overflow_aria,
-  progress_status_overflow_remove_progress,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   DropdownMenu,
@@ -21,11 +17,6 @@ import {
   X,
 } from "lucide-react";
 import { type ReadStatus, readStatusLabel } from "../models/status";
-
-const i18nMessages = {
-  progress_status_overflow_aria,
-  progress_status_overflow_remove_progress,
-};
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -58,8 +49,8 @@ export function StatusOverflowMenu({
   showPrimaryStatuses = false,
   className,
 }: StatusOverflowMenuProps) {
-  const m = useMessage(i18nMessages);
-  const renderStatusMarker = (status: ReadStatus) => (
+  const { t } = useTranslation(["community"]);
+const renderStatusMarker = (status: ReadStatus) => (
     <span
       aria-hidden="true"
       className={cx(
@@ -79,7 +70,7 @@ export function StatusOverflowMenu({
           <Button
             variant="outline"
             size="default"
-            aria-label={m.progress_status_overflow_aria()}
+            aria-label={t("community:progress_status_overflow_aria")}
             disabled={disabled}
             className={cx(
               "h-9 w-full min-w-0 rounded-none border-0 bg-transparent px-2 text-white/90 hover:bg-white/10 hover:text-white aria-expanded:bg-white/15 aria-expanded:text-white",
@@ -141,7 +132,7 @@ export function StatusOverflowMenu({
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onRemoveProgress}>
           <Trash2 className="w-4 h-4 mr-2" />
-          {m.progress_status_overflow_remove_progress()}
+          {t("community:progress_status_overflow_remove_progress")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

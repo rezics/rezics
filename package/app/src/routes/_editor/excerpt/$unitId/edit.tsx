@@ -1,8 +1,8 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { common_back, excerpt_form_title } from "@rezics/i18n/messages";
 import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
 import { createMinimalEditConsoleConfig } from "@/core/layouts/editConsoleConfig";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 const ExcerptEditPageContainer = lazyRouteComponent(
   () => import("@/excerpt/pages/ExcerptEditPage"),
   "ExcerptEditPageContainer",
@@ -14,9 +14,9 @@ export const Route = createFileRoute("/_editor/excerpt/$unitId/edit")({
     return (
       <EditConsoleLayout
         {...createMinimalEditConsoleConfig({
-          returnLabel: common_back(),
+          returnLabel: getI18nRuntime().i18n.t("common:back"),
           returnHref: `/excerpt/${unitId}`,
-          editorLabel: excerpt_form_title(),
+          editorLabel: getI18nRuntime().i18n.t("community:excerpt_form_title"),
           editorHref: `/excerpt/${unitId}/edit`,
         })}
       >

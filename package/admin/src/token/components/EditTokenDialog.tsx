@@ -1,13 +1,5 @@
 import type { ApiTokenDTO, UpdateApiTokenInput } from "@rezics/contract";
-import {
-  admin_token_edit_dialog_title,
-  admin_token_expires_at_optional,
-  admin_token_token_name,
-  admin_token_updating,
-  common_cancel,
-  common_update,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -23,15 +15,6 @@ import {
 import type { FC } from "react";
 import { useEffect, useState } from "react";
 import { ScopesEditor } from "./ScopesEditor";
-
-const i18nMessages = {
-  admin_token_edit_dialog_title,
-  admin_token_expires_at_optional,
-  admin_token_token_name,
-  admin_token_updating,
-  common_cancel,
-  common_update,
-};
 
 interface EditTokenDialogProps {
   open: boolean;
@@ -53,8 +36,8 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
   updating,
   error,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [name, setName] = useState("");
+  const { t } = useTranslation(["admin", "common"]);
+const [name, setName] = useState("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [scopes, setScopes] = useState<Record<string, string[]>>({});
 
@@ -96,11 +79,11 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
     <Dialog open={open} onOpenChange={(o) => (o ? null : handleClose())}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{m.admin_token_edit_dialog_title()}</DialogTitle>
+          <DialogTitle>{t("admin:token_edit_dialog_title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="etd-name">{m.admin_token_token_name()}</Label>
+            <Label htmlFor="etd-name">{t("admin:token_token_name")}</Label>
             <Input
               id="etd-name"
               value={name}
@@ -109,7 +92,7 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
           </div>
           <div className="flex flex-col gap-1">
             <Label htmlFor="etd-exp">
-              {m.admin_token_expires_at_optional()}
+              {t("admin:token_expires_at_optional")}
             </Label>
             <Input
               id="etd-exp"
@@ -129,10 +112,10 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button onClick={handleUpdate} disabled={updating}>
-            {updating ? m.admin_token_updating() : m.common_update()}
+            {updating ? t("admin:token_updating") : t("common:update")}
           </Button>
         </DialogFooter>
       </DialogContent>

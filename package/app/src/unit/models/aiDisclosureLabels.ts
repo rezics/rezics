@@ -1,12 +1,4 @@
 import type { AiDisclosureMode } from "@rezics/contract";
-import {
-  ai_disclosure_AI_ASSISTED,
-  ai_disclosure_AI_ORIGINATED,
-  ai_disclosure_MACHINE_GENERATED,
-  ai_disclosure_NONE,
-  ai_disclosure_UNKNOWN,
-} from "@rezics/i18n/messages";
-
 const AI_DISCLOSURE_LABEL: Record<AiDisclosureMode, () => string> = {
   UNKNOWN: ai_disclosure_UNKNOWN,
   NONE: ai_disclosure_NONE,

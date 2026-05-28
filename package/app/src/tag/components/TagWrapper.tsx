@@ -1,18 +1,12 @@
 import type { TagFilters } from "@rezics/api/tag/tag";
 import { tagContextQuery, tagQueries } from "@rezics/api/tag/tag";
 import type { UnitTagDTO } from "@rezics/contract";
-import { tag_load_failed, tag_loading } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { RealmTagHighlights } from "./RealmTagHighlights";
 import TagList from "./TagList";
-
-const i18nMessages = {
-  tag_load_failed,
-  tag_loading,
-};
 
 type Mode = "flat" | "grouped";
 
@@ -31,8 +25,8 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   domainIds: _domainIds,
   className,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery(tagQueries.list(filters));
+  const { t } = useTranslation(["community"]);
+const { data, isLoading, error } = useQuery(tagQueries.list(filters));
   const tags: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
 
   const unitId = filters?.unitId;
@@ -52,7 +46,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   if (isLoading) {
     return (
       <div className={className}>
-        <div className="text-sm text-gray-500">{m.tag_loading()}</div>
+        <div className="text-sm text-gray-500">{t("community:tag_loading")}</div>
       </div>
     );
   }
@@ -61,7 +55,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
     return (
       <div className={className}>
         <div className="text-sm text-red-600">
-          {m.tag_load_failed({
+          {t("community:tag_load_failed", {
             error: String((error as any)?.message ?? error),
           })}
         </div>

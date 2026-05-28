@@ -1,12 +1,5 @@
 import type { SearchQuery } from "@rezics/contract";
-import {
-  placeholders_search_books,
-  search_advanced_label,
-  search_input_tags_hint,
-  search_input_tags_label,
-  search_input_word_count_label,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { SlidersHorizontal as TuneIcon } from "lucide-react";
 import type React from "react";
@@ -21,14 +14,6 @@ import {
 } from "@/search/components/primitive";
 import type { UseSearchQueryReturn } from "@/search/hooks/useSearchQuery";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
-
-const i18nMessages = {
-  placeholders_search_books,
-  search_advanced_label,
-  search_input_tags_hint,
-  search_input_tags_label,
-  search_input_word_count_label,
-};
 
 export type BookSearchProps = {
   query: UseSearchQueryReturn["query"];
@@ -68,8 +53,8 @@ export const BookSearch: React.FC<BookSearchProps> = ({
   showWordCount = true,
   keywordPlaceholder,
 }) => {
-  const m = useMessage(i18nMessages);
-  const keyword = bind("keyword");
+  const { t } = useTranslation(["editor", "search"]);
+const keyword = bind("keyword");
   const tags = bind("tags");
   const ratings = bind("ratings");
   const isLicensed = bind("isLicensed");
@@ -94,7 +79,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
             onPatch={(p) => patch(p)}
             onSubmit={onSubmit}
             middleware={middleware}
-            placeholder={keywordPlaceholder ?? m.placeholders_search_books()}
+            placeholder={keywordPlaceholder ?? t("editor:placeholders_search_books")}
           />
         </div>
         {onToggleAdvanced && (
@@ -103,7 +88,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
             size="icon"
             variant="ghost"
             onClick={onToggleAdvanced}
-            aria-label={m.search_advanced_label()}
+            aria-label={t("search:advanced_label")}
           >
             <TuneIcon className="w-5 h-5" />
           </Button>
@@ -115,8 +100,8 @@ export const BookSearch: React.FC<BookSearchProps> = ({
           <TagPicker
             value={tags.value ?? []}
             onChange={(v) => tags.onChange(v.length ? v : undefined)}
-            label={m.search_input_tags_label()}
-            placeholder={m.search_input_tags_hint()}
+            label={t("search:input_tags_label")}
+            placeholder={t("search:input_tags_hint")}
           />
         </div>
         <div className="scrollbar-hide flex min-w-0 items-center gap-2 overflow-x-auto">
@@ -124,7 +109,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
             <WordCountRangeInput
               value={textLength.value}
               onChange={textLength.onChange}
-              label={m.search_input_word_count_label()}
+              label={t("search:input_word_count_label")}
             />
           )}
           <RatingMultiSelect

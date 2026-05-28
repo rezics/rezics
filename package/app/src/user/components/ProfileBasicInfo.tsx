@@ -1,16 +1,7 @@
 import { useCanEdit } from "@rezics/api/hooks";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UserDTO } from "@rezics/contract";
-import {
-  profile_following,
-  profile_stats,
-  profile_tab_content,
-  profile_tab_followers,
-  profile_tab_shelves,
-  settings_profile_edit_title,
-  settings_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
@@ -18,16 +9,6 @@ import type { FC } from "react";
 import FollowButton from "@/engagement/components/FollowButton";
 import { Link } from "@/shared/ui/link";
 import { ProfileStatLink } from "./ProfileOverviewCards";
-
-const i18nMessages = {
-  profile_following,
-  profile_stats,
-  profile_tab_content,
-  profile_tab_followers,
-  profile_tab_shelves,
-  settings_profile_edit_title,
-  settings_title,
-};
 
 interface ProfileBasicInfoProps {
   user: UserDTO;
@@ -40,8 +21,8 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
   isCurrentUser,
   userId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const canEdit = useCanEdit({
+  const { t } = useTranslation(["settings"]);
+const canEdit = useCanEdit({
     resource: "unit",
     ownerUnit: { user: { unitId: user.unitId } },
   });
@@ -72,7 +53,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             <Button
               size="icon"
               variant="ghost"
-              aria-label={m.settings_title()}
+              aria-label={t("settings:title")}
               className="h-8 w-8"
             >
               <SettingsIcon className="w-4 h-4" />
@@ -91,7 +72,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
                 <Button
                   size="icon"
                   variant="ghost"
-                  aria-label={m.settings_profile_edit_title()}
+                  aria-label={t("settings:profile_edit_title")}
                   className="h-8 w-8"
                 >
                   <EditOutlined className="w-4 h-4" />
@@ -109,14 +90,14 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
               <strong className="font-medium text-text-primary">
                 {user.followersCount ?? 0}
               </strong>{" "}
-              {m.profile_tab_followers()}
+              {t("settings:profile_tab_followers")}
             </span>
             <span aria-hidden="true">&middot;</span>
             <span className="min-w-0 truncate">
               <strong className="font-medium text-text-primary">
                 {user.followingsCount ?? 0}
               </strong>{" "}
-              {m.profile_following()}
+              {t("settings:profile_following")}
             </span>
           </div>
           {user.bio && (
@@ -157,14 +138,14 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             <strong className="font-medium text-text-primary">
               {user.followersCount ?? 0}
             </strong>{" "}
-            {m.profile_tab_followers()}
+            {t("settings:profile_tab_followers")}
           </span>
           <span aria-hidden="true">&middot;</span>
           <span>
             <strong className="font-medium text-text-primary">
               {user.followingsCount ?? 0}
             </strong>{" "}
-            {m.profile_following()}
+            {t("settings:profile_following")}
           </span>
         </div>
 
@@ -188,25 +169,25 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
         {/* Stats — desktop only, shown in sidebar */}
         <div className="w-full mt-4 flex flex-col gap-2">
           <span className="text-sm font-semibold mb-1">
-            {m.profile_stats()}
+            {t("settings:profile_stats")}
           </span>
           <ProfileStatLink
-            label={m.profile_tab_shelves()}
+            label={t("settings:profile_tab_shelves")}
             count={shelvesCountQuery.data?.total}
             to={`/user/${userId}/shelves`}
           />
           <ProfileStatLink
-            label={m.profile_tab_content()}
+            label={t("settings:profile_tab_content")}
             count={reviewsCountQuery.data?.total}
             to={`/user/${userId}/content`}
           />
           <ProfileStatLink
-            label={m.profile_tab_followers()}
+            label={t("settings:profile_tab_followers")}
             count={user.followersCount ?? 0}
             to={`/user/${userId}/followers`}
           />
           <ProfileStatLink
-            label={m.profile_following()}
+            label={t("settings:profile_following")}
             count={user.followingsCount ?? 0}
             to={`/user/${userId}/followers?filter=following`}
           />

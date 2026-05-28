@@ -3,11 +3,7 @@ import {
   type ExcerptSource,
   type UnitDTO,
 } from "@rezics/contract";
-import {
-  excerpt_card_description_fallback,
-  excerpt_card_source_unknown,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
   AvatarFallback,
@@ -22,11 +18,6 @@ import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { cn } from "@/shared/utils/css-util";
 import { excerptCardActions, excerptPolicy } from "../../models/excerptPolicy";
 
-const i18nMessages = {
-  excerpt_card_description_fallback,
-  excerpt_card_source_unknown,
-};
-
 export interface ExcerptCardProps {
   excerpt: UnitDTO;
   className?: string;
@@ -36,8 +27,8 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
   excerpt,
   className,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["community"]);
+const navigate = useNavigate();
 
   const excerptId = excerpt.id;
 
@@ -61,7 +52,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
     | undefined;
   const description =
     contentDocMarkdownFallback(excerpt.translations?.[0]?.description) ||
-    m.excerpt_card_description_fallback();
+    t("community:excerpt_card_description_fallback");
 
   const reactionPost: ReactionBarPost = {
     unitId: excerptId ?? "",
@@ -125,8 +116,8 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
 };
 
 function ExcerptCardSource({ source }: { source?: ExcerptSource | string }) {
-  const m = useMessage(i18nMessages);
-  if (!source) return <>{m.excerpt_card_source_unknown()}</>;
+  const { t } = useTranslation(["community"]);
+if (!source) return <>{t("community:excerpt_card_source_unknown")}</>;
   if (typeof source === "string") return <>{source}</>;
   return <>{source.title}</>;
 }

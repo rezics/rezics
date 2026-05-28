@@ -3,27 +3,12 @@ import {
   type ShelfDTO,
   shelfCoverImageSpec,
 } from "@rezics/contract";
-import {
-  common_anonymous,
-  shelf_cover_alt,
-  shelf_items_count,
-  shelf_no_description,
-  shelf_untitled,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
 import { getTranslation } from "@/shared/utils/translation-helpers";
-
-const i18nMessages = {
-  common_anonymous,
-  shelf_cover_alt,
-  shelf_items_count,
-  shelf_no_description,
-  shelf_untitled,
-};
 
 interface ShelfCardProps {
   shelf: ShelfDTO;
@@ -35,8 +20,8 @@ type ShelfCardLinkable = ShelfDTO & {
 };
 
 export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
-  const m = useMessage(i18nMessages);
-  const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
+  const { t } = useTranslation(["common", "entity"]);
+const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "";
   const description = contentDocMarkdownFallback(translation?.description);
@@ -55,7 +40,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
         {shelf.coverUrl ? (
           <img
             src={shelf.coverUrl}
-            alt={m.shelf_cover_alt({ title: title || m.shelf_untitled() })}
+            alt={t("entity:shelf_cover_alt", { title: title || t("entity:shelf_untitled") })}
             className="h-full w-full object-cover"
           />
         ) : (
@@ -67,7 +52,7 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
             }}
           >
             <span className="text-xs text-text-secondary">
-              {m.shelf_items_count({ count: itemsCount })}
+              {t("entity:shelf_items_count", { count: itemsCount })}
             </span>
           </div>
         )}
@@ -75,22 +60,22 @@ export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
 
       <CardContent className="px-4 pb-4 pt-3">
         <h3 className="truncate text-lg font-semibold">
-          {title || m.shelf_untitled()}
+          {title || t("entity:shelf_untitled")}
         </h3>
 
         <p className="mt-1 line-clamp-2 min-h-[2.8em] text-sm leading-[1.4] text-text-secondary">
-          {description || m.shelf_no_description()}
+          {description || t("entity:shelf_no_description")}
         </p>
 
         <div className="mt-3 flex items-center justify-between text-xs">
           <span className="text-xs text-text-secondary">
-            {m.shelf_items_count({ count: itemsCount })}
+            {t("entity:shelf_items_count", { count: itemsCount })}
           </span>
           <span
             className="whitespace-nowrap text-xs text-text-brand"
             style={{ lineHeight: 1 }}
           >
-            {shelf.user?.name || m.common_anonymous()}
+            {shelf.user?.name || t("common:anonymous")}
           </span>
         </div>
         {shelf.matchedUnit?.unitId && (

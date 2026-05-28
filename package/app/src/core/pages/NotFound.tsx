@@ -1,9 +1,4 @@
-import {
-  common_back,
-  common_home,
-  common_not_found,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button, Card, CardContent, CardFooter } from "@rezics/ui/shadcn";
 import {
   useCanGoBack,
@@ -13,12 +8,6 @@ import {
 } from "@tanstack/react-router";
 import { MapPin as Place } from "lucide-react";
 import type React from "react";
-
-const i18nMessages = {
-  common_back,
-  common_home,
-  common_not_found,
-};
 
 export type NotFoundShowProps = {
   path: string;
@@ -31,13 +20,13 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
   onBack,
   onHome,
 }) => {
-  const m = useMessage(i18nMessages);
-  const canGoBack = useCanGoBack();
+  const { t } = useTranslation(["common"]);
+const canGoBack = useCanGoBack();
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card surface="contained" className="min-w-md max-w-lg">
         <CardContent className="flex flex-col gap-4">
-          <h4 className="text-2xl font-medium m-0">{m.common_not_found()}</h4>
+          <h4 className="text-2xl font-medium m-0">{t("common:not_found")}</h4>
           <div className="flex items-center gap-2">
             <Place /> {path}
           </div>
@@ -45,11 +34,11 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
         <CardFooter className="flex flex-row justify-between">
           {canGoBack ? (
             <Button variant="ghost" onClick={onBack}>
-              {m.common_back()}
+              {t("common:back")}
             </Button>
           ) : null}
           <Button variant="ghost" onClick={onHome}>
-            {m.common_home()}
+            {t("common:home")}
           </Button>
         </CardFooter>
       </Card>

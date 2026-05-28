@@ -1,8 +1,8 @@
 import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import { common_back, common_edit } from "@rezics/i18n/messages";
 import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
 import { createMinimalEditConsoleConfig } from "@/core/layouts/editConsoleConfig";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 const RemarkEditPage = lazyRouteComponent(
   () => import("@/remark/pages/RemarkEditPage"),
   "RemarkEditPage",
@@ -14,9 +14,9 @@ export const Route = createFileRoute("/_editor/remark/$reviewId/edit")({
     return (
       <EditConsoleLayout
         {...createMinimalEditConsoleConfig({
-          returnLabel: common_back(),
+          returnLabel: getI18nRuntime().i18n.t("common:back"),
           returnHref: `/remark/${reviewId}`,
-          editorLabel: common_edit(),
+          editorLabel: getI18nRuntime().i18n.t("common:edit"),
           editorHref: `/remark/${reviewId}/edit`,
         })}
       >

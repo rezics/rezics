@@ -4,30 +4,15 @@ import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { markdownContentDoc, PostKind } from "@rezics/contract";
-import {
-  common_submit,
-  common_submitting,
-  excerpt_book_unit_id,
-  remark_new_title,
-  review_new_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 
-const i18nMessages = {
-  common_submit,
-  common_submitting,
-  excerpt_book_unit_id,
-  remark_new_title,
-  review_new_title,
-};
-
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
-  const m = useMessage(i18nMessages);
-  const search = useRouterState({ select: (s) => s.location.search ?? "" });
+  const { t } = useTranslation(["common", "community", "page"]);
+const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = new URLSearchParams(search);
   const navigate = useNavigate();
   const userId = useCurrentUserId();
@@ -96,11 +81,11 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       <div className="max-w-4xl mx-auto mt-4">
         <h1 className="text-xl font-semibold">
           {kind === PostKind.REMARK
-            ? m.remark_new_title()
-            : m.review_new_title()}
+            ? t("page:remark_new_title")
+            : t("community:review_new_title")}
         </h1>
         <div className="mt-4 flex flex-col gap-2">
-          <Label htmlFor="book-unit-id">{m.excerpt_book_unit_id()}</Label>
+          <Label htmlFor="book-unit-id">{t("community:excerpt_book_unit_id")}</Label>
           <Input
             id="book-unit-id"
             className="w-full"
@@ -112,7 +97,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
           data={reviewData}
           setData={setReviewData}
           onSubmit={handleSave}
-          submitLabel={isPending ? m.common_submitting() : m.common_submit()}
+          submitLabel={isPending ? t("common:submitting") : t("common:submit")}
         />
       </div>
     </div>

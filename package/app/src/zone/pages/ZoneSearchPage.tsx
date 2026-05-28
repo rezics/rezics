@@ -1,23 +1,12 @@
 import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
-import {
-  common_loading,
-  zone_not_found,
-  zone_search_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 import { useZone } from "../hooks/useZone";
-
-const i18nMessages = {
-  common_loading,
-  zone_not_found,
-  zone_search_title,
-};
 
 export type ZoneSearchPageProps = {
   slug: string;
@@ -28,8 +17,8 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   slug,
   initialKeyword,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { zone, isLoading: zoneLoading } = useZone(slug);
+  const { t } = useTranslation(["common", "search"]);
+const { zone, isLoading: zoneLoading } = useZone(slug);
   const { allowed } = useAllowedRatings();
 
   const implicitInitial = useMemo<SearchQuery>(() => {
@@ -63,7 +52,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   if (zoneLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <p className="text-text-secondary">{m.common_loading()}</p>
+        <p className="text-text-secondary">{t("common:loading")}</p>
       </div>
     );
   }
@@ -71,7 +60,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   if (!zone) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-semibold">{m.zone_not_found()}</h2>
+        <h2 className="text-2xl font-semibold">{t("search:zone_not_found")}</h2>
       </div>
     );
   }
@@ -84,7 +73,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h2 className="text-2xl font-semibold mb-4">
-        {m.zone_search_title({ name: zone.name })}
+        {t("search:zone_search_title", { name: zone.name })}
       </h2>
       <AdvancedSearch
         query={search.query}

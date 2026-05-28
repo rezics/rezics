@@ -1,10 +1,4 @@
-import {
-  common_cancel,
-  progress_status_remove_backlog_modal_confirm,
-  progress_status_remove_backlog_modal_description,
-  progress_status_remove_backlog_modal_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -14,13 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@rezics/ui/shadcn";
-
-const i18nMessages = {
-  common_cancel,
-  progress_status_remove_backlog_modal_confirm,
-  progress_status_remove_backlog_modal_description,
-  progress_status_remove_backlog_modal_title,
-};
 
 type BacklogRemoveConfirmModalProps = {
   open: boolean;
@@ -35,8 +22,8 @@ export function BacklogRemoveConfirmModal({
   onConfirm,
   isPending,
 }: BacklogRemoveConfirmModalProps) {
-  const m = useMessage(i18nMessages);
-  const handleConfirm = async () => {
+  const { t } = useTranslation(["common", "community"]);
+const handleConfirm = async () => {
     await onConfirm();
     onCancel();
   };
@@ -46,10 +33,10 @@ export function BacklogRemoveConfirmModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {m.progress_status_remove_backlog_modal_title()}
+            {t("community:progress_status_remove_backlog_modal_title")}
           </DialogTitle>
           <DialogDescription>
-            {m.progress_status_remove_backlog_modal_description()}
+            {t("community:progress_status_remove_backlog_modal_description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -60,10 +47,10 @@ export function BacklogRemoveConfirmModal({
             onClick={onCancel}
             disabled={isPending}
           >
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button type="button" onClick={handleConfirm} disabled={isPending}>
-            {m.progress_status_remove_backlog_modal_confirm()}
+            {t("community:progress_status_remove_backlog_modal_confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,20 +1,5 @@
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
-import {
-  admin_jwt_activate,
-  admin_jwt_audience,
-  admin_jwt_deactivate,
-  admin_jwt_edit_title,
-  admin_jwt_issuer,
-  admin_jwt_jwks_path,
-  admin_jwt_jwks_url,
-  admin_jwt_local_issuer,
-  admin_jwt_saving,
-  common_active,
-  common_cancel,
-  common_inactive,
-  common_save,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -32,22 +17,6 @@ import {
 } from "@rezics/ui/shadcn";
 import type { FC } from "react";
 import { useEffect, useState } from "react";
-
-const i18nMessages = {
-  admin_jwt_activate,
-  admin_jwt_audience,
-  admin_jwt_deactivate,
-  admin_jwt_edit_title,
-  admin_jwt_issuer,
-  admin_jwt_jwks_path,
-  admin_jwt_jwks_url,
-  admin_jwt_local_issuer,
-  admin_jwt_saving,
-  common_active,
-  common_cancel,
-  common_inactive,
-  common_save,
-};
 
 type Props = {
   open: boolean;
@@ -70,8 +39,8 @@ export const JwtServiceEditDialog: FC<Props> = ({
   updating,
   error,
 }) => {
-  const m = useMessage(i18nMessages);
-  const [issuer, setIssuer] = useState("");
+  const { t } = useTranslation(["admin", "common"]);
+const [issuer, setIssuer] = useState("");
   const [audience, setAudience] = useState("");
   const [jwksUrl, setJwksUrl] = useState("");
   const [jwksPath, setJwksPath] = useState("");
@@ -114,7 +83,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {m.admin_jwt_edit_title({ serviceKey: service.serviceKey })}
+            {t("admin:jwt_edit_title", { serviceKey: service.serviceKey })}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-4 mt-1">
@@ -134,7 +103,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
                   : "bg-surface-elevated text-text-secondary"
               }
             >
-              {service.isActive ? m.common_active() : m.common_inactive()}
+              {service.isActive ? t("common:active") : t("common:inactive")}
             </Badge>
             <Button
               size="sm"
@@ -146,15 +115,15 @@ export const JwtServiceEditDialog: FC<Props> = ({
               disabled={updating}
             >
               {service.isActive
-                ? m.admin_jwt_deactivate()
-                : m.admin_jwt_activate()}
+                ? t("admin:jwt_deactivate")
+                : t("admin:jwt_activate")}
             </Button>
           </div>
 
           <Separator />
 
           <div className="flex flex-col gap-1">
-            <Label htmlFor="jsed-issuer">{m.admin_jwt_issuer()}</Label>
+            <Label htmlFor="jsed-issuer">{t("admin:jwt_issuer")}</Label>
             <Input
               id="jsed-issuer"
               value={issuer}
@@ -163,7 +132,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="jsed-aud">{m.admin_jwt_audience()}</Label>
+            <Label htmlFor="jsed-aud">{t("admin:jwt_audience")}</Label>
             <Input
               id="jsed-aud"
               value={audience}
@@ -172,7 +141,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="jsed-url">{m.admin_jwt_jwks_url()}</Label>
+            <Label htmlFor="jsed-url">{t("admin:jwt_jwks_url")}</Label>
             <Input
               id="jsed-url"
               value={jwksUrl}
@@ -181,7 +150,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
             />
           </div>
           <div className="flex flex-col gap-1">
-            <Label htmlFor="jsed-path">{m.admin_jwt_jwks_path()}</Label>
+            <Label htmlFor="jsed-path">{t("admin:jwt_jwks_path")}</Label>
             <Input
               id="jsed-path"
               value={jwksPath}
@@ -194,15 +163,15 @@ export const JwtServiceEditDialog: FC<Props> = ({
               checked={isLocalIssuer}
               onCheckedChange={(v) => setIsLocalIssuer(Boolean(v))}
             />
-            {m.admin_jwt_local_issuer()}
+            {t("admin:jwt_local_issuer")}
           </Label>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={updating}>
-            {m.common_cancel()}
+            {t("common:cancel")}
           </Button>
           <Button onClick={handleSave} disabled={updating}>
-            {updating ? m.admin_jwt_saving() : m.common_save()}
+            {updating ? t("admin:jwt_saving") : t("common:save")}
           </Button>
         </DialogFooter>
       </DialogContent>

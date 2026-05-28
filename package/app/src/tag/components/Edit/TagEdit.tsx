@@ -8,22 +8,11 @@ import {
   useUpdateTagMutation,
 } from "@rezics/api/tag/tag";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import {
-  common_name,
-  common_save_changes,
-  tag_create,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
-
-const i18nMessages = {
-  common_name,
-  common_save_changes,
-  tag_create,
-};
 
 /**
  * TagEdit - now creates/updates tags using the new translation-based model.
@@ -42,8 +31,8 @@ export const TagEdit: React.FC<TagEditProps> = ({
   onSaved,
   className,
 }) => {
-  const m = useMessage(i18nMessages);
-  const isUpdate = !!tag;
+  const { t } = useTranslation(["common", "community"]);
+const isUpdate = !!tag;
   const [name, setName] = useState(initialName ?? "");
 
   const createMutation = useCreateTagMutation({
@@ -75,7 +64,7 @@ export const TagEdit: React.FC<TagEditProps> = ({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="tag-name" className="text-sm text-text-secondary">
-            {m.common_name()}
+            {t("common:name")}
           </Label>
           <Input
             id="tag-name"
@@ -87,7 +76,7 @@ export const TagEdit: React.FC<TagEditProps> = ({
 
         <div className="flex items-center gap-3">
           <Button type="submit" size="sm" disabled={busy}>
-            {isUpdate ? m.common_save_changes() : m.tag_create()}
+            {isUpdate ? t("common:save_changes") : t("community:tag_create")}
           </Button>
           {busy && <Spinner size="sm" />}
         </div>

@@ -1,24 +1,13 @@
 import { useConversations } from "@rezics/api/dm/dm";
-import {
-  inbox_all_conversations,
-  inbox_conversation_loading,
-  inbox_conversation_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Link, useParams } from "@tanstack/react-router";
 import type React from "react";
 import { ConversationThreadSection } from "../sections/ConversationThreadSection";
 
-const i18nMessages = {
-  inbox_all_conversations,
-  inbox_conversation_loading,
-  inbox_conversation_title,
-};
-
 export const DmConversationPage: React.FC = () => {
-  const m = useMessage(i18nMessages);
-  const { conversationId } = useParams({
+  const { t } = useTranslation(["community"]);
+const { conversationId } = useParams({
     from: "/_mainLayout/inbox/dm/$conversationId",
   });
   const { data } = useConversations();
@@ -27,7 +16,7 @@ export const DmConversationPage: React.FC = () => {
     conversation?.peerName ??
     conversation?.peerSlug ??
     conversation?.peerId ??
-    m.inbox_conversation_title();
+    t("community:inbox_conversation_title");
 
   return (
     <div className="mx-auto mt-16 flex h-[calc(100vh-8rem)] w-11/12 max-w-3xl flex-col">
@@ -37,7 +26,7 @@ export const DmConversationPage: React.FC = () => {
           to="/inbox/dm"
           className="text-sm text-text-secondary hover:text-text-primary"
         >
-          {m.inbox_all_conversations()}
+          {t("community:inbox_all_conversations")}
         </Link>
       </div>
       {conversation ? (
@@ -47,7 +36,7 @@ export const DmConversationPage: React.FC = () => {
         />
       ) : (
         <p className="text-sm text-text-secondary">
-          {m.inbox_conversation_loading()}
+          {t("community:inbox_conversation_loading")}
         </p>
       )}
     </div>

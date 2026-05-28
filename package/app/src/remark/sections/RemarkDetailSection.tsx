@@ -1,11 +1,6 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
-import {
-  common_edit,
-  common_loading,
-  common_no_data,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
@@ -16,12 +11,6 @@ import { PostTreeSection } from "@/post/sections/PostTreeSection";
 import { Link } from "@/shared/ui/link";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
 
-const i18nMessages = {
-  common_edit,
-  common_loading,
-  common_no_data,
-};
-
 interface RemarkDetailSectionProps {
   remarkId: string;
 }
@@ -29,16 +18,16 @@ interface RemarkDetailSectionProps {
 export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   remarkId,
 }) => {
-  const m = useMessage(i18nMessages);
-  const composerRef = useFocusReplyFromQuery();
+  const { t } = useTranslation(["common"]);
+const composerRef = useFocusReplyFromQuery();
   const { data: remark, isLoading } = useQuery(postQueries.detail(remarkId));
   const editorEntry = useEditorEntry({
     surface: "remark",
     ownerUnit: { user: remark?.author },
   });
 
-  if (isLoading) return <div>{m.common_loading()}</div>;
-  if (!remark) return <div>{m.common_no_data()}</div>;
+  if (isLoading) return <div>{t("common:loading")}</div>;
+  if (!remark) return <div>{t("common:no_data")}</div>;
 
   const handleReplyInvoke = () => {
     composerRef.current?.focus();
@@ -53,7 +42,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
               type="button"
               size="icon"
               variant="ghost"
-              aria-label={m.common_edit()}
+              aria-label={t("common:edit")}
             >
               <Pencil className="h-4 w-4" />
             </Button>

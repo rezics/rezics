@@ -6,14 +6,7 @@ import {
 } from "@rezics/api/auth-jwt-service/auth-jwt-service.mutations";
 import { authJwtServiceQueries } from "@rezics/api/auth-jwt-service/auth-jwt-service.queries";
 import type { JwtServiceDTO, UpdateJwtServiceInput } from "@rezics/contract";
-import {
-  admin_jwt_activate_failed,
-  admin_jwt_auth_empty,
-  admin_jwt_auth_title,
-  admin_jwt_deactivate_failed,
-  admin_jwt_update_failed,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Alert, AlertDescription } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -25,17 +18,9 @@ import {
   JwtServiceTable,
 } from "../../jwt-service/components";
 
-const i18nMessages = {
-  admin_jwt_activate_failed,
-  admin_jwt_auth_empty,
-  admin_jwt_auth_title,
-  admin_jwt_deactivate_failed,
-  admin_jwt_update_failed,
-};
-
 export const AuthJwtServicesPage: FC = () => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery(authJwtServiceQueries.list());
+  const { t } = useTranslation(["admin"]);
+const { data, isLoading, error } = useQuery(authJwtServiceQueries.list());
 
   const [services, setServices] = useState<JwtServiceDTO[]>([]);
 
@@ -75,7 +60,7 @@ export const AuthJwtServicesPage: FC = () => {
       setOpenEdit(false);
       setEditingService(null);
     } catch (err) {
-      setUpdatingError((err as Error)?.message ?? m.admin_jwt_update_failed());
+      setUpdatingError((err as Error)?.message ?? t("admin:jwt_update_failed"));
     } finally {
       setUpdating(false);
     }
@@ -90,7 +75,7 @@ export const AuthJwtServicesPage: FC = () => {
       setEditingService(updated);
     } catch (err) {
       setUpdatingError(
-        (err as Error)?.message ?? m.admin_jwt_activate_failed(),
+        (err as Error)?.message ?? t("admin:jwt_activate_failed"),
       );
     } finally {
       setUpdating(false);
@@ -107,7 +92,7 @@ export const AuthJwtServicesPage: FC = () => {
       setEditingService(updated);
     } catch (err) {
       setUpdatingError(
-        (err as Error)?.message ?? m.admin_jwt_deactivate_failed(),
+        (err as Error)?.message ?? t("admin:jwt_deactivate_failed"),
       );
     } finally {
       setUpdating(false);
@@ -133,7 +118,7 @@ export const AuthJwtServicesPage: FC = () => {
   };
 
   return (
-    <Page title={m.admin_jwt_auth_title()}>
+    <Page title={t("admin:jwt_auth_title")}>
       {isLoading && (
         <div className="flex items-center justify-center h-40">
           <Spinner />
@@ -151,7 +136,7 @@ export const AuthJwtServicesPage: FC = () => {
       {!isLoading && !error && services.length === 0 && (
         <div className="flex items-center justify-center h-40">
           <p className="text-base text-text-secondary">
-            {m.admin_jwt_auth_empty()}
+            {t("admin:jwt_auth_empty")}
           </p>
         </div>
       )}

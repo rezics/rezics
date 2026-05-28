@@ -8,27 +8,6 @@ import {
   type UnitListResponse,
 } from "@rezics/contract";
 import {
-  admin_auth_actions_title,
-  admin_auth_email_status,
-  admin_unit_failed_load_list,
-  admin_unit_list_description,
-  admin_unit_list_meili_description,
-  admin_unit_list_meili_title,
-  admin_unit_list_title,
-  admin_unit_no_title,
-  admin_unit_search_label,
-  admin_unit_search_placeholder,
-  common_create,
-  common_created,
-  common_edit,
-  common_id,
-  common_search,
-  common_title,
-  common_type,
-  common_updated,
-  common_user,
-} from "@rezics/i18n/messages";
-import {
   Badge,
   Button,
   Input,
@@ -49,14 +28,15 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 /** Extract the best title from the translations array on a UnitDTO. */
 function extractUnitTitle(unit: UnitDTO): string {
   const translations = unit.translations;
-  if (!translations?.length) return admin_unit_no_title();
+  if (!translations?.length) return getI18nRuntime().i18n.t("admin:unit_no_title");
   const primary =
     translations.find((t) => t.language === unit.defaultLanguage) ??
     translations[0];
-  return primary?.title || admin_unit_no_title();
+  return primary?.title || getI18nRuntime().i18n.t("admin:unit_no_title");
 }
 
 type UnitOperationsFilters = {
@@ -228,13 +208,13 @@ export default function UnitsPage() {
     const cols: PaginatedColumn<UnitDTO>[] = [
       {
         id: "id",
-        header: common_id(),
+        header: getI18nRuntime().i18n.t("common:id"),
         minWidth: 220,
         cell: (u) => <span className="text-sm font-mono">{u.id}</span>,
       },
       {
         id: "title",
-        header: common_title(),
+        header: getI18nRuntime().i18n.t("common:title"),
         minWidth: 220,
         cell: (u) => (
           <span className="text-sm font-semibold whitespace-nowrap">
@@ -244,20 +224,20 @@ export default function UnitsPage() {
       },
       {
         id: "type",
-        header: common_type(),
+        header: getI18nRuntime().i18n.t("common:type"),
         minWidth: 120,
         cell: (u) =>
           u.type ? <Badge variant="secondary">{u.type}</Badge> : "-",
       },
       {
         id: "status",
-        header: admin_auth_email_status(),
+        header: getI18nRuntime().i18n.t("admin:auth_email_status"),
         minWidth: 120,
         cell: (u) => u.status || "-",
       },
       {
         id: "user",
-        header: common_user(),
+        header: getI18nRuntime().i18n.t("common:user"),
         minWidth: 200,
         cell: (u) => (
           <div className="flex flex-col">
@@ -274,19 +254,19 @@ export default function UnitsPage() {
       },
       {
         id: "createdAt",
-        header: common_created(),
+        header: getI18nRuntime().i18n.t("common:created"),
         minWidth: 170,
         cell: (u) => fmtDate(u.createdAt),
       },
       {
         id: "updatedAt",
-        header: common_updated(),
+        header: getI18nRuntime().i18n.t("common:updated"),
         minWidth: 170,
         cell: (u) => fmtDate(u.updatedAt),
       },
       {
         id: "actions",
-        header: admin_auth_actions_title(),
+        header: getI18nRuntime().i18n.t("admin:auth_actions_title"),
         minWidth: 120,
         cell: (u) => (
           <Button
@@ -294,7 +274,7 @@ export default function UnitsPage() {
             variant="outline"
             render={(props) => (
               <Link to="/unit/$unitId" params={{ unitId: u.id }} {...props}>
-                {common_edit()}
+                {getI18nRuntime().i18n.t("common:edit")}
               </Link>
             )}
           />
@@ -327,19 +307,19 @@ export default function UnitsPage() {
   return (
     <Page
       title={
-        isMeiliMode ? admin_unit_list_meili_title() : admin_unit_list_title()
+        isMeiliMode ? getI18nRuntime().i18n.t("admin:unit_list_meili_title") : getI18nRuntime().i18n.t("admin:unit_list_title")
       }
       description={
         isMeiliMode
-          ? admin_unit_list_meili_description()
-          : admin_unit_list_description()
+          ? getI18nRuntime().i18n.t("admin:unit_list_meili_description")
+          : getI18nRuntime().i18n.t("admin:unit_list_description")
       }
     >
       <SearchablePaginatedTableCard<UnitDTO>
         searchInputId="unit-search"
-        searchLabel={isMeiliMode ? common_search() : admin_unit_search_label()}
-        searchPlaceholder={admin_unit_search_placeholder()}
-        errorLabel={admin_unit_failed_load_list()}
+        searchLabel={isMeiliMode ? getI18nRuntime().i18n.t("common:search") : getI18nRuntime().i18n.t("admin:unit_search_label")}
+        searchPlaceholder={getI18nRuntime().i18n.t("admin:unit_search_placeholder")}
+        errorLabel={getI18nRuntime().i18n.t("admin:unit_failed_load_list")}
         q={q}
         onQChange={setQ}
         onSearch={() => {
@@ -539,7 +519,7 @@ export default function UnitsPage() {
               render={(props) => (
                 <Link to="/unit/create" {...props}>
                   <AddIcon className="size-4" />
-                  {common_create()}
+                  {getI18nRuntime().i18n.t("common:create")}
                 </Link>
               )}
             />

@@ -4,16 +4,7 @@ import {
   LANGUAGES,
   normalizeLanguage,
 } from "@rezics/contract";
-import {
-  admin_setting_appearance_title,
-  admin_setting_dark_mode_label,
-  admin_setting_description,
-  admin_setting_language_description,
-  admin_setting_language_select_label,
-  admin_setting_language_title,
-  admin_setting_title,
-} from "@rezics/i18n/messages";
-import { setLocale, useLocale, useMessage } from "@rezics/i18n/react";
+import { setLocale, useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Card,
   CardContent,
@@ -29,21 +20,11 @@ import {
 import React from "react";
 import { Page } from "@/core/layouts/Page";
 
-const i18nMessages = {
-  admin_setting_appearance_title,
-  admin_setting_dark_mode_label,
-  admin_setting_description,
-  admin_setting_language_description,
-  admin_setting_language_select_label,
-  admin_setting_language_title,
-  admin_setting_title,
-};
-
 const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
 
 export default function SettingsPage() {
-  const m = useMessage(i18nMessages);
-  const [dark, setDark] = React.useState(false);
+  const { t } = useTranslation(["admin"]);
+const [dark, setDark] = React.useState(false);
   const locale = normalizeLanguage(useLocale()) ?? DEFAULT_LANGUAGE;
 
   const handleLanguageChange = (value: string | null) => {
@@ -53,22 +34,22 @@ export default function SettingsPage() {
 
   return (
     <Page
-      title={m.admin_setting_title()}
-      description={m.admin_setting_description()}
+      title={t("admin:setting_title")}
+      description={t("admin:setting_description")}
     >
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-12">
           <Card>
             <CardContent>
               <h3 className="text-sm font-bold mb-2">
-                {m.admin_setting_appearance_title()}
+                {t("admin:setting_appearance_title")}
               </h3>
               <Label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox
                   checked={dark}
                   onCheckedChange={(v) => setDark(v === true)}
                 />
-                <span>{m.admin_setting_dark_mode_label()}</span>
+                <span>{t("admin:setting_dark_mode_label")}</span>
               </Label>
             </CardContent>
           </Card>
@@ -78,14 +59,14 @@ export default function SettingsPage() {
           <Card>
             <CardContent>
               <h3 className="text-sm font-bold mb-2">
-                {m.admin_setting_language_title()}
+                {t("admin:setting_language_title")}
               </h3>
               <p className="mb-4 text-sm leading-normal text-text-secondary">
-                {m.admin_setting_language_description()}
+                {t("admin:setting_language_description")}
               </p>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Label htmlFor="admin-language">
-                  {m.admin_setting_language_select_label()}
+                  {t("admin:setting_language_select_label")}
                 </Label>
                 <Select value={locale} onValueChange={handleLanguageChange}>
                   <SelectTrigger id="admin-language" className="min-w-[180px]">

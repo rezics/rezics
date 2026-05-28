@@ -1,13 +1,6 @@
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
-import {
-  page_book_tabs_community,
-  page_book_tabs_content,
-  page_book_tabs_overview,
-  page_book_tabs_review_shelf,
-  book_otherEditions,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Select,
@@ -29,14 +22,6 @@ import {
   hasMissingReleaseLanguages,
   releaseWorkUnitId,
 } from "../models/releaseWork";
-
-const i18nMessages = {
-  page_book_tabs_community,
-  page_book_tabs_content,
-  page_book_tabs_overview,
-  page_book_tabs_review_shelf,
-  book_otherEditions,
-};
 
 const TAB_ROUTES = [
   "info",
@@ -70,8 +55,8 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   children,
   sidebar,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["book", "page"]);
+const navigate = useNavigate();
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const activeTab = useActiveTabRoute();
   const [selectedLang, setSelectedLang] = useBookLanguage(bookId, bookInfo);
@@ -115,22 +100,22 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                 className="w-full max-w-full justify-start overflow-x-auto overscroll-x-contain scroll-smooth snap-x snap-mandatory sm:w-fit sm:overflow-visible"
               >
                 <TabsTrigger value="info" className="flex-none snap-start">
-                  {m.page_book_tabs_overview()}
+                  {t("page:book_tabs_overview")}
                 </TabsTrigger>
                 <TabsTrigger value="review" className="flex-none snap-start">
-                  {m.page_book_tabs_review_shelf()}
+                  {t("page:book_tabs_review_shelf")}
                 </TabsTrigger>
                 <TabsTrigger value="releases" className="flex-none snap-start">
-                  {m.book_otherEditions()}
+                  {t("book:otherEditions")}
                 </TabsTrigger>
                 <TabsTrigger value="content" className="flex-none snap-start">
-                  {m.page_book_tabs_content()}
+                  {t("page:book_tabs_content")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="discussion"
                   className="flex-none snap-start"
                 >
-                  {m.page_book_tabs_community()}
+                  {t("page:book_tabs_community")}
                 </TabsTrigger>
                 <TabsTrigger value="history" className="flex-none snap-start">
                   History

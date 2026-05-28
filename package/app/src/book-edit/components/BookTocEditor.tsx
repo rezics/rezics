@@ -3,14 +3,7 @@ import { bookMutations } from "@rezics/api/book/book.mutations";
 import { chapterMutations } from "@rezics/api/chapter/chapter.mutations";
 import { chapterDetailQuery } from "@rezics/api/chapter/chapter.queries";
 import type { ContentRating } from "@rezics/contract";
-import {
-  book_edit_create_first_chapter,
-  book_edit_no_chapters_yet,
-  book_edit_toc_footer_summary,
-  common_save,
-  common_saving,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -56,14 +49,6 @@ import { BulkRatingDialog } from "./BulkRatingDialog";
 import { CreateChapterDialog } from "./CreateChapterDialog";
 import { EditChapterDialog } from "./EditChapterDialog";
 import { MoveToParentDialog } from "./MoveToParentDialog";
-
-const i18nMessages = {
-  book_edit_create_first_chapter,
-  book_edit_no_chapters_yet,
-  book_edit_toc_footer_summary,
-  common_save,
-  common_saving,
-};
 
 /** Chapter tree node structure. */
 export type Chapter = {
@@ -153,8 +138,8 @@ export const BookTocEditor = forwardRef<
   BookTocEditorHandle,
   BookTocEditorProps
 >(({ bookTocTree, bookUnitId, bookRating, onDownloadJSON }, ref) => {
-  const m = useMessage(i18nMessages);
-  const treeRef = useRef<TreeApi<Chapter> | null>(null);
+  const { t } = useTranslation(["book", "common"]);
+const treeRef = useRef<TreeApi<Chapter> | null>(null);
   const [treeData, setTreeData] = useState<Chapter[]>([]);
   const [treeSize, setTreeSize] = useState({
     width: 0,
@@ -531,14 +516,14 @@ export const BookTocEditor = forwardRef<
       >
         {treeData.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
-            <p className="text-sm">{m.book_edit_no_chapters_yet()}</p>
+            <p className="text-sm">{t("book:edit_no_chapters_yet")}</p>
             <Button
               variant="outline"
               size="sm"
               className="mt-3"
               onClick={() => handlePreCreate(null)}
             >
-              {m.book_edit_create_first_chapter()}
+              {t("book:edit_create_first_chapter")}
             </Button>
           </div>
         ) : (
@@ -581,7 +566,7 @@ export const BookTocEditor = forwardRef<
       {/* Footer */}
       <div className="flex items-center justify-between py-3 pb-8 text-sm text-muted-foreground">
         <span>
-          {m.book_edit_toc_footer_summary({
+          {t("book:edit_toc_footer_summary", {
             chapters: chapterCount,
             words: formatTotal(wordCount),
           })}
@@ -601,8 +586,8 @@ export const BookTocEditor = forwardRef<
             <SaveIcon className="w-4 h-4 mr-2" />
             <span className="hidden sm:inline">
               {updateContentStructureMutation.isPending
-                ? m.common_saving()
-                : m.common_save()}
+                ? t("common:saving")
+                : t("common:save")}
             </span>
           </Button>
         </div>

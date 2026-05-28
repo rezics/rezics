@@ -1,17 +1,11 @@
 import { postQueries } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
-import { common_loading, review_list_empty_title } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ReviewList } from "../components/list/ReviewList";
-
-const i18nMessages = {
-  common_loading,
-  review_list_empty_title,
-};
 
 interface ReviewListSectionProps {
   targetUnitId: string;
@@ -22,18 +16,18 @@ export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
   targetUnitId,
   limit = 20,
 }) => {
-  const m = useMessage(i18nMessages);
-  const { data, isLoading, error } = useQuery({
+  const { t } = useTranslation(["common", "community"]);
+const { data, isLoading, error } = useQuery({
     ...postQueries.byTarget(targetUnitId, { kind: PostKind.REVIEW, limit }),
     enabled: !!targetUnitId,
   });
 
-  if (isLoading) return <div>{m.common_loading()}</div>;
+  if (isLoading) return <div>{t("common:loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
 
   const reviews = data?.posts ?? [];
   if (reviews.length === 0) {
-    return <EmptyState title={m.review_list_empty_title()} />;
+    return <EmptyState title={t("community:review_list_empty_title")} />;
   }
 
   return <ReviewList reviews={reviews} showTargetWork={false} />;

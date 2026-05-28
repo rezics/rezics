@@ -1,7 +1,6 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
-import { page_home_sections_trending_shelves } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { buttonVariants } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -10,10 +9,6 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
-
-const i18nMessages = {
-  page_home_sections_trending_shelves,
-};
 
 export type TrendingShelfSectionProps = {
   title?: string;
@@ -24,8 +19,8 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
   title,
   limit = 8,
 }) => {
-  const m = useMessage(i18nMessages);
-  const resolvedTitle = title ?? m.page_home_sections_trending_shelves();
+  const { t } = useTranslation(["page"]);
+const resolvedTitle = title ?? t("page:home_sections_trending_shelves");
   const { data, isLoading, error } = useQuery(
     contentSearchQueryOptions({ type: "SHELF", offset: 0, limit }),
   );

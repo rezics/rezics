@@ -1,13 +1,6 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
-import {
-  common_next,
-  common_prev,
-  shelf_none_found,
-  shelf_search_placeholder,
-  shelf_search_title,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -16,17 +9,9 @@ import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { ShelfCard } from "../components/ShelfCard";
 
-const i18nMessages = {
-  common_next,
-  common_prev,
-  shelf_none_found,
-  shelf_search_placeholder,
-  shelf_search_title,
-};
-
 export function ShelfSearchPage() {
-  const m = useMessage(i18nMessages);
-  const search = useSearchQuery({
+  const { t } = useTranslation(["common", "entity"]);
+const search = useSearchQuery({
     implicitInitial: { type: ["SHELF"] },
   });
   const [offset, setOffset] = useState(0);
@@ -54,14 +39,14 @@ export function ShelfSearchPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{m.shelf_search_title()}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("entity:shelf_search_title")}</h1>
 
       <div className="mb-6">
         <KeywordInput
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           onSubmit={() => setOffset(0)}
-          placeholder={m.shelf_search_placeholder()}
+          placeholder={t("entity:shelf_search_placeholder")}
         />
       </div>
 
@@ -71,7 +56,7 @@ export function ShelfSearchPage() {
         </div>
       ) : shelves.length === 0 ? (
         <p className="py-8 text-center text-text-secondary">
-          {m.shelf_none_found()}
+          {t("entity:shelf_none_found")}
         </p>
       ) : (
         <>
@@ -88,7 +73,7 @@ export function ShelfSearchPage() {
                 disabled={!hasPreviousPage || isLoading}
                 onClick={() => setOffset((value) => Math.max(0, value - limit))}
               >
-                {m.common_prev()}
+                {t("common:prev")}
               </Button>
               <span className="text-sm text-text-secondary">
                 {currentPage} / {totalPages}
@@ -99,7 +84,7 @@ export function ShelfSearchPage() {
                 disabled={!hasNextPage || isLoading}
                 onClick={() => setOffset((value) => value + limit)}
               >
-                {m.common_next()}
+                {t("common:next")}
               </Button>
             </div>
           )}

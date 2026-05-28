@@ -1,10 +1,4 @@
-import {
-  admin_token_created_secret_description,
-  admin_token_created_secret_title,
-  common_close,
-  common_copy_link,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -17,13 +11,6 @@ import {
 } from "@rezics/ui/shadcn";
 import { Copy as ContentCopyIcon } from "lucide-react";
 import type { FC } from "react";
-
-const i18nMessages = {
-  admin_token_created_secret_description,
-  admin_token_created_secret_title,
-  common_close,
-  common_copy_link,
-};
 
 interface TokenSecretDialogProps {
   open: boolean;
@@ -39,8 +26,8 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
   secret,
   onClose,
 }) => {
-  const m = useMessage(i18nMessages);
-  const copyToClipboard = async () => {
+  const { t } = useTranslation(["admin", "common"]);
+const copyToClipboard = async () => {
     if (!secret) return;
     try {
       await navigator.clipboard.writeText(secret);
@@ -53,12 +40,12 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
     <Dialog open={open} onOpenChange={(o) => (o ? null : onClose())}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{m.admin_token_created_secret_title()}</DialogTitle>
+          <DialogTitle>{t("admin:token_created_secret_title")}</DialogTitle>
         </DialogHeader>
         <div className="mt-2">
           <Alert>
             <AlertDescription className="text-warning-text">
-              {m.admin_token_created_secret_description()}
+              {t("admin:token_created_secret_description")}
             </AlertDescription>
           </Alert>
 
@@ -70,7 +57,7 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
               variant="ghost"
               size="icon"
               onClick={copyToClipboard}
-              aria-label={m.common_copy_link()}
+              aria-label={t("common:copy_link")}
             >
               <ContentCopyIcon className="size-4" />
             </Button>
@@ -78,7 +65,7 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            {m.common_close()}
+            {t("common:close")}
           </Button>
         </DialogFooter>
       </DialogContent>

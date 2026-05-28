@@ -1,9 +1,4 @@
-import {
-  book_extra_publish_urls_title,
-  common_add,
-  placeholders_enter_url,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RezicsJsonEditor } from "@rezics/ui/editor";
 import { Button } from "@rezics/ui/shadcn";
 import {
@@ -13,12 +8,6 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
-
-const i18nMessages = {
-  book_extra_publish_urls_title,
-  common_add,
-  placeholders_enter_url,
-};
 
 /** Book extra data structure. */
 export type BookExtraData = {
@@ -35,8 +24,8 @@ interface BookExtraEditorProps {
 }
 
 function PublishURL({ value, onChange }: BookExtraEditorProps) {
-  const m = useMessage(i18nMessages);
-  const [newUrl, setNewUrl] = useState("");
+  const { t } = useTranslation(["book", "common", "editor"]);
+const [newUrl, setNewUrl] = useState("");
   const urls: string[] = Array.isArray(value) ? value : [];
 
   const handleAdd = () => {
@@ -57,7 +46,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
   return (
     <div className="space-y-3">
       <h4 className="text-sm font-medium">
-        {m.book_extra_publish_urls_title()}
+        {t("book:extra_publish_urls_title")}
       </h4>
 
       {urls.length > 0 && (
@@ -104,7 +93,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
               handleAdd();
             }
           }}
-          placeholder={m.placeholders_enter_url()}
+          placeholder={t("editor:placeholders_enter_url")}
           className="flex-1 border-b border-input bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-foreground transition-colors"
         />
         <Button
@@ -114,7 +103,7 @@ function PublishURL({ value, onChange }: BookExtraEditorProps) {
           disabled={!newUrl.trim()}
         >
           <Add className="w-4 h-4 mr-2" />
-          {m.common_add()}
+          {t("common:add")}
         </Button>
       </div>
     </div>

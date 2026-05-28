@@ -1,7 +1,6 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostDTO } from "@rezics/contract";
-import { page_home_sections_trending_reviews } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -10,10 +9,6 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalReviewCarousel } from "@/review/components/list/HorizontalReviewCarousel";
-
-const i18nMessages = {
-  page_home_sections_trending_reviews,
-};
 
 export type TrendingReviewsProps = {
   title?: string;
@@ -24,8 +19,8 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   title,
   limit = 8,
 }) => {
-  const m = useMessage(i18nMessages);
-  const resolvedTitle = title ?? m.page_home_sections_trending_reviews();
+  const { t } = useTranslation(["page"]);
+const resolvedTitle = title ?? t("page:home_sections_trending_reviews");
   const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(
     contentSearchQueryOptions({ type: "POST", offset: 0, limit }),
@@ -50,7 +45,7 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold">{resolvedTitle}</h2>
         <Button variant="ghost" onClick={() => navigate({ to: "/review" })}>
-          {m.page_home_sections_trending_reviews()} →
+          {t("page:home_sections_trending_reviews")} →
         </Button>
       </div>
       {isLoading && <Spinner size="sm" />}

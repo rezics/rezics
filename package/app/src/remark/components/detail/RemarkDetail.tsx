@@ -1,7 +1,6 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
-import { page_book_edit_info_dialog_view_book } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   ThumbsDown as ThumbDownIcon,
   ThumbsUp as ThumbUpIcon,
@@ -14,10 +13,6 @@ import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { TextLink } from "@/shared/ui/link";
 import { remarkDetailActions, remarkPolicy } from "../../models/remarkPolicy";
 
-const i18nMessages = {
-  page_book_edit_info_dialog_view_book,
-};
-
 interface RemarkDetailProps {
   remark: PostDTO;
   onReplyInvoke?: () => void;
@@ -27,8 +22,8 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
   remark,
   onReplyInvoke,
 }) => {
-  const m = useMessage(i18nMessages);
-  const rating = (remark.extra as { rating?: number } | null)?.rating;
+  const { t } = useTranslation(["page"]);
+const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
   const bookUnitId = remark.targetUnitId;
   const hydrationIds = useMemo(
@@ -56,7 +51,7 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
         <div>
           <TextLink to="/book/$bookId" params={{ bookId: bookUnitId }}>
             <span className="text-xs text-text-brand">
-              {m.page_book_edit_info_dialog_view_book()}
+              {t("page:book_edit_info_dialog_view_book")}
             </span>
           </TextLink>
         </div>

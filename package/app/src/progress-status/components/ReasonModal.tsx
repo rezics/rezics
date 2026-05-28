@@ -1,17 +1,4 @@
-import {
-  common_loading,
-  common_save,
-  progress_status_reason_modal_append,
-  progress_status_reason_modal_desc_dropped,
-  progress_status_reason_modal_desc_paused,
-  progress_status_reason_modal_history,
-  progress_status_reason_modal_placeholder,
-  progress_status_reason_modal_private,
-  progress_status_reason_modal_skip,
-  progress_status_reason_modal_title_dropped,
-  progress_status_reason_modal_title_paused,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Checkbox,
@@ -35,20 +22,6 @@ import {
 } from "../hooks/useReasonPostHistory";
 import type { ReasonPostVisibility } from "../hooks/useReasonPostMutations";
 import type { ReasonStatus } from "../models/extra";
-
-const i18nMessages = {
-  common_loading,
-  common_save,
-  progress_status_reason_modal_append,
-  progress_status_reason_modal_history,
-  progress_status_reason_modal_placeholder,
-  progress_status_reason_modal_private,
-  progress_status_reason_modal_skip,
-  progress_status_reason_modal_desc_dropped,
-  progress_status_reason_modal_desc_paused,
-  progress_status_reason_modal_title_dropped,
-  progress_status_reason_modal_title_paused,
-};
 
 type ReasonModalProps = {
   open: boolean;
@@ -88,8 +61,8 @@ export function ReasonModal({
   onAppend,
   isPending,
 }: ReasonModalProps) {
-  const m = useMessage(i18nMessages);
-  const { posts, isLoading: postsLoading } =
+  const { t } = useTranslation(["common", "community"]);
+const { posts, isLoading: postsLoading } =
     useReasonPostHistory(reasonPostUnitIds);
 
   const latestPost: ReasonPost | undefined = posts[posts.length - 1];
@@ -122,7 +95,7 @@ export function ReasonModal({
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder={m.progress_status_reason_modal_placeholder()}
+            placeholder={t("community:progress_status_reason_modal_placeholder")}
             rows={6}
           />
 
@@ -131,7 +104,7 @@ export function ReasonModal({
               checked={isPrivate}
               onCheckedChange={(c) => setIsPrivate(c === true)}
             />
-            {m.progress_status_reason_modal_private()}
+            {t("community:progress_status_reason_modal_private")}
           </Label>
 
           {hasHistory && olderPosts.length > 0 && (
@@ -142,11 +115,11 @@ export function ReasonModal({
                     showHistory ? "rotate-180" : ""
                   }`}
                 />
-                {m.progress_status_reason_modal_history()}
+                {t("community:progress_status_reason_modal_history")}
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-2 grid gap-2">
                 {postsLoading
-                  ? m.common_loading()
+                  ? t("common:loading")
                   : olderPosts.map((p) => (
                       <article
                         key={p.unitId}
@@ -162,7 +135,7 @@ export function ReasonModal({
 
         <DialogFooter className="gap-2">
           <Button type="button" variant="ghost" onClick={onSkip}>
-            {m.progress_status_reason_modal_skip()}
+            {t("community:progress_status_reason_modal_skip")}
           </Button>
           {hasHistory && (
             <Button
@@ -171,7 +144,7 @@ export function ReasonModal({
               onClick={() => onAppend({ body, visibility })}
               disabled={isPending || body.trim().length === 0}
             >
-              {m.progress_status_reason_modal_append()}
+              {t("community:progress_status_reason_modal_append")}
             </Button>
           )}
           <Button
@@ -179,7 +152,7 @@ export function ReasonModal({
             onClick={() => onSave({ body, visibility, mode: "create-or-edit" })}
             disabled={isPending || body.trim().length === 0}
           >
-            {m.common_save()}
+            {t("common:save")}
           </Button>
         </DialogFooter>
       </DialogContent>

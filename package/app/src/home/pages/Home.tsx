@@ -1,8 +1,4 @@
-import {
-  page_home_hero_subtitle,
-  page_home_hero_title_highlight,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { HomeSearch } from "@/search";
@@ -15,16 +11,11 @@ import { NewBookSection } from "../sections/NewBookSection";
 import { TrendingReviews } from "../sections/TrendingReviewsSection";
 import { TrendingShelfSection } from "../sections/TrendingShelfSection";
 
-const i18nMessages = {
-  page_home_hero_subtitle,
-  page_home_hero_title_highlight,
-};
-
 export type HomeProps = object;
 
 export const Home: React.FC<HomeProps> = () => {
-  const m = useMessage(i18nMessages);
-  const isMobile = useIsMobile();
+  const { t } = useTranslation(["page"]);
+const isMobile = useIsMobile();
 
   return (
     <MainContentContainer className="mb-16 space-y-12 pt-6 md:pt-8">
@@ -38,11 +29,11 @@ export const Home: React.FC<HomeProps> = () => {
           <div className="space-y-2 mb-4">
             <h1 className="text-2xl font-semibold leading-snug">
               <span className="text-brand">
-                {m.page_home_hero_title_highlight()}
+                {t("page:home_hero_title_highlight")}
               </span>
             </h1>
             <p className="text-xs text-muted-foreground">
-              {m.page_home_hero_subtitle()}
+              {t("page:home_hero_subtitle")}
             </p>
           </div>
           <BookCarousel autoplayIntervalNum={3000} />

@@ -1,7 +1,6 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { BookDTO, PostDTO } from "@rezics/contract";
-import { pages_review_page } from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useMemo } from "react";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
@@ -9,10 +8,6 @@ import { ReactionBar } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
-
-const i18nMessages = {
-  pages_review_page,
-};
 
 interface ReviewDetailProps {
   review: PostDTO;
@@ -25,8 +20,8 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
   book,
   onReplyInvoke,
 }) => {
-  const m = useMessage(i18nMessages);
-  const rating = (review.extra as { rating?: number } | null)?.rating;
+  const { t } = useTranslation(["book"]);
+const rating = (review.extra as { rating?: number } | null)?.rating;
   const title = (review.extra as { title?: string } | null)?.title;
   const hydrationIds = useMemo(
     () => (review.unitId ? [review.unitId] : []),
@@ -39,7 +34,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
       {book && <BookListViewItem book={book} />}
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{title || m.pages_review_page()}</h1>
+        <h1 className="text-2xl font-bold">{title || t("book:pages_review_page")}</h1>
         {rating !== undefined && (
           <span className="text-sm text-text-secondary">
             {rating.toFixed(1)} / 10

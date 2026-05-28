@@ -1,17 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
-import {
-  auth_error_invalid_password,
-  auth_error_passwords_mismatch,
-  auth_flow_reset_link_sending,
-  auth_reset_back_to_login,
-  auth_reset_missing_token,
-  auth_reset_send_link,
-  auth_reset_success_redirecting,
-  auth_reset_title,
-  common_email,
-  common_loading,
-} from "@rezics/i18n/messages";
-import { useMessage } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { PasswordField } from "@rezics/ui/composite/forms/field/PasswordField.tsx";
 import { TextButton } from "@rezics/ui/primitive/button/TextButton.tsx";
@@ -30,19 +18,6 @@ import { Layout } from "../layouts/Layout.tsx";
 import { ModalLayout } from "../layouts/ModalLayout.tsx";
 import { validateEmail, validatePassword } from "../models/validate.ts";
 
-const i18nMessages = {
-  auth_error_invalid_password,
-  auth_error_passwords_mismatch,
-  auth_flow_reset_link_sending,
-  auth_reset_back_to_login,
-  auth_reset_missing_token,
-  auth_reset_send_link,
-  auth_reset_success_redirecting,
-  auth_reset_title,
-  common_email,
-  common_loading,
-};
-
 export interface ResetPasswordPageProps {
   isModal?: boolean;
   onClose?: () => void;
@@ -51,8 +26,8 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   isModal = false,
   onClose,
 }) => {
-  const m = useMessage(i18nMessages);
-  const navigate = useNavigate();
+  const { t } = useTranslation(["auth", "common"]);
+const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const query = useMemo(() => {
     if (typeof window === "undefined") {
@@ -114,15 +89,15 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
     try {
       const validated = validatePassword(password);
       if (!validated.valid) {
-        throw new Error(validated.error ?? m.auth_error_invalid_password());
+        throw new Error(validated.error ?? t("auth:error_invalid_password"));
       }
 
       if (password !== confirmPassword) {
-        throw new Error(m.auth_error_passwords_mismatch());
+        throw new Error(t("auth:error_passwords_mismatch"));
       }
 
       if (!resetToken) {
-        throw new Error(m.auth_reset_missing_token());
+        throw new Error(t("auth:reset_missing_token"));
       }
 
       await authApi.resetPassword({
@@ -130,7 +105,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         token: resetToken,
       });
 
-      setMessage(m.auth_reset_success_redirecting());
+      setMessage(t("auth:reset_success_redirecting"));
       onClose?.();
 
       if (pathname === "/reset-password") {
@@ -159,7 +134,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
       )}
       {!resetToken ? (
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="reset-email">{m.common_email()}</Label>
+          <Label htmlFor="reset-email">{t("common:email")}</Label>
           <Input
             id="reset-email"
             name="email"
@@ -180,7 +155,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
       )}
       <div>
         <TextButton onClick={handleLoginClick}>
-          {m.auth_reset_back_to_login()}
+          {t("auth:reset_back_to_login")}
         </TextButton>
       </div>
     </>
@@ -197,18 +172,18 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
         {loading && <Spinner size="sm" />}
         {loading
           ? resetToken
-            ? m.common_loading()
-            : m.auth_flow_reset_link_sending()
+            ? t("common:loading")
+            : t("auth:flow_reset_link_sending")
           : resetToken
-            ? m.auth_reset_title()
-            : m.auth_reset_send_link()}
+            ? t("auth:reset_title")
+            : t("auth:reset_send_link")}
       </Button>
     </>
   );
 
   return (
     <LayoutComponent
-      title={m.auth_reset_title()}
+      title={t("auth:reset_title")}
       content={content}
       actions={actions}
     />
