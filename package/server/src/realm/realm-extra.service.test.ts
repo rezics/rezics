@@ -40,6 +40,10 @@ const unitFindManyMock = mock(async ({ where }: any) => {
   }
   return ids.filter((id) => id.startsWith("tag-")).map((id) => ({ id }));
 });
+const zoneFindUniqueMock = mock(async ({ where }: any) => {
+  const unitId = where.unitId as string;
+  return unitId.startsWith("zone-") ? { unitId } : null;
+});
 const transactionMock = mock(async (fn: any) =>
   fn({
     $queryRaw: queryRawMock,
@@ -60,6 +64,9 @@ Object.assign(prismaMock, {
   unit: {
     findUnique: unitFindUniqueMock,
     findMany: unitFindManyMock,
+  },
+  zone: {
+    findUnique: zoneFindUniqueMock,
   },
 });
 
@@ -89,10 +96,11 @@ describe("realm extra single-key service", () => {
     realmMemberFindFirstMock.mockResolvedValue({ realmUnitId: "realm-1" });
     unitFindUniqueMock.mockClear();
     unitFindManyMock.mockClear();
+    zoneFindUniqueMock.mockClear();
     transactionMock.mockClear();
   });
 
-  test("sets and replaces rule/about/banner keys", async () => {
+  test("sets and replaces rule/about/banner/wiki Zone keys", async () => {
     await setSingleExtraKey(caller, "realm-1", "rule", "post-rule");
     expect(storedExtra.rule).toBe("post-rule");
 
@@ -116,6 +124,9 @@ describe("realm extra single-key service", () => {
       kind: "post",
       unitId: "post-banner",
     });
+
+    await setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "zone-wiki");
+    expect(storedExtra.wikiZoneUnitId).toBe("zone-wiki");
   });
 
   test("clears each supported key", async () => {
@@ -124,12 +135,14 @@ describe("realm extra single-key service", () => {
       about: "post-about",
       banner: { kind: "url", url: "https://example.com/banner.png" },
       tagTree: [{ tagId: "tag-action" }],
+      wikiZoneUnitId: "zone-wiki",
     };
 
     await clearSingleExtraKey(caller, "realm-1", "rule");
     await clearSingleExtraKey(caller, "realm-1", "about");
     await clearSingleExtraKey(caller, "realm-1", "banner");
     await clearSingleExtraKey(caller, "realm-1", "tagTree");
+    await clearSingleExtraKey(caller, "realm-1", "wikiZoneUnitId");
 
     expect(storedExtra).toEqual({});
   });
@@ -143,6 +156,9 @@ describe("realm extra single-key service", () => {
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
       setSingleExtraKey(caller, "realm-1", "banner", { kind: "post" }),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
+      setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "missing-zone"),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
       setTagTreeExtra(caller, "realm-1", [{ label: "Genre" }]),

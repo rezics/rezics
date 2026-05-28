@@ -1,6 +1,12 @@
 import { tagKeys } from "@rezics/api/tag/tag";
 import { unitKeys } from "@rezics/api/unit/unit";
-import { LANGUAGES, type UnitDTO, UnitType } from "@rezics/contract";
+import { zoneKeys } from "@rezics/api/zone/zone";
+import {
+  LANGUAGES,
+  type UnitDTO,
+  UnitType,
+  type ZoneDTO,
+} from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect } from "react";
@@ -15,6 +21,7 @@ export default meta;
 type Story = StoryObj;
 
 const REALM_ID = "realm-manage-fixture";
+const WIKI_ZONE_ID = "zone-wiki-fixture";
 
 function makePostUnit(id: string, title: string): UnitDTO {
   return {
@@ -26,6 +33,30 @@ function makePostUnit(id: string, title: string): UnitDTO {
     translations: [{ unitId: id, language: LANGUAGES.EN, title }],
   } as UnitDTO;
 }
+
+const wikiZone: ZoneDTO = {
+  unitId: WIKI_ZONE_ID,
+  slug: "fixture-wiki",
+  name: "Fixture Wiki",
+  description: "Managed wiki portal",
+  filters: { type: ["POST"] },
+  template: "wiki-classic",
+  styling: null,
+  wiki: {
+    realmId: REALM_ID,
+    filters: { postKind: "WIKI" },
+    navigation: [],
+    homepage: { sections: [] },
+    theme: {
+      template: "wiki-classic",
+      homepageTemplate: "wiki-classic-home",
+      chrome: "classic",
+      palette: {},
+    },
+  },
+  startsAt: null,
+  endsAt: null,
+};
 
 function Seeded({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
@@ -45,6 +76,7 @@ function Seeded({ children }: { children: ReactNode }) {
         makePostUnit("post-about", "About this realm"),
       ],
     });
+    qc.setQueryData(zoneKeys.byUnitId(WIKI_ZONE_ID), wikiZone);
   }, [qc]);
 
   return <div className="max-w-3xl p-4">{children}</div>;
@@ -70,6 +102,7 @@ export const Populated: Story = {
             kind: "url",
             url: "https://picsum.photos/seed/realm/960/320",
           },
+          wikiZoneUnitId: WIKI_ZONE_ID,
           tagTree: [
             { disabled: true, label: "Format" },
             { tagId: "tag-a", label: "Analysis" },

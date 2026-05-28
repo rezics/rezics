@@ -104,7 +104,7 @@
 
 ## 11. Management UI
 
-- [ ] 11.1 Add realm/Zone management controls for assigning a wiki Zone to a realm.
+- [x] 11.1 Add realm/Zone management controls for assigning a wiki Zone to a realm.
 - [ ] 11.2 Add Zone editor controls for wiki template, homepage template, theme tokens, navigation config, and homepage sections.
 - [ ] 11.3 Add LABEL Unit picker/creator flow for navigation headings and homepage labels.
 - [ ] 11.4 Add WorkRealmContext management surface or admin operation for linking works to official/community/language/archive realms.

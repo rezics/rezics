@@ -4,6 +4,7 @@ import {
 } from "@rezics/api/realm/realm-extra.mutations";
 import { tagQueries } from "@rezics/api/tag/tag";
 import { unitQueries } from "@rezics/api/unit/unit";
+import { zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import type {
   RealmBannerExtra,
   RealmExtra,
@@ -37,6 +38,10 @@ import {
   realm_tag_tree,
   realm_tag_tree_description,
   realm_tag_tree_saved,
+  realm_wiki_zone,
+  realm_wiki_zone_description,
+  realm_wiki_zone_saved,
+  realm_wiki_zone_unit_id_placeholder,
   tag_search_placeholder,
 } from "@rezics/i18n/messages";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
@@ -92,12 +97,101 @@ export const RealmExtraManageSection: React.FC<
         realmId={realmId}
         initialValue={extra?.tagTree as TagTreeNode[] | undefined}
       />
+      <WikiZonePicker realmId={realmId} value={extra?.wikiZoneUnitId ?? null} />
       <SlotPicker realmId={realmId} slotKey="rule" value={extra?.rule} />
       <SlotPicker realmId={realmId} slotKey="about" value={extra?.about} />
       <BannerPicker realmId={realmId} value={extra?.banner ?? null} />
     </section>
   );
 };
+
+function WikiZonePicker({
+  realmId,
+  value,
+}: {
+  realmId: string;
+  value?: string | null;
+}) {
+  const [zoneId, setZoneId] = useState(value ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const trimmedZoneId = zoneId.trim();
+  const setValue = useSetRealmExtraValueMutation();
+  const clearValue = useClearRealmExtraValueMutation();
+  const zoneQuery = useQuery(zoneByUnitIdQueryOptions(trimmedZoneId));
+
+  useEffect(() => {
+    setZoneId(value ?? "");
+  }, [value]);
+
+  const save = async () => {
+    setError(null);
+    try {
+      if (trimmedZoneId) {
+        await setValue.mutateAsync({
+          realmId,
+          key: "wikiZoneUnitId",
+          value: trimmedZoneId,
+        });
+      } else {
+        await clearValue.mutateAsync({ realmId, key: "wikiZoneUnitId" });
+      }
+      toast.success(realm_wiki_zone_saved());
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
+      <div>
+        <Label>{realm_wiki_zone()}</Label>
+        <p className="mt-1 text-sm leading-body text-text-secondary">
+          {realm_wiki_zone_description()}
+        </p>
+      </div>
+      <Input
+        value={zoneId}
+        onChange={(event) => setZoneId(event.target.value)}
+        placeholder={realm_wiki_zone_unit_id_placeholder()}
+      />
+      {trimmedZoneId && (
+        <div className="rounded-md border border-border-default bg-surface-base px-3 py-2 text-sm leading-ui">
+          {zoneQuery.data ? (
+            <div className="flex flex-col gap-1">
+              <span className="font-medium text-text-primary">
+                {zoneQuery.data.name || zoneQuery.data.slug}
+              </span>
+              <span className="text-text-secondary">
+                {common_selected_id({ id: trimmedZoneId })}
+              </span>
+            </div>
+          ) : (
+            <span className="text-text-secondary">
+              {common_selected_id({ id: trimmedZoneId })}
+            </span>
+          )}
+        </div>
+      )}
+      <div className="flex justify-end gap-2">
+        {error && (
+          <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
+        )}
+        <Button type="button" variant="ghost" onClick={() => setZoneId("")}>
+          {common_clear()}
+        </Button>
+        <Button
+          type="button"
+          onClick={save}
+          disabled={setValue.isPending || clearValue.isPending}
+        >
+          {common_save()}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function TagTreeEditor({
   realmId,

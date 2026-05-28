@@ -27,7 +27,12 @@ export class RealmExtraError extends Error {
 const REALM_AUTHORITY_ROLES = ["owner", "admin", "moderator"] as const;
 
 type ExtraJson = Record<string, unknown>;
-type SingleExtraKey = "rule" | "about" | "banner" | "defaultLicenseSlug";
+type SingleExtraKey =
+  | "rule"
+  | "about"
+  | "banner"
+  | "defaultLicenseSlug"
+  | "wikiZoneUnitId";
 type UnitReferenceExtraKey = "rule" | "about" | "banner";
 
 const SINGLE_EXTRA_KEYS = new Set<string>([
@@ -35,6 +40,7 @@ const SINGLE_EXTRA_KEYS = new Set<string>([
   "about",
   "banner",
   "defaultLicenseSlug",
+  "wikiZoneUnitId",
 ]);
 
 function readList(extra: unknown, key: string): string[] {
@@ -210,6 +216,20 @@ async function validateTagUnitIds(tagIds: Set<string>): Promise<void> {
   }
 }
 
+async function validateZoneUnit(unitId: string): Promise<void> {
+  const zone = await prisma.zone.findUnique({
+    where: { unitId },
+    select: { unitId: true },
+  });
+  if (!zone) {
+    throw new RealmExtraError(
+      "INVALID_VALUE",
+      "wikiZoneUnitId must reference an existing Zone Unit",
+      400,
+    );
+  }
+}
+
 function collectTagTreeIds(value: unknown): Set<string> {
   if (!Array.isArray(value)) {
     throw new RealmExtraError("INVALID_VALUE", "tagTree must be an array", 400);
@@ -284,6 +304,18 @@ async function validateSingleExtraValue(
       );
     }
     await validatePostUnit(value, key);
+    return value;
+  }
+
+  if (key === "wikiZoneUnitId") {
+    if (typeof value !== "string" || value.length === 0) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "wikiZoneUnitId must be a Zone Unit ID string",
+        400,
+      );
+    }
+    await validateZoneUnit(value);
     return value;
   }
 
