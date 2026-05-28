@@ -97,9 +97,9 @@
 
 ## 10. Release And Work Integration
 
-- [ ] 10.1 Extend release detail wiki data loading to resolve work realm context through UnitWork.
-- [ ] 10.2 Add release wiki UI state for official realm, community realm choices, no-context fallback, and conflict diagnostics where applicable.
-- [ ] 10.3 Ensure release wiki UI links to the resolved realm Wiki tab and configured Zone page.
+- [x] 10.1 Extend release detail wiki data loading to resolve work realm context through UnitWork.
+- [x] 10.2 Add release wiki UI state for official realm, community realm choices, no-context fallback, and conflict diagnostics where applicable.
+- [x] 10.3 Ensure release wiki UI links to the resolved realm Wiki tab and configured Zone page.
 - [ ] 10.4 Add tests or stories for release with official realm, release with multiple community realms, and standalone release with no work context.
 
 ## 11. Management UI

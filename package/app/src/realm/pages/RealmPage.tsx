@@ -33,7 +33,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Settings } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PinnedFeedSection } from "@/pinboard";
 import { ReplyComposer } from "@/post";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -67,18 +67,24 @@ const i18nMessages = {
   realm_untitled,
 };
 
+export type RealmPageTab = "feed" | "wiki" | "tags" | "members";
+
 interface RealmPageProps {
   realmId: string;
+  tab?: RealmPageTab;
   feedSort?: RealmFeedSort;
   feedTagIds?: string[];
+  onTabChange?: (tab: RealmPageTab) => void;
   onFeedSortChange?: (sort: RealmFeedSort) => void;
   onFeedTagIdsChange?: (tagIds: string[]) => void;
 }
 
 export function RealmPage({
   realmId,
+  tab,
   feedSort = "new",
   feedTagIds = [],
+  onTabChange,
   onFeedSortChange,
   onFeedTagIdsChange,
 }: RealmPageProps) {
@@ -86,8 +92,12 @@ export function RealmPage({
   const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const permission = useServerPermission();
-  const [tab, setTab] = useState<"feed" | "wiki" | "tags" | "members">("feed");
+  const [localTab, setLocalTab] = useState<RealmPageTab>(tab ?? "feed");
   const [composerOpen, setComposerOpen] = useState(false);
+
+  useEffect(() => {
+    if (tab) setLocalTab(tab);
+  }, [tab]);
 
   const showManage = canManageRealm({
     permission,
@@ -113,6 +123,12 @@ export function RealmPage({
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
   const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
   const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
+  const activeTab = localTab === "wiki" && !showWikiTab ? "feed" : localTab;
+  const handleTabChange = (value: string) => {
+    const next = value as RealmPageTab;
+    if (onTabChange) onTabChange(next);
+    else setLocalTab(next);
+  };
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
@@ -166,11 +182,7 @@ export function RealmPage({
         <RuleSection postUnitId={realm.extra?.rule ?? null} />
       </div>
 
-      <Tabs
-        value={tab}
-        onValueChange={(v) => setTab(v as typeof tab)}
-        className="mb-4"
-      >
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-4">
         <TabsList>
           <TabsTrigger value="feed">{m.realm_tab_feed()}</TabsTrigger>
           {showWikiTab && <TabsTrigger value="wiki">Wiki</TabsTrigger>}
