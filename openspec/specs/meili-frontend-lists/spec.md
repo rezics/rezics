@@ -1,4 +1,18 @@
-## ADDED Requirements
+# meili-frontend-lists Specification
+
+## Purpose
+
+Defines the rule that frontend post and realm list surfaces query
+`POST /meili/posts/search` and `POST /meili/realms/search`
+instead of the DB-backed `GET /posts/` and `GET /realms/`. Owns
+the kind / target / depth filter contracts for RemarkList,
+ThreadList, and review lists, the `isPublic` / `isOfficial` /
+keyword filters for realm landing and search, the
+`BasicAdminPermission` gate on the relational list endpoints, and
+the `offset` / `limit` / `sort` defaults
+(`createdAt:desc` for posts, `memberCount:desc` for realms).
+
+## Requirements
 
 ### Requirement: Frontend post list views use Meilisearch search endpoint
 Frontend components that display post lists (RemarkList, ThreadList, review lists) SHALL query the server's `POST /meili/posts/search` endpoint instead of the DB-backed `GET /posts/` endpoint. An empty keyword with filters SHALL return a filtered list.

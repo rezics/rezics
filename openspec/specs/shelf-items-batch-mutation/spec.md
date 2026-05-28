@@ -1,3 +1,17 @@
+# shelf-items-batch-mutation Specification
+
+## Purpose
+
+Defines the `PATCH /shelf/:shelfId/items/batch` endpoint that
+applies an op-log payload to shelf items inside a single Prisma
+transaction. Owns the supported op types (add, remove, move,
+tag, untag, etc.), the rule that authentication and ownership
+checks match the per-op item routes, the all-or-nothing apply
+behavior, and the response shape that lets the shelf editor
+reconcile its local state after the batch commit.
+
+## Requirements
+
 ### Requirement: Server exposes a batch op endpoint for shelf items
 
 The server SHALL expose a route at `PATCH /shelf/:shelfId/items/batch`

@@ -1,4 +1,19 @@
-## ADDED Requirements
+# tanstack-query-keys Specification
+
+## Purpose
+
+Defines the rule that every TanStack Query `queryKey` originates
+from a per-domain factory in `package/api/src/<domain>/<domain>.keys.ts`
+following the `all() / lists() / list(filters) /
+details() / detail(id)` pattern. Owns the requirement that
+filter parameters are embedded in the key, array parameters are
+normalized (deduped, sorted) for cache stability, the
+`reactionKeys.summaryBatch` factory paired with
+`useBatchReactionSummary`, and the `check:convention` rule that
+forbids inline `queryKey: [` literals outside the API package's
+`.keys` / `.queries` / `.mutations` files.
+
+## Requirements
 
 ### Requirement: Query keys come from per-domain factories
 

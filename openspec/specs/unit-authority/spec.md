@@ -1,4 +1,17 @@
-## ADDED Requirements
+# unit-authority Specification
+
+## Purpose
+
+Defines the `hasAuthorityOver(caller, unit)` service-layer
+predicate exposed by the `unit` server domain. Owns the three
+authority paths (owner via `Unit.userId`, system `ADMIN` from
+access-token claims, and realm `MODERATOR`/`OWNER` via
+`RealmUnit`), the rule that owner-less units never authorize
+through `null === null`, and the indexed-lookup latency budget
+(<10ms p99) used by the `work-release` and `work-link-claim`
+capabilities.
+
+## Requirements
 
 ### Requirement: hasAuthorityOver(caller, unit) returns true for owner, admin, or realm-moderator
 

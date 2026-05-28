@@ -1,3 +1,15 @@
+# progress-status-ui Specification
+
+## Purpose
+
+Defines the `package/app/src/progress-status/` feature that owns
+the `UserUnitProgress` status-control UI. Owns the feature layout
+(`models/`, `hooks/`, `states/`, `components/`, `sections/`) with
+`index.ts` as the single public boundary, the rule that `models/`
+never imports from `hooks/` or `states/`, the
+`BookProgressStatusSection` export consumed by surfaces like
+`BookHeroActionBar`, and the status transition / picker UX.
+
 ## Requirements
 
 ### Requirement: Status control feature folder

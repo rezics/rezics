@@ -1,4 +1,15 @@
-## ADDED Requirements
+# settings-profile Specification
+
+## Purpose
+
+Defines the Profile section of user settings: editable display
+name, plain-text bio, markdown-edited description (via
+`RezicsMarkdownEditor`), avatar URL with live preview, and a
+read-only `@slug` field. Persistence goes through
+`userApi.updateMe()` with success / loading / error feedback on the
+save action.
+
+## Requirements
 
 ### Requirement: Edit display name
 The Profile section SHALL provide a text input for the user's display name. Changes SHALL be saved via `userApi.updateMe()`.
@@ -39,12 +50,10 @@ The Profile section save action SHALL show a loading indicator while the API cal
 - **WHEN** the user saves profile changes and the API returns an error
 - **THEN** the error message is displayed to the user
 
-## MODIFIED Requirements
-
-### Requirement: Edit bio and description
+### Requirement: Edit bio and description (markdown)
 The Profile section SHALL provide a multiline text input for bio (short, plain text). The description field SHALL use `RezicsMarkdownEditor` for rich markdown editing. Changes SHALL be saved via `userApi.updateMe()`.
 
-#### Scenario: Update bio
+#### Scenario: Update bio with markdown editor
 - **WHEN** the user edits their bio and saves
 - **THEN** the bio is updated and the profile page reflects the change
 

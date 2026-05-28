@@ -1,4 +1,16 @@
-## ADDED Requirements
+# seed-zone Specification
+
+## Purpose
+
+Defines the Zone fixture seeder: it creates `Unit` rows with a
+`Zone` extension, mixing the five canonical templates
+(`featured-carousel`, `trending-grid`, `seasonal-banner`,
+`topic-spotlight`, `new-releases`), realistic `filters` JSON,
+optional `styling`, and a four-bucket temporal distribution
+(always-active / current / scheduled / expired). Default volume is
+~40 zones, tunable via `SEED_ZONES`.
+
+## Requirements
 
 ### Requirement: Zone unit seeding
 

@@ -1,4 +1,20 @@
-## ADDED Requirements
+# progress-search-index Specification
+
+## Purpose
+
+Defines the Meilisearch `user_unit_progress` index that projects
+`UserUnitProgress` rows for per-unit aggregate stats. Owns the
+deterministic `${userId}:${unitId}` document id, the 10-bucket
+`progressBucket = min(9, floor(progress * 10))` rule, the
+`unitId` / `userId` / `status` / `progressBucket` filterable plus
+`lastSeenAt` sortable settings, the in-process
+`syncProgress` / `removeProgress` writes from the progress
+service with retry on Meili failures, the
+`GET /units/:unitId/progress-stats` aggregate endpoint, an
+idempotent backfill script, and the rule that unit list responses
+do not carry progress stats.
+
+## Requirements
 
 ### Requirement: Progress search index existence and document shape
 

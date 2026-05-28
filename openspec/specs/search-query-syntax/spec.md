@@ -1,4 +1,16 @@
-## ADDED Requirements
+# search-query-syntax Specification
+
+## Purpose
+
+Defines the structured `SearchQuery` type exported from
+`@rezics/contract` and the `parseSearchString` /
+`serializeSearchString` round-trip in the frontend `search` feature.
+Owns the token grammar (`[slug]`, `type:`, `kind:`, `lang:`,
+`rating:`, `licensed:`, `in:`, `sort:`) that turns user input into
+typed filters, and enforces that syntax parsing is a frontend-only
+concern — the backend only receives structured `ContentSearchOptions`.
+
+## Requirements
 
 ### Requirement: SearchQuery structured type in contract
 

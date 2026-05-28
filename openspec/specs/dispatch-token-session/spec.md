@@ -1,4 +1,15 @@
-## ADDED Requirements
+# dispatch-token-session Specification
+
+## Purpose
+
+Defines the `POST /token/session` boundary that exchanges an API token
+with the `dispatch` / `rezics-server-session` scope for a standard
+`rezics-session-token` JWT. The exchanged token uses the same claim
+schema and `MAIN_SESSION_JWT_TTL_SECONDS` as cookie-issued sessions, so
+downstream services treat dispatch worker sessions identically to
+user-cookie sessions.
+
+## Requirements
 
 ### Requirement: API token can be exchanged for a session JWT
 

@@ -1,4 +1,16 @@
-## ADDED Requirements
+# settings-preferences Specification
+
+## Purpose
+
+Defines the user Preferences page: ordered `preferredLanguages`
+with drag reordering, realm tag preferences, the 500-item keyword
+vocabulary saved via `PATCH /users/me/keywords`, the Content
+rating opt-in group (`GENERAL`/`R_15` locked on, `R_18`/`R_18G`
+gated by a confirmation modal and validated server-side), and the
+default publishing license slug that the composer reads as a
+prefill outside realm context.
+
+## Requirements
 
 ### Requirement: Language preferences
 The Preferences section SHALL display the user's preferred languages (from `userSettings.preferredLanguages`) and allow adding/removing languages from the supported set (zh-hant, zh-hans, en, ja, de). Changes SHALL be saved via `userApi.updateSettings()`.
@@ -36,9 +48,7 @@ When the user has no keywords, a helpful message SHALL be displayed explaining w
 - **WHEN** the user has zero keywords
 - **THEN** a message explaining the keyword vocabulary feature is displayed with the add input available
 
-## MODIFIED Requirements
-
-### Requirement: Language preferences
+### Requirement: Language preferences (ordered priority list)
 
 The Preferences section SHALL display the user's preferred languages (from `userSettings.preferredLanguages`) as an **ordered priority list** with drag-to-reorder support. The list order SHALL represent the user's language preference priority — the first language is the most preferred. Users SHALL be able to add languages from the supported set (zh-hant, zh-hans, en, ja, de), remove languages, and reorder them by dragging. Changes SHALL be saved via `userApi.updateSettings()` with the array preserving the user-defined order.
 

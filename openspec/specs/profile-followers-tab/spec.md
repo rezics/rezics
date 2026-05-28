@@ -1,4 +1,15 @@
-## ADDED Requirements
+# profile-followers-tab Specification
+
+## Purpose
+
+Defines the Followers tab on the user profile: L2 chip filter between
+Followers and Following (counts driven by `User.followersCount` /
+`followingsCount` aggregates over the `Subscription` table), paginated
+list of USER-typed subscribers/targets with Follow/Unfollow on the
+owner's own list (a `Subscription(channels=['*'])` upsert/delete), and
+empty states. Reads no longer touch the legacy `Follow` table.
+
+## Requirements
 
 ### Requirement: Followers and Following sub-filters
 

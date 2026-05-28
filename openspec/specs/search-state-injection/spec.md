@@ -1,4 +1,16 @@
-## ADDED Requirements
+# search-state-injection Specification
+
+## Purpose
+
+Defines how the search page seeds `useSearchQuery` from TanStack
+Router navigation state to avoid round-tripping slugs through the
+API. Owns the `injectedTags` contract, the slug-resolution fallback
+for direct URLs and refreshes, the `implicitInitial` channel for
+zone-derived filters, and the `scope` / `category` extensions to
+`SearchQuery` that route the federated search shell and its URL
+serialization.
+
+## Requirements
 
 ### Requirement: Search page accepts pre-resolved tag data via router state
 

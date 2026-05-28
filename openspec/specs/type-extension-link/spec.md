@@ -1,4 +1,14 @@
-## ADDED Requirements
+# type-extension-link Specification
+
+## Purpose
+
+Defines the `LINK` UnitType and its `Link` 1:1 extension storing
+`url`, optional `siteName` / `faviconUrl`, and `extra`. Routes
+LINK titles and descriptions through `UnitTranslation`, makes LINK
+units first-class citizens of tagging, shelves, and Meilisearch
+discovery, and cascades the `Link` row on Unit deletion.
+
+## Requirements
 
 ### Requirement: LINK as a Unit type
 

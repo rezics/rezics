@@ -1,4 +1,19 @@
-## ADDED Requirements
+# profile-tab-layout Specification
+
+## Purpose
+
+Defines the shell layout for the user profile: a top-level L1 tab bar
+(Overview / Content / Shelves / Realms / Followers / Reactions), each
+tab driven by a TanStack Router child route under `/user/$unitId/`.
+The mobile tab bar scrolls horizontally and keeps the active tab in
+view. A user info section sits between the tab bar and the tab outlet
+with desktop/mobile variants — full layout on mobile Overview, compact
+single-row on the other mobile tabs, consistent horizontal layout on
+desktop. The profile shell is implemented as a layout route that
+fetches user data and shares it via context. Legacy `/user/me/...`
+routes redirect to the unitId-based equivalents.
+
+## Requirements
 
 ### Requirement: L1 tab bar at page top
 The profile page SHALL render a horizontal tab bar as the topmost element of the page. The tab bar SHALL include tabs for: Overview, Content, Shelves, Realms, Followers, Reactions. Each tab SHALL be driven by a route — clicking a tab navigates to the corresponding child route under `/user/$unitId/`.

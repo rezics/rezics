@@ -1,4 +1,20 @@
-## ADDED Requirements
+# notify-auth Specification
+
+## Purpose
+
+Defines authentication for the notify service. User-facing read
+endpoints, SSE `/stream`, and `WS /dm` all accept the
+`rezics-session-token` issued by the main server (issuer
+`rezics-server`) via either the `Authorization: Bearer` header or the
+cookie scoped to the registrable domain — `Authorization` wins when both
+are present. Tokens are verified against the server's JWKS using
+`@rezics/jwt`'s `createJwtVerifier` / `createRemoteJWKSet` through the
+`requireUser` Elysia macro; `auth-session-token` is rejected at the
+issuer check. CORS is `credentials: true` with a non-wildcard
+allow-list. Internal write endpoints continue to authenticate via
+`x-internal-secret`, not JWT.
+
+## Requirements
 
 ### Requirement: JWT verification for read endpoints
 

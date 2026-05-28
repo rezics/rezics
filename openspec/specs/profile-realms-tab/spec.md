@@ -1,4 +1,14 @@
-## ADDED Requirements
+# profile-realms-tab Specification
+
+## Purpose
+
+Defines the Realms tab on the user profile: L2 Joined / Created filter
+chips persisted as a URL search param, a list of realm cards (name from
+translation, description snippet, member count, public/official
+badges) that navigate to `/realm/:realmId`, and per-filter empty
+states.
+
+## Requirements
 
 ### Requirement: Joined and Created realm filters
 The Realms tab SHALL render L2 chips: "Joined" and "Created". "Joined" shows realms where the user is a member. "Created" shows realms owned by the user (`userId` filter). The active filter SHALL be persisted in the URL search param `filter`.

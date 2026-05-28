@@ -1,4 +1,18 @@
-## ADDED Requirements
+# realm-tag-interpretation-context Specification
+
+## Purpose
+
+Defines `RealmTagContext`, the pair-level explanatory surface keyed by
+`(realmUnitId, tagUnitId)` that stores a realm's interpretation of an
+existing global TAG Unit without creating a realm-local tag or new
+Unit identity. The optional `contextUnitId` carries materialized
+content (idempotent) used for explanation, discussion, examples, and
+edit history; deleting that content nulls the reference but never
+removes the pair. Read/update/materialize APIs are exposed under the
+realm permission service, with source documentation that reinforces
+the pair's identity rules.
+
+## Requirements
 
 ### Requirement: RealmTagContext stores pair-level realm tag interpretation
 

@@ -1,4 +1,18 @@
-## ADDED Requirements
+# direct-messaging Specification
+
+## Purpose
+
+Defines the user-to-user DM capability spanning server, notify,
+and the `/inbox/dm/*` frontend. Owns the bilateral conversation
+model with lexicographic participant ordering, the server-mediated
+`POST /dm/send` flow gated by `Subscription.channels` (`*`,
+`dm.*`, or `dm.message`), the cookie-authenticated `WS /dm`
+receive-only stream (legacy `?token=` removed), conversation /
+message history endpoints, read tracking via `readAt`, and the
+inbox UI shape with conversation list, thread view, composer, and
+notification tab co-existence.
+
+## Requirements
 
 ### Requirement: Bilateral conversations
 The system SHALL support bilateral (two-party) conversations. Participants SHALL be stored in lexicographic order to ensure the unique constraint `(participantA, participantB)` is order-independent.

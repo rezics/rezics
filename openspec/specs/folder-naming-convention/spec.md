@@ -1,4 +1,18 @@
-## ADDED Requirements
+# folder-naming-convention Specification
+
+## Purpose
+
+Defines the monorepo folder-naming rule enforced by the
+convention check: domain, feature, and sub-feature folders are
+singular; same-kind containers are plural from a fixed allowlist
+(`hooks`, `utils`, `components`, `pages`, `sections`, …); a
+limited singular-domain exception set (e.g. `token` alongside
+`tokens`) is permitted; generated and vendored trees are skipped;
+allowlist changes require spec amendment; the feature standard
+doc links here rather than restating; and `package/auth` is out
+of scope.
+
+## Requirements
 
 ### Requirement: Domain and feature folders are singular
 All folders representing a domain, feature, sub-feature, or bounded context SHALL use singular names. This applies to every folder under `package/*/src/**` that is not on the plural-container allowlist (see below) and is not a generated output directory.

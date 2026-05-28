@@ -1,4 +1,17 @@
-## ADDED Requirements
+# unit-identity Specification
+
+## Purpose
+
+Defines the canonical `Unit` row that every domain extends. Owns
+the immutable `UnitType` enum (excluding `CHAPTER`), the
+DRAFT → PUBLISHED → ARCHIVED → DELETED lifecycle with soft delete,
+the PUBLIC / UNLISTED / PRIVATE visibility scope, the
+`rating: ContentRating` field with no parent / child enforcement,
+the non-nullable creator `userId` used for authorization, the
+extensible `extra` JSON column, and the rule that all
+language-dependent text lives in `UnitTranslation`.
+
+## Requirements
 
 ### Requirement: Unit creation requires a valid UnitType
 

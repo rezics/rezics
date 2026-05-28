@@ -1,3 +1,16 @@
+# reaction-summary Specification
+
+## Purpose
+
+Defines the public `GET /reactions/summary` endpoint that returns
+aggregated reaction counts for one or more `targetIds`. Owns the
+batch semantics (comma-separated or repeated query parameter),
+the no-auth rule (reaction counts are public), and the contract
+that main-server list and detail responses do not carry a
+`reactionSummaries` field — every consumer hydrates summaries
+exclusively through this endpoint, typically via
+`useReactionHydration` and `useBatchReactionSummary`.
+
 ## Requirements
 
 ### Requirement: Batch reaction summary

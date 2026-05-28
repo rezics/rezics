@@ -1,4 +1,19 @@
-## ADDED Requirements
+# admin-auth-api-client Specification
+
+## Purpose
+
+Defines the `@rezics/api/auth` client that owns all browser
+interactions with the auth server. Specifies the `authFetch`
+utility (cookie-included, JSON), the `authApi` surface
+(`signIn` / `signUp` / `signOut` / `getSession` / `getToken` /
+`listSessions` / `revokeSession` and the admin
+`adminListUsers` / `adminRemoveUser` / `adminBanUser` /
+`adminUnbanUser` / `adminSetRole`), the `authKeys` query factory,
+`auth.queries` / `auth.mutations` React Query bindings, the barrel
+export pattern, and the removal of login-style APIs from the
+`userApi` module.
+
+## Requirements
 
 ### Requirement: Auth API fetch utility
 The auth API client module SHALL provide an `authFetch` function in `package/api/src/auth/auth.api.ts` that sends HTTP requests to the auth server base URL (`VITE_AUTH_API_URL` from `@rezics/app/env`). All requests SHALL include `credentials: 'include'` for cookie-based session handling and `Content-Type: application/json`.

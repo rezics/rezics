@@ -1,3 +1,5 @@
+# server-route-cleanup Specification
+
 ## Purpose
 
 Defines the migration from legacy domain-specific routes to unified Unit-backed server routes, including the Post API that replaces separate comment and review APIs.

@@ -1,18 +1,17 @@
-## REMOVED Requirements
+# user-domain-decoupling Specification
 
-### Requirement: UserType enum values AUTHOR, PRESS, PRODUCER
+## Purpose
 
-**Reason**: The `UserType` enum values `AUTHOR`, `PRESS`, and `PRODUCER` conflate platform identity with content attribution. An author does not need a REZICS account to be credited on a book. A publisher credited on a book is not a platform user. Attribution is now handled by the independent `Person`/`Organization` entities with `PersonCredit`/`OrgCredit` junction tables using flexible `roleKey` strings.
+Defines the boundary between platform identity and content
+attribution. Owns the rule that `User.type` collapses to `USER`
+(or is removed), the removal of book-specific
+`authorBook` / `pressBook` / `producerBook` relations in favor of
+`Person` / `Organization` plus `PersonCredit` / `OrgCredit`, the
+stable `User.unitId` actor identifier used by all
+`userId`-typed FKs, and the absence of an `accountStatus` column
+or DTO field — readiness is conveyed by `slug !== null`.
 
-**Migration**: The `UserType` enum is reduced to contain only `USER` (or removed entirely if the enum becomes single-valued). Existing users with `type = AUTHOR`, `PRESS`, or `PRODUCER` are migrated to `type = USER`. Their attribution data is migrated to `Person`/`Organization` records with corresponding `PersonCredit`/`OrgCredit` entries preserving the original role information.
-
-### Requirement: User.authorBook, User.pressBook, User.producerBook relations
-
-**Reason**: The M2M relations `authorBook`, `pressBook`, and `producerBook` on the User model tied book attribution directly to platform accounts. This prevented crediting non-users (deceased authors, foreign publishers) and conflated the concepts of "platform account" and "credited contributor." Attribution is now decoupled via `Person` + `PersonCredit` and `Organization` + `OrgCredit` tables with flexible `roleKey` values (`author`, `translator`, `illustrator`, `publisher`, `developer`, etc.).
-
-**Migration**: For each existing `authorBook` relation, create a `Person` record (if the user does not already have a corresponding Person) and a `PersonCredit` with `roleKey = "author"`. For each `pressBook` relation, create an `Organization` record and an `OrgCredit` with `roleKey = "publisher"`. For each `producerBook` relation, create a `Person` or `Organization` record (based on context) and a credit with `roleKey = "producer"`. The M2M junction tables (`_BookAuthor`, `_BookPress`, `_BookProducer`) are dropped after migration.
-
-## ADDED Requirements
+## Requirements
 
 ### Requirement: User type field simplified to platform identity only
 

@@ -1,3 +1,16 @@
+# multilingual-seed-generators Specification
+
+## Purpose
+
+Defines the `generateTranslations(type: UnitType)` factory used
+by the seed pipeline. Owns the canonical `language` codes sourced
+from `@rezics/contract`, the rule that every call includes a
+`zh-hant` translation, and the probabilistic mix that adds `en`
+~70%, `zh-hans` ~40%, `ja` ~20%, and `de` ~10% across the
+generated array.
+
+## Requirements
+
 ### Requirement: Multilingual translation generation
 
 The `generateTranslations(type: UnitType)` function SHALL return an array of translation objects, each with a canonical `language` code from `@rezics/contract`. Every call SHALL include a `zh-hant` translation. Additional languages SHALL be included probabilistically: `en` at ~70%, `zh-hans` at ~40%, `ja` at ~20%, `de` at ~10%.

@@ -1,4 +1,16 @@
-## ADDED Requirements
+# dispatch-contract Specification
+
+## Purpose
+
+Defines the contract-side primitives for the dispatch worker integration
+exported from `@rezics/contract`: the `DispatchType` Typebox enum
+(`rezics:book` / `rezics:game` / `rezics:media`), the
+`dispatchResultSchema` envelope (`taskId`, `project`, `type`, optional
+`unitId`, partial `data`), and the dispatch scope domain plus its
+permission constants (`rezics-server-session`, `unit:update`,
+`unit:create`) for use with `hasScope`.
+
+## Requirements
 
 ### Requirement: Dispatch type enum defined in contract
 

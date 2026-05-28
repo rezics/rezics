@@ -1,4 +1,17 @@
-## ADDED Requirements
+# type-extension-realm Specification
+
+## Purpose
+
+Defines the `Realm` 1:1 extension of `Unit(type=REALM)` and its
+`RealmMember` companion table. Owns the `isPublic` / `isOfficial`
+flags, the denormalized `memberCount`, the owner > moderator >
+member role hierarchy with its join / leave / role-assignment
+rules, ownership transfer, the moderator-or-higher gate on
+realm-scoped tag operations, and the rule that all
+language-dependent names and descriptions live in
+`UnitTranslation`.
+
+## Requirements
 
 ### Requirement: Realm creation produces Unit and Realm extension
 

@@ -1,4 +1,17 @@
-## ADDED Requirements
+# language-registry Specification
+
+## Purpose
+
+Defines the canonical language registry exported by
+`@rezics/contract`: the lowercase `LANGUAGES` set
+(`zh-hant`, `zh-hans`, `en`, `ja`, `de`, `ko`) with no bare `zh`,
+the Typebox `languageSchema` validator, `LANGUAGE_META` with
+English and native names, the `DEFAULT_LANGUAGE`
+(`zh-hant`) / `FALLBACK_LANGUAGE` (`en`) constants, and the
+case-insensitive `normalizeLanguage()` function that returns
+`null` for any non-canonical input.
+
+## Requirements
 
 ### Requirement: Canonical language code registry
 

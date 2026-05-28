@@ -1,3 +1,5 @@
+# post-thread-ui Specification
+
 ## Purpose
 
 Defines the threaded reply tree presentation for post detail surfaces, including threading rails, collapse controls, depth capping, and continue-thread subtree rendering.

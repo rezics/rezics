@@ -1,4 +1,17 @@
-## MODIFIED Requirements
+# unified-access-token Specification
+
+## Purpose
+
+Defines `rezics-session-token` as the single bearer credential
+verified by Server, Notify, Search, and Reaction against the
+server JWKS. Owns the cookie-boundary rule that the browser only
+obtains and refreshes the token via `POST /auth/session/refresh`,
+forbids any `x-auth-session-token` header (including in CORS
+`allowedHeaders`), and routes auth identity facts to the boundary
+through internal service-to-service calls rather than a
+browser-readable JWT.
+
+## Requirements
 
 ### Requirement: Single access token replaces all service tokens
 
@@ -30,19 +43,3 @@ Auth service produces an internal session representation that, when consulted by
 - **THEN** main SHALL call auth internally (through the configured private channel) to obtain the validated session and identity
 - **AND** the browser SHALL NOT receive or decode an `auth-session-token` JWT
 
-## REMOVED Requirements
-
-### Requirement: AUTH_CONTEXT token type is removed
-
-**Reason**: Already removed in `pure-oauth-auth` change.
-**Migration**: N/A — already completed. Restated here only for completeness; unchanged by this change.
-
-### Requirement: REZICS_SESSION token type is removed
-
-**Reason**: Restated for completeness; the active definition lives in `server-access-token`. This change does not reintroduce or further redefine the legacy token name.
-**Migration**: Refer to `server-access-token` for the canonical `rezics-session-token` definition.
-
-### Requirement: Conditional email_verified claim semantics
-
-**Reason**: With the JWT-in-header pathway deleted, the browser never receives an `auth-session-token` JWT and never reads `email_verified` from it. Verification gating happens at the cookie boundary, which consults auth's validated session state directly.
-**Migration**: Verification checks live in `materializeMainAccountFromAuth` / `refreshMainSessionFromAuth`, which read auth's current session state via internal call.

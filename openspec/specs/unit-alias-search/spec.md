@@ -1,4 +1,17 @@
-## ADDED Requirements
+# unit-alias-search Specification
+
+## Purpose
+
+Defines `UnitAlias` rows that attach searchable alternative names
+to a canonical Unit without creating a new identity or replacing
+`UnitTranslation`. Owns the separation between display `value` and
+NFKC-normalized `normalizedValue`, the one-vote-per-user
+`UnitAliasVote` model that drives `score` and `voteCount`, the
+"pinned-or-above-threshold" rule for inclusion in the search index
+(without ranking boost), and the admin / owner authority gate over
+pin / unpin / hide / delete operations.
+
+## Requirements
 
 ### Requirement: UnitAlias stores searchable alternative names for a Unit
 The system SHALL store searchable alternative names in `UnitAlias` rows attached to a canonical `Unit`. A UnitAlias SHALL NOT create a new Unit identity, SHALL NOT replace `UnitTranslation`, and SHALL NOT establish a canonical merge relationship between Units.

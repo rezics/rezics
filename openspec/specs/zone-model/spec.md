@@ -1,3 +1,5 @@
+# zone-model Specification
+
 ## Purpose
 
 Defines the Unit-backed Zone model, lifecycle access rules, admin CRUD surface,

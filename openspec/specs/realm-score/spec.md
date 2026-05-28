@@ -1,3 +1,16 @@
+# realm-score Specification
+
+## Purpose
+
+Defines the `ScoreEntry` model and aggregate that drive realm
+scoped scoring on Units. Owns the `(userId, unitId, realm)`
+uniqueness invariant, the 1-10 integer score range with optional
+per-field component scores, the rules for create / update /
+delete by the owning user, and the realm-aware aggregation
+exposed by score read endpoints.
+
+## Requirements
+
 ### Requirement: ScoreEntry stores individual user scores per realm
 
 The system SHALL maintain a `ScoreEntry` model representing a single user's score for a unit within a realm. Each ScoreEntry MUST have a UUID primary key (`id`), and the combination of `(userId, unitId, realm)` MUST be unique. The `value` field SHALL be an integer between 1 and 10 inclusive. The `fields` column SHALL be an optional JSON object mapping field keys to integer scores (each also 1-10).

@@ -1,3 +1,5 @@
+# type-extension-post Specification
+
 ## Purpose
 
 Defines Post kind extensions and related rendering rules, including chapter-as-post behavior, excerpt source metadata, and the removal of legacy comment/quote post kinds.

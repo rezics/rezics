@@ -1,3 +1,18 @@
+# outbound-link-protection Specification
+
+## Purpose
+
+Defines the `classifyUrl(raw)` utility exported from
+`@rezics/contract` that buckets every link into
+`app-route`, `rezics`, `external`, or `blocked` and returns a
+canonical `href`. Owns the rules around javascript / data /
+vbscript schemes being blocked, default-https parsing for
+schemeless input, and the downstream rendering / safelist
+behavior that frontends apply for external links (interstitial,
+`rel`, `target`, etc.).
+
+## Requirements
+
 ### Requirement: URL classification utility
 The shared `@rezics/contract` package SHALL export a `classifyUrl(raw: string)` function that returns a discriminated value of the form `{ kind: 'app-route' | 'rezics' | 'external' | 'blocked', href: string }`. The classification rules SHALL be:
 - `raw` starting with `/` followed by an alphanumeric path segment → `app-route`.

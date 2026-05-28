@@ -1,3 +1,17 @@
+# storybook-coverage Specification
+
+## Purpose
+
+Defines the per-package Storybook coverage policy: full coverage
+for `@rezics/ui` (≥30 stories) and `@rezics/app` (≥60 stories),
+Cosmos-parity plus one for `@rezics/folio` (≥6 stories), and
+Cosmos-parity for `@rezics/editor` (≥9 stories). Owns the
+distinction between full and parity packages, the story-count
+targets, and the rule that every covered package keeps its
+Storybook runnable and aligned with the documented targets.
+
+## Requirements
+
 ### Requirement: Per-package Storybook coverage targets
 
 Storybook coverage SHALL be governed by per-package targets that distinguish full coverage from parity-only packages. The targets SHALL be:

@@ -1,4 +1,21 @@
-## ADDED Requirements
+# tag-scoring Specification
+
+## Purpose
+
+Defines tags as language-neutral `Unit(type=TAG)` records with
+labels in `UnitTranslation`, the flat (no-hierarchy) tag model,
+and the `UnitTag` scored junction with `pinned` /
+fractional-index `position` for editorial ordering. Owns the
+pin-first then score-descending display order, the
+`TagVote(+1/-1)` per-user voting that drives `score` and
+`voteCount`, the rule that the first `POST /unit-tag` writes the
+creator's `+1` vote (idempotent on retry), unit-owner-or-admin
+pin / delete authority, the -100 suppression threshold with the
+authorized-viewer flag, the admin discovery endpoint for low-score
+rows, and the pinned-or-above-threshold search inclusion that
+never boosts score.
+
+## Requirements
 
 ### Requirement: Tag is a Unit with type TAG and language-neutral identity
 

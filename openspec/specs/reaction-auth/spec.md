@@ -1,4 +1,16 @@
-## MODIFIED Requirements
+# reaction-auth Specification
+
+## Purpose
+
+Defines authentication for the reaction service. Authenticated reads
+(`GET /reactions/my`) verify the server-issued `rezics-session-token`
+against the server's JWKS via `@rezics/jwt`; `auth-session-token` is
+rejected at the issuer check. The summary endpoint stays public.
+Writes go through the main server, which validates the user session
+with `requireLogin` and proxies to the reaction service's internal
+endpoints using the `x-internal-secret` shared secret.
+
+## Requirements
 
 ### Requirement: JWT verification for read endpoints
 

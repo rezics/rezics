@@ -1,4 +1,15 @@
-## ADDED Requirements
+# default-realm-auto-join Specification
+
+## Purpose
+
+Defines the fire-and-forget step in `/internal/users/provision` that
+adds every newly-provisioned user to the default realm using the cached
+default realm ID. The auto-join is best-effort: it never blocks the
+provisioning response, and failures (missing cache, duplicate
+membership, database errors) are caught and logged so user creation
+always succeeds.
+
+## Requirements
 
 ### Requirement: Auto-join default realm on user provisioning
 

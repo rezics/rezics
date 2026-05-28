@@ -1,4 +1,22 @@
-## ADDED Requirements
+# realm-tag-context Specification
+
+## Purpose
+
+Defines the unit-detail tag aggregation surface: the global tag list
+sorted by `UnitTag.score` descending plus collapsible per-realm
+highlights of the tags each preferred realm has curated through
+`RealmTagUnit`. The `GET /tags/for-unit/:unitId/context` endpoint
+returns both in one response, resolves realm choices from
+`User.settings.realmTagPreferences` (falling back to the 5 most
+recently joined realms), caps preferences at 50 realms per unit type,
+and localizes tag labels through the user's preferred language chain.
+Anonymous callers receive only the global tag list. Includes the
+`User.settings` JSON column plus its `GET`/`PUT /users/me/settings`
+endpoints with deep-merge semantics, and keeps realm-tag highlights
+distinct from the dedicated pair-level `RealmTagContext`
+interpretation surface.
+
+## Requirements
 
 ### Requirement: Global tag display sorted by score
 

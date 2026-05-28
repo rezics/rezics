@@ -1,3 +1,18 @@
+# unit-slug Specification
+
+## Purpose
+
+Defines the `Unit.slug` / `Unit.slugScope` fields and their
+`@@unique([slugScope, slug])` index. Owns the rule that
+`slugScope` points to a placeholder `Unit { type: SCOPE }` for
+named buckets (`user`, `realm`, `tag`, `zone`, `entity`) or an
+owner Unit id for sub-resources like shelves under a user, that
+no FK is declared on `slugScope` (matching the polymorphic
+precedent of `ShelfItem.itemRef`), and that slug uniqueness is
+per scope rather than global.
+
+## Requirements
+
 ### Requirement: Unit slug field
 
 The `Unit` model SHALL have an optional `slug` field of type `String?` and a required `slugScope` field of type `String @db.Uuid` (NOT NULL). Uniqueness SHALL be enforced by a composite index `@@unique([slugScope, slug])`. The slug serves as a human-readable identifier alongside the UUIDv7 primary key, and `slugScope` SHALL identify the namespace under which the slug is unique. A slug is unique within its scope, not globally.

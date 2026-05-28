@@ -1,4 +1,18 @@
-## ADDED Requirements
+# notify-system-email Specification
+
+## Purpose
+
+Defines the `notifySystemAndEmail({ userId, kind, payload, locale? })`
+fan-out exposed by `@rezics/notify` — one call persists an in-app
+notification row and enqueues a localized email for the user's primary
+address using the recipient's language fallback chain. Email failures
+never block in-app persistence (they flow through the existing
+retry/dead-letter path). Also registers the WorkLinkClaim lifecycle
+kinds (`WORK_LINK_CLAIM_PENDING` / `_APPROVED` / `_REJECTED`) with their
+renderers and the 24-hour per-recipient dedup window on
+`WORK_LINK_CLAIM_PENDING`.
+
+## Requirements
 
 ### Requirement: notifySystemAndEmail fan-out API
 

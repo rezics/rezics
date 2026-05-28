@@ -1,3 +1,17 @@
+# email-verification-gate Specification
+
+## Purpose
+
+Defines the verify-email page Refresh action and downstream
+verification gate. Owns the rule that Refresh force-fetches a
+new identity token via `queryAccessToken()` before hydrating
+auth state, detects the verified `email_verified` claim, and
+proceeds to token exchange that issues a `rezics-session-token`.
+Owns the unverified-state UX where Refresh leaves the page in
+verification-needed mode until the OTP completes.
+
+## Requirements
+
 ### Requirement: Verify-email refresh fetches a new identity token
 
 The verify-email page "Refresh" action SHALL force-fetch a new identity token from the auth service (via `queryAccessToken()`) before hydrating auth session state. This ensures updated `email_verified` claims are picked up. After successful OTP verification, the refresh action detects the verified state and proceeds with token exchange.

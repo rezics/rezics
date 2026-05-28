@@ -1,4 +1,17 @@
-## MODIFIED Requirements
+# token-refresh-registry Specification
+
+## Purpose
+
+Defines the frontend token refresh registry consumed by
+`AuthProvider`. Owns the rule that the registry holds exactly one
+entry — `REZICS_SESSION` — refreshed via the
+`POST /auth/session/refresh` cookie boundary, the prohibition on
+`AUTH_SESSION`, `NOTIFICATION_SESSION`, and `SEARCH_SESSION`
+entries, the refresh-function contract returning `{ token }` and
+throwing on failure, and the non-retryable transition to
+anonymous state when the auth session cookie is rejected.
+
+## Requirements
 
 ### Requirement: Registry is extensible via factory function
 
@@ -27,9 +40,3 @@ Each refresh function in the registry SHALL be an async function returning `{ to
 - **THEN** the failure is classified as non-retryable
 - **AND** AuthProvider transitions to anonymous state
 
-## REMOVED Requirements
-
-### Requirement: Missing registry entry is treated as non-retryable
-
-**Reason**: With only one fixed entry in the registry, the concept of a missing entry is no longer meaningful.
-**Migration**: Remove the missing-entry error path. The single entry is always present.

@@ -1,4 +1,15 @@
-## ADDED Requirements
+# profile-sync Specification
+
+## Purpose
+
+Defines best-effort profile sync between the server and downstream
+copies. When `name` / `slug` / `avatar` change on the server, it issues
+partial Meilisearch updates (`patchUserFields`, `patchPostsAuthor`) and
+a non-blocking `POST /internal/users/sync` to auth (authenticated via
+`x-internal-secret`). Failures never block the client response — auth
+and search are allowed to lag and self-heal on the next sync.
+
+## Requirements
 
 ### Requirement: Server notifies auth on profile update
 

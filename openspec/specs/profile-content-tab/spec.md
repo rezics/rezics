@@ -1,4 +1,15 @@
-## ADDED Requirements
+# profile-content-tab Specification
+
+## Purpose
+
+Defines the Content tab on the user profile: an L2 post-kind chip row
+(Reviews, Remarks, Quotes, Posts) defaulting to Reviews, a filter bar
+with body-text search, sort (Newest / Oldest / Most Replies), and
+owner-only status / visibility dropdowns, plus a paginated post list
+with empty states. All filter values live in URL search params so tabs
+deep-link and reload predictably.
+
+## Requirements
 
 ### Requirement: L2 chip sub-filters for post kinds
 The Content tab SHALL render a row of chip-style filters for post kinds: Reviews, Remarks, Quotes, Posts. The active chip SHALL be visually filled; inactive chips SHALL be outlined. Selecting a chip SHALL update the URL search param `kind` and refetch content.

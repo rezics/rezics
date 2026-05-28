@@ -1,4 +1,17 @@
-## ADDED Requirements
+# elysia-error-response-pattern Specification
+
+## Purpose
+
+Defines the Elysia handler convention that makes multi-status
+routes type-check cleanly. Owns the rule that `status` is
+destructured from the handler context (never imported from
+`elysia`), the multi-status `response: { 200, 403, … }` object
+format for any route with error branches, the flat
+`response: schema` exception for success-only routes, and the
+specific admin/user/stats/jwt/chapter files that adopt the
+pattern.
+
+## Requirements
 
 ### Requirement: Status from handler context
 All Elysia route handlers that return non-200 status codes SHALL destructure `status` from the handler's context parameter, not import it from the `elysia` package.

@@ -1,3 +1,5 @@
+# engagement-subscription Specification
+
 ## Purpose
 
 The engagement-subscription capability provides a single, unified attention edge between any user and any subscribable Unit (users, books, realms, posts, tags, etc.). Every "I want to know about X" intent in the platform — follows, realm subscriptions, book follows, DM permission, mention reachability — is expressed as a row in the `Subscription` table with a per-channel filter, replacing the legacy `Follow` model and ad-hoc per-domain recipient resolution. The capability owns the subscription data model, the channel registry, the fan-out recipient resolver consumed by the notification feed, the denormalized subscriber counts, and the CRUD API surface for managing subscriptions.

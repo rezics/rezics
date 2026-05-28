@@ -1,4 +1,18 @@
-## ADDED Requirements
+# typed-json-fields Specification
+
+## Purpose
+
+Defines the Typebox schemas in `@rezics/contract` that give shape
+to opaque `Json` columns instead of `t.Any()`. Owns
+`postExtraSchema` (rating / title / book), `shelfExtraSchema`
+(viewMode), `bookExtraSchema` (publishURL),
+`bookContentStructureNodeSchema`, the `scoreDistributionSchema` /
+`scoreFieldsEntrySchema` numeric records, the
+`apiTokenScopesSchema` record, and the rule that
+`Json` fields without a frontend consumer stay as
+`t.Optional(t.Any())` until a consumer adds a typed schema first.
+
+## Requirements
 
 ### Requirement: Post extra schema
 The contract SHALL define a `postExtraSchema` Typebox schema in `package/contract/src/post.ts` that describes the actual shape of `Post.extra`:

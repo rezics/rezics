@@ -166,181 +166,190 @@ Group the work into batches by prefix so each PR/commit stays reviewable.
 - [x] `content-search-translations`
 - [x] `content-sync`
 
-### B6. Batch: `book-*` / `homepage-*` (3 files)
+### B6. Batch: `book-*` / `homepage-*` (4 files) — done 2026-05-28
 
-- [ ] `book-detail-language-switcher`
-- [ ] `book-detail-release-selector`
-- [ ] `book-library-homepage`
-- [ ] `homepage-ecosystem`
+- [x] `book-detail-language-switcher`
+- [x] `book-detail-release-selector`
+- [x] `book-library-homepage`
+- [x] `homepage-ecosystem`
 
-### B7. Batch: `default-realm-*` (3 files)
+### B7. Batch: `default-realm-*` (3 files) — done 2026-05-28
 
-- [ ] `default-realm-auto-join`
-- [ ] `default-realm-contract`
-- [ ] `default-realm-infra-bootstrap`
+- [x] `default-realm-auto-join`
+- [x] `default-realm-contract`
+- [x] `default-realm-infra-bootstrap`
 
-### B8. Batch: `dispatch-*` / `internal-event-*` (4 files)
+### B8. Batch: `dispatch-*` / `internal-event-*` (4 files) — done 2026-05-28
 
-- [ ] `dispatch-contract`
-- [ ] `dispatch-result-intake`
-- [ ] `dispatch-token-session`
-- [ ] `internal-event-ingestion`
+- [x] `dispatch-contract`
+- [x] `dispatch-result-intake`
+- [x] `dispatch-token-session`
+- [x] `internal-event-ingestion`
 
-### B9. Batch: `notification-*` / `notify-*` (4 files)
+### B9. Batch: `notification-*` / `notify-*` (4 files) — done 2026-05-28
 
-- [ ] `notification-feed`
-- [ ] `notification-stream`
-- [ ] `notify-auth`
-- [ ] `notify-system-email`
+- [x] `notification-feed`
+- [x] `notification-stream`
+- [x] `notify-auth`
+- [x] `notify-system-email`
 
-### B10. Batch: `profile-*` (5 files)
+### B10. Batch: `profile-*` (6 files) — done 2026-05-28
 
-- [ ] `profile-content-tab`
-- [ ] `profile-followers-tab`
-- [ ] `profile-realms-tab`
-- [ ] `profile-shelves-tab`
-- [ ] `profile-sync`
-- [ ] `profile-tab-layout`
+- [x] `profile-content-tab`
+- [x] `profile-followers-tab`
+- [x] `profile-realms-tab`
+- [x] `profile-shelves-tab`
+- [x] `profile-sync`
+- [x] `profile-tab-layout`
 
-### B11. Batch: `reaction-*` (4 files)
+### B11. Batch: `reaction-*` (4 files) — done 2026-05-28
 
-- [ ] `reaction-auth`
-- [ ] `reaction-crud`
-- [ ] `reaction-internal-api`
-- [ ] `reaction-notification`
+- [x] `reaction-auth`
+- [x] `reaction-crud`
+- [x] `reaction-internal-api`
+- [x] `reaction-notification`
 
-### B12. Batch: `realm-*` (4 files)
+### B12. Batch: `realm-*` (4 files) — done 2026-05-28
 
-- [ ] `realm-search-index`
-- [ ] `realm-tag-context`
-- [ ] `realm-tag-interpretation-context`
-- [ ] `realm-taxonomy-seed-support`
+- [x] `realm-search-index`
+- [x] `realm-tag-context`
+- [x] `realm-tag-interpretation-context`
+- [x] `realm-taxonomy-seed-support`
 
-### B13. Batch: `search-*` (2 files)
+### B13. Batch: `search-*` (2 files) — done 2026-05-28
 
-- [ ] `search-query-syntax`
-- [ ] `search-state-injection`
+- [x] `search-query-syntax`
+- [x] `search-state-injection`
 
-### B14. Batch: `seed-*` (2 files)
+### B14. Batch: `seed-*` (2 files) — done 2026-05-28
 
-- [ ] `seed-performance-batch`
-- [ ] `seed-zone`
+- [x] `seed-performance-batch`
+- [x] `seed-zone`
 
-### B15. Batch: `server-*` (2 files)
+### B15. Batch: `server-*` (2 files) — done 2026-05-28
 
-- [ ] `server-access-token`
-- [ ] `server-user-cache`
+- [x] `server-access-token`
+- [x] `server-user-cache`
 
-### B16. Batch: `settings-*` (4 files)
+### B16. Batch: `settings-*` (4 files) — done 2026-05-28
 
-- [ ] `settings-connections`
-- [ ] `settings-preferences`
-- [ ] `settings-profile`
-- [ ] `settings-tokens`
+- [x] `settings-connections`
+- [x] `settings-preferences`
+- [x] `settings-profile`
+- [x] `settings-tokens`
 
-### B17. Batch: `type-extension-*` (4 files)
+### B17. Batch: `type-extension-*` (4 files) — done 2026-05-28
 
-- [ ] `type-extension-book`
-- [ ] `type-extension-link`
-- [ ] `type-extension-realm`
-- [ ] `type-extension-shelf`
+- [x] `type-extension-book`
+- [x] `type-extension-link`
+- [x] `type-extension-realm`
+- [x] `type-extension-shelf`
 
-### B18. Batch: `unified-*` (3 files)
+### B18. Batch: `unified-*` (3 files) — done 2026-05-28
 
-- [ ] `unified-access-token`
-- [ ] `unified-attribution` *(but see Phase C — likely merge with `attribution`)*
-- [ ] `unified-jwt-audience`
+- [x] `unified-access-token`
+- [x] `unified-attribution` *(but see Phase C — likely merge with `attribution`)*
+- [x] `unified-jwt-audience`
 
-### B19. Batch: `unit-*` (3 files)
+### B19. Batch: `unit-*` (3 files) — done 2026-05-28
 
-- [ ] `unit-alias-search`
-- [ ] `unit-authority`
-- [ ] `unit-identity`
+- [x] `unit-alias-search`
+- [x] `unit-authority`
+- [x] `unit-identity`
 
-### B20. Batch: `work-*` (3 files)
+### B20. Batch: `work-*` (3 files) — done 2026-05-28
 
-- [ ] `work-discussion`
-- [ ] `work-link-claim`
-- [ ] `work-release`
+- [x] `work-discussion`
+- [x] `work-link-claim`
+- [x] `work-release`
 
-### B21. Batch: leftovers (~25 files)
+### B21. Batch: leftovers (~33 files) — done 2026-05-28
 
-- [ ] `admin-auth-api-client`
-- [ ] `api-error-class`
-- [ ] `api-route-convention`
-- [ ] `app-header-search`
-- [ ] `backend-prisma-error-mapping`
-- [ ] `biome-config`
-- [ ] `direct-messaging`
-- [ ] `elysia-error-response-pattern`
-- [ ] `folder-naming-convention`
-- [ ] `image-upload-api`
-- [ ] `image-upload-modal`
-- [ ] `infra-seed`
-- [ ] `language-registry`
-- [ ] `lazy-user-provisioning`
-- [ ] `macro-permission-guards`
-- [ ] `markdown-post-content`
-- [ ] `markdown-user-description`
-- [ ] `meili-frontend-lists`
-- [ ] `pagination-limit-contract`
-- [ ] `post-kind-contract`
-- [ ] `post-parallel-translation`
-- [ ] `progress-search-index`
-- [ ] `public-list-endpoints`
-- [ ] `rezics-renderer`
-- [ ] `slug-ref`
-- [ ] `subdomain-trust-boundary`
-- [ ] `tag-batch-translation`
-- [ ] `tag-scoring`
-- [ ] `tanstack-query-keys`
-- [ ] `token-refresh-registry`
-- [ ] `typed-json-fields`
-- [ ] `typed-slug-lookup`
-- [ ] `user-brief-api`
-- [ ] `user-domain-decoupling`
+- [x] `admin-auth-api-client`
+- [x] `api-error-class`
+- [x] `api-route-convention`
+- [x] `app-header-search`
+- [x] `backend-prisma-error-mapping`
+- [x] `biome-config`
+- [x] `direct-messaging`
+- [x] `elysia-error-response-pattern`
+- [x] `folder-naming-convention`
+- [x] `image-upload-api`
+- [x] `image-upload-modal`
+- [x] `infra-seed`
+- [x] `language-registry`
+- [x] `lazy-user-provisioning`
+- [x] `macro-permission-guards`
+- [x] `markdown-post-content`
+- [x] `markdown-user-description`
+- [x] `meili-frontend-lists`
+- [x] `pagination-limit-contract`
+- [x] `post-kind-contract`
+- [x] `post-parallel-translation`
+- [x] `progress-search-index`
+- [x] `public-list-endpoints`
+- [x] `rezics-renderer`
+- [x] `slug-ref`
+- [x] `subdomain-trust-boundary`
+- [x] `tag-batch-translation`
+- [x] `tag-scoring`
+- [x] `tanstack-query-keys`
+- [x] `token-refresh-registry`
+- [x] `typed-json-fields`
+- [x] `typed-slug-lookup`
+- [x] `user-brief-api`
+- [x] `user-domain-decoupling`
 
-### B22. Header-less specs (no delta markers, but no title/Purpose)
+### B22. Header-less specs (no delta markers, but no title/Purpose) — done 2026-05-28
 
 Same recipe minus steps 3–5: just add `# <name> Specification` + `## Purpose`
 above the existing `## Requirements`.
 
-- [ ] `admin-email-testing`
-- [ ] `attribution`
-- [ ] `auth-login-orchestration`
-- [ ] `cleanup`
-- [ ] `database-reset-preserve`
-- [ ] `email-templates`
-- [ ] `email-verification-gate`
-- [ ] `engagement-reaction-bar`
-- [ ] `engagement-share-action`
-- [ ] `engagement-shelf-action`
-- [ ] `multilingual-seed-generators`
-- [ ] `outbound-link-protection`
-- [ ] `post-presentation-architecture`
-- [ ] `profile-reactions-tab`
-- [ ] `progress-status-ui`
-- [ ] `reaction-history`
-- [ ] `reaction-hydration`
-- [ ] `reaction-summary`
-- [ ] `reaction-user-state`
-- [ ] `realm-membership-me`
-- [ ] `realm-score`
-- [ ] `realm-tag-vote`
-- [ ] `registration-identity-step`
-- [ ] `score-realm-field`
-- [ ] `shelf-items-batch-mutation`
-- [ ] `shelf-items-editor`
-- [ ] `slug-validation`
-- [ ] `storybook-coverage`
-- [ ] `unit-picker`
-- [ ] `unit-slug`
-- [ ] `unverified-user-ux`
-- [ ] `user-unit-progress`
+- [x] `admin-email-testing`
+- [x] `attribution`
+- [x] `auth-login-orchestration`
+- [x] `cleanup`
+- [x] `database-reset-preserve`
+- [x] `email-templates`
+- [x] `email-verification-gate`
+- [x] `engagement-reaction-bar`
+- [x] `engagement-share-action`
+- [x] `engagement-shelf-action`
+- [x] `multilingual-seed-generators`
+- [x] `outbound-link-protection`
+- [x] `post-presentation-architecture`
+- [x] `profile-reactions-tab`
+- [x] `progress-status-ui`
+- [x] `reaction-history`
+- [x] `reaction-hydration`
+- [x] `reaction-summary`
+- [x] `reaction-user-state`
+- [x] `realm-membership-me`
+- [x] `realm-score`
+- [x] `realm-tag-vote`
+- [x] `registration-identity-step`
+- [x] `score-realm-field`
+- [x] `shelf-items-batch-mutation`
+- [x] `shelf-items-editor`
+- [x] `slug-validation`
+- [x] `storybook-coverage`
+- [x] `unit-picker`
+- [x] `unit-slug`
+- [x] `unverified-user-ux`
+- [x] `user-unit-progress`
 
-### B23. Update `openspec/config.yaml`
+Also added titles to nine previously-pure-Purpose specs surfaced by the
+final sweep: `server-route-cleanup`, `type-extension-post`,
+`zone-frontend`, `zone-model`, `post-thread-ui`, `shelf-discussion`,
+`engagement-subscription`, `unit-publication-policy`,
+`unit-ai-disclosure`. `server-route-cleanup` retains its
+`## Removed Requirements` section as historical documentation of the
+deleted route surface (not the all-caps delta vocabulary the recipe
+targets).
 
-- [ ] Append two rules to `rules.specs`:
+### B23. Update `openspec/config.yaml` — done 2026-05-28
+
+- [x] Appended two rules to `rules.specs`:
       `- Spec files SHALL start with '# <name> Specification' and contain a '## Purpose' section before '## Requirements'.`
       `- Spec files SHALL NOT contain '## ADDED Requirements', '## MODIFIED Requirements', or '## REMOVED Requirements' — those are change-proposal vocabulary and must be flattened during archive.`
 
@@ -462,9 +471,15 @@ the suggested targets — they are starting points, not decrees.
 |---|---|---|---|
 | Baseline | — | 317 | 2026-05-28 |
 | A | done | 314 | 2026-05-28 |
-| B | not started | — | — |
+| B | done | 314 | 2026-05-28 |
 | C | not started | — | — |
 | D | not started | — | — |
+
+Phase B was editorial — no specs were added or deleted, so the spec
+count is unchanged. Every spec now starts with
+`# <name> Specification`, has a `## Purpose` section, and uses a single
+`## Requirements` heading. `openspec/config.yaml` codifies the new
+format under `rules.specs`.
 
 Phase A reduction: 3 capabilities removed (`auth-organization`,
 `exchange-auto-provision`, `cors-policy-plugin`). Requirement count:

@@ -1,4 +1,16 @@
-## ADDED Requirements
+# public-list-endpoints Specification
+
+## Purpose
+
+Defines the public-read posture of the DB-backed list endpoints:
+`GET /books/`, `GET /posts/`, and `GET /realms/` accept
+unauthenticated callers and force `status=PUBLISHED` /
+`visibility=PUBLIC` / `isPublic=true` filters for non-admins. Owns
+the removal of `q` (full-text search) from the list query schemas
+in favor of the `/meili/*` endpoints, and the rule that
+`GET /chapters/` and `GET /feedbacks/` remain admin-only.
+
+## Requirements
 
 ### Requirement: Public access to book listing
 The `GET /books/` endpoint SHALL accept unauthenticated requests. When the caller is not an admin, the system SHALL force `status=PUBLISHED` and `visibility=PUBLIC` filters regardless of query parameters. The `q` (full-text search) parameter SHALL NOT be available on this endpoint.

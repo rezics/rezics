@@ -1,4 +1,18 @@
-## ADDED Requirements
+# internal-event-ingestion Specification
+
+## Purpose
+
+Defines the `POST /internal/event` and `POST /internal/dm` boundaries
+between the server and the notify service. Recipient resolution stays
+on the server (notify never queries the Subscription table itself);
+notify batches one notification row per recipient via `createMany` and
+attempts SSE push in the same request cycle. The `kind` field is
+validated against the contract `KIND_REGISTRY`. Endpoints are gated on
+the `x-internal-secret` shared secret. Delivery is synchronous and
+best-effort — SSE push failures are logged but never fail the
+persistence batch.
+
+## Requirements
 
 ### Requirement: Internal notification event endpoint
 

@@ -1,3 +1,18 @@
+# auth-login-orchestration Specification
+
+## Purpose
+
+Defines `resolvePostAuthDestination()` and the rule that login,
+social callback, and post-auth refresh flows complete through
+main so it can provision or verify readiness and refresh the
+`rezics-session-token` httpOnly cookie. Owns the soft redirect
+to `/complete-registration` when registration is incomplete
+(missing UserProfile or unverified email), and the override that
+honors an explicit redirect target while still respecting
+readiness gating.
+
+## Requirements
+
 ### Requirement: Post-auth navigation supports redirect targets with readiness overrides
 
 `resolvePostAuthDestination()` SHALL accept optional redirect target and apply readiness-based priority overrides after main has completed login orchestration through the public `/auth/*` boundary. If the user's registration is incomplete (`registrationComplete: false`, meaning either UserProfile is missing OR email is unverified), navigation SHALL go to `/complete-registration` as a soft redirect -- the user is not locked and can navigate away freely.

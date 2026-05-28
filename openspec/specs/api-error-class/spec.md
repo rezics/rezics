@@ -1,4 +1,16 @@
-## ADDED Requirements
+# api-error-class Specification
+
+## Purpose
+
+Defines the `ApiError` class exported by `@rezics/api`: a typed
+`Error` subclass carrying `status`, `code`, `message`, and
+optional `detail` that `apiFetchResponse` throws when the backend
+returns a non-OK response. Owns the contract that the TanStack
+Query retry function reads `ApiError.status` directly instead of
+parsing `error.message` JSON, with 4xx skipped (except 408) and
+5xx / non-`ApiError` errors retried with exponential backoff.
+
+## Requirements
 
 ### Requirement: Typed ApiError class
 `@rezics/api` SHALL export an `ApiError` class extending `Error` with typed fields: `status` (number), `code` (string), `message` (string), and optional `detail` (structured object matching the backend error response shape).

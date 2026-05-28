@@ -1,3 +1,16 @@
+# score-realm-field Specification
+
+## Purpose
+
+Defines the `ScoreRealmField` model that drives per-realm score
+component fields. Owns the `(realm, key)` composite key, the
+`label` and `sortOrder` columns, the admin-only create / update /
+delete authority, the rule that the default realm has no field
+records, and the contract that scoring UIs render fields in the
+configured `sortOrder` for the active realm.
+
+## Requirements
+
 ### Requirement: ScoreRealmField stores field definitions per realm
 
 The system SHALL maintain a `ScoreRealmField` model keyed by `(realm, key)`. Each record MUST have a `key` (VarChar 64, the field identifier), an optional `label` (display name), and a `sortOrder` (integer, default 0). Only admin users SHALL be able to create, modify, or delete field records. The default realm SHALL have no field records.

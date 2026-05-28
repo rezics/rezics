@@ -1,3 +1,17 @@
+# realm-membership-me Specification
+
+## Purpose
+
+Defines the authenticated `GET /realms/:unitId/members/me`
+endpoint and its `RealmMemberDTO` (or `null`) response. Owns the
+rule that the endpoint returns the caller's
+`roleKey` / `joinedAt` for the addressed realm without leaking
+other members' state, and supports surfaces that need to know
+"am I a member, and what is my role here" without listing the
+full membership.
+
+## Requirements
+
 ### Requirement: Endpoint GET /realms/:unitId/members/me returns current user's membership
 The server SHALL expose `GET /realms/:unitId/members/me` that returns the authenticated user's `RealmMemberDTO` (including `roleKey`) for the specified realm, or `null` if the user is not a member. The endpoint SHALL require authentication.
 

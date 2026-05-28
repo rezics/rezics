@@ -1,3 +1,17 @@
+# slug-validation Specification
+
+## Purpose
+
+Defines the shared `validateSlug` function in `@rezics/contract`
+that is the single source of truth for slug validation across
+auth, server, and other consumers. Owns the canonical format
+(lowercase `[a-z0-9-]`, 6-36 characters, no leading / trailing /
+consecutive hyphens), the reserved-word list, the auto-lowercase
+normalization step, and the `{ ok, normalized }` /
+`{ ok: false, reason }` response shape.
+
+## Requirements
+
 ### Requirement: Shared slug validation in contract package
 
 The `@rezics/contract` package SHALL export a `validateSlug` function that validates and normalizes slug input. This function SHALL be the single source of truth for slug validation across all packages (auth, server).

@@ -1,4 +1,20 @@
-## ADDED Requirements
+# post-parallel-translation Specification
+
+## Purpose
+
+Defines the `TranslationGroup` aggregate that links POST Units
+serving as parallel translations of the same wiki topic. Owns
+the `Unit.translationGroupId` foreign key with
+`onDelete: SetNull`, the
+`(translationGroupId, defaultLanguage)` uniqueness invariant, the
+denormalized `supportedLanguages` array kept in sync
+transactionally, the requirement that attached posts carry a
+canonical `defaultLanguage`, the exclusion of
+`UnitTranslation.sourceReleaseUnitId` for POST, the per-post
+`UnitSupportLanguage` row, and the rule that language-filtered
+queries never dedupe across sibling translations.
+
+## Requirements
 
 ### Requirement: TranslationGroup aggregates parallel translation siblings
 

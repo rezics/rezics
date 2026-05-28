@@ -1,4 +1,18 @@
-## ADDED Requirements
+# post-kind-contract Specification
+
+## Purpose
+
+Defines the canonical `PostKind` enum exported by
+`@rezics/contract` with values `REVIEW`, `REMARK`, `EXCERPT`,
+`POST`, and `CHAPTER` (no `COMMENT`, no `QUOTE`). Owns the typed
+`PostDTO.kind` and `CreatePostInput.kind` unions, the
+`postListQuerySchema.kind` narrowing, `buildUrl` routing for each
+kind (including `/chapter/...` for CHAPTER), the rule that
+frontend code uses only valid `UnitType` / `PostKind` values, and
+the `unitTranslationExtraSchema` export used to resolve flat
+`coverUrl` fields on post DTOs.
+
+## Requirements
 
 ### Requirement: PostKind exported as typed const enum
 
@@ -192,22 +206,3 @@ The `@rezics/contract` package SHALL export `unitTranslationExtraSchema` (the Ty
 - THEN the DTO SHALL expose `coverUrl = "https://example.com/c.jpg"`
 - AND the accessor SHALL NOT read `extra` with an untyped index signature
 
-## REMOVED Requirements
-
-### Requirement: PostKind.COMMENT in Prisma enum
-
-**Reason:** The `COMMENT` value in the `PostKind` Prisma enum conflates structural role (reply) with content kind. A comment is structurally a Post with `parentPostUnitId != null` -- threading fields (`parentPostUnitId`, `rootPostUnitId`, `depth`, `sortPath`) fully describe the reply relationship. Keeping `COMMENT` as a kind encourages incorrect usage patterns and contradicts the design decision that `kind` represents content form, not structural role.
-
-**Migration:** Remove `COMMENT` from the `PostKind` enum in the Prisma schema. Existing database rows with `kind = 'COMMENT'` remain as-is (no data migration in this change). New post creation no longer accepts `COMMENT` as a valid kind value.
-
-### Requirement: Contract stub files comment.ts, review.ts, readlist.ts
-
-**Reason:** The files `comment.ts`, `review.ts`, and `readlist.ts` in `package/contract/src/` are empty stubs that export no types or schemas. They were placeholders for domains that have been unified into the Post and Shelf models. Retaining them creates false import targets and misleads consumers into expecting dedicated contracts for these domains.
-
-**Migration:** Delete `package/contract/src/comment.ts`, `package/contract/src/review.ts`, and `package/contract/src/readlist.ts`. Any imports referencing these files SHALL be removed or redirected to `post.ts` or `shelf.ts` as appropriate. Compilation will surface any remaining references as import errors.
-
-### Requirement: comment/ server domain
-
-**Reason:** The `package/server/src/comment/` domain is dead code. It references a `CommentIndex` table that does not exist in the Prisma schema or in any migration file. The domain cannot function and has never been operational. All comment/reply functionality is handled by the Post model with threading fields.
-
-**Migration:** Delete the entire `package/server/src/comment/` directory and remove its `.use()` mount from `package/server/src/index.ts`. No API consumers are affected because the endpoints reference a non-existent database table and would fail at runtime.

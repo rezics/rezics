@@ -1,4 +1,17 @@
-## ADDED Requirements
+# tag-batch-translation Specification
+
+## Purpose
+
+Defines the batch tag-translation endpoint and the matching
+frontend query. The server accepts an array of tag `unitId`s
+plus a `language` and returns name / slug / description per tag
+using the standard resolution chain (exact → unit default →
+`en` → first available), omitting missing tags. The
+`tagQueries.batchTranslations(tagUnitIds, lang)` factory keys on
+sorted ids and language so concurrent components share a single
+cached query and refetch on language switches.
+
+## Requirements
 
 ### Requirement: Batch-resolve tag unit translations by tagUnitIds and language
 

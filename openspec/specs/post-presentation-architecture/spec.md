@@ -1,3 +1,15 @@
+# post-presentation-architecture Specification
+
+## Purpose
+
+Defines the fixed presentation layout shared by the `post/`,
+`remark/`, `review/`, and `excerpt/` feature folders under
+`package/app/src/`. Owns the `components/item/`,
+`components/list/`, `components/detail/`, and `components/parts/`
+subfolder roles, and the rule that every post-kind feature
+follows the same shape so list / detail / part components can be
+mixed across kinds without bespoke conventions.
+
 ## Requirements
 
 ### Requirement: Post-kind features share a fixed presentation layout

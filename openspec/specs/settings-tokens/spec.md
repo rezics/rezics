@@ -1,4 +1,15 @@
-## ADDED Requirements
+# settings-tokens Specification
+
+## Purpose
+
+Defines the API Tokens section of user settings: lists non-revoked
+tokens with name, scopes, creation/expiration/last-used/IP
+metadata, drives token creation through `tokenApi.create()` with a
+one-time raw-token display (copy button, no re-display), supports
+metadata edits via `tokenApi.update()`, and revocation via
+`tokenApi.revoke()` behind a confirmation dialog.
+
+## Requirements
 
 ### Requirement: List API tokens
 The Tokens section SHALL display all non-revoked API tokens from `tokenApi.list()`. Each token entry SHALL show: name, scopes (as chips), creation date, expiration date (or "No expiration"), last used date (or "Never used"), and last IP address.

@@ -1,4 +1,18 @@
-## ADDED Requirements
+# dispatch-result-intake Specification
+
+## Purpose
+
+Defines the worker-facing `POST /dispatch/results` endpoint that
+authenticates an API token, validates the result envelope, routes
+`rezics:book` / `rezics:game` / `rezics:media` payloads to the matching
+Prisma model for create or update, and follows up with an HMAC-SHA256
+signed audit notification to the dispatch hub. The hub callback uses
+exponential-backoff retries; persistent failures are logged but never
+fail the worker response. Dispatch hub config (`DISPATCH_HUB_URL`,
+`DISPATCH_RECEIPT_SECRET`, `DISPATCH_PROJECT_ID`) is validated through
+the standard env pipeline.
+
+## Requirements
 
 ### Requirement: Workers can submit task results via API token
 

@@ -1,4 +1,19 @@
-## ADDED Requirements
+# notification-feed Specification
+
+## Purpose
+
+Defines the persisted notification feed in the notify service: one row
+per `(recipientId, kind, sourceUnitId, actorId, extra)` event with
+free-form `kind` validated against the contract registry, query-time
+aggregation of registry-marked aggregatable kinds, paginated list,
+unread count, mark-read by aggregation key, mark-all-read, and delete.
+Renderer payloads ride in `extra Json?`; the `meta` / `entityType` /
+`entityId` columns and the closed `NotificationType` enum are gone.
+Recipient resolution unifies broadcast subscribers (from `Subscription`
+plus the three-tier `channels` wildcards) with direct recipients
+attached to the event, deduplicated per recipient.
+
+## Requirements
 
 ### Requirement: Notification persistence
 

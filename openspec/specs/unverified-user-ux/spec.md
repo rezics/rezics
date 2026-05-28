@@ -1,3 +1,16 @@
+# unverified-user-ux Specification
+
+## Purpose
+
+Defines the unfinished-registration UX that runs alongside
+authentication. Owns the compact header `PendingVerificationSection`
+that surfaces a "Complete Registration" link plus a "Logout"
+button whenever the user is missing a `UserProfile` or has an
+unverified email, and ensures the prompt persists across all
+routes until both steps complete.
+
+## Requirements
+
 ### Requirement: Compact registration prompt in header toolbar
 
 The `PendingVerificationSection` component (or its replacement) SHALL display a compact "Complete Registration" prompt linking to `/complete-registration`. It SHALL show a "Complete Registration" action button and a "Logout" button. The prompt SHALL appear whenever the user's registration is incomplete (missing UserProfile OR unverified email), not only for unverified email.

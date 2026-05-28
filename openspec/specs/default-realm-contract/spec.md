@@ -1,4 +1,14 @@
-## ADDED Requirements
+# default-realm-contract Specification
+
+## Purpose
+
+Defines the `DEFAULT_REALM` constant in `@rezics/contract` as the single
+source of truth for the default realm's slug, flags, and per-language
+translations (en, zh-hant, ja), along with the derived
+`DefaultRealmDefinition` type and the realm-level publishing license
+default (advisory, used only as composer prefill).
+
+## Requirements
 
 ### Requirement: Default realm definition in contract
 

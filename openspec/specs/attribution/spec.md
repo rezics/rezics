@@ -1,3 +1,19 @@
+# attribution Specification
+
+## Purpose
+
+Defines `CreditAttribution`, the unit-to-entity credit junction
+keyed by `(unitId, entityId, role)` with a `sortOrder`. Owns the
+contract credit-role registry (stable key, i18n label,
+applicable Unit types, prominence hint), the service-layer rule
+that link writes validate each Entity's `eligibleCreditRoles`,
+the storage of `role` as a free string (no DB enum) gated by
+registry validation, the verification that the `User.unitId`
+rename leaves attribution-adjacent FK resolution intact, the
+reservation of attribution for creator/production credits (not
+subject indexing), and the `setCredits` batch reconciliation that
+emits a single editorial history revision.
+
 ## Requirements
 
 ### Requirement: Credit attribution link validates Entity eligibility

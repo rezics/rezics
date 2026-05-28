@@ -1,4 +1,17 @@
-## ADDED Requirements
+# typed-slug-lookup Specification
+
+## Purpose
+
+Defines the typed `GET /{realm|tag|zone|user|entity}/by-slug/:slug`
+endpoints and the owner-scoped `GET /shelf/by-slug/:userSlug/:slug`
+form, each returning 404 unless the resolved Unit matches the
+expected `type`. Owns the cacheable `GET /infra/bootstrap`
+response (seed tag unitIds, default realm id, named slug-scope
+ids) with its additive-evolution rule, and the generic
+`POST /slug/resolve` endpoint that accepts named scopes or owner
+unit ids and returns `{ unitId, type }`.
+
+## Requirements
 
 ### Requirement: Typed by-slug endpoint for realm
 

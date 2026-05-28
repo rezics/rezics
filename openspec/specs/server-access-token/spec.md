@@ -1,4 +1,16 @@
-## ADDED Requirements
+# server-access-token Specification
+
+## Purpose
+
+Defines the `rezics-session-token` issued by `POST
+/auth/session/refresh`: a short-lived ES256 JWT signed via the
+server JWKS that carries `sub` / `userId` / `permission.role` /
+`iss` / `exp` / `iat` claims and rides on an httpOnly cookie. Owns
+the role-as-rejection-hint rule, the 15-minute default TTL, and
+the bearer convention that scopes `api_*` API tokens to `/token`
+and `/dispatch` while forbidding auth-session JWTs in headers.
+
+## Requirements
 
 ### Requirement: Server issues rezics-session-token via exchange endpoint
 

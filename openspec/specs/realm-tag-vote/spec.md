@@ -1,3 +1,16 @@
+# realm-tag-vote Specification
+
+## Purpose
+
+Defines the `RealmTagApplicationVote` model that records realm
+members' agreement or disagreement that a global tag applies to
+a Unit inside a specific realm. Owns the composite primary key
+`(realmUnitId, tagUnitId, unitId, userId)`, the `+1` / `-1`
+value constraint, the one-vote-per-member rule per
+`RealmTagApplication`, and the relation back to
+`RealmTagApplication` (no separate reverse relations from Unit
+per role).
+
 ## Requirements
 
 ### Requirement: RealmTagApplicationVote records per-member votes on realm tag applications

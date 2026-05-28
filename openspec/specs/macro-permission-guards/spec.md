@@ -1,4 +1,17 @@
-## MODIFIED Requirements
+# macro-permission-guards Specification
+
+## Purpose
+
+Defines the `macro/auth` Elysia plugin in
+`package/server/src/middleware/permission.ts`. Owns the single
+`requireLogin` macro that verifies the `Authorization` bearer
+`rezics-session-token` against the server JWKS and resolves
+`identity = { unitId, role }` (role used only as a rejection
+hint), returns 401 on missing or invalid tokens, and replaces the
+removed `requireOwner` / `requireAdmin` macros with inline route
+checks.
+
+## Requirements
 
 ### Requirement: Auth macro plugin
 
@@ -23,24 +36,3 @@ Macro SHALL accept boolean. When enabled, it SHALL read the `Authorization` head
 - **WHEN** a request is missing the `Authorization` header or contains an invalid/expired token
 - **THEN** `requireLogin` returns status 401
 
-## REMOVED Requirements
-
-### Requirement: requireOwner macro
-
-**Reason**: `requireOwner` conflated identity verification, user DB lookup, caching, and lazy provisioning into a single middleware. With `rezics-session-token` carrying role in claims and provisioning guaranteed at registration, none of these are needed. Ownership checks are done inline at the route level.
-**Migration**: Routes using `requireOwner` switch to `requireLogin: true` and add inline `identity.unitId === resource.unitId` checks where needed.
-
-### Requirement: requireAdmin macro
-
-**Reason**: Admin role checks are trivial inline checks (`identity.role === "ADMIN" || identity.role === "ROOT"`) and do not warrant a separate macro. The macro obscured the check and added a full UserDTO resolution as a hidden cost.
-**Migration**: Routes using `requireAdmin` switch to `requireLogin: true` with inline role check.
-
-### Requirement: tokenContext type-cast hack removed
-
-**Reason**: Already removed in previous change. No further action.
-**Migration**: N/A.
-
-### Requirement: requireAdminSession function removed
-
-**Reason**: Already removed in previous change. No further action.
-**Migration**: N/A.

@@ -1,4 +1,15 @@
-## ADDED Requirements
+# settings-connections Specification
+
+## Purpose
+
+Defines the Connected Accounts section of user settings: it lists
+the five supported OAuth providers (Google, GitHub, Microsoft,
+Twitter, Telegram), reflects the current connection state from
+`authSessionState.providerIds`, marks the primary provider, drives
+new connections through `authApi.signInSocial()`, and hides
+disconnect controls until the backend supports unlinking.
+
+## Requirements
 
 ### Requirement: Display connected OAuth providers
 The Connected Accounts section SHALL display all supported OAuth providers (Google, GitHub, Microsoft, Twitter, Telegram) with their connection status. Connected providers SHALL show a "Connected" badge. Unconnected providers SHALL show a "Connect" button.

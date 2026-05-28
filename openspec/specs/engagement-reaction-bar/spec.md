@@ -1,3 +1,16 @@
+# engagement-reaction-bar Specification
+
+## Purpose
+
+Defines the single `ReactionBar` component exported from
+`package/app/src/engagement/` that replaces every per-feature
+interaction footer (`PostReactionFooter`, `MiniActionBar`,
+`ReactionStatistics`). Owns the rule that callers pass
+`post.unitId`, an action policy, and presentation overrides while
+the bar pulls reaction state internally via
+`useReactionData(post.unitId)` — no `reactionSummaries` or
+`userReactions` props flow through the tree.
+
 ## Requirements
 
 ### Requirement: Single ReactionBar component for every interaction footer

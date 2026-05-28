@@ -1,3 +1,16 @@
+# user-unit-progress Specification
+
+## Purpose
+
+Defines the canonical `UserUnitProgress` row keyed by
+`(userId, unitId)` that records each user's interaction with a
+Unit. Owns the `progress ∈ [0, 1]` value, the
+`BACKLOG / ACTIVE / PAUSED / COMPLETED / DROPPED` status enum,
+soft-delete via `isDeleted`, the `completedCount` /
+`totalTimeMs` counters, the opaque `lastPosition`,
+`firstSeenAt` / `lastSeenAt` timestamps, and the per-status
+`ProgressExtra` JSON shape exported from `@rezics/contract`.
+
 ## Requirements
 
 ### Requirement: Progress fact source schema

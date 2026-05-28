@@ -1,3 +1,13 @@
+# cleanup Specification
+
+## Purpose
+
+Defines the baseline cleanliness gate the repo must maintain:
+zero biome lint errors via `bunx biome check .`, zero TypeScript
+errors per package via `tsc --noEmit -p package/<name>/tsconfig.json`,
+and the rule that fixes applied to satisfy these gates SHALL NOT
+change runtime behavior, API contracts, or rendering output.
+
 ## Requirements
 
 ### Requirement: Zero biome lint errors

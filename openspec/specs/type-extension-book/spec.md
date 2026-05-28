@@ -1,4 +1,18 @@
-## ADDED Requirements
+# type-extension-book Specification
+
+## Purpose
+
+Defines the `Book` 1:1 extension of `Unit(type=BOOK)` and its
+companion `BookContentStructure` / `BookContentStructureNode`
+tables. Owns language-neutral fields (`isbn13`, `pageCount`,
+`textLength`, `chapterCount`, `formatKey`, `isLicensed`), the
+LexoRank-ordered TOC row model with on-demand chapter Unit
+materialization, diff-based TOC saves at `PUT
+/books/:bookUnitId/content-structure`, the structure-history
+outbox, and the `BookContentStructure` data / `BookToc*` UI naming
+boundary.
+
+## Requirements
 
 ### Requirement: Book extension creation tied to Unit(type=BOOK)
 

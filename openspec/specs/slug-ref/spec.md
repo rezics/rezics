@@ -1,4 +1,17 @@
-## ADDED Requirements
+# slug-ref Specification
+
+## Purpose
+
+Defines the `SlugRef` Typebox schema exported by
+`@rezics/contract`: `{ scope, slug, unitId? }` where `scope` is
+either a named bucket (`user`, `realm`, `tag`, `zone`, `entity`)
+or an owner Unit id used for sub-resources like a user's shelves.
+Owns the backend resolution strategy that prefers the embedded
+`unitId` and otherwise looks up `(slugScope, slug)` against
+`Unit`, with non-existent slugs dropped from filters rather than
+failing the request.
+
+## Requirements
 
 ### Requirement: SlugRef type in contract
 

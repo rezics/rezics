@@ -1,4 +1,15 @@
-## ADDED Requirements
+# book-library-homepage Specification
+
+## Purpose
+
+Defines the curated `/book` landing page (`BookHomePage`) and its split
+from `/book/search`. The landing page assembles editorial sections — New
+Books with three tabs, Trending Books grid, Trending Quotes carousel,
+Quick Access Tags, and a search entry point — while the full filtered
+search interface lives at `/book/search`. All section copy is driven by
+generated Paraglide message functions; no hardcoded display text.
+
+## Requirements
 
 ### Requirement: /book renders a curated book library homepage
 

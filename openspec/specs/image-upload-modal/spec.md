@@ -1,4 +1,18 @@
-## ADDED Requirements
+# image-upload-modal Specification
+
+## Purpose
+
+Defines the `ImageModal` component in `@rezics/ui`: a tabbed
+dialog whose tabs are pluggable `ImageProvider` entries. Owns the
+default provider set (Rezics R2 upload plus ImgBB / Postimages /
+Imgbox guides via the shared `ExternalImageGuide`), the
+file-picker / paste / drag-drop upload paths with
+`browser-image-compression` (`maxSizeMB: 4.5`,
+`maxWidthOrHeight: 4096`), JPEG/PNG/WebP/GIF validation, loading
+and error states, and the `onInsert(url, alt?)` close-on-success
+contract.
+
+## Requirements
 
 ### Requirement: Image modal component
 

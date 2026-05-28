@@ -26,6 +26,8 @@ rules:
     - Include at least one acceptance scenario per requirement.
     - Separate user-visible behavior from implementation notes.
     - Call out localization, accessibility, and error-handling expectations when relevant.
+    - Spec files SHALL start with '# <name> Specification' and contain a '## Purpose' section before '## Requirements'.
+    - Spec files SHALL NOT contain '## ADDED Requirements', '## MODIFIED Requirements', or '## REMOVED Requirements' — those are change-proposal vocabulary and must be flattened during archive.
 
   tasks:
     - Write in English.

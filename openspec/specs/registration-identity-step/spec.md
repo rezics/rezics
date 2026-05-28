@@ -1,3 +1,18 @@
+# registration-identity-step Specification
+
+## Purpose
+
+Defines the auth-side identity step that turns a newly verified
+user into a fully provisioned account. Owns the endpoint that
+accepts a chosen username plus slug, validates the slug via
+`validateSlug` from `@rezics/contract` (lowercase `[a-z0-9-]`,
+6-36 chars, no leading/trailing/consecutive hyphens, reserved
+list), enforces uniqueness against the `UserProfile.slug`
+constraint, and on success writes the `UserProfile` row plus
+updates `User.name`.
+
+## Requirements
+
 ### Requirement: User explicitly sets username and slug during registration
 
 The auth service SHALL expose an endpoint for authenticated users to submit their chosen username and slug. The endpoint SHALL validate the slug using `validateSlug` imported from `@rezics/contract` (format: lowercase `[a-z0-9-]`, length 6–36, no leading/trailing/consecutive hyphens, no reserved words from the platform-wide reserved list) and uniqueness (against `UserProfile.slug` `@unique` constraint in auth DB). On success, the endpoint SHALL create a `UserProfile` row with the user's `userId` and chosen `slug`, and update `User.name` with the chosen username.

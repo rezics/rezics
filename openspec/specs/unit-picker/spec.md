@@ -1,3 +1,17 @@
+# unit-picker Specification
+
+## Purpose
+
+Defines the `UnitPicker` component that resolves a pasted URL
+into ordered Unit candidates. Owns the use of TanStack Router's
+`getMatchedRoutes(pathname)` to enumerate matched routes, the
+rule that every parameter whose declared name ends in `Id` or
+`Slug` becomes a candidate (kind derived by stripping the
+suffix), and the deepest-match-first ordering that surfaces the
+most specific Unit candidate at the top of the list.
+
+## Requirements
+
 ### Requirement: URL input resolves to ordered unit candidates
 
 The `UnitPicker` component SHALL accept a free-form URL string and resolve it

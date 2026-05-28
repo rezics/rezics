@@ -1,4 +1,17 @@
-## ADDED Requirements
+# pagination-limit-contract Specification
+
+## Purpose
+
+Defines the shared `paginationLimitSchema` exported from
+`@rezics/contract/pagination.ts` (`minimum: 1`, `maximum: 100`,
+`default: 20`) and the rule that every list query schema
+(`bookListQuerySchema`, `postListQuerySchema`,
+`realmListQuerySchema`, `shelfListQuerySchema`,
+`chapterListQuerySchema`, `tagListQuerySchema`,
+`feedbackListQuerySchema`, `userFilterSchema`) uses it for its
+`limit` field instead of bare `t.Number()` or `t.Numeric()`.
+
+## Requirements
 
 ### Requirement: Shared pagination limit schema
 The `@rezics/contract` package SHALL export a reusable `paginationLimitSchema` Typebox schema from `pagination.ts` with `minimum: 1`, `maximum: 100`, and `default: 20`.

@@ -1,4 +1,17 @@
-## ADDED Requirements
+# book-detail-language-switcher Specification
+
+## Purpose
+
+Defines the language dropdown that lives at the right end of the book
+detail tab bar. The switcher resolves an initial language from the
+viewer's preference list, scopes selection to the current book (no
+persistence), drives page-wide translation refresh (hero, author/entity,
+overview, default release), and stays release-local — it never silently
+substitutes another same-work release when the current release lacks the
+requested language. When the language is missing, it routes the viewer
+to the Releases tab for explicit same-work discovery.
+
+## Requirements
 
 ### Requirement: Language switcher is a dropdown fixed at the right end of the tab bar
 

@@ -1,4 +1,21 @@
-## ADDED Requirements
+# realm-taxonomy-seed-support Specification
+
+## Purpose
+
+Defines the seed-data invariants that demonstrate the realm-tag model:
+realms are seeded as community spaces (not classifiers) with
+membership, posting/joining rules, pinboard data, and
+`extra.tagTree` quick-pick references that always resolve to existing
+global TAG Units. Shared global tags appear across multiple realms
+with per-realm `RealmTagContext` interpretations rather than
+duplicated tag identities; `RealmTagApplication` rows are seeded both
+inside and outside realm feeds to keep them independent from
+`RealmUnit`; standard-helper seed paths preserve consistent global
+`TagVote` / `UnitTag` aggregates and remain idempotent across reseed.
+Seed helpers use the `RealmTagApplication` / `RealmTagApplicationVote`
+vocabulary.
+
+## Requirements
 
 ### Requirement: Seed data demonstrates realm community semantics
 

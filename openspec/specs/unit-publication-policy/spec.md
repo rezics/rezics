@@ -1,3 +1,5 @@
+# unit-publication-policy Specification
+
 ## Purpose
 
 Defines how publishable Units (BOOK, GAME, MEDIA, POST, SHELF) carry a single publication license slug, how that slug is validated against the shared license registry, how composer flows resolve license defaults from platform, user, and realm preferences, and how Unit `status` and `visibility` jointly determine public discoverability. Keeps Unit publication license metadata distinct from licensed-work (`isLicensed`) metadata on Book/Game/Media.

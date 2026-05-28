@@ -1,4 +1,17 @@
-## ADDED Requirements
+# rezics-renderer Specification
+
+## Purpose
+
+Defines `createRezicsRenderer` as the canonical markdown renderer
+exported by `@rezics/editor/markdown`. Returns a `MarkdownIt`
+instance configured with `linkify`, `typographer`,
+`novelModePlugin`, and `sourceLinePlugin`. Owns the rename from
+the legacy `createNovelRenderer` (no re-export alias) and the
+rule that all call sites — `MarkdownEditor`, `MarkdownContent`,
+chapter rendering, and folio text rendering — adopt the new
+name.
+
+## Requirements
 
 ### Requirement: Universal renderer function name
 The markdown rendering function SHALL be named `createRezicsRenderer` and exported from `@rezics/editor/markdown`. The previous name `createNovelRenderer` SHALL be removed with no re-export alias.

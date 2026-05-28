@@ -1,4 +1,17 @@
-## ADDED Requirements
+# realm-search-index Specification
+
+## Purpose
+
+Defines the Meilisearch `realms` index: schema (searchable `titles` /
+`descriptions`, filterable `isPublic` / `isOfficial`, sortable
+`memberCount` / `createdAt` / `updatedAt`), multilingual document
+shape with `titles` / `descriptions` arrays and structured
+`translations`, soft-delete exclusion (non-`DELETED` only), cursor-
+paginated full reindex, and incremental partial-update paths for
+metadata, member count, and translations. Realm Unit aliases are also
+indexed (subject to the `score > visibilityThreshold OR pinned` rule).
+
+## Requirements
 
 ### Requirement: Realms Meilisearch index exists with correct settings
 

@@ -1,4 +1,17 @@
-## ADDED Requirements
+# api-route-convention Specification
+
+## Purpose
+
+Defines the routing shape `@rezics/server` exposes: singular
+resource prefixes, the `GET`/`POST /{resource}/list` pair with the
+shared `listGetQueryBase` (CSV `ids`) and `listPostBodyBase`
+(`string[]` ids capped at 200) mixins, single-item / sub-resource
+paths under `:unitId`, the GET-vs-POST list guidance, and the
+`by-slug/:slug` form for alternate unique-key lookups. The
+convention applies to `@rezics/server` only; `@rezics/auth` is
+explicitly out of scope.
+
+## Requirements
 
 ### Requirement: Singular resource prefix
 All Elysia route prefixes in `@rezics/server` SHALL be singular nouns. Plural resource prefixes (e.g., `/books`, `/users`, `/tags`) SHALL NOT be used. Service-name prefixes that are already singular (e.g., `/meili`, `/score`, `/session`) and special paths (`/internal`, `/.well-known`, `/admin/stats`, `/admin/jwt-services`) are permitted as-is. The automated convention check SHALL reject plural resource prefixes.

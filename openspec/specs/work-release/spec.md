@@ -1,4 +1,18 @@
-## ADDED Requirements
+# work-release Specification
+
+## Purpose
+
+Defines the work / release pattern for `{BOOK, GAME, MEDIA, POST}`
+Unit types. A work is a hidden Unit with `workUnitId = null`;
+visible releases live in `UnitWork(role = RELEASE)`. Owns the
+type-match invariant between release and work, the release-first
+catalog and reading destination, the migration from
+`Unit.workUnitId` to `UnitWork` as canonical membership, the rule
+that releases cannot be works for other releases, release-led
+creation, and admin merge that canonicalizes releases without
+deleting the source work.
+
+## Requirements
 
 ### Requirement: A work is a Unit with no parent and a type that supports the work/release pattern
 

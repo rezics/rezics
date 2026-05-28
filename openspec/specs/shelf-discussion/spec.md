@@ -1,3 +1,5 @@
+# shelf-discussion Specification
+
 ## Purpose
 
 Defines the shelf discussion surface, where visitors can read shelf-targeted discussion posts and authenticated users can create new root-level posts targeting the shelf.

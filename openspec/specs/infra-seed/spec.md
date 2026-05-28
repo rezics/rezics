@@ -1,4 +1,19 @@
-## ADDED Requirements
+# infra-seed Specification
+
+## Purpose
+
+Defines the infrastructure seed pipeline shared by the cross-seed
+CLI and the factory orchestrator. Owns content-type tag creation
+keyed by `SEED_TAG_SLUGS`, the official default realm sourced from
+`DEFAULT_REALM` in `@rezics/contract`, the canonical seeding step
+order, the two-phase auth-then-main user pipeline (with factory
+mocks creating real auth users), full two-database reset, scaled
+default counts (1000 books / games / media), entity verified
+ratios and role-eligibility writes, Meili sync of entity
+documents, and the rule that publishable Units carry the
+`all-rights-reserved` license slug and never set `accountStatus`.
+
+## Requirements
 
 ### Requirement: Content-type tag seeding with database-generated IDs and contract slugs
 

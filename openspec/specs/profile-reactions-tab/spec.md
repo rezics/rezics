@@ -1,3 +1,15 @@
+# profile-reactions-tab Specification
+
+## Purpose
+
+Defines the Reactions tab on a profile: two list views switchable
+via the InnerFilterPanel chips — Given (events placed by the
+profile owner, from `GET /profile/:userId/reactions/given`) and
+Received (events on the owner's units, from
+`GET /profile/:userId/reactions/received`). Owns the default
+"Given" selection, scroll/page reset on chip switch, and the
+row rendering that surfaces each reaction with target context.
+
 ## Requirements
 
 ### Requirement: Reactions tab renders Given and Received list views

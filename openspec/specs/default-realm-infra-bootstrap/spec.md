@@ -1,4 +1,16 @@
-## ADDED Requirements
+# default-realm-infra-bootstrap Specification
+
+## Purpose
+
+Defines the boot-time infra cache shared by server and frontend: the
+server resolves default realm and seed-tag unitIds from slugs at startup
+and exposes synchronous accessors, while the frontend persists the
+`/infra/bootstrap` response under `rezics:infra:v1` localStorage with
+schema-versioned invalidation, synchronous accessors for non-React
+callers, a `useInfraBootstrap` hook for reactive callers, and 404-driven
+cache refresh.
+
+## Requirements
 
 ### Requirement: Server boot-time default realm cache
 

@@ -1,4 +1,15 @@
-## ADDED Requirements
+# notification-stream Specification
+
+## Purpose
+
+Defines the real-time delivery side of notify: the `GET /stream` Server-
+Sent Events endpoint authenticated via the `rezics-session-token` cookie
+on a `withCredentials` handshake, raw per-event push (no aggregation),
+30-second heartbeat keep-alive, multi-connection per user, in-process
+`userId → Set<connection>` fan-out, and frontend reconnect-with-backfill
+through TanStack Query invalidation of list and unread-count.
+
+## Requirements
 
 ### Requirement: SSE notification stream with cookie auth
 

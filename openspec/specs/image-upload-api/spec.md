@@ -1,4 +1,18 @@
-## ADDED Requirements
+# image-upload-api Specification
+
+## Purpose
+
+Defines the `POST /api/upload/image` endpoint that stores
+multipart-uploaded images in Cloudflare R2 under
+`images/{year}/{month}/{ulid}.{ext}`. Owns the 5MB cap and
+allowed MIME types (`jpeg`, `png`, `webp`, `gif`), the R2 env-var
+contract (`R2_ENDPOINT`, `R2_ACCESS_KEY_ID`,
+`R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_URL`) with
+graceful 503 when missing, the `ImageUploadResponse` schema in
+`@rezics/contract`, and the `useImageUpload` TanStack mutation
+hook in `@rezics/api`.
+
+## Requirements
 
 ### Requirement: Image upload endpoint
 

@@ -1,3 +1,15 @@
+# reaction-history Specification
+
+## Purpose
+
+Defines the reaction-service history endpoints
+`GET /reaction/given` and the matching `received` form that the
+profile Reactions tab consumes. Owns the required `userId`,
+optional `reactions` filter, `cursor` continuation token, default
+limit of 20 (max 50, clamped on bounds), reverse-chronological
+ordering, and the response shape that pairs each event with its
+target context.
+
 ## Requirements
 
 ### Requirement: Reaction service exposes Given history

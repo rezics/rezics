@@ -1,3 +1,15 @@
+# engagement-shelf-action Specification
+
+## Purpose
+
+Defines the `ShelfAction` atom rendered by `ReactionBar` when the
+`"shelf"` token is configured. Owns the icon-plus-localized-label
+button, the rule that clicking it opens the existing
+`CollectionModal` via `useCollectionModal(targetId)` (no new
+`ShelfPickerModal` is introduced), the prohibition on mutations
+inside the atom itself, and the sign-in gate for unauthenticated
+clicks.
+
 ## Requirements
 
 ### Requirement: ShelfAction button drives the existing CollectionModal

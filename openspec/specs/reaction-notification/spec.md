@@ -1,4 +1,17 @@
-## MODIFIED Requirements
+# reaction-notification Specification
+
+## Purpose
+
+Defines reaction-driven notification dispatch. The main server (not the
+reaction service) emits a single `LIKE`-typed event to notify via
+`POST /internal/event` on newly-created reactions only, suppressing
+self-notifications by resolving the target Unit's owner first. All
+sentiment reactions collapse to `LIKE` — there is no per-type mapping.
+Notification calls are fire-and-forget and never block the reaction
+response. Reaction deletes never notify. The reaction service stays a
+pure data layer with no outbound side-effects.
+
+## Requirements
 
 ### Requirement: Server dispatches notification on reaction create
 When a reaction write is proxied through the main server and the reaction is newly created (not an idempotent hit), the **main server** SHALL dispatch a notification event to the Notify service via `POST /internal/event`. The notification SHALL only be sent if the reaction target's owner differs from the reactor. The reaction service itself has no notification logic.

@@ -1,4 +1,17 @@
-## ADDED Requirements
+# profile-shelves-tab Specification
+
+## Purpose
+
+Defines the Shelves tab on the user profile: a responsive card grid
+with `kindKey` L2 filter chips (All plus one per distinct kind),
+title search, sort, and pagination — all persisted to URL search
+params. Cards show cover, title, item count, and kind label. System
+shelves (`favorites`, `backlog`, `active`, `completed`) resolve their
+label by viewer role — i18n key for the owner's own view, DB-stored
+translated title for non-owners — while user-created shelves always
+use the DB title.
+
+## Requirements
 
 ### Requirement: Shelf grid with kind filter
 The Shelves tab SHALL display the user's shelves in a responsive card grid (2 columns mobile, 3-4 columns desktop). An L2 chip row SHALL allow filtering by shelf kind — an "All" chip plus one chip per distinct `kindKey` found in the user's shelves. The active kind filter SHALL be persisted in the URL search param `kindKey`.

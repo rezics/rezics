@@ -1,4 +1,18 @@
-## ADDED Requirements
+# markdown-post-content Specification
+
+## Purpose
+
+Defines the canonical handling of post and chapter bodies: read
+from `Post.content` as a `ContentDoc`, render
+`content.main = { type: "markdown", source }` via
+`MarkdownContent` / `createRezicsRenderer`, and fall back to
+treating the value as Markdown when the schema is unrecognized
+rather than throwing. Owns the removal of `Post.body` from DTOs
+and storage, and the rule that `InlinePostForm` uses
+`RezicsMarkdownEditor` whose output is wrapped into a `ContentDoc`
+on submit.
+
+## Requirements
 
 ### Requirement: Post body rendered as markdown
 

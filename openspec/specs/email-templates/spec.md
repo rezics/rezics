@@ -1,3 +1,17 @@
+# email-templates Specification
+
+## Purpose
+
+Defines the shared `EmailLayout` and transactional template
+catalog in `@rezics/email`. Owns the branded header (logo +
+"REZICS") and footer (copyright + contextual links), the
+responsive HTML target across Gmail / Outlook / Apple Mail, the
+specific verification-code / password-reset / welcome / system
+notification templates, and the i18n surface that lets each
+template render in the recipient's preferred language.
+
+## Requirements
+
 ### Requirement: Shared email layout with branded header and footer
 
 All transactional emails SHALL be wrapped in an `EmailLayout` component that renders a consistent header (logo image + "REZICS" text) and footer (copyright year, explanatory line, relevant links). The layout SHALL produce responsive HTML that renders correctly in major email clients (Gmail, Outlook, Apple Mail).

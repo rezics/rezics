@@ -1,4 +1,17 @@
-## ADDED Requirements
+# book-detail-release-selector Specification
+
+## Purpose
+
+Defines the release selector that sits above the Content tab's chapter
+tree and the Releases tab that lists same-work releases. The selector
+sorts releases by current language first with the translation-designated
+(official) release pinned within each language group, auto-selects the
+official release for the resolved language while preserving manual
+overrides until the language changes, and exposes language-filtered
+same-work releases ordered by `UnitWork.position`. Hidden-by-default
+releases stay reachable but never dominate default selectors.
+
+## Requirements
 
 ### Requirement: Content tab displays a release selector above the chapter tree
 

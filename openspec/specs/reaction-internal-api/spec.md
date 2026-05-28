@@ -1,4 +1,16 @@
-## MODIFIED Requirements
+# reaction-internal-api Specification
+
+## Purpose
+
+Defines the reaction service's internal endpoints used by the main
+server: `POST /internal/create`, `POST /internal/remove`,
+`POST /internal/cleanup` (called synchronously on Unit deletion;
+failures are logged and tolerated), and `POST /internal/by-user`
+(cursor-paginated lookup over a target id set, capped at 1000 ids
+per call, used by profile-scoped Received views). All endpoints are
+gated by the `x-internal-secret` matching `REACTION_INTERNAL_SECRET`.
+
+## Requirements
 
 ### Requirement: Internal create endpoint
 The reaction service SHALL provide a `POST /internal/create` endpoint that creates a reaction for a given user. The endpoint SHALL be protected by the `x-internal-secret` header matching `REACTION_INTERNAL_SECRET`. This endpoint is called by the main server to proxy write requests.

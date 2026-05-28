@@ -1,4 +1,16 @@
-## ADDED Requirements
+# homepage-ecosystem Specification
+
+## Purpose
+
+Defines the root `/` homepage as a multi-library ecosystem landing —
+REZICS-branded hero with unified search, library section cards (Book
+active, Game/Media "Coming Soon"), four compact content previews
+(featured books, trending shelves, recent reviews, active realms) that
+link to per-type landing pages and `/<type>/search` for full filtering.
+Book-specific editorial sections live on `/book`, not here, and the
+homepage stays lightweight (≤5 items per preview).
+
+## Requirements
 
 ### Requirement: Ecosystem homepage with library section cards
 

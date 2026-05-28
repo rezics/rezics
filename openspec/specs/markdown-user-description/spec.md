@@ -1,4 +1,18 @@
-## ADDED Requirements
+# markdown-user-description Specification
+
+## Purpose
+
+Defines the rule that long descriptions (`User.description` and
+`UnitTranslation.description`) are stored as `ContentDoc` JSON,
+edited via `RezicsMarkdownEditor`, and rendered through
+`MarkdownContent`. Owns the profile Overview "DESCRIPTION.md"
+box, the exclusion of compact `User.bio` and
+`UnitTranslation.summary` from markdown processing, factory and
+canonical write paths persisting `ContentDoc` or `null` (never
+raw JSON strings), and the idempotent repair path that wraps
+legacy string descriptions.
+
+## Requirements
 
 ### Requirement: Description edited as markdown
 

@@ -1,4 +1,17 @@
-## ADDED Requirements
+# work-discussion Specification
+
+## Purpose
+
+Defines the Discussion tab that any work detail page (book, game,
+media) mounts via `<PostListSection targetUnitId={...} />`. Owns
+the top-level thread list, `sortPath`-ordered threaded reply view
+with server `maxDepth` truncation and "continue thread" anchoring,
+markdown-only `PostBodyMarkdown` rendering of `Post.content`
+(never `Post.body`), thread-card metadata (`replyCount`,
+`lastReplyAt`), the locked-thread reply gate, and removal of the
+legacy `comment/` feature.
+
+## Requirements
 
 ### Requirement: Discussion tab on work detail pages
 Every work detail page (book, game, media) SHALL include a Discussion tab that displays threaded discussion for that work. The tab SHALL load posts where the `targetUnitId` matches the current work's unit identifier.

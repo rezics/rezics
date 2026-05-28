@@ -1,4 +1,17 @@
-## ADDED Requirements
+# work-link-claim Specification
+
+## Purpose
+
+Defines the `WorkLinkClaim` table and the
+`/work-link-claims/:claimId` endpoints that mediate cross-user
+release-to-work linkage requests. Owns the `PENDING / APPROVED /
+REJECTED / WITHDRAWN` status machine, the work-owner approve and
+reject paths, the claimer or release-authority withdraw path,
+dedupe of repeated submissions, `notify-system-email` fanout to
+work owners on PENDING, and the cascade-on-hard-delete /
+filter-on-soft-delete handling of referenced Units.
+
+## Requirements
 
 ### Requirement: WorkLinkClaim entity stores pending cross-user work-release linkage requests
 

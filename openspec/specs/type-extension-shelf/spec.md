@@ -1,4 +1,16 @@
-## ADDED Requirements
+# type-extension-shelf Specification
+
+## Purpose
+
+Defines the `Shelf` 1:1 extension of `Unit(type=SHELF)` and the
+`ShelfItem` row model. Owns the rule that shelf covers live in
+`UnitTranslation.extra.coverUrl`, the FK-less `itemRef` link with a
+companion `ShelfItemUnit` junction that carries `role='primary'`
+and per-item tags, the composite primary key that blocks
+duplicates, and the public-vs-owner visibility split for shelf
+listings.
+
+## Requirements
 
 ### Requirement: Shelf cover image stored in UnitTranslation.extra
 

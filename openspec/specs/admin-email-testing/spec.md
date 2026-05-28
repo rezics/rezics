@@ -1,3 +1,16 @@
+# admin-email-testing Specification
+
+## Purpose
+
+Defines the admin-only email testing page under
+`/admin/auth/email` that exercises every template registered with
+`@rezics/email`. Owns the template picker plus dynamic preview
+form, the test-send action that delivers a real email to an
+arbitrary address using the selected template's sample data, and
+the rule that only admin-role users may reach the page.
+
+## Requirements
+
 ### Requirement: Admin email testing page exists
 
 The admin dashboard SHALL include an email testing page at `/admin/auth/email` (or similar path under the auth section). The page SHALL be accessible only to admin-role users.

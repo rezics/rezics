@@ -1,3 +1,16 @@
+# reaction-hydration Specification
+
+## Purpose
+
+Defines the section-level `useReactionHydration(targetIds)` hook
+that batches `GET /reaction/summary` and (when authenticated)
+`GET /reaction/my` for every visible target and writes both into
+the React Query cache. Owns the rule that surfaces never call
+`useBatchReactionSummary` directly, never merge reaction data
+into list-item state, and never pass `reactionSummaries` or
+`userReactions` as props to `ReactionBar` — each bar reads from
+the hydrated cache via `useReactionData(targetId)`.
+
 ## Requirements
 
 ### Requirement: Single hydration entry point per surface

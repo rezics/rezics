@@ -1,4 +1,17 @@
-## MODIFIED Requirements
+# reaction-crud Specification
+
+## Purpose
+
+Defines reaction create and delete from the user-facing surface.
+`POST /reactions` and `DELETE /reactions` land on the main server,
+which proxies to the reaction service's internal API. Both operations
+are idempotent — duplicate creates return the existing row, deletes of
+missing rows return `deleted: false`. Reaction values are validated
+against the `REACTION_TYPES` allowlist (default `like,dislike`).
+ReactionSummary counters are kept in the same transaction and never
+go below zero.
+
+## Requirements
 
 ### Requirement: Create reaction
 The system SHALL allow an authenticated user to create a reaction on a target by providing a `targetId` and a `reaction` type. The write request goes to the **main server** (`POST /reactions`), which proxies it to the reaction service's internal API (`POST /internal/create`). The operation SHALL be idempotent — creating an already-existing reaction SHALL return the existing record without error. The `reaction` value SHALL be validated against the configured allowlist (default: `like`, `dislike`). The system SHALL reject reactions with types not in the allowlist with a 400 status.

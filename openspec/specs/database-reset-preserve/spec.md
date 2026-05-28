@@ -1,3 +1,19 @@
+# database-reset-preserve Specification
+
+## Purpose
+
+Defines the `database-reset` seed utility and the
+`seed:database-reset` script. Owns the rename from
+`databaseReset.ts`, the default behavior that wipes mock data
+while preserving cross-seeded infrastructure (seed users,
+content-type tags, official realm, their translations / language
+support / self-tags / owner membership, and `infra:*` EchoKV
+keys), the `--all` flag for a full wipe, and the JSDoc contract
+on `resetDatabase()`, `resetDatabasePreserveInfra()`, and the CLI
+entry point.
+
+## Requirements
+
 ### Requirement: File and script rename from databaseReset to database-reset
 
 The seed utility file SHALL be renamed from `databaseReset.ts` to `database-reset.ts` in `package/server/prisma/seed/utils/`. The `package.json` script SHALL be renamed from `seed:databaseReset` to `seed:database-reset`.

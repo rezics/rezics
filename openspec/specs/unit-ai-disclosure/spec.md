@@ -1,3 +1,5 @@
+# unit-ai-disclosure Specification
+
 ## Purpose
 
 Define how a Unit declares AI involvement in its content via a coarse

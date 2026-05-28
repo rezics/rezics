@@ -1,4 +1,16 @@
-## ADDED Requirements
+# user-brief-api Specification
+
+## Purpose
+
+Defines the lightweight `UserBrief` surface: the
+`GET /user/brief/:userId` single read and the `POST /user/brief`
+batch (silently omitting unknown ids), the Typebox `UserBrief`
+schema in `@rezics/contract` (`userId`, `name`, `slug`, optional
+`bio` and `avatar`, no `unitId`), and the requirement that the
+endpoint's Prisma query selects only the returned fields without
+joining related tables.
+
+## Requirements
 
 ### Requirement: Single user brief endpoint
 The server SHALL provide a `GET /user/brief/:userId` endpoint that returns a lightweight user object containing only `name`, `slug`, `bio`, and `avatar`. The path parameter SHALL be named `userId` (not `unitId`).

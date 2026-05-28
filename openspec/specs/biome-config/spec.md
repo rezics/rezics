@@ -1,4 +1,17 @@
-## ADDED Requirements
+# biome-config Specification
+
+## Purpose
+
+Defines the single root `biome.json` that governs lint and format
+for the entire monorepo. Owns the formatter style (single quotes,
+trailing commas, 2-space indent, no bracket spacing, forced
+arrow-parens), the TypeScript / React Hooks / a11y /
+React Refresh rule sets, the ignored output paths, the VS Code
+integration that sets `biomejs.biome` as default formatter, the
+root `lint` / `format` / `format:check` / `check` scripts, and the
+removal of legacy ESLint and Prettier configs.
+
+## Requirements
 
 ### Requirement: Root Biome configuration file
 The project SHALL have a single `biome.json` at the repository root that configures both linting and formatting for the entire monorepo.

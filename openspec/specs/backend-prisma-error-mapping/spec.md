@@ -1,4 +1,17 @@
-## ADDED Requirements
+# backend-prisma-error-mapping Specification
+
+## Purpose
+
+Defines the Elysia global `onError` handler that maps
+`PrismaClientKnownRequestError` codes to HTTP responses: `P2025`
+to 404, `P2002` to 409, `P2003` and `P2014` to 400, and unmapped
+codes to 500. Owns the `{ status, code, message, detail? }` error
+envelope (with `detail.prisma` carrying code, target, model, and
+operation), the rule that responses never leak raw SQL or stack
+traces, and the removal of inline P2025 catch blocks in favor of
+the global handler.
+
+## Requirements
 
 ### Requirement: Global Prisma error interception
 The Elysia global `onError` handler SHALL intercept `PrismaClientKnownRequestError` instances and map them to semantically correct HTTP status codes before the response is sent.

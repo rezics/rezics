@@ -1,3 +1,17 @@
+# shelf-items-editor Specification
+
+## Purpose
+
+Defines the items management section on the shelf edit page.
+Owns the layout below the metadata form (horizontal divider, Add
+item composition with search / URL import / contextual browse,
+paginated and sortable item list, sticky save/discard footer
+showing the pending op count), and the op-log model that defers
+mutations until the user saves to the shelf-items batch
+endpoint.
+
+## Requirements
+
 ### Requirement: Shelf edit page exposes an items management section
 
 The shelf edit page SHALL render an items management section below the existing

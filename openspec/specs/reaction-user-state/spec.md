@@ -1,3 +1,15 @@
+# reaction-user-state Specification
+
+## Purpose
+
+Defines the authenticated `GET /reactions/my` endpoint that
+returns the calling user's reaction types per `targetId`. Owns
+the JWT requirement, the rule that main-server list and detail
+responses never carry a `userReactions` field, and the hydration
+contract: consumers go through `useReactionHydration` (which
+fans out to `useBatchUserReactions` only when a session exists)
+so logged-out users do not generate 401 traffic.
+
 ## Requirements
 
 ### Requirement: Batch user reaction state

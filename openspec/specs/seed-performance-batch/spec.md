@@ -1,4 +1,15 @@
-## ADDED Requirements
+# seed-performance-batch Specification
+
+## Purpose
+
+Defines the batch-insert patterns the seeders use to keep mass
+fixture generation fast. Entity, chapter, post, and attribution
+seeders SHALL prefer two-phase `createMany` over per-row
+`prisma.create` once thresholds are reached, while continuing to
+run through `chunkedParallel` with a 500-row chunk cap so the
+database connection pool is not overwhelmed.
+
+## Requirements
 
 ### Requirement: Entity seed uses batch insert
 

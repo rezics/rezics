@@ -1,4 +1,17 @@
-## ADDED Requirements
+# unified-attribution Specification
+
+## Purpose
+
+Defines the `Attribution` junction that links a content Unit to an
+entity Unit with a free-form `role` string and `sortOrder` integer
+under the composite primary key `(unitId, entityId, role)`. Owns
+the link/unlink service that drives Meilisearch content sync, the
+contract DTOs (`AttributionDTO`, `LinkAttributionInput`, role
+constant arrays such as `bookRoles`), and the rule that
+`bookQueries.detail()` returns each entity's `translations[]` for
+per-language name resolution.
+
+## Requirements
 
 ### Requirement: Attribution is a Unit-to-Unit relationship
 
@@ -99,9 +112,7 @@ The `@rezics/contract` package SHALL export: `AttributionDTO` (unitId, entityId,
 - **WHEN** importing `bookRoles` from `@rezics/contract`
 - **THEN** it SHALL be an array including `"author"`, `"translator"`, `"illustrator"`, `"editor"`, `"publisher"`
 
-## MODIFIED Requirements
-
-### Requirement: Retrieve attributions for a unit
+### Requirement: Book detail attribution response includes translations
 
 The server SHALL provide a method to retrieve all attributions for a given unit, including the Entity's resolved translations. Results SHALL be grouped by role and ordered by sortOrder within each role. The `bookQueries.detail()` response SHALL include attribution entities with their full `translations[]` array so that the frontend can resolve entity names and bios per language without additional API calls.
 

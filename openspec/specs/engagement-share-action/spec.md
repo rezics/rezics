@@ -1,3 +1,15 @@
+# engagement-share-action Specification
+
+## Purpose
+
+Defines the `ShareAction` atom rendered by `ReactionBar` when the
+`"share"` token is configured. Owns the popover UI anchored to
+the button with a "Copy link" entry that writes the canonical
+detail URL plus a short-lived success toast, the conditional
+"Share…" entry that calls `navigator.share({ url, title })` only
+when the Web Share API is available, and the title-resolution
+rules per content kind.
+
 ## Requirements
 
 ### Requirement: ShareAction renders a share popover

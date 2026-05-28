@@ -1,4 +1,16 @@
-## ADDED Requirements
+# app-header-search Specification
+
+## Purpose
+
+Defines the app header search entry point and the
+header-vs-content height contract. Owns the 56px desktop / 49px
+mobile fixed header height with matching content offset, the
+inline desktop search input with the rezics-logo leading
+adornment, the mobile search icon button (suppressed on the home
+page in favor of the page-level box), and the presentation-only
+`r/{title}` / `u/{slug}` scope badges on realm and user routes.
+
+## Requirements
 
 ### Requirement: Responsive Header Height
 

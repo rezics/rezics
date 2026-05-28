@@ -1,4 +1,18 @@
-## ADDED Requirements
+# subdomain-trust-boundary Specification
+
+## Purpose
+
+Defines the security boundary that lets first-party services
+under `*.rezics.com` share the `rezics-session-token` cookie.
+Owns the production cookie attributes
+(`Domain=.rezics.com; Path=/; HttpOnly; SameSite=Lax; Secure`)
+and the localhost variant, logout symmetry, the prohibition on
+untrusted content (uploaded HTML, third-party widgets) under any
+first-party origin, DNS hygiene against dangling CNAMEs, the
+first-party XSS = session-compromise rule with per-service CSP,
+and the credentialed CORS allow-list shape.
+
+## Requirements
 
 ### Requirement: Session cookie scoped to registrable domain
 
