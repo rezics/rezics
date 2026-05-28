@@ -17,7 +17,7 @@ export const TranslationFieldsEditor: React.FC<
   TranslationFieldsEditorProps
 > = ({ draft, onChange, disabled, afterTitleSlot }) => {
   const { t } = useTranslation(["book", "page"]);
-return (
+  return (
     <div className="flex flex-col gap-5">
       <div className="space-y-1">
         <label className="text-sm" htmlFor="tr-title">

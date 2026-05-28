@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -77,7 +78,7 @@ export const ReleaseSelector: React.FC<ReleaseSelectorProps> = ({
   onSelect,
 }) => {
   const { t } = useTranslation(["book", "entity"]);
-const workUnitId = releaseWorkUnitId(bookInfo);
+  const workUnitId = releaseWorkUnitId(bookInfo);
 
   const { data: releaseList } = useQuery({
     ...bookQueries.list({ workUnitId, limit: 50 }),
@@ -136,8 +137,8 @@ const workUnitId = releaseWorkUnitId(bookInfo);
     bookInfo,
     officialByLang,
     selectedLang,
-    m.book_release_current,
-    m.book_release_untitled,
+    getI18nRuntime().i18n.t("book:release_current"),
+    getI18nRuntime().i18n.t("book:release_untitled"),
   ]);
 
   if (options.length <= 1) return null;

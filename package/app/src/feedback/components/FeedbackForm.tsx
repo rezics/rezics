@@ -1,3 +1,15 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  feedback_type_bug: () =>
+    getI18nRuntime().i18n.t("community:feedback_type_bug"),
+  feedback_type_feature: () =>
+    getI18nRuntime().i18n.t("community:feedback_type_feature"),
+  feedback_type_report: () =>
+    getI18nRuntime().i18n.t("community:feedback_type_report"),
+  feedback_type_other: () =>
+    getI18nRuntime().i18n.t("community:feedback_type_other"),
+} as const;
 import { useCreateFeedbackMutation } from "@rezics/api/feedback/feedback.mutations";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import { useTranslation } from "@rezics/i18n/react";
@@ -35,7 +47,7 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
   onSubmitted,
 }) => {
   const { t } = useTranslation(["common", "community"]);
-const locationKey = useRouterState({
+  const locationKey = useRouterState({
     select: (s) => `${s.location.pathname}${s.location.search ?? ""}`,
   });
   const [form, setForm] = useState<CreateFeedbackInput>({
@@ -91,7 +103,9 @@ const locationKey = useRouterState({
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
-          <Label htmlFor="feedback-type">{t("community:feedback_type_label")}</Label>
+          <Label htmlFor="feedback-type">
+            {t("community:feedback_type_label")}
+          </Label>
           <Select
             value={form.type ?? "BUG"}
             onValueChange={(v) => handleChange("type", v)}
@@ -110,7 +124,9 @@ const locationKey = useRouterState({
         </div>
 
         <div className="flex flex-col gap-1">
-          <Label htmlFor="feedback-content">{t("community:feedback_content_label")}</Label>
+          <Label htmlFor="feedback-content">
+            {t("community:feedback_content_label")}
+          </Label>
           <textarea
             id="feedback-content"
             placeholder={t("community:feedback_content_placeholder")}
@@ -131,7 +147,9 @@ const locationKey = useRouterState({
         </div>
 
         {createMutation.status === "error" && (
-          <p className="text-error-text">{t("community:feedback_submit_failed")}</p>
+          <p className="text-error-text">
+            {t("community:feedback_submit_failed")}
+          </p>
         )}
 
         <div className="flex flex-row gap-4 justify-end">

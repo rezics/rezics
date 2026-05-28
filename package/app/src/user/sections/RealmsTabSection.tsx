@@ -1,3 +1,10 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  profile_realms_joined: () =>
+    getI18nRuntime().i18n.t("settings:profile_realms_joined"),
+  common_created: () => getI18nRuntime().i18n.t("common:created"),
+} as const;
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -43,7 +50,7 @@ function mapJoinedRealmToListItem(realm: RealmDTO): RealmListItemModel {
 
 export const RealmsTabSection: FC = () => {
   const { t } = useTranslation(["common", "entity", "settings"]);
-const { userId } = useProfileContext();
+  const { userId } = useProfileContext();
   const [filter, setFilter] = useState("joined");
 
   const joinedQuery = useQuery({
@@ -119,7 +126,7 @@ const { userId } = useProfileContext();
 
 const RealmListItem: FC<{ realm: RealmListItemModel }> = ({ realm }) => {
   const { t } = useTranslation(["common", "entity", "settings"]);
-return (
+  return (
     <Link
       to={unitHref({
         type: "REALM",

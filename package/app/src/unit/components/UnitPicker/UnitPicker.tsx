@@ -30,7 +30,7 @@ export function UnitPicker({
   placeholder,
 }: UnitPickerProps) {
   const { t } = useTranslation(["book"]);
-const [input, setInput] = useState(initialInput ?? "");
+  const [input, setInput] = useState(initialInput ?? "");
   const { resolved, parseError } = useUnitCandidates(input);
 
   const fieldId = inputId ?? "unit-picker-input";
@@ -38,7 +38,9 @@ const [input, setInput] = useState(initialInput ?? "");
   return (
     <div className="flex flex-col gap-2 border-b border-border-whisper pb-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor={fieldId}>{label ?? t("book:unit_picker_url_label")}</Label>
+        <Label htmlFor={fieldId}>
+          {label ?? t("book:unit_picker_url_label")}
+        </Label>
         <Input
           id={fieldId}
           value={input}
@@ -91,7 +93,7 @@ function BrowsePanel({
   renderItemAction,
 }: BrowsePanelProps) {
   const { t } = useTranslation(["book"]);
-const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     ...unitQueries.list({ workUnitId: workContextUnitId, limit: 100 }),

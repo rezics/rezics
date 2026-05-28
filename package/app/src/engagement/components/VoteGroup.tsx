@@ -49,7 +49,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
   size: sizeProp,
 }) => {
   const { t } = useTranslation(["community"]);
-const ctx = useReactionBarContext();
+  const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const variant = ctx.variant;
   const { summary, userReactions, isHydrated } = useReactionData(targetUnitId);

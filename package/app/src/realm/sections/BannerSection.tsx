@@ -27,7 +27,7 @@ function getPostBannerTitle(post: unknown, fallbackTitle: string): string {
 
 export const BannerSection: React.FC<BannerSectionProps> = ({ banner }) => {
   const { t } = useTranslation(["entity"]);
-const postId = banner?.kind === "post" ? banner.unitId : undefined;
+  const postId = banner?.kind === "post" ? banner.unitId : undefined;
   const { data: post, isError } = useQuery({
     ...postQueries.detail(postId ?? ""),
     enabled: Boolean(postId),

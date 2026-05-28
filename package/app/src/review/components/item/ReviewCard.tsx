@@ -22,7 +22,7 @@ interface ReviewRatingBadgeProps {
 
 const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
   const { t } = useTranslation(["community"]);
-const rating = (review.extra as { rating?: number } | null)?.rating;
+  const rating = (review.extra as { rating?: number } | null)?.rating;
 
   return (
     <TooltipProvider>
@@ -84,7 +84,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   showTargetWork = true,
 }) => {
   const { t } = useTranslation(["community"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const reviewTitle = (review.extra as any)?.title as string | undefined;
   const reviewTargetWork = showTargetWork
@@ -130,7 +130,9 @@ const navigate = useNavigate();
 
         {reviewTargetWork && (
           <div className="flex min-w-0 items-center gap-1 text-xs leading-dense text-text-secondary">
-            <span className="shrink-0">{t("community:review_target_work_label")}</span>
+            <span className="shrink-0">
+              {t("community:review_target_work_label")}
+            </span>
             <TextLink
               to="/book/$bookId"
               params={{ bookId: reviewTargetWork.unitId }}

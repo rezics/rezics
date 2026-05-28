@@ -14,7 +14,7 @@ export const PinboardErrorState: React.FC<PinboardErrorStateProps> = ({
   onRetry,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-return (
+  return (
     <EmptyState
       icon={<ErrorOutlineRoundedIcon className="h-9 w-9 text-error-text" />}
       title={t("entity:pinboard_error_title")}

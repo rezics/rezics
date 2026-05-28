@@ -20,7 +20,7 @@ export const StaleIdsBanner: React.FC<StaleIdsBannerProps> = ({
   onCleaned,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [working, setWorking] = useState(false);
   const remove = useRemoveRealmExtraMutation();
 
@@ -43,7 +43,10 @@ const [dismissed, setDismissed] = useState(false);
     setWorking(false);
     if (failed > 0) {
       toast.error(
-        t("entity:pinboard_stale_cleanup_partial", { failed, total: staleIds.length }),
+        t("entity:pinboard_stale_cleanup_partial", {
+          failed,
+          total: staleIds.length,
+        }),
       );
     } else {
       toast.success(t("entity:pinboard_stale_cleanup_done"));

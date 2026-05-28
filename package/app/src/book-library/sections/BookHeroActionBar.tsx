@@ -35,7 +35,7 @@ export const BookHeroActionBar: React.FC<BookHeroActionBarProps> = ({
   shareTitle,
 }) => {
   const { t } = useTranslation(["book", "common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const editorEntry = useEditorEntry({
     surface: "book",
     ownerUnit: bookInfo,

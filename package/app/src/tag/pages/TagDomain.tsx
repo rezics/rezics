@@ -8,7 +8,7 @@ import { TagWrapper } from "../components/TagWrapper";
 
 export function TagDomainPage() {
   const { t } = useTranslation(["common", "community"]);
-// Keep both route shapes available while the tag routes are being migrated.
+  // Keep both route shapes available while the tag routes are being migrated.
   const withTitleMatch = tagDomainTitleRoute.useMatch({ shouldThrow: true });
   const baseMatch = tagDomainRoute.useMatch({ shouldThrow: true });
   const unitId =
@@ -18,7 +18,9 @@ export function TagDomainPage() {
   if (isLoading) {
     return (
       <div className="w-11/12 mx-auto mt-16">
-        <div className="text-sm text-gray-500">{t("community:tag_loading")}</div>
+        <div className="text-sm text-gray-500">
+          {t("community:tag_loading")}
+        </div>
       </div>
     );
   }
@@ -35,7 +37,9 @@ export function TagDomainPage() {
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <AccentBarWithText text={title ?? t("community:tag_domain_title", { id: unitId })} />
+      <AccentBarWithText
+        text={title ?? t("community:tag_domain_title", { id: unitId })}
+      />
       <TagWrapper filters={{ unitId }} mode="flat" />
     </div>
   );

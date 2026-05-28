@@ -27,7 +27,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
   reviewNumber = 3,
 }) => {
   const { t } = useTranslation(["book"]);
-// Fetch posts with kind='review' for this book
+  // Fetch posts with kind='review' for this book
   const { data } = useQuery({
     ...postQueries.byTarget(bookId, {
       kind: PostKind.REVIEW,

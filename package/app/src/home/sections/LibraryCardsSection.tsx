@@ -1,3 +1,13 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  page_home_sections_library_cards_book_library: () =>
+    getI18nRuntime().i18n.t("page:home_sections_library_cards_book_library"),
+  page_home_sections_library_cards_game_library: () =>
+    getI18nRuntime().i18n.t("page:home_sections_library_cards_game_library"),
+  page_home_sections_library_cards_media_library: () =>
+    getI18nRuntime().i18n.t("page:home_sections_library_cards_media_library"),
+} as const;
 import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
@@ -39,7 +49,7 @@ const LIBRARY_CARD_TITLE = {
 
 export const LibraryCardsSection: React.FC = () => {
   const { t } = useTranslation(["page"]);
-const renderLibraryCard = (lib: (typeof libraries)[number]) => (
+  const renderLibraryCard = (lib: (typeof libraries)[number]) => (
     <Link key={lib.key} to={lib.to} className="min-w-0">
       <Card size="sm" surface="contained" className="h-full">
         <CardContent className="px-2 sm:px-4">

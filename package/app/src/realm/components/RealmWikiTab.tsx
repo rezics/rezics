@@ -21,7 +21,7 @@ export function RealmWikiTab({
   canManage,
 }: RealmWikiTabProps) {
   const { t } = useTranslation(["common", "entity"]);
-const wikiPostsQuery = useQuery(
+  const wikiPostsQuery = useQuery(
     postQueries.wikiByRealm(realmId, {
       sort: { field: "updatedAt", order: "desc" },
       limit: 24,

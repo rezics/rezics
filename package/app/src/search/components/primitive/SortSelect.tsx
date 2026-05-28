@@ -1,3 +1,13 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  search_sort_relevance: () => getI18nRuntime().i18n.t("search:sort_relevance"),
+  search_sort_newest: () => getI18nRuntime().i18n.t("search:sort_newest"),
+  search_sort_recently_updated: () =>
+    getI18nRuntime().i18n.t("search:sort_recently_updated"),
+  search_sort_publication_date: () =>
+    getI18nRuntime().i18n.t("search:sort_publication_date"),
+} as const;
 import {
   Label,
   Select,

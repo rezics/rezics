@@ -20,7 +20,7 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   limit = 8,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedTitle = title ?? t("page:home_sections_trending_reviews");
+  const resolvedTitle = title ?? t("page:home_sections_trending_reviews");
   const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(
     contentSearchQueryOptions({ type: "POST", offset: 0, limit }),

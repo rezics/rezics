@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type {
   ContentSearchDocument,
   EntitySearchDocument,
@@ -16,7 +17,6 @@ import {
 import { contentHref } from "../models/contentDestination";
 import { unitHref } from "@/shared/ui/link";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 type ContentCategory = "books" | "shelves";
 type PostCategory = "reviews" | "excerpts" | "remarks" | "posts";
 type CardBadge = React.ReactNode;
@@ -65,7 +65,7 @@ function firstText(
       if (found) return found;
       continue;
     }
-    if (value && value.trim() !== "") return value;
+    if (typeof value === "string" && value.trim() !== "") return value;
   }
   return "";
 }
@@ -97,13 +97,17 @@ function targetHref(item: PostSearchDocument): string | undefined {
 function postMeta(item: PostSearchDocument): React.ReactNode {
   return compactParts([
     item.scoreValue !== null ? item.scoreValue : null,
-    item.replyCount > 0 ? `${item.replyCount} ${getI18nRuntime().i18n.t("common:reply")}` : null,
+    item.replyCount > 0
+      ? `${item.replyCount} ${getI18nRuntime().i18n.t("common:reply")}`
+      : null,
     formatDate(item.updatedAt),
   ]);
 }
 
 function profileMeta(count: number | null | undefined) {
-  return count == null ? undefined : getI18nRuntime().i18n.t("settings:profile_followers_count", { count });
+  return count == null
+    ? undefined
+    : getI18nRuntime().i18n.t("settings:profile_followers_count", { count });
 }
 
 export function renderContentSearchCard(
@@ -142,7 +146,10 @@ export function renderContentSearchCard(
         description={summary || undefined}
         meta={meta}
         badge={options.badge}
-        image={{ src: item.coverUrl, alt: title }}
+        image={{
+          src: item.coverUrl,
+          alt: getI18nRuntime().i18n.t("book:title"),
+        }}
       />
     );
   }
@@ -156,7 +163,11 @@ export function renderContentSearchCard(
       titleHref={href}
       body={summary || undefined}
       meta={meta}
-      thumbnail={item.coverUrl ? { src: item.coverUrl, alt: title } : undefined}
+      thumbnail={
+        item.coverUrl
+          ? { src: item.coverUrl, alt: getI18nRuntime().i18n.t("book:title") }
+          : undefined
+      }
     />
   );
 }
@@ -206,7 +217,9 @@ export function renderRealmSearchCard(
       title={title}
       titleHref={unitHref({ type: "REALM", unitId: item.id, slug: null })}
       body={description || undefined}
-      meta={getI18nRuntime().i18n.t("search:realm_members", { count: item.memberCount })}
+      meta={getI18nRuntime().i18n.t("search:realm_members", {
+        count: item.memberCount,
+      })}
     />
   );
 }
@@ -246,10 +259,12 @@ export function renderEntitySearchCard(
 
   return (
     <SearchContentResultCard
-      kind={badge ?? item.kind ?? getI18nRuntime().i18n.t("search:origin_entity")}
+      kind={
+        badge ?? item.kind ?? getI18nRuntime().i18n.t("search:origin_entity")
+      }
       avatar={{
         src: item.avatar,
-        alt: title,
+        alt: getI18nRuntime().i18n.t("book:title"),
         fallback: title.slice(0, 1).toUpperCase(),
       }}
       title={title}
@@ -259,7 +274,10 @@ export function renderEntitySearchCard(
         slug: item.slug,
       })}
       body={summary || undefined}
-      meta={compactParts([item.kind, item.verified ? getI18nRuntime().i18n.t("entity:verified") : null])}
+      meta={compactParts([
+        item.kind,
+        item.verified ? getI18nRuntime().i18n.t("entity:verified") : null,
+      ])}
     />
   );
 }

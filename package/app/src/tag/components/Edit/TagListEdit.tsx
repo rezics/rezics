@@ -32,7 +32,7 @@ export const TagListEdit: React.FC<TagListEditProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["common", "community", "entity"]);
-const { data, isLoading, error, refetch } = useQuery(
+  const { data, isLoading, error, refetch } = useQuery(
     tagQueries.forUnit(objectUnitId),
   );
   const list: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
@@ -82,18 +82,18 @@ const { data, isLoading, error, refetch } = useQuery(
     if (list.length === 0) return null;
     return (
       <div className="space-y-2">
-        {list.map((t) => (
+        {list.map((tag) => (
           <div
-            key={t.tagUnitId}
+            key={tag.tagUnitId}
             className="flex items-center justify-between gap-2"
           >
-            <SingleTagChip tag={t} />
+            <SingleTagChip tag={tag} />
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
                 variant="ghost"
                 className="text-error-text"
-                onClick={() => onDetach(t)}
+                onClick={() => onDetach(tag)}
                 disabled={detachMutation.isPending}
               >
                 {t("common:unlink")}
@@ -116,7 +116,9 @@ const { data, isLoading, error, refetch } = useQuery(
             if (v) setView(v as "list" | "grouped");
           }}
         >
-          <ToggleGroupItem value="list">{t("entity:shelf_view_list")}</ToggleGroupItem>
+          <ToggleGroupItem value="list">
+            {t("entity:shelf_view_list")}
+          </ToggleGroupItem>
         </ToggleGroup>
       </div>
 
@@ -132,7 +134,9 @@ const { data, isLoading, error, refetch } = useQuery(
       )}
 
       {!isLoading && !error && list.length === 0 && (
-        <div className="text-sm text-text-secondary">{t("community:tag_empty")}</div>
+        <div className="text-sm text-text-secondary">
+          {t("community:tag_empty")}
+        </div>
       )}
 
       {!isLoading && !error && renderListView()}
@@ -164,16 +168,16 @@ const { data, isLoading, error, refetch } = useQuery(
         )}
         {searchResults.length > 0 && (
           <div className="space-y-1">
-            {searchResults.map((t) => (
+            {searchResults.map((tag) => (
               <div
-                key={t.tagUnitId}
+                key={tag.tagUnitId}
                 className="flex items-center justify-between gap-2"
               >
-                <Badge variant="secondary">{t.tagUnitId}</Badge>
+                <Badge variant="secondary">{tag.tagUnitId}</Badge>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleAttach(t.tagUnitId)}
+                  onClick={() => handleAttach(tag.tagUnitId)}
                   disabled={attachMutation.isPending}
                 >
                   {t("common:add")}

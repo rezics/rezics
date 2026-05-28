@@ -36,7 +36,7 @@ export function CompletedConfirmModal({
   isPending,
 }: CompletedConfirmModalProps) {
   const { t } = useTranslation(["common", "community"]);
-const [displayCount, setDisplayCount] = useState(currentCount);
+  const [displayCount, setDisplayCount] = useState(currentCount);
   const [badgeFading, setBadgeFading] = useState(false);
   const [animating, setAnimating] = useState(false);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -86,7 +86,9 @@ const [displayCount, setDisplayCount] = useState(currentCount);
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("community:progress_status_completed_modal_title")}</DialogTitle>
+          <DialogTitle>
+            {t("community:progress_status_completed_modal_title")}
+          </DialogTitle>
           <DialogDescription>
             {t("community:progress_status_completed_modal_description")}
           </DialogDescription>

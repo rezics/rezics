@@ -6,7 +6,7 @@ import { SettingsTabBar } from "./SettingsTabBar";
 
 export const SettingsShell: FC = () => {
   const { t } = useTranslation(["settings"]);
-return (
+  return (
     <div className="w-full max-w-6xl mx-auto pb-12">
       <h5 className="text-xl font-semibold px-4 pt-8 pb-4">
         {t("settings:title")}

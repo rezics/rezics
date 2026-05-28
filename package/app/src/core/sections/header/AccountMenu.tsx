@@ -28,7 +28,7 @@ export type AccountMenuProps = {
 
 export const AccountMenu: React.FC<AccountMenuProps> = ({ onLogout }) => {
   const { t } = useTranslation(["auth", "shell"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const clearProfile = useUserProfileStore((state) => state.clearProfile);
   const user = useUserProfileStore((state) => state.user);
   const handleLogout = () => {

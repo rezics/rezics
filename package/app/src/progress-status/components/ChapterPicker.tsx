@@ -24,7 +24,7 @@ export function ChapterPicker({
   disabled,
 }: ChapterPickerProps) {
   const { t } = useTranslation(["community"]);
-const { options, isLoading } = useChapterPicker(bookUnitId);
+  const { options, isLoading } = useChapterPicker(bookUnitId);
 
   return (
     <Select
@@ -37,7 +37,9 @@ const { options, isLoading } = useChapterPicker(bookUnitId);
     >
       <SelectTrigger>
         <SelectValue
-          placeholder={t("community:progress_status_chapter_picker_placeholder")}
+          placeholder={t(
+            "community:progress_status_chapter_picker_placeholder",
+          )}
         />
       </SelectTrigger>
       <SelectContent>

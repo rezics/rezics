@@ -26,7 +26,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
   reviewId,
 }) => {
   const { t } = useTranslation(["common", "community"]);
-const commentRef = useRef<HTMLDivElement>(null);
+  const commentRef = useRef<HTMLDivElement>(null);
   const composerRef = useFocusReplyFromQuery();
 
   const {
@@ -79,7 +79,9 @@ const commentRef = useRef<HTMLDivElement>(null);
       <div ref={commentRef} className="mt-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <AccentBar />
-          <h2 className="text-lg font-bold">{t("community:review_comments")}</h2>
+          <h2 className="text-lg font-bold">
+            {t("community:review_comments")}
+          </h2>
         </div>
 
         <ReplyComposer

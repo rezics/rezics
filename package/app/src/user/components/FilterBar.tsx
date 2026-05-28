@@ -35,7 +35,7 @@ export const FilterBar: FC<FilterBarProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["common"]);
-return (
+  return (
     <div className={`flex flex-wrap items-center gap-3 ${className ?? ""}`}>
       {config.showSearch && (
         <Input

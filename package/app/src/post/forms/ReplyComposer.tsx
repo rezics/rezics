@@ -114,8 +114,14 @@ function RealmPostTagPicker({
   selectedTagIds: string[];
   onSelectedTagIdsChange: (tagIds: string[]) => void;
 }) {
-  const { t } = useTranslation(["auth", "common", "community", "entity", "page"]);
-const [searchTerm, setSearchTerm] = useState("");
+  const { t } = useTranslation([
+    "auth",
+    "common",
+    "community",
+    "entity",
+    "page",
+  ]);
+  const [searchTerm, setSearchTerm] = useState("");
   const firstRealmId = realmUnitIds.length === 1 ? realmUnitIds[0] : undefined;
   const { data: realm } = useQuery({
     ...realmQueries.detail(firstRealmId ?? ""),
@@ -271,8 +277,14 @@ export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
   ReplyComposerProps
 >(function ReplyComposer(props, ref) {
-  const { t } = useTranslation(["auth", "common", "community", "entity", "page"]);
-const authGuard = useAuthGuard();
+  const { t } = useTranslation([
+    "auth",
+    "common",
+    "community",
+    "entity",
+    "page",
+  ]);
+  const authGuard = useAuthGuard();
   const {
     mode,
     placeholder = t("community:post_reply_placeholder"),

@@ -21,7 +21,7 @@ export const TrendingBookSection: React.FC<TrendingBookSectionProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["page"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { items = [], isLoading } = useHomeBooks(limit);
 
   const bookList = React.useMemo(() => {

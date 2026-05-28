@@ -27,7 +27,7 @@ export const ResetPasswordPage: FC<ResetPasswordPageProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(["auth", "common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const query = useMemo(() => {
     if (typeof window === "undefined") {

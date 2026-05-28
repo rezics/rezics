@@ -1,3 +1,19 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  book_hero_meta_author: () => getI18nRuntime().i18n.t("book:hero_meta_author"),
+  book_hero_meta_co_author: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_co_author"),
+  book_hero_meta_translator: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_translator"),
+  book_hero_meta_illustrator: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_illustrator"),
+  book_hero_meta_editor: () => getI18nRuntime().i18n.t("book:hero_meta_editor"),
+  book_hero_meta_publisher: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_publisher"),
+  book_hero_meta_producer: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_producer"),
+} as const;
 import { postQueries } from "@rezics/api/post/post";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
@@ -64,7 +80,7 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
   ratingCount = 0,
 }) => {
   const { t } = useTranslation(["book"]);
-const { bookId: routeBookId } = useParams({ strict: false }) as {
+  const { bookId: routeBookId } = useParams({ strict: false }) as {
     bookId?: string;
   };
   const bookId = routeBookId ?? bookInfo?.unitId ?? "";

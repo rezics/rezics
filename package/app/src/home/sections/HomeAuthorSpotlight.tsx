@@ -26,7 +26,7 @@ export const HomeAuthorSpotlight: React.FC<HomeAuthorSpotlightProps> = ({
   maxAuthors = 12,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedTitle = title ?? t("page:home_sections_author_spotlight");
+  const resolvedTitle = title ?? t("page:home_sections_author_spotlight");
 
   const { data, isLoading, error } = useQuery(
     bookQueries.list({ start: 0, limit }),

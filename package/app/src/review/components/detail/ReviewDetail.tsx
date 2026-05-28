@@ -21,7 +21,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
   onReplyInvoke,
 }) => {
   const { t } = useTranslation(["book"]);
-const rating = (review.extra as { rating?: number } | null)?.rating;
+  const rating = (review.extra as { rating?: number } | null)?.rating;
   const title = (review.extra as { title?: string } | null)?.title;
   const hydrationIds = useMemo(
     () => (review.unitId ? [review.unitId] : []),
@@ -34,7 +34,9 @@ const rating = (review.extra as { rating?: number } | null)?.rating;
       {book && <BookListViewItem book={book} />}
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{title || t("book:pages_review_page")}</h1>
+        <h1 className="text-2xl font-bold">
+          {title || t("book:pages_review_page")}
+        </h1>
         {rating !== undefined && (
           <span className="text-sm text-text-secondary">
             {rating.toFixed(1)} / 10

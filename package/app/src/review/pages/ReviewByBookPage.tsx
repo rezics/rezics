@@ -11,7 +11,7 @@ import { ReviewsPage } from "./ReviewsPage";
 
 export function ReviewByBookPage() {
   const { t } = useTranslation(["book", "common"]);
-const { bookId } = reviewByBookRoute.useParams();
+  const { bookId } = reviewByBookRoute.useParams();
   const { scope } = reviewByBookRoute.useSearch();
   const navigate = useNavigate();
   const { data: bookInfo } = useQuery({

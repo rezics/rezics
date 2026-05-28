@@ -8,7 +8,7 @@ import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 
 export function NewShelfPage() {
   const { t } = useTranslation(["common", "entity"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const createMutation = useCreateShelfMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -43,11 +43,15 @@ const navigate = useNavigate();
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{t("entity:shelf_new_title")}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">
+        {t("entity:shelf_new_title")}
+      </h1>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-shelf-title">{t("entity:shelf_title_label")}</Label>
+          <Label htmlFor="new-shelf-title">
+            {t("entity:shelf_title_label")}
+          </Label>
           <Input
             id="new-shelf-title"
             value={title}
@@ -67,7 +71,9 @@ const navigate = useNavigate();
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="new-shelf-cover">{t("entity:shelf_cover_url_label")}</Label>
+          <Label htmlFor="new-shelf-cover">
+            {t("entity:shelf_cover_url_label")}
+          </Label>
           <Input
             id="new-shelf-cover"
             value={coverUrl}

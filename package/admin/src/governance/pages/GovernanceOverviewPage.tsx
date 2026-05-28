@@ -12,7 +12,7 @@ import type {
 } from "@rezics/contract";
 import {
   Badge,
-  Button,
+  buttonVariants,
   Card,
   CardContent,
   CardHeader,
@@ -443,12 +443,13 @@ export default function GovernanceOverviewPage() {
       description="Site-wide moderation, escalation, enforcement, policy, and audit signals for operators."
       actions={
         <div className="flex gap-2">
-          <Button asChild variant="outline">
-            <Link to="/authority">
-              <FileClock className="size-4" />
-              Authority
-            </Link>
-          </Button>
+          <Link
+            to="/authority"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <FileClock className="size-4" />
+            Authority
+          </Link>
         </div>
       }
     >

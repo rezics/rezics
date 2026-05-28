@@ -16,7 +16,7 @@ type Props = {
 
 export function MoreHorizMenu({ children, className }: Props) {
   const { t } = useTranslation(["common"]);
-return (
+  return (
     <DropdownMenu>
       <DropdownMenuTrigger
         nativeButton

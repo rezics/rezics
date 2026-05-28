@@ -24,7 +24,7 @@ export const RemarkList: React.FC<RemarkListProps> = ({
   spacing = 2,
 }) => {
   const { t } = useTranslation(["page"]);
-const targetIds = useMemo(
+  const targetIds = useMemo(
     () => posts.map((p) => p.unitId).filter(Boolean) as string[],
     [posts],
   );

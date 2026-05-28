@@ -20,7 +20,7 @@ function formatPeerInitial(c: DmConversation): string {
  */
 export const ConversationListSection: FC = () => {
   const { t } = useTranslation(["common", "community"]);
-const { data, isLoading, isError } = useConversations();
+  const { data, isLoading, isError } = useConversations();
   const conversations = (data?.conversations ?? [])
     .slice()
     .sort(compareUpdatedDesc);

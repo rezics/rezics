@@ -386,7 +386,7 @@ function WikiHomepageSections({
   variant: WikiTemplateVariant;
 }) {
   const { t } = useTranslation(["common", "entity", "search"]);
-const locale = useLocale();
+  const locale = useLocale();
   const sections = data?.sections ?? [];
   if (sections.length === 0) {
     return <EmptyState title={t("entity:realm_content_empty_title")} />;
@@ -454,7 +454,7 @@ function WikiZoneTemplateBase({
   variant,
 }: ZoneTemplateProps & { variant: WikiTemplateVariant }) {
   const { t } = useTranslation(["common", "entity", "search"]);
-const search = useSearchQuery({});
+  const search = useSearchQuery({});
   const keywordBind = search.bind("keyword");
   const theme = zone.wiki?.theme;
   const resolvedHomepageVariant =
@@ -495,7 +495,9 @@ const search = useSearchQuery({});
               value={keywordBind.value ?? ""}
               onChange={(value) => keywordBind.onChange(value)}
               onSubmit={() => onSearch?.(search.query.keyword ?? "")}
-              placeholder={t("search:zone_search_placeholder", { name: zone.name })}
+              placeholder={t("search:zone_search_placeholder", {
+                name: zone.name,
+              })}
             />
           </div>
         </header>

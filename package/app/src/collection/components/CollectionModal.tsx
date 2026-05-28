@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { getSeedTagId } from "@rezics/api/infra/bootstrap";
 import type {
   CollectionStatusResponse,
@@ -57,7 +58,7 @@ export function CollectionModal({
   isReview = false,
 }: CollectionModalProps) {
   const { t } = useTranslation(["common", "entity"]);
-const [selectedShelves, setSelectedShelves] = useState<Set<string>>(
+  const [selectedShelves, setSelectedShelves] = useState<Set<string>>(
     new Set(),
   );
   const [filterTag, setFilterTag] = useState<SeedTagName | null>(null);
@@ -93,7 +94,10 @@ const [selectedShelves, setSelectedShelves] = useState<Set<string>>(
       }
       return shelf.title ?? t("common:untitled");
     },
-    [m.common_untitled, m.shelf_system_favorites],
+    [
+      getI18nRuntime().i18n.t("common:untitled"),
+      getI18nRuntime().i18n.t("entity:shelf_system_favorites"),
+    ],
   );
 
   const toggleShelf = useCallback((shelfId: string) => {
@@ -170,7 +174,9 @@ const [selectedShelves, setSelectedShelves] = useState<Set<string>>(
                         <div className="flex-1 min-w-0">
                           <p className="text-sm truncate">{displayTitle}</p>
                           <p className="text-xs text-text-secondary">
-                            {t("entity:shelf_items_count", { count: shelf.itemCount })}
+                            {t("entity:shelf_items_count", {
+                              count: shelf.itemCount,
+                            })}
                           </p>
                         </div>
                       </div>

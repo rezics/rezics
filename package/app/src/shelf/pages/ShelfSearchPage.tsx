@@ -11,7 +11,7 @@ import { ShelfCard } from "../components/ShelfCard";
 
 export function ShelfSearchPage() {
   const { t } = useTranslation(["common", "entity"]);
-const search = useSearchQuery({
+  const search = useSearchQuery({
     implicitInitial: { type: ["SHELF"] },
   });
   const [offset, setOffset] = useState(0);
@@ -39,7 +39,9 @@ const search = useSearchQuery({
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{t("entity:shelf_search_title")}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">
+        {t("entity:shelf_search_title")}
+      </h1>
 
       <div className="mb-6">
         <KeywordInput

@@ -22,7 +22,7 @@ import { unitHref } from "@/shared/ui/link";
 
 export function NewRealmPage() {
   const { t } = useTranslation(["common", "entity"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const createMutation = useCreateRealmMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -63,7 +63,9 @@ const navigate = useNavigate();
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{t("entity:realm_new_title")}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">
+        {t("entity:realm_new_title")}
+      </h1>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <Label htmlFor="new-realm-name">{t("common:name")}</Label>

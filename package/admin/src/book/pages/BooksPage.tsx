@@ -21,7 +21,8 @@ import { getI18nRuntime } from "@rezics/i18n/runtime";
 /** Extract the best title from the translations array. */
 function extractTitle(book: BookDTO): string {
   const translations = book.translations;
-  if (!translations?.length) return getI18nRuntime().i18n.t("admin:unit_no_title");
+  if (!translations?.length)
+    return getI18nRuntime().i18n.t("admin:unit_no_title");
   // Prefer default language match, fall back to first translation
   const primary =
     translations.find((t) => t.language === (book as any).defaultLanguage) ??
@@ -180,7 +181,9 @@ export default function BooksPage() {
   return (
     <Page
       title={
-        isMeiliMode ? getI18nRuntime().i18n.t("admin:book_list_meili_title") : getI18nRuntime().i18n.t("admin:book_list_title")
+        isMeiliMode
+          ? getI18nRuntime().i18n.t("admin:book_list_meili_title")
+          : getI18nRuntime().i18n.t("admin:book_list_title")
       }
       description={
         isMeiliMode

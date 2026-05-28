@@ -55,7 +55,7 @@ export type ReactionHistoryItemProps = GivenProps | ReceivedProps;
 
 export const ReactionHistoryItem: FC<ReactionHistoryItemProps> = (props) => {
   const { t } = useTranslation(["community"]);
-const { mode, item } = props;
+  const { mode, item } = props;
   const Icon = reactionIconFor(item.reaction);
   const timestamp = formatTimestamp(item.createdAt);
   const target = item.target;

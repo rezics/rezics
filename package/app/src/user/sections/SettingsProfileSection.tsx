@@ -36,7 +36,7 @@ type SettingsProfileFormData = Omit<
 
 export const SettingsProfileSection: FC = () => {
   const { t } = useTranslation(["common", "entity", "settings"]);
-useRequireAuth();
+  useRequireAuth();
 
   const { data: user, isLoading } = useQuery(userQueries.me());
   const [formData, setFormData] = useState<SettingsProfileFormData>({

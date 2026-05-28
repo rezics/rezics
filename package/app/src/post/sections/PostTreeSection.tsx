@@ -39,7 +39,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   onReply,
 }) => {
   const { t } = useTranslation(["common"]);
-const permission = useServerPermission();
+  const permission = useServerPermission();
   const actorUserId = useCurrentUserId();
   const [editingPost, setEditingPost] = useState<PostDTO | null>(null);
   const { data, isLoading } = useQuery(

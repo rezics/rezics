@@ -112,8 +112,7 @@ export type Prefix = keyof typeof PREFIX_TO_NAMESPACE;
 
 export function resolveNamespace(flatKey: string): Namespace {
   const underscore = flatKey.indexOf("_");
-  const prefix =
-    underscore >= 0 ? flatKey.slice(0, underscore) : flatKey;
+  const prefix = underscore >= 0 ? flatKey.slice(0, underscore) : flatKey;
   const namespace = (
     PREFIX_TO_NAMESPACE as Record<string, Namespace | undefined>
   )[prefix];

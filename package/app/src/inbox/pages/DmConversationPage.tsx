@@ -7,7 +7,7 @@ import { ConversationThreadSection } from "../sections/ConversationThreadSection
 
 export const DmConversationPage: React.FC = () => {
   const { t } = useTranslation(["community"]);
-const { conversationId } = useParams({
+  const { conversationId } = useParams({
     from: "/_mainLayout/inbox/dm/$conversationId",
   });
   const { data } = useConversations();

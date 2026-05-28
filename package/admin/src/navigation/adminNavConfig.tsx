@@ -1,3 +1,5 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
 import {
   Activity as ActivityIcon,
   GitMerge as AccountTreeIcon,
@@ -22,7 +24,6 @@ import {
 } from "lucide-react";
 import type React from "react";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type AdminNavItem = {
   id: string;
   label: () => string;
@@ -45,7 +46,7 @@ export const adminNav = {
   items: [
     {
       id: "dashboard",
-      label: i18nMessages.admin_nav_dashboard,
+      label: () => getI18nRuntime().i18n.t("admin:nav_dashboard"),
       icon: <DashboardIcon fontSize="small" />,
       to: "/",
     },
@@ -62,20 +63,20 @@ export const adminNav = {
       children: [
         {
           id: "content.units",
-          label: i18nMessages.admin_nav_units,
+          label: () => getI18nRuntime().i18n.t("admin:nav_units"),
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit",
         },
         {
           id: "content.unit-create",
           label: () =>
-            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_units")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_create")}`,
+            `${getI18nRuntime().i18n.t("admin:nav_units")} · ${getI18nRuntime().i18n.t("admin:nav_create")}`,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/create",
         },
         {
           id: "content.books",
-          label: i18nMessages.admin_nav_books,
+          label: () => getI18nRuntime().i18n.t("admin:nav_books"),
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book",
         },
@@ -87,7 +88,7 @@ export const adminNav = {
         },
         {
           id: "content.entities",
-          label: i18nMessages.admin_nav_entities,
+          label: () => getI18nRuntime().i18n.t("admin:nav_entities"),
           icon: <IdentityIcon fontSize="small" />,
           to: "/entity",
         },
@@ -99,19 +100,19 @@ export const adminNav = {
         },
         {
           id: "content.realms",
-          label: i18nMessages.admin_nav_realms,
+          label: () => getI18nRuntime().i18n.t("admin:nav_realms"),
           icon: <ForumIcon fontSize="small" />,
           to: "/realm",
         },
         {
           id: "content.shelves",
-          label: i18nMessages.admin_nav_shelves,
+          label: () => getI18nRuntime().i18n.t("admin:nav_shelves"),
           icon: <CollectionsBookmarkIcon fontSize="small" />,
           to: "/shelf",
         },
         {
           id: "content.low-score-tags",
-          label: i18nMessages.admin_nav_low_score,
+          label: () => getI18nRuntime().i18n.t("admin:nav_low_score"),
           icon: <StyleOutlinedIcon fontSize="small" />,
           to: "/tag/low-score",
         },
@@ -124,51 +125,52 @@ export const adminNav = {
       children: [
         {
           id: "accounts.auth-users",
-          label: i18nMessages.admin_nav_auth,
+          label: () => getI18nRuntime().i18n.t("admin:nav_auth"),
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
           to: "/auth/users",
         },
         {
           id: "accounts.main-users",
-          label: i18nMessages.admin_nav_users,
+          label: () => getI18nRuntime().i18n.t("admin:nav_users"),
           icon: <PeopleIcon fontSize="small" />,
           to: "/user",
         },
         {
           id: "accounts.user-create",
           label: () =>
-            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_users")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_create")}`,
+            `${getI18nRuntime().i18n.t("admin:nav_users")} · ${getI18nRuntime().i18n.t("admin:nav_create")}`,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user/create",
         },
         {
           id: "accounts.sessions",
-          label: i18nMessages.admin_nav_sessions,
+          label: () => getI18nRuntime().i18n.t("admin:nav_sessions"),
           icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />,
           to: "/auth/sessions",
         },
         {
           id: "accounts.auth-status",
-          label: i18nMessages.admin_nav_auth_status,
+          label: () => getI18nRuntime().i18n.t("admin:nav_auth_status"),
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/auth/status",
         },
         {
           id: "accounts.email",
-          label: i18nMessages.admin_nav_auth_email_templates,
+          label: () =>
+            getI18nRuntime().i18n.t("admin:nav_auth_email_templates"),
           icon: <EmailOutlinedIcon fontSize="small" />,
           to: "/auth/email",
         },
         {
           id: "accounts.auth-jwt-services",
-          label: i18nMessages.admin_nav_auth_jwt_services,
+          label: () => getI18nRuntime().i18n.t("admin:nav_auth_jwt_services"),
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/auth/jwt-services",
           requiredRole: "owner",
         },
         {
           id: "accounts.tokens",
-          label: i18nMessages.admin_nav_token,
+          label: () => getI18nRuntime().i18n.t("admin:nav_token"),
           icon: <KeyOutlinedIcon fontSize="small" />,
           to: "/token",
         },
@@ -187,13 +189,13 @@ export const adminNav = {
         },
         {
           id: "governance.authority",
-          label: i18nMessages.admin_nav_authority,
+          label: () => getI18nRuntime().i18n.t("admin:nav_authority"),
           icon: <ShieldCheckIcon fontSize="small" />,
           to: "/authority",
         },
         {
           id: "governance.realm-escalations",
-          label: i18nMessages.admin_nav_realms,
+          label: () => getI18nRuntime().i18n.t("admin:nav_realms"),
           icon: <ForumIcon fontSize="small" />,
           to: "/realm",
         },
@@ -206,7 +208,7 @@ export const adminNav = {
       children: [
         {
           id: "search.meili",
-          label: i18nMessages.admin_nav_meili,
+          label: () => getI18nRuntime().i18n.t("admin:nav_meili"),
           icon: <ManageSearchOutlinedIcon fontSize="small" />,
           to: "/meili",
         },
@@ -225,21 +227,21 @@ export const adminNav = {
         {
           id: "search.unit-meili",
           label: () =>
-            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_units")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
+            `${getI18nRuntime().i18n.t("admin:nav_units")} · ${getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/unit/meili",
         },
         {
           id: "search.book-meili",
           label: () =>
-            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_books")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
+            `${getI18nRuntime().i18n.t("admin:nav_books")} · ${getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book/meili",
         },
         {
           id: "search.user-meili",
           label: () =>
-            `${i18nMessages.getI18nRuntime().i18n.t("admin:nav_users")} · ${i18nMessages.getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
+            `${getI18nRuntime().i18n.t("admin:nav_users")} · ${getI18nRuntime().i18n.t("admin:nav_meili_search")}`,
           icon: <PeopleIcon fontSize="small" />,
           to: "/user/meili",
         },
@@ -258,25 +260,25 @@ export const adminNav = {
         },
         {
           id: "misc.echokv",
-          label: i18nMessages.admin_nav_echokv,
+          label: () => getI18nRuntime().i18n.t("admin:nav_echokv"),
           icon: <StorageOutlinedIcon fontSize="small" />,
           to: "/misc/echokv",
         },
         {
           id: "misc.token",
-          label: i18nMessages.admin_nav_settings,
+          label: () => getI18nRuntime().i18n.t("admin:nav_settings"),
           icon: <SettingsIcon fontSize="small" />,
           to: "/settings",
         },
         {
           id: "system.legacy-token",
-          label: i18nMessages.admin_nav_token,
+          label: () => getI18nRuntime().i18n.t("admin:nav_token"),
           icon: <KeyOutlinedIcon fontSize="small" />,
           to: "/token",
         },
         {
           id: "system.jwt-services",
-          label: i18nMessages.admin_nav_jwt_services,
+          label: () => getI18nRuntime().i18n.t("admin:nav_jwt_services"),
           icon: <VpnKeyOutlinedIcon fontSize="small" />,
           to: "/jwt-services",
           requiredRole: "owner",

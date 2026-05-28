@@ -1,3 +1,9 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  shelf_sort_newest: () => getI18nRuntime().i18n.t("entity:shelf_sort_newest"),
+  shelf_sort_oldest: () => getI18nRuntime().i18n.t("entity:shelf_sort_oldest"),
+} as const;
 import { shelfQueries } from "@rezics/api/shelf/shelf.queries";
 import {
   type ShelfDTO,
@@ -31,7 +37,7 @@ const SORT_OPTION_LABEL = {
 
 export const ShelvesTabSection: FC = () => {
   const { t } = useTranslation(["common", "entity", "search"]);
-const { user, userId, isCurrentUser } = useProfileContext();
+  const { user, userId, isCurrentUser } = useProfileContext();
   const [kindKey, setKindKey] = useState("all");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -63,7 +69,7 @@ const { user, userId, isCurrentUser } = useProfileContext();
       chips.push({ value: k, label });
     }
     return chips;
-  }, [shelves, isCurrentUser, m.search_category_all]);
+  }, [shelves, isCurrentUser, getI18nRuntime().i18n.t("search:category_all")]);
 
   // Filter shelves
   const filtered = useMemo(() => {
@@ -118,7 +124,9 @@ const { user, userId, isCurrentUser } = useProfileContext();
         </p>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-text-secondary py-12 text-center">
-          {filters.q ? t("entity:shelf_no_search_matches") : t("entity:shelf_empty_yet")}
+          {filters.q
+            ? t("entity:shelf_no_search_matches")
+            : t("entity:shelf_empty_yet")}
         </p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -142,7 +150,7 @@ const ShelfCard: FC<{
   userSlug?: string;
 }> = ({ shelf, isOwnerView, userSlug }) => {
   const { t } = useTranslation(["common", "entity", "search"]);
-const dbTitle = shelf.translations?.[0]?.title ?? t("entity:shelf_untitled");
+  const dbTitle = shelf.translations?.[0]?.title ?? t("entity:shelf_untitled");
   const systemKindKey = isSystemKindKey(shelf.kindKey) ? shelf.kindKey : null;
   const isSystemShelf = systemKindKey !== null;
   const title =

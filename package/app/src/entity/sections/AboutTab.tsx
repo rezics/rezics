@@ -9,7 +9,7 @@ interface AboutTabProps {
 
 export function AboutTab({ entity, language }: AboutTabProps) {
   const { t } = useTranslation(["common", "entity"]);
-const tr = getEntityTranslation(entity, language);
+  const tr = getEntityTranslation(entity, language);
   const items: Array<{ label: string; value: string }> = [];
 
   if (entity.kind)

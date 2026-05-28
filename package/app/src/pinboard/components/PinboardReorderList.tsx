@@ -34,7 +34,7 @@ interface SortableRowProps {
 
 function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
   const { t } = useTranslation(["entity"]);
-const {
+  const {
     attributes,
     listeners,
     setNodeRef,
@@ -97,7 +97,7 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
   onConflict,
 }) => {
   const { t } = useTranslation(["entity"]);
-const [working, setWorking] = useState<string[] | null>(null);
+  const [working, setWorking] = useState<string[] | null>(null);
   const ids = useMemo(
     () => working ?? entries.map((e) => e.unitId),
     [entries, working],

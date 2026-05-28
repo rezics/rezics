@@ -30,8 +30,12 @@ function fmtDate(v?: string | Date) {
 }
 
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
-  if (!translations || translations.length === 0) return getI18nRuntime().i18n.t("admin:unit_no_title");
-  return translations[0]?.title?.trim() || getI18nRuntime().i18n.t("admin:unit_no_title");
+  if (!translations || translations.length === 0)
+    return getI18nRuntime().i18n.t("admin:unit_no_title");
+  return (
+    translations[0]?.title?.trim() ||
+    getI18nRuntime().i18n.t("admin:unit_no_title")
+  );
 }
 
 type VerifiedFilter = "all" | "true" | "false";
@@ -94,7 +98,9 @@ export default function EntityListPage() {
         minWidth: 100,
         cell: (e) => (
           <span className="text-sm">
-            {e.verified ? getI18nRuntime().i18n.t("common:yes") : getI18nRuntime().i18n.t("common:no")}
+            {e.verified
+              ? getI18nRuntime().i18n.t("common:yes")
+              : getI18nRuntime().i18n.t("common:no")}
           </span>
         ),
       },
@@ -142,7 +148,9 @@ export default function EntityListPage() {
       <SearchablePaginatedTableCard<EntityDTO>
         searchInputId="entity-search"
         searchLabel={getI18nRuntime().i18n.t("admin:entity_search_title")}
-        searchPlaceholder={getI18nRuntime().i18n.t("admin:entity_search_placeholder")}
+        searchPlaceholder={getI18nRuntime().i18n.t(
+          "admin:entity_search_placeholder",
+        )}
         errorLabel={getI18nRuntime().i18n.t("admin:entity_failed_load_list")}
         q={q}
         onQChange={setQ}
@@ -158,7 +166,9 @@ export default function EntityListPage() {
               </Label>
               <Input
                 id="entity-kind"
-                placeholder={getI18nRuntime().i18n.t("admin:entity_kind_filter_placeholder")}
+                placeholder={getI18nRuntime().i18n.t(
+                  "admin:entity_kind_filter_placeholder",
+                )}
                 value={kind}
                 onChange={(e) => {
                   setKind(e.target.value);
@@ -182,12 +192,16 @@ export default function EntityListPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">
-                    {getI18nRuntime().i18n.t("admin:entity_verified_filter_all")}
+                    {getI18nRuntime().i18n.t(
+                      "admin:entity_verified_filter_all",
+                    )}
                   </SelectItem>
                   <SelectItem value="true">
                     {getI18nRuntime().i18n.t("admin:entity_verified")}
                   </SelectItem>
-                  <SelectItem value="false">{getI18nRuntime().i18n.t("common:unverified")}</SelectItem>
+                  <SelectItem value="false">
+                    {getI18nRuntime().i18n.t("common:unverified")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

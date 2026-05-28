@@ -11,7 +11,7 @@ import { RealmCard } from "@/realm/components/RealmCard";
 
 export const ActiveRealmsSection: React.FC = () => {
   const { t } = useTranslation(["page"]);
-const { data, isLoading, error } = useQuery(
+  const { data, isLoading, error } = useQuery(
     realmListQuery({
       isPublic: true,
       sort: { field: "memberCount", order: "desc" },

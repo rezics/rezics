@@ -28,7 +28,7 @@ export const SearchResultList: React.FC<SearchResultListProps> = ({
   renderItem,
 }) => {
   const { t } = useTranslation(["common", "search"]);
-if (isLoading) {
+  if (isLoading) {
     return (
       <div className="py-12 text-center">
         <p className="text-text-secondary">{t("common:loading")}</p>

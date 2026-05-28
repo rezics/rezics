@@ -23,7 +23,7 @@ export function BacklogRemoveConfirmModal({
   isPending,
 }: BacklogRemoveConfirmModalProps) {
   const { t } = useTranslation(["common", "community"]);
-const handleConfirm = async () => {
+  const handleConfirm = async () => {
     await onConfirm();
     onCancel();
   };

@@ -26,7 +26,7 @@ export function MiniAdminActionBar({
   resource = "post",
 }: MiniAdminActionBarProps) {
   const { t } = useTranslation(["common"]);
-const canEdit = useCanEdit({
+  const canEdit = useCanEdit({
     resource,
     ownerUnit: userId ? { user: { unitId: userId } } : undefined,
   });

@@ -39,7 +39,7 @@ export const ShareAction: React.FC<ShareActionProps> = ({
   title,
 }) => {
   const { t } = useTranslation(["common"]);
-const ctx = useReactionBarContext();
+  const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const isPill = ctx.variant === "pill";
   const { canWebShare, handleCopy, handleWebShare } = useShareMenu({

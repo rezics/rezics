@@ -37,7 +37,7 @@ function FooterLink({
 
 export function MainLayoutFooter({ className }: { className?: string }) {
   const { t } = useTranslation(["common", "shell"]);
-const year = new Date().getFullYear();
+  const year = new Date().getFullYear();
 
   return (
     <footer
@@ -127,7 +127,9 @@ const year = new Date().getFullYear();
               aria-label={t("shell:layout_footer_product_aria")}
               className="md:col-span-1"
             >
-              <SectionTitle>{t("shell:layout_footer_product_title")}</SectionTitle>
+              <SectionTitle>
+                {t("shell:layout_footer_product_title")}
+              </SectionTitle>
               <div className="flex flex-col gap-1">
                 <FooterLink href="/book">
                   {t("shell:layout_footer_product_discover")}
@@ -148,7 +150,9 @@ const year = new Date().getFullYear();
               aria-label={t("shell:layout_footer_resources_aria")}
               className="md:col-span-1"
             >
-              <SectionTitle>{t("shell:layout_footer_resources_title")}</SectionTitle>
+              <SectionTitle>
+                {t("shell:layout_footer_resources_title")}
+              </SectionTitle>
               <div className="flex flex-col gap-1">
                 <FooterLink href="/docs">
                   {t("shell:layout_footer_resources_docs")}
@@ -164,7 +168,9 @@ const year = new Date().getFullYear();
 
             {/* Newsletter */}
             <div className="md:col-span-1">
-              <SectionTitle>{t("shell:layout_footer_newsletter_title")}</SectionTitle>
+              <SectionTitle>
+                {t("shell:layout_footer_newsletter_title")}
+              </SectionTitle>
               <p className="text-sm text-text-secondary mb-3">
                 {t("shell:layout_footer_newsletter_description")}
               </p>
@@ -174,7 +180,9 @@ const year = new Date().getFullYear();
               >
                 <Input
                   type="email"
-                  placeholder={t("shell:layout_footer_newsletter_email_placeholder")}
+                  placeholder={t(
+                    "shell:layout_footer_newsletter_email_placeholder",
+                  )}
                   aria-label={t("shell:layout_footer_newsletter_email_aria")}
                   className="h-9"
                 />

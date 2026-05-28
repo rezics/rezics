@@ -26,7 +26,7 @@ import { Route as bookReadLayoutRoute } from "@/routes/book_/$bookId/read/$chapt
 
 export const BookReadChapterPage: React.FC = () => {
   const { t } = useTranslation(["book", "common"]);
-const { bookId, chapterId } = bookReadLayoutRoute.useParams();
+  const { bookId, chapterId } = bookReadLayoutRoute.useParams();
   // `$chapterId` is retained for URL compatibility; it carries a materialized
   // content Unit id in current reader/editor code.
   const contentUnitId = chapterId;

@@ -32,7 +32,8 @@ import { getI18nRuntime } from "@rezics/i18n/runtime";
 /** Extract the best title from the translations array on a UnitDTO. */
 function extractUnitTitle(unit: UnitDTO): string {
   const translations = unit.translations;
-  if (!translations?.length) return getI18nRuntime().i18n.t("admin:unit_no_title");
+  if (!translations?.length)
+    return getI18nRuntime().i18n.t("admin:unit_no_title");
   const primary =
     translations.find((t) => t.language === unit.defaultLanguage) ??
     translations[0];
@@ -307,7 +308,9 @@ export default function UnitsPage() {
   return (
     <Page
       title={
-        isMeiliMode ? getI18nRuntime().i18n.t("admin:unit_list_meili_title") : getI18nRuntime().i18n.t("admin:unit_list_title")
+        isMeiliMode
+          ? getI18nRuntime().i18n.t("admin:unit_list_meili_title")
+          : getI18nRuntime().i18n.t("admin:unit_list_title")
       }
       description={
         isMeiliMode
@@ -317,8 +320,14 @@ export default function UnitsPage() {
     >
       <SearchablePaginatedTableCard<UnitDTO>
         searchInputId="unit-search"
-        searchLabel={isMeiliMode ? getI18nRuntime().i18n.t("common:search") : getI18nRuntime().i18n.t("admin:unit_search_label")}
-        searchPlaceholder={getI18nRuntime().i18n.t("admin:unit_search_placeholder")}
+        searchLabel={
+          isMeiliMode
+            ? getI18nRuntime().i18n.t("common:search")
+            : getI18nRuntime().i18n.t("admin:unit_search_label")
+        }
+        searchPlaceholder={getI18nRuntime().i18n.t(
+          "admin:unit_search_placeholder",
+        )}
         errorLabel={getI18nRuntime().i18n.t("admin:unit_failed_load_list")}
         q={q}
         onQChange={setQ}

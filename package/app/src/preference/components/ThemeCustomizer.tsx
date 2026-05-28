@@ -56,7 +56,7 @@ export const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(["common", "shell"]);
-const customColor = useAppStore((state: any) => state.customColor);
+  const customColor = useAppStore((state: any) => state.customColor);
   const setCustomColor = useAppStore((state: any) => state.setCustomColor);
 
   const [selectedColor, setSelectedColor] = useState(
@@ -212,7 +212,7 @@ const customColor = useAppStore((state: any) => state.customColor);
 // 快速主题切换按钮组件
 export const ThemeQuickToggle: React.FC = () => {
   const { t } = useTranslation(["common", "shell"]);
-const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
     <>

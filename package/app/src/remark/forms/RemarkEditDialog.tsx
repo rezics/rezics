@@ -30,7 +30,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(["common", "page"]);
-const initialRating = (remark.extra as { rating?: number } | null)?.rating;
+  const initialRating = (remark.extra as { rating?: number } | null)?.rating;
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,
   );

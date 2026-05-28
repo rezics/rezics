@@ -13,7 +13,7 @@ const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
 
 export function MiscMenuItems() {
   const { t } = useTranslation(["shell"]);
-const changeLang = (lang: Language) => setLocale(lang);
+  const changeLang = (lang: Language) => setLocale(lang);
 
   return (
     <>

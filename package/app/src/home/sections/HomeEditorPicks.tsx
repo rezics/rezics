@@ -26,7 +26,7 @@ export const HomeEditorPicks: React.FC<HomeEditorPicksProps> = ({
   limit = 8,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedTitle = title ?? t("page:home_sections_editor_picks");
+  const resolvedTitle = title ?? t("page:home_sections_editor_picks");
 
   const { data, isLoading, error } = useQuery(
     bookQueries.list({ start: 0, limit }),

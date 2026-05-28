@@ -18,7 +18,7 @@ export const HorizontalShelfCarousel: React.FC<
   HorizontalShelfCarouselProps
 > = ({ shelves, className }) => {
   const { t } = useTranslation(["entity"]);
-const targetIds = useMemo(
+  const targetIds = useMemo(
     () => shelves.map((s) => s.unitId).filter(Boolean) as string[],
     [shelves],
   );

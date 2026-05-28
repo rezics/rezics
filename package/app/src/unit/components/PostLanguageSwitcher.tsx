@@ -35,7 +35,7 @@ export function PostLanguageSwitcher({
   onAddTranslation,
 }: PostLanguageSwitcherProps) {
   const { t } = useTranslation(["community"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -54,7 +54,9 @@ const navigate = useNavigate();
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs text-text-secondary">{t("community:post_languages")}</span>
+      <span className="text-xs text-text-secondary">
+        {t("community:post_languages")}
+      </span>
       <div className="flex flex-wrap items-center gap-2">
         {orderedSiblings.map((sibling) => {
           const isCurrent = sibling.unitId === currentUnitId;

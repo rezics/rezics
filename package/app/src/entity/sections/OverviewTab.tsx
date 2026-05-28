@@ -9,7 +9,7 @@ interface OverviewTabProps {
 
 export function OverviewTab({ entity, language }: OverviewTabProps) {
   const { t } = useTranslation(["entity"]);
-const tr = getEntityTranslation(entity, language);
+  const tr = getEntityTranslation(entity, language);
   // Per entity detail page spec: do NOT silently fall back to another language;
   // explicit empty-state for the current language.
   const matched = tr?.language === language ? tr : undefined;

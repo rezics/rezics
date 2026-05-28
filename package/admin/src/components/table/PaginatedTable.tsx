@@ -59,7 +59,7 @@ export function PaginatedTable<T>({
   className?: string;
 }) {
   const { t } = useTranslation(["common"]);
-const totalPages = rowsPerPage > 0 ? Math.ceil(count / rowsPerPage) : 0;
+  const totalPages = rowsPerPage > 0 ? Math.ceil(count / rowsPerPage) : 0;
   const [pageInput, setPageInput] = React.useState(() => String(page + 1));
 
   React.useEffect(() => {

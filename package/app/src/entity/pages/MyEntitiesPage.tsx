@@ -9,7 +9,7 @@ import { EntityIdentityRow } from "../components/EntityIdentityRow";
 
 export function MyEntitiesPage() {
   const { t } = useTranslation(["entity"]);
-const currentUserUnitId = useCurrentUserId();
+  const currentUserUnitId = useCurrentUserId();
 
   const { data, isLoading } = useEntityList(
     currentUserUnitId ? { ownerUnitId: currentUserUnitId } : undefined,

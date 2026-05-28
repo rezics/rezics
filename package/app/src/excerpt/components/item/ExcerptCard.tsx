@@ -28,7 +28,7 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["community"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const excerptId = excerpt.id;
 
@@ -117,7 +117,7 @@ const navigate = useNavigate();
 
 function ExcerptCardSource({ source }: { source?: ExcerptSource | string }) {
   const { t } = useTranslation(["community"]);
-if (!source) return <>{t("community:excerpt_card_source_unknown")}</>;
+  if (!source) return <>{t("community:excerpt_card_source_unknown")}</>;
   if (typeof source === "string") return <>{source}</>;
   return <>{source.title}</>;
 }

@@ -15,7 +15,7 @@ export type HomeProps = object;
 
 export const Home: React.FC<HomeProps> = () => {
   const { t } = useTranslation(["page"]);
-const isMobile = useIsMobile();
+  const isMobile = useIsMobile();
 
   return (
     <MainContentContainer className="mb-16 space-y-12 pt-6 md:pt-8">

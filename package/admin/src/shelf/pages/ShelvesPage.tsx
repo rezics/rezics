@@ -11,8 +11,12 @@ import { fmtDate } from "@/utils/format";
 
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
-  if (!translations?.length) return getI18nRuntime().i18n.t("admin:unit_no_title");
-  return translations[0]?.title?.trim() || getI18nRuntime().i18n.t("admin:unit_no_title");
+  if (!translations?.length)
+    return getI18nRuntime().i18n.t("admin:unit_no_title");
+  return (
+    translations[0]?.title?.trim() ||
+    getI18nRuntime().i18n.t("admin:unit_no_title")
+  );
 }
 
 function optionalFilter(value: string) {
@@ -154,7 +158,10 @@ export default function ShelvesPage() {
   );
 
   return (
-    <Page title={getI18nRuntime().i18n.t("admin:shelf_title")} description={getI18nRuntime().i18n.t("admin:shelf_description")}>
+    <Page
+      title={getI18nRuntime().i18n.t("admin:shelf_title")}
+      description={getI18nRuntime().i18n.t("admin:shelf_description")}
+    >
       <SearchablePaginatedTableCard<ShelfDTO>
         searchInputId="shelf-search"
         searchPlaceholder="unit id or CSV"

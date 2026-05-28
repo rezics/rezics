@@ -20,7 +20,7 @@ export function SeedTagChipGroup({
   disabled = false,
 }: SeedTagChipGroupProps) {
   const { t } = useTranslation(["entity"]);
-const chips = useMemo(
+  const chips = useMemo(
     () =>
       SEED_TAG_NAMES.map((name) => {
         const tagId = getSeedTagId(name);
@@ -44,7 +44,9 @@ const chips = useMemo(
 
   return (
     <fieldset className="flex flex-wrap gap-2">
-      <legend className="sr-only">{t("entity:shelf_content_type_tags_legend")}</legend>
+      <legend className="sr-only">
+        {t("entity:shelf_content_type_tags_legend")}
+      </legend>
       {chips.map(({ name, tagId, label }) => {
         const isSelected = selected.has(tagId);
         return (

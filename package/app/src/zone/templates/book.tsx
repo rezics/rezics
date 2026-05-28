@@ -13,7 +13,7 @@ export const BookZoneTemplate: React.FC<ZoneTemplateProps> = ({
   onSearch,
 }) => {
   const { t } = useTranslation(["search"]);
-const search = useSearchQuery({});
+  const search = useSearchQuery({});
   const keywordBind = search.bind("keyword");
   const bgImage = (zone.styling as Record<string, unknown> | null)?.bgImage as
     | string
@@ -47,13 +47,17 @@ const search = useSearchQuery({});
           value={keywordBind.value ?? ""}
           onChange={(v) => keywordBind.onChange(v)}
           onSubmit={() => onSearch?.(search.query.keyword ?? "")}
-          placeholder={t("search:zone_search_books_placeholder", { name: zone.name })}
+          placeholder={t("search:zone_search_books_placeholder", {
+            name: zone.name,
+          })}
         />
       </div>
 
       {/* Book sections */}
       <div>
-        <h2 className="text-lg font-semibold mb-4">{t("search:zone_books_title")}</h2>
+        <h2 className="text-lg font-semibold mb-4">
+          {t("search:zone_books_title")}
+        </h2>
         {/* MOCK: book listing sections with zone.filters pre-applied will be wired here */}
         <p className="text-text-secondary">
           {t("search:zone_book_content_placeholder")}

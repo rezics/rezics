@@ -27,7 +27,7 @@ export interface UserListPageProps {
  */
 export const UserListPage: FC<UserListPageProps> = ({ onUserClick }) => {
   const { t } = useTranslation(["settings"]);
-const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
+  const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,7 +80,9 @@ const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
 
   return (
     <div className="w-11/12 mx-auto mt-16">
-      <h3 className="text-3xl font-bold mb-8">{t("settings:user_list_title")}</h3>
+      <h3 className="text-3xl font-bold mb-8">
+        {t("settings:user_list_title")}
+      </h3>
 
       <div className="mb-8 relative">
         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
@@ -98,7 +100,9 @@ const [users, setUsers] = useState<Omit<UserDTO, "email">[]>([]);
 
       {!isLoading && !error && users.length === 0 && (
         <div className="flex items-center justify-center h-64">
-          <h6 className="text-lg text-text-secondary">{t("settings:user_none_found")}</h6>
+          <h6 className="text-lg text-text-secondary">
+            {t("settings:user_none_found")}
+          </h6>
         </div>
       )}
 

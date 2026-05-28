@@ -7,14 +7,16 @@ interface WorksTabProps {
 
 export function WorksTab({ entityUnitId }: WorksTabProps) {
   const { t } = useTranslation(["entity"]);
-const { works, isLoading } = useEntityWorks(entityUnitId);
+  const { works, isLoading } = useEntityWorks(entityUnitId);
   if (isLoading) {
     return (
       <p className="text-sm text-text-secondary">{t("entity:loading_works")}</p>
     );
   }
   if (works.length === 0) {
-    return <p className="text-sm text-text-secondary">{t("entity:no_works")}</p>;
+    return (
+      <p className="text-sm text-text-secondary">{t("entity:no_works")}</p>
+    );
   }
   return (
     <ul className="flex flex-col gap-2">

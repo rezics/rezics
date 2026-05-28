@@ -56,7 +56,7 @@ const SortableLangItem: FC<SortableLangItemProps> = ({
   disabled,
 }) => {
   const { t } = useTranslation(["common", "settings"]);
-const {
+  const {
     attributes,
     listeners,
     setNodeRef,
@@ -106,7 +106,7 @@ const {
 
 export const SettingsPreferencesSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-useRequireAuth();
+  useRequireAuth();
 
   const { data: settings, isLoading: settingsLoading } = useQuery(
     userQueries.settings(),

@@ -35,7 +35,7 @@ export function ActiveProgressModal({
   isPending,
 }: ActiveProgressModalProps) {
   const { t } = useTranslation(["common", "community"]);
-const [progressPct, setProgressPct] = useState<number>(
+  const [progressPct, setProgressPct] = useState<number>(
     Math.round((initialProgress ?? 0) * 100),
   );
   const [nodeId, setNodeId] = useState<string | undefined>(
@@ -60,7 +60,9 @@ const [progressPct, setProgressPct] = useState<number>(
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("community:progress_status_active_modal_title")}</DialogTitle>
+          <DialogTitle>
+            {t("community:progress_status_active_modal_title")}
+          </DialogTitle>
           <DialogDescription>
             {t("community:progress_status_active_modal_description")}
           </DialogDescription>
@@ -69,7 +71,8 @@ const [progressPct, setProgressPct] = useState<number>(
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="progress-status-pct">
-              {t("community:progress_status_active_modal_progress_label")} · {progressPct}%
+              {t("community:progress_status_active_modal_progress_label")} ·{" "}
+              {progressPct}%
             </Label>
             <input
               id="progress-status-pct"
@@ -84,7 +87,9 @@ const [progressPct, setProgressPct] = useState<number>(
           </div>
 
           <div className="grid gap-2">
-            <Label>{t("community:progress_status_active_modal_chapter_label")}</Label>
+            <Label>
+              {t("community:progress_status_active_modal_chapter_label")}
+            </Label>
             <ChapterPicker
               bookUnitId={bookUnitId}
               value={nodeId}

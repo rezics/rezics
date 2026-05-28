@@ -18,7 +18,7 @@ import {
 
 export const BookEditChapterListPage: React.FC = () => {
   const { t } = useTranslation(["book", "common"]);
-const { bookId } = bookEditLayoutRoute.useParams();
+  const { bookId } = bookEditLayoutRoute.useParams();
   const queryClient = useQueryClient();
   const editorRef = useRef<BookTocEditorHandle | null>(null);
   const [tab, setTab] = useState<"editor" | "json">("editor");

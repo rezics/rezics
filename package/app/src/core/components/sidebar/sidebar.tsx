@@ -27,7 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDragging = false,
 }) => {
   const { t } = useTranslation(["shell"]);
-// handle escape key
+  // handle escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (mode === "fixed" && isOpen && e.key === "Escape") {

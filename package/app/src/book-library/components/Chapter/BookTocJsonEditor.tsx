@@ -28,7 +28,7 @@ export const BookTocJsonEditor: React.FC<BookTocJsonEditorProps> = ({
   bookId,
 }) => {
   const { t } = useTranslation(["book", "common"]);
-const { data, isLoading, error } = useQuery(
+  const { data, isLoading, error } = useQuery(
     bookQueries.contentStructure(bookId),
   );
 

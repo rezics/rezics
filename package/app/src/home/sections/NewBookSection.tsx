@@ -23,7 +23,7 @@ export const NewBookSection: React.FC<NewBookSectionProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["page"]);
-const [tab, setTab] = React.useState<TabKey>("latest");
+  const [tab, setTab] = React.useState<TabKey>("latest");
   const navigate = useNavigate();
 
   const { items = [], isLoading } = useHomeBooks(limit);

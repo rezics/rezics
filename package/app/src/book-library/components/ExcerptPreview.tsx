@@ -16,7 +16,7 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   excerptNumber = 3,
 }) => {
   const { t } = useTranslation(["common"]);
-const { data, isLoading, error } = useQuery(
+  const { data, isLoading, error } = useQuery(
     postQueries.byTarget(id, {
       kind: PostKind.EXCERPT,
       limit: excerptNumber,

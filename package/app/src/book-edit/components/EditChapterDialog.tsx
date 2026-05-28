@@ -1,3 +1,13 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  book_chapter_status_draft: () =>
+    getI18nRuntime().i18n.t("book:chapter_status_draft"),
+  book_chapter_status_published: () =>
+    getI18nRuntime().i18n.t("book:chapter_status_published"),
+  book_chapter_status_archived: () =>
+    getI18nRuntime().i18n.t("book:chapter_status_archived"),
+} as const;
 import type { ContentRating } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";
@@ -47,7 +57,7 @@ export function EditChapterDialog({
   onSave,
 }: EditChapterDialogProps) {
   const { t } = useTranslation(["book", "common"]);
-const [title, setTitle] = useState("");
+  const [title, setTitle] = useState("");
   const [status, setStatus] = useState<PublishStatus>("DRAFT");
   const [rating, setRating] = useState<ContentRating>("GENERAL");
 

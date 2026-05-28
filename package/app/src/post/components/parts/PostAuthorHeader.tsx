@@ -19,7 +19,7 @@ export const PostAuthorHeader: React.FC<PostAuthorHeaderProps> = ({
   avatarClassName,
 }) => {
   const { t } = useTranslation(["community"]);
-const dateStr = post.createdAt
+  const dateStr = post.createdAt
     ? new Date(String(post.createdAt)).toLocaleDateString()
     : "";
   const nameClass =
@@ -73,7 +73,7 @@ export function PostAuthorAvatar({
   className?: string;
 }) {
   const { t } = useTranslation(["community"]);
-const author = post.author?.unitId ? post.author : undefined;
+  const author = post.author?.unitId ? post.author : undefined;
   const avatarClassName = [size === "compact" ? "size-8" : "size-9", className]
     .filter(Boolean)
     .join(" ");
@@ -114,7 +114,7 @@ function AnonymousAuthor({
   avatarClassName,
 }: AnonymousAuthorProps) {
   const { t } = useTranslation(["community"]);
-return (
+  return (
     <span className="inline-flex min-w-0 items-center gap-2">
       {showAvatar ? (
         <Avatar
@@ -126,7 +126,9 @@ return (
           <AvatarFallback>?</AvatarFallback>
         </Avatar>
       ) : null}
-      <span className={nameClassName}>{t("community:post_anonymous_author")}</span>
+      <span className={nameClassName}>
+        {t("community:post_anonymous_author")}
+      </span>
     </span>
   );
 }

@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   getSystemShelfMissingKindKey,
   useSystemShelfRecovery,
@@ -29,10 +30,12 @@ export function useSystemShelfRecoveryToast(): SystemShelfRecoveryToast {
   const showRecoveryToast = (kindKey: SystemShelfKindKey): void => {
     const kindLabel = systemShelfKindLabel(kindKey);
     const toastId = toast.error(
-      shelf_system_recoveryToast({ kind: kindLabel }),
+      getI18nRuntime().i18n.t("entity:shelf_system_recoveryToast", {
+        kind: kindLabel,
+      }),
       {
         action: {
-          label: shelf_system_recoveryRetry(),
+          label: getI18nRuntime().i18n.t("entity:shelf_system_recoveryRetry"),
           onClick: () => {
             recovery.ensure(kindKey).then(
               () => toast.dismiss(toastId),

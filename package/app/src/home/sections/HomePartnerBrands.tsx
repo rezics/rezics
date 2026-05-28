@@ -20,7 +20,7 @@ export const HomePartnerBrands: React.FC<HomePartnerBrandsProps> = ({
   title,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedTitle = title ?? t("page:home_sections_partner_brands");
+  const resolvedTitle = title ?? t("page:home_sections_partner_brands");
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-3">

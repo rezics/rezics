@@ -215,7 +215,7 @@ function DashboardOperationsSummary({
 
 export default function DashboardPage() {
   const { t } = useTranslation(["admin"]);
-const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());
+  const { data: stats } = useSuspenseQuery(adminStatsQueryOptions());
   const { data: dashboardSummary } = useSuspenseQuery(
     adminDashboardSummaryQueryOptions(),
   );

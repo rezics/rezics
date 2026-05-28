@@ -36,7 +36,7 @@ const EXTERNAL_ITEMS_PER_PAGE = 20;
 
 function FollowUserList({ users }: { users: SimpleUser[] }) {
   const { t } = useTranslation(["settings"]);
-if (users.length === 0) {
+  if (users.length === 0) {
     return (
       <div className="py-16 text-center text-text-secondary">
         {t("settings:user_empty")}
@@ -75,7 +75,7 @@ export const FollowInfoPage: React.FC<FollowInfoPageProps> = ({
   isCurrentUser = false,
 }) => {
   const { t } = useTranslation(["settings"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const currentUser = useUserProfileStore((state) => state.user);
   const resolvedUnitId = useMemo(
     () => unitId || (isCurrentUser ? currentUser?.unitId : unitId),
@@ -145,7 +145,9 @@ const navigate = useNavigate();
   if (!resolvedUnitId) {
     return (
       <div className="w-full max-w-3xl mx-auto mt-32 text-center">
-        <h6 className="text-base font-semibold">{t("settings:user_cannot_resolve")}</h6>
+        <h6 className="text-base font-semibold">
+          {t("settings:user_cannot_resolve")}
+        </h6>
         <p className="text-sm text-text-secondary">
           {t("settings:user_cannot_resolve_description")}
         </p>

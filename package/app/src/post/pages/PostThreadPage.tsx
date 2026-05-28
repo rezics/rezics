@@ -14,7 +14,7 @@ import { PostTreeSection } from "../sections/PostTreeSection";
 
 export const PostThreadPage: React.FC = () => {
   const { t } = useTranslation(["common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { rootPostUnitId } = useParams({ strict: false }) as {
     rootPostUnitId: string;
   };

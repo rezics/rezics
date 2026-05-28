@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { useAlertStore } from "@app/states/windowAlertStore";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
@@ -109,7 +110,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
   autoplayIntervalNum = 3000,
 }) => {
   const { t } = useTranslation(["page"]);
-const maxHeightClass = "max-h-[250px]";
+  const maxHeightClass = "max-h-[250px]";
 
   const { data } = useQuery(echoKvGetQuery("home_carousel"));
   type CarouselProduct = {
@@ -133,7 +134,11 @@ const maxHeightClass = "max-h-[250px]";
         t("page:home_carousel_alert_parse_failed", { error: String(error) }),
       );
     }
-  }, [data, showAlert, m.page_home_carousel_alert_parse_failed]);
+  }, [
+    data,
+    showAlert,
+    getI18nRuntime().i18n.t("page:home_carousel_alert_parse_failed"),
+  ]);
 
   // autoplay using carousel api
   useEmblaAutoplay(carouselApi, {

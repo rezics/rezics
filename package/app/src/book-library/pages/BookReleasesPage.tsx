@@ -24,7 +24,7 @@ import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
 export const BookReleasesPage: React.FC = () => {
   const { t } = useTranslation(["book"]);
-const { bookId } = useParams({ strict: false }) as { bookId: string };
+  const { bookId } = useParams({ strict: false }) as { bookId: string };
   const { data } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),

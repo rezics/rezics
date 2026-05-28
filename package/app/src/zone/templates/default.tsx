@@ -12,7 +12,7 @@ export const DefaultZoneTemplate: React.FC<ZoneTemplateProps> = ({
   onSearch,
 }) => {
   const { t } = useTranslation(["search"]);
-const search = useSearchQuery({});
+  const search = useSearchQuery({});
   const keywordBind = search.bind("keyword");
   const bgImage = (zone.styling as Record<string, unknown> | null)?.bgImage as
     | string
@@ -56,7 +56,9 @@ const search = useSearchQuery({});
           {t("search:zone_latest_content")}
         </h2>
         {/* MOCK: content sections will be wired when zone-specific content queries exist */}
-        <p className="text-text-secondary">{t("search:zone_content_placeholder")}</p>
+        <p className="text-text-secondary">
+          {t("search:zone_content_placeholder")}
+        </p>
       </div>
     </div>
   );

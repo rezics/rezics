@@ -6,7 +6,7 @@ import { useAppStore } from "@/app/states/appStore";
 
 export function ThemeToggler() {
   const { t } = useTranslation(["shell"]);
-const themeMode = useAppStore((state) => state.theme);
+  const themeMode = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
 
   const toggleTheme = () => {

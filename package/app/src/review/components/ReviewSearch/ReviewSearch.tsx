@@ -28,7 +28,7 @@ export const ReviewSearch: React.FC<ReviewSearchProps> = ({
   keywordPlaceholder,
 }) => {
   const { t } = useTranslation(["community", "search"]);
-const keyword = bind("keyword");
+  const keyword = bind("keyword");
   const tags = bind("tags");
 
   const rendered: (keyof SearchQuery)[] = ["keyword", "tags"];
@@ -41,7 +41,9 @@ const keyword = bind("keyword");
         onPatch={(p) => patch(p)}
         onSubmit={onSubmit}
         middleware={middleware}
-        placeholder={keywordPlaceholder ?? t("community:review_search_placeholder")}
+        placeholder={
+          keywordPlaceholder ?? t("community:review_search_placeholder")
+        }
       />
       <TagPicker
         value={tags.value ?? []}

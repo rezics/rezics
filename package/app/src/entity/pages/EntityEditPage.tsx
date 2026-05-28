@@ -46,7 +46,7 @@ function getExistingLanguages(entity: EntityDTO | undefined): string[] {
 
 export function EntityEditPage({ unitId }: EntityEditPageProps) {
   const { t } = useTranslation(["common", "entity"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const permission = useServerPermission();
   const canEdit = permission ? BasicAdminPermission(permission) : false;
@@ -291,7 +291,9 @@ const navigate = useNavigate();
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="entity-summary">{t("entity:summary_label")}</Label>
+              <Label htmlFor="entity-summary">
+                {t("entity:summary_label")}
+              </Label>
               <Textarea
                 id="entity-summary"
                 value={summary}

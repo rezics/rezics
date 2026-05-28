@@ -25,7 +25,7 @@ export function ExcerptSourcePicker({
   language,
 }: ExcerptSourcePickerProps) {
   const { t } = useTranslation(["common", "community"]);
-const title = value?.title ?? "";
+  const title = value?.title ?? "";
   const linkedUnitId = value?.mode === "unit" ? value.unitId : undefined;
   const urlValue = value?.mode === "url" ? value.url : "";
   const titlePristineRef = useRef<boolean>(true);

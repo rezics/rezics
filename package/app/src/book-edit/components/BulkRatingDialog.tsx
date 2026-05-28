@@ -28,7 +28,7 @@ export function BulkRatingDialog({
   onConfirm,
 }: BulkRatingDialogProps) {
   const { t } = useTranslation(["book", "common"]);
-return (
+  return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-xs">
         <DialogHeader>

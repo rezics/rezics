@@ -29,7 +29,7 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
   limit = 20,
 }) => {
   const { t } = useTranslation(["community"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const filters = {
     workRoles,
     kind,
@@ -62,7 +62,9 @@ const navigate = useNavigate();
 
   if (posts.length === 0) {
     return (
-      <p className="text-sm text-text-secondary py-4">{t("community:discussion_empty")}</p>
+      <p className="text-sm text-text-secondary py-4">
+        {t("community:discussion_empty")}
+      </p>
     );
   }
 

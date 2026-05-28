@@ -18,7 +18,7 @@ import { Link } from "@/shared/ui/link";
 
 export default function UserCreatePage() {
   const { t } = useTranslation(["admin", "common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");

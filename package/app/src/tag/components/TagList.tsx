@@ -64,7 +64,7 @@ export const TagList: React.FC<{
   autoSelectFirst?: boolean;
 }> = ({ tags, className, autoSelectFirst }) => {
   const { t } = useTranslation(["community"]);
-const [activeId, setActiveId] = useState<string | null>(
+  const [activeId, setActiveId] = useState<string | null>(
     autoSelectFirst && tags.length > 0 ? tags[0].tagUnitId : null,
   );
   const activeTag = tags.find((t) => t.tagUnitId === activeId) || null;
@@ -86,7 +86,9 @@ const [activeId, setActiveId] = useState<string | null>(
   if (tags.length === 0) {
     return (
       <div className={className}>
-        <p className="text-sm text-text-secondary">{t("community:tag_empty")}</p>
+        <p className="text-sm text-text-secondary">
+          {t("community:tag_empty")}
+        </p>
       </div>
     );
   }

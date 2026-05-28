@@ -20,7 +20,7 @@ export function SearchablePaginatedTableCard<T>({
   title,
   description,
   errorLabel,
-  searchLabel = i18nMessages.getI18nRuntime().i18n.t("common:search"),
+  searchLabel = getI18nRuntime().i18n.t("common:search"),
   searchPlaceholder,
   searchInputId,
   q,
@@ -64,7 +64,7 @@ export function SearchablePaginatedTableCard<T>({
   onRowsPerPageChange: (nextRowsPerPage: number) => void;
 }) {
   const { t } = useTranslation(["common"]);
-const fallbackSearchId = React.useId();
+  const fallbackSearchId = React.useId();
   const inputId = searchInputId ?? fallbackSearchId;
 
   return (

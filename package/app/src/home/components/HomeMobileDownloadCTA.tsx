@@ -4,7 +4,7 @@ import type React from "react";
 
 export const HomeMobileDownloadCTA: React.FC = () => {
   const { t } = useTranslation(["shell"]);
-return (
+  return (
     <div className="w-full rounded border p-4 flex items-center justify-between bg-gray-50">
       <div>
         <p className="text-base font-medium mb-1">
@@ -15,8 +15,12 @@ return (
         </p>
       </div>
       <div className="flex gap-2">
-        <Button variant="default">{t("shell:home_mobile_cta_app_store")}</Button>
-        <Button variant="outline">{t("shell:home_mobile_cta_google_play")}</Button>
+        <Button variant="default">
+          {t("shell:home_mobile_cta_app_store")}
+        </Button>
+        <Button variant="outline">
+          {t("shell:home_mobile_cta_google_play")}
+        </Button>
       </div>
     </div>
   );

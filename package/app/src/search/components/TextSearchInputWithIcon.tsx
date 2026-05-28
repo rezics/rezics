@@ -14,7 +14,7 @@ export const TextSearchInputWithIcon = ({
   placeholder?: string;
 }) => {
   const { t } = useTranslation(["common"]);
-const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(defaultValue);
 
   return (
     <div className="flex items-center gap-2">

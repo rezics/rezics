@@ -25,7 +25,7 @@ function firstText(
       if (found) return found;
       continue;
     }
-    if (value && value.trim() !== "") return value;
+    if (typeof value === "string" && value.trim() !== "") return value;
   }
   return "";
 }

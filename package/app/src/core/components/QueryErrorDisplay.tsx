@@ -13,7 +13,7 @@ export function QueryErrorDisplay({
   className,
 }: QueryErrorDisplayProps) {
   const { t } = useTranslation(["common"]);
-const [detailOpen, setDetailOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   if (!error) return null;
 

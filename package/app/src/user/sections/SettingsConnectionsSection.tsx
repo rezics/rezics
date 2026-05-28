@@ -21,7 +21,7 @@ const PROVIDERS: { id: AuthProvider["id"]; name: string }[] = [
 
 export const SettingsConnectionsSection: FC = () => {
   const { t } = useTranslation(["settings"]);
-useRequireAuth();
+  useRequireAuth();
 
   const { data: sessionState, isLoading } = useQuery(
     authQueries.sessionState(),

@@ -70,7 +70,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_content_index_initialized"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_content_index_initialized"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -80,7 +82,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_feedbacks_index_initialized"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_feedbacks_index_initialized"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -90,7 +94,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_users_index_initialized"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_users_index_initialized"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -100,7 +106,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_posts_index_initialized"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_posts_index_initialized"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -110,7 +118,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_realms_index_initialized"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_realms_index_initialized"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -120,7 +130,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_entities_index_initialized"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_entities_index_initialized"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -148,14 +160,20 @@ export function MeiliPage() {
 
   const syncUsersMutation = meiliAdminMutations.useSyncUsers({
     onSuccess: () => {
-      setMessage({ type: "success", text: getI18nRuntime().i18n.t("admin:meili_users_sync_started") });
+      setMessage({
+        type: "success",
+        text: getI18nRuntime().i18n.t("admin:meili_users_sync_started"),
+      });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
   const syncPostsMutation = meiliAdminMutations.useSyncPosts({
     onSuccess: () => {
-      setMessage({ type: "success", text: getI18nRuntime().i18n.t("admin:meili_posts_sync_started") });
+      setMessage({
+        type: "success",
+        text: getI18nRuntime().i18n.t("admin:meili_posts_sync_started"),
+      });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
@@ -184,7 +202,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_all_content_deleted"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_content_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -194,7 +214,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_all_feedbacks_deleted"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_feedbacks_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -204,7 +226,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_all_users_deleted"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_users_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -214,7 +238,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_all_posts_deleted"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_posts_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -224,7 +250,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_all_realms_deleted"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_realms_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -234,7 +262,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_all_entities_deleted"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_entities_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -244,7 +274,9 @@ export function MeiliPage() {
     onSuccess: (res) => {
       setMessage({
         type: "success",
-        text: res.message || getI18nRuntime().i18n.t("admin:meili_all_indexes_deleted"),
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_indexes_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -385,7 +417,9 @@ export function MeiliPage() {
       id: "content",
       label: getI18nRuntime().i18n.t("admin:meili_delete_all_content"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_deleting"),
-      confirmLabel: getI18nRuntime().i18n.t("admin:meili_delete_all_content_confirm"),
+      confirmLabel: getI18nRuntime().i18n.t(
+        "admin:meili_delete_all_content_confirm",
+      ),
       isPending: deleteAllContentMutation.isPending,
       onConfirm: () => deleteAllContentMutation.mutate(),
     },
@@ -393,7 +427,9 @@ export function MeiliPage() {
       id: "feedbacks",
       label: getI18nRuntime().i18n.t("admin:meili_delete_all_feedbacks"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_deleting"),
-      confirmLabel: getI18nRuntime().i18n.t("admin:meili_delete_all_feedbacks_confirm"),
+      confirmLabel: getI18nRuntime().i18n.t(
+        "admin:meili_delete_all_feedbacks_confirm",
+      ),
       isPending: deleteAllFeedbacksMutation.isPending,
       onConfirm: () => deleteAllFeedbacksMutation.mutate(),
     },
@@ -401,7 +437,9 @@ export function MeiliPage() {
       id: "users",
       label: getI18nRuntime().i18n.t("admin:meili_delete_all_users"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_deleting"),
-      confirmLabel: getI18nRuntime().i18n.t("admin:meili_delete_all_users_confirm"),
+      confirmLabel: getI18nRuntime().i18n.t(
+        "admin:meili_delete_all_users_confirm",
+      ),
       isPending: deleteAllUsersMutation.isPending,
       onConfirm: () => deleteAllUsersMutation.mutate(),
     },
@@ -409,7 +447,9 @@ export function MeiliPage() {
       id: "posts",
       label: getI18nRuntime().i18n.t("admin:meili_delete_all_posts"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_deleting"),
-      confirmLabel: getI18nRuntime().i18n.t("admin:meili_delete_all_posts_confirm"),
+      confirmLabel: getI18nRuntime().i18n.t(
+        "admin:meili_delete_all_posts_confirm",
+      ),
       isPending: deleteAllPostsMutation.isPending,
       onConfirm: () => deleteAllPostsMutation.mutate(),
     },
@@ -417,7 +457,9 @@ export function MeiliPage() {
       id: "realms",
       label: getI18nRuntime().i18n.t("admin:meili_delete_all_realms"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_deleting"),
-      confirmLabel: getI18nRuntime().i18n.t("admin:meili_delete_all_realms_confirm"),
+      confirmLabel: getI18nRuntime().i18n.t(
+        "admin:meili_delete_all_realms_confirm",
+      ),
       isPending: deleteAllRealmsMutation.isPending,
       onConfirm: () => deleteAllRealmsMutation.mutate(),
     },
@@ -425,7 +467,9 @@ export function MeiliPage() {
       id: "entities",
       label: getI18nRuntime().i18n.t("admin:meili_delete_all_entities"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_deleting"),
-      confirmLabel: getI18nRuntime().i18n.t("admin:meili_delete_all_entities_confirm"),
+      confirmLabel: getI18nRuntime().i18n.t(
+        "admin:meili_delete_all_entities_confirm",
+      ),
       isPending: deleteAllEntitiesMutation.isPending,
       onConfirm: () => deleteAllEntitiesMutation.mutate(),
     },
@@ -440,7 +484,9 @@ export function MeiliPage() {
           {isHealthLoading ? (
             <div className="flex items-center gap-2 text-sm text-text-secondary">
               <Spinner size="sm" />
-              <span>{getI18nRuntime().i18n.t("admin:meili_checking_status")}</span>
+              <span>
+                {getI18nRuntime().i18n.t("admin:meili_checking_status")}
+              </span>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-sm">

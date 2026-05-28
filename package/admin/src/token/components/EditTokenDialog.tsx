@@ -37,7 +37,7 @@ export const EditTokenDialog: FC<EditTokenDialogProps> = ({
   error,
 }) => {
   const { t } = useTranslation(["admin", "common"]);
-const [name, setName] = useState("");
+  const [name, setName] = useState("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [scopes, setScopes] = useState<Record<string, string[]>>({});
 

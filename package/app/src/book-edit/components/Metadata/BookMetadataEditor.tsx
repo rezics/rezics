@@ -94,7 +94,7 @@ export const BookMetadataEditor: React.FC<BookMetadataEditorProps> = ({
   disabled,
 }) => {
   const { t } = useTranslation(["book", "common"]);
-const currentIsbn = value?.isbn13 ?? "";
+  const currentIsbn = value?.isbn13 ?? "";
   const currentCoverUrl = value?.coverUrl ?? "";
   const currentPageCount = value?.pageCount ?? "";
   const currentTextLength = value?.textLength ?? "";
@@ -240,7 +240,7 @@ const currentIsbn = value?.isbn13 ?? "";
 
 export function IsLicensedInfo({ tooltipTitle }: { tooltipTitle?: string }) {
   const { t } = useTranslation(["book", "common"]);
-return (
+  return (
     <div className="flex items-center gap-1 whitespace-nowrap">
       <span>{t("book:flags_licensed")}</span>
       <TooltipProvider>

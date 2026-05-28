@@ -18,7 +18,7 @@ import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
 const CommunitySidebar: React.FC = () => {
   const { t } = useTranslation(["book", "page"]);
-return (
+  return (
     <div className="bg-surface-elevated p-4 border border-border-whisper rounded-md">
       <h3 className="text-base font-semibold mb-2">
         {t("page:book_tabs_community")}

@@ -20,7 +20,7 @@ export const TranslationLanguageBar: React.FC<TranslationLanguageBarProps> = ({
   hasAvailable,
 }) => {
   const { t } = useTranslation(["page"]);
-return (
+  return (
     <UnitTranslationLanguageBar
       existingLanguages={existingLanguages}
       selectedLanguage={selectedLanguage}

@@ -5,7 +5,7 @@ import { logout } from "@/user/models/handler";
 
 export function PendingVerificationSection() {
   const { t } = useTranslation(["auth"]);
-const handleLogout = async () => {
+  const handleLogout = async () => {
     await logout();
   };
 

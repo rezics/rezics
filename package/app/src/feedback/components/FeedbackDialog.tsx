@@ -26,7 +26,7 @@ const FeedbackDialog: React.FC<FeedbackDialogProps> = ({
   defaultValues,
 }) => {
   const { t } = useTranslation(["community"]);
-return (
+  return (
     <Dialog
       open={open}
       onOpenChange={(o) => {

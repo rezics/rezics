@@ -3,7 +3,7 @@ import type React from "react";
 
 export const BookHomeHeroSection: React.FC = () => {
   const { t } = useTranslation(["page"]);
-return (
+  return (
     <div>
       <div className="space-y-2 mb-4">
         <p className="text-[10px] uppercase tracking-[0.35em] text-primary/80">

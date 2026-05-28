@@ -57,7 +57,7 @@ export function RealmRuleSummaryCard({
   empty = "hidden",
 }: RealmRuleSummaryCardProps) {
   const { t } = useTranslation(["common", "entity"]);
-const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const resolvedQuery = useQuery(realmRuleResolvedQuery(realmUnitId));
   const postUnitId =
     resolvedQuery.data?.sourceRulePostUnitId ??

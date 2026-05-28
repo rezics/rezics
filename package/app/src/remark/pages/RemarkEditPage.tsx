@@ -12,7 +12,7 @@ interface RemarkEditPageProps {
 
 export const RemarkEditPage: React.FC<RemarkEditPageProps> = ({ reviewId }) => {
   const { t } = useTranslation(["common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { data, isLoading, error } = useQuery(postQueries.detail(reviewId));
 
   if (isLoading) return <div>{t("common:loading")}</div>;

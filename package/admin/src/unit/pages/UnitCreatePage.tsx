@@ -20,7 +20,7 @@ import { Link } from "@/shared/ui/link";
 
 export default function UnitCreatePage() {
   const { t } = useTranslation(["admin", "common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const [error, setError] = React.useState<string | null>(null);
 
   const meQuery = useQuery(userQueries.me());

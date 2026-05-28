@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = React.memo(
     disableDrawerToggle = false,
   }) => {
     const { t } = useTranslation(["common"]);
-const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
+    const sidebarOpen = useLayoutStore((s) => s.sidebarOpen);
     const drawerWidth = useLayoutStore((s) => s.drawerWidth);
     const toggleSidebar = useLayoutStore((s) => s.toggleSidebar);
 

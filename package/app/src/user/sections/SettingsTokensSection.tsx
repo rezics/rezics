@@ -60,7 +60,7 @@ function setToScopes(set: Set<string>): ApiTokenScopes {
 
 export const SettingsTokensSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-useRequireAuth();
+  useRequireAuth();
 
   const { data, isLoading } = useQuery(tokenQueries.list());
   const updateToken = useUpdateTokenMutation();

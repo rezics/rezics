@@ -15,7 +15,7 @@ export const PinboardEmptyState: React.FC<PinboardEmptyStateProps> = ({
   action,
 }) => {
   const { t } = useTranslation(["entity"]);
-return (
+  return (
     <EmptyState
       icon={<PushPinRoundedIcon fontSize="large" />}
       title={title ?? t("entity:pinboard_empty_title")}

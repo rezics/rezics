@@ -106,7 +106,10 @@ export function useStatusTransition(
       if (progressFailed && shelfFailed) {
         showRetryToast(
           `${unitId}:both`,
-          progress_status_toast_both_failed,
+          () =>
+            getI18nRuntime().i18n.t(
+              "community:progress_status_toast_both_failed",
+            ),
           async () => {
             await Promise.allSettled([retryProgress(), retryShelf()]);
           },
@@ -114,13 +117,19 @@ export function useStatusTransition(
       } else if (progressFailed) {
         showRetryToast(
           `${unitId}:progress`,
-          progress_status_toast_progress_failed,
+          () =>
+            getI18nRuntime().i18n.t(
+              "community:progress_status_toast_progress_failed",
+            ),
           retryProgress,
         );
       } else if (shelfFailed) {
         showRetryToast(
           `${unitId}:shelf`,
-          progress_status_toast_shelf_failed,
+          () =>
+            getI18nRuntime().i18n.t(
+              "community:progress_status_toast_shelf_failed",
+            ),
           retryShelf,
         );
       }

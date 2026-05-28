@@ -90,7 +90,9 @@ function buildChips(
     for (const kind of visibleKinds) {
       out.push({
         key: `postKind:${kind}`,
-        label: getI18nRuntime().i18n.t("search:chip_post_kind", { value: kind }),
+        label: getI18nRuntime().i18n.t("search:chip_post_kind", {
+          value: kind,
+        }),
         remove: {
           postKind: (query.postKind ?? []).filter(
             (k) => k !== kind,
@@ -120,7 +122,9 @@ function buildChips(
   ) {
     out.push({
       key: `realm:${query.realm.slug}`,
-      label: getI18nRuntime().i18n.t("search:chip_realm", { value: query.realm.slug }),
+      label: getI18nRuntime().i18n.t("search:chip_realm", {
+        value: query.realm.slug,
+      }),
       remove: { realm: undefined },
     });
   }
@@ -147,7 +151,9 @@ function buildChips(
     out.push({
       key: `licensed:${query.isLicensed}`,
       label: getI18nRuntime().i18n.t("search:chip_licensed", {
-        value: query.isLicensed ? getI18nRuntime().i18n.t("common:yes") : getI18nRuntime().i18n.t("common:no"),
+        value: query.isLicensed
+          ? getI18nRuntime().i18n.t("common:yes")
+          : getI18nRuntime().i18n.t("common:no"),
       }),
       remove: { isLicensed: undefined },
     });

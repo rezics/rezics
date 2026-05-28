@@ -10,7 +10,7 @@ import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 
 export function ReviewSearchPage() {
   const { t } = useTranslation(["community"]);
-const search = useSearchQuery({});
+  const search = useSearchQuery({});
   const [start, setStart] = useState(0);
   const limit = 20;
   const keyword = search.query.keyword ?? "";
@@ -27,7 +27,9 @@ const search = useSearchQuery({});
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{t("community:review_search_title")}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">
+        {t("community:review_search_title")}
+      </h1>
 
       <div className="mb-6">
         <KeywordInput

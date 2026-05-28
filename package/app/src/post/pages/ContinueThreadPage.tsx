@@ -16,7 +16,7 @@ import { PostTreeList } from "../sections/PostTreeList";
 
 export const ContinueThreadPage: React.FC = () => {
   const { t } = useTranslation(["common", "community"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { rootPostUnitId, unitId } = useParams({ strict: false }) as {
     rootPostUnitId: string;
     unitId: string;

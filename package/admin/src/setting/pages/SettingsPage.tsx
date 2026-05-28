@@ -24,7 +24,7 @@ const LANGUAGE_OPTIONS = Object.values(LANGUAGES);
 
 export default function SettingsPage() {
   const { t } = useTranslation(["admin"]);
-const [dark, setDark] = React.useState(false);
+  const [dark, setDark] = React.useState(false);
   const locale = normalizeLanguage(useLocale()) ?? DEFAULT_LANGUAGE;
 
   const handleLanguageChange = (value: string | null) => {

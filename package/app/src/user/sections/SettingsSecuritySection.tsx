@@ -22,7 +22,7 @@ import { useRequireAuth } from "@/user/pages/useAuth";
 
 export const SettingsSecuritySection: FC = () => {
   const { t } = useTranslation(["settings"]);
-useRequireAuth();
+  useRequireAuth();
   const { data: sessionState } = useQuery(authQueries.sessionState());
   const { data: sessionsData, isLoading: sessionsLoading } = useQuery(
     authQueries.sessions(),

@@ -17,14 +17,14 @@ const ContentSidebar: React.FC<{ textLength: number; pageCount?: number }> = ({
   pageCount,
 }) => {
   const { t } = useTranslation(["book"]);
-return (
+  return (
     <div className="bg-surface-elevated p-4 border border-border-whisper rounded-md">
       <h3 className="text-base font-semibold mb-2">
         {t("book:content_reading")}
       </h3>
       <div className="flex flex-col gap-2">
         <p className="text-sm">
-          {t("book:content_text_length", { count: textLength.toLocaleString() })}
+          {t("book:content_text_length", { count: textLength })}
         </p>
         {pageCount != null && (
           <p className="text-sm">

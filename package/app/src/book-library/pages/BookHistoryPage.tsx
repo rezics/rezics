@@ -81,7 +81,9 @@ export function BookHistoryPage() {
       <header className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-text-secondary">
           <History className="h-4 w-4" aria-hidden="true" />
-          <h2 className="text-sm font-medium leading-ui">{getI18nRuntime().i18n.t("search:history_title")}</h2>
+          <h2 className="text-sm font-medium leading-ui">
+            {getI18nRuntime().i18n.t("search:history_title")}
+          </h2>
         </div>
         <div className="flex flex-wrap gap-2" role="tablist">
           <HistoryTabButton
@@ -115,7 +117,9 @@ export function BookHistoryPage() {
         <section className="grid gap-3 rounded-md bg-surface-subtle p-4">
           <div className="flex items-center gap-2 text-sm font-medium leading-ui text-text-primary">
             <RotateCcw className="h-4 w-4" aria-hidden="true" />
-            {getI18nRuntime().i18n.t("search:history_restore_title", { sequence: restoreSequence })}
+            {getI18nRuntime().i18n.t("search:history_restore_title", {
+              sequence: restoreSequence,
+            })}
           </div>
           <p className="text-sm leading-ui text-text-secondary">
             {getI18nRuntime().i18n.t("search:history_restore_description")}
@@ -216,10 +220,15 @@ export function RevisionTimeline({
                   params={{ bookId, sequence: String(revision.sequence) }}
                   className="text-sm font-medium leading-ui text-text-primary hover:text-text-brand"
                 >
-                  {getI18nRuntime().i18n.t("search:history_revision_title", { sequence: revision.sequence })}
+                  {getI18nRuntime().i18n.t("search:history_revision_title", {
+                    sequence: revision.sequence,
+                  })}
                 </Link>
                 <p className="mt-1 text-sm leading-ui text-text-secondary">
-                  {revision.message ?? getI18nRuntime().i18n.t("search:history_revision_default_message")}
+                  {revision.message ??
+                    getI18nRuntime().i18n.t(
+                      "search:history_revision_default_message",
+                    )}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -236,10 +245,13 @@ export function RevisionTimeline({
                         mode: "unified",
                       } as never
                     }
-                    aria-label={getI18nRuntime().i18n.t("search:history_revision_compare_label", {
-                      base: compareBase,
-                      target: compareTarget,
-                    })}
+                    aria-label={getI18nRuntime().i18n.t(
+                      "search:history_revision_compare_label",
+                      {
+                        base: compareBase,
+                        target: compareTarget,
+                      },
+                    )}
                     className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
                   >
                     <ArrowLeftRight className="h-4 w-4" aria-hidden="true" />
@@ -247,7 +259,9 @@ export function RevisionTimeline({
                 ) : (
                   <button
                     type="button"
-                    aria-label={getI18nRuntime().i18n.t("search:history_revision_compare_unavailable")}
+                    aria-label={getI18nRuntime().i18n.t(
+                      "search:history_revision_compare_unavailable",
+                    )}
                     className="rounded-md p-2 text-text-disabled"
                     disabled
                   >
@@ -256,9 +270,12 @@ export function RevisionTimeline({
                 )}
                 <button
                   type="button"
-                  aria-label={getI18nRuntime().i18n.t("search:history_revision_restore_label", {
-                    sequence: revision.sequence,
-                  })}
+                  aria-label={getI18nRuntime().i18n.t(
+                    "search:history_revision_restore_label",
+                    {
+                      sequence: revision.sequence,
+                    },
+                  )}
                   className="rounded-md p-2 text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
                   onClick={() => onRestore(revision.sequence)}
                 >
@@ -286,7 +303,11 @@ export function StructureTimeline({
   events: StructureEventDTO[];
 }) {
   if (events.length === 0) {
-    return <EmptyHistoryState label={getI18nRuntime().i18n.t("search:history_empty_structure")} />;
+    return (
+      <EmptyHistoryState
+        label={getI18nRuntime().i18n.t("search:history_empty_structure")}
+      />
+    );
   }
   return (
     <ol className="flex flex-col divide-y divide-border-whisper">
@@ -299,12 +320,17 @@ export function StructureTimeline({
             <details className="group">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                 <span className="text-sm font-medium leading-ui text-text-primary">
-                  {getI18nRuntime().i18n.t("search:history_structure_title", { sequence: event.sequence })}
+                  {getI18nRuntime().i18n.t("search:history_structure_title", {
+                    sequence: event.sequence,
+                  })}
                 </span>
                 <span className="flex items-center gap-2 text-xs leading-dense text-text-secondary">
-                  {getI18nRuntime().i18n.t("search:history_structure_operation_count", {
-                    count: operations.length,
-                  })}
+                  {getI18nRuntime().i18n.t(
+                    "search:history_structure_operation_count",
+                    {
+                      count: operations.length,
+                    },
+                  )}
                   <ChevronDown className="h-4 w-4 transition group-open:rotate-180" />
                 </span>
               </summary>
@@ -389,7 +415,9 @@ export function BookRevisionPage() {
       </Link>
       <header className="grid gap-2">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
-          {getI18nRuntime().i18n.t("search:history_revision_title", { sequence: revision.sequence })}
+          {getI18nRuntime().i18n.t("search:history_revision_title", {
+            sequence: revision.sequence,
+          })}
         </h2>
         <p className="text-sm leading-ui text-text-secondary">
           {formatDate(revision.createdAt)} ·{" "}
@@ -505,7 +533,9 @@ export function BookRevisionComparePage() {
       </header>
       <section
         className="grid gap-3 border-y border-border-whisper py-4 md:grid-cols-[1fr_auto]"
-        aria-label={getI18nRuntime().i18n.t("search:history_compare_controls_label")}
+        aria-label={getI18nRuntime().i18n.t(
+          "search:history_compare_controls_label",
+        )}
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="grid gap-1 text-xs font-medium leading-dense text-text-secondary">
@@ -519,7 +549,9 @@ export function BookRevisionComparePage() {
             >
               {revisionOptions.map((sequence) => (
                 <option key={sequence} value={sequence}>
-                  {getI18nRuntime().i18n.t("search:history_revision_title", { sequence })}
+                  {getI18nRuntime().i18n.t("search:history_revision_title", {
+                    sequence,
+                  })}
                 </option>
               ))}
             </select>
@@ -535,7 +567,9 @@ export function BookRevisionComparePage() {
             >
               {revisionOptions.map((sequence) => (
                 <option key={sequence} value={sequence}>
-                  {getI18nRuntime().i18n.t("search:history_revision_title", { sequence })}
+                  {getI18nRuntime().i18n.t("search:history_revision_title", {
+                    sequence,
+                  })}
                 </option>
               ))}
             </select>
@@ -543,7 +577,9 @@ export function BookRevisionComparePage() {
         </div>
         <fieldset
           className="m-0 flex items-end gap-2 border-0 p-0"
-          aria-label={getI18nRuntime().i18n.t("search:history_compare_layout_label")}
+          aria-label={getI18nRuntime().i18n.t(
+            "search:history_compare_layout_label",
+          )}
         >
           <button
             type="button"
@@ -573,7 +609,9 @@ export function BookRevisionComparePage() {
       </section>
       <nav
         className="flex flex-wrap gap-2"
-        aria-label={getI18nRuntime().i18n.t("search:history_compare_changed_fields")}
+        aria-label={getI18nRuntime().i18n.t(
+          "search:history_compare_changed_fields",
+        )}
       >
         {comparison.changes.length === 0 ? (
           <span className="text-sm leading-ui text-text-secondary">
@@ -660,7 +698,9 @@ export function CompareChange({
         {change.added.map((item) => (
           <StatusLine
             key={`add-${stableHistoryKey(item)}`}
-            status={getI18nRuntime().i18n.t("search:history_compare_status_added")}
+            status={getI18nRuntime().i18n.t(
+              "search:history_compare_status_added",
+            )}
             value={item}
             references={references}
           />
@@ -668,7 +708,9 @@ export function CompareChange({
         {change.removed.map((item) => (
           <StatusLine
             key={`remove-${stableHistoryKey(item)}`}
-            status={getI18nRuntime().i18n.t("search:history_compare_status_removed")}
+            status={getI18nRuntime().i18n.t(
+              "search:history_compare_status_removed",
+            )}
             value={item}
             references={references}
           />
@@ -676,7 +718,9 @@ export function CompareChange({
         {change.updated.map((item) => (
           <StatusLine
             key={item.key}
-            status={getI18nRuntime().i18n.t("search:history_compare_status_changed")}
+            status={getI18nRuntime().i18n.t(
+              "search:history_compare_status_changed",
+            )}
             value={item}
             references={references}
           />
@@ -686,7 +730,11 @@ export function CompareChange({
   }
   return (
     <RevisionPayloadValue
-      value={change.hidden ? getI18nRuntime().i18n.t("search:history_compare_status_changed") : change.after}
+      value={
+        change.hidden
+          ? getI18nRuntime().i18n.t("search:history_compare_status_changed")
+          : change.after
+      }
     />
   );
 }
@@ -902,7 +950,13 @@ function RevisionSections({
 }) {
   const entries = Object.entries(payload);
   if (entries.length === 0) {
-    return <EmptyHistoryState label={getI18nRuntime().i18n.t("search:history_revision_content_unavailable")} />;
+    return (
+      <EmptyHistoryState
+        label={getI18nRuntime().i18n.t(
+          "search:history_revision_content_unavailable",
+        )}
+      />
+    );
   }
   return (
     <div className="grid gap-5">
@@ -986,16 +1040,28 @@ function RevisionPayloadValue({
       return <span>{referenceLabel(references[value])}</span>;
     }
     if (typeof value === "string" && isUuid(value)) {
-      return <span>{getI18nRuntime().i18n.t("search:history_references_unresolved")}</span>;
+      return (
+        <span>
+          {getI18nRuntime().i18n.t("search:history_references_unresolved")}
+        </span>
+      );
     }
-    return <span>{value == null ? getI18nRuntime().i18n.t("search:history_value_null") : String(value)}</span>;
+    return (
+      <span>
+        {value == null
+          ? getI18nRuntime().i18n.t("search:history_value_null")
+          : String(value)}
+      </span>
+    );
   }
   if (typeof value === "boolean") {
     return <span>{value ? "true" : "false"}</span>;
   }
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <span>{getI18nRuntime().i18n.t("search:history_value_empty")}</span>;
+      return (
+        <span>{getI18nRuntime().i18n.t("search:history_value_empty")}</span>
+      );
     }
     return (
       <ul className="mt-2 grid gap-2">
@@ -1013,7 +1079,9 @@ function RevisionPayloadValue({
   if (value && typeof value === "object") {
     const entries = Object.entries(value as Record<string, unknown>);
     if (entries.length === 0) {
-      return <span>{getI18nRuntime().i18n.t("search:history_value_empty")}</span>;
+      return (
+        <span>{getI18nRuntime().i18n.t("search:history_value_empty")}</span>
+      );
     }
     return (
       <dl className="mt-2 grid gap-2 text-sm leading-ui">
@@ -1064,9 +1132,15 @@ function actorLabel(
   fallback: string,
 ) {
   if (!actor)
-    return fallback && !isUuid(fallback) ? fallback : getI18nRuntime().i18n.t("search:history_unknown_actor");
+    return fallback && !isUuid(fallback)
+      ? fallback
+      : getI18nRuntime().i18n.t("search:history_unknown_actor");
   if (actor.status !== "OK") return actor.status.toLowerCase();
-  return actor.displayName ?? actor.handle ?? getI18nRuntime().i18n.t("search:history_unknown_actor");
+  return (
+    actor.displayName ??
+    actor.handle ??
+    getI18nRuntime().i18n.t("search:history_unknown_actor")
+  );
 }
 
 function referenceLabel(reference: {
@@ -1075,7 +1149,9 @@ function referenceLabel(reference: {
   unitType?: string;
 }) {
   if (reference.status === "OK") {
-    const title = reference.title ?? getI18nRuntime().i18n.t("search:history_references_untitled");
+    const title =
+      reference.title ??
+      getI18nRuntime().i18n.t("search:history_references_untitled");
     return `${title} · ${reference.unitType ?? getI18nRuntime().i18n.t("search:history_references_unit")}`;
   }
   if (reference.status === "RESTRICTED") {

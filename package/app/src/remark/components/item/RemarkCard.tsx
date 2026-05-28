@@ -25,7 +25,7 @@ interface RemarkRatingBadgeProps {
 
 const RemarkRatingBadge: React.FC<RemarkRatingBadgeProps> = ({ remark }) => {
   const { t } = useTranslation(["page"]);
-const rating = (remark.extra as { rating?: number } | null)?.rating;
+  const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
   const dateStr = remark.createdAt
     ? new Date(String(remark.createdAt)).toLocaleDateString()

@@ -39,7 +39,7 @@ export function BookCreditAttributionEditor({
   disabled,
 }: BookCreditAttributionEditorProps) {
   const { t } = useTranslation(["book", "common"]);
-const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [queue, setQueue] = useState(() => createEntityAttributionEditQueue());
 
   const creditQuery = useQuery(creditAttributionQueries.byUnit(bookUnitId));

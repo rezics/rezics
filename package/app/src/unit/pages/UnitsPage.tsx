@@ -1,6 +1,6 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { contentDocMarkdownFallback, type UnitDTO } from "@rezics/contract";
-import { type ReactiveMessageBag, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -23,14 +23,11 @@ import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
-
-type UnitsMessages = ReactiveMessageBag<typeof i18nMessages>;
-
 type Unit = UnitDTO;
 
 type UnitsPageMode = "tab" | "single";
 
-function defaultChildren(units: Unit[], m: UnitsMessages) {
+function defaultChildren(units: Unit[], t: (key: string) => string) {
   return (
     <div className="space-y-3">
       {units.map((item) => (
@@ -51,11 +48,14 @@ function defaultChildren(units: Unit[], m: UnitsMessages) {
                       </Link>
                     )}
                   />
-                  <TooltipContent>{t("book:unit_open_content_page")}</TooltipContent>
+                  <TooltipContent>
+                    {t("book:unit_open_content_page")}
+                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
               <p className="text-base font-semibold truncate mb-1">
-                {item.translations?.[0]?.title || t("book:unit_untitled_content")}
+                {item.translations?.[0]?.title ||
+                  t("book:unit_untitled_content")}
               </p>
             </div>
             {item.translations?.[0]?.description && (
@@ -108,7 +108,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   children,
 }) => {
   const { t } = useTranslation(["book"]);
-const ref = useRef<UniversalPaginatorHandle>(null);
+  const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
   const routerSearch = useRouterState({
     select: (s) => s.location.search ?? "",
@@ -261,7 +261,7 @@ const ref = useRef<UniversalPaginatorHandle>(null);
         {(currentPageItems: Unit[]) =>
           children
             ? children(currentPageItems)
-            : defaultChildren(currentPageItems, m)
+            : defaultChildren(currentPageItems, t)
         }
       </UniversalPaginator>
     </div>

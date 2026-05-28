@@ -21,7 +21,7 @@ type Story = StoryObj<Args>;
 
 function Render({ autoplayIntervalNum }: Args) {
   const { t } = useTranslation(["shell"]);
-return (
+  return (
     <div className="p-4 max-w-14/16 mx-auto">
       <h3 className="mb-4 text-lg font-semibold">
         {t("shell:home_story_carousel_title")}

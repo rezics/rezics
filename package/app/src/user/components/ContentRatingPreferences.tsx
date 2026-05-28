@@ -1,3 +1,11 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  settings_content_rating_description_R_18: () =>
+    getI18nRuntime().i18n.t("settings:content_rating_description_R_18"),
+  settings_content_rating_description_R_18G: () =>
+    getI18nRuntime().i18n.t("settings:content_rating_description_R_18G"),
+} as const;
 import { useUpdateSettingsMutation } from "@rezics/api/user/user.mutations";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { ContentRating } from "@rezics/contract";
@@ -29,7 +37,7 @@ const OPT_IN_RATING_DESCRIPTION = {
 
 export const ContentRatingPreferences: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-const { data: settings } = useQuery(userQueries.settings());
+  const { data: settings } = useQuery(userQueries.settings());
   const updateSettings = useUpdateSettingsMutation();
 
   const optedIn: OptInRating[] =

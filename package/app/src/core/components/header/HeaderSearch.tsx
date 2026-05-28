@@ -123,7 +123,7 @@ function useHeaderSearchPresentation(pathname: string) {
 
 export function HeaderSearch({ className }: { className?: string }) {
   const { t } = useTranslation(["common"]);
-const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isMobile = useIsMobile();
   const isHomePage = pathname === "/";
   const presentation = useHeaderSearchPresentation(pathname);

@@ -7,7 +7,7 @@ interface EntityVerifiedIconProps {
 
 export function EntityVerifiedIcon({ verified }: EntityVerifiedIconProps) {
   const { t } = useTranslation(["entity"]);
-if (!verified) return null;
+  if (!verified) return null;
 
   return (
     <BadgeCheck

@@ -12,7 +12,7 @@ interface ShortBookReviewsProps {
 
 export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
   const { t } = useTranslation(["common"]);
-const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...postQueries.byTarget(bookId, { kind: PostKind.REMARK, limit: 4 }),
     enabled: !!bookId,
   });

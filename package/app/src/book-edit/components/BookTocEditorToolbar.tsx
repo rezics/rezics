@@ -48,7 +48,7 @@ export const BookTocEditorToolbar: React.FC<BookTocEditorToolbarProps> = ({
   onResyncOverrides,
 }) => {
   const { t } = useTranslation(["book", "common"]);
-return (
+  return (
     <TooltipProvider>
       <div className="flex items-center gap-2 pb-3">
         <div className="relative flex-1">
@@ -155,7 +155,7 @@ return (
                     <LabelIcon className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">
                       {t("book:edit_rate_selected", {
-                        count: selectedCount > 0 ? `(${selectedCount})` : "",
+                        count: selectedCount,
                       })}
                     </span>
                   </Button>

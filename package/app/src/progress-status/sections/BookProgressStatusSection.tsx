@@ -1,6 +1,6 @@
 import { useUnitProgress } from "@rezics/api/progress/progress.queries";
 import type { UserUnitProgressStatus } from "@rezics/contract";
-import { type ReactiveMessageBag, useLocale, useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useAtom, useSetAtom } from "jotai";
 import { useCallback } from "react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
@@ -26,9 +26,6 @@ import {
   openStatusModalAtom,
   statusModalAtom,
 } from "../states/statusModalAtom";
-
-type ProgressMessages = ReactiveMessageBag<typeof i18nMessages>;
-
 export type BookProgressStatusSectionProps = {
   bookUnitId: string;
 };
@@ -45,7 +42,7 @@ function usesChineseProgressLayout(language: string | undefined) {
 
 function getDefaultPrimaryAction(
   status: UserUnitProgressStatus | null,
-  m: ProgressMessages,
+  t: (key: string) => string,
 ): {
   status: ToggleGroupStatus;
   label: string;
@@ -82,7 +79,7 @@ export function BookProgressStatusSection({
 }: BookProgressStatusSectionProps) {
   const language = useLocale();
   const { t } = useTranslation(["book"]);
-const progress = useUnitProgress(bookUnitId);
+  const progress = useUnitProgress(bookUnitId);
   const currentStatus: UserUnitProgressStatus | null =
     progress.data?.status ?? null;
 
@@ -259,7 +256,7 @@ const progress = useUnitProgress(bookUnitId);
       ? modal.status
       : null;
   const isChineseLayout = usesChineseProgressLayout(language);
-  const primaryAction = getDefaultPrimaryAction(currentStatus, m);
+  const primaryAction = getDefaultPrimaryAction(currentStatus, t);
 
   return (
     <div className="flex flex-col gap-2 w-full">

@@ -35,7 +35,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   workUnitId,
 }) => {
   const { t } = useTranslation(["book"]);
-// MOCK: should sort by reaction count once postsByTarget supports it.
+  // MOCK: should sort by reaction count once postsByTarget supports it.
   // For now, take the most recent review.
   const { data, isLoading } = useQuery({
     ...postQueries.list(

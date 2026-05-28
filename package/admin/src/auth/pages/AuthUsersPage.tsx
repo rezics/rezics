@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   useAdminBanUserMutation,
   useAdminRemoveUserMutation,
@@ -75,7 +76,7 @@ function getSessionCount(user: AuthUser): number | null {
 
 export default function AuthUsersPage() {
   const { t } = useTranslation(["admin", "common"]);
-const [page, setPage] = React.useState(0);
+  const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
   const [confirmDialog, setConfirmDialog] = React.useState<{
     open: boolean;
@@ -185,8 +186,12 @@ const [page, setPage] = React.useState(0);
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="user">{t("admin:auth_role_user")}</SelectItem>
-              <SelectItem value="admin">{t("admin:auth_role_admin")}</SelectItem>
-              <SelectItem value="owner">{t("admin:auth_role_owner")}</SelectItem>
+              <SelectItem value="admin">
+                {t("admin:auth_role_admin")}
+              </SelectItem>
+              <SelectItem value="owner">
+                {t("admin:auth_role_owner")}
+              </SelectItem>
             </SelectContent>
           </Select>
         ),
@@ -418,22 +423,22 @@ const [page, setPage] = React.useState(0);
     unbanMutation,
     setRoleMutation,
     removeMutation,
-    m.admin_auth_actions_title,
-    m.admin_auth_role_admin,
-    m.admin_auth_role_owner,
-    m.admin_auth_role_user,
-    m.admin_auth_user_name,
-    m.admin_auth_user_role,
-    m.admin_auth_users_ban,
-    m.admin_auth_users_banned,
-    m.admin_auth_users_remove_description,
-    m.admin_auth_users_remove_title,
-    m.admin_auth_users_unban,
-    m.common_active,
-    m.common_created,
-    m.common_email,
-    m.common_id,
-    m.common_remove,
+    getI18nRuntime().i18n.t("admin:auth_actions_title"),
+    getI18nRuntime().i18n.t("admin:auth_role_admin"),
+    getI18nRuntime().i18n.t("admin:auth_role_owner"),
+    getI18nRuntime().i18n.t("admin:auth_role_user"),
+    getI18nRuntime().i18n.t("admin:auth_user_name"),
+    getI18nRuntime().i18n.t("admin:auth_user_role"),
+    getI18nRuntime().i18n.t("admin:auth_users_ban"),
+    getI18nRuntime().i18n.t("admin:auth_users_banned"),
+    getI18nRuntime().i18n.t("admin:auth_users_remove_description"),
+    getI18nRuntime().i18n.t("admin:auth_users_remove_title"),
+    getI18nRuntime().i18n.t("admin:auth_users_unban"),
+    getI18nRuntime().i18n.t("common:active"),
+    getI18nRuntime().i18n.t("common:created"),
+    getI18nRuntime().i18n.t("common:email"),
+    getI18nRuntime().i18n.t("common:id"),
+    getI18nRuntime().i18n.t("common:remove"),
     accountSummariesByAuthId,
   ]);
 

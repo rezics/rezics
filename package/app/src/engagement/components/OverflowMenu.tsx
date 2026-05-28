@@ -1,3 +1,10 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  common_reply: () => getI18nRuntime().i18n.t("common:reply"),
+  common_share: () => getI18nRuntime().i18n.t("common:share"),
+  shelf_title: () => getI18nRuntime().i18n.t("entity:shelf_title"),
+} as const;
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -57,7 +64,7 @@ export const OverflowMenu: React.FC<OverflowMenuProps> = ({
   children,
 }) => {
   const { t } = useTranslation(["common"]);
-const visible = items.filter(
+  const visible = items.filter(
     (token) => DESCRIPTORS[token] !== undefined,
   ) as Action[];
 

@@ -26,7 +26,7 @@ export const TagWrapper: React.FC<TagWrapperProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["community"]);
-const { data, isLoading, error } = useQuery(tagQueries.list(filters));
+  const { data, isLoading, error } = useQuery(tagQueries.list(filters));
   const tags: UnitTagDTO[] = useMemo(() => data?.tags ?? [], [data]);
 
   const unitId = filters?.unitId;
@@ -46,7 +46,9 @@ const { data, isLoading, error } = useQuery(tagQueries.list(filters));
   if (isLoading) {
     return (
       <div className={className}>
-        <div className="text-sm text-gray-500">{t("community:tag_loading")}</div>
+        <div className="text-sm text-gray-500">
+          {t("community:tag_loading")}
+        </div>
       </div>
     );
   }

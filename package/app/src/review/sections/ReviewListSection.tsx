@@ -17,7 +17,7 @@ export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
   limit = 20,
 }) => {
   const { t } = useTranslation(["common", "community"]);
-const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...postQueries.byTarget(targetUnitId, { kind: PostKind.REVIEW, limit }),
     enabled: !!targetUnitId,
   });

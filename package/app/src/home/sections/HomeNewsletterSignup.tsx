@@ -5,7 +5,7 @@ import { useState } from "react";
 
 export const HomeNewsletterSignup: React.FC = () => {
   const { t } = useTranslation(["page"]);
-const [email, setEmail] = useState("");
+  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const onSubmit = (e: React.FormEvent) => {

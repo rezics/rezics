@@ -41,7 +41,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
   onSubmit,
 }) => {
   const { t } = useTranslation(["common", "page"]);
-const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
+  const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
   const firstAvailableLanguage = available[0] ?? "";
   const [language, setLanguage] = useState<string>(firstAvailableLanguage);
   const [sourceUnitId, setSourceReleaseUnitId] = useState<string>(NO_SOURCE);
@@ -132,7 +132,9 @@ const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
               </SelectContent>
             </Select>
             <p className="text-sm text-text-secondary">
-              {t("page:book_edit_info_translation_add_dialog_source_release_help")}
+              {t(
+                "page:book_edit_info_translation_add_dialog_source_release_help",
+              )}
             </p>
           </div>
         </div>

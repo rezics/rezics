@@ -29,7 +29,7 @@ export const HomeRankingSection: React.FC<HomeRankingSectionProps> = ({
   limit = 10,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedTitle = title ?? t("page:home_sections_ranking");
+  const resolvedTitle = title ?? t("page:home_sections_ranking");
 
   const { data, isLoading, error } = useQuery(
     bookQueries.list({

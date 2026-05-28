@@ -23,7 +23,7 @@ export function UnitCandidateRow({
   onPreview,
 }: UnitCandidateRowProps) {
   const { t } = useTranslation(["common"]);
-const summary = candidateToUnitCardSummary(candidate, unit, {
+  const summary = candidateToUnitCardSummary(candidate, unit, {
     language,
     fallbackTitle: isLoading ? t("common:loading") : candidate.identifier,
   });

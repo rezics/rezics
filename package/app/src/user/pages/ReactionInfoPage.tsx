@@ -8,7 +8,7 @@ import { useUserProfileStore } from "@/user/states";
 // MOCK: Reaction history page — waiting on reaction service /reactions/history endpoint
 export const ReactionInfoPage: React.FC = () => {
   const { t } = useTranslation(["settings"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const currentUser = useUserProfileStore((state) => state.user);
 
   return (

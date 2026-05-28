@@ -17,7 +17,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation(["common", "page"]);
-const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [body, setBody] = useState("");
   const [score, setScore] = useState<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -99,7 +99,9 @@ const [expanded, setExpanded] = useState(false);
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         submitLabel={
-          postMutation.isPending ? t("common:submitting") : t("page:remark_submit")
+          postMutation.isPending
+            ? t("common:submitting")
+            : t("page:remark_submit")
         }
       />
     </div>

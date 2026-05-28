@@ -12,7 +12,7 @@ interface RealmCardProps {
 
 export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   const { t } = useTranslation(["common", "entity"]);
-const translation = getTranslation(realm.translations);
+  const translation = getTranslation(realm.translations);
   const title = translation?.title ?? t("entity:realm_untitled");
   const description = contentDocMarkdownFallback(translation?.description);
 
@@ -33,7 +33,9 @@ const translation = getTranslation(realm.translations);
           </p>
           <div className="mt-4 flex flex-row items-center gap-2">
             <span className="text-xs text-text-secondary">
-              {t("entity:realm_member_count", { count: realm.memberCount ?? 0 })}
+              {t("entity:realm_member_count", {
+                count: realm.memberCount ?? 0,
+              })}
             </span>
             {realm.isPublic && (
               <Badge variant="outline" className="text-xs">

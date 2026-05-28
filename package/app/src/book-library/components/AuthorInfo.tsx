@@ -34,7 +34,7 @@ const AuthorInfoMobile: React.FC<AuthorInfoLayoutProps> = ({
   onEdit,
 }) => {
   const { t } = useTranslation(["book", "common"]);
-const description = mainMarkdownSource(author.description);
+  const description = mainMarkdownSource(author.description);
 
   return (
     <div>
@@ -96,7 +96,7 @@ const AuthorInfoDesktop: React.FC<AuthorInfoLayoutProps> = ({
   onEdit,
 }) => {
   const { t } = useTranslation(["book", "common"]);
-const description = mainMarkdownSource(author.description);
+  const description = mainMarkdownSource(author.description);
 
   return (
     <div>
@@ -117,7 +117,10 @@ const description = mainMarkdownSource(author.description);
             />
           </ArrowForwardIcon>
           {showEditButton && (
-            <EditButtonFloatRightShow onClick={onEdit} text={t("common:edit")} />
+            <EditButtonFloatRightShow
+              onClick={onEdit}
+              text={t("common:edit")}
+            />
           )}
         </div>
 

@@ -32,7 +32,7 @@ export function PostTreeRail({
   renderChild,
 }: PostTreeRailProps) {
   const { t } = useTranslation(["community"]);
-const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
+  const railCenterLeftPx = -THREAD_INDENT_PX + AVATAR_CENTER_PX;
   const lineLeftPx = railCenterLeftPx - RAIL_STROKE_PX / 2;
   const railLeftPx = railCenterLeftPx - RAIL_HITBOX_PX / 2;
   const branchWidthPx = THREAD_INDENT_PX;

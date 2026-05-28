@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
 import { useTranslation } from "@rezics/i18n/react";
@@ -113,7 +114,7 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
 
 function IdentityStep({ onComplete }: { onComplete: () => void }) {
   const { t } = useTranslation(["auth", "common"]);
-const auth = useAuth();
+  const auth = useAuth();
   const [displayName, setDisplayName] = useState(
     auth.authAccountState?.email?.split("@")[0] ?? "",
   );
@@ -154,9 +155,9 @@ const auth = useAuth();
   }, [
     slug,
     slugCheck,
-    m.auth_flow_setup_slug_invalid,
-    m.auth_flow_setup_slug_short,
-    m.auth_flow_setup_slug_taken,
+    getI18nRuntime().i18n.t("auth:flow_setup_slug_invalid"),
+    getI18nRuntime().i18n.t("auth:flow_setup_slug_short"),
+    getI18nRuntime().i18n.t("auth:flow_setup_slug_taken"),
   ]);
 
   const canSubmit = slug.length >= 6 && !slugError && !checkingSlug && !loading;
@@ -197,7 +198,9 @@ const auth = useAuth();
       )}
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="reg-username">{t("auth:flow_setup_display_name")}</Label>
+        <Label htmlFor="reg-username">
+          {t("auth:flow_setup_display_name")}
+        </Label>
         <Input
           id="reg-username"
           value={displayName}
@@ -246,7 +249,7 @@ function EmailVerificationStep({
   onComplete: () => void;
 }) {
   const { t } = useTranslation(["auth", "common"]);
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
   const [error, setError] = useState<string>();
   const [otpCode, setOtpCode] = useState("");
@@ -447,7 +450,7 @@ const [loading, setLoading] = useState(false);
 
 export const CompleteRegistrationPage: FC = () => {
   const { t } = useTranslation(["auth", "common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const auth = useAuth();
   const [justCompletedEmail, setJustCompletedEmail] = useState(false);
   const [pauseConfirming, setPauseConfirming] = useState(false);

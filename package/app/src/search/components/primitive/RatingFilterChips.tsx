@@ -26,7 +26,7 @@ export const RatingFilterChips: React.FC<RatingFilterChipsProps> = ({
   isAuthenticated = true,
 }) => {
   const { t } = useTranslation(["search"]);
-const selected = new Set(value ?? []);
+  const selected = new Set(value ?? []);
   const allowSet = allowed ? new Set(allowed) : null;
 
   const toggle = (rating: ContentRating, checked: boolean) => {

@@ -28,7 +28,7 @@ export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
   excludeKeys = [],
 }) => {
   const { t } = useTranslation(["book"]);
-const { data: reviewData } = useQuery({
+  const { data: reviewData } = useQuery({
     ...postQueries.list(
       workUnitId
         ? {

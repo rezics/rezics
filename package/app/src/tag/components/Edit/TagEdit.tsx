@@ -32,7 +32,7 @@ export const TagEdit: React.FC<TagEditProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["common", "community"]);
-const isUpdate = !!tag;
+  const isUpdate = !!tag;
   const [name, setName] = useState(initialName ?? "");
 
   const createMutation = useCreateTagMutation({

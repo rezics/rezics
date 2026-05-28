@@ -17,7 +17,7 @@ import { JwtServiceEditDialog, JwtServiceTable } from "../components";
 
 export const JwtServicesPage: FC = () => {
   const { t } = useTranslation(["admin"]);
-const { data, isLoading, error } = useQuery(jwtServiceQueries.list());
+  const { data, isLoading, error } = useQuery(jwtServiceQueries.list());
 
   const [services, setServices] = useState<JwtServiceDTO[]>([]);
 
@@ -132,7 +132,9 @@ const { data, isLoading, error } = useQuery(jwtServiceQueries.list());
 
       {!isLoading && !error && services.length === 0 && (
         <div className="flex items-center justify-center h-40">
-          <p className="text-base text-text-secondary">{t("admin:jwt_empty")}</p>
+          <p className="text-base text-text-secondary">
+            {t("admin:jwt_empty")}
+          </p>
         </div>
       )}
 

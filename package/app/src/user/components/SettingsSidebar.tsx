@@ -1,3 +1,16 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  settings_nav_profile: () => getI18nRuntime().i18n.t("settings:nav_profile"),
+  settings_nav_account: () => getI18nRuntime().i18n.t("settings:nav_account"),
+  settings_nav_security: () => getI18nRuntime().i18n.t("settings:nav_security"),
+  settings_nav_connections: () =>
+    getI18nRuntime().i18n.t("settings:nav_connections"),
+  settings_nav_tokens: () => getI18nRuntime().i18n.t("settings:nav_tokens"),
+  settings_nav_preferences: () =>
+    getI18nRuntime().i18n.t("settings:nav_preferences"),
+  settings_nav_entities: () => getI18nRuntime().i18n.t("settings:nav_entities"),
+} as const;
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   CircleUser as AccountCircleIcon,

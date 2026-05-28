@@ -8,13 +8,7 @@ import {
 import { getTextDirection } from "@rezics/i18n/runtime";
 import { ExternalLinkModal } from "@rezics/ui";
 import { RouterProvider } from "@tanstack/react-router";
-import {
-  type ReactNode,
-  StrictMode,
-  Suspense,
-  useEffect,
-  useRef,
-} from "react";
+import { type ReactNode, StrictMode, Suspense, useEffect, useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
 import { router } from "@/router";
@@ -29,7 +23,7 @@ import "virtual:uno.css";
 import "@rezics/ui/config/base.css";
 function AppProviders({ children }: { children: ReactNode }) {
   const { t } = useTranslation(["shell"]);
-const themeMode = useAppStore((s) => s.theme);
+  const themeMode = useAppStore((s) => s.theme);
 
   useAppInit();
 
@@ -39,7 +33,9 @@ const themeMode = useAppStore((s) => s.theme);
 
   return (
     <StrictMode>
-      <ErrorBoundary fallback={<div>{t("shell:app_error_boundary_message")}</div>}>
+      <ErrorBoundary
+        fallback={<div>{t("shell:app_error_boundary_message")}</div>}
+      >
         <HelmetProvider>
           <PersistentSettingsLoader />
           <ReactQueryProvider>

@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { AdminStatsResponse } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
@@ -31,7 +32,7 @@ function readCssVar(name: string, fallback: string): string {
 
 export function ContentTrendChart({ trend }: ContentTrendChartProps) {
   const { t } = useTranslation(["admin"]);
-const isDark =
+  const isDark =
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");
 
@@ -62,7 +63,13 @@ const isDark =
         },
       ],
     }),
-    [trend, primary, secondary, m.admin_dashboard_comments, m.admin_nav_books],
+    [
+      trend,
+      primary,
+      secondary,
+      getI18nRuntime().i18n.t("admin:dashboard_comments"),
+      getI18nRuntime().i18n.t("admin:nav_books"),
+    ],
   );
 
   const options = useMemo(

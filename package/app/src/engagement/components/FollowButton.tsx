@@ -58,7 +58,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["settings"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
   const authSessionLoading = useAuthSessionStore(
     (state) => state.status === "loading",
@@ -134,7 +134,9 @@ const navigate = useNavigate();
     }
   };
 
-  const label = isFollowing ? t("settings:profile_following") : t("settings:profile_follow");
+  const label = isFollowing
+    ? t("settings:profile_following")
+    : t("settings:profile_follow");
 
   const button = (
     <Button

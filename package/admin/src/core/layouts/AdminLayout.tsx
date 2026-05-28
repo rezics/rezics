@@ -11,7 +11,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const { t } = useTranslation(["admin"]);
-const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
   const drawerWidth = adminNav.drawerWidth;
 
   const drawer = (

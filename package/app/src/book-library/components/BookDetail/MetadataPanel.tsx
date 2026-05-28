@@ -21,7 +21,7 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   variant = "panel",
 }) => {
   const { t } = useTranslation(["book"]);
-const publicationLicenseLabel = bookInfo.licenseSlug
+  const publicationLicenseLabel = bookInfo.licenseSlug
     ? licenseLabel(bookInfo.licenseSlug as LicenseSlug)
     : undefined;
   const uswn = resolveMetadataPanelUswn(bookInfo);

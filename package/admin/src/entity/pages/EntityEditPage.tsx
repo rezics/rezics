@@ -51,7 +51,7 @@ function createTranslationDraft(
 
 export default function EntityEditPage() {
   const { t } = useTranslation(["admin", "book", "common"]);
-const { unitId } = Route.useParams();
+  const { unitId } = Route.useParams();
   const entityQuery = useEntity(unitId);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -370,7 +370,9 @@ const { unitId } = Route.useParams();
                                   e.target.value,
                                 )
                               }
-                              placeholder={t("common:language_code_placeholder")}
+                              placeholder={t(
+                                "common:language_code_placeholder",
+                              )}
                             />
                           </div>
                           <div className="flex flex-col gap-1.5 sm:col-span-2">

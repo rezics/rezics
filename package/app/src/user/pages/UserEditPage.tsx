@@ -49,7 +49,7 @@ export const UserEditPage: FC<UserEditPageProps> = ({
   userId,
 }) => {
   const { t } = useTranslation(["common", "entity", "settings"]);
-const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
+  const routeMatch = useMatch({ from: UserEditRoute.id, shouldThrow: false });
   const resolvedUserId = userId ?? routeMatch?.params.userId;
   const [user, setUser] = useState<UserDTO | null>(null);
   const {

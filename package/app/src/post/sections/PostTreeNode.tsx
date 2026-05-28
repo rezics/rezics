@@ -50,7 +50,7 @@ export function PostTreeNode({
   onThreadHoverChange,
 }: PostTreeNodeProps) {
   const { t } = useTranslation(["community"]);
-const { post } = node;
+  const { post } = node;
   const collapsed = isCollapsed(post.unitId);
   const hasVisibleChildren = node.children.length > 0 && !collapsed;
   const hasThreadChildren =

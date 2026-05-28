@@ -18,7 +18,7 @@ export function ShelfByBookPage({
   scopeMode = "work",
 }: ShelfByBookPageProps) {
   const { t } = useTranslation(["common", "entity"]);
-const { data: bookInfo } = useQuery({
+  const { data: bookInfo } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
   });
@@ -63,7 +63,9 @@ const { data: bookInfo } = useQuery({
                 disabled={isFetchingNextPage}
                 onClick={() => void fetchNextPage()}
               >
-                {isFetchingNextPage ? t("common:loading") : t("common:load_more")}
+                {isFetchingNextPage
+                  ? t("common:loading")
+                  : t("common:load_more")}
               </Button>
             </div>
           )}

@@ -34,7 +34,7 @@ export const Compact: Story = {
 export const OwnerVisibleEditOverflow: Story = {
   render: () => {
     const { t } = useTranslation(["common"]);
-return (
+    return (
       <PostReply
         post={{ ...postFlat[0], directReplyCount: 3 }}
         overflowContent={

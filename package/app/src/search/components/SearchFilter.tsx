@@ -1,3 +1,16 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  search_filter_relevance: () =>
+    getI18nRuntime().i18n.t("search:filter_relevance"),
+  search_filter_time: () => getI18nRuntime().i18n.t("search:filter_time"),
+  search_filter_favorites: () =>
+    getI18nRuntime().i18n.t("search:filter_favorites"),
+  search_filter_word_count: () =>
+    getI18nRuntime().i18n.t("search:filter_word_count"),
+  search_filter_month_votes: () =>
+    getI18nRuntime().i18n.t("search:filter_month_votes"),
+} as const;
 import { useTranslation } from "@rezics/i18n/react";
 import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import {
@@ -38,7 +51,7 @@ export const BookSearchFilter: React.FC<BookSearchFilterProps> = ({
   onSortChange,
 }) => {
   const { t } = useTranslation(["search"]);
-const handleSecondaryMenuSelect = (key: string) => () => {
+  const handleSecondaryMenuSelect = (key: string) => () => {
     console.log(key);
   };
 

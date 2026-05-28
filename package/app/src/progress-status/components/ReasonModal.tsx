@@ -1,3 +1,23 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  progress_status_reason_modal_title_paused: () =>
+    getI18nRuntime().i18n.t(
+      "community:progress_status_reason_modal_title_paused",
+    ),
+  progress_status_reason_modal_title_dropped: () =>
+    getI18nRuntime().i18n.t(
+      "community:progress_status_reason_modal_title_dropped",
+    ),
+  progress_status_reason_modal_desc_paused: () =>
+    getI18nRuntime().i18n.t(
+      "community:progress_status_reason_modal_desc_paused",
+    ),
+  progress_status_reason_modal_desc_dropped: () =>
+    getI18nRuntime().i18n.t(
+      "community:progress_status_reason_modal_desc_dropped",
+    ),
+} as const;
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -62,7 +82,7 @@ export function ReasonModal({
   isPending,
 }: ReasonModalProps) {
   const { t } = useTranslation(["common", "community"]);
-const { posts, isLoading: postsLoading } =
+  const { posts, isLoading: postsLoading } =
     useReasonPostHistory(reasonPostUnitIds);
 
   const latestPost: ReasonPost | undefined = posts[posts.length - 1];
@@ -95,7 +115,9 @@ const { posts, isLoading: postsLoading } =
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder={t("community:progress_status_reason_modal_placeholder")}
+            placeholder={t(
+              "community:progress_status_reason_modal_placeholder",
+            )}
             rows={6}
           />
 

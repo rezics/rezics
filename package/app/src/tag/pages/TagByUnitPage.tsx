@@ -10,7 +10,7 @@ import { TagWrapper } from "../components/TagWrapper";
 
 export function TagByBookPage() {
   const { t } = useTranslation(["common", "community"]);
-const { bookId } = tagBookRoute.useParams();
+  const { bookId } = tagBookRoute.useParams();
   const pageSize = 30;
   const {
     data: listData,
@@ -62,7 +62,7 @@ const { bookId } = tagBookRoute.useParams();
 
 export function TagByBookFullPage() {
   const { t } = useTranslation(["common", "community"]);
-const matchRoute = useMatchRoute();
+  const matchRoute = useMatchRoute();
   const withDomain = matchRoute({
     to: "/tag/book/$bookId/tag/$domainId",
     fuzzy: false,

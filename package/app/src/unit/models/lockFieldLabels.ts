@@ -40,7 +40,8 @@ export function lockMatchesPath(lock: UnitFieldLockDTO, path: string) {
 }
 
 export function editorialPathLabel(path: string) {
-  if (path === UNIT_FIELD_LOCK_ALL) return getI18nRuntime().i18n.t("editor:authority_all_fields_label");
+  if (path === UNIT_FIELD_LOCK_ALL)
+    return getI18nRuntime().i18n.t("editor:authority_all_fields_label");
 
   const translationMatch = /^translations\.([^.]+)\.(.+)$/.exec(path);
   if (translationMatch) {
@@ -62,15 +63,27 @@ export function editorialPathLabel(path: string) {
   const labels: Record<string, string> = {
     "extension.coverUrl": getI18nRuntime().i18n.t("book:fields_cover_url"),
     "extension.isbn13": getI18nRuntime().i18n.t("book:fields_isbn"),
-    "unit.aiDisclosureMode": getI18nRuntime().i18n.t("book:fields_ai_disclosure"),
-    "unit.aiDisclosureDetails": getI18nRuntime().i18n.t("book:fields_ai_disclosure"),
-    "post.content": getI18nRuntime().i18n.t("editor:authority_path_post_content"),
-    "post.content.main": getI18nRuntime().i18n.t("editor:authority_path_post_main"),
-    "post.content.main.source": getI18nRuntime().i18n.t("editor:authority_path_post_source"),
+    "unit.aiDisclosureMode": getI18nRuntime().i18n.t(
+      "book:fields_ai_disclosure",
+    ),
+    "unit.aiDisclosureDetails": getI18nRuntime().i18n.t(
+      "book:fields_ai_disclosure",
+    ),
+    "post.content": getI18nRuntime().i18n.t(
+      "editor:authority_path_post_content",
+    ),
+    "post.content.main": getI18nRuntime().i18n.t(
+      "editor:authority_path_post_main",
+    ),
+    "post.content.main.source": getI18nRuntime().i18n.t(
+      "editor:authority_path_post_source",
+    ),
     "credits.authors": getI18nRuntime().i18n.t("editor:authority_path_authors"),
     "entity.avatar": getI18nRuntime().i18n.t("entity:avatar_url"),
     "entity.kind": getI18nRuntime().i18n.t("editor:authority_path_entity_kind"),
-    "entity.verified": getI18nRuntime().i18n.t("editor:authority_path_entity_verified"),
+    "entity.verified": getI18nRuntime().i18n.t(
+      "editor:authority_path_entity_verified",
+    ),
     "unit.slug": getI18nRuntime().i18n.t("editor:authority_path_slug"),
     "user.avatar": getI18nRuntime().i18n.t("editor:authority_path_avatar"),
     "user.bio": getI18nRuntime().i18n.t("book:author_info_bio_label"),

@@ -17,7 +17,7 @@ import FeedbackList from "../components/FeedbackList";
 
 export const FeedbackAdminPage: React.FC = () => {
   const { t } = useTranslation(["common", "community", "search", "settings"]);
-const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const [type, setType] = React.useState<"all" | "mine" | "user">("all");
   const [userId, setUserId] = React.useState<string>("");
   const [search, setSearch] = React.useState<string>("");
@@ -34,8 +34,12 @@ const [open, setOpen] = React.useState(false);
   return (
     <div className="max-w-8xl mx-auto p-4">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-        <h1 className="text-xl font-bold">{t("community:feedback_admin_title")}</h1>
-        <Button onClick={() => setOpen(true)}>{t("community:feedback_new")}</Button>
+        <h1 className="text-xl font-bold">
+          {t("community:feedback_admin_title")}
+        </h1>
+        <Button onClick={() => setOpen(true)}>
+          {t("community:feedback_new")}
+        </Button>
       </div>
 
       <div className="pb-4">
@@ -53,7 +57,9 @@ const [open, setOpen] = React.useState(false);
           </div>
 
           <div className="flex flex-col gap-1 w-32">
-            <Label htmlFor="admin-feedback-resolved">{t("common:status")}</Label>
+            <Label htmlFor="admin-feedback-resolved">
+              {t("common:status")}
+            </Label>
             <Select
               value={resolvedFilter}
               onValueChange={(v) =>
@@ -86,9 +92,15 @@ const [open, setOpen] = React.useState(false);
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t("search:category_all")}</SelectItem>
-                  <SelectItem value="mine">{t("community:feedback_view_mine")}</SelectItem>
-                  <SelectItem value="user">{t("community:feedback_view_user")}</SelectItem>
+                  <SelectItem value="all">
+                    {t("search:category_all")}
+                  </SelectItem>
+                  <SelectItem value="mine">
+                    {t("community:feedback_view_mine")}
+                  </SelectItem>
+                  <SelectItem value="user">
+                    {t("community:feedback_view_user")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

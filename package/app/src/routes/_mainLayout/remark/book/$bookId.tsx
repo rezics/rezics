@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_mainLayout/remark/book/$bookId")({
   }),
   component: () => {
     const { t } = useTranslation(["search"]);
-const { bookId } = Route.useParams();
+    const { bookId } = Route.useParams();
     const { scope } = Route.useSearch();
     const { data: bookInfo } = useQuery({
       ...bookQueries.detail(bookId),

@@ -50,7 +50,7 @@ export function StatusOverflowMenu({
   className,
 }: StatusOverflowMenuProps) {
   const { t } = useTranslation(["community"]);
-const renderStatusMarker = (status: ReadStatus) => (
+  const renderStatusMarker = (status: ReadStatus) => (
     <span
       aria-hidden="true"
       className={cx(

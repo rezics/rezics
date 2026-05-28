@@ -1,3 +1,18 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  shelf_sort_manual: () => getI18nRuntime().i18n.t("entity:shelf_sort_manual"),
+  shelf_sort_manual_reversed: () =>
+    getI18nRuntime().i18n.t("entity:shelf_sort_manual_reversed"),
+  shelf_sort_newest: () => getI18nRuntime().i18n.t("entity:shelf_sort_newest"),
+  shelf_sort_oldest: () => getI18nRuntime().i18n.t("entity:shelf_sort_oldest"),
+  shelf_sort_title_az: () =>
+    getI18nRuntime().i18n.t("entity:shelf_sort_title_az"),
+  shelf_sort_title_za: () =>
+    getI18nRuntime().i18n.t("entity:shelf_sort_title_za"),
+  shelf_view_nested: () => getI18nRuntime().i18n.t("entity:shelf_view_nested"),
+  shelf_view_list: () => getI18nRuntime().i18n.t("entity:shelf_view_list"),
+} as const;
 import { useCanEdit } from "@rezics/api/hooks";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
@@ -82,7 +97,7 @@ function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
   const { t } = useTranslation(["common", "entity"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const [viewModeOverride, setViewModeOverride] = useState<{
     unitId: string;
     value: ShelfView | undefined;
@@ -272,10 +287,14 @@ const navigate = useNavigate();
               )}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
                 <span>
-                  {t("entity:shelf_items_count", { count: shelf?.itemCount ?? 0 })}
+                  {t("entity:shelf_items_count", {
+                    count: shelf?.itemCount ?? 0,
+                  })}
                 </span>
                 {shelf?.user?.name && (
-                  <span>{t("entity:shelf_by_author", { name: shelf.user.name })}</span>
+                  <span>
+                    {t("entity:shelf_by_author", { name: shelf.user.name })}
+                  </span>
                 )}
               </div>
             </div>
@@ -330,10 +349,14 @@ const navigate = useNavigate();
               )}
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary">
                 <span>
-                  {t("entity:shelf_items_count", { count: shelf?.itemCount ?? 0 })}
+                  {t("entity:shelf_items_count", {
+                    count: shelf?.itemCount ?? 0,
+                  })}
                 </span>
                 {shelf?.user?.name && (
-                  <span>{t("entity:shelf_by_author", { name: shelf.user.name })}</span>
+                  <span>
+                    {t("entity:shelf_by_author", { name: shelf.user.name })}
+                  </span>
                 )}
               </div>
             </div>

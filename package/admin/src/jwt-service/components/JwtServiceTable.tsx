@@ -35,7 +35,7 @@ export const JwtServiceTable: FC<Props> = ({
   updatingServiceKey,
 }) => {
   const { t } = useTranslation(["admin", "common"]);
-return (
+  return (
     <TooltipProvider>
       <div className="rounded-md border border-border-whisper">
         <Table>

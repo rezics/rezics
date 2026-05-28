@@ -24,7 +24,7 @@ export const BookHeroScoreBlock: React.FC<BookHeroScoreBlockProps> = ({
   variant = "block",
 }) => {
   const { t } = useTranslation(["book"]);
-const hasRating = rating > 0;
+  const hasRating = rating > 0;
 
   if (variant === "inline") {
     return (

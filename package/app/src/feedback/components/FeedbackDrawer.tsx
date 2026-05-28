@@ -26,7 +26,7 @@ const FeedbackDrawer: React.FC<FeedbackDrawerProps> = ({
   defaultValues,
 }) => {
   const { t } = useTranslation(["community"]);
-return (
+  return (
     <Sheet
       open={open}
       onOpenChange={(o) => {

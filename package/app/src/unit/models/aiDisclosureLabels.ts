@@ -1,10 +1,14 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { AiDisclosureMode } from "@rezics/contract";
 const AI_DISCLOSURE_LABEL: Record<AiDisclosureMode, () => string> = {
-  UNKNOWN: ai_disclosure_UNKNOWN,
-  NONE: ai_disclosure_NONE,
-  AI_ASSISTED: ai_disclosure_AI_ASSISTED,
-  AI_ORIGINATED: ai_disclosure_AI_ORIGINATED,
-  MACHINE_GENERATED: ai_disclosure_MACHINE_GENERATED,
+  UNKNOWN: () => getI18nRuntime().i18n.t("settings:ai_disclosure_UNKNOWN"),
+  NONE: () => getI18nRuntime().i18n.t("settings:ai_disclosure_NONE"),
+  AI_ASSISTED: () =>
+    getI18nRuntime().i18n.t("settings:ai_disclosure_AI_ASSISTED"),
+  AI_ORIGINATED: () =>
+    getI18nRuntime().i18n.t("settings:ai_disclosure_AI_ORIGINATED"),
+  MACHINE_GENERATED: () =>
+    getI18nRuntime().i18n.t("settings:ai_disclosure_MACHINE_GENERATED"),
 };
 
 export function aiDisclosureLabel(mode: AiDisclosureMode): string {

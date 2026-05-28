@@ -33,7 +33,7 @@ export function MeiliKeyManagementSection({
   onDeleteKey: (key: MeiliKey) => void;
 }) {
   const { t } = useTranslation(["admin", "common"]);
-return (
+  return (
     <Card className="border-border-whisper bg-surface-base">
       <CardHeader>
         <CardTitle>{t("admin:meili_key_management_title")}</CardTitle>

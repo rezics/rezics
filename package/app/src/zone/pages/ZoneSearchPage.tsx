@@ -18,7 +18,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   initialKeyword,
 }) => {
   const { t } = useTranslation(["common", "search"]);
-const { zone, isLoading: zoneLoading } = useZone(slug);
+  const { zone, isLoading: zoneLoading } = useZone(slug);
   const { allowed } = useAllowedRatings();
 
   const implicitInitial = useMemo<SearchQuery>(() => {

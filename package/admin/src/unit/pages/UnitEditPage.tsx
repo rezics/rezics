@@ -81,7 +81,7 @@ function toJsonText(value: unknown) {
 
 export default function UnitEditPage() {
   const { t } = useTranslation(["admin", "common"]);
-const { unitId } = Route.useParams();
+  const { unitId } = Route.useParams();
   const [error, setError] = React.useState<string | null>(null);
 
   const detailQuery = useQuery(unitQueries.detail(unitId));
@@ -101,7 +101,9 @@ const { unitId } = Route.useParams();
   const linkSubjectMutation = useLinkSubjectAttributionMutation({
     onError: (err) =>
       setError(
-        err instanceof Error ? err.message : t("admin:unit_subject_link_failed"),
+        err instanceof Error
+          ? err.message
+          : t("admin:unit_subject_link_failed"),
       ),
     onSuccess: () => setError(null),
   });
@@ -457,7 +459,9 @@ const { unitId } = Route.useParams();
                           type="button"
                           variant="ghost"
                           size="icon"
-                          aria-label={t("admin:unit_subject_attribution_remove")}
+                          aria-label={t(
+                            "admin:unit_subject_attribution_remove",
+                          )}
                           disabled={unlinkSubjectMutation.isPending}
                           onClick={async () => {
                             await unlinkSubjectMutation.mutateAsync({

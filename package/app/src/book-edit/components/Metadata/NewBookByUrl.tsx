@@ -13,7 +13,7 @@ import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 
 export function NewBookByUrl() {
   const { t } = useTranslation(["book", "common"]);
-const [url, setUrl] = useState("");
+  const [url, setUrl] = useState("");
   function handleCreateBook() {
     // TODO 对接爬虫
     console.log("create book", url);

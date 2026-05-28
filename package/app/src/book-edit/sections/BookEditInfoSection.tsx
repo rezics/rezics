@@ -127,7 +127,9 @@ function lockedFieldMessage(error: unknown) {
     locked.blockedPaths.length > 0
       ? locked.blockedPaths.map(editorialPathLabel).join(", ")
       : locked.message;
-  return getI18nRuntime().i18n.t("editor:authority_edit_form_locked_error", { paths });
+  return getI18nRuntime().i18n.t("editor:authority_edit_form_locked_error", {
+    paths,
+  });
 }
 
 function matchingLocks(
@@ -160,15 +162,22 @@ function LockedFieldNotice({
       <AlertDescription>
         <span className="block text-sm leading-ui">
           {allFieldsLocked
-            ? getI18nRuntime().i18n.t("editor:authority_edit_form_all_locked_notice")
-            : getI18nRuntime().i18n.t("editor:authority_edit_form_locked_notice", {
-                fields: matched
-                  .map((lock) => editorialPathLabel(lock.path))
-                  .join(", "),
-              })}
+            ? getI18nRuntime().i18n.t(
+                "editor:authority_edit_form_all_locked_notice",
+              )
+            : getI18nRuntime().i18n.t(
+                "editor:authority_edit_form_locked_notice",
+                {
+                  fields: matched
+                    .map((lock) => editorialPathLabel(lock.path))
+                    .join(", "),
+                },
+              )}
         </span>
         <span className="mt-1 block text-xs leading-dense text-text-secondary">
-          {getI18nRuntime().i18n.t("editor:authority_edit_form_privileged_notice")}
+          {getI18nRuntime().i18n.t(
+            "editor:authority_edit_form_privileged_notice",
+          )}
         </span>
       </AlertDescription>
     </Alert>
@@ -192,14 +201,18 @@ const UpdateBookDialog: React.FC<{
             <p className="text-base">
               {state?.showBookLink && state?.bookId && (
                 <TextLink to="/book/$bookId" params={{ bookId: state.bookId }}>
-                  {getI18nRuntime().i18n.t("page:book_edit_info_dialog_view_book")}
+                  {getI18nRuntime().i18n.t(
+                    "page:book_edit_info_dialog_view_book",
+                  )}
                 </TextLink>
               )}
             </p>
           </AlertDescription>
         </Alert>
         <DialogFooter>
-          <Button onClick={onClose}>{getI18nRuntime().i18n.t("common:close")}</Button>
+          <Button onClick={onClose}>
+            {getI18nRuntime().i18n.t("common:close")}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -489,8 +502,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const createBookMutation = useCreateBookMutation({
     onSuccess: (responseData) => {
       setDialogState({
-        title: getI18nRuntime().i18n.t("page:book_edit_info_toast_create_success_title"),
-        message: getI18nRuntime().i18n.t("page:book_edit_info_toast_create_success_message"),
+        title: getI18nRuntime().i18n.t(
+          "page:book_edit_info_toast_create_success_title",
+        ),
+        message: getI18nRuntime().i18n.t(
+          "page:book_edit_info_toast_create_success_message",
+        ),
         showBookLink: true,
         bookId: responseData.unitId,
       });
@@ -498,7 +515,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     },
     onError: (err) => {
       setDialogState({
-        title: getI18nRuntime().i18n.t("page:book_edit_info_toast_create_failed_title"),
+        title: getI18nRuntime().i18n.t(
+          "page:book_edit_info_toast_create_failed_title",
+        ),
         message: String(err || getI18nRuntime().i18n.t("common:unknown_error")),
         error: true,
       });
@@ -509,16 +528,23 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
   const updateBookMutation = useUpdateBookMutation({
     onSuccess: () => {
       setDialogState({
-        title: getI18nRuntime().i18n.t("page:book_edit_info_toast_update_success_title"),
-        message: getI18nRuntime().i18n.t("page:book_edit_info_toast_update_success_message"),
+        title: getI18nRuntime().i18n.t(
+          "page:book_edit_info_toast_update_success_title",
+        ),
+        message: getI18nRuntime().i18n.t(
+          "page:book_edit_info_toast_update_success_message",
+        ),
       });
       setUpdateBookErrorOpen(true);
     },
     onError: (err) => {
       setDialogState({
-        title: getI18nRuntime().i18n.t("page:book_edit_info_toast_update_failed_title"),
+        title: getI18nRuntime().i18n.t(
+          "page:book_edit_info_toast_update_failed_title",
+        ),
         message:
-          lockedFieldMessage(err) ?? String(err || getI18nRuntime().i18n.t("common:unknown_error")),
+          lockedFieldMessage(err) ??
+          String(err || getI18nRuntime().i18n.t("common:unknown_error")),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -529,9 +555,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     affectedDetailKeys: () => (bookId ? [bookKeys.detail(bookId)] : []),
     onError: (err) => {
       setDialogState({
-        title: getI18nRuntime().i18n.t("page:book_edit_info_toast_update_failed_title"),
+        title: getI18nRuntime().i18n.t(
+          "page:book_edit_info_toast_update_failed_title",
+        ),
         message:
-          lockedFieldMessage(err) ?? String(err || getI18nRuntime().i18n.t("common:unknown_error")),
+          lockedFieldMessage(err) ??
+          String(err || getI18nRuntime().i18n.t("common:unknown_error")),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -596,8 +625,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         await createBookMutation.mutateAsync(createBookData);
       } else {
         setDialogState({
-          title: getI18nRuntime().i18n.t("page:book_edit_info_toast_create_failed_title"),
-          message: getI18nRuntime().i18n.t("page:book_edit_info_validation_publish_url_required"),
+          title: getI18nRuntime().i18n.t(
+            "page:book_edit_info_toast_create_failed_title",
+          ),
+          message: getI18nRuntime().i18n.t(
+            "page:book_edit_info_validation_publish_url_required",
+          ),
           error: true,
         });
         setUpdateBookErrorOpen(true);
@@ -607,8 +640,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
 
     if (restoreSubmitDisabled) {
       setDialogState({
-        title: getI18nRuntime().i18n.t("search:history_restore_edit_unavailable_title"),
-        message: getI18nRuntime().i18n.t("search:history_restore_edit_unavailable_description"),
+        title: getI18nRuntime().i18n.t(
+          "search:history_restore_edit_unavailable_title",
+        ),
+        message: getI18nRuntime().i18n.t(
+          "search:history_restore_edit_unavailable_description",
+        ),
         error: true,
       });
       setUpdateBookErrorOpen(true);
@@ -716,9 +753,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     if (!editor.currentTranslation) return;
     if (
       !window.confirm(
-        getI18nRuntime().i18n.t("page:book_edit_info_translation_delete_confirm", {
-          lang: editor.selectedLanguage,
-        }),
+        getI18nRuntime().i18n.t(
+          "page:book_edit_info_translation_delete_confirm",
+          {
+            lang: editor.selectedLanguage,
+          },
+        ),
       )
     )
       return;
@@ -751,7 +791,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
       </div>
     );
 
-  const resolvedPageTitle = pageTitle ?? getI18nRuntime().i18n.t("page:book_edit_info_title");
+  const resolvedPageTitle =
+    pageTitle ?? getI18nRuntime().i18n.t("page:book_edit_info_title");
   const sourceUnitId = editor.currentTranslation?.sourceUnitId;
   const hasAvailable = ALL_LANGUAGES.length > editor.existingLanguages.length;
   const locks = fieldLocksQuery.data?.locks;
@@ -781,20 +822,26 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         <div className="mb-8 space-y-3">
           <Alert>
             <AlertDescription>
-              {getI18nRuntime().i18n.t("search:history_restore_edit_notice", { sequence: restoreSequence })}
+              {getI18nRuntime().i18n.t("search:history_restore_edit_notice", {
+                sequence: restoreSequence,
+              })}
             </AlertDescription>
           </Alert>
           {restoreQuery.error ? (
             <Alert variant="destructive">
               <AlertDescription>
-                {getI18nRuntime().i18n.t("search:history_restore_edit_load_failed")}
+                {getI18nRuntime().i18n.t(
+                  "search:history_restore_edit_load_failed",
+                )}
               </AlertDescription>
             </Alert>
           ) : null}
           {restoreQuery.isSuccess && !restoreContentPayload ? (
             <Alert variant="destructive">
               <AlertDescription>
-                {getI18nRuntime().i18n.t("search:history_restore_edit_content_missing")}
+                {getI18nRuntime().i18n.t(
+                  "search:history_restore_edit_content_missing",
+                )}
               </AlertDescription>
             </Alert>
           ) : null}
@@ -884,7 +931,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         {!newBook && data && (
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              {getI18nRuntime().i18n.t("page:book_edit_info_translation_section_title")}
+              {getI18nRuntime().i18n.t(
+                "page:book_edit_info_translation_section_title",
+              )}
             </h3>
             <Separator className="mb-6" />
             <div className="flex flex-col gap-8">
@@ -905,9 +954,12 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {!editor.currentTranslation && (
                 <Alert>
                   <AlertDescription>
-                    {getI18nRuntime().i18n.t("page:book_edit_info_translation_empty_for_lang", {
-                      lang: editor.selectedLanguage,
-                    })}
+                    {getI18nRuntime().i18n.t(
+                      "page:book_edit_info_translation_empty_for_lang",
+                      {
+                        lang: editor.selectedLanguage,
+                      },
+                    )}
                   </AlertDescription>
                 </Alert>
               )}
@@ -942,7 +994,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
               {editor.isDirty && sourceUnitId && (
                 <Alert>
                   <AlertDescription>
-                    {getI18nRuntime().i18n.t("page:book_edit_info_translation_diverge_warning")}
+                    {getI18nRuntime().i18n.t(
+                      "page:book_edit_info_translation_diverge_warning",
+                    )}
                   </AlertDescription>
                 </Alert>
               )}
@@ -964,7 +1018,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                       className="text-error-text"
                       onClick={handleDeleteCurrentTranslation}
                     >
-                      {getI18nRuntime().i18n.t("page:book_edit_info_translation_delete_button")}
+                      {getI18nRuntime().i18n.t(
+                        "page:book_edit_info_translation_delete_button",
+                      )}
                     </Button>
                   </div>
                 )}
@@ -976,7 +1032,9 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
         {newBook && (
           <section>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              {getI18nRuntime().i18n.t("page:book_edit_info_translation_section_title")}
+              {getI18nRuntime().i18n.t(
+                "page:book_edit_info_translation_section_title",
+              )}
             </h3>
             <Separator className="mb-6" />
             <TranslationFieldsEditor

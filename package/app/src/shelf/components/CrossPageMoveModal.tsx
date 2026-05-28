@@ -24,7 +24,7 @@ export function CrossPageMoveModal({
   onPick,
 }: CrossPageMoveModalProps) {
   const { t } = useTranslation(["common", "entity"]);
-const pages = Array.from({ length: Math.max(pageCount, 1) }, (_, i) => i + 1);
+  const pages = Array.from({ length: Math.max(pageCount, 1) }, (_, i) => i + 1);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

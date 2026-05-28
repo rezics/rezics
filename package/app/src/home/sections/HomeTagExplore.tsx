@@ -20,7 +20,7 @@ export const HomeTagExplore: React.FC<HomeTagExploreProps> = ({
   maxTags = 18,
 }) => {
   const { t } = useTranslation(["page"]);
-const locale = useLocale();
+  const locale = useLocale();
   const resolvedTitle = title ?? t("page:home_sections_tag_explore");
 
   const { data, isLoading, error } = useQuery(tagQueries.list({ limit }));

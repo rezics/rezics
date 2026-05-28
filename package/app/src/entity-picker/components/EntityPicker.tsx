@@ -85,7 +85,7 @@ export function EntityPicker({
   requireCreditRoleForSelect = false,
 }: EntityPickerProps) {
   const { t } = useTranslation(["entity"]);
-const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [creditRoleFilter, setCreditRoleFilter] =
     useState<CreditRoleFilterValue>(lockedCreditRole ?? ALL_CREDIT_ROLES);
@@ -175,7 +175,9 @@ const [query, setQuery] = useState("");
       <DialogContent className="max-w-xl gap-0 overflow-hidden p-0">
         <DialogHeader className="border-b border-border-whisper p-4">
           <DialogTitle>{t("entity:picker_title")}</DialogTitle>
-          <DialogDescription>{t("entity:picker_description")}</DialogDescription>
+          <DialogDescription>
+            {t("entity:picker_description")}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex gap-2 p-3">

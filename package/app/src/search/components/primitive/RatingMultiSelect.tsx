@@ -30,7 +30,7 @@ export const RatingMultiSelect: React.FC<RatingMultiSelectProps> = ({
   minWidth = 160,
 }) => {
   const { t } = useTranslation(["search"]);
-const selected = new Set(value ?? []);
+  const selected = new Set(value ?? []);
   const allowSet = allowed ? new Set(allowed) : null;
   const labelText = t("search:filters_rating");
 

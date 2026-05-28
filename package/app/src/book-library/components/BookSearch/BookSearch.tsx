@@ -54,7 +54,7 @@ export const BookSearch: React.FC<BookSearchProps> = ({
   keywordPlaceholder,
 }) => {
   const { t } = useTranslation(["editor", "search"]);
-const keyword = bind("keyword");
+  const keyword = bind("keyword");
   const tags = bind("tags");
   const ratings = bind("ratings");
   const isLicensed = bind("isLicensed");
@@ -79,7 +79,9 @@ const keyword = bind("keyword");
             onPatch={(p) => patch(p)}
             onSubmit={onSubmit}
             middleware={middleware}
-            placeholder={keywordPlaceholder ?? t("editor:placeholders_search_books")}
+            placeholder={
+              keywordPlaceholder ?? t("editor:placeholders_search_books")
+            }
           />
         </div>
         {onToggleAdvanced && (

@@ -82,8 +82,7 @@ async function main(): Promise<void> {
   }
 
   const callSitesByKey = new Map<string, CallSiteCounts>();
-  const callPattern = (key: string) =>
-    new RegExp(`\\bm\\.${key}\\b`, "g");
+  const callPattern = (key: string) => new RegExp(`\\bm\\.${key}\\b`, "g");
 
   for (const [pkg, files] of filesByPackage) {
     for (const file of files) {
@@ -142,15 +141,19 @@ async function main(): Promise<void> {
     });
   }
 
-  groups.sort((a, b) => b.keys.length - a.keys.length || a.value.localeCompare(b.value));
+  groups.sort(
+    (a, b) => b.keys.length - a.keys.length || a.value.localeCompare(b.value),
+  );
 
   const summary = {
     generatedAt: new Date().toISOString(),
     totalKeys: Object.keys(en).filter((k) => k !== "$schema").length,
     duplicateGroupCount: groups.length,
     duplicateKeyCount: groups.reduce((n, g) => n + g.keys.length, 0),
-    semanticGroups: groups.filter((g) => g.classification === "semantic").length,
-    accidentalGroups: groups.filter((g) => g.classification === "accidental").length,
+    semanticGroups: groups.filter((g) => g.classification === "semantic")
+      .length,
+    accidentalGroups: groups.filter((g) => g.classification === "accidental")
+      .length,
   };
 
   const report = { summary, groups };

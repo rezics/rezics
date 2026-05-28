@@ -50,7 +50,7 @@ export function FederatedSearchPage({
   onCategoryChange,
 }: FederatedSearchPageProps) {
   const { t } = useTranslation(["common"]);
-const injectedTags = useInjectedTags();
+  const injectedTags = useInjectedTags();
 
   const initial = useMemo<SearchQuery>(() => {
     const base: SearchQuery = initialQuery ?? {};

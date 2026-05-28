@@ -31,7 +31,7 @@ export const LinearChapterList: React.FC<LinearChapterListProps> = ({
   height = 300,
 }) => {
   const { t } = useTranslation(["book", "common"]);
-const { data, isLoading, error } = useQuery(
+  const { data, isLoading, error } = useQuery(
     bookQueries.contentStructure(bookId),
   );
 

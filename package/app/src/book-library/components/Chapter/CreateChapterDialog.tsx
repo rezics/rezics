@@ -37,7 +37,7 @@ export function CreateChapterDialog({
   currentEditParentId,
 }: CreateChapterDialogProps) {
   const { t } = useTranslation(["auth", "book", "common"]);
-const userId = useCurrentUserId();
+  const userId = useCurrentUserId();
   const { show } = useAlertStore();
 
   const [title, setTitle] = useState("");
@@ -114,7 +114,9 @@ const userId = useCurrentUserId();
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="chapter-title">{t("book:edit_chapter_title")}</Label>
+            <Label htmlFor="chapter-title">
+              {t("book:edit_chapter_title")}
+            </Label>
             <Input
               id="chapter-title"
               value={title}

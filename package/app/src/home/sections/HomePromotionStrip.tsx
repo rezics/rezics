@@ -13,7 +13,7 @@ export const HomePromotionStrip: React.FC<HomePromotionStripProps> = ({
   items,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedItems = items ?? [
+  const resolvedItems = items ?? [
     { text: t("page:home_sections_promotion_item_1") },
     { text: t("page:home_sections_promotion_item_2") },
     { text: t("page:home_sections_promotion_item_3") },

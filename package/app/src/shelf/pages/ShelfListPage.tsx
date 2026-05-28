@@ -8,7 +8,7 @@ import { ShelfCard } from "../components/ShelfCard";
 
 export function ShelfListPage() {
   const { t } = useTranslation(["common", "entity"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery(
       shelfInfiniteListQuery({
@@ -22,7 +22,9 @@ const navigate = useNavigate();
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="mb-6 flex flex-row items-center justify-between">
-        <h1 className="text-2xl font-semibold">{t("entity:shelf_list_title")}</h1>
+        <h1 className="text-2xl font-semibold">
+          {t("entity:shelf_list_title")}
+        </h1>
         <div className="flex flex-row gap-2">
           <Button
             variant="ghost"
@@ -58,7 +60,9 @@ const navigate = useNavigate();
                 disabled={isFetchingNextPage}
                 onClick={() => void fetchNextPage()}
               >
-                {isFetchingNextPage ? t("common:loading") : t("common:load_more")}
+                {isFetchingNextPage
+                  ? t("common:loading")
+                  : t("common:load_more")}
               </Button>
             </div>
           )}

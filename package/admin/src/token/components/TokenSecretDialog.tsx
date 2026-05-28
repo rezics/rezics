@@ -27,7 +27,7 @@ export const TokenSecretDialog: FC<TokenSecretDialogProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(["admin", "common"]);
-const copyToClipboard = async () => {
+  const copyToClipboard = async () => {
     if (!secret) return;
     try {
       await navigator.clipboard.writeText(secret);

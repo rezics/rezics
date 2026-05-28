@@ -31,7 +31,7 @@ export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
   onAgree,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-const body = content ?? post?.content;
+  const body = content ?? post?.content;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
@@ -47,7 +47,9 @@ const body = content ?? post?.content;
           </Button>
           {joining && (
             <Button onClick={onAgree} disabled={joinPending}>
-              {joinPending ? t("entity:realm_joining") : t("entity:realm_agree_and_join")}
+              {joinPending
+                ? t("entity:realm_joining")
+                : t("entity:realm_agree_and_join")}
             </Button>
           )}
         </DialogFooter>

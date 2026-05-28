@@ -19,7 +19,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
   remarkId,
 }) => {
   const { t } = useTranslation(["common"]);
-const composerRef = useFocusReplyFromQuery();
+  const composerRef = useFocusReplyFromQuery();
   const { data: remark, isLoading } = useQuery(postQueries.detail(remarkId));
   const editorEntry = useEditorEntry({
     surface: "remark",

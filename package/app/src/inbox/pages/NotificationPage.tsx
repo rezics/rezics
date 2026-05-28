@@ -12,7 +12,7 @@ import { NotificationCard } from "../components/NotificationCard.tsx";
 
 export const NotificationPage: React.FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-const { data, isLoading, isError } = useNotifications(1, 50);
+  const { data, isLoading, isError } = useNotifications(1, 50);
   const markAsRead = useMarkAsReadMutation();
   const markAllAsRead = useMarkAllAsReadMutation();
 

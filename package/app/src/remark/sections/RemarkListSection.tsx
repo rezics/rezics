@@ -18,7 +18,7 @@ export const RemarkListSection: React.FC<RemarkListSectionProps> = ({
   limit = 20,
 }) => {
   const { t } = useTranslation(["common"]);
-const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     ...postQueries.list(
       workUnitId
         ? {

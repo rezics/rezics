@@ -40,7 +40,7 @@ export function CreateChapterDialog({
   currentEditParentId,
 }: CreateChapterDialogProps) {
   const { t } = useTranslation(["book", "common"]);
-const userId = useCurrentUserId();
+  const userId = useCurrentUserId();
   const { show } = useAlertStore();
 
   const [title, setTitle] = useState("");

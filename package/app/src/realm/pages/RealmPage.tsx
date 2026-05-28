@@ -70,7 +70,7 @@ export function RealmPage({
   onFeedTagIdsChange,
 }: RealmPageProps) {
   const { t } = useTranslation(["entity"]);
-const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
+  const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const permission = useServerPermission();
   const [localTab, setLocalTab] = useState<RealmPageTab>(tab ?? "feed");
@@ -95,7 +95,9 @@ const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   }
 
   if (!realm) {
-    return <p className="py-8 text-text-secondary">{t("entity:realm_not_found")}</p>;
+    return (
+      <p className="py-8 text-text-secondary">{t("entity:realm_not_found")}</p>
+    );
   }
 
   const translation = getTranslation(realm.translations);
@@ -157,7 +159,9 @@ const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
             {t("entity:realm_member_count", { count: realm.memberCount ?? 0 })}
           </span>
           {realm.isPublic && (
-            <span className="text-xs text-text-brand">{t("entity:realm_public")}</span>
+            <span className="text-xs text-text-brand">
+              {t("entity:realm_public")}
+            </span>
           )}
           {realm.isOfficial && (
             <span className="text-xs text-text-secondary">
@@ -173,7 +177,9 @@ const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
           {showWikiTab && <TabsTrigger value="wiki">Wiki</TabsTrigger>}
           <TabsTrigger value="tags">{t("entity:realm_tab_tags")}</TabsTrigger>
           <TabsTrigger value="about">About</TabsTrigger>
-          <TabsTrigger value="members">{t("entity:realm_tab_members")}</TabsTrigger>
+          <TabsTrigger value="members">
+            {t("entity:realm_tab_members")}
+          </TabsTrigger>
           {showModerationTab ? (
             <TabsTrigger value="moderation">Moderation</TabsTrigger>
           ) : null}

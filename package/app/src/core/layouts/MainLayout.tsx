@@ -25,7 +25,7 @@ export interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { t } = useTranslation(["shell"]);
-useSyncUserProfile();
+  useSyncUserProfile();
   const navigate = useNavigate();
   const location = useLocation();
   const pendingRegistration = useAuthSessionStore(

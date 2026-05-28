@@ -144,7 +144,7 @@ export function MoveToParentDialog({
   onConfirm,
 }: MoveToParentDialogProps) {
   const { t } = useTranslation(["book", "common"]);
-const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | number | null>(null);
 
   const excludeIds = useMemo(

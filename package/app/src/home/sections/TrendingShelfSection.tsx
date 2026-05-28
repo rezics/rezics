@@ -20,7 +20,7 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
   limit = 8,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedTitle = title ?? t("page:home_sections_trending_shelves");
+  const resolvedTitle = title ?? t("page:home_sections_trending_shelves");
   const { data, isLoading, error } = useQuery(
     contentSearchQueryOptions({ type: "SHELF", offset: 0, limit }),
   );

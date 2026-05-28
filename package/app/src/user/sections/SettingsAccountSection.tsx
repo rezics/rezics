@@ -29,7 +29,7 @@ import { useRequireAuth } from "@/user/pages/useAuth";
 
 export const SettingsAccountSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-useRequireAuth();
+  useRequireAuth();
   const { data: emailState, isLoading } = useQuery(
     userQueries.emailVerification(),
   );
@@ -130,7 +130,9 @@ useRequireAuth();
 
         {pendingEmail && pendingEmail !== currentEmail && (
           <p className="text-sm text-text-secondary mb-3">
-            {t("settings:account_pending_verification", { email: pendingEmail })}
+            {t("settings:account_pending_verification", {
+              email: pendingEmail,
+            })}
           </p>
         )}
 

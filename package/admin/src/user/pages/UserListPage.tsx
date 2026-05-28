@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
@@ -31,7 +32,7 @@ function fmtDate(v?: string | Date) {
 
 export default function UserListPage() {
   const { t } = useTranslation(["admin", "common"]);
-const matchRoute = useMatchRoute();
+  const matchRoute = useMatchRoute();
   const isMeiliMode = Boolean(matchRoute({ to: "/user/meili" }));
   const [q, setQ] = React.useState("");
   const [query, setQuery] = React.useState("");
@@ -137,14 +138,14 @@ const matchRoute = useMatchRoute();
     ];
     return cols;
   }, [
-    m.admin_user_actions,
-    m.admin_user_join_date,
-    m.admin_user_name_label,
-    m.admin_user_rezics_email_label,
-    m.admin_user_roles,
-    m.admin_user_slug,
-    m.admin_user_user_id,
-    m.common_edit,
+    getI18nRuntime().i18n.t("admin:user_actions"),
+    getI18nRuntime().i18n.t("admin:user_join_date"),
+    getI18nRuntime().i18n.t("admin:user_name_label"),
+    getI18nRuntime().i18n.t("admin:user_rezics_email_label"),
+    getI18nRuntime().i18n.t("admin:user_roles"),
+    getI18nRuntime().i18n.t("admin:user_slug"),
+    getI18nRuntime().i18n.t("admin:user_user_id"),
+    getI18nRuntime().i18n.t("common:edit"),
   ]);
 
   return (

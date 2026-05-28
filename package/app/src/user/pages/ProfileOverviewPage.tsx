@@ -16,7 +16,7 @@ import {
 
 export const ProfileOverviewPage: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-const { user, userId } = useProfileContext();
+  const { user, userId } = useProfileContext();
 
   // MOCK: pinned items — first 6 published units by this user
   const pinnedQuery = useQuery(

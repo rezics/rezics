@@ -30,7 +30,7 @@ export function ExcerptEditPage({
   targetUnitId,
 }: ExcerptEditPageProps) {
   const { t } = useTranslation(["common", "community"]);
-const { show } = useAlertStore();
+  const { show } = useAlertStore();
   const translation = data.translations?.[0];
   const extra = (data.extra as Record<string, any>) ?? {};
   const source = extra.source as ExcerptSource | undefined;
@@ -41,7 +41,9 @@ const { show } = useAlertStore();
       console.log("update excerpt success", result);
     },
     onError: (error) => {
-      show(t("community:excerpt_messages_update_failed", { error: String(error) }));
+      show(
+        t("community:excerpt_messages_update_failed", { error: String(error) }),
+      );
       console.error("update excerpt failed", error);
     },
   });
@@ -70,7 +72,9 @@ const { show } = useAlertStore();
   return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-1">
-        <Label htmlFor="excerpt-title">{t("community:excerpt_form_title")}</Label>
+        <Label htmlFor="excerpt-title">
+          {t("community:excerpt_form_title")}
+        </Label>
         <Input
           id="excerpt-title"
           value={translation?.title || ""}
@@ -118,7 +122,7 @@ const { show } = useAlertStore();
 
 export function ExcerptEditPageContainer() {
   const { t } = useTranslation(["common", "community"]);
-const { unitId } = excerptEditRoute.useParams();
+  const { unitId } = excerptEditRoute.useParams();
   const {
     data: unitData,
     isLoading,

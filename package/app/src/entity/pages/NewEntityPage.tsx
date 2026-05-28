@@ -13,7 +13,7 @@ import { unitHref } from "@/shared/ui/link";
 
 export function NewEntityPage() {
   const { t } = useTranslation(["common", "entity", "shell"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("en");
   const [kind, setKind] = useState<EntityKind>(entityKinds[0]);

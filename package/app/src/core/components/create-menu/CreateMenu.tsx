@@ -12,7 +12,7 @@ import { CreateMenuItem } from "./CreateMenuItem";
 
 export const CreateMenu: React.FC = () => {
   const { t } = useTranslation(["common", "shell"]);
-const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger

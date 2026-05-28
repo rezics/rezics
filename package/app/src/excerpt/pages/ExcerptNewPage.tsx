@@ -11,7 +11,7 @@ import { ExcerptEditPage } from "./ExcerptEditPage";
 
 export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { t } = useTranslation(["auth", "common", "community"]);
-const [excerptData, setExcerptData] = useState<UnitFormData>(
+  const [excerptData, setExcerptData] = useState<UnitFormData>(
     {} as UnitFormData,
   );
   const { show } = useAlertStore();
@@ -54,9 +54,13 @@ const [excerptData, setExcerptData] = useState<UnitFormData>(
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">{t("community:excerpt_new_title")}</h1>
+        <h1 className="text-xl font-semibold">
+          {t("community:excerpt_new_title")}
+        </h1>
         <div className="flex flex-col gap-1 mt-4">
-          <Label htmlFor="book-unit-id">{t("community:excerpt_book_unit_id")}</Label>
+          <Label htmlFor="book-unit-id">
+            {t("community:excerpt_book_unit_id")}
+          </Label>
           <Input
             id="book-unit-id"
             className="w-full"

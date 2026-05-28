@@ -139,7 +139,7 @@ export const BookTocEditor = forwardRef<
   BookTocEditorProps
 >(({ bookTocTree, bookUnitId, bookRating, onDownloadJSON }, ref) => {
   const { t } = useTranslation(["book", "common"]);
-const treeRef = useRef<TreeApi<Chapter> | null>(null);
+  const treeRef = useRef<TreeApi<Chapter> | null>(null);
   const [treeData, setTreeData] = useState<Chapter[]>([]);
   const [treeSize, setTreeSize] = useState({
     width: 0,

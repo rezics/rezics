@@ -37,7 +37,7 @@ const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
   currentUnitId,
 }) => {
   const { t } = useTranslation(["book"]);
-const { data } = useQuery({
+  const { data } = useQuery({
     ...bookQueries.list({ workUnitId, limit: 10 }),
     enabled: Boolean(workUnitId),
   });
@@ -69,7 +69,7 @@ const { data } = useQuery({
 
 export const BookBasicInfoPage: React.FC = () => {
   const { t } = useTranslation(["book"]);
-const { bookId } = useParams({ strict: false }) as { bookId: string };
+  const { bookId } = useParams({ strict: false }) as { bookId: string };
   const { data } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),

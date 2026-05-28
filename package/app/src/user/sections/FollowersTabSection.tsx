@@ -14,7 +14,7 @@ import { useProfileContext } from "@/user/components/ProfileLayout";
 
 export const FollowersTabSection: FC = () => {
   const { t } = useTranslation(["common", "settings"]);
-const { user, userId, isCurrentUser } = useProfileContext();
+  const { user, userId, isCurrentUser } = useProfileContext();
   const [filter, setFilter] = useState("followers");
   const [page, setPage] = useState(1);
   const limit = 20;

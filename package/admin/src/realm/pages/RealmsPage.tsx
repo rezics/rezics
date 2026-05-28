@@ -22,8 +22,12 @@ import { getI18nRuntime } from "@rezics/i18n/runtime";
 type BooleanFilter = "all" | "true" | "false";
 
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
-  if (!translations?.length) return getI18nRuntime().i18n.t("admin:unit_no_title");
-  return translations[0]?.title?.trim() || getI18nRuntime().i18n.t("admin:unit_no_title");
+  if (!translations?.length)
+    return getI18nRuntime().i18n.t("admin:unit_no_title");
+  return (
+    translations[0]?.title?.trim() ||
+    getI18nRuntime().i18n.t("admin:unit_no_title")
+  );
 }
 
 function optionalFilter(value: string) {
@@ -123,7 +127,9 @@ export default function RealmsPage() {
         minWidth: 100,
         cell: (realm) => (
           <span className="text-sm">
-            {realm.isPublic ? getI18nRuntime().i18n.t("common:yes") : getI18nRuntime().i18n.t("common:no")}
+            {realm.isPublic
+              ? getI18nRuntime().i18n.t("common:yes")
+              : getI18nRuntime().i18n.t("common:no")}
           </span>
         ),
       },
@@ -133,7 +139,9 @@ export default function RealmsPage() {
         minWidth: 100,
         cell: (realm) => (
           <span className="text-sm">
-            {realm.isOfficial ? getI18nRuntime().i18n.t("common:yes") : getI18nRuntime().i18n.t("common:no")}
+            {realm.isOfficial
+              ? getI18nRuntime().i18n.t("common:yes")
+              : getI18nRuntime().i18n.t("common:no")}
           </span>
         ),
       },
@@ -180,7 +188,10 @@ export default function RealmsPage() {
   );
 
   return (
-    <Page title={getI18nRuntime().i18n.t("admin:realm_title")} description={getI18nRuntime().i18n.t("admin:realm_description")}>
+    <Page
+      title={getI18nRuntime().i18n.t("admin:realm_title")}
+      description={getI18nRuntime().i18n.t("admin:realm_description")}
+    >
       <SearchablePaginatedTableCard<RealmDTO>
         searchInputId="realm-search"
         searchPlaceholder="title, slug, or keyword"
@@ -235,9 +246,15 @@ export default function RealmsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{getI18nRuntime().i18n.t("common:all")}</SelectItem>
-                  <SelectItem value="true">{getI18nRuntime().i18n.t("common:yes")}</SelectItem>
-                  <SelectItem value="false">{getI18nRuntime().i18n.t("common:no")}</SelectItem>
+                  <SelectItem value="all">
+                    {getI18nRuntime().i18n.t("common:all")}
+                  </SelectItem>
+                  <SelectItem value="true">
+                    {getI18nRuntime().i18n.t("common:yes")}
+                  </SelectItem>
+                  <SelectItem value="false">
+                    {getI18nRuntime().i18n.t("common:no")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -256,9 +273,15 @@ export default function RealmsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{getI18nRuntime().i18n.t("common:all")}</SelectItem>
-                  <SelectItem value="true">{getI18nRuntime().i18n.t("common:yes")}</SelectItem>
-                  <SelectItem value="false">{getI18nRuntime().i18n.t("common:no")}</SelectItem>
+                  <SelectItem value="all">
+                    {getI18nRuntime().i18n.t("common:all")}
+                  </SelectItem>
+                  <SelectItem value="true">
+                    {getI18nRuntime().i18n.t("common:yes")}
+                  </SelectItem>
+                  <SelectItem value="false">
+                    {getI18nRuntime().i18n.t("common:no")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

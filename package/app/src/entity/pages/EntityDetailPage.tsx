@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { entityDetailQueryOptions, useEntity } from "@rezics/api/entity";
 import { useServerPermission } from "@rezics/api/hooks";
 import { BasicAdminPermission } from "@rezics/contract";
@@ -34,7 +35,7 @@ interface EntityDetailPageProps {
 
 export function EntityDetailPage({ unitId }: EntityDetailPageProps) {
   const { t } = useTranslation(["entity"]);
-const { data: entity, isLoading, error } = useEntity(unitId);
+  const { data: entity, isLoading, error } = useEntity(unitId);
   const permission = useServerPermission();
 
   // Hooks must run unconditionally — call works hook with current id regardless
@@ -75,17 +76,17 @@ const { data: entity, isLoading, error } = useEntity(unitId);
   const tabs: Array<{ value: string; label: () => string; show: boolean }> = [
     {
       value: "overview",
-      label: m.entity_tab_overview,
+      label: () => getI18nRuntime().i18n.t("entity:tab_overview"),
       show: hasOverviewData(entity, activeLanguage),
     },
     {
       value: "works",
-      label: m.entity_tab_works,
+      label: () => getI18nRuntime().i18n.t("entity:tab_works"),
       show: works.length > 0,
     },
     {
       value: "about",
-      label: m.entity_tab_about,
+      label: () => getI18nRuntime().i18n.t("entity:tab_about"),
       show: hasAboutData(entity),
     },
     /* AWARDS_TAB: { value: "awards", label: "Awards", show: hasAwardsData(entity) }, */

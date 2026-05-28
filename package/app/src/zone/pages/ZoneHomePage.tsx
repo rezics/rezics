@@ -28,7 +28,7 @@ export type ZoneHomePageProps = {
 
 export const ZoneHomePage: React.FC<ZoneHomePageProps> = ({ slug }) => {
   const { t } = useTranslation(["search"]);
-const locale = useLocale();
+  const locale = useLocale();
   const { zone, isLoading, error } = useZone(slug);
   const navigate = useNavigate();
   const homepageQuery = useQuery(
@@ -46,8 +46,12 @@ const locale = useLocale();
   if (error || !zone) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-semibold mb-2">{t("search:zone_not_found")}</h2>
-        <p className="text-text-secondary">{t("search:zone_not_found_description")}</p>
+        <h2 className="text-2xl font-semibold mb-2">
+          {t("search:zone_not_found")}
+        </h2>
+        <p className="text-text-secondary">
+          {t("search:zone_not_found_description")}
+        </p>
       </div>
     );
   }

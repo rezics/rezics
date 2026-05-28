@@ -14,7 +14,7 @@ export const ShelfDiscussionSection: React.FC<ShelfDiscussionSectionProps> = ({
   shelfUnitId,
 }) => {
   const { t } = useTranslation(["auth", "entity"]);
-const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const auth = useAuthModal("login");
 
   return (

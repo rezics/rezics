@@ -29,7 +29,7 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { t } = useTranslation(["common"]);
-const params = useParams({ strict: false }) as { bookId?: string };
+  const params = useParams({ strict: false }) as { bookId?: string };
   const bookId = params.bookId ?? "";
   const queriesEnabled = Boolean(bookId);
   const { data, isLoading, error } = useQuery({

@@ -35,7 +35,7 @@ export const UserProfilePage: FC<UserProfilePageProps> = ({
   onEditClick,
 }) => {
   const { t } = useTranslation(["common", "community", "settings"]);
-const currentUser = useUserProfileStore((state) => state.user);
+  const currentUser = useUserProfileStore((state) => state.user);
   const meQuery = useQuery({
     ...userQueries.me(),
     enabled: isCurrentUser,

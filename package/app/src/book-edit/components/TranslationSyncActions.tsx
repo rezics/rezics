@@ -39,7 +39,7 @@ export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   onSync,
 }) => {
   const { t } = useTranslation(["page"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const { data: sourceBook, isFetching } = useQuery({
     ...bookQueries.detail(sourceUnitId ?? ""),

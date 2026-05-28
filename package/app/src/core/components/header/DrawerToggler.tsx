@@ -14,7 +14,7 @@ export const DrawerToggler = ({
   sidebarOpen,
 }: DrawerTogglerProps) => {
   const { t } = useTranslation(["common"]);
-const hidden = layoutType === "type-a" && sidebarOpen;
+  const hidden = layoutType === "type-a" && sidebarOpen;
   return (
     <Button
       variant="ghost"

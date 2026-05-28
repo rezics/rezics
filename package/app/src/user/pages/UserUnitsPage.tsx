@@ -48,7 +48,7 @@ const EXTERNAL_PAGE_SIZE = 50;
 
 export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const { t } = useTranslation(["search", "settings"]);
-const ref = useRef<UniversalPaginatorHandle>(null);
+  const ref = useRef<UniversalPaginatorHandle>(null);
   const queryClient = useQueryClient();
 
   const [tab, setTab] = useState<TabKey>("shelf");

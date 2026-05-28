@@ -12,7 +12,7 @@ import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { t } = useTranslation(["common", "community", "page"]);
-const search = useRouterState({ select: (s) => s.location.search ?? "" });
+  const search = useRouterState({ select: (s) => s.location.search ?? "" });
   const searchParams = new URLSearchParams(search);
   const navigate = useNavigate();
   const userId = useCurrentUserId();
@@ -85,7 +85,9 @@ const search = useRouterState({ select: (s) => s.location.search ?? "" });
             : t("community:review_new_title")}
         </h1>
         <div className="mt-4 flex flex-col gap-2">
-          <Label htmlFor="book-unit-id">{t("community:excerpt_book_unit_id")}</Label>
+          <Label htmlFor="book-unit-id">
+            {t("community:excerpt_book_unit_id")}
+          </Label>
           <Input
             id="book-unit-id"
             className="w-full"

@@ -25,7 +25,7 @@ import { Link } from "@/shared/ui/link";
 
 export default function UserEditPage() {
   const { t } = useTranslation(["admin", "common"]);
-const { userId } = Route.useParams();
+  const { userId } = Route.useParams();
   const [error, setError] = React.useState<string | null>(null);
 
   const detailQuery = useQuery(userQueries.adminDetail(userId));

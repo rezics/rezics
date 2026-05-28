@@ -44,7 +44,7 @@ export const ThreadingRail: React.FC<ThreadingRailProps> = ({
   onHoverChange,
 }) => {
   const { t } = useTranslation(["community"]);
-const { hovered, setHovered } = useThreadingHover();
+  const { hovered, setHovered } = useThreadingHover();
 
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -139,7 +139,9 @@ const { hovered, setHovered } = useThreadingHover();
         <button
           type="button"
           aria-label={
-            isCollapsed ? t("community:post_expand_thread") : t("community:post_collapse_thread")
+            isCollapsed
+              ? t("community:post_expand_thread")
+              : t("community:post_collapse_thread")
           }
           onClick={handleClick}
           onMouseEnter={() => handleHoverChange(true)}

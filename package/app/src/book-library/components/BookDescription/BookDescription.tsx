@@ -7,7 +7,7 @@ export const BookDescription: React.FC<BookDescriptionProps> = ({
   description,
 }) => {
   const { t } = useTranslation(["book"]);
-return (
+  return (
     <div>
       <div>
         <div className="flex mb-4">

@@ -30,7 +30,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   peerId,
 }) => {
   const { t } = useTranslation(["community"]);
-const { data, isLoading, isError } = useMessages(conversationId);
+  const { data, isLoading, isError } = useMessages(conversationId);
   const sendMutation = useSendDmMutation();
   const queryClient = useQueryClient();
   const myUnitId = useAuthSessionStore((s) => s.rezics.userId) ?? undefined;

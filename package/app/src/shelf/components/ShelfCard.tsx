@@ -21,7 +21,7 @@ type ShelfCardLinkable = ShelfDTO & {
 
 export const ShelfCard: React.FC<ShelfCardProps> = ({ shelf, className }) => {
   const { t } = useTranslation(["common", "entity"]);
-const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
+  const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
   const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? "";
   const description = contentDocMarkdownFallback(translation?.description);
@@ -40,7 +40,9 @@ const shelfId = shelf.unitId ?? (shelf as ShelfCardLinkable).id;
         {shelf.coverUrl ? (
           <img
             src={shelf.coverUrl}
-            alt={t("entity:shelf_cover_alt", { title: title || t("entity:shelf_untitled") })}
+            alt={t("entity:shelf_cover_alt", {
+              title: title || t("entity:shelf_untitled"),
+            })}
             className="h-full w-full object-cover"
           />
         ) : (

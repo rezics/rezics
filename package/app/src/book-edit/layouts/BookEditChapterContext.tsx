@@ -14,7 +14,7 @@ export function BookEditChapterContext({
   contentUnitId,
 }: BookEditChapterContextProps) {
   const { t } = useTranslation(["settings"]);
-const { data, isError, isPending } = useQuery(
+  const { data, isError, isPending } = useQuery(
     chapterDetailQuery(contentUnitId),
   );
   const title =

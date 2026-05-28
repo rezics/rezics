@@ -17,7 +17,7 @@ export const ExcerptList: React.FC<ExcerptListProps> = ({
   spacing = 2,
 }) => {
   const { t } = useTranslation(["community"]);
-const targetIds = useMemo(
+  const targetIds = useMemo(
     () => units.map((u) => u.id).filter(Boolean) as string[],
     [units],
   );

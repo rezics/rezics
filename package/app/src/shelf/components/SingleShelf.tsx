@@ -13,7 +13,7 @@ interface SingleShelfProps {
 
 export const SingleShelf: React.FC<SingleShelfProps> = ({ shelf }) => {
   const { t } = useTranslation(["common", "entity"]);
-const translation = getTranslation(shelf.translations);
+  const translation = getTranslation(shelf.translations);
   const title = translation?.title ?? t("entity:shelf_untitled");
   const description = contentDocMarkdownFallback(translation?.description);
   const navigate = useNavigate();

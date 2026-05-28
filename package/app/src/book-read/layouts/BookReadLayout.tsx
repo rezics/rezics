@@ -15,7 +15,7 @@ export interface BookReadLayoutProps {
 
 export const BookReadLayout: React.FC<BookReadLayoutProps> = ({ children }) => {
   const { t } = useTranslation(["book"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { bookId, chapterId } = bookReadLayoutRoute.useParams();
   const { sidebarHeightBelow } = useLayoutStore();
 

@@ -18,7 +18,9 @@ export async function adminLogin(email: string, password: string) {
 
   const refreshed = await exchangeForSessionToken();
   if (!refreshed) {
-    throw new Error(getI18nRuntime().i18n.t("admin:user_login_token_exchange_failed"));
+    throw new Error(
+      getI18nRuntime().i18n.t("admin:user_login_token_exchange_failed"),
+    );
   }
 
   await hydrateAuthSessionState();

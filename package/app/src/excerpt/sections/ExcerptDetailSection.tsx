@@ -20,7 +20,7 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
   unitId,
 }) => {
   const { t } = useTranslation(["common", "community"]);
-const composerRef = useFocusReplyFromQuery();
+  const composerRef = useFocusReplyFromQuery();
   const { data: excerpt, isLoading } = useQuery(unitQueries.detail(unitId));
   const editorEntry = useEditorEntry({
     surface: "excerpt",
@@ -67,7 +67,9 @@ const composerRef = useFocusReplyFromQuery();
       <div className="mt-4 flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <AccentBar />
-          <h2 className="text-xl font-bold">{t("community:review_comments")}</h2>
+          <h2 className="text-xl font-bold">
+            {t("community:review_comments")}
+          </h2>
         </div>
         <ReplyComposer
           ref={composerRef}

@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -36,7 +37,7 @@ type SendTestStats = {
 
 export default function AuthEmailPage() {
   const { t } = useTranslation(["admin"]);
-const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [recipientEmail, setRecipientEmail] = useState("");
@@ -81,7 +82,7 @@ const [templates, setTemplates] = useState<EmailTemplate[]>([]);
     return () => {
       cancelled = true;
     };
-  }, [m.admin_auth_email_failed_load_templates]);
+  }, [getI18nRuntime().i18n.t("admin:auth_email_failed_load_templates")]);
 
   useEffect(() => {
     if (!currentTemplate) return;
@@ -121,7 +122,11 @@ const [templates, setTemplates] = useState<EmailTemplate[]>([]);
     return () => {
       cancelled = true;
     };
-  }, [selectedTemplate, formValues, m.admin_auth_email_failed_render_preview]);
+  }, [
+    selectedTemplate,
+    formValues,
+    getI18nRuntime().i18n.t("admin:auth_email_failed_render_preview"),
+  ]);
 
   const handleSendTest = async () => {
     if (!recipientEmail || !selectedTemplate) return;
@@ -154,7 +159,9 @@ const [templates, setTemplates] = useState<EmailTemplate[]>([]);
       setSendResult({
         type: "error",
         message:
-          err instanceof Error ? err.message : t("admin:auth_email_failed_send"),
+          err instanceof Error
+            ? err.message
+            : t("admin:auth_email_failed_send"),
       });
       setSendStats({
         status: "error",

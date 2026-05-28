@@ -44,7 +44,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
   stale,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-const title = entry.title ?? t("entity:pinboard_entry_untitled");
+  const title = entry.title ?? t("entity:pinboard_entry_untitled");
   const summary = entry.summary ?? undefined;
 
   if (variant === "compact") {
@@ -92,7 +92,9 @@ const title = entry.title ?? t("entity:pinboard_entry_untitled");
             ) : null}
             <Badge
               variant="outline"
-              aria-label={t("entity:pinboard_entry_language", { lang: entry.language })}
+              aria-label={t("entity:pinboard_entry_language", {
+                lang: entry.language,
+              })}
             >
               {entry.language}
             </Badge>

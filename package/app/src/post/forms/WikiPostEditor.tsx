@@ -27,7 +27,7 @@ export function WikiPostEditor({
   onCancel,
 }: WikiPostEditorProps) {
   const { t } = useTranslation(["common"]);
-const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
+  const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const resize = useMemo(
     () => ({ height: 220, minHeight: 140, maxHeight: 520 }),

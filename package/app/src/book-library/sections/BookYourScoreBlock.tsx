@@ -35,7 +35,7 @@ export const BookYourScoreBlock: React.FC<BookYourScoreBlockProps> = ({
   realmId = getDefaultRealmId() ?? "default",
 }) => {
   const { t } = useTranslation(["book", "common"]);
-const userId = useCurrentUserId();
+  const userId = useCurrentUserId();
   const isAuthed = Boolean(userId);
 
   const { data: userScores } = useQuery({

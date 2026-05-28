@@ -35,7 +35,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(["common", "community"]);
-const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
+  const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isWikiPost = post.kind === PostKind.WIKI;
 

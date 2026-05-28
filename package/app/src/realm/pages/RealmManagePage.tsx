@@ -50,7 +50,7 @@ interface RealmManagePageProps {
 
 export function RealmManagePage({ realmId }: RealmManagePageProps) {
   const { t } = useTranslation(["common", "entity"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const {
     data: realm,
@@ -217,7 +217,9 @@ const navigate = useNavigate();
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-semibold">{t("entity:realm_manage")}</h1>
+      <h1 className="mb-6 text-2xl font-semibold">
+        {t("entity:realm_manage")}
+      </h1>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <UnitTranslationLanguageBar

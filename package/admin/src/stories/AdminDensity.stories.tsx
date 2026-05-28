@@ -49,7 +49,7 @@ function statusVariant(status: string) {
 
 function UsersTablePreview() {
   const { t } = useTranslation(["admin", "common"]);
-return (
+  return (
     <div className="flex flex-col gap-6 max-w-[720px]">
       <div className="flex flex-row gap-4 items-center">
         <h2 className="flex-1 text-2xl font-bold">{t("admin:nav_users")}</h2>

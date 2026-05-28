@@ -37,7 +37,7 @@ export const TokenCreateDialog: FC<TokenCreateDialogProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(["common", "settings"]);
-const [name, setName] = useState("");
+  const [name, setName] = useState("");
   const [selectedScopes, setSelectedScopes] = useState<Set<string>>(new Set());
   const [expiresAt, setExpiresAt] = useState("");
   const [rawToken, setRawToken] = useState<string | null>(null);
@@ -143,7 +143,9 @@ const [name, setName] = useState("");
         )}
         <div className="space-y-4 pt-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="token-name">{t("settings:tokens_name_label")}</Label>
+            <Label htmlFor="token-name">
+              {t("settings:tokens_name_label")}
+            </Label>
             <Input
               id="token-name"
               value={name}

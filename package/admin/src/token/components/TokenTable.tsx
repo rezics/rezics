@@ -34,7 +34,7 @@ export const TokenTable: FC<TokenTableProps> = ({
   onEdit,
 }) => {
   const { t } = useTranslation(["admin", "common"]);
-const renderScopes = (scopes?: Record<string, string[]>) => {
+  const renderScopes = (scopes?: Record<string, string[]>) => {
     if (!scopes || Object.keys(scopes).length === 0) {
       return (
         <Badge variant="outline" className="text-xs">
@@ -75,20 +75,22 @@ const renderScopes = (scopes?: Record<string, string[]>) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tokens.map((t) => (
-            <TableRow key={t.id}>
-              <TableCell>{t.name}</TableCell>
-              <TableCell>{renderScopes(t.scopes)}</TableCell>
+          {tokens.map((token) => (
+            <TableRow key={token.id}>
+              <TableCell>{token.name}</TableCell>
+              <TableCell>{renderScopes(token.scopes)}</TableCell>
               <TableCell>
-                {t.createdAt ? new Date(t.createdAt).toLocaleString() : "-"}
+                {token.createdAt
+                  ? new Date(token.createdAt).toLocaleString()
+                  : "-"}
               </TableCell>
               <TableCell>
-                {t.expiresAt
-                  ? new Date(t.expiresAt).toLocaleString()
+                {token.expiresAt
+                  ? new Date(token.expiresAt).toLocaleString()
                   : t("admin:token_never")}
               </TableCell>
               <TableCell>
-                {t.revoked ? t("common:yes") : t("common:no")}
+                {token.revoked ? t("common:yes") : t("common:no")}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex flex-row gap-2 justify-end">
@@ -98,8 +100,8 @@ const renderScopes = (scopes?: Record<string, string[]>) => {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => onEdit(t)}
-                          disabled={t.revoked ?? false}
+                          onClick={() => onEdit(token)}
+                          disabled={token.revoked ?? false}
                           {...props}
                         >
                           <EditIcon className="size-4" />
@@ -116,8 +118,10 @@ const renderScopes = (scopes?: Record<string, string[]>) => {
                           size="sm"
                           variant="ghost"
                           className="text-error-text"
-                          onClick={() => onRevoke(t.id)}
-                          disabled={(t.revoked ?? false) || !!revokingIds[t.id]}
+                          onClick={() => onRevoke(token.id)}
+                          disabled={
+                            (token.revoked ?? false) || !!revokingIds[token.id]
+                          }
                           {...props}
                         >
                           {t("common:revoke")}

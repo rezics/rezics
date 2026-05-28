@@ -32,7 +32,7 @@ import {
  */
 export const TokenPage: FC = () => {
   const { t } = useTranslation(["admin"]);
-const { data, isLoading, error } = useQuery(tokenQueries.list());
+  const { data, isLoading, error } = useQuery(tokenQueries.list());
 
   const [tokens, setTokens] = useState<ApiTokenDTO[]>([]);
 

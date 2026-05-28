@@ -43,7 +43,7 @@ export const RegisterPage: FC<RegisterPageProps> = ({
   onLoginClick,
 }) => {
   const { t } = useTranslation(["auth", "common"]);
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [data, setData] = useState<RegisterData>({
     email: "",

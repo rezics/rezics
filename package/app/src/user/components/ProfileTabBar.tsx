@@ -1,3 +1,19 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  profile_tab_overview: () =>
+    getI18nRuntime().i18n.t("settings:profile_tab_overview"),
+  profile_tab_content: () =>
+    getI18nRuntime().i18n.t("settings:profile_tab_content"),
+  profile_tab_shelves: () =>
+    getI18nRuntime().i18n.t("settings:profile_tab_shelves"),
+  profile_tab_realms: () =>
+    getI18nRuntime().i18n.t("settings:profile_tab_realms"),
+  profile_tab_followers: () =>
+    getI18nRuntime().i18n.t("settings:profile_tab_followers"),
+  profile_tab_reactions: () =>
+    getI18nRuntime().i18n.t("settings:profile_tab_reactions"),
+} as const;
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";

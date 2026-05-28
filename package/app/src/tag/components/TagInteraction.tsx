@@ -81,7 +81,7 @@ export const TagInteraction: React.FC<TagInteractionProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["common", "community"]);
-const [state, dispatch] = useTagInteractionReducer();
+  const [state, dispatch] = useTagInteractionReducer();
   const defaultNavigate = useNavigateToTagSearch();
   const navigateToTagSearch = onSearchTags ?? defaultNavigate;
   const voteMutation = useCastTagVoteMutation();
@@ -320,7 +320,9 @@ const [state, dispatch] = useTagInteractionReducer();
       {state.selected.length > 0 && (
         <div className="mt-3 p-2 flex items-center justify-between gap-2 rounded-md border border-border-whisper bg-surface-elevated">
           <p className="text-sm px-1">
-            {t("community:tag_selected_count", { count: state.selected.length })}
+            {t("community:tag_selected_count", {
+              count: state.selected.length,
+            })}
           </p>
           <div className="flex items-center gap-2">
             <Button

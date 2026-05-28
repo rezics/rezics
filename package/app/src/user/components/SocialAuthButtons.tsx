@@ -1,6 +1,6 @@
 import { authApi, authQueries } from "@rezics/api/auth/auth";
 import type { AuthProvider } from "@rezics/contract";
-import { type ReactiveMessageBag, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { AuthProviderButton } from "@rezics/ui/composite/auth/AuthProviderButton.tsx";
 import {
   Alert,
@@ -12,14 +12,11 @@ import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
 import { buildOAuthCallbackTargets } from "../models/authRedirect";
 import { providerIcons } from "./providerIcons";
-
-type SocialAuthMessages = ReactiveMessageBag<typeof i18nMessages>;
-
 // TODO 横条文字应该居中一点，更美观
 
 function formatProviderLabel(
   providerId: string,
-  m: SocialAuthMessages,
+  t: (key: string) => string,
 ): string {
   switch (providerId) {
     case "github":
@@ -48,7 +45,7 @@ export const SocialAuthButtons: FC<{
   mode: "login" | "register";
 }> = ({ mode }) => {
   const { t } = useTranslation(["auth"]);
-const [error, setError] = useState<string>();
+  const [error, setError] = useState<string>();
   const [providerLoading, setProviderLoading] = useState<string>();
   const { data, isLoading } = useQuery(authQueries.providers());
 
@@ -101,9 +98,9 @@ const [error, setError] = useState<string>();
         disabled={Boolean(providerLoading && providerLoading !== provider.id)}
         label={
           isCompact
-            ? formatProviderLabel(provider.id, m)
+            ? formatProviderLabel(provider.id, t)
             : t("auth:flow_continue_with_provider", {
-                provider: formatProviderLabel(provider.id, m),
+                provider: formatProviderLabel(provider.id, t),
               })
         }
         onClick={() => void startProviderSignIn(provider.id)}

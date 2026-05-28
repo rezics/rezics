@@ -22,7 +22,7 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
   userId,
 }) => {
   const { t } = useTranslation(["settings"]);
-const canEdit = useCanEdit({
+  const canEdit = useCanEdit({
     resource: "unit",
     ownerUnit: { user: { unitId: user.unitId } },
   });

@@ -25,7 +25,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   placeholder,
 }) => {
   const { t } = useTranslation(["community"]);
-const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const { suggestions } = useTagSuggest(inputValue);
 
   const commit = (raw: string) => {

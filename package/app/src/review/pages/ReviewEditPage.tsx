@@ -15,7 +15,7 @@ import { Route as reviewEditRoute } from "@/routes/_editor/review/$reviewId/edit
 
 export function ReviewEditPageContainer() {
   const { t } = useTranslation(["common", "community"]);
-const { reviewId } = reviewEditRoute.useParams();
+  const { reviewId } = reviewEditRoute.useParams();
   const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
   const navigate = useNavigate();
   const [reviewData, setReviewData] = useState<ReviewEditState>({
@@ -111,7 +111,9 @@ const { reviewId } = reviewEditRoute.useParams();
   return (
     <div>
       <div className="max-w-4xl mx-auto mt-4">
-        <h1 className="text-xl font-semibold">{t("community:review_edit_title")}</h1>
+        <h1 className="text-xl font-semibold">
+          {t("community:review_edit_title")}
+        </h1>
         <ReviewForm
           data={reviewData}
           setData={setReviewData}

@@ -61,7 +61,7 @@ export function BookAuthorityPanel({
   unitId?: string;
 }) {
   const { t } = useTranslation(["common", "editor"]);
-const [selectedPath, setSelectedPath] = useState<string>(
+  const [selectedPath, setSelectedPath] = useState<string>(
     EDITORIAL_LOCK_PATH_OPTIONS[1],
   );
   const [customPath, setCustomPath] = useState("");
@@ -384,7 +384,7 @@ function FieldLockRow({
   showMutationControls: boolean;
 }) {
   const { t } = useTranslation(["common", "editor"]);
-const locked = Boolean(lock);
+  const locked = Boolean(lock);
   const covered = allFieldsLocked && !locked;
 
   return (

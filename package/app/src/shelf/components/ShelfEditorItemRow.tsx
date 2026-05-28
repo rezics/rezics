@@ -39,7 +39,7 @@ export function ShelfEditorItemRow({
   preview,
 }: ShelfEditorItemRowProps) {
   const { t } = useTranslation(["common", "entity"]);
-const {
+  const {
     attributes,
     listeners,
     setNodeRef,

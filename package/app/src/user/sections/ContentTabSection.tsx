@@ -1,3 +1,18 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  search_category_reviews: () =>
+    getI18nRuntime().i18n.t("search:category_reviews"),
+  search_category_remarks: () =>
+    getI18nRuntime().i18n.t("search:category_remarks"),
+  search_category_excerpts: () =>
+    getI18nRuntime().i18n.t("search:category_excerpts"),
+  search_category_posts: () => getI18nRuntime().i18n.t("search:category_posts"),
+  shelf_sort_newest: () => getI18nRuntime().i18n.t("entity:shelf_sort_newest"),
+  shelf_sort_oldest: () => getI18nRuntime().i18n.t("entity:shelf_sort_oldest"),
+  profile_sort_most_replies: () =>
+    getI18nRuntime().i18n.t("settings:profile_sort_most_replies"),
+} as const;
 import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -29,7 +44,7 @@ const SORT_OPTION_LABEL = {
 
 export const ContentTabSection: FC = () => {
   const { t } = useTranslation(["common", "entity", "search", "settings"]);
-const { userId } = useProfileContext();
+  const { userId } = useProfileContext();
   const [kind, setKind] = useState("REVIEW");
   const [filters, setFilters] = useState<Record<string, string>>({
     sort: "createdAt:desc",
@@ -131,7 +146,10 @@ const { userId } = useProfileContext();
                 {t("common:previous_page")}
               </Button>
               <span className="text-sm text-text-secondary">
-                {t("common:page_of", { page: currentPage + 1, total: totalPages })}
+                {t("common:page_of", {
+                  page: currentPage + 1,
+                  total: totalPages,
+                })}
               </span>
               <Button
                 type="button"

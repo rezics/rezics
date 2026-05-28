@@ -28,7 +28,7 @@ export const KeywordInput: React.FC<KeywordInputProps> = ({
   label,
 }) => {
   const { t } = useTranslation(["common"]);
-const [local, setLocal] = useState(value);
+  const [local, setLocal] = useState(value);
 
   const commit = () => {
     const trimmed = local.trim();

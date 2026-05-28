@@ -23,7 +23,7 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
   onReplyInvoke,
 }) => {
   const { t } = useTranslation(["page"]);
-const rating = (remark.extra as { rating?: number } | null)?.rating;
+  const rating = (remark.extra as { rating?: number } | null)?.rating;
   const isRecommended = !!(rating && rating >= 3);
   const bookUnitId = remark.targetUnitId;
   const hydrationIds = useMemo(

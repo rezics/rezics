@@ -21,7 +21,7 @@ export const HomeTrendingWiki: React.FC<HomeTrendingWikiProps> = ({
   limit = 6,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedTitle = title ?? t("page:home_sections_trending_wiki");
+  const resolvedTitle = title ?? t("page:home_sections_trending_wiki");
 
   const { data, isLoading, error } = useQuery(
     bookQueries.list({ start: 0, limit }),

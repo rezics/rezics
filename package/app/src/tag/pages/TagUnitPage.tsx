@@ -8,12 +8,14 @@ import { TagDetailCard } from "../components/TagCards";
 
 export function TagUnitPage() {
   const { t } = useTranslation(["common", "community"]);
-const { unitId } = tagUnitRoute.useParams();
+  const { unitId } = tagUnitRoute.useParams();
   const { data, isLoading, error } = useQuery(tagQueries.detail(unitId));
   if (isLoading) {
     return (
       <div className="w-11/12 mx-auto mt-16">
-        <div className="text-sm text-gray-500">{t("community:tag_loading")}</div>
+        <div className="text-sm text-gray-500">
+          {t("community:tag_loading")}
+        </div>
       </div>
     );
   }

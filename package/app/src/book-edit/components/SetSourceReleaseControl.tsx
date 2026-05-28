@@ -31,7 +31,7 @@ export const SetSourceReleaseControl: React.FC<
   SetSourceReleaseControlProps
 > = ({ book, language, currentSourceReleaseUnitId }) => {
   const { t } = useTranslation(["page"]);
-const canonicalWorkUnitId = releaseWorkUnitId(book) ?? book.unitId;
+  const canonicalWorkUnitId = releaseWorkUnitId(book) ?? book.unitId;
   const { data: siblings } = useQuery({
     ...bookQueries.list({ workUnitId: canonicalWorkUnitId, limit: 50 }),
     enabled: Boolean(book.unitId),

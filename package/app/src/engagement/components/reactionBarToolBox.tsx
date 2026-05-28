@@ -23,7 +23,7 @@ export const ReactionBarToolBox: React.FC<ReactionBarToolBoxProps> = ({
   itemText = "Source: REZICS",
 }) => {
   const { t } = useTranslation(["common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const origin = window?.location?.origin;
   const itemFullUrl = origin + itemUrl;
 

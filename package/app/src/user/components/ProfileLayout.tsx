@@ -26,7 +26,7 @@ export function useProfileContext(): ProfileContextValue {
 
 export const ProfileLayout: FC = () => {
   const { t } = useTranslation(["settings"]);
-const { userId: routeUserId, userSlug } = useParams({ strict: false }) as {
+  const { userId: routeUserId, userSlug } = useParams({ strict: false }) as {
     userId?: string;
     userSlug?: string;
   };

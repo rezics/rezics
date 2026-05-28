@@ -89,7 +89,7 @@ function SidebarFixture({
 
 function ChapterContextPreview() {
   const { t } = useTranslation(["book", "common", "settings"]);
-return (
+  return (
     <div className="grid gap-2 rounded-md bg-surface-subtle p-3">
       <div className="flex items-center gap-2 text-xs font-medium leading-dense text-text-secondary">
         <BookOpenText className="h-4 w-4" aria-hidden="true" />
@@ -107,7 +107,7 @@ return (
 
 function SharedLayoutShellPreview() {
   const { t } = useTranslation(["book", "common", "settings"]);
-return (
+  return (
     <EditConsoleLayout {...createBookEditConsoleConfig(historyBookId)}>
       <section className="mx-auto max-w-3xl px-6 py-10">
         <h2 className="text-lg font-medium leading-ui text-text-primary">
@@ -120,7 +120,7 @@ return (
 
 function MinimalLayoutShellPreview() {
   const { t } = useTranslation(["book", "common", "settings"]);
-return (
+  return (
     <EditConsoleLayout
       {...createMinimalEditConsoleConfig({
         returnLabel: t("common:back"),

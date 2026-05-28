@@ -42,7 +42,7 @@ export function EntityInlineCreateForm({
   onCancel,
 }: EntityInlineCreateFormProps) {
   const { t } = useTranslation(["common", "entity", "shell"]);
-const [title, setTitle] = useState(initialTitle);
+  const [title, setTitle] = useState(initialTitle);
   const [language, setLanguage] = useState(initialLanguage);
   const [kind, setKind] = useState<EntityKind>(kindHint ?? entityKinds[0]);
   const [eligibleCreditRoles, setEligibleCreditRoles] = useState<
@@ -222,7 +222,7 @@ function EligibilityRoleEditor<Role extends string>({
   onRemove,
 }: EligibilityRoleEditorProps<Role>) {
   const { t } = useTranslation(["common", "entity", "shell"]);
-return (
+  return (
     <div className="flex flex-col gap-2">
       <Label>{label}</Label>
       <div className="flex flex-wrap gap-2">

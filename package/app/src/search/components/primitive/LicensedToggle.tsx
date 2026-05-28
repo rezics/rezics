@@ -13,7 +13,7 @@ export const LicensedToggle: React.FC<LicensedToggleProps> = ({
   onChange,
 }) => {
   const { t } = useTranslation(["search"]);
-return (
+  return (
     <div className="m-0 inline-flex items-center gap-2">
       <Checkbox
         checked={!!value}

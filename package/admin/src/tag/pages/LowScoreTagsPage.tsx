@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   useDeleteRealmTagApplicationMutation,
   usePatchRealmTagApplicationMutation,
@@ -52,7 +53,7 @@ type Row =
 
 export default function LowScoreTagsPage() {
   const { t } = useTranslation(["admin", "common"]);
-const [scope, setScope] = React.useState<LowScoreTagsScope>("global");
+  const [scope, setScope] = React.useState<LowScoreTagsScope>("global");
   const [thresholdInput, setThresholdInput] = React.useState("-100");
   const [realmInput, setRealmInput] = React.useState("");
   const [appliedRealm, setAppliedRealm] = React.useState("");
@@ -285,18 +286,18 @@ const [scope, setScope] = React.useState<LowScoreTagsScope>("global");
     deleteRealmTagApplication.isPending,
     patchUnitTag.isPending,
     patchRealmTagApplication.isPending,
-    m.admin_tag_pin,
-    m.admin_tag_unpin,
-    m.common_actions,
-    m.common_delete,
-    m.common_pinned,
-    m.common_realm,
-    m.common_scope,
-    m.common_score,
-    m.common_tag,
-    m.common_unit,
-    m.common_votes,
-    m.common_yes,
+    getI18nRuntime().i18n.t("admin:tag_pin"),
+    getI18nRuntime().i18n.t("admin:tag_unpin"),
+    getI18nRuntime().i18n.t("common:actions"),
+    getI18nRuntime().i18n.t("common:delete"),
+    getI18nRuntime().i18n.t("common:pinned"),
+    getI18nRuntime().i18n.t("common:realm"),
+    getI18nRuntime().i18n.t("common:scope"),
+    getI18nRuntime().i18n.t("common:score"),
+    getI18nRuntime().i18n.t("common:tag"),
+    getI18nRuntime().i18n.t("common:unit"),
+    getI18nRuntime().i18n.t("common:votes"),
+    getI18nRuntime().i18n.t("common:yes"),
   ]);
 
   return (

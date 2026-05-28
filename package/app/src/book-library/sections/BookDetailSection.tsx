@@ -56,7 +56,7 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   sidebar,
 }) => {
   const { t } = useTranslation(["book", "page"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const activeTab = useActiveTabRoute();
   const [selectedLang, setSelectedLang] = useBookLanguage(bookId, bookInfo);

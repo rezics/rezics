@@ -40,7 +40,7 @@ function formatMetadataValue(value: unknown): string {
 
 export function UnitPageById({ unitId }: { unitId: string }) {
   const { t } = useTranslation(["book", "common", "community", "settings"]);
-const {
+  const {
     data: unit,
     isLoading,
     error,
@@ -82,7 +82,9 @@ const {
   // MOCK: client-side gate until permissions are finalized for translation attach.
   const canAddTranslation = isPost;
   const handleAddTranslation = () => {
-    const lang = window.prompt(t("community:post_add_translation_prompt") ?? "");
+    const lang = window.prompt(
+      t("community:post_add_translation_prompt") ?? "",
+    );
     if (!lang) return;
     attach.mutate({
       unitId: unit.id,
@@ -95,7 +97,9 @@ const {
       {/* ANCHOR Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold">{title || t("book:pages_unit_page")}</h1>
+          <h1 className="text-3xl font-bold">
+            {title || t("book:pages_unit_page")}
+          </h1>
           <p className="text-xs sm:text-sm break-all text-text-secondary">
             ID: {unit.id}
           </p>
@@ -141,7 +145,9 @@ const {
                         </TextLink>
                       )}
                     />
-                    <TooltipContent>{t("settings:user_open_profile")}</TooltipContent>
+                    <TooltipContent>
+                      {t("settings:user_open_profile")}
+                    </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
                 <span className="text-xs text-text-secondary">
@@ -187,7 +193,9 @@ const {
           {content ? (
             <MarkdownContent content={content} />
           ) : (
-            <p className="text-sm text-text-secondary">{t("book:unit_no_content")}</p>
+            <p className="text-sm text-text-secondary">
+              {t("book:unit_no_content")}
+            </p>
           )}
         </div>
       </div>
@@ -200,7 +208,9 @@ const {
         </div>
 
         {metadataEntries.length === 0 ? (
-          <p className="text-sm text-text-secondary">{t("book:unit_no_metadata")}</p>
+          <p className="text-sm text-text-secondary">
+            {t("book:unit_no_metadata")}
+          </p>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {metadataEntries.map(([key, value]) => (

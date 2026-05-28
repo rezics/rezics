@@ -25,7 +25,7 @@ interface BookExtraEditorProps {
 
 function PublishURL({ value, onChange }: BookExtraEditorProps) {
   const { t } = useTranslation(["book", "common", "editor"]);
-const [newUrl, setNewUrl] = useState("");
+  const [newUrl, setNewUrl] = useState("");
   const urls: string[] = Array.isArray(value) ? value : [];
 
   const handleAdd = () => {

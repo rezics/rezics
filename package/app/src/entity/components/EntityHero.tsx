@@ -34,7 +34,7 @@ export function EntityHero({
   canEdit = false,
 }: EntityHeroProps) {
   const { t } = useTranslation(["entity"]);
-const title = getEntityPrimaryTitle(entity, language);
+  const title = getEntityPrimaryTitle(entity, language);
   const tr = getEntityTranslation(entity, language);
   const languages = getEntityLanguages(entity);
 

@@ -15,7 +15,7 @@ import FeedbackList from "../components/FeedbackList";
 
 export const FeedbackPage: React.FC = () => {
   const { t } = useTranslation(["common", "community", "search"]);
-const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const [resolvedFilter, setResolvedFilter] = React.useState<
     "all" | "resolved" | "unresolved"
@@ -27,13 +27,19 @@ const [open, setOpen] = React.useState(false);
   return (
     <div className="max-w-5xl mx-auto p-4">
       <div className="flex flex-row items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">{t("community:feedback_my_title")}</h1>
-        <Button onClick={() => setOpen(true)}>{t("community:feedback_submit")}</Button>
+        <h1 className="text-xl font-semibold">
+          {t("community:feedback_my_title")}
+        </h1>
+        <Button onClick={() => setOpen(true)}>
+          {t("community:feedback_submit")}
+        </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <div className="flex flex-col gap-1 flex-1">
-          <Label htmlFor="feedback-search">{t("community:feedback_search_label")}</Label>
+          <Label htmlFor="feedback-search">
+            {t("community:feedback_search_label")}
+          </Label>
           <Input
             id="feedback-search"
             value={search}

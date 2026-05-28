@@ -20,7 +20,7 @@ import {
 
 export const AuthJwtServicesPage: FC = () => {
   const { t } = useTranslation(["admin"]);
-const { data, isLoading, error } = useQuery(authJwtServiceQueries.list());
+  const { data, isLoading, error } = useQuery(authJwtServiceQueries.list());
 
   const [services, setServices] = useState<JwtServiceDTO[]>([]);
 

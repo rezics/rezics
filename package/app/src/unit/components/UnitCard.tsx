@@ -22,7 +22,7 @@ export function UnitCard({
   className,
 }: UnitCardProps) {
   const { t } = useTranslation(["book"]);
-const titleId = useId();
+  const titleId = useId();
   const isCompact = variant === "compact";
   const addedAt = formatAddedAt(summary.addedAt);
   const author = authorSlot ?? renderAuthor(summary);

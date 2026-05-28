@@ -41,9 +41,12 @@ function originBadge(hit: FederatedRankedHit): string {
     const doc = hit as PostSearchDocument & { _origin: typeof origin };
     return doc.kind ?? getI18nRuntime().i18n.t("search:origin_post");
   }
-  if (origin.indexUid === "realm") return getI18nRuntime().i18n.t("search:origin_realm");
-  if (origin.indexUid === "user") return getI18nRuntime().i18n.t("search:origin_user");
-  if (origin.indexUid === "entities") return getI18nRuntime().i18n.t("search:origin_entity");
+  if (origin.indexUid === "realm")
+    return getI18nRuntime().i18n.t("search:origin_realm");
+  if (origin.indexUid === "user")
+    return getI18nRuntime().i18n.t("search:origin_user");
+  if (origin.indexUid === "entities")
+    return getI18nRuntime().i18n.t("search:origin_entity");
   return origin.indexUid;
 }
 
@@ -75,7 +78,9 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
   if (isLoading) {
     return (
       <div className="py-12 text-center">
-        <p className="text-text-secondary">{getI18nRuntime().i18n.t("common:loading")}</p>
+        <p className="text-text-secondary">
+          {getI18nRuntime().i18n.t("common:loading")}
+        </p>
       </div>
     );
   }
@@ -101,7 +106,9 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
     const visible = sectionEntries.filter(([, sec]) => sec.totalHits > 0);
     if (visible.length === 0) {
-      return <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />;
+      return (
+        <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />
+      );
     }
 
     return (
@@ -138,7 +145,9 @@ export const FederatedResultList: React.FC<FederatedResultListProps> = ({
 
   if (result.kind === "ranked") {
     if (result.hits.length === 0) {
-      return <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />;
+      return (
+        <EmptyState title={getI18nRuntime().i18n.t("search:empty_title")} />
+      );
     }
     return (
       <div>

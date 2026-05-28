@@ -20,6 +20,9 @@ jobs:
       - name: Check convention (routes & folders)
         run: bun run check:convention
 
+      - name: Check i18n keys & namespaces
+        run: bun run check:i18n
+
       - name: Check unused exports & dependencies
         run: bun run knip
 

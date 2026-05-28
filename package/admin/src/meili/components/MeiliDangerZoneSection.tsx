@@ -45,7 +45,7 @@ export function MeiliDangerZoneSection({
   onReset: () => void;
 }) {
   const { t } = useTranslation(["admin", "common"]);
-return (
+  return (
     <>
       <Card className="border-border-whisper bg-surface-base">
         <CardHeader>

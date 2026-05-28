@@ -17,7 +17,7 @@ const BookCard = ({
   className?: string;
 }) => {
   const { t } = useTranslation(["book"]);
-const title = getBookTitle(book);
+  const title = getBookTitle(book);
   const coverUrl = getBookCoverUrl(book);
   const authorName = getBookAuthorName(book);
 

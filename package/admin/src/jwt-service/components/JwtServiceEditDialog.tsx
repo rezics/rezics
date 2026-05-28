@@ -40,7 +40,7 @@ export const JwtServiceEditDialog: FC<Props> = ({
   error,
 }) => {
   const { t } = useTranslation(["admin", "common"]);
-const [issuer, setIssuer] = useState("");
+  const [issuer, setIssuer] = useState("");
   const [audience, setAudience] = useState("");
   const [jwksUrl, setJwksUrl] = useState("");
   const [jwksPath, setJwksPath] = useState("");

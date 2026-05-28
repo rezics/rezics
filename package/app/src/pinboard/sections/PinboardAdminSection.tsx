@@ -1,3 +1,11 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  pinboard_admin_tabs_announcement: () =>
+    getI18nRuntime().i18n.t("entity:pinboard_admin_tabs_announcement"),
+  pinboard_admin_tabs_pinboard: () =>
+    getI18nRuntime().i18n.t("entity:pinboard_admin_tabs_pinboard"),
+} as const;
 import { patchTranslationDetailQueries } from "@rezics/api/react-query/cache-coherence";
 import {
   useAppendRealmExtraMutation,
@@ -62,7 +70,7 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   isDefaultRealm,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-const availableKeys = useMemo<PinboardListKey[]>(
+  const availableKeys = useMemo<PinboardListKey[]>(
     () => (isDefaultRealm ? ["announcement", "pinboard"] : ["pinboard"]),
     [isDefaultRealm],
   );
@@ -70,7 +78,9 @@ const availableKeys = useMemo<PinboardListKey[]>(
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-2">{t("entity:pinboard_admin_title")}</h2>
+      <h2 className="text-lg font-semibold mb-2">
+        {t("entity:pinboard_admin_title")}
+      </h2>
       {availableKeys.length > 1 ? (
         <Tabs
           value={activeKey}
@@ -103,7 +113,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   pinboardKey,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-const { entries, staleIds, isLoading, isError, error, refetch } =
+  const { entries, staleIds, isLoading, isError, error, refetch } =
     usePinboardList({
       realmUnitId,
       pinboardKey,
@@ -163,8 +173,8 @@ const { entries, staleIds, isLoading, isError, error, refetch } =
     pendingRemove,
     realmUnitId,
     pinboardKey,
-    m.pinboard_admin_delete_done,
-    m.pinboard_admin_delete_failed,
+    getI18nRuntime().i18n.t("entity:pinboard_admin_delete_done"),
+    getI18nRuntime().i18n.t("entity:pinboard_admin_delete_failed"),
   ]);
 
   const handleCreate = useCallback(
@@ -197,7 +207,13 @@ const { entries, staleIds, isLoading, isError, error, refetch } =
       toast.success(t("entity:pinboard_editor_created"));
       refetch();
     },
-    [append, realmUnitId, pinboardKey, refetch, m.pinboard_editor_created],
+    [
+      append,
+      realmUnitId,
+      pinboardKey,
+      refetch,
+      getI18nRuntime().i18n.t("entity:pinboard_editor_created"),
+    ],
   );
 
   const handleEditSave = useCallback(
@@ -225,7 +241,11 @@ const { entries, staleIds, isLoading, isError, error, refetch } =
       toast.success(t("entity:pinboard_editor_saved"));
       refetch();
     },
-    [queryClient, refetch, m.pinboard_editor_saved],
+    [
+      queryClient,
+      refetch,
+      getI18nRuntime().i18n.t("entity:pinboard_editor_saved"),
+    ],
   );
 
   return (
@@ -342,7 +362,7 @@ const PinboardEntryEditorDialog: React.FC<PinboardEntryEditorDialogProps> = ({
   onEdit,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-const isEdit = entry !== null;
+  const isEdit = entry !== null;
   const detailQuery = useQuery({
     ...unitDetailQuery(entry?.unitId ?? ""),
     enabled: isEdit && Boolean(entry?.unitId),
@@ -392,7 +412,7 @@ const isEdit = entry !== null;
     drafts,
     onCreate,
     onEdit,
-    m.pinboard_editor_errors_save_failed,
+    getI18nRuntime().i18n.t("entity:pinboard_editor_errors_save_failed"),
   ]);
 
   return (

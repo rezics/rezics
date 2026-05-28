@@ -8,7 +8,7 @@ export function MainSidebarDrawerHeader({
   handleDrawerToggle: () => void;
 }) {
   const { t } = useTranslation(["shell"]);
-// Direction is fixed to LTR by default; document.dir handled at <html>.
+  // Direction is fixed to LTR by default; document.dir handled at <html>.
   const isLtr = typeof document !== "undefined" ? document.dir !== "rtl" : true;
 
   return (

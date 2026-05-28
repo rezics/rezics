@@ -40,7 +40,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["ui"]);
-const isControlled = controlledExpanded !== undefined;
+  const isControlled = controlledExpanded !== undefined;
   const [internalExpanded, setInternalExpanded] = useState(false);
   const isExpanded = isControlled ? controlledExpanded : internalExpanded;
   const resolvedShowMoreLabel = showMoreLabel ?? t("ui:collapsible_show_more");

@@ -43,7 +43,7 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
   cardKeys = DEFAULT_STAT_CARD_KEYS,
 }) => {
   const { t } = useTranslation(["book"]);
-const { data: reviewData } = useQuery({
+  const { data: reviewData } = useQuery({
     ...postQueries.list(
       workUnitId
         ? {

@@ -11,7 +11,7 @@ import { ExcerptNewPage } from "./ExcerptNewPage";
 
 export function ExcerptByBookPage() {
   const { t } = useTranslation(["community"]);
-const { bookId } = excerptByBookRoute.useParams();
+  const { bookId } = excerptByBookRoute.useParams();
   const { data: bookInfo } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),

@@ -358,7 +358,7 @@ export interface ChapterListProps {
  */
 export const ChapterList: React.FC<ChapterListProps> = ({ id }) => {
   const { t } = useTranslation(["book", "common"]);
-const { data, isLoading, error } = useQuery(bookQueries.contentStructure(id));
+  const { data, isLoading, error } = useQuery(bookQueries.contentStructure(id));
 
   const bookTocTree: BookContentStructureItem[] = useMemo(
     () => data?.nodes ?? [],

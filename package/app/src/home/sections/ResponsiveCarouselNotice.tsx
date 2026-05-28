@@ -5,7 +5,7 @@ import { NoticeBoard } from "./NoticeBoard";
 
 export function ResponsiveCarouselNotice() {
   const { t } = useTranslation(["page"]);
-const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const noticeRef = useRef<HTMLDivElement>(null);
   const [isWide, setIsWide] = useState(window.innerWidth >= 1200);

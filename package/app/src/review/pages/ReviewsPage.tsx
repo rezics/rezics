@@ -23,7 +23,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
   workUnitId,
 }) => {
   const { t } = useTranslation(["book", "community"]);
-const ref = useRef<UniversalPaginatorHandle>(null);
+  const ref = useRef<UniversalPaginatorHandle>(null);
   const targetUnitId = bookUnitId ?? "";
   const EXTERNAL_PAGE_SIZE = 50;
   const [start, setStart] = useState<number>(0);

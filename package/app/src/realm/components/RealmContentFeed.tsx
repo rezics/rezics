@@ -29,7 +29,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   realmLifecycleState,
 }) => {
   const { t } = useTranslation(["entity"]);
-const { data, error, isError, isLoading } = useQuery(
+  const { data, error, isError, isLoading } = useQuery(
     postQueries.byRealm(realmId, {
       sort,
       ...(tagIds.length > 0 ? { tagIds } : {}),

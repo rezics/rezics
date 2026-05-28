@@ -43,7 +43,7 @@ export function MeiliOperationsSection({
   syncActions: MeiliAction[];
 }) {
   const { t } = useTranslation(["admin"]);
-return (
+  return (
     <div className="space-y-4">
       <Card className="border-border-whisper bg-surface-base">
         <CardHeader>

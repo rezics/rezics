@@ -27,7 +27,7 @@ type SessionStatus = "active" | "missing";
 
 function StatusBadge({ status }: { status: SessionStatus }) {
   const { t } = useTranslation(["admin", "auth", "common"]);
-const map = {
+  const map = {
     active: {
       label: t("common:active"),
       className: "bg-success-fill text-white",
@@ -55,7 +55,7 @@ function SessionRefreshCard({
   refreshLabel: string;
 }) {
   const { t } = useTranslation(["admin", "auth", "common"]);
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const permission = useAuthSessionStore((s) => s.rezics.permission);
@@ -118,7 +118,7 @@ const [loading, setLoading] = useState(false);
 
 function SessionStoreCard() {
   const { t } = useTranslation(["admin", "auth", "common"]);
-const status = useAuthSessionStore((s) => s.status);
+  const status = useAuthSessionStore((s) => s.status);
   const hasAuthIdentity = useAuthSessionStore((s) => s.auth.hasIdentity);
   const hasMemberSession = useAuthSessionStore(
     (s) => s.rezics.hasMemberSession,
@@ -138,7 +138,10 @@ const status = useAuthSessionStore((s) => s.status);
 
   const rows: [string, React.ReactNode][] = [
     [t("admin:auth_status_hydration"), status],
-    [t("admin:auth_identity"), hasAuthIdentity ? t("common:yes") : t("common:no")],
+    [
+      t("admin:auth_identity"),
+      hasAuthIdentity ? t("common:yes") : t("common:no"),
+    ],
     [
       t("admin:auth_member_session"),
       hasMemberSession ? t("common:yes") : t("common:no"),
@@ -204,7 +207,7 @@ const status = useAuthSessionStore((s) => s.status);
 
 function ActionsCard() {
   const { t } = useTranslation(["admin", "auth", "common"]);
-const [loading, setLoading] = useState<string | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     message: string;
@@ -282,7 +285,7 @@ const [loading, setLoading] = useState<string | null>(null);
 
 export default function AuthStatusPage() {
   const { t } = useTranslation(["admin", "auth", "common"]);
-return (
+  return (
     <Page
       title={t("admin:auth_status_title")}
       description={t("admin:auth_status_description")}

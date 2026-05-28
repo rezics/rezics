@@ -14,14 +14,16 @@ export const ScoreOverview: React.FC<ScoreOverviewProps> = ({
   realm = getDefaultRealmId() ?? "default",
 }) => {
   const { t } = useTranslation(["community"]);
-const { data: aggregates } = useQuery(scoreQueries.aggregates(unitId));
+  const { data: aggregates } = useQuery(scoreQueries.aggregates(unitId));
 
   const aggregate =
     aggregates?.find((a) => a.realm === realm) ?? aggregates?.[0];
 
   if (!aggregate) {
     return (
-      <p className="text-sm text-text-secondary">{t("community:score_no_ratings")}</p>
+      <p className="text-sm text-text-secondary">
+        {t("community:score_no_ratings")}
+      </p>
     );
   }
 

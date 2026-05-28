@@ -118,7 +118,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
   tipsLabel,
 }) => {
   const { t } = useTranslation(["ui"]);
-useEffect(() => {
+  useEffect(() => {
     console.log(
       "PaginationBar",
       JSON.stringify({

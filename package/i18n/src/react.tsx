@@ -73,7 +73,9 @@ export function setLocale(locale: Language | string): Promise<void> {
       new RangeError(`Unsupported Rezics locale: ${locale}`),
     );
   }
-  return getI18nRuntime().i18n.changeLanguage(next).then(() => {});
+  return getI18nRuntime()
+    .i18n.changeLanguage(next)
+    .then(() => {});
 }
 
 export function useSetLocale(): (locale: Language | string) => Promise<void> {
@@ -93,9 +95,7 @@ export function subscribeLocale(listener: () => void): () => void {
 }
 
 export function getLocale(): Language {
-  return (
-    normalizeLanguage(getI18nRuntime().i18n.language) ?? DEFAULT_LANGUAGE
-  );
+  return normalizeLanguage(getI18nRuntime().i18n.language) ?? DEFAULT_LANGUAGE;
 }
 
 /**

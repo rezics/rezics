@@ -7,7 +7,7 @@ import { NotificationCard } from "../components/NotificationCard.tsx";
 
 export function NotificationTabSection() {
   const { t } = useTranslation(["common", "settings"]);
-const { data, isLoading, isError } = useNotifications(1, 10);
+  const { data, isLoading, isError } = useNotifications(1, 10);
   const markAsRead = useMarkAsReadMutation();
 
   const items = data?.items ?? [];

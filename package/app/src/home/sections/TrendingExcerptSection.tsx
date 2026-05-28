@@ -17,7 +17,7 @@ export const TrendingExcerptSection: React.FC<TrendingExcerptSectionProps> = ({
   limit = 8,
 }) => {
   const { t } = useTranslation(["page"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const resolvedTitle = title ?? t("page:home_sections_trending_excerpt_title");
   const { items, isLoading, error } = useHomeExcerpts(limit);
 

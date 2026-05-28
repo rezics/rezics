@@ -1,4 +1,4 @@
-import { type ReactiveMessageBag, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Avatar,
   AvatarFallback,
@@ -14,9 +14,6 @@ import { useId, useState } from "react";
 import { FollowButton } from "@/engagement/components/FollowButton";
 import { Link, unitHref } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-
-type UserHoverMessages = ReactiveMessageBag<typeof i18nMessages>;
-
 export type UserHoverPreviewSize = "compact" | "default";
 
 export interface UserHoverPreviewUser {
@@ -58,7 +55,7 @@ export function UserHoverPreview({
   defaultOpen = false,
 }: UserHoverPreviewProps) {
   const { t } = useTranslation(["settings"]);
-const idPrefix = useId();
+  const idPrefix = useId();
   const userId = getOptionalText(user.unitId);
   const slug = getOptionalText(user.slug);
   const displayName = getOptionalText(user.name) ?? slug ?? "Reader";
@@ -99,7 +96,7 @@ const idPrefix = useId();
     );
   }
 
-  const stats = getStats(user, m);
+  const stats = getStats(user, t);
   const profileHref = unitHref({
     type: "USER",
     unitId: userId,
@@ -309,7 +306,7 @@ function getAvatarFallback(
   return fallback.toUpperCase();
 }
 
-function getStats(user: UserHoverPreviewUser, m: UserHoverMessages) {
+function getStats(user: UserHoverPreviewUser, t: (key: string) => string) {
   return [
     { label: t("settings:profile_tab_followers"), value: user.followersCount },
     { label: t("settings:profile_following"), value: user.followingsCount },

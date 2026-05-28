@@ -23,7 +23,7 @@ export interface PostEditPageProps {
 
 export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
   const { t } = useTranslation(["common", "community"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const {
     data: post,
     isLoading,

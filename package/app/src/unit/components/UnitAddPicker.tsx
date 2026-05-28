@@ -51,7 +51,7 @@ export function UnitAddPicker({
   renderItemAction,
 }: UnitAddPickerProps) {
   const { t } = useTranslation(["book"]);
-const explicitContext = useMemo(
+  const explicitContext = useMemo(
     () =>
       workContextUnitId
         ? { unitId: workContextUnitId, title: workContextTitle }
@@ -157,7 +157,7 @@ export function UnitSearchSelect({
   onPreview,
 }: UnitSearchSelectProps) {
   const { t } = useTranslation(["book"]);
-const inputId = useId();
+  const inputId = useId();
   const [query, setQuery] = useState(initialQuery ?? "");
   const trimmedQuery = query.trim();
   const { data, isLoading, error } = useQuery(
@@ -224,7 +224,7 @@ export function UnitUrlImport({
   onPreview,
 }: UnitUrlImportProps) {
   const { t } = useTranslation(["book"]);
-const inputId = useId();
+  const inputId = useId();
   const [input, setInput] = useState(initialInput ?? "");
   const { resolved, parseError } = useUnitCandidates(input);
 
@@ -287,7 +287,7 @@ export function UnitBrowseRelated({
   onPreview,
 }: UnitBrowseRelatedProps) {
   const { t } = useTranslation(["book"]);
-const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(true);
   const { data, isLoading, error } = useQuery({
     ...unitQueries.list({ workUnitId: context.unitId, limit: 100 }),
     enabled: expanded,

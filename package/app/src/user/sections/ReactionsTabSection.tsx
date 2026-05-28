@@ -1,3 +1,11 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  profile_reactions_given: () =>
+    getI18nRuntime().i18n.t("settings:profile_reactions_given"),
+  profile_reactions_received: () =>
+    getI18nRuntime().i18n.t("settings:profile_reactions_received"),
+} as const;
 import {
   useGivenReactionsInfinite,
   useReceivedReactionsInfinite,

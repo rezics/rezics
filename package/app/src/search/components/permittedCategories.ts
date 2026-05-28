@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { SearchCategory, SearchScope } from "@rezics/contract";
 export const ALL_CATEGORIES: readonly SearchCategory[] = [
   "all",
@@ -14,17 +15,17 @@ export const ALL_CATEGORIES: readonly SearchCategory[] = [
 ];
 
 export const CATEGORY_LABELS = {
-  all: search_category_all,
-  mixed: search_category_mixed,
-  books: search_category_books,
-  reviews: search_category_reviews,
-  excerpts: search_category_excerpts,
-  remarks: search_category_remarks,
-  posts: search_category_posts,
-  shelves: search_category_shelves,
-  realms: search_category_realms,
-  users: search_category_users,
-  entities: search_category_entities,
+  all: () => getI18nRuntime().i18n.t("search:category_all"),
+  mixed: () => getI18nRuntime().i18n.t("search:category_mixed"),
+  books: () => getI18nRuntime().i18n.t("search:category_books"),
+  reviews: () => getI18nRuntime().i18n.t("search:category_reviews"),
+  excerpts: () => getI18nRuntime().i18n.t("search:category_excerpts"),
+  remarks: () => getI18nRuntime().i18n.t("search:category_remarks"),
+  posts: () => getI18nRuntime().i18n.t("search:category_posts"),
+  shelves: () => getI18nRuntime().i18n.t("search:category_shelves"),
+  realms: () => getI18nRuntime().i18n.t("search:category_realms"),
+  users: () => getI18nRuntime().i18n.t("search:category_users"),
+  entities: () => getI18nRuntime().i18n.t("search:category_entities"),
 } as const satisfies Record<SearchCategory, () => string>;
 
 export function permittedCategoriesForScope(

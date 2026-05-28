@@ -32,7 +32,7 @@ export function ReviewForm({
   extraActions,
 }: ReviewFormProps) {
   const { t } = useTranslation(["community"]);
-return (
+  return (
     <div className="flex flex-col gap-4 mt-2">
       <div className="flex flex-col gap-2">
         <Label htmlFor="review-title">{t("community:review_form_title")}</Label>
@@ -44,7 +44,9 @@ return (
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium">{t("community:review_form_rating")}</span>
+        <span className="text-sm font-medium">
+          {t("community:review_form_rating")}
+        </span>
         <RatingInput
           value={data._editRating > 0 ? data._editRating : null}
           onChange={(value) => setData({ ...data, _editRating: value ?? 0 })}

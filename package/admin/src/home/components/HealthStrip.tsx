@@ -13,7 +13,7 @@ function StatusDot({ status }: { status: "ok" | "degraded" | "unreachable" }) {
 
 export function HealthStrip({ server, meili }: HealthStripProps) {
   const { t } = useTranslation(["admin"]);
-return (
+  return (
     <Card>
       <CardContent className="flex gap-8 items-center py-3">
         <span className="text-[0.6875rem] uppercase tracking-wider text-text-secondary mr-2">

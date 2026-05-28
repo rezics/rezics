@@ -36,7 +36,7 @@ export const AdvancedSearch: React.FC<AdvancedSearchProps> = ({
   keywordPlaceholder,
 }) => {
   const { t } = useTranslation(["search"]);
-const keyword = bind("keyword");
+  const keyword = bind("keyword");
   const tags = bind("tags");
   const type = bind("type");
   const postKind = bind("postKind");

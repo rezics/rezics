@@ -21,7 +21,7 @@ function normalizeRedirect(to?: string) {
 
 export default function LoginPage() {
   const { t } = useTranslation(["admin", "auth", "common"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { redirect: redirectTo } = Route.useSearch();
 
   const [email, setEmail] = useState("");

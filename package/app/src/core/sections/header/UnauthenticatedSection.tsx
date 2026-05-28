@@ -9,7 +9,7 @@ import { MoreHorizMenu } from "../../components/header/MoreHorizMenu";
 
 const LoginPrompt = () => {
   const { t } = useTranslation(["auth"]);
-const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
   const isMobile = useIsMobile();
 

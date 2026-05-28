@@ -31,7 +31,7 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
 
 export function RealmListPage() {
   const { t } = useTranslation(["common", "entity"]);
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const { data, isLoading } = useRealmSearchQuery({
     isPublic: true,
     sort: { field: "memberCount", order: "desc" },
@@ -43,7 +43,9 @@ const navigate = useNavigate();
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
       <div className="mb-6 flex flex-row items-center justify-between">
-        <h1 className="text-2xl font-semibold">{t("entity:realm_list_title")}</h1>
+        <h1 className="text-2xl font-semibold">
+          {t("entity:realm_list_title")}
+        </h1>
         <div className="flex flex-row gap-2">
           <Button
             variant="ghost"

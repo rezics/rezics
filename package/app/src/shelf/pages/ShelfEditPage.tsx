@@ -39,7 +39,10 @@ function normalizeViewMode(raw: unknown): ShelfView {
 }
 
 const VIEW_MODE_OPTIONS: { value: ShelfView; label: string }[] = [
-  { value: "nested", label: getI18nRuntime().i18n.t("entity:shelf_view_nested") },
+  {
+    value: "nested",
+    label: getI18nRuntime().i18n.t("entity:shelf_view_nested"),
+  },
   { value: "flat", label: getI18nRuntime().i18n.t("entity:shelf_view_flat") },
   // { value: "masonry", label: "Masonry" },
 ];
@@ -109,7 +112,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   useBlocker({
     shouldBlockFn: () => {
       if (!isDirty) return false;
-      return !window.confirm(getI18nRuntime().i18n.t("entity:shelf_unsaved_changes_confirm"));
+      return !window.confirm(
+        getI18nRuntime().i18n.t("entity:shelf_unsaved_changes_confirm"),
+      );
     },
     enableBeforeUnload: () => isDirty,
   });
@@ -151,12 +156,16 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-2xl font-semibold">{getI18nRuntime().i18n.t("entity:shelf_edit_title")}</h1>
+        <h1 className="text-2xl font-semibold">
+          {getI18nRuntime().i18n.t("entity:shelf_edit_title")}
+        </h1>
       </div>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-title">{getI18nRuntime().i18n.t("entity:shelf_title_label")}</Label>
+          <Label htmlFor="edit-shelf-title">
+            {getI18nRuntime().i18n.t("entity:shelf_title_label")}
+          </Label>
           <Input
             id="edit-shelf-title"
             value={title}
@@ -176,7 +185,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="edit-shelf-cover">{getI18nRuntime().i18n.t("entity:shelf_cover_url_label")}</Label>
+          <Label htmlFor="edit-shelf-cover">
+            {getI18nRuntime().i18n.t("entity:shelf_cover_url_label")}
+          </Label>
           <Input
             id="edit-shelf-cover"
             value={coverUrl}
@@ -184,7 +195,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label>{getI18nRuntime().i18n.t("entity:shelf_content_type_label")}</Label>
+          <Label>
+            {getI18nRuntime().i18n.t("entity:shelf_content_type_label")}
+          </Label>
           <SeedTagChipGroup
             value={pinnedTagIds}
             onChange={handlePinnedTagsChange}
@@ -193,7 +206,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
           {setPinnedTagsMutation.isError && (
             <span className="text-xs text-error-text">
               {setPinnedTagsMutation.error?.message ??
-                getI18nRuntime().i18n.t("entity:shelf_content_type_update_failed")}
+                getI18nRuntime().i18n.t(
+                  "entity:shelf_content_type_update_failed",
+                )}
             </span>
           )}
         </div>
@@ -210,7 +225,8 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
             <SelectTrigger id="edit-shelf-default-view" className="w-full">
               <SelectValue>
                 {VIEW_MODE_OPTIONS.find((o) => o.value === defaultViewMode)
-                  ?.label ?? getI18nRuntime().i18n.t("entity:shelf_view_nested")}
+                  ?.label ??
+                  getI18nRuntime().i18n.t("entity:shelf_view_nested")}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>

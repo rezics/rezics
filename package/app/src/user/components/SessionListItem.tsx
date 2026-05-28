@@ -41,7 +41,7 @@ export const SessionListItem: FC<SessionListItemProps> = ({
   revoking,
 }) => {
   const { t } = useTranslation(["settings"]);
-const userAgent = parseUserAgent(
+  const userAgent = parseUserAgent(
     session.userAgent,
     t("settings:security_unknown_device"),
   );

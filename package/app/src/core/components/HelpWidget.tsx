@@ -1,4 +1,4 @@
-import { type ReactiveMessageBag, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import {
   Plus as AddIcon,
@@ -8,9 +8,6 @@ import {
 import * as React from "react";
 import FeedbackDialog from "@/feedback/components/FeedbackDialog";
 import { cn } from "@/shared/utils/css-util";
-
-type HelpMessages = ReactiveMessageBag<typeof i18nMessages>;
-
 export interface HelpFabAction {
   id: string;
   label: string;
@@ -26,7 +23,7 @@ export interface HelpFabProps {
   enterDelayMs?: number;
 }
 
-function getDefaultHelpActions(m: HelpMessages): HelpFabAction[] {
+function getDefaultHelpActions(t: (key: string) => string): HelpFabAction[] {
   return [
     {
       id: "feedback",
@@ -47,10 +44,10 @@ export const HelpFab: React.FC<HelpFabProps> = ({
   enterDelayMs = 0,
 }) => {
   const { t } = useTranslation(["shell"]);
-const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = React.useState(false);
 
-  const list = actions ?? getDefaultHelpActions(m);
+  const list = actions ?? getDefaultHelpActions(t);
   const resolvedAriaLabel = ariaLabel ?? t("shell:app_help_aria_label");
   if (!list.length) return null;
 

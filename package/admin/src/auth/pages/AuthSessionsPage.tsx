@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   accountOperationsQueries,
   useRevokeAuthUserSessionMutation,
@@ -66,7 +67,7 @@ function toSession(row: AdminAuthSession): AuthSession {
 
 export default function AuthSessionsPage() {
   const { t } = useTranslation(["admin", "common"]);
-const [page, setPage] = React.useState(0);
+  const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
   const [authUserIdInput, setAuthUserIdInput] = React.useState("");
   const [authUserId, setAuthUserId] = React.useState("");
@@ -161,11 +162,11 @@ const [page, setPage] = React.useState(0);
     ];
     return cols;
   }, [
-    m.admin_auth_actions_title,
-    m.common_created,
-    m.common_expires,
-    m.common_revoke,
-    m.common_user_agent,
+    getI18nRuntime().i18n.t("admin:auth_actions_title"),
+    getI18nRuntime().i18n.t("common:created"),
+    getI18nRuntime().i18n.t("common:expires"),
+    getI18nRuntime().i18n.t("common:revoke"),
+    getI18nRuntime().i18n.t("common:user_agent"),
   ]);
 
   return (

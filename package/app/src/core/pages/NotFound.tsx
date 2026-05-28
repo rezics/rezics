@@ -21,7 +21,7 @@ export const NotFoundShow: React.FC<NotFoundShowProps> = ({
   onHome,
 }) => {
   const { t } = useTranslation(["common"]);
-const canGoBack = useCanGoBack();
+  const canGoBack = useCanGoBack();
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card surface="contained" className="min-w-md max-w-lg">

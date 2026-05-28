@@ -1,3 +1,18 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
+const i18nMessages = {
+  shelf_sort_manual: () => getI18nRuntime().i18n.t("entity:shelf_sort_manual"),
+  shelf_sort_manual_reversed: () =>
+    getI18nRuntime().i18n.t("entity:shelf_sort_manual_reversed"),
+  shelf_sort_newest: () => getI18nRuntime().i18n.t("entity:shelf_sort_newest"),
+  shelf_sort_oldest: () => getI18nRuntime().i18n.t("entity:shelf_sort_oldest"),
+  shelf_sort_title_az: () =>
+    getI18nRuntime().i18n.t("entity:shelf_sort_title_az"),
+  shelf_sort_title_za: () =>
+    getI18nRuntime().i18n.t("entity:shelf_sort_title_za"),
+  shelf_view_nested: () => getI18nRuntime().i18n.t("entity:shelf_view_nested"),
+  shelf_view_list: () => getI18nRuntime().i18n.t("entity:shelf_view_list"),
+} as const;
 import {
   closestCenter,
   DndContext,
@@ -125,7 +140,7 @@ export function ShelfEditorItemsSection({
   editor,
 }: ShelfEditorItemsSectionProps) {
   const { t } = useTranslation(["common", "entity"]);
-const hydration = useHydratedShelfUnits(editor.units);
+  const hydration = useHydratedShelfUnits(editor.units);
   const [sortState, setSortState] = useState<ShelfSortState>({
     field: "manual",
     order: "desc",
@@ -320,7 +335,9 @@ const hydration = useHydratedShelfUnits(editor.units);
   return (
     <div className="flex flex-col gap-4">
       <hr className="border-border-whisper" />
-      <h2 className="text-lg font-semibold">{t("entity:shelf_edit_items_heading")}</h2>
+      <h2 className="text-lg font-semibold">
+        {t("entity:shelf_edit_items_heading")}
+      </h2>
 
       {mode === "edit" && (
         <UnitAddPicker
@@ -502,7 +519,9 @@ const hydration = useHydratedShelfUnits(editor.units);
         <div className="rounded border border-border-error bg-error-fill/10 p-3 text-sm">
           <div className="flex items-center justify-between gap-2">
             <span>
-              {t("entity:shelf_ops_failed", { count: editor.lastResult.failedCount })}
+              {t("entity:shelf_ops_failed", {
+                count: editor.lastResult.failedCount,
+              })}
             </span>
             <Button
               size="sm"
@@ -532,7 +551,7 @@ interface FooterProps {
 
 function ShelfEditorItemsFooter({ editor }: FooterProps) {
   const { t } = useTranslation(["common", "entity"]);
-if (!editor.dirty) return null;
+  if (!editor.dirty) return null;
   return (
     <div className="sticky bottom-0 -mx-4 px-4 py-3 bg-surface-elevated border-t border-border-whisper flex items-center justify-end gap-2">
       <Button

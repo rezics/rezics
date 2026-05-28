@@ -43,7 +43,7 @@ export function EntityIdentityRow({
   className,
 }: EntityIdentityRowProps) {
   const { t } = useTranslation(["entity"]);
-const title = getEntityIdentityTitle(
+  const title = getEntityIdentityTitle(
     entity,
     fallbackTitle ?? t("entity:untitled"),
   );

@@ -37,7 +37,7 @@ export type ReactionListProps =
 
 export function ReactionList(props: ReactionListProps) {
   const { t } = useTranslation(["common", "community"]);
-const {
+  const {
     mode,
     items,
     isLoading,

@@ -16,7 +16,7 @@ export const PostBodyMarkdown: React.FC<PostBodyMarkdownProps> = ({
   className,
 }) => {
   const { t } = useTranslation(["common"]);
-const markdown = mainMarkdownSource(content) ?? "";
+  const markdown = mainMarkdownSource(content) ?? "";
 
   if (clamp) {
     return (

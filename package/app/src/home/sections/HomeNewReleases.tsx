@@ -26,7 +26,7 @@ export const HomeNewReleases: React.FC<HomeNewReleasesProps> = ({
   limit = 12,
 }) => {
   const { t } = useTranslation(["page"]);
-const resolvedTitle =
+  const resolvedTitle =
     title ?? t("page:home_sections_new_book_recommendations");
 
   const { data, isLoading, error } = useQuery(

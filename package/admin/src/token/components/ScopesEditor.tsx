@@ -43,7 +43,7 @@ const PREDEFINED_PERMISSIONS = ["read", "write", "delete", "admin"];
  */
 export const ScopesEditor: FC<ScopesEditorProps> = ({ scopes, onChange }) => {
   const { t } = useTranslation(["admin", "common"]);
-const [newDomain, setNewDomain] = useState("");
+  const [newDomain, setNewDomain] = useState("");
   const [newPermission, setNewPermission] = useState("");
   const [customDomain, setCustomDomain] = useState("");
 
@@ -81,7 +81,9 @@ const [newDomain, setNewDomain] = useState("");
 
   return (
     <div>
-      <p className="mb-2 font-medium text-sm">{t("admin:token_scopes_title")}</p>
+      <p className="mb-2 font-medium text-sm">
+        {t("admin:token_scopes_title")}
+      </p>
 
       {/* 显示当前 scopes */}
       {Object.keys(scopes).length > 0 && (

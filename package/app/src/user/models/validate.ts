@@ -1,18 +1,27 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 export function validateEmail(email: string) {
   if (!email) {
-    return { valid: false, error: getI18nRuntime().i18n.t("auth:error_email_required") };
+    return {
+      valid: false,
+      error: getI18nRuntime().i18n.t("auth:error_email_required"),
+    };
   }
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!pattern.test(email)) {
-    return { valid: false, error: getI18nRuntime().i18n.t("auth:error_invalid_email") };
+    return {
+      valid: false,
+      error: getI18nRuntime().i18n.t("auth:error_invalid_email"),
+    };
   }
   return { valid: true, error: null };
 }
 
 export function validatePassword(password: string) {
   if (!password) {
-    return { valid: false, error: getI18nRuntime().i18n.t("auth:error_password_required") };
+    return {
+      valid: false,
+      error: getI18nRuntime().i18n.t("auth:error_password_required"),
+    };
   }
   if (password.length < 8) {
     return {
@@ -49,10 +58,16 @@ export function validatePassword(password: string) {
 
 export function validateName(name: string) {
   if (!name) {
-    return { valid: false, error: getI18nRuntime().i18n.t("auth:error_name_required") };
+    return {
+      valid: false,
+      error: getI18nRuntime().i18n.t("auth:error_name_required"),
+    };
   }
   if (name.length < 5) {
-    return { valid: false, error: getI18nRuntime().i18n.t("auth:error_name_min_length") };
+    return {
+      valid: false,
+      error: getI18nRuntime().i18n.t("auth:error_name_min_length"),
+    };
   }
   // if (!/^[A-Za-z0-9_\-\s]+$/.test(name)) {
   //   return {

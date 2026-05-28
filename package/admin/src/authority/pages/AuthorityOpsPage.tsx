@@ -41,7 +41,7 @@ function fmtDate(v?: string | Date) {
 
 export default function AuthorityOpsPage() {
   const { t } = useTranslation(["admin", "common"]);
-const [unitIdInput, setUnitIdInput] = React.useState("");
+  const [unitIdInput, setUnitIdInput] = React.useState("");
   const [unitId, setUnitId] = React.useState("");
   const [message, setMessage] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
