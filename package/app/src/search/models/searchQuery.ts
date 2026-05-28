@@ -61,6 +61,8 @@ const FILTER_REGEX = /(\w+):("[^"]*"|\S+)/g;
  *   type:value      → content type
  *   lang:value      → language
  *   rating:tier     → rating tier (GENERAL, R_15, R_18, R_18G; repeatable)
+ *   platform:id     → game platform Entity id (repeatable)
+ *   ageRating:id    → external rating tag Unit id (repeatable)
  *   ai:value        → AI disclosure mode (UNKNOWN, NONE, AI_ASSISTED, AI_ORIGINATED, MACHINE_GENERATED; repeatable)
  *   licensed:yes|no → licensed toggle
  *   in:slug         → realm scope
@@ -104,6 +106,22 @@ export function parseSearchString(input: string): SearchQuery {
         if (tier) {
           result.ratings = [...(result.ratings ?? []), tier];
         }
+        break;
+      }
+      case "platform":
+      case "platformentity": {
+        result.platformEntityIds = [
+          ...(result.platformEntityIds ?? []),
+          rawValue,
+        ];
+        break;
+      }
+      case "agerating":
+      case "ratingtag": {
+        result.ageRatingTagUnitIds = [
+          ...(result.ageRatingTagUnitIds ?? []),
+          rawValue,
+        ];
         break;
       }
       case "ai":
@@ -175,6 +193,18 @@ export function serializeSearchString(query: SearchQuery): string {
   if (query.ratings?.length) {
     for (const tier of query.ratings) {
       parts.push(`rating:${tier}`);
+    }
+  }
+
+  if (query.platformEntityIds?.length) {
+    for (const id of query.platformEntityIds) {
+      parts.push(`platform:${id}`);
+    }
+  }
+
+  if (query.ageRatingTagUnitIds?.length) {
+    for (const id of query.ageRatingTagUnitIds) {
+      parts.push(`ageRating:${id}`);
     }
   }
 

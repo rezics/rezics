@@ -45,11 +45,11 @@
 
 ## 6. API Client And Frontend Readiness
 
-- [ ] 6.1 Update `package/api` clients, query keys, and hooks for GAME/MEDIA DTOs, platform/rating filters, and system requirement reads.
-- [ ] 6.2 Update frontend search/filter models to use Entity-backed platform and age-rating ids.
-- [ ] 6.3 Add placeholder data integration points for future GAME/MEDIA detail pages using the book-like hero plus multi-tab layout direction.
-- [ ] 6.4 Document that trailer/screenshot/carousel hero content is domain media and not part of this backend implementation.
-- [ ] 6.5 Add frontend type-level or unit tests for DTO consumption and search filter state where existing patterns support it.
+- [x] 6.1 Update `package/api` clients, query keys, and hooks for GAME/MEDIA DTOs, platform/rating filters, and system requirement reads.
+- [x] 6.2 Update frontend search/filter models to use Entity-backed platform and age-rating ids.
+- [x] 6.3 Add placeholder data integration points for future GAME/MEDIA detail pages using the book-like hero plus multi-tab layout direction.
+- [x] 6.4 Document that trailer/screenshot/carousel hero content is domain media and not part of this backend implementation.
+- [x] 6.5 Add frontend type-level or unit tests for DTO consumption and search filter state where existing patterns support it.
 
 ## 7. Admin And Import Readiness
 

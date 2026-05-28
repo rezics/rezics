@@ -10,6 +10,7 @@ export * from "./credit-attribution/credit-attribution";
 export * from "./content-structure/content-structure";
 export * from "./diagnostic/status";
 export * from "./entity-attribution/entity-attribution";
+export * from "./game-system-requirement/game-system-requirement";
 export * from "./governance/governance";
 export * from "./history/history";
 export * from "./meili/meili";

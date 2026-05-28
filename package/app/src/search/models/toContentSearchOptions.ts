@@ -39,6 +39,11 @@ export function toContentSearchOptions(
     if (normalized.length) opts.tags = normalized;
   }
 
+  if (query.ageRatingTagUnitIds?.length) {
+    const ratingTags = query.ageRatingTagUnitIds.map((unitId) => ({ unitId }));
+    opts.tags = [...(opts.tags ?? []), ...ratingTags];
+  }
+
   if (query.realm?.slug) {
     opts.realmId = query.realm.unitId ?? query.realm.slug;
   }
@@ -49,6 +54,10 @@ export function toContentSearchOptions(
 
   if (query.ratings?.length) {
     opts.ratings = query.ratings;
+  }
+
+  if (query.platformEntityIds?.length) {
+    opts.platformEntityIds = [...new Set(query.platformEntityIds)];
   }
 
   if (query.aiDisclosureModes?.length) {

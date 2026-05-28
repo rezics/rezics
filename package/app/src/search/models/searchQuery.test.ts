@@ -61,6 +61,21 @@ describe("parseSearchString", () => {
     expect(serializeSearchString(parsed)).toContain("ai:MACHINE_GENERATED");
   });
 
+  test("parses platform Entity ids and age-rating tag Unit ids", () => {
+    const parsed = parseSearchString(
+      "platform:platform-steam ageRating:tag-esrb-teen platform:platform-windows",
+    );
+
+    expect(parsed.platformEntityIds).toEqual([
+      "platform-steam",
+      "platform-windows",
+    ]);
+    expect(parsed.ageRatingTagUnitIds).toEqual(["tag-esrb-teen"]);
+    expect(serializeSearchString(parsed)).toBe(
+      "platform:platform-steam platform:platform-windows ageRating:tag-esrb-teen",
+    );
+  });
+
   test("parses multiple types", () => {
     const result = parseSearchString("type:book type:game test");
     expect(result).toEqual({

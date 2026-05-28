@@ -168,7 +168,7 @@ describe("GAME/MEDIA contract schemas", () => {
       Value.Check(SearchQuerySchema, {
         keyword: "game",
         platformEntityIds: ["platform-steam"],
-        tags: [{ unitId: "tag-esrb-teen" }],
+        ageRatingTagUnitIds: ["tag-esrb-teen"],
       }),
     ).toBe(true);
     expect(
