@@ -319,6 +319,25 @@ export class PostService {
     return hydrateUnitOwnerUserSlugRow(post as PostWithRelations);
   }
 
+  async getPrimaryVisibleRealmForPost(unitId: string): Promise<string | null> {
+    const post = await prisma.post.findUnique({
+      where: { unitId },
+      select: {
+        unit: {
+          select: {
+            inRealms: {
+              where: { state: "VISIBLE" },
+              select: { realmUnitId: true },
+              take: 1,
+            },
+          },
+        },
+      },
+    });
+
+    return post?.unit.inRealms[0]?.realmUnitId ?? null;
+  }
+
   private async assertRealmPostAllowed(
     realmUnitIds: string[],
     userId: string,

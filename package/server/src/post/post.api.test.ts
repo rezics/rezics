@@ -19,6 +19,7 @@ const getByUnitIdMock = mock(async () => ({
     user: { unitId: "owner-1" },
   },
 }));
+const getPrimaryVisibleRealmForPostMock = mock(async () => "realm-1");
 const createMock = mock(async () => ({ unitId: "created-post-1" }));
 const deleteMock = mock(async () => undefined);
 const listGlobalContentStatesMock = mock(async () => [
@@ -89,6 +90,7 @@ mock.module("./post.service", () => ({
   postService: {
     create: createMock,
     getByUnitId: getByUnitIdMock,
+    getPrimaryVisibleRealmForPost: getPrimaryVisibleRealmForPostMock,
     delete: deleteMock,
   },
 }));
@@ -106,6 +108,7 @@ describe("postApi", () => {
     listRealmContentOverlaysMock.mockClear();
     createMock.mockClear();
     getByUnitIdMock.mockClear();
+    getPrimaryVisibleRealmForPostMock.mockClear();
     deleteMock.mockClear();
   });
 
@@ -199,8 +202,15 @@ describe("postApi", () => {
     expect(decideForIdentityMock).toHaveBeenCalledWith({
       identity: currentIdentity,
       action: "content.create",
-      target: { kind: "post-reply", id: "parent-post-1", realmUnitId: null },
+      target: {
+        kind: "post-reply",
+        id: "parent-post-1",
+        realmUnitId: "realm-1",
+      },
     });
+    expect(getPrimaryVisibleRealmForPostMock).toHaveBeenCalledWith(
+      "parent-post-1",
+    );
     expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({ parentPostUnitId: "parent-post-1" }),
       "owner-1",

@@ -61,13 +61,20 @@ async function assertPostCreatePolicy(input: {
   identity: any;
   status: any;
 }) {
+  const realmUnitId =
+    input.body.realmUnitIds?.[0] ??
+    (input.body.parentPostUnitId
+      ? await postService.getPrimaryVisibleRealmForPost(
+          input.body.parentPostUnitId,
+        )
+      : null);
   const decision = await governanceRoutePolicyService.decideForIdentity({
     identity: input.identity,
     action: contentPolicyActions.create,
     target: {
       kind: input.body.parentPostUnitId ? "post-reply" : "post",
       id: input.body.parentPostUnitId ?? input.body.targetUnitId ?? "new",
-      realmUnitId: input.body.realmUnitIds?.[0] ?? null,
+      realmUnitId,
     },
   });
   if (!decision.allowed) {

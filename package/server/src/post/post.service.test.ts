@@ -740,6 +740,37 @@ describe("PostService.byRealm", () => {
   });
 });
 
+describe("PostService.getPrimaryVisibleRealmForPost", () => {
+  const service = new PostService();
+
+  test("returns the first visible parent realm for route policy context", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce({
+      unit: {
+        inRealms: [{ realmUnitId: "realm-1" }],
+      },
+    });
+
+    await expect(
+      service.getPrimaryVisibleRealmForPost("parent-post-1"),
+    ).resolves.toBe("realm-1");
+    expect(postFindUniqueMock).toHaveBeenCalledWith({
+      where: { unitId: "parent-post-1" },
+      select: {
+        unit: {
+          select: {
+            inRealms: {
+              where: { state: "VISIBLE" },
+              select: { realmUnitId: true },
+              take: 1,
+            },
+          },
+        },
+      },
+    });
+  });
+});
+
 describe("PostService.list subtree queries", () => {
   const service = new PostService();
 
