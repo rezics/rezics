@@ -143,5 +143,16 @@
   "remark_list_empty_title": "No remarks yet",
   "remark_submit": "Submit Remark",
   "remark_open_remark_page": "Open full remark",
-  "remark_new_title": "New Remark"
+  "remark_new_title": "New Remark",
+  "dashboard_title": "Dashboard",
+  "dashboard_continue_reading": "Continue reading",
+  "dashboard_shelves": "Your shelves",
+  "dashboard_realms": "Your realms",
+  "dashboard_safety": "Account notices",
+  "dashboard_notifications": "Notifications",
+  "dashboard_messages": "Messages",
+  "dashboard_empty_continue": "Nothing in progress yet — start reading to see it here.",
+  "dashboard_empty_shelves": "You haven't created any shelves yet.",
+  "dashboard_empty_realms": "You haven't joined any realms yet.",
+  "dashboard_chapters_progress": "{{completed}} / {{total}} chapters"
 }

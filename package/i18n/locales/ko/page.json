@@ -143,5 +143,16 @@
   "remark_list_empty_title": "아직 의견이 없습니다.",
   "remark_submit": "비고 제출",
   "remark_open_remark_page": "전체 짧은 평 열기",
-  "remark_new_title": "새 짧은 평"
+  "remark_new_title": "새 짧은 평",
+  "dashboard_title": "대시보드",
+  "dashboard_continue_reading": "이어서 읽기",
+  "dashboard_shelves": "내 서재",
+  "dashboard_realms": "참여 중인 렐름",
+  "dashboard_safety": "계정 알림",
+  "dashboard_notifications": "알림",
+  "dashboard_messages": "메시지",
+  "dashboard_empty_continue": "아직 진행 중인 작품이 없습니다. 읽기 시작하면 여기에 표시됩니다.",
+  "dashboard_empty_shelves": "아직 만든 서재가 없습니다.",
+  "dashboard_empty_realms": "아직 참여한 렐름이 없습니다.",
+  "dashboard_chapters_progress": "{{completed}} / {{total}} 챕터"
 }

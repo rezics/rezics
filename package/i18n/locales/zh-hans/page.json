@@ -143,5 +143,16 @@
   "remark_list_empty_title": "还没有评论",
   "remark_submit": "提交评论",
   "remark_open_remark_page": "阅读完整短评",
-  "remark_new_title": "新建短评"
+  "remark_new_title": "新建短评",
+  "dashboard_title": "仪表盘",
+  "dashboard_continue_reading": "继续阅读",
+  "dashboard_shelves": "我的书架",
+  "dashboard_realms": "我的领域",
+  "dashboard_safety": "账户通知",
+  "dashboard_notifications": "通知",
+  "dashboard_messages": "私信",
+  "dashboard_empty_continue": "还没有正在阅读的内容——开始阅读后会显示在这里。",
+  "dashboard_empty_shelves": "你还没有创建任何书架。",
+  "dashboard_empty_realms": "你还没有加入任何领域。",
+  "dashboard_chapters_progress": "{{completed}} / {{total}} 章"
 }

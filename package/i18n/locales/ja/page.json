@@ -143,5 +143,16 @@
   "remark_list_empty_title": "まだコメントはありません",
   "remark_submit": "コメントを送信",
   "remark_open_remark_page": "短評全文を開く",
-  "remark_new_title": "新しい短評"
+  "remark_new_title": "新しい短評",
+  "dashboard_title": "ダッシュボード",
+  "dashboard_continue_reading": "読書を続ける",
+  "dashboard_shelves": "あなたの本棚",
+  "dashboard_realms": "参加中のレルム",
+  "dashboard_safety": "アカウント通知",
+  "dashboard_notifications": "通知",
+  "dashboard_messages": "メッセージ",
+  "dashboard_empty_continue": "まだ読書中の作品はありません。読み始めるとここに表示されます。",
+  "dashboard_empty_shelves": "本棚はまだ作成されていません。",
+  "dashboard_empty_realms": "まだレルムに参加していません。",
+  "dashboard_chapters_progress": "{{completed}} / {{total}} 章"
 }

@@ -143,5 +143,16 @@
   "remark_list_empty_title": "目前還沒有短評",
   "remark_submit": "提交短評",
   "remark_open_remark_page": "閱讀完整短評",
-  "remark_new_title": "新增短評"
+  "remark_new_title": "新增短評",
+  "dashboard_title": "儀表板",
+  "dashboard_continue_reading": "繼續閱讀",
+  "dashboard_shelves": "我的書架",
+  "dashboard_realms": "我的領域",
+  "dashboard_safety": "帳號通知",
+  "dashboard_notifications": "通知",
+  "dashboard_messages": "私訊",
+  "dashboard_empty_continue": "還沒有正在閱讀的內容——開始閱讀後會顯示在這裡。",
+  "dashboard_empty_shelves": "你還沒有建立任何書架。",
+  "dashboard_empty_realms": "你還沒有加入任何領域。",
+  "dashboard_chapters_progress": "{{completed}} / {{total}} 章"
 }

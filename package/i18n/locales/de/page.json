@@ -143,5 +143,16 @@
   "remark_list_empty_title": "Noch keine Bemerkungen",
   "remark_submit": "Bemerkung abgeben",
   "remark_open_remark_page": "Vollständige Kurznotiz öffnen",
-  "remark_new_title": "Neue Kurznotiz"
+  "remark_new_title": "Neue Kurznotiz",
+  "dashboard_title": "Übersicht",
+  "dashboard_continue_reading": "Weiterlesen",
+  "dashboard_shelves": "Deine Regale",
+  "dashboard_realms": "Deine Realms",
+  "dashboard_safety": "Kontohinweise",
+  "dashboard_notifications": "Benachrichtigungen",
+  "dashboard_messages": "Nachrichten",
+  "dashboard_empty_continue": "Noch nichts begonnen — fang an zu lesen, um es hier zu sehen.",
+  "dashboard_empty_shelves": "Du hast noch keine Regale erstellt.",
+  "dashboard_empty_realms": "Du bist noch keinem Realm beigetreten.",
+  "dashboard_chapters_progress": "{{completed}} / {{total}} Kapitel"
 }

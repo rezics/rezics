@@ -31,6 +31,12 @@ export const NAVIGATION = (isAdmin = false): NavigationItem[] => {
     },
     {
       kind: "item",
+      segment: "/u/me/dashboard",
+      title: "Dashboard",
+      icon: DashboardOutlinedIcon,
+    },
+    {
+      kind: "item",
       segment: "/user/me",
       title: "My",
       onlyMobile: true,
