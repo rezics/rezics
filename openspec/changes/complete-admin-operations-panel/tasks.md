@@ -18,7 +18,7 @@
 
 - [x] 3.1 Add cross-type Unit search/list filters by id, slug, title, type, owner, status, visibility, and drift flags.
 - [x] 3.2 Normalize entity/tag/realm/shelf/source-site pages into shared content operation patterns.
-- [ ] 3.3 Add work/release grouping and repair surfaces when `introduce-unit-work-domain` is active.
+- [x] 3.3 Add work/release grouping and repair surfaces when `introduce-unit-work-domain` is active.
 - [ ] 3.4 Add authority action forms with reason capture, impact preview, validation, and audit integration.
 - [ ] 3.5 Add tests/stories for empty, loading, forbidden, validation, and destructive-confirmation states.
 

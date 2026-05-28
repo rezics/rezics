@@ -2,6 +2,13 @@ import type {
   AdminWorkMergeOperation,
   AdminWorkMergePreview,
 } from "@rezics/api";
+import { statusQueryOptions } from "@rezics/api/diagnostic/status";
+import type {
+  HiddenWorkDomainSummary,
+  LargeWorkDomainSummary,
+  WorkDomainDiagnostics,
+  WorkDomainProjectionDriftSummary,
+} from "@rezics/api/diagnostic/status.types";
 import {
   usePreviewAdminWorkMergeMutation,
   useRevertAdminWorkMergeMutation,
@@ -20,9 +27,11 @@ import {
   Separator,
   Textarea,
 } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
 import { GitMerge, Loader2, RotateCcw, Search } from "lucide-react";
 import React from "react";
 import { Page } from "@/core/layouts/Page";
+import { Link } from "@/shared/ui/link";
 
 function CountLine({
   label,
@@ -207,6 +216,255 @@ function OperationPanel({
   );
 }
 
+function WorkIdActions({
+  unitId,
+  onUseAsSource,
+  onUseAsTarget,
+}: {
+  unitId: string;
+  onUseAsSource: (unitId: string) => void;
+  onUseAsTarget: (unitId: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => onUseAsSource(unitId)}
+        type="button"
+      >
+        Source
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={() => onUseAsTarget(unitId)}
+        type="button"
+      >
+        Target
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        render={(props) => (
+          <Link to="/unit/$unitId" params={{ unitId }} {...props}>
+            Inspect
+          </Link>
+        )}
+      />
+    </div>
+  );
+}
+
+function ProjectionDriftRow({
+  drift,
+  onUseAsSource,
+  onUseAsTarget,
+}: {
+  drift: WorkDomainProjectionDriftSummary;
+  onUseAsSource: (unitId: string) => void;
+  onUseAsTarget: (unitId: string) => void;
+}) {
+  return (
+    <div className="grid gap-3 rounded-sm border border-border-whisper p-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="min-w-0 space-y-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline">projection</Badge>
+          <span className="break-all text-xs font-mono">
+            {drift.workUnitId}
+          </span>
+        </div>
+        <p className="break-all text-xs leading-[1.4] text-text-secondary">
+          Release {drift.releaseUnitId} is missing {drift.missingWorkTagCount}{" "}
+          inherited work tags
+          {drift.missingWorkTagIds.length
+            ? `: ${drift.missingWorkTagIds.slice(0, 6).join(", ")}`
+            : "."}
+        </p>
+      </div>
+      <WorkIdActions
+        unitId={drift.workUnitId}
+        onUseAsSource={onUseAsSource}
+        onUseAsTarget={onUseAsTarget}
+      />
+    </div>
+  );
+}
+
+function HiddenWorkRow({
+  work,
+  onUseAsSource,
+  onUseAsTarget,
+}: {
+  work: HiddenWorkDomainSummary;
+  onUseAsSource: (unitId: string) => void;
+  onUseAsTarget: (unitId: string) => void;
+}) {
+  return (
+    <div className="grid gap-3 rounded-sm border border-border-whisper p-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="min-w-0 space-y-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline">hidden work</Badge>
+          <span className="break-all text-xs font-mono">{work.workUnitId}</span>
+        </div>
+        <p className="text-xs leading-[1.4] text-text-secondary">
+          {work.releaseCount} releases, status {work.status ?? "-"}, visibility{" "}
+          {work.visibility ?? "-"}
+        </p>
+        {work.members.length ? (
+          <p className="break-all text-xs leading-[1.4] text-text-secondary">
+            {work.members
+              .slice(0, 6)
+              .map((member) => `${member.role}:${member.unitId}`)
+              .join(", ")}
+            {work.members.length > 6 ? " ..." : ""}
+          </p>
+        ) : null}
+      </div>
+      <WorkIdActions
+        unitId={work.workUnitId}
+        onUseAsSource={onUseAsSource}
+        onUseAsTarget={onUseAsTarget}
+      />
+    </div>
+  );
+}
+
+function LargeWorkRow({
+  work,
+  onUseAsSource,
+  onUseAsTarget,
+}: {
+  work: LargeWorkDomainSummary;
+  onUseAsSource: (unitId: string) => void;
+  onUseAsTarget: (unitId: string) => void;
+}) {
+  return (
+    <div className="grid gap-3 rounded-sm border border-border-whisper p-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+      <div className="min-w-0 space-y-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline">large domain</Badge>
+          <span className="break-all text-xs font-mono">{work.workUnitId}</span>
+        </div>
+        <p className="text-xs leading-[1.4] text-text-secondary">
+          {work.releaseCount} releases exceeds threshold {work.threshold}.
+        </p>
+      </div>
+      <WorkIdActions
+        unitId={work.workUnitId}
+        onUseAsSource={onUseAsSource}
+        onUseAsTarget={onUseAsTarget}
+      />
+    </div>
+  );
+}
+
+function WorkDomainDiagnosticsPanel({
+  diagnostics,
+  isLoading,
+  error,
+  onUseAsSource,
+  onUseAsTarget,
+}: {
+  diagnostics?: WorkDomainDiagnostics;
+  isLoading: boolean;
+  error: unknown;
+  onUseAsSource: (unitId: string) => void;
+  onUseAsTarget: (unitId: string) => void;
+}) {
+  const hasRows = Boolean(
+    diagnostics &&
+      (diagnostics.hiddenWorks.length > 0 ||
+        diagnostics.projectionDrift.length > 0 ||
+        diagnostics.largeDomains.length > 0),
+  );
+
+  return (
+    <Card surface="contained">
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CardTitle>Work-domain diagnostics</CardTitle>
+          <Badge variant="secondary">
+            {diagnostics?.item.status ?? (isLoading ? "loading" : "unknown")}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isLoading ? (
+          <div className="flex items-center gap-2 text-sm text-text-secondary">
+            <Loader2 className="size-4 animate-spin" />
+            Loading diagnostics
+          </div>
+        ) : error ? (
+          <p className="text-sm leading-[1.4] text-error-text">
+            {String(error)}
+          </p>
+        ) : !diagnostics ? (
+          <p className="text-sm leading-[1.4] text-text-secondary">
+            Diagnostics are unavailable.
+          </p>
+        ) : (
+          <>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <CountLine
+                label="Hidden works"
+                count={diagnostics.hiddenWorks.length}
+              />
+              <CountLine
+                label="Projection drift"
+                count={diagnostics.projectionDrift.length}
+              />
+              <CountLine
+                label="Large domains"
+                count={diagnostics.largeDomains.length}
+              />
+            </div>
+
+            {diagnostics.item.reason ? (
+              <p className="text-sm leading-[1.4] text-text-secondary">
+                {diagnostics.item.reason}
+              </p>
+            ) : null}
+
+            {!hasRows ? (
+              <p className="text-sm leading-[1.4] text-text-secondary">
+                No work-domain drift currently needs review.
+              </p>
+            ) : (
+              <div className="grid gap-3">
+                {diagnostics.projectionDrift.map((drift) => (
+                  <ProjectionDriftRow
+                    key={`${drift.workUnitId}:${drift.releaseUnitId}`}
+                    drift={drift}
+                    onUseAsSource={onUseAsSource}
+                    onUseAsTarget={onUseAsTarget}
+                  />
+                ))}
+                {diagnostics.hiddenWorks.map((work) => (
+                  <HiddenWorkRow
+                    key={work.workUnitId}
+                    work={work}
+                    onUseAsSource={onUseAsSource}
+                    onUseAsTarget={onUseAsTarget}
+                  />
+                ))}
+                {diagnostics.largeDomains.map((work) => (
+                  <LargeWorkRow
+                    key={work.workUnitId}
+                    work={work}
+                    onUseAsSource={onUseAsSource}
+                    onUseAsTarget={onUseAsTarget}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function WorkMergePage() {
   const [sourceWorkUnitId, setSourceWorkUnitId] = React.useState("");
   const [targetWorkUnitId, setTargetWorkUnitId] = React.useState("");
@@ -218,6 +476,7 @@ export default function WorkMergePage() {
   );
   const [operation, setOperation] =
     React.useState<AdminWorkMergeOperation | null>(null);
+  const systemStatusQuery = useQuery(statusQueryOptions.system());
 
   const request = React.useMemo(
     () => ({
@@ -352,6 +611,13 @@ export default function WorkMergePage() {
         </Card>
 
         <PreviewPanel preview={preview} />
+        <WorkDomainDiagnosticsPanel
+          diagnostics={systemStatusQuery.data?.workDomains}
+          isLoading={systemStatusQuery.isLoading}
+          error={systemStatusQuery.error}
+          onUseAsSource={(unitId) => setSourceWorkUnitId(unitId)}
+          onUseAsTarget={(unitId) => setTargetWorkUnitId(unitId)}
+        />
         <OperationPanel
           operation={operation}
           isReverting={revertMutation.isPending}
