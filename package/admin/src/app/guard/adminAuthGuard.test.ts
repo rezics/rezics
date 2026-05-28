@@ -3,6 +3,7 @@ import { ApiError } from "@rezics/api";
 import {
   buildCurrentRedirectPath,
   isAdminRole,
+  isOwnerRole,
   isUnauthorizedError,
   sanitizeRedirectPath,
 } from "./adminAuthGuardUtils";
@@ -13,6 +14,13 @@ describe("adminAuthGuard", () => {
     expect(isAdminRole("admin")).toBe(true);
     expect(isAdminRole("user")).toBe(false);
     expect(isAdminRole(null)).toBe(false);
+  });
+
+  test("identifies owner-only roles", () => {
+    expect(isOwnerRole("owner")).toBe(true);
+    expect(isOwnerRole("admin")).toBe(false);
+    expect(isOwnerRole("user")).toBe(false);
+    expect(isOwnerRole(undefined)).toBe(false);
   });
 
   test("detects unauthorized API errors", () => {

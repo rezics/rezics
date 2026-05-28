@@ -9,6 +9,10 @@ export function isAdminRole(role: string | null | undefined): boolean {
   return role === "admin" || role === "owner";
 }
 
+export function isOwnerRole(role: string | null | undefined): boolean {
+  return role === "owner";
+}
+
 export function buildCurrentRedirectPath(location: {
   pathname?: string;
   searchStr?: string;
