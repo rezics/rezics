@@ -28,6 +28,7 @@ import {
   ExternalLink,
   ListChecks,
   Search,
+  Wrench,
   Workflow,
 } from "lucide-react";
 import type React from "react";
@@ -204,7 +205,30 @@ export function ServicesPanel({
   );
 }
 
-function MeiliIndexRow({ index }: { index: MeiliIndexStatus }) {
+function latestTaskForIndex(
+  tasks: MeiliStatusSummary["tasks"],
+  indexUid: string,
+) {
+  return tasks.find((task) => task.indexUid === indexUid) ?? null;
+}
+
+function formatTaskTime(task: MeiliStatusSummary["tasks"][number]) {
+  return (
+    task.finishedAt ??
+    task.startedAt ??
+    task.enqueuedAt ??
+    task.duration ??
+    "未回報"
+  );
+}
+
+function MeiliIndexRow({
+  index,
+  latestTask,
+}: {
+  index: MeiliIndexStatus;
+  latestTask: MeiliStatusSummary["tasks"][number] | null;
+}) {
   const drift = index.settingsDrift;
   const driftLabels = [
     drift?.primaryKey && !drift.primaryKey.matches ? "primary key" : null,
@@ -239,7 +263,20 @@ function MeiliIndexRow({ index }: { index: MeiliIndexStatus }) {
           Primary key：{index.primaryKey ?? index.expected.primaryKey}
         </span>
         <span>索引中：{index.isIndexing ? "是" : "否"}</span>
+        <span>searchable：{index.expected.searchableAttributes.length}</span>
+        <span>filterable：{index.expected.filterableAttributes.length}</span>
+        <span>sortable：{index.expected.sortableAttributes.length}</span>
       </div>
+      {latestTask ? (
+        <p className="mt-2 text-xs leading-[1.4] text-text-secondary">
+          最近任務：#{latestTask.uid} · {latestTask.type ?? "unknown"} ·{" "}
+          {latestTask.status ?? "unknown"} · {formatTaskTime(latestTask)}
+        </p>
+      ) : (
+        <p className="mt-2 text-xs leading-[1.4] text-text-tertiary">
+          最近任務：未回報
+        </p>
+      )}
       {drift?.hasDrift ? (
         <p className="mt-2 text-xs leading-[1.4] text-warning-text">
           設定漂移：{driftLabels.join("、") || "已偵測到差異"}
@@ -249,6 +286,15 @@ function MeiliIndexRow({ index }: { index: MeiliIndexStatus }) {
           設定與預期 schema 相符
         </p>
       )}
+      <div className="mt-3">
+        <Link
+          to="/repair"
+          className={buttonVariants({ variant: "outline", size: "xs" })}
+        >
+          <Wrench className="size-3" aria-hidden="true" />
+          開啟修復
+        </Link>
+      </div>
     </div>
   );
 }
@@ -284,7 +330,11 @@ export function MeiliSummaryPanel({ meili }: { meili: MeiliStatusSummary }) {
       ) : null}
       <div className="grid gap-2">
         {meili.indexes.map((index) => (
-          <MeiliIndexRow key={index.uid} index={index} />
+          <MeiliIndexRow
+            key={index.uid}
+            index={index}
+            latestTask={latestTaskForIndex(meili.tasks, index.uid)}
+          />
         ))}
       </div>
       {meili.tasks.length === 0 ? (
