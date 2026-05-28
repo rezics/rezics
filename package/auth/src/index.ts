@@ -26,6 +26,7 @@ const observability = createObservabilityConfig(
     port,
     openApiPath: isDev ? "/openapi" : undefined,
     healthPath: "/health",
+    readyPath: "/ready",
   },
   {
     nodeEnv: env.NODE_ENV,
@@ -87,7 +88,8 @@ app
   .use(authInternalApi)
   .use(adminEmailApi)
   .use(authOpenApiRouter)
-  .get("/health", () => ({ status: "ok" }));
+  .get("/health", () => ({ status: "ok" }))
+  .get("/ready", () => ({ status: "ready" }));
 
 app.listen(port);
 logStartupBanner(observability);

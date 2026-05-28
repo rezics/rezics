@@ -44,6 +44,7 @@ const observability = createObservabilityConfig(
     port,
     openApiPath: "/openapi",
     healthPath: "/health",
+    readyPath: "/ready",
   },
   {
     nodeEnv: env.NODE_ENV,
@@ -123,6 +124,9 @@ const app = new Elysia()
   })
   .get("/health", () => ({ status: "ok" }), {
     detail: { summary: "Health check", tags: ["Health"] },
+  })
+  .get("/ready", () => ({ status: "ready" }), {
+    detail: { summary: "Readiness check", tags: ["Health"] },
   });
 
 app.listen(port);

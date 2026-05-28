@@ -91,6 +91,7 @@ const observability = createObservabilityConfig(
     port,
     openApiPath: isDev ? "/openapi" : undefined,
     healthPath: "/health",
+    readyPath: "/ready",
   },
   {
     nodeEnv: env.NODE_ENV,
@@ -270,7 +271,8 @@ routeApp
   .use(uploadApi)
   .use(dmBoundaryApi)
   .get("/", () => "Hello Elysia")
-  .get("/health", () => ({ status: "ok" }));
+  .get("/health", () => ({ status: "ok" }))
+  .get("/ready", () => ({ status: "ready" }));
 
 // Slug-scopes must hydrate first: default-realm and seed-tags lookups go
 // through `(slugScope, slug)` and depend on the scope cache being populated.

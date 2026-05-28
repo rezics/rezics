@@ -13,7 +13,7 @@
 - [ ] 2.3 Keep `package/job-runner` HTTP and worker roles separate; ensure `job-runner-http` uses HTTP semantics while `job-runner-worker` concurrency stays explicit.
 - [ ] 2.4 Define a dedicated `ranking-worker` role that consumes the ranking job lane, separate from `job-runner-worker`, with explicit replica/concurrency controls.
 - [x] 2.5 Ensure each backend runtime package has a `build:linux` (or equivalent) production build script producing the correct compiled Linux artifact (target amd64).
-- [ ] 2.6 Verify compiled binaries start with minimal production-like env and expose health/readiness behavior; add `/health` + `/ready` where missing.
+- [x] 2.6 Verify compiled binaries start with minimal production-like env and expose health/readiness behavior; add `/health` + `/ready` where missing.
 
 ## 3. Docker Images
 

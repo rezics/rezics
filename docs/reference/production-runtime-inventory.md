@@ -140,13 +140,18 @@ Current state vs. the production target (every backend service should expose
 
 | Service | `/health` | `/ready` | Gap |
 |---|---|---|---|
-| server | ✓ | ✗ | add `/ready` (DB + downstream reachability); confirm graceful shutdown |
-| auth | ✓ | ✗ | add `/ready`; confirm graceful shutdown |
-| notify | ✓ | ✗ | add `/ready`; set an explicit default `PORT` |
-| reaction | ✓ | ✗ | add `/ready`; set an explicit default `PORT` |
+| server | ✓ | ✓ | confirm graceful shutdown |
+| auth | ✓ | ✓ | confirm graceful shutdown |
+| notify | ✓ | ✓ | set an explicit default `PORT` |
+| reaction | ✓ | ✓ | set an explicit default `PORT` |
 | history | ✓ | ✓ | confirm graceful shutdown of outbox poller |
 | ranking | ✓ | ✓ (`/ready`, `/ranking/ready`) | reference for the others |
 | job-runner | ✓ | ✓ | confirm pg-boss drain on SIGTERM |
+
+All backend services now expose both `/health` and `/ready` (added to
+server/auth/notify/reaction). The readiness route is a process-liveness check
+matching the existing `history` pattern; dependency-aware readiness (DB ping)
+is a possible refinement.
 
 Spec-assumption corrections surfaced by this inventory:
 
