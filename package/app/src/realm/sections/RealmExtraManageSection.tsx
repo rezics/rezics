@@ -3,8 +3,9 @@ import {
   useSetRealmExtraValueMutation,
 } from "@rezics/api/realm/realm-extra.mutations";
 import { tagQueries } from "@rezics/api/tag/tag";
-import { unitQueries } from "@rezics/api/unit/unit";
+import { unitApi, unitQueries } from "@rezics/api/unit/unit";
 import { useUpdateZone, zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import type {
   RealmBannerExtra,
   RealmExtra,
@@ -50,6 +51,14 @@ import {
   realm_wiki_zone_homepage_sections_json,
   realm_wiki_zone_homepage_template,
   realm_wiki_zone_invalid_json,
+  realm_wiki_zone_label_create,
+  realm_wiki_zone_label_created,
+  realm_wiki_zone_label_homepage,
+  realm_wiki_zone_label_navigation,
+  realm_wiki_zone_label_picker,
+  realm_wiki_zone_label_picker_description,
+  realm_wiki_zone_label_search_placeholder,
+  realm_wiki_zone_label_title_placeholder,
   realm_wiki_zone_navigation_json,
   realm_wiki_zone_saved,
   realm_wiki_zone_template,
@@ -130,10 +139,12 @@ const densityOptions = ["comfortable", "compact"] as const;
 const navPositionOptions = ["side", "top"] as const;
 const contentWidthOptions = ["normal", "wide"] as const;
 const infoboxPositionOptions = ["right", "inline"] as const;
+const labelInsertTargets = ["navigation", "homepage"] as const;
 type DensityOption = (typeof densityOptions)[number];
 type NavPositionOption = (typeof navPositionOptions)[number];
 type ContentWidthOption = (typeof contentWidthOptions)[number];
 type InfoboxPositionOption = (typeof infoboxPositionOptions)[number];
+type LabelInsertTarget = (typeof labelInsertTargets)[number];
 
 function prettyJson(value: unknown) {
   return JSON.stringify(value, null, 2);
@@ -307,7 +318,15 @@ function WikiZoneConfigEditor({
   const [sectionsJson, setSectionsJson] = useState(
     prettyJson(homepage?.sections ?? []),
   );
+  const [labelSearch, setLabelSearch] = useState("");
+  const [labelTitle, setLabelTitle] = useState("");
+  const [labelTarget, setLabelTarget] =
+    useState<LabelInsertTarget>("navigation");
   const [error, setError] = useState<string | null>(null);
+  const labelSearchTerm = labelSearch.trim();
+  const { data: labelSearchData } = useQuery(
+    unitQueries.search(labelSearchTerm, { type: "LABEL", limit: 8 }),
+  );
 
   useEffect(() => {
     setTemplate(theme?.template ?? "wiki-classic");
@@ -325,6 +344,74 @@ function WikiZoneConfigEditor({
     setNavigationJson(prettyJson(wiki?.navigation ?? { sections: [] }));
     setSectionsJson(prettyJson(homepage?.sections ?? []));
   }, [homepage, theme, wiki]);
+
+  const insertLabel = (labelUnitId: string, target: LabelInsertTarget) => {
+    try {
+      if (target === "navigation") {
+        const navigation = parseJsonField<WikiZoneNavigation>(navigationJson, {
+          sections: [],
+        });
+        const [firstSection, ...restSections] = navigation.sections;
+        const nextFirstSection = firstSection ?? { id: "main", items: [] };
+        setNavigationJson(
+          prettyJson({
+            sections: [
+              {
+                ...nextFirstSection,
+                items: [
+                  { kind: "labelHeading", labelUnitId },
+                  ...nextFirstSection.items,
+                ],
+              },
+              ...restSections,
+            ],
+          }),
+        );
+      } else {
+        const sections = parseJsonField<WikiZoneHomepageSection[]>(
+          sectionsJson,
+          [],
+        );
+        setSectionsJson(
+          prettyJson([
+            {
+              id: `label-${labelUnitId.slice(0, 8)}`,
+              kind: "manualLinks",
+              titleLabelUnitId: labelUnitId,
+              links: [],
+            },
+            ...sections,
+          ]),
+        );
+      }
+      setError(null);
+    } catch {
+      const message = realm_wiki_zone_invalid_json();
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  const createLabel = async () => {
+    const title = labelTitle.trim();
+    if (!title) return;
+    setError(null);
+    try {
+      const created = await unitApi.create({
+        type: "LABEL",
+        defaultLanguage: DEFAULT_LANGUAGE,
+        isLanguageNeutral: true,
+        translations: [{ language: DEFAULT_LANGUAGE, title }],
+      });
+      insertLabel(created.id, labelTarget);
+      setLabelTitle("");
+      toast.success(realm_wiki_zone_label_created());
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      toast.error(message);
+    }
+  };
 
   const save = async () => {
     setError(null);
@@ -451,6 +538,65 @@ function WikiZoneConfigEditor({
         />
       </div>
 
+      <div className="flex flex-col gap-3 rounded-md border border-border-default bg-surface-base p-3">
+        <div>
+          <h5 className="text-sm font-medium leading-ui text-text-primary">
+            {realm_wiki_zone_label_picker()}
+          </h5>
+          <p className="mt-1 text-sm leading-body text-text-secondary">
+            {realm_wiki_zone_label_picker_description()}
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-[1fr_11rem]">
+          <Input
+            value={labelSearch}
+            onChange={(event) => setLabelSearch(event.target.value)}
+            placeholder={realm_wiki_zone_label_search_placeholder()}
+          />
+          <LabeledSelect
+            label=""
+            value={labelTarget}
+            options={labelInsertTargets}
+            onChange={setLabelTarget}
+            getLabel={(option) =>
+              option === "navigation"
+                ? realm_wiki_zone_label_navigation()
+                : realm_wiki_zone_label_homepage()
+            }
+          />
+        </div>
+        {labelSearchTerm && labelSearchData?.units?.length ? (
+          <div className="flex flex-wrap gap-2">
+            {labelSearchData.units.map((unit) => (
+              <Button
+                key={unit.id}
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => insertLabel(unit.id, labelTarget)}
+              >
+                {unitLabel(unit)}
+              </Button>
+            ))}
+          </div>
+        ) : null}
+        <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+          <Input
+            value={labelTitle}
+            onChange={(event) => setLabelTitle(event.target.value)}
+            placeholder={realm_wiki_zone_label_title_placeholder()}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={createLabel}
+            disabled={!labelTitle.trim()}
+          >
+            {realm_wiki_zone_label_create()}
+          </Button>
+        </div>
+      </div>
+
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label>{realm_wiki_zone_navigation_json()}</Label>
@@ -504,15 +650,17 @@ function LabeledSelect<T extends string>({
   value,
   options,
   onChange,
+  getLabel,
 }: {
   label: string;
   value: T;
   options: readonly T[];
   onChange: (value: T) => void;
+  getLabel?: (value: T) => string;
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <Label>{label}</Label>
+      {label ? <Label>{label}</Label> : null}
       <Select value={value} onValueChange={(next) => onChange(next as T)}>
         <SelectTrigger>
           <SelectValue />
@@ -520,7 +668,7 @@ function LabeledSelect<T extends string>({
         <SelectContent>
           {options.map((option) => (
             <SelectItem key={option} value={option}>
-              {option}
+              {getLabel ? getLabel(option) : option}
             </SelectItem>
           ))}
         </SelectContent>

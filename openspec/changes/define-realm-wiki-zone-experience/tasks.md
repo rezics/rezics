@@ -106,7 +106,7 @@
 
 - [x] 11.1 Add realm/Zone management controls for assigning a wiki Zone to a realm.
 - [x] 11.2 Add Zone editor controls for wiki template, homepage template, theme tokens, navigation config, and homepage sections.
-- [ ] 11.3 Add LABEL Unit picker/creator flow for navigation headings and homepage labels.
+- [x] 11.3 Add LABEL Unit picker/creator flow for navigation headings and homepage labels.
 - [ ] 11.4 Add WorkRealmContext management surface or admin operation for linking works to official/community/language/archive realms.
 - [ ] 11.5 Add validation messages for raw manual labels, invalid references, low-contrast theme tokens, and conflicting official contexts.
 - [ ] 11.6 Ensure management controls follow existing app feature layering and import from public feature indexes.
