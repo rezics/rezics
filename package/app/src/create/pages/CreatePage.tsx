@@ -8,6 +8,14 @@ import { Link } from "@/shared/ui/link";
  * Unified creation entry. Presents the standalone creation flows
  * (book, shelf, realm, entity) as a single type-selection surface; each
  * tile links to the existing route for that flow.
+ *
+ * Contributor inventory note — chapter creation is intentionally NOT a tile
+ * here. A chapter is created contextually from an empty TOC node via the
+ * "Create chapter" CTA in `book-read-node/EmptyNodeView`, which reuses the
+ * materialization-by-node path (`useEnsureChapterUnit`, accepting a node's
+ * `{ path, title }`). This menu must neither duplicate that flow nor hide it:
+ * the empty-node CTA remains the recognized chapter-creation entry at
+ * `/book/:bookId/node/:nodeId`.
  */
 export const CreatePage: React.FC = () => {
   const { t } = useTranslation(["page"]);
