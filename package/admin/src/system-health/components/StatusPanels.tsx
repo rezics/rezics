@@ -409,6 +409,27 @@ export function CdcPanel({ cdc }: { cdc: CdcStatus }) {
 }
 
 export function QueuePanel({ queue }: { queue: QueueStatus }) {
+  const totals = queue.counts.reduce(
+    (acc, count) => ({
+      created: acc.created + count.created,
+      retry: acc.retry + count.retry,
+      active: acc.active + count.active,
+      completed: acc.completed + count.completed,
+      cancelled: acc.cancelled + count.cancelled,
+      failed: acc.failed + count.failed,
+      all: acc.all + count.all,
+    }),
+    {
+      created: 0,
+      retry: 0,
+      active: 0,
+      completed: 0,
+      cancelled: 0,
+      failed: 0,
+      all: 0,
+    },
+  );
+
   return (
     <StatusCard
       title="Job-runner 佇列"
@@ -416,6 +437,14 @@ export function QueuePanel({ queue }: { queue: QueueStatus }) {
       icon={<ListChecks className="size-4" aria-hidden="true" />}
     >
       <StatusItemRow item={queue.item} />
+      <div className="grid gap-2 text-xs text-text-secondary sm:grid-cols-4">
+        <span>active：{totals.active}</span>
+        <span>retry：{totals.retry}</span>
+        <span className={totals.failed > 0 ? statusTextClass("degraded") : ""}>
+          failed：{totals.failed}
+        </span>
+        <span>all：{totals.all}</span>
+      </div>
       {queue.counts.length === 0 ? (
         <SectionState empty />
       ) : (
@@ -428,6 +457,8 @@ export function QueuePanel({ queue }: { queue: QueueStatus }) {
                 <th className="py-2 pr-3">Retry</th>
                 <th className="py-2 pr-3">Active</th>
                 <th className="py-2 pr-3">Failed</th>
+                <th className="py-2 pr-3">Completed</th>
+                <th className="py-2 pr-3">Cancelled</th>
                 <th className="py-2 pr-3">All</th>
               </tr>
             </thead>
@@ -443,6 +474,8 @@ export function QueuePanel({ queue }: { queue: QueueStatus }) {
                   >
                     {count.failed}
                   </td>
+                  <td className="py-2 pr-3">{count.completed}</td>
+                  <td className="py-2 pr-3">{count.cancelled}</td>
                   <td className="py-2 pr-3">{count.all}</td>
                 </tr>
               ))}
@@ -463,8 +496,33 @@ export function QueuePanel({ queue }: { queue: QueueStatus }) {
                 {job.lane ?? "unknown"} · {job.commandKind ?? "unknown"}
               </p>
               <p className="mt-1 text-text-secondary">
-                id：{job.id ?? "未回報"} · attempts：{job.attemptCount}
+                id：{job.id ?? "未回報"} · state：{job.state ?? "unknown"} ·
+                attempts：{job.attemptCount}
               </p>
+              <p className="mt-1 text-text-secondary">
+                command lane：{job.commandLane ?? "unknown"} · created：
+                {formatCheckedAt(job.createdAt)}
+              </p>
+              {job.source && typeof job.source === "object" ? (
+                <p className="mt-1 truncate text-text-tertiary">
+                  source：
+                  {Object.entries(job.source as Record<string, unknown>)
+                    .map(([key, value]) => `${key}:${String(value)}`)
+                    .join(" · ")}
+                </p>
+              ) : null}
+              {job.id && job.lane ? (
+                <Link
+                  to="/repair"
+                  className={`${buttonVariants({
+                    variant: "outline",
+                    size: "xs",
+                  })} mt-3`}
+                >
+                  <Wrench className="size-3" aria-hidden="true" />
+                  開啟修復
+                </Link>
+              ) : null}
             </div>
           ))}
         </div>
