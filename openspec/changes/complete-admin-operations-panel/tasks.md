@@ -48,8 +48,8 @@
 - [ ] 7.1 Run `bun --filter=@rezics/contract test`.
 - [ ] 7.2 Run targeted `package/server` admin/diagnostic/governance/search/history tests.
 - [ ] 7.3 Run targeted `package/auth` admin/JWT/session tests.
-- [ ] 7.4 Run targeted `package/api` admin client/hook tests.
-- [ ] 7.5 Run targeted `package/admin` route/page tests or Storybook checks.
-- [ ] 7.6 Run `bun run check:convention`.
-- [ ] 7.7 Run `bun run format:check`.
-- [ ] 7.8 Run `openspec validate complete-admin-operations-panel --strict`.
+- [x] 7.4 Run targeted `package/api` admin client/hook tests.
+- [x] 7.5 Run targeted `package/admin` route/page tests or Storybook checks.
+- [x] 7.6 Run `bun run check:convention`.
+- [x] 7.7 Run `bun run format:check`.
+- [x] 7.8 Run `openspec validate complete-admin-operations-panel --strict`.
