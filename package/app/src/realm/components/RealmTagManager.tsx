@@ -1,19 +1,156 @@
+import type {
+  RealmTagView,
+  RealmTagViewStyle,
+  TagTreeNode,
+} from "@rezics/contract";
+import { EmptyState } from "@rezics/ui";
+import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface RealmTagManagerProps {
   realmId: string;
+  tagTree?: TagTreeNode[];
+  tagView?: RealmTagView | null;
+}
+
+type TagEntry = {
+  tagId: string;
+  label: string;
+  depth: number;
+  groupLabel?: string;
+};
+
+const viewLabels: Record<RealmTagViewStyle, string> = {
+  flat: "Flat",
+  grouped: "Grouped",
+  tree: "Tree",
+};
+
+function nodeLabel(node: TagTreeNode) {
+  return node.label?.trim() || node.tagId?.slice(0, 8) || "Untitled";
+}
+
+function collectTags(nodes: TagTreeNode[] | undefined) {
+  const entries: TagEntry[] = [];
+
+  const visit = (
+    items: TagTreeNode[],
+    depth: number,
+    groupLabel: string | undefined,
+  ) => {
+    for (const item of items) {
+      if (item.disabled) continue;
+      const label = nodeLabel(item);
+      const nextGroup = depth === 0 ? label : groupLabel;
+      if (item.tagId) {
+        entries.push({
+          tagId: item.tagId,
+          label,
+          depth,
+          groupLabel,
+        });
+      }
+      if (item.children?.length) visit(item.children, depth + 1, nextGroup);
+    }
+  };
+
+  visit(nodes ?? [], 0, undefined);
+  return entries;
+}
+
+function groupTags(entries: TagEntry[]) {
+  const grouped = new Map<string, TagEntry[]>();
+  for (const entry of entries) {
+    const key = entry.groupLabel ?? "Ungrouped";
+    grouped.set(key, [...(grouped.get(key) ?? []), entry]);
+  }
+  return grouped;
+}
+
+function TagChip({ entry }: { entry: TagEntry }) {
+  return (
+    <span className="rounded-sm bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary">
+      {entry.label}
+    </span>
+  );
 }
 
 export const RealmTagManager: React.FC<RealmTagManagerProps> = ({
   realmId: _realmId,
+  tagTree,
+  tagView,
 }) => {
-  // MOCK: tag management UI placeholder
+  const entries = useMemo(() => collectTags(tagTree), [tagTree]);
+  const [selectedView, setSelectedView] = useState<RealmTagViewStyle>(
+    tagView?.defaultStyle ?? "flat",
+  );
+  useEffect(() => {
+    setSelectedView(tagView?.defaultStyle ?? "flat");
+  }, [tagView?.defaultStyle]);
+
+  const view = tagView?.allowViewerSwitch
+    ? selectedView
+    : (tagView?.defaultStyle ?? "flat");
+
+  if (entries.length === 0) {
+    return <EmptyState title="No realm tags" />;
+  }
+
+  const grouped = groupTags(entries);
+
   return (
-    <div className="py-4">
-      <p className="text-sm text-text-secondary">
-        Tag management will be available when the realm-tag API endpoints are
-        wired up.
-      </p>
+    <div className="flex flex-col gap-4 py-4">
+      {tagView?.allowViewerSwitch ? (
+        <div className="flex flex-wrap gap-2">
+          {(["flat", "grouped", "tree"] as const).map((option) => (
+            <Button
+              key={option}
+              type="button"
+              size="sm"
+              variant={selectedView === option ? "default" : "secondary"}
+              onClick={() => setSelectedView(option)}
+            >
+              {viewLabels[option]}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+
+      {view === "grouped" ? (
+        <div className="grid gap-4">
+          {Array.from(grouped).map(([group, items]) => (
+            <section key={group} className="flex flex-col gap-2">
+              <h2 className="text-sm font-semibold leading-ui text-text-primary">
+                {group}
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {items.map((entry) => (
+                  <TagChip key={entry.tagId} entry={entry} />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : view === "tree" ? (
+        <div className="grid gap-2">
+          {entries.map((entry) => (
+            <div
+              key={entry.tagId}
+              className="flex"
+              style={{ paddingInlineStart: `${entry.depth * 1.25}rem` }}
+            >
+              <TagChip entry={entry} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {entries.map((entry) => (
+            <TagChip key={entry.tagId} entry={entry} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

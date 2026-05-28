@@ -14,6 +14,8 @@ import {
 import type {
   RealmBannerExtra,
   RealmExtra,
+  RealmTagView,
+  RealmTagViewStyle,
   TagTreeNode,
   UnitDTO,
   WorkRealmContextRole,
@@ -218,6 +220,10 @@ export const RealmExtraManageSection: React.FC<
         realmId={realmId}
         initialValue={extra?.tagTree as TagTreeNode[] | undefined}
       />
+      <TagViewPreferenceEditor
+        realmId={realmId}
+        initialValue={extra?.tagView as RealmTagView | undefined}
+      />
       <WikiZonePicker realmId={realmId} value={extra?.wikiZoneUnitId ?? null} />
       <WorkRealmContextCreator realmId={realmId} />
       <SlotPicker realmId={realmId} slotKey="rule" value={extra?.rule} />
@@ -226,6 +232,87 @@ export const RealmExtraManageSection: React.FC<
     </section>
   );
 };
+
+function TagViewPreferenceEditor({
+  realmId,
+  initialValue,
+}: {
+  realmId: string;
+  initialValue?: RealmTagView;
+}) {
+  const [defaultStyle, setDefaultStyle] = useState<RealmTagViewStyle>(
+    initialValue?.defaultStyle ?? "flat",
+  );
+  const [allowViewerSwitch, setAllowViewerSwitch] = useState(
+    initialValue?.allowViewerSwitch ?? true,
+  );
+  const [error, setError] = useState<string | null>(null);
+  const setValue = useSetRealmExtraValueMutation();
+
+  useEffect(() => {
+    setDefaultStyle(initialValue?.defaultStyle ?? "flat");
+    setAllowViewerSwitch(initialValue?.allowViewerSwitch ?? true);
+  }, [initialValue]);
+
+  const save = async () => {
+    setError(null);
+    try {
+      await setValue.mutateAsync({
+        realmId,
+        key: "tagView",
+        value: { defaultStyle, allowViewerSwitch },
+      });
+      toast.success("Tags tab view saved.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
+      <div>
+        <h3 className="text-sm font-medium leading-ui text-text-primary">
+          Tags tab view
+        </h3>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="realm-tag-view-style">Default view</Label>
+          <Select
+            value={defaultStyle}
+            onValueChange={(value) =>
+              setDefaultStyle(value as RealmTagViewStyle)
+            }
+          >
+            <SelectTrigger id="realm-tag-view-style">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="flat">Flat</SelectItem>
+              <SelectItem value="grouped">Grouped</SelectItem>
+              <SelectItem value="tree">Tree</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button
+          type="button"
+          variant={allowViewerSwitch ? "secondary" : "outline"}
+          onClick={() => setAllowViewerSwitch((value) => !value)}
+        >
+          {allowViewerSwitch ? "Viewer switch on" : "Viewer switch off"}
+        </Button>
+        <Button type="button" onClick={save} disabled={setValue.isPending}>
+          {common_save()}
+        </Button>
+      </div>
+      {error ? (
+        <p className="text-sm leading-body text-error-text">{error}</p>
+      ) : null}
+    </div>
+  );
+}
 
 function WorkRealmContextCreator({ realmId }: { realmId: string }) {
   const [workUnitId, setWorkUnitId] = useState("");

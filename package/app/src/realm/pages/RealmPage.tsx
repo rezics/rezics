@@ -226,7 +226,11 @@ export function RealmPage({
           </TabsContent>
         )}
         <TabsContent value="tags">
-          <RealmTagManager realmId={realmId} />
+          <RealmTagManager
+            realmId={realmId}
+            tagTree={tagTree}
+            tagView={realm.extra?.tagView ?? null}
+          />
         </TabsContent>
         <TabsContent value="members">
           <RealmMemberList realmId={realmId} />
