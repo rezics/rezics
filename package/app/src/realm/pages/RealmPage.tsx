@@ -51,6 +51,7 @@ import {
   RealmFeedSortSwitcher,
 } from "../sections/RealmFeedSortSwitcher";
 import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
+import { RealmAboutTab } from "../sections/RealmAboutTab";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 import { RuleSection } from "../sections/RuleSection";
 
@@ -68,7 +69,13 @@ const i18nMessages = {
   realm_untitled,
 };
 
-export type RealmPageTab = "feed" | "wiki" | "tags" | "members" | "moderation";
+export type RealmPageTab =
+  | "feed"
+  | "wiki"
+  | "tags"
+  | "about"
+  | "members"
+  | "moderation";
 
 interface RealmPageProps {
   realmId: string;
@@ -193,6 +200,7 @@ export function RealmPage({
           <TabsTrigger value="feed">{m.realm_tab_feed()}</TabsTrigger>
           {showWikiTab && <TabsTrigger value="wiki">Wiki</TabsTrigger>}
           <TabsTrigger value="tags">{m.realm_tab_tags()}</TabsTrigger>
+          <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="members">{m.realm_tab_members()}</TabsTrigger>
           {showModerationTab ? (
             <TabsTrigger value="moderation">Moderation</TabsTrigger>
@@ -243,6 +251,14 @@ export function RealmPage({
         </TabsContent>
         <TabsContent value="members">
           <RealmMemberList realmId={realmId} />
+        </TabsContent>
+        <TabsContent value="about">
+          <RealmAboutTab
+            realm={realm}
+            description={description}
+            membership={membership}
+            canManage={showManage}
+          />
         </TabsContent>
         {showModerationTab ? (
           <TabsContent value="moderation">
