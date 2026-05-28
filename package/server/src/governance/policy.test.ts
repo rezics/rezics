@@ -155,6 +155,21 @@ describe("governance policy", () => {
       decide({
         actorUserId: "moderator-1",
         permission: { role: "USER" },
+        action: "content.pin",
+        capabilities: [
+          {
+            capability: "content.pin",
+            scope: { kind: "realm", realmUnitId: "realm-1" },
+          },
+        ],
+        target: { kind: "post", id: "post-1", realmUnitId: "realm-1" },
+      }),
+    ).toMatchObject({ allowed: true, code: "ALLOWED" });
+
+    expect(
+      decide({
+        actorUserId: "moderator-1",
+        permission: { role: "USER" },
         action: "content.restore",
         capabilities: [
           {

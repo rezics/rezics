@@ -1,5 +1,8 @@
 import type {
   RealmDTO,
+  RealmExtraAdminReadResponse,
+  RealmExtraOkResponse,
+  RealmExtraReadResponse,
   RealmListResponse,
   RealmMemberDTO,
   RealmMembershipMeDTO,
@@ -15,6 +18,11 @@ import {
   createRealmSchema,
   hasPermissionToUpdateUnit,
   joinRealmSchema,
+  realmExtraAdminReadResponseSchema,
+  realmExtraAppendBodySchema,
+  realmExtraOkResponseSchema,
+  realmExtraReadResponseSchema,
+  realmExtraReorderBodySchema,
   realmListBodySchema,
   realmListQuerySchema,
   realmParamsSchema,
@@ -111,6 +119,40 @@ async function assertRealmTagVotePolicy(input: {
   if (!decision.allowed) {
     input.set.status = 403;
     throw new Error(
+      decision.safeMessage ?? "Forbidden: policy denied this action",
+    );
+  }
+}
+
+async function assertRealmContentPinPolicy(input: {
+  identity: any;
+  status: any;
+  realmUnitId: string;
+  targetId: string;
+}) {
+  const actorMember = await realmService.getMember(
+    input.realmUnitId,
+    input.identity.userId,
+  );
+  const decision = await governanceRoutePolicyService.decideForIdentity({
+    identity: input.identity,
+    action: realmPolicyActions.contentPin,
+    realmMembership: actorMember
+      ? {
+          realmUnitId: actorMember.realmUnitId,
+          role: actorMember.roleKey as never,
+          capabilities: actorMember.capabilities ?? [],
+        }
+      : null,
+    target: {
+      kind: "realm-content-list",
+      id: input.targetId,
+      realmUnitId: input.realmUnitId,
+    },
+  });
+  if (!decision.allowed) {
+    return input.status(
+      403,
       decision.safeMessage ?? "Forbidden: policy denied this action",
     );
   }
@@ -329,6 +371,348 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       detail: {
         summary: "Delete realm",
         description: "Delete a realm (owner/admin only)",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
+    "/:unitId/pinboard",
+    async ({ params, headers }): Promise<RealmExtraReadResponse> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      return realmService.readCommunityList(
+        identity,
+        params.unitId,
+        "pinboard",
+      );
+    },
+    {
+      params: realmParamsSchema,
+      response: realmExtraReadResponseSchema,
+      detail: {
+        summary: "Read realm pinboard",
+        description:
+          "Read the public, stale-filtered Pinboard list backed by Realm.extra.pinboard",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
+    "/:unitId/pinboard/admin",
+    async ({
+      params,
+      identity,
+      status,
+    }): Promise<RealmExtraAdminReadResponse | string> => {
+      const denied = await assertRealmContentPinPolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+        targetId: `${params.unitId}:pinboard`,
+      });
+      if (denied) return denied;
+      return realmService.readCommunityListAdmin(
+        identity,
+        params.unitId,
+        "pinboard",
+      );
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      response: {
+        200: realmExtraAdminReadResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Read realm pinboard for moderators",
+        description:
+          "Read the full Pinboard list, including stale IDs, backed by Realm.extra.pinboard",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/pinboard",
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<RealmExtraOkResponse | string> => {
+      const denied = await assertRealmContentPinPolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+        targetId: `${params.unitId}:pinboard`,
+      });
+      if (denied) return denied;
+      return realmService.appendCommunityList(
+        identity,
+        params.unitId,
+        "pinboard",
+        body.unitId,
+      );
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      body: realmExtraAppendBodySchema,
+      response: {
+        200: realmExtraOkResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Append to realm pinboard",
+        description:
+          "Append a Unit to the Pinboard using the Realm.extra.pinboard primitive",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/pinboard/reorder",
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<RealmExtraOkResponse | string> => {
+      const denied = await assertRealmContentPinPolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+        targetId: `${params.unitId}:pinboard`,
+      });
+      if (denied) return denied;
+      return realmService.reorderCommunityList(
+        identity,
+        params.unitId,
+        "pinboard",
+        body.unitIds,
+      );
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      body: realmExtraReorderBodySchema,
+      response: {
+        200: realmExtraOkResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Reorder realm pinboard",
+        description:
+          "Reorder the Pinboard using the Realm.extra.pinboard primitive",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .delete(
+    "/:unitId/pinboard/:contentUnitId",
+    async ({
+      params,
+      identity,
+      status,
+    }): Promise<RealmExtraOkResponse | string> => {
+      const denied = await assertRealmContentPinPolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+        targetId: `${params.unitId}:pinboard`,
+      });
+      if (denied) return denied;
+      return realmService.removeCommunityListEntry(
+        identity,
+        params.unitId,
+        "pinboard",
+        params.contentUnitId,
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ unitId: t.String(), contentUnitId: t.String() }),
+      response: {
+        200: realmExtraOkResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Remove from realm pinboard",
+        description:
+          "Remove a Unit from the Pinboard using the Realm.extra.pinboard primitive",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
+    "/:unitId/announcements",
+    async ({ params, headers }): Promise<RealmExtraReadResponse> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      return realmService.readCommunityList(
+        identity,
+        params.unitId,
+        "announcement",
+      );
+    },
+    {
+      params: realmParamsSchema,
+      response: realmExtraReadResponseSchema,
+      detail: {
+        summary: "Read realm announcements",
+        description:
+          "Read the public, stale-filtered special announcement list backed by Realm.extra.announcement",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
+    "/:unitId/announcements/admin",
+    async ({
+      params,
+      identity,
+      status,
+    }): Promise<RealmExtraAdminReadResponse | string> => {
+      const denied = await assertRealmContentPinPolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+        targetId: `${params.unitId}:announcement`,
+      });
+      if (denied) return denied;
+      return realmService.readCommunityListAdmin(
+        identity,
+        params.unitId,
+        "announcement",
+      );
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      response: {
+        200: realmExtraAdminReadResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Read realm announcements for moderators",
+        description:
+          "Read the full special announcement list, including stale IDs, backed by Realm.extra.announcement",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/announcements",
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<RealmExtraOkResponse | string> => {
+      const denied = await assertRealmContentPinPolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+        targetId: `${params.unitId}:announcement`,
+      });
+      if (denied) return denied;
+      return realmService.appendCommunityList(
+        identity,
+        params.unitId,
+        "announcement",
+        body.unitId,
+      );
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      body: realmExtraAppendBodySchema,
+      response: {
+        200: realmExtraOkResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Append to realm announcements",
+        description:
+          "Append a Unit to special announcements using the Realm.extra.announcement primitive",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/announcements/reorder",
+    async ({
+      params,
+      body,
+      identity,
+      status,
+    }): Promise<RealmExtraOkResponse | string> => {
+      const denied = await assertRealmContentPinPolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+        targetId: `${params.unitId}:announcement`,
+      });
+      if (denied) return denied;
+      return realmService.reorderCommunityList(
+        identity,
+        params.unitId,
+        "announcement",
+        body.unitIds,
+      );
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      body: realmExtraReorderBodySchema,
+      response: {
+        200: realmExtraOkResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Reorder realm announcements",
+        description:
+          "Reorder special announcements using the Realm.extra.announcement primitive",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .delete(
+    "/:unitId/announcements/:contentUnitId",
+    async ({
+      params,
+      identity,
+      status,
+    }): Promise<RealmExtraOkResponse | string> => {
+      const denied = await assertRealmContentPinPolicy({
+        identity,
+        status,
+        realmUnitId: params.unitId,
+        targetId: `${params.unitId}:announcement`,
+      });
+      if (denied) return denied;
+      return realmService.removeCommunityListEntry(
+        identity,
+        params.unitId,
+        "announcement",
+        params.contentUnitId,
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ unitId: t.String(), contentUnitId: t.String() }),
+      response: {
+        200: realmExtraOkResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "Remove from realm announcements",
+        description:
+          "Remove a Unit from special announcements using the Realm.extra.announcement primitive",
         tags: ["Realms"],
       },
     },

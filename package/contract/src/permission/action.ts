@@ -16,6 +16,7 @@ export const policyActionKeys = [
   "queue.realm.decide",
   "content.create",
   "content.delete",
+  "content.pin",
   "content.takedown",
   "content.lock",
   "content.archive",

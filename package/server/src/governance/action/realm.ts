@@ -8,6 +8,7 @@ export const realmPolicyActions = {
   memberCapabilityChange: "realm.member.capability.change",
   reportEscalate: "realm.report.escalate",
   dmSend: "dm.send",
+  contentPin: "content.pin",
   tagVote: "tag.vote",
   tagCurate: "tag.curate",
 } as const satisfies Record<string, PolicyAction>;
@@ -44,6 +45,12 @@ export const realmActionDefinitions = [
   {
     action: realmPolicyActions.dmSend,
     family: "realm",
+  },
+  {
+    action: realmPolicyActions.contentPin,
+    requiredCapability: "content.pin",
+    family: "realm",
+    realmScoped: true,
   },
   {
     action: realmPolicyActions.tagVote,

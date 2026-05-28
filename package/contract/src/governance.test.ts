@@ -42,6 +42,7 @@ describe("governance contract registry", () => {
   test("accepts closed capability and decision code keys", () => {
     expect(Value.Check(capabilitySchema, "account.ban")).toBe(true);
     expect(Value.Check(capabilitySchema, "moderation.case.decide")).toBe(true);
+    expect(Value.Check(capabilitySchema, "content.pin")).toBe(true);
     expect(Value.Check(capabilitySchema, "moderation.decide")).toBe(false);
 
     expect(Value.Check(decisionCodeSchema, "ALLOWED")).toBe(true);
@@ -51,6 +52,7 @@ describe("governance contract registry", () => {
     expect(Value.Check(policyActionSchema, "realm.create")).toBe(true);
     expect(Value.Check(policyActionSchema, "dm.send")).toBe(true);
     expect(Value.Check(policyActionSchema, "reaction.create")).toBe(true);
+    expect(Value.Check(policyActionSchema, "content.pin")).toBe(true);
     expect(Value.Check(policyActionSchema, "tag.vote")).toBe(true);
     expect(Value.Check(policyActionSchema, "reaction.destroy")).toBe(false);
   });

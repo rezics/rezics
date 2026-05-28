@@ -2,10 +2,14 @@ import type {
   AcknowledgeRealmRuleInput,
   CreateRealmInput,
   RealmDTO,
+  RealmExtraAdminReadResponse,
+  RealmExtraOkResponse,
+  RealmExtraReadResponse,
   RealmListQuery,
   RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
+  RezicsSessionClaims,
   UnitRealmDTO,
   UpdateRealmInput,
 } from "@rezics/contract";
@@ -14,7 +18,9 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma, RealmTagApplication } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { governanceAuditService } from "@/governance/audit.service";
 import { governanceCapabilityService } from "@/governance/capability.service";
+import { realmPolicyActions } from "@/governance/action/realm";
 import { serverJobProducer } from "@/job/job-boundary";
 
 /** Score at or below this threshold hides a RealmTagApplication from regular users. */
@@ -30,7 +36,14 @@ import {
   mapRealmToDTO,
   mapUnitRealmToDTO,
 } from "./realm.mapper";
-import { filterRealmExtraPublic } from "./realm-extra.service";
+import {
+  appendToList,
+  filterRealmExtraPublic,
+  readListAdmin,
+  readListPublic,
+  removeFromList,
+  reorderList,
+} from "./realm-extra.service";
 import {
   type RealmWithRelations,
   realmInclude,
@@ -84,6 +97,12 @@ function getRuleUnitIdFromExtra(extra: Prisma.JsonValue | null): string | null {
   if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
   const rule = (extra as Record<string, unknown>).rule;
   return typeof rule === "string" && rule.length > 0 ? rule : null;
+}
+
+type RealmCommunityListKey = "pinboard" | "announcement";
+
+function communityListTargetKind(key: RealmCommunityListKey) {
+  return key === "pinboard" ? "realm-pinboard" : "realm-announcement";
 }
 
 export class RealmService {
@@ -635,6 +654,86 @@ export class RealmService {
       acceptedAt: row.acceptedAt,
       acceptedLanguage: row.acceptedLanguage,
     };
+  }
+
+  async readCommunityList(
+    caller: RezicsSessionClaims | null,
+    realmUnitId: string,
+    key: RealmCommunityListKey,
+  ): Promise<RealmExtraReadResponse> {
+    return {
+      realmId: realmUnitId,
+      key,
+      unitIds: await readListPublic(caller, realmUnitId, key),
+    };
+  }
+
+  async readCommunityListAdmin(
+    caller: RezicsSessionClaims,
+    realmUnitId: string,
+    key: RealmCommunityListKey,
+  ): Promise<RealmExtraAdminReadResponse> {
+    const { unitIds, staleIds } = await readListAdmin(caller, realmUnitId, key);
+    return { realmId: realmUnitId, key, unitIds, staleIds };
+  }
+
+  async appendCommunityList(
+    caller: RezicsSessionClaims,
+    realmUnitId: string,
+    key: RealmCommunityListKey,
+    unitId: string,
+  ): Promise<RealmExtraOkResponse> {
+    const { unitIds } = await appendToList(caller, realmUnitId, key, unitId);
+    await this.auditCommunityListMutation(caller, realmUnitId, key, "append", {
+      unitId,
+      unitIds,
+    });
+    return { ok: true, unitIds };
+  }
+
+  async reorderCommunityList(
+    caller: RezicsSessionClaims,
+    realmUnitId: string,
+    key: RealmCommunityListKey,
+    unitIds: string[],
+  ): Promise<RealmExtraOkResponse> {
+    const result = await reorderList(caller, realmUnitId, key, unitIds);
+    await this.auditCommunityListMutation(caller, realmUnitId, key, "reorder", {
+      unitIds: result.unitIds,
+    });
+    return { ok: true, unitIds: result.unitIds };
+  }
+
+  async removeCommunityListEntry(
+    caller: RezicsSessionClaims,
+    realmUnitId: string,
+    key: RealmCommunityListKey,
+    unitId: string,
+  ): Promise<RealmExtraOkResponse> {
+    const { unitIds } = await removeFromList(caller, realmUnitId, key, unitId);
+    await this.auditCommunityListMutation(caller, realmUnitId, key, "remove", {
+      unitId,
+      unitIds,
+    });
+    return { ok: true, unitIds };
+  }
+
+  private auditCommunityListMutation(
+    caller: RezicsSessionClaims,
+    realmUnitId: string,
+    key: RealmCommunityListKey,
+    operation: "append" | "reorder" | "remove",
+    metadata: Record<string, unknown>,
+  ) {
+    return governanceAuditService.appendPrivilegedMutation({
+      actorUserId: caller.userId,
+      action: realmPolicyActions.contentPin,
+      targetKind: communityListTargetKind(key),
+      targetId: realmUnitId,
+      reason: `Realm ${key} ${operation}`,
+      correlationId: crypto.randomUUID(),
+      metadata: { key, operation, ...metadata },
+    });
   }
 
   // --- Content feed ---

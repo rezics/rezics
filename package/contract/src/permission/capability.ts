@@ -13,6 +13,7 @@ export const capabilityKeys = [
   "moderation.case.reverse",
   "queue.site.decide",
   "queue.realm.decide",
+  "content.pin",
   "content.takedown",
   "content.lock",
   "content.archive",

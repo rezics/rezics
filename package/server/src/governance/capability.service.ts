@@ -67,6 +67,10 @@ export class GovernanceCapabilityService {
     )
       ? [
           {
+            capability: "content.pin",
+            scope: { kind: "realm", realmUnitId },
+          },
+          {
             capability: "queue.realm.decide",
             scope: { kind: "realm", realmUnitId },
           },

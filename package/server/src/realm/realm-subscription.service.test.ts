@@ -8,6 +8,14 @@ installPrismaClientMock();
 
 // Stub fire-and-forget meili sync so it doesn't reach into real env.
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
+const appendToListMock = mock(async () => ({
+  unitIds: ["unit-1", "unit-2"],
+}));
+const reorderListMock = mock(async (_caller, _realmId, _key, unitIds) => ({
+  unitIds,
+}));
+const removeFromListMock = mock(async () => ({ unitIds: ["unit-2"] }));
+const auditPrivilegedMutationMock = mock(async () => ({ id: "audit-1" }));
 mock.module("@/meili/realm/sync", () => ({
   patchRealmMemberCountToMeili: mock(async () => undefined),
   patchRealmMetadataToMeili: mock(async () => undefined),
@@ -26,11 +34,29 @@ mock.module("@/job/job-boundary", () => ({
     enqueue: enqueueMock,
   },
 }));
+mock.module("@/governance/audit.service", () => ({
+  governanceAuditService: {
+    appendPrivilegedMutation: auditPrivilegedMutationMock,
+  },
+}));
+mock.module("./realm-extra.service", () => ({
+  appendToList: appendToListMock,
+  filterRealmExtraPublic: mock(async (extra: unknown) => extra),
+  readListAdmin: mock(async () => ({ unitIds: ["unit-1"], staleIds: [] })),
+  readListPublic: mock(async () => ["unit-1"]),
+  removeFromList: removeFromListMock,
+  reorderList: reorderListMock,
+}));
 
 import { realmService } from "./realm.service";
 
 const REALM = "realm-unit-id";
 const USER = "user-unit-id";
+const currentIdentity = {
+  sub: USER,
+  userId: USER,
+  permission: { role: "USER" as const },
+};
 
 interface TxOps {
   memberCreate?: ReturnType<typeof mock>;
@@ -77,6 +103,10 @@ function installTx(ops: TxOps) {
 
 afterEach(() => {
   enqueueMock.mockClear();
+  appendToListMock.mockClear();
+  reorderListMock.mockClear();
+  removeFromListMock.mockClear();
+  auditPrivilegedMutationMock.mockClear();
   delete prismaMock.$transaction;
   delete prismaMock.realmMember;
   delete prismaMock.realm;
@@ -242,6 +272,10 @@ describe("realmService.getMember", () => {
       roleKey: "moderator",
       capabilities: [
         {
+          capability: "content.pin",
+          scope: { kind: "realm", realmUnitId: REALM },
+        },
+        {
           capability: "queue.realm.decide",
           scope: { kind: "realm", realmUnitId: REALM },
         },
@@ -395,6 +429,78 @@ describe("realmService.acknowledgeCurrentRule", () => {
             userId: USER,
           },
         },
+      }),
+    );
+  });
+});
+
+describe("realmService community list wrappers", () => {
+  test("appends to pinboard through Realm.extra and writes audit metadata", async () => {
+    await expect(
+      realmService.appendCommunityList(
+        currentIdentity,
+        REALM,
+        "pinboard",
+        "unit-2",
+      ),
+    ).resolves.toEqual({ ok: true, unitIds: ["unit-1", "unit-2"] });
+
+    expect(appendToListMock).toHaveBeenCalledWith(
+      currentIdentity,
+      REALM,
+      "pinboard",
+      "unit-2",
+    );
+    expect(auditPrivilegedMutationMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: USER,
+        action: "content.pin",
+        targetKind: "realm-pinboard",
+        targetId: REALM,
+        metadata: expect.objectContaining({
+          key: "pinboard",
+          operation: "append",
+          unitId: "unit-2",
+        }),
+      }),
+    );
+  });
+
+  test("reorders and removes announcement entries through Realm.extra", async () => {
+    await expect(
+      realmService.reorderCommunityList(
+        currentIdentity,
+        REALM,
+        "announcement",
+        ["unit-2", "unit-1"],
+      ),
+    ).resolves.toEqual({ ok: true, unitIds: ["unit-2", "unit-1"] });
+    await expect(
+      realmService.removeCommunityListEntry(
+        currentIdentity,
+        REALM,
+        "announcement",
+        "unit-1",
+      ),
+    ).resolves.toEqual({ ok: true, unitIds: ["unit-2"] });
+
+    expect(reorderListMock).toHaveBeenCalledWith(
+      currentIdentity,
+      REALM,
+      "announcement",
+      ["unit-2", "unit-1"],
+    );
+    expect(removeFromListMock).toHaveBeenCalledWith(
+      currentIdentity,
+      REALM,
+      "announcement",
+      "unit-1",
+    );
+    expect(auditPrivilegedMutationMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "content.pin",
+        targetKind: "realm-announcement",
+        metadata: expect.objectContaining({ operation: "remove" }),
       }),
     );
   });
