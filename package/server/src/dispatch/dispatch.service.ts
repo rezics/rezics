@@ -4,6 +4,7 @@ import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
 import { env } from "@/env";
 import { gameMediaLibraryService } from "@/game-media-library";
+import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import type { DispatchConfig } from "./dispatch.types";
 
 async function persistCoverUrlToTranslation(
@@ -24,6 +25,7 @@ async function persistCoverUrlToTranslation(
     existing?.extra ?? undefined,
     coverUrl ?? undefined,
   ) as Prisma.InputJsonValue;
+  assertUnitTranslationExtraAllowed(nextExtra);
   await prisma.unitTranslation.upsert({
     where: { unitId_language: { unitId, language } },
     create: { unitId, language, extra: nextExtra },
@@ -91,10 +93,6 @@ export class DispatchService {
         result.unitId,
         data.coverUrl as string | null | undefined,
       );
-      await gameMediaLibraryService.appendGameMetadataRelations(result.unitId, {
-        platformEntityIds: data.platformEntityIds as string[] | undefined,
-        ageRatingTagUnitIds: data.ageRatingTagUnitIds as string[] | undefined,
-      });
       return { unitId: result.unitId };
     }
 
@@ -131,10 +129,6 @@ export class DispatchService {
       unit.id,
       data.coverUrl as string | null | undefined,
     );
-    await gameMediaLibraryService.appendGameMetadataRelations(unit.id, {
-      platformEntityIds: data.platformEntityIds as string[] | undefined,
-      ageRatingTagUnitIds: data.ageRatingTagUnitIds as string[] | undefined,
-    });
     return { unitId: unit.id };
   }
 
@@ -164,6 +158,10 @@ export class DispatchService {
         result.unitId,
         data.coverUrl as string | null | undefined,
       );
+      await gameMediaLibraryService.appendGameMetadataRelations(result.unitId, {
+        platformEntityIds: data.platformEntityIds as string[] | undefined,
+        ageRatingTagUnitIds: data.ageRatingTagUnitIds as string[] | undefined,
+      });
       return { unitId: result.unitId };
     }
 
@@ -193,6 +191,10 @@ export class DispatchService {
       unit.id,
       data.coverUrl as string | null | undefined,
     );
+    await gameMediaLibraryService.appendGameMetadataRelations(unit.id, {
+      platformEntityIds: data.platformEntityIds as string[] | undefined,
+      ageRatingTagUnitIds: data.ageRatingTagUnitIds as string[] | undefined,
+    });
     return { unitId: unit.id };
   }
 

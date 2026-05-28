@@ -36,6 +36,7 @@ import {
 import { contentStructureService } from "@/content-structure";
 import { countReadableContentStructureItems } from "@/content-structure/types";
 import { assertLicenseSlug } from "@/unit/publication-policy";
+import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
@@ -379,6 +380,7 @@ export class BookService {
         req.coverUrl !== undefined && tr.language === language
           ? withCoverUrl(baseExtra, req.coverUrl ?? undefined)
           : baseExtra;
+      assertUnitTranslationExtraAllowed(nextExtra ?? null);
       return {
         language: tr.language,
         title: tr.title ?? undefined,
@@ -564,6 +566,7 @@ export class BookService {
           existingCoverTranslation?.extra ?? undefined,
           req.coverUrl ?? undefined,
         ) as Prisma.InputJsonValue;
+        assertUnitTranslationExtraAllowed(nextExtra);
         await tx.unitTranslation.upsert({
           where: { unitId_language: { unitId, language } },
           create: { unitId, language, extra: nextExtra },

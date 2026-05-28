@@ -25,6 +25,7 @@ import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { pickSlugScope } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";
 import { assertLicenseSlug } from "@/unit/publication-policy";
+import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import { AppError } from "@/utils/errors";
 import { mapSeriesContentIndexToDTO, mapSeriesToDTO } from "./series.mapper";
 import {
@@ -173,15 +174,18 @@ export class SeriesService {
               licenseSlug: assertLicenseSlug(input.licenseSlug) ?? undefined,
               translations: input.translations?.length
                 ? {
-                    create: input.translations.map((tr) => ({
-                      language: tr.language,
-                      title: tr.title ?? undefined,
-                      subtitle: tr.subtitle ?? undefined,
-                      summary: tr.summary ?? undefined,
-                      description: nullableContentDocJson(tr.description),
-                      extra: (tr.extra ?? null) as Prisma.InputJsonValue,
-                      sourceUnitId: tr.sourceUnitId ?? undefined,
-                    })),
+                    create: input.translations.map((tr) => {
+                      assertUnitTranslationExtraAllowed(tr.extra ?? null);
+                      return {
+                        language: tr.language,
+                        title: tr.title ?? undefined,
+                        subtitle: tr.subtitle ?? undefined,
+                        summary: tr.summary ?? undefined,
+                        description: nullableContentDocJson(tr.description),
+                        extra: (tr.extra ?? null) as Prisma.InputJsonValue,
+                        sourceUnitId: tr.sourceUnitId ?? undefined,
+                      };
+                    }),
                   }
                 : undefined,
             },

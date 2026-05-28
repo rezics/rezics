@@ -139,6 +139,23 @@ describe("TranslationService history patches", () => {
     expect(enqueueMock).not.toHaveBeenCalled();
   });
 
+  test("rejects game system requirement raw text in translation extra", async () => {
+    const { tx } = freshMocks();
+    const { translationService } = await import("./translation.service");
+
+    await expect(
+      translationService.upsertTranslation("book-1", "zh-hant", {
+        extra: {
+          coverUrl: "https://example.test/cover.jpg",
+          systemRequirementRawText: "Requires a 64-bit processor.",
+        },
+      }),
+    ).rejects.toThrow(/Game system requirement raw text/);
+
+    expect(tx.unitTranslation.upsert).not.toHaveBeenCalled();
+    expect(enqueueMock).not.toHaveBeenCalled();
+  });
+
   test("realm translation edit enqueues realm translation projection", async () => {
     const { tx } = freshMocks();
     prismaMock.unit.findUnique.mockResolvedValueOnce({ type: "REALM" });

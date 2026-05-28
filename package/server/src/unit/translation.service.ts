@@ -17,6 +17,7 @@ import {
   translationPatchFromPaths,
   writeEditorialMetadataHistory,
 } from "./collaborative-metadata";
+import { assertUnitTranslationExtraAllowed } from "./translation-extra";
 
 /**
  * Translation Service - CRUD for UnitTranslation rows
@@ -66,6 +67,7 @@ export class TranslationService {
         hasOwn(data, "extra") && data.extra !== undefined
           ? applySparsePatch(previous?.extra ?? {}, data.extra)
           : previous?.extra;
+      assertUnitTranslationExtraAllowed(nextExtra);
       const payload: Prisma.UnitTranslationCreateInput = {
         unit: { connect: { id: unitId } },
         language,

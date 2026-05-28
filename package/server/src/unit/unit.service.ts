@@ -28,6 +28,7 @@ import {
   assertLicenseSlug,
   publicUnitEligibilityWhere,
 } from "./publication-policy";
+import { assertUnitTranslationExtraAllowed } from "./translation-extra";
 import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
 
@@ -280,15 +281,18 @@ export class UnitService {
           translations:
             input.translations && input.translations.length > 0
               ? {
-                  create: input.translations.map((tr) => ({
-                    language: tr.language,
-                    title: tr.title ?? undefined,
-                    subtitle: tr.subtitle ?? undefined,
-                    summary: tr.summary ?? undefined,
-                    description: nullableContentDocJson(tr.description),
-                    extra: (tr.extra ?? null) as Prisma.InputJsonValue,
-                    sourceUnitId: tr.sourceUnitId ?? undefined,
-                  })),
+                  create: input.translations.map((tr) => {
+                    assertUnitTranslationExtraAllowed(tr.extra ?? null);
+                    return {
+                      language: tr.language,
+                      title: tr.title ?? undefined,
+                      subtitle: tr.subtitle ?? undefined,
+                      summary: tr.summary ?? undefined,
+                      description: nullableContentDocJson(tr.description),
+                      extra: (tr.extra ?? null) as Prisma.InputJsonValue,
+                      sourceUnitId: tr.sourceUnitId ?? undefined,
+                    };
+                  }),
                 }
               : undefined,
         },
