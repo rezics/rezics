@@ -27,6 +27,11 @@ import {
   Checkbox,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Separator,
 } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
@@ -70,26 +75,35 @@ function RuleEditor({
     <div className="flex flex-col gap-3">
       {rules.map((rule, index) => (
         <div
-          key={rule.externalKind}
+          key={`${rule.externalKind}-${index}`}
           className="grid gap-3 rounded-md border border-border-whisper p-3 md:grid-cols-12"
         >
           <div className="md:col-span-2">
-            <Label className="text-xs">Kind</Label>
-            <select
+            <Label
+              htmlFor={`source-site-rule-kind-${index}`}
+              className="text-xs"
+            >
+              Kind
+            </Label>
+            <Select
               value={rule.externalKind}
-              onChange={(event) =>
+              onValueChange={(value) =>
                 updateRule(index, {
-                  externalKind: event.target.value as ExternalKind,
+                  externalKind: value as ExternalKind,
                 })
               }
-              className="mt-1 h-9 w-full rounded-md border border-border-whisper bg-transparent px-2 text-sm"
             >
-              {externalKinds.map((kind) => (
-                <option key={kind} value={kind}>
-                  {externalKindRegistry[kind].label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger id={`source-site-rule-kind-${index}`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {externalKinds.map((kind) => (
+                  <SelectItem key={kind} value={kind}>
+                    {externalKindRegistry[kind].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="md:col-span-2">
             <Label className="text-xs">ID name</Label>
@@ -258,17 +272,20 @@ export function SourceSiteForm({ sourceSite }: { sourceSite?: SourceSiteDTO }) {
         </div>
         <div>
           <Label htmlFor="source-site-crawl-support">Crawl support</Label>
-          <select
-            id="source-site-crawl-support"
+          <Select
             value={crawlSupport}
-            onChange={(event) => setCrawlSupport(event.target.value as any)}
-            className="mt-1 h-9 w-full rounded-md border border-border-whisper bg-transparent px-2 text-sm"
+            onValueChange={(value) => setCrawlSupport(value as any)}
           >
-            <option value="none">None</option>
-            <option value="planned">Planned</option>
-            <option value="supported">Supported</option>
-            <option value="deprecated">Deprecated</option>
-          </select>
+            <SelectTrigger id="source-site-crawl-support" className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">None</SelectItem>
+              <SelectItem value="planned">Planned</SelectItem>
+              <SelectItem value="supported">Supported</SelectItem>
+              <SelectItem value="deprecated">Deprecated</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="source-site-adapter">Crawler adapter key</Label>
@@ -380,20 +397,21 @@ function ExternalRefControl({ sourceSite }: { sourceSite: SourceSiteDTO }) {
         </div>
         <div>
           <Label htmlFor="external-ref-kind">External kind</Label>
-          <select
-            id="external-ref-kind"
+          <Select
             value={externalKind}
-            onChange={(event) =>
-              setExternalKind(event.target.value as ExternalKind)
-            }
-            className="mt-1 h-9 w-full rounded-md border border-border-whisper bg-transparent px-2 text-sm"
+            onValueChange={(value) => setExternalKind(value as ExternalKind)}
           >
-            {sortedKinds.map((kind) => (
-              <option key={kind} value={kind}>
-                {externalKindRegistry[kind].label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="external-ref-kind" className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sortedKinds.map((kind) => (
+                <SelectItem key={kind} value={kind}>
+                  {externalKindRegistry[kind].label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="external-ref-id">External ID</Label>
