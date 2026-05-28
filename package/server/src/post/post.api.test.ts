@@ -217,6 +217,33 @@ describe("postApi", () => {
     );
   });
 
+  test("denies reply creation rejected by realm-scoped policy", async () => {
+    const { postApi } = await import("./post.api");
+    const response = await postApi.handle(
+      new Request("http://localhost/post/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          parentPostUnitId: "parent-post-1",
+          content: { body: "reply" },
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.text()).toBe("Denied by policy");
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "content.create",
+      target: {
+        kind: "post-reply",
+        id: "parent-post-1",
+        realmUnitId: "realm-1",
+      },
+    });
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
   test("lets owners delete their own posts without policy", async () => {
     const { postApi } = await import("./post.api");
     const response = await postApi.handle(
