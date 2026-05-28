@@ -1,4 +1,17 @@
-## ADDED Requirements
+# folio-tree-navigation Specification
+
+## Purpose
+
+Defines how the folio reader traverses its chapter tree: depth-first
+flattening into a `FlatChapter[]` reading order (leaf nodes only),
+seamless auto-advance/reverse across chapter boundaries, prefetching
+of the next chapter via `AbortSignal`-aware `node.fetch()`, and
+position restoration with `chapterId` priority and bounds clamping.
+Also owns the `FolioPosition` / `FolioProgress` shapes and the
+collapsible TOC panel that renders branch headers and leaf entries
+with depth-based styling.
+
+## Requirements
 
 ### Requirement: Tree flattening to reading order
 

@@ -1,4 +1,15 @@
-## ADDED Requirements
+# folio-ghost-snapshot Specification
+
+## Purpose
+
+Defines the Ghost Snapshot animation technique used for page turns in
+the folio reader: clone the current viewport as a fixed overlay,
+instantly jump the real content, animate the ghost out via the Web
+Animations API, and remove it on completion. Also owns the three
+configurable turn styles (`rotate` / `slide` / `fade`), the WAAPI-only
+rule, and the lock that prevents overlapping turns.
+
+## Requirements
 
 ### Requirement: Ghost Snapshot page turn mechanism
 

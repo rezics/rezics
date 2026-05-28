@@ -1,4 +1,16 @@
-## ADDED Requirements
+# folio-core Specification
+
+## Purpose
+
+Defines the `@rezics/folio` reader runtime: the `FolioNode` chapter
+tree, the `FolioContent` and `FolioState` shapes, the discriminated
+`FolioStatus` lifecycle, the explicit `FolioDispatch` action surface,
+the `FolioProvider` / `useFolio` context, the renderer plugin
+registry, and the `<Folio />` component contract (props, prefetch
+configuration). Reader gestures, pagination math, ghost snapshots, and
+chapter-tree navigation live in sibling specs.
+
+## Requirements
 
 ### Requirement: Package scaffold
 

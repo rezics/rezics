@@ -1,4 +1,15 @@
-## ADDED Requirements
+# folio-pagination Specification
+
+## Purpose
+
+Defines the two reading modes the folio reader supports: scroll mode
+(plain vertical overflow with `scrollOffset` progress tracking) and
+page mode (CSS multi-column layout paginated by `translateX` without
+CSS transition). Also owns the page-count recalculation triggers
+(mount, `ResizeObserver`, `document.fonts.ready`, image load) and the
+position-preserving switch between the two modes.
+
+## Requirements
 
 ### Requirement: Scroll mode
 

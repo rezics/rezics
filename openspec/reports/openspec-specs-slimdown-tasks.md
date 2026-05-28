@@ -126,15 +126,15 @@ Group the work into batches by prefix so each PR/commit stays reviewable.
 - [x] `editor-scroll-sync`
 - [x] `editor-toolbar`
 
-### B2. Batch: `folio-*` (7 files)
+### B2. Batch: `folio-*` (7 files) — done 2026-05-28
 
-- [ ] `folio-core`
-- [ ] `folio-gesture`
-- [ ] `folio-ghost-snapshot`
-- [ ] `folio-pagination`
-- [ ] `folio-plugin-epub`
-- [ ] `folio-plugin-txt`
-- [ ] `folio-tree-navigation`
+- [x] `folio-core`
+- [x] `folio-gesture`
+- [x] `folio-ghost-snapshot`
+- [x] `folio-pagination`
+- [x] `folio-plugin-epub`
+- [x] `folio-plugin-txt`
+- [x] `folio-tree-navigation`
 
 ### B3. Batch: `shelf-*` (8 files)
 

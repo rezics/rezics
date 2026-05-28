@@ -1,4 +1,17 @@
-## ADDED Requirements
+# folio-plugin-epub Specification
+
+## Purpose
+
+Defines the folio renderer plugin for `.epub` files: a DIY parser
+(fflate + fast-xml-parser, no `epubjs`) that locates the OPF via
+`container.xml`, builds the manifest/spine reading order, extracts
+chapter HTML, rewrites internal asset references to blob URLs (with
+lifecycle cleanup), and constructs the `FolioNode` tree from the NCX
+or EPUB 3 nav document. Also owns the `createEpubPlugin` factory,
+the Controls panel for TOC navigation, and the partial-loading
+contract when individual spine items fail to parse.
+
+## Requirements
 
 ### Requirement: Epub parser (DIY, no epubjs)
 

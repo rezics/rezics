@@ -1,4 +1,17 @@
-## ADDED Requirements
+# folio-plugin-txt Specification
+
+## Purpose
+
+Defines the folio renderer plugin for plain-text files: the
+`splitTxt` rule-based chapter splitter (CJK markers, English chapter
+headings, markdown headings, ASCII dividers), the in-memory leaf
+`fetch` contract, the `createRezicsRenderer` integration that
+preserves novel-mode whitespace, and the `createTxtPlugin` factory.
+Also owns the Settings panel that exposes editable split-rule
+regexes, a regex test/preview, and the re-split callback that
+publishes a new chapter tree via `onTreeChange`.
+
+## Requirements
 
 ### Requirement: Txt tree builder utility
 

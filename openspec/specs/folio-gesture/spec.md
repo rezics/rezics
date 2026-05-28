@@ -1,4 +1,14 @@
-## ADDED Requirements
+# folio-gesture Specification
+
+## Purpose
+
+Defines the page-mode gesture layer for the folio reader: horizontal
+swipe detection via `@use-gesture/react`, the three-zone tap region
+(prev/toggle UI/next), the scope rule that disables gestures in
+scroll mode, and the boundary behavior at the first and last page of
+the book.
+
+## Requirements
 
 ### Requirement: Swipe navigation
 
