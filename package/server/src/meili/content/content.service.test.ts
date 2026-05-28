@@ -49,6 +49,48 @@ describe("searchContent work-domain behavior", () => {
     ]);
   });
 
+  test("filters wiki section subject and translation group selectors", async () => {
+    await searchContent({
+      type: "POST",
+      postKind: ["WIKI"],
+      realmId: "realm-1",
+      subjectEntityIds: ["entity-1", "entity-2"],
+      subjectKinds: ["character"],
+      subjectRoles: ["primary_character", "supporting_character"],
+      translationGroupIds: ["tg-1", "tg-2"],
+    });
+
+    expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
+      'type = "POST"',
+      'postKind = "WIKI"',
+      '(subjectEntityIds = "entity-1" OR subjectEntityIds = "entity-2")',
+      'subjectKinds = "character"',
+      '(subjectRoles = "primary_character" OR subjectRoles = "supporting_character")',
+      'realmIds = "realm-1"',
+      '(translationGroupId = "tg-1" OR translationGroupId = "tg-2")',
+      'visibility = "PUBLIC"',
+    ]);
+  });
+
+  test("filters realm-scoped wiki listings with tag and realm tag selectors", async () => {
+    await searchContent({
+      type: "POST",
+      postKind: ["WIKI"],
+      realmId: "realm-1",
+      tagIds: ["tag-lore"],
+      realmTagIds: ["tag-featured", "tag-canon"],
+    });
+
+    expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
+      'type = "POST"',
+      'postKind = "WIKI"',
+      'allTagIds = "tag-lore"',
+      'realmIds = "realm-1"',
+      '(realmTagKeys = "realm-1:tag-featured" OR realmTagKeys = "realm-1:tag-canon")',
+      'visibility = "PUBLIC"',
+    ]);
+  });
+
   test("groups release hits and exposes collapsed alternatives", async () => {
     contentSearchMock.mockResolvedValueOnce({
       hits: [

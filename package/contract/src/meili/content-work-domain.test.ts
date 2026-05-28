@@ -39,6 +39,7 @@ const baseContentDocument = {
   seriesKindKeys: [],
   seriesTitles: [],
   realmIds: [],
+  translationGroupId: null,
   realmTagKeys: [],
   languages: ["en"],
   rating: "GENERAL",
@@ -88,6 +89,7 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         seriesUnitIds: ["series-1"],
         seriesKindKeys: ["book_series"],
         seriesTitles: ["Series"],
+        translationGroupId: "tg-1",
       }),
     ).toBe(true);
   });
@@ -106,6 +108,10 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         workRoles: ["RELEASE"],
         seriesUnitIds: ["series-1"],
         seriesKindKeys: ["book_series"],
+        subjectEntityIds: ["entity-1"],
+        subjectKinds: ["character"],
+        subjectRoles: ["primary_character"],
+        translationGroupIds: ["tg-1"],
         aiDisclosureModes: ["AI_ASSISTED"],
       }),
     ).toBe(true);

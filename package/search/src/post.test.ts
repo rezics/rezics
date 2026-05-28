@@ -53,6 +53,38 @@ describe("buildPostDocument", () => {
     expect(doc.realmIds).toEqual(["realm-1", "realm-2"]);
   });
 
+  test("projects translationGroupId for wiki grouping filters", async () => {
+    setServerEnvForSearchTests();
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "wiki-post-1",
+      type: "POST",
+      translationGroupId: "tg-artoria",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [{ language: "en", title: "Artoria", extra: null }],
+      unitTags: [],
+      inRealms: [{ realmUnitId: "realm-1" }],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      subjectAttributions: [],
+      post: {
+        kind: "WIKI",
+        content: markdownContentDoc("wiki page"),
+      },
+    });
+
+    expect(doc.translationGroupId).toBe("tg-artoria");
+    expect(doc.realmIds).toEqual(["realm-1"]);
+    expect(doc.postKind).toBe("WIKI");
+  });
+
   test("projects rootTargetUnitId and rootTargetUnitType from the Post row", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
@@ -606,6 +638,28 @@ describe("public content indexing eligibility", () => {
       isPublicIndexablePostUnit({
         status: "DELETED",
         visibility: "PUBLIC",
+      }),
+    ).toBe(false);
+  });
+
+  test("rejects private and hidden wiki content Units", async () => {
+    setServerEnvForSearchTests();
+    const { isPublicIndexableContentUnit } = await import("./sync");
+
+    expect(
+      isPublicIndexableContentUnit({
+        type: "POST",
+        status: "PUBLISHED",
+        visibility: "PRIVATE",
+        contentModerationState: null,
+      }),
+    ).toBe(false);
+    expect(
+      isPublicIndexableContentUnit({
+        type: "POST",
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        contentModerationState: { state: "HIDDEN" },
       }),
     ).toBe(false);
   });

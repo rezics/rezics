@@ -58,6 +58,7 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "seriesUnitIds",
       "seriesKindKeys",
       "realmIds",
+      "translationGroupId",
       "realmTagKeys",
       "languages",
       "rating",

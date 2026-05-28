@@ -56,12 +56,12 @@
 
 ## 6. Search And Indexing
 
-- [ ] 6.1 Ensure content search/index documents can filter WIKI Post Units by realm membership through UnitRealm.
-- [ ] 6.2 Ensure content search/index documents expose or can join translation group identifiers needed by wiki Zone sections.
-- [ ] 6.3 Add entity subject filters needed for wiki Zone entity collection sections.
-- [ ] 6.4 Add tag and realm tag filters needed for tag collection sections.
+- [x] 6.1 Ensure content search/index documents can filter WIKI Post Units by realm membership through UnitRealm.
+- [x] 6.2 Ensure content search/index documents expose or can join translation group identifiers needed by wiki Zone sections.
+- [x] 6.3 Add entity subject filters needed for wiki Zone entity collection sections.
+- [x] 6.4 Add tag and realm tag filters needed for tag collection sections.
 - [ ] 6.5 Add bounded repair jobs or sync hooks when work realm context, UnitRealm membership, wiki tags, subject attribution, or translation groups change.
-- [ ] 6.6 Add search tests for realm-scoped wiki listing, translation group filtering, and permission-safe hidden/private wiki exclusion.
+- [x] 6.6 Add search tests for realm-scoped wiki listing, translation group filtering, and permission-safe hidden/private wiki exclusion.
 
 ## 7. Frontend Realm Surfaces
 
@@ -127,7 +127,7 @@
 - [ ] 13.2 Run server tests for LABEL creation, WorkRealmContext permissions, Zone config validation, TranslationGroup best-language resolution, and realm wiki queries.
 - [x] 13.3 Run API client tests or type checks for new query/mutation surfaces.
 - [ ] 13.4 Run frontend component tests or stories for Realm Wiki tab, wiki Zone templates, navigation, homepage sections, and management forms.
-- [ ] 13.5 Run search/index tests for realm-scoped wiki listing and subject/tag/translation group filters.
+- [x] 13.5 Run search/index tests for realm-scoped wiki listing and subject/tag/translation group filters.
 - [ ] 13.6 Run `bun run format:check`.
 - [ ] 13.7 Run `bun run check:convention`.
 - [ ] 13.8 Run affected package tests with Bun filters where available.

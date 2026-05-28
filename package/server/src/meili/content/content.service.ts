@@ -11,6 +11,11 @@ function displayRank(item: any): number {
   return 2;
 }
 
+function anyValueFilter(field: string, values: readonly string[]): string {
+  const filters = values.map((value) => `${field} = "${value}"`);
+  return filters.length === 1 ? filters[0]! : `(${filters.join(" OR ")})`;
+}
+
 function groupReleaseHits(items: any[]): any[] {
   const groups = new Map<string, any[]>();
   for (const item of items) {
@@ -116,6 +121,15 @@ export async function searchContent(
       filter.push(`platformEntityIds = "${platformEntityId}"`);
     }
   }
+  if (opts.subjectEntityIds?.length) {
+    filter.push(anyValueFilter("subjectEntityIds", opts.subjectEntityIds));
+  }
+  if (opts.subjectKinds?.length) {
+    filter.push(anyValueFilter("subjectKinds", opts.subjectKinds));
+  }
+  if (opts.subjectRoles?.length) {
+    filter.push(anyValueFilter("subjectRoles", opts.subjectRoles));
+  }
 
   // Realm filter
   if (opts.realmId) {
@@ -132,6 +146,10 @@ export async function searchContent(
     } else {
       filter.push(`(${realmTagFilters.join(" OR ")})`);
     }
+  }
+
+  if (opts.translationGroupIds?.length) {
+    filter.push(anyValueFilter("translationGroupId", opts.translationGroupIds));
   }
 
   // Language filter
