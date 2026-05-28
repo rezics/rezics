@@ -8,9 +8,9 @@
 
 ## 2. Backend Build and Runtime Entry Points
 
-- [ ] 2.1 Standardize production cluster entrypoints for Elysia HTTP services in `package/server`, `package/auth`, `package/notify`, `package/reaction`, `package/history`, and `package/ranking` (ranking currently only calls `app.listen`).
-- [ ] 2.2 Add configurable worker-count handling (`WORKERS`) for Elysia cluster entrypoints with documented defaults and signal handling, using `@rezics/shared` observability helpers for startup/log output.
-- [ ] 2.3 Keep `package/job-runner` HTTP and worker roles separate; ensure `job-runner-http` uses HTTP semantics while `job-runner-worker` concurrency stays explicit.
+- [x] 2.1 Standardize production cluster entrypoints for Elysia HTTP services in `package/server`, `package/auth`, `package/notify`, `package/reaction`, `package/history`, and `package/ranking` (ranking currently only calls `app.listen`).
+- [x] 2.2 Add configurable worker-count handling (`WORKERS`) for Elysia cluster entrypoints with documented defaults and signal handling, using `@rezics/shared` observability helpers for startup/log output.
+- [x] 2.3 Keep `package/job-runner` HTTP and worker roles separate; ensure `job-runner-http` uses HTTP semantics while `job-runner-worker` concurrency stays explicit.
 - [ ] 2.4 Define a dedicated `ranking-worker` role that consumes the ranking job lane, separate from `job-runner-worker`, with explicit replica/concurrency controls.
 - [x] 2.5 Ensure each backend runtime package has a `build:linux` (or equivalent) production build script producing the correct compiled Linux artifact (target amd64).
 - [x] 2.6 Verify compiled binaries start with minimal production-like env and expose health/readiness behavior; add `/health` + `/ready` where missing.

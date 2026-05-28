@@ -20,6 +20,10 @@
     "./observability": {
       "types": "./src/observability/index.ts",
       "default": "./src/observability/index.ts"
+    },
+    "./cluster": {
+      "types": "./src/cluster/index.ts",
+      "default": "./src/cluster/index.ts"
     }
   },
   "dependencies": {

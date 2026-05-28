@@ -15,8 +15,8 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development bun run --watch --no-cache src/index.ts",
-    "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile ranking",
-    "build:linux": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile ranking",
+    "build": "bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun --outfile ranking",
+    "build:linux": "bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile ranking",
     "prisma:generate": "bunx prisma generate",
     "prisma:migrate": "bunx prisma migrate dev",
     "prisma:deploy": "bunx prisma migrate deploy && bun run prisma:generate",
