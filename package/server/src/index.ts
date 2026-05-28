@@ -37,6 +37,7 @@ import { federatedSearchApi, meiliApi } from "./meili";
 import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
 import { postApi } from "./post";
 import { profileReactionHistoryApi } from "./profile-reaction-history";
+import { dashboardApi } from "./dashboard";
 import { progressApi } from "./progress";
 import { reactionBoundaryApi } from "./reaction-boundary";
 import {
@@ -209,6 +210,7 @@ routeApp
   .use(chapterApi)
   .use(postApi)
   .use(progressApi)
+  .use(dashboardApi)
   .use(shelfApi)
   .use(collectionApi)
   .use(linkApi)
