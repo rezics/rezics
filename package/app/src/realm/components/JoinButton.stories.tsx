@@ -1,5 +1,5 @@
 import { postKeys } from "@rezics/api/post/post";
-import { realmKeys } from "@rezics/api/realm/realm";
+import { realmKeys, realmRuleResolvedQuery } from "@rezics/api/realm/realm";
 import {
   LANGUAGES,
   markdownContentDoc,
@@ -75,7 +75,22 @@ function SeedJoinButton({
   useEffect(() => {
     qc.setQueryData(realmKeys.mine(), { realms: [] });
     qc.setQueryData(realmKeys.detail(realm.unitId), realm);
-    if (post) qc.setQueryData(postKeys.detail(post.unitId), post);
+    if (post) {
+      qc.setQueryData(postKeys.detail(post.unitId), post);
+      qc.setQueryData(realmRuleResolvedQuery(realm.unitId).queryKey, {
+        realmUnitId: realm.unitId,
+        ruleUnitId: realm.extra?.rule ?? post.unitId,
+        version: 1,
+        requireOnJoin: true,
+        requireOnPost: true,
+        requireOnUpdate: true,
+        requestedLanguage: null,
+        resolvedLanguage: LANGUAGES.EN,
+        translation: null,
+        sourceRulePostUnitId: post.unitId,
+        sourceRulePost: post,
+      });
+    }
   }, [post, qc, realm]);
 
   return <div className="p-4">{children}</div>;

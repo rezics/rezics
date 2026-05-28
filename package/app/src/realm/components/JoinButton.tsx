@@ -1,7 +1,7 @@
-import { postQueries } from "@rezics/api/post/post";
 import {
   myRealmsQuery,
   realmDetailQuery,
+  realmRuleResolvedQuery,
   useJoinRealmMutation,
   useLeaveRealmMutation,
 } from "@rezics/api/realm/realm";
@@ -26,23 +26,25 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
   const isMember = myRealms?.realms?.some((r) => r.unitId === realmId) ?? false;
   const rulePostId = realm?.extra?.rule ?? undefined;
   const {
-    data: rulePost,
+    data: rule,
     isLoading: ruleLoading,
     isError: ruleError,
   } = useQuery({
-    ...postQueries.detail(rulePostId ?? ""),
+    ...realmRuleResolvedQuery(realmId),
     enabled: Boolean(rulePostId) && !isMember,
   });
+  const ruleContent =
+    rule?.sourceRulePost?.content ?? rule?.translation?.description ?? null;
   const isPending =
     joinMutation.isPending ||
     leaveMutation.isPending ||
     (Boolean(rulePostId) && ruleLoading);
 
   useEffect(() => {
-    if (ruleOpen && rulePost && !mainMarkdownSource(rulePost.content)?.trim()) {
+    if (ruleOpen && ruleContent && !mainMarkdownSource(ruleContent)?.trim()) {
       console.error("Join rule modal opened with empty post content.");
     }
-  }, [ruleOpen, rulePost]);
+  }, [ruleContent, ruleOpen]);
 
   const join = () => {
     joinMutation.mutate(
@@ -56,7 +58,7 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
   const handleToggle = () => {
     if (isMember) {
       leaveMutation.mutate(realmId);
-    } else if (rulePostId && rulePost && !ruleError) {
+    } else if (rulePostId && ruleContent && !ruleError) {
       setRuleOpen(true);
     } else {
       join();
@@ -75,7 +77,7 @@ export const JoinButton: React.FC<JoinButtonProps> = ({ realmId }) => {
       </Button>
       <RealmRuleDialog
         open={ruleOpen}
-        post={rulePost}
+        content={ruleContent}
         joining
         joinPending={joinMutation.isPending}
         onOpenChange={setRuleOpen}

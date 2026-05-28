@@ -1,6 +1,7 @@
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostBodyMarkdown } from "@/post";
 import { postQueries } from "@rezics/api/post/post";
+import { realmRuleResolvedQuery } from "@rezics/api/realm/realm";
 import {
   mainMarkdownSource,
   type RealmDTO,
@@ -64,6 +65,42 @@ function RealmMarkdownPanel({
   );
 }
 
+function RealmRuleFullPanel({ realmUnitId }: { realmUnitId: string }) {
+  const ruleQuery = useQuery(realmRuleResolvedQuery(realmUnitId));
+  const content =
+    ruleQuery.data?.sourceRulePost?.content ??
+    ruleQuery.data?.translation?.description ??
+    null;
+
+  if (ruleQuery.isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (ruleQuery.isError) {
+    return <QueryErrorDisplay error={ruleQuery.error} />;
+  }
+
+  if (!content || !mainMarkdownSource(content)) {
+    return <EmptyState title="No realm rules" />;
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-base font-semibold leading-ui text-text-primary">
+        Rules
+      </h2>
+      <PostBodyMarkdown
+        content={content}
+        className="text-sm leading-body text-text-secondary"
+      />
+    </section>
+  );
+}
+
 function InfoCard({ label, value }: { label: string; value: string }) {
   return (
     <Card surface="contained">
@@ -111,11 +148,7 @@ export function RealmAboutTab({
           postUnitId={realm.extra?.about ?? null}
           emptyTitle="No about content"
         />
-        <RealmMarkdownPanel
-          title="Rules"
-          postUnitId={realm.extra?.rule ?? null}
-          emptyTitle="No realm rules"
-        />
+        <RealmRuleFullPanel realmUnitId={realm.unitId} />
       </div>
 
       <aside className="flex min-w-0 flex-col gap-3">

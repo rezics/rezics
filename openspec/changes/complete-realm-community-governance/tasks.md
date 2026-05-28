@@ -38,7 +38,7 @@
 
 - [x] 5.1 Keep the realm Feed tab as the default realm detail tab with pinboard, required rule prompts, feed controls, quick filters, and the discussion stream.
 - [x] 5.2 Replace the public vertical pinned list with a Pinboard carousel/rail using existing Rezics carousel primitives and pinboard data hooks.
-- [ ] 5.3 Add rule summary card/dialog UI for feed prompts, about tab, sidebar, join gate, and post gate flows with UnitTranslation fallback.
+- [x] 5.3 Add rule summary card/dialog UI for feed prompts, about tab, sidebar, join gate, and post gate flows with UnitTranslation fallback.
 - [x] 5.4 Build the Tags tab with `flat`, `grouped`, and `tree` render modes over the semantic tagTree structure.
 - [x] 5.5 Add the About tab for full rules/about/stats/join-policy/moderator context, and an optional desktop realm summary sidebar while preserving mobile inline layouts.
 - [ ] 5.6 Add the moderator-only Moderation tab as the product entry for the foundation's queue, reports, sanctions, and audit views.

@@ -3,6 +3,7 @@ import {
   myRealmMembershipQuery,
   myRealmsQuery,
   realmDetailQuery,
+  realmRuleResolvedQuery,
 } from "@rezics/api/realm/realm";
 import { subscriptionCheckQuery } from "@rezics/api/subscription/subscription";
 import {
@@ -181,6 +182,10 @@ function SeededRealmPage({
 
     const realm = makeRealm();
     const membership = state === "global-staff" ? null : stateMembership(state);
+    const rulePost = makePost(
+      RULE_POST_ID,
+      "Keep discussion specific, cite sources for claims, and respect moderator decisions.",
+    );
     queryClient.setQueryData(realmDetailQuery(REALM_ID).queryKey, realm);
     queryClient.setQueryData(
       myRealmMembershipQuery(REALM_ID).queryKey,
@@ -201,11 +206,21 @@ function SeededRealmPage({
     );
     queryClient.setQueryData(
       postQueries.detail(RULE_POST_ID).queryKey,
-      makePost(
-        RULE_POST_ID,
-        "Keep discussion specific, cite sources for claims, and respect moderator decisions.",
-      ),
+      rulePost,
     );
+    queryClient.setQueryData(realmRuleResolvedQuery(REALM_ID).queryKey, {
+      realmUnitId: REALM_ID,
+      ruleUnitId: RULE_POST_ID,
+      version: 1,
+      requireOnJoin: true,
+      requireOnPost: true,
+      requireOnUpdate: true,
+      requestedLanguage: null,
+      resolvedLanguage: LANGUAGES.EN,
+      translation: null,
+      sourceRulePostUnitId: RULE_POST_ID,
+      sourceRulePost: rulePost,
+    });
     queryClient.setQueryData(
       governanceRealmQueueListQuery(REALM_ID, { limit: 25 }).queryKey,
       [

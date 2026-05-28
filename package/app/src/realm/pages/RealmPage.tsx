@@ -209,7 +209,10 @@ export function RealmPage({
         <TabsContent value="feed">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
             <div className="flex min-w-0 flex-col gap-4">
-              <RuleSection postUnitId={realm.extra?.rule ?? null} />
+              <RuleSection
+                realmUnitId={realmId}
+                postUnitId={realm.extra?.rule ?? null}
+              />
               <div className="flex flex-col gap-3">
                 <RealmFeedSortSwitcher
                   value={feedSort}
@@ -230,6 +233,12 @@ export function RealmPage({
             </div>
             <aside className="min-w-0">
               <AboutSection postUnitId={realm.extra?.about ?? null} />
+              <div className="mt-4">
+                <RuleSection
+                  realmUnitId={realmId}
+                  postUnitId={realm.extra?.rule ?? null}
+                />
+              </div>
             </aside>
           </div>
         </TabsContent>
@@ -272,6 +281,10 @@ export function RealmPage({
           <DialogHeader>
             <DialogTitle>{m.realm_post_in_realm()}</DialogTitle>
           </DialogHeader>
+          <RuleSection
+            realmUnitId={realmId}
+            postUnitId={realm.extra?.rule ?? null}
+          />
           <ReplyComposer
             mode="expanded"
             realmUnitIds={[realmId]}

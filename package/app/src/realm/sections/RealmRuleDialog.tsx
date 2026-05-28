@@ -29,6 +29,7 @@ const i18nMessages = {
 export interface RealmRuleDialogProps {
   open: boolean;
   post?: PostDTO | null;
+  content?: unknown;
   joining?: boolean;
   joinPending?: boolean;
   onOpenChange: (open: boolean) => void;
@@ -38,12 +39,14 @@ export interface RealmRuleDialogProps {
 export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
   open,
   post,
+  content,
   joining = false,
   joinPending = false,
   onOpenChange,
   onAgree,
 }) => {
   const m = useMessage(i18nMessages);
+  const body = content ?? post?.content;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
@@ -51,7 +54,7 @@ export const RealmRuleDialog: React.FC<RealmRuleDialogProps> = ({
           <DialogTitle>{m.realm_rules_title()}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto">
-          <PostBodyMarkdown content={post?.content} clamp={false} />
+          <PostBodyMarkdown content={body} clamp={false} />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
