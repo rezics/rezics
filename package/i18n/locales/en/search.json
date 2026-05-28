@@ -129,5 +129,8 @@
   "sort_relevance": "Relevance",
   "sort_newest": "Newest",
   "sort_recently_updated": "Recently Updated",
-  "sort_publication_date": "Publication Date"
+  "sort_publication_date": "Publication Date",
+  "recent_searches_title": "Recent searches",
+  "recent_searches_clear": "Clear",
+  "recent_searches_remove": "Remove search"
 }

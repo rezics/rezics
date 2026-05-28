@@ -129,5 +129,8 @@
   "sort_relevance": "相关度",
   "sort_newest": "最新",
   "sort_recently_updated": "最近更新",
-  "sort_publication_date": "出版日期"
+  "sort_publication_date": "出版日期",
+  "recent_searches_title": "最近搜索",
+  "recent_searches_clear": "清除",
+  "recent_searches_remove": "删除搜索"
 }

@@ -8,6 +8,7 @@ export {
   SearchCategoryNav,
   type SearchCategoryNavProps,
 } from "./SearchCategoryNav";
+export { SearchHistory, type SearchHistoryProps } from "./SearchHistory";
 export type { BookSearchFilterProps } from "./SearchFilter";
 export { BookSearchFilter } from "./SearchFilter";
 export {

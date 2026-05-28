@@ -11,8 +11,10 @@ import {
   AdvancedSearch,
   FederatedResultList,
   SearchCategoryNav,
+  SearchHistory,
 } from "../components";
 import { useInjectedTags } from "../hooks/useInjectedTags";
+import { useSearchHistory } from "../hooks/useSearchHistory";
 import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";
 
@@ -81,11 +83,19 @@ export function FederatedSearchPage({
   });
 
   const counts = useMemo(() => countsFromResult(data), [data]);
+  const history = useSearchHistory();
 
   const handleCategoryChange = (next: SearchCategory) => {
     search.setCategory(next);
     onCategoryChange(next);
   };
+
+  const handleSubmit = () => {
+    const keyword = search.query.keyword?.trim();
+    if (keyword) history.record(keyword);
+  };
+
+  const showHistory = !search.query.keyword?.trim();
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -101,9 +111,20 @@ export function FederatedSearchPage({
         bind={search.bind}
         patch={search.patch}
         implicit={search.implicit}
-        onSubmit={() => {}}
+        onSubmit={handleSubmit}
         middleware={search.middleware}
       />
+      {showHistory ? (
+        <SearchHistory
+          entries={history.entries}
+          onSelect={(term) => {
+            search.patch({ keyword: term });
+            history.record(term);
+          }}
+          onRemove={history.remove}
+          onClear={history.clear}
+        />
+      ) : null}
       <FederatedResultList
         result={data}
         isLoading={isLoading}

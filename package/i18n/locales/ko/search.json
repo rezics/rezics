@@ -129,5 +129,8 @@
   "sort_relevance": "관련성",
   "sort_newest": "최신",
   "sort_recently_updated": "최근 업데이트됨",
-  "sort_publication_date": "출판일"
+  "sort_publication_date": "출판일",
+  "recent_searches_title": "최근 검색",
+  "recent_searches_clear": "지우기",
+  "recent_searches_remove": "검색 삭제"
 }

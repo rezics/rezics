@@ -129,5 +129,8 @@
   "sort_relevance": "関連性",
   "sort_newest": "最新",
   "sort_recently_updated": "最近更新された",
-  "sort_publication_date": "発行日"
+  "sort_publication_date": "発行日",
+  "recent_searches_title": "最近の検索",
+  "recent_searches_clear": "クリア",
+  "recent_searches_remove": "検索を削除"
 }
