@@ -4,6 +4,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
 import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 
 export function NewShelfPage() {
@@ -88,6 +89,9 @@ export function NewShelfPage() {
             disabled={createMutation.isPending}
           />
         </div>
+        <PolicyDenialNotice
+          denial={policyDenialFromError(createMutation.error)}
+        />
         <div className="flex flex-row justify-end">
           <Button
             onClick={handleCreate}

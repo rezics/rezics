@@ -18,6 +18,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
 import { unitHref } from "@/shared/ui/link";
 
 export function NewRealmPage() {
@@ -120,6 +121,9 @@ export function NewRealmPage() {
             </Button>
           </div>
         </section>
+        <PolicyDenialNotice
+          denial={policyDenialFromError(createMutation.error)}
+        />
         <div className="flex flex-row justify-end">
           <Button
             onClick={handleCreate}
