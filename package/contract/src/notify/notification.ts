@@ -9,6 +9,19 @@ export const notificationExtraSchema = t.Optional(
   }),
 );
 
+/**
+ * Server-resolved deep-link target so notification cards navigate without
+ * re-deriving the route client-side. The server picks `route` per the
+ * link-selection policy in `app-product-navigation` (e.g.
+ * `/book/:bookId/node/:nodeId` when the event carries a `nodeId`).
+ */
+export const notificationTargetSchema = t.Object({
+  route: t.String(),
+  params: t.Record(t.String(), t.String()),
+  anchor: t.Optional(t.String()),
+});
+export type NotificationTarget = (typeof notificationTargetSchema)["static"];
+
 export const notificationItemSchema = t.Object({
   id: t.String(),
   kind: t.String(),
@@ -18,6 +31,8 @@ export const notificationItemSchema = t.Object({
   extra: t.Optional(t.Any()),
   read: t.Boolean(),
   latestAt: t.String(),
+  /** Deep-link target resolved by the server emitter. */
+  target: t.Optional(notificationTargetSchema),
 });
 export type NotificationItem = (typeof notificationItemSchema)["static"];
 

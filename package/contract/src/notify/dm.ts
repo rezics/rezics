@@ -17,8 +17,65 @@ export const dmConversationSchema = t.Object({
   participantB: t.String(),
   createdAt: t.String(),
   updatedAt: t.String(),
+  /** Unread messages for the requesting viewer, when resolved. */
+  unreadCount: t.Optional(t.Integer({ minimum: 0 })),
+  /** The viewer has blocked the peer (no new messages may be sent). */
+  peerBlocked: t.Optional(t.Boolean()),
+  /** The peer has blocked the viewer (sending is disabled). */
+  blockedByPeer: t.Optional(t.Boolean()),
 });
 export type DmConversation = (typeof dmConversationSchema)["static"];
+
+// ---- read receipts ----
+
+export const dmReadReceiptSchema = t.Object({
+  conversationId: t.String(),
+  /** The participant the receipt belongs to. */
+  userId: t.String(),
+  /** The latest message id the participant has read. */
+  lastReadMessageId: t.Nullable(t.String()),
+  readAt: t.String(),
+});
+export type DmReadReceipt = (typeof dmReadReceiptSchema)["static"];
+
+export const dmMarkReadBodySchema = t.Object({
+  conversationId: t.String(),
+  /** Mark every message up to and including this id as read. */
+  upToMessageId: t.String(),
+});
+export type DmMarkReadBody = (typeof dmMarkReadBodySchema)["static"];
+
+// ---- typing indicator ----
+
+export const dmTypingIndicatorSchema = t.Object({
+  conversationId: t.String(),
+  userId: t.String(),
+  isTyping: t.Boolean(),
+  at: t.String(),
+});
+export type DmTypingIndicator = (typeof dmTypingIndicatorSchema)["static"];
+
+export const dmTypingBodySchema = t.Object({
+  conversationId: t.String(),
+  isTyping: t.Boolean(),
+});
+export type DmTypingBody = (typeof dmTypingBodySchema)["static"];
+
+// ---- block / unblock peer ----
+
+export const dmBlockPeerBodySchema = t.Object({
+  peerId: t.String(),
+  /** `true` to block, `false` to unblock. */
+  blocked: t.Boolean(),
+});
+export type DmBlockPeerBody = (typeof dmBlockPeerBodySchema)["static"];
+
+export const dmBlockStateSchema = t.Object({
+  peerId: t.String(),
+  peerBlocked: t.Boolean(),
+  blockedByPeer: t.Boolean(),
+});
+export type DmBlockState = (typeof dmBlockStateSchema)["static"];
 
 export const dmConversationListResponseSchema = t.Object({
   conversations: t.Array(dmConversationSchema),
