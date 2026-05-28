@@ -1,12 +1,13 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
-import { PostKind } from "@rezics/contract";
+import { PostKind, type PostListQuery } from "@rezics/contract";
 import { realm_content_empty_title } from "@rezics/i18n/messages";
 import { useMessage } from "@rezics/i18n/react";
-import { EmptyState } from "@rezics/ui";
+import { EmptyState, Spinner } from "@rezics/ui";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostCard } from "@/post";
 import {
   ReviewCard,
@@ -23,18 +24,21 @@ interface RealmContentFeedProps {
   realmId: string;
   sort?: RealmFeedSort;
   tagIds?: string[];
+  realmLifecycleState?: PostListQuery["realmLifecycleState"];
 }
 
 export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   realmId,
   sort = "new",
   tagIds = [],
+  realmLifecycleState,
 }) => {
   const m = useMessage(i18nMessages);
-  const { data } = useQuery(
+  const { data, error, isError, isLoading } = useQuery(
     postQueries.byRealm(realmId, {
       sort,
       ...(tagIds.length > 0 ? { tagIds } : {}),
+      ...(realmLifecycleState ? { realmLifecycleState } : {}),
     }),
   );
   const posts = data?.posts ?? [];
@@ -71,6 +75,18 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     }
     return map;
   }, [targetBookQueries]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <QueryErrorDisplay error={error} />;
+  }
 
   if (posts.length === 0) {
     return <EmptyState title={m.realm_content_empty_title()} />;
