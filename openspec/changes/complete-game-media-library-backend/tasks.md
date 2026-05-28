@@ -22,10 +22,10 @@
 - [x] 3.2 Update game service/mapper behavior to read/write Entity-backed platform subject relations and rating tags (`UnitTag`) instead of `GamePlatform` or `ageRatingKey`.
 - [x] 3.3 Update media service/mapper behavior to expose rating tags and content-structure availability.
 - [x] 3.4 Update GAME/MEDIA read paths to resolve canonical work membership from `UnitWork(role = RELEASE)` and derived `metadata.uswn`.
-- [ ] 3.5 Ensure GAME/MEDIA creation and update flows keep titles, descriptions, and covers in `UnitTranslation` and keep credits in `CreditAttribution`.
+- [x] 3.5 Ensure GAME/MEDIA creation and update flows keep titles, descriptions, and covers in `UnitTranslation` and keep credits in `CreditAttribution`.
 - [x] 3.6 Add server-side validation that game system requirement raw text is stored only in requirement rows, not in `UnitTranslation.extra`.
-- [ ] 3.7 Mount new or updated domain APIs from `package/server/src/index.ts`.
-- [ ] 3.8 Add targeted server tests for GAME/MEDIA DTO mapping, platform/rating relation writes, system requirements, and work-domain resolution.
+- [x] 3.7 Mount new or updated domain APIs from `package/server/src/index.ts`.
+- [x] 3.8 Add targeted server tests for GAME/MEDIA DTO mapping, platform/rating relation writes, system requirements, and work-domain resolution.
 
 ## 4. Search And Job Runner
 

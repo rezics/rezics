@@ -2,35 +2,210 @@ import type { DispatchResult } from "@rezics/contract";
 import { DispatchType, withCoverUrl } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
 import { prisma } from "#/prisma/client";
+import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { env } from "@/env";
 import { gameMediaLibraryService } from "@/game-media-library";
 import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import type { DispatchConfig } from "./dispatch.types";
 
-async function persistCoverUrlToTranslation(
+type DispatchTranslationInput = {
+  language?: unknown;
+  title?: unknown;
+  subtitle?: unknown;
+  summary?: unknown;
+  description?: unknown;
+  extra?: unknown;
+};
+
+type DispatchCreditInput = {
+  entityId: string;
+  role: string;
+  sortOrder?: number;
+};
+
+function hasTranslationMetadata(data: Record<string, unknown>): boolean {
+  return (
+    data.coverUrl !== undefined ||
+    data.title !== undefined ||
+    data.subtitle !== undefined ||
+    data.summary !== undefined ||
+    data.description !== undefined ||
+    Array.isArray(data.translations)
+  );
+}
+
+function readTranslationInputs(
+  data: Record<string, unknown>,
+  defaultLanguage: string,
+): DispatchTranslationInput[] {
+  if (Array.isArray(data.translations)) {
+    const translations = data.translations.filter(
+      (item): item is DispatchTranslationInput =>
+        !!item && typeof item === "object" && !Array.isArray(item),
+    );
+    if (
+      data.coverUrl !== undefined &&
+      !translations.some((item) => item.language === defaultLanguage)
+    ) {
+      return [...translations, { language: defaultLanguage }];
+    }
+    return translations;
+  }
+
+  if (!hasTranslationMetadata(data)) return [];
+
+  return [
+    {
+      language: defaultLanguage,
+      title: data.title,
+      subtitle: data.subtitle,
+      summary: data.summary,
+      description: data.description,
+    },
+  ];
+}
+
+function readCreditInputs(
+  data: Record<string, unknown>,
+): DispatchCreditInput[] {
+  const explicit = data.creditAttributions ?? data.credits;
+
+  if (Array.isArray(explicit)) {
+    return explicit.flatMap((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+      const record = item as Record<string, unknown>;
+      if (
+        typeof record.entityId !== "string" ||
+        typeof record.role !== "string"
+      )
+        return [];
+      return [
+        {
+          entityId: record.entityId,
+          role: record.role,
+          sortOrder:
+            typeof record.sortOrder === "number" ? record.sortOrder : undefined,
+        },
+      ];
+    });
+  }
+
+  if (!explicit || typeof explicit !== "object") return [];
+
+  return Object.entries(explicit as Record<string, unknown>).flatMap(
+    ([role, entries]) => {
+      if (!Array.isArray(entries)) return [];
+      return entries.flatMap((entry, index) => {
+        if (typeof entry === "string") {
+          return [{ entityId: entry, role, sortOrder: index }];
+        }
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+          return [];
+        }
+        const record = entry as Record<string, unknown>;
+        if (typeof record.entityId !== "string") return [];
+        return [
+          {
+            entityId: record.entityId,
+            role,
+            sortOrder:
+              typeof record.sortOrder === "number" ? record.sortOrder : index,
+          },
+        ];
+      });
+    },
+  );
+}
+
+async function persistTranslationMetadata(
   unitId: string,
-  coverUrl: string | null | undefined,
+  data: Record<string, unknown>,
 ): Promise<void> {
-  if (coverUrl === undefined) return;
+  if (!hasTranslationMetadata(data)) return;
+
   const unit = await prisma.unit.findUniqueOrThrow({
     where: { id: unitId },
     select: { defaultLanguage: true },
   });
   const language = unit.defaultLanguage ?? "en";
-  const existing = await prisma.unitTranslation.findUnique({
-    where: { unitId_language: { unitId, language } },
-    select: { extra: true },
-  });
-  const nextExtra = withCoverUrl(
-    existing?.extra ?? undefined,
-    coverUrl ?? undefined,
-  ) as Prisma.InputJsonValue;
-  assertUnitTranslationExtraAllowed(nextExtra);
-  await prisma.unitTranslation.upsert({
-    where: { unitId_language: { unitId, language } },
-    create: { unitId, language, extra: nextExtra },
-    update: { extra: nextExtra },
-  });
+  const translations = readTranslationInputs(data, language);
+
+  for (const input of translations) {
+    const inputLanguage =
+      typeof input.language === "string" ? input.language : language;
+    const existing = await prisma.unitTranslation.findUnique({
+      where: { unitId_language: { unitId, language: inputLanguage } },
+      select: { extra: true },
+    });
+    const baseExtra =
+      input.extra !== undefined ? input.extra : (existing?.extra ?? undefined);
+    const nextExtra =
+      data.coverUrl !== undefined && inputLanguage === language
+        ? withCoverUrl(
+            baseExtra,
+            (data.coverUrl as string | null | undefined) ?? undefined,
+          )
+        : baseExtra;
+    assertUnitTranslationExtraAllowed(nextExtra ?? null);
+
+    await prisma.unitTranslation.upsert({
+      where: { unitId_language: { unitId, language: inputLanguage } },
+      create: {
+        unitId,
+        language: inputLanguage,
+        title: typeof input.title === "string" ? input.title : undefined,
+        subtitle:
+          typeof input.subtitle === "string" ? input.subtitle : undefined,
+        summary: typeof input.summary === "string" ? input.summary : undefined,
+        description: nullableContentDocJson(input.description),
+        extra: (nextExtra ?? null) as Prisma.InputJsonValue,
+      },
+      update: {
+        title: typeof input.title === "string" ? input.title : undefined,
+        subtitle:
+          typeof input.subtitle === "string" ? input.subtitle : undefined,
+        summary: typeof input.summary === "string" ? input.summary : undefined,
+        description: nullableContentDocJson(input.description),
+        extra:
+          nextExtra !== undefined
+            ? ((nextExtra ?? null) as Prisma.InputJsonValue)
+            : undefined,
+      },
+    });
+  }
+}
+
+async function persistCreditAttributions(
+  unitId: string,
+  data: Record<string, unknown>,
+): Promise<void> {
+  const credits = readCreditInputs(data);
+  for (const credit of credits) {
+    await prisma.creditAttribution.upsert({
+      where: {
+        unitId_entityId_role: {
+          unitId,
+          entityId: credit.entityId,
+          role: credit.role,
+        },
+      },
+      create: {
+        unitId,
+        entityId: credit.entityId,
+        role: credit.role,
+        sortOrder: credit.sortOrder ?? 0,
+      },
+      update: { sortOrder: credit.sortOrder ?? 0 },
+    });
+  }
+}
+
+async function persistSharedLibraryMetadata(
+  unitId: string,
+  data: Record<string, unknown>,
+): Promise<void> {
+  await persistTranslationMetadata(unitId, data);
+  await persistCreditAttributions(unitId, data);
 }
 
 export class DispatchService {
@@ -89,10 +264,7 @@ export class DispatchService {
           ...(data.extra !== undefined && { extra: data.extra as any }),
         },
       });
-      await persistCoverUrlToTranslation(
-        result.unitId,
-        data.coverUrl as string | null | undefined,
-      );
+      await persistSharedLibraryMetadata(result.unitId, data);
       return { unitId: result.unitId };
     }
 
@@ -125,10 +297,7 @@ export class DispatchService {
         },
       },
     });
-    await persistCoverUrlToTranslation(
-      unit.id,
-      data.coverUrl as string | null | undefined,
-    );
+    await persistSharedLibraryMetadata(unit.id, data);
     return { unitId: unit.id };
   }
 
@@ -154,10 +323,7 @@ export class DispatchService {
           ...(data.extra !== undefined && { extra: data.extra as any }),
         },
       });
-      await persistCoverUrlToTranslation(
-        result.unitId,
-        data.coverUrl as string | null | undefined,
-      );
+      await persistSharedLibraryMetadata(result.unitId, data);
       await gameMediaLibraryService.appendGameMetadataRelations(result.unitId, {
         platformEntityIds: data.platformEntityIds as string[] | undefined,
         ageRatingTagUnitIds: data.ageRatingTagUnitIds as string[] | undefined,
@@ -187,10 +353,7 @@ export class DispatchService {
         },
       },
     });
-    await persistCoverUrlToTranslation(
-      unit.id,
-      data.coverUrl as string | null | undefined,
-    );
+    await persistSharedLibraryMetadata(unit.id, data);
     await gameMediaLibraryService.appendGameMetadataRelations(unit.id, {
       platformEntityIds: data.platformEntityIds as string[] | undefined,
       ageRatingTagUnitIds: data.ageRatingTagUnitIds as string[] | undefined,
@@ -229,10 +392,7 @@ export class DispatchService {
           ...(data.extra !== undefined && { extra: data.extra as any }),
         },
       });
-      await persistCoverUrlToTranslation(
-        result.unitId,
-        data.coverUrl as string | null | undefined,
-      );
+      await persistSharedLibraryMetadata(result.unitId, data);
       return { unitId: result.unitId };
     }
 
@@ -269,10 +429,7 @@ export class DispatchService {
         },
       },
     });
-    await persistCoverUrlToTranslation(
-      unit.id,
-      data.coverUrl as string | null | undefined,
-    );
+    await persistSharedLibraryMetadata(unit.id, data);
     return { unitId: unit.id };
   }
 
