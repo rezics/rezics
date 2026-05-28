@@ -4,12 +4,16 @@ import {
 } from "@rezics/api/realm/realm-extra.mutations";
 import { tagQueries } from "@rezics/api/tag/tag";
 import { unitQueries } from "@rezics/api/unit/unit";
-import { zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
+import { useUpdateZone, zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import type {
   RealmBannerExtra,
   RealmExtra,
   TagTreeNode,
   UnitDTO,
+  WikiZoneConfig,
+  WikiZoneHomepageSection,
+  WikiZoneNavigation,
+  WikiZoneTheme,
 } from "@rezics/contract";
 import {
   common_clear,
@@ -39,12 +43,38 @@ import {
   realm_tag_tree_description,
   realm_tag_tree_saved,
   realm_wiki_zone,
+  realm_wiki_zone_config_saved,
   realm_wiki_zone_description,
+  realm_wiki_zone_editor,
+  realm_wiki_zone_editor_description,
+  realm_wiki_zone_homepage_sections_json,
+  realm_wiki_zone_homepage_template,
+  realm_wiki_zone_invalid_json,
+  realm_wiki_zone_navigation_json,
   realm_wiki_zone_saved,
+  realm_wiki_zone_template,
+  realm_wiki_zone_theme_accent,
+  realm_wiki_zone_theme_background,
+  realm_wiki_zone_theme_content_width,
+  realm_wiki_zone_theme_density,
+  realm_wiki_zone_theme_infobox_position,
+  realm_wiki_zone_theme_nav_position,
+  realm_wiki_zone_theme_surface,
+  realm_wiki_zone_theme_text,
   realm_wiki_zone_unit_id_placeholder,
   tag_search_placeholder,
 } from "@rezics/i18n/messages";
-import { Button, Input, Label } from "@rezics/ui/shadcn";
+import {
+  Button,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+} from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -78,6 +108,41 @@ function unitLabel(unit: UnitDTO) {
     unit.defaultLanguage ?? undefined,
   );
   return tr?.title ?? unit.slug ?? unit.id;
+}
+
+const wikiTemplateOptions = [
+  "wiki-classic",
+  "wiki-media",
+  "wiki-database",
+  "wiki-minimal",
+] as const;
+type WikiTemplateOption = (typeof wikiTemplateOptions)[number];
+
+const wikiHomepageTemplateOptions = [
+  "wiki-classic-home",
+  "wiki-media-home",
+  "wiki-database-home",
+  "wiki-minimal-home",
+] as const;
+type WikiHomepageTemplateOption = (typeof wikiHomepageTemplateOptions)[number];
+
+const densityOptions = ["comfortable", "compact"] as const;
+const navPositionOptions = ["side", "top"] as const;
+const contentWidthOptions = ["normal", "wide"] as const;
+const infoboxPositionOptions = ["right", "inline"] as const;
+type DensityOption = (typeof densityOptions)[number];
+type NavPositionOption = (typeof navPositionOptions)[number];
+type ContentWidthOption = (typeof contentWidthOptions)[number];
+type InfoboxPositionOption = (typeof infoboxPositionOptions)[number];
+
+function prettyJson(value: unknown) {
+  return JSON.stringify(value, null, 2);
+}
+
+function parseJsonField<T>(value: string, fallback: T): T {
+  const trimmed = value.trim();
+  if (!trimmed) return fallback;
+  return JSON.parse(trimmed) as T;
 }
 
 export const RealmExtraManageSection: React.FC<
@@ -189,6 +254,277 @@ function WikiZonePicker({
           {common_save()}
         </Button>
       </div>
+      {zoneQuery.data && (
+        <WikiZoneConfigEditor realmId={realmId} zone={zoneQuery.data} />
+      )}
+    </div>
+  );
+}
+
+function WikiZoneConfigEditor({
+  realmId,
+  zone,
+}: {
+  realmId: string;
+  zone: {
+    unitId: string;
+    template: string;
+    wiki?: WikiZoneConfig | null;
+  };
+}) {
+  const updateZone = useUpdateZone();
+  const wiki = zone.wiki;
+  const theme = wiki?.theme;
+  const homepage = wiki?.homepage;
+  const [template, setTemplate] = useState<WikiTemplateOption>(
+    theme?.template ?? "wiki-classic",
+  );
+  const [homepageTemplate, setHomepageTemplate] =
+    useState<WikiHomepageTemplateOption>(
+      theme?.homepageTemplate ?? homepage?.template ?? "wiki-classic-home",
+    );
+  const [background, setBackground] = useState(
+    theme?.palette?.background ?? "",
+  );
+  const [surface, setSurface] = useState(theme?.palette?.surface ?? "");
+  const [text, setText] = useState(theme?.palette?.text ?? "");
+  const [accent, setAccent] = useState(theme?.palette?.accent ?? "");
+  const [density, setDensity] = useState<DensityOption>(
+    theme?.chrome?.density ?? "comfortable",
+  );
+  const [navPosition, setNavPosition] = useState<NavPositionOption>(
+    theme?.chrome?.navPosition ?? "side",
+  );
+  const [contentWidth, setContentWidth] = useState<ContentWidthOption>(
+    theme?.layout?.contentWidth ?? "normal",
+  );
+  const [infoboxPosition, setInfoboxPosition] = useState<InfoboxPositionOption>(
+    theme?.layout?.infoboxPosition ?? "right",
+  );
+  const [navigationJson, setNavigationJson] = useState(
+    prettyJson(wiki?.navigation ?? { sections: [] }),
+  );
+  const [sectionsJson, setSectionsJson] = useState(
+    prettyJson(homepage?.sections ?? []),
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTemplate(theme?.template ?? "wiki-classic");
+    setHomepageTemplate(
+      theme?.homepageTemplate ?? homepage?.template ?? "wiki-classic-home",
+    );
+    setBackground(theme?.palette?.background ?? "");
+    setSurface(theme?.palette?.surface ?? "");
+    setText(theme?.palette?.text ?? "");
+    setAccent(theme?.palette?.accent ?? "");
+    setDensity(theme?.chrome?.density ?? "comfortable");
+    setNavPosition(theme?.chrome?.navPosition ?? "side");
+    setContentWidth(theme?.layout?.contentWidth ?? "normal");
+    setInfoboxPosition(theme?.layout?.infoboxPosition ?? "right");
+    setNavigationJson(prettyJson(wiki?.navigation ?? { sections: [] }));
+    setSectionsJson(prettyJson(homepage?.sections ?? []));
+  }, [homepage, theme, wiki]);
+
+  const save = async () => {
+    setError(null);
+    try {
+      const navigation = parseJsonField<WikiZoneNavigation>(navigationJson, {
+        sections: [],
+      });
+      const sections = parseJsonField<WikiZoneHomepageSection[]>(
+        sectionsJson,
+        [],
+      );
+      const palette: NonNullable<WikiZoneTheme["palette"]> = {};
+      if (background.trim()) palette.background = background.trim();
+      if (surface.trim()) palette.surface = surface.trim();
+      if (text.trim()) palette.text = text.trim();
+      if (accent.trim()) palette.accent = accent.trim();
+
+      const nextTheme: WikiZoneTheme = {
+        template,
+        homepageTemplate,
+        ...(Object.keys(palette).length ? { palette } : {}),
+        chrome: { density, navPosition },
+        layout: { contentWidth, infoboxPosition },
+      };
+      const nextWiki: WikiZoneConfig = {
+        filters: {
+          ...wiki?.filters,
+          realmUnitId: wiki?.filters.realmUnitId ?? realmId,
+          type: "POST",
+          postKind: wiki?.filters.postKind ?? "WIKI",
+        },
+        navigation,
+        homepage: { template: homepageTemplate, sections },
+        theme: nextTheme,
+      };
+
+      await updateZone.mutateAsync({
+        unitId: zone.unitId,
+        input: { template, wiki: nextWiki },
+      });
+      toast.success(realm_wiki_zone_config_saved());
+    } catch (error) {
+      const message =
+        error instanceof SyntaxError
+          ? realm_wiki_zone_invalid_json()
+          : error instanceof Error
+            ? error.message
+            : String(error);
+      setError(message);
+      toast.error(message);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-4 border-t border-border-default pt-4">
+      <div>
+        <h4 className="text-sm font-medium leading-ui text-text-primary">
+          {realm_wiki_zone_editor()}
+        </h4>
+        <p className="mt-1 text-sm leading-body text-text-secondary">
+          {realm_wiki_zone_editor_description()}
+        </p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <LabeledSelect
+          label={realm_wiki_zone_template()}
+          value={template}
+          options={wikiTemplateOptions}
+          onChange={setTemplate}
+        />
+        <LabeledSelect
+          label={realm_wiki_zone_homepage_template()}
+          value={homepageTemplate}
+          options={wikiHomepageTemplateOptions}
+          onChange={setHomepageTemplate}
+        />
+        <LabeledSelect
+          label={realm_wiki_zone_theme_density()}
+          value={density}
+          options={densityOptions}
+          onChange={setDensity}
+        />
+        <LabeledSelect
+          label={realm_wiki_zone_theme_nav_position()}
+          value={navPosition}
+          options={navPositionOptions}
+          onChange={setNavPosition}
+        />
+        <LabeledSelect
+          label={realm_wiki_zone_theme_content_width()}
+          value={contentWidth}
+          options={contentWidthOptions}
+          onChange={setContentWidth}
+        />
+        <LabeledSelect
+          label={realm_wiki_zone_theme_infobox_position()}
+          value={infoboxPosition}
+          options={infoboxPositionOptions}
+          onChange={setInfoboxPosition}
+        />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <LabeledInput
+          label={realm_wiki_zone_theme_background()}
+          value={background}
+          onChange={setBackground}
+        />
+        <LabeledInput
+          label={realm_wiki_zone_theme_surface()}
+          value={surface}
+          onChange={setSurface}
+        />
+        <LabeledInput
+          label={realm_wiki_zone_theme_text()}
+          value={text}
+          onChange={setText}
+        />
+        <LabeledInput
+          label={realm_wiki_zone_theme_accent()}
+          value={accent}
+          onChange={setAccent}
+        />
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label>{realm_wiki_zone_navigation_json()}</Label>
+          <Textarea
+            value={navigationJson}
+            onChange={(event) => setNavigationJson(event.target.value)}
+            className="min-h-48 font-mono text-xs"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label>{realm_wiki_zone_homepage_sections_json()}</Label>
+          <Textarea
+            value={sectionsJson}
+            onChange={(event) => setSectionsJson(event.target.value)}
+            className="min-h-48 font-mono text-xs"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        {error && (
+          <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
+        )}
+        <Button type="button" onClick={save} disabled={updateZone.isPending}>
+          {common_save()}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function LabeledInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label>{label}</Label>
+      <Input value={value} onChange={(event) => onChange(event.target.value)} />
+    </div>
+  );
+}
+
+function LabeledSelect<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: readonly T[];
+  onChange: (value: T) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label>{label}</Label>
+      <Select value={value} onValueChange={(next) => onChange(next as T)}>
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

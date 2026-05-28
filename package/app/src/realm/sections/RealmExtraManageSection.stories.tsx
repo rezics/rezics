@@ -43,8 +43,7 @@ const wikiZone: ZoneDTO = {
   template: "wiki-classic",
   styling: null,
   wiki: {
-    realmId: REALM_ID,
-    filters: { postKind: "WIKI" },
+    filters: { realmUnitId: REALM_ID, postKind: "WIKI" },
     navigation: [],
     homepage: { sections: [] },
     theme: {
