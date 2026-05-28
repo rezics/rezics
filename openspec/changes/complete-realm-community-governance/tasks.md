@@ -49,6 +49,6 @@
 - [ ] 6.2 Run targeted `package/server` realm, post, and search tests.
 - [ ] 6.3 Run targeted `package/api` realm hook tests.
 - [ ] 6.4 Run targeted `package/app` realm console, realm feed, about tab, moderation tab, tag tab, pinboard, and composer tests.
-- [ ] 6.5 Run `bun run check:convention`.
-- [ ] 6.6 Run `bun run format:check`.
-- [ ] 6.7 Run `openspec validate complete-realm-community-governance --strict`.
+- [x] 6.5 Run `bun run check:convention`.
+- [x] 6.6 Run `bun run format:check`.
+- [x] 6.7 Run `openspec validate complete-realm-community-governance --strict`.
