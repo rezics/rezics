@@ -1,5 +1,6 @@
 import type {
   CdcStatus,
+  HistoryOutboxStatus,
   MeiliIndexStatus,
   MeiliStatusSummary,
   QueueStatus,
@@ -26,6 +27,7 @@ import {
   ArrowRight,
   Database,
   ExternalLink,
+  History,
   ListChecks,
   Search,
   Wrench,
@@ -408,6 +410,72 @@ export function CdcPanel({ cdc }: { cdc: CdcStatus }) {
   );
 }
 
+export function HistoryOutboxPanel({
+  historyOutbox,
+}: {
+  historyOutbox: HistoryOutboxStatus;
+}) {
+  return (
+    <StatusCard
+      title="History outbox"
+      description="歷史同步 outbox 的 pending、failed 與 retry-ready 狀態。"
+      icon={<History className="size-4" aria-hidden="true" />}
+    >
+      <StatusItemRow item={historyOutbox.item} />
+      <div className="grid gap-2 text-xs text-text-secondary sm:grid-cols-4">
+        <span>pending：{historyOutbox.pending}</span>
+        <span>processing：{historyOutbox.processing}</span>
+        <span
+          className={
+            historyOutbox.failed > 0 ? statusTextClass("degraded") : ""
+          }
+        >
+          failed：{historyOutbox.failed}
+        </span>
+        <span>retry-ready：{historyOutbox.retryReady}</span>
+      </div>
+      {historyOutbox.recentFailed.length > 0 ? (
+        <div className="space-y-2">
+          <Separator />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-medium leading-[1.4]">最近失敗 outbox</p>
+            <Link
+              to="/repair"
+              className={buttonVariants({ variant: "outline", size: "xs" })}
+            >
+              <Wrench className="size-3" aria-hidden="true" />
+              開啟修復
+            </Link>
+          </div>
+          {historyOutbox.recentFailed.slice(0, 5).map((row) => (
+            <div
+              key={row.id}
+              className="rounded-md border border-border-whisper bg-surface-subtle p-3 text-xs"
+            >
+              <p className="font-medium leading-[1.4]">
+                {row.category} · seq {row.sequence}
+              </p>
+              <p className="mt-1 text-text-secondary">
+                unit：{row.unitId} · attempts：{row.attempts} · next：
+                {formatCheckedAt(row.nextAttemptAt)}
+              </p>
+              {row.lastError ? (
+                <p className="mt-1 line-clamp-2 text-error-text">
+                  {row.lastError}
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-success-text">
+          目前沒有 failed HistoryOutbox rows。
+        </p>
+      )}
+    </StatusCard>
+  );
+}
+
 export function QueuePanel({ queue }: { queue: QueueStatus }) {
   const totals = queue.counts.reduce(
     (acc, count) => ({
@@ -629,9 +697,12 @@ export function SystemStatusPanels({
       <MeiliSummaryPanel meili={summary.meili} />
       <div className="grid gap-4 lg:grid-cols-2">
         <CdcPanel cdc={summary.cdc} />
-        <QueuePanel queue={summary.queue} />
+        <HistoryOutboxPanel historyOutbox={summary.historyOutbox} />
       </div>
-      <WorkDomainPanel workDomains={summary.workDomains} />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <QueuePanel queue={summary.queue} />
+        <WorkDomainPanel workDomains={summary.workDomains} />
+      </div>
     </div>
   );
 }

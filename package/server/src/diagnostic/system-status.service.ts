@@ -4,6 +4,7 @@ import { getMeiliStatusSummary } from "@/meili/status.service";
 import type {
   CdcStatus,
   FailedJobSummary,
+  HistoryOutboxStatus,
   QueueStateCounts,
   QueueStatus,
   StatusItem,
@@ -381,6 +382,109 @@ function normalizeStringArray(value: unknown): string[] {
   return value.filter((item): item is string => typeof item === "string");
 }
 
+function numberField(row: Record<string, unknown>, key: string) {
+  return Number(row[key] ?? 0);
+}
+
+function stringField(row: Record<string, unknown>, key: string) {
+  const value = row[key];
+  return typeof value === "string" ? value : String(value ?? "");
+}
+
+function isoField(row: Record<string, unknown>, key: string) {
+  const value = row[key];
+  if (value instanceof Date) return value.toISOString();
+  return typeof value === "string" ? value : null;
+}
+
+async function getHistoryOutboxStatus(options: {
+  queryClient: QueryClient;
+  timeoutMs: number;
+}): Promise<HistoryOutboxStatus> {
+  try {
+    const [countRows, recentRows] = await timeout(
+      Promise.all([
+        options.queryClient.$queryRawUnsafe<Record<string, unknown>[]>(
+          `SELECT status, COUNT(*)::int AS count
+           FROM "HistoryOutbox"
+           GROUP BY status
+           ORDER BY status ASC`,
+        ),
+        options.queryClient.$queryRawUnsafe<Record<string, unknown>[]>(
+          `SELECT id, "unitId", sequence::text AS sequence, category, status,
+                  attempts, "nextAttemptAt", "processedAt", "lastError", "createdAt"
+           FROM "HistoryOutbox"
+           WHERE status = 'failed'
+           ORDER BY "updatedAt" DESC
+           LIMIT 10`,
+        ),
+      ]),
+      options.timeoutMs,
+    );
+
+    const counts = Object.fromEntries(
+      countRows.map((row) => [
+        stringField(row, "status"),
+        numberField(row, "count"),
+      ]),
+    );
+    const pending = counts.pending ?? 0;
+    const failed = counts.failed ?? 0;
+    const processing = counts.processing ?? 0;
+    const completed = counts.completed ?? 0;
+    const retryReady = pending;
+
+    return {
+      item: {
+        id: "history-outbox",
+        label: "History outbox",
+        status: failed > 0 ? "degraded" : "available",
+        checkedAt: checkedAt(),
+        reason: failed > 0 ? "有失敗的歷史同步 outbox 記錄" : undefined,
+        remediation:
+          failed > 0 ? "使用修復工作重試 failed HistoryOutbox rows" : undefined,
+      },
+      counts,
+      pending,
+      failed,
+      processing,
+      completed,
+      retryReady,
+      recentFailed: recentRows.map((row) => ({
+        id: stringField(row, "id"),
+        unitId: stringField(row, "unitId"),
+        sequence: stringField(row, "sequence"),
+        category: stringField(row, "category"),
+        attempts: numberField(row, "attempts"),
+        nextAttemptAt: isoField(row, "nextAttemptAt"),
+        processedAt: isoField(row, "processedAt"),
+        lastError:
+          typeof row.lastError === "string"
+            ? row.lastError.slice(0, 240)
+            : null,
+        createdAt: isoField(row, "createdAt"),
+      })),
+    };
+  } catch (error) {
+    return {
+      item: {
+        id: "history-outbox",
+        label: "History outbox",
+        status: "unavailable",
+        checkedAt: checkedAt(),
+        reason: safeFailureReason(error),
+      },
+      counts: {},
+      pending: 0,
+      failed: 0,
+      processing: 0,
+      completed: 0,
+      retryReady: 0,
+      recentFailed: [],
+    };
+  }
+}
+
 async function getWorkDomainDiagnostics(options: {
   queryClient: QueryClient;
   timeoutMs: number;
@@ -549,6 +653,7 @@ export async function getSystemStatusSummary(options?: {
     sequin,
     queue,
     cdc,
+    historyOutbox,
     workDomains,
   ] = await Promise.all([
     options?.meiliSummary
@@ -600,6 +705,10 @@ export async function getSystemStatusSummary(options?: {
       lagWarningBytes:
         options?.lagWarningBytes ??
         Number(env.STATUS_CDC_LAG_WARNING_BYTES ?? DEFAULT_LAG_WARNING_BYTES),
+    }),
+    getHistoryOutboxStatus({
+      queryClient: options?.queryClient ?? prisma,
+      timeoutMs,
     }),
     getWorkDomainDiagnostics({
       queryClient: options?.queryClient ?? prisma,
@@ -660,6 +769,7 @@ export async function getSystemStatusSummary(options?: {
     status: statusFromParts([
       ...services.map((service) => service.status),
       cdc.item.status,
+      historyOutbox.item.status,
       queue.item.status,
       workDomains.item.status,
     ]),
@@ -668,6 +778,7 @@ export async function getSystemStatusSummary(options?: {
     links,
     databases: [cdc.item],
     cdc,
+    historyOutbox,
     queue,
     workDomains,
     meili,

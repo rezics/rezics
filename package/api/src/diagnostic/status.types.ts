@@ -135,6 +135,29 @@ export interface CdcStatus {
   lagBytes?: number | null;
 }
 
+export interface HistoryOutboxFailedSummary {
+  id: string;
+  unitId: string;
+  sequence: string;
+  category: string;
+  attempts: number;
+  nextAttemptAt?: string | null;
+  processedAt?: string | null;
+  lastError?: string | null;
+  createdAt?: string | null;
+}
+
+export interface HistoryOutboxStatus {
+  item: StatusItem;
+  counts: Record<string, number>;
+  pending: number;
+  failed: number;
+  processing: number;
+  completed: number;
+  retryReady: number;
+  recentFailed: HistoryOutboxFailedSummary[];
+}
+
 export interface WorkDomainMemberSummary {
   unitId: string;
   role: string;
@@ -181,6 +204,7 @@ export interface SystemStatusSummary {
   links: StatusLink[];
   databases: StatusItem[];
   cdc: CdcStatus;
+  historyOutbox: HistoryOutboxStatus;
   queue: QueueStatus;
   workDomains: WorkDomainDiagnostics;
   meili: MeiliStatusSummary;

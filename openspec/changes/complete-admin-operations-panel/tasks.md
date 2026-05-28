@@ -34,7 +34,7 @@
 - [x] 5.1 Integrate system status summary into the dashboard while preserving full status page behavior.
 - [x] 5.2 Expand Meili observability with index health, counts, settings, last sync, drift, and repair links.
 - [x] 5.3 Add job-runner queue and failed-job panels.
-- [ ] 5.4 Add Sequin/CDC and history outbox panels.
+- [x] 5.4 Add Sequin/CDC and history outbox panels.
 - [ ] 5.5 Ensure browser calls only Rezics typed admin APIs, never private service endpoints directly.
 
 ## 6. Governance Oversight
