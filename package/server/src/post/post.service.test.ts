@@ -523,8 +523,27 @@ describe("PostService.byRealm", () => {
 
     expect(result).toEqual({ posts: [], total: 0 });
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
+      some: { realmUnitId: "realm-1", state: "VISIBLE" },
+    });
+    expect(firstPostFindManyArgs().where.unit.realmModerationTargets).toEqual({
+      none: {
+        realmUnitId: "realm-1",
+        state: { in: ["HIDDEN", "TOMBSTONED", "ARCHIVED", "REMOVED"] },
+      },
+    });
+  });
+
+  test("admin realm feed can include non-visible lifecycle states", async () => {
+    resetMocks();
+
+    await service.byRealm("realm-1", {}, { isAdmin: true });
+
+    expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
       some: { realmUnitId: "realm-1" },
     });
+    expect(
+      firstPostFindManyArgs().where.unit.realmModerationTargets,
+    ).toBeUndefined();
   });
 
   test("filters through UnitWork for work-domain feeds", async () => {

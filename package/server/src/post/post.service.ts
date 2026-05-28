@@ -75,6 +75,13 @@ function readRealmRuleUnitId(extra: Prisma.JsonValue | null): string | null {
   return typeof rule === "string" && rule.length > 0 ? rule : null;
 }
 
+const REALM_FEED_EXCLUDED_MODERATION_STATES = [
+  "HIDDEN",
+  "TOMBSTONED",
+  "ARCHIVED",
+  "REMOVED",
+] as const;
+
 export class PostService {
   /**
    * List posts with support for flat and threaded modes.
@@ -192,8 +199,23 @@ export class PostService {
       unit: {
         ...(options?.isAdmin ? {} : publicUnitEligibilityWhere),
         inRealms: {
-          some: { realmUnitId },
+          some: {
+            realmUnitId,
+            ...(options?.isAdmin ? {} : { state: "VISIBLE" as const }),
+          },
         },
+        ...(options?.isAdmin
+          ? {}
+          : {
+              realmModerationTargets: {
+                none: {
+                  realmUnitId,
+                  state: {
+                    in: REALM_FEED_EXCLUDED_MODERATION_STATES as any,
+                  },
+                },
+              },
+            }),
         ...(tagIds.length > 0
           ? {
               OR: [
