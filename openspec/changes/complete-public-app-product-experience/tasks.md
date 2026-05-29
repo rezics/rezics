@@ -32,13 +32,13 @@
 ## 5. Library And Reading
 
 - [x] 5.1 Confirm shelf add/remove/reorder paths persist via typed API mutations and use the cache-coherence map.
-- [ ] 5.2 Surface reading progress on reader, detail, dashboard, profile/library consistently.
-- [ ] 5.3 Integrate work/release browsing on detail (release picker + language/edition filters) without depending on `introduce-api-unit-store`.
-- [ ] 5.4 Add tests for shelf persistence, reorder stability, progress update fan-out, continue-reading, same-work release switching, and standalone content.
+- [x] 5.2 Surface reading progress on reader, detail, dashboard, profile/library consistently.
+- [x] 5.3 Integrate work/release browsing on detail (release picker + language/edition filters) without depending on `introduce-api-unit-store`.
+- [x] 5.4 Add tests for shelf persistence, reorder stability, progress update fan-out, continue-reading, same-work release switching, and standalone content.
 - [x] 5.5 Add bookshelf contract surface: extend `ShelfView` in `package/api/src/shelf/shelf.types.ts` with `"bookshelf"`; add `bookshelfViewConfigSchema`, `DEFAULT_BOOKSHELF_CONFIG`, `LIBRARY_KINDS`, and per-kind aspect-ratio constants in `package/contract/src/`; extend `userSettingsSchema` in `package/contract/src/user.ts` with `library.bookshelf`.
 - [x] 5.6 Add `package/app/src/bookshelf-view/` feature (resolveBookshelfConfig, BookshelfGrid, BookshelfHoverPanel, UseMySettingsButton); extend `BookCard` with `showTitle?` and `aspectRatio?` props; route the `bookshelf` branch in `package/app/src/shelf/components/ShelfItemRenderer.tsx` through this feature and silently skip non-library kinds.
 - [ ] 5.7 Apply the readable filter (`isLicensed === true`) by default in the dashboard library section and expose it as an opt-in toggle on standalone shelf pages; ensure non-book library kinds (`game`, `media`) are unaffected.
-- [ ] 5.8 Add stories/tests: bookshelf grid breakpoint resolution (URL → viewer settings → default), "use my settings" reset, desktop-only hover preview (no preview on touch, tap navigates to detail), mixed-content shelf silently filtering non-library kinds, and readable filter toggle behavior.
+- [x] 5.8 Add stories/tests: bookshelf grid breakpoint resolution (URL → viewer settings → default), "use my settings" reset, desktop-only hover preview (no preview on touch, tap navigates to detail), mixed-content shelf silently filtering non-library kinds, and readable filter toggle behavior.
 
 ## 6. Creation Workflows
 

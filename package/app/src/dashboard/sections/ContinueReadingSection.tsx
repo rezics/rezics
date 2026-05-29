@@ -4,6 +4,7 @@ import type {
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
+import { ReadingProgressBar } from "@/progress-status";
 import { Link } from "@/shared/ui/link";
 import { DashboardSection } from "../components/DashboardSection";
 import { continueReadingProgress, resumeRouteToHref } from "../models";
@@ -53,20 +54,18 @@ export const ContinueReadingSection: React.FC<ContinueReadingSectionProps> = ({
                       {item.lastReadNodeTitle}
                     </div>
                   ) : null}
-                  <div className="mt-1 text-xs text-text-secondary">
-                    {t("page:dashboard_chapters_progress", {
+                  <ReadingProgressBar
+                    className="mt-1"
+                    value={continueReadingProgress(item)}
+                    label={t("page:dashboard_chapters_progress", {
                       completed: item.chaptersCompleted,
                       total: item.chaptersTotal,
                     })}
-                  </div>
-                  <div className="mt-1 h-1 w-full overflow-hidden rounded bg-surface-sunken">
-                    <div
-                      className="h-full bg-brand"
-                      style={{
-                        width: `${Math.round(continueReadingProgress(item) * 100)}%`,
-                      }}
-                    />
-                  </div>
+                    ariaLabel={t("page:dashboard_chapters_progress", {
+                      completed: item.chaptersCompleted,
+                      total: item.chaptersTotal,
+                    })}
+                  />
                 </div>
               </Link>
             </li>

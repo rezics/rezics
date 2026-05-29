@@ -44,6 +44,7 @@ import {
   ShelfSortViewPicker,
   type ShelfViewChoice,
 } from "../components/ShelfSortViewPicker";
+import { filterReadableEntries } from "../models/readableFilter";
 import { shelfDetailActions, shelfPolicy } from "../models/shelfPolicy";
 import {
   deriveShelfStream,
@@ -107,6 +108,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     order: "desc",
   });
   const [sortPrimeOnly, setSortPrimeOnly] = useState<boolean>(true);
+  // Standalone shelf pages expose the readable filter as opt-in (default off);
+  // the dashboard library composition applies it by default instead.
+  const [readableOnly, setReadableOnly] = useState<boolean>(false);
   const [pageState, setPageState] = useState({ unitId, page: 1 });
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
@@ -177,15 +181,19 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     () => stream.filter((e) => !orphanIds.has(e.unit.unit.unitId)),
     [stream, orphanIds],
   );
-  const totalItemCount = Math.max(filteredStream.length, shelf?.itemCount ?? 0);
+  const readableStream = useMemo(
+    () => filterReadableEntries(filteredStream, readableOnly),
+    [filteredStream, readableOnly],
+  );
+  const totalItemCount = Math.max(readableStream.length, shelf?.itemCount ?? 0);
   const totalPages = Math.max(1, Math.ceil(totalItemCount / PAGE_SIZE));
   const page = pageState.unitId === unitId ? pageState.page : 1;
   const pageStart = (page - 1) * PAGE_SIZE;
-  const visibleStream = filteredStream.slice(pageStart, pageStart + PAGE_SIZE);
+  const visibleStream = readableStream.slice(pageStart, pageStart + PAGE_SIZE);
   const waitingForPageData =
     hasNextPage &&
-    pageStart >= filteredStream.length &&
-    filteredStream.length > 0;
+    pageStart >= readableStream.length &&
+    readableStream.length > 0;
 
   useEffect(() => {
     setPageState((current) => {
@@ -423,6 +431,15 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
                 </span>
               </Label>
             )}
+            <Label className="flex min-w-0 items-center gap-2 text-sm">
+              <Checkbox
+                checked={readableOnly}
+                onCheckedChange={(checked) => setReadableOnly(checked === true)}
+              />
+              <span className="whitespace-nowrap">
+                {t("entity:shelf_readable_only")}
+              </span>
+            </Label>
             {hydration.orphanUnitIds.length > 0 && (
               <>
                 <span className="text-xs text-warning-text">

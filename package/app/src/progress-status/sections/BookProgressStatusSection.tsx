@@ -13,6 +13,7 @@ import {
   StatusPrimaryActionButton,
   StatusToggleGroup,
 } from "../components/StatusToggleGroup";
+import { ReadingProgressBar } from "../components/ReadingProgressBar";
 import { useReasonPostMutations } from "../hooks/useReasonPostMutations";
 import { useStatusTransition } from "../hooks/useStatusTransition";
 import {
@@ -258,8 +259,22 @@ export function BookProgressStatusSection({
   const isChineseLayout = usesChineseProgressLayout(language);
   const primaryAction = getDefaultPrimaryAction(currentStatus, t);
 
+  // Surface the same reading-progress fact-source the dashboard uses, as a
+  // hint while a read is in progress.
+  const showProgressHint =
+    currentStatus === "ACTIVE" || currentStatus === "PAUSED";
+  const progressValue = progress.data?.progress ?? 0;
+
   return (
     <div className="flex flex-col gap-2 w-full">
+      {showProgressHint ? (
+        <ReadingProgressBar
+          variant="onDark"
+          value={progressValue}
+          label={`${Math.round(Math.min(1, Math.max(0, progressValue)) * 100)}%`}
+          ariaLabel={t("book:content_reading")}
+        />
+      ) : null}
       <div className="grid w-full grid-cols-4 overflow-hidden rounded-full border border-white/25 bg-transparent divide-x divide-white/15">
         {isChineseLayout ? (
           <StatusToggleGroup

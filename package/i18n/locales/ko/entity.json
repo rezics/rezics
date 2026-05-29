@@ -280,6 +280,7 @@
   "shelf_sort_newest": "최신순",
   "shelf_sort_oldest": "오래된순",
   "shelf_sort_prime_only": "주 항목만 정렬",
+  "shelf_readable_only": "읽을 수 있는 항목만",
   "shelf_sort_title_az": "제목 A-Z",
   "shelf_sort_title_za": "제목 Z-A",
   "shelf_system_active": "활동적인",
