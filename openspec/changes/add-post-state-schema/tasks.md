@@ -1,39 +1,44 @@
 ## 1. Schema & Migration
 
-- [ ] 1.1 Add `Post.state String?` to `package/server/prisma/schema.prisma`; document `extra.stateSchemaTag` in the model comment
-- [ ] 1.2 Add an index supporting lifecycle filtering (e.g. on `(state)` or a realm/target-scoped composite consistent with existing post indexes)
+- [ ] 1.1 Add `Post.state String?` to `package/server/prisma/schema.prisma`; document in the model comment that it is a kebab-case slug and that `extra.stateSchemaTag` snapshots the governing tag slug
+- [ ] 1.2 Add an index supporting bucket filtering (e.g. on `(state)` or a realm/target-scoped composite consistent with existing post indexes)
 - [ ] 1.3 Generate the Prisma migration (additive; all existing posts get `state = null`) and run `prisma:generate`
 
 ## 2. State Schema Registry
 
-- [ ] 2.1 Define the schema type `{ initial, states[], transitions[] }` with rendering hints but no behavior flags
-- [ ] 2.2 Add the code registry keyed by official tag slug, building on `OFFICIAL_QUESTION_TAG_SLUG`
-- [ ] 2.3 Add the `question` schema (`open`/`answered`/`closed`, initial `open`)
-- [ ] 2.4 Add the `issue` schema (`open`/`closed`, initial `open`) and the close-reason vocabulary (`COMPLETED`/`NOT_PLANNED`/`DUPLICATE`); add the official issue tag slug constant
+- [ ] 2.1 Define the schema type `{ initial, values: { slug, bucket: 'active' | 'closed', tagSlug? }[], transitions[] }` — no behavior flags; `tagSlug` defaults to the value slug
+- [ ] 2.2 Add the code registry keyed by official tag slug, building on `OFFICIAL_QUESTION_TAG_SLUG`; add the official issue tag slug constant alongside `SEED_TAG_SLUGS`
+- [ ] 2.3 Add the `question` schema: `open`(active) · `solved`(closed) · `not-planned`(closed) · `duplicate`(closed) · `off-topic`(closed), initial `open`, with reopen transitions
+- [ ] 2.4 Add the `issue` schema: `open`(active) · `completed`(closed) · `not-planned`(closed) · `duplicate`(closed), initial `open`, with reopen transitions
+- [ ] 2.5 Add helpers: bucket slug sets (`activeSlugs`/`closedSlugs`) for filter queries, and slug normalization (lowercase + `_`→`-`) at the write boundary
 
 ## 3. Backend Service
 
 - [ ] 3.1 On post create: detect a stateful tag, snapshot `extra.stateSchemaTag`, initialize `state` to the schema's initial state
 - [ ] 3.2 Enforce at most one stateful tag (reject applying a second); ensure `stateSchemaTag` does not drift on later tag add/remove
-- [ ] 3.3 Implement a state-transition write that validates target state and transition against the schema
-- [ ] 3.4 Maintain the `answered` cache: accept → `open`⇒`answered`; unaccept last → `answered`⇒`open`; never overwrite manual `closed` (pin remains source of truth)
+- [ ] 3.3 Implement a state-transition write that validates target value and transition against the schema (write-strict); normalize and reject illegal values/transitions
+- [ ] 3.4 Maintain the `solved` cache: accept → `open`⇒`solved`; unaccept last → `solved`⇒`open`; never overwrite a manual closed reason (pin remains source of truth)
 - [ ] 3.5 Audit reply-permission and feed-visibility paths to confirm they read only `isLocked` / `Unit.status`, never `state`
+- [ ] 3.6 Provide bucket filtering for listings (`active`/`closed` via the slug sets), with no anti-join
 
 ## 4. Contract & API
 
-- [ ] 4.1 Add `state` to `PostDTO`; document `extra.stateSchemaTag`; expose the schema shape (states, transitions, rendering hints) for client rendering
-- [ ] 4.2 Add `@rezics/api` read of post state + schema and a state-transition mutation with thread/post query invalidation
+- [ ] 4.1 Add `state` to `PostDTO` typed as a generic string (read-lenient — no enum rejection on read); document `extra.stateSchemaTag`; expose the schema shape (values, buckets, transitions, per-value tag slug) for client rendering
+- [ ] 4.2 Add `@rezics/api` read of post state + schema, a state-transition mutation (gated by schema transitions) with thread/post query invalidation, and bucket filter params
 
 ## 5. Tests
 
 - [ ] 5.1 Create with question tag → `state = open`, `stateSchemaTag` set
 - [ ] 5.2 Second stateful tag rejected; snapshot does not drift on tag changes
-- [ ] 5.3 Illegal state value and disallowed transition rejected
-- [ ] 5.4 Accept → answered; unaccept → open; manual `closed` not overwritten by accept/unaccept
-- [ ] 5.5 Closed post with `isLocked = false` still accepts replies; locking is independent of `state`
-- [ ] 5.6 Unanswered-questions list filters on `state` (no anti-join)
+- [ ] 5.3 Illegal value and disallowed transition rejected on write; unknown value tolerated on read
+- [ ] 5.4 Accept → `solved`; unaccept → `open`; manual closed reason not overwritten by accept/unaccept
+- [ ] 5.5 Closed-bucket post with `isLocked = false` still accepts replies; locking is independent of `state`
+- [ ] 5.6 Unsolved-questions list filters on `state` active bucket (no anti-join); `closed` bucket filter matches all closed reason values
+- [ ] 5.7 Closing requires a reason (no bare `closed`); reopen returns to `open`
+- [ ] 5.8 Value renders via mapped tag; missing tag falls back to the raw slug
 
 ## 6. Quality
 
 - [ ] 6.1 `bun run format` and `bun run check:convention`
 - [ ] 6.2 `bun test` for the post domain
+</content>
