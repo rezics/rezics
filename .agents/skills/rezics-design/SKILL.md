@@ -1,6 +1,9 @@
 ---
 name: rezics-design
 description: Use for rezics UI design, JSX/CSS styling, tokens, typography, spacing, icons, and visual reviews.
+metadata:
+  version: 1.0.0
+  license: AGPL-3.0-only
 ---
 
 # rezics Design System — Foundation v1
