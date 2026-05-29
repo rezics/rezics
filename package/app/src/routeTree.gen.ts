@@ -73,6 +73,7 @@ import { Route as MainLayoutUserUserIdReactionsRouteImport } from './routes/_mai
 import { Route as MainLayoutUserUserIdFollowersRouteImport } from './routes/_mainLayout/user/$userId/followers'
 import { Route as MainLayoutUserUserIdEditRouteImport } from './routes/_mainLayout/user/$userId/edit'
 import { Route as MainLayoutUserUserIdContentRouteImport } from './routes/_mainLayout/user/$userId/content'
+import { Route as MainLayoutUserUserIdActivityRouteImport } from './routes/_mainLayout/user/$userId/activity'
 import { Route as MainLayoutUMeDraftsRouteImport } from './routes/_mainLayout/u/me/drafts'
 import { Route as MainLayoutUMeDashboardRouteImport } from './routes/_mainLayout/u/me/dashboard'
 import { Route as MainLayoutUUserSlugShelvesRouteImport } from './routes/_mainLayout/u/$userSlug/shelves'
@@ -81,6 +82,7 @@ import { Route as MainLayoutUUserSlugRealmsRouteImport } from './routes/_mainLay
 import { Route as MainLayoutUUserSlugReactionsRouteImport } from './routes/_mainLayout/u/$userSlug/reactions'
 import { Route as MainLayoutUUserSlugFollowersRouteImport } from './routes/_mainLayout/u/$userSlug/followers'
 import { Route as MainLayoutUUserSlugContentRouteImport } from './routes/_mainLayout/u/$userSlug/content'
+import { Route as MainLayoutUUserSlugActivityRouteImport } from './routes/_mainLayout/u/$userSlug/activity'
 import { Route as MainLayoutStaffCaseCaseIdRouteImport } from './routes/_mainLayout/staff/case/$caseId'
 import { Route as MainLayoutStaffAccountTargetUserIdRouteImport } from './routes/_mainLayout/staff/account/$targetUserId'
 import { Route as MainLayoutShelfBookBookIdRouteImport } from './routes/_mainLayout/shelf/book/$bookId'
@@ -482,6 +484,12 @@ const MainLayoutUserUserIdContentRoute =
     path: '/content',
     getParentRoute: () => MainLayoutUserUserIdRoute,
   } as any)
+const MainLayoutUserUserIdActivityRoute =
+  MainLayoutUserUserIdActivityRouteImport.update({
+    id: '/activity',
+    path: '/activity',
+    getParentRoute: () => MainLayoutUserUserIdRoute,
+  } as any)
 const MainLayoutUMeDraftsRoute = MainLayoutUMeDraftsRouteImport.update({
   id: '/u/me/drafts',
   path: '/u/me/drafts',
@@ -526,6 +534,12 @@ const MainLayoutUUserSlugContentRoute =
   MainLayoutUUserSlugContentRouteImport.update({
     id: '/content',
     path: '/content',
+    getParentRoute: () => MainLayoutUUserSlugRoute,
+  } as any)
+const MainLayoutUUserSlugActivityRoute =
+  MainLayoutUUserSlugActivityRouteImport.update({
+    id: '/activity',
+    path: '/activity',
     getParentRoute: () => MainLayoutUUserSlugRoute,
   } as any)
 const MainLayoutStaffCaseCaseIdRoute =
@@ -944,6 +958,7 @@ export interface FileRoutesByFullPath {
   '/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
   '/staff/account/$targetUserId': typeof MainLayoutStaffAccountTargetUserIdRoute
   '/staff/case/$caseId': typeof MainLayoutStaffCaseCaseIdRoute
+  '/u/$userSlug/activity': typeof MainLayoutUUserSlugActivityRoute
   '/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
   '/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
   '/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
@@ -952,6 +967,7 @@ export interface FileRoutesByFullPath {
   '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/u/me/drafts': typeof MainLayoutUMeDraftsRoute
+  '/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
@@ -1066,6 +1082,7 @@ export interface FileRoutesByTo {
   '/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
   '/staff/account/$targetUserId': typeof MainLayoutStaffAccountTargetUserIdRoute
   '/staff/case/$caseId': typeof MainLayoutStaffCaseCaseIdRoute
+  '/u/$userSlug/activity': typeof MainLayoutUUserSlugActivityRoute
   '/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
   '/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
   '/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
@@ -1074,6 +1091,7 @@ export interface FileRoutesByTo {
   '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/u/me/drafts': typeof MainLayoutUMeDraftsRoute
+  '/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
@@ -1198,6 +1216,7 @@ export interface FileRoutesById {
   '/_mainLayout/shelf/book/$bookId': typeof MainLayoutShelfBookBookIdRoute
   '/_mainLayout/staff/account/$targetUserId': typeof MainLayoutStaffAccountTargetUserIdRoute
   '/_mainLayout/staff/case/$caseId': typeof MainLayoutStaffCaseCaseIdRoute
+  '/_mainLayout/u/$userSlug/activity': typeof MainLayoutUUserSlugActivityRoute
   '/_mainLayout/u/$userSlug/content': typeof MainLayoutUUserSlugContentRoute
   '/_mainLayout/u/$userSlug/followers': typeof MainLayoutUUserSlugFollowersRoute
   '/_mainLayout/u/$userSlug/reactions': typeof MainLayoutUUserSlugReactionsRoute
@@ -1206,6 +1225,7 @@ export interface FileRoutesById {
   '/_mainLayout/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/_mainLayout/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/_mainLayout/u/me/drafts': typeof MainLayoutUMeDraftsRoute
+  '/_mainLayout/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/_mainLayout/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
   '/_mainLayout/user/$userId/edit': typeof MainLayoutUserUserIdEditRoute
   '/_mainLayout/user/$userId/followers': typeof MainLayoutUserUserIdFollowersRoute
@@ -1331,6 +1351,7 @@ export interface FileRouteTypes {
     | '/shelf/book/$bookId'
     | '/staff/account/$targetUserId'
     | '/staff/case/$caseId'
+    | '/u/$userSlug/activity'
     | '/u/$userSlug/content'
     | '/u/$userSlug/followers'
     | '/u/$userSlug/reactions'
@@ -1339,6 +1360,7 @@ export interface FileRouteTypes {
     | '/u/$userSlug/shelves'
     | '/u/me/dashboard'
     | '/u/me/drafts'
+    | '/user/$userId/activity'
     | '/user/$userId/content'
     | '/user/$userId/edit'
     | '/user/$userId/followers'
@@ -1453,6 +1475,7 @@ export interface FileRouteTypes {
     | '/shelf/book/$bookId'
     | '/staff/account/$targetUserId'
     | '/staff/case/$caseId'
+    | '/u/$userSlug/activity'
     | '/u/$userSlug/content'
     | '/u/$userSlug/followers'
     | '/u/$userSlug/reactions'
@@ -1461,6 +1484,7 @@ export interface FileRouteTypes {
     | '/u/$userSlug/shelves'
     | '/u/me/dashboard'
     | '/u/me/drafts'
+    | '/user/$userId/activity'
     | '/user/$userId/content'
     | '/user/$userId/edit'
     | '/user/$userId/followers'
@@ -1584,6 +1608,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/shelf/book/$bookId'
     | '/_mainLayout/staff/account/$targetUserId'
     | '/_mainLayout/staff/case/$caseId'
+    | '/_mainLayout/u/$userSlug/activity'
     | '/_mainLayout/u/$userSlug/content'
     | '/_mainLayout/u/$userSlug/followers'
     | '/_mainLayout/u/$userSlug/reactions'
@@ -1592,6 +1617,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/u/$userSlug/shelves'
     | '/_mainLayout/u/me/dashboard'
     | '/_mainLayout/u/me/drafts'
+    | '/_mainLayout/user/$userId/activity'
     | '/_mainLayout/user/$userId/content'
     | '/_mainLayout/user/$userId/edit'
     | '/_mainLayout/user/$userId/followers'
@@ -2108,6 +2134,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserUserIdContentRouteImport
       parentRoute: typeof MainLayoutUserUserIdRoute
     }
+    '/_mainLayout/user/$userId/activity': {
+      id: '/_mainLayout/user/$userId/activity'
+      path: '/activity'
+      fullPath: '/user/$userId/activity'
+      preLoaderRoute: typeof MainLayoutUserUserIdActivityRouteImport
+      parentRoute: typeof MainLayoutUserUserIdRoute
+    }
     '/_mainLayout/u/me/drafts': {
       id: '/_mainLayout/u/me/drafts'
       path: '/u/me/drafts'
@@ -2162,6 +2195,13 @@ declare module '@tanstack/react-router' {
       path: '/content'
       fullPath: '/u/$userSlug/content'
       preLoaderRoute: typeof MainLayoutUUserSlugContentRouteImport
+      parentRoute: typeof MainLayoutUUserSlugRoute
+    }
+    '/_mainLayout/u/$userSlug/activity': {
+      id: '/_mainLayout/u/$userSlug/activity'
+      path: '/activity'
+      fullPath: '/u/$userSlug/activity'
+      preLoaderRoute: typeof MainLayoutUUserSlugActivityRouteImport
       parentRoute: typeof MainLayoutUUserSlugRoute
     }
     '/_mainLayout/staff/case/$caseId': {
@@ -2750,6 +2790,7 @@ const MainLayoutRRealmSlugRouteWithChildren =
   MainLayoutRRealmSlugRoute._addFileChildren(MainLayoutRRealmSlugRouteChildren)
 
 interface MainLayoutUUserSlugRouteChildren {
+  MainLayoutUUserSlugActivityRoute: typeof MainLayoutUUserSlugActivityRoute
   MainLayoutUUserSlugContentRoute: typeof MainLayoutUUserSlugContentRoute
   MainLayoutUUserSlugFollowersRoute: typeof MainLayoutUUserSlugFollowersRoute
   MainLayoutUUserSlugReactionsRoute: typeof MainLayoutUUserSlugReactionsRoute
@@ -2761,6 +2802,7 @@ interface MainLayoutUUserSlugRouteChildren {
 }
 
 const MainLayoutUUserSlugRouteChildren: MainLayoutUUserSlugRouteChildren = {
+  MainLayoutUUserSlugActivityRoute: MainLayoutUUserSlugActivityRoute,
   MainLayoutUUserSlugContentRoute: MainLayoutUUserSlugContentRoute,
   MainLayoutUUserSlugFollowersRoute: MainLayoutUUserSlugFollowersRoute,
   MainLayoutUUserSlugReactionsRoute: MainLayoutUUserSlugReactionsRoute,
@@ -2775,6 +2817,7 @@ const MainLayoutUUserSlugRouteWithChildren =
   MainLayoutUUserSlugRoute._addFileChildren(MainLayoutUUserSlugRouteChildren)
 
 interface MainLayoutUserUserIdRouteChildren {
+  MainLayoutUserUserIdActivityRoute: typeof MainLayoutUserUserIdActivityRoute
   MainLayoutUserUserIdContentRoute: typeof MainLayoutUserUserIdContentRoute
   MainLayoutUserUserIdEditRoute: typeof MainLayoutUserUserIdEditRoute
   MainLayoutUserUserIdFollowersRoute: typeof MainLayoutUserUserIdFollowersRoute
@@ -2786,6 +2829,7 @@ interface MainLayoutUserUserIdRouteChildren {
 }
 
 const MainLayoutUserUserIdRouteChildren: MainLayoutUserUserIdRouteChildren = {
+  MainLayoutUserUserIdActivityRoute: MainLayoutUserUserIdActivityRoute,
   MainLayoutUserUserIdContentRoute: MainLayoutUserUserIdContentRoute,
   MainLayoutUserUserIdEditRoute: MainLayoutUserUserIdEditRoute,
   MainLayoutUserUserIdFollowersRoute: MainLayoutUserUserIdFollowersRoute,

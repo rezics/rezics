@@ -6,6 +6,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./activity": {
+      "types": "./src/activity/index.ts",
+      "default": "./src/activity/index.ts"
+    },
     "./dashboard": {
       "types": "./src/dashboard/index.ts",
       "default": "./src/dashboard/index.ts"

@@ -62,9 +62,9 @@
 ## 8. Profile, Settings
 
 - [x] 8.1 Add follower / following list sub-pages under profile (route + sections), backed by existing subscription API.
-- [ ] 8.2 Surface an activity timeline on profile using existing reaction/post/shelf events; respect privacy.
-- [ ] 8.3 Add settings sub-pages for blocked users, data export, and account deletion entry points.
-- [ ] 8.4 Detail notification-preference UI (per-kind toggles) on `settings/preferences`; persist through typed mutation.
+- [x] 8.2 Surface an activity timeline on profile using existing reaction/post/shelf events; respect privacy.
+- [~] 8.3 Add settings sub-pages for blocked users, data export, and account deletion entry points. — MOVED to `add-account-safety-and-notification-controls` (net-new safety/privacy backend: block model, export, deletion).
+- [~] 8.4 Detail notification-preference UI (per-kind toggles) on `settings/preferences`; persist through typed mutation. — MOVED to `add-account-safety-and-notification-controls` (net-new `userSettings.notifications` + dispatch-pipeline filtering).
 - [x] 8.5 Add a library-display preference sub-page that edits `userSettings.library.bookshelf` (breakpoint columns + showTitle) with a reset-to-default action; persist through the typed userSettings mutation.
 
 ## 9. Quality, A11y, i18n, Responsive

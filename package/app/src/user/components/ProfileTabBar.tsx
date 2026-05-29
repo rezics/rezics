@@ -13,6 +13,8 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("settings:profile_tab_followers"),
   profile_tab_reactions: () =>
     getI18nRuntime().i18n.t("settings:profile_tab_reactions"),
+  profile_tab_activity: () =>
+    getI18nRuntime().i18n.t("settings:profile_tab_activity"),
 } as const;
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -26,6 +28,7 @@ const PROFILE_TABS = [
   { label: i18nMessages.profile_tab_realms, path: "/realms" },
   { label: i18nMessages.profile_tab_followers, path: "/followers" },
   { label: i18nMessages.profile_tab_reactions, path: "/reactions" },
+  { label: i18nMessages.profile_tab_activity, path: "/activity" },
 ] as const;
 
 interface ProfileTabBarProps {

@@ -7,6 +7,7 @@ export * from "./admin-stats";
 export * from "./auth";
 export * from "./book";
 export * from "./bookshelf";
+export * from "./activity";
 export * from "./chapter";
 export * from "./common";
 export * from "./dashboard";
