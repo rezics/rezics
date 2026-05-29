@@ -194,5 +194,12 @@
   "report_success_title": "举报已提交",
   "report_success_description": "感谢你，管理员会进行审核。",
   "report_signin_prompt": "请先登录才能举报内容。",
-  "dm_action": "发消息"
+  "dm_action": "发消息",
+  "dm_typing": "正在输入…",
+  "dm_read_receipt": "已读",
+  "dm_block": "屏蔽",
+  "dm_unblock": "解除屏蔽",
+  "dm_you_blocked_peer": "你已屏蔽此用户",
+  "dm_blocked_by_peer": "此用户已屏蔽你",
+  "dm_blocked_composer_placeholder": "你无法给此用户发消息"
 }

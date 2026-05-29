@@ -1,8 +1,14 @@
 import {
+  dmApi,
   type DmMessage,
   dmKeys,
+  selectIsPeerTyping,
+  useDmBlockState,
+  useDmTypingStore,
+  useMarkDmReadMutation,
   useMessages,
   useSendDmMutation,
+  useSetDmBlockMutation,
 } from "@rezics/api/dm/dm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
@@ -19,11 +25,19 @@ function isMine(message: DmMessage, myId: string | undefined): boolean {
   return !!myId && message.senderId === myId;
 }
 
+/** The most recent message by `createdAt`, order-independent. */
+function newestMessage(messages: DmMessage[]): DmMessage | undefined {
+  return messages.reduce<DmMessage | undefined>((latest, m) => {
+    if (!latest || m.createdAt > latest.createdAt) return m;
+    return latest;
+  }, undefined);
+}
+
 /**
- * Conversation thread — paginated message list (newest at bottom),
- * send box anchored to the bottom, optimistic append on send. Live
- * incoming messages flow in via `useDmStream` (mounted at the app
- * shell), which invalidates this query and triggers a refetch.
+ * Conversation thread — paginated message list (newest at bottom), send box
+ * anchored to the bottom. Surfaces read receipts on the viewer's latest
+ * message, the peer's live typing indicator, and block/unblock controls in the
+ * thread header. Sending is disabled when either party has blocked the other.
  */
 export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   conversationId,
@@ -32,40 +46,106 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   const { t } = useTranslation(["community"]);
   const { data, isLoading, isError } = useMessages(conversationId);
   const sendMutation = useSendDmMutation();
+  const markReadMutation = useMarkDmReadMutation();
+  const { data: blockState } = useDmBlockState(peerId);
+  const setBlockMutation = useSetDmBlockMutation();
+  const isPeerTyping = useDmTypingStore(selectIsPeerTyping(conversationId));
   const queryClient = useQueryClient();
   const myUnitId = useAuthSessionStore((s) => s.rezics.userId) ?? undefined;
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const typingResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const messages = data?.messages ?? [];
   const messageCount = messages.length;
+
+  const peerBlocked = blockState?.peerBlocked ?? false;
+  const blockedByPeer = blockState?.blockedByPeer ?? false;
+  const blocked = peerBlocked || blockedByPeer;
+
+  // The peer's most-recent message (drives mark-read) and whether the peer has
+  // read the viewer's latest message (drives the read receipt).
+  const newest = newestMessage(messages);
+  const newestId = newest?.id;
+  const newestMine = !!newest && isMine(newest, myUnitId);
+  const myNewest = newestMessage(messages.filter((m) => isMine(m, myUnitId)));
+  const peerHasRead = !!myNewest?.readAt;
 
   useEffect(() => {
     if (messageCount === 0) return;
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messageCount]);
 
+  // Mark the peer's messages read whenever the newest message is theirs.
+  const markRead = markReadMutation.mutate;
+  useEffect(() => {
+    if (!newestId || newestMine) return;
+    markRead({ conversationId, upToMessageId: newestId });
+  }, [conversationId, newestId, newestMine, markRead]);
+
+  const emitTyping = (isTyping: boolean) => {
+    void dmApi.setTyping(conversationId, isTyping).catch(() => {});
+  };
+
+  const handleDraftChange = (value: string) => {
+    setDraft(value);
+    emitTyping(true);
+    if (typingResetRef.current) clearTimeout(typingResetRef.current);
+    typingResetRef.current = setTimeout(() => emitTyping(false), 3000);
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const content = draft.trim();
-    if (!content || sendMutation.isPending) return;
+    if (!content || sendMutation.isPending || blocked) return;
     setDraft("");
+    emitTyping(false);
     try {
       await sendMutation.mutateAsync({ recipientId: peerId, content });
     } catch {
       setDraft(content);
       return;
     }
-    // Invalidating triggers a refetch; the WS stream handles peer-side
-    // updates. Optimistic append is best-effort (the canonical message
-    // shape — id, createdAt — comes from the server).
     queryClient.invalidateQueries({
       queryKey: dmKeys.messages(conversationId),
     });
   };
 
+  const toggleBlock = () => {
+    if (setBlockMutation.isPending) return;
+    setBlockMutation.mutate({ peerId, blocked: !peerBlocked });
+  };
+
+  const statusLabel = peerBlocked
+    ? t("community:dm_you_blocked_peer")
+    : blockedByPeer
+      ? t("community:dm_blocked_by_peer")
+      : isPeerTyping
+        ? t("community:dm_typing")
+        : "";
+
   return (
     <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between border-b border-border-whisper px-4 py-2">
+        <span
+          className="text-xs leading-ui text-text-tertiary"
+          aria-live="polite"
+        >
+          {statusLabel}
+        </span>
+        {!blockedByPeer ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            onClick={toggleBlock}
+            disabled={setBlockMutation.isPending}
+          >
+            {peerBlocked ? t("community:dm_unblock") : t("community:dm_block")}
+          </Button>
+        ) : null}
+      </div>
+
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {isLoading && (
           <p className="text-sm text-text-secondary">
@@ -103,23 +183,36 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
             );
           })}
         </ol>
+        {peerHasRead ? (
+          <p className="mt-1 pr-1 text-right text-xs leading-ui text-text-tertiary">
+            {t("community:dm_read_receipt")}
+          </p>
+        ) : null}
         <div ref={bottomRef} />
       </div>
+
       <form
         onSubmit={handleSubmit}
         className="flex items-center gap-2 border-t border-border-whisper px-4 py-3"
       >
         <Input
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder={t("community:inbox_message_placeholder")}
+          onChange={(e) => handleDraftChange(e.target.value)}
+          onBlur={() => emitTyping(false)}
+          placeholder={
+            blocked
+              ? t("community:dm_blocked_composer_placeholder")
+              : t("community:inbox_message_placeholder")
+          }
           aria-label={t("community:inbox_message_label")}
-          disabled={sendMutation.isPending}
+          disabled={sendMutation.isPending || blocked}
         />
         <Button
           type="submit"
           size="sm"
-          disabled={sendMutation.isPending || draft.trim().length === 0}
+          disabled={
+            sendMutation.isPending || blocked || draft.trim().length === 0
+          }
         >
           {t("community:inbox_send")}
         </Button>

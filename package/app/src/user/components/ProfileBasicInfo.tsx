@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 import type { FC } from "react";
+import { BlockPeerAction } from "@/engagement/components/BlockPeerAction";
 import { DMAction } from "@/engagement/components/DMAction";
 import FollowButton from "@/engagement/components/FollowButton";
 import { Link } from "@/shared/ui/link";
@@ -107,9 +108,10 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
             </p>
           )}
           {!isCurrentUser && (
-            <div className="mt-3 flex items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <FollowButton userId={user.unitId} size="sm" variant="default" />
               <DMAction peerUserId={user.unitId} peerName={user.name} />
+              <BlockPeerAction peerUserId={user.unitId} showLabel={false} />
             </div>
           )}
         </div>
@@ -169,6 +171,10 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
               <DMAction
                 peerUserId={user.unitId}
                 peerName={user.name}
+                className="w-full justify-center"
+              />
+              <BlockPeerAction
+                peerUserId={user.unitId}
                 className="w-full justify-center"
               />
             </div>

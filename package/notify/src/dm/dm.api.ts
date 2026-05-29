@@ -1,4 +1,7 @@
-import { dmMessageListQuerySchema } from "@rezics/contract";
+import {
+  dmBlockPeerBodySchema,
+  dmMessageListQuerySchema,
+} from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, readCookie, verifyJwtToken } from "../macro/auth";
 import * as dmFanOut from "./dm.fan-out";
@@ -12,13 +15,26 @@ export const dmApi = new Elysia({ prefix: "/dm" })
     "/conversations",
     async ({ userId }) => {
       const conversations = await dmService.getConversations(userId);
-      return {
-        conversations: conversations.map((c) => ({
-          ...c,
-          createdAt: c.createdAt.toISOString(),
-          updatedAt: c.updatedAt.toISOString(),
-        })),
-      };
+      const enriched = await Promise.all(
+        conversations.map(async (c) => {
+          const peerId =
+            c.participantA === userId ? c.participantB : c.participantA;
+          const viewer = await dmService.getConversationViewerState(
+            c.id,
+            userId,
+            peerId,
+          );
+          return {
+            ...c,
+            createdAt: c.createdAt.toISOString(),
+            updatedAt: c.updatedAt.toISOString(),
+            unreadCount: viewer.unreadCount,
+            peerBlocked: viewer.peerBlocked,
+            blockedByPeer: viewer.blockedByPeer,
+          };
+        }),
+      );
+      return { conversations: enriched };
     },
     {
       requireUser: true,
@@ -68,6 +84,111 @@ export const dmApi = new Elysia({ prefix: "/dm" })
         summary: "Get conversation messages",
         description:
           "Returns paginated messages for a conversation. Automatically marks messages as read.",
+        tags: ["Direct Messages"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/conversations/:id/read",
+    async ({ userId, params, body, set }) => {
+      const receipt = await dmService.markReadUpTo(
+        params.id,
+        userId,
+        body.upToMessageId,
+      );
+      if (!receipt) {
+        set.status = 404;
+        return { error: "Conversation or message not found" };
+      }
+      const peerId = await dmService.getPeerId(params.id, userId);
+      if (peerId) {
+        // Tell the peer their messages were read (their sent-message receipts).
+        dmFanOut.publish(peerId, {
+          kind: "dm.read",
+          conversationId: params.id,
+          readAt: receipt.readAt,
+        });
+      }
+      return receipt;
+    },
+    {
+      requireUser: true,
+      params: t.Object({ id: t.String() }),
+      body: t.Object({ upToMessageId: t.String() }),
+      detail: {
+        summary: "Mark messages read",
+        description:
+          "Marks the peer's messages up to `upToMessageId` as read and emits a read receipt to the peer.",
+        tags: ["Direct Messages"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/conversations/:id/typing",
+    async ({ userId, params, body, set }) => {
+      const peerId = await dmService.getPeerId(params.id, userId);
+      if (!peerId) {
+        set.status = 404;
+        return { error: "Conversation not found" };
+      }
+      dmFanOut.publish(peerId, {
+        kind: "dm.typing",
+        conversationId: params.id,
+        userId,
+        isTyping: body.isTyping,
+        at: new Date().toISOString(),
+      });
+      return { success: true };
+    },
+    {
+      requireUser: true,
+      params: t.Object({ id: t.String() }),
+      body: t.Object({ isTyping: t.Boolean() }),
+      detail: {
+        summary: "Typing indicator",
+        description:
+          "Broadcasts an ephemeral typing indicator to the peer. Not persisted.",
+        tags: ["Direct Messages", "Realtime"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/blocks",
+    async ({ userId, body }) => {
+      const state = await dmService.setBlock(userId, body.peerId, body.blocked);
+      dmFanOut.publish(body.peerId, {
+        kind: "dm.block",
+        peerId: userId,
+        blocked: body.blocked,
+      });
+      return state;
+    },
+    {
+      requireUser: true,
+      body: dmBlockPeerBodySchema,
+      detail: {
+        summary: "Block or unblock a peer",
+        description:
+          "Blocks or unblocks DM from a peer for the authenticated user.",
+        tags: ["Direct Messages"],
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/blocks/:peerId",
+    async ({ userId, params }) => {
+      return dmService.getBlockState(userId, params.peerId);
+    },
+    {
+      requireUser: true,
+      params: t.Object({ peerId: t.String() }),
+      detail: {
+        summary: "Get block state",
+        description: "Returns the mutual block state with a peer.",
         tags: ["Direct Messages"],
         security: [{ bearerAuth: [] }],
       },

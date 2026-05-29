@@ -194,5 +194,12 @@
   "report_success_title": "신고가 제출되었습니다",
   "report_success_description": "감사합니다. 운영자가 검토할 것입니다.",
   "report_signin_prompt": "콘텐츠를 신고하려면 로그인하세요.",
-  "dm_action": "메시지"
+  "dm_action": "메시지",
+  "dm_typing": "입력 중…",
+  "dm_read_receipt": "읽음",
+  "dm_block": "차단",
+  "dm_unblock": "차단 해제",
+  "dm_you_blocked_peer": "이 사용자를 차단했습니다",
+  "dm_blocked_by_peer": "이 사용자가 당신을 차단했습니다",
+  "dm_blocked_composer_placeholder": "이 사용자에게 메시지를 보낼 수 없습니다"
 }

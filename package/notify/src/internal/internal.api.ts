@@ -63,7 +63,12 @@ export const internalApi = new Elysia({ prefix: "/internal" })
   )
   .post(
     "/dm",
-    async ({ body }) => {
+    async ({ body, set }) => {
+      if (await dmService.isBlockedEitherWay(body.senderId, body.recipientId)) {
+        set.status = 403;
+        return { error: "Messaging is blocked between these users" };
+      }
+
       const conversationId = await dmService.upsertConversation(
         body.senderId,
         body.recipientId,

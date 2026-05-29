@@ -49,3 +49,17 @@ model Message {
 
   @@index([conversationId, createdAt(sort: Desc)])
 }
+
+// Directional DM block: `blockerId` has blocked `blockedId`. A pair may have
+// two rows (mutual block). Sending is disabled in either direction when a row
+// exists.
+model ConversationBlock {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  blockerId String   @db.Uuid
+  blockedId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}

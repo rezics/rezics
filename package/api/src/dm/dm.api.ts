@@ -1,4 +1,4 @@
-import type { DmSendBody } from "@rezics/contract";
+import type { DmBlockState, DmReadReceipt, DmSendBody } from "@rezics/contract";
 import { notifyFetch } from "../notification/notify-fetch";
 import { apiFetch } from "../react-query/http";
 import type {
@@ -39,5 +39,36 @@ export const dmApi = {
     return notifyFetch<DmMessageListResponse>(
       `/dm/conversations/${conversationId}/messages${qs ? `?${qs}` : ""}`,
     );
+  },
+
+  markRead: async (
+    conversationId: string,
+    upToMessageId: string,
+  ): Promise<DmReadReceipt> => {
+    return notifyFetch<DmReadReceipt>(
+      `/dm/conversations/${conversationId}/read`,
+      { method: "POST", body: JSON.stringify({ upToMessageId }) },
+    );
+  },
+
+  setTyping: async (
+    conversationId: string,
+    isTyping: boolean,
+  ): Promise<void> => {
+    await notifyFetch<{ success: true }>(
+      `/dm/conversations/${conversationId}/typing`,
+      { method: "POST", body: JSON.stringify({ isTyping }) },
+    );
+  },
+
+  setBlock: async (peerId: string, blocked: boolean): Promise<DmBlockState> => {
+    return notifyFetch<DmBlockState>("/dm/blocks", {
+      method: "POST",
+      body: JSON.stringify({ peerId, blocked }),
+    });
+  },
+
+  getBlockState: async (peerId: string): Promise<DmBlockState> => {
+    return notifyFetch<DmBlockState>(`/dm/blocks/${peerId}`);
   },
 };

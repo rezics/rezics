@@ -1,3 +1,5 @@
+export type { BlockPeerActionProps } from "./components/BlockPeerAction";
+export { BlockPeerAction } from "./components/BlockPeerAction";
 export type { DMActionProps } from "./components/DMAction";
 export { DMAction } from "./components/DMAction";
 export type { OverflowMenuProps } from "./components/OverflowMenu";

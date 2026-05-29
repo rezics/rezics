@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { getApiConfig } from "../config";
 import { dmKeys } from "./dm.keys";
+import { useDmTypingStore } from "./dm.realtime";
 import type { DmStreamEvent } from "./dm.types";
 
 function getDmWsUrl(): string {
@@ -61,6 +62,23 @@ export function useDmStream(input?: { enabled?: boolean }): void {
         if (conversationId) {
           queryClient.invalidateQueries({
             queryKey: dmKeys.messages(conversationId),
+          });
+        }
+      } else if (parsed && parsed.kind === "dm.typing") {
+        const { conversationId, isTyping } = parsed as {
+          conversationId?: string;
+          isTyping?: boolean;
+        };
+        if (conversationId) {
+          useDmTypingStore
+            .getState()
+            .setPeerTyping(conversationId, isTyping ?? false);
+        }
+      } else if (parsed && parsed.kind === "dm.block") {
+        const peerId = (parsed as { peerId?: string }).peerId;
+        if (peerId) {
+          queryClient.invalidateQueries({
+            queryKey: dmKeys.blockState(peerId),
           });
         }
       }

@@ -93,3 +93,150 @@ export async function markMessagesAsRead(
     data: { readAt: new Date() },
   });
 }
+
+async function isParticipant(
+  conversationId: string,
+  userId: string,
+): Promise<boolean> {
+  return (await getPeerId(conversationId, userId)) !== null;
+}
+
+/** The other participant in a conversation, or null if `userId` isn't in it. */
+export async function getPeerId(
+  conversationId: string,
+  userId: string,
+): Promise<string | null> {
+  const conversation = await prisma.conversation.findUnique({
+    where: { id: conversationId },
+  });
+  if (!conversation) return null;
+  if (conversation.participantA === userId) return conversation.participantB;
+  if (conversation.participantB === userId) return conversation.participantA;
+  return null;
+}
+
+/**
+ * Mark the peer's messages up to (and including) `upToMessageId` as read for
+ * `userId`. Returns the resulting read receipt, or `null` when `userId` is not
+ * a participant or the target message is missing.
+ */
+export async function markReadUpTo(
+  conversationId: string,
+  userId: string,
+  upToMessageId: string,
+) {
+  if (!(await isParticipant(conversationId, userId))) return null;
+
+  const target = await prisma.message.findFirst({
+    where: { id: upToMessageId, conversationId },
+  });
+  if (!target) return null;
+
+  const readAt = new Date();
+  await prisma.message.updateMany({
+    where: {
+      conversationId,
+      senderId: { not: userId },
+      readAt: null,
+      createdAt: { lte: target.createdAt },
+    },
+    data: { readAt },
+  });
+
+  return {
+    conversationId,
+    userId,
+    lastReadMessageId: upToMessageId,
+    readAt: readAt.toISOString(),
+  };
+}
+
+/**
+ * The peer's read state in a conversation: the latest message `userId` sent
+ * that the peer has read. `lastReadMessageId` is null when the peer has read
+ * nothing yet.
+ */
+export async function getReadReceipt(
+  conversationId: string,
+  userId: string,
+  peerId: string,
+) {
+  const lastRead = await prisma.message.findFirst({
+    where: { conversationId, senderId: userId, readAt: { not: null } },
+    orderBy: { createdAt: "desc" },
+  });
+  return {
+    conversationId,
+    userId: peerId,
+    lastReadMessageId: lastRead?.id ?? null,
+    readAt: (lastRead?.readAt ?? new Date()).toISOString(),
+  };
+}
+
+/** Block or unblock a peer for `blockerId`. Returns the resulting block state. */
+export async function setBlock(
+  blockerId: string,
+  blockedId: string,
+  blocked: boolean,
+) {
+  if (blocked) {
+    await prisma.conversationBlock.upsert({
+      where: { blockerId_blockedId: { blockerId, blockedId } },
+      update: {},
+      create: { blockerId, blockedId },
+    });
+  } else {
+    await prisma.conversationBlock.deleteMany({
+      where: { blockerId, blockedId },
+    });
+  }
+  return getBlockState(blockerId, blockedId);
+}
+
+/** Resolve the mutual block state between `userId` and `peerId`. */
+export async function getBlockState(userId: string, peerId: string) {
+  const [peerBlocked, blockedByPeer] = await Promise.all([
+    prisma.conversationBlock.findUnique({
+      where: { blockerId_blockedId: { blockerId: userId, blockedId: peerId } },
+    }),
+    prisma.conversationBlock.findUnique({
+      where: { blockerId_blockedId: { blockerId: peerId, blockedId: userId } },
+    }),
+  ]);
+  return {
+    peerId,
+    peerBlocked: !!peerBlocked,
+    blockedByPeer: !!blockedByPeer,
+  };
+}
+
+/** True when either party has blocked the other. */
+export async function isBlockedEitherWay(
+  userId: string,
+  peerId: string,
+): Promise<boolean> {
+  const state = await getBlockState(userId, peerId);
+  return state.peerBlocked || state.blockedByPeer;
+}
+
+/**
+ * Per-conversation viewer-facing summary fields: unread count (messages from
+ * the peer not yet read) and mutual block flags.
+ */
+export async function getConversationViewerState(
+  conversationId: string,
+  userId: string,
+  peerId: string,
+) {
+  const [unreadCount, blockState] = await Promise.all([
+    prisma.message.count({
+      where: { conversationId, senderId: { not: userId }, readAt: null },
+    }),
+    getBlockState(userId, peerId),
+  ]);
+  return {
+    unreadCount,
+    peerBlocked: blockState.peerBlocked,
+    blockedByPeer: blockState.blockedByPeer,
+  };
+}

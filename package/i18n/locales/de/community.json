@@ -194,5 +194,12 @@
   "report_success_title": "Meldung gesendet",
   "report_success_description": "Danke — Moderatoren werden das prüfen.",
   "report_signin_prompt": "Melde dich an, um Inhalte zu melden.",
-  "dm_action": "Nachricht"
+  "dm_action": "Nachricht",
+  "dm_typing": "Schreibt…",
+  "dm_read_receipt": "Gelesen",
+  "dm_block": "Blockieren",
+  "dm_unblock": "Entsperren",
+  "dm_you_blocked_peer": "Du hast diese Person blockiert",
+  "dm_blocked_by_peer": "Diese Person hat dich blockiert",
+  "dm_blocked_composer_placeholder": "Du kannst dieser Person nicht schreiben"
 }

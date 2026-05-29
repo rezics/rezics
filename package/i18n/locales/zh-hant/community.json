@@ -194,5 +194,12 @@
   "report_success_title": "檢舉已送出",
   "report_success_description": "感謝你，管理員會進行審核。",
   "report_signin_prompt": "請先登入才能檢舉內容。",
-  "dm_action": "傳訊息"
+  "dm_action": "傳訊息",
+  "dm_typing": "輸入中…",
+  "dm_read_receipt": "已讀",
+  "dm_block": "封鎖",
+  "dm_unblock": "解除封鎖",
+  "dm_you_blocked_peer": "你已封鎖此使用者",
+  "dm_blocked_by_peer": "此使用者已封鎖你",
+  "dm_blocked_composer_placeholder": "你無法傳訊息給此使用者"
 }

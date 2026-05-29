@@ -1,6 +1,18 @@
-import type { DmSendBody } from "@rezics/contract";
+import type {
+  DmBlockPeerBody,
+  DmBlockState,
+  DmReadReceipt,
+  DmSendBody,
+  DmTypingIndicator,
+} from "@rezics/contract";
 
-export type { DmSendBody };
+export type {
+  DmBlockPeerBody,
+  DmBlockState,
+  DmReadReceipt,
+  DmSendBody,
+  DmTypingIndicator,
+};
 
 /**
  * Conversation summary as returned by notify's `GET /dm/conversations`.
@@ -17,6 +29,10 @@ export type DmConversation = {
   lastMessage?: string;
   lastMessageAt?: string;
   unreadCount?: number;
+  /** The viewer has blocked the peer (no new messages may be sent). */
+  peerBlocked?: boolean;
+  /** The peer has blocked the viewer (sending is disabled). */
+  blockedByPeer?: boolean;
   updatedAt: string;
 };
 
@@ -47,4 +63,12 @@ export type DmMessageListResponse = {
 export type DmStreamEvent =
   | { kind: "dm.message"; message: DmMessage }
   | { kind: "dm.read"; conversationId: string; readAt: string }
+  | {
+      kind: "dm.typing";
+      conversationId: string;
+      userId: string;
+      isTyping: boolean;
+      at: string;
+    }
+  | { kind: "dm.block"; peerId: string; blocked: boolean }
   | { kind: string; [extra: string]: unknown };

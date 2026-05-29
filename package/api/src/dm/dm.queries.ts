@@ -31,7 +31,20 @@ export function useMessages(
   return useQuery(dmMessagesQuery(conversationId, opts));
 }
 
+export const dmBlockStateQuery = (peerId: string) =>
+  queryOptions({
+    queryKey: dmKeys.blockState(peerId),
+    queryFn: () => dmApi.getBlockState(peerId),
+    enabled: !!peerId,
+    staleTime: 1000 * 30,
+  });
+
+export function useDmBlockState(peerId: string) {
+  return useQuery(dmBlockStateQuery(peerId));
+}
+
 export const dmQueries = {
   conversations: dmConversationsQuery,
   messages: dmMessagesQuery,
+  blockState: dmBlockStateQuery,
 };

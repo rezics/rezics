@@ -194,5 +194,12 @@
   "report_success_title": "報告を送信しました",
   "report_success_description": "ありがとうございます。モデレーターが確認します。",
   "report_signin_prompt": "コンテンツを報告するにはログインしてください。",
-  "dm_action": "メッセージ"
+  "dm_action": "メッセージ",
+  "dm_typing": "入力中…",
+  "dm_read_receipt": "既読",
+  "dm_block": "ブロック",
+  "dm_unblock": "ブロック解除",
+  "dm_you_blocked_peer": "このユーザーをブロックしています",
+  "dm_blocked_by_peer": "このユーザーにブロックされています",
+  "dm_blocked_composer_placeholder": "このユーザーにメッセージを送れません"
 }
