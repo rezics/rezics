@@ -183,5 +183,16 @@
   "feedback_resolved_time": "해결됨: {value}",
   "feedback_unit_id": "단위 {id}",
   "feedback_updated_time": "업데이트됨: {value}",
-  "feedback_user_id": "사용자 ID: {id}"
+  "feedback_user_id": "사용자 ID: {id}",
+  "report_action": "신고",
+  "report_dialog_title": "콘텐츠 신고",
+  "report_dialog_description": "무엇이 문제인지 운영자에게 알려주세요. 신고는 커뮤니티 검토 대기열로 전송됩니다.",
+  "report_reason_label": "사유",
+  "report_reason_placeholder": "문제를 설명해 주세요",
+  "report_submit": "신고 제출",
+  "report_submitting": "제출 중…",
+  "report_success_title": "신고가 제출되었습니다",
+  "report_success_description": "감사합니다. 운영자가 검토할 것입니다.",
+  "report_signin_prompt": "콘텐츠를 신고하려면 로그인하세요.",
+  "dm_action": "메시지"
 }

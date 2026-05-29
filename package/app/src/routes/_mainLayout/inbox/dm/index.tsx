@@ -5,6 +5,14 @@ const DmInboxPage = lazyRouteComponent(
   "DmInboxPage",
 );
 
+type DmInboxSearch = {
+  /** Optional peer to open a conversation with (set by the DM action). */
+  peerId?: string;
+};
+
 export const Route = createFileRoute("/_mainLayout/inbox/dm/")({
+  validateSearch: (search: Record<string, unknown>): DmInboxSearch => ({
+    peerId: typeof search.peerId === "string" ? search.peerId : undefined,
+  }),
   component: DmInboxPage,
 });

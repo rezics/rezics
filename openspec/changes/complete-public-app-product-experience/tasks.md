@@ -52,8 +52,8 @@
 
 ## 7. Engagement, Notifications, DM, Report
 
-- [ ] 7.1 Add `engagement/components/ReportAction.tsx` backed by governance/moderation report endpoints; **do not** reuse `feedback/FeedbackDialog`. Story + tests for unauthenticated, allowed, rate-limited, and submitted states.
-- [ ] 7.2 Add `engagement/components/DMAction.tsx` that consults policy to disable/hide when DM is not allowed; integrate from profile and notifications.
+- [x] 7.1 Add `engagement/components/ReportAction.tsx` backed by governance/moderation report endpoints; **do not** reuse `feedback/FeedbackDialog`. Story + tests for unauthenticated, allowed, rate-limited, and submitted states.
+- [x] 7.2 Add `engagement/components/DMAction.tsx` that consults policy to disable/hide when DM is not allowed; integrate from profile and notifications.
 - [x] 7.3 Extend `package/contract/src/notification/` items with `target: { route, params, anchor? }` so notification cards can deep-link without re-deriving routes client-side. Server emitters SHALL pick `target.route` per the link-selection policy in `app-product-navigation`: `/book/:bookId/node/:nodeId` when the event has `nodeId`, `/book/:bookId/read/:chapterId` when only the chapter Unit id is known in a book context, `/chapter/:contentUnitId` for chapter-only context.
 - [x] 7.4 Update `inbox/components/NotificationCard.tsx` to route per `kindKey` (reply → thread + anchor, follow → profile, moderation outcome → authorization-appropriate detail, realm event → realm tab).
 - [ ] 7.5 Extend `package/contract/src/notify/dm.ts` with read-receipts, typing-indicator, and block/unblock-peer fields; wire into `inbox/sections/ConversationThreadSection.tsx`.

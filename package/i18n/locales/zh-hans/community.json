@@ -183,5 +183,16 @@
   "feedback_resolved_time": "解决时间：{value}",
   "feedback_unit_id": "单元 {id}",
   "feedback_updated_time": "更新时间：{value}",
-  "feedback_user_id": "用户ID：{id}"
+  "feedback_user_id": "用户ID：{id}",
+  "report_action": "举报",
+  "report_dialog_title": "举报内容",
+  "report_dialog_description": "告诉管理员哪里有问题。你的举报将发送至社区审核队列。",
+  "report_reason_label": "原因",
+  "report_reason_placeholder": "描述问题",
+  "report_submit": "提交举报",
+  "report_submitting": "提交中…",
+  "report_success_title": "举报已提交",
+  "report_success_description": "感谢你，管理员会进行审核。",
+  "report_signin_prompt": "请先登录才能举报内容。",
+  "dm_action": "发消息"
 }

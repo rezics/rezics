@@ -1,8 +1,16 @@
 import { type DmConversation, useConversations } from "@rezics/api/dm/dm";
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
-import { Link } from "@tanstack/react-router";
-import type { FC } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { type FC, useEffect } from "react";
+
+interface ConversationListSectionProps {
+  /**
+   * When set (via the DM action's `?peerId`), auto-open the existing
+   * conversation with this peer if one is found. No-op otherwise.
+   */
+  openPeerId?: string;
+}
 
 function compareUpdatedDesc(a: DmConversation, b: DmConversation): number {
   return (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "");
@@ -18,12 +26,27 @@ function formatPeerInitial(c: DmConversation): string {
  * the thread view. Loading / error / empty states follow the same copy
  * shape as `NotificationTabSection` for a consistent inbox feel.
  */
-export const ConversationListSection: FC = () => {
+export const ConversationListSection: FC<ConversationListSectionProps> = ({
+  openPeerId,
+}) => {
   const { t } = useTranslation(["common", "community"]);
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useConversations();
   const conversations = (data?.conversations ?? [])
     .slice()
     .sort(compareUpdatedDesc);
+
+  useEffect(() => {
+    if (!openPeerId) return;
+    const match = conversations.find((c) => c.peerId === openPeerId);
+    if (match) {
+      void navigate({
+        to: "/inbox/dm/$conversationId",
+        params: { conversationId: match.id },
+        replace: true,
+      });
+    }
+  }, [openPeerId, conversations, navigate]);
 
   return (
     <ul className="flex w-full flex-col gap-1">

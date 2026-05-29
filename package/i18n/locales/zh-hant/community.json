@@ -183,5 +183,16 @@
   "feedback_resolved_time": "解決時間：{value}",
   "feedback_unit_id": "單元 {id}",
   "feedback_updated_time": "更新時間：{value}",
-  "feedback_user_id": "使用者ID：{id}"
+  "feedback_user_id": "使用者ID：{id}",
+  "report_action": "檢舉",
+  "report_dialog_title": "檢舉內容",
+  "report_dialog_description": "告訴管理員哪裡有問題。你的檢舉會送往社群審核佇列。",
+  "report_reason_label": "原因",
+  "report_reason_placeholder": "描述問題",
+  "report_submit": "送出檢舉",
+  "report_submitting": "送出中…",
+  "report_success_title": "檢舉已送出",
+  "report_success_description": "感謝你，管理員會進行審核。",
+  "report_signin_prompt": "請先登入才能檢舉內容。",
+  "dm_action": "傳訊息"
 }

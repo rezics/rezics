@@ -183,5 +183,16 @@
   "feedback_resolved_time": "Resolved: {value}",
   "feedback_unit_id": "Unit {id}",
   "feedback_updated_time": "Updated: {value}",
-  "feedback_user_id": "User ID: {id}"
+  "feedback_user_id": "User ID: {id}",
+  "report_action": "Report",
+  "report_dialog_title": "Report content",
+  "report_dialog_description": "Tell moderators what's wrong. Your report goes to the community moderation queue.",
+  "report_reason_label": "Reason",
+  "report_reason_placeholder": "Describe the issue",
+  "report_submit": "Submit report",
+  "report_submitting": "Submitting…",
+  "report_success_title": "Report submitted",
+  "report_success_description": "Thanks — moderators will review this.",
+  "report_signin_prompt": "Sign in to report content.",
+  "dm_action": "Message"
 }

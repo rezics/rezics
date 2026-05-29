@@ -183,5 +183,16 @@
   "feedback_resolved_time": "解決済み:{value}",
   "feedback_unit_id": "ユニット{id}",
   "feedback_updated_time": "更新日:{value}",
-  "feedback_user_id": "ユーザーID:{id}"
+  "feedback_user_id": "ユーザーID:{id}",
+  "report_action": "報告",
+  "report_dialog_title": "コンテンツを報告",
+  "report_dialog_description": "何が問題かをモデレーターに伝えてください。報告はコミュニティの審査キューに送られます。",
+  "report_reason_label": "理由",
+  "report_reason_placeholder": "問題を説明してください",
+  "report_submit": "報告を送信",
+  "report_submitting": "送信中…",
+  "report_success_title": "報告を送信しました",
+  "report_success_description": "ありがとうございます。モデレーターが確認します。",
+  "report_signin_prompt": "コンテンツを報告するにはログインしてください。",
+  "dm_action": "メッセージ"
 }

@@ -183,5 +183,16 @@
   "feedback_resolved_time": "Gelöst:{value}",
   "feedback_unit_id": "Einheit{id}",
   "feedback_updated_time": "Aktualisiert:{value}",
-  "feedback_user_id": "BenutzerID:{id}"
+  "feedback_user_id": "BenutzerID:{id}",
+  "report_action": "Melden",
+  "report_dialog_title": "Inhalt melden",
+  "report_dialog_description": "Teile den Moderatoren mit, was nicht stimmt. Deine Meldung geht an die Moderations-Warteschlange der Community.",
+  "report_reason_label": "Grund",
+  "report_reason_placeholder": "Beschreibe das Problem",
+  "report_submit": "Meldung senden",
+  "report_submitting": "Wird gesendet…",
+  "report_success_title": "Meldung gesendet",
+  "report_success_description": "Danke — Moderatoren werden das prüfen.",
+  "report_signin_prompt": "Melde dich an, um Inhalte zu melden.",
+  "dm_action": "Nachricht"
 }

@@ -1,5 +1,12 @@
+export type { DMActionProps } from "./components/DMAction";
+export { DMAction } from "./components/DMAction";
 export type { OverflowMenuProps } from "./components/OverflowMenu";
 export { OverflowMenu } from "./components/OverflowMenu";
+export type {
+  ReportActionProps,
+  ReportTarget,
+} from "./components/ReportAction";
+export { ReportAction } from "./components/ReportAction";
 export {
   ReactionBar,
   type ReactionBarPolicy,
