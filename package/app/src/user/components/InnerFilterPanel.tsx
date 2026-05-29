@@ -29,12 +29,25 @@ export const InnerFilterPanel: FC<InnerFilterPanelProps> = ({
         const isActive = activeValue === chip.value;
         const label =
           chip.count != null ? `${chip.label} (${chip.count})` : chip.label;
+        const activate = () => {
+          if (!chip.disabled) onChipChange(chip.value);
+        };
         return (
           <Badge
             key={chip.value}
             variant={isActive ? "default" : "outline"}
-            onClick={chip.disabled ? undefined : () => onChipChange(chip.value)}
+            role="button"
+            tabIndex={chip.disabled ? -1 : 0}
+            aria-pressed={isActive}
             aria-disabled={chip.disabled || undefined}
+            onClick={chip.disabled ? undefined : activate}
+            onKeyDown={(event) => {
+              if (chip.disabled) return;
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                activate();
+              }
+            }}
             className={
               chip.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
             }

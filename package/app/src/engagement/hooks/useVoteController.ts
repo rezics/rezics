@@ -2,6 +2,8 @@ import {
   useCreateReactionMutation,
   useDeleteReactionMutation,
 } from "@rezics/api/reaction/reaction.mutations";
+import { useTranslation } from "@rezics/i18n/react";
+import { useRetryToast } from "@/shared/hooks/useRetryToast";
 import { useAuthModal } from "@/user/components/useAuthModal";
 import { useAuth } from "@/user/pages/useAuth";
 import { decideVoteAction, type VoteValue } from "./voteAction";
@@ -30,6 +32,38 @@ export function useVoteController({
   const auth = useAuthModal("login");
   const createReaction = useCreateReactionMutation();
   const deleteReaction = useDeleteReactionMutation();
+  const { t } = useTranslation(["community"]);
+  const showRetryToast = useRetryToast();
+
+  const retryMessage = () => t("community:progress_status_toast_generic_retry");
+
+  const runDelete = (reaction: NonNullable<VoteValue>) => {
+    deleteReaction.mutate(
+      { targetId: targetUnitId, reaction },
+      {
+        onError: () =>
+          showRetryToast(
+            `reaction:${targetUnitId}:delete:${reaction}`,
+            retryMessage(),
+            async () => runDelete(reaction),
+          ),
+      },
+    );
+  };
+
+  const runCreate = (reaction: NonNullable<VoteValue>) => {
+    createReaction.mutate(
+      { targetId: targetUnitId, reaction },
+      {
+        onError: () =>
+          showRetryToast(
+            `reaction:${targetUnitId}:create:${reaction}`,
+            retryMessage(),
+            async () => runCreate(reaction),
+          ),
+      },
+    );
+  };
 
   const apply = (next: VoteValue) => {
     const action = decideVoteAction({ isAuthenticated, userVote, next });
@@ -40,26 +74,14 @@ export function useVoteController({
       case "noop":
         return;
       case "delete":
-        deleteReaction.mutate({
-          targetId: targetUnitId,
-          reaction: action.reaction,
-        });
+        runDelete(action.reaction);
         return;
       case "create":
-        createReaction.mutate({
-          targetId: targetUnitId,
-          reaction: action.reaction,
-        });
+        runCreate(action.reaction);
         return;
       case "swap":
-        deleteReaction.mutate({
-          targetId: targetUnitId,
-          reaction: action.remove,
-        });
-        createReaction.mutate({
-          targetId: targetUnitId,
-          reaction: action.add,
-        });
+        runDelete(action.remove);
+        runCreate(action.add);
         return;
     }
   };

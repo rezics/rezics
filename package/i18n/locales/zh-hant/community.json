@@ -201,5 +201,19 @@
   "dm_unblock": "解除封鎖",
   "dm_you_blocked_peer": "你已封鎖此使用者",
   "dm_blocked_by_peer": "此使用者已封鎖你",
-  "dm_blocked_composer_placeholder": "你無法傳訊息給此使用者"
+  "dm_blocked_composer_placeholder": "你無法傳訊息給此使用者",
+  "notification_kind_reaction_like": "讚了",
+  "notification_kind_reaction_favorite": "收藏了",
+  "notification_kind_follow": "追蹤了你",
+  "notification_kind_reply": "回覆了",
+  "notification_kind_mention": "提及了你",
+  "notification_kind_realm_invite": "邀請了你",
+  "notification_kind_system": "系統通知",
+  "notification_actor_fallback": "有人",
+  "notification_unread": "未讀",
+  "notification_time_now": "剛剛",
+  "notification_time_minutes": "{value} 分鐘",
+  "notification_time_hours": "{value} 小時",
+  "notification_time_days": "{value} 天",
+  "notification_actor_others": "{count} 人"
 }

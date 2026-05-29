@@ -14,6 +14,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
+import { useRetryToast } from "@/shared/hooks/useRetryToast";
 import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 
@@ -57,8 +58,9 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   fullWidth = false,
   className,
 }) => {
-  const { t } = useTranslation(["settings"]);
+  const { t } = useTranslation(["settings", "community"]);
   const navigate = useNavigate();
+  const showRetryToast = useRetryToast();
   const hasMemberSession = useAuthSessionStore(selectHasMemberSession);
   const authSessionLoading = useAuthSessionStore(
     (state) => state.status === "loading",
@@ -103,15 +105,8 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     subscribeMutation.isPending ||
     unsubscribeMutation.isPending;
 
-  const handleClick = async () => {
-    if (!userId || loading) return;
-
-    if (!hasMemberSession) {
-      navigate({ to: "/login" });
-      return;
-    }
-
-    const willUnfollow = isFollowing;
+  const attemptToggle = async (willUnfollow: boolean) => {
+    if (!userId) return;
     const delta = willUnfollow ? -1 : 1;
     const hasLocalCount = typeof localFollowers === "number";
 
@@ -131,7 +126,23 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
         setLocalFollowers((prev) => (prev ?? 0) - delta);
       }
       setLocalIsFollowing(willUnfollow);
+      showRetryToast(
+        `follow:${userId}`,
+        t("community:progress_status_toast_generic_retry"),
+        () => attemptToggle(willUnfollow),
+      );
     }
+  };
+
+  const handleClick = async () => {
+    if (!userId || loading) return;
+
+    if (!hasMemberSession) {
+      navigate({ to: "/login" });
+      return;
+    }
+
+    await attemptToggle(isFollowing);
   };
 
   const label = isFollowing

@@ -4,6 +4,7 @@ import {
   lazyRouteComponent,
   useNavigate,
 } from "@tanstack/react-router";
+import { routeBoundaries } from "@/core/routing/routeBoundaries";
 
 const DashboardPage = lazyRouteComponent(
   () => import("@/dashboard"),
@@ -56,4 +57,5 @@ export const Route = createFileRoute("/_mainLayout/u/me/dashboard")({
     cols: typeof search.cols === "string" ? search.cols : undefined,
   }),
   component: DashboardRoute,
+  ...routeBoundaries(),
 });

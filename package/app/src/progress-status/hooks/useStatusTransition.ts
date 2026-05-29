@@ -8,8 +8,8 @@ import {
   useRemoveShelfUnitMutation,
 } from "@rezics/api/shelf/shelf.mutations";
 import type { ProgressExtra, UserUnitProgressStatus } from "@rezics/contract";
-import { useCallback, useMemo, useRef } from "react";
-import { toast } from "sonner";
+import { useCallback, useMemo } from "react";
+import { useRetryToast } from "@/shared/hooks/useRetryToast";
 import {
   planRemoveProgress,
   planTransition,
@@ -49,7 +49,7 @@ export function useStatusTransition(
   const addShelfUnit = useAddShelfUnitMutation();
   const removeShelfUnit = useRemoveShelfUnitMutation();
 
-  const inFlightRetries = useRef(new Set<string>());
+  const showRetryToast = useRetryToast();
 
   const runShelfOp = useCallback(
     async (op: ShelfOp) => {
@@ -64,25 +64,6 @@ export function useStatusTransition(
       }
     },
     [addShelfUnit, removeShelfUnit, resolveSystemShelfId, unitId],
-  );
-
-  const showRetryToast = useCallback(
-    (retryKey: string, message: () => string, retry: () => Promise<void>) => {
-      if (inFlightRetries.current.has(retryKey)) return;
-      toast.error(message(), {
-        action: {
-          label: getI18nRuntime().i18n.t("common:retry"),
-          onClick: () => {
-            if (inFlightRetries.current.has(retryKey)) return;
-            inFlightRetries.current.add(retryKey);
-            retry().finally(() => {
-              inFlightRetries.current.delete(retryKey);
-            });
-          },
-        },
-      });
-    },
-    [],
   );
 
   const dispatchShelfOps = useCallback(
@@ -106,10 +87,9 @@ export function useStatusTransition(
       if (progressFailed && shelfFailed) {
         showRetryToast(
           `${unitId}:both`,
-          () =>
-            getI18nRuntime().i18n.t(
-              "community:progress_status_toast_both_failed",
-            ),
+          getI18nRuntime().i18n.t(
+            "community:progress_status_toast_both_failed",
+          ),
           async () => {
             await Promise.allSettled([retryProgress(), retryShelf()]);
           },
@@ -117,19 +97,17 @@ export function useStatusTransition(
       } else if (progressFailed) {
         showRetryToast(
           `${unitId}:progress`,
-          () =>
-            getI18nRuntime().i18n.t(
-              "community:progress_status_toast_progress_failed",
-            ),
+          getI18nRuntime().i18n.t(
+            "community:progress_status_toast_progress_failed",
+          ),
           retryProgress,
         );
       } else if (shelfFailed) {
         showRetryToast(
           `${unitId}:shelf`,
-          () =>
-            getI18nRuntime().i18n.t(
-              "community:progress_status_toast_shelf_failed",
-            ),
+          getI18nRuntime().i18n.t(
+            "community:progress_status_toast_shelf_failed",
+          ),
           retryShelf,
         );
       }

@@ -201,5 +201,19 @@
   "dm_unblock": "Entsperren",
   "dm_you_blocked_peer": "Du hast diese Person blockiert",
   "dm_blocked_by_peer": "Diese Person hat dich blockiert",
-  "dm_blocked_composer_placeholder": "Du kannst dieser Person nicht schreiben"
+  "dm_blocked_composer_placeholder": "Du kannst dieser Person nicht schreiben",
+  "notification_kind_reaction_like": "hat geliket",
+  "notification_kind_reaction_favorite": "hat favorisiert",
+  "notification_kind_follow": "folgt dir",
+  "notification_kind_reply": "hat kommentiert",
+  "notification_kind_mention": "hat dich erwähnt",
+  "notification_kind_realm_invite": "hat dich eingeladen",
+  "notification_kind_system": "System",
+  "notification_actor_fallback": "Jemand",
+  "notification_unread": "Ungelesen",
+  "notification_time_now": "gerade eben",
+  "notification_time_minutes": "{value} Min.",
+  "notification_time_hours": "{value} Std.",
+  "notification_time_days": "{value} T.",
+  "notification_actor_others": "{count} Personen"
 }

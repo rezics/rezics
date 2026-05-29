@@ -79,7 +79,10 @@ beforeEach(() => {
     },
     userBlock: {
       findMany: mock(async () => [
-        { blockedId: "blocked-1", createdAt: new Date("2026-04-01T00:00:00.000Z") },
+        {
+          blockedId: "blocked-1",
+          createdAt: new Date("2026-04-01T00:00:00.000Z"),
+        },
       ]),
       deleteMany: userBlockDeleteMany,
     },

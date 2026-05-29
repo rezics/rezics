@@ -33,6 +33,9 @@ export const BlockPeerAction: React.FC<BlockPeerActionProps> = ({
   if (!isAuthenticated) return null;
 
   const peerBlocked = blockState?.peerBlocked ?? false;
+  const label = peerBlocked
+    ? t("community:dm_unblock")
+    : t("community:dm_block");
 
   return (
     <Button
@@ -41,16 +44,13 @@ export const BlockPeerAction: React.FC<BlockPeerActionProps> = ({
       size="sm"
       className={cn("gap-1.5", className)}
       disabled={setBlock.isPending}
+      aria-label={showLabel ? undefined : label}
       onClick={() =>
         setBlock.mutate({ peerId: peerUserId, blocked: !peerBlocked })
       }
     >
       <Ban className="h-4 w-4" aria-hidden="true" />
-      {showLabel
-        ? peerBlocked
-          ? t("community:dm_unblock")
-          : t("community:dm_block")
-        : null}
+      {showLabel ? label : null}
     </Button>
   );
 };

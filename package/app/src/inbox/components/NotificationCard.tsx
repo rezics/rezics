@@ -1,4 +1,5 @@
 import type { NotificationItem } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import { Badge } from "@rezics/ui/shadcn";
 import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
@@ -10,57 +11,63 @@ export interface NotificationCardProps {
   onClick?: () => void;
 }
 
-function formatRelativeTime(iso: string): string {
-  const date = new Date(iso);
-  const diffMs = Date.now() - date.getTime();
-  const minutes = Math.floor(diffMs / 60_000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString();
-}
+type Translate = ReturnType<typeof useTranslation>["t"];
 
-function kindLabel(kind: string): string {
+/** Map a notification kind to its (literal) community message, i18n-resolved. */
+function kindLabel(t: Translate, kind: string): string {
   switch (kind) {
     case "reaction.like":
-      return "liked";
+      return t("community:notification_kind_reaction_like");
     case "reaction.favorite":
-      return "favorited";
+      return t("community:notification_kind_reaction_favorite");
     case "follow.new":
-      return "followed you";
+      return t("community:notification_kind_follow");
     case "comment.new":
-      return "commented";
+      return t("community:notification_kind_reply");
     case "mention.new":
-      return "mentioned you";
+      return t("community:notification_kind_mention");
     case "invitation.new":
-      return "invited you";
+      return t("community:notification_kind_realm_invite");
     case "system.notice":
-      return "system";
+      return t("community:notification_kind_system");
     default:
       return kind;
   }
 }
 
+function relativeTime(t: Translate, iso: string): string {
+  const date = new Date(iso);
+  const minutes = Math.floor((Date.now() - date.getTime()) / 60_000);
+  if (minutes < 1) return t("community:notification_time_now");
+  if (minutes < 60)
+    return t("community:notification_time_minutes", { value: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24)
+    return t("community:notification_time_hours", { value: hours });
+  const days = Math.floor(hours / 24);
+  if (days < 7) return t("community:notification_time_days", { value: days });
+  return date.toLocaleDateString();
+}
+
 export function NotificationCard({ item, onClick }: NotificationCardProps) {
+  const { t } = useTranslation(["community"]);
   const extra = (item.extra ?? null) as {
     unitTitle?: string;
     unitCover?: string;
   } | null;
   const actorCount = item.actorIds.length;
   const actorSummary =
-    actorCount === 0
-      ? "Someone"
-      : actorCount === 1
-        ? "Someone"
-        : `${actorCount} people`;
+    actorCount > 1
+      ? t("community:notification_actor_others", { count: actorCount })
+      : t("community:notification_actor_fallback");
+
+  const kindText = kindLabel(t, item.kind);
 
   const href = resolveNotificationHref(item);
   const className = cn(
     "flex w-full items-start gap-3 rounded-lg px-4 py-3 text-left transition-colors",
-    "hover:bg-surface-subtle focus:bg-surface-subtle focus:outline-none",
+    "hover:bg-surface-subtle focus-visible:bg-surface-subtle",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
     item.read ? "" : "bg-surface-subtle/40",
   );
 
@@ -69,7 +76,7 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 text-sm">
           <span className="font-medium text-foreground">{actorSummary}</span>
-          <span className="text-muted-foreground">{kindLabel(item.kind)}</span>
+          <span className="text-muted-foreground">{kindText}</span>
           {item.count > 1 && (
             <Badge variant="secondary" className="ml-1">
               ×{item.count}
@@ -82,14 +89,19 @@ export function NotificationCard({ item, onClick }: NotificationCardProps) {
           </p>
         )}
         <p className="mt-1 text-xs text-muted-foreground">
-          {formatRelativeTime(item.latestAt)}
+          {relativeTime(t, item.latestAt)}
         </p>
       </div>
       {!item.read && (
-        <span
-          aria-hidden="true"
-          className="mt-2 size-2 shrink-0 rounded-full bg-primary"
-        />
+        <>
+          {/* Unread state is also exposed as text so it is not conveyed by
+              color/position alone. */}
+          <span className="sr-only">{t("community:notification_unread")}</span>
+          <span
+            aria-hidden="true"
+            className="mt-2 size-2 shrink-0 rounded-full bg-primary"
+          />
+        </>
       )}
     </>
   );

@@ -201,5 +201,19 @@
   "dm_unblock": "Unblock",
   "dm_you_blocked_peer": "You blocked this person",
   "dm_blocked_by_peer": "This person blocked you",
-  "dm_blocked_composer_placeholder": "You can't message this person"
+  "dm_blocked_composer_placeholder": "You can't message this person",
+  "notification_kind_reaction_like": "liked",
+  "notification_kind_reaction_favorite": "favorited",
+  "notification_kind_follow": "followed you",
+  "notification_kind_reply": "commented",
+  "notification_kind_mention": "mentioned you",
+  "notification_kind_realm_invite": "invited you",
+  "notification_kind_system": "system",
+  "notification_actor_fallback": "Someone",
+  "notification_unread": "Unread",
+  "notification_time_now": "just now",
+  "notification_time_minutes": "{value}m",
+  "notification_time_hours": "{value}h",
+  "notification_time_days": "{value}d",
+  "notification_actor_others": "{count} people"
 }

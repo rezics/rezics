@@ -69,19 +69,19 @@
 
 ## 9. Quality, A11y, i18n, Responsive
 
-- [ ] 9.1 Confirm each production route defines loading / empty / error / denied / not-found / unauthenticated states.
-- [ ] 9.2 Apply WCAG 2.1 AA expectations across new components: keyboard navigation, visible focus, screen-reader labels, reduced-motion respect; no state communicated by color alone.
-- [ ] 9.3 Define and apply responsive breakpoints across dashboard, search, detail, shelf, profile, settings, creation, inbox.
-- [ ] 9.4 Add offline retry affordance to mutations that the user explicitly triggered (collect, follow, react, send DM).
-- [ ] 9.5 Add missing Traditional Chinese message keys; avoid hardcoded copy where i18n is expected.
-- [ ] 9.6 Verify app pages use Rezics design tokens, `SafeLink`, shared UI primitives, and app density.
+- [x] 9.1 Confirm each production route defines loading / empty / error / denied / not-found / unauthenticated states.
+- [x] 9.2 Apply WCAG 2.1 AA expectations across new components: keyboard navigation, visible focus, screen-reader labels, reduced-motion respect; no state communicated by color alone.
+- [x] 9.3 Define and apply responsive breakpoints across dashboard, search, detail, shelf, profile, settings, creation, inbox.
+- [x] 9.4 Add offline retry affordance to mutations that the user explicitly triggered (collect, follow, react, send DM).
+- [x] 9.5 Add missing Traditional Chinese message keys; avoid hardcoded copy where i18n is expected.
+- [x] 9.6 Verify app pages use Rezics design tokens, `SafeLink`, shared UI primitives, and app density.
 
 ## 10. Verification
 
 - [x] 10.1 `bun --filter=@rezics/contract test`
-- [ ] 10.2 Targeted `@rezics/server` tests for dashboard, draft listing, and report endpoints.
-- [ ] 10.3 Targeted `@rezics/notify` tests for DM read-receipt / typing / block flows.
-- [ ] 10.4 Targeted `@rezics/api` tests for new hooks, query keys, and cache-coherence map.
-- [ ] 10.5 Targeted `@rezics/app` tests / Storybook for dashboard, search, detail, shelf, creation, drafts, notification deep-link, ReportAction, DMAction, profile (follower/timeline), and settings (blocked/export/deletion) flows.
-- [ ] 10.6 `bun run check:convention`, `bun run check:tokens`, `bun run format:check`, `bun run knip`.
-- [ ] 10.7 `openspec validate complete-public-app-product-experience --strict`.
+- [x] 10.2 Targeted `@rezics/server` tests for dashboard, draft listing, and report endpoints.
+- [x] 10.3 Targeted `@rezics/notify` tests for DM read-receipt / typing / block flows.
+- [x] 10.4 Targeted `@rezics/api` tests for new hooks, query keys, and cache-coherence map.
+- [x] 10.5 Targeted `@rezics/app` tests / Storybook for dashboard, search, detail, shelf, creation, drafts, notification deep-link, ReportAction, DMAction, profile (follower/timeline), and settings (blocked/export/deletion) flows.
+- [x] 10.6 `bun run check:convention`, `bun run check:tokens`, `bun run format:check`, `bun run knip`. (convention/tokens/format clean; `knip` surfaces only pre-existing repo-wide debt + a `RANKING_DATABASE_URL` env requirement — no new findings from this change.)
+- [x] 10.7 `openspec validate complete-public-app-product-experience --strict`.

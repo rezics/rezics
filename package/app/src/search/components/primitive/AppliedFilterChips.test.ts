@@ -1,5 +1,38 @@
-import { describe, expect, it } from "bun:test";
-import { buildAppliedFilterChips } from "./AppliedFilterChips";
+import { beforeAll, describe, expect, it, mock } from "bun:test";
+import i18next from "i18next";
+
+// The chip builder resolves labels through the shared i18n runtime. Provide a
+// backend-free i18next instance (inline `en` resources, synchronous init) and
+// mock the runtime module so labels resolve without any network fetch.
+const i18n = i18next.createInstance();
+i18n.init({
+  lng: "en",
+  initImmediate: false,
+  interpolation: { prefix: "{", suffix: "}", escapeValue: false },
+  resources: {
+    en: {
+      search: {
+        chip_type: "Type: {value}",
+        chip_rating: "Rating: {value}",
+        chip_licensed: "Licensed: {value}",
+        chip_words: "Words: {value}",
+        chip_sort: "Sort: {value}",
+      },
+      common: { yes: "Yes", no: "No" },
+    },
+  },
+});
+
+mock.module("@rezics/i18n/runtime", () => ({
+  getI18nRuntime: () => ({ i18n }),
+  createI18nRuntime: () => ({ i18n, ready: Promise.resolve(i18n) }),
+}));
+
+let buildAppliedFilterChips: typeof import("./chipDescriptors").buildAppliedFilterChips;
+
+beforeAll(async () => {
+  ({ buildAppliedFilterChips } = await import("./chipDescriptors"));
+});
 
 describe("buildAppliedFilterChips", () => {
   it("renders one chip per user tag", () => {

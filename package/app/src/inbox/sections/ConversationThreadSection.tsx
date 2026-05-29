@@ -14,6 +14,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQueryClient } from "@tanstack/react-query";
 import { type FC, type FormEvent, useEffect, useRef, useState } from "react";
+import { useRetryToast } from "@/shared/hooks/useRetryToast";
 import { useAuthSessionStore } from "@/user/states";
 
 interface ConversationThreadSectionProps {
@@ -51,6 +52,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
   const setBlockMutation = useSetDmBlockMutation();
   const isPeerTyping = useDmTypingStore(selectIsPeerTyping(conversationId));
   const queryClient = useQueryClient();
+  const showRetryToast = useRetryToast();
   const myUnitId = useAuthSessionStore((s) => s.rezics.userId) ?? undefined;
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -73,7 +75,14 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
 
   useEffect(() => {
     if (messageCount === 0) return;
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    // Honor the user's reduced-motion preference for the auto-scroll.
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    bottomRef.current?.scrollIntoView({
+      behavior: prefersReducedMotion ? "auto" : "smooth",
+      block: "end",
+    });
   }, [messageCount]);
 
   // Mark the peer's messages read whenever the newest message is theirs.
@@ -94,21 +103,32 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
     typingResetRef.current = setTimeout(() => emitTyping(false), 3000);
   };
 
+  const sendContent = async (content: string) => {
+    try {
+      await sendMutation.mutateAsync({ recipientId: peerId, content });
+    } catch {
+      // Keep the failed text in the composer and offer a retry that re-sends
+      // the same payload without forcing the user to re-type it.
+      setDraft((current) => (current.trim() ? current : content));
+      showRetryToast(
+        `dm:${conversationId}:send`,
+        t("community:progress_status_toast_generic_retry"),
+        () => sendContent(content),
+      );
+      return;
+    }
+    queryClient.invalidateQueries({
+      queryKey: dmKeys.messages(conversationId),
+    });
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const content = draft.trim();
     if (!content || sendMutation.isPending || blocked) return;
     setDraft("");
     emitTyping(false);
-    try {
-      await sendMutation.mutateAsync({ recipientId: peerId, content });
-    } catch {
-      setDraft(content);
-      return;
-    }
-    queryClient.invalidateQueries({
-      queryKey: dmKeys.messages(conversationId),
-    });
+    await sendContent(content);
   };
 
   const toggleBlock = () => {
@@ -171,7 +191,7 @@ export const ConversationThreadSection: FC<ConversationThreadSectionProps> = ({
                 className={`flex ${mine ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm ${
+                  className={`max-w-[75%] break-words rounded-2xl px-3 py-2 text-sm ${
                     mine
                       ? "bg-brand-fill text-text-on-brand"
                       : "bg-surface-elevated text-text-primary"

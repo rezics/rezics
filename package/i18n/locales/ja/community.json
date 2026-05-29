@@ -201,5 +201,19 @@
   "dm_unblock": "ブロック解除",
   "dm_you_blocked_peer": "このユーザーをブロックしています",
   "dm_blocked_by_peer": "このユーザーにブロックされています",
-  "dm_blocked_composer_placeholder": "このユーザーにメッセージを送れません"
+  "dm_blocked_composer_placeholder": "このユーザーにメッセージを送れません",
+  "notification_kind_reaction_like": "いいねしました",
+  "notification_kind_reaction_favorite": "お気に入りに追加しました",
+  "notification_kind_follow": "あなたをフォローしました",
+  "notification_kind_reply": "コメントしました",
+  "notification_kind_mention": "あなたをメンションしました",
+  "notification_kind_realm_invite": "あなたを招待しました",
+  "notification_kind_system": "システム",
+  "notification_actor_fallback": "誰か",
+  "notification_unread": "未読",
+  "notification_time_now": "たった今",
+  "notification_time_minutes": "{value}分",
+  "notification_time_hours": "{value}時間",
+  "notification_time_days": "{value}日",
+  "notification_actor_others": "{count}人"
 }
