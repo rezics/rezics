@@ -1,6 +1,7 @@
 import { getLockedFieldError } from "@rezics/api";
 import {
   useCreateWikiPostMutation,
+  useSetPostPublicationMutation,
   useUpdateWikiPostContentMutation,
 } from "@rezics/api/post/post";
 import {
@@ -11,6 +12,8 @@ import {
 import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
+import { DraftPublishActions } from "@/draft";
+import { policyDenialFromError } from "@/policy";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
 export interface WikiPostEditorProps {
@@ -48,20 +51,34 @@ export function WikiPostEditor({
       );
     },
   });
+  const publicationMutation = useSetPostPublicationMutation({
+    onSuccess: onSaved,
+  });
   const activeMutation = post ? updateMutation : createMutation;
 
-  const handleSave = () => {
+  // Create surfaces policy denials inline; edit keeps the locked-field alert.
+  const createDenial = policyDenialFromError(createMutation.error);
+  const isPublished = post?.status === "PUBLISHED";
+
+  const handleCreate = (status: "DRAFT" | "PUBLISHED") => {
     const trimmed = body.trim();
     if (!trimmed) return;
     setLockedError(null);
-    const content = markdownContentDoc(trimmed);
+    createMutation.mutate({
+      content: markdownContentDoc(trimmed),
+      targetUnitId,
+      status,
+    } as never);
+  };
 
-    if (post) {
-      updateMutation.mutate({ unitId: post.unitId, content });
-      return;
-    }
-
-    createMutation.mutate({ content, targetUnitId } as never);
+  const handleUpdate = () => {
+    const trimmed = body.trim();
+    if (!trimmed || !post) return;
+    setLockedError(null);
+    updateMutation.mutate({
+      unitId: post.unitId,
+      content: markdownContentDoc(trimmed),
+    });
   };
 
   return (
@@ -72,25 +89,51 @@ export function WikiPostEditor({
         </Alert>
       ) : null}
       <RezicsMarkdownEditor value={body} onChange={setBody} resize={resize} />
-      <div className="flex justify-end gap-2">
-        {onCancel ? (
+
+      {post ? (
+        <div className="flex items-center justify-end gap-2">
+          {onCancel ? (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onCancel}
+              disabled={activeMutation.isPending}
+            >
+              {t("common:cancel")}
+            </Button>
+          ) : null}
           <Button
             type="button"
             variant="ghost"
-            onClick={onCancel}
-            disabled={activeMutation.isPending}
+            onClick={() =>
+              publicationMutation.mutate({
+                unitId: post.unitId,
+                publish: !isPublished,
+              })
+            }
+            disabled={publicationMutation.isPending}
           >
-            {t("common:cancel")}
+            {isPublished ? t("common:revert_to_draft") : t("common:publish")}
           </Button>
-        ) : null}
-        <Button
-          type="button"
-          onClick={handleSave}
-          disabled={activeMutation.isPending || !body.trim()}
-        >
-          {activeMutation.isPending ? t("common:saving") : t("common:save")}
-        </Button>
-      </div>
+          <Button
+            type="button"
+            onClick={handleUpdate}
+            disabled={updateMutation.isPending || !body.trim()}
+          >
+            {updateMutation.isPending ? t("common:saving") : t("common:update")}
+          </Button>
+        </div>
+      ) : (
+        <DraftPublishActions
+          className="items-end"
+          onSaveDraft={() => handleCreate("DRAFT")}
+          onPublish={() => handleCreate("PUBLISHED")}
+          isPending={createMutation.isPending}
+          saveDraftDisabled={!body.trim()}
+          publishDisabled={!body.trim()}
+          denial={createDenial}
+        />
+      )}
     </div>
   );
 }

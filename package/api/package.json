@@ -10,6 +10,10 @@
       "types": "./src/dashboard/index.ts",
       "default": "./src/dashboard/index.ts"
     },
+    "./draft": {
+      "types": "./src/draft/index.ts",
+      "default": "./src/draft/index.ts"
+    },
     "./notification": {
       "types": "./src/notification/index.ts",
       "default": "./src/notification/index.ts"

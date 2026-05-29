@@ -38,7 +38,12 @@ interface BoundaryShellProps {
   actions?: ReactNode;
 }
 
-function BoundaryShell({ icon, title, description, actions }: BoundaryShellProps) {
+function BoundaryShell({
+  icon,
+  title,
+  description,
+  actions,
+}: BoundaryShellProps) {
   return (
     <div className="flex min-h-[50vh] items-center justify-center p-6">
       <Card surface="contained" className="w-full max-w-lg">
@@ -84,7 +89,9 @@ export const RouteLoading: React.FC = () => {
 };
 
 /** Error boundary state. Receives router error props when used as a route `errorComponent`. */
-export const RouteError: React.FC<Partial<ErrorComponentProps>> = ({ reset }) => {
+export const RouteError: React.FC<Partial<ErrorComponentProps>> = ({
+  reset,
+}) => {
   const { t } = useTranslation(["common"]);
   const router = useRouter();
   const canGoBack = useCanGoBack();

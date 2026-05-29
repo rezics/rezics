@@ -264,9 +264,7 @@ const ADMIN_GROUP: NavigationGroup = {
  * Empty groups (after visibility filtering) are dropped; remaining groups get a
  * section header and are separated by dividers.
  */
-export const NAVIGATION = (
-  context: NavigationContext,
-): NavigationItem[] => {
+export const NAVIGATION = (context: NavigationContext): NavigationItem[] => {
   const groups = [...NAVIGATION_GROUPS];
   if (context.isAdmin) groups.push(ADMIN_GROUP);
 

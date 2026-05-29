@@ -22,6 +22,7 @@ export {
   useCreatePostMutation,
   useCreateWikiPostMutation,
   useDeletePostMutation,
+  useSetPostPublicationMutation,
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
 } from "./post.mutations";

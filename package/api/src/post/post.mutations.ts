@@ -13,6 +13,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { postApi } from "./post.api";
 import { postKeys } from "./post.keys";
 
@@ -69,6 +70,12 @@ export function useCreatePostMutation(
       // Pre-populate detail cache
       queryClient.setQueryData(postKeys.detail(data.unitId), data);
 
+      // A draft create adds to the drafts list / dashboard; route through the
+      // draft cache domain so both refresh.
+      if (variables.status === "DRAFT") {
+        void invalidateForCacheDomain(queryClient, "draft");
+      }
+
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -102,6 +109,10 @@ export function useCreateWikiPostMutation(
         });
       }
       queryClient.setQueryData(postKeys.detail(data.unitId), data);
+      // A draft wiki create surfaces in the drafts list / dashboard.
+      if (variables.status === "DRAFT") {
+        void invalidateForCacheDomain(queryClient, "draft");
+      }
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -188,6 +199,36 @@ export function useDeletePostMutation(
 }
 
 /**
+ * Publish a draft post or revert a published post to draft. Routes
+ * invalidation through the `draft` cache domain (dashboard + drafts list) and
+ * refreshes post lists/detail so the post appears/disappears consistently.
+ */
+export function useSetPostPublicationMutation(
+  options?: Omit<
+    UseMutationOptions<
+      PostResponse,
+      Error,
+      { unitId: string; publish: boolean }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, publish }) =>
+      postApi.setPublication(unitId, { publish }),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      void invalidateForCacheDomain(queryClient, "draft");
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      queryClient.setQueryData(postKeys.detail(data.unitId), data);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
  * Combined mutations export
  */
 export const postMutations = {
@@ -196,4 +237,5 @@ export const postMutations = {
   useUpdate: useUpdatePostMutation,
   useUpdateWikiContent: useUpdateWikiPostContentMutation,
   useDelete: useDeletePostMutation,
+  useSetPublication: useSetPostPublicationMutation,
 };

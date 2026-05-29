@@ -43,11 +43,11 @@
 ## 6. Creation Workflows
 
 - [x] 6.1 Add `routes/_mainLayout/create/index.tsx` as a unified type-selection entry that routes to existing `book/new`, `shelf/new`, `review/new`, `post/...`, `remark/...`, `realm/...` flows.
-- [ ] 6.2 Add `package/contract/src/draft.ts` (`DraftMetadata` for review/post/remark/wiki/shelf-description) and a server listing/recover endpoint that reuses existing per-type draft storage.
-- [ ] 6.3 Add `package/app/src/drafts/` feature and `routes/_mainLayout/u/me/drafts.tsx`; link from dashboard.
+- [x] 6.2 Add `package/contract/src/draft.ts` (`DraftMetadata` for review/post/remark/wiki/shelf-description) and a server listing/recover endpoint that reuses existing per-type draft storage.
+- [x] 6.3 Add `package/app/src/draft/` feature and `routes/_mainLayout/u/me/drafts.tsx`; link from dashboard.
 - [x] 6.4 Build a shared policy-aware form helper that reads `PolicyDecision` codes (`MISSING_CAPABILITY`/`ENFORCEMENT_ACTIVE`/`BLOCKED_ACCOUNT`/`RATE_LIMITED`) from mutation responses and renders inline denial states instead of toast errors.
-- [ ] 6.5 Apply the helper to review/post/remark/shelf/realm creation forms; ensure forms use `@rezics/contract`, `@rezics/api`, UnitTranslation language controls, and editor primitives (no app-local DTO copies).
-- [ ] 6.6 Add tests for draft listing/recover, validation failure, policy denial (silenced/banned), successful publish, and work matching.
+- [x] 6.5 Apply the helper to review/post/remark/shelf/realm creation forms; ensure forms use `@rezics/contract`, `@rezics/api`, UnitTranslation language controls, and editor primitives (no app-local DTO copies).
+- [x] 6.6 Add tests for draft listing/recover, validation failure, policy denial (silenced/banned), successful publish, and work matching.
 - [x] 6.7 Document the empty-node placeholder "Create chapter" CTA (`/book/:bookId/node/:nodeId`) as a recognized chapter creation entry in the unified creation menu / contributor inventory; ensure `routes/_mainLayout/create/index.tsx` does not duplicate or hide it and that the materialization-by-nodeId code path (`useEnsureChapterUnit` accepting `nodeId`) is reused without forking a separate flow.
 
 ## 7. Engagement, Notifications, DM, Report

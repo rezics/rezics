@@ -4,6 +4,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import type React from "react";
 import { ContinueReadingSection } from "../sections/ContinueReadingSection";
+import { DashboardDraftsSection } from "../sections/DashboardDraftsSection";
 import { DashboardLibrarySection } from "../sections/DashboardLibrarySection";
 import { RealmsSection } from "../sections/RealmsSection";
 import { SafetySection } from "../sections/SafetySection";
@@ -57,6 +58,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         urlConfig={libraryUrlConfig}
         onResetUrlConfig={onResetLibraryUrlConfig}
       />
+      <DashboardDraftsSection />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <ShelvesSection result={data.shelves} onRetry={onRetry} />
         <RealmsSection result={data.realms} onRetry={onRetry} />

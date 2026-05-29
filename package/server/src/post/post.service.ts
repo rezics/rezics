@@ -496,6 +496,13 @@ export class PostService {
       scoreEntryId,
       extra,
     } = input;
+    // Drafts apply to top-level posts only; replies and chapters always
+    // publish. A draft is owner-only and stays out of feeds/search until
+    // published (see publication-policy `publicUnitEligibilityWhere`).
+    const asDraft =
+      input.status === "DRAFT" &&
+      !parentPostUnitId &&
+      kind !== PostKindEnum.CHAPTER;
     let realmIdsToWrite = parentPostUnitId
       ? []
       : [...new Set(realmUnitIds ?? [])];
@@ -611,7 +618,8 @@ export class PostService {
           userId: ownerUserId,
           slugScope: ownerUserId,
           type: UnitType.POST,
-          status: UnitStatus.PUBLISHED,
+          status: asDraft ? UnitStatus.DRAFT : UnitStatus.PUBLISHED,
+          publishedAt: asDraft ? null : new Date(),
         },
       });
 
@@ -741,12 +749,64 @@ export class PostService {
       return result;
     });
 
-    await Promise.all([
-      enqueuePostSync(post.unitId),
-      enqueueContentSync(post.unitId),
-    ]);
+    // Drafts are owner-only and must not enter the search index until they are
+    // published; `setPublicationState` enqueues the sync on publish.
+    if (!asDraft) {
+      await Promise.all([
+        enqueuePostSync(post.unitId),
+        enqueueContentSync(post.unitId),
+      ]);
+    }
 
     return hydrateUnitOwnerUserSlugRow(post);
+  }
+
+  /**
+   * Toggle a post between published and draft. Owner-only. Publishing sets
+   * `publishedAt` once (first publication is preserved) and indexes the post;
+   * reverting to draft removes it from feeds/search via the publication policy
+   * and re-syncs the index to de-list it.
+   */
+  async setPublicationState(
+    unitId: string,
+    publish: boolean,
+    authorUserId: string,
+  ): Promise<PostWithRelations> {
+    const existing = await prisma.post.findUniqueOrThrow({
+      where: { unitId },
+      select: {
+        authorUserId: true,
+        unit: { select: { status: true, publishedAt: true } },
+      },
+    });
+    if (existing.authorUserId !== authorUserId) {
+      throw new AppError(403, "Only the author can change publication state");
+    }
+    if (existing.unit.status === UnitStatus.DELETED) {
+      throw new AppError(409, "Cannot publish a deleted post");
+    }
+
+    const updated = await prisma.post.update({
+      where: { unitId },
+      data: {
+        unit: {
+          update: {
+            status: publish ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+            // Preserve the first-publication timestamp; set it on first publish.
+            publishedAt: publish
+              ? (existing.unit.publishedAt ?? new Date())
+              : existing.unit.publishedAt,
+          },
+        },
+      },
+      include: postInclude,
+    });
+
+    // Re-sync either way: publish indexes; unpublish de-lists (the indexer
+    // honours `publicUnitEligibilityWhere`).
+    await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
+
+    return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
   }
 
   /** Update post content, isLocked, and/or extra. */

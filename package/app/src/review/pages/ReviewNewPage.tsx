@@ -8,6 +8,8 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { DraftPublishActions } from "@/draft";
+import { policyDenialFromError } from "@/policy";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
@@ -34,17 +36,22 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       navigate({ to: "/review/$reviewId", params: { reviewId: data.unitId } });
     },
     onError: (error) => {
-      show(`Create review failed: ${error}`);
+      // A recognized policy denial renders inline below; other errors toast.
+      if (!policyDenialFromError(error)) {
+        show(`Create review failed: ${error}`);
+      }
     },
   });
 
-  async function handleSave() {
+  async function handleSave(status: "DRAFT" | "PUBLISHED") {
     if (!userId) {
       show("Please login first");
       return;
     }
 
+    // Drafts may be incomplete; only enforce the length floor on publish.
     if (
+      status === "PUBLISHED" &&
       kind === PostKind.REVIEW &&
       (reviewData.contentSource?.length ?? 0) < 200
     ) {
@@ -66,6 +73,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     postMutation.mutate({
       targetUnitId: bookUnitId,
       kind,
+      status,
       content: markdownContentDoc(reviewData.contentSource || ""),
       scoreEntryId,
       extra: {
@@ -75,6 +83,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   }
 
   const isPending = scoreMutation.isPending || postMutation.isPending;
+  const denial = policyDenialFromError(postMutation.error);
 
   return (
     <div>
@@ -98,8 +107,15 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
         <ReviewForm
           data={reviewData}
           setData={setReviewData}
-          onSubmit={handleSave}
-          submitLabel={isPending ? t("common:submitting") : t("common:submit")}
+          onSubmit={() => handleSave("PUBLISHED")}
+          submitLabel={isPending ? t("common:submitting") : t("common:publish")}
+          extraActions={
+            <DraftPublishActions
+              onSaveDraft={() => handleSave("DRAFT")}
+              isPending={isPending}
+              denial={denial}
+            />
+          }
         />
       </div>
     </div>

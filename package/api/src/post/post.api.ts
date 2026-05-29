@@ -12,6 +12,7 @@ import type {
   PostModerationOverlayRequest,
   PostModerationOverlayResponse,
   PostResponse,
+  SetPostPublicationInput,
   UpdatePostInput,
 } from "@rezics/contract";
 import { CreationMode, PostKind } from "@rezics/contract";
@@ -164,6 +165,17 @@ export const postApi = {
    */
   create: async (input: CreatePostInput): Promise<PostResponse> => {
     return apiFetch<PostResponse>("/post", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  /** Publish a draft post or revert a published post to draft (owner-only). */
+  setPublication: async (
+    unitId: string,
+    input: SetPostPublicationInput,
+  ): Promise<PostResponse> => {
+    return apiFetch<PostResponse>(`/post/${unitId}/publish`, {
       method: "POST",
       body: JSON.stringify(input),
     });

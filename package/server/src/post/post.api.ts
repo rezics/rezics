@@ -13,6 +13,7 @@ import {
   postListQuerySchema,
   postListResponseSchema,
   postParamsSchema,
+  setPostPublicationSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import {
@@ -212,6 +213,50 @@ export const postApi = new Elysia({ prefix: "/post" })
         summary: "Create post",
         description:
           "Create a new post. If parentPostUnitId is provided, creates a reply with threaded tree handling.",
+        tags: ["Posts"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/publish",
+    async ({ params, body, identity, status }) => {
+      // Publishing makes the draft public, so it runs the create policy
+      // (blocked/silenced authors are denied); reverting to draft does not.
+      if (body.publish) {
+        if (isBlocked(identity.permission)) {
+          return status(403, "Forbidden: blocked users cannot publish posts");
+        }
+        const decision = await governanceRoutePolicyService.decideForIdentity({
+          identity,
+          action: contentPolicyActions.create,
+          target: { kind: "post", id: params.unitId },
+        });
+        if (!decision.allowed) {
+          return status(
+            403,
+            decision.safeMessage ?? "Forbidden: policy denied this action",
+          );
+        }
+      }
+      const post = await postService.setPublicationState(
+        params.unitId,
+        body.publish,
+        identity.userId,
+      );
+      return mapPostToDTO(post);
+    },
+    {
+      requireLogin: true,
+      params: postParamsSchema,
+      body: setPostPublicationSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
+      detail: {
+        summary: "Publish or revert a post draft",
+        description:
+          "Owner-only toggle between published and draft. Publishing is policy-gated; reverting to draft removes the post from feeds and search.",
         tags: ["Posts"],
       },
     },

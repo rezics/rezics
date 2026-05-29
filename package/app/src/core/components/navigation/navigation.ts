@@ -16,7 +16,10 @@ export type NavigationIcon = React.ElementType<{
  * Staff/operations routes are intentionally absent from product navigation and
  * gate themselves through governance capability hints at the route component.
  */
-export type NavigationVisibility = "always" | "authenticated" | "unauthenticated";
+export type NavigationVisibility =
+  | "always"
+  | "authenticated"
+  | "unauthenticated";
 
 export type NavigationItem =
   | {

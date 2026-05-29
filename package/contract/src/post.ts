@@ -281,9 +281,24 @@ export const createPostSchema = t.Object({
   content: contentDocWriteSchema,
   scoreEntryId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  /**
+   * Initial publication state. Defaults to `PUBLISHED` (publish on create).
+   * `DRAFT` saves the post as an owner-only draft that is excluded from feeds
+   * and search until published. Drafts apply to top-level posts only; replies
+   * always publish. See `draft.ts` for the cross-type draft listing.
+   */
+  status: t.Optional(t.Union([t.Literal("DRAFT"), t.Literal("PUBLISHED")])),
 });
 
 export type CreatePostInput = (typeof createPostSchema)["static"];
+
+/** Toggle a post between published and draft (owner-only). */
+export const setPostPublicationSchema = t.Object({
+  publish: t.Boolean(),
+});
+
+export type SetPostPublicationInput =
+  (typeof setPostPublicationSchema)["static"];
 
 export const updatePostSchema = t.Object({
   content: t.Optional(contentDocWriteSchema),
