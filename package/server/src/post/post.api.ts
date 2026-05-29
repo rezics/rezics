@@ -125,6 +125,7 @@ export const postApi = new Elysia({ prefix: "/post" })
           })
         : await postService.list(query, {
             isAdmin: admin,
+            viewerUserId: identity?.userId,
           });
       return { posts: posts.map(mapPostToDTO), total };
     },
@@ -180,7 +181,10 @@ export const postApi = new Elysia({ prefix: "/post" })
             isAdmin: admin,
             viewerUserId: identity?.userId,
           })
-        : await postService.list(query, { isAdmin: admin });
+        : await postService.list(query, {
+            isAdmin: admin,
+            viewerUserId: identity?.userId,
+          });
       return { posts: posts.map(mapPostToDTO), total };
     },
     {

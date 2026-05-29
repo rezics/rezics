@@ -1,3 +1,5 @@
+import type { NotificationPreferenceKey } from "../user";
+
 /**
  * Flat registry of notification event kinds. Keyed by dot-namespaced kind
  * string. Each entry declares whether the kind aggregates by (recipientId,
@@ -84,4 +86,32 @@ export function isAggregatable(kind: string): boolean {
 export function kindCategory(kind: string): string | undefined {
   if (!isValidKind(kind)) return undefined;
   return KIND_REGISTRY[kind as NotificationKind].category;
+}
+
+/**
+ * Maps a notification kind's category to the user-facing per-kind preference
+ * toggle that gates it (see `NOTIFICATION_PREFERENCE_KEYS` in `../user`).
+ * Categories with no entry are always delivered (ungated by user preference).
+ */
+const CATEGORY_TO_PREFERENCE_KEY: Record<string, NotificationPreferenceKey> = {
+  comment: "reply",
+  mention: "reply",
+  review: "reply",
+  follow: "follow",
+  moderation: "moderation",
+  realm: "realm",
+  system: "system",
+};
+
+/**
+ * The notification-preference toggle that gates the given kind, or `undefined`
+ * when the kind is ungated (always delivered). Used by the dispatch pipeline
+ * to suppress delivery for recipients who disabled the toggle.
+ */
+export function notificationPreferenceKeyForKind(
+  kind: string,
+): NotificationPreferenceKey | undefined {
+  const category = kindCategory(kind);
+  if (!category) return undefined;
+  return CATEGORY_TO_PREFERENCE_KEY[category];
 }

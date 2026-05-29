@@ -3,7 +3,10 @@ import {
   type InternalBroadcastBody,
   type InternalDmBody,
   isValidKind,
+  type NotificationPreference,
+  notificationPreferenceKeyForKind,
   type SystemEmailBody,
+  type UserSettings,
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { env } from "../env";
@@ -120,6 +123,52 @@ export async function resolveRecipients(
 }
 
 /**
+ * Load each recipient's notification preferences in one batched query.
+ * Missing users / absent `notifications` map to `undefined` — treated as
+ * all-enabled by the filter below.
+ */
+export type LoadRecipientPreferences = (
+  recipientIds: string[],
+) => Promise<Map<string, NotificationPreference | undefined>>;
+
+async function defaultLoadRecipientPreferences(
+  recipientIds: string[],
+): Promise<Map<string, NotificationPreference | undefined>> {
+  const users = await prisma.user.findMany({
+    where: { unitId: { in: recipientIds } },
+    select: { unitId: true, settings: true },
+  });
+  const map = new Map<string, NotificationPreference | undefined>();
+  for (const user of users) {
+    map.set(user.unitId, (user.settings as UserSettings | null)?.notifications);
+  }
+  return map;
+}
+
+/**
+ * Drop recipients who disabled the per-kind toggle that gates this event.
+ *
+ * Enforces preferences at creation time (feed + push), per the
+ * `settings-layout` spec. A toggle is enabled by default — only an explicit
+ * `false` suppresses delivery. Ungated kinds (no preference mapping) pass
+ * through untouched.
+ *
+ * Dependency-injected for unit testing — production callers omit
+ * `loadPreferences` and get the Prisma-backed loader.
+ */
+export async function filterRecipientsByPreference(
+  recipientIds: string[],
+  kind: string,
+  loadPreferences: LoadRecipientPreferences = defaultLoadRecipientPreferences,
+): Promise<string[]> {
+  const prefKey = notificationPreferenceKeyForKind(kind);
+  if (!prefKey || recipientIds.length === 0) return recipientIds;
+
+  const prefs = await loadPreferences(recipientIds);
+  return recipientIds.filter((id) => prefs.get(id)?.[prefKey] !== false);
+}
+
+/**
  * Emit a notification broadcast event.
  *
  * - Validates `kind` against `KIND_REGISTRY` from `@rezics/contract`. Unknown
@@ -141,7 +190,8 @@ export async function broadcast(
     return { ok: false };
   }
 
-  const recipientIds = await resolveRecipients(event);
+  const resolved = await resolveRecipients(event);
+  const recipientIds = await filterRecipientsByPreference(resolved, event.kind);
   if (recipientIds.length === 0) {
     return { ok: true, persisted: 0 };
   }

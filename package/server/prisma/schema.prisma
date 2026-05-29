@@ -1248,6 +1248,22 @@ model User {
   @@index([email])
 }
 
+/// User-to-user block. Directional: `blockerId` blocked `blockedId`. Mutual
+/// blocking is two rows. Hides the blocked user's content from the blocker's
+/// feeds and prevents direct messages in either direction. References are
+/// id-only (no FK relation) to match the `Feedback` convention; account
+/// deletion removes the user's rows explicitly.
+model UserBlock {
+  id        String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  blockerId String   @db.Uuid
+  blockedId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
 model UnitCollaborator {
   unitId    String   @db.Uuid
   userId    String   @db.Uuid

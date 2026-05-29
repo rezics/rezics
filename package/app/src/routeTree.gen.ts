@@ -122,8 +122,11 @@ import { Route as MainLayoutUserMeSettingTokensRouteImport } from './routes/_mai
 import { Route as MainLayoutUserMeSettingSecurityRouteImport } from './routes/_mainLayout/user/me/setting/security'
 import { Route as MainLayoutUserMeSettingProfileRouteImport } from './routes/_mainLayout/user/me/setting/profile'
 import { Route as MainLayoutUserMeSettingPreferencesRouteImport } from './routes/_mainLayout/user/me/setting/preferences'
+import { Route as MainLayoutUserMeSettingNotificationsRouteImport } from './routes/_mainLayout/user/me/setting/notifications'
 import { Route as MainLayoutUserMeSettingLibraryRouteImport } from './routes/_mainLayout/user/me/setting/library'
+import { Route as MainLayoutUserMeSettingDataRouteImport } from './routes/_mainLayout/user/me/setting/data'
 import { Route as MainLayoutUserMeSettingConnectionsRouteImport } from './routes/_mainLayout/user/me/setting/connections'
+import { Route as MainLayoutUserMeSettingBlockedRouteImport } from './routes/_mainLayout/user/me/setting/blocked'
 import { Route as MainLayoutUserMeSettingAccountRouteImport } from './routes/_mainLayout/user/me/setting/account'
 import { Route as MainLayoutUserMeEntityNewRouteImport } from './routes/_mainLayout/user/me/entity/new'
 import { Route as MainLayoutUUserSlugShelfSlugRouteImport } from './routes/_mainLayout/u/$userSlug/shelf/$slug'
@@ -773,16 +776,34 @@ const MainLayoutUserMeSettingPreferencesRoute =
     path: '/preferences',
     getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
+const MainLayoutUserMeSettingNotificationsRoute =
+  MainLayoutUserMeSettingNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
+  } as any)
 const MainLayoutUserMeSettingLibraryRoute =
   MainLayoutUserMeSettingLibraryRouteImport.update({
     id: '/library',
     path: '/library',
     getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
+const MainLayoutUserMeSettingDataRoute =
+  MainLayoutUserMeSettingDataRouteImport.update({
+    id: '/data',
+    path: '/data',
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
+  } as any)
 const MainLayoutUserMeSettingConnectionsRoute =
   MainLayoutUserMeSettingConnectionsRouteImport.update({
     id: '/connections',
     path: '/connections',
+    getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
+  } as any)
+const MainLayoutUserMeSettingBlockedRoute =
+  MainLayoutUserMeSettingBlockedRouteImport.update({
+    id: '/blocked',
+    path: '/blocked',
     getParentRoute: () => MainLayoutUserMeSettingRouteRoute,
   } as any)
 const MainLayoutUserMeSettingAccountRoute =
@@ -1005,8 +1026,11 @@ export interface FileRoutesByFullPath {
   '/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
   '/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
+  '/user/me/setting/blocked': typeof MainLayoutUserMeSettingBlockedRoute
   '/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/user/me/setting/data': typeof MainLayoutUserMeSettingDataRoute
   '/user/me/setting/library': typeof MainLayoutUserMeSettingLibraryRoute
+  '/user/me/setting/notifications': typeof MainLayoutUserMeSettingNotificationsRoute
   '/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
   '/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
@@ -1127,8 +1151,11 @@ export interface FileRoutesByTo {
   '/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
   '/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
+  '/user/me/setting/blocked': typeof MainLayoutUserMeSettingBlockedRoute
   '/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/user/me/setting/data': typeof MainLayoutUserMeSettingDataRoute
   '/user/me/setting/library': typeof MainLayoutUserMeSettingLibraryRoute
+  '/user/me/setting/notifications': typeof MainLayoutUserMeSettingNotificationsRoute
   '/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
   '/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
@@ -1263,8 +1290,11 @@ export interface FileRoutesById {
   '/_mainLayout/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
   '/_mainLayout/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/_mainLayout/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
+  '/_mainLayout/user/me/setting/blocked': typeof MainLayoutUserMeSettingBlockedRoute
   '/_mainLayout/user/me/setting/connections': typeof MainLayoutUserMeSettingConnectionsRoute
+  '/_mainLayout/user/me/setting/data': typeof MainLayoutUserMeSettingDataRoute
   '/_mainLayout/user/me/setting/library': typeof MainLayoutUserMeSettingLibraryRoute
+  '/_mainLayout/user/me/setting/notifications': typeof MainLayoutUserMeSettingNotificationsRoute
   '/_mainLayout/user/me/setting/preferences': typeof MainLayoutUserMeSettingPreferencesRoute
   '/_mainLayout/user/me/setting/profile': typeof MainLayoutUserMeSettingProfileRoute
   '/_mainLayout/user/me/setting/security': typeof MainLayoutUserMeSettingSecurityRoute
@@ -1398,8 +1428,11 @@ export interface FileRouteTypes {
     | '/u/$userSlug/shelf/$slug'
     | '/user/me/entity/new'
     | '/user/me/setting/account'
+    | '/user/me/setting/blocked'
     | '/user/me/setting/connections'
+    | '/user/me/setting/data'
     | '/user/me/setting/library'
+    | '/user/me/setting/notifications'
     | '/user/me/setting/preferences'
     | '/user/me/setting/profile'
     | '/user/me/setting/security'
@@ -1520,8 +1553,11 @@ export interface FileRouteTypes {
     | '/u/$userSlug/shelf/$slug'
     | '/user/me/entity/new'
     | '/user/me/setting/account'
+    | '/user/me/setting/blocked'
     | '/user/me/setting/connections'
+    | '/user/me/setting/data'
     | '/user/me/setting/library'
+    | '/user/me/setting/notifications'
     | '/user/me/setting/preferences'
     | '/user/me/setting/profile'
     | '/user/me/setting/security'
@@ -1655,8 +1691,11 @@ export interface FileRouteTypes {
     | '/_mainLayout/u/$userSlug/shelf/$slug'
     | '/_mainLayout/user/me/entity/new'
     | '/_mainLayout/user/me/setting/account'
+    | '/_mainLayout/user/me/setting/blocked'
     | '/_mainLayout/user/me/setting/connections'
+    | '/_mainLayout/user/me/setting/data'
     | '/_mainLayout/user/me/setting/library'
+    | '/_mainLayout/user/me/setting/notifications'
     | '/_mainLayout/user/me/setting/preferences'
     | '/_mainLayout/user/me/setting/profile'
     | '/_mainLayout/user/me/setting/security'
@@ -2477,6 +2516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserMeSettingPreferencesRouteImport
       parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
+    '/_mainLayout/user/me/setting/notifications': {
+      id: '/_mainLayout/user/me/setting/notifications'
+      path: '/notifications'
+      fullPath: '/user/me/setting/notifications'
+      preLoaderRoute: typeof MainLayoutUserMeSettingNotificationsRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
+    }
     '/_mainLayout/user/me/setting/library': {
       id: '/_mainLayout/user/me/setting/library'
       path: '/library'
@@ -2484,11 +2530,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUserMeSettingLibraryRouteImport
       parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
+    '/_mainLayout/user/me/setting/data': {
+      id: '/_mainLayout/user/me/setting/data'
+      path: '/data'
+      fullPath: '/user/me/setting/data'
+      preLoaderRoute: typeof MainLayoutUserMeSettingDataRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
+    }
     '/_mainLayout/user/me/setting/connections': {
       id: '/_mainLayout/user/me/setting/connections'
       path: '/connections'
       fullPath: '/user/me/setting/connections'
       preLoaderRoute: typeof MainLayoutUserMeSettingConnectionsRouteImport
+      parentRoute: typeof MainLayoutUserMeSettingRouteRoute
+    }
+    '/_mainLayout/user/me/setting/blocked': {
+      id: '/_mainLayout/user/me/setting/blocked'
+      path: '/blocked'
+      fullPath: '/user/me/setting/blocked'
+      preLoaderRoute: typeof MainLayoutUserMeSettingBlockedRouteImport
       parentRoute: typeof MainLayoutUserMeSettingRouteRoute
     }
     '/_mainLayout/user/me/setting/account': {
@@ -2720,8 +2780,11 @@ const MainLayoutBookBookIdRouteRouteWithChildren =
 
 interface MainLayoutUserMeSettingRouteRouteChildren {
   MainLayoutUserMeSettingAccountRoute: typeof MainLayoutUserMeSettingAccountRoute
+  MainLayoutUserMeSettingBlockedRoute: typeof MainLayoutUserMeSettingBlockedRoute
   MainLayoutUserMeSettingConnectionsRoute: typeof MainLayoutUserMeSettingConnectionsRoute
+  MainLayoutUserMeSettingDataRoute: typeof MainLayoutUserMeSettingDataRoute
   MainLayoutUserMeSettingLibraryRoute: typeof MainLayoutUserMeSettingLibraryRoute
+  MainLayoutUserMeSettingNotificationsRoute: typeof MainLayoutUserMeSettingNotificationsRoute
   MainLayoutUserMeSettingPreferencesRoute: typeof MainLayoutUserMeSettingPreferencesRoute
   MainLayoutUserMeSettingProfileRoute: typeof MainLayoutUserMeSettingProfileRoute
   MainLayoutUserMeSettingSecurityRoute: typeof MainLayoutUserMeSettingSecurityRoute
@@ -2732,9 +2795,13 @@ interface MainLayoutUserMeSettingRouteRouteChildren {
 const MainLayoutUserMeSettingRouteRouteChildren: MainLayoutUserMeSettingRouteRouteChildren =
   {
     MainLayoutUserMeSettingAccountRoute: MainLayoutUserMeSettingAccountRoute,
+    MainLayoutUserMeSettingBlockedRoute: MainLayoutUserMeSettingBlockedRoute,
     MainLayoutUserMeSettingConnectionsRoute:
       MainLayoutUserMeSettingConnectionsRoute,
+    MainLayoutUserMeSettingDataRoute: MainLayoutUserMeSettingDataRoute,
     MainLayoutUserMeSettingLibraryRoute: MainLayoutUserMeSettingLibraryRoute,
+    MainLayoutUserMeSettingNotificationsRoute:
+      MainLayoutUserMeSettingNotificationsRoute,
     MainLayoutUserMeSettingPreferencesRoute:
       MainLayoutUserMeSettingPreferencesRoute,
     MainLayoutUserMeSettingProfileRoute: MainLayoutUserMeSettingProfileRoute,

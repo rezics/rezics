@@ -140,6 +140,37 @@ export const librarySettingsSchema = t.Object({
 
 export type LibrarySettings = (typeof librarySettingsSchema)["static"];
 
+/**
+ * User-facing per-kind notification toggles. Each key gates a family of
+ * notification kinds (see `notificationPreferenceKeyForKind` in the
+ * notification module). A toggle is enabled by default when absent — only an
+ * explicit `false` suppresses delivery. Enforced in the dispatch pipeline at
+ * creation time (feed + push), not merely at read time.
+ */
+export const NOTIFICATION_PREFERENCE_KEYS = [
+  "reply",
+  "follow",
+  "dm",
+  "moderation",
+  "realm",
+  "system",
+] as const;
+
+export type NotificationPreferenceKey =
+  (typeof NOTIFICATION_PREFERENCE_KEYS)[number];
+
+export const notificationPreferenceSchema = t.Object({
+  reply: t.Optional(t.Boolean()),
+  follow: t.Optional(t.Boolean()),
+  dm: t.Optional(t.Boolean()),
+  moderation: t.Optional(t.Boolean()),
+  realm: t.Optional(t.Boolean()),
+  system: t.Optional(t.Boolean()),
+});
+
+export type NotificationPreference =
+  (typeof notificationPreferenceSchema)["static"];
+
 export const userSettingsSchema = t.Object({
   realmTagPreferences: t.Optional(
     t.Record(t.String(), realmTagPreferenceSchema),
@@ -148,6 +179,7 @@ export const userSettingsSchema = t.Object({
   content: t.Optional(contentPreferenceSchema),
   publishing: t.Optional(publishingPreferenceSchema),
   library: t.Optional(librarySettingsSchema),
+  notifications: t.Optional(notificationPreferenceSchema),
 });
 
 export type UserSettings = (typeof userSettingsSchema)["static"];

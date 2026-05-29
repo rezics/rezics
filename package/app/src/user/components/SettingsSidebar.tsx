@@ -10,11 +10,18 @@ const i18nMessages = {
   settings_nav_preferences: () =>
     getI18nRuntime().i18n.t("settings:nav_preferences"),
   settings_nav_library: () => getI18nRuntime().i18n.t("settings:nav_library"),
+  settings_nav_notifications: () =>
+    getI18nRuntime().i18n.t("settings:nav_notifications"),
+  settings_nav_blocked: () => getI18nRuntime().i18n.t("settings:nav_blocked"),
+  settings_nav_data: () => getI18nRuntime().i18n.t("settings:nav_data"),
   settings_nav_entities: () => getI18nRuntime().i18n.t("settings:nav_entities"),
 } as const;
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import {
+  Ban as BlockedIcon,
+  Bell as NotificationsIcon,
   CircleUser as AccountCircleIcon,
+  DatabaseBackup as DataIcon,
   Mail as EmailIcon,
   IdCard as IdentityIcon,
   Key as KeyIcon,
@@ -53,9 +60,24 @@ const SETTINGS_NAV = [
     icon: TuneIcon,
   },
   {
+    label: i18nMessages.settings_nav_notifications,
+    path: "notifications",
+    icon: NotificationsIcon,
+  },
+  {
     label: i18nMessages.settings_nav_library,
     path: "library",
     icon: LibraryIcon,
+  },
+  {
+    label: i18nMessages.settings_nav_blocked,
+    path: "blocked",
+    icon: BlockedIcon,
+  },
+  {
+    label: i18nMessages.settings_nav_data,
+    path: "data",
+    icon: DataIcon,
   },
 ] as const;
 

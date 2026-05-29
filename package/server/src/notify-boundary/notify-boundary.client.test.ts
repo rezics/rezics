@@ -1,6 +1,8 @@
+import type { NotificationPreference } from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
 import {
   type BroadcastEvent,
+  filterRecipientsByPreference,
   resolveRecipients,
 } from "./notify-boundary.client";
 
@@ -93,5 +95,69 @@ describe("resolveRecipients", () => {
     );
     expect(seenTarget).toBe("book-42");
     expect(seenKind).toBe("review.updated");
+  });
+});
+
+describe("filterRecipientsByPreference", () => {
+  const prefs = (
+    entries: Record<string, NotificationPreference>,
+  ): ((
+    ids: string[],
+  ) => Promise<Map<string, NotificationPreference | undefined>>) => {
+    return async (ids: string[]) =>
+      new Map<string, NotificationPreference | undefined>(
+        ids.filter((id) => id in entries).map((id) => [id, entries[id]]),
+      );
+  };
+
+  test("suppresses a kind for recipients who disabled its toggle", async () => {
+    const result = await filterRecipientsByPreference(
+      ["opted-out", "opted-in", "default"],
+      "follow.new",
+      prefs({
+        "opted-out": { follow: false },
+        "opted-in": { follow: true },
+      }),
+    );
+    // "default" has no stored preference -> enabled by default.
+    expect(result.sort()).toEqual(["default", "opted-in"]);
+  });
+
+  test("other kinds still deliver when an unrelated toggle is off", async () => {
+    // Same recipient who disabled follow still receives a reply notification.
+    const result = await filterRecipientsByPreference(
+      ["user-1"],
+      "comment.new",
+      prefs({ "user-1": { follow: false } }),
+    );
+    expect(result).toEqual(["user-1"]);
+  });
+
+  test("ungated kinds pass through without a preference lookup", async () => {
+    let called = false;
+    const result = await filterRecipientsByPreference(
+      ["a", "b"],
+      "reaction.like",
+      async (ids) => {
+        called = true;
+        return new Map(ids.map((id) => [id, {}]));
+      },
+    );
+    expect(result).toEqual(["a", "b"]);
+    expect(called).toBe(false);
+  });
+
+  test("empty recipient set short-circuits", async () => {
+    const result = await filterRecipientsByPreference([], "follow.new");
+    expect(result).toEqual([]);
+  });
+
+  test("maps follow category kinds to the follow toggle", async () => {
+    const result = await filterRecipientsByPreference(
+      ["blocked"],
+      "follow.new",
+      prefs({ blocked: { follow: false } }),
+    );
+    expect(result).toEqual([]);
   });
 });

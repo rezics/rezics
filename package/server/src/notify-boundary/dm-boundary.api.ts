@@ -6,6 +6,25 @@ import { authMacro } from "@/middleware";
 import { sendDm } from "./notify-boundary.client";
 
 /**
+ * Whether a user-to-user block exists between the two users in either
+ * direction. Mirrors `blockService.isBlockedEitherWay`; inlined here against
+ * the already-imported `prisma` so the DM route does not depend on the block
+ * domain module.
+ */
+async function isBlockedEitherWay(a: string, b: string): Promise<boolean> {
+  const row = await prisma.userBlock.findFirst({
+    where: {
+      OR: [
+        { blockerId: a, blockedId: b },
+        { blockerId: b, blockedId: a },
+      ],
+    },
+    select: { id: true },
+  });
+  return row !== null;
+}
+
+/**
  * Predicate: does the sender's Subscription to the recipient permit DM?
  *
  * Per design D7a of `engagement-subscription`: a Subscription's `channels`
@@ -33,6 +52,14 @@ export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
     if (senderId === recipientId) {
       set.status = 400;
       return { error: "Cannot send a message to yourself" };
+    }
+
+    // User-to-user block gate: neither party may DM the other if either has
+    // blocked the other. Checked before the subscription/policy gates so a
+    // block always wins.
+    if (await isBlockedEitherWay(senderId, recipientId)) {
+      set.status = 403;
+      return { error: "You cannot message this user" };
     }
 
     const decision = await governanceRoutePolicyService.decideForIdentity({

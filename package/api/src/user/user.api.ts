@@ -4,9 +4,12 @@
  */
 
 import type {
+  DeleteAccountBody,
+  DeleteAccountResult,
   EditorialPatchSubmission,
   UpdateUser,
   UpdateUserSettings,
+  UserDataExport,
   UserDTO,
   UserEmailVerificationConfirmBody,
   UserEmailVerificationRequestBody,
@@ -165,6 +168,19 @@ export const userApi = {
     input: UserEmailVerificationConfirmBody,
   ): Promise<UserEmailVerificationResponse> => {
     return apiFetch(`/user/me/email-verification/verify`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  exportData: async (): Promise<UserDataExport> => {
+    return apiFetch(`/user/me/export`, { method: "POST" });
+  },
+
+  deleteAccount: async (
+    input: DeleteAccountBody,
+  ): Promise<DeleteAccountResult> => {
+    return apiFetch(`/user/me/delete-account`, {
       method: "POST",
       body: JSON.stringify(input),
     });

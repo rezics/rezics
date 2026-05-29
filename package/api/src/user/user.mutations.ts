@@ -1,6 +1,9 @@
 import type {
+  DeleteAccountBody,
+  DeleteAccountResult,
   UpdateUser,
   UpdateUserSettings,
+  UserDataExport,
   UserDTO,
   UserEmailVerificationConfirmBody,
   UserEmailVerificationRequestBody,
@@ -162,6 +165,33 @@ export function useVerifyEmailContractMutation(
   });
 }
 
+export function useExportDataMutation(
+  options?: Omit<UseMutationOptions<UserDataExport, Error, void>, "mutationFn">,
+) {
+  return useMutation({
+    mutationFn: () => userApi.exportData(),
+    ...options,
+  });
+}
+
+export function useDeleteAccountMutation(
+  options?: Omit<
+    UseMutationOptions<DeleteAccountResult, Error, DeleteAccountBody>,
+    "mutationFn"
+  >,
+) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: DeleteAccountBody) => userApi.deleteAccount(input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      qc.removeQueries({ queryKey: userKeys.detail("me") });
+      qc.invalidateQueries({ queryKey: userKeys.lists() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 export const userMutations = {
   useUpdateMe: useUpdateMeMutation,
   useAdminCreate: useAdminCreateUserMutation,
@@ -170,4 +200,6 @@ export const userMutations = {
   useUpdateSettings: useUpdateSettingsMutation,
   useRequestEmailVerification: useRequestEmailVerificationMutation,
   useVerifyEmailContract: useVerifyEmailContractMutation,
+  useExportData: useExportDataMutation,
+  useDeleteAccount: useDeleteAccountMutation,
 };

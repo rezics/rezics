@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+import { accountDataRoute } from "./user.account-data.api";
 import { adminRoute } from "./user.admin.api";
 import { coreRoute } from "./user.core.api";
 import { userEmailVerificationApi } from "./user.email-verification.api";
@@ -20,4 +21,5 @@ export const userApi = new Elysia({ prefix: "/user" })
   .use(adminRoute)
   .use(userSubscriptionRoute)
   .use(userEmailVerificationApi)
-  .use(settingsRoute);
+  .use(settingsRoute)
+  .use(accountDataRoute);

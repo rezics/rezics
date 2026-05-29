@@ -23,6 +23,7 @@ import { echoKvApi } from "./echokv";
 import { entityApi } from "./entity";
 import { entityAttributionApi } from "./entity-attribution";
 import { env } from "./env";
+import { blockApi } from "./block";
 import { feedbackApi } from "./feedback";
 import { gameSystemRequirementApi } from "./game-system-requirement";
 import { governanceApi } from "./governance";
@@ -263,6 +264,7 @@ routeApp
   .use(tokenApi)
   .use(echoKvApi)
   .use(feedbackApi)
+  .use(blockApi)
   .use(governanceApi)
   .use(historyProxyApi)
   .use(historyResolutionApi)

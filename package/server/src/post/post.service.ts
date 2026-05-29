@@ -17,6 +17,7 @@ import {
   UnitWorkDisplayPolicy,
   UnitWorkRole,
 } from "#/prisma/client";
+import { blockService } from "@/block/block.service";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { serverJobProducer } from "@/job/job-boundary";
 import {
@@ -106,7 +107,7 @@ export class PostService {
    */
   async list(
     query: PostListQuery = {},
-    options?: { isAdmin?: boolean },
+    options?: { isAdmin?: boolean; viewerUserId?: string | null },
   ): Promise<{ posts: PostWithRelations[]; total: number }> {
     const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
     const skipNum = query.start ?? 0;
@@ -138,6 +139,22 @@ export class PostService {
     const idList = parseIdsCsv(query.ids);
     if (idList && idList.length > 0) {
       where.unitId = { in: idList };
+    }
+
+    // Hide posts authored by users the viewer has blocked. AND-combined so it
+    // composes with any existing `authorUserId` filter above.
+    if (!options?.isAdmin && options?.viewerUserId) {
+      const blockedIds = await blockService.blockedUserIds(
+        options.viewerUserId,
+      );
+      if (blockedIds.length > 0) {
+        const existingAnd = where.AND
+          ? Array.isArray(where.AND)
+            ? where.AND
+            : [where.AND]
+          : [];
+        where.AND = [...existingAnd, { authorUserId: { notIn: blockedIds } }];
+      }
     }
 
     if (query.subtreeRootPostUnitId) {
