@@ -37,3 +37,11 @@ export const SEED_TAG_POSITIONS: Record<SeedTagName, string> = {
   post: "!a3",
   link: "!a4",
 };
+
+/**
+ * Platform-reserved tag slug marking a post as an issue (the issue lifecycle
+ * schema's key), the issue-genre counterpart to `OFFICIAL_QUESTION_TAG_SLUG`.
+ * Reserved/official like the seed tags; need not be seeded (state rendering
+ * falls back to the raw slug when no tag exists). See `post-state-schema.ts`.
+ */
+export const OFFICIAL_ISSUE_TAG_SLUG = "issue";

@@ -17,6 +17,7 @@ import {
   postListResponseSchema,
   postParamsSchema,
   setPostPublicationSchema,
+  setPostStateSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import {
@@ -291,6 +292,40 @@ export const postApi = new Elysia({ prefix: "/post" })
         summary: "Publish or revert a post draft",
         description:
           "Owner-only toggle between published and draft. Publishing is policy-gated; reverting to draft removes the post from feeds and search.",
+        tags: ["Posts"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/state",
+    async ({ params, body, identity, set }): Promise<PostResponse> => {
+      // `state` gates no behavior, but a transition is still an edit — reuse the
+      // post-update permission (author / admin). The schema enforces which
+      // values and transitions are legal (write-strict).
+      const target = await postService.getByUnitId(params.unitId);
+      if (
+        !hasPermissionToUpdatePost(
+          identity.permission,
+          identity.userId,
+          target.unit as any,
+        )
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to change this post's state",
+        );
+      }
+      const updated = await postService.setState(params.unitId, body.state);
+      return mapPostToDTO(updated);
+    },
+    {
+      requireLogin: true,
+      params: postParamsSchema,
+      body: setPostStateSchema,
+      detail: {
+        summary: "Set post lifecycle state",
+        description:
+          "Transition a post's lifecycle state. Write-strict: validated against the post's schema (legal value + allowed transition). State gates no behavior.",
         tags: ["Posts"],
       },
     },

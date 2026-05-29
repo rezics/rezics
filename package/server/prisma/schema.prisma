@@ -746,6 +746,14 @@ model Post {
   lastReplyAt      DateTime?
   isLocked         Boolean   @default(false)
 
+  /// Lifecycle label: a kebab-case slug (e.g. `open`, `solved`, `not-planned`)
+  /// drawn from the schema named by `extra.stateSchemaTag`. Behaviorally inert —
+  /// it gates nothing (reply permission reads `isLocked`, visibility reads
+  /// `Unit.status`); it is read-lenient (any slug) and write-strict (validated
+  /// against the schema). Null means "no lifecycle". `extra.stateSchemaTag`
+  /// snapshots the governing tag slug at creation and does not drift.
+  state String?
+
   extra Json?
 
   createdAt DateTime @default(now())
@@ -763,6 +771,10 @@ model Post {
   @@index([kind, createdAt])
   @@index([scoreEntryId])
   @@index([rootTargetUnitId, createdAt])
+  // Bucket filtering for lifecycle listings (e.g. unsolved questions): a cheap
+  // `state IN (active|closed slugs)` IN-list, no anti-join. Scoped by
+  // rootTargetUnitId so target/realm feeds hit the index.
+  @@index([rootTargetUnitId, state])
 }
 
 /// Why a post is promoted within a thread. `HIGHLIGHT` is reserved for future

@@ -46,6 +46,7 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     directReplyCount: post.directReplyCount,
     lastReplyAt: post.lastReplyAt?.toISOString() ?? null,
     isLocked: post.isLocked,
+    state: post.state ?? null,
     pinKind: post.pinKind ?? null,
     pinPosition: post.pinPosition ?? null,
     extra: post.extra as Record<string, unknown> | null,

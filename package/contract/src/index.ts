@@ -40,6 +40,7 @@ export * from "./pagination";
 export * from "./permission";
 export * from "./poll";
 export * from "./post";
+export * from "./post-state-schema";
 export * from "./progress";
 export * from "./public-route";
 export * from "./reaction/index";

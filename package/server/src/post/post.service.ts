@@ -9,8 +9,14 @@ import type {
   UpdatePostInput,
 } from "@rezics/contract";
 import {
+  allBucketSlugs,
   BasicAdminPermission,
+  getStateSchema,
+  isLegalStateValue,
+  isLegalTransition,
+  isStatefulTagSlug,
   mainMarkdownSource,
+  normalizeStateSlug,
   OFFICIAL_QUESTION_TAG_SLUG,
   parseIdsCsv,
 } from "@rezics/contract";
@@ -85,6 +91,30 @@ function readRealmRuleUnitId(extra: Prisma.JsonValue | null): string | null {
   if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
   const rule = (extra as Record<string, unknown>).rule;
   return typeof rule === "string" && rule.length > 0 ? rule : null;
+}
+
+/** Read the snapshotted governing-schema tag slug from a post's `extra`. */
+function readStateSchemaTag(extra: Prisma.JsonValue | null): string | null {
+  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
+  const tag = (extra as Record<string, unknown>).stateSchemaTag;
+  return typeof tag === "string" && tag.length > 0 ? tag : null;
+}
+
+/**
+ * Apply the lifecycle `state` filter to a post query: an exact `state` match,
+ * or a derived bucket (`active`/`closed`) expanded to its slug set across the
+ * registered schemas. A cheap indexed `IN`-list — never an anti-join. `state`
+ * is a presentation label and gates nothing (D4); this is filtering only.
+ */
+function applyStateFilter(
+  where: Prisma.PostWhereInput,
+  query: { state?: string; stateBucket?: "active" | "closed" },
+) {
+  if (query.state) {
+    where.state = query.state;
+  } else if (query.stateBucket) {
+    where.state = { in: allBucketSlugs(query.stateBucket) };
+  }
 }
 
 const REALM_FEED_EXCLUDED_MODERATION_STATES = [
@@ -223,6 +253,7 @@ export class PostService {
     if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
     if (query.authorUserId) where.authorUserId = query.authorUserId;
     if (query.kind) where.kind = query.kind;
+    applyStateFilter(where, query);
 
     const idList = parseIdsCsv(query.ids);
     if (idList && idList.length > 0) {
@@ -397,6 +428,7 @@ export class PostService {
     if (opts.parentPostUnitId) where.parentPostUnitId = opts.parentPostUnitId;
     if (opts.authorUserId) where.authorUserId = opts.authorUserId;
     if (opts.kind) where.kind = opts.kind;
+    applyStateFilter(where, opts);
 
     await applyBlockedAuthorFilter(where, options);
 
@@ -744,6 +776,41 @@ export class PostService {
         },
       });
 
+      // Validate the requested tags once (selecting slug), rejecting unknown
+      // ids, and derive the lifecycle initialization from the same rows: a
+      // stateful tag snapshots its slug into `extra.stateSchemaTag` and seeds
+      // `state` to the schema's initial value. At most one stateful tag.
+      let statefulInit: { tagSlug: string; initial: string } | null = null;
+      if (tagIdsToWrite.length > 0) {
+        const validTags = await tx.unit.findMany({
+          where: {
+            id: { in: tagIdsToWrite },
+            type: UnitType.TAG,
+            status: { not: UnitStatus.DELETED },
+          },
+          select: { id: true, slug: true },
+        });
+        const validTagIds = new Set(validTags.map((tag) => tag.id));
+        const invalidTagIds = tagIdsToWrite.filter(
+          (id) => !validTagIds.has(id),
+        );
+        if (invalidTagIds.length > 0) {
+          throw new AppError(
+            400,
+            `Invalid tagIds: ${invalidTagIds.join(", ")}`,
+          );
+        }
+        statefulInit = this.resolveStatefulTagInit(validTags);
+      }
+      const extraToWrite = statefulInit
+        ? {
+            ...(extra && typeof extra === "object" && !Array.isArray(extra)
+              ? (extra as Record<string, unknown>)
+              : {}),
+            stateSchemaTag: statefulInit.tagSlug,
+          }
+        : extra;
+
       const createData: Prisma.PostUncheckedCreateInput = {
         unitId: unit.id,
         authorUserId,
@@ -754,7 +821,8 @@ export class PostService {
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,
         depth,
-        extra: extra as Prisma.InputJsonValue | undefined,
+        state: statefulInit?.initial ?? undefined,
+        extra: extraToWrite as Prisma.InputJsonValue | undefined,
         rootPostUnitId: rootPostUnitId ?? undefined,
         parentPostUnitId: parentPostUnitId ?? undefined,
       };
@@ -780,26 +848,8 @@ export class PostService {
       }
 
       if (tagIdsToWrite.length > 0) {
-        const validTags = await tx.unit.findMany({
-          where: {
-            id: { in: tagIdsToWrite },
-            type: UnitType.TAG,
-            status: { not: UnitStatus.DELETED },
-          },
-          select: { id: true },
-        });
-        const validTagIds = new Set(validTags.map((tag) => tag.id));
-        const invalidTagIds = tagIdsToWrite.filter(
-          (id) => !validTagIds.has(id),
-        );
-
-        if (invalidTagIds.length > 0) {
-          throw new AppError(
-            400,
-            `Invalid tagIds: ${invalidTagIds.join(", ")}`,
-          );
-        }
-
+        // Tags were validated above (before the post insert); just write the
+        // UnitTag junction rows here.
         await Promise.all(
           tagIdsToWrite.map((tagUnitId) =>
             tx.unitTag.create({
@@ -1099,6 +1149,133 @@ export class PostService {
   }
 
   // ============================================================
+  // LIFECYCLE STATE — schema-driven, behaviorally inert
+  // ============================================================
+
+  /**
+   * Derive the lifecycle initialization from a post's (already-validated) tags.
+   * Picks out stateful tags (those keying a schema) and enforces **at most one**.
+   * Returns the governing tag slug and the schema's initial state, or `null`
+   * when no stateful tag is present.
+   */
+  private resolveStatefulTagInit(
+    tags: { slug: string | null }[],
+  ): { tagSlug: string; initial: string } | null {
+    const statefulSlugs = tags
+      .map((tag) => tag.slug)
+      .filter((slug): slug is string => !!slug && isStatefulTagSlug(slug));
+    if (statefulSlugs.length === 0) return null;
+    if (statefulSlugs.length > 1) {
+      throw new AppError(
+        400,
+        `A post may bear at most one stateful tag; got: ${statefulSlugs.join(", ")}`,
+      );
+    }
+    const tagSlug = statefulSlugs[0];
+    const schema = tagSlug ? getStateSchema(tagSlug) : undefined;
+    if (!tagSlug || !schema) return null;
+    return { tagSlug, initial: schema.initial };
+  }
+
+  /**
+   * Transition a post's lifecycle `state` to `target`. Write-strict: the target
+   * is normalized and rejected unless it is a legal value of the post's schema
+   * and the transition from the current state is allowed. A no-op when the post
+   * is already in the target state. `state` gates no behavior (D4); this only
+   * changes the presentation label. Authorization is the caller's concern.
+   */
+  async setState(unitId: string, target: string): Promise<PostWithRelations> {
+    const existing = await prisma.post.findUniqueOrThrow({
+      where: { unitId },
+      select: { state: true, extra: true },
+    });
+    const schemaTag = readStateSchemaTag(existing.extra);
+    const schema = schemaTag ? getStateSchema(schemaTag) : undefined;
+    if (!schema) {
+      throw new AppError(400, "Post has no lifecycle state schema");
+    }
+
+    const normalized = normalizeStateSlug(target);
+    if (!isLegalStateValue(schema, normalized)) {
+      throw new AppError(400, `Illegal state value: ${normalized}`);
+    }
+
+    const current = existing.state ?? schema.initial;
+    if (current === normalized) {
+      return this.getByUnitId(unitId, { isAdmin: true, allowTombstone: true });
+    }
+    if (!isLegalTransition(schema, current, normalized)) {
+      throw new AppError(
+        400,
+        `Disallowed state transition: ${current} → ${normalized}`,
+      );
+    }
+
+    const updated = await prisma.post.update({
+      where: { unitId },
+      data: { state: normalized },
+      include: postInclude,
+    });
+    await enqueuePostFields(unitId, { state: normalized });
+    return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
+  }
+
+  /**
+   * Maintain the `solved` cache when an answer is accepted: `open` ⇒ `solved`.
+   * The `ACCEPTED_ANSWER` pin stays the source of truth; this is a denormalized
+   * shadow (precedent: `replyCount`/`lastReplyAt`). A manually-set closed reason
+   * is never overwritten — only the schema's initial (`open`) advances.
+   */
+  private async maintainSolvedCacheOnAccept(
+    scopeUnitId: string,
+  ): Promise<void> {
+    const root = await prisma.post.findUnique({
+      where: { unitId: scopeUnitId },
+      select: { state: true, extra: true },
+    });
+    if (!root) return;
+    const schemaTag = readStateSchemaTag(root.extra);
+    const schema = schemaTag ? getStateSchema(schemaTag) : undefined;
+    if (!schema || !isLegalStateValue(schema, "solved")) return;
+    if (root.state === schema.initial) {
+      await prisma.post.update({
+        where: { unitId: scopeUnitId },
+        data: { state: "solved" },
+      });
+      await enqueuePostFields(scopeUnitId, { state: "solved" });
+    }
+  }
+
+  /**
+   * Maintain the `solved` cache when an answer is unaccepted: when no accepted
+   * answer remains and the cached state is still `solved`, revert to the
+   * schema's initial (`open`). A manual closed reason is left untouched.
+   */
+  private async maintainSolvedCacheOnUnaccept(
+    scopeUnitId: string,
+  ): Promise<void> {
+    const remaining = await prisma.postPin.count({
+      where: { scopeUnitId, kind: PinKindEnum.ACCEPTED_ANSWER },
+    });
+    if (remaining > 0) return;
+    const root = await prisma.post.findUnique({
+      where: { unitId: scopeUnitId },
+      select: { state: true, extra: true },
+    });
+    if (!root) return;
+    const schemaTag = readStateSchemaTag(root.extra);
+    const schema = schemaTag ? getStateSchema(schemaTag) : undefined;
+    if (!schema) return;
+    if (root.state === "solved") {
+      await prisma.post.update({
+        where: { unitId: scopeUnitId },
+        data: { state: schema.initial },
+      });
+      await enqueuePostFields(scopeUnitId, { state: schema.initial });
+    }
+  }
+
+  // ============================================================
   // PROMOTION OVERLAY — pinning & accepted answers
   // ============================================================
 
@@ -1185,13 +1362,15 @@ export class PostService {
       input.beforePostUnitId,
       input.afterPostUnitId,
     );
-    return this.createPin(
+    const pin = await this.createPin(
       input.scopeUnitId,
       input.postUnitId,
       PinKindEnum.ACCEPTED_ANSWER,
       position,
       caller.userId,
     );
+    await this.maintainSolvedCacheOnAccept(input.scopeUnitId);
+    return pin;
   }
 
   /** Remove an `ACCEPTED_ANSWER` promotion. */
@@ -1202,6 +1381,7 @@ export class PostService {
   ): Promise<void> {
     await this.assertCanPromoteInThread(scopeUnitId, caller);
     await this.deletePin(scopeUnitId, postUnitId, PinKindEnum.ACCEPTED_ANSWER);
+    await this.maintainSolvedCacheOnUnaccept(scopeUnitId);
   }
 
   /**

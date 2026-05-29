@@ -92,6 +92,7 @@ const postPinCreateMock = mock(async (args: any) => ({
 const postPinFindUniqueMock = mock(async (): Promise<any> => null);
 const postPinFindFirstMock = mock(async (): Promise<any> => null);
 const postPinDeleteMock = mock(async (args: any) => args.where);
+const postPinCountMock = mock(async (): Promise<number> => 0);
 const unitFindFirstMock = mock(async (): Promise<any> => null);
 const realmMemberFindFirstMock = mock(async (): Promise<any> => null);
 const unitTagFindUniqueMock = mock(async (): Promise<any> => null);
@@ -177,6 +178,7 @@ Object.assign(prismaMock, {
     findUnique: postPinFindUniqueMock,
     findFirst: postPinFindFirstMock,
     delete: postPinDeleteMock,
+    count: postPinCountMock,
   },
   user: { findUnique: userFindUniqueMock },
 });
@@ -302,6 +304,8 @@ function resetMocks() {
   postPinFindFirstMock.mockClear();
   postPinFindFirstMock.mockResolvedValue(null);
   postPinDeleteMock.mockClear();
+  postPinCountMock.mockClear();
+  postPinCountMock.mockResolvedValue(0);
   unitFindFirstMock.mockClear();
   unitFindFirstMock.mockResolvedValue(null);
   realmMemberFindFirstMock.mockClear();
@@ -410,7 +414,7 @@ describe("PostService.create realm/tag junction writes", () => {
         type: "TAG",
         status: { not: "DELETED" },
       },
-      select: { id: true },
+      select: { id: true, slug: true },
     });
     expect(unitTagCreateMock.mock.calls.map((call) => call[0].data)).toEqual([
       { unitId: "post-1", tagUnitId: "tag-1" },
@@ -1721,5 +1725,273 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
 
     const signals = await service.getThreadPromotionSignals("root-1", op);
     expect(signals.isQuestionThread).toBe(false);
+  });
+});
+
+describe("PostService lifecycle state", () => {
+  const service = new PostService();
+  const op = { userId: "op-1", permission: { role: "USER" } } as any;
+
+  function createDataArg() {
+    return (postCreateMock.mock.calls as any[])[0]?.[0]?.data as any;
+  }
+
+  const rootScope = (
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    authorUserId: "op-1",
+    depth: 0,
+    rootPostUnitId: "root-1",
+    unit: { type: "POST", inRealms: [] },
+    ...overrides,
+  });
+  const directReply = (
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    depth: 1,
+    rootPostUnitId: "root-1",
+    parentPostUnitId: "root-1",
+    ...overrides,
+  });
+
+  // 5.1
+  test("create with the question tag sets state=open and snapshots stateSchemaTag", async () => {
+    resetMocks();
+    unitFindManyMock.mockResolvedValue([{ id: "tag-q", slug: "question" }]);
+
+    await service.create(
+      { content: content("hi"), tagIds: ["tag-q"] },
+      "user-1",
+    );
+
+    const data = createDataArg();
+    expect(data.state).toBe("open");
+    expect(data.extra).toMatchObject({ stateSchemaTag: "question" });
+  });
+
+  test("create without a stateful tag leaves state undefined", async () => {
+    resetMocks();
+    unitFindManyMock.mockResolvedValue([{ id: "tag-x", slug: "book" }]);
+
+    await service.create(
+      { content: content("hi"), tagIds: ["tag-x"] },
+      "user-1",
+    );
+
+    expect(createDataArg().state).toBeUndefined();
+  });
+
+  // 5.2
+  test("a second stateful tag is rejected", async () => {
+    resetMocks();
+    unitFindManyMock.mockResolvedValue([
+      { id: "tag-q", slug: "question" },
+      { id: "tag-i", slug: "issue" },
+    ]);
+
+    await expect(
+      service.create(
+        { content: content("hi"), tagIds: ["tag-q", "tag-i"] },
+        "user-1",
+      ),
+    ).rejects.toThrow(/at most one stateful tag/);
+  });
+
+  // 5.2 — the snapshot is written only at creation; setState never rewrites it.
+  test("setState changes only `state`, never the stateSchemaTag snapshot", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      state: "open",
+      extra: { stateSchemaTag: "question" },
+    });
+
+    await service.setState("post-1", "solved");
+
+    const args = (postUpdateMock.mock.calls as any[])[0]?.[0];
+    expect(args.data).toEqual({ state: "solved" });
+    expect("extra" in args.data).toBe(false);
+  });
+
+  // 5.3
+  test("illegal state value is rejected on write", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      state: "open",
+      extra: { stateSchemaTag: "question" },
+    });
+
+    await expect(service.setState("post-1", "banana")).rejects.toThrow(
+      /Illegal state value/,
+    );
+    expect(postUpdateMock).not.toHaveBeenCalled();
+  });
+
+  test("disallowed transition is rejected on write", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      state: "solved",
+      extra: { stateSchemaTag: "question" },
+    });
+
+    // solved → duplicate is a closed→closed jump the schema does not declare.
+    await expect(service.setState("post-1", "duplicate")).rejects.toThrow(
+      /Disallowed state transition/,
+    );
+    expect(postUpdateMock).not.toHaveBeenCalled();
+  });
+
+  test("setState on a post without a schema is rejected", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({ state: null, extra: {} });
+
+    await expect(service.setState("post-1", "open")).rejects.toThrow(
+      /no lifecycle state schema/,
+    );
+  });
+
+  // 5.4
+  test("accepting an answer advances open → solved", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(directReply())
+      .mockResolvedValueOnce({
+        state: "open",
+        extra: { stateSchemaTag: "question" },
+      });
+    unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
+    unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
+
+    await service.acceptAnswer(
+      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      op,
+    );
+
+    expect(postUpdateMock).toHaveBeenCalledWith({
+      where: { unitId: "root-1" },
+      data: { state: "solved" },
+    });
+  });
+
+  test("accepting an answer never overwrites a manual closed reason", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(directReply())
+      .mockResolvedValueOnce({
+        state: "duplicate",
+        extra: { stateSchemaTag: "question" },
+      });
+    unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
+    unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
+
+    await service.acceptAnswer(
+      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      op,
+    );
+
+    expect(postUpdateMock).not.toHaveBeenCalled();
+  });
+
+  test("unaccepting the last answer reverts solved → open", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce({
+        state: "solved",
+        extra: { stateSchemaTag: "question" },
+      });
+    postPinFindUniqueMock.mockResolvedValueOnce({ kind: "ACCEPTED_ANSWER" });
+    postPinCountMock.mockResolvedValueOnce(0);
+
+    await service.unacceptAnswer("root-1", "reply-1", op);
+
+    expect(postUpdateMock).toHaveBeenCalledWith({
+      where: { unitId: "root-1" },
+      data: { state: "open" },
+    });
+  });
+
+  test("unaccepting does not reopen while another accepted answer remains", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    postPinFindUniqueMock.mockResolvedValueOnce({ kind: "ACCEPTED_ANSWER" });
+    postPinCountMock.mockResolvedValueOnce(1);
+
+    await service.unacceptAnswer("root-1", "reply-1", op);
+
+    expect(postUpdateMock).not.toHaveBeenCalled();
+  });
+
+  // 5.5 — reply permission reads isLocked, never state (D4).
+  test("the reply parent load reads isLocked, not state", async () => {
+    resetMocks();
+
+    await service.create(
+      { content: content("reply"), parentPostUnitId: "parent-1" },
+      "user-1",
+    );
+
+    const select = (postFindUniqueOrThrowMock.mock.calls as any[])[0]?.[0]
+      ?.select;
+    expect(select.isLocked).toBe(true);
+    expect(select.state).toBeUndefined();
+    expect(postCreateMock).toHaveBeenCalled();
+  });
+
+  // 5.6
+  test("active bucket filter matches state IN the active slugs (no anti-join)", async () => {
+    resetMocks();
+    await service.list({ stateBucket: "active" });
+    expect(firstPostFindManyArgs().where.state).toEqual({ in: ["open"] });
+  });
+
+  test("closed bucket filter matches all closed reason values", async () => {
+    resetMocks();
+    await service.list({ stateBucket: "closed" });
+    const inList = (firstPostFindManyArgs().where.state.in as string[]).sort();
+    expect(inList).toEqual(
+      ["completed", "duplicate", "not-planned", "off-topic", "solved"].sort(),
+    );
+  });
+
+  test("an exact state filter takes precedence over a bucket", async () => {
+    resetMocks();
+    await service.list({ state: "open", stateBucket: "closed" });
+    expect(firstPostFindManyArgs().where.state).toBe("open");
+  });
+
+  // 5.7
+  test("closing writes a reason value and reopening returns to the initial state", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      state: "open",
+      extra: { stateSchemaTag: "question" },
+    });
+    await service.setState("post-1", "not-planned");
+    expect((postUpdateMock.mock.calls as any[])[0]?.[0].data).toEqual({
+      state: "not-planned",
+    });
+
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      state: "not-planned",
+      extra: { stateSchemaTag: "question" },
+    });
+    await service.setState("post-1", "open");
+    expect((postUpdateMock.mock.calls as any[])[0]?.[0].data).toEqual({
+      state: "open",
+    });
+  });
+
+  test("a bare `closed` value is rejected (closing requires a reason)", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      state: "open",
+      extra: { stateSchemaTag: "question" },
+    });
+    await expect(service.setState("post-1", "closed")).rejects.toThrow(
+      /Illegal state value/,
+    );
   });
 });

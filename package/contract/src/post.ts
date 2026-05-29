@@ -99,6 +99,13 @@ export const postExtraSchema = t.Object({
    * and return `extra` as-is, so no server change is required.
    */
   poll: t.Optional(t.Object({ unitId: t.String() })),
+  /**
+   * Slug of the tag whose schema governs `Post.state`, snapshotted at creation.
+   * It does NOT drift when tags are later added/removed, so the governing
+   * vocabulary stays stable (see `post-state-schema.ts`). Present only on posts
+   * created with a stateful tag.
+   */
+  stateSchemaTag: t.Optional(t.String()),
 });
 
 export type PostExtra = (typeof postExtraSchema)["static"];
@@ -137,6 +144,15 @@ export const postDTOSchema = t.Object({
   directReplyCount: t.Optional(t.Number()),
   lastReplyAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   isLocked: t.Optional(t.Boolean()),
+  /**
+   * Lifecycle label — a kebab-case slug (e.g. `open`, `solved`, `not-planned`)
+   * governed by the schema named by `extra.stateSchemaTag`, or null for no
+   * lifecycle. Typed as a generic string, NOT a strict enum: reads tolerate
+   * unknown values so adding a value never breaks an older client (the client
+   * renders the value via its mapped tag, falling back to the raw slug). The
+   * closed vocabulary and transitions are enforced only on the write path.
+   */
+  state: t.Optional(t.Nullable(t.String())),
   scoreEntryId: t.Optional(t.Nullable(t.String())),
   /**
    * Promotion overlay for the rendered thread scope: why this reply is promoted
@@ -226,6 +242,14 @@ export const postListQuerySchema = t.Object({
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
+  /** Exact lifecycle-state filter (e.g. `open`). */
+  state: t.Optional(t.String()),
+  /**
+   * Derived lifecycle bucket filter: `active` or `closed`. Matches posts whose
+   * `state` is any value declared in that bucket across the registered schemas
+   * (`state IN (…)`, indexed; no anti-join). Buckets are never stored.
+   */
+  stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
   mode: t.Optional(t.String()),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
@@ -281,6 +305,10 @@ export const postListBodySchema = t.Object({
   parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
+  /** Exact lifecycle-state filter (e.g. `open`). */
+  state: t.Optional(t.String()),
+  /** Derived lifecycle bucket filter: `active` or `closed`. See `postListQuerySchema`. */
+  stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
   mode: t.Optional(t.String()),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
@@ -401,3 +429,15 @@ export const updatePostSchema = t.Object({
 });
 
 export type UpdatePostInput = (typeof updatePostSchema)["static"];
+
+/**
+ * Transition a post's lifecycle `state` to a target value. Write-strict: the
+ * server normalizes the slug and rejects it unless it is a legal value of the
+ * post's schema and the transition from the current state is allowed. Closing
+ * always names a reason value; reopening targets the schema's initial state.
+ */
+export const setPostStateSchema = t.Object({
+  state: t.String(),
+});
+
+export type SetPostStateInput = (typeof setPostStateSchema)["static"];

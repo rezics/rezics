@@ -8,6 +8,8 @@
 - [ ] meilisearch admin 需要更多的東西，比如各個index的行數情況之類的數據，以及還有什麼數據有需要的，應該調查
 - [ ] about, donate, product page.
 - [ ] 確保項目的垂直複雜性不能過高，但是水平複雜性可以擴展因爲水平複雜性是可以獨立維護，甚至隨時拋棄的
+- [ ] 有沒有一個可以通過設定設定github倉庫，會自動clone到 某個文件夾，提取 skill，建立最新的版本 map，並對本地進行更新的工具？感覺還挺有用的，然後通過config還能配置 clone 清理策略，然後對於 agents skill 位置的 contract 維護，如果沒有 Package 也有價值
+- 
 
 
 ## 搜索

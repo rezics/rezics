@@ -9,6 +9,7 @@ import type {
   PinPostInput,
   PostPinDTO,
   PostResponse,
+  SetPostStateInput,
   UpdatePostInput,
 } from "@rezics/contract";
 import {
@@ -232,6 +233,39 @@ export function useSetPostPublicationMutation(
 }
 
 /**
+ * Transition a post's lifecycle state. The server validates the transition
+ * against the post's schema; on success we refresh the post detail (badge
+ * rendering) and its thread (a root-post close/reopen changes thread-level
+ * affordances), plus lists so bucket filters (active/closed) recompute.
+ */
+export function useSetPostStateMutation(
+  options?: Omit<
+    UseMutationOptions<
+      PostResponse,
+      Error,
+      { unitId: string; input: SetPostStateInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, input }) => postApi.setState(unitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.setQueryData(postKeys.detail(variables.unitId), data);
+      const rootPostUnitId = data.rootPostUnitId ?? variables.unitId;
+      queryClient.invalidateQueries({
+        queryKey: postKeys.threads(rootPostUnitId),
+      });
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
  * Promotion mutations (pin / unpin / accept / unaccept).
  *
  * Each mutation targets a reply within a thread scope and, on settle, refreshes
@@ -345,6 +379,7 @@ export const postMutations = {
   useUpdateWikiContent: useUpdateWikiPostContentMutation,
   useDelete: useDeletePostMutation,
   useSetPublication: useSetPostPublicationMutation,
+  useSetState: useSetPostStateMutation,
   usePin: usePinPostMutation,
   useUnpin: useUnpinPostMutation,
   useAcceptAnswer: useAcceptAnswerMutation,

@@ -16,6 +16,7 @@ import type {
   PostPinDTO,
   PostResponse,
   SetPostPublicationInput,
+  SetPostStateInput,
   UpdatePostInput,
 } from "@rezics/contract";
 import { CreationMode, PostKind } from "@rezics/contract";
@@ -220,6 +221,20 @@ export const postApi = {
   remove: async (unitId: string): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(`/post/${unitId}`, {
       method: "DELETE",
+    });
+  },
+
+  /**
+   * Transition a post's lifecycle state (write-strict; gated by the post's
+   * schema transitions server-side).
+   */
+  setState: async (
+    unitId: string,
+    input: SetPostStateInput,
+  ): Promise<PostResponse> => {
+    return apiFetch<PostResponse>(`/post/${unitId}/state`, {
+      method: "POST",
+      body: JSON.stringify(input),
     });
   },
 

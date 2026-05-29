@@ -25,6 +25,7 @@ export {
   useDeletePostMutation,
   usePinPostMutation,
   useSetPostPublicationMutation,
+  useSetPostStateMutation,
   useUnacceptAnswerMutation,
   useUnpinPostMutation,
   useUpdatePostMutation,
