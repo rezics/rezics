@@ -1,14 +1,12 @@
 # Build and publish backend production images to GHCR.
 #
-# Triggered on push to `dev` (and manually). Produces immutable git-SHA-tagged
-# images for every package-owned backend runtime service, plus the build-stage
-# "migrate" images used by one-shot migration jobs. Deploy is a SEPARATE,
-# manually-approved workflow (deploy-production.yml) that pulls these tags.
+# Triggered manually. Produces immutable git-SHA-tagged images for every
+# package-owned backend runtime service, plus the build-stage "migrate" images
+# used by one-shot migration jobs. Deploy is a SEPARATE, manually-approved
+# workflow (deploy-production.yml) that pulls these tags.
 name: Build Images
 
 on:
-  push:
-    branches: [dev]
   workflow_dispatch:
 
 concurrency:
