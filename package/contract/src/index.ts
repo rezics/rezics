@@ -38,6 +38,7 @@ export * from "./notification";
 export * from "./notify";
 export * from "./pagination";
 export * from "./permission";
+export * from "./poll";
 export * from "./post";
 export * from "./progress";
 export * from "./public-route";

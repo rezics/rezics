@@ -182,7 +182,7 @@ The TOC editor SHALL allow the maintainer to select multiple chapter entries and
 
 The system SHALL materialize a Chapter Unit only when an action requires Unit identity for a `BookContentStructureNode`. Such actions include chapter-specific progress, review, discussion, and storing chapter body content. Plain TOC display, opening an empty chapter surface, and book-level progress position updates SHALL NOT materialize a Chapter Unit.
 
-The materialization operation SHALL be addressable by `bookUnitId` plus either a `BookContentStructurePath` (numeric array indexing into the assembled tree) or a `nodeId` (preferred for new code, required for `/book/:bookId/node/:nodeId` interactions). The server SHALL resolve the target row, return the existing `chapterUnitId` if present, or create the required `Unit(type=POST)`, `Post(kind=CHAPTER)`, and `UnitTranslation` rows and write the resulting Unit id into the node's `contentUnitId` column.
+The materialization operation SHALL be addressable by `bookUnitId` plus a `nodeId` (the target `ContentStructureNode.id`). The materialization contract SHALL NOT accept a `BookContentStructurePath` (numeric array indexing into the assembled tree); every reading and TOC surface already addresses nodes by `nodeId`, including `/book/:bookId/node/:nodeId`. The server SHALL resolve the target row by `nodeId`, return the existing `chapterUnitId` if present, or create the required `Unit(type=POST)`, `Post(kind=CHAPTER)`, and `UnitTranslation` rows and write the resulting Unit id into the node's `contentUnitId` column.
 
 Book-level progress SHALL store the user's resume position as `UserUnitProgress.lastReadNodeId` (a foreign key to `ContentStructureNode.id`) and optionally `UserUnitProgress.lastReadAnchor` (a JSON `{ text }` snippet). The system SHALL NOT serialize a `BookContentStructurePath` into `UserUnitProgress`. Recording a resume position SHALL NOT materialize a Chapter Unit.
 
@@ -190,14 +190,14 @@ Book-level progress SHALL store the user's resume position as `UserUnitProgress.
 
 - GIVEN a `BookContentStructureNode` with `nodeId = "node-x"` has title "Chapter Four" and `contentUnitId = NULL`
 - WHEN an authenticated user starts a chapter-specific review for that node
-- THEN the system SHALL materialize a Chapter Unit for the node
+- THEN the system SHALL materialize a Chapter Unit for the node addressed by `nodeId = "node-x"`
 - AND the review SHALL target the returned `contentUnitId`
 - AND the `BookContentStructureNode` row SHALL be updated with that `contentUnitId`
 
 #### Scenario: Return existing materialized chapter id
 
 - GIVEN a `BookContentStructureNode` already has `contentUnitId = "chapter-1"`
-- WHEN a caller requests materialization for that node
+- WHEN a caller requests materialization for that node by `nodeId`
 - THEN the system SHALL return `contentUnitId = "chapter-1"`
 - AND the system SHALL NOT create a duplicate Unit, Post, or UnitTranslation row
 
@@ -216,22 +216,16 @@ Book-level progress SHALL store the user's resume position as `UserUnitProgress.
 - AND the system MAY set `UserUnitProgress.lastReadAnchor` with the in-chapter snippet
 - AND the system SHALL NOT create a Chapter Unit only to store that resume position
 
-### Requirement: Materialization rejects stale BookContentStructure paths
+#### Scenario: Materialization request keyed by path is rejected
 
-The materialization operation SHALL detect when the requested path no longer resolves to the expected `BookContentStructureNode`. Callers SHOULD provide expected node metadata such as `expectedTitle` and/or the container `BookContentStructure.updatedAt` value they observed (`expectedBookContentStructureUpdatedAt`). If the current row at the resolved path doesn't match the expected title, or if the container `updatedAt` doesn't match, the operation SHALL reject with a conflict response and SHALL NOT create or link a Chapter Unit.
-
-#### Scenario: Path no longer matches expected title
-
-- GIVEN a client observed path `[1]` with title "Chapter Two"
-- AND the BookContentStructure was later reordered so the node at path `[1]` now has title "Chapter Five"
-- WHEN the client requests materialization for path `[1]` with `expectedTitle = "Chapter Two"`
-- THEN the system SHALL reject the request with a conflict response
+- GIVEN a materialize request that supplies a numeric `path` instead of a `nodeId`
+- WHEN the server validates the request body
+- THEN the request SHALL be rejected for failing the `{ nodeId }` contract
 - AND no Unit, Post, or UnitTranslation row SHALL be created
-- AND no `BookContentStructureNode` row SHALL be modified
 
 #### Scenario: Concurrent materialization is idempotent
 
-- GIVEN two requests concurrently materialize the same path resolving to the same `BookContentStructureNode`
+- GIVEN two requests concurrently materialize the same `nodeId`
 - WHEN one request creates and links a Chapter Unit first
 - THEN the other request SHALL observe the linked `chapterUnitId` and return it
 - AND only one Chapter Unit SHALL be created for that node

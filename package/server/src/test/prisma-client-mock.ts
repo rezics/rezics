@@ -30,6 +30,17 @@ export const UnitType = {
   ENTITY: "ENTITY",
   ZONE: "ZONE",
   LABEL: "LABEL",
+  POLL: "POLL",
+} as const;
+
+export const PollVoteMode = {
+  SINGLE: "SINGLE",
+  MULTI: "MULTI",
+} as const;
+
+export const PollResultVisibility = {
+  LIVE: "LIVE",
+  AFTER_CLOSE: "AFTER_CLOSE",
 } as const;
 
 export const UnitAliasStatus = {
@@ -98,6 +109,8 @@ export const prismaClientMock = {
   Prisma,
   PostKind,
   PinKind,
+  PollVoteMode,
+  PollResultVisibility,
   UnitStatus,
   UnitAliasStatus,
   UnitType,

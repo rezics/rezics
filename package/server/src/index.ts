@@ -36,6 +36,7 @@ import { bootstrapJwtServiceRecord, jwtServiceAdminApi } from "./jwt";
 import { linkApi } from "./link";
 import { federatedSearchApi, meiliApi } from "./meili";
 import { dmBoundaryApi } from "./notify-boundary/dm-boundary.api";
+import { pollApi } from "./poll";
 import { postApi } from "./post";
 import { profileReactionHistoryApi } from "./profile-reaction-history";
 import { activityApi } from "./activity";
@@ -212,6 +213,7 @@ routeApp
   .use(bookApi)
   .use(contentStructureApi)
   .use(chapterApi)
+  .use(pollApi)
   .use(postApi)
   .use(progressApi)
   .use(dashboardApi)

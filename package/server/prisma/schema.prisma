@@ -27,6 +27,7 @@ enum UnitType {
   QUOTE
   LINK
   LABEL
+  POLL
   ENTITY
   ZONE
   /// Type-extension marker for User rows. `User.unitId` equals the corresponding `Unit.id`.
@@ -221,12 +222,16 @@ model Unit {
   link   Link?
   entity Entity?
   zone   Zone?
+  poll   Poll?
 
   // Tag system
   unitTags       UnitTag[] @relation("TaggedUnit")
   tagUsages      UnitTag[] @relation("UnitTagAppliedTag")
   tagVotesOnUnit TagVote[] @relation("TagVoteUnit")
   tagVotesAsTag  TagVote[] @relation("TagVoteTag")
+
+  // Poll options that reference this Unit as their subject (vote-for-a-unit)
+  pollOptionsAsUnit PollOption[] @relation("PollOptionUnit")
 
   // Realm organization
   realmContent UnitRealm[] @relation("RealmContent")
@@ -1088,6 +1093,89 @@ model TagVote {
 
   @@id([userId, unitId, tagUnitId])
   @@index([unitId, tagUnitId])
+}
+
+/**
+ * ANCHOR POLL VOTING
+ *
+ * Third instance of the "scored junction + per-user vote row" pattern
+ * (`UnitTag`+`TagVote`, `RealmTagApplication`+`RealmTagApplicationVote`). Only
+ * the act of polling is a `Unit(type=POLL)`; options and votes are plain rows.
+ * Single-choice exclusivity is enforced at the database layer (see PollVote).
+ */
+
+enum PollVoteMode {
+  SINGLE
+  MULTI
+}
+
+enum PollResultVisibility {
+  LIVE
+  AFTER_CLOSE
+}
+
+/// Poll-level configuration; a 1:1 type extension on `Unit(type=POLL)`.
+model Poll {
+  unitId           String               @id @db.Uuid
+  voteMode         PollVoteMode         @default(SINGLE)
+  resultVisibility PollResultVisibility @default(LIVE)
+  anonymous        Boolean              @default(false)
+  /// When the poll stops accepting votes and (for AFTER_CLOSE) reveals tallies.
+  /// Null means open indefinitely until explicitly closed.
+  closesAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unit    Unit         @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  options PollOption[] @relation("PollOptions")
+  votes   PollVote[]   @relation("PollVotes")
+}
+
+/// One poll option. Dual-form: exactly one of `label` (ad-hoc text) or `unitId`
+/// (reference to an existing Unit) is set. NOT a Unit. `voteCount` is the
+/// denormalized tally, maintained on every cast/change/withdraw.
+model PollOption {
+  pollUnitId String  @db.Uuid
+  optionId   String  @default(dbgenerated("uuidv7()")) @db.Uuid
+  position   String  @db.VarChar(64) // Fractional Indexing
+  voteCount  Int     @default(0)
+  label      String?
+  unitId     String? @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  poll           Poll       @relation("PollOptions", fields: [pollUnitId], references: [unitId], onDelete: Cascade)
+  referencedUnit Unit?      @relation("PollOptionUnit", fields: [unitId], references: [id], onDelete: SetNull)
+  votes          PollVote[] @relation("PollOptionVotes")
+
+  @@id([pollUnitId, optionId])
+  @@index([pollUnitId, position])
+  @@index([unitId])
+}
+
+/// A per-user vote. Always stores `userId` (even for anonymous polls) to
+/// guarantee one-vote-per-user and allow vote changes. The PK
+/// `(pollUnitId, userId, optionId)` supports MULTI polls (one row per option);
+/// SINGLE polls are constrained to one row per `(pollUnitId, userId)` by a
+/// partial unique index (added in the migration — Prisma cannot express it).
+/// `voteMode` is denormalized from `Poll.voteMode` so that partial index can
+/// gate on it.
+model PollVote {
+  pollUnitId String       @db.Uuid
+  userId     String       @db.Uuid
+  optionId   String       @db.Uuid
+  voteMode   PollVoteMode
+
+  createdAt DateTime @default(now())
+
+  poll   Poll       @relation("PollVotes", fields: [pollUnitId], references: [unitId], onDelete: Cascade)
+  option PollOption @relation("PollOptionVotes", fields: [pollUnitId, optionId], references: [pollUnitId, optionId], onDelete: Cascade)
+
+  @@id([pollUnitId, userId, optionId])
+  @@index([pollUnitId, optionId])
+  @@index([userId])
 }
 
 /**
