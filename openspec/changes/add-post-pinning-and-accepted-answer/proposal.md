@@ -20,8 +20,9 @@ keyed off a platform-reserved "question" tag.
   - `@@id([scopeUnitId, postUnitId])` — a post is promoted at most once per
     scope.
   - `@@index([scopeUnitId, kind, position])` — render-time grouping/ordering.
-  - **Scope** is a Unit id: the **thread root post** (in-thread promotion) or a
-    **realm** (cross-thread moderator pin).
+  - **Scope is always the thread root post**; the target is always a **reply**
+    (`depth ≥ 1`, `rootPostUnitId == scopeUnitId`). A realm is never a scope —
+    realm-level featuring of whole units is `Realm.extra.pinboard`'s job.
 - **`PinKind` enum**: `ACCEPTED_ANSWER`, `PINNED` (with `HIGHLIGHT` reserved).
 - **`position` uses fractional indexing**, consistent with existing `position`
   columns; pin cardinality per scope is low, so there is no key-growth or
@@ -34,8 +35,8 @@ keyed off a platform-reserved "question" tag.
   question MAY have multiple accepted answers, ordered by `position`.
 - **Authorization**:
   - `ACCEPTED_ANSWER`: the thread author (OP) OR a realm moderator/owner.
-  - `PINNED`: a realm moderator/owner anywhere; OR the OP within their own
-    thread.
+  - `PINNED`: a realm moderator/owner within any thread of their realm; OR the
+    OP within their own thread.
 - **Render (School B)**: load the subtree, join `PostPin` for the relevant
   scope(s), group by parent; within each sibling group order is
   `[ACCEPTED_ANSWER group, then PINNED group, each by position]` ++
@@ -48,9 +49,10 @@ keyed off a platform-reserved "question" tag.
 
 ### New Capabilities
 - `post-pinning`: the generic promotion overlay — `PostPin` model, `PinKind`,
-  fractional `position`, scope semantics (root post vs realm), the
-  `@@id`/index shape, pin/unpin API, `PINNED` authorization, and the
-  render-time grouping/ordering + badge contract.
+  fractional `position`, scope semantics (always the thread root post; target
+  always a reply; realm is never a scope), the `@@id`/index shape, pin/unpin
+  API, `PINNED` authorization, and the render-time grouping/ordering + badge
+  contract.
 - `official-question-tag`: the platform-reserved question tag slug, the rule
   that a root post bearing it makes a thread a Q&A thread, the
   `ACCEPTED_ANSWER` specialization (target `depth == 1` and

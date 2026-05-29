@@ -100,9 +100,11 @@ When a realm owner updates the rule Post (or its releases), existing members SHA
 - **THEN** no rule modal SHALL appear automatically
 - **AND** the user's membership SHALL remain valid
 
-### Requirement: Join consent supports rules and approval states
+### Requirement: Join consent supports localized rules and approval states
 
-Realm join flows SHALL support UnitTranslation-aware rules acknowledgement, optional membership approval, and pending state for private or approval-required realms. Acknowledgement SHALL be recorded against the current rule Unit and required version before membership activation when the realm requires rules for joining.
+Realm join flows SHALL present localized rule content and SHALL support optional membership approval and a pending state for private or approval-required realms.
+
+Consent is **not tracked**: rule acknowledgement SHALL NOT be recorded against a rule Unit or version. Per the "Joining counts as consent" requirement above, the `RealmMember` row (or, for approval-required realms, the pending membership request followed by activation) is the sole evidence of consent. If a future product need requires *provable, versioned* consent, it is a purely additive change — a `RealmRuleAck(userId, ruleUnitId, version, …)` ledger keyed off the rule Post's existing content-history/release version — and SHALL be proposed separately rather than re-introduced here.
 
 #### Scenario: Approval-required realm creates pending membership
 
@@ -110,9 +112,9 @@ Realm join flows SHALL support UnitTranslation-aware rules acknowledgement, opti
 - **THEN** the system SHALL create a pending membership request
 - **AND** moderators SHALL be able to approve or reject it from the realm console
 
-#### Scenario: Join requires current localized rules
+#### Scenario: Join presents current localized rules
 
-- **GIVEN** a realm requires rule acknowledgement before joining
+- **GIVEN** a realm with `extra.rule` set
 - **WHEN** a user joins while browsing in Traditional Chinese
 - **THEN** the join flow SHALL present the localized rule content resolved from the current rule Unit
-- **AND** successful consent SHALL store acknowledgement for the current rule Unit and version
+- **AND** the system SHALL NOT store any per-user acknowledgement record

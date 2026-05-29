@@ -25,28 +25,49 @@ rebalancing risk here; render-time grouping is over a handful of rows.
 **Non-Goals:**
 - Changing the tree storage/retrieval (owned by `redesign-post-index-ltree`).
 - Score/Wilson `top/best` ranking implementation.
-- Realm-feed-level pinning of whole units (already covered by
-  `Realm.extra.pinboard`); `PostPin` is for in-thread / scope-level promotion.
+- **Realm-feed-level featuring of whole units** — that is `Realm.extra.pinboard`'s
+  job (see the boundary below). `PostPin` is strictly an *in-thread* overlay.
 - Per-realm voting on accepted answers.
+
+### Boundary: `PostPin` vs `Realm.extra.pinboard`
+
+These two mechanisms never overlap; the split is by **object** and **surface**,
+not by scope:
+
+| | `PostPin` | `Realm.extra.pinboard` |
+|---|---|---|
+| Object | a **reply** (`depth ≥ 1`) | a **top-level unit** (root post / work / shelf) |
+| Surface | inside the thread, reorders siblings | the realm landing page, a curated strip above the feed |
+| Scope | always the thread **root post** | always the **realm** |
+| Storage | relational overlay (this change) | ordered ID list on `Realm.extra` (unchanged) |
+
+Litmus test for any future code/spec: **"Am I featuring a destination, or
+promoting a reply?"** Featuring a whole unit on the realm landing → `pinboard`.
+Promoting a reply within a thread → `PostPin`. The "moderator wants a whole
+thread at the top of the realm" use case is `pinboard` (a thread root is a
+top-level unit), **not** a realm-scoped `PostPin`.
 
 ## Decisions
 
 ### D1: Overlay table over columns on `Post`
 Promotion lives in a `PostPin(scopeUnitId, postUnitId, kind, position,
 byUserId, createdAt)` table, `@@id([scopeUnitId, postUnitId])`. **Why over
-`Post.pinKind`/`Post.pinRank` columns:** a post can live in multiple realms and
-in a thread simultaneously; "promoted in *which* context" is intrinsic to the
-relation, not the post. The overlay also mirrors `RealmTagApplication`, so the
+`Post.pinKind`/`Post.pinRank` columns:** promotion is sparse (most posts are
+never pinned) and carries its own metadata (`kind`, `byUserId`, `createdAt`,
+`position`) that does not belong on every post row; the overlay keeps promotion
+decoupled from post content/`path` and mirrors `RealmTagApplication`, so the
 read/write idiom is familiar. **Trade-off:** one extra join at render; trivial
 given low cardinality.
 
-### D2: `scopeUnitId` is the thread root post OR a realm
-Accepted answers and OP/in-thread pins use `scopeUnitId = rootPostUnitId`
-(the question/thread is the scope). Moderator cross-thread pins use
-`scopeUnitId = realmUnitId`. **Why one polymorphic scope column:** both are
-Unit ids and both express "this post is promoted within this scope"; a single
-`@@index([scopeUnitId, kind, position])` serves both. The render layer requests
-pins for the loaded root scope plus the realm(s) the thread is being viewed in.
+### D2: `scopeUnitId` is always the thread root post
+Every `PostPin` uses `scopeUnitId = rootPostUnitId` — the thread is the scope
+for both accepted answers and pins. **Realm is never a scope.** Promoting a
+whole unit to the realm landing is `Realm.extra.pinboard`'s job (see the
+Boundary above); collapsing the earlier "realm cross-thread pin" idea into
+`pinboard` removes the only source of render-time scope ambiguity. The target
+of every `PostPin` is a **reply** (`depth ≥ 1`, `rootPostUnitId == scopeUnitId`),
+never a thread root and never a realm member at large. A single
+`@@index([scopeUnitId, kind, position])` serves all render-time grouping.
 
 ### D3: `position` via fractional indexing
 `position` is a LexoRank-style string, consistent with `ShelfUnit.position`,
@@ -85,18 +106,15 @@ heavier). Reserved slug is the smallest correct step.
 
 ## Risks / Trade-offs
 
-- **Scope ambiguity at render (root vs realm pins)** → The render contract
-  fetches `PostPin` for the loaded root scope and explicitly for the realm
-  context being viewed; precedence (D4) resolves overlap deterministically.
 - **Authorization drift between accept and pin** → Centralize a single
   capability check in `PostService` (OP-of-thread, realm moderator/owner) used
   by both accept and pin endpoints; cover with tests.
 - **Accepted-answer gating bypass** → Enforce `depth == 1`,
   `parentPostUnitId == rootPostUnitId`, and "root bears question tag" server-
   side at write time, not only in the UI.
-- **Pin to a post in a different thread/realm than the scope** → Validate at
-  write time that the target post's `rootPostUnitId == scopeUnitId` (root
-  scope) or that the post is in the realm (realm scope).
+- **Pin to a post outside the scope thread** → Validate at write time that the
+  target is a reply (`depth ≥ 1`) and `target.rootPostUnitId == scopeUnitId`.
+  There is no realm scope, so there is no cross-scope merge at render.
 - **Multiple accepted answers UX** → Allowed by data model; the renderer orders
   them by `position` and the UI must handle N badges, not assume one.
 
@@ -117,5 +135,3 @@ heavier). Reserved slug is the smallest correct step.
   (e.g. `question`, `help`)? (Default: single `question`.)
 - Whether accepting an answer should also bump the answer's score or lock the
   thread (current plan: neither; promotion only).
-- Whether realm-scope `PINNED` is in scope for the first implementation or
-  deferred, shipping root-scope (OP/mod accept + OP pin) first.

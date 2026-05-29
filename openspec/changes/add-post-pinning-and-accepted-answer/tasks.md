@@ -12,7 +12,7 @@
 ## 3. Service: pinning & accepted answers (server)
 
 - [ ] 3.1 Implement a single scope-capability check (OP-of-thread, realm moderator/owner) reused by pin and accept.
-- [ ] 3.2 Implement pin/unpin (`kind = PINNED`): validate target belongs to scope (root scope: `target.rootPostUnitId == scopeUnitId`; realm scope: target in realm); enforce `PINNED` authorization; mint `position` via fractional indexing with PK-collision retry.
+- [ ] 3.2 Implement pin/unpin (`kind = PINNED`): validate `scopeUnitId` is a thread root and the target is a reply in it (`target.rootPostUnitId == scopeUnitId`, `target.depth ≥ 1`); reject realm-id scopes; enforce `PINNED` authorization; mint `position` via fractional indexing with PK-collision retry.
 - [ ] 3.3 Implement accept/unaccept (`kind = ACCEPTED_ANSWER`): gate on Q&A thread (root bears reserved question tag), `target.depth == 1`, `target.parentPostUnitId == target.rootPostUnitId`; allow multiple, ordered by `position`; enforce OP/moderator authorization.
 - [ ] 3.4 Add a Q&A-thread detection helper (root post bears the reserved question tag) used by the accept gate and by render.
 - [ ] 3.5 Extend thread read to join `PostPin` for the loaded root scope + viewed realm(s) and attach `pinKind` to each post DTO.
