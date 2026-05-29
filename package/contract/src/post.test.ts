@@ -91,3 +91,40 @@ describe("post work-domain contract fields", () => {
     ).toBe(false);
   });
 });
+
+describe("postExtraSchema poll reference", () => {
+  test("post round-trips extra.poll.unitId", () => {
+    const post = {
+      unitId: "post-1",
+      authorUserId: "user-1",
+      content: null,
+      extra: { poll: { unitId: "poll-unit-1" } },
+    };
+    expect(Value.Check(postDTOSchema, post)).toBe(true);
+    const decoded = Value.Decode(
+      postDTOSchema,
+      Value.Clean(postDTOSchema, post),
+    );
+    expect(decoded.extra?.poll?.unitId).toBe("poll-unit-1");
+  });
+
+  test("extra without a poll field still validates", () => {
+    const post = {
+      unitId: "post-1",
+      authorUserId: "user-1",
+      content: null,
+      extra: { rating: 5 },
+    };
+    expect(Value.Check(postDTOSchema, post)).toBe(true);
+  });
+
+  test("poll reference missing unitId fails", () => {
+    const post = {
+      unitId: "post-1",
+      authorUserId: "user-1",
+      content: null,
+      extra: { poll: {} },
+    };
+    expect(Value.Check(postDTOSchema, post)).toBe(false);
+  });
+});

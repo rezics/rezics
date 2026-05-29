@@ -3,6 +3,7 @@ import { realmQueries } from "@rezics/api/realm/realm";
 import { tagQueries } from "@rezics/api/tag/tag";
 import {
   markdownContentDoc,
+  type PollDTO,
   type PostDTO,
   PostKind,
   type TagTreeNode,
@@ -10,6 +11,7 @@ import {
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { BarChart3 } from "lucide-react";
 import type React from "react";
 import {
   forwardRef,
@@ -20,6 +22,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { PollComposer } from "@/poll";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
 
@@ -309,6 +312,7 @@ export const ReplyComposer = forwardRef<
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     initialTagIds ?? [],
   );
+  const [attachingPoll, setAttachingPoll] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const shouldRetainOnBlur = useBlurRetain(body);
   const mutation = useCreatePostMutation();
@@ -353,7 +357,42 @@ export const ReplyComposer = forwardRef<
 
   const reset = () => {
     setBody("");
+    setAttachingPoll(false);
     if (mode === "progressive") setExpanded(false);
+  };
+
+  /**
+   * Attach-poll sequence: `PollComposer` has already minted the poll
+   * (`useCreatePoll`); now create the post carrying `extra.poll.unitId`. A
+   * failure in either step surfaces — the poll error inside `PollComposer`, the
+   * post error below — leaving the minted poll reusable as a standalone unit.
+   */
+  const handlePollCreated = (poll: PollDTO) => {
+    if (!authGuard.requireAuth()) return;
+    const trimmed = body.trim();
+    const activeRealmUnitIds = realmUnitIds ?? [];
+    const payload = isRealmPostMode
+      ? {
+          realmUnitIds: activeRealmUnitIds,
+          tagIds: selectedTagIds,
+          kind: PostKind.POST,
+          content: markdownContentDoc(trimmed),
+          extra: { poll: { unitId: poll.unitId } },
+        }
+      : {
+          targetUnitId,
+          parentPostUnitId,
+          kind: PostKind.POST,
+          content: markdownContentDoc(trimmed),
+          extra: { poll: { unitId: poll.unitId } },
+        };
+
+    mutation.mutate(payload, {
+      onSuccess: (post) => {
+        reset();
+        onSubmitted?.(post);
+      },
+    });
   };
 
   const handleSubmit = () => {
@@ -452,27 +491,53 @@ export const ReplyComposer = forwardRef<
           onSelectedTagIdsChange={setSelectedTagIds}
         />
       )}
-      <div className="flex flex-row justify-end gap-2">
+      <div className="flex flex-row items-center justify-between gap-2">
         <Button
           size="sm"
-          variant="ghost"
-          onClick={handleCancel}
+          variant={attachingPoll ? "secondary" : "ghost"}
+          onClick={() => setAttachingPoll((value) => !value)}
           disabled={mutation.isPending}
         >
-          {t("common:cancel")}
+          <BarChart3 className="mr-1 h-4 w-4" />
+          {t("community:poll_attach")}
         </Button>
-        <Button
-          size="sm"
-          onClick={handleSubmit}
-          disabled={mutation.isPending || !body.trim()}
-        >
-          {mutation.isPending
-            ? t("community:post_composer_posting")
-            : isRealmPostMode
-              ? t("community:post_composer_post")
-              : t("common:reply")}
-        </Button>
+        <div className="flex flex-row gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleCancel}
+            disabled={mutation.isPending}
+          >
+            {t("common:cancel")}
+          </Button>
+          {!attachingPoll && (
+            <Button
+              size="sm"
+              onClick={handleSubmit}
+              disabled={mutation.isPending || !body.trim()}
+            >
+              {mutation.isPending
+                ? t("community:post_composer_posting")
+                : isRealmPostMode
+                  ? t("community:post_composer_post")
+                  : t("common:reply")}
+            </Button>
+          )}
+        </div>
       </div>
+      {attachingPoll && (
+        <div className="rounded-md border border-border-whisper bg-surface-subtle p-4">
+          <PollComposer
+            submitLabel={t("community:poll_attach_submit")}
+            onCreated={handlePollCreated}
+          />
+        </div>
+      )}
+      {mutation.isError && (
+        <p className="text-sm leading-ui text-error-text">
+          {t("community:poll_attach_error")}
+        </p>
+      )}
       {authGuard.AuthModal({})}
     </div>
   );

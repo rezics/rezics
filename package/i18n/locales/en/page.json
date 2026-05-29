@@ -173,5 +173,6 @@
   "create_realm": "Realm",
   "create_entity": "Entity",
   "home_continuation_title": "Pick up where you left off",
-  "home_view_dashboard": "View your dashboard"
+  "home_view_dashboard": "View your dashboard",
+  "create_poll": "Poll"
 }

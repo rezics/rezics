@@ -1,4 +1,8 @@
+import { pollKeys } from "@rezics/api/poll/poll.keys";
+import type { PollResultsDTO } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 import { withRouter } from "@/stories/decorators/withRouter";
 import {
@@ -9,6 +13,48 @@ import {
   postLongBody,
 } from "@/stories/fixtures/post";
 import { PostCard } from "./PostCard";
+
+const POLL_ID = "poll-embed-demo";
+const pollResults: PollResultsDTO = {
+  pollUnitId: POLL_ID,
+  voteMode: "SINGLE",
+  resultVisibility: "LIVE",
+  anonymous: false,
+  closed: false,
+  resultsVisible: true,
+  totalVotes: 12,
+  myVote: ["opt-a"],
+  options: [
+    {
+      pollUnitId: POLL_ID,
+      optionId: "opt-a",
+      position: "a",
+      label: "Yes",
+      voteCount: 8,
+    },
+    {
+      pollUnitId: POLL_ID,
+      optionId: "opt-b",
+      position: "b",
+      label: "No",
+      voteCount: 4,
+    },
+  ],
+};
+
+/** Seeds the embedded poll into the query cache, then renders the post card. */
+function PostCardWithPoll() {
+  const qc = useQueryClient();
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    qc.setQueryData(pollKeys.detail(POLL_ID), pollResults);
+    setReady(true);
+  }, [qc]);
+  if (!ready) return null;
+  return (
+    <PostCard post={{ ...postFlat[0], extra: { poll: { unitId: POLL_ID } } }} />
+  );
+}
 
 const meta = {
   title: "Domain/Post/PostCard",
@@ -46,4 +92,8 @@ export const Edited: Story = {
       updatedAt: "2026-05-02T00:00:00.000Z",
     },
   },
+};
+
+export const WithEmbeddedPoll: Story = {
+  render: () => <PostCardWithPoll />,
 };

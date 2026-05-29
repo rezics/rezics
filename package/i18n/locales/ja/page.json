@@ -173,5 +173,6 @@
   "create_realm": "レルム",
   "create_entity": "エンティティ",
   "home_continuation_title": "続きから読む",
-  "home_view_dashboard": "ダッシュボードを見る"
+  "home_view_dashboard": "ダッシュボードを見る",
+  "create_poll": "投票"
 }

@@ -40,6 +40,8 @@ import { Route as MainLayoutReviewSearchRouteImport } from './routes/_mainLayout
 import { Route as MainLayoutRealmSearchRouteImport } from './routes/_mainLayout/realm/search'
 import { Route as MainLayoutRealmNewRouteImport } from './routes/_mainLayout/realm/new'
 import { Route as MainLayoutRRealmSlugRouteImport } from './routes/_mainLayout/r/$realmSlug'
+import { Route as MainLayoutPollNewRouteImport } from './routes/_mainLayout/poll/new'
+import { Route as MainLayoutPollUnitIdRouteImport } from './routes/_mainLayout/poll/$unitId'
 import { Route as MainLayoutInboxNotificationRouteImport } from './routes/_mainLayout/inbox/notification'
 import { Route as MainLayoutFeedbackAdminRouteImport } from './routes/_mainLayout/feedback/admin'
 import { Route as MainLayoutEEntitySlugRouteImport } from './routes/_mainLayout/e/$entitySlug'
@@ -296,6 +298,16 @@ const MainLayoutRealmNewRoute = MainLayoutRealmNewRouteImport.update({
 const MainLayoutRRealmSlugRoute = MainLayoutRRealmSlugRouteImport.update({
   id: '/r/$realmSlug',
   path: '/r/$realmSlug',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
+const MainLayoutPollNewRoute = MainLayoutPollNewRouteImport.update({
+  id: '/poll/new',
+  path: '/poll/new',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
+const MainLayoutPollUnitIdRoute = MainLayoutPollUnitIdRouteImport.update({
+  id: '/poll/$unitId',
+  path: '/poll/$unitId',
   getParentRoute: () => MainLayoutRoute,
 } as any)
 const MainLayoutInboxNotificationRoute =
@@ -915,6 +927,8 @@ export interface FileRoutesByFullPath {
   '/e/$entitySlug': typeof MainLayoutEEntitySlugRoute
   '/feedback/admin': typeof MainLayoutFeedbackAdminRoute
   '/inbox/notification': typeof MainLayoutInboxNotificationRoute
+  '/poll/$unitId': typeof MainLayoutPollUnitIdRoute
+  '/poll/new': typeof MainLayoutPollNewRoute
   '/r/$realmSlug': typeof MainLayoutRRealmSlugRouteWithChildren
   '/realm/new': typeof MainLayoutRealmNewRoute
   '/realm/search': typeof MainLayoutRealmSearchRoute
@@ -1047,6 +1061,8 @@ export interface FileRoutesByTo {
   '/e/$entitySlug': typeof MainLayoutEEntitySlugRoute
   '/feedback/admin': typeof MainLayoutFeedbackAdminRoute
   '/inbox/notification': typeof MainLayoutInboxNotificationRoute
+  '/poll/$unitId': typeof MainLayoutPollUnitIdRoute
+  '/poll/new': typeof MainLayoutPollNewRoute
   '/r/$realmSlug': typeof MainLayoutRRealmSlugRouteWithChildren
   '/realm/new': typeof MainLayoutRealmNewRoute
   '/realm/search': typeof MainLayoutRealmSearchRoute
@@ -1176,6 +1192,8 @@ export interface FileRoutesById {
   '/_mainLayout/e/$entitySlug': typeof MainLayoutEEntitySlugRoute
   '/_mainLayout/feedback/admin': typeof MainLayoutFeedbackAdminRoute
   '/_mainLayout/inbox/notification': typeof MainLayoutInboxNotificationRoute
+  '/_mainLayout/poll/$unitId': typeof MainLayoutPollUnitIdRoute
+  '/_mainLayout/poll/new': typeof MainLayoutPollNewRoute
   '/_mainLayout/r/$realmSlug': typeof MainLayoutRRealmSlugRouteWithChildren
   '/_mainLayout/realm/new': typeof MainLayoutRealmNewRoute
   '/_mainLayout/realm/search': typeof MainLayoutRealmSearchRoute
@@ -1312,6 +1330,8 @@ export interface FileRouteTypes {
     | '/e/$entitySlug'
     | '/feedback/admin'
     | '/inbox/notification'
+    | '/poll/$unitId'
+    | '/poll/new'
     | '/r/$realmSlug'
     | '/realm/new'
     | '/realm/search'
@@ -1444,6 +1464,8 @@ export interface FileRouteTypes {
     | '/e/$entitySlug'
     | '/feedback/admin'
     | '/inbox/notification'
+    | '/poll/$unitId'
+    | '/poll/new'
     | '/r/$realmSlug'
     | '/realm/new'
     | '/realm/search'
@@ -1572,6 +1594,8 @@ export interface FileRouteTypes {
     | '/_mainLayout/e/$entitySlug'
     | '/_mainLayout/feedback/admin'
     | '/_mainLayout/inbox/notification'
+    | '/_mainLayout/poll/$unitId'
+    | '/_mainLayout/poll/new'
     | '/_mainLayout/r/$realmSlug'
     | '/_mainLayout/realm/new'
     | '/_mainLayout/realm/search'
@@ -1915,6 +1939,20 @@ declare module '@tanstack/react-router' {
       path: '/r/$realmSlug'
       fullPath: '/r/$realmSlug'
       preLoaderRoute: typeof MainLayoutRRealmSlugRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/poll/new': {
+      id: '/_mainLayout/poll/new'
+      path: '/poll/new'
+      fullPath: '/poll/new'
+      preLoaderRoute: typeof MainLayoutPollNewRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
+    '/_mainLayout/poll/$unitId': {
+      id: '/_mainLayout/poll/$unitId'
+      path: '/poll/$unitId'
+      fullPath: '/poll/$unitId'
+      preLoaderRoute: typeof MainLayoutPollUnitIdRouteImport
       parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/inbox/notification': {
@@ -2937,6 +2975,8 @@ interface MainLayoutRouteChildren {
   MainLayoutEEntitySlugRoute: typeof MainLayoutEEntitySlugRoute
   MainLayoutFeedbackAdminRoute: typeof MainLayoutFeedbackAdminRoute
   MainLayoutInboxNotificationRoute: typeof MainLayoutInboxNotificationRoute
+  MainLayoutPollUnitIdRoute: typeof MainLayoutPollUnitIdRoute
+  MainLayoutPollNewRoute: typeof MainLayoutPollNewRoute
   MainLayoutRRealmSlugRoute: typeof MainLayoutRRealmSlugRouteWithChildren
   MainLayoutRealmNewRoute: typeof MainLayoutRealmNewRoute
   MainLayoutRealmSearchRoute: typeof MainLayoutRealmSearchRoute
@@ -3002,6 +3042,8 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutEEntitySlugRoute: MainLayoutEEntitySlugRoute,
   MainLayoutFeedbackAdminRoute: MainLayoutFeedbackAdminRoute,
   MainLayoutInboxNotificationRoute: MainLayoutInboxNotificationRoute,
+  MainLayoutPollUnitIdRoute: MainLayoutPollUnitIdRoute,
+  MainLayoutPollNewRoute: MainLayoutPollNewRoute,
   MainLayoutRRealmSlugRoute: MainLayoutRRealmSlugRouteWithChildren,
   MainLayoutRealmNewRoute: MainLayoutRealmNewRoute,
   MainLayoutRealmSearchRoute: MainLayoutRealmSearchRoute,

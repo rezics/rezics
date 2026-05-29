@@ -1,6 +1,12 @@
 import { useTranslation } from "@rezics/i18n/react";
 import { Card, CardContent } from "@rezics/ui/shadcn";
-import { BookPlus, ListPlus, Users as UsersIcon, UserPlus } from "lucide-react";
+import {
+  BarChart3,
+  BookPlus,
+  ListPlus,
+  Users as UsersIcon,
+  UserPlus,
+} from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
 
@@ -33,6 +39,7 @@ export const CreatePage: React.FC = () => {
       label: t("page:create_entity"),
       icon: UserPlus,
     },
+    { to: "/poll/new", label: t("page:create_poll"), icon: BarChart3 },
   ];
 
   return (

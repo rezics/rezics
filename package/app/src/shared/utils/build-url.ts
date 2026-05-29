@@ -9,6 +9,8 @@ export function buildUnitUrl(unit: UnitDTO): string {
       return `/review/${unit.id}`;
     case "QUOTE":
       return `/excerpt/${unit.id}`;
+    case "POLL":
+      return `/poll/${unit.id}`;
     case "SHELF":
       // SHELF helper needs owner context; UnitDTO does not carry it. Until the
       // owner slug is plumbed through, fall back to the canonical unitId form.
