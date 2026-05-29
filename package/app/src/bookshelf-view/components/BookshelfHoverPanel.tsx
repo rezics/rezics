@@ -1,3 +1,4 @@
+import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
 import type { BookshelfItem } from "../models/types";
@@ -8,11 +9,17 @@ export interface BookshelfHoverPanelProps {
 
 /**
  * Desktop-only hover preview shown when a viewer hovers a bookshelf cover.
- * Renders richer metadata and a direct link to the item's detail page.
+ * Renders richer metadata, the viewer's reading progress when known, and a
+ * direct link to the item's detail page.
  */
 export const BookshelfHoverPanel: React.FC<BookshelfHoverPanelProps> = ({
   item,
 }) => {
+  const { t } = useTranslation(["page"]);
+  // Show the progress line only when the book has countable chapters; never a
+  // "0/0" placeholder.
+  const hasProgress = item.chaptersTotal != null && item.chaptersTotal > 0;
+
   return (
     <div className="w-64 rounded-md border border-border-whisper bg-surface-raised p-3 shadow-lg">
       <div className="flex gap-3">
@@ -32,6 +39,19 @@ export const BookshelfHoverPanel: React.FC<BookshelfHoverPanelProps> = ({
           {item.author ? (
             <div className="mt-1 line-clamp-1 text-xs text-text-secondary">
               {item.author}
+            </div>
+          ) : null}
+          {hasProgress ? (
+            <div className="mt-1 text-xs text-text-secondary">
+              {t("page:dashboard_chapters_progress", {
+                completed: item.chaptersCompleted ?? 0,
+                total: item.chaptersTotal,
+              })}
+              {item.lastReadChapterTitle ? (
+                <span className="line-clamp-1 text-text-tertiary">
+                  {item.lastReadChapterTitle}
+                </span>
+              ) : null}
             </div>
           ) : null}
         </div>

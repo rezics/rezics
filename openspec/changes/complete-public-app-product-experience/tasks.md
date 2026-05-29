@@ -37,7 +37,7 @@
 - [x] 5.4 Add tests for shelf persistence, reorder stability, progress update fan-out, continue-reading, same-work release switching, and standalone content.
 - [x] 5.5 Add bookshelf contract surface: extend `ShelfView` in `package/api/src/shelf/shelf.types.ts` with `"bookshelf"`; add `bookshelfViewConfigSchema`, `DEFAULT_BOOKSHELF_CONFIG`, `LIBRARY_KINDS`, and per-kind aspect-ratio constants in `package/contract/src/`; extend `userSettingsSchema` in `package/contract/src/user.ts` with `library.bookshelf`.
 - [x] 5.6 Add `package/app/src/bookshelf-view/` feature (resolveBookshelfConfig, BookshelfGrid, BookshelfHoverPanel, UseMySettingsButton); extend `BookCard` with `showTitle?` and `aspectRatio?` props; route the `bookshelf` branch in `package/app/src/shelf/components/ShelfItemRenderer.tsx` through this feature and silently skip non-library kinds.
-- [ ] 5.7 Apply the readable filter (`isLicensed === true`) by default in the dashboard library section and expose it as an opt-in toggle on standalone shelf pages; ensure non-book library kinds (`game`, `media`) are unaffected.
+- [x] 5.7 Apply the readable filter (`isLicensed === true`) by default in the dashboard library section and expose it as an opt-in toggle on standalone shelf pages; ensure non-book library kinds (`game`, `media`) are unaffected.
 - [x] 5.8 Add stories/tests: bookshelf grid breakpoint resolution (URL → viewer settings → default), "use my settings" reset, desktop-only hover preview (no preview on touch, tap navigates to detail), mixed-content shelf silently filtering non-library kinds, and readable filter toggle behavior.
 
 ## 6. Creation Workflows

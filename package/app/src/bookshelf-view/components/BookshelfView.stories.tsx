@@ -19,6 +19,9 @@ const ITEMS: BookshelfItem[] = [
     coverUrl: COVER,
     isLicensed: true,
     href: "/book/b1",
+    chaptersCompleted: 3,
+    chaptersTotal: 12,
+    lastReadChapterTitle: "Arrakis",
   },
   {
     unitId: "b2",
@@ -87,10 +90,12 @@ export const HoverPreview: Story = {
     // One link per cover before hover.
     expect(canvas.getAllByRole("link", { name: "Dune" })).toHaveLength(1);
     await userEvent.hover(canvas.getAllByRole("link", { name: "Dune" })[0]!);
-    // The hover panel contributes a second link to the same detail page.
+    // The hover panel contributes a second link to the same detail page...
     await waitFor(() =>
       expect(canvas.getAllByRole("link", { name: "Dune" })).toHaveLength(2),
     );
+    // ...and surfaces the viewer's last-read chapter title.
+    expect(canvas.getByText("Arrakis")).toBeInTheDocument();
   },
 };
 

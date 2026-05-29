@@ -75,6 +75,11 @@ export const BookshelfGrid: React.FC<BookshelfGridProps> = ({
             showTitle={config.showTitle}
             aspectRatio={aspectRatioForKind(item.kind)}
           />
+          {item.chaptersTotal != null && item.chaptersTotal > 0 ? (
+            <div className="mt-1 text-xs tabular-nums text-text-secondary">
+              {item.chaptersCompleted ?? 0}/{item.chaptersTotal}
+            </div>
+          ) : null}
           {!isTouch && hoveredId === item.unitId ? (
             <div className="absolute left-1/2 top-full z-20 mt-1 -translate-x-1/2">
               <BookshelfHoverPanel item={item} />
