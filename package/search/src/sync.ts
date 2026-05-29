@@ -1727,7 +1727,6 @@ export function buildPostDocument(post: any): PostSearchDocument {
     contentText: mainMarkdownSource(post.content),
     kind: post.kind ?? null,
     depth: post.depth,
-    sortPath: post.sortPath ?? null,
     isLocked: post.isLocked,
     replyCount: post.replyCount,
     directReplyCount: post.directReplyCount,

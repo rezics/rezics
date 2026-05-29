@@ -6,16 +6,38 @@ import {
   getChildBranchPrefix,
   getContinuationLines,
   hasLaterSiblingBranch,
+  orderSiblingsByPromotion,
+  type PostTreeNodeModel,
 } from "../models/postTreeRails";
 
-function makePost(unitId: string, sortPath?: string, depth?: number): PostDTO {
+function makePost(unitId: string, path?: string, depth?: number): PostDTO {
   return {
     unitId,
     authorUserId: "user-1",
     content: markdownContentDoc("body"),
-    sortPath,
+    path,
     depth,
   } as PostDTO;
+}
+
+function makePromotablePost(
+  unitId: string,
+  path: string,
+  pin?: { pinKind: PostDTO["pinKind"]; pinPosition?: string },
+): PostDTO {
+  return {
+    unitId,
+    authorUserId: "user-1",
+    content: markdownContentDoc("body"),
+    path,
+    depth: 1,
+    pinKind: pin?.pinKind ?? null,
+    pinPosition: pin?.pinPosition ?? null,
+  } as PostDTO;
+}
+
+function childIds(nodes: PostTreeNodeModel[]): string[] {
+  return nodes[0]?.children.map((child) => child.post.unitId) ?? [];
 }
 
 describe("PostTreeSection helpers", () => {
@@ -120,5 +142,102 @@ describe("PostTreeSection helpers", () => {
       expect(tree[0]?.children[0]?.children[0]?.displayDepth).toBe(2);
       expect(tree[0]?.children[0]?.children[0]?.post.unitId).toBe("ccc");
     });
+  });
+});
+
+describe("post promotion overlay ordering", () => {
+  const root = makePost("root", "0001", 0);
+
+  it("orders accepted answers, then pins, then ordinary replies by base sort", () => {
+    const posts = [
+      root,
+      makePromotablePost("ordinary-1", "0001.0001"),
+      makePromotablePost("pinned-1", "0001.0002", {
+        pinKind: "PINNED",
+        pinPosition: "b",
+      }),
+      makePromotablePost("ordinary-2", "0001.0003"),
+      makePromotablePost("accepted-1", "0001.0004", {
+        pinKind: "ACCEPTED_ANSWER",
+        pinPosition: "a",
+      }),
+    ];
+
+    const nodes = buildPostTreeNodes({
+      posts,
+      baseDepth: 0,
+      maxDepth: 10,
+      visualMaxDepth: 4,
+    });
+
+    expect(childIds(nodes)).toEqual([
+      "accepted-1",
+      "pinned-1",
+      "ordinary-1",
+      "ordinary-2",
+    ]);
+  });
+
+  it("orders within a kind group by pinPosition ascending", () => {
+    const group = [
+      {
+        post: makePromotablePost("a2", "0001.0002", {
+          pinKind: "PINNED",
+          pinPosition: "m",
+        }),
+        displayDepth: 1,
+        atMaxDepth: false,
+        children: [],
+      },
+      {
+        post: makePromotablePost("a1", "0001.0001", {
+          pinKind: "PINNED",
+          pinPosition: "a",
+        }),
+        displayDepth: 1,
+        atMaxDepth: false,
+        children: [],
+      },
+    ];
+
+    const ordered = orderSiblingsByPromotion(group);
+    expect(ordered.map((node) => node.post.unitId)).toEqual(["a1", "a2"]);
+  });
+
+  it("propagates pinKind to the rendered node", () => {
+    const posts = [
+      root,
+      makePromotablePost("accepted-1", "0001.0001", {
+        pinKind: "ACCEPTED_ANSWER",
+        pinPosition: "a",
+      }),
+    ];
+
+    const nodes = buildPostTreeNodes({
+      posts,
+      baseDepth: 0,
+      maxDepth: 10,
+      visualMaxDepth: 4,
+    });
+
+    expect(nodes[0]?.children[0]?.post.pinKind).toBe("ACCEPTED_ANSWER");
+  });
+
+  it("leaves a thread with no promotions in base order", () => {
+    const posts = [
+      root,
+      makePromotablePost("r1", "0001.0001"),
+      makePromotablePost("r2", "0001.0002"),
+      makePromotablePost("r3", "0001.0003"),
+    ];
+
+    const nodes = buildPostTreeNodes({
+      posts,
+      baseDepth: 0,
+      maxDepth: 10,
+      visualMaxDepth: 4,
+    });
+
+    expect(childIds(nodes)).toEqual(["r1", "r2", "r3"]);
   });
 });

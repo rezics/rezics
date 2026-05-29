@@ -9,7 +9,6 @@ export const PostSearchDocumentSchema = t.Object({
   contentText: t.Union([t.String(), t.Null()]),
   kind: t.Union([t.String(), t.Null()]),
   depth: t.Number(),
-  sortPath: t.Union([t.String(), t.Null()]),
   isLocked: t.Boolean(),
   replyCount: t.Number(),
   directReplyCount: t.Number(),

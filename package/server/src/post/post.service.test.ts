@@ -36,7 +36,6 @@ const postFindUniqueOrThrowMock = mock(
     unitId: "parent-1",
     rootPostUnitId: "root-1",
     depth: 0,
-    sortPath: "0001",
     isLocked: false,
     rootTargetUnitId: null,
     rootTargetUnitType: null,
@@ -85,6 +84,17 @@ const subjectAttributionFindManyMock = mock(async (): Promise<any[]> => []);
 const unitCollaboratorFindUniqueMock = mock(async (): Promise<any> => null);
 const unitFieldLockFindManyMock = mock(async (): Promise<any[]> => []);
 const queryRawMock = mock(async (): Promise<any[]> => [{ sequence: 1n }]);
+const executeRawMock = mock(async (): Promise<number> => 1);
+const postPinCreateMock = mock(async (args: any) => ({
+  ...args.data,
+  createdAt: new Date("2026-05-29T00:00:00.000Z"),
+}));
+const postPinFindUniqueMock = mock(async (): Promise<any> => null);
+const postPinFindFirstMock = mock(async (): Promise<any> => null);
+const postPinDeleteMock = mock(async (args: any) => args.where);
+const unitFindFirstMock = mock(async (): Promise<any> => null);
+const realmMemberFindFirstMock = mock(async (): Promise<any> => null);
+const unitTagFindUniqueMock = mock(async (): Promise<any> => null);
 const historyOutboxCreateMock = mock(async (args: any) => args.data);
 const userFindUniqueMock = mock(async () => null);
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
@@ -95,6 +105,7 @@ const blockedUserIdsMock = mock(async (): Promise<string[]> => []);
 const transactionMock = mock(async (fn: any) =>
   fn({
     $queryRaw: queryRawMock,
+    $executeRaw: executeRawMock,
     unit: {
       create: unitCreateMock,
       findMany: unitFindManyMock,
@@ -128,10 +139,13 @@ const transactionMock = mock(async (fn: any) =>
 installPrismaClientMock();
 Object.assign(prismaMock, {
   $transaction: transactionMock,
+  $queryRaw: queryRawMock,
+  $executeRaw: executeRawMock,
   unit: {
     create: unitCreateMock,
     findMany: unitFindManyMock,
     findUnique: unitFindUniqueMock,
+    findFirst: unitFindFirstMock,
     findUniqueOrThrow: unitFindUniqueOrThrowMock,
   },
   post: {
@@ -145,12 +159,25 @@ Object.assign(prismaMock, {
   },
   unitRealm: { create: realmUnitCreateMock },
   realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
-  realmMember: { findMany: realmMemberFindManyMock },
+  realmMember: {
+    findMany: realmMemberFindManyMock,
+    findFirst: realmMemberFindFirstMock,
+  },
   realmRuleAcknowledgement: {
     findMany: realmRuleAcknowledgementFindManyMock,
   },
   unitWork: { findMany: unitWorkFindManyMock, upsert: unitWorkUpsertMock },
-  unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
+  unitTag: {
+    create: unitTagCreateMock,
+    findMany: unitTagFindManyMock,
+    findUnique: unitTagFindUniqueMock,
+  },
+  postPin: {
+    create: postPinCreateMock,
+    findUnique: postPinFindUniqueMock,
+    findFirst: postPinFindFirstMock,
+    delete: postPinDeleteMock,
+  },
   user: { findUnique: userFindUniqueMock },
 });
 
@@ -178,6 +205,7 @@ mock.module("@/unit/collaborative-metadata", () => ({
 
 mock.module("@/unit/publication-policy", () => ({
   publicUnitEligibilityWhere: { status: "PUBLISHED", visibility: "PUBLIC" },
+  resolveStoredLicenseSlug: (slug: unknown) => slug ?? null,
 }));
 
 mock.module("@/utils/userSlugHydration", () => ({
@@ -266,6 +294,20 @@ function resetMocks() {
   unitCollaboratorFindUniqueMock.mockClear();
   unitFieldLockFindManyMock.mockClear();
   queryRawMock.mockClear();
+  queryRawMock.mockImplementation(async () => [{ sequence: 1n }]);
+  executeRawMock.mockClear();
+  postPinCreateMock.mockClear();
+  postPinFindUniqueMock.mockClear();
+  postPinFindUniqueMock.mockResolvedValue(null);
+  postPinFindFirstMock.mockClear();
+  postPinFindFirstMock.mockResolvedValue(null);
+  postPinDeleteMock.mockClear();
+  unitFindFirstMock.mockClear();
+  unitFindFirstMock.mockResolvedValue(null);
+  realmMemberFindFirstMock.mockClear();
+  realmMemberFindFirstMock.mockResolvedValue(null);
+  unitTagFindUniqueMock.mockClear();
+  unitTagFindUniqueMock.mockResolvedValue(null);
   historyOutboxCreateMock.mockClear();
   userFindUniqueMock.mockClear();
   enqueueMock.mockClear();
@@ -461,7 +503,6 @@ describe("PostService.create realm/tag junction writes", () => {
       unitId: "parent-1",
       rootPostUnitId: "parent-1",
       depth: 0,
-      sortPath: "0001",
       isLocked: false,
       rootTargetUnitId: null,
       rootTargetUnitType: null,
@@ -492,7 +533,6 @@ describe("PostService.create realm/tag junction writes", () => {
       unitId: "parent-1",
       rootPostUnitId: "parent-1",
       depth: 0,
-      sortPath: "0001",
       isLocked: false,
       rootTargetUnitId: null,
       rootTargetUnitType: null,
@@ -525,7 +565,6 @@ describe("PostService.create realm/tag junction writes", () => {
       unitId: "parent-1",
       rootPostUnitId: "parent-1",
       depth: 0,
-      sortPath: "0001",
       isLocked: false,
       rootTargetUnitId: null,
       rootTargetUnitType: null,
@@ -916,14 +955,22 @@ describe("PostService.getPrimaryVisibleRealmForPost", () => {
 describe("PostService.list subtree queries", () => {
   const service = new PostService();
 
-  test("queries descendants by anchor sortPath and relative maxDepth", async () => {
+  test("queries descendants by ltree containment scoped to the root thread", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
-      unitId: "reply-2",
-      rootPostUnitId: "root-1",
-      depth: 2,
-      sortPath: "0001.0002",
-    });
+    // First $queryRaw: anchor row (unitId/rootPostUnitId/depth/path).
+    queryRawMock.mockImplementationOnce(async () => [
+      {
+        unitId: "reply-2",
+        rootPostUnitId: "root-1",
+        depth: 2,
+        path: "0001.0002",
+      },
+    ]);
+    // Second $queryRaw: descendant unitIds from `path <@ anchor.path`.
+    queryRawMock.mockImplementationOnce(async () => [
+      { unitId: "reply-3" },
+      { unitId: "reply-4" },
+    ]);
 
     await service.list({
       subtreeRootPostUnitId: "reply-2",
@@ -931,56 +978,54 @@ describe("PostService.list subtree queries", () => {
       maxDepth: 2,
     });
 
-    expect(postFindUniqueOrThrowMock).toHaveBeenCalledWith({
-      where: { unitId: "reply-2" },
-      select: {
-        unitId: true,
-        rootPostUnitId: true,
-        depth: true,
-        sortPath: true,
-      },
-    });
+    // The whole-thread case is NOT used: retrieval is bounded by the
+    // descendant id set computed from `path <@` and the thread root, ordered
+    // by a DB key (School B), never by `path`.
     expect(firstPostFindManyArgs().where).toMatchObject({
       OR: [
         { unit: { status: "PUBLISHED", visibility: "PUBLIC" } },
         { unit: { status: "DELETED", visibility: "PUBLIC" } },
       ],
       rootPostUnitId: "root-1",
-      unitId: { not: "reply-2" },
-      depth: { lte: 4 },
-      sortPath: { startsWith: "0001.0002." },
+      unitId: { in: ["reply-3", "reply-4"] },
     });
-    expect(firstPostFindManyArgs().orderBy).toEqual([
-      { sortPath: "asc" },
-      { createdAt: "asc" },
-    ]);
+    expect(firstPostFindManyArgs().where.path).toBeUndefined();
+    expect(firstPostFindManyArgs().orderBy).toEqual([{ createdAt: "asc" }]);
   });
 
-  test("allows root anchor without sortPath by querying the whole root thread", async () => {
+  test("intersects the descendant set with an explicit ids filter", async () => {
     resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
-      unitId: "root-1",
-      rootPostUnitId: "root-1",
-      depth: 0,
-      sortPath: null,
-    });
+    queryRawMock.mockImplementationOnce(async () => [
+      {
+        unitId: "reply-2",
+        rootPostUnitId: "root-1",
+        depth: 1,
+        path: "0001.0002",
+      },
+    ]);
+    queryRawMock.mockImplementationOnce(async () => [
+      { unitId: "reply-3" },
+      { unitId: "reply-4" },
+    ]);
 
     await service.list({
-      subtreeRootPostUnitId: "root-1",
-      mode: "threaded",
-      maxDepth: 3,
+      subtreeRootPostUnitId: "reply-2",
+      ids: "reply-4,reply-9",
     });
 
     expect(firstPostFindManyArgs().where).toMatchObject({
-      OR: [
-        { unit: { status: "PUBLISHED", visibility: "PUBLIC" } },
-        { unit: { status: "DELETED", visibility: "PUBLIC" } },
-      ],
       rootPostUnitId: "root-1",
-      unitId: { not: "root-1" },
-      depth: { lte: 3 },
+      unitId: { in: ["reply-4"] },
     });
-    expect(firstPostFindManyArgs().where.sortPath).toBeUndefined();
+  });
+
+  test("missing anchor throws not-found", async () => {
+    resetMocks();
+    queryRawMock.mockImplementationOnce(async () => []);
+
+    await expect(
+      service.list({ subtreeRootPostUnitId: "missing-1" }),
+    ).rejects.toThrow("Post not found: missing-1");
   });
 });
 
@@ -1043,7 +1088,6 @@ describe("PostService.create rootTargetUnit derivation", () => {
       unitId: "parent-1",
       rootPostUnitId: "root-1",
       depth: 0,
-      sortPath: "0001",
       isLocked: false,
       rootTargetUnitId: "book-B",
       rootTargetUnitType: "BOOK",
@@ -1070,7 +1114,6 @@ describe("PostService.create rootTargetUnit derivation", () => {
       unitId: "parent-1",
       rootPostUnitId: "root-1",
       depth: 0,
-      sortPath: "0001",
       isLocked: false,
       rootTargetUnitId: null,
       rootTargetUnitType: null,
@@ -1098,7 +1141,6 @@ describe("PostService.create rootTargetUnit derivation", () => {
       unitId: "comment-1",
       rootPostUnitId: "root-1",
       depth: 1,
-      sortPath: "0001.0001",
       isLocked: false,
       rootTargetUnitId: "book-B",
       rootTargetUnitType: "BOOK",
@@ -1349,5 +1391,209 @@ describe("PostService wiki posts", () => {
     expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledTimes(1);
     const postUpdateArgs = (postUpdateMock.mock.calls as any[])[0][0];
     expect(postUpdateArgs.data.isLocked).toBe(true);
+  });
+});
+
+describe("PostService promotion overlay (pin / accepted answer)", () => {
+  const service = new PostService();
+  const op = { userId: "op-1", permission: { role: "USER" } } as any;
+  const stranger = {
+    userId: "stranger-1",
+    permission: { role: "USER" },
+  } as any;
+
+  const rootScope = (
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    authorUserId: "op-1",
+    depth: 0,
+    rootPostUnitId: "root-1",
+    unit: { type: "POST", inRealms: [] },
+    ...overrides,
+  });
+  const directReply = (
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    depth: 1,
+    rootPostUnitId: "root-1",
+    parentPostUnitId: "root-1",
+    ...overrides,
+  });
+
+  test("OP pins a reply within their own thread", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(directReply());
+
+    const pin = await service.pin(
+      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      op,
+    );
+
+    expect(postPinCreateMock.mock.calls[0][0].data).toMatchObject({
+      scopeUnitId: "root-1",
+      postUnitId: "reply-1",
+      kind: "PINNED",
+      byUserId: "op-1",
+    });
+    expect(pin.kind).toBe("PINNED");
+  });
+
+  test("a non-OP non-moderator cannot pin", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(
+      rootScope({
+        unit: { type: "POST", inRealms: [{ realmUnitId: "realm-1" }] },
+      }),
+    );
+
+    await expect(
+      service.pin({ scopeUnitId: "root-1", postUnitId: "reply-1" }, stranger),
+    ).rejects.toThrow(/moderator\/owner/);
+    expect(postPinCreateMock).not.toHaveBeenCalled();
+  });
+
+  test("a realm moderator may pin in a thread of their realm", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(
+        rootScope({
+          unit: { type: "POST", inRealms: [{ realmUnitId: "realm-1" }] },
+        }),
+      )
+      .mockResolvedValueOnce(directReply());
+    realmMemberFindFirstMock.mockResolvedValueOnce({ realmUnitId: "realm-1" });
+
+    const pin = await service.pin(
+      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      { userId: "mod-1", permission: { role: "USER" } } as any,
+    );
+    expect(pin.kind).toBe("PINNED");
+  });
+
+  test("rejects a target outside the scope thread", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(
+        directReply({
+          rootPostUnitId: "other-root",
+          parentPostUnitId: "other-root",
+        }),
+      );
+
+    await expect(
+      service.pin({ scopeUnitId: "root-1", postUnitId: "reply-x" }, op),
+    ).rejects.toThrow(/scope thread/);
+  });
+
+  test("rejects a realm id as a scope", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(null);
+    unitFindUniqueMock.mockResolvedValueOnce({ type: "REALM" });
+
+    await expect(
+      service.pin({ scopeUnitId: "realm-1", postUnitId: "reply-1" }, op),
+    ).rejects.toThrow(/pinboard/);
+  });
+
+  test("accept is rejected outside a Q&A thread", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(directReply());
+    unitFindFirstMock.mockResolvedValueOnce(null); // no official question tag
+
+    await expect(
+      service.acceptAnswer(
+        { scopeUnitId: "root-1", postUnitId: "reply-1" },
+        op,
+      ),
+    ).rejects.toThrow(/Q&A thread/);
+    expect(postPinCreateMock).not.toHaveBeenCalled();
+  });
+
+  test("accept is rejected for a non-direct reply", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(
+        directReply({ depth: 2, parentPostUnitId: "reply-1" }),
+      );
+
+    await expect(
+      service.acceptAnswer(
+        { scopeUnitId: "root-1", postUnitId: "reply-2" },
+        op,
+      ),
+    ).rejects.toThrow(/direct reply/);
+  });
+
+  test("OP accepts a qualifying direct reply in a Q&A thread", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(directReply());
+    unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
+    unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
+
+    const pin = await service.acceptAnswer(
+      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      op,
+    );
+    expect(pin.kind).toBe("ACCEPTED_ANSWER");
+    expect(postPinCreateMock.mock.calls[0][0].data.kind).toBe(
+      "ACCEPTED_ANSWER",
+    );
+  });
+
+  test("multiple accepted answers get distinct positions without renumbering", async () => {
+    resetMocks();
+    unitFindFirstMock.mockResolvedValue({ id: "tag-q" });
+    unitTagFindUniqueMock.mockResolvedValue({ unitId: "root-1" });
+
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(directReply());
+    await service.acceptAnswer(
+      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      op,
+    );
+
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(directReply({ parentPostUnitId: "root-1" }));
+    postPinFindFirstMock.mockResolvedValueOnce({ position: "a0" });
+    await service.acceptAnswer(
+      { scopeUnitId: "root-1", postUnitId: "reply-2" },
+      op,
+    );
+
+    expect(postPinCreateMock).toHaveBeenCalledTimes(2);
+    const positions = (postPinCreateMock.mock.calls as any[]).map(
+      (call) => call[0].data.position,
+    );
+    expect(positions[0]).not.toBe(positions[1]);
+  });
+
+  test("unpin removes the PINNED promotion after a capability check", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    postPinFindUniqueMock.mockResolvedValueOnce({ kind: "PINNED" });
+
+    await service.unpin("root-1", "reply-1", op);
+    expect(postPinDeleteMock).toHaveBeenCalled();
+  });
+
+  test("unaccept rejects when the existing pin is not an accepted answer", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    postPinFindUniqueMock.mockResolvedValueOnce({ kind: "PINNED" });
+
+    await expect(
+      service.unacceptAnswer("root-1", "reply-1", op),
+    ).rejects.toThrow(/not found/);
+    expect(postPinDeleteMock).not.toHaveBeenCalled();
   });
 });

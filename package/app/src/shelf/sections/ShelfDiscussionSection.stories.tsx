@@ -43,14 +43,14 @@ const POPULATED_POSTS: PostDTO[] = [
   makePost({
     unitId: "shelf-p1",
     depth: 1,
-    sortPath: "0001",
+    path: "0001",
     contentSource:
       "Really nice curation! Any chance you'll add the second series?",
   }),
   makePost({
     unitId: "shelf-p2",
     depth: 1,
-    sortPath: "0002",
+    path: "0002",
     contentSource: "Love the range here — thanks for sharing.",
   }),
 ];
@@ -59,7 +59,7 @@ const MANY_POSTS: PostDTO[] = Array.from({ length: 12 }).map((_, i) =>
   makePost({
     unitId: `shelf-many-${i + 1}`,
     depth: 1,
-    sortPath: String(i + 1).padStart(4, "0"),
+    path: String(i + 1).padStart(4, "0"),
     contentSource: `Comment ${i + 1}: thoughtful note about the curation choices.`,
   } as Partial<PostDTO> & Pick<PostDTO, "unitId" | "depth">),
 );

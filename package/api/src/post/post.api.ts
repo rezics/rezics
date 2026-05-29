@@ -6,11 +6,14 @@
  */
 
 import type {
+  AcceptAnswerInput,
   CreatePostInput,
   EditorialPatchSubmission,
+  PinPostInput,
   PostListResponse,
   PostModerationOverlayRequest,
   PostModerationOverlayResponse,
+  PostPinDTO,
   PostResponse,
   SetPostPublicationInput,
   UpdatePostInput,
@@ -218,5 +221,43 @@ export const postApi = {
     return apiFetch<{ message: string }>(`/post/${unitId}`, {
       method: "DELETE",
     });
+  },
+
+  /** Pin a reply within its thread (kind = PINNED). */
+  pin: async (input: PinPostInput): Promise<PostPinDTO> => {
+    return apiFetch<PostPinDTO>("/post/pins", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  /** Remove a PINNED promotion. */
+  unpin: async (
+    scopeUnitId: string,
+    postUnitId: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/post/pins/${scopeUnitId}/${postUnitId}`,
+      { method: "DELETE" },
+    );
+  },
+
+  /** Accept a direct reply as an answer (kind = ACCEPTED_ANSWER) in a Q&A thread. */
+  acceptAnswer: async (input: AcceptAnswerInput): Promise<PostPinDTO> => {
+    return apiFetch<PostPinDTO>("/post/accepted-answers", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  /** Remove an ACCEPTED_ANSWER promotion. */
+  unacceptAnswer: async (
+    scopeUnitId: string,
+    postUnitId: string,
+  ): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(
+      `/post/accepted-answers/${scopeUnitId}/${postUnitId}`,
+      { method: "DELETE" },
+    );
   },
 };

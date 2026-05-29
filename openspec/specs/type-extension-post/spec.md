@@ -3,14 +3,12 @@
 ## Purpose
 
 Defines Post kind extensions and related rendering rules, including chapter-as-post behavior, excerpt source metadata, and the removal of legacy comment/quote post kinds.
-
 ## Requirements
-
 ### Requirement: CHAPTER is a valid Post kindKey
 
 The `Post.kindKey` field SHALL accept `"chapter"` as a valid value alongside the existing `discussion`, `review`, `remark`, `excerpt`, and `post` values. A Post with `kindKey = "chapter"` represents a chapter of a book. Its `targetUnitId` SHALL reference the parent book unit (a Unit of type `BOOK`). Its `content` SHALL hold the chapter content as a `ContentDoc` whose `main` block is Markdown by default. Its `authorUserId` SHALL be the chapter author. Chapter posts SHALL NOT carry a `body` string column or DTO field.
 
-A chapter Post SHALL use the same threading fields as any other Post (`parentPostUnitId`, `rootPostUnitId`, `depth`, `sortPath`) to accommodate replies, annotations, and discussion threads attached to the chapter.
+A chapter Post SHALL use the same threading fields as any other Post (`parentPostUnitId`, `rootPostUnitId`, `depth`, `path`) to accommodate replies, annotations, and discussion threads attached to the chapter.
 
 #### Scenario: Create a chapter post
 
@@ -29,20 +27,9 @@ A chapter Post SHALL use the same threading fields as any other Post (`parentPos
 
 #### Scenario: Chapter post content retrieved from Post.content
 
-- GIVEN a chapter Post whose `content.main.source = "Once upon a time..."`
-- WHEN a client requests the chapter's detail DTO
-- THEN the DTO SHALL expose `content` as a `ContentDoc`
-- AND `content.main.source` SHALL equal "Once upon a time..."
-- AND the DTO SHALL NOT expose a `body` field
-- AND the content SHALL NOT be read from `UnitTranslation.description`
-
-#### Scenario: Chapter cover URL sourced from UnitTranslation.extra
-
-- GIVEN a chapter Post with a `UnitTranslation` row whose `extra = { coverUrl: "https://example.com/ch-cover.jpg" }`
-- WHEN a client requests the chapter's detail DTO
-- THEN the DTO SHALL expose `coverUrl = "https://example.com/ch-cover.jpg"` via the `unitTranslationExtraSchema` accessor
-- AND no chapter-specific cover column SHALL exist on `Post`
-- AND the cover URL SHALL NOT be embedded inside `content.slots`
+- GIVEN a persisted chapter Post for "book-1"
+- WHEN the chapter is loaded
+- THEN its `content` SHALL be returned as the stored `ContentDoc`
 
 ### Requirement: Chapter ordering and grouping live in BookContentStructure, not Post
 
@@ -130,7 +117,7 @@ The Postgres `Post` table SHALL include an index on `(rootTargetUnitId, createdA
 
 ### Requirement: Replies inherit root target identifiers from their parent
 
-When a reply post is created with a non-null `parentPostUnitId`, the post creation flow SHALL inherit `rootTargetUnitId` and `rootTargetUnitType` from the parent post. The inheritance SHALL be performed as part of the same database read that already fetches the parent for `rootPostUnitId`, `depth`, and `sortPath` derivation, with no additional database roundtrip introduced.
+When a reply post is created with a non-null `parentPostUnitId`, the post creation flow SHALL inherit `rootTargetUnitId` and `rootTargetUnitType` from the parent post. The inheritance SHALL be performed as part of the same database read that already fetches the parent for `rootPostUnitId`, `depth`, and `path` derivation, with no additional database roundtrip introduced.
 
 The derivation SHALL NOT branch on `PostKind`. Replies of any `PostKind` (including `REVIEW`, `EXCERPT`, `REMARK`, `POST`, `CHAPTER`) SHALL inherit from their parent identically.
 
@@ -409,3 +396,4 @@ If non-generic post kinds support Unit visibility, the system SHALL apply visibi
 - **WHEN** a reply is created under a root post with Unit visibility metadata
 - **THEN** the reply SHALL inherit the root visibility
 - **AND** the reply SHALL NOT become more public or more private than the root through ordinary user input
+

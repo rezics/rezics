@@ -37,6 +37,12 @@ export const UnitAliasStatus = {
   HIDDEN: "HIDDEN",
 } as const;
 
+export const PinKind = {
+  ACCEPTED_ANSWER: "ACCEPTED_ANSWER",
+  PINNED: "PINNED",
+  HIGHLIGHT: "HIGHLIGHT",
+} as const;
+
 export const UnitVisibility = {
   PUBLIC: "PUBLIC",
   PRIVATE: "PRIVATE",
@@ -75,7 +81,15 @@ export const UserUnitProgressStatus = {
   DROPPED: "DROPPED",
 } as const;
 
-export const Prisma = {};
+// Minimal stand-ins for the raw-SQL tag helpers. The `$queryRaw`/`$executeRaw`
+// mocks ignore their arguments, so these only need to not throw when the
+// service composes ltree path SQL.
+export const Prisma = {
+  sql: (...args: unknown[]) => args,
+  join: (...args: unknown[]) => args,
+  raw: (value: unknown) => value,
+  empty: undefined as unknown,
+};
 
 export const prismaMock: Record<string, any> = {};
 
@@ -83,6 +97,7 @@ export const prismaClientMock = {
   prisma: prismaMock,
   Prisma,
   PostKind,
+  PinKind,
   UnitStatus,
   UnitAliasStatus,
   UnitType,

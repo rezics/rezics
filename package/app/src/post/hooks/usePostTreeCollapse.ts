@@ -59,46 +59,43 @@ export function getRevealExpandedIds(
   if (!revealPostUnitId) return new Set();
 
   const target = posts.find((post) => post.unitId === revealPostUnitId);
-  if (!target?.sortPath) {
+  if (!target?.path) {
     return new Set(revealPostUnitId ? [revealPostUnitId] : []);
   }
 
   const set = new Set<string>();
   for (const post of posts) {
-    if (!post.sortPath) continue;
-    if (
-      target.sortPath === post.sortPath ||
-      target.sortPath.startsWith(`${post.sortPath}.`)
-    ) {
+    if (!post.path) continue;
+    if (target.path === post.path || target.path.startsWith(`${post.path}.`)) {
       set.add(post.unitId);
     }
   }
   return set;
 }
 
-export function filterBySortPathPrefix(
+export function filterByPathPrefix(
   posts: PostDTO[],
   collapsedIds: Set<string>,
 ): PostDTO[] {
   if (collapsedIds.size === 0) return posts;
 
-  const collapsedSortPaths: string[] = [];
+  const collapsedPaths: string[] = [];
   for (const post of posts) {
-    if (collapsedIds.has(post.unitId) && post.sortPath) {
-      collapsedSortPaths.push(post.sortPath);
+    if (collapsedIds.has(post.unitId) && post.path) {
+      collapsedPaths.push(post.path);
     }
   }
-  if (collapsedSortPaths.length === 0) return posts;
-  collapsedSortPaths.sort((a, b) => a.length - b.length);
+  if (collapsedPaths.length === 0) return posts;
+  collapsedPaths.sort((a, b) => a.length - b.length);
 
   return posts.filter((post) => {
-    if (!post.sortPath) return true;
-    for (const prefix of collapsedSortPaths) {
-      if (post.sortPath === prefix) return true;
-      if (
-        post.sortPath.length > prefix.length &&
-        post.sortPath.startsWith(prefix)
-      ) {
+    if (!post.path) return true;
+    for (const prefix of collapsedPaths) {
+      // The collapsed post itself stays visible; its descendants are hidden.
+      // The trailing separator keeps the prefix test label-boundary-safe for
+      // variable-length ltree labels.
+      if (post.path === prefix) return true;
+      if (post.path.startsWith(`${prefix}.`)) {
         return false;
       }
     }
@@ -188,7 +185,7 @@ export function usePostTreeCollapse(
   }, []);
 
   const visiblePosts = useMemo(
-    () => filterBySortPathPrefix(posts, collapsedIds),
+    () => filterByPathPrefix(posts, collapsedIds),
     [posts, collapsedIds],
   );
 

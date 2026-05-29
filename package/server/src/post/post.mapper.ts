@@ -1,4 +1,5 @@
-import type { PostDTO } from "@rezics/contract";
+import type { PostDTO, PostPinDTO } from "@rezics/contract";
+import type { PostPin } from "#/prisma/client";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { PostWithRelations } from "./types";
@@ -40,13 +41,27 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     isTombstone: post.unit.status === "DELETED" || contentHidden,
     scoreEntryId: post.scoreEntryId ?? null,
     depth: post.depth,
-    sortPath: post.sortPath ?? null,
+    path: post.path ?? null,
     replyCount: post.replyCount,
     directReplyCount: post.directReplyCount,
     lastReplyAt: post.lastReplyAt?.toISOString() ?? null,
     isLocked: post.isLocked,
+    pinKind: post.pinKind ?? null,
+    pinPosition: post.pinPosition ?? null,
     extra: post.extra as Record<string, unknown> | null,
     createdAt: post.createdAt.toISOString(),
     updatedAt: post.updatedAt.toISOString(),
+  };
+}
+
+/** Map a PostPin row to its public DTO. */
+export function mapPostPinToDTO(pin: PostPin): PostPinDTO {
+  return {
+    scopeUnitId: pin.scopeUnitId,
+    postUnitId: pin.postUnitId,
+    kind: pin.kind,
+    position: pin.position,
+    byUserId: pin.byUserId,
+    createdAt: pin.createdAt.toISOString(),
   };
 }

@@ -37,6 +37,30 @@ export const postKindLiterals = t.Union([
 ]);
 
 // ============================================================
+// PIN KIND (post promotion overlay)
+// ============================================================
+
+export const PinKind = {
+  ACCEPTED_ANSWER: "ACCEPTED_ANSWER",
+  PINNED: "PINNED",
+  HIGHLIGHT: "HIGHLIGHT",
+} as const;
+
+export type PinKind = (typeof PinKind)[keyof typeof PinKind];
+
+export const pinKindLiterals = t.Union([
+  t.Literal("ACCEPTED_ANSWER"),
+  t.Literal("PINNED"),
+  t.Literal("HIGHLIGHT"),
+]);
+
+/**
+ * Platform-reserved tag slug whose `Unit(type=TAG)` marks a thread as a Q&A
+ * thread when borne by the root post. Uniform across all realms.
+ */
+export const OFFICIAL_QUESTION_TAG_SLUG = "question";
+
+// ============================================================
 // EXCERPT SOURCE SCHEMA
 // ============================================================
 
@@ -97,18 +121,70 @@ export const postDTOSchema = t.Object({
   ),
   isTombstone: t.Optional(t.Boolean()),
   depth: t.Optional(t.Number()),
-  sortPath: t.Optional(t.Nullable(t.String())),
+  /**
+   * Native ltree materialized path (root→post), e.g. `"1.3.a"`. Bounds the
+   * subtree and yields depth; it is NOT a presentation-order key (School B).
+   * Replaces the removed `sortPath`.
+   */
+  path: t.Optional(t.Nullable(t.String())),
   replyCount: t.Optional(t.Number()),
   directReplyCount: t.Optional(t.Number()),
   lastReplyAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   isLocked: t.Optional(t.Boolean()),
   scoreEntryId: t.Optional(t.Nullable(t.String())),
+  /**
+   * Promotion overlay for the rendered thread scope: why this reply is promoted
+   * (accepted answer vs. pin), or null when it is an ordinary reply. Set by the
+   * thread read; the client groups promoted replies ahead of ordinary ones.
+   */
+  pinKind: t.Optional(t.Nullable(pinKindLiterals)),
+  /** Fractional-index position within its `pinKind` group (for render order). */
+  pinPosition: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(postExtraSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
 
 export type PostDTO = (typeof postDTOSchema)["static"];
+
+// ============================================================
+// POST PIN DTO + REQUESTS
+// ============================================================
+
+export const postPinDTOSchema = t.Object({
+  scopeUnitId: t.String(),
+  postUnitId: t.String(),
+  kind: pinKindLiterals,
+  position: t.String(),
+  byUserId: t.String(),
+  createdAt: t.Union([t.String(), t.Date()]),
+});
+
+export type PostPinDTO = (typeof postPinDTOSchema)["static"];
+
+/**
+ * Pin a reply (`kind = PINNED`) within its thread scope. `scopeUnitId` MUST be
+ * the thread root post; the target MUST be a reply in that thread.
+ */
+export const pinPostSchema = t.Object({
+  scopeUnitId: t.String(),
+  postUnitId: t.String(),
+  /** Optional explicit ordering anchors; the server mints a position between them. */
+  beforePostUnitId: t.Optional(t.String()),
+  afterPostUnitId: t.Optional(t.String()),
+});
+
+export type PinPostInput = (typeof pinPostSchema)["static"];
+
+/** Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread. */
+export const acceptAnswerSchema = t.Object({
+  scopeUnitId: t.String(),
+  postUnitId: t.String(),
+  beforePostUnitId: t.Optional(t.String()),
+  afterPostUnitId: t.Optional(t.String()),
+});
+
+export type AcceptAnswerInput = (typeof acceptAnswerSchema)["static"];
 
 // ============================================================
 // POST LIST/QUERY
@@ -162,7 +238,6 @@ export const postListQuerySchema = t.Object({
     t.Object({
       unitId: t.Optional(t.String()),
       createdAt: t.Optional(t.String()),
-      sortPath: t.Optional(t.String()),
     }),
   ),
   limit: paginationLimitSchema,
@@ -218,7 +293,6 @@ export const postListBodySchema = t.Object({
     t.Object({
       unitId: t.Optional(t.String()),
       createdAt: t.Optional(t.String()),
-      sortPath: t.Optional(t.String()),
     }),
   ),
   limit: paginationLimitSchema,

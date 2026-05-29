@@ -8,6 +8,7 @@ import {
 } from "../../models/postPolicy";
 import { PostAuthorHeader } from "../parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
+import { PostPinBadge } from "../parts/PostPinBadge";
 
 interface PostReplyProps {
   post: PostDTO;
@@ -30,6 +31,7 @@ export const PostReply: React.FC<PostReplyProps> = ({
     <div className="flex min-w-0 flex-col gap-1 py-1">
       <PostAuthorHeader post={post} size="compact" showAvatar={showAvatar} />
       <div className={`flex min-w-0 flex-col gap-1 ${contentIndentClass}`}>
+        {post.pinKind ? <PostPinBadge pinKind={post.pinKind} /> : null}
         <PostBodyMarkdown
           content={post.content}
           clamp={{ maxLines: 4 }}

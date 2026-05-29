@@ -10,9 +10,7 @@ markdown-only `PostBodyMarkdown` rendering of `Post.content`
 (never `Post.body`), thread-card metadata (`replyCount`,
 `lastReplyAt`), the locked-thread reply gate, and removal of the
 legacy `comment/` feature.
-
 ## Requirements
-
 ### Requirement: Discussion tab on work detail pages
 Every work detail page (book, game, media) SHALL include a Discussion tab that displays threaded discussion for that work. The tab SHALL load posts where the `targetUnitId` matches the current work's unit identifier.
 
@@ -52,18 +50,36 @@ The Discussion tab SHALL provide an inline form for starting a new discussion th
 
 ### Requirement: Threaded reply view sorted by sort path
 
-When a user opens a thread, the system SHALL display all replies in threaded mode sorted by `sortPath`. The `sortPath` field uses zero-padded segments to maintain hierarchical ordering so that replies appear nested under their parent posts in correct tree order.
+When a user opens a thread, the system SHALL display all replies in threaded
+mode as a tree grouped by parent. Sibling order within the tree SHALL be
+derived from a database-expressible `ORDER BY` key (default `createdAt`
+ascending); it SHALL NOT be derived from a materialized `sortPath` column.
+The thread subtree SHALL be bounded by `rootPostUnitId` (whole thread) or by
+`path <@ anchor.path` (continue-thread anchor), not by a `sortPath` prefix.
 
-Thread loading SHALL be bounded by server-enforced depth: the client SHALL query with `mode: "threaded"` and `maxDepth: 5` (or a documented override). Replies deeper than `maxDepth` SHALL NOT be returned in the initial response. The visual indentation applied on the client SHALL cap at a configurable `VISUAL_MAX_DEPTH` (default 4); replies whose `depth` exceeds this value render with the capped indentation while the real `depth` remains available for logical operations.
+Thread loading SHALL be bounded by server-enforced depth: the client SHALL
+query with `mode: "threaded"` and `maxDepth: 5` (or a documented override).
+Replies deeper than `maxDepth` SHALL NOT be returned in the initial response.
+The visual indentation applied on the client SHALL cap at a configurable
+`VISUAL_MAX_DEPTH` (default 4); replies whose `depth` exceeds this value render
+with the capped indentation while the real `depth` remains available for
+logical operations.
 
-When a loaded reply sits at the loaded depth limit and still has further replies (`directReplyCount > 0` on a truncated branch), the reply SHALL expose a "continue thread" affordance. Activating the affordance SHALL anchor a fresh thread view with that reply as the new root (`rootPostUnitId`), issuing a new query for its subtree.
+When a loaded reply sits at the loaded depth limit and still has further
+replies (`directReplyCount > 0` on a truncated branch), the reply SHALL expose
+a "continue thread" affordance. Activating the affordance SHALL anchor a fresh
+thread view with that reply as the new root, issuing a new query for its
+subtree via `path <@ anchor.path` scoped to the anchor's `rootPostUnitId`.
 
-Collapse state for branches SHALL be owned by the thread orchestrator (`PostTreeSection`) rather than the reply component. Replies at `depth >= 2` SHALL be collapsed by default on initial render; the user SHALL be able to expand any branch.
+Collapse state for branches SHALL be owned by the thread orchestrator
+(`PostTreeSection`) rather than the reply component. Replies at `depth >= 2`
+SHALL be collapsed by default on initial render; the user SHALL be able to
+expand any branch.
 
 #### Scenario: Thread with nested replies
 
 - **WHEN** a user opens a thread that has direct replies and nested replies to those replies
-- **THEN** replies SHALL be displayed in `sortPath` order reflecting the thread hierarchy
+- **THEN** replies SHALL be displayed as a tree grouped by parent, siblings ordered by the DB `ORDER BY` key (default `createdAt`)
 - **AND** the nesting depth SHALL be visually indicated using the `depth` field capped at `VISUAL_MAX_DEPTH`
 
 #### Scenario: Flat display mode
@@ -76,7 +92,7 @@ Collapse state for branches SHALL be owned by the thread orchestrator (`PostTree
 - **WHEN** a thread contains replies at `depth > 5`
 - **THEN** the initial query SHALL NOT return those replies
 - **AND** the deepest loaded reply on that branch SHALL, if it has further replies, render a "continue thread" affordance
-- **AND** activating the affordance SHALL load a new thread view rooted on that reply
+- **AND** activating the affordance SHALL load a new thread view rooted on that reply via `path <@ anchor.path`
 
 #### Scenario: Default collapse beyond depth 2
 
@@ -189,3 +205,21 @@ The Post module's target-list and thread sections SHALL be generic and operate o
 - **WHEN** a user views the Discussion tab on a media detail page
 - **THEN** the tab SHALL render `<PostListSection targetUnitId={mediaUnitId} />`
 - **AND** the section SHALL load and display threads for that media item's `targetUnitId`
+
+### Requirement: Threaded view applies the promotion overlay
+
+The threaded reply view SHALL apply the post promotion overlay on top of its database-ordered base. When loading a thread, the system SHALL fetch `PostPin` rows for the loaded root-post scope and for the realm context being viewed, and within each sibling group SHALL render accepted answers and pins ahead of ordinary replies (accepted answers ahead of pins, each ordered by `position`). Each promoted reply SHALL render its `pinKind` badge. Applying the overlay SHALL NOT modify any post `path` or the underlying base ordering.
+
+#### Scenario: Thread renders accepted answer and pin before ordinary replies
+
+- **GIVEN** a thread whose root has a direct reply accepted as an answer and another reply pinned
+- **WHEN** the thread is loaded for display
+- **THEN** the accepted answer SHALL render first with an accepted-answer badge
+- **AND** the pinned reply SHALL render next with a pin badge
+- **AND** the remaining replies SHALL follow in the base sort order
+
+#### Scenario: Thread with no promotions renders unchanged
+
+- **WHEN** a thread has no `PostPin` rows for the viewed scopes
+- **THEN** the thread SHALL render exactly as it would without the overlay
+

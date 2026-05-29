@@ -1,8 +1,11 @@
 import {
+  acceptAnswerSchema,
   createPostSchema,
   editorialPatchSubmissionSchema,
   hasPermissionToUpdatePost,
   isBlocked,
+  pinPostSchema,
+  postPinDTOSchema,
   PostKind,
   type PostListResponse,
   type PostModerationOverlayResponse,
@@ -261,6 +264,86 @@ export const postApi = new Elysia({ prefix: "/post" })
         summary: "Publish or revert a post draft",
         description:
           "Owner-only toggle between published and draft. Publishing is policy-gated; reverting to draft removes the post from feeds and search.",
+        tags: ["Posts"],
+      },
+    },
+  )
+  .post(
+    "/pins",
+    async ({ body, identity }) => {
+      return postService.pin(body, identity);
+    },
+    {
+      requireLogin: true,
+      body: pinPostSchema,
+      response: { 200: postPinDTOSchema },
+      detail: {
+        summary: "Pin a reply within its thread",
+        description:
+          "Promote a reply (kind=PINNED) in its thread scope. The scope must be the thread root post and the target a reply within it. Authorized to the thread author (OP) or a realm moderator/owner.",
+        tags: ["Posts"],
+      },
+    },
+  )
+  .delete(
+    "/pins/:scopeUnitId/:postUnitId",
+    async ({ params, identity }) => {
+      await postService.unpin(params.scopeUnitId, params.postUnitId, identity);
+      return { message: "Pin removed" };
+    },
+    {
+      requireLogin: true,
+      params: t.Object({
+        scopeUnitId: t.String(),
+        postUnitId: t.String(),
+      }),
+      response: { 200: t.Object({ message: t.String() }) },
+      detail: {
+        summary: "Unpin a reply",
+        description:
+          "Remove a PINNED promotion. Same authorization as pinning.",
+        tags: ["Posts"],
+      },
+    },
+  )
+  .post(
+    "/accepted-answers",
+    async ({ body, identity }) => {
+      return postService.acceptAnswer(body, identity);
+    },
+    {
+      requireLogin: true,
+      body: acceptAnswerSchema,
+      response: { 200: postPinDTOSchema },
+      detail: {
+        summary: "Accept a direct reply as an answer",
+        description:
+          "Promote a direct reply (kind=ACCEPTED_ANSWER) in a Q&A thread (root bears the official question tag). The target must satisfy depth==1 and parentPostUnitId==scopeUnitId. Authorized to the OP or a realm moderator/owner.",
+        tags: ["Posts"],
+      },
+    },
+  )
+  .delete(
+    "/accepted-answers/:scopeUnitId/:postUnitId",
+    async ({ params, identity }) => {
+      await postService.unacceptAnswer(
+        params.scopeUnitId,
+        params.postUnitId,
+        identity,
+      );
+      return { message: "Accepted answer removed" };
+    },
+    {
+      requireLogin: true,
+      params: t.Object({
+        scopeUnitId: t.String(),
+        postUnitId: t.String(),
+      }),
+      response: { 200: t.Object({ message: t.String() }) },
+      detail: {
+        summary: "Unaccept an answer",
+        description:
+          "Remove an ACCEPTED_ANSWER promotion. Same authorization as accepting.",
         tags: ["Posts"],
       },
     },

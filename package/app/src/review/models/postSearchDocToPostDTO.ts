@@ -43,7 +43,6 @@ export function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
     parentPostUnitId: doc.parentPostUnitId,
     kind: doc.kind as PostDTO["kind"],
     depth: doc.depth,
-    sortPath: doc.sortPath,
     replyCount: doc.replyCount,
     directReplyCount: doc.directReplyCount,
     lastReplyAt: doc.lastReplyAt,

@@ -258,6 +258,10 @@ model Unit {
   rootPosts       Post[] @relation("PostRoot")
   parentPosts     Post[] @relation("PostParent")
 
+  // PostPin promotion overlay (scope is always a thread root post; target a reply)
+  postPinsAsScope PostPin[] @relation("PostPinScope")
+  postPinsAsPost  PostPin[] @relation("PostPinPost")
+
   userProgress UserUnitProgress[] @relation("ProgressUnit")
 
   // Subscription edges (see Subscription model). `subscribers` are rows
@@ -722,8 +726,15 @@ model Post {
 
   kind PostKind?
 
-  depth    Int     @default(0)
-  sortPath String? @db.VarChar(512)
+  depth Int @default(0)
+
+  /// Postgres-native ltree materialized path from the thread root to this post.
+  /// Modeled as Unsupported: read and written via raw SQL only. The GiST index
+  /// backing subtree containment is owned by a manual migration, not Prisma
+  /// (see the manual_redesign_post_ltree_index migration). The legacy
+  /// zero-padded `sortPath` VARCHAR column is gone; topology and depth live
+  /// here, while presentation order is a DB ORDER BY key (School B).
+  path Unsupported("ltree")?
 
   replyCount       Int       @default(0)
   directReplyCount Int       @default(0)
@@ -742,12 +753,45 @@ model Post {
 
   @@index([authorUserId, createdAt])
   @@index([targetUnitId, createdAt])
-  @@index([targetUnitId, sortPath])
-  @@index([rootPostUnitId, sortPath])
+  @@index([rootPostUnitId, createdAt])
   @@index([parentPostUnitId, createdAt])
   @@index([kind, createdAt])
   @@index([scoreEntryId])
   @@index([rootTargetUnitId, createdAt])
+}
+
+/// Why a post is promoted within a thread. `HIGHLIGHT` is reserved for future
+/// use; only `ACCEPTED_ANSWER` and `PINNED` are produced today.
+enum PinKind {
+  ACCEPTED_ANSWER
+  PINNED
+  HIGHLIGHT
+}
+
+/**
+ * POST PROMOTION OVERLAY
+ *
+ * Generic in-thread promotion of a reply, mirroring the pinned/position idiom
+ * of `RealmTagApplication`, `UnitTag`, and `ShelfUnit`. `scopeUnitId` is ALWAYS
+ * the thread root post; the target `postUnitId` is ALWAYS a reply within that
+ * thread (`depth >= 1`, `rootPostUnitId == scopeUnitId`). A realm is never a
+ * scope — realm-level featuring of whole units is `Realm.extra.pinboard`'s job.
+ */
+model PostPin {
+  scopeUnitId String  @db.Uuid
+  postUnitId  String  @db.Uuid
+  kind        PinKind
+  position    String  @db.VarChar(64) // Fractional Indexing
+  byUserId    String  @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  scope Unit @relation("PostPinScope", fields: [scopeUnitId], references: [id], onDelete: Cascade)
+  post  Unit @relation("PostPinPost", fields: [postUnitId], references: [id], onDelete: Cascade)
+
+  @@id([scopeUnitId, postUnitId])
+  @@index([scopeUnitId, kind, position])
+  @@index([postUnitId])
 }
 
 /**

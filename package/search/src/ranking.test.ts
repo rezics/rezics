@@ -57,7 +57,6 @@ describe("ranking search projections", () => {
       content: null,
       kind: "POST",
       depth: 0,
-      sortPath: null,
       isLocked: false,
       replyCount: 0,
       directReplyCount: 0,

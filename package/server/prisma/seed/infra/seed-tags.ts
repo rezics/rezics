@@ -1,6 +1,7 @@
 import {
   DEFAULT_LANGUAGE,
   FALLBACK_LANGUAGE,
+  OFFICIAL_QUESTION_TAG_SLUG,
   SEED_TAG_NAMES,
   SEED_TAG_POSITIONS,
   SEED_TAG_SLUGS,
@@ -101,7 +102,63 @@ export async function seedContentTypeTags(
     });
   }
 
+  await seedOfficialQuestionTag(prisma, tagScope);
+
   return tagMap;
+}
+
+/**
+ * Seed the platform-reserved question tag (a `Unit(type=TAG)` whose slug equals
+ * `OFFICIAL_QUESTION_TAG_SLUG`). A root post bearing this tag makes its thread a
+ * Q&A thread, enabling accepted answers. Idempotent on `(tagScope, slug)`.
+ */
+async function seedOfficialQuestionTag(
+  prisma: PrismaClient,
+  tagScope: string,
+): Promise<string> {
+  const slug = OFFICIAL_QUESTION_TAG_SLUG;
+  const existing = await prisma.unit.findUnique({
+    where: { slugScope_slug: { slugScope: tagScope, slug } },
+    select: { id: true, type: true },
+  });
+
+  if (existing) {
+    if (existing.type !== "TAG") {
+      throw new Error(
+        `[Seed] Slug "${slug}" under tag scope is already used by a non-TAG unit (type=${existing.type}).`,
+      );
+    }
+    console.log(`[Seed]   Official question tag already exists, skipping.`);
+    return existing.id;
+  }
+
+  const unit = await prisma.unit.create({
+    data: {
+      type: "TAG",
+      slug,
+      slugScope: tagScope,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      isLanguageNeutral: true,
+      publishedAt: new Date(),
+      defaultLanguage: DEFAULT_LANGUAGE,
+      translations: {
+        create: [
+          { language: DEFAULT_LANGUAGE, title: "Question" },
+          { language: FALLBACK_LANGUAGE, title: "Question" },
+        ],
+      },
+      supportLanguages: {
+        create: [
+          { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
+          { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
+        ],
+      },
+    },
+    select: { id: true },
+  });
+  console.log(`[Seed]   Created official question tag (${unit.id})`);
+  return unit.id;
 }
 
 async function syncTagTranslations(

@@ -1,13 +1,22 @@
 import type {
+  AcceptAnswerInput,
   CreatePostInput,
   EditorialPatchSubmission,
+  PinPostInput,
   PostListQuery,
+  PostPinDTO,
   RezicsSessionClaims,
   UpdatePostInput,
 } from "@rezics/contract";
-import { mainMarkdownSource, parseIdsCsv } from "@rezics/contract";
+import {
+  BasicAdminPermission,
+  mainMarkdownSource,
+  OFFICIAL_QUESTION_TAG_SLUG,
+  parseIdsCsv,
+} from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import {
+  PinKind as PinKindEnum,
   type PostKind,
   PostKind as PostKindEnum,
   Prisma,
@@ -19,6 +28,7 @@ import {
 } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
+import { generateBetween } from "@/shelf/fractional-index";
 import { serverJobProducer } from "@/job/job-boundary";
 import {
   assertCanEditCollaborativeMetadata,
@@ -31,6 +41,7 @@ import {
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
 import { AppError } from "../utils/errors";
+import { mapPostPinToDTO } from "./post.mapper";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 
@@ -91,6 +102,9 @@ const REALM_REPLY_BLOCKING_MODERATION_STATES = [
   "REMOVED",
 ] as const;
 
+/** Realm roles that may pin/accept within a realm's threads. */
+const PROMOTION_ROLES = ["owner", "admin", "moderator"] as const;
+
 function realmLifecycleStateFilter(
   state: PostListQuery["realmLifecycleState"],
 ) {
@@ -115,12 +129,69 @@ async function applyBlockedAuthorFilter(
   where.AND = [...existingAnd, { authorUserId: { notIn: blockedIds } }];
 }
 
+/**
+ * Attach the `Unsupported("ltree")` `path` column to post rows. Prisma's typed
+ * client cannot project `path`, so we read it in one indexed lookup keyed by
+ * `unitId` and merge it onto the rows (null when a row has no path yet). The
+ * value is the materialized path text (e.g. `"1.3.a"`) used by the client to
+ * compute tree structure; it is never a presentation-order key (School B).
+ */
+async function attachPostPaths<
+  T extends { unitId: string; path?: string | null },
+>(posts: T[]): Promise<T[]> {
+  if (posts.length === 0) return posts;
+  const rows = await prisma.$queryRaw<
+    { unitId: string; path: string | null }[]
+  >`
+    SELECT "unitId", "path"::text AS path
+    FROM "Post"
+    WHERE "unitId" IN (${Prisma.join(
+      posts.map((post) => Prisma.sql`${post.unitId}::uuid`),
+    )})
+  `;
+  const pathByUnitId = new Map(rows.map((row) => [row.unitId, row.path]));
+  for (const post of posts) {
+    post.path = pathByUnitId.get(post.unitId) ?? null;
+  }
+  return posts;
+}
+
+/**
+ * Attach the promotion overlay (`pinKind`/`pinPosition`) to thread rows. A post
+ * is promoted at most once per scope and its scope is always its own thread
+ * root, so `postUnitId` maps to at most one `PostPin` — we can key the lookup by
+ * `postUnitId` directly. Ordinary replies stay `null`.
+ */
+async function attachPinKinds<
+  T extends {
+    unitId: string;
+    pinKind?: PinKindEnum | null;
+    pinPosition?: string | null;
+  },
+>(posts: T[]): Promise<T[]> {
+  if (posts.length === 0) return posts;
+  const pins = await prisma.postPin.findMany({
+    where: { postUnitId: { in: posts.map((post) => post.unitId) } },
+    select: { postUnitId: true, kind: true, position: true },
+  });
+  const pinByPostUnitId = new Map(pins.map((pin) => [pin.postUnitId, pin]));
+  for (const post of posts) {
+    const pin = pinByPostUnitId.get(post.unitId);
+    post.pinKind = pin?.kind ?? null;
+    post.pinPosition = pin?.position ?? null;
+  }
+  return posts;
+}
+
 export class PostService {
   /**
    * List posts with support for flat and threaded modes.
    *
-   * - flat mode (default): ordered by createdAt, sortPath is null
-   * - threaded mode (mode="threaded"): ordered by sortPath for tree display
+   * - flat mode (default): ordered by `createdAt`
+   * - threaded mode (mode="threaded"): the subtree is bounded by
+   *   `rootPostUnitId` (whole thread) or `path <@ anchor.path`
+   *   (continue-thread anchor) and ordered by a DB key (`createdAt`); the
+   *   client groups rows into a tree (School B — `path` does not encode order).
    */
   async list(
     query: PostListQuery = {},
@@ -161,37 +232,54 @@ export class PostService {
     await applyBlockedAuthorFilter(where, options);
 
     if (query.subtreeRootPostUnitId) {
-      const anchor = await prisma.post.findUniqueOrThrow({
-        where: { unitId: query.subtreeRootPostUnitId },
-        select: {
-          unitId: true,
-          rootPostUnitId: true,
-          depth: true,
-          sortPath: true,
-        },
-      });
-      const rootPostUnitId = anchor.rootPostUnitId ?? anchor.unitId;
-      where.rootPostUnitId = rootPostUnitId;
-      where.unitId = { not: anchor.unitId };
-
-      if (anchor.sortPath) {
-        where.sortPath = { startsWith: `${anchor.sortPath}.` };
-      } else if (rootPostUnitId !== anchor.unitId) {
+      const [anchor] = await prisma.$queryRaw<
+        {
+          unitId: string;
+          rootPostUnitId: string | null;
+          depth: number;
+          path: string | null;
+        }[]
+      >`
+        SELECT "unitId", "rootPostUnitId", "depth", "path"::text AS path
+        FROM "Post"
+        WHERE "unitId" = ${query.subtreeRootPostUnitId}::uuid
+      `;
+      if (!anchor) {
         throw new AppError(
-          400,
-          "Cannot query a post subtree when the anchor post has no sortPath",
+          404,
+          `Post not found: ${query.subtreeRootPostUnitId}`,
         );
       }
+      const rootPostUnitId = anchor.rootPostUnitId ?? anchor.unitId;
+      where.rootPostUnitId = rootPostUnitId;
 
-      if (typeof query.maxDepth === "number") {
-        where.depth = { lte: anchor.depth + query.maxDepth };
-      }
+      const maxDepth =
+        typeof query.maxDepth === "number" ? query.maxDepth : undefined;
+      // Partial-subtree retrieval over the GiST index: descendants of the
+      // anchor, scoped to the same thread and (optionally) depth-bounded. The
+      // anchor itself is excluded.
+      const descendants = await prisma.$queryRaw<{ unitId: string }[]>`
+        SELECT "unitId" FROM "Post"
+        WHERE "path" <@ ${anchor.path}::ltree
+          AND "rootPostUnitId" = ${rootPostUnitId}::uuid
+          AND "unitId" <> ${anchor.unitId}::uuid
+          ${
+            maxDepth !== undefined
+              ? Prisma.sql`AND "depth" <= ${anchor.depth + maxDepth}`
+              : Prisma.empty
+          }
+      `;
+      const descendantIds = descendants.map((row) => row.unitId);
+      where.unitId =
+        idList && idList.length > 0
+          ? { in: descendantIds.filter((id) => idList.includes(id)) }
+          : { in: descendantIds };
     } else if (typeof query.maxDepth === "number") {
       where.depth = { lte: query.maxDepth };
     }
 
     const orderBy: Prisma.PostOrderByWithRelationInput[] = isThreaded
-      ? [{ sortPath: "asc" }, { createdAt: "asc" }]
+      ? [{ createdAt: "asc" }]
       : [
           {
             createdAt:
@@ -214,7 +302,11 @@ export class PostService {
     ]);
 
     return {
-      posts: await hydrateUnitOwnerUserSlugs(posts as PostWithRelations[]),
+      posts: await hydrateUnitOwnerUserSlugs(
+        await attachPinKinds(
+          await attachPostPaths(posts as PostWithRelations[]),
+        ),
+      ),
       total,
     };
   }
@@ -341,7 +433,11 @@ export class PostService {
     ]);
 
     return {
-      posts: await hydrateUnitOwnerUserSlugs(posts as PostWithRelations[]),
+      posts: await hydrateUnitOwnerUserSlugs(
+        await attachPinKinds(
+          await attachPostPaths(posts as PostWithRelations[]),
+        ),
+      ),
       total,
     };
   }
@@ -393,7 +489,10 @@ export class PostService {
     ) {
       throw new AppError(404, `Post not found: ${unitId}`);
     }
-    return hydrateUnitOwnerUserSlugRow(post as PostWithRelations);
+    const [withPath] = await attachPinKinds(
+      await attachPostPaths([post as PostWithRelations]),
+    );
+    return hydrateUnitOwnerUserSlugRow(withPath);
   }
 
   async getPrimaryVisibleRealmForPost(unitId: string): Promise<string | null> {
@@ -500,9 +599,12 @@ export class PostService {
   /**
    * Create a post with tree handling.
    *
-   * Top-level post: rootPostUnitId = own unitId, depth = 0.
-   * Reply: inherits root from parent, depth = parent.depth + 1,
-   *        sortPath generated for threaded mode.
+   * Top-level post: rootPostUnitId = own unitId, depth = 0, path = one label.
+   * Reply: inherits root from parent, depth = parent.depth + 1, path =
+   *        parent.path || one freshly minted label (append-only, race-free).
+   *
+   * The `path` ltree column is `Unsupported` in Prisma, so it is written via
+   * raw SQL after the typed insert and read back via `attachPostPaths`.
    */
   async create(
     input: CreatePostInput,
@@ -551,7 +653,6 @@ export class PostService {
 
     let depth = 0;
     let rootPostUnitId: string | undefined;
-    let sortPath: string | undefined;
     let rootTargetUnitId: string | null = null;
     let rootTargetUnitType: string | null = null;
 
@@ -562,7 +663,6 @@ export class PostService {
           unitId: true,
           rootPostUnitId: true,
           depth: true,
-          sortPath: true,
           isLocked: true,
           rootTargetUnitId: true,
           rootTargetUnitType: true,
@@ -614,7 +714,6 @@ export class PostService {
         });
       }
       depth = parent.depth + 1;
-      sortPath = await this.generateSortPath(parentPostUnitId);
       rootTargetUnitId = parent.rootTargetUnitId ?? null;
       rootTargetUnitType = parent.rootTargetUnitType ?? null;
     } else if (targetUnitId) {
@@ -655,7 +754,6 @@ export class PostService {
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,
         depth,
-        sortPath: sortPath ?? undefined,
         extra: extra as Prisma.InputJsonValue | undefined,
         rootPostUnitId: rootPostUnitId ?? undefined,
         parentPostUnitId: parentPostUnitId ?? undefined,
@@ -725,8 +823,15 @@ export class PostService {
 
       let result: PostWithRelations;
 
-      // Top-level post: set rootPostUnitId to own unitId
+      // Top-level post: set rootPostUnitId to own unitId and mint a
+      // single-label path. `path` is Unsupported in Prisma, so it is written
+      // via raw SQL (the label comes from the shared sequence, base36-encoded).
       if (!parentPostUnitId) {
+        await tx.$executeRaw`
+          UPDATE "Post"
+          SET "path" = text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
+          WHERE "unitId" = ${created.unitId}::uuid
+        `;
         const updated = await tx.post.update({
           where: { unitId: created.unitId },
           data: { rootPostUnitId: created.unitId },
@@ -735,6 +840,17 @@ export class PostService {
 
         result = updated as PostWithRelations;
       } else {
+        // Reply: append-only path generation — `path = parent.path || label`
+        // computed entirely in SQL, so there is no read-max-then-write race and
+        // no ancestor row is ever rewritten.
+        await tx.$executeRaw`
+          UPDATE "Post" AS c
+          SET "path" = p."path" || text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
+          FROM "Post" AS p
+          WHERE c."unitId" = ${created.unitId}::uuid
+            AND p."unitId" = ${parentPostUnitId}::uuid
+        `;
+
         // Reply: increment parent counters and update lastReplyAt
         await tx.post.update({
           where: { unitId: parentPostUnitId },
@@ -780,7 +896,8 @@ export class PostService {
       ]);
     }
 
-    return hydrateUnitOwnerUserSlugRow(post);
+    const [withPath] = await attachPostPaths([post]);
+    return hydrateUnitOwnerUserSlugRow(withPath);
   }
 
   /**
@@ -981,45 +1098,280 @@ export class PostService {
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
   }
 
+  // ============================================================
+  // PROMOTION OVERLAY — pinning & accepted answers
+  // ============================================================
+
   /**
-   * Generate a sortPath for a new reply under the given parent.
-   *
-   * sortPath format: zero-padded 4-digit segments separated by dots.
-   * Example: "0001.0003.0001"
-   *
-   * Queries the maximum sibling sortPath under the parent, increments,
-   * and appends to the parent's sortPath.
+   * A thread is a Q&A thread when its root post bears the platform-reserved
+   * question tag (a `Unit(type=TAG)` whose slug is `OFFICIAL_QUESTION_TAG_SLUG`).
    */
-  private async generateSortPath(parentPostUnitId: string): Promise<string> {
-    const parent = await prisma.post.findUniqueOrThrow({
-      where: { unitId: parentPostUnitId },
-      select: { sortPath: true },
+  async isQuestionThread(rootPostUnitId: string): Promise<boolean> {
+    const tag = await prisma.unit.findFirst({
+      where: { type: UnitType.TAG, slug: OFFICIAL_QUESTION_TAG_SLUG },
+      select: { id: true },
+    });
+    if (!tag) return false;
+    const applied = await prisma.unitTag.findUnique({
+      where: {
+        unitId_tagUnitId: { unitId: rootPostUnitId, tagUnitId: tag.id },
+      },
+      select: { unitId: true },
+    });
+    return applied !== null;
+  }
+
+  /** Pin a reply within its thread scope (`kind = PINNED`). */
+  async pin(
+    input: PinPostInput,
+    caller: RezicsSessionClaims,
+  ): Promise<PostPinDTO> {
+    await this.assertCanPromoteInThread(input.scopeUnitId, caller);
+    await this.loadPromotableTarget(input.scopeUnitId, input.postUnitId);
+    const position = await this.mintPinPosition(
+      input.scopeUnitId,
+      PinKindEnum.PINNED,
+      input.beforePostUnitId,
+      input.afterPostUnitId,
+    );
+    return this.createPin(
+      input.scopeUnitId,
+      input.postUnitId,
+      PinKindEnum.PINNED,
+      position,
+      caller.userId,
+    );
+  }
+
+  /** Remove a `PINNED` promotion. */
+  async unpin(
+    scopeUnitId: string,
+    postUnitId: string,
+    caller: RezicsSessionClaims,
+  ): Promise<void> {
+    await this.assertCanPromoteInThread(scopeUnitId, caller);
+    await this.deletePin(scopeUnitId, postUnitId, PinKindEnum.PINNED);
+  }
+
+  /**
+   * Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`). Gated on a
+   * Q&A thread, the target being a direct reply (`depth == 1`,
+   * `parentPostUnitId == rootPostUnitId`), and OP/moderator authorization.
+   */
+  async acceptAnswer(
+    input: AcceptAnswerInput,
+    caller: RezicsSessionClaims,
+  ): Promise<PostPinDTO> {
+    await this.assertCanPromoteInThread(input.scopeUnitId, caller);
+    const target = await this.loadPromotableTarget(
+      input.scopeUnitId,
+      input.postUnitId,
+    );
+    if (target.depth !== 1 || target.parentPostUnitId !== input.scopeUnitId) {
+      throw new AppError(
+        400,
+        "An accepted answer must be a direct reply to the question",
+      );
+    }
+    if (!(await this.isQuestionThread(input.scopeUnitId))) {
+      throw new AppError(
+        400,
+        "Accepted answers require a Q&A thread (root post must bear the official question tag)",
+      );
+    }
+    const position = await this.mintPinPosition(
+      input.scopeUnitId,
+      PinKindEnum.ACCEPTED_ANSWER,
+      input.beforePostUnitId,
+      input.afterPostUnitId,
+    );
+    return this.createPin(
+      input.scopeUnitId,
+      input.postUnitId,
+      PinKindEnum.ACCEPTED_ANSWER,
+      position,
+      caller.userId,
+    );
+  }
+
+  /** Remove an `ACCEPTED_ANSWER` promotion. */
+  async unacceptAnswer(
+    scopeUnitId: string,
+    postUnitId: string,
+    caller: RezicsSessionClaims,
+  ): Promise<void> {
+    await this.assertCanPromoteInThread(scopeUnitId, caller);
+    await this.deletePin(scopeUnitId, postUnitId, PinKindEnum.ACCEPTED_ANSWER);
+  }
+
+  /**
+   * Single scope-capability gate shared by pin and accept: permitted to the
+   * thread author (OP), a platform admin, or a moderator/owner of a realm the
+   * thread belongs to. Also validates that the scope IS a thread root post
+   * (never a realm — that is `Realm.extra.pinboard`'s job — and never a reply).
+   */
+  private async assertCanPromoteInThread(
+    scopeUnitId: string,
+    caller: RezicsSessionClaims,
+  ): Promise<void> {
+    const scope = await prisma.post.findUnique({
+      where: { unitId: scopeUnitId },
+      select: {
+        authorUserId: true,
+        depth: true,
+        rootPostUnitId: true,
+        unit: {
+          select: {
+            type: true,
+            inRealms: { select: { realmUnitId: true } },
+          },
+        },
+      },
     });
 
-    const parentPath = parent.sortPath ?? "";
-
-    // Find the max sortPath among direct children of this parent
-    const lastSibling = await prisma.post.findFirst({
-      where: { parentPostUnitId },
-      orderBy: { sortPath: "desc" },
-      select: { sortPath: true },
-    });
-
-    let nextSegment = 1;
-
-    if (lastSibling?.sortPath) {
-      // Extract the last segment from the sibling's sortPath
-      const segments = lastSibling.sortPath.split(".");
-      const lastSegment = segments[segments.length - 1] ?? "0";
-      const parsed = parseInt(lastSegment, 10);
-      if (!isNaN(parsed)) {
-        nextSegment = parsed + 1;
+    if (!scope) {
+      const unit = await prisma.unit.findUnique({
+        where: { id: scopeUnitId },
+        select: { type: true },
+      });
+      if (unit?.type === UnitType.REALM) {
+        throw new AppError(
+          400,
+          "A realm cannot be a PostPin scope; realm-level featuring belongs to Realm.extra.pinboard",
+        );
       }
+      throw new AppError(404, `Thread root post not found: ${scopeUnitId}`);
     }
 
-    const paddedSegment = String(nextSegment).padStart(4, "0");
+    if (
+      scope.depth !== 0 ||
+      (scope.rootPostUnitId !== null && scope.rootPostUnitId !== scopeUnitId)
+    ) {
+      throw new AppError(400, "A PostPin scope must be a thread root post");
+    }
 
-    return parentPath ? `${parentPath}.${paddedSegment}` : paddedSegment;
+    if (scope.authorUserId === caller.userId) return;
+    if (BasicAdminPermission(caller.permission as never)) return;
+
+    const realmIds = scope.unit.inRealms.map((row) => row.realmUnitId);
+    if (realmIds.length > 0) {
+      const ownedRealm = await prisma.unit.findFirst({
+        where: { id: { in: realmIds }, userId: caller.userId },
+        select: { id: true },
+      });
+      if (ownedRealm) return;
+      const moderator = await prisma.realmMember.findFirst({
+        where: {
+          realmUnitId: { in: realmIds },
+          userId: caller.userId,
+          roleKey: { in: [...PROMOTION_ROLES] },
+        },
+        select: { realmUnitId: true },
+      });
+      if (moderator) return;
+    }
+
+    throw new AppError(
+      403,
+      "Only the thread author or a realm moderator/owner may promote posts in this thread",
+    );
+  }
+
+  /** Validate the target is a reply within the scope thread; return its shape. */
+  private async loadPromotableTarget(
+    scopeUnitId: string,
+    postUnitId: string,
+  ): Promise<{ depth: number; parentPostUnitId: string | null }> {
+    const target = await prisma.post.findUnique({
+      where: { unitId: postUnitId },
+      select: { depth: true, rootPostUnitId: true, parentPostUnitId: true },
+    });
+    if (!target) {
+      throw new AppError(404, `Post not found: ${postUnitId}`);
+    }
+    if (target.rootPostUnitId !== scopeUnitId) {
+      throw new AppError(
+        400,
+        "Target post does not belong to the scope thread",
+      );
+    }
+    if (target.depth < 1) {
+      throw new AppError(400, "Only replies (depth >= 1) can be promoted");
+    }
+    return { depth: target.depth, parentPostUnitId: target.parentPostUnitId };
+  }
+
+  /**
+   * Mint a fractional `position` within the `(scope, kind)` group. Explicit
+   * before/after anchors place precisely; otherwise the pin appends after the
+   * current last pin in the group. Reordering one pin never renumbers others.
+   */
+  private async mintPinPosition(
+    scopeUnitId: string,
+    kind: PinKindEnum,
+    beforePostUnitId?: string,
+    afterPostUnitId?: string,
+  ): Promise<string> {
+    const positionOf = async (postUnitId?: string) => {
+      if (!postUnitId) return undefined;
+      const pin = await prisma.postPin.findUnique({
+        where: { scopeUnitId_postUnitId: { scopeUnitId, postUnitId } },
+        select: { position: true },
+      });
+      return pin?.position ?? undefined;
+    };
+    const afterPos = await positionOf(afterPostUnitId);
+    const beforePos = await positionOf(beforePostUnitId);
+    if (afterPos !== undefined || beforePos !== undefined) {
+      return generateBetween(afterPos, beforePos);
+    }
+    const last = await prisma.postPin.findFirst({
+      where: { scopeUnitId, kind },
+      orderBy: { position: "desc" },
+      select: { position: true },
+    });
+    return generateBetween(last?.position ?? undefined, undefined);
+  }
+
+  private async createPin(
+    scopeUnitId: string,
+    postUnitId: string,
+    kind: PinKindEnum,
+    position: string,
+    byUserId: string,
+  ): Promise<PostPinDTO> {
+    try {
+      const pin = await prisma.postPin.create({
+        data: { scopeUnitId, postUnitId, kind, position, byUserId },
+      });
+      return mapPostPinToDTO(pin);
+    } catch (error) {
+      if (
+        error &&
+        typeof error === "object" &&
+        (error as { code?: string }).code === "P2002"
+      ) {
+        throw new AppError(409, "This post is already promoted in this scope");
+      }
+      throw error;
+    }
+  }
+
+  private async deletePin(
+    scopeUnitId: string,
+    postUnitId: string,
+    kind: PinKindEnum,
+  ): Promise<void> {
+    const existing = await prisma.postPin.findUnique({
+      where: { scopeUnitId_postUnitId: { scopeUnitId, postUnitId } },
+      select: { kind: true },
+    });
+    if (!existing || existing.kind !== kind) {
+      throw new AppError(404, "Promotion not found for this post and scope");
+    }
+    await prisma.postPin.delete({
+      where: { scopeUnitId_postUnitId: { scopeUnitId, postUnitId } },
+    });
   }
 
   private normalizeTagIds(tagIds: unknown): string[] {

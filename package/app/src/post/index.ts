@@ -16,7 +16,7 @@ export {
 } from "./forms/WikiPostEditor";
 export { useFocusReplyFromQuery } from "./hooks/useFocusReplyFromQuery";
 export {
-  filterBySortPathPrefix,
+  filterByPathPrefix,
   seedCollapsedIds,
   usePostTreeCollapse,
 } from "./hooks/usePostTreeCollapse";

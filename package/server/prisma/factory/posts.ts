@@ -337,10 +337,12 @@ async function seedTreePostsForTarget(
   const maxDepth = ctx.draw(treeShape.depth);
   const posts: CreatedPost[] = [];
 
-  // Pass 1: Root posts
+  // Pass 1: Root posts. The planned `path` strings are zero-padded numeric
+  // labels (valid ltree tokens) written via raw SQL after the typed create,
+  // because `Post.path` is an Unsupported("ltree") column.
   const rootPlans = Array.from({ length: rootCount }, (_, index) => ({
     id: randomUUID(),
-    sortPath: String(index + 1).padStart(4, "0"),
+    path: String(index + 1).padStart(4, "0"),
   }));
   const rootIds = rootPlans.map((plan) => plan.id);
 
@@ -365,7 +367,6 @@ async function seedTreePostsForTarget(
             kind: PostKind.POST,
             content: generatePostContent(PostKind.POST) as never,
             depth: 0,
-            sortPath: rootPlan.sortPath,
           },
         },
         supportLanguages: {
@@ -374,6 +375,9 @@ async function seedTreePostsForTarget(
       },
       select: { id: true, type: true },
     });
+
+    await ctx.prisma
+      .$executeRaw`UPDATE "Post" SET "path" = ${rootPlan.path}::ltree WHERE "unitId" = ${rootPlan.id}::uuid`;
 
     posts.push({
       ...unit,
@@ -386,7 +390,7 @@ async function seedTreePostsForTarget(
 
   interface ParentSlot {
     id: string;
-    sortPath: string;
+    path: string;
     depth: number;
     rootId: string;
     childCount: number;
@@ -394,7 +398,7 @@ async function seedTreePostsForTarget(
 
   const replyParents: ParentSlot[] = rootIds.map((id, i) => ({
     id,
-    sortPath: rootPlans[i]!.sortPath,
+    path: rootPlans[i]!.path,
     depth: 0,
     rootId: id,
     childCount: 0,
@@ -424,9 +428,10 @@ async function seedTreePostsForTarget(
 
     const author = faker.helpers.arrayElement(users);
     const replyId = randomUUID();
-    const sortPath = `${parent.sortPath}.${String(
-      parent.childCount + 1,
-    ).padStart(4, "0")}`;
+    const path = `${parent.path}.${String(parent.childCount + 1).padStart(
+      4,
+      "0",
+    )}`;
 
     const unit = await ctx.prisma.unit.create({
       data: {
@@ -447,7 +452,6 @@ async function seedTreePostsForTarget(
             kind: PostKind.POST,
             content: generatePostContent(PostKind.POST) as never,
             depth: parent.depth + 1,
-            sortPath,
           },
         },
         supportLanguages: {
@@ -457,10 +461,13 @@ async function seedTreePostsForTarget(
       select: { id: true, type: true },
     });
 
+    await ctx.prisma
+      .$executeRaw`UPDATE "Post" SET "path" = ${path}::ltree WHERE "unitId" = ${replyId}::uuid`;
+
     parent.childCount++;
     replyParents.push({
       id: replyId,
-      sortPath,
+      path,
       depth: parent.depth + 1,
       rootId: parent.rootId,
       childCount: 0,

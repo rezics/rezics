@@ -583,7 +583,6 @@ describe("realmService.resolveRule", () => {
         kind: "POST",
         scoreEntryId: null,
         depth: 0,
-        sortPath: null,
         replyCount: 0,
         directReplyCount: 0,
         lastReplyAt: null,

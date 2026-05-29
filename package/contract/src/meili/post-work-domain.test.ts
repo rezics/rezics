@@ -10,7 +10,6 @@ describe("PostSearchDocumentSchema work-domain fields", () => {
         contentText: "review",
         kind: "REVIEW",
         depth: 0,
-        sortPath: null,
         isLocked: false,
         replyCount: 0,
         directReplyCount: 0,

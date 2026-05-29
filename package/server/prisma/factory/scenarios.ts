@@ -317,7 +317,6 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     kind: PostKind;
     content: Prisma.InputJsonValue;
     depth: number;
-    sortPath: string;
     replyCount?: number;
     directReplyCount?: number;
     lastReplyAt?: Date;
@@ -352,7 +351,6 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
           : `Reply ${planned.replyIndex + 1} at depth ${planned.depth} under root ${planned.rootIndex + 1}.`,
       ) as Prisma.InputJsonValue,
       depth: planned.depth,
-      sortPath: planned.sortPath,
       replyCount: planned.replyCount,
       directReplyCount: planned.directReplyCount,
       ...(planned.replyCount > 0 ? { lastReplyAt: now } : {}),
@@ -366,6 +364,19 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
 
   await ctx.prisma.unit.createMany({ data: unitRows });
   await ctx.prisma.post.createMany({ data: postRows });
+  // `Post.path` is Unsupported("ltree"); set every planned path in one bulk
+  // statement after the typed createMany (zero-padded numeric labels are valid
+  // ltree tokens).
+  await ctx.prisma.$executeRaw`
+    UPDATE "Post" AS p
+    SET "path" = data.path::ltree
+    FROM (
+      SELECT
+        unnest(${plannedPosts.map((node) => node.id)}::uuid[]) AS unit_id,
+        unnest(${plannedPosts.map((node) => node.path)}::text[]) AS path
+    ) AS data
+    WHERE p."unitId" = data.unit_id
+  `;
   await ctx.prisma.unitSupportLanguage.createMany({ data: supportRows });
   for (const post of plannedPosts) {
     await ctx.sync.post(post.id);
@@ -398,7 +409,7 @@ export interface LargePostTreePlanNode {
   replyIndex: number;
   parentId: string | null;
   depth: number;
-  sortPath: string;
+  path: string;
   replyCount: number;
   directReplyCount: number;
 }
@@ -420,7 +431,7 @@ export function buildLargePostTreePlan({
       replyIndex: -1,
       parentId: null,
       depth: 0,
-      sortPath: String(rootIndex + 1).padStart(4, "0"),
+      path: String(rootIndex + 1).padStart(4, "0"),
       replyCount: 0,
       directReplyCount: 0,
     };
@@ -454,7 +465,7 @@ export function buildLargePostTreePlan({
         replyIndex,
         parentId: parent.id,
         depth: parent.depth + 1,
-        sortPath: `${parent.sortPath}.${String(childIndex).padStart(4, "0")}`,
+        path: `${parent.path}.${String(childIndex).padStart(4, "0")}`,
         replyCount: 0,
         directReplyCount: 0,
       };
@@ -777,11 +788,12 @@ async function runUnitWorkDomain(ctx: SeedCtx): Promise<SeedResult> {
             kind: PostKind.REVIEW,
             content: markdownContentDoc(spec.content) as Prisma.InputJsonValue,
             depth: 0,
-            sortPath: "0001",
           },
         },
       },
     });
+    await ctx.prisma
+      .$executeRaw`UPDATE "Post" SET "path" = '0001'::ltree WHERE "unitId" = ${postUnitId}::uuid`;
     await ctx.prisma.unitWork.create({
       data: {
         unitId: postUnitId,
@@ -936,13 +948,14 @@ async function createWikiScenarioPost(
           kind: PostKind.WIKI,
           content: markdownContentDoc(input.body) as Prisma.InputJsonValue,
           depth: 0,
-          sortPath: "0001",
           createdAt: input.publishedAt,
           updatedAt: input.publishedAt,
         },
       },
     },
   });
+  await ctx.prisma
+    .$executeRaw`UPDATE "Post" SET "path" = '0001'::ltree WHERE "unitId" = ${postUnitId}::uuid`;
   await ctx.prisma.unitWork.create({
     data: {
       unitId: postUnitId,

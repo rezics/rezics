@@ -25,7 +25,7 @@ describe("factory scenarios", () => {
 });
 
 describe("buildLargePostTreePlan", () => {
-  test("creates a real nested tree with coherent parent, depth, and sortPath", () => {
+  test("creates a real nested tree with coherent parent, depth, and path", () => {
     const nodes = buildLargePostTreePlan({
       rootCount: 2,
       repliesPerRoot: 18,
@@ -52,7 +52,7 @@ describe("buildLargePostTreePlan", () => {
       expect(parent).toBeDefined();
       expect(node.rootId).toBe(parent!.rootId);
       expect(node.depth).toBe(parent!.depth + 1);
-      expect(node.sortPath.startsWith(`${parent!.sortPath}.`)).toBe(true);
+      expect(node.path.startsWith(`${parent!.path}.`)).toBe(true);
     }
   });
 
@@ -72,7 +72,7 @@ describe("buildLargePostTreePlan", () => {
         (candidate) =>
           candidate.id !== node.id &&
           candidate.rootId === node.rootId &&
-          candidate.sortPath.startsWith(`${node.sortPath}.`),
+          candidate.path.startsWith(`${node.path}.`),
       );
 
       expect(node.directReplyCount).toBe(directChildren.length);
