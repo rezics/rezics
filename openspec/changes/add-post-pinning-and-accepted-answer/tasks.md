@@ -1,7 +1,8 @@
 ## 1. Schema & seed (server)
 
+- [ ] 1.0 Confirm `redesign-post-index-ltree` has landed and its manual `ltree` migration drift verification passed; this change does not manage the `ltree` extension or raw GiST index.
 - [ ] 1.1 Add `PinKind` enum (`ACCEPTED_ANSWER`, `PINNED`; reserve `HIGHLIGHT`) and the `PostPin` model (`scopeUnitId`, `postUnitId`, `kind`, `position`, `byUserId`, `createdAt`) in `package/server/prisma/schema.prisma` with `@@id([scopeUnitId, postUnitId])` and `@@index([scopeUnitId, kind, position])`.
-- [ ] 1.2 Create the additive migration; run `prisma:generate`.
+- [ ] 1.2 Create the ordinary additive Prisma migration; run `prisma:generate`.
 - [ ] 1.3 Seed the official question tag (`Unit(type=TAG)` with the reserved slug) in the factory/seed; ensure idempotent reseed.
 
 ## 2. Contract

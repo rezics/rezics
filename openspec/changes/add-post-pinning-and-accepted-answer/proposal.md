@@ -67,10 +67,12 @@ keyed off a platform-reserved "question" tag.
 
 ## Impact
 
-- **Depends on** `redesign-post-index-ltree` (School-B ordering seam and the
-  `path`/`rootPostUnitId` retrieval shape).
+- **Depends on** `redesign-post-index-ltree` being applied and drift-verified
+  (School-B ordering seam and the `path`/`rootPostUnitId` retrieval shape).
+  This change does not own the `ltree` extension, manual migration naming, or
+  Prisma drift posture.
 - **package/server**: `prisma/schema.prisma` (`PostPin` model, `PinKind`
-  enum, indexes), migration, `src/post/post.service.ts` (accept/pin/unpin,
+  enum, indexes), ordinary additive Prisma migration, `src/post/post.service.ts` (accept/pin/unpin,
   Q&A tag detection, authorization gating, render-join), `post.api.ts` (new
   routes), `post.mapper.ts`/`types.ts`, tests.
 - **package/contract**: `src/post.ts` — `PostPinDTO`, `PinKind`, pin-state on

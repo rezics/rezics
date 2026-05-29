@@ -120,8 +120,13 @@ heavier). Reserved slug is the smallest correct step.
 
 ## Migration Plan
 
-1. Schema migration: add `PinKind` enum and `PostPin` table with the PK and
-   `(scopeUnitId, kind, position)` index. Additive; no backfill.
+0. Precondition: `redesign-post-index-ltree` has landed and its manual
+   `ltree` migration has passed drift verification. This change consumes the
+   resulting `path`/`rootPostUnitId` retrieval shape; it does not manage the
+   `ltree` extension or raw GiST index.
+1. Ordinary additive Prisma schema migration: add `PinKind` enum and `PostPin`
+   table with the PK and `(scopeUnitId, kind, position)` index. Additive; no
+   backfill.
 2. Seed the reserved question tag (`Unit(type=TAG)`, reserved slug) via the
    factory/seed so environments have it; idempotent reseed.
 3. Ship contract (`PostPinDTO`, `PinKind`, reserved slug constant, `pinKind`

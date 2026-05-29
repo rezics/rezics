@@ -82,13 +82,16 @@ simple but locks the thread to a single creation-order sort and makes any
 promotion require path rewrites.
 
 ### D5: Prisma posture — `Unsupported("ltree")` + raw SQL
-Prisma has no native ltree type. Model `path` as `Unsupported("ltree")`;
-enable the extension, create the GiST index, and run the backfill via a raw
-SQL migration; mint labels and perform `<@` filtering through
-`$queryRaw`/`$executeRaw` in `PostService`. **Why:** keeps the column in the
-schema for relation/coexistence while using SQL where Prisma's typed API
-cannot express ltree. **Trade-off:** a few service methods drop to raw SQL;
-contained to path generation and subtree filtering.
+Prisma 7.8.0 still has no native ltree scalar. Model `path` as
+`Unsupported("ltree")`; enable the extension, create the GiST index, and run
+the backfill via a manually authored raw SQL migration; mint labels and
+perform `<@` filtering through `$queryRaw`/`$executeRaw` in `PostService`.
+**Why:** keeps the column visible in Prisma's schema while using SQL where
+Prisma's typed API cannot express ltree. GiST indexes are supported by Prisma
+for supported field types, but this `ltree` GiST index remains raw-SQL-owned
+and MUST NOT be represented as a normal Prisma-managed `@@index([path], type:
+Gist)`. **Trade-off:** a few service methods drop to raw SQL; contained to
+path generation and subtree filtering.
 
 ### D6: Keep `depth` denormalized despite `nlevel(path)`
 `nlevel(path)` can compute depth, but `Post.depth` stays as a stored column.
@@ -100,9 +103,9 @@ without evaluating `nlevel` per row; it is already written on insert.
 - **GiST `<@` plan instability on the hot path** → Mitigated by D3: whole-thread
   reads use `rootPostUnitId` btree; `<@` is reserved for partial subtrees.
 - **Prisma migrate drift on a raw `ltree`/GiST object** → Author the extension,
-  column type, and index in an explicit SQL migration; verify
+  column type, and index in an explicitly named manual SQL migration; verify
   `prisma migrate` + `prisma:generate` accept the `Unsupported` column and do
-  not attempt to drop the index on subsequent diffs.
+  not attempt to drop the index, extension, or sequence on subsequent diffs.
 - **Backfill correctness for deep/old threads** → Backfill walks the existing
   tree in BFS by `(parentPostUnitId, createdAt)`, minting labels parent-before-
   child so every `path` is `parent.path || label`; validate post-migration that
@@ -116,9 +119,13 @@ without evaluating `nlevel` per row; it is already written on insert.
 
 ## Migration Plan
 
-1. SQL migration: `CREATE EXTENSION IF NOT EXISTS ltree`; add `Post.path ltree`
-   (nullable during backfill); create the label sequence; create
-   `GIST (path)` index; keep `rootPostUnitId` btree.
+1. Manual SQL migration: create it with Prisma's `--create-only` flow, but name
+   it with a `manual_` prefix (for example
+   `manual_redesign_post_ltree_index`) so it is visibly distinct from
+   mechanical Prisma-generated migrations. The migration runs `CREATE
+   EXTENSION IF NOT EXISTS ltree`; adds `Post.path ltree` (nullable during
+   backfill); creates the label sequence; creates the raw-owned `GIST (path)`
+   index; and keeps `rootPostUnitId` btree.
 2. Backfill: BFS over existing posts ordered by `(parentPostUnitId, createdAt)`,
    minting a base36 label per node and writing `path = parent.path || label`
    (roots get a single-label path). Run inside the migration or a one-shot
@@ -135,10 +142,22 @@ without evaluating `nlevel` per row; it is already written on insert.
   still exists, so reverting code restores prior behavior. After drop-column,
   rollback requires restoring `sortPath` from a re-derivation script.
 
+## Development Database / Docker
+
+This project is still in development and has no deployed managed-Postgres
+compatibility constraint. The migration may assume it can run `CREATE
+EXTENSION IF NOT EXISTS ltree` on the source database.
+
+The current local source database is `postgres:18.4-trixie` in
+`tool/external-services/compose.yml`, not an app service Dockerfile. The
+official Postgres image normally carries contrib extensions such as `ltree`;
+if that stops being true, adjust the local source Postgres image/build so the
+extension files are installed. Do not add an alternate non-ltree storage path.
+Activation remains in the migration because Postgres extensions are enabled
+per database.
+
 ## Open Questions
 
-- Confirm the deployed PostgreSQL version exposes `ltree` (managed-PG add-on
-  vs. self-hosted) and that the migration may `CREATE EXTENSION`.
 - Whether the `top/best` score column is introduced here as a reserved
   nullable seam or deferred entirely to a later ranking change (current plan:
   reserve only the ordering seam, no new column unless trivial).

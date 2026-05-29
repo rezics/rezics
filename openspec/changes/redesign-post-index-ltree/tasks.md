@@ -1,11 +1,11 @@
 ## 1. Schema & migration (server)
 
 - [ ] 1.1 Add `path Unsupported("ltree")?` to `Post` in `package/server/prisma/schema.prisma`; remove `sortPath` and its `@@index` entries; keep `rootPostUnitId` btree index and `depth`.
-- [ ] 1.2 Author a raw SQL migration: `CREATE EXTENSION IF NOT EXISTS ltree`, create the label `BIGSERIAL` sequence, add the `path` ltree column (nullable), and create `GIST (path)` index.
+- [ ] 1.2 Create the migration with Prisma's `--create-only` flow but give it a `manual_` name (for example `manual_redesign_post_ltree_index`) so it is distinct from mechanical Prisma-generated migrations. Author the raw SQL by hand: `CREATE EXTENSION IF NOT EXISTS ltree`, create the label `BIGSERIAL` sequence, add the `path` ltree column (nullable), and create the raw-owned `GIST (path)` index. Do not model this GiST index as a normal Prisma-managed `@@index([path], type: Gist)`.
 - [ ] 1.3 Add the backfill step (in-migration or one-shot script invoked by it): BFS posts by `(parentPostUnitId, createdAt)`, mint a base36 label per node, write `path = parent.path || label` (roots get a single label).
 - [ ] 1.4 Add post-backfill validation: assert `nlevel(path) = depth + 1`, unique paths, subtree/`replyCount` consistency; fail the migration on mismatch.
 - [ ] 1.5 Add the final drop-column migration for `Post.sortPath` (sequenced after code cutover so rollback before it is code-only).
-- [ ] 1.6 Run `bun --filter=@rezics/server run prisma:generate` and confirm the `Unsupported` column + GiST index do not produce repeated migrate drift.
+- [ ] 1.6 Run `bun --filter=@rezics/server run prisma:generate`, then run a second no-op migrate/diff check and confirm Prisma 7.8.0 accepts `Unsupported("ltree")` and does not try to drop/recreate the raw-owned extension, sequence, or GiST index. Also confirm the local source Postgres container includes `ltree` extension files; if not, update the source Postgres image/build used by `tool/external-services/compose.yml`. Do not add a non-ltree compatibility fallback.
 
 ## 2. Service: path generation & queries (server)
 

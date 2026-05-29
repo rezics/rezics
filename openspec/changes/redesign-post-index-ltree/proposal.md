@@ -42,8 +42,15 @@ moment to move to the optimal base layer rather than patch the string scheme.
   the existing `parentPostUnitId` / `rootPostUnitId` adjacency in creation
   order; assigns labels via the new sequence.
 - **Prisma posture:** model the column as `Unsupported("ltree")`; create the
-  extension and the GiST index via raw SQL migration; perform path
-  generation and subtree filtering with `$queryRaw` / `$executeRaw`.
+  extension and the GiST index via a specially named manual raw SQL
+  migration; perform path generation and subtree filtering with `$queryRaw` /
+  `$executeRaw`. Prisma 7.8.0 still has no native `ltree` scalar, so the GiST
+  index is not Prisma-schema-managed.
+- **Development database posture:** this project is pre-deploy. Do not design
+  around managed-Postgres extension allowlists or compatibility fallbacks.
+  The local source Postgres runtime must include the `ltree` extension files;
+  the migration enables `ltree` per database with `CREATE EXTENSION IF NOT
+  EXISTS ltree`.
 
 ## Capabilities
 
@@ -69,8 +76,10 @@ moment to move to the optimal base layer rather than patch the string scheme.
 ## Impact
 
 - **package/server**: `prisma/schema.prisma` (Post model: drop `sortPath`,
-  add `path`, adjust indexes), a raw-SQL migration (enable `ltree`, GiST
-  index, backfill), `src/post/post.service.ts` (`generateSortPath` →
+  add `path`, adjust indexes), a manual raw-SQL migration (enable `ltree`,
+  GiST index, backfill, drift verification), source Postgres container config
+  if the base image ever lacks the extension files, `src/post/post.service.ts`
+  (`generateSortPath` →
   append-only `generatePath`, `list`/`byRealm`/`subtreeRootPostUnitId`
   queries, create flow), `src/post/post.mapper.ts`, `src/post/types.ts`, and
   associated tests.
