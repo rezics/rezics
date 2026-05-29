@@ -4,7 +4,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useMemo } from "react";
 import { BookListViewItem } from "@/book-library/components/BookList/BookListView";
-import { ReactionBar } from "@/engagement";
+import { ReactionBar, ReportAction } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { reviewDetailActions, reviewPolicy } from "../../models/reviewPolicy";
@@ -50,13 +50,27 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
         <PostBodyMarkdown content={review.content} />
       </div>
 
-      <ReactionBar
-        size="lg"
-        post={review}
-        policy={reviewPolicy}
-        actions={reviewDetailActions}
-        onReplyInvoke={onReplyInvoke}
-      />
+      <div className="flex items-center justify-between gap-2">
+        <ReactionBar
+          size="lg"
+          post={review}
+          policy={reviewPolicy}
+          actions={reviewDetailActions}
+          onReplyInvoke={onReplyInvoke}
+        />
+        {review.realmUnitId ? (
+          <ReportAction
+            target={{
+              kind: "review",
+              id: review.unitId,
+              unitId: review.unitId,
+              subjectUserId: review.authorUserId,
+            }}
+            realmUnitId={review.realmUnitId}
+            showLabel={false}
+          />
+        ) : null}
+      </div>
     </div>
   );
 };

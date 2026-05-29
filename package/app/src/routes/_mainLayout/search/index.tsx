@@ -2,7 +2,10 @@ import type { SearchCategory, SearchQuery } from "@rezics/contract";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { FederatedSearchPage, isSearchCategory } from "@/search";
-import { parseSearchString } from "@/search/models/searchQuery";
+import {
+  parseSearchString,
+  serializeSearchString,
+} from "@/search/models/searchQuery";
 
 type SearchRouteParams = {
   q?: string;
@@ -29,6 +32,17 @@ function GlobalSearchPage() {
           search: (prev: SearchRouteParams) => ({
             ...prev,
             category: next === "all" ? undefined : next,
+          }),
+        });
+      }}
+      onQueryChange={(query) => {
+        const serialized = serializeSearchString(query);
+        navigate({
+          to: "/search",
+          replace: true,
+          search: (prev: SearchRouteParams) => ({
+            ...prev,
+            q: serialized || undefined,
           }),
         });
       }}

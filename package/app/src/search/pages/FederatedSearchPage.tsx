@@ -6,13 +6,14 @@ import type {
   SearchScope,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   AdvancedSearch,
   FederatedResultList,
   SearchCategoryNav,
   SearchHistory,
 } from "../components";
+import { AppliedFilterChips } from "../components/primitive";
 import { useInjectedTags } from "../hooks/useInjectedTags";
 import { useSearchHistory } from "../hooks/useSearchHistory";
 import { useSearchQuery } from "../hooks/useSearchQuery";
@@ -43,6 +44,12 @@ export type FederatedSearchPageProps = {
   initialQuery?: SearchQuery;
   initialCategory?: SearchCategory;
   onCategoryChange: (next: SearchCategory) => void;
+  /**
+   * Called whenever the effective query changes so the host route can persist
+   * filter state to the URL (making it shareable and reversible). Optional —
+   * scopes that do not back filters with the URL can omit it.
+   */
+  onQueryChange?: (query: SearchQuery) => void;
 };
 
 export function FederatedSearchPage({
@@ -50,6 +57,7 @@ export function FederatedSearchPage({
   initialQuery,
   initialCategory = "all",
   onCategoryChange,
+  onQueryChange,
 }: FederatedSearchPageProps) {
   const { t } = useTranslation(["common"]);
   const injectedTags = useInjectedTags();
@@ -85,6 +93,12 @@ export function FederatedSearchPage({
   const counts = useMemo(() => countsFromResult(data), [data]);
   const history = useSearchHistory();
 
+  // Persist effective filter state to the host route (URL) so it is shareable
+  // and reversible. The query hook owns local state; this mirrors it outward.
+  useEffect(() => {
+    onQueryChange?.(search.query);
+  }, [search.query, onQueryChange]);
+
   const handleCategoryChange = (next: SearchCategory) => {
     search.setCategory(next);
     onCategoryChange(next);
@@ -113,6 +127,10 @@ export function FederatedSearchPage({
         implicit={search.implicit}
         onSubmit={handleSubmit}
         middleware={search.middleware}
+      />
+      <AppliedFilterChips
+        query={search.query}
+        onRemove={(patch) => search.set(patch)}
       />
       {showHistory ? (
         <SearchHistory

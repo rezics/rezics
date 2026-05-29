@@ -24,9 +24,9 @@
 ## 4. Discovery, Search, Detail
 
 - [x] 4.1 Upgrade `home/sections/*` and `home/pages/Home.tsx` so signed-out users see discovery and signed-in users see continuation (continue reading, shelves, realms) without scattering dashboard logic.
-- [ ] 4.2 In `routes/_mainLayout/search/index.tsx`, add explicit filter-chip UI (type / realm / work-grouping) backed by stable Unit/Entity/Realm ids; persist query state in the URL.
+- [x] 4.2 In `routes/_mainLayout/search/index.tsx`, add explicit filter-chip UI (type / realm / work-grouping) backed by stable Unit/Entity/Realm ids; persist query state in the URL.
 - [x] 4.3 Add local-only search-history affordance on the search route (no server contract).
-- [ ] 4.4 In book/entity/tag/profile detail surfaces, expose inspect, collect, follow, discuss, contribute, report (via new `ReportAction`), share, and DM (via new `DMAction`) where policy allows.
+- [x] 4.4 In book/entity/tag/profile detail surfaces, expose inspect, collect, follow, discuss, contribute, report (via new `ReportAction`), share, and DM (via new `DMAction`) where policy allows.
 - [x] 4.5 Wire collect/follow/reaction/progress mutations through the cache-coherence map so detail/dashboard/profile/search cards refresh consistently.
 
 ## 5. Library And Reading

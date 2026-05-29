@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { useMemo } from "react";
-import { ReactionBar } from "@/engagement";
+import { ReactionBar, ReportAction } from "@/engagement";
 import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { TextLink } from "@/shared/ui/link";
@@ -57,13 +57,27 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
         </div>
       )}
       <PostBodyMarkdown content={remark.content} />
-      <ReactionBar
-        size="lg"
-        post={remark}
-        policy={remarkPolicy}
-        actions={remarkDetailActions}
-        onReplyInvoke={onReplyInvoke}
-      />
+      <div className="flex items-center justify-between gap-2">
+        <ReactionBar
+          size="lg"
+          post={remark}
+          policy={remarkPolicy}
+          actions={remarkDetailActions}
+          onReplyInvoke={onReplyInvoke}
+        />
+        {remark.realmUnitId ? (
+          <ReportAction
+            target={{
+              kind: "remark",
+              id: remark.unitId,
+              unitId: remark.unitId,
+              subjectUserId: remark.authorUserId,
+            }}
+            realmUnitId={remark.realmUnitId}
+            showLabel={false}
+          />
+        ) : null}
+      </div>
     </div>
   );
 };
