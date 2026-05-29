@@ -19,10 +19,14 @@ export { postKeys } from "./post.keys";
 // Mutation Hooks
 export {
   postMutations,
+  useAcceptAnswerMutation,
   useCreatePostMutation,
   useCreateWikiPostMutation,
   useDeletePostMutation,
+  usePinPostMutation,
   useSetPostPublicationMutation,
+  useUnacceptAnswerMutation,
+  useUnpinPostMutation,
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
 } from "./post.mutations";

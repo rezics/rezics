@@ -303,6 +303,20 @@ export type PostListBody = (typeof postListBodySchema)["static"];
 export const postListResponseSchema = t.Object({
   posts: t.Array(postDTOSchema),
   total: t.Optional(t.Number()),
+  /**
+   * Thread read only: whether the current caller may pin/accept within this
+   * thread (OP, realm moderator/owner, or platform admin). Viewer-derived from
+   * the same `assertCanPromoteInThread` gate the write path enforces, so clients
+   * can present promotion controls without duplicating authorization. Absent on
+   * non-thread list reads; `false` for anonymous callers.
+   */
+  viewerCanPromote: t.Optional(t.Boolean()),
+  /**
+   * Thread read only: whether the thread root bears the official question tag
+   * (gates the accept-answer affordance). Reuses the server `isQuestionThread()`
+   * check. Absent on non-thread list reads.
+   */
+  isQuestionThread: t.Optional(t.Boolean()),
 });
 
 export type PostListResponse = (typeof postListResponseSchema)["static"];

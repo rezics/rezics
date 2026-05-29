@@ -130,7 +130,21 @@ export const postApi = new Elysia({ prefix: "/post" })
             isAdmin: admin,
             viewerUserId: identity?.userId,
           });
-      return { posts: posts.map(mapPostToDTO), total };
+      const response: PostListResponse = {
+        posts: posts.map(mapPostToDTO),
+        total,
+      };
+      // Thread read: attach viewer-derived promotion signals so clients can gate
+      // in-thread pin/accept controls without re-implementing authorization.
+      if (query.rootPostUnitId) {
+        const signals = await postService.getThreadPromotionSignals(
+          query.rootPostUnitId,
+          identity,
+        );
+        response.viewerCanPromote = signals.viewerCanPromote;
+        response.isQuestionThread = signals.isQuestionThread;
+      }
+      return response;
     },
     {
       query: postListQuerySchema,
@@ -188,7 +202,20 @@ export const postApi = new Elysia({ prefix: "/post" })
             isAdmin: admin,
             viewerUserId: identity?.userId,
           });
-      return { posts: posts.map(mapPostToDTO), total };
+      const response: PostListResponse = {
+        posts: posts.map(mapPostToDTO),
+        total,
+      };
+      // Thread read: attach viewer-derived promotion signals (see GET /list).
+      if (body.rootPostUnitId) {
+        const signals = await postService.getThreadPromotionSignals(
+          body.rootPostUnitId,
+          identity,
+        );
+        response.viewerCanPromote = signals.viewerCanPromote;
+        response.isQuestionThread = signals.isQuestionThread;
+      }
+      return response;
     },
     {
       body: postListBodySchema,

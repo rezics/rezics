@@ -1,6 +1,11 @@
 {
   "post_pin_accepted_answer": "已采纳的回答",
   "post_pin_pinned": "已置顶",
+  "post_pin_action_pin": "置顶",
+  "post_pin_action_unpin": "取消置顶",
+  "post_pin_action_accept": "采纳回答",
+  "post_pin_action_unaccept": "取消采纳",
+  "post_pin_action_failed": "无法更新推荐，请重试。",
   "comment_login_to_view": "请登录查看评论",
   "discussion_empty": "还没有讨论。",
   "dm_back_to_list": "所有对话",

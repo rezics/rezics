@@ -3,7 +3,13 @@ import {
   useCurrentUserId,
   useServerPermission,
 } from "@rezics/api/hooks";
-import { postThreadQuery } from "@rezics/api/post/post";
+import {
+  postThreadQuery,
+  useAcceptAnswerMutation,
+  usePinPostMutation,
+  useUnacceptAnswerMutation,
+  useUnpinPostMutation,
+} from "@rezics/api/post/post";
 import type { PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -12,7 +18,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { useMemo } from "react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { PostPromotionControls } from "../components/parts/PostPromotionControls";
 import { excludeRootPost } from "../hooks/usePostTreeCollapse";
+import { decidePromotionControls } from "../models/postPromotionGate";
 import { PostEditDialog } from "../forms/PostEditDialog";
 import { PostTreeList } from "./PostTreeList";
 import { DEFAULT_MAX_DEPTH, DEFAULT_VISUAL_MAX_DEPTH } from "./postTreeLayout";
@@ -38,7 +47,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   highlightFocusedPost,
   onReply,
 }) => {
-  const { t } = useTranslation(["common"]);
+  const { t } = useTranslation(["common", "community"]);
   const permission = useServerPermission();
   const actorUserId = useCurrentUserId();
   const [editingPost, setEditingPost] = useState<PostDTO | null>(null);
@@ -49,6 +58,27 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     () => excludeRootPost(data?.posts ?? [], rootPostUnitId),
     [data?.posts, rootPostUnitId],
   );
+
+  // Viewer-derived signals from the thread read. The server is the single
+  // authorization source; these only gate the affordance. A stale 403 is
+  // handled by the mutations re-syncing the thread on settle.
+  const viewerCanPromote = Boolean(data?.viewerCanPromote);
+  const isQuestionThread = Boolean(data?.isQuestionThread);
+
+  const onPromotionError = () =>
+    toast.error(t("community:post_pin_action_failed"));
+  const pinMutation = usePinPostMutation({ onError: onPromotionError });
+  const unpinMutation = useUnpinPostMutation({ onError: onPromotionError });
+  const acceptMutation = useAcceptAnswerMutation({ onError: onPromotionError });
+  const unacceptMutation = useUnacceptAnswerMutation({
+    onError: onPromotionError,
+  });
+  const promotionPending =
+    pinMutation.isPending ||
+    unpinMutation.isPending ||
+    acceptMutation.isPending ||
+    unacceptMutation.isPending;
+
   const renderOverflowContent = (post: PostDTO) => {
     const decision = computeEditorEntryDecision({
       permission,
@@ -57,20 +87,45 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
       ownerUnit: { user: post.author },
     });
 
-    if (!decision.canEnter) return null;
+    // Mirror the server's promotion rules: pin/unpin on any reply, accept on a
+    // direct (`depth === 1`) reply of a question thread.
+    const { canPin, canAccept } = decidePromotionControls({
+      viewerCanPromote,
+      isQuestionThread,
+      hasSession: Boolean(actorUserId),
+      depth: post.depth ?? 0,
+    });
+
+    if (!decision.canEnter && !canPin && !canAccept) return null;
+
+    const variables = { scopeUnitId: rootPostUnitId, postUnitId: post.unitId };
 
     return (
-      <DropdownMenuItem
-        className="gap-2"
-        onClick={(event) => event.stopPropagation()}
-        onSelect={(event) => {
-          event.stopPropagation();
-          setEditingPost(post);
-        }}
-      >
-        <Pencil size={16} strokeWidth={2} />
-        <span>{t("common:edit")}</span>
-      </DropdownMenuItem>
+      <>
+        {decision.canEnter ? (
+          <DropdownMenuItem
+            className="gap-2"
+            onClick={(event) => event.stopPropagation()}
+            onSelect={(event) => {
+              event.stopPropagation();
+              setEditingPost(post);
+            }}
+          >
+            <Pencil size={16} strokeWidth={2} />
+            <span>{t("common:edit")}</span>
+          </DropdownMenuItem>
+        ) : null}
+        <PostPromotionControls
+          pinKind={post.pinKind}
+          canPin={canPin}
+          canAccept={canAccept}
+          disabled={promotionPending}
+          onPin={() => pinMutation.mutate(variables)}
+          onUnpin={() => unpinMutation.mutate(variables)}
+          onAccept={() => acceptMutation.mutate(variables)}
+          onUnaccept={() => unacceptMutation.mutate(variables)}
+        />
+      </>
     );
   };
 

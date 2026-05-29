@@ -1250,31 +1250,102 @@ export class PostService {
       throw new AppError(400, "A PostPin scope must be a thread root post");
     }
 
-    if (scope.authorUserId === caller.userId) return;
-    if (BasicAdminPermission(caller.permission as never)) return;
+    const allowed = await this.canPromoteInThread(
+      {
+        authorUserId: scope.authorUserId,
+        realmUnitIds: scope.unit.inRealms.map((row) => row.realmUnitId),
+      },
+      caller,
+    );
+    if (!allowed) {
+      throw new AppError(
+        403,
+        "Only the thread author or a realm moderator/owner may promote posts in this thread",
+      );
+    }
+  }
 
-    const realmIds = scope.unit.inRealms.map((row) => row.realmUnitId);
-    if (realmIds.length > 0) {
+  /**
+   * Pure authorization decision shared by the write guard
+   * (`assertCanPromoteInThread`, which throws on `false`) and the thread read
+   * path (which surfaces it as `viewerCanPromote`). One code path, so the UI
+   * affordance never drifts from what the server enforces. Takes an
+   * already-loaded thread-root shape — structural validation (scope is a real
+   * thread root, not a realm) stays in the guard. Returns `true` for the thread
+   * author (OP), a platform admin, or a moderator/owner of a realm the thread
+   * belongs to.
+   */
+  private async canPromoteInThread(
+    scope: { authorUserId: string; realmUnitIds: string[] },
+    caller: RezicsSessionClaims,
+  ): Promise<boolean> {
+    if (scope.authorUserId === caller.userId) return true;
+    if (BasicAdminPermission(caller.permission as never)) return true;
+
+    if (scope.realmUnitIds.length > 0) {
       const ownedRealm = await prisma.unit.findFirst({
-        where: { id: { in: realmIds }, userId: caller.userId },
+        where: { id: { in: scope.realmUnitIds }, userId: caller.userId },
         select: { id: true },
       });
-      if (ownedRealm) return;
+      if (ownedRealm) return true;
       const moderator = await prisma.realmMember.findFirst({
         where: {
-          realmUnitId: { in: realmIds },
+          realmUnitId: { in: scope.realmUnitIds },
           userId: caller.userId,
           roleKey: { in: [...PROMOTION_ROLES] },
         },
         select: { realmUnitId: true },
       });
-      if (moderator) return;
+      if (moderator) return true;
     }
 
-    throw new AppError(
-      403,
-      "Only the thread author or a realm moderator/owner may promote posts in this thread",
+    return false;
+  }
+
+  /**
+   * Thread-scoped viewer signals for the thread read path: whether the caller
+   * may pin/accept in this thread (`viewerCanPromote`) and whether the thread is
+   * a Q&A thread (`isQuestionThread`). Computed once per thread read. Anonymous
+   * callers always get `viewerCanPromote = false`; `viewerCanPromote` reuses the
+   * same `canPromoteInThread` decision the write guard enforces, so a shown
+   * control mirrors server truth.
+   */
+  async getThreadPromotionSignals(
+    rootPostUnitId: string,
+    caller: RezicsSessionClaims | null | undefined,
+  ): Promise<{ viewerCanPromote: boolean; isQuestionThread: boolean }> {
+    const isQuestion = await this.isQuestionThread(rootPostUnitId);
+    if (!caller?.userId) {
+      return { viewerCanPromote: false, isQuestionThread: isQuestion };
+    }
+
+    const scope = await prisma.post.findUnique({
+      where: { unitId: rootPostUnitId },
+      select: {
+        authorUserId: true,
+        depth: true,
+        rootPostUnitId: true,
+        unit: { select: { inRealms: { select: { realmUnitId: true } } } },
+      },
+    });
+
+    // Only a real thread root can be promoted into; anything else → false.
+    if (
+      !scope ||
+      scope.depth !== 0 ||
+      (scope.rootPostUnitId !== null && scope.rootPostUnitId !== rootPostUnitId)
+    ) {
+      return { viewerCanPromote: false, isQuestionThread: isQuestion };
+    }
+
+    const viewerCanPromote = await this.canPromoteInThread(
+      {
+        authorUserId: scope.authorUserId,
+        realmUnitIds: scope.unit.inRealms.map((row) => row.realmUnitId),
+      },
+      caller,
     );
+    return { viewerCanPromote, isQuestionThread: isQuestion };
   }
 
   /** Validate the target is a reply within the scope thread; return its shape. */

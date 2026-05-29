@@ -3,8 +3,11 @@
  */
 
 import type {
+  AcceptAnswerInput,
   CreatePostInput,
   EditorialPatchSubmission,
+  PinPostInput,
+  PostPinDTO,
   PostResponse,
   UpdatePostInput,
 } from "@rezics/contract";
@@ -229,6 +232,110 @@ export function useSetPostPublicationMutation(
 }
 
 /**
+ * Promotion mutations (pin / unpin / accept / unaccept).
+ *
+ * Each mutation targets a reply within a thread scope and, on settle, refreshes
+ * the thread query so promotion badges (`PostPinBadge`) and sibling ordering
+ * (`orderSiblingsByPromotion`) recompute from server truth. Invalidating on
+ * settle — not just success — means a stale `403` re-syncs the thread to the
+ * server's view rather than leaving a falsely-applied control. The server gate
+ * (`assertCanPromoteInThread`) remains the single authorization source; these
+ * hooks never re-implement it.
+ */
+function refreshThread(
+  queryClient: ReturnType<typeof useQueryClient>,
+  scopeUnitId: string,
+) {
+  queryClient.invalidateQueries({ queryKey: postKeys.threads(scopeUnitId) });
+}
+
+/** Pin a reply (`kind = PINNED`) within its thread scope. */
+export function usePinPostMutation(
+  options?: Omit<
+    UseMutationOptions<PostPinDTO, Error, PinPostInput>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: PinPostInput) => postApi.pin(input),
+    ...options,
+    onSettled: (data, error, variables, onMutateResult, context) => {
+      refreshThread(queryClient, variables.scopeUnitId);
+      options?.onSettled?.(data, error, variables, onMutateResult, context);
+    },
+  });
+}
+
+/** Remove a `PINNED` promotion from a reply. */
+export function useUnpinPostMutation(
+  options?: Omit<
+    UseMutationOptions<
+      { message: string },
+      Error,
+      { scopeUnitId: string; postUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ scopeUnitId, postUnitId }) =>
+      postApi.unpin(scopeUnitId, postUnitId),
+    ...options,
+    onSettled: (data, error, variables, onMutateResult, context) => {
+      refreshThread(queryClient, variables.scopeUnitId);
+      options?.onSettled?.(data, error, variables, onMutateResult, context);
+    },
+  });
+}
+
+/** Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread. */
+export function useAcceptAnswerMutation(
+  options?: Omit<
+    UseMutationOptions<PostPinDTO, Error, AcceptAnswerInput>,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: AcceptAnswerInput) => postApi.acceptAnswer(input),
+    ...options,
+    onSettled: (data, error, variables, onMutateResult, context) => {
+      refreshThread(queryClient, variables.scopeUnitId);
+      options?.onSettled?.(data, error, variables, onMutateResult, context);
+    },
+  });
+}
+
+/** Remove an `ACCEPTED_ANSWER` promotion from a reply. */
+export function useUnacceptAnswerMutation(
+  options?: Omit<
+    UseMutationOptions<
+      { message: string },
+      Error,
+      { scopeUnitId: string; postUnitId: string }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ scopeUnitId, postUnitId }) =>
+      postApi.unacceptAnswer(scopeUnitId, postUnitId),
+    ...options,
+    onSettled: (data, error, variables, onMutateResult, context) => {
+      refreshThread(queryClient, variables.scopeUnitId);
+      options?.onSettled?.(data, error, variables, onMutateResult, context);
+    },
+  });
+}
+
+/**
  * Combined mutations export
  */
 export const postMutations = {
@@ -238,4 +345,8 @@ export const postMutations = {
   useUpdateWikiContent: useUpdateWikiPostContentMutation,
   useDelete: useDeletePostMutation,
   useSetPublication: useSetPostPublicationMutation,
+  usePin: usePinPostMutation,
+  useUnpin: useUnpinPostMutation,
+  useAcceptAnswer: useAcceptAnswerMutation,
+  useUnacceptAnswer: useUnacceptAnswerMutation,
 };

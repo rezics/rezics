@@ -1474,14 +1474,12 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("rejects a target outside the scope thread", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(
-        directReply({
-          rootPostUnitId: "other-root",
-          parentPostUnitId: "other-root",
-        }),
-      );
+    postFindUniqueMock.mockResolvedValueOnce(rootScope()).mockResolvedValueOnce(
+      directReply({
+        rootPostUnitId: "other-root",
+        parentPostUnitId: "other-root",
+      }),
+    );
 
     await expect(
       service.pin({ scopeUnitId: "root-1", postUnitId: "reply-x" }, op),
@@ -1595,5 +1593,133 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       service.unacceptAnswer("root-1", "reply-1", op),
     ).rejects.toThrow(/not found/);
     expect(postPinDeleteMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
+  const service = new PostService();
+  const op = { userId: "op-1", permission: { role: "USER" } } as any;
+  const stranger = {
+    userId: "stranger-1",
+    permission: { role: "USER" },
+  } as any;
+  const admin = { userId: "admin-1", permission: { role: "ADMIN" } } as any;
+
+  const readScope = (
+    overrides: Record<string, unknown> = {},
+  ): Record<string, unknown> => ({
+    authorUserId: "op-1",
+    depth: 0,
+    rootPostUnitId: "root-1",
+    unit: { inRealms: [] },
+    ...overrides,
+  });
+
+  test("OP sees viewerCanPromote=true on their own thread", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(readScope());
+
+    const signals = await service.getThreadPromotionSignals("root-1", op);
+    expect(signals.viewerCanPromote).toBe(true);
+  });
+
+  test("an unrelated viewer sees viewerCanPromote=false", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(
+      readScope({ unit: { inRealms: [{ realmUnitId: "realm-1" }] } }),
+    );
+
+    const signals = await service.getThreadPromotionSignals("root-1", stranger);
+    expect(signals.viewerCanPromote).toBe(false);
+  });
+
+  test("an anonymous caller sees viewerCanPromote=false without a scope lookup", async () => {
+    resetMocks();
+
+    const signals = await service.getThreadPromotionSignals("root-1", null);
+    expect(signals.viewerCanPromote).toBe(false);
+    expect(postFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  test("a realm moderator sees viewerCanPromote=true", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(
+      readScope({ unit: { inRealms: [{ realmUnitId: "realm-1" }] } }),
+    );
+    realmMemberFindFirstMock.mockResolvedValueOnce({ realmUnitId: "realm-1" });
+
+    const signals = await service.getThreadPromotionSignals("root-1", {
+      userId: "mod-1",
+      permission: { role: "USER" },
+    } as any);
+    expect(signals.viewerCanPromote).toBe(true);
+  });
+
+  test("a realm owner sees viewerCanPromote=true", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(
+      readScope({ unit: { inRealms: [{ realmUnitId: "realm-1" }] } }),
+    );
+    // First unit.findFirst is the question-tag lookup (none); second is the
+    // owned-realm lookup (hit).
+    unitFindFirstMock
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: "realm-1" });
+
+    const signals = await service.getThreadPromotionSignals("root-1", {
+      userId: "owner-1",
+      permission: { role: "USER" },
+    } as any);
+    expect(signals.viewerCanPromote).toBe(true);
+  });
+
+  test("a platform admin sees viewerCanPromote=true on someone else's thread", async () => {
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(
+      readScope({ authorUserId: "someone-else" }),
+    );
+
+    const signals = await service.getThreadPromotionSignals("root-1", admin);
+    expect(signals.viewerCanPromote).toBe(true);
+  });
+
+  test("viewerCanPromote=false agrees with the write guard for the same caller", async () => {
+    // Read path: stranger gets no capability.
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(
+      readScope({ unit: { inRealms: [{ realmUnitId: "realm-1" }] } }),
+    );
+    const read = await service.getThreadPromotionSignals("root-1", stranger);
+    expect(read.viewerCanPromote).toBe(false);
+
+    // Write guard: the same stranger is rejected when they attempt to pin.
+    resetMocks();
+    postFindUniqueMock.mockResolvedValueOnce(
+      readScope({
+        unit: { type: "POST", inRealms: [{ realmUnitId: "realm-1" }] },
+      }),
+    );
+    await expect(
+      service.pin({ scopeUnitId: "root-1", postUnitId: "reply-1" }, stranger),
+    ).rejects.toThrow(/moderator\/owner/);
+  });
+
+  test("isQuestionThread=true when the root bears the official question tag", async () => {
+    resetMocks();
+    unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
+    unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
+    postFindUniqueMock.mockResolvedValueOnce(readScope());
+
+    const signals = await service.getThreadPromotionSignals("root-1", op);
+    expect(signals.isQuestionThread).toBe(true);
+  });
+
+  test("isQuestionThread=false when the root lacks the official question tag", async () => {
+    resetMocks();
+    unitFindFirstMock.mockResolvedValue(null);
+    postFindUniqueMock.mockResolvedValueOnce(readScope());
+
+    const signals = await service.getThreadPromotionSignals("root-1", op);
+    expect(signals.isQuestionThread).toBe(false);
   });
 });

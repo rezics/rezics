@@ -1,6 +1,11 @@
 {
   "post_pin_accepted_answer": "Akzeptierte Antwort",
   "post_pin_pinned": "Angeheftet",
+  "post_pin_action_pin": "Anheften",
+  "post_pin_action_unpin": "Lösen",
+  "post_pin_action_accept": "Antwort akzeptieren",
+  "post_pin_action_unaccept": "Akzeptanz aufheben",
+  "post_pin_action_failed": "Die Hervorhebung konnte nicht aktualisiert werden. Bitte erneut versuchen.",
   "comment_login_to_view": "Bitte melden Sie sich an, um Kommentare anzuzeigen",
   "discussion_empty": "Noch keine Diskussionen.",
   "dm_back_to_list": "Alle Gespräche",

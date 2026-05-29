@@ -1,6 +1,11 @@
 {
   "post_pin_accepted_answer": "已採納的回答",
   "post_pin_pinned": "已置頂",
+  "post_pin_action_pin": "置頂",
+  "post_pin_action_unpin": "取消置頂",
+  "post_pin_action_accept": "採納回答",
+  "post_pin_action_unaccept": "取消採納",
+  "post_pin_action_failed": "無法更新推薦，請重試。",
   "comment_login_to_view": "請登入以查看留言",
   "discussion_empty": "目前還沒有討論。",
   "dm_back_to_list": "所有對話",

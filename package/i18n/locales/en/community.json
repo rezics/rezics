@@ -1,6 +1,11 @@
 {
   "post_pin_accepted_answer": "Accepted answer",
   "post_pin_pinned": "Pinned",
+  "post_pin_action_pin": "Pin",
+  "post_pin_action_unpin": "Unpin",
+  "post_pin_action_accept": "Accept answer",
+  "post_pin_action_unaccept": "Unaccept answer",
+  "post_pin_action_failed": "Couldn't update the promotion. Please try again.",
   "comment_login_to_view": "Please login to view comments",
   "discussion_empty": "No discussions yet.",
   "dm_back_to_list": "All conversations",
