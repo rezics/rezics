@@ -3,7 +3,8 @@ import { Elysia } from "elysia";
 import { prisma } from "#/prisma/client";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro } from "@/middleware";
-import { sendDm } from "./notify-boundary.client";
+import { deliverDm } from "./dm-boundary.sender";
+import { subscriptionPermitsDm } from "./dm-boundary.subscription";
 
 /**
  * Whether a user-to-user block exists between the two users in either
@@ -22,25 +23,6 @@ async function isBlockedEitherWay(a: string, b: string): Promise<boolean> {
     select: { id: true },
   });
   return row !== null;
-}
-
-/**
- * Predicate: does the sender's Subscription to the recipient permit DM?
- *
- * Per design D7a of `engagement-subscription`: a Subscription's `channels`
- * permits DM if it contains the global wildcard `'*'`, the DM category
- * wildcard `'dm.*'`, or the exact event `'dm.message'`. This collapses
- * "I follow you" and "I'll let you DM me" into one edge with channel
- * filtering — see `CHANNEL_REGISTRY.USER` in `@rezics/contract`.
- *
- * Exported for unit testing alongside the dm-boundary route.
- */
-export function subscriptionPermitsDm(channels: readonly string[]): boolean {
-  return (
-    channels.includes("*") ||
-    channels.includes("dm.*") ||
-    channels.includes("dm.message")
-  );
 }
 
 export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
@@ -95,7 +77,7 @@ export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
       };
     }
 
-    const result = await sendDm({ senderId, recipientId, content });
+    const result = await deliverDm({ senderId, recipientId, content });
     if (!result.ok) {
       set.status = 502;
       return { error: "Failed to deliver message" };

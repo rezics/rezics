@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { subscriptionPermitsDm } from "./dm-boundary.api";
+import { subscriptionPermitsDm } from "./dm-boundary.subscription";
 
 /**
  * Unit tests for the DM permission predicate. Engagement-subscription

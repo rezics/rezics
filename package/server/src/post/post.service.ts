@@ -98,6 +98,23 @@ function realmLifecycleStateFilter(
   return state.toUpperCase();
 }
 
+async function applyBlockedAuthorFilter(
+  where: Prisma.PostWhereInput,
+  options?: { isAdmin?: boolean; viewerUserId?: string | null },
+) {
+  if (options?.isAdmin || !options?.viewerUserId) return;
+
+  const blockedIds = await blockService.blockedUserIds(options.viewerUserId);
+  if (blockedIds.length === 0) return;
+
+  const existingAnd = where.AND
+    ? Array.isArray(where.AND)
+      ? where.AND
+      : [where.AND]
+    : [];
+  where.AND = [...existingAnd, { authorUserId: { notIn: blockedIds } }];
+}
+
 export class PostService {
   /**
    * List posts with support for flat and threaded modes.
@@ -141,21 +158,7 @@ export class PostService {
       where.unitId = { in: idList };
     }
 
-    // Hide posts authored by users the viewer has blocked. AND-combined so it
-    // composes with any existing `authorUserId` filter above.
-    if (!options?.isAdmin && options?.viewerUserId) {
-      const blockedIds = await blockService.blockedUserIds(
-        options.viewerUserId,
-      );
-      if (blockedIds.length > 0) {
-        const existingAnd = where.AND
-          ? Array.isArray(where.AND)
-            ? where.AND
-            : [where.AND]
-          : [];
-        where.AND = [...existingAnd, { authorUserId: { notIn: blockedIds } }];
-      }
-    }
+    await applyBlockedAuthorFilter(where, options);
 
     if (query.subtreeRootPostUnitId) {
       const anchor = await prisma.post.findUniqueOrThrow({
@@ -302,6 +305,8 @@ export class PostService {
     if (opts.parentPostUnitId) where.parentPostUnitId = opts.parentPostUnitId;
     if (opts.authorUserId) where.authorUserId = opts.authorUserId;
     if (opts.kind) where.kind = opts.kind;
+
+    await applyBlockedAuthorFilter(where, options);
 
     if (typeof opts.maxDepth === "number") {
       where.depth = { lte: opts.maxDepth };

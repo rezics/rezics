@@ -55,8 +55,8 @@ mock.module("@/governance", () => ({
   },
 }));
 
-mock.module("./notify-boundary.client", () => ({
-  sendDm: sendDmMock,
+mock.module("./dm-boundary.sender", () => ({
+  deliverDm: sendDmMock,
 }));
 
 describe("dmBoundaryApi policy", () => {

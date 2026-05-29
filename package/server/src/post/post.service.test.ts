@@ -91,6 +91,7 @@ const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const assertCanEditCollaborativeMetadataMock = mock(async () => undefined);
 const collectPatchLeafPathsMock = mock(() => []);
 const writeEditorialMetadataHistoryMock = mock(async () => undefined);
+const blockedUserIdsMock = mock(async (): Promise<string[]> => []);
 const transactionMock = mock(async (fn: any) =>
   fn({
     $queryRaw: queryRawMock,
@@ -155,6 +156,12 @@ Object.assign(prismaMock, {
 
 mock.module("@/infra/infra-users", () => ({
   resolveRezicsWikiUserId: mock(async () => "wiki-owner"),
+}));
+
+mock.module("@/block/block.service", () => ({
+  blockService: {
+    blockedUserIds: blockedUserIdsMock,
+  },
 }));
 
 mock.module("@/job/job-boundary", () => ({
@@ -265,6 +272,8 @@ function resetMocks() {
   assertCanEditCollaborativeMetadataMock.mockClear();
   collectPatchLeafPathsMock.mockClear();
   writeEditorialMetadataHistoryMock.mockClear();
+  blockedUserIdsMock.mockClear();
+  blockedUserIdsMock.mockResolvedValue([]);
   transactionMock.mockClear();
 }
 
@@ -780,6 +789,18 @@ describe("PostService.byRealm", () => {
     });
   });
 
+  test("hides blocked authors in general feeds", async () => {
+    resetMocks();
+    blockedUserIdsMock.mockResolvedValueOnce(["blocked-user-1"]);
+
+    await service.list({}, { viewerUserId: "viewer-1" });
+
+    expect(blockedUserIdsMock).toHaveBeenCalledWith("viewer-1");
+    expect(firstPostFindManyArgs().where.AND).toEqual([
+      { authorUserId: { notIn: ["blocked-user-1"] } },
+    ]);
+  });
+
   test("new sort orders by createdAt descending", async () => {
     resetMocks();
     await service.byRealm("realm-1", { sort: "new" });
@@ -806,6 +827,18 @@ describe("PostService.byRealm", () => {
     expect(args.orderBy).toEqual([
       { scoreEntry: { value: "desc" } },
       { createdAt: "desc" },
+    ]);
+  });
+
+  test("hides blocked authors in realm feeds", async () => {
+    resetMocks();
+    blockedUserIdsMock.mockResolvedValueOnce(["blocked-user-1"]);
+
+    await service.byRealm("realm-1", {}, { viewerUserId: "viewer-1" });
+
+    expect(blockedUserIdsMock).toHaveBeenCalledWith("viewer-1");
+    expect(firstPostFindManyArgs().where.AND).toEqual([
+      { authorUserId: { notIn: ["blocked-user-1"] } },
     ]);
   });
 
