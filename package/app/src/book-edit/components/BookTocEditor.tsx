@@ -27,8 +27,8 @@ import type {
 import { Tree, type TreeApi } from "react-arborist";
 import { useEnsureChapterUnit } from "@/book-library/hooks/useEnsureChapterUnit";
 import {
-  contentUnitIdForNode,
   type BookContentStructureOccurrence,
+  contentUnitIdForNode,
 } from "@/book-library/models/bookContentStructurePath";
 import {
   findAndAddChild,
@@ -297,7 +297,7 @@ export const BookTocEditor = forwardRef<
   const handleNavigateToChapter = useCallback(
     async (chapter: Chapter) => {
       const contentUnitId = contentUnitIdForNode(chapter);
-      if (!contentUnitId && !chapter.path) {
+      if (!contentUnitId && !chapter.nodeId) {
         showAlert(
           "Cannot open a chapter before the table of contents is saved.",
         );
@@ -306,7 +306,7 @@ export const BookTocEditor = forwardRef<
       const chapterUnitId = await ensureChapterUnit({
         title: chapter.title,
         contentUnitId,
-        path: chapter.path ?? [],
+        nodeId: chapter.nodeId,
       });
       navigate({
         to: "/book/$bookId/edit/$chapterId",

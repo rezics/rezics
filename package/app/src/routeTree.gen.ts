@@ -106,12 +106,10 @@ import { Route as EditorRemarkReviewIdEditRouteImport } from './routes/_editor/r
 import { Route as EditorPostRootPostUnitIdEditRouteImport } from './routes/_editor/post/$rootPostUnitId/edit'
 import { Route as EditorExcerptUnitIdEditRouteImport } from './routes/_editor/excerpt/$unitId/edit'
 import { Route as EditorEntityUnitIdEditRouteImport } from './routes/_editor/entity/$unitId/edit'
-import { Route as BookBookIdReadChapterIdRouteRouteImport } from './routes/book_/$bookId/read/$chapterId/route'
 import { Route as MainLayoutUserMeSettingRouteRouteImport } from './routes/_mainLayout/user/me/setting/route'
 import { Route as MainLayoutTagDomainUnitIdRouteRouteImport } from './routes/_mainLayout/tag/domain/$unitId/route'
 import { Route as MainLayoutTagBookBookIdRouteRouteImport } from './routes/_mainLayout/tag/book/$bookId/route'
 import { Route as EditorBookBookIdEditRouteRouteImport } from './routes/_editor/book/$bookId/edit/route'
-import { Route as BookBookIdReadChapterIdIndexRouteImport } from './routes/book_/$bookId/read/$chapterId/index'
 import { Route as BookBookIdNodeNodeIdIndexRouteImport } from './routes/book_/$bookId/node/$nodeId/index'
 import { Route as MainLayoutUserMeSettingIndexRouteImport } from './routes/_mainLayout/user/me/setting/index'
 import { Route as MainLayoutUserMeEntityIndexRouteImport } from './routes/_mainLayout/user/me/entity/index'
@@ -680,12 +678,6 @@ const EditorEntityUnitIdEditRoute = EditorEntityUnitIdEditRouteImport.update({
   path: '/entity/$unitId/edit',
   getParentRoute: () => EditorRoute,
 } as any)
-const BookBookIdReadChapterIdRouteRoute =
-  BookBookIdReadChapterIdRouteRouteImport.update({
-    id: '/book_/$bookId/read/$chapterId',
-    path: '/book/$bookId/read/$chapterId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const MainLayoutUserMeSettingRouteRoute =
   MainLayoutUserMeSettingRouteRouteImport.update({
     id: '/setting',
@@ -709,12 +701,6 @@ const EditorBookBookIdEditRouteRoute =
     id: '/book/$bookId/edit',
     path: '/book/$bookId/edit',
     getParentRoute: () => EditorRoute,
-  } as any)
-const BookBookIdReadChapterIdIndexRoute =
-  BookBookIdReadChapterIdIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => BookBookIdReadChapterIdRouteRoute,
   } as any)
 const BookBookIdNodeNodeIdIndexRoute =
   BookBookIdNodeNodeIdIndexRouteImport.update({
@@ -955,7 +941,6 @@ export interface FileRoutesByFullPath {
   '/tag/book/$bookId': typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   '/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
   '/user/me/setting': typeof MainLayoutUserMeSettingRouteRouteWithChildren
-  '/book/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdRouteRouteWithChildren
   '/entity/$unitId/edit': typeof EditorEntityUnitIdEditRoute
   '/excerpt/$unitId/edit': typeof EditorExcerptUnitIdEditRoute
   '/post/$rootPostUnitId/edit': typeof EditorPostRootPostUnitIdEditRoute
@@ -1041,7 +1026,6 @@ export interface FileRoutesByFullPath {
   '/user/me/entity/': typeof MainLayoutUserMeEntityIndexRoute
   '/user/me/setting/': typeof MainLayoutUserMeSettingIndexRoute
   '/book/$bookId/node/$nodeId/': typeof BookBookIdNodeNodeIdIndexRoute
-  '/book/$bookId/read/$chapterId/': typeof BookBookIdReadChapterIdIndexRoute
   '/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
   '/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
@@ -1166,7 +1150,6 @@ export interface FileRoutesByTo {
   '/user/me/entity': typeof MainLayoutUserMeEntityIndexRoute
   '/user/me/setting': typeof MainLayoutUserMeSettingIndexRoute
   '/book/$bookId/node/$nodeId': typeof BookBookIdNodeNodeIdIndexRoute
-  '/book/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdIndexRoute
   '/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
   '/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
@@ -1219,7 +1202,6 @@ export interface FileRoutesById {
   '/_mainLayout/tag/book/$bookId': typeof MainLayoutTagBookBookIdRouteRouteWithChildren
   '/_mainLayout/tag/domain/$unitId': typeof MainLayoutTagDomainUnitIdRouteRouteWithChildren
   '/_mainLayout/user/me/setting': typeof MainLayoutUserMeSettingRouteRouteWithChildren
-  '/book_/$bookId/read/$chapterId': typeof BookBookIdReadChapterIdRouteRouteWithChildren
   '/_editor/entity/$unitId/edit': typeof EditorEntityUnitIdEditRoute
   '/_editor/excerpt/$unitId/edit': typeof EditorExcerptUnitIdEditRoute
   '/_editor/post/$rootPostUnitId/edit': typeof EditorPostRootPostUnitIdEditRoute
@@ -1305,7 +1287,6 @@ export interface FileRoutesById {
   '/_mainLayout/user/me/entity/': typeof MainLayoutUserMeEntityIndexRoute
   '/_mainLayout/user/me/setting/': typeof MainLayoutUserMeSettingIndexRoute
   '/book_/$bookId/node/$nodeId/': typeof BookBookIdNodeNodeIdIndexRoute
-  '/book_/$bookId/read/$chapterId/': typeof BookBookIdReadChapterIdIndexRoute
   '/_editor/book/$bookId/edit/history/$sequence': typeof EditorBookBookIdEditHistorySequenceRoute
   '/_editor/post/$rootPostUnitId/continue/$unitId/edit': typeof EditorPostRootPostUnitIdContinueUnitIdEditRoute
   '/_mainLayout/tag/book/$bookId/tag/$domainId': typeof MainLayoutTagBookBookIdTagDomainIdRoute
@@ -1357,7 +1338,6 @@ export interface FileRouteTypes {
     | '/tag/book/$bookId'
     | '/tag/domain/$unitId'
     | '/user/me/setting'
-    | '/book/$bookId/read/$chapterId'
     | '/entity/$unitId/edit'
     | '/excerpt/$unitId/edit'
     | '/post/$rootPostUnitId/edit'
@@ -1443,7 +1423,6 @@ export interface FileRouteTypes {
     | '/user/me/entity/'
     | '/user/me/setting/'
     | '/book/$bookId/node/$nodeId/'
-    | '/book/$bookId/read/$chapterId/'
     | '/book/$bookId/edit/history/$sequence'
     | '/post/$rootPostUnitId/continue/$unitId/edit'
     | '/tag/book/$bookId/tag/$domainId'
@@ -1568,7 +1547,6 @@ export interface FileRouteTypes {
     | '/user/me/entity'
     | '/user/me/setting'
     | '/book/$bookId/node/$nodeId'
-    | '/book/$bookId/read/$chapterId'
     | '/book/$bookId/edit/history/$sequence'
     | '/post/$rootPostUnitId/continue/$unitId/edit'
     | '/tag/book/$bookId/tag/$domainId'
@@ -1620,7 +1598,6 @@ export interface FileRouteTypes {
     | '/_mainLayout/tag/book/$bookId'
     | '/_mainLayout/tag/domain/$unitId'
     | '/_mainLayout/user/me/setting'
-    | '/book_/$bookId/read/$chapterId'
     | '/_editor/entity/$unitId/edit'
     | '/_editor/excerpt/$unitId/edit'
     | '/_editor/post/$rootPostUnitId/edit'
@@ -1706,7 +1683,6 @@ export interface FileRouteTypes {
     | '/_mainLayout/user/me/entity/'
     | '/_mainLayout/user/me/setting/'
     | '/book_/$bookId/node/$nodeId/'
-    | '/book_/$bookId/read/$chapterId/'
     | '/_editor/book/$bookId/edit/history/$sequence'
     | '/_editor/post/$rootPostUnitId/continue/$unitId/edit'
     | '/_mainLayout/tag/book/$bookId/tag/$domainId'
@@ -1719,7 +1695,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   EditorRoute: typeof EditorRouteWithChildren
   MainLayoutRoute: typeof MainLayoutRouteWithChildren
-  BookBookIdReadChapterIdRouteRoute: typeof BookBookIdReadChapterIdRouteRouteWithChildren
   BookBookIdNodeNodeIdIndexRoute: typeof BookBookIdNodeNodeIdIndexRoute
 }
 
@@ -2404,13 +2379,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditorEntityUnitIdEditRouteImport
       parentRoute: typeof EditorRoute
     }
-    '/book_/$bookId/read/$chapterId': {
-      id: '/book_/$bookId/read/$chapterId'
-      path: '/book/$bookId/read/$chapterId'
-      fullPath: '/book/$bookId/read/$chapterId'
-      preLoaderRoute: typeof BookBookIdReadChapterIdRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_mainLayout/user/me/setting': {
       id: '/_mainLayout/user/me/setting'
       path: '/setting'
@@ -2438,13 +2406,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/book/$bookId/edit'
       preLoaderRoute: typeof EditorBookBookIdEditRouteRouteImport
       parentRoute: typeof EditorRoute
-    }
-    '/book_/$bookId/read/$chapterId/': {
-      id: '/book_/$bookId/read/$chapterId/'
-      path: '/'
-      fullPath: '/book/$bookId/read/$chapterId/'
-      preLoaderRoute: typeof BookBookIdReadChapterIdIndexRouteImport
-      parentRoute: typeof BookBookIdReadChapterIdRouteRoute
     }
     '/book_/$bookId/node/$nodeId/': {
       id: '/book_/$bookId/node/$nodeId/'
@@ -3100,25 +3061,9 @@ const MainLayoutRouteWithChildren = MainLayoutRoute._addFileChildren(
   MainLayoutRouteChildren,
 )
 
-interface BookBookIdReadChapterIdRouteRouteChildren {
-  BookBookIdReadChapterIdIndexRoute: typeof BookBookIdReadChapterIdIndexRoute
-}
-
-const BookBookIdReadChapterIdRouteRouteChildren: BookBookIdReadChapterIdRouteRouteChildren =
-  {
-    BookBookIdReadChapterIdIndexRoute: BookBookIdReadChapterIdIndexRoute,
-  }
-
-const BookBookIdReadChapterIdRouteRouteWithChildren =
-  BookBookIdReadChapterIdRouteRoute._addFileChildren(
-    BookBookIdReadChapterIdRouteRouteChildren,
-  )
-
 const rootRouteChildren: RootRouteChildren = {
   EditorRoute: EditorRouteWithChildren,
   MainLayoutRoute: MainLayoutRouteWithChildren,
-  BookBookIdReadChapterIdRouteRoute:
-    BookBookIdReadChapterIdRouteRouteWithChildren,
   BookBookIdNodeNodeIdIndexRoute: BookBookIdNodeNodeIdIndexRoute,
 }
 export const routeTree = rootRouteImport

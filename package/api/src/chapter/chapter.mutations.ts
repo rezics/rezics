@@ -117,7 +117,7 @@ export function useMaterializeChapterMutation(
 
   return useMutation({
     mutationFn: ({ bookUnitId, input }) =>
-      chapterApi.materializeByBookPath(bookUnitId, input),
+      chapterApi.materializeNode(bookUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({

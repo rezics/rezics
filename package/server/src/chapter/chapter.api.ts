@@ -63,14 +63,14 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
       }
 
       try {
-        return await chapterService.materializeByBookPath(
+        return await chapterService.materializeNode(
           params.bookUnitId,
           body,
           identity.userId,
         );
       } catch (error) {
-        if (error instanceof Error && error.message.startsWith("Conflict:")) {
-          set.status = 409;
+        if (error instanceof Error && error.message.startsWith("NotFound:")) {
+          set.status = 404;
         }
         throw error;
       }
@@ -83,9 +83,9 @@ export const chapterApi = new Elysia({ prefix: "/chapter" })
         200: chapterMaterializationResponseSchema,
       },
       detail: {
-        summary: "Materialize chapter by content structure path",
+        summary: "Materialize chapter by node id",
         description:
-          "Create or return the materialized chapter Unit for a content structure path",
+          "Create or return the materialized chapter Unit for a content structure node id",
         tags: ["Chapters"],
       },
     },

@@ -71,12 +71,11 @@ export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
         bookUnitId={bookId}
         nodeId={nodeId}
         title={state.node.title}
-        path={state.path}
         canEdit={canEdit}
-        onMaterialized={(materializedContentUnitId) =>
+        onMaterialized={() =>
           navigate({
-            to: "/book/$bookId/read/$chapterId",
-            params: { bookId, chapterId: materializedContentUnitId },
+            to: "/book/$bookId/node/$nodeId",
+            params: { bookId, nodeId },
           })
         }
       />
@@ -89,6 +88,7 @@ export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
       nodeId={nodeId}
       title={state.node.title}
       contentUnitId={state.contentUnitId}
+      canEdit={canEdit}
     />
   );
 };

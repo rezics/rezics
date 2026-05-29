@@ -33,11 +33,11 @@ describe("resolveNotificationHref", () => {
   test("appends the anchor when present", () => {
     expect(
       targetToHref({
-        route: "/book/:bookId/read/:chapterId",
-        params: { bookId: "b1", chapterId: "c2" },
+        route: "/book/:bookId/node/:nodeId",
+        params: { bookId: "b1", nodeId: "n2" },
         anchor: "comment-5",
       }),
-    ).toBe("/book/b1/read/c2#comment-5");
+    ).toBe("/book/b1/node/n2#comment-5");
   });
 
   test("encodes param values and leaves unknown placeholders intact", () => {

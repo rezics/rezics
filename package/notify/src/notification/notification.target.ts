@@ -8,7 +8,6 @@ import type { NotificationTarget } from "@rezics/contract";
 interface NotificationRoutingHints {
   bookId?: string;
   nodeId?: string;
-  chapterId?: string;
   contentUnitId?: string;
   profileSlug?: string;
   realmId?: string;
@@ -25,11 +24,10 @@ function readHints(extra: unknown): NotificationRoutingHints {
  * Resolve a notification's deep-link `target` from its kind and `extra` hints,
  * mirroring the link-selection policy in `app-product-navigation`:
  *
- * - a `nodeId` (chapter-scoped TOC ops, per-node reminders, restores) →
- *   `/book/:bookId/node/:nodeId`;
- * - a chapter Unit id in a known book context (chapter replies/reactions,
- *   chapter moderation) → `/book/:bookId/read/:chapterId`;
- * - a chapter Unit id with no book context → `/chapter/:contentUnitId`;
+ * - a `nodeId` (chapter-scoped TOC ops, per-node reminders, restores, chapter
+ *   replies/reactions, chapter moderation) → `/book/:bookId/node/:nodeId`, the
+ *   sole canonical reading surface;
+ * - a chapter Unit id with no book/node context → `/chapter/:contentUnitId`;
  * - follow → the actor's profile; realm events → the realm tab.
  *
  * Returns `undefined` when no hint resolves a route, so the card stays a plain
@@ -45,14 +43,6 @@ export function buildNotificationTarget(
     return {
       route: "/book/:bookId/node/:nodeId",
       params: { bookId: hints.bookId, nodeId: hints.nodeId },
-      ...(hints.anchor ? { anchor: hints.anchor } : {}),
-    };
-  }
-
-  if (hints.bookId && hints.chapterId) {
-    return {
-      route: "/book/:bookId/read/:chapterId",
-      params: { bookId: hints.bookId, chapterId: hints.chapterId },
       ...(hints.anchor ? { anchor: hints.anchor } : {}),
     };
   }

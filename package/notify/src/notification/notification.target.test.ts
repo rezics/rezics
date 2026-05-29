@@ -17,16 +17,7 @@ describe("buildNotificationTarget", () => {
     });
   });
 
-  test("falls back to read route for chapter Unit in a book context", () => {
-    expect(
-      buildNotificationTarget("comment.new", { bookId: "b1", chapterId: "c3" }),
-    ).toEqual({
-      route: "/book/:bookId/read/:chapterId",
-      params: { bookId: "b1", chapterId: "c3" },
-    });
-  });
-
-  test("uses chapter-only route when no book context", () => {
+  test("uses chapter-only route when no book/node context", () => {
     expect(
       buildNotificationTarget("reaction.like", { contentUnitId: "u9" }),
     ).toEqual({

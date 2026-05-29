@@ -19,7 +19,6 @@ import {
   UnitStatus,
   UnitType,
 } from "#/prisma/client";
-import { contentStructureService } from "@/content-structure";
 import type { ChapterPostWithRelations } from "./types";
 import { chapterPostInclude } from "./types";
 
@@ -205,7 +204,7 @@ export class ChapterService {
     });
   }
 
-  async materializeByBookPath(
+  async materializeNode(
     bookUnitId: string,
     req: ChapterMaterializationRequest,
     userId: string,
@@ -226,28 +225,24 @@ export class ChapterService {
         FOR UPDATE
       `;
 
-      const { container: contentStructure, node } =
-        await contentStructureService.getNodeByPath(tx, bookUnitId, req.path);
-      if (
-        req.expectedBookContentStructureUpdatedAt &&
-        new Date(req.expectedBookContentStructureUpdatedAt).getTime() !==
-          new Date(contentStructure.updatedAt).getTime()
-      ) {
-        throw new Error("Conflict: BookContentStructure has changed");
-      }
+      const contentStructure = await tx.contentStructure.findUniqueOrThrow({
+        where: { ownerUnitId: bookUnitId },
+        select: { ownerUnitId: true, updatedAt: true },
+      });
+
+      // Node id is a stable uuidv7, so it cannot drift under reorder — resolve
+      // the row directly instead of walking a numeric path.
+      const node = await tx.contentStructureNode.findFirst({
+        where: { id: req.nodeId, ownerUnitId: bookUnitId, isDeleted: false },
+      });
       if (!node) {
-        throw new Error("Conflict: BookContentStructure path does not resolve");
-      }
-      if (req.expectedTitle && node.title !== req.expectedTitle) {
-        throw new Error(
-          "Conflict: BookContentStructure path no longer matches title",
-        );
+        throw new Error(`NotFound: ContentStructureNode ${req.nodeId}`);
       }
 
       if (node.contentUnitId) {
         return {
           bookUnitId,
-          path: req.path,
+          nodeId: node.id,
           contentUnitId: node.contentUnitId,
           chapterUnitId: node.contentUnitId,
           alreadyMaterialized: true,
@@ -298,7 +293,7 @@ export class ChapterService {
 
       return {
         bookUnitId,
-        path: req.path,
+        nodeId: node.id,
         contentUnitId: unit.id,
         chapterUnitId: unit.id,
         alreadyMaterialized: false,

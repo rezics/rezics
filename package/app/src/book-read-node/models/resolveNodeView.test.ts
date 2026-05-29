@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { resolveNodeView, findNodeById } from "./resolveNodeView";
+import { findNodeById, resolveNodeView } from "./resolveNodeView";
 
 const nodes = [
   {
@@ -55,9 +55,18 @@ describe("resolveNodeView", () => {
     expect(state.kind).toBe("reading");
     if (state.kind === "reading") expect(state.contentUnitId).toBe("ch-1");
   });
-  test("empty state when no contentUnit", () => {
+  test("empty state when no contentUnit, and carries the resolved path", () => {
     const state = resolveNodeView({ nodes, isLoading: false, nodeId: "n-2" });
     expect(state.kind).toBe("empty");
+    if (state.kind === "empty") expect(state.path).toEqual([1]);
+  });
+  test("reading state resolves a nested node's contentUnit and path", () => {
+    const state = resolveNodeView({ nodes, isLoading: false, nodeId: "n-2a" });
+    expect(state.kind).toBe("reading");
+    if (state.kind === "reading") {
+      expect(state.contentUnitId).toBe("ch-2a");
+      expect(state.path).toEqual([1, 0]);
+    }
   });
   test("deleted state overrides reading", () => {
     const state = resolveNodeView({

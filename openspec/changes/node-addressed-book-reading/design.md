@@ -128,12 +128,38 @@ unreferenced; keep anything the TOC editor / series flows still import. This ord
 
 Rollback: revert the change set; no data migration to undo.
 
-## Open Questions
+## Open Questions (resolved)
 
-- Does the TOC editor's materialize-on-open flow always have a persisted server
-  `nodeId` available, or can it act on an unsaved client node? If the latter, define
-  whether materialize requires a prior save (preferred) or the editor materializes
-  after the diff-based save assigns ids.
-- Are `resolveContentStructurePath` / `getNodeByPath` referenced by any caller other
-  than the book materialize path? Confirm before deleting path-resolution code rather
-  than just unwiring it from materialize.
+- **TOC editor materialize-on-open — persisted `nodeId`?** *Resolved: materialize
+  requires a persisted `nodeId`.* `BookContentStructureOccurrence.nodeId` is
+  round-tripped from server reads and is `undefined` only for client-created nodes
+  not yet saved. `BookTocEditor.handleNavigateToChapter` already gates navigation on
+  the chapter being persisted (it previously alerted when neither `contentUnitId` nor
+  `path` was present). The gate is switched to require `contentUnitId || nodeId`:
+  an unsaved node must be saved (which assigns its server id) before it can be
+  materialized/opened. `useEnsureChapterUnit` therefore takes `{ contentUnitId,
+  nodeId, title }` and throws if both `contentUnitId` and `nodeId` are absent. No
+  materialize-after-save coupling is introduced.
+- **Are `resolveContentStructurePath` / `getNodeByPath` used elsewhere?** *Resolved:
+  yes — keep them.* `getNodeByPath` is called by the book materialize path (removed
+  here) **and** `contentStructureService` retains `resolveContentStructurePath`
+  (used by `service.ts` line ~388 for series/internal node resolution). Only the
+  `getNodeByPath` call inside `chapter.service.materializeByBookPath` is removed; the
+  `getNodeByPath` method and `resolveContentStructurePath` stay for other callers.
+
+## Parity checklist (task 1.1 — gate before deleting `book-read/*`)
+
+Every affordance in `BookReadChapterSection` and its node-view equivalent:
+
+| Read-route affordance (`BookReadChapterSection`) | Node-view equivalent |
+| --- | --- |
+| Render materialized chapter markdown (`md.render` + `handleExternalLinkClick`) | `ReadingNodeView` (already present) |
+| Chapter title heading | `ReadingNodeView` / `EmptyNodeView` |
+| Edit pencil → `/book/$bookId/edit/$contentUnitId` (canEdit) | `ReadingNodeView` (added) |
+| Empty: description + actions hint copy | `EmptyNodeView` (added) |
+| Empty: "Save reading position" (book progress, no materialize) | `EmptyNodeView` (added) |
+| Empty: create chapter content → ensure → node URL (canEdit) | `EmptyNodeView` "Edit content" CTA → `onMaterialized` (node URL); the editor is then reachable via `ReadingNodeView`'s edit pencil |
+| Empty: "Write chapter review" → ensure + `/review/new/$bookUnitId` | `EmptyNodeView` (added) |
+| Empty: "Discuss chapter" → ensure + inline `ReplyComposer` + `PostListSection` | `EmptyNodeView` (added) |
+
+Note: the read route had two save actions — a no-materialize "Save reading position" and a materialize-then-save "Save chapter progress". The latter is dropped: it contradicts the `type-extension-book` scenario "Book-level progress stores nodeId without materialization". Only the no-materialize save survives.

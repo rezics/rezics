@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import type React from "react";
@@ -12,14 +13,8 @@ import {
 import { type NodeRendererProps, Tree, type TreeApi } from "react-arborist";
 import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-import {
-  type BookContentStructureOccurrence,
-  EMPTY_CHAPTER_ROUTE_ID,
-  contentUnitIdForNode,
-  encodeBookContentStructurePath,
-} from "../../models/bookContentStructurePath";
+import type { BookContentStructureOccurrence } from "../../models/bookContentStructurePath";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 const CONTENT_ROW_HEIGHT = 64;
 const MIN_TREE_HEIGHT = 320;
 const VIEWPORT_HEIGHT_GAP = 96;
@@ -43,7 +38,6 @@ function createContentChapterNode(bookId: string) {
   }: NodeRendererProps<ContentChapter>) {
     const hasChildren = Boolean(node.children?.length);
     const isSelected = node.state.isSelected;
-    const contentUnitId = contentUnitIdForNode(node.data);
 
     const title = (
       <div className="min-w-0 flex-1">
@@ -80,19 +74,11 @@ function createContentChapterNode(bookId: string) {
           style={{ height: CONTENT_ROW_HEIGHT }}
         >
           <Link
-            to="/book/$bookId/read/$chapterId"
+            to="/book/$bookId/node/$nodeId"
             params={{
               bookId,
-              chapterId: contentUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
+              nodeId: node.data.nodeId ?? "",
             }}
-            search={
-              contentUnitId
-                ? { path: undefined, title: undefined }
-                : {
-                    path: encodeBookContentStructurePath(node.data.path),
-                    title: node.data.title,
-                  }
-            }
             className="flex h-full min-w-0 flex-1 items-center"
           >
             {title}

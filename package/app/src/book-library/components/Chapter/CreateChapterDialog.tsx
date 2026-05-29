@@ -13,7 +13,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useEffect, useMemo, useState } from "react";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
-import type { Chapter } from "./ChapterArborist";
+import type { BookContentStructureOccurrence } from "../../models/bookContentStructurePath";
 
 interface CreateChapterDialogProps {
   open: boolean;
@@ -25,7 +25,7 @@ interface CreateChapterDialogProps {
     newNode,
   }: {
     parentId: string | number;
-    newNode: Chapter;
+    newNode: BookContentStructureOccurrence;
   }) => void;
 }
 
@@ -86,7 +86,7 @@ export function CreateChapterDialog({
         targetUnitId: bookUnitId,
       });
 
-      const newNode: Chapter = {
+      const newNode: BookContentStructureOccurrence = {
         id: result.unitId,
         contentUnitId: result.unitId,
         occurrenceId: result.unitId,

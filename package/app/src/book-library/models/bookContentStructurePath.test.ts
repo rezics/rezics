@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
   contentUnitIdForNode,
-  findBookContentStructureOccurrence,
   materializedOrPathId,
   withBookContentStructureOccurrences,
 } from "./bookContentStructurePath";
@@ -19,19 +18,19 @@ describe("BookContentStructure occurrence helpers", () => {
       { title: "Route B", contentUnitId: "chapter-shared" },
     ]);
 
-    const group = findBookContentStructureOccurrence(tree, [0]);
-    const empty = findBookContentStructureOccurrence(tree, [0, 0]);
-    const routeA = findBookContentStructureOccurrence(tree, [0, 1]);
-    const routeB = findBookContentStructureOccurrence(tree, [1]);
+    const group = tree[0]!;
+    const empty = group.children![0]!;
+    const routeA = group.children![1]!;
+    const routeB = tree[1]!;
 
-    expect(group?.occurrenceId).toBe("path:0");
-    expect(empty?.occurrenceId).toBe("path:0.0");
-    expect(contentUnitIdForNode(empty!)).toBeUndefined();
-    expect(contentUnitIdForNode(routeA!)).toBe("chapter-shared");
-    expect(contentUnitIdForNode(routeB!)).toBe("chapter-shared");
-    expect(materializedOrPathId(empty!)).toBe("path:0.0");
-    expect(materializedOrPathId(routeA!)).toBe("chapter-shared");
-    expect(materializedOrPathId(routeB!)).toBe("chapter-shared");
+    expect(group.occurrenceId).toBe("path:0");
+    expect(empty.occurrenceId).toBe("path:0.0");
+    expect(contentUnitIdForNode(empty)).toBeUndefined();
+    expect(contentUnitIdForNode(routeA)).toBe("chapter-shared");
+    expect(contentUnitIdForNode(routeB)).toBe("chapter-shared");
+    expect(materializedOrPathId(empty)).toBe("path:0.0");
+    expect(materializedOrPathId(routeA)).toBe("chapter-shared");
+    expect(materializedOrPathId(routeB)).toBe("chapter-shared");
   });
 
   test("uses contentUnitId as the only materialized node identity", () => {

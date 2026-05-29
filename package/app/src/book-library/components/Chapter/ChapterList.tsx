@@ -23,9 +23,6 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Link } from "@/shared/ui/link";
 import {
   type BookContentStructureOccurrence,
-  EMPTY_CHAPTER_ROUTE_ID,
-  contentUnitIdForNode,
-  encodeBookContentStructurePath,
   materializedOrPathId,
   withBookContentStructureOccurrences,
 } from "../../models/bookContentStructurePath";
@@ -58,23 +55,14 @@ export const ChapterLeaf = React.memo(function ChapterLeaf({
   // const displayName = isTruncated ? `${name.slice(0, TRUNCATE_LEN)}…` : name;
   const isTruncated = true;
   const displayName = name;
-  const contentUnitId = contentUnitIdForNode(node);
 
   const content = (
     <Link
-      to="/book/$bookId/read/$chapterId"
+      to="/book/$bookId/node/$nodeId"
       params={{
         bookId,
-        chapterId: contentUnitId ?? EMPTY_CHAPTER_ROUTE_ID,
+        nodeId: node.nodeId ?? "",
       }}
-      search={
-        contentUnitId
-          ? { path: undefined, title: undefined }
-          : {
-              path: encodeBookContentStructurePath(node.path),
-              title: node.title,
-            }
-      }
       className="block hover:text-brand"
     >
       <p className="truncate p-2 rounded-md transition-colors duration-200">

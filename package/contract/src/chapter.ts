@@ -131,11 +131,9 @@ export const chapterResponseSchema = chapterDetailSchema;
 export type ChapterResponse = (typeof chapterResponseSchema)["static"];
 
 export const chapterMaterializationRequestSchema = t.Object({
-  path: t.Array(t.Number()),
-  expectedTitle: t.Optional(t.String()),
-  expectedBookContentStructureUpdatedAt: t.Optional(
-    t.Union([t.String(), t.Date()]),
-  ),
+  // The target ContentStructureNode.id. Node ids are stable uuidv7 values, so
+  // they cannot drift under a TOC reorder — no stale-path guards are needed.
+  nodeId: t.String(),
 });
 
 export type ChapterMaterializationRequest =
@@ -143,7 +141,7 @@ export type ChapterMaterializationRequest =
 
 export const chapterMaterializationResponseSchema = t.Object({
   bookUnitId: t.String(),
-  path: t.Array(t.Number()),
+  nodeId: t.String(),
   contentUnitId: t.String(),
   /** @deprecated Use contentUnitId. */
   chapterUnitId: t.String(),

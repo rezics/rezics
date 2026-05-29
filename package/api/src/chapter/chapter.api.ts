@@ -36,9 +36,9 @@ export const chapterApi = {
   },
 
   /**
-   * Materialize a chapter Unit for a BookContentStructure path, or return the existing one.
+   * Materialize a chapter Unit for a content structure node id, or return the existing one.
    */
-  materializeByBookPath: async (
+  materializeNode: async (
     bookUnitId: string,
     input: ChapterMaterializationRequest,
   ): Promise<ChapterMaterializationResponse> => {
