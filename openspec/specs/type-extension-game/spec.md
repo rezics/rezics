@@ -3,7 +3,8 @@
 ## Purpose
 
 Defines the GAME Unit extension, language-neutral game release facts, platform
-and rating relationships, work/release semantics, and dedicated game metadata.
+and rating relationships, work/release semantics, the rule that platform ports
+default to attributes rather than releases, and dedicated game metadata.
 ## Requirements
 ### Requirement: Game extension creation tied to Unit(type=GAME)
 
@@ -131,4 +132,46 @@ requirements SHALL be stored outside the Game row.
 - WHEN a Game record is created with only `unitId` specified
 - THEN `isLicensed` SHALL default to `false`
 - AND optional release metadata fields SHALL default to null
+
+### Requirement: Platform ports default to attributes, not releases
+
+A platform port of a GAME SHALL default to a platform attribute on an existing
+release through `SubjectAttribution`, not a separate release. A port SHALL be
+promoted to a distinct `role = RELEASE` Unit only when it passes the
+work-release reviewable-thing test — for example a notoriously divergent port,
+or a fundamentally different product such as a touch-based free-to-play mobile
+conversion. When a port is promoted to a release for divergence reasons rather
+than being the primary version, its `UnitWork.displayPolicy` SHALL default to
+`HIDDEN_BY_DEFAULT`.
+
+A difference of edition or generation (such as Enhanced or Definitive) SHALL
+create a release under the work/release edition rule independent of platform and
+SHALL NOT be governed by this port rule. Per-platform content differences that
+do not warrant a release MAY be recorded as platform-attribute notes and SHALL
+NOT be stored as Game-table columns.
+
+#### Scenario: Pure port is recorded as a platform attribute
+
+- GIVEN a GAME release exists for an edition on PS5
+- WHEN the same edition ships on PC with no separately reviewed or tracked
+  divergence
+- THEN the PC platform SHALL be recorded as a `SubjectAttribution` on the
+  existing release
+- AND no new release Unit SHALL be created for the port
+
+#### Scenario: Divergent port graduates to a hidden release
+
+- GIVEN a console port that a distinct population reviews and rates separately
+  because its experience is degraded
+- WHEN the port is added to the catalog
+- THEN it MAY be created as a `role = RELEASE` Unit
+- AND its `UnitWork.displayPolicy` SHALL default to `HIDDEN_BY_DEFAULT` unless
+  it is the primary version
+
+#### Scenario: Edition difference creates a release regardless of platform
+
+- GIVEN an "Enhanced" edition that differs from the original game
+- WHEN it is added to the catalog
+- THEN it SHALL be a separate release under the edition rule
+- AND the decision SHALL NOT depend on which platforms it targets
 

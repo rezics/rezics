@@ -9,8 +9,10 @@ type-match invariant between release and work, the release-first
 catalog and reading destination, the migration from
 `Unit.workUnitId` to `UnitWork` as canonical membership, the rule
 that releases cannot be works for other releases, release-led
-creation, and admin merge that canonicalizes releases without
-deleting the source work.
+creation, admin merge that canonicalizes releases without
+deleting the source work, and the release-granularity policy (the
+reviewable-thing test and the rule that store/distribution SKUs do not
+define release boundaries).
 
 ## Requirements
 
@@ -57,7 +59,7 @@ The system SHALL enforce that a release Unit's `type` is identical to the `type`
 
 ### Requirement: Standalone units are neither works nor releases
 
-A standalone unit is a Unit with `workUnitId = null` that has no other units referencing it via `workUnitId`. Standalone units operate independently without work/release semantics. Any UnitType may exist as a standalone unit.
+A standalone unit is a Unit with `workUnitId = null` that has no other units referencing it via `workUnitId`. Standalone units SHALL operate independently without work/release semantics. Any UnitType may exist as a standalone unit.
 
 #### Scenario: Standalone POST unit
 
@@ -177,3 +179,60 @@ metadata use the target work after merge completion.
 - **THEN** it SHALL resolve the canonical work as `work-new`
 - **AND** it SHALL not expose `work-old` as the current work for ordinary
   release display
+
+### Requirement: Release Granularity Follows The Reviewable-Thing Test
+
+A variation of a work SHALL be modeled as a distinct `role = RELEASE` Unit only
+when a meaningful population of users would treat it as a separately
+**reviewable, trackable, or shelvable** thing — that is, when users would write
+distinct reviews for it, track separate progress/completion against it, or shelf
+it as a distinct item. Variations that do not meet this test SHALL be
+represented as release attributes (such as platform or edition label),
+`UnitTranslation` records, or content-structure metadata, and SHALL NOT spawn a
+separate release. The presence or absence of content differences SHALL be
+treated as one signal feeding this test, not as the deciding criterion.
+
+#### Scenario: Distinct experience warrants a release even without content differences
+
+- **GIVEN** a platform version whose content is effectively identical to an
+  existing release
+- **AND** a distinct population of users reviews, rates, or tracks that version
+  separately because its experience diverges materially
+- **WHEN** the system decides how to represent it
+- **THEN** it SHALL be eligible to become a separate `role = RELEASE` Unit
+- **AND** the decision SHALL NOT be blocked by the absence of content
+  differences
+
+#### Scenario: Minor content difference does not warrant a release
+
+- **GIVEN** a regional variant that omits a small amount of content
+- **AND** users do not review, track, or shelf that variant as a distinct thing
+- **WHEN** the system decides how to represent it
+- **THEN** it SHALL be represented as a release attribute or note
+- **AND** it SHALL NOT become a separate release solely because its content
+  differs
+
+### Requirement: Store And Distribution SKUs Do Not Define Release Boundaries
+
+Release boundaries SHALL model a work's actual versions/editions, not the way a
+storefront or distribution platform lists products. The count of store
+listings, application IDs, or per-platform SKUs SHALL NOT by itself create or
+merge releases.
+
+#### Scenario: Two store listings of one edition remain one release
+
+- **GIVEN** a storefront lists the same edition as two platform-specific
+  products
+- **WHEN** the work is cataloged
+- **THEN** the system SHALL represent one release carrying multiple platform
+  attributes
+- **AND** it SHALL NOT create two releases solely because two listings exist
+
+#### Scenario: Two listings that are different editions are two releases
+
+- **GIVEN** a storefront lists a "Legacy" edition and an "Enhanced" edition as
+  separate products
+- **WHEN** the work is cataloged
+- **THEN** they SHALL be two releases because they are different editions
+- **AND** the decision SHALL follow the edition difference, not the fact that
+  the storefront lists them separately
