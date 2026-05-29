@@ -1,8 +1,9 @@
 {
   "name": "@rezics/job-runner",
-  "module": "src/index.ts",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "module": "src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",

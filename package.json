@@ -2,6 +2,7 @@
   "name": "rezics-book-library",
   "private": true,
   "type": "module",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "dev": "bun run --no-env-file tool/dev-script/dev.ts",
     "prisma:generate": "cd tool && bun run db-script/prisma-regenerate.ts",

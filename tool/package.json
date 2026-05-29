@@ -1,6 +1,8 @@
 {
   "name": "tool",
   "version": "0.0.1",
+  "type": "module",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "dev": "bun run dev-script/dev.ts",
     "prisma:regenerate": "bun run db-script/prisma-regenerate.ts",
@@ -13,7 +15,6 @@
     "generate-barrel": "bun run scripts/generate-barrel.ts",
     "seed": "bun run seed/seed.ts"
   },
-  "type": "module",
   "devDependencies": {
     "@types/bun": "^1.3.11"
   },

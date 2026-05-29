@@ -1,8 +1,9 @@
 {
   "name": "@rezics/jwt",
-  "module": "src/export.ts",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "module": "src/export.ts",
   "exports": {
     ".": {
       "types": "./src/export.ts",
