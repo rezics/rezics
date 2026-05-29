@@ -7,6 +7,7 @@
 - [ ] 可能的通用性能問題，如果 lazy import 同一個 @/entity index，可能會讓detail/edit/self-claim 被打進同一個 lazy chunk。 如果feature很小，這不一定是問題；但如果想保留 route-level split，可以在合併目錄使用薄 entry point，或者在整理 TanStack Router code splitting 策略時一起整理。
 - [ ] meilisearch admin 需要更多的東西，比如各個index的行數情況之類的數據，以及還有什麼數據有需要的，應該調查
 - [ ] about, donate, product page.
+- [ ] 確保項目的垂直複雜性不能過高，但是水平複雜性可以擴展因爲水平複雜性是可以獨立維護，甚至隨時拋棄的
 
 
 ## 搜索
