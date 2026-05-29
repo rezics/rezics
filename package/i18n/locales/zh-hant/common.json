@@ -143,5 +143,12 @@
   "policy_denied_enforcement_active": "在你的帳戶存在生效的管理措施期間，此操作受限。",
   "policy_denied_blocked_account": "你的帳戶已被禁止執行此操作。",
   "policy_denied_rate_limited": "你的操作過於頻繁，請稍後再試。",
-  "policy_denied_generic": "此操作目前不可用。"
+  "policy_denied_generic": "此操作目前不可用。",
+  "sign_in": "登入",
+  "route_error_title": "發生錯誤",
+  "route_error_description": "此頁面發生未預期的錯誤。",
+  "route_denied_title": "存取受限",
+  "route_denied_description": "你沒有檢視此頁面的權限。",
+  "route_unauthenticated_title": "請先登入",
+  "route_unauthenticated_description": "你需要登入才能檢視此頁面。"
 }

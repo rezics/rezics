@@ -143,5 +143,12 @@
   "policy_denied_enforcement_active": "在你的账户存在生效的管理措施期间，此操作受限。",
   "policy_denied_blocked_account": "你的账户已被禁止执行此操作。",
   "policy_denied_rate_limited": "你的操作过于频繁，请稍后再试。",
-  "policy_denied_generic": "此操作当前不可用。"
+  "policy_denied_generic": "此操作当前不可用。",
+  "sign_in": "登录",
+  "route_error_title": "出错了",
+  "route_error_description": "此页面发生了意外错误。",
+  "route_denied_title": "访问受限",
+  "route_denied_description": "你没有查看此页面的权限。",
+  "route_unauthenticated_title": "请先登录",
+  "route_unauthenticated_description": "你需要登录才能查看此页面。"
 }

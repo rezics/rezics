@@ -143,5 +143,12 @@
   "policy_denied_enforcement_active": "アカウントにモデレーション措置が有効な間、この操作は制限されます。",
   "policy_denied_blocked_account": "あなたのアカウントはこの操作をブロックされています。",
   "policy_denied_rate_limited": "操作が頻繁すぎます。しばらくしてからもう一度お試しください。",
-  "policy_denied_generic": "この操作は現在利用できません。"
+  "policy_denied_generic": "この操作は現在利用できません。",
+  "sign_in": "ログイン",
+  "route_error_title": "問題が発生しました",
+  "route_error_description": "このページで予期しないエラーが発生しました。",
+  "route_denied_title": "アクセスが制限されています",
+  "route_denied_description": "このページを表示する権限がありません。",
+  "route_unauthenticated_title": "続行するにはログインしてください",
+  "route_unauthenticated_description": "このページを表示するにはログインが必要です。"
 }

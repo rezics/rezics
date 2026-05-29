@@ -143,5 +143,12 @@
   "policy_denied_enforcement_active": "계정에 제재 조치가 활성화된 동안에는 이 작업이 제한됩니다.",
   "policy_denied_blocked_account": "이 작업에 대해 계정이 차단되었습니다.",
   "policy_denied_rate_limited": "너무 자주 시도하고 있습니다. 나중에 다시 시도해 주세요.",
-  "policy_denied_generic": "이 작업은 현재 사용할 수 없습니다."
+  "policy_denied_generic": "이 작업은 현재 사용할 수 없습니다.",
+  "sign_in": "로그인",
+  "route_error_title": "문제가 발생했습니다",
+  "route_error_description": "이 페이지에서 예기치 않은 오류가 발생했습니다.",
+  "route_denied_title": "접근이 제한됨",
+  "route_denied_description": "이 페이지를 볼 수 있는 권한이 없습니다.",
+  "route_unauthenticated_title": "계속하려면 로그인하세요",
+  "route_unauthenticated_description": "이 페이지를 보려면 로그인해야 합니다."
 }

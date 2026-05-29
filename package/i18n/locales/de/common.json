@@ -143,5 +143,12 @@
   "policy_denied_enforcement_active": "Diese Aktion ist eingeschränkt, solange eine Moderationsmaßnahme für dein Konto aktiv ist.",
   "policy_denied_blocked_account": "Dein Konto ist für diese Aktion gesperrt.",
   "policy_denied_rate_limited": "Du machst das zu oft. Bitte versuche es später erneut.",
-  "policy_denied_generic": "Diese Aktion ist derzeit nicht verfügbar."
+  "policy_denied_generic": "Diese Aktion ist derzeit nicht verfügbar.",
+  "sign_in": "Anmelden",
+  "route_error_title": "Etwas ist schiefgelaufen",
+  "route_error_description": "Auf dieser Seite ist ein unerwarteter Fehler aufgetreten.",
+  "route_denied_title": "Zugriff eingeschränkt",
+  "route_denied_description": "Du hast keine Berechtigung, diese Seite anzuzeigen.",
+  "route_unauthenticated_title": "Zum Fortfahren anmelden",
+  "route_unauthenticated_description": "Du musst angemeldet sein, um diese Seite anzuzeigen."
 }

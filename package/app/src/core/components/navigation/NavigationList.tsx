@@ -71,6 +71,17 @@ export const NavigationList = ({
             </li>
           );
 
+        if (item.kind === "section")
+          return (
+            <li
+              // biome-ignore lint/suspicious/noArrayIndexKey: static list
+              key={index}
+              className="px-3 pt-2 pb-1 text-xs font-medium uppercase leading-ui text-text-tertiary"
+            >
+              {item.title}
+            </li>
+          );
+
         const normalizedPathname = normalizePath(pathname);
         const isActive = matchesNavigationItem(pathname, item);
         const hasChildren = !!item.children && item.children.length > 0;

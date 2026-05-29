@@ -143,5 +143,12 @@
   "policy_denied_enforcement_active": "This action is restricted while a moderation action is active on your account.",
   "policy_denied_blocked_account": "Your account is blocked from this action.",
   "policy_denied_rate_limited": "You're doing that too often. Please try again later.",
-  "policy_denied_generic": "This action isn't available right now."
+  "policy_denied_generic": "This action isn't available right now.",
+  "sign_in": "Sign in",
+  "route_error_title": "Something went wrong",
+  "route_error_description": "This page ran into an unexpected error.",
+  "route_denied_title": "Access restricted",
+  "route_denied_description": "You don't have permission to view this page.",
+  "route_unauthenticated_title": "Sign in to continue",
+  "route_unauthenticated_description": "You need to be signed in to view this page."
 }

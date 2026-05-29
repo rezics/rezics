@@ -1,9 +1,9 @@
 ## 1. Route Inventory And Cleanup
 
 - [x] 1.1 Delete `routes/_mainLayout/test.tsx`, `test02.tsx`, `test03.tsx`, `test-links.tsx` and any references in `core/components/create-menu/` and sidebar/navigation config.
-- [ ] 1.2 Audit remaining `routes/_mainLayout/` entries and classify as production / staff / unauthenticated; gate staff-only routes via policy hints.
-- [ ] 1.3 Define a single navigation config grouping discovery, library, community, create, and personal (`u/me/dashboard`, `u/me/drafts`, settings, inbox) sections.
-- [ ] 1.4 Add route-level loading, denied, not-found, unauthenticated, and error boundaries via shared helpers, so feature pages do not redefine them.
+- [x] 1.2 Audit remaining `routes/_mainLayout/` entries and classify as production / staff / unauthenticated; gate staff-only routes via policy hints.
+- [x] 1.3 Define a single navigation config grouping discovery, library, community, create, and personal (`u/me/dashboard`, `u/me/drafts`, settings, inbox) sections.
+- [x] 1.4 Add route-level loading, denied, not-found, unauthenticated, and error boundaries via shared helpers, so feature pages do not redefine them.
 - [x] 1.5 Align realm tabs with Feed default, About, and moderator-only Moderation per `complete-realm-community-governance`; confirm `routes/_mainLayout/realm/$realmId/index.tsx` matches.
 
 ## 2. Dashboard

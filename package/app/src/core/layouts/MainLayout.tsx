@@ -75,7 +75,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <div className="flex flex-1">
         <Sidebar
           sidebarHeaderClassName="mx-8"
-          NAVIGATION={NAVIGATION(isAdmin)}
+          NAVIGATION={NAVIGATION({ isAuthenticated: hasMemberSession, isAdmin })}
         />
         <main className="flex flex-col flex-1 min-w-0 pt-[49px] md:pt-14 transition-all duration-300 h-screen w-full">
           <div className="flex-1 pb-4">{children}</div>
