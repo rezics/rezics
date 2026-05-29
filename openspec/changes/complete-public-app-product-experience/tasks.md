@@ -13,7 +13,7 @@
 - [x] 2.3 Add `package/api/src/dashboard/` typed hooks + query keys; register invalidation participation in cache-coherence map.
 - [x] 2.4 Add `package/app/src/dashboard/` feature (page, sections per `DashboardSummary` slot, models, hooks, components) following `package/app/docs/feature standard.md`.
 - [x] 2.5 Mount `routes/_mainLayout/u/me/dashboard.tsx`; link from `home/sections/LibraryCardsSection` and the new personal nav.
-- [ ] 2.6 Add stories/tests for partial-success rendering, empty new user, active reader, active community member, and active safety/enforcement notice states.
+- [x] 2.6 Add stories/tests for partial-success rendering, empty new user, active reader, active community member, and active safety/enforcement notice states.
 
 ## 3. Cache-Coherence Map
 
