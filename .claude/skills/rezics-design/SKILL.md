@@ -28,7 +28,7 @@ fixed `--padding-*` tokens, not as a runtime toolbar.
 1. **Brand color**: 轮回红 `#f4606c` (`--rezics-color-brand-fill`). It is a fill color, never a text color. For brand-tinted text, use `text-brand` (`#C4433A` light / `#fa7882` dark) — already contrast-verified.
 2. **Background**: warm parchment `#f5f4ed` (light) / warm dark stone `#1a1a18` (dark). Not pure white, not pure black.
 3. **Card surfaces are explicit**: shadcn `<Card>` is the canonical Rezics card and supports `surface="plain" | "contained" | "elevated"` plus `interactive` for cursor/hover/focus treatment. Cards use `rounded-md`; use `plain` for flat feed/media items with an outer interactive state layer and tighter content padding, `contained` for borderless tonal panels, and `elevated` only for same-color media-rich recommendation/article cards that need calibrated `elevation={1..10}` shadow lift. Use `CardMedia` for flush media blocks. Sections and page panels still do NOT get bordered/shadowed card chrome.
-4. **shadcn-or-custom**. Pick from `@rezics/ui/shadcn` first; these primitives are vendored from the `base-luma` registry by default, with manually changed primitives listed in `openspec/specs/ui-component-foundation/spec.md`. Reach for rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local) only when shadcn lacks the component. See `component-selection.md` for the decision tree, `openspec/specs/ui-component-foundation/spec.md` for the spec, and `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` for the migration boundary.
+4. **shadcn-or-custom**. Pick from `@rezics/ui/shadcn` first; these primitives are vendored from the `base-luma` registry by default. Reach for rezics-owned custom primitives (`@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local) only when shadcn lacks the component. See `component-selection.md` for the decision tree and the `@rezics/ui` Storybook for the component reference.
 5. **No emoji icons in UI chrome**. Use `lucide-react` (default) or `@tabler/icons-react` (named fallback when lucide lacks the glyph). Emoji are content (user posts), not interface vocabulary.
 6. **No raw `<a href>`**. Always use `<SafeLink href={url}>` from `@rezics/ui` (enforced by `bun run check:convention` R5).
 7. **Tokens, not hex literals**. `bg-brand`, `text-text-primary`, `var(--rezics-color-surface-canvas)` — never `bg-[#f4606c]` or `color: #1d1d1f`.
@@ -93,8 +93,6 @@ Both forms resolve to the same underlying value because tokens flow:
 - **`component-selection.md`** — shadcn-or-custom decision tree and category-by-category recommendations. Storybook: every shadcn primitive lives under `Primitives/<Name>`; rezics primitives under `Primitive/<Category>/<Name>`; composites under `Composite/<Category>/<Name>`.
 - **`icons.md`** — lucide-default + tabler-fallback icon guidance and brand-mark catalog. Storybook: `Foundation/Tokens/Iconography`.
 
-For deeper context: `openspec/plans/design-system-research/briefs/01-foundation-v1.md` (the canonical brief).
-
 ---
 
 ## Hard "Never" List
@@ -105,7 +103,7 @@ For deeper context: `openspec/plans/design-system-research/briefs/01-foundation-
 4. Never wrap a section/page in a bordered card with shadow. Use whitespace. For item cards, use shadcn `<Card surface="plain" | "contained" | "elevated">` instead of ad hoc `div` shadow/border recipes.
 5. Never set `font-size: 14px` (or any fixed px). Use the `clamp()` scale.
 6. Never set line-height below 1.30 for any text. Below 1.55 for body. Below 1.60 for book reader.
-7. Never introduce a new chromatic accent color. The escape hatch is `palette.accent` (currently `null`); proposing a second hue requires an OpenSpec change.
+7. Never introduce a new chromatic accent color. The escape hatch is `palette.accent` (currently `null`); proposing a second hue requires a deliberate design decision.
 8. Never bypass the design tokens by hardcoding hex values, px values, or font names.
 
 ---

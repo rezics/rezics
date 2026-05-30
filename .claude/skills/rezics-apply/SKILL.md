@@ -1,6 +1,6 @@
 ---
 name: rezics-apply
-description: Apply a code-first plan or migrate an OpenSpec spec — route each durable item to its home in code (types/tests/comments), then make the source document disposable. No validation CLI, no state machine. Use when implementing a plan/proposal or retiring a spec.
+description: Apply a code-first plan — route each durable item to its home in code (types/tests/comments), then make the source document disposable. No validation CLI, no state machine. Use when implementing a plan/proposal.
 metadata:
   version: 0.1.0
   license: AGPL-3.0-only
@@ -17,11 +17,8 @@ invocation, so this is also *where* the routing rule actually reaches the
 implementer — a plan written in one session is applied in another, and the rule
 must be in context then, not at propose time.
 
-Two sources feed in:
-
-- a plan at `plan/proposal/<slug>.md` (items tagged `(comment)/(test)/(type)`), or
-- an OpenSpec `openspec/specs/<cap>/spec.md` being retired (see
-  `plan/proposal/openspec-retirement.md`).
+The source is a plan at `plan/proposal/<slug>.md` (items tagged
+`(comment)/(test)/(type)`).
 
 ---
 
@@ -80,18 +77,13 @@ Rules:
    write the comments at the owning code.
 3. **Verify** — run the package's tests and `bun run check:*` as relevant.
 4. **Make the source disposable.** A plan: set `status: done` (a human deletes it
-   later). A retired spec: delete that `spec.md` and tick its box in
-   `plan/proposal/openspec-retirement.md`. History/migration prose goes into the
-   commit message, not back into a file.
+   later). History/migration prose goes into the commit message, not back into a
+   file.
 
 ## Guardrails
 
 - **Route per requirement, not per document** — a half-migrated spec is worse than
   an untouched one. Finish a spec atomically or leave it for later.
-- **Do not delete `openspec/` itself, and do not delete plan files** — that is a
-  human action. Individual retired `spec.md` files are the one exception, per the
-  retirement plan.
-- **No new spec files, no OpenSpec workflow.** Knowledge lands in code or it is
-  dropped.
+- Knowledge lands in code or it is dropped; never create a parallel spec corpus.
 - **Do not invent behavior.** This is a migration of knowledge into code, not a
   refactor; if an item is ambiguous, ask rather than guess.

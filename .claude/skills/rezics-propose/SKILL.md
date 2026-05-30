@@ -1,13 +1,13 @@
 ---
 name: rezics-propose
-description: Propose a code-first plan — a single markdown file with context, durable constraints/decisions, and a task checklist. No spec files, no OpenSpec. Use when the user wants to turn an idea into actionable, implementable work.
+description: Propose a code-first plan — a single markdown file with context, durable constraints/decisions, and a task checklist. No spec files. Use when the user wants to turn an idea into actionable, implementable work.
 metadata:
   version: 0.1.0
   license: AGPL-3.0-only
 ---
 
 Produce one executable plan at `plan/proposal/<slug>.md`. **No spec files. No
-OpenSpec. No validation CLI.** A plan is a disposable scaffold: when its work
+validation CLI.** A plan is a disposable scaffold: when its work
 lands, its durable content has migrated into code/comments/tests and the plan can
 be deleted (a human deletes it; you do not, unless told).
 
@@ -82,7 +82,7 @@ lands, the plan is set `status: done` (a human deletes it later).
 
 ## Guardrails
 
-- **Never create spec files or touch `openspec/`.** This workflow has no specs.
+- **Never create spec files or a parallel spec corpus.** This workflow has no specs.
 - **Read before writing** — ground the plan in real files and patterns.
 - Keep the plan tight: tasks must be concrete and file-level; constraints must be
   the non-obvious ones, not a restatement of the types.
