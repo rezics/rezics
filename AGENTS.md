@@ -60,6 +60,12 @@ bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
   all internal callsites in the same change unless a plan explicitly says
   otherwise.
 - Main branch is `dev`.
+- Dirty working trees are normal. The maintainer may be editing in parallel, so
+ignore unrelated unstaged/untracked changes and never revert, stash, clean, or
+flag them.
+- Stage only task-owned files by explicit path; never use `git add -A` or
+`git add .`.
+- Commit only when the index contains this task’s staged files. If unrelated staged files are staged, retry briefly; if still blocked, report them and stop.
 
 ## UI Work
 
