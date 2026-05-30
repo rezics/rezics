@@ -70,7 +70,7 @@ accessories:
     directories:
       - data:/var/lib/postgresql/data
       # Bootstraps one role+database per service on first run.
-      - infra/postgres/init:/docker-entrypoint-initdb.d:ro
+      - tool/infra/postgres/init:/docker-entrypoint-initdb.d:ro
 
   # infra-search: Meilisearch (server + ranking + job-runner consume it).
   meilisearch:
@@ -151,4 +151,4 @@ accessories:
     port: "127.0.0.1:4317:4317"
     cmd: "--config=/etc/otelcol-contrib/config.yml"
     files:
-      - tool/external-services/otel-collector.yml:/etc/otelcol-contrib/config.yml
+      - tool/infra/observability/otel-collector.yml:/etc/otelcol-contrib/config.yml

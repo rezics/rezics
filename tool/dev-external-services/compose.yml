@@ -140,7 +140,7 @@ services:
       - "${OTEL_GRPC_PORT_PUBLISHED:-4317}:4317"
       - "${OTEL_HTTP_PORT_PUBLISHED:-4318}:4318"
     volumes:
-      - ./otel-collector.yml:/etc/otelcol-contrib/config.yml:ro
+      - ../infra/observability/otel-collector.yml:/etc/otelcol-contrib/config.yml:ro
     depends_on:
       - clickstack
 

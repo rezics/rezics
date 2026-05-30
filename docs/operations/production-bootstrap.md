@@ -43,7 +43,7 @@ kamal accessory boot otel-collector
 ```
 
 - **PostgreSQL (`infra-db`)** — one instance, database-per-service. On first
-  boot `infra/postgres/init/10-databases.sh` creates `rezics_server`,
+  boot `tool/infra/postgres/init/10-databases.sh` creates `rezics_server`,
   `rezics_auth`, `rezics_notify`, `rezics_reaction`, `rezics_history`,
   `rezics_ranking`, and `rezics_job`. Set `<SERVICE>_DB_PASSWORD` in the
   postgres accessory env to also create per-service owner roles.

@@ -6,7 +6,9 @@ const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
 const [, , command, subcommand, ...rest] = Bun.argv;
 
 if (!command) {
-  console.error("Usage: bun run tool/external-services/sequin.ts <command>");
+  console.error(
+    "Usage: bun run tool/dev-external-services/sequin.ts <command>",
+  );
   process.exit(1);
 }
 
@@ -20,7 +22,7 @@ console.warn(
 );
 
 runCommand(
-  ["bun", "run", "tool/external-services/services.ts", ...mappedArgs],
+  ["bun", "run", "tool/dev-external-services/services.ts", ...mappedArgs],
   {
     cwd: REPO_ROOT,
   },

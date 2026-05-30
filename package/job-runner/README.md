@@ -68,7 +68,7 @@ bun run service:up
 bun run service:health
 ```
 
-The managed runtime uses Docker Compose v2 through `tool/external-services`.
+The managed runtime uses Docker Compose v2 through `tool/dev-external-services`.
 It starts source PostgreSQL, Meilisearch, Sequin state services, and Sequin in
 one repo compose project. Its checked-in config delivers only to this service at
 `/webhooks/sequin` with the `x-internal-secret` value from

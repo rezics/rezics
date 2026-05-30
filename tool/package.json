@@ -8,8 +8,8 @@
     "prisma:regenerate": "bun run db-script/prisma-regenerate.ts",
     "prisma:migrate": "bun run db-script/prisma-migrate.ts",
     "prisma:reset-db": "bun run db-script/prisma-reset-db.ts",
-    "service:source:verify": "bun run external-services/services.ts source:verify",
-    "service:source:repair": "bun run external-services/services.ts source:repair",
+    "service:source:verify": "bun run dev-external-services/services.ts source:verify",
+    "service:source:repair": "bun run dev-external-services/services.ts source:repair",
     "generate-barrel": "bun run scripts/generate-barrel.ts",
     "seed": "bun run seed/seed.ts"
   },

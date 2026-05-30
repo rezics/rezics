@@ -10,8 +10,8 @@ import { runCommand, runCompose } from "./compose-runtime";
 const SCRIPT_DIR = path.dirname(Bun.main);
 const TOOL_DIR = path.resolve(SCRIPT_DIR, "..");
 const REPO_ROOT = path.resolve(TOOL_DIR, "..");
-const SERVICE_DIR = path.join(TOOL_DIR, "external-services");
-const COMPOSE_PROJECT_NAME = "rezics-external-services";
+const SERVICE_DIR = path.join(TOOL_DIR, "dev-external-services");
+const COMPOSE_PROJECT_NAME = "rezics-dev-external-services";
 const DEFAULT_SEQUIN_HEALTH_URL = "http://127.0.0.1:7376/health";
 const DEFAULT_MEILI_HEALTH_URL = "http://127.0.0.1:7700/health";
 
@@ -32,7 +32,7 @@ function composeBaseArgs() {
 function usage(): never {
   console.error(
     [
-      "Usage: bun run tool/external-services/services.ts <command>",
+      "Usage: bun run tool/dev-external-services/services.ts <command>",
       "",
       "Commands:",
       "  up                      Start Postgres, Meilisearch, Sequin state services, and Sequin",

@@ -1,4 +1,4 @@
-# External Services
+# Dev External Services
 
 > **Local development only.** This Docker Compose project is a developer
 > convenience for running source PostgreSQL, Meilisearch, Sequin (+ its state
@@ -28,8 +28,15 @@ incompatible with existing data.
 Reset local managed service volumes with:
 
 ```bash
-docker compose -p rezics-external-services -f tool/external-services/compose.yml down -v
+docker compose -p rezics-dev-external-services -f tool/dev-external-services/compose.yml down -v
 bun run service:up
+```
+
+If you have containers from the old `rezics-external-services` project name,
+stop them explicitly before switching:
+
+```bash
+docker compose -p rezics-external-services -f tool/dev-external-services/compose.yml down
 ```
 
 The source PostgreSQL init scripts recreate local development databases on
@@ -46,7 +53,7 @@ bun run service:source:verify
 For the optional observability smoke stack:
 
 ```bash
-docker compose -p rezics-external-services -f tool/external-services/compose.yml --profile observability up -d clickstack otel-collector
+docker compose -p rezics-dev-external-services -f tool/dev-external-services/compose.yml --profile observability up -d clickstack otel-collector
 ```
 
 Set application services to export to the local Collector with:

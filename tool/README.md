@@ -4,9 +4,9 @@ Repo-level automation lives under `tool/`. Application packages may expose env
 contracts and health checks, but runtime application code must not import helper
 modules from `tool/`.
 
-## External Services
+## Dev External Services
 
-`tool/external-services` owns the repo-managed local dependency stack for
+`tool/dev-external-services` owns the repo-managed local dependency stack for
 PostgreSQL, Meilisearch, Sequin state PostgreSQL, Sequin Redis, and Sequin.
 This workflow requires Docker Compose v2 through `docker compose`; Podman,
 podman-compose, and docker-compose v1 are not supported.
