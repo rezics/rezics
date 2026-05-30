@@ -32,7 +32,6 @@ import {
   syncEntitySegment,
   syncFeedbackSegment,
   syncPostRealmIdsSegment,
-  syncPostRootTargetsSegment,
   syncPostSegment,
   syncPostsByAuthorSegment,
   syncProgressSegment,
@@ -254,10 +253,6 @@ export function createSearchHandlers(client: SearchClient) {
     [SEARCH_COMMAND_KINDS.postPatchRealmIds]: async (command, context) =>
       runFanoutSegment(command, context, (_targetId, options) =>
         syncPostRealmIdsSegment(client, options),
-      ),
-    [SEARCH_COMMAND_KINDS.postRepairRootTarget]: async (command, context) =>
-      runFanoutSegment(command, context, (_targetId, options) =>
-        syncPostRootTargetsSegment(client, options),
       ),
     [SEARCH_COMMAND_KINDS.postFullSync]: async (command, context) =>
       runFullSyncSegment(command, context, {

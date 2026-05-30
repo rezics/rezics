@@ -149,11 +149,11 @@ describe("federatedSearch", () => {
     );
     expect(shelfQuery).toBeDefined();
     expect(shelfQuery!.filter).toContain('containedUnitIds = "b-9"');
-    // Posts sub-queries must include rootTargetUnitId.
+    // Posts sub-queries must include targetUnitId.
     const postsQueries = queries.filter((q) => q.indexUid === "posts");
     expect(postsQueries.length).toBeGreaterThan(0);
     for (const q of postsQueries) {
-      expect(q.filter).toContain('rootTargetUnitId = "b-9"');
+      expect(q.filter).toContain('targetUnitId = "b-9"');
     }
   });
 
@@ -180,7 +180,7 @@ describe("federatedSearch", () => {
     );
     expect(reviewQuery?.filter).toContain('workUnitIds = "work-1"');
     expect(reviewQuery?.filter).toContain('workRoles = "REVIEW"');
-    expect(reviewQuery?.filter).not.toContain('rootTargetUnitId = "release-1"');
+    expect(reviewQuery?.filter).not.toContain('targetUnitId = "release-1"');
   });
 
   test("book exact scope with work id carries exact filters through grouped search", async () => {
@@ -207,7 +207,7 @@ describe("federatedSearch", () => {
 
     const postsQueries = queries.filter((q) => q.indexUid === "posts");
     for (const q of postsQueries) {
-      expect(q.filter).toContain('rootTargetUnitId = "release-1"');
+      expect(q.filter).toContain('targetUnitId = "release-1"');
       expect(q.filter).not.toContain('workUnitIds = "work-1"');
     }
   });

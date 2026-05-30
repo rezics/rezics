@@ -97,7 +97,7 @@ describe("buildPostDocument", () => {
     expect(doc.postKind).toBe("WIKI");
   });
 
-  test("projects rootTargetUnitId and rootTargetUnitType from the Post row", async () => {
+  test("projects targetUnitId from the Post row", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
@@ -112,8 +112,6 @@ describe("buildPostDocument", () => {
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       targetUnitId: "book-B",
-      rootTargetUnitId: "book-B",
-      rootTargetUnitType: "BOOK",
       rootPostUnitId: "post-1",
       parentPostUnitId: null,
       authorUserId: "user-1",
@@ -124,11 +122,10 @@ describe("buildPostDocument", () => {
       extra: null,
     });
 
-    expect(doc.rootTargetUnitId).toBe("book-B");
-    expect(doc.rootTargetUnitType).toBe("BOOK");
+    expect(doc.targetUnitId).toBe("book-B");
   });
 
-  test("falls back to null when rootTargetUnit fields are missing on the row", async () => {
+  test("falls back to null when targetUnitId is missing on the row", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
@@ -152,8 +149,7 @@ describe("buildPostDocument", () => {
       scoreEntry: null,
     });
 
-    expect(doc.rootTargetUnitId).toBeNull();
-    expect(doc.rootTargetUnitType).toBeNull();
+    expect(doc.targetUnitId).toBeNull();
   });
 
   test("uses empty realmIds when a post belongs to no realms", async () => {

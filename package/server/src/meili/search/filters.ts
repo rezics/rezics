@@ -188,7 +188,7 @@ export function buildContentFilter(
 // ANCHOR: buildPostFilter
 // Scope mapping for posts:
 //   global → no scope filter
-//   book   → rootTargetUnitId = unitId
+//   book   → targetUnitId = unitId
 //   realm  → realmIds = realmId
 //   user   → authorUserId = userId
 
@@ -224,7 +224,7 @@ export function buildPostFilter(
         );
       }
     } else {
-      filter.push(`rootTargetUnitId = "${bookScope.unitId}"`);
+      filter.push(`targetUnitId = "${bookScope.unitId}"`);
     }
   } else if (scope.kind === "realm") {
     filter.push(`realmIds = "${scope.realmId}"`);

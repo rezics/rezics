@@ -26,8 +26,6 @@ describe("PostSearchDocumentSchema work-domain fields", () => {
         commentQualityScore: 0,
         commentRankUpdatedAt: null,
         targetUnitId: "release-1",
-        rootTargetUnitId: "release-1",
-        rootTargetUnitType: "BOOK",
         realmIds: [],
         workUnitIds: ["work-1"],
         workRoles: ["REVIEW"],
@@ -61,7 +59,7 @@ describe("PostSearchDocumentSchema work-domain fields", () => {
     ).toBe(true);
     expect(
       Value.Check(PostSearchOptionsSchema, {
-        rootTargetUnitId: "release-1",
+        targetUnitId: "release-1",
         workUnitId: "work-1",
         workRoles: ["REVIEW"],
       }),

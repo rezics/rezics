@@ -1753,8 +1753,6 @@ export function buildPostDocument(post: any): PostSearchDocument {
     commentQualityScore: 0,
     commentRankUpdatedAt: null,
     targetUnitId: post.targetUnitId ?? null,
-    rootTargetUnitId: post.rootTargetUnitId ?? null,
-    rootTargetUnitType: post.rootTargetUnitType ?? null,
     realmIds: realmIdsForSearch(post.unit),
     workUnitIds: workMemberships.map((membership) => membership.workUnitId),
     workRoles: workMemberships.map((membership) => membership.role),
@@ -1992,75 +1990,6 @@ export async function syncAllContainedUnitIds(client: SearchClient) {
   }
 
   return { message: "syncAllContainedUnitIds success", totalSynced: total };
-}
-
-export async function syncAllPostRootTargets(client: SearchClient) {
-  let cursor: string | undefined;
-  let total = 0;
-
-  while (true) {
-    const posts: any[] = await getSearchPrismaClient().post.findMany({
-      where: {
-        unit: publicSearchableUnitWhere(),
-      },
-      select: {
-        unitId: true,
-        rootTargetUnitId: true,
-        rootTargetUnitType: true,
-      },
-      orderBy: { unitId: "asc" },
-      take: BATCH_SIZE,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { unitId: cursor } : undefined,
-    });
-
-    if (posts.length === 0) break;
-
-    await client.patchPosts(
-      posts.map((post) => ({
-        id: post.unitId,
-        rootTargetUnitId: post.rootTargetUnitId ?? null,
-        rootTargetUnitType: post.rootTargetUnitType ?? null,
-      })),
-    );
-
-    total += posts.length;
-    cursor = posts[posts.length - 1]!.unitId;
-  }
-
-  return { message: "syncAllPostRootTargets success", totalSynced: total };
-}
-
-export async function syncPostRootTargetsSegment(
-  client: SearchClient,
-  options: SearchSegmentOptions = {},
-): Promise<SearchSegmentResult> {
-  const limit = segmentLimit(options);
-  const rows: any[] = await getSearchPrismaClient().post.findMany({
-    where: {
-      unit: publicSearchableUnitWhere(),
-    },
-    select: {
-      unitId: true,
-      rootTargetUnitId: true,
-      rootTargetUnitType: true,
-    },
-    orderBy: { unitId: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
-  });
-  const { current, nextCursor } = segmentRows(rows, limit, "unitId");
-  if (current.length > 0) {
-    await client.patchPosts(
-      current.map((post) => ({
-        id: post.unitId,
-        rootTargetUnitId: post.rootTargetUnitId ?? null,
-        rootTargetUnitType: post.rootTargetUnitType ?? null,
-      })),
-    );
-  }
-  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }
 
 export async function syncPostsByAuthor(client: SearchClient, userId: string) {

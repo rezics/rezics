@@ -136,8 +136,6 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "isLocked",
       "rootPostUnitId",
       "parentPostUnitId",
-      "rootTargetUnitId",
-      "rootTargetUnitType",
     ],
     sortableAttributes: [
       "createdAt",

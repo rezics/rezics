@@ -61,7 +61,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
       };
     case "book":
       // BOOK-side excluded; SHELF allowed via containedUnitIds; posts via
-      // rootTargetUnitId. Realms & users excluded.
+      // targetUnitId. Realms & users excluded.
       return {
         contentBooks: false,
         contentShelves: true,

@@ -27,7 +27,6 @@ export const SEARCH_COMMAND_KINDS = {
   postPatchAuthorFanout: "search.post.patchAuthorFanout",
   postPatchTargetFanout: "search.post.patchTargetFanout",
   postPatchRealmIds: "search.post.patchRealmIds",
-  postRepairRootTarget: "search.post.repairRootTarget",
   postFullSync: "search.post.fullSync",
 
   realmSync: "search.realm.sync",
@@ -192,11 +191,6 @@ export const PostPatchRealmIdsCommandSchema = commandSchema(
   JOB_LANES.searchSyncSlow,
   FanoutPayloadSchema,
 );
-export const PostRepairRootTargetCommandSchema = commandSchema(
-  SEARCH_COMMAND_KINDS.postRepairRootTarget,
-  JOB_LANES.searchSyncSlow,
-  FanoutPayloadSchema,
-);
 export const PostFullSyncCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.postFullSync,
   JOB_LANES.maintenance,
@@ -345,7 +339,6 @@ export const SearchCommandSchema = v.union([
   PostPatchAuthorFanoutCommandSchema,
   PostPatchTargetFanoutCommandSchema,
   PostPatchRealmIdsCommandSchema,
-  PostRepairRootTargetCommandSchema,
   PostFullSyncCommandSchema,
   RealmSyncCommandSchema,
   RealmDeleteCommandSchema,

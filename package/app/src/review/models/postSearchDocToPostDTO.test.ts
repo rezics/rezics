@@ -17,8 +17,6 @@ function makeDoc(
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     targetUnitId: "book-1",
-    rootTargetUnitId: "book-1",
-    rootTargetUnitType: "BOOK",
     realmIds: [],
     rootPostUnitId: null,
     parentPostUnitId: null,

@@ -53,7 +53,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
       <ReplyComposer
         ref={composerRef}
         mode="progressive"
-        targetUnitId={remark.unitId}
+        targetUnitId={remark.targetUnitId ?? remark.unitId}
         parentPostUnitId={remark.unitId}
       />
       <PostTreeSection rootPostUnitId={remark.unitId} />

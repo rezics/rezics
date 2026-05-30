@@ -247,7 +247,12 @@ export class PostService {
           }
         : { unit: { ...publicUnitEligibilityWhere } };
 
-    if (query.targetUnitId) where.targetUnitId = query.targetUnitId;
+    if (query.targetUnitId) {
+      where.targetUnitId = query.targetUnitId;
+      if (!query.rootPostUnitId && !query.parentPostUnitId && !isThreaded) {
+        where.parentPostUnitId = null;
+      }
+    }
     this.applyWorkDomainFilter(where, query.workUnitId, query.workRoles);
     if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
     if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
@@ -643,7 +648,7 @@ export class PostService {
     authorUserId: string,
   ): Promise<PostWithRelations> {
     const {
-      targetUnitId,
+      targetUnitId: inputTargetUnitId,
       realmUnitIds,
       tagIds,
       parentPostUnitId,
@@ -659,12 +664,12 @@ export class PostService {
       input.status === "DRAFT" &&
       !parentPostUnitId &&
       kind !== PostKindEnum.CHAPTER;
+    let targetUnitId = inputTargetUnitId;
     let realmIdsToWrite = parentPostUnitId
       ? []
       : [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
-    let targetUnitTypeFromChapterCheck: string | null = null;
     if (kind === PostKindEnum.CHAPTER) {
       if (!targetUnitId) {
         throw new Error(
@@ -680,13 +685,10 @@ export class PostService {
           `Post(kind=CHAPTER) targetUnitId must reference a Unit(type=BOOK); got ${target?.type ?? "missing"}`,
         );
       }
-      targetUnitTypeFromChapterCheck = target.type;
     }
 
     let depth = 0;
     let rootPostUnitId: string | undefined;
-    let rootTargetUnitId: string | null = null;
-    let rootTargetUnitType: string | null = null;
 
     if (parentPostUnitId) {
       const parent = await prisma.post.findUniqueOrThrow({
@@ -694,10 +696,9 @@ export class PostService {
         select: {
           unitId: true,
           rootPostUnitId: true,
+          targetUnitId: true,
           depth: true,
           isLocked: true,
-          rootTargetUnitId: true,
-          rootTargetUnitType: true,
           unit: {
             select: {
               inRealms: {
@@ -746,19 +747,7 @@ export class PostService {
         });
       }
       depth = parent.depth + 1;
-      rootTargetUnitId = parent.rootTargetUnitId ?? null;
-      rootTargetUnitType = parent.rootTargetUnitType ?? null;
-    } else if (targetUnitId) {
-      rootTargetUnitId = targetUnitId;
-      if (targetUnitTypeFromChapterCheck) {
-        rootTargetUnitType = targetUnitTypeFromChapterCheck;
-      } else {
-        const target = await prisma.unit.findUnique({
-          where: { id: targetUnitId },
-          select: { type: true },
-        });
-        rootTargetUnitType = target?.type ?? null;
-      }
+      targetUnitId = parent.targetUnitId ?? rootPostUnitId;
     }
 
     await this.assertRealmPostAllowed(realmIdsToWrite, authorUserId);
@@ -815,8 +804,6 @@ export class PostService {
         unitId: unit.id,
         authorUserId,
         targetUnitId: targetUnitId ?? undefined,
-        rootTargetUnitId: rootTargetUnitId ?? undefined,
-        rootTargetUnitType: rootTargetUnitType ?? undefined,
         content: content as Prisma.InputJsonValue,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,

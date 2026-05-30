@@ -721,10 +721,8 @@ model Post {
 
   authorUserId String @db.Uuid
 
-  targetUnitId       String? @db.Uuid
-  rootTargetUnitId   String? @db.Uuid
-  rootTargetUnitType String? @db.VarChar(32)
-  scoreEntryId       String? @db.Uuid
+  targetUnitId String? @db.Uuid
+  scoreEntryId String? @db.Uuid
 
   /// Canonical ContentDoc JSON. Search projections such as contentText are
   /// Meilisearch-only and must not be added as PostgreSQL columns.
@@ -774,12 +772,11 @@ model Post {
   @@index([parentPostUnitId, createdAt])
   @@index([kind, createdAt])
   @@index([scoreEntryId])
-  @@index([rootTargetUnitId, createdAt])
   @@index([path], type: Gist, map: "Post_path_gist_idx")
   // Bucket filtering for lifecycle listings (e.g. unsolved questions): a cheap
   // `state IN (active|closed slugs)` IN-list, no anti-join. Scoped by
-  // rootTargetUnitId so target/realm feeds hit the index.
-  @@index([rootTargetUnitId, state])
+  // targetUnitId so target/realm feeds hit the index.
+  @@index([targetUnitId, state])
 }
 
 /// Why a post is promoted within a thread. `HIGHLIGHT` is reserved for future

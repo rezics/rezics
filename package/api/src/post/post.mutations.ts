@@ -40,9 +40,10 @@ export function useCreatePostMutation(
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
 
       // Invalidate target-specific queries if post is attached to a unit
-      if (variables.targetUnitId) {
+      const targetUnitId = data.targetUnitId ?? variables.targetUnitId;
+      if (targetUnitId) {
         queryClient.invalidateQueries({
-          queryKey: postKeys.byTargets(variables.targetUnitId),
+          queryKey: postKeys.byTargets(targetUnitId),
         });
       }
 

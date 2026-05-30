@@ -144,9 +144,9 @@ describe("buildPostFilter", () => {
     expect(filter).not.toContain('kind = "POST"');
   });
 
-  test("book scope emits rootTargetUnitId", () => {
+  test("book scope emits targetUnitId", () => {
     const filter = buildPostFilter(emptyQuery, { kind: "book", unitId: "b-2" });
-    expect(filter).toContain('rootTargetUnitId = "b-2"');
+    expect(filter).toContain('targetUnitId = "b-2"');
   });
 
   test("book work scope emits work-domain post filters", () => {
@@ -159,7 +159,7 @@ describe("buildPostFilter", () => {
     expect(filter).toContain('kind = "REVIEW"');
     expect(filter).toContain('workUnitIds = "work-1"');
     expect(filter).toContain('workRoles = "REVIEW"');
-    expect(filter).not.toContain('rootTargetUnitId = "release-1"');
+    expect(filter).not.toContain('targetUnitId = "release-1"');
   });
 
   test("book work scope uses POST role for remark and excerpt post categories", () => {

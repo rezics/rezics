@@ -135,7 +135,7 @@ export function PostTreeNode({
                 <ReplyComposer
                   mode="expanded"
                   autoFocus
-                  targetUnitId={rootPostUnitId}
+                  targetUnitId={post.targetUnitId ?? rootPostUnitId}
                   parentPostUnitId={post.unitId}
                   onSubmitted={(createdPost) =>
                     onComposerSubmitted(post.unitId, createdPost)

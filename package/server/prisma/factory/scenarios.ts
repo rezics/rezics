@@ -783,8 +783,6 @@ async function runUnitWorkDomain(ctx: SeedCtx): Promise<SeedResult> {
           create: {
             authorUserId: user.userId,
             targetUnitId: spec.targetUnitId,
-            rootTargetUnitId: spec.targetUnitId,
-            rootTargetUnitType: UnitType.BOOK,
             kind: PostKind.REVIEW,
             content: markdownContentDoc(spec.content) as Prisma.InputJsonValue,
             depth: 0,
@@ -943,8 +941,6 @@ async function createWikiScenarioPost(
         create: {
           authorUserId: input.userId,
           targetUnitId: input.workUnitId,
-          rootTargetUnitId: input.workUnitId,
-          rootTargetUnitType: UnitType.BOOK,
           kind: PostKind.WIKI,
           content: markdownContentDoc(input.body) as Prisma.InputJsonValue,
           depth: 0,

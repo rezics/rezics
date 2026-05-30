@@ -59,7 +59,7 @@ export const PostThreadPage: React.FC = () => {
         <ReplyComposer
           ref={composerRef}
           mode="progressive"
-          targetUnitId={root.unitId}
+          targetUnitId={root.targetUnitId ?? root.unitId}
           parentPostUnitId={root.unitId}
         />
       )}

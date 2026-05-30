@@ -35,10 +35,9 @@ const postFindUniqueOrThrowMock = mock(
   async (): Promise<any> => ({
     unitId: "parent-1",
     rootPostUnitId: "root-1",
+    targetUnitId: null,
     depth: 0,
     isLocked: false,
-    rootTargetUnitId: null,
-    rootTargetUnitType: null,
     unit: {
       inRealms: [],
       realmModerationTargets: [],
@@ -251,6 +250,7 @@ const content = (source: string) => markdownContentDoc(source);
 function resetMocks() {
   unitCreateMock.mockClear();
   unitFindUniqueMock.mockClear();
+  unitFindUniqueMock.mockResolvedValue(null);
   unitFindUniqueOrThrowMock.mockClear();
   unitFindManyMock.mockClear();
   unitFindManyMock.mockImplementation(async (args: any) =>
@@ -361,7 +361,6 @@ describe("PostService.create realm/tag junction writes", () => {
 
   test("realm-scoped wiki references do not add UnitRealm rows to the original wiki Unit", async () => {
     resetMocks();
-    unitFindUniqueMock.mockResolvedValueOnce({ type: "POST" });
 
     await service.create(
       {
@@ -506,10 +505,9 @@ describe("PostService.create realm/tag junction writes", () => {
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "parent-1",
       rootPostUnitId: "parent-1",
+      targetUnitId: null,
       depth: 0,
       isLocked: false,
-      rootTargetUnitId: null,
-      rootTargetUnitType: null,
       unit: {
         inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
         realmModerationTargets: [],
@@ -536,10 +534,9 @@ describe("PostService.create realm/tag junction writes", () => {
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "parent-1",
       rootPostUnitId: "parent-1",
+      targetUnitId: null,
       depth: 0,
       isLocked: false,
-      rootTargetUnitId: null,
-      rootTargetUnitType: null,
       unit: {
         inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
         realmModerationTargets: [],
@@ -568,10 +565,9 @@ describe("PostService.create realm/tag junction writes", () => {
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "parent-1",
       rootPostUnitId: "parent-1",
+      targetUnitId: null,
       depth: 0,
       isLocked: false,
-      rootTargetUnitId: null,
-      rootTargetUnitType: null,
       unit: {
         inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
         realmModerationTargets: [{ realmUnitId: "realm-1", state: "LOCKED" }],
@@ -824,6 +820,7 @@ describe("PostService.byRealm", () => {
 
     const where = firstPostFindManyArgs().where;
     expect(where.targetUnitId).toBe("release-1");
+    expect(where.parentPostUnitId).toBeNull();
     expect(where.unit.workMemberships).toEqual({
       some: {
         workUnitId: "work-1",
@@ -1033,35 +1030,28 @@ describe("PostService.list subtree queries", () => {
   });
 });
 
-describe("PostService.create rootTargetUnit derivation", () => {
+describe("PostService.create targetUnitId derivation", () => {
   const service = new PostService();
 
   function createDataArg() {
     return (postCreateMock.mock.calls as any[])[0]?.[0]?.data as any;
   }
 
-  test("top-level REVIEW carries its own targetUnitId as rootTargetUnitId with type from Unit", async () => {
+  test("top-level REVIEW stores its targetUnitId without an extra Unit lookup", async () => {
     resetMocks();
-    unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
 
     await service.create(
       { content: content("great"), kind: "REVIEW", targetUnitId: "book-B" },
       "user-1",
     );
 
-    expect(unitFindUniqueMock).toHaveBeenCalledWith({
-      where: { id: "book-B" },
-      select: { type: true },
-    });
     const data = createDataArg();
     expect(data.targetUnitId).toBe("book-B");
-    expect(data.rootTargetUnitId).toBe("book-B");
-    expect(data.rootTargetUnitType).toBe("BOOK");
+    expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
-  test("top-level REMARK with game target derives GAME type", async () => {
+  test("top-level REMARK with game target stores targetUnitId only", async () => {
     resetMocks();
-    unitFindUniqueMock.mockResolvedValueOnce({ type: "GAME" });
 
     await service.create(
       { content: content("thoughts"), kind: "REMARK", targetUnitId: "game-G" },
@@ -1069,32 +1059,28 @@ describe("PostService.create rootTargetUnit derivation", () => {
     );
 
     const data = createDataArg();
-    expect(data.rootTargetUnitId).toBe("game-G");
-    expect(data.rootTargetUnitType).toBe("GAME");
+    expect(data.targetUnitId).toBe("game-G");
   });
 
-  test("top-level POST with no targetUnitId leaves both fields undefined", async () => {
+  test("top-level POST with no targetUnitId leaves target undefined", async () => {
     resetMocks();
 
     await service.create({ content: content("free-form") }, "user-1");
 
     const data = createDataArg();
     expect(data.targetUnitId).toBeUndefined();
-    expect(data.rootTargetUnitId).toBeUndefined();
-    expect(data.rootTargetUnitType).toBeUndefined();
     // No Unit lookup needed when there is no target.
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
-  test("reply inherits rootTargetUnit fields from parent without extra Unit lookup", async () => {
+  test("reply inherits targetUnitId from parent without extra Unit lookup", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "parent-1",
       rootPostUnitId: "root-1",
+      targetUnitId: "book-B",
       depth: 0,
       isLocked: false,
-      rootTargetUnitId: "book-B",
-      rootTargetUnitType: "BOOK",
       unit: {
         inRealms: [],
         realmModerationTargets: [],
@@ -1107,8 +1093,7 @@ describe("PostService.create rootTargetUnit derivation", () => {
     );
 
     const data = createDataArg();
-    expect(data.rootTargetUnitId).toBe("book-B");
-    expect(data.rootTargetUnitType).toBe("BOOK");
+    expect(data.targetUnitId).toBe("book-B");
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
@@ -1117,10 +1102,9 @@ describe("PostService.create rootTargetUnit derivation", () => {
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "parent-1",
       rootPostUnitId: "root-1",
+      targetUnitId: null,
       depth: 0,
       isLocked: false,
-      rootTargetUnitId: null,
-      rootTargetUnitType: null,
       unit: {
         inRealms: [],
         realmModerationTargets: [],
@@ -1139,15 +1123,14 @@ describe("PostService.create rootTargetUnit derivation", () => {
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
   });
 
-  test("nested reply still inherits root target from its parent", async () => {
+  test("nested reply still inherits target from its parent", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "comment-1",
       rootPostUnitId: "root-1",
+      targetUnitId: "book-B",
       depth: 1,
       isLocked: false,
-      rootTargetUnitId: "book-B",
-      rootTargetUnitType: "BOOK",
       unit: {
         inRealms: [],
         realmModerationTargets: [],
@@ -1160,11 +1143,10 @@ describe("PostService.create rootTargetUnit derivation", () => {
     );
 
     const data = createDataArg();
-    expect(data.rootTargetUnitId).toBe("book-B");
-    expect(data.rootTargetUnitType).toBe("BOOK");
+    expect(data.targetUnitId).toBe("book-B");
   });
 
-  test("CHAPTER kind reuses the Unit type read from the BOOK validation (single Unit lookup)", async () => {
+  test("CHAPTER kind validates the target is a BOOK", async () => {
     resetMocks();
     unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
 
@@ -1175,15 +1157,14 @@ describe("PostService.create rootTargetUnit derivation", () => {
 
     expect(unitFindUniqueMock).toHaveBeenCalledTimes(1);
     const data = createDataArg();
-    expect(data.rootTargetUnitId).toBe("book-B");
-    expect(data.rootTargetUnitType).toBe("BOOK");
+    expect(data.targetUnitId).toBe("book-B");
   });
 });
 
 describe("PostService.update immutability", () => {
   const service = new PostService();
 
-  test("update writes only content/isLocked/extra; rootTarget* fields are not in the update payload", async () => {
+  test("update writes only content/isLocked/extra; target fields are not in the update payload", async () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
     Object.assign(prismaMock.post, { update: directPostUpdateMock });
@@ -1198,8 +1179,6 @@ describe("PostService.update immutability", () => {
     expect(args.where).toEqual({ unitId: "post-1" });
     expect(args.data).toEqual({ content: content("edited"), isLocked: true });
     expect(args.data.targetUnitId).toBeUndefined();
-    expect(args.data.rootTargetUnitId).toBeUndefined();
-    expect(args.data.rootTargetUnitType).toBeUndefined();
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
       "search.post.patchFields",
       "search.content.sync",
