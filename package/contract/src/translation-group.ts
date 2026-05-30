@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { contentDocWriteSchema } from "./content-doc-v1";
+import { contentDocWriteSchema } from "./content/doc-v1";
 import { type Language, languageSchema } from "./language";
 
 export const translationGroupSchema = t.Object({

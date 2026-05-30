@@ -1,6 +1,6 @@
 import { t } from "elysia";
-import { creationModeSchema } from "./content-authority";
-import { contentDocSchema, contentDocWriteSchema } from "./content-doc-v1";
+import { creationModeSchema } from "./content/authority";
+import { contentDocSchema, contentDocWriteSchema } from "./content/doc-v1";
 import {
   contentModerationStateDTOSchema,
   contentModerationStateKindSchema,

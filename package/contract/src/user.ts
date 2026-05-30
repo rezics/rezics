@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { bookshelfViewConfigSchema } from "./bookshelf";
-import { contentDocSchema, contentDocWriteSchema } from "./content-doc-v1";
+import { contentDocSchema, contentDocWriteSchema } from "./content/doc-v1";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";

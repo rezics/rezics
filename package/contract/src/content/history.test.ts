@@ -12,7 +12,7 @@ import {
   historyUnitReferenceResolutionSchema,
   unitRevisionSchema,
   unitRevisionTimelineItemSchema,
-} from "./content-history";
+} from "./history";
 
 describe("content history contracts", () => {
   test("accepts typed ContentStructure batch operations", () => {

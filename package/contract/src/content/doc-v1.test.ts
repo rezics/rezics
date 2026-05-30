@@ -6,7 +6,7 @@ import {
   contentDocMarkdownFallback,
   mainMarkdownSource,
   markdownContentDoc,
-} from "./content-doc-v1";
+} from "./doc-v1";
 
 const doc = (source = "Hello"): ContentDoc => ({
   schema: "rezics.content",

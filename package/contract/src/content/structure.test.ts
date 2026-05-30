@@ -3,8 +3,8 @@ import { Value } from "@sinclair/typebox/value";
 import {
   contentStructureDTOSchema,
   contentStructureNodeSchema,
-} from "./content-structure";
-import { postListQuerySchema } from "./post";
+} from "./structure";
+import { postListQuerySchema } from "../post";
 
 describe("contentStructure schemas", () => {
   test("accept generic ownerUnitId and contentUnitId shape", () => {

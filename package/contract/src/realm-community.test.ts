@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
-import { markdownContentDoc } from "./content-doc-v1";
+import { markdownContentDoc } from "./content/doc-v1";
 import {
   realmMembershipMeDTOSchema,
   realmMemberDTOSchema,

@@ -3,7 +3,7 @@ import {
   CONTENT_DOC_SCHEMA,
   markdownContentBlockSchema,
   unitRefSourceSchema,
-} from "./content-doc-v1";
+} from "./doc-v1";
 
 export const CONTENT_DOC_V2_VERSION = 2 as const;
 

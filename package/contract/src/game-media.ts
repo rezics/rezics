@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { contentStructureDTOSchema } from "./content-structure";
+import { contentStructureDTOSchema } from "./content/structure";
 import { languageSchema } from "./language";
 import { unitTranslationDTOSchema } from "./unit";
 import { unitWorkDTOSchema } from "./unit-work";

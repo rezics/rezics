@@ -2,7 +2,7 @@ import { t } from "elysia";
 import {
   contentStructureNodeSchema,
   type ContentStructureItem,
-} from "./content-structure";
+} from "./content/structure";
 import { languageSchema } from "./language";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";

@@ -11,8 +11,8 @@ import {
   UnitAuthorityRoleKey,
   unitAuthorityRoleKeySchema,
   unitFieldLockSchema,
-} from "./content-authority";
-import { PostKind, postKindLiterals } from "./post";
+} from "./authority";
+import { PostKind, postKindLiterals } from "../post";
 
 describe("content authority vocabulary", () => {
   test("creation mode literals are stable", () => {

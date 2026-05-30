@@ -1,13 +1,13 @@
 import { t } from "elysia";
-import { creationModeSchema } from "./content-authority";
-import { contentDocWriteSchema } from "./content-doc-v1";
+import { creationModeSchema } from "./content/authority";
+import { contentDocWriteSchema } from "./content/doc-v1";
 import {
   contentStructureDTOSchema,
   contentStructureNodeSchema,
   type ContentStructureItem,
   type ContentStructurePath,
   type ContentStructureResponse,
-} from "./content-structure";
+} from "./content/structure";
 import { creditAttributionBriefSchema } from "./credit-attribution";
 import { languageSchema } from "./language";
 import { licenseSlugSchema } from "./license";

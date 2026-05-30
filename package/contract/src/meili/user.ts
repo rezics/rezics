@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { contentDocSchema } from "../content-doc-v1";
+import { contentDocSchema } from "../content/doc-v1";
 
 // ANCHOR: User Search Document
 // UserType removed — no more AUTHOR/PRESS/PRODUCER distinction.

@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { type ContentRating, contentRatingSchema } from "./unit";
+import { type ContentRating, contentRatingSchema } from "../unit";
 
 export const contentStructureNodeSchema: ReturnType<typeof t.Recursive> =
   t.Recursive((self) =>
