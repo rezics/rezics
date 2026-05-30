@@ -55,7 +55,7 @@ export function isSubscribableUnitType(
 }
 
 /**
- * Accept exactly one of three forms per design D2:
+ * Accept exactly one of three forms:
  *   - '*'                        global wildcard
  *   - '<category>.*'             category wildcard (category must be registered)
  *   - '<category>.<event>'       exact event (full string must be registered)

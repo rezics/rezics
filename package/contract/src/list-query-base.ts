@@ -10,7 +10,7 @@ import { t } from "elysia";
  * schema; spread `...listPostBodyBase.properties` into a domain's POST body
  * schema when that endpoint is added.
  *
- * Transport guidance (see `openspec/specs/api-route-convention/spec.md`):
+ * Transport guidance:
  * - Prefer `GET /{resource}/list?ids=a,b,c` when `ids.length <= 30` and the
  *   rest of the filter fits in a URL (~2 KB).
  * - Prefer `POST /{resource}/list` with a JSON body when `ids.length > 30`,

@@ -6,10 +6,11 @@ Shared product and domain translations for Rezics frontends. The runtime is
 ## Layout
 
 - Source translations live under `package/i18n/locales/{locale}/{ns}.json`.
-- Namespaces follow `openspec/specs/i18n-namespace-architecture/spec.md`:
-  `common`, `shell`, `auth` (bootstrap); `book`, `page`, `entity`,
-  `community`, `search`, `settings`, `editor`, `admin` (route-lazy); `ui`
-  (bundled with `@rezics/ui`).
+- Namespaces are: `common`, `shell`, `auth` (bootstrap); `book`, `page`,
+  `entity`, `community`, `search`, `settings`, `editor`, `admin`
+  (route-lazy, `admin` admin-only); `ui` (bundled with `@rezics/ui`). New
+  keys use the namespace matching the closest existing prefix; cross-domain
+  generic words go in `common`. `bun run check:i18n` enforces coverage.
 - Vite serves the tree at `/locales/<lng>/<ns>.json` via the
   `rezicsI18nLocales()` plugin from `@rezics/i18n/vite`.
 

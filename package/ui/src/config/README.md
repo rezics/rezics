@@ -10,7 +10,7 @@ Three files together define how every consumer references rezics design tokens:
 
 ## Consumption rule
 
-Application code SHALL consume tokens via the curated short names exposed by `uno-config.ts` `theme.colors`. R9 in `bun run check:convention` bans every `var(--rezics-*)` reference in source files (`.css`, `.ts`, `.tsx`, `.js`, `.jsx`, `.mdx`); the `--rezics-*` namespace was retired by openspec change `unify-tokens-single-source`. R9 also asserts that `package/ui/src/config/tokens.css` does not exist.
+Application code SHALL consume tokens via the curated short names exposed by `uno-config.ts` `theme.colors`. R9 in `bun run check:convention` bans every `var(--rezics-*)` reference in source files (`.css`, `.ts`, `.tsx`, `.js`, `.jsx`, `.mdx`); the `--rezics-*` namespace is retired in favor of the single-source flat `--colors-*` cascade. R9 also asserts that `package/ui/src/config/tokens.css` does not exist.
 
 For raw CSS and inline style cases, reference the flat tokens directly (`var(--colors-text-primary)`, `var(--shadow-modal)`, etc.). When ≥3 callsites share an inline-style need, prefer promoting it to a UnoCSS shortcut in `uno-config.ts`.
 
@@ -20,7 +20,7 @@ Dark mode is class-based: set `class="dark"` on `<html>`. The `.dark` selector i
 
 ## Adding or removing a short name
 
-`uno-config.ts` `theme.colors` is governed by [`openspec/specs/ui-component-foundation/spec.md`](../../../../openspec/specs/ui-component-foundation/spec.md). Additions and removals require an OpenSpec change updating that spec.
+Add or remove a curated short name by editing the `shortcuts` layer and `theme.colors` tree in `uno-config.ts`; the leaf must exist in `tokens/colors.ts` (`lightColors` / `darkColors`) so the `--colors-*` cascade resolves. `bun run check:tokens` enforces token consistency.
 
 ## Where to look first
 
@@ -32,4 +32,4 @@ Dark mode is class-based: set `class="dark"` on `<html>`. The `.dark` selector i
 - Need a border? → `theme.colors.border.{whisper, defined, strong, focus, error}`.
 - Need a shadcn role? → top-level `theme.colors.{primary, secondary, accent, muted, card, popover, destructive, input, ring, background, foreground}`, each with `DEFAULT` and (where applicable) `foreground`.
 
-The full list lives in `tokens/colors.ts`. If a needed token is missing, the answer is to extend the surface (and update the spec) — not to bypass it.
+The full list lives in `tokens/colors.ts`. If a needed token is missing, the answer is to extend the surface — not to bypass it.

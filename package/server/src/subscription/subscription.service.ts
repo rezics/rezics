@@ -26,7 +26,7 @@ export class SubscriptionService {
    * - Target's `Unit.type` must be in `CHANNEL_REGISTRY` (400 otherwise).
    * - Private REALM targets require the subscriber to already be a
    *   `RealmMember`; non-members can only subscribe to public realms
-   *   (403 otherwise; per design D5).
+   *   (403 otherwise).
    * - Channels are validated against the per-type registry. Default is
    *   `['*']` when omitted; an empty array is rejected (would be a
    *   silent no-op subscription).

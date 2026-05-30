@@ -1,7 +1,10 @@
 /**
  * Base36 LexoRank sortKey generation for ContentStructureNode sibling
- * ordering. See `openspec/specs/type-extension-book/spec.md` (Requirement:
- * Sibling ordering uses LexoRank sortKey) for invariants.
+ * ordering. Sibling nodes (rows sharing the same `bookUnitId` and `parentId`)
+ * are ordered by lexicographic comparison of their `sortKey`: appending yields
+ * a key strictly greater than every existing sibling, and inserting yields a
+ * key strictly between the two adjacent siblings — so reorder/insert touches a
+ * single row's `sortKey` and never its neighbors or descendants.
  *
  * Keys are strings of `[0-9a-z]`. Lexicographic comparison of these strings
  * determines sibling order. The alphabet is interpreted as base36 fractional

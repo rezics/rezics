@@ -1,4 +1,5 @@
-// Path-P exception — see `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` Decision 2.
+// This file carries intentional local edits (the custom carousel controls and
+// Embla integration below); regenerating it would clobber them.
 // Do not run `shadcn@latest add` against this file.
 import useEmblaCarousel, {
   type UseEmblaCarouselType,

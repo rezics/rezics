@@ -40,7 +40,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
         try {
           publishSse(event.recipientId, event.raw);
         } catch (err) {
-          // SSE failures are logged but do not fail persistence (per spec)
+          // SSE failures are logged but do not fail persistence
           console.error(
             `[notify/internal/event] SSE push failed for ${event.recipientId}:`,
             err,
@@ -114,7 +114,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
       detail: {
         summary: "Fan out system + email notification",
         description:
-          "Persists an in-app system notification and enqueues a templated email to the recipient. Returns even when the email channel fails. Spec: notify-system-email.",
+          "Persists an in-app system notification and enqueues a templated email to the recipient. Returns even when the email channel fails: the email failure is logged and handled by the retry/dead-letter path rather than propagated, so in-app persistence is never blocked.",
         tags: ["Internal"],
         security: [{ internalSecret: [] }],
       },

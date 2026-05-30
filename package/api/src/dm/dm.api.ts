@@ -9,12 +9,12 @@ import type {
 /**
  * DM client surface.
  *
- * - `send` POSTs to `@rezics/server`'s `/dm/send` route, which checks
- *   the Subscription-based permission gate (engagement-subscription
- *   design D7a) and forwards to notify.
+ * - `send` POSTs to `@rezics/server`'s `/dm/send` route, which gates the
+ *   send on a Subscription whose `channels` includes `'*'`, `'dm.*'`, or
+ *   `'dm.message'` (sender -> recipient), then forwards to notify.
  * - `listConversations` and `listMessages` hit notify directly via
- *   cookie-authenticated `notifyFetch` (notify-broadcast-boundary
- *   established the Domain=.rezics.com cookie scope).
+ *   cookie-authenticated `notifyFetch`; the session cookie is scoped to
+ *   `Domain=.rezics.com` so it is sent cross-subdomain to notify.
  */
 export const dmApi = {
   send: async (input: DmSendBody): Promise<{ success: true }> => {

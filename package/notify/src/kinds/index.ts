@@ -17,8 +17,8 @@ export { resolveLocale, SUPPORTED_LOCALES } from "./locale";
 /**
  * Render any registered kind in the given locale.
  *
- * If `requested` is not in the supported set, falls back to `en` per the spec
- * fallback chain (caller should usually pre-resolve via `resolveLocale`).
+ * If `requested` is not in the supported set, falls back to the platform
+ * default `en` (caller should usually pre-resolve via `resolveLocale`).
  */
 export function renderKind(
   kind: string,

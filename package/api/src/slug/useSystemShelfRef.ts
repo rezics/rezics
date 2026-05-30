@@ -50,8 +50,7 @@ export function computeSystemShelfRefResult(args: {
  * `active` | `completed`).
  *
  * This is the canonical client-side resolution for system shelves. There is
- * no user-DTO field carrying these ids — see openspec change
- * `shelf-system-slugs`.
+ * no user-DTO field carrying these ids; the slug index is the only source.
  */
 export function useSystemShelfRef(
   kindKey: SystemShelfKindKey,

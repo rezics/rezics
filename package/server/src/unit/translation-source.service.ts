@@ -25,7 +25,7 @@ export class TranslationSourceError extends Error {
 /**
  * Set or clear `UnitTranslation.sourceUnitId` for `(workId, lang)`.
  *
- * Validations (per `unit-translation` spec):
+ * Validations:
  * - workUnit must exist
  * - sourceUnitId, if set, must reference a release of this work
  *   through `UnitWork(role = RELEASE)`

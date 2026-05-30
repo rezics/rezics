@@ -1,5 +1,8 @@
-// Foundation v1 design tokens — single source of truth for rezics design system.
-// See openspec/plans/design-system-research/briefs/01-foundation-v1.md.
+// Foundation design tokens — single source of truth for the rezics design system
+// (color, typography, spacing, radius, elevation, motion). Consumed by
+// package/ui/src/config/uno-config.ts, which emits them as the flat UnoCSS
+// custom-property cascade (`--colors-*`, `--radius-*`, etc.). Light/dark switches
+// via the `dark` class on <html>; there is no JS theme provider.
 
 export * from "./colors";
 export * from "./elevation";

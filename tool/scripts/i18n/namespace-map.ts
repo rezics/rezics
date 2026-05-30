@@ -5,8 +5,8 @@
  * by its first underscore; the resulting prefix is looked up here to find
  * the target namespace under `public/locales/<lng>/<ns>.json`.
  *
- * The set of namespaces is defined by
- * `openspec/specs/i18n-namespace-architecture/spec.md`.
+ * `NAMESPACES` below is the canonical, exhaustive namespace set; every
+ * underscore prefix in `PREFIX_TO_NAMESPACE` maps to exactly one of them.
  */
 
 export const NAMESPACES = [

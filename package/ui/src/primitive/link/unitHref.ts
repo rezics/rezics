@@ -2,10 +2,8 @@
  * Single sanctioned helper for building hrefs to slug-bearing Unit types.
  *
  * Returns the short-prefix slug URL when a slug is known, falls back to the
- * long-prefix unitId URL otherwise. See
- * `openspec/specs/public-short-routes/spec.md` for the link-builder rule:
- * short=slug is the canonical browser-facing identity; long-prefix unitId URLs
- * SHALL NOT be rendered when a slug is known.
+ * long-prefix unitId URL otherwise. short=slug is the canonical browser-facing
+ * identity; long-prefix unitId URLs must not be rendered when a slug is known.
  *
  * Pure and synchronous — usable from route loaders, prefetchers, search-result
  * generators, and tests. Use {@link useUnitHref} for the React-side ergonomic

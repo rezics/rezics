@@ -358,8 +358,8 @@ export class UserService {
   }
 
   /**
-   * Update user. Per design D7 user slugs are immutable in v1 — any caller
-   * that smuggles a `slug` field is rejected with `USER_SLUG_IMMUTABLE`.
+   * Update user. User slugs are immutable — any caller that smuggles a
+   * `slug` field is rejected with `USER_SLUG_IMMUTABLE`.
    */
   async update(userId: string, req: UpdateUser): Promise<UserWithRelations> {
     if ((req as Record<string, unknown>).slug !== undefined) {

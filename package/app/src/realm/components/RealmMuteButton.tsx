@@ -14,9 +14,9 @@ interface RealmMuteButtonProps {
 /**
  * Realm header affordance for muting / unmuting activity notifications.
  *
- * Per engagement-subscription design D5: mute removes the Subscription
- * edge while keeping the RealmMember row intact, preserving posting
- * rights and role. The toggle reflects the live subscription state from
+ * Mute removes the Subscription edge while keeping the RealmMember row
+ * intact, preserving posting rights and role. The toggle reflects the
+ * live subscription state from
  * `useIsSubscribed`, falling back to "Mute" when no membership exists
  * (a logged-out or non-member surface — the button is disabled).
  */

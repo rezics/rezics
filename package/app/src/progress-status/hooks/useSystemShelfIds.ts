@@ -22,9 +22,9 @@ export type UseSystemShelfIdsResult = {
 /**
  * Resolve the viewer's four system shelf ids through the slug system.
  *
- * Each `kindKey` resolves under `scope = viewer.unitId`, slug = kindKey
- * (see openspec change `shelf-system-slugs`). The `(scope, slug)` index is
- * the canonical lookup; no user-DTO field carries these ids.
+ * Each `kindKey` resolves under `scope = viewer.unitId`, slug = kindKey.
+ * The `(scope, slug)` index is the canonical lookup; no user-DTO field
+ * carries these ids.
  */
 export function useSystemShelfIds(): UseSystemShelfIdsResult {
   const favorites = useSystemShelfRef("favorites");

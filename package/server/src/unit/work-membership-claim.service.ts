@@ -66,9 +66,8 @@ function toDTO(row: ClaimRow): WorkMembershipClaimDTO {
 /**
  * Inbox listing for the work-side: returns claims for the given workUnitId.
  *
- * Per spec scenario "Soft-deleted unit hides claims at read time", claims
- * whose release Unit is `status = DELETED` are filtered out at read time
- * (the rows remain in the DB).
+ * Claims whose release Unit is `status = DELETED` are filtered out at read
+ * time (the rows remain in the DB).
  */
 export async function listByWork(
   caller: RezicsSessionClaims,

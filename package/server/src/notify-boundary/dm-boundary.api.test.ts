@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { subscriptionPermitsDm } from "./dm-boundary.subscription";
 
 /**
- * Unit tests for the DM permission predicate. Engagement-subscription
- * design D7a: a Subscription's `channels` permits DM iff it contains
- * the global wildcard, the DM category wildcard, or the exact event.
+ * Unit tests for the DM permission predicate. A Subscription's
+ * `channels` permits DM iff it contains the global wildcard, the DM
+ * category wildcard, or the exact event.
  * Mutual subscription is NOT required — one-way (sender→recipient) is
  * sufficient, matching the previous one-way Follow semantics.
  */

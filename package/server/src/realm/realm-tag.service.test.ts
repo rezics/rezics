@@ -252,7 +252,7 @@ describe("RealmService.listLowScoreRealmTagApplications", () => {
 });
 
 describe("REALM_TAG_VISIBILITY_THRESHOLD", () => {
-  test("equals -100 per spec", () => {
+  test("score at or below this value hides a RealmTagApplication from regular users", () => {
     expect(REALM_TAG_VISIBILITY_THRESHOLD).toBe(-100);
   });
 });

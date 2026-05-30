@@ -983,7 +983,8 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       },
     },
   )
-  // --- Subscription / mute (engagement-subscription, design D5) ---
+  // --- Subscription / mute (RealmMember and Subscription are orthogonal
+  // edges: mute removes only the Subscription, leaving membership intact) ---
   .post(
     "/:unitId/mute",
     async ({ params, identity }): Promise<{ muted: boolean }> => {

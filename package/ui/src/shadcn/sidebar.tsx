@@ -1,4 +1,5 @@
-// Path-P exception — see `openspec/changes/migrate-shadcn-to-base-ui-luma/design.md` Decision 2.
+// Hand-maintained exception: this file's local sidebar behavior, responsive
+// state, and layout are NOT regenerated from the base-luma shadcn registry.
 // Do not run `shadcn@latest add` against this file.
 
 import { mergeProps } from "@base-ui/react/merge-props";

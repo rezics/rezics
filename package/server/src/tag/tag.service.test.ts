@@ -126,7 +126,8 @@ describe("TagService tag writes", () => {
 });
 
 describe("VISIBILITY_THRESHOLD", () => {
-  test("equals -100 per spec", () => {
+  // -100 is the score at or below which UnitTag rows are suppressed from regular callers.
+  test("equals -100", () => {
     expect(VISIBILITY_THRESHOLD).toBe(-100);
   });
 });

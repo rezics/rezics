@@ -1,6 +1,5 @@
-// Rezics-aligned shadcn exception — see
-// `openspec/specs/ui-component-foundation/spec.md`,
-// "Requirement: shadcn primitive manual changes are documented".
+// Rezics-aligned shadcn exception: this primitive carries documented rezics-side
+// edits and is NOT a plain vendored copy of the upstream registry source.
 // Do not run `shadcn@latest add card` without reconciling this file's
 // documented surface/interactive API, media slot, and container-query behavior.
 import type * as React from "react";

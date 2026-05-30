@@ -186,7 +186,7 @@ export function useLeaveRealmMutation(
 
 /**
  * Mutation for muting a realm — removes the Subscription edge while
- * keeping `RealmMember` intact (engagement-subscription design D5).
+ * keeping `RealmMember` intact.
  * Invalidates the same membership/detail keys as join/leave so any
  * "is subscribed" derived state re-fetches.
  */

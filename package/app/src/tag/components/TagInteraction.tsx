@@ -70,7 +70,7 @@ export type TagInteractionProps = {
  *
  * The popover is rendered with `modal={false}` so the backdrop is absent,
  * scroll lock is disabled, and other chips remain clickable while the
- * preview is open (per tag-interaction-component spec).
+ * preview is open.
  */
 export const TagInteraction: React.FC<TagInteractionProps> = ({
   tags,

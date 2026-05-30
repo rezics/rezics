@@ -60,7 +60,7 @@ Both Apple HIG and MD3 forbid this for legibility. Type carries information; ref
 
 The dialog **frame** may opt in when it owns chrome rows; dialog content does not. Reading and form layouts inside should keep their own local rhythm.
 
-Adding a new density-aware component requires an OpenSpec change that adds a fixed `--padding-*` token in `uno-config.ts` and wires a rezics-authored consumer to that token.
+Adding a new density-aware component means adding a fixed-value `--padding-*` token to the preflight in `package/ui/src/config/uno-config.ts` (chosen against the existing nine) and wiring a rezics-authored consumer to that token. Keep the vocabulary closed and the values fixed: no `calc()`, no `--density-step`, no runtime density toggle.
 
 ## Why intrinsic, not runtime
 
@@ -75,4 +75,4 @@ Adding a new density-aware component requires an OpenSpec change that adds a fix
 
 ## Reference
 
-> **MD3 density**: m3.material.io/foundations/layout/applying-layout/window-size-classes — the 4-step density model is the engineering reference, but rezics adopts only the idea that repeating surfaces need explicit spacing vocabulary. Apple HIG offers no token vocabulary for density; we use HIG's "type carries information" sensibility to forbid type changes across tiers. Spec: `openspec/specs/design-system-density/spec.md`.
+> **MD3 density**: m3.material.io/foundations/layout/applying-layout/window-size-classes — the 4-step density model is the engineering reference, but rezics adopts only the idea that repeating surfaces need explicit spacing vocabulary. Apple HIG offers no token vocabulary for density; we use HIG's "type carries information" sensibility to forbid type changes across tiers. The nine fixed-value `--padding-*-y` tokens are emitted by the preflight in `package/ui/src/config/uno-config.ts`.

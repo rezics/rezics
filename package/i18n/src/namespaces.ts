@@ -1,7 +1,9 @@
 /**
  * Canonical i18next namespace registry shared by app, admin, ui, editor, and folio.
- * Mirrors the namespace table in
- * `openspec/specs/i18n-namespace-architecture/spec.md`.
+ * This is the single source of truth for the namespace set; the arrays below
+ * also encode each namespace's loading tier: BOOTSTRAP loads in parallel during
+ * `i18next.init`, LAZY loads on demand per route, and UI ships bundled with
+ * `@rezics/ui`. New keys go in the namespace whose domain matches closest.
  */
 
 export const BOOTSTRAP_NAMESPACES = ["common", "shell", "auth"] as const;
