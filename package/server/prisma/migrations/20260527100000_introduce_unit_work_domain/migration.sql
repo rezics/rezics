@@ -25,7 +25,7 @@ CREATE TABLE "UnitWork" (
     "position" VARCHAR(64),
     "displayPolicy" "UnitWorkDisplayPolicy" NOT NULL DEFAULT 'PRIMARY',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "UnitWork_pkey" PRIMARY KEY ("unitId", "workUnitId", "role")
 );

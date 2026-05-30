@@ -40,5 +40,5 @@ CREATE INDEX "GameSystemRequirement_tier_idx"
 CREATE INDEX "GameSystemRequirement_sourceRefId_idx"
     ON "GameSystemRequirement"("sourceRefId");
 
-CREATE INDEX "GameSystemRequirement_gameUnitId_platformEntityId_tier_sourceRefId_idx"
+CREATE INDEX "GameSystemRequirement_gameUnitId_platformEntityId_tier_sour_idx"
     ON "GameSystemRequirement"("gameUnitId", "platformEntityId", "tier", "sourceRefId");

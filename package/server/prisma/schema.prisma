@@ -520,10 +520,10 @@ model AdminWorkMergeOperation {
   copyAliasesRequested      Boolean   @default(false)
   itemProgress              Json      @default("{}")
   movedMemberships          Json      @default("[]")
-  movedLegacyReleaseUnitIds String[]  @default([])
+  movedLegacyReleaseUnitIds String[]  @db.Uuid @default([])
   createdTagKeys            String[]  @default([])
-  createdAliasIds           String[]  @default([])
-  repairUnitIds             String[]  @default([])
+  createdAliasIds           String[]  @db.Uuid @default([])
+  repairUnitIds             String[]  @db.Uuid @default([])
   repairCommandCount        Int       @default(0)
   errorMessage              String?
   revertedAt                DateTime?
@@ -739,10 +739,10 @@ model Post {
 
   /// Postgres-native ltree materialized path from the thread root to this post.
   /// Modeled as Unsupported: read and written via raw SQL only. The GiST index
-  /// backing subtree containment is owned by a manual migration, not Prisma
-  /// (see the manual_redesign_post_ltree_index migration). The legacy
-  /// zero-padded `sortPath` VARCHAR column is gone; topology and depth live
-  /// here, while presentation order is a DB ORDER BY key (School B).
+  /// backing subtree containment is declared below so Prisma diff can verify
+  /// the migration history even though the ltree data movement is handwritten.
+  /// The legacy zero-padded `sortPath` VARCHAR column is gone; topology and
+  /// depth live here, while presentation order is a DB ORDER BY key (School B).
   path Unsupported("ltree")?
 
   replyCount       Int       @default(0)
@@ -775,6 +775,7 @@ model Post {
   @@index([kind, createdAt])
   @@index([scoreEntryId])
   @@index([rootTargetUnitId, createdAt])
+  @@index([path], type: Gist, map: "Post_path_gist_idx")
   // Bucket filtering for lifecycle listings (e.g. unsolved questions): a cheap
   // `state IN (active|closed slugs)` IN-list, no anti-join. Scoped by
   // rootTargetUnitId so target/realm feeds hit the index.
