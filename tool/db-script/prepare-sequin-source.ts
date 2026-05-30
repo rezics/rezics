@@ -98,7 +98,7 @@ function sourceConnectionConfig(args: Args) {
   return {
     host: envValue("SOURCE_DB_HOST", "localhost"),
     port: Number(envValue("SOURCE_DB_PORT", "5432")),
-    database: envValue("SOURCE_DB_NAME", "rezics_booklib"),
+    database: envValue("SOURCE_DB_NAME", "rezics_server"),
     user: envValue("SOURCE_DB_USER", "postgres"),
     password: envValue("SOURCE_DB_PASSWORD"),
   };

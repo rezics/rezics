@@ -36,7 +36,7 @@
 
 ## Replication-slot lag (both CDC sources)
 
-Sequin streams **two** sources — the main database (`rezics_booklib`) and the
+Sequin streams **two** sources — the main database (`rezics_server`) and the
 reaction database (`rezics_reaction`) — each with its own publication and
 logical replication slot. An offline/slow consumer grows WAL on the source DB,
 which can fill disk.

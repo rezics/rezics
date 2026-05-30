@@ -126,7 +126,7 @@ accessories:
         # Source 1: main database.
         SOURCE_DB_HOST: rezics-postgres
         SOURCE_DB_PORT: "5432"
-        SOURCE_DB_NAME: rezics_booklib
+        SOURCE_DB_NAME: rezics_server
         SOURCE_DB_USER: postgres
         # Source 2: reaction database (same instance, separate db).
         REACTION_DB_HOST: rezics-postgres

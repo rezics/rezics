@@ -59,12 +59,11 @@ pg_ctl start
 psql -U postgres
 ```
 
-## Systemd Service
+## Production
 
-```sh
-sudo systemctl restart rezbooklib.service
-journalctl -u rezbooklib.service -n 50 --no-pager
-```
+Production runs as Docker images via Kamal — see
+[`docs/guide/deployment.md`](../../docs/guide/deployment.md). Use
+`kamal app logs -r server` for logs instead of `journalctl`.
 
 ## Bun Cache
 

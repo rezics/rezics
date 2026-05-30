@@ -10,9 +10,9 @@
 # with the superuser credential (acceptable for a single-instance v1).
 set -euo pipefail
 
-# Service key -> database name. The `server` schema owns `rezics_booklib`.
+# Service key -> database name. The `server` schema owns `rezics_server`.
 declare -A DATABASES=(
-  [server]=rezics_booklib
+  [server]=rezics_server
   [auth]=rezics_auth
   [notify]=rezics_notify
   [reaction]=rezics_reaction

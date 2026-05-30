@@ -69,7 +69,3 @@ Runtime and package manager: **Bun**. Workspaces live under `package/*`. See
 
 The `Docs` folder is for manually written documentation, while the `tsDocs`
 folder stores automatically generated documentation.
-
-```sh
-git diff --cached > git-staged.txt
-```

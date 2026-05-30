@@ -11,7 +11,7 @@ services:
       - -c
       - max_wal_senders=10
     environment:
-      POSTGRES_DB: rezics_booklib
+      POSTGRES_DB: rezics_server
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${SOURCE_DB_PASSWORD:-postgres}
     ports:
@@ -20,7 +20,7 @@ services:
       - source-postgres-data:/var/lib/postgresql
       - ./source-postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d rezics_booklib"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d rezics_server"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -67,7 +67,7 @@ services:
       ENV: ${ENV:-development}
       SOURCE_DB_HOST: source-postgres
       SOURCE_DB_PORT: "5432"
-      SOURCE_DB_NAME: ${SOURCE_DB_NAME:-rezics_booklib}
+      SOURCE_DB_NAME: ${SOURCE_DB_NAME:-rezics_server}
       SOURCE_DB_USER: ${SOURCE_DB_USER:-postgres}
       SOURCE_DB_PASSWORD: ${SOURCE_DB_PASSWORD:-postgres}
       SOURCE_DB_POOL_SIZE: ${SOURCE_DB_POOL_SIZE:-10}

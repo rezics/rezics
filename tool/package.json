@@ -10,8 +10,6 @@
     "prisma:reset-db": "bun run db-script/prisma-reset-db.ts",
     "service:source:verify": "bun run external-services/services.ts source:verify",
     "service:source:repair": "bun run external-services/services.ts source:repair",
-    "install-services": "bun run install-services/install-services.ts",
-    "deploy": "bun run deploy-script/deploy-script.ts",
     "generate-barrel": "bun run scripts/generate-barrel.ts",
     "seed": "bun run seed/seed.ts"
   },

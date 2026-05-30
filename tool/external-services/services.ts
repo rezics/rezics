@@ -111,7 +111,7 @@ function sourceVerifyEnv(): NodeJS.ProcessEnv {
     SOURCE_DB_HOST: "127.0.0.1",
     SOURCE_DB_PORT:
       toolEnv.SOURCE_DB_PORT_PUBLISHED ?? toolEnv.SOURCE_DB_PORT ?? "5432",
-    SOURCE_DB_NAME: toolEnv.SOURCE_DB_NAME ?? "rezics_booklib",
+    SOURCE_DB_NAME: toolEnv.SOURCE_DB_NAME ?? "rezics_server",
     SOURCE_DB_USER: toolEnv.SOURCE_DB_USER ?? "postgres",
     SOURCE_DB_PASSWORD: toolEnv.SOURCE_DB_PASSWORD ?? "postgres",
   };
@@ -166,7 +166,7 @@ async function checkHealth() {
     "-U",
     "postgres",
     "-d",
-    "rezics_booklib",
+    "rezics_server",
   ]);
   await fetchHealth("Meilisearch", DEFAULT_MEILI_HEALTH_URL);
   execHealth("Sequin state PostgreSQL", "sequin-postgres", [

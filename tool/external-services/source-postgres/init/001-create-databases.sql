@@ -1,5 +1,5 @@
-SELECT 'CREATE DATABASE rezics_booklib'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'rezics_booklib')\gexec
+SELECT 'CREATE DATABASE rezics_server'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'rezics_server')\gexec
 
 SELECT 'CREATE DATABASE rezics_auth'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'rezics_auth')\gexec

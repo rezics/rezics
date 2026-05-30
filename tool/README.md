@@ -29,7 +29,7 @@ bun run service:down
 The managed source Postgres container starts with logical replication enabled:
 `wal_level=logical`, `max_replication_slots=10`, and `max_wal_senders=10`.
 On a fresh Docker volume it also creates the local development databases used
-by package env examples: `rezics_booklib`, `rezics_auth`, `rezics_jobs`,
+by package env examples: `rezics_server`, `rezics_auth`, `rezics_jobs`,
 `rezics_history`, `rezics_notify`, and `reaction`. Prisma migrations still run
 through the package workflows.
 
@@ -69,12 +69,12 @@ window, but new docs and workflows should use the unified `service:*` commands.
 
 ## Deploy
 
-```sh
-cd /www/wwwroot/Library.Book/Library.Book/tool/
-bun run deploy
-```
+Production deploys as Docker images via [Kamal](https://kamal-deploy.org) (config
+in `config/`, workflows in `.github/workflows/`), with static frontends on
+Cloudflare Pages. See [`docs/guide/deployment.md`](../docs/guide/deployment.md).
 
 ```sh
-systemctl restart rezbooklib.service
-journalctl -u rezbooklib.service -f
+bin/deploy <git-sha>   # validate → infra → migrate → services → workers → backfill
 ```
+
+The previous systemd + rsync single-host path is retired.

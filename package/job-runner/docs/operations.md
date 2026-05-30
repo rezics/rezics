@@ -44,7 +44,7 @@ Sequin in each environment:
 
 ```sql
 CREATE ROLE rezics_sequin WITH REPLICATION LOGIN PASSWORD 'replace-me';
-GRANT CONNECT ON DATABASE rezics_booklib TO rezics_sequin;
+GRANT CONNECT ON DATABASE rezics_server TO rezics_sequin;
 GRANT USAGE ON SCHEMA public TO rezics_sequin;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO rezics_sequin;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
