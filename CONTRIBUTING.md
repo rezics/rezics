@@ -26,22 +26,22 @@ dependencies such as PostgreSQL, Meilisearch, Redis, object storage, or Sequin.
 For the repo-managed local path, start Docker Compose v2 services first:
 
 ```bash
-bun run service:up
-bun run service:health
-bun run service:logs
-bun run service:down
+bun run service up
+bun run service health
+bun run service logs
+bun run service down
 ```
 
 This starts the managed source PostgreSQL, Meilisearch, Sequin state
 PostgreSQL, Sequin Redis, and Sequin stack. The source PostgreSQL container is
 created with logical replication enabled and creates the local development
 databases on fresh volumes. User-managed external services remain possible by
-editing package env files manually, but `service:*` commands do not discover,
+editing package env files manually, but `service` commands do not discover,
 start, stop, or repair unrelated services.
 
 If the managed source database comes from an old or manually modified volume,
-use `bun run service:source:verify` first. Reserve
-`bun run service:source:repair` for existing, external, or broken local source
+use `bun run service source verify` first. Reserve
+`bun run service source repair` for existing, external, or broken local source
 databases; it is not required for a fresh managed Docker volume.
 
 Start any other required external services first, then start the dependent
@@ -98,7 +98,7 @@ Mixing the two is forbidden: a slug under a long prefix or a UUID under a short 
 ### Enforcement
 
 These conventions are enforced by `bun run check:convention`; each rule
-(`tool/scripts/check-convention/rules/`) states its own normative rule and is
+(`tool/src/commands/convention/rules/`) states its own normative rule and is
 the authoritative source.
 
 ## Seeding

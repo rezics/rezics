@@ -75,7 +75,7 @@ The repo-managed local stack includes an opt-in Collector/ClickStack smoke
 profile:
 
 ```bash
-docker compose -p rezics-dev-external-services -f tool/dev-external-services/compose.yml --profile observability up -d clickstack otel-collector
+docker compose -p rezics-dev-external-services -f tool/service/compose.yml --profile observability up -d clickstack otel-collector
 ```
 
 The OpenTelemetry Collector receives OTLP on `4317` and `4318` and exports to

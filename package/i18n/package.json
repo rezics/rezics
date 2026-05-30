@@ -5,7 +5,7 @@
   "type": "module",
   "license": "AGPL-3.0-only",
   "scripts": {
-    "check:i18n": "bun run ../../tool/scripts/i18n/check-i18n.ts"
+    "check:i18n": "bun run ../../tool/src/commands/i18n/check.ts"
   },
   "exports": {
     ".": {

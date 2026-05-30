@@ -14,7 +14,7 @@
  *
  * Authors consume tokens via the curated short names exposed by
  * `theme.colors` (`text-primary`, `bg-surface-elevated`, …). R9 in
- * `tool/scripts/check-convention.ts` bans any `var(--rezics-*)` reference in
+ * `tool/src/commands/convention/check.ts` bans any `var(--rezics-*)` reference in
  * source files; the `--rezics-*` namespace is retired.
  */
 import presetWind4 from "@unocss/preset-wind4";

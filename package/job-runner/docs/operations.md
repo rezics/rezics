@@ -6,10 +6,10 @@ Sequin CDC is started outside `@rezics/job-runner`:
 
 ```bash
 cp tool/.env.example tool/.env
-bun run service:up
-bun run service:health
-bun run service:logs
-bun run service:down
+bun run service up
+bun run service health
+bun run service logs
+bun run service down
 ```
 
 The wrapper loads `tool/.env`, requires Docker Compose v2, and manages source
@@ -216,7 +216,7 @@ repair unrelated services.
 Before enabling Sequin in a non-production environment:
 
 1. Confirm `wal_level=logical` and the replication role permissions.
-2. Start managed services and confirm `bun run service:health` succeeds.
+2. Start managed services and confirm `bun run service health` succeeds.
 3. Confirm `JOB_RUNNER_BASE_URL` reaches `@rezics/job-runner`.
 4. Confirm unauthorized `/webhooks/sequin` requests return 401.
 5. Change one search-affecting table and verify a search lane receives work.

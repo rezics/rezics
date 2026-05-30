@@ -24,7 +24,7 @@ export async function assertSequinHealthAvailable({
       [
         `JOB_RUNNER_ROLE=${role} requires Sequin health before exposing /webhooks/sequin.`,
         "Set SEQUIN_HEALTH_URL to the Sequin /health endpoint.",
-        "Start the managed runtime with: bun run service:up",
+        "Start the managed runtime with: bun run service up",
       ].join("\n"),
     );
   }
@@ -38,7 +38,7 @@ export async function assertSequinHealthAvailable({
         `JOB_RUNNER_ROLE=${role} requires Sequin health before exposing /webhooks/sequin.`,
         `Checked URL: ${healthUrl}`,
         `Request failed: ${error instanceof Error ? error.message : String(error)}`,
-        "Start the managed runtime with: bun run service:up",
+        "Start the managed runtime with: bun run service up",
       ].join("\n"),
     );
   }
@@ -49,7 +49,7 @@ export async function assertSequinHealthAvailable({
         `JOB_RUNNER_ROLE=${role} requires Sequin health before exposing /webhooks/sequin.`,
         `Checked URL: ${healthUrl}`,
         `Received HTTP ${response.status}.`,
-        "Start the managed runtime with: bun run service:up",
+        "Start the managed runtime with: bun run service up",
       ].join("\n"),
     );
   }

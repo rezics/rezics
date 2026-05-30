@@ -1,5 +1,5 @@
-import { runRepoToolCli } from "../../../../tool/cli";
+import { runToolCli } from "../../../../tool/src/cli/root";
 
 export async function runCli(argv: string[]): Promise<void> {
-  await runRepoToolCli(argv);
+  await runToolCli(argv);
 }

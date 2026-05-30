@@ -6,7 +6,7 @@ modules from `tool/`.
 
 ## Dev External Services
 
-`tool/dev-external-services` owns the repo-managed local dependency stack for
+`tool/service` owns the repo-managed local dependency stack for
 PostgreSQL, Meilisearch, Sequin state PostgreSQL, Sequin Redis, and Sequin.
 This workflow requires Docker Compose v2 through `docker compose`; Podman,
 podman-compose, and docker-compose v1 are not supported.
@@ -19,11 +19,11 @@ Set real local values for `SECRET_KEY_BASE` and `VAULT_KEY` before starting
 Sequin. `SEQUIN_WEBHOOK_SECRET` must match `package/job-runner/.env`.
 
 ```sh
-bun run service:up
-bun run service:health
-bun run service:ps
-bun run service:logs
-bun run service:down
+bun run service up
+bun run service health
+bun run service ps
+bun run service logs
+bun run service down
 ```
 
 The managed source Postgres container starts with logical replication enabled:
@@ -36,20 +36,20 @@ through the package workflows.
 Validate the compose plan without starting services:
 
 ```sh
-bun run service:config:plan
+bun run service config plan
 ```
 
 Verify the managed source database after startup:
 
 ```sh
-bun run service:source:verify
+bun run service source verify
 ```
 
 Use repair only for existing, external, or broken local source databases:
 
 ```sh
-bun run service:source:repair
-bun run service:source:repair --force-active-slot
+bun run service source repair
+bun run service source repair --force-active-slot
 ```
 
 Repair can recreate the local Sequin publication and replication slot. If it
@@ -58,14 +58,13 @@ and verify again. The repair path is not part of the fresh managed Docker
 happy path.
 
 User-managed PostgreSQL, Meilisearch, Redis, or Sequin instances remain manual.
-Point package env files at them yourself and avoid `service:*` commands for
+Point package env files at them yourself and avoid `service` commands for
 those services. The managed Docker workflow only starts, stops, inspects, and
 repairs the repo Docker Compose project; it will not stop host services or
 unrelated containers. If a default port is already in use, stop the conflicting
 service manually or override the published port in `tool/.env`.
 
-`service:sequin:*` scripts remain as compatibility aliases for one transition
-window, but new docs and workflows should use the unified `service:*` commands.
+Use `bun run service ...` for the repo-managed local Docker workflow.
 
 ## Deploy
 

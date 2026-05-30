@@ -14,7 +14,7 @@ describe("Sequin startup preflight", () => {
           throw new Error("connection refused");
         },
       }),
-    ).rejects.toThrow("bun run service:up");
+    ).rejects.toThrow("bun run service up");
   });
 
   test.each([
