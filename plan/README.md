@@ -1,9 +1,9 @@
 # plan/
 
-Lightweight, code-first planning workspace. This replaces OpenSpec: we do **not**
-maintain a parallel spec corpus. A plan is a disposable scaffold — once its work
-lands, its durable content has migrated into code, comments, and tests, and the
-plan file can be deleted (git keeps the history).
+Lightweight, code-first planning workspace. We do **not** maintain a parallel
+spec corpus. A plan is a disposable scaffold — once its work lands, its durable
+content has migrated into code, comments, and tests, and the plan file can be
+deleted (git keeps the history).
 
 > Authoritative behavior lives in **code**: types/schemas express shape, tests
 > express behavior, comments express the irreducible *why* and the invariants a
@@ -50,7 +50,7 @@ Link related files with `[[slug]]`.
 - `/rezics-explore` — thinking partner; investigate and clarify, never implement.
   Captures to `plan/exploration/`.
 - `/rezics-propose` — produce an executable plan in `plan/proposal/`. No spec
-  files, no OpenSpec.
+  files.
 
 ## Migrating constraints back to code
 

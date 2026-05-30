@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Shared project instructions for coding agents. Keep this file short, concrete,
-and repo-specific; move detailed rules to skills, OpenSpec specs, or docs.
+and repo-specific; move detailed rules to skills or docs.
 
 ## Project
 
@@ -48,10 +48,12 @@ bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
 
 ## Workflows
 
-- Non-trivial changes use OpenSpec: propose, review artifacts under
-  `openspec/changes/<change>/`, apply, then archive when complete.
+- Planning is code-first: capture context, durable constraints, and a task
+  checklist in `plan/proposal/<change>.md` via `/rezics-propose`, then implement
+  with `/rezics-apply`, routing each durable item into code (types/tests/comments)
+  and letting the plan file become disposable. No spec corpus.
 - In this development-stage project, internal renames are clear cutovers: update
-  all internal callsites in the same change unless an OpenSpec explicitly says
+  all internal callsites in the same change unless a plan explicitly says
   otherwise.
 - Main branch is `dev`.
 
@@ -59,9 +61,9 @@ bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
 
 - Load the `rezics-design` skill before editing or reviewing JSX, CSS, UnoCSS
   classes, tokens, typography, spacing, component selection, icons, or copy.
-- Authoritative UI rules live in `rezics-design`, `@rezics/ui` Storybook, and
-  `openspec/specs/ui-component-foundation/spec.md`; do not duplicate those
-  details here.
+- Authoritative UI rules live in `rezics-design`, the `@rezics/ui` Storybook, and
+  the `check:convention` / `check:tokens` rules; do not duplicate those details
+  here.
 - For browser verification, prefer giving the user the exact URLs to verify
   after they run `bun run dev` from the repo root. Do not download browsers or
   run heavyweight browser automation unless the user explicitly asks.
@@ -69,5 +71,6 @@ bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
 ## References
 
 - `CONTRIBUTING.md` - route, folder, seed, Storybook, and convention details.
-- `openspec/specs/` - authoritative behavior specs.
+- Authoritative behavior lives in code: types/schemas, tests, and the
+  `check:convention` rules. `plan/` holds in-flight planning.
 - `.agents/skills/` and `.claude/skills/` - task-specific agent guidance.

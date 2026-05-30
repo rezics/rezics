@@ -90,11 +90,11 @@ Mixing the two is forbidden: a slug under a long prefix or a UUID under a short 
 
 `R10` in `bun run check:convention` flags route definitions whose param names violate this convention (a `:userSlug` under `/user`, or a `:unitId` under `/u`).
 
-### Full Specs
+### Enforcement
 
-- `openspec/specs/api-route-convention/spec.md`
-- `openspec/specs/folder-naming-convention/spec.md`
-- `openspec/specs/convention-enforcement/spec.md`
+These conventions are enforced by `bun run check:convention`; each rule
+(`tool/scripts/check-convention/rules/`) states its own normative rule and is
+the authoritative source.
 
 ## Seeding
 
@@ -146,13 +146,16 @@ Pick UI primitives in this order:
 1. **shadcn** — `@rezics/ui/shadcn` (Radix-based, token-aligned)
 2. **Custom rezics primitives** — `@rezics/ui/primitive/`, `@rezics/ui/composite/`, or feature-local `components/`
 
-There is no third option. Icons: `lucide-react` by default, `@tabler/icons-react` as the named fallback when lucide lacks the glyph. See `openspec/specs/ui-component-foundation/spec.md` for the authoritative spec.
+There is no third option. Icons: `lucide-react` by default, `@tabler/icons-react` as the named fallback when lucide lacks the glyph. Load the `rezics-design` skill and see the `@rezics/ui` Storybook for the authoritative rules.
 
 The retired `SEED_*` env vars (e.g. `SEED_PROFILE=fast`) no longer have any effect — replace with `--preset=<name>`.
 
 ## Change Management
 
-This project uses **OpenSpec** for non-trivial changes. See `CLAUDE.md` for workflow commands.
+Planning is **code-first**: capture a plan in `plan/proposal/<change>.md` with
+`/rezics-propose`, implement with `/rezics-apply`, and route durable knowledge
+into code (types/tests/comments) so the plan file stays disposable. See
+`plan/README.md`.
 
 ## Storybook
 

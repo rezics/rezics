@@ -1,17 +1,21 @@
-# OpenSpec workflow for this repository
+# Change workflow for this repository
 
-Use OpenSpec as the default change-management workflow for non-trivial work.
+Planning is code-first: durable knowledge lives in **code** (types/schemas,
+tests, comments), not in a parallel spec corpus.
 
 ## Default workflow
 
-1. Propose a change with `/opsx:propose <change-name-or-description>`.
-2. Review generated artifacts under `openspec/changes/<change>/`.
-3. Implement with `/opsx:apply <change>`.
-4. Archive completed changes with `/opsx:archive <change>`.
+1. Plan a change in `plan/proposal/<change>.md` (`/rezics-propose`): context,
+   durable constraints/decisions, and a task checklist.
+2. Implement with `/rezics-apply`, routing each durable item to its home —
+   shape to types/Valibot/Prisma, behavior to a test, the irreducible *why* to a
+   concise comment at the owning code, history to the commit message.
+3. The plan file is a disposable scaffold; once its work lands and its durable
+   content has migrated into code, it can be deleted (git keeps the history).
 
 ## Project-specific constraints
 
-- Write all OpenSpec artifacts in English.
+- Write all code, comments, and docs in English.
 - Keep implementation scoped to the packages required by the change.
 - Respect monorepo boundaries and shared package contracts:
   - frontend apps: `package/app`, `package/admin`
@@ -24,11 +28,12 @@ Use OpenSpec as the default change-management workflow for non-trivial work.
 
 ## Validation expectations
 
-- Add or update validation steps in `tasks.md` for each change.
-- Prefer targeted checks first (affected package build/lint/tests), then broader checks only if needed.
+- Prefer targeted checks first (affected package build/lint/tests), then broader
+  checks (`bun run check:convention`, `bun run check:tokens`, `bun run knip`).
 - Do not fix unrelated failures as part of a focused change.
 
 ## Documentation expectations
 
 - Update relevant docs when behavior, APIs, or operational steps change.
-- For server or schema-impacting changes, include migration and rollout notes in artifacts.
+- For server or schema-impacting changes, include migration and rollout notes in
+  the commit message.
