@@ -33,8 +33,9 @@ the same constraints that will become comments and tests at apply time.
    that slug exists, ask whether to continue it or pick a new slug.
 
 4. **Summarize**: slug, location, and the task count, then "ready to implement —
-   ask me to start, or work through the task list." Implementation is ordinary
-   coding against the tasks; there is no apply CLI and no separate apply skill.
+   ask me to start, or run `/rezics-apply`." Implementation is ordinary coding
+   against the tasks; `/rezics-apply` carries the routing rule that lands each
+   durable item in code. There is still no apply CLI and no state machine.
 
 ## Plan file structure
 
@@ -70,19 +71,14 @@ Group with `## N. <phase>` headings when the work has phases.
 What this plan deliberately does not do.
 ```
 
-## At apply time (remind the implementer)
+## At apply time
 
-When the tasks are done, route every durable item to its home and let the plan
-become disposable:
-
-| Item | Home |
-|---|---|
-| Shape, legal values, types, indexes | Types / Valibot / Prisma |
-| Behavior under conditions | A test |
-| Irreducible invariant / why / deliberate non-restriction / known staleness | A concise comment at the owning code |
-| History, migration steps, rename maps | The git commit message |
-
-Then set `status: done` (a human deletes the file later).
+The `(comment)/(test)/(type)` marks above are routing hints for `/rezics-apply`,
+which owns the four-way routing rule (shape → types, behavior → test,
+invariant/why → comment, history → commit message) and the comment-format
+conventions. **Propose only *tags*; apply *routes*** — deciding a comment's exact
+form needs the target site in view, which only happens at apply. When the work
+lands, the plan is set `status: done` (a human deletes it later).
 
 ## Guardrails
 
