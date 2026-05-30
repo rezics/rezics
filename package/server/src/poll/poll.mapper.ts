@@ -51,7 +51,8 @@ export function mapPollToDTO(poll: PollWithOptions, now?: Date): PollDTO {
  * gating. When `resultsVisible` is false (AFTER_CLOSE before close and the
  * caller is not privileged) option `voteCount` and `totalVotes` are withheld.
  * The voter↔option mapping is never serialized here regardless of anonymity;
- * `myVote` carries only the calling user's own selection.
+ * `myVote` carries only the calling user's own selection. Privileged audit
+ * access (if ever added) must use a separate path, never this public read.
  */
 export function mapPollResultsToDTO(
   poll: PollWithOptions,

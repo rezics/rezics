@@ -363,9 +363,10 @@ export const ReplyComposer = forwardRef<
 
   /**
    * Attach-poll sequence: `PollComposer` has already minted the poll
-   * (`useCreatePoll`); now create the post carrying `extra.poll.unitId`. A
-   * failure in either step surfaces — the poll error inside `PollComposer`, the
-   * post error below — leaving the minted poll reusable as a standalone unit.
+   * (`useCreatePoll`); now create the post carrying `extra.poll.unitId`. This is
+   * deliberately non-atomic — an orphan poll on post failure is acceptable: the
+   * failure surfaces (the poll error inside `PollComposer`, the post error
+   * below) and the minted poll stays reusable as a standalone unit.
    */
   const handlePollCreated = (poll: PollDTO) => {
     if (!authGuard.requireAuth()) return;

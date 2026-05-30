@@ -579,6 +579,9 @@ model ContentStructure {
 /// - `id`: globally unique node identity.
 /// - `contentUnitId`: not unique; the same Unit can be referenced by many nodes.
 /// - `sortKey`: orders siblings within each `(ownerUnitId, parentId)` group.
+/// Because of that reuse, the node `id` — not `contentUnitId` — is the canonical
+/// reading address (`lastReadNodeId`, materialize, the read route): only the node
+/// id says which occurrence the reader is at, and it is stable under TOC reorder.
 model ContentStructureNode {
   id            String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
   ownerUnitId   String         @db.Uuid
@@ -1131,6 +1134,10 @@ model Poll {
   unitId           String               @id @db.Uuid
   voteMode         PollVoteMode         @default(SINGLE)
   resultVisibility PollResultVisibility @default(LIVE)
+  /// Anonymity is a read-path/presentation guarantee, NOT reduced storage:
+  /// `PollVote` still records `userId`. When true, no read path may expose the
+  /// `userId`↔`optionId` mapping — only aggregate tallies + the caller's own
+  /// `myVote`.
   anonymous        Boolean              @default(false)
   /// When the poll stops accepting votes and (for AFTER_CLOSE) reveals tallies.
   /// Null means open indefinitely until explicitly closed.

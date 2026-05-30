@@ -84,25 +84,25 @@ schema/registry/tests; only ~7 irreducible "why" notes are still only in
 `design.md`. Land these comments, then delete all four change directories in one
 commit.
 
-- [ ] `add-poll` — comment `PollVote.userId` (stored even for anonymous polls, to
+- [x] `add-poll` — comment `PollVote.userId` (stored even for anonymous polls, to
   guarantee one-vote-per-user and allow vote changes; anonymity is a read-path
   concern); comment in `poll.mapper.ts` (anonymous polls never expose
   userId↔optionId mappings in any DTO — only aggregates + myVote; audit access,
   if ever added, must use a separate path).
-- [ ] `add-poll-ui` — comment the composer submit handler where `useCreatePoll` +
+- [x] `add-poll-ui` — comment the composer submit handler where `useCreatePoll` +
   `createPost` are sequenced (non-atomic; an orphan poll on post failure is
   acceptable and stays a standalone unit).
-- [ ] `add-post-state-schema` — comment `post.service.ts` near `setState()`
+- [x] `add-post-state-schema` — comment `post.service.ts` near `setState()`
   (⚠ `state` gates **no** behavior; authorization keys only on `isLocked` /
   `Unit.status`, never `state` — security-critical); expand the
   `maintainSolvedCache*` comment (`PostPin(ACCEPTED_ANSWER)` is the source of
   truth, `state = solved` is a maintained shadow; the pin wins over manual close
   reasons).
-- [ ] `node-addressed-book-reading` — comment on `ContentStructureNode` / book
+- [x] `node-addressed-book-reading` — comment on `ContentStructureNode` / book
   service (node id is the canonical reading address: stable under TOC reorder,
   unambiguous under content reuse where the same `contentUnitId` sits at multiple
   nodes; path-addressing was the leaky abstraction the old stale-guards patched).
-- [ ] delete `openspec/changes/{add-poll,add-poll-ui,add-post-state-schema,node-addressed-book-reading}/`.
+- [x] delete `openspec/changes/{add-poll,add-poll-ui,add-post-state-schema,node-addressed-book-reading}/`.
 
 ## Tail — clean up this cleanup
 

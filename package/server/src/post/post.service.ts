@@ -104,7 +104,7 @@ function readStateSchemaTag(extra: Prisma.JsonValue | null): string | null {
  * Apply the lifecycle `state` filter to a post query: an exact `state` match,
  * or a derived bucket (`active`/`closed`) expanded to its slug set across the
  * registered schemas. A cheap indexed `IN`-list — never an anti-join. `state`
- * is a presentation label and gates nothing (D4); this is filtering only.
+ * is a presentation label and gates nothing; this is filtering only.
  */
 function applyStateFilter(
   where: Prisma.PostWhereInput,
@@ -1181,8 +1181,13 @@ export class PostService {
    * Transition a post's lifecycle `state` to `target`. Write-strict: the target
    * is normalized and rejected unless it is a legal value of the post's schema
    * and the transition from the current state is allowed. A no-op when the post
-   * is already in the target state. `state` gates no behavior (D4); this only
-   * changes the presentation label. Authorization is the caller's concern.
+   * is already in the target state.
+   *
+   * ⚠ Security-critical: `state` gates NO behavior. Authorization and hard gates
+   * key only on `Post.isLocked` (reply permission) and `Unit.status` (visibility),
+   * never on `state` — `state` is user-influenced presentation data (per-realm
+   * rendering today, custom schemas later) and must never control authorization.
+   * This only changes the label; authorization is the caller's concern.
    */
   async setState(unitId: string, target: string): Promise<PostWithRelations> {
     const existing = await prisma.post.findUniqueOrThrow({
