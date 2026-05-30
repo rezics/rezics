@@ -3,7 +3,8 @@ import { relative } from "node:path";
 import { REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
-const SPEC = "openspec/specs/tanstack-query-keys/spec.md";
+const SPEC =
+  "R6 — queryKey arrays live only in per-domain .keys.ts factories; no inline `queryKey: [` in app/admin/ui";
 
 const INLINE_PATTERN = /queryKey\s*:\s*\[/g;
 

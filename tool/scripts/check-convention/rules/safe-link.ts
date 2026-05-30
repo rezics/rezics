@@ -3,7 +3,8 @@ import { relative } from "node:path";
 import { REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
-const SPEC = "openspec/specs/outbound-link-protection/spec.md";
+const SPEC =
+  "R5 — no raw <a href> outside the SafeLink/Link primitives (rel/target safety + outbound interstitial)";
 
 const ALLOWLIST = new Set([
   "package/ui/src/link/SafeLink.tsx",

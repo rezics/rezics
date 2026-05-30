@@ -2,7 +2,8 @@ import { basename, relative } from "node:path";
 import { REPO_ROOT, isExemptPackage, isExemptPath } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
-const SPEC = "openspec/specs/folder-naming-convention/spec.md";
+const SPEC =
+  "R3/R4 — domain/feature folders are singular; container folders are plural from the allowlist below";
 
 const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "hooks",

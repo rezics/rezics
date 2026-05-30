@@ -2,19 +2,18 @@
 /**
  * Convention check for API routes, folders, and architectural invariants.
  *
- * Rules enforced (see openspec/specs/ for normative source):
- * - R1  api-route-convention    — Elysia route prefixes must be singular
- * - R2  api-route-convention    — list/collection endpoints use /list suffix
- * - R3  folder-naming-convention — domain/feature folders are singular
- * - R4  folder-naming-convention — container folders are plural from allowlist
- * - R5  outbound-link-protection — no raw <a href> outside SafeLink
- * - R6  tanstack-query-keys      — no inline `queryKey: [` outside per-domain factories
- * - R9  ui-component-foundation  — ban `var(--rezics-…)` and hand-written tokens.css
- * - R11 i18n-toolchain           — no dynamic access to generated Paraglide messages
- * - R12 i18n-toolchain           — no i18nKey fields / legacy translation APIs
- * - R13 ui-package-autonomy      — core @rezics/ui cannot import host runtime deps
- * - R14 i18n-toolchain           — contract / Paraglide / catalogs share the same
- *                                  locale set with exact key parity
+ * Rules enforced (each rule below is the normative source; its message names it):
+ * - R1  — Elysia route prefixes must be singular
+ * - R2  — list/collection endpoints use /list suffix
+ * - R3  — domain/feature folders are singular
+ * - R4  — container folders are plural from allowlist
+ * - R5  — no raw <a href> outside SafeLink
+ * - R6  — no inline `queryKey: [` outside per-domain factories
+ * - R9  — ban `var(--rezics-…)` and hand-written tokens.css
+ * - R11 — no dynamic access to generated Paraglide messages
+ * - R12 — no i18nKey fields / legacy translation APIs
+ * - R13 — core @rezics/ui cannot import host runtime deps
+ * - R14 — contract / Paraglide / catalogs share the same locale set with exact key parity
  *
  * Usage:
  *   bun run check:convention               # full scan
@@ -75,7 +74,7 @@ export function run(): void {
     for (const v of newViolations) {
       console.log(`  [${v.rule}] ${v.path}`);
       console.log(`        ${v.message}`);
-      console.log(`        see ${v.spec}`);
+      console.log(`        convention: ${v.spec}`);
     }
     console.log(
       "\nFix new violations or update the baseline with: bun run check:convention -- --snapshot",

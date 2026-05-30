@@ -3,7 +3,8 @@ import { relative } from "node:path";
 import { REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
-const SPEC = "openspec/specs/i18n-toolchain/spec.md";
+const SPEC =
+  "R11/R12 — no dynamic access to generated messages; no i18nKey fields or legacy translation APIs";
 
 // `t(variableExpression)` — bare identifier, not a typed map lookup — is the
 // dynamic-key anti-pattern. Bracketed indexing (`t(MAP[slug])`) is the

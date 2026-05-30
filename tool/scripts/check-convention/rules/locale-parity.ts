@@ -3,7 +3,8 @@ import { join, relative } from "node:path";
 import { REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
-const SPEC = "openspec/specs/i18n-toolchain/spec.md";
+const SPEC =
+  "R14 — contract, Paraglide, and catalogs share one locale set with exact key parity";
 
 function readJson(path: string): unknown {
   return JSON.parse(readFileSync(path, "utf8"));

@@ -3,10 +3,11 @@ import { join, relative } from "node:path";
 import { REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
-const SPEC = "openspec/specs/ui-component-foundation/spec.md";
+const SPEC =
+  "R9 — no `var(--rezics-*)` and no hand-written tokens.css; tokens come only from uno-config";
 
-// Match any `--rezics-*` CSS variable reference. The whole namespace was
-// retired by the unify-tokens-single-source openspec change; the flat
+// Match any `--rezics-*` CSS variable reference. That whole namespace is
+// retired; the flat
 // `--colors-*` / `--radius-*` / `--shadow-*` / `--font-*` / `--duration-*` /
 // `--easing-*` surface emitted by `package/ui/src/config/uno-config.ts` is the
 // only sanctioned form.

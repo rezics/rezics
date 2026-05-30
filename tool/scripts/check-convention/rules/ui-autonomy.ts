@@ -3,7 +3,8 @@ import { join, relative } from "node:path";
 import { REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
-const SPEC = "openspec/specs/ui-package-autonomy/spec.md";
+const SPEC =
+  "R13 — core @rezics/ui must not import host runtime deps (react-router, @rezics/api|server|app|admin)";
 
 const FORBIDDEN_IMPORT_PATTERN =
   /from\s+["'](@tanstack\/react-router|@rezics\/api(?:\/[^"']*)?|@rezics\/server(?:\/[^"']*)?|@rezics\/app(?:\/[^"']*)?|@rezics\/admin(?:\/[^"']*)?)["']|import\s*\(\s*["'](@tanstack\/react-router|@rezics\/api(?:\/[^"']*)?|@rezics\/server(?:\/[^"']*)?|@rezics\/app(?:\/[^"']*)?|@rezics\/admin(?:\/[^"']*)?)["']\s*\)/g;
