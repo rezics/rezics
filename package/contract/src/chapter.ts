@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { contentDocSchema, contentDocWriteSchema } from "./content-doc";
+import { contentDocSchema, contentDocWriteSchema } from "./content-doc-v1";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { paginationLimitSchema } from "./pagination";
 import {

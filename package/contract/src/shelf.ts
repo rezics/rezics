@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { contentDocWriteSchema } from "./content-doc";
+import { contentDocWriteSchema } from "./content-doc-v1";
 import { languageSchema } from "./language";
 import { licenseSlugSchema } from "./license";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";

@@ -1,7 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { TagRefSchema } from "../common/tag-ref";
-import { contentDocSchema } from "../content-doc";
+import { contentDocSchema } from "../content-doc-v1";
 import { gameSystemRequirementSummarySchema } from "../game-media";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";

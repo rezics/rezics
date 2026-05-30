@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { creationModeSchema } from "./content-authority";
-import { contentDocWriteSchema } from "./content-doc";
+import { contentDocWriteSchema } from "./content-doc-v1";
 import { creditAttributionRoleKeySchema } from "./credit-attribution.roles";
 import { listGetQueryBase, listPostBodyBase } from "./list-query-base";
 import { subjectAttributionRoleKeySchema } from "./subject-attribution.roles";
