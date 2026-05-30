@@ -18,5 +18,5 @@ should live here — kept small, pure, and free of Prisma / React dependencies.
 - Prisma-coupled generators (anything referencing `UnitType` / `PostKind` /
   `Prisma.InputJsonValue`) stay in `package/server/prisma/factory/`.
 - Storybook intentful fixtures (`bookEmpty`, `bookLongTitle`, `bookCJK`, …) stay
-  in `package/app/src/stories/fixtures/` per the `storybook-coverage` spec; they
-  may import the primitives above for locale-aware string generation.
+  in `package/app/src/stories/fixtures/`; they may import the primitives above
+  for locale-aware string generation.
