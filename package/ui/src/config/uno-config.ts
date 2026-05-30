@@ -1,6 +1,10 @@
 /**
  * uno-config.ts — single consumption surface for rezics design tokens.
  *
+ * All tokens derive from the TS modules in `package/ui/src/config/tokens/`. Do
+ * not introduce a `--rezics-*` namespace or a parallel token CSS file — there is
+ * a single consumption surface.
+ *
  * `theme.colors` is set from `tokens/colors.ts` (`lightColors`). UnoCSS
  * preset-wind4 emits the matching `--colors-*` CSS custom properties under
  * `:root, :host` on demand. A preflight emits the `.dark { --colors-* }`
@@ -8,15 +12,10 @@
  * `--radius-*`, `--shadow-*`, `--duration-*`, `--easing-*`, state opacities)
  * that consumers reference directly.
  *
- * Authors SHALL consume tokens via the curated short names exposed by
+ * Authors consume tokens via the curated short names exposed by
  * `theme.colors` (`text-primary`, `bg-surface-elevated`, …). R9 in
  * `tool/scripts/check-convention.ts` bans any `var(--rezics-*)` reference in
- * source files; the namespace was retired by openspec change
- * `unify-tokens-single-source`.
- *
- * Spec: `openspec/specs/design-system-foundation/spec.md` and
- *       `openspec/specs/ui-component-foundation/spec.md`. Adding or removing
- *       a short name (or any auxiliary token) requires an OpenSpec change.
+ * source files; the `--rezics-*` namespace is retired.
  */
 import presetWind4 from "@unocss/preset-wind4";
 import { container as defaultContainer } from "@unocss/preset-wind4/theme";
@@ -109,8 +108,9 @@ const STATE_OPACITY = {
   dragged: 0.16,
 } as const;
 
-// Intrinsic density vocabulary. See
-// `openspec/specs/design-system-density/spec.md`.
+// Intrinsic density vocabulary: density is a per-component-type design-time
+// property, not a runtime/user toggle, so these are fixed values (no `calc()`,
+// no `--density-step`).
 //
 // These fixed-value component-tier tokens apply to rezics-authored repeating
 // rows and chrome only. Vendored shadcn primitives stay on their own spacing;

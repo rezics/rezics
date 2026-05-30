@@ -74,7 +74,9 @@ export function ShelfEditPage({ shelfId }: ShelfEditPageProps) {
   /** Persisted default shelf view — edited via metadata form. */
   const [defaultViewMode, setDefaultViewMode] = useState<ShelfView>("nested");
 
-  /** Local items-editor preview view — does NOT dirty metadata. */
+  // Editor preview view is local state and must not dirty metadata or trigger
+  // Save; the persisted default view lives in shelf.extra.viewMode, edited via
+  // the metadata form.
   const [editorPreviewView, setEditorPreviewView] =
     useState<ShelfView>("nested");
 

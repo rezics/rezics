@@ -125,6 +125,11 @@ export async function ensureSystemShelf(
   );
 }
 
+/**
+ * System shelves are minted in the same transaction as user creation; the
+ * (slugScope, slug) unique index is what makes this race-safe against
+ * duplicates.
+ */
 export async function bootstrapSystemShelves(
   userId: string,
   userSlug: string,

@@ -254,11 +254,14 @@ export async function assertCanEditUnitFields(
 }
 
 /**
- * Authority predicate per unit-authority spec / design D3.
+ * Authority predicate.
  *
  * Returns true if caller is the unit owner, a system admin, or a
  * moderator+ of any Realm whose `UnitRealm` rows reference this unit.
  * Resolves with a single indexed JOIN against `UnitRealm × RealmMember`.
+ *
+ * Expected to resolve well under ~10 ms p99 via indexed joins on the
+ * realm-membership tables; keep it index-only.
  */
 export async function hasAuthorityOver(
   caller: RezicsSessionClaims | null,

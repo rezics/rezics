@@ -183,6 +183,10 @@ export class ContentStructureService {
       }
 
       if (mutated) {
+        // Container `updatedAt` bumps only on structural node changes
+        // (insert/delete/move/rename, rating or noContent toggle) — never on
+        // chapter body edits, which propagate to the node's own `updatedAt`
+        // separately.
         await tx.contentStructure.update({
           where: { ownerUnitId },
           data: { updatedAt: new Date() },

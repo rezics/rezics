@@ -427,7 +427,7 @@ export class ShelfService {
    *
    * Lookup goes through the Unit slug index `(slugScope = ownerUserId,
    * slug)` so the resolver shares the path used by every other slug-bearing
-   * Unit (see openspec change `shelf-system-slugs`).
+   * Unit.
    */
   async getByOwnerAndSlug(
     ownerUserId: string,
@@ -472,8 +472,10 @@ export class ShelfService {
       );
     }
 
-    // User-created shelves remain slug-less in v1 — guard against any payload
-    // that smuggles a `slug` field (per design D7 / SHELF_CUSTOM_SLUG_DISABLED).
+    // v1 rejects any client-supplied slug for user-created shelves
+    // (schema-enforced) — system shelves only. Custom slugs are a deliberate
+    // future toggle, not an oversight. Guard against any payload that smuggles
+    // a `slug` field (SHELF_CUSTOM_SLUG_DISABLED).
     if ((req as Record<string, unknown>).slug != null) {
       throw new AppError(
         400,

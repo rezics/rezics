@@ -97,6 +97,9 @@ export async function tryResolveIdentity(
   )) as RezicsSessionClaims | null;
 }
 
+// The token `role` is a rejection-only hint: it may deny a request but never
+// grant elevated access. Only `unitId` is trusted as identity; any
+// admin/elevated check must verify against the database, never the token claim.
 function isAdminRole(identity: RezicsSessionClaims | null): boolean {
   if (!identity) return false;
   return (

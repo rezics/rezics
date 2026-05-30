@@ -55,8 +55,8 @@ export type BroadcastEvent = {
 
 /**
  * Find subscriber Unit ids whose `channels` filter on `Subscription`
- * matches the incoming event. Implements the three-tier wildcard match
- * from design D4: exact event, category wildcard, global wildcard.
+ * matches the incoming event. Implements the three-tier wildcard match:
+ * exact event, category wildcard, global wildcard.
  *
  * The filter goes through Prisma's `{ has: 'x' }` operator which emits
  * `channels @> ARRAY['x']` under the hood and is served by the GIN
@@ -148,10 +148,10 @@ async function defaultLoadRecipientPreferences(
 /**
  * Drop recipients who disabled the per-kind toggle that gates this event.
  *
- * Enforces preferences at creation time (feed + push), per the
- * `settings-layout` spec. A toggle is enabled by default — only an explicit
- * `false` suppresses delivery. Ungated kinds (no preference mapping) pass
- * through untouched.
+ * Per-kind notification preferences are enforced here at dispatch time (when
+ * feed/push entries are created), not at read time. Each toggle is on by
+ * default; only an explicit `false` suppresses delivery. Ungated kinds (no
+ * preference mapping) pass through untouched.
  *
  * Dependency-injected for unit testing — production callers omit
  * `loadPreferences` and get the Prisma-backed loader.
@@ -174,8 +174,8 @@ export async function filterRecipientsByPreference(
  * - Validates `kind` against `KIND_REGISTRY` from `@rezics/contract`. Unknown
  *   kinds are logged and dropped (fire-and-forget ergonomics, matches the
  *   prior `emitNotificationEvent` contract).
- * - Resolves recipients via `resolveRecipients` (v1: directRecipients only;
- *   engagement-subscription extends this).
+ * - Resolves recipients via `resolveRecipients` (direct recipients unioned
+ *   with subscription matches).
  * - Skips the HTTP call entirely when the resolved recipient set is empty.
  * - Sends a single batched POST to `/internal/event`; notify persists rows
  *   via `createMany` and SSE-pushes to each connected recipient.

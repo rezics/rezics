@@ -344,7 +344,13 @@ export class UnitService {
     return hydrateUnitOwnerUserSlugRow(unit as UnitWithRelations);
   }
 
-  /** Update a Unit (does not touch translations -- use TranslationService) */
+  /**
+   * Update a Unit (does not touch translations -- use TranslationService).
+   *
+   * Unit rating is independent per unit -- a chapter may rate higher than its
+   * book; no parent/child rating constraint is enforced, by design
+   * (chapter-level moderation).
+   */
   async update(
     unitId: string,
     input: UpdateUnitInput,

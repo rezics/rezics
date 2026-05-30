@@ -8,6 +8,11 @@ export interface TokenResolverConfig<TPayload extends JWTPayload = JWTPayload> {
   verifier: JwtVerifier<TPayload>;
 }
 
+/**
+ * Invalid or expired tokens resolve to a null context rather than throwing —
+ * handlers branch on the absence of identity, not on caught auth errors. This
+ * leniency is intentional; do not change it to throw 401.
+ */
 export function createTokenResolver<
   Name extends string,
   TPayload extends JWTPayload = JWTPayload,

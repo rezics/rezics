@@ -15,6 +15,9 @@ export async function bootstrapJwtServiceRecord(
 ): Promise<void> {
   const service = await prisma.jwtService.upsert({
     where: { serviceKey },
+    // TODO: upsert `update: {}` does not refresh `audience` on existing rows;
+    // intended behavior was to update audience on bootstrap. Behavior change
+    // left out of scope.
     update: {},
     create: {
       serviceKey,

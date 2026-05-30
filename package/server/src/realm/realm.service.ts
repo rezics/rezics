@@ -397,8 +397,8 @@ export class RealmService {
 
   /**
    * Join the realm as a member. Atomically writes BOTH the `RealmMember`
-   * permission edge AND the `Subscription` attention edge (channels=['*'])
-   * per design D5 of `engagement-subscription`. Bumps both denormalized
+   * permission edge AND the `Subscription` attention edge (channels=['*']).
+   * Bumps both denormalized
    * counters (`Realm.memberCount` and `Unit.subscriberCount`) in the same
    * transaction. If a Subscription row already exists (the user was
    * lurking on a public realm and is now joining), the upsert keeps it
@@ -511,7 +511,7 @@ export class RealmService {
 
   /**
    * Remove the membership and the matching subscription in one
-   * transaction (design D5). Idempotent for partial state — if either
+   * transaction. Idempotent for partial state — if either
    * row is missing the corresponding counter is not decremented, so a
    * second call doesn't double-decrement.
    */
@@ -566,8 +566,8 @@ export class RealmService {
 
   /**
    * Mute a realm — remove the Subscription row only (keeps RealmMember).
-   * Idempotent for missing subscription. Per design D5: muting preserves
-   * posting rights and role, only suppresses inbound activity.
+   * Idempotent for missing subscription. Muting preserves posting rights
+   * and role, only suppresses inbound activity.
    */
   async muteRealm(realmUnitId: string, userId: string): Promise<void> {
     await prisma.$transaction(async (tx) => {
@@ -592,8 +592,8 @@ export class RealmService {
   /**
    * Unmute a realm — re-add the Subscription row with `channels=['*']`.
    * Idempotent: if a subscription already exists (caller wasn't muted),
-   * no-op. Per design D5 the caller does not need to be a member to
-   * unmute, since lurking subscriptions are also valid (in which case
+   * no-op. The caller does not need to be a member to unmute, since
+   * lurking subscriptions are also valid (in which case
    * "unmute" is just a generic subscribe).
    */
   async unmuteRealm(realmUnitId: string, userId: string): Promise<void> {
@@ -704,6 +704,9 @@ export class RealmService {
     };
   }
 
+  // TODO(openspec-retired): an earlier spec intended NO per-user
+  // rule-acknowledgement record, yet RealmRuleAcknowledgement exists and is
+  // written here. Revisit whether the table should exist.
   async acknowledgeCurrentRule(
     realmUnitId: string,
     userId: string,

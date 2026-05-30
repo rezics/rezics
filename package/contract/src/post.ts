@@ -64,6 +64,12 @@ export const OFFICIAL_QUESTION_TAG_SLUG = "question";
 // EXCERPT SOURCE SCHEMA
 // ============================================================
 
+/**
+ * URL mode accepts any well-formed URL — no rezics-domain or ancestry
+ * restriction (internal-vs-external is a render-time concern). Unit mode accepts
+ * any unitId regardless of the post target ancestry. `title` is an author
+ * snapshot, never auto-synced to the linked unit name.
+ */
 export const excerptSourceSchema = t.Union([
   t.Object({
     mode: t.Literal("unit"),

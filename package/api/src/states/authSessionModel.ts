@@ -58,6 +58,7 @@ export type AuthSessionDerivedState = {
   rezics: RezicsSessionState;
   registration: AuthRegistrationState;
   authAccountState: GetSessionStateResponse["authAccountState"] | null;
+  // TODO(openspec-retired): capabilityLevel was slated for removal in favor of role/unitId; it remains in use. Revisit.
   capabilityLevel: AuthCapabilityLevel;
   error: string | null;
 };

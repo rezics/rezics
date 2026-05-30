@@ -56,6 +56,11 @@ interface ShelfPageProps {
   unitId: string;
 }
 
+/**
+ * Legacy view-mode values map forward (review to nested, list to flat, grid to
+ * masonry); unknown to nested. No data migration — the legacy value is
+ * overwritten on next write.
+ */
 function normalizePersistedViewMode(raw: unknown): ShelfView | undefined {
   if (typeof raw !== "string") return undefined;
   if (raw === "nested" || raw === "flat" || raw === "masonry") return raw;

@@ -146,6 +146,7 @@ const configuredApp = app
       origin: isDev ? devOrigins : prodOrigins,
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      // x-auth-session-token is intentionally absent: session credentials travel only via the httpOnly cookie, never a request header.
       allowedHeaders: ["content-type", "authorization", "accept"],
       maxAge: 600,
     }),

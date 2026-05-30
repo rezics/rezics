@@ -11,6 +11,9 @@ export const NormalizedTokenName = {
   /**
    * rezics-session-token — issued by server, used as Bearer access token for rezics server
    */
+  // TODO(openspec-retired): rezics-session-token is intended as the sole browser
+  // credential; verify the auth service no longer issues x-auth-session-token for
+  // browser flows, and that no external token-wallet boundary is needed here.
   REZICS_SESSION: "rezics-session-token",
   /**
    * rezics-profile-setup-token — issued by server for profile setup routes only

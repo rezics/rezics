@@ -40,6 +40,7 @@ enum UnitStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
+  // DELETED is a soft-delete marker — units are never hard-deleted; read paths must filter `status != DELETED`.
   DELETED
 }
 

@@ -89,6 +89,8 @@ export const authPublicApi = new Elysia({ prefix: "/auth" })
       },
     },
   )
+  // Intentionally blocks the public /auth/token endpoint: session tokens are
+  // issued only by the auth service, never minted through the public boundary.
   .all("/token", () => status(404, "Not Found"), {
     detail: {
       summary: "Block public auth session token acquisition",
