@@ -13,5 +13,8 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'rezics_history')\gexe
 SELECT 'CREATE DATABASE rezics_notify'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'rezics_notify')\gexec
 
-SELECT 'CREATE DATABASE reaction'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'reaction')\gexec
+SELECT 'CREATE DATABASE rezics_reaction'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'rezics_reaction')\gexec
+
+SELECT 'CREATE DATABASE rezics_ranking'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'rezics_ranking')\gexec

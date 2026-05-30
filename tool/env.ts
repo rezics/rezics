@@ -45,6 +45,31 @@ export const env = createEnv({
   emptyStringAsUndefined: true,
 });
 
+export type ToolEnv = typeof env;
+
+const DEFAULT_TOOL_ENV = {
+  ENV: "development",
+  SEQUIN_HEALTH_URL: "http://127.0.0.1:7376/health",
+  PG_PASSWORD: "DO-NOT-USE-IN-PRODUCTION-sequin-state-postgres",
+  SECRET_KEY_BASE: SECRET_KEY_BASE_EXAMPLE,
+  VAULT_KEY: VAULT_KEY_EXAMPLE,
+  SOURCE_DB_PORT_PUBLISHED: "5432",
+  SOURCE_DB_PORT: "5432",
+  SOURCE_DB_NAME: "rezics_server",
+  SOURCE_DB_USER: "postgres",
+  SOURCE_DB_PASSWORD: "postgres",
+  SOURCE_DB_POOL_SIZE: "10",
+  REACTION_DB_HOST: "source-postgres",
+  REACTION_DB_PORT: "5432",
+  REACTION_DB_NAME: "rezics_reaction",
+  REACTION_DB_USER: "postgres",
+  REACTION_DB_PASSWORD: "postgres",
+  REACTION_DB_POOL_SIZE: "10",
+  MEILI_MASTER_KEY: "masterKey",
+  SEQUIN_WEBHOOK_SECRET: "change-me-sequin-webhook-secret",
+  SEQUIN_JOB_RUNNER_BASE_URL: "http://host.docker.internal:3005",
+} as const;
+
 const REQUIRED_SEQUIN_KEYS = [
   "PG_PASSWORD",
   "SECRET_KEY_BASE",
@@ -62,11 +87,117 @@ export type SequinEnvKey =
   | (typeof REQUIRED_SEQUIN_KEYS)[number]
   | (typeof REQUIRED_PROD_SEQUIN_KEYS)[number];
 
-export function missingSequinEnv(mode: "dev" | "prod"): SequinEnvKey[] {
+export function missingSequinEnv(
+  mode: "dev" | "prod",
+  input: ToolEnv = env,
+): SequinEnvKey[] {
   const keys: readonly SequinEnvKey[] =
     mode === "prod"
       ? [...REQUIRED_SEQUIN_KEYS, ...REQUIRED_PROD_SEQUIN_KEYS]
       : REQUIRED_SEQUIN_KEYS;
 
-  return keys.filter((key) => !env[key]);
+  return keys.filter((key) => !input[key]);
 }
+
+export function unsafeSequinExampleKeys(input: ToolEnv = env) {
+  const keys: Array<"SECRET_KEY_BASE" | "VAULT_KEY"> = [];
+  if (input.SECRET_KEY_BASE === SECRET_KEY_BASE_EXAMPLE) {
+    keys.push("SECRET_KEY_BASE");
+  }
+  if (input.VAULT_KEY === VAULT_KEY_EXAMPLE) {
+    keys.push("VAULT_KEY");
+  }
+  return keys;
+}
+
+export function assertSequinRuntimeEnv(input: ToolEnv = env) {
+  const missing = missingSequinEnv("dev", input);
+  if (missing.length > 0) {
+    throw new Error(
+      [
+        `Missing tool environment variables for managed services: ${missing.join(", ")}`,
+        "Copy tool/.env.example to tool/.env and set the missing values.",
+        "SEQUIN_WEBHOOK_SECRET must match package/job-runner/.env.",
+      ].join("\n"),
+    );
+  }
+
+  const unsafe = unsafeSequinExampleKeys(input);
+  if (unsafe.length === 0) {
+    return;
+  }
+
+  throw new Error(
+    [
+      `Refusing to start Sequin with documented example secret(s): ${unsafe.join(", ")}.`,
+      "Generate real local values with:",
+      "  openssl rand -base64 48  # SECRET_KEY_BASE",
+      "  openssl rand -base64 32  # VAULT_KEY",
+    ].join("\n"),
+  );
+}
+
+export function createToolConfig(input: ToolEnv = env) {
+  const sourceDbPassword =
+    input.SOURCE_DB_PASSWORD ?? DEFAULT_TOOL_ENV.SOURCE_DB_PASSWORD;
+
+  return {
+    mode: input.ENV ?? DEFAULT_TOOL_ENV.ENV,
+    services: {
+      composeProjectName: "rezics-dev-external-services",
+      sequinHealthUrl:
+        input.SEQUIN_HEALTH_URL ?? DEFAULT_TOOL_ENV.SEQUIN_HEALTH_URL,
+      meiliHealthUrl: "http://127.0.0.1:7700/health",
+    },
+    composeEnv: {
+      ENV: input.ENV ?? DEFAULT_TOOL_ENV.ENV,
+      PG_PASSWORD: input.PG_PASSWORD ?? DEFAULT_TOOL_ENV.PG_PASSWORD,
+      PG_POOL_SIZE: input.PG_POOL_SIZE,
+      SECRET_KEY_BASE:
+        input.SECRET_KEY_BASE ?? DEFAULT_TOOL_ENV.SECRET_KEY_BASE,
+      VAULT_KEY: input.VAULT_KEY ?? DEFAULT_TOOL_ENV.VAULT_KEY,
+      SOURCE_DB_NAME: input.SOURCE_DB_NAME ?? DEFAULT_TOOL_ENV.SOURCE_DB_NAME,
+      SOURCE_DB_USER: input.SOURCE_DB_USER ?? DEFAULT_TOOL_ENV.SOURCE_DB_USER,
+      SOURCE_DB_PASSWORD: sourceDbPassword,
+      SOURCE_DB_POOL_SIZE:
+        input.SOURCE_DB_POOL_SIZE ?? DEFAULT_TOOL_ENV.SOURCE_DB_POOL_SIZE,
+      SOURCE_DB_PORT_PUBLISHED:
+        input.SOURCE_DB_PORT_PUBLISHED ??
+        DEFAULT_TOOL_ENV.SOURCE_DB_PORT_PUBLISHED,
+      REACTION_DB_HOST:
+        input.REACTION_DB_HOST ?? DEFAULT_TOOL_ENV.REACTION_DB_HOST,
+      REACTION_DB_PORT:
+        input.REACTION_DB_PORT ?? DEFAULT_TOOL_ENV.REACTION_DB_PORT,
+      REACTION_DB_NAME:
+        input.REACTION_DB_NAME ?? DEFAULT_TOOL_ENV.REACTION_DB_NAME,
+      REACTION_DB_USER:
+        input.REACTION_DB_USER ?? DEFAULT_TOOL_ENV.REACTION_DB_USER,
+      REACTION_DB_PASSWORD:
+        input.REACTION_DB_PASSWORD ??
+        input.SOURCE_DB_PASSWORD ??
+        DEFAULT_TOOL_ENV.REACTION_DB_PASSWORD,
+      REACTION_DB_POOL_SIZE:
+        input.REACTION_DB_POOL_SIZE ?? DEFAULT_TOOL_ENV.REACTION_DB_POOL_SIZE,
+      MEILI_MASTER_KEY:
+        input.MEILI_MASTER_KEY ?? DEFAULT_TOOL_ENV.MEILI_MASTER_KEY,
+      SEQUIN_WEBHOOK_SECRET:
+        input.SEQUIN_WEBHOOK_SECRET ?? DEFAULT_TOOL_ENV.SEQUIN_WEBHOOK_SECRET,
+      SEQUIN_JOB_RUNNER_BASE_URL:
+        input.SEQUIN_JOB_RUNNER_BASE_URL ??
+        DEFAULT_TOOL_ENV.SEQUIN_JOB_RUNNER_BASE_URL,
+    },
+    sourceVerifyEnv: {
+      ENV: input.ENV ?? DEFAULT_TOOL_ENV.ENV,
+      SOURCE_DB_HOST: "127.0.0.1",
+      SOURCE_DB_PORT:
+        input.SOURCE_DB_PORT_PUBLISHED ??
+        input.SOURCE_DB_PORT ??
+        DEFAULT_TOOL_ENV.SOURCE_DB_PORT,
+      SOURCE_DB_NAME: input.SOURCE_DB_NAME ?? DEFAULT_TOOL_ENV.SOURCE_DB_NAME,
+      SOURCE_DB_USER: input.SOURCE_DB_USER ?? DEFAULT_TOOL_ENV.SOURCE_DB_USER,
+      SOURCE_DB_PASSWORD: sourceDbPassword,
+    },
+  } as const;
+}
+
+export type ToolConfig = ReturnType<typeof createToolConfig>;

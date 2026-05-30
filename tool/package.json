@@ -5,11 +5,13 @@
   "license": "AGPL-3.0-only",
   "scripts": {
     "dev": "bun run dev-script/dev.ts",
-    "prisma:regenerate": "bun run db-script/prisma-regenerate.ts",
-    "prisma:migrate": "bun run db-script/prisma-migrate.ts",
-    "prisma:reset-db": "bun run db-script/prisma-reset-db.ts",
-    "service:source:verify": "bun run dev-external-services/services.ts source:verify",
-    "service:source:repair": "bun run dev-external-services/services.ts source:repair",
+    "cli": "bun run cli.ts",
+    "prisma:regenerate": "bun run cli.ts prisma generate",
+    "prisma:migrate": "bun run cli.ts prisma migrate",
+    "prisma:reset-db": "bun run cli.ts prisma reset",
+    "db:ensure": "bun run cli.ts db ensure",
+    "service:source:verify": "bun run cli.ts service source verify",
+    "service:source:repair": "bun run cli.ts service source repair",
     "generate-barrel": "bun run scripts/generate-barrel.ts",
     "seed": "bun run seed/seed.ts"
   },
@@ -17,11 +19,12 @@
     "@types/bun": "^1.3.11"
   },
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.10",
     "@clack/prompts": "^0.11.0",
     "@prisma/adapter-pg": "^7.8.0",
+    "@t3-oss/env-core": "^0.13.10",
     "better-auth": "^1.5.3",
     "dotenv": "^17.2.3",
+    "gunshi": "^0.32.0",
     "valibot": "^1.2.0"
   }
 }

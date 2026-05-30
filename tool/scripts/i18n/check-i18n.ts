@@ -86,10 +86,10 @@ async function loadCatalog(): Promise<{
       const path = join(UI_LOCALES_ROOT, `${lng}.ts`);
       try {
         const mod = (await import(path)) as { default: Record<string, string> };
-        catalog[lng].ui = mod.default;
+        catalog[lng]!.ui = mod.default;
         namespaces.add("ui");
       } catch {
-        catalog[lng].ui = catalog[lng].ui ?? {};
+        catalog[lng]!.ui = catalog[lng]!.ui ?? {};
       }
     }
   } catch {

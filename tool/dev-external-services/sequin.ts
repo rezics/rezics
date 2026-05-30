@@ -1,29 +1,7 @@
-import path from "node:path";
-import { runCommand } from "./compose-runtime";
-
-const SCRIPT_DIR = path.dirname(Bun.main);
-const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
-const [, , command, subcommand, ...rest] = Bun.argv;
-
-if (!command) {
-  console.error(
-    "Usage: bun run tool/dev-external-services/sequin.ts <command>",
-  );
-  process.exit(1);
-}
-
-const mappedArgs =
-  command === "config"
-    ? ["config", ...(subcommand ? [subcommand] : []), ...rest]
-    : [command, ...(subcommand ? [subcommand] : []), ...rest];
+import { runRepoToolCli } from "../cli";
 
 console.warn(
   "service:sequin:* is a compatibility alias. Prefer the unified service:* commands.",
 );
 
-runCommand(
-  ["bun", "run", "tool/dev-external-services/services.ts", ...mappedArgs],
-  {
-    cwd: REPO_ROOT,
-  },
-);
+await runRepoToolCli(["service", ...Bun.argv.slice(2)]);

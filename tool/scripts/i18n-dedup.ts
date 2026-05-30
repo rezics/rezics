@@ -9,7 +9,8 @@ function countTopLevelDuplicates(raw: string): Map<string, number> {
   const counts = new Map<string, number>();
   for (const line of raw.split("\n")) {
     const m = line.match(/^ {2}"((?:[^"\\]|\\.)*)":/);
-    if (m) counts.set(m[1], (counts.get(m[1]) ?? 0) + 1);
+    const key = m?.[1];
+    if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   return counts;
 }
