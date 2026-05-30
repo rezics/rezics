@@ -25,8 +25,7 @@ import {
 
 // ANCHOR: federatedSearch
 // Single entry point used by `POST /meili/search/federated`. Branches on the
-// requested `category` and computes the scope-permitted index allowlist per
-// `federated-search/spec.md`.
+// requested `category` and computes the scope-permitted index allowlist.
 
 const POST_KIND_BY_CATEGORY: Record<
   "reviews" | "excerpts" | "remarks" | "posts",

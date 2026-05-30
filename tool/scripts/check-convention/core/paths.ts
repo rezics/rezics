@@ -16,7 +16,6 @@ const EXEMPT_DIR_PATTERNS = [
   ".turbo",
   "coverage",
   "prisma/generated",
-  "openspec",
 ];
 
 const EXEMPT_PACKAGES = new Set(["auth"]);
