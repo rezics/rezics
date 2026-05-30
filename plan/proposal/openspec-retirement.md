@@ -1,71 +1,132 @@
 ---
-title: OpenSpec retirement — return to code-first
+title: Drain openspec into code
 status: active
 created: 2026-05-29
 completed:
 supersededBy:
-tags: [meta, openspec, tooling, cleanup]
+tags: [meta, cleanup, tooling]
 ---
 
-## Why
+## What
 
-OpenSpec holds ~293 capability specs (378 markdown files) that duplicate what the
-code already says (shape, value-sets) and accrete content that is dead after a
-change lands (migration steps, rename maps). The durable, irreducible part —
-invariants and *why* — would serve better as comments next to the code it
-constrains, where it cannot drift. This plan retires OpenSpec and returns
-authoritative behavior to **code**: types/schemas express shape, tests express
-behavior, comments express the irreducible why. Planning moves to `plan/` with
-`/rezics-explore` and `/rezics-propose`.
+`openspec/` holds ~293 capability specs + 4 completed changes (378 markdown
+files), plus ~312 references scattered across the repo. Almost all of it
+duplicates what the code already says; the small durable part — invariants and
+the irreducible *why* — belongs as comments next to the code it constrains, where
+it cannot drift.
 
-End state: `openspec/` is deleted; the OpenSpec skills are removed; all durable
-knowledge lives in code, comments, and tests.
+This is a cleanup, not a project. We drain the irreducible content into code and
+delete the rest, slice by slice, until `openspec/` is gone and no reference
+remains. There is no ceremony to perform and nothing to memorialize: once the
+directory and the references are gone, openspec simply doesn't exist. This file
+is the worklist that drives that loop and gets deleted with everything else at
+the end.
 
-## Durable constraints & decisions
+Authoritative behavior lives in **code**: types/schemas express shape, tests
+express behavior, comments express the irreducible why. Planning is code-first
+via `plan/` + `/rezics-explore` / `/rezics-propose`.
 
-- `(comment)` The four-way routing rule is the heart of this work and must be
-  applied per requirement, not per spec: **shape → types/Valibot/Prisma**,
-  **behavior → a test**, **irreducible invariant/why → a concise comment at the
-  owning code**, **history/migration/rename → the git commit message (drop)**.
-  Deliberate non-restrictions (e.g. "no ancestry check", "no domain restriction
-  on url") and known staleness windows are the highest-value comments — without
-  them a future dev "fixes" intended behavior.
-- `(comment)` Cross-cutting invariants (e.g. "hard gates depend only on
-  `isLocked`/`Unit.status`, never on `Post.state`") live in the **owning** file's
-  comment, with a one-line back-pointer at each remote site. Only the genuinely
-  scattered ones earn a short `package/.../README.md` — a handful, not 293.
-- This is **incremental, not big-bang**. Phase 1 default is "migrate a domain's
-  spec only when you next touch that domain." A spec left in place is acceptable;
-  a half-migrated spec is not.
-- In-flight changes (`add-poll`, `add-poll-ui`, `add-post-state-schema`,
-  `node-addressed-book-reading`) are essentially complete. **Archive them with
-  the existing OpenSpec flow**; do not port them to the new workflow.
-- Do not delete `openspec/` until the inventory below is fully checked. Deletion
-  is a human action.
+## The loop
 
-## Tasks
+No phases. Each pass, the agent judges the batch size — anywhere from one checker
+rule to a whole domain — and runs:
 
-### Phase 0 — stop the bleeding
-- [ ] 0.1 Adopt `/rezics-propose` for all **new** work; create no new `openspec/changes/*`.
-- [ ] 0.2 Archive the four in-flight changes via `openspec-archive-change` once their working trees are committed.
-- [ ] 0.3 Note in `AGENTS.md` that planning is code-first via `plan/` + `rezics-explore`/`rezics-propose`, and that OpenSpec is being retired (point to this plan).
+```
+while openspec/ still exists OR any reference remains:
+    pick a coherent slice (one domain / one cluster of refs / a group of changes)
+    triage: is there any why/invariant here that code does NOT already capture?
+        yes → route it into code (usually a one- or two-line comment)
+        no  → drop it
+    delete the spec/change/reference
+    generate a git commit message (what moved where, what was deleted)
+    commit
+final cut: rm openspec/; repoint the 9 convention checkers at code;
+           strip openspec from AGENTS.md / CLAUDE.md / CONTRIBUTING.md and skills
+```
 
-### Phase 1 — migrate specs to code (per domain, when touched)
-For each spec below: triage every requirement with the four-way rule, land the
-comments/tests, then delete that `spec.md`. Tick the box when the spec is gone.
+A coherent slice is one that commits cleanly on its own: a domain's specs
+together with the source comments and checker rules that cite them. Prefer slices
+that leave the tree green at every commit.
 
-### Phase 2 — finish & remove
-- [ ] 2.1 When the inventory is empty, delete `openspec/`.
-- [ ] 2.2 Remove OpenSpec skills (`openspec-*`, `opsx:*`) and any OpenSpec CLI config.
-- [ ] 2.3 Strip OpenSpec references from `AGENTS.md` / `CLAUDE.md` / `CONTRIBUTING.md`.
+## The four-way routing rule (load-bearing)
+
+This is the technique, applied per requirement — not per spec:
+
+- **shape** (fields, enums, value-sets) → types / Valibot / Prisma
+- **behavior** (rules, flows) → a test
+- **irreducible invariant / why** → a concise comment at the owning code
+- **history / migration / rename** → the git commit message, then dropped
+
+The highest-value comments are the *non-obvious* ones: deliberate
+non-restrictions ("no ancestry check", "no domain restriction on url"), security
+invariants, and known staleness windows — without them a future dev "fixes"
+intended behavior. Cross-cutting invariants live in the **owning** file's comment
+with a one-line back-pointer at each remote site; only the genuinely scattered
+ones earn a short `package/.../README.md` — a handful, not 293.
+
+"Delete cleanly" never means `rm -rf` without reading. Route first, then delete.
+
+## Keystone dependency
+
+The 9 `check:convention` rules hardcode `openspec/specs/*.md` paths in their
+`SPEC` constants (route-prefix, folder-naming, query-keys, safe-link, ui-autonomy,
+i18n-invariants ×2, token-consumption ×2). While any of these point at
+`openspec/specs/`, `rm openspec/` breaks the checker. Each rule's irreducible
+*why* moves into the rule code itself (comment / error message); the spec path is
+dropped. These are the last hard gate before the final cut — resolve each in its
+domain slice, or sweep them all in one slice just before deletion.
+
+## First slice — the four completed changes
+
+`add-poll`, `add-poll-ui`, `add-post-state-schema`, `node-addressed-book-reading`
+are implemented and intentionally never archived. Their decisions already live in
+schema/registry/tests; only ~7 irreducible "why" notes are still only in
+`design.md`. Land these comments, then delete all four change directories in one
+commit.
+
+- [ ] `add-poll` — comment `PollVote.userId` (stored even for anonymous polls, to
+  guarantee one-vote-per-user and allow vote changes; anonymity is a read-path
+  concern); comment in `poll.mapper.ts` (anonymous polls never expose
+  userId↔optionId mappings in any DTO — only aggregates + myVote; audit access,
+  if ever added, must use a separate path).
+- [ ] `add-poll-ui` — comment the composer submit handler where `useCreatePoll` +
+  `createPost` are sequenced (non-atomic; an orphan poll on post failure is
+  acceptable and stays a standalone unit).
+- [ ] `add-post-state-schema` — comment `post.service.ts` near `setState()`
+  (⚠ `state` gates **no** behavior; authorization keys only on `isLocked` /
+  `Unit.status`, never `state` — security-critical); expand the
+  `maintainSolvedCache*` comment (`PostPin(ACCEPTED_ANSWER)` is the source of
+  truth, `state = solved` is a maintained shadow; the pin wins over manual close
+  reasons).
+- [ ] `node-addressed-book-reading` — comment on `ContentStructureNode` / book
+  service (node id is the canonical reading address: stable under TOC reorder,
+  unambiguous under content reuse where the same `contentUnitId` sits at multiple
+  nodes; path-addressing was the leaky abstraction the old stale-guards patched).
+- [ ] delete `openspec/changes/{add-poll,add-poll-ui,add-post-state-schema,node-addressed-book-reading}/`.
+
+## Tail — clean up this cleanup
+
+When the inventory is empty and the references are gone:
+
+- [ ] delete `openspec/` and `openspec/config.yaml`.
+- [ ] repoint / drop the 9 convention-checker `SPEC` constants and the `openspec`
+  entry in `EXEMPT_DIR_PATTERNS`.
+- [ ] remove the OpenSpec skills/commands and their mirrors
+  (`.claude/skills/openspec-*`, `.claude/commands/opsx/*`, `.codex/skills/openspec-*`,
+  `.github/skills/openspec-*`, `.github/prompts/opsx-*`).
+- [ ] strip openspec from `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`,
+  `.github/copilot-instructions.md`, `plan/README.md`.
+- [ ] fold the four-way routing rule into `rezics-apply`, then delete this file
+  and rewrite the `openspec-retirement` memory to plain "planning is code-first
+  via `plan/` + `rezics-*`" (no mention of openspec — nothing left to contrast).
 
 ## Out of scope
 
-- Rewriting code behavior — this is a documentation/tooling migration, not a refactor.
-- Porting in-flight changes to the new workflow (they finish under OpenSpec).
-- Converting every spec up front (Phase 1 is lazy, touch-driven).
+- Rewriting code behavior — this is a docs/tooling cleanup, not a refactor.
+- Up-front conversion of every spec — the loop drains them as slices, and a spec
+  left in place between passes is fine; a half-migrated spec is not.
 
-## Inventory — specs to migrate then delete (grouped by domain)
+## Inventory — specs to drain then delete (grouped by domain)
 
 ### unit & entity (44)
 - [ ] `attribution`
