@@ -147,7 +147,7 @@ describe("ranking search projections", () => {
         episodeCount: null,
         seasonCount: null,
       },
-      ownedContentStructure: { id: "structure-1" },
+      ownedContentStructure: { ownerUnitId: "media-1" },
       createdAt: "2026-01-01T00:00:00.000Z",
       updatedAt: "2026-01-01T00:00:00.000Z",
       publishedAt: null,

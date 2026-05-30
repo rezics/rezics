@@ -372,7 +372,7 @@ const contentInclude: any = {
   },
   media: true,
   ownedContentStructure: {
-    select: { id: true },
+    select: { ownerUnitId: true },
   },
   shelf: { include: { units: { select: { unitId: true } } } },
   seriesContentIndexesAsRelease: {
