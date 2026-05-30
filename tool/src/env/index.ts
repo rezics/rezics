@@ -4,7 +4,10 @@ import { createEnv } from "@t3-oss/env-core";
 import { config as loadDotenv } from "dotenv";
 import * as v from "valibot";
 
-const TOOL_DIR = path.dirname(fileURLToPath(import.meta.url));
+const TOOL_DIR = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../..",
+);
 
 export const SECRET_KEY_BASE_EXAMPLE =
   "DO-NOT-USE-IN-PRODUCTION-secret-key-base";
