@@ -61,7 +61,16 @@ Rules:
 - **Never leave a `spec.md` back-reference.** A comment like `// per foo/spec.md`
   must become the actual invariant inline — the spec is being deleted; the
   knowledge cannot point at a corpse.
-- If a type already says it, say nothing. Prefer a concise comment to a verbose one.
+- **Never paraphrase what the schema/types already encode.** The declaration is
+  the source of truth, so a comment that restates it is pure redundancy, even a
+  terse one. `@id` already means unique — don't add `// unique`; a field without
+  `@unique` is already non-unique; a field's name and type already state their
+  purpose. Comment only what the declaration *cannot* say: the deliberate
+  non-restriction ("non-unique **by design** — reused across nodes"), the *why*,
+  the invariant that spans fields. If after deleting every restating word nothing
+  remains, the right comment is no comment.
+- Prefer a concise comment to a verbose one — and a verbose comment is usually a
+  signal you smuggled in history (→ commit message) or restatement (→ delete).
 
 ## Steps
 
