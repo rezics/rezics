@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "rezics-book-library",
+      "name": "rezics",
       "dependencies": {
         "@t3-oss/env-core": "^0.13.10",
         "@vitejs/plugin-react": "^5.1.4",

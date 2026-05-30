@@ -5,9 +5,13 @@ and repo-specific; move detailed rules to skills or docs.
 
 ## Project
 
-Library.Book (`rezics-book-library`) is a full-stack TypeScript monorepo for a
-book library platform. Runtime and package manager: Bun. Workspaces live under
-`package/*`.
+Rezics (repo `rezics/rezics`) is a full-stack TypeScript monorepo for a
+community-driven, cross-language catalog of works. Everything — books, games,
+media, posts, shelves, tags, community `realm`s — is modeled as a unified
+`Unit`, so the same catalog, classification, attribution, and social layers work
+across content types and languages. Communities (`realm`s) collectively classify
+and discuss works, co-locating a work's index, discussion, and collaborative
+knowledge. Runtime and package manager: Bun. Workspaces live under `package/*`.
 
 ## Commands
 

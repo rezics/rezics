@@ -1,6 +1,6 @@
 # @rezics/app
 
-Main user-facing application for the Rezics book library platform. Provides book browsing, reading, editing, reviews, readlists, and community engagement features.
+Main user-facing application for the Rezics platform — a community-driven, cross-language catalog of works spanning books, games, and other media. Provides catalog browsing and search, collective tag classification, community realms, reading and authoring, reviews and excerpts, shelves and collections, and social engagement features.
 
 ## Overview
 
@@ -8,11 +8,13 @@ A React SPA built with Vite that serves as the primary interface for readers and
 
 ## Features
 
-- **Book Library** — Browse, search, and discover books with Meilisearch-powered full-text search
-- **Book Reading** — Read books with the `@rezics/folio` reader
-- **Book Editing** — Author and edit book content with the `@rezics/editor`
-- **Reviews & Ratings** — Write and browse book reviews
-- **Readlists** — Curate and share reading lists
+- **Catalog & Search** — Browse, search, and discover works (books, games, media) with Meilisearch-powered full-text search
+- **Collective Classification** — Global tag voting plus realm-scoped tag votes on individual works
+- **Realms** — Community spaces where people gather, discuss, and collectively classify the works they care about
+- **Reading** — Read works with the `@rezics/folio` reader
+- **Authoring** — Author and edit content with the `@rezics/editor`
+- **Reviews & Excerpts** — Write and browse reviews and highlighted passages
+- **Shelves & Collections** — Curate works, paired with the curator's review so a shelf explains why each work was collected
 - **Comments & Reactions** — Community engagement on content
 - **User Preferences** — Theme customization, reading settings, and profile management
 

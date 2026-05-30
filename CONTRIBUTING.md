@@ -2,7 +2,12 @@
 
 ## Project Overview
 
-Library.Book (rezics-book-library) is a full-stack TypeScript monorepo using **Bun** workspaces. Packages live under `package/`.
+Rezics (repo `rezics/rezics`) is a full-stack TypeScript monorepo for a
+community-driven, cross-language catalog of works — books, games, media, posts,
+shelves, tags, and community `realm`s, all modeled as a unified `Unit`.
+Communities (`realm`s) collectively classify and discuss works, co-locating a
+work's index, discussion, and collaborative knowledge. Built on **Bun**
+workspaces; packages live under `package/`.
 
 ## Development Setup
 
