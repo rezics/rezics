@@ -74,4 +74,20 @@ describe("repo tool CLI schema", () => {
     expect(result.exitCode).not.toBe(0);
     expect(result.stderr + result.stdout).toContain("--only");
   });
+
+  test("seed kebab-case subcommands are addressable", async () => {
+    const result = await runTool(["seed", "reset-root", "--help"]);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stderr + result.stdout).toContain("reset-root");
+  });
+
+  test("seed root command does not prompt without a TTY", async () => {
+    const result = await runTool(["seed"]);
+
+    expect(result.exitCode).not.toBe(0);
+    expect(result.stderr + result.stdout).toContain(
+      "Interactive seed workflow requires a TTY",
+    );
+  });
 });

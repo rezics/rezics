@@ -1,6 +1,104 @@
 import * as p from "@clack/prompts";
 import { define } from "gunshi";
 
+type SeedWorkflow =
+  | "baseline"
+  | "reset-root"
+  | "database-reset"
+  | "init-meili-search"
+  | "exit";
+
+function cancel(): never {
+  p.cancel("Cancelled.");
+  process.exit(0);
+}
+
+async function runBaselineSeed(options: { noInteractive?: boolean } = {}) {
+  p.intro("Rezics Seed");
+  const { runSeedCommand } = await import(
+    "../../../../package/utils/src/seed/command"
+  );
+  await runSeedCommand({
+    noInteractive: Boolean(options.noInteractive),
+  });
+  p.outro("Done!");
+}
+
+async function runResetRootSeed() {
+  p.intro("Rezics Reset Root");
+  const { runResetRoot } = await import(
+    "../../../../package/utils/src/seed/index"
+  );
+  await runResetRoot();
+  p.outro("Done!");
+}
+
+async function runDatabaseReset() {
+  const { runDbReset } = await import(
+    "../../../../package/utils/src/db/command"
+  );
+  await runDbReset();
+}
+
+async function runInitMeiliSearch() {
+  const { runInitMeili } = await import(
+    "../../../../package/utils/src/db/command"
+  );
+  await runInitMeili();
+}
+
+async function pickSeedWorkflow(): Promise<SeedWorkflow> {
+  const workflow = await p.select<SeedWorkflow>({
+    message: "What seed workflow do you want to run?",
+    initialValue: "baseline",
+    options: [
+      {
+        value: "baseline",
+        label: "Reset databases and seed baseline data",
+      },
+      {
+        value: "reset-root",
+        label: "Reset root user only",
+        hint: "does not reset databases",
+      },
+      {
+        value: "database-reset",
+        label: "Reset auth and server databases only",
+      },
+      {
+        value: "init-meili-search",
+        label: "Initialize Meilisearch indexes",
+      },
+      { value: "exit", label: "Exit" },
+    ],
+  });
+  if (p.isCancel(workflow)) {
+    cancel();
+  }
+  return workflow;
+}
+
+async function runInteractiveSeedWorkflow() {
+  const workflow = await pickSeedWorkflow();
+  if (workflow === "exit") {
+    p.outro("Done!");
+    return;
+  }
+  if (workflow === "baseline") {
+    await runBaselineSeed({ noInteractive: true });
+    return;
+  }
+  if (workflow === "reset-root") {
+    await runResetRootSeed();
+    return;
+  }
+  if (workflow === "database-reset") {
+    await runDatabaseReset();
+    return;
+  }
+  await runInitMeiliSearch();
+}
+
 export const seedCommand = define({
   name: "seed",
   description: "Run baseline seed workflows.",
@@ -12,47 +110,42 @@ export const seedCommand = define({
   },
   toKebab: true,
   subCommands: {
-    resetRoot: define({
+    "reset-root": define({
       name: "reset-root",
       description: "Repair the root user and reset its password.",
       run: async () => {
-        p.intro("Rezics Reset Root");
-        const { runResetRoot } = await import(
-          "../../../../package/utils/src/seed/index"
-        );
-        await runResetRoot();
-        p.outro("Done!");
+        await runResetRootSeed();
       },
     }),
-    databaseReset: define({
+    "database-reset": define({
       name: "database-reset",
       description: "Reset auth and server seed databases.",
       run: async () => {
-        const { runDbReset } = await import(
-          "../../../../package/utils/src/db/command"
-        );
-        await runDbReset();
+        await runDatabaseReset();
       },
     }),
-    initMeiliSearch: define({
+    "init-meili-search": define({
       name: "init-meili-search",
       description: "Initialize Meilisearch indexes for seed data.",
       run: async () => {
-        const { runInitMeili } = await import(
-          "../../../../package/utils/src/db/command"
-        );
-        await runInitMeili();
+        await runInitMeiliSearch();
       },
     }),
   },
   run: async (ctx) => {
-    p.intro("Rezics Seed");
-    const { runSeedCommand } = await import(
-      "../../../../package/utils/src/seed/command"
-    );
-    await runSeedCommand({
-      noInteractive: Boolean(ctx.values.noInteractive),
+    if (!ctx.values.noInteractive && process.stdin.isTTY) {
+      await runInteractiveSeedWorkflow();
+      return;
+    }
+
+    if (!ctx.values.noInteractive) {
+      throw new Error(
+        "Interactive seed workflow requires a TTY. Run `bun run seed` in a terminal, or pass `--no-interactive` to run the baseline seed directly.",
+      );
+    }
+
+    await runBaselineSeed({
+      noInteractive: true,
     });
-    p.outro("Done!");
   },
 });
