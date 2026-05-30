@@ -1,5 +1,5 @@
 import { basename, relative } from "node:path";
-import { REPO_ROOT, isExemptPackage, isExemptPath } from "../core/paths";
+import { isExemptPackage, isExemptPath, REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
 const SPEC =

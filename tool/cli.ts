@@ -1,6 +1,13 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import * as p from "@clack/prompts";
 import { type Command, type CommandContext, cli, define } from "gunshi";
+import { runDbReset, runInitMeili } from "../package/utils/src/db/command";
+import {
+  type FactoryCommandOptions,
+  runFactoryCommand,
+} from "../package/utils/src/factory/command";
+import { runSeedCommand } from "../package/utils/src/seed/command";
 import { ensureLocalDatabases } from "./db-script/ensure";
 import { runServiceCommand } from "./dev-external-services/commands";
 import { runCommand } from "./dev-external-services/compose-runtime";
@@ -20,10 +27,6 @@ function repeatedCsv(value: string | string[] | undefined) {
       .map((part) => part.trim())
       .filter(Boolean),
   );
-}
-
-function maybeArg(name: string, value: string | undefined) {
-  return value ? [`--${name}=${value}`] : [];
 }
 
 // @clack/prompts remains in downstream interactive flows; Gunshi owns command and flag parsing here.
@@ -72,6 +75,22 @@ function assertKnownCliInput(ctx: Readonly<CommandContext>) {
     const unknown = ctx.positionals[ctx.commandPath.length];
     throw new Error(`Unknown command or argument: ${unknown}`);
   }
+}
+
+function factoryOptionsFromValues(
+  values: Readonly<CommandContext["values"]>,
+): FactoryCommandOptions {
+  return {
+    presetName: values.preset as string | undefined,
+    planFile: values.planFile as string | undefined,
+    only: values.only as FactoryCommandOptions["only"],
+    meiliMode: values.meili as FactoryCommandOptions["meiliMode"],
+    scenarioNames: repeatedCsv(values.scenario as string[] | undefined),
+    allScenarios: Boolean(values.allScenarios),
+    noScenarios: Boolean(values.noScenarios),
+    manifestFormat: values.manifest as FactoryCommandOptions["manifestFormat"],
+    noInteractive: Boolean(values.noInteractive),
+  };
 }
 
 const serviceCommand = define({
@@ -147,7 +166,7 @@ const serviceCommand = define({
           run: (ctx) =>
             runServiceCommand({
               kind: "source-verify",
-              args: [...maybeArg("url", ctx.values.url as string | undefined)],
+              url: ctx.values.url as string | undefined,
             }),
         }),
         repair: define({
@@ -169,10 +188,8 @@ const serviceCommand = define({
           run: (ctx) =>
             runServiceCommand({
               kind: "source-repair",
-              args: [
-                ...maybeArg("url", ctx.values.url as string | undefined),
-                ...(ctx.values.forceActiveSlot ? ["--force-active-slot"] : []),
-              ],
+              url: ctx.values.url as string | undefined,
+              forceActiveSlot: Boolean(ctx.values.forceActiveSlot),
             }),
         }),
       },
@@ -229,7 +246,7 @@ const dbCommand = define({
     ensure: define({
       name: "ensure",
       description:
-        "Create managed local databases idempotently from the repo registry.",
+        "Create managed local databases idempotently from tool config.",
       run: () => ensureLocalDatabases(),
     }),
   },
@@ -249,26 +266,33 @@ const seedCommand = define({
     resetRoot: define({
       name: "reset-root",
       description: "Repair the root user and reset its password.",
-      run: () => runRepoScript(["package/utils/bin/cli.ts", "reset-root"]),
+      run: async () => {
+        p.intro("Rezics Reset Root");
+        const { runResetRoot } = await import(
+          "../package/utils/src/seed/index"
+        );
+        await runResetRoot();
+        p.outro("Done!");
+      },
     }),
     databaseReset: define({
       name: "database-reset",
       description: "Reset auth and server seed databases.",
-      run: () => runRepoScript(["package/utils/bin/cli.ts", "db", "reset"]),
+      run: runDbReset,
     }),
     initMeiliSearch: define({
       name: "init-meili-search",
       description: "Initialize Meilisearch indexes for seed data.",
-      run: () =>
-        runRepoScript(["package/utils/bin/cli.ts", "db", "init-meili"]),
+      run: runInitMeili,
     }),
   },
-  run: (ctx) =>
-    runRepoScript([
-      "package/utils/bin/cli.ts",
-      "seed",
-      ...(ctx.values.noInteractive ? ["--no-interactive"] : []),
-    ]),
+  run: async (ctx) => {
+    p.intro("Rezics Seed");
+    await runSeedCommand({
+      noInteractive: Boolean(ctx.values.noInteractive),
+    });
+    p.outro("Done!");
+  },
 });
 
 const factoryCommand = define({
@@ -316,22 +340,11 @@ const factoryCommand = define({
     },
   },
   toKebab: true,
-  run: (ctx) =>
-    runRepoScript([
-      "package/utils/bin/cli.ts",
-      "factory",
-      ...maybeArg("preset", ctx.values.preset as string | undefined),
-      ...maybeArg("plan-file", ctx.values.planFile as string | undefined),
-      ...maybeArg("only", ctx.values.only as string | undefined),
-      ...maybeArg("meili", ctx.values.meili as string | undefined),
-      ...repeatedCsv(ctx.values.scenario as string[] | undefined).map(
-        (scenario) => `--scenario=${scenario}`,
-      ),
-      ...(ctx.values.allScenarios ? ["--all-scenarios"] : []),
-      ...(ctx.values.noScenarios ? ["--no-scenarios"] : []),
-      ...maybeArg("manifest", ctx.values.manifest as string | undefined),
-      ...(ctx.values.noInteractive ? ["--no-interactive"] : []),
-    ]),
+  run: async (ctx) => {
+    p.intro("Rezics Factory");
+    await runFactoryCommand(factoryOptionsFromValues(ctx.values));
+    p.outro("Done!");
+  },
 });
 
 // Convention checks stay under tool/scripts/check-convention because they are repo rules, not i18n maintenance.

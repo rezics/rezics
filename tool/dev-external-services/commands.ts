@@ -22,8 +22,8 @@ export type ServiceCommand =
   | { kind: "health" }
   | { kind: "config-plan" }
   | { kind: "config-apply" }
-  | { kind: "source-verify"; args: string[] }
-  | { kind: "source-repair"; args: string[] };
+  | { kind: "source-verify"; url?: string }
+  | { kind: "source-repair"; url?: string; forceActiveSlot?: boolean };
 
 function composeBaseArgs(config: ToolConfig) {
   return ["-p", config.services.composeProjectName, "-f", "compose.yml"];
@@ -109,9 +109,33 @@ async function checkHealth(config: ToolConfig) {
   await fetchHealth("Sequin", config.services.sequinHealthUrl);
 }
 
-function runSourceScript(args: string[], config: ToolConfig) {
+function sourceScriptArgs(
+  command: Extract<ServiceCommand, { kind: "source-verify" | "source-repair" }>,
+) {
+  const args: string[] = [];
+  if (command.kind === "source-repair") {
+    args.push("--apply", "--dev-reset");
+  }
+  if (command.url) {
+    args.push(`--url=${command.url}`);
+  }
+  if (command.kind === "source-repair" && command.forceActiveSlot) {
+    args.push("--force-active-slot");
+  }
+  return args;
+}
+
+function runSourceScript(
+  command: Extract<ServiceCommand, { kind: "source-verify" | "source-repair" }>,
+  config: ToolConfig,
+) {
   runCommand(
-    ["bun", "run", "tool/db-script/prepare-sequin-source.ts", ...args],
+    [
+      "bun",
+      "run",
+      "tool/db-script/prepare-sequin-source.ts",
+      ...sourceScriptArgs(command),
+    ],
     {
       cwd: REPO_ROOT,
       env: processEnv(config.sourceVerifyEnv),
@@ -129,12 +153,12 @@ export async function runServiceCommand(
   }
 
   if (command.kind === "source-verify") {
-    runSourceScript(command.args, config);
+    runSourceScript(command, config);
     return;
   }
 
   if (command.kind === "source-repair") {
-    runSourceScript(["--apply", "--dev-reset", ...command.args], config);
+    runSourceScript(command, config);
     return;
   }
 

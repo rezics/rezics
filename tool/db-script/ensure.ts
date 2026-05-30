@@ -1,9 +1,9 @@
-import path from "node:path";
 import { spawnSync } from "node:child_process";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DOCKER_COMPOSE_COMMAND } from "../dev-external-services/compose-runtime";
 import { createToolConfig } from "../env";
 import { renderCreateDatabaseSql } from "../repo-database-registry";
-import { DOCKER_COMPOSE_COMMAND } from "../dev-external-services/compose-runtime";
 
 const TOOL_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -14,7 +14,7 @@ const SERVICE_DIR = path.join(TOOL_DIR, "dev-external-services");
 export function ensureLocalDatabases() {
   const config = createToolConfig();
   // Managed startup may create empty databases for convenience; Prisma migrations remain the schema authority.
-  const sql = renderCreateDatabaseSql();
+  const sql = renderCreateDatabaseSql(config.managedDatabaseNames);
   const args = [
     ...DOCKER_COMPOSE_COMMAND,
     "-p",

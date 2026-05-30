@@ -3,9 +3,9 @@ import {
   assertSequinRuntimeEnv,
   createToolConfig,
   SECRET_KEY_BASE_EXAMPLE,
+  type ToolEnv,
   unsafeSequinExampleKeys,
   VAULT_KEY_EXAMPLE,
-  type ToolEnv,
 } from "./env";
 
 function toolEnv(values: Partial<ToolEnv>): ToolEnv {
@@ -22,6 +22,15 @@ describe("tool env config boundary", () => {
     );
     expect(config.composeEnv.REACTION_DB_NAME).toBe("rezics_reaction");
     expect(config.composeEnv.REACTION_DB_PASSWORD).toBe("source");
+    expect(config.managedDatabaseNames).toEqual([
+      "rezics_server",
+      "rezics_auth",
+      "rezics_jobs",
+      "rezics_history",
+      "rezics_notify",
+      "rezics_reaction",
+      "rezics_ranking",
+    ]);
     expect(config.sourceVerifyEnv.SOURCE_DB_NAME).toBe("rezics_server");
   });
 

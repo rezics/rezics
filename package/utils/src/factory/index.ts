@@ -32,11 +32,11 @@ export interface RunFactoryOptions {
   planFile?: string;
   noInteractive?: boolean;
   only?: "echokv";
-  meiliMode?: string;
+  meiliMode?: MeiliMode;
   scenarioNames?: string[];
   allScenarios?: boolean;
   noScenarios?: boolean;
-  manifestFormat?: string;
+  manifestFormat?: ManifestFormat;
 }
 
 function resolvePresetByName(name: string): SeedPreset {
@@ -168,27 +168,16 @@ async function confirmRun(
   }
 }
 
-function resolveMeiliMode(value: string | undefined): MeiliMode {
+function resolveMeiliMode(value: MeiliMode | undefined): MeiliMode {
   if (!value) return "skip";
-  if (value === "init-and-sync" || value === "skip") return value;
-  p.log.error('Unknown --meili value. Supported: "init-and-sync", "skip".');
-  process.exit(2);
+  return value;
 }
 
-function resolveManifestFormat(value: string | undefined): ManifestFormat {
+function resolveManifestFormat(
+  value: ManifestFormat | undefined,
+): ManifestFormat {
   if (!value) return "human";
-  if (
-    value === "human" ||
-    value === "json" ||
-    value === "both" ||
-    value === "none"
-  ) {
-    return value;
-  }
-  p.log.error(
-    'Unknown --manifest value. Supported: "human", "json", "both", "none".',
-  );
-  process.exit(2);
+  return value;
 }
 
 function resolveScenarioNames(

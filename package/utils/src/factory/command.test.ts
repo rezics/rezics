@@ -1,32 +1,37 @@
-import { describe, expect, test } from "bun:test";
-import { parseFactoryArgs } from "./command";
+import { describe, expect, mock, test } from "bun:test";
 
-describe("parseFactoryArgs", () => {
-  test("parses Meili, scenario, and manifest flags", () => {
-    const flags = parseFactoryArgs([
-      "--preset=fast",
-      "--no-interactive",
-      "--meili=init-and-sync",
-      "--scenario=large-post-tree,complex-shelf",
-      "--scenario=large-history",
-      "--manifest=both",
+const runFactoryCalls: unknown[] = [];
+
+mock.module("./index", () => ({
+  runFactory: mock(async (options: unknown) => {
+    runFactoryCalls.push(options);
+  }),
+}));
+
+describe("runFactoryCommand", () => {
+  test("passes typed options through without reparsing argv", async () => {
+    const { runFactoryCommand } = await import("./command");
+
+    await runFactoryCommand({
+      presetName: "fast",
+      noInteractive: true,
+      meiliMode: "init-and-sync",
+      scenarioNames: ["large-post-tree", "complex-shelf", "large-history"],
+      manifestFormat: "both",
+      allScenarios: true,
+      noScenarios: false,
+    });
+
+    expect(runFactoryCalls).toEqual([
+      {
+        presetName: "fast",
+        noInteractive: true,
+        meiliMode: "init-and-sync",
+        scenarioNames: ["large-post-tree", "complex-shelf", "large-history"],
+        manifestFormat: "both",
+        allScenarios: true,
+        noScenarios: false,
+      },
     ]);
-
-    expect(flags.preset).toBe("fast");
-    expect(flags.noInteractive).toBe(true);
-    expect(flags.meiliMode).toBe("init-and-sync");
-    expect(flags.scenarios).toEqual([
-      "large-post-tree",
-      "complex-shelf",
-      "large-history",
-    ]);
-    expect(flags.manifestFormat).toBe("both");
-  });
-
-  test("parses all-scenarios and no-scenarios switches", () => {
-    const flags = parseFactoryArgs(["--all-scenarios", "--no-scenarios"]);
-
-    expect(flags.allScenarios).toBe(true);
-    expect(flags.noScenarios).toBe(true);
   });
 });

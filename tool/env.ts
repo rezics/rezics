@@ -70,6 +70,14 @@ const DEFAULT_TOOL_ENV = {
   SEQUIN_JOB_RUNNER_BASE_URL: "http://host.docker.internal:3005",
 } as const;
 
+const DEFAULT_MANAGED_DATABASE_NAMES = {
+  auth: "rezics_auth",
+  job: "rezics_jobs",
+  history: "rezics_history",
+  notify: "rezics_notify",
+  ranking: "rezics_ranking",
+} as const;
+
 const REQUIRED_SEQUIN_KEYS = [
   "PG_PASSWORD",
   "SECRET_KEY_BASE",
@@ -186,6 +194,15 @@ export function createToolConfig(input: ToolEnv = env) {
         input.SEQUIN_JOB_RUNNER_BASE_URL ??
         DEFAULT_TOOL_ENV.SEQUIN_JOB_RUNNER_BASE_URL,
     },
+    managedDatabaseNames: [
+      input.SOURCE_DB_NAME ?? DEFAULT_TOOL_ENV.SOURCE_DB_NAME,
+      DEFAULT_MANAGED_DATABASE_NAMES.auth,
+      DEFAULT_MANAGED_DATABASE_NAMES.job,
+      DEFAULT_MANAGED_DATABASE_NAMES.history,
+      DEFAULT_MANAGED_DATABASE_NAMES.notify,
+      input.REACTION_DB_NAME ?? DEFAULT_TOOL_ENV.REACTION_DB_NAME,
+      DEFAULT_MANAGED_DATABASE_NAMES.ranking,
+    ],
     sourceVerifyEnv: {
       ENV: input.ENV ?? DEFAULT_TOOL_ENV.ENV,
       SOURCE_DB_HOST: "127.0.0.1",
