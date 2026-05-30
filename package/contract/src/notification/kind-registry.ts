@@ -1,4 +1,4 @@
-import type { NotificationPreferenceKey } from "../user";
+import type { NotificationPreferenceKey } from "../user/user";
 
 /**
  * Flat registry of notification event kinds. Keyed by dot-namespaced kind

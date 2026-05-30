@@ -1,5 +1,8 @@
 import { t } from "elysia";
-import { type TokenPermissionRole, tokenPermissionRoleSchema } from "../token";
+import {
+  type TokenPermissionRole,
+  tokenPermissionRoleSchema,
+} from "../token/token";
 
 /**
  * Canonical representation of the main server's permission model.

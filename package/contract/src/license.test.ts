@@ -5,11 +5,13 @@ import {
   LICENSE_REGISTRY,
   LICENSE_SLUGS,
   licenseSlugSchema,
+} from "./license";
+import {
   publishableUnitInputSchema,
   unitPublicationMetadataSchema,
-} from "./index";
+} from "./unit/unit";
 import { realmExtraSchema } from "./realm/realm-extra";
-import { userSettingsSchema } from "./user";
+import { userSettingsSchema } from "./user/user";
 
 describe("licenseSlugSchema", () => {
   test("accepts known license slugs", () => {

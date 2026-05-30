@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { markdownContentDoc } from "./content/doc-v1";
-import { postListResponseSchema } from "./post";
-import { publicUserSchema, unitTranslationDTOSchema } from "./unit";
-import { userDTOSchema } from "./user";
+import { postListResponseSchema } from "./post/post";
+import { publicUserSchema, unitTranslationDTOSchema } from "./unit/unit";
+import { userDTOSchema } from "./user/user";
 
 describe("rich description DTO contracts", () => {
   test("public and full users reject raw string descriptions", () => {

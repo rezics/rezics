@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { type SystemShelfKindKey, systemShelfKindKeySchema } from "../progress";
+import { type SystemShelfKindKey, systemShelfKindKeySchema } from "./progress";
 
 export const SYSTEM_SHELF_LABELS: Record<SystemShelfKindKey, string> = {
   favorites: "Favorites",

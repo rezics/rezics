@@ -1,4 +1,4 @@
-import type { UnitDTO } from "../index";
+import type { UnitDTO } from "../unit/unit";
 import type { Permission } from "./core";
 import { BasicAdminPermission, isBlocked } from "./core";
 

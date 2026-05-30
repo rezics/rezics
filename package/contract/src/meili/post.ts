@@ -1,6 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { unitWorkRoleSchema } from "../unit-work";
+import { unitWorkRoleSchema } from "../unit/work";
 
 // ANCHOR: Post Search Document
 

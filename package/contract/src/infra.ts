@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { SEED_TAG_NAMES, type SeedTagName } from "./seed-tags";
+import { SEED_TAG_NAMES, type SeedTagName } from "./tag/seed-tags";
 import { SLUG_SCOPES, type SlugScopeName } from "./slug";
 
 /**

@@ -9,9 +9,9 @@ export * from "./core";
 export * from "./decision";
 export * from "./main";
 export * from "./policy";
-export * from "./post"; // /posts (replaces comment + review)
+export * from "../post/post"; // /posts (replaces comment + review)
 export * from "./realm-role";
 export * from "./shelf"; // /shelves (replaces readlist)
-export * from "./tag"; // /tags
+export * from "../tag/index"; // /tags
 export * from "./unit"; // /units
 export * from "./user"; // /users

@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { unitTypeSchema } from "../unit";
+import { unitTypeSchema } from "../unit/unit";
 
 // ============================================================
 // TYPED BY-SLUG PATH PARAMS

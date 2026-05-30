@@ -5,7 +5,7 @@ import { EntitySearchDocumentSchema } from "../meili/entity";
 import { PostSearchDocumentSchema } from "../meili/post";
 import { RealmSearchDocumentSchema } from "../meili/realm";
 import { UserSearchDocumentSchema } from "../meili/user";
-import { SearchQuerySchema } from "../search";
+import { SearchQuerySchema } from "./search";
 import { SearchCategorySchema, SearchScopeSchema } from "./scope";
 
 // ANCHOR: Federated Search Options

@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { activeAccountEnforcementSummarySchema } from "../governance";
+import { activeAccountEnforcementSummarySchema } from "../realm/governance";
 import { capabilityHintSchema } from "./capability";
 import { permissionSchema } from "./core";
 import { policyDecisionSchema } from "./decision";

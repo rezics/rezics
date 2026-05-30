@@ -2,11 +2,11 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 import { TagRefSchema } from "../common/tag-ref";
 import { contentDocSchema } from "../content/doc-v1";
-import { gameSystemRequirementSummarySchema } from "../game-media";
+import { gameSystemRequirementSummarySchema } from "../media/game-media";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";
-import { aiDisclosureModeSchema, contentRatingSchema } from "../unit";
-import { unitWorkDisplayPolicySchema, unitWorkRoleSchema } from "../unit-work";
+import { aiDisclosureModeSchema, contentRatingSchema } from "../unit/unit";
+import { unitWorkDisplayPolicySchema, unitWorkRoleSchema } from "../unit/work";
 
 // ANCHOR: Content Search Document
 

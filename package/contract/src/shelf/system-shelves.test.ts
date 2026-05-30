@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { SYSTEM_SHELF_KIND_KEYS } from "../progress";
+import { SYSTEM_SHELF_KIND_KEYS } from "./progress";
 import { formatSystemShelfTitle, SYSTEM_SHELF_LABELS } from "./system-shelves";
 
 describe("SYSTEM_SHELF_LABELS", () => {

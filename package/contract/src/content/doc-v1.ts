@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import type { UnitType } from "../unit";
+import type { UnitType } from "../unit/unit";
 
 export const CONTENT_DOC_SCHEMA = "rezics.content" as const;
 export const CONTENT_DOC_V1_VERSION = 1 as const;

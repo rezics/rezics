@@ -1,0 +1,449 @@
+import { t } from "elysia";
+import { creationModeSchema } from "../content/authority";
+import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
+import {
+  contentModerationStateDTOSchema,
+  contentModerationStateKindSchema,
+  realmContentModerationDTOSchema,
+} from "../realm/governance";
+import { licenseSlugSchema } from "../license";
+import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import { paginationLimitSchema } from "../pagination";
+import { publicUserSchema } from "../unit/unit";
+import { unitWorkRoleSchema } from "../unit/work";
+
+// ============================================================
+// POST KIND
+// ============================================================
+
+export const PostKind = {
+  REVIEW: "REVIEW",
+  REMARK: "REMARK",
+  EXCERPT: "EXCERPT",
+  POST: "POST",
+  CHAPTER: "CHAPTER",
+  WIKI: "WIKI",
+} as const;
+
+export type PostKind = (typeof PostKind)[keyof typeof PostKind];
+
+export const postKindLiterals = t.Union([
+  t.Literal("REVIEW"),
+  t.Literal("REMARK"),
+  t.Literal("EXCERPT"),
+  t.Literal("POST"),
+  t.Literal("CHAPTER"),
+  t.Literal("WIKI"),
+]);
+
+// ============================================================
+// PIN KIND (post promotion overlay)
+// ============================================================
+
+export const PinKind = {
+  ACCEPTED_ANSWER: "ACCEPTED_ANSWER",
+  PINNED: "PINNED",
+  HIGHLIGHT: "HIGHLIGHT",
+} as const;
+
+export type PinKind = (typeof PinKind)[keyof typeof PinKind];
+
+export const pinKindLiterals = t.Union([
+  t.Literal("ACCEPTED_ANSWER"),
+  t.Literal("PINNED"),
+  t.Literal("HIGHLIGHT"),
+]);
+
+/**
+ * Platform-reserved tag slug whose `Unit(type=TAG)` marks a thread as a Q&A
+ * thread when borne by the root post. Uniform across all realms.
+ */
+export const OFFICIAL_QUESTION_TAG_SLUG = "question";
+
+// ============================================================
+// EXCERPT SOURCE SCHEMA
+// ============================================================
+
+/**
+ * URL mode accepts any well-formed URL — no rezics-domain or ancestry
+ * restriction (internal-vs-external is a render-time concern). Unit mode accepts
+ * any unitId regardless of the post target ancestry. `title` is an author
+ * snapshot, never auto-synced to the linked unit name.
+ */
+export const excerptSourceSchema = t.Union([
+  t.Object({
+    mode: t.Literal("unit"),
+    unitId: t.String(),
+    title: t.String({ minLength: 1, maxLength: 200 }),
+  }),
+  t.Object({
+    mode: t.Literal("url"),
+    url: t.String({ maxLength: 2048 }),
+    title: t.String({ minLength: 1, maxLength: 200 }),
+  }),
+]);
+
+export type ExcerptSource = (typeof excerptSourceSchema)["static"];
+
+// ============================================================
+// POST EXTRA SCHEMA
+// ============================================================
+
+export const postExtraSchema = t.Object({
+  rating: t.Optional(t.Number()),
+  title: t.Optional(t.String()),
+  book: t.Optional(
+    t.Object({
+      id: t.String(),
+      title: t.String(),
+    }),
+  ),
+  source: t.Optional(excerptSourceSchema),
+  /**
+   * Optional reference to an embedded `Unit(type=POLL)`. Additive and optional:
+   * posts that do not embed a poll omit it. The post write/read paths persist
+   * and return `extra` as-is, so no server change is required.
+   */
+  poll: t.Optional(t.Object({ unitId: t.String() })),
+  /**
+   * Slug of the tag whose schema governs `Post.state`, snapshotted at creation.
+   * It does NOT drift when tags are later added/removed, so the governing
+   * vocabulary stays stable (see `post-state-schema.ts`). Present only on posts
+   * created with a stateful tag.
+   */
+  stateSchemaTag: t.Optional(t.String()),
+});
+
+export type PostExtra = (typeof postExtraSchema)["static"];
+
+// ============================================================
+// POST DTO (replaces Comment, Review, Note, Remark)
+// ============================================================
+
+export const postDTOSchema = t.Object({
+  unitId: t.String(),
+  authorUserId: t.String(),
+  author: t.Optional(publicUserSchema),
+  targetUnitId: t.Optional(t.Nullable(t.String())),
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  workUnitIds: t.Optional(t.Array(t.String())),
+  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
+  content: t.Optional(t.Nullable(contentDocSchema)),
+  rootPostUnitId: t.Optional(t.Nullable(t.String())),
+  parentPostUnitId: t.Optional(t.Nullable(t.String())),
+  kind: t.Optional(t.Nullable(postKindLiterals)),
+  status: t.Optional(t.String()),
+  visibility: t.Optional(t.String()),
+  licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
+  globalModerationState: t.Optional(
+    t.Nullable(contentModerationStateKindSchema),
+  ),
+  isTombstone: t.Optional(t.Boolean()),
+  depth: t.Optional(t.Number()),
+  /**
+   * Native ltree materialized path (root→post), e.g. `"1.3.a"`. Bounds the
+   * subtree and yields depth; it is NOT a presentation-order key (School B).
+   * Replaces the removed `sortPath`.
+   */
+  path: t.Optional(t.Nullable(t.String())),
+  replyCount: t.Optional(t.Number()),
+  directReplyCount: t.Optional(t.Number()),
+  lastReplyAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
+  isLocked: t.Optional(t.Boolean()),
+  /**
+   * Lifecycle label — a kebab-case slug (e.g. `open`, `solved`, `not-planned`)
+   * governed by the schema named by `extra.stateSchemaTag`, or null for no
+   * lifecycle. Typed as a generic string, NOT a strict enum: reads tolerate
+   * unknown values so adding a value never breaks an older client (the client
+   * renders the value via its mapped tag, falling back to the raw slug). The
+   * closed vocabulary and transitions are enforced only on the write path.
+   */
+  state: t.Optional(t.Nullable(t.String())),
+  scoreEntryId: t.Optional(t.Nullable(t.String())),
+  /**
+   * Promotion overlay for the rendered thread scope: why this reply is promoted
+   * (accepted answer vs. pin), or null when it is an ordinary reply. Set by the
+   * thread read; the client groups promoted replies ahead of ordinary ones.
+   */
+  pinKind: t.Optional(t.Nullable(pinKindLiterals)),
+  /** Fractional-index position within its `pinKind` group (for render order). */
+  pinPosition: t.Optional(t.Nullable(t.String())),
+  extra: t.Optional(t.Nullable(postExtraSchema)),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type PostDTO = (typeof postDTOSchema)["static"];
+
+// ============================================================
+// POST PIN DTO + REQUESTS
+// ============================================================
+
+export const postPinDTOSchema = t.Object({
+  scopeUnitId: t.String(),
+  postUnitId: t.String(),
+  kind: pinKindLiterals,
+  position: t.String(),
+  byUserId: t.String(),
+  createdAt: t.Union([t.String(), t.Date()]),
+});
+
+export type PostPinDTO = (typeof postPinDTOSchema)["static"];
+
+/**
+ * Pin a reply (`kind = PINNED`) within its thread scope. `scopeUnitId` MUST be
+ * the thread root post; the target MUST be a reply in that thread.
+ */
+export const pinPostSchema = t.Object({
+  scopeUnitId: t.String(),
+  postUnitId: t.String(),
+  /** Optional explicit ordering anchors; the server mints a position between them. */
+  beforePostUnitId: t.Optional(t.String()),
+  afterPostUnitId: t.Optional(t.String()),
+});
+
+export type PinPostInput = (typeof pinPostSchema)["static"];
+
+/** Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread. */
+export const acceptAnswerSchema = t.Object({
+  scopeUnitId: t.String(),
+  postUnitId: t.String(),
+  beforePostUnitId: t.Optional(t.String()),
+  afterPostUnitId: t.Optional(t.String()),
+});
+
+export type AcceptAnswerInput = (typeof acceptAnswerSchema)["static"];
+
+// ============================================================
+// POST LIST/QUERY
+// ============================================================
+
+export const postListQuerySchema = t.Object({
+  ...listGetQueryBase.properties,
+  /** Target Unit ID for reply/thread targets. Realm feeds use `realmUnitId`. */
+  targetUnitId: t.Optional(t.String()),
+  /** Realm Unit ID to list posts through the UnitRealm junction. */
+  realmUnitId: t.Optional(t.String()),
+  /** Work Unit ID to list posts through UnitWork membership. */
+  workUnitId: t.Optional(t.String()),
+  /** UnitWork roles to include when querying a work-domain feed. */
+  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
+  /** Any-of tag filter for realm feed queries. */
+  tagIds: t.Optional(t.Array(t.String())),
+  /** Moderator realm feed lifecycle filter. Regular callers are always visible-only. */
+  realmLifecycleState: t.Optional(
+    t.Union([
+      t.Literal("visible"),
+      t.Literal("hidden"),
+      t.Literal("tombstoned"),
+      t.Literal("locked"),
+      t.Literal("archived"),
+      t.Literal("removed"),
+      t.Literal("all"),
+    ]),
+  ),
+  rootPostUnitId: t.Optional(t.String()),
+  /** Post Unit ID to use as the anchor for descendant subtree queries. */
+  subtreeRootPostUnitId: t.Optional(t.String()),
+  parentPostUnitId: t.Optional(t.String()),
+  authorUserId: t.Optional(t.String()),
+  kind: t.Optional(postKindLiterals),
+  /** Exact lifecycle-state filter (e.g. `open`). */
+  state: t.Optional(t.String()),
+  /**
+   * Derived lifecycle bucket filter: `active` or `closed`. Matches posts whose
+   * `state` is any value declared in that bucket across the registered schemas
+   * (`state IN (…)`, indexed; no anti-join). Buckets are never stored.
+   */
+  stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
+  mode: t.Optional(t.String()),
+  maxDepth: t.Optional(t.Number()),
+  sort: t.Optional(
+    t.Union([
+      t.Literal("new"),
+      t.Literal("top"),
+      t.Literal("hot"),
+      t.Object({
+        field: t.Optional(t.String()),
+        order: t.Optional(t.String()),
+      }),
+    ]),
+  ),
+  start: t.Optional(t.Number()),
+  cursor: t.Optional(
+    t.Object({
+      unitId: t.Optional(t.String()),
+      createdAt: t.Optional(t.String()),
+    }),
+  ),
+  limit: paginationLimitSchema,
+});
+
+export type PostListQuery = (typeof postListQuerySchema)["static"];
+
+export const postListBodySchema = t.Object({
+  ...listPostBodyBase.properties,
+  /** Target Unit ID for reply/thread targets. Realm feeds use `realmUnitId`. */
+  targetUnitId: t.Optional(t.String()),
+  /** Realm Unit ID to list posts through the UnitRealm junction. */
+  realmUnitId: t.Optional(t.String()),
+  /** Work Unit ID to list posts through UnitWork membership. */
+  workUnitId: t.Optional(t.String()),
+  /** UnitWork roles to include when querying a work-domain feed. */
+  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
+  /** Any-of tag filter for realm feed queries. */
+  tagIds: t.Optional(t.Array(t.String())),
+  /** Moderator realm feed lifecycle filter. Regular callers are always visible-only. */
+  realmLifecycleState: t.Optional(
+    t.Union([
+      t.Literal("visible"),
+      t.Literal("hidden"),
+      t.Literal("tombstoned"),
+      t.Literal("locked"),
+      t.Literal("archived"),
+      t.Literal("removed"),
+      t.Literal("all"),
+    ]),
+  ),
+  rootPostUnitId: t.Optional(t.String()),
+  /** Post Unit ID to use as the anchor for descendant subtree queries. */
+  subtreeRootPostUnitId: t.Optional(t.String()),
+  parentPostUnitId: t.Optional(t.String()),
+  authorUserId: t.Optional(t.String()),
+  kind: t.Optional(postKindLiterals),
+  /** Exact lifecycle-state filter (e.g. `open`). */
+  state: t.Optional(t.String()),
+  /** Derived lifecycle bucket filter: `active` or `closed`. See `postListQuerySchema`. */
+  stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
+  mode: t.Optional(t.String()),
+  maxDepth: t.Optional(t.Number()),
+  sort: t.Optional(
+    t.Union([
+      t.Literal("new"),
+      t.Literal("top"),
+      t.Literal("hot"),
+      t.Object({
+        field: t.Optional(t.String()),
+        order: t.Optional(t.String()),
+      }),
+    ]),
+  ),
+  start: t.Optional(t.Number()),
+  cursor: t.Optional(
+    t.Object({
+      unitId: t.Optional(t.String()),
+      createdAt: t.Optional(t.String()),
+    }),
+  ),
+  limit: paginationLimitSchema,
+});
+
+export type PostListBody = (typeof postListBodySchema)["static"];
+
+export const postListResponseSchema = t.Object({
+  posts: t.Array(postDTOSchema),
+  total: t.Optional(t.Number()),
+  /**
+   * Thread read only: whether the current caller may pin/accept within this
+   * thread (OP, realm moderator/owner, or platform admin). Viewer-derived from
+   * the same `assertCanPromoteInThread` gate the write path enforces, so clients
+   * can present promotion controls without duplicating authorization. Absent on
+   * non-thread list reads; `false` for anonymous callers.
+   */
+  viewerCanPromote: t.Optional(t.Boolean()),
+  /**
+   * Thread read only: whether the thread root bears the official question tag
+   * (gates the accept-answer affordance). Reuses the server `isQuestionThread()`
+   * check. Absent on non-thread list reads.
+   */
+  isQuestionThread: t.Optional(t.Boolean()),
+});
+
+export type PostListResponse = (typeof postListResponseSchema)["static"];
+
+export const postModerationOverlayRequestSchema = t.Object({
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  targetUnitIds: t.Array(t.String()),
+});
+
+export type PostModerationOverlayRequest =
+  (typeof postModerationOverlayRequestSchema)["static"];
+
+export const postModerationOverlayResponseSchema = t.Object({
+  globalStates: t.Array(contentModerationStateDTOSchema),
+  realmOverlays: t.Array(realmContentModerationDTOSchema),
+});
+
+export type PostModerationOverlayResponse =
+  (typeof postModerationOverlayResponseSchema)["static"];
+
+// ============================================================
+// POST PARAMS/RESPONSE
+// ============================================================
+
+export const postParamsSchema = t.Object({
+  unitId: t.String(),
+});
+
+export type PostParams = (typeof postParamsSchema)["static"];
+
+export const postResponseSchema = postDTOSchema;
+export type PostResponse = (typeof postResponseSchema)["static"];
+
+// ============================================================
+// CREATE/UPDATE POST
+// ============================================================
+
+export const createPostSchema = t.Object({
+  targetUnitId: t.Optional(t.String()),
+  /**
+   * Realm Unit IDs that create UnitRealm junction rows in the same transaction
+   * as the Post.
+   */
+  realmUnitIds: t.Optional(t.Array(t.String())),
+  /** Tag Unit IDs that create UnitTag junction rows in the same transaction. */
+  tagIds: t.Optional(t.Array(t.String())),
+  parentPostUnitId: t.Optional(t.String()),
+  kind: t.Optional(postKindLiterals),
+  creationMode: t.Optional(creationModeSchema),
+  content: contentDocWriteSchema,
+  scoreEntryId: t.Optional(t.String()),
+  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+  /**
+   * Initial publication state. Defaults to `PUBLISHED` (publish on create).
+   * `DRAFT` saves the post as an owner-only draft that is excluded from feeds
+   * and search until published. Drafts apply to top-level posts only; replies
+   * always publish. See `draft.ts` for the cross-type draft listing.
+   */
+  status: t.Optional(t.Union([t.Literal("DRAFT"), t.Literal("PUBLISHED")])),
+});
+
+export type CreatePostInput = (typeof createPostSchema)["static"];
+
+/** Toggle a post between published and draft (owner-only). */
+export const setPostPublicationSchema = t.Object({
+  publish: t.Boolean(),
+});
+
+export type SetPostPublicationInput =
+  (typeof setPostPublicationSchema)["static"];
+
+export const updatePostSchema = t.Object({
+  content: t.Optional(contentDocWriteSchema),
+  isLocked: t.Optional(t.Boolean()),
+  extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
+});
+
+export type UpdatePostInput = (typeof updatePostSchema)["static"];
+
+/**
+ * Transition a post's lifecycle `state` to a target value. Write-strict: the
+ * server normalizes the slug and rejects it unless it is a legal value of the
+ * post's schema and the transition from the current state is allowed. Closing
+ * always names a reason value; reopening targets the schema's initial state.
+ */
+export const setPostStateSchema = t.Object({
+  state: t.String(),
+});
+
+export type SetPostStateInput = (typeof setPostStateSchema)["static"];
