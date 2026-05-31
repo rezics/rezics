@@ -3,22 +3,15 @@ import { Value } from "@sinclair/typebox/value";
 import { SearchCategorySchema, SearchScopeSchema } from "./scope";
 
 describe("SearchScopeSchema", () => {
-  test("accepts exact and work-domain book scopes", () => {
+  test("accepts exact book scopes", () => {
     expect(
       Value.Check(SearchScopeSchema, {
         kind: "book",
         unitId: "release-1",
-        scopeMode: "exact",
       }),
     ).toBe(true);
-    expect(
-      Value.Check(SearchScopeSchema, {
-        kind: "book",
-        unitId: "release-1",
-        workUnitId: "work-1",
-        scopeMode: "work",
-      }),
-    ).toBe(true);
+    expect("workUnitId" in SearchScopeSchema.anyOf[1].properties).toBe(false);
+    expect("scopeMode" in SearchScopeSchema.anyOf[1].properties).toBe(false);
   });
 });
 

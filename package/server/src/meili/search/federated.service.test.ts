@@ -161,66 +161,6 @@ describe("federatedSearch", () => {
     expect(commentQuery?.filter).toContain('rootUnitId = "b-9"');
   });
 
-  test("book work scope uses exact filters through grouped search", async () => {
-    const { client, multi } = makeFakeClient();
-    const opts: FederatedSearchOptions = {
-      scope: { kind: "book", unitId: "release-1", workUnitId: "work-1" },
-      category: "all",
-      query: { keyword: "epic" },
-    };
-
-    await federatedSearch(client, opts);
-
-    const queries = multi[0]!.queries;
-    const shelfQuery = queries.find(
-      (q) => q.indexUid === "content" && q.filter?.includes('type = "SHELF"'),
-    );
-    expect(shelfQuery?.filter).toContain('containedUnitIds = "release-1"');
-    expect(shelfQuery?.filter).not.toContain('workUnitIds = "work-1"');
-    expect(shelfQuery?.filter).not.toContain('workRoles = "SHELF"');
-
-    const reviewQuery = queries.find(
-      (q) => q.indexUid === "posts" && q.filter?.includes('kind = "REVIEW"'),
-    );
-    expect(reviewQuery?.filter).toContain('targetUnitId = "release-1"');
-    expect(reviewQuery?.filter).not.toContain('workUnitIds = "work-1"');
-    expect(reviewQuery?.filter).not.toContain('workRoles = "REVIEW"');
-
-    const commentQuery = queries.find((q) => q.indexUid === "comments");
-    expect(commentQuery?.filter).toContain('rootUnitId = "release-1"');
-  });
-
-  test("book exact scope with work id carries exact filters through grouped search", async () => {
-    const { client, multi } = makeFakeClient();
-    const opts: FederatedSearchOptions = {
-      scope: {
-        kind: "book",
-        unitId: "release-1",
-        workUnitId: "work-1",
-        scopeMode: "exact",
-      },
-      category: "all",
-      query: { keyword: "epic" },
-    };
-
-    await federatedSearch(client, opts);
-
-    const queries = multi[0]!.queries;
-    const shelfQuery = queries.find(
-      (q) => q.indexUid === "content" && q.filter?.includes('type = "SHELF"'),
-    );
-    expect(shelfQuery?.filter).toContain('containedUnitIds = "release-1"');
-    expect(shelfQuery?.filter).not.toContain('workUnitIds = "work-1"');
-
-    const postsQueries = queries.filter((q) => q.indexUid === "posts");
-    for (const q of postsQueries) {
-      expect(q.filter).toContain('targetUnitId = "release-1"');
-      expect(q.filter).not.toContain('workUnitIds = "work-1"');
-    }
-    const commentQuery = queries.find((q) => q.indexUid === "comments");
-    expect(commentQuery?.filter).toContain('rootUnitId = "release-1"');
-  });
-
   test("realm scope filters every queried index by realmIds", async () => {
     const { client, multi } = makeFakeClient();
     const opts: FederatedSearchOptions = {

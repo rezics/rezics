@@ -225,8 +225,7 @@ export function buildPostFilter(
 // ANCHOR: buildCommentFilter
 // Scope mapping for comments:
 //   global → no scope filter
-//   book   → rootUnitId = unitId; work scopes are intentionally excluded by
-//            federated permissions until content-anchor projections exist
+//   book   → rootUnitId = unitId
 //   realm  → realmUnitId = realmId
 //   user   → authorUserId = userId
 

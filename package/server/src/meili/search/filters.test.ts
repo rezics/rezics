@@ -30,45 +30,6 @@ describe("buildContentFilter", () => {
     expect(filter).toContain('containedUnitIds = "b-1"');
   });
 
-  test("book work scope with shelves subtype stays on exact containment", () => {
-    const scope: SearchScope = {
-      kind: "book",
-      unitId: "release-1",
-      workUnitId: "work-1",
-    };
-    const filter = buildContentFilter(
-      emptyQuery,
-      scope,
-      {},
-      {
-        contentSubtype: "shelves",
-      },
-    );
-    expect(filter).toContain('type = "SHELF"');
-    expect(filter).toContain('containedUnitIds = "release-1"');
-    expect(filter).not.toContain('workUnitIds = "work-1"');
-    expect(filter).not.toContain('workRoles = "SHELF"');
-  });
-
-  test("book exact scope with work id still emits containedUnitIds", () => {
-    const scope: SearchScope = {
-      kind: "book",
-      unitId: "release-1",
-      workUnitId: "work-1",
-      scopeMode: "exact",
-    };
-    const filter = buildContentFilter(
-      emptyQuery,
-      scope,
-      {},
-      {
-        contentSubtype: "shelves",
-      },
-    );
-    expect(filter).toContain('containedUnitIds = "release-1"');
-    expect(filter).not.toContain('workUnitIds = "work-1"');
-  });
-
   test("realm scope emits realmIds filter", () => {
     const scope: SearchScope = { kind: "realm", realmId: "r-7" };
     const filter = buildContentFilter(emptyQuery, scope);
@@ -166,36 +127,6 @@ describe("buildPostFilter", () => {
     expect(filter).toContain('targetUnitId = "b-2"');
   });
 
-  test("book work scope emits exact post target filters", () => {
-    const filter = buildPostFilter(
-      emptyQuery,
-      { kind: "book", unitId: "release-1", workUnitId: "work-1" },
-      {},
-      { postCategory: "reviews" },
-    );
-    expect(filter).toContain('kind = "REVIEW"');
-    expect(filter).toContain('targetUnitId = "release-1"');
-    expect(filter).not.toContain('workUnitIds = "work-1"');
-    expect(filter).not.toContain('workRoles = "REVIEW"');
-  });
-
-  test("book work scope keeps remark and excerpt posts on exact targets", () => {
-    for (const postCategory of ["remarks", "excerpts"] as const) {
-      const filter = buildPostFilter(
-        emptyQuery,
-        { kind: "book", unitId: "release-1", workUnitId: "work-1" },
-        {},
-        { postCategory },
-      );
-      expect(filter).toContain(
-        `kind = "${postCategory === "remarks" ? "REMARK" : "EXCERPT"}"`,
-      );
-      expect(filter).toContain('targetUnitId = "release-1"');
-      expect(filter).not.toContain('workUnitIds = "work-1"');
-      expect(filter).not.toContain('workRoles = "POST"');
-    }
-  });
-
   test("realm scope emits realmIds", () => {
     const filter = buildPostFilter(emptyQuery, {
       kind: "realm",
@@ -231,15 +162,6 @@ describe("buildCommentFilter", () => {
     });
     expect(filter).toContain('rootUnitId = "book-1"');
     expect(filter).toContain("isLocked = false");
-  });
-
-  test("book work scope keeps comments on exact roots", () => {
-    const filter = buildCommentFilter(emptyQuery, {
-      kind: "book",
-      unitId: "release-1",
-      workUnitId: "work-1",
-    });
-    expect(filter).toContain('rootUnitId = "release-1"');
   });
 
   test("realm and user scopes map to comment partition fields", () => {
