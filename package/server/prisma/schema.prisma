@@ -119,6 +119,12 @@ enum UnitAliasStatus {
   HIDDEN
 }
 
+enum ContentTranslationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 enum PostKind {
   /**
    * Long-form review with rating.
@@ -220,9 +226,10 @@ model Unit {
   catalogVariants Unit[] @relation("UnitCatalogTarget")
 
   // Translation layer
-  translations     UnitTranslation[]
-  supportLanguages UnitSupportLanguage[]
-  aliases          UnitAlias[]           @relation("UnitAliases")
+  translations        UnitTranslation[]
+  contentTranslations ContentTranslation[] @relation("UnitContentTranslations")
+  supportLanguages    UnitSupportLanguage[]
+  aliases             UnitAlias[]          @relation("UnitAliases")
 
   // Parallel-translation grouping (POST wiki flow); see TranslationGroup.
   translationGroupId String?           @db.Uuid
@@ -389,6 +396,32 @@ model UnitTranslation {
 
   @@id([unitId, language])
   @@index([language, title])
+}
+
+model ContentTranslation {
+  unitId   String @db.Uuid
+  language String @db.VarChar(16)
+
+  content Json
+  status  ContentTranslationStatus @default(PUBLISHED)
+
+  /// Optional hooks for future source/provenance migration. These are scalar
+  /// ids so the initial body-translation table does not imply ownership or
+  /// source validation rules before wiki migration lands.
+  sourceUnitId String? @db.Uuid
+  authorUserId String? @db.Uuid
+  provenance   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  unit Unit @relation("UnitContentTranslations", fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([unitId, language])
+  @@index([language, status])
+  @@index([status, updatedAt])
+  @@index([sourceUnitId])
+  @@index([authorUserId])
 }
 
 model UnitSupportLanguage {
