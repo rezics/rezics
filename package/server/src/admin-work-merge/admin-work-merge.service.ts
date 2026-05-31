@@ -125,12 +125,11 @@ export class AdminWorkMergeService {
     ]);
     const contentMembershipUnitIds = unique(
       moves
-        .filter((row) => row.role !== UnitWorkRole.RELEASE)
-        .map((row) => row.unitId),
-    );
-    const shelfUnitIds = unique(
-      moves
-        .filter((row) => row.role === UnitWorkRole.SHELF)
+        .filter(
+          (row) =>
+            row.role !== UnitWorkRole.RELEASE &&
+            row.role !== UnitWorkRole.SHELF,
+        )
         .map((row) => row.unitId),
     );
 
@@ -141,7 +140,8 @@ export class AdminWorkMergeService {
         (row) => row.role === UnitWorkRole.RELEASE,
       ),
       contentMembershipMoves: moves.filter(
-        (row) => row.role !== UnitWorkRole.RELEASE,
+        (row) =>
+          row.role !== UnitWorkRole.RELEASE && row.role !== UnitWorkRole.SHELF,
       ),
       legacyReleaseUnitIds: [],
       metadataCopy: {
@@ -166,14 +166,13 @@ export class AdminWorkMergeService {
           ...contentMembershipUnitIds,
         ]),
         postSearchUnitIds: unique(contentMembershipUnitIds),
-        shelfUnitIds,
         uswnReleaseUnitIds: releaseUnitIds,
         contentMembershipUnitIds,
       },
       affectedBehavior: [
         "Release DTO metadata.uswn resolves to the target work Unit after repair.",
         "Content and post search group by the target work domain after queued sync.",
-        "Shelf and content memberships that pointed at the source work are repaired to the target work.",
+        "Content memberships that pointed at the source work are repaired to the target work.",
         "The source work Unit and its tags, aliases, external references, attribution, and history are preserved.",
       ],
     };

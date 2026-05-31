@@ -128,7 +128,7 @@ function PreviewPanel({ preview }: { preview: AdminWorkMergePreview | null }) {
         <CardHeader>
           <CardTitle>Repair scope</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <CountLine
             label="Content search"
             count={preview.repairScope.contentSearchUnitIds.length}
@@ -136,10 +136,6 @@ function PreviewPanel({ preview }: { preview: AdminWorkMergePreview | null }) {
           <CountLine
             label="Post search"
             count={preview.repairScope.postSearchUnitIds.length}
-          />
-          <CountLine
-            label="Shelves"
-            count={preview.repairScope.shelfUnitIds.length}
           />
           <CountLine
             label="USWN DTOs"

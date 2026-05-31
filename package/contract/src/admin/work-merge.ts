@@ -66,7 +66,6 @@ export type AdminWorkMergeMetadataCopy =
 export const adminWorkMergeRepairScopeSchema = t.Object({
   contentSearchUnitIds: t.Array(t.String()),
   postSearchUnitIds: t.Array(t.String()),
-  shelfUnitIds: t.Array(t.String()),
   uswnReleaseUnitIds: t.Array(t.String()),
   contentMembershipUnitIds: t.Array(t.String()),
 });

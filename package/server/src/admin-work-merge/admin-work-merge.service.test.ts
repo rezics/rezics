@@ -274,7 +274,6 @@ describe("AdminWorkMergeService", () => {
       { unitId: "release-1", action: "move" },
     ]);
     expect(preview.contentMembershipMoves).toMatchObject([
-      { unitId: "shelf-1", role: "SHELF", action: "dedupe" },
       { unitId: "series-1", role: "SERIES", action: "move" },
     ]);
     expect(preview.legacyReleaseUnitIds).toEqual([]);
@@ -319,7 +318,7 @@ describe("AdminWorkMergeService", () => {
       unitWorkRows.find(
         (row) => row.unitId === "shelf-1" && row.workUnitId === "source-work",
       ),
-    ).toBeUndefined();
+    ).toBeDefined();
     expect(
       unitTagRows.find(
         (row) => row.unitId === "source-work" && row.tagUnitId === "tag-a",
