@@ -14,7 +14,6 @@ import { Link } from "@/shared/ui/link";
 
 interface BookHeroStatCardsProps {
   bookId: string;
-  workUnitId?: string;
   /** Subset of stat keys to render as cards. Defaults to all available stats. */
   cardKeys?: BookHeroStatKey[];
 }
@@ -39,21 +38,15 @@ const BRAND_TINT_STYLE: React.CSSProperties = {
 
 export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
   bookId,
-  workUnitId,
   cardKeys = DEFAULT_STAT_CARD_KEYS,
 }) => {
   const { t } = useTranslation(["book"]);
   const { data: reviewData } = useQuery({
-    ...postQueries.list(
-      workUnitId
-        ? {
-            workUnitId,
-            kind: PostKind.REVIEW,
-            workRoles: ["REVIEW"],
-            limit: 1,
-          }
-        : { targetUnitId: bookId, kind: PostKind.REVIEW, limit: 1 },
-    ),
+    ...postQueries.list({
+      targetUnitId: bookId,
+      kind: PostKind.REVIEW,
+      limit: 1,
+    }),
     enabled: Boolean(bookId),
   });
   const { data: shelfData } = useQuery({

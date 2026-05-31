@@ -1,29 +1,17 @@
-import type { PostDTO, PostListQuery } from "@rezics/contract";
+import type { PostDTO } from "@rezics/contract";
 
-export type BookCommunityFeedMode = "work" | "release";
+export type BookCommunityFeedMode = "entry";
 
 export type BookCommunityFeedQuery = {
   mode: BookCommunityFeedMode;
-  targetUnitId?: string;
-  workUnitId?: string;
-  workRoles?: PostListQuery["workRoles"];
+  targetUnitId: string;
 };
 
 export function resolveBookCommunityFeedQuery(input: {
   currentReleaseUnitId: string;
-  workUnitId?: string | null;
-  exactRelease: boolean;
 }): BookCommunityFeedQuery {
-  if (input.workUnitId && !input.exactRelease) {
-    return {
-      mode: "work",
-      workUnitId: input.workUnitId,
-      workRoles: ["POST", "REVIEW"],
-    };
-  }
-
   return {
-    mode: "release",
+    mode: "entry",
     targetUnitId: input.currentReleaseUnitId,
   };
 }

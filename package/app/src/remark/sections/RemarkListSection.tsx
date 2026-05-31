@@ -8,27 +8,16 @@ import { RemarkList } from "../components/list/RemarkList";
 
 interface RemarkListSectionProps {
   targetUnitId: string;
-  workUnitId?: string;
   limit?: number;
 }
 
 export const RemarkListSection: React.FC<RemarkListSectionProps> = ({
   targetUnitId,
-  workUnitId,
   limit = 20,
 }) => {
   const { t } = useTranslation(["common"]);
   const { data, isLoading, error } = useQuery({
-    ...postQueries.list(
-      workUnitId
-        ? {
-            workUnitId,
-            kind: PostKind.REMARK,
-            workRoles: ["POST"],
-            limit,
-          }
-        : { targetUnitId, kind: PostKind.REMARK, limit },
-    ),
+    ...postQueries.list({ targetUnitId, kind: PostKind.REMARK, limit }),
     enabled: !!targetUnitId,
   });
 

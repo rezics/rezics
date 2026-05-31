@@ -1,5 +1,5 @@
 import { postQueries } from "@rezics/api/post/post";
-import type { PostKind, PostListQuery } from "@rezics/contract";
+import type { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Badge } from "@rezics/ui/shadcn";
@@ -11,8 +11,6 @@ import { PostCard } from "../components/item/PostCard";
 
 interface PostListSectionProps {
   targetUnitId?: string;
-  workUnitId?: string;
-  workRoles?: PostListQuery["workRoles"];
   currentReleaseUnitId?: string;
   targetReleaseTitles?: Record<string, string>;
   kind?: PostKind;
@@ -21,8 +19,6 @@ interface PostListSectionProps {
 
 export const PostListSection: React.FC<PostListSectionProps> = ({
   targetUnitId,
-  workUnitId,
-  workRoles,
   currentReleaseUnitId,
   targetReleaseTitles = {},
   kind,
@@ -30,25 +26,12 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
 }) => {
   const { t } = useTranslation(["community"]);
   const navigate = useNavigate();
-  const filters = {
-    workRoles,
+  const query = postQueries.list({
+    targetUnitId: targetUnitId ?? "",
     kind,
     limit,
     parentPostUnitId: undefined,
-  };
-  const query = postQueries.list(
-    workUnitId
-      ? {
-          workUnitId,
-          ...filters,
-        }
-      : {
-          targetUnitId: targetUnitId ?? "",
-          kind,
-          limit,
-          parentPostUnitId: undefined,
-        },
-  );
+  });
   const { data, isLoading } = useQuery(query);
   const posts = data?.posts ?? [];
 

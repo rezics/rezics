@@ -5,36 +5,12 @@ import {
 } from "./communityFeed";
 
 describe("book community feed helpers", () => {
-  test("defaults release-aware books to a work-domain feed", () => {
+  test("uses the current catalog entry as the feed target", () => {
     expect(
       resolveBookCommunityFeedQuery({
         currentReleaseUnitId: "release-1",
-        workUnitId: "work-1",
-        exactRelease: false,
       }),
-    ).toEqual({
-      mode: "work",
-      workUnitId: "work-1",
-      workRoles: ["POST", "REVIEW"],
-    });
-  });
-
-  test("uses exact release filtering when requested or no work exists", () => {
-    expect(
-      resolveBookCommunityFeedQuery({
-        currentReleaseUnitId: "release-1",
-        workUnitId: "work-1",
-        exactRelease: true,
-      }),
-    ).toEqual({ mode: "release", targetUnitId: "release-1" });
-
-    expect(
-      resolveBookCommunityFeedQuery({
-        currentReleaseUnitId: "standalone-1",
-        workUnitId: null,
-        exactRelease: false,
-      }),
-    ).toEqual({ mode: "release", targetUnitId: "standalone-1" });
+    ).toEqual({ mode: "entry", targetUnitId: "release-1" });
   });
 
   test("labels sibling-release posts without labelling current-release posts", () => {

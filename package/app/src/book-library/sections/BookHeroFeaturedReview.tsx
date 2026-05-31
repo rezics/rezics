@@ -14,7 +14,6 @@ import { Link } from "@/shared/ui/link";
 
 interface BookHeroFeaturedReviewProps {
   bookId: string;
-  workUnitId?: string;
 }
 
 const QUOTE_OPEN = "“";
@@ -32,26 +31,16 @@ function mockReviewScore(post: PostDTO): number | null {
 
 export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   bookId,
-  workUnitId,
 }) => {
   const { t } = useTranslation(["book"]);
   // MOCK: should sort by reaction count once postsByTarget supports it.
   // For now, take the most recent review.
   const { data, isLoading } = useQuery({
-    ...postQueries.list(
-      workUnitId
-        ? {
-            workUnitId,
-            kind: PostKind.REVIEW,
-            workRoles: ["REVIEW"],
-            limit: 1,
-          }
-        : {
-            targetUnitId: bookId,
-            kind: PostKind.REVIEW,
-            limit: 1,
-          },
-    ),
+    ...postQueries.list({
+      targetUnitId: bookId,
+      kind: PostKind.REVIEW,
+      limit: 1,
+    }),
     enabled: Boolean(bookId),
   });
 

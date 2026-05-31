@@ -10,7 +10,6 @@ import type { BookHeroStatKey } from "./BookHeroStatCards";
 
 interface BookHeroCountLinksProps {
   bookId: string;
-  workUnitId?: string;
   /** Stat keys already shown as big-icon cards above; suppressed from the link row. */
   excludeKeys?: BookHeroStatKey[];
 }
@@ -24,21 +23,15 @@ type CountLink = {
 
 export const BookHeroCountLinks: React.FC<BookHeroCountLinksProps> = ({
   bookId,
-  workUnitId,
   excludeKeys = [],
 }) => {
   const { t } = useTranslation(["book"]);
   const { data: reviewData } = useQuery({
-    ...postQueries.list(
-      workUnitId
-        ? {
-            workUnitId,
-            kind: PostKind.REVIEW,
-            workRoles: ["REVIEW"],
-            limit: 1,
-          }
-        : { targetUnitId: bookId, kind: PostKind.REVIEW, limit: 1 },
-    ),
+    ...postQueries.list({
+      targetUnitId: bookId,
+      kind: PostKind.REVIEW,
+      limit: 1,
+    }),
     enabled: Boolean(bookId),
   });
   const { data: shelfData } = useQuery({
