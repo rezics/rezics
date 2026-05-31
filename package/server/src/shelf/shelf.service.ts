@@ -82,25 +82,15 @@ async function enqueueContainedUnitIdsSync(shelfId: string): Promise<void> {
 
 async function enqueueShelfWorkDomainProjectionSync(
   shelfId: string,
-  workUnitId: string,
 ): Promise<void> {
   const source = { type: "server" as const, service: "shelf" };
-  await Promise.all([
-    serverJobProducer.enqueue(
-      createSearchCommand(
-        SEARCH_COMMAND_KINDS.contentSync,
-        { unitId: shelfId },
-        source,
-      ),
+  await serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentSync,
+      { unitId: shelfId },
+      source,
     ),
-    serverJobProducer.enqueue(
-      createSearchCommand(
-        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-        { targetId: workUnitId },
-        source,
-      ),
-    ),
-  ]);
+  );
 }
 
 type Tx = Prisma.TransactionClient;
@@ -207,11 +197,7 @@ export async function reconcileShelfWorkMemberships(
   }
 
   if (desiredWorkUnitIds.length > 0) {
-    await Promise.all(
-      desiredWorkUnitIds.map((workUnitId) =>
-        enqueueShelfWorkDomainProjectionSync(shelfId, workUnitId),
-      ),
-    );
+    await enqueueShelfWorkDomainProjectionSync(shelfId);
   }
 }
 

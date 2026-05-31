@@ -173,11 +173,10 @@ describe("job-runner HTTP app", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       status: "ok",
-      enqueued: 3,
+      enqueued: 2,
       results: [
         { kind: "ranking.invalidate", status: "coalesced" },
         { kind: "search.content.delete", status: "coalesced" },
-        { kind: "search.content.syncWorkReleases", status: "coalesced" },
       ],
     });
   });
@@ -247,7 +246,7 @@ describe("job-runner HTTP app", () => {
     });
   });
 
-  test("admin repair endpoints enqueue work-domain search repairs", async () => {
+  test("admin repair endpoints enqueue content search repairs", async () => {
     const { queue, sent } = createMemoryQueue("job-1");
     const app = createJobRunnerApp({
       queue,
@@ -261,15 +260,6 @@ describe("job-runner HTTP app", () => {
         headers: { "x-internal-secret": "secret" },
       }),
     );
-    const workResponse = await app.handle(
-      new Request(
-        "http://localhost/admin/search/work-domains/work-1/rebuild?limit=25",
-        {
-          method: "POST",
-          headers: { "x-internal-secret": "secret" },
-        },
-      ),
-    );
     const allResponse = await app.handle(
       new Request(
         "http://localhost/admin/search/work-domains/rebuild-all?limit=25",
@@ -281,16 +271,11 @@ describe("job-runner HTTP app", () => {
     );
 
     expect(releaseResponse.status).toBe(200);
-    expect(workResponse.status).toBe(200);
     expect(allResponse.status).toBe(200);
     expect(sent).toMatchObject([
       {
         kind: "search.content.sync",
         payload: { unitId: "release-1" },
-      },
-      {
-        kind: "search.content.syncWorkReleases",
-        payload: { targetId: "work-1", limit: 25 },
       },
       {
         kind: "search.content.workDomainFullSync",

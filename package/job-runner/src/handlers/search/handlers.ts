@@ -50,7 +50,6 @@ import {
   syncUserSegment,
   syncUserUnitCollectionSegment,
   syncWorkDomainContentSegment,
-  syncWorkReleasesSegment,
 } from "@rezics/search";
 import {
   DEFAULT_FANOUT_SEGMENT_LIMIT,
@@ -215,10 +214,6 @@ export function createSearchHandlers(client: SearchClient) {
       "unitId" in command.payload
         ? patchContentContainedUnitIds(client, command.payload.unitId)
         : undefined,
-    [SEARCH_COMMAND_KINDS.contentSyncWorkReleases]: async (command, context) =>
-      runFanoutSegment(command, context, (targetId, options) =>
-        syncWorkReleasesSegment(client, targetId, options),
-      ),
     [SEARCH_COMMAND_KINDS.contentWorkDomainFullSync]: async (
       command,
       context,

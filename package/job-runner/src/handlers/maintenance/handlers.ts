@@ -326,18 +326,9 @@ export function createMaintenanceHandlers(
           maintenance.source,
         ),
       );
-      for (const workUnitId of result.projectedWorkUnitIds) {
-        await context.enqueue(
-          createSearchCommand(
-            SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-            { targetId: workUnitId },
-            maintenance.source,
-          ),
-        );
-      }
       return {
         ...result,
-        enqueued: 1 + result.projectedWorkUnitIds.length,
+        enqueued: 1,
       };
     },
     [MAINTENANCE_COMMAND_KINDS.replay]: async (command, context) => {

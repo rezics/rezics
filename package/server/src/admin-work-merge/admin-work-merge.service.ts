@@ -34,7 +34,7 @@ function parseTagKey(
   return unitId && tagUnitId ? { unitId, tagUnitId } : null;
 }
 
-async function enqueueMergeRepair(unitIds: string[], workUnitIds: string[]) {
+async function enqueueMergeRepair(unitIds: string[]) {
   const commands = [
     ...unitIds.map((unitId) =>
       createSearchCommand(SEARCH_COMMAND_KINDS.contentSync, { unitId }, source),
@@ -43,13 +43,6 @@ async function enqueueMergeRepair(unitIds: string[], workUnitIds: string[]) {
       createSearchCommand(
         SEARCH_COMMAND_KINDS.postSync,
         { postId: unitId },
-        source,
-      ),
-    ),
-    ...workUnitIds.map((targetId) =>
-      createSearchCommand(
-        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-        { targetId },
         source,
       ),
     ),
@@ -295,10 +288,7 @@ export class AdminWorkMergeService {
         });
       });
 
-      const commandCount = await enqueueMergeRepair(operation.repairUnitIds, [
-        current.sourceWorkUnitId,
-        current.targetWorkUnitId,
-      ]);
+      const commandCount = await enqueueMergeRepair(operation.repairUnitIds);
 
       return prisma.adminWorkMergeOperation.update({
         where: { id: operationId },
@@ -375,10 +365,7 @@ export class AdminWorkMergeService {
       });
     });
 
-    await enqueueMergeRepair(current.repairUnitIds, [
-      current.sourceWorkUnitId,
-      current.targetWorkUnitId,
-    ]);
+    await enqueueMergeRepair(current.repairUnitIds);
 
     return row;
   }

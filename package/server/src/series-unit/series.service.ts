@@ -56,27 +56,15 @@ function flattenContentNodes(
 
 async function enqueueSeriesProjectionSync(
   seriesUnitId: string,
-  workUnitIds: readonly string[],
 ): Promise<void> {
   const source = { type: "server" as const, service: "series" };
-  await Promise.all([
-    serverJobProducer.enqueue(
-      createSearchCommand(
-        SEARCH_COMMAND_KINDS.contentSync,
-        { unitId: seriesUnitId },
-        source,
-      ),
+  await serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentSync,
+      { unitId: seriesUnitId },
+      source,
     ),
-    ...workUnitIds.map((workUnitId) =>
-      serverJobProducer.enqueue(
-        createSearchCommand(
-          SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-          { targetId: workUnitId },
-          source,
-        ),
-      ),
-    ),
-  ]);
+  );
 }
 
 export class SeriesService {
@@ -197,7 +185,7 @@ export class SeriesService {
       return created;
     });
 
-    await enqueueSeriesProjectionSync(series.unitId, []);
+    await enqueueSeriesProjectionSync(series.unitId);
     return series;
   }
 
@@ -229,7 +217,7 @@ export class SeriesService {
       },
       include: seriesInclude,
     });
-    await enqueueSeriesProjectionSync(unitId, []);
+    await enqueueSeriesProjectionSync(unitId);
     return row;
   }
 
@@ -412,7 +400,7 @@ export class SeriesService {
       });
     }
 
-    await enqueueSeriesProjectionSync(seriesUnitId, desiredWorkUnitIds);
+    await enqueueSeriesProjectionSync(seriesUnitId);
     return desiredWorkUnitIds;
   }
 

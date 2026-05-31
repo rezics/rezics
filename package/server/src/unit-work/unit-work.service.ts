@@ -17,10 +17,7 @@ import { unitWorkOrderBy } from "./unit-work.types";
 
 const RELEASE_ROLE = UnitWorkRole.RELEASE;
 
-async function enqueueWorkDomainProjectionSync(
-  unitId: string,
-  workUnitId: string,
-) {
+async function enqueueWorkDomainProjectionSync(unitId: string) {
   const source = { type: "server" as const, service: "unit-work" };
   await Promise.all([
     serverJobProducer.enqueue(
@@ -30,13 +27,6 @@ async function enqueueWorkDomainProjectionSync(
       createSearchCommand(
         SEARCH_COMMAND_KINDS.postSync,
         { postId: unitId },
-        source,
-      ),
-    ),
-    serverJobProducer.enqueue(
-      createSearchCommand(
-        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-        { targetId: workUnitId },
         source,
       ),
     ),
@@ -108,7 +98,7 @@ export class UnitWorkService {
       return membership;
     });
 
-    await enqueueWorkDomainProjectionSync(input.unitId, input.workUnitId);
+    await enqueueWorkDomainProjectionSync(input.unitId);
     return row;
   }
 
@@ -128,7 +118,7 @@ export class UnitWorkService {
           : {}),
       },
     });
-    await enqueueWorkDomainProjectionSync(unitId, workUnitId);
+    await enqueueWorkDomainProjectionSync(unitId);
     return row;
   }
 
@@ -142,7 +132,7 @@ export class UnitWorkService {
         where: { unitId_workUnitId_role: { unitId, workUnitId, role } },
       });
     });
-    await enqueueWorkDomainProjectionSync(unitId, workUnitId);
+    await enqueueWorkDomainProjectionSync(unitId);
   }
 
   async reconcileContentMemberships(
@@ -179,9 +169,7 @@ export class UnitWorkService {
 
     if (rows.length > 0) {
       await Promise.all(
-        rows.map((row) =>
-          enqueueWorkDomainProjectionSync(row.unitId, row.workUnitId),
-        ),
+        rows.map((row) => enqueueWorkDomainProjectionSync(row.unitId)),
       );
     }
     return rows;

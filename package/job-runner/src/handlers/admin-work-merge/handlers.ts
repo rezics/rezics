@@ -228,7 +228,6 @@ async function enqueueRepair(
   context: HandlerContext,
   unitIds: string[],
   postUnitIds: string[],
-  workUnitIds: string[],
 ) {
   let count = 0;
   for (const unitId of unitIds) {
@@ -246,16 +245,6 @@ async function enqueueRepair(
       createSearchCommand(
         SEARCH_COMMAND_KINDS.postSync,
         { postId },
-        command.source,
-      ),
-    );
-    count++;
-  }
-  for (const targetId of workUnitIds) {
-    await context.enqueue(
-      createSearchCommand(
-        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-        { targetId },
         command.source,
       ),
     );
@@ -346,7 +335,6 @@ export async function executeAdminWorkMerge(
       context,
       repairUnitIds,
       postUnitIds,
-      [operation.sourceWorkUnitId, operation.targetWorkUnitId],
     );
 
     await prisma.adminWorkMergeOperation.update({

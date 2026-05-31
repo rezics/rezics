@@ -208,29 +208,6 @@ export function createAdminApi(options: {
       },
     )
     .post(
-      "/admin/search/work-domains/:workUnitId/rebuild",
-      async ({ authorized, params, query, set }) => {
-        if (!authorized) return { status: "error", message: "Unauthorized" };
-        if (!options.queue.send) {
-          set.status = 503;
-          return { status: "error", message: "Queue does not support enqueue" };
-        }
-        const limit =
-          typeof query.limit === "string"
-            ? Number.parseInt(query.limit, 10)
-            : undefined;
-        const command = createSearchCommand(
-          SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-          {
-            targetId: params.workUnitId,
-            ...(Number.isFinite(limit) ? { limit } : {}),
-          },
-          { type: "server", service: "job-runner-admin" },
-        );
-        return enqueueCommand(options.queue as QueueLike, command);
-      },
-    )
-    .post(
       "/admin/search/work-domains/rebuild-all",
       async ({ authorized, query, set }) => {
         if (!authorized) return { status: "error", message: "Unauthorized" };

@@ -188,7 +188,6 @@ export function isPublicIndexableContentUnit(
         status: string;
         visibility: string;
         contentModerationState?: { state: string } | null;
-        workUnitId?: string | null;
         workMembers?: readonly unknown[];
       }
     | null
@@ -696,36 +695,6 @@ export async function syncContentSegment(
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }
 
-export async function syncWorkReleasesSegment(
-  client: SearchClient,
-  workUnitId: string,
-  options: SearchSegmentOptions = {},
-): Promise<SearchSegmentResult> {
-  const limit = segmentLimit(options);
-  const units: any[] = await getSearchPrismaClient().unit.findMany({
-    where: {
-      type: { in: INDEXABLE_TYPES },
-      ...publicSearchableUnitWhere(),
-      workMemberships: {
-        some: {
-          workUnitId,
-          role: "RELEASE",
-        },
-      },
-    },
-    include: contentInclude,
-    orderBy: { id: "asc" },
-    take: limit + 1,
-    skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { id: options.cursor } : undefined,
-  });
-  const { current, nextCursor } = segmentRows(units, limit, "id");
-  if (current.length > 0) {
-    await client.addOrUpdateContent(current.map(buildContentDocument));
-  }
-  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
-}
-
 export async function syncWorkDomainContentSegment(
   client: SearchClient,
   options: SearchSegmentOptions = {},
@@ -1201,7 +1170,7 @@ export async function patchContentMetadata(
   unitId: string,
   fields: Record<string, any>,
 ) {
-  if ("status" in fields || "visibility" in fields || "workUnitId" in fields) {
+  if ("status" in fields || "visibility" in fields) {
     await syncSingleContent(client, unitId);
     return;
   }

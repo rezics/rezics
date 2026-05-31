@@ -116,11 +116,6 @@ describe("TagService tag writes", () => {
         payload: { unitId: "unit-1" },
         source: { type: "server", service: "tag" },
       },
-      {
-        kind: "search.content.syncWorkReleases",
-        payload: { targetId: "unit-1" },
-        source: { type: "server", service: "tag" },
-      },
     ]);
   });
 });

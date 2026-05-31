@@ -61,11 +61,6 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
         { unitId },
         source,
       ),
-      createSearchCommand(
-        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-        { targetId: unitId },
-        source,
-      ),
     ];
   }
 
@@ -83,11 +78,6 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
         { targetId: unitId },
         source,
       ),
-      createSearchCommand(
-        SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-        { targetId: unitId },
-        source,
-      ),
     ];
   }
 
@@ -98,11 +88,6 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
           createSearchCommand(
             SEARCH_COMMAND_KINDS.contentPatchTags,
             { unitId },
-            source,
-          ),
-          createSearchCommand(
-            SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-            { targetId: unitId },
             source,
           ),
         ]
@@ -128,18 +113,12 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
             { unitId },
             source,
           ),
-          createSearchCommand(
-            SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-            { targetId: unitId },
-            source,
-          ),
         ]
       : [];
   }
 
   if (table === "UnitWork") {
     const unitId = targetId(message, ["unitId", "unit_id"]);
-    const workUnitId = targetId(message, ["workUnitId", "work_unit_id"]);
     return [
       ...(unitId
         ? [
@@ -151,15 +130,6 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
             createSearchCommand(
               SEARCH_COMMAND_KINDS.postSync,
               { postId: unitId },
-              source,
-            ),
-          ]
-        : []),
-      ...(workUnitId
-        ? [
-            createSearchCommand(
-              SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-              { targetId: workUnitId },
               source,
             ),
           ]

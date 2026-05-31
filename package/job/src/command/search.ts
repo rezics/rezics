@@ -16,7 +16,6 @@ export const SEARCH_COMMAND_KINDS = {
   contentPatchRealmIds: "search.content.patchRealmIds",
   contentPatchRealmTagKeys: "search.content.patchRealmTagKeys",
   contentPatchContainedUnitIds: "search.content.patchContainedUnitIds",
-  contentSyncWorkReleases: "search.content.syncWorkReleases",
   contentWorkDomainFullSync: "search.content.workDomainFullSync",
   contentGameMediaFullSync: "search.content.gameMediaFullSync",
   contentFullSync: "search.content.fullSync",
@@ -152,11 +151,6 @@ export const ContentPatchContainedUnitIdsCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.contentPatchContainedUnitIds,
   JOB_LANES.searchSyncSlow,
   UnitTargetPayloadSchema,
-);
-export const ContentSyncWorkReleasesCommandSchema = commandSchema(
-  SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-  JOB_LANES.searchSyncSlow,
-  FanoutPayloadSchema,
 );
 export const ContentWorkDomainFullSyncCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
@@ -372,7 +366,6 @@ export const SearchCommandSchema = v.union([
   ContentPatchRealmIdsCommandSchema,
   ContentPatchRealmTagKeysCommandSchema,
   ContentPatchContainedUnitIdsCommandSchema,
-  ContentSyncWorkReleasesCommandSchema,
   ContentWorkDomainFullSyncCommandSchema,
   ContentGameMediaFullSyncCommandSchema,
   ContentFullSyncCommandSchema,
@@ -449,13 +442,11 @@ export function createSearchCommand(
   const lane =
     kind.includes(".fullSync") || kind.endsWith("FullSync")
       ? JOB_LANES.maintenance
-      : kind === SEARCH_COMMAND_KINDS.contentSyncWorkReleases
-        ? JOB_LANES.searchSyncSlow
-        : kind.includes(".sync") ||
-            kind.includes(".delete") ||
-            kind.includes(".remove")
-          ? JOB_LANES.searchSyncFast
-          : JOB_LANES.searchSyncSlow;
+      : kind.includes(".sync") ||
+          kind.includes(".delete") ||
+          kind.includes(".remove")
+        ? JOB_LANES.searchSyncFast
+        : JOB_LANES.searchSyncSlow;
   const [, domain, operation] = kind.split(".");
   return v.parse(SearchCommandSchema, {
     kind,

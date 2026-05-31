@@ -190,15 +190,11 @@ describe("maintenance handlers", () => {
 
     expect(result).toEqual({
       projectedWorkUnitIds: ["work-1"],
-      enqueued: 2,
+      enqueued: 1,
     });
     expect(upserts).toHaveLength(1);
     expect(enqueued).toEqual([
       { kind: "search.content.sync", payload: { unitId: "series-1" } },
-      {
-        kind: "search.content.syncWorkReleases",
-        payload: { targetId: "work-1" },
-      },
     ]);
   });
 });

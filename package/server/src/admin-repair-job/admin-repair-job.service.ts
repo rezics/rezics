@@ -283,29 +283,14 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
             });
           }
         } else if (input.scope === "work-domain") {
-          if (targetIds.length === 0) {
-            const command = createSearchCommand(
-              SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
-              { limit: 500 },
-              { type: "server", service: "admin-repair-job" },
-            );
-            queuedOperations.push(
-              operationFromEnqueue(await options.jobProducer.enqueue(command)),
-            );
-          } else {
-            for (const targetId of targetIds) {
-              const command = createSearchCommand(
-                SEARCH_COMMAND_KINDS.contentSyncWorkReleases,
-                { targetId, limit: 500 },
-                { type: "server", service: "admin-repair-job" },
-              );
-              queuedOperations.push(
-                operationFromEnqueue(
-                  await options.jobProducer.enqueue(command),
-                ),
-              );
-            }
-          }
+          const command = createSearchCommand(
+            SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+            { limit: 500 },
+            { type: "server", service: "admin-repair-job" },
+          );
+          queuedOperations.push(
+            operationFromEnqueue(await options.jobProducer.enqueue(command)),
+          );
         } else {
           const failureAudit = await appendRepairAudit(options, {
             actorUserId: input.actorUserId,

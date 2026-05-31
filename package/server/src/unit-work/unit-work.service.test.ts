@@ -147,10 +147,6 @@ describe("UnitWorkService", () => {
         kind: "search.post.sync",
         payload: { postId: "release-1" },
       },
-      {
-        kind: "search.content.syncWorkReleases",
-        payload: { targetId: "work-1" },
-      },
     ]);
   });
 
@@ -200,20 +196,12 @@ describe("UnitWorkService", () => {
         payload: { postId: "post-1" },
       },
       {
-        kind: "search.content.syncWorkReleases",
-        payload: { targetId: "work-1" },
-      },
-      {
         kind: "search.content.sync",
         payload: { unitId: "post-1" },
       },
       {
         kind: "search.post.sync",
         payload: { postId: "post-1" },
-      },
-      {
-        kind: "search.content.syncWorkReleases",
-        payload: { targetId: "work-2" },
       },
     ]);
   });

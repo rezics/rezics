@@ -36,19 +36,15 @@ describe("Sequin payload routing", () => {
 
     const commands = routeSequinMessages(messages);
 
-    expect(commands).toHaveLength(2);
+    expect(commands).toHaveLength(1);
     expect(commands[0]).toMatchObject({
       kind: "search.content.patchTags",
       payload: { unitId: "unit-1" },
     });
-    expect(commands[1]).toMatchObject({
-      kind: "search.content.syncWorkReleases",
-      payload: { targetId: "unit-1" },
-    });
     expect(JSON.stringify(commands[0])).not.toContain("stale");
   });
 
-  test("routes UnitWork changes to member and work-domain projection rebuilds", () => {
+  test("routes UnitWork changes to direct member rebuilds", () => {
     const messages = parseSequinPayload({
       table: "UnitWork",
       action: "insert",
@@ -63,10 +59,6 @@ describe("Sequin payload routing", () => {
       {
         kind: "search.post.sync",
         payload: { postId: "release-1" },
-      },
-      {
-        kind: "search.content.syncWorkReleases",
-        payload: { targetId: "work-1" },
       },
     ]);
   });
@@ -109,7 +101,7 @@ describe("Sequin payload routing", () => {
     ]);
   });
 
-  test("routes work metadata changes to release projection rebuilds", () => {
+  test("routes unit metadata changes to direct target fanouts", () => {
     const messages = parseSequinPayload({
       table: "UnitTranslation",
       action: "update",
@@ -119,10 +111,6 @@ describe("Sequin payload routing", () => {
     expect(routeSequinMessages(messages)).toMatchObject([
       { kind: "search.content.patchTranslations" },
       { kind: "search.post.patchTargetFanout" },
-      {
-        kind: "search.content.syncWorkReleases",
-        payload: { targetId: "work-1" },
-      },
     ]);
   });
 
