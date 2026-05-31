@@ -10,7 +10,7 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostCard } from "@/post";
 import {
   ReviewCard,
-  type ReviewTargetWork,
+  type ReviewTargetUnit,
 } from "@/review/components/item/ReviewCard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
@@ -55,8 +55,8 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
       enabled: Boolean(unitId),
     })),
   });
-  const targetWorkByUnitId = useMemo(() => {
-    const map = new Map<string, ReviewTargetWork>();
+  const targetUnitByUnitId = useMemo(() => {
+    const map = new Map<string, ReviewTargetUnit>();
     for (const result of targetBookQueries) {
       const book = result.data;
       if (!book) continue;
@@ -94,9 +94,9 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
           <ReviewCard
             key={post.unitId}
             review={post}
-            targetWork={
+            targetUnit={
               post.targetUnitId
-                ? targetWorkByUnitId.get(post.targetUnitId)
+                ? targetUnitByUnitId.get(post.targetUnitId)
                 : undefined
             }
           />

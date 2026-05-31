@@ -26,7 +26,7 @@ import type { ShelfStreamEntry } from "../models/shelfStream";
 import { ShelfCard } from "./ShelfCard";
 import { ShelfItemCard } from "./ShelfItemCard";
 
-interface ReviewTargetWork {
+interface ReviewTargetUnit {
   unitId: string;
   title: string;
 }
@@ -49,8 +49,8 @@ function renderUnit(
   enriched: EnrichedShelfUnit,
   viewMode: ShelfView,
   options?: {
-    targetWork?: ReviewTargetWork;
-    showTargetWork?: boolean;
+    targetUnit?: ReviewTargetUnit;
+    showTargetUnit?: boolean;
   },
 ): React.ReactNode {
   const { unit, data } = enriched;
@@ -110,8 +110,8 @@ function renderUnit(
       return (
         <ReviewCard
           review={post}
-          targetWork={options?.targetWork}
-          showTargetWork={options?.showTargetWork}
+          targetUnit={options?.targetUnit}
+          showTargetUnit={options?.showTargetUnit}
         />
       );
     }
@@ -146,9 +146,9 @@ function getBookTitle(enriched: EnrichedShelfUnit | undefined): string | null {
   return book?.translations?.[0]?.title ?? enriched.unit.unitId;
 }
 
-function targetWorkFromParent(
+function targetUnitFromParent(
   parent: EnrichedShelfUnit | undefined,
-): ReviewTargetWork | undefined {
+): ReviewTargetUnit | undefined {
   const title = getBookTitle(parent);
   if (!parent || !title) return undefined;
   return {
@@ -213,7 +213,7 @@ function NestedRootCard({
         {reviewChildren[activeIdx]?.data && (
           <ReviewCard
             review={reviewChildren[activeIdx]!.data as PostDTO}
-            showTargetWork={false}
+            showTargetUnit={false}
           />
         )}
       </div>
@@ -248,8 +248,8 @@ export function ShelfItemRenderer({
     );
   } else {
     content = renderUnit(entry.unit, viewMode, {
-      targetWork:
-        entry.kind === "child" ? targetWorkFromParent(entry.parent) : undefined,
+      targetUnit:
+        entry.kind === "child" ? targetUnitFromParent(entry.parent) : undefined,
     });
   }
 

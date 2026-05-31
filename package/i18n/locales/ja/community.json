@@ -121,7 +121,7 @@
   "post_composer_invalid_configuration": "コンポーザー設定が無効です。",
   "post_composer_posting": "投稿中…",
   "post_composer_post": "投稿",
-  "review_target_work_label": "作品",
+  "review_target_label": "対象",
   "review_search_placeholder": "レビューを検索",
   "review_tabs_label": "レビュータブ",
   "review_edit_title": "レビューを編集",

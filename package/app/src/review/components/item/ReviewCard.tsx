@@ -54,20 +54,20 @@ const ReviewRatingBadge: React.FC<ReviewRatingBadgeProps> = ({ review }) => {
 interface ReviewCardProps {
   review: PostDTO;
   className?: string;
-  targetWork?: ReviewTargetWork | null;
-  showTargetWork?: boolean;
+  targetUnit?: ReviewTargetUnit | null;
+  showTargetUnit?: boolean;
 }
 
-export interface ReviewTargetWork {
+export interface ReviewTargetUnit {
   unitId: string;
   title: string;
 }
 
-function getReviewTargetWork(
+function getReviewTargetUnit(
   review: PostDTO,
-  targetWork?: ReviewTargetWork | null,
-): ReviewTargetWork | null {
-  if (targetWork?.unitId && targetWork.title) return targetWork;
+  targetUnit?: ReviewTargetUnit | null,
+): ReviewTargetUnit | null {
+  if (targetUnit?.unitId && targetUnit.title) return targetUnit;
   const book = (
     review.extra as { book?: { id?: string; title?: string } } | null
   )?.book;
@@ -80,15 +80,15 @@ function getReviewTargetWork(
 export const ReviewCard: React.FC<ReviewCardProps> = ({
   review,
   className,
-  targetWork,
-  showTargetWork = true,
+  targetUnit,
+  showTargetUnit = true,
 }) => {
   const { t } = useTranslation(["community"]);
   const navigate = useNavigate();
 
   const reviewTitle = (review.extra as any)?.title as string | undefined;
-  const reviewTargetWork = showTargetWork
-    ? getReviewTargetWork(review, targetWork)
+  const reviewTargetUnit = showTargetUnit
+    ? getReviewTargetUnit(review, targetUnit)
     : null;
 
   const handleReplyInvoke = () => {
@@ -128,19 +128,19 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
           </TextLink>
         )}
 
-        {reviewTargetWork && (
+        {reviewTargetUnit && (
           <div className="flex min-w-0 items-center gap-1 text-xs leading-dense text-text-secondary">
             <span className="shrink-0">
-              {t("community:review_target_work_label")}
+              {t("community:review_target_label")}
             </span>
             <TextLink
               to="/book/$bookId"
-              params={{ bookId: reviewTargetWork.unitId }}
+              params={{ bookId: reviewTargetUnit.unitId }}
               underline="none"
               className="min-w-0 truncate text-text-secondary hover:text-text-primary"
               onClick={(e) => e.stopPropagation()}
             >
-              {reviewTargetWork.title}
+              {reviewTargetUnit.title}
             </TextLink>
           </div>
         )}

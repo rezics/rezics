@@ -121,7 +121,7 @@
   "post_composer_invalid_configuration": "回复编辑器配置无效。",
   "post_composer_posting": "发布中…",
   "post_composer_post": "发布",
-  "review_target_work_label": "作品",
+  "review_target_label": "对象",
   "review_search_placeholder": "搜索书评",
   "review_tabs_label": "书评分页",
   "review_edit_title": "编辑书评",

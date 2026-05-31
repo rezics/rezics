@@ -15,13 +15,13 @@ const SPACING_CLASS_BY_NUMBER: Record<number, string> = {
 export interface ReviewListProps {
   reviews: PostDTO[];
   spacing?: number | string;
-  showTargetWork?: boolean;
+  showTargetUnit?: boolean;
 }
 
 export const ReviewList: React.FC<ReviewListProps> = ({
   reviews,
   spacing = 0,
-  showTargetWork = true,
+  showTargetUnit = true,
 }) => {
   const targetIds = useMemo(
     () => reviews.map((r) => r.unitId).filter(Boolean) as string[],
@@ -38,7 +38,7 @@ export const ReviewList: React.FC<ReviewListProps> = ({
         <ReviewCard
           key={review.unitId}
           review={review}
-          showTargetWork={showTargetWork}
+          showTargetUnit={showTargetUnit}
         />
       ))}
     </div>

@@ -121,7 +121,7 @@
   "post_composer_invalid_configuration": "Invalid composer configuration.",
   "post_composer_posting": "Posting…",
   "post_composer_post": "Post",
-  "review_target_work_label": "Work",
+  "review_target_label": "Target",
   "review_search_placeholder": "Search reviews",
   "review_tabs_label": "Review tabs",
   "review_edit_title": "Edit Review",

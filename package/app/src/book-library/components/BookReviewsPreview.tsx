@@ -43,7 +43,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
       <ArrowForwardIcon size={16} to={`/review/book/${bookId}/`}>
         <AccentBarWithText text={t("book:reviews_of_book", { title })} />
       </ArrowForwardIcon>
-      <ReviewList reviews={reviews} showTargetWork={false} />
+      <ReviewList reviews={reviews} showTargetUnit={false} />
     </div>
   );
 };

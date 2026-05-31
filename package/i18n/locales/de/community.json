@@ -121,7 +121,7 @@
   "post_composer_invalid_configuration": "Ungültige Composer-Konfiguration.",
   "post_composer_posting": "Wird gepostet…",
   "post_composer_post": "Posten",
-  "review_target_work_label": "Werk",
+  "review_target_label": "Ziel",
   "review_search_placeholder": "Rezensionen suchen",
   "review_tabs_label": "Rezension-Tabs",
   "review_edit_title": "Rezension bearbeiten",

@@ -121,7 +121,7 @@
   "post_composer_invalid_configuration": "작성기 설정이 올바르지 않습니다.",
   "post_composer_posting": "게시 중…",
   "post_composer_post": "게시",
-  "review_target_work_label": "작품",
+  "review_target_label": "대상",
   "review_search_placeholder": "리뷰 검색",
   "review_tabs_label": "리뷰 탭",
   "review_edit_title": "리뷰 편집",

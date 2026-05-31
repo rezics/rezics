@@ -30,5 +30,5 @@ export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
     return <EmptyState title={t("community:review_list_empty_title")} />;
   }
 
-  return <ReviewList reviews={reviews} showTargetWork={false} />;
+  return <ReviewList reviews={reviews} showTargetUnit={false} />;
 };
