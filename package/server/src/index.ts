@@ -75,6 +75,7 @@ import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
 import { unitExternalRefApi } from "./unit-external-ref";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
+import { userTagApplicationApi } from "./user-tag-application";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
@@ -240,6 +241,7 @@ routeApp
   .use(subscriptionApi)
   .use(userApi)
   .use(userBriefApi)
+  .use(userTagApplicationApi)
   .use(meiliApi)
   .use(federatedSearchApi)
   .use(unitApi)

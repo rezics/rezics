@@ -31,6 +31,7 @@ export * from "./subscription/subscription";
 export * from "./unit/unit";
 export * from "./unit-alias-record/unit-alias";
 export * from "./unit-external-ref/unit-external-ref";
+export * from "./user-tag-application/user-tag-application";
 export * from "./work-maintenance/work-maintenance";
 export * from "./work-realm-context/work-realm-context";
 export * from "./zone/zone";
