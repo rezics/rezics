@@ -37,6 +37,8 @@ describe("searchContent work-domain behavior", () => {
       tagIds: ["tag-esrb-teen"],
       workUnitId: "work-1",
       workRoles: ["RELEASE"],
+      catalogEntryKind: "VARIANT",
+      targetUnitId: "main-entry-1",
       platformEntityIds: ["platform-windows"],
     });
 
@@ -44,6 +46,8 @@ describe("searchContent work-domain behavior", () => {
       'allTagIds = "tag-esrb-teen"',
       'workUnitId = "work-1"',
       'workRoles = "RELEASE"',
+      'catalogEntryKind = "VARIANT"',
+      'targetUnitId = "main-entry-1"',
       'platformEntityIds = "platform-windows"',
       'visibility = "PUBLIC"',
     ]);

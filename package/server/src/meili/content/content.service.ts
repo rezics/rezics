@@ -116,6 +116,13 @@ export async function searchContent(
     }
   }
 
+  if (opts.catalogEntryKind) {
+    filter.push(`catalogEntryKind = "${opts.catalogEntryKind}"`);
+  }
+  if (opts.targetUnitId) {
+    filter.push(`targetUnitId = "${opts.targetUnitId}"`);
+  }
+
   if (opts.platformEntityIds?.length) {
     for (const platformEntityId of opts.platformEntityIds) {
       filter.push(`platformEntityIds = "${platformEntityId}"`);
