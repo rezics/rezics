@@ -1,5 +1,5 @@
 import { useCreateCommentMutation } from "@rezics/api/comment/comment";
-import { postKeys, useCreatePostMutation } from "@rezics/api/post/post";
+import { useCreatePostMutation } from "@rezics/api/post/post";
 import { realmQueries } from "@rezics/api/realm/realm";
 import { tagQueries } from "@rezics/api/tag/tag";
 import {
@@ -11,7 +11,7 @@ import {
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { BarChart3 } from "lucide-react";
 import type React from "react";
 import {
@@ -323,7 +323,6 @@ export const ReplyComposer = forwardRef<
   const [attachingPoll, setAttachingPoll] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const shouldRetainOnBlur = useBlurRetain(body);
-  const queryClient = useQueryClient();
   const postMutation = useCreatePostMutation();
   const commentMutation = useCreateCommentMutation();
   const submitting = postMutation.isPending || commentMutation.isPending;
@@ -352,17 +351,6 @@ export const ReplyComposer = forwardRef<
           {
             onSuccess: (comment) => {
               reset();
-              queryClient.invalidateQueries({
-                queryKey: postKeys.threads(rootUnitId),
-              });
-              queryClient.invalidateQueries({
-                queryKey: postKeys.detail(rootUnitId),
-              });
-              if (parentCommentUnitId) {
-                queryClient.invalidateQueries({
-                  queryKey: postKeys.detail(parentCommentUnitId),
-                });
-              }
               onSubmitted?.(mapCommentToPost(comment));
             },
           },
@@ -393,7 +381,6 @@ export const ReplyComposer = forwardRef<
       onSubmitted,
       parentCommentUnitId,
       postMutation.mutate,
-      queryClient,
       realmUnitId,
       rootUnitId,
       targetUnitId,
