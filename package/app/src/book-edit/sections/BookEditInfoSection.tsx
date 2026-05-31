@@ -56,7 +56,7 @@ import {
   BookMetadataEditor,
   type BookMetadataValue,
 } from "../components/Metadata/BookMetadataEditor";
-import { SetSourceReleaseControl } from "../components/SetSourceReleaseControl";
+import { SetSourceUnitControl } from "../components/SetSourceUnitControl";
 import { TranslationFieldsEditor } from "../components/TranslationFieldsEditor";
 import { TranslationLanguageBar } from "../components/TranslationLanguageBar";
 import { TranslationSyncActions } from "../components/TranslationSyncActions";
@@ -819,10 +819,10 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
                 }
               />
 
-              <SetSourceReleaseControl
+              <SetSourceUnitControl
                 book={data}
                 language={editor.selectedLanguage}
-                currentSourceReleaseUnitId={sourceUnitId}
+                currentSourceUnitId={sourceUnitId}
               />
 
               {editor.isDirty && sourceUnitId && (

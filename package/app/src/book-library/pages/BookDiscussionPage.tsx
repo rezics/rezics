@@ -43,7 +43,7 @@ export const BookCommunityPage: React.FC = () => {
   if (!bookInfo) return null;
 
   const feedQuery = resolveBookCommunityFeedQuery({
-    currentReleaseUnitId: bookInfo.unitId,
+    currentCatalogEntryUnitId: bookInfo.unitId,
   });
 
   return (
@@ -58,7 +58,7 @@ export const BookCommunityPage: React.FC = () => {
 
       <PostListSection
         targetUnitId={feedQuery.targetUnitId}
-        currentReleaseUnitId={bookInfo.unitId}
+        currentCatalogEntryUnitId={bookInfo.unitId}
       />
     </div>
   );

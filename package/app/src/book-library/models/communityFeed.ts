@@ -8,22 +8,22 @@ export type BookCommunityFeedQuery = {
 };
 
 export function resolveBookCommunityFeedQuery(input: {
-  currentReleaseUnitId: string;
+  currentCatalogEntryUnitId: string;
 }): BookCommunityFeedQuery {
   return {
     mode: "entry",
-    targetUnitId: input.currentReleaseUnitId,
+    targetUnitId: input.currentCatalogEntryUnitId,
   };
 }
 
-export function resolvePostTargetReleaseLabel(
+export function resolvePostTargetVariantLabel(
   post: Pick<PostDTO, "targetUnitId">,
-  currentReleaseUnitId: string,
-  releaseTitlesByUnitId: Readonly<Record<string, string>>,
+  currentCatalogEntryUnitId: string,
+  variantTitlesByUnitId: Readonly<Record<string, string>>,
 ): string | undefined {
   const targetUnitId = post.targetUnitId ?? undefined;
-  if (!targetUnitId || targetUnitId === currentReleaseUnitId) {
+  if (!targetUnitId || targetUnitId === currentCatalogEntryUnitId) {
     return undefined;
   }
-  return releaseTitlesByUnitId[targetUnitId] ?? targetUnitId;
+  return variantTitlesByUnitId[targetUnitId] ?? targetUnitId;
 }

@@ -98,9 +98,9 @@ import { Route as MainLayoutRealmRealmIdManageRouteImport } from './routes/_main
 import { Route as MainLayoutRRealmSlugManageRouteImport } from './routes/_mainLayout/r/$realmSlug/manage'
 import { Route as MainLayoutInboxDmConversationIdRouteImport } from './routes/_mainLayout/inbox/dm/$conversationId'
 import { Route as MainLayoutExcerptBookBookIdRouteImport } from './routes/_mainLayout/excerpt/book/$bookId'
+import { Route as MainLayoutBookBookIdVariantsRouteImport } from './routes/_mainLayout/book/$bookId/variants'
 import { Route as MainLayoutBookBookIdSearchRouteImport } from './routes/_mainLayout/book/$bookId/search'
 import { Route as MainLayoutBookBookIdReviewRouteImport } from './routes/_mainLayout/book/$bookId/review'
-import { Route as MainLayoutBookBookIdReleasesRouteImport } from './routes/_mainLayout/book/$bookId/releases'
 import { Route as MainLayoutBookBookIdInfoRouteImport } from './routes/_mainLayout/book/$bookId/info'
 import { Route as MainLayoutBookBookIdDiscussionRouteImport } from './routes/_mainLayout/book/$bookId/discussion'
 import { Route as MainLayoutBookBookIdContentRouteImport } from './routes/_mainLayout/book/$bookId/content'
@@ -635,6 +635,12 @@ const MainLayoutExcerptBookBookIdRoute =
     path: '/excerpt/book/$bookId',
     getParentRoute: () => MainLayoutRoute,
   } as any)
+const MainLayoutBookBookIdVariantsRoute =
+  MainLayoutBookBookIdVariantsRouteImport.update({
+    id: '/variants',
+    path: '/variants',
+    getParentRoute: () => MainLayoutBookBookIdRouteRoute,
+  } as any)
 const MainLayoutBookBookIdSearchRoute =
   MainLayoutBookBookIdSearchRouteImport.update({
     id: '/search',
@@ -645,12 +651,6 @@ const MainLayoutBookBookIdReviewRoute =
   MainLayoutBookBookIdReviewRouteImport.update({
     id: '/review',
     path: '/review',
-    getParentRoute: () => MainLayoutBookBookIdRouteRoute,
-  } as any)
-const MainLayoutBookBookIdReleasesRoute =
-  MainLayoutBookBookIdReleasesRouteImport.update({
-    id: '/releases',
-    path: '/releases',
     getParentRoute: () => MainLayoutBookBookIdRouteRoute,
   } as any)
 const MainLayoutBookBookIdInfoRoute =
@@ -978,9 +978,9 @@ export interface FileRoutesByFullPath {
   '/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
   '/book/$bookId/discussion': typeof MainLayoutBookBookIdDiscussionRoute
   '/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
-  '/book/$bookId/releases': typeof MainLayoutBookBookIdReleasesRoute
   '/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
+  '/book/$bookId/variants': typeof MainLayoutBookBookIdVariantsRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
   '/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
@@ -1108,9 +1108,9 @@ export interface FileRoutesByTo {
   '/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
   '/book/$bookId/discussion': typeof MainLayoutBookBookIdDiscussionRoute
   '/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
-  '/book/$bookId/releases': typeof MainLayoutBookBookIdReleasesRoute
   '/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
+  '/book/$bookId/variants': typeof MainLayoutBookBookIdVariantsRoute
   '/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
   '/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
@@ -1247,9 +1247,9 @@ export interface FileRoutesById {
   '/_mainLayout/book/$bookId/content': typeof MainLayoutBookBookIdContentRoute
   '/_mainLayout/book/$bookId/discussion': typeof MainLayoutBookBookIdDiscussionRoute
   '/_mainLayout/book/$bookId/info': typeof MainLayoutBookBookIdInfoRoute
-  '/_mainLayout/book/$bookId/releases': typeof MainLayoutBookBookIdReleasesRoute
   '/_mainLayout/book/$bookId/review': typeof MainLayoutBookBookIdReviewRoute
   '/_mainLayout/book/$bookId/search': typeof MainLayoutBookBookIdSearchRoute
+  '/_mainLayout/book/$bookId/variants': typeof MainLayoutBookBookIdVariantsRoute
   '/_mainLayout/excerpt/book/$bookId': typeof MainLayoutExcerptBookBookIdRoute
   '/_mainLayout/inbox/dm/$conversationId': typeof MainLayoutInboxDmConversationIdRoute
   '/_mainLayout/r/$realmSlug/manage': typeof MainLayoutRRealmSlugManageRoute
@@ -1387,9 +1387,9 @@ export interface FileRouteTypes {
     | '/book/$bookId/content'
     | '/book/$bookId/discussion'
     | '/book/$bookId/info'
-    | '/book/$bookId/releases'
     | '/book/$bookId/review'
     | '/book/$bookId/search'
+    | '/book/$bookId/variants'
     | '/excerpt/book/$bookId'
     | '/inbox/dm/$conversationId'
     | '/r/$realmSlug/manage'
@@ -1517,9 +1517,9 @@ export interface FileRouteTypes {
     | '/book/$bookId/content'
     | '/book/$bookId/discussion'
     | '/book/$bookId/info'
-    | '/book/$bookId/releases'
     | '/book/$bookId/review'
     | '/book/$bookId/search'
+    | '/book/$bookId/variants'
     | '/excerpt/book/$bookId'
     | '/inbox/dm/$conversationId'
     | '/r/$realmSlug/manage'
@@ -1655,9 +1655,9 @@ export interface FileRouteTypes {
     | '/_mainLayout/book/$bookId/content'
     | '/_mainLayout/book/$bookId/discussion'
     | '/_mainLayout/book/$bookId/info'
-    | '/_mainLayout/book/$bookId/releases'
     | '/_mainLayout/book/$bookId/review'
     | '/_mainLayout/book/$bookId/search'
+    | '/_mainLayout/book/$bookId/variants'
     | '/_mainLayout/excerpt/book/$bookId'
     | '/_mainLayout/inbox/dm/$conversationId'
     | '/_mainLayout/r/$realmSlug/manage'
@@ -2373,6 +2373,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutExcerptBookBookIdRouteImport
       parentRoute: typeof MainLayoutRoute
     }
+    '/_mainLayout/book/$bookId/variants': {
+      id: '/_mainLayout/book/$bookId/variants'
+      path: '/variants'
+      fullPath: '/book/$bookId/variants'
+      preLoaderRoute: typeof MainLayoutBookBookIdVariantsRouteImport
+      parentRoute: typeof MainLayoutBookBookIdRouteRoute
+    }
     '/_mainLayout/book/$bookId/search': {
       id: '/_mainLayout/book/$bookId/search'
       path: '/search'
@@ -2385,13 +2392,6 @@ declare module '@tanstack/react-router' {
       path: '/review'
       fullPath: '/book/$bookId/review'
       preLoaderRoute: typeof MainLayoutBookBookIdReviewRouteImport
-      parentRoute: typeof MainLayoutBookBookIdRouteRoute
-    }
-    '/_mainLayout/book/$bookId/releases': {
-      id: '/_mainLayout/book/$bookId/releases'
-      path: '/releases'
-      fullPath: '/book/$bookId/releases'
-      preLoaderRoute: typeof MainLayoutBookBookIdReleasesRouteImport
       parentRoute: typeof MainLayoutBookBookIdRouteRoute
     }
     '/_mainLayout/book/$bookId/info': {
@@ -2795,9 +2795,9 @@ interface MainLayoutBookBookIdRouteRouteChildren {
   MainLayoutBookBookIdContentRoute: typeof MainLayoutBookBookIdContentRoute
   MainLayoutBookBookIdDiscussionRoute: typeof MainLayoutBookBookIdDiscussionRoute
   MainLayoutBookBookIdInfoRoute: typeof MainLayoutBookBookIdInfoRoute
-  MainLayoutBookBookIdReleasesRoute: typeof MainLayoutBookBookIdReleasesRoute
   MainLayoutBookBookIdReviewRoute: typeof MainLayoutBookBookIdReviewRoute
   MainLayoutBookBookIdSearchRoute: typeof MainLayoutBookBookIdSearchRoute
+  MainLayoutBookBookIdVariantsRoute: typeof MainLayoutBookBookIdVariantsRoute
   MainLayoutBookBookIdIndexRoute: typeof MainLayoutBookBookIdIndexRoute
 }
 
@@ -2806,9 +2806,9 @@ const MainLayoutBookBookIdRouteRouteChildren: MainLayoutBookBookIdRouteRouteChil
     MainLayoutBookBookIdContentRoute: MainLayoutBookBookIdContentRoute,
     MainLayoutBookBookIdDiscussionRoute: MainLayoutBookBookIdDiscussionRoute,
     MainLayoutBookBookIdInfoRoute: MainLayoutBookBookIdInfoRoute,
-    MainLayoutBookBookIdReleasesRoute: MainLayoutBookBookIdReleasesRoute,
     MainLayoutBookBookIdReviewRoute: MainLayoutBookBookIdReviewRoute,
     MainLayoutBookBookIdSearchRoute: MainLayoutBookBookIdSearchRoute,
+    MainLayoutBookBookIdVariantsRoute: MainLayoutBookBookIdVariantsRoute,
     MainLayoutBookBookIdIndexRoute: MainLayoutBookBookIdIndexRoute,
   }
 

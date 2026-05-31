@@ -6,21 +6,21 @@ import { Badge } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { resolvePostTargetReleaseLabel } from "@/book-library/models/communityFeed";
+import { resolvePostTargetVariantLabel } from "@/book-library/models/communityFeed";
 import { PostCard } from "../components/item/PostCard";
 
 interface PostListSectionProps {
   targetUnitId?: string;
-  currentReleaseUnitId?: string;
-  targetReleaseTitles?: Record<string, string>;
+  currentCatalogEntryUnitId?: string;
+  targetVariantTitles?: Record<string, string>;
   kind?: PostKind;
   limit?: number;
 }
 
 export const PostListSection: React.FC<PostListSectionProps> = ({
   targetUnitId,
-  currentReleaseUnitId,
-  targetReleaseTitles = {},
+  currentCatalogEntryUnitId,
+  targetVariantTitles = {},
   kind,
   limit = 20,
 }) => {
@@ -53,18 +53,18 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
   return (
     <div>
       {posts.map((post) => {
-        const targetReleaseLabel = currentReleaseUnitId
-          ? resolvePostTargetReleaseLabel(
+        const targetVariantLabel = currentCatalogEntryUnitId
+          ? resolvePostTargetVariantLabel(
               post,
-              currentReleaseUnitId,
-              targetReleaseTitles,
+              currentCatalogEntryUnitId,
+              targetVariantTitles,
             )
           : undefined;
         return (
           <div key={post.unitId}>
-            {targetReleaseLabel && (
+            {targetVariantLabel && (
               <div className="pt-3">
-                <Badge variant="outline">Target: {targetReleaseLabel}</Badge>
+                <Badge variant="outline">Variant: {targetVariantLabel}</Badge>
               </div>
             )}
             <PostCard

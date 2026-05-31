@@ -13,10 +13,10 @@ import type React from "react";
 
 const NO_SOURCE = "__none__";
 
-export interface SetSourceReleaseControlProps {
+export interface SetSourceUnitControlProps {
   book: BookDTO;
   language: string;
-  currentSourceReleaseUnitId: string | null | undefined;
+  currentSourceUnitId: string | null | undefined;
 }
 
 /**
@@ -24,9 +24,11 @@ export interface SetSourceReleaseControlProps {
  * `sourceUnitId`. Available even when no source is set yet — that's how
  * a user gets a sync target onto an existing translation.
  */
-export const SetSourceReleaseControl: React.FC<
-  SetSourceReleaseControlProps
-> = ({ book, language, currentSourceReleaseUnitId }) => {
+export const SetSourceUnitControl: React.FC<SetSourceUnitControlProps> = ({
+  book,
+  language,
+  currentSourceUnitId,
+}) => {
   const { t } = useTranslation(["page"]);
   const mutation = useSetTranslationSourceMutation({
     affectedDetailKeys: () => [bookKeys.detail(book.unitId)],
@@ -38,7 +40,7 @@ export const SetSourceReleaseControl: React.FC<
         {t("page:book_edit_info_translation_set_source_label")}
       </span>
       <Select
-        value={currentSourceReleaseUnitId ?? NO_SOURCE}
+        value={currentSourceUnitId ?? NO_SOURCE}
         onValueChange={(v) =>
           mutation.mutate({
             unitId: book.unitId,

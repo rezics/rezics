@@ -39,12 +39,12 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
   const available = ALL_LANGS.filter((l) => !existingLanguages.includes(l));
   const firstAvailableLanguage = available[0] ?? "";
   const [language, setLanguage] = useState<string>(firstAvailableLanguage);
-  const [sourceUnitId, setSourceReleaseUnitId] = useState<string>(NO_SOURCE);
+  const [sourceUnitId, setSourceUnitId] = useState<string>(NO_SOURCE);
 
   useEffect(() => {
     if (open) {
       setLanguage(firstAvailableLanguage);
-      setSourceReleaseUnitId(NO_SOURCE);
+      setSourceUnitId(NO_SOURCE);
     }
   }, [open, firstAvailableLanguage]);
 
@@ -92,11 +92,11 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
 
           <div className="flex flex-col gap-1">
             <Label htmlFor="add-trans-source">
-              {t("page:book_edit_info_translation_add_dialog_source_release")}
+              {t("page:book_edit_info_translation_add_dialog_source_entry")}
             </Label>
             <Select
               value={sourceUnitId}
-              onValueChange={(v) => setSourceReleaseUnitId(v)}
+              onValueChange={(v) => setSourceUnitId(v)}
             >
               <SelectTrigger id="add-trans-source" className="w-full">
                 <SelectValue />
@@ -111,7 +111,7 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
             </Select>
             <p className="text-sm text-text-secondary">
               {t(
-                "page:book_edit_info_translation_add_dialog_source_release_help",
+                "page:book_edit_info_translation_add_dialog_source_entry_help",
               )}
             </p>
           </div>

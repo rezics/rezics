@@ -19,7 +19,7 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { TranslationDraft as EditorDraft } from "../hooks/useBookTranslationEditor";
 
 export interface TranslationSyncActionsProps {
-  /** Source release unit id this language is wired to. Falsy disables actions. */
+  /** Source unit id this language is wired to. Falsy disables actions. */
   sourceUnitId: string | null | undefined;
   /** Currently selected language. */
   language: string;
@@ -29,9 +29,9 @@ export interface TranslationSyncActionsProps {
 
 /**
  * Shown when the current language's translation has a `sourceUnitId`.
- * Offers two actions: pull the source release's fields into the form (purely
+ * Offers two actions: pull the source entry's fields into the form (purely
  * client-side prefill — caller saves explicitly), and navigate to the source
- * release's edit page.
+ * entry's edit page.
  */
 export const TranslationSyncActions: React.FC<TranslationSyncActionsProps> = ({
   sourceUnitId,

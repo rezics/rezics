@@ -19,15 +19,15 @@ function book(
 }
 
 describe("resolveSelectedBookLanguage", () => {
-  test("keeps stored language only when it exists on the current release", () => {
-    const englishRelease = book("release-en", ["en"], "en");
-    const japaneseRelease = book("release-ja", ["ja"], "ja");
+  test("keeps stored language only when it exists on the current entry", () => {
+    const englishEntry = book("entry-en", ["en"], "en");
+    const japaneseEntry = book("entry-ja", ["ja"], "ja");
 
-    expect(
-      resolveSelectedBookLanguage(["ja", "en"], englishRelease, "ja"),
-    ).toBe("en");
-    expect(
-      resolveSelectedBookLanguage(["ja", "en"], japaneseRelease, "ja"),
-    ).toBe("ja");
+    expect(resolveSelectedBookLanguage(["ja", "en"], englishEntry, "ja")).toBe(
+      "en",
+    );
+    expect(resolveSelectedBookLanguage(["ja", "en"], japaneseEntry, "ja")).toBe(
+      "ja",
+    );
   });
 });
