@@ -1290,7 +1290,7 @@ export async function patchCommentRankingFields(
   unitId: string,
   fields: CommentRankingPatch,
 ) {
-  await patchPostFields(client, unitId, fields);
+  await client.patchComments([{ id: unitId, ...fields }]);
 }
 
 // ANCHOR: Post partial sync functions

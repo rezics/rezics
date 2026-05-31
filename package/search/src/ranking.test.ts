@@ -29,6 +29,9 @@ describe("ranking search projections", () => {
     expect(getExpectedMeiliIndexSchema("posts").sortableAttributes).toContain(
       "commentHotScore",
     );
+    expect(
+      getExpectedMeiliIndexSchema("comments").sortableAttributes,
+    ).toContain("hotScore");
   });
 
   test("document builders emit numeric ranking defaults", async () => {
@@ -78,6 +81,35 @@ describe("ranking search projections", () => {
     expect(post.hotScore).toBe(0);
     expect(post.commentHotScore).toBe(0);
     expect(post.commentRankUpdatedAt).toBeNull();
+  });
+
+  test("comment ranking patches land in the comments index", async () => {
+    setServerEnvForSearchTests();
+    const { patchCommentRankingFields } = await import("./sync");
+    const patchComments = mock(async (_docs: unknown[]) => undefined);
+    const patchPosts = mock(async (_docs: unknown[]) => undefined);
+
+    await patchCommentRankingFields(
+      { patchComments, patchPosts } as never,
+      "comment-1",
+      {
+        hotScore: 10,
+        topScore: 7,
+        qualityScore: 5,
+        rankUpdatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    );
+
+    expect(patchComments).toHaveBeenCalledWith([
+      {
+        id: "comment-1",
+        hotScore: 10,
+        topScore: 7,
+        qualityScore: 5,
+        rankUpdatedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ]);
+    expect(patchPosts).not.toHaveBeenCalled();
   });
 
   test("content document builder projects GAME and MEDIA metadata", async () => {
