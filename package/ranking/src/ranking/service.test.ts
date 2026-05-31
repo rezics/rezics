@@ -185,7 +185,16 @@ describe("RankingService", () => {
       createdAt: "2026-02-01T00:00:00.000Z",
     });
     expect(patchCalls).toMatchObject([
-      { type: "comment", unitId: "comment-1" },
+      {
+        type: "comment",
+        unitId: "comment-1",
+        fields: {
+          hotScore: expect.any(Number),
+          topScore: expect.any(Number),
+          qualityScore: expect.any(Number),
+          rankUpdatedAt: expect.any(String),
+        },
+      },
     ]);
     expect(patchStatusCreates[0].data).toMatchObject({
       unitId: "comment-1",

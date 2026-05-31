@@ -1262,12 +1262,7 @@ export type ContentRankingPatch = {
 
 export type PostRankingPatch = ContentRankingPatch;
 
-export type CommentRankingPatch = {
-  commentHotScore: number;
-  commentTopScore: number;
-  commentQualityScore: number;
-  commentRankUpdatedAt: string | null;
-};
+export type CommentRankingPatch = Omit<ContentRankingPatch, "trendingScore">;
 
 export async function patchContentRankingFields(
   client: SearchClient,

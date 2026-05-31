@@ -310,10 +310,10 @@ export class RankingService {
         });
       } else {
         await patchCommentRankingFields(this.search, projection.unitId, {
-          commentHotScore: projection.hotScore,
-          commentTopScore: projection.topScore,
-          commentQualityScore: projection.qualityScore,
-          commentRankUpdatedAt: rankUpdatedAt,
+          hotScore: projection.hotScore,
+          topScore: projection.topScore,
+          qualityScore: projection.qualityScore,
+          rankUpdatedAt,
         });
       }
 
