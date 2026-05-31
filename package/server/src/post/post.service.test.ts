@@ -45,6 +45,44 @@ const postFindUniqueOrThrowMock = mock(
   }),
 );
 const postFindFirstMock = mock(async () => null);
+const postUpdateManyMock = mock(async () => ({ count: 1 }));
+const commentCreateMock = mock(
+  async (args: any): Promise<any> => ({
+    unitId: "comment-1",
+    rootUnitId: args.data.rootUnitId,
+    realmUnitId: args.data.realmUnitId,
+    parentCommentUnitId: args.data.parentCommentUnitId ?? null,
+    authorUserId: args.data.authorUserId,
+    content: args.data.content,
+    depth: args.data.depth,
+    path: null,
+    replyCount: 0,
+    directReplyCount: 0,
+    lastReplyAt: null,
+    isLocked: false,
+    state: null,
+    createdAt: new Date("2026-05-31T00:00:00.000Z"),
+    updatedAt: new Date("2026-05-31T00:00:00.000Z"),
+    unit: {
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      licenseSlug: null,
+      user: null,
+      contentModerationState: null,
+    },
+  }),
+);
+const commentFindUniqueMock = mock(async (): Promise<any> => null);
+const commentFindUniqueOrThrowMock = mock(
+  async (): Promise<any> => ({
+    unitId: "comment-parent-1",
+    rootUnitId: "root-1",
+    realmUnitId: "realm-1",
+    depth: 1,
+    isLocked: false,
+  }),
+);
+const commentUpdateMock = mock(async (_args?: any) => ({}));
 const realmFindManyMock = mock(
   async (args: any): Promise<any[]> =>
     (args.where.unitId.in as string[]).map((unitId) => ({
@@ -114,8 +152,15 @@ const transactionMock = mock(async (fn: any) =>
     post: {
       create: postCreateMock,
       update: postUpdateMock,
+      updateMany: postUpdateManyMock,
       findUniqueOrThrow: postFindUniqueOrThrowMock,
       findFirst: postFindFirstMock,
+    },
+    comment: {
+      create: commentCreateMock,
+      findUnique: commentFindUniqueMock,
+      findUniqueOrThrow: commentFindUniqueOrThrowMock,
+      update: commentUpdateMock,
     },
     realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
     realmMember: { findMany: realmMemberFindManyMock },
@@ -151,11 +196,18 @@ Object.assign(prismaMock, {
   post: {
     create: postCreateMock,
     update: postUpdateMock,
+    updateMany: postUpdateManyMock,
     findMany: postFindManyMock,
     count: postCountMock,
     findUnique: postFindUniqueMock,
     findUniqueOrThrow: postFindUniqueOrThrowMock,
     findFirst: postFindFirstMock,
+  },
+  comment: {
+    create: commentCreateMock,
+    findUnique: commentFindUniqueMock,
+    findUniqueOrThrow: commentFindUniqueOrThrowMock,
+    update: commentUpdateMock,
   },
   unitRealm: { create: realmUnitCreateMock },
   realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
@@ -258,11 +310,35 @@ function resetMocks() {
   );
   postCreateMock.mockClear();
   postUpdateMock.mockClear();
+  postUpdateManyMock.mockClear();
   postFindManyMock.mockClear();
   postCountMock.mockClear();
   postFindUniqueMock.mockClear();
   postFindUniqueOrThrowMock.mockClear();
+  postFindUniqueOrThrowMock.mockResolvedValue({
+    unitId: "parent-1",
+    rootPostUnitId: "root-1",
+    targetUnitId: null,
+    depth: 0,
+    isLocked: false,
+    unit: {
+      inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
+      realmModerationTargets: [],
+    },
+  });
   postFindFirstMock.mockClear();
+  commentCreateMock.mockClear();
+  commentFindUniqueMock.mockClear();
+  commentFindUniqueMock.mockResolvedValue(null);
+  commentFindUniqueOrThrowMock.mockClear();
+  commentFindUniqueOrThrowMock.mockResolvedValue({
+    unitId: "comment-parent-1",
+    rootUnitId: "root-1",
+    realmUnitId: "realm-1",
+    depth: 1,
+    isLocked: false,
+  });
+  commentUpdateMock.mockClear();
   realmFindManyMock.mockClear();
   realmFindManyMock.mockImplementation(async (args: any) =>
     (args.where.unitId.in as string[]).map((unitId) => ({
@@ -500,7 +576,7 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(transactionMock).not.toHaveBeenCalled();
   });
 
-  test("inherits parent realm rows for replies", async () => {
+  test("uses the parent post realm for delegated comment replies", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "parent-1",
@@ -519,14 +595,12 @@ describe("PostService.create realm/tag junction writes", () => {
       "user-1",
     );
 
-    expect(realmUnitCreateMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          realmUnitId: "realm-1",
-          unitId: "post-1",
-        }),
-      }),
-    );
+    expect(realmUnitCreateMock).not.toHaveBeenCalled();
+    expect(commentCreateMock.mock.calls[0]?.[0].data).toMatchObject({
+      rootUnitId: "parent-1",
+      realmUnitId: "realm-1",
+      authorUserId: "user-1",
+    });
   });
 
   test("blocks realm replies until required rules are acknowledged", async () => {
@@ -1088,7 +1162,7 @@ describe("PostService.create targetUnitId derivation", () => {
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
-  test("reply inherits targetUnitId from parent without extra Unit lookup", async () => {
+  test("reply creation delegates to the comment domain using the parent post realm", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "parent-1",
@@ -1097,22 +1171,67 @@ describe("PostService.create targetUnitId derivation", () => {
       depth: 0,
       isLocked: false,
       unit: {
-        inRealms: [],
+        inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
         realmModerationTargets: [],
       },
     });
 
-    await service.create(
+    const result = await service.create(
       { content: content("reply"), parentPostUnitId: "parent-1" },
       "user-1",
     );
 
-    const data = createDataArg();
-    expect(data.targetUnitId).toBe("book-B");
+    expect(postCreateMock).not.toHaveBeenCalled();
+    expect(commentCreateMock.mock.calls[0]?.[0].data).toMatchObject({
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      parentCommentUnitId: undefined,
+      authorUserId: "user-1",
+      depth: 1,
+    });
+    expect(postUpdateManyMock).toHaveBeenCalledWith({
+      where: { unitId: "root-1" },
+      data: expect.objectContaining({
+        replyCount: { increment: 1 },
+        directReplyCount: { increment: 1 },
+      }),
+    });
+    expect(result.unitId).toBe("comment-1");
+    expect(result.rootPostUnitId).toBe("root-1");
+    expect(result.parentPostUnitId).toBe("root-1");
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
-  test("reply does not create independent UnitRealm placement rows", async () => {
+  test("reply can target an existing comment parent", async () => {
+    resetMocks();
+    commentFindUniqueMock.mockResolvedValueOnce({
+      unitId: "comment-parent-1",
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+    });
+
+    await service.create(
+      { content: content("nested"), parentPostUnitId: "comment-parent-1" },
+      "user-1",
+    );
+
+    expect(postFindUniqueOrThrowMock).not.toHaveBeenCalled();
+    expect(commentCreateMock.mock.calls[0]?.[0].data).toMatchObject({
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      parentCommentUnitId: "comment-parent-1",
+      depth: 2,
+    });
+    expect(commentUpdateMock).toHaveBeenCalledWith({
+      where: { unitId: "comment-parent-1" },
+      data: expect.objectContaining({
+        replyCount: { increment: 1 },
+        directReplyCount: { increment: 1 },
+      }),
+    });
+  });
+
+  test("legacy reply creation requires an explicit realm for multi-realm roots", async () => {
     resetMocks();
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       unitId: "parent-1",
@@ -1121,44 +1240,34 @@ describe("PostService.create targetUnitId derivation", () => {
       depth: 0,
       isLocked: false,
       unit: {
-        inRealms: [],
+        inRealms: [
+          { realmUnitId: "realm-1", state: "VISIBLE" },
+          { realmUnitId: "realm-2", state: "VISIBLE" },
+        ],
         realmModerationTargets: [],
       },
     });
+
+    await expect(
+      service.create(
+        { content: content("reply"), parentPostUnitId: "parent-1" },
+        "user-1",
+      ),
+    ).rejects.toThrow("Comment realmUnitId is required");
 
     await service.create(
       {
         content: content("reply"),
         parentPostUnitId: "parent-1",
-        realmUnitIds: ["realm-1"],
+        realmUnitIds: ["realm-2"],
       },
       "user-1",
     );
 
+    expect(commentCreateMock.mock.calls[0]?.[0].data.realmUnitId).toBe(
+      "realm-2",
+    );
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
-  });
-
-  test("nested reply still inherits target from its parent", async () => {
-    resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
-      unitId: "comment-1",
-      rootPostUnitId: "root-1",
-      targetUnitId: "book-B",
-      depth: 1,
-      isLocked: false,
-      unit: {
-        inRealms: [],
-        realmModerationTargets: [],
-      },
-    });
-
-    await service.create(
-      { content: content("nested"), parentPostUnitId: "comment-1" },
-      "user-1",
-    );
-
-    const data = createDataArg();
-    expect(data.targetUnitId).toBe("book-B");
   });
 
   test("CHAPTER kind validates the target is a BOOK", async () => {
@@ -1930,7 +2039,8 @@ describe("PostService lifecycle state", () => {
       ?.select;
     expect(select.isLocked).toBe(true);
     expect(select.state).toBeUndefined();
-    expect(postCreateMock).toHaveBeenCalled();
+    expect(postCreateMock).not.toHaveBeenCalled();
+    expect(commentCreateMock).toHaveBeenCalled();
   });
 
   // 5.6

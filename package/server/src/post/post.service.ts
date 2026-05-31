@@ -33,6 +33,7 @@ import {
   UnitWorkRole,
 } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
+import { commentService } from "@/comment/service";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { generateBetween } from "@/shelf/fractional-index";
 import { serverJobProducer } from "@/job/job-boundary";
@@ -79,6 +80,36 @@ function enqueuePostFields(unitId: string, fields: Record<string, unknown>) {
       { type: "server", service: "post" },
     ),
   );
+}
+
+function commentAsPostCompat(comment: any): PostWithRelations {
+  return {
+    unitId: comment.unitId,
+    authorUserId: comment.authorUserId,
+    targetUnitId: comment.rootUnitId,
+    scoreEntryId: null,
+    content: comment.content,
+    rootPostUnitId: comment.rootUnitId,
+    parentPostUnitId: comment.parentCommentUnitId ?? comment.rootUnitId,
+    kind: null,
+    depth: comment.depth,
+    path: comment.path ?? null,
+    replyCount: comment.replyCount,
+    directReplyCount: comment.directReplyCount,
+    lastReplyAt: comment.lastReplyAt,
+    isLocked: comment.isLocked,
+    state: comment.state,
+    extra: null,
+    createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt,
+    unit: {
+      ...comment.unit,
+      workMemberships: [],
+      licenseSlug: comment.unit?.licenseSlug ?? null,
+    },
+    pinKind: null,
+    pinPosition: null,
+  } as PostWithRelations;
 }
 
 function postKindToWorkRole(kind: PostKindEnum | undefined): UnitWorkRole {
@@ -669,6 +700,11 @@ export class PostService {
       scoreEntryId,
       extra,
     } = input;
+
+    if (parentPostUnitId) {
+      return this.createReplyComment(input, authorUserId);
+    }
+
     // Drafts apply to top-level posts only; replies and chapters always
     // publish. A draft is owner-only and stays out of feeds/search until
     // published (see publication-policy `publicUnitEligibilityWhere`).
@@ -947,6 +983,91 @@ export class PostService {
 
     const [withPath] = await attachPostPaths([post]);
     return hydrateUnitOwnerUserSlugRow(withPath);
+  }
+
+  private async createReplyComment(
+    input: CreatePostInput,
+    authorUserId: string,
+  ): Promise<PostWithRelations> {
+    const parentUnitId = input.parentPostUnitId;
+    if (!parentUnitId) throw new AppError(400, "Missing parentPostUnitId");
+
+    const parentComment = await prisma.comment.findUnique({
+      where: { unitId: parentUnitId },
+      select: {
+        unitId: true,
+        rootUnitId: true,
+        realmUnitId: true,
+      },
+    });
+
+    if (parentComment) {
+      const comment = await commentService.create(
+        {
+          rootUnitId: parentComment.rootUnitId,
+          realmUnitId: parentComment.realmUnitId,
+          parentCommentUnitId: parentComment.unitId,
+          content: input.content,
+        },
+        authorUserId,
+      );
+      return commentAsPostCompat(comment);
+    }
+
+    const parentPost = await prisma.post.findUniqueOrThrow({
+      where: { unitId: parentUnitId },
+      select: {
+        unitId: true,
+        rootPostUnitId: true,
+        isLocked: true,
+        unit: {
+          select: {
+            inRealms: {
+              select: { realmUnitId: true, state: true },
+            },
+            realmModerationTargets: {
+              select: { realmUnitId: true, state: true },
+            },
+          },
+        },
+      },
+    });
+    if (parentPost.isLocked) throw new Error("Cannot reply to a locked post");
+
+    const rootUnitId = parentPost.rootPostUnitId ?? parentPost.unitId;
+    const visibleRealmIds = parentPost.unit.inRealms
+      .filter((realm) => realm.state === "VISIBLE")
+      .map((realm) => realm.realmUnitId);
+    const explicitRealmIds = [...new Set(input.realmUnitIds ?? [])];
+    const realmUnitId =
+      explicitRealmIds.length === 1
+        ? explicitRealmIds[0]
+        : visibleRealmIds.length === 1
+          ? visibleRealmIds[0]
+          : null;
+
+    if (!realmUnitId) {
+      throw new AppError(
+        400,
+        "Comment realmUnitId is required for roots without exactly one visible realm",
+      );
+    }
+
+    this.assertRealmReplyLifecycleAllowed({
+      realmUnitIds: [realmUnitId],
+      overlays: parentPost.unit.realmModerationTargets,
+    });
+    await this.assertRealmPostAllowed([realmUnitId], authorUserId);
+
+    const comment = await commentService.create(
+      {
+        rootUnitId,
+        realmUnitId,
+        content: input.content,
+      },
+      authorUserId,
+    );
+    return commentAsPostCompat(comment);
   }
 
   /**
