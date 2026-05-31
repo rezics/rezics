@@ -9,7 +9,7 @@ import {
   markdownContentDoc,
   type PostDTO,
 } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
 import { DraftPublishActions } from "@/draft";
@@ -30,6 +30,7 @@ export function WikiPostEditor({
   onCancel,
 }: WikiPostEditorProps) {
   const { t } = useTranslation(["common"]);
+  const locale = useLocale();
   const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const resize = useMemo(
@@ -66,6 +67,7 @@ export function WikiPostEditor({
     setLockedError(null);
     createMutation.mutate({
       content: markdownContentDoc(trimmed),
+      language: locale,
       targetUnitId,
       status,
     } as never);
@@ -78,6 +80,7 @@ export function WikiPostEditor({
     updateMutation.mutate({
       unitId: post.unitId,
       content: markdownContentDoc(trimmed),
+      language: locale,
     });
   };
 

@@ -210,9 +210,11 @@ export const postApi = {
 
   updateWikiContent: async (
     unitId: string,
-    content: UpdatePostInput["content"],
+    input: Pick<UpdatePostInput, "content" | "language">,
   ): Promise<PostResponse> => {
-    return postApi.update(unitId, { patch: { post: { content } } });
+    return postApi.update(unitId, {
+      patch: { post: { content: input.content, language: input.language } },
+    });
   },
 
   /**

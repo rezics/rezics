@@ -9,7 +9,7 @@ import {
   markdownContentDoc,
   PostKind,
 } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Alert,
   AlertDescription,
@@ -35,6 +35,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(["common", "community"]);
+  const locale = useLocale();
   const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isWikiPost = post.kind === PostKind.WIKI;
@@ -67,7 +68,11 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
     setLockedError(null);
     const content = markdownContentDoc(text.trim());
     if (isWikiPost) {
-      updateWikiMutation.mutate({ unitId: post.unitId, content });
+      updateWikiMutation.mutate({
+        unitId: post.unitId,
+        content,
+        language: locale,
+      });
       return;
     }
     updateMutation.mutate({

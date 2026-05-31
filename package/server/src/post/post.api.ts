@@ -4,6 +4,7 @@ import {
   editorialPatchSubmissionSchema,
   hasPermissionToUpdatePost,
   isBlocked,
+  normalizeLanguage,
   pinPostSchema,
   postPinDTOSchema,
   PostKind,
@@ -425,6 +426,10 @@ export const postApi = new Elysia({ prefix: "/post" })
         content:
           postPatch.content !== undefined
             ? applySparsePatch(target.content, postPatch.content)
+            : undefined,
+        language:
+          typeof postPatch.language === "string"
+            ? (normalizeLanguage(postPatch.language) ?? undefined)
             : undefined,
         isLocked:
           typeof postPatch.isLocked === "boolean"

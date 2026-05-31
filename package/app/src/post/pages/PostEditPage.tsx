@@ -9,7 +9,7 @@ import {
   markdownContentDoc,
   PostKind,
 } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -23,6 +23,7 @@ export interface PostEditPageProps {
 
 export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
   const { t } = useTranslation(["common", "community"]);
+  const locale = useLocale();
   const navigate = useNavigate();
   const {
     data: post,
@@ -63,7 +64,11 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
     setLockedError(null);
     const content = markdownContentDoc(text.trim());
     if (isWikiPost) {
-      updateWikiMutation.mutate({ unitId: post.unitId, content });
+      updateWikiMutation.mutate({
+        unitId: post.unitId,
+        content,
+        language: locale,
+      });
       return;
     }
     updateMutation.mutate({

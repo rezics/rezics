@@ -21,6 +21,10 @@ const getByUnitIdMock = mock(async () => ({
 }));
 const getPrimaryVisibleRealmForPostMock = mock(async () => "realm-1");
 const createMock = mock(async () => ({ unitId: "created-post-1" }));
+const updateMock = mock(async (_unitId: string, input: any) => ({
+  unitId: "post-1",
+  ...input,
+}));
 const deleteMock = mock(async () => undefined);
 const listGlobalContentStatesMock = mock(async () => [
   {
@@ -91,6 +95,7 @@ mock.module("./post.service", () => ({
     create: createMock,
     getByUnitId: getByUnitIdMock,
     getPrimaryVisibleRealmForPost: getPrimaryVisibleRealmForPostMock,
+    update: updateMock,
     delete: deleteMock,
   },
 }));
@@ -107,6 +112,7 @@ describe("postApi", () => {
     listGlobalContentStatesMock.mockClear();
     listRealmContentOverlaysMock.mockClear();
     createMock.mockClear();
+    updateMock.mockClear();
     getByUnitIdMock.mockClear();
     getPrimaryVisibleRealmForPostMock.mockClear();
     deleteMock.mockClear();
@@ -293,5 +299,40 @@ describe("postApi", () => {
     expect(response.status).toBe(200);
     expect(decideForIdentityMock).toHaveBeenCalled();
     expect(deleteMock).toHaveBeenCalledWith("post-1");
+  });
+
+  test("normalizes wiki body language from editorial patch metadata", async () => {
+    getByUnitIdMock.mockResolvedValueOnce({
+      unitId: "wiki-post-1",
+      kind: "WIKI",
+      content: { main: { source: "old" } },
+      unit: { user: { unitId: "owner-1" } },
+    });
+    const { postApi } = await import("./post.api");
+    const response = await postApi.handle(
+      new Request("http://localhost/post/wiki-post-1", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          patch: {
+            post: {
+              content: { main: { source: "new" } },
+              language: "EN",
+            },
+          },
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(updateMock).toHaveBeenCalledWith(
+      "wiki-post-1",
+      expect.objectContaining({
+        content: { main: { source: "new" } },
+        language: "en",
+      }),
+      currentIdentity,
+      expect.anything(),
+    );
   });
 });

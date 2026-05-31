@@ -79,4 +79,37 @@ describe("post wiki API helpers", () => {
   test("uses the shared WIKI kind literal", () => {
     expect(PostKind.WIKI).toBe("WIKI");
   });
+
+  test("sends wiki body language on create and update helpers", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ unitId: "wiki-post-1" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await postApi.createWiki({
+      content: { body: "hello" } as never,
+      language: "en",
+    });
+    await postApi.updateWikiContent("wiki-post-1", {
+      content: { body: "edited" } as never,
+      language: "ja",
+    });
+
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual(
+      expect.objectContaining({
+        kind: "WIKI",
+        language: "en",
+      }),
+    );
+    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toEqual({
+      patch: {
+        post: {
+          content: { body: "edited" },
+          language: "ja",
+        },
+      },
+    });
+  });
 });
