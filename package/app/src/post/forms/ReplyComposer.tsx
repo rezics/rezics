@@ -4,7 +4,6 @@ import { realmQueries } from "@rezics/api/realm/realm";
 import { tagQueries } from "@rezics/api/tag/tag";
 import {
   markdownContentDoc,
-  type CommentDTO,
   type PollDTO,
   type PostDTO,
   PostKind,
@@ -27,6 +26,7 @@ import {
 import { PollComposer } from "@/poll";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
+import { mapCommentToPost } from "../models/commentPostCompat";
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -326,33 +326,6 @@ export const ReplyComposer = forwardRef<
   const commentMutation = useCreateCommentMutation();
   const submitting = postMutation.isPending || commentMutation.isPending;
 
-  const mapCommentToPost = useCallback(
-    (comment: CommentDTO): PostDTO => ({
-      unitId: comment.unitId,
-      authorUserId: comment.authorUserId,
-      author: comment.author,
-      targetUnitId: comment.rootUnitId,
-      realmUnitId: comment.realmUnitId,
-      content: comment.content,
-      rootPostUnitId: comment.rootUnitId,
-      parentPostUnitId: comment.parentCommentUnitId ?? comment.rootUnitId,
-      kind: null,
-      status: undefined,
-      visibility: undefined,
-      depth: comment.depth,
-      path: comment.path,
-      replyCount: comment.replyCount,
-      directReplyCount: comment.directReplyCount,
-      lastReplyAt: comment.lastReplyAt,
-      isLocked: comment.isLocked,
-      state: comment.state,
-      extra: null,
-      createdAt: comment.createdAt,
-      updatedAt: comment.updatedAt,
-    }),
-    [],
-  );
-
   const submitReply = useCallback(
     (
       content: ReturnType<typeof markdownContentDoc>,
@@ -413,7 +386,6 @@ export const ReplyComposer = forwardRef<
     },
     [
       commentMutation.mutate,
-      mapCommentToPost,
       onSubmitted,
       parentPostUnitId,
       postMutation.mutate,

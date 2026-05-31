@@ -3,6 +3,7 @@ import {
   useCurrentUserId,
   useServerPermission,
 } from "@rezics/api/hooks";
+import { commentListQuery } from "@rezics/api/comment/comment";
 import {
   postThreadQuery,
   useAcceptAnswerMutation,
@@ -20,14 +21,16 @@ import { useMemo } from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { PostPromotionControls } from "../components/parts/PostPromotionControls";
-import { excludeRootPost } from "../hooks/usePostTreeCollapse";
-import { decidePromotionControls } from "../models/postPromotionGate";
 import { PostEditDialog } from "../forms/PostEditDialog";
+import { excludeRootPost } from "../hooks/usePostTreeCollapse";
+import { mapCommentToPost } from "../models/commentPostCompat";
+import { decidePromotionControls } from "../models/postPromotionGate";
 import { PostTreeList } from "./PostTreeList";
 import { DEFAULT_MAX_DEPTH, DEFAULT_VISUAL_MAX_DEPTH } from "./postTreeLayout";
 
 interface PostTreeSectionProps {
   rootPostUnitId: string;
+  realmUnitId?: string | null;
   maxDepth?: number;
   visualMaxDepth?: number;
   focusPostUnitId?: string;
@@ -41,6 +44,7 @@ interface PostTreeSectionProps {
 
 export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   rootPostUnitId,
+  realmUnitId,
   maxDepth = DEFAULT_MAX_DEPTH,
   visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
   focusPostUnitId,
@@ -51,19 +55,51 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   const permission = useServerPermission();
   const actorUserId = useCurrentUserId();
   const [editingPost, setEditingPost] = useState<PostDTO | null>(null);
-  const { data, isLoading } = useQuery(
-    postThreadQuery(rootPostUnitId, { mode: "threaded", maxDepth }),
+  const signalQuery = useQuery({
+    ...postThreadQuery(rootPostUnitId, {
+      mode: "threaded",
+      maxDepth: 0,
+      limit: 1,
+    }),
+    enabled: Boolean(realmUnitId) && !!rootPostUnitId,
+  });
+  const commentThreadQuery = useQuery(
+    commentListQuery({
+      rootUnitId: rootPostUnitId,
+      realmUnitId: realmUnitId ?? "",
+      mode: "threaded",
+      maxDepth,
+      limit: 200,
+    }),
   );
-  const posts = useMemo(
-    () => excludeRootPost(data?.posts ?? [], rootPostUnitId),
-    [data?.posts, rootPostUnitId],
-  );
+  const legacyThreadQuery = useQuery({
+    ...postThreadQuery(rootPostUnitId, { mode: "threaded", maxDepth }),
+    enabled: !realmUnitId && !!rootPostUnitId,
+  });
+  const isCommentThread = Boolean(realmUnitId);
+  const isLoading = isCommentThread
+    ? commentThreadQuery.isLoading || signalQuery.isLoading
+    : legacyThreadQuery.isLoading;
+  const posts = useMemo(() => {
+    if (isCommentThread) {
+      return (commentThreadQuery.data?.comments ?? []).map(mapCommentToPost);
+    }
+    return excludeRootPost(legacyThreadQuery.data?.posts ?? [], rootPostUnitId);
+  }, [
+    commentThreadQuery.data?.comments,
+    isCommentThread,
+    legacyThreadQuery.data?.posts,
+    rootPostUnitId,
+  ]);
+  const signalData = isCommentThread
+    ? signalQuery.data
+    : legacyThreadQuery.data;
 
   // Viewer-derived signals from the thread read. The server is the single
   // authorization source; these only gate the affordance. A stale 403 is
   // handled by the mutations re-syncing the thread on settle.
-  const viewerCanPromote = Boolean(data?.viewerCanPromote);
-  const isQuestionThread = Boolean(data?.isQuestionThread);
+  const viewerCanPromote = Boolean(signalData?.viewerCanPromote);
+  const isQuestionThread = Boolean(signalData?.isQuestionThread);
 
   const onPromotionError = () =>
     toast.error(t("community:post_pin_action_failed"));
