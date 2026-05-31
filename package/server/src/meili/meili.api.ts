@@ -1,4 +1,5 @@
 import {
+  CommentSearchOptionsSchema,
   ContentSearchOptionsSchema,
   EntitySearchOptionsSchema,
   type FeedbackListQuery,
@@ -136,6 +137,21 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
         description:
           "Full-text search over posts with filters for kind, target, realm, author, depth.",
         tags: ["Meili", "Posts", "Search"],
+      },
+    },
+  )
+  .post(
+    "/comments/search",
+    async ({ body }) => {
+      return meiliService.searchComments(body);
+    },
+    {
+      body: CommentSearchOptionsSchema,
+      detail: {
+        summary: "Search comments (Meilisearch)",
+        description:
+          "Full-text search over comments partitioned by root unit and realm.",
+        tags: ["Meili", "Comments", "Search"],
       },
     },
   )

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { SearchQuery, SearchScope } from "@rezics/contract";
 import {
   buildContentFilter,
+  buildCommentFilter,
   buildPostFilter,
   buildRealmFilter,
   buildUserFilter,
@@ -202,6 +203,35 @@ describe("buildPostFilter", () => {
       { kind: "global" },
     );
     expect(filter).toContain('kind IN ["REVIEW", "REMARK"]');
+  });
+});
+
+describe("buildCommentFilter", () => {
+  test("book exact scope emits rootUnitId", () => {
+    const filter = buildCommentFilter(emptyQuery, {
+      kind: "book",
+      unitId: "book-1",
+    });
+    expect(filter).toContain('rootUnitId = "book-1"');
+    expect(filter).toContain("isLocked = false");
+  });
+
+  test("book work scope excludes comments until anchor projections exist", () => {
+    const filter = buildCommentFilter(emptyQuery, {
+      kind: "book",
+      unitId: "release-1",
+      workUnitId: "work-1",
+    });
+    expect(filter).toContain('rootUnitId = "__never__"');
+  });
+
+  test("realm and user scopes map to comment partition fields", () => {
+    expect(
+      buildCommentFilter(emptyQuery, { kind: "realm", realmId: "realm-1" }),
+    ).toContain('realmUnitId = "realm-1"');
+    expect(
+      buildCommentFilter(emptyQuery, { kind: "user", userId: "user-1" }),
+    ).toContain('authorUserId = "user-1"');
   });
 });
 

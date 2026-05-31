@@ -6,6 +6,7 @@
 export const federationWeights = {
   content: 1.0,
   posts: 1.0,
+  comments: 0.9,
   realms: 1.2,
   users: 1.5,
   entities: 1.2,

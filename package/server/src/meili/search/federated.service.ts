@@ -1,4 +1,5 @@
 import type {
+  CommentSearchDocument,
   ContentSearchDocument,
   EntitySearchDocument,
   FederatedSearchOptions,
@@ -18,6 +19,7 @@ import {
 import type { FilterContext } from "./filters";
 import {
   buildContentFilter,
+  buildCommentFilter,
   buildPostFilter,
   buildRealmFilter,
   buildUserFilter,
@@ -43,6 +45,7 @@ interface PermittedIndexes {
   // SHELF content surface
   contentShelves: boolean;
   posts: boolean;
+  comments: boolean;
   realms: boolean;
   users: boolean;
   entities: boolean;
@@ -55,6 +58,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         contentBooks: true,
         contentShelves: true,
         posts: true,
+        comments: true,
         realms: true,
         users: true,
         entities: true,
@@ -66,6 +70,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         contentBooks: false,
         contentShelves: true,
         posts: true,
+        comments: true,
         realms: false,
         users: false,
         entities: false,
@@ -75,6 +80,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         contentBooks: true,
         contentShelves: true,
         posts: true,
+        comments: true,
         realms: false,
         users: false,
         entities: false,
@@ -84,6 +90,7 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
         contentBooks: true,
         contentShelves: true,
         posts: true,
+        comments: true,
         realms: false,
         users: false,
         entities: true,
@@ -187,6 +194,21 @@ async function federatedSingle(
         categoryHint: category,
       });
       const resp = await client.postIndex.search<PostSearchDocument>(q, {
+        filter: joinFilter(filter),
+        offset,
+        limit: hitsPerPage,
+      });
+      items = resp.hits;
+      totalHits = resp.estimatedTotalHits ?? resp.hits.length;
+      processingTimeMs = resp.processingTimeMs;
+      break;
+    }
+    case "comments": {
+      if (!permitted.comments) break;
+      const filter = buildCommentFilter(query, scope, ctx, {
+        categoryHint: category,
+      });
+      const resp = await client.commentIndex.search<CommentSearchDocument>(q, {
         filter: joinFilter(filter),
         offset,
         limit: hitsPerPage,
@@ -364,6 +386,7 @@ interface BuiltSubQuery extends BuiltQuery {
     | "excerpts"
     | "remarks"
     | "posts"
+    | "comments"
     | "shelves"
     | "realms"
     | "users"
@@ -420,6 +443,19 @@ function buildAllSubQueries(
         weightKey: "posts",
       });
     }
+  }
+
+  if (permitted.comments) {
+    const filter = buildCommentFilter(query, scope, ctx, {
+      categoryHint: mode === "all" ? "comments" : "mixed",
+    });
+    out.push({
+      indexUid: "comments",
+      q: query.keyword ?? "",
+      filter,
+      weightKey: "comments",
+      sectionKey: "comments",
+    });
   }
 
   if (permitted.contentShelves) {
@@ -486,6 +522,7 @@ function mapIndexToCategory(indexUid: string, hit: any): SearchCategory {
     if (k === "remark") return "remarks";
     return "posts";
   }
+  if (indexUid === "comments") return "comments";
   if (indexUid === "content") {
     const t = (hit?.type ?? "").toString().toUpperCase();
     if (t === "SHELF") return "shelves";

@@ -3,6 +3,7 @@
  */
 
 import type {
+  CommentSearchOptions,
   ContentSearchOptions,
   ContentSearchResult,
   FeedbackListResponse,
@@ -18,6 +19,7 @@ import {
 } from "@tanstack/react-query";
 import {
   meiliContentApi,
+  meiliCommentApi,
   meiliFeedbackApi,
   meiliPostApi,
   meiliRealmApi,
@@ -118,6 +120,36 @@ export function usePostSearchInfiniteQuery(
     queryKey: ["meili", "posts", "infinite", opts],
     queryFn: ({ pageParam = 0 }) =>
       meiliPostApi.postSearch({ ...opts, offset: pageParam, limit }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage.items.length < limit) return undefined;
+      return lastPageParam + limit;
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+}
+
+// ANCHOR: Comment search
+
+export const commentSearchQueryOptions = (opts: CommentSearchOptions) =>
+  queryOptions({
+    queryKey: ["meili", "comments", opts],
+    queryFn: () => meiliCommentApi.commentSearch(opts),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export function useCommentSearchQuery(opts: CommentSearchOptions) {
+  return useQuery(commentSearchQueryOptions(opts));
+}
+
+export function useCommentSearchInfiniteQuery(
+  opts: Omit<CommentSearchOptions, "offset">,
+) {
+  const limit = opts.limit ?? 20;
+  return useInfiniteQuery({
+    queryKey: ["meili", "comments", "infinite", opts],
+    queryFn: ({ pageParam = 0 }) =>
+      meiliCommentApi.commentSearch({ ...opts, offset: pageParam, limit }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       if (lastPage.items.length < limit) return undefined;

@@ -44,6 +44,10 @@ export interface PostBuildOpts {
   categoryHint?: SearchCategory;
 }
 
+export interface CommentBuildOpts {
+  categoryHint?: SearchCategory;
+}
+
 const POST_CATEGORY_TO_KIND: Record<
   NonNullable<PostBuildOpts["postCategory"]>,
   PostKind
@@ -235,6 +239,39 @@ export function buildPostFilter(
   // 3. Locked posts excluded by default (per content-search-api default filters).
   filter.push("isLocked = false");
 
+  return filter;
+}
+
+// ANCHOR: buildCommentFilter
+// Scope mapping for comments:
+//   global → no scope filter
+//   book   → rootUnitId = unitId; work scopes are intentionally excluded by
+//            federated permissions until content-anchor projections exist
+//   realm  → realmUnitId = realmId
+//   user   → authorUserId = userId
+
+export function buildCommentFilter(
+  _query: SearchQuery,
+  scope: SearchScope,
+  _ctx: FilterContext = {},
+  _opts: CommentBuildOpts = {},
+): string[] {
+  const filter: string[] = [];
+
+  if (scope.kind === "book") {
+    const bookScope = resolveBookScope(scope);
+    if (bookScope.mode === "exact") {
+      filter.push(`rootUnitId = "${bookScope.unitId}"`);
+    } else {
+      filter.push(`rootUnitId = "__never__"`);
+    }
+  } else if (scope.kind === "realm") {
+    filter.push(`realmUnitId = "${scope.realmId}"`);
+  } else if (scope.kind === "user") {
+    filter.push(`authorUserId = "${scope.userId}"`);
+  }
+
+  filter.push("isLocked = false");
   return filter;
 }
 

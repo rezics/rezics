@@ -29,6 +29,7 @@ export const SearchCategorySchema = t.Union([
   t.Literal("excerpts"),
   t.Literal("remarks"),
   t.Literal("posts"),
+  t.Literal("comments"),
   t.Literal("shelves"),
   t.Literal("realms"),
   t.Literal("users"),

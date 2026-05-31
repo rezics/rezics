@@ -1,6 +1,8 @@
 import type {
   ContentSearchOptions,
   ContentSearchResult,
+  CommentSearchOptions,
+  CommentSearchResult,
   EntitySearchOptions,
   EntitySearchResult,
   FeedbackListQuery,
@@ -17,11 +19,13 @@ import {
   syncAllEntities,
   syncAllFeedbacks,
   syncAllPosts,
+  syncAllComments,
   syncAllRealms,
   syncAllUsers,
   syncSingleContent,
 } from "@rezics/search";
 import { searchContent } from "./content/content.service";
+import { searchComments } from "./comment/comment.service";
 import { searchEntities } from "./entity/entity.service";
 import { searchFeedbacks } from "./feedback/feedback.api";
 import { searchPosts } from "./post/post.service";
@@ -50,6 +54,12 @@ export class MeiliService {
     return searchPosts(options);
   }
 
+  async searchComments(
+    options: CommentSearchOptions,
+  ): Promise<CommentSearchResult> {
+    return searchComments(options);
+  }
+
   async searchRealms(options: RealmSearchOptions): Promise<RealmSearchResult> {
     return searchRealms(options);
   }
@@ -74,6 +84,10 @@ export class MeiliService {
 
   async initPostsIndex(): Promise<void> {
     await searchClient.initPostIndex();
+  }
+
+  async initCommentsIndex(): Promise<void> {
+    await searchClient.initCommentIndex();
   }
 
   async initRealmsIndex(): Promise<void> {
@@ -106,6 +120,10 @@ export class MeiliService {
 
   async syncAllPosts(): Promise<unknown> {
     return syncAllPosts(searchClient);
+  }
+
+  async syncAllComments(): Promise<unknown> {
+    return syncAllComments(searchClient);
   }
 
   async syncAllRealms(): Promise<unknown> {

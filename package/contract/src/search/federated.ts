@@ -1,5 +1,6 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
+import { CommentSearchDocumentSchema } from "../meili/comment";
 import { ContentSearchDocumentSchema } from "../meili/content";
 import { EntitySearchDocumentSchema } from "../meili/entity";
 import { PostSearchDocumentSchema } from "../meili/post";
@@ -43,6 +44,7 @@ const FederatedGroupedSectionsSchema = t.Object({
   excerpts: t.Optional(FederatedSectionSchema(PostSearchDocumentSchema)),
   remarks: t.Optional(FederatedSectionSchema(PostSearchDocumentSchema)),
   posts: t.Optional(FederatedSectionSchema(PostSearchDocumentSchema)),
+  comments: t.Optional(FederatedSectionSchema(CommentSearchDocumentSchema)),
   shelves: t.Optional(FederatedSectionSchema(ContentSearchDocumentSchema)),
   realms: t.Optional(FederatedSectionSchema(RealmSearchDocumentSchema)),
   users: t.Optional(FederatedSectionSchema(UserSearchDocumentSchema)),
@@ -66,6 +68,7 @@ const FederatedRankedHitSchema = t.Intersect([
   t.Union([
     ContentSearchDocumentSchema,
     PostSearchDocumentSchema,
+    CommentSearchDocumentSchema,
     RealmSearchDocumentSchema,
     UserSearchDocumentSchema,
     EntitySearchDocumentSchema,
@@ -80,6 +83,7 @@ export type FederatedRankedHit = Static<typeof FederatedRankedHitSchema>;
 const FederatedSingleItemSchema = t.Union([
   ContentSearchDocumentSchema,
   PostSearchDocumentSchema,
+  CommentSearchDocumentSchema,
   RealmSearchDocumentSchema,
   UserSearchDocumentSchema,
   EntitySearchDocumentSchema,

@@ -8,7 +8,7 @@ import { federatedSearch } from "./federated.service";
 // is on the orchestrator's filter and index allowlist behavior.
 
 interface CapturedSearch {
-  index: "content" | "posts" | "realms" | "users" | "entities";
+  index: "content" | "posts" | "comments" | "realms" | "users" | "entities";
   q: string;
   filter?: string;
   offset?: number;
@@ -91,6 +91,7 @@ function makeFakeClient(opts?: {
     meili,
     contentIndex: captureIndex("content"),
     postIndex: captureIndex("posts"),
+    commentIndex: captureIndex("comments"),
     realmIndex: captureIndex("realms"),
     userIndex: captureIndex("users"),
     entityIndex: captureIndex("entities"),
@@ -115,10 +116,11 @@ describe("federatedSearch", () => {
     // The orchestrator issues one multiSearch with all permitted sub-queries.
     expect(multi.length).toBe(1);
     const indexUids = multi[0]!.queries.map((q) => q.indexUid).sort();
-    // Books + 4 post sections + shelves + realms + users + entities = 9 sub-queries.
+    // Books + 4 post sections + comments + shelves + realms + users + entities = 10 sub-queries.
     // Books and shelves both target the "content" index.
     expect(indexUids.filter((u) => u === "content")).toHaveLength(2);
     expect(indexUids.filter((u) => u === "posts")).toHaveLength(4);
+    expect(indexUids.filter((u) => u === "comments")).toHaveLength(1);
     expect(indexUids).toContain("realms");
     expect(indexUids).toContain("users");
     expect(indexUids).toContain("entities");
@@ -155,6 +157,8 @@ describe("federatedSearch", () => {
     for (const q of postsQueries) {
       expect(q.filter).toContain('targetUnitId = "b-9"');
     }
+    const commentQuery = queries.find((q) => q.indexUid === "comments");
+    expect(commentQuery?.filter).toContain('rootUnitId = "b-9"');
   });
 
   test("book work scope carries work-domain shelf and post filters through grouped search", async () => {
@@ -181,6 +185,9 @@ describe("federatedSearch", () => {
     expect(reviewQuery?.filter).toContain('workUnitIds = "work-1"');
     expect(reviewQuery?.filter).toContain('workRoles = "REVIEW"');
     expect(reviewQuery?.filter).not.toContain('targetUnitId = "release-1"');
+
+    const commentQuery = queries.find((q) => q.indexUid === "comments");
+    expect(commentQuery?.filter).toContain('rootUnitId = "__never__"');
   });
 
   test("book exact scope with work id carries exact filters through grouped search", async () => {
@@ -210,6 +217,8 @@ describe("federatedSearch", () => {
       expect(q.filter).toContain('targetUnitId = "release-1"');
       expect(q.filter).not.toContain('workUnitIds = "work-1"');
     }
+    const commentQuery = queries.find((q) => q.indexUid === "comments");
+    expect(commentQuery?.filter).toContain('rootUnitId = "release-1"');
   });
 
   test("realm scope filters every queried index by realmIds", async () => {
@@ -231,6 +240,8 @@ describe("federatedSearch", () => {
     )) {
       expect(q.filter).toContain('realmIds = "r-1"');
     }
+    const commentQuery = queries.find((q) => q.indexUid === "comments");
+    expect(commentQuery?.filter).toContain('realmUnitId = "r-1"');
   });
 
   test("user scope filters content by userId, posts by authorUserId, and entities by ownerUnitId", async () => {
@@ -250,6 +261,8 @@ describe("federatedSearch", () => {
     for (const q of queries.filter((qq) => qq.indexUid === "posts")) {
       expect(q.filter).toContain('authorUserId = "u-3"');
     }
+    const commentQuery = queries.find((q) => q.indexUid === "comments");
+    expect(commentQuery?.filter).toContain('authorUserId = "u-3"');
     const entityQuery = queries.find((q) => q.indexUid === "entities");
     expect(entityQuery?.filter).toContain('ownerUnitId = "u-3"');
   });
@@ -339,6 +352,25 @@ describe("federatedSearch", () => {
     expect(calls[0]!.limit).toBe(20);
     expect(calls[0]!.filter).toContain('kind = "REVIEW"');
     expect(calls[0]!.filter).toContain('realmIds = "r-1"');
+  });
+
+  test("single comments category drills down on the comments index", async () => {
+    const { client, calls } = makeFakeClient();
+    const result = await federatedSearch(client, {
+      scope: { kind: "realm", realmId: "r-1" },
+      category: "comments",
+      query: { keyword: "answer" },
+      page: 2,
+      hitsPerPage: 20,
+    });
+
+    expect(result.kind).toBe("single");
+    expect(calls.length).toBe(1);
+    expect(calls[0]!.index).toBe("comments");
+    expect(calls[0]!.offset).toBe(20);
+    expect(calls[0]!.limit).toBe(20);
+    expect(calls[0]!.filter).toContain('realmUnitId = "r-1"');
+    expect(calls[0]!.filter).toContain("isLocked = false");
   });
 
   test("allowed ratings default applies to content sub-queries", async () => {

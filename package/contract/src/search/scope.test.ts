@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
-import { SearchScopeSchema } from "./scope";
+import { SearchCategorySchema, SearchScopeSchema } from "./scope";
 
 describe("SearchScopeSchema", () => {
   test("accepts exact and work-domain book scopes", () => {
@@ -19,5 +19,11 @@ describe("SearchScopeSchema", () => {
         scopeMode: "work",
       }),
     ).toBe(true);
+  });
+});
+
+describe("SearchCategorySchema", () => {
+  test("accepts comments as an independent result category", () => {
+    expect(Value.Check(SearchCategorySchema, "comments")).toBe(true);
   });
 });

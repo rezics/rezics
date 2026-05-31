@@ -5,6 +5,8 @@
  */
 
 import type {
+  CommentSearchOptions,
+  CommentSearchResult,
   ContentSearchOptions,
   ContentSearchResult,
   FeedbackListQuery,
@@ -50,6 +52,19 @@ export const meiliFeedbackApi = {
 export const meiliPostApi = {
   postSearch: async (opts: PostSearchOptions): Promise<PostSearchResult> => {
     return apiFetch<PostSearchResult>(`/meili/posts/search`, {
+      method: "POST",
+      body: JSON.stringify(opts),
+    });
+  },
+};
+
+// ANCHOR: Comment search
+
+export const meiliCommentApi = {
+  commentSearch: async (
+    opts: CommentSearchOptions,
+  ): Promise<CommentSearchResult> => {
+    return apiFetch<CommentSearchResult>(`/meili/comments/search`, {
       method: "POST",
       body: JSON.stringify(opts),
     });
