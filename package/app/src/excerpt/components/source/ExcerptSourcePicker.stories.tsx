@@ -1,10 +1,5 @@
 import { unitKeys } from "@rezics/api/unit/unit.keys";
-import type {
-  ExcerptSource,
-  UnitDTO,
-  UnitListResponse,
-  UnitResponse,
-} from "@rezics/contract";
+import type { ExcerptSource, UnitDTO, UnitResponse } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -31,25 +26,11 @@ const fixtureBook: UnitDTO = {
 const fixtureChapter: UnitDTO = {
   id: "chapter-xyz",
   type: "chapter",
-  workUnitId: "book-abc",
   translations: [
     { unitId: "chapter-xyz", language: "en", title: "Chapter 1: Beginnings" },
   ],
   defaultLanguage: "en",
 };
-
-const fixtureSubUnits: UnitDTO[] = [
-  fixtureChapter,
-  {
-    id: "chapter-2",
-    type: "chapter",
-    workUnitId: "book-abc",
-    translations: [
-      { unitId: "chapter-2", language: "en", title: "Chapter 2: Middle" },
-    ],
-    defaultLanguage: "en",
-  },
-];
 
 function useHydrateCache() {
   const qc = useQueryClient();
@@ -59,10 +40,6 @@ function useHydrateCache() {
       unitKeys.detail("chapter-xyz"),
       fixtureChapter,
     );
-    qc.setQueryData<UnitListResponse>(
-      unitKeys.list({ workUnitId: "book-abc", limit: 100 }),
-      { units: fixtureSubUnits, total: fixtureSubUnits.length },
-    );
   }, [qc]);
 }
 
@@ -70,7 +47,6 @@ interface WrapperProps {
   initial?: ExcerptSource;
   disabled?: boolean;
   error?: string;
-  targetUnitId?: string;
 }
 
 function Wrapper(args: WrapperProps) {
@@ -82,7 +58,6 @@ function Wrapper(args: WrapperProps) {
       onChange={setValue}
       disabled={args.disabled}
       error={args.error}
-      targetUnitId={args.targetUnitId}
       language="en"
     />
   );
@@ -142,7 +117,5 @@ export const Disabled: Story = {
 };
 
 export const TwoIdUrlPicksChapter: Story = {
-  args: {
-    targetUnitId: "book-abc",
-  },
+  args: {},
 };

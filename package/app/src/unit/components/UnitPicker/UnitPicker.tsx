@@ -1,17 +1,11 @@
-import { unitQueries } from "@rezics/api/unit/unit.queries";
-import type { UnitDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Spinner } from "@rezics/ui";
 import { Input, Label } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { ChevronDown } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useUnitCandidates } from "../../hooks/useUnitCandidates";
 import type { Candidate } from "../../models/types";
 import { UnitCandidateRow } from "./UnitCandidateRow";
 
 export interface UnitPickerProps {
-  workContextUnitId?: string;
   language?: string;
   initialInput?: string;
   renderItemAction: (candidate: Candidate) => ReactNode;
@@ -21,7 +15,6 @@ export interface UnitPickerProps {
 }
 
 export function UnitPicker({
-  workContextUnitId,
   language,
   initialInput,
   renderItemAction,
@@ -68,86 +61,6 @@ export function UnitPicker({
         <p className="text-xs text-text-secondary">
           {t("book:unit_picker_parse_error")}
         </p>
-      )}
-
-      {workContextUnitId && (
-        <BrowsePanel
-          workContextUnitId={workContextUnitId}
-          language={language}
-          renderItemAction={renderItemAction}
-        />
-      )}
-    </div>
-  );
-}
-
-interface BrowsePanelProps {
-  workContextUnitId: string;
-  language?: string;
-  renderItemAction: (candidate: Candidate) => ReactNode;
-}
-
-function BrowsePanel({
-  workContextUnitId,
-  language,
-  renderItemAction,
-}: BrowsePanelProps) {
-  const { t } = useTranslation(["book"]);
-  const [expanded, setExpanded] = useState(false);
-
-  const { data, isLoading, error } = useQuery({
-    ...unitQueries.list({ workUnitId: workContextUnitId, limit: 100 }),
-    enabled: expanded,
-  });
-
-  const units = (data?.units ?? []) as UnitDTO[];
-
-  return (
-    <div className="border-t border-border-whisper pt-2">
-      <button
-        type="button"
-        onClick={() => setExpanded((s) => !s)}
-        className="flex items-center gap-2 text-sm w-full text-left hover:text-text-brand"
-        aria-expanded={expanded}
-      >
-        <ChevronDown
-          className={
-            "h-4 w-4 transition-transform " +
-            (expanded ? "rotate-180" : "rotate-0")
-          }
-        />
-        <span>{t("book:unit_picker_browse_panel")}</span>
-      </button>
-      {expanded && (
-        <div className="pt-2">
-          {isLoading && <Spinner size="sm" />}
-          {error && <p className="text-xs text-error-text">{String(error)}</p>}
-          {!isLoading && !error && units.length === 0 && (
-            <p className="text-xs text-text-secondary">
-              {t("book:unit_picker_no_sub_units")}
-            </p>
-          )}
-          <ul className="flex flex-col">
-            {units.map((unit) => {
-              if (!unit.id) return null;
-              const candidate: Candidate = {
-                kind: "unit",
-                identifier: unit.id,
-                identifierType: "id",
-                paramName: "unitId",
-              };
-              return (
-                <UnitCandidateRow
-                  key={unit.id}
-                  candidate={candidate}
-                  unit={unit}
-                  language={language}
-                  action={renderItemAction(candidate)}
-                />
-              );
-            })}
-          </ul>
-        </div>
       )}
     </div>
   );

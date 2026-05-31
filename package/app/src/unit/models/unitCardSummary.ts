@@ -57,7 +57,6 @@ export interface UnitDtoLike
       | "id"
       | "type"
       | "user"
-      | "workUnitId"
       | "defaultLanguage"
       | "translations"
       | "extra"
@@ -76,11 +75,6 @@ type TagLike =
       label?: string | null;
       translations?: { language?: string; title?: string | null }[];
     };
-
-export interface UnitWorkContext {
-  unitId: string;
-  title?: string;
-}
 
 export function unitDtoToUnitCardSummary(
   unit: UnitDtoLike,
@@ -220,33 +214,6 @@ export function shelfUnitToUnitCardSummary(
   }
 
   return attachmentCounts ? { ...summary, attachmentCounts } : summary;
-}
-
-export function resolveUnitWorkContext(
-  candidate: { kind: string; identifier: string } | undefined,
-  unit?: UnitDtoLike,
-): UnitWorkContext | undefined {
-  const title = unit
-    ? unitDtoToUnitCardSummary(unit, {
-        fallbackKind: candidate?.kind,
-        fallbackTitle: candidate?.identifier,
-      }).title
-    : undefined;
-
-  if (text(unit?.workUnitId)) {
-    return { unitId: unit!.workUnitId!, title };
-  }
-
-  const unitId =
-    text(unit?.unitId) ?? text(unit?.id) ?? text(candidate?.identifier);
-  if (!unitId) return undefined;
-
-  const type = normalizeKind(unit?.type ?? candidate?.kind);
-  if (type === "book" || type === "game" || type === "media") {
-    return { unitId, title };
-  }
-
-  return undefined;
 }
 
 function postToSummary(

@@ -10,7 +10,6 @@ import { type Candidate, UnitPicker } from "@/unit";
 interface ExcerptSourcePickerProps {
   value?: ExcerptSource;
   onChange: (value: ExcerptSource | undefined) => void;
-  targetUnitId?: string;
   disabled?: boolean;
   error?: string;
   language?: string;
@@ -19,7 +18,6 @@ interface ExcerptSourcePickerProps {
 export function ExcerptSourcePicker({
   value,
   onChange,
-  targetUnitId,
   disabled,
   error,
   language,
@@ -107,7 +105,6 @@ export function ExcerptSourcePicker({
       )}
 
       <UnitPicker
-        workContextUnitId={targetUnitId}
         language={language}
         inputId="excerpt-source-url"
         label={t("community:excerpt_form_source_url")}

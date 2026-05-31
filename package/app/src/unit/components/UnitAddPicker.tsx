@@ -1,4 +1,3 @@
-import { unitQueries } from "@rezics/api/unit/unit.queries";
 import type { UnitDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -12,29 +11,16 @@ import {
   TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, Link as LinkIcon, Search } from "lucide-react";
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useState,
-} from "react";
+import { Link as LinkIcon, Search } from "lucide-react";
+import { type ReactNode, useId, useState } from "react";
 import { useUnitCandidates } from "../hooks/useUnitCandidates";
 import type { Candidate } from "../models/types";
-import {
-  resolveUnitWorkContext,
-  type UnitWorkContext,
-} from "../models/unitCardSummary";
 import { UnitCandidateRow } from "./UnitPicker/UnitCandidateRow";
 
 export interface UnitAddPickerProps {
   language?: string;
   initialSearchQuery?: string;
   initialUrlInput?: string;
-  workContextUnitId?: string;
-  workContextTitle?: string;
   actionLabel?: string;
   onSelectCandidate?: (candidate: Candidate) => void;
   renderItemAction?: (candidate: Candidate) => ReactNode;
@@ -44,27 +30,11 @@ export function UnitAddPicker({
   language,
   initialSearchQuery,
   initialUrlInput,
-  workContextUnitId,
-  workContextTitle,
   actionLabel,
   onSelectCandidate,
   renderItemAction,
 }: UnitAddPickerProps) {
   const { t } = useTranslation(["book"]);
-  const explicitContext = useMemo(
-    () =>
-      workContextUnitId
-        ? { unitId: workContextUnitId, title: workContextTitle }
-        : undefined,
-    [workContextUnitId, workContextTitle],
-  );
-  const [workContext, setWorkContext] = useState<UnitWorkContext | undefined>(
-    explicitContext,
-  );
-
-  useEffect(() => {
-    if (explicitContext) setWorkContext(explicitContext);
-  }, [explicitContext]);
 
   const renderAction = (candidate: Candidate) => {
     if (renderItemAction) return renderItemAction(candidate);
@@ -80,16 +50,6 @@ export function UnitAddPicker({
       </Button>
     );
   };
-
-  const handlePreview = useCallback((candidate: Candidate, unit?: UnitDTO) => {
-    const next = resolveUnitWorkContext(candidate, unit);
-    if (!next) return;
-    setWorkContext((current) =>
-      current?.unitId === next.unitId && current.title === next.title
-        ? current
-        : next,
-    );
-  }, []);
 
   return (
     <section className="flex flex-col gap-3 border-b border-border-whisper pb-4">
@@ -115,7 +75,6 @@ export function UnitAddPicker({
             language={language}
             initialQuery={initialSearchQuery}
             actionForCandidate={renderAction}
-            onPreview={handlePreview}
           />
         </TabsContent>
         <TabsContent value="url" className="pt-3">
@@ -123,19 +82,9 @@ export function UnitAddPicker({
             language={language}
             initialInput={initialUrlInput}
             actionForCandidate={renderAction}
-            onPreview={handlePreview}
           />
         </TabsContent>
       </Tabs>
-
-      {workContext ? (
-        <UnitBrowseRelated
-          context={workContext}
-          language={language}
-          actionForCandidate={renderAction}
-          onPreview={handlePreview}
-        />
-      ) : null}
     </section>
   );
 }
@@ -143,7 +92,6 @@ export function UnitAddPicker({
 interface SourceProps {
   language?: string;
   actionForCandidate: (candidate: Candidate) => ReactNode;
-  onPreview: (candidate: Candidate, unit?: UnitDTO) => void;
 }
 
 interface UnitSearchSelectProps extends SourceProps {
@@ -154,7 +102,6 @@ export function UnitSearchSelect({
   language,
   initialQuery,
   actionForCandidate,
-  onPreview,
 }: UnitSearchSelectProps) {
   const { t } = useTranslation(["book"]);
   const inputId = useId();
@@ -203,7 +150,6 @@ export function UnitSearchSelect({
                 unit={unit}
                 language={language}
                 action={actionForCandidate(candidate)}
-                onPreview={onPreview}
               />
             );
           })}
@@ -221,23 +167,11 @@ export function UnitUrlImport({
   language,
   initialInput,
   actionForCandidate,
-  onPreview,
 }: UnitUrlImportProps) {
   const { t } = useTranslation(["book"]);
   const inputId = useId();
   const [input, setInput] = useState(initialInput ?? "");
   const { resolved, parseError } = useUnitCandidates(input);
-
-  useEffect(() => {
-    for (const item of resolved) {
-      if (!item.unit) continue;
-      const context = resolveUnitWorkContext(item.candidate, item.unit);
-      if (context) {
-        onPreview(item.candidate, item.unit);
-        return;
-      }
-    }
-  }, [onPreview, resolved]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -261,7 +195,6 @@ export function UnitUrlImport({
               isLoading={item.isLoading}
               language={language}
               action={actionForCandidate(item.candidate)}
-              onPreview={onPreview}
             />
           ))}
         </ul>
@@ -271,85 +204,6 @@ export function UnitUrlImport({
         <p className="text-xs leading-dense text-text-secondary">
           {t("book:unit_picker_parse_error")}
         </p>
-      ) : null}
-    </div>
-  );
-}
-
-interface UnitBrowseRelatedProps extends SourceProps {
-  context: UnitWorkContext;
-}
-
-export function UnitBrowseRelated({
-  context,
-  language,
-  actionForCandidate,
-  onPreview,
-}: UnitBrowseRelatedProps) {
-  const { t } = useTranslation(["book"]);
-  const [expanded, setExpanded] = useState(true);
-  const { data, isLoading, error } = useQuery({
-    ...unitQueries.list({ workUnitId: context.unitId, limit: 100 }),
-    enabled: expanded,
-  });
-  const units = (data?.units ?? []) as UnitDTO[];
-
-  return (
-    <div className="border-t border-border-whisper pt-3">
-      <button
-        type="button"
-        onClick={() => setExpanded((value) => !value)}
-        className="flex w-full items-center gap-2 text-left text-sm leading-ui text-text-primary hover:text-text-brand"
-        aria-expanded={expanded}
-      >
-        <ChevronDown
-          className={
-            "h-4 w-4 transition-transform " +
-            (expanded ? "rotate-180" : "rotate-0")
-          }
-        />
-        <span className="min-w-0 truncate">
-          {context.title
-            ? t("book:unit_picker_browse_named_work", { title: context.title })
-            : t("book:unit_picker_browse_panel")}
-        </span>
-      </button>
-
-      {expanded ? (
-        <div className="pt-2">
-          {isLoading ? <Spinner size="sm" /> : null}
-          {error ? (
-            <p className="text-xs leading-dense text-error-text">
-              {String(error)}
-            </p>
-          ) : null}
-          {!isLoading && !error && units.length === 0 ? (
-            <p className="text-xs leading-dense text-text-secondary">
-              {t("book:unit_picker_no_sub_units")}
-            </p>
-          ) : null}
-          <ul className="flex flex-col">
-            {units.map((unit) => {
-              if (!unit.id) return null;
-              const candidate: Candidate = {
-                kind: unit.type?.toLowerCase() ?? "unit",
-                identifier: unit.id,
-                identifierType: "id",
-                paramName: "unitId",
-              };
-              return (
-                <UnitCandidateRow
-                  key={unit.id}
-                  candidate={candidate}
-                  unit={unit}
-                  language={language}
-                  action={actionForCandidate(candidate)}
-                  onPreview={onPreview}
-                />
-              );
-            })}
-          </ul>
-        </div>
       ) : null}
     </div>
   );

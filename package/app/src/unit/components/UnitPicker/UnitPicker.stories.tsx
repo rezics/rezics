@@ -1,5 +1,5 @@
 import { unitKeys } from "@rezics/api/unit/unit.keys";
-import type { UnitDTO, UnitListResponse, UnitResponse } from "@rezics/contract";
+import type { UnitDTO, UnitResponse } from "@rezics/contract";
 import { Button } from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,7 +31,6 @@ const fixtureBook: UnitDTO = {
 const fixtureChapter: UnitDTO = {
   id: "chapter-xyz",
   type: "chapter",
-  workUnitId: "book-abc",
   translations: [
     {
       unitId: "chapter-xyz",
@@ -42,28 +41,6 @@ const fixtureChapter: UnitDTO = {
   defaultLanguage: "en",
 };
 
-const fixtureSubUnits: UnitDTO[] = [
-  fixtureChapter,
-  {
-    id: "chapter-2",
-    type: "chapter",
-    workUnitId: "book-abc",
-    translations: [
-      { unitId: "chapter-2", language: "en", title: "Chapter 2: Middle" },
-    ],
-    defaultLanguage: "en",
-  },
-  {
-    id: "chapter-3",
-    type: "chapter",
-    workUnitId: "book-abc",
-    translations: [
-      { unitId: "chapter-3", language: "en", title: "Chapter 3: End" },
-    ],
-    defaultLanguage: "en",
-  },
-];
-
 function useHydrateUnitCache() {
   const qc = useQueryClient();
   useEffect(() => {
@@ -72,24 +49,15 @@ function useHydrateUnitCache() {
       unitKeys.detail("chapter-xyz"),
       fixtureChapter,
     );
-    qc.setQueryData<UnitListResponse>(
-      unitKeys.list({ workUnitId: "book-abc", limit: 100 }),
-      { units: fixtureSubUnits, total: fixtureSubUnits.length },
-    );
   }, [qc]);
 }
 
 interface StoryShellProps {
   initialInput?: string;
-  workContextUnitId?: string;
   mode: "single" | "multi";
 }
 
-function StoryShell({
-  initialInput,
-  workContextUnitId,
-  mode,
-}: StoryShellProps) {
+function StoryShell({ initialInput, mode }: StoryShellProps) {
   useHydrateUnitCache();
   const [selected, setSelected] = useState<Candidate | undefined>(undefined);
   const [added, setAdded] = useState<Candidate[]>([]);
@@ -121,7 +89,6 @@ function StoryShell({
     <div className="max-w-xl flex flex-col gap-4">
       <UnitPicker
         initialInput={initialInput}
-        workContextUnitId={workContextUnitId}
         renderItemAction={renderItemAction}
       />
       <div className="text-xs text-text-secondary border-t border-border-whisper pt-2">
@@ -209,13 +176,5 @@ export const ParseError: Story = {
   args: {
     mode: "single",
     initialInput: "not-a-valid-url",
-  },
-};
-
-export const BrowsePanelPopulated: Story = {
-  args: {
-    mode: "multi",
-    workContextUnitId: "book-abc",
-    initialInput: "",
   },
 };

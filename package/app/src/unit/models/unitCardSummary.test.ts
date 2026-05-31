@@ -8,7 +8,6 @@ import {
 } from "@rezics/contract";
 import {
   candidateToUnitCardSummary,
-  resolveUnitWorkContext,
   shelfUnitToUnitCardSummary,
   unitDtoToUnitCardSummary,
 } from "./unitCardSummary";
@@ -192,22 +191,5 @@ describe("shelfUnitToUnitCardSummary", () => {
       title: "book-x",
       addedAt: "2026-02-01T00:00:00.000Z",
     });
-  });
-});
-
-describe("resolveUnitWorkContext", () => {
-  test("uses a release's workUnitId when present", () => {
-    expect(
-      resolveUnitWorkContext(
-        { kind: "chapter", identifier: "chapter-1" },
-        { id: "chapter-1", type: "POST", workUnitId: "book-1" },
-      ),
-    ).toEqual({ unitId: "book-1", title: "chapter-1" });
-  });
-
-  test("uses work-like candidate ids directly", () => {
-    expect(
-      resolveUnitWorkContext({ kind: "book", identifier: "book-1" }),
-    ).toEqual({ unitId: "book-1", title: undefined });
   });
 });

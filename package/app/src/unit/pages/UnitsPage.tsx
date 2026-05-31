@@ -93,7 +93,6 @@ export interface UnitsPageProps {
    * Optional target unit filter (e.g., bookId)
    */
   targetUnitId?: string;
-  workUnitId?: string;
 
   children?: (units: any[]) => React.ReactNode;
 }
@@ -104,7 +103,6 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   types = ["UNIT", "POST", "QUOTE", "BOOK"],
   userId,
   targetUnitId,
-  workUnitId,
   children,
 }) => {
   const { t } = useTranslation(["book"]);
@@ -172,11 +170,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     contentSearchQueryOptions({
       type: tab === "UNIT" ? undefined : tab,
       userId,
-      ...(workUnitId
-        ? { workUnitId, workRoles: ["POST" as const] }
-        : targetUnitId
-          ? { containedUnitIds: [targetUnitId] }
-          : {}),
+      ...(targetUnitId ? { containedUnitIds: [targetUnitId] } : {}),
       keyword: keyword || undefined,
       offset: startMap[tab] ?? 0,
       limit: EXTERNAL_PAGE_SIZE,
@@ -195,11 +189,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
       contentSearchQueryOptions({
         type: tab === "UNIT" ? undefined : tab,
         userId,
-        ...(workUnitId
-          ? { workUnitId, workRoles: ["POST" as const] }
-          : targetUnitId
-            ? { containedUnitIds: [targetUnitId] }
-            : {}),
+        ...(targetUnitId ? { containedUnitIds: [targetUnitId] } : {}),
         keyword: keyword || undefined,
         offset: start,
         limit: EXTERNAL_PAGE_SIZE,

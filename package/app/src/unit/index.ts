@@ -23,11 +23,9 @@ export type {
   UnitCardSummary,
   UnitCardSummaryOptions,
   UnitCardTranslationMeta,
-  UnitWorkContext,
 } from "./models/unitCardSummary";
 export {
   candidateToUnitCardSummary,
-  resolveUnitWorkContext,
   shelfUnitToUnitCardSummary,
   unitDtoToUnitCardSummary,
 } from "./models/unitCardSummary";

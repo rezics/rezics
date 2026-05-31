@@ -72,7 +72,6 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
           unitId={""}
           data={excerptData}
           setData={setExcerptData}
-          targetUnitId={bookUnitId}
         />
         <div className="flex justify-end gap-2">
           <CooldownButton

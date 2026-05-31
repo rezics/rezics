@@ -32,7 +32,6 @@ const bookUnit: UnitDTO = {
 const chapterUnit: UnitDTO = {
   id: "chapter-xyz",
   type: "POST",
-  workUnitId: "book-abc",
   translations: [
     {
       unitId: "chapter-xyz",
@@ -61,23 +60,6 @@ const searchUnits: UnitDTO[] = [
   },
 ];
 
-const browseUnits: UnitDTO[] = [
-  chapterUnit,
-  {
-    id: "chapter-2",
-    type: "POST",
-    workUnitId: "book-abc",
-    translations: [
-      {
-        unitId: "chapter-2",
-        language: "en",
-        title: "Chapter 2: Middle",
-      },
-    ],
-    defaultLanguage: "en",
-  },
-];
-
 function useHydrateUnitCache() {
   const qc = useQueryClient();
   useEffect(() => {
@@ -91,24 +73,15 @@ function useHydrateUnitCache() {
     );
     qc.setQueryData<UnitResponse>(unitKeys.detail("book-abc"), bookUnit);
     qc.setQueryData<UnitResponse>(unitKeys.detail("chapter-xyz"), chapterUnit);
-    qc.setQueryData<UnitListResponse>(
-      unitKeys.list({ workUnitId: "book-abc", limit: 100 }),
-      { units: browseUnits, total: browseUnits.length },
-    );
   }, [qc]);
 }
 
 interface StoryShellProps {
   initialSearchQuery?: string;
   initialUrlInput?: string;
-  workContextUnitId?: string;
 }
 
-function StoryShell({
-  initialSearchQuery,
-  initialUrlInput,
-  workContextUnitId,
-}: StoryShellProps) {
+function StoryShell({ initialSearchQuery, initialUrlInput }: StoryShellProps) {
   useHydrateUnitCache();
   const [added, setAdded] = useState<Candidate[]>([]);
 
@@ -117,8 +90,6 @@ function StoryShell({
       <UnitAddPicker
         initialSearchQuery={initialSearchQuery}
         initialUrlInput={initialUrlInput}
-        workContextUnitId={workContextUnitId}
-        workContextTitle={workContextUnitId ? "The Demo Book" : undefined}
         onSelectCandidate={(candidate) =>
           setAdded((previous) => [...previous, candidate])
         }
@@ -172,12 +143,6 @@ export const SearchResults: Story = {
 
 export const UrlCandidates: Story = {
   args: { initialUrlInput: "/book/book-abc/read/chapter-xyz" },
-};
-
-export const BrowseAfterResolution: Story = {
-  args: {
-    initialUrlInput: "/book/book-abc",
-  },
 };
 
 export const ParseError: Story = {

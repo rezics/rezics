@@ -20,14 +20,12 @@ interface ExcerptEditPageProps {
   unitId: string;
   data: UnitFormData;
   setData: (data: UnitFormData) => void;
-  targetUnitId?: string;
 }
 
 export function ExcerptEditPage({
   unitId,
   data,
   setData,
-  targetUnitId,
 }: ExcerptEditPageProps) {
   const { t } = useTranslation(["common", "community"]);
   const { show } = useAlertStore();
@@ -92,11 +90,7 @@ export function ExcerptEditPage({
         />
       </div>
 
-      <ExcerptSourcePicker
-        value={source}
-        onChange={handleSourceChange}
-        targetUnitId={targetUnitId}
-      />
+      <ExcerptSourcePicker value={source} onChange={handleSourceChange} />
 
       <div className="flex-1 min-h-[300px]">
         <RezicsMarkdownEditor
@@ -162,7 +156,6 @@ export function ExcerptEditPageContainer() {
         unitId={unitId}
         data={excerptData}
         setData={setExcerptData}
-        targetUnitId={unitData?.workUnitId ?? undefined}
       />
     </div>
   );
