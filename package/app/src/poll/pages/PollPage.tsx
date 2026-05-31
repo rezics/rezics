@@ -4,7 +4,7 @@ import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { PostTreeSection } from "@/post";
+import { PostListSection } from "@/post";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PollView } from "../components/PollView";
@@ -41,11 +41,9 @@ export const PollPage: React.FC<{ unitId: string }> = ({ unitId }) => {
             ref={composerRef}
             mode="progressive"
             targetUnitId={unitId}
-            rootUnitId={unitId}
-            parentCommentUnitId={unitId}
           />
 
-          <PostTreeSection rootUnitId={unitId} />
+          <PostListSection targetUnitId={unitId} />
         </div>
       </div>
     </div>

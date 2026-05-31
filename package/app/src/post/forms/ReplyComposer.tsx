@@ -307,6 +307,8 @@ export const ReplyComposer = forwardRef<
   const parentCommentUnitId = isRealmPostMode
     ? undefined
     : props.parentCommentUnitId;
+  const isCommentReplyMode = !isRealmPostMode && Boolean(parentCommentUnitId);
+  const canAttachPoll = !isCommentReplyMode;
   const initialTagIds = props.tagIds;
   const invalidMode =
     Boolean(realmUnitIds?.length) &&
@@ -314,6 +316,8 @@ export const ReplyComposer = forwardRef<
       (props as Partial<ReplyComposerReplyModeProps>).targetUnitId ||
         (props as Partial<ReplyComposerReplyModeProps>).parentCommentUnitId,
     );
+  const invalidCommentReplyMode =
+    isCommentReplyMode && (!rootUnitId || !realmUnitId);
   const startsExpanded = mode === "expanded" || autoFocus;
   const [expanded, setExpanded] = useState<boolean>(startsExpanded);
   const [body, setBody] = useState("");
@@ -332,12 +336,8 @@ export const ReplyComposer = forwardRef<
       content: ReturnType<typeof markdownContentDoc>,
       options?: { pollUnitId?: string },
     ) => {
-      if (
-        !options?.pollUnitId &&
-        rootUnitId &&
-        realmUnitId &&
-        parentCommentUnitId
-      ) {
+      if (parentCommentUnitId) {
+        if (!rootUnitId || !realmUnitId || options?.pollUnitId) return;
         commentMutation.mutate(
           {
             rootUnitId,
@@ -361,7 +361,6 @@ export const ReplyComposer = forwardRef<
       postMutation.mutate(
         {
           targetUnitId,
-          parentPostUnitId: parentCommentUnitId,
           kind: PostKind.POST,
           content,
           ...(options?.pollUnitId
@@ -420,6 +419,10 @@ export const ReplyComposer = forwardRef<
       );
     }
   }, [invalidMode]);
+
+  useEffect(() => {
+    if (!canAttachPoll && attachingPoll) setAttachingPoll(false);
+  }, [attachingPoll, canAttachPoll]);
 
   useEffect(() => {
     if (isRealmPostMode && expanded) focusEditor();
@@ -501,7 +504,7 @@ export const ReplyComposer = forwardRef<
     setExpanded(true);
   };
 
-  if (invalidMode) {
+  if (invalidMode || invalidCommentReplyMode) {
     return (
       <div className="rounded-md bg-error-fill/10 p-3 text-sm leading-ui text-error-text">
         {t("community:post_composer_invalid_configuration")}
@@ -560,15 +563,19 @@ export const ReplyComposer = forwardRef<
         />
       )}
       <div className="flex flex-row items-center justify-between gap-2">
-        <Button
-          size="sm"
-          variant={attachingPoll ? "secondary" : "ghost"}
-          onClick={() => setAttachingPoll((value) => !value)}
-          disabled={submitting}
-        >
-          <BarChart3 className="mr-1 h-4 w-4" />
-          {t("community:poll_attach")}
-        </Button>
+        {canAttachPoll ? (
+          <Button
+            size="sm"
+            variant={attachingPoll ? "secondary" : "ghost"}
+            onClick={() => setAttachingPoll((value) => !value)}
+            disabled={submitting}
+          >
+            <BarChart3 className="mr-1 h-4 w-4" />
+            {t("community:poll_attach")}
+          </Button>
+        ) : (
+          <span />
+        )}
         <div className="flex flex-row gap-2">
           <Button
             size="sm"

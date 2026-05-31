@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Inline composer used by `PostTreeSection` and `ShelfDiscussionSection`. The submit step calls `useCreatePostMutation`; without an MSW handler the network call rejects, so the `HappyPath` play stops after the body is typed and the editor reports it.",
+          "Inline composer used by post feeds and comment threads. The submit step calls the matching create mutation; without an MSW handler the network call rejects, so the `HappyPath` play stops after the body is typed and the editor reports it.",
       },
     },
   },
