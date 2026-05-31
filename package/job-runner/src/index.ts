@@ -11,9 +11,9 @@ import { env } from "./env";
 import { createJobHandlers } from "./handlers";
 import { resolveWorkerLanes } from "./lanes";
 import {
-  createAdminWorkMergeRuntime,
-  type AdminWorkMergeRuntime,
-} from "./handlers/admin-work-merge/runtime";
+  createServerPrismaRuntime,
+  type ServerPrismaRuntime,
+} from "./handlers/maintenance/runtime";
 import {
   createHistoryRuntime,
   type HistoryRuntime,
@@ -57,7 +57,7 @@ let boss: Awaited<ReturnType<typeof createBoss>> | undefined;
 let app: ReturnType<typeof createJobRunnerApp> | undefined;
 let searchRuntime: SearchRuntime | undefined;
 let historyRuntime: HistoryRuntime | undefined;
-let adminWorkMergeRuntime: AdminWorkMergeRuntime | undefined;
+let serverPrismaRuntime: ServerPrismaRuntime | undefined;
 let rankingRuntime: RankingRuntime | undefined;
 
 if (role === "all" || role === "worker" || role === "http") {
@@ -79,7 +79,7 @@ if ((role === "all" || role === "worker") && boss) {
     serverDatabaseUrl: env.SERVER_DATABASE_URL,
     historyDatabaseUrl: env.HISTORY_DATABASE_URL,
   });
-  adminWorkMergeRuntime = createAdminWorkMergeRuntime({
+  serverPrismaRuntime = createServerPrismaRuntime({
     serverDatabaseUrl: env.SERVER_DATABASE_URL,
   });
   rankingRuntime = createRankingRuntime({
@@ -91,7 +91,7 @@ if ((role === "all" || role === "worker") && boss) {
     createJobHandlers({
       searchClient: searchRuntime.client,
       historyConsumer: historyRuntime.consumer,
-      adminWorkMergeRuntime,
+      serverPrismaRuntime,
       rankingDispatcher: rankingRuntime,
     }),
     workerLanes,
@@ -121,7 +121,7 @@ if ((role === "all" || role === "http") && boss) {
 async function shutdown() {
   await searchRuntime?.disconnect();
   await historyRuntime?.disconnect();
-  await adminWorkMergeRuntime?.disconnect();
+  await serverPrismaRuntime?.disconnect();
   await rankingRuntime?.disconnect();
   await boss?.stop({ graceful: true, timeout: 30_000 });
   app?.server?.stop();

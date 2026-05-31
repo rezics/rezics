@@ -1,14 +1,14 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@rezics/server/prisma/generated/client";
 
-export interface AdminWorkMergeRuntime {
+export interface ServerPrismaRuntime {
   prisma: PrismaClient;
   disconnect(): Promise<void>;
 }
 
-export function createAdminWorkMergeRuntime(options: {
+export function createServerPrismaRuntime(options: {
   serverDatabaseUrl: string;
-}): AdminWorkMergeRuntime {
+}): ServerPrismaRuntime {
   const adapter = new PrismaPg({
     connectionString: options.serverDatabaseUrl,
     max: 5,

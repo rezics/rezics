@@ -84,26 +84,10 @@ describe("maintenance handlers", () => {
     ]);
   });
 
-  test("admin work merge fanout requires the admin runtime", async () => {
-    const handlers = createMaintenanceHandlers();
-    const command = createMaintenanceCommand(
-      MAINTENANCE_COMMAND_KINDS.fanoutContinuation,
-      {
-        fanout: "admin-work-merge.execute",
-        targetId: "operation-1",
-        cursor: "start",
-      },
-    );
-
-    await expect(
-      handlers[command.kind]?.(command, { enqueue: async () => undefined }),
-    ).rejects.toThrow("Admin work merge runtime is not configured");
-  });
-
   test("repairs Series direct content index from release member nodes only", async () => {
     const createManyCalls: unknown[] = [];
     const handlers = createMaintenanceHandlers({
-      adminWorkMergeRuntime: {
+      serverPrismaRuntime: {
         prisma: {
           series: {
             findUnique: async () => ({ unitId: "series-1" }),
@@ -152,7 +136,7 @@ describe("maintenance handlers", () => {
     const enqueued: Array<{ kind: string; payload: unknown }> = [];
     const upserts: unknown[] = [];
     const handlers = createMaintenanceHandlers({
-      adminWorkMergeRuntime: {
+      serverPrismaRuntime: {
         prisma: {
           series: {
             findUnique: async () => ({ unitId: "series-1" }),
