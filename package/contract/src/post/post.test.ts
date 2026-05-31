@@ -2,7 +2,10 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   createPostSchema,
+  acceptAnswerSchema,
+  pinPostSchema,
   postDTOSchema,
+  postPinDTOSchema,
   postListQuerySchema,
   excerptSourceSchema,
 } from "./post";
@@ -90,6 +93,15 @@ describe("post work-domain contract fields", () => {
 
   test("does not accept comment topology on post creation", () => {
     expect("parentPostUnitId" in createPostSchema.properties).toBe(false);
+  });
+
+  test("uses target naming for promotion contracts", () => {
+    expect("targetUnitId" in postPinDTOSchema.properties).toBe(true);
+    expect("postUnitId" in postPinDTOSchema.properties).toBe(false);
+    expect("targetUnitId" in pinPostSchema.properties).toBe(true);
+    expect("postUnitId" in pinPostSchema.properties).toBe(false);
+    expect("beforeTargetUnitId" in acceptAnswerSchema.properties).toBe(true);
+    expect("beforePostUnitId" in acceptAnswerSchema.properties).toBe(false);
   });
 });
 

@@ -109,7 +109,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
 
     if (!decision.canEnter && !canPin && !canAccept) return null;
 
-    const variables = { scopeUnitId: rootUnitId, postUnitId: post.unitId };
+    const variables = { scopeUnitId: rootUnitId, targetUnitId: post.unitId };
 
     return (
       <>

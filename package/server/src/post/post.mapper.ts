@@ -56,7 +56,7 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
 export function mapPostPinToDTO(pin: PostPin): PostPinDTO {
   return {
     scopeUnitId: pin.scopeUnitId,
-    postUnitId: pin.postUnitId,
+    targetUnitId: pin.postUnitId,
     kind: pin.kind,
     position: pin.position,
     byUserId: pin.byUserId,

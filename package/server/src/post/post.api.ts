@@ -322,16 +322,20 @@ export const postApi = new Elysia({ prefix: "/post" })
     },
   )
   .delete(
-    "/pins/:scopeUnitId/:postUnitId",
+    "/pins/:scopeUnitId/:targetUnitId",
     async ({ params, identity }) => {
-      await postService.unpin(params.scopeUnitId, params.postUnitId, identity);
+      await postService.unpin(
+        params.scopeUnitId,
+        params.targetUnitId,
+        identity,
+      );
       return { message: "Pin removed" };
     },
     {
       requireLogin: true,
       params: t.Object({
         scopeUnitId: t.String(),
-        postUnitId: t.String(),
+        targetUnitId: t.String(),
       }),
       response: { 200: t.Object({ message: t.String() }) },
       detail: {
@@ -360,11 +364,11 @@ export const postApi = new Elysia({ prefix: "/post" })
     },
   )
   .delete(
-    "/accepted-answers/:scopeUnitId/:postUnitId",
+    "/accepted-answers/:scopeUnitId/:targetUnitId",
     async ({ params, identity }) => {
       await postService.unacceptAnswer(
         params.scopeUnitId,
-        params.postUnitId,
+        params.targetUnitId,
         identity,
       );
       return { message: "Accepted answer removed" };
@@ -373,7 +377,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       requireLogin: true,
       params: t.Object({
         scopeUnitId: t.String(),
-        postUnitId: t.String(),
+        targetUnitId: t.String(),
       }),
       response: { 200: t.Object({ message: t.String() }) },
       detail: {

@@ -273,8 +273,8 @@ async function attachPostPaths<
 /**
  * Attach the promotion overlay (`pinKind`/`pinPosition`) to thread rows. A post
  * is promoted at most once per scope and its scope is always its own thread
- * root, so `postUnitId` maps to at most one `PostPin` — we can key the lookup by
- * `postUnitId` directly. Ordinary replies stay `null`.
+ * root, so the target unit maps to at most one `PostPin`. The storage column is
+ * still named `postUnitId` until the physical migration catches up.
  */
 async function attachPinKinds<
   T extends {
@@ -1191,16 +1191,16 @@ export class PostService {
     caller: RezicsSessionClaims,
   ): Promise<PostPinDTO> {
     await this.assertCanPromoteInThread(input.scopeUnitId, caller);
-    await this.loadPromotableTarget(input.scopeUnitId, input.postUnitId);
+    await this.loadPromotableTarget(input.scopeUnitId, input.targetUnitId);
     const position = await this.mintPinPosition(
       input.scopeUnitId,
       PinKindEnum.PINNED,
-      input.beforePostUnitId,
-      input.afterPostUnitId,
+      input.beforeTargetUnitId,
+      input.afterTargetUnitId,
     );
     return this.createPin(
       input.scopeUnitId,
-      input.postUnitId,
+      input.targetUnitId,
       PinKindEnum.PINNED,
       position,
       caller.userId,
@@ -1210,11 +1210,11 @@ export class PostService {
   /** Remove a `PINNED` promotion. */
   async unpin(
     scopeUnitId: string,
-    postUnitId: string,
+    targetUnitId: string,
     caller: RezicsSessionClaims,
   ): Promise<void> {
     await this.assertCanPromoteInThread(scopeUnitId, caller);
-    await this.deletePin(scopeUnitId, postUnitId, PinKindEnum.PINNED);
+    await this.deletePin(scopeUnitId, targetUnitId, PinKindEnum.PINNED);
   }
 
   /**
@@ -1229,7 +1229,7 @@ export class PostService {
     await this.assertCanPromoteInThread(input.scopeUnitId, caller);
     const target = await this.loadPromotableTarget(
       input.scopeUnitId,
-      input.postUnitId,
+      input.targetUnitId,
     );
     if (target.depth !== 1 || target.parentPostUnitId !== input.scopeUnitId) {
       throw new AppError(
@@ -1246,12 +1246,12 @@ export class PostService {
     const position = await this.mintPinPosition(
       input.scopeUnitId,
       PinKindEnum.ACCEPTED_ANSWER,
-      input.beforePostUnitId,
-      input.afterPostUnitId,
+      input.beforeTargetUnitId,
+      input.afterTargetUnitId,
     );
     const pin = await this.createPin(
       input.scopeUnitId,
-      input.postUnitId,
+      input.targetUnitId,
       PinKindEnum.ACCEPTED_ANSWER,
       position,
       caller.userId,
@@ -1263,11 +1263,15 @@ export class PostService {
   /** Remove an `ACCEPTED_ANSWER` promotion. */
   async unacceptAnswer(
     scopeUnitId: string,
-    postUnitId: string,
+    targetUnitId: string,
     caller: RezicsSessionClaims,
   ): Promise<void> {
     await this.assertCanPromoteInThread(scopeUnitId, caller);
-    await this.deletePin(scopeUnitId, postUnitId, PinKindEnum.ACCEPTED_ANSWER);
+    await this.deletePin(
+      scopeUnitId,
+      targetUnitId,
+      PinKindEnum.ACCEPTED_ANSWER,
+    );
     await this.maintainSolvedCacheOnUnaccept(scopeUnitId);
   }
 
@@ -1418,15 +1422,15 @@ export class PostService {
   /** Validate the target is a reply within the scope thread; return its shape. */
   private async loadPromotableTarget(
     scopeUnitId: string,
-    postUnitId: string,
+    targetUnitId: string,
   ): Promise<{ depth: number; parentPostUnitId: string | null }> {
     const target = await prisma.post.findUnique({
-      where: { unitId: postUnitId },
+      where: { unitId: targetUnitId },
       select: { depth: true, rootPostUnitId: true, parentPostUnitId: true },
     });
     if (!target) {
       const comment = await prisma.comment.findUnique({
-        where: { unitId: postUnitId },
+        where: { unitId: targetUnitId },
         select: {
           depth: true,
           rootUnitId: true,
@@ -1434,7 +1438,7 @@ export class PostService {
         },
       });
       if (!comment) {
-        throw new AppError(404, `Post not found: ${postUnitId}`);
+        throw new AppError(404, `Promotable target not found: ${targetUnitId}`);
       }
       if (comment.rootUnitId !== scopeUnitId) {
         throw new AppError(
@@ -1470,19 +1474,21 @@ export class PostService {
   private async mintPinPosition(
     scopeUnitId: string,
     kind: PinKindEnum,
-    beforePostUnitId?: string,
-    afterPostUnitId?: string,
+    beforeTargetUnitId?: string,
+    afterTargetUnitId?: string,
   ): Promise<string> {
-    const positionOf = async (postUnitId?: string) => {
-      if (!postUnitId) return undefined;
+    const positionOf = async (targetUnitId?: string) => {
+      if (!targetUnitId) return undefined;
       const pin = await prisma.postPin.findUnique({
-        where: { scopeUnitId_postUnitId: { scopeUnitId, postUnitId } },
+        where: {
+          scopeUnitId_postUnitId: { scopeUnitId, postUnitId: targetUnitId },
+        },
         select: { position: true },
       });
       return pin?.position ?? undefined;
     };
-    const afterPos = await positionOf(afterPostUnitId);
-    const beforePos = await positionOf(beforePostUnitId);
+    const afterPos = await positionOf(afterTargetUnitId);
+    const beforePos = await positionOf(beforeTargetUnitId);
     if (afterPos !== undefined || beforePos !== undefined) {
       return generateBetween(afterPos, beforePos);
     }
@@ -1496,14 +1502,20 @@ export class PostService {
 
   private async createPin(
     scopeUnitId: string,
-    postUnitId: string,
+    targetUnitId: string,
     kind: PinKindEnum,
     position: string,
     byUserId: string,
   ): Promise<PostPinDTO> {
     try {
       const pin = await prisma.postPin.create({
-        data: { scopeUnitId, postUnitId, kind, position, byUserId },
+        data: {
+          scopeUnitId,
+          postUnitId: targetUnitId,
+          kind,
+          position,
+          byUserId,
+        },
       });
       return mapPostPinToDTO(pin);
     } catch (error) {
@@ -1520,18 +1532,22 @@ export class PostService {
 
   private async deletePin(
     scopeUnitId: string,
-    postUnitId: string,
+    targetUnitId: string,
     kind: PinKindEnum,
   ): Promise<void> {
     const existing = await prisma.postPin.findUnique({
-      where: { scopeUnitId_postUnitId: { scopeUnitId, postUnitId } },
+      where: {
+        scopeUnitId_postUnitId: { scopeUnitId, postUnitId: targetUnitId },
+      },
       select: { kind: true },
     });
     if (!existing || existing.kind !== kind) {
       throw new AppError(404, "Promotion not found for this post and scope");
     }
     await prisma.postPin.delete({
-      where: { scopeUnitId_postUnitId: { scopeUnitId, postUnitId } },
+      where: {
+        scopeUnitId_postUnitId: { scopeUnitId, postUnitId: targetUnitId },
+      },
     });
   }
 

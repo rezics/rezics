@@ -177,7 +177,7 @@ export type PostDTO = (typeof postDTOSchema)["static"];
 
 export const postPinDTOSchema = t.Object({
   scopeUnitId: t.String(),
-  postUnitId: t.String(),
+  targetUnitId: t.String(),
   kind: pinKindLiterals,
   position: t.String(),
   byUserId: t.String(),
@@ -192,10 +192,10 @@ export type PostPinDTO = (typeof postPinDTOSchema)["static"];
  */
 export const pinPostSchema = t.Object({
   scopeUnitId: t.String(),
-  postUnitId: t.String(),
+  targetUnitId: t.String(),
   /** Optional explicit ordering anchors; the server mints a position between them. */
-  beforePostUnitId: t.Optional(t.String()),
-  afterPostUnitId: t.Optional(t.String()),
+  beforeTargetUnitId: t.Optional(t.String()),
+  afterTargetUnitId: t.Optional(t.String()),
 });
 
 export type PinPostInput = (typeof pinPostSchema)["static"];
@@ -203,9 +203,9 @@ export type PinPostInput = (typeof pinPostSchema)["static"];
 /** Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread. */
 export const acceptAnswerSchema = t.Object({
   scopeUnitId: t.String(),
-  postUnitId: t.String(),
-  beforePostUnitId: t.Optional(t.String()),
-  afterPostUnitId: t.Optional(t.String()),
+  targetUnitId: t.String(),
+  beforeTargetUnitId: t.Optional(t.String()),
+  afterTargetUnitId: t.Optional(t.String()),
 });
 
 export type AcceptAnswerInput = (typeof acceptAnswerSchema)["static"];

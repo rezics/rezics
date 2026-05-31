@@ -1291,7 +1291,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       .mockResolvedValueOnce(directReply());
 
     const pin = await service.pin(
-      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      { scopeUnitId: "root-1", targetUnitId: "reply-1" },
       op,
     );
 
@@ -1302,6 +1302,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       byUserId: "op-1",
     });
     expect(pin.kind).toBe("PINNED");
+    expect(pin.targetUnitId).toBe("reply-1");
   });
 
   test("OP pins a Comment reply within their own thread", async () => {
@@ -1316,7 +1317,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     });
 
     const pin = await service.pin(
-      { scopeUnitId: "root-1", postUnitId: "comment-1" },
+      { scopeUnitId: "root-1", targetUnitId: "comment-1" },
       op,
     );
 
@@ -1326,6 +1327,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       kind: "PINNED",
     });
     expect(pin.kind).toBe("PINNED");
+    expect(pin.targetUnitId).toBe("comment-1");
   });
 
   test("a non-OP non-moderator cannot pin", async () => {
@@ -1337,7 +1339,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     );
 
     await expect(
-      service.pin({ scopeUnitId: "root-1", postUnitId: "reply-1" }, stranger),
+      service.pin({ scopeUnitId: "root-1", targetUnitId: "reply-1" }, stranger),
     ).rejects.toThrow(/moderator\/owner/);
     expect(postPinCreateMock).not.toHaveBeenCalled();
   });
@@ -1354,7 +1356,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     realmMemberFindFirstMock.mockResolvedValueOnce({ realmUnitId: "realm-1" });
 
     const pin = await service.pin(
-      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      { scopeUnitId: "root-1", targetUnitId: "reply-1" },
       { userId: "mod-1", permission: { role: "USER" } } as any,
     );
     expect(pin.kind).toBe("PINNED");
@@ -1370,7 +1372,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     );
 
     await expect(
-      service.pin({ scopeUnitId: "root-1", postUnitId: "reply-x" }, op),
+      service.pin({ scopeUnitId: "root-1", targetUnitId: "reply-x" }, op),
     ).rejects.toThrow(/scope thread/);
   });
 
@@ -1380,7 +1382,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     unitFindUniqueMock.mockResolvedValueOnce({ type: "REALM" });
 
     await expect(
-      service.pin({ scopeUnitId: "realm-1", postUnitId: "reply-1" }, op),
+      service.pin({ scopeUnitId: "realm-1", targetUnitId: "reply-1" }, op),
     ).rejects.toThrow(/pinboard/);
   });
 
@@ -1393,7 +1395,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
     await expect(
       service.acceptAnswer(
-        { scopeUnitId: "root-1", postUnitId: "reply-1" },
+        { scopeUnitId: "root-1", targetUnitId: "reply-1" },
         op,
       ),
     ).rejects.toThrow(/Q&A thread/);
@@ -1410,7 +1412,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
     await expect(
       service.acceptAnswer(
-        { scopeUnitId: "root-1", postUnitId: "reply-2" },
+        { scopeUnitId: "root-1", targetUnitId: "reply-2" },
         op,
       ),
     ).rejects.toThrow(/direct reply/);
@@ -1425,7 +1427,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 
     const pin = await service.acceptAnswer(
-      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      { scopeUnitId: "root-1", targetUnitId: "reply-1" },
       op,
     );
     expect(pin.kind).toBe("ACCEPTED_ANSWER");
@@ -1443,7 +1445,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       .mockResolvedValueOnce(rootScope())
       .mockResolvedValueOnce(directReply());
     await service.acceptAnswer(
-      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      { scopeUnitId: "root-1", targetUnitId: "reply-1" },
       op,
     );
 
@@ -1452,7 +1454,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       .mockResolvedValueOnce(directReply({ parentPostUnitId: "root-1" }));
     postPinFindFirstMock.mockResolvedValueOnce({ position: "a0" });
     await service.acceptAnswer(
-      { scopeUnitId: "root-1", postUnitId: "reply-2" },
+      { scopeUnitId: "root-1", targetUnitId: "reply-2" },
       op,
     );
 
@@ -1588,7 +1590,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
       }),
     );
     await expect(
-      service.pin({ scopeUnitId: "root-1", postUnitId: "reply-1" }, stranger),
+      service.pin({ scopeUnitId: "root-1", targetUnitId: "reply-1" }, stranger),
     ).rejects.toThrow(/moderator\/owner/);
   });
 
@@ -1747,7 +1749,7 @@ describe("PostService lifecycle state", () => {
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 
     await service.acceptAnswer(
-      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      { scopeUnitId: "root-1", targetUnitId: "reply-1" },
       op,
     );
 
@@ -1770,7 +1772,7 @@ describe("PostService lifecycle state", () => {
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 
     await service.acceptAnswer(
-      { scopeUnitId: "root-1", postUnitId: "reply-1" },
+      { scopeUnitId: "root-1", targetUnitId: "reply-1" },
       op,
     );
 
