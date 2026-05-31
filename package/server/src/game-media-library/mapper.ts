@@ -9,21 +9,6 @@ import type { GameLibraryRow, MediaLibraryRow } from "./types";
 
 const RATING_TAG_SLUGS = new Set<string>(RATING_TAGS);
 
-function releaseMembership(unit: {
-  workMemberships?: Array<{
-    unitId: string;
-    workUnitId: string;
-    role: string;
-    language: string | null;
-    position: string | null;
-    displayPolicy: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
-}) {
-  return unit.workMemberships?.[0] ?? null;
-}
-
 function ratingTagUnitIds(unit: {
   unitTags?: Array<{ tagUnitId: string; tag?: { slug: string | null } }>;
 }): string[] {
@@ -51,27 +36,11 @@ function mapRequirementSummary(row: {
 export function mapGameLibraryContentToDTO(
   row: GameLibraryRow,
 ): GameLibraryContentDTO {
-  const membership = releaseMembership(row.unit);
-  const workUnitId = membership?.workUnitId ?? null;
   const contentStructure = row.unit.ownedContentStructure;
 
   return {
     unitId: row.unitId,
-    workUnitId,
-    metadata: { uswn: workUnitId },
     translations: row.unit.translations,
-    workMembership: membership
-      ? {
-          unitId: membership.unitId,
-          workUnitId: membership.workUnitId,
-          role: membership.role as any,
-          language: membership.language as any,
-          position: membership.position,
-          displayPolicy: membership.displayPolicy as any,
-          createdAt: membership.createdAt,
-          updatedAt: membership.updatedAt,
-        }
-      : null,
     contentStructure: contentStructure
       ? {
           ownerUnitId: contentStructure.ownerUnitId,
@@ -95,27 +64,11 @@ export function mapGameLibraryContentToDTO(
 export function mapMediaLibraryContentToDTO(
   row: MediaLibraryRow,
 ): MediaLibraryContentDTO {
-  const membership = releaseMembership(row.unit);
-  const workUnitId = membership?.workUnitId ?? null;
   const contentStructure = row.unit.ownedContentStructure;
 
   return {
     unitId: row.unitId,
-    workUnitId,
-    metadata: { uswn: workUnitId },
     translations: row.unit.translations,
-    workMembership: membership
-      ? {
-          unitId: membership.unitId,
-          workUnitId: membership.workUnitId,
-          role: membership.role as any,
-          language: membership.language as any,
-          position: membership.position,
-          displayPolicy: membership.displayPolicy as any,
-          createdAt: membership.createdAt,
-          updatedAt: membership.updatedAt,
-        }
-      : null,
     contentStructure: contentStructure
       ? {
           ownerUnitId: contentStructure.ownerUnitId,

@@ -119,8 +119,6 @@ describe("GAME/MEDIA contract schemas", () => {
     expect(
       Value.Check(gameLibraryContentDTOSchema, {
         unitId: "game-1",
-        workUnitId: "work-1",
-        metadata: { uswn: "work-1" },
         contentStructure: {
           ownerUnitId: "game-1",
           nodes: [{ title: "Expansion", contentUnitId: "dlc-1" }],

@@ -9,18 +9,6 @@ const now = new Date("2026-05-28T00:00:00.000Z");
 function unitBase(overrides: Record<string, unknown> = {}) {
   return {
     translations: [],
-    workMemberships: [
-      {
-        unitId: "release-1",
-        workUnitId: "work-1",
-        role: "RELEASE",
-        language: "en",
-        position: "a0",
-        displayPolicy: "PRIMARY",
-        createdAt: now,
-        updatedAt: now,
-      },
-    ],
     unitTags: [
       {
         tagUnitId: "tag-esrb-teen",
@@ -33,7 +21,7 @@ function unitBase(overrides: Record<string, unknown> = {}) {
 }
 
 describe("GAME/MEDIA library mappers", () => {
-  test("maps GAME platform Entities, rating tags, requirements, and USWN", () => {
+  test("maps GAME platform Entities, rating tags, and requirements", () => {
     const dto = mapGameLibraryContentToDTO({
       unitId: "game-1",
       unit: unitBase({
@@ -71,8 +59,6 @@ describe("GAME/MEDIA library mappers", () => {
       ],
     } as any);
 
-    expect(dto.workUnitId).toBe("work-1");
-    expect(dto.metadata?.uswn).toBe("work-1");
     expect(dto.game.platformEntityIds).toEqual([
       "platform-windows",
       "platform-steam",
@@ -117,7 +103,6 @@ describe("GAME/MEDIA library mappers", () => {
       }),
     } as any);
 
-    expect(dto.workUnitId).toBe("work-1");
     expect(dto.media.ageRatingTagUnitIds).toEqual(["tag-esrb-teen"]);
     expect(dto.media.contentStructureAvailable).toBe(true);
     expect(dto.contentStructure?.nodes[0]?.contentUnitId).toBe("episode-1");

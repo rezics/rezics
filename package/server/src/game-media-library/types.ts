@@ -4,10 +4,6 @@ export const gameLibraryInclude = {
   unit: {
     include: {
       translations: true,
-      workMemberships: {
-        where: { role: "RELEASE" },
-        orderBy: [{ position: "asc" as const }, { createdAt: "asc" as const }],
-      },
       subjectAttributions: {
         where: { role: "available_on" },
         orderBy: { sortOrder: "asc" as const },
@@ -37,10 +33,6 @@ export const mediaLibraryInclude = {
   unit: {
     include: {
       translations: true,
-      workMemberships: {
-        where: { role: "RELEASE" },
-        orderBy: [{ position: "asc" as const }, { createdAt: "asc" as const }],
-      },
       unitTags: {
         include: {
           tag: { select: { id: true, slug: true } },

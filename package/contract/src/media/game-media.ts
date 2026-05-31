@@ -2,7 +2,6 @@ import { t } from "elysia";
 import { contentStructureDTOSchema } from "../content/structure";
 import { languageSchema } from "../language";
 import { unitTranslationDTOSchema } from "../unit/unit";
-import { unitWorkDTOSchema } from "../unit/work";
 
 export const RATING_TAGS = [
   "esrb-everyone",
@@ -165,14 +164,7 @@ export type MediaLibraryContentMetadata =
 
 export const gameLibraryContentDTOSchema = t.Object({
   unitId: t.String(),
-  workUnitId: t.Optional(t.Nullable(t.String())),
-  metadata: t.Optional(
-    t.Object({
-      uswn: t.Union([t.String(), t.Null()]),
-    }),
-  ),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
-  workMembership: t.Optional(t.Nullable(unitWorkDTOSchema)),
   contentStructure: t.Optional(t.Nullable(contentStructureDTOSchema)),
   game: gameLibraryContentMetadataSchema,
 });
@@ -182,14 +174,7 @@ export type GameLibraryContentDTO =
 
 export const mediaLibraryContentDTOSchema = t.Object({
   unitId: t.String(),
-  workUnitId: t.Optional(t.Nullable(t.String())),
-  metadata: t.Optional(
-    t.Object({
-      uswn: t.Union([t.String(), t.Null()]),
-    }),
-  ),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
-  workMembership: t.Optional(t.Nullable(unitWorkDTOSchema)),
   contentStructure: t.Optional(t.Nullable(contentStructureDTOSchema)),
   media: mediaLibraryContentMetadataSchema,
 });
