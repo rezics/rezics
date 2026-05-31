@@ -1,5 +1,5 @@
 import { useEditorEntry } from "@rezics/api/hooks";
-import { commentListQuery } from "@rezics/api/comment/comment";
+import { commentListQuery, commentQuery } from "@rezics/api/comment/comment";
 import { postQueries, postSubtreeQuery } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -24,7 +24,15 @@ export const ContinueThreadPage: React.FC = () => {
     unitId: string;
   };
   const composerRef = useFocusReplyFromQuery();
-  const { data: anchor } = useQuery(postQueries.detail(unitId));
+  const commentAnchorQuery = useQuery(commentQuery(unitId));
+  const legacyAnchorQuery = useQuery({
+    ...postQueries.detail(unitId),
+    enabled:
+      !!unitId && !commentAnchorQuery.data && !commentAnchorQuery.isLoading,
+  });
+  const anchor = commentAnchorQuery.data
+    ? mapCommentToPost(commentAnchorQuery.data)
+    : legacyAnchorQuery.data;
   const commentSubtreeQuery = useQuery(
     commentListQuery({
       rootUnitId: rootPostUnitId,
@@ -44,9 +52,13 @@ export const ContinueThreadPage: React.FC = () => {
       !!rootPostUnitId && !!unitId && Boolean(anchor) && !anchor?.realmUnitId,
   });
   const isCommentSubtree = Boolean(anchor?.realmUnitId);
-  const isLoading = isCommentSubtree
-    ? commentSubtreeQuery.isLoading
-    : legacySubtreeQuery.isLoading;
+  const isAnchorLoading =
+    !anchor && (commentAnchorQuery.isLoading || legacyAnchorQuery.isLoading);
+  const isLoading = isAnchorLoading
+    ? true
+    : isCommentSubtree
+      ? commentSubtreeQuery.isLoading
+      : legacySubtreeQuery.isLoading;
   const posts = isCommentSubtree
     ? (commentSubtreeQuery.data?.comments ?? []).map(mapCommentToPost)
     : (legacySubtreeQuery.data?.posts ?? []);
