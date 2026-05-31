@@ -10,7 +10,6 @@ import {
   catalogEntryKindSchema,
   contentRatingSchema,
 } from "../unit/unit";
-import { unitWorkDisplayPolicySchema } from "../unit/work";
 
 // ANCHOR: Content Search Document
 
@@ -48,8 +47,6 @@ export const ContentSearchDocumentSchema = t.Object({
 
   // Filterable/display: legacy work-domain projection.
   workUnitId: t.Union([t.String(), t.Null()]),
-  position: t.Union([t.String(), t.Null()]),
-  displayPolicy: t.Union([unitWorkDisplayPolicySchema, t.Null()]),
 
   // Native catalog identity. Variants resolve normal interactions through
   // targetUnitId; SERIES and other non-participating types keep null.

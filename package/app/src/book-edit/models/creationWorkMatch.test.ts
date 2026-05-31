@@ -27,8 +27,6 @@ function searchDoc(
     tagIds: [],
     tagScores: {},
     workUnitId: null,
-    position: null,
-    displayPolicy: null,
     realmIds: [],
     realmTagKeys: [],
     languages: ["en"],

@@ -6,8 +6,10 @@ import { resolveSlugRefs } from "../../shared/slug-ref";
 import { searchClient } from "../search-client";
 
 function displayRank(item: any): number {
-  if (item.displayPolicy === "PRIMARY") return 0;
-  if (item.displayPolicy === "SECONDARY") return 1;
+  if (item.catalogEntryKind === "MAIN") return 0;
+  if (item.catalogEntryKind === "NONE" || item.catalogEntryKind == null) {
+    return 1;
+  }
   return 2;
 }
 
@@ -30,9 +32,7 @@ function groupReleaseHits(items: any[]): any[] {
     const sorted = [...group].sort((left, right) => {
       const rank = displayRank(left) - displayRank(right);
       if (rank !== 0) return rank;
-      return String(left.position ?? "").localeCompare(
-        String(right.position ?? ""),
-      );
+      return String(left.id ?? "").localeCompare(String(right.id ?? ""));
     });
     const [visible, ...alternatives] = sorted;
     return {

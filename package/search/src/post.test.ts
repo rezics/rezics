@@ -276,8 +276,6 @@ describe("buildContentDocument realm tag keys", () => {
         {
           workUnitId: "work-1",
           role: "RELEASE",
-          position: "a0",
-          displayPolicy: "PRIMARY",
           work: {
             unitTags: [
               {
@@ -298,8 +296,6 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.workUnitId).toBe("work-1");
     expect(doc.tagIds).toEqual(["tag-own"]);
     expect(doc.tagLabels).toEqual(["Own"]);
-    expect(doc.position).toBe("a0");
-    expect(doc.displayPolicy).toBe("PRIMARY");
   });
 
   test("projects direct Series metadata without nested expansion", async () => {

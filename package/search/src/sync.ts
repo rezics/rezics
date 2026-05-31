@@ -587,8 +587,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     tagIds,
     tagScores,
     workUnitId,
-    position: releaseMembership?.position ?? null,
-    displayPolicy: releaseMembership?.displayPolicy ?? null,
     catalogEntryKind: unit.catalogEntryKind ?? null,
     targetUnitId: unit.targetUnitId ?? null,
     seriesUnitIds,

@@ -50,8 +50,6 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "postKind",
       "tagIds",
       "workUnitId",
-      "displayPolicy",
-      "position",
       "catalogEntryKind",
       "targetUnitId",
       "seriesUnitIds",

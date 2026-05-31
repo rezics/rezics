@@ -34,8 +34,6 @@ const baseSearchDocument = {
   tagIds: [],
   tagScores: {},
   workUnitId: "work-1",
-  position: "a0",
-  displayPolicy: "PRIMARY",
   catalogEntryKind: "MAIN",
   targetUnitId: null,
   seriesUnitIds: [],
