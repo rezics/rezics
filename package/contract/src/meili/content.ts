@@ -48,7 +48,6 @@ export const ContentSearchDocumentSchema = t.Object({
 
   // Filterable/display: work-domain projection (from UnitWork + inherited UnitTag)
   workUnitId: t.Union([t.String(), t.Null()]),
-  searchGroupId: t.String(),
   ownTagIds: t.Array(t.String()),
   workTagIds: t.Array(t.String()),
   allTagIds: t.Array(t.String()),
@@ -163,7 +162,6 @@ export const ContentSearchOptionsSchema = t.Object({
   tagIds: t.Optional(t.Array(t.String())),
   allTagIds: t.Optional(t.Array(t.String())),
   workUnitId: t.Optional(t.String()),
-  searchGroupId: t.Optional(t.String()),
   workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   catalogEntryKind: t.Optional(catalogEntryKindSchema),
   targetUnitId: t.Optional(t.String()),

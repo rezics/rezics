@@ -120,24 +120,27 @@ describe("searchContent work-domain behavior", () => {
     ]);
   });
 
-  test("groups release hits and exposes collapsed alternatives", async () => {
+  test("groups catalog variant hits and exposes collapsed alternatives", async () => {
     contentSearchMock.mockResolvedValueOnce({
       hits: [
         {
           id: "release-secondary",
-          searchGroupId: "work-1",
+          catalogEntryKind: "VARIANT",
+          targetUnitId: "release-primary",
           displayPolicy: "SECONDARY",
           position: "b0",
         },
         {
           id: "release-primary",
-          searchGroupId: "work-1",
+          catalogEntryKind: "MAIN",
+          targetUnitId: null,
           displayPolicy: "PRIMARY",
           position: "a0",
         },
         {
           id: "standalone",
-          searchGroupId: "standalone",
+          catalogEntryKind: "NONE",
+          targetUnitId: null,
           displayPolicy: null,
           position: null,
         },
@@ -165,8 +168,16 @@ describe("searchContent work-domain behavior", () => {
   test("expanded release presentation returns raw hits", async () => {
     contentSearchMock.mockResolvedValueOnce({
       hits: [
-        { id: "release-primary", searchGroupId: "work-1" },
-        { id: "release-secondary", searchGroupId: "work-1" },
+        {
+          id: "release-primary",
+          catalogEntryKind: "MAIN",
+          targetUnitId: null,
+        },
+        {
+          id: "release-secondary",
+          catalogEntryKind: "VARIANT",
+          targetUnitId: "release-primary",
+        },
       ],
       estimatedTotalHits: 2,
       processingTimeMs: 1,

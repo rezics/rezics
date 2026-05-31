@@ -24,7 +24,6 @@ const baseContentDocument = {
   tagIds: ["tag-own"],
   tagScores: { "tag-own": 1 },
   workUnitId: "work-1",
-  searchGroupId: "work-1",
   ownTagIds: ["tag-own"],
   workTagIds: ["tag-work"],
   allTagIds: ["tag-own", "tag-work"],
@@ -70,13 +69,12 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
     );
   });
 
-  test("accepts standalone documents grouped by themselves", () => {
+  test("accepts standalone documents without legacy search grouping", () => {
     expect(
       Value.Check(ContentSearchDocumentSchema, {
         ...baseContentDocument,
         id: "standalone-1",
         workUnitId: null,
-        searchGroupId: "standalone-1",
         ownTagIds: [],
         workTagIds: [],
         allTagIds: [],
@@ -88,6 +86,7 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         displayPolicy: null,
         workUnitIds: [],
         workRoles: [],
+        catalogEntryKind: "NONE",
         seriesUnitIds: ["series-1"],
         seriesKindKeys: ["book_series"],
         seriesTitles: ["Series"],
@@ -96,7 +95,7 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
     ).toBe(true);
   });
 
-  test("accepts grouped and expanded release search options", () => {
+  test("accepts grouped and expanded catalog release search options", () => {
     expect(
       Value.Check(ContentSearchOptionsSchema, {
         releasePresentation: "grouped",

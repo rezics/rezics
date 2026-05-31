@@ -250,7 +250,7 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.realmTagKeys).toEqual(["realm-1:tag-1"]);
   });
 
-  test("projects inherited work tags and release grouping fields", async () => {
+  test("projects inherited work tags without legacy release grouping", async () => {
     setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
 
@@ -296,7 +296,6 @@ describe("buildContentDocument realm tag keys", () => {
     });
 
     expect(doc.workUnitId).toBe("work-1");
-    expect(doc.searchGroupId).toBe("work-1");
     expect(doc.ownTagIds).toEqual(["tag-own"]);
     expect(doc.workTagIds).toEqual(["tag-work"]);
     expect(doc.allTagIds).toEqual(["tag-own", "tag-work"]);

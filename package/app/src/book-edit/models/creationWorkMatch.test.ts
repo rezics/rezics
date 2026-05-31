@@ -27,7 +27,6 @@ function searchDoc(
     tagIds: [],
     tagScores: {},
     workUnitId: null,
-    searchGroupId: "release-1",
     ownTagIds: [],
     workTagIds: [],
     allTagIds: [],
@@ -78,7 +77,6 @@ describe("resolveCreationWorkMatchContext", () => {
       resolveCreationWorkMatchContext(
         searchDoc({
           workUnitId: "work-1",
-          searchGroupId: "work-1",
           collapsedAlternativeUnitIds: ["release-2", "release-3"],
           workTagLabels: ["mystery", "translation"],
         }),

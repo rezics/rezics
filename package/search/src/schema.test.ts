@@ -8,7 +8,6 @@ describe("expected Meilisearch work-domain settings", () => {
     expect(content.filterableAttributes).toEqual(
       expect.arrayContaining([
         "workUnitId",
-        "searchGroupId",
         "ownTagIds",
         "workTagIds",
         "allTagIds",

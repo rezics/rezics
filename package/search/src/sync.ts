@@ -600,7 +600,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     tagIds,
     tagScores,
     workUnitId,
-    searchGroupId: workUnitId ?? unit.id,
     ownTagIds: tagIds,
     workTagIds,
     allTagIds,

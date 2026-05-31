@@ -53,7 +53,6 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "workTagIds",
       "allTagIds",
       "workUnitId",
-      "searchGroupId",
       "displayPolicy",
       "position",
       "workUnitIds",

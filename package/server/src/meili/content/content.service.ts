@@ -19,7 +19,10 @@ function anyValueFilter(field: string, values: readonly string[]): string {
 function groupReleaseHits(items: any[]): any[] {
   const groups = new Map<string, any[]>();
   for (const item of items) {
-    const groupId = item.searchGroupId ?? item.id;
+    const groupId =
+      item.catalogEntryKind === "VARIANT" && item.targetUnitId
+        ? item.targetUnitId
+        : item.id;
     groups.set(groupId, [...(groups.get(groupId) ?? []), item]);
   }
 
@@ -113,9 +116,6 @@ export async function searchContent(
 
   if (opts.workUnitId) {
     filter.push(`workUnitId = "${opts.workUnitId}"`);
-  }
-  if (opts.searchGroupId) {
-    filter.push(`searchGroupId = "${opts.searchGroupId}"`);
   }
   if (opts.workRoles?.length) {
     if (opts.workRoles.length === 1) {
