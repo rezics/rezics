@@ -18,7 +18,7 @@ import {
 
 export interface PostTreeNodeProps {
   node: PostTreeNodeModel;
-  rootPostUnitId: string;
+  rootUnitId: string;
   visualMaxDepth: number;
   isCollapsed: (postUnitId: string) => boolean;
   toggleCollapse: (postUnitId: string) => void;
@@ -35,7 +35,7 @@ export interface PostTreeNodeProps {
 
 export function PostTreeNode({
   node,
-  rootPostUnitId,
+  rootUnitId,
   visualMaxDepth,
   isCollapsed,
   toggleCollapse,
@@ -135,8 +135,8 @@ export function PostTreeNode({
                 <ReplyComposer
                   mode="expanded"
                   autoFocus
-                  targetUnitId={post.targetUnitId ?? rootPostUnitId}
-                  rootUnitId={rootPostUnitId}
+                  targetUnitId={post.targetUnitId ?? rootUnitId}
+                  rootUnitId={rootUnitId}
                   realmUnitId={post.realmUnitId}
                   parentCommentUnitId={post.unitId}
                   onSubmitted={(createdPost) =>
@@ -154,7 +154,7 @@ export function PostTreeNode({
             <TextLink
               to="/post/$rootPostUnitId/continue/$unitId"
               params={{
-                rootPostUnitId,
+                rootPostUnitId: rootUnitId,
                 unitId: post.unitId,
               }}
             >
@@ -176,7 +176,7 @@ export function PostTreeNode({
             renderChild={(child) => (
               <PostTreeNode
                 node={child}
-                rootPostUnitId={rootPostUnitId}
+                rootUnitId={rootUnitId}
                 visualMaxDepth={visualMaxDepth}
                 isCollapsed={isCollapsed}
                 toggleCollapse={toggleCollapse}

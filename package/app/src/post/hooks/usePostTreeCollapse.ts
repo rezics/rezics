@@ -18,9 +18,9 @@ type SeedCollapsedIdsOptions =
 
 export function excludeRootPost(
   posts: PostDTO[],
-  rootPostUnitId: string,
+  rootUnitId: string,
 ): PostDTO[] {
-  return posts.filter((post) => post.unitId !== rootPostUnitId);
+  return posts.filter((post) => post.unitId !== rootUnitId);
 }
 
 export function seedCollapsedIds(

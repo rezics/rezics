@@ -45,7 +45,7 @@ export const PollPage: React.FC<{ unitId: string }> = ({ unitId }) => {
             parentCommentUnitId={unitId}
           />
 
-          <PostTreeSection rootPostUnitId={unitId} />
+          <PostTreeSection rootUnitId={unitId} />
         </div>
       </div>
     </div>

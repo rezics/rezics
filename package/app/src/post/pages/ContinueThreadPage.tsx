@@ -98,7 +98,7 @@ export const ContinueThreadPage: React.FC = () => {
       ) : (
         <PostTreeList
           posts={posts}
-          rootPostUnitId={rootPostUnitId}
+          rootUnitId={rootPostUnitId}
           baseDepth={anchor?.depth ?? 0}
         />
       )}

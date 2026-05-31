@@ -59,7 +59,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
         parentCommentUnitId={remark.unitId}
       />
       <PostTreeSection
-        rootPostUnitId={remark.unitId}
+        rootUnitId={remark.unitId}
         realmUnitId={remark.realmUnitId}
       />
     </div>

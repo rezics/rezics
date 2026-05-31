@@ -8,7 +8,7 @@ import { DEFAULT_MAX_DEPTH, DEFAULT_VISUAL_MAX_DEPTH } from "./postTreeLayout";
 
 export interface PostTreeListProps {
   posts: PostDTO[];
-  rootPostUnitId: string;
+  rootUnitId: string;
   maxDepth?: number;
   visualMaxDepth?: number;
   baseDepth?: number;
@@ -20,7 +20,7 @@ export interface PostTreeListProps {
 
 export function PostTreeList({
   posts,
-  rootPostUnitId,
+  rootUnitId,
   maxDepth = DEFAULT_MAX_DEPTH,
   visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
   baseDepth = 0,
@@ -136,7 +136,7 @@ export function PostTreeList({
         <PostTreeNode
           key={node.post.unitId}
           node={node}
-          rootPostUnitId={rootPostUnitId}
+          rootUnitId={rootUnitId}
           visualMaxDepth={visualMaxDepth}
           isCollapsed={isCollapsed}
           toggleCollapse={toggleCollapse}

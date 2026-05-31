@@ -29,7 +29,7 @@ import { PostTreeList } from "./PostTreeList";
 import { DEFAULT_MAX_DEPTH, DEFAULT_VISUAL_MAX_DEPTH } from "./postTreeLayout";
 
 interface PostTreeSectionProps {
-  rootPostUnitId: string;
+  rootUnitId: string;
   realmUnitId?: string | null;
   maxDepth?: number;
   visualMaxDepth?: number;
@@ -43,7 +43,7 @@ interface PostTreeSectionProps {
 }
 
 export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
-  rootPostUnitId,
+  rootUnitId,
   realmUnitId,
   maxDepth = DEFAULT_MAX_DEPTH,
   visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
@@ -57,7 +57,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   const [editingPost, setEditingPost] = useState<PostDTO | null>(null);
   const commentThreadQuery = useQuery(
     commentListQuery({
-      rootUnitId: rootPostUnitId,
+      rootUnitId,
       realmUnitId: realmUnitId ?? "",
       mode: "threaded",
       maxDepth,
@@ -65,8 +65,8 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     }),
   );
   const legacyThreadQuery = useQuery({
-    ...postThreadQuery(rootPostUnitId, { mode: "threaded", maxDepth }),
-    enabled: !realmUnitId && !!rootPostUnitId,
+    ...postThreadQuery(rootUnitId, { mode: "threaded", maxDepth }),
+    enabled: !realmUnitId && !!rootUnitId,
   });
   const isCommentThread = Boolean(realmUnitId);
   const isLoading = isCommentThread
@@ -76,12 +76,12 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     if (isCommentThread) {
       return (commentThreadQuery.data?.comments ?? []).map(mapCommentToPost);
     }
-    return excludeRootPost(legacyThreadQuery.data?.posts ?? [], rootPostUnitId);
+    return excludeRootPost(legacyThreadQuery.data?.posts ?? [], rootUnitId);
   }, [
     commentThreadQuery.data?.comments,
     isCommentThread,
     legacyThreadQuery.data?.posts,
-    rootPostUnitId,
+    rootUnitId,
   ]);
   const signalData = isCommentThread
     ? commentThreadQuery.data
@@ -126,7 +126,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
 
     if (!decision.canEnter && !canPin && !canAccept) return null;
 
-    const variables = { scopeUnitId: rootPostUnitId, postUnitId: post.unitId };
+    const variables = { scopeUnitId: rootUnitId, postUnitId: post.unitId };
 
     return (
       <>
@@ -169,7 +169,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     <>
       <PostTreeList
         posts={posts}
-        rootPostUnitId={rootPostUnitId}
+        rootUnitId={rootUnitId}
         maxDepth={maxDepth}
         visualMaxDepth={visualMaxDepth}
         focusPostUnitId={focusPostUnitId}

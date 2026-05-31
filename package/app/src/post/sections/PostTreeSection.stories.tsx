@@ -164,7 +164,7 @@ function Seeded({ posts }: { posts: PostDTO[] }) {
 
   return (
     <div className="p-4">
-      <PostTreeSection rootPostUnitId={ROOT_ID} />
+      <PostTreeSection rootUnitId={ROOT_ID} />
     </div>
   );
 }
@@ -207,7 +207,7 @@ export const ContinuousOuterRail: Story = {
 export const RoundedRailLab: Story = {
   render: () => (
     <div className="p-4">
-      <PostTreeList posts={CONTINUOUS_RAIL_POSTS} rootPostUnitId={ROOT_ID} />
+      <PostTreeList posts={CONTINUOUS_RAIL_POSTS} rootUnitId={ROOT_ID} />
     </div>
   ),
 };
