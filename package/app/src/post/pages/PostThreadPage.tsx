@@ -67,7 +67,7 @@ export const PostThreadPage: React.FC = () => {
       )}
       <PostTreeSection
         rootUnitId={rootPostUnitId}
-        realmUnitId={root.realmUnitId}
+        realmUnitId={root?.realmUnitId}
         focusPostUnitId={focusPostUnitId}
         highlightFocusedPost={Boolean(focusPostUnitId)}
       />
