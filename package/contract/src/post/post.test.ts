@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  createPostSchema,
   postDTOSchema,
   postListQuerySchema,
   excerptSourceSchema,
@@ -85,6 +86,10 @@ describe("post work-domain contract fields", () => {
         limit: 20,
       }),
     ).toBe(false);
+  });
+
+  test("does not accept comment topology on post creation", () => {
+    expect("parentPostUnitId" in createPostSchema.properties).toBe(false);
   });
 });
 

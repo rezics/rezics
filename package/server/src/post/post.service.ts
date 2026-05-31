@@ -32,7 +32,6 @@ import {
   UnitType,
 } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
-import { commentService } from "@/comment/comment.service";
 import type { CommentWithRelations } from "@/comment/comment.types";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { generateBetween } from "@/shelf/fractional-index";
@@ -175,14 +174,6 @@ function applyStateFilter(
 const REALM_FEED_EXCLUDED_MODERATION_STATES = [
   "HIDDEN",
   "TOMBSTONED",
-  "ARCHIVED",
-  "REMOVED",
-] as const;
-
-const REALM_REPLY_BLOCKING_MODERATION_STATES = [
-  "HIDDEN",
-  "TOMBSTONED",
-  "LOCKED",
   "ARCHIVED",
   "REMOVED",
 ] as const;
@@ -571,25 +562,6 @@ export class PostService {
     return hydrateUnitOwnerUserSlugRow(withPath);
   }
 
-  async getPrimaryVisibleRealmForPost(unitId: string): Promise<string | null> {
-    const post = await prisma.post.findUnique({
-      where: { unitId },
-      select: {
-        unit: {
-          select: {
-            inRealms: {
-              where: { state: "VISIBLE" },
-              select: { realmUnitId: true },
-              take: 1,
-            },
-          },
-        },
-      },
-    });
-
-    return post?.unit.inRealms[0]?.realmUnitId ?? null;
-  }
-
   private async assertRealmPostAllowed(
     realmUnitIds: string[],
     userId: string,
@@ -649,38 +621,9 @@ export class PostService {
     }
   }
 
-  private assertRealmReplyLifecycleAllowed(input: {
-    realmUnitIds: string[];
-    overlays: { realmUnitId: string; state: string }[];
-  }) {
-    const realmUnitIds = new Set(input.realmUnitIds);
-    const blocking = input.overlays.find(
-      (overlay) =>
-        realmUnitIds.has(overlay.realmUnitId) &&
-        REALM_REPLY_BLOCKING_MODERATION_STATES.includes(overlay.state as any),
-    );
-    if (!blocking) return;
-
-    if (blocking.state === "LOCKED") {
-      throw new Error("Cannot reply to locked realm content");
-    }
-    if (blocking.state === "ARCHIVED") {
-      throw new Error("Cannot reply to archived realm content");
-    }
-    throw new Error(
-      `Cannot reply to realm content in moderation state ${blocking.state.toLowerCase()}`,
-    );
-  }
-
   /**
-   * Create a post with tree handling.
-   *
-   * Top-level post: rootPostUnitId = own unitId, depth = 0, path = one label.
-   * Reply: inherits root from parent, depth = parent.depth + 1, path =
-   *        parent.path || one freshly minted label (append-only, race-free).
-   *
-   * The `path` ltree column is `Unsupported` in Prisma, so it is written via
-   * raw SQL after the typed insert and read back via `attachPostPaths`.
+   * Create a top-level post. Comment replies are created through the comment
+   * domain; this path always writes a one-label root path.
    */
   async create(
     input: CreatePostInput,
@@ -690,28 +633,18 @@ export class PostService {
       targetUnitId: inputTargetUnitId,
       realmUnitIds,
       tagIds,
-      parentPostUnitId,
       kind,
       content,
       scoreEntryId,
       extra,
     } = input;
 
-    if (parentPostUnitId) {
-      return this.createReplyComment(input, authorUserId);
-    }
-
-    // Drafts apply to top-level posts only; replies and chapters always
-    // publish. A draft is owner-only and stays out of feeds/search until
-    // published (see publication-policy `publicUnitEligibilityWhere`).
-    const asDraft =
-      input.status === "DRAFT" &&
-      !parentPostUnitId &&
-      kind !== PostKindEnum.CHAPTER;
+    // Chapters always publish. A draft is owner-only and stays out of
+    // feeds/search until published (see publication-policy
+    // `publicUnitEligibilityWhere`).
+    const asDraft = input.status === "DRAFT" && kind !== PostKindEnum.CHAPTER;
     let targetUnitId = inputTargetUnitId;
-    let realmIdsToWrite = parentPostUnitId
-      ? []
-      : [...new Set(realmUnitIds ?? [])];
+    const realmIdsToWrite = [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
     if (kind === PostKindEnum.CHAPTER) {
@@ -729,69 +662,6 @@ export class PostService {
           `Post(kind=CHAPTER) targetUnitId must reference a Unit(type=BOOK); got ${target?.type ?? "missing"}`,
         );
       }
-    }
-
-    let depth = 0;
-    let rootPostUnitId: string | undefined;
-
-    if (parentPostUnitId) {
-      const parent = await prisma.post.findUniqueOrThrow({
-        where: { unitId: parentPostUnitId },
-        select: {
-          unitId: true,
-          rootPostUnitId: true,
-          targetUnitId: true,
-          depth: true,
-          isLocked: true,
-          unit: {
-            select: {
-              inRealms: {
-                select: { realmUnitId: true, state: true },
-              },
-              realmModerationTargets: {
-                select: { realmUnitId: true, state: true },
-              },
-            },
-          },
-        },
-      });
-
-      if (parent.isLocked) {
-        throw new Error("Cannot reply to a locked post");
-      }
-
-      rootPostUnitId = parent.rootPostUnitId ?? parent.unitId;
-      realmIdsToWrite = parent.unit.inRealms
-        .filter((realm) => realm.state === "VISIBLE")
-        .map((realm) => realm.realmUnitId);
-      this.assertRealmReplyLifecycleAllowed({
-        realmUnitIds: realmIdsToWrite,
-        overlays: parent.unit.realmModerationTargets,
-      });
-      if (rootPostUnitId !== parent.unitId && realmIdsToWrite.length > 0) {
-        const root = await prisma.post.findUnique({
-          where: { unitId: rootPostUnitId },
-          select: {
-            isLocked: true,
-            unit: {
-              select: {
-                realmModerationTargets: {
-                  select: { realmUnitId: true, state: true },
-                },
-              },
-            },
-          },
-        });
-        if (root?.isLocked) {
-          throw new Error("Cannot reply to a locked post");
-        }
-        this.assertRealmReplyLifecycleAllowed({
-          realmUnitIds: realmIdsToWrite,
-          overlays: root?.unit.realmModerationTargets ?? [],
-        });
-      }
-      depth = parent.depth + 1;
-      targetUnitId = parent.targetUnitId ?? rootPostUnitId;
     }
 
     await this.assertRealmPostAllowed(realmIdsToWrite, authorUserId);
@@ -857,11 +727,9 @@ export class PostService {
         content: content as Prisma.InputJsonValue,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,
-        depth,
+        depth: 0,
         state: statefulInit?.initial ?? undefined,
         extra: extraToWrite as Prisma.InputJsonValue | undefined,
-        rootPostUnitId: rootPostUnitId ?? undefined,
-        parentPostUnitId: parentPostUnitId ?? undefined,
       };
 
       const created = await tx.post.create({
@@ -899,59 +767,16 @@ export class PostService {
         );
       }
 
-      let result: PostWithRelations;
-
-      // Top-level post: set rootPostUnitId to own unitId and mint a
-      // single-label path. `path` is Unsupported in Prisma, so it is written
-      // via raw SQL (the label comes from the shared sequence, base36-encoded).
-      if (!parentPostUnitId) {
-        await tx.$executeRaw`
-          UPDATE "Post"
-          SET "path" = text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
-          WHERE "unitId" = ${created.unitId}::uuid
-        `;
-        const updated = await tx.post.update({
-          where: { unitId: created.unitId },
-          data: { rootPostUnitId: created.unitId },
-          include: postInclude,
-        });
-
-        result = updated as PostWithRelations;
-      } else {
-        // Reply: append-only path generation — `path = parent.path || label`
-        // computed entirely in SQL, so there is no read-max-then-write race and
-        // no ancestor row is ever rewritten.
-        await tx.$executeRaw`
-          UPDATE "Post" AS c
-          SET "path" = p."path" || text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
-          FROM "Post" AS p
-          WHERE c."unitId" = ${created.unitId}::uuid
-            AND p."unitId" = ${parentPostUnitId}::uuid
-        `;
-
-        // Reply: increment parent counters and update lastReplyAt
-        await tx.post.update({
-          where: { unitId: parentPostUnitId },
-          data: {
-            replyCount: { increment: 1 },
-            directReplyCount: { increment: 1 },
-            lastReplyAt: new Date(),
-          },
-        });
-
-        // Also increment root post's replyCount (not directReplyCount)
-        if (rootPostUnitId && rootPostUnitId !== parentPostUnitId) {
-          await tx.post.update({
-            where: { unitId: rootPostUnitId },
-            data: {
-              replyCount: { increment: 1 },
-              lastReplyAt: new Date(),
-            },
-          });
-        }
-
-        result = created as PostWithRelations;
-      }
+      await tx.$executeRaw`
+        UPDATE "Post"
+        SET "path" = text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
+        WHERE "unitId" = ${created.unitId}::uuid
+      `;
+      const result = (await tx.post.update({
+        where: { unitId: created.unitId },
+        data: { rootPostUnitId: created.unitId },
+        include: postInclude,
+      })) as PostWithRelations;
 
       if (kind === "WIKI") {
         await upsertWikiContentTranslation(tx, {
@@ -983,91 +808,6 @@ export class PostService {
 
     const [withPath] = await attachPostPaths([post]);
     return hydrateUnitOwnerUserSlugRow(withPath);
-  }
-
-  private async createReplyComment(
-    input: CreatePostInput,
-    authorUserId: string,
-  ): Promise<PostWithRelations> {
-    const parentUnitId = input.parentPostUnitId;
-    if (!parentUnitId) throw new AppError(400, "Missing parentPostUnitId");
-
-    const parentComment = await prisma.comment.findUnique({
-      where: { unitId: parentUnitId },
-      select: {
-        unitId: true,
-        rootUnitId: true,
-        realmUnitId: true,
-      },
-    });
-
-    if (parentComment) {
-      const comment = await commentService.create(
-        {
-          rootUnitId: parentComment.rootUnitId,
-          realmUnitId: parentComment.realmUnitId,
-          parentCommentUnitId: parentComment.unitId,
-          content: input.content,
-        },
-        authorUserId,
-      );
-      return commentAsPostCompat(comment);
-    }
-
-    const parentPost = await prisma.post.findUniqueOrThrow({
-      where: { unitId: parentUnitId },
-      select: {
-        unitId: true,
-        rootPostUnitId: true,
-        isLocked: true,
-        unit: {
-          select: {
-            inRealms: {
-              select: { realmUnitId: true, state: true },
-            },
-            realmModerationTargets: {
-              select: { realmUnitId: true, state: true },
-            },
-          },
-        },
-      },
-    });
-    if (parentPost.isLocked) throw new Error("Cannot reply to a locked post");
-
-    const rootUnitId = parentPost.rootPostUnitId ?? parentPost.unitId;
-    const visibleRealmIds = parentPost.unit.inRealms
-      .filter((realm) => realm.state === "VISIBLE")
-      .map((realm) => realm.realmUnitId);
-    const explicitRealmIds = [...new Set(input.realmUnitIds ?? [])];
-    const realmUnitId =
-      explicitRealmIds.length === 1
-        ? explicitRealmIds[0]
-        : visibleRealmIds.length === 1
-          ? visibleRealmIds[0]
-          : null;
-
-    if (!realmUnitId) {
-      throw new AppError(
-        400,
-        "Comment realmUnitId is required for roots without exactly one visible realm",
-      );
-    }
-
-    this.assertRealmReplyLifecycleAllowed({
-      realmUnitIds: [realmUnitId],
-      overlays: parentPost.unit.realmModerationTargets,
-    });
-    await this.assertRealmPostAllowed([realmUnitId], authorUserId);
-
-    const comment = await commentService.create(
-      {
-        rootUnitId,
-        realmUnitId,
-        content: input.content,
-      },
-      authorUserId,
-    );
-    return commentAsPostCompat(comment);
   }
 
   /**

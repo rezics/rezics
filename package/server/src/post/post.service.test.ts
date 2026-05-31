@@ -596,87 +596,6 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(transactionMock).not.toHaveBeenCalled();
   });
 
-  test("uses the parent post realm for delegated comment replies", async () => {
-    resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
-      unitId: "parent-1",
-      rootPostUnitId: "parent-1",
-      targetUnitId: null,
-      depth: 0,
-      isLocked: false,
-      unit: {
-        inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
-        realmModerationTargets: [],
-      },
-    });
-
-    await service.create(
-      { content: content("reply"), parentPostUnitId: "parent-1" },
-      "user-1",
-    );
-
-    expect(realmUnitCreateMock).not.toHaveBeenCalled();
-    expect(commentCreateMock.mock.calls[0]?.[0].data).toMatchObject({
-      rootUnitId: "parent-1",
-      realmUnitId: "realm-1",
-      authorUserId: "user-1",
-    });
-  });
-
-  test("blocks realm replies until required rules are acknowledged", async () => {
-    resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
-      unitId: "parent-1",
-      rootPostUnitId: "parent-1",
-      targetUnitId: null,
-      depth: 0,
-      isLocked: false,
-      unit: {
-        inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
-        realmModerationTargets: [],
-      },
-    });
-    realmFindManyMock.mockResolvedValueOnce([
-      {
-        unitId: "realm-1",
-        extra: { rule: "rule-unit-1" },
-        ruleVersion: 2,
-        ruleRequireOnPost: true,
-      },
-    ]);
-
-    await expect(
-      service.create(
-        { content: content("reply"), parentPostUnitId: "parent-1" },
-        "user-1",
-      ),
-    ).rejects.toThrow("Realm rules must be acknowledged before posting");
-    expect(transactionMock).not.toHaveBeenCalled();
-  });
-
-  test("blocks replies to locked realm content", async () => {
-    resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
-      unitId: "parent-1",
-      rootPostUnitId: "parent-1",
-      targetUnitId: null,
-      depth: 0,
-      isLocked: false,
-      unit: {
-        inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
-        realmModerationTargets: [{ realmUnitId: "realm-1", state: "LOCKED" }],
-      },
-    });
-
-    await expect(
-      service.create(
-        { content: content("reply"), parentPostUnitId: "parent-1" },
-        "user-1",
-      ),
-    ).rejects.toThrow("Cannot reply to locked realm content");
-    expect(transactionMock).not.toHaveBeenCalled();
-  });
-
   test("rejects invalid tag ids with 400", async () => {
     resetMocks();
     unitFindManyMock.mockResolvedValueOnce([{ id: "tag-1" }]);
@@ -958,37 +877,6 @@ describe("PostService.byRealm", () => {
   });
 });
 
-describe("PostService.getPrimaryVisibleRealmForPost", () => {
-  const service = new PostService();
-
-  test("returns the first visible parent realm for route policy context", async () => {
-    resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce({
-      unit: {
-        inRealms: [{ realmUnitId: "realm-1" }],
-      },
-    });
-
-    await expect(
-      service.getPrimaryVisibleRealmForPost("parent-post-1"),
-    ).resolves.toBe("realm-1");
-    expect(postFindUniqueMock).toHaveBeenCalledWith({
-      where: { unitId: "parent-post-1" },
-      select: {
-        unit: {
-          select: {
-            inRealms: {
-              where: { state: "VISIBLE" },
-              select: { realmUnitId: true },
-              take: 1,
-            },
-          },
-        },
-      },
-    });
-  });
-});
-
 describe("PostService.list comment compatibility reads", () => {
   const service = new PostService();
 
@@ -1079,114 +967,6 @@ describe("PostService.create targetUnitId derivation", () => {
     expect(data.targetUnitId).toBeUndefined();
     // No Unit lookup needed when there is no target.
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
-  });
-
-  test("reply creation delegates to the comment domain using the parent post realm", async () => {
-    resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
-      unitId: "parent-1",
-      rootPostUnitId: "root-1",
-      targetUnitId: "book-B",
-      depth: 0,
-      isLocked: false,
-      unit: {
-        inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
-        realmModerationTargets: [],
-      },
-    });
-
-    const result = await service.create(
-      { content: content("reply"), parentPostUnitId: "parent-1" },
-      "user-1",
-    );
-
-    expect(postCreateMock).not.toHaveBeenCalled();
-    expect(commentCreateMock.mock.calls[0]?.[0].data).toMatchObject({
-      rootUnitId: "root-1",
-      realmUnitId: "realm-1",
-      parentCommentUnitId: undefined,
-      authorUserId: "user-1",
-      depth: 1,
-    });
-    expect(postUpdateManyMock).toHaveBeenCalledWith({
-      where: { unitId: "root-1" },
-      data: expect.objectContaining({
-        replyCount: { increment: 1 },
-        directReplyCount: { increment: 1 },
-      }),
-    });
-    expect(result.unitId).toBe("comment-1");
-    expect(result.rootPostUnitId).toBe("root-1");
-    expect(result.parentPostUnitId).toBe("root-1");
-    expect(unitFindUniqueMock).not.toHaveBeenCalled();
-  });
-
-  test("reply can target an existing comment parent", async () => {
-    resetMocks();
-    commentFindUniqueMock.mockResolvedValueOnce({
-      unitId: "comment-parent-1",
-      rootUnitId: "root-1",
-      realmUnitId: "realm-1",
-    });
-
-    await service.create(
-      { content: content("nested"), parentPostUnitId: "comment-parent-1" },
-      "user-1",
-    );
-
-    expect(postFindUniqueOrThrowMock).not.toHaveBeenCalled();
-    expect(commentCreateMock.mock.calls[0]?.[0].data).toMatchObject({
-      rootUnitId: "root-1",
-      realmUnitId: "realm-1",
-      parentCommentUnitId: "comment-parent-1",
-      depth: 2,
-    });
-    expect(commentUpdateMock).toHaveBeenCalledWith({
-      where: { unitId: "comment-parent-1" },
-      data: expect.objectContaining({
-        replyCount: { increment: 1 },
-        directReplyCount: { increment: 1 },
-      }),
-    });
-  });
-
-  test("legacy reply creation requires an explicit realm for multi-realm roots", async () => {
-    resetMocks();
-    postFindUniqueOrThrowMock.mockResolvedValueOnce({
-      unitId: "parent-1",
-      rootPostUnitId: "root-1",
-      targetUnitId: null,
-      depth: 0,
-      isLocked: false,
-      unit: {
-        inRealms: [
-          { realmUnitId: "realm-1", state: "VISIBLE" },
-          { realmUnitId: "realm-2", state: "VISIBLE" },
-        ],
-        realmModerationTargets: [],
-      },
-    });
-
-    await expect(
-      service.create(
-        { content: content("reply"), parentPostUnitId: "parent-1" },
-        "user-1",
-      ),
-    ).rejects.toThrow("Comment realmUnitId is required");
-
-    await service.create(
-      {
-        content: content("reply"),
-        parentPostUnitId: "parent-1",
-        realmUnitIds: ["realm-2"],
-      },
-      "user-1",
-    );
-
-    expect(commentCreateMock.mock.calls[0]?.[0].data.realmUnitId).toBe(
-      "realm-2",
-    );
-    expect(realmUnitCreateMock).not.toHaveBeenCalled();
   });
 
   test("CHAPTER kind validates the target is a BOOK", async () => {
@@ -2025,23 +1805,6 @@ describe("PostService lifecycle state", () => {
     await service.unacceptAnswer("root-1", "reply-1", op);
 
     expect(postUpdateMock).not.toHaveBeenCalled();
-  });
-
-  // 5.5 — reply permission reads isLocked, never state (D4).
-  test("the reply parent load reads isLocked, not state", async () => {
-    resetMocks();
-
-    await service.create(
-      { content: content("reply"), parentPostUnitId: "parent-1" },
-      "user-1",
-    );
-
-    const select = (postFindUniqueOrThrowMock.mock.calls as any[])[0]?.[0]
-      ?.select;
-    expect(select.isLocked).toBe(true);
-    expect(select.state).toBeUndefined();
-    expect(postCreateMock).not.toHaveBeenCalled();
-    expect(commentCreateMock).toHaveBeenCalled();
   });
 
   // 5.6

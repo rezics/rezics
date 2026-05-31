@@ -60,26 +60,19 @@ async function assertPostDeletePolicy(input: {
 
 async function assertPostCreatePolicy(input: {
   body: {
-    parentPostUnitId?: string;
     targetUnitId?: string;
     realmUnitIds?: string[];
   };
   identity: any;
   status: any;
 }) {
-  const realmUnitId =
-    input.body.realmUnitIds?.[0] ??
-    (input.body.parentPostUnitId
-      ? await postService.getPrimaryVisibleRealmForPost(
-          input.body.parentPostUnitId,
-        )
-      : null);
+  const realmUnitId = input.body.realmUnitIds?.[0] ?? null;
   const decision = await governanceRoutePolicyService.decideForIdentity({
     identity: input.identity,
     action: contentPolicyActions.create,
     target: {
-      kind: input.body.parentPostUnitId ? "post-reply" : "post",
-      id: input.body.parentPostUnitId ?? input.body.targetUnitId ?? "new",
+      kind: "post",
+      id: input.body.targetUnitId ?? "new",
       realmUnitId,
     },
   });

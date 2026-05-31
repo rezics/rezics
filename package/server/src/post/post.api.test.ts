@@ -19,7 +19,6 @@ const getByUnitIdMock = mock(async () => ({
     user: { unitId: "owner-1" },
   },
 }));
-const getPrimaryVisibleRealmForPostMock = mock(async () => "realm-1");
 const createMock = mock(async () => ({ unitId: "created-post-1" }));
 const updateMock = mock(async (_unitId: string, input: any) => ({
   unitId: "post-1",
@@ -94,7 +93,6 @@ mock.module("./post.service", () => ({
   postService: {
     create: createMock,
     getByUnitId: getByUnitIdMock,
-    getPrimaryVisibleRealmForPost: getPrimaryVisibleRealmForPostMock,
     update: updateMock,
     delete: deleteMock,
   },
@@ -114,7 +112,6 @@ describe("postApi", () => {
     createMock.mockClear();
     updateMock.mockClear();
     getByUnitIdMock.mockClear();
-    getPrimaryVisibleRealmForPostMock.mockClear();
     deleteMock.mockClear();
   });
 
@@ -186,66 +183,6 @@ describe("postApi", () => {
       identity: currentIdentity,
       action: "content.create",
       target: { kind: "post", id: "new", realmUnitId: "realm-1" },
-    });
-    expect(createMock).not.toHaveBeenCalled();
-  });
-
-  test("marks reply creation as a create policy target", async () => {
-    policyAllowed = true;
-    const { postApi } = await import("./post.api");
-    const response = await postApi.handle(
-      new Request("http://localhost/post/", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          parentPostUnitId: "parent-post-1",
-          content: { body: "reply" },
-        }),
-      }),
-    );
-
-    expect(response.status).toBe(200);
-    expect(decideForIdentityMock).toHaveBeenCalledWith({
-      identity: currentIdentity,
-      action: "content.create",
-      target: {
-        kind: "post-reply",
-        id: "parent-post-1",
-        realmUnitId: "realm-1",
-      },
-    });
-    expect(getPrimaryVisibleRealmForPostMock).toHaveBeenCalledWith(
-      "parent-post-1",
-    );
-    expect(createMock).toHaveBeenCalledWith(
-      expect.objectContaining({ parentPostUnitId: "parent-post-1" }),
-      "owner-1",
-    );
-  });
-
-  test("denies reply creation rejected by realm-scoped policy", async () => {
-    const { postApi } = await import("./post.api");
-    const response = await postApi.handle(
-      new Request("http://localhost/post/", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          parentPostUnitId: "parent-post-1",
-          content: { body: "reply" },
-        }),
-      }),
-    );
-
-    expect(response.status).toBe(403);
-    expect(await response.text()).toBe("Denied by policy");
-    expect(decideForIdentityMock).toHaveBeenCalledWith({
-      identity: currentIdentity,
-      action: "content.create",
-      target: {
-        kind: "post-reply",
-        id: "parent-post-1",
-        realmUnitId: "realm-1",
-      },
     });
     expect(createMock).not.toHaveBeenCalled();
   });

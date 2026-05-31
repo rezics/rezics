@@ -24,7 +24,7 @@ export type {
   UpdatePostInput,
 };
 
-export type CreateRootPostInput = Omit<CreatePostInput, "parentPostUnitId">;
+export type CreateRootPostInput = CreatePostInput;
 
 /**
  * Extended frontend types

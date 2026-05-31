@@ -365,7 +365,6 @@ export const createPostSchema = t.Object({
   realmUnitIds: t.Optional(t.Array(t.String())),
   /** Tag Unit IDs that create UnitTag junction rows in the same transaction. */
   tagIds: t.Optional(t.Array(t.String())),
-  parentPostUnitId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
   language: t.Optional(languageSchema),
   creationMode: t.Optional(creationModeSchema),
@@ -375,8 +374,7 @@ export const createPostSchema = t.Object({
   /**
    * Initial publication state. Defaults to `PUBLISHED` (publish on create).
    * `DRAFT` saves the post as an owner-only draft that is excluded from feeds
-   * and search until published. Drafts apply to top-level posts only; replies
-   * always publish. See `draft.ts` for the cross-type draft listing.
+   * and search until published. See `draft.ts` for the cross-type draft listing.
    */
   status: t.Optional(t.Union([t.Literal("DRAFT"), t.Literal("PUBLISHED")])),
 });
