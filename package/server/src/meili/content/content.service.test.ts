@@ -76,6 +76,31 @@ describe("searchContent work-domain behavior", () => {
     ]);
   });
 
+  test("defaults edition-capable type searches to main catalog entries", async () => {
+    await searchContent({
+      type: ["BOOK", "GAME"],
+    });
+
+    expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
+      'type IN ["BOOK", "GAME"]',
+      'catalogEntryKind = "MAIN"',
+      'visibility = "PUBLIC"',
+    ]);
+  });
+
+  test("exact variant lookup does not add the main catalog default", async () => {
+    await searchContent({
+      type: "BOOK",
+      targetUnitId: "main-entry-1",
+    });
+
+    expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
+      'type = "BOOK"',
+      'targetUnitId = "main-entry-1"',
+      'visibility = "PUBLIC"',
+    ]);
+  });
+
   test("filters realm-scoped wiki listings with tag and realm tag selectors", async () => {
     await searchContent({
       type: "POST",

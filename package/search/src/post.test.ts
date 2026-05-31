@@ -351,6 +351,20 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.seriesTitles).toEqual(["Direct Series"]);
   });
 
+  test("accepts Series as first-class searchable content", async () => {
+    setServerEnvForSearchTests();
+    const { isPublicIndexableContentUnit } = await import("./sync");
+
+    expect(
+      isPublicIndexableContentUnit({
+        type: "SERIES",
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        contentModerationState: null,
+      }),
+    ).toBe(true);
+  });
+
   test("buildPostDocument omits UnitWork membership fields", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");

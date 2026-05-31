@@ -40,6 +40,17 @@ function groupReleaseHits(items: any[]): any[] {
   });
 }
 
+const EDITION_CATALOG_TYPES = new Set(["BOOK", "GAME", "MEDIA"]);
+
+function shouldDefaultToMainCatalogEntry(opts: ContentSearchOptions): boolean {
+  if (opts.catalogEntryKind || opts.targetUnitId) return false;
+  if (!opts.type) return false;
+  const types = Array.isArray(opts.type) ? opts.type : [opts.type];
+  return (
+    types.length > 0 && types.every((type) => EDITION_CATALOG_TYPES.has(type))
+  );
+}
+
 /**
  * Search the unified content index with typed options.
  */
@@ -118,6 +129,8 @@ export async function searchContent(
 
   if (opts.catalogEntryKind) {
     filter.push(`catalogEntryKind = "${opts.catalogEntryKind}"`);
+  } else if (shouldDefaultToMainCatalogEntry(opts)) {
+    filter.push('catalogEntryKind = "MAIN"');
   }
   if (opts.targetUnitId) {
     filter.push(`targetUnitId = "${opts.targetUnitId}"`);

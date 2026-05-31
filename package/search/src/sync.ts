@@ -119,6 +119,7 @@ const INDEXABLE_TYPES = [
   UnitType.BOOK,
   UnitType.GAME,
   UnitType.MEDIA,
+  UnitType.SERIES,
   UnitType.SHELF,
   UnitType.LINK,
 ];
