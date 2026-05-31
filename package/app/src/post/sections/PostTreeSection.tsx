@@ -5,11 +5,11 @@ import {
 } from "@rezics/api/hooks";
 import { commentListQuery } from "@rezics/api/comment/comment";
 import {
-  postThreadQuery,
   useAcceptAnswerMutation,
   usePinPostMutation,
   useUnacceptAnswerMutation,
   useUnpinPostMutation,
+  postThreadQuery,
 } from "@rezics/api/post/post";
 import type { PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -55,14 +55,6 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   const permission = useServerPermission();
   const actorUserId = useCurrentUserId();
   const [editingPost, setEditingPost] = useState<PostDTO | null>(null);
-  const signalQuery = useQuery({
-    ...postThreadQuery(rootPostUnitId, {
-      mode: "threaded",
-      maxDepth: 0,
-      limit: 1,
-    }),
-    enabled: Boolean(realmUnitId) && !!rootPostUnitId,
-  });
   const commentThreadQuery = useQuery(
     commentListQuery({
       rootUnitId: rootPostUnitId,
@@ -78,7 +70,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   });
   const isCommentThread = Boolean(realmUnitId);
   const isLoading = isCommentThread
-    ? commentThreadQuery.isLoading || signalQuery.isLoading
+    ? commentThreadQuery.isLoading
     : legacyThreadQuery.isLoading;
   const posts = useMemo(() => {
     if (isCommentThread) {
@@ -92,7 +84,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     rootPostUnitId,
   ]);
   const signalData = isCommentThread
-    ? signalQuery.data
+    ? commentThreadQuery.data
     : legacyThreadQuery.data;
 
   // Viewer-derived signals from the thread read. The server is the single

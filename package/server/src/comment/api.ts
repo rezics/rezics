@@ -11,6 +11,7 @@ import {
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, tryResolveIdentity } from "@/middleware";
+import { postService } from "@/post/post.service";
 import { mapCommentToDTO } from "./mapper";
 import { commentService } from "./service";
 
@@ -40,7 +41,11 @@ export const commentApi = new Elysia({ prefix: "/comment" })
       const { comments, total } = await commentService.list(query, {
         viewerUserId: identity?.userId,
       });
-      return { comments: comments.map(mapCommentToDTO), total };
+      const signals = await postService.getThreadPromotionSignals(
+        query.rootUnitId,
+        identity,
+      );
+      return { comments: comments.map(mapCommentToDTO), total, ...signals };
     },
     {
       query: commentListQuerySchema,
@@ -61,7 +66,11 @@ export const commentApi = new Elysia({ prefix: "/comment" })
       const { comments, total } = await commentService.list(body, {
         viewerUserId: identity?.userId,
       });
-      return { comments: comments.map(mapCommentToDTO), total };
+      const signals = await postService.getThreadPromotionSignals(
+        body.rootUnitId,
+        identity,
+      );
+      return { comments: comments.map(mapCommentToDTO), total, ...signals };
     },
     {
       body: commentListBodySchema,

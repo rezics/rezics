@@ -113,6 +113,16 @@ export type CommentListBody = Static<typeof commentListBodySchema>;
 export const commentListResponseSchema = t.Object({
   comments: t.Array(commentDTOSchema),
   total: t.Optional(t.Number()),
+  /**
+   * Thread read only: whether the current caller may pin/accept within this
+   * root comment partition. Mirrors the post promotion write guard.
+   */
+  viewerCanPromote: t.Optional(t.Boolean()),
+  /**
+   * Thread read only: whether the root bears the reserved Q&A tag, which gates
+   * accepted-answer affordances for direct comments.
+   */
+  isQuestionThread: t.Optional(t.Boolean()),
 });
 
 export type CommentListResponse = Static<typeof commentListResponseSchema>;

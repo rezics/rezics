@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import {
   commentDTOSchema,
   commentListQuerySchema,
+  commentListResponseSchema,
   createCommentSchema,
 } from "./comment";
 
@@ -49,6 +50,17 @@ describe("comment contract", () => {
         parentCommentUnitId: "comment-1",
         mode: "threaded",
         limit: 20,
+      }),
+    ).toBe(true);
+  });
+
+  test("list response carries thread promotion signals", () => {
+    expect(
+      Value.Check(commentListResponseSchema, {
+        comments: [],
+        total: 0,
+        viewerCanPromote: true,
+        isQuestionThread: true,
       }),
     ).toBe(true);
   });
