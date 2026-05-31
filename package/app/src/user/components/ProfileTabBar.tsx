@@ -5,6 +5,8 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("settings:profile_tab_overview"),
   profile_tab_content: () =>
     getI18nRuntime().i18n.t("settings:profile_tab_content"),
+  profile_tab_collection: () =>
+    getI18nRuntime().i18n.t("settings:profile_tab_collection"),
   profile_tab_shelves: () =>
     getI18nRuntime().i18n.t("settings:profile_tab_shelves"),
   profile_tab_realms: () =>
@@ -24,6 +26,7 @@ import { unitHref } from "@/shared/ui/link";
 const PROFILE_TABS = [
   { label: i18nMessages.profile_tab_overview, path: "" },
   { label: i18nMessages.profile_tab_content, path: "/content" },
+  { label: i18nMessages.profile_tab_collection, path: "/collection" },
   { label: i18nMessages.profile_tab_shelves, path: "/shelves" },
   { label: i18nMessages.profile_tab_realms, path: "/realms" },
   { label: i18nMessages.profile_tab_followers, path: "/followers" },
