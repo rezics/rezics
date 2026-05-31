@@ -30,8 +30,6 @@ import {
   prisma,
   UnitStatus,
   UnitType,
-  UnitWorkDisplayPolicy,
-  UnitWorkRole,
 } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
 import { commentService } from "@/comment/service";
@@ -111,12 +109,6 @@ function commentAsPostCompat(comment: any): PostWithRelations {
     pinKind: null,
     pinPosition: null,
   } as PostWithRelations;
-}
-
-function postKindToWorkRole(kind: PostKindEnum | undefined): UnitWorkRole {
-  if (kind === PostKindEnum.REVIEW) return UnitWorkRole.REVIEW;
-  if (kind === PostKindEnum.WIKI) return UnitWorkRole.WIKI;
-  return UnitWorkRole.POST;
 }
 
 function readRealmRuleUnitId(extra: Prisma.JsonValue | null): string | null {
@@ -937,15 +929,6 @@ export class PostService {
               },
             }),
           ),
-        );
-      }
-
-      if (targetUnitId) {
-        await this.registerTargetWorkMemberships(
-          tx,
-          created.unitId,
-          targetUnitId,
-          postKindToWorkRole(kind),
         );
       }
 
@@ -1842,43 +1825,6 @@ export class PostService {
       .split(",")
       .map((id: string) => id.trim())
       .filter(Boolean);
-  }
-
-  private async registerTargetWorkMemberships(
-    tx: Prisma.TransactionClient,
-    unitId: string,
-    targetUnitId: string,
-    role: UnitWorkRole,
-  ) {
-    const releaseMemberships = await tx.unitWork.findMany({
-      where: {
-        unitId: targetUnitId,
-        role: UnitWorkRole.RELEASE,
-      },
-      select: { workUnitId: true },
-      distinct: ["workUnitId"],
-    });
-
-    await Promise.all(
-      releaseMemberships.map((membership) =>
-        tx.unitWork.upsert({
-          where: {
-            unitId_workUnitId_role: {
-              unitId,
-              workUnitId: membership.workUnitId,
-              role,
-            },
-          },
-          update: {},
-          create: {
-            unitId,
-            workUnitId: membership.workUnitId,
-            role,
-            displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-          },
-        }),
-      ),
-    );
   }
 }
 
