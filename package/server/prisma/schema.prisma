@@ -66,6 +66,12 @@ enum AiDisclosureMode {
   MACHINE_GENERATED
 }
 
+enum CatalogEntryKind {
+  MAIN
+  VARIANT
+  NONE
+}
+
 enum UserUnitProgressStatus {
   BACKLOG
   ACTIVE
@@ -180,6 +186,13 @@ model Unit {
   /// default when an effective license is required.
   licenseSlug String?
 
+  /// Native catalog identity for edition-capable Unit types. Rezics-lib
+  /// entries are ordinary native Units with catalogEntryKind=MAIN. Exact
+  /// editions/source records use VARIANT and resolve normal interactions
+  /// through targetUnitId. SERIES and other non-participating types keep null.
+  catalogEntryKind CatalogEntryKind?
+  targetUnitId     String?           @db.Uuid
+
   /// Denormalized count of `Subscription` rows targeting this unit.
   /// Maintained transactionally by the subscription service alongside row
   /// insert/delete. Powers Unit-detail render of "N watchers" without a
@@ -203,6 +216,8 @@ model Unit {
 
   // Owner/creator
   user User? @relation("UnitForUser", fields: [userId], references: [unitId])
+  catalogTarget   Unit?  @relation("UnitCatalogTarget", fields: [targetUnitId], references: [id], onDelete: SetNull)
+  catalogVariants Unit[] @relation("UnitCatalogTarget")
 
   // Translation layer
   translations     UnitTranslation[]
@@ -313,6 +328,7 @@ model Unit {
   @@index([type, status, createdAt])
   @@index([userId, createdAt])
   @@index([status, visibility])
+  @@index([catalogEntryKind, targetUnitId])
   @@index([defaultLanguage])
   @@index([translationGroupId])
   @@index([slugScope, type])

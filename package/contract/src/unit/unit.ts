@@ -128,6 +128,21 @@ export const aiDisclosureModeSchema = t.Union([
   t.Literal("MACHINE_GENERATED"),
 ]);
 
+export const CatalogEntryKind = {
+  MAIN: "MAIN",
+  VARIANT: "VARIANT",
+  NONE: "NONE",
+} as const;
+
+export type CatalogEntryKind =
+  (typeof CatalogEntryKind)[keyof typeof CatalogEntryKind];
+
+export const catalogEntryKindSchema = t.Union([
+  t.Literal("MAIN"),
+  t.Literal("VARIANT"),
+  t.Literal("NONE"),
+]);
+
 export const aiDisclosureSourceSchema = t.Union([
   t.Literal("USER"),
   t.Literal("MODERATOR"),
@@ -239,6 +254,8 @@ export const baseUnitSchema = t.Object({
   rating: t.Optional(contentRatingSchema),
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
+  catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
+  targetUnitId: t.Optional(t.Nullable(t.String())),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -369,6 +386,8 @@ export const createUnitSchema = t.Object({
   rating: t.Optional(contentRatingSchema),
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
+  catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
+  targetUnitId: t.Optional(t.Nullable(t.String())),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   publishedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -395,6 +414,8 @@ export const updateUnitSchema = t.Object({
   rating: t.Optional(contentRatingSchema),
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
+  catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
+  targetUnitId: t.Optional(t.Nullable(t.String())),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),

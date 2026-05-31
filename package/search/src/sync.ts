@@ -610,6 +610,8 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     displayPolicy: releaseMembership?.displayPolicy ?? null,
     workUnitIds,
     workRoles,
+    catalogEntryKind: unit.catalogEntryKind ?? null,
+    targetUnitId: unit.targetUnitId ?? null,
     seriesUnitIds,
     seriesKindKeys,
     seriesTitles,

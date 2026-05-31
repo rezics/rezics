@@ -26,6 +26,12 @@ describe("ranking search projections", () => {
     expect(getExpectedMeiliIndexSchema("content").sortableAttributes).toContain(
       "hotScore",
     );
+    expect(
+      getExpectedMeiliIndexSchema("content").filterableAttributes,
+    ).toContain("catalogEntryKind");
+    expect(
+      getExpectedMeiliIndexSchema("content").filterableAttributes,
+    ).toContain("targetUnitId");
     expect(getExpectedMeiliIndexSchema("posts").sortableAttributes).toContain(
       "commentHotScore",
     );
@@ -78,6 +84,8 @@ describe("ranking search projections", () => {
 
     expect(content.hotScore).toBe(0);
     expect(content.rankUpdatedAt).toBeNull();
+    expect(content.catalogEntryKind).toBeNull();
+    expect(content.targetUnitId).toBeNull();
     expect(post.hotScore).toBe(0);
     expect(post.commentHotScore).toBe(0);
     expect(post.commentRankUpdatedAt).toBeNull();

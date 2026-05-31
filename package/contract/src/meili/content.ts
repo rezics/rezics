@@ -5,7 +5,11 @@ import { contentDocSchema } from "../content/doc-v1";
 import { gameSystemRequirementSummarySchema } from "../media/game-media";
 import { languageSchema } from "../language";
 import { postKindLiterals } from "../post";
-import { aiDisclosureModeSchema, contentRatingSchema } from "../unit/unit";
+import {
+  aiDisclosureModeSchema,
+  catalogEntryKindSchema,
+  contentRatingSchema,
+} from "../unit/unit";
 import { unitWorkDisplayPolicySchema, unitWorkRoleSchema } from "../unit/work";
 
 // ANCHOR: Content Search Document
@@ -57,6 +61,11 @@ export const ContentSearchDocumentSchema = t.Object({
   // Generic work-domain memberships for non-release content.
   workUnitIds: t.Array(t.String()),
   workRoles: t.Array(unitWorkRoleSchema),
+
+  // Native catalog identity. Variants resolve normal interactions through
+  // targetUnitId; SERIES and other non-participating types keep null.
+  catalogEntryKind: t.Union([catalogEntryKindSchema, t.Null()]),
+  targetUnitId: t.Union([t.String(), t.Null()]),
 
   // Direct public Series metadata projected from SeriesContentIndex rows.
   seriesUnitIds: t.Array(t.String()),
@@ -156,6 +165,8 @@ export const ContentSearchOptionsSchema = t.Object({
   workUnitId: t.Optional(t.String()),
   searchGroupId: t.Optional(t.String()),
   workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
+  catalogEntryKind: t.Optional(catalogEntryKindSchema),
+  targetUnitId: t.Optional(t.String()),
   containedUnitIds: t.Optional(t.Array(t.String())),
   seriesUnitIds: t.Optional(t.Array(t.String())),
   seriesKindKeys: t.Optional(t.Array(t.String())),

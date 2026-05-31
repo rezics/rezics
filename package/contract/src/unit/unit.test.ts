@@ -4,6 +4,7 @@ import {
   AiDisclosureMode,
   aiDisclosureDetailsSchema,
   aiDisclosureModeSchema,
+  catalogEntryKindSchema,
   createUnitSchema,
   unitDTOSchema,
   unitListBodySchema,
@@ -81,6 +82,37 @@ describe("Unit AI disclosure DTO/input schemas", () => {
       Value.Check(updateUnitSchema, {
         aiDisclosureMode: "AI_ORIGINATED",
         aiDisclosureDetails: null,
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("CatalogEntryKind", () => {
+  test("models native main entries, variants, and non-catalog rows", () => {
+    expect(Value.Check(catalogEntryKindSchema, "MAIN")).toBe(true);
+    expect(Value.Check(catalogEntryKindSchema, "VARIANT")).toBe(true);
+    expect(Value.Check(catalogEntryKindSchema, "NONE")).toBe(true);
+    expect(Value.Check(catalogEntryKindSchema, "WORK")).toBe(false);
+
+    expect(
+      Value.Check(unitDTOSchema, {
+        id: "main-1",
+        type: "BOOK",
+        catalogEntryKind: "MAIN",
+        targetUnitId: null,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(createUnitSchema, {
+        type: "BOOK",
+        catalogEntryKind: "VARIANT",
+        targetUnitId: "main-1",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(updateUnitSchema, {
+        catalogEntryKind: null,
+        targetUnitId: null,
       }),
     ).toBe(true);
   });
