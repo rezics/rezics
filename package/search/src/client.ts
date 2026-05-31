@@ -24,6 +24,7 @@ export class SearchClient {
   readonly feedbackIndex: Index;
   readonly userIndex: Index;
   readonly postIndex: Index;
+  readonly commentIndex: Index;
   readonly realmIndex: Index;
   readonly entityIndex: Index;
   readonly progressIndex: Index;
@@ -34,6 +35,7 @@ export class SearchClient {
     this.feedbackIndex = this.meili.index("feedbacks");
     this.userIndex = this.meili.index("users");
     this.postIndex = this.meili.index("posts");
+    this.commentIndex = this.meili.index("comments");
     this.realmIndex = this.meili.index("realms");
     this.entityIndex = this.meili.index("entities");
     this.progressIndex = this.meili.index(PROGRESS_INDEX_NAME);
@@ -81,6 +83,8 @@ export class SearchClient {
         return this.userIndex;
       case "posts":
         return this.postIndex;
+      case "comments":
+        return this.commentIndex;
       case "realms":
         return this.realmIndex;
       case "entities":
@@ -119,6 +123,10 @@ export class SearchClient {
 
   async initPostIndex(): Promise<void> {
     await this.initIndexFromSchema(getExpectedMeiliIndexSchema("posts"));
+  }
+
+  async initCommentIndex(): Promise<void> {
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("comments"));
   }
 
   async initRealmIndex(): Promise<void> {
@@ -193,6 +201,21 @@ export class SearchClient {
   }
   deleteAllPosts() {
     return this.postIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Comment document operations
+
+  addOrUpdateComments(docs: any[]) {
+    return this.commentIndex.addDocuments(docs);
+  }
+  patchComments(docs: any[]) {
+    return this.commentIndex.updateDocuments(docs);
+  }
+  deleteComments(ids: string[]) {
+    return this.commentIndex.deleteDocuments(ids);
+  }
+  deleteAllComments() {
+    return this.commentIndex.deleteAllDocuments();
   }
 
   // ANCHOR: Realm document operations

@@ -5,6 +5,7 @@ export * from "./admin/index";
 export * from "./auth";
 export * from "./book/index";
 export * from "./common";
+export * from "./comment";
 export * from "./dashboard/index";
 export * from "./content/index";
 export * from "./entity/index";

@@ -5,6 +5,7 @@ export type ExpectedMeiliIndexUid =
   | "feedbacks"
   | "users"
   | "posts"
+  | "comments"
   | "realms"
   | "entities"
   | typeof PROGRESS_INDEX_NAME;
@@ -153,6 +154,32 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     supportsFullSync: true,
     domain: "Posts",
     description: "Discussion posts and replies.",
+  },
+  {
+    uid: "comments",
+    primaryKey: "id",
+    searchableAttributes: ["contentText", "authorName"],
+    filterableAttributes: [
+      "rootUnitId",
+      "realmUnitId",
+      "parentCommentUnitId",
+      "authorUserId",
+      "depth",
+      "isLocked",
+      "state",
+    ],
+    sortableAttributes: [
+      "createdAt",
+      "updatedAt",
+      "replyCount",
+      "hotScore",
+      "topScore",
+      "qualityScore",
+    ],
+    facetableSummaryFields: ["isLocked", "state"],
+    supportsFullSync: true,
+    domain: "Comments",
+    description: "Reply tree comments partitioned by root unit and realm.",
   },
   {
     uid: "realms",

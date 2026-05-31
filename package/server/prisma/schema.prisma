@@ -18,6 +18,7 @@ enum UnitType {
   GAME
   MEDIA
   POST
+  COMMENT
   TAG
   REALM
   SHELF
@@ -217,6 +218,7 @@ model Unit {
   game   Game?
   media  Media?
   post   Post?
+  comment Comment?
   shelf  Shelf?
   series Series?
   realm  Realm?
@@ -263,6 +265,11 @@ model Unit {
   targetedByPosts Post[] @relation("PostTarget")
   rootPosts       Post[] @relation("PostRoot")
   parentPosts     Post[] @relation("PostParent")
+
+  // Comment relations (comments are first-class Unit extensions)
+  rootComments          Comment[] @relation("CommentRoot")
+  realmComments         Comment[] @relation("CommentRealm")
+  parentCommentChildren Comment[] @relation("CommentParent")
 
   // PostPin promotion overlay (scope is always a thread root post; target a reply)
   postPinsAsScope PostPin[] @relation("PostPinScope")
@@ -777,6 +784,54 @@ model Post {
   // `state IN (active|closed slugs)` IN-list, no anti-join. Scoped by
   // targetUnitId so target/realm feeds hit the index.
   @@index([targetUnitId, state])
+}
+
+/**
+ * ANCHOR COMMENT EXTENSION
+ *
+ * First-class reply tree node. `rootUnitId` is the generic discussion root;
+ * post-rooted threads use the root post's Unit id, but the field deliberately
+ * does not encode `Post` in its name. `realmUnitId` is required so the stable
+ * comment partition is `(rootUnitId, realmUnitId)`.
+ */
+model Comment {
+  unitId String @id @db.Uuid
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  rootUnitId          String  @db.Uuid
+  realmUnitId         String  @db.Uuid
+  parentCommentUnitId String? @db.Uuid
+  authorUserId        String  @db.Uuid
+
+  /// Canonical ContentDoc JSON. Search projections such as contentText are
+  /// Meilisearch-only and must not be added as PostgreSQL columns.
+  content Json?
+
+  depth Int @default(1)
+
+  /// Postgres-native ltree materialized path from the root comment scope to
+  /// this comment. Modeled as Unsupported and read/written via raw SQL.
+  path Unsupported("ltree")?
+
+  replyCount       Int       @default(0)
+  directReplyCount Int       @default(0)
+  lastReplyAt      DateTime?
+  isLocked         Boolean   @default(false)
+  state            String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rootUnit      Unit  @relation("CommentRoot", fields: [rootUnitId], references: [id], onDelete: Cascade)
+  realmUnit     Unit  @relation("CommentRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
+  parentComment Unit? @relation("CommentParent", fields: [parentCommentUnitId], references: [id], onDelete: SetNull)
+
+  @@index([rootUnitId, realmUnitId, createdAt])
+  @@index([rootUnitId, realmUnitId, parentCommentUnitId, createdAt])
+  @@index([parentCommentUnitId, createdAt])
+  @@index([authorUserId, createdAt])
+  @@index([state])
+  @@index([path], type: Gist, map: "Comment_path_gist_idx")
 }
 
 /// Why a post is promoted within a thread. `HIGHLIGHT` is reserved for future

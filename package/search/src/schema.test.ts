@@ -41,4 +41,19 @@ describe("expected Meilisearch work-domain settings", () => {
       expect.arrayContaining(["workUnitIds", "workRoles"]),
     );
   });
+
+  test("comment index is partitioned by root unit and realm", () => {
+    const comments = getExpectedMeiliIndexSchema("comments");
+
+    expect(comments.filterableAttributes).toEqual(
+      expect.arrayContaining([
+        "rootUnitId",
+        "realmUnitId",
+        "parentCommentUnitId",
+      ]),
+    );
+    expect(comments.searchableAttributes).toEqual(
+      expect.arrayContaining(["contentText", "authorName"]),
+    );
+  });
 });
