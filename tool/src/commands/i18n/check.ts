@@ -18,10 +18,13 @@
 
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
+import {
+  I18N_LOCALES_ROOT,
+  REPO_ROOT,
+  UI_LOCALES_ROOT,
+  toRepoRelPath,
+} from "../core/paths";
 
-const REPO_ROOT = new URL("../../../..", import.meta.url).pathname;
-const LOCALES_ROOT = join(REPO_ROOT, "package/i18n/locales");
-const UI_LOCALES_ROOT = join(REPO_ROOT, "package/ui/locales");
 const SCAN_ROOTS = [
   "package/app/src",
   "package/admin/src",
@@ -68,11 +71,11 @@ async function loadCatalog(): Promise<{
   namespaces: string[];
 }> {
   const catalog: Catalog = {};
-  const locales = await readdir(LOCALES_ROOT);
+  const locales = await readdir(I18N_LOCALES_ROOT);
   const namespaces = new Set<string>();
   for (const lng of locales) {
     catalog[lng] = {};
-    const lngDir = join(LOCALES_ROOT, lng);
+    const lngDir = join(I18N_LOCALES_ROOT, lng);
     for (const file of await readdir(lngDir)) {
       const ns = file.replace(/\.json$/, "");
       namespaces.add(ns);
@@ -142,7 +145,7 @@ async function scanSources(): Promise<{
 }
 
 function relRepo(p: string): string {
-  return p.replace(REPO_ROOT, ".").replace(/^\.\/+/, "");
+  return toRepoRelPath(p);
 }
 
 async function main(): Promise<void> {

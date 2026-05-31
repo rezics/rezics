@@ -1,9 +1,9 @@
-import { relative } from "node:path";
-
-export const REPO_ROOT = new URL(
-  "../../../../..",
-  import.meta.url,
-).pathname.replace(/\/$/, "");
+export {
+  I18N_LOCALES_ROOT,
+  REPO_ROOT,
+  UI_LOCALES_ROOT,
+} from "../../core/paths";
+import { toRepoRelPath } from "../../core/paths";
 
 const EXEMPT_DIR_PATTERNS = [
   "node_modules",
@@ -21,8 +21,9 @@ const EXEMPT_DIR_PATTERNS = [
 const EXEMPT_PACKAGES = new Set(["auth"]);
 
 export function isExemptPath(absPath: string): boolean {
-  const relPath = relative(REPO_ROOT, absPath);
+  const relPath = toRepoRelPath(absPath);
   if (relPath.startsWith("..")) return true;
+
   return EXEMPT_DIR_PATTERNS.some(
     (pattern) =>
       relPath === pattern ||
@@ -33,7 +34,7 @@ export function isExemptPath(absPath: string): boolean {
 }
 
 export function isExemptPackage(absPath: string): boolean {
-  const relPath = relative(REPO_ROOT, absPath);
+  const relPath = toRepoRelPath(absPath);
   const match = relPath.match(/^package\/([^/]+)/);
   if (!match?.[1]) return false;
   return EXEMPT_PACKAGES.has(match[1]);

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
-import { REPO_ROOT } from "../core/paths";
+import { I18N_LOCALES_ROOT, REPO_ROOT, UI_LOCALES_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
 const SPEC =
@@ -44,7 +44,7 @@ export const localeParityRule: RuleScanner = {
     const baseLocale = "en";
 
     // 1. The shared product/admin tree lives at `package/i18n/locales/<lng>/<ns>.json`.
-    const sharedRoot = join(REPO_ROOT, "package/i18n/locales");
+    const sharedRoot = I18N_LOCALES_ROOT;
     if (!existsSync(sharedRoot) || !statSync(sharedRoot).isDirectory()) {
       violations.push({
         rule: "R14",
@@ -99,7 +99,7 @@ export const localeParityRule: RuleScanner = {
 
     // 2. UI per-locale ES modules at `package/ui/locales/<lng>.ts` must mirror
     //    the English UI bundle's key set.
-    const uiRoot = join(REPO_ROOT, "package/ui/locales");
+    const uiRoot = UI_LOCALES_ROOT;
     if (!existsSync(uiRoot)) {
       violations.push({
         rule: "R14",
