@@ -58,9 +58,7 @@ export const unitTypeSchema = t.Union([
 ]);
 
 /**
- * Unit types where cross-user contribution to a Work's Releases is permitted
- * without an explicit work-side approval step. Used by the UnitWork membership service
- * to short-circuit the membership claim flow for catalog-style content.
+ * Unit types that participate in collaborative catalog/wiki editing.
  */
 export const WIKI_TYPES = ["BOOK", "GAME", "MEDIA"] as const;
 
@@ -245,7 +243,6 @@ export const baseUnitSchema = t.Object({
   slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
-  workUnitId: t.Optional(t.Nullable(t.String())),
   defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
   translationGroupId: t.Optional(t.Nullable(t.String())),
@@ -291,7 +288,6 @@ export const unitListQuerySchema = t.Object({
   visibility: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
-  workUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   rating: t.Optional(contentRatingSchema),
   createdAtFrom: t.Optional(t.String()),
@@ -330,7 +326,6 @@ export const unitListBodySchema = t.Object({
   visibility: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
-  workUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   rating: t.Optional(contentRatingSchema),
   createdAtFrom: t.Optional(t.String()),
@@ -378,7 +373,6 @@ export type UnitResponse = (typeof unitResponseSchema)["static"];
 export const createUnitSchema = t.Object({
   userId: t.Optional(t.String()),
   type: t.String(),
-  workUnitId: t.Optional(t.String()),
   defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),
   status: t.Optional(t.String()),
@@ -419,7 +413,6 @@ export const updateUnitSchema = t.Object({
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),
-  workUnitId: t.Optional(t.Nullable(t.String())),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   publishedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
 });

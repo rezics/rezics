@@ -37,20 +37,12 @@ mock.module("@/utils/errors", () => ({
 const { buildUnitWhereClause } = await import("./unit.service");
 
 describe("buildUnitWhereClause", () => {
-  test("filters work-domain unit lists through UnitWork release membership", () => {
+  test("ignores removed work-domain unit filters", () => {
     expect(buildUnitWhereClause({ workUnitId: "work-1" })).toEqual({
       AND: [
         {
           NOT: {
             type: "LABEL",
-          },
-        },
-        {
-          workMemberships: {
-            some: {
-              workUnitId: "work-1",
-              role: "RELEASE",
-            },
           },
         },
       ],

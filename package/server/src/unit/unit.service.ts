@@ -13,8 +13,6 @@ import {
   UnitStatus,
   type UnitType,
   type UnitVisibility,
-  UnitWorkDisplayPolicy,
-  UnitWorkRole,
 } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { pickSlugScope } from "@/infra/slug-scopes";
@@ -68,7 +66,7 @@ function enqueueContentMetadataCommand(
  *
  * Searches UnitTranslation titles for text queries. Rich description text is
  * projected through Meilisearch, not PostgreSQL JSON fields.
- * Filters by visibility, workUnitId, language, rating, type, status, userId.
+ * Filters by visibility, language, rating, type, status, userId.
  */
 export function buildUnitWhereClause(
   options: UnitListQuery,
@@ -151,18 +149,6 @@ export function buildUnitWhereClause(
     .map((s) => s.trim())
     .filter(Boolean);
   if (userList.length > 0) andWhere.push({ userId: { in: userList } });
-
-  // Filter release-aware work membership through canonical UnitWork.
-  if (options.workUnitId?.trim()) {
-    andWhere.push({
-      workMemberships: {
-        some: {
-          workUnitId: options.workUnitId,
-          role: "RELEASE",
-        },
-      },
-    });
-  }
 
   // Filter by language (translations must have this language)
   if (options.language?.trim()) {
@@ -325,16 +311,6 @@ export class UnitService {
               : undefined,
         },
       });
-      if (input.workUnitId) {
-        await tx.unitWork.create({
-          data: {
-            unitId: created.id,
-            workUnitId: input.workUnitId,
-            role: UnitWorkRole.RELEASE,
-            displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-          },
-        });
-      }
       return tx.unit.findUniqueOrThrow({
         where: { id: created.id },
         include: unitInclude,
@@ -383,24 +359,6 @@ export class UnitService {
       },
       include: unitInclude,
     });
-
-    if (input.workUnitId !== undefined) {
-      await prisma.$transaction(async (tx) => {
-        await tx.unitWork.deleteMany({
-          where: { unitId, role: UnitWorkRole.RELEASE },
-        });
-        if (input.workUnitId) {
-          await tx.unitWork.create({
-            data: {
-              unitId,
-              workUnitId: input.workUnitId,
-              role: UnitWorkRole.RELEASE,
-              displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-            },
-          });
-        }
-      });
-    }
 
     const patchFields: Record<string, any> = {};
     if (input.rating !== undefined) patchFields.rating = input.rating;

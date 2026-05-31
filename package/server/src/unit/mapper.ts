@@ -13,7 +13,6 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     slug: unit.slug ?? undefined,
     userId: unit.userId,
     user: mapPublicUser(unit.user),
-    workUnitId: unit.workMemberships?.[0]?.workUnitId ?? undefined,
     defaultLanguage: unit.defaultLanguage ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,
     translationGroupId: unit.translationGroupId ?? undefined,

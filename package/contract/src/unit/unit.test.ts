@@ -85,6 +85,14 @@ describe("Unit AI disclosure DTO/input schemas", () => {
       }),
     ).toBe(true);
   });
+
+  test("omits legacy work membership fields", () => {
+    expect("workUnitId" in unitDTOSchema.properties).toBe(false);
+    expect("workUnitId" in createUnitSchema.properties).toBe(false);
+    expect("workUnitId" in updateUnitSchema.properties).toBe(false);
+    expect("workUnitId" in unitListQuerySchema.properties).toBe(false);
+    expect("workUnitId" in unitListBodySchema.properties).toBe(false);
+  });
 });
 
 describe("CatalogEntryKind", () => {
