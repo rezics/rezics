@@ -117,7 +117,7 @@ export const postExtraSchema = t.Object({
 export type PostExtra = (typeof postExtraSchema)["static"];
 
 // ============================================================
-// POST DTO (replaces Comment, Review, Note, Remark)
+// POST DTO
 // ============================================================
 
 export const postDTOSchema = t.Object({
@@ -127,8 +127,6 @@ export const postDTOSchema = t.Object({
   targetUnitId: t.Optional(t.Nullable(t.String())),
   realmUnitId: t.Optional(t.Nullable(t.String())),
   content: t.Optional(t.Nullable(contentDocSchema)),
-  rootPostUnitId: t.Optional(t.Nullable(t.String())),
-  parentPostUnitId: t.Optional(t.Nullable(t.String())),
   kind: t.Optional(t.Nullable(postKindLiterals)),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),

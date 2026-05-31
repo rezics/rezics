@@ -30,8 +30,6 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     targetUnitId: post.targetUnitId ?? null,
     realmUnitId: post.unit.inRealms?.[0]?.realmUnitId ?? null,
     content: contentHidden ? null : (post.content as PostDTO["content"]),
-    rootPostUnitId: post.rootPostUnitId ?? null,
-    parentPostUnitId: post.parentPostUnitId ?? null,
     kind: post.kind ?? null,
     status: post.unit.status,
     visibility: post.unit.visibility,

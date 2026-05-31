@@ -8,8 +8,6 @@ export function mapCommentToPost(comment: CommentDTO): PostDTO {
     targetUnitId: comment.rootUnitId,
     realmUnitId: comment.realmUnitId,
     content: comment.content,
-    rootPostUnitId: comment.rootUnitId,
-    parentPostUnitId: comment.parentCommentUnitId ?? comment.rootUnitId,
     kind: null,
     status: undefined,
     visibility: undefined,

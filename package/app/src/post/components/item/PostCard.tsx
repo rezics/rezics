@@ -18,9 +18,7 @@ interface PostCardProps {
 
 export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
   const navigate = useNavigate();
-  const rootPostUnitId =
-    (post as unknown as { rootPostUnitId?: string }).rootPostUnitId ??
-    post.unitId;
+  const rootPostUnitId = post.unitId;
 
   const handleCardClick = () => {
     if (onOpen) {

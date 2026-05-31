@@ -30,7 +30,6 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
     targetUnitId: targetUnitId ?? "",
     kind,
     limit,
-    parentPostUnitId: undefined,
   });
   const { data, isLoading } = useQuery(query);
   const posts = data?.posts ?? [];
@@ -53,35 +52,33 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
 
   return (
     <div>
-      {posts
-        .filter((post) => !post.parentPostUnitId)
-        .map((post) => {
-          const targetReleaseLabel = currentReleaseUnitId
-            ? resolvePostTargetReleaseLabel(
-                post,
-                currentReleaseUnitId,
-                targetReleaseTitles,
-              )
-            : undefined;
-          return (
-            <div key={post.unitId}>
-              {targetReleaseLabel && (
-                <div className="pt-3">
-                  <Badge variant="outline">Target: {targetReleaseLabel}</Badge>
-                </div>
-              )}
-              <PostCard
-                post={post}
-                onOpen={() =>
-                  navigate({
-                    to: "/post/$rootPostUnitId",
-                    params: { rootPostUnitId: post.unitId },
-                  })
-                }
-              />
-            </div>
-          );
-        })}
+      {posts.map((post) => {
+        const targetReleaseLabel = currentReleaseUnitId
+          ? resolvePostTargetReleaseLabel(
+              post,
+              currentReleaseUnitId,
+              targetReleaseTitles,
+            )
+          : undefined;
+        return (
+          <div key={post.unitId}>
+            {targetReleaseLabel && (
+              <div className="pt-3">
+                <Badge variant="outline">Target: {targetReleaseLabel}</Badge>
+              </div>
+            )}
+            <PostCard
+              post={post}
+              onOpen={() =>
+                navigate({
+                  to: "/post/$rootPostUnitId",
+                  params: { rootPostUnitId: post.unitId },
+                })
+              }
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };
