@@ -195,7 +195,6 @@ export const wikiZoneHomepageSectionSchema = t.Union([
       kind: t.Literal("entityCollection"),
       entityKinds: t.Optional(t.Array(t.String())),
       subjectRoles: t.Optional(t.Array(t.String())),
-      workUnitId: t.Optional(t.String()),
       realmUnitId: t.Optional(t.String()),
       sort: t.Optional(wikiZoneSortSchema),
     },

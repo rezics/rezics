@@ -606,13 +606,6 @@ export class ZoneService {
           : {}),
         unit: {
           ...this.wikiVisibleUnitWhere(realmUnitId),
-          ...(input.section.workUnitId
-            ? {
-                workMemberships: {
-                  some: { workUnitId: input.section.workUnitId },
-                },
-              }
-            : {}),
         },
         entity: {
           type: UnitType.ENTITY,

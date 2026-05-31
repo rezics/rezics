@@ -103,7 +103,6 @@ function commentAsPostCompat(comment: any): PostWithRelations {
     updatedAt: comment.updatedAt,
     unit: {
       ...comment.unit,
-      workMemberships: [],
       licenseSlug: comment.unit?.licenseSlug ?? null,
     },
     pinKind: null,

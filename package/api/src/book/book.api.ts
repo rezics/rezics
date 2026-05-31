@@ -26,7 +26,7 @@ export const bookApi = {
   /**
    * List books with optional filters
    * Supports: q, rating, language, tagUnitIds, personId, organizationId,
-   * userId, isbn13, workUnitId, visibility, status, sort, start, cursor, limit
+   * userId, isbn13, visibility, status, sort, start, cursor, limit
    */
   list: async (filters?: BookFilters): Promise<BookListResponse> => {
     return apiFetch<BookListResponse>(`/book/list${buildQueryString(filters)}`);
