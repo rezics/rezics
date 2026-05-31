@@ -45,9 +45,9 @@ export const translationSourceApi = new Elysia({ prefix: "/unit" })
       body: translationSourceBodySchema,
       response: translationSourceResponseSchema,
       detail: {
-        summary: "Set or clear the translation source for a work",
+        summary: "Set or clear the translation source for a unit",
         description:
-          "PATCH /unit/:unitId/translations/:lang/source — `:unitId` is a work Unit. Sets `UnitTranslation.sourceUnitId` for the given (workUnitId, lang). Validates that the source is a release of this work and that the caller has authority. Existing translation fields are not touched.",
+          "PATCH /unit/:unitId/translations/:lang/source - sets UnitTranslation.sourceUnitId for the given unit and language. Existing translation fields are not touched.",
         tags: ["Units", "Translations"],
       },
     },

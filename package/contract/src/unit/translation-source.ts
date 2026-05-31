@@ -2,11 +2,11 @@ import { t } from "elysia";
 import { languageSchema } from "../language";
 
 // ============================================================
-// PATH PARAMS — PATCH /units/:workId/translations/:lang/source
+// PATH PARAMS - PATCH /units/:unitId/translations/:lang/source
 // ============================================================
 
 export const translationSourcePathParamsSchema = t.Object({
-  workId: t.String(),
+  unitId: t.String(),
   lang: languageSchema,
 });
 
@@ -18,8 +18,8 @@ export type TranslationSourcePathParams =
 // ============================================================
 
 /**
- * Sets `UnitTranslation.sourceUnitId` for `(workId, lang)`. The
- * caller MUST have authority over the work. If the row does not exist, it
+ * Sets `UnitTranslation.sourceUnitId` for `(unitId, lang)`. The
+ * caller MUST have authority over the unit. If the row does not exist, it
  * is created with only `sourceUnitId` set; existing `title`,
  * `subtitle`, `summary`, `description` fields are left untouched.
  */

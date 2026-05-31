@@ -13,7 +13,7 @@ import { translationSourceApi } from "./translation-source.api";
 import { unitKeys } from "./unit.keys";
 
 type SetTranslationSourceVariables = {
-  workId: string;
+  unitId: string;
   lang: string;
   body: TranslationSourceBody;
 };
@@ -39,8 +39,8 @@ export function useSetTranslationSourceMutation(
   const { affectedDetailKeys, ...mutationOptions } = options ?? {};
 
   return useMutation({
-    mutationFn: ({ workId, lang, body }) =>
-      translationSourceApi.patch(workId, lang, body),
+    mutationFn: ({ unitId, lang, body }) =>
+      translationSourceApi.patch(unitId, lang, body),
     ...mutationOptions,
     onSuccess: async (data, variables, onMutateResult, context) => {
       await patchTranslationDetailQueries({
@@ -49,7 +49,7 @@ export function useSetTranslationSourceMutation(
         translation: data,
       });
       queryClient.invalidateQueries({
-        queryKey: unitKeys.detail(variables.workId),
+        queryKey: unitKeys.detail(variables.unitId),
       });
       await options?.onSuccess?.(data, variables, onMutateResult, context);
     },

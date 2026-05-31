@@ -9,11 +9,7 @@ import { hasAuthorityOver } from "./authority";
 
 export class TranslationSourceError extends Error {
   constructor(
-    public code:
-      | "WORK_NOT_FOUND"
-      | "NOT_A_WORK"
-      | "RELEASE_NOT_OF_WORK"
-      | "FORBIDDEN",
+    public code: "UNIT_NOT_FOUND" | "SOURCE_UNIT_NOT_FOUND" | "FORBIDDEN",
     message: string,
     public httpStatus: 400 | 403 | 404,
   ) {
@@ -23,73 +19,62 @@ export class TranslationSourceError extends Error {
 }
 
 /**
- * Set or clear `UnitTranslation.sourceUnitId` for `(workId, lang)`.
+ * Set or clear `UnitTranslation.sourceUnitId` for `(unitId, lang)`.
  *
  * Validations:
- * - workUnit must exist
- * - sourceUnitId, if set, must reference a release of this work
- *   through `UnitWork(role = RELEASE)`
- * - caller must have authority over the work
+ * - unit must exist
+ * - sourceUnitId, if set, must reference an existing Unit
+ * - caller must have authority over the target Unit
  *
  * Existing `title/subtitle/summary/description` fields are left untouched.
  */
 export async function setTranslationSource(
   caller: RezicsSessionClaims,
-  workId: string,
+  unitId: string,
   language: string,
   sourceUnitId: string | null,
 ): Promise<TranslationSourceResponse> {
-  const workUnit = await prisma.unit.findUnique({
-    where: { id: workId },
+  const unit = await prisma.unit.findUnique({
+    where: { id: unitId },
     select: { id: true, userId: true },
   });
-  if (!workUnit) {
-    throw new TranslationSourceError(
-      "WORK_NOT_FOUND",
-      "Work unit not found",
-      404,
-    );
+  if (!unit) {
+    throw new TranslationSourceError("UNIT_NOT_FOUND", "Unit not found", 404);
   }
   const authorized = await hasAuthorityOver(caller, {
-    id: workUnit.id,
-    userId: workUnit.userId,
+    id: unit.id,
+    userId: unit.userId,
   });
   if (!authorized) {
     throw new TranslationSourceError(
       "FORBIDDEN",
-      "Caller lacks authority over the work unit",
+      "Caller lacks authority over the unit",
       403,
     );
   }
 
   if (sourceUnitId !== null) {
-    const release = await prisma.unit.findUnique({
+    const sourceUnit = await prisma.unit.findUnique({
       where: { id: sourceUnitId },
-      select: {
-        workMemberships: {
-          where: { workUnitId: workId, role: "RELEASE" },
-          select: { workUnitId: true },
-          take: 1,
-        },
-      },
+      select: { id: true },
     });
-    if (!release || release.workMemberships.length === 0) {
+    if (!sourceUnit) {
       throw new TranslationSourceError(
-        "RELEASE_NOT_OF_WORK",
-        "sourceUnitId must reference a release of this work",
-        400,
+        "SOURCE_UNIT_NOT_FOUND",
+        "sourceUnitId must reference an existing unit",
+        404,
       );
     }
   }
 
   const create: Prisma.UnitTranslationCreateInput = {
-    unit: { connect: { id: workId } },
+    unit: { connect: { id: unitId } },
     language,
     sourceUnitId,
   };
 
   const updated = await prisma.unitTranslation.upsert({
-    where: { unitId_language: { unitId: workId, language } },
+    where: { unitId_language: { unitId, language } },
     create,
     update: { sourceUnitId },
     select: { unitId: true, language: true, sourceUnitId: true },

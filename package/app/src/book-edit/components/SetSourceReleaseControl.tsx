@@ -41,7 +41,7 @@ export const SetSourceReleaseControl: React.FC<
         value={currentSourceReleaseUnitId ?? NO_SOURCE}
         onValueChange={(v) =>
           mutation.mutate({
-            workId: book.unitId,
+            unitId: book.unitId,
             lang: language,
             body: { sourceUnitId: v === NO_SOURCE ? null : v },
           })
