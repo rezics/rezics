@@ -29,6 +29,7 @@ export * from "./source-site/source-site";
 export * from "./series-unit/series";
 export * from "./subject-attribution/subject-attribution";
 export * from "./subscription/subscription";
+export * from "./tag/tag";
 export * from "./unit/unit";
 export * from "./unit-alias-record/unit-alias";
 export * from "./unit-external-ref/unit-external-ref";

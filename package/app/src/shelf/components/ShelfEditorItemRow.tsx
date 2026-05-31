@@ -5,6 +5,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button, Checkbox } from "@rezics/ui/shadcn";
 import { GripVertical, MoveRight, Trash2 } from "lucide-react";
 import type { ShelfStreamEntry } from "../models/shelfStream";
+import { ShelfItemMetadataDialog } from "./ShelfItemMetadataDialog";
 import { ShelfItemRenderer } from "./ShelfItemRenderer";
 
 interface ShelfEditorItemRowProps {
@@ -98,6 +99,7 @@ export function ShelfEditorItemRow({
             <MoveRight className="h-4 w-4" />
           </Button>
         )}
+        <ShelfItemMetadataDialog unitId={unitId} />
         {canDelete && (
           <Button
             type="button"
@@ -113,14 +115,12 @@ export function ShelfEditorItemRow({
     );
   }
 
-  const hasControls = multiSelect || sortable || canMoveCrossPage || canDelete;
-
   return (
     <div ref={setNodeRef} style={style} className="py-1">
       <ShelfItemRenderer
         entry={entry}
         viewMode={viewMode}
-        editControls={hasControls ? controls : undefined}
+        editControls={controls}
         editing
       />
     </div>
