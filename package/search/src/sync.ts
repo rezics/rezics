@@ -18,6 +18,11 @@ import {
 } from "@rezics/server/prisma/generated/client";
 import type { SearchClient } from "./client";
 import {
+  buildUserUnitCollectionDocument,
+  collectionDocumentId,
+  type UserUnitCollectionRow,
+} from "./collection";
+import {
   buildProgressDocument,
   progressDocumentId,
   type UserUnitProgressRow,
@@ -879,6 +884,92 @@ export async function syncAllProgress(client: SearchClient) {
   }
 
   return { message: "syncAllProgress success", totalSynced: total };
+}
+
+// ANCHOR: User unit collection sync functions
+
+export async function syncUserUnitCollection(
+  client: SearchClient,
+  row: UserUnitCollectionRow,
+): Promise<void> {
+  await client.addOrUpdateCollections([buildUserUnitCollectionDocument(row)]);
+}
+
+export async function syncSingleUserUnitCollection(
+  client: SearchClient,
+  userId: string,
+  unitId: string,
+): Promise<void> {
+  const row = await getSearchPrismaClient().userUnitCollection.findUnique({
+    where: { userId_unitId: { userId, unitId } },
+  });
+  if (!row) {
+    await removeUserUnitCollection(client, userId, unitId);
+    return;
+  }
+  await syncUserUnitCollection(client, row as UserUnitCollectionRow);
+}
+
+export async function removeUserUnitCollection(
+  client: SearchClient,
+  userId: string,
+  unitId: string,
+): Promise<void> {
+  await client.deleteCollections([collectionDocumentId(userId, unitId)]);
+}
+
+export async function syncUserUnitCollectionSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const rows: any[] = await getSearchPrismaClient().userUnitCollection.findMany(
+    {
+      orderBy: [{ userId: "asc" }, { unitId: "asc" }],
+      take: limit + 1,
+      skip: options.cursor ? 1 : 0,
+      cursor: options.cursor
+        ? {
+            userId_unitId: {
+              userId: options.cursor.split(":")[0] ?? "",
+              unitId: options.cursor.split(":").slice(1).join(":"),
+            },
+          }
+        : undefined,
+    },
+  );
+  const current = rows.slice(0, limit);
+  const hasMore = rows.length > limit && current.length > 0;
+  if (current.length > 0) {
+    await client.addOrUpdateCollections(
+      current.map(buildUserUnitCollectionDocument),
+    );
+  }
+  const last = current.at(-1);
+  return {
+    processed: current.length,
+    ...(hasMore && last ? { nextCursor: `${last.userId}:${last.unitId}` } : {}),
+  };
+}
+
+export async function syncAllUserUnitCollections(client: SearchClient) {
+  const deleteResult = await client.deleteAllCollections();
+  console.log(
+    "syncAllUserUnitCollections: deleted all documents",
+    deleteResult,
+  );
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const result = await syncUserUnitCollectionSegment(client, { cursor });
+    total += result.processed;
+    if (!result.nextCursor) break;
+    cursor = result.nextCursor;
+  }
+
+  return { message: "syncAllUserUnitCollections success", totalSynced: total };
 }
 
 // ANCHOR: Incremental single-unit sync

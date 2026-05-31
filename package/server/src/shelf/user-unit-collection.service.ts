@@ -1,5 +1,7 @@
 import type { PatchUserUnitCollectionInput } from "@rezics/contract";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
+import { serverJobProducer } from "@/job/job-boundary";
 
 type CollectionMetadataPatch = Pick<
   PatchUserUnitCollectionInput,
@@ -45,4 +47,17 @@ export async function applyUserUnitCollectionMetadata(
       });
     }
   }
+}
+
+export function enqueueUserUnitCollectionSearchSync(
+  userId: string,
+  unitId: string,
+) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.collectionSync,
+      { userId, unitId },
+      { type: "server", service: "user-unit-collection" },
+    ),
+  );
 }

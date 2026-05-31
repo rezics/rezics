@@ -2,6 +2,12 @@ import { afterEach, describe, expect, mock, test } from "bun:test";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 import { AppError } from "@/utils/errors";
 
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: mock(async () => ({ status: "created" })),
+  },
+}));
+
 installPrismaClientMock();
 
 const unitFindFirstMock = mock(async () => null as { id: string } | null);

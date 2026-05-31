@@ -75,6 +75,7 @@ import { unitAliasApi, unitAliasVoteApi } from "./unit-alias-record";
 import { unitExternalRefApi } from "./unit-external-ref";
 import { uploadApi } from "./upload";
 import { userApi, userBriefApi } from "./user";
+import { userUnitCollectionApi } from "./user-unit-collection";
 import { userTagApplicationApi } from "./user-tag-application";
 import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
@@ -241,6 +242,7 @@ routeApp
   .use(subscriptionApi)
   .use(userApi)
   .use(userBriefApi)
+  .use(userUnitCollectionApi)
   .use(userTagApplicationApi)
   .use(meiliApi)
   .use(federatedSearchApi)

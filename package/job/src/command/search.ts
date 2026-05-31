@@ -56,6 +56,10 @@ export const SEARCH_COMMAND_KINDS = {
   progressSync: "search.progress.sync",
   progressRemove: "search.progress.remove",
   progressFullSync: "search.progress.fullSync",
+
+  collectionSync: "search.collection.sync",
+  collectionRemove: "search.collection.remove",
+  collectionFullSync: "search.collection.fullSync",
 } as const;
 
 export type SearchCommandKind =
@@ -68,6 +72,10 @@ const EntityTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const UserTargetPayloadSchema = v.strictObject({ userId: v.string() });
 const FeedbackTargetPayloadSchema = v.strictObject({ feedbackId: v.string() });
 const ProgressTargetPayloadSchema = v.strictObject({
+  userId: v.string(),
+  unitId: v.string(),
+});
+const CollectionTargetPayloadSchema = v.strictObject({
   userId: v.string(),
   unitId: v.string(),
 });
@@ -316,6 +324,21 @@ export const ProgressFullSyncCommandSchema = commandSchema(
   JOB_LANES.maintenance,
   FullSyncPayloadSchema,
 );
+export const CollectionSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.collectionSync,
+  JOB_LANES.searchSyncFast,
+  CollectionTargetPayloadSchema,
+);
+export const CollectionRemoveCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.collectionRemove,
+  JOB_LANES.searchSyncFast,
+  CollectionTargetPayloadSchema,
+);
+export const CollectionFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.collectionFullSync,
+  JOB_LANES.maintenance,
+  FullSyncPayloadSchema,
+);
 
 export const SearchCommandSchema = v.union([
   ContentSyncCommandSchema,
@@ -363,6 +386,9 @@ export const SearchCommandSchema = v.union([
   ProgressSyncCommandSchema,
   ProgressRemoveCommandSchema,
   ProgressFullSyncCommandSchema,
+  CollectionSyncCommandSchema,
+  CollectionRemoveCommandSchema,
+  CollectionFullSyncCommandSchema,
 ]);
 
 export type SearchCommand = v.InferOutput<typeof SearchCommandSchema>;

@@ -1,6 +1,12 @@
 import { describe, expect, mock, test } from "bun:test";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: mock(async () => ({ status: "created" })),
+  },
+}));
+
 installPrismaClientMock();
 
 describe("UserTagApplicationService", () => {

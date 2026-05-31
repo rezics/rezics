@@ -25,6 +25,7 @@ import {
   patchRealmTranslations,
   patchUserFields,
   removeProgress,
+  removeUserUnitCollection,
   type SearchClient,
   type SearchSegmentOptions,
   type SearchSegmentResult,
@@ -43,7 +44,9 @@ import {
   syncSingleProgress,
   syncSingleRealm,
   syncSingleUser,
+  syncSingleUserUnitCollection,
   syncUserSegment,
+  syncUserUnitCollectionSegment,
   syncWorkDomainContentSegment,
   syncWorkReleasesSegment,
 } from "@rezics/search";
@@ -368,6 +371,29 @@ export function createSearchHandlers(client: SearchClient) {
       runFullSyncSegment(command, context, {
         deleteAll: () => client.deleteAllProgress(),
         syncSegment: (options) => syncProgressSegment(client, options),
+      }),
+
+    [SEARCH_COMMAND_KINDS.collectionSync]: async (command) =>
+      "userId" in command.payload && "unitId" in command.payload
+        ? syncSingleUserUnitCollection(
+            client,
+            command.payload.userId,
+            command.payload.unitId,
+          )
+        : undefined,
+    [SEARCH_COMMAND_KINDS.collectionRemove]: async (command) =>
+      "userId" in command.payload && "unitId" in command.payload
+        ? removeUserUnitCollection(
+            client,
+            command.payload.userId,
+            command.payload.unitId,
+          )
+        : undefined,
+    [SEARCH_COMMAND_KINDS.collectionFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllCollections(),
+        syncSegment: (options) =>
+          syncUserUnitCollectionSegment(client, options),
       }),
   };
 

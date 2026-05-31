@@ -44,6 +44,8 @@ function fullSyncKindForIndex(index: string) {
       return SEARCH_COMMAND_KINDS.feedbackFullSync;
     case "progress":
       return SEARCH_COMMAND_KINDS.progressFullSync;
+    case "collection":
+      return SEARCH_COMMAND_KINDS.collectionFullSync;
     default:
       return undefined;
   }
@@ -68,6 +70,21 @@ async function enqueueSearchRepair(
       await context.enqueue(
         createSearchCommand(
           SEARCH_COMMAND_KINDS.progressSync,
+          { userId, unitId },
+          command.source,
+        ),
+      );
+      return 1;
+    }
+    return 0;
+  }
+
+  if (targetType === "collection") {
+    const [userId, unitId] = targetId.split(":");
+    if (userId && unitId) {
+      await context.enqueue(
+        createSearchCommand(
+          SEARCH_COMMAND_KINDS.collectionSync,
           { userId, unitId },
           command.source,
         ),
@@ -121,6 +138,10 @@ function replayTargetFromKey(scope: string, key: string) {
     case "userUnitProgress":
     case "progress":
       return { targetType: "progress", targetId: id };
+    case "UserUnitCollection":
+    case "userUnitCollection":
+    case "collection":
+      return { targetType: "collection", targetId: id };
     default:
       return undefined;
   }

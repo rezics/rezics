@@ -338,6 +338,22 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       : [];
   }
 
+  if (table === "UserUnitCollection") {
+    const userId = targetId(message, ["userId", "user_id"]);
+    const unitId = targetId(message, ["unitId", "unit_id"]);
+    return userId && unitId
+      ? [
+          createSearchCommand(
+            isDelete
+              ? SEARCH_COMMAND_KINDS.collectionRemove
+              : SEARCH_COMMAND_KINDS.collectionSync,
+            { userId, unitId },
+            source,
+          ),
+        ]
+      : [];
+  }
+
   if (table === "ScoreEntry" || table === "ScoreAggregate") {
     const unitId = targetId(message, ["unitId", "unit_id"]);
     const realm = targetId(message, ["realm"]);

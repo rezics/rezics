@@ -11,7 +11,10 @@ import { AppError } from "@/utils/errors";
 import { generateBetween } from "./fractional-index";
 import { mapUnitToKind, reconcileShelfWorkMemberships } from "./shelf.service";
 import { findSystemShelf } from "./system-shelves";
-import { applyUserUnitCollectionMetadata } from "./user-unit-collection.service";
+import {
+  applyUserUnitCollectionMetadata,
+  enqueueUserUnitCollectionSearchSync,
+} from "./user-unit-collection.service";
 
 const FAVORITES_KIND_KEY = "favorites" as const;
 const COLLECTION_STATUS_BATCH_CAP = 100;
@@ -205,6 +208,10 @@ export class CollectionService {
         savedTo.push(shelfId);
       }
     });
+
+    if (searchText !== undefined) {
+      await enqueueUserUnitCollectionSearchSync(userId, resolved.parentUnitId);
+    }
 
     await Promise.all(
       savedTo.map((shelfId) => reconcileShelfWorkMemberships(shelfId)),

@@ -1,5 +1,11 @@
 import { describe, expect, mock, test } from "bun:test";
 
+mock.module("@/job/job-boundary", () => ({
+  serverJobProducer: {
+    enqueue: mock(async () => ({ status: "created" })),
+  },
+}));
+
 describe("applyUserUnitCollectionMetadata", () => {
   test("uses patch semantics for search text and user tags", async () => {
     const upsert = mock(async () => ({}));

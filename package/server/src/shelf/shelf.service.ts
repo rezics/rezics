@@ -48,7 +48,10 @@ import {
   POSITION_LENGTH_THRESHOLD,
   rebalance,
 } from "./fractional-index";
-import { applyUserUnitCollectionMetadata } from "./user-unit-collection.service";
+import {
+  applyUserUnitCollectionMetadata,
+  enqueueUserUnitCollectionSearchSync,
+} from "./user-unit-collection.service";
 
 export const SHELF_ITEM_BATCH_OP_CAP = 200;
 
@@ -737,6 +740,10 @@ export class ShelfService {
         where: { shelfId_unitId: { shelfId, unitId: req.unitId } },
       });
     });
+
+    if (userId && req.searchText !== undefined) {
+      await enqueueUserUnitCollectionSearchSync(userId, req.unitId);
+    }
 
     await enqueueContainedUnitIdsSync(shelfId);
     await reconcileShelfWorkMemberships(shelfId);
