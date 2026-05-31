@@ -829,6 +829,14 @@ describe("PostService.byRealm", () => {
     });
   });
 
+  test("general post feeds are root-only by default", async () => {
+    resetMocks();
+
+    await service.list({});
+
+    expect(firstPostFindManyArgs().where.parentPostUnitId).toBeNull();
+  });
+
   test("hides blocked authors in general feeds", async () => {
     resetMocks();
     blockedUserIdsMock.mockResolvedValueOnce(["blocked-user-1"]);
@@ -846,6 +854,13 @@ describe("PostService.byRealm", () => {
     await service.byRealm("realm-1", { sort: "new" });
 
     expect(firstPostFindManyArgs().orderBy).toEqual([{ createdAt: "desc" }]);
+  });
+
+  test("realm post feeds are root-only by default", async () => {
+    resetMocks();
+    await service.byRealm("realm-1", {});
+
+    expect(firstPostFindManyArgs().where.parentPostUnitId).toBeNull();
   });
 
   test("top sort orders by ScoreEntry value descending", async () => {

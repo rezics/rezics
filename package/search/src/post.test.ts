@@ -723,6 +723,32 @@ describe("search sync global moderation projection", () => {
     expect(addOrUpdatePosts).not.toHaveBeenCalled();
   });
 
+  test("syncSinglePost keeps replies out of the post index", async () => {
+    setServerEnvForSearchTests();
+    const { setSearchPrismaClient, syncSinglePost } = await import("./sync");
+    const deletePosts = mock(async (_ids: string[]) => undefined);
+    const addOrUpdatePosts = mock(async (_docs: any[]) => undefined);
+
+    setSearchPrismaClient({
+      post: {
+        findUnique: mock(async () => ({
+          unitId: "reply-1",
+          parentPostUnitId: "post-1",
+          unit: {
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            contentModerationState: null,
+          },
+        })),
+      },
+    } as any);
+
+    await syncSinglePost({ deletePosts, addOrUpdatePosts } as any, "reply-1");
+
+    expect(deletePosts).toHaveBeenCalledWith(["reply-1"]);
+    expect(addOrUpdatePosts).not.toHaveBeenCalled();
+  });
+
   test("realm id patches exclude hidden realm overlays", async () => {
     setServerEnvForSearchTests();
     const { patchContentRealmIds, setSearchPrismaClient } = await import(

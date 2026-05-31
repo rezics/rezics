@@ -253,6 +253,15 @@ export class PostService {
         where.parentPostUnitId = null;
       }
     }
+    if (
+      !query.targetUnitId &&
+      !query.rootPostUnitId &&
+      !query.parentPostUnitId &&
+      !query.subtreeRootPostUnitId &&
+      !isThreaded
+    ) {
+      where.parentPostUnitId = null;
+    }
     this.applyWorkDomainFilter(where, query.workUnitId, query.workRoles);
     if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
     if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
@@ -431,6 +440,9 @@ export class PostService {
     if (opts.rootPostUnitId) where.rootPostUnitId = opts.rootPostUnitId;
     this.applyWorkDomainFilter(where, opts.workUnitId, opts.workRoles);
     if (opts.parentPostUnitId) where.parentPostUnitId = opts.parentPostUnitId;
+    if (!opts.rootPostUnitId && !opts.parentPostUnitId) {
+      where.parentPostUnitId = null;
+    }
     if (opts.authorUserId) where.authorUserId = opts.authorUserId;
     if (opts.kind) where.kind = opts.kind;
     applyStateFilter(where, opts);
