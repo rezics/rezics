@@ -114,6 +114,8 @@ const unitWorkUpsertMock = mock(async (args: any) => args.create);
 const unitTagCreateMock = mock(async (args: any) => args.data);
 const unitTagFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationFindManyMock = mock(async (): Promise<any[]> => []);
+const contentTranslationUpsertMock = mock(async (args: any) => args.create);
+const contentTranslationUpdateManyMock = mock(async () => ({ count: 1 }));
 const bookFindUniqueMock = mock(async (): Promise<any> => null);
 const entityFindUniqueMock = mock(async (): Promise<any> => null);
 const creditAttributionFindManyMock = mock(async (): Promise<any[]> => []);
@@ -171,6 +173,10 @@ const transactionMock = mock(async (fn: any) =>
     unitWork: { findMany: unitWorkFindManyMock, upsert: unitWorkUpsertMock },
     unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
     unitTranslation: { findMany: unitTranslationFindManyMock },
+    contentTranslation: {
+      upsert: contentTranslationUpsertMock,
+      updateMany: contentTranslationUpdateManyMock,
+    },
     book: { findUnique: bookFindUniqueMock },
     entity: { findUnique: entityFindUniqueMock },
     creditAttribution: { findMany: creditAttributionFindManyMock },
@@ -223,6 +229,10 @@ Object.assign(prismaMock, {
     create: unitTagCreateMock,
     findMany: unitTagFindManyMock,
     findUnique: unitTagFindUniqueMock,
+  },
+  contentTranslation: {
+    upsert: contentTranslationUpsertMock,
+    updateMany: contentTranslationUpdateManyMock,
   },
   postPin: {
     create: postPinCreateMock,
@@ -365,6 +375,8 @@ function resetMocks() {
   unitTagCreateMock.mockClear();
   unitTagFindManyMock.mockClear();
   unitTranslationFindManyMock.mockClear();
+  contentTranslationUpsertMock.mockClear();
+  contentTranslationUpdateManyMock.mockClear();
   bookFindUniqueMock.mockClear();
   entityFindUniqueMock.mockClear();
   creditAttributionFindManyMock.mockClear();
@@ -1343,8 +1355,26 @@ describe("PostService wiki posts", () => {
     const unitCreateArgs = (unitCreateMock.mock.calls as any[])[0][0];
     const postCreateArgs = (postCreateMock.mock.calls as any[])[0][0];
     expect(unitCreateArgs.data.userId).toBe("wiki-owner");
+    expect(unitCreateArgs.data.defaultLanguage).toBe("zh-hant");
+    expect(unitCreateArgs.data.supportLanguages).toEqual({
+      create: { language: "zh-hant", isPrimary: true },
+    });
     expect(postCreateArgs.data.authorUserId).toBe("actor-1");
     expect(postCreateArgs.data.kind).toBe("WIKI");
+    expect(contentTranslationUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          unitId_language: { unitId: "wiki-post-1", language: "zh-hant" },
+        },
+        create: expect.objectContaining({
+          unitId: "wiki-post-1",
+          language: "zh-hant",
+          content: content("body"),
+          status: "PUBLISHED",
+          authorUserId: "actor-1",
+        }),
+      }),
+    );
     expect(writeEditorialMetadataHistoryMock).toHaveBeenCalledTimes(1);
     const patch = writeEditorialMetadataHistoryMock.mock.calls[0]?.[1].patch;
     expect(
@@ -1359,12 +1389,25 @@ describe("PostService wiki posts", () => {
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
       content: content("original"),
+      unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
 
     await service.update("wiki-post-1", { content: content("edited") }, actor);
 
     expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledTimes(1);
     expect(postUpdateMock).toHaveBeenCalledTimes(1);
+    expect(contentTranslationUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          unitId_language: { unitId: "wiki-post-1", language: "en" },
+        },
+        update: expect.objectContaining({
+          content: content("edited"),
+          status: "PUBLISHED",
+          authorUserId: "actor-1",
+        }),
+      }),
+    );
     expect(writeEditorialMetadataHistoryMock).toHaveBeenCalledTimes(1);
   });
 
@@ -1373,6 +1416,7 @@ describe("PostService wiki posts", () => {
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
       content: content("original"),
+      unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
 
     await service.update(
@@ -1395,6 +1439,7 @@ describe("PostService wiki posts", () => {
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
       content: content("original"),
+      unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
     collectPatchLeafPathsMock.mockReturnValueOnce(["post.content.main.source"]);
 
@@ -1421,6 +1466,7 @@ describe("PostService wiki posts", () => {
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
       content: content("original"),
+      unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
     collectPatchLeafPathsMock.mockReturnValueOnce(["post.content.main.source"]);
     assertCanEditCollaborativeMetadataMock.mockRejectedValueOnce({
@@ -1454,6 +1500,7 @@ describe("PostService wiki posts", () => {
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
       content: content("original"),
+      unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
     assertCanEditCollaborativeMetadataMock.mockRejectedValueOnce({
       statusCode: 403,
@@ -1487,6 +1534,7 @@ describe("PostService wiki posts", () => {
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "WIKI",
       content: content("original"),
+      unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
 
     await service.update(
@@ -1498,6 +1546,28 @@ describe("PostService wiki posts", () => {
     expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledTimes(1);
     const postUpdateArgs = (postUpdateMock.mock.calls as any[])[0][0];
     expect(postUpdateArgs.data.isLocked).toBe(true);
+  });
+
+  test("wiki publication toggles content translation status", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
+      authorUserId: "actor-1",
+      kind: "WIKI",
+      unit: { status: "DRAFT", publishedAt: null },
+    }));
+    postUpdateMock.mockImplementationOnce(async () => ({
+      unitId: "wiki-post-1",
+      kind: "WIKI",
+      content: content("body"),
+      unit: { status: "PUBLISHED" },
+    }));
+
+    await service.setPublicationState("wiki-post-1", true, "actor-1");
+
+    expect(contentTranslationUpdateManyMock).toHaveBeenCalledWith({
+      where: { unitId: "wiki-post-1" },
+      data: { status: "PUBLISHED" },
+    });
   });
 });
 

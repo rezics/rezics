@@ -7,6 +7,7 @@ import {
   realmContentModerationDTOSchema,
 } from "../realm/governance";
 import { licenseSlugSchema } from "../license";
+import { languageSchema } from "../language";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import { publicUserSchema } from "../unit/unit";
@@ -405,6 +406,7 @@ export const createPostSchema = t.Object({
   tagIds: t.Optional(t.Array(t.String())),
   parentPostUnitId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
+  language: t.Optional(languageSchema),
   creationMode: t.Optional(creationModeSchema),
   content: contentDocWriteSchema,
   scoreEntryId: t.Optional(t.String()),
@@ -430,6 +432,7 @@ export type SetPostPublicationInput =
 
 export const updatePostSchema = t.Object({
   content: t.Optional(contentDocWriteSchema),
+  language: t.Optional(languageSchema),
   isLocked: t.Optional(t.Boolean()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
 });

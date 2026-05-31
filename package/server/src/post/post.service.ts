@@ -11,6 +11,7 @@ import type {
 import {
   allBucketSlugs,
   BasicAdminPermission,
+  DEFAULT_LANGUAGE,
   getStateSchema,
   isLegalStateValue,
   isLegalTransition,
@@ -162,6 +163,44 @@ const REALM_REPLY_BLOCKING_MODERATION_STATES = [
   "ARCHIVED",
   "REMOVED",
 ] as const;
+
+function wikiContentTranslationStatus(isDraft: boolean) {
+  return isDraft ? "DRAFT" : "PUBLISHED";
+}
+
+async function upsertWikiContentTranslation(
+  tx: Prisma.TransactionClient,
+  input: {
+    unitId: string;
+    language: string;
+    content: unknown;
+    actorUserId: string;
+    status: "DRAFT" | "PUBLISHED";
+  },
+) {
+  await tx.contentTranslation.upsert({
+    where: {
+      unitId_language: {
+        unitId: input.unitId,
+        language: input.language,
+      },
+    },
+    create: {
+      unitId: input.unitId,
+      language: input.language,
+      content: input.content as Prisma.InputJsonValue,
+      status: input.status,
+      authorUserId: input.actorUserId,
+      provenance: { source: "legacy-post-content" },
+    },
+    update: {
+      content: input.content as Prisma.InputJsonValue,
+      status: input.status,
+      authorUserId: input.actorUserId,
+      provenance: { source: "legacy-post-content" },
+    },
+  });
+}
 
 /** Realm roles that may pin/accept within a realm's threads. */
 const PROMOTION_ROLES = ["owner", "admin", "moderator"] as const;
@@ -803,6 +842,8 @@ export class PostService {
     const post = await prisma.$transaction(async (tx) => {
       const ownerUserId =
         kind === "WIKI" ? await resolveRezicsWikiUserId() : authorUserId;
+      const wikiLanguage =
+        kind === "WIKI" ? (input.language ?? DEFAULT_LANGUAGE) : null;
       const unit = await tx.unit.create({
         data: {
           userId: ownerUserId,
@@ -810,6 +851,10 @@ export class PostService {
           type: UnitType.POST,
           status: asDraft ? UnitStatus.DRAFT : UnitStatus.PUBLISHED,
           publishedAt: asDraft ? null : new Date(),
+          defaultLanguage: wikiLanguage ?? undefined,
+          supportLanguages: wikiLanguage
+            ? { create: { language: wikiLanguage, isPrimary: true } }
+            : undefined,
         },
       });
 
@@ -961,6 +1006,13 @@ export class PostService {
       }
 
       if (kind === "WIKI") {
+        await upsertWikiContentTranslation(tx, {
+          unitId: result.unitId,
+          language: wikiLanguage ?? DEFAULT_LANGUAGE,
+          content: result.content,
+          actorUserId: authorUserId,
+          status: wikiContentTranslationStatus(asDraft),
+        });
         await writeEditorialMetadataHistory(tx as any, {
           unitId: result.unitId,
           actorUserId: authorUserId,
@@ -1085,6 +1137,7 @@ export class PostService {
       where: { unitId },
       select: {
         authorUserId: true,
+        kind: true,
         unit: { select: { status: true, publishedAt: true } },
       },
     });
@@ -1110,6 +1163,13 @@ export class PostService {
       },
       include: postInclude,
     });
+
+    if (existing.kind === "WIKI") {
+      await prisma.contentTranslation.updateMany({
+        where: { unitId },
+        data: { status: wikiContentTranslationStatus(!publish) },
+      });
+    }
 
     // Re-sync either way: publish indexes; unpublish de-lists (the indexer
     // honours `publicUnitEligibilityWhere`).
@@ -1156,7 +1216,11 @@ export class PostService {
     const updated = await prisma.$transaction(async (tx) => {
       const existing = await tx.post.findUniqueOrThrow({
         where: { unitId },
-        select: { kind: true, content: true },
+        select: {
+          kind: true,
+          content: true,
+          unit: { select: { defaultLanguage: true, status: true } },
+        },
       });
       const isWikiContentMainEdit =
         existing.kind === "WIKI" &&
@@ -1193,6 +1257,16 @@ export class PostService {
       });
 
       if (isWikiContentMainEdit && actor) {
+        await upsertWikiContentTranslation(tx, {
+          unitId,
+          language:
+            input.language ?? existing.unit.defaultLanguage ?? DEFAULT_LANGUAGE,
+          content: input.content,
+          actorUserId: actor.userId,
+          status: wikiContentTranslationStatus(
+            existing.unit.status === UnitStatus.DRAFT,
+          ),
+        });
         await writeEditorialMetadataHistory(tx as any, {
           unitId,
           actorUserId: actor.userId,
