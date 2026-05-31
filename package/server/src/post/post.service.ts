@@ -271,11 +271,9 @@ async function attachPostPaths<
 }
 
 /**
- * Attach the promotion overlay (`pinKind`/`pinPosition`) to thread rows. A post
- * is promoted at most once per scope and its scope is always its own thread
- * root, so the target comment unit maps to at most one promotion row. The
- * storage column is still named `postUnitId` until the physical migration
- * catches up.
+ * Attach the promotion overlay (`pinKind`/`pinPosition`) to thread rows. A
+ * comment is promoted at most once per scope and its scope is always its own
+ * thread root, so the target comment unit maps to at most one promotion row.
  */
 async function attachPinKinds<
   T extends {
@@ -285,13 +283,15 @@ async function attachPinKinds<
   },
 >(posts: T[]): Promise<T[]> {
   if (posts.length === 0) return posts;
-  const pins = await prisma.postPin.findMany({
-    where: { postUnitId: { in: posts.map((post) => post.unitId) } },
-    select: { postUnitId: true, kind: true, position: true },
+  const pins = await prisma.commentPromotion.findMany({
+    where: { commentUnitId: { in: posts.map((post) => post.unitId) } },
+    select: { commentUnitId: true, kind: true, position: true },
   });
-  const pinByPostUnitId = new Map(pins.map((pin) => [pin.postUnitId, pin]));
+  const pinByCommentUnitId = new Map(
+    pins.map((pin) => [pin.commentUnitId, pin]),
+  );
   for (const post of posts) {
-    const pin = pinByPostUnitId.get(post.unitId);
+    const pin = pinByCommentUnitId.get(post.unitId);
     post.pinKind = pin?.kind ?? null;
     post.pinPosition = pin?.position ?? null;
   }
@@ -1142,7 +1142,7 @@ export class PostService {
   private async maintainSolvedCacheOnUnaccept(
     scopeUnitId: string,
   ): Promise<void> {
-    const remaining = await prisma.postPin.count({
+    const remaining = await prisma.commentPromotion.count({
       where: { scopeUnitId, kind: PinKindEnum.ACCEPTED_ANSWER },
     });
     if (remaining > 0) return;
@@ -1483,9 +1483,12 @@ export class PostService {
   ): Promise<string> {
     const positionOf = async (targetUnitId?: string) => {
       if (!targetUnitId) return undefined;
-      const pin = await prisma.postPin.findUnique({
+      const pin = await prisma.commentPromotion.findUnique({
         where: {
-          scopeUnitId_postUnitId: { scopeUnitId, postUnitId: targetUnitId },
+          scopeUnitId_commentUnitId: {
+            scopeUnitId,
+            commentUnitId: targetUnitId,
+          },
         },
         select: { position: true },
       });
@@ -1496,7 +1499,7 @@ export class PostService {
     if (afterPos !== undefined || beforePos !== undefined) {
       return generateBetween(afterPos, beforePos);
     }
-    const last = await prisma.postPin.findFirst({
+    const last = await prisma.commentPromotion.findFirst({
       where: { scopeUnitId, kind },
       orderBy: { position: "desc" },
       select: { position: true },
@@ -1512,10 +1515,10 @@ export class PostService {
     byUserId: string,
   ): Promise<CommentPromotionDTO> {
     try {
-      const pin = await prisma.postPin.create({
+      const pin = await prisma.commentPromotion.create({
         data: {
           scopeUnitId,
-          postUnitId: targetUnitId,
+          commentUnitId: targetUnitId,
           kind,
           position,
           byUserId,
@@ -1528,7 +1531,10 @@ export class PostService {
         typeof error === "object" &&
         (error as { code?: string }).code === "P2002"
       ) {
-        throw new AppError(409, "This post is already promoted in this scope");
+        throw new AppError(
+          409,
+          "This comment is already promoted in this scope",
+        );
       }
       throw error;
     }
@@ -1539,18 +1545,18 @@ export class PostService {
     targetUnitId: string,
     kind: PinKindEnum,
   ): Promise<void> {
-    const existing = await prisma.postPin.findUnique({
+    const existing = await prisma.commentPromotion.findUnique({
       where: {
-        scopeUnitId_postUnitId: { scopeUnitId, postUnitId: targetUnitId },
+        scopeUnitId_commentUnitId: { scopeUnitId, commentUnitId: targetUnitId },
       },
       select: { kind: true },
     });
     if (!existing || existing.kind !== kind) {
-      throw new AppError(404, "Promotion not found for this post and scope");
+      throw new AppError(404, "Promotion not found for this comment and scope");
     }
-    await prisma.postPin.delete({
+    await prisma.commentPromotion.delete({
       where: {
-        scopeUnitId_postUnitId: { scopeUnitId, postUnitId: targetUnitId },
+        scopeUnitId_commentUnitId: { scopeUnitId, commentUnitId: targetUnitId },
       },
     });
   }

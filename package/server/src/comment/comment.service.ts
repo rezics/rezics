@@ -65,26 +65,26 @@ async function attachPinOverlays<
   const rootUnitIds = [
     ...new Set(comments.map((comment) => comment.rootUnitId)),
   ];
-  const pins = await prisma.postPin.findMany({
+  const pins = await prisma.commentPromotion.findMany({
     where: {
       scopeUnitId: { in: rootUnitIds },
-      postUnitId: { in: comments.map((comment) => comment.unitId) },
+      commentUnitId: { in: comments.map((comment) => comment.unitId) },
     },
     select: {
       scopeUnitId: true,
-      postUnitId: true,
+      commentUnitId: true,
       kind: true,
       position: true,
     },
   });
-  const pinByScopeAndPost = new Map(
+  const pinByScopeAndComment = new Map(
     pins.map((pin) => [
-      `${pin.scopeUnitId}:${pin.postUnitId}`,
+      `${pin.scopeUnitId}:${pin.commentUnitId}`,
       { kind: pin.kind, position: pin.position },
     ]),
   );
   for (const comment of comments) {
-    const pin = pinByScopeAndPost.get(
+    const pin = pinByScopeAndComment.get(
       `${comment.rootUnitId}:${comment.unitId}`,
     );
     comment.pinKind = pin?.kind ?? null;

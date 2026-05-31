@@ -24,7 +24,7 @@ describe("CommentService", () => {
     const queryRaw = mock(async () => []);
     Object.assign(prismaMock, {
       comment: { findMany, count },
-      postPin: { findMany: mock(async () => []) },
+      commentPromotion: { findMany: mock(async () => []) },
       $queryRaw: queryRaw,
     });
 
@@ -111,7 +111,7 @@ describe("CommentService", () => {
       $transaction: transaction,
       $queryRaw: queryRaw,
       comment: { findUniqueOrThrow: mock(async () => null) },
-      postPin: { findMany: mock(async () => []) },
+      commentPromotion: { findMany: mock(async () => []) },
     });
 
     const { CommentService } = await import("./comment.service");
@@ -173,7 +173,7 @@ describe("CommentService", () => {
     const pinFindMany = mock(async () => [
       {
         scopeUnitId: "root-1",
-        postUnitId: "comment-1",
+        commentUnitId: "comment-1",
         kind: "PINNED",
         position: "a0",
       },
@@ -181,7 +181,7 @@ describe("CommentService", () => {
     const queryRaw = mock(async () => [{ unitId: "comment-1", path: "1" }]);
     Object.assign(prismaMock, {
       comment: { findMany, count },
-      postPin: { findMany: pinFindMany },
+      commentPromotion: { findMany: pinFindMany },
       $queryRaw: queryRaw,
     });
 
@@ -209,11 +209,11 @@ describe("CommentService", () => {
     expect(pinFindMany).toHaveBeenCalledWith({
       where: {
         scopeUnitId: { in: ["root-1"] },
-        postUnitId: { in: ["comment-1"] },
+        commentUnitId: { in: ["comment-1"] },
       },
       select: {
         scopeUnitId: true,
-        postUnitId: true,
+        commentUnitId: true,
         kind: true,
         position: true,
       },

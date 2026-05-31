@@ -125,15 +125,15 @@ const unitCollaboratorFindUniqueMock = mock(async (): Promise<any> => null);
 const unitFieldLockFindManyMock = mock(async (): Promise<any[]> => []);
 const queryRawMock = mock(async (): Promise<any[]> => [{ sequence: 1n }]);
 const executeRawMock = mock(async (): Promise<number> => 1);
-const postPinCreateMock = mock(async (args: any) => ({
+const commentPromotionCreateMock = mock(async (args: any) => ({
   ...args.data,
   createdAt: new Date("2026-05-29T00:00:00.000Z"),
 }));
-const postPinFindUniqueMock = mock(async (): Promise<any> => null);
-const postPinFindFirstMock = mock(async (): Promise<any> => null);
-const postPinFindManyMock = mock(async (): Promise<any[]> => []);
-const postPinDeleteMock = mock(async (args: any) => args.where);
-const postPinCountMock = mock(async (): Promise<number> => 0);
+const commentPromotionFindUniqueMock = mock(async (): Promise<any> => null);
+const commentPromotionFindFirstMock = mock(async (): Promise<any> => null);
+const commentPromotionFindManyMock = mock(async (): Promise<any[]> => []);
+const commentPromotionDeleteMock = mock(async (args: any) => args.where);
+const commentPromotionCountMock = mock(async (): Promise<number> => 0);
 const unitFindFirstMock = mock(async (): Promise<any> => null);
 const realmMemberFindFirstMock = mock(async (): Promise<any> => null);
 const unitTagFindUniqueMock = mock(async (): Promise<any> => null);
@@ -236,13 +236,13 @@ Object.assign(prismaMock, {
     upsert: contentTranslationUpsertMock,
     updateMany: contentTranslationUpdateManyMock,
   },
-  postPin: {
-    create: postPinCreateMock,
-    findUnique: postPinFindUniqueMock,
-    findFirst: postPinFindFirstMock,
-    findMany: postPinFindManyMock,
-    delete: postPinDeleteMock,
-    count: postPinCountMock,
+  commentPromotion: {
+    create: commentPromotionCreateMock,
+    findUnique: commentPromotionFindUniqueMock,
+    findFirst: commentPromotionFindFirstMock,
+    findMany: commentPromotionFindManyMock,
+    delete: commentPromotionDeleteMock,
+    count: commentPromotionCountMock,
   },
   user: { findUnique: userFindUniqueMock },
 });
@@ -392,16 +392,16 @@ function resetMocks() {
   queryRawMock.mockClear();
   queryRawMock.mockImplementation(async () => [{ sequence: 1n }]);
   executeRawMock.mockClear();
-  postPinCreateMock.mockClear();
-  postPinFindUniqueMock.mockClear();
-  postPinFindUniqueMock.mockResolvedValue(null);
-  postPinFindFirstMock.mockClear();
-  postPinFindFirstMock.mockResolvedValue(null);
-  postPinFindManyMock.mockClear();
-  postPinFindManyMock.mockResolvedValue([]);
-  postPinDeleteMock.mockClear();
-  postPinCountMock.mockClear();
-  postPinCountMock.mockResolvedValue(0);
+  commentPromotionCreateMock.mockClear();
+  commentPromotionFindUniqueMock.mockClear();
+  commentPromotionFindUniqueMock.mockResolvedValue(null);
+  commentPromotionFindFirstMock.mockClear();
+  commentPromotionFindFirstMock.mockResolvedValue(null);
+  commentPromotionFindManyMock.mockClear();
+  commentPromotionFindManyMock.mockResolvedValue([]);
+  commentPromotionDeleteMock.mockClear();
+  commentPromotionCountMock.mockClear();
+  commentPromotionCountMock.mockResolvedValue(0);
   unitFindFirstMock.mockClear();
   unitFindFirstMock.mockResolvedValue(null);
   realmMemberFindFirstMock.mockClear();
@@ -1295,9 +1295,9 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       op,
     );
 
-    expect(postPinCreateMock.mock.calls[0][0].data).toMatchObject({
+    expect(commentPromotionCreateMock.mock.calls[0][0].data).toMatchObject({
       scopeUnitId: "root-1",
-      postUnitId: "reply-1",
+      commentUnitId: "reply-1",
       kind: "PINNED",
       byUserId: "op-1",
     });
@@ -1321,9 +1321,9 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       op,
     );
 
-    expect(postPinCreateMock.mock.calls[0][0].data).toMatchObject({
+    expect(commentPromotionCreateMock.mock.calls[0][0].data).toMatchObject({
       scopeUnitId: "root-1",
-      postUnitId: "comment-1",
+      commentUnitId: "comment-1",
       kind: "PINNED",
     });
     expect(pin.kind).toBe("PINNED");
@@ -1341,7 +1341,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     await expect(
       service.pin({ scopeUnitId: "root-1", targetUnitId: "reply-1" }, stranger),
     ).rejects.toThrow(/moderator\/owner/);
-    expect(postPinCreateMock).not.toHaveBeenCalled();
+    expect(commentPromotionCreateMock).not.toHaveBeenCalled();
   });
 
   test("a realm moderator may pin in a thread of their realm", async () => {
@@ -1399,7 +1399,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
         op,
       ),
     ).rejects.toThrow(/Q&A thread/);
-    expect(postPinCreateMock).not.toHaveBeenCalled();
+    expect(commentPromotionCreateMock).not.toHaveBeenCalled();
   });
 
   test("accept is rejected for a non-direct reply", async () => {
@@ -1431,7 +1431,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       op,
     );
     expect(pin.kind).toBe("ACCEPTED_ANSWER");
-    expect(postPinCreateMock.mock.calls[0][0].data.kind).toBe(
+    expect(commentPromotionCreateMock.mock.calls[0][0].data.kind).toBe(
       "ACCEPTED_ANSWER",
     );
   });
@@ -1452,14 +1452,14 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     postFindUniqueMock
       .mockResolvedValueOnce(rootScope())
       .mockResolvedValueOnce(directReply({ parentPostUnitId: "root-1" }));
-    postPinFindFirstMock.mockResolvedValueOnce({ position: "a0" });
+    commentPromotionFindFirstMock.mockResolvedValueOnce({ position: "a0" });
     await service.acceptAnswer(
       { scopeUnitId: "root-1", targetUnitId: "reply-2" },
       op,
     );
 
-    expect(postPinCreateMock).toHaveBeenCalledTimes(2);
-    const positions = (postPinCreateMock.mock.calls as any[]).map(
+    expect(commentPromotionCreateMock).toHaveBeenCalledTimes(2);
+    const positions = (commentPromotionCreateMock.mock.calls as any[]).map(
       (call) => call[0].data.position,
     );
     expect(positions[0]).not.toBe(positions[1]);
@@ -1468,21 +1468,21 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
   test("unpin removes the PINNED promotion after a capability check", async () => {
     resetMocks();
     postFindUniqueMock.mockResolvedValueOnce(rootScope());
-    postPinFindUniqueMock.mockResolvedValueOnce({ kind: "PINNED" });
+    commentPromotionFindUniqueMock.mockResolvedValueOnce({ kind: "PINNED" });
 
     await service.unpin("root-1", "reply-1", op);
-    expect(postPinDeleteMock).toHaveBeenCalled();
+    expect(commentPromotionDeleteMock).toHaveBeenCalled();
   });
 
   test("unaccept rejects when the existing pin is not an accepted answer", async () => {
     resetMocks();
     postFindUniqueMock.mockResolvedValueOnce(rootScope());
-    postPinFindUniqueMock.mockResolvedValueOnce({ kind: "PINNED" });
+    commentPromotionFindUniqueMock.mockResolvedValueOnce({ kind: "PINNED" });
 
     await expect(
       service.unacceptAnswer("root-1", "reply-1", op),
     ).rejects.toThrow(/not found/);
-    expect(postPinDeleteMock).not.toHaveBeenCalled();
+    expect(commentPromotionDeleteMock).not.toHaveBeenCalled();
   });
 });
 
@@ -1787,8 +1787,10 @@ describe("PostService lifecycle state", () => {
         state: "solved",
         extra: { stateSchemaTag: "question" },
       });
-    postPinFindUniqueMock.mockResolvedValueOnce({ kind: "ACCEPTED_ANSWER" });
-    postPinCountMock.mockResolvedValueOnce(0);
+    commentPromotionFindUniqueMock.mockResolvedValueOnce({
+      kind: "ACCEPTED_ANSWER",
+    });
+    commentPromotionCountMock.mockResolvedValueOnce(0);
 
     await service.unacceptAnswer("root-1", "reply-1", op);
 
@@ -1801,8 +1803,10 @@ describe("PostService lifecycle state", () => {
   test("unaccepting does not reopen while another accepted answer remains", async () => {
     resetMocks();
     postFindUniqueMock.mockResolvedValueOnce(rootScope());
-    postPinFindUniqueMock.mockResolvedValueOnce({ kind: "ACCEPTED_ANSWER" });
-    postPinCountMock.mockResolvedValueOnce(1);
+    commentPromotionFindUniqueMock.mockResolvedValueOnce({
+      kind: "ACCEPTED_ANSWER",
+    });
+    commentPromotionCountMock.mockResolvedValueOnce(1);
 
     await service.unacceptAnswer("root-1", "reply-1", op);
 

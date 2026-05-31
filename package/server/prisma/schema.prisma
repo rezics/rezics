@@ -259,9 +259,9 @@ model Unit {
   realmComments         Comment[] @relation("CommentRealm")
   parentCommentChildren Comment[] @relation("CommentParent")
 
-  // PostPin promotion overlay (scope is always a thread root post; target a reply)
-  postPinsAsScope PostPin[] @relation("PostPinScope")
-  postPinsAsPost  PostPin[] @relation("PostPinPost")
+  // Comment promotion overlay (scope is always a thread root post; target a comment)
+  commentPromotionsAsScope   CommentPromotion[] @relation("CommentPromotionScope")
+  commentPromotionsAsComment CommentPromotion[] @relation("CommentPromotionComment")
 
   userProgress UserUnitProgress[] @relation("ProgressUnit")
 
@@ -731,27 +731,27 @@ enum PinKind {
 /**
  * POST PROMOTION OVERLAY
  *
- * Generic in-thread promotion of a reply, mirroring the pinned/position idiom
+ * Generic in-thread promotion of a comment, mirroring the pinned/position idiom
  * of `RealmTagApplication`, `UnitTag`, and `ShelfUnit`. `scopeUnitId` is ALWAYS
- * the thread root post; the target `postUnitId` is ALWAYS a reply within that
- * thread (`depth >= 1`, `rootPostUnitId == scopeUnitId`). A realm is never a
- * scope — realm-level featuring of whole units is `Realm.extra.pinboard`'s job.
+ * the thread root post; the target `commentUnitId` is ALWAYS a comment within
+ * that thread. A realm is never a scope — realm-level featuring of whole units
+ * is `Realm.extra.pinboard`'s job.
  */
-model PostPin {
-  scopeUnitId String  @db.Uuid
-  postUnitId  String  @db.Uuid
-  kind        PinKind
-  position    String  @db.VarChar(64) // Fractional Indexing
-  byUserId    String  @db.Uuid
+model CommentPromotion {
+  scopeUnitId   String  @db.Uuid
+  commentUnitId String  @db.Uuid
+  kind          PinKind
+  position      String  @db.VarChar(64) // Fractional Indexing
+  byUserId      String  @db.Uuid
 
   createdAt DateTime @default(now())
 
-  scope Unit @relation("PostPinScope", fields: [scopeUnitId], references: [id], onDelete: Cascade)
-  post  Unit @relation("PostPinPost", fields: [postUnitId], references: [id], onDelete: Cascade)
+  scope   Unit @relation("CommentPromotionScope", fields: [scopeUnitId], references: [id], onDelete: Cascade)
+  comment Unit @relation("CommentPromotionComment", fields: [commentUnitId], references: [id], onDelete: Cascade)
 
-  @@id([scopeUnitId, postUnitId])
+  @@id([scopeUnitId, commentUnitId])
   @@index([scopeUnitId, kind, position])
-  @@index([postUnitId])
+  @@index([commentUnitId])
 }
 
 /**
