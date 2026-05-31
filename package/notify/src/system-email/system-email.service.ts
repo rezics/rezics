@@ -1,4 +1,4 @@
-import { type SystemEmailBody, SystemEmailKind } from "@rezics/contract";
+import type { SystemEmailBody } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { emailTransport } from "../email/transport";
 import { pickLocale, renderKind } from "../kinds";
@@ -22,18 +22,18 @@ export async function notifySystemAndEmail(
   body: SystemEmailBody & { primaryEmail?: string | null },
 ): Promise<NotifySystemAndEmailResult> {
   const { userId, kind, payload, locale, primaryEmail } = body;
-  const claimerUserId =
-    typeof payload?.claimerUserId === "string"
-      ? (payload.claimerUserId as string)
+  const actorUserId =
+    typeof payload?.actorUserId === "string"
+      ? (payload.actorUserId as string)
       : null;
-  const workUnitId =
-    typeof payload?.workUnitId === "string"
-      ? (payload.workUnitId as string)
+  const sourceUnitId =
+    typeof payload?.sourceUnitId === "string"
+      ? (payload.sourceUnitId as string)
       : null;
   const claimId =
     typeof payload?.claimId === "string" ? (payload.claimId as string) : kind;
-  if (!workUnitId) {
-    throw new Error("System email payload is missing workUnitId");
+  if (!sourceUnitId) {
+    throw new Error("System email payload is missing sourceUnitId");
   }
 
   const extra = {
@@ -42,30 +42,27 @@ export async function notifySystemAndEmail(
     locale: locale ?? null,
   };
 
-  const isPendingWithDedup =
-    kind === SystemEmailKind.WORK_MEMBERSHIP_CLAIM_PENDING &&
-    claimerUserId !== null &&
-    workUnitId !== null;
-
   const since = new Date(Date.now() - DEDUP_WINDOW_MS);
 
-  if (isPendingWithDedup) {
+  if (actorUserId) {
     const existing = await prisma.notification.findFirst({
       where: {
         recipientId: userId,
         kind,
-        sourceUnitId: workUnitId,
-        actorId: claimerUserId,
+        sourceUnitId,
+        actorId: actorUserId,
         createdAt: { gte: since },
         AND: [
           { extra: { path: ["kind"], equals: kind } },
           {
             extra: {
-              path: ["payload", "claimerUserId"],
-              equals: claimerUserId,
+              path: ["payload", "actorUserId"],
+              equals: actorUserId,
             },
           },
-          { extra: { path: ["payload", "workUnitId"], equals: workUnitId } },
+          {
+            extra: { path: ["payload", "sourceUnitId"], equals: sourceUnitId },
+          },
         ],
       },
       orderBy: { createdAt: "desc" },
@@ -88,9 +85,9 @@ export async function notifySystemAndEmail(
   const notification = await prisma.notification.create({
     data: {
       recipientId: userId,
-      actorId: claimerUserId,
+      actorId: actorUserId,
       kind,
-      sourceUnitId: workUnitId,
+      sourceUnitId,
       extra: { ...extra, claimId },
     },
   });

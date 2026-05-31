@@ -1,18 +1,17 @@
-import { SystemEmailKind } from "@rezics/contract";
 import {
   isSupportedLocale,
   resolveLocale,
   type SupportedLocale,
 } from "./locale";
-import {
-  type KindRender,
-  renderApproved,
-  renderPending,
-  renderRejected,
-} from "./work-membership-claim";
 
 export type { SupportedLocale } from "./locale";
 export { resolveLocale, SUPPORTED_LOCALES } from "./locale";
+
+export interface KindRender {
+  systemBody: string;
+  emailSubject: string;
+  emailText: string;
+}
 
 /**
  * Render any registered kind in the given locale.
@@ -26,24 +25,24 @@ export function renderKind(
   locale: string,
 ): KindRender {
   const safeLocale: SupportedLocale = isSupportedLocale(locale) ? locale : "en";
-  switch (kind) {
-    case SystemEmailKind.WORK_MEMBERSHIP_CLAIM_PENDING:
-      return renderPending(safeLocale, {
-        workTitle: payload["workTitle"] as string | undefined,
-        releaseSummary: payload["releaseSummary"] as string | undefined,
-      });
-    case SystemEmailKind.WORK_MEMBERSHIP_CLAIM_APPROVED:
-      return renderApproved(safeLocale, {
-        workTitle: payload["workTitle"] as string | undefined,
-      });
-    case SystemEmailKind.WORK_MEMBERSHIP_CLAIM_REJECTED:
-      return renderRejected(safeLocale, {
-        workTitle: payload["workTitle"] as string | undefined,
-        rejectReason: payload["rejectReason"] as string | undefined,
-      });
-    default:
-      throw new Error(`renderKind: unknown kind "${kind}"`);
-  }
+  const subject =
+    typeof payload.emailSubject === "string" && payload.emailSubject.trim()
+      ? payload.emailSubject
+      : kind;
+  const text =
+    typeof payload.emailText === "string" && payload.emailText.trim()
+      ? payload.emailText
+      : subject;
+  const systemBody =
+    typeof payload.systemBody === "string" && payload.systemBody.trim()
+      ? payload.systemBody
+      : text;
+
+  return {
+    systemBody,
+    emailSubject: subject,
+    emailText: safeLocale === "en" ? text : text,
+  };
 }
 
 export { resolveLocale as resolveSystemLocale };
