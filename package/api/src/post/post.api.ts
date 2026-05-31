@@ -70,18 +70,6 @@ export const postApi = {
   },
 
   /**
-   * Legacy post-thread read for pre-comment fallback surfaces.
-   */
-  getThread: async (
-    rootPostUnitId: string,
-    filters?: PostFilters,
-  ): Promise<PostListResponse> => {
-    return apiFetch<PostListResponse>(
-      `/post/list${buildQueryString({ rootPostUnitId, ...filters })}`,
-    );
-  },
-
-  /**
    * Get posts within a realm
    */
   getByRealm: async (

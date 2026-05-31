@@ -1,6 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import { markdownContentDoc, type PostDTO } from "@rezics/contract";
-import { excludeRootPost } from "../hooks/usePostTreeCollapse";
 import {
   buildPostTreeNodes,
   getChildBranchPrefix,
@@ -41,15 +40,6 @@ function childIds(nodes: PostTreeNodeModel[]): string[] {
 }
 
 describe("PostTreeSection helpers", () => {
-  it("excludes the root post from the rendered reply tree", () => {
-    const posts = [makePost("root"), makePost("reply-1"), makePost("reply-2")];
-
-    expect(excludeRootPost(posts, "root").map((post) => post.unitId)).toEqual([
-      "reply-1",
-      "reply-2",
-    ]);
-  });
-
   describe("getChildBranchPrefix", () => {
     it("returns the child segment under the parent", () => {
       const xxx = makePost("xxx", "0001");

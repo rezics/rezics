@@ -1,6 +1,6 @@
 /**
  * Post API - Main entry point
- * Post is the unified discussion primitive replacing Comment + Review.
+ * Posts are top-level discussion entities. Reply trees use comment APIs.
  *
  * File organization:
  * - post.types.ts: TypeScript types and interfaces
@@ -41,7 +41,6 @@ export {
   postsByAuthorQuery,
   postsByRealmQuery,
   postsByTargetQuery,
-  postThreadQuery,
   wikiPostsByRealmQuery,
   wikiPostsByTargetQuery,
 } from "./post.queries";

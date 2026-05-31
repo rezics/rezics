@@ -17,6 +17,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { commentKeys } from "../comment/comment.keys";
 import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { postApi } from "./post.api";
 import { postKeys } from "./post.keys";
@@ -53,18 +54,9 @@ export function useCreatePostMutation(
         });
       }
 
-      // Invalidate thread queries if this is a legacy post reply.
       if (variables.parentPostUnitId) {
         queryClient.invalidateQueries({
           queryKey: postKeys.detail(variables.parentPostUnitId),
-        });
-
-        const rootPostUnitId = variables.parentPostUnitId;
-        queryClient.invalidateQueries({
-          queryKey: postKeys.threads(rootPostUnitId),
-        });
-        queryClient.invalidateQueries({
-          queryKey: postKeys.detail(rootPostUnitId),
         });
       }
 
@@ -257,7 +249,7 @@ export function useSetPostStateMutation(
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(postKeys.detail(variables.unitId), data);
       queryClient.invalidateQueries({
-        queryKey: postKeys.threads(variables.unitId),
+        queryKey: commentKeys.all(),
       });
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
@@ -276,11 +268,8 @@ export function useSetPostStateMutation(
  * (`assertCanPromoteInThread`) remains the single authorization source; these
  * hooks never re-implement it.
  */
-function refreshThread(
-  queryClient: ReturnType<typeof useQueryClient>,
-  scopeUnitId: string,
-) {
-  queryClient.invalidateQueries({ queryKey: postKeys.threads(scopeUnitId) });
+function refreshCommentThreads(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: commentKeys.all() });
 }
 
 /** Pin a reply (`kind = PINNED`) within its thread scope. */
@@ -296,7 +285,7 @@ export function usePinPostMutation(
     mutationFn: (input: PinPostInput) => postApi.pin(input),
     ...options,
     onSettled: (data, error, variables, onMutateResult, context) => {
-      refreshThread(queryClient, variables.scopeUnitId);
+      refreshCommentThreads(queryClient);
       options?.onSettled?.(data, error, variables, onMutateResult, context);
     },
   });
@@ -320,7 +309,7 @@ export function useUnpinPostMutation(
       postApi.unpin(scopeUnitId, postUnitId),
     ...options,
     onSettled: (data, error, variables, onMutateResult, context) => {
-      refreshThread(queryClient, variables.scopeUnitId);
+      refreshCommentThreads(queryClient);
       options?.onSettled?.(data, error, variables, onMutateResult, context);
     },
   });
@@ -339,7 +328,7 @@ export function useAcceptAnswerMutation(
     mutationFn: (input: AcceptAnswerInput) => postApi.acceptAnswer(input),
     ...options,
     onSettled: (data, error, variables, onMutateResult, context) => {
-      refreshThread(queryClient, variables.scopeUnitId);
+      refreshCommentThreads(queryClient);
       options?.onSettled?.(data, error, variables, onMutateResult, context);
     },
   });
@@ -363,7 +352,7 @@ export function useUnacceptAnswerMutation(
       postApi.unacceptAnswer(scopeUnitId, postUnitId),
     ...options,
     onSettled: (data, error, variables, onMutateResult, context) => {
-      refreshThread(queryClient, variables.scopeUnitId);
+      refreshCommentThreads(queryClient);
       options?.onSettled?.(data, error, variables, onMutateResult, context);
     },
   });

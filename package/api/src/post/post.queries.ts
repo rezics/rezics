@@ -67,20 +67,6 @@ export const postsByAuthorQuery = (
   });
 
 /**
- * Query options for getting a thread (all replies under root post)
- */
-export const postThreadQuery = (
-  rootPostUnitId: string,
-  filters?: PostFilters,
-) =>
-  queryOptions({
-    queryKey: postKeys.thread(rootPostUnitId, filters),
-    queryFn: () => postApi.getThread(rootPostUnitId, filters),
-    enabled: !!rootPostUnitId,
-    staleTime: 1000 * 60 * 2, // 2 minutes
-  });
-
-/**
  * Query options for getting posts within a realm
  */
 export const postsByRealmQuery = (realmUnitId: string, filters?: PostFilters) =>
@@ -141,7 +127,6 @@ export const postQueries = {
   byTarget: postsByTargetQuery,
   wikiByTarget: wikiPostsByTargetQuery,
   byAuthor: postsByAuthorQuery,
-  thread: postThreadQuery,
   byRealm: postsByRealmQuery,
   wikiByRealm: wikiPostsByRealmQuery,
   moderationOverlays: postModerationOverlaysQuery,

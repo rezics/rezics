@@ -46,13 +46,6 @@ export const postKeys = {
     [...postKeys.byAuthors(authorUserId), filters ?? null] as const,
 
   /**
-   * Keys for thread queries (replies under a root post)
-   */
-  threads: (rootPostUnitId: string) =>
-    [...postKeys.all(), "thread", rootPostUnitId] as const,
-  thread: (rootPostUnitId: string, filters?: PostFilters) =>
-    [...postKeys.threads(rootPostUnitId), filters ?? null] as const,
-  /**
    * Keys for realm-scoped queries
    */
   byRealms: (realmUnitId: string) =>

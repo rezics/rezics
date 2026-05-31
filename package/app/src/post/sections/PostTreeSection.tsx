@@ -9,7 +9,6 @@ import {
   usePinPostMutation,
   useUnacceptAnswerMutation,
   useUnpinPostMutation,
-  postThreadQuery,
 } from "@rezics/api/post/post";
 import type { PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -22,7 +21,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { PostPromotionControls } from "../components/parts/PostPromotionControls";
 import { PostEditDialog } from "../forms/PostEditDialog";
-import { excludeRootPost } from "../hooks/usePostTreeCollapse";
 import { mapCommentToPost } from "../models/commentPostCompat";
 import { decidePromotionControls } from "../models/postPromotionGate";
 import { PostTreeList } from "./PostTreeList";
@@ -64,28 +62,13 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
       limit: 200,
     }),
   );
-  const legacyThreadQuery = useQuery({
-    ...postThreadQuery(rootUnitId, { mode: "threaded", maxDepth }),
-    enabled: !realmUnitId && !!rootUnitId,
-  });
-  const isCommentThread = Boolean(realmUnitId);
-  const isLoading = isCommentThread
-    ? commentThreadQuery.isLoading
-    : legacyThreadQuery.isLoading;
+  const hasCommentPartition = Boolean(realmUnitId);
+  const isLoading = hasCommentPartition && commentThreadQuery.isLoading;
   const posts = useMemo(() => {
-    if (isCommentThread) {
-      return (commentThreadQuery.data?.comments ?? []).map(mapCommentToPost);
-    }
-    return excludeRootPost(legacyThreadQuery.data?.posts ?? [], rootUnitId);
-  }, [
-    commentThreadQuery.data?.comments,
-    isCommentThread,
-    legacyThreadQuery.data?.posts,
-    rootUnitId,
-  ]);
-  const signalData = isCommentThread
-    ? commentThreadQuery.data
-    : legacyThreadQuery.data;
+    if (!hasCommentPartition) return [];
+    return (commentThreadQuery.data?.comments ?? []).map(mapCommentToPost);
+  }, [commentThreadQuery.data?.comments, hasCommentPartition]);
+  const signalData = hasCommentPartition ? commentThreadQuery.data : undefined;
 
   // Viewer-derived signals from the thread read. The server is the single
   // authorization source; these only gate the affordance. A stale 403 is

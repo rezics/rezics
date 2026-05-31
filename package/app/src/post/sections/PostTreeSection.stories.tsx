@@ -1,5 +1,10 @@
-import { postKeys } from "@rezics/api/post/post.keys";
-import { markdownContentDoc, type PostDTO, PostKind } from "@rezics/contract";
+import { commentKeys } from "@rezics/api/comment/comment.keys";
+import {
+  markdownContentDoc,
+  type CommentDTO,
+  type PostDTO,
+  PostKind,
+} from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -8,6 +13,7 @@ import { PostTreeList } from "./PostTreeList";
 import { PostTreeSection } from "./PostTreeSection";
 
 const ROOT_ID = "fixture-root-1";
+const REALM_ID = "fixture-realm-1";
 
 // MOCK: deterministic post fixtures used to seed the React Query cache for stories.
 function makePost(
@@ -156,15 +162,42 @@ const CONTINUOUS_RAIL_POSTS: PostDTO[] = [
 function Seeded({ posts }: { posts: PostDTO[] }) {
   const qc = useQueryClient();
   useEffect(() => {
-    qc.setQueryData(
-      postKeys.thread(ROOT_ID, { mode: "threaded", maxDepth: 5 }),
-      { posts },
-    );
+    const query = {
+      rootUnitId: ROOT_ID,
+      realmUnitId: REALM_ID,
+      mode: "threaded" as const,
+      maxDepth: 5,
+      limit: 200,
+    };
+    const comments: CommentDTO[] = posts.map((post) => ({
+      unitId: post.unitId,
+      rootUnitId: ROOT_ID,
+      realmUnitId: REALM_ID,
+      parentCommentUnitId: null,
+      authorUserId: post.authorUserId,
+      author: post.author,
+      content: post.content,
+      depth: post.depth ?? 1,
+      path: post.path,
+      replyCount: post.replyCount,
+      directReplyCount: post.directReplyCount,
+      lastReplyAt: post.lastReplyAt,
+      isLocked: post.isLocked,
+      state: post.state,
+      pinKind: post.pinKind,
+      pinPosition: post.pinPosition,
+      createdAt: post.createdAt,
+      updatedAt: post.updatedAt,
+    }));
+    qc.setQueryData(commentKeys.list(query), {
+      comments,
+      total: comments.length,
+    });
   }, [qc, posts]);
 
   return (
     <div className="p-4">
-      <PostTreeSection rootUnitId={ROOT_ID} />
+      <PostTreeSection rootUnitId={ROOT_ID} realmUnitId={REALM_ID} />
     </div>
   );
 }
@@ -173,7 +206,8 @@ const meta = {
   title: "App/Post/PostTreeSection",
   component: PostTreeSection,
   args: {
-    rootPostUnitId: ROOT_ID,
+    rootUnitId: ROOT_ID,
+    realmUnitId: REALM_ID,
   },
 } satisfies Meta<typeof PostTreeSection>;
 

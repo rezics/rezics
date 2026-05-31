@@ -16,13 +16,6 @@ type SeedCollapsedIdsOptions =
       "baseDepth" | "defaultVisibleGenerations" | "revealPostUnitId"
     >;
 
-export function excludeRootPost(
-  posts: PostDTO[],
-  rootUnitId: string,
-): PostDTO[] {
-  return posts.filter((post) => post.unitId !== rootUnitId);
-}
-
 export function seedCollapsedIds(
   posts: PostDTO[],
   options?: SeedCollapsedIdsOptions,
