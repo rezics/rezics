@@ -9,9 +9,6 @@ export const postInclude = {
   unit: {
     include: {
       user: { select: publicUserSelect },
-      workMemberships: {
-        select: { workUnitId: true, role: true },
-      },
       contentModerationState: true,
     },
   },

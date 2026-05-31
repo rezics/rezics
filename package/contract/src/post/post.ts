@@ -127,8 +127,6 @@ export const postDTOSchema = t.Object({
   author: t.Optional(publicUserSchema),
   targetUnitId: t.Optional(t.Nullable(t.String())),
   realmUnitId: t.Optional(t.Nullable(t.String())),
-  workUnitIds: t.Optional(t.Array(t.String())),
-  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   content: t.Optional(t.Nullable(contentDocSchema)),
   rootPostUnitId: t.Optional(t.Nullable(t.String())),
   parentPostUnitId: t.Optional(t.Nullable(t.String())),

@@ -57,18 +57,9 @@ describe("excerptSourceSchema", () => {
 });
 
 describe("post work-domain contract fields", () => {
-  test("accepts work-domain DTO metadata", () => {
-    expect(
-      Value.Check(postDTOSchema, {
-        unitId: "post-1",
-        authorUserId: "user-1",
-        targetUnitId: "release-1",
-        realmUnitId: null,
-        workUnitIds: ["work-1"],
-        workRoles: ["REVIEW"],
-        content: null,
-      }),
-    ).toBe(true);
+  test("does not expose work-domain DTO metadata", () => {
+    expect("workUnitIds" in postDTOSchema.properties).toBe(false);
+    expect("workRoles" in postDTOSchema.properties).toBe(false);
   });
 
   test("accepts work-domain list filters while targetUnitId remains exact", () => {
