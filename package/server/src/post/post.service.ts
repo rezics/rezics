@@ -2,9 +2,9 @@ import type {
   AcceptAnswerInput,
   CreatePostInput,
   EditorialPatchSubmission,
-  PinPostInput,
+  PinCommentInput,
   PostListQuery,
-  PostPinDTO,
+  CommentPromotionDTO,
   RezicsSessionClaims,
   UpdatePostInput,
 } from "@rezics/contract";
@@ -48,7 +48,7 @@ import {
 } from "@/utils/userSlugHydration";
 import { publicUserSelect } from "@/utils/sanitizeUser";
 import { AppError } from "../utils/errors";
-import { mapPostPinToDTO } from "./post.mapper";
+import { mapCommentPromotionToDTO } from "./post.mapper";
 import type { PostWithRelations } from "./types";
 import { postInclude } from "./types";
 
@@ -273,8 +273,9 @@ async function attachPostPaths<
 /**
  * Attach the promotion overlay (`pinKind`/`pinPosition`) to thread rows. A post
  * is promoted at most once per scope and its scope is always its own thread
- * root, so the target unit maps to at most one `PostPin`. The storage column is
- * still named `postUnitId` until the physical migration catches up.
+ * root, so the target comment unit maps to at most one promotion row. The
+ * storage column is still named `postUnitId` until the physical migration
+ * catches up.
  */
 async function attachPinKinds<
   T extends {
@@ -1187,9 +1188,9 @@ export class PostService {
 
   /** Pin a reply within its thread scope (`kind = PINNED`). */
   async pin(
-    input: PinPostInput,
+    input: PinCommentInput,
     caller: RezicsSessionClaims,
-  ): Promise<PostPinDTO> {
+  ): Promise<CommentPromotionDTO> {
     await this.assertCanPromoteInThread(input.scopeUnitId, caller);
     await this.loadPromotableTarget(input.scopeUnitId, input.targetUnitId);
     const position = await this.mintPinPosition(
@@ -1225,7 +1226,7 @@ export class PostService {
   async acceptAnswer(
     input: AcceptAnswerInput,
     caller: RezicsSessionClaims,
-  ): Promise<PostPinDTO> {
+  ): Promise<CommentPromotionDTO> {
     await this.assertCanPromoteInThread(input.scopeUnitId, caller);
     const target = await this.loadPromotableTarget(
       input.scopeUnitId,
@@ -1308,7 +1309,7 @@ export class PostService {
       if (unit?.type === UnitType.REALM) {
         throw new AppError(
           400,
-          "A realm cannot be a PostPin scope; realm-level featuring belongs to Realm.extra.pinboard",
+          "A realm cannot be a comment promotion scope; realm-level featuring belongs to Realm.extra.pinboard",
         );
       }
       throw new AppError(404, `Thread root post not found: ${scopeUnitId}`);
@@ -1318,7 +1319,10 @@ export class PostService {
       scope.depth !== 0 ||
       (scope.rootPostUnitId !== null && scope.rootPostUnitId !== scopeUnitId)
     ) {
-      throw new AppError(400, "A PostPin scope must be a thread root post");
+      throw new AppError(
+        400,
+        "A comment promotion scope must be a thread root post",
+      );
     }
 
     const allowed = await this.canPromoteInThread(
@@ -1506,7 +1510,7 @@ export class PostService {
     kind: PinKindEnum,
     position: string,
     byUserId: string,
-  ): Promise<PostPinDTO> {
+  ): Promise<CommentPromotionDTO> {
     try {
       const pin = await prisma.postPin.create({
         data: {
@@ -1517,7 +1521,7 @@ export class PostService {
           byUserId,
         },
       });
-      return mapPostPinToDTO(pin);
+      return mapCommentPromotionToDTO(pin);
     } catch (error) {
       if (
         error &&

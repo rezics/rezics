@@ -6,9 +6,9 @@ import {
 import { commentListQuery } from "@rezics/api/comment/comment";
 import {
   useAcceptAnswerMutation,
-  usePinPostMutation,
+  usePinCommentMutation,
   useUnacceptAnswerMutation,
-  useUnpinPostMutation,
+  useUnpinCommentMutation,
 } from "@rezics/api/post/post";
 import type { PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -78,8 +78,8 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
 
   const onPromotionError = () =>
     toast.error(t("community:post_pin_action_failed"));
-  const pinMutation = usePinPostMutation({ onError: onPromotionError });
-  const unpinMutation = useUnpinPostMutation({ onError: onPromotionError });
+  const pinMutation = usePinCommentMutation({ onError: onPromotionError });
+  const unpinMutation = useUnpinCommentMutation({ onError: onPromotionError });
   const acceptMutation = useAcceptAnswerMutation({ onError: onPromotionError });
   const unacceptMutation = useUnacceptAnswerMutation({
     onError: onPromotionError,

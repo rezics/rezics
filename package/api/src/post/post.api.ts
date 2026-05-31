@@ -8,11 +8,11 @@
 import type {
   AcceptAnswerInput,
   EditorialPatchSubmission,
-  PinPostInput,
+  PinCommentInput,
   PostListResponse,
   PostModerationOverlayRequest,
   PostModerationOverlayResponse,
-  PostPinDTO,
+  CommentPromotionDTO,
   PostResponse,
   SetPostPublicationInput,
   SetPostStateInput,
@@ -184,8 +184,8 @@ export const postApi = {
   },
 
   /** Pin a reply within its thread (kind = PINNED). */
-  pin: async (input: PinPostInput): Promise<PostPinDTO> => {
-    return apiFetch<PostPinDTO>("/post/pins", {
+  pin: async (input: PinCommentInput): Promise<CommentPromotionDTO> => {
+    return apiFetch<CommentPromotionDTO>("/post/pins", {
       method: "POST",
       body: JSON.stringify(input),
     });
@@ -203,8 +203,10 @@ export const postApi = {
   },
 
   /** Accept a direct reply as an answer (kind = ACCEPTED_ANSWER) in a Q&A thread. */
-  acceptAnswer: async (input: AcceptAnswerInput): Promise<PostPinDTO> => {
-    return apiFetch<PostPinDTO>("/post/accepted-answers", {
+  acceptAnswer: async (
+    input: AcceptAnswerInput,
+  ): Promise<CommentPromotionDTO> => {
+    return apiFetch<CommentPromotionDTO>("/post/accepted-answers", {
       method: "POST",
       body: JSON.stringify(input),
     });

@@ -7,7 +7,11 @@ import { CircleCheck, Pin } from "lucide-react";
  * badge (✓, success-tinted) or a general pin badge (📌, brand-tinted). Returns
  * nothing for ordinary replies. Icons are lucide glyphs, not emoji.
  */
-export function PostPinBadge({ pinKind }: { pinKind: PostDTO["pinKind"] }) {
+export function CommentPromotionBadge({
+  pinKind,
+}: {
+  pinKind: PostDTO["pinKind"];
+}) {
   const { t } = useTranslation(["community"]);
 
   if (pinKind === "ACCEPTED_ANSWER") {

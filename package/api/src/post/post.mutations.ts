@@ -5,8 +5,8 @@
 import type {
   AcceptAnswerInput,
   EditorialPatchSubmission,
-  PinPostInput,
-  PostPinDTO,
+  PinCommentInput,
+  CommentPromotionDTO,
   PostResponse,
   SetPostStateInput,
   UpdatePostInput,
@@ -255,10 +255,10 @@ export function useSetPostStateMutation(
  * Promotion mutations (pin / unpin / accept / unaccept).
  *
  * Each mutation targets a reply within a thread scope and, on settle, refreshes
- * the thread query so promotion badges (`PostPinBadge`) and sibling ordering
- * (`orderSiblingsByPromotion`) recompute from server truth. Invalidating on
- * settle — not just success — means a stale `403` re-syncs the thread to the
- * server's view rather than leaving a falsely-applied control. The server gate
+ * the thread query so promotion badges (`CommentPromotionBadge`) and sibling
+ * ordering (`orderSiblingsByPromotion`) recompute from server truth.
+ * Invalidating on settle — not just success — means a stale `403` re-syncs the
+ * thread to the server's view rather than leaving a falsely-applied control. The server gate
  * (`assertCanPromoteInThread`) remains the single authorization source; these
  * hooks never re-implement it.
  */
@@ -267,16 +267,16 @@ function refreshCommentThreads(queryClient: ReturnType<typeof useQueryClient>) {
 }
 
 /** Pin a reply (`kind = PINNED`) within its thread scope. */
-export function usePinPostMutation(
+export function usePinCommentMutation(
   options?: Omit<
-    UseMutationOptions<PostPinDTO, Error, PinPostInput>,
+    UseMutationOptions<CommentPromotionDTO, Error, PinCommentInput>,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: PinPostInput) => postApi.pin(input),
+    mutationFn: (input: PinCommentInput) => postApi.pin(input),
     ...options,
     onSettled: (data, error, variables, onMutateResult, context) => {
       refreshCommentThreads(queryClient);
@@ -286,7 +286,7 @@ export function usePinPostMutation(
 }
 
 /** Remove a `PINNED` promotion from a reply. */
-export function useUnpinPostMutation(
+export function useUnpinCommentMutation(
   options?: Omit<
     UseMutationOptions<
       { message: string },
@@ -312,7 +312,7 @@ export function useUnpinPostMutation(
 /** Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread. */
 export function useAcceptAnswerMutation(
   options?: Omit<
-    UseMutationOptions<PostPinDTO, Error, AcceptAnswerInput>,
+    UseMutationOptions<CommentPromotionDTO, Error, AcceptAnswerInput>,
     "mutationFn"
   >,
 ) {
@@ -363,8 +363,8 @@ export const postMutations = {
   useDelete: useDeletePostMutation,
   useSetPublication: useSetPostPublicationMutation,
   useSetState: useSetPostStateMutation,
-  usePin: usePinPostMutation,
-  useUnpin: useUnpinPostMutation,
+  usePin: usePinCommentMutation,
+  useUnpin: useUnpinCommentMutation,
   useAcceptAnswer: useAcceptAnswerMutation,
   useUnacceptAnswer: useUnacceptAnswerMutation,
 };

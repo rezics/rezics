@@ -1,4 +1,4 @@
-import type { PostDTO, PostPinDTO } from "@rezics/contract";
+import type { PostDTO, CommentPromotionDTO } from "@rezics/contract";
 import type { PostPin } from "#/prisma/client";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
@@ -52,8 +52,8 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
   };
 }
 
-/** Map a PostPin row to its public DTO. */
-export function mapPostPinToDTO(pin: PostPin): PostPinDTO {
+/** Map the current promotion storage row to its public comment promotion DTO. */
+export function mapCommentPromotionToDTO(pin: PostPin): CommentPromotionDTO {
   return {
     scopeUnitId: pin.scopeUnitId,
     targetUnitId: pin.postUnitId,

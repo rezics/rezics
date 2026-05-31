@@ -5,8 +5,8 @@ import {
   hasPermissionToUpdatePost,
   isBlocked,
   normalizeLanguage,
-  pinPostSchema,
-  postPinDTOSchema,
+  pinCommentSchema,
+  commentPromotionDTOSchema,
   PostKind,
   type PostListResponse,
   type PostModerationOverlayResponse,
@@ -311,8 +311,8 @@ export const postApi = new Elysia({ prefix: "/post" })
     },
     {
       requireLogin: true,
-      body: pinPostSchema,
-      response: { 200: postPinDTOSchema },
+      body: pinCommentSchema,
+      response: { 200: commentPromotionDTOSchema },
       detail: {
         summary: "Pin a reply within its thread",
         description:
@@ -354,7 +354,7 @@ export const postApi = new Elysia({ prefix: "/post" })
     {
       requireLogin: true,
       body: acceptAnswerSchema,
-      response: { 200: postPinDTOSchema },
+      response: { 200: commentPromotionDTOSchema },
       detail: {
         summary: "Accept a direct reply as an answer",
         description:

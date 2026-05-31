@@ -3,9 +3,9 @@ import { Value } from "@sinclair/typebox/value";
 import {
   createPostSchema,
   acceptAnswerSchema,
-  pinPostSchema,
+  pinCommentSchema,
   postDTOSchema,
-  postPinDTOSchema,
+  commentPromotionDTOSchema,
   postListQuerySchema,
   excerptSourceSchema,
 } from "./post";
@@ -96,10 +96,10 @@ describe("post work-domain contract fields", () => {
   });
 
   test("uses target naming for promotion contracts", () => {
-    expect("targetUnitId" in postPinDTOSchema.properties).toBe(true);
-    expect("postUnitId" in postPinDTOSchema.properties).toBe(false);
-    expect("targetUnitId" in pinPostSchema.properties).toBe(true);
-    expect("postUnitId" in pinPostSchema.properties).toBe(false);
+    expect("targetUnitId" in commentPromotionDTOSchema.properties).toBe(true);
+    expect("postUnitId" in commentPromotionDTOSchema.properties).toBe(false);
+    expect("targetUnitId" in pinCommentSchema.properties).toBe(true);
+    expect("postUnitId" in pinCommentSchema.properties).toBe(false);
     expect("beforeTargetUnitId" in acceptAnswerSchema.properties).toBe(true);
     expect("beforePostUnitId" in acceptAnswerSchema.properties).toBe(false);
   });

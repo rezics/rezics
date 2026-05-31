@@ -23,11 +23,11 @@ export {
   useCreatePostMutation,
   useCreateWikiPostMutation,
   useDeletePostMutation,
-  usePinPostMutation,
+  usePinCommentMutation,
   useSetPostPublicationMutation,
   useSetPostStateMutation,
   useUnacceptAnswerMutation,
-  useUnpinPostMutation,
+  useUnpinCommentMutation,
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
 } from "./post.mutations";
