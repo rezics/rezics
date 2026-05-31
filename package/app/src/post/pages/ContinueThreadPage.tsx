@@ -1,6 +1,5 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import { commentListQuery, commentQuery } from "@rezics/api/comment/comment";
-import { postQueries, postSubtreeQuery } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -25,14 +24,9 @@ export const ContinueThreadPage: React.FC = () => {
   };
   const composerRef = useFocusReplyFromQuery();
   const commentAnchorQuery = useQuery(commentQuery(unitId));
-  const legacyAnchorQuery = useQuery({
-    ...postQueries.detail(unitId),
-    enabled:
-      !!unitId && !commentAnchorQuery.data && !commentAnchorQuery.isLoading,
-  });
   const anchor = commentAnchorQuery.data
     ? mapCommentToPost(commentAnchorQuery.data)
-    : legacyAnchorQuery.data;
+    : undefined;
   const commentSubtreeQuery = useQuery(
     commentListQuery({
       rootUnitId: rootPostUnitId,
@@ -43,25 +37,11 @@ export const ContinueThreadPage: React.FC = () => {
       limit: 200,
     }),
   );
-  const legacySubtreeQuery = useQuery({
-    ...postSubtreeQuery(rootPostUnitId, unitId, {
-      mode: "threaded",
-      maxDepth: 5,
-    }),
-    enabled:
-      !!rootPostUnitId && !!unitId && Boolean(anchor) && !anchor?.realmUnitId,
-  });
-  const isCommentSubtree = Boolean(anchor?.realmUnitId);
-  const isAnchorLoading =
-    !anchor && (commentAnchorQuery.isLoading || legacyAnchorQuery.isLoading);
-  const isLoading = isAnchorLoading
-    ? true
-    : isCommentSubtree
-      ? commentSubtreeQuery.isLoading
-      : legacySubtreeQuery.isLoading;
-  const posts = isCommentSubtree
-    ? (commentSubtreeQuery.data?.comments ?? []).map(mapCommentToPost)
-    : (legacySubtreeQuery.data?.posts ?? []);
+  const isAnchorLoading = !anchor && commentAnchorQuery.isLoading;
+  const isLoading = isAnchorLoading ? true : commentSubtreeQuery.isLoading;
+  const posts = (commentSubtreeQuery.data?.comments ?? []).map(
+    mapCommentToPost,
+  );
   const editorEntry = useEditorEntry({
     surface: anchor?.kind === PostKind.WIKI ? "wikiPost" : "post",
     ownerUnit: { user: anchor?.author },
