@@ -18,6 +18,12 @@ mock.module("@/infra/seed-tags", () => ({
 }));
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
+const contentSearchMock = mock(async (_query: string, _options?: any) => ({
+  hits: [],
+}));
+const collectionSearchMock = mock(async (_query: string, _options?: any) => ({
+  hits: [],
+}));
 
 mock.module("@/meili/content/sync", () => ({
   patchContentMetadataToMeili: async () => undefined,
@@ -32,6 +38,12 @@ mock.module("@/meili/content/sync", () => ({
 mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {
     enqueue: enqueueMock,
+  },
+}));
+mock.module("@/meili/search-client", () => ({
+  searchClient: {
+    contentIndex: { search: contentSearchMock },
+    collectionIndex: { search: collectionSearchMock },
   },
 }));
 
@@ -311,6 +323,122 @@ describe("ShelfService", () => {
       ],
       skipDuplicates: true,
     });
+  });
+
+  test("getShelfUnits filters q matches through public content search hits", async () => {
+    contentSearchMock.mockClear();
+    collectionSearchMock.mockClear();
+    contentSearchMock.mockResolvedValueOnce({ hits: [{ id: "book-2" }] });
+
+    let findManyArgs: any;
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "owner-1" } }),
+      },
+      shelfUnit: {
+        findMany: async (args: any) => {
+          findManyArgs = args;
+          return [makeShelfUnitRow({ unitId: "book-2" })];
+        },
+      },
+      shelfUnitRelation: { findMany: async () => [] },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const result = await shelfService.getShelfUnits(
+      "shelf-1",
+      { q: "translated title", limit: 20 },
+      { viewerUserId: "viewer-1" },
+    );
+
+    expect(result.units.map((unit) => unit.unitId)).toEqual(["book-2"]);
+    expect(findManyArgs.where).toEqual({
+      shelfId: "shelf-1",
+      unitId: { in: ["book-2"] },
+    });
+    expect(collectionSearchMock).not.toHaveBeenCalled();
+  });
+
+  test("getShelfUnits includes owner-private collection q matches for the owner", async () => {
+    contentSearchMock.mockClear();
+    collectionSearchMock.mockClear();
+    contentSearchMock.mockResolvedValueOnce({ hits: [] });
+    collectionSearchMock.mockResolvedValueOnce({
+      hits: [{ unitId: "book-3" }],
+    });
+
+    let findManyArgs: any;
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "owner-1" } }),
+      },
+      shelfUnit: {
+        findMany: async (args: any) => {
+          findManyArgs = args;
+          return [makeShelfUnitRow({ unitId: "book-3" })];
+        },
+      },
+      shelfUnitRelation: { findMany: async () => [] },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.getShelfUnits(
+      "shelf-1",
+      { q: "private note" },
+      { viewerUserId: "owner-1" },
+    );
+
+    expect(collectionSearchMock).toHaveBeenCalledWith("private note", {
+      limit: 1000,
+      filter: 'ownerUserId = "owner-1"',
+      attributesToRetrieve: ["unitId"],
+    });
+    expect(findManyArgs.where.unitId.in).toEqual(["book-3"]);
+  });
+
+  test("getShelfUnits intersects owner tag filters with q matches", async () => {
+    contentSearchMock.mockClear();
+    collectionSearchMock.mockClear();
+    contentSearchMock.mockResolvedValueOnce({
+      hits: [{ id: "book-1" }, { id: "book-2" }],
+    });
+    collectionSearchMock.mockResolvedValueOnce({ hits: [] });
+
+    let findManyArgs: any;
+    Object.assign(prismaMock, {
+      shelf: {
+        findUnique: async () => ({ unit: { userId: "owner-1" } }),
+      },
+      userTagApplication: {
+        findMany: async ({ where }: any) => {
+          expect(where).toEqual({
+            userId: "owner-1",
+            tagUnitId: { in: ["tag-a", "tag-b"] },
+          });
+          return [
+            { unitId: "book-1", tagUnitId: "tag-a" },
+            { unitId: "book-1", tagUnitId: "tag-b" },
+            { unitId: "book-2", tagUnitId: "tag-a" },
+          ];
+        },
+      },
+      shelfUnit: {
+        findMany: async (args: any) => {
+          findManyArgs = args;
+          return [makeShelfUnitRow({ unitId: "book-1" })];
+        },
+      },
+      shelfUnitRelation: { findMany: async () => [] },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.getShelfUnits(
+      "shelf-1",
+      { q: "space", tagUnitIds: ["tag-a", "tag-b", "tag-a"] },
+      { viewerUserId: "owner-1" },
+    );
+
+    expect(findManyArgs.where.unitId.in).toEqual(["book-1"]);
   });
 
   test("reconcileShelfWorkMemberships registers shelf work domains from contained releases", async () => {

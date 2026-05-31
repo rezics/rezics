@@ -31,7 +31,7 @@ import {
   updateShelfSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro } from "@/middleware";
+import { authMacro, tryResolveIdentity } from "@/middleware";
 import { unitService } from "@/unit/unit.service";
 import { userService } from "@/user/service/user.service";
 import { AppError } from "@/utils/errors";
@@ -331,8 +331,14 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
   // --- Shelf unit routes ---
   .get(
     "/:unitId/units",
-    async ({ params, query }): Promise<ShelfUnitsResponse> => {
-      return shelfService.getShelfUnits(params.unitId, query);
+    async ({ headers, params, query }): Promise<ShelfUnitsResponse> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      return shelfService.getShelfUnits(params.unitId, query, {
+        viewerUserId: identity?.userId,
+      });
     },
     {
       params: shelfParamsSchema,

@@ -34,6 +34,7 @@ import {
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { getSeedTagId } from "@/infra/seed-tags";
 import { serverJobProducer } from "@/job/job-boundary";
+import { searchClient } from "@/meili/search-client";
 import {
   assertLicenseSlug,
   publicUnitEligibilityWhere,
@@ -67,6 +68,7 @@ import { isSystemKindKey } from "./system-shelves";
 import { shelfInclude, shelfListSelect } from "./types";
 
 const REBALANCE_WINDOW = 50;
+const SHELF_SEARCH_HIT_LIMIT = 1000;
 
 async function enqueueContainedUnitIdsSync(shelfId: string): Promise<void> {
   await serverJobProducer.enqueue(
@@ -233,6 +235,75 @@ function assertOnlySeedTags(ids: readonly string[]): void {
 }
 
 export class ShelfService {
+  private async resolveShelfUnitSearchIds(
+    shelfId: string,
+    query: ShelfUnitsQuery,
+    viewerUserId?: string | null,
+  ): Promise<Set<string> | null> {
+    const q = query.q?.trim();
+    const tagUnitIds = Array.from(
+      new Set((query.tagUnitIds ?? []).map((id) => id.trim()).filter(Boolean)),
+    );
+    if (!q && tagUnitIds.length === 0) return null;
+
+    const shelf = await prisma.shelf.findUnique({
+      where: { unitId: shelfId },
+      select: { unit: { select: { userId: true } } },
+    });
+    const ownerUserId = shelf?.unit.userId;
+    if (!ownerUserId) return new Set();
+
+    let allowedIds: Set<string> | null = null;
+
+    if (q) {
+      const [contentResp, collectionResp] = await Promise.all([
+        searchClient.contentIndex.search(q, {
+          limit: SHELF_SEARCH_HIT_LIMIT,
+          attributesToRetrieve: ["id"],
+        }),
+        viewerUserId === ownerUserId
+          ? searchClient.collectionIndex.search(q, {
+              limit: SHELF_SEARCH_HIT_LIMIT,
+              filter: `ownerUserId = "${ownerUserId}"`,
+              attributesToRetrieve: ["unitId"],
+            })
+          : Promise.resolve({ hits: [] as any[] }),
+      ]);
+
+      allowedIds = new Set([
+        ...(contentResp.hits as any[])
+          .map((hit) => hit.id)
+          .filter((id): id is string => typeof id === "string"),
+        ...(collectionResp.hits as any[])
+          .map((hit) => hit.unitId)
+          .filter((id): id is string => typeof id === "string"),
+      ]);
+    }
+
+    if (tagUnitIds.length > 0) {
+      const tagRows = await prisma.userTagApplication.findMany({
+        where: { userId: ownerUserId, tagUnitId: { in: tagUnitIds } },
+        select: { unitId: true, tagUnitId: true },
+      });
+      const tagsByUnitId = new Map<string, Set<string>>();
+      for (const row of tagRows) {
+        const set = tagsByUnitId.get(row.unitId) ?? new Set<string>();
+        set.add(row.tagUnitId);
+        tagsByUnitId.set(row.unitId, set);
+      }
+      const taggedIds = new Set(
+        [...tagsByUnitId.entries()]
+          .filter(([, tags]) => tagUnitIds.every((tagId) => tags.has(tagId)))
+          .map(([unitId]) => unitId),
+      );
+      allowedIds = allowedIds
+        ? new Set([...allowedIds].filter((unitId) => taggedIds.has(unitId)))
+        : taggedIds;
+    }
+
+    return allowedIds ?? null;
+  }
+
   private async buildWhere(
     options: ShelfListQuery,
   ): Promise<Prisma.ShelfWhereInput> {
@@ -847,15 +918,24 @@ export class ShelfService {
   async getShelfUnits(
     shelfId: string,
     query: ShelfUnitsQuery = {},
+    options: { viewerUserId?: string | null } = {},
   ): Promise<ShelfUnitsResponse> {
     const limit = Math.max(1, Math.min(Number(query.limit ?? 100), 100));
+    const searchIds = await this.resolveShelfUnitSearchIds(
+      shelfId,
+      query,
+      options.viewerUserId,
+    );
 
     const cursor = query.cursor
       ? { shelfId_unitId: { shelfId, unitId: query.cursor } }
       : undefined;
 
     const units = await prisma.shelfUnit.findMany({
-      where: { shelfId },
+      where: {
+        shelfId,
+        ...(searchIds ? { unitId: { in: [...searchIds] } } : {}),
+      },
       orderBy: { position: "asc" },
       cursor,
       skip: cursor ? 1 : 0,
