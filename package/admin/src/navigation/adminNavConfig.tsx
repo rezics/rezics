@@ -2,7 +2,6 @@ import { getI18nRuntime } from "@rezics/i18n/runtime";
 
 import {
   Activity as ActivityIcon,
-  GitMerge as AccountTreeIcon,
   Wrench as BuildIcon,
   ShieldUser as AdminPanelSettingsOutlinedIcon,
   ShieldAlert as ShieldAlertIcon,
@@ -79,12 +78,6 @@ export const adminNav = {
           label: () => getI18nRuntime().i18n.t("admin:nav_books"),
           icon: <Inventory2Icon fontSize="small" />,
           to: "/book",
-        },
-        {
-          id: "content.work-merge",
-          label: () => "Work merge",
-          icon: <AccountTreeIcon fontSize="small" />,
-          to: "/unit/work-merge",
         },
         {
           id: "content.entities",

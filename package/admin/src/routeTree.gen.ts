@@ -30,7 +30,6 @@ import { Route as AdminBookIndexRouteImport } from './routes/_admin/book/index'
 import { Route as AdminUserMeiliRouteImport } from './routes/_admin/user/meili'
 import { Route as AdminUserCreateRouteImport } from './routes/_admin/user/create'
 import { Route as AdminUserUserIdRouteImport } from './routes/_admin/user/$userId'
-import { Route as AdminUnitWorkMergeRouteImport } from './routes/_admin/unit/work-merge'
 import { Route as AdminUnitMeiliRouteImport } from './routes/_admin/unit/meili'
 import { Route as AdminUnitCreateRouteImport } from './routes/_admin/unit/create'
 import { Route as AdminUnitUnitIdRouteImport } from './routes/_admin/unit/$unitId'
@@ -150,11 +149,6 @@ const AdminUserUserIdRoute = AdminUserUserIdRouteImport.update({
   path: '/user/$userId',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminUnitWorkMergeRoute = AdminUnitWorkMergeRouteImport.update({
-  id: '/unit/work-merge',
-  path: '/unit/work-merge',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminUnitMeiliRoute = AdminUnitMeiliRouteImport.update({
   id: '/unit/meili',
   path: '/unit/meili',
@@ -251,7 +245,6 @@ export interface FileRoutesByFullPath {
   '/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/unit/create': typeof AdminUnitCreateRoute
   '/unit/meili': typeof AdminUnitMeiliRoute
-  '/unit/work-merge': typeof AdminUnitWorkMergeRoute
   '/user/$userId': typeof AdminUserUserIdRoute
   '/user/create': typeof AdminUserCreateRoute
   '/user/meili': typeof AdminUserMeiliRoute
@@ -288,7 +281,6 @@ export interface FileRoutesByTo {
   '/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/unit/create': typeof AdminUnitCreateRoute
   '/unit/meili': typeof AdminUnitMeiliRoute
-  '/unit/work-merge': typeof AdminUnitWorkMergeRoute
   '/user/$userId': typeof AdminUserUserIdRoute
   '/user/create': typeof AdminUserCreateRoute
   '/user/meili': typeof AdminUserMeiliRoute
@@ -327,7 +319,6 @@ export interface FileRoutesById {
   '/_admin/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/_admin/unit/create': typeof AdminUnitCreateRoute
   '/_admin/unit/meili': typeof AdminUnitMeiliRoute
-  '/_admin/unit/work-merge': typeof AdminUnitWorkMergeRoute
   '/_admin/user/$userId': typeof AdminUserUserIdRoute
   '/_admin/user/create': typeof AdminUserCreateRoute
   '/_admin/user/meili': typeof AdminUserMeiliRoute
@@ -366,7 +357,6 @@ export interface FileRouteTypes {
     | '/unit/$unitId'
     | '/unit/create'
     | '/unit/meili'
-    | '/unit/work-merge'
     | '/user/$userId'
     | '/user/create'
     | '/user/meili'
@@ -403,7 +393,6 @@ export interface FileRouteTypes {
     | '/unit/$unitId'
     | '/unit/create'
     | '/unit/meili'
-    | '/unit/work-merge'
     | '/user/$userId'
     | '/user/create'
     | '/user/meili'
@@ -441,7 +430,6 @@ export interface FileRouteTypes {
     | '/_admin/unit/$unitId'
     | '/_admin/unit/create'
     | '/_admin/unit/meili'
-    | '/_admin/unit/work-merge'
     | '/_admin/user/$userId'
     | '/_admin/user/create'
     | '/_admin/user/meili'
@@ -609,13 +597,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUserUserIdRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/unit/work-merge': {
-      id: '/_admin/unit/work-merge'
-      path: '/unit/work-merge'
-      fullPath: '/unit/work-merge'
-      preLoaderRoute: typeof AdminUnitWorkMergeRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_admin/unit/meili': {
       id: '/_admin/unit/meili'
       path: '/unit/meili'
@@ -740,7 +721,6 @@ interface AdminRouteChildren {
   AdminUnitUnitIdRoute: typeof AdminUnitUnitIdRoute
   AdminUnitCreateRoute: typeof AdminUnitCreateRoute
   AdminUnitMeiliRoute: typeof AdminUnitMeiliRoute
-  AdminUnitWorkMergeRoute: typeof AdminUnitWorkMergeRoute
   AdminUserUserIdRoute: typeof AdminUserUserIdRoute
   AdminUserCreateRoute: typeof AdminUserCreateRoute
   AdminUserMeiliRoute: typeof AdminUserMeiliRoute
@@ -777,7 +757,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUnitUnitIdRoute: AdminUnitUnitIdRoute,
   AdminUnitCreateRoute: AdminUnitCreateRoute,
   AdminUnitMeiliRoute: AdminUnitMeiliRoute,
-  AdminUnitWorkMergeRoute: AdminUnitWorkMergeRoute,
   AdminUserUserIdRoute: AdminUserUserIdRoute,
   AdminUserCreateRoute: AdminUserCreateRoute,
   AdminUserMeiliRoute: AdminUserMeiliRoute,

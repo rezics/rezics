@@ -57,7 +57,7 @@ const repairScopes: RepairScopeConfig[] = [
     title: "Work-domain membership",
     description:
       "Detects hidden works, work-tag projection drift, and large release groups.",
-    link: { to: "/unit/work-merge", label: "Open work merge" },
+    link: { to: "/unit", label: "Open Units" },
   },
   {
     scope: "slug",

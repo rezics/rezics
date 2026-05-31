@@ -7,7 +7,6 @@ export {
 } from "@rezics/contract";
 export * from "./account-operation/account-operation";
 export * from "./admin-repair-job/admin-repair-job";
-export * from "./admin-work-merge/admin-work-merge";
 export * from "./comment/comment";
 export * from "./credit-attribution/credit-attribution";
 export * from "./content-structure/content-structure";
