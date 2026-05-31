@@ -5,7 +5,6 @@ import {
   seriesDiagnosticsQuery,
   seriesDetailQuery,
   seriesListQuery,
-  workMaintenanceQuery,
 } from "@rezics/api";
 
 export function seriesManagementData(unitId: string) {
@@ -20,13 +19,6 @@ export function workAbstractData(workUnitId: string) {
   return {
     relatedSeries: relatedSeriesByWorkQuery(workUnitId),
     releaseListScope: { workUnitId },
-  };
-}
-
-export function workMaintenanceIdentityData(workUnitId: string) {
-  return {
-    detail: workMaintenanceQuery(workUnitId),
-    translationMode: "work-abstract-identity" as const,
   };
 }
 

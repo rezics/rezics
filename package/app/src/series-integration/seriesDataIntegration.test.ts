@@ -4,7 +4,6 @@ import {
   releaseWorkSeriesAddData,
   seriesManagementData,
   workAbstractData,
-  workMaintenanceIdentityData,
 } from "./seriesDataIntegration";
 
 describe("Series frontend data integration placeholders", () => {
@@ -25,15 +24,9 @@ describe("Series frontend data integration placeholders", () => {
     ]);
   });
 
-  test("provides Work abstract and maintenance placeholders without slug scope", () => {
+  test("provides Work abstract placeholders without slug scope", () => {
     expect(workAbstractData("work-1").releaseListScope).toEqual({
       workUnitId: "work-1",
-    });
-    expect(workMaintenanceIdentityData("work-1")).toEqual({
-      detail: expect.objectContaining({
-        queryKey: ["workMaintenance", "detail", "work-1"],
-      }),
-      translationMode: "work-abstract-identity",
     });
   });
 

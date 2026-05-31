@@ -3,5 +3,4 @@ export {
   releaseWorkSeriesAddData,
   seriesManagementData,
   workAbstractData,
-  workMaintenanceIdentityData,
 } from "./seriesDataIntegration";
