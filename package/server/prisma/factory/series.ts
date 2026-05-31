@@ -3,8 +3,7 @@ import type { SeriesKind } from "@rezics/contract";
 export interface FactorySeriesVerificationInput {
   seriesUnitId: string;
   kindKey: SeriesKind;
-  representativeReleaseUnitId: string;
-  workUnitId: string;
+  releaseUnitId: string;
   contentNodeId: string;
 }
 
@@ -18,22 +17,13 @@ export function buildFactorySeriesVerificationPlan(
     },
     directReleaseNode: {
       ownerUnitId: input.seriesUnitId,
-      contentUnitId: input.representativeReleaseUnitId,
+      contentUnitId: input.releaseUnitId,
       id: input.contentNodeId,
     },
     directIndexRow: {
       seriesUnitId: input.seriesUnitId,
-      releaseUnitId: input.representativeReleaseUnitId,
+      releaseUnitId: input.releaseUnitId,
       contentNodeId: input.contentNodeId,
-    },
-    representativeRelease: {
-      releaseUnitId: input.representativeReleaseUnitId,
-      workUnitId: input.workUnitId,
-    },
-    workProjection: {
-      unitId: input.seriesUnitId,
-      workUnitId: input.workUnitId,
-      role: "SERIES" as const,
     },
   };
 }

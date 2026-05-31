@@ -12,7 +12,6 @@ describe("factory scenarios", () => {
       "large-content-tree",
       "large-history",
       "complex-shelf",
-      "unit-work-domain",
       "wiki-zone-experience",
     ]);
 

@@ -2,13 +2,12 @@ import { describe, expect, test } from "bun:test";
 import { buildFactorySeriesVerificationPlan } from "./series";
 
 describe("factory Series verification plan", () => {
-  test("captures extension, direct release node, index, representative release, and work projection", () => {
+  test("captures extension, direct release node, and index", () => {
     expect(
       buildFactorySeriesVerificationPlan({
         seriesUnitId: "series-1",
         kindKey: "book_series",
-        representativeReleaseUnitId: "release-1",
-        workUnitId: "work-1",
+        releaseUnitId: "release-1",
         contentNodeId: "node-1",
       }),
     ).toEqual({
@@ -25,15 +24,6 @@ describe("factory Series verification plan", () => {
         seriesUnitId: "series-1",
         releaseUnitId: "release-1",
         contentNodeId: "node-1",
-      },
-      representativeRelease: {
-        releaseUnitId: "release-1",
-        workUnitId: "work-1",
-      },
-      workProjection: {
-        unitId: "series-1",
-        workUnitId: "work-1",
-        role: "SERIES",
       },
     });
   });

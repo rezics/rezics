@@ -12,8 +12,6 @@ import {
   UnitStatus,
   UnitType,
   UnitVisibility,
-  UnitWorkDisplayPolicy,
-  UnitWorkRole,
 } from "../generated/client.js";
 import { seedChaptersForBook } from "./books.js";
 import { addSpecialSeedTarget, createSeedResult } from "./result.js";
@@ -25,7 +23,6 @@ export const FACTORY_SCENARIO_NAMES = [
   "large-content-tree",
   "large-history",
   "complex-shelf",
-  "unit-work-domain",
   "wiki-zone-experience",
 ] as const;
 
@@ -160,58 +157,13 @@ async function createScenarioEntity(
   return id;
 }
 
-async function ensureFactoryExternalRefSource(ctx: SeedCtx): Promise<string> {
-  const existing = await ctx.prisma.sourceSite.findUnique({
-    where: { key: "factory-work-domain" },
-    select: { entityUnitId: true },
-  });
-  if (existing) return existing.entityUnitId;
-
-  const sourceUnit = await ctx.prisma.unit.create({
-    data: {
-      type: UnitType.ENTITY,
-      slug: "factory-work-domain-source",
-      slugScope: ctx.slugScopes.entity,
-      status: UnitStatus.PUBLISHED,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      translations: {
-        create: {
-          language: DEFAULT_LANGUAGE,
-          title: "Factory Work Domain Source",
-          summary: "Source site used by the unit-work-domain seed scenario.",
-        },
-      },
-      entity: {
-        create: {
-          kind: "organization",
-          verified: true,
-          eligibleCreditRoles: ["publisher"],
-          eligibleSubjectRoles: [],
-          sourceSite: {
-            create: {
-              key: "factory-work-domain",
-              crawlSupport: "unsupported",
-              crawlEnabled: false,
-              refRules: [],
-            },
-          },
-        },
-      },
-    },
-    select: { id: true },
-  });
-  await ctx.sync.entity(sourceUnit.id);
-  return sourceUnit.id;
-}
-
-async function createWorkDomainBookUnit(
+async function createScenarioBookUnit(
   ctx: SeedCtx,
   input: {
     userId: string;
     title: string;
     language: string;
     visibility?: UnitVisibility;
-    sourceUnitId?: string;
     pageCount?: number;
     textLength?: number;
   },
@@ -225,7 +177,6 @@ async function createWorkDomainBookUnit(
           type: UnitType.BOOK,
           userId: input.userId,
           slugScope: input.userId,
-          workUnitId: input.sourceUnitId,
           status: UnitStatus.PUBLISHED,
           visibility: input.visibility ?? UnitVisibility.PUBLIC,
           licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
@@ -235,8 +186,7 @@ async function createWorkDomainBookUnit(
             create: {
               language: input.language,
               title: input.title,
-              summary: `${input.title} fixture for work-domain behavior.`,
-              sourceUnitId: input.sourceUnitId,
+              summary: `${input.title} factory fixture.`,
             },
           },
           supportLanguages: {
@@ -632,279 +582,11 @@ async function runComplexShelf(ctx: SeedCtx): Promise<SeedResult> {
   return result;
 }
 
-async function runUnitWorkDomain(ctx: SeedCtx): Promise<SeedResult> {
-  const result = createSeedResult();
-  const user = await getScenarioUser(ctx);
-  const [workTagId, releaseLocalTagId] = await Promise.all([
-    createScenarioTag(ctx, "Factory Work-Domain Shared Tag"),
-    createScenarioTag(ctx, "Factory Release-Local Tag"),
-  ]);
-  const sourceSiteEntityUnitId = await ensureFactoryExternalRefSource(ctx);
-
-  const hiddenWorkId = await createWorkDomainBookUnit(ctx, {
-    userId: user.userId,
-    title: "Factory Scenario: Hidden Work Domain",
-    language: DEFAULT_LANGUAGE,
-    visibility: UnitVisibility.PRIVATE,
-    pageCount: 0,
-    textLength: 0,
-  });
-
-  const releases = [
-    {
-      key: "primary",
-      title: "Factory Work Domain: Primary Release",
-      language: DEFAULT_LANGUAGE,
-      displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-      position: "a0",
-      specialLabel: "Work-domain primary release",
-      externalId: "factory-work-domain-primary",
-    },
-    {
-      key: "translation",
-      title: "工廠 Work Domain：繁中譯本",
-      language: LANGUAGES.ZH_HANT,
-      displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-      position: "b0",
-      specialLabel: "Work-domain translation release",
-      externalId: "factory-work-domain-zh-hant",
-    },
-    {
-      key: "secondary",
-      title: "Factory Work Domain: Secondary Edition",
-      language: LANGUAGES.JA,
-      displayPolicy: UnitWorkDisplayPolicy.SECONDARY,
-      position: "c0",
-      specialLabel: "Work-domain secondary release",
-      externalId: "factory-work-domain-secondary",
-    },
-    {
-      key: "hidden",
-      title: "Factory Work Domain: Hidden Draftlike Release",
-      language: DEFAULT_LANGUAGE,
-      displayPolicy: UnitWorkDisplayPolicy.HIDDEN_BY_DEFAULT,
-      position: "d0",
-      specialLabel: "Work-domain hidden-by-default release",
-      externalId: "factory-work-domain-hidden",
-    },
-  ] as const;
-
-  const releaseUnitIds: Record<(typeof releases)[number]["key"], string> =
-    {} as Record<(typeof releases)[number]["key"], string>;
-
-  for (const release of releases) {
-    const unitId = await createWorkDomainBookUnit(ctx, {
-      userId: user.userId,
-      title: release.title,
-      language: release.language,
-      sourceUnitId: hiddenWorkId,
-    });
-    releaseUnitIds[release.key] = unitId;
-    await ctx.prisma.unitWork.create({
-      data: {
-        unitId,
-        workUnitId: hiddenWorkId,
-        role: UnitWorkRole.RELEASE,
-        language: release.language,
-        position: release.position,
-        displayPolicy: release.displayPolicy,
-      },
-    });
-    await seedChaptersForBook(ctx, unitId, user.userId, {
-      count: { min: 3, max: 3, target: 3 },
-      unitProbability: 1,
-      multiLinkChapterProbability: 0,
-    });
-    await ctx.prisma.unitExternalRef.upsert({
-      where: {
-        sourceSiteEntityUnitId_externalKind_externalId: {
-          sourceSiteEntityUnitId,
-          externalKind: "book",
-          externalId: release.externalId,
-        },
-      },
-      create: {
-        unitId,
-        sourceSiteEntityUnitId,
-        externalKind: "book",
-        externalId: release.externalId,
-        canonicalUrl: `https://factory.rezics.local/books/${release.externalId}`,
-      },
-      update: {
-        unitId,
-        canonicalUrl: `https://factory.rezics.local/books/${release.externalId}`,
-      },
-    });
-  }
-
-  await ctx.prisma.unitTag.createMany({
-    data: [
-      { unitId: hiddenWorkId, tagUnitId: workTagId },
-      { unitId: releaseUnitIds.primary, tagUnitId: releaseLocalTagId },
-      { unitId: releaseUnitIds.translation, tagUnitId: releaseLocalTagId },
-    ],
-    skipDuplicates: true,
-  });
-
-  const reviewSpecs = [
-    {
-      targetUnitId: releaseUnitIds.primary,
-      title: "Factory review of primary release",
-      content: "Primary release review for work-domain feed aggregation.",
-    },
-    {
-      targetUnitId: releaseUnitIds.translation,
-      title: "Factory review of translation release",
-      content: "Translation release review for same-work feed aggregation.",
-    },
-  ];
-
-  const reviewUnitIds: string[] = [];
-  for (const spec of reviewSpecs) {
-    const postUnitId = randomUUID();
-    await ctx.prisma.unit.create({
-      data: {
-        id: postUnitId,
-        type: UnitType.POST,
-        userId: user.userId,
-        slugScope: user.userId,
-        status: UnitStatus.PUBLISHED,
-        visibility: UnitVisibility.PUBLIC,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: new Date(),
-        translations: {
-          create: { language: DEFAULT_LANGUAGE, title: spec.title },
-        },
-        supportLanguages: {
-          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-        },
-        post: {
-          create: {
-            authorUserId: user.userId,
-            targetUnitId: spec.targetUnitId,
-            kind: PostKind.REVIEW,
-            content: markdownContentDoc(spec.content) as Prisma.InputJsonValue,
-            depth: 0,
-          },
-        },
-      },
-    });
-    await ctx.prisma
-      .$executeRaw`UPDATE "Post" SET "path" = '0001'::ltree WHERE "unitId" = ${postUnitId}::uuid`;
-    await ctx.prisma.unitWork.create({
-      data: {
-        unitId: postUnitId,
-        workUnitId: hiddenWorkId,
-        role: UnitWorkRole.REVIEW,
-        displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-      },
-    });
-    reviewUnitIds.push(postUnitId);
-  }
-
-  const shelfId = randomUUID();
-  await ctx.prisma.unit.create({
-    data: {
-      id: shelfId,
-      type: UnitType.SHELF,
-      userId: user.userId,
-      slugScope: user.userId,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PUBLIC,
-      licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-      translations: {
-        create: {
-          language: DEFAULT_LANGUAGE,
-          title: "Factory Scenario: Work-Domain Shelf",
-        },
-      },
-      supportLanguages: {
-        create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-      },
-      shelf: {
-        create: {
-          kindKey: "factory-work-domain",
-          itemCount: 3,
-          extra: { scenario: "unit-work-domain" },
-        },
-      },
-    },
-  });
-
-  let prev: string | undefined;
-  const shelfRows = [
-    releaseUnitIds.primary,
-    releaseUnitIds.translation,
-    releaseUnitIds.hidden,
-  ].map((unitId) => {
-    const position = generateBetween(prev, undefined);
-    prev = position;
-    return { shelfId, unitId, kind: "book", position };
-  });
-  await ctx.prisma.shelfUnit.createMany({
-    data: shelfRows,
-    skipDuplicates: true,
-  });
-  await ctx.prisma.unitWork.create({
-    data: {
-      unitId: shelfId,
-      workUnitId: hiddenWorkId,
-      role: UnitWorkRole.SHELF,
-      displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-    },
-  });
-
-  await ctx.sync.content(hiddenWorkId);
-  await Promise.all([
-    ...Object.values(releaseUnitIds).map((unitId) => ctx.sync.content(unitId)),
-    ...reviewUnitIds.map((unitId) => ctx.sync.post(unitId)),
-    ctx.sync.content(shelfId),
-    ctx.sync.contentContainedUnits(shelfId),
-  ]);
-
-  addSpecialSeedTarget(result, {
-    label: "Work-domain hidden work",
-    scenario: "unit-work-domain",
-    unitType: UnitType.BOOK,
-    unitId: hiddenWorkId,
-    notes: "Private canonical work Unit with work-level tags.",
-  });
-  addSpecialSeedTarget(result, {
-    label: "Work-domain primary release",
-    scenario: "unit-work-domain",
-    unitType: UnitType.BOOK,
-    unitId: releaseUnitIds.primary,
-  });
-  addSpecialSeedTarget(result, {
-    label: "Work-domain translation release",
-    scenario: "unit-work-domain",
-    unitType: UnitType.BOOK,
-    unitId: releaseUnitIds.translation,
-  });
-  addSpecialSeedTarget(result, {
-    label: "Work-domain hidden-by-default release",
-    scenario: "unit-work-domain",
-    unitType: UnitType.BOOK,
-    unitId: releaseUnitIds.hidden,
-  });
-  addSpecialSeedTarget(result, {
-    label: "Work-domain shelf",
-    scenario: "unit-work-domain",
-    unitType: UnitType.SHELF,
-    unitId: shelfId,
-  });
-
-  return result;
-}
-
 async function createWikiScenarioPost(
   ctx: SeedCtx,
   input: {
     userId: string;
-    workUnitId: string;
+    targetUnitId: string;
     realmUnitId: string;
     translationGroupId: string;
     language: string;
@@ -940,7 +622,7 @@ async function createWikiScenarioPost(
       post: {
         create: {
           authorUserId: input.userId,
-          targetUnitId: input.workUnitId,
+          targetUnitId: input.targetUnitId,
           kind: PostKind.WIKI,
           content: markdownContentDoc(input.body) as Prisma.InputJsonValue,
           depth: 0,
@@ -952,14 +634,6 @@ async function createWikiScenarioPost(
   });
   await ctx.prisma
     .$executeRaw`UPDATE "Post" SET "path" = '0001'::ltree WHERE "unitId" = ${postUnitId}::uuid`;
-  await ctx.prisma.unitWork.create({
-    data: {
-      unitId: postUnitId,
-      workUnitId: input.workUnitId,
-      role: UnitWorkRole.WIKI,
-      displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-    },
-  });
   await ctx.prisma.unitRealm.create({
     data: {
       realmUnitId: input.realmUnitId,
@@ -1138,29 +812,15 @@ async function createWikiScenarioZone(
 async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
   const result = createSeedResult();
   const user = await getScenarioUser(ctx);
-  const workUnitId = await createWorkDomainBookUnit(ctx, {
+  const wikiEntryUnitId = await createScenarioBookUnit(ctx, {
     userId: user.userId,
-    title: "Factory Scenario: Wiki Zone Work",
+    title: "Factory Scenario: Wiki Zone Entry",
     language: DEFAULT_LANGUAGE,
-    visibility: UnitVisibility.PRIVATE,
-    pageCount: 0,
-    textLength: 0,
   });
-  const releaseUnitId = await createWorkDomainBookUnit(ctx, {
+  const releaseUnitId = await createScenarioBookUnit(ctx, {
     userId: user.userId,
     title: "Factory Scenario: Wiki Zone Release",
     language: DEFAULT_LANGUAGE,
-    sourceUnitId: workUnitId,
-  });
-  await ctx.prisma.unitWork.create({
-    data: {
-      unitId: releaseUnitId,
-      workUnitId,
-      role: UnitWorkRole.RELEASE,
-      language: DEFAULT_LANGUAGE,
-      position: "a0",
-      displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-    },
   });
 
   const realmUnitId = randomUUID();
@@ -1195,17 +855,6 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
   await ctx.prisma.realmMember.create({
     data: { realmUnitId, userId: user.userId, roleKey: "owner" },
   });
-  await ctx.prisma.workRealmContext.create({
-    data: {
-      workUnitId,
-      realmUnitId,
-      role: "official",
-      priority: 100,
-      createdByUserId: user.userId,
-      updatedByUserId: user.userId,
-    },
-  });
-
   const [characterId, locationId, factionId] = await Promise.all([
     createScenarioEntity(ctx, {
       title: "Factory Wiki Character",
@@ -1225,8 +874,12 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
   ]);
   await ctx.prisma.subjectAttribution.createMany({
     data: [
-      { unitId: workUnitId, entityId: characterId, role: "primary_character" },
-      { unitId: workUnitId, entityId: locationId, role: "setting" },
+      {
+        unitId: wikiEntryUnitId,
+        entityId: characterId,
+        role: "primary_character",
+      },
+      { unitId: wikiEntryUnitId, entityId: locationId, role: "setting" },
       { unitId: releaseUnitId, entityId: factionId, role: "about" },
     ],
     skipDuplicates: true,
@@ -1262,7 +915,7 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
     postIds.push(
       await createWikiScenarioPost(ctx, {
         userId: user.userId,
-        workUnitId,
+        targetUnitId: wikiEntryUnitId,
         realmUnitId,
         translationGroupId: group.id,
         language: DEFAULT_LANGUAGE,
@@ -1277,7 +930,7 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
     postIds.push(
       await createWikiScenarioPost(ctx, {
         userId: user.userId,
-        workUnitId,
+        targetUnitId: wikiEntryUnitId,
         realmUnitId,
         translationGroupId: group.id,
         language: LANGUAGES.ZH_HANT,
@@ -1332,17 +985,17 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
   });
 
   await Promise.all([
-    ctx.sync.content(workUnitId),
+    ctx.sync.content(wikiEntryUnitId),
     ctx.sync.content(releaseUnitId),
     ctx.sync.realm(realmUnitId),
     ...zoneIds.map((zoneId) => ctx.sync.content(zoneId)),
   ]);
 
   addSpecialSeedTarget(result, {
-    label: "Wiki Zone work",
+    label: "Wiki Zone entry",
     scenario: "wiki-zone-experience",
     unitType: UnitType.BOOK,
-    unitId: workUnitId,
+    unitId: wikiEntryUnitId,
   });
   addSpecialSeedTarget(result, {
     label: "Wiki Zone release",
@@ -1393,17 +1046,10 @@ export const FACTORY_SCENARIOS: Record<FactoryScenarioName, FactoryScenario> = {
     defaultSelected: true,
     run: runComplexShelf,
   },
-  "unit-work-domain": {
-    name: "unit-work-domain",
-    description:
-      "Hidden work with same-work releases, inherited tags, reviews, shelf, and external refs.",
-    defaultSelected: true,
-    run: runUnitWorkDomain,
-  },
   "wiki-zone-experience": {
     name: "wiki-zone-experience",
     description:
-      "Official work wiki realm with translated WIKI posts, labels, entities, and all wiki Zone templates.",
+      "Official wiki realm with translated WIKI posts, labels, entities, and all wiki Zone templates.",
     defaultSelected: true,
     run: runWikiZoneExperience,
   },

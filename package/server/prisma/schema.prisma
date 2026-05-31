@@ -80,30 +80,6 @@ enum UserUnitProgressStatus {
   DROPPED
 }
 
-enum ClaimStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  WITHDRAWN
-}
-
-enum UnitWorkRole {
-  RELEASE
-  POST
-  REVIEW
-  SHELF
-  SERIES
-  WIKI
-  GUIDE
-  DERIVED
-}
-
-enum UnitWorkDisplayPolicy {
-  PRIMARY
-  SECONDARY
-  HIDDEN_BY_DEFAULT
-}
-
 enum UnitAliasKind {
   COMMON
   ABBREVIATION
@@ -210,15 +186,6 @@ model Unit {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   publishedAt DateTime?
-
-  // Cross-user work-release claim flow (see WorkLinkClaim).
-  releaseClaims   WorkLinkClaim[] @relation("WorkLinkClaimRelease")
-  workClaims      WorkLinkClaim[] @relation("WorkLinkClaimWork")
-  workMemberships UnitWork[]      @relation("UnitWorkMember")
-  workMembers     UnitWork[]      @relation("UnitWorkWork")
-  workRealmContextsAsWork    WorkRealmContext[] @relation("WorkRealmContextWork")
-  workRealmContextsAsRealm   WorkRealmContext[] @relation("WorkRealmContextRealm")
-  workRealmContextsAsRelease WorkRealmContext[] @relation("WorkRealmContextRelease")
 
   // Owner/creator
   user User? @relation("UnitForUser", fields: [userId], references: [unitId])
@@ -484,119 +451,6 @@ model UnitAliasVote {
 
   @@id([aliasId, userId])
   @@index([userId])
-}
-
-/**
- * ANCHOR WORK-LINK CLAIM
- * Cross-user work/release linkage approval.
- */
-
-model WorkLinkClaim {
-  id            String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  releaseUnitId String      @db.Uuid
-  workUnitId    String      @db.Uuid
-  claimerUserId String      @db.Uuid
-  status        ClaimStatus @default(PENDING)
-  rejectReason  String?
-  createdAt     DateTime    @default(now())
-  resolvedAt    DateTime?
-  resolvedBy    String?     @db.Uuid
-
-  releaseUnit Unit  @relation("WorkLinkClaimRelease", fields: [releaseUnitId], references: [id], onDelete: Cascade)
-  workUnit    Unit  @relation("WorkLinkClaimWork", fields: [workUnitId], references: [id], onDelete: Cascade)
-  claimer     User  @relation("WorkLinkClaimClaimer", fields: [claimerUserId], references: [unitId])
-  resolver    User? @relation("WorkLinkClaimResolver", fields: [resolvedBy], references: [unitId])
-
-  @@index([workUnitId, status])
-  @@index([claimerUserId, status])
-  @@index([releaseUnitId, status])
-}
-
-/**
- * ANCHOR UNIT WORK DOMAIN
- * Canonical relation between any Unit participating in a work domain and the
- * hidden work Unit that owns grouping, inherited discovery metadata, and shared
- * content aggregation.
- */
-model UnitWork {
-  unitId        String                @db.Uuid
-  workUnitId    String                @db.Uuid
-  role          UnitWorkRole
-  language      String?               @db.VarChar(16)
-  position      String?               @db.VarChar(64)
-  displayPolicy UnitWorkDisplayPolicy @default(PRIMARY)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  unit Unit @relation("UnitWorkMember", fields: [unitId], references: [id], onDelete: Cascade)
-  work Unit @relation("UnitWorkWork", fields: [workUnitId], references: [id], onDelete: Cascade)
-
-  @@id([unitId, workUnitId, role])
-  @@index([workUnitId, role, position, unitId])
-  @@index([workUnitId, role, createdAt, unitId])
-  @@index([unitId, role, workUnitId])
-}
-
-model WorkRealmContext {
-  id            String  @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  workUnitId    String  @db.Uuid
-  realmUnitId   String  @db.Uuid
-  role          String  @db.VarChar(32)
-  priority      Int     @default(0)
-  locale        String? @db.VarChar(16)
-  releaseUnitId String? @db.Uuid
-
-  createdByUserId String? @db.Uuid
-  updatedByUserId String? @db.Uuid
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  work        Unit  @relation("WorkRealmContextWork", fields: [workUnitId], references: [id], onDelete: Cascade)
-  realm       Unit  @relation("WorkRealmContextRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
-  releaseUnit Unit? @relation("WorkRealmContextRelease", fields: [releaseUnitId], references: [id], onDelete: SetNull)
-
-  @@index([workUnitId, role, priority, id])
-  @@index([realmUnitId, role, priority, id])
-  @@index([releaseUnitId, role])
-}
-
-/**
- * ANCHOR ADMIN WORK MERGE
- * Durable audit and revert log for admin-only work-domain canonical merges.
- * The source work Unit is preserved; this row records moved memberships,
- * legacy release pointers, optional metadata copies, repair enqueue counts,
- * and item-level progress.
- */
-model AdminWorkMergeOperation {
-  id                        String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  sourceWorkUnitId          String    @db.Uuid
-  targetWorkUnitId          String    @db.Uuid
-  status                    String    @default("QUEUED") @db.VarChar(32)
-  actorUserId               String    @db.Uuid
-  reason                    String?
-  copyTagsRequested         Boolean   @default(false)
-  copyAliasesRequested      Boolean   @default(false)
-  itemProgress              Json      @default("{}")
-  movedMemberships          Json      @default("[]")
-  movedLegacyReleaseUnitIds String[]  @db.Uuid @default([])
-  createdTagKeys            String[]  @default([])
-  createdAliasIds           String[]  @db.Uuid @default([])
-  repairUnitIds             String[]  @db.Uuid @default([])
-  repairCommandCount        Int       @default(0)
-  errorMessage              String?
-  revertedAt                DateTime?
-  revertedByUserId          String?   @db.Uuid
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  actor      User  @relation("AdminWorkMergeActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
-  revertedBy User? @relation("AdminWorkMergeRevertedBy", fields: [revertedByUserId], references: [unitId], onDelete: SetNull)
-
-  @@index([sourceWorkUnitId, status, createdAt])
-  @@index([targetWorkUnitId, status, createdAt])
-  @@index([actorUserId, createdAt])
 }
 
 /**
@@ -1044,7 +898,7 @@ model Series {
 
 /// Direct lookup projection from counted release member nodes in generic
 /// ContentStructure. This model intentionally stores no path, depth, ordering,
-/// hierarchy, Work Unit, inherited-membership, or work-domain source fields.
+/// hierarchy, inherited membership, or source-domain fields.
 model SeriesContentIndex {
   seriesUnitId  String @db.Uuid
   releaseUnitId String @db.Uuid
@@ -1513,8 +1367,6 @@ model User {
   units     Unit[]     @relation("UnitForUser")
   apiTokens ApiToken[]
 
-  workLinkClaimsAsClaimer         WorkLinkClaim[]            @relation("WorkLinkClaimClaimer")
-  workLinkClaimsAsResolver        WorkLinkClaim[]            @relation("WorkLinkClaimResolver")
   unitProgress                    UserUnitProgress[]
   userUnitCollections             UserUnitCollection[]
   userTagApplications             UserTagApplication[]
@@ -1527,8 +1379,6 @@ model User {
   unitAliasesCreated              UnitAlias[]                @relation("UnitAliasCreatedBy")
   unitAliasesUpdated              UnitAlias[]                @relation("UnitAliasUpdatedBy")
   unitAliasVotes                  UnitAliasVote[]            @relation("UnitAliasVoteUser")
-  adminWorkMergesCreated          AdminWorkMergeOperation[]  @relation("AdminWorkMergeActor")
-  adminWorkMergesReverted         AdminWorkMergeOperation[]  @relation("AdminWorkMergeRevertedBy")
   staffGrantsReceived             StaffGrant[]               @relation("StaffGrantUser")
   staffGrantsCreated              StaffGrant[]               @relation("StaffGrantGrantedBy")
   staffGrantsRevoked              StaffGrant[]               @relation("StaffGrantRevokedBy")
