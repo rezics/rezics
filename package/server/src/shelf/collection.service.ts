@@ -11,6 +11,7 @@ import { AppError } from "@/utils/errors";
 import { generateBetween } from "./fractional-index";
 import { mapUnitToKind, reconcileShelfWorkMemberships } from "./shelf.service";
 import { findSystemShelf } from "./system-shelves";
+import { applyUserUnitCollectionMetadata } from "./user-unit-collection.service";
 
 const FAVORITES_KIND_KEY = "favorites" as const;
 const COLLECTION_STATUS_BATCH_CAP = 100;
@@ -90,13 +91,24 @@ export class CollectionService {
    * Collect a unit to multiple shelves.
    */
   async collect(userId: string, input: CollectInput): Promise<CollectResponse> {
-    const { targetId, shelfIds, independent = false } = input;
+    const {
+      targetId,
+      shelfIds,
+      independent = false,
+      tagUnitIds,
+      searchText,
+    } = input;
     const resolved = await this.resolveTarget(targetId, independent);
 
     const savedTo: string[] = [];
     let isNew = false;
 
     await prisma.$transaction(async (tx) => {
+      await applyUserUnitCollectionMetadata(tx, userId, resolved.parentUnitId, {
+        tagUnitIds,
+        searchText,
+      });
+
       for (const shelfId of shelfIds) {
         if (shelfId === resolved.parentUnitId) {
           throw new AppError(400, "A shelf cannot contain itself");

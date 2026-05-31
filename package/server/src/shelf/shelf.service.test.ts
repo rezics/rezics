@@ -249,6 +249,70 @@ describe("ShelfService", () => {
     });
   });
 
+  test("addUnit writes optional user collection metadata", async () => {
+    enqueueMock.mockClear();
+    const upsert = mock(async () => ({}));
+    const deleteMany = mock(async () => ({ count: 0 }));
+    const createMany = mock(async () => ({ count: 1 }));
+
+    Object.assign(prismaMock, {
+      unit: {
+        findUnique: async () => ({ type: "BOOK", post: null }),
+      },
+      shelfUnit: {
+        findMany: async () => [],
+      },
+      unitWork: {
+        findMany: async () => [],
+        deleteMany: async () => ({ count: 0 }),
+        upsert: async () => ({}),
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          shelfUnit: {
+            findFirst: async () => null,
+            createMany: async () => ({ count: 1 }),
+            findUniqueOrThrow: async () => makeShelfUnitRow(),
+          },
+          shelf: { update: async () => ({}) },
+          userUnitCollection: { upsert },
+          userTagApplication: { deleteMany, createMany },
+        }),
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.addUnit(
+      "shelf-1",
+      {
+        unitId: "book-1",
+        kind: "book",
+        tagUnitIds: ["tag-1"],
+        searchText: null,
+      },
+      "user-1",
+    );
+
+    expect(upsert).toHaveBeenCalledWith({
+      where: { userId_unitId: { userId: "user-1", unitId: "book-1" } },
+      create: { userId: "user-1", unitId: "book-1", searchText: null },
+      update: { searchText: null },
+    });
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { userId: "user-1", unitId: "book-1" },
+    });
+    expect(createMany).toHaveBeenCalledWith({
+      data: [
+        {
+          userId: "user-1",
+          unitId: "book-1",
+          tagUnitId: "tag-1",
+          position: "00000000",
+        },
+      ],
+      skipDuplicates: true,
+    });
+  });
+
   test("reconcileShelfWorkMemberships registers shelf work domains from contained releases", async () => {
     enqueueMock.mockClear();
     const deleteManyMock = mock(async () => ({ count: 0 }));

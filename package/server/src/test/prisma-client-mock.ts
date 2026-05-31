@@ -19,6 +19,7 @@ export const UnitType = {
   GAME: "GAME",
   MEDIA: "MEDIA",
   POST: "POST",
+  COMMENT: "COMMENT",
   TAG: "TAG",
   REALM: "REALM",
   SHELF: "SHELF",

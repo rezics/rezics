@@ -361,7 +361,7 @@ export const shelfApi = new Elysia({ prefix: "/shelf" })
           "Forbidden: you do not have permission to modify this shelf",
         );
       }
-      return shelfService.addUnit(params.unitId, body);
+      return shelfService.addUnit(params.unitId, body, identity.userId);
     },
     {
       requireLogin: true,

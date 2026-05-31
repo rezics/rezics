@@ -48,6 +48,7 @@ import {
   POSITION_LENGTH_THRESHOLD,
   rebalance,
 } from "./fractional-index";
+import { applyUserUnitCollectionMetadata } from "./user-unit-collection.service";
 
 export const SHELF_ITEM_BATCH_OP_CAP = 200;
 
@@ -716,6 +717,7 @@ export class ShelfService {
   async addUnit(
     shelfId: string,
     req: AddShelfUnitInput,
+    userId?: string,
   ): Promise<ShelfUnitDTO> {
     if (shelfId === req.unitId) {
       throw new AppError(400, "A shelf cannot contain itself");
@@ -725,6 +727,12 @@ export class ShelfService {
 
     const row = await prisma.$transaction(async (tx) => {
       await ensureShelfUnit(tx, shelfId, req.unitId, kind);
+      if (userId) {
+        await applyUserUnitCollectionMetadata(tx, userId, req.unitId, {
+          tagUnitIds: req.tagUnitIds,
+          searchText: req.searchText,
+        });
+      }
       return tx.shelfUnit.findUniqueOrThrow({
         where: { shelfId_unitId: { shelfId, unitId: req.unitId } },
       });
