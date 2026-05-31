@@ -33,6 +33,7 @@ import {
 } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
 import { commentService } from "@/comment/service";
+import type { CommentWithRelations } from "@/comment/types";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { generateBetween } from "@/shelf/fractional-index";
 import { serverJobProducer } from "@/job/job-boundary";
@@ -46,6 +47,7 @@ import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
+import { publicUserSelect } from "@/utils/sanitizeUser";
 import { AppError } from "../utils/errors";
 import { mapPostPinToDTO } from "./post.mapper";
 import type { PostWithRelations } from "./types";
@@ -108,6 +110,35 @@ function commentAsPostCompat(comment: any): PostWithRelations {
     pinKind: null,
     pinPosition: null,
   } as PostWithRelations;
+}
+
+const commentIncludeForPostCompat = {
+  unit: {
+    include: {
+      user: { select: publicUserSelect },
+      contentModerationState: true,
+    },
+  },
+} as const;
+
+async function attachCommentPathsForPostCompat<
+  T extends { unitId: string; path?: string | null },
+>(comments: T[]): Promise<T[]> {
+  if (comments.length === 0) return comments;
+  const rows = await prisma.$queryRaw<
+    { unitId: string; path: string | null }[]
+  >`
+    SELECT "unitId", "path"::text AS path
+    FROM "Comment"
+    WHERE "unitId" IN (${Prisma.join(
+      comments.map((comment) => Prisma.sql`${comment.unitId}::uuid`),
+    )})
+  `;
+  const pathByUnitId = new Map(rows.map((row) => [row.unitId, row.path]));
+  for (const comment of comments) {
+    comment.path = pathByUnitId.get(comment.unitId) ?? null;
+  }
+  return comments;
 }
 
 function readRealmRuleUnitId(extra: Prisma.JsonValue | null): string | null {
@@ -275,6 +306,154 @@ async function attachPinKinds<
 }
 
 export class PostService {
+  private isCommentRead(query: PostListQuery) {
+    return Boolean(query.rootPostUnitId || query.parentPostUnitId);
+  }
+
+  private async resolveCommentRealmIds(
+    rootUnitId: string,
+    explicitRealmUnitId?: string,
+  ): Promise<string[]> {
+    if (explicitRealmUnitId) return [explicitRealmUnitId];
+    const rows = await prisma.unitRealm.findMany({
+      where: { unitId: rootUnitId, state: "VISIBLE" },
+      select: { realmUnitId: true },
+    });
+    return rows.map((row) => row.realmUnitId);
+  }
+
+  private async listCommentCompat(
+    query: PostListQuery,
+    options?: { isAdmin?: boolean; viewerUserId?: string | null },
+  ): Promise<{ posts: PostWithRelations[]; total: number }> {
+    const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
+    const skipNum = query.start ?? 0;
+    const idList = parseIdsCsv(query.ids);
+
+    const parentComment = query.parentPostUnitId
+      ? await prisma.comment.findUnique({
+          where: { unitId: query.parentPostUnitId },
+          select: { unitId: true, rootUnitId: true, realmUnitId: true },
+        })
+      : null;
+
+    const parentPost =
+      query.parentPostUnitId && !parentComment
+        ? await prisma.post.findUnique({
+            where: { unitId: query.parentPostUnitId },
+            select: { unitId: true, rootPostUnitId: true },
+          })
+        : null;
+
+    const rootUnitId =
+      query.rootPostUnitId ??
+      parentComment?.rootUnitId ??
+      parentPost?.rootPostUnitId ??
+      parentPost?.unitId;
+
+    if (!rootUnitId) {
+      throw new AppError(400, "Comment reads require a root or parent unit");
+    }
+
+    const realmUnitIds = parentComment
+      ? [parentComment.realmUnitId]
+      : await this.resolveCommentRealmIds(rootUnitId, query.realmUnitId);
+
+    if (realmUnitIds.length === 0) {
+      return { posts: [], total: 0 };
+    }
+
+    const where: Prisma.CommentWhereInput = {
+      rootUnitId,
+      realmUnitId:
+        realmUnitIds.length === 1 ? realmUnitIds[0] : { in: realmUnitIds },
+      unit: options?.isAdmin
+        ? undefined
+        : {
+            OR: [
+              { status: UnitStatus.PUBLISHED, visibility: "PUBLIC" },
+              { status: UnitStatus.DELETED, visibility: "PUBLIC" },
+            ],
+          },
+    };
+
+    if (query.authorUserId) where.authorUserId = query.authorUserId;
+    if (query.state) where.state = query.state;
+    if (typeof query.maxDepth === "number") {
+      where.depth = { lte: query.maxDepth };
+    }
+
+    if (query.subtreeRootPostUnitId) {
+      const [anchor] = await prisma.$queryRaw<
+        {
+          unitId: string;
+          rootUnitId: string;
+          depth: number;
+          path: string | null;
+        }[]
+      >`
+        SELECT "unitId", "rootUnitId", "depth", "path"::text AS path
+        FROM "Comment"
+        WHERE "unitId" = ${query.subtreeRootPostUnitId}::uuid
+          AND "rootUnitId" = ${rootUnitId}::uuid
+      `;
+      if (!anchor?.path) {
+        throw new AppError(
+          404,
+          `Comment not found: ${query.subtreeRootPostUnitId}`,
+        );
+      }
+      const maxDepth =
+        typeof query.maxDepth === "number" ? query.maxDepth : undefined;
+      const descendants = await prisma.$queryRaw<{ unitId: string }[]>`
+        SELECT "unitId" FROM "Comment"
+        WHERE "path" <@ ${anchor.path}::ltree
+          AND "rootUnitId" = ${rootUnitId}::uuid
+          AND "unitId" <> ${anchor.unitId}::uuid
+          ${
+            maxDepth !== undefined
+              ? Prisma.sql`AND "depth" <= ${anchor.depth + maxDepth}`
+              : Prisma.empty
+          }
+      `;
+      const descendantIds = descendants.map((row) => row.unitId);
+      where.unitId =
+        idList && idList.length > 0
+          ? { in: descendantIds.filter((id) => idList.includes(id)) }
+          : { in: descendantIds };
+    } else if (query.parentPostUnitId) {
+      where.parentCommentUnitId = parentComment ? parentComment.unitId : null;
+    } else if (idList && idList.length > 0) {
+      where.unitId = { in: idList };
+    }
+
+    await applyBlockedAuthorFilter(where, options);
+
+    const [comments, total] = await Promise.all([
+      prisma.comment.findMany({
+        where,
+        orderBy: [{ createdAt: "asc" }],
+        skip: skipNum,
+        take: limitNum,
+        include: commentIncludeForPostCompat,
+      }),
+      prisma.comment.count({ where }),
+    ]);
+
+    const compatPosts = await attachPinKinds(
+      (
+        await attachCommentPathsForPostCompat(
+          comments as CommentWithRelations[],
+        )
+      ).map(commentAsPostCompat),
+    );
+
+    return {
+      posts: await hydrateUnitOwnerUserSlugs(compatPosts),
+      total,
+    };
+  }
+
   /**
    * List posts with support for flat and threaded modes.
    *
@@ -288,6 +467,10 @@ export class PostService {
     query: PostListQuery = {},
     options?: { isAdmin?: boolean; viewerUserId?: string | null },
   ): Promise<{ posts: PostWithRelations[]; total: number }> {
+    if (this.isCommentRead(query)) {
+      return this.listCommentCompat(query, options);
+    }
+
     const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
     const skipNum = query.start ?? 0;
     const isThreaded = query.mode === "threaded";
@@ -585,10 +768,34 @@ export class PostService {
     unitId: string,
     options?: { isAdmin?: boolean; allowTombstone?: boolean },
   ): Promise<PostWithRelations> {
-    const post = await prisma.post.findUniqueOrThrow({
+    const post = await prisma.post.findUnique({
       where: { unitId },
       include: postInclude,
     });
+    if (!post) {
+      const comment = await prisma.comment.findUnique({
+        where: { unitId },
+        include: commentIncludeForPostCompat,
+      });
+      if (!comment) throw new AppError(404, `Post not found: ${unitId}`);
+      if (
+        !options?.isAdmin &&
+        !options?.allowTombstone &&
+        (comment.unit.status !== UnitStatus.PUBLISHED ||
+          comment.unit.visibility !== "PUBLIC")
+      ) {
+        throw new AppError(404, `Post not found: ${unitId}`);
+      }
+      const compat = commentAsPostCompat(
+        (
+          await attachCommentPathsForPostCompat([
+            comment as CommentWithRelations,
+          ])
+        )[0]!,
+      );
+      const [withPin] = await attachPinKinds([compat]);
+      return hydrateUnitOwnerUserSlugRow(withPin);
+    }
     if (
       !options?.isAdmin &&
       !options?.allowTombstone &&
@@ -1717,7 +1924,30 @@ export class PostService {
       select: { depth: true, rootPostUnitId: true, parentPostUnitId: true },
     });
     if (!target) {
-      throw new AppError(404, `Post not found: ${postUnitId}`);
+      const comment = await prisma.comment.findUnique({
+        where: { unitId: postUnitId },
+        select: {
+          depth: true,
+          rootUnitId: true,
+          parentCommentUnitId: true,
+        },
+      });
+      if (!comment) {
+        throw new AppError(404, `Post not found: ${postUnitId}`);
+      }
+      if (comment.rootUnitId !== scopeUnitId) {
+        throw new AppError(
+          400,
+          "Target post does not belong to the scope thread",
+        );
+      }
+      if (comment.depth < 1) {
+        throw new AppError(400, "Only replies (depth >= 1) can be promoted");
+      }
+      return {
+        depth: comment.depth,
+        parentPostUnitId: comment.parentCommentUnitId ?? scopeUnitId,
+      };
     }
     if (target.rootPostUnitId !== scopeUnitId) {
       throw new AppError(

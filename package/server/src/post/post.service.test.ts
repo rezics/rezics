@@ -73,6 +73,8 @@ const commentCreateMock = mock(
   }),
 );
 const commentFindUniqueMock = mock(async (): Promise<any> => null);
+const commentFindManyMock = mock(async (): Promise<any[]> => []);
+const commentCountMock = mock(async () => 0);
 const commentFindUniqueOrThrowMock = mock(
   async (): Promise<any> => ({
     unitId: "comment-parent-1",
@@ -109,6 +111,7 @@ const realmUnitCreateMock = mock(async (args: any) => {
   }
   return args.data;
 });
+const realmUnitFindManyMock = mock(async () => [{ realmUnitId: "realm-1" }]);
 const unitTagCreateMock = mock(async (args: any) => args.data);
 const unitTagFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationFindManyMock = mock(async (): Promise<any[]> => []);
@@ -128,6 +131,7 @@ const postPinCreateMock = mock(async (args: any) => ({
 }));
 const postPinFindUniqueMock = mock(async (): Promise<any> => null);
 const postPinFindFirstMock = mock(async (): Promise<any> => null);
+const postPinFindManyMock = mock(async (): Promise<any[]> => []);
 const postPinDeleteMock = mock(async (args: any) => args.where);
 const postPinCountMock = mock(async (): Promise<number> => 0);
 const unitFindFirstMock = mock(async (): Promise<any> => null);
@@ -209,10 +213,12 @@ Object.assign(prismaMock, {
   comment: {
     create: commentCreateMock,
     findUnique: commentFindUniqueMock,
+    findMany: commentFindManyMock,
+    count: commentCountMock,
     findUniqueOrThrow: commentFindUniqueOrThrowMock,
     update: commentUpdateMock,
   },
-  unitRealm: { create: realmUnitCreateMock },
+  unitRealm: { create: realmUnitCreateMock, findMany: realmUnitFindManyMock },
   realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
   realmMember: {
     findMany: realmMemberFindManyMock,
@@ -234,6 +240,7 @@ Object.assign(prismaMock, {
     create: postPinCreateMock,
     findUnique: postPinFindUniqueMock,
     findFirst: postPinFindFirstMock,
+    findMany: postPinFindManyMock,
     delete: postPinDeleteMock,
     count: postPinCountMock,
   },
@@ -336,6 +343,10 @@ function resetMocks() {
   commentCreateMock.mockClear();
   commentFindUniqueMock.mockClear();
   commentFindUniqueMock.mockResolvedValue(null);
+  commentFindManyMock.mockClear();
+  commentFindManyMock.mockResolvedValue([]);
+  commentCountMock.mockClear();
+  commentCountMock.mockResolvedValue(0);
   commentFindUniqueOrThrowMock.mockClear();
   commentFindUniqueOrThrowMock.mockResolvedValue({
     unitId: "comment-parent-1",
@@ -365,6 +376,8 @@ function resetMocks() {
   realmRuleAcknowledgementFindManyMock.mockClear();
   realmRuleAcknowledgementFindManyMock.mockResolvedValue([]);
   realmUnitCreateMock.mockClear();
+  realmUnitFindManyMock.mockClear();
+  realmUnitFindManyMock.mockResolvedValue([{ realmUnitId: "realm-1" }]);
   unitTagCreateMock.mockClear();
   unitTagFindManyMock.mockClear();
   unitTranslationFindManyMock.mockClear();
@@ -384,6 +397,8 @@ function resetMocks() {
   postPinFindUniqueMock.mockResolvedValue(null);
   postPinFindFirstMock.mockClear();
   postPinFindFirstMock.mockResolvedValue(null);
+  postPinFindManyMock.mockClear();
+  postPinFindManyMock.mockResolvedValue([]);
   postPinDeleteMock.mockClear();
   postPinCountMock.mockClear();
   postPinCountMock.mockResolvedValue(0);
@@ -406,6 +421,10 @@ function resetMocks() {
 
 function firstPostFindManyArgs() {
   return (postFindManyMock.mock.calls as any[])[0]?.[0] as any;
+}
+
+function firstCommentFindManyArgs() {
+  return (commentFindManyMock.mock.calls as any[])[0]?.[0] as any;
 }
 
 describe("PostService.create realm/tag junction writes", () => {
@@ -974,6 +993,106 @@ describe("PostService.getPrimaryVisibleRealmForPost", () => {
   });
 });
 
+describe("PostService.list comment compatibility reads", () => {
+  const service = new PostService();
+
+  test("detail reads fall back to Comment rows", async () => {
+    resetMocks();
+    commentFindUniqueMock.mockResolvedValue({
+      unitId: "comment-1",
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      parentCommentUnitId: null,
+      authorUserId: "user-1",
+      content: content("reply"),
+      depth: 1,
+      replyCount: 0,
+      directReplyCount: 0,
+      lastReplyAt: null,
+      isLocked: false,
+      state: null,
+      createdAt: new Date("2026-06-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-06-01T00:00:00.000Z"),
+      unit: {
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        licenseSlug: null,
+        user: null,
+        contentModerationState: null,
+      },
+    });
+    queryRawMock.mockResolvedValueOnce([{ unitId: "comment-1", path: "1" }]);
+
+    const result = await service.getByUnitId("comment-1");
+
+    expect(postFindUniqueMock).toHaveBeenCalledWith({
+      where: { unitId: "comment-1" },
+      include: expect.any(Object),
+    });
+    expect(commentFindUniqueMock).toHaveBeenCalledWith({
+      where: { unitId: "comment-1" },
+      include: expect.any(Object),
+    });
+    expect(result).toMatchObject({
+      unitId: "comment-1",
+      rootPostUnitId: "root-1",
+      parentPostUnitId: "root-1",
+      path: "1",
+    });
+  });
+
+  test("thread reads come from Comment rows and return post-compatible DTO shape", async () => {
+    resetMocks();
+    commentFindManyMock.mockResolvedValue([
+      {
+        unitId: "comment-1",
+        rootUnitId: "root-1",
+        realmUnitId: "realm-1",
+        parentCommentUnitId: null,
+        authorUserId: "user-1",
+        content: content("reply"),
+        depth: 1,
+        replyCount: 0,
+        directReplyCount: 0,
+        lastReplyAt: null,
+        isLocked: false,
+        state: null,
+        createdAt: new Date("2026-06-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-06-01T00:00:00.000Z"),
+        unit: {
+          status: "PUBLISHED",
+          visibility: "PUBLIC",
+          licenseSlug: null,
+          user: null,
+          contentModerationState: null,
+        },
+      },
+    ]);
+    commentCountMock.mockResolvedValue(1);
+    queryRawMock.mockResolvedValueOnce([{ unitId: "comment-1", path: "1" }]);
+
+    const result = await service.list({
+      rootPostUnitId: "root-1",
+      mode: "threaded",
+      limit: 20,
+    });
+
+    expect(postFindManyMock).not.toHaveBeenCalled();
+    expect(firstCommentFindManyArgs().where).toMatchObject({
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+    });
+    expect(result.total).toBe(1);
+    expect(result.posts[0]).toMatchObject({
+      unitId: "comment-1",
+      rootPostUnitId: "root-1",
+      parentPostUnitId: "root-1",
+      depth: 1,
+      path: "1",
+    });
+  });
+});
+
 describe("PostService.list subtree queries", () => {
   const service = new PostService();
 
@@ -1533,6 +1652,30 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       postUnitId: "reply-1",
       kind: "PINNED",
       byUserId: "op-1",
+    });
+    expect(pin.kind).toBe("PINNED");
+  });
+
+  test("OP pins a Comment reply within their own thread", async () => {
+    resetMocks();
+    postFindUniqueMock
+      .mockResolvedValueOnce(rootScope())
+      .mockResolvedValueOnce(null);
+    commentFindUniqueMock.mockResolvedValueOnce({
+      depth: 1,
+      rootUnitId: "root-1",
+      parentCommentUnitId: null,
+    });
+
+    const pin = await service.pin(
+      { scopeUnitId: "root-1", postUnitId: "comment-1" },
+      op,
+    );
+
+    expect(postPinCreateMock.mock.calls[0][0].data).toMatchObject({
+      scopeUnitId: "root-1",
+      postUnitId: "comment-1",
+      kind: "PINNED",
     });
     expect(pin.kind).toBe("PINNED");
   });
