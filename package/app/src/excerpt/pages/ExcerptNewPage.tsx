@@ -38,7 +38,7 @@ export function ExcerptNewPage({ bookUnitId }: { bookUnitId: string }) {
       userId,
       type: "QUOTE",
       extra: (excerptData.extra as Record<string, any>) || undefined,
-      workUnitId: bookUnitId,
+      targetUnitId: bookUnitId,
       translations: [
         {
           language: translation?.language || "en",
