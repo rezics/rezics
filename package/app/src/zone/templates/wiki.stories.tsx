@@ -1,4 +1,3 @@
-import { bestLanguageWikiPostsQuery } from "@rezics/api/translation-group";
 import { unitDetailQuery } from "@rezics/api/unit";
 import {
   LANGUAGES,
@@ -18,13 +17,13 @@ import {
   WikiMinimalZoneTemplate,
 } from "./wiki";
 
-const TRANSLATION_GROUP_ID = "translation-group-overview";
 const UNIT_IDS = {
   overviewLabel: "label-overview",
   charactersLabel: "label-characters",
   character: "entity-character",
   tag: "tag-lore",
   unit: "unit-guide",
+  wikiOverview: "wiki-overview-en",
 };
 
 function makeUnit(
@@ -51,6 +50,7 @@ const navigationUnits = [
   makeUnit(UNIT_IDS.character, "Archivist Rin", UnitType.ENTITY),
   makeUnit(UNIT_IDS.tag, "Lore", UnitType.TAG),
   makeUnit(UNIT_IDS.unit, "Reading guide", UnitType.POST),
+  makeUnit(UNIT_IDS.wikiOverview, "Overview", UnitType.POST),
 ];
 
 const baseZone: ZoneDTO = {
@@ -58,7 +58,7 @@ const baseZone: ZoneDTO = {
   slug: "fixture-wiki-template",
   name: "Archive of the Glass City",
   description:
-    "A seeded wiki portal covering characters, places, factions, and translated entry groups.",
+    "A seeded wiki portal covering characters, places, factions, and translated entries.",
   template: "wiki-classic",
   filters: {},
   wiki: {
@@ -73,8 +73,8 @@ const baseZone: ZoneDTO = {
             { kind: "entity", entityId: UNIT_IDS.character },
             { kind: "tag", tagUnitId: UNIT_IDS.tag },
             {
-              kind: "translationGroup",
-              translationGroupId: TRANSLATION_GROUP_ID,
+              kind: "wikiUnit",
+              unitId: UNIT_IDS.wikiOverview,
             },
             { kind: "unit", unitId: UNIT_IDS.unit },
             {
@@ -132,7 +132,8 @@ const homepageData: WikiZoneHomepageData = {
     {
       section: {
         id: "featured",
-        kind: "translationGroupCollection",
+        kind: "wikiUnitCollection",
+        unitIds: [UNIT_IDS.wikiOverview],
         title: {
           translations: { en: "Featured entries" },
           fallbackLanguage: LANGUAGES.EN,
@@ -141,11 +142,9 @@ const homepageData: WikiZoneHomepageData = {
       items: [
         {
           kind: "wikiPost",
-          unitId: "wiki-overview-en",
-          translationGroupId: TRANSLATION_GROUP_ID,
+          unitId: UNIT_IDS.wikiOverview,
           title: "Overview",
-          summary:
-            "Best-language wiki entry selected from a translation group.",
+          summary: "Wiki entry with language-specific body translations.",
         },
       ],
     },
@@ -254,20 +253,6 @@ function Seeded({ children }: { children: ReactNode }) {
     for (const unit of navigationUnits) {
       qc.setQueryData(unitDetailQuery(unit.id).queryKey, unit);
     }
-    qc.setQueryData(
-      bestLanguageWikiPostsQuery([TRANSLATION_GROUP_ID], [LANGUAGES.ZH_HANT])
-        .queryKey,
-      {
-        posts: [
-          {
-            translationGroupId: TRANSLATION_GROUP_ID,
-            unitId: "wiki-overview-en",
-            language: LANGUAGES.EN,
-            title: "Overview",
-          },
-        ],
-      },
-    );
   }, [qc]);
 
   return <div className="p-6">{children}</div>;

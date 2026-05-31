@@ -15,7 +15,6 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     user: mapPublicUser(unit.user),
     defaultLanguage: unit.defaultLanguage ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,
-    translationGroupId: unit.translationGroupId ?? undefined,
     status: unit.status,
     visibility: unit.visibility,
     rating: unit.rating,

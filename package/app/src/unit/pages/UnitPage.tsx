@@ -1,7 +1,3 @@
-import {
-  useAttachTranslation,
-  useTranslationGroupSiblings,
-} from "@rezics/api/translation-group";
 import { unitDetailQuery } from "@rezics/api/unit/unit";
 import { mainMarkdownSource } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -21,7 +17,6 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
 import { TextLink, unitHref } from "@/shared/ui/link";
-import { PostLanguageSwitcher } from "../components/PostLanguageSwitcher";
 
 function formatMetadataValue(value: unknown): string {
   if (value === null || value === undefined) return "-";
@@ -39,19 +34,12 @@ function formatMetadataValue(value: unknown): string {
 }
 
 export function UnitPageById({ unitId }: { unitId: string }) {
-  const { t } = useTranslation(["book", "common", "community", "settings"]);
+  const { t } = useTranslation(["book", "common", "settings"]);
   const {
     data: unit,
     isLoading,
     error,
   } = useQuery(unitDetailQuery(unitId || ""));
-
-  const isPost = unit?.type === "POST";
-  const groupId = unit?.translationGroupId ?? null;
-  const siblingsQuery = useTranslationGroupSiblings(
-    isPost && groupId ? unit.id : null,
-  );
-  const attach = useAttachTranslation();
 
   if (isLoading) {
     return (
@@ -78,19 +66,6 @@ export function UnitPageById({ unitId }: { unitId: string }) {
   const content = mainMarkdownSource(primaryTranslation?.description);
   const metadataEntries = Object.entries(unit.extra ?? {});
   const author = unit.user;
-
-  // MOCK: client-side gate until permissions are finalized for translation attach.
-  const canAddTranslation = isPost;
-  const handleAddTranslation = () => {
-    const lang = window.prompt(
-      t("community:post_add_translation_prompt") ?? "",
-    );
-    if (!lang) return;
-    attach.mutate({
-      unitId: unit.id,
-      input: { language: lang as never },
-    });
-  };
 
   return (
     <div className="w-11/12 max-w-4xl mx-auto mt-16 mb-16">
@@ -169,21 +144,6 @@ export function UnitPageById({ unitId }: { unitId: string }) {
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* ANCHOR Translation switcher (POST only when grouped) */}
-      {isPost && groupId && (
-        <div className="mt-8">
-          <PostLanguageSwitcher
-            currentUnitId={unit.id}
-            currentLanguage={unit.defaultLanguage ?? null}
-            supportedLanguages={siblingsQuery.data?.supportedLanguages ?? []}
-            siblings={siblingsQuery.data?.siblings ?? []}
-            isLoading={siblingsQuery.isLoading}
-            canAddTranslation={canAddTranslation}
-            onAddTranslation={handleAddTranslation}
-          />
         </div>
       )}
 

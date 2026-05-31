@@ -28,7 +28,7 @@ export const wikiZoneFiltersSchema = t.Object(
     realmTagUnitIds: t.Optional(t.Array(t.String())),
     subjectFilters: t.Optional(t.Array(wikiZoneSubjectFilterSchema)),
     languages: t.Optional(t.Array(languageSchema)),
-    translationGroupIds: t.Optional(t.Array(t.String())),
+    wikiUnitIds: t.Optional(t.Array(t.String())),
     ratings: t.Optional(t.Array(contentRatingSchema)),
   },
   { additionalProperties: false },
@@ -47,7 +47,7 @@ export const ZoneFiltersSchema = t.Object(
     isLicensed: t.Optional(t.Boolean()),
     languages: t.Optional(t.Array(t.String())),
     subjectFilters: t.Optional(t.Array(wikiZoneSubjectFilterSchema)),
-    translationGroupIds: t.Optional(t.Array(t.String())),
+    wikiUnitIds: t.Optional(t.Array(t.String())),
   },
   { additionalProperties: false },
 );
@@ -85,8 +85,8 @@ export const wikiZoneNavigationItemSchema = t.Union([
   ),
   t.Object(
     {
-      kind: t.Literal("translationGroup"),
-      translationGroupId: t.String(),
+      kind: t.Literal("wikiUnit"),
+      unitId: t.String(),
       labelUnitId: t.Optional(t.String()),
     },
     { additionalProperties: false },
@@ -213,8 +213,8 @@ export const wikiZoneHomepageSectionSchema = t.Union([
   t.Object(
     {
       ...wikiZoneSectionBaseSchema.properties,
-      kind: t.Literal("translationGroupCollection"),
-      translationGroupIds: t.Array(t.String()),
+      kind: t.Literal("wikiUnitCollection"),
+      unitIds: t.Array(t.String()),
     },
     { additionalProperties: false },
   ),
@@ -353,7 +353,6 @@ export const wikiZoneHomepageTagItemSchema = t.Object({
 export const wikiZoneHomepageWikiPostItemSchema = t.Object({
   kind: t.Literal("wikiPost"),
   unitId: t.String(),
-  translationGroupId: t.Union([t.String(), t.Null()]),
   language: t.Union([languageSchema, t.Null()]),
   title: t.Union([t.String(), t.Null()]),
   summary: t.Union([t.String(), t.Null()]),

@@ -25,7 +25,7 @@ describe("wiki Zone contract schemas", () => {
             },
           ],
           languages: ["en"],
-          translationGroupIds: ["tg-1"],
+          wikiUnitIds: ["wiki-main"],
         },
         navigation: {
           sections: [
@@ -36,8 +36,8 @@ describe("wiki Zone contract schemas", () => {
                 { kind: "entity", entityId: "entity-1" },
                 { kind: "tag", tagUnitId: "tag-lore" },
                 {
-                  kind: "translationGroup",
-                  translationGroupId: "tg-main-page",
+                  kind: "wikiUnit",
+                  unitId: "wiki-main-page",
                 },
                 { kind: "labelHeading", labelUnitId: "label-places" },
                 {
@@ -54,8 +54,8 @@ describe("wiki Zone contract schemas", () => {
           sections: [
             {
               id: "featured",
-              kind: "translationGroupCollection",
-              translationGroupIds: ["tg-main-page"],
+              kind: "wikiUnitCollection",
+              unitIds: ["wiki-main-page"],
             },
             {
               id: "recent",
@@ -125,14 +125,13 @@ describe("wiki Zone contract schemas", () => {
           {
             section: {
               id: "featured",
-              kind: "translationGroupCollection",
-              translationGroupIds: ["tg-main-page"],
+              kind: "wikiUnitCollection",
+              unitIds: ["wiki-main-page"],
             },
             items: [
               {
                 kind: "wikiPost",
                 unitId: "wiki-zh",
-                translationGroupId: "tg-main-page",
                 language: "zh-hant",
                 title: "主頁",
                 summary: null,

@@ -22,7 +22,6 @@ const hydratedUnitRows = new Map<string, any>([
     {
       id: "wiki-en",
       type: "POST",
-      translationGroupId: "tg-1",
       defaultLanguage: "en",
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-02T00:00:00.000Z"),
@@ -35,7 +34,6 @@ const hydratedUnitRows = new Map<string, any>([
     {
       id: "wiki-zh",
       type: "POST",
-      translationGroupId: "tg-1",
       defaultLanguage: "zh-hant",
       createdAt: new Date("2026-01-03T00:00:00.000Z"),
       updatedAt: new Date("2026-01-04T00:00:00.000Z"),
@@ -63,14 +61,8 @@ const hydratedUnitRows = new Map<string, any>([
     },
   ],
 ]);
-const translationGroupRows = new Set(["tg-1"]);
 
 const unitFindManyMock = mock(async ({ where }: any): Promise<any[]> => {
-  if (where.translationGroupId?.in) {
-    return [...hydratedUnitRows.values()].filter((row) =>
-      where.translationGroupId.in.includes(row.translationGroupId),
-    );
-  }
   if (!where.id?.in) {
     return [...hydratedUnitRows.values()].filter((row) => row.type === "POST");
   }
@@ -82,12 +74,6 @@ const unitFindManyMock = mock(async ({ where }: any): Promise<any[]> => {
     return row ? [row] : [];
   });
 });
-const translationGroupFindManyMock = mock(
-  async ({ where }: any): Promise<any[]> => {
-    const ids = where.id.in as string[];
-    return ids.flatMap((id) => (translationGroupRows.has(id) ? [{ id }] : []));
-  },
-);
 const zoneUpdateMock = mock(
   async (): Promise<any> => ({
     unitId: "zone-1",
@@ -113,8 +99,8 @@ const zoneFindUniqueMock = mock(
         sections: [
           {
             id: "featured",
-            kind: "translationGroupCollection",
-            translationGroupIds: ["tg-1"],
+            kind: "wikiUnitCollection",
+            unitIds: ["wiki-zh"],
           },
           { id: "tags", kind: "tagCollection", tagUnitIds: ["tag-1"] },
           {
@@ -157,9 +143,6 @@ installPrismaClientMock();
 Object.assign(prismaMock, {
   unit: {
     findMany: unitFindManyMock,
-  },
-  translationGroup: {
-    findMany: translationGroupFindManyMock,
   },
   zone: {
     findUnique: zoneFindUniqueMock,
@@ -209,7 +192,6 @@ describe("ZoneService wiki config validation", () => {
 
   beforeEach(() => {
     unitFindManyMock.mockClear();
-    translationGroupFindManyMock.mockClear();
     zoneUpdateMock.mockClear();
     zoneFindUniqueMock.mockClear();
     subjectAttributionFindManyMock.mockClear();
@@ -222,7 +204,7 @@ describe("ZoneService wiki config validation", () => {
           realmUnitId: "realm-1",
           tagUnitIds: ["tag-1"],
           subjectFilters: [{ entityIds: ["entity-1"] }],
-          translationGroupIds: ["tg-1"],
+          wikiUnitIds: ["wiki-zh"],
         },
         navigation: {
           sections: [
@@ -232,7 +214,7 @@ describe("ZoneService wiki config validation", () => {
               items: [
                 { kind: "entity", entityId: "entity-1" },
                 { kind: "tag", tagUnitId: "tag-1" },
-                { kind: "translationGroup", translationGroupId: "tg-1" },
+                { kind: "wikiUnit", unitId: "wiki-zh" },
                 { kind: "unit", unitId: "unit-1" },
               ],
             },

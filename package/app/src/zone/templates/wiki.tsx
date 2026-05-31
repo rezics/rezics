@@ -1,7 +1,6 @@
 import type {
   Language,
   UnitDTO,
-  BestLanguageWikiPostDTO,
   WikiZoneHomepageData,
   WikiZoneHomepageItem,
   WikiZoneHomepageSectionData,
@@ -10,12 +9,11 @@ import type {
   WikiZoneNavigation,
   WikiZoneNavigationItem,
 } from "@rezics/contract";
-import { bestLanguageWikiPostsQuery } from "@rezics/api/translation-group";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { unitDetailQuery } from "@rezics/api/unit";
 import { EmptyState, SafeLink, Spinner } from "@rezics/ui";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { KeywordInput, useSearchQuery } from "@/search";
@@ -124,20 +122,9 @@ function collectNavigationUnitIds(navigation: WikiZoneNavigation | undefined) {
       if ("labelUnitId" in item && item.labelUnitId) ids.add(item.labelUnitId);
       if (item.kind === "entity") ids.add(item.entityId);
       if (item.kind === "tag") ids.add(item.tagUnitId);
+      if (item.kind === "wikiUnit") ids.add(item.unitId);
       if (item.kind === "unit") ids.add(item.unitId);
       if (item.kind === "labelHeading") ids.add(item.labelUnitId);
-    }
-  }
-  return [...ids];
-}
-
-function collectNavigationTranslationGroupIds(
-  navigation: WikiZoneNavigation | undefined,
-) {
-  const ids = new Set<string>();
-  for (const section of navigation?.sections ?? []) {
-    for (const item of section.items) {
-      if (item.kind === "translationGroup") ids.add(item.translationGroupId);
     }
   }
   return [...ids];
@@ -146,7 +133,7 @@ function collectNavigationTranslationGroupIds(
 function navigationItemFallback(item: WikiZoneNavigationItem) {
   if (item.kind === "entity") return item.entityId;
   if (item.kind === "tag") return item.tagUnitId;
-  if (item.kind === "translationGroup") return item.translationGroupId;
+  if (item.kind === "wikiUnit") return item.unitId;
   if (item.kind === "unit") return item.unitId;
   if (item.kind === "external") return item.href;
   if (item.kind === "manualLink") return item.href;
@@ -166,6 +153,8 @@ function navigationItemLabel(
   if (item.kind === "entity")
     return unitTitle(units.get(item.entityId), locale);
   if (item.kind === "tag") return unitTitle(units.get(item.tagUnitId), locale);
+  if (item.kind === "wikiUnit")
+    return unitTitle(units.get(item.unitId), locale);
   if (item.kind === "unit") return unitTitle(units.get(item.unitId), locale);
   if (item.kind === "labelHeading") {
     return unitTitle(units.get(item.labelUnitId), locale);
@@ -173,50 +162,20 @@ function navigationItemLabel(
   return null;
 }
 
-function translationGroupHref(
-  translationGroupId: string,
-  homepageData: WikiZoneHomepageData | null | undefined,
-  bestWikiPosts: Map<string, BestLanguageWikiPostDTO>,
-) {
-  const resolved = bestWikiPosts.get(translationGroupId);
-  if (resolved) return `/post/${resolved.unitId}`;
-  for (const section of homepageData?.sections ?? []) {
-    const match = section.items.find(
-      (item) =>
-        item.kind === "wikiPost" &&
-        item.translationGroupId === translationGroupId,
-    );
-    if (match?.kind === "wikiPost") return `/post/${match.unitId}`;
-  }
-  return null;
-}
-
-function navigationItemHref(
-  item: WikiZoneNavigationItem,
-  homepageData: WikiZoneHomepageData | null | undefined,
-  bestWikiPosts: Map<string, BestLanguageWikiPostDTO>,
-) {
+function navigationItemHref(item: WikiZoneNavigationItem) {
   if (item.kind === "entity") return `/entity/${item.entityId}`;
   if (item.kind === "tag") return `/tag/${item.tagUnitId}`;
+  if (item.kind === "wikiUnit") return `/post/${item.unitId}`;
   if (item.kind === "unit") return `/unit/${item.unitId}`;
-  if (item.kind === "translationGroup") {
-    return translationGroupHref(
-      item.translationGroupId,
-      homepageData,
-      bestWikiPosts,
-    );
-  }
   if (item.kind === "external" || item.kind === "manualLink") return item.href;
   return null;
 }
 
 function WikiNavigation({
   navigation,
-  homepageData,
   placement = "side",
 }: {
   navigation: WikiZoneNavigation | undefined;
-  homepageData?: WikiZoneHomepageData | null;
   placement?: "side" | "top";
 }) {
   const locale = useLocale();
@@ -224,16 +183,9 @@ function WikiNavigation({
     () => collectNavigationUnitIds(navigation),
     [navigation],
   );
-  const translationGroupIds = useMemo(
-    () => collectNavigationTranslationGroupIds(navigation),
-    [navigation],
-  );
   const unitResults = useQueries({
     queries: unitIds.map((unitId) => unitDetailQuery(unitId)),
   });
-  const bestWikiPostsResult = useQuery(
-    bestLanguageWikiPostsQuery(translationGroupIds, [locale]),
-  );
   const units = useMemo(
     () =>
       new Map(
@@ -242,16 +194,6 @@ function WikiNavigation({
         ),
       ),
     [unitIds, unitResults],
-  );
-  const bestWikiPosts = useMemo(
-    () =>
-      new Map(
-        (bestWikiPostsResult.data?.posts ?? []).map((post) => [
-          post.translationGroupId,
-          post,
-        ]),
-      ),
-    [bestWikiPostsResult.data?.posts],
   );
   const sections = navigation?.sections ?? [];
 
@@ -274,11 +216,7 @@ function WikiNavigation({
               const label =
                 navigationItemLabel(item, units, locale) ??
                 navigationItemFallback(item);
-              const href = navigationItemHref(
-                item,
-                homepageData,
-                bestWikiPosts,
-              );
+              const href = navigationItemHref(item);
 
               if (item.kind === "labelHeading") {
                 return (
@@ -503,11 +441,7 @@ function WikiZoneTemplateBase({
         </header>
 
         {navPosition === "top" && (
-          <WikiNavigation
-            navigation={zone.wiki?.navigation}
-            homepageData={homepageData}
-            placement="top"
-          />
+          <WikiNavigation navigation={zone.wiki?.navigation} placement="top" />
         )}
 
         <div
@@ -518,10 +452,7 @@ function WikiZoneTemplateBase({
           }
         >
           {navPosition === "side" && (
-            <WikiNavigation
-              navigation={zone.wiki?.navigation}
-              homepageData={homepageData}
-            />
+            <WikiNavigation navigation={zone.wiki?.navigation} />
           )}
           <main className="min-w-0">
             {homepageLoading ? (

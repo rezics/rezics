@@ -62,7 +62,6 @@ import { subjectAttributionApi } from "./subject-attribution";
 import { subscriptionApi } from "./subscription";
 import { lowScoreTagsAdminApi, tagApi, tagVoteApi, unitTagApi } from "./tag";
 import { tokenApi } from "./token";
-import { translationGroupApi } from "./translation-group";
 import {
   historyOutboxAdminApi,
   translationSourceApi,
@@ -255,7 +254,6 @@ routeApp
   .use(unitTagApi)
   .use(tagVoteApi)
   .use(lowScoreTagsAdminApi)
-  .use(translationGroupApi)
   .use(scoreApi)
   .use(seriesApi)
   .use(reactionBoundaryApi)

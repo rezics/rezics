@@ -14,7 +14,6 @@ import type { Prisma } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { unitService } from "@/unit";
 import { AppError } from "@/utils/errors";
-import { translationGroupService } from "../translation-group/translation-group.service";
 
 const zoneInclude = {
   unit: {
@@ -42,7 +41,6 @@ const WIKI_EXCLUDED_MODERATION_STATES = [
 type TranslatedUnitRow = {
   id: string;
   defaultLanguage?: string | null;
-  translationGroupId?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   translations?: Array<{
@@ -96,7 +94,6 @@ function mapUnitToWikiPostItem(
   return {
     kind: "wikiPost",
     unitId: row.id,
-    translationGroupId: row.translationGroupId ?? null,
     language: (translation?.language ??
       row.defaultLanguage ??
       null) as Language | null,
@@ -147,7 +144,6 @@ function collectNavigationRefs(input: {
   item: WikiZoneNavigationItem;
   entityIds: Set<string>;
   tagUnitIds: Set<string>;
-  translationGroupIds: Set<string>;
   unitIds: Set<string>;
   labelUnitIds: Set<string>;
 }) {
@@ -160,10 +156,7 @@ function collectNavigationRefs(input: {
       input.tagUnitIds.add(input.item.tagUnitId);
       pushIfPresent(input.labelUnitIds, input.item.labelUnitId);
       break;
-    case "translationGroup":
-      input.translationGroupIds.add(input.item.translationGroupId);
-      pushIfPresent(input.labelUnitIds, input.item.labelUnitId);
-      break;
+    case "wikiUnit":
     case "unit":
       input.unitIds.add(input.item.unitId);
       pushIfPresent(input.labelUnitIds, input.item.labelUnitId);
@@ -223,33 +216,11 @@ export class ZoneService {
     }
   }
 
-  private async assertTranslationGroupRefs(refs: Set<string>): Promise<void> {
-    if (refs.size === 0) return;
-    const ids = [...refs];
-    const rows = await prisma.translationGroup.findMany({
-      where: { id: { in: ids } },
-      select: { id: true },
-    });
-    const found = new Set(rows.map((row: { id: string }) => row.id));
-    const invalid = ids.filter((id) => !found.has(id));
-    if (invalid.length > 0) {
-      throw new AppError(
-        400,
-        "Wiki Zone config references invalid TranslationGroups",
-        {
-          code: "WIKI_ZONE_TRANSLATION_GROUP_REF_INVALID",
-          details: { ids: invalid },
-        },
-      );
-    }
-  }
-
   private collectHomepageSectionRefs(
     section: WikiZoneHomepageSection,
     refs: {
       entityIds: Set<string>;
       tagUnitIds: Set<string>;
-      translationGroupIds: Set<string>;
       unitIds: Set<string>;
       labelUnitIds: Set<string>;
     },
@@ -263,10 +234,8 @@ export class ZoneService {
       return;
     }
 
-    if (section.kind === "translationGroupCollection") {
-      for (const id of section.translationGroupIds) {
-        refs.translationGroupIds.add(id);
-      }
+    if (section.kind === "wikiUnitCollection") {
+      for (const id of section.unitIds) refs.unitIds.add(id);
       return;
     }
 
@@ -282,7 +251,6 @@ export class ZoneService {
 
     const entityIds = new Set<string>();
     const tagUnitIds = new Set<string>();
-    const translationGroupIds = new Set<string>();
     const unitIds = new Set<string>();
     const labelUnitIds = new Set<string>();
 
@@ -292,9 +260,7 @@ export class ZoneService {
     for (const filter of wiki.filters.subjectFilters ?? []) {
       for (const id of filter.entityIds ?? []) entityIds.add(id);
     }
-    for (const id of wiki.filters.translationGroupIds ?? []) {
-      translationGroupIds.add(id);
-    }
+    for (const id of wiki.filters.wikiUnitIds ?? []) unitIds.add(id);
 
     for (const section of wiki.navigation?.sections ?? []) {
       pushIfPresent(labelUnitIds, section.labelUnitId);
@@ -304,7 +270,6 @@ export class ZoneService {
           item,
           entityIds,
           tagUnitIds,
-          translationGroupIds,
           unitIds,
           labelUnitIds,
         });
@@ -315,7 +280,6 @@ export class ZoneService {
       this.collectHomepageSectionRefs(section, {
         entityIds,
         tagUnitIds,
-        translationGroupIds,
         unitIds,
         labelUnitIds,
       });
@@ -347,7 +311,6 @@ export class ZoneService {
         "WIKI_ZONE_LABEL_REF_INVALID",
       ),
       this.assertAnyUnitRefs(unitIds),
-      this.assertTranslationGroupRefs(translationGroupIds),
     ]);
   }
 
@@ -537,19 +500,12 @@ export class ZoneService {
       .map((row) => mapUnitToWikiPostItem(row, input.preferredLanguages));
   }
 
-  private async hydrateTranslationGroupSection(input: {
+  private async hydrateWikiUnitSection(input: {
     realmUnitId: string;
-    section: Extract<
-      WikiZoneHomepageSection,
-      { kind: "translationGroupCollection" }
-    >;
+    section: Extract<WikiZoneHomepageSection, { kind: "wikiUnitCollection" }>;
     preferredLanguages?: string[];
   }): Promise<WikiZoneHomepageItem[]> {
-    const best = await translationGroupService.resolveBestLanguageWikiPosts({
-      translationGroupIds: input.section.translationGroupIds,
-      preferredLanguages: input.preferredLanguages,
-    });
-    const unitIds = best.map((row) => row.unitId);
+    const unitIds = input.section.unitIds;
     if (unitIds.length === 0) return [];
 
     const rows = await prisma.unit.findMany({
@@ -644,8 +600,8 @@ export class ZoneService {
     preferredLanguages?: string[];
   }): Promise<WikiZoneHomepageItem[]> {
     switch (input.section.kind) {
-      case "translationGroupCollection":
-        return this.hydrateTranslationGroupSection({
+      case "wikiUnitCollection":
+        return this.hydrateWikiUnitSection({
           realmUnitId: input.realmUnitId,
           section: input.section,
           preferredLanguages: input.preferredLanguages,

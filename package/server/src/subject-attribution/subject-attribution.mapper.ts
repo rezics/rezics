@@ -64,7 +64,6 @@ export function mapSubjectAttributionToDTO(
           userId: unit.userId ?? undefined,
           defaultLanguage: unit.defaultLanguage ?? undefined,
           isLanguageNeutral: unit.isLanguageNeutral ?? undefined,
-          translationGroupId: unit.translationGroupId ?? undefined,
           status: unit.status ?? undefined,
           visibility: unit.visibility ?? undefined,
           rating: unit.rating ?? undefined,
