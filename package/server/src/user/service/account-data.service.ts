@@ -23,7 +23,16 @@ async function getHandle(userId: string): Promise<string | null> {
  * and social graph. Returned inline — no job/file storage.
  */
 export async function exportUserData(userId: string): Promise<UserDataExport> {
-  const [user, handle, posts, shelves, follows, blocks] = await Promise.all([
+  const [
+    user,
+    handle,
+    posts,
+    shelves,
+    userUnitCollections,
+    userTagApplications,
+    follows,
+    blocks,
+  ] = await Promise.all([
     prisma.user.findUniqueOrThrow({
       where: { unitId: userId },
       select: {
@@ -60,6 +69,27 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
       },
       orderBy: { updatedAt: "desc" },
     }),
+    prisma.userUnitCollection.findMany({
+      where: { userId },
+      select: {
+        unitId: true,
+        searchText: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: [{ updatedAt: "desc" }, { unitId: "asc" }],
+    }),
+    prisma.userTagApplication.findMany({
+      where: { userId },
+      select: {
+        unitId: true,
+        tagUnitId: true,
+        position: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: [{ unitId: "asc" }, { position: "asc" }, { tagUnitId: "asc" }],
+    }),
     prisma.subscription.findMany({
       where: { subscriberUnitId: userId },
       select: { targetUnitId: true, channels: true, createdAt: true },
@@ -93,6 +123,19 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
       title: s.unit?.translations[0]?.title ?? "",
       updatedAt: s.updatedAt.toISOString(),
     })),
+    userUnitCollections: userUnitCollections.map((row) => ({
+      unitId: row.unitId,
+      searchText: row.searchText,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    })),
+    userTagApplications: userTagApplications.map((row) => ({
+      unitId: row.unitId,
+      tagUnitId: row.tagUnitId,
+      position: row.position,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    })),
     follows: follows.map((f) => ({
       targetUnitId: f.targetUnitId,
       channels: f.channels,
@@ -113,8 +156,8 @@ export class DeletionNotConfirmedError extends Error {}
  *
  * - Removed/scrubbed: PII on the User row (email, name, avatar, bio,
  *   description, settings), the auth link, the public profile (USER unit set
- *   to DELETED + PRIVATE), the user's blocks, and the user's follow edges
- *   (counters adjusted on peers).
+ *   to DELETED + PRIVATE), private collection metadata, the user's blocks, and
+ *   the user's follow edges (counters adjusted on peers).
  * - Retained: authored content (posts/reviews/books/shelves) — kept and shown
  *   as authored by a deleted user — plus moderation cases, enforcement, and
  *   audit records, which are NOT touched here for safety/audit integrity.
@@ -176,6 +219,12 @@ export async function deleteAccount(
     await tx.unit.update({
       where: { id: userId },
       data: { status: "DELETED", visibility: "PRIVATE" },
+    });
+    await tx.userUnitCollection.deleteMany({
+      where: { userId },
+    });
+    await tx.userTagApplication.deleteMany({
+      where: { userId },
     });
   });
 }

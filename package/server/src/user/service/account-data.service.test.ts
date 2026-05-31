@@ -19,12 +19,16 @@ mock.module("@/subscription/subscription.service", () => ({
 
 const userUpdate = mock(async () => ({}));
 const unitUpdate = mock(async () => ({}));
+const userUnitCollectionDeleteMany = mock(async () => ({ count: 1 }));
+const userTagApplicationDeleteMany = mock(async () => ({ count: 1 }));
 
 beforeEach(() => {
   userBlockDeleteMany.mockClear();
   unsubscribe.mockClear();
   userUpdate.mockClear();
   unitUpdate.mockClear();
+  userUnitCollectionDeleteMany.mockClear();
+  userTagApplicationDeleteMany.mockClear();
 
   Object.assign(prismaMock, {
     $transaction: mock(async (fn: any) => fn(prismaMock)),
@@ -77,6 +81,29 @@ beforeEach(() => {
           : [],
       ),
     },
+    userUnitCollection: {
+      findMany: mock(async () => [
+        {
+          unitId: "book-1",
+          searchText: "private alias",
+          createdAt: new Date("2026-02-15T00:00:00.000Z"),
+          updatedAt: new Date("2026-02-16T00:00:00.000Z"),
+        },
+      ]),
+      deleteMany: userUnitCollectionDeleteMany,
+    },
+    userTagApplication: {
+      findMany: mock(async () => [
+        {
+          unitId: "book-1",
+          tagUnitId: "tag-1",
+          position: "00000000",
+          createdAt: new Date("2026-02-17T00:00:00.000Z"),
+          updatedAt: new Date("2026-02-18T00:00:00.000Z"),
+        },
+      ]),
+      deleteMany: userTagApplicationDeleteMany,
+    },
     userBlock: {
       findMany: mock(async () => [
         {
@@ -109,6 +136,23 @@ describe("exportUserData", () => {
       },
     ]);
     expect(data.shelves[0]?.title).toBe("Favourites");
+    expect(data.userUnitCollections).toEqual([
+      {
+        unitId: "book-1",
+        searchText: "private alias",
+        createdAt: "2026-02-15T00:00:00.000Z",
+        updatedAt: "2026-02-16T00:00:00.000Z",
+      },
+    ]);
+    expect(data.userTagApplications).toEqual([
+      {
+        unitId: "book-1",
+        tagUnitId: "tag-1",
+        position: "00000000",
+        createdAt: "2026-02-17T00:00:00.000Z",
+        updatedAt: "2026-02-18T00:00:00.000Z",
+      },
+    ]);
     expect(data.follows[0]?.targetUnitId).toBe("peer");
     expect(data.blocks[0]?.blockedId).toBe("blocked-1");
     expect(typeof data.exportedAt).toBe("string");
@@ -127,6 +171,8 @@ describe("deleteAccount", () => {
     expect(userUpdate).not.toHaveBeenCalled();
     expect(unitUpdate).not.toHaveBeenCalled();
     expect(userBlockDeleteMany).not.toHaveBeenCalled();
+    expect(userUnitCollectionDeleteMany).not.toHaveBeenCalled();
+    expect(userTagApplicationDeleteMany).not.toHaveBeenCalled();
   });
 
   test("anonymizes the account and removes safety/social state on confirmation", async () => {
@@ -146,6 +192,12 @@ describe("deleteAccount", () => {
       { blockedId: "me" },
     ]);
     expect(unsubscribe).toHaveBeenCalledWith("me", "peer");
+    expect(userUnitCollectionDeleteMany).toHaveBeenCalledWith({
+      where: { userId: "me" },
+    });
+    expect(userTagApplicationDeleteMany).toHaveBeenCalledWith({
+      where: { userId: "me" },
+    });
 
     // Retained: authored content is never deleted.
     expect((prismaMock as any).post.deleteMany).not.toHaveBeenCalled();

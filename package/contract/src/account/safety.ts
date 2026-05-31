@@ -36,6 +36,23 @@ export const userDataExportSchema = t.Object({
       updatedAt: t.String(),
     }),
   ),
+  userUnitCollections: t.Array(
+    t.Object({
+      unitId: t.String(),
+      searchText: t.Optional(t.Nullable(t.String())),
+      createdAt: t.String(),
+      updatedAt: t.String(),
+    }),
+  ),
+  userTagApplications: t.Array(
+    t.Object({
+      unitId: t.String(),
+      tagUnitId: t.String(),
+      position: t.Optional(t.Nullable(t.String())),
+      createdAt: t.String(),
+      updatedAt: t.String(),
+    }),
+  ),
   follows: t.Array(
     t.Object({
       targetUnitId: t.String(),
