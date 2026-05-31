@@ -136,16 +136,6 @@ export const postApi = new Elysia({ prefix: "/post" })
         posts: posts.map(mapPostToDTO),
         total,
       };
-      // Thread read: attach viewer-derived promotion signals so clients can gate
-      // in-thread pin/accept controls without re-implementing authorization.
-      if (query.rootPostUnitId) {
-        const signals = await postService.getThreadPromotionSignals(
-          query.rootPostUnitId,
-          identity,
-        );
-        response.viewerCanPromote = signals.viewerCanPromote;
-        response.isQuestionThread = signals.isQuestionThread;
-      }
       return response;
     },
     {
@@ -208,15 +198,6 @@ export const postApi = new Elysia({ prefix: "/post" })
         posts: posts.map(mapPostToDTO),
         total,
       };
-      // Thread read: attach viewer-derived promotion signals (see GET /list).
-      if (body.rootPostUnitId) {
-        const signals = await postService.getThreadPromotionSignals(
-          body.rootPostUnitId,
-          identity,
-        );
-        response.viewerCanPromote = signals.viewerCanPromote;
-        response.isQuestionThread = signals.isQuestionThread;
-      }
       return response;
     },
     {
@@ -247,8 +228,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       },
       detail: {
         summary: "Create post",
-        description:
-          "Create a new post. If parentPostUnitId is provided, creates a reply with threaded tree handling.",
+        description: "Create a new top-level post.",
         tags: ["Posts"],
       },
     },
@@ -381,7 +361,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       detail: {
         summary: "Accept a direct reply as an answer",
         description:
-          "Promote a direct reply (kind=ACCEPTED_ANSWER) in a Q&A thread (root bears the official question tag). The target must satisfy depth==1 and parentPostUnitId==scopeUnitId. Authorized to the OP or a realm moderator/owner.",
+          "Promote a direct comment reply (kind=ACCEPTED_ANSWER) in a Q&A thread (root bears the official question tag). Authorized to the OP or a realm moderator/owner.",
         tags: ["Posts"],
       },
     },

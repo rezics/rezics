@@ -307,208 +307,25 @@ async function attachPinKinds<
 }
 
 export class PostService {
-  private isCommentRead(query: PostListQuery) {
-    return Boolean(query.rootPostUnitId || query.parentPostUnitId);
-  }
-
-  private async resolveCommentRealmIds(
-    rootUnitId: string,
-    explicitRealmUnitId?: string,
-  ): Promise<string[]> {
-    if (explicitRealmUnitId) return [explicitRealmUnitId];
-    const rows = await prisma.unitRealm.findMany({
-      where: { unitId: rootUnitId, state: "VISIBLE" },
-      select: { realmUnitId: true },
-    });
-    return rows.map((row) => row.realmUnitId);
-  }
-
-  private async listCommentCompat(
-    query: PostListQuery,
-    options?: { isAdmin?: boolean; viewerUserId?: string | null },
-  ): Promise<{ posts: PostWithRelations[]; total: number }> {
-    const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
-    const skipNum = query.start ?? 0;
-    const idList = parseIdsCsv(query.ids);
-
-    const parentComment = query.parentPostUnitId
-      ? await prisma.comment.findUnique({
-          where: { unitId: query.parentPostUnitId },
-          select: { unitId: true, rootUnitId: true, realmUnitId: true },
-        })
-      : null;
-
-    const parentPost =
-      query.parentPostUnitId && !parentComment
-        ? await prisma.post.findUnique({
-            where: { unitId: query.parentPostUnitId },
-            select: { unitId: true, rootPostUnitId: true },
-          })
-        : null;
-
-    const rootUnitId =
-      query.rootPostUnitId ??
-      parentComment?.rootUnitId ??
-      parentPost?.rootPostUnitId ??
-      parentPost?.unitId;
-
-    if (!rootUnitId) {
-      throw new AppError(400, "Comment reads require a root or parent unit");
-    }
-
-    const realmUnitIds = parentComment
-      ? [parentComment.realmUnitId]
-      : await this.resolveCommentRealmIds(rootUnitId, query.realmUnitId);
-
-    if (realmUnitIds.length === 0) {
-      return { posts: [], total: 0 };
-    }
-
-    const where: Prisma.CommentWhereInput = {
-      rootUnitId,
-      realmUnitId:
-        realmUnitIds.length === 1 ? realmUnitIds[0] : { in: realmUnitIds },
-      unit: options?.isAdmin
-        ? undefined
-        : {
-            OR: [
-              { status: UnitStatus.PUBLISHED, visibility: "PUBLIC" },
-              { status: UnitStatus.DELETED, visibility: "PUBLIC" },
-            ],
-          },
-    };
-
-    if (query.authorUserId) where.authorUserId = query.authorUserId;
-    if (query.state) where.state = query.state;
-    if (typeof query.maxDepth === "number") {
-      where.depth = { lte: query.maxDepth };
-    }
-
-    if (query.subtreeRootPostUnitId) {
-      const [anchor] = await prisma.$queryRaw<
-        {
-          unitId: string;
-          rootUnitId: string;
-          depth: number;
-          path: string | null;
-        }[]
-      >`
-        SELECT "unitId", "rootUnitId", "depth", "path"::text AS path
-        FROM "Comment"
-        WHERE "unitId" = ${query.subtreeRootPostUnitId}::uuid
-          AND "rootUnitId" = ${rootUnitId}::uuid
-      `;
-      if (!anchor?.path) {
-        throw new AppError(
-          404,
-          `Comment not found: ${query.subtreeRootPostUnitId}`,
-        );
-      }
-      const maxDepth =
-        typeof query.maxDepth === "number" ? query.maxDepth : undefined;
-      const descendants = await prisma.$queryRaw<{ unitId: string }[]>`
-        SELECT "unitId" FROM "Comment"
-        WHERE "path" <@ ${anchor.path}::ltree
-          AND "rootUnitId" = ${rootUnitId}::uuid
-          AND "unitId" <> ${anchor.unitId}::uuid
-          ${
-            maxDepth !== undefined
-              ? Prisma.sql`AND "depth" <= ${anchor.depth + maxDepth}`
-              : Prisma.empty
-          }
-      `;
-      const descendantIds = descendants.map((row) => row.unitId);
-      where.unitId =
-        idList && idList.length > 0
-          ? { in: descendantIds.filter((id) => idList.includes(id)) }
-          : { in: descendantIds };
-    } else if (query.parentPostUnitId) {
-      where.parentCommentUnitId = parentComment ? parentComment.unitId : null;
-    } else if (idList && idList.length > 0) {
-      where.unitId = { in: idList };
-    }
-
-    await applyBlockedAuthorFilter(where, options);
-
-    const [comments, total] = await Promise.all([
-      prisma.comment.findMany({
-        where,
-        orderBy: [{ createdAt: "asc" }],
-        skip: skipNum,
-        take: limitNum,
-        include: commentIncludeForPostCompat,
-      }),
-      prisma.comment.count({ where }),
-    ]);
-
-    const compatPosts = await attachPinKinds(
-      (
-        await attachCommentPathsForPostCompat(
-          comments as CommentWithRelations[],
-        )
-      ).map(commentAsPostCompat),
-    );
-
-    return {
-      posts: await hydrateUnitOwnerUserSlugs(compatPosts),
-      total,
-    };
-  }
-
   /**
-   * List posts with support for flat and threaded modes.
-   *
-   * - flat mode (default): ordered by `createdAt`
-   * - threaded mode (mode="threaded"): the subtree is bounded by
-   *   `rootPostUnitId` (whole thread) or `path <@ anchor.path`
-   *   (continue-thread anchor) and ordered by a DB key (`createdAt`); the
-   *   client groups rows into a tree (School B — `path` does not encode order).
+   * List root posts only. Reply tree reads live in the comment domain, so this
+   * path deliberately excludes legacy `Post(parentPostUnitId != null)` rows.
    */
   async list(
     query: PostListQuery = {},
     options?: { isAdmin?: boolean; viewerUserId?: string | null },
   ): Promise<{ posts: PostWithRelations[]; total: number }> {
-    if (this.isCommentRead(query)) {
-      return this.listCommentCompat(query, options);
-    }
-
     const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
     const skipNum = query.start ?? 0;
-    const isThreaded = query.mode === "threaded";
 
     const where: Prisma.PostWhereInput = options?.isAdmin
       ? {}
-      : isThreaded
-        ? {
-            OR: [
-              { unit: { ...publicUnitEligibilityWhere } },
-              {
-                unit: {
-                  status: UnitStatus.DELETED,
-                  visibility: publicUnitEligibilityWhere.visibility,
-                },
-              },
-            ],
-          }
-        : { unit: { ...publicUnitEligibilityWhere } };
+      : { unit: { ...publicUnitEligibilityWhere } };
+    where.parentPostUnitId = null;
 
     if (query.targetUnitId) {
       where.targetUnitId = query.targetUnitId;
-      if (!query.rootPostUnitId && !query.parentPostUnitId && !isThreaded) {
-        where.parentPostUnitId = null;
-      }
     }
-    if (
-      !query.targetUnitId &&
-      !query.rootPostUnitId &&
-      !query.parentPostUnitId &&
-      !query.subtreeRootPostUnitId &&
-      !isThreaded
-    ) {
-      where.parentPostUnitId = null;
-    }
-    if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
-    if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
     if (query.authorUserId) where.authorUserId = query.authorUserId;
     if (query.kind) where.kind = query.kind;
     applyStateFilter(where, query);
@@ -520,64 +337,15 @@ export class PostService {
 
     await applyBlockedAuthorFilter(where, options);
 
-    if (query.subtreeRootPostUnitId) {
-      const [anchor] = await prisma.$queryRaw<
-        {
-          unitId: string;
-          rootPostUnitId: string | null;
-          depth: number;
-          path: string | null;
-        }[]
-      >`
-        SELECT "unitId", "rootPostUnitId", "depth", "path"::text AS path
-        FROM "Post"
-        WHERE "unitId" = ${query.subtreeRootPostUnitId}::uuid
-      `;
-      if (!anchor) {
-        throw new AppError(
-          404,
-          `Post not found: ${query.subtreeRootPostUnitId}`,
-        );
-      }
-      const rootPostUnitId = anchor.rootPostUnitId ?? anchor.unitId;
-      where.rootPostUnitId = rootPostUnitId;
-
-      const maxDepth =
-        typeof query.maxDepth === "number" ? query.maxDepth : undefined;
-      // Partial-subtree retrieval over the GiST index: descendants of the
-      // anchor, scoped to the same thread and (optionally) depth-bounded. The
-      // anchor itself is excluded.
-      const descendants = await prisma.$queryRaw<{ unitId: string }[]>`
-        SELECT "unitId" FROM "Post"
-        WHERE "path" <@ ${anchor.path}::ltree
-          AND "rootPostUnitId" = ${rootPostUnitId}::uuid
-          AND "unitId" <> ${anchor.unitId}::uuid
-          ${
-            maxDepth !== undefined
-              ? Prisma.sql`AND "depth" <= ${anchor.depth + maxDepth}`
-              : Prisma.empty
-          }
-      `;
-      const descendantIds = descendants.map((row) => row.unitId);
-      where.unitId =
-        idList && idList.length > 0
-          ? { in: descendantIds.filter((id) => idList.includes(id)) }
-          : { in: descendantIds };
-    } else if (typeof query.maxDepth === "number") {
-      where.depth = { lte: query.maxDepth };
-    }
-
-    const orderBy: Prisma.PostOrderByWithRelationInput[] = isThreaded
-      ? [{ createdAt: "asc" }]
-      : [
-          {
-            createdAt:
-              typeof query.sort === "object" &&
-              (query.sort.order === "asc" || query.sort.order === "desc")
-                ? query.sort.order
-                : "desc",
-          },
-        ];
+    const orderBy: Prisma.PostOrderByWithRelationInput[] = [
+      {
+        createdAt:
+          typeof query.sort === "object" &&
+          (query.sort.order === "asc" || query.sort.order === "desc")
+            ? query.sort.order
+            : "desc",
+      },
+    ];
 
     const [posts, total] = await Promise.all([
       prisma.post.findMany({
@@ -681,20 +449,12 @@ export class PostService {
       },
     };
 
-    if (opts.rootPostUnitId) where.rootPostUnitId = opts.rootPostUnitId;
-    if (opts.parentPostUnitId) where.parentPostUnitId = opts.parentPostUnitId;
-    if (!opts.rootPostUnitId && !opts.parentPostUnitId) {
-      where.parentPostUnitId = null;
-    }
+    where.parentPostUnitId = null;
     if (opts.authorUserId) where.authorUserId = opts.authorUserId;
     if (opts.kind) where.kind = opts.kind;
     applyStateFilter(where, opts);
 
     await applyBlockedAuthorFilter(where, options);
-
-    if (typeof opts.maxDepth === "number") {
-      where.depth = { lte: opts.maxDepth };
-    }
 
     const idList = parseIdsCsv(opts.ids);
     if (idList && idList.length > 0) {

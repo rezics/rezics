@@ -216,7 +216,7 @@ export type AcceptAnswerInput = (typeof acceptAnswerSchema)["static"];
 
 export const postListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
-  /** Target Unit ID for reply/thread targets. Realm feeds use `realmUnitId`. */
+  /** Target Unit ID for root posts. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
@@ -234,10 +234,6 @@ export const postListQuerySchema = t.Object({
       t.Literal("all"),
     ]),
   ),
-  rootPostUnitId: t.Optional(t.String()),
-  /** Post Unit ID to use as the anchor for descendant subtree queries. */
-  subtreeRootPostUnitId: t.Optional(t.String()),
-  parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
   /** Exact lifecycle-state filter (e.g. `open`). */
@@ -248,8 +244,6 @@ export const postListQuerySchema = t.Object({
    * (`state IN (…)`, indexed; no anti-join). Buckets are never stored.
    */
   stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
-  mode: t.Optional(t.String()),
-  maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
     t.Union([
       t.Literal("new"),
@@ -275,7 +269,7 @@ export type PostListQuery = (typeof postListQuerySchema)["static"];
 
 export const postListBodySchema = t.Object({
   ...listPostBodyBase.properties,
-  /** Target Unit ID for reply/thread targets. Realm feeds use `realmUnitId`. */
+  /** Target Unit ID for root posts. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
@@ -293,18 +287,12 @@ export const postListBodySchema = t.Object({
       t.Literal("all"),
     ]),
   ),
-  rootPostUnitId: t.Optional(t.String()),
-  /** Post Unit ID to use as the anchor for descendant subtree queries. */
-  subtreeRootPostUnitId: t.Optional(t.String()),
-  parentPostUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
   /** Exact lifecycle-state filter (e.g. `open`). */
   state: t.Optional(t.String()),
   /** Derived lifecycle bucket filter: `active` or `closed`. See `postListQuerySchema`. */
   stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
-  mode: t.Optional(t.String()),
-  maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
     t.Union([
       t.Literal("new"),
@@ -331,20 +319,6 @@ export type PostListBody = (typeof postListBodySchema)["static"];
 export const postListResponseSchema = t.Object({
   posts: t.Array(postDTOSchema),
   total: t.Optional(t.Number()),
-  /**
-   * Thread read only: whether the current caller may pin/accept within this
-   * thread (OP, realm moderator/owner, or platform admin). Viewer-derived from
-   * the same `assertCanPromoteInThread` gate the write path enforces, so clients
-   * can present promotion controls without duplicating authorization. Absent on
-   * non-thread list reads; `false` for anonymous callers.
-   */
-  viewerCanPromote: t.Optional(t.Boolean()),
-  /**
-   * Thread read only: whether the thread root bears the official question tag
-   * (gates the accept-answer affordance). Reuses the server `isQuestionThread()`
-   * check. Absent on non-thread list reads.
-   */
-  isQuestionThread: t.Optional(t.Boolean()),
 });
 
 export type PostListResponse = (typeof postListResponseSchema)["static"];

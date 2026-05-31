@@ -70,6 +70,13 @@ describe("post work-domain contract fields", () => {
   test("does not expose work-domain list filters", () => {
     expect("workUnitId" in postListQuerySchema.properties).toBe(false);
     expect("workRoles" in postListQuerySchema.properties).toBe(false);
+    expect("rootPostUnitId" in postListQuerySchema.properties).toBe(false);
+    expect("parentPostUnitId" in postListQuerySchema.properties).toBe(false);
+    expect("subtreeRootPostUnitId" in postListQuerySchema.properties).toBe(
+      false,
+    );
+    expect("mode" in postListQuerySchema.properties).toBe(false);
+    expect("maxDepth" in postListQuerySchema.properties).toBe(false);
 
     expect(
       Value.Check(postListQuerySchema, {
