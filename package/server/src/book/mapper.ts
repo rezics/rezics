@@ -47,15 +47,11 @@ function mapTranslation(
  */
 export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
   const unit = book.unit;
-  const workMembership = unit.workMemberships?.[0];
-  const uswn = workMembership?.workUnitId ?? null;
 
   return {
     unitId: book.unitId,
     userId: unit.userId,
     user: mapPublicUser(unit.user),
-    workUnitId: workMembership?.workUnitId ?? undefined,
-    metadata: { uswn },
     status: unit.status,
     visibility: unit.visibility,
     rating: unit.rating,
@@ -79,20 +75,6 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
 
     // Translation layer
     translations: unit.translations?.map(mapTranslation) ?? [],
-
-    // Work-domain release membership
-    workMembership: workMembership
-      ? {
-          unitId: workMembership.unitId,
-          workUnitId: workMembership.workUnitId,
-          role: workMembership.role,
-          language: workMembership.language,
-          position: workMembership.position,
-          displayPolicy: workMembership.displayPolicy,
-          createdAt: workMembership.createdAt,
-          updatedAt: workMembership.updatedAt,
-        }
-      : undefined,
 
     // Credit attribution
     creditAttributions: (unit.creditAttributions?.map((a) => {

@@ -17,9 +17,6 @@ import {
   UnitStatus,
   UnitType,
   type UnitVisibility,
-  UnitVisibility as UnitVisibilityValue,
-  UnitWorkDisplayPolicy,
-  UnitWorkRole,
 } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
@@ -75,100 +72,6 @@ function enqueueContentDelete(unitId: string) {
       { type: "server", service: "book" },
     ),
   );
-}
-
-type WorkMatchResolution = {
-  workUnitId: string | null;
-  affectedUnitIds: string[];
-};
-
-async function resolveWorkMatch(
-  tx: Prisma.TransactionClient,
-  req: CreateBookInput,
-  ownerUserId: string,
-  language: string,
-): Promise<WorkMatchResolution> {
-  const explicitWorkUnitId = req.workUnitId?.trim();
-  if (explicitWorkUnitId) {
-    return { workUnitId: explicitWorkUnitId, affectedUnitIds: [] };
-  }
-
-  const matchedReleaseUnitId = req.workMatch?.releaseUnitId?.trim();
-  if (!matchedReleaseUnitId) {
-    return { workUnitId: null, affectedUnitIds: [] };
-  }
-
-  const matched = await tx.unit.findUniqueOrThrow({
-    where: { id: matchedReleaseUnitId },
-    select: {
-      id: true,
-      type: true,
-      translations: {
-        select: { language: true, title: true, subtitle: true, summary: true },
-        orderBy: { language: "asc" },
-      },
-      workMemberships: {
-        where: { role: UnitWorkRole.RELEASE },
-        select: { workUnitId: true },
-        orderBy: { createdAt: "asc" },
-        take: 1,
-      },
-    },
-  });
-
-  if (matched.type !== UnitType.BOOK) {
-    throw new Error(`Matched release is not a book: ${matchedReleaseUnitId}`);
-  }
-
-  const existingWorkUnitId = matched.workMemberships[0]?.workUnitId ?? null;
-  if (existingWorkUnitId) {
-    return { workUnitId: existingWorkUnitId, affectedUnitIds: [] };
-  }
-
-  const title =
-    matched.translations.find((tr) => tr.language === language)?.title ??
-    matched.translations[0]?.title ??
-    "Matched work";
-  const hiddenWork = await tx.book.create({
-    data: {
-      unit: {
-        create: {
-          userId: ownerUserId,
-          slugScope: ownerUserId,
-          type: UnitType.BOOK,
-          status: UnitStatus.PUBLISHED,
-          visibility: UnitVisibilityValue.PRIVATE,
-          defaultLanguage: language,
-          translations: {
-            create: {
-              language,
-              title,
-              subtitle: matched.translations[0]?.subtitle ?? undefined,
-              summary: matched.translations[0]?.summary ?? undefined,
-            },
-          },
-        },
-      },
-      textLength: 0,
-      chapterCount: 0,
-    },
-    select: { unitId: true },
-  });
-  await contentStructureService.ensureForOwner(tx, hiddenWork.unitId);
-
-  await tx.unitWork.create({
-    data: {
-      unitId: matchedReleaseUnitId,
-      workUnitId: hiddenWork.unitId,
-      role: UnitWorkRole.RELEASE,
-      language: matched.translations[0]?.language ?? language,
-      displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-    },
-  });
-  return {
-    workUnitId: hiddenWork.unitId,
-    affectedUnitIds: [matchedReleaseUnitId, hiddenWork.unitId],
-  };
 }
 
 /**
@@ -230,20 +133,6 @@ export class BookService {
         unit: {
           translations: {
             some: { language: options.language },
-          },
-        },
-      });
-    }
-
-    // Filter release membership by canonical UnitWork relation.
-    if (options.workUnitId?.trim()) {
-      andWhere.push({
-        unit: {
-          workMemberships: {
-            some: {
-              workUnitId: options.workUnitId,
-              role: "RELEASE",
-            },
           },
         },
       });
@@ -394,11 +283,6 @@ export class BookService {
 
     const syncAfterCommit = new Set<string>();
     const book = await prisma.$transaction(async (tx) => {
-      const workMatch = await resolveWorkMatch(tx, req, ownerUserId, language);
-      for (const unitId of workMatch.affectedUnitIds) {
-        syncAfterCommit.add(unitId);
-      }
-      const resolvedWorkUnitId = workMatch.workUnitId ?? undefined;
       const created = await tx.book.create({
         data: {
           unit: {
@@ -450,29 +334,6 @@ export class BookService {
         include: bookInclude,
       });
       await contentStructureService.ensureForOwner(tx, created.unitId);
-
-      if (resolvedWorkUnitId) {
-        await tx.unitWork.upsert({
-          where: {
-            unitId_workUnitId_role: {
-              unitId: created.unitId,
-              workUnitId: resolvedWorkUnitId,
-              role: UnitWorkRole.RELEASE,
-            },
-          },
-          create: {
-            unitId: created.unitId,
-            workUnitId: resolvedWorkUnitId,
-            role: UnitWorkRole.RELEASE,
-            language,
-            displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-          },
-          update: {
-            language,
-            displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-          },
-        });
-      }
 
       if (actorUserId) {
         await writeEditorialMetadataHistory(tx as any, {

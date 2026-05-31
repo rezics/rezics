@@ -8,7 +8,6 @@ function bookRow(overrides: Record<string, unknown> = {}) {
       id: "release-1",
       userId: null,
       user: null,
-      workUnitId: null,
       status: "PUBLISHED",
       visibility: "PUBLIC",
       rating: "GENERAL",
@@ -18,7 +17,6 @@ function bookRow(overrides: Record<string, unknown> = {}) {
       defaultLanguage: "en",
       isLanguageNeutral: false,
       translations: [],
-      workMemberships: [],
       creditAttributions: [],
       publishedAt: null,
     },
@@ -37,35 +35,18 @@ function bookRow(overrides: Record<string, unknown> = {}) {
 }
 
 describe("mapBaseBookToDTO", () => {
-  test("projects USWN from canonical UnitWork membership", () => {
+  test("omits work-domain metadata", () => {
     const dto = mapBaseBookToDTO(
       bookRow({
         unit: {
           ...bookRow().unit,
-          workUnitId: "legacy-work",
-          workMemberships: [
-            {
-              unitId: "release-1",
-              workUnitId: "canonical-work",
-              role: "RELEASE",
-              language: "en",
-              position: null,
-              displayPolicy: "PRIMARY",
-              createdAt: new Date("2026-01-01T00:00:00.000Z"),
-              updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-            },
-          ],
         },
       }),
     );
 
-    expect(dto.metadata?.uswn).toBe("canonical-work");
-  });
-
-  test("projects null USWN for standalone content", () => {
-    const dto = mapBaseBookToDTO(bookRow());
-
-    expect(dto.metadata?.uswn).toBeNull();
+    expect("workUnitId" in dto).toBe(false);
+    expect("metadata" in dto).toBe(false);
+    expect("workMembership" in dto).toBe(false);
   });
 
   test("projects AI disclosure metadata independently from rating", () => {

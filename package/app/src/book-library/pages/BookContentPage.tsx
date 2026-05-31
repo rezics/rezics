@@ -6,9 +6,6 @@ import { useAtomValue } from "jotai";
 import type React from "react";
 import { useMemo } from "react";
 import { ChapterList } from "../components/Chapter/ChapterList";
-import { ReleaseSelector } from "../components/ReleaseSelector";
-import { useBookLanguage } from "../hooks/useBookLanguage";
-import { useReleaseSelection } from "../hooks/useReleaseSelection";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
@@ -43,11 +40,6 @@ export const BookContentPage: React.FC = () => {
     enabled: Boolean(bookId),
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
-  const [selectedLang] = useBookLanguage(bookId, bookInfo);
-  const [selectedReleaseUnitId, setSelectedRelease] = useReleaseSelection(
-    bookInfo,
-    selectedLang,
-  );
 
   const sidebar = useMemo(() => {
     if (!bookInfo) return null;
@@ -64,13 +56,6 @@ export const BookContentPage: React.FC = () => {
 
   return (
     <div className="flex min-h-0 flex-col gap-6">
-      <ReleaseSelector
-        bookInfo={bookInfo}
-        selectedLang={selectedLang}
-        selectedReleaseUnitId={selectedReleaseUnitId}
-        onSelect={setSelectedRelease}
-      />
-
       <div className="lg:hidden">
         <ContentSidebar
           textLength={bookInfo.textLength ?? 0}
@@ -78,7 +63,7 @@ export const BookContentPage: React.FC = () => {
         />
       </div>
 
-      <ChapterList id={selectedReleaseUnitId || bookInfo.unitId} />
+      <ChapterList id={bookInfo.unitId} />
     </div>
   );
 };

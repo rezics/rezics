@@ -115,31 +115,10 @@ describe("bookContentStructureNodeSchema", () => {
 });
 
 describe("bookDTOSchema", () => {
-  test("accepts release work membership metadata", () => {
-    expect(
-      Value.Check(bookDTOSchema, {
-        unitId: "release-1",
-        workUnitId: "work-1",
-        metadata: { uswn: "work-1" },
-        workMembership: {
-          unitId: "release-1",
-          workUnitId: "work-1",
-          role: "RELEASE",
-          language: "en",
-          position: "a0",
-          displayPolicy: "PRIMARY",
-        },
-      }),
-    ).toBe(true);
-  });
-
-  test("accepts null USWN for standalone content", () => {
-    expect(
-      Value.Check(bookDTOSchema, {
-        unitId: "standalone-1",
-        metadata: { uswn: null },
-      }),
-    ).toBe(true);
+  test("omits legacy work membership properties", () => {
+    expect("workUnitId" in bookDTOSchema.properties).toBe(false);
+    expect("metadata" in bookDTOSchema.properties).toBe(false);
+    expect("workMembership" in bookDTOSchema.properties).toBe(false);
   });
 
   test("accepts Unit-level AI disclosure metadata", () => {
@@ -155,15 +134,9 @@ describe("bookDTOSchema", () => {
 });
 
 describe("createBookSchema", () => {
-  test("accepts creation-time work matching", () => {
-    expect(
-      Value.Check(createBookSchema, {
-        creationMode: "wiki",
-        defaultLanguage: "en",
-        workMatch: { releaseUnitId: "release-1" },
-        translations: [{ language: "en", title: "New Release" }],
-      }),
-    ).toBe(true);
+  test("omits legacy work creation fields", () => {
+    expect("workUnitId" in createBookSchema.properties).toBe(false);
+    expect("workMatch" in createBookSchema.properties).toBe(false);
   });
 
   test("accepts AI disclosure fields and rejects unsupported details", () => {

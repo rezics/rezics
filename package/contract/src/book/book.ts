@@ -20,7 +20,6 @@ import {
   publicUserSchema,
   unitTranslationDTOSchema,
 } from "../unit/unit";
-import { unitWorkDTOSchema } from "../unit/work";
 
 // ============================================================
 // BOOK EXTRA SCHEMA
@@ -40,12 +39,6 @@ export const bookDTOSchema = t.Object({
   unitId: t.String(),
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
-  workUnitId: t.Optional(t.Nullable(t.String())),
-  metadata: t.Optional(
-    t.Object({
-      uswn: t.Union([t.String(), t.Null()]),
-    }),
-  ),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
@@ -69,9 +62,6 @@ export const bookDTOSchema = t.Object({
   // Translation layer
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
 
-  // Work-domain release membership
-  workMembership: t.Optional(t.Nullable(unitWorkDTOSchema)),
-
   // Credit attribution
   creditAttributions: t.Optional(t.Array(creditAttributionBriefSchema)),
 
@@ -94,7 +84,6 @@ export const bookListQuerySchema = t.Object({
   entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   isbn13: t.Optional(t.String()),
-  workUnitId: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   status: t.Optional(t.String()),
   sort: t.Optional(
@@ -123,7 +112,6 @@ export const bookListBodySchema = t.Object({
   entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
   isbn13: t.Optional(t.String()),
-  workUnitId: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   status: t.Optional(t.String()),
   sort: t.Optional(
@@ -171,11 +159,6 @@ export type BookResponse = (typeof bookResponseSchema)["static"];
 export const createBookSchema = t.Object({
   userId: t.Optional(t.String()),
   creationMode: t.Optional(creationModeSchema),
-  workMatch: t.Optional(
-    t.Object({
-      releaseUnitId: t.String(),
-    }),
-  ),
   defaultLanguage: t.Optional(languageSchema),
   isbn13: t.Optional(t.String()),
   publicationDate: t.Optional(t.Union([t.String(), t.Date()])),
@@ -189,7 +172,6 @@ export const createBookSchema = t.Object({
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   visibility: t.Optional(t.String()),
-  workUnitId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   translations: t.Optional(
     t.Array(

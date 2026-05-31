@@ -1,8 +1,6 @@
-import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
-  Button,
   Select,
   SelectContent,
   SelectItem,
@@ -12,21 +10,15 @@ import {
   TabsList,
   TabsTrigger,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { MainContentContainer } from "@/core/components/container/MainContentContainer";
 import { useBookLanguage } from "../hooks/useBookLanguage";
-import {
-  hasMissingReleaseLanguages,
-  releaseWorkUnitId,
-} from "../models/releaseWork";
 
 const TAB_ROUTES = [
   "info",
   "review",
-  "releases",
   "content",
   "discussion",
   "history",
@@ -60,20 +52,10 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const activeTab = useActiveTabRoute();
   const [selectedLang, setSelectedLang] = useBookLanguage(bookId, bookInfo);
-  const workUnitId = releaseWorkUnitId(bookInfo);
-
-  const { data: releaseList } = useQuery({
-    ...bookQueries.list({ workUnitId, limit: 100 }),
-    enabled: Boolean(workUnitId),
-  });
 
   const availableLanguages = useMemo(
     () => (bookInfo?.translations ?? []).map((tr) => tr.language as string),
     [bookInfo?.translations],
-  );
-  const hasMissingReleaseLanguage = hasMissingReleaseLanguages(
-    availableLanguages,
-    releaseList?.books ?? [],
   );
 
   const handleTabChange = (newValue: string) => {
@@ -104,9 +86,6 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                 </TabsTrigger>
                 <TabsTrigger value="review" className="flex-none snap-start">
                   {t("page:book_tabs_review_shelf")}
-                </TabsTrigger>
-                <TabsTrigger value="releases" className="flex-none snap-start">
-                  {t("book:otherEditions")}
                 </TabsTrigger>
                 <TabsTrigger value="content" className="flex-none snap-start">
                   {t("page:book_tabs_content")}
@@ -140,23 +119,6 @@ export const BookDetailShell: React.FC<BookDetailShellProps> = ({
                 ))}
               </SelectContent>
             </Select>
-          )}
-
-          {hasMissingReleaseLanguage && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="flex-shrink-0"
-              onClick={() =>
-                navigate({
-                  to: "/book/$bookId/releases",
-                  params: { bookId },
-                })
-              }
-            >
-              Releases
-            </Button>
           )}
         </div>
 

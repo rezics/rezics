@@ -5,7 +5,6 @@ import { AiDisclosureBadge } from "@rezics/ui";
 import { Separator } from "@rezics/ui/shadcn";
 import type React from "react";
 import { aiDisclosureLabel } from "@/unit/models/aiDisclosureLabels";
-import { resolveMetadataPanelUswn } from "../../models/bookMetadata";
 
 export type MetadataPanelProps = {
   bookInfo: BookDTO;
@@ -24,13 +23,11 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({
   const publicationLicenseLabel = bookInfo.licenseSlug
     ? licenseLabel(bookInfo.licenseSlug as LicenseSlug)
     : undefined;
-  const uswn = resolveMetadataPanelUswn(bookInfo);
   const aiDisclosureMode =
     (bookInfo.aiDisclosureMode as AiDisclosureMode | undefined) ?? "UNKNOWN";
 
   const items = (
     <div className="flex flex-col gap-2">
-      {uswn && <p className="text-sm">USWN：{uswn}</p>}
       {bookInfo?.isbn13 && (
         <p className="text-sm">
           {t("book:fields_isbn")}：{bookInfo.isbn13}

@@ -1,8 +1,6 @@
-import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { mainMarkdownSource } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { WorkReleaseNav } from "@rezics/ui";
 import { ArrowForwardIcon } from "@rezics/ui/composite/navigation/ArrowForwardIcon.tsx";
 import { AccentBarWithText } from "@rezics/ui/composite/typography/AccentBarWithText.tsx";
 import { Separator } from "@rezics/ui/shadcn";
@@ -22,49 +20,8 @@ import { MetadataPanel } from "../components/BookDetail/MetadataPanel";
 import { ExcerptPreview } from "../components/ExcerptPreview";
 import { RemarkPreview } from "../components/RemarkPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
-import { releaseWorkUnitId } from "../models/releaseWork";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
-
-interface BookWorkReleaseNavProps {
-  workUnitId: string;
-  currentUnitId: string;
-}
-
-const BookWorkReleaseNav: React.FC<BookWorkReleaseNavProps> = ({
-  workUnitId,
-  currentUnitId,
-}) => {
-  const { t } = useTranslation(["book"]);
-  const { data } = useQuery({
-    ...bookQueries.list({ workUnitId, limit: 10 }),
-    enabled: Boolean(workUnitId),
-  });
-
-  const releases =
-    data?.books?.map((b) => ({
-      unitId: b.unitId,
-      title: getTranslation(b.translations)?.title ?? undefined,
-    })) ?? [];
-
-  return (
-    <WorkReleaseNav
-      releases={releases}
-      currentUnitId={currentUnitId}
-      heading={t("book:editionFallback")}
-      emptyLabel={t("book:editionFallback")}
-      renderLink={(release, children) => (
-        <Link
-          key={release.unitId}
-          to="/book/$bookId"
-          params={{ bookId: release.unitId }}
-        >
-          {children}
-        </Link>
-      )}
-    />
-  );
-};
 
 export const BookBasicInfoPage: React.FC = () => {
   const { t } = useTranslation(["book"]);
@@ -92,12 +49,6 @@ export const BookBasicInfoPage: React.FC = () => {
     return (
       <div className="flex flex-col gap-6">
         <MetadataPanel bookInfo={bookInfo} />
-        {releaseWorkUnitId(bookInfo) && (
-          <BookWorkReleaseNav
-            workUnitId={releaseWorkUnitId(bookInfo)!}
-            currentUnitId={bookInfo.unitId}
-          />
-        )}
       </div>
     );
   }, [bookInfo]);

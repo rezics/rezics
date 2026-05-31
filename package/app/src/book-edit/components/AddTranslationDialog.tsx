@@ -1,4 +1,3 @@
-import { bookQueries } from "@rezics/api/book/book";
 import type { BookDTO } from "@rezics/contract";
 import { LANGUAGE_META, LANGUAGES } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -16,11 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useState } from "react";
-import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
-import { getBookTitle } from "@/shared/utils/translation-helpers";
 
 export interface AddTranslationDialogProps {
   open: boolean;
@@ -35,7 +31,6 @@ const NO_SOURCE = "__none__";
 
 export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
   open,
-  book,
   existingLanguages,
   onClose,
   onSubmit,
@@ -52,18 +47,6 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
       setSourceReleaseUnitId(NO_SOURCE);
     }
   }, [open, firstAvailableLanguage]);
-
-  // Sibling releases under the same work — also let the user pick the work
-  // itself (for releases) or any release of this work (for works).
-  const canonicalWorkUnitId = releaseWorkUnitId(book) ?? book?.unitId;
-  const { data: siblings } = useQuery({
-    ...bookQueries.list({ workUnitId: canonicalWorkUnitId, limit: 50 }),
-    enabled: open && Boolean(book?.unitId),
-  });
-
-  const candidates = (siblings?.books ?? []).filter(
-    (b) => b.unitId !== book?.unitId,
-  );
 
   const handleSubmit = () => {
     if (!language) return;
@@ -124,11 +107,6 @@ export const AddTranslationDialog: React.FC<AddTranslationDialogProps> = ({
                     {t("page:book_edit_info_translation_add_dialog_no_source")}
                   </span>
                 </SelectItem>
-                {candidates.map((b) => (
-                  <SelectItem key={b.unitId} value={b.unitId}>
-                    {getBookTitle(b) || b.unitId}
-                  </SelectItem>
-                ))}
               </SelectContent>
             </Select>
             <p className="text-sm text-text-secondary">

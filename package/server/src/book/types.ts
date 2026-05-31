@@ -12,10 +12,6 @@ export const bookInclude = {
       user: { select: publicUserSelect },
       translations: true,
       supportLanguages: true,
-      workMemberships: {
-        where: { role: "RELEASE" },
-        orderBy: [{ position: "asc" as const }, { createdAt: "asc" as const }],
-      },
       creditAttributions: {
         include: {
           entity: {
