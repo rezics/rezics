@@ -1,4 +1,5 @@
 import { useEditorEntry } from "@rezics/api/hooks";
+import { commentListQuery } from "@rezics/api/comment/comment";
 import { postQueries, postSubtreeQuery } from "@rezics/api/post/post";
 import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -12,6 +13,7 @@ import { Link } from "@/shared/ui/link";
 import { PostCard } from "../components/item/PostCard";
 import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
+import { mapCommentToPost } from "../models/commentPostCompat";
 import { PostTreeList } from "../sections/PostTreeList";
 
 export const ContinueThreadPage: React.FC = () => {
@@ -23,12 +25,31 @@ export const ContinueThreadPage: React.FC = () => {
   };
   const composerRef = useFocusReplyFromQuery();
   const { data: anchor } = useQuery(postQueries.detail(unitId));
-  const { data: subtree, isLoading } = useQuery(
-    postSubtreeQuery(rootPostUnitId, unitId, {
+  const commentSubtreeQuery = useQuery(
+    commentListQuery({
+      rootUnitId: rootPostUnitId,
+      realmUnitId: anchor?.realmUnitId ?? "",
+      mode: "subtree",
+      subtreeRootCommentUnitId: unitId,
+      maxDepth: 5,
+      limit: 200,
+    }),
+  );
+  const legacySubtreeQuery = useQuery({
+    ...postSubtreeQuery(rootPostUnitId, unitId, {
       mode: "threaded",
       maxDepth: 5,
     }),
-  );
+    enabled:
+      !!rootPostUnitId && !!unitId && Boolean(anchor) && !anchor?.realmUnitId,
+  });
+  const isCommentSubtree = Boolean(anchor?.realmUnitId);
+  const isLoading = isCommentSubtree
+    ? commentSubtreeQuery.isLoading
+    : legacySubtreeQuery.isLoading;
+  const posts = isCommentSubtree
+    ? (commentSubtreeQuery.data?.comments ?? []).map(mapCommentToPost)
+    : (legacySubtreeQuery.data?.posts ?? []);
   const editorEntry = useEditorEntry({
     surface: anchor?.kind === PostKind.WIKI ? "wikiPost" : "post",
     ownerUnit: { user: anchor?.author },
@@ -84,7 +105,7 @@ export const ContinueThreadPage: React.FC = () => {
         </div>
       ) : (
         <PostTreeList
-          posts={subtree?.posts ?? []}
+          posts={posts}
           rootPostUnitId={rootPostUnitId}
           baseDepth={anchor?.depth ?? 0}
         />
