@@ -37,15 +37,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
 
   const { data, isLoading } = usePostSearchQuery({
     kind,
-    ...(workUnitId
-      ? {
-          workUnitId,
-          workRoles: [kind === "REVIEW" ? "REVIEW" : "POST"] as (
-            | "REVIEW"
-            | "POST"
-          )[],
-        }
-      : { targetUnitId: targetUnitId || undefined }),
+    targetUnitId: targetUnitId || undefined,
     keyword: keyword || undefined,
     offset: start,
     limit: EXTERNAL_PAGE_SIZE,

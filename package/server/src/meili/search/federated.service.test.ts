@@ -161,7 +161,7 @@ describe("federatedSearch", () => {
     expect(commentQuery?.filter).toContain('rootUnitId = "b-9"');
   });
 
-  test("book work scope carries work-domain shelf and post filters through grouped search", async () => {
+  test("book work scope carries shelf work filters but exact post filters through grouped search", async () => {
     const { client, multi } = makeFakeClient();
     const opts: FederatedSearchOptions = {
       scope: { kind: "book", unitId: "release-1", workUnitId: "work-1" },
@@ -182,9 +182,9 @@ describe("federatedSearch", () => {
     const reviewQuery = queries.find(
       (q) => q.indexUid === "posts" && q.filter?.includes('kind = "REVIEW"'),
     );
-    expect(reviewQuery?.filter).toContain('workUnitIds = "work-1"');
-    expect(reviewQuery?.filter).toContain('workRoles = "REVIEW"');
-    expect(reviewQuery?.filter).not.toContain('targetUnitId = "release-1"');
+    expect(reviewQuery?.filter).toContain('targetUnitId = "release-1"');
+    expect(reviewQuery?.filter).not.toContain('workUnitIds = "work-1"');
+    expect(reviewQuery?.filter).not.toContain('workRoles = "REVIEW"');
 
     const commentQuery = queries.find((q) => q.indexUid === "comments");
     expect(commentQuery?.filter).toContain('rootUnitId = "__never__"');

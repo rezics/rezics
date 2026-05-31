@@ -33,7 +33,7 @@ describe("ranking search projections", () => {
       getExpectedMeiliIndexSchema("content").filterableAttributes,
     ).toContain("targetUnitId");
     expect(getExpectedMeiliIndexSchema("posts").sortableAttributes).toContain(
-      "commentHotScore",
+      "hotScore",
     );
     expect(
       getExpectedMeiliIndexSchema("comments").sortableAttributes,
@@ -65,7 +65,6 @@ describe("ranking search projections", () => {
       unitId: "post-1",
       content: null,
       kind: "POST",
-      depth: 0,
       isLocked: false,
       replyCount: 0,
       directReplyCount: 0,
@@ -73,8 +72,6 @@ describe("ranking search projections", () => {
       createdAt: "2026-01-01T00:00:00.000Z",
       updatedAt: "2026-01-01T00:00:00.000Z",
       targetUnitId: null,
-      rootPostUnitId: null,
-      parentPostUnitId: null,
       authorUserId: "user-1",
       scoreEntryId: null,
       unit: { user: null, inRealms: [], workMemberships: [] },
@@ -87,8 +84,7 @@ describe("ranking search projections", () => {
     expect(content.catalogEntryKind).toBeNull();
     expect(content.targetUnitId).toBeNull();
     expect(post.hotScore).toBe(0);
-    expect(post.commentHotScore).toBe(0);
-    expect(post.commentRankUpdatedAt).toBeNull();
+    expect(post.rankUpdatedAt).toBeNull();
   });
 
   test("comment ranking patches land in the comments index", async () => {

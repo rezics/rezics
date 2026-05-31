@@ -1,6 +1,5 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
-import { unitWorkRoleSchema } from "../unit/work";
 
 // ANCHOR: Post Search Document
 
@@ -8,7 +7,6 @@ export const PostSearchDocumentSchema = t.Object({
   id: t.String(),
   contentText: t.Union([t.String(), t.Null()]),
   kind: t.Union([t.String(), t.Null()]),
-  depth: t.Number(),
   isLocked: t.Boolean(),
   replyCount: t.Number(),
   directReplyCount: t.Number(),
@@ -20,18 +18,10 @@ export const PostSearchDocumentSchema = t.Object({
   trendingScore: t.Number(),
   qualityScore: t.Number(),
   rankUpdatedAt: t.Union([t.String(), t.Null()]),
-  commentHotScore: t.Number(),
-  commentTopScore: t.Number(),
-  commentQualityScore: t.Number(),
-  commentRankUpdatedAt: t.Union([t.String(), t.Null()]),
 
   // Foreign keys (filterable)
   targetUnitId: t.Union([t.String(), t.Null()]),
   realmIds: t.Array(t.String()),
-  workUnitIds: t.Array(t.String()),
-  workRoles: t.Array(unitWorkRoleSchema),
-  rootPostUnitId: t.Union([t.String(), t.Null()]),
-  parentPostUnitId: t.Union([t.String(), t.Null()]),
   authorUserId: t.String(),
   scoreEntryId: t.Union([t.String(), t.Null()]),
 
@@ -62,12 +52,7 @@ export const PostSearchOptionsSchema = t.Object({
   kind: t.Optional(t.String()),
   targetUnitId: t.Optional(t.String()),
   realmUnitId: t.Optional(t.String()),
-  workUnitId: t.Optional(t.String()),
-  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   authorUserId: t.Optional(t.String()),
-  rootPostUnitId: t.Optional(t.String()),
-  parentPostUnitId: t.Optional(t.String()),
-  depth: t.Optional(t.Number()),
   isLocked: t.Optional(t.Boolean()),
   sort: t.Optional(
     t.Object({
@@ -79,9 +64,6 @@ export const PostSearchOptionsSchema = t.Object({
         t.Literal("topScore"),
         t.Literal("trendingScore"),
         t.Literal("qualityScore"),
-        t.Literal("commentHotScore"),
-        t.Literal("commentTopScore"),
-        t.Literal("commentQualityScore"),
         t.Literal("relevance"),
       ]),
       order: t.Optional(t.Union([t.Literal("asc"), t.Literal("desc")])),

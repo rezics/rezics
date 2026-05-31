@@ -39,10 +39,10 @@ export function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
       (doc as PostSearchDocument & { realmUnitId?: string | null })
         .realmUnitId ?? undefined,
     content: markdownContentDoc(doc.contentText ?? ""),
-    rootPostUnitId: doc.rootPostUnitId,
-    parentPostUnitId: doc.parentPostUnitId,
+    rootPostUnitId: null,
+    parentPostUnitId: null,
     kind: doc.kind as PostDTO["kind"],
-    depth: doc.depth,
+    depth: 0,
     replyCount: doc.replyCount,
     directReplyCount: doc.directReplyCount,
     lastReplyAt: doc.lastReplyAt,

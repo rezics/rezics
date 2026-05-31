@@ -150,7 +150,7 @@ describe("buildPostFilter", () => {
     expect(filter).toContain('targetUnitId = "b-2"');
   });
 
-  test("book work scope emits work-domain post filters", () => {
+  test("book work scope emits exact post target filters", () => {
     const filter = buildPostFilter(
       emptyQuery,
       { kind: "book", unitId: "release-1", workUnitId: "work-1" },
@@ -158,12 +158,12 @@ describe("buildPostFilter", () => {
       { postCategory: "reviews" },
     );
     expect(filter).toContain('kind = "REVIEW"');
-    expect(filter).toContain('workUnitIds = "work-1"');
-    expect(filter).toContain('workRoles = "REVIEW"');
-    expect(filter).not.toContain('targetUnitId = "release-1"');
+    expect(filter).toContain('targetUnitId = "release-1"');
+    expect(filter).not.toContain('workUnitIds = "work-1"');
+    expect(filter).not.toContain('workRoles = "REVIEW"');
   });
 
-  test("book work scope uses POST role for remark and excerpt post categories", () => {
+  test("book work scope keeps remark and excerpt posts on exact targets", () => {
     for (const postCategory of ["remarks", "excerpts"] as const) {
       const filter = buildPostFilter(
         emptyQuery,
@@ -174,8 +174,9 @@ describe("buildPostFilter", () => {
       expect(filter).toContain(
         `kind = "${postCategory === "remarks" ? "REMARK" : "EXCERPT"}"`,
       );
-      expect(filter).toContain('workUnitIds = "work-1"');
-      expect(filter).toContain('workRoles = "POST"');
+      expect(filter).toContain('targetUnitId = "release-1"');
+      expect(filter).not.toContain('workUnitIds = "work-1"');
+      expect(filter).not.toContain('workRoles = "POST"');
     }
   });
 

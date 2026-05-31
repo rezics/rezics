@@ -58,16 +58,6 @@ const POST_CATEGORY_TO_KIND: Record<
   posts: "POST",
 };
 
-const POST_CATEGORY_TO_WORK_ROLE: Record<
-  NonNullable<PostBuildOpts["postCategory"]>,
-  "POST" | "REVIEW"
-> = {
-  reviews: "REVIEW",
-  excerpts: "POST",
-  remarks: "POST",
-  posts: "POST",
-};
-
 function quoteList(values: readonly string[]): string {
   return values.map((v) => `"${v}"`).join(", ");
 }
@@ -219,17 +209,7 @@ export function buildPostFilter(
 
   // 2. Scope filter
   if (scope.kind === "book") {
-    const bookScope = resolveBookScope(scope);
-    if (bookScope.mode === "work") {
-      filter.push(`workUnitIds = "${bookScope.workUnitId}"`);
-      if (opts.postCategory) {
-        filter.push(
-          `workRoles = "${POST_CATEGORY_TO_WORK_ROLE[opts.postCategory]}"`,
-        );
-      }
-    } else {
-      filter.push(`targetUnitId = "${bookScope.unitId}"`);
-    }
+    filter.push(`targetUnitId = "${scope.unitId}"`);
   } else if (scope.kind === "realm") {
     filter.push(`realmIds = "${scope.realmId}"`);
   } else if (scope.kind === "user") {

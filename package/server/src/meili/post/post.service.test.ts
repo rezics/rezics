@@ -17,7 +17,7 @@ mock.module("../search-client", () => ({
 
 const { searchPosts } = await import("./post.service");
 
-describe("searchPosts work-domain filters", () => {
+describe("searchPosts filters", () => {
   beforeEach(() => {
     postSearchMock.mockClear();
     postSearchMock.mockResolvedValue({
@@ -28,17 +28,15 @@ describe("searchPosts work-domain filters", () => {
     });
   });
 
-  test("combines exact target and work-domain filters", async () => {
+  test("combines exact target and realm filters", async () => {
     await searchPosts({
       targetUnitId: "release-1",
-      workUnitId: "work-1",
-      workRoles: ["REVIEW"],
+      realmUnitId: "realm-1",
     });
 
     expect(postSearchMock.mock.calls[0]?.[1].filter).toEqual([
       'targetUnitId = "release-1"',
-      'workUnitIds = "work-1"',
-      'workRoles = "REVIEW"',
+      'realmIds = "realm-1"',
     ]);
   });
 });

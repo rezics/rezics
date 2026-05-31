@@ -2,14 +2,13 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { PostSearchDocumentSchema, PostSearchOptionsSchema } from "./post";
 
-describe("PostSearchDocumentSchema work-domain fields", () => {
-  test("accepts UnitWork-derived membership fields", () => {
+describe("PostSearchDocumentSchema root post fields", () => {
+  test("accepts root-post search fields without reply or work-domain fields", () => {
     expect(
       Value.Check(PostSearchDocumentSchema, {
         id: "post-1",
         contentText: "review",
         kind: "REVIEW",
-        depth: 0,
         isLocked: false,
         replyCount: 0,
         directReplyCount: 0,
@@ -21,16 +20,8 @@ describe("PostSearchDocumentSchema work-domain fields", () => {
         trendingScore: 0,
         qualityScore: 0,
         rankUpdatedAt: null,
-        commentHotScore: 0,
-        commentTopScore: 0,
-        commentQualityScore: 0,
-        commentRankUpdatedAt: null,
         targetUnitId: "release-1",
         realmIds: [],
-        workUnitIds: ["work-1"],
-        workRoles: ["REVIEW"],
-        rootPostUnitId: null,
-        parentPostUnitId: null,
         authorUserId: "user-1",
         scoreEntryId: null,
         authorName: "Reader",
@@ -45,13 +36,7 @@ describe("PostSearchDocumentSchema work-domain fields", () => {
     ).toBe(true);
   });
 
-  test("accepts work-domain feed options while preserving target filters", () => {
-    expect(
-      Value.Check(PostSearchOptionsSchema, {
-        workUnitId: "work-1",
-        workRoles: ["POST", "REVIEW"],
-      }),
-    ).toBe(true);
+  test("accepts target and realm feed options", () => {
     expect(
       Value.Check(PostSearchOptionsSchema, {
         targetUnitId: "release-1",
@@ -60,8 +45,7 @@ describe("PostSearchDocumentSchema work-domain fields", () => {
     expect(
       Value.Check(PostSearchOptionsSchema, {
         targetUnitId: "release-1",
-        workUnitId: "work-1",
-        workRoles: ["REVIEW"],
+        realmUnitId: "realm-1",
       }),
     ).toBe(true);
   });

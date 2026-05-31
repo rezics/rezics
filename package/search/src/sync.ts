@@ -1853,7 +1853,6 @@ export function buildCommentDocument(comment: any): CommentSearchDocument {
 
 export function buildPostDocument(post: any): PostSearchDocument {
   const user = post.unit?.user;
-  const workMemberships: any[] = post.unit?.workMemberships ?? [];
   const targetUnit = post.targetUnit;
   const scoreEntry = post.scoreEntry;
 
@@ -1876,7 +1875,6 @@ export function buildPostDocument(post: any): PostSearchDocument {
     id: post.unitId,
     contentText: mainMarkdownSource(post.content),
     kind: post.kind ?? null,
-    depth: post.depth,
     isLocked: post.isLocked,
     replyCount: post.replyCount,
     directReplyCount: post.directReplyCount,
@@ -1898,16 +1896,8 @@ export function buildPostDocument(post: any): PostSearchDocument {
     trendingScore: 0,
     qualityScore: 0,
     rankUpdatedAt: null,
-    commentHotScore: 0,
-    commentTopScore: 0,
-    commentQualityScore: 0,
-    commentRankUpdatedAt: null,
     targetUnitId: post.targetUnitId ?? null,
     realmIds: realmIdsForSearch(post.unit),
-    workUnitIds: workMemberships.map((membership) => membership.workUnitId),
-    workRoles: workMemberships.map((membership) => membership.role),
-    rootPostUnitId: post.rootPostUnitId ?? null,
-    parentPostUnitId: post.parentPostUnitId ?? null,
     authorUserId: post.authorUserId,
     scoreEntryId: post.scoreEntryId ?? null,
     authorName: user?.name ?? null,

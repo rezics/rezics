@@ -351,7 +351,7 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.seriesTitles).toEqual(["Direct Series"]);
   });
 
-  test("buildPostDocument projects UnitWork membership fields", async () => {
+  test("buildPostDocument omits UnitWork membership fields", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
 
@@ -370,8 +370,8 @@ describe("buildContentDocument realm tag keys", () => {
       scoreEntry: null,
     });
 
-    expect(doc.workUnitIds).toEqual(["work-1"]);
-    expect(doc.workRoles).toEqual(["REVIEW"]);
+    expect("workUnitIds" in doc).toBe(false);
+    expect("workRoles" in doc).toBe(false);
   });
 
   test("projects main markdown and ignores slot text for runtime v1", async () => {

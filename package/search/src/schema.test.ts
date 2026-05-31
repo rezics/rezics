@@ -34,12 +34,15 @@ describe("expected Meilisearch work-domain settings", () => {
     );
   });
 
-  test("post index exposes UnitWork membership fields", () => {
+  test("post index omits reply and work-domain fields", () => {
     const posts = getExpectedMeiliIndexSchema("posts");
 
     expect(posts.filterableAttributes).toEqual(
-      expect.arrayContaining(["workUnitIds", "workRoles"]),
+      expect.arrayContaining(["kind", "targetUnitId", "realmIds"]),
     );
+    expect(posts.filterableAttributes).not.toContain("workUnitIds");
+    expect(posts.filterableAttributes).not.toContain("workRoles");
+    expect(posts.filterableAttributes).not.toContain("parentPostUnitId");
   });
 
   test("comment index is partitioned by root unit and realm", () => {
