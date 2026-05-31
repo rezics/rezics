@@ -117,26 +117,6 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       : [];
   }
 
-  if (table === "UnitWork") {
-    const unitId = targetId(message, ["unitId", "unit_id"]);
-    return [
-      ...(unitId
-        ? [
-            createSearchCommand(
-              SEARCH_COMMAND_KINDS.contentSync,
-              { unitId },
-              source,
-            ),
-            createSearchCommand(
-              SEARCH_COMMAND_KINDS.postSync,
-              { postId: unitId },
-              source,
-            ),
-          ]
-        : []),
-    ];
-  }
-
   if (table === "CreditAttribution") {
     const unitId = targetId(message, ["unitId", "unit_id"]);
     return unitId
@@ -225,11 +205,6 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       ? [
           createMaintenanceCommand(
             MAINTENANCE_COMMAND_KINDS.seriesContentIndexRepair,
-            { seriesUnitId: ownerUnitId },
-            source,
-          ),
-          createMaintenanceCommand(
-            MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair,
             { seriesUnitId: ownerUnitId },
             source,
           ),

@@ -30,7 +30,7 @@ describe("search handlers", () => {
           type: "BOOK",
           status: "PUBLISHED",
           visibility: "PUBLIC",
-          workUnitId: null,
+          catalogEntryKind: null,
         }),
       },
       unitTag: {
@@ -141,15 +141,13 @@ describe("search handlers", () => {
     expect(enqueued).toEqual(["search.entity.fullSync:entity-1"]);
   });
 
-  test("release full repair continues by release cursor", async () => {
+  test("variant full repair continues by variant cursor", async () => {
     const added: Array<Record<string, unknown>> = [];
     const enqueued: string[] = [];
     setSearchPrismaClient({
       unit: {
         findMany: async (args: any) => {
-          expect(args.where.workMemberships).toEqual({
-            some: { role: "RELEASE" },
-          });
+          expect(args.where.catalogEntryKind).toBe("VARIANT");
           return [
             {
               id: "release-1",
@@ -163,14 +161,8 @@ describe("search handlers", () => {
               publishedAt: null,
               translations: [{ language: "en", title: "Release One" }],
               unitTags: [],
-              workMemberships: [
-                {
-                  workUnitId: "work-1",
-                  role: "RELEASE",
-                  displayPolicy: "PRIMARY",
-                  work: { unitTags: [] },
-                },
-              ],
+              catalogEntryKind: "VARIANT",
+              targetUnitId: "main-1",
               inRealms: [],
               realmTagApplicationsAsTargetUnit: [],
               creditAttributions: [],
@@ -188,14 +180,8 @@ describe("search handlers", () => {
               publishedAt: null,
               translations: [{ language: "en", title: "Release Two" }],
               unitTags: [],
-              workMemberships: [
-                {
-                  workUnitId: "work-1",
-                  role: "RELEASE",
-                  displayPolicy: "SECONDARY",
-                  work: { unitTags: [] },
-                },
-              ],
+              catalogEntryKind: "VARIANT",
+              targetUnitId: "main-1",
               inRealms: [],
               realmTagApplicationsAsTargetUnit: [],
               creditAttributions: [],

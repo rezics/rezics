@@ -9,7 +9,6 @@ export const MAINTENANCE_COMMAND_KINDS = {
   searchDriftRepair: "maintenance.search.driftRepair",
   searchRebuildIndex: "maintenance.search.rebuildIndex",
   seriesContentIndexRepair: "maintenance.series.contentIndexRepair",
-  seriesWorkProjectionRepair: "maintenance.series.workProjectionRepair",
   fanoutContinuation: "maintenance.fanout.continuation",
 } as const;
 
@@ -81,11 +80,6 @@ export const SeriesContentIndexRepairCommandSchema = commandSchema(
   JOB_LANES.maintenance,
   SeriesRepairPayloadSchema,
 );
-export const SeriesWorkProjectionRepairCommandSchema = commandSchema(
-  MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair,
-  JOB_LANES.maintenance,
-  SeriesRepairPayloadSchema,
-);
 export const FanoutContinuationCommandSchema = commandSchema(
   MAINTENANCE_COMMAND_KINDS.fanoutContinuation,
   JOB_LANES.maintenance,
@@ -97,7 +91,6 @@ export const MaintenanceCommandSchema = v.union([
   SearchDriftRepairCommandSchema,
   SearchRebuildIndexCommandSchema,
   SeriesContentIndexRepairCommandSchema,
-  SeriesWorkProjectionRepairCommandSchema,
   FanoutContinuationCommandSchema,
 ]);
 
@@ -121,22 +114,16 @@ export function createMaintenanceCommand(
               "contentIndex",
               payload.seriesUnitId,
             )
-          : kind === MAINTENANCE_COMMAND_KINDS.seriesWorkProjectionRepair &&
-              "seriesUnitId" in payload
-            ? maintenanceIdempotency.seriesRepair(
-                "workProjection",
-                payload.seriesUnitId,
+          : kind === MAINTENANCE_COMMAND_KINDS.fanoutContinuation &&
+              "fanout" in payload
+            ? maintenanceIdempotency.fanoutContinuation(
+                payload.fanout,
+                payload.targetId,
+                payload.cursor,
               )
-            : kind === MAINTENANCE_COMMAND_KINDS.fanoutContinuation &&
-                "fanout" in payload
-              ? maintenanceIdempotency.fanoutContinuation(
-                  payload.fanout,
-                  payload.targetId,
-                  payload.cursor,
-                )
-              : "scope" in payload
-                ? maintenanceIdempotency.replay(payload.scope, payload.key)
-                : `${kind}:unknown`;
+            : "scope" in payload
+              ? maintenanceIdempotency.replay(payload.scope, payload.key)
+              : `${kind}:unknown`;
 
   return v.parse(MaintenanceCommandSchema, {
     kind,

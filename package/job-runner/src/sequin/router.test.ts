@@ -44,25 +44,6 @@ describe("Sequin payload routing", () => {
     expect(JSON.stringify(commands[0])).not.toContain("stale");
   });
 
-  test("routes UnitWork changes to direct member rebuilds", () => {
-    const messages = parseSequinPayload({
-      table: "UnitWork",
-      action: "insert",
-      record: { unitId: "release-1", workUnitId: "work-1", role: "RELEASE" },
-    });
-
-    expect(routeSequinMessages(messages)).toMatchObject([
-      {
-        kind: "search.content.sync",
-        payload: { unitId: "release-1" },
-      },
-      {
-        kind: "search.post.sync",
-        payload: { postId: "release-1" },
-      },
-    ]);
-  });
-
   test("routes main database rank-relevant rows to ranking invalidations", () => {
     const messages = parseSequinPayload({
       table: "Post",
@@ -124,10 +105,6 @@ describe("Sequin payload routing", () => {
     expect(routeSequinMessages(messages)).toMatchObject([
       {
         kind: "maintenance.series.contentIndexRepair",
-        payload: { seriesUnitId: "series-1" },
-      },
-      {
-        kind: "maintenance.series.workProjectionRepair",
         payload: { seriesUnitId: "series-1" },
       },
       {

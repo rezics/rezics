@@ -157,6 +157,13 @@ function publicSearchableUnitWhere(): Prisma.UnitWhereInput {
   };
 }
 
+function publicCatalogContentWhere(): Prisma.UnitWhereInput {
+  return {
+    ...publicSearchableUnitWhere(),
+    OR: [{ catalogEntryKind: null }, { catalogEntryKind: "MAIN" }],
+  };
+}
+
 const visibleUnitTagsInclude = {
   where: {
     OR: [{ score: { gt: VISIBILITY_THRESHOLD } }, { pinned: true }] as any,
@@ -175,7 +182,7 @@ async function isContentPatchEligible(unitId: string): Promise<boolean> {
       status: true,
       visibility: true,
       contentModerationState: { select: { state: true } },
-      workMembers: { where: { role: "RELEASE" }, select: { unitId: true } },
+      catalogEntryKind: true,
     },
   });
   return isPublicIndexableContentUnit(unit);
@@ -188,7 +195,7 @@ export function isPublicIndexableContentUnit(
         status: string;
         visibility: string;
         contentModerationState?: { state: string } | null;
-        workMembers?: readonly unknown[];
+        catalogEntryKind?: string | null;
       }
     | null
     | undefined,
@@ -201,7 +208,9 @@ export function isPublicIndexableContentUnit(
       !SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
         unit.contentModerationState?.state as any,
       ) &&
-      (unit.workMembers?.length ?? 0) === 0,
+      (unit.catalogEntryKind === null ||
+        unit.catalogEntryKind === undefined ||
+        unit.catalogEntryKind === "MAIN"),
   );
 }
 
@@ -332,10 +341,6 @@ const contentInclude: any = {
     orderBy: [{ pinned: "desc" as const }, { score: "desc" as const }],
   } as any,
   unitTags: visibleUnitTagsInclude,
-  workMembers: {
-    where: { role: "RELEASE" },
-    select: { unitId: true },
-  },
   ...realmSearchProjectionSelect,
   contentModerationState: true,
   realmTagApplicationsAsTargetUnit: true,
@@ -635,8 +640,7 @@ export async function syncAllContent(client: SearchClient) {
     const units: any[] = await getSearchPrismaClient().unit.findMany({
       where: {
         type: { in: INDEXABLE_TYPES },
-        ...publicSearchableUnitWhere(),
-        NOT: { workMembers: { some: { role: "RELEASE" } } },
+        ...publicCatalogContentWhere(),
       },
       include: contentInclude,
       orderBy: { id: "asc" },
@@ -666,8 +670,7 @@ export async function syncContentSegment(
   const units: any[] = await getSearchPrismaClient().unit.findMany({
     where: {
       type: { in: INDEXABLE_TYPES },
-      ...publicSearchableUnitWhere(),
-      NOT: { workMembers: { some: { role: "RELEASE" } } },
+      ...publicCatalogContentWhere(),
     },
     include: contentInclude,
     orderBy: { id: "asc" },
@@ -691,9 +694,7 @@ export async function syncReleaseContentSegment(
     where: {
       type: { in: INDEXABLE_TYPES },
       ...publicSearchableUnitWhere(),
-      workMemberships: {
-        some: { role: "RELEASE" },
-      },
+      catalogEntryKind: "VARIANT",
     },
     include: contentInclude,
     orderBy: { id: "asc" },
@@ -716,8 +717,7 @@ export async function syncGameMediaContentSegment(
   const units: any[] = await getSearchPrismaClient().unit.findMany({
     where: {
       type: { in: [UnitType.GAME, UnitType.MEDIA] },
-      ...publicSearchableUnitWhere(),
-      NOT: { workMembers: { some: { role: "RELEASE" } } },
+      ...publicCatalogContentWhere(),
     },
     include: contentInclude,
     orderBy: { id: "asc" },
@@ -923,7 +923,11 @@ export async function syncSingleContent(client: SearchClient, unitId: string) {
     SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
       (unit as any).contentModerationState?.state,
     ) ||
-    (unit.workMembers?.length ?? 0) > 0
+    !(
+      unit.catalogEntryKind === null ||
+      unit.catalogEntryKind === undefined ||
+      unit.catalogEntryKind === "MAIN"
+    )
   ) {
     await client.deleteContent([unitId]);
     return;

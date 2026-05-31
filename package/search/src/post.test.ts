@@ -613,7 +613,7 @@ describe("public content indexing eligibility", () => {
     ).toBe(true);
   });
 
-  test("rejects hidden Work Units that aggregate releases", async () => {
+  test("rejects variant and non-catalog content Units from generic content indexing", async () => {
     setServerEnvForSearchTests();
     const { isPublicIndexableContentUnit } = await import("./sync");
     expect(
@@ -621,7 +621,15 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PUBLIC",
-        workMembers: [{ unitId: "release-1" }],
+        catalogEntryKind: "VARIANT",
+      }),
+    ).toBe(false);
+    expect(
+      isPublicIndexableContentUnit({
+        type: "BOOK",
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        catalogEntryKind: "NONE",
       }),
     ).toBe(false);
   });
@@ -687,7 +695,7 @@ describe("search sync global moderation projection", () => {
           status: "PUBLISHED",
           visibility: "PUBLIC",
           contentModerationState: { state: "TOMBSTONED" },
-          workMembers: [],
+          catalogEntryKind: null,
         })),
       },
     } as any);
@@ -771,7 +779,7 @@ describe("search sync global moderation projection", () => {
           status: "PUBLISHED",
           visibility: "PUBLIC",
           contentModerationState: null,
-          workMembers: [],
+          catalogEntryKind: null,
         })),
       },
       unitRealm: {
