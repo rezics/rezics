@@ -59,8 +59,7 @@ export function useCreatePostMutation(
           queryKey: postKeys.detail(variables.parentPostUnitId),
         });
 
-        const rootPostUnitId =
-          data.rootPostUnitId ?? variables.parentPostUnitId;
+        const rootPostUnitId = variables.parentPostUnitId;
         queryClient.invalidateQueries({
           queryKey: postKeys.threads(rootPostUnitId),
         });

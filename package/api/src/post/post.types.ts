@@ -1,8 +1,9 @@
 /**
  * Post-related TypeScript types and interfaces for the frontend
  *
- * Post replaces Comment, Review, Note, Remark as a unified discussion entity.
- * Posts support threading via rootPostUnitId/parentPostUnitId, and kinds via kind.
+ * Posts are top-level discussion entities. Reply-tree reads and writes belong
+ * to the comment domain; legacy post-reply write fields remain only for
+ * compatibility while the server cutover finishes.
  */
 
 import type {

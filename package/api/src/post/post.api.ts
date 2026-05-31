@@ -2,7 +2,7 @@
  * Post API client functions
  * Direct API communication layer
  *
- * Post replaces Comment + Review as a unified discussion primitive.
+ * Post API client functions for top-level discussion entities.
  */
 
 import type {
@@ -31,7 +31,7 @@ export const postApi = {
   /**
    * List posts with optional filters
    * Supports: targetUnitId, realmUnitId,
-   * rootPostUnitId, parentPostUnitId, subtreeRootPostUnitId, authorUserId,
+   * legacy thread filters, authorUserId,
    * kind, mode, maxDepth, sort, start, cursor, limit
    */
   list: async (filters?: PostFilters): Promise<PostListResponse> => {
@@ -70,7 +70,7 @@ export const postApi = {
   },
 
   /**
-   * Get thread (replies under a root post)
+   * Legacy post-thread read for pre-comment fallback surfaces.
    */
   getThread: async (
     rootPostUnitId: string,
