@@ -136,6 +136,8 @@ export function PostTreeNode({
                   mode="expanded"
                   autoFocus
                   targetUnitId={post.targetUnitId ?? rootPostUnitId}
+                  rootUnitId={rootPostUnitId}
+                  realmUnitId={post.realmUnitId}
                   parentPostUnitId={post.unitId}
                   onSubmitted={(createdPost) =>
                     onComposerSubmitted(post.unitId, createdPost)

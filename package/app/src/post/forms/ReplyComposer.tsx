@@ -1,8 +1,10 @@
-import { useCreatePostMutation } from "@rezics/api/post/post";
+import { useCreateCommentMutation } from "@rezics/api/comment/comment";
+import { postKeys, useCreatePostMutation } from "@rezics/api/post/post";
 import { realmQueries } from "@rezics/api/realm/realm";
 import { tagQueries } from "@rezics/api/tag/tag";
 import {
   markdownContentDoc,
+  type CommentDTO,
   type PollDTO,
   type PostDTO,
   PostKind,
@@ -10,7 +12,7 @@ import {
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BarChart3 } from "lucide-react";
 import type React from "react";
 import {
@@ -42,6 +44,8 @@ type ReplyComposerBaseProps = {
 
 export type ReplyComposerReplyModeProps = ReplyComposerBaseProps & {
   targetUnitId: string;
+  rootUnitId?: string;
+  realmUnitId?: string | null;
   parentPostUnitId?: string;
   realmUnitIds?: never;
   tagIds?: string[];
@@ -298,6 +302,8 @@ export const ReplyComposer = forwardRef<
   const isRealmPostMode = "realmUnitIds" in props;
   const realmUnitIds = isRealmPostMode ? props.realmUnitIds : undefined;
   const targetUnitId = isRealmPostMode ? undefined : props.targetUnitId;
+  const rootUnitId = isRealmPostMode ? undefined : props.rootUnitId;
+  const realmUnitId = isRealmPostMode ? undefined : props.realmUnitId;
   const parentPostUnitId = isRealmPostMode ? undefined : props.parentPostUnitId;
   const initialTagIds = props.tagIds;
   const invalidMode =
@@ -315,7 +321,108 @@ export const ReplyComposer = forwardRef<
   const [attachingPoll, setAttachingPoll] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const shouldRetainOnBlur = useBlurRetain(body);
-  const mutation = useCreatePostMutation();
+  const queryClient = useQueryClient();
+  const postMutation = useCreatePostMutation();
+  const commentMutation = useCreateCommentMutation();
+  const submitting = postMutation.isPending || commentMutation.isPending;
+
+  const mapCommentToPost = useCallback(
+    (comment: CommentDTO): PostDTO => ({
+      unitId: comment.unitId,
+      authorUserId: comment.authorUserId,
+      author: comment.author,
+      targetUnitId: comment.rootUnitId,
+      realmUnitId: comment.realmUnitId,
+      content: comment.content,
+      rootPostUnitId: comment.rootUnitId,
+      parentPostUnitId: comment.parentCommentUnitId ?? comment.rootUnitId,
+      kind: null,
+      status: undefined,
+      visibility: undefined,
+      depth: comment.depth,
+      path: comment.path,
+      replyCount: comment.replyCount,
+      directReplyCount: comment.directReplyCount,
+      lastReplyAt: comment.lastReplyAt,
+      isLocked: comment.isLocked,
+      state: comment.state,
+      extra: null,
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
+    }),
+    [],
+  );
+
+  const submitReply = useCallback(
+    (
+      content: ReturnType<typeof markdownContentDoc>,
+      options?: { pollUnitId?: string },
+    ) => {
+      if (
+        !options?.pollUnitId &&
+        rootUnitId &&
+        realmUnitId &&
+        parentPostUnitId
+      ) {
+        commentMutation.mutate(
+          {
+            rootUnitId,
+            realmUnitId,
+            parentCommentUnitId:
+              parentPostUnitId === rootUnitId ? undefined : parentPostUnitId,
+            content,
+          },
+          {
+            onSuccess: (comment) => {
+              reset();
+              queryClient.invalidateQueries({
+                queryKey: postKeys.threads(rootUnitId),
+              });
+              queryClient.invalidateQueries({
+                queryKey: postKeys.detail(rootUnitId),
+              });
+              if (parentPostUnitId) {
+                queryClient.invalidateQueries({
+                  queryKey: postKeys.detail(parentPostUnitId),
+                });
+              }
+              onSubmitted?.(mapCommentToPost(comment));
+            },
+          },
+        );
+        return;
+      }
+
+      postMutation.mutate(
+        {
+          targetUnitId,
+          parentPostUnitId,
+          kind: PostKind.POST,
+          content,
+          ...(options?.pollUnitId
+            ? { extra: { poll: { unitId: options.pollUnitId } } }
+            : {}),
+        },
+        {
+          onSuccess: (post) => {
+            reset();
+            onSubmitted?.(post);
+          },
+        },
+      );
+    },
+    [
+      commentMutation.mutate,
+      mapCommentToPost,
+      onSubmitted,
+      parentPostUnitId,
+      postMutation.mutate,
+      queryClient,
+      realmUnitId,
+      rootUnitId,
+      targetUnitId,
+    ],
+  );
 
   const resize = useMemo(
     () => ({ height: 150, minHeight: 100, maxHeight: 400 }),
@@ -372,28 +479,26 @@ export const ReplyComposer = forwardRef<
     if (!authGuard.requireAuth()) return;
     const trimmed = body.trim();
     const activeRealmUnitIds = realmUnitIds ?? [];
-    const payload = isRealmPostMode
-      ? {
+    if (isRealmPostMode) {
+      postMutation.mutate(
+        {
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
           content: markdownContentDoc(trimmed),
           extra: { poll: { unitId: poll.unitId } },
-        }
-      : {
-          targetUnitId,
-          parentPostUnitId,
-          kind: PostKind.POST,
-          content: markdownContentDoc(trimmed),
-          extra: { poll: { unitId: poll.unitId } },
-        };
+        },
+        {
+          onSuccess: (post) => {
+            reset();
+            onSubmitted?.(post);
+          },
+        },
+      );
+      return;
+    }
 
-    mutation.mutate(payload, {
-      onSuccess: (post) => {
-        reset();
-        onSubmitted?.(post);
-      },
-    });
+    submitReply(markdownContentDoc(trimmed), { pollUnitId: poll.unitId });
   };
 
   const handleSubmit = () => {
@@ -401,26 +506,25 @@ export const ReplyComposer = forwardRef<
     const trimmed = body.trim();
     if (!trimmed) return;
     const activeRealmUnitIds = realmUnitIds ?? [];
-    const payload = isRealmPostMode
-      ? {
+    if (isRealmPostMode) {
+      postMutation.mutate(
+        {
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
           content: markdownContentDoc(trimmed),
-        }
-      : {
-          targetUnitId,
-          parentPostUnitId,
-          kind: PostKind.POST,
-          content: markdownContentDoc(trimmed),
-        };
+        },
+        {
+          onSuccess: (post) => {
+            reset();
+            onSubmitted?.(post);
+          },
+        },
+      );
+      return;
+    }
 
-    mutation.mutate(payload, {
-      onSuccess: (post) => {
-        reset();
-        onSubmitted?.(post);
-      },
-    });
+    submitReply(markdownContentDoc(trimmed));
   };
 
   const handleCancel = () => {
@@ -497,7 +601,7 @@ export const ReplyComposer = forwardRef<
           size="sm"
           variant={attachingPoll ? "secondary" : "ghost"}
           onClick={() => setAttachingPoll((value) => !value)}
-          disabled={mutation.isPending}
+          disabled={submitting}
         >
           <BarChart3 className="mr-1 h-4 w-4" />
           {t("community:poll_attach")}
@@ -507,7 +611,7 @@ export const ReplyComposer = forwardRef<
             size="sm"
             variant="ghost"
             onClick={handleCancel}
-            disabled={mutation.isPending}
+            disabled={submitting}
           >
             {t("common:cancel")}
           </Button>
@@ -515,9 +619,9 @@ export const ReplyComposer = forwardRef<
             <Button
               size="sm"
               onClick={handleSubmit}
-              disabled={mutation.isPending || !body.trim()}
+              disabled={submitting || !body.trim()}
             >
-              {mutation.isPending
+              {submitting
                 ? t("community:post_composer_posting")
                 : isRealmPostMode
                   ? t("community:post_composer_post")
@@ -534,7 +638,7 @@ export const ReplyComposer = forwardRef<
           />
         </div>
       )}
-      {mutation.isError && (
+      {(postMutation.isError || commentMutation.isError) && (
         <p className="text-sm leading-ui text-error-text">
           {t("community:poll_attach_error")}
         </p>

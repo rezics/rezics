@@ -10,6 +10,11 @@ export const postInclude = {
     include: {
       user: { select: publicUserSelect },
       contentModerationState: true,
+      inRealms: {
+        where: { state: "VISIBLE" },
+        select: { realmUnitId: true },
+        take: 1,
+      },
     },
   },
 } satisfies Prisma.PostInclude;

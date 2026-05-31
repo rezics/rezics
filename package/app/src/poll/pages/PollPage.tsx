@@ -41,6 +41,7 @@ export const PollPage: React.FC<{ unitId: string }> = ({ unitId }) => {
             ref={composerRef}
             mode="progressive"
             targetUnitId={unitId}
+            rootUnitId={unitId}
             parentPostUnitId={unitId}
           />
 

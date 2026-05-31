@@ -32,6 +32,7 @@ describe("mapPostToDTO", () => {
       createdAt: new Date("2026-01-01T00:00:00Z"),
       updatedAt: new Date("2026-01-01T00:00:00Z"),
       unit: {
+        inRealms: [{ realmUnitId: "realm-1" }],
         user: {
           unitId: "user-1",
           slug: "alice",
@@ -47,6 +48,7 @@ describe("mapPostToDTO", () => {
       name: "Alice",
       avatar: null,
     });
+    expect(dto.realmUnitId).toBe("realm-1");
   });
 
   test("maps ContentDoc author descriptions for post list responses", () => {

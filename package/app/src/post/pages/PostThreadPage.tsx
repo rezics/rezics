@@ -60,6 +60,8 @@ export const PostThreadPage: React.FC = () => {
           ref={composerRef}
           mode="progressive"
           targetUnitId={root.targetUnitId ?? root.unitId}
+          rootUnitId={root.unitId}
+          realmUnitId={root.realmUnitId}
           parentPostUnitId={root.unitId}
         />
       )}

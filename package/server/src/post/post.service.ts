@@ -88,6 +88,7 @@ function commentAsPostCompat(comment: any): PostWithRelations {
     unitId: comment.unitId,
     authorUserId: comment.authorUserId,
     targetUnitId: comment.rootUnitId,
+    realmUnitId: comment.realmUnitId,
     scoreEntryId: null,
     content: comment.content,
     rootPostUnitId: comment.rootUnitId,
