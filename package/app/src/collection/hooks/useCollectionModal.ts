@@ -31,12 +31,17 @@ export function useCollectionModal(unitId: string) {
   const handleClose = useCallback(() => setOpen(false), []);
 
   const handleCollect = useCallback(
-    async (shelfIds: string[], independent?: boolean) => {
+    async (
+      shelfIds: string[],
+      independent?: boolean,
+      searchText?: string | null,
+    ) => {
       try {
         await collectMutation.mutateAsync({
           targetId: unitId,
           shelfIds,
           independent,
+          searchText,
         });
         handleClose();
       } catch {

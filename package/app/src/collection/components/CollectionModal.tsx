@@ -21,7 +21,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Label,
   Separator,
+  Textarea,
 } from "@rezics/ui/shadcn";
 import { useCallback, useMemo, useState } from "react";
 
@@ -39,7 +41,11 @@ const HIDDEN_SYSTEM_KIND_KEYS: ReadonlySet<SystemShelfKindKey> = new Set([
 interface CollectionModalProps {
   open: boolean;
   onClose: () => void;
-  onCollect: (shelfIds: string[], independent?: boolean) => void;
+  onCollect: (
+    shelfIds: string[],
+    independent?: boolean,
+    searchText?: string | null,
+  ) => void;
   shelves: ShelfSummaryDTO[];
   status?: CollectionStatusResponse;
   isCollecting: boolean;
@@ -63,6 +69,7 @@ export function CollectionModal({
   );
   const [filterTag, setFilterTag] = useState<SeedTagName | null>(null);
   const [independent, setIndependent] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   // Initialize selected shelves from status
   useMemo(() => {
@@ -110,8 +117,13 @@ export function CollectionModal({
   }, []);
 
   const handleSave = useCallback(() => {
-    onCollect([...selectedShelves], independent);
-  }, [selectedShelves, independent, onCollect]);
+    const normalizedSearchText = searchText.trim();
+    onCollect(
+      [...selectedShelves],
+      independent,
+      normalizedSearchText.length > 0 ? normalizedSearchText : undefined,
+    );
+  }, [selectedShelves, independent, searchText, onCollect]);
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -185,6 +197,22 @@ export function CollectionModal({
                 })
               )}
             </ul>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="collection-search-text" className="text-sm">
+                {t("entity:collection_search_text_label")}
+              </Label>
+              <Textarea
+                id="collection-search-text"
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+                placeholder={t("entity:collection_search_text_placeholder")}
+                rows={3}
+              />
+              <p className="text-xs leading-[1.4] text-text-secondary">
+                {t("entity:collection_search_text_hint")}
+              </p>
+            </div>
 
             {/* Dual collection mode for reviews */}
             {isReview && (
