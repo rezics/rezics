@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { markdownContentDoc } from "./doc-v1";
 import {
+  contentTranslationListResponseSchema,
   contentTranslationDTOSchema,
   upsertContentTranslationSchema,
 } from "./translation";
@@ -32,6 +33,26 @@ describe("ContentTranslation schemas", () => {
         status: "DRAFT",
         sourceUnitId: "source-1",
         provenance: null,
+      }),
+    ).toBe(true);
+  });
+
+  test("list response returns language-specific body rows", () => {
+    expect(
+      Value.Check(contentTranslationListResponseSchema, {
+        translations: [
+          {
+            unitId: "wiki-1",
+            language: "en",
+            content: markdownContentDoc("Body"),
+            status: "PUBLISHED",
+            sourceUnitId: null,
+            authorUserId: null,
+            provenance: null,
+            createdAt: "2026-05-31T00:00:00.000Z",
+            updatedAt: "2026-05-31T00:00:00.000Z",
+          },
+        ],
       }),
     ).toBe(true);
   });

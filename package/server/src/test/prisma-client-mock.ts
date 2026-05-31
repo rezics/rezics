@@ -97,6 +97,7 @@ export const UserUnitProgressStatus = {
 // mocks ignore their arguments, so these only need to not throw when the
 // service composes ltree path SQL.
 export const Prisma = {
+  JsonNull: null,
   sql: (...args: unknown[]) => args,
   join: (...args: unknown[]) => args,
   raw: (value: unknown) => value,

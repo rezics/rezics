@@ -27,6 +27,31 @@ export const contentTranslationDTOSchema = t.Object({
 
 export type ContentTranslationDTO = Static<typeof contentTranslationDTOSchema>;
 
+export const contentTranslationParamsSchema = t.Object({
+  unitId: t.String(),
+  language: languageSchema,
+});
+
+export type ContentTranslationParams = Static<
+  typeof contentTranslationParamsSchema
+>;
+
+export const contentTranslationUnitParamsSchema = t.Object({
+  unitId: t.String(),
+});
+
+export type ContentTranslationUnitParams = Static<
+  typeof contentTranslationUnitParamsSchema
+>;
+
+export const contentTranslationListResponseSchema = t.Object({
+  translations: t.Array(contentTranslationDTOSchema),
+});
+
+export type ContentTranslationListResponse = Static<
+  typeof contentTranslationListResponseSchema
+>;
+
 export const upsertContentTranslationSchema = t.Object({
   unitId: t.String(),
   language: languageSchema,
@@ -39,4 +64,10 @@ export const upsertContentTranslationSchema = t.Object({
 
 export type UpsertContentTranslationInput = Static<
   typeof upsertContentTranslationSchema
+>;
+
+export const contentTranslationResponseSchema = contentTranslationDTOSchema;
+
+export type ContentTranslationResponse = Static<
+  typeof contentTranslationResponseSchema
 >;

@@ -16,6 +16,7 @@ import { authPublicApi } from "./auth-boundary";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
 import { commentApi } from "./comment";
+import { contentTranslationApi } from "./content-translation";
 import { contentStructureApi } from "./content-structure";
 import { creditAttributionApi } from "./credit-attribution";
 import { statusApi } from "./diagnostic";
@@ -216,6 +217,7 @@ routeApp
   .use(wellKnownApi)
   .use(bookApi)
   .use(commentApi)
+  .use(contentTranslationApi)
   .use(contentStructureApi)
   .use(chapterApi)
   .use(pollApi)

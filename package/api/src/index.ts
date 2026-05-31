@@ -11,6 +11,7 @@ export * from "./admin-work-merge/admin-work-merge";
 export * from "./comment/comment";
 export * from "./credit-attribution/credit-attribution";
 export * from "./content-structure/content-structure";
+export * from "./content-translation/content-translation";
 export * from "./dashboard";
 export * from "./diagnostic/status";
 export * from "./entity-attribution/entity-attribution";
