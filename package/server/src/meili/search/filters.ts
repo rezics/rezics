@@ -62,6 +62,16 @@ function quoteList(values: readonly string[]): string {
   return values.map((v) => `"${v}"`).join(", ");
 }
 
+const BOOK_CONTENT_TYPES = ["BOOK", "GAME", "MEDIA", "LINK", "SERIES"];
+
+const BOOK_CONTENT_CATALOG_FILTER = [
+  '(type = "BOOK" AND catalogEntryKind = "MAIN")',
+  '(type = "GAME" AND catalogEntryKind = "MAIN")',
+  '(type = "MEDIA" AND catalogEntryKind = "MAIN")',
+  'type = "LINK"',
+  'type = "SERIES"',
+].join(" OR ");
+
 function resolveBookScope(
   scope: SearchScope,
 ): { mode: "exact"; unitId: string } | { mode: "work"; workUnitId: string } {
@@ -97,7 +107,8 @@ export function buildContentFilter(
     filter.push(`type = "SHELF"`);
   } else if (opts.contentSubtype === "books") {
     // BOOK-side content surfaces (BOOK | GAME | MEDIA | LINK)
-    filter.push(`type IN ["BOOK", "GAME", "MEDIA", "LINK"]`);
+    filter.push(`type IN [${quoteList(BOOK_CONTENT_TYPES)}]`);
+    filter.push(`(${BOOK_CONTENT_CATALOG_FILTER})`);
   } else if (query.type?.length) {
     if (query.type.length === 1) {
       filter.push(`type = "${query.type[0]}"`);

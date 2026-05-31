@@ -131,6 +131,22 @@ describe("buildContentFilter", () => {
     );
     expect(filter).toContain('type IN ["BOOK", "GAME"]');
   });
+
+  test("books subtype includes main catalog entries plus non-edition content", () => {
+    const filter = buildContentFilter(
+      emptyQuery,
+      { kind: "global" },
+      {},
+      { contentSubtype: "books" },
+    );
+
+    expect(filter).toContain(
+      'type IN ["BOOK", "GAME", "MEDIA", "LINK", "SERIES"]',
+    );
+    expect(filter).toContain(
+      '((type = "BOOK" AND catalogEntryKind = "MAIN") OR (type = "GAME" AND catalogEntryKind = "MAIN") OR (type = "MEDIA" AND catalogEntryKind = "MAIN") OR type = "LINK" OR type = "SERIES")',
+    );
+  });
 });
 
 describe("buildPostFilter", () => {
