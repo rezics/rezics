@@ -114,7 +114,6 @@ export const seriesListQuerySchema = t.Object({
   q: t.Optional(t.String()),
   kindKey: t.Optional(seriesKindSchema),
   containsReleaseUnitId: t.Optional(t.String()),
-  relatedWorkUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
@@ -129,7 +128,6 @@ export const seriesListBodySchema = t.Object({
   q: t.Optional(t.String()),
   kindKey: t.Optional(seriesKindSchema),
   containsReleaseUnitId: t.Optional(t.String()),
-  relatedWorkUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
@@ -179,7 +177,7 @@ export const seriesReleaseMemberNodeSchema = t.Object({
 /**
  * Nested Series references are structural/cross-reference nodes only. They do
  * not recursively contribute inherited release membership, search projection,
- * or work-domain projection.
+ * or catalog projection.
  */
 export const seriesNestedReferenceNodeSchema = t.Object({
   ...contentStructureNodeSchema.properties,
@@ -213,7 +211,7 @@ export const seriesContentEligibilityHints = {
 /**
  * Direct lookup projection from counted release member nodes. This row is not
  * hierarchy authority and intentionally has no path, depth, ordering,
- * parentage, inherited membership, or work-domain source fields.
+ * parentage, inherited membership, or source-domain fields.
  */
 export const seriesContentIndexDTOSchema = t.Object({
   seriesUnitId: t.String(),
@@ -232,48 +230,7 @@ export const seriesDiagnosticsDTOSchema = t.Object({
   weakDisplayReleaseUnitIds: t.Array(t.String()),
   missingTranslationReleaseUnitIds: t.Array(t.String()),
   missingSourceReleaseUnitIds: t.Array(t.String()),
-  betterRepresentativeCandidateWorkUnitIds: t.Array(t.String()),
 });
 
 export type SeriesDiagnosticsDTO =
   (typeof seriesDiagnosticsDTOSchema)["static"];
-
-export const representativeReleaseReasonValues = [
-  "explicit_selection",
-  "primary_canonical_release",
-  "translation_coverage",
-  "source_quality",
-  "display_completeness",
-  "deterministic_fallback",
-] as const;
-
-export const representativeReleaseReasonSchema = t.Union(
-  representativeReleaseReasonValues.map((value) => t.Literal(value)),
-);
-
-export type RepresentativeReleaseReason =
-  (typeof representativeReleaseReasonSchema)["static"];
-
-export const representativeReleaseCandidateSchema = t.Object({
-  releaseUnitId: t.String(),
-  workUnitId: t.String(),
-  reason: representativeReleaseReasonSchema,
-  score: t.Optional(t.Number()),
-  translationCoverageLocales: t.Optional(t.Array(languageSchema)),
-  hasPrimaryCanonicalSignal: t.Optional(t.Boolean()),
-  hasStrongSourceQuality: t.Optional(t.Boolean()),
-  hasDisplayCompleteness: t.Optional(t.Boolean()),
-});
-
-export type RepresentativeReleaseCandidate =
-  (typeof representativeReleaseCandidateSchema)["static"];
-
-export const representativeReleaseSelectionSchema = t.Object({
-  workUnitId: t.String(),
-  selectedReleaseUnitId: t.String(),
-  reason: representativeReleaseReasonSchema,
-  candidates: t.Array(representativeReleaseCandidateSchema),
-});
-
-export type RepresentativeReleaseSelection =
-  (typeof representativeReleaseSelectionSchema)["static"];

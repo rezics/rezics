@@ -1,8 +1,6 @@
 import type {
   ContentStructureItem,
   CreateSeriesInput,
-  Language,
-  RepresentativeReleaseSelection,
   SeriesContentIndexDTO,
   SeriesDiagnosticsDTO,
   SeriesDetailDTO,
@@ -17,8 +15,6 @@ import {
   UnitStatus,
   UnitType,
   UnitVisibility,
-  UnitWorkDisplayPolicy,
-  UnitWorkRole,
 } from "#/prisma/client";
 import { contentStructureService } from "@/content-structure";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
@@ -34,8 +30,6 @@ import {
   type SeriesWithRelations,
 } from "./series.types";
 
-const RELEASE_ROLE = UnitWorkRole.RELEASE;
-const SERIES_ROLE = UnitWorkRole.SERIES;
 const RELEASE_UNIT_TYPES = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];
 const RELEASE_UNIT_TYPE_SET: ReadonlySet<UnitType> = new Set(
   RELEASE_UNIT_TYPES,
@@ -86,16 +80,6 @@ export class SeriesService {
           ? {
               translations: {
                 some: { title: { contains: query.q, mode: "insensitive" } },
-              },
-            }
-          : {}),
-        ...(query.relatedWorkUnitId
-          ? {
-              workMemberships: {
-                some: {
-                  workUnitId: query.relatedWorkUnitId,
-                  role: SERIES_ROLE,
-                },
               },
             }
           : {}),
@@ -268,10 +252,6 @@ export class SeriesService {
             include: {
               translations: true,
               externalRefs: true,
-              workMemberships: {
-                where: { role: RELEASE_ROLE },
-                select: { workUnitId: true, displayPolicy: true },
-              },
             },
           },
         },
@@ -281,7 +261,6 @@ export class SeriesService {
     const weakDisplayReleaseUnitIds: string[] = [];
     const missingTranslationReleaseUnitIds: string[] = [];
     const missingSourceReleaseUnitIds: string[] = [];
-    const betterRepresentativeCandidateWorkUnitIds = new Set<string>();
     for (const row of indexedRows) {
       const translations = row.releaseUnit.translations;
       const hasTitle = translations.some((tr) => tr.title);
@@ -291,11 +270,6 @@ export class SeriesService {
       }
       if (row.releaseUnit.externalRefs.length === 0) {
         missingSourceReleaseUnitIds.push(row.releaseUnitId);
-      }
-      for (const membership of row.releaseUnit.workMemberships) {
-        if (membership.displayPolicy !== UnitWorkDisplayPolicy.PRIMARY) {
-          betterRepresentativeCandidateWorkUnitIds.add(membership.workUnitId);
-        }
       }
     }
 
@@ -311,9 +285,6 @@ export class SeriesService {
       weakDisplayReleaseUnitIds,
       missingTranslationReleaseUnitIds,
       missingSourceReleaseUnitIds,
-      betterRepresentativeCandidateWorkUnitIds: [
-        ...betterRepresentativeCandidateWorkUnitIds,
-      ],
     };
   }
 
@@ -328,20 +299,11 @@ export class SeriesService {
         isDeleted: false,
         contentUnit: {
           type: { in: RELEASE_UNIT_TYPES },
-          workMemberships: { some: { role: RELEASE_ROLE } },
         },
       },
       select: {
         id: true,
         contentUnitId: true,
-        contentUnit: {
-          select: {
-            workMemberships: {
-              where: { role: RELEASE_ROLE },
-              select: { workUnitId: true },
-            },
-          },
-        },
       },
       orderBy: [{ sortKey: "asc" }, { id: "asc" }],
     });
@@ -361,128 +323,8 @@ export class SeriesService {
       });
     }
 
-    const desiredWorkUnitIds = [
-      ...new Set(
-        releaseNodes.flatMap(
-          (node) =>
-            node.contentUnit?.workMemberships.map((row) => row.workUnitId) ??
-            [],
-        ),
-      ),
-    ];
-
-    await tx.unitWork.deleteMany({
-      where: {
-        unitId: seriesUnitId,
-        role: SERIES_ROLE,
-        ...(desiredWorkUnitIds.length > 0
-          ? { workUnitId: { notIn: desiredWorkUnitIds } }
-          : {}),
-      },
-    });
-
-    for (const workUnitId of desiredWorkUnitIds) {
-      await tx.unitWork.upsert({
-        where: {
-          unitId_workUnitId_role: {
-            unitId: seriesUnitId,
-            workUnitId,
-            role: SERIES_ROLE,
-          },
-        },
-        update: {},
-        create: {
-          unitId: seriesUnitId,
-          workUnitId,
-          role: SERIES_ROLE,
-          displayPolicy: UnitWorkDisplayPolicy.PRIMARY,
-        },
-      });
-    }
-
     await enqueueSeriesProjectionSync(seriesUnitId);
-    return desiredWorkUnitIds;
-  }
-
-  async explainRepresentativeRelease(
-    workUnitId: string,
-    explicitReleaseUnitId?: string,
-  ): Promise<RepresentativeReleaseSelection> {
-    const memberships = await prisma.unitWork.findMany({
-      where: { workUnitId, role: RELEASE_ROLE },
-      include: {
-        unit: {
-          include: {
-            translations: true,
-            externalRefs: true,
-          },
-        },
-      },
-      orderBy: [{ position: "asc" }, { createdAt: "asc" }, { unitId: "asc" }],
-    });
-    if (memberships.length === 0) {
-      throw new AppError(404, "No releases found for work domain", {
-        code: "series_representative_release_none",
-      });
-    }
-
-    const candidates = memberships.map((membership) => {
-      const translationCount = membership.unit.translations.length;
-      const sourceCount = membership.unit.externalRefs.length;
-      const hasTitle = membership.unit.translations.some((tr) => tr.title);
-      const explicit = membership.unitId === explicitReleaseUnitId;
-      const primary =
-        membership.displayPolicy === UnitWorkDisplayPolicy.PRIMARY;
-      const reason = explicit
-        ? "explicit_selection"
-        : primary
-          ? "primary_canonical_release"
-          : translationCount > 0
-            ? "translation_coverage"
-            : sourceCount > 0
-              ? "source_quality"
-              : hasTitle
-                ? "display_completeness"
-                : "deterministic_fallback";
-      return {
-        releaseUnitId: membership.unitId,
-        workUnitId,
-        reason,
-        score:
-          (explicit ? 100 : 0) +
-          (primary ? 50 : 0) +
-          translationCount * 10 +
-          sourceCount * 4 +
-          (hasTitle ? 2 : 0),
-        translationCoverageLocales: membership.unit.translations.map(
-          (tr) => tr.language as Language,
-        ),
-        hasPrimaryCanonicalSignal: primary,
-        hasStrongSourceQuality: sourceCount > 0,
-        hasDisplayCompleteness: hasTitle,
-      };
-    });
-
-    const [selected] = [...candidates].sort(
-      (a, b) =>
-        (b.score ?? 0) - (a.score ?? 0) ||
-        a.releaseUnitId.localeCompare(b.releaseUnitId),
-    );
-    if (!selected) {
-      throw new AppError(404, "No representative release candidate found", {
-        code: "series_representative_release_none",
-      });
-    }
-    return {
-      workUnitId,
-      selectedReleaseUnitId: selected.releaseUnitId,
-      reason: selected.reason as RepresentativeReleaseSelection["reason"],
-      candidates: candidates.map((candidate) => ({
-        ...candidate,
-        reason:
-          candidate.reason as RepresentativeReleaseSelection["candidates"][number]["reason"],
-      })),
-    };
+    return directRows.map((row) => row.releaseUnitId);
   }
 
   private async assertSeriesUnit(tx: Tx, seriesUnitId: string): Promise<void> {
@@ -515,10 +357,6 @@ export class SeriesService {
       select: {
         id: true,
         type: true,
-        workMemberships: {
-          where: { role: RELEASE_ROLE },
-          select: { workUnitId: true },
-        },
       },
     });
     const byId = new Map(units.map((unit) => [unit.id, unit]));
@@ -532,10 +370,7 @@ export class SeriesService {
         });
       }
       if (unit.type === UnitType.SERIES) continue;
-      if (
-        RELEASE_UNIT_TYPE_SET.has(unit.type) &&
-        unit.workMemberships.length > 0
-      ) {
+      if (RELEASE_UNIT_TYPE_SET.has(unit.type)) {
         continue;
       }
       throw new AppError(

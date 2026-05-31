@@ -11,16 +11,4 @@ export const seriesKeys = {
     [...seriesKeys.detail(unitId), "contentIndex"] as const,
   diagnostics: (unitId: string) =>
     [...seriesKeys.detail(unitId), "diagnostics"] as const,
-  relatedByWork: (workUnitId: string) =>
-    [...seriesKeys.all(), "relatedByWork", workUnitId] as const,
-  representativeReleaseSuggestions: (
-    workUnitId: string,
-    explicitReleaseUnitId?: string,
-  ) =>
-    [
-      ...seriesKeys.all(),
-      "representativeReleaseSuggestions",
-      workUnitId,
-      explicitReleaseUnitId ?? null,
-    ] as const,
 } as const;

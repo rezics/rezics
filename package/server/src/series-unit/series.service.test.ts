@@ -47,27 +47,20 @@ const unitFindManyMock = mock(async () => [
   {
     id: "release-1",
     type: "BOOK",
-    workMemberships: [{ workUnitId: "work-1" }],
   },
   {
     id: "nested-series-1",
     type: "SERIES",
-    workMemberships: [],
   },
 ]);
 const contentNodeFindManyMock = mock(async () => [
   {
     id: "node-release-1",
     contentUnitId: "release-1",
-    contentUnit: {
-      workMemberships: [{ workUnitId: "work-1" }],
-    },
   },
 ]);
 const seriesContentIndexDeleteManyMock = mock(async () => ({ count: 0 }));
 const seriesContentIndexCreateManyMock = mock(async () => ({ count: 1 }));
-const unitWorkDeleteManyMock = mock(async () => ({ count: 0 }));
-const unitWorkUpsertMock = mock(async () => ({}));
 
 const txMock = {
   series: {
@@ -83,10 +76,6 @@ const txMock = {
     deleteMany: seriesContentIndexDeleteManyMock,
     createMany: seriesContentIndexCreateManyMock,
   },
-  unitWork: {
-    deleteMany: unitWorkDeleteManyMock,
-    upsert: unitWorkUpsertMock,
-  },
 };
 
 Object.assign(prismaMock, {
@@ -95,9 +84,6 @@ Object.assign(prismaMock, {
     findMany: mock(async () => []),
   },
   seriesContentIndex: {
-    findMany: mock(async () => []),
-  },
-  unitWork: {
     findMany: mock(async () => []),
   },
 });
@@ -116,22 +102,18 @@ describe("SeriesService", () => {
       {
         id: "release-1",
         type: "BOOK",
-        workMemberships: [{ workUnitId: "work-1" }],
       },
       {
         id: "nested-series-1",
         type: "SERIES",
-        workMemberships: [],
       },
     ]);
     contentNodeFindManyMock.mockClear();
     seriesContentIndexDeleteManyMock.mockClear();
     seriesContentIndexCreateManyMock.mockClear();
-    unitWorkDeleteManyMock.mockClear();
-    unitWorkUpsertMock.mockClear();
   });
 
-  test("reconciles direct release index and SERIES work projection from release nodes only", async () => {
+  test("reconciles direct release index from release nodes only", async () => {
     await service.reconcileSeriesProjections(txMock as any, "series-1");
 
     expect(contentNodeFindManyMock.mock.calls[0]?.[0]).toMatchObject({
@@ -139,7 +121,6 @@ describe("SeriesService", () => {
         ownerUnitId: "series-1",
         contentUnit: {
           type: { in: ["BOOK", "GAME", "MEDIA"] },
-          workMemberships: { some: { role: "RELEASE" } },
         },
       },
     });
@@ -153,17 +134,6 @@ describe("SeriesService", () => {
       ],
       skipDuplicates: true,
     });
-    expect(unitWorkUpsertMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          unitId_workUnitId_role: {
-            unitId: "series-1",
-            workUnitId: "work-1",
-            role: "SERIES",
-          },
-        },
-      }),
-    );
   });
 
   test("allows nested Series references without expanding their child releases", async () => {
@@ -189,64 +159,41 @@ describe("SeriesService", () => {
     expect(contentNodeFindManyMock).toHaveBeenCalledTimes(1);
   });
 
-  test("rejects hidden Work Units as direct Series content nodes", async () => {
+  test("allows native release Units as direct Series content nodes", async () => {
     unitFindManyMock.mockImplementationOnce(async () => [
       {
-        id: "work-1",
+        id: "release-2",
         type: "BOOK",
-        workMemberships: [],
       },
     ]);
 
     await expect(
       service.updateContentStructure(
         "series-1",
-        [{ title: "Work", contentUnitId: "work-1" }],
+        [{ title: "Release", contentUnitId: "release-2" }],
+        "editor-1",
+      ),
+    ).resolves.toBeDefined();
+  });
+
+  test("rejects unsupported direct Series content nodes", async () => {
+    unitFindManyMock.mockImplementationOnce(async () => [
+      {
+        id: "post-1",
+        type: "POST",
+      },
+    ]);
+
+    await expect(
+      service.updateContentStructure(
+        "series-1",
+        [{ title: "Post", contentUnitId: "post-1" }],
         "editor-1",
       ),
     ).rejects.toThrow(/release Units or nested Series/);
   });
 
-  test("explains representative release candidates with explicit selection preference", async () => {
-    const findMany = mock(async () => [
-      {
-        unitId: "release-2",
-        workUnitId: "work-1",
-        displayPolicy: "PRIMARY",
-        createdAt: new Date("2026-05-27T00:00:00.000Z"),
-        unit: {
-          translations: [{ language: "en", title: "Release 2" }],
-          externalRefs: [],
-        },
-      },
-      {
-        unitId: "release-1",
-        workUnitId: "work-1",
-        displayPolicy: "SECONDARY",
-        createdAt: new Date("2026-05-27T00:00:00.000Z"),
-        unit: {
-          translations: [{ language: "en", title: "Release 1" }],
-          externalRefs: [{ id: "ref-1" }],
-        },
-      },
-    ]);
-    Object.assign(prismaMock, {
-      unitWork: { findMany },
-    });
-
-    const selection = await service.explainRepresentativeRelease(
-      "work-1",
-      "release-1",
-    );
-
-    expect(selection.selectedReleaseUnitId).toBe("release-1");
-    expect(selection.reason).toBe("explicit_selection");
-    expect(
-      selection.candidates.map((candidate) => candidate.releaseUnitId),
-    ).toEqual(["release-2", "release-1"]);
-  });
-
-  test("reports nested Series and weak representative-release diagnostics", async () => {
+  test("reports nested Series and weak release diagnostics", async () => {
     Object.assign(prismaMock, {
       contentStructureNode: {
         findMany: mock(async () => [
@@ -261,9 +208,6 @@ describe("SeriesService", () => {
             releaseUnit: {
               translations: [],
               externalRefs: [],
-              workMemberships: [
-                { workUnitId: "work-1", displayPolicy: "SECONDARY" },
-              ],
             },
           },
         ]),
@@ -278,7 +222,6 @@ describe("SeriesService", () => {
       weakDisplayReleaseUnitIds: ["release-1"],
       missingTranslationReleaseUnitIds: ["release-1"],
       missingSourceReleaseUnitIds: ["release-1"],
-      betterRepresentativeCandidateWorkUnitIds: ["work-1"],
     });
   });
 });

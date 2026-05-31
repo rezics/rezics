@@ -31,35 +31,9 @@ export const seriesDiagnosticsQuery = (unitId: string) =>
     staleTime: 1000 * 60,
   });
 
-export const relatedSeriesByWorkQuery = (workUnitId: string) =>
-  queryOptions({
-    queryKey: seriesKeys.relatedByWork(workUnitId),
-    queryFn: () => seriesApi.relatedByWork(workUnitId),
-    staleTime: 1000 * 60 * 5,
-  });
-
-export const representativeReleaseSuggestionsQuery = (
-  workUnitId: string,
-  explicitReleaseUnitId?: string,
-) =>
-  queryOptions({
-    queryKey: seriesKeys.representativeReleaseSuggestions(
-      workUnitId,
-      explicitReleaseUnitId,
-    ),
-    queryFn: () =>
-      seriesApi.representativeReleaseSuggestions(
-        workUnitId,
-        explicitReleaseUnitId,
-      ),
-    staleTime: 1000 * 60,
-  });
-
 export const seriesQueries = {
   detail: seriesDetailQuery,
   list: seriesListQuery,
   contentIndex: seriesContentIndexQuery,
   diagnostics: seriesDiagnosticsQuery,
-  relatedByWork: relatedSeriesByWorkQuery,
-  representativeReleaseSuggestions: representativeReleaseSuggestionsQuery,
 };

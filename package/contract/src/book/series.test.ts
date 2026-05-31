@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
-  representativeReleaseSelectionSchema,
   seriesContentEligibilityHints,
   seriesContentIndexDTOSchema,
   seriesContentNodeSchema,
@@ -73,25 +72,6 @@ describe("series contract schemas", () => {
           .properties,
       ),
     ).not.toEqual(expect.arrayContaining(["path", "depth", "position"]));
-  });
-
-  test("accepts representative release selection reasons", () => {
-    expect(
-      Value.Check(representativeReleaseSelectionSchema, {
-        workUnitId: "work-1",
-        selectedReleaseUnitId: "release-1",
-        reason: "translation_coverage",
-        candidates: [
-          {
-            releaseUnitId: "release-1",
-            workUnitId: "work-1",
-            reason: "translation_coverage",
-            score: 8,
-            translationCoverageLocales: ["en", "ja"],
-          },
-        ],
-      }),
-    ).toBe(true);
   });
 
   test("accepts Series details with generic content structure", () => {

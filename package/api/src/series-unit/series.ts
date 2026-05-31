@@ -1,8 +1,6 @@
 export { seriesApi } from "./series.api";
 export { seriesKeys } from "./series.keys";
 export {
-  relatedSeriesByWorkQuery,
-  representativeReleaseSuggestionsQuery,
   seriesContentIndexQuery,
   seriesDiagnosticsQuery,
   seriesDetailQuery,

@@ -1,7 +1,6 @@
 import type {
   ContentStructureItem,
   ContentStructureResponse,
-  RepresentativeReleaseSelection,
   SeriesContentIndexDTO,
   SeriesDiagnosticsDTO,
   SeriesDetailDTO,
@@ -19,10 +18,6 @@ import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
 import { mapSeriesToDTO } from "./series.mapper";
 import { seriesService } from "./series.service";
-
-const representativeReleaseQuerySchema = t.Object({
-  explicitReleaseUnitId: t.Optional(t.String()),
-});
 
 export const seriesApi = new Elysia({ prefix: "/series-unit" })
   .use(authMacro)
@@ -146,40 +141,6 @@ export const seriesApi = new Elysia({ prefix: "/series-unit" })
       detail: {
         summary:
           "Inspect Series projection and representative-release diagnostics",
-        tags: ["Series"],
-      },
-    },
-  )
-  .get(
-    "/work/:workUnitId/related",
-    async ({ params }): Promise<SeriesListResponse> => {
-      const result = await seriesService.list({
-        relatedWorkUnitId: params.workUnitId,
-        limit: 50,
-      });
-      return { series: result.series.map(mapSeriesToDTO), total: result.total };
-    },
-    {
-      params: t.Object({ workUnitId: t.String() }),
-      detail: {
-        summary: "List Series related to a work domain",
-        tags: ["Series"],
-      },
-    },
-  )
-  .get(
-    "/representative-release/:workUnitId/suggestions",
-    async ({ params, query }): Promise<RepresentativeReleaseSelection> => {
-      return seriesService.explainRepresentativeRelease(
-        params.workUnitId,
-        query.explicitReleaseUnitId,
-      );
-    },
-    {
-      params: t.Object({ workUnitId: t.String() }),
-      query: representativeReleaseQuerySchema,
-      detail: {
-        summary: "Explain representative release candidates for a work",
         tags: ["Series"],
       },
     },

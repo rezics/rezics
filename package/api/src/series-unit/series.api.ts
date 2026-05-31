@@ -2,7 +2,6 @@ import type {
   ContentStructureItem,
   ContentStructureResponse,
   CreateSeriesInput,
-  RepresentativeReleaseSelection,
   SeriesContentIndexDTO,
   SeriesDiagnosticsDTO,
   SeriesDetailDTO,
@@ -83,24 +82,5 @@ export const seriesApi = {
 
   diagnostics: async (unitId: string): Promise<SeriesDiagnosticsDTO> => {
     return apiFetch<SeriesDiagnosticsDTO>(`/series-unit/${unitId}/diagnostics`);
-  },
-
-  relatedByWork: async (workUnitId: string): Promise<SeriesListResponse> => {
-    return apiFetch<SeriesListResponse>(
-      `/series-unit/work/${workUnitId}/related`,
-    );
-  },
-
-  representativeReleaseSuggestions: async (
-    workUnitId: string,
-    explicitReleaseUnitId?: string,
-  ): Promise<RepresentativeReleaseSelection> => {
-    return apiFetch<RepresentativeReleaseSelection>(
-      `/series-unit/representative-release/${workUnitId}/suggestions${toQueryString(
-        {
-          explicitReleaseUnitId,
-        },
-      )}`,
-    );
   },
 };

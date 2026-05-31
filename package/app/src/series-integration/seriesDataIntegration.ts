@@ -1,6 +1,4 @@
 import {
-  relatedSeriesByWorkQuery,
-  representativeReleaseSuggestionsQuery,
   seriesContentIndexQuery,
   seriesDiagnosticsQuery,
   seriesDetailQuery,
@@ -15,31 +13,11 @@ export function seriesManagementData(unitId: string) {
   };
 }
 
-export function workAbstractData(workUnitId: string) {
-  return {
-    relatedSeries: relatedSeriesByWorkQuery(workUnitId),
-    releaseListScope: { workUnitId },
-  };
-}
-
 export function releaseSeriesAddData(releaseUnitId: string) {
   return {
     containingSeries: seriesListQuery({
       containsReleaseUnitId: releaseUnitId,
       limit: 50,
     }),
-  };
-}
-
-export function releaseWorkSeriesAddData(
-  releaseUnitId: string,
-  workUnitId: string,
-) {
-  return {
-    representativeRelease: representativeReleaseSuggestionsQuery(
-      workUnitId,
-      releaseUnitId,
-    ),
-    relatedSeries: relatedSeriesByWorkQuery(workUnitId),
   };
 }

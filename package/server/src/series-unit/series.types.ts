@@ -7,10 +7,6 @@ export const seriesInclude = {
       user: { select: publicUserSelect },
       translations: true,
       supportLanguages: true,
-      workMemberships: {
-        where: { role: "SERIES" },
-        orderBy: [{ position: "asc" as const }, { createdAt: "asc" as const }],
-      },
     },
   },
   _count: {
