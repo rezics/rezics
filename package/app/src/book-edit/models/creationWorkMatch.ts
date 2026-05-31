@@ -10,10 +10,10 @@ export type CreationWorkMatchCopy = {
 export type CreationWorkMatchContext = {
   releaseUnitId: string;
   title: string;
-  workUnitId: string | null;
-  createsHiddenWork: boolean;
-  sameWorkReleaseCount: number;
-  workTagSummary: string[];
+  targetUnitId: string;
+  isVariant: boolean;
+  relatedReleaseCount: number;
+  tagSummary: string[];
 };
 
 export function creationWorkMatchCopy(
@@ -21,9 +21,9 @@ export function creationWorkMatchCopy(
 ): CreationWorkMatchCopy {
   if (creationMode === CreationModeValue.WIKI) {
     return {
-      title: "Find an existing work first",
+      title: "Find an existing catalog entry first",
       description:
-        "Search the catalog before creating a release. Selecting a match binds this release to the existing canonical work; standalone matches will create a hidden work domain for both releases.",
+        "Search the catalog before creating a release. Selecting a match connects this release to the selected catalog entry or variant target.",
       prominent: true,
     };
   }
@@ -31,7 +31,7 @@ export function creationWorkMatchCopy(
   return {
     title: "Work row",
     description:
-      "Optional: link this personal release to an existing catalog release so future work-domain context stays precise.",
+      "Optional: link this personal release to an existing catalog entry or source variant.",
     prominent: false,
   };
 }
@@ -47,12 +47,16 @@ export function contentSearchTitle(item: ContentSearchDocument): string {
 export function resolveCreationWorkMatchContext(
   item: ContentSearchDocument,
 ): CreationWorkMatchContext {
+  const targetUnitId =
+    item.catalogEntryKind === "VARIANT" && item.targetUnitId
+      ? item.targetUnitId
+      : item.id;
   return {
     releaseUnitId: item.id,
     title: contentSearchTitle(item),
-    workUnitId: item.workUnitId,
-    createsHiddenWork: !item.workUnitId,
-    sameWorkReleaseCount: 1 + (item.collapsedAlternativeUnitIds?.length ?? 0),
-    workTagSummary: item.tagLabels.slice(0, 6),
+    targetUnitId,
+    isVariant: item.catalogEntryKind === "VARIANT",
+    relatedReleaseCount: 1 + (item.collapsedAlternativeUnitIds?.length ?? 0),
+    tagSummary: item.tagLabels.slice(0, 6),
   };
 }

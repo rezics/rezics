@@ -7,7 +7,6 @@ describe("search result card destinations", () => {
     const item = {
       id: "release-visible",
       type: "BOOK",
-      workUnitId: "hidden-work",
     } as unknown as ContentSearchDocument;
 
     expect(contentHref(item)).toBe("/book/release-visible");

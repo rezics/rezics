@@ -35,7 +35,6 @@ describe("searchContent work-domain behavior", () => {
   test("filters direct tags and catalog identity", async () => {
     await searchContent({
       tagIds: ["tag-esrb-teen"],
-      workUnitId: "work-1",
       catalogEntryKind: "VARIANT",
       targetUnitId: "main-entry-1",
       platformEntityIds: ["platform-windows"],
@@ -43,7 +42,6 @@ describe("searchContent work-domain behavior", () => {
 
     expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
       'tagIds = "tag-esrb-teen"',
-      'workUnitId = "work-1"',
       'catalogEntryKind = "VARIANT"',
       'targetUnitId = "main-entry-1"',
       'platformEntityIds = "platform-windows"',

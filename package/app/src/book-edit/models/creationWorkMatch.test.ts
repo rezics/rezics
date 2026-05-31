@@ -26,7 +26,8 @@ function searchDoc(
     aliasValues: [],
     tagIds: [],
     tagScores: {},
-    workUnitId: null,
+    catalogEntryKind: "MAIN",
+    targetUnitId: null,
     realmIds: [],
     realmTagKeys: [],
     languages: ["en"],
@@ -48,7 +49,7 @@ function searchDoc(
 describe("creationWorkMatchCopy", () => {
   test("uses prominent guidance for public catalog creation", () => {
     expect(creationWorkMatchCopy("wiki")).toMatchObject({
-      title: "Find an existing work first",
+      title: "Find an existing catalog entry first",
       prominent: true,
     });
   });
@@ -62,11 +63,12 @@ describe("creationWorkMatchCopy", () => {
 });
 
 describe("resolveCreationWorkMatchContext", () => {
-  test("disambiguates matched releases that already belong to a work", () => {
+  test("disambiguates variants that point at a catalog target", () => {
     expect(
       resolveCreationWorkMatchContext(
         searchDoc({
-          workUnitId: "work-1",
+          catalogEntryKind: "VARIANT",
+          targetUnitId: "main-1",
           collapsedAlternativeUnitIds: ["release-2", "release-3"],
           tagLabels: ["mystery", "translation"],
         }),
@@ -74,20 +76,18 @@ describe("resolveCreationWorkMatchContext", () => {
     ).toEqual({
       releaseUnitId: "release-1",
       title: "Release",
-      workUnitId: "work-1",
-      createsHiddenWork: false,
-      sameWorkReleaseCount: 3,
-      workTagSummary: ["mystery", "translation"],
+      targetUnitId: "main-1",
+      isVariant: true,
+      relatedReleaseCount: 3,
+      tagSummary: ["mystery", "translation"],
     });
   });
 
-  test("marks standalone matched releases for hidden work-domain creation", () => {
-    expect(
-      resolveCreationWorkMatchContext(searchDoc({ workUnitId: null })),
-    ).toMatchObject({
-      workUnitId: null,
-      createsHiddenWork: true,
-      sameWorkReleaseCount: 1,
+  test("uses main catalog entries as their own interaction target", () => {
+    expect(resolveCreationWorkMatchContext(searchDoc({}))).toMatchObject({
+      targetUnitId: "release-1",
+      isVariant: false,
+      relatedReleaseCount: 1,
     });
   });
 });

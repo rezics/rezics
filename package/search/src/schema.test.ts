@@ -7,7 +7,6 @@ describe("expected Meilisearch work-domain settings", () => {
 
     expect(content.filterableAttributes).toEqual(
       expect.arrayContaining([
-        "workUnitId",
         "seriesUnitIds",
         "seriesKindKeys",
         "platformEntityIds",

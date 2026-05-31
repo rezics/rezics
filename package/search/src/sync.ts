@@ -411,7 +411,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const workMemberships: any[] = unit.workMemberships ?? [];
   const releaseMembership =
     workMemberships.find((membership) => membership.role === "RELEASE") ?? null;
-  const workUnitId = releaseMembership?.workUnitId ?? null;
   const realmTagApplicationsAsTargetUnit: any[] =
     unit.realmTagApplicationsAsTargetUnit ?? [];
   const creditAttributions: any[] = unit.creditAttributions ?? [];
@@ -586,7 +585,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     aliasValues,
     tagIds,
     tagScores,
-    workUnitId,
     catalogEntryKind: unit.catalogEntryKind ?? null,
     targetUnitId: unit.targetUnitId ?? null,
     seriesUnitIds,

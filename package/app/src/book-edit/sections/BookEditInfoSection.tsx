@@ -274,13 +274,13 @@ function WorkMatchPanel({
                 Selected: {selectedContext.title}
               </span>
               <span className="mt-1 block text-xs leading-dense text-text-secondary">
-                {selectedContext.workUnitId
-                  ? `Canonical work ${selectedContext.workUnitId}; ${selectedContext.sameWorkReleaseCount} same-work release(s).`
-                  : "Standalone release; submit will create or reuse a hidden work domain."}
+                {selectedContext.isVariant
+                  ? `Variant of ${selectedContext.targetUnitId}; ${selectedContext.relatedReleaseCount} related release(s).`
+                  : `Catalog entry ${selectedContext.targetUnitId}; ${selectedContext.relatedReleaseCount} related release(s).`}
               </span>
-              {selectedContext.workTagSummary.length > 0 ? (
+              {selectedContext.tagSummary.length > 0 ? (
                 <span className="mt-1 block text-xs leading-dense text-text-secondary">
-                  Work tags: {selectedContext.workTagSummary.join(", ")}
+                  Tags: {selectedContext.tagSummary.join(", ")}
                 </span>
               ) : null}
               <Button
@@ -322,9 +322,10 @@ function WorkMatchPanel({
                       {context.title}
                     </span>
                     <span className="mt-1 block text-xs leading-dense text-text-secondary">
-                      {context.workUnitId
-                        ? `${context.sameWorkReleaseCount} same-work release(s)`
-                        : "Standalone release"}
+                      {context.isVariant
+                        ? `Variant of ${context.targetUnitId}`
+                        : "Catalog entry"}
+                      {` - ${context.relatedReleaseCount} related release(s)`}
                       {item.languages.length > 0
                         ? ` - ${item.languages.join(", ")}`
                         : ""}

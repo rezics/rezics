@@ -33,7 +33,6 @@ const baseSearchDocument = {
   aliasValues: [],
   tagIds: [],
   tagScores: {},
-  workUnitId: "work-1",
   catalogEntryKind: "MAIN",
   targetUnitId: null,
   seriesUnitIds: [],

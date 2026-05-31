@@ -23,7 +23,6 @@ const baseContentDocument = {
   aliasValues: [],
   tagIds: ["tag-own"],
   tagScores: { "tag-own": 1 },
-  workUnitId: "work-1",
   catalogEntryKind: "MAIN",
   targetUnitId: null,
   seriesUnitIds: [],
@@ -53,7 +52,7 @@ const baseContentDocument = {
 };
 
 describe("ContentSearchDocumentSchema work-domain fields", () => {
-  test("accepts legacy work membership projection fields", () => {
+  test("accepts catalog identity projection fields", () => {
     expect(Value.Check(ContentSearchDocumentSchema, baseContentDocument)).toBe(
       true,
     );
@@ -64,7 +63,6 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
       Value.Check(ContentSearchDocumentSchema, {
         ...baseContentDocument,
         id: "standalone-1",
-        workUnitId: null,
         aiDisclosureMode: "AI_ASSISTED",
         catalogEntryKind: "NONE",
         seriesUnitIds: ["series-1"],
@@ -85,7 +83,6 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
     expect(
       Value.Check(ContentSearchOptionsSchema, {
         releasePresentation: "expanded",
-        workUnitId: "work-1",
         catalogEntryKind: "VARIANT",
         targetUnitId: "release-1",
         seriesUnitIds: ["series-1"],
@@ -107,7 +104,6 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
     ).toBe(true);
     expect(
       Value.Check(ContentSearchOptionsSchema, {
-        workUnitId: "work-1",
         catalogEntryKind: "VARIANT",
         targetUnitId: "main-1",
       }),

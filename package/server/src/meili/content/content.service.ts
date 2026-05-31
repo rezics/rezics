@@ -111,10 +111,6 @@ export async function searchContent(
     }
   }
 
-  if (opts.workUnitId) {
-    filter.push(`workUnitId = "${opts.workUnitId}"`);
-  }
-
   if (opts.catalogEntryKind) {
     filter.push(`catalogEntryKind = "${opts.catalogEntryKind}"`);
   } else if (shouldDefaultToMainCatalogEntry(opts)) {

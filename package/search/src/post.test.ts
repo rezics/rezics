@@ -250,7 +250,7 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.realmTagKeys).toEqual(["realm-1:tag-1"]);
   });
 
-  test("projects work membership metadata without inherited work tags", async () => {
+  test("omits work membership metadata from content documents", async () => {
     setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
 
@@ -293,7 +293,7 @@ describe("buildContentDocument realm tag keys", () => {
       book: { textLength: 100, isLicensed: false },
     });
 
-    expect(doc.workUnitId).toBe("work-1");
+    expect("workUnitId" in doc).toBe(false);
     expect(doc.tagIds).toEqual(["tag-own"]);
     expect(doc.tagLabels).toEqual(["Own"]);
   });

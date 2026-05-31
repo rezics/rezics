@@ -45,9 +45,6 @@ export const ContentSearchDocumentSchema = t.Object({
   tagIds: t.Array(t.String()),
   tagScores: t.Record(t.String(), t.Number()),
 
-  // Filterable/display: legacy work-domain projection.
-  workUnitId: t.Union([t.String(), t.Null()]),
-
   // Native catalog identity. Variants resolve normal interactions through
   // targetUnitId; SERIES and other non-participating types keep null.
   catalogEntryKind: t.Union([catalogEntryKindSchema, t.Null()]),
@@ -147,7 +144,6 @@ export const ContentSearchOptionsSchema = t.Object({
   postKind: t.Optional(t.Array(postKindLiterals)),
   tags: t.Optional(t.Array(TagRefSchema)),
   tagIds: t.Optional(t.Array(t.String())),
-  workUnitId: t.Optional(t.String()),
   catalogEntryKind: t.Optional(catalogEntryKindSchema),
   targetUnitId: t.Optional(t.String()),
   containedUnitIds: t.Optional(t.Array(t.String())),
