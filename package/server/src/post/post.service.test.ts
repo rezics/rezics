@@ -882,37 +882,17 @@ describe("PostService.byRealm", () => {
     ).toBeUndefined();
   });
 
-  test("filters through UnitWork for work-domain feeds", async () => {
-    resetMocks();
-
-    await service.list({ workUnitId: "work-1", workRoles: ["REVIEW"] });
-
-    expect(firstPostFindManyArgs().where.unit.workMemberships).toEqual({
-      some: {
-        workUnitId: "work-1",
-        role: { in: ["REVIEW"] },
-      },
-    });
-  });
-
-  test("preserves targetUnitId as an exact-release filter with work domains", async () => {
+  test("preserves targetUnitId as an exact target filter", async () => {
     resetMocks();
 
     await service.list({
       targetUnitId: "release-1",
-      workUnitId: "work-1",
-      workRoles: ["POST", "REVIEW"],
     });
 
     const where = firstPostFindManyArgs().where;
     expect(where.targetUnitId).toBe("release-1");
     expect(where.parentPostUnitId).toBeNull();
-    expect(where.unit.workMemberships).toEqual({
-      some: {
-        workUnitId: "work-1",
-        role: { in: ["POST", "REVIEW"] },
-      },
-    });
+    expect(where.unit.workMemberships).toBeUndefined();
   });
 
   test("general post feeds are root-only by default", async () => {

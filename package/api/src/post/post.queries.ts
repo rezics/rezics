@@ -145,17 +145,6 @@ export const postModerationOverlaysQuery = (
   });
 
 /**
- * Query options for getting posts within a work domain.
- */
-export const postsByWorkQuery = (workUnitId: string, filters?: PostFilters) =>
-  queryOptions({
-    queryKey: postKeys.byWork(workUnitId, filters),
-    queryFn: () => postApi.getByWork(workUnitId, filters),
-    enabled: !!workUnitId,
-    staleTime: 1000 * 60 * 2,
-  });
-
-/**
  * Infinite query options for paginated post list
  */
 export const postInfiniteListQuery = (filters?: Omit<PostFilters, "start">) =>
@@ -188,6 +177,5 @@ export const postQueries = {
   byRealm: postsByRealmQuery,
   wikiByRealm: wikiPostsByRealmQuery,
   moderationOverlays: postModerationOverlaysQuery,
-  byWork: postsByWorkQuery,
   infiniteList: postInfiniteListQuery,
 };

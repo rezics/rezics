@@ -11,7 +11,6 @@ import { languageSchema } from "../language";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import { publicUserSchema } from "../unit/unit";
-import { unitWorkRoleSchema } from "../unit/work";
 
 // ============================================================
 // POST KIND
@@ -223,10 +222,6 @@ export const postListQuerySchema = t.Object({
   targetUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
-  /** Work Unit ID to list posts through UnitWork membership. */
-  workUnitId: t.Optional(t.String()),
-  /** UnitWork roles to include when querying a work-domain feed. */
-  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
   /** Moderator realm feed lifecycle filter. Regular callers are always visible-only. */
@@ -286,10 +281,6 @@ export const postListBodySchema = t.Object({
   targetUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
-  /** Work Unit ID to list posts through UnitWork membership. */
-  workUnitId: t.Optional(t.String()),
-  /** UnitWork roles to include when querying a work-domain feed. */
-  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
   /** Moderator realm feed lifecycle filter. Regular callers are always visible-only. */

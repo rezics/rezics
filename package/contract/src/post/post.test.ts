@@ -62,16 +62,9 @@ describe("post work-domain contract fields", () => {
     expect("workRoles" in postDTOSchema.properties).toBe(false);
   });
 
-  test("accepts work-domain list filters while targetUnitId remains exact", () => {
-    expect(
-      Value.Check(postListQuerySchema, {
-        targetUnitId: "release-1",
-        workUnitId: "work-1",
-        workRoles: ["POST", "REVIEW"],
-        realmLifecycleState: "archived",
-        limit: 20,
-      }),
-    ).toBe(true);
+  test("does not expose work-domain list filters", () => {
+    expect("workUnitId" in postListQuerySchema.properties).toBe(false);
+    expect("workRoles" in postListQuerySchema.properties).toBe(false);
 
     expect(
       Value.Check(postListQuerySchema, {

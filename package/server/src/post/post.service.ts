@@ -332,7 +332,6 @@ export class PostService {
     ) {
       where.parentPostUnitId = null;
     }
-    this.applyWorkDomainFilter(where, query.workUnitId, query.workRoles);
     if (query.rootPostUnitId) where.rootPostUnitId = query.rootPostUnitId;
     if (query.parentPostUnitId) where.parentPostUnitId = query.parentPostUnitId;
     if (query.authorUserId) where.authorUserId = query.authorUserId;
@@ -508,7 +507,6 @@ export class PostService {
     };
 
     if (opts.rootPostUnitId) where.rootPostUnitId = opts.rootPostUnitId;
-    this.applyWorkDomainFilter(where, opts.workUnitId, opts.workRoles);
     if (opts.parentPostUnitId) where.parentPostUnitId = opts.parentPostUnitId;
     if (!opts.rootPostUnitId && !opts.parentPostUnitId) {
       where.parentPostUnitId = null;
@@ -1844,28 +1842,6 @@ export class PostService {
       .split(",")
       .map((id: string) => id.trim())
       .filter(Boolean);
-  }
-
-  private applyWorkDomainFilter(
-    where: Prisma.PostWhereInput,
-    workUnitId?: string,
-    workRoles?: PostListQuery["workRoles"],
-  ) {
-    if (!workUnitId) return;
-
-    const roles = workRoles?.length
-      ? (workRoles as UnitWorkRole[])
-      : [UnitWorkRole.POST, UnitWorkRole.REVIEW, UnitWorkRole.WIKI];
-
-    where.unit = {
-      ...(where.unit && !Array.isArray(where.unit) ? where.unit : {}),
-      workMemberships: {
-        some: {
-          workUnitId,
-          role: { in: roles },
-        },
-      },
-    };
   }
 
   private async registerTargetWorkMemberships(

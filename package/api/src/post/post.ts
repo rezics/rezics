@@ -43,7 +43,6 @@ export {
   postsByAuthorQuery,
   postsByRealmQuery,
   postsByTargetQuery,
-  postsByWorkQuery,
   postThreadQuery,
   wikiPostsByRealmQuery,
   wikiPostsByTargetQuery,

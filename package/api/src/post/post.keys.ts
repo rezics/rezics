@@ -93,12 +93,4 @@ export const postKeys = {
       realmUnitId ?? null,
       [...targetUnitIds].sort(),
     ] as const,
-
-  /**
-   * Keys for work-domain scoped queries.
-   */
-  byWorks: (workUnitId: string) =>
-    [...postKeys.all(), "work", workUnitId] as const,
-  byWork: (workUnitId: string, filters?: PostFilters) =>
-    [...postKeys.byWorks(workUnitId), filters ?? null] as const,
 } as const;
