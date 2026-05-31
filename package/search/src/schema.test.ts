@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { getExpectedMeiliIndexSchema } from "./schema";
 
-describe("expected Meilisearch work-domain settings", () => {
-  test("content index exposes work-domain filter fields", () => {
+describe("expected Meilisearch index settings", () => {
+  test("content index exposes catalog and media filter fields", () => {
     const content = getExpectedMeiliIndexSchema("content");
 
     expect(content.filterableAttributes).toEqual(
@@ -25,7 +25,7 @@ describe("expected Meilisearch work-domain settings", () => {
     );
   });
 
-  test("post index omits reply and work-domain fields", () => {
+  test("post index omits reply and legacy work fields", () => {
     const posts = getExpectedMeiliIndexSchema("posts");
 
     expect(posts.filterableAttributes).toEqual(

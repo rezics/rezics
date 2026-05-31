@@ -141,7 +141,7 @@ describe("search handlers", () => {
     expect(enqueued).toEqual(["search.entity.fullSync:entity-1"]);
   });
 
-  test("work-domain full repair continues by release cursor", async () => {
+  test("release full repair continues by release cursor", async () => {
     const added: Array<Record<string, unknown>> = [];
     const enqueued: string[] = [];
     setSearchPrismaClient({
@@ -212,7 +212,7 @@ describe("search handlers", () => {
       },
     } as never);
     const command = createSearchCommand(
-      SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+      SEARCH_COMMAND_KINDS.contentReleaseFullSync,
       { limit: 1 },
     );
 
@@ -223,6 +223,6 @@ describe("search handlers", () => {
     });
 
     expect(added.map((doc) => doc.id)).toEqual(["release-1"]);
-    expect(enqueued).toEqual(["search.content.workDomainFullSync:release-1"]);
+    expect(enqueued).toEqual(["search.content.releaseFullSync:release-1"]);
   });
 });

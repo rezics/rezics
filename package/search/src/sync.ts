@@ -695,7 +695,7 @@ export async function syncContentSegment(
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }
 
-export async function syncWorkDomainContentSegment(
+export async function syncReleaseContentSegment(
   client: SearchClient,
   options: SearchSegmentOptions = {},
 ): Promise<SearchSegmentResult> {

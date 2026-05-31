@@ -16,7 +16,7 @@ export const SEARCH_COMMAND_KINDS = {
   contentPatchRealmIds: "search.content.patchRealmIds",
   contentPatchRealmTagKeys: "search.content.patchRealmTagKeys",
   contentPatchContainedUnitIds: "search.content.patchContainedUnitIds",
-  contentWorkDomainFullSync: "search.content.workDomainFullSync",
+  contentReleaseFullSync: "search.content.releaseFullSync",
   contentGameMediaFullSync: "search.content.gameMediaFullSync",
   contentFullSync: "search.content.fullSync",
 
@@ -152,8 +152,8 @@ export const ContentPatchContainedUnitIdsCommandSchema = commandSchema(
   JOB_LANES.searchSyncSlow,
   UnitTargetPayloadSchema,
 );
-export const ContentWorkDomainFullSyncCommandSchema = commandSchema(
-  SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+export const ContentReleaseFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.contentReleaseFullSync,
   JOB_LANES.maintenance,
   FullSyncPayloadSchema,
 );
@@ -366,7 +366,7 @@ export const SearchCommandSchema = v.union([
   ContentPatchRealmIdsCommandSchema,
   ContentPatchRealmTagKeysCommandSchema,
   ContentPatchContainedUnitIdsCommandSchema,
-  ContentWorkDomainFullSyncCommandSchema,
+  ContentReleaseFullSyncCommandSchema,
   ContentGameMediaFullSyncCommandSchema,
   ContentFullSyncCommandSchema,
   PostSyncCommandSchema,

@@ -29,7 +29,7 @@ describe("@rezics/job command contract", () => {
 
   test("validates content search repair commands", () => {
     const fullCommand = createSearchCommand(
-      SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+      SEARCH_COMMAND_KINDS.contentReleaseFullSync,
       { cursor: "release-1", limit: 50 },
     );
     const gameMediaCommand = createSearchCommand(
@@ -39,7 +39,7 @@ describe("@rezics/job command contract", () => {
 
     expect(fullCommand.lane).toBe(JOB_LANES.maintenance);
     expect(fullCommand.idempotencyKey).toBe(
-      "search.content.workDomainFullSync:all:release-1",
+      "search.content.releaseFullSync:all:release-1",
     );
     expect(gameMediaCommand.lane).toBe(JOB_LANES.maintenance);
     expect(gameMediaCommand.idempotencyKey).toBe(

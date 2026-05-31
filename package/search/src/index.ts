@@ -98,5 +98,5 @@ export {
   syncUserSegment,
   syncUserUnitCollection,
   syncUserUnitCollectionSegment,
-  syncWorkDomainContentSegment,
+  syncReleaseContentSegment,
 } from "./sync";

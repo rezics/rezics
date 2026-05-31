@@ -208,7 +208,7 @@ export function createAdminApi(options: {
       },
     )
     .post(
-      "/admin/search/work-domains/rebuild-all",
+      "/admin/search/releases/rebuild-all",
       async ({ authorized, query, set }) => {
         if (!authorized) return { status: "error", message: "Unauthorized" };
         if (!options.queue.send) {
@@ -220,7 +220,7 @@ export function createAdminApi(options: {
             ? Number.parseInt(query.limit, 10)
             : undefined;
         const command = createSearchCommand(
-          SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+          SEARCH_COMMAND_KINDS.contentReleaseFullSync,
           {
             ...(Number.isFinite(limit) ? { limit } : {}),
           },

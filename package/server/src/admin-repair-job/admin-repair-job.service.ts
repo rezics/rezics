@@ -284,7 +284,7 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
           }
         } else if (input.scope === "work-domain") {
           const command = createSearchCommand(
-            SEARCH_COMMAND_KINDS.contentWorkDomainFullSync,
+            SEARCH_COMMAND_KINDS.contentReleaseFullSync,
             { limit: 500 },
             { type: "server", service: "admin-repair-job" },
           );

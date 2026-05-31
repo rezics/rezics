@@ -262,7 +262,7 @@ describe("job-runner HTTP app", () => {
     );
     const allResponse = await app.handle(
       new Request(
-        "http://localhost/admin/search/work-domains/rebuild-all?limit=25",
+        "http://localhost/admin/search/releases/rebuild-all?limit=25",
         {
           method: "POST",
           headers: { "x-internal-secret": "secret" },
@@ -278,7 +278,7 @@ describe("job-runner HTTP app", () => {
         payload: { unitId: "release-1" },
       },
       {
-        kind: "search.content.workDomainFullSync",
+        kind: "search.content.releaseFullSync",
         payload: { limit: 25 },
       },
     ]);
