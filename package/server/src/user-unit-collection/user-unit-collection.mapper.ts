@@ -2,7 +2,10 @@ import type {
   CollectionUnitDTO,
   UserUnitCollectionDTO,
 } from "@rezics/contract";
-import type { CollectionUnitRow, UserUnitCollectionRow } from "./types";
+import type {
+  CollectionUnitRow,
+  UserUnitCollectionRow,
+} from "./user-unit-collection.types";
 
 export function mapUserUnitCollectionToDTO(
   row: UserUnitCollectionRow,

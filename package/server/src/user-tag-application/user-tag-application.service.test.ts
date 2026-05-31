@@ -16,7 +16,9 @@ describe("UserTagApplicationService", () => {
       userTagApplication: { findMany },
     });
 
-    const { UserTagApplicationService } = await import("./service");
+    const { UserTagApplicationService } = await import(
+      "./user-tag-application.service"
+    );
     await new UserTagApplicationService().listForUnit("user-1", "unit-1");
 
     expect(findMany).toHaveBeenCalledWith({
@@ -40,7 +42,9 @@ describe("UserTagApplicationService", () => {
       userTagApplication: { findMany },
     });
 
-    const { UserTagApplicationService } = await import("./service");
+    const { UserTagApplicationService } = await import(
+      "./user-tag-application.service"
+    );
     await new UserTagApplicationService().setForUnit("user-1", {
       unitId: "unit-1",
       tagUnitIds: ["tag-1", "tag-2"],
@@ -74,7 +78,9 @@ describe("UserTagApplicationService", () => {
       userTagApplication: { deleteMany },
     });
 
-    const { UserTagApplicationService } = await import("./service");
+    const { UserTagApplicationService } = await import(
+      "./user-tag-application.service"
+    );
     await new UserTagApplicationService().deleteOne(
       "user-1",
       "unit-1",

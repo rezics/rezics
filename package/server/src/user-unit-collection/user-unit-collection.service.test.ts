@@ -30,7 +30,9 @@ describe("UserUnitCollectionService", () => {
       userUnitCollection: { findUnique },
     });
 
-    const { UserUnitCollectionService } = await import("./service");
+    const { UserUnitCollectionService } = await import(
+      "./user-unit-collection.service"
+    );
     await new UserUnitCollectionService().get("user-1", "unit-1");
 
     expect(findUnique).toHaveBeenCalledWith({
@@ -61,7 +63,9 @@ describe("UserUnitCollectionService", () => {
       userUnitCollection: { findUnique },
     });
 
-    const { UserUnitCollectionService } = await import("./service");
+    const { UserUnitCollectionService } = await import(
+      "./user-unit-collection.service"
+    );
     const result = await new UserUnitCollectionService().patch("user-1", {
       unitId: "unit-1",
       searchText: "keeper note",
@@ -128,7 +132,9 @@ describe("UserUnitCollectionService", () => {
       },
     });
 
-    const { UserUnitCollectionService } = await import("./service");
+    const { UserUnitCollectionService } = await import(
+      "./user-unit-collection.service"
+    );
     const result = await new UserUnitCollectionService().search(
       "user-1",
       { q: "space", limit: 10 },
@@ -186,7 +192,9 @@ describe("UserUnitCollectionService", () => {
       userTagApplication: { findMany: async () => [] },
     });
 
-    const { UserUnitCollectionService } = await import("./service");
+    const { UserUnitCollectionService } = await import(
+      "./user-unit-collection.service"
+    );
     const result = await new UserUnitCollectionService().search(
       "owner-1",
       { q: "public title" },

@@ -8,7 +8,10 @@ import {
   applyUserUnitCollectionMetadata,
   enqueueUserUnitCollectionSearchSync,
 } from "@/shelf/user-unit-collection.service";
-import type { CollectionUnitRow, UserUnitCollectionRow } from "./types";
+import type {
+  CollectionUnitRow,
+  UserUnitCollectionRow,
+} from "./user-unit-collection.types";
 
 const COLLECTION_SEARCH_HIT_LIMIT = 1000;
 

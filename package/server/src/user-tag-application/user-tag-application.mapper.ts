@@ -1,5 +1,5 @@
 import type { UserTagApplicationDTO } from "@rezics/contract";
-import type { UserTagApplicationRow } from "./types";
+import type { UserTagApplicationRow } from "./user-tag-application.types";
 
 export function mapUserTagApplicationToDTO(
   row: UserTagApplicationRow,

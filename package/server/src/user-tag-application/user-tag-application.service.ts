@@ -5,7 +5,7 @@ import type {
 import { prisma } from "#/prisma/client";
 import { generateBetween } from "@/shelf/fractional-index";
 import { applyUserUnitCollectionMetadata } from "@/shelf/user-unit-collection.service";
-import type { UserTagApplicationRow } from "./types";
+import type { UserTagApplicationRow } from "./user-tag-application.types";
 
 export class UserTagApplicationService {
   async listForUnit(

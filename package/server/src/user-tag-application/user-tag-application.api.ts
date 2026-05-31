@@ -8,8 +8,8 @@ import {
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro } from "@/middleware";
-import { mapUserTagApplicationToDTO } from "./mapper";
-import { userTagApplicationService } from "./service";
+import { mapUserTagApplicationToDTO } from "./user-tag-application.mapper";
+import { userTagApplicationService } from "./user-tag-application.service";
 
 const unitParamsSchema = t.Object({
   unitId: t.String(),

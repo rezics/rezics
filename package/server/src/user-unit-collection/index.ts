@@ -1,5 +1,5 @@
-export { userUnitCollectionApi } from "./api";
+export { userUnitCollectionApi } from "./user-unit-collection.api";
 export {
   UserUnitCollectionService,
   userUnitCollectionService,
-} from "./service";
+} from "./user-unit-collection.service";

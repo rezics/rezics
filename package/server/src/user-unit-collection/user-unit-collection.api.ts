@@ -10,8 +10,11 @@ import {
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, tryResolveIdentity } from "@/middleware";
-import { mapCollectionUnitToDTO, mapUserUnitCollectionToDTO } from "./mapper";
-import { userUnitCollectionService } from "./service";
+import {
+  mapCollectionUnitToDTO,
+  mapUserUnitCollectionToDTO,
+} from "./user-unit-collection.mapper";
+import { userUnitCollectionService } from "./user-unit-collection.service";
 
 const unitParamsSchema = t.Object({
   unitId: t.String(),

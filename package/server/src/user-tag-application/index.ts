@@ -1,7 +1,7 @@
-export { userTagApplicationApi } from "./api";
-export { mapUserTagApplicationToDTO } from "./mapper";
+export { userTagApplicationApi } from "./user-tag-application.api";
+export { mapUserTagApplicationToDTO } from "./user-tag-application.mapper";
 export {
   UserTagApplicationService,
   userTagApplicationService,
-} from "./service";
-export * from "./types";
+} from "./user-tag-application.service";
+export * from "./user-tag-application.types";
