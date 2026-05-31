@@ -43,10 +43,9 @@ function release(
 }
 
 describe("release work helpers", () => {
-  test("prefers canonical UnitWork work id over legacy workUnitId", () => {
+  test("reads release scope from canonical UnitWork membership", () => {
     expect(
       releaseWorkUnitId({
-        workUnitId: "legacy-work",
         workMembership: {
           unitId: "release-1",
           workUnitId: "canonical-work",
@@ -57,7 +56,7 @@ describe("release work helpers", () => {
           createdAt: "2026-01-01T00:00:00.000Z",
           updatedAt: "2026-01-01T00:00:00.000Z",
         },
-      } as BookDTO),
+      }),
     ).toBe("canonical-work");
   });
 

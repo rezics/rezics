@@ -8,11 +8,9 @@ export type ReleaseListItem = Pick<
 export const ALL_RELEASE_LANGUAGES = "__all__";
 
 export function releaseWorkUnitId(
-  bookInfo: Pick<BookDTO, "workMembership" | "workUnitId"> | null | undefined,
+  bookInfo: Pick<BookDTO, "workMembership"> | null | undefined,
 ): string | undefined {
-  return (
-    bookInfo?.workMembership?.workUnitId ?? bookInfo?.workUnitId ?? undefined
-  );
+  return bookInfo?.workMembership?.workUnitId ?? undefined;
 }
 
 export type ReleaseScopeMode = "work" | "exact";
@@ -24,10 +22,7 @@ export interface ReleaseScope {
 }
 
 export function resolveReleaseScope(
-  bookInfo:
-    | Pick<BookDTO, "unitId" | "workMembership" | "workUnitId">
-    | null
-    | undefined,
+  bookInfo: Pick<BookDTO, "unitId" | "workMembership"> | null | undefined,
   scopeMode: ReleaseScopeMode = "work",
 ): ReleaseScope | null {
   if (!bookInfo?.unitId) return null;
