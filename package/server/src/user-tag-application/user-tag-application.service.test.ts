@@ -10,6 +10,49 @@ mock.module("@/job/job-boundary", () => ({
 installPrismaClientMock();
 
 describe("UserTagApplicationService", () => {
+  test("direct user tag visibility follows profile privacy", async () => {
+    const { canViewDirectUserTags } = await import(
+      "./user-tag-application.service"
+    );
+
+    expect(
+      canViewDirectUserTags({
+        ownerUserId: "owner-1",
+        viewerUserId: "owner-1",
+        settings: { privacy: { userTags: "private" } },
+      }),
+    ).toBe(true);
+    expect(
+      canViewDirectUserTags({
+        ownerUserId: "owner-1",
+        viewerUserId: "viewer-1",
+        settings: { privacy: { userTags: "public" } },
+      }),
+    ).toBe(true);
+    expect(
+      canViewDirectUserTags({
+        ownerUserId: "owner-1",
+        viewerUserId: "viewer-1",
+        settings: { privacy: { userTags: "followers" } },
+        isFollower: true,
+      }),
+    ).toBe(true);
+    expect(
+      canViewDirectUserTags({
+        ownerUserId: "owner-1",
+        viewerUserId: "viewer-1",
+        settings: { privacy: { userTags: "followers" } },
+      }),
+    ).toBe(false);
+    expect(
+      canViewDirectUserTags({
+        ownerUserId: "owner-1",
+        viewerUserId: "viewer-1",
+        settings: {},
+      }),
+    ).toBe(false);
+  });
+
   test("lists caller-scoped tags for one unit", async () => {
     const findMany = mock(async () => []);
     Object.assign(prismaMock, {
@@ -25,6 +68,78 @@ describe("UserTagApplicationService", () => {
       where: { userId: "user-1", unitId: "unit-1" },
       orderBy: [{ position: "asc" }, { tagUnitId: "asc" }],
     });
+  });
+
+  test("lists another user's tags only when direct privacy permits", async () => {
+    const tagRows = [
+      {
+        userId: "owner-1",
+        unitId: "unit-1",
+        tagUnitId: "tag-1",
+        position: "00000000",
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      },
+    ];
+    const findMany = mock(async () => tagRows);
+    const userFindUnique = mock(async () => ({
+      settings: { privacy: { userTags: "followers" } },
+    }));
+    const subscriptionFindUnique = mock(async () => ({ id: "sub-1" }));
+    Object.assign(prismaMock, {
+      user: { findUnique: userFindUnique },
+      subscription: { findUnique: subscriptionFindUnique },
+      userTagApplication: { findMany },
+    });
+
+    const { UserTagApplicationService } = await import(
+      "./user-tag-application.service"
+    );
+    const rows = await new UserTagApplicationService().listForUserUnit(
+      "owner-1",
+      "unit-1",
+      "viewer-1",
+    );
+
+    expect(userFindUnique).toHaveBeenCalledWith({
+      where: { unitId: "owner-1" },
+      select: { settings: true },
+    });
+    expect(subscriptionFindUnique).toHaveBeenCalledWith({
+      where: {
+        subscriberUnitId_targetUnitId: {
+          subscriberUnitId: "viewer-1",
+          targetUnitId: "owner-1",
+        },
+      },
+      select: { id: true },
+    });
+    expect(findMany).toHaveBeenCalledWith({
+      where: { userId: "owner-1", unitId: "unit-1" },
+      orderBy: [{ position: "asc" }, { tagUnitId: "asc" }],
+    });
+    expect(rows).toBe(tagRows);
+  });
+
+  test("hides another user's direct tags when privacy blocks", async () => {
+    const findMany = mock(async () => []);
+    Object.assign(prismaMock, {
+      user: { findUnique: mock(async () => ({ settings: {} })) },
+      subscription: { findUnique: mock(async () => null) },
+      userTagApplication: { findMany },
+    });
+
+    const { UserTagApplicationService } = await import(
+      "./user-tag-application.service"
+    );
+    const rows = await new UserTagApplicationService().listForUserUnit(
+      "owner-1",
+      "unit-1",
+      "viewer-1",
+    );
+
+    expect(rows).toEqual([]);
+    expect(findMany).not.toHaveBeenCalled();
   });
 
   test("setForUnit replaces tags through shared collection metadata helper", async () => {

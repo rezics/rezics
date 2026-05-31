@@ -7,7 +7,7 @@ import {
   setUserTagApplicationsSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro } from "@/middleware";
+import { authMacro, tryResolveIdentity } from "@/middleware";
 import { mapUserTagApplicationToDTO } from "./user-tag-application.mapper";
 import { userTagApplicationService } from "./user-tag-application.service";
 
@@ -20,10 +20,39 @@ const tagParamsSchema = t.Object({
   tagUnitId: t.String(),
 });
 
+const userUnitParamsSchema = t.Object({
+  userId: t.String(),
+  unitId: t.String(),
+});
+
 export const userTagApplicationApi = new Elysia({
   prefix: "/user-tag-application",
 })
   .use(authMacro)
+  .get(
+    "/user/:userId/:unitId",
+    async ({ headers, params }): Promise<UserTagApplicationDTO[]> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      const rows = await userTagApplicationService.listForUserUnit(
+        params.userId,
+        params.unitId,
+        identity?.userId,
+      );
+      return rows.map(mapUserTagApplicationToDTO);
+    },
+    {
+      params: userUnitParamsSchema,
+      detail: {
+        summary: "List visible direct user tags for a Unit",
+        description:
+          "Applies the profile user tag privacy setting. Shelf and collection APIs make separate exposure decisions from shelf visibility.",
+        tags: ["Collection", "Tags"],
+      },
+    },
+  )
   .get(
     "/:unitId",
     async ({ params, identity }): Promise<UserTagApplicationDTO[]> => {
