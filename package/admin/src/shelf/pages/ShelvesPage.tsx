@@ -30,7 +30,6 @@ export default function ShelvesPage() {
   const [userId, setUserId] = React.useState("");
   const [kindKey, setKindKey] = React.useState("");
   const [containsUnitId, setContainsUnitId] = React.useState("");
-  const [containsWorkUnitId, setContainsWorkUnitId] = React.useState("");
   const [page, setPage] = React.useState(0);
   const [limit, setLimit] = React.useState(20);
 
@@ -43,7 +42,6 @@ export default function ShelvesPage() {
       userId: optionalFilter(userId),
       kindKey: optionalFilter(kindKey),
       containsUnitId: optionalFilter(containsUnitId),
-      containsWorkUnitId: optionalFilter(containsWorkUnitId),
     }),
   );
 
@@ -213,20 +211,6 @@ export default function ShelvesPage() {
                   setPage(0);
                 }}
                 placeholder="unit id"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="shelf-filter-work" className="text-xs">
-                Contains work
-              </Label>
-              <Input
-                id="shelf-filter-work"
-                value={containsWorkUnitId}
-                onChange={(event) => {
-                  setContainsWorkUnitId(event.target.value);
-                  setPage(0);
-                }}
-                placeholder="work unit id"
               />
             </div>
           </div>

@@ -82,7 +82,6 @@ export const BookReviewPage: React.FC = () => {
 
       <ShelfByBookPreview
         bookId={bookInfo.unitId || ""}
-        workUnitId={workUnitId}
         title={title}
         shelfNumber={SHELF_PREVIEW_LIMIT}
       />

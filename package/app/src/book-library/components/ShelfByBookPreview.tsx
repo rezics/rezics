@@ -9,21 +9,15 @@ import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarou
 export function ShelfByBookPreview({
   title,
   bookId,
-  workUnitId,
   shelfNumber = 12,
 }: {
   title: string;
   bookId?: string;
-  workUnitId?: string;
   shelfNumber?: number;
 }) {
   const { t } = useTranslation(["common", "entity"]);
   const { data, isLoading, error } = useQuery({
-    ...shelfQueries.list(
-      workUnitId
-        ? { containsWorkUnitId: workUnitId, limit: shelfNumber }
-        : { containsUnitId: bookId, limit: shelfNumber },
-    ),
+    ...shelfQueries.list({ containsUnitId: bookId, limit: shelfNumber }),
     enabled: !!bookId,
   });
 

@@ -191,20 +191,19 @@ describe("POST /shelf/system/ensure", () => {
 });
 
 describe("GET/POST /shelf/list scope validation", () => {
-  test("GET rejects ambiguous exact and work-domain containment filters", async () => {
+  test("GET accepts exact containment filters", async () => {
     const app = await makeApp();
 
     const res = await app.handle(
       new Request(
-        "http://localhost/shelf/list?containsUnitId=release-1&containsWorkUnitId=work-1&limit=20",
+        "http://localhost/shelf/list?containsUnitId=release-1&limit=20",
       ),
     );
 
-    expect(res.status).toBeGreaterThanOrEqual(400);
-    expect(res.status).toBeLessThan(500);
+    expect(res.status).toBe(200);
   });
 
-  test("POST rejects ambiguous exact and work-domain containment filters", async () => {
+  test("POST accepts exact containment filters", async () => {
     const app = await makeApp();
 
     const res = await app.handle(
@@ -213,13 +212,11 @@ describe("GET/POST /shelf/list scope validation", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           containsUnitId: "release-1",
-          containsWorkUnitId: "work-1",
           limit: 20,
         }),
       }),
     );
 
-    expect(res.status).toBeGreaterThanOrEqual(400);
-    expect(res.status).toBeLessThan(500);
+    expect(res.status).toBe(200);
   });
 });

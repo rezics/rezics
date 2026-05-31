@@ -120,80 +120,22 @@ describe("ShelfService", () => {
     });
   });
 
-  test("list filters work-domain containment through shelf UnitWork", async () => {
-    let findManyArgs: any;
-    Object.assign(prismaMock, {
-      shelf: {
-        findMany: async (args: any) => {
-          findManyArgs = args;
-          return [];
-        },
-        count: async () => 0,
-      },
-    });
-
-    const { shelfService } = await import("./shelf.service");
-    await shelfService.list({ containsWorkUnitId: "work-1", limit: 10 });
-
-    expect(findManyArgs.where).toMatchObject({
-      AND: [
-        {
-          unit: {
-            type: "SHELF",
-            status: "PUBLISHED",
-            visibility: "PUBLIC",
-          },
-        },
-        {
-          unit: {
-            workMemberships: {
-              some: {
-                workUnitId: "work-1",
-                role: "SHELF",
-              },
-            },
-          },
-        },
-      ],
-    });
-  });
-
-  test("list rejects ambiguous exact and work-domain containment filters", async () => {
-    const { shelfService } = await import("./shelf.service");
-
-    await expect(
-      shelfService.list({
-        containsUnitId: "release-1",
-        containsWorkUnitId: "work-1",
-        limit: 10,
-      }),
-    ).rejects.toThrow("ambiguous-shelf-containment-filter");
-  });
-
-  test("list hydrates the matched contained release for work-domain results", async () => {
+  test("list hydrates the matched contained unit for exact results", async () => {
     Object.assign(prismaMock, {
       shelf: {
         findMany: async () => [makeShelfListRow()],
         count: async () => 1,
       },
-      unitWork: {
-        findMany: async () => [
-          {
-            unitId: "release-2",
-            workUnitId: "work-1",
-            unit: {
-              defaultLanguage: "en",
-              translations: [{ language: "en", title: "Sibling Release" }],
-            },
-          },
-        ],
-      },
       shelfUnit: {
         findMany: async () => [
           {
             shelfId: "shelf-1",
-            unitId: "release-2",
+            unitId: "release-1",
             kind: "book",
+            unit: {
+              defaultLanguage: "en",
+              translations: [{ language: "en", title: "Contained Release" }],
+            },
           },
         ],
       },
@@ -201,15 +143,14 @@ describe("ShelfService", () => {
 
     const { shelfService } = await import("./shelf.service");
     const result = await shelfService.list({
-      containsWorkUnitId: "work-1",
+      containsUnitId: "release-1",
       limit: 10,
     });
 
     expect(result.shelves[0]?.matchedUnit).toEqual({
-      unitId: "release-2",
+      unitId: "release-1",
       kind: "book",
-      title: "Sibling Release",
-      workUnitId: "work-1",
+      title: "Contained Release",
     });
   });
 

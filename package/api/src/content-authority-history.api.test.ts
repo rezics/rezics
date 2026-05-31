@@ -86,7 +86,7 @@ describe("content authority and history API clients", () => {
       creationMode: "wiki",
     });
     expect(JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string)).toEqual({
-      patch: { post: { content: edited } },
+      patch: { post: {} },
     });
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
       "http://api.example/post/list?limit=5&targetUnitId=book-1&kind=WIKI",
@@ -236,13 +236,6 @@ describe("content authority and history API clients", () => {
       "list",
       "containsUnit",
       "release-1",
-      { limit: 5 },
-    ]);
-    expect(shelfKeys.containingWork("work-1", { limit: 5 })).toEqual([
-      "shelves",
-      "list",
-      "containsWorkUnit",
-      "work-1",
       { limit: 5 },
     ]);
   });

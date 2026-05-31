@@ -306,26 +306,9 @@ export class ShelfService {
     }
 
     const containsUnitId = options.containsUnitId?.trim();
-    const containsWorkUnitId = options.containsWorkUnitId?.trim();
-    if (containsUnitId && containsWorkUnitId) {
-      throw new AppError(400, "ambiguous-shelf-containment-filter");
-    }
     if (containsUnitId) {
       and.push({
         units: { some: { unitId: containsUnitId } },
-      });
-    }
-
-    if (containsWorkUnitId) {
-      and.push({
-        unit: {
-          workMemberships: {
-            some: {
-              workUnitId: containsWorkUnitId,
-              role: UnitWorkRole.SHELF,
-            },
-          },
-        },
       });
     }
 
@@ -373,7 +356,6 @@ export class ShelfService {
       hydratedRows.map((row) => row.unitId),
       {
         containsUnitId: options.containsUnitId?.trim(),
-        containsWorkUnitId: options.containsWorkUnitId?.trim(),
       },
     );
     return {
@@ -388,74 +370,43 @@ export class ShelfService {
     shelfIds: string[],
     filters: {
       containsUnitId?: string;
-      containsWorkUnitId?: string;
     },
   ): Promise<Map<string, ShelfMatchedUnitDTO>> {
     const out = new Map<string, ShelfMatchedUnitDTO>();
     if (shelfIds.length === 0) return out;
 
     const containsUnitId = filters.containsUnitId?.trim();
-    const containsWorkUnitId = filters.containsWorkUnitId?.trim();
-    const releaseRows = containsWorkUnitId
-      ? await prisma.unitWork.findMany({
-          where: { workUnitId: containsWorkUnitId, role: UnitWorkRole.RELEASE },
-          select: {
-            unitId: true,
-            workUnitId: true,
-            unit: {
-              select: {
-                defaultLanguage: true,
-                translations: { select: { language: true, title: true } },
-              },
-            },
-          },
-        })
-      : containsUnitId
-        ? await prisma.unitWork.findMany({
-            where: { unitId: containsUnitId, role: UnitWorkRole.RELEASE },
-            select: {
-              unitId: true,
-              workUnitId: true,
-              unit: {
-                select: {
-                  defaultLanguage: true,
-                  translations: { select: { language: true, title: true } },
-                },
-              },
-            },
-          })
-        : [];
-    const releaseIds = containsWorkUnitId
-      ? releaseRows.map((row) => row.unitId)
-      : containsUnitId
-        ? [containsUnitId]
-        : [];
-    if (releaseIds.length === 0) return out;
-    const releaseById = new Map(releaseRows.map((row) => [row.unitId, row]));
+    if (!containsUnitId) return out;
 
     const shelfUnits = await prisma.shelfUnit.findMany({
-      where: { shelfId: { in: shelfIds }, unitId: { in: releaseIds } },
+      where: { shelfId: { in: shelfIds }, unitId: containsUnitId },
       orderBy: { position: "asc" },
-      select: { shelfId: true, unitId: true, kind: true },
+      select: {
+        shelfId: true,
+        unitId: true,
+        kind: true,
+        unit: {
+          select: {
+            defaultLanguage: true,
+            translations: { select: { language: true, title: true } },
+          },
+        },
+      },
     });
 
     for (const row of shelfUnits) {
-      if (out.has(row.shelfId) && row.unitId !== containsUnitId) continue;
-      const release = releaseById.get(row.unitId);
-      const translations = release?.unit?.translations ?? [];
+      if (out.has(row.shelfId)) continue;
+      const translations = row.unit?.translations ?? [];
       const title =
-        translations.find(
-          (tr) => tr.language === release?.unit?.defaultLanguage,
-        )?.title ??
+        translations.find((tr) => tr.language === row.unit?.defaultLanguage)
+          ?.title ??
         translations[0]?.title ??
         null;
       out.set(row.shelfId, {
         unitId: row.unitId,
         kind: row.kind as ShelfMatchedUnitDTO["kind"],
         title,
-        workUnitId: containsWorkUnitId ?? release?.workUnitId ?? null,
       });
-      if (row.unitId === containsUnitId) continue;
     }
 
     return out;

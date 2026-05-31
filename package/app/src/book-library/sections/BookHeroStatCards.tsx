@@ -57,11 +57,7 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
     enabled: Boolean(bookId),
   });
   const { data: shelfData } = useQuery({
-    ...shelfQueries.list(
-      workUnitId
-        ? { containsWorkUnitId: workUnitId, limit: 1 }
-        : { containsUnitId: bookId, limit: 1 },
-    ),
+    ...shelfQueries.list({ containsUnitId: bookId, limit: 1 }),
     enabled: Boolean(bookId),
   });
   const { data: tagsData } = useQuery({

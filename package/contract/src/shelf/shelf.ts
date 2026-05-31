@@ -89,7 +89,6 @@ export const shelfMatchedUnitDTOSchema = t.Object({
   unitId: t.String(),
   kind: shelfUnitKindSchema,
   title: t.Optional(t.Nullable(t.String())),
-  workUnitId: t.Optional(t.Nullable(t.String())),
 });
 
 export type ShelfMatchedUnitDTO = (typeof shelfMatchedUnitDTOSchema)["static"];
@@ -172,7 +171,6 @@ const shelfListCommonProperties = {
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   containsUnitId: t.Optional(t.String()),
-  containsWorkUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
@@ -195,7 +193,6 @@ const shelfListBodyCommonProperties = {
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   containsUnitId: t.Optional(t.String()),
-  containsWorkUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
@@ -220,14 +217,6 @@ export type ShelfListQuery = (typeof shelfListQuerySchema)["static"];
 export const shelfListBodySchema = t.Object(shelfListBodyCommonProperties);
 
 export type ShelfListBody = (typeof shelfListBodySchema)["static"];
-
-export function hasAmbiguousShelfListScopeFilters(
-  value: Pick<ShelfListQuery, "containsUnitId" | "containsWorkUnitId">,
-): boolean {
-  return Boolean(
-    value.containsUnitId?.trim() && value.containsWorkUnitId?.trim(),
-  );
-}
 
 export const shelfListResponseSchema = t.Object({
   shelves: t.Array(shelfDTOSchema),

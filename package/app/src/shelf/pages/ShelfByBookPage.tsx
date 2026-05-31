@@ -5,32 +5,22 @@ import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { releaseWorkUnitId } from "@/book-library/models/releaseWork";
 import { ShelfCard } from "../components/ShelfCard";
 
 interface ShelfByBookPageProps {
   bookId: string;
-  scopeMode?: "work" | "exact";
 }
 
-export function ShelfByBookPage({
-  bookId,
-  scopeMode = "work",
-}: ShelfByBookPageProps) {
+export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
   const { t } = useTranslation(["common", "entity"]);
   const { data: bookInfo } = useQuery({
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
   });
-  const workUnitId =
-    scopeMode === "work" ? releaseWorkUnitId(bookInfo) : undefined;
+  const targetUnitId = bookInfo?.unitId ?? bookId;
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery(
-      shelfInfiniteListQuery(
-        workUnitId
-          ? { containsWorkUnitId: workUnitId, limit: 50 }
-          : { containsUnitId: bookId, limit: 50 },
-      ),
+      shelfInfiniteListQuery({ containsUnitId: targetUnitId, limit: 50 }),
     );
 
   const shelves = data?.pages.flatMap((page) => page.shelves) ?? [];
