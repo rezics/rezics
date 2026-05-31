@@ -1,8 +1,8 @@
 ---
 title: Simplify Shelf With User Tag Applications
-status: active
+status: done
 created: 2026-05-31
-completed:
+completed: 2026-06-01
 supersededBy:
 tags: [shelf, catalog, tag, user, search, privacy]
 ---

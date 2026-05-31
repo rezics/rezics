@@ -1,8 +1,8 @@
 ---
 title: Remove Work and Adopt Lib Entries
-status: active
+status: done
 created: 2026-05-30
-completed:
+completed: 2026-06-01
 supersededBy:
 tags: [work, catalog, book, content, search, wiki, comments]
 ---

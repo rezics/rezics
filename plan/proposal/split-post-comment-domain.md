@@ -1,8 +1,8 @@
 ---
 title: Split Post and Comment Domains
-status: active
+status: done
 created: 2026-05-30
-completed:
+completed: 2026-06-01
 supersededBy:
 tags: [post, comment, realm, search, ranking]
 ---
