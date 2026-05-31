@@ -25,14 +25,12 @@ describe("expected Meilisearch index settings", () => {
     );
   });
 
-  test("post index omits reply and legacy work fields", () => {
+  test("post index exposes root post filters only", () => {
     const posts = getExpectedMeiliIndexSchema("posts");
 
     expect(posts.filterableAttributes).toEqual(
       expect.arrayContaining(["kind", "targetUnitId", "realmIds"]),
     );
-    expect(posts.filterableAttributes).not.toContain("workUnitIds");
-    expect(posts.filterableAttributes).not.toContain("workRoles");
     expect(posts.filterableAttributes).not.toContain("parentPostUnitId");
   });
 

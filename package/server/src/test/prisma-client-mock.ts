@@ -68,23 +68,6 @@ export const AiDisclosureMode = {
   MACHINE_GENERATED: "MACHINE_GENERATED",
 } as const;
 
-export const UnitWorkDisplayPolicy = {
-  PRIMARY: "PRIMARY",
-  SECONDARY: "SECONDARY",
-  HIDDEN_BY_DEFAULT: "HIDDEN_BY_DEFAULT",
-} as const;
-
-export const UnitWorkRole = {
-  RELEASE: "RELEASE",
-  POST: "POST",
-  REVIEW: "REVIEW",
-  SHELF: "SHELF",
-  SERIES: "SERIES",
-  WIKI: "WIKI",
-  GUIDE: "GUIDE",
-  DERIVED: "DERIVED",
-} as const;
-
 export const UserUnitProgressStatus = {
   BACKLOG: "BACKLOG",
   ACTIVE: "ACTIVE",
@@ -118,8 +101,6 @@ export const prismaClientMock = {
   UnitType,
   UnitVisibility,
   AiDisclosureMode,
-  UnitWorkDisplayPolicy,
-  UnitWorkRole,
   UserUnitProgressStatus,
 };
 

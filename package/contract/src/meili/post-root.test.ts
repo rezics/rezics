@@ -3,7 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import { PostSearchDocumentSchema, PostSearchOptionsSchema } from "./post";
 
 describe("PostSearchDocumentSchema root post fields", () => {
-  test("accepts root-post search fields without reply or work-domain fields", () => {
+  test("accepts root-post search fields without reply fields", () => {
     expect(
       Value.Check(PostSearchDocumentSchema, {
         id: "post-1",

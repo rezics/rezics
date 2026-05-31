@@ -91,7 +91,6 @@ function subjectRow(
       type: "BOOK",
       slug: null,
       userId: "user-1",
-      workUnitId: null,
       defaultLanguage: "en",
       isLanguageNeutral: false,
       translationGroupId: null,

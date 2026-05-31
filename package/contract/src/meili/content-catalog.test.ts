@@ -51,7 +51,7 @@ const baseContentDocument = {
   userId: null,
 };
 
-describe("ContentSearchDocumentSchema work-domain fields", () => {
+describe("ContentSearchDocumentSchema catalog fields", () => {
   test("accepts catalog identity projection fields", () => {
     expect(Value.Check(ContentSearchDocumentSchema, baseContentDocument)).toBe(
       true,

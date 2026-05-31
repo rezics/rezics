@@ -21,7 +21,7 @@ mock.module("../../shared/slug-ref", () => ({
 
 const { searchContent } = await import("./content.service");
 
-describe("searchContent work-domain behavior", () => {
+describe("searchContent catalog behavior", () => {
   beforeEach(() => {
     contentSearchMock.mockClear();
     contentSearchMock.mockResolvedValue({

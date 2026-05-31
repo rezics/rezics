@@ -594,7 +594,6 @@ describe("realmService.resolveRule", () => {
           status: "PUBLISHED",
           visibility: "PUBLIC",
           licenseSlug: null,
-          workMemberships: [],
           contentModerationState: null,
           user: {
             unitId: USER,

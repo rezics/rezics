@@ -833,7 +833,6 @@ describe("PostService.byRealm", () => {
     const where = firstPostFindManyArgs().where;
     expect(where.targetUnitId).toBe("release-1");
     expect(where.parentPostUnitId).toBeNull();
-    expect(where.unit.workMemberships).toBeUndefined();
   });
 
   test("general post feeds are root-only by default", async () => {

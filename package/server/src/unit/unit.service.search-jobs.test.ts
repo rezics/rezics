@@ -42,10 +42,6 @@ function resetPrisma() {
   prismaMock.$transaction = mock(async (cb: any) =>
     cb({
       unit,
-      unitWork: {
-        create: mock(async () => ({})),
-        deleteMany: mock(async () => ({})),
-      },
     }),
   );
 }

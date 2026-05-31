@@ -98,9 +98,6 @@ describe("ShelfService", () => {
         },
         count: async () => 0,
       },
-      unitWork: {
-        findFirst: async () => null,
-      },
     });
 
     const { shelfService } = await import("./shelf.service");
@@ -175,11 +172,6 @@ describe("ShelfService", () => {
       shelfUnit: {
         findMany: async () => [],
       },
-      unitWork: {
-        findMany: async () => [],
-        deleteMany: async () => ({ count: 0 }),
-        upsert: async () => ({}),
-      },
       $transaction: async (fn: any) =>
         fn({
           shelfUnit: {
@@ -214,11 +206,6 @@ describe("ShelfService", () => {
       },
       shelfUnit: {
         findMany: async () => [],
-      },
-      unitWork: {
-        findMany: async () => [],
-        deleteMany: async () => ({ count: 0 }),
-        upsert: async () => ({}),
       },
       $transaction: async (fn: any) =>
         fn({
@@ -445,11 +432,6 @@ describe("ShelfService", () => {
         findUnique: async () =>
           makeShelfUnitRow({ unitId: "b-1", position: "z0" }),
       },
-      unitWork: {
-        findMany: async () => [],
-        deleteMany: async () => ({ count: 0 }),
-        upsert: async () => ({}),
-      },
     });
 
     const { shelfService } = await import("./shelf.service");
@@ -486,11 +468,6 @@ describe("ShelfService", () => {
           shelf: { update: async () => ({}) },
         }),
       shelfUnit: { findMany: async () => [], findUnique: async () => null },
-      unitWork: {
-        findMany: async () => [],
-        deleteMany: async () => ({ count: 0 }),
-        upsert: async () => ({}),
-      },
     });
 
     const { shelfService } = await import("./shelf.service");
@@ -954,11 +931,6 @@ describe("ShelfService", () => {
         }),
       shelfUnit: {
         findMany: async () => [],
-      },
-      unitWork: {
-        findMany: async () => [],
-        deleteMany: async () => ({ count: 0 }),
-        upsert: async () => ({}),
       },
     });
 

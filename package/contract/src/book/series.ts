@@ -164,7 +164,7 @@ export type SeriesReleaseUnitType =
 
 /**
  * Counted Series membership is release-first: this node points at a visible
- * release Unit, not a hidden Work Unit.
+ * release Unit.
  */
 export const seriesReleaseMemberNodeSchema = t.Object({
   ...contentStructureNodeSchema.properties,

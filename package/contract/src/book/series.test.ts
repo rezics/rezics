@@ -29,13 +29,13 @@ describe("series contract schemas", () => {
     ).toBe(true);
   });
 
-  test("rejects Work Units as counted Series member nodes", () => {
+  test("rejects non-release types as counted Series member nodes", () => {
     expect(
       Value.Check(seriesContentNodeSchema, {
-        title: "Abstract work",
+        title: "Discussion",
         nodeKind: "release_member",
-        contentUnitId: "work-1",
-        contentUnitType: "WORK",
+        contentUnitId: "post-1",
+        contentUnitType: "POST",
         contributesDirectReleaseMembership: true,
       }),
     ).toBe(false);

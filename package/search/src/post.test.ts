@@ -250,54 +250,6 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.realmTagKeys).toEqual(["realm-1:tag-1"]);
   });
 
-  test("omits work membership metadata from content documents", async () => {
-    setServerEnvForSearchTests();
-    const { buildContentDocument } = await import("./sync");
-
-    const doc = buildContentDocument({
-      id: "release-1",
-      type: "BOOK",
-      defaultLanguage: "en",
-      visibility: "PUBLIC",
-      rating: "GENERAL",
-      userId: "user-1",
-      createdAt: new Date("2026-01-01T00:00:00.000Z"),
-      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      publishedAt: null,
-      translations: [{ language: "en", title: "Release", extra: null }],
-      unitTags: [
-        {
-          tagUnitId: "tag-own",
-          score: 1,
-          tag: { translations: [{ title: "Own" }] },
-        },
-      ],
-      workMemberships: [
-        {
-          workUnitId: "work-1",
-          role: "RELEASE",
-          work: {
-            unitTags: [
-              {
-                tagUnitId: "tag-work",
-                score: 2,
-                tag: { translations: [{ title: "Work" }] },
-              },
-            ],
-          },
-        },
-      ],
-      inRealms: [],
-      realmTagApplicationsAsTargetUnit: [],
-      creditAttributions: [],
-      book: { textLength: 100, isLicensed: false },
-    });
-
-    expect("workUnitId" in doc).toBe(false);
-    expect(doc.tagIds).toEqual(["tag-own"]);
-    expect(doc.tagLabels).toEqual(["Own"]);
-  });
-
   test("projects direct Series metadata without nested expansion", async () => {
     setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
@@ -314,7 +266,6 @@ describe("buildContentDocument realm tag keys", () => {
       publishedAt: null,
       translations: [{ language: "en", title: "Release", extra: null }],
       unitTags: [],
-      workMemberships: [{ workUnitId: "work-1", role: "RELEASE" }],
       seriesContentIndexesAsRelease: [
         {
           seriesUnitId: "series-1",
@@ -352,29 +303,6 @@ describe("buildContentDocument realm tag keys", () => {
         contentModerationState: null,
       }),
     ).toBe(true);
-  });
-
-  test("buildPostDocument omits UnitWork membership fields", async () => {
-    setServerEnvForSearchTests();
-    const { buildPostDocument } = await import("./sync");
-
-    const doc = buildPostDocument({
-      unitId: "post-1",
-      content: { type: "doc", content: [] },
-      kind: "REVIEW",
-      depth: 0,
-      createdAt: new Date("2026-01-01T00:00:00.000Z"),
-      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      unit: {
-        user: null,
-        inRealms: [],
-        workMemberships: [{ workUnitId: "work-1", role: "REVIEW" }],
-      },
-      scoreEntry: null,
-    });
-
-    expect("workUnitIds" in doc).toBe(false);
-    expect("workRoles" in doc).toBe(false);
   });
 
   test("projects main markdown and ignores slot text for runtime v1", async () => {
@@ -550,7 +478,6 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PUBLIC",
-        workUnitId: null,
       }),
     ).toBe(true);
   });
@@ -563,7 +490,6 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PRIVATE",
-        workUnitId: null,
       }),
     ).toBe(false);
     expect(
@@ -571,7 +497,6 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "DELETED",
         visibility: "PUBLIC",
-        workUnitId: null,
       }),
     ).toBe(false);
     expect(
@@ -579,7 +504,6 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PUBLIC",
-        workUnitId: "work-1",
       }),
     ).toBe(true);
   });

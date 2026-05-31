@@ -35,7 +35,7 @@ function bookRow(overrides: Record<string, unknown> = {}) {
 }
 
 describe("mapBaseBookToDTO", () => {
-  test("omits work-domain metadata", () => {
+  test("omits internal metadata", () => {
     const dto = mapBaseBookToDTO(
       bookRow({
         unit: {
@@ -44,9 +44,7 @@ describe("mapBaseBookToDTO", () => {
       }),
     );
 
-    expect("workUnitId" in dto).toBe(false);
     expect("metadata" in dto).toBe(false);
-    expect("workMembership" in dto).toBe(false);
   });
 
   test("projects AI disclosure metadata independently from rating", () => {
