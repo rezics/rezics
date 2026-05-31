@@ -15,13 +15,9 @@ type Review = PostDTO;
 
 export interface ReviewsPageProps {
   bookUnitId?: string;
-  workUnitId?: string;
 }
 
-export const ReviewsPage: React.FC<ReviewsPageProps> = ({
-  bookUnitId,
-  workUnitId,
-}) => {
+export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
   const { t } = useTranslation(["book", "community"]);
   const ref = useRef<UniversalPaginatorHandle>(null);
   const targetUnitId = bookUnitId ?? "";
@@ -114,10 +110,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
         }
       >
         {(currentPageItems: Review[]) => (
-          <ReviewList
-            reviews={currentPageItems}
-            showTargetWork={Boolean(workUnitId)}
-          />
+          <ReviewList reviews={currentPageItems} />
         )}
       </UniversalPaginator>
     </div>
