@@ -5,14 +5,12 @@ import {
 import { tagQueries } from "@rezics/api/tag/tag";
 import { unitApi, unitQueries } from "@rezics/api/unit/unit";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
-import { useCreateWorkRealmContext } from "@rezics/api/work-realm-context/work-realm-context";
 import { useUpdateZone, zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import {
   contentDocMarkdownFallback,
   DEFAULT_LANGUAGE,
   markdownContentDoc,
   normalizeLanguage,
-  workRealmContextRoleValues,
 } from "@rezics/contract";
 import type {
   RealmBannerExtra,
@@ -21,7 +19,6 @@ import type {
   RealmTagViewStyle,
   TagTreeNode,
   UnitDTO,
-  WorkRealmContextRole,
   WikiZoneConfig,
   WikiZoneHomepageSection,
   WikiZoneNavigation,
@@ -175,7 +172,6 @@ export const RealmExtraManageSection: React.FC<
         initialValue={extra?.tagView as RealmTagView | undefined}
       />
       <WikiZonePicker realmId={realmId} value={extra?.wikiZoneUnitId ?? null} />
-      <WorkRealmContextCreator realmId={realmId} />
       <SlotPicker realmId={realmId} slotKey="rule" value={extra?.rule} />
       <SlotPicker realmId={realmId} slotKey="about" value={extra?.about} />
       <BannerPicker realmId={realmId} value={extra?.banner ?? null} />
@@ -260,104 +256,6 @@ function TagViewPreferenceEditor({
       {error ? (
         <p className="text-sm leading-body text-error-text">{error}</p>
       ) : null}
-    </div>
-  );
-}
-
-function WorkRealmContextCreator({ realmId }: { realmId: string }) {
-  const [workUnitId, setWorkUnitId] = useState("");
-  const [releaseUnitId, setReleaseUnitId] = useState("");
-  const [role, setRole] = useState<WorkRealmContextRole>("community");
-  const [locale, setLocale] = useState("");
-  const [priority, setPriority] = useState("0");
-  const [error, setError] = useState<string | null>(null);
-  const createContext = useCreateWorkRealmContext();
-
-  const save = async () => {
-    const workId = workUnitId.trim();
-    if (!workId) return;
-    const normalizedLocale = locale.trim()
-      ? normalizeLanguage(locale.trim())
-      : null;
-    setError(null);
-    try {
-      await createContext.mutateAsync({
-        workUnitId: workId,
-        realmUnitId: realmId,
-        role,
-        priority: Number.parseInt(priority, 10) || 0,
-        ...(normalizedLocale ? { locale: normalizedLocale } : {}),
-        ...(releaseUnitId.trim()
-          ? { releaseUnitId: releaseUnitId.trim() }
-          : {}),
-      });
-      setWorkUnitId("");
-      setReleaseUnitId("");
-      setLocale("");
-      setPriority("0");
-      toast.success(
-        getI18nRuntime().i18n.t("entity:realm_work_context_created"),
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setError(message);
-      toast.error(message);
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
-      <div>
-        <Label>
-          {getI18nRuntime().i18n.t("entity:realm_work_context_title")}
-        </Label>
-      </div>
-      <div className="grid gap-3 md:grid-cols-2">
-        <Input
-          value={workUnitId}
-          onChange={(event) => setWorkUnitId(event.target.value)}
-          placeholder={getI18nRuntime().i18n.t(
-            "entity:realm_work_context_work_placeholder",
-          )}
-        />
-        <Input
-          value={releaseUnitId}
-          onChange={(event) => setReleaseUnitId(event.target.value)}
-          placeholder={getI18nRuntime().i18n.t(
-            "entity:realm_work_context_release_placeholder",
-          )}
-        />
-        <LabeledSelect
-          label={getI18nRuntime().i18n.t("entity:realm_work_context_role")}
-          value={role}
-          options={workRealmContextRoleValues}
-          onChange={setRole}
-        />
-        <Input
-          value={locale}
-          onChange={(event) => setLocale(event.target.value)}
-          placeholder={getI18nRuntime().i18n.t(
-            "entity:realm_work_context_locale_placeholder",
-          )}
-        />
-        <LabeledInput
-          label={getI18nRuntime().i18n.t("entity:realm_work_context_priority")}
-          value={priority}
-          onChange={setPriority}
-        />
-      </div>
-      <div className="flex justify-end">
-        {error && (
-          <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
-        )}
-        <Button
-          type="button"
-          onClick={save}
-          disabled={!workUnitId.trim() || createContext.isPending}
-        >
-          {getI18nRuntime().i18n.t("common:save")}
-        </Button>
-      </div>
     </div>
   );
 }

@@ -82,7 +82,6 @@ import { AppError } from "./utils/errors";
 import { getProdState } from "./utils/getProdState";
 import { wellKnownApi } from "./well-known/well-known.api";
 import { workMaintenanceApi } from "./work-maintenance";
-import { workRealmContextApi } from "./work-realm-context";
 import { zoneApi } from "./zone/zone.api";
 import "dotenv/config";
 
@@ -251,7 +250,6 @@ routeApp
   .use(federatedSearchApi)
   .use(unitApi)
   .use(unitWorkApi)
-  .use(workRealmContextApi)
   .use(unitAliasApi)
   .use(unitAliasVoteApi)
   .use(unitAuthorityApi)

@@ -18,7 +18,6 @@ import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag/components/TagInteraction";
 import { BookCopyrightNotice } from "../components/BookCopyrightNotice";
 import { BookDescription } from "../components/BookDescription";
-import { BookWikiContextPanel } from "../components/BookDetail/BookWikiContextPanel";
 import { MetadataPanel } from "../components/BookDetail/MetadataPanel";
 import { ExcerptPreview } from "../components/ExcerptPreview";
 import { RemarkPreview } from "../components/RemarkPreview";
@@ -92,7 +91,6 @@ export const BookBasicInfoPage: React.FC = () => {
     if (!bookInfo) return null;
     return (
       <div className="flex flex-col gap-6">
-        <BookWikiContextPanel bookInfo={bookInfo} />
         <MetadataPanel bookInfo={bookInfo} />
         {releaseWorkUnitId(bookInfo) && (
           <BookWorkReleaseNav
