@@ -38,13 +38,11 @@ function rankKindsForState(
   state: Awaited<ReturnType<MainStateReader["readUnitState"]>>,
 ): RankKind[] {
   const kinds: RankKind[] = [];
-  if (state.unit) kinds.push("content");
+  if (state.unit && state.unit.type !== "COMMENT") kinds.push("content");
   if (state.post) {
     kinds.push("post");
-    if (state.post.parentPostUnitId || state.post.rootPostUnitId) {
-      kinds.push("comment");
-    }
   }
+  if (state.comment) kinds.push("comment");
   return kinds;
 }
 
@@ -55,7 +53,8 @@ function scopesForRankKind(
 ): RankingScope[] {
   if (requested) return [requested];
   if (rankKind === "comment") {
-    const parentId = state.post?.parentPostUnitId ?? state.post?.rootPostUnitId;
+    const parentId =
+      state.comment?.parentCommentUnitId ?? state.comment?.rootUnitId;
     return parentId ? [{ kind: "parent", id: parentId }] : [];
   }
   if (rankKind === "post" && state.realms.length > 0) {
@@ -152,11 +151,19 @@ export class RankingService {
           publishedAt: toIso(state.unit.publishedAt),
           createdAt: toIso(
             rankKind === "post" || rankKind === "comment"
-              ? state.post?.createdAt
+              ? (rankKind === "comment" ? state.comment : state.post)?.createdAt
               : state.unit.createdAt,
           ),
-          replyCount: toNumber(state.post?.replyCount),
-          directReplyCount: toNumber(state.post?.directReplyCount),
+          replyCount: toNumber(
+            rankKind === "comment"
+              ? state.comment?.replyCount
+              : state.post?.replyCount,
+          ),
+          directReplyCount: toNumber(
+            rankKind === "comment"
+              ? state.comment?.directReplyCount
+              : state.post?.directReplyCount,
+          ),
           scoreTotal: toNumber(state.scoreAggregate?.totalScore),
           scoreCount: toNumber(state.scoreAggregate?.totalCount),
           progressCount: state.progressCount,
@@ -314,7 +321,12 @@ export class RankingService {
         data: {
           projectionId: projection.id,
           unitId: projection.unitId,
-          indexName: projection.rankKind === "content" ? "content" : "posts",
+          indexName:
+            projection.rankKind === "content"
+              ? "content"
+              : projection.rankKind === "comment"
+                ? "comments"
+                : "posts",
           documentId: projection.unitId,
           status: "patched",
           patchedAt: new Date(),
@@ -332,7 +344,12 @@ export class RankingService {
         data: {
           projectionId: projection.id,
           unitId: projection.unitId,
-          indexName: projection.rankKind === "content" ? "content" : "posts",
+          indexName:
+            projection.rankKind === "content"
+              ? "content"
+              : projection.rankKind === "comment"
+                ? "comments"
+                : "posts",
           documentId: projection.unitId,
           status: "failed",
           lastAttemptAt: new Date(),

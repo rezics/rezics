@@ -8,6 +8,7 @@ export type MainStateReaderOptions = {
 export type UnitRankingState = {
   unit: any | null;
   post: any | null;
+  comment: any | null;
   scoreAggregate: any | null;
   progressCount: number;
   realms: string[];
@@ -33,7 +34,7 @@ export class MainStateReader {
   }
 
   async readUnitState(unitId: string): Promise<UnitRankingState> {
-    const [unit, post, scoreAggregate, progressCount, realms] =
+    const [unit, post, comment, scoreAggregate, progressCount, realms] =
       await Promise.all([
         this.prisma.unit.findUnique({
           where: { id: unitId },
@@ -59,6 +60,19 @@ export class MainStateReader {
             updatedAt: true,
           },
         }),
+        this.prisma.comment.findUnique({
+          where: { unitId },
+          select: {
+            unitId: true,
+            rootUnitId: true,
+            realmUnitId: true,
+            parentCommentUnitId: true,
+            replyCount: true,
+            directReplyCount: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        }),
         this.prisma.scoreAggregate.findFirst({
           where: { unitId },
           orderBy: { updatedAt: "desc" },
@@ -75,6 +89,7 @@ export class MainStateReader {
     return {
       unit,
       post,
+      comment,
       scoreAggregate,
       progressCount,
       realms: realms.map((realm: { realmUnitId: string }) => realm.realmUnitId),
