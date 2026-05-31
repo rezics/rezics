@@ -332,16 +332,6 @@ const contentInclude: any = {
     orderBy: [{ pinned: "desc" as const }, { score: "desc" as const }],
   } as any,
   unitTags: visibleUnitTagsInclude,
-  workMemberships: {
-    include: {
-      work: {
-        include: {
-          unitTags: visibleUnitTagsInclude,
-        },
-      },
-    },
-    orderBy: [{ role: "asc" }, { createdAt: "asc" }],
-  },
   workMembers: {
     where: { role: "RELEASE" },
     select: { unitId: true },
@@ -407,9 +397,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const unitTags: any[] = (unit.unitTags ?? []).filter(
     isSearchVisibleScoredRow,
   );
-  const workMemberships: any[] = unit.workMemberships ?? [];
-  const releaseMembership =
-    workMemberships.find((membership) => membership.role === "RELEASE") ?? null;
   const realmTagApplicationsAsTargetUnit: any[] =
     unit.realmTagApplicationsAsTargetUnit ?? [];
   const creditAttributions: any[] = unit.creditAttributions ?? [];
@@ -1284,7 +1271,6 @@ export async function syncPostsByAuthorSegment(
         include: {
           user: true,
           ...realmSearchProjectionSelect,
-          workMemberships: true,
           contentModerationState: true,
         },
       },
@@ -1724,7 +1710,6 @@ const postIncludeForSync = {
     include: {
       user: true,
       ...realmSearchProjectionSelect,
-      workMemberships: true,
       contentModerationState: true,
     },
   },
@@ -1868,7 +1853,6 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
         include: {
           user: true,
           ...realmSearchProjectionSelect,
-          workMemberships: true,
           contentModerationState: true,
         },
       },
@@ -1905,7 +1889,6 @@ export async function syncAllPosts(client: SearchClient) {
           include: {
             user: true,
             ...realmSearchProjectionSelect,
-            workMemberships: true,
             contentModerationState: true,
           },
         },
@@ -1945,7 +1928,6 @@ export async function syncPostSegment(
         include: {
           user: true,
           ...realmSearchProjectionSelect,
-          workMemberships: true,
           contentModerationState: true,
         },
       },
@@ -2181,7 +2163,6 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
           include: {
             user: true,
             ...realmSearchProjectionSelect,
-            workMemberships: true,
             contentModerationState: true,
           },
         },
@@ -2224,7 +2205,6 @@ export async function syncPostsByTarget(
           include: {
             user: true,
             ...realmSearchProjectionSelect,
-            workMemberships: true,
             contentModerationState: true,
           },
         },
