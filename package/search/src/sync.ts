@@ -453,7 +453,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
 
   // Realms
   const realmIds = realmIdsForSearch(unit);
-  const translationGroupId = unit.translationGroupId ?? null;
 
   // Realm-tag compound keys
   const realmTagKeys = realmTagApplicationsAsTargetUnit.map(
@@ -582,7 +581,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     seriesKindKeys,
     seriesTitles,
     realmIds,
-    translationGroupId,
     realmTagKeys,
     languages,
     rating: unit.rating ?? "GENERAL",

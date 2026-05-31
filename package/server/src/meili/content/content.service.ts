@@ -152,10 +152,6 @@ export async function searchContent(
     }
   }
 
-  if (opts.translationGroupIds?.length) {
-    filter.push(anyValueFilter("translationGroupId", opts.translationGroupIds));
-  }
-
   // Language filter
   if (opts.languages?.length) {
     for (const lang of opts.languages) {

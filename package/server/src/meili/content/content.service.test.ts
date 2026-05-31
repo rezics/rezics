@@ -49,7 +49,7 @@ describe("searchContent catalog behavior", () => {
     ]);
   });
 
-  test("filters wiki section subject and translation group selectors", async () => {
+  test("filters wiki section subject selectors without translation grouping", async () => {
     await searchContent({
       type: "POST",
       postKind: ["WIKI"],
@@ -57,7 +57,6 @@ describe("searchContent catalog behavior", () => {
       subjectEntityIds: ["entity-1", "entity-2"],
       subjectKinds: ["character"],
       subjectRoles: ["primary_character", "supporting_character"],
-      translationGroupIds: ["tg-1", "tg-2"],
     });
 
     expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
@@ -67,7 +66,6 @@ describe("searchContent catalog behavior", () => {
       'subjectKinds = "character"',
       '(subjectRoles = "primary_character" OR subjectRoles = "supporting_character")',
       'realmIds = "realm-1"',
-      '(translationGroupId = "tg-1" OR translationGroupId = "tg-2")',
       'visibility = "PUBLIC"',
     ]);
   });

@@ -29,7 +29,6 @@ const baseContentDocument = {
   seriesKindKeys: [],
   seriesTitles: [],
   realmIds: [],
-  translationGroupId: null,
   realmTagKeys: [],
   languages: ["en"],
   rating: "GENERAL",
@@ -68,9 +67,11 @@ describe("ContentSearchDocumentSchema catalog fields", () => {
         seriesUnitIds: ["series-1"],
         seriesKindKeys: ["book_series"],
         seriesTitles: ["Series"],
-        translationGroupId: "tg-1",
       }),
     ).toBe(true);
+    expect("translationGroupId" in ContentSearchDocumentSchema.properties).toBe(
+      false,
+    );
   });
 
   test("accepts grouped and expanded catalog release search options", () => {
@@ -90,10 +91,12 @@ describe("ContentSearchDocumentSchema catalog fields", () => {
         subjectEntityIds: ["entity-1"],
         subjectKinds: ["character"],
         subjectRoles: ["primary_character"],
-        translationGroupIds: ["tg-1"],
         aiDisclosureModes: ["AI_ASSISTED"],
       }),
     ).toBe(true);
+    expect("translationGroupIds" in ContentSearchOptionsSchema.properties).toBe(
+      false,
+    );
   });
 
   test("documents exact shelf containment and catalog option names", () => {

@@ -73,9 +73,6 @@ export const ContentSearchDocumentSchema = t.Object({
   // Filterable: realm system (from UnitRealm)
   realmIds: t.Array(t.String()),
 
-  // Filterable: multilingual wiki grouping (from Unit.translationGroupId)
-  translationGroupId: t.Union([t.String(), t.Null()]),
-
   // Filterable: realm-tag system (from RealmTagApplication). Values are machine
   // filter keys formatted as "{realmUnitId}:{tagUnitId}", not display labels.
   realmTagKeys: t.Array(t.String()),
@@ -158,7 +155,6 @@ export const ContentSearchOptionsSchema = t.Object({
   ),
   realmId: t.Optional(t.String()),
   realmTagIds: t.Optional(t.Array(t.String())),
-  translationGroupIds: t.Optional(t.Array(t.String())),
   languages: t.Optional(t.Array(t.String())),
   ratings: t.Optional(t.Array(contentRatingSchema)),
   aiDisclosureModes: t.Optional(t.Array(aiDisclosureModeSchema)),
