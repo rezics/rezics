@@ -11,6 +11,7 @@ describe("permittedCategoriesForScope", () => {
       "excerpts",
       "remarks",
       "posts",
+      "comments",
       "shelves",
       "realms",
       "users",
@@ -24,6 +25,7 @@ describe("permittedCategoriesForScope", () => {
     expect(out).not.toContain("users");
     expect(out).not.toContain("entities");
     expect(out).toContain("books");
+    expect(out).toContain("comments");
     expect(out).toContain("shelves");
   });
 
@@ -32,6 +34,7 @@ describe("permittedCategoriesForScope", () => {
     expect(out).not.toContain("users");
     expect(out).toContain("entities");
     expect(out).toContain("realms");
+    expect(out).toContain("comments");
   });
 
   test("book scope omits books, realms, users, and entities", () => {
@@ -41,6 +44,7 @@ describe("permittedCategoriesForScope", () => {
     expect(out).not.toContain("users");
     expect(out).not.toContain("entities");
     expect(out).toContain("reviews");
+    expect(out).toContain("comments");
     expect(out).toContain("shelves");
   });
 });

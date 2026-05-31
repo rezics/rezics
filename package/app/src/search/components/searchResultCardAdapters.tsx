@@ -1,5 +1,6 @@
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type {
+  CommentSearchDocument,
   ContentSearchDocument,
   EntitySearchDocument,
   FederatedSingleItem,
@@ -201,6 +202,42 @@ export function renderPostSearchCard(
   );
 }
 
+function commentHref(item: CommentSearchDocument): string {
+  return `/post/${item.rootUnitId}/continue/${item.id}`;
+}
+
+function commentMeta(item: CommentSearchDocument): React.ReactNode {
+  return compactParts([
+    item.replyCount > 0
+      ? `${item.replyCount} ${getI18nRuntime().i18n.t("common:reply")}`
+      : null,
+    formatDate(item.updatedAt),
+  ]);
+}
+
+export function renderCommentSearchCard(
+  item: CommentSearchDocument,
+  badge?: CardBadge,
+) {
+  return (
+    <SearchContentResultCard
+      user={{
+        unitId: item.authorUserId,
+        name: item.authorName,
+        slug: item.authorSlug,
+        avatar: item.authorAvatar,
+      }}
+      time={formatDate(item.updatedAt)}
+      kind={badge ?? getI18nRuntime().i18n.t("search:origin_comment")}
+      title={getI18nRuntime().i18n.t("search:origin_comment")}
+      titleHref={commentHref(item)}
+      body={item.contentText ?? undefined}
+      meta={commentMeta(item)}
+      bodyLines={3}
+    />
+  );
+}
+
 export function renderRealmSearchCard(
   item: RealmSearchDocument,
   badge?: CardBadge,
@@ -296,6 +333,9 @@ export function renderFederatedSearchCard(
   }
   if (isPostSearchCategory(category)) {
     return renderPostSearchCard(item as PostSearchDocument, badge);
+  }
+  if (category === "comments") {
+    return renderCommentSearchCard(item as CommentSearchDocument, badge);
   }
   if (category === "realms") {
     return renderRealmSearchCard(item as RealmSearchDocument, badge);

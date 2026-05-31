@@ -19,12 +19,14 @@ import {
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 type ContentRowCategory = "books" | "shelves";
 type PostRowCategory = "reviews" | "excerpts" | "remarks" | "posts";
+type CommentRowCategory = "comments";
 type RealmRowCategory = "realms";
 type UserRowCategory = "users";
 type EntityRowCategory = "entities";
 type ItemRowCategory =
   | ContentRowCategory
   | PostRowCategory
+  | CommentRowCategory
   | RealmRowCategory
   | UserRowCategory
   | EntityRowCategory;
@@ -40,6 +42,9 @@ function originBadge(hit: FederatedRankedHit): string {
   if (origin.indexUid === "post") {
     const doc = hit as PostSearchDocument & { _origin: typeof origin };
     return doc.kind ?? getI18nRuntime().i18n.t("search:origin_post");
+  }
+  if (origin.indexUid === "comments") {
+    return getI18nRuntime().i18n.t("search:origin_comment");
   }
   if (origin.indexUid === "realm")
     return getI18nRuntime().i18n.t("search:origin_realm");
