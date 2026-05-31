@@ -98,19 +98,16 @@ export async function searchContent(
     }
   }
 
-  // Global tag filter — tags (SlugRef[]) takes precedence over tagIds
+  // Global tag filter — tags (SlugRef[]) takes precedence over tagIds.
+  // Work-inherited tag projection is intentionally not part of content search.
   if (opts.tags?.length) {
     const resolvedTagIds = await resolveSlugRefs(opts.tags);
     for (const tagId of resolvedTagIds) {
-      filter.push(`allTagIds = "${tagId}"`);
-    }
-  } else if (opts.allTagIds?.length) {
-    for (const tagId of opts.allTagIds) {
-      filter.push(`allTagIds = "${tagId}"`);
+      filter.push(`tagIds = "${tagId}"`);
     }
   } else if (opts.tagIds?.length) {
     for (const tagId of opts.tagIds) {
-      filter.push(`allTagIds = "${tagId}"`);
+      filter.push(`tagIds = "${tagId}"`);
     }
   }
 

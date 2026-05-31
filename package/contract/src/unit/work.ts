@@ -93,12 +93,6 @@ export type UnitWorkListResponse =
 
 export const workDomainSearchMetadataSchema = t.Object({
   workUnitId: t.Optional(t.Nullable(t.String())),
-  ownTagIds: t.Array(t.String()),
-  workTagIds: t.Array(t.String()),
-  allTagIds: t.Array(t.String()),
-  ownTagLabels: t.Array(t.String()),
-  workTagLabels: t.Array(t.String()),
-  allTagLabels: t.Array(t.String()),
   position: t.Optional(t.Nullable(t.String())),
   displayPolicy: t.Optional(t.Nullable(unitWorkDisplayPolicySchema)),
 });

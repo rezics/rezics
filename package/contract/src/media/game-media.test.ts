@@ -34,12 +34,6 @@ const baseSearchDocument = {
   tagIds: [],
   tagScores: {},
   workUnitId: "work-1",
-  ownTagIds: [],
-  workTagIds: [],
-  allTagIds: [],
-  ownTagLabels: [],
-  workTagLabels: [],
-  allTagLabels: [],
   position: "a0",
   displayPolicy: "PRIMARY",
   workUnitIds: ["work-1"],
@@ -176,7 +170,7 @@ describe("GAME/MEDIA contract schemas", () => {
     expect(
       Value.Check(ContentSearchOptionsSchema, {
         platformEntityIds: ["platform-steam"],
-        allTagIds: ["tag-esrb-teen"],
+        tagIds: ["tag-esrb-teen"],
       }),
     ).toBe(true);
     expect(

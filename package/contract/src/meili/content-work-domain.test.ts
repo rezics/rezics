@@ -24,12 +24,6 @@ const baseContentDocument = {
   tagIds: ["tag-own"],
   tagScores: { "tag-own": 1 },
   workUnitId: "work-1",
-  ownTagIds: ["tag-own"],
-  workTagIds: ["tag-work"],
-  allTagIds: ["tag-own", "tag-work"],
-  ownTagLabels: ["Own"],
-  workTagLabels: ["Work"],
-  allTagLabels: ["Own", "Work"],
   position: "a0",
   displayPolicy: "PRIMARY",
   workUnitIds: ["work-1"],
@@ -63,7 +57,7 @@ const baseContentDocument = {
 };
 
 describe("ContentSearchDocumentSchema work-domain fields", () => {
-  test("accepts inherited work tag projection fields", () => {
+  test("accepts legacy work membership projection fields", () => {
     expect(Value.Check(ContentSearchDocumentSchema, baseContentDocument)).toBe(
       true,
     );
@@ -75,12 +69,6 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         ...baseContentDocument,
         id: "standalone-1",
         workUnitId: null,
-        ownTagIds: [],
-        workTagIds: [],
-        allTagIds: [],
-        ownTagLabels: [],
-        workTagLabels: [],
-        allTagLabels: [],
         aiDisclosureMode: "AI_ASSISTED",
         position: null,
         displayPolicy: null,
@@ -99,7 +87,7 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
     expect(
       Value.Check(ContentSearchOptionsSchema, {
         releasePresentation: "grouped",
-        allTagIds: ["tag-work"],
+        tagIds: ["tag-work"],
       }),
     ).toBe(true);
     expect(

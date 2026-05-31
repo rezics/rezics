@@ -27,12 +27,6 @@ function searchDoc(
     tagIds: [],
     tagScores: {},
     workUnitId: null,
-    ownTagIds: [],
-    workTagIds: [],
-    allTagIds: [],
-    ownTagLabels: [],
-    workTagLabels: [],
-    allTagLabels: [],
     position: null,
     displayPolicy: null,
     workUnitIds: [],
@@ -78,7 +72,7 @@ describe("resolveCreationWorkMatchContext", () => {
         searchDoc({
           workUnitId: "work-1",
           collapsedAlternativeUnitIds: ["release-2", "release-3"],
-          workTagLabels: ["mystery", "translation"],
+          tagLabels: ["mystery", "translation"],
         }),
       ),
     ).toEqual({

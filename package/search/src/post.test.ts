@@ -250,7 +250,7 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.realmTagKeys).toEqual(["realm-1:tag-1"]);
   });
 
-  test("projects inherited work tags without legacy release grouping", async () => {
+  test("projects work membership metadata without inherited work tags", async () => {
     setServerEnvForSearchTests();
     const { buildContentDocument } = await import("./sync");
 
@@ -296,12 +296,8 @@ describe("buildContentDocument realm tag keys", () => {
     });
 
     expect(doc.workUnitId).toBe("work-1");
-    expect(doc.ownTagIds).toEqual(["tag-own"]);
-    expect(doc.workTagIds).toEqual(["tag-work"]);
-    expect(doc.allTagIds).toEqual(["tag-own", "tag-work"]);
-    expect(doc.ownTagLabels).toEqual(["Own"]);
-    expect(doc.workTagLabels).toEqual(["Work"]);
-    expect(doc.allTagLabels).toEqual(["Own", "Work"]);
+    expect(doc.tagIds).toEqual(["tag-own"]);
+    expect(doc.tagLabels).toEqual(["Own"]);
     expect(doc.position).toBe("a0");
     expect(doc.displayPolicy).toBe("PRIMARY");
     expect(doc.workUnitIds).toEqual(["work-1"]);

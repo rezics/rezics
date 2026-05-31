@@ -412,9 +412,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
   const releaseMembership =
     workMemberships.find((membership) => membership.role === "RELEASE") ?? null;
   const workUnitId = releaseMembership?.workUnitId ?? null;
-  const workTagRows: any[] = (releaseMembership?.work?.unitTags ?? []).filter(
-    isSearchVisibleScoredRow,
-  );
   const realmTagApplicationsAsTargetUnit: any[] =
     unit.realmTagApplicationsAsTargetUnit ?? [];
   const creditAttributions: any[] = unit.creditAttributions ?? [];
@@ -443,12 +440,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
       .filter(Boolean);
     tagLabels.push(...labels);
   }
-  const workTagIds = workTagRows.map((ut: any) => ut.tagUnitId);
-  const workTagLabels = workTagRows.flatMap((ut: any) =>
-    (ut.tag?.translations ?? []).map((t: any) => t.title).filter(Boolean),
-  );
-  const allTagIds = [...new Set([...tagIds, ...workTagIds])];
-  const allTagLabels = [...new Set([...tagLabels, ...workTagLabels])];
   const workUnitIds = workMemberships.map(
     (membership) => membership.workUnitId,
   );
@@ -600,12 +591,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     tagIds,
     tagScores,
     workUnitId,
-    ownTagIds: tagIds,
-    workTagIds,
-    allTagIds,
-    ownTagLabels: tagLabels,
-    workTagLabels,
-    allTagLabels,
     position: releaseMembership?.position ?? null,
     displayPolicy: releaseMembership?.displayPolicy ?? null,
     workUnitIds,

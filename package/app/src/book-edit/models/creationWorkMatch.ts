@@ -53,6 +53,6 @@ export function resolveCreationWorkMatchContext(
     workUnitId: item.workUnitId,
     createsHiddenWork: !item.workUnitId,
     sameWorkReleaseCount: 1 + (item.collapsedAlternativeUnitIds?.length ?? 0),
-    workTagSummary: item.workTagLabels.slice(0, 6),
+    workTagSummary: item.tagLabels.slice(0, 6),
   };
 }

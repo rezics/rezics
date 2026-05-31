@@ -46,14 +46,8 @@ export const ContentSearchDocumentSchema = t.Object({
   tagIds: t.Array(t.String()),
   tagScores: t.Record(t.String(), t.Number()),
 
-  // Filterable/display: work-domain projection (from UnitWork + inherited UnitTag)
+  // Filterable/display: legacy work-domain projection.
   workUnitId: t.Union([t.String(), t.Null()]),
-  ownTagIds: t.Array(t.String()),
-  workTagIds: t.Array(t.String()),
-  allTagIds: t.Array(t.String()),
-  ownTagLabels: t.Array(t.String()),
-  workTagLabels: t.Array(t.String()),
-  allTagLabels: t.Array(t.String()),
   position: t.Union([t.String(), t.Null()]),
   displayPolicy: t.Union([unitWorkDisplayPolicySchema, t.Null()]),
 
@@ -160,7 +154,6 @@ export const ContentSearchOptionsSchema = t.Object({
   postKind: t.Optional(t.Array(postKindLiterals)),
   tags: t.Optional(t.Array(TagRefSchema)),
   tagIds: t.Optional(t.Array(t.String())),
-  allTagIds: t.Optional(t.Array(t.String())),
   workUnitId: t.Optional(t.String()),
   workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   catalogEntryKind: t.Optional(catalogEntryKindSchema),

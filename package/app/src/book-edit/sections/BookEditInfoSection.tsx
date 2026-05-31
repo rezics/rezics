@@ -329,9 +329,9 @@ function WorkMatchPanel({
                         ? ` - ${item.languages.join(", ")}`
                         : ""}
                     </span>
-                    {item.allTagLabels.length > 0 ? (
+                    {item.tagLabels.length > 0 ? (
                       <span className="mt-1 block text-xs leading-dense text-text-tertiary">
-                        {item.allTagLabels.slice(0, 8).join(", ")}
+                        {item.tagLabels.slice(0, 8).join(", ")}
                       </span>
                     ) : null}
                   </button>

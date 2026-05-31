@@ -32,7 +32,7 @@ describe("searchContent work-domain behavior", () => {
     });
   });
 
-  test("filters tags through allTagIds and supports work-domain filters", async () => {
+  test("filters direct tags and supports work-domain filters", async () => {
     await searchContent({
       tagIds: ["tag-esrb-teen"],
       workUnitId: "work-1",
@@ -43,7 +43,7 @@ describe("searchContent work-domain behavior", () => {
     });
 
     expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
-      'allTagIds = "tag-esrb-teen"',
+      'tagIds = "tag-esrb-teen"',
       'workUnitId = "work-1"',
       'workRoles = "RELEASE"',
       'catalogEntryKind = "VARIANT"',
@@ -113,7 +113,7 @@ describe("searchContent work-domain behavior", () => {
     expect(contentSearchMock.mock.calls[0]?.[1].filter).toEqual([
       'type = "POST"',
       'postKind = "WIKI"',
-      'allTagIds = "tag-lore"',
+      'tagIds = "tag-lore"',
       'realmIds = "realm-1"',
       '(realmTagKeys = "realm-1:tag-featured" OR realmTagKeys = "realm-1:tag-canon")',
       'visibility = "PUBLIC"',
