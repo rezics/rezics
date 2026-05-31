@@ -52,26 +52,6 @@ export const postKeys = {
     [...postKeys.all(), "thread", rootPostUnitId] as const,
   thread: (rootPostUnitId: string, filters?: PostFilters) =>
     [...postKeys.threads(rootPostUnitId), filters ?? null] as const,
-  subtree: (
-    rootPostUnitId: string,
-    subtreeRootPostUnitId: string,
-    filters?: PostFilters,
-  ) =>
-    [
-      ...postKeys.threads(rootPostUnitId),
-      "subtree",
-      subtreeRootPostUnitId,
-      filters ?? null,
-    ] as const,
-
-  /**
-   * Keys for direct reply queries
-   */
-  allReplies: (parentPostUnitId: string) =>
-    [...postKeys.all(), "replies", parentPostUnitId] as const,
-  replies: (parentPostUnitId: string, filters?: PostFilters) =>
-    [...postKeys.allReplies(parentPostUnitId), filters ?? null] as const,
-
   /**
    * Keys for realm-scoped queries
    */

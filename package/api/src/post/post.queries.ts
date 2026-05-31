@@ -81,36 +81,6 @@ export const postThreadQuery = (
   });
 
 /**
- * Query options for getting a descendant subtree under a post.
- */
-export const postSubtreeQuery = (
-  rootPostUnitId: string,
-  subtreeRootPostUnitId: string,
-  filters?: PostFilters,
-) =>
-  queryOptions({
-    queryKey: postKeys.subtree(rootPostUnitId, subtreeRootPostUnitId, filters),
-    queryFn: () =>
-      postApi.getSubtree(rootPostUnitId, subtreeRootPostUnitId, filters),
-    enabled: !!rootPostUnitId && !!subtreeRootPostUnitId,
-    staleTime: 1000 * 60 * 2, // 2 minutes
-  });
-
-/**
- * Query options for getting direct replies to a post
- */
-export const postRepliesQuery = (
-  parentPostUnitId: string,
-  filters?: PostFilters,
-) =>
-  queryOptions({
-    queryKey: postKeys.replies(parentPostUnitId, filters),
-    queryFn: () => postApi.getReplies(parentPostUnitId, filters),
-    enabled: !!parentPostUnitId,
-    staleTime: 1000 * 60 * 2, // 2 minutes
-  });
-
-/**
  * Query options for getting posts within a realm
  */
 export const postsByRealmQuery = (realmUnitId: string, filters?: PostFilters) =>
@@ -172,8 +142,6 @@ export const postQueries = {
   wikiByTarget: wikiPostsByTargetQuery,
   byAuthor: postsByAuthorQuery,
   thread: postThreadQuery,
-  subtree: postSubtreeQuery,
-  replies: postRepliesQuery,
   byRealm: postsByRealmQuery,
   wikiByRealm: wikiPostsByRealmQuery,
   moderationOverlays: postModerationOverlaysQuery,

@@ -38,8 +38,6 @@ export {
   postInfiniteListQuery,
   postListQuery,
   postQueries,
-  postRepliesQuery,
-  postSubtreeQuery,
   postsByAuthorQuery,
   postsByRealmQuery,
   postsByTargetQuery,

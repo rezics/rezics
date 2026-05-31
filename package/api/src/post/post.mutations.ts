@@ -53,11 +53,8 @@ export function useCreatePostMutation(
         });
       }
 
-      // Invalidate thread/reply queries if this is a reply
+      // Invalidate thread queries if this is a legacy post reply.
       if (variables.parentPostUnitId) {
-        queryClient.invalidateQueries({
-          queryKey: postKeys.allReplies(variables.parentPostUnitId),
-        });
         queryClient.invalidateQueries({
           queryKey: postKeys.detail(variables.parentPostUnitId),
         });

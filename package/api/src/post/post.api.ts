@@ -82,35 +82,6 @@ export const postApi = {
   },
 
   /**
-   * Get descendant subtree under a post within a root thread.
-   */
-  getSubtree: async (
-    rootPostUnitId: string,
-    subtreeRootPostUnitId: string,
-    filters?: PostFilters,
-  ): Promise<PostListResponse> => {
-    return apiFetch<PostListResponse>(
-      `/post/list${buildQueryString({
-        ...filters,
-        rootPostUnitId,
-        subtreeRootPostUnitId,
-      })}`,
-    );
-  },
-
-  /**
-   * Get direct replies to a post
-   */
-  getReplies: async (
-    parentPostUnitId: string,
-    filters?: PostFilters,
-  ): Promise<PostListResponse> => {
-    return apiFetch<PostListResponse>(
-      `/post/list${buildQueryString({ parentPostUnitId, ...filters })}`,
-    );
-  },
-
-  /**
    * Get posts within a realm
    */
   getByRealm: async (
