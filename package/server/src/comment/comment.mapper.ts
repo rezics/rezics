@@ -1,6 +1,6 @@
 import type { CommentDTO } from "@rezics/contract";
 import { mapPublicUser } from "@/utils/sanitizeUser";
-import type { CommentWithRelations } from "./types";
+import type { CommentWithRelations } from "./comment.types";
 
 function moderationState(comment: CommentWithRelations) {
   return comment.unit.contentModerationState?.state ?? null;

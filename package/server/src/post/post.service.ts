@@ -32,8 +32,8 @@ import {
   UnitType,
 } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
-import { commentService } from "@/comment/service";
-import type { CommentWithRelations } from "@/comment/types";
+import { commentService } from "@/comment/comment.service";
+import type { CommentWithRelations } from "@/comment/comment.types";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { generateBetween } from "@/shelf/fractional-index";
 import { serverJobProducer } from "@/job/job-boundary";

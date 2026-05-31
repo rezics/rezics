@@ -256,9 +256,8 @@ export function useSetPostStateMutation(
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(postKeys.detail(variables.unitId), data);
-      const rootPostUnitId = data.rootPostUnitId ?? variables.unitId;
       queryClient.invalidateQueries({
-        queryKey: postKeys.threads(rootPostUnitId),
+        queryKey: postKeys.threads(variables.unitId),
       });
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
       options?.onSuccess?.(data, variables, onMutateResult, context);

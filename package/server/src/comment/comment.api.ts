@@ -12,8 +12,8 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, tryResolveIdentity } from "@/middleware";
 import { postService } from "@/post/post.service";
-import { mapCommentToDTO } from "./mapper";
-import { commentService } from "./service";
+import { mapCommentToDTO } from "./comment.mapper";
+import { commentService } from "./comment.service";
 
 export const commentApi = new Elysia({ prefix: "/comment" })
   .use(authMacro)

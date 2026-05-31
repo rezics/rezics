@@ -9,7 +9,7 @@ import { blockService } from "@/block/block.service";
 import { serverJobProducer } from "@/job/job-boundary";
 import { publicUserSelect } from "@/utils/sanitizeUser";
 import { AppError } from "@/utils/errors";
-import type { CommentWithRelations } from "./types";
+import type { CommentWithRelations } from "./comment.types";
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;

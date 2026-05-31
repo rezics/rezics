@@ -28,7 +28,7 @@ describe("CommentService", () => {
       $queryRaw: queryRaw,
     });
 
-    const { CommentService } = await import("./service");
+    const { CommentService } = await import("./comment.service");
     await new CommentService().list({
       rootUnitId: "root-1",
       realmUnitId: "realm-1",
@@ -114,7 +114,7 @@ describe("CommentService", () => {
       postPin: { findMany: mock(async () => []) },
     });
 
-    const { CommentService } = await import("./service");
+    const { CommentService } = await import("./comment.service");
     const comment = await new CommentService().create(
       {
         rootUnitId: "post-1",
@@ -185,7 +185,7 @@ describe("CommentService", () => {
       $queryRaw: queryRaw,
     });
 
-    const { CommentService } = await import("./service");
+    const { CommentService } = await import("./comment.service");
     const result = await new CommentService().list({
       rootUnitId: "root-1",
       realmUnitId: "realm-1",

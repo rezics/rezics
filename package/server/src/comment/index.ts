@@ -1,2 +1,2 @@
-export { commentApi } from "./api";
-export { CommentService, commentService } from "./service";
+export { commentApi } from "./comment.api";
+export { CommentService, commentService } from "./comment.service";
