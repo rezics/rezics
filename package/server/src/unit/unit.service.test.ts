@@ -1,5 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock } from "../test/prisma-client-mock";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "../test/prisma-client-mock";
 
 installPrismaClientMock();
 mock.module("@/content-doc/prisma-json", () => ({
@@ -78,6 +81,78 @@ describe("buildUnitWhereClause", () => {
         { visibility: "PUBLIC" },
         { userId: { in: ["owner-1"] } },
       ],
+    });
+  });
+
+  test("filters catalog identity and exact variant target", () => {
+    expect(
+      buildUnitWhereClause({
+        type: "BOOK",
+        catalogEntryKind: "VARIANT",
+        targetUnitId: "main-entry-1",
+      }),
+    ).toEqual({
+      AND: [
+        { type: { in: ["BOOK"] } },
+        { catalogEntryKind: "VARIANT" },
+        { targetUnitId: "main-entry-1" },
+      ],
+    });
+  });
+});
+
+describe("UnitService catalog identity", () => {
+  test("persists catalog identity on create", async () => {
+    const create = mock(async () => ({ id: "variant-1" }));
+    const findUniqueOrThrow = mock(async () => ({
+      id: "variant-1",
+      type: "BOOK",
+      catalogEntryKind: "VARIANT",
+      targetUnitId: "main-entry-1",
+      translations: [],
+    }));
+    Object.assign(prismaMock, {
+      $transaction: async (fn: any) =>
+        fn({
+          unit: { create, findUniqueOrThrow },
+        }),
+    });
+
+    const { UnitService } = await import("./unit.service");
+    await new UnitService().create({
+      type: "BOOK",
+      catalogEntryKind: "VARIANT",
+      targetUnitId: "main-entry-1",
+    });
+
+    expect(create.mock.calls[0]?.[0].data).toMatchObject({
+      type: "BOOK",
+      catalogEntryKind: "VARIANT",
+      targetUnitId: "main-entry-1",
+    });
+  });
+
+  test("patches catalog identity on update for search projection sync", async () => {
+    const update = mock(async () => ({
+      id: "variant-1",
+      type: "BOOK",
+      catalogEntryKind: "MAIN",
+      targetUnitId: null,
+      translations: [],
+    }));
+    Object.assign(prismaMock, {
+      unit: { update },
+    });
+
+    const { UnitService } = await import("./unit.service");
+    await new UnitService().update("variant-1", {
+      catalogEntryKind: "MAIN",
+      targetUnitId: null,
+    });
+
+    expect(update.mock.calls[0]?.[0]).toMatchObject({
+      where: { id: "variant-1" },
+      data: { catalogEntryKind: "MAIN", targetUnitId: null },
     });
   });
 });

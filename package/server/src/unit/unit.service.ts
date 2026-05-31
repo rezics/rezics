@@ -8,6 +8,7 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma } from "#/prisma/client";
 import {
   type AiDisclosureMode,
+  type CatalogEntryKind,
   type ContentRating,
   prisma,
   UnitStatus,
@@ -59,6 +60,16 @@ function enqueueContentMetadataCommand(
       { type: "server", service: "unit" },
     ),
   );
+}
+
+function catalogEntryKindValue(
+  value:
+    | CreateUnitInput["catalogEntryKind"]
+    | UpdateUnitInput["catalogEntryKind"],
+): CatalogEntryKind | null | undefined {
+  return value === undefined
+    ? undefined
+    : ((value ?? null) as CatalogEntryKind | null);
 }
 
 /**
@@ -149,6 +160,17 @@ export function buildUnitWhereClause(
     .map((s) => s.trim())
     .filter(Boolean);
   if (userList.length > 0) andWhere.push({ userId: { in: userList } });
+
+  if (options.catalogEntryKind !== undefined) {
+    andWhere.push({
+      catalogEntryKind: (options.catalogEntryKind ??
+        null) as CatalogEntryKind | null,
+    });
+  }
+
+  if (options.targetUnitId !== undefined) {
+    andWhere.push({ targetUnitId: options.targetUnitId ?? null });
+  }
 
   // Filter by language (translations must have this language)
   if (options.language?.trim()) {
@@ -288,6 +310,9 @@ export class UnitService {
               ? undefined
               : ((input.aiDisclosureDetails ?? null) as Prisma.InputJsonValue),
           licenseSlug: assertLicenseSlug(input.licenseSlug) ?? undefined,
+          catalogEntryKind: catalogEntryKindValue(input.catalogEntryKind),
+          targetUnitId:
+            input.targetUnitId === undefined ? undefined : input.targetUnitId,
           extra: (input.extra ?? null) as Prisma.InputJsonValue,
           publishedAt: input.publishedAt
             ? new Date(input.publishedAt as any)
@@ -348,6 +373,9 @@ export class UnitService {
           input.licenseSlug === null
             ? null
             : (assertLicenseSlug(input.licenseSlug) ?? undefined),
+        catalogEntryKind: catalogEntryKindValue(input.catalogEntryKind),
+        targetUnitId:
+          input.targetUnitId === undefined ? undefined : input.targetUnitId,
         defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? undefined,
         extra: (input.extra ?? undefined) as Prisma.InputJsonValue | undefined,
@@ -368,6 +396,10 @@ export class UnitService {
       patchFields.visibility = input.visibility;
     if (input.licenseSlug !== undefined)
       patchFields.licenseSlug = input.licenseSlug;
+    if (input.catalogEntryKind !== undefined)
+      patchFields.catalogEntryKind = input.catalogEntryKind;
+    if (input.targetUnitId !== undefined)
+      patchFields.targetUnitId = input.targetUnitId;
     if (input.defaultLanguage !== undefined)
       patchFields.defaultLanguage = input.defaultLanguage;
     if (input.publishedAt !== undefined) {
