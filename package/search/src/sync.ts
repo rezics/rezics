@@ -13,7 +13,7 @@ import {
   readCoverUrlFromExtra,
 } from "@rezics/contract";
 import {
-  type Prisma,
+  Prisma,
   type PrismaClient,
   UnitType,
 } from "@rezics/server/prisma/generated/client";
@@ -1424,6 +1424,7 @@ export async function patchPostFields(
   const post = await getSearchPrismaClient().post.findUnique({
     where: { unitId },
     select: {
+      parentPostUnitId: true,
       unit: {
         select: {
           status: true,
