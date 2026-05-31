@@ -264,6 +264,8 @@
   "shelf_includes_reviews_other": "{count} 則短評",
   "shelf_items_count": "{count} 個項目",
   "shelf_items_load_failed": "載入書架項目失敗",
+  "shelf_item_no_search_matches": "沒有書架項目符合你的搜尋",
+  "shelf_item_search_placeholder": "搜尋書架項目...",
   "shelf_list_title": "書架",
   "shelf_mode_label": "模式",
   "shelf_move_to_another_page": "移至其他頁",

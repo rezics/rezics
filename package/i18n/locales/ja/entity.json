@@ -264,6 +264,8 @@
   "shelf_includes_reviews_other": "{count}の短いレビュー",
   "shelf_items_count": "{count} 件",
   "shelf_items_load_failed": "棚の項目を読み込めませんでした",
+  "shelf_item_no_search_matches": "検索に一致する棚の項目はありません",
+  "shelf_item_search_placeholder": "棚の項目を検索...",
   "shelf_list_title": "棚",
   "shelf_mode_label": "モード",
   "shelf_move_to_another_page": "別のページへ移動",

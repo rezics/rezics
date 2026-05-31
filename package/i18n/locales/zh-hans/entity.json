@@ -264,6 +264,8 @@
   "shelf_includes_reviews_other": "{count}简短评论",
   "shelf_items_count": "{count} 个项目",
   "shelf_items_load_failed": "加载书架项目失败",
+  "shelf_item_no_search_matches": "没有书架项目符合你的搜索",
+  "shelf_item_search_placeholder": "搜索书架项目...",
   "shelf_list_title": "书架",
   "shelf_mode_label": "模式",
   "shelf_move_to_another_page": "移至其他页",

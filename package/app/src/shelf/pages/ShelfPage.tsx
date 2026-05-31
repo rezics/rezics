@@ -29,10 +29,16 @@ import {
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
-import { Button, Checkbox, DropdownMenuItem, Label } from "@rezics/ui/shadcn";
+import {
+  Button,
+  Checkbox,
+  DropdownMenuItem,
+  Input,
+  Label,
+} from "@rezics/ui/shadcn";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Pencil as EditIcon } from "lucide-react";
+import { Pencil as EditIcon, Search as SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { getTranslation } from "@/shared/utils/translation-helpers";
@@ -113,6 +119,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     order: "desc",
   });
   const [sortPrimeOnly, setSortPrimeOnly] = useState<boolean>(true);
+  const [itemSearchText, setItemSearchText] = useState("");
   // Standalone shelf pages expose the readable filter as opt-in (default off);
   // the dashboard library composition applies it by default instead.
   const [readableOnly, setReadableOnly] = useState<boolean>(false);
@@ -120,8 +127,18 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
   const detailQuery = useQuery(shelfDetailQuery(unitId));
+  const normalizedItemSearchText = itemSearchText.trim();
+  const shelfUnitsQuery = useMemo(
+    () => ({
+      limit: 100,
+      ...(normalizedItemSearchText
+        ? { q: normalizedItemSearchText }
+        : undefined),
+    }),
+    [normalizedItemSearchText],
+  );
   const itemsQuery = useInfiniteQuery(
-    shelfUnitsInfiniteQuery(unitId, { limit: 100 }),
+    shelfUnitsInfiniteQuery(unitId, shelfUnitsQuery),
   );
   const {
     data: itemsData,
@@ -210,6 +227,10 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
       return { unitId, page: nextPage };
     });
   }, [totalPages, unitId]);
+
+  useEffect(() => {
+    setPageState({ unitId, page: 1 });
+  }, [normalizedItemSearchText, unitId]);
 
   useEffect(() => {
     if (waitingForPageData && !isFetchingNextPage) {
@@ -413,6 +434,16 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
 
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <div className="relative min-w-[min(100%,16rem)] flex-1 sm:flex-none">
+              <SearchIcon className="-translate-y-1/2 pointer-events-none absolute left-3 top-1/2 h-4 w-4 text-text-tertiary" />
+              <Input
+                value={itemSearchText}
+                onChange={(event) => setItemSearchText(event.target.value)}
+                placeholder={t("entity:shelf_item_search_placeholder")}
+                aria-label={t("common:search")}
+                className="h-9 pl-9"
+              />
+            </div>
             <ShelfSortViewPicker
               sort={sortState}
               sortOptions={SORT_OPTIONS}
@@ -482,7 +513,9 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </p>
         ) : visibleStream.length === 0 ? (
           <p className="py-8 text-center text-text-secondary">
-            {t("entity:shelf_empty_items")}
+            {normalizedItemSearchText
+              ? t("entity:shelf_item_no_search_matches")
+              : t("entity:shelf_empty_items")}
           </p>
         ) : effectiveViewMode === "masonry" ? (
           <div className={MASONRY_COLUMN_CLASS}>
