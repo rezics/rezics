@@ -1,6 +1,5 @@
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
-import { statusQueryOptions } from "@rezics/api/diagnostic/status";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
+import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import {
   UnitStatus,
   UnitType,
@@ -48,7 +47,6 @@ type UnitOperationsFilters = {
   ownerUserId: string;
   status: string;
   visibility: string;
-  driftFlag: string;
 };
 
 const emptyFilters: UnitOperationsFilters = {
@@ -59,21 +57,15 @@ const emptyFilters: UnitOperationsFilters = {
   ownerUserId: "",
   status: "",
   visibility: "",
-  driftFlag: "",
 };
 
 const unitTypes = Object.values(UnitType);
 const unitStatuses = Object.values(UnitStatus);
 const unitVisibilities = Object.values(UnitVisibility);
-const NO_DRIFT_UNIT_ID = "__rezics_no_unit_drift__";
 
 function optionalFilter(value: string) {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function unique(values: string[]) {
-  return [...new Set(values.filter(Boolean))];
 }
 
 export default function UnitsPage() {
@@ -91,66 +83,11 @@ export default function UnitsPage() {
 
   const trimmedQuery = query.trim();
   const start = page * limit;
-  const systemStatusQuery = useQuery({
-    ...statusQueryOptions.system(),
-    enabled: filters.driftFlag === "work-domain",
-  });
-  const workDomainDriftUnitIds = React.useMemo(() => {
-    const workDomains = systemStatusQuery.data?.workDomains;
-    if (!workDomains) return [];
-    return unique([
-      ...workDomains.hiddenWorks.flatMap((work) => [
-        work.workUnitId,
-        ...work.members.map((member) => member.unitId),
-      ]),
-      ...workDomains.projectionDrift.flatMap((drift) => [
-        drift.workUnitId,
-        drift.releaseUnitId,
-      ]),
-      ...workDomains.largeDomains.map((domain) => domain.workUnitId),
-    ]);
-  }, [systemStatusQuery.data?.workDomains]);
-  const workDomainDriftByUnitId = React.useMemo(() => {
-    const workDomains = systemStatusQuery.data?.workDomains;
-    const map = new Map<string, string[]>();
-    const add = (unitId: string, label: string) => {
-      const next = map.get(unitId) ?? [];
-      next.push(label);
-      map.set(unitId, next);
-    };
-    if (!workDomains) return map;
-
-    for (const work of workDomains.hiddenWorks) {
-      add(work.workUnitId, "hidden work");
-      for (const member of work.members) add(member.unitId, "hidden work");
-    }
-    for (const drift of workDomains.projectionDrift) {
-      add(drift.workUnitId, "projection");
-      add(drift.releaseUnitId, "projection");
-    }
-    for (const domain of workDomains.largeDomains) {
-      add(domain.workUnitId, "large domain");
-    }
-
-    for (const [unitId, labels] of map) {
-      map.set(unitId, unique(labels));
-    }
-    return map;
-  }, [systemStatusQuery.data?.workDomains]);
   const effectiveMeiliMode = isMeiliMode;
-  const waitingForDriftIds =
-    filters.driftFlag === "work-domain" && systemStatusQuery.isLoading;
-  const driftUnitIdsFilter =
-    filters.driftFlag === "work-domain"
-      ? workDomainDriftUnitIds.length > 0
-        ? workDomainDriftUnitIds.join(",")
-        : NO_DRIFT_UNIT_ID
-      : undefined;
   const listFilters = React.useMemo(
     () => ({
       start,
       limit,
-      ...(driftUnitIdsFilter ? { ids: driftUnitIdsFilter } : {}),
       ...(optionalFilter(filters.id) ? { id: filters.id.trim() } : {}),
       ...(optionalFilter(filters.slug) ? { slug: filters.slug.trim() } : {}),
       ...(optionalFilter(filters.title) ? { title: filters.title.trim() } : {}),
@@ -161,7 +98,7 @@ export default function UnitsPage() {
       ...(filters.status ? { status: filters.status } : {}),
       ...(filters.visibility ? { visibility: filters.visibility } : {}),
     }),
-    [driftUnitIdsFilter, filters, limit, start],
+    [filters, limit, start],
   );
 
   React.useEffect(() => {
@@ -175,14 +112,12 @@ export default function UnitsPage() {
 
   const listQuery = useQuery({
     ...unitQueries.list(listFilters),
-    enabled:
-      !effectiveMeiliMode && !waitingForDriftIds && trimmedQuery.length === 0,
+    enabled: !effectiveMeiliMode && trimmedQuery.length === 0,
   });
 
   const searchQuery = useQuery({
     ...unitQueries.search(trimmedQuery, listFilters),
-    enabled:
-      !effectiveMeiliMode && !waitingForDriftIds && trimmedQuery.length > 0,
+    enabled: !effectiveMeiliMode && trimmedQuery.length > 0,
   });
 
   const meiliQuery = useQuery({
@@ -282,28 +217,8 @@ export default function UnitsPage() {
         ),
       },
     ];
-    if (!isMeiliMode) {
-      cols.splice(5, 0, {
-        id: "drift",
-        header: "Drift",
-        minWidth: 180,
-        cell: (u) => {
-          const labels = workDomainDriftByUnitId.get(u.id) ?? [];
-          if (labels.length === 0) return "-";
-          return (
-            <div className="flex flex-wrap gap-1">
-              {labels.map((label) => (
-                <Badge key={label} variant="outline">
-                  {label}
-                </Badge>
-              ))}
-            </div>
-          );
-        },
-      });
-    }
     return cols;
-  }, [isMeiliMode, workDomainDriftByUnitId]);
+  }, []);
 
   return (
     <Page
@@ -484,28 +399,6 @@ export default function UnitsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="unit-filter-drift" className="text-xs">
-                Drift
-              </Label>
-              <Select
-                value={filterDraft.driftFlag || "__all"}
-                onValueChange={(value) =>
-                  setFilterDraft((prev) => ({
-                    ...prev,
-                    driftFlag: value === "__all" ? "" : value,
-                  }))
-                }
-              >
-                <SelectTrigger id="unit-filter-drift">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all">Any</SelectItem>
-                  <SelectItem value="work-domain">Work-domain drift</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         }
         toolbarRight={
@@ -535,17 +428,10 @@ export default function UnitsPage() {
           </>
         }
         isLoading={
-          waitingForDriftIds ||
-          (effectiveMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading)
+          effectiveMeiliMode ? meiliQuery.isLoading : normalQuery.isLoading
         }
-        isError={
-          systemStatusQuery.isError ||
-          (effectiveMeiliMode ? meiliQuery.isError : normalQuery.isError)
-        }
-        error={
-          systemStatusQuery.error ??
-          (effectiveMeiliMode ? meiliQuery.error : normalQuery.error)
-        }
+        isError={effectiveMeiliMode ? meiliQuery.isError : normalQuery.isError}
+        error={effectiveMeiliMode ? meiliQuery.error : normalQuery.error}
         columns={columns}
         rows={units}
         getRowId={(u) => u.id}

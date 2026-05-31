@@ -11,11 +11,6 @@ mock.module("@/diagnostic", () => ({
   getSystemStatusSummary: mock(async () => ({
     meili: { indexes: [] },
     queue: { failedJobs: [] },
-    workDomains: {
-      projectionDrift: [],
-      largeDomains: [],
-      hiddenWorks: [],
-    },
   })),
 }));
 

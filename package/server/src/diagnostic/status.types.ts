@@ -151,45 +151,6 @@ export interface HistoryOutboxStatus {
   recentFailed: HistoryOutboxFailedSummary[];
 }
 
-export interface WorkDomainMemberSummary {
-  unitId: string;
-  role: string;
-  position?: string | null;
-  displayPolicy?: string | null;
-  language?: string | null;
-  status?: string | null;
-  type?: string | null;
-}
-
-export interface HiddenWorkDomainSummary {
-  workUnitId: string;
-  status?: string | null;
-  visibility?: string | null;
-  releaseCount: number;
-  members: WorkDomainMemberSummary[];
-}
-
-export interface WorkDomainProjectionDriftSummary {
-  workUnitId: string;
-  releaseUnitId: string;
-  missingWorkTagCount: number;
-  missingWorkTagIds: string[];
-}
-
-export interface LargeWorkDomainSummary {
-  workUnitId: string;
-  releaseCount: number;
-  threshold: number;
-}
-
-export interface WorkDomainDiagnostics {
-  item: StatusItem;
-  releaseCountThreshold: number;
-  hiddenWorks: HiddenWorkDomainSummary[];
-  projectionDrift: WorkDomainProjectionDriftSummary[];
-  largeDomains: LargeWorkDomainSummary[];
-}
-
 export interface SystemStatusSummary {
   status: StatusState;
   checkedAt: string;
@@ -199,7 +160,6 @@ export interface SystemStatusSummary {
   cdc: CdcStatus;
   historyOutbox: HistoryOutboxStatus;
   queue: QueueStatus;
-  workDomains: WorkDomainDiagnostics;
   meili: MeiliStatusSummary;
   sequin: StatusItem;
 }

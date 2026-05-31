@@ -53,13 +53,6 @@ const repairScopes: RepairScopeConfig[] = [
     link: { to: "/status", label: "Open queue status" },
   },
   {
-    scope: "work-domain",
-    title: "Work-domain membership",
-    description:
-      "Detects hidden works, work-tag projection drift, and large release groups.",
-    link: { to: "/unit", label: "Open Units" },
-  },
-  {
     scope: "slug",
     title: "Slugs and aliases",
     description:

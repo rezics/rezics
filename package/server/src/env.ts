@@ -226,9 +226,6 @@ export const env = createEnv({
 
     /** Byte threshold where replication slot lag degrades CDC status. */
     STATUS_CDC_LAG_WARNING_BYTES: v.optional(v.string()),
-
-    /** Release-count threshold where work-domain diagnostics warn operators. */
-    STATUS_WORK_DOMAIN_RELEASE_WARNING_COUNT: v.optional(v.string()),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

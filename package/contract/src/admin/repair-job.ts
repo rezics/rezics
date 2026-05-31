@@ -3,7 +3,6 @@ import { t } from "elysia";
 export const adminRepairJobScopeSchema = t.Union([
   t.Literal("search"),
   t.Literal("history-outbox"),
-  t.Literal("work-domain"),
   t.Literal("slug"),
   t.Literal("attribution"),
   t.Literal("source-site"),

@@ -9,10 +9,8 @@ import type {
 } from "@rezics/contract";
 import {
   createMaintenanceCommand,
-  createSearchCommand,
   type EnqueueResult,
   MAINTENANCE_COMMAND_KINDS,
-  SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
 import { getSystemStatusSummary } from "@/diagnostic";
 import { env } from "@/env";
@@ -197,15 +195,6 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
         targets = system.queue.failedJobs
           .map((job) => (job.id && job.lane ? `${job.lane}:${job.id}` : null))
           .filter((target): target is string => Boolean(target));
-      } else if (input.scope === "work-domain") {
-        targets = [
-          ...system.workDomains.projectionDrift.flatMap((row) => [
-            row.workUnitId,
-            row.releaseUnitId,
-          ]),
-          ...system.workDomains.largeDomains.map((row) => row.workUnitId),
-          ...system.workDomains.hiddenWorks.map((row) => row.workUnitId),
-        ];
       } else {
         warnings.push(
           `${input.scope} dry-run contract is available; detector implementation is pending.`,
@@ -282,15 +271,6 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
               },
             });
           }
-        } else if (input.scope === "work-domain") {
-          const command = createSearchCommand(
-            SEARCH_COMMAND_KINDS.contentReleaseFullSync,
-            { limit: 500 },
-            { type: "server", service: "admin-repair-job" },
-          );
-          queuedOperations.push(
-            operationFromEnqueue(await options.jobProducer.enqueue(command)),
-          );
         } else {
           const failureAudit = await appendRepairAudit(options, {
             actorUserId: input.actorUserId,

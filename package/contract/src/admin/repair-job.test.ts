@@ -26,15 +26,15 @@ describe("admin repair job contracts", () => {
   test("requires reason for repair start requests", () => {
     expect(
       Value.Check(adminRepairJobStartRequestSchema, {
-        scope: "work-domain",
-        reason: "repair inherited memberships",
-        targetIds: ["work-1"],
+        scope: "search",
+        reason: "repair search projections",
+        targetIds: ["content"],
         dryRunId: "dryrun-1",
       }),
     ).toBe(true);
     expect(
       Value.Check(adminRepairJobStartRequestSchema, {
-        scope: "work-domain",
+        scope: "search",
         reason: "",
       }),
     ).toBe(false);

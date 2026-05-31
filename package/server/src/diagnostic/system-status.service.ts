@@ -11,12 +11,10 @@ import type {
   StatusLink,
   StatusState,
   SystemStatusSummary,
-  WorkDomainDiagnostics,
 } from "./status.types";
 
 const DEFAULT_TIMEOUT_MS = 2_500;
 const DEFAULT_LAG_WARNING_BYTES = 256 * 1024 * 1024;
-const DEFAULT_WORK_DOMAIN_RELEASE_WARNING_COUNT = 24;
 
 const ROUTED_SEQUIN_TABLES = [
   "HistoryOutbox",
@@ -485,136 +483,6 @@ async function getHistoryOutboxStatus(options: {
   }
 }
 
-async function getWorkDomainDiagnostics(options: {
-  queryClient: QueryClient;
-  timeoutMs: number;
-  releaseCountThreshold: number;
-}): Promise<WorkDomainDiagnostics> {
-  try {
-    const [hiddenWorks, projectionDrift, largeDomains] = await Promise.all([
-      timeout(
-        options.queryClient.$queryRawUnsafe<
-          WorkDomainDiagnostics["hiddenWorks"]
-        >(
-          `SELECT
-             w.id AS "workUnitId",
-             w.status::text AS status,
-             w.visibility::text AS visibility,
-             COUNT(*) FILTER (WHERE uw.role = 'RELEASE')::int AS "releaseCount",
-             COALESCE(
-               json_agg(
-                 json_build_object(
-                   'unitId', uw."unitId",
-                   'role', uw.role::text,
-                   'position', uw.position,
-                   'displayPolicy', uw."displayPolicy"::text,
-                   'language', uw.language,
-                   'status', u.status::text,
-                   'type', u.type::text
-                 )
-                 ORDER BY uw.role, uw.position NULLS LAST, uw."unitId"
-               ),
-               '[]'::json
-             ) AS members
-           FROM "Unit" w
-           JOIN "UnitWork" uw ON uw."workUnitId" = w.id
-           JOIN "Unit" u ON u.id = uw."unitId"
-           WHERE w.visibility <> 'PUBLIC'
-           GROUP BY w.id, w.status, w.visibility
-           ORDER BY "releaseCount" DESC, w.id
-           LIMIT 20`,
-        ),
-        options.timeoutMs,
-      ),
-      timeout(
-        options.queryClient.$queryRawUnsafe<
-          WorkDomainDiagnostics["projectionDrift"]
-        >(
-          `SELECT
-             uw."workUnitId",
-             uw."unitId" AS "releaseUnitId",
-             COUNT(wt."tagUnitId")::int AS "missingWorkTagCount",
-             COALESCE(array_agg(wt."tagUnitId" ORDER BY wt."tagUnitId"), '{}') AS "missingWorkTagIds"
-           FROM "UnitWork" uw
-           JOIN "UnitTag" wt ON wt."unitId" = uw."workUnitId"
-           LEFT JOIN "UnitTag" rt
-             ON rt."unitId" = uw."unitId"
-            AND rt."tagUnitId" = wt."tagUnitId"
-           WHERE uw.role = 'RELEASE'
-             AND rt."tagUnitId" IS NULL
-           GROUP BY uw."workUnitId", uw."unitId"
-           ORDER BY "missingWorkTagCount" DESC, uw."workUnitId", uw."unitId"
-           LIMIT 50`,
-        ),
-        options.timeoutMs,
-      ),
-      timeout(
-        options.queryClient.$queryRawUnsafe<
-          Array<{ workUnitId: string; releaseCount: number }>
-        >(
-          `SELECT
-             "workUnitId",
-             COUNT(*)::int AS "releaseCount"
-           FROM "UnitWork"
-           WHERE role = 'RELEASE'
-           GROUP BY "workUnitId"
-           HAVING COUNT(*) > $1
-           ORDER BY "releaseCount" DESC, "workUnitId"
-           LIMIT 50`,
-          options.releaseCountThreshold,
-        ),
-        options.timeoutMs,
-      ),
-    ]);
-
-    const normalizedDrift = projectionDrift.map((row) => ({
-      ...row,
-      missingWorkTagIds: normalizeStringArray(row.missingWorkTagIds),
-      missingWorkTagCount: Number(row.missingWorkTagCount ?? 0),
-    }));
-    const normalizedLargeDomains = largeDomains.map((row) => ({
-      workUnitId: row.workUnitId,
-      releaseCount: Number(row.releaseCount ?? 0),
-      threshold: options.releaseCountThreshold,
-    }));
-    const status =
-      normalizedDrift.length > 0 || normalizedLargeDomains.length > 0
-        ? "degraded"
-        : "available";
-
-    return {
-      item: {
-        id: "work-domain-diagnostics",
-        label: "Work-domain diagnostics",
-        status,
-        checkedAt: checkedAt(),
-        reason:
-          status === "degraded"
-            ? "work-domain projection drift or large domains need review"
-            : undefined,
-      },
-      releaseCountThreshold: options.releaseCountThreshold,
-      hiddenWorks,
-      projectionDrift: normalizedDrift,
-      largeDomains: normalizedLargeDomains,
-    };
-  } catch (error) {
-    return {
-      item: {
-        id: "work-domain-diagnostics",
-        label: "Work-domain diagnostics",
-        status: "unknown",
-        checkedAt: checkedAt(),
-        reason: safeFailureReason(error),
-      },
-      releaseCountThreshold: options.releaseCountThreshold,
-      hiddenWorks: [],
-      projectionDrift: [],
-      largeDomains: [],
-    };
-  }
-}
-
 export async function getSystemStatusSummary(options?: {
   fetchImpl?: FetchLike;
   queryClient?: QueryClient;
@@ -627,7 +495,6 @@ export async function getSystemStatusSummary(options?: {
   publicationName?: string;
   slotName?: string;
   lagWarningBytes?: number;
-  workDomainReleaseCountThreshold?: number;
   meiliSummary?: Awaited<ReturnType<typeof getMeiliStatusSummary>>;
 }): Promise<SystemStatusSummary> {
   const fetchImpl = options?.fetchImpl ?? fetch;
@@ -654,7 +521,6 @@ export async function getSystemStatusSummary(options?: {
     queue,
     cdc,
     historyOutbox,
-    workDomains,
   ] = await Promise.all([
     options?.meiliSummary
       ? Promise.resolve(options.meiliSummary)
@@ -710,16 +576,6 @@ export async function getSystemStatusSummary(options?: {
       queryClient: options?.queryClient ?? prisma,
       timeoutMs,
     }),
-    getWorkDomainDiagnostics({
-      queryClient: options?.queryClient ?? prisma,
-      timeoutMs,
-      releaseCountThreshold:
-        options?.workDomainReleaseCountThreshold ??
-        Number(
-          env.STATUS_WORK_DOMAIN_RELEASE_WARNING_COUNT ??
-            DEFAULT_WORK_DOMAIN_RELEASE_WARNING_COUNT,
-        ),
-    }),
   ]);
 
   const services: StatusItem[] = [
@@ -771,7 +627,6 @@ export async function getSystemStatusSummary(options?: {
       cdc.item.status,
       historyOutbox.item.status,
       queue.item.status,
-      workDomains.item.status,
     ]),
     checkedAt: checkedAt(),
     services,
@@ -780,7 +635,6 @@ export async function getSystemStatusSummary(options?: {
     cdc,
     historyOutbox,
     queue,
-    workDomains,
     meili,
     sequin: {
       ...sequin,

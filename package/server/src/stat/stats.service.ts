@@ -169,7 +169,6 @@ export class StatsService {
       ...system.services,
       ...system.databases,
       system.queue.item,
-      system.workDomains.item,
       system.sequin,
     ].filter(
       (item) => item.status === "degraded" || item.status === "unavailable",
@@ -326,15 +325,6 @@ export class StatsService {
       source: "search",
       link: ADMIN_ROUTES.search,
     });
-    pushStatusWarning({
-      id: "work-domain-diagnostics",
-      status: system.workDomains.item.status,
-      title: "Work-domain diagnostics found drift",
-      description: system.workDomains.item.reason,
-      source: "history",
-      link: ADMIN_ROUTES.history,
-    });
-
     const driftedIndexes = system.meili.indexes.filter(
       (index) => index.settingsDrift?.hasDrift,
     ).length;
