@@ -30,6 +30,7 @@ import {
   type SearchSegmentOptions,
   type SearchSegmentResult,
   syncContentSegment,
+  syncCommentSegment,
   syncEntitySegment,
   syncFeedbackSegment,
   syncPostRealmIdsSegment,
@@ -38,6 +39,7 @@ import {
   syncProgressSegment,
   syncRealmSegment,
   syncSingleContent,
+  syncSingleComment,
   syncSingleEntity,
   syncSingleFeedback,
   syncSinglePost,
@@ -261,6 +263,20 @@ export function createSearchHandlers(client: SearchClient) {
       runFullSyncSegment(command, context, {
         deleteAll: () => client.deleteAllPosts(),
         syncSegment: (options) => syncPostSegment(client, options),
+      }),
+
+    [SEARCH_COMMAND_KINDS.commentSync]: async (command) =>
+      "commentId" in command.payload
+        ? syncSingleComment(client, command.payload.commentId)
+        : undefined,
+    [SEARCH_COMMAND_KINDS.commentDelete]: async (command) =>
+      "commentId" in command.payload
+        ? client.deleteComments([command.payload.commentId])
+        : undefined,
+    [SEARCH_COMMAND_KINDS.commentFullSync]: async (command, context) =>
+      runFullSyncSegment(command, context, {
+        deleteAll: () => client.deleteAllComments(),
+        syncSegment: (options) => syncCommentSegment(client, options),
       }),
 
     [SEARCH_COMMAND_KINDS.realmSync]: async (command) =>

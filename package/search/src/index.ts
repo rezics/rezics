@@ -28,6 +28,7 @@ export {
 } from "./schema";
 export {
   buildContentDocument,
+  buildCommentDocument,
   buildEntityDocument,
   buildPostDocument,
   buildRealmDocument,
@@ -63,6 +64,7 @@ export {
   setSearchPrismaClient,
   syncAllContainedUnitIds,
   syncAllContent,
+  syncAllComments,
   syncAllEntities,
   syncAllFeedbacks,
   syncAllUserUnitCollections,
@@ -72,6 +74,7 @@ export {
   syncAllRealms,
   syncAllUsers,
   syncContentSegment,
+  syncCommentSegment,
   syncEntitySegment,
   syncFeedbackSegment,
   syncGameMediaContentSegment,
@@ -84,6 +87,7 @@ export {
   syncProgressSegment,
   syncRealmSegment,
   syncSingleContent,
+  syncSingleComment,
   syncSingleEntity,
   syncSingleFeedback,
   syncSingleUserUnitCollection,

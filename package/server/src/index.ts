@@ -15,6 +15,7 @@ import { adminWorkMergeApi } from "./admin-work-merge";
 import { authPublicApi } from "./auth-boundary";
 import { bookApi } from "./book";
 import { chapterApi } from "./chapter";
+import { commentApi } from "./comment";
 import { contentStructureApi } from "./content-structure";
 import { creditAttributionApi } from "./credit-attribution";
 import { statusApi } from "./diagnostic";
@@ -214,6 +215,7 @@ routeApp
   .use(authPublicApi)
   .use(wellKnownApi)
   .use(bookApi)
+  .use(commentApi)
   .use(contentStructureApi)
   .use(chapterApi)
   .use(pollApi)

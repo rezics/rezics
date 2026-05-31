@@ -1,4 +1,5 @@
 import type {
+  CommentSearchDocument,
   ContentSearchDocument,
   EntitySearchDocument,
   FeedbackSearchDocument,
@@ -1792,6 +1793,63 @@ const postIncludeForSync = {
   scoreEntry: true,
 } as const;
 
+const commentIncludeForSync = {
+  unit: {
+    include: {
+      user: true,
+      contentModerationState: true,
+    },
+  },
+} as const;
+
+function isPublicIndexableCommentUnit(unit: any): boolean {
+  return (
+    unit?.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
+    unit?.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility &&
+    !SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
+      unit.contentModerationState?.state,
+    )
+  );
+}
+
+export function buildCommentDocument(comment: any): CommentSearchDocument {
+  const user = comment.unit?.user;
+  return {
+    id: comment.unitId,
+    contentText: mainMarkdownSource(comment.content),
+    rootUnitId: comment.rootUnitId,
+    realmUnitId: comment.realmUnitId,
+    parentCommentUnitId: comment.parentCommentUnitId ?? null,
+    authorUserId: comment.authorUserId,
+    depth: comment.depth,
+    path: comment.path ?? null,
+    isLocked: comment.isLocked,
+    replyCount: comment.replyCount,
+    directReplyCount: comment.directReplyCount,
+    lastReplyAt: comment.lastReplyAt
+      ? comment.lastReplyAt instanceof Date
+        ? comment.lastReplyAt.toISOString()
+        : comment.lastReplyAt
+      : null,
+    state: comment.state ?? null,
+    createdAt:
+      comment.createdAt instanceof Date
+        ? comment.createdAt.toISOString()
+        : comment.createdAt,
+    updatedAt:
+      comment.updatedAt instanceof Date
+        ? comment.updatedAt.toISOString()
+        : comment.updatedAt,
+    hotScore: 0,
+    topScore: 0,
+    qualityScore: 0,
+    rankUpdatedAt: null,
+    authorName: user?.name ?? null,
+    authorSlug: user?.slug ?? null,
+    authorAvatar: user?.avatar ?? null,
+  };
+}
+
 export function buildPostDocument(post: any): PostSearchDocument {
   const user = post.unit?.user;
   const workMemberships: any[] = post.unit?.workMemberships ?? [];
@@ -1964,6 +2022,89 @@ export async function syncPostSegment(
     await client.addOrUpdatePosts(current.map(buildPostDocument));
   }
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
+// ANCHOR: Comment sync functions
+
+export async function syncSingleComment(
+  client: SearchClient,
+  commentId: string,
+) {
+  const comment = await getSearchPrismaClient().comment.findUnique({
+    where: { unitId: commentId },
+    include: commentIncludeForSync,
+  });
+
+  if (!comment || !isPublicIndexableCommentUnit(comment.unit)) {
+    await client.deleteComments([commentId]);
+    return;
+  }
+
+  const [pathRow] = await getSearchPrismaClient().$queryRaw<
+    { unitId: string; path: string | null }[]
+  >`
+    SELECT "unitId", "path"::text AS path
+    FROM "Comment"
+    WHERE "unitId" = ${comment.unitId}::uuid
+  `;
+
+  await client.addOrUpdateComments([
+    buildCommentDocument({ ...comment, path: pathRow?.path ?? null }),
+  ]);
+}
+
+export async function syncCommentSegment(
+  client: SearchClient,
+  options: SearchSegmentOptions = {},
+): Promise<SearchSegmentResult> {
+  const limit = segmentLimit(options);
+  const comments: any[] = await getSearchPrismaClient().comment.findMany({
+    where: { unit: publicSearchableUnitWhere() },
+    include: commentIncludeForSync,
+    orderBy: { unitId: "asc" },
+    take: limit + 1,
+    skip: options.cursor ? 1 : 0,
+    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+  });
+  const { current, nextCursor } = segmentRows(comments, limit, "unitId");
+  if (current.length > 0) {
+    const paths = await getSearchPrismaClient().$queryRaw<
+      { unitId: string; path: string | null }[]
+    >`
+      SELECT "unitId", "path"::text AS path
+      FROM "Comment"
+      WHERE "unitId" IN (${Prisma.join(
+        current.map((comment) => Prisma.sql`${comment.unitId}::uuid`),
+      )})
+    `;
+    const pathByUnitId = new Map(paths.map((row) => [row.unitId, row.path]));
+    await client.addOrUpdateComments(
+      current.map((comment) =>
+        buildCommentDocument({
+          ...comment,
+          path: pathByUnitId.get(comment.unitId) ?? null,
+        }),
+      ),
+    );
+  }
+  return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
+}
+
+export async function syncAllComments(client: SearchClient) {
+  const deleteResult = await client.deleteAllComments();
+  console.log("syncAllComments: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const result = await syncCommentSegment(client, { cursor });
+    total += result.processed;
+    if (!result.nextCursor) break;
+    cursor = result.nextCursor;
+  }
+
+  return { message: "syncAllComments success", totalSynced: total };
 }
 
 export async function syncAllPostRealmIds(client: SearchClient) {

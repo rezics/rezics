@@ -15,6 +15,8 @@ function searchSyncKindForTarget(targetType: string) {
       return SEARCH_COMMAND_KINDS.contentSync;
     case "post":
       return SEARCH_COMMAND_KINDS.postSync;
+    case "comment":
+      return SEARCH_COMMAND_KINDS.commentSync;
     case "realm":
       return SEARCH_COMMAND_KINDS.realmSync;
     case "entity":
@@ -34,6 +36,8 @@ function fullSyncKindForIndex(index: string) {
       return SEARCH_COMMAND_KINDS.contentFullSync;
     case "post":
       return SEARCH_COMMAND_KINDS.postFullSync;
+    case "comment":
+      return SEARCH_COMMAND_KINDS.commentFullSync;
     case "realm":
       return SEARCH_COMMAND_KINDS.realmFullSync;
     case "entity":
@@ -53,6 +57,7 @@ function fullSyncKindForIndex(index: string) {
 
 function targetPayload(targetType: string, targetId: string) {
   if (targetType === "post") return { postId: targetId };
+  if (targetType === "comment") return { commentId: targetId };
   if (targetType === "user") return { userId: targetId };
   if (targetType === "feedback") return { feedbackId: targetId };
   return { unitId: targetId };
@@ -122,6 +127,9 @@ function replayTargetFromKey(scope: string, key: string) {
     case "Post":
     case "post":
       return { targetType: "post", targetId: id };
+    case "Comment":
+    case "comment":
+      return { targetType: "comment", targetId: id };
     case "Realm":
     case "realm":
       return { targetType: "realm", targetId: id };

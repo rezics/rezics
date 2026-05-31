@@ -354,6 +354,21 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
       : [];
   }
 
+  if (table === "Comment") {
+    const commentId = targetId(message, ["unitId", "unit_id"]);
+    return commentId
+      ? [
+          createSearchCommand(
+            isDelete
+              ? SEARCH_COMMAND_KINDS.commentDelete
+              : SEARCH_COMMAND_KINDS.commentSync,
+            { commentId },
+            source,
+          ),
+        ]
+      : [];
+  }
+
   if (table === "ScoreEntry" || table === "ScoreAggregate") {
     const unitId = targetId(message, ["unitId", "unit_id"]);
     const realm = targetId(message, ["realm"]);

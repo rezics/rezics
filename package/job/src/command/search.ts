@@ -29,6 +29,10 @@ export const SEARCH_COMMAND_KINDS = {
   postPatchRealmIds: "search.post.patchRealmIds",
   postFullSync: "search.post.fullSync",
 
+  commentSync: "search.comment.sync",
+  commentDelete: "search.comment.delete",
+  commentFullSync: "search.comment.fullSync",
+
   realmSync: "search.realm.sync",
   realmDelete: "search.realm.delete",
   realmPatchMetadata: "search.realm.patchMetadata",
@@ -67,6 +71,7 @@ export type SearchCommandKind =
 
 const UnitTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const PostTargetPayloadSchema = v.strictObject({ postId: v.string() });
+const CommentTargetPayloadSchema = v.strictObject({ commentId: v.string() });
 const RealmTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const EntityTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const UserTargetPayloadSchema = v.strictObject({ userId: v.string() });
@@ -201,6 +206,21 @@ export const PostPatchRealmIdsCommandSchema = commandSchema(
 );
 export const PostFullSyncCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.postFullSync,
+  JOB_LANES.maintenance,
+  FullSyncPayloadSchema,
+);
+export const CommentSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.commentSync,
+  JOB_LANES.searchSyncFast,
+  CommentTargetPayloadSchema,
+);
+export const CommentDeleteCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.commentDelete,
+  JOB_LANES.searchSyncFast,
+  CommentTargetPayloadSchema,
+);
+export const CommentFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.commentFullSync,
   JOB_LANES.maintenance,
   FullSyncPayloadSchema,
 );
@@ -363,6 +383,9 @@ export const SearchCommandSchema = v.union([
   PostPatchTargetFanoutCommandSchema,
   PostPatchRealmIdsCommandSchema,
   PostFullSyncCommandSchema,
+  CommentSyncCommandSchema,
+  CommentDeleteCommandSchema,
+  CommentFullSyncCommandSchema,
   RealmSyncCommandSchema,
   RealmDeleteCommandSchema,
   RealmPatchMetadataCommandSchema,
@@ -408,6 +431,7 @@ export function createSearchCommand(
   const targetPart =
     getStringPart("unitId") ??
     getStringPart("postId") ??
+    getStringPart("commentId") ??
     getStringPart("userId") ??
     getStringPart("feedbackId") ??
     getStringPart("targetId") ??
