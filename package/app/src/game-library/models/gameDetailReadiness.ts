@@ -25,7 +25,8 @@ export function gameDetailData(unitId: string) {
   return {
     releaseSearch: contentSearchQueryOptions({
       type: "GAME",
-      searchGroupId: unitId,
+      catalogEntryKind: "VARIANT",
+      targetUnitId: unitId,
       releasePresentation: "expanded",
       limit: 1,
     }),

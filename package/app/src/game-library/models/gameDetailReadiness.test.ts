@@ -26,7 +26,8 @@ describe("game detail readiness", () => {
       "content",
       {
         type: "GAME",
-        searchGroupId: "game-1",
+        catalogEntryKind: "VARIANT",
+        targetUnitId: "game-1",
         releasePresentation: "expanded",
         limit: 1,
       },
