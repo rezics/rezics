@@ -96,6 +96,8 @@ const createHistoryOutbox = mock(async (_args: unknown) => ({}));
 const allocateSequence = mock(async (_strings: TemplateStringsArray) => [
   { sequence: 1n },
 ]);
+const deleteManyAnchorsMock = mock(async (_args: unknown) => ({ count: 0 }));
+const createManyAnchorsMock = mock(async (_args: unknown) => ({ count: 0 }));
 
 const upsertContainerMock = mock(async (_args: unknown) => ({}));
 const findContainerMock = mock(async (_args: unknown) => ({
@@ -115,6 +117,10 @@ const mockTx = {
   contentStructure: {
     update: updateContainerMock,
     upsert: upsertContainerMock,
+  },
+  contentStructureAnchor: {
+    deleteMany: deleteManyAnchorsMock,
+    createMany: createManyAnchorsMock,
   },
   historyOutbox: {
     create: createHistoryOutbox,
@@ -142,8 +148,67 @@ function resetMocks(): void {
   findContainerMock.mockClear();
   createHistoryOutbox.mockClear();
   allocateSequence.mockClear();
+  deleteManyAnchorsMock.mockClear();
+  createManyAnchorsMock.mockClear();
   transactionMock.mockClear();
 }
+
+describe("buildContentStructureAnchorRows", () => {
+  test("projects materialized nodes with ancestor ids, path, depth, and sort path", async () => {
+    const { buildContentStructureAnchorRows } = await import("./service");
+    const anchors = buildContentStructureAnchorRows("book-1", [
+      makeNode({ id: "root", title: "Root", sortKey: "m" }),
+      makeNode({
+        id: "chapter-a",
+        parentId: "root",
+        sortKey: "a",
+        title: "A",
+        contentUnitId: "content-a",
+      }),
+      makeNode({
+        id: "section-b",
+        parentId: "chapter-a",
+        sortKey: "b",
+        title: "B",
+        contentUnitId: "content-b",
+      }),
+      makeNode({
+        id: "empty",
+        parentId: "root",
+        sortKey: "z",
+        title: "Empty",
+        contentUnitId: null,
+      }),
+    ]);
+
+    expect(anchors).toEqual([
+      {
+        nodeId: "chapter-a",
+        ownerUnitId: "book-1",
+        contentUnitId: "content-a",
+        parentNodeId: "root",
+        ancestorNodeIds: ["root"],
+        path: ["root", "chapter-a"],
+        depth: 1,
+        sortKey: "a",
+        sortPath: "m.a",
+        titlePath: ["Root", "A"],
+      },
+      {
+        nodeId: "section-b",
+        ownerUnitId: "book-1",
+        contentUnitId: "content-b",
+        parentNodeId: "chapter-a",
+        ancestorNodeIds: ["root", "chapter-a"],
+        path: ["root", "chapter-a", "section-b"],
+        depth: 2,
+        sortKey: "b",
+        sortPath: "m.a.b",
+        titlePath: ["Root", "A", "B"],
+      },
+    ]);
+  });
+});
 
 describe("ContentStructureService.softDeleteNodes", () => {
   beforeEach(resetMocks);

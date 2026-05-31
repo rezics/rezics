@@ -191,6 +191,7 @@ export class ContentStructureService {
           where: { ownerUnitId },
           data: { updatedAt: new Date() },
         });
+        await rebuildContentStructureAnchors(tx, ownerUnitId);
         await options.afterMutate?.(tx, { ownerUnitId, submitted });
         await writeSequencedHistoryOutbox(tx, {
           unitId: ownerUnitId,
@@ -250,6 +251,7 @@ export class ContentStructureService {
         where: { ownerUnitId },
         data: { updatedAt: new Date() },
       });
+      await rebuildContentStructureAnchors(tx, ownerUnitId);
 
       await writeSequencedHistoryOutbox(tx, {
         unitId: ownerUnitId,
@@ -351,6 +353,7 @@ export class ContentStructureService {
         where: { ownerUnitId },
         data: { updatedAt: new Date() },
       });
+      await rebuildContentStructureAnchors(tx, ownerUnitId);
 
       await writeSequencedHistoryOutbox(tx, {
         unitId: ownerUnitId,
@@ -395,6 +398,119 @@ export class ContentStructureService {
 }
 
 export const contentStructureService = new ContentStructureService();
+
+type ContentStructureAnchorSourceNode = {
+  id: string;
+  parentId: string | null;
+  sortKey: string;
+  contentUnitId: string | null;
+  title: string;
+};
+
+export type ContentStructureAnchorWrite = {
+  nodeId: string;
+  ownerUnitId: string;
+  contentUnitId: string;
+  parentNodeId: string | null;
+  ancestorNodeIds: string[];
+  path: string[];
+  depth: number;
+  sortKey: string;
+  sortPath: string;
+  titlePath: string[];
+};
+
+export function buildContentStructureAnchorRows(
+  ownerUnitId: string,
+  rows: readonly ContentStructureAnchorSourceNode[],
+): ContentStructureAnchorWrite[] {
+  const childrenByParentId = new Map<
+    string | null,
+    ContentStructureAnchorSourceNode[]
+  >();
+  for (const row of rows) {
+    const bucket = childrenByParentId.get(row.parentId) ?? [];
+    bucket.push(row);
+    childrenByParentId.set(row.parentId, bucket);
+  }
+  for (const bucket of childrenByParentId.values()) {
+    bucket.sort((a, b) =>
+      a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0,
+    );
+  }
+
+  const anchors: ContentStructureAnchorWrite[] = [];
+
+  function visit(
+    row: ContentStructureAnchorSourceNode,
+    ancestorNodeIds: string[],
+    ancestorSortKeys: string[],
+    ancestorTitles: string[],
+  ): void {
+    const path = [...ancestorNodeIds, row.id];
+    const titlePath = [...ancestorTitles, row.title];
+    const sortPath = [...ancestorSortKeys, row.sortKey].join(".");
+    if (row.contentUnitId) {
+      anchors.push({
+        nodeId: row.id,
+        ownerUnitId,
+        contentUnitId: row.contentUnitId,
+        parentNodeId: row.parentId,
+        ancestorNodeIds,
+        path,
+        depth: ancestorNodeIds.length,
+        sortKey: row.sortKey,
+        sortPath,
+        titlePath,
+      });
+    }
+
+    for (const child of childrenByParentId.get(row.id) ?? []) {
+      visit(child, path, [...ancestorSortKeys, row.sortKey], titlePath);
+    }
+  }
+
+  for (const root of childrenByParentId.get(null) ?? []) {
+    visit(root, [], [], []);
+  }
+
+  return anchors;
+}
+
+export async function rebuildContentStructureAnchors(
+  tx: Prisma.TransactionClient,
+  ownerUnitId: string,
+): Promise<void> {
+  const rows = await tx.contentStructureNode.findMany({
+    where: { ownerUnitId, isDeleted: false },
+    select: {
+      id: true,
+      parentId: true,
+      sortKey: true,
+      contentUnitId: true,
+      title: true,
+    },
+  });
+  const anchors = buildContentStructureAnchorRows(ownerUnitId, rows);
+
+  await tx.contentStructureAnchor.deleteMany({ where: { ownerUnitId } });
+  if (anchors.length === 0) return;
+
+  await tx.contentStructureAnchor.createMany({
+    data: anchors.map((anchor) => ({
+      nodeId: anchor.nodeId,
+      ownerUnitId: anchor.ownerUnitId,
+      contentUnitId: anchor.contentUnitId,
+      parentNodeId: anchor.parentNodeId,
+      ancestorNodeIds: anchor.ancestorNodeIds,
+      path: anchor.path,
+      depth: anchor.depth,
+      sortKey: anchor.sortKey,
+      sortPath: anchor.sortPath,
+      titlePath: anchor.titlePath,
+    })),
+  });
+}
 
 async function softDeleteNodesInTx(
   tx: Prisma.TransactionClient,

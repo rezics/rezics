@@ -292,6 +292,7 @@ model Unit {
   // Inverse of ContentStructureNode.contentUnitId — every content-structure
   // node that references this Unit as concrete content.
   contentStructureNodesAsContent ContentStructureNode[] @relation("ContentStructureNodeContent")
+  contentStructureAnchorsAsContent ContentStructureAnchor[] @relation("ContentStructureAnchorContent")
 
   @@unique([slugScope, slug])
   @@index([type, status, createdAt])
@@ -465,6 +466,7 @@ model ContentStructure {
 
   owner        Unit                   @relation(fields: [ownerUnitId], references: [id], onDelete: Cascade)
   contentNodes ContentStructureNode[] @relation("ContentStructureContainer")
+  anchors      ContentStructureAnchor[]
 
   @@index([updatedAt(sort: Desc)])
 }
@@ -495,6 +497,7 @@ model ContentStructureNode {
   children             ContentStructureNode[]    @relation("ContentStructureNodeChildren")
   contentUnit          Unit?                     @relation("ContentStructureNodeContent", fields: [contentUnitId], references: [id], onDelete: SetNull)
   seriesContentIndex   SeriesContentIndex?
+  contentAnchor        ContentStructureAnchor?
   userProgressLastNode UserUnitProgress[]        @relation("UserUnitProgressLastNode")
   userNodeProgress     UserContentNodeProgress[]
 
@@ -502,6 +505,39 @@ model ContentStructureNode {
   @@index([contentUnitId])
   @@index([ownerUnitId, updatedAt(sort: Desc)])
   @@index([ownerUnitId, isDeleted, updatedAt(sort: Desc)])
+}
+
+/**
+ * Flattened projection of materialized ContentStructureNode rows.
+ *
+ * Source-of-truth hierarchy remains ContentStructureNode. This projection exists
+ * so interaction and search reads can ask "where does this content Unit appear?"
+ * by owner, ancestor, path, depth, and sibling sort order without rebuilding the
+ * whole tree on every query. Only nodes with contentUnitId are projected.
+ */
+model ContentStructureAnchor {
+  nodeId          String @id @db.Uuid
+  ownerUnitId     String @db.Uuid
+  contentUnitId   String @db.Uuid
+  parentNodeId    String? @db.Uuid
+  ancestorNodeIds Json
+  path            Json
+  depth           Int
+  sortKey         String
+  sortPath        String
+  titlePath       Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  structure ContentStructure     @relation(fields: [ownerUnitId], references: [ownerUnitId], onDelete: Cascade)
+  node      ContentStructureNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  content   Unit                 @relation("ContentStructureAnchorContent", fields: [contentUnitId], references: [id], onDelete: Cascade)
+
+  @@index([ownerUnitId, sortPath])
+  @@index([contentUnitId, ownerUnitId])
+  @@index([ownerUnitId, parentNodeId, sortKey])
+  @@index([ownerUnitId, depth])
 }
 
 /**
