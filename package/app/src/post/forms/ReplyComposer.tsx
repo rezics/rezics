@@ -46,7 +46,7 @@ export type ReplyComposerReplyModeProps = ReplyComposerBaseProps & {
   targetUnitId: string;
   rootUnitId?: string;
   realmUnitId?: string | null;
-  parentPostUnitId?: string;
+  parentCommentUnitId?: string;
   realmUnitIds?: never;
   tagIds?: string[];
 };
@@ -55,7 +55,7 @@ export type ReplyComposerRealmPostModeProps = ReplyComposerBaseProps & {
   realmUnitIds: string[];
   tagIds?: string[];
   targetUnitId?: never;
-  parentPostUnitId?: never;
+  parentCommentUnitId?: never;
 };
 
 export type ReplyComposerProps =
@@ -304,13 +304,15 @@ export const ReplyComposer = forwardRef<
   const targetUnitId = isRealmPostMode ? undefined : props.targetUnitId;
   const rootUnitId = isRealmPostMode ? undefined : props.rootUnitId;
   const realmUnitId = isRealmPostMode ? undefined : props.realmUnitId;
-  const parentPostUnitId = isRealmPostMode ? undefined : props.parentPostUnitId;
+  const parentCommentUnitId = isRealmPostMode
+    ? undefined
+    : props.parentCommentUnitId;
   const initialTagIds = props.tagIds;
   const invalidMode =
     Boolean(realmUnitIds?.length) &&
     Boolean(
       (props as Partial<ReplyComposerReplyModeProps>).targetUnitId ||
-        (props as Partial<ReplyComposerReplyModeProps>).parentPostUnitId,
+        (props as Partial<ReplyComposerReplyModeProps>).parentCommentUnitId,
     );
   const startsExpanded = mode === "expanded" || autoFocus;
   const [expanded, setExpanded] = useState<boolean>(startsExpanded);
@@ -335,14 +337,16 @@ export const ReplyComposer = forwardRef<
         !options?.pollUnitId &&
         rootUnitId &&
         realmUnitId &&
-        parentPostUnitId
+        parentCommentUnitId
       ) {
         commentMutation.mutate(
           {
             rootUnitId,
             realmUnitId,
             parentCommentUnitId:
-              parentPostUnitId === rootUnitId ? undefined : parentPostUnitId,
+              parentCommentUnitId === rootUnitId
+                ? undefined
+                : parentCommentUnitId,
             content,
           },
           {
@@ -354,9 +358,9 @@ export const ReplyComposer = forwardRef<
               queryClient.invalidateQueries({
                 queryKey: postKeys.detail(rootUnitId),
               });
-              if (parentPostUnitId) {
+              if (parentCommentUnitId) {
                 queryClient.invalidateQueries({
-                  queryKey: postKeys.detail(parentPostUnitId),
+                  queryKey: postKeys.detail(parentCommentUnitId),
                 });
               }
               onSubmitted?.(mapCommentToPost(comment));
@@ -369,7 +373,7 @@ export const ReplyComposer = forwardRef<
       postMutation.mutate(
         {
           targetUnitId,
-          parentPostUnitId,
+          parentPostUnitId: parentCommentUnitId,
           kind: PostKind.POST,
           content,
           ...(options?.pollUnitId
@@ -387,7 +391,7 @@ export const ReplyComposer = forwardRef<
     [
       commentMutation.mutate,
       onSubmitted,
-      parentPostUnitId,
+      parentCommentUnitId,
       postMutation.mutate,
       queryClient,
       realmUnitId,

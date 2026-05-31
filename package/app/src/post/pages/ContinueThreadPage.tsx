@@ -108,7 +108,7 @@ export const ContinueThreadPage: React.FC = () => {
           targetUnitId={anchor.targetUnitId ?? rootPostUnitId}
           rootUnitId={rootPostUnitId}
           realmUnitId={anchor.realmUnitId}
-          parentPostUnitId={anchor.unitId}
+          parentCommentUnitId={anchor.unitId}
         />
       )}
       {isLoading ? (

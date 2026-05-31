@@ -28,7 +28,7 @@ export interface PostTreeNodeProps {
   highlightedThreadUnitId?: string;
   onReplyClick: (postUnitId: string) => void;
   renderOverflowContent?: (post: PostDTO) => React.ReactNode;
-  onComposerSubmitted: (parentPostUnitId: string, post: PostDTO) => void;
+  onComposerSubmitted: (parentCommentUnitId: string, post: PostDTO) => void;
   onComposerDone: (postUnitId: string) => void;
   onThreadHoverChange: (postUnitId: string, hovered: boolean) => void;
 }
@@ -138,7 +138,7 @@ export function PostTreeNode({
                   targetUnitId={post.targetUnitId ?? rootPostUnitId}
                   rootUnitId={rootPostUnitId}
                   realmUnitId={post.realmUnitId}
-                  parentPostUnitId={post.unitId}
+                  parentCommentUnitId={post.unitId}
                   onSubmitted={(createdPost) =>
                     onComposerSubmitted(post.unitId, createdPost)
                   }

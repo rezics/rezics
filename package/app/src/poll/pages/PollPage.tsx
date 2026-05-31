@@ -42,7 +42,7 @@ export const PollPage: React.FC<{ unitId: string }> = ({ unitId }) => {
             mode="progressive"
             targetUnitId={unitId}
             rootUnitId={unitId}
-            parentPostUnitId={unitId}
+            parentCommentUnitId={unitId}
           />
 
           <PostTreeSection rootPostUnitId={unitId} />

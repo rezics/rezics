@@ -90,7 +90,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
           targetUnitId={review.targetUnitId ?? review.unitId}
           rootUnitId={review.unitId}
           realmUnitId={review.realmUnitId}
-          parentPostUnitId={review.unitId}
+          parentCommentUnitId={review.unitId}
         />
 
         <PostTreeSection
