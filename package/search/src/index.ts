@@ -1,4 +1,11 @@
 export type { SearchResponse } from "meilisearch";
+export {
+  buildUserUnitCollectionDocument,
+  COLLECTION_INDEX_NAME,
+  collectionDocumentId,
+  type UserUnitCollectionDocument,
+  type UserUnitCollectionRow,
+} from "./collection";
 export { type MeiliConfig, SearchClient } from "./client";
 export {
   bucketize,

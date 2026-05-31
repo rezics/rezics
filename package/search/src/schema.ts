@@ -1,3 +1,4 @@
+import { COLLECTION_INDEX_NAME } from "./collection";
 import { PROGRESS_INDEX_NAME } from "./progress";
 
 export type ExpectedMeiliIndexUid =
@@ -6,6 +7,7 @@ export type ExpectedMeiliIndexUid =
   | "users"
   | "posts"
   | "comments"
+  | typeof COLLECTION_INDEX_NAME
   | "realms"
   | "entities"
   | typeof PROGRESS_INDEX_NAME;
@@ -180,6 +182,17 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     supportsFullSync: true,
     domain: "Comments",
     description: "Reply tree comments partitioned by root unit and realm.",
+  },
+  {
+    uid: COLLECTION_INDEX_NAME,
+    primaryKey: "id",
+    searchableAttributes: ["searchText"],
+    filterableAttributes: ["ownerUserId", "unitId", "createdAt", "updatedAt"],
+    sortableAttributes: ["createdAt", "updatedAt"],
+    facetableSummaryFields: [],
+    supportsFullSync: true,
+    domain: "User unit collections",
+    description: "Private per-user collection search text only.",
   },
   {
     uid: "realms",

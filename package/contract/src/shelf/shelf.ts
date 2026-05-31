@@ -316,6 +316,8 @@ export type SetPinnedTagsResponse =
 export const addShelfUnitSchema = t.Object({
   unitId: t.String(),
   kind: shelfUnitKindSchema,
+  tagUnitIds: t.Optional(t.Array(t.String())),
+  searchText: t.Optional(t.Nullable(t.String())),
 });
 
 export type AddShelfUnitInput = (typeof addShelfUnitSchema)["static"];
@@ -328,6 +330,8 @@ export const shelfUnitParamsSchema = t.Object({
 export type ShelfUnitParams = (typeof shelfUnitParamsSchema)["static"];
 
 export const shelfUnitsQuerySchema = t.Object({
+  q: t.Optional(t.String()),
+  tagUnitIds: t.Optional(t.Array(t.String())),
   cursor: t.Optional(t.String()),
   limit: paginationLimitSchema,
 });
@@ -503,6 +507,8 @@ export const collectInputSchema = t.Object({
   targetId: t.String(),
   shelfIds: t.Array(t.String()),
   independent: t.Optional(t.Boolean()),
+  tagUnitIds: t.Optional(t.Array(t.String())),
+  searchText: t.Optional(t.Nullable(t.String())),
 });
 
 export type CollectInput = (typeof collectInputSchema)["static"];
@@ -553,3 +559,71 @@ export const collectionStatusBatchResponseSchema = t.Object({
 
 export type CollectionStatusBatchResponse =
   (typeof collectionStatusBatchResponseSchema)["static"];
+
+// ============================================================
+// USER UNIT COLLECTION METADATA
+// ============================================================
+
+export const userTagApplicationDTOSchema = t.Object(
+  {
+    userId: t.String(),
+    unitId: t.String(),
+    tagUnitId: t.String(),
+    position: t.Optional(t.Nullable(t.String())),
+    createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+    updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+  },
+  { additionalProperties: false },
+);
+
+export type UserTagApplicationDTO =
+  (typeof userTagApplicationDTOSchema)["static"];
+
+export const setUserTagApplicationsSchema = t.Object({
+  unitId: t.String(),
+  tagUnitIds: t.Array(t.String()),
+});
+
+export type SetUserTagApplicationsInput =
+  (typeof setUserTagApplicationsSchema)["static"];
+
+export const reorderUserTagApplicationSchema = t.Object({
+  unitId: t.String(),
+  tagUnitId: t.String(),
+  beforeTagUnitId: t.Optional(t.String()),
+  afterTagUnitId: t.Optional(t.String()),
+});
+
+export type ReorderUserTagApplicationInput =
+  (typeof reorderUserTagApplicationSchema)["static"];
+
+export const userUnitCollectionDTOSchema = t.Object({
+  userId: t.String(),
+  unitId: t.String(),
+  searchText: t.Optional(t.Nullable(t.String())),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type UserUnitCollectionDTO =
+  (typeof userUnitCollectionDTOSchema)["static"];
+
+export const patchUserUnitCollectionSchema = t.Object({
+  unitId: t.String(),
+  tagUnitIds: t.Optional(t.Array(t.String())),
+  searchText: t.Optional(t.Nullable(t.String())),
+});
+
+export type PatchUserUnitCollectionInput =
+  (typeof patchUserUnitCollectionSchema)["static"];
+
+export const collectionSearchQuerySchema = t.Object({
+  q: t.Optional(t.String()),
+  tagUnitIds: t.Optional(t.Array(t.String())),
+  userId: t.Optional(t.String()),
+  cursor: t.Optional(t.String()),
+  limit: paginationLimitSchema,
+});
+
+export type CollectionSearchQuery =
+  (typeof collectionSearchQuerySchema)["static"];

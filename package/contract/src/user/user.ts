@@ -140,6 +140,23 @@ export const librarySettingsSchema = t.Object({
 
 export type LibrarySettings = (typeof librarySettingsSchema)["static"];
 
+export const USER_TAG_PRIVACY_FIELD_KEY = "userTags" as const;
+
+export const profileFieldVisibilitySchema = t.Union([
+  t.Literal("private"),
+  t.Literal("followers"),
+  t.Literal("public"),
+]);
+
+export type ProfileFieldVisibility =
+  (typeof profileFieldVisibilitySchema)["static"];
+
+export const userProfilePrivacySchema = t.Object({
+  [USER_TAG_PRIVACY_FIELD_KEY]: t.Optional(profileFieldVisibilitySchema),
+});
+
+export type UserProfilePrivacy = (typeof userProfilePrivacySchema)["static"];
+
 /**
  * User-facing per-kind notification toggles. Each key gates a family of
  * notification kinds (see `notificationPreferenceKeyForKind` in the
@@ -180,6 +197,7 @@ export const userSettingsSchema = t.Object({
   publishing: t.Optional(publishingPreferenceSchema),
   library: t.Optional(librarySettingsSchema),
   notifications: t.Optional(notificationPreferenceSchema),
+  privacy: t.Optional(userProfilePrivacySchema),
 });
 
 export type UserSettings = (typeof userSettingsSchema)["static"];

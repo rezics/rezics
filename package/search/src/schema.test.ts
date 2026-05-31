@@ -56,4 +56,15 @@ describe("expected Meilisearch work-domain settings", () => {
       expect.arrayContaining(["contentText", "authorName"]),
     );
   });
+
+  test("collection index stores only collection-side metadata", () => {
+    const collection = getExpectedMeiliIndexSchema("user_unit_collections");
+
+    expect(collection.searchableAttributes).toEqual(["searchText"]);
+    expect(collection.filterableAttributes).toEqual(
+      expect.arrayContaining(["ownerUserId", "unitId"]),
+    );
+    expect(collection.filterableAttributes).not.toContain("titles");
+    expect(collection.filterableAttributes).not.toContain("tagUnitIds");
+  });
 });

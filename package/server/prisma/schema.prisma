@@ -247,6 +247,9 @@ model Unit {
   realmTagApplicationsAsTargetUnit RealmTagApplication[] @relation("RealmTagApplicationTargetUnit")
   realmTagContextsAsTag            RealmTagContext[]     @relation("RealmTagContextTag")
   realmTagContextsAsContent        RealmTagContext[]     @relation("RealmTagContextContent")
+  userTagApplicationsAsTargetUnit  UserTagApplication[]  @relation("UserTagApplicationTargetUnit")
+  userTagApplicationsAsAppliedTag  UserTagApplication[]  @relation("UserTagApplicationAppliedTag")
+  userUnitCollections              UserUnitCollection[]  @relation("UserUnitCollectionUnit")
 
   // Credit attribution
   creditAttributions            CreditAttribution[]  @relation("CreditAttributedUnit")
@@ -923,6 +926,52 @@ model ShelfUnitRelation {
 }
 
 /**
+ * ANCHOR USER COLLECTION METADATA
+ *
+ * Shelf remains containment/publication. These rows are shared per user/unit
+ * metadata and do not prove that the Unit is currently contained by any shelf.
+ */
+model UserUnitCollection {
+  userId String @db.Uuid
+  unitId String @db.Uuid
+
+  /// User-authored indexing help only. Do not copy collected Unit content,
+  /// metadata, tags, or shelf metadata into this field or its search index.
+  searchText String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+  unit Unit @relation("UserUnitCollectionUnit", fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@id([userId, unitId])
+  @@index([userId, updatedAt])
+  @@index([unitId])
+}
+
+model UserTagApplication {
+  userId    String  @db.Uuid
+  unitId    String  @db.Uuid
+  tagUnitId String  @db.Uuid
+  position  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// User tags apply to the resolved interaction target Unit, not to
+  /// `(shelfId, unitId)` pairs or exact edition/source context.
+  user       User @relation(fields: [userId], references: [unitId], onDelete: Cascade)
+  targetUnit Unit @relation("UserTagApplicationTargetUnit", fields: [unitId], references: [id], onDelete: Cascade)
+  appliedTag Unit @relation("UserTagApplicationAppliedTag", fields: [tagUnitId], references: [id], onDelete: Cascade)
+
+  @@id([userId, unitId, tagUnitId])
+  @@index([userId, unitId])
+  @@index([userId, tagUnitId, unitId])
+  @@index([userId, unitId, position])
+}
+
+/**
  * ANCHOR SERIES EXTENSION
  */
 
@@ -1418,6 +1467,8 @@ model User {
   workLinkClaimsAsClaimer         WorkLinkClaim[]            @relation("WorkLinkClaimClaimer")
   workLinkClaimsAsResolver        WorkLinkClaim[]            @relation("WorkLinkClaimResolver")
   unitProgress                    UserUnitProgress[]
+  userUnitCollections             UserUnitCollection[]
+  userTagApplications             UserTagApplication[]
   contentNodeProgress             UserContentNodeProgress[]
   unitCollaborations              UnitCollaborator[]         @relation("UnitCollaboratorUser")
   unitCollaboratorsAdded          UnitCollaborator[]         @relation("UnitCollaboratorAddedBy")

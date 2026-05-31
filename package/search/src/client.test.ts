@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { SearchClient } from "./client";
+import { COLLECTION_INDEX_NAME } from "./collection";
 import { PROGRESS_INDEX_NAME } from "./progress";
 import {
   EXPECTED_MEILI_INDEX_SCHEMAS,
@@ -69,6 +70,7 @@ describe("SearchClient", () => {
     ["users", "userIndex", "initUserIndex"],
     ["posts", "postIndex", "initPostIndex"],
     ["comments", "commentIndex", "initCommentIndex"],
+    [COLLECTION_INDEX_NAME, "collectionIndex", "initCollectionIndex"],
     ["realms", "realmIndex", "initRealmIndex"],
     ["entities", "entityIndex", "initEntityIndex"],
     [PROGRESS_INDEX_NAME, "progressIndex", "initProgressIndex"],
@@ -112,6 +114,7 @@ describe("SearchClient", () => {
       "users",
       "posts",
       "comments",
+      "user_unit_collections",
       "realms",
       "entities",
       "user_unit_progress",

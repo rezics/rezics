@@ -1,4 +1,5 @@
 import { type Index, MeiliSearch } from "meilisearch";
+import { COLLECTION_INDEX_NAME } from "./collection";
 import { PROGRESS_INDEX_NAME } from "./progress";
 import {
   type ExpectedMeiliIndexSchema,
@@ -25,6 +26,7 @@ export class SearchClient {
   readonly userIndex: Index;
   readonly postIndex: Index;
   readonly commentIndex: Index;
+  readonly collectionIndex: Index;
   readonly realmIndex: Index;
   readonly entityIndex: Index;
   readonly progressIndex: Index;
@@ -36,6 +38,7 @@ export class SearchClient {
     this.userIndex = this.meili.index("users");
     this.postIndex = this.meili.index("posts");
     this.commentIndex = this.meili.index("comments");
+    this.collectionIndex = this.meili.index(COLLECTION_INDEX_NAME);
     this.realmIndex = this.meili.index("realms");
     this.entityIndex = this.meili.index("entities");
     this.progressIndex = this.meili.index(PROGRESS_INDEX_NAME);
@@ -85,6 +88,8 @@ export class SearchClient {
         return this.postIndex;
       case "comments":
         return this.commentIndex;
+      case COLLECTION_INDEX_NAME:
+        return this.collectionIndex;
       case "realms":
         return this.realmIndex;
       case "entities":
@@ -127,6 +132,12 @@ export class SearchClient {
 
   async initCommentIndex(): Promise<void> {
     await this.initIndexFromSchema(getExpectedMeiliIndexSchema("comments"));
+  }
+
+  async initCollectionIndex(): Promise<void> {
+    await this.initIndexFromSchema(
+      getExpectedMeiliIndexSchema(COLLECTION_INDEX_NAME),
+    );
   }
 
   async initRealmIndex(): Promise<void> {
@@ -216,6 +227,21 @@ export class SearchClient {
   }
   deleteAllComments() {
     return this.commentIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: User collection document operations
+
+  addOrUpdateCollections(docs: any[]) {
+    return this.collectionIndex.addDocuments(docs);
+  }
+  patchCollections(docs: any[]) {
+    return this.collectionIndex.updateDocuments(docs);
+  }
+  deleteCollections(ids: string[]) {
+    return this.collectionIndex.deleteDocuments(ids);
+  }
+  deleteAllCollections() {
+    return this.collectionIndex.deleteAllDocuments();
   }
 
   // ANCHOR: Realm document operations
