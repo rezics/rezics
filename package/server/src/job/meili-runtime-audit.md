@@ -16,7 +16,6 @@ Generated for OpenSpec change `introduce-job-runner-sync-infrastructure`.
 - `post/post.service.ts`: post sync/field patch and content sync.
 - `shelf/shelf.service.ts`: contained-unit content patch.
 - `tag/tag.service.ts`: content tag patch.
-- `translation-group/translation-group.service.ts`: post sync for translation-group mutations.
 - `entity/entity.service.ts`: entity sync/delete.
 - `credit-attribution/credit-attribution.service.ts`: content credit patch.
 

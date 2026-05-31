@@ -509,7 +509,6 @@ async function seedTreePostsForTarget(
 }
 
 // Deterministic uuidv7-shaped ids (version nibble 7) so reseeds are stable.
-const WIKI_GROUP_ID = "01910000-0000-7000-8000-000000000001";
 const WIKI_POST_ZH_ID = "01910000-0000-7000-8000-000000001001";
 const WIKI_POST_EN_ID = "01910000-0000-7000-8000-000000001002";
 const WIKI_POST_JA_ID = "01910000-0000-7000-8000-000000001003";
@@ -545,67 +544,67 @@ const WIKI_POSTS: {
   },
 ];
 
-export async function seedWikiTranslationGroups(
+export async function seedWikiContentTranslations(
   prisma: PrismaClient,
   users: CreatedUser[],
-): Promise<{ groupId: string; postIds: string[] } | null> {
+): Promise<{ unitId: string } | null> {
   if (users.length === 0) return null;
 
-  const existing = await prisma.translationGroup.findUnique({
-    where: { id: WIKI_GROUP_ID },
+  const existing = await prisma.unit.findUnique({
+    where: { id: WIKI_POST_EN_ID },
     select: { id: true },
   });
   if (existing) {
-    return { groupId: WIKI_GROUP_ID, postIds: WIKI_POSTS.map((p) => p.id) };
+    return { unitId: WIKI_POST_EN_ID };
   }
 
   const author = users[0]!;
 
   await prisma.$transaction(async (tx) => {
-    await tx.translationGroup.create({
+    const primary = WIKI_POSTS[1] ?? WIKI_POSTS[0]!;
+    await tx.unit.create({
       data: {
-        id: WIKI_GROUP_ID,
-        supportedLanguages: WIKI_POSTS.map((p) => p.language),
-      },
-    });
-
-    for (const p of WIKI_POSTS) {
-      await tx.unit.create({
-        data: {
-          id: p.id,
-          type: UnitType.POST,
-          userId: author.userId,
-          slugScope: author.userId,
-          status: UnitStatus.PUBLISHED,
-          licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-          defaultLanguage: p.language,
-          translationGroupId: WIKI_GROUP_ID,
-          publishedAt: new Date(),
-          post: {
-            create: {
-              authorUserId: author.userId,
-              kind: PostKind.POST,
-              content: markdownContentDoc(p.contentSource) as never,
-              depth: 0,
-            },
-          },
-          translations: {
-            create: {
-              language: p.language,
-              title: p.title,
-            },
-          },
-          supportLanguages: {
-            create: {
-              language: p.language,
-              isPrimary: true,
-              sortOrder: 0,
-            },
+        id: primary.id,
+        type: UnitType.POST,
+        userId: author.userId,
+        slugScope: author.userId,
+        status: UnitStatus.PUBLISHED,
+        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
+        defaultLanguage: primary.language,
+        publishedAt: new Date(),
+        post: {
+          create: {
+            authorUserId: author.userId,
+            kind: PostKind.POST,
+            content: markdownContentDoc(primary.contentSource) as never,
+            depth: 0,
           },
         },
-      });
-    }
+        translations: {
+          create: WIKI_POSTS.map((p) => ({
+            language: p.language,
+            title: p.title,
+          })),
+        },
+        supportLanguages: {
+          create: WIKI_POSTS.map((p, index) => ({
+            language: p.language,
+            isPrimary: p.language === primary.language,
+            sortOrder: index,
+          })),
+        },
+        contentTranslations: {
+          create: WIKI_POSTS.map((p) => ({
+            language: p.language,
+            content: markdownContentDoc(p.contentSource) as never,
+            status: "PUBLISHED",
+            authorUserId: author.userId,
+            provenance: { importedFrom: "factory-wiki-seed" },
+          })),
+        },
+      },
+    });
   });
 
-  return { groupId: WIKI_GROUP_ID, postIds: WIKI_POSTS.map((p) => p.id) };
+  return { unitId: WIKI_POST_EN_ID };
 }

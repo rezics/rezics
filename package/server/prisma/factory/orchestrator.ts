@@ -11,7 +11,7 @@ import {
 import { seedGames } from "./games.js";
 import { seedMedia } from "./media.js";
 import { seedPinboard } from "./pinboard.js";
-import { seedPostsForWorks, seedWikiTranslationGroups } from "./posts.js";
+import { seedPostsForWorks, seedWikiContentTranslations } from "./posts.js";
 import { seedRealms } from "./realms.js";
 import { createSeedResult } from "./result.js";
 import { seedScores } from "./scores.js";
@@ -117,15 +117,11 @@ export async function runFactorySeed(
   console.log(`[Seed]   ${posts.length} posts`);
   done();
 
-  done = stepTimer("Step 7: Wiki translation groups");
-  const wikiGroup = await seedWikiTranslationGroups(ctx.prisma, users);
-  if (wikiGroup) {
-    for (const postId of wikiGroup.postIds) {
-      await ctx.sync.post(postId);
-    }
-    console.log(
-      `[Seed]   1 wiki translation group with ${wikiGroup.postIds.length} parallel posts`,
-    );
+  done = stepTimer("Step 7: Wiki content translations");
+  const wikiEntry = await seedWikiContentTranslations(ctx.prisma, users);
+  if (wikiEntry) {
+    await ctx.sync.post(wikiEntry.unitId);
+    console.log("[Seed]   1 wiki post with ContentTranslation bodies");
   }
   done();
 

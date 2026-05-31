@@ -93,7 +93,6 @@ function subjectRow(
       userId: "user-1",
       defaultLanguage: "en",
       isLanguageNeutral: false,
-      translationGroupId: null,
       status: "PUBLISHED",
       visibility: "PUBLIC",
       rating: "GENERAL",

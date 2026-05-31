@@ -588,13 +588,15 @@ async function createWikiScenarioPost(
     userId: string;
     targetUnitId: string;
     realmUnitId: string;
-    translationGroupId: string;
-    language: string;
-    title: string;
-    body: string;
+    defaultLanguage: string;
+    translations: Array<{ language: string; title: string; body: string }>;
     publishedAt: Date;
   },
 ): Promise<string> {
+  const primary =
+    input.translations.find(
+      (item) => item.language === input.defaultLanguage,
+    ) ?? input.translations[0]!;
   const postUnitId = randomUUID();
   await ctx.prisma.unit.create({
     data: {
@@ -605,26 +607,38 @@ async function createWikiScenarioPost(
       status: UnitStatus.PUBLISHED,
       visibility: UnitVisibility.PUBLIC,
       licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-      defaultLanguage: input.language,
-      translationGroupId: input.translationGroupId,
+      defaultLanguage: input.defaultLanguage,
       publishedAt: input.publishedAt,
       updatedAt: input.publishedAt,
       translations: {
-        create: {
-          language: input.language,
-          title: input.title,
-          summary: `${input.title} wiki fixture.`,
-        },
+        create: input.translations.map((item) => ({
+          language: item.language,
+          title: item.title,
+          summary: `${item.title} wiki fixture.`,
+        })),
       },
       supportLanguages: {
-        create: { language: input.language, isPrimary: true },
+        create: input.translations.map((item, index) => ({
+          language: item.language,
+          isPrimary: item.language === input.defaultLanguage,
+          sortOrder: index,
+        })),
+      },
+      contentTranslations: {
+        create: input.translations.map((item) => ({
+          language: item.language,
+          content: markdownContentDoc(item.body) as Prisma.InputJsonValue,
+          status: "PUBLISHED",
+          authorUserId: input.userId,
+          provenance: { importedFrom: "factory-wiki-zone-scenario" },
+        })),
       },
       post: {
         create: {
           authorUserId: input.userId,
           targetUnitId: input.targetUnitId,
           kind: PostKind.WIKI,
-          content: markdownContentDoc(input.body) as Prisma.InputJsonValue,
+          content: markdownContentDoc(primary.body) as Prisma.InputJsonValue,
           depth: 0,
           createdAt: input.publishedAt,
           updatedAt: input.publishedAt,
@@ -663,7 +677,7 @@ async function createWikiScenarioZone(
     };
     entityIds: string[];
     tagUnitIds: string[];
-    translationGroupIds: string[];
+    wikiUnitIds: string[];
   },
 ): Promise<string> {
   const zoneUnitId = randomUUID();
@@ -713,8 +727,8 @@ async function createWikiScenarioZone(
                     { kind: "entity", entityId: input.entityIds[0] },
                     { kind: "tag", tagUnitId: input.tagUnitIds[0] },
                     {
-                      kind: "translationGroup",
-                      translationGroupId: input.translationGroupIds[0],
+                      kind: "wikiUnit",
+                      unitId: input.wikiUnitIds[0],
                     },
                     {
                       kind: "manualLink",
@@ -754,13 +768,13 @@ async function createWikiScenarioZone(
                   sort: "title",
                 },
                 {
-                  id: "translation-groups",
-                  kind: "translationGroupCollection",
+                  id: "wiki-units",
+                  kind: "wikiUnitCollection",
                   title: {
-                    translations: { en: "Parallel entries" },
+                    translations: { en: "Translated entries" },
                     fallbackLanguage: DEFAULT_LANGUAGE,
                   },
-                  translationGroupIds: input.translationGroupIds,
+                  unitIds: input.wikiUnitIds,
                   limit: 6,
                 },
                 { id: "recent", kind: "recentWiki", limit: 4 },
@@ -897,46 +911,38 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
     createScenarioTag(ctx, "Factory Wiki Stub"),
   ]);
 
-  const translationGroups = [
+  const wikiEntries = [
     { id: randomUUID(), en: "Overview", zh: "概覽" },
     { id: randomUUID(), en: "Characters", zh: "角色" },
     { id: randomUUID(), en: "Stub Notes", zh: "短條目" },
   ];
-  await ctx.prisma.translationGroup.createMany({
-    data: translationGroups.map((group) => ({
-      id: group.id,
-      supportedLanguages: [DEFAULT_LANGUAGE, LANGUAGES.ZH_HANT],
-    })),
-  });
 
   const now = new Date();
   const postIds: string[] = [];
-  for (const [index, group] of translationGroups.entries()) {
+  for (const [index, entry] of wikiEntries.entries()) {
     postIds.push(
       await createWikiScenarioPost(ctx, {
         userId: user.userId,
         targetUnitId: wikiEntryUnitId,
         realmUnitId,
-        translationGroupId: group.id,
-        language: DEFAULT_LANGUAGE,
-        title: `Factory Wiki: ${group.en}`,
-        body:
-          index === 2
-            ? "Stub."
-            : `Long-form wiki entry for ${group.en} in the wiki Zone scenario.`,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        translations: [
+          {
+            language: DEFAULT_LANGUAGE,
+            title: `Factory Wiki: ${entry.en}`,
+            body:
+              index === 2
+                ? "Stub."
+                : `Long-form wiki entry for ${entry.en} in the wiki Zone scenario.`,
+          },
+          {
+            language: LANGUAGES.ZH_HANT,
+            title: `Factory Wiki：${entry.zh}`,
+            body:
+              index === 2 ? "短。" : `Wiki Zone 情境的${entry.zh}繁中條目。`,
+          },
+        ],
         publishedAt: new Date(now.getTime() - index * 86400000),
-      }),
-    );
-    postIds.push(
-      await createWikiScenarioPost(ctx, {
-        userId: user.userId,
-        targetUnitId: wikiEntryUnitId,
-        realmUnitId,
-        translationGroupId: group.id,
-        language: LANGUAGES.ZH_HANT,
-        title: `Factory Wiki：${group.zh}`,
-        body: index === 2 ? "短。" : `Wiki Zone 情境的${group.zh}繁中條目。`,
-        publishedAt: new Date(now.getTime() - (index + 3) * 86400000),
       }),
     );
   }
@@ -970,7 +976,7 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
         },
         entityIds: [characterId, locationId, factionId],
         tagUnitIds: [loreTagId, stubTagId],
-        translationGroupIds: translationGroups.map((group) => group.id),
+        wikiUnitIds: postIds,
       }),
     );
   }
