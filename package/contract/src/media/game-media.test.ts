@@ -36,8 +36,6 @@ const baseSearchDocument = {
   workUnitId: "work-1",
   position: "a0",
   displayPolicy: "PRIMARY",
-  workUnitIds: ["work-1"],
-  workRoles: ["RELEASE"],
   catalogEntryKind: "MAIN",
   targetUnitId: null,
   seriesUnitIds: [],

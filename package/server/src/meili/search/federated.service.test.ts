@@ -161,7 +161,7 @@ describe("federatedSearch", () => {
     expect(commentQuery?.filter).toContain('rootUnitId = "b-9"');
   });
 
-  test("book work scope carries shelf work filters but exact post filters through grouped search", async () => {
+  test("book work scope uses exact filters through grouped search", async () => {
     const { client, multi } = makeFakeClient();
     const opts: FederatedSearchOptions = {
       scope: { kind: "book", unitId: "release-1", workUnitId: "work-1" },
@@ -175,9 +175,9 @@ describe("federatedSearch", () => {
     const shelfQuery = queries.find(
       (q) => q.indexUid === "content" && q.filter?.includes('type = "SHELF"'),
     );
-    expect(shelfQuery?.filter).toContain('workUnitIds = "work-1"');
-    expect(shelfQuery?.filter).toContain('workRoles = "SHELF"');
-    expect(shelfQuery?.filter).not.toContain('containedUnitIds = "release-1"');
+    expect(shelfQuery?.filter).toContain('containedUnitIds = "release-1"');
+    expect(shelfQuery?.filter).not.toContain('workUnitIds = "work-1"');
+    expect(shelfQuery?.filter).not.toContain('workRoles = "SHELF"');
 
     const reviewQuery = queries.find(
       (q) => q.indexUid === "posts" && q.filter?.includes('kind = "REVIEW"'),
@@ -187,7 +187,7 @@ describe("federatedSearch", () => {
     expect(reviewQuery?.filter).not.toContain('workRoles = "REVIEW"');
 
     const commentQuery = queries.find((q) => q.indexUid === "comments");
-    expect(commentQuery?.filter).toContain('rootUnitId = "__never__"');
+    expect(commentQuery?.filter).toContain('rootUnitId = "release-1"');
   });
 
   test("book exact scope with work id carries exact filters through grouped search", async () => {

@@ -30,7 +30,7 @@ describe("buildContentFilter", () => {
     expect(filter).toContain('containedUnitIds = "b-1"');
   });
 
-  test("book work scope with shelves subtype emits work-domain shelf filters", () => {
+  test("book work scope with shelves subtype stays on exact containment", () => {
     const scope: SearchScope = {
       kind: "book",
       unitId: "release-1",
@@ -45,9 +45,9 @@ describe("buildContentFilter", () => {
       },
     );
     expect(filter).toContain('type = "SHELF"');
-    expect(filter).toContain('workUnitIds = "work-1"');
-    expect(filter).toContain('workRoles = "SHELF"');
-    expect(filter).not.toContain('containedUnitIds = "release-1"');
+    expect(filter).toContain('containedUnitIds = "release-1"');
+    expect(filter).not.toContain('workUnitIds = "work-1"');
+    expect(filter).not.toContain('workRoles = "SHELF"');
   });
 
   test("book exact scope with work id still emits containedUnitIds", () => {
@@ -233,13 +233,13 @@ describe("buildCommentFilter", () => {
     expect(filter).toContain("isLocked = false");
   });
 
-  test("book work scope excludes comments until anchor projections exist", () => {
+  test("book work scope keeps comments on exact roots", () => {
     const filter = buildCommentFilter(emptyQuery, {
       kind: "book",
       unitId: "release-1",
       workUnitId: "work-1",
     });
-    expect(filter).toContain('rootUnitId = "__never__"');
+    expect(filter).toContain('rootUnitId = "release-1"');
   });
 
   test("realm and user scopes map to comment partition fields", () => {

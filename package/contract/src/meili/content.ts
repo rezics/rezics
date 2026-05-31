@@ -10,7 +10,7 @@ import {
   catalogEntryKindSchema,
   contentRatingSchema,
 } from "../unit/unit";
-import { unitWorkDisplayPolicySchema, unitWorkRoleSchema } from "../unit/work";
+import { unitWorkDisplayPolicySchema } from "../unit/work";
 
 // ANCHOR: Content Search Document
 
@@ -50,10 +50,6 @@ export const ContentSearchDocumentSchema = t.Object({
   workUnitId: t.Union([t.String(), t.Null()]),
   position: t.Union([t.String(), t.Null()]),
   displayPolicy: t.Union([unitWorkDisplayPolicySchema, t.Null()]),
-
-  // Generic work-domain memberships for non-release content.
-  workUnitIds: t.Array(t.String()),
-  workRoles: t.Array(unitWorkRoleSchema),
 
   // Native catalog identity. Variants resolve normal interactions through
   // targetUnitId; SERIES and other non-participating types keep null.
@@ -155,7 +151,6 @@ export const ContentSearchOptionsSchema = t.Object({
   tags: t.Optional(t.Array(TagRefSchema)),
   tagIds: t.Optional(t.Array(t.String())),
   workUnitId: t.Optional(t.String()),
-  workRoles: t.Optional(t.Array(unitWorkRoleSchema)),
   catalogEntryKind: t.Optional(catalogEntryKindSchema),
   targetUnitId: t.Optional(t.String()),
   containedUnitIds: t.Optional(t.Array(t.String())),

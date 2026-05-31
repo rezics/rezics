@@ -29,8 +29,6 @@ function searchDoc(
     workUnitId: null,
     position: null,
     displayPolicy: null,
-    workUnitIds: [],
-    workRoles: [],
     realmIds: [],
     realmTagKeys: [],
     languages: ["en"],

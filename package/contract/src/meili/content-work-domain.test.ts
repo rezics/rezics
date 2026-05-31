@@ -26,8 +26,6 @@ const baseContentDocument = {
   workUnitId: "work-1",
   position: "a0",
   displayPolicy: "PRIMARY",
-  workUnitIds: ["work-1"],
-  workRoles: ["RELEASE"],
   catalogEntryKind: "MAIN",
   targetUnitId: null,
   seriesUnitIds: [],
@@ -72,8 +70,6 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
         aiDisclosureMode: "AI_ASSISTED",
         position: null,
         displayPolicy: null,
-        workUnitIds: [],
-        workRoles: [],
         catalogEntryKind: "NONE",
         seriesUnitIds: ["series-1"],
         seriesKindKeys: ["book_series"],
@@ -94,7 +90,6 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
       Value.Check(ContentSearchOptionsSchema, {
         releasePresentation: "expanded",
         workUnitId: "work-1",
-        workRoles: ["RELEASE"],
         catalogEntryKind: "VARIANT",
         targetUnitId: "release-1",
         seriesUnitIds: ["series-1"],
@@ -108,7 +103,7 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
     ).toBe(true);
   });
 
-  test("documents exact shelf containment and work-domain option names", () => {
+  test("documents exact shelf containment and catalog option names", () => {
     expect(
       Value.Check(ContentSearchOptionsSchema, {
         containedUnitIds: ["release-1"],
@@ -117,7 +112,8 @@ describe("ContentSearchDocumentSchema work-domain fields", () => {
     expect(
       Value.Check(ContentSearchOptionsSchema, {
         workUnitId: "work-1",
-        workRoles: ["SHELF"],
+        catalogEntryKind: "VARIANT",
+        targetUnitId: "main-1",
       }),
     ).toBe(true);
   });

@@ -300,8 +300,6 @@ describe("buildContentDocument realm tag keys", () => {
     expect(doc.tagLabels).toEqual(["Own"]);
     expect(doc.position).toBe("a0");
     expect(doc.displayPolicy).toBe("PRIMARY");
-    expect(doc.workUnitIds).toEqual(["work-1"]);
-    expect(doc.workRoles).toEqual(["RELEASE"]);
   });
 
   test("projects direct Series metadata without nested expansion", async () => {

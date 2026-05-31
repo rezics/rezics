@@ -8,7 +8,6 @@ describe("search result card destinations", () => {
       id: "release-visible",
       type: "BOOK",
       workUnitId: "hidden-work",
-      workUnitIds: ["hidden-work"],
     } as unknown as ContentSearchDocument;
 
     expect(contentHref(item)).toBe("/book/release-visible");

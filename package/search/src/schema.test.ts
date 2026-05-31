@@ -10,8 +10,6 @@ describe("expected Meilisearch work-domain settings", () => {
         "workUnitId",
         "displayPolicy",
         "position",
-        "workUnitIds",
-        "workRoles",
         "seriesUnitIds",
         "seriesKindKeys",
         "platformEntityIds",

@@ -440,10 +440,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
       .filter(Boolean);
     tagLabels.push(...labels);
   }
-  const workUnitIds = workMemberships.map(
-    (membership) => membership.workUnitId,
-  );
-  const workRoles = workMemberships.map((membership) => membership.role);
   const directSeriesRows: any[] = unit.seriesContentIndexesAsRelease ?? [];
   const seriesUnitIds = [
     ...new Set(directSeriesRows.map((row) => row.seriesUnitId)),
@@ -593,8 +589,6 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     workUnitId,
     position: releaseMembership?.position ?? null,
     displayPolicy: releaseMembership?.displayPolicy ?? null,
-    workUnitIds,
-    workRoles,
     catalogEntryKind: unit.catalogEntryKind ?? null,
     targetUnitId: unit.targetUnitId ?? null,
     seriesUnitIds,

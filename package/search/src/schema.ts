@@ -52,8 +52,6 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "workUnitId",
       "displayPolicy",
       "position",
-      "workUnitIds",
-      "workRoles",
       "catalogEntryKind",
       "targetUnitId",
       "seriesUnitIds",

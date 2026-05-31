@@ -114,15 +114,6 @@ export async function searchContent(
   if (opts.workUnitId) {
     filter.push(`workUnitId = "${opts.workUnitId}"`);
   }
-  if (opts.workRoles?.length) {
-    if (opts.workRoles.length === 1) {
-      filter.push(`workRoles = "${opts.workRoles[0]}"`);
-    } else {
-      filter.push(
-        `workRoles IN [${opts.workRoles.map((role) => `"${role}"`).join(", ")}]`,
-      );
-    }
-  }
 
   if (opts.catalogEntryKind) {
     filter.push(`catalogEntryKind = "${opts.catalogEntryKind}"`);

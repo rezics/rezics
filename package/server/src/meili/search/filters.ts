@@ -72,16 +72,10 @@ const BOOK_CONTENT_CATALOG_FILTER = [
   'type = "SERIES"',
 ].join(" OR ");
 
-function resolveBookScope(
-  scope: SearchScope,
-): { mode: "exact"; unitId: string } | { mode: "work"; workUnitId: string } {
-  if (
-    scope.kind === "book" &&
-    scope.scopeMode !== "exact" &&
-    scope.workUnitId?.trim()
-  ) {
-    return { mode: "work", workUnitId: scope.workUnitId };
-  }
+function resolveBookScope(scope: SearchScope): {
+  mode: "exact";
+  unitId: string;
+} {
   if (scope.kind === "book") return { mode: "exact", unitId: scope.unitId };
   throw new Error("resolveBookScope requires a book scope");
 }
@@ -120,12 +114,7 @@ export function buildContentFilter(
   // 2. Scope filter
   if (scope.kind === "book") {
     const bookScope = resolveBookScope(scope);
-    if (bookScope.mode === "work" && opts.contentSubtype === "shelves") {
-      filter.push(`workUnitIds = "${bookScope.workUnitId}"`);
-      filter.push(`workRoles = "SHELF"`);
-    } else if (bookScope.mode === "exact") {
-      filter.push(`containedUnitIds = "${bookScope.unitId}"`);
-    }
+    filter.push(`containedUnitIds = "${bookScope.unitId}"`);
   } else if (scope.kind === "realm") {
     filter.push(`realmIds = "${scope.realmId}"`);
   } else if (scope.kind === "user") {
@@ -251,11 +240,7 @@ export function buildCommentFilter(
 
   if (scope.kind === "book") {
     const bookScope = resolveBookScope(scope);
-    if (bookScope.mode === "exact") {
-      filter.push(`rootUnitId = "${bookScope.unitId}"`);
-    } else {
-      filter.push(`rootUnitId = "__never__"`);
-    }
+    filter.push(`rootUnitId = "${bookScope.unitId}"`);
   } else if (scope.kind === "realm") {
     filter.push(`realmUnitId = "${scope.realmId}"`);
   } else if (scope.kind === "user") {
