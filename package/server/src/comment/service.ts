@@ -53,6 +53,46 @@ async function attachCommentPaths<
   return comments;
 }
 
+async function attachPinOverlays<
+  T extends {
+    unitId: string;
+    rootUnitId: string;
+    pinKind?: string | null;
+    pinPosition?: string | null;
+  },
+>(comments: T[]): Promise<T[]> {
+  if (comments.length === 0) return comments;
+  const rootUnitIds = [
+    ...new Set(comments.map((comment) => comment.rootUnitId)),
+  ];
+  const pins = await prisma.postPin.findMany({
+    where: {
+      scopeUnitId: { in: rootUnitIds },
+      postUnitId: { in: comments.map((comment) => comment.unitId) },
+    },
+    select: {
+      scopeUnitId: true,
+      postUnitId: true,
+      kind: true,
+      position: true,
+    },
+  });
+  const pinByScopeAndPost = new Map(
+    pins.map((pin) => [
+      `${pin.scopeUnitId}:${pin.postUnitId}`,
+      { kind: pin.kind, position: pin.position },
+    ]),
+  );
+  for (const comment of comments) {
+    const pin = pinByScopeAndPost.get(
+      `${comment.rootUnitId}:${comment.unitId}`,
+    );
+    comment.pinKind = pin?.kind ?? null;
+    comment.pinPosition = pin?.position ?? null;
+  }
+  return comments;
+}
+
 async function applyBlockedAuthorFilter(
   where: Prisma.CommentWhereInput,
   options?: { viewerUserId?: string | null },
@@ -124,7 +164,7 @@ export class CommentService {
           }
       `;
       where.unitId = { in: descendants.map((row) => row.unitId) };
-    } else {
+    } else if (query.mode !== "threaded") {
       where.parentCommentUnitId = query.parentCommentUnitId ?? null;
     }
 
@@ -147,7 +187,9 @@ export class CommentService {
     ]);
 
     return {
-      comments: await attachCommentPaths(comments as CommentWithRelations[]),
+      comments: await attachPinOverlays(
+        await attachCommentPaths(comments as CommentWithRelations[]),
+      ),
       total,
     };
   }
@@ -160,7 +202,8 @@ export class CommentService {
     const [withPath] = await attachCommentPaths([
       comment as CommentWithRelations,
     ]);
-    return withPath;
+    const [withPins] = await attachPinOverlays([withPath]);
+    return withPins;
   }
 
   async create(

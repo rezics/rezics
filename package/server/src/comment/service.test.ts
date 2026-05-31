@@ -24,6 +24,7 @@ describe("CommentService", () => {
     const queryRaw = mock(async () => []);
     Object.assign(prismaMock, {
       comment: { findMany, count },
+      postPin: { findMany: mock(async () => []) },
       $queryRaw: queryRaw,
     });
 
@@ -110,6 +111,7 @@ describe("CommentService", () => {
       $transaction: transaction,
       $queryRaw: queryRaw,
       comment: { findUniqueOrThrow: mock(async () => null) },
+      postPin: { findMany: mock(async () => []) },
     });
 
     const { CommentService } = await import("./service");
@@ -142,5 +144,81 @@ describe("CommentService", () => {
     });
     expect(enqueueMock).toHaveBeenCalledTimes(1);
     expect(comment.path).toBe("1");
+  });
+
+  test("lists a whole threaded partition and hydrates pin overlays", async () => {
+    const commentRow = {
+      unitId: "comment-1",
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      parentCommentUnitId: null,
+      authorUserId: "user-1",
+      content: null,
+      depth: 1,
+      replyCount: 0,
+      directReplyCount: 0,
+      lastReplyAt: null,
+      isLocked: false,
+      state: null,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      unit: {
+        status: "PUBLISHED",
+        user: null,
+        contentModerationState: null,
+      },
+    };
+    const findMany = mock(async () => [commentRow]);
+    const count = mock(async () => 1);
+    const pinFindMany = mock(async () => [
+      {
+        scopeUnitId: "root-1",
+        postUnitId: "comment-1",
+        kind: "PINNED",
+        position: "a0",
+      },
+    ]);
+    const queryRaw = mock(async () => [{ unitId: "comment-1", path: "1" }]);
+    Object.assign(prismaMock, {
+      comment: { findMany, count },
+      postPin: { findMany: pinFindMany },
+      $queryRaw: queryRaw,
+    });
+
+    const { CommentService } = await import("./service");
+    const result = await new CommentService().list({
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      mode: "threaded",
+      maxDepth: 4,
+      limit: 20,
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          rootUnitId: "root-1",
+          realmUnitId: "realm-1",
+          depth: { lte: 4 },
+        }),
+      }),
+    );
+    expect(findMany.mock.calls[0]?.[0].where).not.toHaveProperty(
+      "parentCommentUnitId",
+    );
+    expect(pinFindMany).toHaveBeenCalledWith({
+      where: {
+        scopeUnitId: { in: ["root-1"] },
+        postUnitId: { in: ["comment-1"] },
+      },
+      select: {
+        scopeUnitId: true,
+        postUnitId: true,
+        kind: true,
+        position: true,
+      },
+    });
+    expect(result.comments[0]?.pinKind).toBe("PINNED");
+    expect(result.comments[0]?.pinPosition).toBe("a0");
   });
 });

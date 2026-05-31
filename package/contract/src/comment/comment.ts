@@ -3,6 +3,7 @@ import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
+import { pinKindLiterals } from "../post/post";
 import { publicUserSchema } from "../unit/unit";
 
 // ANCHOR: Comment DTO
@@ -23,6 +24,8 @@ export const commentDTOSchema = t.Object({
   isLocked: t.Optional(t.Boolean()),
   state: t.Optional(t.Nullable(t.String())),
   isTombstone: t.Optional(t.Boolean()),
+  pinKind: t.Optional(t.Nullable(pinKindLiterals)),
+  pinPosition: t.Optional(t.Nullable(t.String())),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -39,7 +42,13 @@ export const commentListQuerySchema = t.Object({
   subtreeRootCommentUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   state: t.Optional(t.String()),
-  mode: t.Optional(t.Union([t.Literal("children"), t.Literal("subtree")])),
+  mode: t.Optional(
+    t.Union([
+      t.Literal("children"),
+      t.Literal("threaded"),
+      t.Literal("subtree"),
+    ]),
+  ),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
     t.Union([
@@ -71,7 +80,13 @@ export const commentListBodySchema = t.Object({
   subtreeRootCommentUnitId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   state: t.Optional(t.String()),
-  mode: t.Optional(t.Union([t.Literal("children"), t.Literal("subtree")])),
+  mode: t.Optional(
+    t.Union([
+      t.Literal("children"),
+      t.Literal("threaded"),
+      t.Literal("subtree"),
+    ]),
+  ),
   maxDepth: t.Optional(t.Number()),
   sort: t.Optional(
     t.Union([

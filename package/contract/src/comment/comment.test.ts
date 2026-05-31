@@ -18,6 +18,8 @@ describe("comment contract", () => {
         content: null,
         depth: 1,
         path: "1",
+        pinKind: "ACCEPTED_ANSWER",
+        pinPosition: "a0",
       }),
     ).toBe(true);
   });
@@ -45,6 +47,7 @@ describe("comment contract", () => {
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
         parentCommentUnitId: "comment-1",
+        mode: "threaded",
         limit: 20,
       }),
     ).toBe(true);

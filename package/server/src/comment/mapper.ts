@@ -30,6 +30,8 @@ export function mapCommentToDTO(comment: CommentWithRelations): CommentDTO {
     isLocked: comment.isLocked,
     state: comment.state ?? null,
     isTombstone: comment.unit.status === "DELETED" || contentHidden,
+    pinKind: comment.pinKind ?? null,
+    pinPosition: comment.pinPosition ?? null,
     createdAt: comment.createdAt.toISOString(),
     updatedAt: comment.updatedAt.toISOString(),
   };
