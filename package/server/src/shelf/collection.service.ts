@@ -9,7 +9,7 @@ import type {
 import { PostKind, prisma, UnitType } from "#/prisma/client";
 import { AppError } from "@/utils/errors";
 import { generateBetween } from "./fractional-index";
-import { mapUnitToKind, reconcileShelfWorkMemberships } from "./shelf.service";
+import { enqueueContainedUnitIdsSync, mapUnitToKind } from "./shelf.service";
 import { findSystemShelf } from "./system-shelves";
 import {
   applyUserUnitCollectionMetadata,
@@ -214,7 +214,7 @@ export class CollectionService {
     }
 
     await Promise.all(
-      savedTo.map((shelfId) => reconcileShelfWorkMemberships(shelfId)),
+      savedTo.map((shelfId) => enqueueContainedUnitIdsSync(shelfId)),
     );
 
     return { savedTo, isNew };
@@ -260,7 +260,7 @@ export class CollectionService {
           }
         }
       });
-      await reconcileShelfWorkMemberships(favShelfId);
+      await enqueueContainedUnitIdsSync(favShelfId);
       return { isFavorited: false };
     }
 
@@ -332,7 +332,7 @@ export class CollectionService {
       }
     });
 
-    await reconcileShelfWorkMemberships(favShelfId);
+    await enqueueContainedUnitIdsSync(favShelfId);
     return { isFavorited: true };
   }
 

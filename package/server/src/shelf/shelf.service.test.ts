@@ -382,55 +382,6 @@ describe("ShelfService", () => {
     expect(findManyArgs.where.unitId.in).toEqual(["book-1"]);
   });
 
-  test("reconcileShelfWorkMemberships registers shelf work domains from contained releases", async () => {
-    enqueueMock.mockClear();
-    const deleteManyMock = mock(async () => ({ count: 0 }));
-    const upsertMock = mock(async () => ({}));
-
-    Object.assign(prismaMock, {
-      shelfUnit: {
-        findMany: async () => [{ unitId: "release-1" }],
-      },
-      unitWork: {
-        findMany: async () => [{ workUnitId: "work-1" }],
-        deleteMany: deleteManyMock,
-        upsert: upsertMock,
-      },
-    });
-
-    const { reconcileShelfWorkMemberships } = await import("./shelf.service");
-    await reconcileShelfWorkMemberships("shelf-1");
-
-    expect(deleteManyMock.mock.calls[0]?.[0]).toMatchObject({
-      where: {
-        unitId: "shelf-1",
-        role: "SHELF",
-        workUnitId: { notIn: ["work-1"] },
-      },
-    });
-    expect(upsertMock.mock.calls[0]?.[0]).toMatchObject({
-      where: {
-        unitId_workUnitId_role: {
-          unitId: "shelf-1",
-          workUnitId: "work-1",
-          role: "SHELF",
-        },
-      },
-      create: {
-        unitId: "shelf-1",
-        workUnitId: "work-1",
-        role: "SHELF",
-        displayPolicy: "PRIMARY",
-      },
-    });
-    expect(enqueueMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        kind: "search.content.sync",
-        payload: { unitId: "shelf-1" },
-      }),
-    );
-  });
-
   test("addUnit rejects direct self-containment", async () => {
     const { shelfService } = await import("./shelf.service");
 
