@@ -1,5 +1,8 @@
-import type { UserUnitCollectionDTO } from "@rezics/contract";
-import type { UserUnitCollectionRow } from "./types";
+import type {
+  CollectionUnitDTO,
+  UserUnitCollectionDTO,
+} from "@rezics/contract";
+import type { CollectionUnitRow, UserUnitCollectionRow } from "./types";
 
 export function mapUserUnitCollectionToDTO(
   row: UserUnitCollectionRow,
@@ -10,5 +13,19 @@ export function mapUserUnitCollectionToDTO(
     searchText: row.searchText,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+  };
+}
+
+export function mapCollectionUnitToDTO(
+  row: CollectionUnitRow,
+): CollectionUnitDTO {
+  return {
+    userId: row.userId,
+    unitId: row.unitId,
+    shelfIds: row.shelfIds,
+    tagUnitIds: row.tagUnitIds,
+    searchText: row.searchText,
+    createdAt: row.createdAt ?? undefined,
+    updatedAt: row.updatedAt ?? undefined,
   };
 }

@@ -34,4 +34,27 @@ describe("userUnitCollectionApi", () => {
       tagUnitIds: ["tag-1"],
     });
   });
+
+  test("searches my collection and a user's public collection", async () => {
+    const { userUnitCollectionApi } = await import(
+      "./user-unit-collection.api"
+    );
+
+    await userUnitCollectionApi.searchMine({
+      q: "alias",
+      tagUnitIds: ["tag-1", "tag-2"],
+      limit: 20,
+    });
+    await userUnitCollectionApi.searchUser("user-1", {
+      q: "title",
+      cursor: "unit-1",
+    });
+
+    expect(calls[0]?.url).toBe(
+      "/user-unit-collection/search/me?q=alias&tagUnitIds=tag-1&tagUnitIds=tag-2&limit=20",
+    );
+    expect(calls[1]?.url).toBe(
+      "/user-unit-collection/search/user/user-1?q=title&cursor=unit-1",
+    );
+  });
 });

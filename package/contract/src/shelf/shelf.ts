@@ -627,3 +627,23 @@ export const collectionSearchQuerySchema = t.Object({
 
 export type CollectionSearchQuery =
   (typeof collectionSearchQuerySchema)["static"];
+
+export const collectionUnitDTOSchema = t.Object({
+  userId: t.String(),
+  unitId: t.String(),
+  shelfIds: t.Array(t.String()),
+  tagUnitIds: t.Array(t.String()),
+  searchText: t.Optional(t.Nullable(t.String())),
+  createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+  updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
+});
+
+export type CollectionUnitDTO = (typeof collectionUnitDTOSchema)["static"];
+
+export const collectionSearchResponseSchema = t.Object({
+  units: t.Array(collectionUnitDTOSchema),
+  hasMore: t.Boolean(),
+});
+
+export type CollectionSearchResponse =
+  (typeof collectionSearchResponseSchema)["static"];

@@ -1,11 +1,16 @@
-import type { UserUnitCollectionDTO } from "@rezics/contract";
+import type {
+  CollectionSearchResponse,
+  UserUnitCollectionDTO,
+} from "@rezics/contract";
 import {
+  collectionSearchQuerySchema,
+  collectionSearchResponseSchema,
   patchUserUnitCollectionSchema,
   userUnitCollectionDTOSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { authMacro } from "@/middleware";
-import { mapUserUnitCollectionToDTO } from "./mapper";
+import { authMacro, tryResolveIdentity } from "@/middleware";
+import { mapCollectionUnitToDTO, mapUserUnitCollectionToDTO } from "./mapper";
 import { userUnitCollectionService } from "./service";
 
 const unitParamsSchema = t.Object({
@@ -16,6 +21,59 @@ export const userUnitCollectionApi = new Elysia({
   prefix: "/user-unit-collection",
 })
   .use(authMacro)
+  .get(
+    "/search/me",
+    async ({ query, identity }): Promise<CollectionSearchResponse> => {
+      const result = await userUnitCollectionService.search(
+        identity.userId,
+        query,
+        { viewerUserId: identity.userId },
+      );
+      return {
+        units: result.units.map(mapCollectionUnitToDTO),
+        hasMore: result.hasMore,
+      };
+    },
+    {
+      requireLogin: true,
+      query: collectionSearchQuerySchema,
+      response: collectionSearchResponseSchema,
+      detail: {
+        summary: "Search my collection across shelves",
+        tags: ["Collection"],
+      },
+    },
+  )
+  .get(
+    "/search/user/:userId",
+    async ({ headers, params, query }): Promise<CollectionSearchResponse> => {
+      const identity = await tryResolveIdentity(
+        headers["authorization"],
+        headers["cookie"],
+      );
+      const result = await userUnitCollectionService.search(
+        params.userId,
+        query,
+        {
+          viewerUserId: identity?.userId,
+          publicOnly: identity?.userId !== params.userId,
+        },
+      );
+      return {
+        units: result.units.map(mapCollectionUnitToDTO),
+        hasMore: result.hasMore,
+      };
+    },
+    {
+      params: t.Object({ userId: t.String() }),
+      query: collectionSearchQuerySchema,
+      response: collectionSearchResponseSchema,
+      detail: {
+        summary: "Search a user's public collection across public shelves",
+        tags: ["Collection"],
+      },
+    },
+  )
   .get(
     "/:unitId",
     async ({ params, identity }): Promise<UserUnitCollectionDTO | null> => {

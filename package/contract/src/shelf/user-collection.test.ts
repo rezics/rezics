@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import {
   addShelfUnitSchema,
   collectionSearchQuerySchema,
+  collectionSearchResponseSchema,
   collectInputSchema,
   patchUserUnitCollectionSchema,
   setUserTagApplicationsSchema,
@@ -91,6 +92,23 @@ describe("user collection metadata contracts", () => {
         q: "alias",
         tagUnitIds: ["tag-1"],
         limit: 20,
+      }),
+    ).toBe(true);
+  });
+
+  test("collection search returns containment-backed collection units", () => {
+    expect(
+      Value.Check(collectionSearchResponseSchema, {
+        units: [
+          {
+            userId: "user-1",
+            unitId: "book-1",
+            shelfIds: ["shelf-1", "shelf-2"],
+            tagUnitIds: ["tag-1"],
+            searchText: "private alias",
+          },
+        ],
+        hasMore: false,
       }),
     ).toBe(true);
   });
