@@ -26,7 +26,8 @@ describe("media detail readiness", () => {
       "content",
       {
         type: "MEDIA",
-        searchGroupId: "media-1",
+        catalogEntryKind: "VARIANT",
+        targetUnitId: "media-1",
         releasePresentation: "expanded",
         limit: 1,
       },

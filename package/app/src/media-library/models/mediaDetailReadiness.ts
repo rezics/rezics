@@ -21,7 +21,8 @@ export function mediaDetailData(unitId: string) {
   return {
     releaseSearch: contentSearchQueryOptions({
       type: "MEDIA",
-      searchGroupId: unitId,
+      catalogEntryKind: "VARIANT",
+      targetUnitId: unitId,
       releasePresentation: "expanded",
       limit: 1,
     }),
