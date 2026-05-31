@@ -57,7 +57,6 @@ describe("unit work contract schemas", () => {
     expect(
       Value.Check(workDomainSearchMetadataSchema, {
         workUnitId: "work-1",
-        searchGroupId: "work-1",
         ownTagIds: ["tag-own"],
         workTagIds: ["tag-work"],
         allTagIds: ["tag-own", "tag-work"],
