@@ -4,7 +4,6 @@
 
 import type {
   AcceptAnswerInput,
-  CreatePostInput,
   EditorialPatchSubmission,
   PinPostInput,
   PostPinDTO,
@@ -21,20 +20,21 @@ import { commentKeys } from "../comment/comment.keys";
 import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { postApi } from "./post.api";
 import { postKeys } from "./post.keys";
+import type { CreateRootPostInput } from "./post.types";
 
 /**
  * Mutation for creating a post
  */
 export function useCreatePostMutation(
   options?: Omit<
-    UseMutationOptions<PostResponse, Error, CreatePostInput>,
+    UseMutationOptions<PostResponse, Error, CreateRootPostInput>,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreatePostInput) => postApi.create(input),
+    mutationFn: (input: CreateRootPostInput) => postApi.create(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate lists broadly
@@ -51,12 +51,6 @@ export function useCreatePostMutation(
       for (const realmUnitId of variables.realmUnitIds ?? []) {
         queryClient.invalidateQueries({
           queryKey: postKeys.byRealms(realmUnitId),
-        });
-      }
-
-      if (variables.parentPostUnitId) {
-        queryClient.invalidateQueries({
-          queryKey: postKeys.detail(variables.parentPostUnitId),
         });
       }
 
@@ -79,7 +73,7 @@ export function useCreateWikiPostMutation(
     UseMutationOptions<
       PostResponse,
       Error,
-      Omit<CreatePostInput, "kind" | "creationMode">
+      Omit<CreateRootPostInput, "kind" | "creationMode">
     >,
     "mutationFn"
   >,

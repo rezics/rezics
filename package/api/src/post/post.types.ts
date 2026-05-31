@@ -2,8 +2,7 @@
  * Post-related TypeScript types and interfaces for the frontend
  *
  * Posts are top-level discussion entities. Reply-tree reads and writes belong
- * to the comment domain; legacy post-reply write fields remain only for
- * compatibility while the server cutover finishes.
+ * to the comment domain.
  */
 
 import type {
@@ -25,10 +24,12 @@ export type {
   UpdatePostInput,
 };
 
+export type CreateRootPostInput = Omit<CreatePostInput, "parentPostUnitId">;
+
 /**
  * Extended frontend types
  */
-export type PostFormData = Omit<CreatePostInput, never>;
+export type PostFormData = CreateRootPostInput;
 
 export type PostFilters = Partial<PostListQuery>;
 

@@ -47,6 +47,7 @@ export {
 // Types
 export type {
   CreatePostInput,
+  CreateRootPostInput,
   PostDTO,
   PostFilters,
   PostFormData,

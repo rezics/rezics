@@ -7,7 +7,6 @@
 
 import type {
   AcceptAnswerInput,
-  CreatePostInput,
   EditorialPatchSubmission,
   PinPostInput,
   PostListResponse,
@@ -22,17 +21,14 @@ import type {
 import { CreationMode, PostKind } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
-import type { PostFilters } from "./post.types";
+import type { CreateRootPostInput, PostFilters } from "./post.types";
 
 /**
  * Post API methods
  */
 export const postApi = {
   /**
-   * List posts with optional filters
-   * Supports: targetUnitId, realmUnitId,
-   * legacy thread filters, authorUserId,
-   * kind, mode, maxDepth, sort, start, cursor, limit
+   * List top-level posts with optional filters.
    */
   list: async (filters?: PostFilters): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(`/post/list${buildQueryString(filters)}`);
@@ -114,7 +110,7 @@ export const postApi = {
   /**
    * Create new post
    */
-  create: async (input: CreatePostInput): Promise<PostResponse> => {
+  create: async (input: CreateRootPostInput): Promise<PostResponse> => {
     return apiFetch<PostResponse>("/post", {
       method: "POST",
       body: JSON.stringify(input),
@@ -133,7 +129,7 @@ export const postApi = {
   },
 
   createWiki: async (
-    input: Omit<CreatePostInput, "kind" | "creationMode">,
+    input: Omit<CreateRootPostInput, "kind" | "creationMode">,
   ): Promise<PostResponse> => {
     return postApi.create({
       ...input,
