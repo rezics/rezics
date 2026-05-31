@@ -532,7 +532,7 @@ const WIKI_POSTS: {
     title: "What is Rezics",
     // MOCK: seeded wiki content for the English variant.
     contentSource:
-      "Rezics keeps each language's wiki page as its own first-class post and links them as parallel translations.",
+      "Rezics keeps language-specific wiki bodies as ContentTranslation rows on one shared wiki post.",
   },
   {
     id: WIKI_POST_JA_ID,

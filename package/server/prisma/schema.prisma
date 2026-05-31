@@ -198,10 +198,6 @@ model Unit {
   supportLanguages    UnitSupportLanguage[]
   aliases             UnitAlias[]          @relation("UnitAliases")
 
-  // Parallel-translation grouping (POST wiki flow); see TranslationGroup.
-  translationGroupId String?           @db.Uuid
-  translationGroup   TranslationGroup? @relation(fields: [translationGroupId], references: [id], onDelete: SetNull)
-
   // Type extensions (1:1, optional)
   book   Book?
   game   Game?
@@ -298,13 +294,11 @@ model Unit {
   contentStructureNodesAsContent ContentStructureNode[] @relation("ContentStructureNodeContent")
 
   @@unique([slugScope, slug])
-  @@unique([translationGroupId, defaultLanguage])
   @@index([type, status, createdAt])
   @@index([userId, createdAt])
   @@index([status, visibility])
   @@index([catalogEntryKind, targetUnitId])
   @@index([defaultLanguage])
-  @@index([translationGroupId])
   @@index([slugScope, type])
 }
 
@@ -321,20 +315,6 @@ model SlugScope {
   slug   String @id
   /// Placeholder Unit (type = SCOPE) whose id is the slugScope value for top-level slugs in this scope.
   unitId String @unique @db.Uuid
-}
-
-/**
- * ANCHOR PARALLEL TRANSLATION GROUPING
- */
-
-/// Aggregates parallel-translation sibling Units (e.g. wiki-style POSTs in multiple languages).
-/// `supportedLanguages` is a denormalized cache of each member's `defaultLanguage`, maintained transactionally on attach/detach to avoid per-render JOINs at scale.
-model TranslationGroup {
-  id                 String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  supportedLanguages String[] @db.VarChar(16)
-  createdAt          DateTime @default(now())
-
-  units Unit[]
 }
 
 /**
