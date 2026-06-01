@@ -13,11 +13,12 @@ describe("TrustedEmailField", () => {
     });
 
     const children = (element as any).props.children as Array<any>;
-    const textField = children[0];
-    const buttonWrapper = children[1];
+    const textField = children[1];
+    const helperText = children[2];
+    const buttonWrapper = children[3];
 
     expect(textField.props.disabled).toBe(true);
-    expect(textField.props.helperText).toBe("Trusted email");
+    expect(helperText.props.children).toBe("Trusted email");
     expect(buttonWrapper.props.children.props.children).toBe("Edit Email");
   });
 
@@ -32,11 +33,12 @@ describe("TrustedEmailField", () => {
     });
 
     const children = (element as any).props.children as Array<any>;
-    const textField = children[0];
-    const buttonWrapper = children[1];
+    const textField = children[1];
+    const helperText = children[2];
+    const buttonWrapper = children[3];
 
     expect(textField.props.disabled).toBe(false);
-    expect(textField.props.helperText).toBe("Editable email");
+    expect(helperText.props.children).toBe("Editable email");
     expect(buttonWrapper).toBeNull();
   });
 });

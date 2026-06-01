@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { CapabilityHint, GetSessionStateResponse } from "@rezics/contract";
+import { governanceApi as actualGovernanceApi } from "../governance/governance.api";
 
 let presence = false;
 const getSessionStateMock = mock();
@@ -24,6 +25,7 @@ mock.module("@rezics/api/auth/auth.api", () => ({
 
 mock.module("@rezics/api/governance/governance.api", () => ({
   governanceApi: {
+    ...actualGovernanceApi,
     capabilityHints: capabilityHintsMock,
   },
 }));

@@ -1,19 +1,5 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { NormalizedTokenName } from "@rezics/contract";
-
-mock.module("../user/user.api", () => ({
-  userApi: {
-    issueSessionToken: mock(async () => ({ token: "session-token" })),
-  },
-}));
-
-mock.module("@rezics/api/states/authSessionStore", () => ({
-  useAuthSessionStore: {
-    getState: () => ({
-      syncBusinessToken: mock(() => undefined),
-    }),
-  },
-}));
 
 describe("createTokenRefreshRegistry", () => {
   test("default registry is empty for cookie-backed browser sessions", async () => {

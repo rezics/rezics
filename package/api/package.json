@@ -75,7 +75,7 @@
     }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bun test",
     "dev": "bun run --watch src/index.ts",
     "spike:book-db": "bun run src/book/book.collection.spike.ts"
   },

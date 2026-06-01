@@ -1,8 +1,14 @@
 import { beforeEach, describe, expect, test } from "bun:test";
+import { configureApi } from "../config";
 
 const calls: Array<{ url: string; init?: RequestInit }> = [];
 
 beforeEach(() => {
+  configureApi({
+    apiBaseUrl: "",
+    authBaseUrl: "",
+    reactionServiceUrl: "",
+  });
   calls.length = 0;
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     calls.push({ url: String(input), init });
