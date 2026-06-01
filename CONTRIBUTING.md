@@ -53,6 +53,16 @@ The local dev layout keeps `@rezics/job-runner` eligible to auto-start. If its
 `http` or `all` role needs Sequin, start the managed services first or use
 `JOB_RUNNER_ROLE=worker` for queue draining without webhook ingress.
 
+## Git Workflow
+
+### Keep local changes on top of remote changes
+
+Before starting a commit or opening a PR, update your branch from the remote branch and replay your local commits on top of it:
+
+```bash
+git pull --rebase
+```
+
 ## Conventions
 
 ### Route Convention
@@ -127,13 +137,13 @@ bun run seed --preset=minimal --no-interactive
 
 **Presets** (`package/utils/src/factory/presets/`):
 
-| Preset           | Mode      | Use                                                    |
-| ---------------- | --------- | ------------------------------------------------------ |
-| `realistic`      | realistic | Default — power-law distributed counts, prod-ish shape |
-| `fast`           | realistic | Smaller envelope for quick iteration                   |
-| `medium`         | fixed     | Mid-volume deterministic dataset (50 books/games/media, 40 tags, 20 reviews + 100 tree posts per work) |
-| `minimal`        | fixed     | Tiny deterministic dataset for unit-style scenarios    |
-| `post-tree-focus`| fixed     | One work per type, deterministic post tree shape       |
+| Preset            | Mode      | Use                                                                                                    |
+| ----------------- | --------- | ------------------------------------------------------------------------------------------------------ |
+| `realistic`       | realistic | Default — power-law distributed counts, prod-ish shape                                                 |
+| `fast`            | realistic | Smaller envelope for quick iteration                                                                   |
+| `medium`          | fixed     | Mid-volume deterministic dataset (50 books/games/media, 40 tags, 20 reviews + 100 tree posts per work) |
+| `minimal`         | fixed     | Tiny deterministic dataset for unit-style scenarios                                                    |
+| `post-tree-focus` | fixed     | One work per type, deterministic post tree shape                                                       |
 
 **Plan tweaking.** When running interactively, after picking a preset you can tweak the `SeedPlan`. The CLI writes it as JSON to `node_modules/.cache/rezics-seed/edit-*/plan.json`, prints the absolute path, and waits at a "Done editing — continue?" prompt. Open the file in any editor, save, then confirm to continue; the plan is validated against `SeedPlanSchema` and you are re-prompted on parse or validation errors. Stale edit dirs older than one hour are swept on every CLI start.
 
@@ -168,14 +178,14 @@ The design system is documented across **five package-owned Storybooks** plus an
 
 ### Port assignments
 
-| Port | Instance | Owner |
-| ---- | -------- | ----- |
-| 6006 | host | root `.storybook/` (refs the rest) |
-| 6007 | UI · Foundation | `@rezics/ui` |
-| 6008 | Editor · CodeMirror | `@rezics/editor` |
-| 6009 | Folio · Reader | `@rezics/folio` |
-| 6010 | Admin | `@rezics/admin` |
-| 6011 | App | `@rezics/app` |
+| Port | Instance            | Owner                              |
+| ---- | ------------------- | ---------------------------------- |
+| 6006 | host                | root `.storybook/` (refs the rest) |
+| 6007 | UI · Foundation     | `@rezics/ui`                       |
+| 6008 | Editor · CodeMirror | `@rezics/editor`                   |
+| 6009 | Folio · Reader      | `@rezics/folio`                    |
+| 6010 | Admin               | `@rezics/admin`                    |
+| 6011 | App                 | `@rezics/app`                      |
 
 > **Chrome unsafe ports.** Don't reassign to `:6000` (X11 — `ERR_UNSAFE_PORT`), `:6566`, `:6665–6669`, or `:6697`. Storybook's own default `:6006` is what we use for the host.
 
