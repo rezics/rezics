@@ -204,7 +204,7 @@ describe("governance contract registry", () => {
 
     expect(
       Value.Check(contentModerationStateDTOSchema, {
-        targetUnitId: "reply-1",
+        moderatedUnitId: "reply-1",
         state: "hidden",
         decidedByUserId: "staff-1",
         caseId: "case-1",
@@ -218,7 +218,7 @@ describe("governance contract registry", () => {
     expect(
       Value.Check(realmContentModerationDTOSchema, {
         realmUnitId: "realm-1",
-        targetUnitId: "reply-1",
+        moderatedUnitId: "reply-1",
         state: "tombstoned",
         decidedByUserId: "mod-1",
         reason: "off-topic",
@@ -250,7 +250,7 @@ describe("governance contract registry", () => {
       Value.Check(postModerationOverlayResponseSchema, {
         globalStates: [
           {
-            targetUnitId: "reply-1",
+            moderatedUnitId: "reply-1",
             state: "hidden",
             createdAt: "2026-05-28T00:00:00.000Z",
             updatedAt: "2026-05-28T00:00:00.000Z",
@@ -259,7 +259,7 @@ describe("governance contract registry", () => {
         realmOverlays: [
           {
             realmUnitId: "realm-1",
-            targetUnitId: "reply-2",
+            moderatedUnitId: "reply-2",
             state: "tombstoned",
             createdAt: "2026-05-28T00:00:00.000Z",
             updatedAt: "2026-05-28T00:00:00.000Z",
@@ -342,7 +342,7 @@ describe("governance contract registry", () => {
         subjectUserId: "subject-1",
         targetKind: "unit",
         targetId: "post-1",
-        targetUnitId: "post-1",
+        addressedUnitId: "post-1",
         reason: "reported",
       }),
     ).toBe(true);

@@ -107,9 +107,9 @@ describe("UserTagApplicationService", () => {
     });
     expect(subscriptionFindUnique).toHaveBeenCalledWith({
       where: {
-        subscriberUnitId_targetUnitId: {
+        subscriberUnitId_subscribedUnitId: {
           subscriberUnitId: "viewer-1",
-          targetUnitId: "owner-1",
+          subscribedUnitId: "owner-1",
         },
       },
       select: { id: true },

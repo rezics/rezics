@@ -95,10 +95,10 @@ describe("post work-domain contract fields", () => {
     expect("parentPostUnitId" in createPostSchema.properties).toBe(false);
   });
 
-  test("uses target naming for promotion contracts", () => {
-    expect("targetUnitId" in commentPromotionDTOSchema.properties).toBe(true);
+  test("uses comment endpoint naming for promotion contracts", () => {
+    expect("commentUnitId" in commentPromotionDTOSchema.properties).toBe(true);
     expect("postUnitId" in commentPromotionDTOSchema.properties).toBe(false);
-    expect("targetUnitId" in pinCommentSchema.properties).toBe(true);
+    expect("commentUnitId" in pinCommentSchema.properties).toBe(true);
     expect("postUnitId" in pinCommentSchema.properties).toBe(false);
     expect("beforeTargetUnitId" in acceptAnswerSchema.properties).toBe(true);
     expect("beforePostUnitId" in acceptAnswerSchema.properties).toBe(false);

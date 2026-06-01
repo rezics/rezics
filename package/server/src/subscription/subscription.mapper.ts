@@ -5,7 +5,7 @@ export function mapSubscriptionToDTO(row: Subscription): SubscriptionDTO {
   return {
     id: row.id,
     subscriberUnitId: row.subscriberUnitId,
-    targetUnitId: row.targetUnitId,
+    subscribedUnitId: row.subscribedUnitId,
     channels: row.channels,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),

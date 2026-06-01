@@ -416,7 +416,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       });
       if (denied) return denied;
       return governanceModerationService.hideGlobal({
-        targetUnitId: params.targetUnitId,
+        moderatedUnitId: params.targetUnitId,
         decidedById: identity.userId,
         ...body,
       });
@@ -443,7 +443,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       });
       if (denied) return denied;
       return governanceModerationService.tombstoneGlobal({
-        targetUnitId: params.targetUnitId,
+        moderatedUnitId: params.targetUnitId,
         decidedById: identity.userId,
         ...body,
       });
@@ -470,7 +470,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       });
       if (denied) return denied;
       return governanceModerationService.restoreGlobal({
-        targetUnitId: params.targetUnitId,
+        moderatedUnitId: params.targetUnitId,
         decidedById: identity.userId,
         ...body,
       });
@@ -503,7 +503,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       if (denied) return denied;
       return governanceModerationService.hideInRealm({
         realmUnitId: params.realmUnitId,
-        targetUnitId: params.targetUnitId,
+        moderatedUnitId: params.targetUnitId,
         decidedById: identity.userId,
         ...body,
       });
@@ -536,7 +536,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       if (denied) return denied;
       return governanceModerationService.tombstoneInRealm({
         realmUnitId: params.realmUnitId,
-        targetUnitId: params.targetUnitId,
+        moderatedUnitId: params.targetUnitId,
         decidedById: identity.userId,
         ...body,
       });
@@ -569,7 +569,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       if (denied) return denied;
       return governanceModerationService.restoreInRealm({
         realmUnitId: params.realmUnitId,
-        targetUnitId: params.targetUnitId,
+        moderatedUnitId: params.targetUnitId,
         decidedById: identity.userId,
         ...body,
       });
@@ -629,7 +629,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       if (denied) return denied;
       return governanceModerationService.requestOwnerDelegation({
         realmUnitId: params.realmUnitId,
-        targetUnitId: params.targetUnitId,
+        moderatedUnitId: params.targetUnitId,
         decidedById: identity.userId,
         ...body,
       });

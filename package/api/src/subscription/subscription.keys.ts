@@ -5,10 +5,10 @@
  */
 export const subscriptionKeys = {
   all: () => ["subscription"] as const,
-  mine: (filter?: { targetType?: string }) =>
+  mine: (filter?: { subscribedType?: string }) =>
     [...subscriptionKeys.all(), "mine", filter ?? {}] as const,
-  check: (targetUnitId: string) =>
-    [...subscriptionKeys.all(), "check", targetUnitId] as const,
-  count: (targetUnitId: string) =>
-    [...subscriptionKeys.all(), "count", targetUnitId] as const,
+  check: (subscribedUnitId: string) =>
+    [...subscriptionKeys.all(), "check", subscribedUnitId] as const,
+  count: (subscribedUnitId: string) =>
+    [...subscriptionKeys.all(), "count", subscribedUnitId] as const,
 } as const;

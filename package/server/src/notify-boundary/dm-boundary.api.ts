@@ -61,9 +61,9 @@ export const dmBoundaryApi = new Elysia({ prefix: "/dm" }).use(authMacro).post(
     // were materialized as Subscription rows with channels=['*'].
     const sub = await prisma.subscription.findUnique({
       where: {
-        subscriberUnitId_targetUnitId: {
+        subscriberUnitId_subscribedUnitId: {
           subscriberUnitId: senderId,
-          targetUnitId: recipientId,
+          subscribedUnitId: recipientId,
         },
       },
       select: { channels: true },

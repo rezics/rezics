@@ -27,7 +27,7 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     unitId: post.unitId,
     authorUserId: post.authorUserId,
     author: mapPublicUser(post.unit.user),
-    targetUnitId: post.unit.targetUnitId ?? null,
+    commentUnitId: post.unit.commentUnitId ?? null,
     realmUnitId: post.unit.inRealms?.[0]?.realmUnitId ?? null,
     content: contentHidden ? null : (post.content as PostDTO["content"]),
     kind: post.kind ?? null,
@@ -58,7 +58,7 @@ export function mapCommentPromotionToDTO(
 ): CommentPromotionDTO {
   return {
     scopeUnitId: pin.scopeUnitId,
-    targetUnitId: pin.commentUnitId,
+    commentUnitId: pin.commentUnitId,
     kind: pin.kind,
     position: pin.position,
     byUserId: pin.byUserId,

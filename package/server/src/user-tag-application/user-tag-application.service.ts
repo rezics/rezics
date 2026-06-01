@@ -56,9 +56,9 @@ export class UserTagApplicationService {
         ? Boolean(
             await prisma.subscription.findUnique({
               where: {
-                subscriberUnitId_targetUnitId: {
+                subscriberUnitId_subscribedUnitId: {
                   subscriberUnitId: viewerUserId,
-                  targetUnitId: ownerUserId,
+                  subscribedUnitId: ownerUserId,
                 },
               },
               select: { id: true },

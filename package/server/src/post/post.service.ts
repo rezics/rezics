@@ -649,7 +649,7 @@ export class PostService {
     // feeds/search until published (see publication-policy
     // `publicUnitEligibilityWhere`).
     const asDraft = input.status === "DRAFT" && kind !== PostKindEnum.CHAPTER;
-    let targetUnitId = inputTargetUnitId;
+    const targetUnitId = inputTargetUnitId;
     const realmIdsToWrite = [...new Set(realmUnitIds ?? [])];
     const tagIdsToWrite = [...new Set(tagIds ?? [])];
 
@@ -1197,7 +1197,7 @@ export class PostService {
     caller: RezicsSessionClaims,
   ): Promise<CommentPromotionDTO> {
     await this.assertCanPromoteInThread(input.scopeUnitId, caller);
-    await this.loadPromotableTarget(input.scopeUnitId, input.targetUnitId);
+    await this.loadPromotableTarget(input.scopeUnitId, input.commentUnitId);
     const position = await this.mintPinPosition(
       input.scopeUnitId,
       PinKindEnum.PINNED,
@@ -1206,7 +1206,7 @@ export class PostService {
     );
     return this.createPin(
       input.scopeUnitId,
-      input.targetUnitId,
+      input.commentUnitId,
       PinKindEnum.PINNED,
       position,
       caller.userId,
@@ -1216,11 +1216,11 @@ export class PostService {
   /** Remove a `PINNED` promotion. */
   async unpin(
     scopeUnitId: string,
-    targetUnitId: string,
+    commentUnitId: string,
     caller: RezicsSessionClaims,
   ): Promise<void> {
     await this.assertCanPromoteInThread(scopeUnitId, caller);
-    await this.deletePin(scopeUnitId, targetUnitId, PinKindEnum.PINNED);
+    await this.deletePin(scopeUnitId, commentUnitId, PinKindEnum.PINNED);
   }
 
   /**
@@ -1235,7 +1235,7 @@ export class PostService {
     await this.assertCanPromoteInThread(input.scopeUnitId, caller);
     const target = await this.loadPromotableTarget(
       input.scopeUnitId,
-      input.targetUnitId,
+      input.commentUnitId,
     );
     if (target.depth !== 1 || target.parentPostUnitId !== input.scopeUnitId) {
       throw new AppError(
@@ -1257,7 +1257,7 @@ export class PostService {
     );
     const pin = await this.createPin(
       input.scopeUnitId,
-      input.targetUnitId,
+      input.commentUnitId,
       PinKindEnum.ACCEPTED_ANSWER,
       position,
       caller.userId,
@@ -1269,13 +1269,13 @@ export class PostService {
   /** Remove an `ACCEPTED_ANSWER` promotion. */
   async unacceptAnswer(
     scopeUnitId: string,
-    targetUnitId: string,
+    commentUnitId: string,
     caller: RezicsSessionClaims,
   ): Promise<void> {
     await this.assertCanPromoteInThread(scopeUnitId, caller);
     await this.deletePin(
       scopeUnitId,
-      targetUnitId,
+      commentUnitId,
       PinKindEnum.ACCEPTED_ANSWER,
     );
     await this.maintainSolvedCacheOnUnaccept(scopeUnitId);
@@ -1431,15 +1431,15 @@ export class PostService {
   /** Validate the target is a reply within the scope thread; return its shape. */
   private async loadPromotableTarget(
     scopeUnitId: string,
-    targetUnitId: string,
+    commentUnitId: string,
   ): Promise<{ depth: number; parentPostUnitId: string | null }> {
     const target = await prisma.post.findUnique({
-      where: { unitId: targetUnitId },
+      where: { unitId: commentUnitId },
       select: { depth: true, rootPostUnitId: true, parentPostUnitId: true },
     });
     if (!target) {
       const comment = await prisma.comment.findUnique({
-        where: { unitId: targetUnitId },
+        where: { unitId: commentUnitId },
         select: {
           depth: true,
           rootUnitId: true,
@@ -1447,12 +1447,15 @@ export class PostService {
         },
       });
       if (!comment) {
-        throw new AppError(404, `Promotable target not found: ${targetUnitId}`);
+        throw new AppError(
+          404,
+          `Promotable target not found: ${commentUnitId}`,
+        );
       }
       if (comment.rootUnitId !== scopeUnitId) {
         throw new AppError(
           400,
-          "Target post does not belong to the scope thread",
+          "Target comment does not belong to the scope thread",
         );
       }
       if (comment.depth < 1) {
@@ -1466,7 +1469,7 @@ export class PostService {
     if (target.rootPostUnitId !== scopeUnitId) {
       throw new AppError(
         400,
-        "Target post does not belong to the scope thread",
+        "Target comment does not belong to the scope thread",
       );
     }
     if (target.depth < 1) {
@@ -1486,13 +1489,13 @@ export class PostService {
     beforeTargetUnitId?: string,
     afterTargetUnitId?: string,
   ): Promise<string> {
-    const positionOf = async (targetUnitId?: string) => {
-      if (!targetUnitId) return undefined;
+    const positionOf = async (commentUnitId?: string) => {
+      if (!commentUnitId) return undefined;
       const pin = await prisma.commentPromotion.findUnique({
         where: {
           scopeUnitId_commentUnitId: {
             scopeUnitId,
-            commentUnitId: targetUnitId,
+            commentUnitId: commentUnitId,
           },
         },
         select: { position: true },
@@ -1514,7 +1517,7 @@ export class PostService {
 
   private async createPin(
     scopeUnitId: string,
-    targetUnitId: string,
+    commentUnitId: string,
     kind: PinKindEnum,
     position: string,
     byUserId: string,
@@ -1523,7 +1526,7 @@ export class PostService {
       const pin = await prisma.commentPromotion.create({
         data: {
           scopeUnitId,
-          commentUnitId: targetUnitId,
+          commentUnitId: commentUnitId,
           kind,
           position,
           byUserId,
@@ -1547,12 +1550,15 @@ export class PostService {
 
   private async deletePin(
     scopeUnitId: string,
-    targetUnitId: string,
+    commentUnitId: string,
     kind: PinKindEnum,
   ): Promise<void> {
     const existing = await prisma.commentPromotion.findUnique({
       where: {
-        scopeUnitId_commentUnitId: { scopeUnitId, commentUnitId: targetUnitId },
+        scopeUnitId_commentUnitId: {
+          scopeUnitId,
+          commentUnitId: commentUnitId,
+        },
       },
       select: { kind: true },
     });
@@ -1561,7 +1567,10 @@ export class PostService {
     }
     await prisma.commentPromotion.delete({
       where: {
-        scopeUnitId_commentUnitId: { scopeUnitId, commentUnitId: targetUnitId },
+        scopeUnitId_commentUnitId: {
+          scopeUnitId,
+          commentUnitId: commentUnitId,
+        },
       },
     });
   }

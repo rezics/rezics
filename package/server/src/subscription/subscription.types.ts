@@ -1,7 +1,7 @@
 import type { Prisma } from "#/prisma/client";
 
 export const subscriptionInclude = {
-  target: {
+  subscribedUnit: {
     select: {
       id: true,
       type: true,

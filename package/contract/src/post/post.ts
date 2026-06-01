@@ -177,7 +177,7 @@ export type PostDTO = (typeof postDTOSchema)["static"];
 
 export const commentPromotionDTOSchema = t.Object({
   scopeUnitId: t.String(),
-  targetUnitId: t.String(),
+  commentUnitId: t.String(),
   kind: pinKindLiterals,
   position: t.String(),
   byUserId: t.String(),
@@ -188,11 +188,11 @@ export type CommentPromotionDTO = (typeof commentPromotionDTOSchema)["static"];
 
 /**
  * Pin a comment (`kind = PINNED`) within its thread scope. `scopeUnitId` MUST
- * be the thread root post; the target MUST be a comment in that thread.
+ * be the thread root post; `commentUnitId` MUST be a comment in that thread.
  */
 export const pinCommentSchema = t.Object({
   scopeUnitId: t.String(),
-  targetUnitId: t.String(),
+  commentUnitId: t.String(),
   /** Optional explicit ordering anchors; the server mints a position between them. */
   beforeTargetUnitId: t.Optional(t.String()),
   afterTargetUnitId: t.Optional(t.String()),
@@ -203,7 +203,7 @@ export type PinCommentInput = (typeof pinCommentSchema)["static"];
 /** Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread. */
 export const acceptAnswerSchema = t.Object({
   scopeUnitId: t.String(),
-  targetUnitId: t.String(),
+  commentUnitId: t.String(),
   beforeTargetUnitId: t.Optional(t.String()),
   afterTargetUnitId: t.Optional(t.String()),
 });

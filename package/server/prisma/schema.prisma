@@ -278,19 +278,19 @@ model Unit {
   userProgress UserUnitProgress[] @relation("ProgressUnit")
 
   // Subscription edges (see Subscription model). `subscribers` are rows
-  // where this Unit is the target; `subscriptionsMade` are rows where
-  // this Unit (in v1: a USER Unit) is the subscriber.
-  subscribers       Subscription[] @relation("SubscriptionTarget")
+  // where this Unit is explicitly subscribed to; `subscriptionsMade` are
+  // rows where this Unit (in v1: a USER Unit) is the subscriber.
+  subscribers       Subscription[] @relation("SubscriptionSubscribedUnit")
   subscriptionsMade Subscription[] @relation("SubscriptionSubscriber")
 
   realmRuleAcknowledgements RealmRuleAcknowledgement[] @relation("RealmRuleAcknowledgementRuleUnit")
 
   staffCapabilityGrantRealms StaffGrant[]               @relation("StaffGrantRealm")
-  moderationCaseTargets      ModerationCase[]           @relation("ModerationCaseTargetUnit")
+  moderationCaseAddressedUnits ModerationCase[]         @relation("ModerationCaseAddressedUnit")
   moderationCaseRealms       ModerationCase[]           @relation("ModerationCaseRealm")
-  realmQueueTargets          RealmModerationQueueItem[] @relation("RealmModerationQueueTargetUnit")
+  realmQueueAddressedUnits   RealmModerationQueueItem[] @relation("RealmModerationQueueAddressedUnit")
   contentModerationState     ContentModerationState?
-  realmModerationTargets     RealmContentModeration[]   @relation("RealmContentModerationTargetUnit")
+  realmModerationTargets     RealmContentModeration[]   @relation("RealmContentModerationModeratedUnit")
 
   // Collaborative authority and history capture.
   collaborators UnitCollaborator[]
@@ -1633,8 +1633,9 @@ model ScoreRealmField {
   @@index([realm, sortOrder])
 }
 
-/// Generic attention edge from a subscriber Unit (USER in v1) to any
-/// target Unit. `channels` is a String[] filter using dot-namespaced
+/// Generic attention edge from a subscriber Unit (USER in v1) to an explicitly
+/// subscribed Unit. This is a subscription endpoint, not Unit.targetUnitId.
+/// `channels` is a String[] filter using dot-namespaced
 /// events with three wildcard tiers (`'*'`, `'<category>.*'`,
 /// `'<category>.<event>'`); see `@rezics/contract` `CHANNEL_REGISTRY`
 /// for the per-target-type registry. The fan-out resolver in
@@ -1644,16 +1645,16 @@ model ScoreRealmField {
 model Subscription {
   id               String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
   subscriberUnitId String   @db.Uuid
-  targetUnitId     String   @db.Uuid
+  subscribedUnitId String   @db.Uuid
   channels         String[]
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  subscriber Unit @relation("SubscriptionSubscriber", fields: [subscriberUnitId], references: [id], onDelete: Cascade)
-  target     Unit @relation("SubscriptionTarget", fields: [targetUnitId], references: [id], onDelete: Cascade)
+  subscriber     Unit @relation("SubscriptionSubscriber", fields: [subscriberUnitId], references: [id], onDelete: Cascade)
+  subscribedUnit Unit @relation("SubscriptionSubscribedUnit", fields: [subscribedUnitId], references: [id], onDelete: Cascade)
 
-  @@unique([subscriberUnitId, targetUnitId])
-  @@index([targetUnitId])
+  @@unique([subscriberUnitId, subscribedUnitId])
+  @@index([subscribedUnitId])
   @@index([subscriberUnitId])
   @@index([channels], type: Gin, map: "subscription_channels_gin")
 }
@@ -1856,9 +1857,11 @@ model ModerationCase {
   severity          String?             @db.VarChar(32)
   reporterUserId    String?             @db.Uuid
   subjectUserId     String?             @db.Uuid
+  /// Optional resolved Unit for the immutable targetKind/targetId address.
+  /// This supports Unit joins and queues; it is not Unit.targetUnitId.
   targetKind        String              @db.VarChar(64)
   targetId          String              @db.VarChar(128)
-  targetUnitId      String?             @db.Uuid
+  addressedUnitId   String?             @db.Uuid
   realmUnitId       String?             @db.Uuid
   sourceFeedbackId  String?             @db.Uuid
   assignedToUserId  String?             @db.Uuid
@@ -1871,7 +1874,7 @@ model ModerationCase {
 
   reporter       User?            @relation("ModerationCaseReporter", fields: [reporterUserId], references: [unitId], onDelete: SetNull)
   subject        User?            @relation("ModerationCaseSubject", fields: [subjectUserId], references: [unitId], onDelete: SetNull)
-  targetUnit     Unit?            @relation("ModerationCaseTargetUnit", fields: [targetUnitId], references: [id], onDelete: SetNull)
+  addressedUnit  Unit?            @relation("ModerationCaseAddressedUnit", fields: [addressedUnitId], references: [id], onDelete: SetNull)
   realm          Unit?            @relation("ModerationCaseRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
   sourceFeedback Feedback?        @relation("ModerationCaseSourceFeedback", fields: [sourceFeedbackId], references: [id], onDelete: SetNull)
   assignedTo     User?            @relation("ModerationCaseAssignedTo", fields: [assignedToUserId], references: [unitId], onDelete: SetNull)
@@ -1887,7 +1890,7 @@ model ModerationCase {
   @@index([realmUnitId, state, createdAt])
   @@index([assignedToUserId, state, createdAt])
   @@index([targetKind, targetId])
-  @@index([targetUnitId, state])
+  @@index([addressedUnitId, state])
   @@index([subjectUserId, state, createdAt])
   @@index([reporterUserId, createdAt])
   @@index([sourceFeedbackId])
@@ -1922,9 +1925,11 @@ model RealmModerationQueueItem {
   state            RealmModerationQueueState @default(NEW)
   reporterUserId   String?                   @db.Uuid
   subjectUserId    String?                   @db.Uuid
+  /// Optional resolved Unit for the immutable targetKind/targetId address.
+  /// This is queue addressing metadata, not Unit.targetUnitId.
   targetKind       String                    @db.VarChar(64)
   targetId         String                    @db.VarChar(128)
-  targetUnitId     String?                   @db.Uuid
+  addressedUnitId  String?                   @db.Uuid
   sourceFeedbackId String?                   @db.Uuid
   linkedCaseId     String?                   @db.Uuid
   assignedToUserId String?                   @db.Uuid
@@ -1937,7 +1942,7 @@ model RealmModerationQueueItem {
   targetRealm    Realm                  @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
   reporter       User?                  @relation("RealmModerationQueueReporter", fields: [reporterUserId], references: [unitId], onDelete: SetNull)
   subject        User?                  @relation("RealmModerationQueueSubject", fields: [subjectUserId], references: [unitId], onDelete: SetNull)
-  targetUnit     Unit?                  @relation("RealmModerationQueueTargetUnit", fields: [targetUnitId], references: [id], onDelete: SetNull)
+  addressedUnit  Unit?                  @relation("RealmModerationQueueAddressedUnit", fields: [addressedUnitId], references: [id], onDelete: SetNull)
   sourceFeedback Feedback?              @relation("RealmModerationQueueSourceFeedback", fields: [sourceFeedbackId], references: [id], onDelete: SetNull)
   linkedCase     ModerationCase?        @relation(fields: [linkedCaseId], references: [id], onDelete: SetNull)
   assignedTo     User?                  @relation("RealmModerationQueueAssignedTo", fields: [assignedToUserId], references: [unitId], onDelete: SetNull)
@@ -1946,7 +1951,7 @@ model RealmModerationQueueItem {
   @@index([realmUnitId, state, createdAt])
   @@index([realmUnitId, assignedToUserId, state, createdAt], map: "RealmModerationQueueItem_realmUnitId_assignedToUserId_state_idx")
   @@index([targetKind, targetId])
-  @@index([targetUnitId, state])
+  @@index([addressedUnitId, state])
   @@index([subjectUserId, state, createdAt])
   @@index([reporterUserId, createdAt])
   @@index([sourceFeedbackId])
@@ -1976,7 +1981,9 @@ model RealmModerationEvent {
 }
 
 model ContentModerationState {
-  targetUnitId String                     @id @db.Uuid
+  /// The Unit whose visibility state is moderated. This state endpoint is not
+  /// canonical Unit.targetUnitId resolution.
+  moderatedUnitId String                     @id @db.Uuid
   state        ContentModerationStateKind @default(VISIBLE)
   decidedById  String?                    @db.Uuid
   caseId       String?                    @db.Uuid
@@ -1985,7 +1992,7 @@ model ContentModerationState {
   createdAt    DateTime                   @default(now())
   updatedAt    DateTime                   @updatedAt
 
-  targetUnit Unit            @relation(fields: [targetUnitId], references: [id], onDelete: Cascade)
+  moderatedUnit Unit            @relation(fields: [moderatedUnitId], references: [id], onDelete: Cascade)
   decidedBy  User?           @relation("ContentModerationStateDecidedBy", fields: [decidedById], references: [unitId], onDelete: SetNull)
   case       ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
 
@@ -1996,7 +2003,8 @@ model ContentModerationState {
 
 model RealmContentModeration {
   realmUnitId  String                     @db.Uuid
-  targetUnitId String                     @db.Uuid
+  /// The Unit whose realm-local visibility state is moderated.
+  moderatedUnitId String                     @db.Uuid
   state        ContentModerationStateKind
   decidedById  String?                    @db.Uuid
   caseId       String?                    @db.Uuid
@@ -2006,13 +2014,13 @@ model RealmContentModeration {
   updatedAt    DateTime                   @updatedAt
 
   realm      Realm           @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
-  targetUnit Unit            @relation("RealmContentModerationTargetUnit", fields: [targetUnitId], references: [id], onDelete: Cascade)
+  moderatedUnit Unit            @relation("RealmContentModerationModeratedUnit", fields: [moderatedUnitId], references: [id], onDelete: Cascade)
   decidedBy  User?           @relation("RealmContentModerationDecidedBy", fields: [decidedById], references: [unitId], onDelete: SetNull)
   case       ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
 
-  @@id([realmUnitId, targetUnitId])
+  @@id([realmUnitId, moderatedUnitId])
   @@index([realmUnitId, state, updatedAt])
-  @@index([targetUnitId, state])
+  @@index([moderatedUnitId, state])
   @@index([decidedById, updatedAt])
   @@index([caseId])
 }

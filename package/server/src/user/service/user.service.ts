@@ -439,7 +439,7 @@ export class UserService {
     const skip = (pageNum - 1) * limitNum;
 
     const where = {
-      targetUnitId: userId,
+      subscribedUnitId: userId,
       subscriber: { type: "USER" as const },
     } satisfies Prisma.SubscriptionWhereInput;
 
@@ -480,13 +480,13 @@ export class UserService {
 
     const where = {
       subscriberUnitId: userId,
-      target: { type: "USER" as const },
+      subscribedUnit: { type: "USER" as const },
     } satisfies Prisma.SubscriptionWhereInput;
 
     const [subs, total] = await Promise.all([
       prisma.subscription.findMany({
         where,
-        select: { targetUnitId: true, createdAt: true },
+        select: { subscribedUnitId: true, createdAt: true },
         orderBy: { createdAt: "desc" },
         skip,
         take: limitNum,
@@ -494,9 +494,9 @@ export class UserService {
       prisma.subscription.count({ where }),
     ]);
 
-    const orderById = new Map(subs.map((s, i) => [s.targetUnitId, i]));
+    const orderById = new Map(subs.map((s, i) => [s.subscribedUnitId, i]));
     const followings = await prisma.user.findMany({
-      where: { unitId: { in: subs.map((s) => s.targetUnitId) } },
+      where: { unitId: { in: subs.map((s) => s.subscribedUnitId) } },
       include: userInclude,
     });
     followings.sort(

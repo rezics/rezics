@@ -47,7 +47,7 @@ beforeEach(() => {
     update: mock(async (args: { data: unknown }) => ({
       id: "sub-1",
       subscriberUnitId: SUBSCRIBER,
-      targetUnitId: TARGET,
+      subscribedUnitId: TARGET,
       ...(args.data as Record<string, unknown>),
       createdAt: new Date("2026-01-01T00:00:00Z"),
       updatedAt: new Date("2026-01-01T00:00:00Z"),
@@ -87,7 +87,7 @@ describe("subscriptionService.subscribe", () => {
     });
   });
 
-  test("rejects non-subscribable target type with AppError 400", async () => {
+  test("rejects non-subscribable subscribed unit type with AppError 400", async () => {
     prismaMock.unit.findUnique = mock(async () => ({
       id: TARGET,
       type: "QUOTE",
@@ -118,7 +118,7 @@ describe("subscriptionService.subscribe", () => {
     expect(dto.channels).toEqual(["chapter.new"]);
   });
 
-  test("rejects unknown channel for the target type with AppError 400", async () => {
+  test("rejects unknown channel for the subscribed unit type with AppError 400", async () => {
     await expect(
       subscriptionService.subscribe(SUBSCRIBER, TARGET, ["chapter.exploded"]),
     ).rejects.toMatchObject({
@@ -133,7 +133,7 @@ describe("subscriptionService.subscribe", () => {
     ).rejects.toMatchObject({ statusCode: 400 });
   });
 
-  test("accepts category wildcard registered for target type", async () => {
+  test("accepts category wildcard registered for subscribed unit type", async () => {
     const dto = await subscriptionService.subscribe(SUBSCRIBER, TARGET, [
       "chapter.*",
     ]);
@@ -167,7 +167,7 @@ describe("subscriptionService.subscribe", () => {
       realmUnitId: TARGET,
     }));
     const dto = await subscriptionService.subscribe(SUBSCRIBER, TARGET);
-    expect(dto.targetUnitId).toBe(TARGET);
+    expect(dto.subscribedUnitId).toBe(TARGET);
   });
 
   test("USER→USER subscription bumps follower/following counters", async () => {

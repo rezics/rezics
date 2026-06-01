@@ -14,7 +14,7 @@ const DEFAULT_CHANNELS = ["*"] as const;
 
 /**
  * Service for `Subscription` rows — the generic attention edge from a
- * subscriber Unit (USER in v1) to any target Unit. All write paths
+ * subscriber Unit (USER in v1) to any subscribed Unit. All write paths
  * maintain the denormalized counters on `Unit.subscriberCount` and on
  * `User.followersCount` / `followingsCount` (USER→USER edges) atomically.
  */
@@ -22,7 +22,7 @@ export class SubscriptionService {
   /**
    * Insert a subscription row plus counter updates in one transaction.
    *
-   * - `subscriberUnitId === targetUnitId` is rejected (400).
+   * - `subscriberUnitId === subscribedUnitId` is rejected (400).
    * - Target's `Unit.type` must be in `CHANNEL_REGISTRY` (400 otherwise).
    * - Private REALM targets require the subscriber to already be a
    *   `RealmMember`; non-members can only subscribe to public realms
@@ -35,19 +35,19 @@ export class SubscriptionService {
    */
   async subscribe(
     subscriberUnitId: string,
-    targetUnitId: string,
+    subscribedUnitId: string,
     channels?: readonly string[],
   ): Promise<SubscriptionDTO> {
-    if (subscriberUnitId === targetUnitId) {
+    if (subscriberUnitId === subscribedUnitId) {
       throw new AppError(400, "Cannot subscribe to your own Unit");
     }
 
     const target = await prisma.unit.findUnique({
-      where: { id: targetUnitId },
+      where: { id: subscribedUnitId },
       select: { id: true, type: true, userId: true },
     });
     if (!target) {
-      throw new AppError(404, "Target Unit not found");
+      throw new AppError(404, "subscribed Unit not found");
     }
 
     if (!isSubscribableUnitType(target.type)) {
@@ -56,13 +56,13 @@ export class SubscriptionService {
         `Unit type ${target.type} is not subscribable. See CHANNEL_REGISTRY in @rezics/contract.`,
       );
     }
-    const targetType: SubscribableUnitType = target.type;
+    const subscribedType: SubscribableUnitType = target.type;
 
     const effectiveChannels =
       channels && channels.length > 0 ? [...channels] : [...DEFAULT_CHANNELS];
 
     try {
-      assertValidChannels(targetType, effectiveChannels);
+      assertValidChannels(subscribedType, effectiveChannels);
     } catch (err) {
       if (err instanceof InvalidChannelError) {
         throw new AppError(400, err.message);
@@ -70,9 +70,9 @@ export class SubscriptionService {
       throw err;
     }
 
-    if (targetType === "REALM") {
+    if (subscribedType === "REALM") {
       const realm = await prisma.realm.findUnique({
-        where: { unitId: targetUnitId },
+        where: { unitId: subscribedUnitId },
         select: { isPublic: true },
       });
       if (!realm) {
@@ -82,7 +82,7 @@ export class SubscriptionService {
         const member = await prisma.realmMember.findUnique({
           where: {
             realmUnitId_userId: {
-              realmUnitId: targetUnitId,
+              realmUnitId: subscribedUnitId,
               userId: subscriberUnitId,
             },
           },
@@ -97,23 +97,23 @@ export class SubscriptionService {
       }
     }
 
-    const isUserToUser = targetType === "USER";
+    const isUserToUser = subscribedType === "USER";
 
     const row = await prisma.$transaction(async (tx) => {
       const created = await tx.subscription.create({
         data: {
           subscriberUnitId,
-          targetUnitId,
+          subscribedUnitId,
           channels: effectiveChannels,
         },
       });
       await tx.unit.update({
-        where: { id: targetUnitId },
+        where: { id: subscribedUnitId },
         data: { subscriberCount: { increment: 1 } },
       });
       if (isUserToUser) {
         await tx.user.update({
-          where: { unitId: targetUnitId },
+          where: { unitId: subscribedUnitId },
           data: { followersCount: { increment: 1 } },
         });
         await tx.user.update({
@@ -131,8 +131,8 @@ export class SubscriptionService {
     if (isUserToUser) {
       broadcast({
         kind: "follow.new",
-        sourceUnitId: targetUnitId,
-        directRecipients: [targetUnitId],
+        sourceUnitId: subscribedUnitId,
+        directRecipients: [subscribedUnitId],
         actorId: subscriberUnitId,
       }).catch(() => {});
     }
@@ -147,18 +147,21 @@ export class SubscriptionService {
    */
   async unsubscribe(
     subscriberUnitId: string,
-    targetUnitId: string,
+    subscribedUnitId: string,
   ): Promise<boolean> {
     const existing = await prisma.subscription.findUnique({
       where: {
-        subscriberUnitId_targetUnitId: { subscriberUnitId, targetUnitId },
+        subscriberUnitId_subscribedUnitId: {
+          subscriberUnitId,
+          subscribedUnitId,
+        },
       },
       select: { id: true },
     });
     if (!existing) return false;
 
     const target = await prisma.unit.findUnique({
-      where: { id: targetUnitId },
+      where: { id: subscribedUnitId },
       select: { type: true },
     });
     const isUserToUser = target?.type === "USER";
@@ -166,12 +169,12 @@ export class SubscriptionService {
     await prisma.$transaction(async (tx) => {
       await tx.subscription.delete({ where: { id: existing.id } });
       await tx.unit.update({
-        where: { id: targetUnitId },
+        where: { id: subscribedUnitId },
         data: { subscriberCount: { decrement: 1 } },
       });
       if (isUserToUser) {
         await tx.user.update({
-          where: { unitId: targetUnitId },
+          where: { unitId: subscribedUnitId },
           data: { followersCount: { decrement: 1 } },
         });
         await tx.user.update({
@@ -185,27 +188,27 @@ export class SubscriptionService {
 
   /**
    * Replace `channels` on an existing subscription row. Channels are
-   * validated against the target's UnitType registry. Counter values
+   * validated against the subscribed unit's UnitType registry. Counter values
    * are not touched (channel scope changes do not affect the count).
    */
   async updateChannels(
     subscriberUnitId: string,
-    targetUnitId: string,
+    subscribedUnitId: string,
     channels: readonly string[],
   ): Promise<SubscriptionDTO> {
     if (channels.length === 0) {
       throw new AppError(
         400,
-        "Channels cannot be empty; use DELETE /subscription/:targetUnitId to unsubscribe",
+        "Channels cannot be empty; use DELETE /subscription/:subscribedUnitId to unsubscribe",
       );
     }
 
     const target = await prisma.unit.findUnique({
-      where: { id: targetUnitId },
+      where: { id: subscribedUnitId },
       select: { type: true },
     });
     if (!target) {
-      throw new AppError(404, "Target Unit not found");
+      throw new AppError(404, "subscribed Unit not found");
     }
     if (!isSubscribableUnitType(target.type)) {
       throw new AppError(400, `Unit type ${target.type} is not subscribable`);
@@ -222,7 +225,10 @@ export class SubscriptionService {
 
     const row = await prisma.subscription.update({
       where: {
-        subscriberUnitId_targetUnitId: { subscriberUnitId, targetUnitId },
+        subscriberUnitId_subscribedUnitId: {
+          subscriberUnitId,
+          subscribedUnitId,
+        },
       },
       data: { channels: [...channels] },
     });
@@ -231,18 +237,18 @@ export class SubscriptionService {
 
   /**
    * List the caller's subscriptions, optionally filtered by the
-   * target's UnitType (e.g., `targetType=USER` powers the "followings"
+   * subscribed unit's UnitType (e.g., `subscribedType=USER` powers the "followings"
    * view on the profile-followers-tab).
    */
   async listMine(
     userId: string,
-    opts: { targetType?: string } = {},
+    opts: { subscribedType?: string } = {},
   ): Promise<SubscriptionDTO[]> {
     const rows = await prisma.subscription.findMany({
       where: {
         subscriberUnitId: userId,
-        ...(opts.targetType
-          ? { target: { type: opts.targetType as never } }
+        ...(opts.subscribedType
+          ? { subscribedUnit: { type: opts.subscribedType as never } }
           : {}),
       },
       orderBy: { createdAt: "desc" },
@@ -251,19 +257,19 @@ export class SubscriptionService {
   }
 
   /**
-   * Probe whether the caller is subscribed to `targetUnitId`. Returns
+   * Probe whether the caller is subscribed to `subscribedUnitId`. Returns
    * `{ subscribed: false }` rather than 404 so the UI can render a
    * toggle without two requests.
    */
   async checkSubscription(
     userId: string,
-    targetUnitId: string,
+    subscribedUnitId: string,
   ): Promise<{ subscribed: boolean; channels?: string[] }> {
     const row = await prisma.subscription.findUnique({
       where: {
-        subscriberUnitId_targetUnitId: {
+        subscriberUnitId_subscribedUnitId: {
           subscriberUnitId: userId,
-          targetUnitId,
+          subscribedUnitId,
         },
       },
       select: { channels: true },
@@ -278,13 +284,13 @@ export class SubscriptionService {
    * every Subscription insert/delete; the migration seeded the initial
    * value from a COUNT(*) over the backfilled rows.
    */
-  async getSubscriberCount(targetUnitId: string): Promise<number> {
+  async getSubscriberCount(subscribedUnitId: string): Promise<number> {
     const unit = await prisma.unit.findUnique({
-      where: { id: targetUnitId },
+      where: { id: subscribedUnitId },
       select: { subscriberCount: true },
     });
     if (!unit) {
-      throw new AppError(404, "Target Unit not found");
+      throw new AppError(404, "subscribed Unit not found");
     }
     return unit.subscriberCount;
   }

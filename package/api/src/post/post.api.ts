@@ -194,10 +194,10 @@ export const postApi = {
   /** Remove a PINNED promotion. */
   unpin: async (
     scopeUnitId: string,
-    targetUnitId: string,
+    commentUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/post/pins/${scopeUnitId}/${targetUnitId}`,
+      `/post/pins/${scopeUnitId}/${commentUnitId}`,
       { method: "DELETE" },
     );
   },
@@ -215,10 +215,10 @@ export const postApi = {
   /** Remove an ACCEPTED_ANSWER promotion. */
   unacceptAnswer: async (
     scopeUnitId: string,
-    targetUnitId: string,
+    commentUnitId: string,
   ): Promise<{ message: string }> => {
     return apiFetch<{ message: string }>(
-      `/post/accepted-answers/${scopeUnitId}/${targetUnitId}`,
+      `/post/accepted-answers/${scopeUnitId}/${commentUnitId}`,
       { method: "DELETE" },
     );
   },

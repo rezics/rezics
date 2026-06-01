@@ -346,7 +346,7 @@ export const createRealmModerationQueueItemSchema = t.Object(
     subjectUserId: t.Optional(t.Nullable(t.String())),
     targetKind: t.String(),
     targetId: t.String(),
-    targetUnitId: t.Optional(t.Nullable(t.String())),
+    addressedUnitId: t.Optional(t.Nullable(t.String())),
     sourceFeedbackId: t.Optional(t.Nullable(t.String())),
     assignedToUserId: t.Optional(t.Nullable(t.String())),
     reason: t.Optional(t.Nullable(t.String())),
@@ -419,7 +419,7 @@ export type ContentModerationStateKind =
   (typeof contentModerationStateKindSchema)["static"];
 
 export const contentModerationStateDTOSchema = t.Object({
-  targetUnitId: t.String(),
+  moderatedUnitId: t.String(),
   state: contentModerationStateKindSchema,
   decidedByUserId: t.Optional(t.Nullable(t.String())),
   caseId: t.Optional(t.Nullable(t.String())),
@@ -434,7 +434,7 @@ export type ContentModerationStateDTO =
 
 export const realmContentModerationDTOSchema = t.Object({
   realmUnitId: t.String(),
-  targetUnitId: t.String(),
+  moderatedUnitId: t.String(),
   state: contentModerationStateKindSchema,
   decidedByUserId: t.Optional(t.Nullable(t.String())),
   caseId: t.Optional(t.Nullable(t.String())),

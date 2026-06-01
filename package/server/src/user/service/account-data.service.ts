@@ -92,7 +92,7 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
     }),
     prisma.subscription.findMany({
       where: { subscriberUnitId: userId },
-      select: { targetUnitId: true, channels: true, createdAt: true },
+      select: { subscribedUnitId: true, channels: true, createdAt: true },
     }),
     prisma.userBlock.findMany({
       where: { blockerId: userId },
@@ -137,7 +137,7 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
       updatedAt: row.updatedAt.toISOString(),
     })),
     follows: follows.map((f) => ({
-      targetUnitId: f.targetUnitId,
+      subscribedUnitId: f.subscribedUnitId,
       channels: f.channels,
       createdAt: f.createdAt.toISOString(),
     })),
@@ -181,15 +181,15 @@ export async function deleteAccount(
   const [followings, followers] = await Promise.all([
     prisma.subscription.findMany({
       where: { subscriberUnitId: userId },
-      select: { targetUnitId: true },
+      select: { subscribedUnitId: true },
     }),
     prisma.subscription.findMany({
-      where: { targetUnitId: userId },
+      where: { subscribedUnitId: userId },
       select: { subscriberUnitId: true },
     }),
   ]);
   for (const f of followings) {
-    await subscriptionService.unsubscribe(userId, f.targetUnitId);
+    await subscriptionService.unsubscribe(userId, f.subscribedUnitId);
   }
   for (const f of followers) {
     await subscriptionService.unsubscribe(f.subscriberUnitId, userId);

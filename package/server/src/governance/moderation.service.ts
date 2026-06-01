@@ -15,7 +15,7 @@ import {
 import type { GovernanceListOptions } from "./types";
 
 type ContentModerationStateInput = {
-  targetUnitId: string;
+  moderatedUnitId: string;
   state: "visible" | "hidden" | "tombstoned" | "locked" | "archived";
   decidedById?: string | null;
   caseId?: string | null;
@@ -24,7 +24,7 @@ type ContentModerationStateInput = {
 };
 
 type ModerationDecisionInput = {
-  targetUnitId: string;
+  moderatedUnitId: string;
   decidedById: string;
   reason: string;
   caseId?: string | null;
@@ -100,13 +100,13 @@ function contentModerationEventType(input: {
 function contentModerationEventSummary(input: {
   state?: string | null;
   reason?: string | null;
-  targetUnitId: string;
+  moderatedUnitId: string;
   realmUnitId?: string | null;
 }) {
   return cleanJsonObject({
     state: input.state,
     reason: input.reason,
-    targetUnitId: input.targetUnitId,
+    moderatedUnitId: input.moderatedUnitId,
     realmUnitId: input.realmUnitId ?? undefined,
   });
 }
@@ -253,7 +253,7 @@ export class GovernanceModerationService {
           reporterUserId: feedback.userId,
           targetKind: feedback.unitId ? "unit" : "feedback",
           targetId: feedback.unitId ?? feedback.id,
-          targetUnitId: feedback.unitId ?? null,
+          addressedUnitId: feedback.unitId ?? null,
           sourceFeedbackId: feedback.id,
           reason: input.reason ?? feedback.content ?? null,
           safeSummary: input.safeSummary ?? null,
@@ -271,7 +271,7 @@ export class GovernanceModerationService {
         reason: input.reason ?? feedback.content ?? null,
         after: {
           sourceFeedbackId: feedback.id,
-          targetUnitId: feedback.unitId,
+          addressedUnitId: feedback.unitId,
         },
       });
       return created;
@@ -280,7 +280,7 @@ export class GovernanceModerationService {
     notifyModeration({
       kind: "moderation.report.updated",
       recipientUserId: row.reporterUserId,
-      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
     });
@@ -360,7 +360,7 @@ export class GovernanceModerationService {
     notifyModeration({
       kind: "moderation.case.assigned",
       recipientUserId: row.assignedToUserId,
-      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
     });
@@ -460,7 +460,7 @@ export class GovernanceModerationService {
     notifyModeration({
       kind: "moderation.report.updated",
       recipientUserId: row.reporterUserId,
-      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
     });
@@ -503,7 +503,7 @@ export class GovernanceModerationService {
     notifyModeration({
       kind: "moderation.appeal.updated",
       recipientUserId: row.reporterUserId,
-      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
     });
@@ -592,7 +592,7 @@ export class GovernanceModerationService {
     subjectUserId?: string | null;
     targetKind: string;
     targetId: string;
-    targetUnitId?: string | null;
+    addressedUnitId?: string | null;
     sourceFeedbackId?: string | null;
     assignedToUserId?: string | null;
     reason?: string | null;
@@ -608,7 +608,7 @@ export class GovernanceModerationService {
           subjectUserId: input.subjectUserId ?? null,
           targetKind: input.targetKind,
           targetId: input.targetId,
-          targetUnitId: input.targetUnitId ?? null,
+          addressedUnitId: input.addressedUnitId ?? null,
           sourceFeedbackId: input.sourceFeedbackId ?? null,
           assignedToUserId: input.assignedToUserId ?? null,
           reason: input.reason ?? null,
@@ -625,7 +625,7 @@ export class GovernanceModerationService {
           state: created.state,
           targetKind: created.targetKind,
           targetId: created.targetId,
-          targetUnitId: created.targetUnitId,
+          addressedUnitId: created.addressedUnitId,
         },
       });
       return created;
@@ -633,7 +633,7 @@ export class GovernanceModerationService {
     notifyModeration({
       kind: "moderation.report.updated",
       recipientUserId: row.reporterUserId,
-      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { queueItemId: row.id, state: row.state },
     });
@@ -667,7 +667,7 @@ export class GovernanceModerationService {
       reporterUserId: feedback.userId,
       targetKind: feedback.unitId ? "unit" : "feedback",
       targetId: feedback.unitId ?? feedback.id,
-      targetUnitId: feedback.unitId ?? null,
+      addressedUnitId: feedback.unitId ?? null,
       sourceFeedbackId: feedback.id,
       assignedToUserId: input.assignedToUserId,
       reason: input.reason ?? feedback.content ?? null,
@@ -714,17 +714,17 @@ export class GovernanceModerationService {
         },
       });
 
-      if (input.decisionKind === "hide_from_realm" && before.targetUnitId) {
+      if (input.decisionKind === "hide_from_realm" && before.addressedUnitId) {
         await tx.realmContentModeration.upsert({
           where: {
-            realmUnitId_targetUnitId: {
+            realmUnitId_moderatedUnitId: {
               realmUnitId: input.realmUnitId,
-              targetUnitId: before.targetUnitId,
+              moderatedUnitId: before.addressedUnitId,
             },
           },
           create: {
             realmUnitId: input.realmUnitId,
-            targetUnitId: before.targetUnitId,
+            moderatedUnitId: before.addressedUnitId,
             state: "HIDDEN",
             decidedById: input.actorUserId,
             reason: input.reason,
@@ -736,17 +736,17 @@ export class GovernanceModerationService {
           },
         });
       }
-      if (input.decisionKind === "lock" && before.targetUnitId) {
+      if (input.decisionKind === "lock" && before.addressedUnitId) {
         await tx.realmContentModeration.upsert({
           where: {
-            realmUnitId_targetUnitId: {
+            realmUnitId_moderatedUnitId: {
               realmUnitId: input.realmUnitId,
-              targetUnitId: before.targetUnitId,
+              moderatedUnitId: before.addressedUnitId,
             },
           },
           create: {
             realmUnitId: input.realmUnitId,
-            targetUnitId: before.targetUnitId,
+            moderatedUnitId: before.addressedUnitId,
             state: "LOCKED",
             decidedById: input.actorUserId,
             reason: input.reason,
@@ -758,17 +758,17 @@ export class GovernanceModerationService {
           },
         });
       }
-      if (input.decisionKind === "archive" && before.targetUnitId) {
+      if (input.decisionKind === "archive" && before.addressedUnitId) {
         await tx.realmContentModeration.upsert({
           where: {
-            realmUnitId_targetUnitId: {
+            realmUnitId_moderatedUnitId: {
               realmUnitId: input.realmUnitId,
-              targetUnitId: before.targetUnitId,
+              moderatedUnitId: before.addressedUnitId,
             },
           },
           create: {
             realmUnitId: input.realmUnitId,
-            targetUnitId: before.targetUnitId,
+            moderatedUnitId: before.addressedUnitId,
             state: "ARCHIVED",
             decidedById: input.actorUserId,
             reason: input.reason,
@@ -780,12 +780,12 @@ export class GovernanceModerationService {
           },
         });
       }
-      if (input.decisionKind === "remove_from_feed" && before.targetUnitId) {
+      if (input.decisionKind === "remove_from_feed" && before.addressedUnitId) {
         await tx.unitRealm.delete({
           where: {
             realmUnitId_unitId: {
               realmUnitId: input.realmUnitId,
-              unitId: before.targetUnitId,
+              unitId: before.addressedUnitId,
             },
           },
         });
@@ -826,13 +826,13 @@ export class GovernanceModerationService {
       return updated;
     });
     if (input.decisionKind === "remove_from_feed") {
-      const targetUnitId = row.targetUnitId;
+      const targetUnitId = row.addressedUnitId;
       if (targetUnitId) await enqueueRealmMembershipSearch(targetUnitId);
     }
     notifyModeration({
       kind: "moderation.report.updated",
       recipientUserId: row.reporterUserId,
-      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { queueItemId: row.id, state: row.state },
     });
@@ -840,7 +840,7 @@ export class GovernanceModerationService {
       notifyModeration({
         kind: "moderation.subject.warning",
         recipientUserId: row.subjectUserId,
-        sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+        sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
         actorUserId: input.actorUserId,
         extra: { queueItemId: row.id, decisionKind: input.decisionKind },
       });
@@ -881,7 +881,7 @@ export class GovernanceModerationService {
             subjectUserId: queue.subjectUserId,
             targetKind: queue.targetKind,
             targetId: queue.targetId,
-            targetUnitId: queue.targetUnitId,
+            addressedUnitId: queue.addressedUnitId,
             realmUnitId: input.realmUnitId,
             sourceFeedbackId: queue.sourceFeedbackId,
             reason: input.reason,
@@ -931,7 +931,7 @@ export class GovernanceModerationService {
     notifyModeration({
       kind: "moderation.escalation.updated",
       recipientUserId: row.reporterUserId,
-      sourceUnitId: row.targetUnitId ?? row.realmUnitId ?? row.targetId,
+      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { queueItemId: row.id, linkedCaseId: row.linkedCaseId },
     });
@@ -948,19 +948,19 @@ export class GovernanceModerationService {
     return mapRealmQueueItemToDTO(row);
   }
 
-  async getGlobalContentState(targetUnitId: string) {
+  async getGlobalContentState(moderatedUnitId: string) {
     const row = await prisma.contentModerationState.findUnique({
-      where: { targetUnitId },
+      where: { moderatedUnitId },
     });
     return row ? mapContentModerationStateToDTO(row) : null;
   }
 
-  async listGlobalContentStates(targetUnitIds: string[]) {
-    const ids = [...new Set(targetUnitIds)];
+  async listGlobalContentStates(moderatedUnitIds: string[]) {
+    const ids = [...new Set(moderatedUnitIds)];
     if (ids.length === 0) return [];
 
     const rows = await prisma.contentModerationState.findMany({
-      where: { targetUnitId: { in: ids } },
+      where: { moderatedUnitId: { in: ids } },
       orderBy: { updatedAt: "desc" },
     });
     return rows.map(mapContentModerationStateToDTO);
@@ -971,12 +971,12 @@ export class GovernanceModerationService {
     const row = input.caseId
       ? await prisma.$transaction(async (tx) => {
           const before = await tx.contentModerationState.findUnique({
-            where: { targetUnitId: input.targetUnitId },
+            where: { moderatedUnitId: input.moderatedUnitId },
           });
           const updated = await tx.contentModerationState.upsert({
-            where: { targetUnitId: input.targetUnitId },
+            where: { moderatedUnitId: input.moderatedUnitId },
             create: {
-              targetUnitId: input.targetUnitId,
+              moderatedUnitId: input.moderatedUnitId,
               ...data,
             },
             update: data,
@@ -990,34 +990,34 @@ export class GovernanceModerationService {
               ? contentModerationEventSummary({
                   state: before.state,
                   reason: before.reason,
-                  targetUnitId: input.targetUnitId,
+                  moderatedUnitId: input.moderatedUnitId,
                 })
               : null,
             after: contentModerationEventSummary({
               state: updated.state,
               reason: updated.reason,
-              targetUnitId: input.targetUnitId,
+              moderatedUnitId: input.moderatedUnitId,
             }),
             reversible: input.state !== "visible",
           });
           return updated;
         })
       : await prisma.contentModerationState.upsert({
-          where: { targetUnitId: input.targetUnitId },
+          where: { moderatedUnitId: input.moderatedUnitId },
           create: {
-            targetUnitId: input.targetUnitId,
+            moderatedUnitId: input.moderatedUnitId,
             ...data,
           },
           update: data,
         });
-    await enqueueModeratedContentSearch(input.targetUnitId);
+    await enqueueModeratedContentSearch(input.moderatedUnitId);
     auditPrivilegedMutation({
       actorUserId: input.decidedById ?? "",
       action: "content.moderation.state_changed",
       targetKind: "content",
-      targetId: input.targetUnitId,
+      targetId: input.moderatedUnitId,
       reason: input.reason ?? "content moderation state changed",
-      correlationId: input.caseId ?? input.targetUnitId,
+      correlationId: input.caseId ?? input.moderatedUnitId,
       after: { state: row.state, caseId: row.caseId },
     });
     return mapContentModerationStateToDTO(row);
@@ -1046,15 +1046,15 @@ export class GovernanceModerationService {
 
   async listRealmContentOverlays(input: {
     realmUnitId: string;
-    targetUnitIds: string[];
+    moderatedUnitIds: string[];
   }) {
-    const targetUnitIds = [...new Set(input.targetUnitIds)];
-    if (targetUnitIds.length === 0) return [];
+    const moderatedUnitIds = [...new Set(input.moderatedUnitIds)];
+    if (moderatedUnitIds.length === 0) return [];
 
     const rows = await prisma.realmContentModeration.findMany({
       where: {
         realmUnitId: input.realmUnitId,
-        targetUnitId: { in: targetUnitIds },
+        moderatedUnitId: { in: moderatedUnitIds },
       },
       orderBy: { updatedAt: "desc" },
     });
@@ -1069,22 +1069,22 @@ export class GovernanceModerationService {
       ? await prisma.$transaction(async (tx) => {
           const before = await tx.realmContentModeration.findUnique({
             where: {
-              realmUnitId_targetUnitId: {
+              realmUnitId_moderatedUnitId: {
                 realmUnitId: input.realmUnitId,
-                targetUnitId: input.targetUnitId,
+                moderatedUnitId: input.moderatedUnitId,
               },
             },
           });
           const updated = await tx.realmContentModeration.upsert({
             where: {
-              realmUnitId_targetUnitId: {
+              realmUnitId_moderatedUnitId: {
                 realmUnitId: input.realmUnitId,
-                targetUnitId: input.targetUnitId,
+                moderatedUnitId: input.moderatedUnitId,
               },
             },
             create: {
               realmUnitId: input.realmUnitId,
-              targetUnitId: input.targetUnitId,
+              moderatedUnitId: input.moderatedUnitId,
               ...data,
             },
             update: data,
@@ -1101,14 +1101,14 @@ export class GovernanceModerationService {
               ? contentModerationEventSummary({
                   state: before.state,
                   reason: before.reason,
-                  targetUnitId: input.targetUnitId,
+                  moderatedUnitId: input.moderatedUnitId,
                   realmUnitId: input.realmUnitId,
                 })
               : null,
             after: contentModerationEventSummary({
               state: updated.state,
               reason: updated.reason,
-              targetUnitId: input.targetUnitId,
+              moderatedUnitId: input.moderatedUnitId,
               realmUnitId: input.realmUnitId,
             }),
             reversible: input.state !== "visible",
@@ -1117,14 +1117,14 @@ export class GovernanceModerationService {
         })
       : await prisma.realmContentModeration.upsert({
           where: {
-            realmUnitId_targetUnitId: {
+            realmUnitId_moderatedUnitId: {
               realmUnitId: input.realmUnitId,
-              targetUnitId: input.targetUnitId,
+              moderatedUnitId: input.moderatedUnitId,
             },
           },
           create: {
             realmUnitId: input.realmUnitId,
-            targetUnitId: input.targetUnitId,
+            moderatedUnitId: input.moderatedUnitId,
             ...data,
           },
           update: data,
@@ -1133,10 +1133,10 @@ export class GovernanceModerationService {
       actorUserId: input.decidedById ?? "",
       action: "realm.content.moderation.state_changed",
       targetKind: "realm-content",
-      targetId: input.targetUnitId,
+      targetId: input.moderatedUnitId,
       reason: input.reason ?? "realm content moderation state changed",
       correlationId:
-        input.caseId ?? `${input.realmUnitId}:${input.targetUnitId}`,
+        input.caseId ?? `${input.realmUnitId}:${input.moderatedUnitId}`,
       after: { state: row.state, caseId: row.caseId },
       metadata: { realmUnitId: input.realmUnitId },
     });
@@ -1203,8 +1203,8 @@ export class GovernanceModerationService {
         realmUnitId: input.realmUnitId,
         state: "NEW",
         targetKind: "content-owner-delegation",
-        targetId: input.targetUnitId,
-        targetUnitId: input.targetUnitId,
+        targetId: input.moderatedUnitId,
+        addressedUnitId: input.moderatedUnitId,
         assignedToUserId: input.decidedById,
         reason: input.reason,
         metadata: {

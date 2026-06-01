@@ -180,7 +180,7 @@ export function mapContentModerationStateToDTO(
   row: ContentModerationStateRow,
 ): ContentModerationStateDTO {
   return {
-    targetUnitId: row.targetUnitId,
+    moderatedUnitId: row.moderatedUnitId,
     state: lower<ContentModerationStateKind>(row.state),
     decidedByUserId: row.decidedById,
     caseId: row.caseId,
@@ -196,7 +196,7 @@ export function mapRealmContentModerationToDTO(
 ): RealmContentModerationDTO {
   return {
     realmUnitId: row.realmUnitId,
-    targetUnitId: row.targetUnitId,
+    moderatedUnitId: row.moderatedUnitId,
     state: lower<ContentModerationStateKind>(row.state),
     decidedByUserId: row.decidedById,
     caseId: row.caseId,

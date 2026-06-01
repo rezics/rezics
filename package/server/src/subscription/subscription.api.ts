@@ -25,7 +25,7 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
     async ({ body, identity }): Promise<SubscriptionDTO> => {
       return subscriptionService.subscribe(
         identity.userId,
-        body.targetUnitId,
+        body.subscribedUnitId,
         body.channels,
       );
     },
@@ -36,17 +36,17 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
       detail: {
         summary: "Create subscription",
         description:
-          "Subscribe the authenticated user to a target Unit. Defaults channels to ['*'].",
+          "Subscribe the authenticated user to a subscribed Unit. Defaults channels to ['*'].",
         tags: ["Subscription"],
       },
     },
   )
   .delete(
-    "/:targetUnitId",
+    "/:subscribedUnitId",
     async ({ params, identity }): Promise<{ unsubscribed: boolean }> => {
       const ok = await subscriptionService.unsubscribe(
         identity.userId,
-        params.targetUnitId,
+        params.subscribedUnitId,
       );
       return { unsubscribed: ok };
     },
@@ -56,17 +56,17 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
       detail: {
         summary: "Delete subscription",
         description:
-          "Remove the caller's subscription to the target Unit. Idempotent (returns unsubscribed:false if no row existed).",
+          "Remove the caller's subscription to the subscribed Unit. Idempotent (returns unsubscribed:false if no row existed).",
         tags: ["Subscription"],
       },
     },
   )
   .patch(
-    "/:targetUnitId",
+    "/:subscribedUnitId",
     async ({ params, body, identity }): Promise<SubscriptionDTO> => {
       return subscriptionService.updateChannels(
         identity.userId,
-        params.targetUnitId,
+        params.subscribedUnitId,
         body.channels,
       );
     },
@@ -78,7 +78,7 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
       detail: {
         summary: "Update subscription channels",
         description:
-          "Replace the channels filter on the caller's existing subscription to a target Unit.",
+          "Replace the channels filter on the caller's existing subscription to a subscribed Unit.",
         tags: ["Subscription"],
       },
     },
@@ -88,7 +88,7 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
     async ({ query, identity }): Promise<SubscriptionListResponse> => {
       const subscriptions = await subscriptionService.listMine(
         identity.userId,
-        { targetType: query.targetType },
+        { subscribedType: query.subscribedType },
       );
       return { subscriptions };
     },
@@ -99,17 +99,17 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
       detail: {
         summary: "List my subscriptions",
         description:
-          "List the caller's subscriptions; optional ?targetType filter.",
+          "List the caller's subscriptions; optional ?subscribedType filter.",
         tags: ["Subscription"],
       },
     },
   )
   .get(
-    "/check/:targetUnitId",
+    "/check/:subscribedUnitId",
     async ({ params, identity }): Promise<SubscriptionCheckResponse> => {
       return subscriptionService.checkSubscription(
         identity.userId,
-        params.targetUnitId,
+        params.subscribedUnitId,
       );
     },
     {
@@ -124,10 +124,10 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
     },
   )
   .get(
-    "/count/:targetUnitId",
+    "/count/:subscribedUnitId",
     async ({ params }): Promise<SubscriberCountResponse> => {
       const count = await subscriptionService.getSubscriberCount(
-        params.targetUnitId,
+        params.subscribedUnitId,
       );
       return { count };
     },
@@ -137,7 +137,7 @@ export const subscriptionApi = new Elysia({ prefix: "/subscription" })
       detail: {
         summary: "Get subscriber count",
         description:
-          "Read the cached subscriberCount for a target Unit. Public; no auth required.",
+          "Read the cached subscriberCount for a subscribed Unit. Public; no auth required.",
         tags: ["Subscription"],
       },
     },

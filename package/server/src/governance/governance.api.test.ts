@@ -82,7 +82,7 @@ const revokeRealmCapabilityMock = mock(async () => [
   { ...capabilityGrantRow, state: "revoked", revokedByUserId: "staff-1" },
 ]);
 const contentStateRow = {
-  targetUnitId: "reply-1",
+  moderatedUnitId: "reply-1",
   state: "tombstoned",
   decidedByUserId: "staff-1",
   caseId: null,
@@ -92,7 +92,7 @@ const contentStateRow = {
 };
 const realmOverlayRow = {
   realmUnitId: "realm-1",
-  targetUnitId: "reply-1",
+  moderatedUnitId: "reply-1",
   state: "tombstoned",
   decidedByUserId: "staff-1",
   caseId: null,
@@ -561,7 +561,7 @@ describe("governanceApi account enforcement", () => {
       target: { kind: "content", id: "reply-1" },
     });
     expect(tombstoneGlobalMock).toHaveBeenCalledWith({
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "abuse",
     });
@@ -581,7 +581,7 @@ describe("governanceApi account enforcement", () => {
 
     expect(response.status).toBe(200);
     expect(hideGlobalMock).toHaveBeenCalledWith({
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "abuse",
       caseId: "case-1",
@@ -605,7 +605,7 @@ describe("governanceApi account enforcement", () => {
 
     expect(response.status).toBe(200);
     expect(tombstoneGlobalMock).toHaveBeenCalledWith({
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "abuse",
     });
@@ -648,7 +648,7 @@ describe("governanceApi account enforcement", () => {
     });
     expect(tombstoneInRealmMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "off-topic",
     });
@@ -672,7 +672,7 @@ describe("governanceApi account enforcement", () => {
     expect(response.status).toBe(200);
     expect(hideInRealmMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "off-topic",
       caseId: "case-1",
@@ -715,7 +715,7 @@ describe("governanceApi account enforcement", () => {
     expect(response.status).toBe(200);
     expect(requestOwnerDelegationMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "please remove",
     });
@@ -732,7 +732,7 @@ describe("governanceApi account enforcement", () => {
         body: JSON.stringify({
           targetKind: "unit",
           targetId: "post-1",
-          targetUnitId: "post-1",
+          addressedUnitId: "post-1",
           reason: "reported",
         }),
       }),
@@ -744,7 +744,7 @@ describe("governanceApi account enforcement", () => {
       actorUserId: "staff-1",
       targetKind: "unit",
       targetId: "post-1",
-      targetUnitId: "post-1",
+      addressedUnitId: "post-1",
       reason: "reported",
     });
   });

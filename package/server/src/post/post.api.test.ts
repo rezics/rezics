@@ -27,7 +27,7 @@ const updateMock = mock(async (_unitId: string, input: any) => ({
 const deleteMock = mock(async () => undefined);
 const listGlobalContentStatesMock = mock(async () => [
   {
-    targetUnitId: "reply-1",
+    moderatedUnitId: "reply-1",
     state: "hidden",
     decidedByUserId: null,
     caseId: null,
@@ -39,7 +39,7 @@ const listGlobalContentStatesMock = mock(async () => [
 const listRealmContentOverlaysMock = mock(async () => [
   {
     realmUnitId: "realm-1",
-    targetUnitId: "reply-1",
+    moderatedUnitId: "reply-1",
     state: "tombstoned",
     decidedByUserId: null,
     caseId: null,
@@ -132,7 +132,7 @@ describe("postApi", () => {
     expect(await response.json()).toEqual({
       globalStates: [
         {
-          targetUnitId: "reply-1",
+          moderatedUnitId: "reply-1",
           state: "hidden",
           decidedByUserId: null,
           caseId: null,
@@ -144,7 +144,7 @@ describe("postApi", () => {
       realmOverlays: [
         {
           realmUnitId: "realm-1",
-          targetUnitId: "reply-1",
+          moderatedUnitId: "reply-1",
           state: "tombstoned",
           decidedByUserId: null,
           caseId: null,
@@ -160,7 +160,7 @@ describe("postApi", () => {
     ]);
     expect(listRealmContentOverlaysMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      targetUnitIds: ["reply-1", "reply-2"],
+      moderatedUnitIds: ["reply-1", "reply-2"],
     });
   });
 

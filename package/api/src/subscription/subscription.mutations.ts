@@ -10,10 +10,10 @@ import { subscriptionKeys } from "./subscription.keys";
 
 function invalidateForTarget(
   qc: ReturnType<typeof useQueryClient>,
-  targetUnitId: string,
+  subscribedUnitId: string,
 ) {
-  qc.invalidateQueries({ queryKey: subscriptionKeys.check(targetUnitId) });
-  qc.invalidateQueries({ queryKey: subscriptionKeys.count(targetUnitId) });
+  qc.invalidateQueries({ queryKey: subscriptionKeys.check(subscribedUnitId) });
+  qc.invalidateQueries({ queryKey: subscriptionKeys.count(subscribedUnitId) });
   qc.invalidateQueries({ queryKey: subscriptionKeys.all() });
   void invalidateForCacheDomain(qc, "follow");
 }
@@ -30,7 +30,7 @@ export function useSubscribeMutation(
       subscriptionApi.subscribe(input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateForTarget(qc, variables.targetUnitId);
+      invalidateForTarget(qc, variables.subscribedUnitId);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -44,12 +44,12 @@ export function useUnsubscribeMutation(
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (targetUnitId: string) =>
-      subscriptionApi.unsubscribe(targetUnitId),
+    mutationFn: (subscribedUnitId: string) =>
+      subscriptionApi.unsubscribe(subscribedUnitId),
     ...options,
-    onSuccess: (data, targetUnitId, onMutateResult, context) => {
-      invalidateForTarget(qc, targetUnitId);
-      options?.onSuccess?.(data, targetUnitId, onMutateResult, context);
+    onSuccess: (data, subscribedUnitId, onMutateResult, context) => {
+      invalidateForTarget(qc, subscribedUnitId);
+      options?.onSuccess?.(data, subscribedUnitId, onMutateResult, context);
     },
   });
 }
@@ -59,18 +59,18 @@ export function useUpdateSubscriptionChannelsMutation(
     UseMutationOptions<
       SubscriptionDTO,
       Error,
-      { targetUnitId: string; channels: string[] }
+      { subscribedUnitId: string; channels: string[] }
     >,
     "mutationFn"
   >,
 ) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ targetUnitId, channels }) =>
-      subscriptionApi.updateChannels(targetUnitId, { channels }),
+    mutationFn: ({ subscribedUnitId, channels }) =>
+      subscriptionApi.updateChannels(subscribedUnitId, { channels }),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateForTarget(qc, variables.targetUnitId);
+      invalidateForTarget(qc, variables.subscribedUnitId);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });

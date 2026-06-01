@@ -151,7 +151,7 @@ export const postApi = new Elysia({ prefix: "/post" })
         body.realmUnitId
           ? governanceModerationService.listRealmContentOverlays({
               realmUnitId: body.realmUnitId,
-              targetUnitIds,
+              moderatedUnitIds: targetUnitIds,
             })
           : [],
       ]);
@@ -322,11 +322,11 @@ export const postApi = new Elysia({ prefix: "/post" })
     },
   )
   .delete(
-    "/pins/:scopeUnitId/:targetUnitId",
+    "/pins/:scopeUnitId/:commentUnitId",
     async ({ params, identity }) => {
       await postService.unpin(
         params.scopeUnitId,
-        params.targetUnitId,
+        params.commentUnitId,
         identity,
       );
       return { message: "Pin removed" };
@@ -335,7 +335,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       requireLogin: true,
       params: t.Object({
         scopeUnitId: t.String(),
-        targetUnitId: t.String(),
+        commentUnitId: t.String(),
       }),
       response: { 200: t.Object({ message: t.String() }) },
       detail: {
@@ -364,11 +364,11 @@ export const postApi = new Elysia({ prefix: "/post" })
     },
   )
   .delete(
-    "/accepted-answers/:scopeUnitId/:targetUnitId",
+    "/accepted-answers/:scopeUnitId/:commentUnitId",
     async ({ params, identity }) => {
       await postService.unacceptAnswer(
         params.scopeUnitId,
-        params.targetUnitId,
+        params.commentUnitId,
         identity,
       );
       return { message: "Accepted answer removed" };
@@ -377,7 +377,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       requireLogin: true,
       params: t.Object({
         scopeUnitId: t.String(),
-        targetUnitId: t.String(),
+        commentUnitId: t.String(),
       }),
       response: { 200: t.Object({ message: t.String() }) },
       detail: {

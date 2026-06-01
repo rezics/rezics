@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { afterEach, describe, expect, mock, test } from "bun:test";
 import {
   installPrismaClientMock,
   prismaMock,
@@ -149,12 +149,12 @@ describe("realmService.joinRealm", () => {
       data: {
         channels: string[];
         subscriberUnitId: string;
-        targetUnitId: string;
+        subscribedUnitId: string;
       };
     };
     expect(subArgs.data.channels).toEqual(["*"]);
     expect(subArgs.data.subscriberUnitId).toBe(USER);
-    expect(subArgs.data.targetUnitId).toBe(REALM);
+    expect(subArgs.data.subscribedUnitId).toBe(REALM);
   });
 
   test("preserves existing Subscription (lurker→member) without double-bumping subscriberCount", async () => {
@@ -576,7 +576,7 @@ describe("realmService.resolveRule", () => {
       findUnique: mock(async () => ({
         unitId: "rule-post-ja",
         authorUserId: USER,
-        targetUnitId: null,
+        subscribedUnitId: null,
         content: { type: "doc", content: [] },
         rootPostUnitId: "rule-post-ja",
         parentPostUnitId: null,

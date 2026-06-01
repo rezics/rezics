@@ -147,7 +147,7 @@ only if the surrounding model context makes part of it redundant.
   `targetUnitId` is valid for non-variant Units, while retaining tests that
   `VARIANT` requires a target and generic content search treats variants
   specially.
-- [ ] 1.4 Add a focused schema/contract test matrix classifying target-like
+- [x] 1.4 Add a focused schema/contract test matrix classifying target-like
   fields as canonical Unit target, operation edge, topology edge, structure edge,
   provenance source, or audit/event address.
 
@@ -173,18 +173,18 @@ only if the surrounding model context makes part of it redundant.
 
 ## 3. Rename Non-Canonical Target Endpoints
 
-- [ ] 3.1 Rename `Subscription.targetUnitId` through Prisma, contract, API,
+- [x] 3.1 Rename `Subscription.targetUnitId` through Prisma, contract, API,
   notification, account-data export, and app query layers to a subscription
   endpoint name such as `subscribedUnitId`, with compatibility adapters only at
   route boundaries.
-- [ ] 3.2 Rename `ContentModerationState.targetUnitId` and
+- [x] 3.2 Rename `ContentModerationState.targetUnitId` and
   `RealmContentModeration.targetUnitId` to moderation endpoint names such as
   `moderatedUnitId`, preserving existing primary keys and indexes under clearer
   names.
-- [ ] 3.3 Rename optional moderation queue/case Unit lookup fields away from
+- [x] 3.3 Rename optional moderation queue/case Unit lookup fields away from
   generic `targetUnitId`, while keeping `targetKind`/`targetId` as immutable
   event addresses.
-- [ ] 3.4 Rename comment promotion request/DTO fields from `targetUnitId` to
+- [x] 3.4 Rename comment promotion request/DTO fields from `targetUnitId` to
   `commentUnitId`, matching the existing `CommentPromotion.commentUnitId`
   storage model.
 - [ ] 3.5 Audit remaining contract/API/search fields named `targetUnitId` and
@@ -207,10 +207,10 @@ only if the surrounding model context makes part of it redundant.
 
 ## 5. Preserve Domain Endpoints That Should Stay Local
 
-- [ ] 5.1 Add or update comments/tests around `Comment` proving comment topology
+- [x] 5.1 Add or update comments/tests around `Comment` proving comment topology
   remains `rootUnitId + realmUnitId + parentCommentUnitId + path`, independent
   of `Unit.targetUnitId`.
-- [ ] 5.2 Add or update comments/tests around `ContentStructure` proving owner
+- [x] 5.2 Add or update comments/tests around `ContentStructure` proving owner
   structure and reusable content occurrences are not canonical Unit targets.
 - [ ] 5.3 Add regression tests for subscriptions, reactions, user tags, realm
   tags, and moderation states proving those row endpoints do not auto-follow

@@ -3,12 +3,12 @@ import { unitTypeSchema } from "../unit/unit";
 
 /**
  * Persisted `Subscription` row. `subscriberUnitId` is a USER `Unit.id`
- * in v1; `targetUnitId` is any `Unit.id`. The pair is unique.
+ * in v1; `subscribedUnitId` is any `Unit.id`. The pair is unique.
  */
 export const subscriptionDTOSchema = t.Object({
   id: t.String(),
   subscriberUnitId: t.String(),
-  targetUnitId: t.String(),
+  subscribedUnitId: t.String(),
   channels: t.Array(t.String()),
   createdAt: t.Union([t.String(), t.Date()]),
   updatedAt: t.Union([t.String(), t.Date()]),
@@ -17,7 +17,7 @@ export const subscriptionDTOSchema = t.Object({
 export type SubscriptionDTO = (typeof subscriptionDTOSchema)["static"];
 
 export const subscriptionCreateBodySchema = t.Object({
-  targetUnitId: t.String(),
+  subscribedUnitId: t.String(),
   channels: t.Optional(t.Array(t.String())),
 });
 
@@ -32,13 +32,13 @@ export type SubscriptionPatchBody =
   (typeof subscriptionPatchBodySchema)["static"];
 
 export const subscriptionParamsSchema = t.Object({
-  targetUnitId: t.String(),
+  subscribedUnitId: t.String(),
 });
 
 export type SubscriptionParams = (typeof subscriptionParamsSchema)["static"];
 
 export const subscriptionListQuerySchema = t.Object({
-  targetType: t.Optional(unitTypeSchema),
+  subscribedType: t.Optional(unitTypeSchema),
 });
 
 export type SubscriptionListQuery =

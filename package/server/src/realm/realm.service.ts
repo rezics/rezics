@@ -456,9 +456,9 @@ export class RealmService {
 
       const existingSub = await tx.subscription.findUnique({
         where: {
-          subscriberUnitId_targetUnitId: {
+          subscriberUnitId_subscribedUnitId: {
             subscriberUnitId: userId,
-            targetUnitId: realmUnitId,
+            subscribedUnitId: realmUnitId,
           },
         },
         select: { id: true },
@@ -467,7 +467,7 @@ export class RealmService {
         await tx.subscription.create({
           data: {
             subscriberUnitId: userId,
-            targetUnitId: realmUnitId,
+            subscribedUnitId: realmUnitId,
             channels: ["*"],
           },
         });
@@ -523,9 +523,9 @@ export class RealmService {
       });
       const existingSub = await tx.subscription.findUnique({
         where: {
-          subscriberUnitId_targetUnitId: {
+          subscriberUnitId_subscribedUnitId: {
             subscriberUnitId: userId,
-            targetUnitId: realmUnitId,
+            subscribedUnitId: realmUnitId,
           },
         },
         select: { id: true },
@@ -573,9 +573,9 @@ export class RealmService {
     await prisma.$transaction(async (tx) => {
       const existingSub = await tx.subscription.findUnique({
         where: {
-          subscriberUnitId_targetUnitId: {
+          subscriberUnitId_subscribedUnitId: {
             subscriberUnitId: userId,
-            targetUnitId: realmUnitId,
+            subscribedUnitId: realmUnitId,
           },
         },
         select: { id: true },
@@ -600,9 +600,9 @@ export class RealmService {
     await prisma.$transaction(async (tx) => {
       const existingSub = await tx.subscription.findUnique({
         where: {
-          subscriberUnitId_targetUnitId: {
+          subscriberUnitId_subscribedUnitId: {
             subscriberUnitId: userId,
-            targetUnitId: realmUnitId,
+            subscribedUnitId: realmUnitId,
           },
         },
         select: { id: true },
@@ -611,7 +611,7 @@ export class RealmService {
       await tx.subscription.create({
         data: {
           subscriberUnitId: userId,
-          targetUnitId: realmUnitId,
+          subscribedUnitId: realmUnitId,
           channels: ["*"],
         },
       });

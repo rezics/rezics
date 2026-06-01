@@ -119,7 +119,7 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
       if (willUnfollow) {
         await unsubscribeMutation.mutateAsync(userId);
       } else {
-        await subscribeMutation.mutateAsync({ targetUnitId: userId });
+        await subscribeMutation.mutateAsync({ subscribedUnitId: userId });
       }
     } catch {
       if (hasLocalCount) {

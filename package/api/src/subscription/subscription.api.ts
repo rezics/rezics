@@ -26,41 +26,43 @@ export const subscriptionApi = {
   },
 
   unsubscribe: async (
-    targetUnitId: string,
+    subscribedUnitId: string,
   ): Promise<{ unsubscribed: boolean }> => {
     return apiFetch<{ unsubscribed: boolean }>(
-      `/subscription/${targetUnitId}`,
+      `/subscription/${subscribedUnitId}`,
       { method: "DELETE" },
     );
   },
 
   updateChannels: async (
-    targetUnitId: string,
+    subscribedUnitId: string,
     input: SubscriptionPatchBody,
   ): Promise<SubscriptionDTO> => {
-    return apiFetch<SubscriptionDTO>(`/subscription/${targetUnitId}`, {
+    return apiFetch<SubscriptionDTO>(`/subscription/${subscribedUnitId}`, {
       method: "PATCH",
       body: JSON.stringify(input),
     });
   },
 
   listMine: async (query?: {
-    targetType?: string;
+    subscribedType?: string;
   }): Promise<SubscriptionListResponse> => {
     return apiFetch<SubscriptionListResponse>(
       `/subscription/me${buildQueryString(query)}`,
     );
   },
 
-  check: async (targetUnitId: string): Promise<SubscriptionCheckResponse> => {
+  check: async (
+    subscribedUnitId: string,
+  ): Promise<SubscriptionCheckResponse> => {
     return apiFetch<SubscriptionCheckResponse>(
-      `/subscription/check/${targetUnitId}`,
+      `/subscription/check/${subscribedUnitId}`,
     );
   },
 
-  count: async (targetUnitId: string): Promise<SubscriberCountResponse> => {
+  count: async (subscribedUnitId: string): Promise<SubscriberCountResponse> => {
     return apiFetch<SubscriberCountResponse>(
-      `/subscription/count/${targetUnitId}`,
+      `/subscription/count/${subscribedUnitId}`,
     );
   },
 };

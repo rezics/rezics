@@ -8,7 +8,7 @@ installPrismaClientMock();
 
 const now = new Date("2026-05-28T00:00:00.000Z");
 const contentModerationUpsert = mock(async ({ create, update }: any) => ({
-  targetUnitId: create?.targetUnitId ?? "post-1",
+  moderatedUnitId: create?.moderatedUnitId ?? "post-1",
   ...(update ?? create),
   createdAt: now,
   updatedAt: now,
@@ -16,7 +16,7 @@ const contentModerationUpsert = mock(async ({ create, update }: any) => ({
 const contentModerationFindUnique = mock(async () => null);
 const contentModerationFindMany = mock(async () => [
   {
-    targetUnitId: "reply-1",
+    moderatedUnitId: "reply-1",
     state: "HIDDEN",
     decidedById: "staff-1",
     caseId: null,
@@ -28,7 +28,7 @@ const contentModerationFindMany = mock(async () => [
 ]);
 const realmContentModerationUpsert = mock(async ({ create, update }: any) => ({
   realmUnitId: create?.realmUnitId ?? "realm-1",
-  targetUnitId: create?.targetUnitId ?? "reply-1",
+  moderatedUnitId: create?.moderatedUnitId ?? "reply-1",
   ...(update ?? create),
   createdAt: now,
   updatedAt: now,
@@ -36,7 +36,7 @@ const realmContentModerationUpsert = mock(async ({ create, update }: any) => ({
 const realmContentModerationFindMany = mock(async () => [
   {
     realmUnitId: "realm-1",
-    targetUnitId: "reply-1",
+    moderatedUnitId: "reply-1",
     state: "TOMBSTONED",
     decidedById: "mod-1",
     caseId: null,
@@ -62,7 +62,7 @@ const realmQueueRow = {
   subjectUserId: "subject-1",
   targetKind: "unit",
   targetId: "post-1",
-  targetUnitId: "post-1",
+  addressedUnitId: "post-1",
   sourceFeedbackId: "feedback-1",
   linkedCaseId: null,
   assignedToUserId: null,
@@ -121,7 +121,7 @@ const moderationCaseRow = {
   subjectUserId: null,
   targetKind: "unit",
   targetId: "post-1",
-  targetUnitId: "post-1",
+  addressedUnitId: "post-1",
   realmUnitId: null,
   sourceFeedbackId: "feedback-1",
   assignedToUserId: null,
@@ -313,16 +313,16 @@ describe("GovernanceModerationService content moderation state", () => {
     );
 
     const result = await governanceModerationService.setGlobalContentState({
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       state: "hidden",
       decidedById: "staff-1",
       reason: "abuse",
     });
 
     expect(contentModerationUpsert).toHaveBeenCalledWith({
-      where: { targetUnitId: "reply-1" },
+      where: { moderatedUnitId: "reply-1" },
       create: expect.objectContaining({
-        targetUnitId: "reply-1",
+        moderatedUnitId: "reply-1",
         state: "HIDDEN",
         decidedById: "staff-1",
         reason: "abuse",
@@ -334,7 +334,7 @@ describe("GovernanceModerationService content moderation state", () => {
       }),
     });
     expect(result).toMatchObject({
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       state: "hidden",
       decidedByUserId: "staff-1",
       reason: "abuse",
@@ -357,12 +357,12 @@ describe("GovernanceModerationService content moderation state", () => {
     ]);
 
     expect(contentModerationFindMany).toHaveBeenCalledWith({
-      where: { targetUnitId: { in: ["reply-1", "reply-2"] } },
+      where: { moderatedUnitId: { in: ["reply-1", "reply-2"] } },
       orderBy: { updatedAt: "desc" },
     });
     expect(result).toMatchObject([
       {
-        targetUnitId: "reply-1",
+        moderatedUnitId: "reply-1",
         state: "hidden",
         decidedByUserId: "staff-1",
       },
@@ -376,20 +376,20 @@ describe("GovernanceModerationService content moderation state", () => {
 
     const result = await governanceModerationService.listRealmContentOverlays({
       realmUnitId: "realm-1",
-      targetUnitIds: ["reply-1", "reply-1", "reply-2"],
+      moderatedUnitIds: ["reply-1", "reply-1", "reply-2"],
     });
 
     expect(realmContentModerationFindMany).toHaveBeenCalledWith({
       where: {
         realmUnitId: "realm-1",
-        targetUnitId: { in: ["reply-1", "reply-2"] },
+        moderatedUnitId: { in: ["reply-1", "reply-2"] },
       },
       orderBy: { updatedAt: "desc" },
     });
     expect(result).toEqual([
       {
         realmUnitId: "realm-1",
-        targetUnitId: "reply-1",
+        moderatedUnitId: "reply-1",
         state: "tombstoned",
         decidedByUserId: "mod-1",
         caseId: null,
@@ -408,7 +408,7 @@ describe("GovernanceModerationService content moderation state", () => {
 
     const result = await governanceModerationService.setRealmContentOverlay({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       state: "tombstoned",
       decidedById: "mod-1",
       reason: "off-topic",
@@ -416,14 +416,14 @@ describe("GovernanceModerationService content moderation state", () => {
 
     expect(realmContentModerationUpsert).toHaveBeenCalledWith({
       where: {
-        realmUnitId_targetUnitId: {
+        realmUnitId_moderatedUnitId: {
           realmUnitId: "realm-1",
-          targetUnitId: "reply-1",
+          moderatedUnitId: "reply-1",
         },
       },
       create: expect.objectContaining({
         realmUnitId: "realm-1",
-        targetUnitId: "reply-1",
+        moderatedUnitId: "reply-1",
         state: "TOMBSTONED",
       }),
       update: expect.objectContaining({
@@ -433,7 +433,7 @@ describe("GovernanceModerationService content moderation state", () => {
     });
     expect(result).toMatchObject({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       state: "tombstoned",
     });
     expect(contentModerationUpsert).not.toHaveBeenCalled();
@@ -446,13 +446,13 @@ describe("GovernanceModerationService content moderation state", () => {
     );
 
     await governanceModerationService.restoreGlobal({
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "appeal approved",
     });
     await governanceModerationService.restoreInRealm({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "mod-1",
       reason: "appeal approved",
     });
@@ -475,14 +475,14 @@ describe("GovernanceModerationService content moderation state", () => {
     );
 
     await governanceModerationService.hideGlobal({
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "staff-1",
       reason: "abuse",
       caseId: "case-1",
     });
 
     expect(contentModerationFindUnique).toHaveBeenCalledWith({
-      where: { targetUnitId: "reply-1" },
+      where: { moderatedUnitId: "reply-1" },
     });
     expect(contentModerationUpsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -499,11 +499,11 @@ describe("GovernanceModerationService content moderation state", () => {
         actorUserId: "staff-1",
         eventType: "content.hidden",
         reason: "abuse",
-        before: undefined,
+        before: null,
         after: {
           state: "HIDDEN",
           reason: "abuse",
-          targetUnitId: "reply-1",
+          moderatedUnitId: "reply-1",
         },
         reversible: true,
       }),
@@ -523,7 +523,7 @@ describe("GovernanceModerationService content moderation state", () => {
   test("records case event history for realm content restore decisions", async () => {
     realmContentModerationFindUnique.mockResolvedValueOnce({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       state: "HIDDEN",
       decidedById: "mod-1",
       caseId: "case-1",
@@ -538,7 +538,7 @@ describe("GovernanceModerationService content moderation state", () => {
 
     await governanceModerationService.restoreInRealm({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "mod-2",
       reason: "appeal approved",
       caseId: "case-1",
@@ -546,9 +546,9 @@ describe("GovernanceModerationService content moderation state", () => {
 
     expect(realmContentModerationFindUnique).toHaveBeenCalledWith({
       where: {
-        realmUnitId_targetUnitId: {
+        realmUnitId_moderatedUnitId: {
           realmUnitId: "realm-1",
-          targetUnitId: "reply-1",
+          moderatedUnitId: "reply-1",
         },
       },
     });
@@ -561,13 +561,13 @@ describe("GovernanceModerationService content moderation state", () => {
         before: {
           state: "HIDDEN",
           reason: "off-topic",
-          targetUnitId: "reply-1",
+          moderatedUnitId: "reply-1",
           realmUnitId: "realm-1",
         },
         after: {
           state: "VISIBLE",
           reason: "appeal approved",
-          targetUnitId: "reply-1",
+          moderatedUnitId: "reply-1",
           realmUnitId: "realm-1",
         },
         reversible: false,
@@ -622,7 +622,7 @@ describe("GovernanceModerationService content moderation state", () => {
 
     const result = await governanceModerationService.requestOwnerDelegation({
       realmUnitId: "realm-1",
-      targetUnitId: "reply-1",
+      moderatedUnitId: "reply-1",
       decidedById: "mod-1",
       reason: "please remove",
     });
@@ -633,7 +633,7 @@ describe("GovernanceModerationService content moderation state", () => {
         state: "NEW",
         targetKind: "content-owner-delegation",
         targetId: "reply-1",
-        targetUnitId: "reply-1",
+        addressedUnitId: "reply-1",
         assignedToUserId: "mod-1",
         reason: "please remove",
         metadata: { ownerDelegation: true },
@@ -658,7 +658,7 @@ describe("GovernanceModerationService content moderation state", () => {
       subjectUserId: "subject-1",
       targetKind: "unit",
       targetId: "post-1",
-      targetUnitId: "post-1",
+      addressedUnitId: "post-1",
       reason: "reported",
     });
 
@@ -670,7 +670,7 @@ describe("GovernanceModerationService content moderation state", () => {
         subjectUserId: "subject-1",
         targetKind: "unit",
         targetId: "post-1",
-        targetUnitId: "post-1",
+        addressedUnitId: "post-1",
         reason: "reported",
       }),
     });
@@ -685,7 +685,7 @@ describe("GovernanceModerationService content moderation state", () => {
           state: "NEW",
           targetKind: "unit",
           targetId: "post-1",
-          targetUnitId: "post-1",
+          addressedUnitId: "post-1",
         },
       }),
     });
@@ -727,7 +727,7 @@ describe("GovernanceModerationService content moderation state", () => {
         reporterUserId: "reporter-1",
         targetKind: "unit",
         targetId: "post-1",
-        targetUnitId: "post-1",
+        addressedUnitId: "post-1",
         sourceFeedbackId: "feedback-1",
         reason: "reported",
       }),
@@ -768,9 +768,9 @@ describe("GovernanceModerationService content moderation state", () => {
     });
     expect(realmContentModerationUpsert).toHaveBeenCalledWith({
       where: {
-        realmUnitId_targetUnitId: {
+        realmUnitId_moderatedUnitId: {
           realmUnitId: "realm-1",
-          targetUnitId: "post-1",
+          moderatedUnitId: "post-1",
         },
       },
       create: expect.objectContaining({
@@ -822,7 +822,7 @@ describe("GovernanceModerationService content moderation state", () => {
         subjectUserId: "subject-1",
         targetKind: "unit",
         targetId: "post-1",
-        targetUnitId: "post-1",
+        addressedUnitId: "post-1",
         realmUnitId: "realm-1",
         sourceFeedbackId: "feedback-1",
         reason: "site review needed",
@@ -926,7 +926,7 @@ describe("GovernanceModerationService content moderation state", () => {
         reporterUserId: "reporter-1",
         targetKind: "unit",
         targetId: "post-1",
-        targetUnitId: "post-1",
+        addressedUnitId: "post-1",
         sourceFeedbackId: "feedback-1",
         reason: "policy review needed",
         safeSummary: "Reported post",
@@ -939,7 +939,7 @@ describe("GovernanceModerationService content moderation state", () => {
         actorUserId: "staff-1",
         eventType: "case.created_from_report",
         reason: "policy review needed",
-        after: { sourceFeedbackId: "feedback-1", targetUnitId: "post-1" },
+        after: { sourceFeedbackId: "feedback-1", addressedUnitId: "post-1" },
       }),
     });
     expect(result).toMatchObject({

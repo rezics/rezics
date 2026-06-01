@@ -3,42 +3,42 @@ import { subscriptionApi } from "./subscription.api";
 import { subscriptionKeys } from "./subscription.keys";
 
 /**
- * Query: my subscriptions (optionally filtered by target type, e.g.
+ * Query: my subscriptions (optionally filtered by subscribed unit type, e.g.
  * `'USER'` for the "followings" view).
  */
-export const mySubscriptionsQuery = (filter?: { targetType?: string }) =>
+export const mySubscriptionsQuery = (filter?: { subscribedType?: string }) =>
   queryOptions({
     queryKey: subscriptionKeys.mine(filter),
     queryFn: () => subscriptionApi.listMine(filter),
     staleTime: 1000 * 30,
   });
 
-export const subscriptionCheckQuery = (targetUnitId: string) =>
+export const subscriptionCheckQuery = (subscribedUnitId: string) =>
   queryOptions({
-    queryKey: subscriptionKeys.check(targetUnitId),
-    queryFn: () => subscriptionApi.check(targetUnitId),
-    enabled: !!targetUnitId,
+    queryKey: subscriptionKeys.check(subscribedUnitId),
+    queryFn: () => subscriptionApi.check(subscribedUnitId),
+    enabled: !!subscribedUnitId,
     staleTime: 1000 * 30,
   });
 
-export const subscriberCountQuery = (targetUnitId: string) =>
+export const subscriberCountQuery = (subscribedUnitId: string) =>
   queryOptions({
-    queryKey: subscriptionKeys.count(targetUnitId),
-    queryFn: () => subscriptionApi.count(targetUnitId),
-    enabled: !!targetUnitId,
+    queryKey: subscriptionKeys.count(subscribedUnitId),
+    queryFn: () => subscriptionApi.count(subscribedUnitId),
+    enabled: !!subscribedUnitId,
     staleTime: 1000 * 30,
   });
 
-export function useMySubscriptions(filter?: { targetType?: string }) {
+export function useMySubscriptions(filter?: { subscribedType?: string }) {
   return useQuery(mySubscriptionsQuery(filter));
 }
 
-export function useIsSubscribed(targetUnitId: string) {
-  return useQuery(subscriptionCheckQuery(targetUnitId));
+export function useIsSubscribed(subscribedUnitId: string) {
+  return useQuery(subscriptionCheckQuery(subscribedUnitId));
 }
 
-export function useSubscriberCount(targetUnitId: string) {
-  return useQuery(subscriberCountQuery(targetUnitId));
+export function useSubscriberCount(subscribedUnitId: string) {
+  return useQuery(subscriberCountQuery(subscribedUnitId));
 }
 
 export const subscriptionQueries = {

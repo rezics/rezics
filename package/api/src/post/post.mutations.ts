@@ -291,7 +291,7 @@ export function useUnpinCommentMutation(
     UseMutationOptions<
       { message: string },
       Error,
-      { scopeUnitId: string; targetUnitId: string }
+      { scopeUnitId: string; commentUnitId: string }
     >,
     "mutationFn"
   >,
@@ -299,8 +299,8 @@ export function useUnpinCommentMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ scopeUnitId, targetUnitId }) =>
-      postApi.unpin(scopeUnitId, targetUnitId),
+    mutationFn: ({ scopeUnitId, commentUnitId }) =>
+      postApi.unpin(scopeUnitId, commentUnitId),
     ...options,
     onSettled: (data, error, variables, onMutateResult, context) => {
       refreshCommentThreads(queryClient);
@@ -334,7 +334,7 @@ export function useUnacceptAnswerMutation(
     UseMutationOptions<
       { message: string },
       Error,
-      { scopeUnitId: string; targetUnitId: string }
+      { scopeUnitId: string; commentUnitId: string }
     >,
     "mutationFn"
   >,
@@ -342,8 +342,8 @@ export function useUnacceptAnswerMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ scopeUnitId, targetUnitId }) =>
-      postApi.unacceptAnswer(scopeUnitId, targetUnitId),
+    mutationFn: ({ scopeUnitId, commentUnitId }) =>
+      postApi.unacceptAnswer(scopeUnitId, commentUnitId),
     ...options,
     onSettled: (data, error, variables, onMutateResult, context) => {
       refreshCommentThreads(queryClient);
