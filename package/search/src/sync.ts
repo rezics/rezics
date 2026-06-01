@@ -1272,6 +1272,7 @@ export async function syncPostsByAuthorSegment(
       unit: {
         include: {
           user: true,
+          targetUnit: { include: targetUnitSearchInclude },
           ...realmSearchProjectionSelect,
           contentModerationState: true,
         },
@@ -1323,9 +1324,11 @@ export async function patchPostsTarget(
   while (true) {
     const posts = await getSearchPrismaClient().post.findMany({
       where: {
-        targetUnitId,
         parentPostUnitId: null,
-        unit: publicSearchableUnitWhere(),
+        unit: {
+          ...publicSearchableUnitWhere(),
+          targetUnitId,
+        },
       },
       select: { unitId: true },
       orderBy: { unitId: "asc" },
@@ -1380,9 +1383,11 @@ export async function patchPostsTargetSegment(
   const limit = segmentLimit(options);
   const rows: any[] = await getSearchPrismaClient().post.findMany({
     where: {
-      targetUnitId,
       parentPostUnitId: null,
-      unit: publicSearchableUnitWhere(),
+      unit: {
+        ...publicSearchableUnitWhere(),
+        targetUnitId,
+      },
     },
     select: { unitId: true },
     orderBy: { unitId: "asc" },
@@ -1707,20 +1712,20 @@ export async function syncFeedbackSegment(
 
 // ANCHOR: Post document builder
 
+const targetUnitSearchInclude = {
+  translations: true,
+  book: true,
+  game: true,
+  media: true,
+} as const;
+
 const postIncludeForSync = {
   unit: {
     include: {
       user: true,
+      targetUnit: { include: targetUnitSearchInclude },
       ...realmSearchProjectionSelect,
       contentModerationState: true,
-    },
-  },
-  targetUnit: {
-    include: {
-      translations: true,
-      book: true,
-      game: true,
-      media: true,
     },
   },
   scoreEntry: true,
@@ -1785,7 +1790,7 @@ export function buildCommentDocument(comment: any): CommentSearchDocument {
 
 export function buildPostDocument(post: any): PostSearchDocument {
   const user = post.unit?.user;
-  const targetUnit = post.targetUnit;
+  const targetUnit = post.unit?.targetUnit ?? post.targetUnit;
   const scoreEntry = post.scoreEntry;
 
   // Denormalized target unit info
@@ -1828,7 +1833,7 @@ export function buildPostDocument(post: any): PostSearchDocument {
     trendingScore: 0,
     qualityScore: 0,
     rankUpdatedAt: null,
-    targetUnitId: post.targetUnitId ?? null,
+    targetUnitId: post.unit?.targetUnitId ?? null,
     realmIds: realmIdsForSearch(post.unit),
     authorUserId: post.authorUserId,
     scoreEntryId: post.scoreEntryId ?? null,
@@ -1854,6 +1859,7 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
       unit: {
         include: {
           user: true,
+          targetUnit: { include: targetUnitSearchInclude },
           ...realmSearchProjectionSelect,
           contentModerationState: true,
         },
@@ -1890,6 +1896,7 @@ export async function syncAllPosts(client: SearchClient) {
         unit: {
           include: {
             user: true,
+            targetUnit: { include: targetUnitSearchInclude },
             ...realmSearchProjectionSelect,
             contentModerationState: true,
           },
@@ -1929,6 +1936,7 @@ export async function syncPostSegment(
       unit: {
         include: {
           user: true,
+          targetUnit: { include: targetUnitSearchInclude },
           ...realmSearchProjectionSelect,
           contentModerationState: true,
         },
@@ -2164,6 +2172,7 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
         unit: {
           include: {
             user: true,
+            targetUnit: { include: targetUnitSearchInclude },
             ...realmSearchProjectionSelect,
             contentModerationState: true,
           },
@@ -2197,15 +2206,18 @@ export async function syncPostsByTarget(
   while (true) {
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
-        targetUnitId,
         parentPostUnitId: null,
-        unit: publicSearchableUnitWhere(),
+        unit: {
+          ...publicSearchableUnitWhere(),
+          targetUnitId,
+        },
       },
       include: {
         ...postIncludeForSync,
         unit: {
           include: {
             user: true,
+            targetUnit: { include: targetUnitSearchInclude },
             ...realmSearchProjectionSelect,
             contentModerationState: true,
           },

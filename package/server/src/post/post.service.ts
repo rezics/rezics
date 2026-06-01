@@ -316,7 +316,12 @@ export class PostService {
     where.parentPostUnitId = null;
 
     if (query.targetUnitId) {
-      where.targetUnitId = query.targetUnitId;
+      where.unit = {
+        ...(typeof where.unit === "object" && !Array.isArray(where.unit)
+          ? where.unit
+          : {}),
+        targetUnitId: query.targetUnitId,
+      };
     }
     if (query.authorUserId) where.authorUserId = query.authorUserId;
     if (query.kind) where.kind = query.kind;
@@ -677,6 +682,7 @@ export class PostService {
           userId: ownerUserId,
           slugScope: ownerUserId,
           type: UnitType.POST,
+          targetUnitId: targetUnitId ?? undefined,
           status: asDraft ? UnitStatus.DRAFT : UnitStatus.PUBLISHED,
           publishedAt: asDraft ? null : new Date(),
           defaultLanguage: wikiLanguage ?? undefined,
@@ -724,7 +730,6 @@ export class PostService {
       const createData: Prisma.PostUncheckedCreateInput = {
         unitId: unit.id,
         authorUserId,
-        targetUnitId: targetUnitId ?? undefined,
         content: content as Prisma.InputJsonValue,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,

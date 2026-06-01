@@ -60,7 +60,7 @@ export const draftService = {
         kind: true,
         content: true,
         extra: true,
-        targetUnitId: true,
+        unit: { select: { targetUnitId: true } },
         updatedAt: true,
       },
       orderBy: { updatedAt: "desc" },
@@ -78,7 +78,7 @@ export const draftService = {
           title: deriveTitle(post.extra, post.content),
           excerpt: deriveExcerpt(post.content),
           updatedAt: post.updatedAt.toISOString(),
-          targetUnitId: post.targetUnitId,
+          targetUnitId: post.unit.targetUnitId,
         }),
       );
     }

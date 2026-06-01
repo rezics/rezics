@@ -41,7 +41,7 @@ export function mapChapterPostToDetailDTO(
     title: translation?.title ?? "",
     content: post.content as ChapterDetailDTO["content"],
     userId: post.authorUserId,
-    targetUnitId: post.targetUnitId ?? null,
+    targetUnitId: post.unit.targetUnitId ?? null,
     coverUrl: readCoverUrlFromExtra(translation?.extra) ?? null,
     rating: post.unit.rating,
     aiDisclosureMode: post.unit.aiDisclosureMode,

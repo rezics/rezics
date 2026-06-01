@@ -118,6 +118,13 @@ describe("CatalogEntryKind", () => {
       }),
     ).toBe(true);
     expect(
+      Value.Check(createUnitSchema, {
+        type: "POST",
+        catalogEntryKind: "NONE",
+        targetUnitId: "book-1",
+      }),
+    ).toBe(true);
+    expect(
       Value.Check(updateUnitSchema, {
         catalogEntryKind: null,
         targetUnitId: null,

@@ -65,7 +65,7 @@ describe("buildPostDocument", () => {
     expect(doc.realmIds).toEqual(["realm-1"]);
   });
 
-  test("projects targetUnitId from the Post row", async () => {
+  test("projects targetUnitId from the owning Unit row", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
@@ -79,12 +79,12 @@ describe("buildPostDocument", () => {
       lastReplyAt: null,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      targetUnitId: "book-B",
+      targetUnitId: null,
       rootPostUnitId: "post-1",
       parentPostUnitId: null,
       authorUserId: "user-1",
       scoreEntryId: null,
-      unit: { user: null, inRealms: [] },
+      unit: { targetUnitId: "book-B", user: null, inRealms: [] },
       targetUnit: null,
       scoreEntry: null,
       extra: null,

@@ -2,6 +2,7 @@ import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
 
 mock.module("@/unit/publication-policy", () => ({
+  publicUnitEligibilityWhere: { status: "PUBLISHED", visibility: "PUBLIC" },
   resolveStoredLicenseSlug: mock((slug: string | null) => slug),
 }));
 
@@ -32,6 +33,7 @@ describe("mapPostToDTO", () => {
       createdAt: new Date("2026-01-01T00:00:00Z"),
       updatedAt: new Date("2026-01-01T00:00:00Z"),
       unit: {
+        targetUnitId: "book-1",
         inRealms: [{ realmUnitId: "realm-1" }],
         user: {
           unitId: "user-1",
@@ -42,6 +44,7 @@ describe("mapPostToDTO", () => {
       },
     } as any);
 
+    expect(dto.targetUnitId).toBe("book-1");
     expect(dto.author).toMatchObject({
       unitId: "user-1",
       slug: "alice",

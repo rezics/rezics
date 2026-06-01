@@ -45,8 +45,8 @@ export const ContentSearchDocumentSchema = t.Object({
   tagIds: t.Array(t.String()),
   tagScores: t.Record(t.String(), t.Number()),
 
-  // Native catalog identity. Variants resolve normal interactions through
-  // targetUnitId; SERIES and other non-participating types keep null.
+  // Native catalog identity plus the Unit's canonical weak target projection.
+  // Variants require targetUnitId; non-variant Unit extensions may also carry it.
   catalogEntryKind: t.Union([catalogEntryKindSchema, t.Null()]),
   targetUnitId: t.Union([t.String(), t.Null()]),
 

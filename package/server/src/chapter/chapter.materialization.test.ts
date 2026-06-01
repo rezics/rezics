@@ -157,6 +157,7 @@ describe("ChapterService.materializeNode", () => {
         userId: "actor-user",
         slugScope: "actor-user",
         type: UnitType.POST,
+        targetUnitId: "book-1",
         status: UnitStatus.PUBLISHED,
         defaultLanguage: "zh-Hant",
         rating: "R_15",
@@ -172,7 +173,6 @@ describe("ChapterService.materializeNode", () => {
       data: {
         unitId: "chapter-new",
         authorUserId: "actor-user",
-        targetUnitId: "book-1",
         kind: PostKind.CHAPTER,
         content: markdownContentDoc(""),
         rootPostUnitId: "chapter-new",

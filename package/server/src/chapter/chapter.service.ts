@@ -29,7 +29,7 @@ import { chapterPostInclude } from "./types";
  *   - Chapter title       -> UnitTranslation.title
  *   - Chapter cover URL   -> UnitTranslation.extra.coverUrl (typed)
  *   - Chapter content     -> Post.content
- *   - Chapter parent book -> Post.targetUnitId (must reference Unit(type=BOOK))
+ *   - Chapter parent book -> Unit.targetUnitId (must reference Unit(type=BOOK))
  *   - Chapter ordering    -> ContentStructureNode rows (out of scope of this service)
  */
 export class ChapterService {
@@ -65,13 +65,13 @@ export class ChapterService {
       });
     }
 
-    // Filter by parent book (targetUnitId). CSV allowed.
+    // Filter by parent book through the owning Unit target. CSV allowed.
     const targetList = (options.targetUnitIds ?? options.targetUnitId ?? "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
     if (targetList.length > 0) {
-      andWhere.push({ targetUnitId: { in: targetList } });
+      andWhere.push({ unit: { targetUnitId: { in: targetList } } });
     }
 
     // Date range
@@ -166,6 +166,7 @@ export class ChapterService {
           userId,
           slugScope: userId,
           type: UnitType.POST,
+          targetUnitId,
           status: (status as UnitStatus) || UnitStatus.PUBLISHED,
           defaultLanguage: language,
           rating: (rating as ContentRating | undefined) ?? undefined,
@@ -189,7 +190,6 @@ export class ChapterService {
         data: {
           unitId: unit.id,
           authorUserId: userId,
-          targetUnitId,
           kind: PostKind.CHAPTER,
           content: (content ?? markdownContentDoc("")) as Prisma.InputJsonValue,
           rootPostUnitId: unit.id,
@@ -256,6 +256,7 @@ export class ChapterService {
           userId,
           slugScope: userId,
           type: UnitType.POST,
+          targetUnitId: bookUnitId,
           status: UnitStatus.PUBLISHED,
           defaultLanguage: language,
           rating: (node.rating as ContentRating | undefined) ?? undefined,
@@ -272,7 +273,6 @@ export class ChapterService {
         data: {
           unitId: unit.id,
           authorUserId: userId,
-          targetUnitId: bookUnitId,
           kind: PostKind.CHAPTER,
           content: markdownContentDoc("") as Prisma.InputJsonValue,
           rootPostUnitId: unit.id,
@@ -333,12 +333,6 @@ export class ChapterService {
       const postPatch: Prisma.PostUpdateInput = {};
       if (content !== undefined)
         postPatch.content = content as Prisma.InputJsonValue;
-      if (targetUnitId !== undefined) {
-        postPatch.targetUnit =
-          targetUnitId === null
-            ? { disconnect: true }
-            : { connect: { id: targetUnitId } };
-      }
       if (Object.keys(postPatch).length > 0) {
         await tx.post.update({ where: { unitId }, data: postPatch });
       }
@@ -354,6 +348,7 @@ export class ChapterService {
       }
 
       if (
+        targetUnitId !== undefined ||
         status ||
         rating !== undefined ||
         aiDisclosureMode !== undefined ||
@@ -363,6 +358,7 @@ export class ChapterService {
           where: { id: unitId },
           data: {
             ...(status ? { status: status as UnitStatus } : {}),
+            ...(targetUnitId !== undefined ? { targetUnitId } : {}),
             ...(rating !== undefined
               ? { rating: rating as ContentRating }
               : {}),

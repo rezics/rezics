@@ -156,7 +156,7 @@ export const createChapterSchema = t.Object({
   userId: t.String(),
   title: t.String(),
   content: t.Optional(contentDocWriteSchema),
-  // The parent book unit id (Post.targetUnitId after persistence).
+  // The parent book unit id (Unit.targetUnitId after persistence).
   // MUST resolve to a Unit(type=BOOK) — server rejects otherwise.
   targetUnitId: t.String(),
   coverUrl: t.Optional(t.String()),

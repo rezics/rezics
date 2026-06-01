@@ -168,11 +168,24 @@ model Unit {
   /// default when an effective license is required.
   licenseSlug String?
 
-  /// Native catalog identity for edition-capable Unit types. Rezics-lib
-  /// entries are ordinary native Units with catalogEntryKind=MAIN. Exact
-  /// editions/source records use VARIANT and resolve normal interactions
-  /// through targetUnitId. SERIES and other non-participating types keep null.
+  /// Native catalog identity for discovery. Rezics-lib entries are ordinary
+  /// native Units with catalogEntryKind=MAIN. Exact editions/source records use
+  /// VARIANT and consume `targetUnitId` to point at the main catalog Unit.
   catalogEntryKind CatalogEntryKind?
+  /// Canonical weak target edge for this Unit.
+  ///
+  /// Use this when the source Unit's normal interactions, aggregation, or
+  /// "about" relation resolve to another Unit. Catalog VARIANT rows point to
+  /// the main catalog Unit; POST rows use this as the owning Post extension's
+  /// aggregation target.
+  ///
+  /// This is not ownership, containment, ordering, discussion topology, realm
+  /// membership, moderation state, or a generic edge table. Rows that own those
+  /// domain endpoints must use domain-specific field names.
+  ///
+  /// Storage rule: this is the only persisted column that may use the generic
+  /// `targetUnitId` name. Other models may project this value at DTO/search
+  /// boundaries, but must not duplicate it as their own canonical target.
   targetUnitId     String?           @db.Uuid
 
   /// Denormalized count of `Subscription` rows targeting this unit.
@@ -189,8 +202,8 @@ model Unit {
 
   // Owner/creator
   user User? @relation("UnitForUser", fields: [userId], references: [unitId])
-  catalogTarget   Unit?  @relation("UnitCatalogTarget", fields: [targetUnitId], references: [id], onDelete: SetNull)
-  catalogVariants Unit[] @relation("UnitCatalogTarget")
+  targetUnit    Unit?  @relation("UnitTarget", fields: [targetUnitId], references: [id], onDelete: SetNull)
+  targetedUnits Unit[] @relation("UnitTarget")
 
   // Translation layer
   translations        UnitTranslation[]
@@ -249,8 +262,7 @@ model Unit {
 
   // Engagement (reactions moved to @rezics/reaction service)
 
-  // Post relations (other posts referencing this unit)
-  targetedByPosts Post[] @relation("PostTarget")
+  // Post topology residue remains post-local until legacy reply reads finish.
   rootPosts       Post[] @relation("PostRoot")
   parentPosts     Post[] @relation("PostParent")
 
@@ -298,7 +310,12 @@ model Unit {
   @@index([type, status, createdAt])
   @@index([userId, createdAt])
   @@index([status, visibility])
-  @@index([catalogEntryKind, targetUnitId])
+  // Generic lookup for "Units about X" across catalog variants, POST extension
+  // rows, and future Unit extensions with product-backed aggregation targets.
+  @@index([targetUnitId], map: "Unit_targetUnitId_idx")
+  // Catalog-specific variant lookup. This consumes Unit.targetUnitId but does
+  // not define the field's broader semantics.
+  @@index([catalogEntryKind, targetUnitId], map: "Unit_catalogEntryKind_targetUnitId_idx")
   @@index([defaultLanguage])
   @@index([slugScope, type])
 }
@@ -650,7 +667,6 @@ model Post {
 
   authorUserId String @db.Uuid
 
-  targetUnitId String? @db.Uuid
   scoreEntryId String? @db.Uuid
 
   /// Canonical ContentDoc JSON. Search projections such as contentText are
@@ -690,22 +706,16 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  targetUnit Unit?       @relation("PostTarget", fields: [targetUnitId], references: [id], onDelete: SetNull)
   rootPost   Unit?       @relation("PostRoot", fields: [rootPostUnitId], references: [id], onDelete: SetNull)
   parentPost Unit?       @relation("PostParent", fields: [parentPostUnitId], references: [id], onDelete: SetNull)
   scoreEntry ScoreEntry? @relation("PostScoreEntry", fields: [scoreEntryId], references: [id], onDelete: Restrict)
 
   @@index([authorUserId, createdAt])
-  @@index([targetUnitId, createdAt])
   @@index([rootPostUnitId, createdAt])
   @@index([parentPostUnitId, createdAt])
   @@index([kind, createdAt])
   @@index([scoreEntryId])
   @@index([path], type: Gist, map: "Post_path_gist_idx")
-  // Bucket filtering for lifecycle listings (e.g. unsolved questions): a cheap
-  // `state IN (active|closed slugs)` IN-list, no anti-join. Scoped by
-  // targetUnitId so target/realm feeds hit the index.
-  @@index([targetUnitId, state])
 }
 
 /**

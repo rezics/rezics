@@ -251,6 +251,9 @@ export const baseUnitSchema = t.Object({
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
+  // Canonical weak target edge for the Unit's primary aggregation/about target.
+  // Variants require it, but non-variant Unit extensions such as POST may also
+  // project it when their interactions resolve to another Unit.
   targetUnitId: t.Optional(t.Nullable(t.String())),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -380,6 +383,8 @@ export const createUnitSchema = t.Object({
   aiDisclosureMode: t.Optional(aiDisclosureModeSchema),
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
+  // The owning Unit stores canonical target semantics; extension tables must
+  // not duplicate this as their own persisted target column.
   targetUnitId: t.Optional(t.Nullable(t.String())),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),

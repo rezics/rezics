@@ -50,8 +50,8 @@ export class CollectionService {
   /**
    * Resolve the collect target to a parent shelf unit + optional review child.
    *
-   * - If `targetId` is a REVIEW post with a `targetUnitId`, the parent is the
-   *   target work and the review itself is threaded back as a child of role='review'.
+   * - If `targetId` is a REVIEW post whose Unit has a canonical target, the
+   *   target work is the parent and the review itself is threaded back as a child.
    * - Otherwise the target is the parent.
    */
   private async resolveTarget(
@@ -62,7 +62,8 @@ export class CollectionService {
       where: { id: targetId },
       select: {
         type: true,
-        post: { select: { kind: true, targetUnitId: true } },
+        targetUnitId: true,
+        post: { select: { kind: true } },
       },
     });
 
@@ -70,14 +71,14 @@ export class CollectionService {
       !independent &&
       unit.type === UnitType.POST &&
       unit.post?.kind === PostKind.REVIEW &&
-      unit.post?.targetUnitId
+      unit.targetUnitId
     ) {
       const target = await prisma.unit.findUniqueOrThrow({
-        where: { id: unit.post.targetUnitId },
+        where: { id: unit.targetUnitId },
         select: { type: true, post: { select: { kind: true } } },
       });
       return {
-        parentUnitId: unit.post.targetUnitId,
+        parentUnitId: unit.targetUnitId,
         parentKind: mapUnitToKind(target.type, target.post?.kind ?? null),
         reviewUnitId: targetId,
         reviewKind: "review",
@@ -428,7 +429,8 @@ export class CollectionService {
       select: {
         id: true,
         type: true,
-        post: { select: { kind: true, targetUnitId: true } },
+        targetUnitId: true,
+        post: { select: { kind: true } },
       },
     });
 
@@ -437,9 +439,9 @@ export class CollectionService {
       if (
         unit.type === UnitType.POST &&
         unit.post?.kind === PostKind.REVIEW &&
-        unit.post.targetUnitId
+        unit.targetUnitId
       ) {
-        reviewTargetIds.add(unit.post.targetUnitId);
+        reviewTargetIds.add(unit.targetUnitId);
       }
     }
 
@@ -460,9 +462,9 @@ export class CollectionService {
       if (
         unit.type === UnitType.POST &&
         unit.post?.kind === PostKind.REVIEW &&
-        unit.post.targetUnitId
+        unit.targetUnitId
       ) {
-        const target = reviewTargetById.get(unit.post.targetUnitId);
+        const target = reviewTargetById.get(unit.targetUnitId);
         if (target) {
           return {
             targetId: unit.id,

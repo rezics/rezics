@@ -765,7 +765,7 @@ describe("PostService.byRealm", () => {
     });
 
     const where = firstPostFindManyArgs().where;
-    expect(where.targetUnitId).toBe("release-1");
+    expect(where.unit.targetUnitId).toBe("release-1");
     expect(where.parentPostUnitId).toBeNull();
   });
 
@@ -933,7 +933,11 @@ describe("PostService.create targetUnitId derivation", () => {
     return (postCreateMock.mock.calls as any[])[0]?.[0]?.data as any;
   }
 
-  test("top-level REVIEW stores its targetUnitId without an extra Unit lookup", async () => {
+  function unitCreateDataArg() {
+    return (unitCreateMock.mock.calls as any[])[0]?.[0]?.data as any;
+  }
+
+  test("top-level REVIEW stores its targetUnitId on the owning Unit without an extra Unit lookup", async () => {
     resetMocks();
 
     await service.create(
@@ -941,12 +945,12 @@ describe("PostService.create targetUnitId derivation", () => {
       "user-1",
     );
 
-    const data = createDataArg();
-    expect(data.targetUnitId).toBe("book-B");
+    expect(unitCreateDataArg().targetUnitId).toBe("book-B");
+    expect(createDataArg().targetUnitId).toBeUndefined();
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
-  test("top-level REMARK with game target stores targetUnitId only", async () => {
+  test("top-level REMARK with game target stores targetUnitId only on Unit", async () => {
     resetMocks();
 
     await service.create(
@@ -954,8 +958,8 @@ describe("PostService.create targetUnitId derivation", () => {
       "user-1",
     );
 
-    const data = createDataArg();
-    expect(data.targetUnitId).toBe("game-G");
+    expect(unitCreateDataArg().targetUnitId).toBe("game-G");
+    expect(createDataArg().targetUnitId).toBeUndefined();
   });
 
   test("top-level POST with no targetUnitId leaves target undefined", async () => {
@@ -963,8 +967,8 @@ describe("PostService.create targetUnitId derivation", () => {
 
     await service.create({ content: content("free-form") }, "user-1");
 
-    const data = createDataArg();
-    expect(data.targetUnitId).toBeUndefined();
+    expect(unitCreateDataArg().targetUnitId).toBeUndefined();
+    expect(createDataArg().targetUnitId).toBeUndefined();
     // No Unit lookup needed when there is no target.
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
@@ -979,8 +983,8 @@ describe("PostService.create targetUnitId derivation", () => {
     );
 
     expect(unitFindUniqueMock).toHaveBeenCalledTimes(1);
-    const data = createDataArg();
-    expect(data.targetUnitId).toBe("book-B");
+    expect(unitCreateDataArg().targetUnitId).toBe("book-B");
+    expect(createDataArg().targetUnitId).toBeUndefined();
   });
 });
 

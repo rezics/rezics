@@ -136,14 +136,14 @@ only if the surrounding model context makes part of it redundant.
 
 ## 1. Inventory And Invariants
 
-- [ ] 1.1 Move the draft schema comment for `Unit.targetUnitId` into
+- [x] 1.1 Move the draft schema comment for `Unit.targetUnitId` into
   `package/server/prisma/schema.prisma`, documenting the field from the owning
   `Unit` model's perspective and keeping catalog variants as one required use
   case rather than the definition.
-- [ ] 1.2 Rename Prisma relation surfaces around `Unit.targetUnitId` from
+- [x] 1.2 Rename Prisma relation surfaces around `Unit.targetUnitId` from
   catalog-specific names to canonical target names, and add migration/tests for
   generic target indexes before removing any extension-table target indexes.
-- [ ] 1.3 Update `package/contract/src/unit/unit.ts` comments/tests so
+- [x] 1.3 Update `package/contract/src/unit/unit.ts` comments/tests so
   `targetUnitId` is valid for non-variant Units, while retaining tests that
   `VARIANT` requires a target and generic content search treats variants
   specially.
@@ -153,22 +153,22 @@ only if the surrounding model context makes part of it redundant.
 
 ## 2. Move Post Target To Unit
 
-- [ ] 2.1 Add a migration that backfills `Unit.targetUnitId` from
+- [x] 2.1 Add a migration that backfills `Unit.targetUnitId` from
   `Post.targetUnitId` for existing posts whose Unit target is null, without
   overwriting existing catalog/interaction targets.
-- [ ] 2.2 Update `PostService.create` and chapter materialization so post,
+- [x] 2.2 Update `PostService.create` and chapter materialization so post,
   review, remark, excerpt, wiki, and chapter target writes set the owning
   `Unit.targetUnitId` in the same transaction as the `Post` row.
-- [ ] 2.3 Update post read includes, mapper, contract DTO population, and app/API
+- [x] 2.3 Update post read includes, mapper, contract DTO population, and app/API
   adapters so `PostDTO.targetUnitId` is projected from `post.unit.targetUnitId`
   during the compatibility window.
-- [ ] 2.4 Update `PostService.list`, realm feed queries, chapter queries, shelf
+- [x] 2.4 Update `PostService.list`, realm feed queries, chapter queries, shelf
   review-parent resolution, and moderation overlay request builders to filter or
   select post targets through `Unit.targetUnitId`.
-- [ ] 2.5 Update `package/search/src/sync.ts`, `package/contract/src/meili/post.ts`,
+- [x] 2.5 Update `package/search/src/sync.ts`, `package/contract/src/meili/post.ts`,
   and `package/server/src/meili/post` so post search documents carry target data
   from `Unit.targetUnitId`, not `Post.targetUnitId`.
-- [ ] 2.6 Drop `Post.targetUnitId` and its indexes after all internal callsites
+- [x] 2.6 Drop `Post.targetUnitId` and its indexes after all internal callsites
   use `Unit.targetUnitId`.
 
 ## 3. Rename Non-Canonical Target Endpoints
@@ -221,10 +221,10 @@ only if the surrounding model context makes part of it redundant.
 
 ## 6. Search And Projection Cleanup
 
-- [ ] 6.1 Update content search projections so `ContentSearchDocument.targetUnitId`
+- [x] 6.1 Update content search projections so `ContentSearchDocument.targetUnitId`
   continues to read from `Unit.targetUnitId` and the generalized semantics are
   documented in tests.
-- [ ] 6.2 Update post search filters and ranking patch paths to avoid relying on
+- [x] 6.2 Update post search filters and ranking patch paths to avoid relying on
   post extension target columns.
 - [ ] 6.3 Add target-query regression tests for book/game/media pages querying
   posts, reviews, excerpts, chapters, and comments through the intended split:
