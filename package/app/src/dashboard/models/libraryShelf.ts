@@ -68,20 +68,20 @@ function libraryKindFromUnitType(unitType: UnitType): LibraryKind | null {
 export function progressLibraryRowToBookshelfItem(
   row: ProgressLibraryRow,
 ): BookshelfItem | null {
-  const kind = libraryKindFromUnitType(row.unit.unitType);
+  const kind = libraryKindFromUnitType(row.progressUnit.unitType);
   if (!kind) return null;
 
   const item: BookshelfItem = {
-    unitId: row.unit.unitId,
+    unitId: row.progressUnit.unitId,
     kind,
-    title: row.unit.title || row.unit.unitId,
-    coverUrl: row.unit.coverUrl ?? "",
+    title: row.progressUnit.title || row.progressUnit.unitId,
+    coverUrl: row.progressUnit.coverUrl ?? "",
     href:
       row.resumeRoute?.kind === "node"
         ? `/book/${row.resumeRoute.bookId}/node/${row.resumeRoute.nodeId}`
         : kind === "book"
-          ? `/book/${row.unit.unitId}`
-          : `/unit/${row.unit.unitId}`,
+          ? `/book/${row.progressUnit.unitId}`
+          : `/unit/${row.progressUnit.unitId}`,
     isLicensed: true,
   };
   if (kind === "book" && row.progress.completedCount > 0) {

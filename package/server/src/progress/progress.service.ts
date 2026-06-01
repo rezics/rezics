@@ -2,6 +2,7 @@ import {
   PROGRESS_EXTRA_KNOWN_KEYS,
   type ProgressLibraryListResponse,
   type ProgressLibraryRow,
+  type ProgressLibraryUnitSummary,
   type UnitProgressListResponse,
   type UnitProgressStatsResponse,
   readCoverUrlFromExtra,
@@ -31,14 +32,20 @@ type TranslationRow = {
   extra?: unknown;
 };
 
-type UnitDisplay = {
+type TitleDisplay = {
   defaultLanguage: string | null;
   translations: TranslationRow[];
 };
 
+type UnitDisplay = TitleDisplay & {
+  type: string;
+  catalogEntryKind: ProgressLibraryUnitSummary["catalogEntryKind"];
+  targetUnitId: string | null;
+};
+
 type ProgressPage = {
   rows: (UserUnitProgress & {
-    unit?: UnitDisplay & { type: ProgressLibraryRow["unit"]["unitType"] };
+    unit?: UnitDisplay & { targetUnit?: UnitDisplay | null };
     lastReadNode?: { isDeleted: boolean } | null;
   })[];
   nextCursor: string | null;
@@ -112,7 +119,7 @@ function enqueueProgressSearch(
 }
 
 /** Resolve a display title: default-language -> en -> first non-empty. */
-function pickTitle(unit: UnitDisplay): string {
+function pickTitle(unit: TitleDisplay): string {
   const ordered = [
     unit.defaultLanguage
       ? unit.translations.find((t) => t.language === unit.defaultLanguage)
@@ -127,7 +134,7 @@ function pickTitle(unit: UnitDisplay): string {
 }
 
 /** Resolve a cover URL from translation extra, same order as title. */
-function pickCover(unit: UnitDisplay): string | undefined {
+function pickCover(unit: TitleDisplay): string | undefined {
   const ordered = [
     unit.defaultLanguage
       ? unit.translations.find((t) => t.language === unit.defaultLanguage)
@@ -140,6 +147,20 @@ function pickCover(unit: UnitDisplay): string | undefined {
     if (url) return url;
   }
   return undefined;
+}
+
+function unitSummary(
+  unitId: string,
+  unit: UnitDisplay,
+): ProgressLibraryUnitSummary {
+  return {
+    unitId,
+    title: pickTitle(unit) || unitId,
+    coverUrl: pickCover(unit),
+    unitType: unit.type as ProgressLibraryUnitSummary["unitType"],
+    catalogEntryKind: unit.catalogEntryKind,
+    targetUnitId: unit.targetUnitId,
+  };
 }
 
 export class ProgressService {
@@ -305,9 +326,22 @@ export class ProgressService {
         unit: {
           select: {
             type: true,
+            catalogEntryKind: true,
+            targetUnitId: true,
             defaultLanguage: true,
             translations: {
               select: { language: true, title: true, extra: true },
+            },
+            targetUnit: {
+              select: {
+                type: true,
+                catalogEntryKind: true,
+                targetUnitId: true,
+                defaultLanguage: true,
+                translations: {
+                  select: { language: true, title: true, extra: true },
+                },
+              },
             },
           },
         },
@@ -349,13 +383,15 @@ export class ProgressService {
     }
 
     const unitIds = page.rows.map((row) => row.unitId);
+    const unitIdSet = new Set(unitIds);
     const shelfRows = await prisma.shelfUnit.findMany({
       where: {
-        unitId: { in: unitIds },
+        OR: [{ unitId: { in: unitIds } }, { variantUnitId: { in: unitIds } }],
         shelf: { unit: { userId } },
       },
       select: {
         unitId: true,
+        variantUnitId: true,
         shelfId: true,
         shelf: {
           select: {
@@ -372,18 +408,27 @@ export class ProgressService {
     });
     const shelvesByUnit = new Map<string, ProgressLibraryRow["shelves"]>();
     for (const shelfRow of shelfRows) {
-      const shelves = shelvesByUnit.get(shelfRow.unitId) ?? [];
-      shelves.push({
+      const linkedUnitIds = [
+        unitIdSet.has(shelfRow.unitId) ? shelfRow.unitId : null,
+        shelfRow.variantUnitId && unitIdSet.has(shelfRow.variantUnitId)
+          ? shelfRow.variantUnitId
+          : null,
+      ].filter((unitId): unitId is string => Boolean(unitId));
+      const link = {
         shelfUnitId: shelfRow.shelfId,
         title: pickTitle(shelfRow.shelf.unit) || shelfRow.shelfId,
-      });
-      shelvesByUnit.set(shelfRow.unitId, shelves);
+      };
+      for (const progressUnitId of new Set(linkedUnitIds)) {
+        const shelves = shelvesByUnit.get(progressUnitId) ?? [];
+        shelves.push(link);
+        shelvesByUnit.set(progressUnitId, shelves);
+      }
     }
 
     return {
       rows: page.rows.map((row): ProgressLibraryRow => {
         const unit = row.unit as unknown as UnitDisplay & {
-          type: ProgressLibraryRow["unit"]["unitType"];
+          targetUnit?: UnitDisplay | null;
         };
         const lastReadNode =
           "lastReadNode" in row
@@ -394,12 +439,15 @@ export class ProgressService {
 
         return {
           progress: mapProgressToDTO(row),
-          unit: {
-            unitId: row.unitId,
-            title: pickTitle(unit) || row.unitId,
-            coverUrl: pickCover(unit),
-            unitType: unit.type,
-          },
+          progressUnit: unitSummary(row.unitId, unit),
+          mainUnitContext:
+            unit.catalogEntryKind === "VARIANT" &&
+            unit.targetUnitId &&
+            unit.targetUnit
+              ? unitSummary(unit.targetUnitId, unit.targetUnit)
+              : null,
+          // Progress rows are anchored to the exact unit the user touched.
+          // Even when that unit is a VARIANT, resume routes keep that id.
           resumeRoute:
             unit.type === "BOOK"
               ? lastReadNodeId

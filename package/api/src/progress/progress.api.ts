@@ -41,6 +41,13 @@ export const progressApi = {
     return apiFetch<ProgressLibraryListResponse>(`/me/progress/library${qs}`);
   },
 
+  listMyProgressPage: async (
+    query?: UnitProgressListQuery,
+  ): Promise<ProgressLibraryListResponse> => {
+    const qs = buildQueryString(query ?? {});
+    return apiFetch<ProgressLibraryListResponse>(`/me/progress/library${qs}`);
+  },
+
   getUnitProgressStats: async (
     unitId: string,
   ): Promise<UnitProgressStatsResponse> => {

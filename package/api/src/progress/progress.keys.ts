@@ -10,4 +10,7 @@ export const progressKeys = {
   libraryLists: () => [...progressKeys.all(), "library"] as const,
   libraryList: (query?: UnitProgressListQuery) =>
     [...progressKeys.libraryLists(), query ?? {}] as const,
+  pageLists: () => [...progressKeys.all(), "page"] as const,
+  pageList: (query?: UnitProgressListQuery) =>
+    [...progressKeys.pageLists(), query ?? {}] as const,
 } as const;

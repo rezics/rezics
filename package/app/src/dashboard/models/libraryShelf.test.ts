@@ -127,12 +127,15 @@ describe("progressLibraryRowToBookshelfItem", () => {
   test("maps progress-owned rows without requiring shelf membership", () => {
     const row = {
       progress: progressRow("b1"),
-      unit: {
+      progressUnit: {
         unitId: "b1",
         title: "Dune",
         coverUrl: "https://x/d.jpg",
         unitType: "BOOK",
+        catalogEntryKind: "MAIN",
+        targetUnitId: null,
       },
+      mainUnitContext: null,
       resumeRoute: { kind: "book", bookId: "b1" },
       shelves: [],
     } satisfies ProgressLibraryRow;
@@ -149,7 +152,14 @@ describe("progressLibraryRowToBookshelfItem", () => {
   test("skips non-library unit types", () => {
     const row = {
       progress: progressRow("post-1"),
-      unit: { unitId: "post-1", title: "Post", unitType: "POST" },
+      progressUnit: {
+        unitId: "post-1",
+        title: "Post",
+        unitType: "POST",
+        catalogEntryKind: null,
+        targetUnitId: null,
+      },
+      mainUnitContext: null,
       shelves: [],
     } satisfies ProgressLibraryRow;
 

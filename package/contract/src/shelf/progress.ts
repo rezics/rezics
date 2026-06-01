@@ -1,5 +1,5 @@
 import { t } from "elysia";
-import { unitTypeSchema } from "../unit/unit";
+import { catalogEntryKindSchema, unitTypeSchema } from "../unit/unit";
 
 export const SYSTEM_SHELF_KIND_KEYS = [
   "favorites",
@@ -140,6 +140,8 @@ export const progressLibraryUnitSummarySchema = t.Object({
   title: t.String(),
   coverUrl: t.Optional(t.String()),
   unitType: unitTypeSchema,
+  catalogEntryKind: t.Nullable(catalogEntryKindSchema),
+  targetUnitId: t.Nullable(t.String()),
 });
 
 export type ProgressLibraryUnitSummary =
@@ -147,7 +149,8 @@ export type ProgressLibraryUnitSummary =
 
 export const progressLibraryRowSchema = t.Object({
   progress: unitProgressRowDTOSchema,
-  unit: progressLibraryUnitSummarySchema,
+  progressUnit: progressLibraryUnitSummarySchema,
+  mainUnitContext: t.Nullable(progressLibraryUnitSummarySchema),
   resumeRoute: t.Optional(
     t.Union([
       t.Object({

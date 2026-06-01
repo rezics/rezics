@@ -1,8 +1,11 @@
 import { describe, expect, mock, test } from "bun:test";
-import { dashboardSummarySchema } from "@rezics/contract";
+import {
+  dashboardSummarySchema,
+  type ProgressLibraryRow,
+} from "@rezics/contract";
 import { Value } from "@sinclair/typebox/value";
 
-const mockProgressRows = [
+const mockProgressRows: ProgressLibraryRow[] = [
   {
     progress: {
       userId: "user-1",
@@ -18,11 +21,14 @@ const mockProgressRows = [
       lastSeenAt: "2026-01-02T00:00:00.000Z",
       extra: null,
     },
-    unit: {
+    progressUnit: {
       unitId: "book-1",
       title: "Book One",
       unitType: "BOOK",
+      catalogEntryKind: "MAIN",
+      targetUnitId: null,
     },
+    mainUnitContext: null,
     resumeRoute: { kind: "book", bookId: "book-1" },
     shelves: [],
   },

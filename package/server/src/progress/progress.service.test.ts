@@ -5,7 +5,7 @@ import {
   UserUnitProgressStatus,
 } from "@/test/prisma-client-mock";
 
-const baseRow = {
+const baseRow: any = {
   userId: "user-1",
   unitId: "unit-1",
   progress: 0,
@@ -22,7 +22,7 @@ const baseRow = {
 
 const mockUpsert = mock(async () => baseRow);
 const mockFindUnique = mock(async (): Promise<any> => baseRow);
-const mockFindMany = mock(async () => [] as (typeof baseRow)[]);
+const mockFindMany = mock(async (): Promise<any[]> => []);
 const mockUpdateMany = mock(async () => ({ count: 0 }));
 const mockNodeFindUnique = mock(async (_args: unknown): Promise<any> => null);
 const mockNodeProgressUpsert = mock(async (_args: unknown) => ({}));
@@ -361,6 +361,8 @@ describe("ProgressService", () => {
         progress: 0.4,
         unit: {
           type: "BOOK",
+          catalogEntryKind: "VARIANT",
+          targetUnitId: "book-main-1",
           defaultLanguage: "en",
           translations: [
             {
@@ -369,6 +371,19 @@ describe("ProgressService", () => {
               extra: { coverUrl: "https://cdn.example/dune.jpg" },
             },
           ],
+          targetUnit: {
+            type: "BOOK",
+            catalogEntryKind: "MAIN",
+            targetUnitId: null,
+            defaultLanguage: "en",
+            translations: [
+              {
+                language: "en",
+                title: "Dune",
+                extra: { coverUrl: "https://cdn.example/dune-main.jpg" },
+              },
+            ],
+          },
         },
         lastReadNode: null,
       },
@@ -388,20 +403,117 @@ describe("ProgressService", () => {
     expect(mockShelfUnitFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
-          unitId: { in: ["variant-1"] },
+          OR: [
+            { unitId: { in: ["variant-1"] } },
+            { variantUnitId: { in: ["variant-1"] } },
+          ],
           shelf: { unit: { userId: "user-1" } },
         },
       }),
     );
     expect(result.rows[0]).toMatchObject({
-      unit: {
+      progressUnit: {
         unitId: "variant-1",
         title: "Dune First Edition",
         coverUrl: "https://cdn.example/dune.jpg",
         unitType: "BOOK",
+        catalogEntryKind: "VARIANT",
+        targetUnitId: "book-main-1",
+      },
+      mainUnitContext: {
+        unitId: "book-main-1",
+        title: "Dune",
+        coverUrl: "https://cdn.example/dune-main.jpg",
+        unitType: "BOOK",
+        catalogEntryKind: "MAIN",
+        targetUnitId: null,
       },
       resumeRoute: { kind: "book", bookId: "variant-1" },
       shelves: [],
+    });
+  });
+
+  test("listLibrary surfaces shelves that directly contain the progress unit or store it as variant context", async () => {
+    mockFindMany.mockResolvedValue([
+      {
+        ...baseRow,
+        unitId: "variant-1",
+        unit: {
+          type: "BOOK",
+          catalogEntryKind: "VARIANT",
+          targetUnitId: "book-main-1",
+          defaultLanguage: "en",
+          translations: [{ language: "en", title: "Dune First Edition" }],
+          targetUnit: null,
+        },
+        lastReadNode: null,
+      },
+    ]);
+    mockShelfUnitFindMany.mockResolvedValue([
+      {
+        unitId: "variant-1",
+        variantUnitId: null,
+        shelfId: "direct-shelf",
+        shelf: {
+          unit: {
+            defaultLanguage: "en",
+            translations: [{ language: "en", title: "Direct Shelf" }],
+          },
+        },
+      },
+      {
+        unitId: "book-main-1",
+        variantUnitId: "variant-1",
+        shelfId: "context-shelf",
+        shelf: {
+          unit: {
+            defaultLanguage: "en",
+            translations: [{ language: "en", title: "Context Shelf" }],
+          },
+        },
+      },
+    ]);
+    const { progressService } = await import("./progress.service");
+
+    const result = await progressService.listLibrary("user-1", { limit: 10 });
+
+    expect(result.rows[0]?.shelves).toEqual([
+      { shelfUnitId: "direct-shelf", title: "Direct Shelf" },
+      { shelfUnitId: "context-shelf", title: "Context Shelf" },
+    ]);
+  });
+
+  test("listLibrary preserves variant book id and last-read node in resume routes", async () => {
+    mockFindMany.mockResolvedValue([
+      {
+        ...baseRow,
+        unitId: "variant-1",
+        lastReadNodeId: "node-1",
+        unit: {
+          type: "BOOK",
+          catalogEntryKind: "VARIANT",
+          targetUnitId: "book-main-1",
+          defaultLanguage: "en",
+          translations: [{ language: "en", title: "Dune First Edition" }],
+          targetUnit: {
+            type: "BOOK",
+            catalogEntryKind: "MAIN",
+            targetUnitId: null,
+            defaultLanguage: "en",
+            translations: [{ language: "en", title: "Dune" }],
+          },
+        },
+        lastReadNode: { isDeleted: false },
+      },
+    ]);
+    const { progressService } = await import("./progress.service");
+
+    const result = await progressService.listLibrary("user-1", { limit: 10 });
+
+    expect(result.rows[0]?.resumeRoute).toEqual({
+      kind: "node",
+      bookId: "variant-1",
+      nodeId: "node-1",
     });
   });
 

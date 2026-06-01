@@ -24,13 +24,16 @@ const PROGRESS_ROWS: ProgressLibraryRow[] = [
       lastSeenAt: "2026-01-02T00:00:00.000Z",
       extra: null,
     },
-    unit: {
+    progressUnit: {
       unitId: "b1",
       title: "Dune",
       coverUrl:
         "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>",
       unitType: "BOOK",
+      catalogEntryKind: "MAIN",
+      targetUnitId: null,
     },
+    mainUnitContext: null,
     resumeRoute: { kind: "node", bookId: "b1", nodeId: "n3" },
     shelves: [],
   },
@@ -49,12 +52,21 @@ const PROGRESS_ROWS: ProgressLibraryRow[] = [
       lastSeenAt: "2026-01-02T00:00:00.000Z",
       extra: null,
     },
-    unit: {
+    progressUnit: {
       unitId: "variant-1",
       title: "Solaris: First Edition",
       coverUrl:
         "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>",
       unitType: "BOOK",
+      catalogEntryKind: "VARIANT",
+      targetUnitId: "main-1",
+    },
+    mainUnitContext: {
+      unitId: "main-1",
+      title: "Solaris",
+      unitType: "BOOK",
+      catalogEntryKind: "MAIN",
+      targetUnitId: null,
     },
     resumeRoute: { kind: "book", bookId: "variant-1" },
     shelves: [],

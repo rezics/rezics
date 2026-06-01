@@ -144,14 +144,62 @@ describe("progress contract schemas", () => {
         rows: [
           {
             progress: row,
-            unit: {
+            progressUnit: {
               unitId: "book-1",
               title: "Dune",
               coverUrl: "https://cdn.example/dune.jpg",
               unitType: "BOOK",
+              catalogEntryKind: "MAIN",
+              targetUnitId: null,
             },
+            mainUnitContext: null,
             resumeRoute: { kind: "node", bookId: "book-1", nodeId: "node-1" },
             shelves: [{ shelfUnitId: "shelf-1", title: "Reading" }],
+          },
+        ],
+        nextCursor: null,
+      }),
+    ).toBe(true);
+  });
+
+  test("validates variant-owned progress rows with separate main context", () => {
+    const row = {
+      userId: "user-1",
+      unitId: "variant-1",
+      progress: 0.2,
+      status: "ACTIVE",
+      isDeleted: false,
+      completedCount: 0,
+      totalTimeMs: 123,
+      lastReadNodeId: null,
+      lastReadAnchor: null,
+      firstSeenAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-02T00:00:00.000Z",
+      extra: null,
+    };
+
+    expect(
+      Value.Check(progressLibraryListResponseSchema, {
+        rows: [
+          {
+            progress: row,
+            progressUnit: {
+              unitId: "variant-1",
+              title: "Dune First Edition",
+              coverUrl: "https://cdn.example/dune-first.jpg",
+              unitType: "BOOK",
+              catalogEntryKind: "VARIANT",
+              targetUnitId: "book-1",
+            },
+            mainUnitContext: {
+              unitId: "book-1",
+              title: "Dune",
+              unitType: "BOOK",
+              catalogEntryKind: "MAIN",
+              targetUnitId: null,
+            },
+            resumeRoute: { kind: "book", bookId: "variant-1" },
+            shelves: [],
           },
         ],
         nextCursor: null,
