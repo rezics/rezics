@@ -4,6 +4,7 @@ import { realmQueries } from "@rezics/api/realm/realm";
 import { tagQueries } from "@rezics/api/tag/tag";
 import {
   markdownContentDoc,
+  type CommentDTO,
   type PollDTO,
   type PostDTO,
   PostKind,
@@ -26,7 +27,6 @@ import {
 import { PollComposer } from "@/poll";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
-import { mapCommentToPost } from "../models/commentPostCompat";
 
 export type ReplyComposerMode = "progressive" | "expanded";
 
@@ -38,7 +38,7 @@ type ReplyComposerBaseProps = {
   mode: ReplyComposerMode;
   placeholder?: string;
   autoFocus?: boolean;
-  onSubmitted?: (post: PostDTO) => void;
+  onSubmitted?: (post: PostDTO | CommentDTO) => void;
   onCancelled?: () => void;
 };
 
@@ -351,7 +351,7 @@ export const ReplyComposer = forwardRef<
           {
             onSuccess: (comment) => {
               reset();
-              onSubmitted?.(mapCommentToPost(comment));
+              onSubmitted?.(comment);
             },
           },
         );

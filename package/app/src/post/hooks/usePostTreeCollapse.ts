@@ -1,4 +1,4 @@
-import type { PostDTO } from "@rezics/contract";
+import type { CommentDTO } from "@rezics/contract";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const DEFAULT_VISIBLE_GENERATIONS = 3;
@@ -17,7 +17,7 @@ type SeedCollapsedIdsOptions =
     >;
 
 export function seedCollapsedIds(
-  posts: PostDTO[],
+  posts: CommentDTO[],
   options?: SeedCollapsedIdsOptions,
 ): Set<string> {
   const normalizedOptions =
@@ -46,7 +46,7 @@ export function seedCollapsedIds(
 }
 
 export function getRevealExpandedIds(
-  posts: PostDTO[],
+  posts: CommentDTO[],
   revealPostUnitId?: string,
 ): Set<string> {
   if (!revealPostUnitId) return new Set();
@@ -67,9 +67,9 @@ export function getRevealExpandedIds(
 }
 
 export function filterByPathPrefix(
-  posts: PostDTO[],
+  posts: CommentDTO[],
   collapsedIds: Set<string>,
-): PostDTO[] {
+): CommentDTO[] {
   if (collapsedIds.size === 0) return posts;
 
   const collapsedPaths: string[] = [];
@@ -100,11 +100,11 @@ export interface UsePostTreeCollapseResult {
   collapsedIds: Set<string>;
   isCollapsed: (unitId: string) => boolean;
   toggleCollapse: (unitId: string) => void;
-  visiblePosts: PostDTO[];
+  visiblePosts: CommentDTO[];
 }
 
 export function usePostTreeCollapse(
-  posts: PostDTO[],
+  posts: CommentDTO[],
   options?: PostTreeCollapseOptions,
 ): UsePostTreeCollapseResult {
   const baseDepth = options?.baseDepth ?? 0;

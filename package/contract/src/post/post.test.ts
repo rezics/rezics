@@ -64,6 +64,8 @@ describe("post work-domain contract fields", () => {
   test("does not expose comment topology on PostDTO", () => {
     expect("rootPostUnitId" in postDTOSchema.properties).toBe(false);
     expect("parentPostUnitId" in postDTOSchema.properties).toBe(false);
+    expect("depth" in postDTOSchema.properties).toBe(false);
+    expect("path" in postDTOSchema.properties).toBe(false);
   });
 
   test("does not expose work-domain DTO metadata", () => {

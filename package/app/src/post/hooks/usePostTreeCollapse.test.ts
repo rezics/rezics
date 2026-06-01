@@ -1,12 +1,14 @@
 import { describe, expect, it } from "bun:test";
-import { markdownContentDoc, type PostDTO } from "@rezics/contract";
+import { markdownContentDoc, type CommentDTO } from "@rezics/contract";
 import {
   filterByPathPrefix,
   getRevealExpandedIds,
   seedCollapsedIds,
 } from "./usePostTreeCollapse";
 
-function makePost(overrides: Partial<PostDTO> & { unitId: string }): PostDTO {
+function makePost(
+  overrides: Partial<CommentDTO> & { unitId: string },
+): CommentDTO {
   return {
     authorUserId: "u1",
     targetUnitId: "target",
@@ -17,7 +19,7 @@ function makePost(overrides: Partial<PostDTO> & { unitId: string }): PostDTO {
     replyCount: 0,
     directReplyCount: 0,
     ...overrides,
-  } as PostDTO;
+  } as CommentDTO;
 }
 
 describe("usePostTreeCollapse helpers", () => {

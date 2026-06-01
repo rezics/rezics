@@ -1,8 +1,8 @@
 ---
 title: Consolidate Unit Target Semantics
-status: active
+status: done
 created: 2026-06-01
-completed:
+completed: 2026-06-01
 supersededBy:
 tags: [unit, target, post, search, governance, catalog]
 ---
@@ -193,16 +193,16 @@ only if the surrounding model context makes part of it redundant.
 
 ## 4. Finish Removing Post Tree Residue
 
-- [ ] 4.1 Drop `Post.rootPostUnitId`, `Post.parentPostUnitId`, `Post.depth`,
+- [x] 4.1 Drop `Post.rootPostUnitId`, `Post.parentPostUnitId`, `Post.depth`,
   `Post.path`, and their indexes once post target reads no longer depend on the
   legacy reply cutoff.
-- [ ] 4.2 Remove root-post path writes and self-root writes from
+- [x] 4.2 Remove root-post path writes and self-root writes from
   `PostService.create`.
-- [ ] 4.3 Replace `parentPostUnitId = null` root-only guards in server/search
+- [x] 4.3 Replace `parentPostUnitId = null` root-only guards in server/search
   code with the invariant that `Post` contains only root submissions.
-- [ ] 4.4 Remove `depth` and `path` from `PostDTO` and post search/UI adapters;
+- [x] 4.4 Remove `depth` and `path` from `PostDTO` and post search/UI adapters;
   keep threaded rendering on `CommentDTO`.
-- [ ] 4.5 Delete post-as-comment compatibility helpers after app thread reads
+- [x] 4.5 Delete post-as-comment compatibility helpers after app thread reads
   consume comments directly.
 
 ## 5. Preserve Domain Endpoints That Should Stay Local
@@ -226,21 +226,21 @@ only if the surrounding model context makes part of it redundant.
   documented in tests.
 - [x] 6.2 Update post search filters and ranking patch paths to avoid relying on
   post extension target columns.
-- [ ] 6.3 Add target-query regression tests for book/game/media pages querying
+- [x] 6.3 Add target-query regression tests for book/game/media pages querying
   posts, reviews, excerpts, chapters, and comments through the intended split:
   posts by `Unit.targetUnitId`, comments by `Comment.rootUnitId` or content
   anchors.
 
 ## 7. Cleanup And Migration Verification
 
-- [ ] 7.1 Add migration verification that no remaining `Post` row has target/tree
+- [x] 7.1 Add migration verification that no remaining `Post` row has target/tree
   data outside the owning `Unit` and that all target-bearing posts have a matching
   `Unit.targetUnitId`.
-- [ ] 7.2 Add migration verification that no persisted non-Unit model keeps a
+- [x] 7.2 Add migration verification that no persisted non-Unit model keeps a
   generic `targetUnitId` column unless it has an explicit documented exemption.
 - [x] 7.3 Remove obsolete comments in plans/code that say only `VARIANT` Units may
   carry `targetUnitId`.
-- [ ] 7.4 Run focused tests for contract unit/post/comment/subscription/governance
+- [x] 7.4 Run focused tests for contract unit/post/comment/subscription/governance
   schemas, post service, chapter service, search sync, content search,
   governance overlays, and shelf collection review parent resolution.
 

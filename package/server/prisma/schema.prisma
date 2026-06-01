@@ -262,10 +262,6 @@ model Unit {
 
   // Engagement (reactions moved to @rezics/reaction service)
 
-  // Post topology residue remains post-local until legacy reply reads finish.
-  rootPosts       Post[] @relation("PostRoot")
-  parentPosts     Post[] @relation("PostParent")
-
   // Comment relations (comments are first-class Unit extensions)
   rootComments          Comment[] @relation("CommentRoot")
   realmComments         Comment[] @relation("CommentRealm")
@@ -673,20 +669,7 @@ model Post {
   /// Meilisearch-only and must not be added as PostgreSQL columns.
   content Json?
 
-  rootPostUnitId   String? @db.Uuid
-  parentPostUnitId String? @db.Uuid
-
   kind PostKind?
-
-  depth Int @default(0)
-
-  /// Postgres-native ltree materialized path from the thread root to this post.
-  /// Modeled as Unsupported: read and written via raw SQL only. The GiST index
-  /// backing subtree containment is declared below so Prisma diff can verify
-  /// the migration history even though the ltree data movement is handwritten.
-  /// The legacy zero-padded `sortPath` VARCHAR column is gone; topology and
-  /// depth live here, while presentation order is a DB ORDER BY key (School B).
-  path Unsupported("ltree")?
 
   replyCount       Int       @default(0)
   directReplyCount Int       @default(0)
@@ -706,16 +689,11 @@ model Post {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  rootPost   Unit?       @relation("PostRoot", fields: [rootPostUnitId], references: [id], onDelete: SetNull)
-  parentPost Unit?       @relation("PostParent", fields: [parentPostUnitId], references: [id], onDelete: SetNull)
   scoreEntry ScoreEntry? @relation("PostScoreEntry", fields: [scoreEntryId], references: [id], onDelete: Restrict)
 
   @@index([authorUserId, createdAt])
-  @@index([rootPostUnitId, createdAt])
-  @@index([parentPostUnitId, createdAt])
   @@index([kind, createdAt])
   @@index([scoreEntryId])
-  @@index([path], type: Gist, map: "Post_path_gist_idx")
 }
 
 /**

@@ -1,4 +1,8 @@
-import { contentDocMarkdownFallback, type PostDTO } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  type CommentDTO,
+  type PostDTO,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -6,7 +10,7 @@ import { UserHoverPreview } from "@/user/components";
 import { isEditedTimestamp } from "../../models/postMetadata";
 
 interface PostAuthorHeaderProps {
-  post: PostDTO;
+  post: PostDTO | CommentDTO;
   size?: "compact" | "default";
   showAvatar?: boolean;
   avatarClassName?: string;
@@ -68,7 +72,7 @@ export function PostAuthorAvatar({
   size = "compact",
   className,
 }: {
-  post: PostDTO;
+  post: PostDTO | CommentDTO;
   size?: "compact" | "default";
   className?: string;
 }) {

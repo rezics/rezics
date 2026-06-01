@@ -1,4 +1,4 @@
-import type { PostDTO } from "@rezics/contract";
+import type { CommentDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { TextLink } from "@/shared/ui/link";
@@ -27,8 +27,8 @@ export interface PostTreeNodeProps {
   highlightedFocusPostUnitId?: string;
   highlightedThreadUnitId?: string;
   onReplyClick: (postUnitId: string) => void;
-  renderOverflowContent?: (post: PostDTO) => React.ReactNode;
-  onComposerSubmitted: (parentCommentUnitId: string, post: PostDTO) => void;
+  renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
+  onComposerSubmitted: (parentCommentUnitId: string, post: CommentDTO) => void;
   onComposerDone: (postUnitId: string) => void;
   onThreadHoverChange: (postUnitId: string, hovered: boolean) => void;
 }
@@ -135,7 +135,7 @@ export function PostTreeNode({
                 <ReplyComposer
                   mode="expanded"
                   autoFocus
-                  targetUnitId={post.targetUnitId ?? rootUnitId}
+                  targetUnitId={rootUnitId}
                   rootUnitId={rootUnitId}
                   realmUnitId={post.realmUnitId}
                   parentCommentUnitId={post.unitId}

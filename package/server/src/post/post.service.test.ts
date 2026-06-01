@@ -766,15 +766,15 @@ describe("PostService.byRealm", () => {
 
     const where = firstPostFindManyArgs().where;
     expect(where.unit.targetUnitId).toBe("release-1");
-    expect(where.parentPostUnitId).toBeNull();
+    expect("parentPostUnitId" in where).toBe(false);
   });
 
-  test("general post feeds are root-only by default", async () => {
+  test("general post feeds no longer carry legacy root-only guards", async () => {
     resetMocks();
 
     await service.list({});
 
-    expect(firstPostFindManyArgs().where.parentPostUnitId).toBeNull();
+    expect("parentPostUnitId" in firstPostFindManyArgs().where).toBe(false);
   });
 
   test("hides blocked authors in general feeds", async () => {
@@ -796,11 +796,11 @@ describe("PostService.byRealm", () => {
     expect(firstPostFindManyArgs().orderBy).toEqual([{ createdAt: "desc" }]);
   });
 
-  test("realm post feeds are root-only by default", async () => {
+  test("realm post feeds no longer carry legacy root-only guards", async () => {
     resetMocks();
     await service.byRealm("realm-1", {});
 
-    expect(firstPostFindManyArgs().where.parentPostUnitId).toBeNull();
+    expect("parentPostUnitId" in firstPostFindManyArgs().where).toBe(false);
   });
 
   test("top sort orders by ScoreEntry value descending", async () => {
@@ -877,52 +877,21 @@ describe("PostService.byRealm", () => {
   });
 });
 
-describe("PostService.list comment compatibility reads", () => {
+describe("PostService.getByUnitId", () => {
   const service = new PostService();
 
-  test("detail reads fall back to Comment rows", async () => {
+  test("does not fall back to Comment rows", async () => {
     resetMocks();
-    commentFindUniqueMock.mockResolvedValue({
-      unitId: "comment-1",
-      rootUnitId: "root-1",
-      realmUnitId: "realm-1",
-      parentCommentUnitId: null,
-      authorUserId: "user-1",
-      content: content("reply"),
-      depth: 1,
-      replyCount: 0,
-      directReplyCount: 0,
-      lastReplyAt: null,
-      isLocked: false,
-      state: null,
-      createdAt: new Date("2026-06-01T00:00:00.000Z"),
-      updatedAt: new Date("2026-06-01T00:00:00.000Z"),
-      unit: {
-        status: "PUBLISHED",
-        visibility: "PUBLIC",
-        licenseSlug: null,
-        user: null,
-        contentModerationState: null,
-      },
-    });
-    queryRawMock.mockResolvedValueOnce([{ unitId: "comment-1", path: "1" }]);
 
-    const result = await service.getByUnitId("comment-1");
+    await expect(service.getByUnitId("comment-1")).rejects.toThrow(
+      "Post not found: comment-1",
+    );
 
     expect(postFindUniqueMock).toHaveBeenCalledWith({
       where: { unitId: "comment-1" },
       include: expect.any(Object),
     });
-    expect(commentFindUniqueMock).toHaveBeenCalledWith({
-      where: { unitId: "comment-1" },
-      include: expect.any(Object),
-    });
-    expect(result).toMatchObject({
-      unitId: "comment-1",
-      rootPostUnitId: "root-1",
-      parentPostUnitId: "root-1",
-      path: "1",
-    });
+    expect(commentFindUniqueMock).not.toHaveBeenCalled();
   });
 });
 

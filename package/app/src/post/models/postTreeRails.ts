@@ -1,4 +1,4 @@
-import type { PostDTO } from "@rezics/contract";
+import type { CommentDTO } from "@rezics/contract";
 
 const PATH_SEPARATOR = ".";
 
@@ -13,13 +13,16 @@ function isInBranch(path: string, prefix: string): boolean {
   return path === prefix || path.startsWith(`${prefix}${PATH_SEPARATOR}`);
 }
 
-export function isDescendantPost(parent: PostDTO, post: PostDTO): boolean {
+export function isDescendantPost(
+  parent: CommentDTO,
+  post: CommentDTO,
+): boolean {
   if (!parent.path || !post.path) return false;
   return post.path.startsWith(`${parent.path}${PATH_SEPARATOR}`);
 }
 
 export function getDisplayDepth(
-  post: PostDTO,
+  post: CommentDTO,
   baseDepth: number,
   visualMaxDepth: number,
 ): number {
@@ -27,7 +30,7 @@ export function getDisplayDepth(
 }
 
 export interface PostTreeNodeModel {
-  post: PostDTO;
+  post: CommentDTO;
   displayDepth: number;
   atMaxDepth: boolean;
   children: PostTreeNodeModel[];
@@ -37,7 +40,7 @@ export interface PostTreeNodeModel {
  * Render precedence within a sibling group: accepted answers first, then pins,
  * then ordinary replies. Lower rank renders earlier.
  */
-function promotionRank(post: PostDTO): number {
+function promotionRank(post: CommentDTO): number {
   if (post.pinKind === "ACCEPTED_ANSWER") return 0;
   if (post.pinKind === "PINNED") return 1;
   return 2;
@@ -74,7 +77,7 @@ export function buildPostTreeNodes({
   maxDepth,
   visualMaxDepth,
 }: {
-  posts: PostDTO[];
+  posts: CommentDTO[];
   baseDepth: number;
   maxDepth: number;
   visualMaxDepth: number;
@@ -122,9 +125,9 @@ export function buildPostTreeNodes({
 }
 
 export function findNearestVisibleAncestor(
-  posts: PostDTO[],
-  post: PostDTO,
-): PostDTO | undefined {
+  posts: CommentDTO[],
+  post: CommentDTO,
+): CommentDTO | undefined {
   return posts
     .filter((candidate) => candidate.unitId !== post.unitId)
     .filter((candidate) => isDescendantPost(candidate, post))
@@ -132,8 +135,8 @@ export function findNearestVisibleAncestor(
 }
 
 export function getChildBranchPrefix(
-  parent: PostDTO,
-  post: PostDTO,
+  parent: CommentDTO,
+  post: CommentDTO,
 ): string | undefined {
   if (!parent.path || !post.path || !isDescendantPost(parent, post)) {
     return undefined;
@@ -146,9 +149,9 @@ export function getChildBranchPrefix(
 }
 
 export function hasLaterSiblingBranch(
-  posts: PostDTO[],
-  parent: PostDTO,
-  post: PostDTO,
+  posts: CommentDTO[],
+  parent: CommentDTO,
+  post: CommentDTO,
 ): boolean {
   const branchPrefix = getChildBranchPrefix(parent, post);
   if (!branchPrefix) return false;
@@ -168,9 +171,9 @@ export function getContinuationLines({
   visualMaxDepth,
   parentLineLevel,
 }: {
-  visibleBefore: PostDTO[];
-  visibleAfter: PostDTO[];
-  post: PostDTO;
+  visibleBefore: CommentDTO[];
+  visibleAfter: CommentDTO[];
+  post: CommentDTO;
   baseDepth: number;
   visualMaxDepth: number;
   parentLineLevel?: number;

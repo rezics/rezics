@@ -37,8 +37,6 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     globalModerationState,
     isTombstone: post.unit.status === "DELETED" || contentHidden,
     scoreEntryId: post.scoreEntryId ?? null,
-    depth: post.depth,
-    path: post.path ?? null,
     replyCount: post.replyCount,
     directReplyCount: post.directReplyCount,
     lastReplyAt: post.lastReplyAt?.toISOString() ?? null,

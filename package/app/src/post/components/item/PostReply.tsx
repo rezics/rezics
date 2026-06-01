@@ -1,4 +1,4 @@
-import type { PostDTO } from "@rezics/contract";
+import type { CommentDTO, PostDTO } from "@rezics/contract";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PollEmbed } from "@/poll";
@@ -12,7 +12,7 @@ import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
 import { CommentPromotionBadge } from "../parts/CommentPromotionBadge";
 
 interface PostReplyProps {
-  post: PostDTO;
+  post: PostDTO | CommentDTO;
   onReply?: () => void;
   overflowContent?: React.ReactNode;
   replyComposerSlot?: React.ReactNode;
@@ -38,7 +38,7 @@ export const PostReply: React.FC<PostReplyProps> = ({
           clamp={{ maxLines: 4 }}
           className="text-sm"
         />
-        {post.extra?.poll?.unitId && (
+        {"extra" in post && post.extra?.poll?.unitId && (
           <PollEmbed pollUnitId={post.extra.poll.unitId} />
         )}
         <ReactionBar

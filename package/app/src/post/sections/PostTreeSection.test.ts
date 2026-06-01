@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { markdownContentDoc, type PostDTO } from "@rezics/contract";
+import { markdownContentDoc, type CommentDTO } from "@rezics/contract";
 import {
   buildPostTreeNodes,
   getChildBranchPrefix,
@@ -9,21 +9,21 @@ import {
   type PostTreeNodeModel,
 } from "../models/postTreeRails";
 
-function makePost(unitId: string, path?: string, depth?: number): PostDTO {
+function makePost(unitId: string, path?: string, depth?: number): CommentDTO {
   return {
     unitId,
     authorUserId: "user-1",
     content: markdownContentDoc("body"),
     path,
     depth,
-  } as PostDTO;
+  } as CommentDTO;
 }
 
 function makePromotablePost(
   unitId: string,
   path: string,
-  pin?: { pinKind: PostDTO["pinKind"]; pinPosition?: string },
-): PostDTO {
+  pin?: { pinKind: CommentDTO["pinKind"]; pinPosition?: string },
+): CommentDTO {
   return {
     unitId,
     authorUserId: "user-1",
@@ -32,7 +32,7 @@ function makePromotablePost(
     depth: 1,
     pinKind: pin?.pinKind ?? null,
     pinPosition: pin?.pinPosition ?? null,
-  } as PostDTO;
+  } as CommentDTO;
 }
 
 function childIds(nodes: PostTreeNodeModel[]): string[] {

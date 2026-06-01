@@ -10,7 +10,7 @@ import {
   useUnacceptAnswerMutation,
   useUnpinCommentMutation,
 } from "@rezics/api/post/post";
-import type { PostDTO } from "@rezics/contract";
+import type { CommentDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
@@ -21,7 +21,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { PostPromotionControls } from "../components/parts/PostPromotionControls";
 import { PostEditDialog } from "../forms/PostEditDialog";
-import { mapCommentToPost } from "../models/commentPostCompat";
 import { decidePromotionControls } from "../models/postPromotionGate";
 import { PostTreeList } from "./PostTreeList";
 import { DEFAULT_MAX_DEPTH, DEFAULT_VISUAL_MAX_DEPTH } from "./postTreeLayout";
@@ -52,7 +51,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   const { t } = useTranslation(["common", "community"]);
   const permission = useServerPermission();
   const actorUserId = useCurrentUserId();
-  const [editingPost, setEditingPost] = useState<PostDTO | null>(null);
+  const [editingPost, setEditingPost] = useState<CommentDTO | null>(null);
   const commentThreadQuery = useQuery(
     commentListQuery({
       rootUnitId,
@@ -66,7 +65,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   const isLoading = hasCommentPartition && commentThreadQuery.isLoading;
   const posts = useMemo(() => {
     if (!hasCommentPartition) return [];
-    return (commentThreadQuery.data?.comments ?? []).map(mapCommentToPost);
+    return commentThreadQuery.data?.comments ?? [];
   }, [commentThreadQuery.data?.comments, hasCommentPartition]);
   const signalData = hasCommentPartition ? commentThreadQuery.data : undefined;
 
@@ -90,7 +89,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     acceptMutation.isPending ||
     unacceptMutation.isPending;
 
-  const renderOverflowContent = (post: PostDTO) => {
+  const renderOverflowContent = (post: CommentDTO) => {
     const decision = computeEditorEntryDecision({
       permission,
       actorUserId,

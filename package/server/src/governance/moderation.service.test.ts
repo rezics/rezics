@@ -623,8 +623,7 @@ describe("GovernanceModerationService content moderation state", () => {
     ]);
   });
 
-  test("realm feed removal rejects reply nodes", async () => {
-    postFindUnique.mockResolvedValueOnce({ parentPostUnitId: "post-1" });
+  test("realm feed removal does not inspect legacy post reply topology", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"
     );
@@ -632,11 +631,16 @@ describe("GovernanceModerationService content moderation state", () => {
     await expect(
       governanceModerationService.removeRootFromRealm({
         realmUnitId: "realm-1",
-        targetUnitId: "reply-1",
+        targetUnitId: "post-1",
       }),
-    ).rejects.toThrow("Realm feed removal only applies to thread roots");
+    ).resolves.toEqual({ message: "Content removed from realm feed" });
 
-    expect(unitRealmDelete).not.toHaveBeenCalled();
+    expect(postFindUnique).not.toHaveBeenCalled();
+    expect(unitRealmDelete).toHaveBeenCalledWith({
+      where: {
+        realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
+      },
+    });
   });
 
   test("owner delegation creates a realm queue item instead of state mutation", async () => {

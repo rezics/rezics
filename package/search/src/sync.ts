@@ -1236,7 +1236,6 @@ export async function patchPostsAuthor(
     const posts = await getSearchPrismaClient().post.findMany({
       where: {
         authorUserId: userId,
-        parentPostUnitId: null,
         unit: publicSearchableUnitWhere(),
       },
       select: { unitId: true },
@@ -1264,7 +1263,6 @@ export async function syncPostsByAuthorSegment(
   const rows: any[] = await getSearchPrismaClient().post.findMany({
     where: {
       authorUserId: userId,
-      parentPostUnitId: null,
       unit: publicSearchableUnitWhere(),
     },
     include: {
@@ -1324,7 +1322,6 @@ export async function patchPostsTarget(
   while (true) {
     const posts = await getSearchPrismaClient().post.findMany({
       where: {
-        parentPostUnitId: null,
         unit: {
           ...publicSearchableUnitWhere(),
           targetUnitId,
@@ -1383,7 +1380,6 @@ export async function patchPostsTargetSegment(
   const limit = segmentLimit(options);
   const rows: any[] = await getSearchPrismaClient().post.findMany({
     where: {
-      parentPostUnitId: null,
       unit: {
         ...publicSearchableUnitWhere(),
         targetUnitId,
@@ -1417,7 +1413,6 @@ export async function patchPostFields(
   const post = await getSearchPrismaClient().post.findUnique({
     where: { unitId },
     select: {
-      parentPostUnitId: true,
       unit: {
         select: {
           status: true,
@@ -1427,7 +1422,7 @@ export async function patchPostFields(
       },
     },
   });
-  if (!post || post.parentPostUnitId || !isPublicIndexablePostUnit(post.unit)) {
+  if (!post || !isPublicIndexablePostUnit(post.unit)) {
     await client.deletePosts([unitId]);
     return;
   }
@@ -1867,7 +1862,7 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
     },
   });
 
-  if (!post || post.parentPostUnitId || !isPublicIndexablePostUnit(post.unit)) {
+  if (!post || !isPublicIndexablePostUnit(post.unit)) {
     await client.deletePosts([unitId]);
     return;
   }
@@ -1889,7 +1884,6 @@ export async function syncAllPosts(client: SearchClient) {
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         unit: publicSearchableUnitWhere(),
-        parentPostUnitId: null,
       },
       include: {
         ...postIncludeForSync,
@@ -1929,7 +1923,6 @@ export async function syncPostSegment(
   const posts: any[] = await getSearchPrismaClient().post.findMany({
     where: {
       unit: publicSearchableUnitWhere(),
-      parentPostUnitId: null,
     },
     include: {
       ...postIncludeForSync,
@@ -2045,7 +2038,6 @@ export async function syncAllPostRealmIds(client: SearchClient) {
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         unit: publicSearchableUnitWhere(),
-        parentPostUnitId: null,
       },
       select: {
         unitId: true,
@@ -2085,7 +2077,6 @@ export async function syncPostRealmIdsSegment(
   const rows: any[] = await getSearchPrismaClient().post.findMany({
     where: {
       unit: publicSearchableUnitWhere(),
-      parentPostUnitId: null,
     },
     select: {
       unitId: true,
@@ -2164,7 +2155,6 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
         authorUserId: userId,
-        parentPostUnitId: null,
         unit: publicSearchableUnitWhere(),
       },
       include: {
@@ -2206,7 +2196,6 @@ export async function syncPostsByTarget(
   while (true) {
     const posts: any[] = await getSearchPrismaClient().post.findMany({
       where: {
-        parentPostUnitId: null,
         unit: {
           ...publicSearchableUnitWhere(),
           targetUnitId,

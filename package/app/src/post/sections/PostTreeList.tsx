@@ -1,5 +1,5 @@
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type { PostDTO } from "@rezics/contract";
+import type { CommentDTO } from "@rezics/contract";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePostTreeCollapse } from "../hooks/usePostTreeCollapse";
 import { buildPostTreeNodes } from "../models/postTreeRails";
@@ -7,7 +7,7 @@ import { PostTreeNode } from "./PostTreeNode";
 import { DEFAULT_MAX_DEPTH, DEFAULT_VISUAL_MAX_DEPTH } from "./postTreeLayout";
 
 export interface PostTreeListProps {
-  posts: PostDTO[];
+  posts: CommentDTO[];
   rootUnitId: string;
   maxDepth?: number;
   visualMaxDepth?: number;
@@ -15,7 +15,7 @@ export interface PostTreeListProps {
   focusPostUnitId?: string;
   highlightFocusedPost?: boolean;
   onReply?: (postUnitId: string) => void;
-  renderOverflowContent?: (post: PostDTO) => React.ReactNode;
+  renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
 }
 
 export function PostTreeList({
@@ -101,7 +101,7 @@ export function PostTreeList({
   }, []);
 
   const handleComposerSubmitted = useCallback(
-    (parentCommentUnitId: string, post: PostDTO) => {
+    (parentCommentUnitId: string, post: CommentDTO) => {
       setSubmittedPostUnitId(post.unitId);
       handleComposerDone(parentCommentUnitId);
     },

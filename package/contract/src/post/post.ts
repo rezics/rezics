@@ -135,13 +135,6 @@ export const postDTOSchema = t.Object({
     t.Nullable(contentModerationStateKindSchema),
   ),
   isTombstone: t.Optional(t.Boolean()),
-  depth: t.Optional(t.Number()),
-  /**
-   * Native ltree materialized path (root→post), e.g. `"1.3.a"`. Bounds the
-   * subtree and yields depth; it is NOT a presentation-order key (School B).
-   * Replaces the removed `sortPath`.
-   */
-  path: t.Optional(t.Nullable(t.String())),
   replyCount: t.Optional(t.Number()),
   directReplyCount: t.Optional(t.Number()),
   lastReplyAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),

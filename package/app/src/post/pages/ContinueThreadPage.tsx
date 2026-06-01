@@ -1,6 +1,5 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import { commentListQuery, commentQuery } from "@rezics/api/comment/comment";
-import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
@@ -9,10 +8,9 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { Pencil } from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
-import { PostCard } from "../components/item/PostCard";
+import { PostReply } from "../components/item/PostReply";
 import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
-import { mapCommentToPost } from "../models/commentPostCompat";
 import { PostTreeList } from "../sections/PostTreeList";
 
 export const ContinueThreadPage: React.FC = () => {
@@ -24,9 +22,7 @@ export const ContinueThreadPage: React.FC = () => {
   };
   const composerRef = useFocusReplyFromQuery();
   const commentAnchorQuery = useQuery(commentQuery(unitId));
-  const anchor = commentAnchorQuery.data
-    ? mapCommentToPost(commentAnchorQuery.data)
-    : undefined;
+  const anchor = commentAnchorQuery.data;
   const commentSubtreeQuery = useQuery(
     commentListQuery({
       rootUnitId: rootPostUnitId,
@@ -39,14 +35,10 @@ export const ContinueThreadPage: React.FC = () => {
   );
   const isAnchorLoading = !anchor && commentAnchorQuery.isLoading;
   const isLoading = isAnchorLoading ? true : commentSubtreeQuery.isLoading;
-  const posts = (commentSubtreeQuery.data?.comments ?? []).map(
-    mapCommentToPost,
-  );
+  const posts = commentSubtreeQuery.data?.comments ?? [];
   const editorEntry = useEditorEntry({
-    surface: anchor?.kind === PostKind.WIKI ? "wikiPost" : "post",
+    surface: "post",
     ownerUnit: { user: anchor?.author },
-    capabilities:
-      anchor?.kind === PostKind.WIKI ? ["content", "tag"] : undefined,
   });
 
   return (
@@ -78,14 +70,14 @@ export const ContinueThreadPage: React.FC = () => {
               </Button>
             </div>
           ) : null}
-          <PostCard post={anchor} />
+          <PostReply post={anchor} />
         </div>
       )}
       {anchor && (
         <ReplyComposer
           ref={composerRef}
           mode="progressive"
-          targetUnitId={anchor.targetUnitId ?? rootPostUnitId}
+          targetUnitId={rootPostUnitId}
           rootUnitId={rootPostUnitId}
           realmUnitId={anchor.realmUnitId}
           parentCommentUnitId={anchor.unitId}

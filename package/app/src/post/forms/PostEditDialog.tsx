@@ -1,9 +1,10 @@
 import { getLockedFieldError } from "@rezics/api";
+import { useUpdateCommentMutation } from "@rezics/api/comment/comment";
 import {
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
 } from "@rezics/api/post/post";
-import type { PostDTO } from "@rezics/contract";
+import type { CommentDTO, PostDTO } from "@rezics/contract";
 import {
   mainMarkdownSource,
   markdownContentDoc,
@@ -24,7 +25,7 @@ import type React from "react";
 import { useState } from "react";
 
 interface PostEditDialogProps {
-  post: PostDTO;
+  post: PostDTO | CommentDTO;
   open: boolean;
   onClose: () => void;
 }
@@ -38,7 +39,8 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   const locale = useLocale();
   const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
-  const isWikiPost = post.kind === PostKind.WIKI;
+  const isComment = "rootUnitId" in post;
+  const isWikiPost = !isComment && post.kind === PostKind.WIKI;
 
   const updateMutation = useUpdatePostMutation({
     onSuccess: () => {
@@ -61,7 +63,16 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
       );
     },
   });
-  const activeMutation = isWikiPost ? updateWikiMutation : updateMutation;
+  const updateCommentMutation = useUpdateCommentMutation({
+    onSuccess: () => {
+      onClose();
+    },
+  });
+  const activeMutation = isComment
+    ? updateCommentMutation
+    : isWikiPost
+      ? updateWikiMutation
+      : updateMutation;
 
   const handleSubmit = () => {
     if (!text.trim()) return;
@@ -72,6 +83,13 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
         unitId: post.unitId,
         content,
         language: locale,
+      });
+      return;
+    }
+    if (isComment) {
+      updateCommentMutation.mutate({
+        unitId: post.unitId,
+        input: { content },
       });
       return;
     }

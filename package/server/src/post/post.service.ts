@@ -32,7 +32,6 @@ import {
   UnitType,
 } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
-import type { CommentWithRelations } from "@/comment/comment.types";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { generateBetween } from "@/shelf/fractional-index";
 import { serverJobProducer } from "@/job/job-boundary";
@@ -46,7 +45,6 @@ import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
-import { publicUserSelect } from "@/utils/sanitizeUser";
 import { AppError } from "../utils/errors";
 import { mapCommentPromotionToDTO } from "./post.mapper";
 import type { PostWithRelations } from "./types";
@@ -80,65 +78,6 @@ function enqueuePostFields(unitId: string, fields: Record<string, unknown>) {
       { type: "server", service: "post" },
     ),
   );
-}
-
-function commentAsPostCompat(comment: any): PostWithRelations {
-  return {
-    unitId: comment.unitId,
-    authorUserId: comment.authorUserId,
-    targetUnitId: comment.rootUnitId,
-    realmUnitId: comment.realmUnitId,
-    scoreEntryId: null,
-    content: comment.content,
-    rootPostUnitId: comment.rootUnitId,
-    parentPostUnitId: comment.parentCommentUnitId ?? comment.rootUnitId,
-    kind: null,
-    depth: comment.depth,
-    path: comment.path ?? null,
-    replyCount: comment.replyCount,
-    directReplyCount: comment.directReplyCount,
-    lastReplyAt: comment.lastReplyAt,
-    isLocked: comment.isLocked,
-    state: comment.state,
-    extra: null,
-    createdAt: comment.createdAt,
-    updatedAt: comment.updatedAt,
-    unit: {
-      ...comment.unit,
-      licenseSlug: comment.unit?.licenseSlug ?? null,
-    },
-    pinKind: null,
-    pinPosition: null,
-  } as PostWithRelations;
-}
-
-const commentIncludeForPostCompat = {
-  unit: {
-    include: {
-      user: { select: publicUserSelect },
-      contentModerationState: true,
-    },
-  },
-} as const;
-
-async function attachCommentPathsForPostCompat<
-  T extends { unitId: string; path?: string | null },
->(comments: T[]): Promise<T[]> {
-  if (comments.length === 0) return comments;
-  const rows = await prisma.$queryRaw<
-    { unitId: string; path: string | null }[]
-  >`
-    SELECT "unitId", "path"::text AS path
-    FROM "Comment"
-    WHERE "unitId" IN (${Prisma.join(
-      comments.map((comment) => Prisma.sql`${comment.unitId}::uuid`),
-    )})
-  `;
-  const pathByUnitId = new Map(rows.map((row) => [row.unitId, row.path]));
-  for (const comment of comments) {
-    comment.path = pathByUnitId.get(comment.unitId) ?? null;
-  }
-  return comments;
 }
 
 function readRealmRuleUnitId(extra: Prisma.JsonValue | null): string | null {
@@ -244,33 +183,6 @@ async function applyBlockedAuthorFilter(
 }
 
 /**
- * Attach the `Unsupported("ltree")` `path` column to post rows. Prisma's typed
- * client cannot project `path`, so we read it in one indexed lookup keyed by
- * `unitId` and merge it onto the rows (null when a row has no path yet). The
- * value is the materialized path text (e.g. `"1.3.a"`) used by the client to
- * compute tree structure; it is never a presentation-order key (School B).
- */
-async function attachPostPaths<
-  T extends { unitId: string; path?: string | null },
->(posts: T[]): Promise<T[]> {
-  if (posts.length === 0) return posts;
-  const rows = await prisma.$queryRaw<
-    { unitId: string; path: string | null }[]
-  >`
-    SELECT "unitId", "path"::text AS path
-    FROM "Post"
-    WHERE "unitId" IN (${Prisma.join(
-      posts.map((post) => Prisma.sql`${post.unitId}::uuid`),
-    )})
-  `;
-  const pathByUnitId = new Map(rows.map((row) => [row.unitId, row.path]));
-  for (const post of posts) {
-    post.path = pathByUnitId.get(post.unitId) ?? null;
-  }
-  return posts;
-}
-
-/**
  * Attach the promotion overlay (`pinKind`/`pinPosition`) to thread rows. A
  * comment is promoted at most once per scope and its scope is always its own
  * thread root, so the target comment unit maps to at most one promotion row.
@@ -300,8 +212,8 @@ async function attachPinKinds<
 
 export class PostService {
   /**
-   * List root posts only. Reply tree reads live in the comment domain, so this
-   * path deliberately excludes legacy `Post(parentPostUnitId != null)` rows.
+   * List root submissions only. Reply tree reads live in the comment domain;
+   * Post no longer stores discussion topology.
    */
   async list(
     query: PostListQuery = {},
@@ -313,8 +225,6 @@ export class PostService {
     const where: Prisma.PostWhereInput = options?.isAdmin
       ? {}
       : { unit: { ...publicUnitEligibilityWhere } };
-    where.parentPostUnitId = null;
-
     if (query.targetUnitId) {
       where.unit = {
         ...(typeof where.unit === "object" && !Array.isArray(where.unit)
@@ -357,9 +267,7 @@ export class PostService {
 
     return {
       posts: await hydrateUnitOwnerUserSlugs(
-        await attachPinKinds(
-          await attachPostPaths(posts as PostWithRelations[]),
-        ),
+        await attachPinKinds(posts as PostWithRelations[]),
       ),
       total,
     };
@@ -446,7 +354,6 @@ export class PostService {
       },
     };
 
-    where.parentPostUnitId = null;
     if (opts.authorUserId) where.authorUserId = opts.authorUserId;
     if (opts.kind) where.kind = opts.kind;
     applyStateFilter(where, opts);
@@ -483,9 +390,7 @@ export class PostService {
 
     return {
       posts: await hydrateUnitOwnerUserSlugs(
-        await attachPinKinds(
-          await attachPostPaths(posts as PostWithRelations[]),
-        ),
+        await attachPinKinds(posts as PostWithRelations[]),
       ),
       total,
     };
@@ -531,28 +436,7 @@ export class PostService {
       include: postInclude,
     });
     if (!post) {
-      const comment = await prisma.comment.findUnique({
-        where: { unitId },
-        include: commentIncludeForPostCompat,
-      });
-      if (!comment) throw new AppError(404, `Post not found: ${unitId}`);
-      if (
-        !options?.isAdmin &&
-        !options?.allowTombstone &&
-        (comment.unit.status !== UnitStatus.PUBLISHED ||
-          comment.unit.visibility !== "PUBLIC")
-      ) {
-        throw new AppError(404, `Post not found: ${unitId}`);
-      }
-      const compat = commentAsPostCompat(
-        (
-          await attachCommentPathsForPostCompat([
-            comment as CommentWithRelations,
-          ])
-        )[0]!,
-      );
-      const [withPin] = await attachPinKinds([compat]);
-      return hydrateUnitOwnerUserSlugRow(withPin);
+      throw new AppError(404, `Post not found: ${unitId}`);
     }
     if (
       !options?.isAdmin &&
@@ -562,10 +446,8 @@ export class PostService {
     ) {
       throw new AppError(404, `Post not found: ${unitId}`);
     }
-    const [withPath] = await attachPinKinds(
-      await attachPostPaths([post as PostWithRelations]),
-    );
-    return hydrateUnitOwnerUserSlugRow(withPath);
+    const [withPin] = await attachPinKinds([post as PostWithRelations]);
+    return hydrateUnitOwnerUserSlugRow(withPin);
   }
 
   private async assertRealmPostAllowed(
@@ -629,7 +511,7 @@ export class PostService {
 
   /**
    * Create a top-level post. Comment replies are created through the comment
-   * domain; this path always writes a one-label root path.
+   * domain; this path writes no post topology.
    */
   async create(
     input: CreatePostInput,
@@ -733,15 +615,14 @@ export class PostService {
         content: content as Prisma.InputJsonValue,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,
-        depth: 0,
         state: statefulInit?.initial ?? undefined,
         extra: extraToWrite as Prisma.InputJsonValue | undefined,
       };
 
-      const created = await tx.post.create({
+      const created = (await tx.post.create({
         data: createData,
         include: postInclude,
-      });
+      })) as PostWithRelations;
 
       if (realmIdsToWrite.length > 0) {
         const createdAt = new Date();
@@ -773,34 +654,23 @@ export class PostService {
         );
       }
 
-      await tx.$executeRaw`
-        UPDATE "Post"
-        SET "path" = text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
-        WHERE "unitId" = ${created.unitId}::uuid
-      `;
-      const result = (await tx.post.update({
-        where: { unitId: created.unitId },
-        data: { rootPostUnitId: created.unitId },
-        include: postInclude,
-      })) as PostWithRelations;
-
       if (kind === "WIKI") {
         await upsertWikiContentTranslation(tx, {
-          unitId: result.unitId,
+          unitId: created.unitId,
           language: wikiLanguage ?? DEFAULT_LANGUAGE,
-          content: result.content,
+          content: created.content,
           actorUserId: authorUserId,
           status: wikiContentTranslationStatus(asDraft),
         });
         await writeEditorialMetadataHistory(tx as any, {
-          unitId: result.unitId,
+          unitId: created.unitId,
           actorUserId: authorUserId,
-          patch: wikiPostContentHistoryPatch(result.content),
+          patch: wikiPostContentHistoryPatch(created.content),
           message: "wiki-post.create",
         });
       }
 
-      return result;
+      return created;
     });
 
     // Drafts are owner-only and must not enter the search index until they are
@@ -812,8 +682,7 @@ export class PostService {
       ]);
     }
 
-    const [withPath] = await attachPostPaths([post]);
-    return hydrateUnitOwnerUserSlugRow(withPath);
+    return hydrateUnitOwnerUserSlugRow(post);
   }
 
   /**
@@ -984,15 +853,12 @@ export class PostService {
     return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
   }
 
-  /** Delete a post and decrement parent reply counts. */
+  /** Delete a root submission. Comment reply counters are owned by Comment. */
   async delete(unitId: string): Promise<void> {
     await prisma.$transaction(async (tx) => {
-      const post = await tx.post.findUniqueOrThrow({
+      await tx.post.findUniqueOrThrow({
         where: { unitId },
-        select: {
-          parentPostUnitId: true,
-          rootPostUnitId: true,
-        },
+        select: { unitId: true },
       });
 
       // Soft-delete: mark the unit as DELETED
@@ -1006,31 +872,6 @@ export class PostService {
         where: { unitId },
         data: { content: Prisma.JsonNull },
       });
-
-      // Decrement parent counters
-      if (post.parentPostUnitId) {
-        await tx.post.update({
-          where: { unitId: post.parentPostUnitId },
-          data: {
-            replyCount: { decrement: 1 },
-            directReplyCount: { decrement: 1 },
-          },
-        });
-      }
-
-      // Decrement root post replyCount (not directReplyCount)
-      if (
-        post.rootPostUnitId &&
-        post.rootPostUnitId !== unitId &&
-        post.rootPostUnitId !== post.parentPostUnitId
-      ) {
-        await tx.post.update({
-          where: { unitId: post.rootPostUnitId },
-          data: {
-            replyCount: { decrement: 1 },
-          },
-        });
-      }
     });
 
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
@@ -1225,8 +1066,8 @@ export class PostService {
 
   /**
    * Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`). Gated on a
-   * Q&A thread, the target being a direct reply (`depth == 1`,
-   * `parentPostUnitId == rootPostUnitId`), and OP/moderator authorization.
+   * Q&A thread, the target being a direct comment reply, and OP/moderator
+   * authorization.
    */
   async acceptAnswer(
     input: AcceptAnswerInput,
@@ -1237,7 +1078,7 @@ export class PostService {
       input.scopeUnitId,
       input.commentUnitId,
     );
-    if (target.depth !== 1 || target.parentPostUnitId !== input.scopeUnitId) {
+    if (target.depth !== 1 || target.parentCommentUnitId !== null) {
       throw new AppError(
         400,
         "An accepted answer must be a direct reply to the question",
@@ -1285,7 +1126,7 @@ export class PostService {
    * Single scope-capability gate shared by pin and accept: permitted to the
    * thread author (OP), a platform admin, or a moderator/owner of a realm the
    * thread belongs to. Also validates that the scope IS a thread root post
-   * (never a realm — that is `Realm.extra.pinboard`'s job — and never a reply).
+   * (never a realm — that is `Realm.extra.pinboard`'s job).
    */
   private async assertCanPromoteInThread(
     scopeUnitId: string,
@@ -1295,8 +1136,6 @@ export class PostService {
       where: { unitId: scopeUnitId },
       select: {
         authorUserId: true,
-        depth: true,
-        rootPostUnitId: true,
         unit: {
           select: {
             type: true,
@@ -1320,20 +1159,12 @@ export class PostService {
       throw new AppError(404, `Thread root post not found: ${scopeUnitId}`);
     }
 
-    if (
-      scope.depth !== 0 ||
-      (scope.rootPostUnitId !== null && scope.rootPostUnitId !== scopeUnitId)
-    ) {
-      throw new AppError(
-        400,
-        "A comment promotion scope must be a thread root post",
-      );
-    }
-
     const allowed = await this.canPromoteInThread(
       {
         authorUserId: scope.authorUserId,
-        realmUnitIds: scope.unit.inRealms.map((row) => row.realmUnitId),
+        realmUnitIds: (scope.unit?.inRealms ?? []).map(
+          (row) => row.realmUnitId,
+        ),
       },
       caller,
     );
@@ -1403,25 +1234,21 @@ export class PostService {
       where: { unitId: rootPostUnitId },
       select: {
         authorUserId: true,
-        depth: true,
-        rootPostUnitId: true,
         unit: { select: { inRealms: { select: { realmUnitId: true } } } },
       },
     });
 
-    // Only a real thread root can be promoted into; anything else → false.
-    if (
-      !scope ||
-      scope.depth !== 0 ||
-      (scope.rootPostUnitId !== null && scope.rootPostUnitId !== rootPostUnitId)
-    ) {
+    // Only a real thread root post can be promoted into; anything else -> false.
+    if (!scope) {
       return { viewerCanPromote: false, isQuestionThread: isQuestion };
     }
 
     const viewerCanPromote = await this.canPromoteInThread(
       {
         authorUserId: scope.authorUserId,
-        realmUnitIds: scope.unit.inRealms.map((row) => row.realmUnitId),
+        realmUnitIds: (scope.unit?.inRealms ?? []).map(
+          (row) => row.realmUnitId,
+        ),
       },
       caller,
     );
@@ -1432,50 +1259,58 @@ export class PostService {
   private async loadPromotableTarget(
     scopeUnitId: string,
     commentUnitId: string,
-  ): Promise<{ depth: number; parentPostUnitId: string | null }> {
-    const target = await prisma.post.findUnique({
+  ): Promise<{ depth: number; parentCommentUnitId: string | null }> {
+    const legacyPostTarget = (await prisma.post.findUnique({
       where: { unitId: commentUnitId },
-      select: { depth: true, rootPostUnitId: true, parentPostUnitId: true },
-    });
-    if (!target) {
-      const comment = await prisma.comment.findUnique({
-        where: { unitId: commentUnitId },
-        select: {
-          depth: true,
-          rootUnitId: true,
-          parentCommentUnitId: true,
-        },
-      });
-      if (!comment) {
-        throw new AppError(
-          404,
-          `Promotable target not found: ${commentUnitId}`,
-        );
-      }
-      if (comment.rootUnitId !== scopeUnitId) {
+      select: { unitId: true },
+    })) as {
+      depth?: number;
+      rootPostUnitId?: string | null;
+      parentPostUnitId?: string | null;
+    } | null;
+    if (legacyPostTarget) {
+      if (legacyPostTarget.rootPostUnitId !== scopeUnitId) {
         throw new AppError(
           400,
           "Target comment does not belong to the scope thread",
         );
       }
-      if (comment.depth < 1) {
+      if (!legacyPostTarget.depth || legacyPostTarget.depth < 1) {
         throw new AppError(400, "Only replies (depth >= 1) can be promoted");
       }
       return {
-        depth: comment.depth,
-        parentPostUnitId: comment.parentCommentUnitId ?? scopeUnitId,
+        depth: legacyPostTarget.depth,
+        parentCommentUnitId:
+          legacyPostTarget.parentPostUnitId === scopeUnitId
+            ? null
+            : (legacyPostTarget.parentPostUnitId ?? null),
       };
     }
-    if (target.rootPostUnitId !== scopeUnitId) {
+
+    const comment = await prisma.comment.findUnique({
+      where: { unitId: commentUnitId },
+      select: {
+        depth: true,
+        rootUnitId: true,
+        parentCommentUnitId: true,
+      },
+    });
+    if (!comment) {
+      throw new AppError(404, `Promotable target not found: ${commentUnitId}`);
+    }
+    if (comment.rootUnitId !== scopeUnitId) {
       throw new AppError(
         400,
         "Target comment does not belong to the scope thread",
       );
     }
-    if (target.depth < 1) {
+    if (comment.depth < 1) {
       throw new AppError(400, "Only replies (depth >= 1) can be promoted");
     }
-    return { depth: target.depth, parentPostUnitId: target.parentPostUnitId };
+    return {
+      depth: comment.depth,
+      parentCommentUnitId: comment.parentCommentUnitId,
+    };
   }
 
   /**

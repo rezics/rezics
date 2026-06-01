@@ -1172,17 +1172,6 @@ export class GovernanceModerationService {
     realmUnitId: string;
     targetUnitId: string;
   }) {
-    const post = await prisma.post.findUnique({
-      where: { unitId: input.targetUnitId },
-      select: { parentPostUnitId: true },
-    });
-    if (post?.parentPostUnitId) {
-      throw new AppError(
-        400,
-        "Realm feed removal only applies to thread roots",
-      );
-    }
-
     await prisma.unitRealm.delete({
       where: {
         realmUnitId_unitId: {

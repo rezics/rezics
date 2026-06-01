@@ -192,8 +192,6 @@ export class ChapterService {
           authorUserId: userId,
           kind: PostKind.CHAPTER,
           content: (content ?? markdownContentDoc("")) as Prisma.InputJsonValue,
-          rootPostUnitId: unit.id,
-          depth: 0,
         },
       });
 
@@ -275,8 +273,6 @@ export class ChapterService {
           authorUserId: userId,
           kind: PostKind.CHAPTER,
           content: markdownContentDoc("") as Prisma.InputJsonValue,
-          rootPostUnitId: unit.id,
-          depth: 0,
         },
       });
 

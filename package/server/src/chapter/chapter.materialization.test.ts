@@ -175,8 +175,6 @@ describe("ChapterService.materializeNode", () => {
         authorUserId: "actor-user",
         kind: PostKind.CHAPTER,
         content: markdownContentDoc(""),
-        rootPostUnitId: "chapter-new",
-        depth: 0,
       },
     });
     expect(firstArg(mockUpdateNode)).toEqual({
