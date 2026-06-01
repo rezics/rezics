@@ -269,11 +269,6 @@ mock.module("@/unit/collaborative-metadata", () => ({
   writeEditorialMetadataHistory: writeEditorialMetadataHistoryMock,
 }));
 
-mock.module("@/unit/publication-policy", () => ({
-  publicUnitEligibilityWhere: { status: "PUBLISHED", visibility: "PUBLIC" },
-  resolveStoredLicenseSlug: (slug: unknown) => slug ?? null,
-}));
-
 mock.module("@/utils/userSlugHydration", () => ({
   hydrateUnitOwnerUserSlugRow: mock((row: unknown) => row),
   hydrateUnitOwnerUserSlugs: mock((rows: unknown) => rows),

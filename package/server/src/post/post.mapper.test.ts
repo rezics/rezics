@@ -1,14 +1,5 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
-
-mock.module("@/unit/publication-policy", () => ({
-  publicUnitEligibilityWhere: { status: "PUBLISHED", visibility: "PUBLIC" },
-  resolveStoredLicenseSlug: mock((slug: string | null) => slug),
-}));
-
-mock.module("@/utils/sanitizeUser", () => ({
-  mapPublicUser: mock((user: unknown) => user),
-}));
 
 const { mapPostToDTO } = await import("./post.mapper");
 
