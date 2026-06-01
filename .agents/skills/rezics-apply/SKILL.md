@@ -67,9 +67,13 @@ Rules:
 2. **Route each item** with the table above: land the types, write the tests,
    write the comments at the owning code.
 3. **Verify** — run the package's tests and `bun run check:*` as relevant.
-4. **Make the source disposable.** A plan: set `status: done` (a human deletes it
-   later). History/migration prose goes into the commit message, not back into a
-   file.
+4. **Update plan progress.** Mark every completed `## Tasks` checkbox as
+   `- [x]`. Leave unfinished or deliberately skipped work unchecked and call it
+   out in the final response.
+5. **Make the source disposable.** A plan: set `status: done` only when all
+   task-owned work is complete or explicitly no longer applicable (a human
+   deletes it later). History/migration prose goes into the commit message, not
+   back into a file.
 
 ## Guardrails
 

@@ -66,6 +66,8 @@ its target home:
 - [ ] 1.1 <concrete, file-level step>
 - [ ] 1.2 ...
 Group with `## N. <phase>` headings when the work has phases.
+These checkboxes are apply-time progress markers: `/rezics-apply` must mark
+completed items as `- [x]` and leave unfinished or skipped items unchecked.
 
 ## Out of scope
 What this plan deliberately does not do.
@@ -78,7 +80,9 @@ which owns the four-way routing rule (shape → types, behavior → test,
 invariant/why → comment, history → commit message) and the comment-format
 conventions. **Propose only *tags*; apply *routes*** — deciding a comment's exact
 form needs the target site in view, which only happens at apply. When the work
-lands, the plan is set `status: done` (a human deletes it later).
+lands, apply marks completed task checkboxes and sets `status: done` only if all
+task-owned work is complete or explicitly no longer applicable (a human deletes
+it later).
 
 ## Guardrails
 
