@@ -11,6 +11,7 @@ import { PostCard } from "../components/item/PostCard";
 
 interface PostListSectionProps {
   targetUnitId?: string;
+  variantUnitId?: string;
   currentCatalogEntryUnitId?: string;
   targetVariantTitles?: Record<string, string>;
   kind?: PostKind;
@@ -19,6 +20,7 @@ interface PostListSectionProps {
 
 export const PostListSection: React.FC<PostListSectionProps> = ({
   targetUnitId,
+  variantUnitId,
   currentCatalogEntryUnitId,
   targetVariantTitles = {},
   kind,
@@ -27,7 +29,9 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
   const { t } = useTranslation(["community"]);
   const navigate = useNavigate();
   const query = postQueries.list({
-    targetUnitId: targetUnitId ?? "",
+    ...(variantUnitId
+      ? { variantUnitId }
+      : { targetUnitId: targetUnitId ?? "" }),
     kind,
     limit,
   });

@@ -7,6 +7,7 @@ import { useAtomValue } from "jotai";
 import type React from "react";
 import { useMemo } from "react";
 import { PostListSection, ReplyComposer } from "@/post";
+import { resolveCatalogEntryInteractionContext } from "../models/catalogEntryContext";
 import { resolveBookCommunityFeedQuery } from "../models/communityFeed";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
@@ -42,8 +43,9 @@ export const BookCommunityPage: React.FC = () => {
 
   if (!bookInfo) return null;
 
+  const context = resolveCatalogEntryInteractionContext(bookInfo);
   const feedQuery = resolveBookCommunityFeedQuery({
-    currentCatalogEntryUnitId: bookInfo.unitId,
+    currentCatalogEntryUnitId: context.primaryTargetUnitId,
   });
 
   return (
@@ -52,13 +54,20 @@ export const BookCommunityPage: React.FC = () => {
         <CommunitySidebar />
       </div>
 
-      <ReplyComposer mode="progressive" targetUnitId={bookId} />
+      <ReplyComposer
+        mode="progressive"
+        targetUnitId={context.primaryTargetUnitId}
+        variantUnitId={context.variantUnitId}
+      />
 
       <Separator />
 
       <PostListSection
-        targetUnitId={feedQuery.targetUnitId}
-        currentCatalogEntryUnitId={bookInfo.unitId}
+        targetUnitId={
+          context.variantUnitId ? undefined : feedQuery.targetUnitId
+        }
+        variantUnitId={context.variantUnitId}
+        currentCatalogEntryUnitId={context.pageUnitId}
       />
     </div>
   );

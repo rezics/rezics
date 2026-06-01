@@ -510,6 +510,7 @@ export type ShelfUnitBatchResponse =
 
 export const collectInputSchema = t.Object({
   targetId: t.String(),
+  variantUnitId: t.Optional(t.String()),
   shelfIds: t.Array(t.String()),
   independent: t.Optional(t.Boolean()),
   tagUnitIds: t.Optional(t.Array(t.String())),

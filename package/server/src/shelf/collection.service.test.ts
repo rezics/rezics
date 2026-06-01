@@ -112,4 +112,57 @@ describe("CollectionService — user collection metadata", () => {
       skipDuplicates: true,
     });
   });
+
+  test("collect stores variant context on the primary shelf unit", async () => {
+    const createMany = mock(async () => ({ count: 1 }));
+    const shelfUpdate = mock(async () => ({}));
+
+    Object.assign(prismaMock, {
+      unit: {
+        findUniqueOrThrow: unitFindUniqueOrThrowMock,
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          userUnitCollection: { upsert: mock(async () => ({})) },
+          userTagApplication: {
+            deleteMany: mock(async () => ({ count: 0 })),
+            createMany: mock(async () => ({ count: 0 })),
+          },
+          shelf: {
+            findFirst: mock(async () => ({ unitId: "shelf-1" })),
+            update: shelfUpdate,
+          },
+          shelfUnit: {
+            findUnique: mock(async () => null),
+            findFirst: mock(async () => null),
+            createMany,
+          },
+        }),
+    });
+
+    const { collectionService } = await import("./collection.service");
+    const result = await collectionService.collect("user-1", {
+      targetId: "main-1",
+      variantUnitId: "variant-1",
+      shelfIds: ["shelf-1"],
+    });
+
+    expect(result).toEqual({ savedTo: ["shelf-1"], isNew: true });
+    expect(createMany).toHaveBeenCalledWith({
+      data: [
+        {
+          shelfId: "shelf-1",
+          unitId: "main-1",
+          variantUnitId: "variant-1",
+          kind: "book",
+          position: "V",
+        },
+      ],
+      skipDuplicates: true,
+    });
+    expect(shelfUpdate).toHaveBeenCalledWith({
+      where: { unitId: "shelf-1" },
+      data: { itemCount: { increment: 1 } },
+    });
+  });
 });

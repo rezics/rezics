@@ -1,4 +1,5 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
+import { bookQueries } from "@rezics/api/book/book";
 import { useCurrentUserId } from "@rezics/api/hooks";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
@@ -6,18 +7,27 @@ import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { markdownContentDoc, PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Input, Label } from "@rezics/ui/shadcn";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { resolveCatalogEntryInteractionContext } from "@/book-library/models/catalogEntryContext";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { t } = useTranslation(["common", "community", "page"]);
-  const search = useRouterState({ select: (s) => s.location.search ?? "" });
-  const searchParams = new URLSearchParams(search);
+  const search = useRouterState({ select: (s) => s.location.search });
+  const searchParams =
+    typeof search === "string"
+      ? new URLSearchParams(search)
+      : new URLSearchParams(search as Record<string, string>);
   const navigate = useNavigate();
   const userId = useCurrentUserId();
+  const { data: bookInfo } = useQuery({
+    ...bookQueries.detail(bookUnitId),
+    enabled: Boolean(bookUnitId),
+  });
   const [reviewData, setReviewData] = useState<ReviewEditState>({
     unitId: "",
     contentSource: "",
@@ -28,6 +38,12 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { show } = useAlertStore();
   const kind =
     searchParams.get("tab") === "remark" ? PostKind.REMARK : PostKind.REVIEW;
+  const catalogContext = bookInfo
+    ? resolveCatalogEntryInteractionContext(bookInfo)
+    : null;
+  const primaryTargetUnitId = catalogContext?.primaryTargetUnitId ?? bookUnitId;
+  const variantUnitId =
+    searchParams.get("variantUnitId") ?? catalogContext?.variantUnitId;
 
   const scoreMutation = useUpsertScoreMutation();
   const postMutation = useCreatePostMutation({
@@ -71,7 +87,8 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     }
 
     postMutation.mutate({
-      targetUnitId: bookUnitId,
+      targetUnitId: primaryTargetUnitId,
+      variantUnitId,
       kind,
       status,
       content: markdownContentDoc(reviewData.contentSource || ""),

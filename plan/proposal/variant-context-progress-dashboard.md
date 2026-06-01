@@ -1,6 +1,6 @@
 ---
 title: Variant Context and Progress Dashboard
-status: active
+status: done
 created: 2026-06-01
 completed:
 supersededBy:
@@ -121,14 +121,14 @@ shelf-based flows feel continuous.
 
 ## 5. MAIN and VARIANT Page Query Behavior
 
-- [ ] 5.1 Update MAIN catalog pages to continue querying posts/reviews/shelves by
+- [x] 5.1 Update MAIN catalog pages to continue querying posts/reviews/shelves by
   primary `targetUnitId` / `containsUnitId`, rendering variant rows when present.
-- [ ] 5.2 Add or update VARIANT page sections to query posts/reviews/shelves by
+- [x] 5.2 Add or update VARIANT page sections to query posts/reviews/shelves by
   `variantUnitId` for "this edition/source" content.
-- [ ] 5.3 If a VARIANT page also shows MAIN-wide discussion, keep it as a
+- [x] 5.3 If a VARIANT page also shows MAIN-wide discussion, keep it as a
   separate section or tab that queries the VARIANT's `targetUnitId`; do not make
   `targetUnitId = variantUnitId` a normal feed path.
-- [ ] 5.4 Update app route/query helpers around book/review/shelf pages so the
+- [x] 5.4 Update app route/query helpers around book/review/shelf pages so the
   selected VARIANT can be submitted as `variantUnitId` while primary writes use
   the resolved MAIN target.
 

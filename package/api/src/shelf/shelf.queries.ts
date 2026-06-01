@@ -158,6 +158,7 @@ export function useCollectionStatusHydration(
 export const shelfQueries = {
   list: shelfListQuery,
   containingUnit: shelvesContainingUnitQuery,
+  variantContext: shelvesByVariantContextQuery,
   detail: shelfDetailQuery,
   byUser: shelvesByUserQuery,
   mine: userShelvesQuery,

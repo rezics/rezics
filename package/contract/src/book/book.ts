@@ -16,6 +16,7 @@ import { paginationLimitSchema } from "../pagination";
 import {
   aiDisclosureDetailsSchema,
   aiDisclosureModeSchema,
+  catalogEntryKindSchema,
   contentRatingSchema,
   publicUserSchema,
   unitTranslationDTOSchema,
@@ -47,6 +48,8 @@ export const bookDTOSchema = t.Object({
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
+  catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
+  targetUnitId: t.Optional(t.Nullable(t.String())),
 
   // Book extension fields
   isbn13: t.Optional(t.Nullable(t.String())),

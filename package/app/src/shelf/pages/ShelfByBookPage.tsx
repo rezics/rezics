@@ -5,6 +5,10 @@ import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  resolveCatalogEntryInteractionContext,
+  shelfListFiltersForCatalogEntry,
+} from "@/book-library/models/catalogEntryContext";
 import { ShelfCard } from "../components/ShelfCard";
 
 interface ShelfByBookPageProps {
@@ -17,11 +21,14 @@ export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
     ...bookQueries.detail(bookId),
     enabled: Boolean(bookId),
   });
-  const targetUnitId = bookInfo?.unitId ?? bookId;
+  const catalogContext = bookInfo
+    ? resolveCatalogEntryInteractionContext(bookInfo)
+    : null;
+  const shelfFilters = catalogContext
+    ? shelfListFiltersForCatalogEntry(catalogContext, { limit: 50 })
+    : { containsUnitId: bookId, limit: 50 };
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteQuery(
-      shelfInfiniteListQuery({ containsUnitId: targetUnitId, limit: 50 }),
-    );
+    useInfiniteQuery(shelfInfiniteListQuery(shelfFilters));
 
   const shelves = data?.pages.flatMap((page) => page.shelves) ?? [];
 

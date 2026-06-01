@@ -9,6 +9,7 @@ import { useReactionBarContext } from "./ReactionBarContext";
 
 export type ShelfActionProps = {
   targetUnitId: string;
+  variantUnitId?: string;
   /** Override the size from context. Rarely needed; prefer setting on the bar. */
   size?: EngagementSize;
   /** When the target is a review, the collection modal surfaces the review-specific dual-mode UI. */
@@ -28,6 +29,7 @@ function sizeToIconPx(size: EngagementSize): number {
 
 export const ShelfAction: React.FC<ShelfActionProps> = ({
   targetUnitId,
+  variantUnitId,
   size: sizeProp,
   isReview,
 }) => {
@@ -36,6 +38,7 @@ export const ShelfAction: React.FC<ShelfActionProps> = ({
   const isPill = ctx.variant === "pill";
   const { isAuthenticated, collection, auth, handleClick } = useShelfTrigger({
     targetUnitId,
+    variantUnitId,
   });
 
   return (

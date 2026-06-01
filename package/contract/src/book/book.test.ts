@@ -121,6 +121,16 @@ describe("bookDTOSchema", () => {
       }),
     ).toBe(true);
   });
+
+  test("accepts catalog MAIN/VARIANT context from the owning Unit", () => {
+    expect(
+      Value.Check(bookDTOSchema, {
+        unitId: "variant-1",
+        catalogEntryKind: "VARIANT",
+        targetUnitId: "main-1",
+      }),
+    ).toBe(true);
+  });
 });
 
 describe("createBookSchema", () => {

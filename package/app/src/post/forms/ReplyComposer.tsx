@@ -44,6 +44,7 @@ type ReplyComposerBaseProps = {
 
 export type ReplyComposerReplyModeProps = ReplyComposerBaseProps & {
   targetUnitId: string;
+  variantUnitId?: string;
   rootUnitId?: string;
   realmUnitId?: string | null;
   parentCommentUnitId?: string;
@@ -302,6 +303,7 @@ export const ReplyComposer = forwardRef<
   const isRealmPostMode = "realmUnitIds" in props;
   const realmUnitIds = isRealmPostMode ? props.realmUnitIds : undefined;
   const targetUnitId = isRealmPostMode ? undefined : props.targetUnitId;
+  const variantUnitId = isRealmPostMode ? undefined : props.variantUnitId;
   const rootUnitId = isRealmPostMode ? undefined : props.rootUnitId;
   const realmUnitId = isRealmPostMode ? undefined : props.realmUnitId;
   const parentCommentUnitId = isRealmPostMode
@@ -361,6 +363,7 @@ export const ReplyComposer = forwardRef<
       postMutation.mutate(
         {
           targetUnitId,
+          variantUnitId,
           kind: PostKind.POST,
           content,
           ...(options?.pollUnitId
@@ -383,6 +386,7 @@ export const ReplyComposer = forwardRef<
       realmUnitId,
       rootUnitId,
       targetUnitId,
+      variantUnitId,
     ],
   );
 

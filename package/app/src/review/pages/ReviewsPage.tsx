@@ -15,9 +15,13 @@ type Review = PostDTO;
 
 export interface ReviewsPageProps {
   bookUnitId?: string;
+  variantUnitId?: string;
 }
 
-export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
+export const ReviewsPage: React.FC<ReviewsPageProps> = ({
+  bookUnitId,
+  variantUnitId,
+}) => {
   const { t } = useTranslation(["book", "community"]);
   const ref = useRef<UniversalPaginatorHandle>(null);
   const targetUnitId = bookUnitId ?? "";
@@ -34,6 +38,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ bookUnitId }) => {
   const { data, isLoading } = usePostSearchQuery({
     kind,
     targetUnitId: targetUnitId || undefined,
+    variantUnitId,
     keyword: keyword || undefined,
     offset: start,
     limit: EXTERNAL_PAGE_SIZE,

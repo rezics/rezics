@@ -14,6 +14,10 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { ShelfByBookPreview } from "../components/ShelfByBookPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
+import {
+  postListFiltersForCatalogEntry,
+  resolveCatalogEntryInteractionContext,
+} from "../models/catalogEntryContext";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 
@@ -30,13 +34,23 @@ export const BookReviewPage: React.FC = () => {
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
 
+  const catalogContext = bookInfo
+    ? resolveCatalogEntryInteractionContext(bookInfo)
+    : null;
   const { data: reviewsData } = useQuery({
-    ...postQueries.list({
-      targetUnitId: bookId,
-      kind: PostKind.REVIEW,
-      limit: REVIEW_PREVIEW_LIMIT,
-    }),
-    enabled: Boolean(bookId),
+    ...postQueries.list(
+      catalogContext
+        ? postListFiltersForCatalogEntry(catalogContext, {
+            kind: PostKind.REVIEW,
+            limit: REVIEW_PREVIEW_LIMIT,
+          })
+        : {
+            targetUnitId: bookId,
+            kind: PostKind.REVIEW,
+            limit: REVIEW_PREVIEW_LIMIT,
+          },
+    ),
+    enabled: Boolean(catalogContext?.pageUnitId ?? bookId),
   });
 
   const sidebar = useMemo(
@@ -70,7 +84,8 @@ export const BookReviewPage: React.FC = () => {
       </div>
 
       <ShelfByBookPreview
-        bookId={bookInfo.unitId || ""}
+        bookId={catalogContext?.primaryTargetUnitId || bookInfo.unitId || ""}
+        variantUnitId={catalogContext?.variantUnitId}
         title={title}
         shelfNumber={SHELF_PREVIEW_LIMIT}
       />
@@ -88,7 +103,13 @@ export const BookReviewPage: React.FC = () => {
             onClick={() =>
               navigate({
                 to: "/review/new/$bookUnitId",
-                params: { bookUnitId: bookId },
+                params: {
+                  bookUnitId:
+                    catalogContext?.primaryTargetUnitId ?? bookInfo.unitId,
+                },
+                search: catalogContext?.variantUnitId
+                  ? { variantUnitId: catalogContext.variantUnitId }
+                  : undefined,
               })
             }
           >

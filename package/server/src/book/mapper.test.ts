@@ -16,6 +16,8 @@ function bookRow(overrides: Record<string, unknown> = {}) {
       licenseSlug: null,
       defaultLanguage: "en",
       isLanguageNeutral: false,
+      catalogEntryKind: "MAIN",
+      targetUnitId: null,
       translations: [],
       creditAttributions: [],
       publishedAt: null,
@@ -65,5 +67,20 @@ describe("mapBaseBookToDTO", () => {
       provider: "OpenAI",
       reviewedByHuman: true,
     });
+  });
+
+  test("projects catalog entry context from the owning Unit", () => {
+    const dto = mapBaseBookToDTO(
+      bookRow({
+        unit: {
+          ...bookRow().unit,
+          catalogEntryKind: "VARIANT",
+          targetUnitId: "main-1",
+        },
+      }),
+    );
+
+    expect(dto.catalogEntryKind).toBe("VARIANT");
+    expect(dto.targetUnitId).toBe("main-1");
   });
 });

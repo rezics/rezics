@@ -61,6 +61,8 @@ export function mapBaseBookToDTO(book: BookWithRelations): BookDTO {
     licenseSlug: resolveStoredLicenseSlug(unit.licenseSlug),
     defaultLanguage: (unit.defaultLanguage as Language) ?? undefined,
     isLanguageNeutral: unit.isLanguageNeutral,
+    catalogEntryKind: unit.catalogEntryKind,
+    targetUnitId: unit.targetUnitId,
 
     // Book extension fields
     isbn13: book.isbn13 ?? undefined,

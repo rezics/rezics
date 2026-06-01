@@ -97,6 +97,7 @@ export class CollectionService {
   async collect(userId: string, input: CollectInput): Promise<CollectResponse> {
     const {
       targetId,
+      variantUnitId,
       shelfIds,
       independent = false,
       tagUnitIds,
@@ -141,6 +142,7 @@ export class CollectionService {
               {
                 shelfId,
                 unitId: resolved.parentUnitId,
+                variantUnitId: variantUnitId ?? null,
                 kind: resolved.parentKind,
                 position,
               },
@@ -154,6 +156,13 @@ export class CollectionService {
             });
             isNew = true;
           }
+        } else if (variantUnitId !== undefined) {
+          await tx.shelfUnit.update({
+            where: {
+              shelfId_unitId: { shelfId, unitId: resolved.parentUnitId },
+            },
+            data: { variantUnitId },
+          });
         }
 
         if (resolved.reviewUnitId && resolved.reviewKind) {

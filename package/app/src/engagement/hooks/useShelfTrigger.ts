@@ -5,6 +5,7 @@ import { useAuth } from "@/user/pages/useAuth";
 
 export type UseShelfTriggerArgs = {
   targetUnitId: string;
+  variantUnitId?: string;
 };
 
 export type UseShelfTriggerReturn = {
@@ -16,9 +17,10 @@ export type UseShelfTriggerReturn = {
 
 export function useShelfTrigger({
   targetUnitId,
+  variantUnitId,
 }: UseShelfTriggerArgs): UseShelfTriggerReturn {
   const { isAuthenticated } = useAuth();
-  const collection = useCollectionModal(targetUnitId);
+  const collection = useCollectionModal(targetUnitId, { variantUnitId });
   const auth = useAuthModal("login");
 
   const handleClick = (event: React.MouseEvent) => {

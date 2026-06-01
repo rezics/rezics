@@ -7,7 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useSystemShelfRecoveryToast } from "./useSystemShelfRecoveryToast";
 
-export function useCollectionModal(unitId: string) {
+export function useCollectionModal(
+  unitId: string,
+  options?: { variantUnitId?: string },
+) {
   const [open, setOpen] = useState(false);
 
   const shelvesQuery = useQuery({
@@ -39,6 +42,7 @@ export function useCollectionModal(unitId: string) {
       try {
         await collectMutation.mutateAsync({
           targetId: unitId,
+          variantUnitId: options?.variantUnitId,
           shelfIds,
           independent,
           searchText,
@@ -49,7 +53,7 @@ export function useCollectionModal(unitId: string) {
         // and re-clicks Save themselves after retry succeeds.
       }
     },
-    [unitId, collectMutation, handleClose],
+    [unitId, options?.variantUnitId, collectMutation, handleClose],
   );
 
   return {

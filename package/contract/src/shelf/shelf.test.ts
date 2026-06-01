@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   addShelfUnitSchema,
+  collectInputSchema,
   shelfDTOSchema,
   shelfListBodySchema,
   shelfListQuerySchema,
@@ -78,6 +79,13 @@ describe("shelf containment contract fields", () => {
       Value.Check(shelfUnitsQuerySchema, {
         variantUnitId: "variant-1",
         limit: 20,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(collectInputSchema, {
+        targetId: "main-1",
+        variantUnitId: "variant-1",
+        shelfIds: ["shelf-1"],
       }),
     ).toBe(true);
   });
