@@ -10,22 +10,65 @@ import type { PrismaClient } from "#/prisma/generated/client.js";
 export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   console.log("[Reset] Resetting database...");
 
-  // Group 1: Leaf tables with no dependents
+  // Group 1: Leaf tables with no dependents or only id-shaped references.
   await Promise.all([
+    prisma.staffAuditLog.deleteMany(),
+    prisma.userBlock.deleteMany(),
+    prisma.emailVerificationContract.deleteMany(),
     prisma.apiToken.deleteMany(),
-    prisma.feedback.deleteMany(),
     prisma.tagVote.deleteMany(),
+    prisma.unitAliasVote.deleteMany(),
+    prisma.pollVote.deleteMany(),
     prisma.subscription.deleteMany(),
+    prisma.userContentNodeProgress.deleteMany(),
+    prisma.userUnitProgress.deleteMany(),
+    prisma.userUnitCollection.deleteMany(),
+    prisma.userTagApplication.deleteMany(),
+    prisma.realmTagApplicationVote.deleteMany(),
+    prisma.realmRuleAcknowledgement.deleteMany(),
+    prisma.moderationCaseEvent.deleteMany(),
+    prisma.realmModerationEvent.deleteMany(),
+    prisma.contentModerationState.deleteMany(),
+    prisma.realmContentModeration.deleteMany(),
+    prisma.accountEnforcement.deleteMany(),
+    prisma.staffGrant.deleteMany(),
+    prisma.realmCapabilityGrant.deleteMany(),
+    prisma.unitCollaborator.deleteMany(),
+    prisma.unitFieldLock.deleteMany(),
+    prisma.historyOutbox.deleteMany(),
+    prisma.unitHistoryClock.deleteMany(),
+  ]);
+
+  // Group 2: Moderation and feedback records.
+  await Promise.all([
+    prisma.realmModerationQueueItem.deleteMany(),
+    prisma.moderationCase.deleteMany(),
+  ]);
+  await prisma.feedback.deleteMany();
+
+  // Group 3: Attribution and external-reference leaves.
+  await Promise.all([
+    prisma.creditAttributionEvidence.deleteMany(),
+    prisma.gameSystemRequirement.deleteMany(),
+  ]);
+  await Promise.all([
+    prisma.unitExternalRef.deleteMany(),
     prisma.subjectAttribution.deleteMany(),
     prisma.creditAttribution.deleteMany(),
+  ]);
+
+  // Group 4: Poll, score, and tag leaves.
+  await Promise.all([
     prisma.scoreRealmField.deleteMany(),
     prisma.scoreAggregate.deleteMany(),
   ]);
+  await prisma.pollOption.deleteMany();
 
-  // Group 2: Aggregate / junction leaves
+  // Group 5: Aggregate / junction leaves.
   await Promise.all([prisma.realmTagApplication.deleteMany()]);
+  await prisma.realmTagContext.deleteMany();
 
-  // Group 3: Realm + shelf + tag junction
+  // Group 6: Realm + shelf + tag junctions.
   await prisma.shelfUnitRelation.deleteMany();
   await Promise.all([
     prisma.unitRealm.deleteMany(),
@@ -34,44 +77,55 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.unitTag.deleteMany(),
   ]);
 
-  // Group 4: Extension children
+  // Group 7: Extension children.
   // ContentStructureNode rows hold FKs to ContentStructure; delete them first
   // so the parent delete in this group doesn't trip a constraint.
+  await prisma.seriesContentIndex.deleteMany();
+  await prisma.contentStructureAnchor.deleteMany();
   await prisma.contentStructureNode.deleteMany();
   await Promise.all([
     prisma.contentStructure.deleteMany(),
     prisma.gamePlatform.deleteMany(),
+    prisma.sourceSite.deleteMany(),
   ]);
 
-  // Group 5: Type extensions (1:1 with Unit)
+  // Group 8: Type extensions (1:1 with Unit).
   // Post must be deleted before ScoreEntry (FK constraint)
+  await prisma.commentPromotion.deleteMany();
+  await prisma.comment.deleteMany();
   await prisma.post.deleteMany();
   await prisma.scoreEntry.deleteMany();
   await Promise.all([
+    prisma.poll.deleteMany(),
     prisma.shelf.deleteMany(),
+    prisma.series.deleteMany(),
     prisma.realm.deleteMany(),
     prisma.book.deleteMany(),
     prisma.game.deleteMany(),
     prisma.media.deleteMany(),
     prisma.link.deleteMany(),
+    prisma.zone.deleteMany(),
+    prisma.entity.deleteMany(),
   ]);
 
-  // Group 6: Translation layer
+  // Group 9: Translation layer.
   await Promise.all([
+    prisma.contentTranslation.deleteMany(),
+    prisma.unitAlias.deleteMany(),
     prisma.unitTranslation.deleteMany(),
     prisma.unitSupportLanguage.deleteMany(),
   ]);
 
-  // Group 7: Core
+  // Group 10: Core.
   // Drop SlugScope rows first — they reference SCOPE Units; Unit.deleteMany
   // cascades only what Prisma models, but SlugScope.unitId has no FK.
   await prisma.slugScope.deleteMany();
   await prisma.unit.deleteMany();
 
-  // Group 8: Identity + entity
-  await Promise.all([prisma.user.deleteMany(), prisma.entity.deleteMany()]);
+  // Group 11: Identity.
+  await prisma.user.deleteMany();
 
-  // Group 9: Platform misc
+  // Group 12: Platform misc.
   await Promise.all([prisma.echoKV.deleteMany(), prisma.jwks.deleteMany()]);
   await prisma.jwtService.deleteMany();
 

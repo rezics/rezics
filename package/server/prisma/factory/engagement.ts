@@ -113,7 +113,7 @@ async function seedFollows(
   const data: {
     id: string;
     subscriberUnitId: string;
-    targetUnitId: string;
+    subscribedUnitId: string;
     channels: string[];
   }[] = [];
 
@@ -130,7 +130,7 @@ async function seedFollows(
       data.push({
         id: randomUUID(),
         subscriberUnitId: user.userId,
-        targetUnitId: target.userId,
+        subscribedUnitId: target.userId,
         channels: ["*"],
       });
     }
@@ -149,16 +149,16 @@ async function seedFollows(
   const subscriberCounts = new Map<string, number>();
   for (const f of data) {
     followerCounts.set(
-      f.targetUnitId,
-      (followerCounts.get(f.targetUnitId) ?? 0) + 1,
+      f.subscribedUnitId,
+      (followerCounts.get(f.subscribedUnitId) ?? 0) + 1,
     );
     followingCounts.set(
       f.subscriberUnitId,
       (followingCounts.get(f.subscriberUnitId) ?? 0) + 1,
     );
     subscriberCounts.set(
-      f.targetUnitId,
-      (subscriberCounts.get(f.targetUnitId) ?? 0) + 1,
+      f.subscribedUnitId,
+      (subscriberCounts.get(f.subscribedUnitId) ?? 0) + 1,
     );
   }
 

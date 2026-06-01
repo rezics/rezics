@@ -9,6 +9,7 @@ import {
 } from "@rezics/contract";
 import type { Prisma, PrismaClient } from "../generated/client.js";
 import { PostKind, UnitStatus, UnitType } from "../generated/client.js";
+import { rebuildFactoryContentStructureAnchors } from "./content-structure.js";
 import { getRandomBookCover } from "./data.js";
 import { generateBookExtra, generateTranslations } from "./generators.js";
 import type { CountSpec, SeedCtx } from "./strategy.js";
@@ -476,6 +477,7 @@ async function insertNodeRows(
       data: rows.slice(i, i + NODE_BATCH_SIZE),
     });
   }
+  await rebuildFactoryContentStructureAnchors(prisma, bookUnitId);
 
   return rows.filter((row) => !row.noContent).length;
 }
@@ -523,6 +525,9 @@ export async function insertMultiLinkNodes(
     await prisma.contentStructureNode.createMany({
       data: extras.slice(i, i + NODE_BATCH_SIZE),
     });
+  }
+  if (extras.length > 0) {
+    await rebuildFactoryContentStructureAnchors(prisma, bookUnitId);
   }
   return extras.length;
 }

@@ -96,8 +96,122 @@ export async function createFactoryContentStructureNodes(
   visit(nodes, null);
   if (rows.length > 0) {
     await prisma.contentStructureNode.createMany({ data: rows });
+    await rebuildFactoryContentStructureAnchors(prisma, ownerUnitId);
   }
   return rows;
+}
+
+type FactoryContentStructureAnchorSourceNode = {
+  id: string;
+  parentId: string | null;
+  sortKey: string;
+  contentUnitId: string | null;
+  title: string;
+};
+
+export type FactoryContentStructureAnchorWrite = {
+  nodeId: string;
+  ownerUnitId: string;
+  contentUnitId: string;
+  parentNodeId: string | null;
+  ancestorNodeIds: string[];
+  path: string[];
+  depth: number;
+  sortKey: string;
+  sortPath: string;
+  titlePath: string[];
+};
+
+export function buildFactoryContentStructureAnchorRows(
+  ownerUnitId: string,
+  rows: readonly FactoryContentStructureAnchorSourceNode[],
+): FactoryContentStructureAnchorWrite[] {
+  const childrenByParentId = new Map<
+    string | null,
+    FactoryContentStructureAnchorSourceNode[]
+  >();
+  for (const row of rows) {
+    const bucket = childrenByParentId.get(row.parentId) ?? [];
+    bucket.push(row);
+    childrenByParentId.set(row.parentId, bucket);
+  }
+  for (const bucket of childrenByParentId.values()) {
+    bucket.sort((a, b) =>
+      a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0,
+    );
+  }
+
+  const anchors: FactoryContentStructureAnchorWrite[] = [];
+
+  function visit(
+    row: FactoryContentStructureAnchorSourceNode,
+    ancestorNodeIds: string[],
+    ancestorSortKeys: string[],
+    ancestorTitles: string[],
+  ): void {
+    const path = [...ancestorNodeIds, row.id];
+    const titlePath = [...ancestorTitles, row.title];
+    const sortPath = [...ancestorSortKeys, row.sortKey].join(".");
+    if (row.contentUnitId) {
+      anchors.push({
+        nodeId: row.id,
+        ownerUnitId,
+        contentUnitId: row.contentUnitId,
+        parentNodeId: row.parentId,
+        ancestorNodeIds,
+        path,
+        depth: ancestorNodeIds.length,
+        sortKey: row.sortKey,
+        sortPath,
+        titlePath,
+      });
+    }
+
+    for (const child of childrenByParentId.get(row.id) ?? []) {
+      visit(child, path, [...ancestorSortKeys, row.sortKey], titlePath);
+    }
+  }
+
+  for (const root of childrenByParentId.get(null) ?? []) {
+    visit(root, [], [], []);
+  }
+
+  return anchors;
+}
+
+export async function rebuildFactoryContentStructureAnchors(
+  prisma: PrismaClient,
+  ownerUnitId: string,
+): Promise<void> {
+  const rows = await prisma.contentStructureNode.findMany({
+    where: { ownerUnitId, isDeleted: false },
+    select: {
+      id: true,
+      parentId: true,
+      sortKey: true,
+      contentUnitId: true,
+      title: true,
+    },
+  });
+  const anchors = buildFactoryContentStructureAnchorRows(ownerUnitId, rows);
+
+  await prisma.contentStructureAnchor.deleteMany({ where: { ownerUnitId } });
+  if (anchors.length === 0) return;
+
+  await prisma.contentStructureAnchor.createMany({
+    data: anchors.map((anchor) => ({
+      nodeId: anchor.nodeId,
+      ownerUnitId: anchor.ownerUnitId,
+      contentUnitId: anchor.contentUnitId,
+      parentNodeId: anchor.parentNodeId,
+      ancestorNodeIds: anchor.ancestorNodeIds,
+      path: anchor.path,
+      depth: anchor.depth,
+      sortKey: anchor.sortKey,
+      sortPath: anchor.sortPath,
+      titlePath: anchor.titlePath,
+    })),
+  });
 }
 
 export async function createFactoryReleasePartStructure(

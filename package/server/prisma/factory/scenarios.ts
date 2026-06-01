@@ -898,7 +898,7 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
         defaultLanguage: DEFAULT_LANGUAGE,
         translations: [
           {
-            language: DEFAULT_LANGUAGE,
+            language: LANGUAGES.EN,
             title: `Factory Wiki: ${entry.en}`,
             body:
               index === 2
