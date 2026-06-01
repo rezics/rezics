@@ -216,9 +216,12 @@ export const dashboardService = {
     ]);
     // Progress library rows are progress-owned; shelf links are optional
     // projections for sharing/organization, not the source of truth.
-    const libraryProgress = await section(() =>
-      progressService.listLibrary(userId, { limit: CONTINUE_READING_LIMIT }),
-    );
+    const libraryProgress = await section(async () => {
+      const page = await progressService.listLibrary(userId, {
+        limit: CONTINUE_READING_LIMIT,
+      });
+      return page.rows;
+    });
 
     return {
       continueReading,
