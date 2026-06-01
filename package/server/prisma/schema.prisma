@@ -179,6 +179,10 @@ model Unit {
   /// the main catalog Unit; POST rows use this as the owning Post extension's
   /// aggregation target.
   ///
+  /// Normal interactions that start from a VARIANT must target the VARIANT's
+  /// main catalog target. Only progress and rating may target a VARIANT
+  /// directly.
+  ///
   /// This is not ownership, containment, ordering, discussion topology, realm
   /// membership, moderation state, or a generic edge table. Rows that own those
   /// domain endpoints must use domain-specific field names.
