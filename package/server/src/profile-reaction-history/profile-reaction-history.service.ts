@@ -1,4 +1,5 @@
 import { mainMarkdownSource } from "@rezics/contract";
+import { parseReactionScopeKey } from "@rezics/contract/reaction";
 import { prisma, type UnitType } from "#/prisma/client";
 import {
   listByUser,
@@ -28,6 +29,7 @@ export interface ProfileReactionActor {
 export interface ProfileReactionGivenItem {
   id: string;
   reaction: string;
+  scopeKey: string;
   createdAt: string;
   target: ProfileReactionTarget | null;
 }
@@ -41,7 +43,19 @@ export interface ProfileReactionListResult<T> {
   nextCursor: string | null;
 }
 
-function buildHref(type: UnitType, id: string): string {
+function buildHref(
+  type: UnitType,
+  id: string,
+  scopeKey?: string,
+  realmSlugById?: Map<string, string | null>,
+): string {
+  const scope = scopeKey ? parseReactionScopeKey(scopeKey) : null;
+  if (type === "POST" && scope?.kind === "realm") {
+    const realmSlug = realmSlugById?.get(scope.realmUnitId);
+    return realmSlug
+      ? `/r/${realmSlug}/post/${id}`
+      : `/realm/${scope.realmUnitId}/post/${id}`;
+  }
   switch (type) {
     case "BOOK":
       return `/book/${id}`;
@@ -64,6 +78,10 @@ function unitKind(type: UnitType): string {
   return type.toLowerCase();
 }
 
+function targetScopeMapKey(targetId: string, scopeKey?: string): string {
+  return `${targetId}:${scopeKey ?? ""}`;
+}
+
 function snippet(text: string | null | undefined): string | undefined {
   if (!text) return undefined;
   const trimmed = text.trim();
@@ -73,32 +91,61 @@ function snippet(text: string | null | undefined): string | undefined {
 }
 
 async function loadTargets(
-  unitIds: string[],
-): Promise<Map<string, ProfileReactionTarget>> {
+  rows: Array<{ targetId: string; scopeKey?: string }>,
+) {
+  const unitIds = Array.from(new Set(rows.map((row) => row.targetId)));
   const map = new Map<string, ProfileReactionTarget>();
   if (unitIds.length === 0) return map;
+  const realmIds = Array.from(
+    new Set(
+      rows.flatMap((row) => {
+        const scope = row.scopeKey ? parseReactionScopeKey(row.scopeKey) : null;
+        return scope?.kind === "realm" ? [scope.realmUnitId] : [];
+      }),
+    ),
+  );
 
-  const units = await prisma.unit.findMany({
-    where: { id: { in: unitIds } },
-    select: {
-      id: true,
-      type: true,
-      translations: {
-        select: { title: true, description: true },
-        take: 1,
+  const [units, realms] = await Promise.all([
+    prisma.unit.findMany({
+      where: { id: { in: unitIds } },
+      select: {
+        id: true,
+        type: true,
+        translations: {
+          select: { title: true, description: true },
+          take: 1,
+        },
       },
-    },
-  });
+    }),
+    realmIds.length > 0
+      ? prisma.unit.findMany({
+          where: { id: { in: realmIds }, type: "REALM" },
+          select: { id: true, slug: true },
+        })
+      : Promise.resolve([]),
+  ]);
+  const realmSlugById = new Map(realms.map((realm) => [realm.id, realm.slug]));
+  const scopeKeysByTargetId = new Map<string, Set<string | undefined>>();
+  for (const row of rows) {
+    const scopeKeys = scopeKeysByTargetId.get(row.targetId) ?? new Set();
+    scopeKeys.add(row.scopeKey);
+    scopeKeysByTargetId.set(row.targetId, scopeKeys);
+  }
 
   for (const u of units) {
     const tr = u.translations[0];
-    map.set(u.id, {
+    const base = {
       unitId: u.id,
       kind: unitKind(u.type),
       title: tr?.title ?? undefined,
       snippet: snippet(mainMarkdownSource(tr?.description)),
-      href: buildHref(u.type, u.id),
-    });
+    };
+    for (const scopeKey of scopeKeysByTargetId.get(u.id) ?? [undefined]) {
+      map.set(targetScopeMapKey(u.id, scopeKey), {
+        ...base,
+        href: buildHref(u.type, u.id, scopeKey, realmSlugById),
+      });
+    }
   }
   return map;
 }
@@ -175,14 +222,15 @@ export class ProfileReactionHistoryService {
       limit: opts.limit,
     });
 
-    const targets = await loadTargets(raw.items.map((r) => r.targetId));
+    const targets = await loadTargets(raw.items);
 
     return {
       items: raw.items.map((r) => ({
         id: r.id,
         reaction: r.reaction,
+        scopeKey: r.scopeKey,
         createdAt: r.createdAt,
-        target: targets.get(r.targetId) ?? null,
+        target: targets.get(targetScopeMapKey(r.targetId, r.scopeKey)) ?? null,
       })),
       nextCursor: raw.nextCursor,
     };
@@ -249,10 +297,9 @@ export class ProfileReactionHistoryService {
       nextCursor = encodeMergedCursor(last.createdAt, last.id);
     }
 
-    const targetIds = Array.from(new Set(sliced.map((r) => r.targetId)));
     const actorIds = Array.from(new Set(sliced.map((r) => r.userId)));
     const [targets, actors] = await Promise.all([
-      loadTargets(targetIds),
+      loadTargets(sliced),
       loadActors(actorIds),
     ]);
 
@@ -263,9 +310,11 @@ export class ProfileReactionHistoryService {
         {
           id: r.id,
           reaction: r.reaction,
+          scopeKey: r.scopeKey,
           createdAt: r.createdAt,
           actor,
-          target: targets.get(r.targetId) ?? null,
+          target:
+            targets.get(targetScopeMapKey(r.targetId, r.scopeKey)) ?? null,
         },
       ];
     });

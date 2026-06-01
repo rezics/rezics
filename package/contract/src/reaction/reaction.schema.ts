@@ -1,4 +1,8 @@
 import { t } from "elysia";
+import {
+  DIRECT_REACTION_SCOPE_KEY,
+  type ReactionScopeKey,
+} from "./reaction.scope";
 
 export const allowedReactionKindSchema = t.Union([
   t.Literal("like"),
@@ -18,25 +22,30 @@ export type KnownReactionKind = (typeof knownReactionKindSchema)["static"];
 export const createSchema = t.Object({
   targetId: t.String(),
   reaction: allowedReactionKindSchema,
+  scopeKey: t.Optional(t.String()),
 });
 
 export const deleteQuerySchema = t.Object({
   targetId: t.String(),
   reaction: allowedReactionKindSchema,
+  scopeKey: t.Optional(t.String()),
 });
 
 export const summaryQuerySchema = t.Object({
   targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+  scopeKey: t.Optional(t.String()),
 });
 
 export const myQuerySchema = t.Object({
   targetIds: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+  scopeKey: t.Optional(t.String()),
 });
 
 /** GET /reaction/given query parameters. */
 export const givenQuerySchema = t.Object({
   userId: t.String(),
   reactions: t.Optional(t.String()),
+  scopeKey: t.Optional(t.String()),
   cursor: t.Optional(t.String()),
   limit: t.Optional(t.Numeric()),
 });
@@ -46,6 +55,7 @@ const reactionRowSchema = t.Object({
   userId: t.String(),
   targetId: t.String(),
   reaction: t.String(),
+  scopeKey: t.String(),
   createdAt: t.String(),
 });
 
@@ -54,3 +64,11 @@ export const givenResponseSchema = t.Object({
   nextCursor: t.Union([t.String(), t.Null()]),
 });
 export type GivenResponse = (typeof givenResponseSchema)["static"];
+
+export function normalizeReactionScopeKey(
+  scopeKey: ReactionScopeKey | null | undefined,
+): ReactionScopeKey {
+  return scopeKey && scopeKey.trim().length > 0
+    ? scopeKey
+    : DIRECT_REACTION_SCOPE_KEY;
+}

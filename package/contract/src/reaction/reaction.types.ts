@@ -3,6 +3,7 @@ export interface ReactionDto {
   userId: string;
   targetId: string;
   reaction: string;
+  scopeKey: string;
   createdAt: string;
 }
 

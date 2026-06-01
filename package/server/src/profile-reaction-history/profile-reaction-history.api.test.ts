@@ -18,6 +18,7 @@ interface FakeUser {
 interface FakeUnit {
   id: string;
   type: string;
+  slug?: string | null;
   userId: string | null;
   translations: Array<{ title: string | null; description: string | null }>;
 }
@@ -27,6 +28,7 @@ interface FakeReactionRow {
   userId: string;
   targetId: string;
   reaction: string;
+  scopeKey: string;
   createdAt: string;
 }
 
@@ -49,19 +51,25 @@ mock.module("#/prisma/client", () => ({
   prisma: {
     user: {
       findUnique: async ({ where, select }: any) => {
-        const u = users.get(where.userId);
+        const u = users.get(where.unitId ?? where.userId);
         if (!u) return null;
         if (select?.userId && Object.keys(select).length === 1) {
           return { userId: u.userId };
         }
-        return u;
+        return { ...u, unitId: u.userId };
       },
       findMany: async ({ where, select: _select }: any) => {
-        if (where?.userId?.in) {
-          const set = new Set<string>(where.userId.in);
-          return Array.from(users.values()).filter((u) => set.has(u.userId));
+        const ids = where?.unitId?.in ?? where?.userId?.in;
+        if (ids) {
+          const set = new Set<string>(ids);
+          return Array.from(users.values())
+            .filter((u) => set.has(u.userId))
+            .map((u) => ({ ...u, unitId: u.userId }));
         }
-        return Array.from(users.values());
+        return Array.from(users.values()).map((u) => ({
+          ...u,
+          unitId: u.userId,
+        }));
       },
     },
     unit: {
@@ -74,9 +82,13 @@ mock.module("#/prisma/client", () => ({
           const set = new Set<string>(where.id.in);
           rows = rows.filter((u) => set.has(u.id));
         }
+        if (where?.type) {
+          rows = rows.filter((u) => u.type === where.type);
+        }
         return rows.map((u) => ({
           id: u.id,
           type: u.type,
+          slug: u.slug ?? null,
           userId: u.userId,
           translations: u.translations,
         }));
@@ -92,6 +104,10 @@ mock.module("@/middleware", () => ({
     if (auth === "Bearer bob") return { userId: "bob" };
     return null;
   },
+}));
+
+mock.module("@/infra/slug-scopes", () => ({
+  requireSlugScopeId: () => "user-scope",
 }));
 
 mock.module("@/reaction-boundary/reaction-boundary.client", () => ({
@@ -150,6 +166,7 @@ function row(
     userId: "u-actor",
     targetId: "t-1",
     reaction: "like",
+    scopeKey: "direct",
     createdAt: `2026-01-01T00:00:${String(i).padStart(2, "0")}.000Z`,
     ...partial,
   };
@@ -233,6 +250,39 @@ describe("GET /profile/:userId/reaction/given", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.items[0].target).toBeNull();
+  });
+
+  test("links realm-scoped post reactions to the realm-context route", async () => {
+    resetState();
+    users.set("u1", { userId: "u1" });
+    units.set("realm-1", {
+      id: "realm-1",
+      type: "REALM",
+      slug: "fiction",
+      userId: null,
+      translations: [],
+    });
+    units.set("post-1", {
+      id: "post-1",
+      type: "POST",
+      userId: "someone-else",
+      translations: [{ title: "Scoped", description: null }],
+    });
+    givenByUser.set("u1", [
+      row(1, {
+        id: "r1",
+        userId: "u1",
+        targetId: "post-1",
+        scopeKey: "realm:realm-1",
+      }),
+    ]);
+
+    const res = await api.handle(
+      new Request("http://localhost/profile/u1/reaction/given"),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.items[0].target.href).toBe("/r/fiction/post/post-1");
   });
 });
 

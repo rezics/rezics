@@ -133,7 +133,9 @@ import { Route as MainLayoutUserMeSettingBlockedRouteImport } from './routes/_ma
 import { Route as MainLayoutUserMeSettingAccountRouteImport } from './routes/_mainLayout/user/me/setting/account'
 import { Route as MainLayoutUserMeEntityNewRouteImport } from './routes/_mainLayout/user/me/entity/new'
 import { Route as MainLayoutUUserSlugShelfSlugRouteImport } from './routes/_mainLayout/u/$userSlug/shelf/$slug'
+import { Route as MainLayoutRealmRealmIdPostPostUnitIdRouteImport } from './routes/_mainLayout/realm/$realmId/post/$postUnitId'
 import { Route as MainLayoutRRealmSlugShelfSlugRouteImport } from './routes/_mainLayout/r/$realmSlug/shelf/$slug'
+import { Route as MainLayoutRRealmSlugPostPostUnitIdRouteImport } from './routes/_mainLayout/r/$realmSlug/post/$postUnitId'
 import { Route as MainLayoutPostRootPostUnitIdContinueUnitIdRouteImport } from './routes/_mainLayout/post/$rootPostUnitId/continue.$unitId'
 import { Route as EditorBookBookIdEditTagRouteImport } from './routes/_editor/book/$bookId/edit/tag'
 import { Route as EditorBookBookIdEditHistoryRouteImport } from './routes/_editor/book/$bookId/edit/history'
@@ -842,10 +844,22 @@ const MainLayoutUUserSlugShelfSlugRoute =
     path: '/shelf/$slug',
     getParentRoute: () => MainLayoutUUserSlugRoute,
   } as any)
+const MainLayoutRealmRealmIdPostPostUnitIdRoute =
+  MainLayoutRealmRealmIdPostPostUnitIdRouteImport.update({
+    id: '/realm/$realmId/post/$postUnitId',
+    path: '/realm/$realmId/post/$postUnitId',
+    getParentRoute: () => MainLayoutRoute,
+  } as any)
 const MainLayoutRRealmSlugShelfSlugRoute =
   MainLayoutRRealmSlugShelfSlugRouteImport.update({
     id: '/shelf/$slug',
     path: '/shelf/$slug',
+    getParentRoute: () => MainLayoutRRealmSlugRoute,
+  } as any)
+const MainLayoutRRealmSlugPostPostUnitIdRoute =
+  MainLayoutRRealmSlugPostPostUnitIdRouteImport.update({
+    id: '/post/$postUnitId',
+    path: '/post/$postUnitId',
     getParentRoute: () => MainLayoutRRealmSlugRoute,
   } as any)
 const MainLayoutPostRootPostUnitIdContinueUnitIdRoute =
@@ -1044,7 +1058,9 @@ export interface FileRoutesByFullPath {
   '/book/$bookId/edit/history': typeof EditorBookBookIdEditHistoryRouteWithChildren
   '/book/$bookId/edit/tag': typeof EditorBookBookIdEditTagRoute
   '/post/$rootPostUnitId/continue/$unitId': typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
+  '/r/$realmSlug/post/$postUnitId': typeof MainLayoutRRealmSlugPostPostUnitIdRoute
   '/r/$realmSlug/shelf/$slug': typeof MainLayoutRRealmSlugShelfSlugRoute
+  '/realm/$realmId/post/$postUnitId': typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
   '/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
   '/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
@@ -1173,7 +1189,9 @@ export interface FileRoutesByTo {
   '/book/$bookId/edit/chapter': typeof EditorBookBookIdEditChapterRoute
   '/book/$bookId/edit/tag': typeof EditorBookBookIdEditTagRoute
   '/post/$rootPostUnitId/continue/$unitId': typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
+  '/r/$realmSlug/post/$postUnitId': typeof MainLayoutRRealmSlugPostPostUnitIdRoute
   '/r/$realmSlug/shelf/$slug': typeof MainLayoutRRealmSlugShelfSlugRoute
+  '/realm/$realmId/post/$postUnitId': typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
   '/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
   '/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
@@ -1315,7 +1333,9 @@ export interface FileRoutesById {
   '/_editor/book/$bookId/edit/history': typeof EditorBookBookIdEditHistoryRouteWithChildren
   '/_editor/book/$bookId/edit/tag': typeof EditorBookBookIdEditTagRoute
   '/_mainLayout/post/$rootPostUnitId/continue/$unitId': typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
+  '/_mainLayout/r/$realmSlug/post/$postUnitId': typeof MainLayoutRRealmSlugPostPostUnitIdRoute
   '/_mainLayout/r/$realmSlug/shelf/$slug': typeof MainLayoutRRealmSlugShelfSlugRoute
+  '/_mainLayout/realm/$realmId/post/$postUnitId': typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
   '/_mainLayout/u/$userSlug/shelf/$slug': typeof MainLayoutUUserSlugShelfSlugRoute
   '/_mainLayout/user/me/entity/new': typeof MainLayoutUserMeEntityNewRoute
   '/_mainLayout/user/me/setting/account': typeof MainLayoutUserMeSettingAccountRoute
@@ -1456,7 +1476,9 @@ export interface FileRouteTypes {
     | '/book/$bookId/edit/history'
     | '/book/$bookId/edit/tag'
     | '/post/$rootPostUnitId/continue/$unitId'
+    | '/r/$realmSlug/post/$postUnitId'
     | '/r/$realmSlug/shelf/$slug'
+    | '/realm/$realmId/post/$postUnitId'
     | '/u/$userSlug/shelf/$slug'
     | '/user/me/entity/new'
     | '/user/me/setting/account'
@@ -1585,7 +1607,9 @@ export interface FileRouteTypes {
     | '/book/$bookId/edit/chapter'
     | '/book/$bookId/edit/tag'
     | '/post/$rootPostUnitId/continue/$unitId'
+    | '/r/$realmSlug/post/$postUnitId'
     | '/r/$realmSlug/shelf/$slug'
+    | '/realm/$realmId/post/$postUnitId'
     | '/u/$userSlug/shelf/$slug'
     | '/user/me/entity/new'
     | '/user/me/setting/account'
@@ -1726,7 +1750,9 @@ export interface FileRouteTypes {
     | '/_editor/book/$bookId/edit/history'
     | '/_editor/book/$bookId/edit/tag'
     | '/_mainLayout/post/$rootPostUnitId/continue/$unitId'
+    | '/_mainLayout/r/$realmSlug/post/$postUnitId'
     | '/_mainLayout/r/$realmSlug/shelf/$slug'
+    | '/_mainLayout/realm/$realmId/post/$postUnitId'
     | '/_mainLayout/u/$userSlug/shelf/$slug'
     | '/_mainLayout/user/me/entity/new'
     | '/_mainLayout/user/me/setting/account'
@@ -2630,11 +2656,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainLayoutUUserSlugShelfSlugRouteImport
       parentRoute: typeof MainLayoutUUserSlugRoute
     }
+    '/_mainLayout/realm/$realmId/post/$postUnitId': {
+      id: '/_mainLayout/realm/$realmId/post/$postUnitId'
+      path: '/realm/$realmId/post/$postUnitId'
+      fullPath: '/realm/$realmId/post/$postUnitId'
+      preLoaderRoute: typeof MainLayoutRealmRealmIdPostPostUnitIdRouteImport
+      parentRoute: typeof MainLayoutRoute
+    }
     '/_mainLayout/r/$realmSlug/shelf/$slug': {
       id: '/_mainLayout/r/$realmSlug/shelf/$slug'
       path: '/shelf/$slug'
       fullPath: '/r/$realmSlug/shelf/$slug'
       preLoaderRoute: typeof MainLayoutRRealmSlugShelfSlugRouteImport
+      parentRoute: typeof MainLayoutRRealmSlugRoute
+    }
+    '/_mainLayout/r/$realmSlug/post/$postUnitId': {
+      id: '/_mainLayout/r/$realmSlug/post/$postUnitId'
+      path: '/post/$postUnitId'
+      fullPath: '/r/$realmSlug/post/$postUnitId'
+      preLoaderRoute: typeof MainLayoutRRealmSlugPostPostUnitIdRouteImport
       parentRoute: typeof MainLayoutRRealmSlugRoute
     }
     '/_mainLayout/post/$rootPostUnitId/continue/$unitId': {
@@ -2903,11 +2943,14 @@ const MainLayoutUserMeRouteRouteWithChildren =
 
 interface MainLayoutRRealmSlugRouteChildren {
   MainLayoutRRealmSlugManageRoute: typeof MainLayoutRRealmSlugManageRoute
+  MainLayoutRRealmSlugPostPostUnitIdRoute: typeof MainLayoutRRealmSlugPostPostUnitIdRoute
   MainLayoutRRealmSlugShelfSlugRoute: typeof MainLayoutRRealmSlugShelfSlugRoute
 }
 
 const MainLayoutRRealmSlugRouteChildren: MainLayoutRRealmSlugRouteChildren = {
   MainLayoutRRealmSlugManageRoute: MainLayoutRRealmSlugManageRoute,
+  MainLayoutRRealmSlugPostPostUnitIdRoute:
+    MainLayoutRRealmSlugPostPostUnitIdRoute,
   MainLayoutRRealmSlugShelfSlugRoute: MainLayoutRRealmSlugShelfSlugRoute,
 }
 
@@ -3089,6 +3132,7 @@ interface MainLayoutRouteChildren {
   MainLayoutUnitUnitIdIndexRoute: typeof MainLayoutUnitUnitIdIndexRoute
   MainLayoutZSlugIndexRoute: typeof MainLayoutZSlugIndexRoute
   MainLayoutPostRootPostUnitIdContinueUnitIdRoute: typeof MainLayoutPostRootPostUnitIdContinueUnitIdRoute
+  MainLayoutRealmRealmIdPostPostUnitIdRoute: typeof MainLayoutRealmRealmIdPostPostUnitIdRoute
 }
 
 const MainLayoutRouteChildren: MainLayoutRouteChildren = {
@@ -3162,6 +3206,8 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutZSlugIndexRoute: MainLayoutZSlugIndexRoute,
   MainLayoutPostRootPostUnitIdContinueUnitIdRoute:
     MainLayoutPostRootPostUnitIdContinueUnitIdRoute,
+  MainLayoutRealmRealmIdPostPostUnitIdRoute:
+    MainLayoutRealmRealmIdPostPostUnitIdRoute,
 }
 
 const MainLayoutRouteWithChildren = MainLayoutRoute._addFileChildren(

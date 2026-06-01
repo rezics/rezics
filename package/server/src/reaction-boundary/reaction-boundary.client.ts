@@ -6,6 +6,7 @@ import type {
   InternalCreateResponse,
   InternalRemoveResponse,
 } from "@rezics/contract/reaction";
+import { normalizeReactionScopeKey } from "@rezics/contract/reaction";
 import { env } from "../env";
 
 const baseUrl = env.REACTION_BASE_URL;
@@ -66,11 +67,13 @@ export async function createReaction(
   userId: string,
   targetId: string,
   reaction: AllowedReactionKind,
+  scopeKey?: string,
 ): Promise<InternalCreateResponse> {
   return postInternal<InternalCreateResponse>("/internal/create", {
     userId,
     targetId,
     reaction,
+    scopeKey: normalizeReactionScopeKey(scopeKey),
   });
 }
 
@@ -81,11 +84,13 @@ export async function removeReaction(
   userId: string,
   targetId: string,
   reaction: AllowedReactionKind,
+  scopeKey?: string,
 ): Promise<InternalRemoveResponse> {
   return postInternal<InternalRemoveResponse>("/internal/remove", {
     userId,
     targetId,
     reaction,
+    scopeKey: normalizeReactionScopeKey(scopeKey),
   });
 }
 
@@ -97,6 +102,7 @@ export async function removeReaction(
 export async function listGivenReactions(query: {
   userId: string;
   reactions?: string;
+  scopeKey?: string;
   cursor?: string;
   limit?: number;
 }): Promise<GivenResponse> {

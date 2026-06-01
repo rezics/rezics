@@ -17,6 +17,8 @@ import {
 export type UseReactionHydrationOptions = {
   /** Override the default auth-derived enabled state for the my-reaction batch. */
   authenticated?: boolean;
+  summaryScopeKey?: string | null;
+  userScopeKey?: string | null;
 };
 
 export type UseReactionHydrationReturn = {
@@ -31,9 +33,12 @@ export function useReactionHydration(
   const isAuthenticatedFromStore = useAuthSessionStore(selectHasAuthIdentity);
   const isAuthenticated = options?.authenticated ?? isAuthenticatedFromStore;
 
-  const summaryQuery = useBatchReactionSummary(targetIds);
+  const summaryQuery = useBatchReactionSummary(targetIds, {
+    scopeKey: options?.summaryScopeKey,
+  });
   const myQuery = useBatchUserReactions(targetIds, {
     enabled: isAuthenticated,
+    scopeKey: options?.userScopeKey,
   });
 
   const hasIds = targetIds.length > 0;

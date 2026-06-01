@@ -35,6 +35,8 @@ export type ReactionBarPolicy = {
 export type ReactionBarProps = {
   post: ReactionBarPost;
   policy: ReactionBarPolicy;
+  summaryScopeKey?: string | null;
+  reactionScopeKey?: string | null;
   /** Explicit action list — overrides `actionPolicy.actions` when provided. */
   actions?: Action[];
   /** Explicit overflow list — overrides `actionPolicy.overflow` when provided. */
@@ -76,6 +78,8 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   actionPolicy,
   size = "md",
   variant = "plain",
+  summaryScopeKey,
+  reactionScopeKey,
   onReplyInvoke,
   replyMode = "count",
   overflowContent,
@@ -146,7 +150,14 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
         {visibleActions.map((token) => {
           switch (token) {
             case "vote":
-              return <VoteGroup key="vote" targetUnitId={post.unitId} />;
+              return (
+                <VoteGroup
+                  key="vote"
+                  targetUnitId={post.unitId}
+                  summaryScopeKey={summaryScopeKey}
+                  userScopeKey={reactionScopeKey}
+                />
+              );
             case "reply":
               return (
                 <ReplyAction

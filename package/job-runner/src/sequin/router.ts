@@ -334,6 +334,10 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
 
   if (table === "ReactionSummary") {
     const unitId = targetId(message, ["targetId", "target_id"]);
+    const scopeKey = targetId(message, ["scopeKey", "scope_key"]);
+    const realmUnitId = scopeKey?.startsWith("realm:")
+      ? scopeKey.slice("realm:".length)
+      : undefined;
     return unitId
       ? [
           createRankingCommand(
@@ -341,6 +345,19 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
             { unitId, reason: "ReactionSummary CDC" },
             source,
           ),
+          ...(realmUnitId
+            ? [
+                createRankingCommand(
+                  RANKING_COMMAND_KINDS.invalidate,
+                  {
+                    unitId,
+                    scope: { kind: "realm", id: realmUnitId },
+                    reason: "ReactionSummary realm CDC",
+                  },
+                  source,
+                ),
+              ]
+            : []),
         ]
       : [];
   }

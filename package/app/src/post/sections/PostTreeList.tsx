@@ -15,6 +15,8 @@ export interface PostTreeListProps {
   focusPostUnitId?: string;
   highlightFocusedPost?: boolean;
   onReply?: (postUnitId: string) => void;
+  summaryScopeKey?: string | null;
+  reactionScopeKey?: string | null;
   renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
 }
 
@@ -27,13 +29,18 @@ export function PostTreeList({
   focusPostUnitId,
   highlightFocusedPost = false,
   onReply,
+  summaryScopeKey,
+  reactionScopeKey,
   renderOverflowContent,
 }: PostTreeListProps) {
   const allUnitIds = useMemo(
     () => posts.map((p) => p.unitId).filter(Boolean) as string[],
     [posts],
   );
-  useReactionHydration(allUnitIds);
+  useReactionHydration(allUnitIds, {
+    summaryScopeKey,
+    userScopeKey: reactionScopeKey,
+  });
   const [submittedPostUnitId, setSubmittedPostUnitId] = useState<
     string | undefined
   >();
@@ -145,6 +152,8 @@ export function PostTreeList({
           highlightedFocusPostUnitId={highlightedFocusPostUnitId}
           highlightedThreadUnitId={highlightedThreadUnitId}
           onReplyClick={handleReplyClick}
+          summaryScopeKey={summaryScopeKey}
+          reactionScopeKey={reactionScopeKey}
           renderOverflowContent={renderOverflowContent}
           onComposerSubmitted={handleComposerSubmitted}
           onComposerDone={handleComposerDone}

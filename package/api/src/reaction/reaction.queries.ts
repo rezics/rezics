@@ -20,10 +20,13 @@ import type {
 /**
  * Query options for getting summary by target
  */
-export const reactionSummaryQuery = (targetId: string) =>
+export const reactionSummaryQuery = (
+  targetId: string,
+  scopeKey?: string | null,
+) =>
   queryOptions({
-    queryKey: reactionKeys.summary(targetId),
-    queryFn: () => reactionApi.summary([targetId]),
+    queryKey: reactionKeys.summary(targetId, scopeKey),
+    queryFn: () => reactionApi.summary([targetId], { scopeKey }),
     enabled: !!targetId,
     staleTime: 1000 * 60 * 2,
   });
@@ -31,10 +34,10 @@ export const reactionSummaryQuery = (targetId: string) =>
 /**
  * Query options for getting current user's reactions for a target
  */
-export const reactionMyQuery = (targetId: string) =>
+export const reactionMyQuery = (targetId: string, scopeKey?: string | null) =>
   queryOptions({
-    queryKey: reactionKeys.my(targetId),
-    queryFn: () => reactionApi.my([targetId]),
+    queryKey: reactionKeys.my(targetId, scopeKey),
+    queryFn: () => reactionApi.my([targetId], { scopeKey }),
     enabled: !!targetId,
     staleTime: 1000 * 60 * 1,
   });
@@ -43,11 +46,14 @@ export const reactionMyQuery = (targetId: string) =>
  * Query options for fetching a batch of reaction summaries in one request.
  * Normalizes `targetIds` (sort + dedupe) for stable cache keys.
  */
-export const batchReactionSummaryQuery = (targetIds: readonly string[]) => {
+export const batchReactionSummaryQuery = (
+  targetIds: readonly string[],
+  scopeKey?: string | null,
+) => {
   const normalized = normalizeIds(targetIds);
   return queryOptions({
-    queryKey: reactionKeys.summaryBatch(normalized),
-    queryFn: () => reactionApi.summary(normalized),
+    queryKey: reactionKeys.summaryBatch(normalized, scopeKey),
+    queryFn: () => reactionApi.summary(normalized, { scopeKey }),
     enabled: normalized.length > 0,
     staleTime: 1000 * 60 * 2,
   });
@@ -58,13 +64,14 @@ export const batchReactionSummaryQuery = (targetIds: readonly string[]) => {
  */
 export const useBatchReactionSummary = (
   targetIds: readonly string[],
-  options?: { enabled?: boolean },
+  options?: { enabled?: boolean; scopeKey?: string | null },
 ) => {
   const normalized = normalizeIds(targetIds);
   const enabled = (options?.enabled ?? true) && normalized.length > 0;
   return useQuery<ReactionSummaryResponse>({
-    queryKey: reactionKeys.summaryBatch(normalized),
-    queryFn: () => reactionApi.summary(normalized),
+    queryKey: reactionKeys.summaryBatch(normalized, options?.scopeKey),
+    queryFn: () =>
+      reactionApi.summary(normalized, { scopeKey: options?.scopeKey }),
     enabled,
     staleTime: 1000 * 60 * 2,
   });
@@ -74,11 +81,14 @@ export const useBatchReactionSummary = (
  * Query options for fetching the current user's reactions for a batch of targets.
  * Normalises `targetIds` (sort + dedupe) for stable cache keys.
  */
-export const batchUserReactionsQuery = (targetIds: readonly string[]) => {
+export const batchUserReactionsQuery = (
+  targetIds: readonly string[],
+  scopeKey?: string | null,
+) => {
   const normalized = normalizeIds(targetIds);
   return queryOptions({
-    queryKey: reactionKeys.myBatch(normalized),
-    queryFn: () => reactionApi.my(normalized),
+    queryKey: reactionKeys.myBatch(normalized, scopeKey),
+    queryFn: () => reactionApi.my(normalized, { scopeKey }),
     enabled: normalized.length > 0,
     staleTime: 1000 * 60 * 1,
   });
@@ -93,13 +103,13 @@ export const batchUserReactionsQuery = (targetIds: readonly string[]) => {
  */
 export const useBatchUserReactions = (
   targetIds: readonly string[],
-  options?: { enabled?: boolean },
+  options?: { enabled?: boolean; scopeKey?: string | null },
 ) => {
   const normalized = normalizeIds(targetIds);
   const enabled = (options?.enabled ?? true) && normalized.length > 0;
   return useQuery<ReactionMyResponse>({
-    queryKey: reactionKeys.myBatch(normalized),
-    queryFn: () => reactionApi.my(normalized),
+    queryKey: reactionKeys.myBatch(normalized, options?.scopeKey),
+    queryFn: () => reactionApi.my(normalized, { scopeKey: options?.scopeKey }),
     enabled,
     staleTime: 1000 * 60 * 1,
   });
@@ -123,10 +133,15 @@ export const useGivenReactionsInfinite = (
     ReturnType<typeof reactionKeys.given>,
     string | undefined
   >({
-    queryKey: reactionKeys.given(userId ?? "", options?.reactions),
+    queryKey: reactionKeys.given(
+      userId ?? "",
+      options?.reactions,
+      options?.scopeKey,
+    ),
     queryFn: ({ pageParam }) =>
       reactionApi.given(userId!, {
         reactions: options?.reactions,
+        scopeKey: options?.scopeKey,
         cursor: pageParam,
         limit: options?.limit,
       }),

@@ -1,6 +1,11 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
-import { PostKind, type PostListQuery } from "@rezics/contract";
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
+import {
+  PostKind,
+  type PostListQuery,
+  realmReactionScopeKey,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -37,6 +42,18 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     }),
   );
   const posts = data?.posts ?? [];
+  const reactionScopeKey = realmReactionScopeKey(realmId);
+  const postReactionTargetIds = useMemo(
+    () =>
+      posts
+        .filter((post) => post.kind !== PostKind.REVIEW)
+        .map((post) => post.unitId),
+    [posts],
+  );
+  useReactionHydration(postReactionTargetIds, {
+    summaryScopeKey: reactionScopeKey,
+    userScopeKey: reactionScopeKey,
+  });
   const reviewTargetIds = useMemo(
     () =>
       Array.from(
@@ -101,7 +118,13 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
             }
           />
         ) : (
-          <PostCard key={post.unitId} post={post} />
+          <PostCard
+            key={post.unitId}
+            post={post}
+            href={`/realm/${realmId}/post/${post.unitId}`}
+            summaryScopeKey={reactionScopeKey}
+            reactionScopeKey={reactionScopeKey}
+          />
         ),
       )}
     </div>

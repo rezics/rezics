@@ -17,6 +17,10 @@ import type {
   ReactionSummaryResponse,
 } from "./reaction.types";
 
+type ReactionScopeQuery = {
+  scopeKey?: string | null;
+};
+
 function getReactionBaseUrl(): string {
   return getApiConfig().reactionServiceUrl;
 }
@@ -54,9 +58,13 @@ export const reactionApi = {
   /**
    * Get summary counts for one or many targets (unauthenticated)
    */
-  summary: async (targetIds: string[]): Promise<ReactionSummaryResponse> => {
+  summary: async (
+    targetIds: string[],
+    options: ReactionScopeQuery = {},
+  ): Promise<ReactionSummaryResponse> => {
     const qs = new URLSearchParams();
     for (const id of targetIds) qs.append("targetIds", id);
+    if (options.scopeKey) qs.set("scopeKey", options.scopeKey);
     const queryString = qs.toString();
     return reactionFetch<ReactionSummaryResponse>(
       `/reaction/summary${queryString ? `?${queryString}` : ""}`,
@@ -66,9 +74,13 @@ export const reactionApi = {
   /**
    * Get current user's reactions for one or many targets
    */
-  my: async (targetIds: string[]): Promise<ReactionMyResponse> => {
+  my: async (
+    targetIds: string[],
+    options: ReactionScopeQuery = {},
+  ): Promise<ReactionMyResponse> => {
     const qs = new URLSearchParams();
     for (const id of targetIds) qs.append("targetIds", id);
+    if (options.scopeKey) qs.set("scopeKey", options.scopeKey);
     const queryString = qs.toString();
     return reactionFetch<ReactionMyResponse>(
       `/reaction/my${queryString ? `?${queryString}` : ""}`,
@@ -95,6 +107,7 @@ export const reactionApi = {
       targetId: query.targetId,
       reaction: query.reaction,
     });
+    if (query.scopeKey) qs.set("scopeKey", query.scopeKey);
     return apiFetch<{ deleted: boolean }>(`/reaction?${qs.toString()}`, {
       method: "DELETE",
     });
@@ -110,6 +123,7 @@ export const reactionApi = {
   ): Promise<ReactionHistoryPage<ReactionHistoryGivenItem>> => {
     const qs = new URLSearchParams();
     if (query.reactions) qs.set("reactions", query.reactions);
+    if (query.scopeKey) qs.set("scopeKey", query.scopeKey);
     if (query.cursor) qs.set("cursor", query.cursor);
     if (query.limit !== undefined) qs.set("limit", String(query.limit));
     const search = qs.toString();

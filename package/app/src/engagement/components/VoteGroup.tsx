@@ -10,6 +10,8 @@ import { useReactionBarContext } from "./ReactionBarContext";
 
 export type VoteGroupProps = {
   targetUnitId: string;
+  summaryScopeKey?: string | null;
+  userScopeKey?: string | null;
   /** Override the size from context. Rarely needed; prefer setting on the bar. */
   size?: EngagementSize;
 };
@@ -46,13 +48,18 @@ function sizeToTextClass(size: EngagementSize): string {
 
 export const VoteGroup: React.FC<VoteGroupProps> = ({
   targetUnitId,
+  summaryScopeKey,
+  userScopeKey,
   size: sizeProp,
 }) => {
   const { t } = useTranslation(["community"]);
   const ctx = useReactionBarContext();
   const size = sizeProp ?? ctx.size;
   const variant = ctx.variant;
-  const { summary, userReactions, isHydrated } = useReactionData(targetUnitId);
+  const { summary, userReactions, isHydrated } = useReactionData(targetUnitId, {
+    summaryScopeKey,
+    userScopeKey,
+  });
   const score = (summary.like ?? 0) - (summary.dislike ?? 0);
   const userVote: "like" | "dislike" | null = userReactions.includes("like")
     ? "like"
@@ -61,6 +68,7 @@ export const VoteGroup: React.FC<VoteGroupProps> = ({
       : null;
   const { toggleUp, toggleDown, auth } = useVoteController({
     targetUnitId,
+    scopeKey: userScopeKey ?? undefined,
     userVote,
   });
 

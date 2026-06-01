@@ -41,14 +41,21 @@ function isBatchKey(key: QueryKey, prefix: readonly unknown[]): boolean {
   return Array.isArray(key[key.length - 1]);
 }
 
-function batchContainsTarget(key: QueryKey, targetId: string): boolean {
-  const ids = (key as unknown[])[key.length - 1];
-  return Array.isArray(ids) && ids.includes(targetId);
+function batchKeyTail(
+  key: QueryKey,
+): { targetIds: readonly string[]; scopeKey: string | null } | undefined {
+  const tail = (key as unknown[])[key.length - 1] as
+    | { targetIds?: readonly string[]; scopeKey?: string | null }
+    | readonly string[];
+  if (Array.isArray(tail)) return { targetIds: tail, scopeKey: null };
+  if (!Array.isArray(tail?.targetIds)) return undefined;
+  return { targetIds: tail.targetIds, scopeKey: tail.scopeKey ?? null };
 }
 
 function snapshotAffectedBatches(
   queryClient: ReturnType<typeof useQueryClient>,
   targetId: string,
+  userScopeKey?: string | null,
 ): MutationContext {
   const summaryPrefix = [...reactionKeys.summaries(), "batch"] as const;
   const myPrefix = [...reactionKeys.mine(), "batch"] as const;
@@ -58,7 +65,11 @@ function snapshotAffectedBatches(
     { queryKey: reactionKeys.summaries() },
   )) {
     if (!isBatchKey(key, summaryPrefix)) continue;
-    if (!batchContainsTarget(key, targetId)) continue;
+    const tail = batchKeyTail(key);
+    if (!tail?.targetIds.includes(targetId)) continue;
+    if (tail.scopeKey !== null && tail.scopeKey !== (userScopeKey ?? null)) {
+      continue;
+    }
     if (data === undefined) continue;
     summarySnapshots.push({ key, data });
   }
@@ -68,7 +79,9 @@ function snapshotAffectedBatches(
     queryKey: reactionKeys.mine(),
   })) {
     if (!isBatchKey(key, myPrefix)) continue;
-    if (!batchContainsTarget(key, targetId)) continue;
+    const tail = batchKeyTail(key);
+    if (!tail?.targetIds.includes(targetId)) continue;
+    if (tail.scopeKey !== (userScopeKey ?? null)) continue;
     if (data === undefined) continue;
     mySnapshots.push({ key, data });
   }
@@ -120,7 +133,7 @@ function applyUserReactionRemove(
   reaction: string,
 ): ReactionMyResponse {
   const current = data.reactionsByTarget[targetId];
-  if (!current || !current.includes(reaction)) return data;
+  if (!current?.includes(reaction)) return data;
   return {
     ...data,
     reactionsByTarget: {
@@ -161,7 +174,11 @@ export function useCreateReactionMutation(
     ...options,
     onMutate: async (variables, mutationCtx) => {
       const userOnMutate = await options?.onMutate?.(variables, mutationCtx);
-      const context = snapshotAffectedBatches(queryClient, variables.targetId);
+      const context = snapshotAffectedBatches(
+        queryClient,
+        variables.targetId,
+        variables.scopeKey,
+      );
 
       for (const snap of context.summarySnapshots) {
         queryClient.setQueryData(
@@ -225,7 +242,11 @@ export function useDeleteReactionMutation(
     ...options,
     onMutate: async (variables, mutationCtx) => {
       const userOnMutate = await options?.onMutate?.(variables, mutationCtx);
-      const context = snapshotAffectedBatches(queryClient, variables.targetId);
+      const context = snapshotAffectedBatches(
+        queryClient,
+        variables.targetId,
+        variables.scopeKey,
+      );
 
       for (const snap of context.summarySnapshots) {
         queryClient.setQueryData(

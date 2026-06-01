@@ -7,9 +7,9 @@ import {
   postReplyRowActions,
   postReplyRowOverflow,
 } from "../../models/postPolicy";
+import { CommentPromotionBadge } from "../parts/CommentPromotionBadge";
 import { PostAuthorHeader } from "../parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
-import { CommentPromotionBadge } from "../parts/CommentPromotionBadge";
 
 interface PostReplyProps {
   post: PostDTO | CommentDTO;
@@ -17,6 +17,8 @@ interface PostReplyProps {
   overflowContent?: React.ReactNode;
   replyComposerSlot?: React.ReactNode;
   showAvatar?: boolean;
+  summaryScopeKey?: string | null;
+  reactionScopeKey?: string | null;
 }
 
 export const PostReply: React.FC<PostReplyProps> = ({
@@ -25,6 +27,8 @@ export const PostReply: React.FC<PostReplyProps> = ({
   overflowContent,
   replyComposerSlot,
   showAvatar = true,
+  summaryScopeKey,
+  reactionScopeKey,
 }) => {
   const contentIndentClass = showAvatar ? "pl-10" : "";
 
@@ -45,6 +49,8 @@ export const PostReply: React.FC<PostReplyProps> = ({
           size="sm"
           post={post}
           policy={postPolicy}
+          summaryScopeKey={summaryScopeKey}
+          reactionScopeKey={reactionScopeKey}
           actions={postReplyRowActions}
           overflow={postReplyRowOverflow}
           onReplyInvoke={onReply}

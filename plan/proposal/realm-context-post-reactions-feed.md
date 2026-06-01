@@ -56,86 +56,86 @@ direct plus all realm scopes without deduplicating by user.
 
 ## 1. Contract Shape
 
-- [ ] 1.1 Add reaction scope request/response shape in
+- [x] 1.1 Add reaction scope request/response shape in
   `package/contract/src/reaction/reaction.schema.ts`,
   `reaction.types.ts`, and `internal.ts`: optional public `scopeKey` defaults
   to `direct`; internal create/remove/list rows carry explicit `scopeKey`.
-- [ ] 1.2 Extend reaction summary and my-reaction query contracts with an
+- [x] 1.2 Extend reaction summary and my-reaction query contracts with an
   optional `scopeKey`. Omitted summary means global aggregate across all scopes;
   omitted my-reaction means `direct` for backwards-compatible button state.
-- [ ] 1.3 Add typed constants/helpers for `direct` and `realm:<realmUnitId>`
+- [x] 1.3 Add typed constants/helpers for `direct` and `realm:<realmUnitId>`
   scope keys in the reaction contract package or a shared API helper, keeping
   parsing/formatting consistent across app, server, reaction, and ranking.
-- [ ] 1.4 Add a feed context DTO/type in the most local existing feed/ranking
+- [x] 1.4 Add a feed context DTO/type in the most local existing feed/ranking
   contract home: `{ kind: "direct" } | { kind: "realm"; realmUnitId: string }`.
 
 ## 2. Reaction Service
 
-- [ ] 2.1 Add `scopeKey` and `ReactionTargetUsage` (or equivalent active quota
+- [x] 2.1 Add `scopeKey` and `ReactionTargetUsage` (or equivalent active quota
   table) to `package/reaction/prisma/schema.prisma`, with unique identity
   `(userId, targetId, reaction, scopeKey)` and summary identity
   `(targetId, reaction, scopeKey)`.
-- [ ] 2.2 Add a migration that backfills all existing reactions and summaries
+- [x] 2.2 Add a migration that backfills all existing reactions and summaries
   to `scopeKey = direct` and initializes usage rows from active reaction counts.
-- [ ] 2.3 Update `package/reaction/src/reaction/reaction.service.ts` so create
+- [x] 2.3 Update `package/reaction/src/reaction/reaction.service.ts` so create
   validates reaction type, locks/creates the usage row, rejects quota overflow,
   inserts the scoped reaction, increments scoped summary, and increments active
   usage in one transaction.
-- [ ] 2.4 Update remove to delete by `(userId, targetId, reaction, scopeKey)`,
+- [x] 2.4 Update remove to delete by `(userId, targetId, reaction, scopeKey)`,
   decrement the scoped summary, and decrement active usage in the same
   transaction.
-- [ ] 2.5 Update `getSummary` to support both scoped and global reads: scoped
+- [x] 2.5 Update `getSummary` to support both scoped and global reads: scoped
   reads filter `scopeKey`; global reads group all summaries for the requested
   target ids by `(targetId, reaction)` without user dedupe.
-- [ ] 2.6 Update `getUserReactions`, `listGiven`, and `listByUser` to carry or
+- [x] 2.6 Update `getUserReactions`, `listGiven`, and `listByUser` to carry or
   filter `scopeKey` where needed, preserving existing direct-scope behavior for
   callers that do not pass a scope.
-- [ ] 2.7 Add tests in `package/reaction/src/reaction/reaction.service.test.ts`
+- [x] 2.7 Add tests in `package/reaction/src/reaction/reaction.service.test.ts`
   for scoped duplicate behavior, global aggregation, quota rejection,
   quota release on delete, and backwards-compatible direct defaults.
 
 ## 3. Server Boundary And Policy
 
-- [ ] 3.1 Update `package/server/src/reaction-boundary/reaction-boundary.api.ts`
+- [x] 3.1 Update `package/server/src/reaction-boundary/reaction-boundary.api.ts`
   to accept scope input, validate `realm:<realmUnitId>` scopes against realm
   visibility/membership/policy, and forward explicit `scopeKey` to the reaction
   service.
-- [ ] 3.2 Keep notification ownership tied to `targetId`, not scope. Include
+- [x] 3.2 Keep notification ownership tied to `targetId`, not scope. Include
   scope metadata in notification `extra` only if the target owner needs context.
-- [ ] 3.3 Update `package/server/src/reaction-boundary/reaction-boundary.client.ts`
+- [x] 3.3 Update `package/server/src/reaction-boundary/reaction-boundary.client.ts`
   and internal contract calls for scoped create/remove/list/cleanup.
-- [ ] 3.4 Update profile reaction history hydration in
+- [x] 3.4 Update profile reaction history hydration in
   `package/server/src/profile-reaction-history` so scoped rows render sensible
   targets and, for realm scopes, can link to the realm-context post route when
   the target is a post.
-- [ ] 3.5 Update server tests for direct defaults, realm policy rejection, and
+- [x] 3.5 Update server tests for direct defaults, realm policy rejection, and
   realm-scoped reaction history hydration.
 
 ## 4. App Routes And Engagement
 
-- [ ] 4.1 Add post-context routes under
+- [x] 4.1 Add post-context routes under
   `package/app/src/routes/_mainLayout/r/$realmSlug/post/$postUnitId.tsx` and
   `package/app/src/routes/_mainLayout/realm/$realmId/post/$postUnitId.tsx`.
   Both should resolve a `realmUnitId` and render the existing post thread page
   with explicit context.
-- [ ] 4.2 Update `package/app/src/post/pages/PostThreadPage.tsx` so context-free
+- [x] 4.2 Update `package/app/src/post/pages/PostThreadPage.tsx` so context-free
   `/post/:postUnitId` does not infer `root.realmUnitId`; it should render global
   reaction summary and either direct comments or an all-realm grouped comment
   overview according to the comment API changes chosen at apply time.
-- [ ] 4.3 Update `package/app/src/post/sections/PostTreeSection.tsx` and reply
+- [x] 4.3 Update `package/app/src/post/sections/PostTreeSection.tsx` and reply
   composer wiring so realm-context routes pass the route realm, not
   `PostDTO.realmUnitId`.
-- [ ] 4.4 Extend `ReactionBar`, `VoteGroup`, `useVoteController`, and reaction
+- [x] 4.4 Extend `ReactionBar`, `VoteGroup`, `useVoteController`, and reaction
   hooks under `package/app/src/engagement` and `package/api/src/reaction` with
   a reaction scope prop. Summary scope and my-reaction/write scope must be
   independently expressible so `/post/:id` can show global counts while writing
   direct reactions.
-- [ ] 4.5 Update `package/api/src/reaction/reaction.keys.ts`,
+- [x] 4.5 Update `package/api/src/reaction/reaction.keys.ts`,
   `reaction.queries.ts`, `reaction.mutations.ts`, and `useReactionData.ts` so
   cache keys include summary scope and user scope. Optimistic updates must only
   touch matching scoped/my caches and any global summary caches containing the
   target.
-- [ ] 4.6 Update realm feed cards in
+- [x] 4.6 Update realm feed cards in
   `package/app/src/realm/components/RealmContentFeed.tsx` to link post cards to
   the realm-context post route and pass realm reaction scope into the reaction
   bar.
@@ -144,20 +144,20 @@ direct plus all realm scopes without deduplicating by user.
 
 ## 5. Feed And Ranking
 
-- [ ] 5.1 Introduce a feed candidate/context model near the first feed/ranking
+- [x] 5.1 Introduce a feed candidate/context model near the first feed/ranking
   implementation site. Candidate identity is `postUnitId`; candidate context is
   direct or realm.
-- [ ] 5.2 Route direct-context feed items to `/post/:postUnitId`; route
+- [x] 5.2 Route direct-context feed items to `/post/:postUnitId`; route
   realm-context items to `/r/:realmSlug/post/:postUnitId` when a slug is
   available, otherwise `/realm/:realmUnitId/post/:postUnitId`.
-- [ ] 5.3 Define feed context selection rules in tests: direct when the reason is
+- [x] 5.3 Define feed context selection rules in tests: direct when the reason is
   author follow, target/work affinity, profile activity, search, or global post
   rank; realm when the reason is realm membership, realm feed activity, realm
   comment activity, realm tags, realm moderation, or realm reaction activity.
-- [ ] 5.4 Update `package/ranking/src/ranking/reaction-client.ts` so existing
+- [x] 5.4 Update `package/ranking/src/ranking/reaction-client.ts` so existing
   global score inputs keep reading global summaries, while future realm-context
   ranking can request scoped summaries.
-- [ ] 5.5 Update ReactionSummary CDC handling in
+- [x] 5.5 Update ReactionSummary CDC handling in
   `package/job-runner/src/sequin/router.ts` so scoped summary changes can
   invalidate both the post's global rank and, for realm scopes, the realm-scoped
   rank/context.

@@ -13,6 +13,7 @@ export { decideVoteAction };
 
 export type UseVoteControllerArgs = {
   targetUnitId: string;
+  scopeKey?: string;
   /** Current user vote derived from the React Query cache by the caller. */
   userVote: VoteValue;
 };
@@ -26,6 +27,7 @@ export type UseVoteControllerReturn = {
 
 export function useVoteController({
   targetUnitId,
+  scopeKey,
   userVote,
 }: UseVoteControllerArgs): UseVoteControllerReturn {
   const { isAuthenticated } = useAuth();
@@ -39,7 +41,7 @@ export function useVoteController({
 
   const runDelete = (reaction: NonNullable<VoteValue>) => {
     deleteReaction.mutate(
-      { targetId: targetUnitId, reaction },
+      { targetId: targetUnitId, reaction, scopeKey },
       {
         onError: () =>
           showRetryToast(
@@ -53,7 +55,7 @@ export function useVoteController({
 
   const runCreate = (reaction: NonNullable<VoteValue>) => {
     createReaction.mutate(
-      { targetId: targetUnitId, reaction },
+      { targetId: targetUnitId, reaction, scopeKey },
       {
         onError: () =>
           showRetryToast(

@@ -1,9 +1,9 @@
+import { commentListQuery } from "@rezics/api/comment/comment";
 import {
   computeEditorEntryDecision,
   useCurrentUserId,
   useServerPermission,
 } from "@rezics/api/hooks";
-import { commentListQuery } from "@rezics/api/comment/comment";
 import {
   useAcceptAnswerMutation,
   usePinCommentMutation,
@@ -16,8 +16,7 @@ import { Spinner } from "@rezics/ui";
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
-import { useMemo } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PostPromotionControls } from "../components/parts/PostPromotionControls";
 import { PostEditDialog } from "../forms/PostEditDialog";
@@ -32,6 +31,8 @@ interface PostTreeSectionProps {
   visualMaxDepth?: number;
   focusPostUnitId?: string;
   highlightFocusedPost?: boolean;
+  summaryScopeKey?: string | null;
+  reactionScopeKey?: string | null;
   /**
    * When supplied, overrides the built-in "mount an inline composer" behaviour
    * (used by surfaces that need to navigate or otherwise intercept replies).
@@ -46,6 +47,8 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
   focusPostUnitId,
   highlightFocusedPost,
+  summaryScopeKey,
+  reactionScopeKey,
   onReply,
 }) => {
   const { t } = useTranslation(["common", "community"]);
@@ -157,6 +160,8 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
         focusPostUnitId={focusPostUnitId}
         highlightFocusedPost={highlightFocusedPost}
         onReply={onReply}
+        summaryScopeKey={summaryScopeKey}
+        reactionScopeKey={reactionScopeKey}
         renderOverflowContent={renderOverflowContent}
       />
       {editingPost ? (

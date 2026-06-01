@@ -2,6 +2,7 @@ import {
   givenQuerySchema,
   givenResponseSchema,
   myQuerySchema,
+  normalizeReactionScopeKey,
   summaryQuerySchema,
 } from "@rezics/contract/reaction";
 import { Elysia, t } from "elysia";
@@ -28,7 +29,10 @@ export const reactionApi = new Elysia({ prefix: "/reaction" })
     "/summary",
     async ({ query }) => {
       const targetIds = normalizeIds(query.targetIds);
-      const summaries = await reactionService.getSummary(targetIds);
+      const summaries = await reactionService.getSummary(
+        targetIds,
+        query.scopeKey,
+      );
       return { summaries };
     },
     {
@@ -48,6 +52,7 @@ export const reactionApi = new Elysia({ prefix: "/reaction" })
       const reactionsByTarget = await reactionService.getUserReactions(
         userId,
         targetIds,
+        normalizeReactionScopeKey(query.scopeKey),
       );
       return { userId, reactionsByTarget };
     },
@@ -70,6 +75,7 @@ export const reactionApi = new Elysia({ prefix: "/reaction" })
         return await reactionService.listGiven({
           userId: query.userId,
           reactions: parseReactionFilter(query.reactions),
+          scopeKey: query.scopeKey,
           cursor: query.cursor,
           limit: query.limit,
         });

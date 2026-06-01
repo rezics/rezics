@@ -42,6 +42,9 @@ mock.module("@/governance", () => ({
   contentPolicyActions: {
     reactionCreate: "reaction.create",
   },
+  governanceCapabilityService: {
+    realmMembershipForPolicy: mock(async () => null),
+  },
   governanceRoutePolicyService: {
     decideForIdentity: decideForIdentityMock,
   },
@@ -53,6 +56,8 @@ mock.module("@/notify-boundary/notify-boundary.client", () => ({
 
 mock.module("./reaction-boundary.client", () => ({
   createReaction: createReactionMock,
+  listByUser: mock(async () => ({ items: [], nextCursor: null })),
+  listGivenReactions: mock(async () => ({ items: [], nextCursor: null })),
   removeReaction: mock(async () => ({ success: true })),
 }));
 
@@ -104,10 +109,37 @@ describe("reactionBoundaryApi", () => {
       currentIdentity.userId,
       "post-1",
       "like",
+      "direct",
     );
     expect(prismaMock.unit.findUnique).toHaveBeenCalledWith({
       where: { id: "post-1" },
       select: { userId: true },
     });
+  });
+
+  test("rejects private realm-scoped reactions without membership", async () => {
+    policyAllowed = true;
+    prismaMock.unit.findUnique = mock(async ({ where, select }: any) => {
+      if (where.id === "realm-1" && select?.visibility) {
+        return { id: "realm-1", type: "REALM", visibility: "PRIVATE" };
+      }
+      return null;
+    });
+    const { reactionBoundaryApi } = await import("./reaction-boundary.api");
+
+    const response = await reactionBoundaryApi.handle(
+      new Request("http://localhost/reaction/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          targetId: "post-1",
+          reaction: "like",
+          scopeKey: "realm:realm-1",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(createReactionMock).not.toHaveBeenCalled();
   });
 });

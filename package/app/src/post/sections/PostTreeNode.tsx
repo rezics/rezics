@@ -27,6 +27,8 @@ export interface PostTreeNodeProps {
   highlightedFocusPostUnitId?: string;
   highlightedThreadUnitId?: string;
   onReplyClick: (postUnitId: string) => void;
+  summaryScopeKey?: string | null;
+  reactionScopeKey?: string | null;
   renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
   onComposerSubmitted: (parentCommentUnitId: string, post: CommentDTO) => void;
   onComposerDone: (postUnitId: string) => void;
@@ -44,6 +46,8 @@ export function PostTreeNode({
   highlightedFocusPostUnitId,
   highlightedThreadUnitId,
   onReplyClick,
+  summaryScopeKey,
+  reactionScopeKey,
   renderOverflowContent,
   onComposerSubmitted,
   onComposerDone,
@@ -129,6 +133,8 @@ export function PostTreeNode({
             post={post}
             showAvatar
             onReply={() => onReplyClick(post.unitId)}
+            summaryScopeKey={summaryScopeKey}
+            reactionScopeKey={reactionScopeKey}
             overflowContent={renderOverflowContent?.(post)}
             replyComposerSlot={
               composerOpen ? (
@@ -185,6 +191,8 @@ export function PostTreeNode({
                 highlightedFocusPostUnitId={highlightedFocusPostUnitId}
                 highlightedThreadUnitId={highlightedThreadUnitId}
                 onReplyClick={onReplyClick}
+                summaryScopeKey={summaryScopeKey}
+                reactionScopeKey={reactionScopeKey}
                 renderOverflowContent={renderOverflowContent}
                 onComposerSubmitted={onComposerSubmitted}
                 onComposerDone={onComposerDone}

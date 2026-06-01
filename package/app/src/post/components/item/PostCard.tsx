@@ -16,12 +16,18 @@ interface PostCardProps {
   post: PostDTO;
   onOpen?: () => void;
   variantContext?: VariantContextSummary | null;
+  href?: string;
+  summaryScopeKey?: string | null;
+  reactionScopeKey?: string | null;
 }
 
 export const PostCard: React.FC<PostCardProps> = ({
   post,
   onOpen,
   variantContext,
+  href,
+  summaryScopeKey,
+  reactionScopeKey,
 }) => {
   const navigate = useNavigate();
   const rootPostUnitId = post.unitId;
@@ -30,6 +36,10 @@ export const PostCard: React.FC<PostCardProps> = ({
   const handleCardClick = () => {
     if (onOpen) {
       onOpen();
+      return;
+    }
+    if (href) {
+      navigate({ to: href });
       return;
     }
     navigate({
@@ -41,6 +51,13 @@ export const PostCard: React.FC<PostCardProps> = ({
   const handleReplyInvoke = () => {
     if (onOpen) {
       onOpen();
+      return;
+    }
+    if (href) {
+      navigate({
+        to: href,
+        search: { focus: "reply" },
+      });
       return;
     }
     navigate({
@@ -82,6 +99,8 @@ export const PostCard: React.FC<PostCardProps> = ({
           variant="pill"
           post={post}
           policy={postPolicy}
+          summaryScopeKey={summaryScopeKey}
+          reactionScopeKey={reactionScopeKey}
           actions={postCardActions}
           overflow={postCardOverflow}
           onReplyInvoke={handleReplyInvoke}

@@ -1,6 +1,7 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
-import { PostKind } from "@rezics/contract";
+import { useReactionHydration } from "@rezics/api/reaction/reaction";
+import { PostKind, realmReactionScopeKey } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -12,17 +13,34 @@ import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "../sections/PostTreeSection";
 
-export const PostThreadPage: React.FC = () => {
+export type PostThreadPageProps = {
+  realmUnitId?: string | null;
+};
+
+export const PostThreadPage: React.FC<PostThreadPageProps> = ({
+  realmUnitId,
+}) => {
   const { t } = useTranslation(["common"]);
   const navigate = useNavigate();
-  const { rootPostUnitId } = useParams({ strict: false }) as {
-    rootPostUnitId: string;
+  const params = useParams({ strict: false }) as {
+    rootPostUnitId?: string;
+    postUnitId?: string;
+    realmId?: string;
   };
+  const rootPostUnitId = params.rootPostUnitId ?? params.postUnitId ?? "";
+  const contextRealmUnitId = realmUnitId ?? params.realmId ?? null;
+  const reactionScopeKey = contextRealmUnitId
+    ? realmReactionScopeKey(contextRealmUnitId)
+    : undefined;
   const search = useSearch({ strict: false }) as
     | { focusPostUnitId?: string | null }
     | undefined;
   const composerRef = useFocusReplyFromQuery();
   const { data: root } = useQuery(postQueries.detail(rootPostUnitId));
+  useReactionHydration(rootPostUnitId ? [rootPostUnitId] : [], {
+    summaryScopeKey: reactionScopeKey,
+    userScopeKey: reactionScopeKey,
+  });
   const focusPostUnitId = search?.focusPostUnitId ?? undefined;
   const editorEntry = useEditorEntry({
     surface: root?.kind === PostKind.WIKI ? "wikiPost" : "post",
@@ -52,22 +70,28 @@ export const PostThreadPage: React.FC = () => {
               </Button>
             </div>
           ) : null}
-          <PostCard post={root} />
+          <PostCard
+            post={root}
+            summaryScopeKey={reactionScopeKey}
+            reactionScopeKey={reactionScopeKey}
+          />
         </div>
       )}
-      {root && (
+      {root && contextRealmUnitId && (
         <ReplyComposer
           ref={composerRef}
           mode="progressive"
           targetUnitId={root.targetUnitId ?? root.unitId}
           rootUnitId={root.unitId}
-          realmUnitId={root.realmUnitId}
+          realmUnitId={contextRealmUnitId}
           parentCommentUnitId={root.unitId}
         />
       )}
       <PostTreeSection
         rootUnitId={rootPostUnitId}
-        realmUnitId={root?.realmUnitId}
+        realmUnitId={contextRealmUnitId}
+        summaryScopeKey={reactionScopeKey}
+        reactionScopeKey={reactionScopeKey}
         focusPostUnitId={focusPostUnitId}
         highlightFocusedPost={Boolean(focusPostUnitId)}
       />

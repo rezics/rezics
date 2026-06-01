@@ -12,10 +12,14 @@ function joinUrl(baseUrl: string, path: string) {
 export class ReactionSummaryClient {
   constructor(private readonly options: ReactionSummaryClientOptions) {}
 
-  async getSummaries(targetIds: string[]): Promise<ReactionSummaryMap> {
+  async getSummaries(
+    targetIds: string[],
+    options: { scopeKey?: string | null } = {},
+  ): Promise<ReactionSummaryMap> {
     if (targetIds.length === 0) return {};
     const params = new URLSearchParams();
     for (const id of targetIds) params.append("targetIds", id);
+    if (options.scopeKey) params.set("scopeKey", options.scopeKey);
 
     const response = await fetch(
       joinUrl(this.options.baseUrl, `/reaction/summary?${params.toString()}`),

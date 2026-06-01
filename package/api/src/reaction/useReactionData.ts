@@ -25,12 +25,18 @@ export type UseReactionDataReturn = {
   isHydrated: boolean;
 };
 
+export type UseReactionDataOptions = {
+  summaryScopeKey?: string | null;
+  userScopeKey?: string | null;
+};
+
 const EMPTY_SUMMARY: Record<string, number> = Object.freeze({});
 const EMPTY_USER_REACTIONS = Object.freeze([] as string[]) as string[];
 
 function readBatchEntries<T>(
   cacheEntries: ReadonlyArray<[readonly unknown[], T | undefined]>,
   prefix: ReadonlyArray<unknown>,
+  scopeKey?: string | null,
 ): Array<{ ids: readonly string[]; data: T }> {
   const matches: Array<{ ids: readonly string[]; data: T }> = [];
   for (const [key, data] of cacheEntries) {
@@ -44,9 +50,14 @@ function readBatchEntries<T>(
       }
     }
     if (!prefixOk) continue;
-    const ids = key[key.length - 1];
+    const tail = key[key.length - 1] as
+      | { targetIds?: readonly string[]; scopeKey?: string | null }
+      | readonly string[];
+    const ids = Array.isArray(tail) ? tail : tail.targetIds;
     if (!Array.isArray(ids)) continue;
-    matches.push({ ids: ids as readonly string[], data });
+    const entryScopeKey = Array.isArray(tail) ? null : (tail.scopeKey ?? null);
+    if (entryScopeKey !== (scopeKey ?? null)) continue;
+    matches.push({ ids, data });
   }
   return matches;
 }
@@ -65,7 +76,10 @@ function pickLargestContaining<T>(
   return best?.data;
 }
 
-export function useReactionData(unitId: string): UseReactionDataReturn {
+export function useReactionData(
+  unitId: string,
+  options: UseReactionDataOptions = {},
+): UseReactionDataReturn {
   const queryClient = useQueryClient();
   const [version, setVersion] = useState(0);
 
@@ -105,8 +119,13 @@ export function useReactionData(unitId: string): UseReactionDataReturn {
     const summaryBatches = readBatchEntries<ReactionSummaryResponse>(
       summaryEntries,
       summaryPrefix,
+      options.summaryScopeKey,
     );
-    const myBatches = readBatchEntries<ReactionMyResponse>(myEntries, myPrefix);
+    const myBatches = readBatchEntries<ReactionMyResponse>(
+      myEntries,
+      myPrefix,
+      options.userScopeKey,
+    );
 
     const summaryData = pickLargestContaining(summaryBatches, unitId);
     const myData = pickLargestContaining(myBatches, unitId);
@@ -118,5 +137,11 @@ export function useReactionData(unitId: string): UseReactionDataReturn {
     const isHydrated = summaryData !== undefined;
 
     return { summary, userReactions, isHydrated };
-  }, [unitId, queryClient, version]);
+  }, [
+    unitId,
+    options.summaryScopeKey,
+    options.userScopeKey,
+    queryClient,
+    version,
+  ]);
 }

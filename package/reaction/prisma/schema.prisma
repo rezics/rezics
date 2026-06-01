@@ -14,20 +14,35 @@ model Reaction {
   userId    String   @db.Uuid
   targetId  String   @db.Uuid
   reaction  String   @db.VarChar(32)
+  scopeKey  String   @default("direct") @db.VarChar(128)
   createdAt DateTime @default(now())
 
-  @@unique([userId, targetId, reaction])
+  @@unique([userId, targetId, reaction, scopeKey])
   @@index([targetId])
   @@index([targetId, reaction])
+  @@index([targetId, reaction, scopeKey])
   @@index([userId, reaction])
+  @@index([userId, targetId])
   @@index([userId, createdAt])
 }
 
 model ReactionSummary {
   targetId String @db.Uuid
   reaction String @db.VarChar(32)
+  scopeKey String @default("direct") @db.VarChar(128)
   count    Int    @default(0)
 
-  @@id([targetId, reaction])
+  @@id([targetId, reaction, scopeKey])
+  @@index([targetId])
+  @@index([targetId, reaction])
+}
+
+model ReactionTargetUsage {
+  userId      String @db.Uuid
+  targetId    String @db.Uuid
+  activeCount Int    @default(0)
+  maxActive   Int    @default(3)
+
+  @@id([userId, targetId])
   @@index([targetId])
 }

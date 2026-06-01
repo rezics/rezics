@@ -30,6 +30,10 @@ export const internalApi = new Elysia({ prefix: "/internal" })
         where: { targetId },
       });
 
+      await prisma.reactionTargetUsage.deleteMany({
+        where: { targetId },
+      });
+
       return { deleted: true, count };
     },
     {
@@ -51,6 +55,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
           body.userId,
           body.targetId,
           body.reaction,
+          body.scopeKey,
         );
         set.status = result.created ? 201 : 200;
         const r = result.reaction;
@@ -59,6 +64,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
           userId: r.userId,
           targetId: r.targetId,
           reaction: r.reaction,
+          scopeKey: r.scopeKey,
           createdAt: r.createdAt.toISOString(),
           created: result.created,
         };
@@ -87,7 +93,12 @@ export const internalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/remove",
     async ({ body }) => {
-      return reactionService.remove(body.userId, body.targetId, body.reaction);
+      return reactionService.remove(
+        body.userId,
+        body.targetId,
+        body.reaction,
+        body.scopeKey,
+      );
     },
     {
       body: internalRemoveBodySchema,
