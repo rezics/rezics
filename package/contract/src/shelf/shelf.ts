@@ -4,7 +4,11 @@ import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
-import { publicUserSchema, unitTranslationDTOSchema } from "../unit/unit";
+import {
+  publicUserSchema,
+  unitTranslationDTOSchema,
+  variantContextSummarySchema,
+} from "../unit/unit";
 
 // ============================================================
 // SHELF EXTRA SCHEMA
@@ -64,6 +68,7 @@ export const shelfUnitDTOSchema = t.Object({
   shelfId: t.String(),
   unitId: t.String(),
   variantUnitId: t.Optional(t.Nullable(t.String())),
+  variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
   kind: shelfUnitKindSchema,
   position: t.String(),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),

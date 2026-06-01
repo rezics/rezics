@@ -7,9 +7,11 @@ import type {
   ShelfUnitKind,
   ShelfUnitRelationDTO,
   ShelfUnitRelationRole,
+  VariantContextSummary,
 } from "@rezics/contract";
 import { readCoverUrlFromExtra } from "@rezics/contract";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
+import { variantContextForRow } from "@/unit/variant-context";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type {
   ShelfListSelected,
@@ -48,10 +50,21 @@ export function mapShelfUnitToDTO(row: ShelfUnitRow): ShelfUnitDTO {
     shelfId: row.shelfId,
     unitId: row.unitId,
     variantUnitId: row.variantUnitId ?? null,
+    variantContext: variantContextForRow(row, undefined),
     kind: row.kind as ShelfUnitKind,
     position: row.position,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+  };
+}
+
+export function mapShelfUnitToDTOWithVariantContext(
+  row: ShelfUnitRow,
+  variantContexts?: ReadonlyMap<string, VariantContextSummary>,
+): ShelfUnitDTO {
+  return {
+    ...mapShelfUnitToDTO(row),
+    variantContext: variantContextForRow(row, variantContexts),
   };
 }
 

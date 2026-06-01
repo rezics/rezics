@@ -4,6 +4,7 @@ export {
 } from "./components/AddUnitTranslationLanguageDialog";
 export { UnitAddPicker, UnitSearchSelect } from "./components/UnitAddPicker";
 export { UnitCard, type UnitCardProps } from "./components/UnitCard";
+export { VariantContextLink } from "./components/VariantContextLink";
 export {
   UnitPicker,
   type UnitPickerProps,

@@ -37,6 +37,7 @@ import {
   assertLicenseSlug,
   publicUnitEligibilityWhere,
 } from "@/unit/publication-policy";
+import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { AppError } from "@/utils/errors";
 import {
   hydrateUnitOwnerUserSlugRow,
@@ -61,6 +62,7 @@ import {
   mapShelfToDTO,
   mapShelfUnitRelationToDTO,
   mapShelfUnitToDTO,
+  mapShelfUnitToDTOWithVariantContext,
 } from "./shelf.mapper";
 import { isSystemKindKey } from "./system-shelves";
 import { shelfInclude, shelfListSelect } from "./types";
@@ -864,8 +866,12 @@ export class ShelfService {
           })
         : [];
 
+    const variantContexts = await hydrateVariantContextSummaries(page);
+
     return {
-      units: page.map(mapShelfUnitToDTO),
+      units: page.map((unit) =>
+        mapShelfUnitToDTOWithVariantContext(unit, variantContexts),
+      ),
       relations: relations.map(mapShelfUnitRelationToDTO),
       hasMore,
     };

@@ -1,6 +1,11 @@
-import type { PostDTO, CommentPromotionDTO } from "@rezics/contract";
+import type {
+  CommentPromotionDTO,
+  PostDTO,
+  VariantContextSummary,
+} from "@rezics/contract";
 import type { CommentPromotion } from "#/prisma/client";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
+import { variantContextForRow } from "@/unit/variant-context";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { PostWithRelations } from "./types";
 
@@ -19,7 +24,10 @@ function contentHiddenByGlobalModeration(post: PostWithRelations) {
 /**
  * Map a PostWithRelations (Prisma result) to the public PostDTO.
  */
-export function mapPostToDTO(post: PostWithRelations): PostDTO {
+export function mapPostToDTO(
+  post: PostWithRelations,
+  variantContexts?: ReadonlyMap<string, VariantContextSummary>,
+): PostDTO {
   const globalModerationState = moderationState(post);
   const contentHidden = contentHiddenByGlobalModeration(post);
 
@@ -29,6 +37,7 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     author: mapPublicUser(post.unit.user),
     targetUnitId: post.unit.targetUnitId ?? null,
     variantUnitId: post.variantUnitId ?? null,
+    variantContext: variantContextForRow(post, variantContexts),
     realmUnitId: post.unit.inRealms?.[0]?.realmUnitId ?? null,
     content: contentHidden ? null : (post.content as PostDTO["content"]),
     kind: post.kind ?? null,

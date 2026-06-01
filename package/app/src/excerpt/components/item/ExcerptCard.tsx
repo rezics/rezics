@@ -2,6 +2,7 @@ import {
   contentDocMarkdownFallback,
   type ExcerptSource,
   type UnitDTO,
+  type VariantContextSummary,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
@@ -16,16 +17,19 @@ import { Quote as FormatQuoteRoundedIcon } from "lucide-react";
 import type React from "react";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
 import { cn } from "@/shared/utils/css-util";
+import { VariantContextLink } from "@/unit";
 import { excerptCardActions, excerptPolicy } from "../../models/excerptPolicy";
 
 export interface ExcerptCardProps {
   excerpt: UnitDTO;
   className?: string;
+  variantContext?: VariantContextSummary | null;
 }
 
 export const ExcerptCard: React.FC<ExcerptCardProps> = ({
   excerpt,
   className,
+  variantContext,
 }) => {
   const { t } = useTranslation(["community"]);
   const navigate = useNavigate();
@@ -95,6 +99,16 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
             <p className="text-sm text-text-primary line-clamp-3 leading-7">
               {description}
             </p>
+            {variantContext && (
+              // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents the parent card click when the nested route link is used.
+              <div
+                className="mt-2 w-fit max-w-full"
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={() => undefined}
+              >
+                <VariantContextLink context={variantContext} />
+              </div>
+            )}
 
             <div className="mt-3 flex items-center justify-between gap-2">
               <ReactionBar

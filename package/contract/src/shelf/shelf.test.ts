@@ -52,6 +52,10 @@ describe("shelf containment contract fields", () => {
         shelfId: "shelf-1",
         unitId: "main-1",
         variantUnitId: "variant-1",
+        variantContext: {
+          unitId: "variant-1",
+          title: "Selected Edition",
+        },
         kind: "book",
         position: "a0",
       }),

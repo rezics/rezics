@@ -1,21 +1,21 @@
 import {
   acceptAnswerSchema,
+  commentPromotionDTOSchema,
   createPostSchema,
   editorialPatchSubmissionSchema,
   hasPermissionToUpdatePost,
   isBlocked,
   normalizeLanguage,
-  pinCommentSchema,
-  commentPromotionDTOSchema,
   PostKind,
   type PostListResponse,
   type PostModerationOverlayResponse,
   type PostResponse,
-  postModerationOverlayRequestSchema,
-  postModerationOverlayResponseSchema,
+  pinCommentSchema,
   postListBodySchema,
   postListQuerySchema,
   postListResponseSchema,
+  postModerationOverlayRequestSchema,
+  postModerationOverlayResponseSchema,
   postParamsSchema,
   setPostPublicationSchema,
   setPostStateSchema,
@@ -31,6 +31,7 @@ import {
   applySparsePatch,
   assertEditorialPatchAllowed,
 } from "@/unit/collaborative-metadata";
+import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { mapPostToDTO } from "./post.mapper";
 import { postService } from "./post.service";
 
@@ -125,8 +126,9 @@ export const postApi = new Elysia({ prefix: "/post" })
             isAdmin: admin,
             viewerUserId: identity?.userId,
           });
+      const variantContexts = await hydrateVariantContextSummaries(posts);
       const response: PostListResponse = {
-        posts: posts.map(mapPostToDTO),
+        posts: posts.map((post) => mapPostToDTO(post, variantContexts)),
         total,
       };
       return response;
@@ -187,8 +189,9 @@ export const postApi = new Elysia({ prefix: "/post" })
             isAdmin: admin,
             viewerUserId: identity?.userId,
           });
+      const variantContexts = await hydrateVariantContextSummaries(posts);
       const response: PostListResponse = {
-        posts: posts.map(mapPostToDTO),
+        posts: posts.map((post) => mapPostToDTO(post, variantContexts)),
         total,
       };
       return response;

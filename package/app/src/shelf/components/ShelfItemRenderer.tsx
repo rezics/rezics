@@ -112,18 +112,24 @@ function renderUnit(
           review={post}
           targetUnit={options?.targetUnit}
           showTargetUnit={options?.showTargetUnit}
+          variantContext={post.variantContext ?? unit.variantContext}
         />
       );
     }
     case "quote": {
       const post = data as PostDTO | undefined;
       if (!post) return <ShelfItemCard unit={unit} />;
-      return <ExcerptCard excerpt={post as unknown as UnitDTO} />;
+      return (
+        <ExcerptCard
+          excerpt={post as unknown as UnitDTO}
+          variantContext={post.variantContext ?? unit.variantContext}
+        />
+      );
     }
     case "post": {
       const post = data as PostDTO | undefined;
       if (!post) return <ShelfItemCard unit={unit} />;
-      return <PostCard post={post} />;
+      return <PostCard post={post} variantContext={unit.variantContext} />;
     }
     case "shelf": {
       const shelf = data as ShelfDTO | undefined;
@@ -214,6 +220,7 @@ function NestedRootCard({
           <ReviewCard
             review={reviewChildren[activeIdx]!.data as PostDTO}
             showTargetUnit={false}
+            variantContext={reviewChildren[activeIdx]!.unit.variantContext}
           />
         )}
       </div>

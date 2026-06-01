@@ -5,6 +5,7 @@ import { useId } from "react";
 import { cn } from "@/shared/utils/css-util";
 import { UserHoverPreview } from "@/user/components";
 import type { UnitCardSummary } from "../models/unitCardSummary";
+import { VariantContextLink } from "./VariantContextLink";
 
 export interface UnitCardProps {
   summary: UnitCardSummary;
@@ -79,6 +80,12 @@ export function UnitCard({
             <p className="truncate text-xs leading-dense text-text-secondary">
               {summary.subtitle}
             </p>
+          )}
+          {summary.variantContext && (
+            <VariantContextLink
+              context={summary.variantContext}
+              className="mt-1"
+            />
           )}
         </div>
 

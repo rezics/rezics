@@ -55,6 +55,30 @@ export const MissingImage: Story = {
   },
 };
 
+export const VariantContext: Story = {
+  args: {
+    summary: {
+      ...baseSummary,
+      variantContext: {
+        unitId: "variant-1",
+        title: "Paperback Taiwan Edition",
+      },
+    },
+  },
+};
+
+export const VariantContextFallback: Story = {
+  args: {
+    summary: {
+      ...baseSummary,
+      variantContext: {
+        unitId: "variant-missing-title",
+        title: "variant-missing-title",
+      },
+    },
+  },
+};
+
 export const LongText: Story = {
   args: {
     summary: {

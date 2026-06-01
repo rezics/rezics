@@ -7,6 +7,7 @@ import type {
   ShelfUnitDTO,
   UnitDTO,
   UnitTranslationDTO,
+  VariantContextSummary,
 } from "@rezics/contract";
 import {
   contentDocMarkdownFallback,
@@ -41,6 +42,7 @@ export interface UnitCardSummary {
   addedAt?: string | Date | null;
   translationMeta?: UnitCardTranslationMeta;
   attachmentCounts?: UnitCardAttachmentCounts;
+  variantContext?: VariantContextSummary | null;
 }
 
 export interface UnitCardSummaryOptions {
@@ -213,7 +215,23 @@ export function shelfUnitToUnitCardSummary(
     };
   }
 
-  return attachmentCounts ? { ...summary, attachmentCounts } : summary;
+  return attachSummaryMetadata(
+    summary,
+    shelfUnit.variantContext,
+    attachmentCounts,
+  );
+}
+
+function attachSummaryMetadata(
+  summary: UnitCardSummary,
+  variantContext?: VariantContextSummary | null,
+  attachmentCounts?: UnitCardAttachmentCounts,
+): UnitCardSummary {
+  return {
+    ...summary,
+    ...(variantContext ? { variantContext } : {}),
+    ...(attachmentCounts ? { attachmentCounts } : {}),
+  };
 }
 
 function postToSummary(

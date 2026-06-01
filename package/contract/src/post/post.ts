@@ -10,7 +10,7 @@ import { licenseSlugSchema } from "../license";
 import { languageSchema } from "../language";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
-import { publicUserSchema } from "../unit/unit";
+import { publicUserSchema, variantContextSummarySchema } from "../unit/unit";
 
 // ============================================================
 // POST KIND
@@ -126,6 +126,7 @@ export const postDTOSchema = t.Object({
   author: t.Optional(publicUserSchema),
   targetUnitId: t.Optional(t.Nullable(t.String())),
   variantUnitId: t.Optional(t.Nullable(t.String())),
+  variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
   realmUnitId: t.Optional(t.Nullable(t.String())),
   content: t.Optional(t.Nullable(contentDocSchema)),
   kind: t.Optional(t.Nullable(postKindLiterals)),

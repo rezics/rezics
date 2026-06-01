@@ -205,6 +205,14 @@ export const unitTranslationDTOSchema = t.Object({
 
 export type UnitTranslationDTO = (typeof unitTranslationDTOSchema)["static"];
 
+export const variantContextSummarySchema = t.Object({
+  unitId: t.String(),
+  title: t.String(),
+});
+
+export type VariantContextSummary =
+  (typeof variantContextSummarySchema)["static"];
+
 // ============================================================
 // UNIT PUBLICATION METADATA
 // ============================================================

@@ -1,8 +1,9 @@
-import type { PostDTO } from "@rezics/contract";
+import type { PostDTO, VariantContextSummary } from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PollEmbed } from "@/poll";
+import { VariantContextLink } from "@/unit";
 import {
   postCardActions,
   postCardOverflow,
@@ -14,11 +15,17 @@ import { PostBodyMarkdown } from "../parts/PostBodyMarkdown";
 interface PostCardProps {
   post: PostDTO;
   onOpen?: () => void;
+  variantContext?: VariantContextSummary | null;
 }
 
-export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
+export const PostCard: React.FC<PostCardProps> = ({
+  post,
+  onOpen,
+  variantContext,
+}) => {
   const navigate = useNavigate();
   const rootPostUnitId = post.unitId;
+  const resolvedVariantContext = variantContext ?? post.variantContext;
 
   const handleCardClick = () => {
     if (onOpen) {
@@ -57,6 +64,16 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onOpen }) => {
           clamp={{ maxLines: 4 }}
           className="text-sm"
         />
+        {resolvedVariantContext && (
+          // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents the parent card click when the nested route link is used.
+          <div
+            className="w-fit max-w-full"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={() => undefined}
+          >
+            <VariantContextLink context={resolvedVariantContext} />
+          </div>
+        )}
         {post.extra?.poll?.unitId && (
           <PollEmbed pollUnitId={post.extra.poll.unitId} />
         )}

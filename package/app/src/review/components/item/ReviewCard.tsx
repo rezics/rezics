@@ -1,4 +1,4 @@
-import type { PostDTO } from "@rezics/contract";
+import type { PostDTO, VariantContextSummary } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Tooltip,
@@ -14,6 +14,7 @@ import { PostAuthorHeader } from "@/post/components/parts/PostAuthorHeader";
 import { PostBodyMarkdown } from "@/post/components/parts/PostBodyMarkdown";
 import { TextLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
+import { VariantContextLink } from "@/unit";
 import { reviewCardActions, reviewPolicy } from "../../models/reviewPolicy";
 
 interface ReviewRatingBadgeProps {
@@ -56,6 +57,7 @@ interface ReviewCardProps {
   className?: string;
   targetUnit?: ReviewTargetUnit | null;
   showTargetUnit?: boolean;
+  variantContext?: VariantContextSummary | null;
 }
 
 export interface ReviewTargetUnit {
@@ -82,6 +84,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   className,
   targetUnit,
   showTargetUnit = true,
+  variantContext,
 }) => {
   const { t } = useTranslation(["community"]);
   const navigate = useNavigate();
@@ -90,6 +93,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   const reviewTargetUnit = showTargetUnit
     ? getReviewTargetUnit(review, targetUnit)
     : null;
+  const resolvedVariantContext = variantContext ?? review.variantContext;
 
   const handleReplyInvoke = () => {
     if (!review.unitId) return;
@@ -143,6 +147,13 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
               {reviewTargetUnit.title}
             </TextLink>
           </div>
+        )}
+
+        {resolvedVariantContext && (
+          <VariantContextLink
+            context={resolvedVariantContext}
+            className="w-fit max-w-full"
+          />
         )}
 
         <PostBodyMarkdown content={review.content} clamp={{ maxLines: 6 }} />

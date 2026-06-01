@@ -113,6 +113,10 @@ describe("post work-domain contract fields", () => {
         authorUserId: "user-1",
         targetUnitId: "main-1",
         variantUnitId: "variant-1",
+        variantContext: {
+          unitId: "variant-1",
+          title: "Selected Edition",
+        },
       }),
     ).toBe(true);
     expect(

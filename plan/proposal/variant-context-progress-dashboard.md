@@ -102,21 +102,21 @@ shelf-based flows feel continuous.
 
 ## 4. Variant Title Hydration and Card Rendering
 
-- [ ] 4.1 Add a small shared variant context summary shape in
+- [x] 4.1 Add a small shared variant context summary shape in
   `@rezics/contract` or the relevant app model: `{ unitId, title }`, derived
   from the VARIANT Unit title when available.
-- [ ] 4.2 Batch-load variant titles for post and shelf list reads where the API
+- [x] 4.2 Batch-load variant titles for post and shelf list reads where the API
   already hydrates card data; missing titles must not fail the request.
-- [ ] 4.3 Extend `UnitCardSummary` in
+- [x] 4.3 Extend `UnitCardSummary` in
   `package/app/src/unit/models/unitCardSummary.ts` with optional
   `variantContext`.
-- [ ] 4.4 Update `UnitCard` in `package/app/src/unit/components/UnitCard.tsx`
+- [x] 4.4 Update `UnitCard` in `package/app/src/unit/components/UnitCard.tsx`
   to render the MAIN card as primary and a single linked variant row using the
   title only.
-- [ ] 4.5 Update `ReviewCard`, `PostCard`, `ExcerptCard`, and shelf item
+- [x] 4.5 Update `ReviewCard`, `PostCard`, `ExcerptCard`, and shelf item
   renderers to pass and display variant context without rendering a separate
   VARIANT card as the primary object.
-- [ ] 4.6 Add Storybook/test coverage for cards with no variant context, valid
+- [x] 4.6 Add Storybook/test coverage for cards with no variant context, valid
   variant title, and missing-title fallback.
 
 ## 5. MAIN and VARIANT Page Query Behavior

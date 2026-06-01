@@ -104,7 +104,14 @@ function makeShelfUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
 
 describe("shelfUnitToUnitCardSummary", () => {
   test("maps a hydrated shelf book unit with shelf added time", () => {
-    const unit = makeShelfUnit({ unitId: "book-1", kind: "book" });
+    const unit = makeShelfUnit({
+      unitId: "book-1",
+      kind: "book",
+      variantContext: {
+        unitId: "variant-1",
+        title: "Selected Edition",
+      },
+    });
     const book: BookDTO = {
       unitId: "book-1",
       coverUrl: null,
@@ -126,6 +133,10 @@ describe("shelfUnitToUnitCardSummary", () => {
       title: "Shelf Book",
       contentPreview: "Book description",
       addedAt: "2026-02-01T00:00:00.000Z",
+      variantContext: {
+        unitId: "variant-1",
+        title: "Selected Edition",
+      },
     });
   });
 
