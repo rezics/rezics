@@ -23,7 +23,7 @@ CREATE TABLE "Comment" (
 CREATE INDEX "Comment_rootUnitId_realmUnitId_createdAt_idx"
     ON "Comment"("rootUnitId", "realmUnitId", "createdAt");
 
-CREATE INDEX "Comment_rootUnitId_realmUnitId_parentCommentUnitId_createdAt_idx"
+CREATE INDEX "Comment_rootUnitId_realmUnitId_parentCommentUnitId_createdA_idx"
     ON "Comment"("rootUnitId", "realmUnitId", "parentCommentUnitId", "createdAt");
 
 CREATE INDEX "Comment_parentCommentUnitId_createdAt_idx"
