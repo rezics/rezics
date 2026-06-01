@@ -4,7 +4,11 @@
 
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { postApi } from "./post.api";
-import { type PostByTargetFilters, postKeys } from "./post.keys";
+import {
+  type PostByTargetFilters,
+  type PostByVariantFilters,
+  postKeys,
+} from "./post.keys";
 import type { PostFilters } from "./post.types";
 
 /**
@@ -39,6 +43,17 @@ export const postsByTargetQuery = (
     queryFn: () => postApi.getByTarget(targetUnitId, filters),
     enabled: !!targetUnitId,
     staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+
+export const postsByVariantQuery = (
+  variantUnitId: string,
+  filters?: PostByVariantFilters,
+) =>
+  queryOptions({
+    queryKey: postKeys.byVariant(variantUnitId, filters),
+    queryFn: () => postApi.getByVariant(variantUnitId, filters),
+    enabled: !!variantUnitId,
+    staleTime: 1000 * 60 * 2,
   });
 
 export const wikiPostsByTargetQuery = (
@@ -125,6 +140,7 @@ export const postQueries = {
   list: postListQuery,
   detail: postDetailQuery,
   byTarget: postsByTargetQuery,
+  byVariant: postsByVariantQuery,
   wikiByTarget: wikiPostsByTargetQuery,
   byAuthor: postsByAuthorQuery,
   byRealm: postsByRealmQuery,

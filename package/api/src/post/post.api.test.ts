@@ -76,6 +76,15 @@ describe("post wiki API helpers", () => {
     ]);
   });
 
+  test("builds stable variant context keys", () => {
+    expect(postKeys.byVariant("variant-1", { limit: 20 })).toEqual([
+      "posts",
+      "variant",
+      "variant-1",
+      { limit: 20 },
+    ]);
+  });
+
   test("uses the shared WIKI kind literal", () => {
     expect(PostKind.WIKI).toBe("WIKI");
   });

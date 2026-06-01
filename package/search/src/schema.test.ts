@@ -29,7 +29,12 @@ describe("expected Meilisearch index settings", () => {
     const posts = getExpectedMeiliIndexSchema("posts");
 
     expect(posts.filterableAttributes).toEqual(
-      expect.arrayContaining(["kind", "targetUnitId", "realmIds"]),
+      expect.arrayContaining([
+        "kind",
+        "targetUnitId",
+        "variantUnitId",
+        "realmIds",
+      ]),
     );
     expect(posts.filterableAttributes).not.toContain("parentPostUnitId");
   });

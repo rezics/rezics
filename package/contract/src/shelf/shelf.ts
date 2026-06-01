@@ -63,6 +63,7 @@ export type ShelfUnitRelationRole =
 export const shelfUnitDTOSchema = t.Object({
   shelfId: t.String(),
   unitId: t.String(),
+  variantUnitId: t.Optional(t.Nullable(t.String())),
   kind: shelfUnitKindSchema,
   position: t.String(),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -171,6 +172,7 @@ const shelfListCommonProperties = {
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   containsUnitId: t.Optional(t.String()),
+  variantUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
@@ -193,6 +195,7 @@ const shelfListBodyCommonProperties = {
   userId: t.Optional(t.String()),
   kindKey: t.Optional(t.String()),
   containsUnitId: t.Optional(t.String()),
+  variantUnitId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   sort: t.Optional(
     t.Object({
@@ -304,6 +307,11 @@ export type SetPinnedTagsResponse =
 
 export const addShelfUnitSchema = t.Object({
   unitId: t.String(),
+  /**
+   * Weak selected VARIANT context. The ShelfUnit row remains keyed by
+   * `(shelfId, unitId)` and this value is not validated as existing or VARIANT.
+   */
+  variantUnitId: t.Optional(t.String()),
   kind: shelfUnitKindSchema,
   tagUnitIds: t.Optional(t.Array(t.String())),
   searchText: t.Optional(t.Nullable(t.String())),
@@ -320,6 +328,7 @@ export type ShelfUnitParams = (typeof shelfUnitParamsSchema)["static"];
 
 export const shelfUnitsQuerySchema = t.Object({
   q: t.Optional(t.String()),
+  variantUnitId: t.Optional(t.String()),
   tagUnitIds: t.Optional(t.Array(t.String())),
   cursor: t.Optional(t.String()),
   limit: paginationLimitSchema,
@@ -376,6 +385,7 @@ export type CleanupShelfOrphansInput =
 export const shelfUnitBatchAddOpSchema = t.Object({
   op: t.Literal("add"),
   unitId: t.String(),
+  variantUnitId: t.Optional(t.String()),
   kind: shelfUnitKindSchema,
   position: t.String(),
 });
@@ -415,6 +425,7 @@ export const shelfUnitBatchAttachOpSchema = t.Object({
   op: t.Literal("attach"),
   parentUnitId: t.String(),
   childUnitId: t.String(),
+  childVariantUnitId: t.Optional(t.String()),
   childKind: shelfUnitKindSchema,
   role: shelfUnitRelationRoleSchema,
   position: t.Optional(t.String()),

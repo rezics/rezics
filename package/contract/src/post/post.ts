@@ -125,6 +125,7 @@ export const postDTOSchema = t.Object({
   authorUserId: t.String(),
   author: t.Optional(publicUserSchema),
   targetUnitId: t.Optional(t.Nullable(t.String())),
+  variantUnitId: t.Optional(t.Nullable(t.String())),
   realmUnitId: t.Optional(t.Nullable(t.String())),
   content: t.Optional(t.Nullable(contentDocSchema)),
   kind: t.Optional(t.Nullable(postKindLiterals)),
@@ -211,6 +212,8 @@ export const postListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   /** Target Unit ID for root posts. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
+  /** Exact VARIANT context lookup. Does not replace targetUnitId aggregation. */
+  variantUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
@@ -264,6 +267,8 @@ export const postListBodySchema = t.Object({
   ...listPostBodyBase.properties,
   /** Target Unit ID for root posts. Realm feeds use `realmUnitId`. */
   targetUnitId: t.Optional(t.String()),
+  /** Exact VARIANT context lookup. Does not replace targetUnitId aggregation. */
+  variantUnitId: t.Optional(t.String()),
   /** Realm Unit ID to list posts through the UnitRealm junction. */
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
@@ -351,6 +356,11 @@ export type PostResponse = (typeof postResponseSchema)["static"];
 
 export const createPostSchema = t.Object({
   targetUnitId: t.Optional(t.String()),
+  /**
+   * Weak selected VARIANT context. Normal posts still aggregate on
+   * `targetUnitId`; this value is not validated as existing or as a VARIANT.
+   */
+  variantUnitId: t.Optional(t.String()),
   /**
    * Realm Unit IDs that create UnitRealm junction rows in the same transaction
    * as the Post.

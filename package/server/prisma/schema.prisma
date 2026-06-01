@@ -653,6 +653,10 @@ model Post {
   authorUserId String @db.Uuid
 
   scoreEntryId String? @db.Uuid
+  /// Weak edition/source/package context selected by the author. The Post still
+  /// aggregates through Unit.targetUnitId; this field is a lookup hint only and
+  /// deliberately has no relation or VARIANT validation.
+  variantUnitId String? @db.Uuid
 
   /// Canonical ContentDoc JSON. Search projections such as contentText are
   /// Meilisearch-only and must not be added as PostgreSQL columns.
@@ -683,6 +687,7 @@ model Post {
   @@index([authorUserId, createdAt])
   @@index([kind, createdAt])
   @@index([scoreEntryId])
+  @@index([variantUnitId])
 }
 
 /**
@@ -788,10 +793,14 @@ model Shelf {
 }
 
 model ShelfUnit {
-  shelfId  String @db.Uuid
-  unitId   String @db.Uuid
-  kind     String @db.VarChar(32)
-  position String @db.VarChar(64) // Fractional Indexing
+  shelfId       String  @db.Uuid
+  unitId        String  @db.Uuid
+  /// Weak edition/source/package context for the selected shelf item. The row
+  /// identity remains (shelfId, unitId); this is a lookup hint only and
+  /// deliberately has no relation or VARIANT validation.
+  variantUnitId String? @db.Uuid
+  kind          String  @db.VarChar(32)
+  position      String  @db.VarChar(64) // Fractional Indexing
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -802,6 +811,7 @@ model ShelfUnit {
 
   @@id([shelfId, unitId])
   @@index([shelfId, position])
+  @@index([variantUnitId])
 }
 
 model ShelfUnitRelation {

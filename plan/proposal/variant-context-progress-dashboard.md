@@ -55,49 +55,49 @@ shelf-based flows feel continuous.
 
 ## 1. Variant Context Schema and Contracts
 
-- [ ] 1.1 Add nullable scalar `variantUnitId` with a plain index to `Post` in
+- [x] 1.1 Add nullable scalar `variantUnitId` with a plain index to `Post` in
   `package/server/prisma/schema.prisma`; do not add a relation or validation
   constraint.
-- [ ] 1.2 Add nullable scalar `variantUnitId` with a plain index to `ShelfUnit`
+- [x] 1.2 Add nullable scalar `variantUnitId` with a plain index to `ShelfUnit`
   in `package/server/prisma/schema.prisma`; keep `(shelfId, unitId)` as the row
   identity.
-- [ ] 1.3 Add a migration under `package/server/prisma/migrations/` for the two
+- [x] 1.3 Add a migration under `package/server/prisma/migrations/` for the two
   columns and indexes.
-- [ ] 1.4 Extend `PostDTO`, `CreatePostInput`, `PostListQuery`, and
+- [x] 1.4 Extend `PostDTO`, `CreatePostInput`, `PostListQuery`, and
   `PostListBody` in `package/contract/src/post/post.ts` with optional
   `variantUnitId`.
-- [ ] 1.5 Extend `ShelfUnitDTO`, `AddShelfUnitInput`, `ShelfUnitsQuery`, and
+- [x] 1.5 Extend `ShelfUnitDTO`, `AddShelfUnitInput`, `ShelfUnitsQuery`, and
   shelf list/search contracts in `package/contract/src/shelf/shelf.ts` with
   optional `variantUnitId`.
-- [ ] 1.6 Add contract tests that accept `variantUnitId` and keep it separate
+- [x] 1.6 Add contract tests that accept `variantUnitId` and keep it separate
   from `targetUnitId` / `containsUnitId`.
 
 ## 2. Post Variant Context
 
-- [ ] 2.1 Persist `CreatePostInput.variantUnitId` on the `Post` row in
+- [x] 2.1 Persist `CreatePostInput.variantUnitId` on the `Post` row in
   `package/server/src/post/post.service.ts` while continuing to persist
   `targetUnitId` on the owning `Unit`.
-- [ ] 2.2 Project `Post.variantUnitId` in
+- [x] 2.2 Project `Post.variantUnitId` in
   `package/server/src/post/post.mapper.ts`.
-- [ ] 2.3 Add exact `variantUnitId` filtering to `PostService.list` and the
+- [x] 2.3 Add exact `variantUnitId` filtering to `PostService.list` and the
   POST/GET list APIs in `package/server/src/post/post.api.ts`.
-- [ ] 2.4 Update `package/api/src/post/` API, keys, and query helpers so callers
+- [x] 2.4 Update `package/api/src/post/` API, keys, and query helpers so callers
   can request either `targetUnitId` aggregation or `variantUnitId` context.
-- [ ] 2.5 Add post service tests covering MAIN aggregation lookup,
+- [x] 2.5 Add post service tests covering MAIN aggregation lookup,
   VARIANT-context lookup, and the no-validation behavior for arbitrary
   `variantUnitId` values.
 
 ## 3. Shelf Variant Context
 
-- [ ] 3.1 Persist `AddShelfUnitInput.variantUnitId` and batch add operation
+- [x] 3.1 Persist `AddShelfUnitInput.variantUnitId` and batch add operation
   variant context in `package/server/src/shelf/shelf.service.ts`.
-- [ ] 3.2 Project `ShelfUnit.variantUnitId` in
+- [x] 3.2 Project `ShelfUnit.variantUnitId` in
   `package/server/src/shelf/shelf.mapper.ts`.
-- [ ] 3.3 Add shelf listing/search filters for `variantUnitId` alongside the
+- [x] 3.3 Add shelf listing/search filters for `variantUnitId` alongside the
   existing primary `containsUnitId` behavior.
-- [ ] 3.4 Update `package/api/src/shelf/` types, API functions, keys, and
+- [x] 3.4 Update `package/api/src/shelf/` types, API functions, keys, and
   hydration helpers to carry `variantUnitId`.
-- [ ] 3.5 Add shelf service tests proving `containsUnitId` and `variantUnitId`
+- [x] 3.5 Add shelf service tests proving `containsUnitId` and `variantUnitId`
   are separate filters and that variant context is not validated.
 
 ## 4. Variant Title Hydration and Card Rendering
@@ -175,12 +175,12 @@ shelf-based flows feel continuous.
 
 ## 8. Search and Indexing
 
-- [ ] 8.1 Add `variantUnitId` to post search documents and filters where post
+- [x] 8.1 Add `variantUnitId` to post search documents and filters where post
   search supports exact target/context filtering.
 - [ ] 8.2 Decide whether shelf search needs a search-index projection or only
   PostgreSQL filtering; implement the smaller path unless UI requirements need
   search-index support.
-- [ ] 8.3 Add search/job-runner tests that preserve MAIN aggregation defaults and
+- [x] 8.3 Add search/job-runner tests that preserve MAIN aggregation defaults and
   support exact VARIANT context filtering.
 
 ## Out of scope

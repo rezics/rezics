@@ -1829,6 +1829,7 @@ export function buildPostDocument(post: any): PostSearchDocument {
     qualityScore: 0,
     rankUpdatedAt: null,
     targetUnitId: post.unit?.targetUnitId ?? null,
+    variantUnitId: post.variantUnitId ?? null,
     realmIds: realmIdsForSearch(post.unit),
     authorUserId: post.authorUserId,
     scoreEntryId: post.scoreEntryId ?? null,

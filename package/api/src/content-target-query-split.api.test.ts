@@ -43,6 +43,14 @@ describe("target query split", () => {
     ]);
   });
 
+  test("variant context post feeds query variantUnitId separately", async () => {
+    await postApi.getByVariant("variant-1", { limit: 10 });
+
+    expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
+      "http://api.example/post/list?variantUnitId=variant-1&limit=10",
+    ]);
+  });
+
   test("chapter pages query Unit.targetUnitId while comments query topology", async () => {
     await chapterApi.getByTargetUnitId("book-1", { limit: 20 });
     await commentApi.list({

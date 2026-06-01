@@ -45,6 +45,7 @@ describe("mapPostToDTO", () => {
     } as any);
 
     expect(dto.targetUnitId).toBe("book-1");
+    expect(dto.variantUnitId).toBeNull();
     expect(dto.author).toMatchObject({
       unitId: "user-1",
       slug: "alice",

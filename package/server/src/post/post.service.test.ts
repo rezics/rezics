@@ -769,6 +769,19 @@ describe("PostService.byRealm", () => {
     expect("parentPostUnitId" in where).toBe(false);
   });
 
+  test("filters variantUnitId as exact weak context without changing target aggregation", async () => {
+    resetMocks();
+
+    await service.list({
+      targetUnitId: "main-1",
+      variantUnitId: "variant-1",
+    });
+
+    const where = firstPostFindManyArgs().where;
+    expect(where.unit.targetUnitId).toBe("main-1");
+    expect(where.variantUnitId).toBe("variant-1");
+  });
+
   test("general post feeds do not carry root-only guards", async () => {
     resetMocks();
 
@@ -916,6 +929,24 @@ describe("PostService.create targetUnitId derivation", () => {
 
     expect(unitCreateDataArg().targetUnitId).toBe("book-B");
     expect(createDataArg().targetUnitId).toBeUndefined();
+    expect(unitFindUniqueMock).not.toHaveBeenCalled();
+  });
+
+  test("top-level REVIEW stores variantUnitId on Post without validation", async () => {
+    resetMocks();
+
+    await service.create(
+      {
+        content: content("great"),
+        kind: "REVIEW",
+        targetUnitId: "book-B",
+        variantUnitId: "arbitrary-variant-context",
+      },
+      "user-1",
+    );
+
+    expect(unitCreateDataArg().targetUnitId).toBe("book-B");
+    expect(createDataArg().variantUnitId).toBe("arbitrary-variant-context");
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 

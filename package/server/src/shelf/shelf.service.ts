@@ -99,13 +99,22 @@ async function ensureShelfUnit(
   shelfId: string,
   unitId: string,
   kind: ShelfUnitKind,
+  variantUnitId?: string | null,
   explicitPosition?: string,
 ): Promise<{ created: boolean }> {
   const position = explicitPosition ?? (await nextShelfPosition(tx, shelfId));
   const created = await tx.shelfUnit.createMany({
-    data: [{ shelfId, unitId, kind, position }],
+    data: [
+      { shelfId, unitId, variantUnitId: variantUnitId ?? null, kind, position },
+    ],
     skipDuplicates: true,
   });
+  if (created.count === 0 && variantUnitId !== undefined) {
+    await tx.shelfUnit.update({
+      where: { shelfId_unitId: { shelfId, unitId } },
+      data: { variantUnitId },
+    });
+  }
   if (created.count > 0) {
     await tx.shelf.update({
       where: { unitId: shelfId },
@@ -243,6 +252,13 @@ export class ShelfService {
       });
     }
 
+    const variantUnitId = options.variantUnitId?.trim();
+    if (variantUnitId) {
+      and.push({
+        units: { some: { variantUnitId } },
+      });
+    }
+
     const idList = parseIdsCsv(options.ids);
     if (idList && idList.length > 0) {
       and.push({ unitId: { in: idList } });
@@ -287,6 +303,7 @@ export class ShelfService {
       hydratedRows.map((row) => row.unitId),
       {
         containsUnitId: options.containsUnitId?.trim(),
+        variantUnitId: options.variantUnitId?.trim(),
       },
     );
     return {
@@ -301,25 +318,34 @@ export class ShelfService {
     shelfIds: string[],
     filters: {
       containsUnitId?: string;
+      variantUnitId?: string;
     },
   ): Promise<Map<string, ShelfMatchedUnitDTO>> {
     const out = new Map<string, ShelfMatchedUnitDTO>();
     if (shelfIds.length === 0) return out;
 
     const containsUnitId = filters.containsUnitId?.trim();
-    if (!containsUnitId) return out;
+    const variantUnitId = filters.variantUnitId?.trim();
+    if (!containsUnitId && !variantUnitId) return out;
 
     const shelfUnits = await prisma.shelfUnit.findMany({
-      where: { shelfId: { in: shelfIds }, unitId: containsUnitId },
+      where: {
+        shelfId: { in: shelfIds },
+        ...(containsUnitId ? { unitId: containsUnitId } : {}),
+        ...(variantUnitId ? { variantUnitId } : {}),
+      },
       orderBy: { position: "asc" },
       select: {
         shelfId: true,
         unitId: true,
+        variantUnitId: true,
         kind: true,
       },
     });
 
-    const matchedUnitIds = [...new Set(shelfUnits.map((row) => row.unitId))];
+    const matchedUnitIds = [
+      ...new Set(shelfUnits.map((row) => row.variantUnitId ?? row.unitId)),
+    ];
     const units =
       matchedUnitIds.length > 0
         ? await prisma.unit.findMany({
@@ -335,7 +361,8 @@ export class ShelfService {
 
     for (const row of shelfUnits) {
       if (out.has(row.shelfId)) continue;
-      const unit = unitById.get(row.unitId);
+      const matchedUnitId = row.variantUnitId ?? row.unitId;
+      const unit = unitById.get(matchedUnitId);
       const translations = unit?.translations ?? [];
       const title =
         translations.find((tr) => tr.language === unit?.defaultLanguage)
@@ -343,7 +370,7 @@ export class ShelfService {
         translations[0]?.title ??
         null;
       out.set(row.shelfId, {
-        unitId: row.unitId,
+        unitId: matchedUnitId,
         kind: row.kind as ShelfMatchedUnitDTO["kind"],
         title,
       });
@@ -677,7 +704,7 @@ export class ShelfService {
     const kind = req.kind ?? (await this.deriveKind(req.unitId));
 
     const row = await prisma.$transaction(async (tx) => {
-      await ensureShelfUnit(tx, shelfId, req.unitId, kind);
+      await ensureShelfUnit(tx, shelfId, req.unitId, kind, req.variantUnitId);
       if (userId) {
         await applyUserUnitCollectionMetadata(tx, userId, req.unitId, {
           tagUnitIds: req.tagUnitIds,
@@ -809,6 +836,9 @@ export class ShelfService {
     const units = await prisma.shelfUnit.findMany({
       where: {
         shelfId,
+        ...(query.variantUnitId?.trim()
+          ? { variantUnitId: query.variantUnitId.trim() }
+          : {}),
         ...(searchIds ? { unitId: { in: [...searchIds] } } : {}),
       },
       orderBy: { position: "asc" },
@@ -1003,22 +1033,15 @@ export class ShelfService {
                 });
                 continue;
               }
-              const created = await tx.shelfUnit.createMany({
-                data: [
-                  {
-                    shelfId,
-                    unitId: op.unitId,
-                    kind: op.kind,
-                    position: op.position,
-                  },
-                ],
-                skipDuplicates: true,
-              });
-              if (created.count > 0) {
-                await tx.shelf.update({
-                  where: { unitId: shelfId },
-                  data: { itemCount: { increment: 1 } },
-                });
+              const created = await ensureShelfUnit(
+                tx,
+                shelfId,
+                op.unitId,
+                op.kind,
+                op.variantUnitId,
+                op.position,
+              );
+              if (created.created) {
                 mutated = true;
               }
               const row = await tx.shelfUnit.findUniqueOrThrow({
@@ -1127,6 +1150,7 @@ export class ShelfService {
                   shelfId,
                   op.childUnitId,
                   op.childKind,
+                  op.childVariantUnitId,
                   op.position,
                 );
                 if (r.created) mutated = true;

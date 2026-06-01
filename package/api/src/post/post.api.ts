@@ -46,10 +46,22 @@ export const postApi = {
    */
   getByTarget: async (
     targetUnitId: string,
-    filters?: PostFilters,
+    filters?: Omit<PostFilters, "targetUnitId">,
   ): Promise<PostListResponse> => {
     return apiFetch<PostListResponse>(
       `/post/list${buildQueryString({ targetUnitId, ...filters })}`,
+    );
+  },
+
+  /**
+   * Get posts that mention an exact selected VARIANT context.
+   */
+  getByVariant: async (
+    variantUnitId: string,
+    filters?: Omit<PostFilters, "variantUnitId">,
+  ): Promise<PostListResponse> => {
+    return apiFetch<PostListResponse>(
+      `/post/list${buildQueryString({ variantUnitId, ...filters })}`,
     );
   },
 

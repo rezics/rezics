@@ -117,6 +117,40 @@ describe("ShelfService", () => {
     });
   });
 
+  test("list keeps containsUnitId primary containment separate from variantUnitId context", async () => {
+    let findManyArgs: any;
+    Object.assign(prismaMock, {
+      shelf: {
+        findMany: async (args: any) => {
+          findManyArgs = args;
+          return [];
+        },
+        count: async () => 0,
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    await shelfService.list({
+      containsUnitId: "main-1",
+      variantUnitId: "variant-1",
+      limit: 10,
+    });
+
+    expect(findManyArgs.where).toMatchObject({
+      AND: [
+        {
+          unit: {
+            type: "SHELF",
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+          },
+        },
+        { units: { some: { unitId: "main-1" } } },
+        { units: { some: { variantUnitId: "variant-1" } } },
+      ],
+    });
+  });
+
   test("list hydrates the matched contained unit for exact results", async () => {
     Object.assign(prismaMock, {
       shelf: {
@@ -153,6 +187,46 @@ describe("ShelfService", () => {
       unitId: "release-1",
       kind: "book",
       title: "Contained Release",
+    });
+  });
+
+  test("list hydrates the matched variant context when filtering by variantUnitId", async () => {
+    Object.assign(prismaMock, {
+      shelf: {
+        findMany: async () => [makeShelfListRow()],
+        count: async () => 1,
+      },
+      shelfUnit: {
+        findMany: async () => [
+          {
+            shelfId: "shelf-1",
+            unitId: "main-1",
+            variantUnitId: "variant-1",
+            kind: "book",
+          },
+        ],
+      },
+      unit: {
+        findMany: async () => [
+          {
+            id: "variant-1",
+            defaultLanguage: "en",
+            translations: [{ language: "en", title: "Exact Edition" }],
+          },
+        ],
+      },
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const result = await shelfService.list({
+      variantUnitId: "variant-1",
+      limit: 10,
+    });
+
+    expect(result.shelves[0]?.matchedUnit).toEqual({
+      unitId: "variant-1",
+      kind: "book",
+      title: "Exact Edition",
     });
   });
 
@@ -197,6 +271,47 @@ describe("ShelfService", () => {
       payload: { unitId: "shelf-1" },
       source: { type: "server", service: "shelf" },
     });
+  });
+
+  test("addUnit persists variantUnitId as weak context without validating it", async () => {
+    enqueueMock.mockClear();
+    let createManyArgs: any;
+
+    Object.assign(prismaMock, {
+      unit: {
+        findUnique: async () => ({ type: "BOOK", post: null }),
+      },
+      shelfUnit: {
+        findMany: async () => [],
+      },
+      $transaction: async (fn: any) =>
+        fn({
+          shelfUnit: {
+            findFirst: async () => null,
+            createMany: async (args: any) => {
+              createManyArgs = args;
+              return { count: 1 };
+            },
+            findUniqueOrThrow: async () =>
+              makeShelfUnitRow({ variantUnitId: "missing-or-not-variant" }),
+          },
+          shelf: { update: async () => ({}) },
+        }),
+    });
+
+    const { shelfService } = await import("./shelf.service");
+    const dto = await shelfService.addUnit("shelf-1", {
+      unitId: "book-1",
+      variantUnitId: "missing-or-not-variant",
+      kind: "book",
+    });
+
+    expect(createManyArgs.data[0]).toMatchObject({
+      shelfId: "shelf-1",
+      unitId: "book-1",
+      variantUnitId: "missing-or-not-variant",
+    });
+    expect(dto.variantUnitId).toBe("missing-or-not-variant");
   });
 
   test("addUnit writes optional user collection metadata", async () => {
@@ -411,12 +526,14 @@ describe("ShelfService", () => {
     enqueueMock.mockClear();
 
     const applied: string[] = [];
+    let createManyArgs: any;
 
     Object.assign(prismaMock, {
       $transaction: async (fn: any) =>
         fn({
           shelfUnit: {
-            createMany: async () => {
+            createMany: async (args: any) => {
+              createManyArgs = args;
               applied.push("createMany");
               return { count: 1 };
             },
@@ -442,7 +559,13 @@ describe("ShelfService", () => {
     const { shelfService } = await import("./shelf.service");
     const results = await shelfService.applyBatch("shelf-1", [
       { op: "delete", unitId: "old" },
-      { op: "add", unitId: "b-1", kind: "book", position: "a0" },
+      {
+        op: "add",
+        unitId: "b-1",
+        variantUnitId: "variant-b-1",
+        kind: "book",
+        position: "a0",
+      },
       { op: "reorder", unitId: "b-1", position: "z0" },
     ]);
 
@@ -454,6 +577,7 @@ describe("ShelfService", () => {
     expect(results[2]!.status).toBe("ok");
     expect(results[2]!.op.op).toBe("reorder");
     expect(applied[0]).toBe("deleteMany");
+    expect(createManyArgs.data[0].variantUnitId).toBe("variant-b-1");
     expect(enqueueMock).toHaveBeenCalledTimes(1);
   });
 

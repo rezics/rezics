@@ -21,6 +21,7 @@ describe("PostSearchDocumentSchema root post fields", () => {
         qualityScore: 0,
         rankUpdatedAt: null,
         targetUnitId: "release-1",
+        variantUnitId: "variant-1",
         realmIds: [],
         authorUserId: "user-1",
         scoreEntryId: null,
@@ -40,6 +41,7 @@ describe("PostSearchDocumentSchema root post fields", () => {
     expect(
       Value.Check(PostSearchOptionsSchema, {
         targetUnitId: "release-1",
+        variantUnitId: "variant-1",
       }),
     ).toBe(true);
     expect(

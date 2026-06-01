@@ -5,6 +5,7 @@
 import type { PostFilters } from "./post.types";
 
 export type PostByTargetFilters = Omit<PostFilters, "targetUnitId">;
+export type PostByVariantFilters = Omit<PostFilters, "variantUnitId">;
 
 export const postKeys = {
   /**
@@ -36,6 +37,10 @@ export const postKeys = {
     [...postKeys.byTargets(targetUnitId), filters ?? null] as const,
   wikiByTarget: (targetUnitId: string, filters?: PostByTargetFilters) =>
     [...postKeys.byTargets(targetUnitId), "wiki", filters ?? null] as const,
+  byVariants: (variantUnitId: string) =>
+    [...postKeys.all(), "variant", variantUnitId] as const,
+  byVariant: (variantUnitId: string, filters?: PostByVariantFilters) =>
+    [...postKeys.byVariants(variantUnitId), filters ?? null] as const,
 
   /**
    * Keys for author-specific queries

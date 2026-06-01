@@ -13,6 +13,9 @@ export async function searchPosts(
   if (opts.targetUnitId) {
     filter.push(`targetUnitId = "${opts.targetUnitId}"`);
   }
+  if (opts.variantUnitId) {
+    filter.push(`variantUnitId = "${opts.variantUnitId}"`);
+  }
   if (opts.realmUnitId) {
     filter.push(`realmIds = "${opts.realmUnitId}"`);
   }

@@ -1,9 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  addShelfUnitSchema,
   shelfDTOSchema,
   shelfListBodySchema,
   shelfListQuerySchema,
+  shelfUnitDTOSchema,
+  shelfUnitsQuerySchema,
 } from "./shelf";
 
 describe("shelf containment contract fields", () => {
@@ -31,6 +34,45 @@ describe("shelf containment contract fields", () => {
     expect(
       Value.Check(shelfListBodySchema, {
         containsUnitId: "release-1",
+        limit: 20,
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts weak variant context separately from containment", () => {
+    expect(
+      Value.Check(addShelfUnitSchema, {
+        unitId: "main-1",
+        variantUnitId: "variant-1",
+        kind: "book",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(shelfUnitDTOSchema, {
+        shelfId: "shelf-1",
+        unitId: "main-1",
+        variantUnitId: "variant-1",
+        kind: "book",
+        position: "a0",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(shelfListQuerySchema, {
+        containsUnitId: "main-1",
+        variantUnitId: "variant-1",
+        limit: 20,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(shelfListBodySchema, {
+        containsUnitId: "main-1",
+        variantUnitId: "variant-1",
+        limit: 20,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(shelfUnitsQuerySchema, {
+        variantUnitId: "variant-1",
         limit: 20,
       }),
     ).toBe(true);

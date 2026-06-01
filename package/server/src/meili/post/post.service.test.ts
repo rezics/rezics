@@ -28,14 +28,16 @@ describe("searchPosts filters", () => {
     });
   });
 
-  test("combines exact target and realm filters", async () => {
+  test("combines exact target, variant context, and realm filters", async () => {
     await searchPosts({
       targetUnitId: "release-1",
+      variantUnitId: "variant-1",
       realmUnitId: "realm-1",
     });
 
     expect(postSearchMock.mock.calls[0]?.[1].filter).toEqual([
       'targetUnitId = "release-1"',
+      'variantUnitId = "variant-1"',
       'realmIds = "realm-1"',
     ]);
   });

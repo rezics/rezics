@@ -123,6 +123,7 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     filterableAttributes: [
       "kind",
       "targetUnitId",
+      "variantUnitId",
       "realmIds",
       "authorUserId",
       "isLocked",

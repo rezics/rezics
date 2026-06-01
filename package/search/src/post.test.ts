@@ -93,6 +93,32 @@ describe("buildPostDocument", () => {
     expect(doc.targetUnitId).toBe("book-B");
   });
 
+  test("projects variantUnitId from the Post row as weak context", async () => {
+    setServerEnvForSearchTests();
+    const { buildPostDocument } = await import("./sync");
+    const doc = buildPostDocument({
+      unitId: "post-1",
+      variantUnitId: "variant-1",
+      content: markdownContentDoc("hello"),
+      kind: "REVIEW",
+      isLocked: false,
+      replyCount: 0,
+      directReplyCount: 0,
+      lastReplyAt: null,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      authorUserId: "user-1",
+      scoreEntryId: null,
+      unit: { targetUnitId: "book-B", user: null, inRealms: [] },
+      targetUnit: null,
+      scoreEntry: null,
+      extra: null,
+    });
+
+    expect(doc.targetUnitId).toBe("book-B");
+    expect(doc.variantUnitId).toBe("variant-1");
+  });
+
   test("falls back to null when targetUnitId is missing on the row", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");

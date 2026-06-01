@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { collectionApi, shelfApi } from "./shelf.api";
 import {
   type ShelfContainmentFilters,
+  type ShelfVariantFilters,
   collectionKeys,
   normalizeCollectionIds,
   shelfKeys,
@@ -31,6 +32,17 @@ export const shelvesContainingUnitQuery = (
     queryKey: shelfKeys.containingUnit(unitId, filters),
     queryFn: () => shelfApi.list({ ...filters, containsUnitId: unitId }),
     enabled: !!unitId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+export const shelvesByVariantContextQuery = (
+  variantUnitId: string,
+  filters?: ShelfVariantFilters,
+) =>
+  queryOptions({
+    queryKey: shelfKeys.variantContext(variantUnitId, filters),
+    queryFn: () => shelfApi.list({ ...filters, variantUnitId }),
+    enabled: !!variantUnitId,
     staleTime: 1000 * 60 * 5,
   });
 

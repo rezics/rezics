@@ -47,6 +47,7 @@ export function mapShelfUnitToDTO(row: ShelfUnitRow): ShelfUnitDTO {
   return {
     shelfId: row.shelfId,
     unitId: row.unitId,
+    variantUnitId: row.variantUnitId ?? null,
     kind: row.kind as ShelfUnitKind,
     position: row.position,
     createdAt: row.createdAt,

@@ -1,6 +1,7 @@
 import type { ShelfFilters, ShelfUnitsQuery } from "./shelf.types";
 
 export type ShelfContainmentFilters = Omit<ShelfFilters, "containsUnitId">;
+export type ShelfVariantFilters = Omit<ShelfFilters, "variantUnitId">;
 
 export const normalizeCollectionIds = (ids: readonly string[]): string[] =>
   Array.from(new Set(ids.filter(Boolean))).sort();
@@ -11,6 +12,8 @@ export const shelfKeys = {
   list: (filters?: ShelfFilters) => [...shelfKeys.lists(), filters] as const,
   containingUnit: (unitId: string, filters?: ShelfContainmentFilters) =>
     [...shelfKeys.lists(), "containsUnit", unitId, filters ?? null] as const,
+  variantContext: (variantUnitId: string, filters?: ShelfVariantFilters) =>
+    [...shelfKeys.lists(), "variant", variantUnitId, filters ?? null] as const,
   details: () => [...shelfKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...shelfKeys.details(), unitId] as const,
   byUser: (userId: string, filters?: ShelfFilters) =>

@@ -7,8 +7,10 @@ import {
   postDTOSchema,
   commentPromotionDTOSchema,
   postListQuerySchema,
+  postListBodySchema,
   excerptSourceSchema,
 } from "./post";
+import { markdownContentDoc } from "../content/doc-v1";
 
 describe("excerptSourceSchema", () => {
   test("unit mode passes", () => {
@@ -95,6 +97,38 @@ describe("post work-domain contract fields", () => {
 
   test("does not accept comment topology on post creation", () => {
     expect("parentPostUnitId" in createPostSchema.properties).toBe(false);
+  });
+
+  test("accepts weak variant context separately from target aggregation", () => {
+    expect(
+      Value.Check(createPostSchema, {
+        targetUnitId: "main-1",
+        variantUnitId: "variant-1",
+        content: markdownContentDoc("body"),
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(postDTOSchema, {
+        unitId: "post-1",
+        authorUserId: "user-1",
+        targetUnitId: "main-1",
+        variantUnitId: "variant-1",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(postListQuerySchema, {
+        targetUnitId: "main-1",
+        variantUnitId: "variant-1",
+        limit: 20,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(postListBodySchema, {
+        targetUnitId: "main-1",
+        variantUnitId: "variant-1",
+        limit: 20,
+      }),
+    ).toBe(true);
   });
 
   test("uses comment endpoint naming for promotion contracts", () => {

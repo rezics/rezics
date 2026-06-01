@@ -34,6 +34,7 @@ export {
   shelfQueries,
   shelfUnitsInfiniteQuery,
   shelfUnitsQuery,
+  shelvesByVariantContextQuery,
   shelvesByUserQuery,
   useCollectionStatusHydration,
   userShelvesQuery,

@@ -233,6 +233,9 @@ export class PostService {
         targetUnitId: query.targetUnitId,
       };
     }
+    // Weak context lookup only: do not resolve through Unit.targetUnitId and do
+    // not validate that the value names a VARIANT.
+    if (query.variantUnitId) where.variantUnitId = query.variantUnitId;
     if (query.authorUserId) where.authorUserId = query.authorUserId;
     if (query.kind) where.kind = query.kind;
     applyStateFilter(where, query);
@@ -525,6 +528,7 @@ export class PostService {
       content,
       scoreEntryId,
       extra,
+      variantUnitId,
     } = input;
 
     // Chapters always publish. A draft is owner-only and stays out of
@@ -615,6 +619,7 @@ export class PostService {
         content: content as Prisma.InputJsonValue,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,
+        variantUnitId: variantUnitId ?? undefined,
         state: statefulInit?.initial ?? undefined,
         extra: extraToWrite as Prisma.InputJsonValue | undefined,
       };
