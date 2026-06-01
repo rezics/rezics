@@ -32,7 +32,7 @@ export function useEnsureChapterUnit(bookUnitId: string) {
           nodeId: chapter.nodeId,
         },
       });
-      return materialized.chapterUnitId;
+      return materialized.contentUnitId;
     },
     [bookUnitId, materializeChapterMutation],
   );

@@ -303,14 +303,14 @@ export const BookTocEditor = forwardRef<
         );
         return;
       }
-      const chapterUnitId = await ensureChapterUnit({
+      const targetContentUnitId = await ensureChapterUnit({
         title: chapter.title,
         contentUnitId,
         nodeId: chapter.nodeId,
       });
       navigate({
         to: "/book/$bookId/edit/$chapterId",
-        params: { bookId: bookUnitId, chapterId: chapterUnitId },
+        params: { bookId: bookUnitId, chapterId: targetContentUnitId },
       });
     },
     [ensureChapterUnit, navigate, bookUnitId, showAlert],

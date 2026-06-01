@@ -58,7 +58,6 @@ export const editorialRevisionPayloadSchema = t.Object({
   sequence: t.Number(),
   actorUserId: t.String(),
   patch: editorialPatchSchema,
-  legacyChangedKeys: t.Optional(t.Array(t.String())),
   message: t.Optional(t.Nullable(t.String())),
   restoreSource: t.Optional(historyRestoreSourceSchema),
 });

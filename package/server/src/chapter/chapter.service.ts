@@ -242,7 +242,6 @@ export class ChapterService {
           bookUnitId,
           nodeId: node.id,
           contentUnitId: node.contentUnitId,
-          chapterUnitId: node.contentUnitId,
           alreadyMaterialized: true,
           bookContentStructureUpdatedAt: contentStructure.updatedAt,
         };
@@ -291,7 +290,6 @@ export class ChapterService {
         bookUnitId,
         nodeId: node.id,
         contentUnitId: unit.id,
-        chapterUnitId: unit.id,
         alreadyMaterialized: false,
         bookContentStructureUpdatedAt: updatedContentStructure.updatedAt,
       };

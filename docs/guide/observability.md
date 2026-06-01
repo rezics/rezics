@@ -13,7 +13,7 @@ role behavior.
 | Main server | `package/server/src/index.ts` | Development only at `/openapi` | `/health` | None | Owns route composition and startup cache hydration. |
 | Auth | `package/auth/src/index.ts` | Development only at `/openapi` | `/health` | None | Keeps `coreInstance()` ownership and auth route mounting. |
 | Reaction | `package/reaction/src/index.ts` | `/openapi` | `/health` | None | Keeps reaction and internal APIs. |
-| History | `package/history/src/index.ts` | `/openapi` | `/health` | `/ready` | Keeps outbox poller fallback behavior. |
+| History | `package/history/src/index.ts` | `/openapi` | `/health` | `/ready` | Serves history reads; job-runner owns outbox ingestion. |
 | Notify | `package/notify/src/index.ts` | `/openapi` | `/health` | None | Keeps production Rezics origin predicate. |
 | Job runner HTTP role | `package/job-runner/src/index.ts` | `/openapi` | `/health` | `/ready` | Worker role startup and shutdown remain explicit. |
 | Preview | `package/preview/src/index.ts` | Development only at `/openapi` | `/health` | None | Retained service now uses the shared timing plugin. |

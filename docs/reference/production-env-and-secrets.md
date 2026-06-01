@@ -110,8 +110,6 @@ in-code fallbacks; everything else must be supplied.
 | `HISTORY_DATABASE_URL` | ✓ | ✓ | — |
 | `SERVER_DATABASE_URL` | ✓ | ✓ | — |
 | `HISTORY_INTERNAL_SECRET` | ✓ | ✓ | — |
-| `HISTORY_QUEUE_INGESTION_ENABLED` | — | — | `true` |
-| `HISTORY_OUTBOX_POLLER_FALLBACK`, `HISTORY_OUTBOX_POLL_MS` | — | — | — |
 | `PORT` | — | — | (none) |
 
 ### `ranking` (internal-only)

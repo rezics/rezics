@@ -115,9 +115,7 @@ expected to resume.
 
 Sequin targets only `@rezics/job-runner`. `@rezics/history` is not a direct
 Sequin sink because job-runner owns durable side effects and enqueues
-`history.outbox.ingest` work on the `history.ingest` lane. The history fallback
-poller is temporary and opt-in; do not run it while the job-runner history
-worker is consuming the same outbox rows.
+`history.outbox.ingest` work on the `history.ingest` lane.
 
 ## Production Roles
 
@@ -232,9 +230,8 @@ Before enabling Sequin in a non-production environment:
 - Server producers can temporarily stop enqueueing by unsetting
   `JOB_RUNNER_BASE_URL` or `JOB_RUNNER_INTERNAL_SECRET`; affected mutations will
   fail fast when they attempt to enqueue.
-- History ingestion fallback requires `HISTORY_OUTBOX_POLLER_FALLBACK=1`; do
-  not run it while the `history.ingest` worker is active for the same outbox
-  rows.
+- History ingestion resumes by restarting the job-runner `history.ingest`
+  worker; outbox rows remain pending or failed until the worker claims them.
 - Search drift after rollback should be repaired with targeted
   `maintenance.search.driftRepair` or `maintenance.search.rebuildIndex` jobs.
 - If Sequin is paused but expected to resume, configure source-DB

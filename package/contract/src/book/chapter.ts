@@ -143,8 +143,6 @@ export const chapterMaterializationResponseSchema = t.Object({
   bookUnitId: t.String(),
   nodeId: t.String(),
   contentUnitId: t.String(),
-  /** @deprecated Use contentUnitId. */
-  chapterUnitId: t.String(),
   alreadyMaterialized: t.Boolean(),
   bookContentStructureUpdatedAt: t.Union([t.String(), t.Date()]),
 });

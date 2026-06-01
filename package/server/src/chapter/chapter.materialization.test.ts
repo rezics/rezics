@@ -186,13 +186,12 @@ describe("ChapterService.materializeNode", () => {
       bookUnitId: "book-1",
       nodeId: "n-1",
       contentUnitId: "chapter-new",
-      chapterUnitId: "chapter-new",
       alreadyMaterialized: false,
       bookContentStructureUpdatedAt: updatedContentStructureAt,
     });
   });
 
-  test("returns an existing chapterUnitId without creating duplicate rows", async () => {
+  test("returns an existing contentUnitId without creating duplicate rows", async () => {
     mockFindNode.mockResolvedValue(
       nodeRow({
         id: "n-1",
@@ -220,7 +219,6 @@ describe("ChapterService.materializeNode", () => {
       bookUnitId: "book-1",
       nodeId: "n-1",
       contentUnitId: "chapter-existing",
-      chapterUnitId: "chapter-existing",
       alreadyMaterialized: true,
       bookContentStructureUpdatedAt,
     });
@@ -266,7 +264,6 @@ describe("ChapterService.materializeNode", () => {
     expect(events).toEqual(["lock", "read-node"]);
     expect(mockCreateUnit).not.toHaveBeenCalled();
     expect(result.contentUnitId).toBe("chapter-existing");
-    expect(result.chapterUnitId).toBe("chapter-existing");
     expect(result.alreadyMaterialized).toBe(true);
   });
 });

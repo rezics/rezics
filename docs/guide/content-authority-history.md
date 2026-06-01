@@ -28,10 +28,8 @@ To pause history consumption, stop or scale down the job-runner
 pending. When the worker resumes, it can process pending rows without a backfill
 of main current state.
 
-The legacy in-process history poller is disabled by default. During migration it
-can be temporarily enabled with `HISTORY_OUTBOX_POLLER_FALLBACK=1`, but do not
-run that poller and the job-runner history worker as concurrent owners of the
-same outbox rows.
+History ingestion has one owner path: the job-runner `history.ingest` worker.
+The history service serves reads and does not run an in-process outbox poller.
 
 Failed rows are observable through admin dashboard counts. Admins can move
 failed rows back to pending with:

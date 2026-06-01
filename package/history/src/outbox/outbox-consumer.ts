@@ -33,7 +33,7 @@ type HistoryFailureDb = {
 
 type RevisionWriter = {
   insertUnitRevision(input: {
-    payload: EditorialRevisionPayload | LegacyEditorialRevisionPayload;
+    payload: EditorialRevisionPayload;
     contentHash: string;
     createdAt?: Date;
   }): Promise<unknown>;
@@ -44,14 +44,6 @@ type RevisionWriter = {
     >["event"];
     createdAt?: Date;
   }): Promise<unknown>;
-};
-
-type LegacyEditorialRevisionPayload = Omit<
-  EditorialRevisionPayload,
-  "patch" | "legacyChangedKeys"
-> & {
-  changedFieldKeys: string[];
-  slots: Record<string, unknown>;
 };
 
 export type OutboxConsumerResult = {
@@ -100,10 +92,8 @@ function asPayload(row: HistoryOutboxRow): HistoryOutboxPayload {
   return row.payload as HistoryOutboxPayload;
 }
 
-function editorialContent(
-  revision: EditorialRevisionPayload | LegacyEditorialRevisionPayload,
-) {
-  return "patch" in revision ? revision.patch : revision.slots;
+function editorialContent(revision: EditorialRevisionPayload) {
+  return revision.patch;
 }
 
 export class HistoryOutboxConsumer {

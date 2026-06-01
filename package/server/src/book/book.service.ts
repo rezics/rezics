@@ -213,7 +213,7 @@ export class BookService {
 
   /**
    * Get content structure by bookUnitId. Reads all node rows for the book and
-   * assembles them server-side into the legacy `BookContentStructureItem[]` wire shape.
+   * adapts the generic ContentStructure tree to the book-domain response shape.
    */
   async getContentStructureByBookUnitId(
     bookUnitId: string,

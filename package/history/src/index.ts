@@ -9,15 +9,12 @@ import {
 } from "@rezics/shared/observability";
 import { Elysia } from "elysia";
 import { env } from "./env";
-import { createDefaultHistoryOutboxConsumer } from "./outbox";
-import { shouldStartHistoryOutboxPoller } from "./outbox/startup";
 import { revisionApi } from "./revision/revision.api";
 
 import "dotenv/config";
 
 const isDev = (env.NODE_ENV ?? "development") !== "production";
 const port = env.PORT ? Number(env.PORT) : 3004;
-const outboxIntervalMs = Number(env.HISTORY_OUTBOX_POLL_MS ?? 2000);
 const observability = createObservabilityConfig(
   {
     key: "history",
@@ -95,40 +92,6 @@ export const app = new Elysia()
 
 app.listen(port);
 
-let outboxTimer: ReturnType<typeof setInterval> | undefined;
-let outboxRunning = false;
-
-if (shouldStartHistoryOutboxPoller(env)) {
-  const consumer = await createDefaultHistoryOutboxConsumer();
-  const consumeOnce = async () => {
-    if (outboxRunning) return;
-    outboxRunning = true;
-    try {
-      const result = await consumer.consumeBatch({ batchSize: 25 });
-      if (result.processed > 0 || result.failed > 0) {
-        console.log(
-          `[History Outbox] processed=${result.processed} failed=${result.failed}`,
-        );
-      }
-    } catch (error) {
-      console.error("[History Outbox] consumer failed", error);
-    } finally {
-      outboxRunning = false;
-    }
-  };
-  void consumeOnce();
-  outboxTimer = setInterval(() => void consumeOnce(), outboxIntervalMs);
-} else {
-  console.log(
-    "[History Outbox] poller disabled; queued job-runner ingestion is the default owner",
-  );
-}
-
-const stopOutbox = () => {
-  if (outboxTimer) clearInterval(outboxTimer);
-};
-
-process.on("SIGTERM", stopOutbox);
-process.on("SIGINT", stopOutbox);
+console.log("[History Outbox] queued job-runner ingestion is the only owner");
 
 logStartupBanner(observability);

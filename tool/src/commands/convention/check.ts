@@ -10,8 +10,8 @@
  * - R5  — no raw <a href> outside SafeLink
  * - R6  — no inline `queryKey: [` outside per-domain factories
  * - R9  — ban `var(--rezics-…)` and hand-written tokens.css
- * - R11 — no dynamic access to generated Paraglide messages
- * - R12 — no i18nKey fields / legacy translation APIs
+ * - R11 — no dynamic i18next keys
+ * - R12 — no fallback-string args or contract i18nKey fields
  * - R13 — core @rezics/ui cannot import host runtime deps
  * - R14 — contract / Paraglide / catalogs share the same locale set with exact key parity
  *

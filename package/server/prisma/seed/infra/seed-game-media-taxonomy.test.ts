@@ -5,8 +5,6 @@ import { seedGameMediaTaxonomy } from "./seed-game-media-taxonomy";
 function makePrismaMock() {
   let nextId = 1;
   const createdUnits: unknown[] = [];
-  const subjectAttributions: unknown[] = [];
-  const unitTags: unknown[] = [];
 
   return {
     prisma: {
@@ -24,41 +22,13 @@ function makePrismaMock() {
       unitSupportLanguage: {
         upsert: async () => ({}),
       },
-      gamePlatform: {
-        findMany: async () => [
-          { gameUnitId: "game-1", platformKey: "PC", sortOrder: 0 },
-          { gameUnitId: "game-2", platformKey: "MOBILE", sortOrder: 0 },
-          { gameUnitId: "game-3", platformKey: "UNKNOWN", sortOrder: 0 },
-        ],
-      },
-      game: {
-        findMany: async () => [
-          { unitId: "game-1", ageRatingKey: "T" },
-          { unitId: "game-2", ageRatingKey: "M" },
-          { unitId: "game-3", ageRatingKey: "UNKNOWN" },
-        ],
-      },
-      subjectAttribution: {
-        createMany: async ({ data }: { data: unknown[] }) => {
-          subjectAttributions.push(...data);
-          return { count: data.length };
-        },
-      },
-      unitTag: {
-        createMany: async ({ data }: { data: unknown[] }) => {
-          unitTags.push(...data);
-          return { count: data.length };
-        },
-      },
     },
     createdUnits,
-    subjectAttributions,
-    unitTags,
   };
 }
 
 describe("seedGameMediaTaxonomy", () => {
-  test("seeds platform entities and rating tags then backfills legacy game rows", async () => {
+  test("seeds platform entities and rating tags", async () => {
     const mock = makePrismaMock();
 
     const result = await seedGameMediaTaxonomy(
@@ -98,45 +68,6 @@ describe("seedGameMediaTaxonomy", () => {
           slugScope: "tag-scope",
         }),
       }),
-    );
-    expect(mock.subjectAttributions).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          unitId: "game-1",
-          entityId: result.platformEntityIds.windows,
-          role: "available_on",
-        }),
-        expect.objectContaining({
-          unitId: "game-2",
-          entityId: result.platformEntityIds.ios,
-          role: "available_on",
-        }),
-        expect.objectContaining({
-          unitId: "game-2",
-          entityId: result.platformEntityIds.android,
-          role: "available_on",
-        }),
-      ]),
-    );
-    expect(mock.unitTags).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          unitId: "game-1",
-          tagUnitId: result.ratingTagIds["esrb-teen"],
-          pinned: true,
-        }),
-        expect.objectContaining({
-          unitId: "game-2",
-          tagUnitId: result.ratingTagIds["esrb-mature"],
-          pinned: true,
-        }),
-      ]),
-    );
-    expect(mock.subjectAttributions).not.toContainEqual(
-      expect.objectContaining({ unitId: "game-3" }),
-    );
-    expect(mock.unitTags).not.toContainEqual(
-      expect.objectContaining({ unitId: "game-3" }),
     );
   });
 });

@@ -42,18 +42,6 @@ export type GameMediaAdminRatingTag = {
 export type GameMediaAdminDiagnostics = {
   missingPlatformSlugs: string[];
   missingRatingTagSlugs: RatingTagSlug[];
-  legacyPlatformRowCount: number;
-  legacyPlatformRows: {
-    gameUnitId: string;
-    platformKey: string;
-    sortOrder: number;
-  }[];
-  legacyAgeRatingRowCount: number;
-  legacyAgeRatingRows: {
-    gameUnitId: string;
-    ageRatingKey: string;
-  }[];
-  searchProjectionMismatchCandidateUnitIds: string[];
 };
 
 function preferredLabel(translations: TranslationRow[]): string | null {
@@ -120,29 +108,10 @@ export class GameMediaAdminReadinessService {
   }
 
   async diagnostics(): Promise<GameMediaAdminDiagnostics> {
-    const [platforms, ratingTags, legacyPlatformRows, legacyAgeRatingRows] =
-      await Promise.all([
-        this.listPlatformEntities(),
-        this.listRatingTags(),
-        prisma.gamePlatform.findMany({
-          select: { gameUnitId: true, platformKey: true, sortOrder: true },
-          orderBy: [{ gameUnitId: "asc" }, { sortOrder: "asc" }],
-          take: 50,
-        }),
-        prisma.game.findMany({
-          where: { ageRatingKey: { not: null } },
-          select: { unitId: true, ageRatingKey: true },
-          orderBy: { unitId: "asc" },
-          take: 50,
-        }),
-      ]);
-
-    const [legacyPlatformRowCount, legacyAgeRatingRowCount] = await Promise.all(
-      [
-        prisma.gamePlatform.count(),
-        prisma.game.count({ where: { ageRatingKey: { not: null } } }),
-      ],
-    );
+    const [platforms, ratingTags] = await Promise.all([
+      this.listPlatformEntities(),
+      this.listRatingTags(),
+    ]);
 
     const platformSlugs = new Set(platforms.map((platform) => platform.slug));
     const missingPlatformSlugs = EXPECTED_GAME_PLATFORM_SLUGS.filter(
@@ -151,24 +120,10 @@ export class GameMediaAdminReadinessService {
     const missingRatingTagSlugs = ratingTags
       .filter((tag) => tag.tagUnitId === null)
       .map((tag) => tag.slug);
-    const searchProjectionMismatchCandidateUnitIds = [
-      ...new Set([
-        ...legacyPlatformRows.map((row) => row.gameUnitId),
-        ...legacyAgeRatingRows.map((row) => row.unitId),
-      ]),
-    ].sort();
 
     return {
       missingPlatformSlugs,
       missingRatingTagSlugs,
-      legacyPlatformRowCount,
-      legacyPlatformRows,
-      legacyAgeRatingRowCount,
-      legacyAgeRatingRows: legacyAgeRatingRows.map((row) => ({
-        gameUnitId: row.unitId,
-        ageRatingKey: row.ageRatingKey ?? "",
-      })),
-      searchProjectionMismatchCandidateUnitIds,
     };
   }
 }

@@ -623,7 +623,7 @@ describe("GovernanceModerationService content moderation state", () => {
     ]);
   });
 
-  test("realm feed removal does not inspect legacy post reply topology", async () => {
+  test("realm feed removal does not inspect Post reply topology", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"
     );

@@ -34,14 +34,6 @@ type HistoryDb = {
   };
 };
 
-type LegacyEditorialRevisionPayload = Omit<
-  EditorialRevisionPayload,
-  "patch" | "legacyChangedKeys"
-> & {
-  changedFieldKeys: string[];
-  slots: Record<string, unknown>;
-};
-
 let defaultDbPromise: Promise<HistoryDb> | null = null;
 
 async function getDefaultDb(): Promise<HistoryDb> {
@@ -120,16 +112,7 @@ function normalizeRestoreSource(
 
 function deriveChangedFieldKeys(payload: unknown): string[] {
   if (!payload || typeof payload !== "object") return [];
-  const legacyChangedKeys = (payload as { legacyChangedKeys?: unknown })
-    .legacyChangedKeys;
-  if (Array.isArray(legacyChangedKeys)) {
-    return legacyChangedKeys.filter(
-      (path): path is string => typeof path === "string",
-    );
-  }
-  return collectLeafPaths(payload).filter(
-    (path) => path !== "legacyChangedKeys",
-  );
+  return collectLeafPaths(payload);
 }
 
 function collectLeafPaths(value: unknown, prefix = ""): string[] {
@@ -214,9 +197,9 @@ export function computeRevisionContentHash(payload: unknown): string {
 }
 
 function editorialContent(
-  payload: EditorialRevisionPayload | LegacyEditorialRevisionPayload,
+  payload: EditorialRevisionPayload,
 ): Record<string, unknown> {
-  return "patch" in payload ? payload.patch : payload.slots;
+  return payload.patch;
 }
 
 export class RevisionService {
@@ -239,7 +222,7 @@ export class RevisionService {
   }
 
   async insertUnitRevision(input: {
-    payload: EditorialRevisionPayload | LegacyEditorialRevisionPayload;
+    payload: EditorialRevisionPayload;
     contentHash?: string | null;
     createdAt?: Date;
   }): Promise<UnitRevisionDTO> {

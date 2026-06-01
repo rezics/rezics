@@ -8,89 +8,70 @@ function rulesFor(relFilePath: string, source: string) {
 }
 
 describe("frontend i18n convention checks", () => {
-  test("passes named generated message imports", () => {
+  test("passes typed map translation lookup", () => {
     expect(
       rulesFor(
         "package/app/src/example.tsx",
         `
-          import { common_save } from "@rezics/i18n/messages";
+          const LABEL_KEYS = {
+            save: "common:save",
+          } satisfies Record<"save", "common:\${string}">;
 
-          export function Example() {
-            return <button>{common_save()}</button>;
+          export function Example({ t }) {
+            return <button>{t(LABEL_KEYS.save)}</button>;
           }
         `,
       ),
     ).toEqual([]);
   });
 
-  test("rejects generated message namespace imports", () => {
+  test("rejects dynamic translation keys", () => {
     expect(
       rulesFor(
         "package/app/src/example.tsx",
         `
-          import * as m from "@rezics/i18n/messages";
-
-          export function Example() {
-            return <button>{m.common_save()}</button>;
+          export function Example({ t, keyName }) {
+            return <button>{t(keyName)}</button>;
           }
         `,
       ),
     ).toContain("R11");
   });
 
-  test("rejects legacy fallback-string translation calls", () => {
+  test("rejects template-literal translation keys", () => {
+    expect(
+      rulesFor(
+        "package/app/src/example.tsx",
+        `
+          export function Example({ t, keyName }) {
+            return <button>{t(\`common:\${keyName}\`)}</button>;
+          }
+        `,
+      ),
+    ).toContain("R11");
+  });
+
+  test("rejects fallback-string translation calls", () => {
     expect(
       rulesFor(
         "package/app/src/example.tsx",
         `
           export function Example({ t }) {
-            return <button>{t("common.save", "Save")}</button>;
+            return <button>{t("common:save", "Save")}</button>;
           }
         `,
       ),
     ).toContain("R12");
   });
 
-  test("rejects static UI copy fallbacks around generated messages", () => {
+  test("rejects contract i18nKey fields", () => {
     expect(
       rulesFor(
-        "package/admin/src/example.tsx",
+        "package/contract/src/example.ts",
         `
-          import * as m from "@rezics/i18n/messages";
-
-          export function Example() {
-            return <button>{m.common_save() ?? "Save"}</button>;
-          }
-        `,
-      ),
-    ).toContain("R12");
-  });
-
-  test("rejects dynamic generated message access", () => {
-    expect(
-      rulesFor(
-        "package/app/src/example.tsx",
-        `
-          import * as m from "@rezics/i18n/paraglide/messages";
-
-          export function Example({ keyName }) {
-            return <span>{m[keyName]()}</span>;
-          }
-        `,
-      ),
-    ).toContain("R11");
-  });
-
-  test("rejects admin-local locale imports", () => {
-    expect(
-      rulesFor(
-        "package/admin/src/example.tsx",
-        `
-          import { labels } from "@/locale";
-
-          export function Example() {
-            return <span>{labels.save}</span>;
-          }
+          export const Example = t.Object({
+            i18nKey: t.String(),
+          });
         `,
       ),
     ).toContain("R12");

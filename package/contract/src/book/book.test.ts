@@ -25,21 +25,12 @@ describe("bookContentStructureNodeSchema", () => {
     ).toBe(true);
   });
 
-  test("accepts legacy materialized node with chapterUnitId", () => {
-    expect(
-      Value.Check(bookContentStructureNodeSchema, {
-        title: "Chapter One",
-        chapterUnitId: "chapter-1",
-      }),
-    ).toBe(true);
-  });
-
-  test("accepts repeated chapterUnitId values in one content structure", () => {
+  test("accepts repeated contentUnitId values in one content structure", () => {
     const value = {
       bookUnitId: "book-1",
       nodes: [
-        { title: "Route A", chapterUnitId: "chapter-1" },
-        { title: "Route B", chapterUnitId: "chapter-1" },
+        { title: "Route A", contentUnitId: "chapter-1" },
+        { title: "Route B", contentUnitId: "chapter-1" },
       ],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -88,7 +79,6 @@ describe("bookContentStructureNodeSchema", () => {
           id: "node-2",
           title: "Chapter Two",
           contentUnitId: "chapter-2",
-          chapterUnitId: "chapter-2",
           updatedAt: "2026-05-18T12:00:01.000Z",
         },
       ],

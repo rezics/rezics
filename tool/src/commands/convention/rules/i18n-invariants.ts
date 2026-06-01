@@ -4,7 +4,7 @@ import { REPO_ROOT } from "../core/paths";
 import type { RuleScanner, Violation } from "../core/types";
 
 const SPEC =
-  "R11/R12 — no dynamic access to generated messages; no i18nKey fields or legacy translation APIs";
+  "R11/R12 — no dynamic translation keys, fallback-string args, or contract i18nKey fields";
 
 // `t(variableExpression)` — bare identifier, not a typed map lookup — is the
 // dynamic-key anti-pattern. Bracketed indexing (`t(MAP[slug])`) is the
@@ -16,8 +16,6 @@ const frontendSourcePattern =
   /^package\/(?:app|admin|ui|editor|folio)\/src\/.*\.(?:ts|tsx)$/;
 const fallbackTranslatePattern =
   /\bt\s*\(\s*["'][^"']*:[^"']+["']\s*,\s*["'][^"']+["']\s*\)/;
-const legacyParagildeImportPattern =
-  /from\s+["'](?:@rezics\/i18n\/messages|@rezics\/ui\/i18n\/messages|@rezics\/ui\/i18n\/runtime|[^"']*paraglide\/messages(?:\.js)?|[^"']*paraglide\/runtime(?:\.js)?)["']/;
 
 function shouldScan(relPath: string): boolean {
   if (/\.(?:test|spec)\.tsx?$/.test(relPath)) return false;
@@ -34,21 +32,12 @@ export function scanI18nSourceForTest(
   const violations: Violation[] = [];
 
   if (frontendSourcePattern.test(relPath)) {
-    if (legacyParagildeImportPattern.test(source)) {
+    if (dynamicTranslateKeyPattern.test(source)) {
       violations.push({
         rule: "R11",
         path: relPath,
         message:
-          "Paraglide-generated message modules are removed; resolve copy through useTranslation('<ns>') or typed label helpers in @rezics/i18n",
-        spec: SPEC,
-      });
-    }
-
-    if (dynamicTranslateKeyPattern.test(source)) {
-      violations.push({
-        rule: "R12",
-        path: relPath,
-        message:
+          // biome-ignore lint/suspicious/noTemplateCurlyInString: <i18n key patterns>
           "dynamic `t(variable)` is forbidden; dispatch through a `satisfies Record<Slug, '<ns>:${string}'>` map and call `t(MAP[slug])`",
         spec: SPEC,
       });
@@ -56,7 +45,7 @@ export function scanI18nSourceForTest(
 
     if (dynamicTemplateKeyPattern.test(source)) {
       violations.push({
-        rule: "R12",
+        rule: "R11",
         path: relPath,
         message:
           "template-literal i18next keys are forbidden; use a typed slug-to-key map",

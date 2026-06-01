@@ -79,7 +79,7 @@ single-process (`src/index.ts`).
 - **Port**: `PORT` (no in-code default).
 - **Health**: `/health` **and** `/ready`.
 - **Schema owner**: yes — `package/history/prisma/schema.prisma` (UnitRevision, RevisionContent, UnitRevisionPath). DB via `HISTORY_DATABASE_URL`; also reads the main DB via `SERVER_DATABASE_URL`.
-- **Key env**: `HISTORY_DATABASE_URL`, `SERVER_DATABASE_URL`, `HISTORY_INTERNAL_SECRET`. Optional: `HISTORY_QUEUE_INGESTION_ENABLED` (default `true`), `HISTORY_OUTBOX_POLLER_FALLBACK`, `HISTORY_OUTBOX_POLL_MS`.
+- **Key env**: `HISTORY_DATABASE_URL`, `SERVER_DATABASE_URL`, `HISTORY_INTERNAL_SECRET`.
 - **External deps**: PostgreSQL (history) + read on the main DB.
 - **Routing**: proxied.
 
@@ -144,7 +144,7 @@ Current state vs. the production target (every backend service should expose
 | auth | ✓ | ✓ | confirm graceful shutdown |
 | notify | ✓ | ✓ | set an explicit default `PORT` |
 | reaction | ✓ | ✓ | set an explicit default `PORT` |
-| history | ✓ | ✓ | confirm graceful shutdown of outbox poller |
+| history | ✓ | ✓ | confirm graceful shutdown |
 | ranking | ✓ | ✓ (`/ready`, `/ranking/ready`) | reference for the others |
 | job-runner | ✓ | ✓ | confirm pg-boss drain on SIGTERM |
 

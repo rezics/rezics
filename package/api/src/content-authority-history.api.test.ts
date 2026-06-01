@@ -115,9 +115,9 @@ describe("content authority and history API clients", () => {
             id: "event-1",
             unitId: "unit-1",
             sequence: 2,
-            eventType: "book.contentStructure.batch",
+            eventType: "contentStructure.content.batch",
             actorUserId: "actor-1",
-            changedFieldKeys: ["book.contentStructure"],
+            changedFieldKeys: ["contentStructure"],
             createdAt: "2026-05-19T00:00:00.000Z",
             payload: { operations: [] },
           },
@@ -159,13 +159,13 @@ describe("content authority and history API clients", () => {
     });
     await historyApi.getUnitRevision("unit-1", 1, { includeContent: true });
     await historyApi.listStructureEvents("unit-1", {
-      eventType: "book.contentStructure.batch",
+      eventType: "contentStructure.content.batch",
       includePayload: false,
     });
     await historyApi.getStructureEvent(
       "unit-1",
       2,
-      "book.contentStructure.batch",
+      "contentStructure.content.batch",
       { includePayload: true },
     );
     await historyApi.resolveActors(["actor-1"]);
@@ -179,10 +179,10 @@ describe("content authority and history API clients", () => {
       "http://api.example/history/unit/unit-1/revisions/1?includeContent=true",
     );
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
-      "http://api.example/history/unit/unit-1/structure-events?eventType=book.contentStructure.batch&includePayload=false",
+      "http://api.example/history/unit/unit-1/structure-events?eventType=contentStructure.content.batch&includePayload=false",
     );
     expect(fetchMock.mock.calls[3]?.[0]).toBe(
-      "http://api.example/history/unit/unit-1/structure-events/2/book.contentStructure.batch?includePayload=true",
+      "http://api.example/history/unit/unit-1/structure-events/2/contentStructure.content.batch?includePayload=true",
     );
     expect(fetchMock.mock.calls[4]?.[0]).toBe(
       "http://api.example/history/resolve/actors",

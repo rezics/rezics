@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS "GamePlatform";
+
+ALTER TABLE "Game" DROP COLUMN IF EXISTS "ageRatingKey";

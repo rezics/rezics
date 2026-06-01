@@ -769,7 +769,7 @@ describe("PostService.byRealm", () => {
     expect("parentPostUnitId" in where).toBe(false);
   });
 
-  test("general post feeds no longer carry legacy root-only guards", async () => {
+  test("general post feeds do not carry root-only guards", async () => {
     resetMocks();
 
     await service.list({});
@@ -796,7 +796,7 @@ describe("PostService.byRealm", () => {
     expect(firstPostFindManyArgs().orderBy).toEqual([{ createdAt: "desc" }]);
   });
 
-  test("realm post feeds no longer carry legacy root-only guards", async () => {
+  test("realm post feeds do not carry root-only guards", async () => {
     resetMocks();
     await service.byRealm("realm-1", {});
 
@@ -1252,16 +1252,15 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     overrides: Record<string, unknown> = {},
   ): Record<string, unknown> => ({
     depth: 1,
-    rootPostUnitId: "root-1",
-    parentPostUnitId: "root-1",
+    rootUnitId: "root-1",
+    parentCommentUnitId: null,
     ...overrides,
   });
 
-  test("OP pins a reply within their own thread", async () => {
+  test("OP pins a Comment reply within their own thread", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(directReply());
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    commentFindUniqueMock.mockResolvedValueOnce(directReply());
 
     const pin = await service.pin(
       { scopeUnitId: "root-1", commentUnitId: "reply-1" },
@@ -1276,31 +1275,6 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     });
     expect(pin.kind).toBe("PINNED");
     expect(pin.commentUnitId).toBe("reply-1");
-  });
-
-  test("OP pins a Comment reply within their own thread", async () => {
-    resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(null);
-    commentFindUniqueMock.mockResolvedValueOnce({
-      depth: 1,
-      rootUnitId: "root-1",
-      parentCommentUnitId: null,
-    });
-
-    const pin = await service.pin(
-      { scopeUnitId: "root-1", commentUnitId: "comment-1" },
-      op,
-    );
-
-    expect(commentPromotionCreateMock.mock.calls[0][0].data).toMatchObject({
-      scopeUnitId: "root-1",
-      commentUnitId: "comment-1",
-      kind: "PINNED",
-    });
-    expect(pin.kind).toBe("PINNED");
-    expect(pin.commentUnitId).toBe("comment-1");
   });
 
   test("a non-OP non-moderator cannot pin", async () => {
@@ -1322,13 +1296,12 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("a realm moderator may pin in a thread of their realm", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(
-        rootScope({
-          unit: { type: "POST", inRealms: [{ realmUnitId: "realm-1" }] },
-        }),
-      )
-      .mockResolvedValueOnce(directReply());
+    postFindUniqueMock.mockResolvedValueOnce(
+      rootScope({
+        unit: { type: "POST", inRealms: [{ realmUnitId: "realm-1" }] },
+      }),
+    );
+    commentFindUniqueMock.mockResolvedValueOnce(directReply());
     realmMemberFindFirstMock.mockResolvedValueOnce({ realmUnitId: "realm-1" });
 
     const pin = await service.pin(
@@ -1340,10 +1313,11 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("rejects a target outside the scope thread", async () => {
     resetMocks();
-    postFindUniqueMock.mockResolvedValueOnce(rootScope()).mockResolvedValueOnce(
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    commentFindUniqueMock.mockResolvedValueOnce(
       directReply({
-        rootPostUnitId: "other-root",
-        parentPostUnitId: "other-root",
+        rootUnitId: "other-root",
+        parentCommentUnitId: null,
       }),
     );
 
@@ -1364,9 +1338,8 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("accept is rejected outside a Q&A thread", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(directReply());
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    commentFindUniqueMock.mockResolvedValueOnce(directReply());
     unitFindFirstMock.mockResolvedValueOnce(null); // no official question tag
 
     await expect(
@@ -1380,11 +1353,10 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("accept is rejected for a non-direct reply", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(
-        directReply({ depth: 2, parentPostUnitId: "reply-1" }),
-      );
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    commentFindUniqueMock.mockResolvedValueOnce(
+      directReply({ depth: 2, parentCommentUnitId: "reply-1" }),
+    );
 
     await expect(
       service.acceptAnswer(
@@ -1396,9 +1368,8 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
   test("OP accepts a qualifying direct reply in a Q&A thread", async () => {
     resetMocks();
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(directReply());
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    commentFindUniqueMock.mockResolvedValueOnce(directReply());
     unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 
@@ -1417,17 +1388,15 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     unitFindFirstMock.mockResolvedValue({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValue({ unitId: "root-1" });
 
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(directReply());
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    commentFindUniqueMock.mockResolvedValueOnce(directReply());
     await service.acceptAnswer(
       { scopeUnitId: "root-1", commentUnitId: "reply-1" },
       op,
     );
 
-    postFindUniqueMock
-      .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(directReply({ parentPostUnitId: "root-1" }));
+    postFindUniqueMock.mockResolvedValueOnce(rootScope());
+    commentFindUniqueMock.mockResolvedValueOnce(directReply());
     commentPromotionFindFirstMock.mockResolvedValueOnce({ position: "a0" });
     await service.acceptAnswer(
       { scopeUnitId: "root-1", commentUnitId: "reply-2" },
@@ -1614,8 +1583,8 @@ describe("PostService lifecycle state", () => {
     overrides: Record<string, unknown> = {},
   ): Record<string, unknown> => ({
     depth: 1,
-    rootPostUnitId: "root-1",
-    parentPostUnitId: "root-1",
+    rootUnitId: "root-1",
+    parentCommentUnitId: null,
     ...overrides,
   });
 
@@ -1719,11 +1688,11 @@ describe("PostService lifecycle state", () => {
     resetMocks();
     postFindUniqueMock
       .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(directReply())
       .mockResolvedValueOnce({
         state: "open",
         extra: { stateSchemaTag: "question" },
       });
+    commentFindUniqueMock.mockResolvedValueOnce(directReply());
     unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 
@@ -1742,11 +1711,11 @@ describe("PostService lifecycle state", () => {
     resetMocks();
     postFindUniqueMock
       .mockResolvedValueOnce(rootScope())
-      .mockResolvedValueOnce(directReply())
       .mockResolvedValueOnce({
         state: "duplicate",
         extra: { stateSchemaTag: "question" },
       });
+    commentFindUniqueMock.mockResolvedValueOnce(directReply());
     unitFindFirstMock.mockResolvedValueOnce({ id: "tag-q" });
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 

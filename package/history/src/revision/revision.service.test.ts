@@ -308,33 +308,6 @@ describe("RevisionService", () => {
     ]);
   });
 
-  test("projects legacy slots-shaped revisions into the path index", async () => {
-    const db = dbStub();
-    const service = new RevisionService(db as never);
-
-    await service.insertUnitRevision({
-      payload: {
-        unitId: "unit-1",
-        sequence: 1,
-        actorUserId: "user-1",
-        slots: {
-          identity: { title: "Legacy title" },
-          tags: [{ tagUnitId: "tag-1" }],
-        },
-        changedFieldKeys: ["identity.title", "tags"],
-        message: null,
-      },
-    });
-
-    const revision = await service.getUnitRevision({
-      unitId: "unit-1",
-      sequence: 1,
-      includeContent: false,
-    });
-
-    expect(revision?.changedFieldKeys).toEqual(["identity.title", "tags"]);
-  });
-
   test("backfills existing revisions into the path index", async () => {
     const db = dbStub();
     const service = new RevisionService(db as never);
@@ -776,51 +749,6 @@ describe("RevisionService", () => {
           nodeId: "node-1",
           before: { title: "Before" },
           after: { title: "Captured" },
-        },
-      ],
-    });
-  });
-
-  test("legacy book content-structure batch events remain readable", async () => {
-    const db = dbStub();
-    const service = new RevisionService(db as never);
-
-    await service.insertStructureEvent({
-      payload: {
-        unitId: "unit-1",
-        sequence: 2,
-        actorUserId: "user-1",
-        eventType: "book.contentStructure.batch",
-        changedFieldKeys: ["book.contentStructure"],
-        payload: {
-          operations: [
-            {
-              op: "node.update",
-              nodeId: "legacy-node",
-              before: { title: "Before" },
-              after: { title: "Legacy" },
-            },
-          ],
-        },
-        message: "Legacy pre-cutover row",
-      },
-      createdAt: new Date("2026-05-19T00:00:00.000Z"),
-    });
-
-    const event = await service.getStructureEvent({
-      unitId: "unit-1",
-      sequence: 2,
-      eventType: "book.contentStructure.batch",
-    });
-
-    expect(event?.eventType).toBe("book.contentStructure.batch");
-    expect(event?.payload).toEqual({
-      operations: [
-        {
-          op: "node.update",
-          nodeId: "legacy-node",
-          before: { title: "Before" },
-          after: { title: "Legacy" },
         },
       ],
     });

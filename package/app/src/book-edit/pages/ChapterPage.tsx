@@ -70,8 +70,8 @@ export const BookEditChapterPage: React.FC = () => {
   const { t } = useTranslation(["book", "editor"]);
   const { bookId } = bookEditLayoutRoute.useParams();
   const { chapterId } = bookEditChapterRoute.useParams();
-  // `$chapterId` is a legacy route param name; current logic treats it as the
-  // materialized content Unit id for this content-structure node.
+  // `$chapterId` is the existing route param name; current logic treats it as
+  // the materialized content Unit id for this content-structure node.
   const contentUnitId = chapterId;
   // Load chapter detail
   const {

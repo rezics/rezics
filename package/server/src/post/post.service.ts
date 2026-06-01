@@ -144,13 +144,13 @@ async function upsertWikiContentTranslation(
       content: input.content as Prisma.InputJsonValue,
       status: input.status,
       authorUserId: input.actorUserId,
-      provenance: { source: "legacy-post-content" },
+      provenance: { source: "post-content" },
     },
     update: {
       content: input.content as Prisma.InputJsonValue,
       status: input.status,
       authorUserId: input.actorUserId,
-      provenance: { source: "legacy-post-content" },
+      provenance: { source: "post-content" },
     },
   });
 }
@@ -1260,33 +1260,6 @@ export class PostService {
     scopeUnitId: string,
     commentUnitId: string,
   ): Promise<{ depth: number; parentCommentUnitId: string | null }> {
-    const legacyPostTarget = (await prisma.post.findUnique({
-      where: { unitId: commentUnitId },
-      select: { unitId: true },
-    })) as {
-      depth?: number;
-      rootPostUnitId?: string | null;
-      parentPostUnitId?: string | null;
-    } | null;
-    if (legacyPostTarget) {
-      if (legacyPostTarget.rootPostUnitId !== scopeUnitId) {
-        throw new AppError(
-          400,
-          "Target comment does not belong to the scope thread",
-        );
-      }
-      if (!legacyPostTarget.depth || legacyPostTarget.depth < 1) {
-        throw new AppError(400, "Only replies (depth >= 1) can be promoted");
-      }
-      return {
-        depth: legacyPostTarget.depth,
-        parentCommentUnitId:
-          legacyPostTarget.parentPostUnitId === scopeUnitId
-            ? null
-            : (legacyPostTarget.parentPostUnitId ?? null),
-      };
-    }
-
     const comment = await prisma.comment.findUnique({
       where: { unitId: commentUnitId },
       select: {

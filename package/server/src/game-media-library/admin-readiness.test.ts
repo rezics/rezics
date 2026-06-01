@@ -32,16 +32,6 @@ function freshMocks() {
         },
       ]),
     },
-    gamePlatform: {
-      findMany: mock(async () => [
-        { gameUnitId: "game-1", platformKey: "PC", sortOrder: 0 },
-      ]),
-      count: mock(async () => 1),
-    },
-    game: {
-      findMany: mock(async () => [{ unitId: "game-2", ageRatingKey: "T" }]),
-      count: mock(async () => 1),
-    },
     gameSystemRequirement: {
       findMany: mock(async () => []),
     },
@@ -85,7 +75,7 @@ describe("GameMediaAdminReadinessService", () => {
     });
   });
 
-  test("reports missing taxonomy and legacy projection repair candidates", async () => {
+  test("reports missing taxonomy", async () => {
     freshMocks();
     const { gameMediaAdminReadinessService } = await import(
       "./admin-readiness"
@@ -95,12 +85,6 @@ describe("GameMediaAdminReadinessService", () => {
 
     expect(diagnostics.missingPlatformSlugs).toContain("macos");
     expect(diagnostics.missingRatingTagSlugs).toContain("pegi-18");
-    expect(diagnostics.legacyPlatformRowCount).toBe(1);
-    expect(diagnostics.legacyAgeRatingRowCount).toBe(1);
-    expect(diagnostics.searchProjectionMismatchCandidateUnitIds).toEqual([
-      "game-1",
-      "game-2",
-    ]);
   });
 
   test("delegates requirement rows to the requirement service filters", async () => {

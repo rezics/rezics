@@ -23,7 +23,6 @@ proxy:
 env:
   clear:
     PORT: "3004"
-    HISTORY_QUEUE_INGESTION_ENABLED: "true"
   secret:
     - HISTORY_DATABASE_URL
     - SERVER_DATABASE_URL
