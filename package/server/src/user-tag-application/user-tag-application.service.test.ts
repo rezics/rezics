@@ -187,6 +187,51 @@ describe("UserTagApplicationService", () => {
     });
   });
 
+  test("setForUnit tags the requested unit id without resolving Unit.targetUnitId", async () => {
+    const deleteMany = mock(async () => ({ count: 0 }));
+    const createMany = mock(async () => ({ count: 1 }));
+    const findMany = mock(async () => []);
+    const unitFindUnique = mock(async () => ({
+      id: "unit-1",
+      targetUnitId: "canonical-target",
+    }));
+    const transaction = mock(async (fn: any) =>
+      fn({
+        unit: { findUnique: unitFindUnique },
+        userTagApplication: { deleteMany, createMany },
+        userUnitCollection: { upsert: mock(async () => ({})) },
+      }),
+    );
+    Object.assign(prismaMock, {
+      $transaction: transaction,
+      userTagApplication: { findMany },
+    });
+
+    const { UserTagApplicationService } = await import(
+      "./user-tag-application.service"
+    );
+    await new UserTagApplicationService().setForUnit("user-1", {
+      unitId: "unit-1",
+      tagUnitIds: ["tag-1"],
+    });
+
+    expect(unitFindUnique).not.toHaveBeenCalled();
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { userId: "user-1", unitId: "unit-1" },
+    });
+    expect(createMany).toHaveBeenCalledWith({
+      data: [
+        {
+          userId: "user-1",
+          unitId: "unit-1",
+          tagUnitId: "tag-1",
+          position: "00000000",
+        },
+      ],
+      skipDuplicates: true,
+    });
+  });
+
   test("deleteOne only deletes the caller-owned user tag", async () => {
     const deleteMany = mock(async () => ({ count: 1 }));
     Object.assign(prismaMock, {

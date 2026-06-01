@@ -345,6 +345,30 @@ describe("GovernanceModerationService content moderation state", () => {
     ]);
   });
 
+  test("moderates the requested unit without following Unit.targetUnitId", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await governanceModerationService.setGlobalContentState({
+      moderatedUnitId: "post-1",
+      state: "hidden",
+      decidedById: "staff-1",
+      reason: "abuse",
+    });
+
+    expect(contentModerationUpsert).toHaveBeenCalledWith({
+      where: { moderatedUnitId: "post-1" },
+      create: expect.objectContaining({
+        moderatedUnitId: "post-1",
+        state: "HIDDEN",
+      }),
+      update: expect.objectContaining({
+        state: "HIDDEN",
+      }),
+    });
+  });
+
   test("lists global content states bounded to requested node ids", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"

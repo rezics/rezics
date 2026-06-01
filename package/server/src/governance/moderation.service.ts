@@ -146,38 +146,38 @@ function auditPrivilegedMutation(
   governanceAuditService.appendPrivilegedMutation(input).catch(() => {});
 }
 
-function enqueueModeratedContentSearch(targetUnitId: string) {
+function enqueueModeratedContentSearch(moderatedUnitId: string) {
   return Promise.all([
     serverJobProducer.enqueue(
       createSearchCommand(
         SEARCH_COMMAND_KINDS.contentSync,
-        { unitId: targetUnitId },
+        { unitId: moderatedUnitId },
         { type: "server", service: "governance" },
       ),
     ),
     serverJobProducer.enqueue(
       createSearchCommand(
         SEARCH_COMMAND_KINDS.postSync,
-        { postId: targetUnitId },
+        { postId: moderatedUnitId },
         { type: "server", service: "governance" },
       ),
     ),
   ]);
 }
 
-function enqueueRealmMembershipSearch(targetUnitId: string) {
+function enqueueRealmMembershipSearch(contentUnitId: string) {
   return Promise.all([
     serverJobProducer.enqueue(
       createSearchCommand(
         SEARCH_COMMAND_KINDS.contentPatchRealmIds,
-        { unitId: targetUnitId },
+        { unitId: contentUnitId },
         { type: "server", service: "governance" },
       ),
     ),
     serverJobProducer.enqueue(
       createSearchCommand(
         SEARCH_COMMAND_KINDS.postSync,
-        { postId: targetUnitId },
+        { postId: contentUnitId },
         { type: "server", service: "governance" },
       ),
     ),
@@ -826,8 +826,8 @@ export class GovernanceModerationService {
       return updated;
     });
     if (input.decisionKind === "remove_from_feed") {
-      const targetUnitId = row.addressedUnitId;
-      if (targetUnitId) await enqueueRealmMembershipSearch(targetUnitId);
+      const contentUnitId = row.addressedUnitId;
+      if (contentUnitId) await enqueueRealmMembershipSearch(contentUnitId);
     }
     notifyModeration({
       kind: "moderation.report.updated",

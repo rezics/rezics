@@ -187,7 +187,7 @@ only if the surrounding model context makes part of it redundant.
 - [x] 3.4 Rename comment promotion request/DTO fields from `targetUnitId` to
   `commentUnitId`, matching the existing `CommentPromotion.commentUnitId`
   storage model.
-- [ ] 3.5 Audit remaining contract/API/search fields named `targetUnitId` and
+- [x] 3.5 Audit remaining contract/API/search fields named `targetUnitId` and
   mark each one as either a compatibility projection of `Unit.targetUnitId` or a
   domain endpoint that must be renamed.
 
@@ -212,10 +212,10 @@ only if the surrounding model context makes part of it redundant.
   of `Unit.targetUnitId`.
 - [x] 5.2 Add or update comments/tests around `ContentStructure` proving owner
   structure and reusable content occurrences are not canonical Unit targets.
-- [ ] 5.3 Add regression tests for subscriptions, reactions, user tags, realm
+- [x] 5.3 Add regression tests for subscriptions, reactions, user tags, realm
   tags, and moderation states proving those row endpoints do not auto-follow
   `Unit.targetUnitId` after write.
-- [ ] 5.4 Update naming comments in governance and notification boundaries so
+- [x] 5.4 Update naming comments in governance and notification boundaries so
   event/audit/source endpoint fields are clearly operation/event addresses, not
   canonical Unit target fields.
 
@@ -238,7 +238,7 @@ only if the surrounding model context makes part of it redundant.
   `Unit.targetUnitId`.
 - [ ] 7.2 Add migration verification that no persisted non-Unit model keeps a
   generic `targetUnitId` column unless it has an explicit documented exemption.
-- [ ] 7.3 Remove obsolete comments in plans/code that say only `VARIANT` Units may
+- [x] 7.3 Remove obsolete comments in plans/code that say only `VARIANT` Units may
   carry `targetUnitId`.
 - [ ] 7.4 Run focused tests for contract unit/post/comment/subscription/governance
   schemas, post service, chapter service, search sync, content search,

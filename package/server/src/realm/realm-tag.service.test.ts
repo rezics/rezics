@@ -14,6 +14,9 @@ const unitFindUniqueMock = mock(async ({ where }: any) => {
   }
   if (where.id === "tag-1") return { id: "tag-1", type: "TAG" };
   if (where.id === "book-1") return { id: "book-1", type: "BOOK" };
+  if (where.id === "unit-1") {
+    return { id: "unit-1", type: "BOOK", targetUnitId: "canonical-target" };
+  }
   return null;
 });
 const realmUnitCreateMock = mock(async () => ({}));
@@ -286,6 +289,32 @@ describe("RealmService.createRealmTagApplication", () => {
       "search.content.patchTags",
       "search.content.patchRealmTagKeys",
     ]);
+  });
+
+  test("writes the requested content unit without following Unit.targetUnitId", async () => {
+    await service.createRealmTagApplication(
+      "user-1",
+      "realm-1",
+      "unit-1",
+      "tag-1",
+    );
+
+    expect(realmTagApplicationUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          realmUnitId_tagUnitId_unitId: {
+            realmUnitId: "realm-1",
+            tagUnitId: "tag-1",
+            unitId: "unit-1",
+          },
+        },
+        create: expect.objectContaining({
+          realmUnitId: "realm-1",
+          tagUnitId: "tag-1",
+          unitId: "unit-1",
+        }),
+      }),
+    );
   });
 
   test("rejects non-TAG tagUnitId and non-REALM realmUnitId", async () => {

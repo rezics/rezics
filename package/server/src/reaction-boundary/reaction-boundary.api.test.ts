@@ -82,4 +82,32 @@ describe("reactionBoundaryApi", () => {
     });
     expect(createReactionMock).not.toHaveBeenCalled();
   });
+
+  test("creates reaction for the requested targetId without resolving Unit.targetUnitId", async () => {
+    policyAllowed = true;
+    prismaMock.unit.findUnique = mock(async () => ({
+      userId: "owner-1",
+      targetUnitId: "canonical-target",
+    }));
+    const { reactionBoundaryApi } = await import("./reaction-boundary.api");
+
+    const response = await reactionBoundaryApi.handle(
+      new Request("http://localhost/reaction/", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ targetId: "post-1", reaction: "like" }),
+      }),
+    );
+
+    expect(response.status).toBe(201);
+    expect(createReactionMock).toHaveBeenCalledWith(
+      currentIdentity.userId,
+      "post-1",
+      "like",
+    );
+    expect(prismaMock.unit.findUnique).toHaveBeenCalledWith({
+      where: { id: "post-1" },
+      select: { userId: true },
+    });
+  });
 });

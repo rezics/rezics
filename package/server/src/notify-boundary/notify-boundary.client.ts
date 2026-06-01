@@ -63,7 +63,7 @@ export type BroadcastEvent = {
  * index `subscription_channels_gin` created in the migration.
  */
 async function defaultFindSubscriptionMatches(
-  targetUnitId: string,
+  sourceUnitId: string,
   kind: string,
 ): Promise<string[]> {
   const category = categoryOf(kind);
@@ -71,7 +71,7 @@ async function defaultFindSubscriptionMatches(
 
   const rows = await prisma.subscription.findMany({
     where: {
-      targetUnitId,
+      subscribedUnitId: sourceUnitId,
       OR: [
         { channels: { has: kind } },
         ...(categoryWildcard ? [{ channels: { has: categoryWildcard } }] : []),
@@ -85,7 +85,7 @@ async function defaultFindSubscriptionMatches(
 
 export type ResolveRecipientsDeps = {
   findSubscriptionMatches: (
-    targetUnitId: string,
+    sourceUnitId: string,
     kind: string,
   ) => Promise<string[]>;
 };
@@ -96,8 +96,9 @@ export type ResolveRecipientsDeps = {
  * Unions:
  *   - `directRecipients` (explicit-addressed events keep their direct
  *     path — mention target, reply parent, DM peer, etc.)
- *   - subscribers whose `Subscription.channels` matches the event kind
- *     via the three-tier wildcard query.
+ *   - subscribers whose `Subscription.channels` matches the event kind for
+ *     this event source Unit. Notification source addressing is an operation
+ *     endpoint and does not follow `Unit.targetUnitId`.
  *
  * Dedupes through an in-memory `Set` so a subscriber who is also a
  * direct recipient receives exactly one notification row.

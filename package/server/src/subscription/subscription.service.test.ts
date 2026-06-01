@@ -111,6 +111,29 @@ describe("subscriptionService.subscribe", () => {
     expect(dto.channels).toEqual(["*"]);
   });
 
+  test("writes the requested subscribedUnitId without following Unit.targetUnitId", async () => {
+    prismaMock.unit.findUnique = mock(async () => ({
+      id: TARGET,
+      type: "BOOK",
+      userId: null,
+      targetUnitId: "canonical-target",
+    }));
+
+    await subscriptionService.subscribe(SUBSCRIBER, TARGET);
+
+    expect(prismaMock.subscription.create).toHaveBeenCalledWith({
+      data: {
+        subscriberUnitId: SUBSCRIBER,
+        subscribedUnitId: TARGET,
+        channels: ["*"],
+      },
+    });
+    expect(prismaMock.unit.update).toHaveBeenCalledWith({
+      where: { id: TARGET },
+      data: { subscriberCount: { increment: 1 } },
+    });
+  });
+
   test("explicit channels are validated and passed through", async () => {
     const dto = await subscriptionService.subscribe(SUBSCRIBER, TARGET, [
       "chapter.new",

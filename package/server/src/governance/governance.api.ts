@@ -381,6 +381,8 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
   .get(
     "/content/:targetUnitId/moderation",
     async ({ params, identity, status }) => {
+      // Route param name is compatibility surface; service storage uses
+      // moderatedUnitId and never follows Unit.targetUnitId.
       const denied = await assertGovernancePolicy({
         identity,
         status,

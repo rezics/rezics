@@ -27,7 +27,7 @@ export function mapPostToDTO(post: PostWithRelations): PostDTO {
     unitId: post.unitId,
     authorUserId: post.authorUserId,
     author: mapPublicUser(post.unit.user),
-    commentUnitId: post.unit.commentUnitId ?? null,
+    targetUnitId: post.unit.targetUnitId ?? null,
     realmUnitId: post.unit.inRealms?.[0]?.realmUnitId ?? null,
     content: contentHidden ? null : (post.content as PostDTO["content"]),
     kind: post.kind ?? null,
