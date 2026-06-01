@@ -115,28 +115,6 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
     ],
   },
   {
-    title: "Community",
-    visibility: "authenticated",
-    items: [
-      {
-        kind: "item",
-        segment: "/inbox",
-        title: "Inbox",
-        icon: InboxOutlinedIcon,
-        visibility: "authenticated",
-        activeMatch: "prefix",
-      },
-      {
-        kind: "item",
-        segment: "/notice",
-        title: "Notice",
-        onlyMobile: true,
-        icon: NotificationsOutlinedIcon,
-        visibility: "authenticated",
-      },
-    ],
-  },
-  {
     title: "Create",
     visibility: "authenticated",
     items: [
