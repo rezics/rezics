@@ -15,7 +15,11 @@ const i18nMessages = {
 } as const;
 import { useCanEdit } from "@rezics/api/hooks";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type { ShelfSortState, ShelfView } from "@rezics/api/shelf";
+import type {
+  EnrichedShelfUnit,
+  ShelfSortState,
+  ShelfView,
+} from "@rezics/api/shelf";
 import {
   shelfDetailQuery,
   shelfUnitsInfiniteQuery,
@@ -23,9 +27,13 @@ import {
   useCollectionStatusHydration,
   useHydratedShelfUnits,
 } from "@rezics/api/shelf";
+import { userQueries } from "@rezics/api/user/user.queries";
 import {
+  type BookDTO,
   contentDocMarkdownFallback,
+  isLibraryKind,
   shelfCoverImageSpec,
+  type SystemShelfKindKey,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -40,8 +48,17 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Pencil as EditIcon, Search as SearchIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import {
+  applyReadableFilter,
+  BookshelfGrid,
+  type BookshelfItem,
+  resolveBookshelfConfig,
+} from "@/bookshelf-view";
 import { ReactionBar, type ReactionBarPost } from "@/engagement";
-import { getTranslation } from "@/shared/utils/translation-helpers";
+import {
+  getBookAuthorName,
+  getTranslation,
+} from "@/shared/utils/translation-helpers";
 import { useMediaQuery } from "@/shared/utils/use-media-query";
 import { useUserProfileStore } from "@/user/states";
 import { ShelfItemRenderer } from "../components/ShelfItemRenderer";
@@ -99,12 +116,52 @@ const VIEW_OPTIONS: ShelfViewChoice[] = [
 ];
 
 const PAGE_SIZE = 20;
+const PROGRESS_SHELF_KIND_KEYS = new Set<SystemShelfKindKey>([
+  "backlog",
+  "active",
+  "completed",
+]);
 
 function streamEntryKey(prefix: string, entry: ShelfStreamEntry): string {
   if (entry.kind === "root") return `${prefix}:r:${entry.unit.unit.unitId}`;
   if (entry.kind === "child")
     return `${prefix}:c:${entry.parentUnitId}:${entry.unit.unit.unitId}`;
   return `${prefix}:p:${entry.unit.unit.unitId}`;
+}
+
+function isProgressShelfKind(
+  kindKey: string | null | undefined,
+): kindKey is SystemShelfKindKey {
+  return PROGRESS_SHELF_KIND_KEYS.has(kindKey as SystemShelfKindKey);
+}
+
+function shelfUnitToBookshelfItem(
+  enriched: EnrichedShelfUnit,
+): BookshelfItem | null {
+  const kind = enriched.unit.kind;
+  if (!isLibraryKind(kind)) return null;
+
+  if (kind === "book") {
+    const book = enriched.data as BookDTO | undefined;
+    return {
+      unitId: enriched.unit.unitId,
+      kind,
+      title: book?.translations?.[0]?.title ?? enriched.unit.unitId,
+      coverUrl: book?.coverUrl ?? "",
+      author: book ? getBookAuthorName(book) || undefined : undefined,
+      isLicensed: book?.isLicensed,
+      href: `/book/${enriched.unit.unitId}`,
+    };
+  }
+
+  return {
+    unitId: enriched.unit.unitId,
+    kind,
+    title: enriched.unit.unitId,
+    coverUrl: "",
+    isLicensed: true,
+    href: `/unit/${enriched.unit.unitId}`,
+  };
 }
 
 export function ShelfPage({ unitId }: ShelfPageProps) {
@@ -127,6 +184,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
   const isCompactLayout = useMediaQuery("(max-width: 639px)");
 
   const detailQuery = useQuery(shelfDetailQuery(unitId));
+  const { data: settings } = useQuery(userQueries.settings());
   const normalizedItemSearchText = itemSearchText.trim();
   const shelfUnitsQuery = useMemo(
     () => ({
@@ -259,6 +317,21 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
     () => (shelf?.unitId ? { unitId: shelf.unitId } : null),
     [shelf?.unitId],
   );
+  const isProgressShelf = isProgressShelfKind(shelf?.kindKey);
+  const bookshelfConfig = useMemo(
+    () =>
+      resolveBookshelfConfig({
+        viewer: settings?.library?.bookshelf ?? null,
+      }),
+    [settings?.library?.bookshelf],
+  );
+  const bookshelfItems = useMemo(() => {
+    const items = visibleStream.flatMap((entry) => {
+      const item = shelfUnitToBookshelfItem(entry.unit);
+      return item ? [item] : [];
+    });
+    return applyReadableFilter(items, readableOnly);
+  }, [readableOnly, visibleStream]);
 
   const showSortScopeToggle =
     (effectiveViewMode === "flat" || effectiveViewMode === "masonry") &&
@@ -432,76 +505,80 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <div className="relative min-w-[min(100%,16rem)] flex-1 sm:flex-none">
-              <SearchIcon className="-translate-y-1/2 pointer-events-none absolute left-3 top-1/2 h-4 w-4 text-text-tertiary" />
-              <Input
-                value={itemSearchText}
-                onChange={(event) => setItemSearchText(event.target.value)}
-                placeholder={t("entity:shelf_item_search_placeholder")}
-                aria-label={t("common:search")}
-                className="h-9 pl-9"
+        {!isProgressShelf && (
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <div className="relative min-w-[min(100%,16rem)] flex-1 sm:flex-none">
+                <SearchIcon className="-translate-y-1/2 pointer-events-none absolute left-3 top-1/2 h-4 w-4 text-text-tertiary" />
+                <Input
+                  value={itemSearchText}
+                  onChange={(event) => setItemSearchText(event.target.value)}
+                  placeholder={t("entity:shelf_item_search_placeholder")}
+                  aria-label={t("common:search")}
+                  className="h-9 pl-9"
+                />
+              </div>
+              <ShelfSortViewPicker
+                sort={sortState}
+                sortOptions={SORT_OPTIONS}
+                view={effectiveViewMode}
+                viewOptions={VIEW_OPTIONS}
+                onSortChange={setSortState}
+                onViewChange={(value) => setViewModeOverride({ unitId, value })}
+                sortHeading={t("entity:shelf_controls_sort_by")}
+                viewHeading={t("entity:shelf_controls_view")}
               />
-            </div>
-            <ShelfSortViewPicker
-              sort={sortState}
-              sortOptions={SORT_OPTIONS}
-              view={effectiveViewMode}
-              viewOptions={VIEW_OPTIONS}
-              onSortChange={setSortState}
-              onViewChange={(value) => setViewModeOverride({ unitId, value })}
-              sortHeading={t("entity:shelf_controls_sort_by")}
-              viewHeading={t("entity:shelf_controls_view")}
-            />
-            {showSortScopeToggle && (
+              {showSortScopeToggle && (
+                <Label className="flex min-w-0 items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={sortPrimeOnly}
+                    onCheckedChange={(checked) =>
+                      setSortPrimeOnly(checked === true)
+                    }
+                  />
+                  <span className="whitespace-nowrap">
+                    {t("entity:shelf_sort_prime_only")}
+                  </span>
+                </Label>
+              )}
               <Label className="flex min-w-0 items-center gap-2 text-sm">
                 <Checkbox
-                  checked={sortPrimeOnly}
+                  checked={readableOnly}
                   onCheckedChange={(checked) =>
-                    setSortPrimeOnly(checked === true)
+                    setReadableOnly(checked === true)
                   }
                 />
                 <span className="whitespace-nowrap">
-                  {t("entity:shelf_sort_prime_only")}
+                  {t("entity:shelf_readable_only")}
                 </span>
               </Label>
-            )}
-            <Label className="flex min-w-0 items-center gap-2 text-sm">
-              <Checkbox
-                checked={readableOnly}
-                onCheckedChange={(checked) => setReadableOnly(checked === true)}
-              />
-              <span className="whitespace-nowrap">
-                {t("entity:shelf_readable_only")}
-              </span>
-            </Label>
-            {hydration.orphanUnitIds.length > 0 && (
-              <>
-                <span className="text-xs text-warning-text">
-                  {t("entity:shelf_orphan_count", {
-                    count: hydration.orphanUnitIds.length,
-                  })}
-                </span>
-                {isOwner && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    disabled={cleanupMutation.isPending}
-                    onClick={() =>
-                      cleanupMutation.mutate({
-                        shelfId: unitId,
-                        input: { orphanUnitIds: hydration.orphanUnitIds },
-                      })
-                    }
-                  >
-                    {t("entity:shelf_cleanup_orphans")}
-                  </Button>
-                )}
-              </>
-            )}
+              {hydration.orphanUnitIds.length > 0 && (
+                <>
+                  <span className="text-xs text-warning-text">
+                    {t("entity:shelf_orphan_count", {
+                      count: hydration.orphanUnitIds.length,
+                    })}
+                  </span>
+                  {isOwner && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={cleanupMutation.isPending}
+                      onClick={() =>
+                        cleanupMutation.mutate({
+                          shelfId: unitId,
+                          input: { orphanUnitIds: hydration.orphanUnitIds },
+                        })
+                      }
+                    >
+                      {t("entity:shelf_cleanup_orphans")}
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {isItemsLoading || waitingForPageData || isFetchingNextPage ? (
           <div className="flex justify-center py-8">
@@ -511,6 +588,18 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
           <p className="py-8 text-center text-error">
             {t("entity:shelf_items_load_failed")}
           </p>
+        ) : isProgressShelf ? (
+          <BookshelfGrid
+            items={bookshelfItems}
+            config={bookshelfConfig}
+            emptyState={
+              <p className="py-8 text-center text-text-secondary">
+                {normalizedItemSearchText
+                  ? t("entity:shelf_item_no_search_matches")
+                  : t("entity:shelf_empty_items")}
+              </p>
+            }
+          />
         ) : visibleStream.length === 0 ? (
           <p className="py-8 text-center text-text-secondary">
             {normalizedItemSearchText

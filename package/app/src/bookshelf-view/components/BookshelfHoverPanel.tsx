@@ -1,4 +1,5 @@
 import { useTranslation } from "@rezics/i18n/react";
+import { BookOpen } from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
 import type { BookshelfItem } from "../models/types";
@@ -19,16 +20,26 @@ export const BookshelfHoverPanel: React.FC<BookshelfHoverPanelProps> = ({
   // Show the progress line only when the book has countable chapters; never a
   // "0/0" placeholder.
   const hasProgress = item.chaptersTotal != null && item.chaptersTotal > 0;
+  const hasCover = item.coverUrl.trim().length > 0;
 
   return (
-    <div className="w-64 rounded-md border border-border-whisper bg-surface-raised p-3 shadow-lg">
+    <div className="w-64 rounded-md border border-border-whisper bg-surface-elevated p-3 text-text-primary shadow-lg">
       <div className="flex gap-3">
-        <img
-          src={item.coverUrl}
-          alt={item.title}
-          className="h-24 w-16 flex-none rounded object-cover"
-          loading="lazy"
-        />
+        {hasCover ? (
+          <img
+            src={item.coverUrl}
+            alt={item.title}
+            className="h-24 w-16 flex-none rounded object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="flex h-24 w-16 flex-none items-center justify-center rounded bg-surface-subtle text-text-tertiary"
+            aria-hidden="true"
+          >
+            <BookOpen className="h-6 w-6" />
+          </div>
+        )}
         <div className="min-w-0">
           <Link
             to={item.href}

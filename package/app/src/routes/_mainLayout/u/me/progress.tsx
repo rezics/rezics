@@ -1,4 +1,9 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
+import type { BookshelfViewConfig } from "@rezics/contract";
+import {
+  createFileRoute,
+  lazyRouteComponent,
+  useNavigate,
+} from "@tanstack/react-router";
 import { routeBoundaries } from "@/core/routing/routeBoundaries";
 
 const ProgressLibraryPage = lazyRouteComponent(
@@ -6,7 +11,45 @@ const ProgressLibraryPage = lazyRouteComponent(
   "ProgressLibraryPage",
 );
 
+type ProgressSearch = {
+  /**
+   * Bookshelf column override for the progress library. Kept string-valued to
+   * match the dashboard route's URLSearchParams-compatible search shape.
+   */
+  cols?: string;
+};
+
+function urlConfigFromSearch(
+  search: ProgressSearch,
+): BookshelfViewConfig | null {
+  const columns = search.cols ? Number(search.cols) : 0;
+  if (!Number.isFinite(columns) || columns <= 0) return null;
+  return {
+    breakpoints: [{ minWidthPx: 0, columns }],
+    showTitle: true,
+  };
+}
+
+function ProgressRoute() {
+  const search = Route.useSearch();
+  const navigate = useNavigate();
+  return (
+    <ProgressLibraryPage
+      libraryUrlConfig={urlConfigFromSearch(search)}
+      onResetLibraryUrlConfig={() =>
+        navigate({
+          to: "/u/me/progress",
+          search: (prev: ProgressSearch) => ({ ...prev, cols: undefined }),
+        })
+      }
+    />
+  );
+}
+
 export const Route = createFileRoute("/_mainLayout/u/me/progress")({
-  component: ProgressLibraryPage,
+  validateSearch: (search: Record<string, unknown>): ProgressSearch => ({
+    cols: typeof search.cols === "string" ? search.cols : undefined,
+  }),
+  component: ProgressRoute,
   ...routeBoundaries(),
 });

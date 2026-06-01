@@ -1,15 +1,50 @@
+import { userQueries } from "@rezics/api/user/user.queries";
 import { myProgressPageQuery } from "@rezics/api/progress/progress.queries";
+import type { BookshelfViewConfig } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
-import { ProgressLibraryGrid } from "../components/ProgressLibraryGrid";
+import { useMemo } from "react";
+import {
+  BookshelfGrid,
+  resolveBookshelfConfig,
+  UseMySettingsButton,
+} from "@/bookshelf-view";
+import { progressLibraryRowToBookshelfItem } from "../models/progressBookshelf";
 
-export function ProgressLibraryPage() {
+export interface ProgressLibraryPageProps {
+  /** Bookshelf layout from the route URL query (highest precedence). */
+  libraryUrlConfig?: BookshelfViewConfig | null;
+  /** Clear the URL override so the viewer's stored settings take effect. */
+  onResetLibraryUrlConfig?: () => void;
+}
+
+export function ProgressLibraryPage({
+  libraryUrlConfig,
+  onResetLibraryUrlConfig,
+}: ProgressLibraryPageProps) {
   const { t } = useTranslation(["common"]);
   const { data, isLoading, isError } = useQuery(
     myProgressPageQuery({ limit: 50 }),
   );
+  const { data: settings } = useQuery(userQueries.settings());
   const rows = data?.rows ?? [];
+  const config = useMemo(
+    () =>
+      resolveBookshelfConfig({
+        url: libraryUrlConfig ?? null,
+        viewer: settings?.library?.bookshelf ?? null,
+      }),
+    [libraryUrlConfig, settings?.library?.bookshelf],
+  );
+  const items = useMemo(
+    () =>
+      rows.flatMap((row) => {
+        const item = progressLibraryRowToBookshelfItem(row);
+        return item ? [item] : [];
+      }),
+    [rows],
+  );
 
   if (isLoading) {
     return (
@@ -27,11 +62,22 @@ export function ProgressLibraryPage() {
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
-      <h1 className="text-2xl font-bold text-text-primary">Progress</h1>
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-text-primary">Library</h2>
-        <ProgressLibraryGrid
-          rows={rows}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-text-primary">Progress</h1>
+          <p className="mt-1 text-sm leading-ui text-text-secondary">
+            Library items with your current progress.
+          </p>
+        </div>
+        <UseMySettingsButton
+          hasUrlOverride={!!libraryUrlConfig}
+          onReset={() => onResetLibraryUrlConfig?.()}
+        />
+      </div>
+      <section>
+        <BookshelfGrid
+          items={items}
+          config={config}
           emptyState={
             <div className="py-8 text-sm text-text-secondary">
               No progress yet.

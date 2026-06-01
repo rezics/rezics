@@ -7,6 +7,7 @@
 // into the `NavigationItem[]` the sidebar renders.
 
 import {
+  Activity as ActivityOutlinedIcon,
   CircleUser as AccountCircleOutlinedIcon,
   FileText as ArticleOutlinedIcon,
   LayoutDashboard as DashboardOutlinedIcon,
@@ -150,6 +151,13 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
         segment: "/u/me/dashboard",
         title: "Dashboard",
         icon: DashboardOutlinedIcon,
+        visibility: "authenticated",
+      },
+      {
+        kind: "item",
+        segment: "/u/me/progress",
+        title: "Progress",
+        icon: ActivityOutlinedIcon,
         visibility: "authenticated",
       },
       {

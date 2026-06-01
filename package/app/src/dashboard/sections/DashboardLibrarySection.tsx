@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { resolveBookshelfConfig, UseMySettingsButton } from "@/bookshelf-view";
-import { progressLibraryRowToBookshelfItem } from "../models/libraryShelf";
+import { progressLibraryRowToBookshelfItem } from "@/progress";
 import { DashboardLibraryShelfBlock } from "./DashboardLibraryShelfBlock";
 
 export interface DashboardLibrarySectionProps {

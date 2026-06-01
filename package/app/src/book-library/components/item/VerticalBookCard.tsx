@@ -1,3 +1,4 @@
+import { BookOpen } from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util.ts";
@@ -30,6 +31,7 @@ export function BookCard({
 }: BookProps) {
   const Root: React.ElementType = href ? Link : "button";
   const rootProps = href ? { to: href } : { type: "button" as const, onClick };
+  const hasCover = coverUrl.trim().length > 0;
 
   return (
     <Root
@@ -41,15 +43,27 @@ export function BookCard({
         className="relative w-full overflow-hidden"
         style={aspectRatio ? { aspectRatio } : undefined}
       >
-        <img
-          src={coverUrl}
-          alt={title}
-          className={cn(
-            "w-full object-cover rounded",
-            aspectRatio ? "h-full" : "",
-          )}
-          loading="lazy"
-        />
+        {hasCover ? (
+          <img
+            src={coverUrl}
+            alt={title}
+            className={cn(
+              "w-full object-cover rounded",
+              aspectRatio ? "h-full" : "",
+            )}
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className={cn(
+              "flex w-full items-center justify-center rounded bg-surface-subtle text-text-tertiary",
+              aspectRatio ? "h-full" : "aspect-[2/3]",
+            )}
+            aria-hidden="true"
+          >
+            <BookOpen className="h-8 w-8" />
+          </div>
+        )}
       </div>
 
       {showTitle ? (
