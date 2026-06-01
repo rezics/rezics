@@ -1,4 +1,5 @@
 import type {
+  AllowedReactionKind,
   GivenResponse,
   InternalByUserBody,
   InternalByUserResponse,
@@ -64,7 +65,7 @@ async function getPublic<T>(
 export async function createReaction(
   userId: string,
   targetId: string,
-  reaction: string,
+  reaction: AllowedReactionKind,
 ): Promise<InternalCreateResponse> {
   return postInternal<InternalCreateResponse>("/internal/create", {
     userId,
@@ -79,7 +80,7 @@ export async function createReaction(
 export async function removeReaction(
   userId: string,
   targetId: string,
-  reaction: string,
+  reaction: AllowedReactionKind,
 ): Promise<InternalRemoveResponse> {
   return postInternal<InternalRemoveResponse>("/internal/remove", {
     userId,

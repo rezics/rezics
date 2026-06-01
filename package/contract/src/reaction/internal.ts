@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { allowedReactionKindSchema } from "./reaction.schema";
 
 export const cleanupBodySchema = t.Object({
   targetId: t.String(),
@@ -7,14 +8,14 @@ export const cleanupBodySchema = t.Object({
 export const internalCreateBodySchema = t.Object({
   userId: t.String(),
   targetId: t.String(),
-  reaction: t.String(),
+  reaction: allowedReactionKindSchema,
 });
 
 export const internalCreateResponseSchema = t.Object({
   id: t.String(),
   userId: t.String(),
   targetId: t.String(),
-  reaction: t.String(),
+  reaction: allowedReactionKindSchema,
   createdAt: t.String(),
   created: t.Boolean(),
 });
@@ -24,7 +25,7 @@ export type InternalCreateResponse =
 export const internalRemoveBodySchema = t.Object({
   userId: t.String(),
   targetId: t.String(),
-  reaction: t.String(),
+  reaction: allowedReactionKindSchema,
 });
 
 export const internalRemoveResponseSchema = t.Object({

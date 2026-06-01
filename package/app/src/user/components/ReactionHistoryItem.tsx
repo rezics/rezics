@@ -5,12 +5,11 @@ import type {
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@rezics/ui/shadcn";
 import {
-  Bookmark,
+  Award,
   Heart,
+  Laugh,
   type LucideIcon,
-  MessageSquare,
   Sparkles,
-  Star,
   ThumbsDown,
   ThumbsUp,
 } from "lucide-react";
@@ -20,11 +19,9 @@ import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 const REACTION_ICONS: Record<string, LucideIcon> = {
   like: ThumbsUp,
   dislike: ThumbsDown,
-  bookmark: Bookmark,
   heart: Heart,
-  star: Star,
-  insightful: Sparkles,
-  reply: MessageSquare,
+  funny: Laugh,
+  award: Award,
 };
 
 function reactionIconFor(reaction: string): LucideIcon {

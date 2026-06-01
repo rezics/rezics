@@ -1,13 +1,28 @@
 import { t } from "elysia";
 
+export const allowedReactionKindSchema = t.Union([
+  t.Literal("like"),
+  t.Literal("dislike"),
+]);
+export type AllowedReactionKind = (typeof allowedReactionKindSchema)["static"];
+
+export const knownReactionKindSchema = t.Union([
+  t.Literal("like"),
+  t.Literal("dislike"),
+  t.Literal("heart"),
+  t.Literal("funny"),
+  t.Literal("award"),
+]);
+export type KnownReactionKind = (typeof knownReactionKindSchema)["static"];
+
 export const createSchema = t.Object({
   targetId: t.String(),
-  reaction: t.String(),
+  reaction: allowedReactionKindSchema,
 });
 
 export const deleteQuerySchema = t.Object({
   targetId: t.String(),
-  reaction: t.String(),
+  reaction: allowedReactionKindSchema,
 });
 
 export const summaryQuerySchema = t.Object({

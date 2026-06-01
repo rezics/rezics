@@ -20,7 +20,7 @@ const sampleGiven: ReactionHistoryGivenItem[] = [
   },
   {
     id: "g2",
-    reaction: "bookmark",
+    reaction: "heart",
     createdAt: "2026-04-22T08:30:00.000Z",
     target: {
       unitId: "unit-2",
@@ -31,7 +31,7 @@ const sampleGiven: ReactionHistoryGivenItem[] = [
   },
   {
     id: "g3",
-    reaction: "heart",
+    reaction: "award",
     createdAt: "2026-04-15T19:42:00.000Z",
     target: {
       unitId: "unit-3",
@@ -62,7 +62,7 @@ const sampleReceived: ReactionHistoryReceivedItem[] = [
   },
   {
     id: "r2",
-    reaction: "insightful",
+    reaction: "funny",
     createdAt: "2026-05-01T09:08:00.000Z",
     target: {
       unitId: "unit-8",

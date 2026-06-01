@@ -1,3 +1,5 @@
+import type { AllowedReactionKind } from "@rezics/contract/reaction";
+
 /**
  * Types for Reaction API (aligned with @rezics/contract/reaction)
  */
@@ -6,18 +8,18 @@ export type ReactionDTO = {
   id: string;
   userId: string;
   targetId: string;
-  reaction: string;
+  reaction: AllowedReactionKind;
   createdAt: string;
 };
 
 export type ReactionCreateInput = {
   targetId: string;
-  reaction: string;
+  reaction: AllowedReactionKind;
 };
 
 export type ReactionDeleteQuery = {
   targetId: string;
-  reaction: string;
+  reaction: AllowedReactionKind;
 };
 
 /** Response shape for GET /reactions/summary */
