@@ -316,20 +316,29 @@ export class ShelfService {
         shelfId: true,
         unitId: true,
         kind: true,
-        unit: {
-          select: {
-            defaultLanguage: true,
-            translations: { select: { language: true, title: true } },
-          },
-        },
       },
     });
 
+    const matchedUnitIds = [...new Set(shelfUnits.map((row) => row.unitId))];
+    const units =
+      matchedUnitIds.length > 0
+        ? await prisma.unit.findMany({
+            where: { id: { in: matchedUnitIds } },
+            select: {
+              id: true,
+              defaultLanguage: true,
+              translations: { select: { language: true, title: true } },
+            },
+          })
+        : [];
+    const unitById = new Map(units.map((unit) => [unit.id, unit]));
+
     for (const row of shelfUnits) {
       if (out.has(row.shelfId)) continue;
-      const translations = row.unit?.translations ?? [];
+      const unit = unitById.get(row.unitId);
+      const translations = unit?.translations ?? [];
       const title =
-        translations.find((tr) => tr.language === row.unit?.defaultLanguage)
+        translations.find((tr) => tr.language === unit?.defaultLanguage)
           ?.title ??
         translations[0]?.title ??
         null;

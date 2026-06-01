@@ -1,3 +1,4 @@
+import { bookQueries } from "@rezics/api/book/book";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import { mainMarkdownSource } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

@@ -129,10 +129,15 @@ describe("ShelfService", () => {
             shelfId: "shelf-1",
             unitId: "release-1",
             kind: "book",
-            unit: {
-              defaultLanguage: "en",
-              translations: [{ language: "en", title: "Contained Release" }],
-            },
+          },
+        ],
+      },
+      unit: {
+        findMany: async () => [
+          {
+            id: "release-1",
+            defaultLanguage: "en",
+            translations: [{ language: "en", title: "Contained Release" }],
           },
         ],
       },
