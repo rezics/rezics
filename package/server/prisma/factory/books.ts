@@ -271,6 +271,7 @@ export async function seedChaptersForBook(
           userId: bookUserId,
           slugScope: bookUserId,
           type: UnitType.POST,
+          targetUnitId: bookUnitId,
           status: UnitStatus.PUBLISHED,
           licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
@@ -304,11 +305,8 @@ export async function seedChaptersForBook(
         data: chunk.map((r) => ({
           unitId: r.id,
           authorUserId: bookUserId,
-          targetUnitId: bookUnitId,
           kind: PostKind.CHAPTER,
           content: markdownContentDoc(r.body ?? "") as Prisma.InputJsonValue,
-          rootPostUnitId: r.id,
-          depth: 0,
         })),
       });
     }
@@ -320,6 +318,7 @@ export async function seedChaptersForBook(
           userId: bookUserId,
           slugScope: bookUserId,
           type: UnitType.POST,
+          targetUnitId: bookUnitId,
           status: UnitStatus.PUBLISHED,
           licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
           defaultLanguage: DEFAULT_LANGUAGE,
@@ -335,13 +334,10 @@ export async function seedChaptersForBook(
           post: {
             create: {
               authorUserId: bookUserId,
-              targetUnitId: bookUnitId,
               kind: PostKind.CHAPTER,
               content: markdownContentDoc(
                 row.body ?? "",
               ) as Prisma.InputJsonValue,
-              rootPostUnitId: row.id,
-              depth: 0,
             },
           },
         },

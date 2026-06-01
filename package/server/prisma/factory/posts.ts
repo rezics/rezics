@@ -141,6 +141,7 @@ async function seedPostKindForTarget(
         type: UnitType.POST,
         userId: author.userId,
         slugScope: author.userId,
+        targetUnitId,
         status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
         licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
@@ -148,11 +149,9 @@ async function seedPostKindForTarget(
         post: {
           create: {
             authorUserId: author.userId,
-            targetUnitId,
             kind,
             content: markdownContentDoc(body) as never,
             extra: extra ?? undefined,
-            depth: 0,
             scoreEntryId: scoreEntryId ?? undefined,
           },
         },
@@ -242,6 +241,7 @@ async function seedPostKindBatch(
         type: UnitType.POST,
         userId: r.author.userId,
         slugScope: r.author.userId,
+        targetUnitId,
         status: r.published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
         licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
@@ -256,11 +256,9 @@ async function seedPostKindBatch(
       data: chunk.map((r) => ({
         unitId: r.id,
         authorUserId: r.author.userId,
-        targetUnitId,
         kind,
         content: markdownContentDoc(r.body) as never,
         extra: r.extra ?? undefined,
-        depth: 0,
         scoreEntryId: r.scoreEntryId ?? null,
       })),
     });
@@ -312,16 +310,6 @@ async function seedPostKindBatch(
   }));
 }
 
-/**
- * Tree shape is drawn from the plan via ctx.draw on every CountSpec slot:
- *   roots:     how many root posts to create (clamped to total)
- *   depth:     maximum depth a reply may reach
- *   branching: per-parent direct-child target when allocating replies
- *
- * Under fixed mode every draw resolves to the spec's `target`, producing a
- * deterministic tree. Under realistic mode the same call sites recover the
- * pre-change "mostly shallow, occasionally deep" distribution.
- */
 async function seedTreePostsForTarget(
   ctx: SeedCtx,
   treeShape: TreeShapePlan,
@@ -331,30 +319,20 @@ async function seedTreePostsForTarget(
 ): Promise<CreatedPost[]> {
   if (total === 0) return [];
 
-  const drawnRoots = ctx.draw(treeShape.roots);
-  const rootCount = Math.max(1, Math.min(total, drawnRoots));
-  const replyCount = total - rootCount;
-  const maxDepth = ctx.draw(treeShape.depth);
+  void treeShape;
   const posts: CreatedPost[] = [];
+  const rootIds = Array.from({ length: total }, () => randomUUID());
 
-  // Pass 1: Root posts. The planned `path` strings are zero-padded numeric
-  // labels (valid ltree tokens) written via raw SQL after the typed create,
-  // because `Post.path` is an Unsupported("ltree") column.
-  const rootPlans = Array.from({ length: rootCount }, (_, index) => ({
-    id: randomUUID(),
-    path: String(index + 1).padStart(4, "0"),
-  }));
-  const rootIds = rootPlans.map((plan) => plan.id);
-
-  await chunkedParallel(rootPlans, CHUNK_SIZE, async (rootPlan) => {
+  await chunkedParallel(rootIds, CHUNK_SIZE, async (rootId) => {
     const author = faker.helpers.arrayElement(users);
 
     const unit = await ctx.prisma.unit.create({
       data: {
-        id: rootPlan.id,
+        id: rootId,
         type: UnitType.POST,
         userId: author.userId,
         slugScope: author.userId,
+        targetUnitId,
         status: UnitStatus.PUBLISHED,
         licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
@@ -362,11 +340,8 @@ async function seedTreePostsForTarget(
         post: {
           create: {
             authorUserId: author.userId,
-            targetUnitId,
-            rootPostUnitId: rootPlan.id,
             kind: PostKind.POST,
             content: generatePostContent(PostKind.POST) as never,
-            depth: 0,
           },
         },
         supportLanguages: {
@@ -375,9 +350,6 @@ async function seedTreePostsForTarget(
       },
       select: { id: true, type: true },
     });
-
-    await ctx.prisma
-      .$executeRaw`UPDATE "Post" SET "path" = ${rootPlan.path}::ltree WHERE "unitId" = ${rootPlan.id}::uuid`;
 
     posts.push({
       ...unit,
@@ -385,125 +357,6 @@ async function seedTreePostsForTarget(
       targetUnitId,
     });
   });
-
-  if (rootIds.length === 0 || replyCount === 0) return posts;
-
-  interface ParentSlot {
-    id: string;
-    path: string;
-    depth: number;
-    rootId: string;
-    childCount: number;
-  }
-
-  const replyParents: ParentSlot[] = rootIds.map((id, i) => ({
-    id,
-    path: rootPlans[i]!.path,
-    depth: 0,
-    rootId: id,
-    childCount: 0,
-  }));
-
-  const eligibleParents = (): ParentSlot[] =>
-    replyParents.filter((p) => p.depth < maxDepth);
-
-  const pickParent = (): ParentSlot | undefined => {
-    const candidates = eligibleParents();
-    if (candidates.length === 0) return undefined;
-    // Prefer parents that haven't yet reached their drawn branching cap so
-    // that fixed-mode trees produce the exact configured shape, while still
-    // accepting any eligible parent as a fallback.
-    const underBranching = candidates.filter((p) => {
-      const cap = ctx.draw(treeShape.branching);
-      return p.childCount < cap;
-    });
-    const pool = underBranching.length > 0 ? underBranching : candidates;
-    return faker.helpers.arrayElement(pool);
-  };
-
-  let createdReplies = 0;
-  while (createdReplies < replyCount) {
-    const parent = pickParent();
-    if (!parent) break;
-
-    const author = faker.helpers.arrayElement(users);
-    const replyId = randomUUID();
-    const path = `${parent.path}.${String(parent.childCount + 1).padStart(
-      4,
-      "0",
-    )}`;
-
-    const unit = await ctx.prisma.unit.create({
-      data: {
-        id: replyId,
-        type: UnitType.POST,
-        userId: author.userId,
-        slugScope: author.userId,
-        status: UnitStatus.PUBLISHED,
-        licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
-        defaultLanguage: DEFAULT_LANGUAGE,
-        publishedAt: faker.date.past({ years: 1 }),
-        post: {
-          create: {
-            authorUserId: author.userId,
-            targetUnitId,
-            rootPostUnitId: parent.rootId,
-            parentPostUnitId: parent.id,
-            kind: PostKind.POST,
-            content: generatePostContent(PostKind.POST) as never,
-            depth: parent.depth + 1,
-          },
-        },
-        supportLanguages: {
-          create: { language: DEFAULT_LANGUAGE, isPrimary: true },
-        },
-      },
-      select: { id: true, type: true },
-    });
-
-    await ctx.prisma
-      .$executeRaw`UPDATE "Post" SET "path" = ${path}::ltree WHERE "unitId" = ${replyId}::uuid`;
-
-    parent.childCount++;
-    replyParents.push({
-      id: replyId,
-      path,
-      depth: parent.depth + 1,
-      rootId: parent.rootId,
-      childCount: 0,
-    });
-    posts.push({
-      ...unit,
-      kind: PostKind.POST,
-      targetUnitId,
-    });
-    createdReplies++;
-  }
-
-  // Update reply counts on root posts
-  const replyCounts = new Map<string, { total: number; direct: number }>();
-  for (const node of replyParents) {
-    if (node.depth === 0) continue;
-    const counts = replyCounts.get(node.rootId) ?? { total: 0, direct: 0 };
-    counts.total++;
-    if (node.depth === 1) counts.direct++;
-    replyCounts.set(node.rootId, counts);
-  }
-
-  await chunkedParallel(
-    Array.from(replyCounts.entries()),
-    CHUNK_SIZE,
-    async ([rootId, counts]) => {
-      await ctx.prisma.post.update({
-        where: { unitId: rootId },
-        data: {
-          replyCount: counts.total,
-          directReplyCount: counts.direct,
-          lastReplyAt: new Date(),
-        },
-      });
-    },
-  );
 
   return posts;
 }
@@ -577,7 +430,6 @@ export async function seedWikiContentTranslations(
             authorUserId: author.userId,
             kind: PostKind.POST,
             content: markdownContentDoc(primary.contentSource) as never,
-            depth: 0,
           },
         },
         translations: {

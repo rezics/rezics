@@ -248,11 +248,13 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     maxDepth,
     branchCap,
   });
+  const rootPosts = plannedPosts.filter((post) => post.depth === 0);
   const unitRows: Array<{
     id: string;
     type: UnitType;
     userId: string;
     slugScope: string;
+    targetUnitId: string;
     status: UnitStatus;
     licenseSlug: string;
     defaultLanguage: string;
@@ -261,15 +263,8 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
   const postRows: Array<{
     unitId: string;
     authorUserId: string;
-    targetUnitId: string;
-    rootPostUnitId: string;
-    parentPostUnitId?: string;
     kind: PostKind;
     content: Prisma.InputJsonValue;
-    depth: number;
-    replyCount?: number;
-    directReplyCount?: number;
-    lastReplyAt?: Date;
   }> = [];
   const supportRows: Array<{
     unitId: string;
@@ -277,12 +272,13 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     isPrimary: boolean;
   }> = [];
 
-  for (const planned of plannedPosts) {
+  for (const planned of rootPosts) {
     unitRows.push({
       id: planned.id,
       type: UnitType.POST,
       userId: user.userId,
       slugScope: user.userId,
+      targetUnitId,
       status: UnitStatus.PUBLISHED,
       licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
       defaultLanguage: DEFAULT_LANGUAGE,
@@ -291,19 +287,10 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     postRows.push({
       unitId: planned.id,
       authorUserId: user.userId,
-      targetUnitId,
-      rootPostUnitId: planned.rootId,
-      ...(planned.parentId ? { parentPostUnitId: planned.parentId } : {}),
       kind: PostKind.POST,
       content: markdownContentDoc(
-        planned.depth === 0
-          ? `Root ${planned.rootIndex + 1} for the large post tree scenario.`
-          : `Reply ${planned.replyIndex + 1} at depth ${planned.depth} under root ${planned.rootIndex + 1}.`,
+        `Root ${planned.rootIndex + 1} for the large post tree scenario.`,
       ) as Prisma.InputJsonValue,
-      depth: planned.depth,
-      replyCount: planned.replyCount,
-      directReplyCount: planned.directReplyCount,
-      ...(planned.replyCount > 0 ? { lastReplyAt: now } : {}),
     });
     supportRows.push({
       unitId: planned.id,
@@ -314,26 +301,12 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
 
   await ctx.prisma.unit.createMany({ data: unitRows });
   await ctx.prisma.post.createMany({ data: postRows });
-  // `Post.path` is Unsupported("ltree"); set every planned path in one bulk
-  // statement after the typed createMany (zero-padded numeric labels are valid
-  // ltree tokens).
-  await ctx.prisma.$executeRaw`
-    UPDATE "Post" AS p
-    SET "path" = data.path::ltree
-    FROM (
-      SELECT
-        unnest(${plannedPosts.map((node) => node.id)}::uuid[]) AS unit_id,
-        unnest(${plannedPosts.map((node) => node.path)}::text[]) AS path
-    ) AS data
-    WHERE p."unitId" = data.unit_id
-  `;
   await ctx.prisma.unitSupportLanguage.createMany({ data: supportRows });
-  for (const post of plannedPosts) {
+  for (const post of rootPosts) {
     await ctx.sync.post(post.id);
   }
 
-  const roots = plannedPosts.filter((post) => post.depth === 0);
-  for (const [index, post] of roots.slice(0, 3).entries()) {
+  for (const [index, post] of rootPosts.slice(0, 3).entries()) {
     addSpecialSeedTarget(result, {
       label: `Large post tree root ${index + 1}`,
       scenario: "large-post-tree",
@@ -608,6 +581,7 @@ async function createWikiScenarioPost(
       visibility: UnitVisibility.PUBLIC,
       licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
       defaultLanguage: input.defaultLanguage,
+      targetUnitId: input.targetUnitId,
       publishedAt: input.publishedAt,
       updatedAt: input.publishedAt,
       translations: {
@@ -636,18 +610,14 @@ async function createWikiScenarioPost(
       post: {
         create: {
           authorUserId: input.userId,
-          targetUnitId: input.targetUnitId,
           kind: PostKind.WIKI,
           content: markdownContentDoc(primary.body) as Prisma.InputJsonValue,
-          depth: 0,
           createdAt: input.publishedAt,
           updatedAt: input.publishedAt,
         },
       },
     },
   });
-  await ctx.prisma
-    .$executeRaw`UPDATE "Post" SET "path" = '0001'::ltree WHERE "unitId" = ${postUnitId}::uuid`;
   await ctx.prisma.unitRealm.create({
     data: {
       realmUnitId: input.realmUnitId,
@@ -1030,7 +1000,7 @@ async function runWikiZoneExperience(ctx: SeedCtx): Promise<SeedResult> {
 export const FACTORY_SCENARIOS: Record<FactoryScenarioName, FactoryScenario> = {
   "large-post-tree": {
     name: "large-post-tree",
-    description: "Large deterministic post tree for thread pagination.",
+    description: "Large deterministic post roots for pagination.",
     defaultSelected: true,
     run: runLargePostTree,
   },
