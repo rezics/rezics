@@ -1,11 +1,7 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import {
-  PostKind,
-  type PostListQuery,
-  realmReactionScopeKey,
-} from "@rezics/contract";
+import { PostKind, type PostListQuery } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -18,6 +14,10 @@ import {
   type ReviewTargetUnit,
 } from "@/review/components/item/ReviewCard";
 import { getTranslation } from "@/shared/utils/translation-helpers";
+import {
+  realmContextPostHref,
+  realmContextReactionScopeKey,
+} from "../models/realmPostContext";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
 
 interface RealmContentFeedProps {
@@ -42,7 +42,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     }),
   );
   const posts = data?.posts ?? [];
-  const reactionScopeKey = realmReactionScopeKey(realmId);
+  const reactionScopeKey = realmContextReactionScopeKey(realmId);
   const postReactionTargetIds = useMemo(
     () =>
       posts
@@ -121,7 +121,10 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
           <PostCard
             key={post.unitId}
             post={post}
-            href={`/realm/${realmId}/post/${post.unitId}`}
+            href={realmContextPostHref({
+              realmId,
+              postUnitId: post.unitId,
+            })}
             summaryScopeKey={reactionScopeKey}
             reactionScopeKey={reactionScopeKey}
           />

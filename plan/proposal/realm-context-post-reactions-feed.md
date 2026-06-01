@@ -1,6 +1,6 @@
 ---
 title: Realm Context Post Reactions And Feed
-status: active
+status: done
 created: 2026-06-01
 completed:
 supersededBy:
@@ -139,7 +139,7 @@ direct plus all realm scopes without deduplicating by user.
   `package/app/src/realm/components/RealmContentFeed.tsx` to link post cards to
   the realm-context post route and pass realm reaction scope into the reaction
   bar.
-- [ ] 4.7 Add app/API tests or stories proving direct post pages, realm-context
+- [x] 4.7 Add app/API tests or stories proving direct post pages, realm-context
   post pages, and realm feed cards use the intended scope and link shape.
 
 ## 5. Feed And Ranking

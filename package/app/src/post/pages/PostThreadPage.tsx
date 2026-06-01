@@ -1,7 +1,7 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import { postQueries } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import { PostKind, realmReactionScopeKey } from "@rezics/contract";
+import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ import type React from "react";
 import { PostCard } from "../components/item/PostCard";
 import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
+import { resolvePostThreadContext } from "../models/postThreadContext";
 import { PostTreeSection } from "../sections/PostTreeSection";
 
 export type PostThreadPageProps = {
@@ -27,11 +28,11 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     postUnitId?: string;
     realmId?: string;
   };
-  const rootPostUnitId = params.rootPostUnitId ?? params.postUnitId ?? "";
-  const contextRealmUnitId = realmUnitId ?? params.realmId ?? null;
-  const reactionScopeKey = contextRealmUnitId
-    ? realmReactionScopeKey(contextRealmUnitId)
-    : undefined;
+  const {
+    rootPostUnitId,
+    realmUnitId: contextRealmUnitId,
+    reactionScopeKey,
+  } = resolvePostThreadContext({ params, realmUnitId });
   const search = useSearch({ strict: false }) as
     | { focusPostUnitId?: string | null }
     | undefined;
