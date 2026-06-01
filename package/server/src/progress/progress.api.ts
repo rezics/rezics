@@ -1,5 +1,6 @@
 import {
   nodeCompletionToggleBodySchema,
+  progressLibraryListResponseSchema,
   unitProgressListQuerySchema,
   unitProgressListResponseSchema,
   unitProgressParamsSchema,
@@ -76,6 +77,21 @@ export const progressApi = new Elysia()
       response: unitProgressListResponseSchema,
       detail: {
         summary: "List my unit progress",
+        tags: ["Progress"],
+      },
+    },
+  )
+  .get(
+    "/me/progress/library",
+    async ({ query, identity }) => {
+      return progressService.listLibrary(identity.userId, query);
+    },
+    {
+      requireLogin: true,
+      query: unitProgressListQuerySchema,
+      response: progressLibraryListResponseSchema,
+      detail: {
+        summary: "List my hydrated progress library",
         tags: ["Progress"],
       },
     },

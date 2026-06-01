@@ -1,4 +1,10 @@
-import type { BookDTO, ContinueReadingItem } from "@rezics/contract";
+import type {
+  BookDTO,
+  ContinueReadingItem,
+  LibraryKind,
+  ProgressLibraryRow,
+  UnitType,
+} from "@rezics/contract";
 import type { BookshelfItem } from "@/bookshelf-view";
 import { getBookAuthorName } from "@/shared/utils/translation-helpers";
 
@@ -48,6 +54,38 @@ export function bookToBookshelfItem(
     item.chaptersCompleted = progress.chaptersCompleted;
     item.chaptersTotal = progress.chaptersTotal;
     item.lastReadChapterTitle = progress.lastReadChapterTitle;
+  }
+  return item;
+}
+
+function libraryKindFromUnitType(unitType: UnitType): LibraryKind | null {
+  if (unitType === "BOOK") return "book";
+  if (unitType === "GAME") return "game";
+  if (unitType === "MEDIA") return "media";
+  return null;
+}
+
+export function progressLibraryRowToBookshelfItem(
+  row: ProgressLibraryRow,
+): BookshelfItem | null {
+  const kind = libraryKindFromUnitType(row.unit.unitType);
+  if (!kind) return null;
+
+  const item: BookshelfItem = {
+    unitId: row.unit.unitId,
+    kind,
+    title: row.unit.title || row.unit.unitId,
+    coverUrl: row.unit.coverUrl ?? "",
+    href:
+      row.resumeRoute?.kind === "node"
+        ? `/book/${row.resumeRoute.bookId}/node/${row.resumeRoute.nodeId}`
+        : kind === "book"
+          ? `/book/${row.unit.unitId}`
+          : `/unit/${row.unit.unitId}`,
+    isLicensed: true,
+  };
+  if (kind === "book" && row.progress.completedCount > 0) {
+    item.chaptersCompleted = row.progress.completedCount;
   }
   return item;
 }

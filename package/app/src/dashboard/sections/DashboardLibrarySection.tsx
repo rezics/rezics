@@ -1,20 +1,16 @@
-import { userShelvesQuery } from "@rezics/api/shelf";
 import { userQueries } from "@rezics/api/user/user.queries";
-import type {
-  BookshelfViewConfig,
-  ContinueReadingItem,
-} from "@rezics/contract";
+import type { BookshelfViewConfig, ProgressLibraryRow } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { resolveBookshelfConfig, UseMySettingsButton } from "@/bookshelf-view";
-import { progressByBook } from "../models/libraryShelf";
+import { progressLibraryRowToBookshelfItem } from "../models/libraryShelf";
 import { DashboardLibraryShelfBlock } from "./DashboardLibraryShelfBlock";
 
 export interface DashboardLibrarySectionProps {
-  /** Continue-reading items, the source of the chapter-completion counter. */
-  continueReading: readonly ContinueReadingItem[];
+  /** Progress-owned library rows; shelf membership is not required. */
+  progressRows: readonly ProgressLibraryRow[];
   /** Bookshelf layout from the URL query, if any (highest precedence). */
   urlConfig?: BookshelfViewConfig | null;
   /** Clear the URL override so the viewer's stored settings take effect. */
@@ -22,19 +18,17 @@ export interface DashboardLibrarySectionProps {
 }
 
 /**
- * The dashboard library section: a composition of the viewer's existing
- * shelves rendered through the shared `bookshelf` view, with the readable
- * filter applied by default. Layout follows the `shelf-collection` resolution
+ * The dashboard library section: progress-owned rows rendered through the
+ * shared `bookshelf` view. Layout follows the `shelf-collection` resolution
  * order — URL override → viewer's `userSettings.library.bookshelf` → default —
  * and exposes the same "use my settings" reset.
  */
 export function DashboardLibrarySection({
-  continueReading,
+  progressRows,
   urlConfig,
   onResetUrlConfig,
 }: DashboardLibrarySectionProps) {
   const { t } = useTranslation(["page"]);
-  const { data: shelves } = useQuery(userShelvesQuery());
   const { data: settings } = useQuery(userQueries.settings());
 
   const config = useMemo(
@@ -45,13 +39,15 @@ export function DashboardLibrarySection({
       }),
     [urlConfig, settings?.library?.bookshelf],
   );
-  const progress = useMemo(
-    () => progressByBook(continueReading),
-    [continueReading],
+  const items = useMemo(
+    () =>
+      progressRows.flatMap((row) => {
+        const item = progressLibraryRowToBookshelfItem(row);
+        return item ? [item] : [];
+      }),
+    [progressRows],
   );
-
-  const libraryShelves = shelves ?? [];
-  if (libraryShelves.length === 0) return null;
+  if (items.length === 0) return null;
 
   return (
     <Card>
@@ -63,15 +59,7 @@ export function DashboardLibrarySection({
         />
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        {libraryShelves.map((shelf) => (
-          <DashboardLibraryShelfBlock
-            key={shelf.unitId}
-            shelf={shelf}
-            config={config}
-            readableOnly
-            progress={progress}
-          />
-        ))}
+        <DashboardLibraryShelfBlock items={items} config={config} />
       </CardContent>
     </Card>
   );

@@ -1,5 +1,6 @@
 import type {
   NodeCompletionToggleBody,
+  ProgressLibraryListResponse,
   UnitProgressListQuery,
   UnitProgressListResponse,
   UnitProgressRowDTO,
@@ -31,6 +32,13 @@ export const progressApi = {
   ): Promise<UnitProgressListResponse> => {
     const qs = buildQueryString(query ?? {});
     return apiFetch<UnitProgressListResponse>(`/me/progress${qs}`);
+  },
+
+  listMyProgressLibrary: async (
+    query?: UnitProgressListQuery,
+  ): Promise<ProgressLibraryListResponse> => {
+    const qs = buildQueryString(query ?? {});
+    return apiFetch<ProgressLibraryListResponse>(`/me/progress/library${qs}`);
   },
 
   getUnitProgressStats: async (

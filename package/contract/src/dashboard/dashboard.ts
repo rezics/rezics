@@ -1,5 +1,6 @@
 import { type TSchema, t } from "elysia";
 import { draftMetadataSchema } from "../post/draft";
+import { progressLibraryRowSchema } from "../shelf/progress";
 
 // ============================================================
 // DASHBOARD SUMMARY
@@ -133,6 +134,7 @@ export const dashboardSafetySchema = t.Object({
 
 export const dashboardSummarySchema = t.Object({
   continueReading: dashboardSection(t.Array(continueReadingItemSchema)),
+  libraryProgress: dashboardSection(t.Array(progressLibraryRowSchema)),
   shelves: dashboardSection(t.Array(dashboardShelfSummarySchema)),
   realms: dashboardSection(t.Array(dashboardRealmSummarySchema)),
   notifications: dashboardSection(dashboardNotificationSummarySchema),
@@ -144,6 +146,9 @@ export const dashboardSummarySchema = t.Object({
 
 export type DashboardSummary = {
   continueReading: DashboardSectionResult<ContinueReadingItem[]>;
+  libraryProgress: DashboardSectionResult<
+    (typeof progressLibraryRowSchema)["static"][]
+  >;
   shelves: DashboardSectionResult<
     (typeof dashboardShelfSummarySchema)["static"][]
   >;

@@ -1,6 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import type { BookDTO, ContinueReadingItem } from "@rezics/contract";
-import { bookToBookshelfItem, progressByBook } from "./libraryShelf";
+import type {
+  BookDTO,
+  ContinueReadingItem,
+  ProgressLibraryRow,
+} from "@rezics/contract";
+import {
+  bookToBookshelfItem,
+  progressByBook,
+  progressLibraryRowToBookshelfItem,
+} from "./libraryShelf";
 
 function continueItem(
   overrides: Partial<ContinueReadingItem> & { bookUnitId: string },
@@ -27,6 +35,23 @@ function book(overrides: {
     coverUrl: null,
     ...overrides,
   } as unknown as BookDTO;
+}
+
+function progressRow(unitId: string): ProgressLibraryRow["progress"] {
+  return {
+    userId: "user-1",
+    unitId,
+    progress: 0.4,
+    status: "ACTIVE",
+    isDeleted: false,
+    completedCount: 0,
+    totalTimeMs: 0,
+    lastReadNodeId: null,
+    lastReadAnchor: null,
+    firstSeenAt: "2026-01-01T00:00:00.000Z",
+    lastSeenAt: "2026-01-01T00:00:00.000Z",
+    extra: null,
+  };
 }
 
 describe("progressByBook", () => {
@@ -95,5 +120,39 @@ describe("bookToBookshelfItem", () => {
   test("falls back to unitId when no translation title exists", () => {
     const item = bookToBookshelfItem(book({ unitId: "b9", translations: [] }));
     expect(item.title).toBe("b9");
+  });
+});
+
+describe("progressLibraryRowToBookshelfItem", () => {
+  test("maps progress-owned rows without requiring shelf membership", () => {
+    const row = {
+      progress: progressRow("b1"),
+      unit: {
+        unitId: "b1",
+        title: "Dune",
+        coverUrl: "https://x/d.jpg",
+        unitType: "BOOK",
+      },
+      resumeRoute: { kind: "book", bookId: "b1" },
+      shelves: [],
+    } satisfies ProgressLibraryRow;
+
+    expect(progressLibraryRowToBookshelfItem(row)).toMatchObject({
+      unitId: "b1",
+      kind: "book",
+      title: "Dune",
+      coverUrl: "https://x/d.jpg",
+      href: "/book/b1",
+    });
+  });
+
+  test("skips non-library unit types", () => {
+    const row = {
+      progress: progressRow("post-1"),
+      unit: { unitId: "post-1", title: "Post", unitType: "POST" },
+      shelves: [],
+    } satisfies ProgressLibraryRow;
+
+    expect(progressLibraryRowToBookshelfItem(row)).toBeNull();
   });
 });

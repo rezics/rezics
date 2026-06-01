@@ -6,6 +6,7 @@ import {
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 import { governanceEnforcementService } from "@/governance/enforcement.service";
+import { progressService } from "@/progress";
 import { notAggregated, section } from "./dashboard.types";
 
 const CONTINUE_READING_LIMIT = 12;
@@ -213,9 +214,15 @@ export const dashboardService = {
       section(() => loadRealms(userId)),
       section(() => loadSafety(userId)),
     ]);
+    // Progress library rows are progress-owned; shelf links are optional
+    // projections for sharing/organization, not the source of truth.
+    const libraryProgress = await section(() =>
+      progressService.listLibrary(userId, { limit: CONTINUE_READING_LIMIT }),
+    );
 
     return {
       continueReading,
+      libraryProgress,
       shelves,
       realms,
       safety,

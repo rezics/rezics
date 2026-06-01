@@ -134,42 +134,42 @@ shelf-based flows feel continuous.
 
 ## 6. Progress-Owned API and Page
 
-- [ ] 6.1 Add progress contract DTOs in
+- [x] 6.1 Add progress contract DTOs in
   `package/contract/src/shelf/progress.ts` for a hydrated progress library row:
   progress fields plus the target Unit title/cover/kind and optional resume
   route.
-- [ ] 6.2 Extend `package/server/src/progress/progress.service.ts` with a
+- [x] 6.2 Extend `package/server/src/progress/progress.service.ts` with a
   hydrated list method for progress library/page reads, reusing current
   pagination where practical.
-- [ ] 6.3 Expose the hydrated progress list through
+- [x] 6.3 Expose the hydrated progress list through
   `package/server/src/progress/progress.api.ts` and
   `package/api/src/progress/` query helpers.
-- [ ] 6.4 Build a progress page under `package/app/src/progress` or the existing
+- [x] 6.4 Build a progress page under `package/app/src/progress` or the existing
   progress feature location that renders progress rows with the shared
   bookshelf/shelf card language.
-- [ ] 6.5 Keep progress source-of-truth in `UserUnitProgress`; do not require a
+- [x] 6.5 Keep progress source-of-truth in `UserUnitProgress`; do not require a
   `ShelfUnit` to display progress.
-- [ ] 6.6 Preserve the option for progress rows to target VARIANT Units directly,
+- [x] 6.6 Preserve the option for progress rows to target VARIANT Units directly,
   and show the VARIANT title as the primary progress item when that is the saved
   progress unit.
-- [ ] 6.7 Keep progress shelf flows available as shareable/user-curated
+- [x] 6.7 Keep progress shelf flows available as shareable/user-curated
   projections, with links between the progress page and matching shelf pages
   where those shelves exist.
 
 ## 7. Dashboard Cutover
 
-- [ ] 7.1 Update `package/server/src/dashboard/dashboard.service.ts` so dashboard
+- [x] 7.1 Update `package/server/src/dashboard/dashboard.service.ts` so dashboard
   continue-reading/library data comes from progress-owned reads rather than
   client-side shelf aggregation.
-- [ ] 7.2 Update `package/contract/src/dashboard/dashboard.ts` if dashboard needs
+- [x] 7.2 Update `package/contract/src/dashboard/dashboard.ts` if dashboard needs
   a richer progress/library section payload than current `ContinueReadingItem`.
-- [ ] 7.3 Update `package/app/src/dashboard/sections/DashboardLibrarySection.tsx`
+- [x] 7.3 Update `package/app/src/dashboard/sections/DashboardLibrarySection.tsx`
   and `DashboardLibraryShelfBlock.tsx` to consume the new progress API payload
   while reusing bookshelf grid/card components.
-- [ ] 7.4 Keep shelf-based dashboard/shelf blocks available for actual shelf
+- [x] 7.4 Keep shelf-based dashboard/shelf blocks available for actual shelf
   summaries; progress display should no longer depend on fetching every user
   shelf and intersecting shelf items with progress.
-- [ ] 7.5 Add dashboard model/component tests showing progress rows render when
+- [x] 7.5 Add dashboard model/component tests showing progress rows render when
   no shelf membership exists and that shelf-based functionality still links into
   normal shelf pages.
 
@@ -177,7 +177,7 @@ shelf-based flows feel continuous.
 
 - [x] 8.1 Add `variantUnitId` to post search documents and filters where post
   search supports exact target/context filtering.
-- [ ] 8.2 Decide whether shelf search needs a search-index projection or only
+- [x] 8.2 Decide whether shelf search needs a search-index projection or only
   PostgreSQL filtering; implement the smaller path unless UI requirements need
   search-index support.
 - [x] 8.3 Add search/job-runner tests that preserve MAIN aggregation defaults and

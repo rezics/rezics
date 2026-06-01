@@ -29,6 +29,7 @@ const mockNodeProgressUpsert = mock(async (_args: unknown) => ({}));
 const mockNodeProgressDeleteMany = mock(async (_args: unknown) => ({
   count: 0,
 }));
+const mockShelfUnitFindMany = mock(async () => [] as any[]);
 const enqueueMock = mock(async (_command: any) => ({
   status: "created" as const,
 }));
@@ -67,6 +68,9 @@ Object.assign(prismaMock, {
     upsert: mockNodeProgressUpsert,
     deleteMany: mockNodeProgressDeleteMany,
   },
+  shelfUnit: {
+    findMany: mockShelfUnitFindMany,
+  },
 });
 
 mock.module("@/meili/search-client", () => ({
@@ -86,12 +90,14 @@ describe("ProgressService", () => {
     mockNodeFindUnique.mockClear();
     mockNodeProgressUpsert.mockClear();
     mockNodeProgressDeleteMany.mockClear();
+    mockShelfUnitFindMany.mockClear();
     enqueueMock.mockClear();
     mockProgressSearch.mockClear();
     mockUpsert.mockResolvedValue(baseRow);
     mockFindUnique.mockResolvedValue(baseRow);
     mockFindMany.mockResolvedValue([]);
     mockNodeFindUnique.mockResolvedValue(null);
+    mockShelfUnitFindMany.mockResolvedValue([]);
     mockProgressSearch.mockResolvedValue({
       estimatedTotalHits: 0,
       hits: [],
@@ -345,6 +351,58 @@ describe("ProgressService", () => {
     expect(args.take).toBe(2);
     expect(result.rows).toHaveLength(1);
     expect(result.nextCursor).toBeTruthy();
+  });
+
+  test("listLibrary hydrates progress-owned unit cards without shelf membership", async () => {
+    mockFindMany.mockResolvedValue([
+      {
+        ...baseRow,
+        unitId: "variant-1",
+        progress: 0.4,
+        unit: {
+          type: "BOOK",
+          defaultLanguage: "en",
+          translations: [
+            {
+              language: "en",
+              title: "Dune First Edition",
+              extra: { coverUrl: "https://cdn.example/dune.jpg" },
+            },
+          ],
+        },
+        lastReadNode: null,
+      },
+    ]);
+    const { progressService } = await import("./progress.service");
+
+    const result = await progressService.listLibrary("user-1", { limit: 10 });
+
+    expect(mockFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        include: expect.objectContaining({
+          unit: expect.any(Object),
+          lastReadNode: expect.any(Object),
+        }),
+      }),
+    );
+    expect(mockShelfUnitFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          unitId: { in: ["variant-1"] },
+          shelf: { unit: { userId: "user-1" } },
+        },
+      }),
+    );
+    expect(result.rows[0]).toMatchObject({
+      unit: {
+        unitId: "variant-1",
+        title: "Dune First Edition",
+        coverUrl: "https://cdn.example/dune.jpg",
+        unitType: "BOOK",
+      },
+      resumeRoute: { kind: "book", bookId: "variant-1" },
+      shelves: [],
+    });
   });
 
   test("toggleNodeCompletion (on) upserts a progress row", async () => {

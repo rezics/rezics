@@ -1,12 +1,5 @@
-import { bookApi } from "@rezics/api/book/book.api";
-import { shelfUnitsQuery, userShelvesQuery } from "@rezics/api/shelf";
 import { userQueries } from "@rezics/api/user/user.queries";
-import type {
-  BookDTO,
-  BookshelfViewConfig,
-  ContinueReadingItem,
-  ShelfSummaryDTO,
-} from "@rezics/contract";
+import type { BookshelfViewConfig, ProgressLibraryRow } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useState } from "react";
@@ -15,38 +8,56 @@ import { expect, waitFor, within } from "storybook/test";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { DashboardLibrarySection } from "./DashboardLibrarySection";
 
-const SHELF: ShelfSummaryDTO = {
-  unitId: "shelf-1",
-  title: "Reading",
-  itemCount: 2,
-};
-
-const BOOKS: BookDTO[] = [
+const PROGRESS_ROWS: ProgressLibraryRow[] = [
   {
-    unitId: "b1",
-    translations: [{ language: "en", title: "Dune" }],
-    coverUrl:
-      "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>",
-    isLicensed: true,
-  },
-  {
-    unitId: "b2",
-    translations: [{ language: "en", title: "Solaris" }],
-    coverUrl:
-      "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>",
-    isLicensed: false,
-  },
-] as unknown as BookDTO[];
-
-const CONTINUE_READING: ContinueReadingItem[] = [
-  {
-    bookUnitId: "b1",
-    bookTitle: "Dune",
-    lastReadNodeId: "n3",
-    lastReadNodeTitle: "Chapter 3",
-    chaptersCompleted: 3,
-    chaptersTotal: 12,
+    progress: {
+      userId: "user-1",
+      unitId: "b1",
+      progress: 0.25,
+      status: "ACTIVE",
+      isDeleted: false,
+      completedCount: 3,
+      totalTimeMs: 0,
+      lastReadNodeId: "n3",
+      lastReadAnchor: null,
+      firstSeenAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-02T00:00:00.000Z",
+      extra: null,
+    },
+    unit: {
+      unitId: "b1",
+      title: "Dune",
+      coverUrl:
+        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>",
+      unitType: "BOOK",
+    },
     resumeRoute: { kind: "node", bookId: "b1", nodeId: "n3" },
+    shelves: [],
+  },
+  {
+    progress: {
+      userId: "user-1",
+      unitId: "variant-1",
+      progress: 0.1,
+      status: "ACTIVE",
+      isDeleted: false,
+      completedCount: 0,
+      totalTimeMs: 0,
+      lastReadNodeId: null,
+      lastReadAnchor: null,
+      firstSeenAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-02T00:00:00.000Z",
+      extra: null,
+    },
+    unit: {
+      unitId: "variant-1",
+      title: "Solaris: First Edition",
+      coverUrl:
+        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>",
+      unitType: "BOOK",
+    },
+    resumeRoute: { kind: "book", bookId: "variant-1" },
+    shelves: [],
   },
 ];
 
@@ -59,25 +70,11 @@ function StoryHost({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    const originalList = bookApi.list;
-    // Hydration fans book ids out to bookApi.list; serve the fixtures.
-    bookApi.list = (async () => ({ books: BOOKS })) as typeof bookApi.list;
-
-    qc.setQueryData(userShelvesQuery().queryKey, [SHELF]);
     qc.setQueryData(userQueries.settings().queryKey, {
       library: { bookshelf: VIEWER_CONFIG },
     });
-    qc.setQueryData(shelfUnitsQuery(SHELF.unitId, { limit: 24 }).queryKey, {
-      units: [
-        { shelfId: SHELF.unitId, unitId: "b1", kind: "book", position: "a" },
-        { shelfId: SHELF.unitId, unitId: "b2", kind: "book", position: "b" },
-      ],
-      relations: [],
-      hasMore: false,
-    });
     setReady(true);
     return () => {
-      bookApi.list = originalList;
       qc.clear();
     };
   }, [qc]);
@@ -95,21 +92,18 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Default (readable filter on): the licensed book renders with its server
- * chapter counter; the unlicensed book is hidden.
+ * Dashboard library renders progress-owned rows; no shelf membership fixture is
+ * required.
  */
 export const ReadableDefault: Story = {
   render: () => (
     <StoryHost>
-      <DashboardLibrarySection continueReading={CONTINUE_READING} />
+      <DashboardLibrarySection progressRows={PROGRESS_ROWS} />
     </StoryHost>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // Licensed book appears with its chapter-completion counter.
     await waitFor(() => expect(canvas.getByText("Dune")).toBeInTheDocument());
-    expect(canvas.getByText("3/12")).toBeInTheDocument();
-    // Unlicensed book is filtered out by the dashboard default.
-    expect(canvas.queryByText("Solaris")).toBeNull();
+    expect(canvas.getByText("Solaris: First Edition")).toBeInTheDocument();
   },
 };

@@ -4,6 +4,7 @@ import {
   lastReadAnchorSchema,
   nodeCompletionToggleBodySchema,
   progressExtraSchema,
+  progressLibraryListResponseSchema,
   SYSTEM_SHELF_KIND_KEYS,
   unitProgressListResponseSchema,
   unitProgressRowDTOSchema,
@@ -118,6 +119,42 @@ describe("progress contract schemas", () => {
         ...row,
         lastReadNodeId: "node-1",
         lastReadAnchor: { text: "Resume here" },
+      }),
+    ).toBe(true);
+  });
+
+  test("validates hydrated progress library rows", () => {
+    const row = {
+      userId: "user-1",
+      unitId: "book-1",
+      progress: 0.5,
+      status: "ACTIVE",
+      isDeleted: false,
+      completedCount: 0,
+      totalTimeMs: 123,
+      lastReadNodeId: "node-1",
+      lastReadAnchor: { text: "Resume here" },
+      firstSeenAt: "2026-01-01T00:00:00.000Z",
+      lastSeenAt: "2026-01-02T00:00:00.000Z",
+      extra: null,
+    };
+
+    expect(
+      Value.Check(progressLibraryListResponseSchema, {
+        rows: [
+          {
+            progress: row,
+            unit: {
+              unitId: "book-1",
+              title: "Dune",
+              coverUrl: "https://cdn.example/dune.jpg",
+              unitType: "BOOK",
+            },
+            resumeRoute: { kind: "node", bookId: "book-1", nodeId: "node-1" },
+            shelves: [{ shelfUnitId: "shelf-1", title: "Reading" }],
+          },
+        ],
+        nextCursor: null,
       }),
     ).toBe(true);
   });

@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { unitTypeSchema } from "../unit/unit";
 
 export const SYSTEM_SHELF_KIND_KEYS = [
   "favorites",
@@ -125,6 +126,53 @@ export const unitProgressListResponseSchema = t.Object({
 
 export type UnitProgressListResponse =
   (typeof unitProgressListResponseSchema)["static"];
+
+export const progressLibraryShelfLinkSchema = t.Object({
+  shelfUnitId: t.String(),
+  title: t.String(),
+});
+
+export type ProgressLibraryShelfLink =
+  (typeof progressLibraryShelfLinkSchema)["static"];
+
+export const progressLibraryUnitSummarySchema = t.Object({
+  unitId: t.String(),
+  title: t.String(),
+  coverUrl: t.Optional(t.String()),
+  unitType: unitTypeSchema,
+});
+
+export type ProgressLibraryUnitSummary =
+  (typeof progressLibraryUnitSummarySchema)["static"];
+
+export const progressLibraryRowSchema = t.Object({
+  progress: unitProgressRowDTOSchema,
+  unit: progressLibraryUnitSummarySchema,
+  resumeRoute: t.Optional(
+    t.Union([
+      t.Object({
+        kind: t.Literal("node"),
+        bookId: t.String(),
+        nodeId: t.String(),
+      }),
+      t.Object({
+        kind: t.Literal("book"),
+        bookId: t.String(),
+      }),
+    ]),
+  ),
+  shelves: t.Array(progressLibraryShelfLinkSchema),
+});
+
+export type ProgressLibraryRow = (typeof progressLibraryRowSchema)["static"];
+
+export const progressLibraryListResponseSchema = t.Object({
+  rows: t.Array(progressLibraryRowSchema),
+  nextCursor: t.Nullable(t.String()),
+});
+
+export type ProgressLibraryListResponse =
+  (typeof progressLibraryListResponseSchema)["static"];
 
 export const unitProgressStatusCountsSchema = t.Object({
   BACKLOG: t.Number({ minimum: 0 }),

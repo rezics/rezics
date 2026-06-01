@@ -1,7 +1,10 @@
 import {
   PROGRESS_EXTRA_KNOWN_KEYS,
+  type ProgressLibraryListResponse,
+  type ProgressLibraryRow,
   type UnitProgressListResponse,
   type UnitProgressStatsResponse,
+  readCoverUrlFromExtra,
   userUnitProgressStatusValues,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
@@ -21,6 +24,25 @@ import { progressStatusMap } from "./progress.types";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
+
+type TranslationRow = {
+  language: string;
+  title: string | null;
+  extra?: unknown;
+};
+
+type UnitDisplay = {
+  defaultLanguage: string | null;
+  translations: TranslationRow[];
+};
+
+type ProgressPage = {
+  rows: (UserUnitProgress & {
+    unit?: UnitDisplay & { type: ProgressLibraryRow["unit"]["unitType"] };
+    lastReadNode?: { isDeleted: boolean } | null;
+  })[];
+  nextCursor: string | null;
+};
 
 function encodeCursor(cursor: ProgressCursor): string {
   return encodeURIComponent(JSON.stringify(cursor));
@@ -87,6 +109,37 @@ function enqueueProgressSearch(
       { type: "server", service: "progress" },
     ),
   );
+}
+
+/** Resolve a display title: default-language -> en -> first non-empty. */
+function pickTitle(unit: UnitDisplay): string {
+  const ordered = [
+    unit.defaultLanguage
+      ? unit.translations.find((t) => t.language === unit.defaultLanguage)
+      : undefined,
+    unit.translations.find((t) => t.language === "en"),
+    ...unit.translations,
+  ];
+  for (const tr of ordered) {
+    if (tr?.title) return tr.title;
+  }
+  return "";
+}
+
+/** Resolve a cover URL from translation extra, same order as title. */
+function pickCover(unit: UnitDisplay): string | undefined {
+  const ordered = [
+    unit.defaultLanguage
+      ? unit.translations.find((t) => t.language === unit.defaultLanguage)
+      : undefined,
+    unit.translations.find((t) => t.language === "en"),
+    ...unit.translations,
+  ];
+  for (const tr of ordered) {
+    const url = readCoverUrlFromExtra(tr?.extra);
+    if (url) return url;
+  }
+  return undefined;
 }
 
 export class ProgressService {
@@ -215,10 +268,10 @@ export class ProgressService {
       .then((row) => (row?.isDeleted ? null : row));
   }
 
-  async list(
+  private async listRows(
     userId: string,
     query: ProgressListInput = {},
-  ): Promise<UnitProgressListResponse> {
+  ): Promise<ProgressPage> {
     const limit = Math.max(
       1,
       Math.min(Number(query.limit ?? DEFAULT_LIMIT), MAX_LIMIT),
@@ -248,6 +301,18 @@ export class ProgressService {
       },
       orderBy: [{ lastSeenAt: "desc" }, { unitId: "desc" }],
       take: limit + 1,
+      include: {
+        unit: {
+          select: {
+            type: true,
+            defaultLanguage: true,
+            translations: {
+              select: { language: true, title: true, extra: true },
+            },
+          },
+        },
+        lastReadNode: { select: { isDeleted: true } },
+      },
     });
 
     const pageRows = rows.slice(0, limit);
@@ -260,9 +325,91 @@ export class ProgressService {
           })
         : null;
 
+    return { rows: pageRows, nextCursor };
+  }
+
+  async list(
+    userId: string,
+    query: ProgressListInput = {},
+  ): Promise<UnitProgressListResponse> {
+    const page = await this.listRows(userId, query);
     return {
-      rows: pageRows.map(mapProgressToDTO),
-      nextCursor,
+      rows: page.rows.map(mapProgressToDTO),
+      nextCursor: page.nextCursor,
+    };
+  }
+
+  async listLibrary(
+    userId: string,
+    query: ProgressListInput = {},
+  ): Promise<ProgressLibraryListResponse> {
+    const page = await this.listRows(userId, query);
+    if (page.rows.length === 0) {
+      return { rows: [], nextCursor: null };
+    }
+
+    const unitIds = page.rows.map((row) => row.unitId);
+    const shelfRows = await prisma.shelfUnit.findMany({
+      where: {
+        unitId: { in: unitIds },
+        shelf: { unit: { userId } },
+      },
+      select: {
+        unitId: true,
+        shelfId: true,
+        shelf: {
+          select: {
+            unit: {
+              select: {
+                defaultLanguage: true,
+                translations: { select: { language: true, title: true } },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    const shelvesByUnit = new Map<string, ProgressLibraryRow["shelves"]>();
+    for (const shelfRow of shelfRows) {
+      const shelves = shelvesByUnit.get(shelfRow.unitId) ?? [];
+      shelves.push({
+        shelfUnitId: shelfRow.shelfId,
+        title: pickTitle(shelfRow.shelf.unit) || shelfRow.shelfId,
+      });
+      shelvesByUnit.set(shelfRow.unitId, shelves);
+    }
+
+    return {
+      rows: page.rows.map((row): ProgressLibraryRow => {
+        const unit = row.unit as unknown as UnitDisplay & {
+          type: ProgressLibraryRow["unit"]["unitType"];
+        };
+        const lastReadNode =
+          "lastReadNode" in row
+            ? (row.lastReadNode as { isDeleted?: boolean } | null)
+            : null;
+        const lastReadNodeId =
+          lastReadNode && !lastReadNode.isDeleted ? row.lastReadNodeId : null;
+
+        return {
+          progress: mapProgressToDTO(row),
+          unit: {
+            unitId: row.unitId,
+            title: pickTitle(unit) || row.unitId,
+            coverUrl: pickCover(unit),
+            unitType: unit.type,
+          },
+          resumeRoute:
+            unit.type === "BOOK"
+              ? lastReadNodeId
+                ? { kind: "node", bookId: row.unitId, nodeId: lastReadNodeId }
+                : { kind: "book", bookId: row.unitId }
+              : undefined,
+          shelves: shelvesByUnit.get(row.unitId) ?? [],
+        };
+      }),
+      nextCursor: page.nextCursor,
     };
   }
 

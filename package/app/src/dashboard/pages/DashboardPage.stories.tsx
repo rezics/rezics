@@ -62,6 +62,7 @@ function makeSummary(
 ): DashboardSummary {
   return {
     continueReading: ok([]),
+    libraryProgress: ok([]),
     shelves: ok([]),
     realms: ok([]),
     notifications: ok({ unreadCount: 0, latestKindKeys: [] }),

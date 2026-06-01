@@ -44,6 +44,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   const continueReading =
     "ok" in data.continueReading ? data.continueReading.ok : [];
+  const libraryProgress =
+    "ok" in data.libraryProgress ? data.libraryProgress.ok : [];
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
@@ -54,7 +56,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       <SafetySection result={data.safety} onRetry={onRetry} />
       <ContinueReadingSection result={data.continueReading} onRetry={onRetry} />
       <DashboardLibrarySection
-        continueReading={continueReading}
+        progressRows={libraryProgress}
         urlConfig={libraryUrlConfig}
         onResetUrlConfig={onResetLibraryUrlConfig}
       />

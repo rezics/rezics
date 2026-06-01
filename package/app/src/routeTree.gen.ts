@@ -77,6 +77,7 @@ import { Route as MainLayoutUserUserIdEditRouteImport } from './routes/_mainLayo
 import { Route as MainLayoutUserUserIdContentRouteImport } from './routes/_mainLayout/user/$userId/content'
 import { Route as MainLayoutUserUserIdCollectionRouteImport } from './routes/_mainLayout/user/$userId/collection'
 import { Route as MainLayoutUserUserIdActivityRouteImport } from './routes/_mainLayout/user/$userId/activity'
+import { Route as MainLayoutUMeProgressRouteImport } from './routes/_mainLayout/u/me/progress'
 import { Route as MainLayoutUMeDraftsRouteImport } from './routes/_mainLayout/u/me/drafts'
 import { Route as MainLayoutUMeDashboardRouteImport } from './routes/_mainLayout/u/me/dashboard'
 import { Route as MainLayoutUUserSlugShelvesRouteImport } from './routes/_mainLayout/u/$userSlug/shelves'
@@ -511,6 +512,11 @@ const MainLayoutUserUserIdActivityRoute =
     path: '/activity',
     getParentRoute: () => MainLayoutUserUserIdRoute,
   } as any)
+const MainLayoutUMeProgressRoute = MainLayoutUMeProgressRouteImport.update({
+  id: '/u/me/progress',
+  path: '/u/me/progress',
+  getParentRoute: () => MainLayoutRoute,
+} as any)
 const MainLayoutUMeDraftsRoute = MainLayoutUMeDraftsRouteImport.update({
   id: '/u/me/drafts',
   path: '/u/me/drafts',
@@ -1002,6 +1008,7 @@ export interface FileRoutesByFullPath {
   '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/u/me/drafts': typeof MainLayoutUMeDraftsRoute
+  '/u/me/progress': typeof MainLayoutUMeProgressRoute
   '/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/user/$userId/collection': typeof MainLayoutUserUserIdCollectionRoute
   '/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
@@ -1132,6 +1139,7 @@ export interface FileRoutesByTo {
   '/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/u/me/drafts': typeof MainLayoutUMeDraftsRoute
+  '/u/me/progress': typeof MainLayoutUMeProgressRoute
   '/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/user/$userId/collection': typeof MainLayoutUserUserIdCollectionRoute
   '/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
@@ -1271,6 +1279,7 @@ export interface FileRoutesById {
   '/_mainLayout/u/$userSlug/shelves': typeof MainLayoutUUserSlugShelvesRoute
   '/_mainLayout/u/me/dashboard': typeof MainLayoutUMeDashboardRoute
   '/_mainLayout/u/me/drafts': typeof MainLayoutUMeDraftsRoute
+  '/_mainLayout/u/me/progress': typeof MainLayoutUMeProgressRoute
   '/_mainLayout/user/$userId/activity': typeof MainLayoutUserUserIdActivityRoute
   '/_mainLayout/user/$userId/collection': typeof MainLayoutUserUserIdCollectionRoute
   '/_mainLayout/user/$userId/content': typeof MainLayoutUserUserIdContentRoute
@@ -1411,6 +1420,7 @@ export interface FileRouteTypes {
     | '/u/$userSlug/shelves'
     | '/u/me/dashboard'
     | '/u/me/drafts'
+    | '/u/me/progress'
     | '/user/$userId/activity'
     | '/user/$userId/collection'
     | '/user/$userId/content'
@@ -1541,6 +1551,7 @@ export interface FileRouteTypes {
     | '/u/$userSlug/shelves'
     | '/u/me/dashboard'
     | '/u/me/drafts'
+    | '/u/me/progress'
     | '/user/$userId/activity'
     | '/user/$userId/collection'
     | '/user/$userId/content'
@@ -1679,6 +1690,7 @@ export interface FileRouteTypes {
     | '/_mainLayout/u/$userSlug/shelves'
     | '/_mainLayout/u/me/dashboard'
     | '/_mainLayout/u/me/drafts'
+    | '/_mainLayout/u/me/progress'
     | '/_mainLayout/user/$userId/activity'
     | '/_mainLayout/user/$userId/collection'
     | '/_mainLayout/user/$userId/content'
@@ -2225,6 +2237,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/user/$userId/activity'
       preLoaderRoute: typeof MainLayoutUserUserIdActivityRouteImport
       parentRoute: typeof MainLayoutUserUserIdRoute
+    }
+    '/_mainLayout/u/me/progress': {
+      id: '/_mainLayout/u/me/progress'
+      path: '/u/me/progress'
+      fullPath: '/u/me/progress'
+      preLoaderRoute: typeof MainLayoutUMeProgressRouteImport
+      parentRoute: typeof MainLayoutRoute
     }
     '/_mainLayout/u/me/drafts': {
       id: '/_mainLayout/u/me/drafts'
@@ -3057,6 +3076,7 @@ interface MainLayoutRouteChildren {
   MainLayoutStaffCaseCaseIdRoute: typeof MainLayoutStaffCaseCaseIdRoute
   MainLayoutUMeDashboardRoute: typeof MainLayoutUMeDashboardRoute
   MainLayoutUMeDraftsRoute: typeof MainLayoutUMeDraftsRoute
+  MainLayoutUMeProgressRoute: typeof MainLayoutUMeProgressRoute
   MainLayoutZSlugSearchRoute: typeof MainLayoutZSlugSearchRoute
   MainLayoutEntityUnitIdIndexRoute: typeof MainLayoutEntityUnitIdIndexRoute
   MainLayoutExcerptUnitIdIndexRoute: typeof MainLayoutExcerptUnitIdIndexRoute
@@ -3127,6 +3147,7 @@ const MainLayoutRouteChildren: MainLayoutRouteChildren = {
   MainLayoutStaffCaseCaseIdRoute: MainLayoutStaffCaseCaseIdRoute,
   MainLayoutUMeDashboardRoute: MainLayoutUMeDashboardRoute,
   MainLayoutUMeDraftsRoute: MainLayoutUMeDraftsRoute,
+  MainLayoutUMeProgressRoute: MainLayoutUMeProgressRoute,
   MainLayoutZSlugSearchRoute: MainLayoutZSlugSearchRoute,
   MainLayoutEntityUnitIdIndexRoute: MainLayoutEntityUnitIdIndexRoute,
   MainLayoutExcerptUnitIdIndexRoute: MainLayoutExcerptUnitIdIndexRoute,
