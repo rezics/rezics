@@ -1,6 +1,6 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { markdownContentDoc, PostKind, SCORE_MAX } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -16,8 +16,10 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   bookUnitId,
   onSuccess,
 }) => {
-  const { t } = useTranslation(["common", "page"]);
+  const { t } = useTranslation(["common", "community", "page"]);
+  const locale = useLocale();
   const [expanded, setExpanded] = useState(false);
+  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [score, setScore] = useState<number | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -31,18 +33,22 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
 
   const reset = useCallback(() => {
     setBody("");
+    setTitle("");
     setScore(null);
     setExpanded(false);
   }, []);
 
   const handleSubmit = () => {
     const trimmed = body.trim();
-    if (!trimmed || postMutation.isPending) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !trimmed || postMutation.isPending) return;
     const extra = score !== null ? { rating: score } : undefined;
     postMutation.mutate(
       {
         targetUnitId: bookUnitId,
         kind: PostKind.REMARK,
+        language: locale,
+        title: trimmedTitle,
         content: markdownContentDoc(trimmed),
         ...(extra ? { extra } : {}),
       },
@@ -92,6 +98,12 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
           aria-label={t("page:remark_form_rating")}
         />
       </div>
+      <Input
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        placeholder={t("community:post_title_placeholder")}
+        disabled={postMutation.isPending}
+      />
       <RezicsMarkdownEditor
         value={body}
         onChange={setBody}

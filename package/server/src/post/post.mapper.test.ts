@@ -37,7 +37,7 @@ const basePost = {
 } as unknown as PostWithRelations;
 
 describe("mapPostToDTO", () => {
-  test("resolves post title and body from translations before legacy fields", () => {
+  test("resolves post title and body from translations", () => {
     const dto = mapPostToDTO({
       ...basePost,
       unit: {
@@ -59,7 +59,7 @@ describe("mapPostToDTO", () => {
     expect(dto.content).toEqual(markdownContentDoc("translated body"));
   });
 
-  test("falls back through primary support language and legacy fields", () => {
+  test("falls back through primary support language without legacy storage", () => {
     const dto = mapPostToDTO({
       ...basePost,
       unit: {
@@ -73,6 +73,13 @@ describe("mapPostToDTO", () => {
     } as unknown as PostWithRelations);
 
     expect(dto.title).toBe("Japanese title");
-    expect(dto.content).toEqual(markdownContentDoc("legacy body"));
+    expect(dto.content).toBeNull();
+  });
+
+  test("does not resolve title or body from repair-only legacy fields", () => {
+    const dto = mapPostToDTO(basePost);
+
+    expect(dto.title).toBeNull();
+    expect(dto.content).toBeNull();
   });
 });

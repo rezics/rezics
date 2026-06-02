@@ -15,7 +15,7 @@ export function titleOf(unit: ShelfUnitDTO, cached: unknown): string {
     case "quote":
     case "post": {
       const post = cached as PostDTO | undefined;
-      return post?.title ?? post?.extra?.title ?? unit.unitId;
+      return post?.title ?? unit.unitId;
     }
     case "tag": {
       const tag = cached as TagLike | undefined;

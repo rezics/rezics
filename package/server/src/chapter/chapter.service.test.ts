@@ -11,6 +11,7 @@ installPrismaClientMock();
 const mockPostUpdate = mock(async () => ({}));
 const mockUnitUpdate = mock(async () => ({}));
 const mockUnitFindUnique = mock(async () => ({ defaultLanguage: "en" }));
+const mockContentTranslationUpsert = mock(async (args: any) => args.create);
 const mockTranslationFindFirst = mock(
   async (): Promise<{ language: string; extra: unknown } | null> => ({
     language: "en",
@@ -27,7 +28,8 @@ const mockContainerUpdateMany = mock(async () => ({ count: 0 }));
 const mockFindBookForTarget = mock(async () => ({ type: UnitType.BOOK }));
 const mockPostFindUniqueOrThrow = mock(async () => ({
   unitId: "ch-1",
-  content: markdownContentDoc("body"),
+  authorUserId: "author-1",
+  unit: { defaultLanguage: "en", status: "PUBLISHED" },
 }));
 
 const mockTx = {
@@ -51,6 +53,9 @@ const mockTx = {
   contentStructure: {
     updateMany: mockContainerUpdateMany,
   },
+  contentTranslation: {
+    upsert: mockContentTranslationUpsert,
+  },
 };
 
 const mockTransaction = mock(async (fn: (tx: unknown) => unknown) =>
@@ -71,7 +76,8 @@ const REAL_CHAPTER_SERVICE_PATH = new URL(
   "./chapter.service.ts",
   import.meta.url,
 ).href;
-mock.module("./chapter.service", () => import(REAL_CHAPTER_SERVICE_PATH));
+const realChapterServiceModule = await import(REAL_CHAPTER_SERVICE_PATH);
+mock.module("./chapter.service", () => realChapterServiceModule);
 
 function firstArg(fn: { mock: { calls: unknown[][] } }) {
   return fn.mock.calls[0]?.[0] as any;
@@ -89,6 +95,7 @@ function resetMocks(): void {
   mockNodeUpdateMany.mockClear();
   mockNodeFindMany.mockClear();
   mockContainerUpdateMany.mockClear();
+  mockContentTranslationUpsert.mockClear();
   mockFindBookForTarget.mockClear();
   mockPostFindUniqueOrThrow.mockClear();
   mockTransaction.mockClear();
@@ -112,6 +119,16 @@ describe("ChapterService.update propagation", () => {
     expect(args.where).toEqual({ contentUnitId: "ch-1" });
     expect(args.data.updatedAt).toBeInstanceOf(Date);
     expect(args.data.title).toBeUndefined();
+    expect(mockContentTranslationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId_language: { unitId: "ch-1", language: "en" } },
+        update: expect.objectContaining({
+          content: content("new body"),
+          status: "PUBLISHED",
+          authorUserId: "author-1",
+        }),
+      }),
+    );
     expect(mockContainerUpdateMany).not.toHaveBeenCalled();
     expect(mockNodeFindMany).not.toHaveBeenCalled();
   });
@@ -126,6 +143,16 @@ describe("ChapterService.update propagation", () => {
     expect(firstArg(mockNodeUpdateMany).where).toEqual({
       contentUnitId: "ch-1",
     });
+    expect(mockContentTranslationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId_language: { unitId: "ch-1", language: "en" } },
+        update: expect.objectContaining({
+          content: content("edit"),
+          status: "PUBLISHED",
+          authorUserId: "author-1",
+        }),
+      }),
+    );
     expect(mockContainerUpdateMany).not.toHaveBeenCalled();
   });
 

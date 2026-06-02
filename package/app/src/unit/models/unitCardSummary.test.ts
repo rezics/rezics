@@ -169,14 +169,15 @@ describe("shelfUnitToUnitCardSummary", () => {
     expect(summary.attachmentCounts).toBeUndefined();
   });
 
-  test("maps a review shelf unit using post content and extra.title", () => {
+  test("maps a review shelf unit using resolved post title and content", () => {
     const unit = makeShelfUnit({ unitId: "review-1", kind: "review" });
     const review: PostDTO = {
       unitId: "review-1",
       authorUserId: "user-1",
       author: { unitId: "user-1", name: "Reviewer" },
+      title: "Review title",
       content: markdownContentDoc("Review body"),
-      extra: { title: "Review title" },
+      extra: {},
     };
 
     const summary = shelfUnitToUnitCardSummary(unit, review);

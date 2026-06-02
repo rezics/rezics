@@ -49,6 +49,7 @@ const mockFindBook = mock(async () => ({
 }));
 const mockCreateUnit = mock(async () => ({ id: "chapter-new" }));
 const mockCreatePost = mock(async () => ({ unitId: "chapter-new" }));
+const mockContentTranslationUpsert = mock(async (args: any) => args.create);
 const mockUpdateBook = mock(async (_args: unknown) => ({ unitId: "book-1" }));
 const mockFindContentStructure = mock(async () => ({
   ownerUnitId: "book-1",
@@ -77,6 +78,9 @@ const mockTransaction = mock(async (fn: (tx: unknown) => unknown) =>
     },
     post: {
       create: mockCreatePost,
+    },
+    contentTranslation: {
+      upsert: mockContentTranslationUpsert,
     },
     book: {
       update: mockUpdateBook,
@@ -107,6 +111,7 @@ describe("ChapterService.materializeNode", () => {
     mockFindBook.mockClear();
     mockCreateUnit.mockClear();
     mockCreatePost.mockClear();
+    mockContentTranslationUpsert.mockClear();
     mockUpdateBook.mockClear();
     mockFindContentStructure.mockClear();
     mockFindNode.mockClear();
@@ -174,9 +179,22 @@ describe("ChapterService.materializeNode", () => {
         unitId: "chapter-new",
         authorUserId: "actor-user",
         kind: PostKind.CHAPTER,
-        content: markdownContentDoc(""),
       },
     });
+    expect(mockContentTranslationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          unitId_language: { unitId: "chapter-new", language: "zh-Hant" },
+        },
+        create: expect.objectContaining({
+          unitId: "chapter-new",
+          language: "zh-Hant",
+          content: markdownContentDoc(""),
+          status: "PUBLISHED",
+          authorUserId: "actor-user",
+        }),
+      }),
+    );
     expect(firstArg(mockUpdateNode)).toEqual({
       where: { id: "n-1" },
       data: { contentUnitId: "chapter-new" },

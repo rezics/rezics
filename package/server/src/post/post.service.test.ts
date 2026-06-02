@@ -343,6 +343,12 @@ mock.module("@/utils/sanitizeUser", () => ({
 const { PostService } = await import("./post.service");
 
 const content = (source: string) => markdownContentDoc(source);
+const postInput = (overrides: Record<string, unknown> = {}) => ({
+  language: "en",
+  title: "Test post",
+  content: content("hello"),
+  ...overrides,
+});
 
 function resetMocks() {
   unitCreateMock.mockClear();
@@ -470,7 +476,7 @@ describe("PostService.create realm/tag junction writes", () => {
   test("creates a post with no realm or tags", async () => {
     resetMocks();
 
-    await service.create({ content: content("hello") }, "user-1");
+    await service.create(postInput(), "user-1");
 
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
     expect(unitTagCreateMock).not.toHaveBeenCalled();
@@ -484,10 +490,7 @@ describe("PostService.create realm/tag junction writes", () => {
   test("creates UnitRealm rows for one realm", async () => {
     resetMocks();
 
-    await service.create(
-      { content: content("hello"), realmUnitIds: ["realm-1"] },
-      "user-1",
-    );
+    await service.create(postInput({ realmUnitIds: ["realm-1"] }), "user-1");
 
     expect(realmUnitCreateMock).toHaveBeenCalledTimes(1);
     expect(realmUnitCreateMock.mock.calls[0]?.[0].data).toMatchObject({
@@ -500,11 +503,11 @@ describe("PostService.create realm/tag junction writes", () => {
     resetMocks();
 
     await service.create(
-      {
+      postInput({
         content: content("see the wiki page"),
         targetUnitId: "wiki-original-1",
         realmUnitIds: ["realm-1"],
-      },
+      }),
       "user-1",
     );
 
@@ -524,10 +527,9 @@ describe("PostService.create realm/tag junction writes", () => {
     resetMocks();
 
     await service.create(
-      {
-        content: content("hello"),
+      postInput({
         realmUnitIds: ["realm-1", "realm-2", "realm-3"],
-      },
+      }),
       "user-1",
     );
 
@@ -539,10 +541,7 @@ describe("PostService.create realm/tag junction writes", () => {
   test("creates UnitTag rows for tags", async () => {
     resetMocks();
 
-    await service.create(
-      { content: content("hello"), tagIds: ["tag-1", "tag-2"] },
-      "user-1",
-    );
+    await service.create(postInput({ tagIds: ["tag-1", "tag-2"] }), "user-1");
 
     expect(unitFindManyMock).toHaveBeenCalledWith({
       where: {
@@ -562,11 +561,10 @@ describe("PostService.create realm/tag junction writes", () => {
     resetMocks();
 
     await service.create(
-      {
-        content: content("hello"),
+      postInput({
         realmUnitIds: ["realm-1"],
         tagIds: ["tag-1"],
-      },
+      }),
       "user-1",
     );
 
@@ -587,10 +585,7 @@ describe("PostService.create realm/tag junction writes", () => {
     ]);
 
     await expect(
-      service.create(
-        { content: content("hello"), realmUnitIds: ["realm-1"] },
-        "user-1",
-      ),
+      service.create(postInput({ realmUnitIds: ["realm-1"] }), "user-1"),
     ).rejects.toThrow("Realm rules must be acknowledged before posting");
     expect(transactionMock).not.toHaveBeenCalled();
     expect(realmUnitCreateMock).not.toHaveBeenCalled();
@@ -614,10 +609,7 @@ describe("PostService.create realm/tag junction writes", () => {
       },
     ]);
 
-    await service.create(
-      { content: content("hello"), realmUnitIds: ["realm-1"] },
-      "user-1",
-    );
+    await service.create(postInput({ realmUnitIds: ["realm-1"] }), "user-1");
 
     expect(realmUnitCreateMock).toHaveBeenCalledTimes(1);
   });
@@ -629,10 +621,7 @@ describe("PostService.create realm/tag junction writes", () => {
     ]);
 
     await expect(
-      service.create(
-        { content: content("hello"), realmUnitIds: ["realm-1"] },
-        "user-1",
-      ),
+      service.create(postInput({ realmUnitIds: ["realm-1"] }), "user-1"),
     ).rejects.toThrow("Cannot post to realm while membership state is muted");
     expect(transactionMock).not.toHaveBeenCalled();
   });
@@ -642,10 +631,7 @@ describe("PostService.create realm/tag junction writes", () => {
     unitFindManyMock.mockResolvedValueOnce([{ id: "tag-1" }]);
 
     await expect(
-      service.create(
-        { content: content("hello"), tagIds: ["tag-1", "missing-tag"] },
-        "user-1",
-      ),
+      service.create(postInput({ tagIds: ["tag-1", "missing-tag"] }), "user-1"),
     ).rejects.toMatchObject({
       statusCode: 400,
       message: "Invalid tagIds: missing-tag",
@@ -658,10 +644,9 @@ describe("PostService.create realm/tag junction writes", () => {
 
     await expect(
       service.create(
-        {
-          content: content("hello"),
+        postInput({
           realmUnitIds: ["realm-1", "missing-realm"],
-        },
+        }),
         "user-1",
       ),
     ).rejects.toThrow("Foreign key failed");
@@ -1064,7 +1049,11 @@ describe("PostService.create targetUnitId derivation", () => {
     resetMocks();
 
     await service.create(
-      { content: content("great"), kind: "REVIEW", targetUnitId: "book-B" },
+      postInput({
+        content: content("great"),
+        kind: "REVIEW",
+        targetUnitId: "book-B",
+      }),
       "user-1",
     );
 
@@ -1077,12 +1066,12 @@ describe("PostService.create targetUnitId derivation", () => {
     resetMocks();
 
     await service.create(
-      {
+      postInput({
         content: content("great"),
         kind: "REVIEW",
         targetUnitId: "book-B",
         variantUnitId: "arbitrary-variant-context",
-      },
+      }),
       "user-1",
     );
 
@@ -1095,7 +1084,11 @@ describe("PostService.create targetUnitId derivation", () => {
     resetMocks();
 
     await service.create(
-      { content: content("thoughts"), kind: "REMARK", targetUnitId: "game-G" },
+      postInput({
+        content: content("thoughts"),
+        kind: "REMARK",
+        targetUnitId: "game-G",
+      }),
       "user-1",
     );
 
@@ -1106,7 +1099,10 @@ describe("PostService.create targetUnitId derivation", () => {
   test("top-level POST with no targetUnitId leaves target undefined", async () => {
     resetMocks();
 
-    await service.create({ content: content("free-form") }, "user-1");
+    await service.create(
+      postInput({ content: content("free-form") }),
+      "user-1",
+    );
 
     expect(unitCreateDataArg().targetUnitId).toBeUndefined();
     expect(createDataArg().targetUnitId).toBeUndefined();
@@ -1150,6 +1146,7 @@ describe("PostService.create targetUnitId derivation", () => {
       defaultLanguage: "en",
       supportLanguages: { create: { language: "en", isPrimary: true } },
     });
+    expect(createDataArg().content).toBeUndefined();
     expect(createDataArg().extra).toEqual({ poll: { unitId: "poll-1" } });
     expect(unitTranslationUpsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1180,7 +1177,11 @@ describe("PostService.create targetUnitId derivation", () => {
     unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
 
     await service.create(
-      { content: content("ch1"), kind: "CHAPTER", targetUnitId: "book-B" },
+      postInput({
+        content: content("ch1"),
+        kind: "CHAPTER",
+        targetUnitId: "book-B",
+      }),
       "user-1",
     );
 
@@ -1193,10 +1194,14 @@ describe("PostService.create targetUnitId derivation", () => {
 describe("PostService.update immutability", () => {
   const service = new PostService();
 
-  test("update writes only content/isLocked/extra; target fields are not in the post update payload", async () => {
+  test("update writes body to ContentTranslation and only row fields to Post", async () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
     Object.assign(prismaMock.post, { update: directPostUpdateMock });
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      authorUserId: "author-1",
+      unit: { defaultLanguage: "en", status: "PUBLISHED" },
+    });
 
     await service.update("post-1", {
       content: content("edited"),
@@ -1206,7 +1211,8 @@ describe("PostService.update immutability", () => {
     expect(directPostUpdateMock).toHaveBeenCalledTimes(1);
     const args = (directPostUpdateMock.mock.calls as any[])[0]?.[0];
     expect(args.where).toEqual({ unitId: "post-1" });
-    expect(args.data).toEqual({ content: content("edited"), isLocked: true });
+    expect(args.data).toEqual({ isLocked: true });
+    expect(args.data.content).toBeUndefined();
     expect(args.data.targetUnitId).toBeUndefined();
     expect(contentTranslationUpsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -1231,14 +1237,16 @@ describe("PostService.update immutability", () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
     Object.assign(prismaMock.post, { update: directPostUpdateMock });
+    postFindUniqueOrThrowMock
+      .mockResolvedValueOnce({ unitId: "post-1" })
+      .mockResolvedValueOnce({ unit: { defaultLanguage: "en" } });
 
     await service.update("post-1", {
       title: "Updated title",
       language: "ja",
     });
 
-    const args = (directPostUpdateMock.mock.calls as any[])[0]?.[0];
-    expect(args.data.extra).toBeUndefined();
+    expect(directPostUpdateMock).not.toHaveBeenCalled();
     expect(unitTranslationUpsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { unitId_language: { unitId: "post-1", language: "ja" } },
@@ -1280,7 +1288,14 @@ describe("PostService wiki posts", () => {
       rootPostUnitId: args.data.rootPostUnitId,
     }));
 
-    await service.create({ kind: "WIKI", content: content("body") }, "actor-1");
+    await service.create(
+      postInput({
+        kind: "WIKI",
+        language: "zh-hant",
+        content: content("body"),
+      }),
+      "actor-1",
+    );
 
     const unitCreateArgs = (unitCreateMock.mock.calls as any[])[0][0];
     const postCreateArgs = (postCreateMock.mock.calls as any[])[0][0];
@@ -1325,7 +1340,7 @@ describe("PostService wiki posts", () => {
     await service.update("wiki-post-1", { content: content("edited") }, actor);
 
     expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledTimes(1);
-    expect(postUpdateMock).toHaveBeenCalledTimes(1);
+    expect(postUpdateMock).not.toHaveBeenCalled();
     expect(contentTranslationUpsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
@@ -1866,7 +1881,7 @@ describe("PostService lifecycle state", () => {
     unitFindManyMock.mockResolvedValue([{ id: "tag-q", slug: "question" }]);
 
     await service.create(
-      { content: content("hi"), tagIds: ["tag-q"] },
+      postInput({ content: content("hi"), tagIds: ["tag-q"] }),
       "user-1",
     );
 
@@ -1880,7 +1895,7 @@ describe("PostService lifecycle state", () => {
     unitFindManyMock.mockResolvedValue([{ id: "tag-x", slug: "book" }]);
 
     await service.create(
-      { content: content("hi"), tagIds: ["tag-x"] },
+      postInput({ content: content("hi"), tagIds: ["tag-x"] }),
       "user-1",
     );
 
@@ -1897,7 +1912,7 @@ describe("PostService lifecycle state", () => {
 
     await expect(
       service.create(
-        { content: content("hi"), tagIds: ["tag-q", "tag-i"] },
+        postInput({ content: content("hi"), tagIds: ["tag-q", "tag-i"] }),
         "user-1",
       ),
     ).rejects.toThrow(/at most one stateful tag/);

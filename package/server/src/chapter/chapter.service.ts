@@ -28,7 +28,7 @@ import { chapterPostInclude } from "./types";
  * Storage:
  *   - Chapter title       -> UnitTranslation.title
  *   - Chapter cover URL   -> UnitTranslation.extra.coverUrl (typed)
- *   - Chapter content     -> Post.content
+ *   - Chapter content     -> ContentTranslation.content
  *   - Chapter parent book -> Unit.targetUnitId (must reference Unit(type=BOOK))
  *   - Chapter ordering    -> ContentStructureNode rows (out of scope of this service)
  */
@@ -191,7 +191,29 @@ export class ChapterService {
           unitId: unit.id,
           authorUserId: userId,
           kind: PostKind.CHAPTER,
+        },
+      });
+      await tx.contentTranslation.upsert({
+        where: { unitId_language: { unitId: unit.id, language } },
+        create: {
+          unitId: unit.id,
+          language,
           content: (content ?? markdownContentDoc("")) as Prisma.InputJsonValue,
+          status:
+            unit.status === UnitStatus.DRAFT
+              ? UnitStatus.DRAFT
+              : UnitStatus.PUBLISHED,
+          authorUserId: userId,
+          provenance: { source: "chapter-content" },
+        },
+        update: {
+          content: (content ?? markdownContentDoc("")) as Prisma.InputJsonValue,
+          status:
+            unit.status === UnitStatus.DRAFT
+              ? UnitStatus.DRAFT
+              : UnitStatus.PUBLISHED,
+          authorUserId: userId,
+          provenance: { source: "chapter-content" },
         },
       });
 
@@ -271,7 +293,23 @@ export class ChapterService {
           unitId: unit.id,
           authorUserId: userId,
           kind: PostKind.CHAPTER,
+        },
+      });
+      await tx.contentTranslation.upsert({
+        where: { unitId_language: { unitId: unit.id, language } },
+        create: {
+          unitId: unit.id,
+          language,
           content: markdownContentDoc("") as Prisma.InputJsonValue,
+          status: UnitStatus.PUBLISHED,
+          authorUserId: userId,
+          provenance: { source: "chapter-content" },
+        },
+        update: {
+          content: markdownContentDoc("") as Prisma.InputJsonValue,
+          status: UnitStatus.PUBLISHED,
+          authorUserId: userId,
+          provenance: { source: "chapter-content" },
         },
       });
 
@@ -324,17 +362,41 @@ export class ChapterService {
     }
 
     return prisma.$transaction(async (tx) => {
-      const postPatch: Prisma.PostUpdateInput = {};
-      if (content !== undefined)
-        postPatch.content = content as Prisma.InputJsonValue;
-      if (Object.keys(postPatch).length > 0) {
-        await tx.post.update({ where: { unitId }, data: postPatch });
-      }
-
       // Content-only edit: bump every linked ContentStructureNode's updatedAt,
       // never bump container ContentStructure.updatedAt (content edits are
       // not structure-shape changes). updateMany handles the multi-link case.
       if (content !== undefined) {
+        const existing = await tx.post.findUniqueOrThrow({
+          where: { unitId },
+          select: {
+            authorUserId: true,
+            unit: { select: { defaultLanguage: true, status: true } },
+          },
+        });
+        const language = existing.unit.defaultLanguage ?? "en";
+        await tx.contentTranslation.upsert({
+          where: { unitId_language: { unitId, language } },
+          create: {
+            unitId,
+            language,
+            content: content as Prisma.InputJsonValue,
+            status:
+              existing.unit.status === UnitStatus.DRAFT
+                ? UnitStatus.DRAFT
+                : UnitStatus.PUBLISHED,
+            authorUserId: existing.authorUserId,
+            provenance: { source: "chapter-content" },
+          },
+          update: {
+            content: content as Prisma.InputJsonValue,
+            status:
+              existing.unit.status === UnitStatus.DRAFT
+                ? UnitStatus.DRAFT
+                : UnitStatus.PUBLISHED,
+            authorUserId: existing.authorUserId,
+            provenance: { source: "chapter-content" },
+          },
+        });
         await tx.contentStructureNode.updateMany({
           where: { contentUnitId: unitId },
           data: { updatedAt: new Date() },

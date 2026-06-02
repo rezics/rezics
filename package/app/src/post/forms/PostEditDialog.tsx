@@ -108,6 +108,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
           post: {
             title: trimmedTitle === originalTitle ? undefined : trimmedTitle,
             content,
+            language: locale,
           },
         },
       },

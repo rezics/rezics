@@ -240,7 +240,6 @@ function postToSummary(
 ): UnitCardSummary {
   const title =
     text(post.title) ??
-    text(post.extra?.title) ??
     firstLine(mainMarkdownSource(post.content)) ??
     text(options.fallbackTitle) ??
     post.unitId;

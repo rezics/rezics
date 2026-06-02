@@ -5,7 +5,7 @@ import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { markdownContentDoc, PostKind } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -17,6 +17,7 @@ import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { t } = useTranslation(["common", "community", "page"]);
+  const locale = useLocale();
   const search = useRouterState({ select: (s) => s.location.search });
   const searchParams =
     typeof search === "string"
@@ -64,6 +65,10 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       show("Please login first");
       return;
     }
+    if (!reviewData._editTitle.trim()) {
+      show("Review title is required");
+      return;
+    }
 
     // Drafts may be incomplete; only enforce the length floor on publish.
     if (
@@ -90,12 +95,11 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       targetUnitId: primaryTargetUnitId,
       variantUnitId,
       kind,
+      language: locale,
+      title: reviewData._editTitle.trim(),
       status,
       content: markdownContentDoc(reviewData.contentSource || ""),
       scoreEntryId,
-      extra: {
-        title: reviewData._editTitle || undefined,
-      },
     });
   }
 

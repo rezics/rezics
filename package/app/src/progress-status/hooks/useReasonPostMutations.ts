@@ -2,7 +2,11 @@ import {
   useCreatePostMutation,
   useUpdatePostMutation,
 } from "@rezics/api/post/post.mutations";
-import { markdownContentDoc, type PostResponse } from "@rezics/contract";
+import {
+  DEFAULT_LANGUAGE,
+  markdownContentDoc,
+  type PostResponse,
+} from "@rezics/contract";
 import { useCallback } from "react";
 
 export type ReasonPostVisibility = "PUBLIC" | "UNLISTED";
@@ -35,6 +39,8 @@ export function useReasonPostMutations(): UseReasonPostMutationsResult {
       // `extra.visibility` until the backend route accepts the field directly.
       return createPost.mutateAsync({
         targetUnitId: unitId,
+        language: DEFAULT_LANGUAGE,
+        title: body.trim().split(/\r?\n/, 1)[0]?.slice(0, 120) || "Reason",
         content: markdownContentDoc(body),
         kind: "POST",
         extra: { visibility },
@@ -50,7 +56,11 @@ export function useReasonPostMutations(): UseReasonPostMutationsResult {
         unitId: postUnitId,
         input: {
           patch: {
-            post: { content: markdownContentDoc(body), extra: { visibility } },
+            post: {
+              language: DEFAULT_LANGUAGE,
+              content: markdownContentDoc(body),
+              extra: { visibility },
+            },
           },
         },
       });

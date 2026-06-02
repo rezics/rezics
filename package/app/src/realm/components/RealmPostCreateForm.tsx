@@ -1,6 +1,6 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import type { PollDTO, PostDTO } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -31,6 +31,7 @@ export function RealmPostCreateForm({
 }: RealmPostCreateFormProps) {
   const { t } = useTranslation(["common"]);
   const { t: tc } = useTranslation(["community"]);
+  const locale = useLocale();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -60,6 +61,7 @@ export function RealmPostCreateForm({
           realmId,
           title: trimmedTitle,
           content: trimmed,
+          language: locale,
           tagIds: selectedTagIds,
           status,
         }),

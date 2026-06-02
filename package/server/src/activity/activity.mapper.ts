@@ -29,14 +29,6 @@ export function shelfActivityHref(unitId: string): string {
   return `/shelf/${unitId}`;
 }
 
-function extractExtraTitle(extra: unknown): string | undefined {
-  if (extra && typeof extra === "object" && "title" in extra) {
-    const value = (extra as { title?: unknown }).title;
-    if (typeof value === "string" && value.trim()) return value;
-  }
-  return undefined;
-}
-
 export function resolvePostActivityTitle(input: {
   translations: Array<{ language: string; title: string | null }>;
   defaultLanguage?: string | null;
@@ -67,7 +59,7 @@ export function resolvePostActivityTitle(input: {
     const title = titleByLanguage.get(language);
     if (title?.trim()) return title.trim();
   }
-  return extractExtraTitle(input.extra);
+  return undefined;
 }
 
 /**

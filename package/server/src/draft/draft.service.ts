@@ -23,35 +23,23 @@ function plainText(content: unknown): string {
 
 function deriveTitle(
   translations: Array<{ title: string | null; language: string }>,
-  extra: unknown,
-  content: unknown,
 ): string {
   for (const translation of translations) {
     if (translation.title?.trim()) {
       return translation.title.trim().slice(0, 120);
     }
   }
-  const extraTitle =
-    extra && typeof extra === "object"
-      ? (extra as { title?: unknown }).title
-      : undefined;
-  if (typeof extraTitle === "string" && extraTitle.trim()) {
-    return extraTitle.trim().slice(0, 120);
-  }
-  const text = plainText(content);
-  return text ? text.slice(0, 80) : "";
+  return "";
 }
 
 function deriveExcerpt(
   contentTranslations: Array<{ content: unknown; language: string }>,
-  content: unknown,
 ): string | undefined {
   for (const translation of contentTranslations) {
     const translatedText = plainText(translation.content);
     if (translatedText) return translatedText.slice(0, 200);
   }
-  const text = plainText(content);
-  return text ? text.slice(0, 200) : undefined;
+  return undefined;
 }
 
 export const draftService = {
@@ -74,8 +62,6 @@ export const draftService = {
       select: {
         unitId: true,
         kind: true,
-        content: true,
-        extra: true,
         unit: {
           select: {
             targetUnitId: true,
@@ -108,8 +94,6 @@ export const draftService = {
               post.unit.defaultLanguage,
               post.unit.supportLanguages,
             ),
-            post.extra,
-            post.content,
           ),
           excerpt: deriveExcerpt(
             orderByPostLanguage(
@@ -117,7 +101,6 @@ export const draftService = {
               post.unit.defaultLanguage,
               post.unit.supportLanguages,
             ),
-            post.content,
           ),
           updatedAt: post.updatedAt.toISOString(),
           targetUnitId: post.unit.targetUnitId,

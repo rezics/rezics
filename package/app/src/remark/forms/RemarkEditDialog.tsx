@@ -5,7 +5,7 @@ import {
   type PostDTO,
   SCORE_MAX,
 } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import {
   Button,
@@ -31,6 +31,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation(["common", "community", "page"]);
+  const locale = useLocale();
   const initialRating = (remark.extra as { rating?: number } | null)?.rating;
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,
@@ -58,6 +59,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
           post: {
             title: trimmedTitle,
             content: markdownContentDoc(text.trim()),
+            language: locale,
             extra: nextExtra,
           },
         },

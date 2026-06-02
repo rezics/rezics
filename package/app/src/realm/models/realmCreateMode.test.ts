@@ -24,6 +24,7 @@ describe("realm create mode helpers", () => {
         realmId: "realm-1",
         title: " hello title ",
         content: " hello ",
+        language: "en",
         tagIds: ["tag-1", "tag-2"],
         status: "PUBLISHED",
       }),
@@ -31,6 +32,7 @@ describe("realm create mode helpers", () => {
       realmUnitIds: ["realm-1"],
       tagIds: ["tag-1", "tag-2"],
       kind: PostKind.POST,
+      language: "en",
       title: "hello title",
       status: "PUBLISHED",
     });
@@ -40,12 +42,14 @@ describe("realm create mode helpers", () => {
     expect(
       buildRealmWikiCreateInput({
         realmId: "realm-1",
+        title: " wiki title ",
         content: " wiki body ",
         language: "zh-hant",
         status: "DRAFT",
       }),
     ).toMatchObject({
       realmUnitIds: ["realm-1"],
+      title: "wiki title",
       language: "zh-hant",
       status: "DRAFT",
     });
@@ -57,6 +61,7 @@ describe("realm create mode helpers", () => {
         realmId: "realm-1",
         title: "poll title",
         content: "poll body",
+        language: "en",
         tagIds: ["tag-1"],
         pollUnitId: "poll-1",
         status: "PUBLISHED",
@@ -65,6 +70,7 @@ describe("realm create mode helpers", () => {
       realmUnitIds: ["realm-1"],
       tagIds: ["tag-1"],
       kind: PostKind.POST,
+      language: "en",
       title: "poll title",
       status: "PUBLISHED",
       extra: { poll: { unitId: "poll-1" } },

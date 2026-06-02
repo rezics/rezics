@@ -25,20 +25,22 @@ language, falling back through the unit default language.
 
 ## Durable constraints & decisions
 
-- (type) Root post create/update accepts an explicit language and writes
+- (type) Root post create/update requires an explicit language and writes
   `Unit.defaultLanguage`, `Unit.supportLanguages`, `UnitTranslation.title`, and
   `ContentTranslation.content` for that language.
-- (type) `PostDTO` exposes a resolved `title` and resolved `content`; the long-term
-  source is `UnitTranslation` plus `ContentTranslation`, not `Post.extra.title`
-  or `Post.content`.
+- (type) `PostDTO` exposes a resolved `title` and resolved `content`; the source
+  is `UnitTranslation` plus `ContentTranslation`, not `Post.extra.title` or
+  `Post.content`.
 - (test) Language resolution falls back from requested language to
   `Unit.defaultLanguage`, then to the primary/first available support language,
   so Unit-first cards and post detail agree on title/body.
-- (test) `Post.extra.title` is legacy-only migration input. New review/remark/wiki
-  and realm post writes must not store fresh titles there.
+- (test) `Post.extra.title` is repair-only migration input. New review/remark/wiki
+  and realm post writes must not store fresh titles there, and normal read paths
+  must not depend on it after repair.
 - (test) Root post UI renders a title; comment/reply UI remains titleless.
-- (comment) `Post.content` remains only as a temporary legacy read/migration
-  fallback during the cutover. New root post writes should populate
+- (comment) `Post.content` is repair-only migration input during this internal
+  development cutover. Do not keep old-reader writes or mapper fallbacks for
+  compatibility; after repair, root post body reads come from
   `ContentTranslation`.
 - (test) Every root post kind, including ordinary realm posts, reviews, remarks,
   excerpts, chapters, and wiki posts, supports full multilingual title/body
@@ -56,15 +58,16 @@ language, falling back through the unit default language.
   body content for the selected/default language.
 - [x] 1.3 Update `package/api/src/post/post.types.ts`,
   `package/api/src/post/post.api.ts`, and post mutation helpers to send the new
-  shape while preserving a narrow legacy compatibility path where needed.
+  shape without a legacy compatibility wrapper.
 - [x] 1.4 Add or adjust contract/API tests for post create/update payloads,
-  resolved title, and legacy `extra.title` rejection/deprecation behavior.
+  resolved title, required language, and repair-only `extra.title` rejection.
 
 ## 2. Server Write Path
 
 - [x] 2.1 Update `package/server/src/post/post.service.ts` create to write
   `Unit.defaultLanguage`, `supportLanguages`, `UnitTranslation.title`, and
-  `ContentTranslation.content/status` for every root post kind.
+  `ContentTranslation.content/status` for every root post kind without writing a
+  compatibility body to `Post.content`.
 - [x] 2.2 Update post edit paths so title edits write `UnitTranslation` and body
   edits write `ContentTranslation`; preserve wiki collaborative authority checks
   for `post.content.*` equivalent body paths.
@@ -73,19 +76,19 @@ language, falling back through the unit default language.
 - [x] 2.4 Keep draft/publish transitions syncing `ContentTranslation.status` for
   all post kinds that support drafts, not only wiki.
 - [x] 2.5 Add server tests for create, update, publish, language fallback, and
-  legacy fallback migration behavior.
+  repair-only migration behavior with no normal legacy read fallback.
 
 ## 3. Server Read and Mapping
 
 - [x] 3.1 Extend post include/query helpers to load Unit translations and
   ContentTranslation rows needed for resolved-language mapping.
 - [x] 3.2 Update `package/server/src/post/post.mapper.ts` to resolve `title` from
-  `UnitTranslation` and `content` from `ContentTranslation`, falling back to
-  legacy `extra.title` / `Post.content` only for old rows.
+  `UnitTranslation` and `content` from `ContentTranslation` without falling back
+  to `extra.title` / `Post.content`.
 - [x] 3.3 Update draft, activity, search sync, account data, and other post title
   readers to use Unit translations rather than `Post.extra.title`.
 - [ ] 3.4 Add mapper/search/draft/activity tests so root post title/body
-  resolution stays consistent across surfaces.
+  resolution stays consistent across surfaces and does not read legacy storage.
 
 ## 4. Frontend UI Cutover
 
@@ -93,7 +96,7 @@ language, falling back through the unit default language.
   above body content.
 - [x] 4.2 Keep comment/reply components titleless and ensure shared post/comment
   components do not erase the model boundary.
-- [ ] 4.3 Update ordinary realm post, review, remark, excerpt, chapter, and wiki
+- [x] 4.3 Update ordinary realm post, review, remark, excerpt, chapter, and wiki
   create/edit forms to write title/body through the new post translation input,
   not `extra.title` or `Post.content`.
 - [ ] 4.4 Add a shared root-post translation editor surface for managing all
@@ -109,12 +112,12 @@ language, falling back through the unit default language.
 - [x] 5.1 Add a server-side data repair/migration path that copies existing
   `Post.extra.title` into `UnitTranslation.title` and existing `Post.content`
   into `ContentTranslation.content` using the unit default/support language.
-- [x] 5.2 Decide whether `Post.content` remains as a legacy nullable column for
-  one release or is removed after repair; document the temporary fallback in
-  code while it exists.
-- [ ] 5.3 Remove or narrow legacy `extra.title` readers after the repair path is
-  covered.
-- [ ] 5.4 Run focused tests plus repo convention checks that cover contract,
+- [x] 5.2 Remove the `Post.content` compatibility dependency after repair; if the
+  column remains temporarily nullable, code must not use it for normal root-post
+  reads or writes.
+- [x] 5.3 Remove legacy `extra.title` and `Post.content` readers after the repair
+  path is covered.
+- [x] 5.4 Run focused tests plus repo convention checks that cover contract,
   server post/content translation, and app post/review/wiki surfaces.
 
 ## Out of scope

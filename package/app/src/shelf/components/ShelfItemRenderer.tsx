@@ -209,9 +209,7 @@ function NestedRootCard({
               const post = c.data as PostDTO | undefined;
               return (
                 <TabsTrigger key={c.unit.unitId} value={String(idx)}>
-                  {post?.title ??
-                    (post?.extra as { title?: string } | undefined)?.title ??
-                    `Review ${idx + 1}`}
+                  {post?.title ?? `Review ${idx + 1}`}
                 </TabsTrigger>
               );
             })}

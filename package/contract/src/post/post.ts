@@ -131,8 +131,8 @@ export const postDTOSchema = t.Object({
   /** Resolved root-post display title for the selected/default language. */
   title: t.Optional(t.Nullable(t.String())),
   /**
-   * Resolved root-post body content for the selected/default language. During
-   * the translation cutover, old rows may still fall back to `Post.content`.
+   * Resolved root-post body content for the selected/default language.
+   * Root-post reads resolve this from ContentTranslation, not Post.content.
    */
   content: t.Optional(t.Nullable(contentDocSchema)),
   kind: t.Optional(t.Nullable(postKindLiterals)),
@@ -376,9 +376,9 @@ export const createPostSchema = t.Object({
   /** Tag Unit IDs that create UnitTag junction rows in the same transaction. */
   tagIds: t.Optional(t.Array(t.String())),
   kind: t.Optional(postKindLiterals),
-  language: t.Optional(languageSchema),
+  language: languageSchema,
   creationMode: t.Optional(creationModeSchema),
-  title: t.Optional(t.String({ minLength: 1, maxLength: 300 })),
+  title: t.String({ minLength: 1, maxLength: 300 }),
   content: contentDocWriteSchema,
   scoreEntryId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),

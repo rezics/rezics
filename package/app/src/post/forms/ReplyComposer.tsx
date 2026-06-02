@@ -7,7 +7,7 @@ import {
   type PostDTO,
   PostKind,
 } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Button, Input } from "@rezics/ui/shadcn";
 import { BarChart3 } from "lucide-react";
 import {
@@ -77,6 +77,7 @@ export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
   ReplyComposerProps
 >(function ReplyComposer(props, ref) {
+  const locale = useLocale();
   const { t } = useTranslation([
     "auth",
     "common",
@@ -124,6 +125,8 @@ export const ReplyComposer = forwardRef<
   const postMutation = useCreatePostMutation();
   const commentMutation = useCreateCommentMutation();
   const submitting = postMutation.isPending || commentMutation.isPending;
+  const derivedTitle =
+    body.trim().split(/\r?\n/, 1)[0]?.slice(0, 120) || "Post";
 
   const submitReply = useCallback(
     (
@@ -156,7 +159,11 @@ export const ReplyComposer = forwardRef<
         {
           targetUnitId,
           variantUnitId,
+          realmUnitIds,
+          tagIds: selectedTagIds,
           kind: PostKind.POST,
+          language: locale,
+          title: derivedTitle,
           content,
           ...(options?.pollUnitId
             ? { extra: { poll: { unitId: options.pollUnitId } } }
@@ -173,10 +180,14 @@ export const ReplyComposer = forwardRef<
     [
       commentMutation.mutate,
       onSubmitted,
+      derivedTitle,
+      locale,
       parentCommentUnitId,
       postMutation.mutate,
       realmUnitId,
+      realmUnitIds,
       rootUnitId,
+      selectedTagIds,
       targetUnitId,
       variantUnitId,
     ],
@@ -247,6 +258,8 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
+          language: locale,
+          title: derivedTitle,
           content: markdownContentDoc(trimmed),
           extra: { poll: { unitId: poll.unitId } },
         },
@@ -274,6 +287,8 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
+          language: locale,
+          title: derivedTitle,
           content: markdownContentDoc(trimmed),
         },
         {

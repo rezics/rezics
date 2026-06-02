@@ -28,7 +28,7 @@ describe("hrefs", () => {
 });
 
 describe("resolvePostActivityTitle", () => {
-  it("uses UnitTranslation title before legacy extra.title", () => {
+  it("uses UnitTranslation title and ignores repair-only extra.title", () => {
     expect(
       resolvePostActivityTitle({
         defaultLanguage: "en",
@@ -45,7 +45,7 @@ describe("resolvePostActivityTitle", () => {
         translations: [],
         extra: { title: "Legacy" },
       }),
-    ).toBe("Legacy");
+    ).toBeUndefined();
     expect(
       resolvePostActivityTitle({ translations: [], extra: null }),
     ).toBeUndefined();

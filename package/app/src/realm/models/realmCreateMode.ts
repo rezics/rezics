@@ -37,6 +37,7 @@ export function buildRealmPostCreateInput(input: {
   realmId: string;
   title: string;
   content: string;
+  language: Language;
   tagIds: string[];
   status: "DRAFT" | "PUBLISHED";
 }): CreatePostInput {
@@ -44,6 +45,7 @@ export function buildRealmPostCreateInput(input: {
     realmUnitIds: [input.realmId],
     tagIds: input.tagIds,
     kind: PostKind.POST,
+    language: input.language,
     title: input.title.trim(),
     content: markdownContentDoc(input.content.trim()),
     status: input.status,
@@ -52,12 +54,14 @@ export function buildRealmPostCreateInput(input: {
 
 export function buildRealmWikiCreateInput(input: {
   realmId: string;
+  title: string;
   content: string;
   language: Language;
   status: "DRAFT" | "PUBLISHED";
 }): Omit<CreatePostInput, "kind" | "creationMode"> {
   return {
     realmUnitIds: [input.realmId],
+    title: input.title.trim(),
     content: markdownContentDoc(input.content.trim()),
     language: input.language,
     status: input.status,
@@ -68,6 +72,7 @@ export function buildRealmPollPostCreateInput(input: {
   realmId: string;
   title: string;
   content: string;
+  language: Language;
   tagIds: string[];
   pollUnitId: string;
   status: "DRAFT" | "PUBLISHED";

@@ -22,19 +22,24 @@ describe("titleOf", () => {
     expect(titleOf(unit, cached)).toBe("War and Peace");
   });
 
-  test("review with extra.title returns extra.title", () => {
+  test("review with resolved title returns title", () => {
     const unit = makeUnit({ kind: "review", unitId: "rev-1" });
     const cached = {
       unitId: "rev-1",
       authorUserId: "u1",
-      extra: { title: "A great review" },
+      title: "A great review",
+      extra: { title: "Legacy title" },
     };
     expect(titleOf(unit, cached)).toBe("A great review");
   });
 
-  test("review with no title falls back to unitId", () => {
+  test("review ignores repair-only extra.title and falls back to unitId", () => {
     const unit = makeUnit({ kind: "review", unitId: "rev-2" });
-    const cached = { unitId: "rev-2", authorUserId: "u1", extra: {} };
+    const cached = {
+      unitId: "rev-2",
+      authorUserId: "u1",
+      extra: { title: "Legacy title" },
+    };
     expect(titleOf(unit, cached)).toBe("rev-2");
   });
 

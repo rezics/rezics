@@ -155,6 +155,18 @@ describe("post work-domain contract fields", () => {
         content: markdownContentDoc("body"),
       }),
     ).toBe(false);
+    expect(
+      Value.Check(createPostSchema, {
+        title: "Display title",
+        content: markdownContentDoc("body"),
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(createPostSchema, {
+        language: "en",
+        content: markdownContentDoc("body"),
+      }),
+    ).toBe(false);
   });
 
   test("member realm submission names the author intent explicitly", () => {

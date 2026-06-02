@@ -26,8 +26,8 @@ export const postInclude = {
  * Internal post type with relations.
  *
  * Root post title/body are resolved from UnitTranslation and
- * ContentTranslation. `Post.content` remains as a temporary legacy fallback
- * while old rows are repaired.
+ * ContentTranslation. Post.content is repair-only migration input and is not
+ * used by normal post reads or writes.
  *
  * `pinKind`/`pinPosition` are the promotion overlay for the rendered thread
  * scope, attached by the thread read (`attachPinKinds`).

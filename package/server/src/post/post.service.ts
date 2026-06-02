@@ -136,14 +136,6 @@ function sanitizePostExtraForCreate(
   return rest as Prisma.JsonValue;
 }
 
-function readLegacyExtraTitle(extra: Prisma.JsonValue | undefined | null) {
-  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
-  const title = (extra as Record<string, unknown>).title;
-  return typeof title === "string" && title.trim().length > 0
-    ? title.trim()
-    : null;
-}
-
 async function upsertPostContentTranslation(
   tx: Pick<Prisma.TransactionClient, "contentTranslation">,
   input: {
@@ -664,14 +656,11 @@ export class PostService {
             stateSchemaTag: statefulInit.tagSlug,
           }
         : extraWithoutLegacyTitle;
-      const titleToWrite = title?.trim() || readLegacyExtraTitle(extra);
+      const titleToWrite = title.trim();
 
       const createData: Prisma.PostUncheckedCreateInput = {
         unitId: unit.id,
         authorUserId,
-        // Temporary legacy fallback for old readers; new reads resolve body via
-        // ContentTranslation and repair will eventually remove this dependency.
-        content: content as Prisma.InputJsonValue,
         kind: (kind as PostKind) ?? undefined,
         scoreEntryId: scoreEntryId ?? undefined,
         variantUnitId: variantUnitId ?? undefined,
@@ -724,7 +713,7 @@ export class PostService {
       await upsertPostContentTranslation(tx, {
         unitId: created.unitId,
         language: postLanguage,
-        content: created.content,
+        content,
         actorUserId: authorUserId,
         status: postContentTranslationStatus(asDraft),
       });
@@ -733,7 +722,7 @@ export class PostService {
         await writeEditorialMetadataHistory(tx as any, {
           unitId: created.unitId,
           actorUserId: authorUserId,
-          patch: wikiPostContentHistoryPatch(created.content),
+          patch: wikiPostContentHistoryPatch(content),
           message: "wiki-post.create",
         });
       }
@@ -929,8 +918,6 @@ export class PostService {
     const data: Prisma.PostUpdateInput = {};
 
     const titleToWrite = input.title?.trim();
-    if (input.content !== undefined)
-      data.content = input.content as Prisma.InputJsonValue;
     if (input.isLocked !== undefined) data.isLocked = input.isLocked;
     if (input.extra !== undefined)
       data.extra = sanitizePostExtraForCreate(input.extra) as
@@ -939,11 +926,17 @@ export class PostService {
         | null;
 
     if (!actor) {
-      const updated = await prisma.post.update({
-        where: { unitId },
-        data,
-        include: postInclude,
-      });
+      const updated =
+        Object.keys(data).length > 0
+          ? await prisma.post.update({
+              where: { unitId },
+              data,
+              include: postInclude,
+            })
+          : await prisma.post.findUniqueOrThrow({
+              where: { unitId },
+              include: postInclude,
+            });
       if (titleToWrite) {
         const existing = await prisma.post.findUniqueOrThrow({
           where: { unitId },
@@ -1006,16 +999,26 @@ export class PostService {
         where: { unitId },
         select: {
           kind: true,
-          content: true,
           authorUserId: true,
-          unit: { select: { defaultLanguage: true, status: true } },
+          unit: {
+            select: {
+              defaultLanguage: true,
+              status: true,
+              contentTranslations: true,
+            },
+          },
         },
       });
+      const language =
+        input.language ?? existing.unit.defaultLanguage ?? DEFAULT_LANGUAGE;
+      const currentContent = (existing.unit.contentTranslations ?? []).find(
+        (translation) => translation.language === language,
+      )?.content;
       const isWikiContentMainEdit =
         existing.kind === "WIKI" &&
         input.content !== undefined &&
         !jsonEquivalent(
-          mainMarkdownSource(existing.content),
+          mainMarkdownSource(currentContent),
           mainMarkdownSource(input.content),
         );
 
@@ -1039,14 +1042,18 @@ export class PostService {
         );
       }
 
-      const row = await tx.post.update({
-        where: { unitId },
-        data,
-        include: postInclude,
-      });
+      const row =
+        Object.keys(data).length > 0
+          ? await tx.post.update({
+              where: { unitId },
+              data,
+              include: postInclude,
+            })
+          : await tx.post.findUniqueOrThrow({
+              where: { unitId },
+              include: postInclude,
+            });
 
-      const language =
-        input.language ?? existing.unit.defaultLanguage ?? DEFAULT_LANGUAGE;
       if (titleToWrite) {
         await upsertPostTitleTranslation(tx, {
           unitId,
@@ -1071,7 +1078,7 @@ export class PostService {
           unitId,
           actorUserId: actor.userId,
           patch:
-            historyInput?.patch ?? wikiPostContentHistoryPatch(row.content),
+            historyInput?.patch ?? wikiPostContentHistoryPatch(input.content),
           message: historyInput?.message ?? "wiki-post.content.update",
           restoreSource: historyInput?.restoreSource,
         });

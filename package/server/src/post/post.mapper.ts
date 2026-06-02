@@ -21,12 +21,6 @@ function contentHiddenByGlobalModeration(post: PostWithRelations) {
   );
 }
 
-function legacyExtraTitle(extra: unknown): string | null {
-  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
-  const title = (extra as Record<string, unknown>).title;
-  return typeof title === "string" && title.trim().length > 0 ? title : null;
-}
-
 function postLanguageOrder(post: PostWithRelations): string[] {
   const order = [
     post.unit.defaultLanguage,
@@ -53,7 +47,7 @@ function resolvePostTitle(post: PostWithRelations): string | null {
     const title = byLanguage.get(language);
     if (title && title.trim().length > 0) return title;
   }
-  return legacyExtraTitle(post.extra);
+  return null;
 }
 
 function resolvePostContent(post: PostWithRelations): PostDTO["content"] {
@@ -69,7 +63,7 @@ function resolvePostContent(post: PostWithRelations): PostDTO["content"] {
       return content as PostDTO["content"];
     }
   }
-  return post.content as PostDTO["content"];
+  return null;
 }
 
 /**
