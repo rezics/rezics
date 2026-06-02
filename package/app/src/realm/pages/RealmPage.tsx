@@ -19,7 +19,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Settings } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PinnedFeedSection } from "@/pinboard";
 import { ReplyComposer } from "@/post";
@@ -33,12 +33,12 @@ import { RealmWikiTab } from "../components/RealmWikiTab";
 import { canManageRealm } from "../models/canManageRealm";
 import { AboutSection } from "../sections/AboutSection";
 import { BannerSection } from "../sections/BannerSection";
+import { RealmAboutTab } from "../sections/RealmAboutTab";
 import {
   type RealmFeedSort,
   RealmFeedSortSwitcher,
 } from "../sections/RealmFeedSortSwitcher";
 import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
-import { RealmAboutTab } from "../sections/RealmAboutTab";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 import { RuleSection } from "../sections/RuleSection";
 
@@ -69,7 +69,7 @@ export function RealmPage({
   onFeedSortChange,
   onFeedTagIdsChange,
 }: RealmPageProps) {
-  const { t } = useTranslation(["entity"]);
+  const { t } = useTranslation(["common", "entity"]);
   const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const permission = useServerPermission();
@@ -139,8 +139,13 @@ export function RealmPage({
           </div>
           <div className="flex items-center gap-2">
             {isMember ? (
-              <Button size="sm" onClick={() => setComposerOpen(true)}>
-                {t("entity:realm_post_in_realm")}
+              <Button
+                size="sm"
+                className="gap-1 rounded-full px-2 md:px-4"
+                onClick={() => setComposerOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+                {t("common:create")}
               </Button>
             ) : (
               <Button size="sm" variant="outline" disabled>
