@@ -14,7 +14,6 @@ import {
 } from "@rezics/contract";
 import type {
   RealmBannerExtra,
-  RealmExtra,
   RealmTagView,
   RealmTagViewStyle,
   TagTreeNode,
@@ -43,17 +42,11 @@ import {
   Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
 import { getI18nRuntime } from "@rezics/i18n/runtime";
-export interface RealmExtraManageSectionProps {
-  realmId: string;
-  extra?: RealmExtra | null;
-}
-
 type TagSearchResult = {
   unitId?: string;
   tagUnitId?: string;
@@ -150,36 +143,7 @@ function hasLowContrast(foreground: string, background: string) {
   return (lighter + 0.05) / (darker + 0.05) < 4.5;
 }
 
-export const RealmExtraManageSection: React.FC<
-  RealmExtraManageSectionProps
-> = ({ realmId, extra }) => {
-  return (
-    <section className="flex flex-col gap-6">
-      <div>
-        <h2 className="text-lg font-semibold leading-ui text-text-primary">
-          {getI18nRuntime().i18n.t("entity:realm_forum_settings")}
-        </h2>
-        <p className="mt-1 text-sm leading-body text-text-secondary">
-          {getI18nRuntime().i18n.t("entity:realm_forum_settings_description")}
-        </p>
-      </div>
-      <TagTreeEditor
-        realmId={realmId}
-        initialValue={extra?.tagTree as TagTreeNode[] | undefined}
-      />
-      <TagViewPreferenceEditor
-        realmId={realmId}
-        initialValue={extra?.tagView as RealmTagView | undefined}
-      />
-      <WikiZonePicker realmId={realmId} value={extra?.wikiZoneUnitId ?? null} />
-      <SlotPicker realmId={realmId} slotKey="rule" value={extra?.rule} />
-      <SlotPicker realmId={realmId} slotKey="about" value={extra?.about} />
-      <BannerPicker realmId={realmId} value={extra?.banner ?? null} />
-    </section>
-  );
-};
-
-function TagViewPreferenceEditor({
+export function TagViewPreferenceEditor({
   realmId,
   initialValue,
 }: {
@@ -260,7 +224,7 @@ function TagViewPreferenceEditor({
   );
 }
 
-function WikiZonePicker({
+export function WikiZonePicker({
   realmId,
   value,
 }: {
@@ -357,7 +321,7 @@ function WikiZonePicker({
   );
 }
 
-function WikiZoneConfigEditor({
+export function WikiZoneConfigEditor({
   realmId,
   zone,
 }: {
@@ -808,7 +772,7 @@ function LabeledSelect<T extends string>({
   );
 }
 
-function TagTreeEditor({
+export function TagTreeEditor({
   realmId,
   initialValue,
 }: {
@@ -1088,7 +1052,7 @@ function TagTreeEditor({
   );
 }
 
-function SlotPicker({
+export function SlotPicker({
   realmId,
   slotKey,
   value,
@@ -1264,7 +1228,7 @@ function RealmSlotTranslationEditor({ unitId }: { unitId: string }) {
   );
 }
 
-function BannerPicker({
+export function BannerPicker({
   realmId,
   value,
 }: {

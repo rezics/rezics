@@ -37,6 +37,7 @@ import {
   TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { Plus as AddRoundedIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -70,6 +71,7 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   isDefaultRealm,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
+  const navigate = useNavigate();
   const availableKeys = useMemo<PinboardListKey[]>(
     () => (isDefaultRealm ? ["announcement", "pinboard"] : ["pinboard"]),
     [isDefaultRealm],
@@ -138,10 +140,16 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
     setEditorOpen(true);
   }, []);
 
-  const openEdit = useCallback((entry: PinboardEntryView) => {
-    setEditingEntry(entry);
-    setEditorOpen(true);
-  }, []);
+  const openEdit = useCallback(
+    (entry: PinboardEntryView) => {
+      // Pinboard entries are POST Units; edits use the canonical post editor.
+      navigate({
+        to: "/_editor/post/$rootPostUnitId/edit",
+        params: { rootPostUnitId: entry.unitId },
+      });
+    },
+    [navigate],
+  );
 
   const closeEditor = useCallback(() => {
     setEditorOpen(false);

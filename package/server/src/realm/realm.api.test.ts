@@ -27,6 +27,16 @@ const updateMemberRoleMock = mock(async (_realmUnitId, userId, roleKey) => ({
   joinedAt: new Date("2026-05-28T00:00:00.000Z"),
   updatedAt: new Date("2026-05-28T00:00:00.000Z"),
 }));
+const listMembersMock = mock(async () => ({
+  members: [
+    {
+      realmUnitId: "realm-1",
+      userId: "member-1",
+      roleKey: "member",
+    },
+  ],
+  hasMore: false,
+}));
 const createRealmMock = mock(async () => ({
   unitId: "realm-created",
   isPublic: true,
@@ -134,6 +144,7 @@ mock.module("./realm.service", () => ({
     appendCommunityList: appendCommunityListMock,
     getRulePolicy: getRulePolicyMock,
     getMember: getMemberMock,
+    listMembers: listMembersMock,
     resolveRule: resolveRuleMock,
     updateRulePolicy: updateRulePolicyMock,
     updateMemberRole: updateMemberRoleMock,
@@ -158,6 +169,7 @@ describe("realmApi", () => {
     resolveRuleMock.mockClear();
     updateRulePolicyMock.mockClear();
     getMemberMock.mockClear();
+    listMembersMock.mockClear();
     updateMemberRoleMock.mockClear();
   });
 
@@ -258,6 +270,28 @@ describe("realmApi", () => {
       "user-2",
       "admin",
     );
+  });
+
+  test("lists members for moderator roles", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/members?limit=25"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      members: [
+        {
+          realmUnitId: "realm-1",
+          userId: "member-1",
+          roleKey: "member",
+        },
+      ],
+      hasMore: false,
+    });
+    expect(listMembersMock).toHaveBeenCalledWith("realm-1", {
+      limit: 25,
+    });
   });
 
   test("denies pinboard append rejected by content pin policy", async () => {

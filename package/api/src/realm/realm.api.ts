@@ -20,6 +20,8 @@ import type {
   RealmExtraReadResponse,
   RealmListResponse,
   RealmMemberDTO,
+  RealmMemberListQuery,
+  RealmMemberListResponse,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
   RealmRuleReferenceDTO,
@@ -225,6 +227,15 @@ export const realmApi = {
     realmUnitId: string,
   ): Promise<RealmMembershipMeDTO> => {
     return apiFetch<RealmMembershipMeDTO>(`/realm/${realmUnitId}/members/me`);
+  },
+
+  listMembers: async (
+    realmUnitId: string,
+    query?: RealmMemberListQuery,
+  ): Promise<RealmMemberListResponse> => {
+    return apiFetch<RealmMemberListResponse>(
+      `/realm/${realmUnitId}/members${buildQueryString(query)}`,
+    );
   },
 
   /**

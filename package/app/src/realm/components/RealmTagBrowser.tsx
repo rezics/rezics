@@ -9,7 +9,7 @@ import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 
-interface RealmTagManagerProps {
+interface RealmTagBrowserProps {
   realmId: string;
   tagTree?: TagTreeNode[];
   tagView?: RealmTagView | null;
@@ -85,7 +85,7 @@ function TagChip({ entry }: { entry: TagEntry }) {
   );
 }
 
-export const RealmTagManager: React.FC<RealmTagManagerProps> = ({
+export const RealmTagBrowser: React.FC<RealmTagBrowserProps> = ({
   realmId: _realmId,
   tagTree,
   tagView,

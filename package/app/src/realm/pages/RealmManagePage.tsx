@@ -14,6 +14,7 @@ import {
   DEFAULT_LANGUAGE,
   markdownContentDoc,
   type RealmDTO,
+  type TagTreeNode,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
@@ -27,6 +28,10 @@ import {
   DialogTitle,
   Input,
   Label,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -41,7 +46,14 @@ import {
   UnitTranslationLanguageBar,
 } from "@/unit";
 import { canManageRealm } from "../models/canManageRealm";
-import { RealmExtraManageSection } from "../sections/RealmExtraManageSection";
+import { RealmMemberList } from "../components/RealmMemberList";
+import {
+  BannerPicker,
+  SlotPicker,
+  TagTreeEditor,
+  TagViewPreferenceEditor,
+  WikiZonePicker,
+} from "../sections/RealmManageEditors";
 import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 
 interface RealmManagePageProps {
@@ -159,13 +171,7 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
         queryKey: realmKeys.detail(realmId),
       });
 
-      navigate({
-        to: unitHref({
-          type: "REALM",
-          unitId: realmId,
-          slug: realm?.slug ?? null,
-        }),
-      });
+      toast.success("Realm profile saved.");
     } finally {
       setSaving(false);
     }
@@ -220,65 +226,101 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
       <h1 className="mb-6 text-2xl font-semibold">
         {t("entity:realm_manage")}
       </h1>
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <UnitTranslationLanguageBar
-            existingLanguages={editableLanguages}
-            selectedLanguage={selectedLanguage}
-            onSelect={setSelectedLanguage}
-            onAddClick={() => setAddOpen(true)}
-            label={t("common:language")}
-            addLabel={t("common:add_translation")}
+      <Tabs defaultValue="profile">
+        <TabsList className="mb-6 flex flex-wrap">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="organization">Organization</TabsTrigger>
+          <TabsTrigger value="wiki">Wiki</TabsTrigger>
+          <TabsTrigger value="moderation">Moderation</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="danger">Danger</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <UnitTranslationLanguageBar
+              existingLanguages={editableLanguages}
+              selectedLanguage={selectedLanguage}
+              onSelect={setSelectedLanguage}
+              onAddClick={() => setAddOpen(true)}
+              label={t("common:language")}
+              addLabel={t("common:add_translation")}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="realm-name">{t("common:name")}</Label>
+            <Input
+              id="realm-name"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="realm-description">{t("common:description")}</Label>
+            <Textarea
+              id="realm-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+            />
+          </div>
+          <div className="flex justify-end">
+            {/* Identity save only upserts the selected translation; realm extra controls auto-save independently. */}
+            <Button onClick={handleSave} disabled={saving}>
+              {t("common:save")}
+            </Button>
+          </div>
+          <SlotPicker
+            realmId={realmId}
+            slotKey="about"
+            value={realm.extra?.about}
           />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="realm-name">{t("common:name")}</Label>
-          <Input
-            id="realm-name"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+          <BannerPicker realmId={realmId} value={realm.extra?.banner ?? null} />
+          <SlotPicker
+            realmId={realmId}
+            slotKey="rule"
+            value={realm.extra?.rule}
           />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="realm-description">{t("common:description")}</Label>
-          <Textarea
-            id="realm-description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={4}
+        </TabsContent>
+
+        <TabsContent value="organization" className="flex flex-col gap-6">
+          <TagTreeEditor
+            realmId={realmId}
+            initialValue={realm.extra?.tagTree as TagTreeNode[] | undefined}
           />
-        </div>
-        <PinboardAdminSection
-          realmUnitId={realmId}
-          isDefaultRealm={isDefaultRealm}
-        />
-        <RealmModerationQueueSection realmUnitId={realmId} />
-        <RealmExtraManageSection realmId={realmId} extra={realm?.extra} />
-        <RealmOwnershipSection
-          realm={realm}
-          canDelete={canDeleteRealm}
-          onDeleted={() => navigate({ to: "/realm" })}
-        />
-        <div className="flex flex-row justify-end gap-4">
-          <Button
-            variant="ghost"
-            onClick={() =>
-              navigate({
-                to: unitHref({
-                  type: "REALM",
-                  unitId: realmId,
-                  slug: realm?.slug ?? null,
-                }),
-              })
-            }
-          >
-            {t("common:cancel")}
-          </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {t("common:save")}
-          </Button>
-        </div>
-      </div>
+          <TagViewPreferenceEditor
+            realmId={realmId}
+            initialValue={realm.extra?.tagView}
+          />
+          <PinboardAdminSection
+            realmUnitId={realmId}
+            isDefaultRealm={isDefaultRealm}
+          />
+        </TabsContent>
+
+        <TabsContent value="wiki" className="flex flex-col gap-6">
+          <WikiZonePicker
+            realmId={realmId}
+            value={realm.extra?.wikiZoneUnitId ?? null}
+          />
+        </TabsContent>
+
+        <TabsContent value="moderation">
+          <RealmModerationQueueSection realmUnitId={realmId} />
+        </TabsContent>
+
+        <TabsContent value="members">
+          <RealmMemberList realmId={realmId} />
+        </TabsContent>
+
+        <TabsContent value="danger">
+          <RealmOwnershipSection
+            realm={realm}
+            canDelete={canDeleteRealm}
+            onDeleted={() => navigate({ to: "/realm" })}
+          />
+        </TabsContent>
+      </Tabs>
       <AddUnitTranslationLanguageDialog
         open={addOpen}
         existingLanguages={editableLanguages}

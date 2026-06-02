@@ -15,8 +15,7 @@ export const Route = createFileRoute("/_mainLayout/realm/$realmId/")({
       search.tab === "wiki" ||
       search.tab === "tags" ||
       search.tab === "about" ||
-      search.tab === "members" ||
-      search.tab === "moderation"
+      search.tab === "members"
         ? search.tab
         : "feed";
     return {

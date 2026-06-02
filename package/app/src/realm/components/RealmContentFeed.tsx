@@ -25,6 +25,7 @@ interface RealmContentFeedProps {
   sort?: RealmFeedSort;
   tagIds?: string[];
   realmLifecycleState?: PostListQuery["realmLifecycleState"];
+  manageMode?: boolean;
 }
 
 export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
@@ -32,6 +33,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   sort = "new",
   tagIds = [],
   realmLifecycleState,
+  manageMode = false,
 }) => {
   const { t } = useTranslation(["entity"]);
   const { data, error, isError, isLoading } = useQuery(
@@ -127,6 +129,8 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
             })}
             summaryScopeKey={reactionScopeKey}
             reactionScopeKey={reactionScopeKey}
+            manageMode={manageMode}
+            manageRealmId={realmId}
           />
         ),
       )}

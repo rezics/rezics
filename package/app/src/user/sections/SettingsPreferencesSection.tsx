@@ -25,6 +25,7 @@ import {
   Alert,
   AlertDescription,
   Button,
+  Checkbox,
   Select,
   SelectContent,
   SelectItem,
@@ -116,6 +117,7 @@ export const SettingsPreferencesSection: FC = () => {
   const updateSettings = useUpdateSettingsMutation();
 
   const [langSuccess, setLangSuccess] = useState(false);
+  const [moderationSuccess, setModerationSuccess] = useState(false);
 
   const preferredLangs: string[] = settings?.preferredLanguages ?? [];
   const availableToAdd = SUPPORTED_LANGUAGES.filter(
@@ -159,6 +161,18 @@ export const SettingsPreferencesSection: FC = () => {
     const newIndex = preferredLangs.indexOf(String(over.id));
     if (oldIndex < 0 || newIndex < 0) return;
     persistOrder(arrayMove(preferredLangs, oldIndex, newIndex));
+  };
+
+  const handleManageModeDefaultChange = (next: boolean) => {
+    updateSettings.mutate(
+      { moderation: { realmManageModeDefault: next } },
+      {
+        onSuccess: () => {
+          setModerationSuccess(true);
+          setTimeout(() => setModerationSuccess(false), 2000);
+        },
+      },
+    );
   };
 
   if (settingsLoading) {
@@ -245,6 +259,35 @@ export const SettingsPreferencesSection: FC = () => {
         description={t("settings:preferences_content_rating_description")}
       >
         <ContentRatingPreferences />
+      </SettingsSection>
+
+      <SettingsSection
+        title="Realm moderation"
+        description="Choose whether realm manage mode starts enabled on feeds you moderate."
+      >
+        {moderationSuccess && (
+          <Alert className="mb-3 text-success-text">
+            <AlertDescription>Moderation preference saved.</AlertDescription>
+          </Alert>
+        )}
+        <label className="flex cursor-pointer items-start gap-3">
+          <Checkbox
+            checked={settings?.moderation?.realmManageModeDefault !== false}
+            disabled={updateSettings.isPending}
+            onCheckedChange={(checked) =>
+              handleManageModeDefaultChange(checked === true)
+            }
+            className="mt-0.5"
+          />
+          <span className="flex flex-col">
+            <span className="text-sm font-medium">
+              Start realm manage mode enabled
+            </span>
+            <span className="text-sm text-text-secondary">
+              Per-realm changes are kept only for the current visit.
+            </span>
+          </span>
+        </label>
       </SettingsSection>
 
       <SettingsSection

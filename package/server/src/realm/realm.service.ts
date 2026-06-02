@@ -6,6 +6,8 @@ import type {
   RealmExtraOkResponse,
   RealmExtraReadResponse,
   RealmListQuery,
+  RealmMemberListQuery,
+  RealmMemberListResponse,
   RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
@@ -37,7 +39,9 @@ export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
+  loadUserSlugMap,
 } from "@/utils/userSlugHydration";
+import { mapPublicUser, publicUserSelect } from "@/utils/sanitizeUser";
 import {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,
@@ -507,6 +511,53 @@ export class RealmService {
     });
 
     return mapRealmMemberToDTO(member);
+  }
+
+  async listMembers(
+    realmUnitId: string,
+    options: RealmMemberListQuery = {},
+  ): Promise<RealmMemberListResponse> {
+    const limit = Math.max(1, Math.min(Number(options.limit ?? 50), 100));
+    const cursorDate = options.cursor ? new Date(options.cursor) : null;
+    const rows = await prisma.realmMember.findMany({
+      where: {
+        realmUnitId,
+        ...(cursorDate && !Number.isNaN(cursorDate.getTime())
+          ? { joinedAt: { lt: cursorDate } }
+          : {}),
+      },
+      orderBy: [{ joinedAt: "desc" }, { userId: "asc" }],
+      take: limit + 1,
+    });
+    const pageRows = rows.slice(0, limit);
+    const users = await prisma.user.findMany({
+      where: { unitId: { in: pageRows.map((row) => row.userId) } },
+      select: publicUserSelect,
+    });
+    const slugByUserId = await loadUserSlugMap(
+      users.map((user) => user.unitId),
+    );
+    const userById = new Map(
+      users.map((user) => [
+        user.unitId,
+        {
+          ...user,
+          slug: slugByUserId.get(user.unitId) ?? null,
+        },
+      ]),
+    );
+
+    return {
+      members: pageRows.map((row) => ({
+        ...mapRealmMemberToDTO(row),
+        user: mapPublicUser(userById.get(row.userId)),
+      })),
+      cursor:
+        rows.length > limit
+          ? pageRows[pageRows.length - 1]?.joinedAt.toISOString()
+          : undefined,
+      hasMore: rows.length > limit,
+    };
   }
 
   /**

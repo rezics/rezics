@@ -5,6 +5,7 @@ import type {
   RealmExtraReadResponse,
   RealmListResponse,
   RealmMemberDTO,
+  RealmMemberListResponse,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
   RealmRuleReferenceDTO,
@@ -27,6 +28,8 @@ import {
   realmExtraReorderBodySchema,
   realmListBodySchema,
   realmListQuerySchema,
+  realmMemberListQuerySchema,
+  realmMemberListResponseSchema,
   realmParamsSchema,
   resolveRealmRuleQuerySchema,
   updateMemberRoleSchema,
@@ -767,6 +770,45 @@ export const realmApi = new Elysia({ prefix: "/realm" })
         summary: "Get my membership",
         description:
           "Get the current user's membership, capability hints, and rule acknowledgement state in a realm",
+        tags: ["Realms"],
+      },
+    },
+  )
+  .get(
+    "/:unitId/members",
+    async ({
+      params,
+      query,
+      identity,
+      set,
+    }): Promise<RealmMemberListResponse> => {
+      const actorMember = await realmService.getMember(
+        params.unitId,
+        identity.userId,
+      );
+      if (
+        !actorMember ||
+        (!MODERATOR_ROLES.includes(actorMember.roleKey) &&
+          !BasicAdminPermission(identity.permission))
+      ) {
+        set.status = 403;
+        throw new Error(
+          "Forbidden: you do not have permission to list members",
+        );
+      }
+      return realmService.listMembers(params.unitId, query);
+    },
+    {
+      requireLogin: true,
+      params: realmParamsSchema,
+      query: realmMemberListQuerySchema,
+      response: {
+        200: realmMemberListResponseSchema,
+        403: t.String(),
+      },
+      detail: {
+        summary: "List realm members",
+        description: "List the roster for realm moderators and staff",
         tags: ["Realms"],
       },
     },

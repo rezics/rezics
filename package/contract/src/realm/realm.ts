@@ -118,6 +118,23 @@ export const realmMemberDTOSchema = t.Object({
 
 export type RealmMemberDTO = (typeof realmMemberDTOSchema)["static"];
 
+export const realmMemberListQuerySchema = t.Object({
+  cursor: t.Optional(t.String()),
+  limit: paginationLimitSchema,
+});
+
+export type RealmMemberListQuery =
+  (typeof realmMemberListQuerySchema)["static"];
+
+export const realmMemberListResponseSchema = t.Object({
+  members: t.Array(realmMemberDTOSchema),
+  cursor: t.Optional(t.String()),
+  hasMore: t.Boolean(),
+});
+
+export type RealmMemberListResponse =
+  (typeof realmMemberListResponseSchema)["static"];
+
 // ============================================================
 // REALM RULE ACKNOWLEDGEMENT DTO
 // ============================================================

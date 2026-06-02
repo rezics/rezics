@@ -3,11 +3,13 @@ import {
   myRealmMembershipQuery,
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
+import { userQueries } from "@rezics/api/user/user.queries";
 import { contentDocMarkdownFallback, type TagTreeNode } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
+  Checkbox,
   Tabs,
   TabsContent,
   TabsList,
@@ -23,9 +25,10 @@ import { JoinButton } from "../components/JoinButton";
 import { RealmContentFeed } from "../components/RealmContentFeed";
 import { RealmMemberList } from "../components/RealmMemberList";
 import { RealmMuteButton } from "../components/RealmMuteButton";
-import { RealmTagManager } from "../components/RealmTagManager";
+import { RealmTagBrowser } from "../components/RealmTagBrowser";
 import { RealmWikiTab } from "../components/RealmWikiTab";
 import { canManageRealm } from "../models/canManageRealm";
+import { useRealmManageMode } from "../models/realmManageMode";
 import { AboutSection } from "../sections/AboutSection";
 import { BannerSection } from "../sections/BannerSection";
 import { RealmAboutTab } from "../sections/RealmAboutTab";
@@ -34,16 +37,9 @@ import {
   RealmFeedSortSwitcher,
 } from "../sections/RealmFeedSortSwitcher";
 import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
-import { RealmModerationQueueSection } from "../sections/RealmModerationQueueSection";
 import { RuleSection } from "../sections/RuleSection";
 
-export type RealmPageTab =
-  | "feed"
-  | "wiki"
-  | "tags"
-  | "about"
-  | "members"
-  | "moderation";
+export type RealmPageTab = "feed" | "wiki" | "tags" | "about" | "members";
 
 interface RealmPageProps {
   realmId: string;
@@ -67,6 +63,10 @@ export function RealmPage({
   const { t } = useTranslation(["common", "entity"]);
   const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
+  const { data: settings } = useQuery({
+    ...userQueries.settings(),
+    enabled: Boolean(membership),
+  });
   const permission = useServerPermission();
   const [localTab, setLocalTab] = useState<RealmPageTab>(tab ?? "feed");
 
@@ -79,6 +79,10 @@ export function RealmPage({
     memberRoleKey: membership?.roleKey,
   });
   const isMember = Boolean(membership);
+  const [manageMode, setManageMode] = useRealmManageMode({
+    realmId,
+    settings,
+  });
 
   if (isLoading) {
     return (
@@ -100,12 +104,8 @@ export function RealmPage({
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
   const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
   const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
-  const showModerationTab = showManage;
-  const activeTab =
-    (localTab === "wiki" && !showWikiTab) ||
-    (localTab === "moderation" && !showModerationTab)
-      ? "feed"
-      : localTab;
+  // Public realm tabs are consumption-only; configuration and queues live in /manage.
+  const activeTab = localTab === "wiki" && !showWikiTab ? "feed" : localTab;
   const handleTabChange = (value: string) => {
     const next = value as RealmPageTab;
     if (onTabChange) onTabChange(next);
@@ -177,9 +177,6 @@ export function RealmPage({
           <TabsTrigger value="members">
             {t("entity:realm_tab_members")}
           </TabsTrigger>
-          {showModerationTab ? (
-            <TabsTrigger value="moderation">Moderation</TabsTrigger>
-          ) : null}
         </TabsList>
 
         <TabsContent value="feed">
@@ -199,12 +196,24 @@ export function RealmPage({
                   selectedTagIds={feedTagIds}
                   onChange={(tagIds) => onFeedTagIdsChange?.(tagIds)}
                 />
+                {showManage ? (
+                  <label className="flex w-fit cursor-pointer items-center gap-2 rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary">
+                    <Checkbox
+                      checked={manageMode}
+                      onCheckedChange={(checked) =>
+                        setManageMode(checked === true)
+                      }
+                    />
+                    Manage mode
+                  </label>
+                ) : null}
               </div>
               <PinnedFeedSection realmUnitId={realmId} />
               <RealmContentFeed
                 realmId={realmId}
                 sort={feedSort}
                 tagIds={feedTagIds}
+                manageMode={showManage && manageMode}
               />
             </div>
             <aside className="min-w-0">
@@ -228,7 +237,7 @@ export function RealmPage({
           </TabsContent>
         )}
         <TabsContent value="tags">
-          <RealmTagManager
+          <RealmTagBrowser
             realmId={realmId}
             tagTree={tagTree}
             tagView={realm.extra?.tagView ?? null}
@@ -245,11 +254,6 @@ export function RealmPage({
             canManage={showManage}
           />
         </TabsContent>
-        {showModerationTab ? (
-          <TabsContent value="moderation">
-            <RealmModerationQueueSection realmUnitId={realmId} />
-          </TabsContent>
-        ) : null}
       </Tabs>
     </div>
   );

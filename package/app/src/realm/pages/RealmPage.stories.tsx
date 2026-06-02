@@ -284,15 +284,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Owner: Story = {
-  render: () => <RealmStateStory state="owner" tab="moderation" />,
+  render: () => <RealmStateStory state="owner" tab="feed" />,
 };
 
 export const Moderator: Story = {
-  render: () => <RealmStateStory state="moderator" tab="moderation" />,
+  render: () => <RealmStateStory state="moderator" tab="feed" />,
 };
 
 export const GlobalStaffOverride: Story = {
-  render: () => <RealmStateStory state="global-staff" tab="moderation" />,
+  render: () => <RealmStateStory state="global-staff" tab="feed" />,
 };
 
 export const Member: Story = {

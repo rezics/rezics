@@ -127,6 +127,17 @@ export const publishingPreferenceSchema = t.Object({
 export type PublishingPreference =
   (typeof publishingPreferenceSchema)["static"];
 
+export const moderationPreferenceSchema = t.Object({
+  /**
+   * Account-level default for realm feed management mode. Missing means true;
+   * per-realm toggles are session-only UI state.
+   */
+  realmManageModeDefault: t.Optional(t.Boolean()),
+});
+
+export type ModerationPreference =
+  (typeof moderationPreferenceSchema)["static"];
+
 /** Ratings a user may opt into; GENERAL/R_15 are always on. */
 export const OPT_IN_RATINGS: readonly ContentRating[] = ["R_18", "R_18G"];
 
@@ -195,6 +206,7 @@ export const userSettingsSchema = t.Object({
   preferredLanguages: t.Optional(t.Array(t.String())),
   content: t.Optional(contentPreferenceSchema),
   publishing: t.Optional(publishingPreferenceSchema),
+  moderation: t.Optional(moderationPreferenceSchema),
   library: t.Optional(librarySettingsSchema),
   notifications: t.Optional(notificationPreferenceSchema),
   privacy: t.Optional(userProfilePrivacySchema),

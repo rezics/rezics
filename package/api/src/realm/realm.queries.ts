@@ -6,6 +6,7 @@ import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
 import type { RealmFilters } from "./realm.types";
+import type { RealmMemberListQuery } from "@rezics/contract";
 
 /**
  * Query options for listing realms
@@ -66,6 +67,16 @@ export const myRealmMembershipQuery = (realmUnitId: string) =>
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+export const realmMembersQuery = (
+  realmUnitId: string,
+  query?: RealmMemberListQuery,
+) =>
+  queryOptions({
+    queryKey: realmKeys.memberList(realmUnitId, query?.cursor ?? null),
+    queryFn: () => realmApi.listMembers(realmUnitId, query),
+    staleTime: 1000 * 60 * 2,
+  });
+
 export const realmRulePolicyQuery = (realmUnitId: string) =>
   queryOptions({
     queryKey: realmKeys.rules(realmUnitId),
@@ -119,6 +130,7 @@ export const realmQueries = {
   mine: myRealmsQuery,
   byMember: realmsByMemberQuery,
   myMembership: myRealmMembershipQuery,
+  members: realmMembersQuery,
   rulePolicy: realmRulePolicyQuery,
   ruleResolved: realmRuleResolvedQuery,
   tagContext: realmTagContextQuery,

@@ -1,10 +1,18 @@
 import {
+  useHideRealmContentMutation,
+  useRemoveRealmFeedRootMutation,
+} from "@rezics/api/governance/governance.mutations";
+import { useDeletePostMutation } from "@rezics/api/post/post.mutations";
+import { useAppendRealmPinboardMutation } from "@rezics/api/realm/realm";
+import {
   extractPollUnitIdsFromContentDoc,
   type PostDTO,
   type VariantContextSummary,
 } from "@rezics/contract";
+import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { toast } from "sonner";
 import { ReactionBar } from "@/engagement";
 import { PollEmbed } from "@/poll";
 import { VariantContextLink } from "@/unit";
@@ -23,6 +31,8 @@ interface PostCardProps {
   href?: string;
   summaryScopeKey?: string | null;
   reactionScopeKey?: string | null;
+  manageMode?: boolean;
+  manageRealmId?: string;
 }
 
 export const PostCard: React.FC<PostCardProps> = ({
@@ -32,8 +42,26 @@ export const PostCard: React.FC<PostCardProps> = ({
   href,
   summaryScopeKey,
   reactionScopeKey,
+  manageMode = false,
+  manageRealmId,
 }) => {
   const navigate = useNavigate();
+  const deletePost = useDeletePostMutation({
+    onSuccess: () => toast.success("Post deleted."),
+    onError: (error) => toast.error(error.message),
+  });
+  const pinPost = useAppendRealmPinboardMutation({
+    onSuccess: () => toast.success("Post pinned."),
+    onError: (error) => toast.error(error.message),
+  });
+  const removeFromFeed = useRemoveRealmFeedRootMutation({
+    onSuccess: () => toast.success("Post removed from realm feed."),
+    onError: (error) => toast.error(error.message),
+  });
+  const hideInRealm = useHideRealmContentMutation({
+    onSuccess: () => toast.success("Post hidden in this realm."),
+    onError: (error) => toast.error(error.message),
+  });
   const rootPostUnitId = post.unitId;
   const resolvedVariantContext = variantContext ?? post.variantContext;
   const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
@@ -51,6 +79,16 @@ export const PostCard: React.FC<PostCardProps> = ({
       to: "/post/$rootPostUnitId",
       params: { rootPostUnitId },
     });
+  };
+
+  const runAdminAction = (
+    event: React.MouseEvent,
+    message: string,
+    action: () => void,
+  ) => {
+    event.stopPropagation();
+    if (!window.confirm(message)) return;
+    action();
   };
 
   const handleReplyInvoke = () => {
@@ -119,6 +157,79 @@ export const PostCard: React.FC<PostCardProps> = ({
           overflow={postCardOverflow}
           onReplyInvoke={handleReplyInvoke}
         />
+        {manageMode && manageRealmId ? (
+          <div
+            className="flex flex-wrap gap-2 pt-1"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={() => undefined}
+          >
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={pinPost.isPending}
+              onClick={(event) =>
+                runAdminAction(event, "Pin this post?", () =>
+                  pinPost.mutate({
+                    realmUnitId: manageRealmId,
+                    unitId: post.unitId,
+                  }),
+                )
+              }
+            >
+              Pin
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={removeFromFeed.isPending}
+              onClick={(event) =>
+                runAdminAction(
+                  event,
+                  "Remove this post from the realm feed?",
+                  () =>
+                    removeFromFeed.mutate({
+                      realmUnitId: manageRealmId,
+                      targetUnitId: post.unitId,
+                    }),
+                )
+              }
+            >
+              Remove
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={hideInRealm.isPending}
+              onClick={(event) =>
+                runAdminAction(event, "Hide this post in this realm?", () =>
+                  hideInRealm.mutate({
+                    realmUnitId: manageRealmId,
+                    targetUnitId: post.unitId,
+                    input: { reason: "moderator_action" },
+                  }),
+                )
+              }
+            >
+              Hide
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="destructive"
+              disabled={deletePost.isPending}
+              onClick={(event) =>
+                runAdminAction(event, "Delete this post?", () =>
+                  deletePost.mutate(post.unitId),
+                )
+              }
+            >
+              Delete
+            </Button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
