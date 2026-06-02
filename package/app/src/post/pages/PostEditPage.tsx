@@ -4,6 +4,7 @@ import {
   useUpdatePostMutation,
   useUpdateWikiPostContentMutation,
 } from "@rezics/api/post/post";
+import { unitQueries } from "@rezics/api/unit/unit";
 import {
   mainMarkdownSource,
   markdownContentDoc,
@@ -30,17 +31,20 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
     isLoading,
     error,
   } = useQuery(postQueries.detail(postUnitId));
+  const { data: languageContent, isLoading: isLanguageContentLoading } =
+    useQuery(unitQueries.languageContent(postUnitId, { appLocale: locale }));
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
+  const [language, setLanguage] = useState(locale);
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isWikiPost = post?.kind === PostKind.WIKI;
 
   useEffect(() => {
-    if (post) {
-      setTitle(post.title ?? "");
-      setText(mainMarkdownSource(post.content) ?? "");
-    }
-  }, [post]);
+    if (!post || !languageContent) return;
+    setTitle(languageContent.title ?? "");
+    setText(mainMarkdownSource(languageContent.content) ?? "");
+    setLanguage(languageContent.resolvedLanguage ?? locale);
+  }, [languageContent, locale, post]);
 
   const handleSaved = () => {
     navigate({ to: returnTo });
@@ -73,7 +77,7 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
         unitId: post.unitId,
         title: trimmedTitle === post.title ? undefined : trimmedTitle,
         content,
-        language: locale,
+        language,
       });
       return;
     }
@@ -84,13 +88,15 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
           post: {
             title: trimmedTitle === post.title ? undefined : trimmedTitle,
             content,
+            language,
           },
         },
       },
     });
   };
 
-  if (isLoading) return <div>{t("common:loading")}</div>;
+  if (isLoading || isLanguageContentLoading)
+    return <div>{t("common:loading")}</div>;
   if (error) return <QueryErrorDisplay error={error} />;
   if (!post) return null;
 

@@ -1,16 +1,16 @@
-import { contentTranslationQueries } from "@rezics/api/content-translation/content-translation";
 import { unitQueries } from "@rezics/api/unit/unit";
 import { mainMarkdownSource, type PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { RezicsMarkdownEditorProps } from "@/shared/ui/RezicsMarkdownEditor";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import {
   AddUnitTranslationLanguageDialog,
   UnitTranslationLanguageBar,
 } from "@/unit";
+import { rootPostEditorLanguages } from "../models/rootPostTranslationEditorLanguages";
 
 export type RootPostTranslationDraft = {
   language: string;
@@ -45,10 +45,6 @@ function readBody(content: unknown): string {
   return mainMarkdownSource(content) ?? "";
 }
 
-function uniq(values: string[]): string[] {
-  return [...new Set(values.filter(Boolean))];
-}
-
 export function RootPostTranslationEditor({
   post,
   language,
@@ -70,54 +66,80 @@ export function RootPostTranslationEditor({
 }: RootPostTranslationEditorProps) {
   const { t } = useTranslation(["common", "community"]);
   const [addLanguageOpen, setAddLanguageOpen] = useState(false);
+  const [draftLanguages, setDraftLanguages] = useState<string[]>([]);
   const [drafts, setDrafts] = useState<DraftMap>(() => ({
     [language]: { title, body },
   }));
-  const { data: contentTranslationList } = useQuery(
-    contentTranslationQueries.list(post?.unitId ?? ""),
+  const contentQuery = useMemo(
+    () => ({
+      explicitLanguage: language,
+      appLocale: defaultLanguage ?? undefined,
+    }),
+    [defaultLanguage, language],
   );
-  const { data: unit } = useQuery({
-    ...unitQueries.detail(post?.unitId ?? ""),
+  const { data: languageContent } = useQuery({
+    ...unitQueries.languageContent(post?.unitId ?? "", contentQuery),
     enabled: Boolean(post?.unitId),
   });
-  const resolvedDefaultLanguage = defaultLanguage ?? unit?.defaultLanguage;
+  const lastAppliedResolvedContent = useRef<string | null>(null);
 
-  const translationBodies = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const translation of contentTranslationList?.translations ?? []) {
-      map.set(translation.language, readBody(translation.content));
-    }
-    return map;
-  }, [contentTranslationList]);
+  const resolvedLanguage = languageContent?.resolvedLanguage ?? language;
+  const resolvedTitle = languageContent?.title ?? "";
+  const resolvedBody = readBody(languageContent?.content);
 
   const existingLanguages = useMemo(
     () =>
-      uniq([
-        resolvedDefaultLanguage ?? "",
-        language,
-        ...(unit?.supportLanguages ?? []).map(
-          (supportLanguage) => supportLanguage.language,
-        ),
-        ...(unit?.translations ?? []).map(
-          (translation) => translation.language,
-        ),
-        ...(contentTranslationList?.translations ?? []).map(
-          (translation) => translation.language,
-        ),
-      ]),
-    [contentTranslationList, language, resolvedDefaultLanguage, unit],
+      rootPostEditorLanguages({
+        supportLanguages: languageContent?.supportLanguages,
+        draftLanguages,
+        fallbackLanguage: post ? undefined : language,
+      }),
+    [draftLanguages, language, languageContent?.supportLanguages, post],
   );
 
   useEffect(() => {
+    if (!post || !languageContent?.resolvedLanguage) return;
+    const contentKey = [
+      post.unitId,
+      language,
+      languageContent.resolvedLanguage,
+      resolvedTitle,
+      resolvedBody,
+    ].join(":");
+    if (lastAppliedResolvedContent.current === contentKey) return;
+    if (draftLanguages.includes(languageContent.resolvedLanguage)) return;
+    lastAppliedResolvedContent.current = contentKey;
+
+    onLanguageChange(languageContent.resolvedLanguage);
+    onTitleChange(resolvedTitle);
+    onBodyChange(resolvedBody);
+    onDraftChange?.({
+      language: languageContent.resolvedLanguage,
+      title: resolvedTitle,
+      body: resolvedBody,
+    });
+  }, [
+    draftLanguages,
+    language,
+    languageContent,
+    onBodyChange,
+    onDraftChange,
+    onLanguageChange,
+    onTitleChange,
+    post,
+    resolvedBody,
+    resolvedTitle,
+  ]);
+
+  useEffect(() => {
+    if (!resolvedLanguage) return;
     setDrafts((current) => {
       const seeded = { ...current };
-      for (const [translationLanguage, translationBody] of translationBodies) {
-        seeded[translationLanguage] ??= { title: "", body: translationBody };
-      }
+      seeded[resolvedLanguage] ??= { title: resolvedTitle, body: resolvedBody };
       seeded[language] = { title, body };
       return seeded;
     });
-  }, [body, language, title, translationBodies]);
+  }, [body, language, resolvedBody, resolvedLanguage, resolvedTitle, title]);
 
   const selectLanguage = (nextLanguage: string) => {
     setDrafts((current) => ({
@@ -126,9 +148,9 @@ export function RootPostTranslationEditor({
     }));
     const nextDraft =
       drafts[nextLanguage] ??
-      (resolvedDefaultLanguage === nextLanguage
-        ? { title: post.title ?? "", body: readBody(post.content) }
-        : { title: "", body: translationBodies.get(nextLanguage) ?? "" });
+      (resolvedLanguage === nextLanguage
+        ? { title: resolvedTitle, body: resolvedBody }
+        : { title: "", body: "" });
     onLanguageChange(nextLanguage);
     onTitleChange(nextDraft.title);
     onBodyChange(nextDraft.body);
@@ -137,6 +159,9 @@ export function RootPostTranslationEditor({
 
   const addLanguage = (nextLanguage: string) => {
     setAddLanguageOpen(false);
+    setDraftLanguages((current) =>
+      current.includes(nextLanguage) ? current : [...current, nextLanguage],
+    );
     selectLanguage(nextLanguage);
   };
 
@@ -155,7 +180,10 @@ export function RootPostTranslationEditor({
       <UnitTranslationLanguageBar
         existingLanguages={existingLanguages}
         selectedLanguage={language}
-        defaultLanguage={resolvedDefaultLanguage}
+        defaultLanguage={
+          languageContent?.supportLanguages.find((item) => item.isPrimary)
+            ?.language
+        }
         onSelect={selectLanguage}
         onAddClick={() => setAddLanguageOpen(true)}
         label={t("community:post_languages")}

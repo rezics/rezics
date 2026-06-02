@@ -47,10 +47,7 @@ export const UnitTranslationLanguageBar: React.FC<
   className,
   selectClassName,
 }) => {
-  const visible =
-    selectedLanguage && !existingLanguages.includes(selectedLanguage)
-      ? [...existingLanguages, selectedLanguage]
-      : existingLanguages;
+  const visible = existingLanguages;
   const canAdd =
     hasAvailable ?? ALL_LANGUAGES.some((lang) => !visible.includes(lang));
 
