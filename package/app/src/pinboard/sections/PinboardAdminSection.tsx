@@ -71,7 +71,6 @@ export const PinboardAdminSection: React.FC<PinboardAdminSectionProps> = ({
   isDefaultRealm,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
-  const navigate = useNavigate();
   const availableKeys = useMemo<PinboardListKey[]>(
     () => (isDefaultRealm ? ["announcement", "pinboard"] : ["pinboard"]),
     [isDefaultRealm],
@@ -115,6 +114,7 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
   pinboardKey,
 }) => {
   const { t } = useTranslation(["common", "entity"]);
+  const navigate = useNavigate();
   const { entries, staleIds, isLoading, isError, error, refetch } =
     usePinboardList({
       realmUnitId,
