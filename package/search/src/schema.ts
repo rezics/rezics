@@ -7,6 +7,7 @@ export type ExpectedMeiliIndexUid =
   | "users"
   | "posts"
   | "comments"
+  | "polls"
   | typeof COLLECTION_INDEX_NAME
   | "realms"
   | "entities"
@@ -172,6 +173,26 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     supportsFullSync: true,
     domain: "Comments",
     description: "Reply tree comments partitioned by root unit and realm.",
+  },
+  {
+    uid: "polls",
+    primaryKey: "id",
+    searchableAttributes: ["titles", "descriptions", "optionLabels"],
+    filterableAttributes: [
+      "ownerUserId",
+      "used",
+      "closed",
+      "voteMode",
+      "resultVisibility",
+      "languages",
+      "createdAt",
+      "updatedAt",
+    ],
+    sortableAttributes: ["createdAt", "updatedAt", "usageCount"],
+    facetableSummaryFields: ["used", "closed", "voteMode"],
+    supportsFullSync: true,
+    domain: "Polls",
+    description: "Reusable poll library records.",
   },
   {
     uid: COLLECTION_INDEX_NAME,

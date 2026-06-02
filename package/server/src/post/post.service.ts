@@ -17,6 +17,7 @@ import {
   isLegalStateValue,
   isLegalTransition,
   isStatefulTagSlug,
+  extractPollUnitIdsFromContentDoc,
   mainMarkdownSource,
   normalizeStateSlug,
   OFFICIAL_QUESTION_TAG_SLUG,
@@ -132,8 +133,80 @@ function sanitizePostExtraForCreate(
   if (!extra || typeof extra !== "object" || Array.isArray(extra)) {
     return extra;
   }
-  const { title: _legacyTitle, ...rest } = extra as Record<string, unknown>;
+  const {
+    title: _legacyTitle,
+    poll: _legacyPoll,
+    ...rest
+  } = extra as Record<string, unknown>;
   return rest as Prisma.JsonValue;
+}
+
+type PostPollReferenceTx = Pick<
+  Prisma.TransactionClient,
+  "postPollReference" | "poll"
+>;
+
+async function syncPostPollReferences(
+  tx: PostPollReferenceTx,
+  input: {
+    postUnitId: string;
+    oldContent: unknown;
+    newContent: unknown;
+  },
+) {
+  const oldPollIds = new Set(
+    extractPollUnitIdsFromContentDoc(input.oldContent),
+  );
+  const newPollIds = new Set(
+    extractPollUnitIdsFromContentDoc(input.newContent),
+  );
+  const addedPollIds = [...newPollIds].filter((id) => !oldPollIds.has(id));
+  const removedPollIds = [...oldPollIds].filter((id) => !newPollIds.has(id));
+
+  if (addedPollIds.length > 0) {
+    await tx.postPollReference.createMany({
+      data: addedPollIds.map((pollUnitId) => ({
+        postUnitId: input.postUnitId,
+        pollUnitId,
+      })),
+      skipDuplicates: true,
+    });
+    await tx.poll.updateMany({
+      where: { unitId: { in: addedPollIds } },
+      data: { usageCount: { increment: 1 } },
+    });
+  }
+
+  if (removedPollIds.length > 0) {
+    await tx.postPollReference.deleteMany({
+      where: {
+        postUnitId: input.postUnitId,
+        pollUnitId: { in: removedPollIds },
+      },
+    });
+    await tx.poll.updateMany({
+      where: { unitId: { in: removedPollIds }, usageCount: { gt: 0 } },
+      data: { usageCount: { decrement: 1 } },
+    });
+  }
+}
+
+export function rebuildPollUsageFromPostContents(
+  posts: { unitId: string; content: unknown }[],
+): {
+  references: { postUnitId: string; pollUnitId: string }[];
+  usage: Map<string, number>;
+} {
+  const references: { postUnitId: string; pollUnitId: string }[] = [];
+  const usage = new Map<string, number>();
+  for (const post of posts) {
+    const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
+    for (const pollUnitId of pollUnitIds) {
+      references.push({ postUnitId: post.unitId, pollUnitId });
+      usage.set(pollUnitId, (usage.get(pollUnitId) ?? 0) + 1);
+    }
+  }
+  return { references, usage };
 }
 
 async function upsertPostContentTranslation(
@@ -717,6 +790,11 @@ export class PostService {
         actorUserId: authorUserId,
         status: postContentTranslationStatus(asDraft),
       });
+      await syncPostPollReferences(tx, {
+        postUnitId: created.unitId,
+        oldContent: null,
+        newContent: content,
+      });
 
       if (kind === "WIKI") {
         await writeEditorialMetadataHistory(tx as any, {
@@ -926,62 +1004,61 @@ export class PostService {
         | null;
 
     if (!actor) {
-      const updated =
-        Object.keys(data).length > 0
-          ? await prisma.post.update({
-              where: { unitId },
-              data,
-              include: postInclude,
-            })
-          : await prisma.post.findUniqueOrThrow({
-              where: { unitId },
-              include: postInclude,
-            });
-      if (titleToWrite) {
-        const existing = await prisma.post.findUniqueOrThrow({
-          where: { unitId },
-          select: { unit: { select: { defaultLanguage: true } } },
-        });
-        await prisma.unitTranslation.upsert({
-          where: {
-            unitId_language: {
-              unitId,
-              language:
-                input.language ??
-                existing.unit.defaultLanguage ??
-                DEFAULT_LANGUAGE,
-            },
-          },
-          create: {
-            unitId,
-            language:
-              input.language ??
-              existing.unit.defaultLanguage ??
-              DEFAULT_LANGUAGE,
-            title: titleToWrite,
-          },
-          update: { title: titleToWrite },
-        });
-      }
-      if (input.content !== undefined) {
-        const existing = await prisma.post.findUniqueOrThrow({
+      const updated = await prisma.$transaction(async (tx) => {
+        const existing = await tx.post.findUniqueOrThrow({
           where: { unitId },
           select: {
             authorUserId: true,
-            unit: { select: { defaultLanguage: true, status: true } },
+            unit: {
+              select: {
+                defaultLanguage: true,
+                status: true,
+                contentTranslations: true,
+              },
+            },
           },
         });
-        await upsertPostContentTranslation(prisma, {
-          unitId,
-          language:
-            input.language ?? existing.unit.defaultLanguage ?? DEFAULT_LANGUAGE,
-          content: input.content,
-          actorUserId: existing.authorUserId,
-          status: postContentTranslationStatus(
-            existing.unit.status === UnitStatus.DRAFT,
-          ),
-        });
-      }
+        const language =
+          input.language ?? existing.unit.defaultLanguage ?? DEFAULT_LANGUAGE;
+        const oldContent = (existing.unit.contentTranslations ?? []).find(
+          (translation) => translation.language === language,
+        )?.content;
+        const row =
+          Object.keys(data).length > 0
+            ? await tx.post.update({
+                where: { unitId },
+                data,
+                include: postInclude,
+              })
+            : await tx.post.findUniqueOrThrow({
+                where: { unitId },
+                include: postInclude,
+              });
+        if (titleToWrite) {
+          await upsertPostTitleTranslation(tx, {
+            unitId,
+            language,
+            title: titleToWrite,
+          });
+        }
+        if (input.content !== undefined) {
+          await upsertPostContentTranslation(tx, {
+            unitId,
+            language,
+            content: input.content,
+            actorUserId: existing.authorUserId,
+            status: postContentTranslationStatus(
+              existing.unit.status === UnitStatus.DRAFT,
+            ),
+          });
+          await syncPostPollReferences(tx, {
+            postUnitId: unitId,
+            oldContent,
+            newContent: input.content,
+          });
+        }
+        return row;
+      });
 
       const patchFields: Record<string, any> = {};
       if (input.title !== undefined) patchFields.title = input.title;
@@ -1070,6 +1147,11 @@ export class PostService {
           status: postContentTranslationStatus(
             existing.unit.status === UnitStatus.DRAFT,
           ),
+        });
+        await syncPostPollReferences(tx, {
+          postUnitId: unitId,
+          oldContent: currentContent,
+          newContent: input.content,
         });
       }
 

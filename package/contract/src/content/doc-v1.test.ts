@@ -4,8 +4,11 @@ import {
   type ContentDoc,
   contentDocSchema,
   contentDocMarkdownFallback,
+  extractPollUnitIdsFromContentDoc,
   mainMarkdownSource,
   markdownContentDoc,
+  markdownContentDocWithPoll,
+  pollContentBlock,
 } from "./doc-v1";
 
 const doc = (source = "Hello"): ContentDoc => ({
@@ -55,6 +58,47 @@ describe("contentDocSchema v1", () => {
 describe("content doc v1 helpers", () => {
   test("creates markdown docs with the active v1 version", () => {
     expect(markdownContentDoc("Main text")).toEqual(doc("Main text"));
+  });
+
+  test("creates poll region blocks whose source is the poll unit id", () => {
+    expect(pollContentBlock("poll-unit-1")).toEqual({
+      type: "poll",
+      source: "poll-unit-1",
+    });
+    expect(markdownContentDocWithPoll("Main text", "poll-unit-1")).toEqual({
+      ...doc("Main text"),
+      afterMain: [{ type: "poll", source: "poll-unit-1" }],
+    });
+  });
+
+  test("extracts distinct poll ids from both fixed regions in order", () => {
+    expect(
+      extractPollUnitIdsFromContentDoc({
+        ...doc(),
+        beforeMain: [
+          pollContentBlock("poll-1"),
+          { type: "unit-ref", source: { unitId: "book-1" } },
+          pollContentBlock("poll-2"),
+        ],
+        afterMain: [pollContentBlock("poll-1"), pollContentBlock("poll-3")],
+      }),
+    ).toEqual(["poll-1", "poll-2", "poll-3"]);
+  });
+
+  test("ignores malformed poll blocks and legacy docs without regions", () => {
+    expect(extractPollUnitIdsFromContentDoc(doc())).toEqual([]);
+    expect(
+      extractPollUnitIdsFromContentDoc({
+        ...doc(),
+        beforeMain: [
+          { type: "poll" },
+          { type: "poll", source: "" },
+          { type: "poll", source: 123 },
+          { type: "poll", source: "poll-1", extra: true },
+        ],
+        afterMain: "not-a-region",
+      }),
+    ).toEqual(["poll-1"]);
   });
 
   test("reads main markdown from unknown input", () => {

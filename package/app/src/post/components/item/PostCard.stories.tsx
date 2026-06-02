@@ -1,5 +1,8 @@
 import { pollKeys } from "@rezics/api/poll/poll.keys";
-import type { PollResultsDTO } from "@rezics/contract";
+import {
+  markdownContentDocWithPoll,
+  type PollResultsDTO,
+} from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -24,6 +27,7 @@ const pollResults: PollResultsDTO = {
   resultsVisible: true,
   totalVotes: 12,
   myVote: ["opt-a"],
+  myVoteContexts: [{ optionId: "opt-a", realmUnitId: null }],
   options: [
     {
       pollUnitId: POLL_ID,
@@ -52,7 +56,12 @@ function PostCardWithPoll() {
   }, [qc]);
   if (!ready) return null;
   return (
-    <PostCard post={{ ...postFlat[0], extra: { poll: { unitId: POLL_ID } } }} />
+    <PostCard
+      post={{
+        ...postFlat[0],
+        content: markdownContentDocWithPoll("Poll body", POLL_ID),
+      }}
+    />
   );
 }
 

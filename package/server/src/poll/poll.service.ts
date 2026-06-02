@@ -1,4 +1,5 @@
 import type { CreatePollInput } from "@rezics/contract";
+import { DEFAULT_LANGUAGE } from "@rezics/contract";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { keyAfter } from "@/book/position-index";
 import { isPollClosed } from "./poll.mapper";
@@ -62,6 +63,7 @@ export class PollService {
 
     const voteMode = input.voteMode ?? "SINGLE";
     const closesAt = parseClosesAt(input.closesAt);
+    const language = input.language ?? DEFAULT_LANGUAGE;
 
     let lastPosition: string | null = null;
     const optionData = input.options.map((option) => {
@@ -82,6 +84,19 @@ export class PollService {
           type: UnitType.POLL,
           status: UnitStatus.PUBLISHED,
           publishedAt: new Date(),
+          defaultLanguage: language,
+          supportLanguages: {
+            create: { language, isPrimary: true },
+          },
+        },
+      });
+
+      await tx.unitTranslation.create({
+        data: {
+          unitId: unit.id,
+          language,
+          title: input.title.trim(),
+          summary: input.description?.trim() || null,
         },
       });
 
@@ -164,6 +179,7 @@ export class PollService {
     userId: string,
     pollUnitId: string,
     optionId: string,
+    realmUnitId?: string | null,
   ): Promise<void> {
     await prisma.$transaction(async (tx) => {
       const poll = await tx.poll.findUnique({ where: { unitId: pollUnitId } });
@@ -212,7 +228,13 @@ export class PollService {
           });
         }
         await tx.pollVote.create({
-          data: { pollUnitId, userId, optionId, voteMode: "SINGLE" },
+          data: {
+            pollUnitId,
+            userId,
+            optionId,
+            voteMode: "SINGLE",
+            realmUnitId: realmUnitId ?? null,
+          },
         });
         await tx.pollOption.update({
           where: { pollUnitId_optionId: { pollUnitId, optionId } },
@@ -229,7 +251,13 @@ export class PollService {
       });
       if (existing) return; // already voted for this option
       await tx.pollVote.create({
-        data: { pollUnitId, userId, optionId, voteMode: "MULTI" },
+        data: {
+          pollUnitId,
+          userId,
+          optionId,
+          voteMode: "MULTI",
+          realmUnitId: realmUnitId ?? null,
+        },
       });
       await tx.pollOption.update({
         where: { pollUnitId_optionId: { pollUnitId, optionId } },
@@ -247,6 +275,7 @@ export class PollService {
     userId: string,
     pollUnitId: string,
     optionId?: string,
+    _realmUnitId?: string | null,
   ): Promise<void> {
     await prisma.$transaction(async (tx) => {
       const poll = await tx.poll.findUnique({ where: { unitId: pollUnitId } });
@@ -312,6 +341,7 @@ export class PollService {
   ): Promise<{
     poll: PollWithOptions;
     myVote: string[];
+    myVoteContexts: { optionId: string; realmUnitId: string | null }[];
     resultsVisible: boolean;
   }> {
     const poll = await this.getPoll(pollUnitId);
@@ -323,15 +353,20 @@ export class PollService {
       options?.isPrivileged === true;
 
     let myVote: string[] = [];
+    let myVoteContexts: { optionId: string; realmUnitId: string | null }[] = [];
     if (options?.userId) {
       const votes = await prisma.pollVote.findMany({
         where: { pollUnitId, userId: options.userId },
-        select: { optionId: true },
+        select: { optionId: true, realmUnitId: true },
       });
       myVote = votes.map((v) => v.optionId);
+      myVoteContexts = votes.map((vote) => ({
+        optionId: vote.optionId,
+        realmUnitId: vote.realmUnitId ?? null,
+      }));
     }
 
-    return { poll, myVote, resultsVisible };
+    return { poll, myVote, myVoteContexts, resultsVisible };
   }
 }
 

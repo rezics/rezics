@@ -26,6 +26,7 @@ export class SearchClient {
   readonly userIndex: Index;
   readonly postIndex: Index;
   readonly commentIndex: Index;
+  readonly pollIndex: Index;
   readonly collectionIndex: Index;
   readonly realmIndex: Index;
   readonly entityIndex: Index;
@@ -38,6 +39,7 @@ export class SearchClient {
     this.userIndex = this.meili.index("users");
     this.postIndex = this.meili.index("posts");
     this.commentIndex = this.meili.index("comments");
+    this.pollIndex = this.meili.index("polls");
     this.collectionIndex = this.meili.index(COLLECTION_INDEX_NAME);
     this.realmIndex = this.meili.index("realms");
     this.entityIndex = this.meili.index("entities");
@@ -88,6 +90,8 @@ export class SearchClient {
         return this.postIndex;
       case "comments":
         return this.commentIndex;
+      case "polls":
+        return this.pollIndex;
       case COLLECTION_INDEX_NAME:
         return this.collectionIndex;
       case "realms":
@@ -132,6 +136,10 @@ export class SearchClient {
 
   async initCommentIndex(): Promise<void> {
     await this.initIndexFromSchema(getExpectedMeiliIndexSchema("comments"));
+  }
+
+  async initPollIndex(): Promise<void> {
+    await this.initIndexFromSchema(getExpectedMeiliIndexSchema("polls"));
   }
 
   async initCollectionIndex(): Promise<void> {
@@ -227,6 +235,21 @@ export class SearchClient {
   }
   deleteAllComments() {
     return this.commentIndex.deleteAllDocuments();
+  }
+
+  // ANCHOR: Poll document operations
+
+  addOrUpdatePolls(docs: any[]) {
+    return this.pollIndex.addDocuments(docs);
+  }
+  patchPolls(docs: any[]) {
+    return this.pollIndex.updateDocuments(docs);
+  }
+  deletePolls(ids: string[]) {
+    return this.pollIndex.deleteDocuments(ids);
+  }
+  deleteAllPolls() {
+    return this.pollIndex.deleteAllDocuments();
   }
 
   // ANCHOR: User collection document operations

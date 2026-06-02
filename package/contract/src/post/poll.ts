@@ -49,12 +49,17 @@ export type PollOptionDTO = (typeof pollOptionDTOSchema)["static"];
 
 export const pollDTOSchema = t.Object({
   unitId: t.String(),
+  title: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(t.String())),
   voteMode: pollVoteModeSchema,
   resultVisibility: pollResultVisibilitySchema,
   anonymous: t.Boolean(),
   closesAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   /** Derived: the poll is past `closesAt`. */
   closed: t.Boolean(),
+  usageCount: t.Number(),
+  /** Derived from `usageCount > 0`. */
+  used: t.Boolean(),
   options: t.Array(pollOptionDTOSchema),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -81,6 +86,9 @@ export const createPollOptionSchema = t.Object({
 export type CreatePollOptionInput = (typeof createPollOptionSchema)["static"];
 
 export const createPollSchema = t.Object({
+  title: t.String({ minLength: 1, maxLength: 200 }),
+  description: t.Optional(t.String({ maxLength: 5000 })),
+  language: t.Optional(t.String()),
   voteMode: t.Optional(pollVoteModeSchema),
   resultVisibility: t.Optional(pollResultVisibilitySchema),
   anonymous: t.Optional(t.Boolean()),
@@ -100,6 +108,7 @@ export type CreatePollInput = (typeof createPollSchema)["static"];
  */
 export const castPollVoteSchema = t.Object({
   optionId: t.String(),
+  realmUnitId: t.Optional(t.String()),
 });
 
 export type CastPollVoteInput = (typeof castPollVoteSchema)["static"];
@@ -110,6 +119,7 @@ export type CastPollVoteInput = (typeof castPollVoteSchema)["static"];
  */
 export const withdrawPollVoteSchema = t.Object({
   optionId: t.Optional(t.String()),
+  realmUnitId: t.Optional(t.String()),
 });
 
 export type WithdrawPollVoteInput = (typeof withdrawPollVoteSchema)["static"];
@@ -119,6 +129,14 @@ export const pollPathParamsSchema = t.Object({
 });
 
 export type PollPathParams = (typeof pollPathParamsSchema)["static"];
+
+export const pollCallerVoteContextDTOSchema = t.Object({
+  optionId: t.String(),
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+});
+
+export type PollCallerVoteContextDTO =
+  (typeof pollCallerVoteContextDTOSchema)["static"];
 
 // ============================================================
 // POLL RESULTS (tallies — conditional on resultVisibility + anonymity)
@@ -144,6 +162,8 @@ export const pollResultsDTOSchema = t.Object({
   totalVotes: t.Optional(t.Number()),
   /** The option ids the calling user has voted for — always included. */
   myVote: t.Array(t.String()),
+  /** Caller vote rows with optional realm context metadata, always included. */
+  myVoteContexts: t.Array(pollCallerVoteContextDTOSchema),
 });
 
 export type PollResultsDTO = (typeof pollResultsDTOSchema)["static"];

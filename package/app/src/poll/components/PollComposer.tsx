@@ -11,6 +11,7 @@ import {
   Checkbox,
   Input,
   Label,
+  Textarea,
   ToggleGroup,
   ToggleGroupItem,
 } from "@rezics/ui/shadcn";
@@ -49,8 +50,12 @@ export const PollComposer: React.FC<PollComposerProps> = ({
   const createPoll = useCreatePollMutation();
   const anonymousId = useId();
   const closesAtId = useId();
+  const titleId = useId();
+  const descriptionId = useId();
   const keyRef = useRef(2);
 
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [options, setOptions] = useState<DraftOption[]>([
     { key: 0, kind: "text", label: "" },
     { key: 1, kind: "text", label: "" },
@@ -102,11 +107,16 @@ export const PollComposer: React.FC<PollComposerProps> = ({
   const validOptions = options.filter((option) =>
     option.kind === "unit" ? true : option.label.trim().length > 0,
   );
-  const canSubmit = validOptions.length >= 2 && !createPoll.isPending;
+  const canSubmit =
+    title.trim().length > 0 &&
+    validOptions.length >= 2 &&
+    !createPoll.isPending;
 
   const handleSubmit = () => {
     if (!canSubmit) return;
     const input: CreatePollInput = {
+      title: title.trim(),
+      ...(description.trim() ? { description: description.trim() } : {}),
       voteMode,
       resultVisibility,
       anonymous,
@@ -130,6 +140,32 @@ export const PollComposer: React.FC<PollComposerProps> = ({
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor={titleId}>
+            {t("community:poll_composer_title_field")}
+          </Label>
+          <Input
+            id={titleId}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder={t("community:poll_composer_title_placeholder")}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor={descriptionId}>
+            {t("community:poll_composer_description")}
+          </Label>
+          <Textarea
+            id={descriptionId}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder={t("community:poll_composer_description_placeholder")}
+            rows={3}
+          />
+        </div>
+      </div>
+
       <div className="flex flex-col gap-3">
         {options.map((option, index) => (
           <div key={option.key} className="flex items-center gap-2">

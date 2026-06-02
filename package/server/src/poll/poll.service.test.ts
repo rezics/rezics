@@ -50,12 +50,16 @@ describe("PollService.createPoll — option validation (5.3)", () => {
   test("creates poll + options when each option is valid (xor holds)", async () => {
     const createPoll = mock(async (_args?: any) => ({}));
     prismaMock.unit = { create: mock(async () => ({ id: "poll-1" })) };
+    prismaMock.unitTranslation = {
+      create: mock(async (args: any) => args.data),
+    };
     prismaMock.poll = {
       create: createPoll,
       findUniqueOrThrow: mock(async () => ({ unitId: "poll-1", options: [] })),
     };
 
     await service.createPoll("user-1", {
+      title: "Poll title",
       options: [{ label: "A" }, { unitId: "unit-x" }],
     } as any);
 
@@ -325,6 +329,7 @@ describe("poll.mapper — anonymity (5.5)", () => {
   test("exposes aggregate tallies and the caller's own vote, never a voter mapping", () => {
     const dto = mapPollResultsToDTO(poll as any, {
       myVote: ["B"],
+      myVoteContexts: [{ optionId: "B", realmUnitId: null }],
       resultsVisible: true,
     });
 
@@ -340,6 +345,7 @@ describe("poll.mapper — anonymity (5.5)", () => {
   test("withholds option tallies and totalVotes when results are not visible", () => {
     const dto = mapPollResultsToDTO(poll as any, {
       myVote: ["B"],
+      myVoteContexts: [{ optionId: "B", realmUnitId: null }],
       resultsVisible: false,
     });
     expect(dto.totalVotes).toBeUndefined();

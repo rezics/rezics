@@ -121,6 +121,9 @@ const unitTranslationFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationUpsertMock = mock(async (args: any) => args.create);
 const contentTranslationUpsertMock = mock(async (args: any) => args.create);
 const contentTranslationUpdateManyMock = mock(async () => ({ count: 1 }));
+const postPollReferenceCreateManyMock = mock(async () => ({ count: 0 }));
+const postPollReferenceDeleteManyMock = mock(async () => ({ count: 0 }));
+const pollUpdateManyMock = mock(async () => ({ count: 0 }));
 const bookFindUniqueMock = mock(async (): Promise<any> => null);
 const entityFindUniqueMock = mock(async (): Promise<any> => null);
 const creditAttributionFindManyMock = mock(async (): Promise<any[]> => []);
@@ -192,6 +195,11 @@ const transactionMock = mock(async (fn: any) =>
       upsert: contentTranslationUpsertMock,
       updateMany: contentTranslationUpdateManyMock,
     },
+    postPollReference: {
+      createMany: postPollReferenceCreateManyMock,
+      deleteMany: postPollReferenceDeleteManyMock,
+    },
+    poll: { updateMany: pollUpdateManyMock },
     book: { findUnique: bookFindUniqueMock },
     entity: { findUnique: entityFindUniqueMock },
     creditAttribution: { findMany: creditAttributionFindManyMock },
@@ -215,6 +223,11 @@ Object.assign(prismaMock, {
     findFirst: unitFindFirstMock,
     findUniqueOrThrow: unitFindUniqueOrThrowMock,
   },
+  postPollReference: {
+    createMany: postPollReferenceCreateManyMock,
+    deleteMany: postPollReferenceDeleteManyMock,
+  },
+  poll: { updateMany: pollUpdateManyMock },
   post: {
     create: postCreateMock,
     update: postUpdateMock,
@@ -340,7 +353,9 @@ mock.module("@/utils/sanitizeUser", () => ({
   publicUserSelect: {},
 }));
 
-const { PostService } = await import("./post.service");
+const { PostService, rebuildPollUsageFromPostContents } = await import(
+  "./post.service"
+);
 
 const content = (source: string) => markdownContentDoc(source);
 const postInput = (overrides: Record<string, unknown> = {}) => ({
@@ -428,6 +443,9 @@ function resetMocks() {
   unitTranslationUpsertMock.mockClear();
   contentTranslationUpsertMock.mockClear();
   contentTranslationUpdateManyMock.mockClear();
+  postPollReferenceCreateManyMock.mockClear();
+  postPollReferenceDeleteManyMock.mockClear();
+  pollUpdateManyMock.mockClear();
   bookFindUniqueMock.mockClear();
   entityFindUniqueMock.mockClear();
   creditAttributionFindManyMock.mockClear();
@@ -1147,7 +1165,7 @@ describe("PostService.create targetUnitId derivation", () => {
       supportLanguages: { create: { language: "en", isPrimary: true } },
     });
     expect(createDataArg().content).toBeUndefined();
-    expect(createDataArg().extra).toEqual({ poll: { unitId: "poll-1" } });
+    expect(createDataArg().extra).toEqual({});
     expect(unitTranslationUpsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { unitId_language: { unitId: "post-1", language: "en" } },
@@ -1170,6 +1188,51 @@ describe("PostService.create targetUnitId derivation", () => {
         }),
       }),
     );
+  });
+
+  test("root post create maintains distinct poll references from content blocks", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "user-1",
+      content: content("body"),
+      kind: "POST",
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        inRealms: [],
+        realmModerationTargets: [],
+      },
+    });
+
+    await service.create(
+      {
+        kind: "POST",
+        language: "en",
+        title: "Thread title",
+        content: {
+          ...content("body"),
+          beforeMain: [{ type: "poll", source: "poll-1" }],
+          afterMain: [
+            { type: "poll", source: "poll-1" },
+            { type: "poll", source: "poll-2" },
+          ],
+        },
+      },
+      "user-1",
+    );
+
+    expect(postPollReferenceCreateManyMock).toHaveBeenCalledWith({
+      data: [
+        { postUnitId: "post-1", pollUnitId: "poll-1" },
+        { postUnitId: "post-1", pollUnitId: "poll-2" },
+      ],
+      skipDuplicates: true,
+    });
+    expect(pollUpdateManyMock).toHaveBeenCalledWith({
+      where: { unitId: { in: ["poll-1", "poll-2"] } },
+      data: { usageCount: { increment: 1 } },
+    });
   });
 
   test("CHAPTER kind validates the target is a BOOK", async () => {
@@ -1200,7 +1263,11 @@ describe("PostService.update immutability", () => {
     Object.assign(prismaMock.post, { update: directPostUpdateMock });
     postFindUniqueOrThrowMock.mockResolvedValueOnce({
       authorUserId: "author-1",
-      unit: { defaultLanguage: "en", status: "PUBLISHED" },
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        contentTranslations: [],
+      },
     });
 
     await service.update("post-1", {
@@ -1208,8 +1275,8 @@ describe("PostService.update immutability", () => {
       isLocked: true,
     });
 
-    expect(directPostUpdateMock).toHaveBeenCalledTimes(1);
-    const args = (directPostUpdateMock.mock.calls as any[])[0]?.[0];
+    expect(postUpdateMock).toHaveBeenCalledTimes(1);
+    const args = (postUpdateMock.mock.calls as any[])[0]?.[0];
     expect(args.where).toEqual({ unitId: "post-1" });
     expect(args.data).toEqual({ isLocked: true });
     expect(args.data.content).toBeUndefined();
@@ -1237,9 +1304,15 @@ describe("PostService.update immutability", () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
     Object.assign(prismaMock.post, { update: directPostUpdateMock });
-    postFindUniqueOrThrowMock
-      .mockResolvedValueOnce({ unitId: "post-1" })
-      .mockResolvedValueOnce({ unit: { defaultLanguage: "en" } });
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "author-1",
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        contentTranslations: [],
+      },
+    });
 
     await service.update("post-1", {
       title: "Updated title",
@@ -1260,6 +1333,92 @@ describe("PostService.update immutability", () => {
     );
 
     Object.assign(prismaMock.post, { update: postUpdateMock });
+  });
+
+  test("content update applies poll reference set diffs", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      authorUserId: "author-1",
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        contentTranslations: [
+          {
+            language: "en",
+            content: {
+              ...content("old"),
+              afterMain: [
+                { type: "poll", source: "poll-keep" },
+                { type: "poll", source: "poll-remove" },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    await service.update("post-1", {
+      content: {
+        ...content("new"),
+        beforeMain: [{ type: "poll", source: "poll-keep" }],
+        afterMain: [
+          { type: "poll", source: "poll-add" },
+          { type: "poll", source: "poll-add" },
+        ],
+      },
+    });
+
+    expect(postPollReferenceCreateManyMock).toHaveBeenCalledWith({
+      data: [{ postUnitId: "post-1", pollUnitId: "poll-add" }],
+      skipDuplicates: true,
+    });
+    expect(postPollReferenceDeleteManyMock).toHaveBeenCalledWith({
+      where: {
+        postUnitId: "post-1",
+        pollUnitId: { in: ["poll-remove"] },
+      },
+    });
+    expect(pollUpdateManyMock).toHaveBeenCalledWith({
+      where: { unitId: { in: ["poll-add"] } },
+      data: { usageCount: { increment: 1 } },
+    });
+    expect(pollUpdateManyMock).toHaveBeenCalledWith({
+      where: { unitId: { in: ["poll-remove"] }, usageCount: { gt: 0 } },
+      data: { usageCount: { decrement: 1 } },
+    });
+  });
+
+  test("repair helper rebuilds distinct poll usage from post content", () => {
+    const rebuilt = rebuildPollUsageFromPostContents([
+      {
+        unitId: "post-1",
+        content: {
+          ...content("one"),
+          afterMain: [
+            { type: "poll", source: "poll-1" },
+            { type: "poll", source: "poll-1" },
+            { type: "poll", source: "poll-2" },
+          ],
+        },
+      },
+      {
+        unitId: "post-2",
+        content: {
+          ...content("two"),
+          beforeMain: [{ type: "poll", source: "poll-1" }],
+        },
+      },
+    ]);
+
+    expect(rebuilt.references).toEqual([
+      { postUnitId: "post-1", pollUnitId: "poll-1" },
+      { postUnitId: "post-1", pollUnitId: "poll-2" },
+      { postUnitId: "post-2", pollUnitId: "poll-1" },
+    ]);
+    expect(Object.fromEntries(rebuilt.usage)).toEqual({
+      "poll-1": 2,
+      "poll-2": 1,
+    });
   });
 });
 

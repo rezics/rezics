@@ -64,4 +64,18 @@ describe("expected Meilisearch index settings", () => {
     expect(collection.filterableAttributes).not.toContain("titles");
     expect(collection.filterableAttributes).not.toContain("tagUnitIds");
   });
+
+  test("poll index supports library usage and lifecycle filters", () => {
+    const polls = getExpectedMeiliIndexSchema("polls");
+
+    expect(polls.searchableAttributes).toEqual(
+      expect.arrayContaining(["titles", "descriptions", "optionLabels"]),
+    );
+    expect(polls.filterableAttributes).toEqual(
+      expect.arrayContaining(["ownerUserId", "used", "closed", "languages"]),
+    );
+    expect(polls.sortableAttributes).toEqual(
+      expect.arrayContaining(["usageCount", "createdAt", "updatedAt"]),
+    );
+  });
 });

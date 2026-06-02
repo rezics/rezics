@@ -94,6 +94,41 @@ export function markdownContentDoc(source: string): ContentDoc {
   };
 }
 
+export function pollContentBlock(pollUnitId: string): PollContentBlock {
+  return { type: "poll", source: pollUnitId };
+}
+
+export function markdownContentDocWithPoll(
+  source: string,
+  pollUnitId: string,
+  region: "beforeMain" | "afterMain" = "afterMain",
+): ContentDoc {
+  return {
+    ...markdownContentDoc(source),
+    [region]: [pollContentBlock(pollUnitId)],
+  };
+}
+
+export function extractPollUnitIdsFromContentDoc(value: unknown): string[] {
+  if (!isRecord(value)) return [];
+  const ids = new Set<string>();
+  for (const regionName of ["beforeMain", "afterMain"] as const) {
+    const region = value[regionName];
+    if (!Array.isArray(region)) continue;
+    for (const block of region) {
+      if (
+        isRecord(block) &&
+        block.type === "poll" &&
+        typeof block.source === "string" &&
+        block.source.length > 0
+      ) {
+        ids.add(block.source);
+      }
+    }
+  }
+  return [...ids];
+}
+
 export function contentDocMarkdownFallback(value: unknown): string {
   if (typeof value === "string") return value;
   const mainSource = mainMarkdownSource(value);

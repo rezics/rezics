@@ -1,4 +1,8 @@
-import type { PostDTO, VariantContextSummary } from "@rezics/contract";
+import {
+  extractPollUnitIdsFromContentDoc,
+  type PostDTO,
+  type VariantContextSummary,
+} from "@rezics/contract";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
@@ -32,6 +36,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   const navigate = useNavigate();
   const rootPostUnitId = post.unitId;
   const resolvedVariantContext = variantContext ?? post.variantContext;
+  const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
 
   const handleCardClick = () => {
     if (onOpen) {
@@ -96,9 +101,9 @@ export const PostCard: React.FC<PostCardProps> = ({
             <VariantContextLink context={resolvedVariantContext} />
           </div>
         )}
-        {post.extra?.poll?.unitId && (
-          <PollEmbed pollUnitId={post.extra.poll.unitId} />
-        )}
+        {pollUnitIds.map((pollUnitId) => (
+          <PollEmbed key={pollUnitId} pollUnitId={pollUnitId} />
+        ))}
         <ReactionBar
           size="md"
           variant="pill"

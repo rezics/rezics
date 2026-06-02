@@ -1,5 +1,9 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
-import type { PollDTO, PostDTO } from "@rezics/contract";
+import {
+  markdownContentDocWithPoll,
+  type PollDTO,
+  type PostDTO,
+} from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -56,19 +60,26 @@ export function RealmPostCreateForm({
     const trimmedTitle = title.trim();
     if (!trimmedTitle || !trimmed) return;
     createMutation.mutate(
-      {
-        ...buildRealmPostCreateInput({
-          realmId,
-          title: trimmedTitle,
-          content: trimmed,
-          language: locale,
-          tagIds: selectedTagIds,
-          status,
-        }),
-        ...(attachedPoll
-          ? { extra: { poll: { unitId: attachedPoll.unitId } } }
-          : {}),
-      },
+      attachedPoll
+        ? {
+            ...buildRealmPostCreateInput({
+              realmId,
+              title: trimmedTitle,
+              content: trimmed,
+              language: locale,
+              tagIds: selectedTagIds,
+              status,
+            }),
+            content: markdownContentDocWithPoll(trimmed, attachedPoll.unitId),
+          }
+        : buildRealmPostCreateInput({
+            realmId,
+            title: trimmedTitle,
+            content: trimmed,
+            language: locale,
+            tagIds: selectedTagIds,
+            status,
+          }),
       {
         onSuccess: (post) => {
           onCreated?.(post);

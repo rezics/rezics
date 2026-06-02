@@ -692,6 +692,22 @@ model Post {
   @@index([variantUnitId])
 }
 
+/// Weak reference table rebuilt from post ContentDoc poll blocks. It is a
+/// maintenance aid for usage/search, not the render source of truth: renderers
+/// read ordered poll blocks from ContentDoc, while this table deliberately
+/// stores only distinct post↔poll membership.
+model PostPollReference {
+  postUnitId String @db.Uuid
+  pollUnitId String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([postUnitId, pollUnitId])
+  @@index([postUnitId])
+  @@index([pollUnitId])
+}
+
 /**
  * ANCHOR COMMENT EXTENSION
  *
@@ -1153,6 +1169,7 @@ model Poll {
   /// When the poll stops accepting votes and (for AFTER_CLOSE) reveals tallies.
   /// Null means open indefinitely until explicitly closed.
   closesAt         DateTime?
+  usageCount       Int                  @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1193,18 +1210,25 @@ model PollOption {
 /// `voteMode` is denormalized from `Poll.voteMode` so that partial index can
 /// gate on it.
 model PollVote {
-  pollUnitId String       @db.Uuid
-  userId     String       @db.Uuid
-  optionId   String       @db.Uuid
-  voteMode   PollVoteMode
+  id          String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  pollUnitId  String       @db.Uuid
+  userId      String       @db.Uuid
+  optionId    String       @db.Uuid
+  voteMode    PollVoteMode
+  /// Optional voting context for statistics/future realm-aware voting. It is
+  /// metadata, not poll ownership; the current unique constraints still make a
+  /// user's vote globally unique for a poll/option.
+  realmUnitId String?      @db.Uuid
 
   createdAt DateTime @default(now())
 
   poll   Poll       @relation("PollVotes", fields: [pollUnitId], references: [unitId], onDelete: Cascade)
   option PollOption @relation("PollOptionVotes", fields: [pollUnitId, optionId], references: [pollUnitId, optionId], onDelete: Cascade)
 
-  @@id([pollUnitId, userId, optionId])
+  @@unique([pollUnitId, userId, optionId])
+  @@index([pollUnitId, userId])
   @@index([pollUnitId, optionId])
+  @@index([pollUnitId, realmUnitId, optionId])
   @@index([userId])
 }
 

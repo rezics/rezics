@@ -191,20 +191,27 @@ describe("post work-domain contract fields", () => {
   });
 });
 
-describe("postExtraSchema poll reference", () => {
-  test("post round-trips extra.poll.unitId", () => {
+describe("post poll content blocks", () => {
+  test("post round-trips poll content blocks", () => {
     const post = {
       unitId: "post-1",
       authorUserId: "user-1",
-      content: null,
-      extra: { poll: { unitId: "poll-unit-1" } },
+      content: {
+        schema: "rezics.content",
+        version: 1,
+        main: { type: "markdown", source: "body" },
+        afterMain: [{ type: "poll", source: "poll-unit-1" }],
+      },
     };
     expect(Value.Check(postDTOSchema, post)).toBe(true);
     const decoded = Value.Decode(
       postDTOSchema,
       Value.Clean(postDTOSchema, post),
     );
-    expect(decoded.extra?.poll?.unitId).toBe("poll-unit-1");
+    expect(decoded.content?.afterMain?.[0]).toEqual({
+      type: "poll",
+      source: "poll-unit-1",
+    });
   });
 
   test("extra without a poll field still validates", () => {
@@ -217,13 +224,13 @@ describe("postExtraSchema poll reference", () => {
     expect(Value.Check(postDTOSchema, post)).toBe(true);
   });
 
-  test("poll reference missing unitId fails", () => {
+  test("extra no longer validates poll references", () => {
     const post = {
       unitId: "post-1",
       authorUserId: "user-1",
       content: null,
       extra: { poll: {} },
     };
-    expect(Value.Check(postDTOSchema, post)).toBe(false);
+    expect(Value.Clean(postDTOSchema, post).extra).toEqual({});
   });
 });

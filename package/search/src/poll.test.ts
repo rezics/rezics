@@ -1,0 +1,44 @@
+import { describe, expect, test } from "bun:test";
+import { buildPollDocument } from "./sync";
+
+describe("buildPollDocument", () => {
+  test("projects title, options, config, usage count, and derived used", () => {
+    const doc = buildPollDocument({
+      unitId: "poll-1",
+      voteMode: "SINGLE",
+      resultVisibility: "LIVE",
+      anonymous: false,
+      closesAt: new Date("2026-06-01T00:00:00.000Z"),
+      usageCount: 2,
+      createdAt: new Date("2026-05-31T00:00:00.000Z"),
+      updatedAt: new Date("2026-06-01T00:00:00.000Z"),
+      unit: {
+        userId: "user-1",
+        translations: [
+          {
+            language: "en",
+            title: "Reading poll",
+            summary: "Pick a weekend book",
+          },
+        ],
+      },
+      options: [
+        { label: "Novel", unitId: null },
+        { label: null, unitId: "book-1" },
+      ],
+    });
+
+    expect(doc).toMatchObject({
+      id: "poll-1",
+      ownerUserId: "user-1",
+      titles: ["Reading poll"],
+      descriptions: ["Pick a weekend book"],
+      optionLabels: ["Novel"],
+      optionUnitIds: ["book-1"],
+      usageCount: 2,
+      used: true,
+      languages: ["en"],
+    });
+    expect(doc.closed).toBe(true);
+  });
+});

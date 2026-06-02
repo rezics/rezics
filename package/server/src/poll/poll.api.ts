@@ -41,11 +41,16 @@ async function readResults(
     !!identity &&
     (isAdminRole(identity as any) || identity.userId === ownerUserId);
 
-  const { myVote, resultsVisible } = await pollService.getResults(pollUnitId, {
-    userId: identity?.userId,
-    isPrivileged,
+  const { myVote, myVoteContexts, resultsVisible } =
+    await pollService.getResults(pollUnitId, {
+      userId: identity?.userId,
+      isPrivileged,
+    });
+  return mapPollResultsToDTO(poll, {
+    myVote,
+    myVoteContexts,
+    resultsVisible,
   });
-  return mapPollResultsToDTO(poll, { myVote, resultsVisible });
 }
 
 export const pollApi = new Elysia({ prefix: "/poll" })
@@ -108,6 +113,7 @@ export const pollApi = new Elysia({ prefix: "/poll" })
           identity.userId,
           params.pollUnitId,
           body.optionId,
+          body.realmUnitId,
         );
         return await readResults(params.pollUnitId, identity);
       } catch (error) {
@@ -134,6 +140,7 @@ export const pollApi = new Elysia({ prefix: "/poll" })
           identity.userId,
           params.pollUnitId,
           query.optionId,
+          query.realmUnitId,
         );
         return await readResults(params.pollUnitId, identity);
       } catch (error) {

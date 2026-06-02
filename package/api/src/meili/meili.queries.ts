@@ -8,6 +8,7 @@ import type {
   ContentSearchResult,
   FeedbackListResponse,
   FeedbackType,
+  PollSearchOptions,
   PostSearchOptions,
   RealmSearchOptions,
   UserListQuery,
@@ -21,6 +22,7 @@ import {
   meiliContentApi,
   meiliCommentApi,
   meiliFeedbackApi,
+  meiliPollApi,
   meiliPostApi,
   meiliRealmApi,
   meiliUserApi,
@@ -110,6 +112,19 @@ export const postSearchQueryOptions = (opts: PostSearchOptions) =>
 
 export function usePostSearchQuery(opts: PostSearchOptions) {
   return useQuery(postSearchQueryOptions(opts));
+}
+
+// ANCHOR: Poll search
+
+export const pollSearchQueryOptions = (opts: PollSearchOptions) =>
+  queryOptions({
+    queryKey: ["meili", "polls", opts],
+    queryFn: () => meiliPollApi.pollSearch(opts),
+    staleTime: 1000 * 60 * 2,
+  });
+
+export function usePollSearchQuery(opts: PollSearchOptions) {
+  return useQuery(pollSearchQueryOptions(opts));
 }
 
 export function usePostSearchInfiniteQuery(

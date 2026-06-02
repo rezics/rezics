@@ -11,6 +11,8 @@ import type {
   ContentSearchResult,
   FeedbackListQuery,
   FeedbackSearchResult,
+  PollSearchOptions,
+  PollSearchResult,
   PostSearchOptions,
   PostSearchResult,
   RealmSearchOptions,
@@ -52,6 +54,17 @@ export const meiliFeedbackApi = {
 export const meiliPostApi = {
   postSearch: async (opts: PostSearchOptions): Promise<PostSearchResult> => {
     return apiFetch<PostSearchResult>(`/meili/posts/search`, {
+      method: "POST",
+      body: JSON.stringify(opts),
+    });
+  },
+};
+
+// ANCHOR: Poll search
+
+export const meiliPollApi = {
+  pollSearch: async (opts: PollSearchOptions): Promise<PollSearchResult> => {
+    return apiFetch<PollSearchResult>(`/meili/polls/search`, {
       method: "POST",
       body: JSON.stringify(opts),
     });

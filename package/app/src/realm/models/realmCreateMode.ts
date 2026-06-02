@@ -3,7 +3,11 @@ import type {
   Language,
   SubmitPostToRealmInput,
 } from "@rezics/contract";
-import { markdownContentDoc, PostKind } from "@rezics/contract";
+import {
+  markdownContentDoc,
+  markdownContentDocWithPoll,
+  PostKind,
+} from "@rezics/contract";
 
 export const realmCreateModes = ["post", "wiki", "poll", "existing"] as const;
 
@@ -79,7 +83,7 @@ export function buildRealmPollPostCreateInput(input: {
 }): CreatePostInput {
   return {
     ...buildRealmPostCreateInput(input),
-    extra: { poll: { unitId: input.pollUnitId } },
+    content: markdownContentDocWithPoll(input.content.trim(), input.pollUnitId),
   };
 }
 

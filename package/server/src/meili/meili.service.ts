@@ -7,6 +7,8 @@ import type {
   EntitySearchResult,
   FeedbackListQuery,
   FeedbackSearchResult,
+  PollSearchOptions,
+  PollSearchResult,
   PostSearchOptions,
   PostSearchResult,
   RealmSearchOptions,
@@ -19,6 +21,7 @@ import {
   syncAllEntities,
   syncAllFeedbacks,
   syncAllPosts,
+  syncAllPolls,
   syncAllComments,
   syncAllRealms,
   syncAllUsers,
@@ -28,6 +31,7 @@ import { searchContent } from "./content/content.service";
 import { searchComments } from "./comment/comment.service";
 import { searchEntities } from "./entity/entity.service";
 import { searchFeedbacks } from "./feedback/feedback.api";
+import { searchPolls } from "./poll/poll.service";
 import { searchPosts } from "./post/post.service";
 import { searchRealms } from "./realm/realm.service";
 import { searchClient } from "./search-client";
@@ -52,6 +56,10 @@ export class MeiliService {
 
   async searchPosts(options: PostSearchOptions): Promise<PostSearchResult> {
     return searchPosts(options);
+  }
+
+  async searchPolls(options: PollSearchOptions): Promise<PollSearchResult> {
+    return searchPolls(options);
   }
 
   async searchComments(
@@ -90,6 +98,10 @@ export class MeiliService {
     await searchClient.initCommentIndex();
   }
 
+  async initPollsIndex(): Promise<void> {
+    await searchClient.initPollIndex();
+  }
+
   async initRealmsIndex(): Promise<void> {
     await searchClient.initRealmIndex();
   }
@@ -122,6 +134,10 @@ export class MeiliService {
     return syncAllPosts(searchClient);
   }
 
+  async syncAllPolls(): Promise<unknown> {
+    return syncAllPolls(searchClient);
+  }
+
   async syncAllComments(): Promise<unknown> {
     return syncAllComments(searchClient);
   }
@@ -144,6 +160,10 @@ export class MeiliService {
 
   async deleteAllPosts() {
     return searchClient.deleteAllPosts();
+  }
+
+  async deleteAllPolls() {
+    return searchClient.deleteAllPolls();
   }
 
   async deleteAllRealms() {

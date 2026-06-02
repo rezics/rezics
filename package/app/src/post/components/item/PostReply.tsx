@@ -1,4 +1,8 @@
-import type { CommentDTO, PostDTO } from "@rezics/contract";
+import {
+  extractPollUnitIdsFromContentDoc,
+  type CommentDTO,
+  type PostDTO,
+} from "@rezics/contract";
 import type React from "react";
 import { ReactionBar } from "@/engagement";
 import { PollEmbed } from "@/poll";
@@ -31,6 +35,7 @@ export const PostReply: React.FC<PostReplyProps> = ({
   reactionScopeKey,
 }) => {
   const contentIndentClass = showAvatar ? "pl-10" : "";
+  const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
 
   return (
     <div className="flex min-w-0 flex-col gap-1 py-1">
@@ -42,9 +47,9 @@ export const PostReply: React.FC<PostReplyProps> = ({
           clamp={{ maxLines: 4 }}
           className="text-sm"
         />
-        {"extra" in post && post.extra?.poll?.unitId && (
-          <PollEmbed pollUnitId={post.extra.poll.unitId} />
-        )}
+        {pollUnitIds.map((pollUnitId) => (
+          <PollEmbed key={pollUnitId} pollUnitId={pollUnitId} />
+        ))}
         <ReactionBar
           size="sm"
           post={post}

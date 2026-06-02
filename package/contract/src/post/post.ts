@@ -100,12 +100,6 @@ export const postExtraSchema = t.Object({
   ),
   source: t.Optional(excerptSourceSchema),
   /**
-   * Optional reference to an embedded `Unit(type=POLL)`. Additive and optional:
-   * posts that do not embed a poll omit it. The post write/read paths persist
-   * and return `extra` as-is, so no server change is required.
-   */
-  poll: t.Optional(t.Object({ unitId: t.String() })),
-  /**
    * Slug of the tag whose schema governs `Post.state`, snapshotted at creation.
    * It does NOT drift when tags are later added/removed, so the governing
    * vocabulary stays stable (see `post-state-schema.ts`). Present only on posts

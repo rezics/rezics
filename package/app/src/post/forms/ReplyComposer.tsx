@@ -2,6 +2,7 @@ import { useCreateCommentMutation } from "@rezics/api/comment/comment";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import {
   markdownContentDoc,
+  markdownContentDocWithPoll,
   type CommentDTO,
   type PollDTO,
   type PostDTO,
@@ -129,12 +130,9 @@ export const ReplyComposer = forwardRef<
     body.trim().split(/\r?\n/, 1)[0]?.slice(0, 120) || "Post";
 
   const submitReply = useCallback(
-    (
-      content: ReturnType<typeof markdownContentDoc>,
-      options?: { pollUnitId?: string },
-    ) => {
+    (content: ReturnType<typeof markdownContentDoc>) => {
       if (parentCommentUnitId) {
-        if (!rootUnitId || !realmUnitId || options?.pollUnitId) return;
+        if (!rootUnitId || !realmUnitId) return;
         commentMutation.mutate(
           {
             rootUnitId,
@@ -165,9 +163,6 @@ export const ReplyComposer = forwardRef<
           language: locale,
           title: derivedTitle,
           content,
-          ...(options?.pollUnitId
-            ? { extra: { poll: { unitId: options.pollUnitId } } }
-            : {}),
         },
         {
           onSuccess: (post) => {
@@ -243,7 +238,7 @@ export const ReplyComposer = forwardRef<
 
   /**
    * Attach-poll sequence: `PollComposer` has already minted the poll
-   * (`useCreatePoll`); now create the post carrying `extra.poll.unitId`. This is
+   * (`useCreatePoll`); now create the post with a poll content block. This is
    * deliberately non-atomic — an orphan poll on post failure is acceptable: the
    * failure surfaces (the poll error inside `PollComposer`, the post error
    * below) and the minted poll stays reusable as a standalone unit.
@@ -260,8 +255,7 @@ export const ReplyComposer = forwardRef<
           kind: PostKind.POST,
           language: locale,
           title: derivedTitle,
-          content: markdownContentDoc(trimmed),
-          extra: { poll: { unitId: poll.unitId } },
+          content: markdownContentDocWithPoll(trimmed, poll.unitId),
         },
         {
           onSuccess: (post) => {
@@ -273,7 +267,7 @@ export const ReplyComposer = forwardRef<
       return;
     }
 
-    submitReply(markdownContentDoc(trimmed), { pollUnitId: poll.unitId });
+    submitReply(markdownContentDocWithPoll(trimmed, poll.unitId));
   };
 
   const handleSubmit = () => {

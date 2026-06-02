@@ -73,7 +73,12 @@ describe("realm create mode helpers", () => {
       language: "en",
       title: "poll title",
       status: "PUBLISHED",
-      extra: { poll: { unitId: "poll-1" } },
+      content: {
+        schema: "rezics.content",
+        version: 1,
+        main: { type: "markdown", source: "poll body" },
+        afterMain: [{ type: "poll", source: "poll-1" }],
+      },
     });
   });
 

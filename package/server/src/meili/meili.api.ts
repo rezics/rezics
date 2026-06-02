@@ -5,6 +5,7 @@ import {
   type FeedbackListQuery,
   feedbackListQuerySchema,
   isRoot,
+  PollSearchOptionsSchema,
   PostSearchOptionsSchema,
   RealmSearchOptionsSchema,
   type UserListQuery,
@@ -141,6 +142,21 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
   )
   .post(
+    "/polls/search",
+    async ({ body }) => {
+      return meiliService.searchPolls(body);
+    },
+    {
+      body: PollSearchOptionsSchema,
+      detail: {
+        summary: "Search polls (Meilisearch)",
+        description:
+          "Full-text search over reusable polls with usage and lifecycle filters.",
+        tags: ["Meili", "Polls", "Search"],
+      },
+    },
+  )
+  .post(
     "/comments/search",
     async ({ body }) => {
       return meiliService.searchComments(body);
@@ -259,6 +275,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Init posts index",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/polls/init",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init polls index");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to init polls index");
+      }
+      await meiliService.initPollsIndex();
+      return { message: "polls index initialized" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Init polls index",
         tags: ["Meili", "Admin"],
       },
     },
@@ -421,6 +460,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
       requireLogin: true,
       detail: {
         summary: "Sync all posts to Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .post(
+    "/polls/sync",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync polls");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to sync polls");
+      }
+      const task = await meiliService.syncAllPolls();
+      return { task };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Sync all polls to Meilisearch",
         tags: ["Meili", "Admin"],
       },
     },

@@ -3,7 +3,7 @@
  *
  * Backend routes:
  * - /meili/health
- * - /meili/content|feedbacks|users|posts|realms|entities/(init|sync)
+ * - /meili/content|feedbacks|users|posts|polls|realms|entities/(init|sync)
  * - /meili/content/deleteAll
  * - /meili/keys/admin|(list|delete)
  */
@@ -81,6 +81,11 @@ export const meiliAdminApi = {
       method: "POST",
     });
   },
+  initPollsIndex: async (): Promise<MeiliApiMessageResponse> => {
+    return apiFetch<MeiliApiMessageResponse>("/meili/polls/init", {
+      method: "POST",
+    });
+  },
   initRealmsIndex: async (): Promise<MeiliApiMessageResponse> => {
     return apiFetch<MeiliApiMessageResponse>("/meili/realms/init", {
       method: "POST",
@@ -111,6 +116,11 @@ export const meiliAdminApi = {
 
   syncAllPosts: async (): Promise<MeiliTaskResponse> => {
     return apiFetch<MeiliTaskResponse>("/meili/posts/sync", {
+      method: "POST",
+    });
+  },
+  syncAllPolls: async (): Promise<MeiliTaskResponse> => {
+    return apiFetch<MeiliTaskResponse>("/meili/polls/sync", {
       method: "POST",
     });
   },

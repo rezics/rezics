@@ -3,6 +3,7 @@ import type {
   ContentSearchDocument,
   EntitySearchDocument,
   FeedbackSearchDocument,
+  PollSearchDocument,
   PostSearchDocument,
   RealmSearchDocument,
   UserSearchDocument,
@@ -2314,6 +2315,107 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
     })),
     extra: realm.extra ?? undefined,
   };
+}
+
+// ANCHOR: Poll document builder
+
+export function buildPollDocument(poll: any): PollSearchDocument {
+  const unit = poll.unit;
+  const translations: any[] = unit?.translations ?? [];
+  const titles = translations
+    .map((translation) => translation.title)
+    .filter(Boolean);
+  const descriptions = translations
+    .map((translation) => translation.summary)
+    .filter(isNonEmptyString);
+  const optionLabels = (poll.options ?? [])
+    .map((option: any) => option.label)
+    .filter(isNonEmptyString);
+  const optionUnitIds = (poll.options ?? [])
+    .map((option: any) => option.unitId)
+    .filter(isNonEmptyString);
+  const closesAt = toIsoString(poll.closesAt);
+  const now = Date.now();
+
+  return {
+    id: poll.unitId,
+    unitId: poll.unitId,
+    ownerUserId: unit?.userId ?? null,
+    titles,
+    descriptions,
+    optionLabels,
+    optionUnitIds,
+    voteMode: poll.voteMode,
+    resultVisibility: poll.resultVisibility,
+    anonymous: poll.anonymous,
+    closesAt,
+    closed:
+      poll.closesAt instanceof Date
+        ? poll.closesAt.getTime() <= now
+        : Boolean(closesAt && Date.parse(closesAt) <= now),
+    usageCount: poll.usageCount,
+    used: poll.usageCount > 0,
+    languages: translations.map((translation) => translation.language),
+    createdAt: toIsoString(poll.createdAt) ?? "",
+    updatedAt: toIsoString(poll.updatedAt) ?? "",
+  };
+}
+
+// ANCHOR: Poll sync functions
+
+const pollIncludeForSync = {
+  options: true,
+  unit: {
+    include: {
+      translations: true,
+    },
+  },
+} as const;
+
+export async function syncSinglePoll(client: SearchClient, unitId: string) {
+  const poll = await getSearchPrismaClient().poll.findUnique({
+    where: { unitId },
+    include: pollIncludeForSync,
+  });
+
+  if (!poll || poll.unit.status !== "PUBLISHED") {
+    await client.deletePolls([unitId]);
+    return;
+  }
+
+  await client.addOrUpdatePolls([buildPollDocument(poll)]);
+}
+
+export async function syncAllPolls(client: SearchClient) {
+  const deleteResult = await client.deleteAllPolls();
+  console.log("syncAllPolls: deleted all documents", deleteResult);
+
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    console.log("syncAllPolls: cursor", cursor, "total", total);
+
+    const polls: any[] = await getSearchPrismaClient().poll.findMany({
+      where: { unit: { status: "PUBLISHED" } },
+      include: pollIncludeForSync,
+      orderBy: { unitId: "asc" },
+      take: BATCH_SIZE,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { unitId: cursor } : undefined,
+    });
+
+    if (polls.length === 0) break;
+
+    const docs = polls.map(buildPollDocument);
+    const addResult = await client.addOrUpdatePolls(docs);
+    console.log("syncAllPolls: added batch", addResult);
+
+    total += docs.length;
+    cursor = polls[polls.length - 1]!.unitId;
+  }
+
+  return { message: "syncAllPolls success", totalSynced: total };
 }
 
 // ANCHOR: Realm sync functions

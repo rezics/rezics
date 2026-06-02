@@ -33,13 +33,20 @@ export function isPollClosed(
  * poll DTO; result gating lives in {@link mapPollResultsToDTO}.
  */
 export function mapPollToDTO(poll: PollWithOptions, now?: Date): PollDTO {
+  const translation = poll.unit?.translations.find(
+    (item) => item.title && item.title.trim().length > 0,
+  );
   return {
     unitId: poll.unitId,
+    title: translation?.title ?? null,
+    description: translation?.summary ?? null,
     voteMode: poll.voteMode,
     resultVisibility: poll.resultVisibility,
     anonymous: poll.anonymous,
     closesAt: poll.closesAt ? poll.closesAt.toISOString() : null,
     closed: isPollClosed(poll, now),
+    usageCount: poll.usageCount,
+    used: poll.usageCount > 0,
     options: poll.options.map((o) => mapPollOptionToDTO(o, true)),
     createdAt: poll.createdAt.toISOString(),
     updatedAt: poll.updatedAt.toISOString(),
@@ -56,9 +63,14 @@ export function mapPollToDTO(poll: PollWithOptions, now?: Date): PollDTO {
  */
 export function mapPollResultsToDTO(
   poll: PollWithOptions,
-  input: { myVote: string[]; resultsVisible: boolean; now?: Date },
+  input: {
+    myVote: string[];
+    myVoteContexts: { optionId: string; realmUnitId: string | null }[];
+    resultsVisible: boolean;
+    now?: Date;
+  },
 ): PollResultsDTO {
-  const { myVote, resultsVisible } = input;
+  const { myVote, myVoteContexts, resultsVisible } = input;
   return {
     pollUnitId: poll.unitId,
     voteMode: poll.voteMode,
@@ -72,5 +84,6 @@ export function mapPollResultsToDTO(
       ? { totalVotes: poll.options.reduce((sum, o) => sum + o.voteCount, 0) }
       : {}),
     myVote,
+    myVoteContexts,
   };
 }
