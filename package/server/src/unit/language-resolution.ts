@@ -4,6 +4,7 @@ import type {
   UnitLanguageContentResponse,
 } from "@rezics/contract";
 import {
+  parseReadLanguages,
   resolveAuthoringLanguage,
   resolveReadLanguage,
 } from "@rezics/contract";
@@ -89,12 +90,11 @@ export class UnitLanguageService {
     });
     const resolvedLanguage = resolveReadLanguage({
       explicitLanguage: query.explicitLanguage,
+      languages: parseReadLanguages(
+        (query as { languages?: string }).languages,
+      ),
       appLocale: query.appLocale,
       supportLanguages: unit.supportLanguages,
-      availableLanguages: [
-        ...unit.translations.map((item) => item.language),
-        ...unit.contentTranslations.map((item) => item.language),
-      ],
     });
     const unitTranslation = resolvedLanguage
       ? unit.translations.find((item) => item.language === resolvedLanguage)

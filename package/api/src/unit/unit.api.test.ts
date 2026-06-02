@@ -28,4 +28,12 @@ describe("unitApi language reads", () => {
       "/unit/unit-1/languages/content?explicitLanguage=ja&appLocale=en",
     ]);
   });
+
+  test("serializes list read languages as comma-separated candidates", async () => {
+    const { unitApi } = await import("./unit.api");
+
+    await unitApi.list({ languages: ["zh-Hant", "ja", "en"] });
+
+    expect(calls[0]?.url).toBe("/unit/list?languages=zh-Hant%2Cja%2Cen");
+  });
 });

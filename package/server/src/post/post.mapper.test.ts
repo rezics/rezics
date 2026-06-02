@@ -66,11 +66,12 @@ describe("mapPostToDTO", () => {
       },
     } as unknown as PostWithRelations);
 
+    expect(dto.resolvedLanguage).toBe("en");
     expect(dto.title).toBe("English title");
     expect(dto.content).toEqual(markdownContentDoc("translated body"));
   });
 
-  test("falls back through primary support language without legacy storage", () => {
+  test("keeps resolved supported language even when fields are missing", () => {
     const dto = mapPostToDTO({
       ...basePost,
       unit: {
@@ -82,13 +83,35 @@ describe("mapPostToDTO", () => {
       },
     } as unknown as PostWithRelations);
 
-    expect(dto.title).toBe("Japanese title");
+    expect(dto.resolvedLanguage).toBe("en");
+    expect(dto.title).toBeNull();
     expect(dto.content).toBeNull();
+  });
+
+  test("resolves list preview from request language candidates", () => {
+    const dto = mapPostToDTO(
+      {
+        ...basePost,
+        unit: {
+          ...basePost.unit,
+          translations: [
+            { unitId: "post-1", language: "ja", title: "Japanese title" },
+          ],
+          contentTranslations: [],
+        },
+      } as unknown as PostWithRelations,
+      undefined,
+      ["ja", "en"],
+    );
+
+    expect(dto.resolvedLanguage).toBe("ja");
+    expect(dto.title).toBe("Japanese title");
   });
 
   test("returns null title and body when translations are absent", () => {
     const dto = mapPostToDTO(basePost);
 
+    expect(dto.resolvedLanguage).toBe("en");
     expect(dto.title).toBeNull();
     expect(dto.content).toBeNull();
   });

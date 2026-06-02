@@ -9,6 +9,7 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostCard } from "@/post";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import {
   ReviewCard,
   type ReviewTargetUnit,
@@ -36,9 +37,11 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   manageMode = false,
 }) => {
   const { t } = useTranslation(["entity"]);
+  const languages = useReadLanguageCandidates();
   const { data, error, isError, isLoading } = useQuery(
     postQueries.byRealm(realmId, {
       sort,
+      languages,
       ...(tagIds.length > 0 ? { tagIds } : {}),
       ...(realmLifecycleState ? { realmLifecycleState } : {}),
     }),

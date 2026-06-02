@@ -1,9 +1,10 @@
 import type {
   CommentPromotionDTO,
   PostDTO,
+  SupportLanguageLike,
   VariantContextSummary,
 } from "@rezics/contract";
-import { readLanguageCandidates as buildReadLanguageCandidates } from "@rezics/contract";
+import { resolveReadLanguage } from "@rezics/contract";
 import type { CommentPromotion } from "#/prisma/client";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { variantContextForRow } from "@/unit/variant-context";
@@ -22,47 +23,57 @@ function contentHiddenByGlobalModeration(post: PostWithRelations) {
   );
 }
 
-function postLanguageOrder(post: PostWithRelations): string[] {
-  const order = [
-    ...buildReadLanguageCandidates({
-      supportLanguages: post.unit.supportLanguages,
-    }),
-    ...post.unit.translations.map((translation) => translation.language),
-    ...post.unit.contentTranslations.map((translation) => translation.language),
-  ];
-  return [
-    ...new Set(order.filter((language): language is string => !!language)),
-  ];
+function resolvedPostLanguage(
+  post: PostWithRelations,
+  languages: readonly string[] = [],
+): string | null {
+  return resolveReadLanguage({
+    languages,
+    supportLanguages: post.unit.supportLanguages as SupportLanguageLike[],
+  });
 }
 
-function resolvePostTitle(post: PostWithRelations): string | null {
-  const byLanguage = new Map(
-    post.unit.translations.map((translation) => [
-      translation.language,
-      translation.title,
-    ]),
-  );
-  for (const language of postLanguageOrder(post)) {
-    const title = byLanguage.get(language);
-    if (title && title.trim().length > 0) return title;
-  }
-  return null;
+function resolvePostTitle(
+  post: PostWithRelations,
+  language: string | null,
+): string | null {
+  if (!language) return null;
+  const title = post.unit.translations.find(
+    (translation) => translation.language === language,
+  )?.title;
+  return title ?? null;
 }
 
-function resolvePostContent(post: PostWithRelations): PostDTO["content"] {
-  const byLanguage = new Map(
-    post.unit.contentTranslations.map((translation) => [
-      translation.language,
-      translation.content,
-    ]),
-  );
-  for (const language of postLanguageOrder(post)) {
-    const content = byLanguage.get(language);
-    if (content !== undefined && content !== null) {
-      return content as PostDTO["content"];
-    }
-  }
-  return null;
+function resolvePostContent(
+  post: PostWithRelations,
+  language: string | null,
+): PostDTO["content"] {
+  if (!language) return null;
+  const content = post.unit.contentTranslations.find(
+    (translation) => translation.language === language,
+  )?.content;
+  return (content as PostDTO["content"] | undefined) ?? null;
+}
+
+function previewLanguage(
+  post: PostWithRelations,
+  languages: readonly string[] = [],
+): PostDTO["resolvedLanguage"] {
+  return resolvedPostLanguage(post, languages) as PostDTO["resolvedLanguage"];
+}
+
+function previewTitle(
+  post: PostWithRelations,
+  language: PostDTO["resolvedLanguage"],
+): string | null {
+  return resolvePostTitle(post, language ?? null);
+}
+
+function previewContent(
+  post: PostWithRelations,
+  language: PostDTO["resolvedLanguage"],
+): PostDTO["content"] {
+  return resolvePostContent(post, language ?? null);
 }
 
 /**
@@ -71,9 +82,11 @@ function resolvePostContent(post: PostWithRelations): PostDTO["content"] {
 export function mapPostToDTO(
   post: PostWithRelations,
   variantContexts?: ReadonlyMap<string, VariantContextSummary>,
+  languages: readonly string[] = [],
 ): PostDTO {
   const globalModerationState = moderationState(post);
   const contentHidden = contentHiddenByGlobalModeration(post);
+  const resolvedLanguage = previewLanguage(post, languages);
 
   return {
     unitId: post.unitId,
@@ -83,8 +96,9 @@ export function mapPostToDTO(
     variantUnitId: post.variantUnitId ?? null,
     variantContext: variantContextForRow(post, variantContexts),
     realmUnitId: post.unit.inRealms?.[0]?.realmUnitId ?? null,
-    title: contentHidden ? null : resolvePostTitle(post),
-    content: contentHidden ? null : resolvePostContent(post),
+    resolvedLanguage,
+    title: contentHidden ? null : previewTitle(post, resolvedLanguage),
+    content: contentHidden ? null : previewContent(post, resolvedLanguage),
     kind: post.kind ?? null,
     status: post.unit.status,
     visibility: post.unit.visibility,

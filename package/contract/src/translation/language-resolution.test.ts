@@ -3,6 +3,7 @@ import { Value } from "@sinclair/typebox/value";
 import {
   authoringLanguageCandidates,
   languageResolutionInputSchema,
+  parseReadLanguages,
   primaryLanguages,
   readLanguageCandidates,
   resolveReadLanguage,
@@ -24,15 +25,16 @@ describe("language resolution helpers", () => {
     expect(
       readLanguageCandidates({
         explicitLanguage: "ko",
+        languages: ["zh-hant"],
         preferredLanguages: ["ja", "en"],
         appLocale: "de",
         supportLanguages,
         fallbackLanguage: "zh-hant",
       }),
-    ).toEqual(["ko", "ja", "en", "de", "zh-hant"]);
+    ).toEqual(["ko", "zh-hant", "ja", "en", "de"]);
   });
 
-  test("missing explicit language does not block preference or app locale fallback", () => {
+  test("resolves against support languages instead of translation availability", () => {
     expect(
       resolveReadLanguage({
         preferredLanguages: ["ja"],
@@ -40,7 +42,15 @@ describe("language resolution helpers", () => {
         supportLanguages,
         availableLanguages: ["de"],
       }),
-    ).toBe("de");
+    ).toBe("ja");
+  });
+
+  test("parses comma-separated read language candidates", () => {
+    expect(parseReadLanguages("zh-hant, ja, en,ja")).toEqual([
+      "zh-hant",
+      "ja",
+      "en",
+    ]);
   });
 
   test("orders authoring candidates from explicit, first preference, app locale, then fallback", () => {

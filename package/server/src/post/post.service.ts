@@ -41,10 +41,7 @@ import {
   collectPatchLeafPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
-import {
-  primarySupportLanguageCreate,
-  resolveUnitAuthoringLanguage,
-} from "@/unit/language-resolution";
+import { primarySupportLanguageCreate } from "@/unit/language-resolution";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import {
   hydrateUnitOwnerUserSlugRow,
@@ -142,6 +139,16 @@ function sanitizePostExtraForCreate(
     ...rest
   } = extra as Record<string, unknown>;
   return rest as Prisma.JsonValue;
+}
+
+function assertExplicitLocalizedWriteLanguage(input: UpdatePostInput): string {
+  const touchesLocalizedFields =
+    input.title !== undefined || input.content !== undefined;
+  if (!touchesLocalizedFields) return input.language ?? "";
+  if (!input.language) {
+    throw new AppError(400, "Post title/content updates require language");
+  }
+  return input.language;
 }
 
 type PostPollReferenceTx = Pick<
@@ -689,9 +696,7 @@ export class PostService {
     const post = await prisma.$transaction(async (tx) => {
       const ownerUserId =
         kind === "WIKI" ? await resolveRezicsWikiUserId() : authorUserId;
-      const postLanguage = resolveUnitAuthoringLanguage({
-        explicitLanguage: input.language,
-      });
+      const postLanguage = input.language;
       const unit = await tx.unit.create({
         data: {
           userId: ownerUserId,
@@ -1019,6 +1024,7 @@ export class PostService {
 
     if (!actor) {
       const updated = await prisma.$transaction(async (tx) => {
+        const language = assertExplicitLocalizedWriteLanguage(input);
         const existing = await tx.post.findUniqueOrThrow({
           where: { unitId },
           select: {
@@ -1031,12 +1037,6 @@ export class PostService {
               },
             },
           },
-        });
-        const language = resolveUnitAuthoringLanguage({
-          explicitLanguage: input.language,
-          appLocale: existing.unit.supportLanguages?.find(
-            (item) => item.isPrimary,
-          )?.language,
         });
         const oldContent = (existing.unit.contentTranslations ?? []).find(
           (translation) => translation.language === language,
@@ -1090,6 +1090,7 @@ export class PostService {
     }
 
     const updated = await prisma.$transaction(async (tx) => {
+      const language = assertExplicitLocalizedWriteLanguage(input);
       const existing = await tx.post.findUniqueOrThrow({
         where: { unitId },
         select: {
@@ -1103,12 +1104,6 @@ export class PostService {
             },
           },
         },
-      });
-      const language = resolveUnitAuthoringLanguage({
-        explicitLanguage: input.language,
-        appLocale: existing.unit.supportLanguages?.find(
-          (item) => item.isPrimary,
-        )?.language,
       });
       const currentContent = (existing.unit.contentTranslations ?? []).find(
         (translation) => translation.language === language,

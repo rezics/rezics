@@ -13,6 +13,11 @@ export function buildQueryString(
   for (const [key, value] of Object.entries(filters)) {
     if (value === undefined || value === null || value === "") continue;
 
+    if (key === "languages" && Array.isArray(value)) {
+      params.set(key, value.join(","));
+      continue;
+    }
+
     // 如果是对象或数组，序列化为 JSON 字符串
     if (typeof value === "object") {
       params.set(key, JSON.stringify(value));

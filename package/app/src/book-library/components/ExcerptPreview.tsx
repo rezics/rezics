@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { ExcerptList } from "@/excerpt";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 
 export type ExcerptPreviewProps = {
   id: string;
@@ -16,9 +17,11 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
   excerptNumber = 3,
 }) => {
   const { t } = useTranslation(["common"]);
+  const languages = useReadLanguageCandidates();
   const { data, isLoading, error } = useQuery(
     postQueries.byTarget(id, {
       kind: PostKind.EXCERPT,
+      languages,
       limit: excerptNumber,
     }),
   );
@@ -42,7 +45,7 @@ function mapExcerptPostToUnit(post: PostDTO): UnitDTO {
     translations: [
       {
         unitId: post.unitId,
-        language: "zh-hant",
+        language: post.resolvedLanguage ?? "en",
         title: null,
         subtitle: null,
         summary: null,

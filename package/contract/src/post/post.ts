@@ -121,6 +121,7 @@ export const postDTOSchema = t.Object({
   variantUnitId: t.Optional(t.Nullable(t.String())),
   variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
   realmUnitId: t.Optional(t.Nullable(t.String())),
+  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
   /** Resolved root-post display title for the selected/default language. */
   title: t.Optional(t.Nullable(t.String())),
   /**
@@ -240,6 +241,7 @@ export const postListQuerySchema = t.Object({
    * (`state IN (…)`, indexed; no anti-join). Buckets are never stored.
    */
   stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
+  languages: t.Optional(t.String()),
   sort: t.Optional(
     t.Union([
       t.Literal("new"),
@@ -291,6 +293,7 @@ export const postListBodySchema = t.Object({
   state: t.Optional(t.String()),
   /** Derived lifecycle bucket filter: `active` or `closed`. See `postListQuerySchema`. */
   stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
+  languages: t.Optional(t.Array(languageSchema)),
   sort: t.Optional(
     t.Union([
       t.Literal("new"),

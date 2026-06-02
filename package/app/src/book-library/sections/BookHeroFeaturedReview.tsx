@@ -10,6 +10,7 @@ import {
 } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 
 interface BookHeroFeaturedReviewProps {
@@ -33,12 +34,14 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
   bookId,
 }) => {
   const { t } = useTranslation(["book"]);
+  const languages = useReadLanguageCandidates();
   // MOCK: should sort by reaction count once postsByTarget supports it.
   // For now, take the most recent review.
   const { data, isLoading } = useQuery({
     ...postQueries.list({
       targetUnitId: bookId,
       kind: PostKind.REVIEW,
+      languages,
       limit: 1,
     }),
     enabled: Boolean(bookId),

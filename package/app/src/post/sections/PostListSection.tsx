@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { resolvePostTargetVariantLabel } from "@/book-library/models/communityFeed";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { PostCard } from "../components/item/PostCard";
 
 interface PostListSectionProps {
@@ -28,11 +29,13 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
 }) => {
   const { t } = useTranslation(["community"]);
   const navigate = useNavigate();
+  const languages = useReadLanguageCandidates();
   const query = postQueries.list({
     ...(variantUnitId
       ? { variantUnitId }
       : { targetUnitId: targetUnitId ?? "" }),
     kind,
+    languages,
     limit,
   });
   const { data, isLoading } = useQuery(query);

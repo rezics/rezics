@@ -54,13 +54,16 @@ function defaultChildren(units: Unit[], t: (key: string) => string) {
                 </Tooltip>
               </TooltipProvider>
               <p className="text-base font-semibold truncate mb-1">
-                {item.translations?.[0]?.title ||
+                {item.title ||
+                  item.translations?.[0]?.title ||
                   t("book:unit_untitled_content")}
               </p>
             </div>
-            {item.translations?.[0]?.description && (
+            {(item.description || item.translations?.[0]?.description) && (
               <p className="text-sm text-text-secondary line-clamp-4">
-                {contentDocMarkdownFallback(item.translations[0].description)}
+                {contentDocMarkdownFallback(
+                  item.description ?? item.translations?.[0]?.description,
+                )}
               </p>
             )}
           </div>

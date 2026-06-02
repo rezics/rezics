@@ -14,6 +14,7 @@ import {
   type UnitResponse,
   type UpdateTranslationInput,
   type UpdateUnitInput,
+  parseReadLanguages,
   unitLanguageAvailabilityResponseSchema,
   unitLanguageContentQuerySchema,
   unitLanguageContentResponseSchema,
@@ -29,7 +30,11 @@ import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { assertEditorialPatchAllowed } from "./collaborative-metadata";
 import { unitLanguageService } from "./language-resolution";
-import { mapTranslationToDTO, mapUnitToDTO } from "./mapper";
+import {
+  mapTranslationToDTO,
+  mapUnitListItemToDTO,
+  mapUnitToDTO,
+} from "./mapper";
 import { translationService } from "./translation.service";
 import { unitService } from "./unit.service";
 
@@ -116,7 +121,11 @@ export const unitApi = new Elysia({ prefix: "/unit" })
         );
       }
       const { units, total } = await unitService.list(query as UnitListQuery);
-      return { units: units.map(mapUnitToDTO), total };
+      const languages = parseReadLanguages(query.languages);
+      return {
+        units: units.map((unit) => mapUnitListItemToDTO(unit, languages)),
+        total,
+      };
     },
     {
       requireLogin: true,
@@ -143,7 +152,12 @@ export const unitApi = new Elysia({ prefix: "/unit" })
         ...body,
         ids: body.ids?.join(","),
       } as UnitListQuery);
-      return { units: units.map(mapUnitToDTO), total };
+      return {
+        units: units.map((unit) =>
+          mapUnitListItemToDTO(unit, body.languages ?? []),
+        ),
+        total,
+      };
     },
     {
       requireLogin: true,

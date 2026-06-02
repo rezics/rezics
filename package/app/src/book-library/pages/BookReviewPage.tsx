@@ -11,6 +11,7 @@ import type React from "react";
 import { useMemo } from "react";
 import { ScoreOverview } from "@/engagement/components/ScoreOverview";
 import { ReviewList } from "@/review/components/list/ReviewList";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { ShelfByBookPreview } from "../components/ShelfByBookPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
@@ -33,6 +34,7 @@ export const BookReviewPage: React.FC = () => {
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
+  const languages = useReadLanguageCandidates();
 
   const catalogContext = bookInfo
     ? resolveCatalogEntryInteractionContext(bookInfo)
@@ -42,11 +44,13 @@ export const BookReviewPage: React.FC = () => {
       catalogContext
         ? postListFiltersForCatalogEntry(catalogContext, {
             kind: PostKind.REVIEW,
+            languages,
             limit: REVIEW_PREVIEW_LIMIT,
           })
         : {
             targetUnitId: bookId,
             kind: PostKind.REVIEW,
+            languages,
             limit: REVIEW_PREVIEW_LIMIT,
           },
     ),

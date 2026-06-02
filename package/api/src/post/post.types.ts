@@ -31,7 +31,9 @@ export type CreateRootPostInput = CreatePostInput;
  */
 export type PostFormData = CreateRootPostInput;
 
-export type PostFilters = Partial<PostListQuery>;
+export type PostFilters = Omit<Partial<PostListQuery>, "languages"> & {
+  languages?: string | readonly string[];
+};
 
 export type PostSortOption = "createdAt" | "updatedAt" | "lastReplyAt";
 

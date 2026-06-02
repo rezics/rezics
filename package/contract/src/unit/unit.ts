@@ -273,6 +273,11 @@ export type BaseUnit = (typeof baseUnitSchema)["static"];
 
 export const unitDTOSchema = t.Object({
   ...baseUnitSchema.properties,
+  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  title: t.Optional(t.Nullable(t.String())),
+  subtitle: t.Optional(t.Nullable(t.String())),
+  summary: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   supportLanguages: t.Optional(t.Array(unitSupportLanguageDTOSchema)),
 });
@@ -298,6 +303,7 @@ export const unitListQuerySchema = t.Object({
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
   language: t.Optional(languageSchema),
+  languages: t.Optional(t.String()),
   rating: t.Optional(contentRatingSchema),
   createdAtFrom: t.Optional(t.String()),
   createdAtTo: t.Optional(t.String()),
@@ -336,6 +342,7 @@ export const unitListBodySchema = t.Object({
   userId: t.Optional(t.String()),
   userIds: t.Optional(t.String()),
   language: t.Optional(languageSchema),
+  languages: t.Optional(t.Array(languageSchema)),
   rating: t.Optional(contentRatingSchema),
   createdAtFrom: t.Optional(t.String()),
   createdAtTo: t.Optional(t.String()),

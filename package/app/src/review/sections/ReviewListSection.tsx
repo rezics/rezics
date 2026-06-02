@@ -5,6 +5,7 @@ import { EmptyState } from "@rezics/ui";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { ReviewList } from "../components/list/ReviewList";
 
 interface ReviewListSectionProps {
@@ -17,8 +18,13 @@ export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
   limit = 20,
 }) => {
   const { t } = useTranslation(["common", "community"]);
+  const languages = useReadLanguageCandidates();
   const { data, isLoading, error } = useQuery({
-    ...postQueries.byTarget(targetUnitId, { kind: PostKind.REVIEW, limit }),
+    ...postQueries.byTarget(targetUnitId, {
+      kind: PostKind.REVIEW,
+      languages,
+      limit,
+    }),
     enabled: !!targetUnitId,
   });
 

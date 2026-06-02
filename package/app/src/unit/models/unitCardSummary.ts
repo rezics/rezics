@@ -60,6 +60,11 @@ export interface UnitDtoLike
       | "type"
       | "user"
       | "defaultLanguage"
+      | "resolvedLanguage"
+      | "title"
+      | "subtitle"
+      | "summary"
+      | "description"
       | "translations"
       | "extra"
       | "createdAt"
@@ -89,6 +94,7 @@ export function unitDtoToUnitCardSummary(
     unit.defaultLanguage ?? undefined,
   );
   const title =
+    text(unit.title) ??
     text(translation?.title) ??
     text(options.fallbackTitle) ??
     text(unitId) ??
@@ -102,15 +108,20 @@ export function unitDtoToUnitCardSummary(
     unitId,
     kind: normalizeKind(options.fallbackKind ?? unit.kind ?? unit.type),
     title,
-    subtitle: text(translation?.subtitle),
+    subtitle: text(unit.subtitle) ?? text(translation?.subtitle),
     imageUrl: imageUrl ?? null,
     contentPreview:
+      text(unit.summary) ??
+      contentDocMarkdownFallback(unit.description) ??
       text(translation?.summary) ??
       contentDocMarkdownFallback(translation?.description),
     author: unit.user ?? null,
     isCommunityCatalog: isRezicsWikiUser(unit.user),
     addedAt: options.addedAt ?? null,
-    translationMeta: translationToMeta(translation),
+    translationMeta:
+      unit.resolvedLanguage && !translation
+        ? { language: unit.resolvedLanguage }
+        : translationToMeta(translation),
   };
 }
 

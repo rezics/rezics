@@ -1,4 +1,8 @@
-import { wikiZoneConfigSchema, ZoneFiltersSchema } from "@rezics/contract";
+import {
+  parseReadLanguages,
+  wikiZoneConfigSchema,
+  ZoneFiltersSchema,
+} from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole } from "@/middleware";
 import { mapZoneToDTO } from "./zone.mapper";
@@ -29,10 +33,7 @@ function resolvePublicZone(
 }
 
 function preferredLanguages(query: { languages?: string }) {
-  return query.languages
-    ?.split(",")
-    .map((language) => language.trim())
-    .filter(Boolean);
+  return parseReadLanguages(query.languages);
 }
 
 export const zoneApi = new Elysia({ prefix: "/zone" })

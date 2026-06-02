@@ -1279,6 +1279,19 @@ describe("PostService.create targetUnitId derivation", () => {
 describe("PostService.update immutability", () => {
   const service = new PostService();
 
+  test("localized updates require explicit language", async () => {
+    resetMocks();
+
+    await expect(
+      service.update("post-1", { content: content("edited") }),
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "Post title/content updates require language",
+    });
+    expect(contentTranslationUpsertMock).not.toHaveBeenCalled();
+    expect(unitTranslationUpsertMock).not.toHaveBeenCalled();
+  });
+
   test("update writes body to ContentTranslation and only row fields to Post", async () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
@@ -1294,6 +1307,7 @@ describe("PostService.update immutability", () => {
 
     await service.update("post-1", {
       content: content("edited"),
+      language: "en",
       isLocked: true,
     });
 
@@ -1406,6 +1420,7 @@ describe("PostService.update immutability", () => {
           { type: "poll", source: "poll-add" },
         ],
       },
+      language: "en",
     });
 
     expect(postPollReferenceCreateManyMock).toHaveBeenCalledWith({
@@ -1502,7 +1517,11 @@ describe("PostService wiki posts", () => {
       unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
 
-    await service.update("wiki-post-1", { content: content("edited") }, actor);
+    await service.update(
+      "wiki-post-1",
+      { content: content("edited"), language: "en" },
+      actor,
+    );
 
     expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledTimes(1);
     expect(postUpdateMock).not.toHaveBeenCalled();
@@ -1531,7 +1550,7 @@ describe("PostService wiki posts", () => {
 
     await service.update(
       "wiki-post-1",
-      { content: content("edited") },
+      { content: content("edited"), language: "en" },
       rootActor,
     );
 
@@ -1553,10 +1572,15 @@ describe("PostService wiki posts", () => {
     }));
     collectPatchLeafPathsMock.mockReturnValueOnce(["post.content.main.source"]);
 
-    await service.update("wiki-post-1", { content: content("edited") }, actor, {
-      patch: { post: { content: { main: { source: "edited" } } } },
-      message: "wiki-post.content.source.update",
-    });
+    await service.update(
+      "wiki-post-1",
+      { content: content("edited"), language: "en" },
+      actor,
+      {
+        patch: { post: { content: { main: { source: "edited" } } } },
+        message: "wiki-post.content.source.update",
+      },
+    );
 
     expect(assertCanEditCollaborativeMetadataMock).toHaveBeenCalledWith(
       expect.anything(),
@@ -1590,10 +1614,15 @@ describe("PostService wiki posts", () => {
     });
 
     await expect(
-      service.update("wiki-post-1", { content: content("edited") }, actor, {
-        patch: { post: { content: { main: { source: "edited" } } } },
-        message: "wiki-post.content.source.update",
-      }),
+      service.update(
+        "wiki-post-1",
+        { content: content("edited"), language: "en" },
+        actor,
+        {
+          patch: { post: { content: { main: { source: "edited" } } } },
+          message: "wiki-post.content.source.update",
+        },
+      ),
     ).rejects.toMatchObject({
       statusCode: 403,
       code: "FIELD_LOCKED",
@@ -1618,7 +1647,11 @@ describe("PostService wiki posts", () => {
     });
 
     await expect(
-      service.update("wiki-post-1", { content: content("edited") }, actor),
+      service.update(
+        "wiki-post-1",
+        { content: content("edited"), language: "en" },
+        actor,
+      ),
     ).rejects.toMatchObject({
       statusCode: 403,
       code: "FIELD_LOCKED",
@@ -1635,7 +1668,11 @@ describe("PostService wiki posts", () => {
       unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
 
-    await service.update("review-1", { content: content("edited") }, actor);
+    await service.update(
+      "review-1",
+      { content: content("edited"), language: "en" },
+      actor,
+    );
 
     expect(unitFieldLockFindManyMock).not.toHaveBeenCalled();
     expect(historyOutboxCreateMock).not.toHaveBeenCalled();
@@ -1651,7 +1688,7 @@ describe("PostService wiki posts", () => {
 
     await service.update(
       "wiki-post-1",
-      { content: content("edited"), isLocked: true },
+      { content: content("edited"), language: "en", isLocked: true },
       actor,
     );
 

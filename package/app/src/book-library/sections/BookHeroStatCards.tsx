@@ -10,6 +10,7 @@ import {
   MessageSquareText as RateReviewOutlined,
 } from "lucide-react";
 import type React from "react";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 
 interface BookHeroStatCardsProps {
@@ -41,10 +42,12 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
   cardKeys = DEFAULT_STAT_CARD_KEYS,
 }) => {
   const { t } = useTranslation(["book"]);
+  const languages = useReadLanguageCandidates();
   const { data: reviewData } = useQuery({
     ...postQueries.list({
       targetUnitId: bookId,
       kind: PostKind.REVIEW,
+      languages,
       limit: 1,
     }),
     enabled: Boolean(bookId),

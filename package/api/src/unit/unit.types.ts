@@ -28,7 +28,9 @@ export type {
  */
 export type UnitFormData = Omit<CreateUnitInput, "userId">;
 
-export type UnitFilters = Partial<UnitListQuery>;
+export type UnitFilters = Omit<Partial<UnitListQuery>, "languages"> & {
+  languages?: string | readonly string[];
+};
 
 export type UnitSortOption = "createdAt" | "updatedAt" | "publishedAt";
 

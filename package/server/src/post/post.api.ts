@@ -6,7 +6,9 @@ import {
   hasPermissionToUpdatePost,
   isBlocked,
   normalizeLanguage,
+  parseReadLanguages,
   PostKind,
+  type PostListQuery,
   type PostListResponse,
   type PostModerationOverlayResponse,
   type PostResponse,
@@ -128,8 +130,11 @@ export const postApi = new Elysia({ prefix: "/post" })
             viewerUserId: identity?.userId,
           });
       const variantContexts = await hydrateVariantContextSummaries(posts);
+      const languages = parseReadLanguages(query.languages);
       const response: PostListResponse = {
-        posts: posts.map((post) => mapPostToDTO(post, variantContexts)),
+        posts: posts.map((post) =>
+          mapPostToDTO(post, variantContexts, languages),
+        ),
         total,
       };
       return response;
@@ -180,7 +185,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       );
       const admin = isAdminRole(identity);
 
-      const query = { ...body, ids: body.ids?.join(",") };
+      const query = { ...body, ids: body.ids?.join(",") } as PostListQuery;
       const { posts, total } = body.realmUnitId
         ? await postService.byRealm(body.realmUnitId, query, {
             isAdmin: admin,
@@ -192,7 +197,9 @@ export const postApi = new Elysia({ prefix: "/post" })
           });
       const variantContexts = await hydrateVariantContextSummaries(posts);
       const response: PostListResponse = {
-        posts: posts.map((post) => mapPostToDTO(post, variantContexts)),
+        posts: posts.map((post) =>
+          mapPostToDTO(post, variantContexts, body.languages ?? []),
+        ),
         total,
       };
       return response;

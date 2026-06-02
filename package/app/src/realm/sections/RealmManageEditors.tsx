@@ -61,6 +61,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MoveHandler, NodeRendererProps, TreeApi } from "react-arborist";
 import { Tree } from "react-arborist";
 import { toast } from "sonner";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
 type TagSearchResult = {
@@ -84,7 +85,7 @@ function unitLabel(unit: UnitDTO) {
     undefined,
     unit.defaultLanguage ?? undefined,
   );
-  return tr?.title ?? unit.slug ?? unit.id;
+  return unit.title ?? tr?.title ?? unit.slug ?? unit.id;
 }
 
 const wikiTemplateOptions = [
@@ -384,9 +385,10 @@ export function WikiZoneConfigEditor({
   const [labelTarget, setLabelTarget] =
     useState<LabelInsertTarget>("navigation");
   const [error, setError] = useState<string | null>(null);
+  const languages = useReadLanguageCandidates();
   const labelSearchTerm = labelSearch.trim();
   const { data: labelSearchData } = useQuery(
-    unitQueries.search(labelSearchTerm, { type: "LABEL", limit: 8 }),
+    unitQueries.search(labelSearchTerm, { type: "LABEL", languages, limit: 8 }),
   );
 
   useEffect(() => {
@@ -1436,9 +1438,10 @@ export function SlotPicker({
   const [error, setError] = useState<string | null>(null);
   const setValue = useSetRealmExtraValueMutation();
   const clearValue = useClearRealmExtraValueMutation();
+  const languages = useReadLanguageCandidates();
   const searchTerm = search.trim();
   const { data } = useQuery(
-    unitQueries.search(searchTerm, { type: "POST", limit: 8 }),
+    unitQueries.search(searchTerm, { type: "POST", languages, limit: 8 }),
   );
 
   useEffect(() => {
@@ -1613,9 +1616,10 @@ export function BannerPicker({
   const clearValue = useClearRealmExtraValueMutation();
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const languages = useReadLanguageCandidates();
   const searchTerm = search.trim();
   const { data } = useQuery(
-    unitQueries.search(searchTerm, { type: "POST", limit: 8 }),
+    unitQueries.search(searchTerm, { type: "POST", languages, limit: 8 }),
   );
 
   useEffect(() => {

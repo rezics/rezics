@@ -35,6 +35,14 @@ describe("post wiki API helpers", () => {
     );
   });
 
+  test("serializes list read languages as comma-separated candidates", async () => {
+    await postApi.list({ languages: ["zh-Hant", "ja", "en"] });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://api.example/post/list?languages=zh-Hant%2Cja%2Cen",
+    );
+  });
+
   test("requests moderation overlays for rendered post nodes", async () => {
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ globalStates: [], realmOverlays: [] }), {

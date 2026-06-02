@@ -1,12 +1,12 @@
 import { t } from "elysia";
-import { DEFAULT_LANGUAGE } from "../language-core";
-import { languageSchema } from "../language";
 import { contentDocSchema } from "../content/doc-v1";
+import { contentTranslationDTOSchema } from "../content/translation";
+import { languageSchema } from "../language";
+import { DEFAULT_LANGUAGE } from "../language-core";
 import {
   unitSupportLanguageDTOSchema,
   unitTranslationDTOSchema,
 } from "../unit/unit";
-import { contentTranslationDTOSchema } from "../content/translation";
 
 export const languageResolutionInputSchema = t.Object({
   explicitLanguage: t.Optional(languageSchema),
@@ -23,6 +23,12 @@ export type SupportLanguageLike = {
   sortOrder?: number | null;
 };
 
+export const readLanguageQuerySchema = t.Object({
+  languages: t.Optional(t.String()),
+});
+
+export type ReadLanguageQuery = (typeof readLanguageQuerySchema)["static"];
+
 export function primaryLanguages(
   supportLanguages: readonly SupportLanguageLike[] = [],
 ): string[] {
@@ -37,6 +43,7 @@ export function primaryLanguages(
 export function readLanguageCandidates(input: {
   explicitLanguage?: string | null;
   preferredLanguages?: readonly (string | null | undefined)[] | null;
+  languages?: readonly (string | null | undefined)[] | null;
   appLocale?: string | null;
   supportLanguages?: readonly SupportLanguageLike[] | null;
   fallbackLanguage?: string | null;
@@ -53,6 +60,7 @@ export function readLanguageCandidates(input: {
   // more specific and intentionally outrank it for content reads.
   return uniqueLanguages([
     input.explicitLanguage,
+    ...(input.languages ?? []),
     ...(input.preferredLanguages ?? []),
     input.appLocale,
     ...primary.map((item) => item.language),
@@ -84,17 +92,29 @@ export function resolveAuthoringLanguage(
 export function resolveReadLanguage(input: {
   explicitLanguage?: string | null;
   preferredLanguages?: readonly (string | null | undefined)[] | null;
+  languages?: readonly (string | null | undefined)[] | null;
   appLocale?: string | null;
   supportLanguages?: readonly SupportLanguageLike[] | null;
   availableLanguages?: readonly (string | null | undefined)[] | null;
   fallbackLanguage?: string | null;
 }): string | null {
-  const available = uniqueLanguages(input.availableLanguages ?? []);
+  const available = uniqueLanguages(
+    input.supportLanguages?.map((item) => item.language) ??
+      input.availableLanguages ??
+      [],
+  );
   if (available.length === 0) return null;
   for (const language of readLanguageCandidates(input)) {
     if (available.includes(language)) return language;
   }
   return available[0] ?? null;
+}
+
+export function parseReadLanguages(
+  raw: string | readonly string[] | null | undefined,
+): string[] {
+  const parts = Array.isArray(raw) ? raw : (raw?.split(",") ?? []);
+  return uniqueLanguages(parts);
 }
 
 function uniqueLanguages(
@@ -127,6 +147,7 @@ export type UnitLanguageAvailabilityResponse =
 
 export const unitLanguageContentQuerySchema = t.Object({
   explicitLanguage: t.Optional(languageSchema),
+  languages: t.Optional(t.String()),
   appLocale: t.Optional(languageSchema),
 });
 
