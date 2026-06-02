@@ -1732,6 +1732,16 @@ const postIncludeForSync = {
   scoreEntry: true,
 } as const;
 
+const postUnitIncludeForSync = {
+  user: true,
+  targetUnit: { include: targetUnitSearchInclude },
+  translations: true,
+  contentTranslations: true,
+  supportLanguages: true,
+  ...realmSearchProjectionSelect,
+  contentModerationState: true,
+} as const;
+
 function languageOrder(unit: any, rows: any[]): string[] {
   const supportLanguages = unit?.supportLanguages ?? [];
   return [
@@ -1759,10 +1769,7 @@ function resolvePostTitleText(post: any): string | null {
     const title = byLanguage.get(language);
     if (typeof title === "string" && title.trim()) return title;
   }
-  const legacyTitle = post.extra?.title;
-  return typeof legacyTitle === "string" && legacyTitle.trim()
-    ? legacyTitle
-    : null;
+  return null;
 }
 
 function resolvePostContent(post: any): unknown {
@@ -1776,7 +1783,7 @@ function resolvePostContent(post: any): unknown {
   for (const language of languageOrder(post.unit, translations)) {
     if (byLanguage.has(language)) return byLanguage.get(language);
   }
-  return post.content;
+  return null;
 }
 
 const commentIncludeForSync = {
@@ -1907,12 +1914,7 @@ export async function syncSinglePost(client: SearchClient, unitId: string) {
     include: {
       ...postIncludeForSync,
       unit: {
-        include: {
-          user: true,
-          targetUnit: { include: targetUnitSearchInclude },
-          ...realmSearchProjectionSelect,
-          contentModerationState: true,
-        },
+        include: postUnitIncludeForSync,
       },
     },
   });
@@ -1943,12 +1945,7 @@ export async function syncAllPosts(client: SearchClient) {
       include: {
         ...postIncludeForSync,
         unit: {
-          include: {
-            user: true,
-            targetUnit: { include: targetUnitSearchInclude },
-            ...realmSearchProjectionSelect,
-            contentModerationState: true,
-          },
+          include: postUnitIncludeForSync,
         },
       },
       orderBy: { unitId: "asc" },
@@ -1982,12 +1979,7 @@ export async function syncPostSegment(
     include: {
       ...postIncludeForSync,
       unit: {
-        include: {
-          user: true,
-          targetUnit: { include: targetUnitSearchInclude },
-          ...realmSearchProjectionSelect,
-          contentModerationState: true,
-        },
+        include: postUnitIncludeForSync,
       },
     },
     orderBy: { unitId: "asc" },

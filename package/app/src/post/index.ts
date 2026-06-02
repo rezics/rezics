@@ -4,6 +4,11 @@ export { PostAuthorHeader } from "./components/parts/PostAuthorHeader";
 export { PostBodyMarkdown } from "./components/parts/PostBodyMarkdown";
 export { PostEditDialog } from "./forms/PostEditDialog";
 export {
+  RootPostTranslationEditor,
+  type RootPostTranslationDraft,
+  type RootPostTranslationEditorProps,
+} from "./forms/RootPostTranslationEditor";
+export {
   ReplyComposer,
   type ReplyComposerHandle,
   type ReplyComposerMode,

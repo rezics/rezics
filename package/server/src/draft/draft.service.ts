@@ -1,6 +1,7 @@
 import {
   contentDocMarkdownFallback,
   type DraftMetadata,
+  mainMarkdownSource,
 } from "@rezics/contract";
 import { PostKind, prisma, UnitStatus } from "#/prisma/client";
 import { postKindToDraftKind, toDraftMetadata } from "./draft.mapper";
@@ -15,8 +16,8 @@ const DRAFT_POST_KINDS = [
 
 /** Collapse a ContentDoc to a single line of plain text, trimmed. */
 function plainText(content: unknown): string {
-  return contentDocMarkdownFallback(content)
-    .replace(/[#*_>`~\-]/g, " ")
+  return (mainMarkdownSource(content) ?? contentDocMarkdownFallback(content))
+    .replace(/[#*_>`~-]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }

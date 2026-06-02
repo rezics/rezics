@@ -5,7 +5,7 @@ import {
   useUpdatePostMutation,
 } from "@rezics/api/post/post";
 import { mainMarkdownSource, markdownContentDoc } from "@rezics/contract";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -15,6 +15,7 @@ import { Route as reviewEditRoute } from "@/routes/_editor/review/$reviewId/edit
 
 export function ReviewEditPageContainer() {
   const { t } = useTranslation(["common", "community"]);
+  const locale = useLocale();
   const { reviewId } = reviewEditRoute.useParams();
   const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
   const navigate = useNavigate();
@@ -33,11 +34,12 @@ export function ReviewEditPageContainer() {
         contentSource: mainMarkdownSource(data.content) ?? "",
         _editTitle: data.title ?? "",
         _editRating: (data.extra as any)?.rating ?? 0,
+        language: locale,
         extra: (data.extra as Record<string, any>) ?? {},
         targetUnitId: data.targetUnitId,
       });
     }
-  }, [data]);
+  }, [data, locale]);
 
   const { show } = useAlertStore();
 
@@ -77,6 +79,7 @@ export function ReviewEditPageContainer() {
         post: {
           content: markdownContentDoc(reviewData.contentSource || ""),
           title: reviewData._editTitle || undefined,
+          language: reviewData.language ?? locale,
           extra: {
             ...reviewData.extra,
             rating: reviewData._editRating || 0,
@@ -120,6 +123,7 @@ export function ReviewEditPageContainer() {
           onSubmit={handleSave}
           submitLabel={isPending ? t("common:submitting") : t("common:submit")}
           extraActions={<DeleteButton onDelete={handleDelete} />}
+          post={data}
         />
       </div>
     </div>

@@ -14,10 +14,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Input,
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
+import { RootPostTranslationEditor } from "@/post";
 
 interface RemarkEditDialogProps {
   remark: PostDTO;
@@ -36,6 +36,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,
   );
+  const [language, setLanguage] = useState(locale);
   const [title, setTitle] = useState(remark.title ?? "");
   const [text, setText] = useState(mainMarkdownSource(remark.content) ?? "");
 
@@ -59,7 +60,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
           post: {
             title: trimmedTitle,
             content: markdownContentDoc(text.trim()),
-            language: locale,
+            language,
             extra: nextExtra,
           },
         },
@@ -86,17 +87,17 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
               max={SCORE_MAX}
               aria-label={t("page:remark_form_rating")}
             />
-            <Input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder={t("community:post_title_placeholder")}
+            <RootPostTranslationEditor
+              post={remark}
+              language={language}
+              defaultLanguage={locale}
+              title={title}
+              body={text}
+              onLanguageChange={setLanguage}
+              onTitleChange={setTitle}
+              onBodyChange={setText}
+              titlePlaceholder={t("community:post_title_placeholder")}
               disabled={updateMutation.isPending}
-            />
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={4}
-              className="w-full resize-y rounded-md border border-border-whisper bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </div>

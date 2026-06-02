@@ -1,7 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-
 import { useTranslation } from "@rezics/i18n/react";
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Pencil } from "lucide-react";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { postFlat } from "@/stories/fixtures/post";
@@ -29,6 +28,18 @@ export const Default: Story = {};
 
 export const Compact: Story = {
   args: { showAvatar: false },
+};
+
+export const TitlelessComment: Story = {
+  render: () => (
+    <PostReply
+      post={{
+        ...postFlat[0],
+        title: "Root-only title that replies do not render",
+        directReplyCount: 3,
+      }}
+    />
+  ),
 };
 
 export const OwnerVisibleEditOverflow: Story = {

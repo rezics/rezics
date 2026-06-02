@@ -20,10 +20,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Input,
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
+import { RootPostTranslationEditor } from "./RootPostTranslationEditor";
 
 interface PostEditDialogProps {
   post: PostDTO | CommentDTO;
@@ -38,12 +38,11 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
 }) => {
   const { t } = useTranslation(["common", "community"]);
   const locale = useLocale();
-  const [title, setTitle] = useState(
-    !("rootUnitId" in post) ? (post.title ?? "") : "",
-  );
-  const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
-  const [lockedError, setLockedError] = useState<string | null>(null);
   const isComment = "rootUnitId" in post;
+  const [title, setTitle] = useState(!isComment ? (post.title ?? "") : "");
+  const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
+  const [language, setLanguage] = useState(locale);
+  const [lockedError, setLockedError] = useState<string | null>(null);
   const originalTitle = isComment ? "" : (post.title ?? "");
   const isWikiPost = !isComment && post.kind === PostKind.WIKI;
 
@@ -90,7 +89,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
         unitId: post.unitId,
         title: trimmedTitle === originalTitle ? undefined : trimmedTitle,
         content,
-        language: locale,
+        language,
       });
       return;
     }
@@ -108,7 +107,7 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
           post: {
             title: trimmedTitle === originalTitle ? undefined : trimmedTitle,
             content,
-            language: locale,
+            language,
           },
         },
       },
@@ -129,20 +128,27 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
               <AlertDescription>{lockedError}</AlertDescription>
             </Alert>
           ) : null}
-          {!isComment ? (
-            <Input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder={t("community:post_title_placeholder")}
+          {isComment ? (
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={6}
+              className="w-full min-h-[120px] max-h-[400px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            />
+          ) : (
+            <RootPostTranslationEditor
+              post={post}
+              language={language}
+              defaultLanguage={locale}
+              title={title}
+              body={text}
+              onLanguageChange={setLanguage}
+              onTitleChange={setTitle}
+              onBodyChange={setText}
+              titlePlaceholder={t("community:post_title_placeholder")}
               disabled={activeMutation.isPending}
             />
-          ) : null}
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={6}
-            className="w-full min-h-[120px] max-h-[400px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
+          )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>

@@ -34,6 +34,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     contentSource: "",
     _editTitle: "",
     _editRating: 0,
+    language: locale,
     extra: {},
   });
   const { show } = useAlertStore();
@@ -95,7 +96,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       targetUnitId: primaryTargetUnitId,
       variantUnitId,
       kind,
-      language: locale,
+      language: reviewData.language ?? locale,
       title: reviewData._editTitle.trim(),
       status,
       content: markdownContentDoc(reviewData.contentSource || ""),

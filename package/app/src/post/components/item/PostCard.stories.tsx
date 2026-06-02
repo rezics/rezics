@@ -68,6 +68,15 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
+export const RootPostWithTitle: Story = {
+  args: {
+    post: {
+      ...postFlat[0],
+      title: "Translation-resolved thread title",
+    },
+  },
+};
+
 export const LongContent: Story = {
   args: { post: postLongBody },
 };

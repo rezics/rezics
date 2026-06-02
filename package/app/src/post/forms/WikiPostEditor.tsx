@@ -10,11 +10,11 @@ import {
   type PostDTO,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
-import { Alert, AlertDescription, Button, Input } from "@rezics/ui/shadcn";
+import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
-import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
+import { RootPostTranslationEditor } from "./RootPostTranslationEditor";
 
 export interface WikiPostEditorProps {
   targetUnitId?: string;
@@ -34,6 +34,7 @@ export function WikiPostEditor({
   const { t } = useTranslation(["common"]);
   const { t: tc } = useTranslation(["community"]);
   const locale = useLocale();
+  const [language, setLanguage] = useState(locale);
   const [title, setTitle] = useState(post?.title ?? "");
   const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export function WikiPostEditor({
     createMutation.mutate({
       title: trimmedTitle,
       content: markdownContentDoc(trimmed),
-      language: locale,
+      language,
       realmUnitIds,
       targetUnitId,
       status,
@@ -89,7 +90,7 @@ export function WikiPostEditor({
       unitId: post.unitId,
       title: trimmedTitle === post.title ? undefined : trimmedTitle,
       content: markdownContentDoc(trimmed),
-      language: locale,
+      language,
     });
   };
 
@@ -100,13 +101,19 @@ export function WikiPostEditor({
           <AlertDescription>{lockedError}</AlertDescription>
         </Alert>
       ) : null}
-      <Input
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        placeholder={tc("community:post_title_placeholder")}
+      <RootPostTranslationEditor
+        post={post}
+        language={language}
+        defaultLanguage={locale}
+        title={title}
+        body={body}
+        onLanguageChange={setLanguage}
+        onTitleChange={setTitle}
+        onBodyChange={setBody}
+        titlePlaceholder={tc("community:post_title_placeholder")}
         disabled={activeMutation.isPending}
+        resize={resize}
       />
-      <RezicsMarkdownEditor value={body} onChange={setBody} resize={resize} />
 
       {post ? (
         <div className="flex items-center justify-end gap-2">

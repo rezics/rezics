@@ -6,6 +6,7 @@ export const PostKind = {
   REMARK: "REMARK",
   EXCERPT: "EXCERPT",
   CHAPTER: "CHAPTER",
+  WIKI: "WIKI",
 } as const;
 
 export const UnitStatus = {

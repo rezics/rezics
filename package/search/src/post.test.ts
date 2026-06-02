@@ -178,20 +178,6 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      content: {
-        ...markdownContentDoc("main markdown"),
-        slots: {
-          facts: {
-            type: "infobox",
-            rows: [
-              {
-                label: { type: "markdown", source: "Author" },
-                value: { type: "markdown", source: "Slot text" },
-              },
-            ],
-          },
-        },
-      },
       kind: "POST",
       depth: 0,
       isLocked: false,
@@ -205,13 +191,119 @@ describe("buildPostDocument", () => {
       parentPostUnitId: null,
       authorUserId: "user-1",
       scoreEntryId: null,
-      unit: { user: null, inRealms: [] },
+      unit: {
+        user: null,
+        inRealms: [],
+        defaultLanguage: "en",
+        supportLanguages: [],
+        translations: [],
+        contentTranslations: [
+          {
+            language: "en",
+            content: {
+              ...markdownContentDoc("main markdown"),
+              slots: {
+                facts: {
+                  type: "infobox",
+                  rows: [
+                    {
+                      label: { type: "markdown", source: "Author" },
+                      value: { type: "markdown", source: "Slot text" },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ],
+      },
       targetUnit: null,
       scoreEntry: null,
     });
 
     expect(doc.contentText).toBe("main markdown");
     expect(doc.contentText).not.toContain("Slot text");
+  });
+
+  test("resolves root post title and content from translations only", async () => {
+    setServerEnvForSearchTests();
+    const { buildPostDocument } = await import("./sync");
+    const doc = buildPostDocument({
+      unitId: "post-1",
+      content: markdownContentDoc("legacy body"),
+      kind: "POST",
+      depth: 0,
+      isLocked: false,
+      replyCount: 0,
+      directReplyCount: 0,
+      lastReplyAt: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      targetUnitId: null,
+      rootPostUnitId: null,
+      parentPostUnitId: null,
+      authorUserId: "user-1",
+      scoreEntryId: null,
+      unit: {
+        user: null,
+        inRealms: [],
+        defaultLanguage: "ja",
+        supportLanguages: [
+          { language: "en", isPrimary: true, sortOrder: 1 },
+          { language: "ja", isPrimary: false, sortOrder: 2 },
+        ],
+        translations: [
+          { language: "en", title: "English title" },
+          { language: "ja", title: "Japanese title" },
+        ],
+        contentTranslations: [
+          { language: "en", content: markdownContentDoc("English body") },
+          { language: "ja", content: markdownContentDoc("Japanese body") },
+        ],
+      },
+      targetUnit: null,
+      scoreEntry: null,
+      extra: { title: "Legacy title" },
+    });
+
+    expect(doc.titleText).toBe("Japanese title");
+    expect(doc.contentText).toBe("Japanese body");
+  });
+
+  test("does not fall back to legacy post title or body storage", async () => {
+    setServerEnvForSearchTests();
+    const { buildPostDocument } = await import("./sync");
+    const doc = buildPostDocument({
+      unitId: "post-1",
+      content: markdownContentDoc("legacy body"),
+      kind: "POST",
+      depth: 0,
+      isLocked: false,
+      replyCount: 0,
+      directReplyCount: 0,
+      lastReplyAt: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      targetUnitId: null,
+      rootPostUnitId: null,
+      parentPostUnitId: null,
+      authorUserId: "user-1",
+      scoreEntryId: null,
+      unit: {
+        user: null,
+        inRealms: [],
+        defaultLanguage: "en",
+        supportLanguages: [],
+        translations: [],
+        contentTranslations: [],
+      },
+      targetUnit: null,
+      scoreEntry: null,
+      extra: { title: "Legacy title" },
+    });
+
+    expect(doc.titleText).toBeNull();
+    expect(doc.contentText).toBeNull();
   });
 });
 
