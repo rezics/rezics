@@ -125,6 +125,7 @@ async function seedPostKindForTarget(
     const extra = generatePostExtra(kind);
     const needsTitle = kind === PostKind.REVIEW;
     const translations = needsTitle ? generateTranslations(UnitType.POST) : [];
+    const published = randomBoolean(0.9);
 
     let scoreEntryId: string | undefined;
     if (needsScore && scoreEntries) {
@@ -142,7 +143,7 @@ async function seedPostKindForTarget(
         userId: author.userId,
         slugScope: author.userId,
         targetUnitId,
-        status: randomBoolean(0.9) ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
+        status: published ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
         licenseSlug: DEFAULT_PUBLICATION_LICENSE_SLUG,
         defaultLanguage: DEFAULT_LANGUAGE,
         publishedAt: randomBoolean(0.85) ? faker.date.past({ years: 2 }) : null,
@@ -150,9 +151,17 @@ async function seedPostKindForTarget(
           create: {
             authorUserId: author.userId,
             kind,
-            content: markdownContentDoc(body) as never,
             extra: extra ?? undefined,
             scoreEntryId: scoreEntryId ?? undefined,
+          },
+        },
+        contentTranslations: {
+          create: {
+            language: DEFAULT_LANGUAGE,
+            content: markdownContentDoc(body) as never,
+            status: published ? "PUBLISHED" : "DRAFT",
+            authorUserId: author.userId,
+            provenance: { importedFrom: "factory-post-seed" },
           },
         },
         translations: needsTitle
@@ -257,10 +266,23 @@ async function seedPostKindBatch(
         unitId: r.id,
         authorUserId: r.author.userId,
         kind,
-        content: markdownContentDoc(r.body) as never,
         extra: r.extra ?? undefined,
         scoreEntryId: r.scoreEntryId ?? null,
       })),
+    });
+  }
+
+  const allContentTranslations = rows.map((r) => ({
+    unitId: r.id,
+    language: DEFAULT_LANGUAGE,
+    content: markdownContentDoc(r.body) as never,
+    status: r.published ? "PUBLISHED" : "DRAFT",
+    authorUserId: r.author.userId,
+    provenance: { importedFrom: "factory-post-seed" },
+  }));
+  for (let i = 0; i < allContentTranslations.length; i += BATCH_SIZE) {
+    await prisma.contentTranslation.createMany({
+      data: allContentTranslations.slice(i, i + BATCH_SIZE),
     });
   }
 
@@ -341,11 +363,19 @@ async function seedTreePostsForTarget(
           create: {
             authorUserId: author.userId,
             kind: PostKind.POST,
-            content: generatePostContent(PostKind.POST) as never,
           },
         },
         supportLanguages: {
           create: { language: DEFAULT_LANGUAGE, isPrimary: true },
+        },
+        contentTranslations: {
+          create: {
+            language: DEFAULT_LANGUAGE,
+            content: generatePostContent(PostKind.POST) as never,
+            status: "PUBLISHED",
+            authorUserId: author.userId,
+            provenance: { importedFrom: "factory-post-tree-seed" },
+          },
         },
       },
       select: { id: true, type: true },
@@ -429,7 +459,6 @@ export async function seedWikiContentTranslations(
           create: {
             authorUserId: author.userId,
             kind: PostKind.POST,
-            content: markdownContentDoc(primary.contentSource) as never,
           },
         },
         translations: {

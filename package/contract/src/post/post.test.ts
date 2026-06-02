@@ -139,13 +139,12 @@ describe("post work-domain contract fields", () => {
     ).toBe(true);
   });
 
-  test("create title is the root-post display title, not extra.title", () => {
+  test("create title is the required root-post display title", () => {
     expect(
       Value.Check(createPostSchema, {
         language: "en",
         title: "Display title",
         content: markdownContentDoc("body"),
-        extra: { title: "legacy import title" },
       }),
     ).toBe(true);
     expect(
@@ -230,6 +229,16 @@ describe("post poll content blocks", () => {
       authorUserId: "user-1",
       content: null,
       extra: { poll: {} },
+    };
+    expect(Value.Clean(postDTOSchema, post).extra).toEqual({});
+  });
+
+  test("extra no longer validates legacy title references", () => {
+    const post = {
+      unitId: "post-1",
+      authorUserId: "user-1",
+      content: null,
+      extra: { title: "legacy title" },
     };
     expect(Value.Clean(postDTOSchema, post).extra).toEqual({});
   });

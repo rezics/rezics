@@ -36,7 +36,7 @@ function makeReviewPost(unitId: string, title: string): PostDTO {
   return {
     unitId,
     authorUserId: "u1",
-    extra: { title },
+    title,
   } as unknown as PostDTO;
 }
 

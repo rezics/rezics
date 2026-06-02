@@ -28,17 +28,15 @@ describe("titleOf", () => {
       unitId: "rev-1",
       authorUserId: "u1",
       title: "A great review",
-      extra: { title: "Legacy title" },
     };
     expect(titleOf(unit, cached)).toBe("A great review");
   });
 
-  test("review ignores repair-only extra.title and falls back to unitId", () => {
+  test("review falls back to unitId when resolved title is absent", () => {
     const unit = makeUnit({ kind: "review", unitId: "rev-2" });
     const cached = {
       unitId: "rev-2",
       authorUserId: "u1",
-      extra: { title: "Legacy title" },
     };
     expect(titleOf(unit, cached)).toBe("rev-2");
   });

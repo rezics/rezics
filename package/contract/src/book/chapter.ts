@@ -11,7 +11,7 @@ import {
 // ============================================================
 // CHAPTER CONTRACTS
 // Chapter = Unit(type=POST, targetUnitId=<book>) + Post(kind=CHAPTER).
-// Content lives in Post.content. Title lives in UnitTranslation.title.
+// Body content lives in ContentTranslation. Title lives in UnitTranslation.title.
 // Cover (optional) lives in UnitTranslation.extra.coverUrl
 // (see unitTranslationExtraSchema). BookContentStructure JSON stores chapter order.
 // ============================================================

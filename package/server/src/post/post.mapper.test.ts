@@ -11,6 +11,7 @@ mock.module("@/unit/variant-context", () => ({
 }));
 mock.module("@/utils/sanitizeUser", () => ({
   mapPublicUser: (user: unknown) => user,
+  publicUserSelect: {},
 }));
 
 const { mapPostToDTO } = await import("./post.mapper");
@@ -19,7 +20,6 @@ const basePost = {
   unitId: "post-1",
   authorUserId: "user-1",
   variantUnitId: null,
-  content: markdownContentDoc("legacy body"),
   kind: "POST",
   scoreEntryId: null,
   replyCount: 0,
@@ -27,7 +27,7 @@ const basePost = {
   lastReplyAt: null,
   isLocked: false,
   state: null,
-  extra: { title: "Legacy title" },
+  extra: null,
   createdAt: new Date("2026-06-02T00:00:00.000Z"),
   updatedAt: new Date("2026-06-02T00:00:00.000Z"),
   unit: {
@@ -86,7 +86,7 @@ describe("mapPostToDTO", () => {
     expect(dto.content).toBeNull();
   });
 
-  test("does not resolve title or body from repair-only legacy fields", () => {
+  test("returns null title and body when translations are absent", () => {
     const dto = mapPostToDTO(basePost);
 
     expect(dto.title).toBeNull();

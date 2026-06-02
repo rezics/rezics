@@ -134,6 +134,7 @@ const unitTranslationUpsertMock = mock(async (args: any) => args.create);
 const unitSupportLanguageUpsertMock = mock(async (args: any) => args.create);
 const contentTranslationUpsertMock = mock(async (args: any) => args.create);
 const contentTranslationUpdateManyMock = mock(async () => ({ count: 1 }));
+const contentTranslationDeleteManyMock = mock(async () => ({ count: 1 }));
 const postPollReferenceCreateManyMock = mock(async () => ({ count: 0 }));
 const postPollReferenceDeleteManyMock = mock(async () => ({ count: 0 }));
 const pollUpdateManyMock = mock(async () => ({ count: 0 }));
@@ -208,6 +209,7 @@ const transactionMock = mock(async (fn: any) =>
     contentTranslation: {
       upsert: contentTranslationUpsertMock,
       updateMany: contentTranslationUpdateManyMock,
+      deleteMany: contentTranslationDeleteManyMock,
     },
     postPollReference: {
       createMany: postPollReferenceCreateManyMock,
@@ -282,6 +284,7 @@ Object.assign(prismaMock, {
   contentTranslation: {
     upsert: contentTranslationUpsertMock,
     updateMany: contentTranslationUpdateManyMock,
+    deleteMany: contentTranslationDeleteManyMock,
   },
   unitTranslation: {
     findMany: unitTranslationFindManyMock,
@@ -368,9 +371,7 @@ mock.module("@/utils/sanitizeUser", () => ({
   publicUserSelect: {},
 }));
 
-const { PostService, rebuildPollUsageFromPostContents } = await import(
-  "./post.service"
-);
+const { PostService } = await import("./post.service");
 
 const content = (source: string) => markdownContentDoc(source);
 const postInput = (overrides: Record<string, unknown> = {}) => ({
@@ -459,6 +460,7 @@ function resetMocks() {
   unitSupportLanguageUpsertMock.mockClear();
   contentTranslationUpsertMock.mockClear();
   contentTranslationUpdateManyMock.mockClear();
+  contentTranslationDeleteManyMock.mockClear();
   postPollReferenceCreateManyMock.mockClear();
   postPollReferenceDeleteManyMock.mockClear();
   pollUpdateManyMock.mockClear();
@@ -1171,7 +1173,10 @@ describe("PostService.create targetUnitId derivation", () => {
         language: "en",
         title: "Thread title",
         content: content("body"),
-        extra: { title: "legacy title", poll: { unitId: "poll-1" } },
+        extra: {
+          title: "legacy title",
+          poll: { unitId: "poll-1" },
+        } as any,
       },
       "user-1",
     );
@@ -1420,39 +1425,6 @@ describe("PostService.update immutability", () => {
     expect(pollUpdateManyMock).toHaveBeenCalledWith({
       where: { unitId: { in: ["poll-remove"] }, usageCount: { gt: 0 } },
       data: { usageCount: { decrement: 1 } },
-    });
-  });
-
-  test("repair helper rebuilds distinct poll usage from post content", () => {
-    const rebuilt = rebuildPollUsageFromPostContents([
-      {
-        unitId: "post-1",
-        content: {
-          ...content("one"),
-          afterMain: [
-            { type: "poll", source: "poll-1" },
-            { type: "poll", source: "poll-1" },
-            { type: "poll", source: "poll-2" },
-          ],
-        },
-      },
-      {
-        unitId: "post-2",
-        content: {
-          ...content("two"),
-          beforeMain: [{ type: "poll", source: "poll-1" }],
-        },
-      },
-    ]);
-
-    expect(rebuilt.references).toEqual([
-      { postUnitId: "post-1", pollUnitId: "poll-1" },
-      { postUnitId: "post-1", pollUnitId: "poll-2" },
-      { postUnitId: "post-2", pollUnitId: "poll-1" },
-    ]);
-    expect(Object.fromEntries(rebuilt.usage)).toEqual({
-      "poll-1": 2,
-      "poll-2": 1,
     });
   });
 });

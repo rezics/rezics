@@ -334,6 +334,8 @@ async function runProgressSyncWithRetry(
 
 const contentInclude: any = {
   translations: true,
+  contentTranslations: true,
+  supportLanguages: true,
   aliases: {
     where: {
       status: "ACTIVE" as const,
@@ -416,7 +418,10 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     .map((t: any) => mainMarkdownSource(t.description))
     .filter(isNonEmptyString);
   const descriptionText = descriptions.join("\n") || null;
-  const contentText = mainMarkdownSource(unit.post?.content);
+  const contentText =
+    unit.type === "POST"
+      ? mainMarkdownSource(resolvePostContent({ unit }))
+      : null;
   const languages = translations.map((t: any) => t.language);
   const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
 

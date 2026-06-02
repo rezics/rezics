@@ -26,7 +26,8 @@ const hydratedUnitRows = new Map<string, any>([
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-02T00:00:00.000Z"),
       translations: [{ language: "en", title: "English Wiki", summary: null }],
-      post: { kind: "WIKI", content: null },
+      post: { kind: "WIKI" },
+      contentTranslations: [],
     },
   ],
   [
@@ -40,7 +41,8 @@ const hydratedUnitRows = new Map<string, any>([
       translations: [
         { language: "zh-hant", title: "Traditional Wiki", summary: "Summary" },
       ],
-      post: { kind: "WIKI", content: null },
+      post: { kind: "WIKI" },
+      contentTranslations: [],
     },
   ],
   [

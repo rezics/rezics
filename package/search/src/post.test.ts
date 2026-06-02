@@ -26,7 +26,6 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      content: markdownContentDoc("hello"),
       kind: "POST",
       depth: 0,
       isLocked: false,
@@ -70,7 +69,6 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      content: markdownContentDoc("hello"),
       kind: "REVIEW",
       depth: 0,
       isLocked: false,
@@ -99,7 +97,6 @@ describe("buildPostDocument", () => {
     const doc = buildPostDocument({
       unitId: "post-1",
       variantUnitId: "variant-1",
-      content: markdownContentDoc("hello"),
       kind: "REVIEW",
       isLocked: false,
       replyCount: 0,
@@ -124,7 +121,6 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-2",
-      content: null,
       kind: "POST",
       depth: 0,
       isLocked: false,
@@ -151,7 +147,6 @@ describe("buildPostDocument", () => {
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      content: null,
       kind: "POST",
       depth: 0,
       isLocked: false,
@@ -225,12 +220,11 @@ describe("buildPostDocument", () => {
     expect(doc.contentText).not.toContain("Slot text");
   });
 
-  test("resolves root post title and content from translations only", async () => {
+  test("resolves root post title and content from translations", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      content: markdownContentDoc("legacy body"),
       kind: "POST",
       depth: 0,
       isLocked: false,
@@ -263,19 +257,17 @@ describe("buildPostDocument", () => {
       },
       targetUnit: null,
       scoreEntry: null,
-      extra: { title: "Legacy title" },
     });
 
     expect(doc.titleText).toBe("Japanese title");
     expect(doc.contentText).toBe("Japanese body");
   });
 
-  test("does not fall back to legacy post title or body storage", async () => {
+  test("returns null title and content when translations are absent", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
       unitId: "post-1",
-      content: markdownContentDoc("legacy body"),
       kind: "POST",
       depth: 0,
       isLocked: false,
@@ -299,7 +291,6 @@ describe("buildPostDocument", () => {
       },
       targetUnit: null,
       scoreEntry: null,
-      extra: { title: "Legacy title" },
     });
 
     expect(doc.titleText).toBeNull();
@@ -433,21 +424,27 @@ describe("buildContentDocument realm tag keys", () => {
       subjectAttributions: [],
       post: {
         kind: "POST",
-        content: {
-          ...markdownContentDoc("content main"),
-          slots: {
-            facts: {
-              type: "infobox",
-              rows: [
-                {
-                  label: { type: "markdown", source: "Content slot" },
-                  value: { type: "markdown", source: "Hidden content" },
-                },
-              ],
+      },
+      contentTranslations: [
+        {
+          language: "en",
+          content: {
+            ...markdownContentDoc("content main"),
+            slots: {
+              facts: {
+                type: "infobox",
+                rows: [
+                  {
+                    label: { type: "markdown", source: "Content slot" },
+                    value: { type: "markdown", source: "Hidden content" },
+                  },
+                ],
+              },
             },
           },
         },
-      },
+      ],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
     });
 
     expect(doc.contentText).toBe("content main");

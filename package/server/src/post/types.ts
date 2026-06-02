@@ -25,9 +25,7 @@ export const postInclude = {
 /**
  * Internal post type with relations.
  *
- * Root post title/body are resolved from UnitTranslation and
- * ContentTranslation. Post.content is repair-only migration input and is not
- * used by normal post reads or writes.
+ * Root post title/body are resolved from UnitTranslation and ContentTranslation.
  *
  * `pinKind`/`pinPosition` are the promotion overlay for the rendered thread
  * scope, attached by the thread read (`attachPinKinds`).

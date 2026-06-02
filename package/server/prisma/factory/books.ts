@@ -307,7 +307,19 @@ export async function seedChaptersForBook(
           unitId: r.id,
           authorUserId: bookUserId,
           kind: PostKind.CHAPTER,
+        })),
+      });
+    }
+    for (let i = 0; i < materializedRows.length; i += CHAPTER_BATCH_SIZE) {
+      const chunk = materializedRows.slice(i, i + CHAPTER_BATCH_SIZE);
+      await ctx.prisma.contentTranslation.createMany({
+        data: chunk.map((r) => ({
+          unitId: r.id,
+          language: DEFAULT_LANGUAGE,
           content: markdownContentDoc(r.body ?? "") as Prisma.InputJsonValue,
+          status: "PUBLISHED",
+          authorUserId: bookUserId,
+          provenance: { importedFrom: "factory-book-chapter-seed" },
         })),
       });
     }
@@ -336,9 +348,17 @@ export async function seedChaptersForBook(
             create: {
               authorUserId: bookUserId,
               kind: PostKind.CHAPTER,
+            },
+          },
+          contentTranslations: {
+            create: {
+              language: DEFAULT_LANGUAGE,
               content: markdownContentDoc(
                 row.body ?? "",
               ) as Prisma.InputJsonValue,
+              status: "PUBLISHED",
+              authorUserId: bookUserId,
+              provenance: { importedFrom: "factory-book-chapter-seed" },
             },
           },
         },

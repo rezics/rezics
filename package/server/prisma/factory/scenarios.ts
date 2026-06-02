@@ -264,7 +264,14 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
     unitId: string;
     authorUserId: string;
     kind: PostKind;
+  }> = [];
+  const contentRows: Array<{
+    unitId: string;
+    language: string;
     content: Prisma.InputJsonValue;
+    status: "PUBLISHED";
+    authorUserId: string;
+    provenance: Prisma.InputJsonValue;
   }> = [];
   const supportRows: Array<{
     unitId: string;
@@ -288,9 +295,16 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
       unitId: planned.id,
       authorUserId: user.userId,
       kind: PostKind.POST,
+    });
+    contentRows.push({
+      unitId: planned.id,
+      language: DEFAULT_LANGUAGE,
       content: markdownContentDoc(
         `Root ${planned.rootIndex + 1} for the large post tree scenario.`,
       ) as Prisma.InputJsonValue,
+      status: "PUBLISHED",
+      authorUserId: user.userId,
+      provenance: { importedFrom: "factory-large-post-tree-scenario" },
     });
     supportRows.push({
       unitId: planned.id,
@@ -302,6 +316,7 @@ async function runLargePostTree(ctx: SeedCtx): Promise<SeedResult> {
   await ctx.prisma.unit.createMany({ data: unitRows });
   await ctx.prisma.post.createMany({ data: postRows });
   await ctx.prisma.unitSupportLanguage.createMany({ data: supportRows });
+  await ctx.prisma.contentTranslation.createMany({ data: contentRows });
   for (const post of rootPosts) {
     await ctx.sync.post(post.id);
   }
@@ -566,10 +581,6 @@ async function createWikiScenarioPost(
     publishedAt: Date;
   },
 ): Promise<string> {
-  const primary =
-    input.translations.find(
-      (item) => item.language === input.defaultLanguage,
-    ) ?? input.translations[0]!;
   const postUnitId = randomUUID();
   await ctx.prisma.unit.create({
     data: {
@@ -611,7 +622,6 @@ async function createWikiScenarioPost(
         create: {
           authorUserId: input.userId,
           kind: PostKind.WIKI,
-          content: markdownContentDoc(primary.body) as Prisma.InputJsonValue,
           createdAt: input.publishedAt,
           updatedAt: input.publishedAt,
         },

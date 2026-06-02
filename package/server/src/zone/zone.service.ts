@@ -49,7 +49,7 @@ type TranslatedUnitRow = {
     summary?: string | null;
     description?: unknown;
   }>;
-  post?: { content?: unknown } | null;
+  contentTranslations?: Array<{ content?: unknown }>;
   entity?: { kind?: string | null } | null;
 };
 
@@ -477,7 +477,7 @@ export class ZoneService {
     const limit = sectionLimit(input.section);
     const rows = await prisma.unit.findMany({
       where: this.wikiVisibleUnitWhere(input.realmUnitId),
-      include: { translations: true, post: true },
+      include: { translations: true, contentTranslations: true, post: true },
       orderBy:
         input.mode === "recent"
           ? [{ createdAt: "desc" }, { id: "asc" }]
@@ -489,7 +489,9 @@ export class ZoneService {
       input.mode !== "stub"
         ? rows
         : rows.filter((row) => {
-            const source = mainMarkdownSource(row.post?.content);
+            const source = (row.contentTranslations ?? [])
+              .map((translation) => mainMarkdownSource(translation.content))
+              .find((value) => value !== null);
             if (input.section.kind !== "stubWiki") return false;
             if (input.section.predicate === "missing-body") return !source;
             return !source || source.length < 500;

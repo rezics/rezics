@@ -59,7 +59,8 @@ async function ensureGlobalTag(
 /**
  * Ensure a POST unit owned by `userId`. POST units have no slug in the new
  * substrate (POST is not slug-bearing); existence is determined by an
- * idempotency tuple of (owner, kind, content main source) seeded only at infra time.
+ * idempotency tuple of (owner, kind, content translation main source) seeded
+ * only at infra time.
  */
 async function ensurePostUnit(
   prisma: PrismaClient,
@@ -71,7 +72,13 @@ async function ensurePostUnit(
     where: {
       type: "POST",
       userId,
-      post: { is: { content: { path: ["main", "source"], equals: body } } },
+      post: { is: { kind: "POST" } },
+      contentTranslations: {
+        some: {
+          language: DEFAULT_LANGUAGE,
+          content: { path: ["main", "source"], equals: body },
+        },
+      },
     },
     select: { id: true },
   });
@@ -98,7 +105,15 @@ async function ensurePostUnit(
         create: {
           authorUserId: userId,
           kind: "POST",
+        },
+      },
+      contentTranslations: {
+        create: {
+          language: DEFAULT_LANGUAGE,
           content: markdownContentDoc(body) as never,
+          status: "PUBLISHED",
+          authorUserId: userId,
+          provenance: { importedFrom: "infra-realm-taxonomy-seed" },
         },
       },
     },

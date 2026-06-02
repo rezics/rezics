@@ -54,8 +54,8 @@ function makePost(id: string, title: string): PostDTO {
     unitId: id,
     authorUserId: "story-user",
     author: { unitId: "story-user", name: "Story Curator" },
+    title,
     content: markdownContentDoc(`Body for ${title}.`),
-    extra: { title },
     createdAt: "2026-01-01T00:00:00.000Z",
   };
 }

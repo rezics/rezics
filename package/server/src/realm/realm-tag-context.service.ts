@@ -1,6 +1,5 @@
 import {
   BasicAdminPermission,
-  markdownContentDoc,
   type RezicsSessionClaims,
 } from "@rezics/contract";
 import {
@@ -180,7 +179,6 @@ export class RealmTagContextService {
           unitId: unit.id,
           authorUserId: callerUserId,
           kind: "POST",
-          content: markdownContentDoc("") as Prisma.InputJsonValue,
           extra: {
             kind: "realmTagContext",
             realmUnitId,

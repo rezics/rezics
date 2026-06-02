@@ -91,7 +91,6 @@ export type ExcerptSource = (typeof excerptSourceSchema)["static"];
 
 export const postExtraSchema = t.Object({
   rating: t.Optional(t.Number()),
-  title: t.Optional(t.String()),
   book: t.Optional(
     t.Object({
       id: t.String(),
@@ -126,7 +125,7 @@ export const postDTOSchema = t.Object({
   title: t.Optional(t.Nullable(t.String())),
   /**
    * Resolved root-post body content for the selected/default language.
-   * Root-post reads resolve this from ContentTranslation, not Post.content.
+   * Root-post reads resolve this from ContentTranslation.
    */
   content: t.Optional(t.Nullable(contentDocSchema)),
   kind: t.Optional(t.Nullable(postKindLiterals)),

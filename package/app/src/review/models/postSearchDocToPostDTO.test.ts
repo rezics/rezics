@@ -30,7 +30,8 @@ function makeDoc(
     targetCoverUrl: null,
     scoreValue: null,
     scoreFields: null,
-    extra: { title: "Review title" },
+    titleText: "Review title",
+    extra: null,
     ...overrides,
   };
 }
@@ -39,17 +40,17 @@ describe("mapPostSearchDocToPostDTO", () => {
   test("keeps review title and adds target book metadata", () => {
     const dto = mapPostSearchDocToPostDTO(makeDoc());
 
+    expect(dto.title).toBe("Review title");
     expect(dto.extra).toEqual({
-      title: "Review title",
       book: { id: "book-1", title: "The Book" },
     });
   });
 
   test("leaves extra unchanged when target title is unavailable", () => {
     const dto = mapPostSearchDocToPostDTO(
-      makeDoc({ targetTitles: null, extra: { title: "Only title" } }),
+      makeDoc({ targetTitles: null, extra: { rating: 4 } }),
     );
 
-    expect(dto.extra).toEqual({ title: "Only title" });
+    expect(dto.extra).toEqual({ rating: 4 });
   });
 });

@@ -194,24 +194,6 @@ async function syncPostPollReferences(
   }
 }
 
-export function rebuildPollUsageFromPostContents(
-  posts: { unitId: string; content: unknown }[],
-): {
-  references: { postUnitId: string; pollUnitId: string }[];
-  usage: Map<string, number>;
-} {
-  const references: { postUnitId: string; pollUnitId: string }[] = [];
-  const usage = new Map<string, number>();
-  for (const post of posts) {
-    const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
-    for (const pollUnitId of pollUnitIds) {
-      references.push({ postUnitId: post.unitId, pollUnitId });
-      usage.set(pollUnitId, (usage.get(pollUnitId) ?? 0) + 1);
-    }
-  }
-  return { references, usage };
-}
-
 async function upsertPostContentTranslation(
   tx: Pick<
     Prisma.TransactionClient,
@@ -1234,11 +1216,7 @@ export class PostService {
         data: { status: UnitStatus.DELETED },
       });
 
-      // Clear the post content
-      await tx.post.update({
-        where: { unitId },
-        data: { content: Prisma.JsonNull },
-      });
+      await tx.contentTranslation.deleteMany({ where: { unitId } });
     });
 
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
