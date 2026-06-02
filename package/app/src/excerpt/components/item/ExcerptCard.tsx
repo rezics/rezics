@@ -5,13 +5,7 @@ import {
   type VariantContextSummary,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Card,
-  CardContent,
-} from "@rezics/ui/shadcn";
+import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Quote as FormatQuoteRoundedIcon } from "lucide-react";
 import type React from "react";
@@ -78,24 +72,6 @@ export const ExcerptCard: React.FC<ExcerptCardProps> = ({
           <FormatQuoteRoundedIcon className="h-4 w-4 text-text-secondary mt-1 shrink-0" />
 
           <div className="min-w-0 flex-1">
-            {excerpt.user && (
-              // biome-ignore lint/a11y/noStaticElementInteractions: this only prevents the parent card click when nested author content is used.
-              <div
-                className="flex items-center gap-2 mb-1"
-                onClick={(e) => e.stopPropagation()}
-                onKeyDown={() => undefined}
-              >
-                <Avatar className="h-5 w-5 rounded-md">
-                  <AvatarImage src={excerpt.user.avatar ?? ""} />
-                  <AvatarFallback>
-                    {(excerpt.user.name ?? "?").slice(0, 1)}
-                  </AvatarFallback>
-                </Avatar>
-                <p className="text-xs font-semibold">
-                  {excerpt.user.name ?? ""}
-                </p>
-              </div>
-            )}
             <p className="text-sm text-text-primary line-clamp-3 leading-7">
               {description}
             </p>

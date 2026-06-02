@@ -22,6 +22,7 @@
   "dm_thread_error": "Could not load messages.",
   "dm_thread_loading": "Loading messages…",
   "excerpt_card_description_fallback": "No excerpt content",
+  "excerpt_contributor_label": "excerpted by",
   "excerpt_card_likes_count": "{count} likes",
   "excerpt_card_source_unknown": "Unknown source",
   "excerpt_excerpts_title": "Excerpts",

@@ -22,6 +22,7 @@
   "dm_thread_error": "無法載入訊息。",
   "dm_thread_loading": "正在載入訊息…",
   "excerpt_card_description_fallback": "暫無摘錄內容",
+  "excerpt_contributor_label": "摘錄者",
   "excerpt_card_likes_count": "{count} 喜歡",
   "excerpt_card_source_unknown": "未知出處",
   "excerpt_excerpts_title": "原文摘錄",

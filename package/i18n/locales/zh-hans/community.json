@@ -22,6 +22,7 @@
   "dm_thread_error": "无法加载消息。",
   "dm_thread_loading": "正在加载消息...",
   "excerpt_card_description_fallback": "没有摘录内容",
+  "excerpt_contributor_label": "摘录者",
   "excerpt_card_likes_count": "{count}喜欢",
   "excerpt_card_source_unknown": "来源不明",
   "excerpt_excerpts_title": "摘录",

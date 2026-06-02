@@ -22,6 +22,7 @@
   "dm_thread_error": "メッセージを読み込めませんでした。",
   "dm_thread_loading": "メッセージを読み込んでいます…",
   "excerpt_card_description_fallback": "抜粋コンテンツはありません",
+  "excerpt_contributor_label": "抜粋者",
   "excerpt_card_likes_count": "{count}が「いいね！」",
   "excerpt_card_source_unknown": "出典不明",
   "excerpt_excerpts_title": "抜粋",

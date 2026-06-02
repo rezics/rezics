@@ -1,5 +1,5 @@
 import { useEditorEntry } from "@rezics/api/hooks";
-import { unitQueries } from "@rezics/api/unit/unit.queries";
+import { excerptQueries } from "@rezics/api/excerpt/excerpt.queries";
 import { useTranslation } from "@rezics/i18n/react";
 import { AccentBar } from "@rezics/ui/primitive/decorative/AccentBar.tsx";
 import { Button } from "@rezics/ui/shadcn";
@@ -21,7 +21,9 @@ export const ExcerptDetailSection: React.FC<ExcerptDetailSectionProps> = ({
 }) => {
   const { t } = useTranslation(["common", "community"]);
   const composerRef = useFocusReplyFromQuery();
-  const { data: excerpt, isLoading } = useQuery(unitQueries.detail(unitId));
+  const { data: excerpt, isLoading } = useQuery(
+    excerptQueries.detail(unitId),
+  );
   const editorEntry = useEditorEntry({
     surface: "excerpt",
     ownerUnit: { user: excerpt?.user },

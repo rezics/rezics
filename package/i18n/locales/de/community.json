@@ -22,6 +22,7 @@
   "dm_thread_error": "Nachrichten konnten nicht geladen werden.",
   "dm_thread_loading": "Nachrichten werden geladen…",
   "excerpt_card_description_fallback": "Kein Auszugsinhalt",
+  "excerpt_contributor_label": "exzerpiert von",
   "excerpt_card_likes_count": "{count}mag",
   "excerpt_card_source_unknown": "Unbekannte Quelle",
   "excerpt_excerpts_title": "Auszüge",
