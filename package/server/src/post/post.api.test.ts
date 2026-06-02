@@ -20,6 +20,10 @@ const getByUnitIdMock = mock(async () => ({
   },
 }));
 const createMock = mock(async () => ({ unitId: "created-post-1" }));
+const submitToRealmMock = mock(async () => ({
+  unitId: "post-1",
+  realmUnitId: "realm-1",
+}));
 const updateMock = mock(async (_unitId: string, input: any) => ({
   unitId: "post-1",
   ...input,
@@ -85,6 +89,10 @@ mock.module("@/unit/collaborative-metadata", () => ({
   assertEditorialPatchAllowed: mock(() => undefined),
 }));
 
+mock.module("@/unit/variant-context", () => ({
+  hydrateVariantContextSummaries: mock(async () => undefined),
+}));
+
 mock.module("./post.mapper", () => ({
   mapPostToDTO: mock((post: unknown) => post),
 }));
@@ -92,6 +100,7 @@ mock.module("./post.mapper", () => ({
 mock.module("./post.service", () => ({
   postService: {
     create: createMock,
+    submitToRealm: submitToRealmMock,
     getByUnitId: getByUnitIdMock,
     update: updateMock,
     delete: deleteMock,
@@ -110,6 +119,7 @@ describe("postApi", () => {
     listGlobalContentStatesMock.mockClear();
     listRealmContentOverlaysMock.mockClear();
     createMock.mockClear();
+    submitToRealmMock.mockClear();
     updateMock.mockClear();
     getByUnitIdMock.mockClear();
     deleteMock.mockClear();
@@ -270,6 +280,34 @@ describe("postApi", () => {
       }),
       currentIdentity,
       expect.anything(),
+    );
+  });
+
+  test("submits an authored post to a realm through the post domain", async () => {
+    policyAllowed = true;
+    const { postApi } = await import("./post.api");
+    const response = await postApi.handle(
+      new Request("http://localhost/post/post-1/submit-to-realm", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          realmUnitId: "realm-1",
+          tagIds: ["tag-1"],
+          publish: true,
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "content.create",
+      target: { kind: "post", id: "post-1", realmUnitId: "realm-1" },
+    });
+    expect(submitToRealmMock).toHaveBeenCalledWith(
+      "post-1",
+      { realmUnitId: "realm-1", tagIds: ["tag-1"], publish: true },
+      "owner-1",
     );
   });
 });

@@ -31,6 +31,14 @@ const createRealmMock = mock(async () => ({
   unitId: "realm-created",
   isPublic: true,
 }));
+const getUnitByUnitIdMock = mock(async () => ({
+  unitId: "realm-1",
+  userId: "owner-1",
+}));
+const addUnitRealmMock = mock(async () => ({
+  realmUnitId: "realm-1",
+  unitId: "post-1",
+}));
 const createRealmTagApplicationMock = mock(async () => ({
   realmUnitId: "realm-1",
   unitId: "unit-1",
@@ -109,7 +117,9 @@ mock.module("@/governance", () => ({
 }));
 
 mock.module("@/unit/unit.service", () => ({
-  unitService: {},
+  unitService: {
+    getByUnitId: getUnitByUnitIdMock,
+  },
 }));
 
 mock.module("./realm.mapper", () => ({
@@ -119,6 +129,7 @@ mock.module("./realm.mapper", () => ({
 mock.module("./realm.service", () => ({
   realmService: {
     create: createRealmMock,
+    addUnitRealm: addUnitRealmMock,
     createRealmTagApplication: createRealmTagApplicationMock,
     appendCommunityList: appendCommunityListMock,
     getRulePolicy: getRulePolicyMock,
@@ -139,6 +150,8 @@ describe("realmApi", () => {
     policyAllowed = false;
     decideForIdentityMock.mockClear();
     createRealmMock.mockClear();
+    getUnitByUnitIdMock.mockClear();
+    addUnitRealmMock.mockClear();
     createRealmTagApplicationMock.mockClear();
     appendCommunityListMock.mockClear();
     getRulePolicyMock.mockClear();
@@ -295,6 +308,24 @@ describe("realmApi", () => {
       "pinboard",
       "unit-1",
     );
+  });
+
+  test("keeps realm content feed route admin-scoped", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/content", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ unitId: "post-1" }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(await response.text()).toContain(
+      "Forbidden: you do not have permission to add content to this realm",
+    );
+    expect(getUnitByUnitIdMock).toHaveBeenCalledWith("realm-1");
+    expect(addUnitRealmMock).not.toHaveBeenCalled();
   });
 
   test("reads rule policy without privileged policy decision", async () => {

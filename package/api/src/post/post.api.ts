@@ -16,6 +16,7 @@ import type {
   PostResponse,
   SetPostPublicationInput,
   SetPostStateInput,
+  SubmitPostToRealmInput,
   UpdatePostInput,
 } from "@rezics/contract";
 import { CreationMode, PostKind } from "@rezics/contract";
@@ -135,6 +136,16 @@ export const postApi = {
     input: SetPostPublicationInput,
   ): Promise<PostResponse> => {
     return apiFetch<PostResponse>(`/post/${unitId}/publish`, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  submitToRealm: async (
+    unitId: string,
+    input: SubmitPostToRealmInput,
+  ): Promise<PostResponse> => {
+    return apiFetch<PostResponse>(`/post/${unitId}/submit-to-realm`, {
       method: "POST",
       body: JSON.stringify(input),
     });

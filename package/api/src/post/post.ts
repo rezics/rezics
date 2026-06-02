@@ -26,6 +26,7 @@ export {
   usePinCommentMutation,
   useSetPostPublicationMutation,
   useSetPostStateMutation,
+  useSubmitPostToRealmMutation,
   useUnacceptAnswerMutation,
   useUnpinCommentMutation,
   useUpdatePostMutation,

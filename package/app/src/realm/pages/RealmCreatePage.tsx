@@ -19,6 +19,7 @@ import { useState } from "react";
 import { WikiPostEditor } from "@/post";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { JoinButton } from "../components/JoinButton";
+import { RealmExistingPostSubmitSection } from "../components/RealmExistingPostSubmitSection";
 import { RealmPollWorkspace } from "../components/RealmPollWorkspace";
 import { RealmPostCreateForm } from "../components/RealmPostCreateForm";
 import {
@@ -154,12 +155,7 @@ export function RealmCreatePage({
             />
           </TabsContent>
           <TabsContent value="existing">
-            <div className="rounded-md bg-surface-subtle p-6">
-              <p className="text-sm leading-ui text-text-secondary">
-                Existing post and draft submission needs a member-scoped API
-                operation separate from realm management content routes.
-              </p>
-            </div>
+            <RealmExistingPostSubmitSection realmId={realmId} />
           </TabsContent>
         </Tabs>
       )}

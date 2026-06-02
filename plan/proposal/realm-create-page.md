@@ -23,7 +23,7 @@ The intended outcome is a canonical `/realm/$realmId/create` page that becomes t
 - (type) Publishing existing content into a realm is not the same operation as realm management "add content". The API shape must name the actor intent explicitly, for example author/member submission of an existing post to a realm.
 - (test) The existing-content flow must not use `/realm/:unitId/content` as-is for ordinary member publishing, because that route currently checks realm update permission rather than realm post permission.
 - (test) Publishing a draft into a realm must attach the realm before or during publication so the post appears in the realm feed after publish and respects the same realm posting rule acknowledgement checks as new post creation.
-- (comment) Canonical routing is `/realm/$realmId/create`; slug routes under `/r/$realmSlug/create` may redirect later, but the implementation should not duplicate authoring state across slug and id routes.
+- (comment) Canonical routing is `/realm/$realmId/create`. This is an internal development cutover: do not preserve the modal authoring flow or add duplicate slug-route authoring state for compatibility.
 - (test) The realm page create button must navigate to `/realm/$realmId/create` for members and keep the non-member disabled/join prompt behavior.
 
 ## 1. Route And Page Shell
@@ -32,7 +32,7 @@ The intended outcome is a canonical `/realm/$realmId/create` page that becomes t
 - [x] 1.2 Add `package/app/src/realm/pages/RealmCreatePage.tsx` as the page-level coordinator: fetch realm detail/membership, enforce member-only authoring UI, and host mode selection.
 - [x] 1.3 Update `package/app/src/realm/pages/RealmPage.tsx` so the member create action is a link to `/realm/$realmId/create` instead of a dialog.
 - [x] 1.4 Remove the realm create dialog state and dialog-only imports from `RealmPage.tsx`.
-- [ ] 1.5 Export `RealmCreatePage` from `package/app/src/realm/index.ts` only if route lazy loading or nearby code needs the public feature entry.
+- [x] 1.5 Export `RealmCreatePage` from `package/app/src/realm/index.ts` only if route lazy loading or nearby code needs the public feature entry.
 
 ## 2. Realm Create App Model
 
@@ -63,23 +63,23 @@ The intended outcome is a canonical `/realm/$realmId/create` page that becomes t
 
 ## 6. Existing Post Or Draft Workflow
 
-- [ ] 6.1 Define the contract/API operation for author/member publishing an existing post to a realm, separate from realm admin content management.
-- [ ] 6.2 Implement the server operation in the appropriate domain after deciding ownership: either post service owns "publish this post into realm" or realm service exposes a member-scoped submit route that delegates to post permission checks.
-- [ ] 6.3 Reuse `assertRealmPostAllowed`-equivalent checks so membership state and rule acknowledgement behavior match new realm post creation.
-- [ ] 6.4 Add frontend API mutation and cache invalidation for attaching an existing post/draft to a realm and refreshing realm post lists/drafts.
-- [ ] 6.5 Add a page section that lists eligible drafts/posts by the current author, allows selection, optional realm tags, and submits/publishes into the realm.
+- [x] 6.1 Define the contract/API operation for author/member publishing an existing post to a realm, separate from realm admin content management and without a compatibility wrapper around `/realm/:unitId/content`.
+- [x] 6.2 Implement the server operation in the appropriate domain after deciding ownership: either post service owns "publish this post into realm" or realm service exposes a member-scoped submit route that delegates to post permission checks.
+- [x] 6.3 Reuse `assertRealmPostAllowed`-equivalent checks so membership state and rule acknowledgement behavior match new realm post creation.
+- [x] 6.4 Add frontend API mutation and cache invalidation for attaching an existing post/draft to a realm and refreshing realm post lists/drafts.
+- [x] 6.5 Add a page section that lists eligible drafts/posts by the current author, allows selection, optional realm tags, and submits/publishes into the realm.
 
 ## 7. Tests And Stories
 
 - [ ] 7.1 Add app-level tests for `RealmCreatePage` mode selection and mutation payload assembly.
-- [ ] 7.2 Add API/server tests for the new existing-post-to-realm route, including ordinary member allowed, banned/muted/pending member denied, missing rule acknowledgement denied, and realm admin content route remaining admin-scoped.
+- [x] 7.2 Add API/server tests for the new existing-post-to-realm route, including ordinary member allowed, banned/muted/pending member denied, missing rule acknowledgement denied, and realm admin content route remaining admin-scoped.
 - [ ] 7.3 Add Storybook coverage for the page shell and major empty/loading/member/non-member states if nearby realm pages/components already have story coverage.
-- [ ] 7.4 Run focused tests for changed app models/components and server domain tests; defer broad checks unless the implementation touches shared contracts broadly.
+- [x] 7.4 Run focused tests for changed app models/components and server domain tests; defer broad checks unless the implementation touches shared contracts broadly.
 
 ## Out of scope
 
 - Replacing the global `/create` page.
 - Changing reply/comment authoring.
 - Reworking realm wiki zones or wiki tab management.
-- Making `/r/$realmSlug/create` a first-class authoring route; a redirect can be added later.
+- Making `/r/$realmSlug/create` a first-class authoring route or preserving old modal-create state for compatibility.
 - Building moderation queues for submitted existing content unless the existing-post API decision explicitly requires review states.

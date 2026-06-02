@@ -9,6 +9,7 @@ import type {
   CommentPromotionDTO,
   PostResponse,
   SetPostStateInput,
+  SubmitPostToRealmInput,
   UpdatePostInput,
 } from "@rezics/contract";
 import {
@@ -220,6 +221,36 @@ export function useSetPostPublicationMutation(
   });
 }
 
+export function useSubmitPostToRealmMutation(
+  options?: Omit<
+    UseMutationOptions<
+      PostResponse,
+      Error,
+      { unitId: string; input: SubmitPostToRealmInput }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ unitId, input }) => postApi.submitToRealm(unitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.setQueryData(postKeys.detail(data.unitId), data);
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: postKeys.byRealms(variables.input.realmUnitId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: postKeys.byAuthors(data.authorUserId),
+      });
+      void invalidateForCacheDomain(queryClient, "draft");
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
 /**
  * Transition a post's lifecycle state. The server validates the transition
  * against the post's schema; on success we refresh the post detail (badge
@@ -363,6 +394,7 @@ export const postMutations = {
   useUpdateWikiContent: useUpdateWikiPostContentMutation,
   useDelete: useDeletePostMutation,
   useSetPublication: useSetPostPublicationMutation,
+  useSubmitToRealm: useSubmitPostToRealmMutation,
   useSetState: useSetPostStateMutation,
   usePin: usePinCommentMutation,
   useUnpin: useUnpinCommentMutation,

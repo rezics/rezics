@@ -19,6 +19,7 @@ import {
   postParamsSchema,
   setPostPublicationSchema,
   setPostStateSchema,
+  submitPostToRealmSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import {
@@ -270,6 +271,50 @@ export const postApi = new Elysia({ prefix: "/post" })
         description:
           "Owner-only toggle between published and draft. Publishing is policy-gated; reverting to draft removes the post from feeds and search.",
         tags: ["Posts"],
+      },
+    },
+  )
+  .post(
+    "/:unitId/submit-to-realm",
+    async ({ params, body, identity, status }) => {
+      if (isBlocked(identity.permission)) {
+        return status(403, "Forbidden: blocked users cannot submit posts");
+      }
+      const decision = await governanceRoutePolicyService.decideForIdentity({
+        identity,
+        action: contentPolicyActions.create,
+        target: {
+          kind: "post",
+          id: params.unitId,
+          realmUnitId: body.realmUnitId,
+        },
+      });
+      if (!decision.allowed) {
+        return status(
+          403,
+          decision.safeMessage ?? "Forbidden: policy denied this action",
+        );
+      }
+      const post = await postService.submitToRealm(
+        params.unitId,
+        body,
+        identity.userId,
+      );
+      return mapPostToDTO(post);
+    },
+    {
+      requireLogin: true,
+      params: postParamsSchema,
+      body: submitPostToRealmSchema,
+      response: {
+        200: t.Any(),
+        403: t.String(),
+      },
+      detail: {
+        summary: "Submit an authored post to a realm",
+        description:
+          "Author/member operation for publishing an existing post or draft into a realm. It intentionally does not use the realm admin content route.",
+        tags: ["Posts", "Realms"],
       },
     },
   )

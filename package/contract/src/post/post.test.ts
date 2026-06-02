@@ -9,6 +9,7 @@ import {
   postListQuerySchema,
   postListBodySchema,
   excerptSourceSchema,
+  submitPostToRealmSchema,
 } from "./post";
 import { markdownContentDoc } from "../content/doc-v1";
 
@@ -154,6 +155,18 @@ describe("post work-domain contract fields", () => {
         content: markdownContentDoc("body"),
       }),
     ).toBe(false);
+  });
+
+  test("member realm submission names the author intent explicitly", () => {
+    expect(
+      Value.Check(submitPostToRealmSchema, {
+        realmUnitId: "realm-1",
+        tagIds: ["tag-1"],
+        publish: true,
+      }),
+    ).toBe(true);
+    expect("unitId" in submitPostToRealmSchema.properties).toBe(false);
+    expect("realmUnitIds" in submitPostToRealmSchema.properties).toBe(false);
   });
 
   test("uses comment endpoint naming for promotion contracts", () => {

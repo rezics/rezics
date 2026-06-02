@@ -124,4 +124,29 @@ describe("post wiki API helpers", () => {
       },
     });
   });
+
+  test("submits an authored post to a realm through the post endpoint", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ unitId: "post-1" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await postApi.submitToRealm("post-1", {
+      realmUnitId: "realm-1",
+      tagIds: ["tag-1"],
+      publish: true,
+    });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://api.example/post/post-1/submit-to-realm",
+    );
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: "POST" });
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
+      realmUnitId: "realm-1",
+      tagIds: ["tag-1"],
+      publish: true,
+    });
+  });
 });

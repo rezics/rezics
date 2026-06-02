@@ -400,6 +400,14 @@ export const setPostPublicationSchema = t.Object({
 export type SetPostPublicationInput =
   (typeof setPostPublicationSchema)["static"];
 
+export const submitPostToRealmSchema = t.Object({
+  realmUnitId: t.String(),
+  tagIds: t.Optional(t.Array(t.String())),
+  publish: t.Optional(t.Boolean()),
+});
+
+export type SubmitPostToRealmInput = (typeof submitPostToRealmSchema)["static"];
+
 export const updatePostSchema = t.Object({
   title: t.Optional(t.String({ minLength: 1, maxLength: 300 })),
   content: t.Optional(contentDocWriteSchema),

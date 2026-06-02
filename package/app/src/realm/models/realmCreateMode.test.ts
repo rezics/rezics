@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { PostKind } from "@rezics/contract";
 import {
+  buildRealmExistingPostSubmitInput,
   buildRealmPollPostCreateInput,
   buildRealmPostCreateInput,
   buildRealmWikiCreateInput,
@@ -67,6 +68,32 @@ describe("realm create mode helpers", () => {
       title: "poll title",
       status: "PUBLISHED",
       extra: { poll: { unitId: "poll-1" } },
+    });
+  });
+
+  test("builds existing post submit input for drafts and published posts", () => {
+    expect(
+      buildRealmExistingPostSubmitInput({
+        realmId: "realm-1",
+        tagIds: ["tag-1"],
+        source: "draft",
+      }),
+    ).toEqual({
+      realmUnitId: "realm-1",
+      tagIds: ["tag-1"],
+      publish: true,
+    });
+
+    expect(
+      buildRealmExistingPostSubmitInput({
+        realmId: "realm-1",
+        tagIds: [],
+        source: "published",
+      }),
+    ).toEqual({
+      realmUnitId: "realm-1",
+      tagIds: [],
+      publish: false,
     });
   });
 });

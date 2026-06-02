@@ -14,6 +14,7 @@ process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
 
 const unitCreateMock = mock(async (): Promise<any> => ({ id: "post-1" }));
+const unitUpdateMock = mock(async (args: any): Promise<any> => args.data);
 const unitFindUniqueMock = mock(async (): Promise<any> => null);
 const unitFindUniqueOrThrowMock = mock(
   async (): Promise<any> => ({ id: "post-1", userId: "wiki-owner" }),
@@ -111,8 +112,10 @@ const realmUnitCreateMock = mock(async (args: any) => {
   }
   return args.data;
 });
+const realmUnitUpsertMock = mock(async (args: any) => args.create);
 const realmUnitFindManyMock = mock(async () => [{ realmUnitId: "realm-1" }]);
 const unitTagCreateMock = mock(async (args: any) => args.data);
+const unitTagUpsertMock = mock(async (args: any) => args.create);
 const unitTagFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationUpsertMock = mock(async (args: any) => args.create);
@@ -141,6 +144,8 @@ const unitTagFindUniqueMock = mock(async (): Promise<any> => null);
 const historyOutboxCreateMock = mock(async (args: any) => args.data);
 const userFindUniqueMock = mock(async () => null);
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
+let generatedPosition = 0;
+const generateBetweenMock = mock(() => `pos-${++generatedPosition}`);
 const assertCanEditCollaborativeMetadataMock = mock(async () => undefined);
 const collectPatchLeafPathsMock = mock(() => []);
 const writeEditorialMetadataHistoryMock = mock(async () => undefined);
@@ -151,6 +156,7 @@ const transactionMock = mock(async (fn: any) =>
     $executeRaw: executeRawMock,
     unit: {
       create: unitCreateMock,
+      update: unitUpdateMock,
       findMany: unitFindManyMock,
       findUniqueOrThrow: unitFindUniqueOrThrowMock,
     },
@@ -172,8 +178,12 @@ const transactionMock = mock(async (fn: any) =>
     realmRuleAcknowledgement: {
       findMany: realmRuleAcknowledgementFindManyMock,
     },
-    unitRealm: { create: realmUnitCreateMock },
-    unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
+    unitRealm: { create: realmUnitCreateMock, upsert: realmUnitUpsertMock },
+    unitTag: {
+      create: unitTagCreateMock,
+      upsert: unitTagUpsertMock,
+      findMany: unitTagFindManyMock,
+    },
     unitTranslation: {
       findMany: unitTranslationFindManyMock,
       upsert: unitTranslationUpsertMock,
@@ -199,6 +209,7 @@ Object.assign(prismaMock, {
   $executeRaw: executeRawMock,
   unit: {
     create: unitCreateMock,
+    update: unitUpdateMock,
     findMany: unitFindManyMock,
     findUnique: unitFindUniqueMock,
     findFirst: unitFindFirstMock,
@@ -222,7 +233,11 @@ Object.assign(prismaMock, {
     findUniqueOrThrow: commentFindUniqueOrThrowMock,
     update: commentUpdateMock,
   },
-  unitRealm: { create: realmUnitCreateMock, findMany: realmUnitFindManyMock },
+  unitRealm: {
+    create: realmUnitCreateMock,
+    upsert: realmUnitUpsertMock,
+    findMany: realmUnitFindManyMock,
+  },
   realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
   realmMember: {
     findMany: realmMemberFindManyMock,
@@ -233,6 +248,7 @@ Object.assign(prismaMock, {
   },
   unitTag: {
     create: unitTagCreateMock,
+    upsert: unitTagUpsertMock,
     findMany: unitTagFindManyMock,
     findUnique: unitTagFindUniqueMock,
   },
@@ -271,10 +287,23 @@ mock.module("@/job/job-boundary", () => ({
   },
 }));
 
+mock.module("@/shelf/fractional-index", () => ({
+  generateBetween: generateBetweenMock,
+}));
+
 mock.module("@/unit/collaborative-metadata", () => ({
   assertCanEditCollaborativeMetadata: assertCanEditCollaborativeMetadataMock,
   collectPatchLeafPaths: collectPatchLeafPathsMock,
   writeEditorialMetadataHistory: writeEditorialMetadataHistoryMock,
+}));
+
+mock.module("@/unit/publication-policy", () => ({
+  publicUnitEligibilityWhere: {},
+  resolveStoredLicenseSlug: mock((licenseSlug: unknown) => licenseSlug),
+}));
+
+mock.module("@/unit/variant-context", () => ({
+  variantContextForRow: mock(() => null),
 }));
 
 mock.module("@/utils/userSlugHydration", () => ({
@@ -317,6 +346,7 @@ const content = (source: string) => markdownContentDoc(source);
 
 function resetMocks() {
   unitCreateMock.mockClear();
+  unitUpdateMock.mockClear();
   unitFindUniqueMock.mockClear();
   unitFindUniqueMock.mockResolvedValue(null);
   unitFindUniqueOrThrowMock.mockClear();
@@ -382,9 +412,11 @@ function resetMocks() {
   realmRuleAcknowledgementFindManyMock.mockClear();
   realmRuleAcknowledgementFindManyMock.mockResolvedValue([]);
   realmUnitCreateMock.mockClear();
+  realmUnitUpsertMock.mockClear();
   realmUnitFindManyMock.mockClear();
   realmUnitFindManyMock.mockResolvedValue([{ realmUnitId: "realm-1" }]);
   unitTagCreateMock.mockClear();
+  unitTagUpsertMock.mockClear();
   unitTagFindManyMock.mockClear();
   unitTranslationFindManyMock.mockClear();
   unitTranslationUpsertMock.mockClear();
@@ -418,6 +450,8 @@ function resetMocks() {
   historyOutboxCreateMock.mockClear();
   userFindUniqueMock.mockClear();
   enqueueMock.mockClear();
+  generatedPosition = 0;
+  generateBetweenMock.mockClear();
   assertCanEditCollaborativeMetadataMock.mockClear();
   collectPatchLeafPathsMock.mockClear();
   writeEditorialMetadataHistoryMock.mockClear();
@@ -631,6 +665,106 @@ describe("PostService.create realm/tag junction writes", () => {
         "user-1",
       ),
     ).rejects.toThrow("Foreign key failed");
+  });
+});
+
+describe("PostService.submitToRealm", () => {
+  const service = new PostService();
+
+  test("attaches an authored draft to a realm and publishes it", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "user-1",
+      kind: "POST",
+      unit: { status: "DRAFT", publishedAt: null },
+    });
+
+    await service.submitToRealm(
+      "post-1",
+      { realmUnitId: "realm-1", tagIds: ["tag-1"], publish: true },
+      "user-1",
+    );
+
+    expect(realmUnitUpsertMock).toHaveBeenCalledWith({
+      where: {
+        realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
+      },
+      create: { realmUnitId: "realm-1", unitId: "post-1" },
+      update: {},
+    });
+    expect(unitTagUpsertMock).toHaveBeenCalledWith({
+      where: { unitId_tagUnitId: { unitId: "post-1", tagUnitId: "tag-1" } },
+      create: { unitId: "post-1", tagUnitId: "tag-1" },
+      update: {},
+    });
+    expect(unitUpdateMock).toHaveBeenCalledWith({
+      where: { id: "post-1" },
+      data: expect.objectContaining({ status: "PUBLISHED" }),
+    });
+    expect(contentTranslationUpdateManyMock).toHaveBeenCalledWith({
+      where: { unitId: "post-1" },
+      data: { status: "PUBLISHED" },
+    });
+  });
+
+  test("rejects submitting another author's post", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "other-user",
+      kind: "POST",
+      unit: { status: "PUBLISHED", publishedAt: new Date() },
+    });
+
+    await expect(
+      service.submitToRealm("post-1", { realmUnitId: "realm-1" }, "user-1"),
+    ).rejects.toMatchObject({
+      statusCode: 403,
+      message: "Only the author can submit this post to a realm",
+    });
+    expect(realmUnitUpsertMock).not.toHaveBeenCalled();
+  });
+
+  test("reuses realm posting membership restrictions", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "user-1",
+      kind: "POST",
+      unit: { status: "PUBLISHED", publishedAt: new Date() },
+    });
+    realmMemberFindManyMock.mockResolvedValueOnce([
+      { realmUnitId: "realm-1", state: "PENDING" },
+    ]);
+
+    await expect(
+      service.submitToRealm("post-1", { realmUnitId: "realm-1" }, "user-1"),
+    ).rejects.toThrow("Cannot post to realm while membership state is pending");
+    expect(realmUnitUpsertMock).not.toHaveBeenCalled();
+  });
+
+  test("reuses realm rule acknowledgement restrictions", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "user-1",
+      kind: "POST",
+      unit: { status: "PUBLISHED", publishedAt: new Date() },
+    });
+    realmFindManyMock.mockResolvedValueOnce([
+      {
+        unitId: "realm-1",
+        extra: { rule: "rule-unit-1" },
+        ruleVersion: 2,
+        ruleRequireOnPost: true,
+      },
+    ]);
+
+    await expect(
+      service.submitToRealm("post-1", { realmUnitId: "realm-1" }, "user-1"),
+    ).rejects.toThrow("Realm rules must be acknowledged before posting");
+    expect(realmUnitUpsertMock).not.toHaveBeenCalled();
   });
 });
 

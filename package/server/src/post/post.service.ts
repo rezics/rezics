@@ -6,6 +6,7 @@ import type {
   PostListQuery,
   CommentPromotionDTO,
   RezicsSessionClaims,
+  SubmitPostToRealmInput,
   UpdatePostInput,
 } from "@rezics/contract";
 import {
@@ -804,6 +805,112 @@ export class PostService {
 
     // Re-sync either way: publish indexes; unpublish de-lists (the indexer
     // honours `publicUnitEligibilityWhere`).
+    await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
+
+    return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
+  }
+
+  async submitToRealm(
+    unitId: string,
+    input: SubmitPostToRealmInput,
+    authorUserId: string,
+  ): Promise<PostWithRelations> {
+    const tagIdsToWrite = [...new Set(input.tagIds ?? [])];
+    const existing = await prisma.post.findUniqueOrThrow({
+      where: { unitId },
+      select: {
+        authorUserId: true,
+        kind: true,
+        unit: { select: { status: true, publishedAt: true } },
+      },
+    });
+    if (existing.authorUserId !== authorUserId) {
+      throw new AppError(
+        403,
+        "Only the author can submit this post to a realm",
+      );
+    }
+    if (existing.unit.status === UnitStatus.DELETED) {
+      throw new AppError(409, "Cannot submit a deleted post to a realm");
+    }
+
+    await this.assertRealmPostAllowed([input.realmUnitId], authorUserId);
+
+    const updated = await prisma.$transaction(async (tx) => {
+      if (tagIdsToWrite.length > 0) {
+        const validTags = await tx.unit.findMany({
+          where: {
+            id: { in: tagIdsToWrite },
+            type: UnitType.TAG,
+            status: { not: UnitStatus.DELETED },
+          },
+          select: { id: true },
+        });
+        const validTagIds = new Set(validTags.map((tag) => tag.id));
+        const invalidTagIds = tagIdsToWrite.filter(
+          (id) => !validTagIds.has(id),
+        );
+        if (invalidTagIds.length > 0) {
+          throw new AppError(
+            400,
+            `Invalid tagIds: ${invalidTagIds.join(", ")}`,
+          );
+        }
+      }
+
+      // This is author/member publishing, not realm admin content management.
+      // Keep it in the post domain so ownership and post-to-realm policy stay
+      // aligned with new realm post creation.
+      await tx.unitRealm.upsert({
+        where: {
+          realmUnitId_unitId: {
+            realmUnitId: input.realmUnitId,
+            unitId,
+          },
+        },
+        create: {
+          realmUnitId: input.realmUnitId,
+          unitId,
+        },
+        update: {},
+      });
+
+      for (const tagUnitId of tagIdsToWrite) {
+        await tx.unitTag.upsert({
+          where: {
+            unitId_tagUnitId: {
+              unitId,
+              tagUnitId,
+            },
+          },
+          create: {
+            unitId,
+            tagUnitId,
+          },
+          update: {},
+        });
+      }
+
+      if (input.publish && existing.unit.status === UnitStatus.DRAFT) {
+        await tx.unit.update({
+          where: { id: unitId },
+          data: {
+            status: UnitStatus.PUBLISHED,
+            publishedAt: existing.unit.publishedAt ?? new Date(),
+          },
+        });
+        await tx.contentTranslation.updateMany({
+          where: { unitId },
+          data: { status: postContentTranslationStatus(false) },
+        });
+      }
+
+      return tx.post.findUniqueOrThrow({
+        where: { unitId },
+        include: postInclude,
+      });
+    });
+
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
 
     return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
