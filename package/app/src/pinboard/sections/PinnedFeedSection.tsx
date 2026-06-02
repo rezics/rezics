@@ -1,13 +1,20 @@
 import { useTranslation } from "@rezics/i18n/react";
 import { DomainCarousel } from "@rezics/ui/composite/carousel/DomainCarousel.tsx";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@rezics/ui/shadcn";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type React from "react";
+import { useState } from "react";
 import { PinboardEntryCard } from "../components/PinboardEntryCard";
 import { PinboardErrorState } from "../components/PinboardErrorState";
 import { PinboardSkeleton } from "../components/PinboardSkeleton";
 import { usePinboardList } from "../hooks/usePinboard";
 
 const PINNED_ITEM_CLASS =
-  "pl-4 basis-[90%] @sm:basis-[70%] @md:basis-[52%] @lg:basis-[44%] @xl:basis-[36%]";
+  "pl-4 basis-[82%] @sm:basis-[58%] @md:basis-[42%] @lg:basis-[34%] @xl:basis-[30%]";
 
 export interface PinnedFeedSectionProps {
   realmUnitId: string;
@@ -25,6 +32,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   linkFor,
 }) => {
   const { t } = useTranslation(["entity"]);
+  const [open, setOpen] = useState(true);
   const { entries, isLoading, isError, refetch } = usePinboardList({
     realmUnitId,
     pinboardKey: "pinboard",
@@ -33,7 +41,7 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
   if (isLoading) {
     return (
       <div className="mb-4">
-        <PinboardSkeleton rows={2} rowHeight={64} />
+        <PinboardSkeleton rows={2} rowHeight={112} />
       </div>
     );
   }
@@ -50,23 +58,31 @@ export const PinnedFeedSection: React.FC<PinnedFeedSectionProps> = ({
 
   return (
     <section className="mb-4" aria-label={t("entity:pinboard_pinned_region")}>
-      <p className="px-1 text-xs font-medium uppercase leading-ui text-text-secondary">
-        {t("entity:pinboard_pinned_heading")}
-      </p>
-      <DomainCarousel
-        items={entries}
-        itemKey={(entry) => entry.unitId}
-        itemClassName={PINNED_ITEM_CLASS}
-        className="mt-2"
-        ariaLabel={t("entity:pinboard_pinned_region")}
-        renderItem={(entry) => (
-          <PinboardEntryCard
-            entry={entry}
-            variant="card"
-            href={linkFor?.(entry.unitId)}
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm font-medium leading-ui text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus">
+          <span>{t("entity:pinboard_pinned_heading")}</span>
+          {open ? (
+            <ChevronUp className="h-4 w-4 text-text-secondary" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-text-secondary" />
+          )}
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-3">
+          <DomainCarousel
+            items={entries}
+            itemKey={(entry) => entry.unitId}
+            itemClassName={PINNED_ITEM_CLASS}
+            ariaLabel={t("entity:pinboard_pinned_region")}
+            renderItem={(entry) => (
+              <PinboardEntryCard
+                entry={entry}
+                variant="pinned"
+                href={linkFor?.(entry.unitId) ?? `/unit/${entry.unitId}`}
+              />
+            )}
           />
-        )}
-      />
+        </CollapsibleContent>
+      </Collapsible>
     </section>
   );
 };

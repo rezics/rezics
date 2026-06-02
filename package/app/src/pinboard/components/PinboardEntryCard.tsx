@@ -2,6 +2,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
+  Card,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -15,9 +16,14 @@ import {
 } from "lucide-react";
 import type React from "react";
 import { cn } from "@/shared/utils/css-util";
+import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import type { PinboardEntryView } from "../models/types";
 
-export type PinboardEntryCardVariant = "compact" | "card" | "adminRow";
+export type PinboardEntryCardVariant =
+  | "compact"
+  | "card"
+  | "pinned"
+  | "adminRow";
 
 export interface PinboardEntryCardProps {
   entry: PinboardEntryView;
@@ -48,19 +54,32 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
   const summary = entry.summary ?? undefined;
 
   if (variant === "compact") {
-    const Wrapper = (href ? "a" : "span") as "a" | "span";
-    return (
-      <div className="flex flex-row items-center gap-2 min-w-0 flex-1">
+    const content = (
+      <>
         <PushPinRoundedIcon
           className="h-3.5 w-3.5 text-warning-text shrink-0"
           aria-hidden="true"
         />
-        <Wrapper
-          className="text-sm whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1"
-          {...(href ? { href } : {})}
-        >
+        <span className="text-sm whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1">
           {title}
-        </Wrapper>
+        </span>
+      </>
+    );
+
+    if (href) {
+      return (
+        <SafeLink
+          href={href}
+          className="flex flex-row items-center gap-2 min-w-0 flex-1 text-inherit no-underline"
+        >
+          {content}
+        </SafeLink>
+      );
+    }
+
+    return (
+      <div className="flex flex-row items-center gap-2 min-w-0 flex-1">
+        {content}
       </div>
     );
   }
@@ -150,15 +169,69 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
     );
   }
 
-  const Wrapper = (href ? "a" : "div") as "a" | "div";
-  return (
-    <Wrapper
-      {...(href ? { href } : {})}
-      className={cn(
-        "block no-underline text-inherit p-4 rounded-lg border border-border-whisper bg-surface-elevated transition-colors",
-        href && "hover:border-brand-fill/60",
-      )}
-    >
+  if (variant === "pinned") {
+    const content = (
+      <>
+        <p
+          className="text-sm font-semibold leading-ui text-text-primary overflow-hidden"
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {title}
+        </p>
+        {summary ? (
+          <p
+            className="mt-1 text-xs leading-dense text-text-secondary overflow-hidden"
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+            }}
+          >
+            {summary}
+          </p>
+        ) : null}
+        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+          <span className="truncate text-xs leading-dense text-text-tertiary">
+            {entry.subtitle ?? entry.language}
+          </span>
+          <span
+            className="shrink-0 text-xs leading-dense text-text-tertiary"
+            aria-label={t("entity:pinboard_entry_language", {
+              lang: entry.language,
+            })}
+          >
+            {entry.language}
+          </span>
+        </div>
+      </>
+    );
+    const card = (
+      <Card
+        surface="plain"
+        interactive={Boolean(href)}
+        className="min-h-28 gap-0 p-4"
+      >
+        {content}
+      </Card>
+    );
+
+    if (href) {
+      return (
+        <SafeLink href={href} className="block text-inherit no-underline">
+          {card}
+        </SafeLink>
+      );
+    }
+
+    return card;
+  }
+
+  const content = (
+    <>
       <div className="flex flex-row items-center gap-2 mb-1">
         <PushPinRoundedIcon
           className="h-4 w-4 text-warning-text shrink-0"
@@ -178,6 +251,21 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
           {summary}
         </p>
       ) : null}
-    </Wrapper>
+    </>
   );
+  const card = (
+    <Card surface="plain" interactive={Boolean(href)} className="gap-0 p-4">
+      {content}
+    </Card>
+  );
+
+  if (href) {
+    return (
+      <SafeLink href={href} className="block text-inherit no-underline">
+        {card}
+      </SafeLink>
+    );
+  }
+
+  return card;
 };
