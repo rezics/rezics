@@ -1,4 +1,5 @@
 import { contentTranslationQueries } from "@rezics/api/content-translation/content-translation";
+import { unitQueries } from "@rezics/api/unit/unit";
 import { mainMarkdownSource, type PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Input } from "@rezics/ui/shadcn";
@@ -21,6 +22,7 @@ export type RootPostTranslationDraft = {
 export interface RootPostTranslationEditorProps {
   post?: PostDTO;
   language: string;
+  defaultLanguage?: string | null;
   title: string;
   body: string;
   onLanguageChange: (language: string) => void;
@@ -74,6 +76,11 @@ export function RootPostTranslationEditor({
   const { data: contentTranslationList } = useQuery(
     contentTranslationQueries.list(post?.unitId ?? ""),
   );
+  const { data: unit } = useQuery({
+    ...unitQueries.detail(post?.unitId ?? ""),
+    enabled: Boolean(post?.unitId),
+  });
+  const resolvedDefaultLanguage = defaultLanguage ?? unit?.defaultLanguage;
 
   const translationBodies = useMemo(() => {
     const map = new Map<string, string>();
@@ -86,12 +93,19 @@ export function RootPostTranslationEditor({
   const existingLanguages = useMemo(
     () =>
       uniq([
+        resolvedDefaultLanguage ?? "",
         language,
+        ...(unit?.supportLanguages ?? []).map(
+          (supportLanguage) => supportLanguage.language,
+        ),
+        ...(unit?.translations ?? []).map(
+          (translation) => translation.language,
+        ),
         ...(contentTranslationList?.translations ?? []).map(
           (translation) => translation.language,
         ),
       ]),
-    [contentTranslationList, language],
+    [contentTranslationList, language, resolvedDefaultLanguage, unit],
   );
 
   useEffect(() => {
@@ -112,7 +126,7 @@ export function RootPostTranslationEditor({
     }));
     const nextDraft =
       drafts[nextLanguage] ??
-      (defaultLanguage === nextLanguage
+      (resolvedDefaultLanguage === nextLanguage
         ? { title: post.title ?? "", body: readBody(post.content) }
         : { title: "", body: translationBodies.get(nextLanguage) ?? "" });
     onLanguageChange(nextLanguage);
@@ -141,7 +155,7 @@ export function RootPostTranslationEditor({
       <UnitTranslationLanguageBar
         existingLanguages={existingLanguages}
         selectedLanguage={language}
-        defaultLanguage={defaultLanguage}
+        defaultLanguage={resolvedDefaultLanguage}
         onSelect={selectLanguage}
         onAddClick={() => setAddLanguageOpen(true)}
         label={t("community:post_languages")}

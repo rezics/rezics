@@ -119,6 +119,7 @@ const unitTagUpsertMock = mock(async (args: any) => args.create);
 const unitTagFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationUpsertMock = mock(async (args: any) => args.create);
+const unitSupportLanguageUpsertMock = mock(async (args: any) => args.create);
 const contentTranslationUpsertMock = mock(async (args: any) => args.create);
 const contentTranslationUpdateManyMock = mock(async () => ({ count: 1 }));
 const postPollReferenceCreateManyMock = mock(async () => ({ count: 0 }));
@@ -191,6 +192,7 @@ const transactionMock = mock(async (fn: any) =>
       findMany: unitTranslationFindManyMock,
       upsert: unitTranslationUpsertMock,
     },
+    unitSupportLanguage: { upsert: unitSupportLanguageUpsertMock },
     contentTranslation: {
       upsert: contentTranslationUpsertMock,
       updateMany: contentTranslationUpdateManyMock,
@@ -273,6 +275,7 @@ Object.assign(prismaMock, {
     findMany: unitTranslationFindManyMock,
     upsert: unitTranslationUpsertMock,
   },
+  unitSupportLanguage: { upsert: unitSupportLanguageUpsertMock },
   commentPromotion: {
     create: commentPromotionCreateMock,
     findUnique: commentPromotionFindUniqueMock,
@@ -441,6 +444,7 @@ function resetMocks() {
   unitTagFindManyMock.mockClear();
   unitTranslationFindManyMock.mockClear();
   unitTranslationUpsertMock.mockClear();
+  unitSupportLanguageUpsertMock.mockClear();
   contentTranslationUpsertMock.mockClear();
   contentTranslationUpdateManyMock.mockClear();
   postPollReferenceCreateManyMock.mockClear();
@@ -1291,6 +1295,15 @@ describe("PostService.update immutability", () => {
         }),
       }),
     );
+    expect(unitSupportLanguageUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId_language: { unitId: "post-1", language: "en" } },
+        create: expect.objectContaining({
+          unitId: "post-1",
+          language: "en",
+        }),
+      }),
+    );
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
       "search.post.patchFields",
       "search.content.sync",
@@ -1329,6 +1342,15 @@ describe("PostService.update immutability", () => {
           title: "Updated title",
         }),
         update: { title: "Updated title" },
+      }),
+    );
+    expect(unitSupportLanguageUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId_language: { unitId: "post-1", language: "ja" } },
+        create: expect.objectContaining({
+          unitId: "post-1",
+          language: "ja",
+        }),
       }),
     );
 

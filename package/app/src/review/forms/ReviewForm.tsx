@@ -3,6 +3,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import { Input, Label } from "@rezics/ui/shadcn";
 import type React from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { RootPostTranslationEditor } from "@/post/forms/RootPostTranslationEditor";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
@@ -26,7 +27,7 @@ export type ReviewFormPrimaryAction = {
 
 interface ReviewFormProps {
   data: ReviewEditState;
-  setData: (data: ReviewEditState) => void;
+  setData: Dispatch<SetStateAction<ReviewEditState>>;
   mode?: ReviewFormMode;
   primaryAction?: ReviewFormPrimaryAction;
   secondaryActions?: React.ReactNode;
@@ -69,7 +70,12 @@ export function ReviewForm({
           <Input
             id="review-title"
             value={data._editTitle || ""}
-            onChange={(e) => setData({ ...data, _editTitle: e.target.value })}
+            onChange={(e) =>
+              setData((current) => ({
+                ...current,
+                _editTitle: e.target.value,
+              }))
+            }
           />
         </div>
       )}
@@ -80,7 +86,12 @@ export function ReviewForm({
         </span>
         <RatingInput
           value={data._editRating > 0 ? data._editRating : null}
-          onChange={(value) => setData({ ...data, _editRating: value ?? 0 })}
+          onChange={(value) =>
+            setData((current) => ({
+              ...current,
+              _editRating: value ?? 0,
+            }))
+          }
           max={SCORE_MAX}
           size="lg"
           aria-label={t("community:review_form_rating")}
@@ -91,14 +102,17 @@ export function ReviewForm({
           <RootPostTranslationEditor
             post={post}
             language={language}
-            defaultLanguage={data.language ?? "en"}
             title={data._editTitle || ""}
             body={data.contentSource || ""}
             onLanguageChange={(nextLanguage) =>
-              setData({ ...data, language: nextLanguage })
+              setData((current) => ({ ...current, language: nextLanguage }))
             }
-            onTitleChange={(value) => setData({ ...data, _editTitle: value })}
-            onBodyChange={(value) => setData({ ...data, contentSource: value })}
+            onTitleChange={(value) =>
+              setData((current) => ({ ...current, _editTitle: value }))
+            }
+            onBodyChange={(value) =>
+              setData((current) => ({ ...current, contentSource: value }))
+            }
             titlePlaceholder={t("community:post_title_placeholder")}
             onSubmit={actionSubmit}
             onCancel={onCancel}
@@ -109,7 +123,9 @@ export function ReviewForm({
         ) : (
           <RezicsMarkdownEditor
             value={data.contentSource || ""}
-            onChange={(value) => setData({ ...data, contentSource: value })}
+            onChange={(value) =>
+              setData((current) => ({ ...current, contentSource: value }))
+            }
             onSubmit={actionSubmit}
             onCancel={onCancel}
             submitLabel={actionLabel}

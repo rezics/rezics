@@ -20,41 +20,58 @@ export class ContentTranslationService {
     input: UpsertContentTranslationInput,
     actorUserId?: string,
   ): Promise<ContentTranslationRow> {
-    return prisma.contentTranslation.upsert({
-      where: {
-        unitId_language: {
+    return prisma.$transaction(async (tx) => {
+      const row = await tx.contentTranslation.upsert({
+        where: {
+          unitId_language: {
+            unitId: input.unitId,
+            language: input.language,
+          },
+        },
+        create: {
+          unit: { connect: { id: input.unitId } },
+          language: input.language,
+          content: input.content as Prisma.InputJsonValue,
+          status: input.status ?? "PUBLISHED",
+          sourceUnitId: input.sourceUnitId ?? undefined,
+          authorUserId: input.authorUserId ?? actorUserId ?? undefined,
+          provenance:
+            input.provenance === null
+              ? Prisma.JsonNull
+              : (input.provenance as Prisma.InputJsonValue | undefined),
+        },
+        update: {
+          content: input.content as Prisma.InputJsonValue,
+          status: input.status,
+          sourceUnitId:
+            input.sourceUnitId === undefined ? undefined : input.sourceUnitId,
+          authorUserId:
+            input.authorUserId === undefined
+              ? actorUserId
+              : (input.authorUserId ?? null),
+          provenance:
+            input.provenance === undefined
+              ? undefined
+              : input.provenance === null
+                ? Prisma.JsonNull
+                : (input.provenance as Prisma.InputJsonValue),
+        },
+      });
+      await tx.unitSupportLanguage.upsert({
+        where: {
+          unitId_language: {
+            unitId: input.unitId,
+            language: input.language,
+          },
+        },
+        create: {
           unitId: input.unitId,
           language: input.language,
+          isPrimary: false,
         },
-      },
-      create: {
-        unit: { connect: { id: input.unitId } },
-        language: input.language,
-        content: input.content as Prisma.InputJsonValue,
-        status: input.status ?? "PUBLISHED",
-        sourceUnitId: input.sourceUnitId ?? undefined,
-        authorUserId: input.authorUserId ?? actorUserId ?? undefined,
-        provenance:
-          input.provenance === null
-            ? Prisma.JsonNull
-            : (input.provenance as Prisma.InputJsonValue | undefined),
-      },
-      update: {
-        content: input.content as Prisma.InputJsonValue,
-        status: input.status,
-        sourceUnitId:
-          input.sourceUnitId === undefined ? undefined : input.sourceUnitId,
-        authorUserId:
-          input.authorUserId === undefined
-            ? actorUserId
-            : (input.authorUserId ?? null),
-        provenance:
-          input.provenance === undefined
-            ? undefined
-            : input.provenance === null
-              ? Prisma.JsonNull
-              : (input.provenance as Prisma.InputJsonValue),
-      },
+        update: {},
+      });
+      return row;
     });
   }
 

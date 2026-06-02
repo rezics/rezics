@@ -1,5 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "../test/prisma-client-mock";
 
 installPrismaClientMock();
 
@@ -31,8 +34,15 @@ describe("ContentTranslationService", () => {
       createdAt: new Date("2026-05-31T00:00:00.000Z"),
       updatedAt: new Date("2026-05-31T00:00:00.000Z"),
     }));
+    const unitSupportLanguageUpsert = mock(async (args: any) => args.create);
+    const transaction = mock(async (fn: any) =>
+      fn({
+        contentTranslation: { upsert },
+        unitSupportLanguage: { upsert: unitSupportLanguageUpsert },
+      }),
+    );
     Object.assign(prismaMock, {
-      contentTranslation: { upsert },
+      $transaction: transaction,
     });
 
     const { ContentTranslationService } = await import("./service");
@@ -60,6 +70,14 @@ describe("ContentTranslationService", () => {
         authorUserId: "user-1",
         provenance: { importedFrom: "legacy-wiki-post" },
       }),
+    });
+    expect(unitSupportLanguageUpsert).toHaveBeenCalledWith({
+      where: { unitId_language: { unitId: "wiki-1", language: "en" } },
+      create: expect.objectContaining({
+        unitId: "wiki-1",
+        language: "en",
+      }),
+      update: {},
     });
     expect(result.authorUserId).toBe("user-1");
   });

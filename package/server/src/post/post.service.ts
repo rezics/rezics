@@ -1,10 +1,10 @@
 import type {
   AcceptAnswerInput,
+  CommentPromotionDTO,
   CreatePostInput,
   EditorialPatchSubmission,
   PinCommentInput,
   PostListQuery,
-  CommentPromotionDTO,
   RezicsSessionClaims,
   SubmitPostToRealmInput,
   UpdatePostInput,
@@ -13,11 +13,11 @@ import {
   allBucketSlugs,
   BasicAdminPermission,
   DEFAULT_LANGUAGE,
+  extractPollUnitIdsFromContentDoc,
   getStateSchema,
   isLegalStateValue,
   isLegalTransition,
   isStatefulTagSlug,
-  extractPollUnitIdsFromContentDoc,
   mainMarkdownSource,
   normalizeStateSlug,
   OFFICIAL_QUESTION_TAG_SLUG,
@@ -35,8 +35,8 @@ import {
 } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
-import { generateBetween } from "@/shelf/fractional-index";
 import { serverJobProducer } from "@/job/job-boundary";
+import { generateBetween } from "@/shelf/fractional-index";
 import {
   assertCanEditCollaborativeMetadata,
   collectPatchLeafPaths,
@@ -210,7 +210,10 @@ export function rebuildPollUsageFromPostContents(
 }
 
 async function upsertPostContentTranslation(
-  tx: Pick<Prisma.TransactionClient, "contentTranslation">,
+  tx: Pick<
+    Prisma.TransactionClient,
+    "contentTranslation" | "unitSupportLanguage"
+  >,
   input: {
     unitId: string;
     language: string;
@@ -241,10 +244,34 @@ async function upsertPostContentTranslation(
       provenance: { source: "post-content" },
     },
   });
+  await ensurePostSupportLanguage(tx, input);
+}
+
+async function ensurePostSupportLanguage(
+  tx: Pick<Prisma.TransactionClient, "unitSupportLanguage">,
+  input: {
+    unitId: string;
+    language: string;
+  },
+) {
+  await tx.unitSupportLanguage.upsert({
+    where: {
+      unitId_language: {
+        unitId: input.unitId,
+        language: input.language,
+      },
+    },
+    create: {
+      unitId: input.unitId,
+      language: input.language,
+      isPrimary: false,
+    },
+    update: {},
+  });
 }
 
 async function upsertPostTitleTranslation(
-  tx: Pick<Prisma.TransactionClient, "unitTranslation">,
+  tx: Pick<Prisma.TransactionClient, "unitTranslation" | "unitSupportLanguage">,
   input: {
     unitId: string;
     language: string;
@@ -267,6 +294,7 @@ async function upsertPostTitleTranslation(
       title: input.title,
     },
   });
+  await ensurePostSupportLanguage(tx, input);
 }
 
 /** Realm roles that may pin/accept within a realm's threads. */

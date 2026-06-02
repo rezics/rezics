@@ -1,4 +1,5 @@
 import { useAlertStore } from "@app/states/windowAlertStore";
+import { contentTranslationQueries } from "@rezics/api/content-translation/content-translation";
 import {
   postQueries,
   useDeletePostMutation,
@@ -9,7 +10,7 @@ import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { DeleteButton } from "@rezics/ui/composite/forms/DeleteWrapper.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
 import { Route as reviewEditRoute } from "@/routes/_editor/review/$reviewId/edit";
 
@@ -18,7 +19,12 @@ export function ReviewEditPageContainer() {
   const locale = useLocale();
   const { reviewId } = reviewEditRoute.useParams();
   const { data, isLoading, isError } = useQuery(postQueries.detail(reviewId));
+  const {
+    data: contentTranslationList,
+    isLoading: isContentTranslationLoading,
+  } = useQuery(contentTranslationQueries.list(reviewId));
   const navigate = useNavigate();
+  const initializedUnitId = useRef<string | null>(null);
   const [reviewData, setReviewData] = useState<ReviewEditState>({
     unitId: "",
     contentSource: "",
@@ -28,18 +34,26 @@ export function ReviewEditPageContainer() {
   });
 
   useEffect(() => {
-    if (data) {
-      setReviewData({
-        unitId: data.unitId,
-        contentSource: mainMarkdownSource(data.content) ?? "",
-        _editTitle: data.title ?? "",
-        _editRating: (data.extra as any)?.rating ?? 0,
-        language: locale,
-        extra: (data.extra as Record<string, any>) ?? {},
-        targetUnitId: data.targetUnitId,
-      });
-    }
-  }, [data, locale]);
+    if (!data || !contentTranslationList) return;
+    if (initializedUnitId.current === data.unitId) return;
+
+    const selectedTranslation = contentTranslationList.translations.find(
+      (translation) => translation.language === locale,
+    );
+
+    setReviewData({
+      unitId: data.unitId,
+      contentSource: selectedTranslation
+        ? (mainMarkdownSource(selectedTranslation.content) ?? "")
+        : "",
+      _editTitle: data.title ?? "",
+      _editRating: (data.extra as any)?.rating ?? 0,
+      language: locale,
+      extra: (data.extra as Record<string, any>) ?? {},
+      targetUnitId: data.targetUnitId,
+    });
+    initializedUnitId.current = data.unitId;
+  }, [contentTranslationList, data, locale]);
 
   const { show } = useAlertStore();
 
@@ -103,7 +117,7 @@ export function ReviewEditPageContainer() {
     });
   }
 
-  if (isLoading) {
+  if (isLoading || isContentTranslationLoading) {
     return <div>{t("common:loading")}</div>;
   }
 
