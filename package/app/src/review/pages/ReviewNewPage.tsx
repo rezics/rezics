@@ -5,7 +5,7 @@ import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
 import { markdownContentDoc, PostKind } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -14,10 +14,11 @@ import { resolveCatalogEntryInteractionContext } from "@/book-library/models/cat
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { type ReviewEditState, ReviewForm } from "@/review/forms/ReviewForm";
+import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 
 export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
   const { t } = useTranslation(["common", "community", "page"]);
-  const locale = useLocale();
+  const authoringLanguage = useAuthoringLanguageDefault();
   const search = useRouterState({ select: (s) => s.location.search });
   const searchParams =
     typeof search === "string"
@@ -34,7 +35,6 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
     contentSource: "",
     _editTitle: "",
     _editRating: 0,
-    language: locale,
     extra: {},
   });
   const { show } = useAlertStore();
@@ -96,7 +96,7 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       targetUnitId: primaryTargetUnitId,
       variantUnitId,
       kind,
-      language: reviewData.language ?? locale,
+      language: reviewData.language ?? authoringLanguage,
       title: reviewData._editTitle.trim(),
       status,
       content: markdownContentDoc(reviewData.contentSource || ""),

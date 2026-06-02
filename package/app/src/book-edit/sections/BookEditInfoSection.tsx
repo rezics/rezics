@@ -13,8 +13,8 @@ import {
   useUpsertTranslationMutation,
 } from "@rezics/api/unit/unit.mutations";
 import type {
-  ContentRating,
   AiDisclosureMode,
+  ContentRating,
   CreateBookInput,
   CreationMode,
   EditorialPatchSubmission,
@@ -23,13 +23,13 @@ import type {
 } from "@rezics/contract";
 import {
   CreationMode as CreationModeValue,
-  DEFAULT_LANGUAGE,
   lockPathIntersectsPatchPath,
   mainMarkdownSource,
   markdownContentDoc,
   normalizeLanguage,
   UNIT_FIELD_LOCK_ALL,
 } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   Alert,
   AlertDescription,
@@ -47,6 +47,7 @@ import { ChevronDown as ExpandMore, LockKeyhole, Plus } from "lucide-react";
 import React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { EntityPicker } from "@/entity-picker";
+import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { TextLink } from "@/shared/ui/link";
 import { resolvePublicationLicenseDefault } from "@/shared/utils/publication-license";
 import { editorialPathLabel } from "@/unit/models/lockFieldLabels";
@@ -70,7 +71,6 @@ import {
   withRestoreSource,
 } from "../models/restoreEdit";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 function validatePublishURL(publishURL: string[]) {
   return publishURL.every((url) => url.startsWith("https://"));
 }
@@ -268,7 +268,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     CreationModeValue.WIKI,
   );
 
-  const editor = useBookTranslationEditor(data);
+  const authoringLanguage = useAuthoringLanguageDefault();
+  const editor = useBookTranslationEditor(data, authoringLanguage);
 
   const metadata: BookMetadataValue = metadataState ?? data ?? {};
   const restoreContentPayload = asRecordOrNull(
@@ -434,6 +435,8 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
     const draft = editor.currentDraft;
 
     if (newBook || !bookId) {
+      const createLanguage =
+        normalizeLanguage(editor.selectedLanguage) ?? authoringLanguage;
       const createBookData: CreateBookInput = {
         isbn13: metadataState?.isbn13 ?? undefined,
         coverUrl: metadataState?.coverUrl ?? undefined,
@@ -448,12 +451,11 @@ export const BookEditMainPage: React.FC<BookEditMainPageProps> = ({
           explicitSelection: metadataState?.licenseSlug,
         }),
         extra: metadataState?.extra,
-        defaultLanguage: DEFAULT_LANGUAGE,
+        defaultLanguage: createLanguage,
         creationMode,
         translations: [
           {
-            language:
-              normalizeLanguage(editor.selectedLanguage) ?? DEFAULT_LANGUAGE,
+            language: createLanguage,
             title: draft.title || undefined,
             subtitle: draft.subtitle || undefined,
             summary: draft.summary || undefined,

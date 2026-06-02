@@ -1,9 +1,5 @@
 import { useCreateRealmMutation } from "@rezics/api/realm/realm";
-import {
-  DEFAULT_LANGUAGE,
-  markdownContentDoc,
-  type RealmTagViewStyle,
-} from "@rezics/contract";
+import { markdownContentDoc, type RealmTagViewStyle } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -19,10 +15,12 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PolicyDenialNotice, policyDenialFromError } from "@/policy";
+import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { unitHref } from "@/shared/ui/link";
 
 export function NewRealmPage() {
   const { t } = useTranslation(["common", "entity"]);
+  const authoringLanguage = useAuthoringLanguageDefault();
   const navigate = useNavigate();
   const createMutation = useCreateRealmMutation();
   const [title, setTitle] = useState("");
@@ -35,7 +33,7 @@ export function NewRealmPage() {
       {
         translations: [
           {
-            language: DEFAULT_LANGUAGE,
+            language: authoringLanguage,
             title,
             description: description.trim()
               ? markdownContentDoc(description)

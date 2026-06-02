@@ -1,10 +1,11 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { markdownContentDoc, PostKind, SCORE_MAX } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { RatingInput } from "@rezics/ui";
 import { Input } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
 interface RemarkInlineFormProps {
@@ -17,7 +18,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
   onSuccess,
 }) => {
   const { t } = useTranslation(["common", "community", "page"]);
-  const locale = useLocale();
+  const authoringLanguage = useAuthoringLanguageDefault();
   const [expanded, setExpanded] = useState(false);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -47,7 +48,7 @@ export const RemarkInlineForm: React.FC<RemarkInlineFormProps> = ({
       {
         targetUnitId: bookUnitId,
         kind: PostKind.REMARK,
-        language: locale,
+        language: authoringLanguage,
         title: trimmedTitle,
         content: markdownContentDoc(trimmed),
         ...(extra ? { extra } : {}),

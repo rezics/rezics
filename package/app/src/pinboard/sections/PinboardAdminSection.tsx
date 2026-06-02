@@ -159,8 +159,6 @@ const PinboardAdminBoard: React.FC<PinboardAdminBoardProps> = ({
     async (translations: TranslationEditorEntry[]) => {
       const created = await unitApi.create({
         type: "POST",
-        defaultLanguage:
-          toLanguage(translations[0]?.language) ?? DEFAULT_LANGUAGE,
         translations: translations.flatMap((tr) => {
           const language = toLanguage(tr.language);
           if (!language) return [];

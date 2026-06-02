@@ -1,14 +1,14 @@
 import { useCreateCommentMutation } from "@rezics/api/comment/comment";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import {
+  type CommentDTO,
   markdownContentDoc,
   markdownContentDocWithPoll,
-  type CommentDTO,
   type PollDTO,
   type PostDTO,
   PostKind,
 } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Input,
@@ -29,6 +29,7 @@ import {
 } from "react";
 import { PollComposer, PollLibrarySurface } from "@/poll";
 import { RealmPostTagPicker } from "@/realm/components/RealmPostTagPicker";
+import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
 
@@ -85,7 +86,7 @@ export const ReplyComposer = forwardRef<
   ReplyComposerHandle,
   ReplyComposerProps
 >(function ReplyComposer(props, ref) {
-  const locale = useLocale();
+  const authoringLanguage = useAuthoringLanguageDefault();
   const { t } = useTranslation([
     "auth",
     "common",
@@ -135,6 +136,11 @@ export const ReplyComposer = forwardRef<
   const submitting = postMutation.isPending || commentMutation.isPending;
   const derivedTitle =
     body.trim().split(/\r?\n/, 1)[0]?.slice(0, 120) || "Post";
+  const reset = useCallback(() => {
+    setBody("");
+    setAttachingPoll(false);
+    if (mode === "progressive") setExpanded(false);
+  }, [mode]);
 
   const submitReply = useCallback(
     (content: ReturnType<typeof markdownContentDoc>) => {
@@ -167,7 +173,7 @@ export const ReplyComposer = forwardRef<
           realmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
-          language: locale,
+          language: authoringLanguage,
           title: derivedTitle,
           content,
         },
@@ -183,11 +189,12 @@ export const ReplyComposer = forwardRef<
       commentMutation.mutate,
       onSubmitted,
       derivedTitle,
-      locale,
+      authoringLanguage,
       parentCommentUnitId,
       postMutation.mutate,
       realmUnitId,
       realmUnitIds,
+      reset,
       rootUnitId,
       selectedTagIds,
       targetUnitId,
@@ -237,12 +244,6 @@ export const ReplyComposer = forwardRef<
     if (isRealmPostMode && expanded) focusEditor();
   }, [expanded, focusEditor, isRealmPostMode]);
 
-  const reset = () => {
-    setBody("");
-    setAttachingPoll(false);
-    if (mode === "progressive") setExpanded(false);
-  };
-
   /**
    * Attach-poll sequence: `PollComposer` has already minted the poll
    * (`useCreatePoll`); now create the post with a poll content block. This is
@@ -260,7 +261,7 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
-          language: locale,
+          language: authoringLanguage,
           title: derivedTitle,
           content: markdownContentDocWithPoll(trimmed, poll.unitId),
         },
@@ -287,7 +288,7 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
-          language: locale,
+          language: authoringLanguage,
           title: derivedTitle,
           content: markdownContentDocWithPoll(trimmed, pollUnitId),
         },
@@ -315,7 +316,7 @@ export const ReplyComposer = forwardRef<
           realmUnitIds: activeRealmUnitIds,
           tagIds: selectedTagIds,
           kind: PostKind.POST,
-          language: locale,
+          language: authoringLanguage,
           title: derivedTitle,
           content: markdownContentDoc(trimmed),
         },

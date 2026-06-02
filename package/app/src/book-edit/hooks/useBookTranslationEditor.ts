@@ -33,13 +33,16 @@ export function translationToDraft(
   };
 }
 
-function pickInitialLanguage(book: BookDTO | null | undefined): string {
-  if (!book) return DEFAULT_LANGUAGE;
+function pickInitialLanguage(
+  book: BookDTO | null | undefined,
+  fallbackLanguage = DEFAULT_LANGUAGE,
+): string {
+  if (!book) return fallbackLanguage;
   const existing = book.translations?.[0]?.language;
   return (
     (book.defaultLanguage as string | undefined) ??
     (existing as string | undefined) ??
-    DEFAULT_LANGUAGE
+    fallbackLanguage
   );
 }
 
@@ -50,11 +53,14 @@ function pickInitialLanguage(book: BookDTO | null | undefined): string {
  * book's default language. Drafts are kept in memory keyed by language so a
  * user can switch between languages without losing in-flight edits.
  */
-export function useBookTranslationEditor(book: BookDTO | null | undefined) {
+export function useBookTranslationEditor(
+  book: BookDTO | null | undefined,
+  fallbackLanguage = DEFAULT_LANGUAGE,
+) {
   const navigate = useNavigate();
   const search = useSearch({ strict: false }) as { lang?: string };
 
-  const initialLang = pickInitialLanguage(book);
+  const initialLang = pickInitialLanguage(book, fallbackLanguage);
   const selectedLanguage = (search.lang as string | undefined) ?? initialLang;
 
   const [drafts, setDrafts] = useState<DraftMap>({});

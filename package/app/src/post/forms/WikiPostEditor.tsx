@@ -9,11 +9,12 @@ import {
   markdownContentDoc,
   type PostDTO,
 } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
+import { useAuthoringLanguageState } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RootPostTranslationEditor } from "./RootPostTranslationEditor";
 
 export interface WikiPostEditorProps {
@@ -33,8 +34,9 @@ export function WikiPostEditor({
 }: WikiPostEditorProps) {
   const { t } = useTranslation(["common"]);
   const { t: tc } = useTranslation(["community"]);
-  const locale = useLocale();
-  const [language, setLanguage] = useState(locale);
+  const { defaultLanguage, language, setLanguage } = useAuthoringLanguageState({
+    initialLanguage: post?.resolvedLanguage,
+  });
   const [title, setTitle] = useState(post?.title ?? "");
   const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
@@ -104,7 +106,7 @@ export function WikiPostEditor({
       <RootPostTranslationEditor
         post={post}
         language={language}
-        defaultLanguage={locale}
+        defaultLanguage={defaultLanguage}
         title={title}
         body={body}
         onLanguageChange={setLanguage}

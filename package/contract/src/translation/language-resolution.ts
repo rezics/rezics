@@ -2,7 +2,11 @@ import { t } from "elysia";
 import { contentDocSchema } from "../content/doc-v1";
 import { contentTranslationDTOSchema } from "../content/translation";
 import { languageSchema } from "../language";
-import { DEFAULT_LANGUAGE } from "../language-core";
+import {
+  DEFAULT_LANGUAGE,
+  type Language,
+  normalizeLanguage,
+} from "../language-core";
 import {
   unitSupportLanguageDTOSchema,
   unitTranslationDTOSchema,
@@ -18,7 +22,7 @@ export type LanguageResolutionInput =
   (typeof languageResolutionInputSchema)["static"];
 
 export type SupportLanguageLike = {
-  language: string;
+  language: string | Language;
   isPrimary?: boolean | null;
   sortOrder?: number | null;
 };
@@ -29,9 +33,10 @@ export const readLanguageQuerySchema = t.Object({
 
 export type ReadLanguageQuery = (typeof readLanguageQuerySchema)["static"];
 
+/** Return primary support languages in stable support-language sort order. */
 export function primaryLanguages(
   supportLanguages: readonly SupportLanguageLike[] = [],
-): string[] {
+): Language[] {
   return uniqueLanguages(
     supportLanguages
       .filter((item) => item.isPrimary)
@@ -40,6 +45,12 @@ export function primaryLanguages(
   );
 }
 
+/**
+ * Build the ordered candidate list for localized reads.
+ *
+ * User content preferences outrank UI locale; support languages and the
+ * platform fallback fill in only after request/user/app candidates.
+ */
 export function readLanguageCandidates(input: {
   explicitLanguage?: string | null;
   preferredLanguages?: readonly (string | null | undefined)[] | null;
@@ -47,7 +58,7 @@ export function readLanguageCandidates(input: {
   appLocale?: string | null;
   supportLanguages?: readonly SupportLanguageLike[] | null;
   fallbackLanguage?: string | null;
-}): string[] {
+}): Language[] {
   const supportLanguages = input.supportLanguages ?? [];
   const primary = supportLanguages
     .filter((item) => item.isPrimary)
@@ -69,12 +80,18 @@ export function readLanguageCandidates(input: {
   ]);
 }
 
+/**
+ * Build the ordered candidate list for a new localized write.
+ *
+ * Existing content updates should pass an explicit language instead of using
+ * this as fallback resolution; create surfaces use it to seed the first draft.
+ */
 export function authoringLanguageCandidates(input: {
   explicitLanguage?: string | null;
   preferredLanguages?: readonly (string | null | undefined)[] | null;
   appLocale?: string | null;
   fallbackLanguage?: string | null;
-}): string[] {
+}): Language[] {
   return uniqueLanguages([
     input.explicitLanguage,
     input.preferredLanguages?.[0],
@@ -85,10 +102,16 @@ export function authoringLanguageCandidates(input: {
 
 export function resolveAuthoringLanguage(
   input: Parameters<typeof authoringLanguageCandidates>[0],
-): string {
+): Language {
   return authoringLanguageCandidates(input)[0] ?? DEFAULT_LANGUAGE;
 }
 
+/**
+ * Resolve one language for a read response from candidate order and supported
+ * languages. Missing rows/fields in the resolved language intentionally remain
+ * missing; availability is the supported-language set, not translation
+ * completeness.
+ */
 export function resolveReadLanguage(input: {
   explicitLanguage?: string | null;
   preferredLanguages?: readonly (string | null | undefined)[] | null;
@@ -97,7 +120,7 @@ export function resolveReadLanguage(input: {
   supportLanguages?: readonly SupportLanguageLike[] | null;
   availableLanguages?: readonly (string | null | undefined)[] | null;
   fallbackLanguage?: string | null;
-}): string | null {
+}): Language | null {
   const available = uniqueLanguages(
     input.supportLanguages?.map((item) => item.language) ??
       input.availableLanguages ??
@@ -112,19 +135,20 @@ export function resolveReadLanguage(input: {
 
 export function parseReadLanguages(
   raw: string | readonly string[] | null | undefined,
-): string[] {
-  const parts = Array.isArray(raw) ? raw : (raw?.split(",") ?? []);
-  return uniqueLanguages(parts);
+): Language[] {
+  if (typeof raw === "string") return uniqueLanguages(raw.split(","));
+  return uniqueLanguages(raw ?? []);
 }
 
 function uniqueLanguages(
   languages: readonly (string | null | undefined)[],
-): string[] {
+): Language[] {
   return [
     ...new Set(
       languages
         .map((language) => language?.trim())
-        .filter((language): language is string => !!language),
+        .map((language) => (language ? normalizeLanguage(language) : null))
+        .filter((language): language is Language => !!language),
     ),
   ];
 }

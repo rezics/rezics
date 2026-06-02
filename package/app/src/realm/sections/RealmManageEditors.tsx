@@ -61,6 +61,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MoveHandler, NodeRendererProps, TreeApi } from "react-arborist";
 import { Tree } from "react-arborist";
 import { toast } from "sonner";
+import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
@@ -385,6 +386,7 @@ export function WikiZoneConfigEditor({
   const [labelTarget, setLabelTarget] =
     useState<LabelInsertTarget>("navigation");
   const [error, setError] = useState<string | null>(null);
+  const authoringLanguage = useAuthoringLanguageDefault();
   const languages = useReadLanguageCandidates();
   const labelSearchTerm = labelSearch.trim();
   const { data: labelSearchData } = useQuery(
@@ -464,9 +466,8 @@ export function WikiZoneConfigEditor({
     try {
       const created = await unitApi.create({
         type: "LABEL",
-        defaultLanguage: DEFAULT_LANGUAGE,
         isLanguageNeutral: true,
-        translations: [{ language: DEFAULT_LANGUAGE, title }],
+        translations: [{ language: authoringLanguage, title }],
       });
       insertLabel(created.id, labelTarget);
       setLabelTitle("");

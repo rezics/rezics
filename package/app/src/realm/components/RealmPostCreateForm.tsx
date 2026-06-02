@@ -4,7 +4,7 @@ import {
   type PollDTO,
   type PostDTO,
 } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   Dialog,
@@ -22,8 +22,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { Link2, Vote, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { DraftPublishActions } from "@/draft";
-import { PollComposer, PollLibrarySurface } from "@/poll";
 import { policyDenialFromError } from "@/policy";
+import { PollComposer, PollLibrarySurface } from "@/poll";
+import { useAuthoringLanguageDefault } from "@/shared/hooks/useAuthoringLanguageDefault";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { buildRealmPostCreateInput } from "../models/realmCreateMode";
 import { RealmPostTagPicker } from "./RealmPostTagPicker";
@@ -39,7 +40,7 @@ export function RealmPostCreateForm({
 }: RealmPostCreateFormProps) {
   const { t } = useTranslation(["common"]);
   const { t: tc } = useTranslation(["community"]);
-  const locale = useLocale();
+  const authoringLanguage = useAuthoringLanguageDefault();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -75,7 +76,7 @@ export function RealmPostCreateForm({
               realmId,
               title: trimmedTitle,
               content: trimmed,
-              language: locale,
+              language: authoringLanguage,
               tagIds: selectedTagIds,
               status,
             }),
@@ -85,7 +86,7 @@ export function RealmPostCreateForm({
             realmId,
             title: trimmedTitle,
             content: trimmed,
-            language: locale,
+            language: authoringLanguage,
             tagIds: selectedTagIds,
             status,
           }),
