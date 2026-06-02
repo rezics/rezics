@@ -2,6 +2,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import {
   Badge,
   Button,
+  buttonVariants,
   Card,
   Tooltip,
   TooltipContent,
@@ -11,12 +12,12 @@ import {
 import {
   Trash2 as DeleteOutlineRoundedIcon,
   GripVertical as DragIndicatorRoundedIcon,
-  Pencil as EditRoundedIcon,
+  ExternalLink as OpenInNewRoundedIcon,
   Pin as PushPinRoundedIcon,
 } from "lucide-react";
 import type React from "react";
+import { Link, AppSafeLink as SafeLink } from "@/shared/ui/link";
 import { cn } from "@/shared/utils/css-util";
-import { AppSafeLink as SafeLink } from "@/shared/ui/link";
 import type { PinboardEntryView } from "../models/types";
 
 export type PinboardEntryCardVariant =
@@ -29,7 +30,7 @@ export interface PinboardEntryCardProps {
   entry: PinboardEntryView;
   variant?: PinboardEntryCardVariant;
   href?: string;
-  onEdit?: (entry: PinboardEntryView) => void;
+  openHref?: string;
   onDelete?: (entry: PinboardEntryView) => void;
   /**
    * Rendered at the leading edge of the adminRow variant; intended for
@@ -44,7 +45,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
   entry,
   variant = "card",
   href,
-  onEdit,
+  openHref,
   onDelete,
   dragHandle,
   stale,
@@ -126,22 +127,26 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
         </div>
         <TooltipProvider>
           <div className="flex flex-row gap-1">
-            {onEdit ? (
+            {openHref ? (
               <Tooltip>
                 <TooltipTrigger
                   render={(props) => (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => onEdit(entry)}
-                      aria-label={t("common:edit")}
+                    <Link
                       {...props}
+                      to={openHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={cn(
+                        buttonVariants({ size: "icon", variant: "ghost" }),
+                        props.className,
+                      )}
+                      aria-label={t("common:open")}
                     >
-                      <EditRoundedIcon className="h-4 w-4" />
-                    </Button>
+                      <OpenInNewRoundedIcon className="h-4 w-4" />
+                    </Link>
                   )}
                 />
-                <TooltipContent>{t("common:edit")}</TooltipContent>
+                <TooltipContent>{t("common:open")}</TooltipContent>
               </Tooltip>
             ) : null}
             {onDelete ? (
@@ -152,9 +157,9 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
                       size="icon"
                       variant="ghost"
                       className="text-error-text"
+                      {...props}
                       onClick={() => onDelete(entry)}
                       aria-label={t("common:delete")}
-                      {...props}
                     >
                       <DeleteOutlineRoundedIcon className="h-4 w-4" />
                     </Button>
@@ -198,12 +203,7 @@ export const PinboardEntryCard: React.FC<PinboardEntryCardProps> = ({
           <span className="truncate text-xs leading-dense text-text-tertiary">
             {entry.subtitle ?? entry.language}
           </span>
-          <span
-            className="shrink-0 text-xs leading-dense text-text-tertiary"
-            aria-label={t("entity:pinboard_entry_language", {
-              lang: entry.language,
-            })}
-          >
+          <span className="shrink-0 text-xs leading-dense text-text-tertiary">
             {entry.language}
           </span>
         </div>

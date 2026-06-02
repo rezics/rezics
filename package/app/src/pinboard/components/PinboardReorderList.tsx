@@ -28,11 +28,10 @@ import { PinboardEntryCard } from "./PinboardEntryCard";
 interface SortableRowProps {
   entry: PinboardEntryView;
   stale?: boolean;
-  onEdit?: (entry: PinboardEntryView) => void;
   onDelete?: (entry: PinboardEntryView) => void;
 }
 
-function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
+function SortableRow({ entry, stale, onDelete }: SortableRowProps) {
   const { t } = useTranslation(["entity"]);
   const {
     attributes,
@@ -55,7 +54,7 @@ function SortableRow({ entry, stale, onEdit, onDelete }: SortableRowProps) {
         entry={entry}
         variant="adminRow"
         stale={stale}
-        onEdit={onEdit}
+        openHref={`/unit/${entry.unitId}`}
         onDelete={onDelete}
         dragHandle={
           <Button
@@ -81,7 +80,6 @@ interface PinboardReorderListProps {
   pinboardKey: PinboardListKey;
   entries: PinboardEntryView[];
   staleIds?: string[];
-  onEdit?: (entry: PinboardEntryView) => void;
   onDelete?: (entry: PinboardEntryView) => void;
   /** Called after a 409 so the parent can re-sync. */
   onConflict?: () => void;
@@ -92,7 +90,6 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
   pinboardKey,
   entries,
   staleIds,
-  onEdit,
   onDelete,
   onConflict,
 }) => {
@@ -169,7 +166,6 @@ export const PinboardReorderList: React.FC<PinboardReorderListProps> = ({
                 <SortableRow
                   entry={entry}
                   stale={staleSet.has(id)}
-                  onEdit={onEdit}
                   onDelete={onDelete}
                 />
               </li>
