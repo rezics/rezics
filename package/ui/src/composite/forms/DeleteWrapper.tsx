@@ -69,6 +69,15 @@ export interface DeleteButtonProps {
   onDelete: () => Promise<unknown> | unknown;
   label?: React.ReactNode;
   variant?: "default" | "outline" | "destructive" | "ghost";
+  size?:
+    | "default"
+    | "xs"
+    | "sm"
+    | "lg"
+    | "icon"
+    | "icon-xs"
+    | "icon-sm"
+    | "icon-lg";
   disabled?: boolean;
   className?: string;
 }
@@ -78,6 +87,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
   label = "删除",
   disabled,
   variant = "destructive",
+  size = "default",
   className,
 }) => {
   return (
@@ -85,6 +95,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
       <Button
         type="button"
         variant={variant}
+        size={size}
         disabled={disabled}
         className={className}
       >

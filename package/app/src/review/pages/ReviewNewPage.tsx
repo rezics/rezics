@@ -129,9 +129,13 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
         <ReviewForm
           data={reviewData}
           setData={setReviewData}
-          onSubmit={() => handleSave("PUBLISHED")}
-          submitLabel={isPending ? t("common:submitting") : t("common:publish")}
-          extraActions={
+          mode="create"
+          primaryAction={{
+            label: isPending ? t("common:submitting") : t("common:publish"),
+            onClick: () => handleSave("PUBLISHED"),
+            disabled: isPending,
+          }}
+          secondaryActions={
             <DraftPublishActions
               onSaveDraft={() => handleSave("DRAFT")}
               isPending={isPending}

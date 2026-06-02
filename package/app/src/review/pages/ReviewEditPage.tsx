@@ -120,9 +120,13 @@ export function ReviewEditPageContainer() {
         <ReviewForm
           data={reviewData}
           setData={setReviewData}
-          onSubmit={handleSave}
-          submitLabel={isPending ? t("common:submitting") : t("common:submit")}
-          extraActions={<DeleteButton onDelete={handleDelete} />}
+          mode="update"
+          primaryAction={{
+            label: isPending ? t("common:submitting") : t("common:update"),
+            onClick: handleSave,
+            disabled: isPending,
+          }}
+          secondaryActions={<DeleteButton onDelete={handleDelete} size="sm" />}
           post={data}
         />
       </div>

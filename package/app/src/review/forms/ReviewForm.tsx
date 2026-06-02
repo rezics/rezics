@@ -16,9 +16,20 @@ export type ReviewEditState = {
   targetUnitId?: string | null;
 };
 
+export type ReviewFormMode = "create" | "update";
+
+export type ReviewFormPrimaryAction = {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+};
+
 interface ReviewFormProps {
   data: ReviewEditState;
   setData: (data: ReviewEditState) => void;
+  mode?: ReviewFormMode;
+  primaryAction?: ReviewFormPrimaryAction;
+  secondaryActions?: React.ReactNode;
   onSubmit?: () => void;
   onCancel?: () => void;
   submitLabel?: string;
@@ -29,6 +40,9 @@ interface ReviewFormProps {
 export function ReviewForm({
   data,
   setData,
+  mode = "create",
+  primaryAction,
+  secondaryActions,
   onSubmit,
   onCancel,
   submitLabel,
@@ -37,9 +51,17 @@ export function ReviewForm({
 }: ReviewFormProps) {
   const { t } = useTranslation(["community"]);
   const language = data.language ?? "en";
+  const actionLabel =
+    (data.contentSource?.length ?? 0) < 200
+      ? `${200 - (data.contentSource?.length ?? 0)} chars remaining`
+      : (primaryAction?.label ?? submitLabel);
+  const actionSubmit = primaryAction?.onClick ?? onSubmit;
+  const actionDisabled = primaryAction?.disabled;
+  const actionExtras = secondaryActions ?? extraActions;
+
   return (
     <div className="flex flex-col gap-4 mt-2">
-      {post ? null : (
+      {mode === "update" ? null : (
         <div className="flex flex-col gap-2">
           <Label htmlFor="review-title">
             {t("community:review_form_title")}
@@ -78,19 +100,21 @@ export function ReviewForm({
             onTitleChange={(value) => setData({ ...data, _editTitle: value })}
             onBodyChange={(value) => setData({ ...data, contentSource: value })}
             titlePlaceholder={t("community:post_title_placeholder")}
+            onSubmit={actionSubmit}
+            onCancel={onCancel}
+            submitLabel={actionLabel}
+            submitDisabled={actionDisabled}
+            extraRight={actionExtras}
           />
         ) : (
           <RezicsMarkdownEditor
             value={data.contentSource || ""}
             onChange={(value) => setData({ ...data, contentSource: value })}
-            onSubmit={onSubmit}
+            onSubmit={actionSubmit}
             onCancel={onCancel}
-            submitLabel={
-              (data.contentSource?.length ?? 0) < 200
-                ? `${200 - (data.contentSource?.length ?? 0)} chars remaining`
-                : submitLabel
-            }
-            extraRight={extraActions}
+            submitLabel={actionLabel}
+            submitDisabled={actionDisabled}
+            extraRight={actionExtras}
           />
         )}
         <div className="flex justify-between mt-1">

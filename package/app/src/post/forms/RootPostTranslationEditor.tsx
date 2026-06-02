@@ -30,6 +30,11 @@ export interface RootPostTranslationEditorProps {
   disabled?: boolean;
   titlePlaceholder?: string;
   resize?: RezicsMarkdownEditorProps["resize"];
+  onSubmit?: RezicsMarkdownEditorProps["onSubmit"];
+  onCancel?: RezicsMarkdownEditorProps["onCancel"];
+  submitLabel?: RezicsMarkdownEditorProps["submitLabel"];
+  submitDisabled?: RezicsMarkdownEditorProps["submitDisabled"];
+  extraRight?: RezicsMarkdownEditorProps["extraRight"];
 }
 
 type DraftMap = Record<string, { title: string; body: string }>;
@@ -55,6 +60,11 @@ export function RootPostTranslationEditor({
   disabled,
   titlePlaceholder,
   resize,
+  onSubmit,
+  onCancel,
+  submitLabel,
+  submitDisabled,
+  extraRight,
 }: RootPostTranslationEditorProps) {
   const { t } = useTranslation(["common", "community"]);
   const [addLanguageOpen, setAddLanguageOpen] = useState(false);
@@ -147,6 +157,11 @@ export function RootPostTranslationEditor({
         value={body}
         onChange={handleBodyChange}
         resize={resize}
+        onSubmit={onSubmit}
+        onCancel={onCancel}
+        submitLabel={submitLabel}
+        submitDisabled={submitDisabled}
+        extraRight={extraRight}
       />
       <AddUnitTranslationLanguageDialog
         open={addLanguageOpen}

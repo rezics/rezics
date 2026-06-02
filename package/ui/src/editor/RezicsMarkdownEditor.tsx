@@ -32,6 +32,7 @@ export interface RezicsMarkdownEditorProps
   onSubmit?: () => void;
   onCancel?: () => void;
   submitLabel?: string;
+  submitDisabled?: boolean;
   extraRight?: React.ReactNode;
   imageProviders?: ImageProvider[];
   userSearch?: UserSearchAdapter;
@@ -45,6 +46,7 @@ export function RezicsMarkdownEditor({
   onSubmit,
   onCancel,
   submitLabel = "Submit",
+  submitDisabled,
   extraRight,
   imageProviders,
   userSearch,
@@ -196,6 +198,7 @@ export function RezicsMarkdownEditor({
                 size="sm"
                 variant="default"
                 onClick={onSubmit}
+                disabled={submitDisabled}
               >
                 {submitLabel}
               </Button>
