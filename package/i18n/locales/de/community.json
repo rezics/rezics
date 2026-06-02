@@ -256,5 +256,17 @@
   "poll_composer_submit": "Umfrage erstellen",
   "poll_attach": "Umfrage",
   "poll_attach_submit": "Umfrage erstellen & antworten",
-  "poll_attach_error": "Umfrage konnte nicht angehängt werden. Bitte versuche es erneut."
+  "poll_attach_error": "Umfrage konnte nicht angehängt werden. Bitte versuche es erneut.",
+  "poll_attach_post_hint": "Hänge eine Umfrage an diesen Beitrag an. Die Umfrage wird zuerst erstellt und dann über den Beitrag veröffentlicht.",
+  "poll_attach_dialog_title": "Umfrage-Anhang erstellen",
+  "poll_attach_dialog_description": "Erstellt eine wiederverwendbare Umfrage-Unit und hängt sie an den Beitragsentwurf an. Der Beitrag wird erst veröffentlicht, wenn du ihn veröffentlichst.",
+  "poll_attach_dialog_submit": "Erstellen und anhängen",
+  "poll_attached_title": "Umfrage angehängt",
+  "poll_workspace_title": "Umfrage-Arbeitsbereich",
+  "poll_workspace_description": "Umfragen sind wiederverwendbare Units in deinem Besitz. Sie erscheinen im Realm-Feed, wenn sie an einen Beitrag angehängt werden.",
+  "poll_workspace_attach_to_post": "Beitrag mit Umfrage schreiben",
+  "poll_workspace_open_new": "Eigenständige Seite öffnen",
+  "poll_workspace_create_title": "Wiederverwendbare Umfrage erstellen",
+  "poll_workspace_create_description": "Erstelle zuerst eine Umfrage und hänge sie später aus einem Beitrag an, wenn sie im Realm-Feed veröffentlicht werden soll.",
+  "poll_workspace_create": "Wiederverwendbare Umfrage erstellen"
 }

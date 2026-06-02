@@ -256,5 +256,17 @@
   "poll_composer_submit": "투표 만들기",
   "poll_attach": "투표",
   "poll_attach_submit": "투표 만들고 답글",
-  "poll_attach_error": "투표를 첨부하지 못했습니다. 다시 시도해 주세요."
+  "poll_attach_error": "투표를 첨부하지 못했습니다. 다시 시도해 주세요.",
+  "poll_attach_post_hint": "이 게시물에 투표를 첨부합니다. 투표를 먼저 만든 뒤 게시물을 통해 공개합니다.",
+  "poll_attach_dialog_title": "투표 첨부 만들기",
+  "poll_attach_dialog_description": "재사용 가능한 투표 유닛을 만들고 현재 게시물 초안에 첨부합니다. 게시물은 직접 게시할 때까지 공개되지 않습니다.",
+  "poll_attach_dialog_submit": "만들고 첨부",
+  "poll_attached_title": "투표 첨부됨",
+  "poll_workspace_title": "투표 작업공간",
+  "poll_workspace_description": "투표는 사용자가 소유한 재사용 가능한 유닛입니다. realm feed에는 게시물에 첨부되어 들어갑니다.",
+  "poll_workspace_attach_to_post": "투표 포함 게시물 쓰기",
+  "poll_workspace_open_new": "단독 페이지 열기",
+  "poll_workspace_create_title": "재사용 가능한 투표 만들기",
+  "poll_workspace_create_description": "먼저 투표를 만들고, realm feed에 공개할 준비가 되면 게시물에서 첨부하세요.",
+  "poll_workspace_create": "재사용 가능한 투표 만들기"
 }

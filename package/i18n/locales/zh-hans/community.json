@@ -256,5 +256,17 @@
   "poll_composer_submit": "创建投票",
   "poll_attach": "投票",
   "poll_attach_submit": "创建投票并回复",
-  "poll_attach_error": "无法附加投票，请重试。"
+  "poll_attach_error": "无法附加投票，请重试。",
+  "poll_attach_post_hint": "将投票附加到这篇帖子。投票会先创建，然后通过帖子发布。",
+  "poll_attach_dialog_title": "创建投票附件",
+  "poll_attach_dialog_description": "这会创建一个可复用的投票单元，并附加到当前帖子草稿。帖子要等你发布才会送出。",
+  "poll_attach_dialog_submit": "创建并附加",
+  "poll_attached_title": "已附加投票",
+  "poll_workspace_title": "投票工作区",
+  "poll_workspace_description": "投票是由你拥有、可复用的单元。它们通过附加到帖子进入 realm feed。",
+  "poll_workspace_attach_to_post": "撰写含投票的帖子",
+  "poll_workspace_open_new": "打开独立页",
+  "poll_workspace_create_title": "创建可复用投票",
+  "poll_workspace_create_description": "先创建投票；准备发布到 realm feed 时，再从帖子附加它。",
+  "poll_workspace_create": "创建可复用投票"
 }

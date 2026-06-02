@@ -18,6 +18,7 @@ import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 
 export interface WikiPostEditorProps {
   targetUnitId?: string;
+  realmUnitIds?: string[];
   post?: PostDTO;
   onSaved?: (post: PostDTO) => void;
   onCancel?: () => void;
@@ -25,6 +26,7 @@ export interface WikiPostEditorProps {
 
 export function WikiPostEditor({
   targetUnitId,
+  realmUnitIds,
   post,
   onSaved,
   onCancel,
@@ -68,6 +70,7 @@ export function WikiPostEditor({
     createMutation.mutate({
       content: markdownContentDoc(trimmed),
       language: locale,
+      realmUnitIds,
       targetUnitId,
       status,
     } as never);

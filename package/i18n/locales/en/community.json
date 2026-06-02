@@ -256,5 +256,17 @@
   "poll_composer_submit": "Create poll",
   "poll_attach": "Poll",
   "poll_attach_submit": "Create poll & reply",
-  "poll_attach_error": "Couldn't attach the poll. Please try again."
+  "poll_attach_error": "Couldn't attach the poll. Please try again.",
+  "poll_attach_post_hint": "Attach a poll to this post. The poll is created first, then published through the post.",
+  "poll_attach_dialog_title": "Create poll attachment",
+  "poll_attach_dialog_description": "This creates a reusable poll unit and attaches it to the post draft. The post is not published until you publish it.",
+  "poll_attach_dialog_submit": "Create and attach",
+  "poll_attached_title": "Poll attached",
+  "poll_workspace_title": "Poll workspace",
+  "poll_workspace_description": "Polls are reusable units owned by you. They enter a realm feed by being attached to a post.",
+  "poll_workspace_attach_to_post": "Write post with poll",
+  "poll_workspace_open_new": "Open standalone",
+  "poll_workspace_create_title": "Create reusable poll",
+  "poll_workspace_create_description": "Create a poll now, then attach it from a post when you are ready to publish it to the realm feed.",
+  "poll_workspace_create": "Create reusable poll"
 }

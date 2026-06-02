@@ -8,10 +8,6 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
   Tabs,
   TabsContent,
   TabsList,
@@ -22,7 +18,6 @@ import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PinnedFeedSection } from "@/pinboard";
-import { ReplyComposer } from "@/post";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { JoinButton } from "../components/JoinButton";
 import { RealmContentFeed } from "../components/RealmContentFeed";
@@ -74,7 +69,6 @@ export function RealmPage({
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const permission = useServerPermission();
   const [localTab, setLocalTab] = useState<RealmPageTab>(tab ?? "feed");
-  const [composerOpen, setComposerOpen] = useState(false);
 
   useEffect(() => {
     if (tab) setLocalTab(tab);
@@ -139,14 +133,12 @@ export function RealmPage({
           </div>
           <div className="flex items-center gap-2">
             {isMember ? (
-              <Button
-                size="sm"
-                className="gap-1 rounded-full px-2 md:px-4"
-                onClick={() => setComposerOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-                {t("common:create")}
-              </Button>
+              <Link to="/realm/$realmId/create" params={{ realmId }}>
+                <Button size="sm" className="gap-1 rounded-full px-2 md:px-4">
+                  <Plus className="h-4 w-4" />
+                  {t("common:create")}
+                </Button>
+              </Link>
             ) : (
               <Button size="sm" variant="outline" disabled>
                 {t("entity:realm_join_to_post")}
@@ -259,24 +251,6 @@ export function RealmPage({
           </TabsContent>
         ) : null}
       </Tabs>
-
-      <Dialog open={composerOpen} onOpenChange={setComposerOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{t("entity:realm_post_in_realm")}</DialogTitle>
-          </DialogHeader>
-          <RuleSection
-            realmUnitId={realmId}
-            postUnitId={realm.extra?.rule ?? null}
-          />
-          <ReplyComposer
-            mode="expanded"
-            realmUnitIds={[realmId]}
-            onSubmitted={() => setComposerOpen(false)}
-            onCancelled={() => setComposerOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
