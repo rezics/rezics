@@ -125,14 +125,19 @@ setup-time seed/factory flows must not require `JOB_RUNNER_BASE_URL`,
 `JOB_DATABASE_URL`, Sequin, or a job-runner worker.
 
 ```bash
-# Fully interactive (multi-select users / infrastructure / factory)
+# Interactive baseline seed; does not reset databases
 bun run seed
 
 # Factory data only, named preset, no prompts
 bun run seed:factory              # shortcut for --preset=realistic --no-interactive
 bun run seed:factory:fast         # shortcut for --preset=fast --no-interactive
 bun run seed:factory:medium       # shortcut for --preset=medium --no-interactive
-bun run seed --preset=minimal --no-interactive
+bun run ../../tool/bin/tool.ts factory --preset=minimal --no-interactive
+
+# Explicit destructive reset
+bun run seed:database-reset
+# CI/headless reset requires explicit confirmation
+bun run ../../tool/bin/tool.ts seed database-reset --yes
 ```
 
 **Presets** (`package/utils/src/factory/presets/`):

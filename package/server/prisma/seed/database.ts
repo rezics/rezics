@@ -61,6 +61,7 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   await Promise.all([
     prisma.scoreRealmField.deleteMany(),
     prisma.scoreAggregate.deleteMany(),
+    prisma.postPollReference.deleteMany(),
   ]);
   await prisma.pollOption.deleteMany();
 
@@ -85,7 +86,6 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   await prisma.contentStructureNode.deleteMany();
   await Promise.all([
     prisma.contentStructure.deleteMany(),
-    prisma.gamePlatform.deleteMany(),
     prisma.sourceSite.deleteMany(),
   ]);
 

@@ -33,7 +33,28 @@ async function runResetRootSeed() {
   p.outro("Done!");
 }
 
-async function runDatabaseReset() {
+async function confirmDatabaseReset(options: { yes?: boolean } = {}) {
+  if (options.yes) return;
+
+  if (!process.stdin.isTTY) {
+    throw new Error(
+      "Database reset requires interactive confirmation. Run `bun run seed:database-reset` in a terminal, or pass `--yes` to confirm the destructive reset.",
+    );
+  }
+
+  const ok = await p.confirm({
+    message: "Delete all auth and server seed data?",
+    initialValue: false,
+  });
+
+  if (p.isCancel(ok) || !ok) {
+    p.cancel("Database reset cancelled.");
+    process.exit(0);
+  }
+}
+
+async function runDatabaseReset(options: { yes?: boolean } = {}) {
+  await confirmDatabaseReset(options);
   const { runDbReset } = await import(
     "../../../../package/utils/src/db/command"
   );
@@ -54,7 +75,8 @@ async function pickSeedWorkflow(): Promise<SeedWorkflow> {
     options: [
       {
         value: "baseline",
-        label: "Reset databases and seed baseline data",
+        label: "Seed baseline users and infrastructure",
+        hint: "does not reset databases",
       },
       {
         value: "reset-root",
@@ -120,8 +142,14 @@ export const seedCommand = define({
     "database-reset": define({
       name: "database-reset",
       description: "Reset auth and server seed databases.",
-      run: async () => {
-        await runDatabaseReset();
+      args: {
+        yes: {
+          type: "boolean",
+          description: "Confirm the destructive database reset.",
+        },
+      },
+      run: async (ctx) => {
+        await runDatabaseReset({ yes: Boolean(ctx.values.yes) });
       },
     }),
     "init-meili-search": define({

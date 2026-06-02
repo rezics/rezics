@@ -54,7 +54,7 @@ bun run db:migrate       # Run custom migrations
 
 ## Factory Seed
 
-Factory seed commands reset auth and server databases, seed baseline rows, run a base preset, optionally run special scenarios, and print special scenario fixture Unit IDs.
+Factory seed commands seed baseline rows without resetting databases, run a base preset, optionally run special scenarios, and print special scenario fixture Unit IDs. Run `bun run seed:database-reset` explicitly when a clean database is needed; headless reset requires `seed database-reset --yes`.
 
 ```bash
 bun run seed:factory:fast

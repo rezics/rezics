@@ -159,7 +159,7 @@ async function confirmRun(
   );
   const ok = await p.confirm({
     message:
-      "Reset auth and server databases, seed users/infrastructure, then run factory seed with this plan?",
+      "Seed users/infrastructure without resetting databases, then run factory seed with this plan?",
     initialValue: true,
   });
   if (p.isCancel(ok) || !ok) {

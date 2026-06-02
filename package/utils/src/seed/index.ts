@@ -59,7 +59,7 @@ export async function seedBaseline(
   serverPrisma: ServerPrismaClient,
   opts: RunSeedOptions = {},
 ): Promise<SeedBaselineResult> {
-  const resetDatabases = opts.resetDatabases ?? true;
+  const resetDatabases = opts.resetDatabases ?? false;
 
   if (resetDatabases) {
     const s = p.spinner();

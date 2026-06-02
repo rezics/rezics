@@ -10,8 +10,7 @@ export async function runSeedCommand(
 ): Promise<void> {
   if (!options.noInteractive) {
     const ok = await p.confirm({
-      message:
-        "Reset auth and server databases, then seed users and infrastructure?",
+      message: "Seed users and infrastructure without resetting databases?",
       initialValue: true,
     });
 

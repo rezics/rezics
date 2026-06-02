@@ -90,4 +90,13 @@ describe("repo tool CLI schema", () => {
       "Interactive seed workflow requires a TTY",
     );
   });
+
+  test("database reset requires confirmation without a TTY", async () => {
+    const result = await runTool(["seed", "database-reset"]);
+
+    expect(result.exitCode).not.toBe(0);
+    expect(result.stderr + result.stdout).toContain(
+      "Database reset requires interactive confirmation",
+    );
+  });
 });
