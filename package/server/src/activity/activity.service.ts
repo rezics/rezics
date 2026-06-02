@@ -3,10 +3,10 @@ import { PostKind, prisma } from "#/prisma/client";
 import { profileReactionHistoryService } from "@/profile-reaction-history/profile-reaction-history.service";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import {
-  extractExtraTitle,
   mergeActivity,
   postActivityHref,
   postActivityKind,
+  resolvePostActivityTitle,
   shelfActivityHref,
 } from "./activity.mapper";
 
@@ -48,7 +48,13 @@ export const activityService = {
           createdAt: true,
           extra: true,
           unit: {
-            select: { translations: { select: { title: true }, take: 1 } },
+            select: {
+              defaultLanguage: true,
+              translations: { select: { language: true, title: true } },
+              supportLanguages: {
+                select: { language: true, isPrimary: true, sortOrder: true },
+              },
+            },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -80,7 +86,12 @@ export const activityService = {
     const postItems: ActivityItem[] = posts.map((p) => {
       const kind = postActivityKind(p.kind);
       const title =
-        p.unit?.translations[0]?.title ?? extractExtraTitle(p.extra) ?? "";
+        resolvePostActivityTitle({
+          translations: p.unit?.translations ?? [],
+          defaultLanguage: p.unit?.defaultLanguage,
+          supportLanguages: p.unit?.supportLanguages,
+          extra: p.extra,
+        }) ?? "";
       return {
         id: p.unitId,
         kind,

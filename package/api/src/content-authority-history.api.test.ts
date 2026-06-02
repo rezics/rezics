@@ -73,7 +73,7 @@ describe("content authority and history API clients", () => {
       content,
       targetUnitId: "book-1",
     } as never);
-    await postApi.updateWikiContent("post-1", edited);
+    await postApi.updateWikiContent("post-1", { content: edited });
     await postApi.getWikiByTarget("book-1", { limit: 5 });
 
     expect(
@@ -85,7 +85,7 @@ describe("content authority and history API clients", () => {
       creationMode: "wiki",
     });
     expect(JSON.parse(fetchMock.mock.calls[1]?.[1]?.body as string)).toEqual({
-      patch: { post: {} },
+      patch: { post: { content: edited } },
     });
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
       "http://api.example/post/list?limit=5&targetUnitId=book-1&kind=WIKI",

@@ -104,6 +104,8 @@ describe("post work-domain contract fields", () => {
       Value.Check(createPostSchema, {
         targetUnitId: "main-1",
         variantUnitId: "variant-1",
+        language: "en",
+        title: "Resolved post title",
         content: markdownContentDoc("body"),
       }),
     ).toBe(true);
@@ -113,6 +115,7 @@ describe("post work-domain contract fields", () => {
         authorUserId: "user-1",
         targetUnitId: "main-1",
         variantUnitId: "variant-1",
+        title: "Resolved post title",
         variantContext: {
           unitId: "variant-1",
           title: "Selected Edition",
@@ -133,6 +136,24 @@ describe("post work-domain contract fields", () => {
         limit: 20,
       }),
     ).toBe(true);
+  });
+
+  test("create title is the root-post display title, not extra.title", () => {
+    expect(
+      Value.Check(createPostSchema, {
+        language: "en",
+        title: "Display title",
+        content: markdownContentDoc("body"),
+        extra: { title: "legacy import title" },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(createPostSchema, {
+        language: "en",
+        title: "",
+        content: markdownContentDoc("body"),
+      }),
+    ).toBe(false);
   });
 
   test("uses comment endpoint naming for promotion contracts", () => {

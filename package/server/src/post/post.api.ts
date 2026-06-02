@@ -403,6 +403,8 @@ export const postApi = new Elysia({ prefix: "/post" })
           ? (body.patch.post as Record<string, unknown>)
           : {};
       const updateInput = {
+        title:
+          typeof postPatch.title === "string" ? postPatch.title : undefined,
         content:
           postPatch.content !== undefined
             ? applySparsePatch(target.content, postPatch.content)
@@ -423,6 +425,7 @@ export const postApi = new Elysia({ prefix: "/post" })
       const isWikiContentOnlyEdit =
         target.kind === PostKind.WIKI &&
         updateInput.content !== undefined &&
+        updateInput.title === undefined &&
         updateInput.isLocked === undefined &&
         updateInput.extra === undefined;
 

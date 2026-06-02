@@ -10,6 +10,9 @@ export const postInclude = {
     include: {
       user: { select: publicUserSelect },
       contentModerationState: true,
+      translations: true,
+      contentTranslations: true,
+      supportLanguages: true,
       inRealms: {
         where: { state: "VISIBLE" },
         select: { realmUnitId: true },
@@ -22,8 +25,9 @@ export const postInclude = {
 /**
  * Internal post type with relations.
  *
- * Post has its own `content` field (fast path, no UnitTranslation),
- * but still links to Unit for user/reaction data.
+ * Root post title/body are resolved from UnitTranslation and
+ * ContentTranslation. `Post.content` remains as a temporary legacy fallback
+ * while old rows are repaired.
  *
  * `pinKind`/`pinPosition` are the promotion overlay for the rendered thread
  * scope, attached by the thread read (`attachPinKinds`).

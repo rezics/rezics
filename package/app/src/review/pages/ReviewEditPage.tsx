@@ -31,7 +31,7 @@ export function ReviewEditPageContainer() {
       setReviewData({
         unitId: data.unitId,
         contentSource: mainMarkdownSource(data.content) ?? "",
-        _editTitle: (data.extra as any)?.title ?? "",
+        _editTitle: data.title ?? (data.extra as any)?.title ?? "",
         _editRating: (data.extra as any)?.rating ?? 0,
         extra: (data.extra as Record<string, any>) ?? {},
         targetUnitId: data.targetUnitId,
@@ -72,13 +72,14 @@ export function ReviewEditPageContainer() {
       }
     }
 
+    const { title: _legacyTitle, ...extraWithoutTitle } = reviewData.extra;
     const input = {
       patch: {
         post: {
           content: markdownContentDoc(reviewData.contentSource || ""),
+          title: reviewData._editTitle || undefined,
           extra: {
-            ...reviewData.extra,
-            title: reviewData._editTitle || undefined,
+            ...extraWithoutTitle,
             rating: reviewData._editRating || 0,
           },
         },

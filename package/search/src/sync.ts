@@ -1271,6 +1271,9 @@ export async function syncPostsByAuthorSegment(
         include: {
           user: true,
           targetUnit: { include: targetUnitSearchInclude },
+          translations: true,
+          contentTranslations: true,
+          supportLanguages: true,
           ...realmSearchProjectionSelect,
           contentModerationState: true,
         },
@@ -1719,12 +1722,62 @@ const postIncludeForSync = {
     include: {
       user: true,
       targetUnit: { include: targetUnitSearchInclude },
+      translations: true,
+      contentTranslations: true,
+      supportLanguages: true,
       ...realmSearchProjectionSelect,
       contentModerationState: true,
     },
   },
   scoreEntry: true,
 } as const;
+
+function languageOrder(unit: any, rows: any[]): string[] {
+  const supportLanguages = unit?.supportLanguages ?? [];
+  return [
+    unit?.defaultLanguage,
+    supportLanguages.find((language: any) => language.isPrimary)?.language,
+    ...[...supportLanguages]
+      .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map((language: any) => language.language),
+    ...rows.map((row: any) => row.language),
+  ].filter(
+    (language, index, self): language is string =>
+      Boolean(language) && self.indexOf(language) === index,
+  );
+}
+
+function resolvePostTitleText(post: any): string | null {
+  const translations = post.unit?.translations ?? [];
+  const byLanguage = new Map(
+    translations.map((translation: any) => [
+      translation.language,
+      translation.title,
+    ]),
+  );
+  for (const language of languageOrder(post.unit, translations)) {
+    const title = byLanguage.get(language);
+    if (typeof title === "string" && title.trim()) return title;
+  }
+  const legacyTitle = post.extra?.title;
+  return typeof legacyTitle === "string" && legacyTitle.trim()
+    ? legacyTitle
+    : null;
+}
+
+function resolvePostContent(post: any): unknown {
+  const translations = post.unit?.contentTranslations ?? [];
+  const byLanguage = new Map(
+    translations.map((translation: any) => [
+      translation.language,
+      translation.content,
+    ]),
+  );
+  for (const language of languageOrder(post.unit, translations)) {
+    if (byLanguage.has(language)) return byLanguage.get(language);
+  }
+  return post.content;
+}
 
 const commentIncludeForSync = {
   unit: {
@@ -1805,7 +1858,8 @@ export function buildPostDocument(post: any): PostSearchDocument {
 
   return {
     id: post.unitId,
-    contentText: mainMarkdownSource(post.content),
+    titleText: resolvePostTitleText(post),
+    contentText: mainMarkdownSource(resolvePostContent(post)),
     kind: post.kind ?? null,
     isLocked: post.isLocked,
     replyCount: post.replyCount,

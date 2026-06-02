@@ -128,6 +128,12 @@ export const postDTOSchema = t.Object({
   variantUnitId: t.Optional(t.Nullable(t.String())),
   variantContext: t.Optional(t.Nullable(variantContextSummarySchema)),
   realmUnitId: t.Optional(t.Nullable(t.String())),
+  /** Resolved root-post display title for the selected/default language. */
+  title: t.Optional(t.Nullable(t.String())),
+  /**
+   * Resolved root-post body content for the selected/default language. During
+   * the translation cutover, old rows may still fall back to `Post.content`.
+   */
   content: t.Optional(t.Nullable(contentDocSchema)),
   kind: t.Optional(t.Nullable(postKindLiterals)),
   status: t.Optional(t.String()),
@@ -372,6 +378,7 @@ export const createPostSchema = t.Object({
   kind: t.Optional(postKindLiterals),
   language: t.Optional(languageSchema),
   creationMode: t.Optional(creationModeSchema),
+  title: t.Optional(t.String({ minLength: 1, maxLength: 300 })),
   content: contentDocWriteSchema,
   scoreEntryId: t.Optional(t.String()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
@@ -394,6 +401,7 @@ export type SetPostPublicationInput =
   (typeof setPostPublicationSchema)["static"];
 
 export const updatePostSchema = t.Object({
+  title: t.Optional(t.String({ minLength: 1, maxLength: 300 })),
   content: t.Optional(contentDocWriteSchema),
   language: t.Optional(languageSchema),
   isLocked: t.Optional(t.Boolean()),

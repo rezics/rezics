@@ -118,6 +118,7 @@
   "post_metadata_edited": "bearbeitet",
   "post_edit_wiki_post": "Wiki-Beitrag bearbeiten",
   "post_tag_picker_no_matches": "Keine passenden Tags",
+  "post_title_placeholder": "Beitragstitel",
   "post_reply_placeholder": "Antwort hinzufügen…",
   "post_composer_invalid_configuration": "Ungültige Composer-Konfiguration.",
   "post_composer_posting": "Wird gepostet…",

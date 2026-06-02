@@ -21,6 +21,57 @@ function contentHiddenByGlobalModeration(post: PostWithRelations) {
   );
 }
 
+function legacyExtraTitle(extra: unknown): string | null {
+  if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
+  const title = (extra as Record<string, unknown>).title;
+  return typeof title === "string" && title.trim().length > 0 ? title : null;
+}
+
+function postLanguageOrder(post: PostWithRelations): string[] {
+  const order = [
+    post.unit.defaultLanguage,
+    post.unit.supportLanguages.find((language) => language.isPrimary)?.language,
+    ...post.unit.supportLanguages
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((language) => language.language),
+    ...post.unit.translations.map((translation) => translation.language),
+    ...post.unit.contentTranslations.map((translation) => translation.language),
+  ];
+  return [
+    ...new Set(order.filter((language): language is string => !!language)),
+  ];
+}
+
+function resolvePostTitle(post: PostWithRelations): string | null {
+  const byLanguage = new Map(
+    post.unit.translations.map((translation) => [
+      translation.language,
+      translation.title,
+    ]),
+  );
+  for (const language of postLanguageOrder(post)) {
+    const title = byLanguage.get(language);
+    if (title && title.trim().length > 0) return title;
+  }
+  return legacyExtraTitle(post.extra);
+}
+
+function resolvePostContent(post: PostWithRelations): PostDTO["content"] {
+  const byLanguage = new Map(
+    post.unit.contentTranslations.map((translation) => [
+      translation.language,
+      translation.content,
+    ]),
+  );
+  for (const language of postLanguageOrder(post)) {
+    const content = byLanguage.get(language);
+    if (content !== undefined && content !== null) {
+      return content as PostDTO["content"];
+    }
+  }
+  return post.content as PostDTO["content"];
+}
+
 /**
  * Map a PostWithRelations (Prisma result) to the public PostDTO.
  */
@@ -39,7 +90,8 @@ export function mapPostToDTO(
     variantUnitId: post.variantUnitId ?? null,
     variantContext: variantContextForRow(post, variantContexts),
     realmUnitId: post.unit.inRealms?.[0]?.realmUnitId ?? null,
-    content: contentHidden ? null : (post.content as PostDTO["content"]),
+    title: contentHidden ? null : resolvePostTitle(post),
+    content: contentHidden ? null : resolvePostContent(post),
     kind: post.kind ?? null,
     status: post.unit.status,
     visibility: post.unit.visibility,

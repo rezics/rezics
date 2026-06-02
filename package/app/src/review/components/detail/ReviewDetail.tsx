@@ -22,7 +22,8 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
 }) => {
   const { t } = useTranslation(["book"]);
   const rating = (review.extra as { rating?: number } | null)?.rating;
-  const title = (review.extra as { title?: string } | null)?.title;
+  const title =
+    review.title ?? (review.extra as { title?: string } | null)?.title;
   const hydrationIds = useMemo(
     () => (review.unitId ? [review.unitId] : []),
     [review.unitId],

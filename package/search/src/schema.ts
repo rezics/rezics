@@ -119,7 +119,12 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
   {
     uid: "posts",
     primaryKey: "id",
-    searchableAttributes: ["contentText", "targetTitles", "authorName"],
+    searchableAttributes: [
+      "titleText",
+      "contentText",
+      "targetTitles",
+      "authorName",
+    ],
     filterableAttributes: [
       "kind",
       "targetUnitId",

@@ -10,7 +10,7 @@ import {
   type PostDTO,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
-import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
+import { Alert, AlertDescription, Button, Input } from "@rezics/ui/shadcn";
 import { useMemo, useState } from "react";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
@@ -32,7 +32,9 @@ export function WikiPostEditor({
   onCancel,
 }: WikiPostEditorProps) {
   const { t } = useTranslation(["common"]);
+  const { t: tc } = useTranslation(["community"]);
   const locale = useLocale();
+  const [title, setTitle] = useState(post?.title ?? "");
   const [body, setBody] = useState(mainMarkdownSource(post?.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const resize = useMemo(
@@ -65,9 +67,11 @@ export function WikiPostEditor({
 
   const handleCreate = (status: "DRAFT" | "PUBLISHED") => {
     const trimmed = body.trim();
-    if (!trimmed) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !trimmed) return;
     setLockedError(null);
     createMutation.mutate({
+      title: trimmedTitle,
       content: markdownContentDoc(trimmed),
       language: locale,
       realmUnitIds,
@@ -78,10 +82,12 @@ export function WikiPostEditor({
 
   const handleUpdate = () => {
     const trimmed = body.trim();
-    if (!trimmed || !post) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !trimmed || !post) return;
     setLockedError(null);
     updateMutation.mutate({
       unitId: post.unitId,
+      title: trimmedTitle === post.title ? undefined : trimmedTitle,
       content: markdownContentDoc(trimmed),
       language: locale,
     });
@@ -94,6 +100,12 @@ export function WikiPostEditor({
           <AlertDescription>{lockedError}</AlertDescription>
         </Alert>
       ) : null}
+      <Input
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        placeholder={tc("community:post_title_placeholder")}
+        disabled={activeMutation.isPending}
+      />
       <RezicsMarkdownEditor value={body} onChange={setBody} resize={resize} />
 
       {post ? (
@@ -124,7 +136,7 @@ export function WikiPostEditor({
           <Button
             type="button"
             onClick={handleUpdate}
-            disabled={updateMutation.isPending || !body.trim()}
+            disabled={updateMutation.isPending || !title.trim() || !body.trim()}
           >
             {updateMutation.isPending ? t("common:saving") : t("common:update")}
           </Button>
@@ -135,8 +147,8 @@ export function WikiPostEditor({
           onSaveDraft={() => handleCreate("DRAFT")}
           onPublish={() => handleCreate("PUBLISHED")}
           isPending={createMutation.isPending}
-          saveDraftDisabled={!body.trim()}
-          publishDisabled={!body.trim()}
+          saveDraftDisabled={!title.trim() || !body.trim()}
+          publishDisabled={!title.trim() || !body.trim()}
           denial={createDenial}
         />
       )}

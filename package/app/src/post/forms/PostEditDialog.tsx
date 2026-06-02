@@ -20,6 +20,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Input,
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
@@ -37,9 +38,13 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
 }) => {
   const { t } = useTranslation(["common", "community"]);
   const locale = useLocale();
+  const [title, setTitle] = useState(
+    !("rootUnitId" in post) ? (post.title ?? "") : "",
+  );
   const [text, setText] = useState(mainMarkdownSource(post.content) ?? "");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isComment = "rootUnitId" in post;
+  const originalTitle = isComment ? "" : (post.title ?? "");
   const isWikiPost = !isComment && post.kind === PostKind.WIKI;
 
   const updateMutation = useUpdatePostMutation({
@@ -77,10 +82,13 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
   const handleSubmit = () => {
     if (!text.trim()) return;
     setLockedError(null);
+    const trimmedTitle = isComment ? undefined : title.trim();
+    if (!isComment && !trimmedTitle) return;
     const content = markdownContentDoc(text.trim());
     if (isWikiPost) {
       updateWikiMutation.mutate({
         unitId: post.unitId,
+        title: trimmedTitle === originalTitle ? undefined : trimmedTitle,
         content,
         language: locale,
       });
@@ -95,7 +103,14 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
     }
     updateMutation.mutate({
       unitId: post.unitId,
-      input: { patch: { post: { content } } },
+      input: {
+        patch: {
+          post: {
+            title: trimmedTitle === originalTitle ? undefined : trimmedTitle,
+            content,
+          },
+        },
+      },
     });
   };
 
@@ -113,6 +128,14 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
               <AlertDescription>{lockedError}</AlertDescription>
             </Alert>
           ) : null}
+          {!isComment ? (
+            <Input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder={t("community:post_title_placeholder")}
+              disabled={activeMutation.isPending}
+            />
+          ) : null}
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -126,7 +149,11 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={activeMutation.isPending || !text.trim()}
+            disabled={
+              activeMutation.isPending ||
+              !text.trim() ||
+              (!isComment && !title.trim())
+            }
           >
             {activeMutation.isPending ? t("common:saving") : t("common:save")}
           </Button>

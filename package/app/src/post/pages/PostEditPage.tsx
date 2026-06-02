@@ -10,7 +10,7 @@ import {
   PostKind,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
-import { Alert, AlertDescription, Button } from "@rezics/ui/shadcn";
+import { Alert, AlertDescription, Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -30,12 +30,16 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
     isLoading,
     error,
   } = useQuery(postQueries.detail(postUnitId));
+  const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [lockedError, setLockedError] = useState<string | null>(null);
   const isWikiPost = post?.kind === PostKind.WIKI;
 
   useEffect(() => {
-    if (post) setText(mainMarkdownSource(post.content) ?? "");
+    if (post) {
+      setTitle(post.title ?? "");
+      setText(mainMarkdownSource(post.content) ?? "");
+    }
   }, [post]);
 
   const handleSaved = () => {
@@ -60,12 +64,14 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
   const activeMutation = isWikiPost ? updateWikiMutation : updateMutation;
 
   const handleSubmit = () => {
-    if (!post || !text.trim()) return;
+    const trimmedTitle = title.trim();
+    if (!post || !trimmedTitle || !text.trim()) return;
     setLockedError(null);
     const content = markdownContentDoc(text.trim());
     if (isWikiPost) {
       updateWikiMutation.mutate({
         unitId: post.unitId,
+        title: trimmedTitle === post.title ? undefined : trimmedTitle,
         content,
         language: locale,
       });
@@ -73,7 +79,14 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
     }
     updateMutation.mutate({
       unitId: post.unitId,
-      input: { patch: { post: { content } } },
+      input: {
+        patch: {
+          post: {
+            title: trimmedTitle === post.title ? undefined : trimmedTitle,
+            content,
+          },
+        },
+      },
     });
   };
 
@@ -88,6 +101,12 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
           <AlertDescription>{lockedError}</AlertDescription>
         </Alert>
       ) : null}
+      <Input
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        placeholder={t("community:post_title_placeholder")}
+        disabled={activeMutation.isPending}
+      />
       {isWikiPost ? (
         <h1 className="text-lg font-medium leading-ui text-text-primary">
           {t("community:post_edit_wiki_post")}
@@ -105,7 +124,7 @@ export function PostEditPage({ postUnitId, returnTo }: PostEditPageProps) {
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={activeMutation.isPending || !text.trim()}
+          disabled={activeMutation.isPending || !title.trim() || !text.trim()}
         >
           {activeMutation.isPending ? t("common:saving") : t("common:save")}
         </Button>

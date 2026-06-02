@@ -38,6 +38,7 @@ export function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
     realmUnitId:
       (doc as PostSearchDocument & { realmUnitId?: string | null })
         .realmUnitId ?? undefined,
+    title: doc.titleText ?? undefined,
     content: markdownContentDoc(doc.contentText ?? ""),
     kind: doc.kind as PostDTO["kind"],
     depth: 0,

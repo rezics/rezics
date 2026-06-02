@@ -98,10 +98,12 @@ describe("post wiki API helpers", () => {
     );
 
     await postApi.createWiki({
+      title: "Wiki title",
       content: { body: "hello" } as never,
       language: "en",
     });
     await postApi.updateWikiContent("wiki-post-1", {
+      title: "Edited title",
       content: { body: "edited" } as never,
       language: "ja",
     });
@@ -115,6 +117,7 @@ describe("post wiki API helpers", () => {
     expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toEqual({
       patch: {
         post: {
+          title: "Edited title",
           content: { body: "edited" },
           language: "ja",
         },

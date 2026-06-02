@@ -76,6 +76,11 @@ export const PostCard: React.FC<PostCardProps> = ({
     >
       <div className="flex flex-col gap-2">
         <PostAuthorHeader post={post} />
+        {post.title ? (
+          <h3 className="m-0 line-clamp-2 text-base font-medium leading-ui text-text-primary">
+            {post.title}
+          </h3>
+        ) : null}
         <PostBodyMarkdown
           content={post.content}
           clamp={{ maxLines: 4 }}

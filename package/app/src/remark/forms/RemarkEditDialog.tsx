@@ -14,6 +14,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  Input,
 } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useState } from "react";
@@ -29,11 +30,12 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   open,
   onClose,
 }) => {
-  const { t } = useTranslation(["common", "page"]);
+  const { t } = useTranslation(["common", "community", "page"]);
   const initialRating = (remark.extra as { rating?: number } | null)?.rating;
   const [score, setScore] = useState<number | null>(
     typeof initialRating === "number" ? initialRating : null,
   );
+  const [title, setTitle] = useState(remark.title ?? "");
   const [text, setText] = useState(mainMarkdownSource(remark.content) ?? "");
 
   const updateMutation = useUpdatePostMutation({
@@ -43,7 +45,8 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
   });
 
   const handleSubmit = () => {
-    if (!text.trim()) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !text.trim()) return;
     const nextExtra = {
       ...(remark.extra ?? {}),
       ...(score !== null ? { rating: score } : {}),
@@ -53,6 +56,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
       input: {
         patch: {
           post: {
+            title: trimmedTitle,
             content: markdownContentDoc(text.trim()),
             extra: nextExtra,
           },
@@ -80,6 +84,12 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
               max={SCORE_MAX}
               aria-label={t("page:remark_form_rating")}
             />
+            <Input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder={t("community:post_title_placeholder")}
+              disabled={updateMutation.isPending}
+            />
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -94,7 +104,7 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={updateMutation.isPending || !text.trim()}
+            disabled={updateMutation.isPending || !title.trim() || !text.trim()}
           >
             {updateMutation.isPending ? t("common:saving") : t("common:save")}
           </Button>

@@ -1,7 +1,7 @@
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import type { PollDTO, PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { Button, ToggleGroup, ToggleGroupItem } from "@rezics/ui/shadcn";
+import { Button, Input, ToggleGroup, ToggleGroupItem } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { PollComposer } from "@/poll";
@@ -21,6 +21,7 @@ export function RealmPollPostCreateForm({
 }: RealmPollPostCreateFormProps) {
   const { t } = useTranslation(["common", "community"]);
   const navigate = useNavigate();
+  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [status, setStatus] = useState<"DRAFT" | "PUBLISHED">("PUBLISHED");
@@ -33,10 +34,12 @@ export function RealmPollPostCreateForm({
 
   const createPostForPoll = (poll: PollDTO) => {
     const trimmed = body.trim();
-    if (!trimmed) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !trimmed) return;
     createMutation.mutate(
       buildRealmPollPostCreateInput({
         realmId,
+        title: trimmedTitle,
         content: trimmed,
         tagIds: selectedTagIds,
         pollUnitId: poll.unitId,
@@ -59,6 +62,12 @@ export function RealmPollPostCreateForm({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-4">
+        <Input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder={t("community:post_title_placeholder")}
+          disabled={createMutation.isPending}
+        />
         <RezicsMarkdownEditor value={body} onChange={setBody} resize={resize} />
         <RealmPostTagPicker
           realmUnitIds={[realmId]}
@@ -89,7 +98,7 @@ export function RealmPollPostCreateForm({
           {t("community:poll_attach_error")}
         </p>
       ) : null}
-      {body.trim() ? (
+      {title.trim() && body.trim() ? (
         <div className="rounded-md bg-surface-subtle p-4">
           <PollComposer
             submitLabel={

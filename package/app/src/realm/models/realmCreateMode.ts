@@ -31,6 +31,7 @@ export function realmCreateModeLabel(mode: RealmCreateMode): string {
 
 export function buildRealmPostCreateInput(input: {
   realmId: string;
+  title: string;
   content: string;
   tagIds: string[];
   status: "DRAFT" | "PUBLISHED";
@@ -39,6 +40,7 @@ export function buildRealmPostCreateInput(input: {
     realmUnitIds: [input.realmId],
     tagIds: input.tagIds,
     kind: PostKind.POST,
+    title: input.title.trim(),
     content: markdownContentDoc(input.content.trim()),
     status: input.status,
   };
@@ -60,6 +62,7 @@ export function buildRealmWikiCreateInput(input: {
 
 export function buildRealmPollPostCreateInput(input: {
   realmId: string;
+  title: string;
   content: string;
   tagIds: string[];
   pollUnitId: string;

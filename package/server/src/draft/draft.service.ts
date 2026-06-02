@@ -21,7 +21,16 @@ function plainText(content: unknown): string {
     .trim();
 }
 
-function deriveTitle(extra: unknown, content: unknown): string {
+function deriveTitle(
+  translations: Array<{ title: string | null; language: string }>,
+  extra: unknown,
+  content: unknown,
+): string {
+  for (const translation of translations) {
+    if (translation.title?.trim()) {
+      return translation.title.trim().slice(0, 120);
+    }
+  }
   const extraTitle =
     extra && typeof extra === "object"
       ? (extra as { title?: unknown }).title
@@ -33,7 +42,14 @@ function deriveTitle(extra: unknown, content: unknown): string {
   return text ? text.slice(0, 80) : "";
 }
 
-function deriveExcerpt(content: unknown): string | undefined {
+function deriveExcerpt(
+  contentTranslations: Array<{ content: unknown; language: string }>,
+  content: unknown,
+): string | undefined {
+  for (const translation of contentTranslations) {
+    const translatedText = plainText(translation.content);
+    if (translatedText) return translatedText.slice(0, 200);
+  }
   const text = plainText(content);
   return text ? text.slice(0, 200) : undefined;
 }
@@ -60,7 +76,18 @@ export const draftService = {
         kind: true,
         content: true,
         extra: true,
-        unit: { select: { targetUnitId: true } },
+        unit: {
+          select: {
+            targetUnitId: true,
+            defaultLanguage: true,
+            supportLanguages: {
+              select: { language: true, isPrimary: true, sortOrder: true },
+              orderBy: { sortOrder: "asc" },
+            },
+            translations: { select: { language: true, title: true } },
+            contentTranslations: { select: { language: true, content: true } },
+          },
+        },
         updatedAt: true,
       },
       orderBy: { updatedAt: "desc" },
@@ -75,8 +102,23 @@ export const draftService = {
         toDraftMetadata({
           unitId: post.unitId,
           kind,
-          title: deriveTitle(post.extra, post.content),
-          excerpt: deriveExcerpt(post.content),
+          title: deriveTitle(
+            orderByPostLanguage(
+              post.unit.translations,
+              post.unit.defaultLanguage,
+              post.unit.supportLanguages,
+            ),
+            post.extra,
+            post.content,
+          ),
+          excerpt: deriveExcerpt(
+            orderByPostLanguage(
+              post.unit.contentTranslations,
+              post.unit.defaultLanguage,
+              post.unit.supportLanguages,
+            ),
+            post.content,
+          ),
           updatedAt: post.updatedAt.toISOString(),
           targetUnitId: post.unit.targetUnitId,
         }),
@@ -85,3 +127,32 @@ export const draftService = {
     return drafts;
   },
 };
+
+function orderByPostLanguage<T extends { language: string }>(
+  rows: T[],
+  defaultLanguage: string | null,
+  supportLanguages: Array<{
+    language: string;
+    isPrimary: boolean;
+    sortOrder: number;
+  }>,
+): T[] {
+  const order = [
+    defaultLanguage,
+    supportLanguages.find((language) => language.isPrimary)?.language,
+    ...supportLanguages
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((language) => language.language),
+    ...rows.map((row) => row.language),
+  ];
+  const rank = new Map(
+    [
+      ...new Set(order.filter((language): language is string => !!language)),
+    ].map((language, index) => [language, index]),
+  );
+  return [...rows].sort(
+    (a, b) =>
+      (rank.get(a.language) ?? Number.MAX_SAFE_INTEGER) -
+      (rank.get(b.language) ?? Number.MAX_SAFE_INTEGER),
+  );
+}

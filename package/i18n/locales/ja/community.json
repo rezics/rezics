@@ -118,6 +118,7 @@
   "post_metadata_edited": "編集済み",
   "post_edit_wiki_post": "Wiki 投稿を編集",
   "post_tag_picker_no_matches": "一致するタグはありません",
+  "post_title_placeholder": "投稿タイトル",
   "post_reply_placeholder": "返信を追加…",
   "post_composer_invalid_configuration": "コンポーザー設定が無効です。",
   "post_composer_posting": "投稿中…",

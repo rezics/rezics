@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import type { ActivityItem } from "@rezics/contract";
 import {
-  extractExtraTitle,
   mergeActivity,
   postActivityHref,
   postActivityKind,
+  resolvePostActivityTitle,
   shelfActivityHref,
 } from "./activity.mapper";
 
@@ -27,13 +27,28 @@ describe("hrefs", () => {
   });
 });
 
-describe("extractExtraTitle", () => {
-  it("reads a non-empty string title, else undefined", () => {
-    expect(extractExtraTitle({ title: "Hi" })).toBe("Hi");
-    expect(extractExtraTitle({ title: "  " })).toBeUndefined();
-    expect(extractExtraTitle({ title: 42 })).toBeUndefined();
-    expect(extractExtraTitle(null)).toBeUndefined();
-    expect(extractExtraTitle("nope")).toBeUndefined();
+describe("resolvePostActivityTitle", () => {
+  it("uses UnitTranslation title before legacy extra.title", () => {
+    expect(
+      resolvePostActivityTitle({
+        defaultLanguage: "en",
+        translations: [
+          { language: "ja", title: "日本語" },
+          { language: "en", title: "English" },
+        ],
+        supportLanguages: [],
+        extra: { title: "Legacy" },
+      }),
+    ).toBe("English");
+    expect(
+      resolvePostActivityTitle({
+        translations: [],
+        extra: { title: "Legacy" },
+      }),
+    ).toBe("Legacy");
+    expect(
+      resolvePostActivityTitle({ translations: [], extra: null }),
+    ).toBeUndefined();
   });
 });
 

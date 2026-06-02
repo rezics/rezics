@@ -115,6 +115,7 @@ const realmUnitFindManyMock = mock(async () => [{ realmUnitId: "realm-1" }]);
 const unitTagCreateMock = mock(async (args: any) => args.data);
 const unitTagFindManyMock = mock(async (): Promise<any[]> => []);
 const unitTranslationFindManyMock = mock(async (): Promise<any[]> => []);
+const unitTranslationUpsertMock = mock(async (args: any) => args.create);
 const contentTranslationUpsertMock = mock(async (args: any) => args.create);
 const contentTranslationUpdateManyMock = mock(async () => ({ count: 1 }));
 const bookFindUniqueMock = mock(async (): Promise<any> => null);
@@ -173,7 +174,10 @@ const transactionMock = mock(async (fn: any) =>
     },
     unitRealm: { create: realmUnitCreateMock },
     unitTag: { create: unitTagCreateMock, findMany: unitTagFindManyMock },
-    unitTranslation: { findMany: unitTranslationFindManyMock },
+    unitTranslation: {
+      findMany: unitTranslationFindManyMock,
+      upsert: unitTranslationUpsertMock,
+    },
     contentTranslation: {
       upsert: contentTranslationUpsertMock,
       updateMany: contentTranslationUpdateManyMock,
@@ -235,6 +239,10 @@ Object.assign(prismaMock, {
   contentTranslation: {
     upsert: contentTranslationUpsertMock,
     updateMany: contentTranslationUpdateManyMock,
+  },
+  unitTranslation: {
+    findMany: unitTranslationFindManyMock,
+    upsert: unitTranslationUpsertMock,
   },
   commentPromotion: {
     create: commentPromotionCreateMock,
@@ -327,9 +335,12 @@ function resetMocks() {
     unitId: "parent-1",
     rootPostUnitId: "root-1",
     targetUnitId: null,
+    authorUserId: "author-1",
     depth: 0,
     isLocked: false,
     unit: {
+      defaultLanguage: "en",
+      status: "PUBLISHED",
       inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
       realmModerationTargets: [],
     },
@@ -376,6 +387,7 @@ function resetMocks() {
   unitTagCreateMock.mockClear();
   unitTagFindManyMock.mockClear();
   unitTranslationFindManyMock.mockClear();
+  unitTranslationUpsertMock.mockClear();
   contentTranslationUpsertMock.mockClear();
   contentTranslationUpdateManyMock.mockClear();
   bookFindUniqueMock.mockClear();
@@ -968,6 +980,67 @@ describe("PostService.create targetUnitId derivation", () => {
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
   });
 
+  test("root post create writes UnitTranslation title and ContentTranslation body", async () => {
+    resetMocks();
+    postCreateMock.mockImplementationOnce(async (args: any) => ({
+      unitId: "post-1",
+      content: args.data.content,
+      kind: args.data.kind,
+      extra: args.data.extra,
+    }));
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "user-1",
+      content: content("body"),
+      kind: "POST",
+      unit: {
+        defaultLanguage: "en",
+        status: "PUBLISHED",
+        inRealms: [],
+        realmModerationTargets: [],
+      },
+    });
+
+    await service.create(
+      {
+        kind: "POST",
+        language: "en",
+        title: "Thread title",
+        content: content("body"),
+        extra: { title: "legacy title", poll: { unitId: "poll-1" } },
+      },
+      "user-1",
+    );
+
+    expect(unitCreateDataArg()).toMatchObject({
+      defaultLanguage: "en",
+      supportLanguages: { create: { language: "en", isPrimary: true } },
+    });
+    expect(createDataArg().extra).toEqual({ poll: { unitId: "poll-1" } });
+    expect(unitTranslationUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId_language: { unitId: "post-1", language: "en" } },
+        create: expect.objectContaining({
+          unitId: "post-1",
+          language: "en",
+          title: "Thread title",
+        }),
+      }),
+    );
+    expect(contentTranslationUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId_language: { unitId: "post-1", language: "en" } },
+        create: expect.objectContaining({
+          unitId: "post-1",
+          language: "en",
+          content: content("body"),
+          status: "PUBLISHED",
+          authorUserId: "user-1",
+        }),
+      }),
+    );
+  });
+
   test("CHAPTER kind validates the target is a BOOK", async () => {
     resetMocks();
     unitFindUniqueMock.mockResolvedValueOnce({ type: "BOOK" });
@@ -986,7 +1059,7 @@ describe("PostService.create targetUnitId derivation", () => {
 describe("PostService.update immutability", () => {
   const service = new PostService();
 
-  test("update writes only content/isLocked/extra; target fields are not in the update payload", async () => {
+  test("update writes only content/isLocked/extra; target fields are not in the post update payload", async () => {
     resetMocks();
     const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
     Object.assign(prismaMock.post, { update: directPostUpdateMock });
@@ -1001,12 +1074,49 @@ describe("PostService.update immutability", () => {
     expect(args.where).toEqual({ unitId: "post-1" });
     expect(args.data).toEqual({ content: content("edited"), isLocked: true });
     expect(args.data.targetUnitId).toBeUndefined();
+    expect(contentTranslationUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId_language: { unitId: "post-1", language: "en" } },
+        update: expect.objectContaining({
+          content: content("edited"),
+          status: "PUBLISHED",
+          authorUserId: "author-1",
+        }),
+      }),
+    );
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
       "search.post.patchFields",
       "search.content.sync",
     ]);
 
     // Restore the shared mock so subsequent tests see the standard behavior.
+    Object.assign(prismaMock.post, { update: postUpdateMock });
+  });
+
+  test("update writes title to UnitTranslation instead of Post.extra", async () => {
+    resetMocks();
+    const directPostUpdateMock = mock(async () => ({ unitId: "post-1" }));
+    Object.assign(prismaMock.post, { update: directPostUpdateMock });
+
+    await service.update("post-1", {
+      title: "Updated title",
+      language: "ja",
+    });
+
+    const args = (directPostUpdateMock.mock.calls as any[])[0]?.[0];
+    expect(args.data.extra).toBeUndefined();
+    expect(unitTranslationUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { unitId_language: { unitId: "post-1", language: "ja" } },
+        create: expect.objectContaining({
+          unitId: "post-1",
+          language: "ja",
+          title: "Updated title",
+        }),
+        update: { title: "Updated title" },
+      }),
+    );
+
     Object.assign(prismaMock.post, { update: postUpdateMock });
   });
 });
@@ -1207,6 +1317,8 @@ describe("PostService wiki posts", () => {
     postFindUniqueOrThrowMock.mockImplementationOnce(async () => ({
       kind: "REVIEW",
       content: content("original"),
+      authorUserId: "actor-1",
+      unit: { defaultLanguage: "en", status: "PUBLISHED" },
     }));
 
     await service.update("review-1", { content: content("edited") }, actor);

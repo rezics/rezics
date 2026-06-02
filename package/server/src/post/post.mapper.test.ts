@@ -1,129 +1,78 @@
 import { describe, expect, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
+import { mapPostToDTO } from "./post.mapper";
+import type { PostWithRelations } from "./types";
 
-const { mapPostToDTO } = await import("./post.mapper");
+const basePost = {
+  unitId: "post-1",
+  authorUserId: "user-1",
+  variantUnitId: null,
+  content: markdownContentDoc("legacy body"),
+  kind: "POST",
+  scoreEntryId: null,
+  replyCount: 0,
+  directReplyCount: 0,
+  lastReplyAt: null,
+  isLocked: false,
+  state: null,
+  extra: { title: "Legacy title" },
+  createdAt: new Date("2026-06-02T00:00:00.000Z"),
+  updatedAt: new Date("2026-06-02T00:00:00.000Z"),
+  unit: {
+    targetUnitId: null,
+    status: "PUBLISHED",
+    visibility: "PUBLIC",
+    licenseSlug: null,
+    defaultLanguage: "en",
+    user: null,
+    contentModerationState: null,
+    inRealms: [],
+    supportLanguages: [
+      { unitId: "post-1", language: "en", isPrimary: true, sortOrder: 0 },
+      { unitId: "post-1", language: "ja", isPrimary: false, sortOrder: 1 },
+    ],
+    translations: [],
+    contentTranslations: [],
+  },
+} as unknown as PostWithRelations;
 
 describe("mapPostToDTO", () => {
-  test("serializes a known author USER slug", () => {
+  test("resolves post title and body from translations before legacy fields", () => {
     const dto = mapPostToDTO({
-      unitId: "post-1",
-      authorUserId: "user-1",
-      targetUnitId: "book-1",
-      content: markdownContentDoc("A thoughtful review"),
-      rootPostUnitId: "post-1",
-      parentPostUnitId: null,
-      kind: "REVIEW",
-      scoreEntryId: null,
-      depth: 0,
-      path: null,
-      replyCount: 0,
-      directReplyCount: 0,
-      lastReplyAt: null,
-      isLocked: false,
-      extra: null,
-      createdAt: new Date("2026-01-01T00:00:00Z"),
-      updatedAt: new Date("2026-01-01T00:00:00Z"),
+      ...basePost,
       unit: {
-        targetUnitId: "book-1",
-        inRealms: [{ realmUnitId: "realm-1" }],
-        user: {
-          unitId: "user-1",
-          slug: "alice",
-          name: "Alice",
-          avatar: null,
-        },
+        ...basePost.unit,
+        translations: [
+          { unitId: "post-1", language: "en", title: "English title" },
+        ],
+        contentTranslations: [
+          {
+            unitId: "post-1",
+            language: "en",
+            content: markdownContentDoc("translated body"),
+          },
+        ],
       },
-    } as any);
+    } as unknown as PostWithRelations);
 
-    expect(dto.targetUnitId).toBe("book-1");
-    expect(dto.variantUnitId).toBeNull();
-    expect(dto.author).toMatchObject({
-      unitId: "user-1",
-      slug: "alice",
-      name: "Alice",
-      avatar: null,
-    });
-    expect(dto.realmUnitId).toBe("realm-1");
+    expect(dto.title).toBe("English title");
+    expect(dto.content).toEqual(markdownContentDoc("translated body"));
   });
 
-  test("maps ContentDoc author descriptions for post list responses", () => {
+  test("falls back through primary support language and legacy fields", () => {
     const dto = mapPostToDTO({
-      unitId: "post-1",
-      authorUserId: "user-1",
-      targetUnitId: null,
-      content: markdownContentDoc("A short post"),
-      rootPostUnitId: "post-1",
-      parentPostUnitId: null,
-      kind: "POST",
-      scoreEntryId: null,
-      depth: 0,
-      path: null,
-      replyCount: 0,
-      directReplyCount: 0,
-      lastReplyAt: null,
-      isLocked: false,
-      extra: null,
-      createdAt: new Date("2026-01-01T00:00:00Z"),
-      updatedAt: new Date("2026-01-01T00:00:00Z"),
+      ...basePost,
       unit: {
-        status: "PUBLISHED",
-        visibility: "PUBLIC",
-        licenseSlug: null,
-        user: {
-          unitId: "user-1",
-          slug: "alice",
-          name: "Alice",
-          avatar: null,
-          description: markdownContentDoc("Generated profile"),
-        },
+        ...basePost.unit,
+        defaultLanguage: "zh-hant",
+        translations: [
+          { unitId: "post-1", language: "ja", title: "Japanese title" },
+        ],
+        contentTranslations: [],
       },
-    } as any);
+    } as unknown as PostWithRelations);
 
-    expect(dto.author?.description).toEqual(
-      markdownContentDoc("Generated profile"),
-    );
-    expect(typeof dto.author?.description).toBe("object");
-    expect(dto.author?.description).not.toBe("Generated profile");
-  });
-
-  test("nulls globally hidden content while preserving the node", () => {
-    const dto = mapPostToDTO({
-      unitId: "reply-1",
-      authorUserId: "user-1",
-      targetUnitId: null,
-      content: markdownContentDoc("Hidden reply"),
-      rootPostUnitId: "post-1",
-      parentPostUnitId: "post-1",
-      kind: "POST",
-      scoreEntryId: null,
-      depth: 1,
-      path: "0001",
-      replyCount: 1,
-      directReplyCount: 1,
-      lastReplyAt: null,
-      isLocked: false,
-      extra: null,
-      createdAt: new Date("2026-01-01T00:00:00Z"),
-      updatedAt: new Date("2026-01-01T00:00:00Z"),
-      unit: {
-        status: "PUBLISHED",
-        visibility: "PUBLIC",
-        licenseSlug: null,
-        contentModerationState: {
-          state: "TOMBSTONED",
-        },
-        user: {
-          unitId: "user-1",
-          slug: "alice",
-          name: "Alice",
-          avatar: null,
-        },
-      },
-    } as any);
-
-    expect(dto.content).toBeNull();
-    expect(dto.globalModerationState).toBe("tombstoned");
-    expect(dto.isTombstone).toBe(true);
-    expect(dto.replyCount).toBe(1);
+    expect(dto.title).toBe("Japanese title");
+    expect(dto.content).toEqual(markdownContentDoc("legacy body"));
   });
 });

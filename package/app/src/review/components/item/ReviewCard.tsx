@@ -89,7 +89,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   const { t } = useTranslation(["community"]);
   const navigate = useNavigate();
 
-  const reviewTitle = (review.extra as any)?.title as string | undefined;
+  const reviewTitle =
+    review.title ?? ((review.extra as any)?.title as string | undefined);
   const reviewTargetUnit = showTargetUnit
     ? getReviewTargetUnit(review, targetUnit)
     : null;

@@ -118,6 +118,7 @@
   "post_metadata_edited": "edited",
   "post_edit_wiki_post": "Edit wiki post",
   "post_tag_picker_no_matches": "No matching tags",
+  "post_title_placeholder": "Post title",
   "post_reply_placeholder": "Add a reply…",
   "post_composer_invalid_configuration": "Invalid composer configuration.",
   "post_composer_posting": "Posting…",

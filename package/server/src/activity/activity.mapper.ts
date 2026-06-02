@@ -29,13 +29,45 @@ export function shelfActivityHref(unitId: string): string {
   return `/shelf/${unitId}`;
 }
 
-/** Read a string `title` off a post's `extra` JSON, if present. */
-export function extractExtraTitle(extra: unknown): string | undefined {
+function extractExtraTitle(extra: unknown): string | undefined {
   if (extra && typeof extra === "object" && "title" in extra) {
     const value = (extra as { title?: unknown }).title;
     if (typeof value === "string" && value.trim()) return value;
   }
   return undefined;
+}
+
+export function resolvePostActivityTitle(input: {
+  translations: Array<{ language: string; title: string | null }>;
+  defaultLanguage?: string | null;
+  supportLanguages?: Array<{
+    language: string;
+    isPrimary: boolean;
+    sortOrder: number;
+  }>;
+  extra?: unknown;
+}): string | undefined {
+  const order = [
+    input.defaultLanguage,
+    input.supportLanguages?.find((language) => language.isPrimary)?.language,
+    ...(input.supportLanguages ?? [])
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((language) => language.language),
+    ...input.translations.map((translation) => translation.language),
+  ];
+  const titleByLanguage = new Map(
+    input.translations.map((translation) => [
+      translation.language,
+      translation.title,
+    ]),
+  );
+  for (const language of [
+    ...new Set(order.filter((language): language is string => !!language)),
+  ]) {
+    const title = titleByLanguage.get(language);
+    if (title?.trim()) return title.trim();
+  }
+  return extractExtraTitle(input.extra);
 }
 
 /**

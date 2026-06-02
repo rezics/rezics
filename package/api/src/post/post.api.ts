@@ -165,10 +165,16 @@ export const postApi = {
 
   updateWikiContent: async (
     unitId: string,
-    input: Pick<UpdatePostInput, "content" | "language">,
+    input: Pick<UpdatePostInput, "title" | "content" | "language">,
   ): Promise<PostResponse> => {
     return postApi.update(unitId, {
-      patch: { post: { content: input.content, language: input.language } },
+      patch: {
+        post: {
+          title: input.title,
+          content: input.content,
+          language: input.language,
+        },
+      },
     });
   },
 

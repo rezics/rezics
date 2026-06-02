@@ -8,6 +8,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  Input,
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Link2, Vote, X } from "lucide-react";
@@ -31,6 +32,7 @@ export function RealmPostCreateForm({
   const { t } = useTranslation(["common"]);
   const { t: tc } = useTranslation(["community"]);
   const navigate = useNavigate();
+  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [pollDialogOpen, setPollDialogOpen] = useState(false);
@@ -41,7 +43,7 @@ export function RealmPostCreateForm({
   );
   const createMutation = useCreatePostMutation();
   const denial = policyDenialFromError(createMutation.error);
-  const disabled = createMutation.isPending || !body.trim();
+  const disabled = createMutation.isPending || !title.trim() || !body.trim();
 
   const handlePollCreated = (poll: PollDTO) => {
     setAttachedPoll(poll);
@@ -50,11 +52,13 @@ export function RealmPostCreateForm({
 
   const submit = (status: "DRAFT" | "PUBLISHED") => {
     const trimmed = body.trim();
-    if (!trimmed) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || !trimmed) return;
     createMutation.mutate(
       {
         ...buildRealmPostCreateInput({
           realmId,
+          title: trimmedTitle,
           content: trimmed,
           tagIds: selectedTagIds,
           status,
@@ -79,6 +83,12 @@ export function RealmPostCreateForm({
 
   return (
     <div className="flex flex-col gap-4">
+      <Input
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        placeholder={tc("community:post_title_placeholder")}
+        disabled={createMutation.isPending}
+      />
       <RezicsMarkdownEditor value={body} onChange={setBody} resize={resize} />
       <RealmPostTagPicker
         realmUnitIds={[realmId]}

@@ -118,6 +118,7 @@
   "post_metadata_edited": "已編輯",
   "post_edit_wiki_post": "編輯 Wiki 貼文",
   "post_tag_picker_no_matches": "沒有符合的標籤",
+  "post_title_placeholder": "貼文標題",
   "post_reply_placeholder": "新增回覆…",
   "post_composer_invalid_configuration": "回覆編輯器設定無效。",
   "post_composer_posting": "發佈中…",

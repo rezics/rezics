@@ -21,6 +21,7 @@ describe("realm create mode helpers", () => {
     expect(
       buildRealmPostCreateInput({
         realmId: "realm-1",
+        title: " hello title ",
         content: " hello ",
         tagIds: ["tag-1", "tag-2"],
         status: "PUBLISHED",
@@ -29,6 +30,7 @@ describe("realm create mode helpers", () => {
       realmUnitIds: ["realm-1"],
       tagIds: ["tag-1", "tag-2"],
       kind: PostKind.POST,
+      title: "hello title",
       status: "PUBLISHED",
     });
   });
@@ -52,6 +54,7 @@ describe("realm create mode helpers", () => {
     expect(
       buildRealmPollPostCreateInput({
         realmId: "realm-1",
+        title: "poll title",
         content: "poll body",
         tagIds: ["tag-1"],
         pollUnitId: "poll-1",
@@ -61,6 +64,7 @@ describe("realm create mode helpers", () => {
       realmUnitIds: ["realm-1"],
       tagIds: ["tag-1"],
       kind: PostKind.POST,
+      title: "poll title",
       status: "PUBLISHED",
       extra: { poll: { unitId: "poll-1" } },
     });

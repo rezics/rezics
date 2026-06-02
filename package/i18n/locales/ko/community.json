@@ -118,6 +118,7 @@
   "post_metadata_edited": "수정됨",
   "post_edit_wiki_post": "위키 게시물 편집",
   "post_tag_picker_no_matches": "일치하는 태그가 없습니다",
+  "post_title_placeholder": "게시물 제목",
   "post_reply_placeholder": "답글 추가…",
   "post_composer_invalid_configuration": "작성기 설정이 올바르지 않습니다.",
   "post_composer_posting": "게시 중…",

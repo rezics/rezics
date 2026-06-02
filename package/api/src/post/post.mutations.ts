@@ -142,6 +142,7 @@ export function useUpdateWikiPostContentMutation(
       Error,
       {
         unitId: string;
+        title?: UpdatePostInput["title"];
         content: UpdatePostInput["content"];
         language?: UpdatePostInput["language"];
       }
@@ -152,8 +153,8 @@ export function useUpdateWikiPostContentMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ unitId, content, language }) =>
-      postApi.updateWikiContent(unitId, { content, language }),
+    mutationFn: ({ unitId, title, content, language }) =>
+      postApi.updateWikiContent(unitId, { title, content, language }),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(postKeys.detail(variables.unitId), data);
