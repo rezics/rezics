@@ -1,24 +1,9 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
-
-const i18nMessages = {
-  book_hero_meta_author: () => getI18nRuntime().i18n.t("book:hero_meta_author"),
-  book_hero_meta_co_author: () =>
-    getI18nRuntime().i18n.t("book:hero_meta_co_author"),
-  book_hero_meta_translator: () =>
-    getI18nRuntime().i18n.t("book:hero_meta_translator"),
-  book_hero_meta_illustrator: () =>
-    getI18nRuntime().i18n.t("book:hero_meta_illustrator"),
-  book_hero_meta_editor: () => getI18nRuntime().i18n.t("book:hero_meta_editor"),
-  book_hero_meta_publisher: () =>
-    getI18nRuntime().i18n.t("book:hero_meta_publisher"),
-  book_hero_meta_producer: () =>
-    getI18nRuntime().i18n.t("book:hero_meta_producer"),
-} as const;
 import { postQueries } from "@rezics/api/post/post";
 import { tagQueries } from "@rezics/api/tag/tag.queries";
 import type { BookDTO } from "@rezics/contract";
 import { mainMarkdownSource, PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -38,6 +23,21 @@ import { BookHeroFeaturedReview } from "./BookHeroFeaturedReview";
 import { BookHeroScoreBlock } from "./BookHeroScoreBlock";
 import { BookHeroStatCards, type BookHeroStatKey } from "./BookHeroStatCards";
 import { BookYourScoreBlock } from "./BookYourScoreBlock";
+
+const i18nMessages = {
+  book_hero_meta_author: () => getI18nRuntime().i18n.t("book:hero_meta_author"),
+  book_hero_meta_co_author: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_co_author"),
+  book_hero_meta_translator: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_translator"),
+  book_hero_meta_illustrator: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_illustrator"),
+  book_hero_meta_editor: () => getI18nRuntime().i18n.t("book:hero_meta_editor"),
+  book_hero_meta_publisher: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_publisher"),
+  book_hero_meta_producer: () =>
+    getI18nRuntime().i18n.t("book:hero_meta_producer"),
+} as const;
 
 type Book = BookDTO;
 
@@ -233,16 +233,13 @@ export const BookHeroSection: React.FC<BookHeroSectionProps> = ({
               )}
 
               {metaRows.length > 0 && (
-                <dl className="border-t border-white/10">
+                <dl className="grid grid-cols-[max-content_minmax(0,1fr)] border-t border-white/10">
                   {metaRows.map((row) => (
-                    <div
-                      key={row.key}
-                      className="flex items-baseline gap-3 border-b border-white/10 py-2.5"
-                    >
-                      <dt className="text-white font-semibold text-sm w-16 shrink-0">
+                    <div key={row.key} className="contents">
+                      <dt className="border-b border-white/10 py-2.5 pr-3 text-white font-semibold text-sm">
                         {row.label}
                       </dt>
-                      <dd className="text-white/85 text-sm flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <dd className="border-b border-white/10 py-2.5 text-white/85 text-sm flex flex-wrap items-baseline gap-x-2 gap-y-1">
                         {row.credits.map((credit, index) => (
                           <span key={credit.entityId} className="inline-flex">
                             {index > 0 && (
