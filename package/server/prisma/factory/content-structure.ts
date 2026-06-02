@@ -72,21 +72,21 @@ export async function createFactoryContentStructureNodes(
     siblings: FactoryContentStructureNodeInput[],
     parentId: string | null,
   ) {
-    let previousSortKey: string | null = null;
+    let previousPosition: string | null = null;
     for (const node of siblings) {
       const id = node.id ?? randomUUID();
-      const sortKey = lexoBetween(previousSortKey, null);
+      const position = lexoBetween(previousPosition, null);
       rows.push({
         id,
         ownerUnitId,
         parentId,
-        sortKey,
+        position,
         contentUnitId: node.contentUnitId ?? null,
         title: node.title,
         noContent: node.noContent === true,
         rating: node.rating ?? null,
       });
-      previousSortKey = sortKey;
+      previousPosition = position;
       if (node.children?.length) {
         visit(node.children, id);
       }
@@ -104,7 +104,7 @@ export async function createFactoryContentStructureNodes(
 type FactoryContentStructureAnchorSourceNode = {
   id: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   contentUnitId: string | null;
   title: string;
 };
@@ -117,8 +117,8 @@ export type FactoryContentStructureAnchorWrite = {
   ancestorNodeIds: string[];
   path: string[];
   depth: number;
-  sortKey: string;
-  sortPath: string;
+  position: string;
+  positionPath: string;
   titlePath: string[];
 };
 
@@ -137,7 +137,7 @@ export function buildFactoryContentStructureAnchorRows(
   }
   for (const bucket of childrenByParentId.values()) {
     bucket.sort((a, b) =>
-      a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0,
+      a.position < b.position ? -1 : a.position > b.position ? 1 : 0,
     );
   }
 
@@ -146,12 +146,12 @@ export function buildFactoryContentStructureAnchorRows(
   function visit(
     row: FactoryContentStructureAnchorSourceNode,
     ancestorNodeIds: string[],
-    ancestorSortKeys: string[],
+    ancestorPositions: string[],
     ancestorTitles: string[],
   ): void {
     const path = [...ancestorNodeIds, row.id];
     const titlePath = [...ancestorTitles, row.title];
-    const sortPath = [...ancestorSortKeys, row.sortKey].join(".");
+    const positionPath = [...ancestorPositions, row.position].join(".");
     if (row.contentUnitId) {
       anchors.push({
         nodeId: row.id,
@@ -161,14 +161,14 @@ export function buildFactoryContentStructureAnchorRows(
         ancestorNodeIds,
         path,
         depth: ancestorNodeIds.length,
-        sortKey: row.sortKey,
-        sortPath,
+        position: row.position,
+        positionPath,
         titlePath,
       });
     }
 
     for (const child of childrenByParentId.get(row.id) ?? []) {
-      visit(child, path, [...ancestorSortKeys, row.sortKey], titlePath);
+      visit(child, path, [...ancestorPositions, row.position], titlePath);
     }
   }
 
@@ -188,7 +188,7 @@ export async function rebuildFactoryContentStructureAnchors(
     select: {
       id: true,
       parentId: true,
-      sortKey: true,
+      position: true,
       contentUnitId: true,
       title: true,
     },
@@ -207,8 +207,8 @@ export async function rebuildFactoryContentStructureAnchors(
       ancestorNodeIds: anchor.ancestorNodeIds,
       path: anchor.path,
       depth: anchor.depth,
-      sortKey: anchor.sortKey,
-      sortPath: anchor.sortPath,
+      position: anchor.position,
+      positionPath: anchor.positionPath,
       titlePath: anchor.titlePath,
     })),
   });

@@ -11,7 +11,7 @@ export interface ContentStructureNodeRow {
   id: string;
   ownerUnitId: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   contentUnitId: string | null;
   title: string;
   noContent: boolean;
@@ -25,7 +25,7 @@ export interface ContentStructureNodeRow {
 export interface PlannedContentStructureNode {
   id: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   title: string;
   noContent: boolean;
   rating: ContentRating | null;
@@ -35,7 +35,7 @@ export interface PlannedContentStructureNode {
 export interface ExistingContentStructureRow {
   id: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   contentUnitId: string | null;
   title: string;
   noContent: boolean;

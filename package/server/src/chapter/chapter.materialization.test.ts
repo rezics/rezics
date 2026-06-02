@@ -15,7 +15,7 @@ interface FakeNodeRow {
   id: string;
   ownerUnitId: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   contentUnitId: string | null;
   title: string;
   noContent: boolean;
@@ -27,7 +27,7 @@ interface FakeNodeRow {
 
 function nodeRow(
   partial: Partial<FakeNodeRow> &
-    Pick<FakeNodeRow, "id" | "parentId" | "sortKey" | "title">,
+    Pick<FakeNodeRow, "id" | "parentId" | "position" | "title">,
 ): FakeNodeRow {
   return {
     ownerUnitId: "book-1",
@@ -59,7 +59,7 @@ const mockFindNode = mock(
     nodeRow({
       id: "n-1",
       parentId: null,
-      sortKey: "g",
+      position: "g",
       title: "Chapter One",
       rating: "R_15",
     }),
@@ -129,7 +129,7 @@ describe("ChapterService.materializeNode", () => {
       nodeRow({
         id: "n-1",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         title: "Chapter One",
         rating: "R_15",
       }),
@@ -196,7 +196,7 @@ describe("ChapterService.materializeNode", () => {
       nodeRow({
         id: "n-1",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         title: "Chapter One",
         contentUnitId: "chapter-existing",
       }),
@@ -248,7 +248,7 @@ describe("ChapterService.materializeNode", () => {
       return nodeRow({
         id: "n-1",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         title: "Chapter One",
         contentUnitId: "chapter-existing",
       });

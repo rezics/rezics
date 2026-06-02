@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { between, firstKey, keyAfter, keyBefore } from "./lexorank";
+import { between, firstKey, keyAfter, keyBefore } from "./position-index";
 
-describe("lexorank", () => {
+describe("position index", () => {
   test("firstKey returns a mid-alphabet key", () => {
     const key = firstKey();
     expect(key.length).toBeGreaterThan(0);

@@ -90,7 +90,7 @@ describe("Unit target semantics in Prisma schema", () => {
     expectField(node, "ownerUnitId");
     expectField(node, "parentId");
     expectField(node, "contentUnitId");
-    expectField(node, "sortKey");
+    expectField(node, "position");
     expectNoField(node, "targetUnitId");
 
     const anchor = modelBlock("ContentStructureAnchor");
@@ -99,7 +99,7 @@ describe("Unit target semantics in Prisma schema", () => {
     expectField(anchor, "contentUnitId");
     expectField(anchor, "parentNodeId");
     expectField(anchor, "path");
-    expectField(anchor, "sortPath");
+    expectField(anchor, "positionPath");
     expectNoField(anchor, "targetUnitId");
   });
 });

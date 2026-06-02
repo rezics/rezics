@@ -504,7 +504,7 @@ export class BookService {
    *
    * Walks the submitted tree, diffs against current ContentStructureNode
    * rows, and applies the minimum set of INSERT / UPDATE / DELETE in a single
-   * transaction. Preserves existing `sortKey` values when sibling order is
+   * transaction. Preserves existing `position` values when sibling order is
    * unchanged so a no-op save produces zero row mutations. The container
    * `updatedAt` is bumped only when at least one node actually changed.
    */

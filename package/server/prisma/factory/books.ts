@@ -375,9 +375,9 @@ export async function seedChaptersForBook(
   return serializeTree(tree);
 }
 
-// LexoRank generation — lightweight base36 fractional indexing for sibling
-// ordering. Mirrors the runtime utility but kept inline to avoid factory
-// importing from server/src.
+// Base36 fractional-index position generation for sibling ordering.
+// Mirrors the runtime utility but kept inline to avoid factory importing from
+// server/src.
 const LEXO_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 const LEXO_FIRST = "0";
 const LEXO_LAST = "z";
@@ -422,7 +422,7 @@ interface NodeRowInput {
   id: string;
   ownerUnitId: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   contentUnitId: string | null;
   title: string;
   noContent: boolean;
@@ -437,7 +437,7 @@ interface TreeNode {
 
 /**
  * Flatten the in-memory tree into ContentStructureNode row inputs and
- * batch-insert via createMany. Each sibling gets a sortKey via lexoBetween
+ * batch-insert via createMany. Each sibling gets a position via lexoBetween
  * keyed off its left neighbour.
  */
 async function insertNodeRows(
@@ -458,7 +458,7 @@ async function insertNodeRows(
         id,
         ownerUnitId: bookUnitId,
         parentId,
-        sortKey: key,
+        position: key,
         contentUnitId: materializedIds.has(id) ? id : null,
         title: node.title,
         noContent: node.noContent === true,
@@ -485,7 +485,7 @@ async function insertNodeRows(
 /**
  * Insert additional multi-link node rows for a sample of materialized
  * chapters. Each picked chapter gets one extra ContentStructureNode row with
- * the same `contentUnitId` but a fresh `id` / `parentId` / `sortKey`,
+ * the same `contentUnitId` but a fresh `id` / `parentId` / `position`,
  * exercising the multi-link contract end-to-end.
  */
 export async function insertMultiLinkNodes(
@@ -496,29 +496,29 @@ export async function insertMultiLinkNodes(
 ): Promise<number> {
   if (multiLinkProbability <= 0 || materializedRows.length === 0) return 0;
 
-  // Fetch root sortKeys for this book so we can append after the last root.
+  // Fetch root positions for this book so we can append after the last root.
   const roots = await prisma.contentStructureNode.findMany({
     where: { ownerUnitId: bookUnitId, parentId: null },
-    select: { sortKey: true },
-    orderBy: { sortKey: "desc" },
+    select: { position: true },
+    orderBy: { position: "desc" },
     take: 1,
   });
-  let lastSortKey = roots[0]?.sortKey ?? null;
+  let lastPosition = roots[0]?.position ?? null;
 
   const extras: NodeRowInput[] = [];
   for (const row of materializedRows) {
     if (Math.random() >= multiLinkProbability) continue;
-    const key = lexoBetween(lastSortKey, null);
+    const key = lexoBetween(lastPosition, null);
     extras.push({
       id: randomUUID(),
       ownerUnitId: bookUnitId,
       parentId: null,
-      sortKey: key,
+      position: key,
       contentUnitId: row.id,
       title: row.title,
       noContent: false,
     });
-    lastSortKey = key;
+    lastPosition = key;
   }
 
   for (let i = 0; i < extras.length; i += NODE_BATCH_SIZE) {

@@ -1,10 +1,14 @@
 /**
- * Base36 LexoRank sortKey generation for ContentStructureNode sibling
- * ordering. Sibling nodes (rows sharing the same `bookUnitId` and `parentId`)
- * are ordered by lexicographic comparison of their `sortKey`: appending yields
+ * Base36 fractional-index position generation for ContentStructureNode sibling
+ * ordering. Sibling nodes (rows sharing the same `ownerUnitId` and `parentId`)
+ * are ordered by lexicographic comparison of their `position`: appending yields
  * a key strictly greater than every existing sibling, and inserting yields a
  * key strictly between the two adjacent siblings — so reorder/insert touches a
- * single row's `sortKey` and never its neighbors or descendants.
+ * single row's `position` and never its neighbors or descendants.
+ *
+ * This stays local instead of using the shelf base62 helper because historical
+ * ContentStructure positions are base36 lowercase keys. Keeping the generator
+ * stable avoids rewriting stored ordering values during the rename.
  *
  * Keys are strings of `[0-9a-z]`. Lexicographic comparison of these strings
  * determines sibling order. The alphabet is interpreted as base36 fractional
@@ -23,13 +27,13 @@ const MID_CHAR = ALPHABET[Math.floor(BASE / 2)]!; // "i"
 
 function digitValue(ch: string): number {
   const idx = ALPHABET.indexOf(ch);
-  if (idx < 0) throw new Error(`Invalid lexorank digit: ${ch}`);
+  if (idx < 0) throw new Error(`Invalid position digit: ${ch}`);
   return idx;
 }
 
 function digitChar(value: number): string {
   if (value < 0 || value >= BASE) {
-    throw new Error(`Lexorank digit out of range: ${value}`);
+    throw new Error(`Position digit out of range: ${value}`);
   }
   return ALPHABET[value]!;
 }
@@ -52,7 +56,7 @@ export function between(
 
   if (a !== "" && b !== "" && a >= b) {
     throw new Error(
-      `Lexorank.between: prev must be lexicographically less than next; got "${a}" / "${b}"`,
+      `position.between: prev must be lexicographically less than next; got "${a}" / "${b}"`,
     );
   }
 

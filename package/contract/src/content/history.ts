@@ -75,7 +75,7 @@ export const contentStructureNodeSnapshotSchema = t.Object({
 
 export const contentStructureNodePlacementSchema = t.Object({
   parentId: t.Optional(t.Nullable(t.String())),
-  sortKey: t.String(),
+  position: t.String(),
 });
 
 export const contentStructureNodeCreateOperationSchema = t.Object({

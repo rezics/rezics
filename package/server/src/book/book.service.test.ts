@@ -19,7 +19,7 @@ interface FakeRow {
   id: string;
   ownerUnitId: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   contentUnitId: string | null;
   title: string;
   noContent: boolean;
@@ -32,7 +32,7 @@ interface FakeRow {
 
 function makeRow(
   partial: Partial<FakeRow> &
-    Pick<FakeRow, "id" | "parentId" | "sortKey" | "title">,
+    Pick<FakeRow, "id" | "parentId" | "position" | "title">,
 ): FakeRow {
   return {
     ownerUnitId: "book-1",
@@ -54,6 +54,8 @@ const mockCreateNode = mock(async (_args: unknown) => ({ id: "" }));
 const mockUpdateNode = mock(async (_args: unknown) => ({ id: "" }));
 const mockDeleteManyNode = mock(async (_args: unknown) => ({ count: 0 }));
 const mockUpdateManyNode = mock(async (_args: unknown) => ({ count: 0 }));
+const mockDeleteManyAnchors = mock(async (_args: unknown) => ({ count: 0 }));
+const mockCreateManyAnchors = mock(async (_args: unknown) => ({ count: 0 }));
 const mockUpdateBook = mock(async (_args: unknown) => ({ unitId: "book-1" }));
 const mockFindUniqueBookForUpdate = mock(async (_args: unknown) => ({
   isbn13: null,
@@ -126,6 +128,10 @@ const mockTx = {
     updateMany: mockUpdateManyNode,
     deleteMany: mockDeleteManyNode,
   },
+  contentStructureAnchor: {
+    deleteMany: mockDeleteManyAnchors,
+    createMany: mockCreateManyAnchors,
+  },
   contentStructure: {
     upsert: mock(async () => ({})),
     update: mockUpdateContainer,
@@ -169,6 +175,8 @@ function resetMocks(): void {
   mockUpdateNode.mockClear();
   mockDeleteManyNode.mockClear();
   mockUpdateManyNode.mockClear();
+  mockDeleteManyAnchors.mockClear();
+  mockCreateManyAnchors.mockClear();
   mockUpdateBook.mockClear();
   mockFindUniqueBookForUpdate.mockClear();
   mockAllocateSequence.mockClear();
@@ -382,8 +390,8 @@ describe("BookService.updateContentStructure (diff-based)", () => {
 
   test("no-op save against unchanged tree issues zero row mutations", async () => {
     const existing: FakeRow[] = [
-      makeRow({ id: "n-a", parentId: null, sortKey: "g", title: "A" }),
-      makeRow({ id: "n-b", parentId: null, sortKey: "n", title: "B" }),
+      makeRow({ id: "n-a", parentId: null, position: "g", title: "A" }),
+      makeRow({ id: "n-b", parentId: null, position: "n", title: "B" }),
     ];
     mockFindNodeRows.mockResolvedValue(existing);
 
@@ -403,7 +411,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
 
   test("single rename issues exactly one UPDATE and bumps container once", async () => {
     const existing: FakeRow[] = [
-      makeRow({ id: "n-a", parentId: null, sortKey: "g", title: "Old" }),
+      makeRow({ id: "n-a", parentId: null, position: "g", title: "Old" }),
     ];
     mockFindNodeRows.mockResolvedValue(existing);
 
@@ -432,17 +440,17 @@ describe("BookService.updateContentStructure (diff-based)", () => {
 
   test("delete subtree soft-deletes targets and never hard-deletes", async () => {
     const existing: FakeRow[] = [
-      makeRow({ id: "n-root", parentId: null, sortKey: "g", title: "Root" }),
+      makeRow({ id: "n-root", parentId: null, position: "g", title: "Root" }),
       makeRow({
         id: "n-child-1",
         parentId: "n-root",
-        sortKey: "g",
+        position: "g",
         title: "C1",
       }),
       makeRow({
         id: "n-child-2",
         parentId: "n-root",
-        sortKey: "n",
+        position: "n",
         title: "C2",
       }),
     ];
@@ -473,10 +481,10 @@ describe("BookService.updateContentStructure (diff-based)", () => {
     }
   });
 
-  test("insert new sibling produces one INSERT with sortKey between neighbors", async () => {
+  test("insert new sibling produces one INSERT with position between neighbors", async () => {
     const existing: FakeRow[] = [
-      makeRow({ id: "n-a", parentId: null, sortKey: "g", title: "A" }),
-      makeRow({ id: "n-c", parentId: null, sortKey: "n", title: "C" }),
+      makeRow({ id: "n-a", parentId: null, position: "g", title: "A" }),
+      makeRow({ id: "n-c", parentId: null, position: "n", title: "C" }),
     ];
     mockFindNodeRows.mockResolvedValue(existing);
 
@@ -492,8 +500,8 @@ describe("BookService.updateContentStructure (diff-based)", () => {
     expect(mockDeleteManyNode).not.toHaveBeenCalled();
     const createArgs = mockCreateNode.mock.calls[0]?.[0] as any;
     expect(createArgs.data.title).toBe("B (new)");
-    expect(createArgs.data.sortKey > "g").toBe(true);
-    expect(createArgs.data.sortKey < "n").toBe(true);
+    expect(createArgs.data.position > "g").toBe(true);
+    expect(createArgs.data.position < "n").toBe(true);
     expect(mockUpdateContainer).toHaveBeenCalledTimes(1);
     expect(mockUpdateBook).toHaveBeenCalledWith({
       where: { unitId: "book-1" },
@@ -511,11 +519,11 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       makeRow({
         id: "n-a",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         title: "A",
         noContent: true,
       }),
-      makeRow({ id: "n-b", parentId: null, sortKey: "n", title: "B" }),
+      makeRow({ id: "n-b", parentId: null, position: "n", title: "B" }),
     ];
     mockFindNodeRows.mockResolvedValue(existing);
 
@@ -537,7 +545,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       makeRow({
         id: "n-existing",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         contentUnitId: "ch-1",
         title: "Preface",
       }),
@@ -562,8 +570,8 @@ describe("BookService.updateContentStructure (diff-based)", () => {
 
   test("move and link changes are recorded in one structure history sequence", async () => {
     const existing: FakeRow[] = [
-      makeRow({ id: "n-a", parentId: null, sortKey: "g", title: "A" }),
-      makeRow({ id: "n-b", parentId: null, sortKey: "n", title: "B" }),
+      makeRow({ id: "n-a", parentId: null, position: "g", title: "A" }),
+      makeRow({ id: "n-b", parentId: null, position: "n", title: "B" }),
     ];
     mockFindNodeRows.mockResolvedValue(existing);
 
@@ -589,10 +597,10 @@ describe("BookService.updateContentStructure (diff-based)", () => {
     expect(operations[0]).toMatchObject({
       op: "node.move",
       nodeId: "n-b",
-      before: { parentId: null, sortKey: "n" },
+      before: { parentId: null, position: "n" },
       after: { parentId: "n-a" },
     });
-    expect(operations[0].after.sortKey).toEqual(expect.any(String));
+    expect(operations[0].after.position).toEqual(expect.any(String));
     expect(operations[1]).toEqual({
       op: "node.link",
       nodeId: "n-b",
@@ -606,7 +614,7 @@ describe("BookService.updateContentStructure (diff-based)", () => {
       makeRow({
         id: "n-a",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         title: "A",
         contentUnitId: "chapter-a",
       }),

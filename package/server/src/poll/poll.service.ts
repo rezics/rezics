@@ -1,6 +1,6 @@
 import type { CreatePollInput } from "@rezics/contract";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
-import { keyAfter } from "@/book/lexorank";
+import { keyAfter } from "@/book/position-index";
 import { isPollClosed } from "./poll.mapper";
 import type { PollWithOptions } from "./poll.types";
 import { pollInclude } from "./poll.types";

@@ -172,7 +172,7 @@ async function repairSeriesContentIndex(prisma: any, seriesUnitId: string) {
       id: true,
       contentUnitId: true,
     },
-    orderBy: [{ sortKey: "asc" }, { id: "asc" }],
+    orderBy: [{ position: "asc" }, { id: "asc" }],
   });
 
   await prisma.seriesContentIndex.deleteMany({ where: { seriesUnitId } });

@@ -9,7 +9,7 @@ interface FakeNode {
   id: string;
   ownerUnitId: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   contentUnitId: string | null;
   title: string;
   noContent: boolean;
@@ -24,7 +24,7 @@ function makeNode(partial: Partial<FakeNode> & Pick<FakeNode, "id">): FakeNode {
   return {
     ownerUnitId: "book-1",
     parentId: null,
-    sortKey: "g",
+    position: "g",
     contentUnitId: null,
     title: partial.id,
     noContent: false,
@@ -154,28 +154,28 @@ function resetMocks(): void {
 }
 
 describe("buildContentStructureAnchorRows", () => {
-  test("projects materialized nodes with ancestor ids, path, depth, and sort path", async () => {
+  test("projects materialized nodes with ancestor ids, path, depth, and position path", async () => {
     const { buildContentStructureAnchorRows } = await import("./service");
     const anchors = buildContentStructureAnchorRows("book-1", [
-      makeNode({ id: "root", title: "Root", sortKey: "m" }),
+      makeNode({ id: "root", title: "Root", position: "m" }),
       makeNode({
         id: "chapter-a",
         parentId: "root",
-        sortKey: "a",
+        position: "a",
         title: "A",
         contentUnitId: "content-a",
       }),
       makeNode({
         id: "section-b",
         parentId: "chapter-a",
-        sortKey: "b",
+        position: "b",
         title: "B",
         contentUnitId: "content-b",
       }),
       makeNode({
         id: "empty",
         parentId: "root",
-        sortKey: "z",
+        position: "z",
         title: "Empty",
         contentUnitId: null,
       }),
@@ -190,8 +190,8 @@ describe("buildContentStructureAnchorRows", () => {
         ancestorNodeIds: ["root"],
         path: ["root", "chapter-a"],
         depth: 1,
-        sortKey: "a",
-        sortPath: "m.a",
+        position: "a",
+        positionPath: "m.a",
         titlePath: ["Root", "A"],
       },
       {
@@ -202,8 +202,8 @@ describe("buildContentStructureAnchorRows", () => {
         ancestorNodeIds: ["root", "chapter-a"],
         path: ["root", "chapter-a", "section-b"],
         depth: 2,
-        sortKey: "b",
-        sortPath: "m.a.b",
+        position: "b",
+        positionPath: "m.a.b",
         titlePath: ["Root", "A", "B"],
       },
     ]);
@@ -215,9 +215,9 @@ describe("ContentStructureService.softDeleteNodes", () => {
 
   test("promotes non-target children to root and tombstones targets", async () => {
     store.push(
-      makeNode({ id: "p", parentId: null, sortKey: "g", title: "P" }),
-      makeNode({ id: "c1", parentId: "p", sortKey: "g", title: "C1" }),
-      makeNode({ id: "c2", parentId: "p", sortKey: "n", title: "C2" }),
+      makeNode({ id: "p", parentId: null, position: "g", title: "P" }),
+      makeNode({ id: "c1", parentId: "p", position: "g", title: "C1" }),
+      makeNode({ id: "c2", parentId: "p", position: "n", title: "C2" }),
     );
 
     const { contentStructureService } = await import("./service");
@@ -238,9 +238,9 @@ describe("ContentStructureService.softDeleteNodes", () => {
 
   test("batch with parent + child: child stays buried", async () => {
     store.push(
-      makeNode({ id: "p", parentId: null, sortKey: "g", title: "P" }),
-      makeNode({ id: "c1", parentId: "p", sortKey: "g", title: "C1" }),
-      makeNode({ id: "c2", parentId: "p", sortKey: "n", title: "C2" }),
+      makeNode({ id: "p", parentId: null, position: "g", title: "P" }),
+      makeNode({ id: "c1", parentId: "p", position: "g", title: "C1" }),
+      makeNode({ id: "c2", parentId: "p", position: "n", title: "C2" }),
     );
 
     const { contentStructureService } = await import("./service");
@@ -258,7 +258,7 @@ describe("ContentStructureService.softDeleteNodes", () => {
       makeNode({
         id: "p",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         title: "P",
         isDeleted: true,
         deletedAt: new Date(),
@@ -278,11 +278,11 @@ describe("ContentStructureService.restoreNodes", () => {
 
   test("restore with alive parent returns the node to its original parent", async () => {
     store.push(
-      makeNode({ id: "p", parentId: null, sortKey: "g", title: "P" }),
+      makeNode({ id: "p", parentId: null, position: "g", title: "P" }),
       makeNode({
         id: "c",
         parentId: "p",
-        sortKey: "n",
+        position: "n",
         title: "C",
         isDeleted: true,
         deletedAt: new Date(),
@@ -308,7 +308,7 @@ describe("ContentStructureService.restoreNodes", () => {
       makeNode({
         id: "p",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         title: "P",
         isDeleted: true,
         deletedAt: new Date(),
@@ -316,7 +316,7 @@ describe("ContentStructureService.restoreNodes", () => {
       makeNode({
         id: "c",
         parentId: "p",
-        sortKey: "n",
+        position: "n",
         title: "C",
         isDeleted: true,
         deletedAt: new Date(),
@@ -336,7 +336,9 @@ describe("ContentStructureService.restoreNodes", () => {
   });
 
   test("skips non-deleted targets", async () => {
-    store.push(makeNode({ id: "x", parentId: null, sortKey: "g", title: "X" }));
+    store.push(
+      makeNode({ id: "x", parentId: null, position: "g", title: "X" }),
+    );
 
     const { contentStructureService } = await import("./service");
     await contentStructureService.restoreNodes("book-1", ["x"]);
@@ -353,7 +355,7 @@ describe("ContentStructureService.update — soft-delete-aware", () => {
       makeNode({
         id: "ghost",
         parentId: null,
-        sortKey: "g",
+        position: "g",
         title: "Ghost",
         isDeleted: true,
         deletedAt: new Date(),
@@ -370,11 +372,11 @@ describe("ContentStructureService.update — soft-delete-aware", () => {
 
   test("ignores deleted rows when diffing the baseline", async () => {
     store.push(
-      makeNode({ id: "a", parentId: null, sortKey: "g", title: "A" }),
+      makeNode({ id: "a", parentId: null, position: "g", title: "A" }),
       makeNode({
         id: "buried",
         parentId: null,
-        sortKey: "n",
+        position: "n",
         title: "Buried",
         isDeleted: true,
         deletedAt: new Date(),

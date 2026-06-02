@@ -21,7 +21,7 @@ describe("content history contracts", () => {
         {
           op: "node.create",
           node: { nodeId: "node-1", title: "Chapter 1" },
-          placement: { parentId: null, sortKey: "a0" },
+          placement: { parentId: null, position: "a0" },
         },
         {
           op: "node.update",
@@ -32,8 +32,8 @@ describe("content history contracts", () => {
         {
           op: "node.move",
           nodeId: "node-1",
-          before: { parentId: null, sortKey: "a0" },
-          after: { parentId: "node-parent", sortKey: "b0" },
+          before: { parentId: null, position: "a0" },
+          after: { parentId: "node-parent", position: "b0" },
         },
         {
           op: "node.delete",
@@ -44,7 +44,7 @@ describe("content history contracts", () => {
             noContent: false,
             rating: null,
           },
-          placement: { parentId: null, sortKey: "c0" },
+          placement: { parentId: null, position: "c0" },
           descendantCount: 2,
         },
         {

@@ -196,7 +196,7 @@ describe("history outbox helpers", () => {
           {
             op: "node.delete",
             node: { nodeId: "n-1", title: "Doomed" },
-            placement: { parentId: null, sortKey: "g" },
+            placement: { parentId: null, position: "g" },
             descendantCount: 0,
             softDelete: true,
             promotedChildIds: ["c-1"],
@@ -215,7 +215,7 @@ describe("history outbox helpers", () => {
           {
             op: "node.restore",
             nodeId: "n-1",
-            placement: { parentId: null, sortKey: "g" },
+            placement: { parentId: null, position: "g" },
             fallbackToRoot: true,
           },
         ],

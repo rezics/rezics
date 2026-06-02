@@ -305,7 +305,7 @@ export class SeriesService {
         id: true,
         contentUnitId: true,
       },
-      orderBy: [{ sortKey: "asc" }, { id: "asc" }],
+      orderBy: [{ position: "asc" }, { id: "asc" }],
     });
 
     await tx.seriesContentIndex.deleteMany({ where: { seriesUnitId } });

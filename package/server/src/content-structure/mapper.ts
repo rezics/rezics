@@ -22,7 +22,7 @@ export function buildContentStructureTree(
   }
   for (const bucket of childrenByParent.values()) {
     bucket.sort((a, b) =>
-      a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0,
+      a.position < b.position ? -1 : a.position > b.position ? 1 : 0,
     );
   }
 
@@ -65,7 +65,7 @@ export function resolveContentStructurePath(
   }
   for (const bucket of childrenByParent.values()) {
     bucket.sort((a, b) =>
-      a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0,
+      a.position < b.position ? -1 : a.position > b.position ? 1 : 0,
     );
   }
 

@@ -12,7 +12,7 @@ import {
   buildStructureEventPayload,
   writeSequencedHistoryOutbox,
 } from "@/unit/history-outbox";
-import { between, firstKey } from "@/book/lexorank";
+import { between, firstKey } from "@/book/position-index";
 import {
   buildContentStructureTree,
   resolveContentStructurePath,
@@ -48,7 +48,7 @@ type RestoreOptions = SoftDeleteOptions;
 const EXISTING_ROW_SELECT = {
   id: true,
   parentId: true,
-  sortKey: true,
+  position: true,
   contentUnitId: true,
   title: true,
   noContent: true,
@@ -68,7 +68,7 @@ export class ContentStructureService {
       }),
       prisma.contentStructureNode.findMany({
         where: { ownerUnitId, isDeleted: false },
-        orderBy: [{ parentId: "asc" }, { sortKey: "asc" }],
+        orderBy: [{ parentId: "asc" }, { position: "asc" }],
       }),
     ]);
 
@@ -148,7 +148,7 @@ export class ContentStructureService {
               id: plan.id,
               ownerUnitId,
               parentId: plan.parentId,
-              sortKey: plan.sortKey,
+              position: plan.position,
               contentUnitId: plan.contentUnitId ?? null,
               title: plan.title,
               noContent: plan.noContent,
@@ -161,7 +161,7 @@ export class ContentStructureService {
 
         if (
           existing.parentId !== plan.parentId ||
-          existing.sortKey !== plan.sortKey ||
+          existing.position !== plan.position ||
           (existing.contentUnitId ?? null) !== (plan.contentUnitId ?? null) ||
           existing.title !== plan.title ||
           existing.noContent !== plan.noContent ||
@@ -171,7 +171,7 @@ export class ContentStructureService {
             where: { id: plan.id },
             data: {
               parentId: plan.parentId,
-              sortKey: plan.sortKey,
+              position: plan.position,
               contentUnitId: plan.contentUnitId ?? null,
               title: plan.title,
               noContent: plan.noContent,
@@ -275,7 +275,7 @@ export class ContentStructureService {
                   noContent: row.noContent,
                   rating: row.rating,
                 },
-                placement: { parentId: row.parentId, sortKey: row.sortKey },
+                placement: { parentId: row.parentId, position: row.position },
                 descendantCount: 0,
                 softDelete: true,
                 promotedChildIds,
@@ -343,7 +343,7 @@ export class ContentStructureService {
           nodeId: target.id,
           placement: {
             parentId: restoredParentId,
-            sortKey: target.sortKey,
+            position: target.position,
           },
           fallbackToRoot,
         });
@@ -388,7 +388,7 @@ export class ContentStructureService {
     });
     const nodeRows = await tx.contentStructureNode.findMany({
       where: { ownerUnitId, isDeleted: false },
-      orderBy: [{ parentId: "asc" }, { sortKey: "asc" }],
+      orderBy: [{ parentId: "asc" }, { position: "asc" }],
     });
     return {
       container,
@@ -402,7 +402,7 @@ export const contentStructureService = new ContentStructureService();
 type ContentStructureAnchorSourceNode = {
   id: string;
   parentId: string | null;
-  sortKey: string;
+  position: string;
   contentUnitId: string | null;
   title: string;
 };
@@ -415,8 +415,8 @@ export type ContentStructureAnchorWrite = {
   ancestorNodeIds: string[];
   path: string[];
   depth: number;
-  sortKey: string;
-  sortPath: string;
+  position: string;
+  positionPath: string;
   titlePath: string[];
 };
 
@@ -435,7 +435,7 @@ export function buildContentStructureAnchorRows(
   }
   for (const bucket of childrenByParentId.values()) {
     bucket.sort((a, b) =>
-      a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0,
+      a.position < b.position ? -1 : a.position > b.position ? 1 : 0,
     );
   }
 
@@ -444,12 +444,12 @@ export function buildContentStructureAnchorRows(
   function visit(
     row: ContentStructureAnchorSourceNode,
     ancestorNodeIds: string[],
-    ancestorSortKeys: string[],
+    ancestorPositions: string[],
     ancestorTitles: string[],
   ): void {
     const path = [...ancestorNodeIds, row.id];
     const titlePath = [...ancestorTitles, row.title];
-    const sortPath = [...ancestorSortKeys, row.sortKey].join(".");
+    const positionPath = [...ancestorPositions, row.position].join(".");
     if (row.contentUnitId) {
       anchors.push({
         nodeId: row.id,
@@ -459,14 +459,14 @@ export function buildContentStructureAnchorRows(
         ancestorNodeIds,
         path,
         depth: ancestorNodeIds.length,
-        sortKey: row.sortKey,
-        sortPath,
+        position: row.position,
+        positionPath,
         titlePath,
       });
     }
 
     for (const child of childrenByParentId.get(row.id) ?? []) {
-      visit(child, path, [...ancestorSortKeys, row.sortKey], titlePath);
+      visit(child, path, [...ancestorPositions, row.position], titlePath);
     }
   }
 
@@ -486,7 +486,7 @@ export async function rebuildContentStructureAnchors(
     select: {
       id: true,
       parentId: true,
-      sortKey: true,
+      position: true,
       contentUnitId: true,
       title: true,
     },
@@ -505,8 +505,8 @@ export async function rebuildContentStructureAnchors(
       ancestorNodeIds: anchor.ancestorNodeIds,
       path: anchor.path,
       depth: anchor.depth,
-      sortKey: anchor.sortKey,
-      sortPath: anchor.sortPath,
+      position: anchor.position,
+      positionPath: anchor.positionPath,
       titlePath: anchor.titlePath,
     })),
   });
@@ -568,7 +568,7 @@ function nodePlacement(
 ) {
   return {
     parentId: row.parentId,
-    sortKey: row.sortKey,
+    position: row.position,
   };
 }
 
@@ -656,7 +656,7 @@ export function planContentStructureOperations(
 
     if (
       existing.parentId !== plan.parentId ||
-      existing.sortKey !== plan.sortKey
+      existing.position !== plan.position
     ) {
       operations.push({
         op: "node.move",
@@ -711,7 +711,7 @@ function planSubmittedContentStructureTree(
       return fresh;
     });
 
-    const sortKeys = allocateSortKeys(siblings, ids, parentId, existingById);
+    const positions = allocatePositions(siblings, ids, parentId, existingById);
 
     for (let i = 0; i < siblings.length; i++) {
       const node = siblings[i]!;
@@ -719,7 +719,7 @@ function planSubmittedContentStructureTree(
       out.push({
         id,
         parentId,
-        sortKey: sortKeys[i]!,
+        position: positions[i]!,
         title: node.title,
         noContent: node.noContent === true,
         rating: (node.rating as ContentRating | undefined) ?? null,
@@ -735,24 +735,24 @@ function planSubmittedContentStructureTree(
   return out;
 }
 
-function allocateSortKeys(
+function allocatePositions(
   siblings: readonly ContentStructureItem[],
   assignedIds: readonly string[],
   parentId: string | null,
   existingById: ReadonlyMap<string, ExistingContentStructureRow>,
 ): string[] {
-  const existingKeys = assignedIds.map((id, i) => {
+  const existingPositions = assignedIds.map((id, i) => {
     const node = siblings[i]!;
     if (!node.id) return null;
     const existing = existingById.get(id);
     if (!existing || existing.parentId !== parentId) return null;
-    return existing.sortKey;
+    return existing.position;
   });
 
   const result: string[] = [];
   for (let i = 0; i < siblings.length; i++) {
     const prev = result[i - 1] ?? null;
-    const candidate = existingKeys[i] ?? null;
+    const candidate = existingPositions[i] ?? null;
 
     if (candidate !== null && (prev === null || candidate > prev)) {
       result.push(candidate);
@@ -761,7 +761,7 @@ function allocateSortKeys(
 
     let upper: string | null = null;
     for (let j = i + 1; j < siblings.length; j++) {
-      const e = existingKeys[j] ?? null;
+      const e = existingPositions[j] ?? null;
       if (e !== null && (prev === null || e > prev)) {
         upper = e;
         break;

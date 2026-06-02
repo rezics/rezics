@@ -416,7 +416,7 @@ model UnitAlias {
   score           Int             @default(0)
   voteCount       Int             @default(0)
   pinned          Boolean         @default(false)
-  position        String?
+  position        String? // Fractional Indexing
   createdById     String?         @db.Uuid
   updatedById     String?         @db.Uuid
 
@@ -491,7 +491,7 @@ model ContentStructure {
 /// One row per node in a ContentStructure tree.
 /// - `id`: globally unique node identity.
 /// - `contentUnitId`: not unique; the same Unit can be referenced by many nodes.
-/// - `sortKey`: orders siblings within each `(ownerUnitId, parentId)` group.
+/// - `position`: Fractional Indexing key ordering siblings within each `(ownerUnitId, parentId)` group.
 /// Because of that reuse, the node `id` — not `contentUnitId` — is the canonical
 /// reading address (`lastReadNodeId`, materialize, the read route): only the node
 /// id says which occurrence the reader is at, and it is stable under TOC reorder.
@@ -499,7 +499,7 @@ model ContentStructureNode {
   id            String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
   ownerUnitId   String         @db.Uuid
   parentId      String?        @db.Uuid
-  sortKey       String
+  position      String         // Fractional Indexing
   contentUnitId String?        @db.Uuid
   title         String
   noContent     Boolean        @default(false)
@@ -518,7 +518,7 @@ model ContentStructureNode {
   userProgressLastNode UserUnitProgress[]        @relation("UserUnitProgressLastNode")
   userNodeProgress     UserContentNodeProgress[]
 
-  @@index([ownerUnitId, parentId, sortKey, isDeleted])
+  @@index([ownerUnitId, parentId, position, isDeleted])
   @@index([contentUnitId])
   @@index([ownerUnitId, updatedAt(sort: Desc)])
   @@index([ownerUnitId, isDeleted, updatedAt(sort: Desc)])
@@ -529,8 +529,10 @@ model ContentStructureNode {
  *
  * Source-of-truth hierarchy remains ContentStructureNode. This projection exists
  * so interaction and search reads can ask "where does this content Unit appear?"
- * by owner, ancestor, path, depth, and sibling sort order without rebuilding the
+ * by owner, ancestor, path, depth, and sibling position without rebuilding the
  * whole tree on every query. Only nodes with contentUnitId are projected.
+ * `position` and `positionPath` are projected from ContentStructureNode's
+ * Fractional Indexing position values and are not independent placement state.
  */
 model ContentStructureAnchor {
   nodeId          String @id @db.Uuid
@@ -540,8 +542,8 @@ model ContentStructureAnchor {
   ancestorNodeIds Json
   path            Json
   depth           Int
-  sortKey         String
-  sortPath        String
+  position        String // Fractional Indexing projection
+  positionPath    String
   titlePath       Json
 
   createdAt DateTime @default(now())
@@ -551,9 +553,9 @@ model ContentStructureAnchor {
   node      ContentStructureNode @relation(fields: [nodeId], references: [id], onDelete: Cascade)
   content   Unit                 @relation("ContentStructureAnchorContent", fields: [contentUnitId], references: [id], onDelete: Cascade)
 
-  @@index([ownerUnitId, sortPath])
+  @@index([ownerUnitId, positionPath])
   @@index([contentUnitId, ownerUnitId])
-  @@index([ownerUnitId, parentNodeId, sortKey])
+  @@index([ownerUnitId, parentNodeId, position])
   @@index([ownerUnitId, depth])
 }
 
@@ -860,7 +862,7 @@ model UserTagApplication {
   userId    String  @db.Uuid
   unitId    String  @db.Uuid
   tagUnitId String  @db.Uuid
-  position  String?
+  position  String? // Fractional Indexing
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1024,7 +1026,7 @@ model RealmTagApplication {
   score       Int     @default(0)
   voteCount   Int     @default(0)
   pinned      Boolean @default(false)
-  position    String?
+  position    String? // Fractional Indexing
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1090,7 +1092,7 @@ model UnitTag {
   score     Int     @default(0)
   voteCount Int     @default(0)
   pinned    Boolean @default(false)
-  position  String?
+  position  String? // Fractional Indexing
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
