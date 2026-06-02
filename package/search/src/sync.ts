@@ -49,6 +49,11 @@ function isNonEmptyString(value: string | null): value is string {
   return Boolean(value);
 }
 
+function searchDescriptionText(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  return mainMarkdownSource(value);
+}
+
 function pickCoverUrlFromTranslations(
   defaultLanguage: string | null | undefined,
   translations: readonly { language: string; extra: unknown }[] | undefined,
@@ -1486,7 +1491,7 @@ export async function patchRealmTranslations(
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const descriptions = translations
-    .map((t: any) => mainMarkdownSource(t.description))
+    .map((t: any) => searchDescriptionText(t.description))
     .filter(isNonEmptyString);
   const descriptionText = descriptions.join("\n") || null;
 
@@ -1499,7 +1504,7 @@ export async function patchRealmTranslations(
       translations: translations.map((tr: any) => ({
         language: tr.language,
         title: tr.title ?? null,
-        description: tr.description ?? null,
+        description: searchDescriptionText(tr.description),
       })),
     },
   ]);
@@ -2292,7 +2297,7 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const descriptions = translations
-    .map((t: any) => mainMarkdownSource(t.description))
+    .map((t: any) => searchDescriptionText(t.description))
     .filter(isNonEmptyString);
   const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
 
@@ -2316,7 +2321,7 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
     translations: translations.map((tr: any) => ({
       language: tr.language,
       title: tr.title ?? null,
-      description: tr.description ?? null,
+      description: searchDescriptionText(tr.description),
     })),
     extra: realm.extra ?? undefined,
   };

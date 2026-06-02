@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { markdownContentDoc } from "@rezics/contract";
 
 function setServerEnvForSearchTests() {
   process.env.DATABASE_URL ??=
@@ -147,5 +148,45 @@ describe("alias and pinned tag search projection", () => {
     expect(entityDoc.aliasValues).toEqual(["Cixin Liu"]);
     expect(realmDoc.titles).toEqual(["rezics"]);
     expect(realmDoc.aliasValues).toEqual(["Library.Book"]);
+  });
+
+  test("realm documents expose translation descriptions as plain markdown text", async () => {
+    setServerEnvForSearchTests();
+    const { buildRealmDocument } = await import("./sync");
+
+    const doc = buildRealmDocument({
+      unitId: "realm-1",
+      isPublic: true,
+      isOfficial: false,
+      memberCount: 1,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      extra: null,
+      unit: {
+        userId: "user-1",
+        translations: [
+          {
+            language: "en",
+            title: "Realm",
+            description: markdownContentDoc("Readable realm summary"),
+          },
+          {
+            language: "zh-hant",
+            title: "Realm",
+            description: "Legacy plain summary",
+          },
+        ],
+        aliases: [],
+      },
+    });
+
+    expect(doc.descriptions).toEqual([
+      "Readable realm summary",
+      "Legacy plain summary",
+    ]);
+    expect(doc.translations.map((tr) => tr.description)).toEqual([
+      "Readable realm summary",
+      "Legacy plain summary",
+    ]);
   });
 });

@@ -1,5 +1,6 @@
 import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import {
+  contentDocMarkdownFallback,
   markdownContentDoc,
   type RealmDTO,
   type RealmSearchDocument,
@@ -22,7 +23,9 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
       unitId: doc.id,
       language: tr.language,
       title: tr.title,
-      description: markdownContentDoc(tr.description ?? ""),
+      description: markdownContentDoc(
+        contentDocMarkdownFallback(tr.description),
+      ),
     })),
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
