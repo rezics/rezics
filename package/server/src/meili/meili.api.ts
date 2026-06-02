@@ -627,6 +627,29 @@ export const meiliApi = new Elysia({ prefix: "/meili" })
     },
   )
   .delete(
+    "/polls/deleteAll",
+    async ({ identity, set }) => {
+      if (!isRoot(identity.permission)) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all polls");
+      }
+      const isRootUser = await verifyRootFromDb(identity.userId);
+      if (!isRootUser) {
+        set.status = 403;
+        throw new Error("Forbidden: not authorized to delete all polls");
+      }
+      await meiliService.deleteAllPolls();
+      return { message: "all polls deleted" };
+    },
+    {
+      requireLogin: true,
+      detail: {
+        summary: "Delete all polls from Meilisearch",
+        tags: ["Meili", "Admin"],
+      },
+    },
+  )
+  .delete(
     "/realms/deleteAll",
     async ({ identity, set }) => {
       if (!isRoot(identity.permission)) {

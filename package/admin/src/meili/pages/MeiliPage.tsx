@@ -114,6 +114,18 @@ export function MeiliPage() {
     onError: (err) => setMessage({ type: "error", text: err.message }),
   });
 
+  const initPollsMutation = meiliAdminMutations.useInitPollsIndex({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_polls_index_initialized"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
   const initRealmsMutation = meiliAdminMutations.useInitRealmsIndex({
     onSuccess: (res) => {
       setMessage({
@@ -173,6 +185,16 @@ export function MeiliPage() {
       setMessage({
         type: "success",
         text: getI18nRuntime().i18n.t("admin:meili_posts_sync_started"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const syncPollsMutation = meiliAdminMutations.useSyncPolls({
+    onSuccess: () => {
+      setMessage({
+        type: "success",
+        text: getI18nRuntime().i18n.t("admin:meili_polls_sync_started"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -241,6 +263,18 @@ export function MeiliPage() {
         text:
           res.message ||
           getI18nRuntime().i18n.t("admin:meili_all_posts_deleted"),
+      });
+    },
+    onError: (err) => setMessage({ type: "error", text: err.message }),
+  });
+
+  const deleteAllPollsMutation = meiliAdminMutations.useDeleteAllPolls({
+    onSuccess: (res) => {
+      setMessage({
+        type: "success",
+        text:
+          res.message ||
+          getI18nRuntime().i18n.t("admin:meili_all_polls_deleted"),
       });
     },
     onError: (err) => setMessage({ type: "error", text: err.message }),
@@ -346,6 +380,13 @@ export function MeiliPage() {
       onClick: () => initPostsMutation.mutate(),
     },
     {
+      id: "polls",
+      label: getI18nRuntime().i18n.t("admin:meili_init_polls_index"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_initializing"),
+      isPending: initPollsMutation.isPending,
+      onClick: () => initPollsMutation.mutate(),
+    },
+    {
       id: "realms",
       label: getI18nRuntime().i18n.t("admin:meili_init_realms_index"),
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_initializing"),
@@ -392,6 +433,14 @@ export function MeiliPage() {
       pendingLabel: getI18nRuntime().i18n.t("admin:meili_syncing"),
       isPending: syncPostsMutation.isPending,
       onClick: () => syncPostsMutation.mutate(),
+      variant: "outline",
+    },
+    {
+      id: "polls",
+      label: getI18nRuntime().i18n.t("admin:meili_sync_all_polls"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_syncing"),
+      isPending: syncPollsMutation.isPending,
+      onClick: () => syncPollsMutation.mutate(),
       variant: "outline",
     },
     {
@@ -452,6 +501,16 @@ export function MeiliPage() {
       ),
       isPending: deleteAllPostsMutation.isPending,
       onConfirm: () => deleteAllPostsMutation.mutate(),
+    },
+    {
+      id: "polls",
+      label: getI18nRuntime().i18n.t("admin:meili_delete_all_polls"),
+      pendingLabel: getI18nRuntime().i18n.t("admin:meili_deleting"),
+      confirmLabel: getI18nRuntime().i18n.t(
+        "admin:meili_delete_all_polls_confirm",
+      ),
+      isPending: deleteAllPollsMutation.isPending,
+      onConfirm: () => deleteAllPollsMutation.mutate(),
     },
     {
       id: "realms",
