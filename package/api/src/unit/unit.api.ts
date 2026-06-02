@@ -7,6 +7,9 @@ import type {
   CreateUnitInput,
   EditorialPatchSubmission,
   UnitListResponse,
+  UnitLanguageAvailabilityResponse,
+  UnitLanguageContentQuery,
+  UnitLanguageContentResponse,
   UnitResponse,
   UnitTranslationDTO,
   UpdateTranslationInput,
@@ -77,6 +80,29 @@ export const unitApi = {
    */
   get: async (unitId: string): Promise<UnitResponse> => {
     return apiFetch<UnitResponse>(`/unit/${unitId}`);
+  },
+
+  /**
+   * Get support languages and translation/content availability without the full Unit payload.
+   */
+  languages: async (
+    unitId: string,
+  ): Promise<UnitLanguageAvailabilityResponse> => {
+    return apiFetch<UnitLanguageAvailabilityResponse>(
+      `/unit/${unitId}/languages`,
+    );
+  },
+
+  /**
+   * Get resolved title/body content for a specific Unit language request.
+   */
+  languageContent: async (
+    unitId: string,
+    query?: UnitLanguageContentQuery,
+  ): Promise<UnitLanguageContentResponse> => {
+    return apiFetch<UnitLanguageContentResponse>(
+      `/unit/${unitId}/languages/content${buildQueryString(query)}`,
+    );
   },
 
   /**

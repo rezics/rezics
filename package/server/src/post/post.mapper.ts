@@ -3,6 +3,7 @@ import type {
   PostDTO,
   VariantContextSummary,
 } from "@rezics/contract";
+import { readLanguageCandidates as buildReadLanguageCandidates } from "@rezics/contract";
 import type { CommentPromotion } from "#/prisma/client";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { variantContextForRow } from "@/unit/variant-context";
@@ -23,11 +24,9 @@ function contentHiddenByGlobalModeration(post: PostWithRelations) {
 
 function postLanguageOrder(post: PostWithRelations): string[] {
   const order = [
-    post.unit.defaultLanguage,
-    post.unit.supportLanguages.find((language) => language.isPrimary)?.language,
-    ...post.unit.supportLanguages
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((language) => language.language),
+    ...buildReadLanguageCandidates({
+      supportLanguages: post.unit.supportLanguages,
+    }),
     ...post.unit.translations.map((translation) => translation.language),
     ...post.unit.contentTranslations.map((translation) => translation.language),
   ];

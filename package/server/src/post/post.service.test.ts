@@ -47,6 +47,18 @@ const postFindUniqueOrThrowMock = mock(
 );
 const postFindFirstMock = mock(async () => null);
 const postUpdateManyMock = mock(async () => ({ count: 1 }));
+
+mock.module("@/unit/language-resolution", () => ({
+  primarySupportLanguageCreate: (language: string) => ({
+    language,
+    isPrimary: true,
+    sortOrder: 0,
+  }),
+  resolveUnitAuthoringLanguage: (input: {
+    explicitLanguage?: string | null;
+    appLocale?: string | null;
+  }) => input.explicitLanguage ?? input.appLocale ?? "en",
+}));
 const commentCreateMock = mock(
   async (args: any): Promise<any> => ({
     unitId: "comment-1",
@@ -1165,8 +1177,9 @@ describe("PostService.create targetUnitId derivation", () => {
     );
 
     expect(unitCreateDataArg()).toMatchObject({
-      defaultLanguage: "en",
-      supportLanguages: { create: { language: "en", isPrimary: true } },
+      supportLanguages: {
+        create: { language: "en", isPrimary: true, sortOrder: 0 },
+      },
     });
     expect(createDataArg().content).toBeUndefined();
     expect(createDataArg().extra).toEqual({});
@@ -1481,9 +1494,8 @@ describe("PostService wiki posts", () => {
     const unitCreateArgs = (unitCreateMock.mock.calls as any[])[0][0];
     const postCreateArgs = (postCreateMock.mock.calls as any[])[0][0];
     expect(unitCreateArgs.data.userId).toBe("wiki-owner");
-    expect(unitCreateArgs.data.defaultLanguage).toBe("zh-hant");
     expect(unitCreateArgs.data.supportLanguages).toEqual({
-      create: { language: "zh-hant", isPrimary: true },
+      create: { language: "zh-hant", isPrimary: true, sortOrder: 0 },
     });
     expect(postCreateArgs.data.authorUserId).toBe("actor-1");
     expect(postCreateArgs.data.kind).toBe("WIKI");

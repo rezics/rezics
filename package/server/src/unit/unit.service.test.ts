@@ -8,6 +8,9 @@ installPrismaClientMock();
 mock.module("@/content-doc/prisma-json", () => ({
   nullableContentDocJson: (value: unknown) => value ?? null,
 }));
+mock.module("@/content-translation/mapper", () => ({
+  mapContentTranslationToDTO: (row: unknown) => row,
+}));
 mock.module("@/infra/slug-scopes", () => ({
   pickSlugScope: () => "global",
 }));
@@ -25,6 +28,7 @@ mock.module("@/utils/userSlugHydration", () => ({
 }));
 mock.module("@/utils/sanitizeUser", () => ({
   publicUserSelect: {},
+  mapPublicUser: (user: unknown) => user,
 }));
 mock.module("@/utils/errors", () => ({
   AppError: class AppError extends Error {
@@ -130,6 +134,37 @@ describe("UnitService catalog identity", () => {
       catalogEntryKind: "VARIANT",
       targetUnitId: "main-entry-1",
     });
+  });
+
+  test("creates a primary support language from the first inline translation", async () => {
+    const create = mock(async () => ({ id: "book-1" }));
+    const findUniqueOrThrow = mock(async () => ({
+      id: "book-1",
+      type: "BOOK",
+      translations: [],
+      supportLanguages: [],
+    }));
+    Object.assign(prismaMock, {
+      $transaction: async (fn: any) =>
+        fn({
+          unit: { create, findUniqueOrThrow },
+        }),
+    });
+
+    const { UnitService } = await import("./unit.service");
+    await new UnitService().create({
+      type: "BOOK",
+      translations: [{ language: "ja", title: "銀河鉄道の夜" }],
+    });
+
+    expect(create.mock.calls[0]?.[0].data).toMatchObject({
+      supportLanguages: {
+        create: { language: "ja", isPrimary: true, sortOrder: 0 },
+      },
+    });
+    expect(create.mock.calls[0]?.[0].data).not.toHaveProperty(
+      "defaultLanguage",
+    );
   });
 
   test("patches catalog identity on update for search projection sync", async () => {

@@ -7,11 +7,16 @@ import {
   hasPermissionToDeleteUnit,
   hasPermissionToUpdateUnit,
   translationParamsSchema,
+  type UnitLanguageAvailabilityResponse,
+  type UnitLanguageContentResponse,
   type UnitListQuery,
   type UnitListResponse,
   type UnitResponse,
   type UpdateTranslationInput,
   type UpdateUnitInput,
+  unitLanguageAvailabilityResponseSchema,
+  unitLanguageContentQuerySchema,
+  unitLanguageContentResponseSchema,
   unitListBodySchema,
   unitListQuerySchema,
   unitListResponseSchema,
@@ -23,12 +28,46 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { assertEditorialPatchAllowed } from "./collaborative-metadata";
+import { unitLanguageService } from "./language-resolution";
 import { mapTranslationToDTO, mapUnitToDTO } from "./mapper";
 import { translationService } from "./translation.service";
 import { unitService } from "./unit.service";
 
 export const unitApi = new Elysia({ prefix: "/unit" })
   .use(authMacro)
+  .get(
+    "/:unitId/languages",
+    async ({ params }): Promise<UnitLanguageAvailabilityResponse> => {
+      return unitLanguageService.availability(params.unitId);
+    },
+    {
+      params: unitParamsSchema,
+      response: unitLanguageAvailabilityResponseSchema,
+      detail: {
+        summary: "Get unit language availability",
+        description:
+          "Returns support languages and translation/body availability without hydrating the full Unit.",
+        tags: ["Units"],
+      },
+    },
+  )
+  .get(
+    "/:unitId/languages/content",
+    async ({ params, query }): Promise<UnitLanguageContentResponse> => {
+      return unitLanguageService.content(params.unitId, query);
+    },
+    {
+      params: unitParamsSchema,
+      query: unitLanguageContentQuerySchema,
+      response: unitLanguageContentResponseSchema,
+      detail: {
+        summary: "Get resolved unit language content",
+        description:
+          "Resolves UnitTranslation metadata plus ContentTranslation body for a Unit/language.",
+        tags: ["Units"],
+      },
+    },
+  )
   .get(
     "/:unitId",
     async ({ params }): Promise<UnitResponse> => {

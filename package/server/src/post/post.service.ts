@@ -12,7 +12,6 @@ import type {
 import {
   allBucketSlugs,
   BasicAdminPermission,
-  DEFAULT_LANGUAGE,
   extractPollUnitIdsFromContentDoc,
   getStateSchema,
   isLegalStateValue,
@@ -42,6 +41,10 @@ import {
   collectPatchLeafPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
+import {
+  primarySupportLanguageCreate,
+  resolveUnitAuthoringLanguage,
+} from "@/unit/language-resolution";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import {
   hydrateUnitOwnerUserSlugRow,
@@ -704,7 +707,9 @@ export class PostService {
     const post = await prisma.$transaction(async (tx) => {
       const ownerUserId =
         kind === "WIKI" ? await resolveRezicsWikiUserId() : authorUserId;
-      const postLanguage = input.language ?? DEFAULT_LANGUAGE;
+      const postLanguage = resolveUnitAuthoringLanguage({
+        explicitLanguage: input.language,
+      });
       const unit = await tx.unit.create({
         data: {
           userId: ownerUserId,
@@ -713,9 +718,8 @@ export class PostService {
           targetUnitId: targetUnitId ?? undefined,
           status: asDraft ? UnitStatus.DRAFT : UnitStatus.PUBLISHED,
           publishedAt: asDraft ? null : new Date(),
-          defaultLanguage: postLanguage,
           supportLanguages: {
-            create: { language: postLanguage, isPrimary: true },
+            create: primarySupportLanguageCreate(postLanguage),
           },
         },
       });
@@ -1039,15 +1043,19 @@ export class PostService {
             authorUserId: true,
             unit: {
               select: {
-                defaultLanguage: true,
+                supportLanguages: true,
                 status: true,
                 contentTranslations: true,
               },
             },
           },
         });
-        const language =
-          input.language ?? existing.unit.defaultLanguage ?? DEFAULT_LANGUAGE;
+        const language = resolveUnitAuthoringLanguage({
+          explicitLanguage: input.language,
+          appLocale: existing.unit.supportLanguages?.find(
+            (item) => item.isPrimary,
+          )?.language,
+        });
         const oldContent = (existing.unit.contentTranslations ?? []).find(
           (translation) => translation.language === language,
         )?.content;
@@ -1107,15 +1115,19 @@ export class PostService {
           authorUserId: true,
           unit: {
             select: {
-              defaultLanguage: true,
+              supportLanguages: true,
               status: true,
               contentTranslations: true,
             },
           },
         },
       });
-      const language =
-        input.language ?? existing.unit.defaultLanguage ?? DEFAULT_LANGUAGE;
+      const language = resolveUnitAuthoringLanguage({
+        explicitLanguage: input.language,
+        appLocale: existing.unit.supportLanguages?.find(
+          (item) => item.isPrimary,
+        )?.language,
+      });
       const currentContent = (existing.unit.contentTranslations ?? []).find(
         (translation) => translation.language === language,
       )?.content;

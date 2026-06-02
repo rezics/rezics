@@ -1,4 +1,5 @@
 import type { VariantContextSummary } from "@rezics/contract";
+import { readLanguageCandidates } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 
 type VariantContextCarrier = {
@@ -7,7 +8,11 @@ type VariantContextCarrier = {
 
 type VariantTitleRow = {
   id: string;
-  defaultLanguage: string | null;
+  supportLanguages: {
+    language: string;
+    isPrimary: boolean;
+    sortOrder: number;
+  }[];
   translations: { language: string; title: string | null }[];
 };
 
@@ -29,7 +34,7 @@ export async function hydrateVariantContextSummaries<
     where: { id: { in: ids } },
     select: {
       id: true,
-      defaultLanguage: true,
+      supportLanguages: true,
       translations: {
         select: { language: true, title: true },
       },
@@ -55,10 +60,13 @@ export function variantContextForRow<T extends VariantContextCarrier>(
 }
 
 function pickVariantTitle(unit: VariantTitleRow): string | null {
+  const byLanguage = new Map(
+    unit.translations.map((item) => [item.language, item]),
+  );
   const ordered = [
-    unit.defaultLanguage
-      ? unit.translations.find((item) => item.language === unit.defaultLanguage)
-      : undefined,
+    ...readLanguageCandidates({ supportLanguages: unit.supportLanguages }).map(
+      (language) => byLanguage.get(language),
+    ),
     unit.translations.find((item) => item.language === "en"),
     ...unit.translations,
   ];

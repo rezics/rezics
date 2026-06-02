@@ -1,7 +1,19 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
-import { mapPostToDTO } from "./post.mapper";
 import type { PostWithRelations } from "./types";
+
+mock.module("@/unit/publication-policy", () => ({
+  publicUnitEligibilityWhere: {},
+  resolveStoredLicenseSlug: (value: unknown) => value,
+}));
+mock.module("@/unit/variant-context", () => ({
+  variantContextForRow: () => null,
+}));
+mock.module("@/utils/sanitizeUser", () => ({
+  mapPublicUser: (user: unknown) => user,
+}));
+
+const { mapPostToDTO } = await import("./post.mapper");
 
 const basePost = {
   unitId: "post-1",
@@ -23,7 +35,6 @@ const basePost = {
     status: "PUBLISHED",
     visibility: "PUBLIC",
     licenseSlug: null,
-    defaultLanguage: "en",
     user: null,
     contentModerationState: null,
     inRealms: [],
@@ -64,7 +75,6 @@ describe("mapPostToDTO", () => {
       ...basePost,
       unit: {
         ...basePost.unit,
-        defaultLanguage: "zh-hant",
         translations: [
           { unitId: "post-1", language: "ja", title: "Japanese title" },
         ],

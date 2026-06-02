@@ -3,6 +3,7 @@
  */
 
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import type { UnitLanguageContentQuery } from "@rezics/contract";
 import { unitApi } from "./unit.api";
 import { unitKeys } from "./unit.keys";
 import type { UnitFilters } from "./unit.types";
@@ -49,6 +50,25 @@ export const unitDetailQuery = (unitId: string) =>
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
+export const unitLanguagesQuery = (unitId: string) =>
+  queryOptions({
+    queryKey: unitKeys.languages(unitId),
+    queryFn: () => unitApi.languages(unitId),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 10,
+  });
+
+export const unitLanguageContentQuery = (
+  unitId: string,
+  query?: UnitLanguageContentQuery,
+) =>
+  queryOptions({
+    queryKey: unitKeys.languageContent(unitId, query),
+    queryFn: () => unitApi.languageContent(unitId, query),
+    enabled: !!unitId,
+    staleTime: 1000 * 60 * 5,
+  });
+
 /**
  * Infinite query options for paginated unit list
  */
@@ -84,6 +104,8 @@ export const unitBySlugQuery = (unitSlug: string) =>
 export const unitQueries = {
   list: unitListQuery,
   detail: unitDetailQuery,
+  languages: unitLanguagesQuery,
+  languageContent: unitLanguageContentQuery,
   bySlug: unitBySlugQuery,
   search: unitSearchQuery,
   byUser: unitsByUserQuery,

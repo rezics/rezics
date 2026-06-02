@@ -251,7 +251,6 @@ export const baseUnitSchema = t.Object({
   slug: t.Optional(t.Nullable(t.String())),
   userId: t.Optional(t.Nullable(t.String())),
   user: t.Optional(publicUserSchema),
-  defaultLanguage: t.Optional(t.Nullable(languageSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
@@ -383,7 +382,6 @@ export type UnitResponse = (typeof unitResponseSchema)["static"];
 export const createUnitSchema = t.Object({
   userId: t.Optional(t.String()),
   type: t.String(),
-  defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
@@ -423,7 +421,6 @@ export const updateUnitSchema = t.Object({
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  defaultLanguage: t.Optional(languageSchema),
   isLanguageNeutral: t.Optional(t.Boolean()),
   extra: t.Optional(t.Nullable(t.Record(t.String(), t.Any()))),
   publishedAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),

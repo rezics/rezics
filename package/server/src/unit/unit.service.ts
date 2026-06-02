@@ -28,6 +28,7 @@ import {
   publicUnitEligibilityWhere,
 } from "./publication-policy";
 import { assertUnitTranslationExtraAllowed } from "./translation-extra";
+import { primarySupportLanguageCreate } from "./language-resolution";
 import type { UnitWithRelations } from "./types";
 import { unitInclude } from "./types";
 
@@ -299,7 +300,6 @@ export class UnitService {
           slugScope: pickSlugScope(type, input.userId),
           status: (input.status as UnitStatus) ?? UnitStatus.DRAFT,
           visibility: (input.visibility as UnitVisibility) ?? undefined,
-          defaultLanguage: input.defaultLanguage ?? undefined,
           isLanguageNeutral: input.isLanguageNeutral ?? false,
           rating: (input.rating as ContentRating | undefined) ?? undefined,
           aiDisclosureMode:
@@ -332,6 +332,14 @@ export class UnitService {
                       sourceUnitId: tr.sourceUnitId ?? undefined,
                     };
                   }),
+                }
+              : undefined,
+          supportLanguages:
+            input.translations && input.translations.length > 0
+              ? {
+                  create: primarySupportLanguageCreate(
+                    input.translations[0]!.language,
+                  ),
                 }
               : undefined,
         },
@@ -376,7 +384,6 @@ export class UnitService {
         catalogEntryKind: catalogEntryKindValue(input.catalogEntryKind),
         targetUnitId:
           input.targetUnitId === undefined ? undefined : input.targetUnitId,
-        defaultLanguage: input.defaultLanguage ?? undefined,
         isLanguageNeutral: input.isLanguageNeutral ?? undefined,
         extra: (input.extra ?? undefined) as Prisma.InputJsonValue | undefined,
         publishedAt: input.publishedAt
@@ -400,8 +407,6 @@ export class UnitService {
       patchFields.catalogEntryKind = input.catalogEntryKind;
     if (input.targetUnitId !== undefined)
       patchFields.targetUnitId = input.targetUnitId;
-    if (input.defaultLanguage !== undefined)
-      patchFields.defaultLanguage = input.defaultLanguage;
     if (input.publishedAt !== undefined) {
       patchFields.publishedAt = input.publishedAt
         ? new Date(input.publishedAt as any).toISOString()

@@ -21,6 +21,12 @@ export const unitKeys = {
    */
   details: () => [...unitKeys.all(), "detail"] as const,
   detail: (unitId: string) => [...unitKeys.details(), unitId] as const,
+  languages: (unitId: string) =>
+    [...unitKeys.details(), unitId, "languages"] as const,
+  languageContent: (
+    unitId: string,
+    query?: { explicitLanguage?: string; appLocale?: string },
+  ) => [...unitKeys.languages(unitId), "content", query] as const,
 
   /**
    * Keys for user-specific queries

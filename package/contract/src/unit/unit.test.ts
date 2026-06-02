@@ -93,6 +93,33 @@ describe("Unit AI disclosure DTO/input schemas", () => {
     expect("workUnitId" in unitListQuerySchema.properties).toBe(false);
     expect("workUnitId" in unitListBodySchema.properties).toBe(false);
   });
+
+  test("uses supportLanguages as the Unit language payload", () => {
+    expect("defaultLanguage" in unitDTOSchema.properties).toBe(false);
+    expect("defaultLanguage" in createUnitSchema.properties).toBe(false);
+    expect("defaultLanguage" in updateUnitSchema.properties).toBe(false);
+
+    expect(
+      Value.Check(unitDTOSchema, {
+        id: "unit-1",
+        type: "BOOK",
+        supportLanguages: [
+          {
+            unitId: "unit-1",
+            language: "en",
+            isPrimary: true,
+            sortOrder: 0,
+          },
+          {
+            unitId: "unit-1",
+            language: "ja",
+            isPrimary: true,
+            sortOrder: 1,
+          },
+        ],
+      }),
+    ).toBe(true);
+  });
 });
 
 describe("CatalogEntryKind", () => {
@@ -139,7 +166,6 @@ describe("UnitType", () => {
     expect(
       Value.Check(createUnitSchema, {
         type: "LABEL",
-        defaultLanguage: "en",
         translations: [{ language: "en", title: "Characters" }],
       }),
     ).toBe(true);
