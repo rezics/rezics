@@ -174,13 +174,6 @@ async function loadExtra(realmId: string): Promise<ExtraJson> {
   return (realm.extra ?? {}) as ExtraJson;
 }
 
-async function saveExtra(realmId: string, extra: ExtraJson): Promise<void> {
-  await prisma.realm.update({
-    where: { unitId: realmId },
-    data: { extra: extra as Prisma.InputJsonValue },
-  });
-}
-
 async function validatePostUnit(unitId: string, label: string): Promise<void> {
   const unit = await prisma.unit.findUnique({
     where: { id: unitId },
@@ -236,6 +229,25 @@ function collectTagTreeIds(value: unknown): Set<string> {
   }
   const tagIds = new Set<string>();
 
+  const hasUsableLabelSource = (item: TagTreeNode): boolean => {
+    if (typeof item.label === "string" && item.label.trim().length > 0) {
+      return true;
+    }
+    if (
+      typeof item.labelUnitId === "string" &&
+      item.labelUnitId.trim().length > 0
+    ) {
+      return true;
+    }
+    const translations = item.labelTranslations?.translations;
+    return (
+      !!translations &&
+      Object.values(translations).some(
+        (value) => typeof value === "string" && value.trim().length > 0,
+      )
+    );
+  };
+
   function visit(node: unknown): void {
     if (!node || typeof node !== "object" || Array.isArray(node)) {
       throw new RealmExtraError(
@@ -245,6 +257,13 @@ function collectTagTreeIds(value: unknown): Set<string> {
       );
     }
     const item = node as TagTreeNode;
+    if ("disabled" in item) {
+      throw new RealmExtraError(
+        "INVALID_VALUE",
+        "tagTree nodes do not support disabled visibility flags",
+        400,
+      );
+    }
     if (item.tagId !== undefined) {
       if (typeof item.tagId !== "string" || item.tagId.length === 0) {
         throw new RealmExtraError(
@@ -254,10 +273,10 @@ function collectTagTreeIds(value: unknown): Set<string> {
         );
       }
       tagIds.add(item.tagId);
-    } else if (item.disabled !== true || typeof item.label !== "string") {
+    } else if (!hasUsableLabelSource(item)) {
       throw new RealmExtraError(
         "INVALID_VALUE",
-        "tagTree nodes without tagId must be disabled headers with a label",
+        "tagTree nodes without tagId must include a label source",
         400,
       );
     }

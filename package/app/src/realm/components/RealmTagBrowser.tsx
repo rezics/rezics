@@ -3,7 +3,7 @@ import type {
   RealmTagViewStyle,
   TagTreeNode,
 } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { useLocale } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -49,7 +49,6 @@ function collectTags(nodes: TagTreeNode[] | undefined, language: string) {
     groupLabel: string | undefined,
   ) => {
     for (const item of items) {
-      if (item.disabled) continue;
       const label = nodeLabel(item, language);
       const nextGroup = depth === 0 ? label : groupLabel;
       if (item.tagId) {
@@ -70,7 +69,10 @@ function collectTags(nodes: TagTreeNode[] | undefined, language: string) {
 
 function groupTags(entries: TagEntry[]) {
   const grouped = new Map<string, TagEntry[]>();
-  for (const entry of entries) {
+  // Grouped layout is a lossy display projection only. It shows depth 0/1
+  // entries and deliberately ignores deeper descendants without mutating or
+  // rejecting the stored forest.
+  for (const entry of entries.filter((item) => item.depth <= 1)) {
     const key = entry.groupLabel ?? "Ungrouped";
     grouped.set(key, [...(grouped.get(key) ?? []), entry]);
   }

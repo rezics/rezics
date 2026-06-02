@@ -1,5 +1,5 @@
 import type { TagTreeNode } from "@rezics/contract";
-import { useLocale, useTranslation } from "@rezics/i18n/react";
+import { useLocale } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { useMemo } from "react";
@@ -35,7 +35,7 @@ function collectTags(
 
   const visit = (items: TagTreeNode[]) => {
     for (const item of items) {
-      if (item.tagId && !item.disabled) {
+      if (item.tagId) {
         chips.push({
           tagId: item.tagId,
           label: nodeLabel(item, language),

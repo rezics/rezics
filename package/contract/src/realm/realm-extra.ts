@@ -60,14 +60,16 @@ export type RealmBannerExtra = (typeof realmBannerExtraSchema)["static"];
 
 export const tagTreeNodeSchema: ReturnType<typeof t.Recursive> = t.Recursive(
   (self) =>
-    t.Object({
-      tagId: t.Optional(t.String()),
-      label: t.Optional(t.String()),
-      labelUnitId: t.Optional(t.String()),
-      labelTranslations: t.Optional(realmTagTreeLabelSchema),
-      disabled: t.Optional(t.Boolean()),
-      children: t.Optional(t.Array(self)),
-    }),
+    t.Object(
+      {
+        tagId: t.Optional(t.String()),
+        label: t.Optional(t.String()),
+        labelUnitId: t.Optional(t.String()),
+        labelTranslations: t.Optional(realmTagTreeLabelSchema),
+        children: t.Optional(t.Array(self)),
+      },
+      { additionalProperties: false },
+    ),
 );
 
 export type TagTreeNode = {
@@ -75,7 +77,6 @@ export type TagTreeNode = {
   label?: string;
   labelUnitId?: string;
   labelTranslations?: RealmTagTreeLabel;
-  disabled?: boolean;
   children?: TagTreeNode[];
 };
 

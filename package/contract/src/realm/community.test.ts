@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { markdownContentDoc } from "../content/doc-v1";
 import {
-  realmMembershipMeDTOSchema,
   realmMemberDTOSchema,
+  realmMembershipMeDTOSchema,
   realmRuleAcknowledgementDTOSchema,
   realmRuleAcknowledgementStatusSchema,
   realmRuleReferenceDTOSchema,
@@ -12,7 +12,7 @@ import {
 import { realmExtraSchema } from "./realm-extra";
 
 describe("realm community contract schemas", () => {
-  test("realm extra accepts tag view preferences and multilingual tag tree labels", () => {
+  test("realm extra accepts recursive label-only and tag-backed tag tree nodes", () => {
     expect(
       Value.Check(realmExtraSchema, {
         tagView: {
@@ -29,12 +29,25 @@ describe("realm community contract schemas", () => {
               },
               fallbackLanguage: "en",
             },
-            disabled: true,
-            children: [{ tagId: "tag-unit-1" }],
+            children: [
+              {
+                tagId: "tag-unit-1",
+                label: "Review",
+                children: [{ label: "Nested group" }],
+              },
+            ],
           },
         ],
       }),
     ).toBe(true);
+  });
+
+  test("realm extra tag tree nodes reject disabled visibility flags", () => {
+    expect(
+      Value.Check(realmExtraSchema, {
+        tagTree: [{ label: "Genre", disabled: true }],
+      }),
+    ).toBe(false);
   });
 
   test("realm extra rejects unknown tag view styles", () => {

@@ -6,12 +6,6 @@ import { tagQueries } from "@rezics/api/tag/tag";
 import { unitApi, unitQueries } from "@rezics/api/unit/unit";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
 import { useUpdateZone, zoneByUnitIdQueryOptions } from "@rezics/api/zone/zone";
-import {
-  contentDocMarkdownFallback,
-  DEFAULT_LANGUAGE,
-  markdownContentDoc,
-  normalizeLanguage,
-} from "@rezics/contract";
 import type {
   RealmBannerExtra,
   RealmTagView,
@@ -23,6 +17,13 @@ import type {
   WikiZoneNavigation,
   WikiZoneTheme,
 } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  DEFAULT_LANGUAGE,
+  markdownContentDoc,
+  normalizeLanguage,
+} from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { TranslationEditor, type TranslationEditorEntry } from "@rezics/ui";
 import {
   Button,
@@ -42,11 +43,26 @@ import {
   Textarea,
 } from "@rezics/ui/shadcn";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  GripVertical,
+  ListTree,
+  Plus,
+  Save,
+  Search,
+  Tag,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { MoveHandler, NodeRendererProps, TreeApi } from "react-arborist";
+import { Tree } from "react-arborist";
 import { toast } from "sonner";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 type TagSearchResult = {
   unitId?: string;
   tagUnitId?: string;
@@ -60,10 +76,6 @@ function nodeLabel(node: TagTreeNode) {
     node.tagId?.slice(0, 8) ||
     getI18nRuntime().i18n.t("common:untitled")
   );
-}
-
-function nodeKey(node: TagTreeNode) {
-  return node.tagId ?? node.label ?? "untitled-node";
 }
 
 function unitLabel(unit: UnitDTO) {
@@ -779,69 +791,271 @@ export function TagTreeEditor({
   realmId: string;
   initialValue?: TagTreeNode[];
 }) {
-  const [nodes, setNodes] = useState<TagTreeNode[]>(initialValue ?? []);
-  const [headerLabel, setHeaderLabel] = useState("");
-  const [labelLanguage, setLabelLanguage] = useState<string>(DEFAULT_LANGUAGE);
+  type EditorNode = TagTreeNode & { id: string; children?: EditorNode[] };
+
+  const nextIdRef = useRef(0);
+  const makeEditorId = useCallback(() => {
+    nextIdRef.current += 1;
+    return `realm-tag-node-${nextIdRef.current}`;
+  }, []);
+  const toEditorNodes = useCallback(
+    (items: TagTreeNode[] | undefined): EditorNode[] => {
+      const visit = (current: TagTreeNode[]): EditorNode[] =>
+        current.map((item) => ({
+          ...item,
+          id: makeEditorId(),
+          children: item.children?.length ? visit(item.children) : undefined,
+        }));
+      return visit(items ?? []);
+    },
+    [makeEditorId],
+  );
+  const toTagTreeNodes = useCallback((items: EditorNode[]): TagTreeNode[] => {
+    const visit = (current: EditorNode[]): TagTreeNode[] =>
+      current.map(({ id: _id, children, ...item }) => ({
+        ...item,
+        children: children?.length ? visit(children) : undefined,
+      }));
+    return visit(items);
+  }, []);
+
+  const [nodes, setNodes] = useState<EditorNode[]>(() =>
+    toEditorNodes(initialValue),
+  );
+  const [labelLanguage, setLabelLanguage] = useState(DEFAULT_LANGUAGE);
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(
-    null,
-  );
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const treeRef = useRef<TreeApi<EditorNode> | null>(null);
+  const treeAreaRef = useRef<HTMLDivElement | null>(null);
+  const uploadRef = useRef<HTMLInputElement | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const [treeSize, setTreeSize] = useState({ width: 0, height: 360 });
   const setValue = useSetRealmExtraValueMutation();
   const searchTerm = search.trim();
   const { data: searchData } = useQuery(tagQueries.search(searchTerm));
+  const serializedNodes = useMemo(
+    () => toTagTreeNodes(nodes),
+    [nodes, toTagTreeNodes],
+  );
+
+  const existingTagIds = useMemo(() => {
+    const ids = new Set<string>();
+    const visit = (items: EditorNode[]) => {
+      for (const item of items) {
+        if (item.tagId) ids.add(item.tagId);
+        if (item.children?.length) visit(item.children);
+      }
+    };
+    visit(nodes);
+    return ids;
+  }, [nodes]);
+
   const results = useMemo(() => {
     return ((searchData?.tags ?? []) as TagSearchResult[]).flatMap((tag) => {
       const tagId = tag.unitId ?? tag.tagUnitId;
-      if (!tagId || nodes.some((node) => node.tagId === tagId)) return [];
+      if (!tagId || existingTagIds.has(tagId)) return [];
       return [{ tagId, label: tag.label ?? tag.slug ?? tagId.slice(0, 8) }];
     });
-  }, [nodes, searchData?.tags]);
+  }, [existingTagIds, searchData?.tags]);
 
   useEffect(() => {
-    setNodes(initialValue ?? []);
-  }, [initialValue]);
+    setNodes(toEditorNodes(initialValue));
+  }, [initialValue, toEditorNodes]);
 
-  const updateNode = (index: number, next: TagTreeNode) => {
-    setNodes((current) =>
-      current.map((node, nodeIndex) => (nodeIndex === index ? next : node)),
-    );
+  const treeAreaCallbackRef = useCallback((el: HTMLDivElement | null) => {
+    if (resizeObserverRef.current) {
+      resizeObserverRef.current.disconnect();
+      resizeObserverRef.current = null;
+    }
+    treeAreaRef.current = el;
+    if (!el) return;
+
+    const measure = () => {
+      const nextSize = {
+        width: el.clientWidth,
+        height: Math.max(360, el.clientHeight),
+      };
+      setTreeSize((current) =>
+        current.width === nextSize.width && current.height === nextSize.height
+          ? current
+          : nextSize,
+      );
+    };
+    measure();
+    resizeObserverRef.current = new ResizeObserver(measure);
+    resizeObserverRef.current.observe(el);
+  }, []);
+
+  const updateNodeById = (
+    id: string,
+    mutate: (node: EditorNode) => EditorNode,
+  ) => {
+    const visit = (items: EditorNode[]): EditorNode[] =>
+      items.map((item) => {
+        if (item.id === id) return mutate(item);
+        return item.children?.length
+          ? { ...item, children: visit(item.children) }
+          : item;
+      });
+    setNodes((current) => visit(current));
   };
 
+  const deleteNodeById = (id: string) => {
+    const visit = (items: EditorNode[]): EditorNode[] =>
+      items.flatMap((item) => {
+        if (item.id === id) return [];
+        return [
+          item.children?.length
+            ? { ...item, children: visit(item.children) }
+            : item,
+        ];
+      });
+    setNodes((current) => visit(current));
+  };
+
+  const insertSiblingAfter = (targetId: string, nextNode: EditorNode) => {
+    const visit = (items: EditorNode[]): EditorNode[] => {
+      const index = items.findIndex((item) => item.id === targetId);
+      if (index >= 0) {
+        return [
+          ...items.slice(0, index + 1),
+          nextNode,
+          ...items.slice(index + 1),
+        ];
+      }
+      return items.map((item) =>
+        item.children?.length
+          ? { ...item, children: visit(item.children) }
+          : item,
+      );
+    };
+    setNodes((current) => visit(current));
+  };
+
+  const addChild = (parentId: string, nextNode: EditorNode) => {
+    updateNodeById(parentId, (node) => ({
+      ...node,
+      children: [...(node.children ?? []), nextNode],
+    }));
+    window.setTimeout(() => treeRef.current?.open(parentId), 0);
+  };
+
+  const createLabelNode = (): EditorNode => ({
+    id: makeEditorId(),
+    label: "New group",
+  });
+
+  const createTagNode = (tag: {
+    tagId: string;
+    label?: string;
+  }): EditorNode => ({
+    id: makeEditorId(),
+    tagId: tag.tagId,
+    label: tag.label,
+  });
+
   const updateNodeLabelTranslation = (
-    index: number,
+    id: string,
     language: string,
     value: string,
   ) => {
     const normalized = normalizeLanguage(language) ?? DEFAULT_LANGUAGE;
-    setNodes((current) =>
-      current.map((node, nodeIndex) => {
-        if (nodeIndex !== index) return node;
-        const translations = {
-          ...(node.labelTranslations?.translations ?? {}),
-        };
-        if (value.trim()) translations[normalized] = value;
-        else delete translations[normalized];
-        return {
-          ...node,
-          labelTranslations: {
-            translations,
-            fallbackLanguage:
-              node.labelTranslations?.fallbackLanguage ?? normalized,
-          },
-        };
-      }),
-    );
+    updateNodeById(id, (node) => {
+      const translations = {
+        ...(node.labelTranslations?.translations ?? {}),
+      };
+      if (value.trim()) translations[normalized] = value;
+      else delete translations[normalized];
+      return {
+        ...node,
+        labelTranslations: {
+          translations,
+          fallbackLanguage:
+            node.labelTranslations?.fallbackLanguage ?? normalized,
+        },
+      };
+    });
   };
 
-  const moveNode = (index: number, delta: -1 | 1) => {
+  const onMove: MoveHandler<EditorNode> = useCallback(
+    ({ dragIds, parentId, index }) => {
+      const removed: EditorNode[] = [];
+      const remove = (items: EditorNode[]): EditorNode[] =>
+        items.flatMap((item) => {
+          if (dragIds.includes(item.id)) {
+            removed.push(item);
+            return [];
+          }
+          return [
+            item.children?.length
+              ? { ...item, children: remove(item.children) }
+              : item,
+          ];
+        });
+      const insert = (items: EditorNode[]): EditorNode[] => {
+        if (parentId === null) {
+          const next = [...items];
+          next.splice(index, 0, ...removed);
+          return next;
+        }
+        return items.map((item) => {
+          if (item.id === parentId) {
+            const children = [...(item.children ?? [])];
+            children.splice(index, 0, ...removed);
+            return { ...item, children };
+          }
+          return item.children?.length
+            ? { ...item, children: insert(item.children) }
+            : item;
+        });
+      };
+      setNodes((current) => insert(remove(current)));
+    },
+    [],
+  );
+
+  const moveDepth = (nodeId: string, direction: "indent" | "outdent") => {
     setNodes((current) => {
-      const target = index + delta;
-      if (target < 0 || target >= current.length) return current;
-      const next = [...current];
-      const [item] = next.splice(index, 1);
-      next.splice(target, 0, item);
-      return next;
+      const clone = structuredClone(current) as EditorNode[];
+
+      const indent = (items: EditorNode[]): boolean => {
+        const index = items.findIndex((item) => item.id === nodeId);
+        if (index > 0) {
+          const [item] = items.splice(index, 1);
+          const previous = items[index - 1];
+          previous.children = [...(previous.children ?? []), item];
+          return true;
+        }
+        return items.some((item) => item.children && indent(item.children));
+      };
+
+      const outdent = (
+        items: EditorNode[],
+        parentItems?: EditorNode[],
+      ): boolean => {
+        for (let index = 0; index < items.length; index += 1) {
+          const item = items[index];
+          if (item.id === nodeId && parentItems) {
+            const [moved] = items.splice(index, 1);
+            const parentIndex = parentItems.findIndex(
+              (candidate) => candidate.children === items,
+            );
+            parentItems.splice(parentIndex + 1, 0, moved);
+            return true;
+          }
+          if (item.children && outdent(item.children, items)) return true;
+        }
+        return false;
+      };
+
+      return direction === "indent"
+        ? indent(clone)
+          ? clone
+          : current
+        : outdent(clone)
+          ? clone
+          : current;
     });
   };
 
@@ -851,7 +1065,7 @@ export function TagTreeEditor({
       await setValue.mutateAsync({
         realmId,
         key: "tagTree",
-        value: nodes,
+        value: serializedNodes,
       });
       toast.success(getI18nRuntime().i18n.t("entity:realm_tag_tree_saved"));
     } catch (error) {
@@ -861,29 +1075,204 @@ export function TagTreeEditor({
     }
   };
 
-  const pendingDeleteNode =
-    pendingDeleteIndex === null ? null : (nodes[pendingDeleteIndex] ?? null);
-  const confirmDeleteNode = () => {
-    if (pendingDeleteIndex === null) return;
-    setNodes((current) =>
-      current.filter((_, index) => index !== pendingDeleteIndex),
-    );
-    setPendingDeleteIndex(null);
+  const downloadJson = () => {
+    const blob = new Blob([prettyJson(serializedNodes)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "realm-tag-tree.json";
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
 
+  const uploadJson = async (file: File | null) => {
+    if (!file) return;
+    setError(null);
+    try {
+      const parsed = JSON.parse(await file.text()) as TagTreeNode[];
+      if (!Array.isArray(parsed)) {
+        throw new Error("Uploaded tagTree JSON must be an array.");
+      }
+      await setValue.mutateAsync({ realmId, key: "tagTree", value: parsed });
+      setNodes(toEditorNodes(parsed));
+      toast.success(getI18nRuntime().i18n.t("entity:realm_tag_tree_saved"));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      toast.error(message);
+    } finally {
+      if (uploadRef.current) uploadRef.current.value = "";
+    }
+  };
+
+  const findNode = (
+    items: EditorNode[],
+    id: string | null,
+  ): EditorNode | null => {
+    if (!id) return null;
+    for (const item of items) {
+      if (item.id === id) return item;
+      const child = item.children?.length ? findNode(item.children, id) : null;
+      if (child) return child;
+    }
+    return null;
+  };
+
+  const pendingDeleteNode = findNode(nodes, pendingDeleteId);
+  const confirmDeleteNode = () => {
+    if (!pendingDeleteId) return;
+    deleteNodeById(pendingDeleteId);
+    setPendingDeleteId(null);
+  };
+
+  function Node({ node, style, dragHandle }: NodeRendererProps<EditorNode>) {
+    const language = normalizeLanguage(labelLanguage) ?? DEFAULT_LANGUAGE;
+    const translation =
+      node.data.labelTranslations?.translations[language] ?? "";
+    const hasChildren = (node.children?.length ?? 0) > 0;
+    return (
+      <div
+        style={style}
+        className="group flex h-full min-w-0 items-center gap-2 border-b border-border-whisper bg-surface-base px-2 text-sm leading-dense text-text-primary hover:bg-surface-subtle"
+      >
+        <span
+          ref={dragHandle}
+          className="flex size-7 cursor-grab items-center justify-center rounded-sm text-text-tertiary"
+        >
+          <GripVertical className="size-4" aria-hidden />
+        </span>
+        <button
+          type="button"
+          className="flex size-7 items-center justify-center rounded-sm text-text-tertiary hover:bg-surface-elevated hover:text-text-primary"
+          onClick={() => node.toggle()}
+          aria-label={hasChildren ? "Toggle children" : "No children"}
+        >
+          {hasChildren ? (
+            node.isOpen ? (
+              <ChevronDown className="size-4" aria-hidden />
+            ) : (
+              <ChevronRight className="size-4" aria-hidden />
+            )
+          ) : (
+            <span className="size-4" />
+          )}
+        </button>
+        <span className="flex size-7 items-center justify-center rounded-sm bg-surface-subtle text-text-tertiary">
+          {node.data.tagId ? (
+            <Tag className="size-4" aria-hidden />
+          ) : (
+            <ListTree className="size-4" aria-hidden />
+          )}
+        </span>
+        <Input
+          value={node.data.label ?? ""}
+          onChange={(event) =>
+            updateNodeById(node.data.id, (item) => ({
+              ...item,
+              label: event.target.value,
+            }))
+          }
+          placeholder={node.data.tagId ? "Tag display label" : "Group label"}
+          className="h-8 min-w-0 flex-1"
+        />
+        <Input
+          value={translation}
+          onChange={(event) =>
+            updateNodeLabelTranslation(
+              node.data.id,
+              labelLanguage,
+              event.target.value,
+            )
+          }
+          placeholder={`Label (${language})`}
+          className="hidden h-8 min-w-0 flex-1 lg:block"
+        />
+        <Input
+          value={node.data.tagId ?? ""}
+          onChange={(event) =>
+            updateNodeById(node.data.id, (item) => ({
+              ...item,
+              tagId: event.target.value.trim() || undefined,
+            }))
+          }
+          placeholder="Tag Unit ID"
+          className="hidden h-8 min-w-0 flex-1 xl:block"
+        />
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            onClick={() => insertSiblingAfter(node.data.id, createLabelNode())}
+            aria-label="Add sibling"
+          >
+            <Plus className="size-4" aria-hidden />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            onClick={() => addChild(node.data.id, createLabelNode())}
+            aria-label="Add child"
+          >
+            <ListTree className="size-4" aria-hidden />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            onClick={() => moveDepth(node.data.id, "indent")}
+            aria-label="Indent"
+          >
+            <ChevronRight className="size-4" aria-hidden />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            onClick={() => moveDepth(node.data.id, "outdent")}
+            aria-label="Outdent"
+          >
+            <ChevronLeft className="size-4" aria-hidden />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="size-8 text-error-text hover:text-error-text"
+            onClick={() => setPendingDeleteId(node.data.id)}
+            aria-label="Delete"
+          >
+            <Trash2 className="size-4" aria-hidden />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-3 rounded-md bg-surface-subtle p-4">
-      <div>
+    <div className="flex max-h-[clamp(360px,58dvh,720px)] min-h-0 flex-col gap-3 rounded-md bg-surface-subtle p-4">
+      <div className="shrink-0">
         <h3 className="text-sm font-medium leading-ui text-text-primary">
           {getI18nRuntime().i18n.t("entity:realm_tag_tree")}
         </h3>
         <p className="mt-1 text-sm leading-body text-text-secondary">
           {getI18nRuntime().i18n.t("entity:realm_tag_tree_description")}
         </p>
+        <p className="mt-1 text-xs leading-dense text-text-tertiary">
+          Deleting a node is the supported way to remove it from tag tree
+          surfaces; hidden disabled nodes are not preserved.
+        </p>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <div className="max-w-40">
+      <div className="grid shrink-0 gap-2 md:grid-cols-[10rem_minmax(0,1fr)_auto_auto_auto] md:items-end">
+        <div>
           <Label htmlFor="realm-tag-tree-label-language">Label language</Label>
           <Input
             id="realm-tag-tree-label-language"
@@ -891,142 +1280,123 @@ export function TagTreeEditor({
             onChange={(event) => setLabelLanguage(event.target.value)}
           />
         </div>
-        {nodes.map((node, index) => (
-          <div
-            key={nodeKey(node)}
-            className="grid gap-2 rounded-sm bg-surface-base p-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto_auto_auto]"
-          >
-            <Input
-              value={nodeLabel(node)}
-              onChange={(event) =>
-                updateNode(index, { ...node, label: event.target.value })
-              }
-              className="min-w-0"
-            />
-            <Input
-              value={
-                node.labelTranslations?.translations[
-                  normalizeLanguage(labelLanguage) ?? DEFAULT_LANGUAGE
-                ] ?? ""
-              }
-              onChange={(event) =>
-                updateNodeLabelTranslation(
-                  index,
-                  labelLanguage,
-                  event.target.value,
-                )
-              }
-              className="min-w-0"
-              placeholder={`Label (${normalizeLanguage(labelLanguage) ?? DEFAULT_LANGUAGE})`}
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant={node.disabled ? "secondary" : "outline"}
-              onClick={() =>
-                updateNode(index, { ...node, disabled: !node.disabled })
-              }
-            >
-              {node.disabled
-                ? getI18nRuntime().i18n.t("common:disabled")
-                : getI18nRuntime().i18n.t("common:enabled")}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => moveNode(index, -1)}
-            >
-              {getI18nRuntime().i18n.t("common:up")}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => moveNode(index, 1)}
-            >
-              {getI18nRuntime().i18n.t("common:down")}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="destructive"
-              onClick={() => setPendingDeleteIndex(index)}
-            >
-              {getI18nRuntime().i18n.t("common:delete")}
-            </Button>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="flex gap-2">
+        <div className="flex min-w-0 flex-col gap-2">
+          <Label htmlFor="realm-tag-tree-search">Bind tag</Label>
           <Input
-            value={headerLabel}
-            onChange={(event) => setHeaderLabel(event.target.value)}
-            placeholder={getI18nRuntime().i18n.t(
-              "entity:realm_header_label_placeholder",
-            )}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              if (!headerLabel.trim()) return;
-              setNodes((current) => [
-                ...current,
-                { disabled: true, label: headerLabel.trim() },
-              ]);
-              setHeaderLabel("");
-            }}
-          >
-            {getI18nRuntime().i18n.t("entity:realm_add_header")}
-          </Button>
-        </div>
-        <div className="flex flex-col gap-2">
-          <Input
+            id="realm-tag-tree-search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder={getI18nRuntime().i18n.t(
               "community:tag_search_placeholder",
             )}
           />
-          {searchTerm && results.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {results.map((tag) => (
-                <Button
-                  key={tag.tagId}
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  onClick={() =>
-                    setNodes((current) => [
-                      ...current,
-                      { tagId: tag.tagId, label: tag.label },
-                    ])
-                  }
-                >
-                  {tag.label}
-                </Button>
-              ))}
-            </div>
-          )}
         </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setNodes((current) => [...current, createLabelNode()])}
+        >
+          <Plus className="mr-2 size-4" aria-hidden />
+          Group
+        </Button>
+        <Button type="button" variant="outline" onClick={downloadJson}>
+          <Download className="mr-2 size-4" aria-hidden />
+          JSON
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => uploadRef.current?.click()}
+        >
+          <Upload className="mr-2 size-4" aria-hidden />
+          JSON
+        </Button>
+        <input
+          ref={uploadRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={(event) => void uploadJson(event.target.files?.[0] ?? null)}
+        />
       </div>
 
-      <div className="flex justify-end">
+      {searchTerm && results.length > 0 ? (
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {results.map((tagResult) => (
+            <Button
+              key={tagResult.tagId}
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setNodes((current) => [
+                  ...current,
+                  createTagNode({
+                    tagId: tagResult.tagId,
+                    label: tagResult.label,
+                  }),
+                ]);
+                setSearch("");
+              }}
+            >
+              <Search className="mr-2 size-4" aria-hidden />
+              {tagResult.label}
+            </Button>
+          ))}
+        </div>
+      ) : null}
+
+      <div
+        ref={treeAreaCallbackRef}
+        className="min-h-0 flex-1 overflow-hidden rounded-sm bg-surface-base"
+      >
+        {nodes.length === 0 ? (
+          <div className="flex h-full min-h-48 flex-col items-center justify-center gap-3 text-sm leading-ui text-text-secondary">
+            <ListTree className="size-6 text-text-tertiary" aria-hidden />
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                setNodes((current) => [...current, createLabelNode()])
+              }
+            >
+              <Plus className="mr-2 size-4" aria-hidden />
+              Add first group
+            </Button>
+          </div>
+        ) : (
+          <Tree<EditorNode>
+            ref={treeRef}
+            data={nodes}
+            onMove={onMove}
+            width={treeSize.width}
+            height={treeSize.height}
+            indent={24}
+            rowHeight={46}
+            idAccessor={(node) => node.id}
+            childrenAccessor="children"
+            className="overflow-auto"
+          >
+            {Node}
+          </Tree>
+        )}
+      </div>
+
+      <div className="flex shrink-0 justify-end">
         {error && (
           <p className="mr-auto text-sm leading-ui text-error-text">{error}</p>
         )}
         <Button onClick={save} disabled={setValue.isPending}>
+          <Save className="mr-2 size-4" aria-hidden />
           {getI18nRuntime().i18n.t("entity:realm_save_tag_tree")}
         </Button>
       </div>
 
       <Dialog
-        open={pendingDeleteIndex !== null}
+        open={pendingDeleteId !== null}
         onOpenChange={(open) => {
-          if (!open) setPendingDeleteIndex(null);
+          if (!open) setPendingDeleteId(null);
         }}
       >
         <DialogContent>

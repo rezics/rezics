@@ -161,28 +161,57 @@ describe("realm extra single-key service", () => {
       setSingleExtraKey(caller, "realm-1", "wikiZoneUnitId", "missing-zone"),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
-      setTagTreeExtra(caller, "realm-1", [{ label: "Genre" }]),
+      setTagTreeExtra(caller, "realm-1", [{ children: [{ tagId: "tag-a" }] }]),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
     await expect(
       setTagTreeExtra(caller, "realm-1", [{ tagId: "missing-tag" }]),
     ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
+    await expect(
+      setTagTreeExtra(caller, "realm-1", [{ label: "Hidden", disabled: true }]),
+    ).rejects.toMatchObject({ code: "INVALID_VALUE", httpStatus: 400 });
   });
 
-  test("sets tagTree with valid headers and tag leaves", async () => {
+  test("sets tagTree with label-only nodes and tag-backed nodes at any depth", async () => {
     await setTagTreeExtra(caller, "realm-1", [
       {
-        disabled: true,
         label: "Genre",
-        children: [{ tagId: "tag-action" }, { tagId: "tag-drama" }],
+        children: [
+          {
+            tagId: "tag-action",
+            children: [
+              {
+                labelTranslations: {
+                  translations: { en: "Mood" },
+                  fallbackLanguage: "en",
+                },
+                children: [{ tagId: "tag-drama" }],
+              },
+            ],
+          },
+        ],
       },
+      { labelUnitId: "label-unit-1" },
     ]);
 
     expect(storedExtra.tagTree).toEqual([
       {
-        disabled: true,
         label: "Genre",
-        children: [{ tagId: "tag-action" }, { tagId: "tag-drama" }],
+        children: [
+          {
+            tagId: "tag-action",
+            children: [
+              {
+                labelTranslations: {
+                  translations: { en: "Mood" },
+                  fallbackLanguage: "en",
+                },
+                children: [{ tagId: "tag-drama" }],
+              },
+            ],
+          },
+        ],
       },
+      { labelUnitId: "label-unit-1" },
     ]);
   });
 

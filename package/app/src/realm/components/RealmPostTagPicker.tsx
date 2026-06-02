@@ -39,7 +39,7 @@ function flattenTagTree(nodes: TagTreeNode[] | undefined): TagOption[] {
 
   const visit = (items: TagTreeNode[]) => {
     for (const item of items) {
-      if (item.tagId && !item.disabled) {
+      if (item.tagId) {
         options.push({
           tagId: item.tagId,
           label: getTagLabel(item.tagId, item.label),
@@ -114,7 +114,7 @@ export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
       </div>
     ));
 
-    if (node.disabled && !node.tagId) {
+    if (!node.tagId) {
       return (
         <div className={depth > 0 ? "pl-3" : undefined}>
           {node.label && (
