@@ -1,0 +1,2 @@
+-- RenameIndex
+ALTER INDEX "ContentStructureNode_ownerUnitId_parentId_position_isDeleted_id" RENAME TO "ContentStructureNode_ownerUnitId_parentId_position_isDelete_idx";
