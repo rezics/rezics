@@ -10,12 +10,10 @@
  */
 
 import {
+  DEFAULT_LANGUAGE,
   LANGUAGES,
   type Language,
-  DEFAULT_LANGUAGE,
 } from "@rezics/contract/language-core";
-
-const SUPPORTED_LANGUAGES = Object.values(LANGUAGES) as Language[];
 import i18next, { type i18n } from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import HttpBackend from "i18next-http-backend";
@@ -26,6 +24,8 @@ import {
   DEFAULT_NAMESPACE,
   NAMESPACES,
 } from "./namespaces.ts";
+
+const SUPPORTED_LANGUAGES = Object.values(LANGUAGES) as Language[];
 
 export const LOCALE_STORAGE_KEY = "rezics-locale";
 export const LOCALE_FETCH_PATH = "/locales/{{lng}}/{{ns}}.json";
@@ -79,6 +79,7 @@ export function createI18nRuntime(
     defaultNS: DEFAULT_NAMESPACE,
     ns: [...BOOTSTRAP_NAMESPACES],
     load: "currentOnly",
+    lowerCaseLng: true,
     nonExplicitSupportedLngs: false,
     lng: options.initialLocale,
     interpolation: {
