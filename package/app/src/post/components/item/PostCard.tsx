@@ -102,7 +102,11 @@ export const PostCard: React.FC<PostCardProps> = ({
           </div>
         )}
         {pollUnitIds.map((pollUnitId) => (
-          <PollEmbed key={pollUnitId} pollUnitId={pollUnitId} />
+          <PollEmbed
+            key={pollUnitId}
+            pollUnitId={pollUnitId}
+            realmUnitId={post.realmUnitId}
+          />
         ))}
         <ReactionBar
           size="md"

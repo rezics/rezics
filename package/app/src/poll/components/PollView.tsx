@@ -8,6 +8,7 @@ import { PollOption } from "./PollOption";
 
 interface PollViewProps {
   results: PollResultsDTO;
+  realmUnitId?: string | null;
 }
 
 /**
@@ -17,13 +18,15 @@ interface PollViewProps {
  * {@link usePollVote}. It never re-derives tallies, visibility, or the caller's
  * own vote — it shows only what the contract exposes.
  */
-export const PollView: React.FC<PollViewProps> = ({ results }) => {
+export const PollView: React.FC<PollViewProps> = ({ results, realmUnitId }) => {
   const { t } = useTranslation(["common", "community"]);
-  const view = selectPollView(results);
+  const view = selectPollView(results, { currentRealmUnitId: realmUnitId });
   const vote = usePollVote({
     pollUnitId: view.pollUnitId,
     voteMode: view.voteMode,
     myVote: results.myVote,
+    realmUnitId,
+    canVote: view.votingEnabled,
   });
 
   return (

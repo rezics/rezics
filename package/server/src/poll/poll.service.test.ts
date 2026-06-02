@@ -129,6 +129,32 @@ describe("PollService.castVote — single-choice (5.1)", () => {
     );
   });
 
+  test("records realm context on a new single-choice vote", async () => {
+    const createVote = mock(async (_args?: any) => ({}));
+
+    prismaMock.poll = {
+      findUnique: mock(async () => ({ voteMode: "SINGLE", closesAt: null })),
+    };
+    prismaMock.pollOption = {
+      findUnique: mock(async () => ({ pollUnitId: "poll-1", optionId: "A" })),
+      update: mock(async (_args?: any) => ({})),
+    };
+    prismaMock.pollVote = {
+      findFirst: mock(async () => null),
+      create: createVote,
+    };
+
+    await service.castVote("user-1", "poll-1", "A", "realm-1");
+
+    expect((createVote.mock.calls[0]?.[0] as any).data).toMatchObject({
+      pollUnitId: "poll-1",
+      userId: "user-1",
+      optionId: "A",
+      voteMode: "SINGLE",
+      realmUnitId: "realm-1",
+    });
+  });
+
   test("re-casting the same option is a no-op (no duplicate row)", async () => {
     const deleteVote = mock(async (_args?: any) => ({}));
     const createVote = mock(async (_args?: any) => ({}));
@@ -189,6 +215,43 @@ describe("PollService.castVote — multi-choice (5.2)", () => {
       data: { voteCount: { increment: 1 } },
     });
   });
+
+  test("global option uniqueness checks ignore realm context for now", async () => {
+    const createVote = mock(async (_args?: any) => ({}));
+    const updateOption = mock(async (_args?: any) => ({}));
+    const findUniqueVote = mock(async () => ({
+      pollUnitId: "poll-1",
+      userId: "user-1",
+      optionId: "C",
+      realmUnitId: null,
+    }));
+
+    prismaMock.poll = {
+      findUnique: mock(async () => ({ voteMode: "MULTI", closesAt: null })),
+    };
+    prismaMock.pollOption = {
+      findUnique: mock(async () => ({ pollUnitId: "poll-1", optionId: "C" })),
+      update: updateOption,
+    };
+    prismaMock.pollVote = {
+      findUnique: findUniqueVote,
+      create: createVote,
+    };
+
+    await service.castVote("user-1", "poll-1", "C", "realm-1");
+
+    expect(findUniqueVote).toHaveBeenCalledWith({
+      where: {
+        pollUnitId_userId_optionId: {
+          pollUnitId: "poll-1",
+          userId: "user-1",
+          optionId: "C",
+        },
+      },
+    });
+    expect(createVote).not.toHaveBeenCalled();
+    expect(updateOption).not.toHaveBeenCalled();
+  });
 });
 
 describe("PollService.withdrawVote (5.6)", () => {
@@ -225,6 +288,36 @@ describe("PollService.withdrawVote (5.6)", () => {
     await expect(
       service.withdrawVote("user-1", "poll-1"),
     ).rejects.toMatchObject({ code: "WITHDRAW_OPTION_REQUIRED" });
+  });
+
+  test("withdraw uses the current global vote identity regardless of context", async () => {
+    const deleteVote = mock(async (_args?: any) => ({}));
+
+    prismaMock.poll = {
+      findUnique: mock(async () => ({ voteMode: "SINGLE", closesAt: null })),
+    };
+    prismaMock.pollVote = {
+      findFirst: mock(async () => ({
+        pollUnitId: "poll-1",
+        userId: "user-1",
+        optionId: "A",
+        realmUnitId: "realm-1",
+      })),
+      delete: deleteVote,
+    };
+    prismaMock.pollOption = { update: mock(async (_args?: any) => ({})) };
+
+    await service.withdrawVote("user-1", "poll-1", undefined, "realm-2");
+
+    expect(deleteVote).toHaveBeenCalledWith({
+      where: {
+        pollUnitId_userId_optionId: {
+          pollUnitId: "poll-1",
+          userId: "user-1",
+          optionId: "A",
+        },
+      },
+    });
   });
 });
 

@@ -42,6 +42,12 @@ export interface PollView {
   countsVisible: boolean;
   /** True when the caller may cast/withdraw a vote (poll is not closed). */
   votingEnabled: boolean;
+  /**
+   * True when the caller already has a vote in a different direct/realm
+   * context. The first pass keeps vote identity global, so the UI blocks a
+   * second context until the existing vote is withdrawn.
+   */
+  voteBlockedByContext: boolean;
   /** Presentation-only flag; the contract already withholds voter↔option maps. */
   anonymous: boolean;
   closed: boolean;
@@ -55,6 +61,10 @@ export interface PollView {
   options: PollOptionView[];
 }
 
+export interface SelectPollViewOptions {
+  currentRealmUnitId?: string | null;
+}
+
 function optionForm(option: PollOptionDTO): PollOptionForm {
   if (typeof option.label === "string") return "text";
   if (typeof option.unitId === "string") return "unit";
@@ -65,12 +75,29 @@ function byPosition(a: PollOptionDTO, b: PollOptionDTO): number {
   return a.position < b.position ? -1 : a.position > b.position ? 1 : 0;
 }
 
-export function selectPollView(results: PollResultsDTO): PollView {
+function isVoteBlockedByContext(
+  results: PollResultsDTO,
+  currentRealmUnitId: string | null,
+): boolean {
+  return (results.myVoteContexts ?? []).some(
+    (context) => (context.realmUnitId ?? null) !== currentRealmUnitId,
+  );
+}
+
+export function selectPollView(
+  results: PollResultsDTO,
+  selectOptions: SelectPollViewOptions = {},
+): PollView {
   const countsVisible = results.resultsVisible;
   const myVote = new Set(results.myVote);
   const totalVotes = countsVisible ? results.totalVotes : undefined;
+  const currentRealmUnitId = selectOptions.currentRealmUnitId ?? null;
+  const voteBlockedByContext = isVoteBlockedByContext(
+    results,
+    currentRealmUnitId,
+  );
 
-  const options: PollOptionView[] = [...results.options]
+  const optionViews: PollOptionView[] = [...results.options]
     .sort(byPosition)
     .map((option) => {
       const form = optionForm(option);
@@ -94,12 +121,13 @@ export function selectPollView(results: PollResultsDTO): PollView {
     pollUnitId: results.pollUnitId,
     voteMode: results.voteMode,
     countsVisible,
-    votingEnabled: !results.closed,
+    votingEnabled: !results.closed && !voteBlockedByContext,
+    voteBlockedByContext,
     anonymous: results.anonymous,
     closed: results.closed,
     resultsHiddenUntilClose:
       results.resultVisibility === "AFTER_CLOSE" && !results.resultsVisible,
     totalVotes,
-    options,
+    options: optionViews,
   };
 }

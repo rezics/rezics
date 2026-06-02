@@ -48,7 +48,11 @@ export const PostReply: React.FC<PostReplyProps> = ({
           className="text-sm"
         />
         {pollUnitIds.map((pollUnitId) => (
-          <PollEmbed key={pollUnitId} pollUnitId={pollUnitId} />
+          <PollEmbed
+            key={pollUnitId}
+            pollUnitId={pollUnitId}
+            realmUnitId={post.realmUnitId}
+          />
         ))}
         <ReactionBar
           size="sm"

@@ -8,6 +8,7 @@ import { PollView } from "../components/PollView";
 
 interface PollEmbedProps {
   pollUnitId: string;
+  realmUnitId?: string | null;
 }
 
 /**
@@ -15,7 +16,10 @@ interface PollEmbedProps {
  * shared `PollView`, with a deep-link to the poll's standalone page. Each embed
  * issues its own `pollDetailQuery`; React Query dedupes by key.
  */
-export const PollEmbed: React.FC<PollEmbedProps> = ({ pollUnitId }) => {
+export const PollEmbed: React.FC<PollEmbedProps> = ({
+  pollUnitId,
+  realmUnitId,
+}) => {
   const { t } = useTranslation(["common", "community"]);
   const {
     data: results,
@@ -32,7 +36,7 @@ export const PollEmbed: React.FC<PollEmbedProps> = ({ pollUnitId }) => {
       onKeyDown={(event) => event.stopPropagation()}
       role="group"
     >
-      <PollView results={results} />
+      <PollView results={results} realmUnitId={realmUnitId} />
       <Link
         to="/poll/$unitId"
         params={{ unitId: pollUnitId }}

@@ -9,6 +9,8 @@ export interface UsePollVoteArgs {
   voteMode: PollVoteMode;
   /** The option ids the caller currently holds (`PollResultsDTO.myVote`). */
   myVote: string[];
+  realmUnitId?: string | null;
+  canVote?: boolean;
 }
 
 export interface UsePollVoteReturn {
@@ -33,16 +35,19 @@ export function usePollVote({
   pollUnitId,
   voteMode,
   myVote,
+  realmUnitId,
+  canVote = true,
 }: UsePollVoteArgs): UsePollVoteReturn {
   const castVote = useCastPollVoteMutation(pollUnitId);
   const withdrawVote = useWithdrawPollVoteMutation(pollUnitId);
 
   const select = (optionId: string) => {
+    if (!canVote) return;
     if (voteMode === "MULTI" && myVote.includes(optionId)) {
-      withdrawVote.mutate({ optionId });
+      withdrawVote.mutate({ optionId, realmUnitId: realmUnitId ?? undefined });
       return;
     }
-    castVote.mutate({ optionId });
+    castVote.mutate({ optionId, realmUnitId: realmUnitId ?? undefined });
   };
 
   return {

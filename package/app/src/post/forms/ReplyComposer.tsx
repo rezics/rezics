@@ -9,8 +9,15 @@ import {
   PostKind,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
-import { Button, Input } from "@rezics/ui/shadcn";
-import { BarChart3 } from "lucide-react";
+import {
+  Button,
+  Input,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@rezics/ui/shadcn";
+import { BarChart3, Link2 } from "lucide-react";
 import {
   forwardRef,
   useCallback,
@@ -20,7 +27,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { PollComposer } from "@/poll";
+import { PollComposer, PollLibrarySurface } from "@/poll";
 import { RealmPostTagPicker } from "@/realm/components/RealmPostTagPicker";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { useAuthGuard } from "@/user/hooks/useAuthGuard";
@@ -270,6 +277,33 @@ export const ReplyComposer = forwardRef<
     submitReply(markdownContentDocWithPoll(trimmed, poll.unitId));
   };
 
+  const handleExistingPollSelected = (pollUnitId: string) => {
+    if (!authGuard.requireAuth()) return;
+    const trimmed = body.trim();
+    const activeRealmUnitIds = realmUnitIds ?? [];
+    if (isRealmPostMode) {
+      postMutation.mutate(
+        {
+          realmUnitIds: activeRealmUnitIds,
+          tagIds: selectedTagIds,
+          kind: PostKind.POST,
+          language: locale,
+          title: derivedTitle,
+          content: markdownContentDocWithPoll(trimmed, pollUnitId),
+        },
+        {
+          onSuccess: (post) => {
+            reset();
+            onSubmitted?.(post);
+          },
+        },
+      );
+      return;
+    }
+
+    submitReply(markdownContentDocWithPoll(trimmed, pollUnitId));
+  };
+
   const handleSubmit = () => {
     if (!authGuard.requireAuth()) return;
     const trimmed = body.trim();
@@ -407,10 +441,37 @@ export const ReplyComposer = forwardRef<
       </div>
       {attachingPoll && (
         <div className="rounded-md border border-border-whisper bg-surface-subtle p-4">
-          <PollComposer
-            submitLabel={t("community:poll_attach_submit")}
-            onCreated={handlePollCreated}
-          />
+          <Tabs defaultValue="existing">
+            <TabsList>
+              <TabsTrigger value="existing">
+                {t("community:poll_attach_existing")}
+              </TabsTrigger>
+              <TabsTrigger value="new">
+                {t("community:poll_attach_create_new")}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="existing" className="pt-3">
+              <PollLibrarySurface
+                renderAction={(poll) => (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => handleExistingPollSelected(poll.unitId)}
+                    disabled={submitting || !body.trim()}
+                  >
+                    <Link2 className="mr-1 h-4 w-4" />
+                    {t("community:poll_attach_existing_action")}
+                  </Button>
+                )}
+              />
+            </TabsContent>
+            <TabsContent value="new" className="pt-3">
+              <PollComposer
+                submitLabel={t("community:poll_attach_submit")}
+                onCreated={handlePollCreated}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       )}
       {(postMutation.isError || commentMutation.isError) && (

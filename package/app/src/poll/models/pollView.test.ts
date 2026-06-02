@@ -31,6 +31,7 @@ function results(overrides: Partial<PollResultsDTO> = {}): PollResultsDTO {
     ],
     totalVotes: 4,
     myVote: [],
+    myVoteContexts: [],
     ...overrides,
   };
 }
@@ -136,6 +137,67 @@ describe("selectPollView — selection from myVote", () => {
       results({ voteMode: "MULTI", myVote: ["opt-a", "opt-b"] }),
     );
     expect(view.options.every((o) => o.selected)).toBe(true);
+  });
+});
+
+describe("selectPollView — vote context", () => {
+  test("allows direct voting when the existing vote is direct", () => {
+    const view = selectPollView(
+      results({
+        myVote: ["opt-a"],
+        myVoteContexts: [{ optionId: "opt-a", realmUnitId: null }],
+      }),
+    );
+
+    expect(view.voteBlockedByContext).toBe(false);
+    expect(view.votingEnabled).toBe(true);
+  });
+
+  test("blocks direct voting when the existing vote is realm-scoped", () => {
+    const view = selectPollView(
+      results({
+        myVote: ["opt-a"],
+        myVoteContexts: [{ optionId: "opt-a", realmUnitId: "realm-1" }],
+      }),
+    );
+
+    expect(view.voteBlockedByContext).toBe(true);
+    expect(view.votingEnabled).toBe(false);
+  });
+
+  test("allows realm voting in the matching context", () => {
+    const view = selectPollView(
+      results({
+        myVote: ["opt-a"],
+        myVoteContexts: [{ optionId: "opt-a", realmUnitId: "realm-1" }],
+      }),
+      { currentRealmUnitId: "realm-1" },
+    );
+
+    expect(view.voteBlockedByContext).toBe(false);
+    expect(view.votingEnabled).toBe(true);
+  });
+
+  test("blocks realm voting when the existing vote is direct or another realm", () => {
+    const direct = selectPollView(
+      results({
+        myVote: ["opt-a"],
+        myVoteContexts: [{ optionId: "opt-a", realmUnitId: null }],
+      }),
+      { currentRealmUnitId: "realm-1" },
+    );
+    const otherRealm = selectPollView(
+      results({
+        myVote: ["opt-a"],
+        myVoteContexts: [{ optionId: "opt-a", realmUnitId: "realm-2" }],
+      }),
+      { currentRealmUnitId: "realm-1" },
+    );
+
+    expect(direct.voteBlockedByContext).toBe(true);
+    expect(otherRealm.voteBlockedByContext).toBe(true);
+    expect(direct.votingEnabled).toBe(false);
+    expect(otherRealm.votingEnabled).toBe(false);
   });
 });
 

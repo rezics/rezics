@@ -13,12 +13,16 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
 import { Link2, Vote, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { DraftPublishActions } from "@/draft";
-import { PollComposer } from "@/poll";
+import { PollComposer, PollLibrarySurface } from "@/poll";
 import { policyDenialFromError } from "@/policy";
 import { RezicsMarkdownEditor } from "@/shared/ui/RezicsMarkdownEditor";
 import { buildRealmPostCreateInput } from "../models/realmCreateMode";
@@ -52,6 +56,11 @@ export function RealmPostCreateForm({
 
   const handlePollCreated = (poll: PollDTO) => {
     setAttachedPoll(poll);
+    setPollDialogOpen(false);
+  };
+
+  const handleExistingPollSelected = (pollUnitId: string) => {
+    setAttachedPoll({ unitId: pollUnitId } as PollDTO);
     setPollDialogOpen(false);
   };
 
@@ -172,10 +181,36 @@ export function RealmPostCreateForm({
               {tc("community:poll_attach_dialog_description")}
             </DialogDescription>
           </DialogHeader>
-          <PollComposer
-            submitLabel={tc("community:poll_attach_dialog_submit")}
-            onCreated={handlePollCreated}
-          />
+          <Tabs defaultValue="existing">
+            <TabsList>
+              <TabsTrigger value="existing">
+                {tc("community:poll_attach_existing")}
+              </TabsTrigger>
+              <TabsTrigger value="new">
+                {tc("community:poll_attach_create_new")}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="existing" className="pt-3">
+              <PollLibrarySurface
+                renderAction={(poll) => (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => handleExistingPollSelected(poll.unitId)}
+                  >
+                    <Link2 className="mr-1 h-4 w-4" />
+                    {tc("community:poll_attach_existing_action")}
+                  </Button>
+                )}
+              />
+            </TabsContent>
+            <TabsContent value="new" className="pt-3">
+              <PollComposer
+                submitLabel={tc("community:poll_attach_dialog_submit")}
+                onCreated={handlePollCreated}
+              />
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>

@@ -2,7 +2,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Button } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import { FileText, SquareArrowOutUpRight, Vote } from "lucide-react";
-import { PollComposer } from "@/poll";
+import { PollComposer, PollLibrarySurface } from "@/poll";
 
 export interface RealmPollWorkspaceProps {
   onCreatePostWithPoll?: () => void;
@@ -47,7 +47,30 @@ export function RealmPollWorkspace({
         </div>
       </div>
 
-      <div className="rounded-md border border-border-whisper bg-surface-base p-5">
+      <div className="rounded-md bg-surface-base p-5">
+        <div className="mb-5">
+          <h3 className="m-0 text-base font-medium leading-ui text-text-primary">
+            {t("community:poll_library_title")}
+          </h3>
+        </div>
+        <PollLibrarySurface
+          renderAction={(poll) => (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              render={
+                <Link to="/poll/$unitId" params={{ unitId: poll.unitId }} />
+              }
+            >
+              <SquareArrowOutUpRight className="mr-1 h-4 w-4" />
+              {t("community:poll_workspace_open_new")}
+            </Button>
+          )}
+        />
+      </div>
+
+      <div className="rounded-md bg-surface-base p-5">
         <div className="mb-5">
           <h3 className="m-0 text-base font-medium leading-ui text-text-primary">
             {t("community:poll_workspace_create_title")}
