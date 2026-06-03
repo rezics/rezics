@@ -21,12 +21,12 @@ import type {
   ModerationCaseEventDTO,
   PolicyDecision,
   PolicyInput,
-  RealmContentModerationDTO,
   RealmModerationEventDTO,
   RealmModerationQueueItemDTO,
   StaffAuditLogDTO,
   TriageModerationCaseInput,
   UnblockAccountEnforcementInput,
+  UnitRealmDTO,
 } from "@rezics/contract";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
@@ -364,8 +364,8 @@ export const governanceApi = {
     realmUnitId: string,
     targetUnitId: string,
     input: ContentModerationDecisionInput,
-  ): Promise<RealmContentModerationDTO> => {
-    return apiFetch<RealmContentModerationDTO>(
+  ): Promise<UnitRealmDTO> => {
+    return apiFetch<UnitRealmDTO>(
       `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/hide`,
       {
         method: "POST",
@@ -378,8 +378,8 @@ export const governanceApi = {
     realmUnitId: string,
     targetUnitId: string,
     input: ContentModerationDecisionInput,
-  ): Promise<RealmContentModerationDTO> => {
-    return apiFetch<RealmContentModerationDTO>(
+  ): Promise<UnitRealmDTO> => {
+    return apiFetch<UnitRealmDTO>(
       `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/tombstone`,
       {
         method: "POST",
@@ -392,8 +392,8 @@ export const governanceApi = {
     realmUnitId: string,
     targetUnitId: string,
     input: ContentModerationDecisionInput,
-  ): Promise<RealmContentModerationDTO> => {
-    return apiFetch<RealmContentModerationDTO>(
+  ): Promise<UnitRealmDTO> => {
+    return apiFetch<UnitRealmDTO>(
       `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/restore`,
       {
         method: "POST",

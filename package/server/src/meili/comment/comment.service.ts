@@ -13,8 +13,8 @@ export function buildCommentSearchFilter(opts: CommentSearchOptions): string[] {
   if (opts.realmUnitId) {
     filter.push(`realmUnitId = "${opts.realmUnitId}"`);
   }
-  if (opts.parentCommentUnitId) {
-    filter.push(`parentCommentUnitId = "${opts.parentCommentUnitId}"`);
+  if (opts.parentCommentId) {
+    filter.push(`parentCommentId = "${opts.parentCommentId}"`);
   }
   if (opts.authorUserId) {
     filter.push(`authorUserId = "${opts.authorUserId}"`);

@@ -10,8 +10,8 @@ import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
 
 export const commentApi = {
-  get: async (unitId: string): Promise<CommentResponse> => {
-    return apiFetch<CommentResponse>(`/comment/${unitId}`);
+  get: async (id: string): Promise<CommentResponse> => {
+    return apiFetch<CommentResponse>(`/comment/${id}`);
   },
 
   list: async (query: CommentListQuery): Promise<CommentListResponse> => {
@@ -34,17 +34,17 @@ export const commentApi = {
   },
 
   update: async (
-    unitId: string,
+    id: string,
     input: UpdateCommentInput,
   ): Promise<CommentResponse> => {
-    return apiFetch<CommentResponse>(`/comment/${unitId}`, {
+    return apiFetch<CommentResponse>(`/comment/${id}`, {
       method: "PATCH",
       body: JSON.stringify(input),
     });
   },
 
-  delete: async (unitId: string): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(`/comment/${unitId}`, {
+  delete: async (id: string): Promise<{ message: string }> => {
+    return apiFetch<{ message: string }>(`/comment/${id}`, {
       method: "DELETE",
     });
   },

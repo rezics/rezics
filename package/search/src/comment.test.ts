@@ -9,10 +9,10 @@ import {
 describe("comment search sync", () => {
   test("buildCommentDocument projects root and realm partition fields", () => {
     const doc = buildCommentDocument({
-      unitId: "comment-1",
+      id: "comment-1",
       rootUnitId: "post-1",
       realmUnitId: "realm-1",
-      parentCommentUnitId: null,
+      parentCommentId: null,
       authorUserId: "user-1",
       content: markdownContentDoc("hello"),
       depth: 1,
@@ -22,9 +22,10 @@ describe("comment search sync", () => {
       directReplyCount: 0,
       lastReplyAt: null,
       state: null,
+      visibilityState: "VISIBLE",
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      unit: { user: { name: "Ada", slug: "ada", avatar: null } },
+      author: { name: "Ada", slug: "ada", avatar: null },
     });
 
     expect(doc).toMatchObject({
@@ -32,7 +33,7 @@ describe("comment search sync", () => {
       contentText: "hello",
       rootUnitId: "post-1",
       realmUnitId: "realm-1",
-      parentCommentUnitId: null,
+      parentCommentId: null,
       authorName: "Ada",
     });
   });
@@ -43,8 +44,8 @@ describe("comment search sync", () => {
     setSearchPrismaClient({
       comment: {
         findUnique: mock(async () => ({
-          unitId: "comment-1",
-          unit: { status: "DRAFT", visibility: "PUBLIC" },
+          id: "comment-1",
+          visibilityState: "TOMBSTONED",
         })),
       },
     } as any);

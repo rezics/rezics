@@ -57,9 +57,9 @@ function QueueItemCard({
     onError: (error) => toast.error(error.message),
   });
   const isPendingReview =
-    item.target.kind === "realm-feed-submission" && item.state === "new";
+    item.target.kind === "realm-unit-submission" && item.state === "new";
   const decide = (
-    decisionKind: "approve_for_feed" | "reject_from_feed",
+    decisionKind: "approve_for_realm" | "reject_from_realm",
     reason: string,
   ) =>
     decideQueueItem.mutate({
@@ -107,7 +107,7 @@ function QueueItemCard({
                   size="sm"
                   disabled={decideQueueItem.isPending}
                   onClick={() =>
-                    decide("approve_for_feed", "approved_for_realm_feed")
+                    decide("approve_for_realm", "approved_for_realm")
                   }
                 >
                   Approve
@@ -117,7 +117,7 @@ function QueueItemCard({
                   size="sm"
                   disabled={decideQueueItem.isPending}
                   onClick={() =>
-                    decide("reject_from_feed", "rejected_from_realm_feed")
+                    decide("reject_from_realm", "rejected_from_realm")
                   }
                 >
                   Reject

@@ -52,7 +52,7 @@ export type ReplyComposerReplyModeProps = ReplyComposerBaseProps & {
   variantUnitId?: string;
   rootUnitId?: string;
   realmUnitId?: string | null;
-  parentCommentUnitId?: string;
+  parentCommentId?: string;
   realmUnitIds?: never;
   tagIds?: string[];
 };
@@ -61,7 +61,7 @@ export type ReplyComposerRealmPostModeProps = ReplyComposerBaseProps & {
   realmUnitIds: string[];
   tagIds?: string[];
   targetUnitId?: never;
-  parentCommentUnitId?: never;
+  parentCommentId?: never;
 };
 
 export type ReplyComposerProps =
@@ -108,17 +108,17 @@ export const ReplyComposer = forwardRef<
   const variantUnitId = isRealmPostMode ? undefined : props.variantUnitId;
   const rootUnitId = isRealmPostMode ? undefined : props.rootUnitId;
   const realmUnitId = isRealmPostMode ? undefined : props.realmUnitId;
-  const parentCommentUnitId = isRealmPostMode
+  const parentCommentId = isRealmPostMode
     ? undefined
-    : props.parentCommentUnitId;
-  const isCommentReplyMode = !isRealmPostMode && Boolean(parentCommentUnitId);
+    : props.parentCommentId;
+  const isCommentReplyMode = !isRealmPostMode && Boolean(parentCommentId);
   const canAttachPoll = !isCommentReplyMode;
   const initialTagIds = props.tagIds;
   const invalidMode =
     Boolean(realmUnitIds?.length) &&
     Boolean(
       (props as Partial<ReplyComposerReplyModeProps>).targetUnitId ||
-        (props as Partial<ReplyComposerReplyModeProps>).parentCommentUnitId,
+        (props as Partial<ReplyComposerReplyModeProps>).parentCommentId,
     );
   const invalidCommentReplyMode =
     isCommentReplyMode && (!rootUnitId || !realmUnitId);
@@ -144,16 +144,16 @@ export const ReplyComposer = forwardRef<
 
   const submitReply = useCallback(
     (content: ReturnType<typeof markdownContentDoc>) => {
-      if (parentCommentUnitId) {
+      if (parentCommentId) {
         if (!rootUnitId || !realmUnitId) return;
         commentMutation.mutate(
           {
             rootUnitId,
             realmUnitId,
-            parentCommentUnitId:
-              parentCommentUnitId === rootUnitId
+            parentCommentId:
+              parentCommentId === rootUnitId
                 ? undefined
-                : parentCommentUnitId,
+                : parentCommentId,
             content,
           },
           {
@@ -190,7 +190,7 @@ export const ReplyComposer = forwardRef<
       onSubmitted,
       derivedTitle,
       authoringLanguage,
-      parentCommentUnitId,
+      parentCommentId,
       postMutation.mutate,
       realmUnitId,
       realmUnitIds,

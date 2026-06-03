@@ -20,12 +20,12 @@ import {
   moderationCaseEventDTOSchema,
   policyDecisionSchema,
   policyInputSchema,
-  realmContentModerationDTOSchema,
   realmModerationEventDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
   triageModerationCaseSchema,
   unblockAccountEnforcementSchema,
+  unitRealmDTOSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, isAdminRole, verifyAdminFromDb } from "@/middleware";
@@ -514,7 +514,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       requireLogin: true,
       params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
       body: contentModerationDecisionSchema,
-      response: { 200: realmContentModerationDTOSchema, 403: t.String() },
+      response: { 200: unitRealmDTOSchema, 403: t.String() },
       detail: {
         summary: "Hide content in one realm",
         tags: ["Governance", "Realms", "Content"],
@@ -547,7 +547,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       requireLogin: true,
       params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
       body: contentModerationDecisionSchema,
-      response: { 200: realmContentModerationDTOSchema, 403: t.String() },
+      response: { 200: unitRealmDTOSchema, 403: t.String() },
       detail: {
         summary: "Tombstone content in one realm",
         tags: ["Governance", "Realms", "Content"],
@@ -580,7 +580,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       requireLogin: true,
       params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
       body: contentModerationDecisionSchema,
-      response: { 200: realmContentModerationDTOSchema, 403: t.String() },
+      response: { 200: unitRealmDTOSchema, 403: t.String() },
       detail: {
         summary: "Restore content in one realm",
         tags: ["Governance", "Realms", "Content"],

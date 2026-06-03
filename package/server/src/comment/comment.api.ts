@@ -19,9 +19,9 @@ import { commentService } from "./comment.service";
 export const commentApi = new Elysia({ prefix: "/comment" })
   .use(authMacro)
   .get(
-    "/:unitId",
+    "/:id",
     async ({ params }): Promise<CommentResponse> => {
-      return mapCommentToDTO(await commentService.getByUnitId(params.unitId));
+      return mapCommentToDTO(await commentService.getById(params.id));
     },
     {
       params: commentParamsSchema,
@@ -102,10 +102,10 @@ export const commentApi = new Elysia({ prefix: "/comment" })
     },
   )
   .patch(
-    "/:unitId",
+    "/:id",
     async ({ params, body, identity }): Promise<CommentResponse> => {
       const comment = await commentService.update(
-        params.unitId,
+        params.id,
         body,
         identity.userId,
       );
@@ -123,9 +123,9 @@ export const commentApi = new Elysia({ prefix: "/comment" })
     },
   )
   .delete(
-    "/:unitId",
+    "/:id",
     async ({ params, identity }): Promise<{ message: string }> => {
-      await commentService.delete(params.unitId, identity.userId);
+      await commentService.delete(params.id, identity.userId);
       return { message: "Comment deleted" };
     },
     {

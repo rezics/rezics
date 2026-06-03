@@ -1055,13 +1055,18 @@ export class RealmService {
   async addUnitRealm(
     realmUnitId: string,
     unitId: string,
-    input: Pick<AddUnitRealmInput, "state"> = {},
+    input: Pick<
+      AddUnitRealmInput,
+      "moderationState" | "visibilityState" | "isLocked"
+    > = {},
   ): Promise<UnitRealmDTO> {
     const row = await prisma.unitRealm.create({
       data: {
         realmUnitId,
         unitId,
-        state: input.state?.toUpperCase() as any,
+        moderationState: input.moderationState?.toUpperCase() as any,
+        visibilityState: input.visibilityState?.toUpperCase() as any,
+        isLocked: input.isLocked,
       },
     });
     await Promise.all([

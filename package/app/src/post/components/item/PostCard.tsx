@@ -7,7 +7,7 @@ import { useAppendRealmPinboardMutation } from "@rezics/api/realm/realm";
 import {
   extractPollUnitIdsFromContentDoc,
   type PostDTO,
-  type RealmFeedPublicationState,
+  type UnitRealmModerationState,
   type VariantContextSummary,
 } from "@rezics/contract";
 import {
@@ -50,8 +50,8 @@ interface PostCardProps {
   reactionScopeKey?: string | null;
   manageMode?: boolean;
   manageRealmId?: string;
-  realmPublicationState?: RealmFeedPublicationState;
-  realmModerationState?: "hidden" | "locked" | "archived" | "removed" | null;
+  realmModerationState?: UnitRealmModerationState;
+  realmVisibilityState?: "hidden" | "tombstoned" | null;
 }
 
 type StatusBadge = {
@@ -114,8 +114,8 @@ export const PostCard: React.FC<PostCardProps> = ({
   reactionScopeKey,
   manageMode = false,
   manageRealmId,
-  realmPublicationState,
   realmModerationState,
+  realmVisibilityState,
 }) => {
   const navigate = useNavigate();
   const deletePost = useDeletePostMutation({
@@ -158,37 +158,33 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   const statusBadges = [
-    realmPublicationState
+    realmModerationState
       ? {
-          key: "publication",
+          key: "relation-moderation",
           label:
-            realmPublicationState === "pending_review"
+            realmModerationState === "pending_review"
               ? "Pending review"
-              : realmPublicationState === "approved"
+              : realmModerationState === "approved"
                 ? "Approved"
-                : realmPublicationState === "rejected"
+                : realmModerationState === "rejected"
                   ? "Rejected"
                   : "Removed",
           tone:
-            realmPublicationState === "approved"
+            realmModerationState === "approved"
               ? "success"
-              : realmPublicationState === "pending_review"
+              : realmModerationState === "pending_review"
                 ? "warning"
                 : "error",
         }
       : null,
-    realmModerationState
+    realmVisibilityState
       ? {
-          key: "moderation",
+          key: "visibility",
           label:
-            realmModerationState === "hidden"
+            realmVisibilityState === "hidden"
               ? "Hidden"
-              : realmModerationState === "locked"
-                ? "Locked"
-                : realmModerationState === "archived"
-                  ? "Archived"
-                  : "Removed",
-          tone: realmModerationState === "removed" ? "error" : "warning",
+              : "Tombstoned",
+          tone: realmVisibilityState === "tombstoned" ? "error" : "warning",
         }
       : null,
   ].filter(Boolean) as StatusBadge[];
@@ -325,7 +321,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                     onClick={(event) => event.stopPropagation()}
                   >
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel>Feed publication</DropdownMenuLabel>
+                      <DropdownMenuLabel>Realm moderation</DropdownMenuLabel>
                       <DropdownMenuItem
                         disabled={removeFromFeed.isPending}
                         onSelect={(event) =>

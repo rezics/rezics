@@ -220,7 +220,6 @@ model Unit {
   game   Game?
   media  Media?
   post   Post?
-  comment Comment?
   shelf  Shelf?
   series Series?
   realm  Realm?
@@ -266,14 +265,12 @@ model Unit {
 
   // Engagement (reactions moved to @rezics/reaction service)
 
-  // Comment relations (comments are first-class Unit extensions)
-  rootComments          Comment[] @relation("CommentRoot")
-  realmComments         Comment[] @relation("CommentRealm")
-  parentCommentChildren Comment[] @relation("CommentParent")
+  // Comment relations (comments are lightweight discussion rows, not Unit extensions).
+  rootComments  Comment[] @relation("CommentRoot")
+  realmComments Comment[] @relation("CommentRealm")
 
   // Comment promotion overlay (scope is always a thread root post; target a comment)
-  commentPromotionsAsScope   CommentPromotion[] @relation("CommentPromotionScope")
-  commentPromotionsAsComment CommentPromotion[] @relation("CommentPromotionComment")
+  commentPromotionsAsScope CommentPromotion[] @relation("CommentPromotionScope")
 
   userProgress UserUnitProgress[] @relation("ProgressUnit")
 
@@ -290,7 +287,6 @@ model Unit {
   moderationCaseRealms       ModerationCase[]           @relation("ModerationCaseRealm")
   realmQueueAddressedUnits   RealmModerationQueueItem[] @relation("RealmModerationQueueAddressedUnit")
   contentModerationState     ContentModerationState?
-  realmModerationTargets     RealmContentModeration[]   @relation("RealmContentModerationModeratedUnit")
 
   // Collaborative authority and history capture.
   collaborators UnitCollaborator[]
@@ -705,20 +701,20 @@ model PostPollReference {
 }
 
 /**
- * ANCHOR COMMENT EXTENSION
+ * ANCHOR COMMENT
  *
- * First-class reply tree node. `rootUnitId` is the generic discussion root;
+ * Lightweight reply tree node. `rootUnitId` is the generic discussion root;
  * post-rooted threads use the root post's Unit id, but the field deliberately
- * does not encode `Post` in its name. `realmUnitId` is required so the stable
- * comment partition is `(rootUnitId, realmUnitId)`.
+ * does not encode `Post` in its name. A non-null `realmUnitId` makes the
+ * comment a realm asset that realm moderators may manage directly; clearing it
+ * removes the comment from that realm without deleting the row or root post.
  */
 model Comment {
-  unitId String @id @db.Uuid
-  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  id String @id @default(dbgenerated("uuidv7()")) @db.Uuid
 
   rootUnitId          String  @db.Uuid
-  realmUnitId         String  @db.Uuid
-  parentCommentUnitId String? @db.Uuid
+  realmUnitId         String? @db.Uuid
+  parentCommentId     String? @db.Uuid
   authorUserId        String  @db.Uuid
 
   /// Canonical ContentDoc JSON. Search projections such as contentText are
@@ -736,19 +732,24 @@ model Comment {
   lastReplyAt      DateTime?
   isLocked         Boolean   @default(false)
   state            String?
+  visibilityState  UnitRealmVisibilityState @default(VISIBLE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  rootUnit      Unit  @relation("CommentRoot", fields: [rootUnitId], references: [id], onDelete: Cascade)
-  realmUnit     Unit  @relation("CommentRealm", fields: [realmUnitId], references: [id], onDelete: Cascade)
-  parentComment Unit? @relation("CommentParent", fields: [parentCommentUnitId], references: [id], onDelete: SetNull)
+  rootUnit      Unit     @relation("CommentRoot", fields: [rootUnitId], references: [id], onDelete: Cascade)
+  realmUnit     Unit?    @relation("CommentRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
+  parentComment Comment? @relation("CommentParent", fields: [parentCommentId], references: [id], onDelete: SetNull)
+  childComments Comment[] @relation("CommentParent")
+  author        User      @relation("CommentAuthor", fields: [authorUserId], references: [unitId], onDelete: Cascade)
+  promotions    CommentPromotion[]
 
   @@index([rootUnitId, realmUnitId, createdAt])
-  @@index([rootUnitId, realmUnitId, parentCommentUnitId, createdAt])
-  @@index([parentCommentUnitId, createdAt])
+  @@index([rootUnitId, realmUnitId, parentCommentId, createdAt])
+  @@index([parentCommentId, createdAt])
   @@index([authorUserId, createdAt])
   @@index([state])
+  @@index([visibilityState])
   @@index([path], type: Gist, map: "Comment_path_gist_idx")
 }
 
@@ -765,25 +766,25 @@ enum PinKind {
  *
  * Generic in-thread promotion of a comment, mirroring the pinned/position idiom
  * of `RealmTagApplication`, `UnitTag`, and `ShelfUnit`. `scopeUnitId` is ALWAYS
- * the thread root post; the target `commentUnitId` is ALWAYS a comment within
+ * the thread root post; the target `commentId` is ALWAYS a comment within
  * that thread. A realm is never a scope — realm-level featuring of whole units
  * is `Realm.extra.pinboard`'s job.
  */
 model CommentPromotion {
   scopeUnitId   String  @db.Uuid
-  commentUnitId String  @db.Uuid
+  commentId     String  @db.Uuid
   kind          PinKind
   position      String  @db.VarChar(64) // Fractional Indexing
   byUserId      String  @db.Uuid
 
   createdAt DateTime @default(now())
 
-  scope   Unit @relation("CommentPromotionScope", fields: [scopeUnitId], references: [id], onDelete: Cascade)
-  comment Unit @relation("CommentPromotionComment", fields: [commentUnitId], references: [id], onDelete: Cascade)
+  scope   Unit    @relation("CommentPromotionScope", fields: [scopeUnitId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
-  @@id([scopeUnitId, commentUnitId])
+  @@id([scopeUnitId, commentId])
   @@index([scopeUnitId, kind, position])
-  @@index([commentUnitId])
+  @@index([commentId])
 }
 
 /**
@@ -972,7 +973,6 @@ model Realm {
   tagContexts          RealmTagContext[]
   capabilityGrants     RealmCapabilityGrant[]
   moderationQueueItems RealmModerationQueueItem[]
-  moderationOverlays   RealmContentModeration[]
 }
 
 model RealmMember {
@@ -1017,16 +1017,19 @@ model RealmRuleAcknowledgement {
  */
 
 model UnitRealm {
-  realmUnitId String                    @db.Uuid
-  unitId      String                    @db.Uuid
-  /// Realm feed publication workflow only; moderation visibility overlays live in RealmContentModeration.
-  state       RealmFeedPublicationState @default(APPROVED)
+  realmUnitId String                   @db.Uuid
+  unitId      String                   @db.Uuid
+  /// Realm-local relation moderation, not feed ranking or recommendation state.
+  /// REMOVED is soft deletion of this Unit-realm relation; hard deletion removes the row.
+  moderationState UnitRealmModerationState @default(APPROVED)
+  visibilityState UnitRealmVisibilityState @default(VISIBLE)
+  isLocked        Boolean                  @default(false)
   /// Future presentation-only card hints, such as a realm-scoped spoiler
   /// overlay, should live on this realm/content junction rather than Unit.extra
   /// or semantic tags. Disabled until the realm feed publication work adds a
   /// typed JSON contract and migration.
   // extra Json?
-  createdAt   DateTime                  @default(now())
+  createdAt   DateTime                 @default(now())
 
   /// Community/feed membership for a target Unit in a realm.
   /// This junction is not semantic tagging and is not a prerequisite or owner relation for RealmTagApplication.
@@ -1036,7 +1039,8 @@ model UnitRealm {
   @@id([realmUnitId, unitId])
   @@index([unitId])
   @@index([realmUnitId, createdAt])
-  @@index([realmUnitId, state, createdAt])
+  @@index([realmUnitId, moderationState, visibilityState, createdAt])
+  @@index([realmUnitId, moderationState, visibilityState, isLocked, createdAt])
 }
 
 model RealmTagApplication {
@@ -1429,8 +1433,8 @@ model User {
   realmQueueAssignments           RealmModerationQueueItem[] @relation("RealmModerationQueueAssignedTo")
   realmModerationEvents           RealmModerationEvent[]     @relation("RealmModerationEventActor")
   contentModerationDecisions      ContentModerationState[]   @relation("ContentModerationStateDecidedBy")
-  realmContentModerationDecisions RealmContentModeration[]   @relation("RealmContentModerationDecidedBy")
   realmRuleAcknowledgements       RealmRuleAcknowledgement[]
+  commentsAuthored                Comment[]                  @relation("CommentAuthor")
   staffAuditLogs                  StaffAuditLog[]            @relation("StaffAuditLogActor")
 
   @@index([email])
@@ -1766,16 +1770,20 @@ enum ContentModerationStateKind {
   VISIBLE
   HIDDEN
   TOMBSTONED
-  LOCKED
-  ARCHIVED
   REMOVED
 }
 
-enum RealmFeedPublicationState {
+enum UnitRealmModerationState {
   PENDING_REVIEW
   APPROVED
   REJECTED
   REMOVED
+}
+
+enum UnitRealmVisibilityState {
+  VISIBLE
+  HIDDEN
+  TOMBSTONED
 }
 
 enum RealmMemberState {
@@ -1898,8 +1906,6 @@ model ModerationCase {
   events                 ModerationCaseEvent[]
   realmQueueItems        RealmModerationQueueItem[]
   contentStates          ContentModerationState[]
-  realmContentModeration RealmContentModeration[]
-
   @@index([state, severity, createdAt])
   @@index([realmUnitId, state, createdAt])
   @@index([assignedToUserId, state, createdAt])
@@ -2011,30 +2017,6 @@ model ContentModerationState {
   case       ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
 
   @@index([state, updatedAt])
-  @@index([decidedById, updatedAt])
-  @@index([caseId])
-}
-
-model RealmContentModeration {
-  realmUnitId  String                     @db.Uuid
-  /// The Unit whose realm-local visibility state is moderated.
-  moderatedUnitId String                     @db.Uuid
-  state        ContentModerationStateKind
-  decidedById  String?                    @db.Uuid
-  caseId       String?                    @db.Uuid
-  reason       String?
-  metadata     Json?
-  createdAt    DateTime                   @default(now())
-  updatedAt    DateTime                   @updatedAt
-
-  realm      Realm           @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
-  moderatedUnit Unit            @relation("RealmContentModerationModeratedUnit", fields: [moderatedUnitId], references: [id], onDelete: Cascade)
-  decidedBy  User?           @relation("RealmContentModerationDecidedBy", fields: [decidedById], references: [unitId], onDelete: SetNull)
-  case       ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
-
-  @@id([realmUnitId, moderatedUnitId])
-  @@index([realmUnitId, state, updatedAt])
-  @@index([moderatedUnitId, state])
   @@index([decidedById, updatedAt])
   @@index([caseId])
 }

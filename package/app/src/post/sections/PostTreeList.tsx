@@ -108,9 +108,9 @@ export function PostTreeList({
   }, []);
 
   const handleComposerSubmitted = useCallback(
-    (parentCommentUnitId: string, post: CommentDTO) => {
+    (parentCommentId: string, post: CommentDTO) => {
       setSubmittedPostUnitId(post.unitId);
-      handleComposerDone(parentCommentUnitId);
+      handleComposerDone(parentCommentId);
     },
     [handleComposerDone],
   );

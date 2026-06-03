@@ -8,7 +8,6 @@ import type {
   ModerationCaseDTO,
   ModerationCaseEventDTO,
   ModerationCaseState,
-  RealmContentModerationDTO,
   RealmModerationEventDTO,
   RealmModerationQueueItemDTO,
   StaffAuditLogDTO,
@@ -19,7 +18,6 @@ import type {
   ModerationCaseEventRow,
   ModerationCaseRow,
   RealmCapabilityGrantRow,
-  RealmContentModerationRow,
   RealmModerationEventRow,
   RealmModerationQueueItemRow,
   StaffAuditLogRow,
@@ -180,22 +178,6 @@ export function mapContentModerationStateToDTO(
   row: ContentModerationStateRow,
 ): ContentModerationStateDTO {
   return {
-    moderatedUnitId: row.moderatedUnitId,
-    state: lower<ContentModerationStateKind>(row.state),
-    decidedByUserId: row.decidedById,
-    caseId: row.caseId,
-    reason: row.reason,
-    metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
-    createdAt: row.createdAt.toISOString(),
-    updatedAt: row.updatedAt.toISOString(),
-  };
-}
-
-export function mapRealmContentModerationToDTO(
-  row: RealmContentModerationRow,
-): RealmContentModerationDTO {
-  return {
-    realmUnitId: row.realmUnitId,
     moderatedUnitId: row.moderatedUnitId,
     state: lower<ContentModerationStateKind>(row.state),
     decidedByUserId: row.decidedById,

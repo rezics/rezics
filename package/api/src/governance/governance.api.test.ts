@@ -6,7 +6,7 @@ import {
   invalidateGovernanceCaseQueries,
   invalidateGovernanceEnforcementQueries,
   invalidateRealmCapabilityQueries,
-  invalidateRealmContentModerationQueries,
+  invalidateRealmUnitStateQueries,
   invalidateRealmQueueQueries,
 } from "./governance.mutations";
 
@@ -145,7 +145,7 @@ describe("governanceApi", () => {
     invalidateGovernanceEnforcementQueries(queryClient, "user-1");
     invalidateRealmCapabilityQueries(queryClient, "realm-1");
     invalidateRealmQueueQueries(queryClient, "realm-1", "queue-1");
-    invalidateRealmContentModerationQueries(queryClient, "realm-1", "post-1");
+    invalidateRealmUnitStateQueries(queryClient, "realm-1", "post-1");
 
     expect(
       (queryClient.invalidateQueries.mock.calls as any[]).map(

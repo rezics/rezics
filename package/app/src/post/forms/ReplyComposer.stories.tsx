@@ -112,7 +112,7 @@ export const Empty: Story = {
         targetUnitId="fixture-target-3"
         rootUnitId="fixture-root-3"
         realmUnitId="fixture-realm-3"
-        parentCommentUnitId="fixture-parent-3"
+        parentCommentId="fixture-parent-3"
       />
     </div>
   ),

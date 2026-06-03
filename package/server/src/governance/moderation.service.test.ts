@@ -26,36 +26,33 @@ const contentModerationFindMany = mock(async () => [
     updatedAt: now,
   },
 ]);
-const realmContentModerationUpsert = mock(async ({ create, update }: any) => ({
-  realmUnitId: create?.realmUnitId ?? "realm-1",
-  moderatedUnitId: create?.moderatedUnitId ?? "reply-1",
-  ...(update ?? create),
-  createdAt: now,
-  updatedAt: now,
-}));
-const realmContentModerationFindMany = mock(async () => [
-  {
-    realmUnitId: "realm-1",
-    moderatedUnitId: "reply-1",
-    state: "TOMBSTONED",
-    decidedById: "mod-1",
-    caseId: null,
-    reason: "off-topic",
-    metadata: null,
-    createdAt: now,
-    updatedAt: now,
-  },
-]);
-const realmContentModerationFindUnique = mock(async (): Promise<any> => null);
 const postFindUnique = mock(
   async (): Promise<{ parentPostUnitId: string | null }> => ({
     parentPostUnitId: null,
   }),
 );
-const unitRealmUpdate = mock(async (args: any) => args.data);
+const unitRealmRow = {
+  realmUnitId: "realm-1",
+  unitId: "reply-1",
+  moderationState: "APPROVED",
+  visibilityState: "TOMBSTONED",
+  isLocked: false,
+  createdAt: now,
+};
+const unitRealmFindMany = mock(async () => [unitRealmRow]);
+const unitRealmUpdate = mock(async (args: any) => ({
+  ...unitRealmRow,
+  unitId: args.where?.realmUnitId_unitId?.unitId ?? unitRealmRow.unitId,
+  realmUnitId:
+    args.where?.realmUnitId_unitId?.realmUnitId ?? unitRealmRow.realmUnitId,
+  ...args.data,
+}));
 const unitRealmFindUnique = mock(
   async (): Promise<any> => ({
-    state: "PENDING_REVIEW",
+    ...unitRealmRow,
+    unitId: "post-1",
+    moderationState: "PENDING_REVIEW",
+    visibilityState: "VISIBLE",
   }),
 );
 const realmMemberDelete = mock(async () => undefined);
@@ -198,10 +195,6 @@ const transactionMock = mock(async (fn: any) =>
       findUnique: contentModerationFindUnique,
       upsert: contentModerationUpsert,
     },
-    realmContentModeration: {
-      findUnique: realmContentModerationFindUnique,
-      upsert: realmContentModerationUpsert,
-    },
     realmModerationQueueItem: {
       create: realmQueueCreate,
       findUniqueOrThrow: realmQueueFindUniqueOrThrow,
@@ -212,6 +205,7 @@ const transactionMock = mock(async (fn: any) =>
     },
     unitRealm: {
       findUnique: unitRealmFindUnique,
+      findMany: unitRealmFindMany,
       update: unitRealmUpdate,
     },
     realmMember: {
@@ -230,16 +224,12 @@ Object.assign(prismaMock, {
     findUnique: contentModerationFindUnique,
     upsert: contentModerationUpsert,
   },
-  realmContentModeration: {
-    findUnique: realmContentModerationFindUnique,
-    findMany: realmContentModerationFindMany,
-    upsert: realmContentModerationUpsert,
-  },
   post: {
     findUnique: postFindUnique,
   },
   unitRealm: {
     findUnique: unitRealmFindUnique,
+    findMany: unitRealmFindMany,
     update: unitRealmUpdate,
   },
   realmModerationQueueItem: {
@@ -284,14 +274,17 @@ describe("GovernanceModerationService content moderation state", () => {
     contentModerationFindUnique.mockResolvedValue(null);
     contentModerationFindMany.mockClear();
     contentModerationUpsert.mockClear();
-    realmContentModerationFindUnique.mockClear();
-    realmContentModerationFindUnique.mockResolvedValue(null);
-    realmContentModerationFindMany.mockClear();
-    realmContentModerationUpsert.mockClear();
     postFindUnique.mockClear();
     postFindUnique.mockResolvedValue({ parentPostUnitId: null });
     unitRealmFindUnique.mockClear();
-    unitRealmFindUnique.mockResolvedValue({ state: "PENDING_REVIEW" });
+    unitRealmFindUnique.mockResolvedValue({
+      ...unitRealmRow,
+      unitId: "post-1",
+      moderationState: "PENDING_REVIEW",
+      visibilityState: "VISIBLE",
+    });
+    unitRealmFindMany.mockClear();
+    unitRealmFindMany.mockResolvedValue([unitRealmRow]);
     unitRealmUpdate.mockClear();
     realmMemberDelete.mockClear();
     realmQueueCreate.mockClear();
@@ -402,44 +395,41 @@ describe("GovernanceModerationService content moderation state", () => {
     ]);
   });
 
-  test("lists realm overlays bounded to requested node ids", async () => {
+  test("lists realm Unit states bounded to requested node ids", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"
     );
 
-    const result = await governanceModerationService.listRealmContentOverlays({
+    const result = await governanceModerationService.listRealmUnitStates({
       realmUnitId: "realm-1",
-      moderatedUnitIds: ["reply-1", "reply-1", "reply-2"],
+      unitIds: ["reply-1", "reply-1", "reply-2"],
     });
 
-    expect(realmContentModerationFindMany).toHaveBeenCalledWith({
+    expect(unitRealmFindMany).toHaveBeenCalledWith({
       where: {
         realmUnitId: "realm-1",
-        moderatedUnitId: { in: ["reply-1", "reply-2"] },
+        unitId: { in: ["reply-1", "reply-2"] },
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { createdAt: "desc" },
     });
     expect(result).toEqual([
       {
         realmUnitId: "realm-1",
-        moderatedUnitId: "reply-1",
-        state: "tombstoned",
-        decidedByUserId: "mod-1",
-        caseId: null,
-        reason: "off-topic",
-        metadata: undefined,
-        createdAt: "2026-05-28T00:00:00.000Z",
-        updatedAt: "2026-05-28T00:00:00.000Z",
+        unitId: "reply-1",
+        moderationState: "approved",
+        visibilityState: "tombstoned",
+        isLocked: false,
+        createdAt: now,
       },
     ]);
   });
 
-  test("upserts sparse realm content overlay by realm and target", async () => {
+  test("updates sparse realm Unit visibility by realm and target", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"
     );
 
-    const result = await governanceModerationService.setRealmContentOverlay({
+    const result = await governanceModerationService.setRealmUnitVisibilityState({
       realmUnitId: "realm-1",
       moderatedUnitId: "reply-1",
       state: "tombstoned",
@@ -447,30 +437,22 @@ describe("GovernanceModerationService content moderation state", () => {
       reason: "off-topic",
     });
 
-    expect(realmContentModerationUpsert).toHaveBeenCalledWith({
+    expect(unitRealmUpdate).toHaveBeenCalledWith({
       where: {
-        realmUnitId_moderatedUnitId: {
+        realmUnitId_unitId: {
           realmUnitId: "realm-1",
-          moderatedUnitId: "reply-1",
+          unitId: "reply-1",
         },
       },
-      create: expect.objectContaining({
-        realmUnitId: "realm-1",
-        moderatedUnitId: "reply-1",
-        state: "TOMBSTONED",
-      }),
-      update: expect.objectContaining({
-        state: "TOMBSTONED",
-        decidedById: "mod-1",
-      }),
+      data: { visibilityState: "TOMBSTONED" },
     });
     expect(result).toMatchObject({
       realmUnitId: "realm-1",
-      moderatedUnitId: "reply-1",
-      state: "tombstoned",
+      unitId: "reply-1",
+      visibilityState: "tombstoned",
     });
     expect(contentModerationUpsert).not.toHaveBeenCalled();
-    expect(enqueueMock).not.toHaveBeenCalled();
+    expect(enqueueMock).toHaveBeenCalled();
   });
 
   test("restore helpers keep reversible visible state rows", async () => {
@@ -495,10 +477,8 @@ describe("GovernanceModerationService content moderation state", () => {
         update: expect.objectContaining({ state: "VISIBLE" }),
       }),
     );
-    expect(realmContentModerationUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        update: expect.objectContaining({ state: "VISIBLE" }),
-      }),
+    expect(unitRealmUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { visibilityState: "VISIBLE" } }),
     );
   });
 
@@ -554,16 +534,10 @@ describe("GovernanceModerationService content moderation state", () => {
   });
 
   test("records case event history for realm content restore decisions", async () => {
-    realmContentModerationFindUnique.mockResolvedValueOnce({
-      realmUnitId: "realm-1",
-      moderatedUnitId: "reply-1",
-      state: "HIDDEN",
-      decidedById: "mod-1",
-      caseId: "case-1",
-      reason: "off-topic",
-      metadata: null,
-      createdAt: now,
-      updatedAt: now,
+    unitRealmFindUnique.mockResolvedValueOnce({
+      ...unitRealmRow,
+      unitId: "reply-1",
+      visibilityState: "HIDDEN",
     });
     const { governanceModerationService } = await import(
       "./moderation.service"
@@ -577,11 +551,11 @@ describe("GovernanceModerationService content moderation state", () => {
       caseId: "case-1",
     });
 
-    expect(realmContentModerationFindUnique).toHaveBeenCalledWith({
+    expect(unitRealmFindUnique).toHaveBeenCalledWith({
       where: {
-        realmUnitId_moderatedUnitId: {
+        realmUnitId_unitId: {
           realmUnitId: "realm-1",
-          moderatedUnitId: "reply-1",
+          unitId: "reply-1",
         },
       },
     });
@@ -593,7 +567,7 @@ describe("GovernanceModerationService content moderation state", () => {
         reason: "appeal approved",
         before: {
           state: "HIDDEN",
-          reason: "off-topic",
+          reason: "appeal approved",
           moderatedUnitId: "reply-1",
           realmUnitId: "realm-1",
         },
@@ -624,9 +598,8 @@ describe("GovernanceModerationService content moderation state", () => {
       where: {
         realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
       },
-      data: { state: "REMOVED" },
+      data: { moderationState: "REMOVED" },
     });
-    expect(realmContentModerationUpsert).not.toHaveBeenCalled();
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
       "search.content.patchRealmIds",
       "search.post.sync",
@@ -650,7 +623,7 @@ describe("GovernanceModerationService content moderation state", () => {
       where: {
         realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
       },
-      data: { state: "REMOVED" },
+      data: { moderationState: "REMOVED" },
     });
   });
 
@@ -805,21 +778,14 @@ describe("GovernanceModerationService content moderation state", () => {
         reason: "off-topic",
       }),
     });
-    expect(realmContentModerationUpsert).toHaveBeenCalledWith({
+    expect(unitRealmUpdate).toHaveBeenCalledWith({
       where: {
-        realmUnitId_moderatedUnitId: {
+        realmUnitId_unitId: {
           realmUnitId: "realm-1",
-          moderatedUnitId: "post-1",
+          unitId: "post-1",
         },
       },
-      create: expect.objectContaining({
-        state: "HIDDEN",
-        decidedById: "mod-1",
-      }),
-      update: expect.objectContaining({
-        state: "HIDDEN",
-        decidedById: "mod-1",
-      }),
+      data: { visibilityState: "HIDDEN" },
     });
     expect(realmModerationEventCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -841,7 +807,7 @@ describe("GovernanceModerationService content moderation state", () => {
     });
   });
 
-  test("approves and rejects realm feed submissions through UnitRealm state", async () => {
+  test("approves and rejects realm submissions through UnitRealm moderation state", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"
     );
@@ -850,7 +816,7 @@ describe("GovernanceModerationService content moderation state", () => {
       realmUnitId: "realm-1",
       queueItemId: "queue-1",
       actorUserId: "mod-1",
-      decisionKind: "approve_for_feed",
+      decisionKind: "approve_for_realm",
       reason: "fits the realm",
     });
 
@@ -858,16 +824,16 @@ describe("GovernanceModerationService content moderation state", () => {
       where: {
         realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
       },
-      data: { state: "APPROVED" },
+      data: { moderationState: "APPROVED" },
     });
     expect(realmModerationEventCreate).toHaveBeenLastCalledWith({
       data: expect.objectContaining({
-        decisionKind: "approve_for_feed",
+        decisionKind: "approve_for_realm",
         before: expect.objectContaining({
-          publicationState: "PENDING_REVIEW",
+          moderationState: "PENDING_REVIEW",
         }),
         after: expect.objectContaining({
-          publicationState: "APPROVED",
+          moderationState: "APPROVED",
         }),
       }),
     });
@@ -879,7 +845,7 @@ describe("GovernanceModerationService content moderation state", () => {
       realmUnitId: "realm-1",
       queueItemId: "queue-1",
       actorUserId: "mod-1",
-      decisionKind: "reject_from_feed",
+      decisionKind: "reject_from_realm",
       reason: "off-topic",
     });
 
@@ -887,7 +853,7 @@ describe("GovernanceModerationService content moderation state", () => {
       where: {
         realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
       },
-      data: { state: "REJECTED" },
+      data: { moderationState: "REJECTED" },
     });
     expect(realmQueueUpdate).toHaveBeenLastCalledWith({
       where: { id: "queue-1" },
@@ -895,12 +861,12 @@ describe("GovernanceModerationService content moderation state", () => {
     });
     expect(realmModerationEventCreate).toHaveBeenLastCalledWith({
       data: expect.objectContaining({
-        decisionKind: "reject_from_feed",
+        decisionKind: "reject_from_realm",
         before: expect.objectContaining({
-          publicationState: "PENDING_REVIEW",
+          moderationState: "PENDING_REVIEW",
         }),
         after: expect.objectContaining({
-          publicationState: "REJECTED",
+          moderationState: "REJECTED",
         }),
       }),
     });

@@ -65,7 +65,7 @@ const commentCreateMock = mock(
     unitId: "comment-1",
     rootUnitId: args.data.rootUnitId,
     realmUnitId: args.data.realmUnitId,
-    parentCommentUnitId: args.data.parentCommentUnitId ?? null,
+    parentCommentId: args.data.parentCommentId ?? null,
     authorUserId: args.data.authorUserId,
     content: args.data.content,
     depth: args.data.depth,
@@ -558,7 +558,9 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(realmUnitCreateMock.mock.calls[0]?.[0].data).toMatchObject({
       realmUnitId: "realm-1",
       unitId: "post-1",
-      state: "APPROVED",
+      moderationState: "APPROVED",
+      visibilityState: "VISIBLE",
+      isLocked: false,
     });
   });
 
@@ -579,12 +581,14 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(realmUnitCreateMock.mock.calls[0]?.[0].data).toMatchObject({
       realmUnitId: "realm-1",
       unitId: "post-1",
-      state: "PENDING_REVIEW",
+      moderationState: "PENDING_REVIEW",
+      visibilityState: "VISIBLE",
+      isLocked: false,
     });
     expect(realmModerationQueueItemCreateMock).toHaveBeenCalledWith({
       data: expect.objectContaining({
         realmUnitId: "realm-1",
-        targetKind: "realm-feed-submission",
+        targetKind: "realm-unit-submission",
         targetId: "post-1",
         addressedUnitId: "post-1",
       }),
@@ -767,7 +771,13 @@ describe("PostService.submitToRealm", () => {
       where: {
         realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
       },
-      create: { realmUnitId: "realm-1", unitId: "post-1", state: "APPROVED" },
+      create: {
+        realmUnitId: "realm-1",
+        unitId: "post-1",
+        moderationState: "APPROVED",
+        visibilityState: "VISIBLE",
+        isLocked: false,
+      },
       update: {},
     });
     expect(unitTagUpsertMock).toHaveBeenCalledWith({
@@ -812,7 +822,9 @@ describe("PostService.submitToRealm", () => {
       create: {
         realmUnitId: "realm-1",
         unitId: "post-1",
-        state: "PENDING_REVIEW",
+        moderationState: "PENDING_REVIEW",
+        visibilityState: "VISIBLE",
+        isLocked: false,
       },
       update: {},
     });
@@ -827,7 +839,9 @@ describe("PostService.submitToRealm", () => {
       kind: "POST",
       unit: { status: "PUBLISHED", publishedAt: new Date() },
     });
-    realmUnitFindUniqueMock.mockResolvedValueOnce({ state: "REJECTED" });
+    realmUnitFindUniqueMock.mockResolvedValueOnce({
+      moderationState: "REJECTED",
+    });
 
     await expect(
       service.submitToRealm("post-1", { realmUnitId: "realm-1" }, "user-1"),
@@ -910,12 +924,10 @@ describe("PostService.byRealm", () => {
 
     expect(result).toEqual({ posts: [], total: 0 });
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
-      some: { realmUnitId: "realm-1", state: "APPROVED" },
-    });
-    expect(firstPostFindManyArgs().where.unit.realmModerationTargets).toEqual({
-      none: {
+      some: {
         realmUnitId: "realm-1",
-        state: { in: ["HIDDEN", "TOMBSTONED", "ARCHIVED", "REMOVED"] },
+        moderationState: "APPROVED",
+        visibilityState: "VISIBLE",
       },
     });
   });
@@ -978,7 +990,7 @@ describe("PostService.byRealm", () => {
     expect(postFindManyMock).not.toHaveBeenCalled();
   });
 
-  test("admin realm feed can include every publication state", async () => {
+  test("admin realm feed can include every relation moderation state", async () => {
     resetMocks();
 
     await service.byRealm("realm-1", {}, { isAdmin: true });
@@ -986,43 +998,34 @@ describe("PostService.byRealm", () => {
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
       some: { realmUnitId: "realm-1" },
     });
-    expect(
-      firstPostFindManyArgs().where.unit.realmModerationTargets,
-    ).toBeUndefined();
   });
 
-  test("admin realm feed can filter pending publication rows", async () => {
+  test("admin realm feed can filter pending relation moderation rows", async () => {
     resetMocks();
 
     await service.byRealm(
       "realm-1",
-      { realmLifecycleState: "pending_review" },
+      { realmModerationState: "pending_review" },
       { isAdmin: true },
     );
 
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
-      some: { realmUnitId: "realm-1", state: "PENDING_REVIEW" },
+      some: { realmUnitId: "realm-1", moderationState: "PENDING_REVIEW" },
     });
-    expect(
-      firstPostFindManyArgs().where.unit.realmModerationTargets,
-    ).toBeUndefined();
   });
 
-  test("admin realm feed can filter approved publication rows", async () => {
+  test("admin realm feed can filter approved relation moderation rows", async () => {
     resetMocks();
 
     await service.byRealm(
       "realm-1",
-      { realmLifecycleState: "approved" },
+      { realmModerationState: "approved" },
       { isAdmin: true },
     );
 
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
-      some: { realmUnitId: "realm-1", state: "APPROVED" },
+      some: { realmUnitId: "realm-1", moderationState: "APPROVED" },
     });
-    expect(
-      firstPostFindManyArgs().where.unit.realmModerationTargets,
-    ).toBeUndefined();
   });
 
   test("preserves targetUnitId as an exact target filter", async () => {
@@ -1853,7 +1856,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
   ): Record<string, unknown> => ({
     depth: 1,
     rootUnitId: "root-1",
-    parentCommentUnitId: null,
+    parentCommentId: null,
     ...overrides,
   });
 
@@ -1863,19 +1866,19 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
 
     const pin = await service.pin(
-      { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+      { scopeUnitId: "root-1", commentId: "reply-1" },
       op,
     );
 
     const createPromotionArgs = commentPromotionCreateMock.mock.calls[0]?.[0];
     expect(createPromotionArgs.data).toMatchObject({
       scopeUnitId: "root-1",
-      commentUnitId: "reply-1",
+      commentId: "reply-1",
       kind: "PINNED",
       byUserId: "op-1",
     });
     expect(pin.kind).toBe("PINNED");
-    expect(pin.commentUnitId).toBe("reply-1");
+    expect(pin.commentId).toBe("reply-1");
   });
 
   test("a non-OP non-moderator cannot pin", async () => {
@@ -1888,7 +1891,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
     await expect(
       service.pin(
-        { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+        { scopeUnitId: "root-1", commentId: "reply-1" },
         stranger,
       ),
     ).rejects.toThrow(/moderator\/owner/);
@@ -1906,7 +1909,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     realmMemberFindFirstMock.mockResolvedValueOnce({ realmUnitId: "realm-1" });
 
     const pin = await service.pin(
-      { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+      { scopeUnitId: "root-1", commentId: "reply-1" },
       { userId: "mod-1", permission: { role: "USER" } } as any,
     );
     expect(pin.kind).toBe("PINNED");
@@ -1918,12 +1921,12 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     commentFindUniqueMock.mockResolvedValueOnce(
       directReply({
         rootUnitId: "other-root",
-        parentCommentUnitId: null,
+        parentCommentId: null,
       }),
     );
 
     await expect(
-      service.pin({ scopeUnitId: "root-1", commentUnitId: "reply-x" }, op),
+      service.pin({ scopeUnitId: "root-1", commentId: "reply-x" }, op),
     ).rejects.toThrow(/scope thread/);
   });
 
@@ -1933,7 +1936,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     unitFindUniqueMock.mockResolvedValueOnce({ type: "REALM" });
 
     await expect(
-      service.pin({ scopeUnitId: "realm-1", commentUnitId: "reply-1" }, op),
+      service.pin({ scopeUnitId: "realm-1", commentId: "reply-1" }, op),
     ).rejects.toThrow(/pinboard/);
   });
 
@@ -1945,7 +1948,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
 
     await expect(
       service.acceptAnswer(
-        { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+        { scopeUnitId: "root-1", commentId: "reply-1" },
         op,
       ),
     ).rejects.toThrow(/Q&A thread/);
@@ -1956,12 +1959,12 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     resetMocks();
     postFindUniqueMock.mockResolvedValueOnce(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(
-      directReply({ depth: 2, parentCommentUnitId: "reply-1" }),
+      directReply({ depth: 2, parentCommentId: "reply-1" }),
     );
 
     await expect(
       service.acceptAnswer(
-        { scopeUnitId: "root-1", commentUnitId: "reply-2" },
+        { scopeUnitId: "root-1", commentId: "reply-2" },
         op,
       ),
     ).rejects.toThrow(/direct reply/);
@@ -1975,7 +1978,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 
     const pin = await service.acceptAnswer(
-      { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+      { scopeUnitId: "root-1", commentId: "reply-1" },
       op,
     );
     expect(pin.kind).toBe("ACCEPTED_ANSWER");
@@ -1991,7 +1994,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     postFindUniqueMock.mockResolvedValueOnce(rootScope());
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
     await service.acceptAnswer(
-      { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+      { scopeUnitId: "root-1", commentId: "reply-1" },
       op,
     );
 
@@ -1999,7 +2002,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     commentFindUniqueMock.mockResolvedValueOnce(directReply());
     commentPromotionFindFirstMock.mockResolvedValueOnce({ position: "a0" });
     await service.acceptAnswer(
-      { scopeUnitId: "root-1", commentUnitId: "reply-2" },
+      { scopeUnitId: "root-1", commentId: "reply-2" },
       op,
     );
 
@@ -2136,7 +2139,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
     );
     await expect(
       service.pin(
-        { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+        { scopeUnitId: "root-1", commentId: "reply-1" },
         stranger,
       ),
     ).rejects.toThrow(/moderator\/owner/);
@@ -2184,7 +2187,7 @@ describe("PostService lifecycle state", () => {
   ): Record<string, unknown> => ({
     depth: 1,
     rootUnitId: "root-1",
-    parentCommentUnitId: null,
+    parentCommentId: null,
     ...overrides,
   });
 
@@ -2297,7 +2300,7 @@ describe("PostService lifecycle state", () => {
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 
     await service.acceptAnswer(
-      { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+      { scopeUnitId: "root-1", commentId: "reply-1" },
       op,
     );
 
@@ -2320,7 +2323,7 @@ describe("PostService lifecycle state", () => {
     unitTagFindUniqueMock.mockResolvedValueOnce({ unitId: "root-1" });
 
     await service.acceptAnswer(
-      { scopeUnitId: "root-1", commentUnitId: "reply-1" },
+      { scopeUnitId: "root-1", commentId: "reply-1" },
       op,
     );
 

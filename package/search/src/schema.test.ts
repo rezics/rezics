@@ -46,7 +46,7 @@ describe("expected Meilisearch index settings", () => {
       expect.arrayContaining([
         "rootUnitId",
         "realmUnitId",
-        "parentCommentUnitId",
+        "parentCommentId",
       ]),
     );
     expect(comments.searchableAttributes).toEqual(

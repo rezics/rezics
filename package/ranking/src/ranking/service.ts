@@ -54,7 +54,7 @@ function scopesForRankKind(
   if (requested) return [requested];
   if (rankKind === "comment") {
     const parentId =
-      state.comment?.parentCommentUnitId ?? state.comment?.rootUnitId;
+      state.comment?.parentCommentId ?? state.comment?.rootUnitId;
     return parentId ? [{ kind: "parent", id: parentId }] : [];
   }
   if (rankKind === "post" && state.realms.length > 0) {

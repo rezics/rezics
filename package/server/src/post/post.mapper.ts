@@ -18,7 +18,7 @@ function moderationState(post: PostWithRelations) {
 }
 
 function contentHiddenByGlobalModeration(post: PostWithRelations) {
-  return ["HIDDEN", "TOMBSTONED", "ARCHIVED"].includes(
+  return ["HIDDEN", "TOMBSTONED", "REMOVED"].includes(
     post.unit.contentModerationState?.state ?? "",
   );
 }
@@ -125,7 +125,7 @@ export function mapCommentPromotionToDTO(
 ): CommentPromotionDTO {
   return {
     scopeUnitId: pin.scopeUnitId,
-    commentUnitId: pin.commentUnitId,
+    commentId: pin.commentId,
     kind: pin.kind,
     position: pin.position,
     byUserId: pin.byUserId,

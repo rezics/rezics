@@ -122,7 +122,7 @@ export const ManagePendingReview: Story = {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmPublicationState: "pending_review",
+    realmModerationState: "pending_review",
   },
 };
 
@@ -131,7 +131,7 @@ export const ManageApproved: Story = {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmPublicationState: "approved",
+    realmModerationState: "approved",
   },
 };
 
@@ -140,7 +140,7 @@ export const ManageRejected: Story = {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmPublicationState: "rejected",
+    realmModerationState: "rejected",
   },
 };
 
@@ -149,8 +149,8 @@ export const ManageRemovedHidden: Story = {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmPublicationState: "removed",
-    realmModerationState: "hidden",
+    realmModerationState: "removed",
+    realmVisibilityState: "hidden",
   },
 };
 
@@ -162,7 +162,7 @@ export const ManageCompactWrap: Story = {
     post: postLongBody,
     manageMode: true,
     manageRealmId: "realm-story",
-    realmPublicationState: "pending_review",
+    realmModerationState: "pending_review",
   },
 };
 
@@ -171,7 +171,7 @@ export const ManageKeyboardFocus: Story = {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmPublicationState: "approved",
+    realmModerationState: "approved",
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -181,6 +181,6 @@ export const ManageKeyboardFocus: Story = {
     trigger.focus();
     expect(trigger).toHaveFocus();
     await userEvent.keyboard("{Enter}");
-    expect(screen.getByText("Feed publication")).toBeInTheDocument();
+    expect(screen.getByText("Realm moderation")).toBeInTheDocument();
   },
 };

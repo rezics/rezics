@@ -11,7 +11,10 @@ import {
   unitDTOSchema,
   unitTranslationDTOSchema,
 } from "../unit/unit";
-import { realmFeedPublicationStateSchema } from "./publication";
+import {
+  unitRealmModerationStateSchema,
+  unitRealmVisibilityStateSchema,
+} from "./publication";
 import { realmExtraSchema } from "./realm-extra";
 
 // ============================================================
@@ -239,10 +242,10 @@ export type RealmMembershipMeDTO =
 // ============================================================
 
 /**
- * UnitRealm is community/feed membership for a Unit in a realm. It is not
- * semantic tagging and is not a prerequisite for RealmTagApplication.
- * `state` is the realm feed publication workflow, not global publication,
- * semantic classification, or a realm-local moderation overlay.
+ * UnitRealm is community membership for a Unit in a realm. It is not semantic
+ * tagging and is not a prerequisite for RealmTagApplication. `moderationState`
+ * records whether the realm accepts, rejects, or soft-removes the relation; it
+ * is not feed ranking or recommendation state.
  *
  * Future card-presentation hints such as realm-scoped `spoiler` belong on this
  * junction as typed `extra`, not on Unit.extra and not in the open tag system.
@@ -251,7 +254,9 @@ export type RealmMembershipMeDTO =
 export const unitRealmDTOSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
-  state: realmFeedPublicationStateSchema,
+  moderationState: unitRealmModerationStateSchema,
+  visibilityState: unitRealmVisibilityStateSchema,
+  isLocked: t.Boolean(),
   // extra: t.Optional(t.Nullable(realmContentExtraSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -575,7 +580,9 @@ export type RealmMemberParams = (typeof realmMemberParamsSchema)["static"];
 
 export const addUnitRealmSchema = t.Object({
   unitId: t.String(),
-  state: t.Optional(realmFeedPublicationStateSchema),
+  moderationState: t.Optional(unitRealmModerationStateSchema),
+  visibilityState: t.Optional(unitRealmVisibilityStateSchema),
+  isLocked: t.Optional(t.Boolean()),
 });
 
 export type AddUnitRealmInput = (typeof addUnitRealmSchema)["static"];

@@ -27,7 +27,7 @@ describe("searchComments", () => {
       keyword: "answer",
       rootUnitId: "post-1",
       realmUnitId: "realm-1",
-      parentCommentUnitId: "comment-1",
+      parentCommentId: "comment-1",
       sort: { field: "hotScore" },
       offset: 20,
       limit: 10,
@@ -39,7 +39,7 @@ describe("searchComments", () => {
       filter: [
         'rootUnitId = "post-1"',
         'realmUnitId = "realm-1"',
-        'parentCommentUnitId = "comment-1"',
+        'parentCommentId = "comment-1"',
       ],
       sort: ["hotScore:desc"],
     });

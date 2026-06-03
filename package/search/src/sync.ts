@@ -138,15 +138,8 @@ const PUBLIC_ELIGIBLE_UNIT_WHERE = {
 const SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES = [
   "HIDDEN",
   "TOMBSTONED",
-  "ARCHIVED",
   "REMOVED",
 ] as string[];
-const SEARCH_EXCLUDED_REALM_CONTENT_STATES = new Set([
-  "HIDDEN",
-  "TOMBSTONED",
-  "ARCHIVED",
-  "REMOVED",
-]);
 const RATING_TAG_SLUGS = new Set<string>(RATING_TAGS);
 
 function publicSearchableUnitWhere(): Prisma.UnitWhereInput {
@@ -250,27 +243,24 @@ function isSearchVisibleScoredRow(row: {
 }
 
 function realmIdsForSearch(unit: any): string[] {
-  const blockedRealmIds = new Set(
-    (unit?.realmModerationTargets ?? [])
-      .filter((overlay: any) =>
-        SEARCH_EXCLUDED_REALM_CONTENT_STATES.has(overlay.state),
-      )
-      .map((overlay: any) => overlay.realmUnitId),
-  );
-
   return (unit?.inRealms ?? [])
-    .filter((realm: any) => !realm.state || realm.state === "APPROVED")
+    .filter(
+      (realm: any) =>
+        (!realm.moderationState || realm.moderationState === "APPROVED") &&
+        (!realm.visibilityState || realm.visibilityState === "VISIBLE"),
+    )
     .filter((realm: any) => realm.realm?.realm?.isPublic !== false)
-    .map((realm: any) => realm.realmUnitId)
-    .filter((realmUnitId: string) => !blockedRealmIds.has(realmUnitId));
+    .map((realm: any) => realm.realmUnitId);
 }
 
 const realmSearchProjectionSelect = {
   inRealms: {
-    where: { state: "APPROVED" },
+    where: { moderationState: "APPROVED", visibilityState: "VISIBLE" },
     select: {
       realmUnitId: true,
-      state: true,
+      moderationState: true,
+      visibilityState: true,
+      isLocked: true,
       realm: {
         select: {
           realm: {
@@ -280,9 +270,6 @@ const realmSearchProjectionSelect = {
       },
     },
     orderBy: { realmUnitId: "asc" as const },
-  },
-  realmModerationTargets: {
-    select: { realmUnitId: true, state: true },
   },
 } as const;
 
@@ -1123,26 +1110,24 @@ export async function patchContentRealmIds(
     await client.deleteContent([unitId]);
     return;
   }
-  const [inRealms, realmModerationTargets] = await Promise.all([
-    getSearchPrismaClient().unitRealm.findMany({
-      where: { unitId, state: "APPROVED" },
-      include: {
-        realm: {
-          select: {
-            realm: {
-              select: { isPublic: true },
-            },
+  const inRealms = await getSearchPrismaClient().unitRealm.findMany({
+    where: {
+      unitId,
+      moderationState: "APPROVED",
+      visibilityState: "VISIBLE",
+    },
+    include: {
+      realm: {
+        select: {
+          realm: {
+            select: { isPublic: true },
           },
         },
       },
-    }),
-    getSearchPrismaClient().realmContentModeration.findMany({
-      where: { moderatedUnitId: unitId },
-      select: { realmUnitId: true, state: true },
-    }),
-  ]);
+    },
+  });
 
-  const realmIds = realmIdsForSearch({ inRealms, realmModerationTargets });
+  const realmIds = realmIdsForSearch({ inRealms });
   await patchContentIfEligible(client, unitId, { realmIds });
 }
 
@@ -1798,32 +1783,21 @@ function resolvePostContent(post: any): unknown {
 }
 
 const commentIncludeForSync = {
-  unit: {
-    include: {
-      user: true,
-      contentModerationState: true,
-    },
-  },
+  author: true,
 } as const;
 
-function isPublicIndexableCommentUnit(unit: any): boolean {
-  return (
-    unit?.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
-    unit?.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility &&
-    !SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
-      unit.contentModerationState?.state,
-    )
-  );
+function isPublicIndexableComment(comment: any): boolean {
+  return comment?.visibilityState !== "TOMBSTONED";
 }
 
 export function buildCommentDocument(comment: any): CommentSearchDocument {
-  const user = comment.unit?.user;
+  const user = comment.author;
   return {
-    id: comment.unitId,
+    id: comment.id,
     contentText: mainMarkdownSource(comment.content),
     rootUnitId: comment.rootUnitId,
-    realmUnitId: comment.realmUnitId,
-    parentCommentUnitId: comment.parentCommentUnitId ?? null,
+    realmUnitId: comment.realmUnitId ?? null,
+    parentCommentId: comment.parentCommentId ?? null,
     authorUserId: comment.authorUserId,
     depth: comment.depth,
     path: comment.path ?? null,
@@ -1836,6 +1810,7 @@ export function buildCommentDocument(comment: any): CommentSearchDocument {
         : comment.lastReplyAt
       : null,
     state: comment.state ?? null,
+    visibilityState: comment.visibilityState ?? "VISIBLE",
     createdAt:
       comment.createdAt instanceof Date
         ? comment.createdAt.toISOString()
@@ -2012,21 +1987,21 @@ export async function syncSingleComment(
   commentId: string,
 ) {
   const comment = await getSearchPrismaClient().comment.findUnique({
-    where: { unitId: commentId },
+    where: { id: commentId },
     include: commentIncludeForSync,
   });
 
-  if (!comment || !isPublicIndexableCommentUnit(comment.unit)) {
+  if (!comment || !isPublicIndexableComment(comment)) {
     await client.deleteComments([commentId]);
     return;
   }
 
   const [pathRow] = await getSearchPrismaClient().$queryRaw<
-    { unitId: string; path: string | null }[]
+    { id: string; path: string | null }[]
   >`
-    SELECT "unitId", "path"::text AS path
+    SELECT "id", "path"::text AS path
     FROM "Comment"
-    WHERE "unitId" = ${comment.unitId}::uuid
+    WHERE "id" = ${comment.id}::uuid
   `;
 
   await client.addOrUpdateComments([
@@ -2040,30 +2015,30 @@ export async function syncCommentSegment(
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
   const comments: any[] = await getSearchPrismaClient().comment.findMany({
-    where: { unit: publicSearchableUnitWhere() },
+    where: { visibilityState: "VISIBLE" },
     include: commentIncludeForSync,
-    orderBy: { unitId: "asc" },
+    orderBy: { id: "asc" },
     take: limit + 1,
     skip: options.cursor ? 1 : 0,
-    cursor: options.cursor ? { unitId: options.cursor } : undefined,
+    cursor: options.cursor ? { id: options.cursor } : undefined,
   });
-  const { current, nextCursor } = segmentRows(comments, limit, "unitId");
+  const { current, nextCursor } = segmentRows(comments, limit, "id");
   if (current.length > 0) {
     const paths = await getSearchPrismaClient().$queryRaw<
-      { unitId: string; path: string | null }[]
+      { id: string; path: string | null }[]
     >`
-      SELECT "unitId", "path"::text AS path
+      SELECT "id", "path"::text AS path
       FROM "Comment"
-      WHERE "unitId" IN (${Prisma.join(
-        current.map((comment) => Prisma.sql`${comment.unitId}::uuid`),
+      WHERE "id" IN (${Prisma.join(
+        current.map((comment) => Prisma.sql`${comment.id}::uuid`),
       )})
     `;
-    const pathByUnitId = new Map(paths.map((row) => [row.unitId, row.path]));
+    const pathById = new Map(paths.map((row) => [row.id, row.path]));
     await client.addOrUpdateComments(
       current.map((comment) =>
         buildCommentDocument({
           ...comment,
-          path: pathByUnitId.get(comment.unitId) ?? null,
+          path: pathById.get(comment.id) ?? null,
         }),
       ),
     );

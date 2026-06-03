@@ -278,12 +278,11 @@ export const realmModerationQueueStateSchema = t.Union([
 ]);
 
 export const realmModerationDecisionKinds = [
-  "approve_for_feed",
-  "reject_from_feed",
+  "approve_for_realm",
+  "reject_from_realm",
   "hide_from_realm",
-  "remove_from_feed",
+  "remove_from_realm",
   "lock",
-  "archive",
   "warn",
   "mute_in_realm",
   "remove_member",
@@ -294,12 +293,11 @@ export const realmModerationDecisionKinds = [
 ] as const;
 
 export const realmModerationDecisionKindSchema = t.Union([
-  t.Literal("approve_for_feed"),
-  t.Literal("reject_from_feed"),
+  t.Literal("approve_for_realm"),
+  t.Literal("reject_from_realm"),
   t.Literal("hide_from_realm"),
-  t.Literal("remove_from_feed"),
+  t.Literal("remove_from_realm"),
   t.Literal("lock"),
-  t.Literal("archive"),
   t.Literal("warn"),
   t.Literal("mute_in_realm"),
   t.Literal("remove_member"),
@@ -407,8 +405,6 @@ export const contentModerationStateKinds = [
   "visible",
   "hidden",
   "tombstoned",
-  "locked",
-  "archived",
   "removed",
 ] as const;
 
@@ -416,8 +412,6 @@ export const contentModerationStateKindSchema = t.Union([
   t.Literal("visible"),
   t.Literal("hidden"),
   t.Literal("tombstoned"),
-  t.Literal("locked"),
-  t.Literal("archived"),
   t.Literal("removed"),
 ]);
 
@@ -437,21 +431,6 @@ export const contentModerationStateDTOSchema = t.Object({
 
 export type ContentModerationStateDTO =
   (typeof contentModerationStateDTOSchema)["static"];
-
-export const realmContentModerationDTOSchema = t.Object({
-  realmUnitId: t.String(),
-  moderatedUnitId: t.String(),
-  state: contentModerationStateKindSchema,
-  decidedByUserId: t.Optional(t.Nullable(t.String())),
-  caseId: t.Optional(t.Nullable(t.String())),
-  reason: t.Optional(t.Nullable(t.String())),
-  metadata: t.Optional(auditMetadataSchema),
-  createdAt: t.String(),
-  updatedAt: t.String(),
-});
-
-export type RealmContentModerationDTO =
-  (typeof realmContentModerationDTOSchema)["static"];
 
 export const contentModerationDecisionSchema = t.Object(
   {

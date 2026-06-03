@@ -77,13 +77,13 @@ export function invalidateRealmQueueQueries(
   }
 }
 
-export function invalidateRealmContentModerationQueries(
+export function invalidateRealmUnitStateQueries(
   queryClient: Pick<QueryClient, "invalidateQueries">,
   realmUnitId: string,
   targetUnitId: string,
 ) {
   queryClient.invalidateQueries({
-    queryKey: governanceKeys.realmContentModeration(realmUnitId, targetUnitId),
+    queryKey: governanceKeys.realmUnitState(realmUnitId, targetUnitId),
   });
   queryClient.invalidateQueries({
     queryKey: postKeys.byRealms(realmUnitId),
@@ -471,7 +471,7 @@ export function useHideRealmContentMutation(
       governanceApi.hideRealmContent(realmUnitId, targetUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmContentModerationQueries(
+      invalidateRealmUnitStateQueries(
         queryClient,
         variables.realmUnitId,
         variables.targetUnitId,
@@ -502,7 +502,7 @@ export function useTombstoneRealmContentMutation(
       governanceApi.tombstoneRealmContent(realmUnitId, targetUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmContentModerationQueries(
+      invalidateRealmUnitStateQueries(
         queryClient,
         variables.realmUnitId,
         variables.targetUnitId,
@@ -533,7 +533,7 @@ export function useRestoreRealmContentMutation(
       governanceApi.restoreRealmContent(realmUnitId, targetUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmContentModerationQueries(
+      invalidateRealmUnitStateQueries(
         queryClient,
         variables.realmUnitId,
         variables.targetUnitId,

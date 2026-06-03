@@ -9,10 +9,12 @@ import { publicUserSchema } from "../unit/unit";
 // ANCHOR: Comment DTO
 
 export const commentDTOSchema = t.Object({
+  id: t.String(),
+  /** @deprecated Use `id`. This is the comment row id, not a Unit id. */
   unitId: t.String(),
   rootUnitId: t.String(),
-  realmUnitId: t.String(),
-  parentCommentUnitId: t.Optional(t.Nullable(t.String())),
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  parentCommentId: t.Optional(t.Nullable(t.String())),
   authorUserId: t.String(),
   author: t.Optional(publicUserSchema),
   content: t.Optional(t.Nullable(contentDocSchema)),
@@ -37,9 +39,9 @@ export type CommentDTO = Static<typeof commentDTOSchema>;
 export const commentListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   rootUnitId: t.String(),
-  realmUnitId: t.String(),
-  parentCommentUnitId: t.Optional(t.String()),
-  subtreeRootCommentUnitId: t.Optional(t.String()),
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  parentCommentId: t.Optional(t.String()),
+  subtreeRootCommentId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   state: t.Optional(t.String()),
   mode: t.Optional(
@@ -63,7 +65,7 @@ export const commentListQuerySchema = t.Object({
   ),
   cursor: t.Optional(
     t.Object({
-      unitId: t.Optional(t.String()),
+      id: t.Optional(t.String()),
       createdAt: t.Optional(t.String()),
     }),
   ),
@@ -75,9 +77,9 @@ export type CommentListQuery = Static<typeof commentListQuerySchema>;
 export const commentListBodySchema = t.Object({
   ...listPostBodyBase.properties,
   rootUnitId: t.String(),
-  realmUnitId: t.String(),
-  parentCommentUnitId: t.Optional(t.String()),
-  subtreeRootCommentUnitId: t.Optional(t.String()),
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  parentCommentId: t.Optional(t.String()),
+  subtreeRootCommentId: t.Optional(t.String()),
   authorUserId: t.Optional(t.String()),
   state: t.Optional(t.String()),
   mode: t.Optional(
@@ -101,7 +103,7 @@ export const commentListBodySchema = t.Object({
   ),
   cursor: t.Optional(
     t.Object({
-      unitId: t.Optional(t.String()),
+      id: t.Optional(t.String()),
       createdAt: t.Optional(t.String()),
     }),
   ),
@@ -131,8 +133,8 @@ export type CommentListResponse = Static<typeof commentListResponseSchema>;
 
 export const createCommentSchema = t.Object({
   rootUnitId: t.String(),
-  realmUnitId: t.String(),
-  parentCommentUnitId: t.Optional(t.String()),
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  parentCommentId: t.Optional(t.String()),
   content: contentDocWriteSchema,
 });
 
@@ -140,6 +142,7 @@ export type CreateCommentInput = Static<typeof createCommentSchema>;
 
 export const updateCommentSchema = t.Object({
   content: t.Optional(contentDocWriteSchema),
+  realmUnitId: t.Optional(t.Nullable(t.String())),
   isLocked: t.Optional(t.Boolean()),
   state: t.Optional(t.Nullable(t.String())),
 });
@@ -147,7 +150,7 @@ export const updateCommentSchema = t.Object({
 export type UpdateCommentInput = Static<typeof updateCommentSchema>;
 
 export const commentParamsSchema = t.Object({
-  unitId: t.String(),
+  id: t.String(),
 });
 
 export type CommentParams = Static<typeof commentParamsSchema>;

@@ -30,13 +30,12 @@ import {
   escalateRealmModerationQueueItemSchema,
   grantCapabilitySchema,
   moderationCaseDTOSchema,
-  realmContentModerationDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
   triageModerationCaseSchema,
   unblockAccountEnforcementSchema,
 } from "./governance";
-import { realmMemberDTOSchema } from "./realm";
+import { realmMemberDTOSchema, unitRealmDTOSchema } from "./realm";
 
 describe("governance contract registry", () => {
   test("accepts closed capability and decision code keys", () => {
@@ -216,14 +215,13 @@ describe("governance contract registry", () => {
     ).toBe(true);
 
     expect(
-      Value.Check(realmContentModerationDTOSchema, {
+      Value.Check(unitRealmDTOSchema, {
         realmUnitId: "realm-1",
-        moderatedUnitId: "reply-1",
-        state: "tombstoned",
-        decidedByUserId: "mod-1",
-        reason: "off-topic",
+        unitId: "reply-1",
+        moderationState: "approved",
+        visibilityState: "tombstoned",
+        isLocked: false,
         createdAt: "2026-05-28T00:00:00.000Z",
-        updatedAt: "2026-05-28T00:00:00.000Z",
       }),
     ).toBe(true);
   });

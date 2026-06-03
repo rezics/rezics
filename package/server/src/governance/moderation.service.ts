@@ -8,15 +8,15 @@ import {
   mapContentModerationStateToDTO,
   mapModerationCaseEventToDTO,
   mapModerationCaseToDTO,
-  mapRealmContentModerationToDTO,
   mapRealmModerationEventToDTO,
   mapRealmQueueItemToDTO,
 } from "./governance.mapper";
+import { mapUnitRealmToDTO } from "../realm/realm.mapper";
 import type { GovernanceListOptions } from "./types";
 
 type ContentModerationStateInput = {
   moderatedUnitId: string;
-  state: "visible" | "hidden" | "tombstoned" | "locked" | "archived";
+  state: "visible" | "hidden" | "tombstoned" | "removed";
   decidedById?: string | null;
   caseId?: string | null;
   reason?: string | null;
@@ -44,12 +44,11 @@ type CaseEventInput = {
 };
 
 type RealmQueueDecisionKind =
-  | "approve_for_feed"
-  | "reject_from_feed"
+  | "approve_for_realm"
+  | "reject_from_realm"
   | "hide_from_realm"
-  | "remove_from_feed"
+  | "remove_from_realm"
   | "lock"
-  | "archive"
   | "warn"
   | "mute_in_realm"
   | "remove_member"
@@ -114,7 +113,7 @@ function contentModerationEventSummary(input: {
 }
 
 function realmQueueStateForDecision(kind: RealmQueueDecisionKind) {
-  if (kind === "reject_from_feed") return "REJECTED";
+  if (kind === "reject_from_realm") return "REJECTED";
   if (kind === "reject") return "REJECTED";
   if (kind === "duplicate") return "DUPLICATE";
   if (kind === "escalate") return "ESCALATED";
@@ -694,8 +693,8 @@ export class GovernanceModerationService {
     decision?: Record<string, unknown>;
     metadata?: Record<string, unknown>;
   }) {
-    let publicationBefore: string | null | undefined;
-    let publicationAfter: string | null | undefined;
+    let moderationBefore: string | null | undefined;
+    let moderationAfter: string | null | undefined;
     const row = await prisma.$transaction(async (tx) => {
       const before = await tx.realmModerationQueueItem.findUniqueOrThrow({
         where: { id: input.queueItemId },
@@ -720,78 +719,34 @@ export class GovernanceModerationService {
       });
 
       if (input.decisionKind === "hide_from_realm" && before.addressedUnitId) {
-        await tx.realmContentModeration.upsert({
+        await tx.unitRealm.update({
           where: {
-            realmUnitId_moderatedUnitId: {
+            realmUnitId_unitId: {
               realmUnitId: input.realmUnitId,
-              moderatedUnitId: before.addressedUnitId,
+              unitId: before.addressedUnitId,
             },
           },
-          create: {
-            realmUnitId: input.realmUnitId,
-            moderatedUnitId: before.addressedUnitId,
-            state: "HIDDEN",
-            decidedById: input.actorUserId,
-            reason: input.reason,
-          },
-          update: {
-            state: "HIDDEN",
-            decidedById: input.actorUserId,
-            reason: input.reason,
-          },
+          data: { visibilityState: "HIDDEN" },
         });
       }
       if (input.decisionKind === "lock" && before.addressedUnitId) {
-        await tx.realmContentModeration.upsert({
+        await tx.unitRealm.update({
           where: {
-            realmUnitId_moderatedUnitId: {
+            realmUnitId_unitId: {
               realmUnitId: input.realmUnitId,
-              moderatedUnitId: before.addressedUnitId,
+              unitId: before.addressedUnitId,
             },
           },
-          create: {
-            realmUnitId: input.realmUnitId,
-            moderatedUnitId: before.addressedUnitId,
-            state: "LOCKED",
-            decidedById: input.actorUserId,
-            reason: input.reason,
-          },
-          update: {
-            state: "LOCKED",
-            decidedById: input.actorUserId,
-            reason: input.reason,
-          },
-        });
-      }
-      if (input.decisionKind === "archive" && before.addressedUnitId) {
-        await tx.realmContentModeration.upsert({
-          where: {
-            realmUnitId_moderatedUnitId: {
-              realmUnitId: input.realmUnitId,
-              moderatedUnitId: before.addressedUnitId,
-            },
-          },
-          create: {
-            realmUnitId: input.realmUnitId,
-            moderatedUnitId: before.addressedUnitId,
-            state: "ARCHIVED",
-            decidedById: input.actorUserId,
-            reason: input.reason,
-          },
-          update: {
-            state: "ARCHIVED",
-            decidedById: input.actorUserId,
-            reason: input.reason,
-          },
+          data: { isLocked: true },
         });
       }
       if (
-        (input.decisionKind === "approve_for_feed" ||
-          input.decisionKind === "reject_from_feed") &&
+        (input.decisionKind === "approve_for_realm" ||
+          input.decisionKind === "reject_from_realm") &&
         before.addressedUnitId
       ) {
-        const nextPublicationState =
-          input.decisionKind === "approve_for_feed" ? "APPROVED" : "REJECTED";
+        const nextModerationState =
+          input.decisionKind === "approve_for_realm" ? "APPROVED" : "REJECTED";
         const unitRealmBefore = await tx.unitRealm.findUnique({
           where: {
             realmUnitId_unitId: {
@@ -799,10 +754,10 @@ export class GovernanceModerationService {
               unitId: before.addressedUnitId,
             },
           },
-          select: { state: true },
+          select: { moderationState: true },
         });
-        publicationBefore = unitRealmBefore?.state ?? null;
-        publicationAfter = nextPublicationState;
+        moderationBefore = unitRealmBefore?.moderationState ?? null;
+        moderationAfter = nextModerationState;
         await tx.unitRealm.update({
           where: {
             realmUnitId_unitId: {
@@ -810,10 +765,10 @@ export class GovernanceModerationService {
               unitId: before.addressedUnitId,
             },
           },
-          data: { state: nextPublicationState },
+          data: { moderationState: nextModerationState },
         });
       }
-      if (input.decisionKind === "remove_from_feed" && before.addressedUnitId) {
+      if (input.decisionKind === "remove_from_realm" && before.addressedUnitId) {
         const unitRealmBefore = await tx.unitRealm.findUnique({
           where: {
             realmUnitId_unitId: {
@@ -821,10 +776,10 @@ export class GovernanceModerationService {
               unitId: before.addressedUnitId,
             },
           },
-          select: { state: true },
+          select: { moderationState: true },
         });
-        publicationBefore = unitRealmBefore?.state ?? null;
-        publicationAfter = "REMOVED";
+        moderationBefore = unitRealmBefore?.moderationState ?? null;
+        moderationAfter = "REMOVED";
         await tx.unitRealm.update({
           where: {
             realmUnitId_unitId: {
@@ -832,7 +787,7 @@ export class GovernanceModerationService {
               unitId: before.addressedUnitId,
             },
           },
-          data: { state: "REMOVED" },
+          data: { moderationState: "REMOVED" },
         });
       }
       if (
@@ -861,21 +816,21 @@ export class GovernanceModerationService {
         before: {
           state: before.state,
           linkedCaseId: before.linkedCaseId,
-          publicationState: publicationBefore,
+          moderationState: moderationBefore,
         },
         after: {
           state: updated.state,
           linkedCaseId: updated.linkedCaseId,
-          publicationState: publicationAfter,
+          moderationState: moderationAfter,
           duplicateOfQueueItemId: input.duplicateOfQueueItemId ?? undefined,
         },
       });
       return updated;
     });
     if (
-      input.decisionKind === "remove_from_feed" ||
-      input.decisionKind === "approve_for_feed" ||
-      input.decisionKind === "reject_from_feed"
+      input.decisionKind === "remove_from_realm" ||
+      input.decisionKind === "approve_for_realm" ||
+      input.decisionKind === "reject_from_realm"
     ) {
       const contentUnitId = row.addressedUnitId;
       if (contentUnitId) await enqueueRealmMembershipSearch(contentUnitId);
@@ -905,13 +860,13 @@ export class GovernanceModerationService {
       reason: input.reason,
       correlationId: row.linkedCaseId ?? row.id,
       before:
-        publicationBefore !== undefined
-          ? { publicationState: publicationBefore }
+        moderationBefore !== undefined
+          ? { moderationState: moderationBefore }
           : undefined,
       after: {
         state: row.state,
         decisionKind: input.decisionKind,
-        publicationState: publicationAfter,
+        moderationState: moderationAfter,
       },
       metadata: { realmUnitId: input.realmUnitId },
     });
@@ -1103,50 +1058,50 @@ export class GovernanceModerationService {
     });
   }
 
-  async listRealmContentOverlays(input: {
+  async listRealmUnitStates(input: {
     realmUnitId: string;
-    moderatedUnitIds: string[];
+    unitIds: string[];
   }) {
-    const moderatedUnitIds = [...new Set(input.moderatedUnitIds)];
-    if (moderatedUnitIds.length === 0) return [];
+    const unitIds = [...new Set(input.unitIds)];
+    if (unitIds.length === 0) return [];
 
-    const rows = await prisma.realmContentModeration.findMany({
+    const rows = await prisma.unitRealm.findMany({
       where: {
         realmUnitId: input.realmUnitId,
-        moderatedUnitId: { in: moderatedUnitIds },
+        unitId: { in: unitIds },
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { createdAt: "desc" },
     });
-    return rows.map(mapRealmContentModerationToDTO);
+    return rows.map(mapUnitRealmToDTO);
   }
 
-  async setRealmContentOverlay(
+  async setRealmUnitVisibilityState(
     input: ContentModerationStateInput & { realmUnitId: string },
   ) {
-    const data = contentModerationData(input);
+    const visibilityState =
+      input.state === "hidden"
+        ? "HIDDEN"
+        : input.state === "tombstoned"
+          ? "TOMBSTONED"
+          : "VISIBLE";
     const row = input.caseId
       ? await prisma.$transaction(async (tx) => {
-          const before = await tx.realmContentModeration.findUnique({
+          const before = await tx.unitRealm.findUnique({
             where: {
-              realmUnitId_moderatedUnitId: {
+              realmUnitId_unitId: {
                 realmUnitId: input.realmUnitId,
-                moderatedUnitId: input.moderatedUnitId,
+                unitId: input.moderatedUnitId,
               },
             },
           });
-          const updated = await tx.realmContentModeration.upsert({
+          const updated = await tx.unitRealm.update({
             where: {
-              realmUnitId_moderatedUnitId: {
+              realmUnitId_unitId: {
                 realmUnitId: input.realmUnitId,
-                moderatedUnitId: input.moderatedUnitId,
+                unitId: input.moderatedUnitId,
               },
             },
-            create: {
-              realmUnitId: input.realmUnitId,
-              moderatedUnitId: input.moderatedUnitId,
-              ...data,
-            },
-            update: data,
+            data: { visibilityState },
           });
           await this.createCaseEvent(tx, {
             caseId: input.caseId as string,
@@ -1158,15 +1113,15 @@ export class GovernanceModerationService {
             reason: input.reason ?? null,
             before: before
               ? contentModerationEventSummary({
-                  state: before.state,
-                  reason: before.reason,
+                  state: before.visibilityState,
+                  reason: input.reason,
                   moderatedUnitId: input.moderatedUnitId,
                   realmUnitId: input.realmUnitId,
                 })
               : null,
             after: contentModerationEventSummary({
-              state: updated.state,
-              reason: updated.reason,
+              state: updated.visibilityState,
+              reason: input.reason,
               moderatedUnitId: input.moderatedUnitId,
               realmUnitId: input.realmUnitId,
             }),
@@ -1174,36 +1129,32 @@ export class GovernanceModerationService {
           });
           return updated;
         })
-      : await prisma.realmContentModeration.upsert({
+      : await prisma.unitRealm.update({
           where: {
-            realmUnitId_moderatedUnitId: {
+            realmUnitId_unitId: {
               realmUnitId: input.realmUnitId,
-              moderatedUnitId: input.moderatedUnitId,
+              unitId: input.moderatedUnitId,
             },
           },
-          create: {
-            realmUnitId: input.realmUnitId,
-            moderatedUnitId: input.moderatedUnitId,
-            ...data,
-          },
-          update: data,
+          data: { visibilityState },
         });
     auditPrivilegedMutation({
       actorUserId: input.decidedById ?? "",
-      action: "realm.content.moderation.state_changed",
+      action: "realm.unit.visibility.state_changed",
       targetKind: "realm-content",
       targetId: input.moderatedUnitId,
-      reason: input.reason ?? "realm content moderation state changed",
+      reason: input.reason ?? "realm Unit visibility state changed",
       correlationId:
         input.caseId ?? `${input.realmUnitId}:${input.moderatedUnitId}`,
-      after: { state: row.state, caseId: row.caseId },
+      after: { visibilityState: row.visibilityState },
       metadata: { realmUnitId: input.realmUnitId },
     });
-    return mapRealmContentModerationToDTO(row);
+    await enqueueRealmMembershipSearch(input.moderatedUnitId);
+    return mapUnitRealmToDTO(row);
   }
 
   async hideInRealm(input: ModerationDecisionInput & { realmUnitId: string }) {
-    return this.setRealmContentOverlay({
+    return this.setRealmUnitVisibilityState({
       ...input,
       state: "hidden",
     });
@@ -1212,7 +1163,7 @@ export class GovernanceModerationService {
   async tombstoneInRealm(
     input: ModerationDecisionInput & { realmUnitId: string },
   ) {
-    return this.setRealmContentOverlay({
+    return this.setRealmUnitVisibilityState({
       ...input,
       state: "tombstoned",
     });
@@ -1221,7 +1172,7 @@ export class GovernanceModerationService {
   async restoreInRealm(
     input: ModerationDecisionInput & { realmUnitId: string },
   ) {
-    return this.setRealmContentOverlay({
+    return this.setRealmUnitVisibilityState({
       ...input,
       state: "visible",
     });
@@ -1238,7 +1189,7 @@ export class GovernanceModerationService {
           unitId: input.targetUnitId,
         },
       },
-      data: { state: "REMOVED" },
+      data: { moderationState: "REMOVED" },
     });
     await enqueueRealmMembershipSearch(input.targetUnitId);
     return { message: "Content removed from realm feed" };

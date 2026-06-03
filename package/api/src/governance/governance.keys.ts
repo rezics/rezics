@@ -48,7 +48,7 @@ export const governanceKeys = {
       "content",
       targetUnitId,
     ] as const,
-  realmContentModeration: (realmUnitId: string, targetUnitId: string) =>
+  realmUnitState: (realmUnitId: string, targetUnitId: string) =>
     [
       ...governanceKeys.realmContent(realmUnitId, targetUnitId),
       "moderation",

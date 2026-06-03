@@ -158,7 +158,7 @@ describe("RankingService", () => {
         unitId: "comment-1",
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
-        parentCommentUnitId: null,
+        parentCommentId: null,
         replyCount: 2,
         directReplyCount: 1,
         createdAt: new Date("2026-02-01T00:00:00.000Z"),

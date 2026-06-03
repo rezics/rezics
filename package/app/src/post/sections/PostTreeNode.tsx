@@ -30,7 +30,7 @@ export interface PostTreeNodeProps {
   summaryScopeKey?: string | null;
   reactionScopeKey?: string | null;
   renderOverflowContent?: (post: CommentDTO) => React.ReactNode;
-  onComposerSubmitted: (parentCommentUnitId: string, post: CommentDTO) => void;
+  onComposerSubmitted: (parentCommentId: string, post: CommentDTO) => void;
   onComposerDone: (postUnitId: string) => void;
   onThreadHoverChange: (postUnitId: string, hovered: boolean) => void;
 }
@@ -144,7 +144,7 @@ export function PostTreeNode({
                   targetUnitId={rootUnitId}
                   rootUnitId={rootUnitId}
                   realmUnitId={post.realmUnitId}
-                  parentCommentUnitId={post.unitId}
+                  parentCommentId={post.unitId}
                   onSubmitted={(createdPost) => {
                     if (!("rootUnitId" in createdPost)) return;
                     onComposerSubmitted(post.unitId, createdPost);

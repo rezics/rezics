@@ -66,7 +66,7 @@ export class MainStateReader {
             unitId: true,
             rootUnitId: true,
             realmUnitId: true,
-            parentCommentUnitId: true,
+            parentCommentId: true,
             replyCount: true,
             directReplyCount: true,
             createdAt: true,

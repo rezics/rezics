@@ -29,7 +29,6 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.moderationCaseEvent.deleteMany(),
     prisma.realmModerationEvent.deleteMany(),
     prisma.contentModerationState.deleteMany(),
-    prisma.realmContentModeration.deleteMany(),
     prisma.accountEnforcement.deleteMany(),
     prisma.staffGrant.deleteMany(),
     prisma.realmCapabilityGrant.deleteMany(),

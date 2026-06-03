@@ -5,7 +5,7 @@ import type {
   UpdateCommentInput,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { Prisma, prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { Prisma, prisma } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
 import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
@@ -19,12 +19,7 @@ type CommentListInput = Omit<CommentListQuery, "ids"> & {
 };
 
 const commentInclude = {
-  unit: {
-    include: {
-      user: { select: publicUserSelect },
-      contentModerationState: true,
-    },
-  },
+  author: { select: publicUserSelect },
 } as const;
 
 function enqueueCommentSync(commentId: string) {
@@ -39,11 +34,11 @@ function enqueueCommentSync(commentId: string) {
 
 function firstCommentOrThrow(
   comments: CommentWithRelations[],
-  unitId: string,
+  id: string,
 ): CommentWithRelations {
   const comment = comments[0];
   if (!comment) {
-    throw new AppError(404, `Comment not found: ${unitId}`);
+    throw new AppError(404, `Comment not found: ${id}`);
   }
   return comment;
 }
@@ -58,28 +53,28 @@ function normalizeIds(ids: CommentListInput["ids"]): string[] | undefined {
 }
 
 async function attachCommentPaths<
-  T extends { unitId: string; path?: string | null },
+  T extends { id: string; path?: string | null },
 >(comments: T[]): Promise<T[]> {
   if (comments.length === 0) return comments;
   const rows = await prisma.$queryRaw<
-    { unitId: string; path: string | null }[]
+    { id: string; path: string | null }[]
   >`
-    SELECT "unitId", "path"::text AS path
+    SELECT "id", "path"::text AS path
     FROM "Comment"
-    WHERE "unitId" IN (${Prisma.join(
-      comments.map((comment) => Prisma.sql`${comment.unitId}::uuid`),
+    WHERE "id" IN (${Prisma.join(
+      comments.map((comment) => Prisma.sql`${comment.id}::uuid`),
     )})
   `;
-  const pathByUnitId = new Map(rows.map((row) => [row.unitId, row.path]));
+  const pathById = new Map(rows.map((row) => [row.id, row.path]));
   for (const comment of comments) {
-    comment.path = pathByUnitId.get(comment.unitId) ?? null;
+    comment.path = pathById.get(comment.id) ?? null;
   }
   return comments;
 }
 
 async function attachPinOverlays<
   T extends {
-    unitId: string;
+    id: string;
     rootUnitId: string;
     pinKind?: string | null;
     pinPosition?: string | null;
@@ -92,24 +87,24 @@ async function attachPinOverlays<
   const pins = await prisma.commentPromotion.findMany({
     where: {
       scopeUnitId: { in: rootUnitIds },
-      commentUnitId: { in: comments.map((comment) => comment.unitId) },
+      commentId: { in: comments.map((comment) => comment.id) },
     },
     select: {
       scopeUnitId: true,
-      commentUnitId: true,
+      commentId: true,
       kind: true,
       position: true,
     },
   });
   const pinByScopeAndComment = new Map(
     pins.map((pin) => [
-      `${pin.scopeUnitId}:${pin.commentUnitId}`,
+      `${pin.scopeUnitId}:${pin.commentId}`,
       { kind: pin.kind, position: pin.position },
     ]),
   );
   for (const comment of comments) {
     const pin = pinByScopeAndComment.get(
-      `${comment.rootUnitId}:${comment.unitId}`,
+      `${comment.rootUnitId}:${comment.id}`,
     );
     comment.pinKind = pin?.kind ?? null;
     comment.pinPosition = pin?.position ?? null;
@@ -145,53 +140,48 @@ export class CommentService {
     );
     const where: Prisma.CommentWhereInput = {
       rootUnitId: query.rootUnitId,
-      realmUnitId: query.realmUnitId,
-      unit: {
-        OR: [
-          { status: UnitStatus.PUBLISHED, visibility: "PUBLIC" },
-          { status: UnitStatus.DELETED, visibility: "PUBLIC" },
-        ],
-      },
+      realmUnitId: query.realmUnitId ?? null,
+      visibilityState: { in: ["VISIBLE", "TOMBSTONED"] },
     };
 
     if (query.authorUserId) where.authorUserId = query.authorUserId;
     if (query.state) where.state = query.state;
     const ids = normalizeIds(query.ids);
-    if (ids?.length) where.unitId = { in: ids };
+    if (ids?.length) where.id = { in: ids };
     if (typeof query.maxDepth === "number")
       where.depth = { lte: query.maxDepth };
 
-    if (query.mode === "subtree" && query.subtreeRootCommentUnitId) {
+    if (query.mode === "subtree" && query.subtreeRootCommentId) {
       const [anchor] = await prisma.$queryRaw<
-        { unitId: string; depth: number; path: string | null }[]
+        { id: string; depth: number; path: string | null }[]
       >`
-        SELECT "unitId", "depth", "path"::text AS path
+        SELECT "id", "depth", "path"::text AS path
         FROM "Comment"
-        WHERE "unitId" = ${query.subtreeRootCommentUnitId}::uuid
+        WHERE "id" = ${query.subtreeRootCommentId}::uuid
           AND "rootUnitId" = ${query.rootUnitId}::uuid
-          AND "realmUnitId" = ${query.realmUnitId}::uuid
+          AND "realmUnitId" IS NOT DISTINCT FROM ${query.realmUnitId ?? null}::uuid
       `;
       if (!anchor?.path) {
         throw new AppError(
           404,
-          `Comment not found: ${query.subtreeRootCommentUnitId}`,
+          `Comment not found: ${query.subtreeRootCommentId}`,
         );
       }
-      const descendants = await prisma.$queryRaw<{ unitId: string }[]>`
-        SELECT "unitId" FROM "Comment"
+      const descendants = await prisma.$queryRaw<{ id: string }[]>`
+        SELECT "id" FROM "Comment"
         WHERE "path" <@ ${anchor.path}::ltree
           AND "rootUnitId" = ${query.rootUnitId}::uuid
-          AND "realmUnitId" = ${query.realmUnitId}::uuid
-          AND "unitId" <> ${anchor.unitId}::uuid
+          AND "realmUnitId" IS NOT DISTINCT FROM ${query.realmUnitId ?? null}::uuid
+          AND "id" <> ${anchor.id}::uuid
           ${
             typeof query.maxDepth === "number"
               ? Prisma.sql`AND "depth" <= ${anchor.depth + query.maxDepth}`
               : Prisma.empty
           }
       `;
-      where.unitId = { in: descendants.map((row) => row.unitId) };
+      where.id = { in: descendants.map((row) => row.id) };
     } else if (query.mode !== "threaded") {
-      where.parentCommentUnitId = query.parentCommentUnitId ?? null;
+      where.parentCommentId = query.parentCommentId ?? null;
     }
 
     await applyBlockedAuthorFilter(where, options);
@@ -220,18 +210,18 @@ export class CommentService {
     };
   }
 
-  async getByUnitId(unitId: string): Promise<CommentWithRelations> {
+  async getById(id: string): Promise<CommentWithRelations> {
     const comment = await prisma.comment.findUniqueOrThrow({
-      where: { unitId },
+      where: { id },
       include: commentInclude,
     });
     const withPaths = await attachCommentPaths([
       comment as CommentWithRelations,
     ]);
     const withPins = await attachPinOverlays([
-      firstCommentOrThrow(withPaths, unitId),
+      firstCommentOrThrow(withPaths, id),
     ]);
-    return firstCommentOrThrow(withPins, unitId);
+    return firstCommentOrThrow(withPins, id);
   }
 
   async create(
@@ -240,11 +230,11 @@ export class CommentService {
   ): Promise<CommentWithRelations> {
     let depth = 1;
 
-    const parent = input.parentCommentUnitId
+    const parent = input.parentCommentId
       ? await prisma.comment.findUniqueOrThrow({
-          where: { unitId: input.parentCommentUnitId },
+          where: { id: input.parentCommentId },
           select: {
-            unitId: true,
+            id: true,
             rootUnitId: true,
             realmUnitId: true,
             depth: true,
@@ -258,7 +248,7 @@ export class CommentService {
         throw new AppError(409, "Cannot reply to a locked comment");
       if (
         parent.rootUnitId !== input.rootUnitId ||
-        parent.realmUnitId !== input.realmUnitId
+        parent.realmUnitId !== (input.realmUnitId ?? null)
       ) {
         throw new AppError(
           400,
@@ -269,26 +259,15 @@ export class CommentService {
     }
 
     const comment = await prisma.$transaction(async (tx) => {
-      const unit = await tx.unit.create({
-        data: {
-          userId: authorUserId,
-          slugScope: authorUserId,
-          type: UnitType.COMMENT,
-          status: UnitStatus.PUBLISHED,
-          visibility: "PUBLIC",
-          publishedAt: new Date(),
-        },
-      });
-
       const created = await tx.comment.create({
         data: {
-          unitId: unit.id,
           rootUnitId: input.rootUnitId,
-          realmUnitId: input.realmUnitId,
-          parentCommentUnitId: input.parentCommentUnitId,
+          realmUnitId: input.realmUnitId ?? null,
+          parentCommentId: input.parentCommentId,
           authorUserId,
           content: input.content as Prisma.InputJsonValue,
           depth,
+          visibilityState: "VISIBLE",
         },
         include: commentInclude,
       });
@@ -298,11 +277,11 @@ export class CommentService {
           UPDATE "Comment" AS c
           SET "path" = p."path" || text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
           FROM "Comment" AS p
-          WHERE c."unitId" = ${created.unitId}::uuid
-            AND p."unitId" = ${parent.unitId}::uuid
+          WHERE c."id" = ${created.id}::uuid
+            AND p."id" = ${parent.id}::uuid
         `;
         await tx.comment.update({
-          where: { unitId: parent.unitId },
+          where: { id: parent.id },
           data: {
             replyCount: { increment: 1 },
             directReplyCount: { increment: 1 },
@@ -313,7 +292,7 @@ export class CommentService {
         await tx.$executeRaw`
           UPDATE "Comment"
           SET "path" = text2ltree(rezics_to_base36(nextval('post_path_label_seq')))
-          WHERE "unitId" = ${created.unitId}::uuid
+          WHERE "id" = ${created.id}::uuid
         `;
       }
 
@@ -329,58 +308,65 @@ export class CommentService {
       return created as CommentWithRelations;
     });
 
-    await enqueueCommentSync(comment.unitId);
+    await enqueueCommentSync(comment.id);
     const withPaths = await attachCommentPaths([comment]);
-    return firstCommentOrThrow(withPaths, comment.unitId);
+    return firstCommentOrThrow(withPaths, comment.id);
   }
 
   async update(
-    unitId: string,
+    id: string,
     input: UpdateCommentInput,
     actorUserId: string,
   ): Promise<CommentWithRelations> {
     const existing = await prisma.comment.findUniqueOrThrow({
-      where: { unitId },
-      select: { authorUserId: true },
+      where: { id },
+      select: { authorUserId: true, realmUnitId: true },
     });
     if (existing.authorUserId !== actorUserId) {
       throw new AppError(403, "Only the author can update this comment");
     }
 
     const updated = await prisma.comment.update({
-      where: { unitId },
+      where: { id },
       data: {
         ...(input.content !== undefined
           ? { content: input.content as Prisma.InputJsonValue }
+          : {}),
+        ...(input.realmUnitId !== undefined
+          ? {
+              // Clearing realmUnitId removes the comment from that realm only.
+              realmUnitId: input.realmUnitId,
+              visibilityState: "VISIBLE",
+            }
           : {}),
         ...(input.isLocked !== undefined ? { isLocked: input.isLocked } : {}),
         ...(input.state !== undefined ? { state: input.state } : {}),
       },
       include: commentInclude,
     });
-    await enqueueCommentSync(unitId);
+    await enqueueCommentSync(id);
     const withPaths = await attachCommentPaths([
       updated as CommentWithRelations,
     ]);
-    return firstCommentOrThrow(withPaths, unitId);
+    return firstCommentOrThrow(withPaths, id);
   }
 
-  async delete(unitId: string, actorUserId: string): Promise<void> {
+  async delete(id: string, actorUserId: string): Promise<void> {
     const existing = await prisma.comment.findUniqueOrThrow({
-      where: { unitId },
+      where: { id },
       select: { authorUserId: true },
     });
     if (existing.authorUserId !== actorUserId) {
       throw new AppError(403, "Only the author can delete this comment");
     }
     await prisma.comment.update({
-      where: { unitId },
+      where: { id },
       data: {
         content: Prisma.JsonNull,
-        unit: { update: { status: UnitStatus.DELETED } },
+        visibilityState: "TOMBSTONED",
       },
     });
-    await enqueueCommentSync(unitId);
+    await enqueueCommentSync(id);
   }
 }
 

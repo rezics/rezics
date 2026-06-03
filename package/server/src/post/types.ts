@@ -14,7 +14,7 @@ export const postInclude = {
       contentTranslations: true,
       supportLanguages: true,
       inRealms: {
-        where: { state: "APPROVED" },
+        where: { moderationState: "APPROVED", visibilityState: "VISIBLE" },
         select: { realmUnitId: true },
         take: 1,
       },

@@ -1,11 +1,12 @@
 import type {
   RealmDTO,
-  RealmFeedPublicationState,
   RealmMemberDTO,
   RealmMemberState,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
   UnitRealmDTO,
+  UnitRealmModerationState,
+  UnitRealmVisibilityState,
   UnitTranslationDTO,
 } from "@rezics/contract";
 import type {
@@ -79,7 +80,11 @@ export function mapUnitRealmToDTO(row: UnitRealm): UnitRealmDTO {
   return {
     realmUnitId: row.realmUnitId,
     unitId: row.unitId,
-    state: lower<RealmFeedPublicationState>(row.state) ?? "approved",
+    moderationState:
+      lower<UnitRealmModerationState>(row.moderationState) ?? "approved",
+    visibilityState:
+      lower<UnitRealmVisibilityState>(row.visibilityState) ?? "visible",
+    isLocked: row.isLocked,
     createdAt: row.createdAt,
   };
 }

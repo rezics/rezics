@@ -13,7 +13,7 @@ describe("CommentSearchDocumentSchema", () => {
         contentText: "answer text",
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
-        parentCommentUnitId: null,
+        parentCommentId: null,
         authorUserId: "user-1",
         depth: 1,
         path: "1",
@@ -22,6 +22,7 @@ describe("CommentSearchDocumentSchema", () => {
         directReplyCount: 0,
         lastReplyAt: null,
         state: null,
+        visibilityState: "VISIBLE",
         createdAt: "2026-05-31T00:00:00.000Z",
         updatedAt: "2026-05-31T00:00:00.000Z",
         hotScore: 0,
@@ -40,7 +41,7 @@ describe("CommentSearchDocumentSchema", () => {
       Value.Check(CommentSearchOptionsSchema, {
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
-        parentCommentUnitId: "comment-1",
+        parentCommentId: "comment-1",
       }),
     ).toBe(true);
   });

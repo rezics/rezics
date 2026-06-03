@@ -8,9 +8,8 @@ import { paginationLimitSchema } from "../pagination";
 import {
   contentModerationStateDTOSchema,
   contentModerationStateKindSchema,
-  realmContentModerationDTOSchema,
 } from "../realm/governance";
-import { realmFeedPublicationStateSchema } from "../realm/publication";
+import { unitRealmModerationStateSchema } from "../realm/publication";
 import { publicUserSchema, variantContextSummarySchema } from "../unit/unit";
 
 // ============================================================
@@ -173,7 +172,7 @@ export type PostDTO = (typeof postDTOSchema)["static"];
 
 export const commentPromotionDTOSchema = t.Object({
   scopeUnitId: t.String(),
-  commentUnitId: t.String(),
+  commentId: t.String(),
   kind: pinKindLiterals,
   position: t.String(),
   byUserId: t.String(),
@@ -184,14 +183,14 @@ export type CommentPromotionDTO = (typeof commentPromotionDTOSchema)["static"];
 
 /**
  * Pin a comment (`kind = PINNED`) within its thread scope. `scopeUnitId` MUST
- * be the thread root post; `commentUnitId` MUST be a comment in that thread.
+ * be the thread root post; `commentId` MUST be a comment in that thread.
  */
 export const pinCommentSchema = t.Object({
   scopeUnitId: t.String(),
-  commentUnitId: t.String(),
+  commentId: t.String(),
   /** Optional explicit ordering anchors; the server mints a position between them. */
-  beforeTargetUnitId: t.Optional(t.String()),
-  afterTargetUnitId: t.Optional(t.String()),
+  beforeTargetCommentId: t.Optional(t.String()),
+  afterTargetCommentId: t.Optional(t.String()),
 });
 
 export type PinCommentInput = (typeof pinCommentSchema)["static"];
@@ -199,9 +198,9 @@ export type PinCommentInput = (typeof pinCommentSchema)["static"];
 /** Accept a direct reply as an answer (`kind = ACCEPTED_ANSWER`) in a Q&A thread. */
 export const acceptAnswerSchema = t.Object({
   scopeUnitId: t.String(),
-  commentUnitId: t.String(),
-  beforeTargetUnitId: t.Optional(t.String()),
-  afterTargetUnitId: t.Optional(t.String()),
+  commentId: t.String(),
+  beforeTargetCommentId: t.Optional(t.String()),
+  afterTargetCommentId: t.Optional(t.String()),
 });
 
 export type AcceptAnswerInput = (typeof acceptAnswerSchema)["static"];
@@ -220,9 +219,9 @@ export const postListQuerySchema = t.Object({
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
-  /** Moderator realm feed publication filter. Regular callers are always approved-only. */
-  realmLifecycleState: t.Optional(
-    t.Union([realmFeedPublicationStateSchema, t.Literal("all")]),
+  /** Moderator UnitRealm moderation filter. Regular callers are always approved + visible. */
+  realmModerationState: t.Optional(
+    t.Union([unitRealmModerationStateSchema, t.Literal("all")]),
   ),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
@@ -268,9 +267,9 @@ export const postListBodySchema = t.Object({
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
-  /** Moderator realm feed publication filter. Regular callers are always approved-only. */
-  realmLifecycleState: t.Optional(
-    t.Union([realmFeedPublicationStateSchema, t.Literal("all")]),
+  /** Moderator UnitRealm moderation filter. Regular callers are always approved + visible. */
+  realmModerationState: t.Optional(
+    t.Union([unitRealmModerationStateSchema, t.Literal("all")]),
   ),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
@@ -319,7 +318,6 @@ export type PostModerationOverlayRequest =
 
 export const postModerationOverlayResponseSchema = t.Object({
   globalStates: t.Array(contentModerationStateDTOSchema),
-  realmOverlays: t.Array(realmContentModerationDTOSchema),
 });
 
 export type PostModerationOverlayResponse =

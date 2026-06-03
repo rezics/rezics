@@ -155,11 +155,12 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     filterableAttributes: [
       "rootUnitId",
       "realmUnitId",
-      "parentCommentUnitId",
+      "parentCommentId",
       "authorUserId",
       "depth",
       "isLocked",
       "state",
+      "visibilityState",
     ],
     sortableAttributes: [
       "createdAt",
@@ -169,7 +170,7 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
       "topScore",
       "qualityScore",
     ],
-    facetableSummaryFields: ["isLocked", "state"],
+    facetableSummaryFields: ["isLocked", "state", "visibilityState"],
     supportsFullSync: true,
     domain: "Comments",
     description: "Reply tree comments partitioned by root unit and realm.",

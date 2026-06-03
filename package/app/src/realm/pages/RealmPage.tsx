@@ -49,22 +49,22 @@ import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
 import { RuleSection } from "../sections/RuleSection";
 
 export type RealmPageTab = "feed" | "wiki" | "tags" | "about" | "members";
-type RealmFeedPublicationFilter = NonNullable<
-  PostListQuery["realmLifecycleState"]
+type RealmModerationFilter = NonNullable<
+  PostListQuery["realmModerationState"]
 >;
 
-const realmFeedPublicationFilters = [
+const realmModerationFilters = [
   "all",
   "pending_review",
   "approved",
   "rejected",
   "removed",
-] satisfies RealmFeedPublicationFilter[];
+] satisfies RealmModerationFilter[];
 
-function realmFeedPublicationFilterLabel(value: RealmFeedPublicationFilter) {
+function realmModerationFilterLabel(value: RealmModerationFilter) {
   switch (value) {
     case "all":
-      return "All feed states";
+      return "All moderation states";
     case "pending_review":
       return "Pending review";
     case "approved":
@@ -104,8 +104,8 @@ export function RealmPage({
   });
   const permission = useServerPermission();
   const [localTab, setLocalTab] = useState<RealmPageTab>(tab ?? "feed");
-  const [realmLifecycleState, setRealmLifecycleState] =
-    useState<RealmFeedPublicationFilter>("all");
+  const [realmModerationState, setRealmModerationState] =
+    useState<RealmModerationFilter>("all");
 
   useEffect(() => {
     if (tab) setLocalTab(tab);
@@ -250,20 +250,18 @@ export function RealmPage({
                     </label>
                     {manageMode ? (
                       <Select
-                        value={realmLifecycleState}
+                        value={realmModerationState}
                         onValueChange={(value) =>
-                          setRealmLifecycleState(
-                            value as RealmFeedPublicationFilter,
-                          )
+                          setRealmModerationState(value as RealmModerationFilter)
                         }
                       >
                         <SelectTrigger className="h-9 w-[12rem]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {realmFeedPublicationFilters.map((value) => (
+                          {realmModerationFilters.map((value) => (
                             <SelectItem key={value} value={value}>
-                              {realmFeedPublicationFilterLabel(value)}
+                              {realmModerationFilterLabel(value)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -278,8 +276,8 @@ export function RealmPage({
                 sort={feedSort}
                 tagIds={feedTagIds}
                 manageMode={showManage && manageMode}
-                realmLifecycleState={
-                  showManage && manageMode ? realmLifecycleState : undefined
+                realmModerationState={
+                  showManage && manageMode ? realmModerationState : undefined
                 }
               />
             </div>

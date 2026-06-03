@@ -85,7 +85,7 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
           targetUnitId={root.targetUnitId ?? root.unitId}
           rootUnitId={root.unitId}
           realmUnitId={contextRealmUnitId}
-          parentCommentUnitId={root.unitId}
+          parentCommentId={root.unitId}
         />
       )}
       <PostTreeSection

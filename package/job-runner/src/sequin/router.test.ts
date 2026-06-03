@@ -114,6 +114,21 @@ describe("Sequin payload routing", () => {
     ]);
   });
 
+  test("routes lightweight Comment changes by comment id", () => {
+    const messages = parseSequinPayload({
+      table: "Comment",
+      action: "update",
+      record: { id: "comment-1", rootUnitId: "post-1" },
+    });
+
+    expect(routeSequinMessages(messages)).toMatchObject([
+      {
+        kind: "search.comment.sync",
+        payload: { commentId: "comment-1" },
+      },
+    ]);
+  });
+
   test("ignores unknown tables", () => {
     const messages = parseSequinPayload({
       table: "Unknown",

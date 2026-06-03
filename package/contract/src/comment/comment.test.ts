@@ -11,10 +11,11 @@ describe("comment contract", () => {
   test("accepts a direct comment under a root unit and realm partition", () => {
     expect(
       Value.Check(commentDTOSchema, {
+        id: "comment-1",
         unitId: "comment-1",
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
-        parentCommentUnitId: null,
+        parentCommentId: null,
         authorUserId: "user-1",
         content: null,
         depth: 1,
@@ -25,7 +26,7 @@ describe("comment contract", () => {
     ).toBe(true);
   });
 
-  test("requires explicit rootUnitId and realmUnitId on writes", () => {
+  test("writes require rootUnitId and allow nullable realmUnitId", () => {
     expect(
       Value.Check(createCommentSchema, {
         rootUnitId: "post-1",
@@ -47,7 +48,7 @@ describe("comment contract", () => {
       Value.Check(commentListQuerySchema, {
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
-        parentCommentUnitId: "comment-1",
+        parentCommentId: "comment-1",
         mode: "threaded",
         limit: 20,
       }),

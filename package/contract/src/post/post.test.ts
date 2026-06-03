@@ -87,10 +87,11 @@ describe("post work-domain contract fields", () => {
     expect("mode" in postListQuerySchema.properties).toBe(false);
     expect("maxDepth" in postListQuerySchema.properties).toBe(false);
 
+    expect("realmLifecycleState" in postListQuerySchema.properties).toBe(false);
     expect(
       Value.Check(postListQuerySchema, {
         realmUnitId: "realm-1",
-        realmLifecycleState: "quarantined",
+        realmModerationState: "quarantined",
         limit: 20,
       }),
     ).toBe(false);
@@ -181,11 +182,11 @@ describe("post work-domain contract fields", () => {
   });
 
   test("uses comment endpoint naming for promotion contracts", () => {
-    expect("commentUnitId" in commentPromotionDTOSchema.properties).toBe(true);
+    expect("commentId" in commentPromotionDTOSchema.properties).toBe(true);
     expect("postUnitId" in commentPromotionDTOSchema.properties).toBe(false);
-    expect("commentUnitId" in pinCommentSchema.properties).toBe(true);
+    expect("commentId" in pinCommentSchema.properties).toBe(true);
     expect("postUnitId" in pinCommentSchema.properties).toBe(false);
-    expect("beforeTargetUnitId" in acceptAnswerSchema.properties).toBe(true);
+    expect("beforeTargetCommentId" in acceptAnswerSchema.properties).toBe(true);
     expect("beforePostUnitId" in acceptAnswerSchema.properties).toBe(false);
   });
 });

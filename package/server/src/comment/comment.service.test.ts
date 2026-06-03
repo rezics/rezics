@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import { markdownContentDoc } from "@rezics/contract";
+import { installPrismaClientMock, prismaMock } from "../test/prisma-client-mock";
 
 const enqueueMock = mock(async () => ({ status: "created" }));
 
@@ -39,32 +40,22 @@ describe("CommentService", () => {
       where: {
         rootUnitId: "root-1",
         realmUnitId: "realm-1",
-        unit: {
-          OR: [
-            { status: "PUBLISHED", visibility: "PUBLIC" },
-            { status: "DELETED", visibility: "PUBLIC" },
-          ],
-        },
-        parentCommentUnitId: null,
+        visibilityState: { in: ["VISIBLE", "TOMBSTONED"] },
+        parentCommentId: null,
       },
       orderBy: [{ createdAt: "asc" }],
       skip: 0,
       take: 20,
       include: {
-        unit: {
-          include: {
-            user: {
-              select: {
-                unitId: true,
-                name: true,
-                avatar: true,
-                bio: true,
-                description: true,
-                followersCount: true,
-                followingsCount: true,
-              },
-            },
-            contentModerationState: true,
+        author: {
+          select: {
+            unitId: true,
+            name: true,
+            avatar: true,
+            bio: true,
+            description: true,
+            followersCount: true,
+            followingsCount: true,
           },
         },
       },
@@ -74,34 +65,29 @@ describe("CommentService", () => {
 
   test("creates a direct root comment and enqueues search sync", async () => {
     enqueueMock.mockClear();
-    const unitCreate = mock(async () => ({ id: "comment-1" }));
     const commentCreate = mock(async () => ({
-      unitId: "comment-1",
+      id: "comment-1",
       rootUnitId: "post-1",
       realmUnitId: "realm-1",
-      parentCommentUnitId: null,
+      parentCommentId: null,
       authorUserId: "user-1",
-      content: { runtime: "doc-v1", source: { markdown: "hello" } },
+      content: markdownContentDoc("hello"),
       depth: 1,
       replyCount: 0,
       directReplyCount: 0,
       lastReplyAt: null,
       isLocked: false,
       state: null,
+      visibilityState: "VISIBLE",
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      unit: {
-        status: "PUBLISHED",
-        user: null,
-        contentModerationState: null,
-      },
+      author: null,
     }));
     const executeRaw = mock(async () => 1);
     const updateMany = mock(async () => ({ count: 1 }));
-    const queryRaw = mock(async () => [{ unitId: "comment-1", path: "1" }]);
+    const queryRaw = mock(async () => [{ id: "comment-1", path: "1" }]);
     const transaction = mock(async (fn: any) =>
       fn({
-        unit: { create: unitCreate },
         comment: { create: commentCreate },
         post: { updateMany },
         $executeRaw: executeRaw,
@@ -119,20 +105,22 @@ describe("CommentService", () => {
       {
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
-        content: { runtime: "doc-v1", source: { markdown: "hello" } },
+        content: markdownContentDoc("hello"),
       },
       "user-1",
     );
 
-    expect(unitCreate).toHaveBeenCalledWith({
+    expect(commentCreate).toHaveBeenCalledWith({
       data: {
-        userId: "user-1",
-        slugScope: "user-1",
-        type: "COMMENT",
-        status: "PUBLISHED",
-        visibility: "PUBLIC",
-        publishedAt: expect.any(Date),
+        rootUnitId: "post-1",
+        realmUnitId: "realm-1",
+        parentCommentId: undefined,
+        authorUserId: "user-1",
+        content: markdownContentDoc("hello"),
+        depth: 1,
+        visibilityState: "VISIBLE",
       },
+      include: { author: { select: expect.any(Object) } },
     });
     expect(updateMany).toHaveBeenCalledWith({
       where: { unitId: "post-1" },
@@ -148,10 +136,10 @@ describe("CommentService", () => {
 
   test("lists a whole threaded partition and hydrates pin overlays", async () => {
     const commentRow = {
-      unitId: "comment-1",
+      id: "comment-1",
       rootUnitId: "root-1",
       realmUnitId: "realm-1",
-      parentCommentUnitId: null,
+      parentCommentId: null,
       authorUserId: "user-1",
       content: null,
       depth: 1,
@@ -160,25 +148,22 @@ describe("CommentService", () => {
       lastReplyAt: null,
       isLocked: false,
       state: null,
+      visibilityState: "VISIBLE",
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      unit: {
-        status: "PUBLISHED",
-        user: null,
-        contentModerationState: null,
-      },
+      author: null,
     };
     const findMany = mock(async (_args: any) => [commentRow]);
     const count = mock(async () => 1);
     const pinFindMany = mock(async () => [
       {
         scopeUnitId: "root-1",
-        commentUnitId: "comment-1",
+        commentId: "comment-1",
         kind: "PINNED",
         position: "a0",
       },
     ]);
-    const queryRaw = mock(async () => [{ unitId: "comment-1", path: "1" }]);
+    const queryRaw = mock(async () => [{ id: "comment-1", path: "1" }]);
     Object.assign(prismaMock, {
       comment: { findMany, count },
       commentPromotion: { findMany: pinFindMany },
@@ -204,15 +189,15 @@ describe("CommentService", () => {
       }),
     );
     const findManyArgs = findMany.mock.calls[0]?.[0] as any;
-    expect(findManyArgs.where).not.toHaveProperty("parentCommentUnitId");
+    expect(findManyArgs.where).not.toHaveProperty("parentCommentId");
     expect(pinFindMany).toHaveBeenCalledWith({
       where: {
         scopeUnitId: { in: ["root-1"] },
-        commentUnitId: { in: ["comment-1"] },
+        commentId: { in: ["comment-1"] },
       },
       select: {
         scopeUnitId: true,
-        commentUnitId: true,
+        commentId: true,
         kind: true,
         position: true,
       },

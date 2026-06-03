@@ -28,7 +28,7 @@ export const ContinueThreadPage: React.FC = () => {
       rootUnitId: rootPostUnitId,
       realmUnitId: anchor?.realmUnitId ?? "",
       mode: "subtree",
-      subtreeRootCommentUnitId: unitId,
+      subtreeRootCommentId: unitId,
       maxDepth: 5,
       limit: 200,
     }),
@@ -80,7 +80,7 @@ export const ContinueThreadPage: React.FC = () => {
           targetUnitId={rootPostUnitId}
           rootUnitId={rootPostUnitId}
           realmUnitId={anchor.realmUnitId}
-          parentCommentUnitId={anchor.unitId}
+          parentCommentId={anchor.unitId}
         />
       )}
       {isLoading ? (

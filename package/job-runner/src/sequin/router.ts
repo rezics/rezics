@@ -300,7 +300,7 @@ export function routeSequinMessage(message: SequinMessage): AnyJobCommand[] {
   }
 
   if (table === "Comment") {
-    const commentId = targetId(message, ["unitId", "unit_id"]);
+    const commentId = targetId(message);
     return commentId
       ? [
           createSearchCommand(

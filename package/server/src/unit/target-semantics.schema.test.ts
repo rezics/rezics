@@ -30,7 +30,7 @@ describe("Unit target semantics in Prisma schema", () => {
       "ModerationCase",
       "RealmModerationQueueItem",
       "ContentModerationState",
-      "RealmContentModeration",
+      "UnitRealm",
       "CommentPromotion",
     ]) {
       expectNoField(modelBlock(modelName), "targetUnitId");
@@ -63,21 +63,25 @@ describe("Unit target semantics in Prisma schema", () => {
     expectField(globalModeration, "moderatedUnitId");
     expect(globalModeration).toContain("moderatedUnitId String");
 
-    const realmModeration = modelBlock("RealmContentModeration");
-    expectField(realmModeration, "moderatedUnitId");
-    expect(realmModeration).toContain("@@id([realmUnitId, moderatedUnitId])");
-    expect(realmModeration).toContain("@@index([moderatedUnitId, state])");
+    const unitRealm = modelBlock("UnitRealm");
+    expectField(unitRealm, "moderationState");
+    expectField(unitRealm, "visibilityState");
+    expectField(unitRealm, "isLocked");
+    expect(unitRealm).toContain("@@id([realmUnitId, unitId])");
+    expect(unitRealm).toContain(
+      "@@index([realmUnitId, moderationState, visibilityState, createdAt])",
+    );
 
     const promotion = modelBlock("CommentPromotion");
-    expectField(promotion, "commentUnitId");
-    expect(promotion).toContain("@@id([scopeUnitId, commentUnitId])");
+    expectField(promotion, "commentId");
+    expect(promotion).toContain("@@id([scopeUnitId, commentId])");
   });
 
   test("keeps topology and structure fields out of canonical Unit targeting", () => {
     const comment = modelBlock("Comment");
     expectField(comment, "rootUnitId");
     expectField(comment, "realmUnitId");
-    expectField(comment, "parentCommentUnitId");
+    expectField(comment, "parentCommentId");
     expectField(comment, "depth");
     expectField(comment, "path");
     expectNoField(comment, "targetUnitId");

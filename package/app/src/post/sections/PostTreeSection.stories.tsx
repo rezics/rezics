@@ -21,7 +21,7 @@ function makePost(
     unitId: overrides.unitId,
     rootUnitId: ROOT_ID,
     realmUnitId: REALM_ID,
-    parentCommentUnitId: null,
+    parentCommentId: null,
     authorUserId: `u-${overrides.unitId}`,
     content: markdownContentDoc(
       contentSource ?? "Placeholder reply body for fixture.",
@@ -170,7 +170,7 @@ function Seeded({ posts }: { posts: CommentDTO[] }) {
       unitId: post.unitId,
       rootUnitId: ROOT_ID,
       realmUnitId: REALM_ID,
-      parentCommentUnitId: null,
+      parentCommentId: null,
       authorUserId: post.authorUserId,
       author: post.author,
       content: post.content,

@@ -33,17 +33,17 @@ export function useUpdateCommentMutation(
     UseMutationOptions<
       CommentResponse,
       Error,
-      { unitId: string; input: UpdateCommentInput }
+      { id: string; input: UpdateCommentInput }
     >,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ unitId, input }) => commentApi.update(unitId, input),
+    mutationFn: ({ id, input }) => commentApi.update(id, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.setQueryData(commentKeys.detail(variables.unitId), data);
+      queryClient.setQueryData(commentKeys.detail(variables.id), data);
       queryClient.invalidateQueries({ queryKey: commentKeys.all() });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -52,18 +52,18 @@ export function useUpdateCommentMutation(
 
 export function useDeleteCommentMutation(
   options?: Omit<
-    UseMutationOptions<{ message: string }, Error, { unitId: string }>,
+    UseMutationOptions<{ message: string }, Error, { id: string }>,
     "mutationFn"
   >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ unitId }) => commentApi.delete(unitId),
+    mutationFn: ({ id }) => commentApi.delete(id),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: commentKeys.all() });
       queryClient.invalidateQueries({
-        queryKey: commentKeys.detail(variables.unitId),
+        queryKey: commentKeys.detail(variables.id),
       });
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },

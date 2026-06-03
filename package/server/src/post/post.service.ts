@@ -112,17 +112,10 @@ function applyStateFilter(
   }
 }
 
-const REALM_FEED_EXCLUDED_MODERATION_STATES = [
-  "HIDDEN",
-  "TOMBSTONED",
-  "ARCHIVED",
-  "REMOVED",
-] as const;
+type UnitRealmModerationState = "PENDING_REVIEW" | "APPROVED";
 
-type RealmFeedPublicationState = "PENDING_REVIEW" | "APPROVED";
-
-function toRealmFeedPublicationState(
-  state: PostListQuery["realmLifecycleState"],
+function toUnitRealmModerationState(
+  state: PostListQuery["realmModerationState"],
 ) {
   if (!state || state === "all") return undefined;
   return state.toUpperCase() as
@@ -336,14 +329,14 @@ async function attachPinKinds<
 >(posts: T[]): Promise<T[]> {
   if (posts.length === 0) return posts;
   const pins = await prisma.commentPromotion.findMany({
-    where: { commentUnitId: { in: posts.map((post) => post.unitId) } },
-    select: { commentUnitId: true, kind: true, position: true },
+    where: { commentId: { in: posts.map((post) => post.unitId) } },
+    select: { commentId: true, kind: true, position: true },
   });
-  const pinByCommentUnitId = new Map(
-    pins.map((pin) => [pin.commentUnitId, pin]),
+  const pinByCommentId = new Map(
+    pins.map((pin) => [pin.commentId, pin]),
   );
   for (const post of posts) {
-    const pin = pinByCommentUnitId.get(post.unitId);
+    const pin = pinByCommentId.get(post.unitId);
     post.pinKind = pin?.kind ?? null;
     post.pinPosition = pin?.position ?? null;
   }
@@ -351,10 +344,10 @@ async function attachPinKinds<
 }
 
 export class PostService {
-  private async initialRealmFeedStates(
+  private async initialUnitRealmModerationStates(
     tx: Pick<Prisma.TransactionClient, "realm">,
     realmUnitIds: string[],
-  ): Promise<Map<string, RealmFeedPublicationState>> {
+  ): Promise<Map<string, UnitRealmModerationState>> {
     if (realmUnitIds.length === 0) return new Map();
     const realms = await tx.realm.findMany({
       where: { unitId: { in: realmUnitIds } },
@@ -385,11 +378,11 @@ export class PostService {
         state: "NEW",
         reporterUserId: input.actorUserId,
         subjectUserId: input.actorUserId,
-        targetKind: "realm-feed-submission",
+        targetKind: "realm-unit-submission",
         targetId: input.unitId,
         addressedUnitId: input.unitId,
         reason: "Content submitted for realm approval",
-        metadata: { approval: true } as never,
+        metadata: { relationModeration: true } as never,
       },
     });
     await tx.realmModerationEvent.create({
@@ -400,7 +393,7 @@ export class PostService {
         reason: created.reason,
         after: {
           state: created.state,
-          publicationState: "PENDING_REVIEW",
+          moderationState: "PENDING_REVIEW",
           addressedUnitId: input.unitId,
         } as never,
       },
@@ -479,8 +472,8 @@ export class PostService {
     const skipNum = opts.start ?? 0;
     const sort = opts.sort === "top" || opts.sort === "hot" ? opts.sort : "new";
     const tagIds = this.normalizeTagIds(opts.tagIds);
-    const lifecycleState = toRealmFeedPublicationState(
-      opts.realmLifecycleState,
+    const moderationState = toUnitRealmModerationState(
+      opts.realmModerationState,
     );
 
     if (!(await this.canReadRealmFeed(realmUnitId, options))) {
@@ -493,25 +486,16 @@ export class PostService {
         inRealms: {
           some: {
             realmUnitId,
-            ...(options?.isAdmin && lifecycleState
-              ? { state: lifecycleState as any }
+            ...(options?.isAdmin && moderationState
+              ? { moderationState: moderationState as any }
               : options?.isAdmin
                 ? {}
-                : { state: "APPROVED" as const }),
+                : {
+                    moderationState: "APPROVED" as const,
+                    visibilityState: "VISIBLE" as const,
+                  }),
           },
         },
-        ...(options?.isAdmin
-          ? {}
-          : {
-              realmModerationTargets: {
-                none: {
-                  realmUnitId,
-                  state: {
-                    in: REALM_FEED_EXCLUDED_MODERATION_STATES as any,
-                  },
-                },
-              },
-            }),
         ...(tagIds.length > 0
           ? {
               OR: [
@@ -821,22 +805,24 @@ export class PostService {
 
       if (realmIdsToWrite.length > 0) {
         const createdAt = new Date();
-        const initialStates = await this.initialRealmFeedStates(
+        const initialStates = await this.initialUnitRealmModerationStates(
           tx,
           realmIdsToWrite,
         );
         await Promise.all(
           realmIdsToWrite.map(async (realmUnitId) => {
-            const state = initialStates.get(realmUnitId) ?? "APPROVED";
+            const moderationState = initialStates.get(realmUnitId) ?? "APPROVED";
             await tx.unitRealm.create({
               data: {
                 realmUnitId,
                 unitId: created.unitId,
-                state,
+                moderationState,
+                visibilityState: "VISIBLE",
+                isLocked: false,
                 createdAt,
               },
             });
-            if (state === "PENDING_REVIEW") {
+            if (moderationState === "PENDING_REVIEW") {
               await this.createPendingRealmReviewQueueItem(tx, {
                 realmUnitId,
                 unitId: created.unitId,
@@ -997,11 +983,11 @@ export class PostService {
             unitId,
           },
         },
-        select: { state: true },
+        select: { moderationState: true },
       });
       if (
-        existingRealmRow?.state === "REJECTED" ||
-        existingRealmRow?.state === "REMOVED"
+        existingRealmRow?.moderationState === "REJECTED" ||
+        existingRealmRow?.moderationState === "REMOVED"
       ) {
         throw new AppError(
           409,
@@ -1033,10 +1019,10 @@ export class PostService {
       // This is author/member publishing, not realm admin content management.
       // Keep it in the post domain so ownership and post-to-realm policy stay
       // aligned with new realm post creation.
-      const initialStates = await this.initialRealmFeedStates(tx, [
+      const initialStates = await this.initialUnitRealmModerationStates(tx, [
         input.realmUnitId,
       ]);
-      const state = initialStates.get(input.realmUnitId) ?? "APPROVED";
+      const moderationState = initialStates.get(input.realmUnitId) ?? "APPROVED";
       await tx.unitRealm.upsert({
         where: {
           realmUnitId_unitId: {
@@ -1047,11 +1033,13 @@ export class PostService {
         create: {
           realmUnitId: input.realmUnitId,
           unitId,
-          state,
+          moderationState,
+          visibilityState: "VISIBLE",
+          isLocked: false,
         },
         update: {},
       });
-      if (!existingRealmRow && state === "PENDING_REVIEW") {
+      if (!existingRealmRow && moderationState === "PENDING_REVIEW") {
         await this.createPendingRealmReviewQueueItem(tx, {
           realmUnitId: input.realmUnitId,
           unitId,
@@ -1475,16 +1463,16 @@ export class PostService {
     caller: RezicsSessionClaims,
   ): Promise<CommentPromotionDTO> {
     await this.assertCanPromoteInThread(input.scopeUnitId, caller);
-    await this.loadPromotableTarget(input.scopeUnitId, input.commentUnitId);
+    await this.loadPromotableTarget(input.scopeUnitId, input.commentId);
     const position = await this.mintPinPosition(
       input.scopeUnitId,
       PinKindEnum.PINNED,
-      input.beforeTargetUnitId,
-      input.afterTargetUnitId,
+      input.beforeTargetCommentId,
+      input.afterTargetCommentId,
     );
     return this.createPin(
       input.scopeUnitId,
-      input.commentUnitId,
+      input.commentId,
       PinKindEnum.PINNED,
       position,
       caller.userId,
@@ -1494,11 +1482,11 @@ export class PostService {
   /** Remove a `PINNED` promotion. */
   async unpin(
     scopeUnitId: string,
-    commentUnitId: string,
+    commentId: string,
     caller: RezicsSessionClaims,
   ): Promise<void> {
     await this.assertCanPromoteInThread(scopeUnitId, caller);
-    await this.deletePin(scopeUnitId, commentUnitId, PinKindEnum.PINNED);
+    await this.deletePin(scopeUnitId, commentId, PinKindEnum.PINNED);
   }
 
   /**
@@ -1513,9 +1501,9 @@ export class PostService {
     await this.assertCanPromoteInThread(input.scopeUnitId, caller);
     const target = await this.loadPromotableTarget(
       input.scopeUnitId,
-      input.commentUnitId,
+      input.commentId,
     );
-    if (target.depth !== 1 || target.parentCommentUnitId !== null) {
+    if (target.depth !== 1 || target.parentCommentId !== null) {
       throw new AppError(
         400,
         "An accepted answer must be a direct reply to the question",
@@ -1530,12 +1518,12 @@ export class PostService {
     const position = await this.mintPinPosition(
       input.scopeUnitId,
       PinKindEnum.ACCEPTED_ANSWER,
-      input.beforeTargetUnitId,
-      input.afterTargetUnitId,
+      input.beforeTargetCommentId,
+      input.afterTargetCommentId,
     );
     const pin = await this.createPin(
       input.scopeUnitId,
-      input.commentUnitId,
+      input.commentId,
       PinKindEnum.ACCEPTED_ANSWER,
       position,
       caller.userId,
@@ -1547,13 +1535,13 @@ export class PostService {
   /** Remove an `ACCEPTED_ANSWER` promotion. */
   async unacceptAnswer(
     scopeUnitId: string,
-    commentUnitId: string,
+    commentId: string,
     caller: RezicsSessionClaims,
   ): Promise<void> {
     await this.assertCanPromoteInThread(scopeUnitId, caller);
     await this.deletePin(
       scopeUnitId,
-      commentUnitId,
+      commentId,
       PinKindEnum.ACCEPTED_ANSWER,
     );
     await this.maintainSolvedCacheOnUnaccept(scopeUnitId);
@@ -1695,18 +1683,18 @@ export class PostService {
   /** Validate the target is a reply within the scope thread; return its shape. */
   private async loadPromotableTarget(
     scopeUnitId: string,
-    commentUnitId: string,
-  ): Promise<{ depth: number; parentCommentUnitId: string | null }> {
+    commentId: string,
+  ): Promise<{ depth: number; parentCommentId: string | null }> {
     const comment = await prisma.comment.findUnique({
-      where: { unitId: commentUnitId },
+      where: { id: commentId },
       select: {
         depth: true,
         rootUnitId: true,
-        parentCommentUnitId: true,
+        parentCommentId: true,
       },
     });
     if (!comment) {
-      throw new AppError(404, `Promotable target not found: ${commentUnitId}`);
+      throw new AppError(404, `Promotable target not found: ${commentId}`);
     }
     if (comment.rootUnitId !== scopeUnitId) {
       throw new AppError(
@@ -1719,7 +1707,7 @@ export class PostService {
     }
     return {
       depth: comment.depth,
-      parentCommentUnitId: comment.parentCommentUnitId,
+      parentCommentId: comment.parentCommentId,
     };
   }
 
@@ -1731,24 +1719,24 @@ export class PostService {
   private async mintPinPosition(
     scopeUnitId: string,
     kind: PinKindEnum,
-    beforeTargetUnitId?: string,
-    afterTargetUnitId?: string,
+    beforeTargetCommentId?: string,
+    afterTargetCommentId?: string,
   ): Promise<string> {
-    const positionOf = async (commentUnitId?: string) => {
-      if (!commentUnitId) return undefined;
+    const positionOf = async (commentId?: string) => {
+      if (!commentId) return undefined;
       const pin = await prisma.commentPromotion.findUnique({
         where: {
-          scopeUnitId_commentUnitId: {
+          scopeUnitId_commentId: {
             scopeUnitId,
-            commentUnitId: commentUnitId,
+            commentId: commentId,
           },
         },
         select: { position: true },
       });
       return pin?.position ?? undefined;
     };
-    const afterPos = await positionOf(afterTargetUnitId);
-    const beforePos = await positionOf(beforeTargetUnitId);
+    const afterPos = await positionOf(afterTargetCommentId);
+    const beforePos = await positionOf(beforeTargetCommentId);
     if (afterPos !== undefined || beforePos !== undefined) {
       return generateBetween(afterPos, beforePos);
     }
@@ -1762,7 +1750,7 @@ export class PostService {
 
   private async createPin(
     scopeUnitId: string,
-    commentUnitId: string,
+    commentId: string,
     kind: PinKindEnum,
     position: string,
     byUserId: string,
@@ -1771,7 +1759,7 @@ export class PostService {
       const pin = await prisma.commentPromotion.create({
         data: {
           scopeUnitId,
-          commentUnitId: commentUnitId,
+          commentId: commentId,
           kind,
           position,
           byUserId,
@@ -1795,14 +1783,14 @@ export class PostService {
 
   private async deletePin(
     scopeUnitId: string,
-    commentUnitId: string,
+    commentId: string,
     kind: PinKindEnum,
   ): Promise<void> {
     const existing = await prisma.commentPromotion.findUnique({
       where: {
-        scopeUnitId_commentUnitId: {
+        scopeUnitId_commentId: {
           scopeUnitId,
-          commentUnitId: commentUnitId,
+          commentId: commentId,
         },
       },
       select: { kind: true },
@@ -1812,9 +1800,9 @@ export class PostService {
     }
     await prisma.commentPromotion.delete({
       where: {
-        scopeUnitId_commentUnitId: {
+        scopeUnitId_commentId: {
           scopeUnitId,
-          commentUnitId: commentUnitId,
+          commentId: commentId,
         },
       },
     });
