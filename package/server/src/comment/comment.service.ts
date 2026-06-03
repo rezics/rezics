@@ -22,6 +22,13 @@ const commentInclude = {
   author: { select: publicUserSelect },
 } as const;
 
+// Public collections read only the serving snapshot; tree reads may add
+// redacted ancestors after this filter to keep approved replies attached.
+const publicCommentWhere = {
+  moderationStatus: "APPROVED",
+  deletedAt: null,
+} as const satisfies Prisma.CommentWhereInput;
+
 function enqueueCommentSync(commentId: string) {
   return serverJobProducer.enqueue(
     createSearchCommand(
@@ -125,6 +132,60 @@ async function applyBlockedAuthorFilter(
   where.AND = [...existingAnd, { authorUserId: { notIn: blockedIds } }];
 }
 
+function missingParentIds(
+  comments: Pick<CommentWithRelations, "id" | "parentCommentId">[],
+) {
+  const commentIds = new Set(comments.map((comment) => comment.id));
+  return [
+    ...new Set(
+      comments
+        .map((comment) => comment.parentCommentId)
+        .filter(
+          (id): id is string => Boolean(id) && !commentIds.has(id as string),
+        ),
+    ),
+  ];
+}
+
+async function includeRedactedAncestors(
+  comments: CommentWithRelations[],
+): Promise<CommentWithRelations[]> {
+  let parentIds = missingParentIds(comments);
+  if (parentIds.length === 0) return comments;
+
+  const byId = new Map(comments.map((comment) => [comment.id, comment]));
+  while (parentIds.length > 0) {
+    const ancestors = (await prisma.comment.findMany({
+      where: {
+        id: { in: parentIds },
+        OR: [
+          { moderationStatus: { not: "APPROVED" } },
+          { deletedAt: { not: null } },
+        ],
+      },
+      include: commentInclude,
+    })) as CommentWithRelations[];
+
+    if (ancestors.length === 0) break;
+
+    for (const ancestor of ancestors) {
+      byId.set(ancestor.id, ancestor);
+    }
+    parentIds = missingParentIds([...byId.values()]);
+  }
+
+  return [...byId.values()];
+}
+
+function sortTreeComments(comments: CommentWithRelations[]) {
+  return comments.sort((left, right) => {
+    if (left.path && right.path && left.path !== right.path) {
+      return left.path.localeCompare(right.path);
+    }
+    return left.createdAt.getTime() - right.createdAt.getTime();
+  });
+}
+
 export class CommentService {
   async list(
     query: CommentListInput,
@@ -137,8 +198,7 @@ export class CommentService {
     const where: Prisma.CommentWhereInput = {
       rootUnitId: query.rootUnitId,
       realmUnitId: query.realmUnitId ?? null,
-      moderationStatus: "APPROVED",
-      deletedAt: null,
+      ...publicCommentWhere,
     };
 
     if (query.authorUserId) where.authorUserId = query.authorUserId;
@@ -199,10 +259,18 @@ export class CommentService {
       prisma.comment.count({ where }),
     ]);
 
+    const listedComments = comments as CommentWithRelations[];
+    const isTreeRead = query.mode === "threaded" || query.mode === "subtree";
+    const commentsWithAncestors = isTreeRead
+      ? await includeRedactedAncestors(listedComments)
+      : listedComments;
+    const pathComments = await attachCommentPaths(commentsWithAncestors);
+    if (commentsWithAncestors.length > listedComments.length) {
+      sortTreeComments(pathComments);
+    }
+
     return {
-      comments: await attachPinOverlays(
-        await attachCommentPaths(comments as CommentWithRelations[]),
-      ),
+      comments: await attachPinOverlays(pathComments),
       total,
     };
   }

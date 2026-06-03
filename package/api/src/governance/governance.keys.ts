@@ -1,3 +1,4 @@
+import type { ModerationTargetKind } from "@rezics/contract";
 import type {
   GovernanceAuditListQuery,
   GovernanceListQuery,
@@ -52,6 +53,18 @@ export const governanceKeys = {
     [
       ...governanceKeys.realmContent(realmUnitId, targetUnitId),
       "moderation",
+    ] as const,
+  moderationOverlays: (
+    targetKind: ModerationTargetKind,
+    targetIds: string[],
+    realmUnitId?: string | null,
+  ) =>
+    [
+      ...governanceKeys.all(),
+      "moderation-overlays",
+      targetKind,
+      realmUnitId ?? null,
+      [...targetIds].sort(),
     ] as const,
   audit: () => [...governanceKeys.all(), "audit"] as const,
   auditList: (query?: GovernanceAuditListQuery) =>

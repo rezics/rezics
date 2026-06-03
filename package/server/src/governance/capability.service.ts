@@ -74,6 +74,14 @@ export class GovernanceCapabilityService {
             capability: "queue.realm.decide",
             scope: { kind: "realm", realmUnitId },
           },
+          {
+            capability: "comment.moderate",
+            scope: { kind: "realm", realmUnitId },
+          },
+          {
+            capability: "realm.member.moderate",
+            scope: { kind: "realm", realmUnitId },
+          },
         ]
       : [];
 

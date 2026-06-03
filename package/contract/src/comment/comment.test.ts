@@ -4,6 +4,7 @@ import {
   commentDTOSchema,
   commentListQuerySchema,
   commentListResponseSchema,
+  commentModerationInputSchema,
   createCommentSchema,
 } from "./comment";
 
@@ -65,5 +66,25 @@ describe("comment contract", () => {
         isQuestionThread: true,
       }),
     ).toBe(true);
+  });
+
+  test("comment moderation command accepts the closed action vocabulary", () => {
+    expect(
+      Value.Check(commentModerationInputSchema, {
+        action: "remove",
+        reasonCode: "comment.abuse",
+        reasonText: "abuse",
+        publicMessage: null,
+        requestId: "request-1",
+        idempotencyKey: "request-1:comment-1:remove",
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(commentModerationInputSchema, {
+        action: "hide",
+        reasonCode: "comment.abuse",
+      }),
+    ).toBe(false);
   });
 });

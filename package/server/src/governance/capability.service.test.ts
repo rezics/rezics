@@ -46,6 +46,7 @@ beforeEach(() => {
 afterEach(() => {
   delete prismaMock.staffGrant;
   delete prismaMock.realmCapabilityGrant;
+  delete prismaMock.realmMember;
 });
 
 describe("GovernanceCapabilityService", () => {
@@ -93,7 +94,44 @@ describe("GovernanceCapabilityService", () => {
       capability: "account.ban",
       scope: { kind: "global" },
     });
+    expect(hints).toContainEqual({
+      capability: "account.unblock",
+      scope: { kind: "global" },
+    });
+    expect(hints).toContainEqual({
+      capability: "comment.moderate",
+      scope: { kind: "global" },
+    });
     expect(prismaMock.staffGrant.findMany).not.toHaveBeenCalled();
     expect(prismaMock.realmCapabilityGrant.findMany).not.toHaveBeenCalled();
+  });
+
+  test("realm moderator roles imply comment and member moderation capabilities", async () => {
+    prismaMock.realmMember = {
+      findUnique: mock(async () => ({
+        realmUnitId: "realm-1",
+        userId: "mod-1",
+        roleKey: "moderator",
+        state: "ACTIVE",
+      })),
+    };
+
+    const { governanceCapabilityService } = await import(
+      "./capability.service"
+    );
+    const membership =
+      await governanceCapabilityService.realmMembershipForPolicy(
+        "realm-1",
+        "mod-1",
+      );
+
+    expect(membership?.capabilities).toContainEqual({
+      capability: "comment.moderate",
+      scope: { kind: "realm", realmUnitId: "realm-1" },
+    });
+    expect(membership?.capabilities).toContainEqual({
+      capability: "realm.member.moderate",
+      scope: { kind: "realm", realmUnitId: "realm-1" },
+    });
   });
 });

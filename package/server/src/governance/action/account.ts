@@ -37,7 +37,7 @@ export const accountActionDefinitions = [
   },
   {
     action: accountPolicyActions.unblock,
-    requiredCapability: "account.ban",
+    requiredCapability: "account.unblock",
     family: "account",
     staffOnly: true,
   },

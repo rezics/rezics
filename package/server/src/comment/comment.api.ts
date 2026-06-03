@@ -4,6 +4,7 @@ import {
   commentListBodySchema,
   commentListQuerySchema,
   commentListResponseSchema,
+  commentModerationInputSchema,
   commentParamsSchema,
   commentResponseSchema,
   createCommentSchema,
@@ -11,6 +12,7 @@ import {
   updateCommentSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
+import { governanceModerationService } from "@/governance";
 import { authMacro, tryResolveIdentity } from "@/middleware";
 import { postService } from "@/post/post.service";
 import { mapCommentToDTO } from "./comment.mapper";
@@ -118,6 +120,30 @@ export const commentApi = new Elysia({ prefix: "/comment" })
       response: commentResponseSchema,
       detail: {
         summary: "Update comment",
+        tags: ["Comments"],
+      },
+    },
+  )
+  .post(
+    "/:id/moderation",
+    async ({ params, body, identity }): Promise<CommentResponse> => {
+      await governanceModerationService.moderateComment({
+        commentId: params.id,
+        actorUserId: identity.userId,
+        identity,
+        ...body,
+      });
+      return mapCommentToDTO(await commentService.getById(params.id));
+    },
+    {
+      requireLogin: true,
+      params: commentParamsSchema,
+      body: commentModerationInputSchema,
+      response: commentResponseSchema,
+      detail: {
+        summary: "Moderate comment",
+        description:
+          "Remove, restore, lock, or unlock a comment. Removed comments return as redacted stubs on public reads.",
         tags: ["Comments"],
       },
     },

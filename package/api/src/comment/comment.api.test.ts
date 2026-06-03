@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, test } from "bun:test";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "../config";
+import { invalidateCommentModerationQueries } from "./comment.mutations";
 
 const calls: Array<{ url: string; init?: RequestInit }> = [];
 
@@ -20,7 +21,7 @@ beforeEach(() => {
 });
 
 describe("commentApi", () => {
-  test("lists, creates, updates, and deletes comments", async () => {
+  test("lists, creates, updates, moderates, and deletes comments", async () => {
     const { commentApi } = await import("./comment.api");
 
     await commentApi.list({
@@ -36,6 +37,11 @@ describe("commentApi", () => {
     await commentApi.update("comment-1", {
       content: { runtime: "doc-v1", source: { markdown: "updated" } },
     });
+    await commentApi.moderate("comment-1", {
+      action: "remove",
+      reasonCode: "comment.abuse",
+      requestId: "request-1",
+    });
     await commentApi.delete("comment-1");
 
     expect(calls[0]?.url).toContain("/comment/list?");
@@ -43,7 +49,44 @@ describe("commentApi", () => {
     expect(calls[1]?.init?.method).toBe("POST");
     expect(calls[2]?.url).toBe("/comment/comment-1");
     expect(calls[2]?.init?.method).toBe("PATCH");
-    expect(calls[3]?.url).toBe("/comment/comment-1");
-    expect(calls[3]?.init?.method).toBe("DELETE");
+    expect(calls[3]?.url).toBe("/comment/comment-1/moderation");
+    expect(calls[3]?.init?.method).toBe("POST");
+    expect(JSON.parse(String(calls[3]?.init?.body))).toEqual({
+      action: "remove",
+      reasonCode: "comment.abuse",
+      requestId: "request-1",
+    });
+    expect(calls[4]?.url).toBe("/comment/comment-1");
+    expect(calls[4]?.init?.method).toBe("DELETE");
+  });
+
+  test("comment moderation invalidates comments, root post, and overlays", () => {
+    const queryClient = {
+      invalidateQueries: mock(async () => undefined),
+    };
+
+    invalidateCommentModerationQueries(queryClient, {
+      id: "comment-1",
+      rootUnitId: "post-1",
+      realmUnitId: "realm-1",
+    });
+
+    expect(
+      (queryClient.invalidateQueries.mock.calls as any[]).map(
+        (call) => call[0].queryKey,
+      ),
+    ).toEqual([
+      ["comments"],
+      ["comments", "detail", "comment-1"],
+      ["posts", "detail", "post-1"],
+      ["posts", "moderation-overlays", "realm-1", ["comment-1"]],
+      [
+        "governance",
+        "moderation-overlays",
+        "comment",
+        "realm-1",
+        ["comment-1"],
+      ],
+    ]);
   });
 });

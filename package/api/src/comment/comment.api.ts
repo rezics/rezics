@@ -2,6 +2,7 @@ import type {
   CommentListBody,
   CommentListQuery,
   CommentListResponse,
+  CommentModerationInput,
   CommentResponse,
   CreateCommentInput,
   UpdateCommentInput,
@@ -39,6 +40,16 @@ export const commentApi = {
   ): Promise<CommentResponse> => {
     return apiFetch<CommentResponse>(`/comment/${id}`, {
       method: "PATCH",
+      body: JSON.stringify(input),
+    });
+  },
+
+  moderate: async (
+    id: string,
+    input: CommentModerationInput,
+  ): Promise<CommentResponse> => {
+    return apiFetch<CommentResponse>(`/comment/${id}/moderation`, {
+      method: "POST",
       body: JSON.stringify(input),
     });
   },

@@ -7,6 +7,7 @@ export const realmPolicyActions = {
   queueDecide: "queue.realm.decide",
   memberRoleChange: "realm.member.role.change",
   memberCapabilityChange: "realm.member.capability.change",
+  memberModerate: "realm.member.moderate",
   reportEscalate: "realm.report.escalate",
   dmSend: "dm.send",
   contentPin: "content.pin",
@@ -40,6 +41,12 @@ export const realmActionDefinitions = [
   {
     action: realmPolicyActions.memberCapabilityChange,
     requiredCapability: "queue.realm.decide",
+    family: "realm",
+    realmScoped: true,
+  },
+  {
+    action: realmPolicyActions.memberModerate,
+    requiredCapability: "realm.member.moderate",
     family: "realm",
     realmScoped: true,
   },

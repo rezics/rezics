@@ -2,12 +2,17 @@ import type {
   ModerationOverlayDTO,
   ModerationStatus,
   ModerationTargetKind,
+  RezicsSessionClaims,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapUnitRealmToDTO } from "../realm/realm.mapper";
+import {
+  governanceCapabilityService,
+  type GovernanceCapabilityService,
+} from "./capability.service";
 import {
   mapModerationActionToDTO,
   mapModerationCaseToDTO,
@@ -20,8 +25,20 @@ import type { GovernanceListOptions } from "./types";
 
 type ModerationStatusInput = "approved" | "pending" | "removed";
 type UnitModerationActionInput = "approve" | "remove" | "restore";
+type CommentModerationActionInput = "remove" | "restore" | "lock" | "unlock";
 type LockTargetKind = "POST" | "COMMENT" | "UNIT_REALM";
 type ModerationTx = Prisma.TransactionClient;
+type ModerationIdentity = Pick<RezicsSessionClaims, "userId" | "permission">;
+type CommentModerationAuthority = "PLATFORM" | "REALM" | "OWNER";
+type CommentModerationSubject = {
+  id: string;
+  rootUnitId: string;
+  realmUnitId: string | null;
+  rootUnit?: {
+    userId: string | null;
+    collaborators?: Array<{ userId: string; roleKey: string }>;
+  } | null;
+};
 
 type ModerationDecisionInput = {
   moderatedUnitId: string;
@@ -58,6 +75,17 @@ type RealmQueueDecisionKind =
   | "reject"
   | "duplicate"
   | "escalate";
+
+const ownerCommentModerationRoles = new Set(["owner", "maintainer"]);
+const realmCommentModerationCapabilities = new Set([
+  "comment.moderate",
+  "queue.realm.decide",
+]);
+const commentAuthorityRank = {
+  OWNER: 1,
+  REALM: 2,
+  PLATFORM: 3,
+} as const satisfies Record<CommentModerationAuthority, number>;
 
 function upper<T extends string>(value: string): T {
   return value.toUpperCase() as T;
@@ -136,6 +164,16 @@ function enqueueRealmMembershipSearch(contentUnitId: string) {
   ]);
 }
 
+function enqueueCommentSearch(commentId: string) {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.commentSync,
+      { commentId },
+      { type: "server", service: "governance" },
+    ),
+  );
+}
+
 function snapshotStatusFromAction(
   action: UnitModerationActionInput,
 ): "APPROVED" | "REMOVED" {
@@ -147,6 +185,15 @@ function actionKindFromAction(
 ): "APPROVE" | "REMOVE" | "RESTORE" {
   if (action === "approve") return "APPROVE";
   if (action === "restore") return "RESTORE";
+  return "REMOVE";
+}
+
+function commentActionKindFromAction(
+  action: CommentModerationActionInput,
+): "REMOVE" | "RESTORE" | "LOCK" | "UNLOCK" {
+  if (action === "restore") return "RESTORE";
+  if (action === "lock") return "LOCK";
+  if (action === "unlock") return "UNLOCK";
   return "REMOVE";
 }
 
@@ -174,6 +221,7 @@ function caseStateForDecision(kind: RealmQueueDecisionKind) {
 export class GovernanceModerationService {
   constructor(
     private readonly actions: ModerationActionService = moderationActionService,
+    private readonly capabilities: GovernanceCapabilityService = governanceCapabilityService,
   ) {}
 
   async listCases(options: GovernanceListOptions = {}) {
@@ -251,6 +299,177 @@ export class GovernanceModerationService {
         ? mapModerationActionToDTO(latestByTargetId.get(snapshot.id)!)
         : null,
     }));
+  }
+
+  async resolveCommentModerationAuthority(
+    identity: ModerationIdentity,
+    comment: CommentModerationSubject,
+  ): Promise<CommentModerationAuthority | null> {
+    const platformHints = await this.capabilities.resolveHintsForIdentity({
+      userId: identity.userId,
+      permission: identity.permission,
+    });
+    if (
+      platformHints.some(
+        (hint) =>
+          hint.capability === "comment.moderate" &&
+          hint.scope.kind === "global",
+      )
+    ) {
+      return "PLATFORM";
+    }
+
+    if (comment.realmUnitId) {
+      const membership = await this.capabilities.realmMembershipForPolicy(
+        comment.realmUnitId,
+        identity.userId,
+      );
+      if (
+        membership?.capabilities.some(
+          (hint) =>
+            hint.scope.kind === "realm" &&
+            hint.scope.realmUnitId === comment.realmUnitId &&
+            realmCommentModerationCapabilities.has(hint.capability),
+        )
+      ) {
+        return "REALM";
+      }
+    }
+
+    const rootUnit =
+      comment.rootUnit ??
+      (await prisma.unit.findUnique({
+        where: { id: comment.rootUnitId },
+        select: {
+          userId: true,
+          collaborators: {
+            where: { userId: identity.userId },
+            select: { userId: true, roleKey: true },
+          },
+        },
+      }));
+
+    if (rootUnit?.userId === identity.userId) return "OWNER";
+    if (
+      rootUnit?.collaborators?.some(
+        (collaborator) =>
+          collaborator.userId === identity.userId &&
+          ownerCommentModerationRoles.has(collaborator.roleKey),
+      )
+    ) {
+      return "OWNER";
+    }
+
+    return null;
+  }
+
+  async moderateComment(input: {
+    commentId: string;
+    actorUserId: string;
+    identity: ModerationIdentity;
+    action: CommentModerationActionInput;
+    reasonCode: string;
+    reasonText?: string | null;
+    publicMessage?: string | null;
+    caseId?: string | null;
+    requestId?: string | null;
+    idempotencyKey?: string | null;
+  }) {
+    if (input.actorUserId !== input.identity.userId) {
+      throw new Error("Comment moderation actor must match identity");
+    }
+
+    const row = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`
+        SELECT "id" FROM "Comment"
+        WHERE "id" = ${input.commentId}::uuid
+        FOR UPDATE
+      `;
+      const comment = await tx.comment.findUniqueOrThrow({
+        where: { id: input.commentId },
+        include: {
+          rootUnit: {
+            select: {
+              userId: true,
+              collaborators: {
+                where: { userId: input.actorUserId },
+                select: { userId: true, roleKey: true },
+              },
+            },
+          },
+        },
+      });
+      const authority = await this.resolveCommentModerationAuthority(
+        input.identity,
+        comment,
+      );
+      if (!authority) {
+        throw new Error("Forbidden: insufficient comment moderation authority");
+      }
+
+      let reversesActionId: string | null = null;
+      if (input.action === "restore") {
+        const latestRemove = await this.actions.latestEffectiveRemoveFor(tx, {
+          targetKind: "COMMENT",
+          targetId: input.commentId,
+        });
+        if (
+          latestRemove &&
+          commentAuthorityRank[authority] <
+            commentAuthorityRank[latestRemove.authority]
+        ) {
+          throw new Error(
+            "Forbidden: cannot restore a comment removed by higher authority",
+          );
+        }
+        reversesActionId = latestRemove?.id ?? null;
+      }
+
+      const resultingStatus =
+        input.action === "remove"
+          ? "REMOVED"
+          : input.action === "restore"
+            ? "APPROVED"
+            : undefined;
+      const resultingLocked =
+        input.action === "lock"
+          ? true
+          : input.action === "unlock"
+            ? false
+            : undefined;
+
+      const updated = await tx.comment.update({
+        where: { id: input.commentId },
+        data: {
+          ...(resultingStatus ? { moderationStatus: resultingStatus } : {}),
+          ...(resultingLocked !== undefined
+            ? { isLocked: resultingLocked }
+            : {}),
+        },
+      });
+      await this.actions.appendModerationAction(tx, {
+        authority,
+        realmUnitId: authority === "REALM" ? comment.realmUnitId : null,
+        targetKind: "COMMENT",
+        targetId: input.commentId,
+        actorKind: "USER",
+        actorUserId: input.actorUserId,
+        actionKind: commentActionKindFromAction(input.action),
+        resultingStatus,
+        resultingLocked,
+        reasonCode: input.reasonCode,
+        reasonText: input.reasonText,
+        publicMessage: input.publicMessage,
+        caseId: input.caseId,
+        reversesActionId,
+        requestId: input.requestId,
+        idempotencyKey: input.idempotencyKey,
+      });
+      return updated;
+    });
+
+    await enqueueCommentSearch(input.commentId);
+    return row;
   }
 
   private async overlaySnapshots(

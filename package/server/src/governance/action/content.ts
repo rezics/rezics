@@ -8,6 +8,7 @@ export const contentPolicyActions = {
   lock: "content.lock",
   archive: "content.archive",
   restore: "content.restore",
+  commentModerate: "comment.moderate",
   reactionCreate: "reaction.create",
 } as const satisfies Record<string, PolicyAction>;
 
@@ -40,6 +41,12 @@ export const contentActionDefinitions = [
     action: contentPolicyActions.restore,
     requiredCapability: "content.restore",
     family: "content",
+  },
+  {
+    action: contentPolicyActions.commentModerate,
+    requiredCapability: "comment.moderate",
+    family: "content",
+    realmScoped: true,
   },
   {
     action: contentPolicyActions.reactionCreate,

@@ -1,6 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
-import { installPrismaClientMock, prismaMock } from "../test/prisma-client-mock";
+import {
+  installPrismaClientMock,
+  prismaMock,
+} from "../test/prisma-client-mock";
 
 const enqueueMock = mock(async () => ({ status: "created" }));
 
@@ -40,7 +43,8 @@ describe("CommentService", () => {
       where: {
         rootUnitId: "root-1",
         realmUnitId: "realm-1",
-        visibilityState: { in: ["VISIBLE", "TOMBSTONED"] },
+        moderationStatus: "APPROVED",
+        deletedAt: null,
         parentCommentId: null,
       },
       orderBy: [{ createdAt: "asc" }],
@@ -78,7 +82,8 @@ describe("CommentService", () => {
       lastReplyAt: null,
       isLocked: false,
       state: null,
-      visibilityState: "VISIBLE",
+      moderationStatus: "APPROVED",
+      deletedAt: null,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       author: null,
@@ -118,7 +123,7 @@ describe("CommentService", () => {
         authorUserId: "user-1",
         content: markdownContentDoc("hello"),
         depth: 1,
-        visibilityState: "VISIBLE",
+        moderationStatus: "APPROVED",
       },
       include: { author: { select: expect.any(Object) } },
     });
@@ -148,7 +153,8 @@ describe("CommentService", () => {
       lastReplyAt: null,
       isLocked: false,
       state: null,
-      visibilityState: "VISIBLE",
+      moderationStatus: "APPROVED",
+      deletedAt: null,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       author: null,
@@ -204,5 +210,106 @@ describe("CommentService", () => {
     });
     expect(result.comments[0]?.pinKind).toBe("PINNED");
     expect(result.comments[0]?.pinPosition).toBe("a0");
+  });
+
+  test("threaded reads include only redacted ancestors needed to preserve the tree", async () => {
+    const childRow = {
+      id: "comment-child",
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      parentCommentId: "comment-parent",
+      authorUserId: "user-2",
+      content: markdownContentDoc("visible child"),
+      depth: 2,
+      replyCount: 0,
+      directReplyCount: 0,
+      lastReplyAt: null,
+      isLocked: false,
+      state: null,
+      moderationStatus: "APPROVED",
+      deletedAt: null,
+      createdAt: new Date("2026-01-02T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-02T00:00:00.000Z"),
+      author: null,
+    };
+    const parentRow = {
+      id: "comment-parent",
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      parentCommentId: null,
+      authorUserId: "user-1",
+      content: markdownContentDoc("removed parent"),
+      depth: 1,
+      replyCount: 1,
+      directReplyCount: 1,
+      lastReplyAt: new Date("2026-01-02T00:00:00.000Z"),
+      isLocked: false,
+      state: null,
+      moderationStatus: "REMOVED",
+      deletedAt: null,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      author: null,
+    };
+    const findMany = mock(async (args: any) => {
+      if (args.where?.id?.in?.includes("comment-parent")) return [parentRow];
+      return [childRow];
+    });
+    const count = mock(async () => 1);
+    const pinFindMany = mock(async () => []);
+    const queryRaw = mock(async () => [
+      { id: "comment-parent", path: "1" },
+      { id: "comment-child", path: "1.1" },
+    ]);
+    Object.assign(prismaMock, {
+      comment: { findMany, count },
+      commentPromotion: { findMany: pinFindMany },
+      $queryRaw: queryRaw,
+    });
+
+    const { CommentService } = await import("./comment.service");
+    const result = await new CommentService().list({
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      mode: "threaded",
+      limit: 20,
+    });
+
+    expect(findMany).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        where: expect.objectContaining({
+          moderationStatus: "APPROVED",
+          deletedAt: null,
+        }),
+      }),
+    );
+    expect(findMany).toHaveBeenNthCalledWith(2, {
+      where: {
+        id: { in: ["comment-parent"] },
+        OR: [
+          { moderationStatus: { not: "APPROVED" } },
+          { deletedAt: { not: null } },
+        ],
+      },
+      include: {
+        author: {
+          select: expect.any(Object),
+        },
+      },
+    });
+    expect(count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          moderationStatus: "APPROVED",
+          deletedAt: null,
+        }),
+      }),
+    );
+    expect(result.total).toBe(1);
+    expect(result.comments.map((comment) => comment.id)).toEqual([
+      "comment-parent",
+      "comment-child",
+    ]);
   });
 });

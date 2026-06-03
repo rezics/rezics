@@ -186,7 +186,7 @@ reset + reseed is acceptable; a backfill script is optional.
   declare allowed targets, resulting snapshot field(s), and whether it may carry
   `resultingStatus`/`resultingLocked`. Legacy imported target strings are mapped
   in one place rather than scattered string switches. `(test)`
-- [ ] 1.3 Update policy/capability resolution: platform capabilities cover global
+- [x] 1.3 Update policy/capability resolution: platform capabilities cover global
   unit/comment/account actions; realm roles/capability grants cover realm-scoped
   content/comment actions; owner authority covers only root-unit owner or
   collaborator `owner`/`maintainer`. Add explicit capability keys for any new
@@ -244,7 +244,7 @@ reset + reseed is acceptable; a backfill script is optional.
 
 ## 2. Comment moderation (`package/server/src/comment/` + governance)
 
-- [ ] 2.1 `comment.service.ts` read filter: change `visibilityState: { in:
+- [x] 2.1 `comment.service.ts` read filter: change `visibilityState: { in:
   ["VISIBLE","TOMBSTONED"] }` to status-aware logic. Flat/list/search-backed
   modes use `WHERE moderationStatus = APPROVED AND deletedAt IS NULL`.
   Threaded/subtree modes first fetch approved descendants, then include removed
@@ -257,13 +257,13 @@ reset + reseed is acceptable; a backfill script is optional.
 - [x] 2.3 `comment.service.ts` `delete`: set `deletedAt = now()` (author self-delete)
   instead of `visibilityState=TOMBSTONED`; clear `content` to `Prisma.JsonNull`.
   Keep author-only ownership check.
-- [ ] 2.4 Add `resolveCommentModerationAuthority(identity, comment)` →
+- [x] 2.4 Add `resolveCommentModerationAuthority(identity, comment)` →
   `PLATFORM | REALM | OWNER | null`: PLATFORM from `capability.service`
   (global moderation capability), REALM when `comment.realmUnitId` matches a realm
   role/capability (`owner`/`admin`/`moderator` or `queue.realm.decide` equivalent),
   OWNER when `comment.rootUnit.userId === identity.userId` or root-unit
   collaborator role is `owner`/`maintainer`. `(test)`
-- [ ] 2.5 Add `moderateComment({ commentId, actorUserId, action: REMOVE|RESTORE|
+- [x] 2.5 Add `moderateComment({ commentId, actorUserId, action: REMOVE|RESTORE|
   LOCK|UNLOCK, reasonCode, ... })` on `GovernanceModerationService`: resolve
   authority, lock/select the comment row, enforce precedence using
   `latestEffectiveRemoveFor(COMMENT, commentId)` (RESTORE denied if actor
@@ -275,10 +275,10 @@ reset + reseed is acceptable; a backfill script is optional.
   The stub must omit `content`, author/profile fields, reactions, poll/embed data,
   and reply affordance flags unless a staff-only DTO explicitly requests them.
   Drop `isTombstone` (or derive it locally only during the cutover).
-- [ ] 2.7 `comment.api.ts`: add `POST /:id/moderation` (requireLogin) →
+- [x] 2.7 `comment.api.ts`: add `POST /:id/moderation` (requireLogin) →
   `moderateComment`; ensure list/get apply the new filter and document which
   routes return stubs vs 404. Mount stays in `index.ts`.
-- [ ] 2.8 Update `@rezics/api` comment client/mutations and any optimistic cache
+- [x] 2.8 Update `@rezics/api` comment client/mutations and any optimistic cache
   invalidation so remove/restore/lock updates invalidate comment lists, post
   detail, moderation overlays, and search sync consumers consistently.
 
@@ -305,7 +305,7 @@ reset + reseed is acceptable; a backfill script is optional.
   polymorphic `targetKind`/`targetId` plus optional `addressedUnitId`; update
   create/list filters and DTOs so targetless feedback, feedback-about-feedback,
   comments, and units are representable without overloading `unitId`.
-- [ ] 3.5 `permission/*`: add/update capability keys and policy action names for
+- [x] 3.5 `permission/*`: add/update capability keys and policy action names for
   comment moderation, account enforcement ledger actions, realm member moderation,
   and scoped case decisions. Contract tests should prove lower-case DTO values map
   to Prisma UPPERCASE enums through the existing `lower()` convention.

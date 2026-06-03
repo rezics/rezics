@@ -161,6 +161,30 @@ export const updateCommentSchema = t.Object({
 
 export type UpdateCommentInput = Static<typeof updateCommentSchema>;
 
+export const commentModerationActionSchema = t.Union([
+  t.Literal("remove"),
+  t.Literal("restore"),
+  t.Literal("lock"),
+  t.Literal("unlock"),
+]);
+
+export const commentModerationInputSchema = t.Object({
+  action: commentModerationActionSchema,
+  reasonCode: t.String(),
+  reasonText: t.Optional(t.Nullable(t.String())),
+  publicMessage: t.Optional(t.Nullable(t.String())),
+  caseId: t.Optional(t.Nullable(t.String())),
+  requestId: t.Optional(t.Nullable(t.String())),
+  idempotencyKey: t.Optional(t.Nullable(t.String())),
+});
+
+export type CommentModerationAction = Static<
+  typeof commentModerationActionSchema
+>;
+export type CommentModerationInput = Static<
+  typeof commentModerationInputSchema
+>;
+
 export const commentParamsSchema = t.Object({
   id: t.String(),
 });

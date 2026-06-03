@@ -6,15 +6,12 @@ export function mapCommentToDTO(comment: CommentWithRelations): CommentDTO {
   const isDeleted = Boolean(comment.deletedAt);
   const isRemoved = comment.moderationStatus === "REMOVED";
   const isRedacted = isDeleted || isRemoved;
-  return {
+  const base = {
     id: comment.id,
     unitId: comment.id,
     rootUnitId: comment.rootUnitId,
     realmUnitId: comment.realmUnitId ?? null,
     parentCommentId: comment.parentCommentId ?? null,
-    authorUserId: isRedacted ? null : comment.authorUserId,
-    author: isRedacted ? undefined : mapPublicUser(comment.author),
-    content: isRedacted ? null : (comment.content as CommentDTO["content"]),
     moderationStatus:
       comment.moderationStatus.toLowerCase() as CommentDTO["moderationStatus"],
     removedReason: isRemoved ? "content_removed_by_moderator" : null,
@@ -27,6 +24,23 @@ export function mapCommentToDTO(comment: CommentWithRelations): CommentDTO {
         : null,
     depth: comment.depth,
     path: comment.path ?? null,
+    createdAt: comment.createdAt.toISOString(),
+    updatedAt: comment.updatedAt.toISOString(),
+  };
+
+  if (isRedacted) {
+    return {
+      ...base,
+      authorUserId: null,
+      content: null,
+    };
+  }
+
+  return {
+    ...base,
+    authorUserId: comment.authorUserId,
+    author: mapPublicUser(comment.author),
+    content: comment.content as CommentDTO["content"],
     replyCount: comment.replyCount,
     directReplyCount: comment.directReplyCount,
     lastReplyAt: comment.lastReplyAt?.toISOString() ?? null,
@@ -34,7 +48,5 @@ export function mapCommentToDTO(comment: CommentWithRelations): CommentDTO {
     state: comment.state ?? null,
     pinKind: (comment.pinKind ?? null) as CommentDTO["pinKind"],
     pinPosition: comment.pinPosition ?? null,
-    createdAt: comment.createdAt.toISOString(),
-    updatedAt: comment.updatedAt.toISOString(),
   };
 }

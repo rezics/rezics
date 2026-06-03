@@ -170,6 +170,21 @@ describe("governance policy", () => {
       decide({
         actorUserId: "moderator-1",
         permission: { role: "USER" },
+        action: "comment.moderate",
+        capabilities: [
+          {
+            capability: "comment.moderate",
+            scope: { kind: "realm", realmUnitId: "realm-1" },
+          },
+        ],
+        target: { kind: "comment", id: "comment-1", realmUnitId: "realm-1" },
+      }),
+    ).toMatchObject({ allowed: true, code: "ALLOWED" });
+
+    expect(
+      decide({
+        actorUserId: "moderator-1",
+        permission: { role: "USER" },
         action: "content.restore",
         capabilities: [
           {
@@ -228,6 +243,30 @@ describe("governance policy", () => {
         },
       }),
     ).toMatchObject({ allowed: true, code: "ALLOWED" });
+
+    expect(
+      decide({
+        actorUserId: "moderator-1",
+        permission: { role: "USER" },
+        action: "realm.member.moderate",
+        capabilities: [],
+        realmMembership: {
+          realmUnitId: "realm-1",
+          role: "moderator",
+          capabilities: [
+            {
+              capability: "realm.member.moderate",
+              scope: { kind: "realm", realmUnitId: "realm-1" },
+            },
+          ],
+        },
+        target: {
+          kind: "realm-member",
+          id: "user-2",
+          realmUnitId: "realm-1",
+        },
+      }),
+    ).toMatchObject({ allowed: true, code: "ALLOWED" });
   });
 
   test("denies cross-realm realm-family decisions", () => {
@@ -269,6 +308,21 @@ describe("governance policy", () => {
           },
         ],
         target: { kind: "post", id: "post-1", realmUnitId: "realm-2" },
+      }),
+    ).toMatchObject({ allowed: false, code: "MISSING_CAPABILITY" });
+
+    expect(
+      decide({
+        actorUserId: "moderator-1",
+        permission: { role: "USER" },
+        action: "comment.moderate",
+        capabilities: [
+          {
+            capability: "comment.moderate",
+            scope: { kind: "realm", realmUnitId: "realm-1" },
+          },
+        ],
+        target: { kind: "comment", id: "comment-1", realmUnitId: "realm-2" },
       }),
     ).toMatchObject({ allowed: false, code: "MISSING_CAPABILITY" });
   });

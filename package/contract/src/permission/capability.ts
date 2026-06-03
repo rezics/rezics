@@ -5,6 +5,7 @@ export const capabilityKeys = [
   "account.silence",
   "account.suspend",
   "account.ban",
+  "account.unblock",
   "account.rate_limit",
   "moderation.case.triage",
   "moderation.case.assign",
@@ -18,6 +19,8 @@ export const capabilityKeys = [
   "content.lock",
   "content.archive",
   "content.restore",
+  "comment.moderate",
+  "realm.member.moderate",
   "tag.curate",
   "audit.read",
 ] as const;
