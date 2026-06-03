@@ -28,6 +28,8 @@ WHERE rcm."realmUnitId" = ur."realmUnitId"
 DROP INDEX IF EXISTS "UnitRealm_realmUnitId_state_createdAt_idx";
 CREATE INDEX "UnitRealm_realmUnitId_moderationState_visibilityState_create_idx"
   ON "UnitRealm"("realmUnitId", "moderationState", "visibilityState", "createdAt");
+ALTER INDEX IF EXISTS "UnitRealm_realmUnitId_moderationState_visibilityState_create_id"
+  RENAME TO "UnitRealm_realmUnitId_moderationState_visibilityState_creat_idx";
 CREATE INDEX "UnitRealm_realmUnitId_moderationState_visibilityState_isLoc_idx"
   ON "UnitRealm"("realmUnitId", "moderationState", "visibilityState", "isLocked", "createdAt");
 
@@ -58,6 +60,7 @@ ALTER TABLE "Comment" DROP CONSTRAINT IF EXISTS "Comment_parentCommentUnitId_fke
 ALTER TABLE "Comment" DROP CONSTRAINT IF EXISTS "Comment_realmUnitId_fkey";
 
 ALTER TABLE "Comment" RENAME COLUMN "unitId" TO "id";
+ALTER TABLE "Comment" ALTER COLUMN "id" SET DEFAULT uuidv7();
 ALTER TABLE "Comment" RENAME COLUMN "parentCommentUnitId" TO "parentCommentId";
 ALTER TABLE "Comment" ALTER COLUMN "realmUnitId" DROP NOT NULL;
 ALTER TABLE "Comment" ADD COLUMN "visibilityState" "UnitRealmVisibilityState" NOT NULL DEFAULT 'VISIBLE';
