@@ -17,11 +17,10 @@ import type {
   DuplicateModerationCaseInput,
   EscalateRealmModerationQueueItemInput,
   GrantCapabilityInput,
+  ModerationActionDTO,
   ModerationCaseDTO,
-  ModerationCaseEventDTO,
   PolicyDecision,
   PolicyInput,
-  RealmModerationEventDTO,
   RealmModerationQueueItemDTO,
   StaffAuditLogDTO,
   TriageModerationCaseInput,
@@ -150,8 +149,8 @@ export const governanceApi = {
   listCaseEvents: async (
     caseId: string,
     query?: GovernanceListQuery,
-  ): Promise<ModerationCaseEventDTO[]> => {
-    return apiFetch<ModerationCaseEventDTO[]>(
+  ): Promise<ModerationActionDTO[]> => {
+    return apiFetch<ModerationActionDTO[]>(
       `/governance/cases/${encodePathPart(caseId)}/events${buildQueryString(query)}`,
     );
   },
@@ -282,8 +281,8 @@ export const governanceApi = {
     realmUnitId: string,
     queueItemId: string,
     query?: GovernanceListQuery,
-  ): Promise<RealmModerationEventDTO[]> => {
-    return apiFetch<RealmModerationEventDTO[]>(
+  ): Promise<ModerationActionDTO[]> => {
+    return apiFetch<ModerationActionDTO[]>(
       `/governance/realms/${encodePathPart(realmUnitId)}/queue/${encodePathPart(queueItemId)}/events${buildQueryString(query)}`,
     );
   },

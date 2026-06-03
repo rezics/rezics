@@ -25,7 +25,8 @@ const enforcementRow = {
   startsAt: "2026-05-28T00:00:00.000Z",
   expiresAt: null,
   revokedAt: null,
-  auditLogId: null,
+  decisionActionId: null,
+  revocationActionId: null,
   createdAt: "2026-05-28T00:00:00.000Z",
   updatedAt: "2026-05-28T00:00:00.000Z",
 };
@@ -48,8 +49,6 @@ const auditRow = {
   decisionCode: "ALLOWED",
   requestId: "req-1",
   reason: "compromised session",
-  before: { state: "active" },
-  after: { state: "revoked" },
   metadata: { sessionId: "session-1" },
   createdAt: "2026-05-28T00:00:00.000Z",
 };
@@ -93,8 +92,7 @@ const contentStateRow = {
 const realmOverlayRow = {
   realmUnitId: "realm-1",
   unitId: "reply-1",
-  moderationState: "approved",
-  visibilityState: "tombstoned",
+  moderationStatus: "removed",
   isLocked: false,
   createdAt: "2026-05-28T00:00:00.000Z",
 };
@@ -110,30 +108,30 @@ const restoreGlobalMock = mock(async () => ({
 const tombstoneInRealmMock = mock(async () => realmOverlayRow);
 const hideInRealmMock = mock(async () => ({
   ...realmOverlayRow,
-  visibilityState: "hidden",
+  moderationStatus: "removed",
 }));
 const restoreInRealmMock = mock(async () => ({
   ...realmOverlayRow,
-  visibilityState: "visible",
+  moderationStatus: "approved",
 }));
 const approveInRealmMock = mock(async () => ({
   ...realmOverlayRow,
-  moderationState: "approved",
+  moderationStatus: "approved",
 }));
 const rejectInRealmMock = mock(async () => ({
   ...realmOverlayRow,
-  moderationState: "rejected",
+  moderationStatus: "removed",
 }));
 const removeFromRealmMock = mock(async () => ({
   ...realmOverlayRow,
-  moderationState: "removed",
+  moderationStatus: "removed",
 }));
 const requestOwnerDelegationMock = mock(async () => ({
   id: "queue-1",
   realmUnitId: "realm-1",
   state: "new",
   target: {
-    kind: "content-owner-delegation",
+    kind: "unit",
     id: "reply-1",
     realmUnitId: "realm-1",
   },
@@ -157,13 +155,22 @@ const realmQueueRow = {
   updatedAt: "2026-05-28T00:00:00.000Z",
 };
 const realmEventRow = {
-  id: "realm-event-1",
-  queueItemId: "queue-1",
+  id: "action-1",
+  authority: "realm",
   realmUnitId: "realm-1",
+  targetKind: "unit_realm",
+  targetId: "post-1",
+  actorKind: "user",
   actorUserId: "mod-1",
-  decisionKind: "hide_from_realm",
-  decision: null,
-  reason: "off-topic",
+  actionKind: "remove",
+  resultingStatus: "removed",
+  resultingLocked: null,
+  reasonCode: "hide_from_realm",
+  reasonText: "off-topic",
+  caseId: "queue-1",
+  reversesActionId: null,
+  requestId: null,
+  importedFrom: null,
   createdAt: "2026-05-28T00:00:00.000Z",
 };
 const createRealmQueueItemMock = mock(async () => realmQueueRow);
@@ -183,6 +190,7 @@ const escalateRealmQueueItemMock = mock(async () => ({
 }));
 const moderationCaseRow = {
   id: "case-1",
+  scope: "platform",
   state: "new",
   severity: "medium",
   reporterUserId: "reporter-1",
@@ -190,6 +198,7 @@ const moderationCaseRow = {
   target: { kind: "unit", id: "post-1", realmUnitId: null },
   sourceFeedbackId: "feedback-1",
   assignedToUserId: null,
+  parentCaseId: null,
   duplicateOfCaseId: null,
   reason: "reported",
   safeSummary: null,
@@ -197,13 +206,22 @@ const moderationCaseRow = {
   updatedAt: "2026-05-28T00:00:00.000Z",
 };
 const moderationCaseEventRow = {
-  id: "event-1",
-  caseId: "case-1",
+  id: "action-2",
+  authority: "platform",
+  realmUnitId: null,
+  targetKind: "unit",
+  targetId: "post-1",
+  actorKind: "user",
   actorUserId: "staff-1",
-  eventType: "case.created_from_report",
-  decision: null,
-  reason: "reported",
-  reversible: false,
+  actionKind: "note",
+  resultingStatus: null,
+  resultingLocked: null,
+  reasonCode: "case.created_from_report",
+  reasonText: "reported",
+  caseId: "case-1",
+  reversesActionId: null,
+  requestId: null,
+  importedFrom: null,
   createdAt: "2026-05-28T00:00:00.000Z",
 };
 const listCaseEventsMock = mock(async () => [moderationCaseEventRow]);

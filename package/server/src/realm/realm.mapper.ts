@@ -6,8 +6,6 @@ import type {
   RealmTagContextDTO,
   SupportLanguageLike,
   UnitRealmDTO,
-  UnitRealmModerationState,
-  UnitRealmVisibilityState,
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
@@ -118,10 +116,9 @@ export function mapUnitRealmToDTO(row: UnitRealm): UnitRealmDTO {
   return {
     realmUnitId: row.realmUnitId,
     unitId: row.unitId,
-    moderationState:
-      lower<UnitRealmModerationState>(row.moderationState) ?? "approved",
-    visibilityState:
-      lower<UnitRealmVisibilityState>(row.visibilityState) ?? "visible",
+    moderationStatus:
+      lower<UnitRealmDTO["moderationStatus"]>(row.moderationStatus) ??
+      "approved",
     isLocked: row.isLocked,
     createdAt: row.createdAt,
   };

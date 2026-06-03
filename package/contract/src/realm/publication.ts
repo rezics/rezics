@@ -1,33 +1,15 @@
 import { t } from "elysia";
 
-export const unitRealmModerationStateValues = [
-  "pending_review",
+export const moderationStatusValues = [
   "approved",
-  "rejected",
+  "pending",
   "removed",
 ] as const;
 
-export const unitRealmModerationStateSchema = t.Union([
-  t.Literal("pending_review"),
+export const moderationStatusSchema = t.Union([
   t.Literal("approved"),
-  t.Literal("rejected"),
+  t.Literal("pending"),
   t.Literal("removed"),
 ]);
 
-export type UnitRealmModerationState =
-  (typeof unitRealmModerationStateSchema)["static"];
-
-export const unitRealmVisibilityStateValues = [
-  "visible",
-  "hidden",
-  "tombstoned",
-] as const;
-
-export const unitRealmVisibilityStateSchema = t.Union([
-  t.Literal("visible"),
-  t.Literal("hidden"),
-  t.Literal("tombstoned"),
-]);
-
-export type UnitRealmVisibilityState =
-  (typeof unitRealmVisibilityStateSchema)["static"];
+export type ModerationStatus = (typeof moderationStatusSchema)["static"];

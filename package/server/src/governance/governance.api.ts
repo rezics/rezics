@@ -16,11 +16,10 @@ import {
   duplicateModerationCaseSchema,
   escalateRealmModerationQueueItemSchema,
   grantCapabilitySchema,
+  moderationActionDTOSchema,
   moderationCaseDTOSchema,
-  moderationCaseEventDTOSchema,
   policyDecisionSchema,
   policyInputSchema,
-  realmModerationEventDTOSchema,
   realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
   triageModerationCaseSchema,
@@ -790,7 +789,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       params: t.Object({ caseId: t.String() }),
       query: listQuerySchema,
       response: {
-        200: t.Array(moderationCaseEventDTOSchema),
+        200: t.Array(moderationActionDTOSchema),
         403: t.String(),
       },
       detail: {
@@ -1076,7 +1075,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       params: t.Object({ realmUnitId: t.String(), queueItemId: t.String() }),
       query: listQuerySchema,
       response: {
-        200: t.Array(realmModerationEventDTOSchema),
+        200: t.Array(moderationActionDTOSchema),
         403: t.String(),
       },
       detail: {

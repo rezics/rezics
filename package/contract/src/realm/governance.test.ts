@@ -19,7 +19,6 @@ import {
   appealModerationCaseSchema,
   assignModerationCaseSchema,
   contentModerationDecisionSchema,
-  contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
   createModerationCaseFromFeedbackSchema,
   createRealmModerationQueueItemFromFeedbackSchema,
@@ -29,8 +28,8 @@ import {
   duplicateModerationCaseSchema,
   escalateRealmModerationQueueItemSchema,
   grantCapabilitySchema,
+  moderationActionDTOSchema,
   moderationCaseDTOSchema,
-  realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
   triageModerationCaseSchema,
   unblockAccountEnforcementSchema,
@@ -137,7 +136,8 @@ describe("governance contract registry", () => {
         startsAt: "2026-05-28T00:00:00.000Z",
         expiresAt: null,
         revokedAt: null,
-        auditLogId: "audit-1",
+        decisionActionId: "action-1",
+        revocationActionId: null,
         createdAt: "2026-05-28T00:00:00.000Z",
         updatedAt: "2026-05-28T00:00:00.000Z",
       }),
@@ -146,10 +146,12 @@ describe("governance contract registry", () => {
     expect(
       Value.Check(moderationCaseDTOSchema, {
         id: "case-1",
+        scope: "realm",
         state: "new",
         reporterUserId: "user-2",
         subjectUserId: "user-1",
-        target: { kind: "post", id: "post-1", realmUnitId: "realm-1" },
+        target: { kind: "unit", id: "post-1", realmUnitId: "realm-1" },
+        parentCaseId: null,
         sourceFeedbackId: "feedback-1",
         reason: "harassment",
         createdAt: "2026-05-28T00:00:00.000Z",
@@ -158,14 +160,24 @@ describe("governance contract registry", () => {
     ).toBe(true);
 
     expect(
-      Value.Check(realmModerationQueueItemDTOSchema, {
-        id: "realm-queue-1",
+      Value.Check(moderationActionDTOSchema, {
+        id: "action-1",
+        authority: "realm",
         realmUnitId: "realm-1",
-        state: "new",
-        target: { kind: "post", id: "post-1", realmUnitId: "realm-1" },
-        linkedCaseId: null,
+        targetKind: "unit",
+        targetId: "post-1",
+        actorKind: "user",
+        actorUserId: "staff-1",
+        actionKind: "remove",
+        resultingStatus: "removed",
+        resultingLocked: null,
+        reasonCode: "ALLOWED",
+        reasonText: "harassment",
+        caseId: "case-1",
+        reversesActionId: null,
+        requestId: null,
+        importedFrom: null,
         createdAt: "2026-05-28T00:00:00.000Z",
-        updatedAt: "2026-05-28T00:00:00.000Z",
       }),
     ).toBe(true);
 
@@ -179,14 +191,13 @@ describe("governance contract registry", () => {
         decisionCode: "ALLOWED",
         requestId: "req-1",
         reason: "abuse",
-        before: { state: "active" },
-        after: { state: "banned" },
+        metadata: { state: "banned" },
         createdAt: "2026-05-28T00:00:00.000Z",
       }),
     ).toBe(true);
   });
 
-  test("content moderation state DTOs validate", () => {
+  test("content moderation decision and UnitRealm DTOs validate", () => {
     expect(
       Value.Check(contentModerationDecisionSchema, {
         reason: "off-topic",
@@ -202,24 +213,10 @@ describe("governance contract registry", () => {
     ).toBe(false);
 
     expect(
-      Value.Check(contentModerationStateDTOSchema, {
-        moderatedUnitId: "reply-1",
-        state: "hidden",
-        decidedByUserId: "staff-1",
-        caseId: "case-1",
-        reason: "abuse",
-        metadata: { source: "case" },
-        createdAt: "2026-05-28T00:00:00.000Z",
-        updatedAt: "2026-05-28T00:00:00.000Z",
-      }),
-    ).toBe(true);
-
-    expect(
       Value.Check(unitRealmDTOSchema, {
         realmUnitId: "realm-1",
         unitId: "reply-1",
-        moderationState: "approved",
-        visibilityState: "tombstoned",
+        moderationStatus: "approved",
         isLocked: false,
         createdAt: "2026-05-28T00:00:00.000Z",
       }),
@@ -232,7 +229,7 @@ describe("governance contract registry", () => {
         unitId: "reply-1",
         authorUserId: "user-1",
         content: null,
-        globalModerationState: "tombstoned",
+        moderationStatus: "removed",
         isTombstone: true,
       }),
     ).toBe(true);
@@ -246,22 +243,11 @@ describe("governance contract registry", () => {
 
     expect(
       Value.Check(postModerationOverlayResponseSchema, {
-        globalStates: [
+        overlays: [
           {
-            moderatedUnitId: "reply-1",
-            state: "hidden",
-            createdAt: "2026-05-28T00:00:00.000Z",
-            updatedAt: "2026-05-28T00:00:00.000Z",
-          },
-        ],
-        realmOverlays: [
-          {
-            realmUnitId: "realm-1",
-            unitId: "reply-2",
-            moderationState: "approved",
-            visibilityState: "tombstoned",
-            isLocked: false,
-            createdAt: "2026-05-28T00:00:00.000Z",
+            id: "reply-1",
+            moderationStatus: "removed",
+            latestAction: null,
           },
         ],
       }),

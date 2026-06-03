@@ -30,8 +30,6 @@ function redactAuditMetadata(
 function redactStaffAuditLog(dto: StaffAuditLogDTO): StaffAuditLogDTO {
   return {
     ...dto,
-    before: redactAuditMetadata(dto.before),
-    after: redactAuditMetadata(dto.after),
     metadata: redactAuditMetadata(dto.metadata),
   };
 }
@@ -45,15 +43,11 @@ export class GovernanceAuditService {
     decisionCode: string;
     reason: string;
     requestId?: string | null;
-    before?: Record<string, unknown>;
-    after?: Record<string, unknown>;
     metadata?: Record<string, unknown>;
   }) {
     const row = await prisma.staffAuditLog.create({
       data: {
         ...input,
-        before: input.before as Prisma.InputJsonValue | undefined,
-        after: input.after as Prisma.InputJsonValue | undefined,
         metadata: input.metadata as Prisma.InputJsonValue | undefined,
       },
     });
@@ -68,8 +62,6 @@ export class GovernanceAuditService {
     reason: string;
     correlationId: string;
     decisionCode?: string;
-    before?: Record<string, unknown>;
-    after?: Record<string, unknown>;
     metadata?: Record<string, unknown>;
   }) {
     return this.append({
@@ -80,8 +72,6 @@ export class GovernanceAuditService {
       decisionCode: input.decisionCode ?? "ALLOWED",
       reason: input.reason,
       requestId: input.correlationId,
-      before: input.before,
-      after: input.after,
       metadata: {
         ...(input.metadata ?? {}),
         correlationId: input.correlationId,

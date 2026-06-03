@@ -156,6 +156,7 @@ model Unit {
 
   status     UnitStatus     @default(DRAFT)
   visibility UnitVisibility @default(PUBLIC)
+  moderationStatus ModerationStatus @default(APPROVED)
   rating     ContentRating  @default(GENERAL)
 
   /// Declared AI involvement/provenance for this Unit's public-facing content.
@@ -285,8 +286,7 @@ model Unit {
   staffCapabilityGrantRealms StaffGrant[]               @relation("StaffGrantRealm")
   moderationCaseAddressedUnits ModerationCase[]         @relation("ModerationCaseAddressedUnit")
   moderationCaseRealms       ModerationCase[]           @relation("ModerationCaseRealm")
-  realmQueueAddressedUnits   RealmModerationQueueItem[] @relation("RealmModerationQueueAddressedUnit")
-  contentModerationState     ContentModerationState?
+  moderationActionRealms     ModerationAction[]         @relation("ModerationActionRealm")
 
   // Collaborative authority and history capture.
   collaborators UnitCollaborator[]
@@ -306,6 +306,7 @@ model Unit {
   @@index([type, status, createdAt])
   @@index([userId, createdAt])
   @@index([status, visibility])
+  @@index([moderationStatus])
   // Generic lookup for "Units about X" across catalog variants, POST extension
   // rows, and future Unit extensions with product-backed aggregation targets.
   @@index([targetUnitId], map: "Unit_targetUnitId_idx")
@@ -732,7 +733,10 @@ model Comment {
   lastReplyAt      DateTime?
   isLocked         Boolean   @default(false)
   state            String?
-  visibilityState  UnitRealmVisibilityState @default(VISIBLE)
+  moderationStatus ModerationStatus @default(APPROVED)
+  /// Author self-delete is separate from moderator removal and is never
+  /// appended to ModerationAction.
+  deletedAt        DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -749,7 +753,8 @@ model Comment {
   @@index([parentCommentId, createdAt])
   @@index([authorUserId, createdAt])
   @@index([state])
-  @@index([visibilityState])
+  @@index([moderationStatus])
+  @@index([deletedAt])
   @@index([path], type: Gist, map: "Comment_path_gist_idx")
 }
 
@@ -972,7 +977,6 @@ model Realm {
   tagApplications      RealmTagApplication[]      @relation("RealmTagApplicationRealm")
   tagContexts          RealmTagContext[]
   capabilityGrants     RealmCapabilityGrant[]
-  moderationQueueItems RealmModerationQueueItem[]
 }
 
 model RealmMember {
@@ -1019,10 +1023,9 @@ model RealmRuleAcknowledgement {
 model UnitRealm {
   realmUnitId String                   @db.Uuid
   unitId      String                   @db.Uuid
-  /// Realm-local relation moderation, not feed ranking or recommendation state.
-  /// REMOVED is soft deletion of this Unit-realm relation; hard deletion removes the row.
-  moderationState UnitRealmModerationState @default(APPROVED)
-  visibilityState UnitRealmVisibilityState @default(VISIBLE)
+  /// Realm-local moderation snapshot. REMOVED is soft deletion of this
+  /// Unit-realm relation; hard deletion removes the row.
+  moderationStatus ModerationStatus @default(APPROVED)
   isLocked        Boolean                  @default(false)
   /// Future presentation-only card hints, such as a realm-scoped spoiler
   /// overlay, should live on this realm/content junction rather than Unit.extra
@@ -1039,8 +1042,8 @@ model UnitRealm {
   @@id([realmUnitId, unitId])
   @@index([unitId])
   @@index([realmUnitId, createdAt])
-  @@index([realmUnitId, moderationState, visibilityState, createdAt])
-  @@index([realmUnitId, moderationState, visibilityState, isLocked, createdAt])
+  @@index([realmUnitId, moderationStatus, createdAt])
+  @@index([realmUnitId, moderationStatus, isLocked, createdAt])
 }
 
 model RealmTagApplication {
@@ -1424,15 +1427,10 @@ model User {
   accountEnforcements             AccountEnforcement[]       @relation("AccountEnforcementTarget")
   accountEnforcementsDecided      AccountEnforcement[]       @relation("AccountEnforcementDecidedBy")
   accountEnforcementsRevoked      AccountEnforcement[]       @relation("AccountEnforcementRevokedBy")
+  moderationActionsAuthored       ModerationAction[]         @relation("ModerationActionActor")
   moderationCasesReported         ModerationCase[]           @relation("ModerationCaseReporter")
   moderationCasesSubject          ModerationCase[]           @relation("ModerationCaseSubject")
   moderationCasesAssigned         ModerationCase[]           @relation("ModerationCaseAssignedTo")
-  moderationCaseEvents            ModerationCaseEvent[]      @relation("ModerationCaseEventActor")
-  realmQueueReports               RealmModerationQueueItem[] @relation("RealmModerationQueueReporter")
-  realmQueueSubjects              RealmModerationQueueItem[] @relation("RealmModerationQueueSubject")
-  realmQueueAssignments           RealmModerationQueueItem[] @relation("RealmModerationQueueAssignedTo")
-  realmModerationEvents           RealmModerationEvent[]     @relation("RealmModerationEventActor")
-  contentModerationDecisions      ContentModerationState[]   @relation("ContentModerationStateDecidedBy")
   realmRuleAcknowledgements       RealmRuleAcknowledgement[]
   commentsAuthored                Comment[]                  @relation("CommentAuthor")
   staffAuditLogs                  StaffAuditLog[]            @relation("StaffAuditLogActor")
@@ -1699,7 +1697,9 @@ model ApiToken {
 model Feedback {
   id         String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
   userId     String       @db.Uuid
-  unitId     String?      @db.Uuid
+  targetKind ModerationTargetKind?
+  targetId   String?      @db.VarChar(128)
+  addressedUnitId String? @db.Uuid
   url        String?
   content    String
   type       FeedbackType @default(REPORT)
@@ -1709,10 +1709,10 @@ model Feedback {
   updatedAt  DateTime     @updatedAt
 
   moderationCases ModerationCase[]           @relation("ModerationCaseSourceFeedback")
-  realmQueueItems RealmModerationQueueItem[] @relation("RealmModerationQueueSourceFeedback")
 
   @@index([userId])
-  @@index([unitId])
+  @@index([targetKind, targetId])
+  @@index([addressedUnitId])
   @@index([type])
   @@index([resolved])
 }
@@ -1745,8 +1745,67 @@ enum AccountEnforcementState {
   REVOKED
 }
 
+enum ModerationStatus {
+  APPROVED
+  PENDING
+  REMOVED
+}
+
+enum ModerationScope {
+  PLATFORM
+  REALM
+}
+
+enum ModerationTargetKind {
+  UNIT
+  UNIT_REALM
+  COMMENT
+  UNIT_FIELD
+  ACCOUNT
+  REALM_MEMBER
+  FEEDBACK
+}
+
+enum ModerationAuthority {
+  PLATFORM
+  REALM
+  OWNER
+}
+
+enum ModerationActorKind {
+  USER
+  SYSTEM
+  AUTOMATION
+  IMPORT
+}
+
+enum ModerationActionKind {
+  APPROVE
+  REMOVE
+  RESTORE
+  LOCK
+  UNLOCK
+  FIELD_LOCK
+  FIELD_UNLOCK
+  WARNING
+  SILENCE
+  SUSPENSION
+  BAN
+  RATE_LIMIT
+  TRUST_RESTRICTION
+  REVOKE_ENFORCEMENT
+  MUTE_MEMBER
+  REMOVE_MEMBER
+  BAN_MEMBER
+  RESTORE_MEMBER
+  ESCALATE
+  REVERSE
+  NOTE
+}
+
 enum ModerationCaseState {
   NEW
+  REVIEWING
   TRIAGED
   ASSIGNED
   ACTIONED
@@ -1754,36 +1813,6 @@ enum ModerationCaseState {
   DUPLICATE
   REJECTED
   ESCALATED
-}
-
-enum RealmModerationQueueState {
-  NEW
-  REVIEWING
-  ACTIONED
-  RESOLVED
-  DUPLICATE
-  REJECTED
-  ESCALATED
-}
-
-enum ContentModerationStateKind {
-  VISIBLE
-  HIDDEN
-  TOMBSTONED
-  REMOVED
-}
-
-enum UnitRealmModerationState {
-  PENDING_REVIEW
-  APPROVED
-  REJECTED
-  REMOVED
-}
-
-enum UnitRealmVisibilityState {
-  VISIBLE
-  HIDDEN
-  TOMBSTONED
 }
 
 enum RealmMemberState {
@@ -1857,7 +1886,8 @@ model AccountEnforcement {
   expiresAt    DateTime?
   revokedAt    DateTime?
   revokedById  String?                 @db.Uuid
-  auditLogId   String?                 @db.Uuid
+  decisionActionId String?              @db.Uuid
+  revocationActionId String?            @db.Uuid
   metadata     Json?
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
@@ -1865,28 +1895,33 @@ model AccountEnforcement {
   targetUser User  @relation("AccountEnforcementTarget", fields: [targetUserId], references: [unitId], onDelete: Cascade)
   decidedBy  User  @relation("AccountEnforcementDecidedBy", fields: [decidedById], references: [unitId], onDelete: Restrict)
   revokedBy  User? @relation("AccountEnforcementRevokedBy", fields: [revokedById], references: [unitId], onDelete: SetNull)
+  decisionAction ModerationAction? @relation("AccountEnforcementDecisionAction", fields: [decisionActionId], references: [id], onDelete: SetNull)
+  revocationAction ModerationAction? @relation("AccountEnforcementRevocationAction", fields: [revocationActionId], references: [id], onDelete: SetNull)
 
   @@index([targetUserId, state, kind, expiresAt])
   @@index([kind, state, createdAt])
   @@index([decidedById, createdAt])
   @@index([revokedById])
-  @@index([auditLogId])
+  @@index([decisionActionId])
+  @@index([revocationActionId])
 }
 
 model ModerationCase {
   id                String              @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  scope             ModerationScope     @default(PLATFORM)
   state             ModerationCaseState @default(NEW)
   severity          String?             @db.VarChar(32)
   reporterUserId    String?             @db.Uuid
   subjectUserId     String?             @db.Uuid
   /// Optional resolved Unit for the immutable targetKind/targetId address.
   /// This supports Unit joins and queues; it is not Unit.targetUnitId.
-  targetKind        String              @db.VarChar(64)
+  targetKind        ModerationTargetKind
   targetId          String              @db.VarChar(128)
   addressedUnitId   String?             @db.Uuid
   realmUnitId       String?             @db.Uuid
   sourceFeedbackId  String?             @db.Uuid
   assignedToUserId  String?             @db.Uuid
+  parentCaseId      String?             @db.Uuid
   duplicateOfCaseId String?             @db.Uuid
   reason            String?
   safeSummary       String?
@@ -1900,13 +1935,14 @@ model ModerationCase {
   realm          Unit?            @relation("ModerationCaseRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
   sourceFeedback Feedback?        @relation("ModerationCaseSourceFeedback", fields: [sourceFeedbackId], references: [id], onDelete: SetNull)
   assignedTo     User?            @relation("ModerationCaseAssignedTo", fields: [assignedToUserId], references: [unitId], onDelete: SetNull)
+  parentCase     ModerationCase?  @relation("ModerationCaseEscalations", fields: [parentCaseId], references: [id], onDelete: SetNull)
+  childCases     ModerationCase[] @relation("ModerationCaseEscalations")
   duplicateOf    ModerationCase?  @relation("ModerationCaseDuplicates", fields: [duplicateOfCaseId], references: [id], onDelete: SetNull)
   duplicates     ModerationCase[] @relation("ModerationCaseDuplicates")
+  actions        ModerationAction[]
 
-  events                 ModerationCaseEvent[]
-  realmQueueItems        RealmModerationQueueItem[]
-  contentStates          ContentModerationState[]
   @@index([state, severity, createdAt])
+  @@index([scope, state, createdAt])
   @@index([realmUnitId, state, createdAt])
   @@index([assignedToUserId, state, createdAt])
   @@index([targetKind, targetId])
@@ -1914,111 +1950,49 @@ model ModerationCase {
   @@index([subjectUserId, state, createdAt])
   @@index([reporterUserId, createdAt])
   @@index([sourceFeedbackId])
+  @@index([parentCaseId])
   @@index([duplicateOfCaseId])
 }
 
-model ModerationCaseEvent {
-  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  caseId       String   @db.Uuid
-  actorUserId  String   @db.Uuid
-  eventType    String   @db.VarChar(64)
-  decision     Json?
-  decisionCode String?  @db.VarChar(64)
-  reason       String?
-  before       Json?
-  after        Json?
-  reversible   Boolean  @default(false)
-  createdAt    DateTime @default(now())
+model ModerationAction {
+  id                String                 @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  authority         ModerationAuthority
+  realmUnitId       String?                @db.Uuid
+  targetKind        ModerationTargetKind
+  targetId          String                 @db.VarChar(128)
+  targetPath        String?
+  actorKind         ModerationActorKind    @default(USER)
+  actorUserId       String?                @db.Uuid
+  actionKind        ModerationActionKind
+  resultingStatus   ModerationStatus?
+  resultingLocked   Boolean?
+  reasonCode        String                 @db.VarChar(64)
+  reasonText        String?
+  publicMessage     String?
+  caseId            String?                @db.Uuid
+  reversesActionId  String?                @db.Uuid
+  requestId         String?                @db.VarChar(128)
+  /// Request-scoped, not target-scoped. Repeated remove/restore cycles are
+  /// separate moderation facts and must use distinct keys.
+  idempotencyKey    String?                @unique @db.VarChar(256)
+  importedFrom      String?                @db.VarChar(128)
+  createdAt         DateTime               @default(now())
 
-  case  ModerationCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
-  actor User           @relation("ModerationCaseEventActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
+  realm            Unit?              @relation("ModerationActionRealm", fields: [realmUnitId], references: [id], onDelete: SetNull)
+  actor            User?              @relation("ModerationActionActor", fields: [actorUserId], references: [unitId], onDelete: SetNull)
+  case             ModerationCase?    @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  reversesAction   ModerationAction?  @relation("ModerationActionReversal", fields: [reversesActionId], references: [id], onDelete: SetNull)
+  reversedByActions ModerationAction[] @relation("ModerationActionReversal")
+  decisionEnforcements AccountEnforcement[] @relation("AccountEnforcementDecisionAction")
+  revocationEnforcements AccountEnforcement[] @relation("AccountEnforcementRevocationAction")
 
-  @@index([caseId, createdAt])
-  @@index([actorUserId, createdAt])
-  @@index([eventType, createdAt])
-  @@index([decisionCode, createdAt])
-}
-
-model RealmModerationQueueItem {
-  id               String                    @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  realmUnitId      String                    @db.Uuid
-  state            RealmModerationQueueState @default(NEW)
-  reporterUserId   String?                   @db.Uuid
-  subjectUserId    String?                   @db.Uuid
-  /// Optional resolved Unit for the immutable targetKind/targetId address.
-  /// This is queue addressing metadata, not Unit.targetUnitId.
-  targetKind       String                    @db.VarChar(64)
-  targetId         String                    @db.VarChar(128)
-  addressedUnitId  String?                   @db.Uuid
-  sourceFeedbackId String?                   @db.Uuid
-  linkedCaseId     String?                   @db.Uuid
-  assignedToUserId String?                   @db.Uuid
-  reason           String?
-  safeSummary      String?
-  metadata         Json?
-  createdAt        DateTime                  @default(now())
-  updatedAt        DateTime                  @updatedAt
-
-  targetRealm    Realm                  @relation(fields: [realmUnitId], references: [unitId], onDelete: Cascade)
-  reporter       User?                  @relation("RealmModerationQueueReporter", fields: [reporterUserId], references: [unitId], onDelete: SetNull)
-  subject        User?                  @relation("RealmModerationQueueSubject", fields: [subjectUserId], references: [unitId], onDelete: SetNull)
-  addressedUnit  Unit?                  @relation("RealmModerationQueueAddressedUnit", fields: [addressedUnitId], references: [id], onDelete: SetNull)
-  sourceFeedback Feedback?              @relation("RealmModerationQueueSourceFeedback", fields: [sourceFeedbackId], references: [id], onDelete: SetNull)
-  linkedCase     ModerationCase?        @relation(fields: [linkedCaseId], references: [id], onDelete: SetNull)
-  assignedTo     User?                  @relation("RealmModerationQueueAssignedTo", fields: [assignedToUserId], references: [unitId], onDelete: SetNull)
-  events         RealmModerationEvent[]
-
-  @@index([realmUnitId, state, createdAt])
-  @@index([realmUnitId, assignedToUserId, state, createdAt], map: "RealmModerationQueueItem_realmUnitId_assignedToUserId_state_idx")
-  @@index([targetKind, targetId])
-  @@index([addressedUnitId, state])
-  @@index([subjectUserId, state, createdAt])
-  @@index([reporterUserId, createdAt])
-  @@index([sourceFeedbackId])
-  @@index([linkedCaseId])
-}
-
-model RealmModerationEvent {
-  id           String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  queueItemId  String   @db.Uuid
-  realmUnitId  String   @db.Uuid
-  actorUserId  String   @db.Uuid
-  decisionKind String?  @db.VarChar(64)
-  decision     Json?
-  decisionCode String?  @db.VarChar(64)
-  reason       String?
-  before       Json?
-  after        Json?
-  createdAt    DateTime @default(now())
-
-  queueItem RealmModerationQueueItem @relation(fields: [queueItemId], references: [id], onDelete: Cascade)
-  actor     User                     @relation("RealmModerationEventActor", fields: [actorUserId], references: [unitId], onDelete: Restrict)
-
-  @@index([queueItemId, createdAt])
-  @@index([realmUnitId, createdAt])
-  @@index([actorUserId, createdAt])
-  @@index([decisionKind, createdAt])
-}
-
-model ContentModerationState {
-  /// The Unit whose visibility state is moderated. This state endpoint is not
-  /// canonical Unit.targetUnitId resolution.
-  moderatedUnitId String                     @id @db.Uuid
-  state        ContentModerationStateKind @default(VISIBLE)
-  decidedById  String?                    @db.Uuid
-  caseId       String?                    @db.Uuid
-  reason       String?
-  metadata     Json?
-  createdAt    DateTime                   @default(now())
-  updatedAt    DateTime                   @updatedAt
-
-  moderatedUnit Unit            @relation(fields: [moderatedUnitId], references: [id], onDelete: Cascade)
-  decidedBy  User?           @relation("ContentModerationStateDecidedBy", fields: [decidedById], references: [unitId], onDelete: SetNull)
-  case       ModerationCase? @relation(fields: [caseId], references: [id], onDelete: SetNull)
-
-  @@index([state, updatedAt])
-  @@index([decidedById, updatedAt])
-  @@index([caseId])
+  @@index([targetKind, targetId, createdAt, id])
+  @@index([targetKind, targetId, actionKind, createdAt, id])
+  @@index([realmUnitId, createdAt, id])
+  @@index([actorUserId, createdAt, id])
+  @@index([caseId, createdAt, id])
+  @@index([actionKind, createdAt, id])
+  @@index([requestId])
 }
 
 model StaffAuditLog {
@@ -2030,8 +2004,6 @@ model StaffAuditLog {
   decisionCode String   @db.VarChar(64)
   requestId    String?  @db.VarChar(128)
   reason       String
-  before       Json?
-  after        Json?
   metadata     Json?
   createdAt    DateTime @default(now())
 

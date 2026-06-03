@@ -18,6 +18,7 @@ describe("comment contract", () => {
         parentCommentId: null,
         authorUserId: "user-1",
         content: null,
+        moderationStatus: "approved",
         depth: 1,
         path: "1",
         pinKind: "ACCEPTED_ANSWER",

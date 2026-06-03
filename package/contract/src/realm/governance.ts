@@ -48,7 +48,8 @@ export const accountEnforcementDTOSchema = t.Object({
   startsAt: t.String(),
   expiresAt: t.Optional(t.Nullable(t.String())),
   revokedAt: t.Optional(t.Nullable(t.String())),
-  auditLogId: t.Optional(t.Nullable(t.String())),
+  decisionActionId: t.Optional(t.Nullable(t.String())),
+  revocationActionId: t.Optional(t.Nullable(t.String())),
   metadata: t.Optional(auditMetadataSchema),
   createdAt: t.String(),
   updatedAt: t.String(),
@@ -119,6 +120,7 @@ export type GrantCapabilityInput = (typeof grantCapabilitySchema)["static"];
 
 export const moderationCaseStates = [
   "new",
+  "reviewing",
   "triaged",
   "assigned",
   "actioned",
@@ -130,6 +132,7 @@ export const moderationCaseStates = [
 
 export const moderationCaseStateSchema = t.Union([
   t.Literal("new"),
+  t.Literal("reviewing"),
   t.Literal("triaged"),
   t.Literal("assigned"),
   t.Literal("actioned"),
@@ -141,8 +144,80 @@ export const moderationCaseStateSchema = t.Union([
 
 export type ModerationCaseState = (typeof moderationCaseStateSchema)["static"];
 
+export const moderationStatusSchema = t.Union([
+  t.Literal("approved"),
+  t.Literal("pending"),
+  t.Literal("removed"),
+]);
+
+export type ModerationStatus = (typeof moderationStatusSchema)["static"];
+
+export const moderationScopeSchema = t.Union([
+  t.Literal("platform"),
+  t.Literal("realm"),
+]);
+
+export type ModerationScope = (typeof moderationScopeSchema)["static"];
+
+export const moderationAuthoritySchema = t.Union([
+  t.Literal("platform"),
+  t.Literal("realm"),
+  t.Literal("owner"),
+]);
+
+export type ModerationAuthority = (typeof moderationAuthoritySchema)["static"];
+
+export const moderationActorKindSchema = t.Union([
+  t.Literal("user"),
+  t.Literal("system"),
+  t.Literal("automation"),
+  t.Literal("import"),
+]);
+
+export type ModerationActorKind = (typeof moderationActorKindSchema)["static"];
+
+export const moderationTargetKindSchema = t.Union([
+  t.Literal("unit"),
+  t.Literal("unit_realm"),
+  t.Literal("comment"),
+  t.Literal("unit_field"),
+  t.Literal("account"),
+  t.Literal("realm_member"),
+  t.Literal("feedback"),
+]);
+
+export type ModerationTargetKind =
+  (typeof moderationTargetKindSchema)["static"];
+
+export const moderationActionKindSchema = t.Union([
+  t.Literal("approve"),
+  t.Literal("remove"),
+  t.Literal("restore"),
+  t.Literal("lock"),
+  t.Literal("unlock"),
+  t.Literal("field_lock"),
+  t.Literal("field_unlock"),
+  t.Literal("warning"),
+  t.Literal("silence"),
+  t.Literal("suspension"),
+  t.Literal("ban"),
+  t.Literal("rate_limit"),
+  t.Literal("trust_restriction"),
+  t.Literal("revoke_enforcement"),
+  t.Literal("mute_member"),
+  t.Literal("remove_member"),
+  t.Literal("ban_member"),
+  t.Literal("restore_member"),
+  t.Literal("escalate"),
+  t.Literal("reverse"),
+  t.Literal("note"),
+]);
+
+export type ModerationActionKind =
+  (typeof moderationActionKindSchema)["static"];
+
 export const moderationTargetRefSchema = t.Object({
-  kind: t.String(),
+  kind: moderationTargetKindSchema,
   id: t.String(),
   realmUnitId: t.Optional(t.Nullable(t.String())),
 });
@@ -151,6 +226,7 @@ export type ModerationTargetRef = (typeof moderationTargetRefSchema)["static"];
 
 export const moderationCaseDTOSchema = t.Object({
   id: t.String(),
+  scope: moderationScopeSchema,
   state: moderationCaseStateSchema,
   severity: t.Optional(t.Nullable(t.String())),
   reporterUserId: t.Optional(t.Nullable(t.String())),
@@ -158,6 +234,7 @@ export const moderationCaseDTOSchema = t.Object({
   target: moderationTargetRefSchema,
   sourceFeedbackId: t.Optional(t.Nullable(t.String())),
   assignedToUserId: t.Optional(t.Nullable(t.String())),
+  parentCaseId: t.Optional(t.Nullable(t.String())),
   duplicateOfCaseId: t.Optional(t.Nullable(t.String())),
   reason: t.Optional(t.Nullable(t.String())),
   safeSummary: t.Optional(t.Nullable(t.String())),
@@ -167,21 +244,38 @@ export const moderationCaseDTOSchema = t.Object({
 
 export type ModerationCaseDTO = (typeof moderationCaseDTOSchema)["static"];
 
-export const moderationCaseEventDTOSchema = t.Object({
+export const moderationActionDTOSchema = t.Object({
   id: t.String(),
-  caseId: t.String(),
-  actorUserId: t.String(),
-  eventType: t.String(),
-  decision: t.Optional(t.Nullable(decisionSchema)),
-  reason: t.Optional(t.Nullable(t.String())),
-  before: t.Optional(auditMetadataSchema),
-  after: t.Optional(auditMetadataSchema),
-  reversible: t.Optional(t.Boolean()),
+  authority: moderationAuthoritySchema,
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  targetKind: moderationTargetKindSchema,
+  targetId: t.String(),
+  targetPath: t.Optional(t.Nullable(t.String())),
+  actorKind: moderationActorKindSchema,
+  actorUserId: t.Optional(t.Nullable(t.String())),
+  actionKind: moderationActionKindSchema,
+  resultingStatus: t.Optional(t.Nullable(moderationStatusSchema)),
+  resultingLocked: t.Optional(t.Nullable(t.Boolean())),
+  reasonCode: t.String(),
+  reasonText: t.Optional(t.Nullable(t.String())),
+  publicMessage: t.Optional(t.Nullable(t.String())),
+  caseId: t.Optional(t.Nullable(t.String())),
+  reversesActionId: t.Optional(t.Nullable(t.String())),
+  requestId: t.Optional(t.Nullable(t.String())),
+  importedFrom: t.Optional(t.Nullable(t.String())),
   createdAt: t.String(),
 });
 
-export type ModerationCaseEventDTO =
-  (typeof moderationCaseEventDTOSchema)["static"];
+export type ModerationActionDTO = (typeof moderationActionDTOSchema)["static"];
+
+export const moderationOverlayDTOSchema = t.Object({
+  id: t.String(),
+  moderationStatus: moderationStatusSchema,
+  latestAction: t.Optional(t.Nullable(moderationActionDTOSchema)),
+});
+
+export type ModerationOverlayDTO =
+  (typeof moderationOverlayDTOSchema)["static"];
 
 export const createModerationCaseFromFeedbackSchema = t.Object(
   {
@@ -453,8 +547,6 @@ export const staffAuditLogDTOSchema = t.Object({
   decisionCode: decisionCodeSchema,
   requestId: t.Optional(t.Nullable(t.String())),
   reason: t.String(),
-  before: t.Optional(auditMetadataSchema),
-  after: t.Optional(auditMetadataSchema),
   metadata: t.Optional(auditMetadataSchema),
   createdAt: t.String(),
 });

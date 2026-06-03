@@ -26,8 +26,6 @@ const OPEN_MODERATION_CASE_STATES = [
   "ESCALATED",
 ] as const;
 
-const OPEN_REALM_QUEUE_STATES = ["NEW", "REVIEWING", "ESCALATED"] as const;
-
 export class StatsService {
   async getStats(): Promise<AdminStatsResponse> {
     const thirtyDaysAgo = new Date();
@@ -228,10 +226,15 @@ export class StatsService {
         where: { state: { in: [...OPEN_MODERATION_CASE_STATES] } },
       }),
       prisma.moderationCase.count({ where: { state: "ESCALATED" } }),
-      prisma.realmModerationQueueItem.count({
-        where: { state: { in: [...OPEN_REALM_QUEUE_STATES] } },
+      prisma.moderationCase.count({
+        where: {
+          scope: "REALM",
+          state: { in: [...OPEN_MODERATION_CASE_STATES] },
+        },
       }),
-      prisma.realmModerationQueueItem.count({ where: { state: "ESCALATED" } }),
+      prisma.moderationCase.count({
+        where: { scope: "REALM", state: "ESCALATED" },
+      }),
       prisma.accountEnforcement.count({ where: { state: "ACTIVE" } }),
     ]);
 

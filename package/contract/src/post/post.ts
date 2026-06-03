@@ -10,13 +10,9 @@ import {
 } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import {
-  contentModerationStateDTOSchema,
-  contentModerationStateKindSchema,
+  moderationOverlayDTOSchema,
+  moderationStatusSchema,
 } from "../realm/governance";
-import {
-  unitRealmModerationStateSchema,
-  unitRealmVisibilityStateSchema,
-} from "../realm/publication";
 import { publicUserSchema, variantContextSummarySchema } from "../unit/unit";
 
 // ============================================================
@@ -140,9 +136,7 @@ export const postDTOSchema = t.Object({
   status: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
-  globalModerationState: t.Optional(
-    t.Nullable(contentModerationStateKindSchema),
-  ),
+  moderationStatus: t.Optional(t.Nullable(moderationStatusSchema)),
   isTombstone: t.Optional(t.Boolean()),
   replyCount: t.Optional(t.Number()),
   directReplyCount: t.Optional(t.Number()),
@@ -226,9 +220,9 @@ export const postListQuerySchema = t.Object({
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
-  /** Moderator UnitRealm moderation filter. Regular callers are always approved + visible. */
-  realmModerationState: t.Optional(
-    t.Union([unitRealmModerationStateSchema, t.Literal("all")]),
+  /** Moderator UnitRealm moderation filter. Regular callers are always approved. */
+  realmModerationStatus: t.Optional(
+    t.Union([moderationStatusSchema, t.Literal("all")]),
   ),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
@@ -275,9 +269,9 @@ export const postListBodySchema = t.Object({
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
-  /** Moderator UnitRealm moderation filter. Regular callers are always approved + visible. */
-  realmModerationState: t.Optional(
-    t.Union([unitRealmModerationStateSchema, t.Literal("all")]),
+  /** Moderator UnitRealm moderation filter. Regular callers are always approved. */
+  realmModerationStatus: t.Optional(
+    t.Union([moderationStatusSchema, t.Literal("all")]),
   ),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
@@ -326,17 +320,7 @@ export type PostModerationOverlayRequest =
   (typeof postModerationOverlayRequestSchema)["static"];
 
 export const postModerationOverlayResponseSchema = t.Object({
-  globalStates: t.Array(contentModerationStateDTOSchema),
-  realmOverlays: t.Array(
-    t.Object({
-      realmUnitId: t.String(),
-      unitId: t.String(),
-      moderationState: unitRealmModerationStateSchema,
-      visibilityState: unitRealmVisibilityStateSchema,
-      isLocked: t.Boolean(),
-      createdAt: t.Optional(t.Union([t.String(), t.Date()])),
-    }),
-  ),
+  overlays: t.Array(moderationOverlayDTOSchema),
 });
 
 export type PostModerationOverlayResponse =

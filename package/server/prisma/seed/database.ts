@@ -26,10 +26,6 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
     prisma.userTagApplication.deleteMany(),
     prisma.realmTagApplicationVote.deleteMany(),
     prisma.realmRuleAcknowledgement.deleteMany(),
-    prisma.moderationCaseEvent.deleteMany(),
-    prisma.realmModerationEvent.deleteMany(),
-    prisma.contentModerationState.deleteMany(),
-    prisma.accountEnforcement.deleteMany(),
     prisma.staffGrant.deleteMany(),
     prisma.realmCapabilityGrant.deleteMany(),
     prisma.unitCollaborator.deleteMany(),
@@ -39,10 +35,9 @@ export async function resetDatabase(prisma: PrismaClient): Promise<void> {
   ]);
 
   // Group 2: Moderation and feedback records.
-  await Promise.all([
-    prisma.realmModerationQueueItem.deleteMany(),
-    prisma.moderationCase.deleteMany(),
-  ]);
+  await prisma.accountEnforcement.deleteMany();
+  await prisma.moderationAction.deleteMany();
+  await prisma.moderationCase.deleteMany();
   await prisma.feedback.deleteMany();
 
   // Group 3: Attribution and external-reference leaves.

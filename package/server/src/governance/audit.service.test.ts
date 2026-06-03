@@ -15,20 +15,13 @@ const auditRow = {
   decisionCode: "ALLOWED",
   requestId: "req-1",
   reason: "compromised session",
-  before: {
-    accessToken: "raw-access-token",
+  metadata: {
+    credential: "raw-credential",
+    sessionId: "safe-session-id",
     nested: {
       privateNote: "internal note",
       visible: "safe",
     },
-  },
-  after: {
-    state: "revoked",
-    stackTrace: "Error: sensitive stack",
-  },
-  metadata: {
-    credential: "raw-credential",
-    sessionId: "safe-session-id",
   },
   createdAt: new Date("2026-05-28T00:00:00.000Z"),
 };
@@ -69,20 +62,13 @@ describe("GovernanceAuditService", () => {
       take: 5,
     });
     expect(rows[0]).toMatchObject({
-      before: {
-        accessToken: "[REDACTED]",
+      metadata: {
+        credential: "[REDACTED]",
+        sessionId: "safe-session-id",
         nested: {
           privateNote: "[REDACTED]",
           visible: "safe",
         },
-      },
-      after: {
-        state: "revoked",
-        stackTrace: "[REDACTED]",
-      },
-      metadata: {
-        credential: "[REDACTED]",
-        sessionId: "safe-session-id",
       },
     });
   });
@@ -95,8 +81,9 @@ describe("GovernanceAuditService", () => {
     expect(prismaMock.staffAuditLog.findUnique).toHaveBeenCalledWith({
       where: { id: "audit-1" },
     });
-    expect(row?.before?.accessToken).toBe("[REDACTED]");
-    expect(row?.after?.stackTrace).toBe("[REDACTED]");
     expect(row?.metadata?.credential).toBe("[REDACTED]");
+    expect(
+      (row?.metadata?.nested as Record<string, unknown>)?.privateNote,
+    ).toBe("[REDACTED]");
   });
 });

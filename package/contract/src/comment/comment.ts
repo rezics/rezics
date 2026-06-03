@@ -4,6 +4,10 @@ import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import { pinKindLiterals } from "../post/post";
+import {
+  moderationAuthoritySchema,
+  moderationStatusSchema,
+} from "../realm/governance";
 import { publicUserSchema } from "../unit/unit";
 
 // ANCHOR: Comment DTO
@@ -15,9 +19,18 @@ export const commentDTOSchema = t.Object({
   rootUnitId: t.String(),
   realmUnitId: t.Optional(t.Nullable(t.String())),
   parentCommentId: t.Optional(t.Nullable(t.String())),
-  authorUserId: t.String(),
+  authorUserId: t.Optional(t.Nullable(t.String())),
   author: t.Optional(publicUserSchema),
   content: t.Optional(t.Nullable(contentDocSchema)),
+  moderationStatus: moderationStatusSchema,
+  removedReason: t.Optional(t.Nullable(t.String())),
+  removedByAuthority: t.Optional(t.Nullable(moderationAuthoritySchema)),
+  isRedacted: t.Optional(t.Boolean()),
+  redactionKind: t.Optional(
+    t.Nullable(
+      t.Union([t.Literal("moderator_removed"), t.Literal("author_deleted")]),
+    ),
+  ),
   depth: t.Number(),
   path: t.Optional(t.Nullable(t.String())),
   replyCount: t.Optional(t.Number()),
@@ -25,7 +38,6 @@ export const commentDTOSchema = t.Object({
   lastReplyAt: t.Optional(t.Nullable(t.Union([t.String(), t.Date()]))),
   isLocked: t.Optional(t.Boolean()),
   state: t.Optional(t.Nullable(t.String())),
-  isTombstone: t.Optional(t.Boolean()),
   pinKind: t.Optional(t.Nullable(pinKindLiterals)),
   pinPosition: t.Optional(t.Nullable(t.String())),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),

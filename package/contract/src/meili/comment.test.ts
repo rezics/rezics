@@ -22,7 +22,7 @@ describe("CommentSearchDocumentSchema", () => {
         directReplyCount: 0,
         lastReplyAt: null,
         state: null,
-        visibilityState: "VISIBLE",
+        moderationStatus: "APPROVED",
         createdAt: "2026-05-31T00:00:00.000Z",
         updatedAt: "2026-05-31T00:00:00.000Z",
         hotScore: 0,

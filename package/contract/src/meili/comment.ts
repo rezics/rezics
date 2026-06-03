@@ -17,7 +17,7 @@ export const CommentSearchDocumentSchema = t.Object({
   directReplyCount: t.Number(),
   lastReplyAt: t.Union([t.String(), t.Null()]),
   state: t.Union([t.String(), t.Null()]),
-  visibilityState: t.String(),
+  moderationStatus: t.String(),
   createdAt: t.String(),
   updatedAt: t.String(),
   hotScore: t.Number(),
@@ -45,7 +45,7 @@ export const CommentSearchOptionsSchema = t.Object({
   depth: t.Optional(t.Number()),
   isLocked: t.Optional(t.Boolean()),
   state: t.Optional(t.String()),
-  visibilityState: t.Optional(t.String()),
+  moderationStatus: t.Optional(t.String()),
   sort: t.Optional(
     t.Object({
       field: t.Union([

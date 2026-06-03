@@ -28,8 +28,7 @@ describe("Unit target semantics in Prisma schema", () => {
       "Post",
       "Subscription",
       "ModerationCase",
-      "RealmModerationQueueItem",
-      "ContentModerationState",
+      "ModerationAction",
       "UnitRealm",
       "CommentPromotion",
     ]) {
@@ -52,24 +51,27 @@ describe("Unit target semantics in Prisma schema", () => {
     expect(moderationCase).toContain("@@index([targetKind, targetId])");
     expect(moderationCase).toContain("@@index([addressedUnitId, state])");
 
-    const queueItem = modelBlock("RealmModerationQueueItem");
-    expectField(queueItem, "targetKind");
-    expectField(queueItem, "targetId");
-    expectField(queueItem, "addressedUnitId");
-    expect(queueItem).toContain("@@index([targetKind, targetId])");
-    expect(queueItem).toContain("@@index([addressedUnitId, state])");
-
-    const globalModeration = modelBlock("ContentModerationState");
-    expectField(globalModeration, "moderatedUnitId");
-    expect(globalModeration).toContain("moderatedUnitId String");
+    const moderationAction = modelBlock("ModerationAction");
+    expectField(moderationAction, "targetKind");
+    expectField(moderationAction, "targetId");
+    expectField(moderationAction, "resultingStatus");
+    expectField(moderationAction, "resultingLocked");
+    expectField(moderationAction, "idempotencyKey");
+    expect(moderationAction).not.toContain("before");
+    expect(moderationAction).not.toContain("after");
+    expect(moderationAction).toContain(
+      "@@index([targetKind, targetId, createdAt, id])",
+    );
+    expect(moderationAction).toContain(
+      "@@index([targetKind, targetId, actionKind, createdAt, id])",
+    );
 
     const unitRealm = modelBlock("UnitRealm");
-    expectField(unitRealm, "moderationState");
-    expectField(unitRealm, "visibilityState");
+    expectField(unitRealm, "moderationStatus");
     expectField(unitRealm, "isLocked");
     expect(unitRealm).toContain("@@id([realmUnitId, unitId])");
     expect(unitRealm).toContain(
-      "@@index([realmUnitId, moderationState, visibilityState, createdAt])",
+      "@@index([realmUnitId, moderationStatus, createdAt])",
     );
 
     const promotion = modelBlock("CommentPromotion");
@@ -84,6 +86,8 @@ describe("Unit target semantics in Prisma schema", () => {
     expectField(comment, "parentCommentId");
     expectField(comment, "depth");
     expectField(comment, "path");
+    expectField(comment, "moderationStatus");
+    expectField(comment, "deletedAt");
     expectNoField(comment, "targetUnitId");
 
     const structure = modelBlock("ContentStructure");

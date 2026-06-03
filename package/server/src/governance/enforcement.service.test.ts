@@ -19,7 +19,8 @@ const accountEnforcementCreate = mock(async ({ data }: any) => ({
   startsAt: new Date("2026-05-28T00:00:00.000Z"),
   expiresAt: data.expiresAt,
   revokedAt: null,
-  auditLogId: null,
+  decisionActionId: null,
+  revocationActionId: null,
   metadata: data.metadata,
   createdAt: new Date("2026-05-28T00:00:00.000Z"),
   updatedAt: new Date("2026-05-28T00:00:00.000Z"),
@@ -28,7 +29,7 @@ const accountEnforcementUpdate = mock(async ({ data, where }: any) => ({
   id: where.id,
   targetUserId: "user-1",
   kind: "BAN",
-  state: data.state,
+  state: data.state ?? (data.revocationActionId ? "REVOKED" : "ACTIVE"),
   reason: "abuse",
   safeMessage: data.safeMessage,
   decidedById: "staff-1",
@@ -36,24 +37,35 @@ const accountEnforcementUpdate = mock(async ({ data, where }: any) => ({
   startsAt: new Date("2026-05-28T00:00:00.000Z"),
   expiresAt: null,
   revokedAt: data.revokedAt,
-  auditLogId: null,
-  metadata: data.metadata,
+  decisionActionId: data.decisionActionId ?? null,
+  revocationActionId: data.revocationActionId ?? null,
+  metadata: data.metadata ?? {
+    authBoundary: {
+      sessionRevocation: {
+        attempted: true,
+        ok: true,
+        revokedSessions: 2,
+      },
+    },
+  },
   createdAt: new Date("2026-05-28T00:00:00.000Z"),
   updatedAt: new Date("2026-05-28T00:00:00.000Z"),
 }));
-const moderationCaseEventCreate = mock(async ({ data }: any) => ({
-  id: "event-1",
+const moderationActionCreate = mock(async ({ data }: any) => ({
+  id: "action-1",
   ...data,
   createdAt: new Date("2026-05-28T00:00:00.000Z"),
 }));
+const moderationActionFindUnique = mock(async () => null);
 const transactionMock = mock(async (fn: any) =>
   fn({
     accountEnforcement: {
       create: accountEnforcementCreate,
       update: accountEnforcementUpdate,
     },
-    moderationCaseEvent: {
-      create: moderationCaseEventCreate,
+    moderationAction: {
+      create: moderationActionCreate,
+      findUnique: moderationActionFindUnique,
     },
   }),
 );
@@ -98,7 +110,8 @@ describe("GovernanceEnforcementService", () => {
     accountEnforcementFindMany.mockResolvedValue([]);
     accountEnforcementCreate.mockClear();
     accountEnforcementUpdate.mockClear();
-    moderationCaseEventCreate.mockClear();
+    moderationActionCreate.mockClear();
+    moderationActionFindUnique.mockClear();
     transactionMock.mockClear();
     userFindUnique.mockClear();
     userFindUnique.mockResolvedValue({ authUserId: "auth-user-1" });
@@ -205,21 +218,21 @@ describe("GovernanceEnforcementService", () => {
       caseId: "case-1",
     });
 
-    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+    expect(moderationActionCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({
+        authority: "PLATFORM",
+        targetKind: "ACCOUNT",
+        targetId: "user-1",
         caseId: "case-1",
+        actionKind: "SILENCE",
         actorUserId: "staff-1",
-        eventType: "account.enforcement.applied",
-        decisionCode: "ALLOWED",
-        reason: "spam",
-        after: {
-          targetUserId: "user-1",
-          enforcementId: "enforcement-1",
-          kind: "SILENCE",
-          state: "ACTIVE",
-        },
-        reversible: true,
+        reasonCode: "ALLOWED",
+        reasonText: "spam",
       }),
+    });
+    expect(accountEnforcementUpdate).toHaveBeenLastCalledWith({
+      where: { id: "enforcement-1" },
+      data: { decisionActionId: "action-1" },
     });
     expect(broadcastMock).not.toHaveBeenCalled();
     expect(staffAuditLogCreate).toHaveBeenCalledWith({
@@ -267,7 +280,8 @@ describe("GovernanceEnforcementService", () => {
         startsAt: new Date("2026-05-28T00:00:00.000Z"),
         expiresAt: null,
         revokedAt: null,
-        auditLogId: null,
+        decisionActionId: "action-apply",
+        revocationActionId: null,
         metadata: null,
         createdAt: new Date("2026-05-28T00:00:00.000Z"),
         updatedAt: new Date("2026-05-28T00:00:00.000Z"),
@@ -291,25 +305,17 @@ describe("GovernanceEnforcementService", () => {
         metadata: { unblockReason: "appeal approved" },
       }),
     });
-    expect(moderationCaseEventCreate).toHaveBeenCalledWith({
+    expect(moderationActionCreate).toHaveBeenCalledWith({
       data: expect.objectContaining({
+        authority: "PLATFORM",
+        targetKind: "ACCOUNT",
+        targetId: "user-1",
         caseId: "case-1",
+        actionKind: "REVOKE_ENFORCEMENT",
         actorUserId: "staff-2",
-        eventType: "account.enforcement.revoked",
-        reason: "appeal approved",
-        before: {
-          targetUserId: "user-1",
-          enforcementId: "enforcement-1",
-          kind: "BAN",
-          state: "ACTIVE",
-        },
-        after: {
-          targetUserId: "user-1",
-          enforcementId: "enforcement-1",
-          kind: "BAN",
-          state: "REVOKED",
-        },
-        reversible: false,
+        reasonCode: "account.enforcement.revoked",
+        reasonText: "appeal approved",
+        reversesActionId: "action-apply",
       }),
     });
     expect(broadcastMock).toHaveBeenCalledWith({

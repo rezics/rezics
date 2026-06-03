@@ -9,12 +9,11 @@ export const postInclude = {
   unit: {
     include: {
       user: { select: publicUserSelect },
-      contentModerationState: true,
       translations: true,
       contentTranslations: true,
       supportLanguages: true,
       inRealms: {
-        where: { moderationState: "APPROVED", visibilityState: "VISIBLE" },
+        where: { moderationStatus: "APPROVED" },
         select: { realmUnitId: true },
         take: 1,
       },

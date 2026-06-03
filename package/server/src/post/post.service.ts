@@ -116,17 +116,13 @@ function applyStateFilter(
   }
 }
 
-type UnitRealmModerationState = "PENDING_REVIEW" | "APPROVED";
+type UnitRealmModerationStatus = "PENDING" | "APPROVED";
 
-function toUnitRealmModerationState(
-  state: PostListQuery["realmModerationState"],
+function toUnitRealmModerationStatus(
+  state: PostListQuery["realmModerationStatus"],
 ) {
   if (!state || state === "all") return undefined;
-  return state.toUpperCase() as
-    | "PENDING_REVIEW"
-    | "APPROVED"
-    | "REJECTED"
-    | "REMOVED";
+  return state.toUpperCase() as "PENDING" | "APPROVED" | "REMOVED";
 }
 
 function wikiContentTranslationStatus(isDraft: boolean) {
@@ -346,10 +342,10 @@ async function attachPinKinds<
 }
 
 export class PostService {
-  private async initialUnitRealmModerationStates(
+  private async initialUnitRealmModerationStatuses(
     tx: Pick<Prisma.TransactionClient, "realm">,
     realmUnitIds: string[],
-  ): Promise<Map<string, UnitRealmModerationState>> {
+  ): Promise<Map<string, UnitRealmModerationStatus>> {
     if (realmUnitIds.length === 0) return new Map();
     const realms = await tx.realm.findMany({
       where: { unitId: { in: realmUnitIds } },
@@ -358,46 +354,46 @@ export class PostService {
     return new Map(
       realms.map((realm) => [
         realm.unitId,
-        realm.contentRequiresApproval ? "PENDING_REVIEW" : "APPROVED",
+        realm.contentRequiresApproval ? "PENDING" : "APPROVED",
       ]),
     );
   }
 
-  private async createPendingRealmReviewQueueItem(
-    tx: Pick<
-      Prisma.TransactionClient,
-      "realmModerationQueueItem" | "realmModerationEvent"
-    >,
+  private async createPendingRealmReviewCase(
+    tx: Pick<Prisma.TransactionClient, "moderationCase" | "moderationAction">,
     input: {
       realmUnitId: string;
       unitId: string;
       actorUserId: string;
     },
   ) {
-    const created = await tx.realmModerationQueueItem.create({
+    const created = await tx.moderationCase.create({
       data: {
+        scope: "REALM",
         realmUnitId: input.realmUnitId,
         state: "NEW",
         reporterUserId: input.actorUserId,
         subjectUserId: input.actorUserId,
-        targetKind: "realm-unit-submission",
+        targetKind: "UNIT_REALM",
         targetId: input.unitId,
         addressedUnitId: input.unitId,
         reason: "Content submitted for realm approval",
         metadata: { relationModeration: true } as never,
       },
     });
-    await tx.realmModerationEvent.create({
+    await tx.moderationAction.create({
       data: {
-        queueItemId: created.id,
+        authority: "REALM",
         realmUnitId: input.realmUnitId,
+        targetKind: "UNIT_REALM",
+        targetId: input.unitId,
+        actionKind: "NOTE",
+        actorKind: "USER",
         actorUserId: input.actorUserId,
-        reason: created.reason,
-        after: {
-          state: created.state,
-          moderationState: "PENDING_REVIEW",
-          addressedUnitId: input.unitId,
-        } as never,
+        reasonCode: "realm.submission.pending_review",
+        reasonText: created.reason,
+        resultingStatus: "PENDING",
+        caseId: created.id,
       },
     });
   }
@@ -490,8 +486,8 @@ export class PostService {
     const skipNum = opts.start ?? 0;
     const sort = opts.sort === "top" || opts.sort === "hot" ? opts.sort : "new";
     const tagIds = this.normalizeTagIds(opts.tagIds);
-    const moderationState = toUnitRealmModerationState(
-      opts.realmModerationState,
+    const moderationStatus = toUnitRealmModerationStatus(
+      opts.realmModerationStatus,
     );
     const readLanguages = resolveEffectiveReadLanguageCandidates({
       languages: (opts as { languages?: string | readonly string[] }).languages,
@@ -512,13 +508,12 @@ export class PostService {
         inRealms: {
           some: {
             realmUnitId,
-            ...(options?.isAdmin && moderationState
-              ? { moderationState: moderationState as any }
+            ...(options?.isAdmin && moderationStatus
+              ? { moderationStatus: moderationStatus as any }
               : options?.isAdmin
                 ? {}
                 : {
-                    moderationState: "APPROVED" as const,
-                    visibilityState: "VISIBLE" as const,
+                    moderationStatus: "APPROVED" as const,
                   }),
           },
         },
@@ -831,26 +826,25 @@ export class PostService {
 
       if (realmIdsToWrite.length > 0) {
         const createdAt = new Date();
-        const initialStates = await this.initialUnitRealmModerationStates(
+        const initialStatuses = await this.initialUnitRealmModerationStatuses(
           tx,
           realmIdsToWrite,
         );
         await Promise.all(
           realmIdsToWrite.map(async (realmUnitId) => {
-            const moderationState =
-              initialStates.get(realmUnitId) ?? "APPROVED";
+            const moderationStatus =
+              initialStatuses.get(realmUnitId) ?? "APPROVED";
             await tx.unitRealm.create({
               data: {
                 realmUnitId,
                 unitId: created.unitId,
-                moderationState,
-                visibilityState: "VISIBLE",
+                moderationStatus,
                 isLocked: false,
                 createdAt,
               },
             });
-            if (moderationState === "PENDING_REVIEW") {
-              await this.createPendingRealmReviewQueueItem(tx, {
+            if (moderationStatus === "PENDING") {
+              await this.createPendingRealmReviewCase(tx, {
                 realmUnitId,
                 unitId: created.unitId,
                 actorUserId: authorUserId,
@@ -1010,12 +1004,9 @@ export class PostService {
             unitId,
           },
         },
-        select: { moderationState: true },
+        select: { moderationStatus: true },
       });
-      if (
-        existingRealmRow?.moderationState === "REJECTED" ||
-        existingRealmRow?.moderationState === "REMOVED"
-      ) {
+      if (existingRealmRow?.moderationStatus === "REMOVED") {
         throw new AppError(
           409,
           "Rejected or removed realm submissions require moderator review",
@@ -1046,11 +1037,12 @@ export class PostService {
       // This is author/member publishing, not realm admin content management.
       // Keep it in the post domain so ownership and post-to-realm policy stay
       // aligned with new realm post creation.
-      const initialStates = await this.initialUnitRealmModerationStates(tx, [
-        input.realmUnitId,
-      ]);
-      const moderationState =
-        initialStates.get(input.realmUnitId) ?? "APPROVED";
+      const initialStatuses = await this.initialUnitRealmModerationStatuses(
+        tx,
+        [input.realmUnitId],
+      );
+      const moderationStatus =
+        initialStatuses.get(input.realmUnitId) ?? "APPROVED";
       await tx.unitRealm.upsert({
         where: {
           realmUnitId_unitId: {
@@ -1061,14 +1053,13 @@ export class PostService {
         create: {
           realmUnitId: input.realmUnitId,
           unitId,
-          moderationState,
-          visibilityState: "VISIBLE",
+          moderationStatus,
           isLocked: false,
         },
         update: {},
       });
-      if (!existingRealmRow && moderationState === "PENDING_REVIEW") {
-        await this.createPendingRealmReviewQueueItem(tx, {
+      if (!existingRealmRow && moderationStatus === "PENDING") {
+        await this.createPendingRealmReviewCase(tx, {
           realmUnitId: input.realmUnitId,
           unitId,
           actorUserId: authorUserId,

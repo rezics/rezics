@@ -11,16 +11,14 @@ import { variantContextForRow } from "@/unit/variant-context";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { PostWithRelations } from "./types";
 
-function moderationState(post: PostWithRelations) {
-  return post.unit.contentModerationState?.state.toLowerCase() as
-    | PostDTO["globalModerationState"]
+function moderationStatus(post: PostWithRelations) {
+  return post.unit.moderationStatus.toLowerCase() as
+    | PostDTO["moderationStatus"]
     | undefined;
 }
 
 function contentHiddenByGlobalModeration(post: PostWithRelations) {
-  return ["HIDDEN", "TOMBSTONED", "REMOVED"].includes(
-    post.unit.contentModerationState?.state ?? "",
-  );
+  return post.unit.moderationStatus === "REMOVED";
 }
 
 function resolvedPostLanguage(
@@ -84,7 +82,7 @@ export function mapPostToDTO(
   variantContexts?: ReadonlyMap<string, VariantContextSummary>,
   languages: readonly string[] = [],
 ): PostDTO {
-  const globalModerationState = moderationState(post);
+  const unitModerationStatus = moderationStatus(post);
   const contentHidden = contentHiddenByGlobalModeration(post);
   const resolvedLanguage = previewLanguage(post, languages);
 
@@ -103,7 +101,7 @@ export function mapPostToDTO(
     status: post.unit.status,
     visibility: post.unit.visibility,
     licenseSlug: resolveStoredLicenseSlug(post.unit.licenseSlug),
-    globalModerationState,
+    moderationStatus: unitModerationStatus,
     isTombstone: post.unit.status === "DELETED" || contentHidden,
     scoreEntryId: post.scoreEntryId ?? null,
     replyCount: post.replyCount,

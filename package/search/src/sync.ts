@@ -133,27 +133,13 @@ const INDEXABLE_TYPES = [
 const PUBLIC_ELIGIBLE_UNIT_WHERE = {
   status: "PUBLISHED",
   visibility: "PUBLIC",
+  moderationStatus: "APPROVED",
 } as const;
 
-const SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES = [
-  "HIDDEN",
-  "TOMBSTONED",
-  "REMOVED",
-] as string[];
 const RATING_TAG_SLUGS = new Set<string>(RATING_TAGS);
 
 function publicSearchableUnitWhere(): Prisma.UnitWhereInput {
-  return {
-    ...PUBLIC_ELIGIBLE_UNIT_WHERE,
-    OR: [
-      { contentModerationState: null },
-      {
-        contentModerationState: {
-          state: { notIn: SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES as any },
-        },
-      },
-    ],
-  };
+  return { ...PUBLIC_ELIGIBLE_UNIT_WHERE };
 }
 
 function publicCatalogContentWhere(): Prisma.UnitWhereInput {
@@ -180,7 +166,7 @@ async function isContentPatchEligible(unitId: string): Promise<boolean> {
       type: true,
       status: true,
       visibility: true,
-      contentModerationState: { select: { state: true } },
+      moderationStatus: true,
       catalogEntryKind: true,
     },
   });
@@ -193,7 +179,7 @@ export function isPublicIndexableContentUnit(
         type: string;
         status: string;
         visibility: string;
-        contentModerationState?: { state: string } | null;
+        moderationStatus?: string | null;
         catalogEntryKind?: string | null;
       }
     | null
@@ -204,9 +190,7 @@ export function isPublicIndexableContentUnit(
       INDEXABLE_TYPES.includes(unit.type as any) &&
       unit.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
       unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility &&
-      !SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
-        unit.contentModerationState?.state as any,
-      ) &&
+      unit.moderationStatus === PUBLIC_ELIGIBLE_UNIT_WHERE.moderationStatus &&
       (unit.catalogEntryKind === null ||
         unit.catalogEntryKind === undefined ||
         unit.catalogEntryKind === "MAIN"),
@@ -218,7 +202,7 @@ export function isPublicIndexablePostUnit(
     | {
         status: string;
         visibility: string;
-        contentModerationState?: { state: string } | null;
+        moderationStatus?: string | null;
       }
     | null
     | undefined,
@@ -227,9 +211,7 @@ export function isPublicIndexablePostUnit(
     unit &&
       unit.status === PUBLIC_ELIGIBLE_UNIT_WHERE.status &&
       unit.visibility === PUBLIC_ELIGIBLE_UNIT_WHERE.visibility &&
-      !SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
-        unit.contentModerationState?.state as any,
-      ),
+      unit.moderationStatus === PUBLIC_ELIGIBLE_UNIT_WHERE.moderationStatus,
   );
 }
 
@@ -246,8 +228,7 @@ function realmIdsForSearch(unit: any): string[] {
   return (unit?.inRealms ?? [])
     .filter(
       (realm: any) =>
-        (!realm.moderationState || realm.moderationState === "APPROVED") &&
-        (!realm.visibilityState || realm.visibilityState === "VISIBLE"),
+        !realm.moderationStatus || realm.moderationStatus === "APPROVED",
     )
     .filter((realm: any) => realm.realm?.realm?.isPublic !== false)
     .map((realm: any) => realm.realmUnitId);
@@ -255,11 +236,10 @@ function realmIdsForSearch(unit: any): string[] {
 
 const realmSearchProjectionSelect = {
   inRealms: {
-    where: { moderationState: "APPROVED", visibilityState: "VISIBLE" },
+    where: { moderationStatus: "APPROVED" },
     select: {
       realmUnitId: true,
-      moderationState: true,
-      visibilityState: true,
+      moderationStatus: true,
       isLocked: true,
       realm: {
         select: {
@@ -376,7 +356,6 @@ const contentInclude: any = {
   } as any,
   unitTags: visibleUnitTagsInclude,
   ...realmSearchProjectionSelect,
-  contentModerationState: true,
   realmTagApplicationsAsTargetUnit: true,
   creditAttributions: {
     include: {
@@ -958,9 +937,7 @@ export async function syncSingleContent(client: SearchClient, unitId: string) {
     !INDEXABLE_TYPES.includes(unit.type as any) ||
     unit.status !== PUBLIC_ELIGIBLE_UNIT_WHERE.status ||
     unit.visibility !== PUBLIC_ELIGIBLE_UNIT_WHERE.visibility ||
-    SEARCH_EXCLUDED_GLOBAL_CONTENT_STATES.includes(
-      (unit as any).contentModerationState?.state,
-    ) ||
+    unit.moderationStatus !== PUBLIC_ELIGIBLE_UNIT_WHERE.moderationStatus ||
     !(
       unit.catalogEntryKind === null ||
       unit.catalogEntryKind === undefined ||
@@ -1159,8 +1136,7 @@ export async function patchContentRealmIds(
   const inRealms = await getSearchPrismaClient().unitRealm.findMany({
     where: {
       unitId,
-      moderationState: "APPROVED",
-      visibilityState: "VISIBLE",
+      moderationStatus: "APPROVED",
     },
     include: {
       realm: {
@@ -1317,7 +1293,6 @@ export async function syncPostsByAuthorSegment(
           contentTranslations: true,
           supportLanguages: true,
           ...realmSearchProjectionSelect,
-          contentModerationState: true,
         },
       },
     },
@@ -1462,7 +1437,7 @@ export async function patchPostFields(
         select: {
           status: true,
           visibility: true,
-          contentModerationState: { select: { state: true } },
+          moderationStatus: true,
         },
       },
     },
@@ -1768,7 +1743,6 @@ const postIncludeForSync = {
       contentTranslations: true,
       supportLanguages: true,
       ...realmSearchProjectionSelect,
-      contentModerationState: true,
     },
   },
   scoreEntry: true,
@@ -1781,7 +1755,6 @@ const postUnitIncludeForSync = {
   contentTranslations: true,
   supportLanguages: true,
   ...realmSearchProjectionSelect,
-  contentModerationState: true,
 } as const;
 
 function languageOrder(unit: any, rows: any[]): string[] {
@@ -1833,7 +1806,10 @@ const commentIncludeForSync = {
 } as const;
 
 function isPublicIndexableComment(comment: any): boolean {
-  return comment?.visibilityState !== "TOMBSTONED";
+  return (
+    comment?.moderationStatus === "APPROVED" &&
+    (comment?.deletedAt === null || comment?.deletedAt === undefined)
+  );
 }
 
 export function buildCommentDocument(comment: any): CommentSearchDocument {
@@ -1856,7 +1832,7 @@ export function buildCommentDocument(comment: any): CommentSearchDocument {
         : comment.lastReplyAt
       : null,
     state: comment.state ?? null,
-    visibilityState: comment.visibilityState ?? "VISIBLE",
+    moderationStatus: comment.moderationStatus ?? "APPROVED",
     createdAt:
       comment.createdAt instanceof Date
         ? comment.createdAt.toISOString()
@@ -2075,7 +2051,7 @@ export async function syncCommentSegment(
 ): Promise<SearchSegmentResult> {
   const limit = segmentLimit(options);
   const comments: any[] = await getSearchPrismaClient().comment.findMany({
-    where: { visibilityState: "VISIBLE" },
+    where: { moderationStatus: "APPROVED", deletedAt: null },
     include: commentIncludeForSync,
     orderBy: { id: "asc" },
     take: limit + 1,
@@ -2257,7 +2233,6 @@ export async function syncPostsByAuthor(client: SearchClient, userId: string) {
             user: true,
             targetUnit: { include: targetUnitSearchInclude },
             ...realmSearchProjectionSelect,
-            contentModerationState: true,
           },
         },
       },
@@ -2301,7 +2276,6 @@ export async function syncPostsByTarget(
             user: true,
             targetUnit: { include: targetUnitSearchInclude },
             ...realmSearchProjectionSelect,
-            contentModerationState: true,
           },
         },
       },

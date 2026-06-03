@@ -8,6 +8,7 @@ import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { revokeAuthSessionsForAuthUser } from "../auth-boundary/auth-internal.client";
 import { governanceAuditService } from "./audit.service";
 import { mapAccountEnforcementToDTO } from "./governance.mapper";
+import { moderationActionService } from "./moderation-action.service";
 import type { GovernanceListOptions } from "./types";
 
 const enforcementKindMap: Record<AccountEnforcementKind, any> = {
@@ -18,10 +19,6 @@ const enforcementKindMap: Record<AccountEnforcementKind, any> = {
   rate_limit: "RATE_LIMIT",
   trust_restriction: "TRUST_RESTRICTION",
 };
-
-function enforcementReversible(kind: AccountEnforcementKind) {
-  return kind !== "warning";
-}
 
 function notifyEnforcement(input: {
   kind: "moderation.subject.warning" | "moderation.appeal.updated";
@@ -163,25 +160,21 @@ export class GovernanceEnforcementService {
           metadata: metadata as never,
         },
       });
-      if (input.caseId) {
-        await tx.moderationCaseEvent.create({
-          data: {
-            caseId: input.caseId,
-            actorUserId: input.decidedById,
-            eventType: "account.enforcement.applied",
-            decisionCode: input.decisionCode,
-            reason: input.reason,
-            after: {
-              targetUserId: input.targetUserId,
-              enforcementId: created.id,
-              kind: created.kind,
-              state: created.state,
-            } as never,
-            reversible: enforcementReversible(input.kind),
-          },
-        });
-      }
-      return created;
+      const action = await moderationActionService.appendModerationAction(tx, {
+        authority: "PLATFORM",
+        targetKind: "ACCOUNT",
+        targetId: input.targetUserId,
+        actorKind: "USER",
+        actorUserId: input.decidedById,
+        actionKind: created.kind,
+        reasonCode: input.decisionCode,
+        reasonText: input.reason,
+        caseId: input.caseId,
+      });
+      return tx.accountEnforcement.update({
+        where: { id: created.id },
+        data: { decisionActionId: action.id },
+      });
     });
     if (input.kind === "warning") {
       notifyEnforcement({
@@ -328,30 +321,25 @@ export class GovernanceEnforcementService {
               } as never,
             },
           });
-          if (input.caseId) {
-            await tx.moderationCaseEvent.create({
-              data: {
-                caseId: input.caseId,
-                actorUserId: input.revokedById,
-                eventType: "account.enforcement.revoked",
-                reason: input.reason,
-                before: {
-                  targetUserId,
-                  enforcementId: row.id,
-                  kind: row.kind,
-                  state: row.state,
-                } as never,
-                after: {
-                  targetUserId,
-                  enforcementId: updated.id,
-                  kind: updated.kind,
-                  state: updated.state,
-                } as never,
-                reversible: false,
-              },
-            });
-          }
-          return updated;
+          const action = await moderationActionService.appendModerationAction(
+            tx,
+            {
+              authority: "PLATFORM",
+              targetKind: "ACCOUNT",
+              targetId: targetUserId,
+              actorKind: "USER",
+              actorUserId: input.revokedById,
+              actionKind: "REVOKE_ENFORCEMENT",
+              reasonCode: "account.enforcement.revoked",
+              reasonText: input.reason,
+              caseId: input.caseId,
+              reversesActionId: row.decisionActionId,
+            },
+          );
+          return tx.accountEnforcement.update({
+            where: { id: updated.id },
+            data: { revocationActionId: action.id },
+          });
         }),
       ),
     );

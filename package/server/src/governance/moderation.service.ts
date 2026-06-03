@@ -3,15 +3,28 @@ import { Prisma, prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapUnitRealmToDTO } from "../realm/realm.mapper";
-import { governanceAuditService } from "./audit.service";
 import {
-  mapContentModerationStateToDTO,
-  mapModerationCaseEventToDTO,
+  mapModerationActionToDTO,
   mapModerationCaseToDTO,
-  mapRealmModerationEventToDTO,
-  mapRealmQueueItemToDTO,
 } from "./governance.mapper";
+import {
+  moderationActionService,
+  type ModerationActionService,
+} from "./moderation-action.service";
 import type { GovernanceListOptions } from "./types";
+
+type ModerationStatusInput = "approved" | "pending" | "removed";
+type UnitModerationActionInput = "approve" | "remove" | "restore";
+type LockTargetKind = "POST" | "COMMENT" | "UNIT_REALM";
+type ModerationTx = Prisma.TransactionClient;
+
+type ModerationDecisionInput = {
+  moderatedUnitId: string;
+  decidedById: string;
+  reason: string;
+  caseId?: string | null;
+  metadata?: Record<string, unknown>;
+};
 
 type ContentModerationStateInput = {
   moderatedUnitId: string;
@@ -22,29 +35,9 @@ type ContentModerationStateInput = {
   metadata?: Record<string, unknown>;
 };
 
-type ModerationDecisionInput = {
-  moderatedUnitId: string;
-  decidedById: string;
-  reason: string;
-  caseId?: string | null;
-  metadata?: Record<string, unknown>;
-};
-
 type RealmUnitModerationStateInput = ModerationDecisionInput & {
   realmUnitId: string;
   state: "pending_review" | "approved" | "rejected" | "removed";
-};
-
-type CaseEventInput = {
-  caseId: string;
-  actorUserId: string;
-  eventType: string;
-  reason?: string | null;
-  decision?: Record<string, unknown> | null;
-  decisionCode?: string | null;
-  before?: Record<string, unknown> | null;
-  after?: Record<string, unknown> | null;
-  reversible?: boolean;
 };
 
 type RealmQueueDecisionKind =
@@ -61,67 +54,17 @@ type RealmQueueDecisionKind =
   | "duplicate"
   | "escalate";
 
-function toPrismaState(input: ContentModerationStateInput["state"]) {
-  return input.toUpperCase() as Uppercase<ContentModerationStateInput["state"]>;
+function upper<T extends string>(value: string): T {
+  return value.toUpperCase() as T;
 }
 
 function cleanJsonObject(
-  input: Record<string, unknown>,
-): Prisma.InputJsonObject {
+  input: Record<string, unknown> | undefined,
+): Prisma.InputJsonObject | undefined {
+  if (!input) return undefined;
   return Object.fromEntries(
     Object.entries(input).filter(([, value]) => value !== undefined),
   ) as Prisma.InputJsonObject;
-}
-
-function jsonOrUndefined(
-  input: Record<string, unknown> | null | undefined,
-): Prisma.InputJsonValue | typeof Prisma.JsonNull | undefined {
-  if (input === undefined) return undefined;
-  if (input === null) return Prisma.JsonNull;
-  return cleanJsonObject(input);
-}
-
-function contentModerationData(input: ContentModerationStateInput) {
-  return {
-    state: toPrismaState(input.state),
-    decidedById: input.decidedById ?? null,
-    caseId: input.caseId ?? null,
-    reason: input.reason ?? null,
-    metadata: input.metadata as never,
-  };
-}
-
-function contentModerationEventType(input: {
-  state: ContentModerationStateInput["state"];
-  realmUnitId?: string | null;
-}) {
-  const prefix = input.realmUnitId ? "realm_content" : "content";
-  if (input.state === "visible") return `${prefix}.restored`;
-  if (input.state === "hidden") return `${prefix}.hidden`;
-  if (input.state === "tombstoned") return `${prefix}.tombstoned`;
-  return `${prefix}.state_changed`;
-}
-
-function contentModerationEventSummary(input: {
-  state?: string | null;
-  reason?: string | null;
-  moderatedUnitId: string;
-  realmUnitId?: string | null;
-}) {
-  return cleanJsonObject({
-    state: input.state,
-    reason: input.reason,
-    moderatedUnitId: input.moderatedUnitId,
-    realmUnitId: input.realmUnitId ?? undefined,
-  });
-}
-
-function realmQueueStateForDecision(kind: RealmQueueDecisionKind) {
-  if (kind === "reject_from_realm") return "REJECTED";
-  if (kind === "reject") return "REJECTED";
-  if (kind === "duplicate") return "DUPLICATE";
-  if (kind === "escalate") return "ESCALATED";
-  return "ACTIONED";
 }
 
 function notifyModeration(input: {
@@ -144,12 +87,6 @@ function notifyModeration(input: {
     actorId: input.actorUserId ?? null,
     extra: input.extra,
   }).catch(() => {});
-}
-
-function auditPrivilegedMutation(
-  input: Parameters<typeof governanceAuditService.appendPrivilegedMutation>[0],
-) {
-  governanceAuditService.appendPrivilegedMutation(input).catch(() => {});
 }
 
 function enqueueModeratedContentSearch(moderatedUnitId: string) {
@@ -190,7 +127,46 @@ function enqueueRealmMembershipSearch(contentUnitId: string) {
   ]);
 }
 
+function snapshotStatusFromAction(
+  action: UnitModerationActionInput,
+): "APPROVED" | "REMOVED" {
+  return action === "remove" ? "REMOVED" : "APPROVED";
+}
+
+function actionKindFromAction(
+  action: UnitModerationActionInput,
+): "APPROVE" | "REMOVE" | "RESTORE" {
+  if (action === "approve") return "APPROVE";
+  if (action === "restore") return "RESTORE";
+  return "REMOVE";
+}
+
+function stateFromContentState(
+  state: ContentModerationStateInput["state"],
+): UnitModerationActionInput {
+  return state === "visible" ? "restore" : "remove";
+}
+
+function realmStatusFromLegacyState(
+  state: RealmUnitModerationStateInput["state"],
+): ModerationStatusInput {
+  if (state === "pending_review") return "pending";
+  if (state === "approved") return "approved";
+  return "removed";
+}
+
+function caseStateForDecision(kind: RealmQueueDecisionKind) {
+  if (kind === "reject_from_realm" || kind === "reject") return "REJECTED";
+  if (kind === "duplicate") return "DUPLICATE";
+  if (kind === "escalate") return "ESCALATED";
+  return "ACTIONED";
+}
+
 export class GovernanceModerationService {
+  constructor(
+    private readonly actions: ModerationActionService = moderationActionService,
+  ) {}
+
   async listCases(options: GovernanceListOptions = {}) {
     const rows = await prisma.moderationCase.findMany({
       orderBy: { createdAt: "desc" },
@@ -208,28 +184,58 @@ export class GovernanceModerationService {
   }
 
   async listCaseEvents(caseId: string, options: GovernanceListOptions = {}) {
-    const rows = await prisma.moderationCaseEvent.findMany({
+    return this.listCaseActions(caseId, options);
+  }
+
+  async listCaseActions(caseId: string, options: GovernanceListOptions = {}) {
+    const rows = await prisma.moderationAction.findMany({
       where: { caseId },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
       skip: options.offset ?? 0,
       take: options.limit ?? 50,
     });
-    return rows.map(mapModerationCaseEventToDTO);
+    return rows.map(mapModerationActionToDTO);
   }
 
-  private async createCaseEvent(tx: any, input: CaseEventInput) {
-    return tx.moderationCaseEvent.create({
-      data: {
-        caseId: input.caseId,
-        actorUserId: input.actorUserId,
-        eventType: input.eventType,
-        reason: input.reason ?? null,
-        decision: jsonOrUndefined(input.decision),
-        decisionCode: input.decisionCode ?? null,
-        before: jsonOrUndefined(input.before),
-        after: jsonOrUndefined(input.after),
-        reversible: input.reversible ?? false,
-      },
+  async listTargetActions(
+    targetKind: Prisma.ModerationTargetKind,
+    targetId: string,
+    options: GovernanceListOptions = {},
+  ) {
+    const rows = await prisma.moderationAction.findMany({
+      where: { targetKind, targetId },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      skip: options.offset ?? 0,
+      take: options.limit ?? 50,
+    });
+    return rows.map(mapModerationActionToDTO);
+  }
+
+  private appendNote(
+    tx: ModerationTx,
+    input: {
+      caseId: string;
+      actorUserId: string;
+      targetKind: Prisma.ModerationTargetKind;
+      targetId: string;
+      realmUnitId?: string | null;
+      reasonCode: string;
+      reasonText?: string | null;
+      metadata?: Record<string, unknown>;
+    },
+  ) {
+    return this.actions.appendModerationAction(tx, {
+      authority: input.realmUnitId ? "REALM" : "PLATFORM",
+      realmUnitId: input.realmUnitId,
+      targetKind: input.targetKind,
+      targetId: input.targetId,
+      actorKind: "USER",
+      actorUserId: input.actorUserId,
+      actionKind: "NOTE",
+      reasonCode: input.reasonCode,
+      reasonText: input.reasonText ?? null,
+      caseId: input.caseId,
+      importedFrom: input.metadata ? "legacy-workflow-metadata" : null,
     });
   }
 
@@ -242,7 +248,7 @@ export class GovernanceModerationService {
     metadata?: Record<string, unknown>;
   }) {
     const existing = await prisma.moderationCase.findFirst({
-      where: { sourceFeedbackId: input.feedbackId },
+      where: { sourceFeedbackId: input.feedbackId, scope: "PLATFORM" },
       orderBy: { createdAt: "asc" },
     });
     if (existing) return mapModerationCaseToDTO(existing);
@@ -250,18 +256,21 @@ export class GovernanceModerationService {
     const feedback = await prisma.feedback.findUniqueOrThrow({
       where: { id: input.feedbackId },
     });
+    const targetKind = feedback.targetKind ?? "FEEDBACK";
+    const targetId = feedback.targetId ?? feedback.id;
 
     const row = await prisma.$transaction(async (tx) => {
       const created = await tx.moderationCase.create({
         data: {
+          scope: "PLATFORM",
           state: "NEW",
           severity: input.severity ?? null,
           reporterUserId: feedback.userId,
-          targetKind: feedback.unitId ? "unit" : "feedback",
-          targetId: feedback.unitId ?? feedback.id,
-          addressedUnitId: feedback.unitId ?? null,
+          targetKind,
+          targetId,
+          addressedUnitId: feedback.addressedUnitId ?? null,
           sourceFeedbackId: feedback.id,
-          reason: input.reason ?? feedback.content ?? null,
+          reason: input.reason ?? feedback.content,
           safeSummary: input.safeSummary ?? null,
           metadata: cleanJsonObject({
             ...(input.metadata ?? {}),
@@ -270,15 +279,14 @@ export class GovernanceModerationService {
           }),
         },
       });
-      await this.createCaseEvent(tx, {
+      await this.appendNote(tx, {
         caseId: created.id,
         actorUserId: input.actorUserId,
-        eventType: "case.created_from_report",
-        reason: input.reason ?? feedback.content ?? null,
-        after: {
-          sourceFeedbackId: feedback.id,
-          addressedUnitId: feedback.unitId,
-        },
+        targetKind,
+        targetId,
+        reasonCode: "case.created_from_report",
+        reasonText: input.reason ?? feedback.content,
+        metadata: input.metadata,
       });
       return created;
     });
@@ -300,9 +308,6 @@ export class GovernanceModerationService {
     reason: string;
   }) {
     const row = await prisma.$transaction(async (tx) => {
-      const before = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.caseId },
-      });
       const updated = await tx.moderationCase.update({
         where: { id: input.caseId },
         data: {
@@ -311,19 +316,14 @@ export class GovernanceModerationService {
           reason: input.reason,
         },
       });
-      await this.createCaseEvent(tx, {
+      await this.appendNote(tx, {
         caseId: input.caseId,
         actorUserId: input.actorUserId,
-        eventType: "case.duplicate_linked",
-        reason: input.reason,
-        before: {
-          state: before.state,
-          duplicateOfCaseId: before.duplicateOfCaseId,
-        },
-        after: {
-          state: updated.state,
-          duplicateOfCaseId: updated.duplicateOfCaseId,
-        },
+        targetKind: updated.targetKind,
+        targetId: updated.targetId,
+        realmUnitId: updated.realmUnitId,
+        reasonCode: "case.duplicate_linked",
+        reasonText: input.reason,
       });
       return updated;
     });
@@ -337,29 +337,24 @@ export class GovernanceModerationService {
     reason?: string | null;
   }) {
     const row = await prisma.$transaction(async (tx) => {
-      const before = await tx.moderationCase.findUniqueOrThrow({
+      const current = await tx.moderationCase.findUniqueOrThrow({
         where: { id: input.caseId },
       });
       const updated = await tx.moderationCase.update({
         where: { id: input.caseId },
         data: {
-          state: input.assignedToUserId ? "ASSIGNED" : before.state,
+          state: input.assignedToUserId ? "ASSIGNED" : current.state,
           assignedToUserId: input.assignedToUserId,
         },
       });
-      await this.createCaseEvent(tx, {
+      await this.appendNote(tx, {
         caseId: input.caseId,
         actorUserId: input.actorUserId,
-        eventType: "case.assigned",
-        reason: input.reason ?? null,
-        before: {
-          assignedToUserId: before.assignedToUserId,
-          state: before.state,
-        },
-        after: {
-          assignedToUserId: updated.assignedToUserId,
-          state: updated.state,
-        },
+        targetKind: updated.targetKind,
+        targetId: updated.targetId,
+        realmUnitId: updated.realmUnitId,
+        reasonCode: "case.assigned",
+        reasonText: input.reason,
       });
       return updated;
     });
@@ -369,15 +364,6 @@ export class GovernanceModerationService {
       sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
-    });
-    auditPrivilegedMutation({
-      actorUserId: input.actorUserId,
-      action: "moderation.case.assigned",
-      targetKind: "moderation-case",
-      targetId: row.id,
-      reason: input.reason ?? "case assignment changed",
-      correlationId: row.id,
-      after: { assignedToUserId: row.assignedToUserId, state: row.state },
     });
     return mapModerationCaseToDTO(row);
   }
@@ -391,37 +377,30 @@ export class GovernanceModerationService {
     safeSummary?: string | null;
   }) {
     const row = await prisma.$transaction(async (tx) => {
-      const before = await tx.moderationCase.findUniqueOrThrow({
+      const current = await tx.moderationCase.findUniqueOrThrow({
         where: { id: input.caseId },
       });
       const updated = await tx.moderationCase.update({
         where: { id: input.caseId },
         data: {
           state: "TRIAGED",
-          severity: input.severity ?? before.severity,
+          severity: input.severity ?? current.severity,
           assignedToUserId:
             input.assignedToUserId === undefined
-              ? before.assignedToUserId
+              ? current.assignedToUserId
               : input.assignedToUserId,
-          reason: input.reason ?? before.reason,
-          safeSummary: input.safeSummary ?? before.safeSummary,
+          reason: input.reason ?? current.reason,
+          safeSummary: input.safeSummary ?? current.safeSummary,
         },
       });
-      await this.createCaseEvent(tx, {
+      await this.appendNote(tx, {
         caseId: input.caseId,
         actorUserId: input.actorUserId,
-        eventType: "case.triaged",
-        reason: input.reason ?? null,
-        before: {
-          state: before.state,
-          severity: before.severity,
-          assignedToUserId: before.assignedToUserId,
-        },
-        after: {
-          state: updated.state,
-          severity: updated.severity,
-          assignedToUserId: updated.assignedToUserId,
-        },
+        targetKind: updated.targetKind,
+        targetId: updated.targetId,
+        realmUnitId: updated.realmUnitId,
+        reasonCode: "case.triaged",
+        reasonText: input.reason,
       });
       return updated;
     });
@@ -435,31 +414,23 @@ export class GovernanceModerationService {
     reason: string;
     decision?: Record<string, unknown>;
   }) {
-    const nextState = input.state.toUpperCase() as
-      | "ACTIONED"
-      | "RESOLVED"
-      | "REJECTED";
     const row = await prisma.$transaction(async (tx) => {
-      const before = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.caseId },
-      });
       const updated = await tx.moderationCase.update({
         where: { id: input.caseId },
         data: {
-          state: nextState,
+          state: upper(input.state),
           reason: input.reason,
         },
       });
-      await this.createCaseEvent(tx, {
+      await this.appendNote(tx, {
         caseId: input.caseId,
         actorUserId: input.actorUserId,
-        eventType: "case.decided",
-        reason: input.reason,
-        decision: input.decision ?? null,
-        decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
-        reversible: nextState === "ACTIONED",
-        before: { state: before.state },
-        after: { state: updated.state },
+        targetKind: updated.targetKind,
+        targetId: updated.targetId,
+        realmUnitId: updated.realmUnitId,
+        reasonCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
+        reasonText: input.reason,
+        metadata: input.decision,
       });
       return updated;
     });
@@ -470,16 +441,6 @@ export class GovernanceModerationService {
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
     });
-    auditPrivilegedMutation({
-      actorUserId: input.actorUserId,
-      action: "moderation.case.decided",
-      targetKind: "moderation-case",
-      targetId: row.id,
-      decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
-      reason: input.reason,
-      correlationId: row.id,
-      after: { state: row.state },
-    });
     return mapModerationCaseToDTO(row);
   }
 
@@ -489,20 +450,18 @@ export class GovernanceModerationService {
     reason: string;
   }) {
     const row = await prisma.$transaction(async (tx) => {
-      const before = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.caseId },
-      });
       const updated = await tx.moderationCase.update({
         where: { id: input.caseId },
         data: { state: "NEW" },
       });
-      await this.createCaseEvent(tx, {
+      await this.appendNote(tx, {
         caseId: input.caseId,
         actorUserId: input.actorUserId,
-        eventType: "case.appeal_requested",
-        reason: input.reason,
-        before: { state: before.state },
-        after: { state: updated.state },
+        targetKind: updated.targetKind,
+        targetId: updated.targetId,
+        realmUnitId: updated.realmUnitId,
+        reasonCode: "case.appeal_requested",
+        reasonText: input.reason,
       });
       return updated;
     });
@@ -513,15 +472,6 @@ export class GovernanceModerationService {
       actorUserId: input.actorUserId,
       extra: { caseId: row.id, state: row.state },
     });
-    auditPrivilegedMutation({
-      actorUserId: input.actorUserId,
-      action: "moderation.case.appeal_requested",
-      targetKind: "moderation-case",
-      targetId: row.id,
-      reason: input.reason,
-      correlationId: row.id,
-      after: { state: row.state },
-    });
     return mapModerationCaseToDTO(row);
   }
 
@@ -529,23 +479,23 @@ export class GovernanceModerationService {
     realmUnitId: string,
     options: GovernanceListOptions = {},
   ) {
-    const rows = await prisma.realmModerationQueueItem.findMany({
-      where: { realmUnitId },
+    const rows = await prisma.moderationCase.findMany({
+      where: { scope: "REALM", realmUnitId },
       orderBy: { createdAt: "desc" },
       skip: options.offset ?? 0,
       take: options.limit ?? 50,
     });
-    return rows.map(mapRealmQueueItemToDTO);
+    return rows.map(mapModerationCaseToDTO);
   }
 
   async listEscalatedRealmQueue(options: GovernanceListOptions = {}) {
-    const rows = await prisma.realmModerationQueueItem.findMany({
-      where: { state: "ESCALATED" },
+    const rows = await prisma.moderationCase.findMany({
+      where: { scope: "REALM", state: "ESCALATED" },
       orderBy: { updatedAt: "desc" },
       skip: options.offset ?? 0,
       take: options.limit ?? 50,
     });
-    return rows.map(mapRealmQueueItemToDTO);
+    return rows.map(mapModerationCaseToDTO);
   }
 
   async listRealmQueueEvents(
@@ -553,42 +503,8 @@ export class GovernanceModerationService {
     queueItemId: string,
     options: GovernanceListOptions = {},
   ) {
-    const rows = await prisma.realmModerationEvent.findMany({
-      where: { realmUnitId, queueItemId },
-      orderBy: { createdAt: "asc" },
-      skip: options.offset ?? 0,
-      take: options.limit ?? 50,
-    });
-    return rows.map(mapRealmModerationEventToDTO);
-  }
-
-  private async createRealmQueueEvent(
-    tx: any,
-    input: {
-      queueItemId: string;
-      realmUnitId: string;
-      actorUserId: string;
-      decisionKind?: RealmQueueDecisionKind | null;
-      decision?: Record<string, unknown> | null;
-      decisionCode?: string | null;
-      reason?: string | null;
-      before?: Record<string, unknown> | null;
-      after?: Record<string, unknown> | null;
-    },
-  ) {
-    return tx.realmModerationEvent.create({
-      data: {
-        queueItemId: input.queueItemId,
-        realmUnitId: input.realmUnitId,
-        actorUserId: input.actorUserId,
-        decisionKind: input.decisionKind ?? null,
-        decision: jsonOrUndefined(input.decision),
-        decisionCode: input.decisionCode ?? null,
-        reason: input.reason ?? null,
-        before: jsonOrUndefined(input.before),
-        after: jsonOrUndefined(input.after),
-      },
-    });
+    void realmUnitId;
+    return this.listCaseActions(queueItemId, options);
   }
 
   async createRealmQueueItem(input: {
@@ -605,45 +521,37 @@ export class GovernanceModerationService {
     safeSummary?: string | null;
     metadata?: Record<string, unknown>;
   }) {
+    const targetKind = upper<Prisma.ModerationTargetKind>(input.targetKind);
     const row = await prisma.$transaction(async (tx) => {
-      const created = await tx.realmModerationQueueItem.create({
+      const created = await tx.moderationCase.create({
         data: {
+          scope: "REALM",
           realmUnitId: input.realmUnitId,
           state: "NEW",
           reporterUserId: input.reporterUserId ?? null,
           subjectUserId: input.subjectUserId ?? null,
-          targetKind: input.targetKind,
+          targetKind,
           targetId: input.targetId,
           addressedUnitId: input.addressedUnitId ?? null,
           sourceFeedbackId: input.sourceFeedbackId ?? null,
           assignedToUserId: input.assignedToUserId ?? null,
           reason: input.reason ?? null,
           safeSummary: input.safeSummary ?? null,
-          metadata: (input.metadata ?? undefined) as never,
+          metadata: cleanJsonObject(input.metadata),
         },
       });
-      await this.createRealmQueueEvent(tx, {
-        queueItemId: created.id,
-        realmUnitId: input.realmUnitId,
+      await this.appendNote(tx, {
+        caseId: created.id,
         actorUserId: input.actorUserId,
-        reason: input.reason ?? null,
-        after: {
-          state: created.state,
-          targetKind: created.targetKind,
-          targetId: created.targetId,
-          addressedUnitId: created.addressedUnitId,
-        },
+        targetKind,
+        targetId: input.targetId,
+        realmUnitId: input.realmUnitId,
+        reasonCode: "realm_case.created",
+        reasonText: input.reason,
       });
       return created;
     });
-    notifyModeration({
-      kind: "moderation.report.updated",
-      recipientUserId: row.reporterUserId,
-      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
-      actorUserId: input.actorUserId,
-      extra: { queueItemId: row.id, state: row.state },
-    });
-    return mapRealmQueueItemToDTO(row);
+    return mapModerationCaseToDTO(row);
   }
 
   async createRealmQueueItemFromFeedback(input: {
@@ -655,14 +563,15 @@ export class GovernanceModerationService {
     safeSummary?: string | null;
     metadata?: Record<string, unknown>;
   }) {
-    const existing = await prisma.realmModerationQueueItem.findFirst({
+    const existing = await prisma.moderationCase.findFirst({
       where: {
+        scope: "REALM",
         realmUnitId: input.realmUnitId,
         sourceFeedbackId: input.feedbackId,
       },
       orderBy: { createdAt: "asc" },
     });
-    if (existing) return mapRealmQueueItemToDTO(existing);
+    if (existing) return mapModerationCaseToDTO(existing);
 
     const feedback = await prisma.feedback.findUniqueOrThrow({
       where: { id: input.feedbackId },
@@ -671,18 +580,18 @@ export class GovernanceModerationService {
       realmUnitId: input.realmUnitId,
       actorUserId: input.actorUserId,
       reporterUserId: feedback.userId,
-      targetKind: feedback.unitId ? "unit" : "feedback",
-      targetId: feedback.unitId ?? feedback.id,
-      addressedUnitId: feedback.unitId ?? null,
+      targetKind: (feedback.targetKind ?? "FEEDBACK").toLowerCase(),
+      targetId: feedback.targetId ?? feedback.id,
+      addressedUnitId: feedback.addressedUnitId ?? null,
       sourceFeedbackId: feedback.id,
       assignedToUserId: input.assignedToUserId,
-      reason: input.reason ?? feedback.content ?? null,
+      reason: input.reason ?? feedback.content,
       safeSummary: input.safeSummary,
-      metadata: cleanJsonObject({
+      metadata: {
         ...(input.metadata ?? {}),
         feedbackType: feedback.type,
         feedbackUrl: feedback.url ?? undefined,
-      }),
+      },
     });
   }
 
@@ -697,143 +606,74 @@ export class GovernanceModerationService {
     decision?: Record<string, unknown>;
     metadata?: Record<string, unknown>;
   }) {
-    let moderationBefore: string | null | undefined;
-    let moderationAfter: string | null | undefined;
     const row = await prisma.$transaction(async (tx) => {
-      const before = await tx.realmModerationQueueItem.findUniqueOrThrow({
+      const current = await tx.moderationCase.findUniqueOrThrow({
         where: { id: input.queueItemId },
       });
-      const nextState = realmQueueStateForDecision(input.decisionKind);
-      const updated = await tx.realmModerationQueueItem.update({
+      const updated = await tx.moderationCase.update({
         where: { id: input.queueItemId },
         data: {
-          state: nextState,
-          linkedCaseId: input.linkedCaseId ?? before.linkedCaseId,
+          state: caseStateForDecision(input.decisionKind),
+          parentCaseId: input.linkedCaseId ?? current.parentCaseId,
           reason: input.reason,
           metadata: cleanJsonObject({
-            ...(before.metadata &&
-            typeof before.metadata === "object" &&
-            !Array.isArray(before.metadata)
-              ? before.metadata
+            ...(current.metadata &&
+            typeof current.metadata === "object" &&
+            !Array.isArray(current.metadata)
+              ? current.metadata
               : {}),
             ...(input.metadata ?? {}),
             duplicateOfQueueItemId: input.duplicateOfQueueItemId ?? undefined,
-          }) as never,
+          }),
         },
       });
 
-      if (input.decisionKind === "hide_from_realm" && before.addressedUnitId) {
-        await tx.unitRealm.update({
-          where: {
-            realmUnitId_unitId: {
-              realmUnitId: input.realmUnitId,
-              unitId: before.addressedUnitId,
-            },
-          },
-          data: { visibilityState: "HIDDEN" },
-        });
-      }
-      if (input.decisionKind === "lock" && before.addressedUnitId) {
-        await tx.unitRealm.update({
-          where: {
-            realmUnitId_unitId: {
-              realmUnitId: input.realmUnitId,
-              unitId: before.addressedUnitId,
-            },
-          },
-          data: { isLocked: true },
-        });
-      }
       if (
-        (input.decisionKind === "approve_for_realm" ||
-          input.decisionKind === "reject_from_realm") &&
-        before.addressedUnitId
+        input.decisionKind === "approve_for_realm" ||
+        input.decisionKind === "reject_from_realm" ||
+        input.decisionKind === "remove_from_realm"
       ) {
-        const nextModerationState =
-          input.decisionKind === "approve_for_realm" ? "APPROVED" : "REJECTED";
-        const unitRealmBefore = await tx.unitRealm.findUnique({
-          where: {
-            realmUnitId_unitId: {
-              realmUnitId: input.realmUnitId,
-              unitId: before.addressedUnitId,
-            },
-          },
-          select: { moderationState: true },
-        });
-        moderationBefore = unitRealmBefore?.moderationState ?? null;
-        moderationAfter = nextModerationState;
-        await tx.unitRealm.update({
-          where: {
-            realmUnitId_unitId: {
-              realmUnitId: input.realmUnitId,
-              unitId: before.addressedUnitId,
-            },
-          },
-          data: { moderationState: nextModerationState },
-        });
-      }
-      if (
-        input.decisionKind === "remove_from_realm" &&
-        before.addressedUnitId
-      ) {
-        const unitRealmBefore = await tx.unitRealm.findUnique({
-          where: {
-            realmUnitId_unitId: {
-              realmUnitId: input.realmUnitId,
-              unitId: before.addressedUnitId,
-            },
-          },
-          select: { moderationState: true },
-        });
-        moderationBefore = unitRealmBefore?.moderationState ?? null;
-        moderationAfter = "REMOVED";
-        await tx.unitRealm.update({
-          where: {
-            realmUnitId_unitId: {
-              realmUnitId: input.realmUnitId,
-              unitId: before.addressedUnitId,
-            },
-          },
-          data: { moderationState: "REMOVED" },
-        });
-      }
-      if (
-        (input.decisionKind === "remove_member" ||
-          input.decisionKind === "ban_from_realm") &&
-        before.subjectUserId
-      ) {
-        await tx.realmMember.delete({
-          where: {
-            realmUnitId_userId: {
-              realmUnitId: input.realmUnitId,
-              userId: before.subjectUserId,
-            },
-          },
+        await this.setRealmUnitModerationStatusInTx(tx, {
+          realmUnitId: input.realmUnitId,
+          unitId: current.addressedUnitId ?? current.targetId,
+          actorUserId: input.actorUserId,
+          action:
+            input.decisionKind === "approve_for_realm" ? "approve" : "remove",
+          reasonCode:
+            (input.decision?.code as string | undefined) ??
+            `realm.${input.decisionKind}`,
+          reasonText: input.reason,
+          caseId: current.id,
         });
       }
 
-      await this.createRealmQueueEvent(tx, {
-        queueItemId: input.queueItemId,
-        realmUnitId: input.realmUnitId,
+      if (input.decisionKind === "lock" && current.addressedUnitId) {
+        await this.setLockInTx(tx, {
+          targetKind: "UNIT_REALM",
+          targetId: current.addressedUnitId,
+          realmUnitId: input.realmUnitId,
+          isLocked: true,
+          actorUserId: input.actorUserId,
+          reasonCode: "realm.lock",
+          reasonText: input.reason,
+          caseId: current.id,
+        });
+      }
+
+      await this.appendNote(tx, {
+        caseId: current.id,
         actorUserId: input.actorUserId,
-        decisionKind: input.decisionKind,
-        decision: input.decision ?? null,
-        decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
-        reason: input.reason,
-        before: {
-          state: before.state,
-          linkedCaseId: before.linkedCaseId,
-          moderationState: moderationBefore,
-        },
-        after: {
-          state: updated.state,
-          linkedCaseId: updated.linkedCaseId,
-          moderationState: moderationAfter,
-          duplicateOfQueueItemId: input.duplicateOfQueueItemId ?? undefined,
-        },
+        targetKind: current.targetKind,
+        targetId: current.targetId,
+        realmUnitId: input.realmUnitId,
+        reasonCode:
+          (input.decision?.code as string | undefined) ?? input.decisionKind,
+        reasonText: input.reason,
+        metadata: input.decision,
       });
       return updated;
     });
+
     if (
       input.decisionKind === "remove_from_realm" ||
       input.decisionKind === "approve_for_realm" ||
@@ -842,42 +682,7 @@ export class GovernanceModerationService {
       const contentUnitId = row.addressedUnitId;
       if (contentUnitId) await enqueueRealmMembershipSearch(contentUnitId);
     }
-    notifyModeration({
-      kind: "moderation.report.updated",
-      recipientUserId: row.reporterUserId,
-      sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
-      actorUserId: input.actorUserId,
-      extra: { queueItemId: row.id, state: row.state },
-    });
-    if (input.decisionKind === "warn") {
-      notifyModeration({
-        kind: "moderation.subject.warning",
-        recipientUserId: row.subjectUserId,
-        sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
-        actorUserId: input.actorUserId,
-        extra: { queueItemId: row.id, decisionKind: input.decisionKind },
-      });
-    }
-    auditPrivilegedMutation({
-      actorUserId: input.actorUserId,
-      action: "realm.moderation.decided",
-      targetKind: "realm-moderation-queue",
-      targetId: row.id,
-      decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
-      reason: input.reason,
-      correlationId: row.linkedCaseId ?? row.id,
-      before:
-        moderationBefore !== undefined
-          ? { moderationState: moderationBefore }
-          : undefined,
-      after: {
-        state: row.state,
-        decisionKind: input.decisionKind,
-        moderationState: moderationAfter,
-      },
-      metadata: { realmUnitId: input.realmUnitId },
-    });
-    return mapRealmQueueItemToDTO(row);
+    return mapModerationCaseToDTO(row);
   }
 
   async escalateRealmQueueItem(input: {
@@ -889,63 +694,60 @@ export class GovernanceModerationService {
     safeSummary?: string | null;
   }) {
     const row = await prisma.$transaction(async (tx) => {
-      const queue = await tx.realmModerationQueueItem.findUniqueOrThrow({
+      const realmCase = await tx.moderationCase.findUniqueOrThrow({
         where: { id: input.queueItemId },
       });
-      let caseId = input.caseId ?? queue.linkedCaseId;
-      if (!caseId) {
-        const moderationCase = await tx.moderationCase.create({
+      let platformCaseId = input.caseId ?? realmCase.parentCaseId;
+      if (!platformCaseId) {
+        const platformCase = await tx.moderationCase.create({
           data: {
+            scope: "PLATFORM",
             state: "ESCALATED",
-            severity: null,
-            reporterUserId: queue.reporterUserId,
-            subjectUserId: queue.subjectUserId,
-            targetKind: queue.targetKind,
-            targetId: queue.targetId,
-            addressedUnitId: queue.addressedUnitId,
+            reporterUserId: realmCase.reporterUserId,
+            subjectUserId: realmCase.subjectUserId,
+            targetKind: realmCase.targetKind,
+            targetId: realmCase.targetId,
+            addressedUnitId: realmCase.addressedUnitId,
             realmUnitId: input.realmUnitId,
-            sourceFeedbackId: queue.sourceFeedbackId,
+            sourceFeedbackId: realmCase.sourceFeedbackId,
             reason: input.reason,
-            safeSummary: input.safeSummary ?? queue.safeSummary,
-            metadata: { escalatedFromRealmQueueItemId: queue.id } as never,
+            safeSummary: input.safeSummary ?? realmCase.safeSummary,
+            metadata: cleanJsonObject({
+              escalatedFromRealmCaseId: realmCase.id,
+            }),
           },
         });
-        caseId = moderationCase.id;
-        await this.createCaseEvent(tx, {
-          caseId,
+        platformCaseId = platformCase.id;
+        await this.appendNote(tx, {
+          caseId: platformCase.id,
           actorUserId: input.actorUserId,
-          eventType: "case.escalated_from_realm_queue",
-          reason: input.reason,
-          after: {
-            realmUnitId: input.realmUnitId,
-            queueItemId: queue.id,
-          },
-          reversible: false,
+          targetKind: platformCase.targetKind,
+          targetId: platformCase.targetId,
+          realmUnitId: input.realmUnitId,
+          reasonCode: "case.escalated_from_realm_case",
+          reasonText: input.reason,
         });
       }
-      const updated = await tx.realmModerationQueueItem.update({
+      const updated = await tx.moderationCase.update({
         where: { id: input.queueItemId },
         data: {
           state: "ESCALATED",
-          linkedCaseId: caseId,
+          parentCaseId: platformCaseId,
           reason: input.reason,
-          safeSummary: input.safeSummary ?? queue.safeSummary,
+          safeSummary: input.safeSummary ?? realmCase.safeSummary,
         },
       });
-      await this.createRealmQueueEvent(tx, {
-        queueItemId: input.queueItemId,
+      await this.actions.appendModerationAction(tx, {
+        authority: "REALM",
         realmUnitId: input.realmUnitId,
+        targetKind: realmCase.targetKind,
+        targetId: realmCase.targetId,
+        actorKind: "USER",
         actorUserId: input.actorUserId,
-        decisionKind: "escalate",
-        reason: input.reason,
-        before: {
-          state: queue.state,
-          linkedCaseId: queue.linkedCaseId,
-        },
-        after: {
-          state: updated.state,
-          linkedCaseId: updated.linkedCaseId,
-        },
+        actionKind: "ESCALATE",
+        reasonCode: "realm.case.escalated",
+        reasonText: input.reason,
+        caseId: realmCase.id,
       });
       return updated;
     });
@@ -954,115 +756,140 @@ export class GovernanceModerationService {
       recipientUserId: row.reporterUserId,
       sourceUnitId: row.addressedUnitId ?? row.realmUnitId ?? row.targetId,
       actorUserId: input.actorUserId,
-      extra: { queueItemId: row.id, linkedCaseId: row.linkedCaseId },
+      extra: { caseId: row.id, parentCaseId: row.parentCaseId },
     });
-    auditPrivilegedMutation({
-      actorUserId: input.actorUserId,
-      action: "realm.moderation.escalated",
-      targetKind: "realm-moderation-queue",
-      targetId: row.id,
-      reason: input.reason,
-      correlationId: row.linkedCaseId ?? row.id,
-      after: { state: row.state, linkedCaseId: row.linkedCaseId },
-      metadata: { realmUnitId: input.realmUnitId },
-    });
-    return mapRealmQueueItemToDTO(row);
+    return mapModerationCaseToDTO(row);
   }
 
   async getGlobalContentState(moderatedUnitId: string) {
-    const row = await prisma.contentModerationState.findUnique({
-      where: { moderatedUnitId },
+    const row = await prisma.unit.findUnique({
+      where: { id: moderatedUnitId },
+      select: {
+        id: true,
+        moderationStatus: true,
+        updatedAt: true,
+        createdAt: true,
+      },
     });
-    return row ? mapContentModerationStateToDTO(row) : null;
+    if (!row) return null;
+    return {
+      moderatedUnitId: row.id,
+      state: row.moderationStatus === "REMOVED" ? "removed" : "visible",
+      decidedByUserId: null,
+      caseId: null,
+      reason: null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
   }
 
   async listGlobalContentStates(moderatedUnitIds: string[]) {
     const ids = [...new Set(moderatedUnitIds)];
     if (ids.length === 0) return [];
-
-    const rows = await prisma.contentModerationState.findMany({
-      where: { moderatedUnitId: { in: ids } },
+    const rows = await prisma.unit.findMany({
+      where: { id: { in: ids } },
+      select: {
+        id: true,
+        moderationStatus: true,
+        updatedAt: true,
+        createdAt: true,
+      },
       orderBy: { updatedAt: "desc" },
     });
-    return rows.map(mapContentModerationStateToDTO);
+    return rows.map((row) => ({
+      moderatedUnitId: row.id,
+      state: row.moderationStatus === "REMOVED" ? "removed" : "visible",
+      decidedByUserId: null,
+      caseId: null,
+      reason: null,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    }));
+  }
+
+  async setUnitModerationStatus(input: {
+    unitId: string;
+    actorUserId: string;
+    action: UnitModerationActionInput;
+    reasonCode: string;
+    reasonText?: string | null;
+    caseId?: string | null;
+    requestId?: string | null;
+    idempotencyKey?: string | null;
+  }) {
+    const row = await prisma.$transaction(async (tx) =>
+      this.setUnitModerationStatusInTx(tx, input),
+    );
+    await enqueueModeratedContentSearch(input.unitId);
+    return row;
+  }
+
+  private async setUnitModerationStatusInTx(
+    tx: ModerationTx,
+    input: {
+      unitId: string;
+      actorUserId: string;
+      action: UnitModerationActionInput;
+      reasonCode: string;
+      reasonText?: string | null;
+      caseId?: string | null;
+      requestId?: string | null;
+      idempotencyKey?: string | null;
+    },
+  ) {
+    const resultingStatus = snapshotStatusFromAction(input.action);
+    const unit = await tx.unit.update({
+      where: { id: input.unitId },
+      data: { moderationStatus: resultingStatus },
+    });
+    await this.actions.appendModerationAction(tx, {
+      authority: "PLATFORM",
+      targetKind: "UNIT",
+      targetId: input.unitId,
+      actorKind: "USER",
+      actorUserId: input.actorUserId,
+      actionKind: actionKindFromAction(input.action),
+      resultingStatus,
+      reasonCode: input.reasonCode,
+      reasonText: input.reasonText,
+      caseId: input.caseId,
+      requestId: input.requestId,
+      idempotencyKey: input.idempotencyKey,
+    });
+    return unit;
   }
 
   async setGlobalContentState(input: ContentModerationStateInput) {
-    const data = contentModerationData(input);
-    const row = input.caseId
-      ? await prisma.$transaction(async (tx) => {
-          const before = await tx.contentModerationState.findUnique({
-            where: { moderatedUnitId: input.moderatedUnitId },
-          });
-          const updated = await tx.contentModerationState.upsert({
-            where: { moderatedUnitId: input.moderatedUnitId },
-            create: {
-              moderatedUnitId: input.moderatedUnitId,
-              ...data,
-            },
-            update: data,
-          });
-          await this.createCaseEvent(tx, {
-            caseId: input.caseId as string,
-            actorUserId: input.decidedById ?? "",
-            eventType: contentModerationEventType({ state: input.state }),
-            reason: input.reason ?? null,
-            before: before
-              ? contentModerationEventSummary({
-                  state: before.state,
-                  reason: before.reason,
-                  moderatedUnitId: input.moderatedUnitId,
-                })
-              : null,
-            after: contentModerationEventSummary({
-              state: updated.state,
-              reason: updated.reason,
-              moderatedUnitId: input.moderatedUnitId,
-            }),
-            reversible: input.state !== "visible",
-          });
-          return updated;
-        })
-      : await prisma.contentModerationState.upsert({
-          where: { moderatedUnitId: input.moderatedUnitId },
-          create: {
-            moderatedUnitId: input.moderatedUnitId,
-            ...data,
-          },
-          update: data,
-        });
-    await enqueueModeratedContentSearch(input.moderatedUnitId);
-    auditPrivilegedMutation({
+    const unit = await this.setUnitModerationStatus({
+      unitId: input.moderatedUnitId,
       actorUserId: input.decidedById ?? "",
-      action: "content.moderation.state_changed",
-      targetKind: "content",
-      targetId: input.moderatedUnitId,
-      reason: input.reason ?? "content moderation state changed",
-      correlationId: input.caseId ?? input.moderatedUnitId,
-      after: { state: row.state, caseId: row.caseId },
+      action: stateFromContentState(input.state),
+      reasonCode: input.state,
+      reasonText: input.reason,
+      caseId: input.caseId,
     });
-    return mapContentModerationStateToDTO(row);
+    return {
+      moderatedUnitId: unit.id,
+      state: unit.moderationStatus === "REMOVED" ? "removed" : "visible",
+      decidedByUserId: input.decidedById ?? null,
+      caseId: input.caseId ?? null,
+      reason: input.reason ?? null,
+      metadata: input.metadata,
+      createdAt: unit.createdAt.toISOString(),
+      updatedAt: unit.updatedAt.toISOString(),
+    };
   }
 
   async hideGlobal(input: ModerationDecisionInput) {
-    return this.setGlobalContentState({
-      ...input,
-      state: "hidden",
-    });
+    return this.setGlobalContentState({ ...input, state: "hidden" });
   }
 
   async tombstoneGlobal(input: ModerationDecisionInput) {
-    return this.setGlobalContentState({
-      ...input,
-      state: "tombstoned",
-    });
+    return this.setGlobalContentState({ ...input, state: "tombstoned" });
   }
 
   async restoreGlobal(input: ModerationDecisionInput) {
-    return this.setGlobalContentState({
-      ...input,
-      state: "visible",
-    });
+    return this.setGlobalContentState({ ...input, state: "visible" });
   }
 
   async listRealmUnitStates(input: { realmUnitId: string; unitIds: string[] }) {
@@ -1079,135 +906,107 @@ export class GovernanceModerationService {
     return rows.map(mapUnitRealmToDTO);
   }
 
-  async setRealmUnitVisibilityState(
-    input: ContentModerationStateInput & { realmUnitId: string },
-  ) {
-    const visibilityState =
-      input.state === "hidden"
-        ? "HIDDEN"
-        : input.state === "tombstoned"
-          ? "TOMBSTONED"
-          : "VISIBLE";
-    const row = input.caseId
-      ? await prisma.$transaction(async (tx) => {
-          const before = await tx.unitRealm.findUnique({
-            where: {
-              realmUnitId_unitId: {
-                realmUnitId: input.realmUnitId,
-                unitId: input.moderatedUnitId,
-              },
-            },
-          });
-          const updated = await tx.unitRealm.update({
-            where: {
-              realmUnitId_unitId: {
-                realmUnitId: input.realmUnitId,
-                unitId: input.moderatedUnitId,
-              },
-            },
-            data: { visibilityState },
-          });
-          await this.createCaseEvent(tx, {
-            caseId: input.caseId as string,
-            actorUserId: input.decidedById ?? "",
-            eventType: contentModerationEventType({
-              state: input.state,
-              realmUnitId: input.realmUnitId,
-            }),
-            reason: input.reason ?? null,
-            before: before
-              ? contentModerationEventSummary({
-                  state: before.visibilityState,
-                  reason: input.reason,
-                  moderatedUnitId: input.moderatedUnitId,
-                  realmUnitId: input.realmUnitId,
-                })
-              : null,
-            after: contentModerationEventSummary({
-              state: updated.visibilityState,
-              reason: input.reason,
-              moderatedUnitId: input.moderatedUnitId,
-              realmUnitId: input.realmUnitId,
-            }),
-            reversible: input.state !== "visible",
-          });
-          return updated;
-        })
-      : await prisma.unitRealm.update({
-          where: {
-            realmUnitId_unitId: {
-              realmUnitId: input.realmUnitId,
-              unitId: input.moderatedUnitId,
-            },
-          },
-          data: { visibilityState },
-        });
-    auditPrivilegedMutation({
-      actorUserId: input.decidedById ?? "",
-      action: "realm.unit.visibility.state_changed",
-      targetKind: "realm-content",
-      targetId: input.moderatedUnitId,
-      reason: input.reason ?? "realm Unit visibility state changed",
-      correlationId:
-        input.caseId ?? `${input.realmUnitId}:${input.moderatedUnitId}`,
-      after: { visibilityState: row.visibilityState },
-      metadata: { realmUnitId: input.realmUnitId },
-    });
-    await enqueueRealmMembershipSearch(input.moderatedUnitId);
+  async setRealmUnitModerationStatus(input: {
+    realmUnitId: string;
+    unitId: string;
+    actorUserId: string;
+    action: UnitModerationActionInput;
+    reasonCode: string;
+    reasonText?: string | null;
+    caseId?: string | null;
+    requestId?: string | null;
+    idempotencyKey?: string | null;
+  }) {
+    const row = await prisma.$transaction(async (tx) =>
+      this.setRealmUnitModerationStatusInTx(tx, input),
+    );
+    await enqueueRealmMembershipSearch(input.unitId);
     return mapUnitRealmToDTO(row);
   }
 
-  async hideInRealm(input: ModerationDecisionInput & { realmUnitId: string }) {
-    return this.setRealmUnitVisibilityState({
-      ...input,
-      state: "hidden",
+  private async setRealmUnitModerationStatusInTx(
+    tx: ModerationTx,
+    input: {
+      realmUnitId: string;
+      unitId: string;
+      actorUserId: string;
+      action: UnitModerationActionInput;
+      reasonCode: string;
+      reasonText?: string | null;
+      caseId?: string | null;
+      requestId?: string | null;
+      idempotencyKey?: string | null;
+    },
+  ) {
+    const resultingStatus = snapshotStatusFromAction(input.action);
+    const row = await tx.unitRealm.update({
+      where: {
+        realmUnitId_unitId: {
+          realmUnitId: input.realmUnitId,
+          unitId: input.unitId,
+        },
+      },
+      data: { moderationStatus: resultingStatus },
     });
+    await this.actions.appendModerationAction(tx, {
+      authority: "REALM",
+      realmUnitId: input.realmUnitId,
+      targetKind: "UNIT_REALM",
+      targetId: input.unitId,
+      actorKind: "USER",
+      actorUserId: input.actorUserId,
+      actionKind: actionKindFromAction(input.action),
+      resultingStatus,
+      reasonCode: input.reasonCode,
+      reasonText: input.reasonText,
+      caseId: input.caseId,
+      requestId: input.requestId,
+      idempotencyKey: input.idempotencyKey,
+    });
+    return row;
+  }
+
+  async setRealmUnitVisibilityState(
+    input: ContentModerationStateInput & { realmUnitId: string },
+  ) {
+    return this.setRealmUnitModerationStatus({
+      realmUnitId: input.realmUnitId,
+      unitId: input.moderatedUnitId,
+      actorUserId: input.decidedById ?? "",
+      action: stateFromContentState(input.state),
+      reasonCode: input.state,
+      reasonText: input.reason,
+      caseId: input.caseId,
+    });
+  }
+
+  async hideInRealm(input: ModerationDecisionInput & { realmUnitId: string }) {
+    return this.setRealmUnitVisibilityState({ ...input, state: "hidden" });
   }
 
   async tombstoneInRealm(
     input: ModerationDecisionInput & { realmUnitId: string },
   ) {
-    return this.setRealmUnitVisibilityState({
-      ...input,
-      state: "tombstoned",
-    });
+    return this.setRealmUnitVisibilityState({ ...input, state: "tombstoned" });
   }
 
   async restoreInRealm(
     input: ModerationDecisionInput & { realmUnitId: string },
   ) {
-    return this.setRealmUnitVisibilityState({
-      ...input,
-      state: "visible",
-    });
+    return this.setRealmUnitVisibilityState({ ...input, state: "visible" });
   }
 
   async setRealmUnitModerationState(input: RealmUnitModerationStateInput) {
-    const moderationState = input.state.toUpperCase() as Uppercase<
-      RealmUnitModerationStateInput["state"]
-    >;
-    const row = await prisma.unitRealm.update({
-      where: {
-        realmUnitId_unitId: {
-          realmUnitId: input.realmUnitId,
-          unitId: input.moderatedUnitId,
-        },
-      },
-      data: { moderationState },
-    });
-    auditPrivilegedMutation({
+    const status = realmStatusFromLegacyState(input.state);
+    return this.setRealmUnitModerationStatus({
+      realmUnitId: input.realmUnitId,
+      unitId: input.moderatedUnitId,
       actorUserId: input.decidedById,
-      action: "realm.unit.moderation.state_changed",
-      targetKind: "realm-content",
-      targetId: input.moderatedUnitId,
-      reason: input.reason,
-      correlationId:
-        input.caseId ?? `${input.realmUnitId}:${input.moderatedUnitId}`,
-      after: { moderationState: row.moderationState },
-      metadata: { realmUnitId: input.realmUnitId, ...(input.metadata ?? {}) },
+      action: status === "removed" ? "remove" : "approve",
+      reasonCode: input.state,
+      reasonText: input.reason,
+      caseId: input.caseId,
     });
-    await enqueueRealmMembershipSearch(input.moderatedUnitId);
-    return mapUnitRealmToDTO(row);
   }
 
   async approveInRealm(
@@ -1228,25 +1027,89 @@ export class GovernanceModerationService {
     return this.setRealmUnitModerationState({ ...input, state: "removed" });
   }
 
+  async setLock(input: {
+    targetKind: LockTargetKind;
+    targetId: string;
+    realmUnitId?: string | null;
+    isLocked: boolean;
+    actorUserId: string;
+    reasonCode: string;
+    reasonText?: string | null;
+    caseId?: string | null;
+  }) {
+    return prisma.$transaction((tx) => this.setLockInTx(tx, input));
+  }
+
+  private async setLockInTx(
+    tx: ModerationTx,
+    input: {
+      targetKind: LockTargetKind;
+      targetId: string;
+      realmUnitId?: string | null;
+      isLocked: boolean;
+      actorUserId: string;
+      reasonCode: string;
+      reasonText?: string | null;
+      caseId?: string | null;
+    },
+  ) {
+    if (input.targetKind === "POST") {
+      await tx.post.update({
+        where: { unitId: input.targetId },
+        data: { isLocked: input.isLocked },
+      });
+    } else if (input.targetKind === "COMMENT") {
+      await tx.comment.update({
+        where: { id: input.targetId },
+        data: { isLocked: input.isLocked },
+      });
+    } else if (input.realmUnitId) {
+      await tx.unitRealm.update({
+        where: {
+          realmUnitId_unitId: {
+            realmUnitId: input.realmUnitId,
+            unitId: input.targetId,
+          },
+        },
+        data: { isLocked: input.isLocked },
+      });
+    }
+    return this.actions.appendModerationAction(tx, {
+      authority: input.realmUnitId ? "REALM" : "PLATFORM",
+      realmUnitId: input.realmUnitId,
+      targetKind:
+        input.targetKind === "POST"
+          ? "UNIT"
+          : input.targetKind === "COMMENT"
+            ? "COMMENT"
+            : "UNIT_REALM",
+      targetId: input.targetId,
+      actorKind: "USER",
+      actorUserId: input.actorUserId,
+      actionKind: input.isLocked ? "LOCK" : "UNLOCK",
+      resultingLocked: input.isLocked,
+      reasonCode: input.reasonCode,
+      reasonText: input.reasonText,
+      caseId: input.caseId,
+    });
+  }
+
   async requestOwnerDelegation(
     input: ModerationDecisionInput & { realmUnitId: string },
   ) {
-    const row = await prisma.realmModerationQueueItem.create({
-      data: {
-        realmUnitId: input.realmUnitId,
-        state: "NEW",
-        targetKind: "content-owner-delegation",
-        targetId: input.moderatedUnitId,
-        addressedUnitId: input.moderatedUnitId,
-        assignedToUserId: input.decidedById,
-        reason: input.reason,
-        metadata: {
-          ...(input.metadata ?? {}),
-          ownerDelegation: true,
-        } as never,
+    return this.createRealmQueueItem({
+      realmUnitId: input.realmUnitId,
+      actorUserId: input.decidedById,
+      targetKind: "unit",
+      targetId: input.moderatedUnitId,
+      addressedUnitId: input.moderatedUnitId,
+      assignedToUserId: input.decidedById,
+      reason: input.reason,
+      metadata: {
+        ...(input.metadata ?? {}),
+        ownerDelegation: true,
       },
     });
-    return mapRealmQueueItemToDTO(row);
   }
 }
 

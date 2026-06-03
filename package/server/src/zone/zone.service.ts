@@ -33,13 +33,6 @@ type UnitRef = { id: string; type: UnitType };
 
 const WIKI_HOMEPAGE_DEFAULT_TEMPLATE = "wiki-classic-home";
 const WIKI_SECTION_DEFAULT_LIMIT = 12;
-const WIKI_EXCLUDED_MODERATION_STATES = [
-  "HIDDEN",
-  "TOMBSTONED",
-  "ARCHIVED",
-  "REMOVED",
-] as const;
-
 type TranslatedUnitRow = {
   id: string;
   defaultLanguage?: string | null;
@@ -451,22 +444,9 @@ export class ZoneService {
       type: UnitType.POST,
       status: UnitStatus.PUBLISHED,
       visibility: "PUBLIC",
+      moderationStatus: "APPROVED",
       post: { kind: "WIKI" },
-      inRealms: { some: { realmUnitId } },
-      OR: [
-        { contentModerationState: null },
-        {
-          contentModerationState: {
-            state: { notIn: WIKI_EXCLUDED_MODERATION_STATES as any },
-          },
-        },
-      ],
-      realmModerationTargets: {
-        none: {
-          realmUnitId,
-          state: { in: WIKI_EXCLUDED_MODERATION_STATES as any },
-        },
-      },
+      inRealms: { some: { realmUnitId, moderationStatus: "APPROVED" } },
     };
   }
 

@@ -56,9 +56,7 @@ async function attachCommentPaths<
   T extends { id: string; path?: string | null },
 >(comments: T[]): Promise<T[]> {
   if (comments.length === 0) return comments;
-  const rows = await prisma.$queryRaw<
-    { id: string; path: string | null }[]
-  >`
+  const rows = await prisma.$queryRaw<{ id: string; path: string | null }[]>`
     SELECT "id", "path"::text AS path
     FROM "Comment"
     WHERE "id" IN (${Prisma.join(
@@ -103,9 +101,7 @@ async function attachPinOverlays<
     ]),
   );
   for (const comment of comments) {
-    const pin = pinByScopeAndComment.get(
-      `${comment.rootUnitId}:${comment.id}`,
-    );
+    const pin = pinByScopeAndComment.get(`${comment.rootUnitId}:${comment.id}`);
     comment.pinKind = pin?.kind ?? null;
     comment.pinPosition = pin?.position ?? null;
   }
@@ -141,7 +137,8 @@ export class CommentService {
     const where: Prisma.CommentWhereInput = {
       rootUnitId: query.rootUnitId,
       realmUnitId: query.realmUnitId ?? null,
-      visibilityState: { in: ["VISIBLE", "TOMBSTONED"] },
+      moderationStatus: "APPROVED",
+      deletedAt: null,
     };
 
     if (query.authorUserId) where.authorUserId = query.authorUserId;
@@ -267,7 +264,7 @@ export class CommentService {
           authorUserId,
           content: input.content as Prisma.InputJsonValue,
           depth,
-          visibilityState: "VISIBLE",
+          moderationStatus: "APPROVED",
         },
         include: commentInclude,
       });
@@ -336,7 +333,6 @@ export class CommentService {
           ? {
               // Clearing realmUnitId removes the comment from that realm only.
               realmUnitId: input.realmUnitId,
-              visibilityState: "VISIBLE",
             }
           : {}),
         ...(input.isLocked !== undefined ? { isLocked: input.isLocked } : {}),
@@ -363,7 +359,7 @@ export class CommentService {
       where: { id },
       data: {
         content: Prisma.JsonNull,
-        visibilityState: "TOMBSTONED",
+        deletedAt: new Date(),
       },
     });
     await enqueueCommentSync(id);

@@ -15,10 +15,7 @@ import {
   unitDTOSchema,
   unitTranslationDTOSchema,
 } from "../unit/unit";
-import {
-  unitRealmModerationStateSchema,
-  unitRealmVisibilityStateSchema,
-} from "./publication";
+import { moderationStatusSchema } from "./publication";
 import { realmExtraSchema } from "./realm-extra";
 
 // ============================================================
@@ -251,9 +248,9 @@ export type RealmMembershipMeDTO =
 
 /**
  * UnitRealm is community membership for a Unit in a realm. It is not semantic
- * tagging and is not a prerequisite for RealmTagApplication. `moderationState`
- * records whether the realm accepts, rejects, or soft-removes the relation; it
- * is not feed ranking or recommendation state.
+ * tagging and is not a prerequisite for RealmTagApplication. `moderationStatus`
+ * is the realm-local moderation snapshot; it is not feed ranking or
+ * recommendation state.
  *
  * Future card-presentation hints such as realm-scoped `spoiler` belong on this
  * junction as typed `extra`, not on Unit.extra and not in the open tag system.
@@ -262,8 +259,7 @@ export type RealmMembershipMeDTO =
 export const unitRealmDTOSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
-  moderationState: unitRealmModerationStateSchema,
-  visibilityState: unitRealmVisibilityStateSchema,
+  moderationStatus: moderationStatusSchema,
   isLocked: t.Boolean(),
   // extra: t.Optional(t.Nullable(realmContentExtraSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -598,8 +594,7 @@ export type RealmMemberParams = (typeof realmMemberParamsSchema)["static"];
 
 export const addUnitRealmSchema = t.Object({
   unitId: t.String(),
-  moderationState: t.Optional(unitRealmModerationStateSchema),
-  visibilityState: t.Optional(unitRealmVisibilityStateSchema),
+  moderationStatus: t.Optional(moderationStatusSchema),
   isLocked: t.Optional(t.Boolean()),
 });
 

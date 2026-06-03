@@ -3,23 +3,22 @@ import type {
   AccountEnforcementKind,
   AccountEnforcementState,
   CapabilityGrantDTO,
-  ContentModerationStateDTO,
-  ContentModerationStateKind,
+  ModerationActionDTO,
+  ModerationActionKind,
+  ModerationActorKind,
+  ModerationAuthority,
   ModerationCaseDTO,
-  ModerationCaseEventDTO,
   ModerationCaseState,
-  RealmModerationEventDTO,
-  RealmModerationQueueItemDTO,
+  ModerationScope,
+  ModerationStatus,
+  ModerationTargetKind,
   StaffAuditLogDTO,
 } from "@rezics/contract";
 import type {
   AccountEnforcementRow,
-  ContentModerationStateRow,
-  ModerationCaseEventRow,
+  ModerationActionRow,
   ModerationCaseRow,
   RealmCapabilityGrantRow,
-  RealmModerationEventRow,
-  RealmModerationQueueItemRow,
   StaffAuditLogRow,
   StaffGrantRow,
 } from "./types";
@@ -85,7 +84,8 @@ export function mapAccountEnforcementToDTO(
     startsAt: row.startsAt.toISOString(),
     expiresAt: iso(row.expiresAt),
     revokedAt: iso(row.revokedAt),
-    auditLogId: row.auditLogId,
+    decisionActionId: row.decisionActionId,
+    revocationActionId: row.revocationActionId,
     metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -97,17 +97,19 @@ export function mapModerationCaseToDTO(
 ): ModerationCaseDTO {
   return {
     id: row.id,
+    scope: lower<ModerationScope>(row.scope),
     state: lower<ModerationCaseState>(row.state),
     severity: row.severity,
     reporterUserId: row.reporterUserId,
     subjectUserId: row.subjectUserId,
     target: {
-      kind: row.targetKind,
+      kind: lower<ModerationTargetKind>(row.targetKind),
       id: row.targetId,
       realmUnitId: row.realmUnitId,
     },
     sourceFeedbackId: row.sourceFeedbackId,
     assignedToUserId: row.assignedToUserId,
+    parentCaseId: row.parentCaseId,
     duplicateOfCaseId: row.duplicateOfCaseId,
     reason: row.reason,
     safeSummary: row.safeSummary,
@@ -116,76 +118,31 @@ export function mapModerationCaseToDTO(
   };
 }
 
-export function mapModerationCaseEventToDTO(
-  row: ModerationCaseEventRow,
-): ModerationCaseEventDTO {
+export function mapModerationActionToDTO(
+  row: ModerationActionRow,
+): ModerationActionDTO {
   return {
     id: row.id,
-    caseId: row.caseId,
-    actorUserId: row.actorUserId,
-    eventType: row.eventType,
-    decision: row.decision as ModerationCaseEventDTO["decision"],
-    reason: row.reason,
-    before: (row.before as Record<string, unknown> | null) ?? undefined,
-    after: (row.after as Record<string, unknown> | null) ?? undefined,
-    reversible: row.reversible,
-    createdAt: row.createdAt.toISOString(),
-  };
-}
-
-export function mapRealmQueueItemToDTO(
-  row: RealmModerationQueueItemRow,
-): RealmModerationQueueItemDTO {
-  return {
-    id: row.id,
+    authority: lower<ModerationAuthority>(row.authority),
     realmUnitId: row.realmUnitId,
-    state: lower(row.state),
-    reporterUserId: row.reporterUserId,
-    subjectUserId: row.subjectUserId,
-    target: {
-      kind: row.targetKind,
-      id: row.targetId,
-      realmUnitId: row.realmUnitId,
-    },
-    sourceFeedbackId: row.sourceFeedbackId,
-    linkedCaseId: row.linkedCaseId,
-    assignedToUserId: row.assignedToUserId,
-    reason: row.reason,
-    safeSummary: row.safeSummary,
-    createdAt: row.createdAt.toISOString(),
-    updatedAt: row.updatedAt.toISOString(),
-  };
-}
-
-export function mapRealmModerationEventToDTO(
-  row: RealmModerationEventRow,
-): RealmModerationEventDTO {
-  return {
-    id: row.id,
-    queueItemId: row.queueItemId,
-    realmUnitId: row.realmUnitId,
+    targetKind: lower<ModerationTargetKind>(row.targetKind),
+    targetId: row.targetId,
+    targetPath: row.targetPath,
+    actorKind: lower<ModerationActorKind>(row.actorKind),
     actorUserId: row.actorUserId,
-    decisionKind: row.decisionKind as RealmModerationEventDTO["decisionKind"],
-    decision: row.decision as RealmModerationEventDTO["decision"],
-    reason: row.reason,
-    before: (row.before as Record<string, unknown> | null) ?? undefined,
-    after: (row.after as Record<string, unknown> | null) ?? undefined,
-    createdAt: row.createdAt.toISOString(),
-  };
-}
-
-export function mapContentModerationStateToDTO(
-  row: ContentModerationStateRow,
-): ContentModerationStateDTO {
-  return {
-    moderatedUnitId: row.moderatedUnitId,
-    state: lower<ContentModerationStateKind>(row.state),
-    decidedByUserId: row.decidedById,
+    actionKind: lower<ModerationActionKind>(row.actionKind),
+    resultingStatus: row.resultingStatus
+      ? lower<ModerationStatus>(row.resultingStatus)
+      : null,
+    resultingLocked: row.resultingLocked,
+    reasonCode: row.reasonCode,
+    reasonText: row.reasonText,
+    publicMessage: row.publicMessage,
     caseId: row.caseId,
-    reason: row.reason,
-    metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
+    reversesActionId: row.reversesActionId,
+    requestId: row.requestId,
+    importedFrom: row.importedFrom,
     createdAt: row.createdAt.toISOString(),
-    updatedAt: row.updatedAt.toISOString(),
   };
 }
 
@@ -199,8 +156,6 @@ export function mapStaffAuditLogToDTO(row: StaffAuditLogRow): StaffAuditLogDTO {
     decisionCode: row.decisionCode as StaffAuditLogDTO["decisionCode"],
     requestId: row.requestId,
     reason: row.reason,
-    before: (row.before as Record<string, unknown> | null) ?? undefined,
-    after: (row.after as Record<string, unknown> | null) ?? undefined,
     metadata: (row.metadata as Record<string, unknown> | null) ?? undefined,
     createdAt: row.createdAt.toISOString(),
   };
