@@ -98,6 +98,7 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
       <PostTreeSection
         rootUnitId={rootPostUnitId}
         realmUnitId={contextRealmUnitId}
+        rootAuthorUserId={root?.author?.unitId ?? root?.authorUserId}
         summaryScopeKey={reactionScopeKey}
         reactionScopeKey={reactionScopeKey}
         focusPostUnitId={focusPostUnitId}

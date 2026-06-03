@@ -101,6 +101,7 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
         <PostTreeSection
           rootUnitId={review.unitId}
           realmUnitId={review.realmUnitId}
+          rootAuthorUserId={review.author?.unitId ?? review.authorUserId}
         />
       </div>
     </div>

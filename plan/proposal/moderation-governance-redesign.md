@@ -362,7 +362,7 @@ reset + reseed is acceptable; a backfill script is optional.
   vs author-deleted). Wire references/embeds/threaded parents to it; ensure
   primary feeds omit instead. The placeholder must not render inside another card
   when the surrounding component is already carded.
-- [ ] 5.5 Comment moderation UI: render `RemovedContentPlaceholder` for removed
+- [x] 5.5 Comment moderation UI: render `RemovedContentPlaceholder` for removed
   comments in threads; add a gated Remove/Restore control for users with authority
   (owner of the post / realm mod / platform mod). Update
   `app/src/post/components/item/PostReply.tsx` so redacted comments suppress

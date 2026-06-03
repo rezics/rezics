@@ -1,4 +1,7 @@
-import { commentListQuery } from "@rezics/api/comment/comment";
+import {
+  commentListQuery,
+  useModerateCommentMutation,
+} from "@rezics/api/comment/comment";
 import {
   computeEditorEntryDecision,
   useCurrentUserId,
@@ -10,14 +13,18 @@ import {
   useUnacceptAnswerMutation,
   useUnpinCommentMutation,
 } from "@rezics/api/post/post";
-import type { CommentDTO } from "@rezics/contract";
+import { BasicAdminPermission, type CommentDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { DropdownMenuItem } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil } from "lucide-react";
+import { Pencil, RotateCcw, ShieldX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  hasGovernanceCapabilityHint,
+  useAuthSessionStore,
+} from "@/user/states";
 import { PostPromotionControls } from "../components/parts/PostPromotionControls";
 import { PostEditDialog } from "../forms/PostEditDialog";
 import { decidePromotionControls } from "../models/postPromotionGate";
@@ -30,6 +37,7 @@ interface PostTreeSectionProps {
   maxDepth?: number;
   visualMaxDepth?: number;
   focusPostUnitId?: string;
+  rootAuthorUserId?: string | null;
   highlightFocusedPost?: boolean;
   summaryScopeKey?: string | null;
   reactionScopeKey?: string | null;
@@ -46,6 +54,7 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   maxDepth = DEFAULT_MAX_DEPTH,
   visualMaxDepth = DEFAULT_VISUAL_MAX_DEPTH,
   focusPostUnitId,
+  rootAuthorUserId,
   highlightFocusedPost,
   summaryScopeKey,
   reactionScopeKey,
@@ -54,6 +63,18 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
   const { t } = useTranslation(["common", "community"]);
   const permission = useServerPermission();
   const actorUserId = useCurrentUserId();
+  const canModerateByCapability = useAuthSessionStore(
+    (state) =>
+      hasGovernanceCapabilityHint(state, "comment.moderate", {
+        kind: "global",
+      }) ||
+      (realmUnitId
+        ? hasGovernanceCapabilityHint(state, "comment.moderate", {
+            kind: "realm",
+            realmUnitId,
+          })
+        : false),
+  );
   const [editingPost, setEditingPost] = useState<CommentDTO | null>(null);
   const commentThreadQuery = useQuery(
     commentListQuery({
@@ -91,10 +112,47 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     unpinMutation.isPending ||
     acceptMutation.isPending ||
     unacceptMutation.isPending;
+  const commentModeration = useModerateCommentMutation({
+    onSuccess: (_data, variables) => {
+      toast.success(
+        variables.input.action === "restore"
+          ? t("community:comment_restore_success")
+          : t("community:comment_remove_success"),
+      );
+    },
+    onError: (error) => toast.error(error.message),
+  });
+  const canModerateComments = Boolean(
+    actorUserId &&
+      (canModerateByCapability ||
+        (permission ? BasicAdminPermission(permission) : false) ||
+        (rootAuthorUserId && actorUserId === rootAuthorUserId)),
+  );
+
+  const moderateComment = (post: CommentDTO, action: "remove" | "restore") => {
+    if (
+      !window.confirm(
+        action === "restore"
+          ? t("community:comment_restore_confirm")
+          : t("community:comment_remove_confirm"),
+      )
+    ) {
+      return;
+    }
+
+    commentModeration.mutate({
+      id: post.id,
+      input: {
+        action,
+        reasonCode:
+          action === "restore"
+            ? "comment.moderation.restored"
+            : "comment.moderation.removed",
+      },
+    });
+  };
 
   const renderOverflowContent = (post: CommentDTO) => {
-    if (post.isRedacted) return null;
-
     const decision = computeEditorEntryDecision({
       permission,
       actorUserId,
@@ -111,13 +169,26 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
       depth: post.depth ?? 0,
     });
 
-    if (!decision.canEnter && !canPin && !canAccept) return null;
+    const showRestore =
+      canModerateComments && post.moderationStatus === "removed";
+    const showRemove =
+      canModerateComments && post.moderationStatus !== "removed";
+
+    if (
+      !decision.canEnter &&
+      !canPin &&
+      !canAccept &&
+      !showRemove &&
+      !showRestore
+    ) {
+      return null;
+    }
 
     const variables = { scopeUnitId: rootUnitId, commentId: post.unitId };
 
     return (
       <>
-        {decision.canEnter ? (
+        {decision.canEnter && !post.isRedacted ? (
           <DropdownMenuItem
             className="gap-2"
             onClick={(event) => event.stopPropagation()}
@@ -130,16 +201,46 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
             <span>{t("common:edit")}</span>
           </DropdownMenuItem>
         ) : null}
-        <PostPromotionControls
-          pinKind={post.pinKind}
-          canPin={canPin}
-          canAccept={canAccept}
-          disabled={promotionPending}
-          onPin={() => pinMutation.mutate(variables)}
-          onUnpin={() => unpinMutation.mutate(variables)}
-          onAccept={() => acceptMutation.mutate(variables)}
-          onUnaccept={() => unacceptMutation.mutate(variables)}
-        />
+        {post.isRedacted ? null : (
+          <PostPromotionControls
+            pinKind={post.pinKind}
+            canPin={canPin}
+            canAccept={canAccept}
+            disabled={promotionPending}
+            onPin={() => pinMutation.mutate(variables)}
+            onUnpin={() => unpinMutation.mutate(variables)}
+            onAccept={() => acceptMutation.mutate(variables)}
+            onUnaccept={() => unacceptMutation.mutate(variables)}
+          />
+        )}
+        {showRemove ? (
+          <DropdownMenuItem
+            className="gap-2"
+            disabled={commentModeration.isPending}
+            onClick={(event) => event.stopPropagation()}
+            onSelect={(event) => {
+              event.stopPropagation();
+              moderateComment(post, "remove");
+            }}
+          >
+            <ShieldX size={16} strokeWidth={2} />
+            <span>{t("community:comment_remove_action")}</span>
+          </DropdownMenuItem>
+        ) : null}
+        {showRestore ? (
+          <DropdownMenuItem
+            className="gap-2"
+            disabled={commentModeration.isPending}
+            onClick={(event) => event.stopPropagation()}
+            onSelect={(event) => {
+              event.stopPropagation();
+              moderateComment(post, "restore");
+            }}
+          >
+            <RotateCcw size={16} strokeWidth={2} />
+            <span>{t("community:comment_restore_action")}</span>
+          </DropdownMenuItem>
+        ) : null}
       </>
     );
   };

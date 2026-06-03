@@ -66,6 +66,7 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
       <PostTreeSection
         rootUnitId={remark.unitId}
         realmUnitId={remark.realmUnitId}
+        rootAuthorUserId={remark.author?.unitId ?? remark.authorUserId}
       />
     </div>
   );
