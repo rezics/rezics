@@ -52,7 +52,12 @@ const postFindUnique = mock(
     parentPostUnitId: null,
   }),
 );
-const unitRealmDelete = mock(async () => undefined);
+const unitRealmUpdate = mock(async (args: any) => args.data);
+const unitRealmFindUnique = mock(
+  async (): Promise<any> => ({
+    state: "PENDING_REVIEW",
+  }),
+);
 const realmMemberDelete = mock(async () => undefined);
 const realmQueueRow = {
   id: "queue-1",
@@ -206,7 +211,8 @@ const transactionMock = mock(async (fn: any) =>
       create: realmModerationEventCreate,
     },
     unitRealm: {
-      delete: unitRealmDelete,
+      findUnique: unitRealmFindUnique,
+      update: unitRealmUpdate,
     },
     realmMember: {
       delete: realmMemberDelete,
@@ -233,7 +239,8 @@ Object.assign(prismaMock, {
     findUnique: postFindUnique,
   },
   unitRealm: {
-    delete: unitRealmDelete,
+    findUnique: unitRealmFindUnique,
+    update: unitRealmUpdate,
   },
   realmModerationQueueItem: {
     create: realmQueueCreate,
@@ -283,7 +290,9 @@ describe("GovernanceModerationService content moderation state", () => {
     realmContentModerationUpsert.mockClear();
     postFindUnique.mockClear();
     postFindUnique.mockResolvedValue({ parentPostUnitId: null });
-    unitRealmDelete.mockClear();
+    unitRealmFindUnique.mockClear();
+    unitRealmFindUnique.mockResolvedValue({ state: "PENDING_REVIEW" });
+    unitRealmUpdate.mockClear();
     realmMemberDelete.mockClear();
     realmQueueCreate.mockClear();
     realmQueueFindMany.mockClear();
@@ -599,7 +608,7 @@ describe("GovernanceModerationService content moderation state", () => {
     });
   });
 
-  test("realm feed removal uses junction drop for roots", async () => {
+  test("realm feed removal marks publication rows removed for roots", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"
     );
@@ -611,10 +620,11 @@ describe("GovernanceModerationService content moderation state", () => {
       }),
     ).resolves.toEqual({ message: "Content removed from realm feed" });
 
-    expect(unitRealmDelete).toHaveBeenCalledWith({
+    expect(unitRealmUpdate).toHaveBeenCalledWith({
       where: {
         realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
       },
+      data: { state: "REMOVED" },
     });
     expect(realmContentModerationUpsert).not.toHaveBeenCalled();
     expect(enqueueMock.mock.calls.map((call) => call[0].kind)).toEqual([
@@ -636,10 +646,11 @@ describe("GovernanceModerationService content moderation state", () => {
     ).resolves.toEqual({ message: "Content removed from realm feed" });
 
     expect(postFindUnique).not.toHaveBeenCalled();
-    expect(unitRealmDelete).toHaveBeenCalledWith({
+    expect(unitRealmUpdate).toHaveBeenCalledWith({
       where: {
         realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
       },
+      data: { state: "REMOVED" },
     });
   });
 
@@ -827,6 +838,71 @@ describe("GovernanceModerationService content moderation state", () => {
       directRecipients: ["reporter-1"],
       actorId: "mod-1",
       extra: { queueItemId: "queue-1", state: "ACTIONED" },
+    });
+  });
+
+  test("approves and rejects realm feed submissions through UnitRealm state", async () => {
+    const { governanceModerationService } = await import(
+      "./moderation.service"
+    );
+
+    await governanceModerationService.decideRealmQueueItem({
+      realmUnitId: "realm-1",
+      queueItemId: "queue-1",
+      actorUserId: "mod-1",
+      decisionKind: "approve_for_feed",
+      reason: "fits the realm",
+    });
+
+    expect(unitRealmUpdate).toHaveBeenCalledWith({
+      where: {
+        realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
+      },
+      data: { state: "APPROVED" },
+    });
+    expect(realmModerationEventCreate).toHaveBeenLastCalledWith({
+      data: expect.objectContaining({
+        decisionKind: "approve_for_feed",
+        before: expect.objectContaining({
+          publicationState: "PENDING_REVIEW",
+        }),
+        after: expect.objectContaining({
+          publicationState: "APPROVED",
+        }),
+      }),
+    });
+
+    unitRealmUpdate.mockClear();
+    realmModerationEventCreate.mockClear();
+
+    await governanceModerationService.decideRealmQueueItem({
+      realmUnitId: "realm-1",
+      queueItemId: "queue-1",
+      actorUserId: "mod-1",
+      decisionKind: "reject_from_feed",
+      reason: "off-topic",
+    });
+
+    expect(unitRealmUpdate).toHaveBeenCalledWith({
+      where: {
+        realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
+      },
+      data: { state: "REJECTED" },
+    });
+    expect(realmQueueUpdate).toHaveBeenLastCalledWith({
+      where: { id: "queue-1" },
+      data: expect.objectContaining({ state: "REJECTED" }),
+    });
+    expect(realmModerationEventCreate).toHaveBeenLastCalledWith({
+      data: expect.objectContaining({
+        decisionKind: "reject_from_feed",
+        before: expect.objectContaining({
+          publicationState: "PENDING_REVIEW",
+        }),
+        after: expect.objectContaining({
+          publicationState: "REJECTED",
+        }),
+      }),
     });
   });
 

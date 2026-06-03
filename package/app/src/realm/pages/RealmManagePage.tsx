@@ -20,6 +20,9 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
+  Card,
+  CardContent,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -74,8 +77,10 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
     myRealmMembershipQuery(realmId),
   );
   const permission = useServerPermission();
-  // updateMutation kept for completeness; actual save runs through unitApi
-  useUpdateRealmMutation();
+  const updateRealm = useUpdateRealmMutation({
+    onSuccess: () => toast.success("Realm settings saved."),
+    onError: (error) => toast.error(error.message),
+  });
 
   const existingLanguages = useMemo(
     () =>
@@ -305,7 +310,34 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
           />
         </TabsContent>
 
-        <TabsContent value="moderation">
+        <TabsContent value="moderation" className="flex flex-col gap-4">
+          <Card surface="contained">
+            <CardContent className="flex items-start gap-3 p-4">
+              <Checkbox
+                id="realm-content-approval"
+                checked={realm.contentRequiresApproval ?? false}
+                disabled={updateRealm.isPending}
+                onCheckedChange={(checked) =>
+                  updateRealm.mutate({
+                    unitId: realmId,
+                    input: { contentRequiresApproval: checked === true },
+                  })
+                }
+              />
+              <div className="flex flex-col gap-1">
+                <Label
+                  htmlFor="realm-content-approval"
+                  className="text-sm font-medium leading-ui text-text-primary"
+                >
+                  Require content approval
+                </Label>
+                <p className="m-0 text-sm leading-body text-text-secondary">
+                  New feed submissions wait in the realm queue before appearing
+                  publicly.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
           <RealmModerationQueueSection realmUnitId={realmId} />
         </TabsContent>
 

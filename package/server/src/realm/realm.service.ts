@@ -1,5 +1,6 @@
 import type {
   AcknowledgeRealmRuleInput,
+  AddUnitRealmInput,
   CreateRealmInput,
   RealmDTO,
   RealmExtraAdminReadResponse,
@@ -305,7 +306,7 @@ export class RealmService {
     req: CreateRealmInput & { slug?: string },
     userId: string,
   ): Promise<RealmDTO> {
-    const { isPublic, extra, translations } = req;
+    const { isPublic, contentRequiresApproval, extra, translations } = req;
 
     let normalizedSlug: string | undefined;
     if (req.slug) {
@@ -343,6 +344,7 @@ export class RealmService {
       data: {
         unitId: unit.id,
         isPublic: isPublic ?? true,
+        contentRequiresApproval: contentRequiresApproval ?? false,
         extra: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
         memberCount: 1,
         members: {
@@ -365,13 +367,17 @@ export class RealmService {
   }
 
   async update(unitId: string, req: UpdateRealmInput): Promise<RealmDTO> {
-    const { isPublic, isOfficial, extra } = req;
+    const { isPublic, isOfficial, contentRequiresApproval, extra } = req;
 
     const row = await prisma.realm.update({
       where: { unitId },
       data: {
         isPublic: isPublic !== undefined ? isPublic : undefined,
         isOfficial: isOfficial !== undefined ? isOfficial : undefined,
+        contentRequiresApproval:
+          contentRequiresApproval !== undefined
+            ? contentRequiresApproval
+            : undefined,
         extra:
           extra !== undefined
             ? ((extra ?? undefined) as Prisma.InputJsonValue | undefined)
@@ -383,6 +389,9 @@ export class RealmService {
     const patchFields: Record<string, any> = {};
     if (isPublic !== undefined) patchFields.isPublic = isPublic;
     if (isOfficial !== undefined) patchFields.isOfficial = isOfficial;
+    if (contentRequiresApproval !== undefined) {
+      patchFields.contentRequiresApproval = contentRequiresApproval;
+    }
     if (extra !== undefined) patchFields.extra = extra;
     await enqueueRealmMetadata(unitId, patchFields);
 
@@ -1039,9 +1048,14 @@ export class RealmService {
   async addUnitRealm(
     realmUnitId: string,
     unitId: string,
+    input: Pick<AddUnitRealmInput, "state"> = {},
   ): Promise<UnitRealmDTO> {
     const row = await prisma.unitRealm.create({
-      data: { realmUnitId, unitId },
+      data: {
+        realmUnitId,
+        unitId,
+        state: input.state?.toUpperCase() as any,
+      },
     });
     await Promise.all([
       enqueueContentSearch(SEARCH_COMMAND_KINDS.contentPatchRealmIds, unitId),

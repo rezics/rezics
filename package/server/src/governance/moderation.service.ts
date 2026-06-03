@@ -44,6 +44,8 @@ type CaseEventInput = {
 };
 
 type RealmQueueDecisionKind =
+  | "approve_for_feed"
+  | "reject_from_feed"
   | "hide_from_realm"
   | "remove_from_feed"
   | "lock"
@@ -112,6 +114,7 @@ function contentModerationEventSummary(input: {
 }
 
 function realmQueueStateForDecision(kind: RealmQueueDecisionKind) {
+  if (kind === "reject_from_feed") return "REJECTED";
   if (kind === "reject") return "REJECTED";
   if (kind === "duplicate") return "DUPLICATE";
   if (kind === "escalate") return "ESCALATED";
@@ -691,6 +694,8 @@ export class GovernanceModerationService {
     decision?: Record<string, unknown>;
     metadata?: Record<string, unknown>;
   }) {
+    let publicationBefore: string | null | undefined;
+    let publicationAfter: string | null | undefined;
     const row = await prisma.$transaction(async (tx) => {
       const before = await tx.realmModerationQueueItem.findUniqueOrThrow({
         where: { id: input.queueItemId },
@@ -780,14 +785,54 @@ export class GovernanceModerationService {
           },
         });
       }
-      if (input.decisionKind === "remove_from_feed" && before.addressedUnitId) {
-        await tx.unitRealm.delete({
+      if (
+        (input.decisionKind === "approve_for_feed" ||
+          input.decisionKind === "reject_from_feed") &&
+        before.addressedUnitId
+      ) {
+        const nextPublicationState =
+          input.decisionKind === "approve_for_feed" ? "APPROVED" : "REJECTED";
+        const unitRealmBefore = await tx.unitRealm.findUnique({
           where: {
             realmUnitId_unitId: {
               realmUnitId: input.realmUnitId,
               unitId: before.addressedUnitId,
             },
           },
+          select: { state: true },
+        });
+        publicationBefore = unitRealmBefore?.state ?? null;
+        publicationAfter = nextPublicationState;
+        await tx.unitRealm.update({
+          where: {
+            realmUnitId_unitId: {
+              realmUnitId: input.realmUnitId,
+              unitId: before.addressedUnitId,
+            },
+          },
+          data: { state: nextPublicationState },
+        });
+      }
+      if (input.decisionKind === "remove_from_feed" && before.addressedUnitId) {
+        const unitRealmBefore = await tx.unitRealm.findUnique({
+          where: {
+            realmUnitId_unitId: {
+              realmUnitId: input.realmUnitId,
+              unitId: before.addressedUnitId,
+            },
+          },
+          select: { state: true },
+        });
+        publicationBefore = unitRealmBefore?.state ?? null;
+        publicationAfter = "REMOVED";
+        await tx.unitRealm.update({
+          where: {
+            realmUnitId_unitId: {
+              realmUnitId: input.realmUnitId,
+              unitId: before.addressedUnitId,
+            },
+          },
+          data: { state: "REMOVED" },
         });
       }
       if (
@@ -816,16 +861,22 @@ export class GovernanceModerationService {
         before: {
           state: before.state,
           linkedCaseId: before.linkedCaseId,
+          publicationState: publicationBefore,
         },
         after: {
           state: updated.state,
           linkedCaseId: updated.linkedCaseId,
+          publicationState: publicationAfter,
           duplicateOfQueueItemId: input.duplicateOfQueueItemId ?? undefined,
         },
       });
       return updated;
     });
-    if (input.decisionKind === "remove_from_feed") {
+    if (
+      input.decisionKind === "remove_from_feed" ||
+      input.decisionKind === "approve_for_feed" ||
+      input.decisionKind === "reject_from_feed"
+    ) {
       const contentUnitId = row.addressedUnitId;
       if (contentUnitId) await enqueueRealmMembershipSearch(contentUnitId);
     }
@@ -853,7 +904,15 @@ export class GovernanceModerationService {
       decisionCode: (input.decision?.code as string | undefined) ?? "ALLOWED",
       reason: input.reason,
       correlationId: row.linkedCaseId ?? row.id,
-      after: { state: row.state, decisionKind: input.decisionKind },
+      before:
+        publicationBefore !== undefined
+          ? { publicationState: publicationBefore }
+          : undefined,
+      after: {
+        state: row.state,
+        decisionKind: input.decisionKind,
+        publicationState: publicationAfter,
+      },
       metadata: { realmUnitId: input.realmUnitId },
     });
     return mapRealmQueueItemToDTO(row);
@@ -1172,13 +1231,14 @@ export class GovernanceModerationService {
     realmUnitId: string;
     targetUnitId: string;
   }) {
-    await prisma.unitRealm.delete({
+    await prisma.unitRealm.update({
       where: {
         realmUnitId_unitId: {
           realmUnitId: input.realmUnitId,
           unitId: input.targetUnitId,
         },
       },
+      data: { state: "REMOVED" },
     });
     await enqueueRealmMembershipSearch(input.targetUnitId);
     return { message: "Content removed from realm feed" };

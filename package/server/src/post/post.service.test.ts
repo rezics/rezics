@@ -125,7 +125,14 @@ const realmUnitCreateMock = mock(async (args: any) => {
   return args.data;
 });
 const realmUnitUpsertMock = mock(async (args: any) => args.create);
+const realmUnitFindUniqueMock = mock(async (): Promise<any> => null);
 const realmUnitFindManyMock = mock(async () => [{ realmUnitId: "realm-1" }]);
+const realmModerationQueueItemCreateMock = mock(
+  async (args: any): Promise<any> => ({ id: "queue-1", ...args.data }),
+);
+const realmModerationEventCreateMock = mock(
+  async (args: any): Promise<any> => args.data,
+);
 const unitTagCreateMock = mock(async (args: any) => args.data);
 const unitTagUpsertMock = mock(async (args: any) => args.create);
 const unitTagFindManyMock = mock(async (): Promise<any[]> => []);
@@ -195,7 +202,13 @@ const transactionMock = mock(async (fn: any) =>
     realmRuleAcknowledgement: {
       findMany: realmRuleAcknowledgementFindManyMock,
     },
-    unitRealm: { create: realmUnitCreateMock, upsert: realmUnitUpsertMock },
+    unitRealm: {
+      create: realmUnitCreateMock,
+      upsert: realmUnitUpsertMock,
+      findUnique: realmUnitFindUniqueMock,
+    },
+    realmModerationQueueItem: { create: realmModerationQueueItemCreateMock },
+    realmModerationEvent: { create: realmModerationEventCreateMock },
     unitTag: {
       create: unitTagCreateMock,
       upsert: unitTagUpsertMock,
@@ -265,8 +278,11 @@ Object.assign(prismaMock, {
   unitRealm: {
     create: realmUnitCreateMock,
     upsert: realmUnitUpsertMock,
+    findUnique: realmUnitFindUniqueMock,
     findMany: realmUnitFindManyMock,
   },
+  realmModerationQueueItem: { create: realmModerationQueueItemCreateMock },
+  realmModerationEvent: { create: realmModerationEventCreateMock },
   realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
   realmMember: {
     findMany: realmMemberFindManyMock,
@@ -408,7 +424,7 @@ function resetMocks() {
     unit: {
       defaultLanguage: "en",
       status: "PUBLISHED",
-      inRealms: [{ realmUnitId: "realm-1", state: "VISIBLE" }],
+      inRealms: [{ realmUnitId: "realm-1", state: "APPROVED" }],
       realmModerationTargets: [],
     },
   });
@@ -436,6 +452,7 @@ function resetMocks() {
       extra: {},
       ruleVersion: 1,
       ruleRequireOnPost: false,
+      contentRequiresApproval: false,
     })),
   );
   realmFindUniqueMock.mockClear();
@@ -450,8 +467,12 @@ function resetMocks() {
   realmRuleAcknowledgementFindManyMock.mockResolvedValue([]);
   realmUnitCreateMock.mockClear();
   realmUnitUpsertMock.mockClear();
+  realmUnitFindUniqueMock.mockClear();
+  realmUnitFindUniqueMock.mockResolvedValue(null);
   realmUnitFindManyMock.mockClear();
   realmUnitFindManyMock.mockResolvedValue([{ realmUnitId: "realm-1" }]);
+  realmModerationQueueItemCreateMock.mockClear();
+  realmModerationEventCreateMock.mockClear();
   unitTagCreateMock.mockClear();
   unitTagUpsertMock.mockClear();
   unitTagFindManyMock.mockClear();
@@ -532,6 +553,36 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(realmUnitCreateMock.mock.calls[0]?.[0].data).toMatchObject({
       realmUnitId: "realm-1",
       unitId: "post-1",
+      state: "APPROVED",
+    });
+  });
+
+  test("creates pending UnitRealm rows and queue items when content approval is required", async () => {
+    resetMocks();
+    realmFindManyMock.mockImplementation(async (args: any) =>
+      (args.where.unitId.in as string[]).map((unitId) => ({
+        unitId,
+        extra: {},
+        ruleVersion: 1,
+        ruleRequireOnPost: false,
+        contentRequiresApproval: true,
+      })),
+    );
+
+    await service.create(postInput({ realmUnitIds: ["realm-1"] }), "user-1");
+
+    expect(realmUnitCreateMock.mock.calls[0]?.[0].data).toMatchObject({
+      realmUnitId: "realm-1",
+      unitId: "post-1",
+      state: "PENDING_REVIEW",
+    });
+    expect(realmModerationQueueItemCreateMock).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        realmUnitId: "realm-1",
+        targetKind: "realm-feed-submission",
+        targetId: "post-1",
+        addressedUnitId: "post-1",
+      }),
     });
   });
 
@@ -711,7 +762,7 @@ describe("PostService.submitToRealm", () => {
       where: {
         realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
       },
-      create: { realmUnitId: "realm-1", unitId: "post-1" },
+      create: { realmUnitId: "realm-1", unitId: "post-1", state: "APPROVED" },
       update: {},
     });
     expect(unitTagUpsertMock).toHaveBeenCalledWith({
@@ -727,6 +778,59 @@ describe("PostService.submitToRealm", () => {
       where: { unitId: "post-1" },
       data: { status: "PUBLISHED" },
     });
+  });
+
+  test("submits an authored post for review when realm approval is required", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "user-1",
+      kind: "POST",
+      unit: { status: "PUBLISHED", publishedAt: new Date() },
+    });
+    realmFindManyMock.mockImplementation(async (args: any) =>
+      (args.where.unitId.in as string[]).map((unitId) => ({
+        unitId,
+        extra: {},
+        ruleVersion: 1,
+        ruleRequireOnPost: false,
+        contentRequiresApproval: true,
+      })),
+    );
+
+    await service.submitToRealm("post-1", { realmUnitId: "realm-1" }, "user-1");
+
+    expect(realmUnitUpsertMock).toHaveBeenCalledWith({
+      where: {
+        realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
+      },
+      create: {
+        realmUnitId: "realm-1",
+        unitId: "post-1",
+        state: "PENDING_REVIEW",
+      },
+      update: {},
+    });
+    expect(realmModerationQueueItemCreateMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not silently re-approve rejected realm submissions", async () => {
+    resetMocks();
+    postFindUniqueOrThrowMock.mockResolvedValueOnce({
+      unitId: "post-1",
+      authorUserId: "user-1",
+      kind: "POST",
+      unit: { status: "PUBLISHED", publishedAt: new Date() },
+    });
+    realmUnitFindUniqueMock.mockResolvedValueOnce({ state: "REJECTED" });
+
+    await expect(
+      service.submitToRealm("post-1", { realmUnitId: "realm-1" }, "user-1"),
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: "Rejected or removed realm submissions require moderator review",
+    });
+    expect(realmUnitUpsertMock).not.toHaveBeenCalled();
   });
 
   test("rejects submitting another author's post", async () => {
@@ -801,7 +905,7 @@ describe("PostService.byRealm", () => {
 
     expect(result).toEqual({ posts: [], total: 0 });
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
-      some: { realmUnitId: "realm-1", state: "VISIBLE" },
+      some: { realmUnitId: "realm-1", state: "APPROVED" },
     });
     expect(firstPostFindManyArgs().where.unit.realmModerationTargets).toEqual({
       none: {
@@ -869,7 +973,7 @@ describe("PostService.byRealm", () => {
     expect(postFindManyMock).not.toHaveBeenCalled();
   });
 
-  test("admin realm feed can include non-visible lifecycle states", async () => {
+  test("admin realm feed can include every publication state", async () => {
     resetMocks();
 
     await service.byRealm("realm-1", {}, { isAdmin: true });
@@ -882,37 +986,34 @@ describe("PostService.byRealm", () => {
     ).toBeUndefined();
   });
 
-  test("admin realm feed can filter archived lifecycle overlays", async () => {
+  test("admin realm feed can filter pending publication rows", async () => {
     resetMocks();
 
     await service.byRealm(
       "realm-1",
-      { realmLifecycleState: "archived" },
+      { realmLifecycleState: "pending_review" },
       { isAdmin: true },
     );
 
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
-      some: { realmUnitId: "realm-1" },
+      some: { realmUnitId: "realm-1", state: "PENDING_REVIEW" },
     });
-    expect(firstPostFindManyArgs().where.unit.realmModerationTargets).toEqual({
-      some: {
-        realmUnitId: "realm-1",
-        state: "ARCHIVED",
-      },
-    });
+    expect(
+      firstPostFindManyArgs().where.unit.realmModerationTargets,
+    ).toBeUndefined();
   });
 
-  test("admin realm feed can filter visible lifecycle rows", async () => {
+  test("admin realm feed can filter approved publication rows", async () => {
     resetMocks();
 
     await service.byRealm(
       "realm-1",
-      { realmLifecycleState: "visible" },
+      { realmLifecycleState: "approved" },
       { isAdmin: true },
     );
 
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
-      some: { realmUnitId: "realm-1", state: "VISIBLE" },
+      some: { realmUnitId: "realm-1", state: "APPROVED" },
     });
     expect(
       firstPostFindManyArgs().where.unit.realmModerationTargets,

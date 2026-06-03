@@ -1078,7 +1078,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           "Forbidden: you do not have permission to add content to this realm",
         );
       }
-      return realmService.addUnitRealm(params.unitId, body.unitId);
+      return realmService.addUnitRealm(params.unitId, body.unitId, body);
     },
     {
       requireLogin: true,

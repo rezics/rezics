@@ -119,6 +119,19 @@ const REALM_FEED_EXCLUDED_MODERATION_STATES = [
   "REMOVED",
 ] as const;
 
+type RealmFeedPublicationState = "PENDING_REVIEW" | "APPROVED";
+
+function toRealmFeedPublicationState(
+  state: PostListQuery["realmLifecycleState"],
+) {
+  if (!state || state === "all") return undefined;
+  return state.toUpperCase() as
+    | "PENDING_REVIEW"
+    | "APPROVED"
+    | "REJECTED"
+    | "REMOVED";
+}
+
 function wikiContentTranslationStatus(isDraft: boolean) {
   return isDraft ? "DRAFT" : "PUBLISHED";
 }
@@ -292,13 +305,6 @@ async function upsertPostTitleTranslation(
 /** Realm roles that may pin/accept within a realm's threads. */
 const PROMOTION_ROLES = ["owner", "admin", "moderator"] as const;
 
-function realmLifecycleStateFilter(
-  state: PostListQuery["realmLifecycleState"],
-) {
-  if (!state || state === "all") return undefined;
-  return state.toUpperCase();
-}
-
 async function applyBlockedAuthorFilter(
   where: Prisma.PostWhereInput,
   options?: { isAdmin?: boolean; viewerUserId?: string | null },
@@ -345,6 +351,62 @@ async function attachPinKinds<
 }
 
 export class PostService {
+  private async initialRealmFeedStates(
+    tx: Pick<Prisma.TransactionClient, "realm">,
+    realmUnitIds: string[],
+  ): Promise<Map<string, RealmFeedPublicationState>> {
+    if (realmUnitIds.length === 0) return new Map();
+    const realms = await tx.realm.findMany({
+      where: { unitId: { in: realmUnitIds } },
+      select: { unitId: true, contentRequiresApproval: true },
+    });
+    return new Map(
+      realms.map((realm) => [
+        realm.unitId,
+        realm.contentRequiresApproval ? "PENDING_REVIEW" : "APPROVED",
+      ]),
+    );
+  }
+
+  private async createPendingRealmReviewQueueItem(
+    tx: Pick<
+      Prisma.TransactionClient,
+      "realmModerationQueueItem" | "realmModerationEvent"
+    >,
+    input: {
+      realmUnitId: string;
+      unitId: string;
+      actorUserId: string;
+    },
+  ) {
+    const created = await tx.realmModerationQueueItem.create({
+      data: {
+        realmUnitId: input.realmUnitId,
+        state: "NEW",
+        reporterUserId: input.actorUserId,
+        subjectUserId: input.actorUserId,
+        targetKind: "realm-feed-submission",
+        targetId: input.unitId,
+        addressedUnitId: input.unitId,
+        reason: "Content submitted for realm approval",
+        metadata: { approval: true } as never,
+      },
+    });
+    await tx.realmModerationEvent.create({
+      data: {
+        queueItemId: created.id,
+        realmUnitId: input.realmUnitId,
+        actorUserId: input.actorUserId,
+        reason: created.reason,
+        after: {
+          state: created.state,
+          publicationState: "PENDING_REVIEW",
+          addressedUnitId: input.unitId,
+        } as never,
+      },
+    });
+  }
+
   /**
    * List root submissions only. Reply tree reads live in the comment domain;
    * Post no longer stores discussion topology.
@@ -420,7 +482,9 @@ export class PostService {
     const skipNum = opts.start ?? 0;
     const sort = opts.sort === "top" || opts.sort === "hot" ? opts.sort : "new";
     const tagIds = this.normalizeTagIds(opts.tagIds);
-    const lifecycleState = realmLifecycleStateFilter(opts.realmLifecycleState);
+    const lifecycleState = toRealmFeedPublicationState(
+      opts.realmLifecycleState,
+    );
 
     if (!(await this.canReadRealmFeed(realmUnitId, options))) {
       return { posts: [], total: 0 };
@@ -432,34 +496,25 @@ export class PostService {
         inRealms: {
           some: {
             realmUnitId,
-            ...(options?.isAdmin
-              ? lifecycleState && lifecycleState === "VISIBLE"
-                ? { state: lifecycleState as any }
-                : {}
-              : { state: "VISIBLE" as const }),
+            ...(options?.isAdmin && lifecycleState
+              ? { state: lifecycleState as any }
+              : options?.isAdmin
+                ? {}
+                : { state: "APPROVED" as const }),
           },
         },
-        ...(options?.isAdmin && lifecycleState && lifecycleState !== "VISIBLE"
-          ? {
+        ...(options?.isAdmin
+          ? {}
+          : {
               realmModerationTargets: {
-                some: {
+                none: {
                   realmUnitId,
-                  state: lifecycleState as any,
-                },
-              },
-            }
-          : options?.isAdmin
-            ? {}
-            : {
-                realmModerationTargets: {
-                  none: {
-                    realmUnitId,
-                    state: {
-                      in: REALM_FEED_EXCLUDED_MODERATION_STATES as any,
-                    },
+                  state: {
+                    in: REALM_FEED_EXCLUDED_MODERATION_STATES as any,
                   },
                 },
-              }),
+              },
+            }),
         ...(tagIds.length > 0
           ? {
               OR: [
@@ -767,16 +822,29 @@ export class PostService {
 
       if (realmIdsToWrite.length > 0) {
         const createdAt = new Date();
+        const initialStates = await this.initialRealmFeedStates(
+          tx,
+          realmIdsToWrite,
+        );
         await Promise.all(
-          realmIdsToWrite.map((realmUnitId) =>
-            tx.unitRealm.create({
+          realmIdsToWrite.map(async (realmUnitId) => {
+            const state = initialStates.get(realmUnitId) ?? "APPROVED";
+            await tx.unitRealm.create({
               data: {
                 realmUnitId,
                 unitId: created.unitId,
+                state,
                 createdAt,
               },
-            }),
-          ),
+            });
+            if (state === "PENDING_REVIEW") {
+              await this.createPendingRealmReviewQueueItem(tx, {
+                realmUnitId,
+                unitId: created.unitId,
+                actorUserId: authorUserId,
+              });
+            }
+          }),
         );
       }
 
@@ -923,6 +991,25 @@ export class PostService {
     await this.assertRealmPostAllowed([input.realmUnitId], authorUserId);
 
     const updated = await prisma.$transaction(async (tx) => {
+      const existingRealmRow = await tx.unitRealm.findUnique({
+        where: {
+          realmUnitId_unitId: {
+            realmUnitId: input.realmUnitId,
+            unitId,
+          },
+        },
+        select: { state: true },
+      });
+      if (
+        existingRealmRow?.state === "REJECTED" ||
+        existingRealmRow?.state === "REMOVED"
+      ) {
+        throw new AppError(
+          409,
+          "Rejected or removed realm submissions require moderator review",
+        );
+      }
+
       if (tagIdsToWrite.length > 0) {
         const validTags = await tx.unit.findMany({
           where: {
@@ -947,6 +1034,10 @@ export class PostService {
       // This is author/member publishing, not realm admin content management.
       // Keep it in the post domain so ownership and post-to-realm policy stay
       // aligned with new realm post creation.
+      const initialStates = await this.initialRealmFeedStates(tx, [
+        input.realmUnitId,
+      ]);
+      const state = initialStates.get(input.realmUnitId) ?? "APPROVED";
       await tx.unitRealm.upsert({
         where: {
           realmUnitId_unitId: {
@@ -957,9 +1048,17 @@ export class PostService {
         create: {
           realmUnitId: input.realmUnitId,
           unitId,
+          state,
         },
         update: {},
       });
+      if (!existingRealmRow && state === "PENDING_REVIEW") {
+        await this.createPendingRealmReviewQueueItem(tx, {
+          realmUnitId: input.realmUnitId,
+          unitId,
+          actorUserId: authorUserId,
+        });
+      }
 
       for (const tagUnitId of tagIdsToWrite) {
         await tx.unitTag.upsert({

@@ -278,6 +278,8 @@ export const realmModerationQueueStateSchema = t.Union([
 ]);
 
 export const realmModerationDecisionKinds = [
+  "approve_for_feed",
+  "reject_from_feed",
   "hide_from_realm",
   "remove_from_feed",
   "lock",
@@ -292,6 +294,8 @@ export const realmModerationDecisionKinds = [
 ] as const;
 
 export const realmModerationDecisionKindSchema = t.Union([
+  t.Literal("approve_for_feed"),
+  t.Literal("reject_from_feed"),
   t.Literal("hide_from_realm"),
   t.Literal("remove_from_feed"),
   t.Literal("lock"),
@@ -405,6 +409,7 @@ export const contentModerationStateKinds = [
   "tombstoned",
   "locked",
   "archived",
+  "removed",
 ] as const;
 
 export const contentModerationStateKindSchema = t.Union([
@@ -413,6 +418,7 @@ export const contentModerationStateKindSchema = t.Union([
   t.Literal("tombstoned"),
   t.Literal("locked"),
   t.Literal("archived"),
+  t.Literal("removed"),
 ]);
 
 export type ContentModerationStateKind =

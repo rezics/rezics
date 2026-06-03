@@ -6,6 +6,7 @@ import {
   contentModerationStateKindSchema,
   realmContentModerationDTOSchema,
 } from "../realm/governance";
+import { realmFeedPublicationStateSchema } from "../realm/publication";
 import { licenseSlugSchema } from "../license";
 import { languageSchema } from "../language";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
@@ -219,17 +220,9 @@ export const postListQuerySchema = t.Object({
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
-  /** Moderator realm feed lifecycle filter. Regular callers are always visible-only. */
+  /** Moderator realm feed publication filter. Regular callers are always approved-only. */
   realmLifecycleState: t.Optional(
-    t.Union([
-      t.Literal("visible"),
-      t.Literal("hidden"),
-      t.Literal("tombstoned"),
-      t.Literal("locked"),
-      t.Literal("archived"),
-      t.Literal("removed"),
-      t.Literal("all"),
-    ]),
+    t.Union([realmFeedPublicationStateSchema, t.Literal("all")]),
   ),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),
@@ -275,17 +268,9 @@ export const postListBodySchema = t.Object({
   realmUnitId: t.Optional(t.String()),
   /** Any-of tag filter for realm feed queries. */
   tagIds: t.Optional(t.Array(t.String())),
-  /** Moderator realm feed lifecycle filter. Regular callers are always visible-only. */
+  /** Moderator realm feed publication filter. Regular callers are always approved-only. */
   realmLifecycleState: t.Optional(
-    t.Union([
-      t.Literal("visible"),
-      t.Literal("hidden"),
-      t.Literal("tombstoned"),
-      t.Literal("locked"),
-      t.Literal("archived"),
-      t.Literal("removed"),
-      t.Literal("all"),
-    ]),
+    t.Union([realmFeedPublicationStateSchema, t.Literal("all")]),
   ),
   authorUserId: t.Optional(t.String()),
   kind: t.Optional(postKindLiterals),

@@ -259,7 +259,7 @@ function realmIdsForSearch(unit: any): string[] {
   );
 
   return (unit?.inRealms ?? [])
-    .filter((realm: any) => !realm.state || realm.state === "VISIBLE")
+    .filter((realm: any) => !realm.state || realm.state === "APPROVED")
     .filter((realm: any) => realm.realm?.realm?.isPublic !== false)
     .map((realm: any) => realm.realmUnitId)
     .filter((realmUnitId: string) => !blockedRealmIds.has(realmUnitId));
@@ -267,7 +267,7 @@ function realmIdsForSearch(unit: any): string[] {
 
 const realmSearchProjectionSelect = {
   inRealms: {
-    where: { state: "VISIBLE" },
+    where: { state: "APPROVED" },
     select: {
       realmUnitId: true,
       state: true,
@@ -1125,7 +1125,7 @@ export async function patchContentRealmIds(
   }
   const [inRealms, realmModerationTargets] = await Promise.all([
     getSearchPrismaClient().unitRealm.findMany({
-      where: { unitId, state: "VISIBLE" },
+      where: { unitId, state: "APPROVED" },
       include: {
         realm: {
           select: {

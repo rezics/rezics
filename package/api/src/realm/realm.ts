@@ -76,6 +76,7 @@ export type {
   RealmExtraOkResponse,
   RealmExtraReadResponse,
   RealmDTO,
+  RealmFeedPublicationState,
   RealmFilters,
   RealmFormData,
   RealmListResponse,

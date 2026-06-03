@@ -9,8 +9,17 @@ import {
   type PostDTO,
   type VariantContextSummary,
 } from "@rezics/contract";
-import { Button } from "@rezics/ui/shadcn";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
+import { Pin, Shield } from "lucide-react";
 import type React from "react";
 import { toast } from "sonner";
 import { ReactionBar } from "@/engagement";
@@ -82,11 +91,11 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   const runAdminAction = (
-    event: React.MouseEvent,
+    event: Event | React.MouseEvent,
     message: string,
     action: () => void,
   ) => {
-    event.stopPropagation();
+    if ("stopPropagation" in event) event.stopPropagation();
     if (!window.confirm(message)) return;
     action();
   };
@@ -159,75 +168,103 @@ export const PostCard: React.FC<PostCardProps> = ({
         />
         {manageMode && manageRealmId ? (
           <div
-            className="flex flex-wrap gap-2 pt-1"
+            className="flex justify-end pt-1"
             onClick={(event) => event.stopPropagation()}
             onKeyDown={() => undefined}
           >
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              disabled={pinPost.isPending}
-              onClick={(event) =>
-                runAdminAction(event, "Pin this post?", () =>
-                  pinPost.mutate({
-                    realmUnitId: manageRealmId,
-                    unitId: post.unitId,
-                  }),
-                )
-              }
-            >
-              Pin
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={removeFromFeed.isPending}
-              onClick={(event) =>
-                runAdminAction(
-                  event,
-                  "Remove this post from the realm feed?",
-                  () =>
-                    removeFromFeed.mutate({
-                      realmUnitId: manageRealmId,
-                      targetUnitId: post.unitId,
-                    }),
-                )
-              }
-            >
-              Remove
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={hideInRealm.isPending}
-              onClick={(event) =>
-                runAdminAction(event, "Hide this post in this realm?", () =>
-                  hideInRealm.mutate({
-                    realmUnitId: manageRealmId,
-                    targetUnitId: post.unitId,
-                    input: { reason: "moderator_action" },
-                  }),
-                )
-              }
-            >
-              Hide
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="destructive"
-              disabled={deletePost.isPending}
-              onClick={(event) =>
-                runAdminAction(event, "Delete this post?", () =>
-                  deletePost.mutate(post.unitId),
-                )
-              }
-            >
-              Delete
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                nativeButton
+                render={(props) => (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    aria-label="Realm moderation actions"
+                    className="h-8 w-8 p-0 text-text-secondary"
+                    {...props}
+                  >
+                    <Shield className="h-4 w-4" aria-hidden />
+                  </Button>
+                )}
+              />
+              <DropdownMenuContent
+                align="end"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <DropdownMenuLabel>Feed publication</DropdownMenuLabel>
+                <DropdownMenuItem
+                  disabled={removeFromFeed.isPending}
+                  onSelect={(event) =>
+                    runAdminAction(
+                      event as unknown as Event,
+                      "Remove this post from the realm feed?",
+                      () =>
+                        removeFromFeed.mutate({
+                          realmUnitId: manageRealmId,
+                          targetUnitId: post.unitId,
+                        }),
+                    )
+                  }
+                >
+                  <Shield className="h-4 w-4" aria-hidden />
+                  Remove from feed
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Realm moderation</DropdownMenuLabel>
+                <DropdownMenuItem
+                  disabled={hideInRealm.isPending}
+                  onSelect={(event) =>
+                    runAdminAction(
+                      event as unknown as Event,
+                      "Hide this post in this realm?",
+                      () =>
+                        hideInRealm.mutate({
+                          realmUnitId: manageRealmId,
+                          targetUnitId: post.unitId,
+                          input: { reason: "moderator_action" },
+                        }),
+                    )
+                  }
+                >
+                  <Shield className="h-4 w-4" aria-hidden />
+                  Hide in realm
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  disabled={deletePost.isPending}
+                  onSelect={(event) =>
+                    runAdminAction(
+                      event as unknown as Event,
+                      "Delete this post?",
+                      () => deletePost.mutate(post.unitId),
+                    )
+                  }
+                >
+                  <Shield className="h-4 w-4" aria-hidden />
+                  Delete post
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Organization</DropdownMenuLabel>
+                <DropdownMenuItem
+                  disabled={pinPost.isPending}
+                  onSelect={(event) =>
+                    runAdminAction(
+                      event as unknown as Event,
+                      "Pin this post?",
+                      () =>
+                        pinPost.mutate({
+                          realmUnitId: manageRealmId,
+                          unitId: post.unitId,
+                        }),
+                    )
+                  }
+                >
+                  <Pin className="h-4 w-4" aria-hidden />
+                  Pin
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         ) : null}
       </div>

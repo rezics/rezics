@@ -21,7 +21,7 @@ function setServerEnvForSearchTests() {
 }
 
 describe("buildPostDocument", () => {
-  test("includes only visible non-hidden realmIds from UnitRealm rows", async () => {
+  test("includes only approved non-hidden realmIds from UnitRealm rows", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
     const doc = buildPostDocument({
@@ -42,12 +42,12 @@ describe("buildPostDocument", () => {
       unit: {
         user: { name: "Alice", slug: "alice", avatar: null },
         inRealms: [
-          { realmUnitId: "realm-1", state: "VISIBLE" },
-          { realmUnitId: "realm-2", state: "VISIBLE" },
-          { realmUnitId: "realm-3", state: "ARCHIVED" },
+          { realmUnitId: "realm-1", state: "APPROVED" },
+          { realmUnitId: "realm-2", state: "APPROVED" },
+          { realmUnitId: "realm-3", state: "PENDING_REVIEW" },
           {
             realmUnitId: "realm-private",
-            state: "VISIBLE",
+            state: "APPROVED",
             realm: { realm: { isPublic: false } },
           },
         ],
@@ -767,17 +767,17 @@ describe("search sync global moderation projection", () => {
         findMany: mock(async () => [
           {
             realmUnitId: "realm-a",
-            state: "VISIBLE",
+            state: "APPROVED",
             realm: { realm: { isPublic: true } },
           },
           {
             realmUnitId: "realm-b",
-            state: "VISIBLE",
+            state: "APPROVED",
             realm: { realm: { isPublic: true } },
           },
           {
             realmUnitId: "realm-private",
-            state: "VISIBLE",
+            state: "APPROVED",
             realm: { realm: { isPublic: false } },
           },
         ]),

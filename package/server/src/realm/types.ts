@@ -22,6 +22,7 @@ export const realmListSelect = {
   unitId: true,
   isPublic: true,
   isOfficial: true,
+  contentRequiresApproval: true,
   memberCount: true,
   extra: true,
   createdAt: true,

@@ -12,6 +12,7 @@ import {
   unitTranslationDTOSchema,
 } from "../unit/unit";
 import { realmExtraSchema } from "./realm-extra";
+import { realmFeedPublicationStateSchema } from "./publication";
 
 // ============================================================
 // DEFAULT REALM
@@ -73,6 +74,7 @@ export const realmDTOSchema = t.Object({
   user: t.Optional(publicUserSchema),
   isPublic: t.Boolean(),
   isOfficial: t.Boolean(),
+  contentRequiresApproval: t.Optional(t.Boolean()),
   memberCount: t.Number(),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
   viewerCapabilities: t.Optional(t.Array(capabilityHintSchema)),
@@ -239,6 +241,8 @@ export type RealmMembershipMeDTO =
 /**
  * UnitRealm is community/feed membership for a Unit in a realm. It is not
  * semantic tagging and is not a prerequisite for RealmTagApplication.
+ * `state` is the realm feed publication workflow, not global publication,
+ * semantic classification, or a realm-local moderation overlay.
  *
  * Future card-presentation hints such as realm-scoped `spoiler` belong on this
  * junction as typed `extra`, not on Unit.extra and not in the open tag system.
@@ -247,6 +251,7 @@ export type RealmMembershipMeDTO =
 export const unitRealmDTOSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
+  state: realmFeedPublicationStateSchema,
   // extra: t.Optional(t.Nullable(realmContentExtraSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
@@ -515,6 +520,7 @@ export type RealmResponse = (typeof realmResponseSchema)["static"];
 
 export const createRealmSchema = t.Object({
   isPublic: t.Optional(t.Boolean()),
+  contentRequiresApproval: t.Optional(t.Boolean()),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
   translations: t.Optional(
     t.Array(
@@ -534,6 +540,7 @@ export type CreateRealmInput = (typeof createRealmSchema)["static"];
 export const updateRealmSchema = t.Object({
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),
+  contentRequiresApproval: t.Optional(t.Boolean()),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
 });
 
@@ -568,6 +575,7 @@ export type RealmMemberParams = (typeof realmMemberParamsSchema)["static"];
 
 export const addUnitRealmSchema = t.Object({
   unitId: t.String(),
+  state: t.Optional(realmFeedPublicationStateSchema),
 });
 
 export type AddUnitRealmInput = (typeof addUnitRealmSchema)["static"];

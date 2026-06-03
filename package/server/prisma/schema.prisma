@@ -957,6 +957,8 @@ model Realm {
 
   /// When true, new joins are stored as pending until a realm moderator approves them.
   joinRequiresApproval Boolean @default(false)
+  /// When true, author submissions enter the realm feed as pending review until approved.
+  contentRequiresApproval Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1015,15 +1017,16 @@ model RealmRuleAcknowledgement {
  */
 
 model UnitRealm {
-  realmUnitId String                     @db.Uuid
-  unitId      String                     @db.Uuid
-  state       ContentModerationStateKind @default(VISIBLE)
+  realmUnitId String                    @db.Uuid
+  unitId      String                    @db.Uuid
+  /// Realm feed publication workflow only; moderation visibility overlays live in RealmContentModeration.
+  state       RealmFeedPublicationState @default(APPROVED)
   /// Future presentation-only card hints, such as a realm-scoped spoiler
   /// overlay, should live on this realm/content junction rather than Unit.extra
   /// or semantic tags. Disabled until the realm feed publication work adds a
   /// typed JSON contract and migration.
   // extra Json?
-  createdAt   DateTime                   @default(now())
+  createdAt   DateTime                  @default(now())
 
   /// Community/feed membership for a target Unit in a realm.
   /// This junction is not semantic tagging and is not a prerequisite or owner relation for RealmTagApplication.
@@ -1765,6 +1768,13 @@ enum ContentModerationStateKind {
   TOMBSTONED
   LOCKED
   ARCHIVED
+  REMOVED
+}
+
+enum RealmFeedPublicationState {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
   REMOVED
 }
 

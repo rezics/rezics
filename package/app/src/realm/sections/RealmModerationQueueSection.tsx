@@ -2,6 +2,7 @@ import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
   governanceAuditListQuery,
   governanceRealmQueueListQuery,
+  useDecideRealmQueueItemMutation,
 } from "@rezics/api/governance/governance";
 import type { RealmModerationQueueItemDTO } from "@rezics/contract";
 import { EmptyState, Spinner } from "@rezics/ui";
@@ -23,6 +24,7 @@ import {
   UserRoundCheck,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
+import { toast } from "sonner";
 
 interface RealmModerationQueueSectionProps {
   realmUnitId: string;
@@ -41,9 +43,30 @@ function formatDate(value?: string | null) {
   return date.toLocaleString();
 }
 
-function QueueItemCard({ item }: { item: RealmModerationQueueItemDTO }) {
+function QueueItemCard({
+  item,
+  realmUnitId,
+}: {
+  item: RealmModerationQueueItemDTO;
+  realmUnitId: string;
+}) {
   const summary = item.reason ?? item.safeSummary ?? "No summary recorded.";
   const updatedAt = formatDate(item.updatedAt);
+  const decideQueueItem = useDecideRealmQueueItemMutation({
+    onSuccess: () => toast.success("Queue item updated."),
+    onError: (error) => toast.error(error.message),
+  });
+  const isPendingReview =
+    item.target.kind === "realm-feed-submission" && item.state === "new";
+  const decide = (
+    decisionKind: "approve_for_feed" | "reject_from_feed",
+    reason: string,
+  ) =>
+    decideQueueItem.mutate({
+      realmUnitId,
+      queueItemId: item.id,
+      input: { decisionKind, reason },
+    });
 
   return (
     <Card surface="plain">
@@ -75,16 +98,42 @@ function QueueItemCard({ item }: { item: RealmModerationQueueItemDTO }) {
           ) : null}
           {updatedAt ? <span>Updated {updatedAt}</span> : null}
         </div>
-        {item.linkedCaseId ? (
-          <div>
-            <Link
-              to="/staff/case/$caseId"
-              params={{ caseId: item.linkedCaseId }}
-            >
-              <Button variant="outline" size="sm">
-                Open case
-              </Button>
-            </Link>
+        {isPendingReview || item.linkedCaseId ? (
+          <div className="flex flex-wrap gap-2">
+            {isPendingReview ? (
+              <>
+                <Button
+                  variant="default"
+                  size="sm"
+                  disabled={decideQueueItem.isPending}
+                  onClick={() =>
+                    decide("approve_for_feed", "approved_for_realm_feed")
+                  }
+                >
+                  Approve
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={decideQueueItem.isPending}
+                  onClick={() =>
+                    decide("reject_from_feed", "rejected_from_realm_feed")
+                  }
+                >
+                  Reject
+                </Button>
+              </>
+            ) : null}
+            {item.linkedCaseId ? (
+              <Link
+                to="/staff/case/$caseId"
+                params={{ caseId: item.linkedCaseId }}
+              >
+                <Button variant="outline" size="sm">
+                  Open case
+                </Button>
+              </Link>
+            ) : null}
           </div>
         ) : null}
       </CardContent>
@@ -244,7 +293,11 @@ export function RealmModerationQueueSection({
           ) : queueItems.length ? (
             <div className="grid gap-3">
               {queueItems.map((item) => (
-                <QueueItemCard key={item.id} item={item} />
+                <QueueItemCard
+                  key={item.id}
+                  item={item}
+                  realmUnitId={realmUnitId}
+                />
               ))}
             </div>
           ) : (

@@ -1,5 +1,6 @@
 import type {
   RealmDTO,
+  RealmFeedPublicationState,
   RealmMemberDTO,
   RealmMemberState,
   RealmTagApplicationDTO,
@@ -30,6 +31,7 @@ export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
     user: mapPublicUser(row.unit?.user),
     isPublic: row.isPublic,
     isOfficial: row.isOfficial,
+    contentRequiresApproval: row.contentRequiresApproval,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: (row.unit?.translations ??
@@ -47,6 +49,7 @@ export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
     user: mapPublicUser(row.unit?.user),
     isPublic: row.isPublic,
     isOfficial: row.isOfficial,
+    contentRequiresApproval: row.contentRequiresApproval,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
     translations: (row.unit?.translations ??
@@ -76,6 +79,7 @@ export function mapUnitRealmToDTO(row: UnitRealm): UnitRealmDTO {
   return {
     realmUnitId: row.realmUnitId,
     unitId: row.unitId,
+    state: lower<RealmFeedPublicationState>(row.state) ?? "approved",
     createdAt: row.createdAt,
   };
 }
