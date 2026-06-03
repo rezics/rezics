@@ -192,7 +192,7 @@ remain available only for language switchers and editing surfaces.
   the read-language context by default.
 - [x] 6.4 Keep query keys language-aware so React Query caches do not mix
   results resolved for different candidate orders.
-- [ ] 6.5 Update ordinary SQL list/detail query consumers to pass the same
+- [x] 6.5 Update ordinary SQL list/detail query consumers to pass the same
   frontend read-language context when they are not edit/language-switch
   surfaces.
 
@@ -203,14 +203,14 @@ remain available only for language switchers and editing surfaces.
   `translations[]` to `RealmDTO`.
 - [x] 7.2 Update homepage active realms and other realm list surfaces to pass
   read-language context and display resolved realm fields.
-- [ ] 7.3 Replace frontend `translations[]` picking for ordinary Book and Realm
+- [x] 7.3 Replace frontend `translations[]` picking for ordinary Book and Realm
   display with resolved DTO/search fields.
-- [ ] 7.4 Keep explicit language switch/edit views wired to full translation
+- [x] 7.4 Keep explicit language switch/edit views wired to full translation
   availability endpoints or `translations[]`, not list preview fields.
 - [x] 7.5 Update home, book library, user profile/unit lists, shelves, zone
   search, and federated search consumers that call raw Meilisearch query
   options so they use the localized wrappers.
-- [ ] 7.6 Update Storybook mocks and app tests for PostCard, book detail, realm
+- [x] 7.6 Update Storybook mocks and app tests for PostCard, book detail, realm
   page, realm feed, unit pickers, and search result cards to include resolved
   language fields.
 

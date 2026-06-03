@@ -7,6 +7,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import type React from "react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { BookDetailShell } from "../sections/BookDetailSection";
 import { BookHeroSection } from "../sections/BookHeroSection";
 import {
@@ -32,9 +33,10 @@ export const BookDetailLayout: React.FC<{ children: React.ReactNode }> = ({
   const params = useParams({ strict: false }) as { bookId?: string };
   const bookId = params.bookId ?? "";
   const queriesEnabled = Boolean(bookId);
+  const readContext = useReadLanguageContext();
   const { data, isLoading, error } = useQuery({
-    ...bookQueries.detail(bookId),
-    enabled: queriesEnabled,
+    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    enabled: queriesEnabled && readContext.ready,
   });
   const { data: scoreAggregates } = useQuery({
     ...scoreQueries.aggregates(bookId),

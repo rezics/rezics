@@ -18,6 +18,8 @@ import { UnitPicker } from "./UnitPicker";
 const fixtureBook: UnitDTO = {
   id: "book-abc",
   type: "book",
+  resolvedLanguage: "en",
+  title: "The Demo Book",
   translations: [
     {
       unitId: "book-abc",
@@ -31,6 +33,8 @@ const fixtureBook: UnitDTO = {
 const fixtureChapter: UnitDTO = {
   id: "chapter-xyz",
   type: "chapter",
+  resolvedLanguage: "en",
+  title: "Chapter 1: Beginnings",
   translations: [
     {
       unitId: "chapter-xyz",

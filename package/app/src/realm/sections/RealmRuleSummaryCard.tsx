@@ -14,6 +14,7 @@ import { ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostBodyMarkdown } from "@/post";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { RealmRuleDialog } from "./RealmRuleDialog";
 
 interface RealmRuleSummaryCardProps {
@@ -58,6 +59,7 @@ export function RealmRuleSummaryCard({
 }: RealmRuleSummaryCardProps) {
   const { t } = useTranslation(["common", "entity"]);
   const [open, setOpen] = useState(false);
+  const readContext = useReadLanguageContext();
   const resolvedQuery = useQuery(realmRuleResolvedQuery(realmUnitId));
   const postUnitId =
     resolvedQuery.data?.sourceRulePostUnitId ??
@@ -65,8 +67,9 @@ export function RealmRuleSummaryCard({
     fallbackPostUnitId ??
     "";
   const fallbackPostQuery = useQuery({
-    ...postQueries.detail(postUnitId),
+    ...postQueries.detail(postUnitId, { languages: readContext.languages }),
     enabled:
+      readContext.ready &&
       Boolean(postUnitId) &&
       !resolvedQuery.data?.sourceRulePost &&
       !resolvedQuery.data?.translation?.description,

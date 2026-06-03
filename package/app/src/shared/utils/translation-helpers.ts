@@ -1,9 +1,8 @@
 /**
  * Translation helpers for the new Unit/Book translation layer.
  *
- * BookDTO and UnitDTO no longer have top-level `title`, `description`, etc.
- * Text fields are stored in `translations[]` (UnitTranslationDTO).
- * These helpers resolve the best match for a given language.
+ * Ordinary read DTOs carry server-resolved display fields. Translation arrays
+ * remain for explicit language switchers and edit surfaces.
  */
 
 import type {
@@ -73,9 +72,11 @@ export function getBookTitle(
   language?: string,
 ): string {
   if (!book) return "";
+  if (!language) return book.title ?? "";
   const tr = getTranslation(
     book.translations,
-    language ?? book.defaultLanguage ?? undefined,
+    language,
+    book.defaultLanguage ?? undefined,
   );
   return tr?.title ?? "";
 }
@@ -88,9 +89,11 @@ export function getBookDescription(
   language?: string,
 ): string {
   if (!book) return "";
+  if (!language) return mainMarkdownSource(book.description) ?? "";
   const tr = getTranslation(
     book.translations,
-    language ?? book.defaultLanguage ?? undefined,
+    language,
+    book.defaultLanguage ?? undefined,
   );
   return mainMarkdownSource(tr?.description) ?? "";
 }
@@ -103,9 +106,11 @@ export function getBookSummary(
   language?: string,
 ): string {
   if (!book) return "";
+  if (!language) return book.summary ?? "";
   const tr = getTranslation(
     book.translations,
-    language ?? book.defaultLanguage ?? undefined,
+    language,
+    book.defaultLanguage ?? undefined,
   );
   return tr?.summary ?? "";
 }
@@ -118,9 +123,11 @@ export function getBookSubtitle(
   language?: string,
 ): string {
   if (!book) return "";
+  if (!language) return book.subtitle ?? "";
   const tr = getTranslation(
     book.translations,
-    language ?? book.defaultLanguage ?? undefined,
+    language,
+    book.defaultLanguage ?? undefined,
   );
   return tr?.subtitle ?? "";
 }

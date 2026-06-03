@@ -41,6 +41,7 @@ function makePost(unitId: string, contentSource: string): PostDTO {
     unitId,
     authorUserId: "story-owner",
     kind: PostKind.POST,
+    resolvedLanguage: LANGUAGES.EN,
     content: markdownContentDoc(contentSource),
     createdAt: "2026-05-27T08:30:00.000Z",
     updatedAt: "2026-05-27T08:30:00.000Z",
@@ -55,6 +56,9 @@ function makeRealm(): RealmDTO {
     isPublic: true,
     isOfficial: false,
     memberCount: 128,
+    resolvedLanguage: LANGUAGES.EN,
+    title: "Story Realm",
+    description: "A fixture realm for community governance states.",
     extra: {
       about: ABOUT_POST_ID,
       rule: RULE_POST_ID,

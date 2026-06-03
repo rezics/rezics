@@ -16,6 +16,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { Route as unitRoute } from "@/routes/_mainLayout/unit/$unitId";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { TextLink, unitHref } from "@/shared/ui/link";
 
 function formatMetadataValue(value: unknown): string {
@@ -35,11 +36,18 @@ function formatMetadataValue(value: unknown): string {
 
 export function UnitPageById({ unitId }: { unitId: string }) {
   const { t } = useTranslation(["book", "common", "settings"]);
+  const readContext = useReadLanguageContext();
   const {
     data: unit,
     isLoading,
     error,
-  } = useQuery(unitDetailQuery(unitId || ""));
+  } = useQuery({
+    ...unitDetailQuery(unitId || "", {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && Boolean(unitId),
+  });
 
   if (isLoading) {
     return (
@@ -61,9 +69,8 @@ export function UnitPageById({ unitId }: { unitId: string }) {
     );
   }
 
-  const primaryTranslation = unit.translations?.[0];
-  const title = primaryTranslation?.title;
-  const content = mainMarkdownSource(primaryTranslation?.description);
+  const title = unit.title;
+  const content = mainMarkdownSource(unit.description);
   const metadataEntries = Object.entries(unit.extra ?? {});
   const author = unit.user;
 

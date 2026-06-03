@@ -89,11 +89,13 @@ export function unitDtoToUnitCardSummary(
   options: UnitCardSummaryOptions = {},
 ): UnitCardSummary {
   const unitId = text(unit.unitId) ?? text(unit.id) ?? "";
-  const translation = getTranslation(
-    unit.translations,
-    options.language,
-    defaultUnitLanguage(unit),
-  );
+  const translation = unit.resolvedLanguage
+    ? undefined
+    : getTranslation(
+        unit.translations,
+        options.language,
+        defaultUnitLanguage(unit),
+      );
   const title =
     text(unit.title) ??
     text(translation?.title) ??
@@ -113,9 +115,9 @@ export function unitDtoToUnitCardSummary(
     imageUrl: imageUrl ?? null,
     contentPreview:
       text(unit.summary) ??
-      contentDocMarkdownFallback(unit.description) ??
+      text(contentDocMarkdownFallback(unit.description)) ??
       text(translation?.summary) ??
-      contentDocMarkdownFallback(translation?.description),
+      text(contentDocMarkdownFallback(translation?.description)),
     author: unit.user ?? null,
     isCommunityCatalog: isRezicsWikiUser(unit.user),
     addedAt: options.addedAt ?? null,
@@ -189,6 +191,12 @@ export function shelfUnitToUnitCardSummary(
         unitId: data.unitId,
         type: "book",
         user: data.user,
+        resolvedLanguage: data.resolvedLanguage,
+        supportLanguages: data.supportLanguages,
+        title: data.title,
+        subtitle: data.subtitle,
+        summary: data.summary,
+        description: data.description,
         defaultLanguage: data.defaultLanguage,
         translations: data.translations,
         coverUrl: data.coverUrl,

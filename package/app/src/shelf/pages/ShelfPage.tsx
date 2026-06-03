@@ -147,7 +147,7 @@ function shelfUnitToBookshelfItem(
     return {
       unitId: enriched.unit.unitId,
       kind,
-      title: book?.translations?.[0]?.title ?? enriched.unit.unitId,
+      title: book?.title ?? enriched.unit.unitId,
       coverUrl: book?.coverUrl ?? "",
       author: book ? getBookAuthorName(book) || undefined : undefined,
       isLicensed: book?.isLicensed,

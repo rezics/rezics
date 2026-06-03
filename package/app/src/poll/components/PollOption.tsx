@@ -5,6 +5,7 @@ import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import type React from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { cn } from "@/shared/utils/css-util";
 import { UnitCard, unitDtoToUnitCardSummary } from "@/unit";
 import type { PollOptionView } from "../models/pollView";
@@ -24,7 +25,14 @@ interface PollOptionProps {
 /** Renders a referenced unit (the option's `unitId`) via the shared unit card. */
 function PollUnitOption({ unitId }: { unitId: string }) {
   const { t } = useTranslation(["common"]);
-  const { data: unit, isLoading } = useQuery(unitDetailQuery(unitId));
+  const readContext = useReadLanguageContext();
+  const { data: unit, isLoading } = useQuery({
+    ...unitDetailQuery(unitId, {
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+    }),
+    enabled: readContext.ready && Boolean(unitId),
+  });
 
   if (isLoading) {
     return (

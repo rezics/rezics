@@ -17,6 +17,9 @@ import { UnitAddPicker } from "./UnitAddPicker";
 const bookUnit: UnitDTO = {
   id: "book-abc",
   type: "BOOK",
+  resolvedLanguage: "en",
+  title: "The Demo Book",
+  summary: "A searchable work used by the add-item composition.",
   translations: [
     {
       unitId: "book-abc",
@@ -32,6 +35,9 @@ const bookUnit: UnitDTO = {
 const chapterUnit: UnitDTO = {
   id: "chapter-xyz",
   type: "POST",
+  resolvedLanguage: "en",
+  title: "Chapter 1: Beginnings",
+  summary: "A related sub-unit.",
   translations: [
     {
       unitId: "chapter-xyz",
@@ -48,6 +54,9 @@ const searchUnits: UnitDTO[] = [
   {
     id: "review-1",
     type: "POST",
+    resolvedLanguage: "en",
+    title: "A review of the demo book",
+    summary: "Search result with no browse context.",
     translations: [
       {
         unitId: "review-1",

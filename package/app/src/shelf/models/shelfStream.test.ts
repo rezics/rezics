@@ -28,6 +28,8 @@ function makeUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
 function makeBook(unitId: string, title: string): BookDTO {
   return {
     unitId,
+    resolvedLanguage: "en",
+    title,
     translations: [{ language: "en", title }],
   } as unknown as BookDTO;
 }

@@ -1,6 +1,7 @@
 import { postQueries } from "@rezics/api/post/post.queries";
 import { mainMarkdownSource, type PostResponse } from "@rezics/contract";
 import { useQueries } from "@tanstack/react-query";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export type ReasonPost = {
   unitId: string;
@@ -28,8 +29,12 @@ function toReasonPost(post: PostResponse | undefined): ReasonPost | null {
 export function useReasonPostHistory(
   postUnitIds: string[],
 ): UseReasonPostHistoryResult {
+  const readContext = useReadLanguageContext();
   const queries = useQueries({
-    queries: postUnitIds.map((id) => postQueries.detail(id)),
+    queries: postUnitIds.map((id) => ({
+      ...postQueries.detail(id, { languages: readContext.languages }),
+      enabled: readContext.ready && Boolean(id),
+    })),
   });
 
   const isLoading = queries.some((q) => q.isLoading);

@@ -13,11 +13,13 @@ function makeUnit(overrides: Partial<ShelfUnitDTO>): ShelfUnitDTO {
 }
 
 describe("titleOf", () => {
-  test("book with translations returns translation title", () => {
+  test("book with resolved title returns title", () => {
     const unit = makeUnit({ kind: "book", unitId: "book-1" });
     const cached = {
       unitId: "book-1",
-      translations: [{ language: "en", title: "War and Peace" }],
+      resolvedLanguage: "en",
+      title: "War and Peace",
+      translations: [{ language: "en", title: "Legacy Translation Title" }],
     };
     expect(titleOf(unit, cached)).toBe("War and Peace");
   });

@@ -9,7 +9,7 @@ export function titleOf(unit: ShelfUnitDTO, cached: unknown): string {
   switch (unit.kind) {
     case "book": {
       const book = cached as BookDTO | undefined;
-      return book?.translations?.[0]?.title ?? unit.unitId;
+      return book?.title ?? unit.unitId;
     }
     case "review":
     case "quote":

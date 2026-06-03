@@ -38,7 +38,7 @@ export function bookToBookshelfItem(
   const item: BookshelfItem = {
     unitId: book.unitId,
     kind: "book",
-    title: book.translations?.[0]?.title ?? book.unitId,
+    title: book.title ?? book.unitId,
     coverUrl: book.coverUrl ?? "",
     author: getBookAuthorName(book) || undefined,
     isLicensed: book.isLicensed,

@@ -15,6 +15,7 @@ import {
   type ReplyComposerHandle,
 } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { ReviewDetail } from "../components/detail/ReviewDetail";
 
@@ -28,16 +29,20 @@ export const ReviewDetailSection: React.FC<ReviewDetailSectionProps> = ({
   const { t } = useTranslation(["common", "community"]);
   const commentRef = useRef<HTMLDivElement>(null);
   const composerRef = useFocusReplyFromQuery();
+  const readContext = useReadLanguageContext();
 
   const {
     data: review,
     isLoading,
     error,
-  } = useQuery(postQueries.detail(reviewId));
+  } = useQuery({
+    ...postQueries.detail(reviewId, { languages: readContext.languages }),
+    enabled: readContext.ready && Boolean(reviewId),
+  });
   const bookUnitId = review?.targetUnitId ?? "";
   const { data: book } = useQuery({
-    ...bookQueries.detail(bookUnitId),
-    enabled: !!bookUnitId,
+    ...bookQueries.detail(bookUnitId, { languages: readContext.languages }),
+    enabled: readContext.ready && !!bookUnitId,
   });
 
   const editorEntry = useEditorEntry({

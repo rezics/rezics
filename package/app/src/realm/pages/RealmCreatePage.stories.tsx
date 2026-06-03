@@ -35,6 +35,11 @@ function makeRealm(): RealmDTO {
     isPublic: true,
     isOfficial: false,
     memberCount: 48,
+    resolvedLanguage: LANGUAGES.EN,
+    title: "Create Story Realm",
+    description: markdownContentDoc(
+      "A fixture realm for the page-level authoring surface.",
+    ),
     extra: {
       rule: RULE_POST_ID,
       tagTree: [
@@ -97,6 +102,7 @@ function makePost(
     unitId,
     authorUserId: STORY_USER_ID,
     kind,
+    resolvedLanguage: LANGUAGES.EN,
     title,
     content: markdownContentDoc(`${title} body preview.`),
     createdAt: "2026-06-02T08:00:00.000Z",

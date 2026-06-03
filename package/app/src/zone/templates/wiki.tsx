@@ -18,6 +18,7 @@ import { useQueries } from "@tanstack/react-query";
 import type React from "react";
 import { useMemo } from "react";
 import { KeywordInput, useSearchQuery } from "@/search";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import type { ZoneTemplateProps } from "./types";
 
 type WikiTemplateVariant = "classic" | "media" | "database" | "minimal";
@@ -217,8 +218,15 @@ function WikiNavigation({
     () => collectNavigationUnitIds(navigation),
     [navigation],
   );
+  const readContext = useReadLanguageContext();
   const unitResults = useQueries({
-    queries: unitIds.map((unitId) => unitDetailQuery(unitId)),
+    queries: unitIds.map((unitId) => ({
+      ...unitDetailQuery(unitId, {
+        languages: readContext.languages,
+        appLocale: readContext.appLocale,
+      }),
+      enabled: readContext.ready && Boolean(unitId),
+    })),
   });
   const units = useMemo(
     () =>

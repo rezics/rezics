@@ -12,6 +12,7 @@ import type React from "react";
 import { useMemo } from "react";
 import { RemarkInlineForm } from "@/remark";
 import { useNavigateToBookTagSearch } from "@/search/hooks/useNavigateToBookTagSearch";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { TagInteraction } from "@/tag/components/TagInteraction";
@@ -27,9 +28,10 @@ import { useBookDetailSidebar } from "./bookDetailLayoutContext";
 export const BookBasicInfoPage: React.FC = () => {
   const { t } = useTranslation(["book"]);
   const { bookId } = useParams({ strict: false }) as { bookId: string };
+  const readContext = useReadLanguageContext();
   const { data } = useQuery({
-    ...bookQueries.detail(bookId),
-    enabled: Boolean(bookId),
+    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    enabled: Boolean(bookId) && readContext.ready,
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
   const [selectedLang] = useBookLanguage(bookId, bookInfo);

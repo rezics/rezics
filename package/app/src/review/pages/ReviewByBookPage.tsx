@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { resolveCatalogEntryInteractionContext } from "@/book-library/models/catalogEntryContext";
 import { Route as reviewByBookRoute } from "@/routes/_mainLayout/review/book/$bookId";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { ReviewNewPage } from "./ReviewNewPage";
 import { ReviewsPage } from "./ReviewsPage";
 
@@ -13,9 +14,10 @@ export function ReviewByBookPage() {
   const { t } = useTranslation(["book", "common"]);
   const { bookId } = reviewByBookRoute.useParams();
   const navigate = useNavigate();
+  const readContext = useReadLanguageContext();
   const { data: bookInfo } = useQuery({
-    ...bookQueries.detail(bookId),
-    enabled: Boolean(bookId),
+    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    enabled: Boolean(bookId) && readContext.ready,
   });
   const catalogContext = bookInfo
     ? resolveCatalogEntryInteractionContext(bookInfo)

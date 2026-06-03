@@ -6,6 +6,7 @@ import { Button, Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 type TagOption = {
   tagId: string;
@@ -61,10 +62,13 @@ export const RealmPostTagPicker: React.FC<RealmPostTagPickerProps> = ({
 }) => {
   const { t } = useTranslation(["common", "community", "page"]);
   const [searchTerm, setSearchTerm] = useState("");
+  const readContext = useReadLanguageContext();
   const firstRealmId = realmUnitIds.length === 1 ? realmUnitIds[0] : undefined;
   const { data: realm } = useQuery({
-    ...realmQueries.detail(firstRealmId ?? ""),
-    enabled: Boolean(firstRealmId),
+    ...realmQueries.detail(firstRealmId ?? "", {
+      languages: readContext.languages,
+    }),
+    enabled: readContext.ready && Boolean(firstRealmId),
   });
   const tagTree = firstRealmId
     ? (realm?.extra?.tagTree as TagTreeNode[] | undefined)

@@ -11,6 +11,7 @@ import type React from "react";
 import { useMemo } from "react";
 import { ScoreOverview } from "@/engagement/components/ScoreOverview";
 import { ReviewList } from "@/review/components/list/ReviewList";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import { ShelfByBookPreview } from "../components/ShelfByBookPreview";
 import { useBookLanguage } from "../hooks/useBookLanguage";
@@ -27,9 +28,10 @@ const SHELF_PREVIEW_LIMIT = 5;
 export const BookReviewPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
   const navigate = useNavigate();
+  const readContext = useReadLanguageContext();
   const { data } = useQuery({
-    ...bookQueries.detail(bookId),
-    enabled: Boolean(bookId),
+    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    enabled: Boolean(bookId) && readContext.ready,
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
   const [selectedLang] = useBookLanguage(bookId, bookInfo);
@@ -43,14 +45,18 @@ export const BookReviewPage: React.FC = () => {
         ? postListFiltersForCatalogEntry(catalogContext, {
             kind: PostKind.REVIEW,
             limit: REVIEW_PREVIEW_LIMIT,
+            languages: readContext.languages,
+            languageMode: readContext.languageMode,
           })
         : {
             targetUnitId: bookId,
             kind: PostKind.REVIEW,
             limit: REVIEW_PREVIEW_LIMIT,
+            languages: readContext.languages,
+            languageMode: readContext.languageMode,
           },
     ),
-    enabled: Boolean(catalogContext?.pageUnitId ?? bookId),
+    enabled: readContext.ready && Boolean(catalogContext?.pageUnitId ?? bookId),
   });
 
   const sidebar = useMemo(

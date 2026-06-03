@@ -9,13 +9,15 @@ type PostFixtureOverrides = Partial<PostDTO> & {
 
 function makePost(overrides: PostFixtureOverrides): PostDTO {
   const { contentSource, ...dtoOverrides } = overrides;
+  const content = markdownContentDoc(
+    contentSource ?? "A short reflection that fits in a single line.",
+  );
   return {
     unitId: overrides.unitId,
     authorUserId: overrides.authorUserId ?? userAlice.unitId,
     author: overrides.author ?? userAlice,
-    content: markdownContentDoc(
-      contentSource ?? "A short reflection that fits in a single line.",
-    ),
+    resolvedLanguage: "en",
+    content,
     depth: 0,
     replyCount: 0,
     directReplyCount: 0,

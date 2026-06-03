@@ -8,6 +8,7 @@ import {
   resolveCatalogEntryInteractionContext,
   shelfListFiltersForCatalogEntry,
 } from "@/book-library/models/catalogEntryContext";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { ShelfCard } from "../components/ShelfCard";
 
 interface ShelfByBookPageProps {
@@ -16,9 +17,10 @@ interface ShelfByBookPageProps {
 
 export function ShelfByBookPage({ bookId }: ShelfByBookPageProps) {
   const { t } = useTranslation(["common", "entity"]);
+  const readContext = useReadLanguageContext();
   const { data: bookInfo } = useQuery({
-    ...bookQueries.detail(bookId),
-    enabled: Boolean(bookId),
+    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    enabled: Boolean(bookId) && readContext.ready,
   });
   const catalogContext = bookInfo
     ? resolveCatalogEntryInteractionContext(bookInfo)

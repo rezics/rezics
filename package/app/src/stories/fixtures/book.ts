@@ -17,26 +17,32 @@ function pickFirst(pool: readonly string[], minLen = 0): string {
 }
 
 function makeBook(overrides: Partial<BookDTO> & { unitId: string }): BookDTO {
+  const translations = overrides.translations ?? [
+    {
+      unitId: overrides.unitId,
+      language: LANGUAGES.EN,
+      title: "The Quiet Library",
+      summary: "A reflection on the rooms that hold our reading lives.",
+      description:
+        "Across twelve essays, the narrator walks through public libraries from Tokyo to Buenos Aires, tracing how each city's reading rooms shape the books that find their way home with us.",
+    },
+  ];
+  const resolvedTranslation = translations[0];
   return {
     unitId: overrides.unitId,
     coverUrl: PLACEHOLDER_COVER,
     rating: "GENERAL",
     defaultLanguage: LANGUAGES.EN,
+    resolvedLanguage: resolvedTranslation?.language ?? null,
+    title: resolvedTranslation?.title ?? null,
+    summary: resolvedTranslation?.summary ?? null,
+    description: resolvedTranslation?.description ?? null,
     pageCount: 320,
     publicationDate: "2024-01-15",
     createdAt: "2024-01-15T00:00:00.000Z",
     updatedAt: "2024-02-01T00:00:00.000Z",
     publishedAt: "2024-01-15T00:00:00.000Z",
-    translations: [
-      {
-        unitId: overrides.unitId,
-        language: LANGUAGES.EN,
-        title: "The Quiet Library",
-        summary: "A reflection on the rooms that hold our reading lives.",
-        description:
-          "Across twelve essays, the narrator walks through public libraries from Tokyo to Buenos Aires, tracing how each city's reading rooms shape the books that find their way home with us.",
-      },
-    ],
+    translations,
     creditAttributions: [
       {
         entityId: "author-mei",
@@ -127,9 +133,9 @@ export const bookLatin: BookDTO = makeBook({
 
 export const bookCardPropsList = bookMany.map((book, index) => ({
   id: book.unitId,
-  title: book.translations?.[0]?.title ?? `Book ${index + 1}`,
+  title: book.title ?? `Book ${index + 1}`,
   author: book.creditAttributions?.[0]?.name,
-  description: book.translations?.[0]?.summary,
+  description: book.summary ?? undefined,
   coverUrl: book.coverUrl ?? PLACEHOLDER_COVER,
   href: `/books/${book.unitId}`,
 }));

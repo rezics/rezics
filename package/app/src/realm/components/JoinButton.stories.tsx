@@ -40,6 +40,9 @@ function makeRealm(extra: RealmDTO["extra"]): RealmDTO {
     isPublic: true,
     isOfficial: false,
     memberCount: 12,
+    resolvedLanguage: LANGUAGES.EN,
+    title: "Fixture Realm",
+    description: "A fixture realm.",
     extra,
     translations: [
       {
@@ -57,6 +60,7 @@ function makePost(contentSource: string): PostDTO {
     unitId: RULE_POST_ID,
     authorUserId: "fixture-user",
     kind: PostKind.POST,
+    resolvedLanguage: LANGUAGES.EN,
     content: markdownContentDoc(contentSource),
   } as PostDTO;
 }

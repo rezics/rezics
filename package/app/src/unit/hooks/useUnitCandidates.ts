@@ -3,6 +3,7 @@ import type { UnitResponse } from "@rezics/contract";
 import { useQueries } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import type {
   GetMatchedRoutes,
   MatchedRoutesResult,
@@ -42,6 +43,7 @@ function useDebouncedValue<T>(value: T, delay: number): T {
  */
 export function useUnitCandidates(input: string): UseUnitCandidatesResult {
   const router = useRouter();
+  const readContext = useReadLanguageContext();
   const debounced = useDebouncedValue(input, DEBOUNCE_MS);
 
   const getMatchedRoutes = useMemo<GetMatchedRoutes>(
@@ -65,10 +67,13 @@ export function useUnitCandidates(input: string): UseUnitCandidatesResult {
       const opts =
         c.identifierType === "slug"
           ? unitQueries.bySlug(c.identifier)
-          : unitQueries.detail(c.identifier);
+          : unitQueries.detail(c.identifier, {
+              languages: readContext.languages,
+              appLocale: readContext.appLocale,
+            });
       return {
         ...opts,
-        enabled: Boolean(c.identifier),
+        enabled: readContext.ready && Boolean(c.identifier),
       };
     }),
   });

@@ -5,6 +5,7 @@ import { useParams } from "@tanstack/react-router";
 import { useAtomValue } from "jotai";
 import type React from "react";
 import { useMemo } from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { ChapterList } from "../components/Chapter/ChapterList";
 import { bookDetailAtomFamily } from "../states/bookDetailAtoms";
 import { useBookDetailSidebar } from "./bookDetailLayoutContext";
@@ -35,9 +36,10 @@ const ContentSidebar: React.FC<{ textLength: number; pageCount?: number }> = ({
 
 export const BookContentPage: React.FC = () => {
   const { bookId } = useParams({ strict: false }) as { bookId: string };
+  const readContext = useReadLanguageContext();
   const { data } = useQuery({
-    ...bookQueries.detail(bookId),
-    enabled: Boolean(bookId),
+    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    enabled: Boolean(bookId) && readContext.ready,
   });
   const bookInfo = useAtomValue(bookDetailAtomFamily(bookId)) ?? data;
 

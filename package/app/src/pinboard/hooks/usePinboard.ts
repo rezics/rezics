@@ -18,6 +18,7 @@ import { defaultSupportLanguage, mainMarkdownSource } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import type { PinboardEntryView, PinboardListKey } from "../models/types";
 
@@ -44,6 +45,7 @@ export function usePinboardList(
 ): UsePinboardListResult {
   const locale = useLocale();
   const language = input.language ?? locale;
+  const readContext = useReadLanguageContext();
 
   const adminView = input.adminView === true;
   const enabled = input.enabled ?? true;
@@ -63,8 +65,12 @@ export function usePinboardList(
 
   const unitQueries = useQueries({
     queries: unitIds.map((id) => ({
-      ...unitDetailQuery(id),
-      enabled: enabled && Boolean(id),
+      ...unitDetailQuery(id, {
+        explicitLanguage: language,
+        languages: readContext.languages,
+        appLocale: readContext.appLocale,
+      }),
+      enabled: enabled && readContext.ready && Boolean(id),
     })),
   });
 

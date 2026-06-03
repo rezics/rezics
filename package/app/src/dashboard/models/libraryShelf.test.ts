@@ -18,12 +18,15 @@ function continueItem(
 
 function book(overrides: {
   unitId: string;
+  title?: string | null;
   translations?: { language: string; title: string }[];
   coverUrl?: string | null;
   isLicensed?: boolean;
 }): BookDTO {
   return {
     translations: [{ language: "en", title: "Untitled" }],
+    title: "Untitled",
+    resolvedLanguage: "en",
     coverUrl: null,
     ...overrides,
   } as unknown as BookDTO;
@@ -57,7 +60,7 @@ describe("bookToBookshelfItem", () => {
     const item = bookToBookshelfItem(
       book({
         unitId: "b1",
-        translations: [{ language: "en", title: "Dune" }],
+        title: "Dune",
         coverUrl: "https://x/d.jpg",
         isLicensed: true,
       }),
@@ -92,8 +95,10 @@ describe("bookToBookshelfItem", () => {
     expect(item.chaptersTotal).toBeUndefined();
   });
 
-  test("falls back to unitId when no translation title exists", () => {
-    const item = bookToBookshelfItem(book({ unitId: "b9", translations: [] }));
+  test("falls back to unitId when no resolved title exists", () => {
+    const item = bookToBookshelfItem(
+      book({ unitId: "b9", title: null, translations: [] }),
+    );
     expect(item.title).toBe("b9");
   });
 });

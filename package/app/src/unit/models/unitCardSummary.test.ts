@@ -77,6 +77,22 @@ describe("unitDtoToUnitCardSummary", () => {
     });
   });
 
+  test("does not fall through to translations after a resolved language is chosen", () => {
+    const summary = unitDtoToUnitCardSummary({
+      id: "book-1",
+      type: "BOOK",
+      resolvedLanguage: "ja",
+      title: null,
+      translations: [{ unitId: "book-1", language: "en", title: "English" }],
+    });
+
+    expect(summary).toMatchObject({
+      unitId: "book-1",
+      title: "book-1",
+      translationMeta: { language: "ja" },
+    });
+  });
+
   test("falls back to identifier data for unresolved candidates", () => {
     const summary = candidateToUnitCardSummary({
       kind: "book",
@@ -116,6 +132,9 @@ describe("shelfUnitToUnitCardSummary", () => {
     });
     const book: BookDTO = {
       unitId: "book-1",
+      resolvedLanguage: "en",
+      title: "Shelf Book",
+      description: markdownContentDoc("Book description"),
       coverUrl: null,
       translations: [
         {
@@ -146,6 +165,8 @@ describe("shelfUnitToUnitCardSummary", () => {
     const unit = makeShelfUnit({ unitId: "book-1", kind: "book" });
     const book = {
       unitId: "book-1",
+      resolvedLanguage: "en",
+      title: "Shelf Book",
       coverUrl: null,
       translations: [{ unitId: "book-1", language: "en", title: "Shelf Book" }],
     } as BookDTO;
@@ -162,6 +183,8 @@ describe("shelfUnitToUnitCardSummary", () => {
     const unit = makeShelfUnit({ unitId: "book-1", kind: "book" });
     const book = {
       unitId: "book-1",
+      resolvedLanguage: "en",
+      title: "Bare Book",
       coverUrl: null,
       translations: [{ unitId: "book-1", language: "en", title: "Bare Book" }],
     } as BookDTO;

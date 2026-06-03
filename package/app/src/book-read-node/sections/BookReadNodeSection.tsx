@@ -4,6 +4,7 @@ import { useCanEdit } from "@rezics/api/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { DeletedNodeView } from "../components/DeletedNodeView";
 import { EmptyNodeView } from "../components/EmptyNodeView";
 import { ReadingNodeView } from "../components/ReadingNodeView";
@@ -19,9 +20,10 @@ export const BookReadNodeSection: React.FC<BookReadNodeSectionProps> = ({
   nodeId,
 }) => {
   const navigate = useNavigate();
+  const readContext = useReadLanguageContext();
   const { data: bookInfo } = useQuery({
-    ...bookQueries.detail(bookId),
-    enabled: Boolean(bookId),
+    ...bookQueries.detail(bookId, { languages: readContext.languages }),
+    enabled: Boolean(bookId) && readContext.ready,
   });
   const { data: contentStructure, isLoading } = useQuery({
     ...bookQueries.contentStructure(bookId),

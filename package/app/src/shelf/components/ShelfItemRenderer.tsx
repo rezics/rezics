@@ -63,7 +63,7 @@ function renderUnit(
     const book = data as BookDTO | undefined;
     return (
       <BookCard
-        title={book?.translations?.[0]?.title ?? unit.unitId}
+        title={book?.title ?? unit.unitId}
         author={book ? getBookAuthorName(book) || undefined : undefined}
         coverUrl={book?.coverUrl ?? ""}
         href={`/book/${unit.unitId}`}
@@ -77,10 +77,9 @@ function renderUnit(
     case "book": {
       const book = data as BookDTO | undefined;
       if (!book) return <ShelfItemCard unit={unit} />;
-      const title = book.translations?.[0]?.title ?? unit.unitId;
+      const title = book.title ?? unit.unitId;
       const description =
-        contentDocMarkdownFallback(book.translations?.[0]?.description) ||
-        undefined;
+        contentDocMarkdownFallback(book.description) ?? undefined;
       const author = getBookAuthorName(book) || undefined;
       const coverUrl = book.coverUrl ?? "";
       const href = `/book/${unit.unitId}`;
@@ -149,7 +148,7 @@ function renderUnit(
 function getBookTitle(enriched: EnrichedShelfUnit | undefined): string | null {
   if (!enriched || enriched.unit.kind !== "book") return null;
   const book = enriched.data as BookDTO | undefined;
-  return book?.translations?.[0]?.title ?? enriched.unit.unitId;
+  return book?.title ?? enriched.unit.unitId;
 }
 
 function targetUnitFromParent(
