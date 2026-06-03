@@ -2,7 +2,7 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
-import { AppError } from "../utils/errors";
+import { mapUnitRealmToDTO } from "../realm/realm.mapper";
 import { governanceAuditService } from "./audit.service";
 import {
   mapContentModerationStateToDTO,
@@ -11,7 +11,6 @@ import {
   mapRealmModerationEventToDTO,
   mapRealmQueueItemToDTO,
 } from "./governance.mapper";
-import { mapUnitRealmToDTO } from "../realm/realm.mapper";
 import type { GovernanceListOptions } from "./types";
 
 type ContentModerationStateInput = {
@@ -29,6 +28,11 @@ type ModerationDecisionInput = {
   reason: string;
   caseId?: string | null;
   metadata?: Record<string, unknown>;
+};
+
+type RealmUnitModerationStateInput = ModerationDecisionInput & {
+  realmUnitId: string;
+  state: "pending_review" | "approved" | "rejected" | "removed";
 };
 
 type CaseEventInput = {
@@ -768,7 +772,10 @@ export class GovernanceModerationService {
           data: { moderationState: nextModerationState },
         });
       }
-      if (input.decisionKind === "remove_from_realm" && before.addressedUnitId) {
+      if (
+        input.decisionKind === "remove_from_realm" &&
+        before.addressedUnitId
+      ) {
         const unitRealmBefore = await tx.unitRealm.findUnique({
           where: {
             realmUnitId_unitId: {
@@ -1058,10 +1065,7 @@ export class GovernanceModerationService {
     });
   }
 
-  async listRealmUnitStates(input: {
-    realmUnitId: string;
-    unitIds: string[];
-  }) {
+  async listRealmUnitStates(input: { realmUnitId: string; unitIds: string[] }) {
     const unitIds = [...new Set(input.unitIds)];
     if (unitIds.length === 0) return [];
 
@@ -1178,21 +1182,50 @@ export class GovernanceModerationService {
     });
   }
 
-  async removeRootFromRealm(input: {
-    realmUnitId: string;
-    targetUnitId: string;
-  }) {
-    await prisma.unitRealm.update({
+  async setRealmUnitModerationState(input: RealmUnitModerationStateInput) {
+    const moderationState = input.state.toUpperCase() as Uppercase<
+      RealmUnitModerationStateInput["state"]
+    >;
+    const row = await prisma.unitRealm.update({
       where: {
         realmUnitId_unitId: {
           realmUnitId: input.realmUnitId,
-          unitId: input.targetUnitId,
+          unitId: input.moderatedUnitId,
         },
       },
-      data: { moderationState: "REMOVED" },
+      data: { moderationState },
     });
-    await enqueueRealmMembershipSearch(input.targetUnitId);
-    return { message: "Content removed from realm feed" };
+    auditPrivilegedMutation({
+      actorUserId: input.decidedById,
+      action: "realm.unit.moderation.state_changed",
+      targetKind: "realm-content",
+      targetId: input.moderatedUnitId,
+      reason: input.reason,
+      correlationId:
+        input.caseId ?? `${input.realmUnitId}:${input.moderatedUnitId}`,
+      after: { moderationState: row.moderationState },
+      metadata: { realmUnitId: input.realmUnitId, ...(input.metadata ?? {}) },
+    });
+    await enqueueRealmMembershipSearch(input.moderatedUnitId);
+    return mapUnitRealmToDTO(row);
+  }
+
+  async approveInRealm(
+    input: ModerationDecisionInput & { realmUnitId: string },
+  ) {
+    return this.setRealmUnitModerationState({ ...input, state: "approved" });
+  }
+
+  async rejectInRealm(
+    input: ModerationDecisionInput & { realmUnitId: string },
+  ) {
+    return this.setRealmUnitModerationState({ ...input, state: "rejected" });
+  }
+
+  async removeFromRealm(
+    input: ModerationDecisionInput & { realmUnitId: string },
+  ) {
+    return this.setRealmUnitModerationState({ ...input, state: "removed" });
   }
 
   async requestOwnerDelegation(

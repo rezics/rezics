@@ -1,7 +1,11 @@
 import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import { PostKind, type PostListQuery } from "@rezics/contract";
+import {
+  PostKind,
+  type PostListQuery,
+  type UnitRealmDTO,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
 import { useQueries, useQuery } from "@tanstack/react-query";
@@ -20,6 +24,7 @@ import {
   realmContextReactionScopeKey,
 } from "../models/realmPostContext";
 import type { RealmFeedSort } from "../sections/RealmFeedSortSwitcher";
+import { RealmContentModerationActions } from "./RealmContentModerationActions";
 
 interface RealmContentFeedProps {
   realmId: string;
@@ -56,6 +61,17 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
         .map((post) => post.unitId),
     [posts],
   );
+  const moderationOverlayQuery = useQuery({
+    ...postQueries.moderationOverlays(postReactionTargetIds, realmId),
+    enabled: manageMode && postReactionTargetIds.length > 0,
+  });
+  const unitRealmByUnitId = useMemo(() => {
+    const map = new Map<string, UnitRealmDTO>();
+    for (const row of moderationOverlayQuery.data?.realmOverlays ?? []) {
+      map.set(row.unitId, row);
+    }
+    return map;
+  }, [moderationOverlayQuery.data]);
   useReactionHydration(postReactionTargetIds, {
     summaryScopeKey: reactionScopeKey,
     userScopeKey: reactionScopeKey,
@@ -110,20 +126,39 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     return <EmptyState title={t("entity:realm_content_empty_title")} />;
   }
 
+  const fallbackModerationState =
+    realmModerationState && realmModerationState !== "all"
+      ? realmModerationState
+      : "approved";
+
   return (
     <div>
-      {posts.map((post) =>
-        post.kind === PostKind.REVIEW ? (
-          <ReviewCard
-            key={post.unitId}
-            review={post}
-            targetUnit={
-              post.targetUnitId
-                ? targetUnitByUnitId.get(post.targetUnitId)
-                : undefined
-            }
-          />
-        ) : (
+      {posts.map((post) => {
+        if (post.kind === PostKind.REVIEW) {
+          return (
+            <ReviewCard
+              key={post.unitId}
+              review={post}
+              targetUnit={
+                post.targetUnitId
+                  ? targetUnitByUnitId.get(post.targetUnitId)
+                  : undefined
+              }
+            />
+          );
+        }
+
+        const unitRealm =
+          unitRealmByUnitId.get(post.unitId) ??
+          ({
+            realmUnitId: realmId,
+            unitId: post.unitId,
+            moderationState: fallbackModerationState,
+            visibilityState: "visible",
+            isLocked: false,
+          } satisfies UnitRealmDTO);
+
+        return (
           <PostCard
             key={post.unitId}
             post={post}
@@ -134,15 +169,27 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
             summaryScopeKey={reactionScopeKey}
             reactionScopeKey={reactionScopeKey}
             manageMode={manageMode}
-            manageRealmId={realmId}
             realmModerationState={
-              manageMode && realmModerationState !== "all"
-                ? realmModerationState
-                : undefined
+              manageMode ? unitRealm.moderationState : undefined
+            }
+            realmModerationAt={unitRealm.createdAt ?? null}
+            realmVisibilityState={
+              manageMode && unitRealm.visibilityState !== "visible"
+                ? unitRealm.visibilityState
+                : null
+            }
+            moderationMenuContent={
+              manageMode ? (
+                <RealmContentModerationActions
+                  realmUnitId={realmId}
+                  targetUnitId={post.unitId}
+                  unitRealm={unitRealm}
+                />
+              ) : undefined
             }
           />
-        ),
-      )}
+        );
+      })}
     </div>
   );
 };

@@ -163,9 +163,9 @@ export const postApi = new Elysia({ prefix: "/post" })
       const [globalStates, realmOverlays] = await Promise.all([
         governanceModerationService.listGlobalContentStates(targetUnitIds),
         body.realmUnitId
-          ? governanceModerationService.listRealmContentOverlays({
+          ? governanceModerationService.listRealmUnitStates({
               realmUnitId: body.realmUnitId,
-              moderatedUnitIds: targetUnitIds,
+              unitIds: targetUnitIds,
             })
           : [],
       ]);

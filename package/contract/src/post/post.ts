@@ -13,7 +13,10 @@ import {
   contentModerationStateDTOSchema,
   contentModerationStateKindSchema,
 } from "../realm/governance";
-import { unitRealmModerationStateSchema } from "../realm/publication";
+import {
+  unitRealmModerationStateSchema,
+  unitRealmVisibilityStateSchema,
+} from "../realm/publication";
 import { publicUserSchema, variantContextSummarySchema } from "../unit/unit";
 
 // ============================================================
@@ -324,6 +327,16 @@ export type PostModerationOverlayRequest =
 
 export const postModerationOverlayResponseSchema = t.Object({
   globalStates: t.Array(contentModerationStateDTOSchema),
+  realmOverlays: t.Array(
+    t.Object({
+      realmUnitId: t.String(),
+      unitId: t.String(),
+      moderationState: unitRealmModerationStateSchema,
+      visibilityState: unitRealmVisibilityStateSchema,
+      isLocked: t.Boolean(),
+      createdAt: t.Optional(t.Union([t.String(), t.Date()])),
+    }),
+  ),
 });
 
 export type PostModerationOverlayResponse =

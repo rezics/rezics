@@ -543,12 +543,16 @@ export function useRestoreRealmContentMutation(
   });
 }
 
-export function useRemoveRealmFeedRootMutation(
+export function useApproveRealmContentMutation(
   options?: Omit<
     UseMutationOptions<
-      Awaited<ReturnType<typeof governanceApi.removeRealmFeedRoot>>,
+      Awaited<ReturnType<typeof governanceApi.approveRealmContent>>,
       Error,
-      { realmUnitId: string; targetUnitId: string }
+      {
+        realmUnitId: string;
+        targetUnitId: string;
+        input: ContentModerationDecisionInput;
+      }
     >,
     "mutationFn"
   >,
@@ -556,13 +560,77 @@ export function useRemoveRealmFeedRootMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ realmUnitId, targetUnitId }) =>
-      governanceApi.removeRealmFeedRoot(realmUnitId, targetUnitId),
+    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
+      governanceApi.approveRealmContent(realmUnitId, targetUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({
-        queryKey: postKeys.byRealms(variables.realmUnitId),
-      });
+      invalidateRealmUnitStateQueries(
+        queryClient,
+        variables.realmUnitId,
+        variables.targetUnitId,
+      );
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useRejectRealmContentMutation(
+  options?: Omit<
+    UseMutationOptions<
+      Awaited<ReturnType<typeof governanceApi.rejectRealmContent>>,
+      Error,
+      {
+        realmUnitId: string;
+        targetUnitId: string;
+        input: ContentModerationDecisionInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
+      governanceApi.rejectRealmContent(realmUnitId, targetUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateRealmUnitStateQueries(
+        queryClient,
+        variables.realmUnitId,
+        variables.targetUnitId,
+      );
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useRemoveRealmContentMutation(
+  options?: Omit<
+    UseMutationOptions<
+      Awaited<ReturnType<typeof governanceApi.removeRealmContent>>,
+      Error,
+      {
+        realmUnitId: string;
+        targetUnitId: string;
+        input: ContentModerationDecisionInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
+      governanceApi.removeRealmContent(realmUnitId, targetUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateRealmUnitStateQueries(
+        queryClient,
+        variables.realmUnitId,
+        variables.targetUnitId,
+      );
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -620,7 +688,9 @@ export const governanceMutations = {
   useHideRealmContent: useHideRealmContentMutation,
   useTombstoneRealmContent: useTombstoneRealmContentMutation,
   useRestoreRealmContent: useRestoreRealmContentMutation,
-  useRemoveRealmFeedRoot: useRemoveRealmFeedRootMutation,
+  useApproveRealmContent: useApproveRealmContentMutation,
+  useRejectRealmContent: useRejectRealmContentMutation,
+  useRemoveRealmContent: useRemoveRealmContentMutation,
   useRequestRealmContentOwnerDelegation:
     useRequestRealmContentOwnerDelegationMutation,
 };

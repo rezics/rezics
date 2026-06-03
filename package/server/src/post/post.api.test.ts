@@ -42,16 +42,14 @@ const listGlobalContentStatesMock = mock(async () => [
     updatedAt: "2026-05-28T00:00:00.000Z",
   },
 ]);
-const listRealmContentOverlaysMock = mock(async () => [
+const listRealmUnitStatesMock = mock(async () => [
   {
     realmUnitId: "realm-1",
-    moderatedUnitId: "reply-1",
-    state: "tombstoned",
-    decidedByUserId: null,
-    caseId: null,
-    reason: "off-topic",
+    unitId: "reply-1",
+    moderationState: "approved",
+    visibilityState: "tombstoned",
+    isLocked: false,
     createdAt: "2026-05-28T00:00:00.000Z",
-    updatedAt: "2026-05-28T00:00:00.000Z",
   },
 ]);
 
@@ -74,7 +72,7 @@ mock.module("@/governance", () => ({
   },
   governanceModerationService: {
     listGlobalContentStates: listGlobalContentStatesMock,
-    listRealmContentOverlays: listRealmContentOverlaysMock,
+    listRealmUnitStates: listRealmUnitStatesMock,
   },
   realmPolicyActions: {
     memberRoleChange: "realm.member.role.change",
@@ -119,7 +117,7 @@ describe("postApi", () => {
     policyAllowed = false;
     decideForIdentityMock.mockClear();
     listGlobalContentStatesMock.mockClear();
-    listRealmContentOverlaysMock.mockClear();
+    listRealmUnitStatesMock.mockClear();
     createMock.mockClear();
     submitToRealmMock.mockClear();
     updateMock.mockClear();
@@ -156,13 +154,11 @@ describe("postApi", () => {
       realmOverlays: [
         {
           realmUnitId: "realm-1",
-          moderatedUnitId: "reply-1",
-          state: "tombstoned",
-          decidedByUserId: null,
-          caseId: null,
-          reason: "off-topic",
+          unitId: "reply-1",
+          moderationState: "approved",
+          visibilityState: "tombstoned",
+          isLocked: false,
           createdAt: "2026-05-28T00:00:00.000Z",
-          updatedAt: "2026-05-28T00:00:00.000Z",
         },
       ],
     });
@@ -170,9 +166,9 @@ describe("postApi", () => {
       "reply-1",
       "reply-2",
     ]);
-    expect(listRealmContentOverlaysMock).toHaveBeenCalledWith({
+    expect(listRealmUnitStatesMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      moderatedUnitIds: ["reply-1", "reply-2"],
+      unitIds: ["reply-1", "reply-2"],
     });
   });
 

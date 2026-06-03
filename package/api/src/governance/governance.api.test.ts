@@ -6,8 +6,8 @@ import {
   invalidateGovernanceCaseQueries,
   invalidateGovernanceEnforcementQueries,
   invalidateRealmCapabilityQueries,
-  invalidateRealmUnitStateQueries,
   invalidateRealmQueueQueries,
+  invalidateRealmUnitStateQueries,
 } from "./governance.mutations";
 
 const fetchMock = mock();
@@ -80,7 +80,9 @@ describe("governanceApi", () => {
     await governanceApi.restoreRealmContent("realm/1", "post/1", {
       reason: "appeal accepted",
     });
-    await governanceApi.removeRealmFeedRoot("realm/1", "post/1");
+    await governanceApi.removeRealmContent("realm/1", "post/1", {
+      reason: "off topic",
+    });
     await governanceApi.requestRealmContentOwnerDelegation(
       "realm/1",
       "post/1",
@@ -109,9 +111,9 @@ describe("governanceApi", () => {
       "http://api.example/governance/realms/realm%2F1/content/post%2F1/restore",
     );
     expect(fetchMock.mock.calls[6]?.[0]).toBe(
-      "http://api.example/governance/realms/realm%2F1/feed/post%2F1",
+      "http://api.example/governance/realms/realm%2F1/content/post%2F1/remove",
     );
-    expect(fetchMock.mock.calls[6]?.[1]).toMatchObject({ method: "DELETE" });
+    expect(fetchMock.mock.calls[6]?.[1]).toMatchObject({ method: "POST" });
     expect(fetchMock.mock.calls[7]?.[0]).toBe(
       "http://api.example/governance/realms/realm%2F1/content/post%2F1/owner-delegation",
     );

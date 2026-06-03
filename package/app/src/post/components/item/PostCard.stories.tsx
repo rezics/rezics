@@ -3,8 +3,14 @@ import {
   markdownContentDocWithPoll,
   type PollResultsDTO,
 } from "@rezics/contract";
+import {
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+} from "@rezics/ui/shadcn";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useQueryClient } from "@tanstack/react-query";
+import { ShieldX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { expect, screen, userEvent, within } from "storybook/test";
 
@@ -46,6 +52,19 @@ const pollResults: PollResultsDTO = {
     },
   ],
 };
+
+const realmModerationStoryItems = (
+  <>
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>Realm moderation</DropdownMenuLabel>
+      <DropdownMenuItem>
+        <ShieldX className="h-4 w-4" aria-hidden />
+        Remove from realm
+      </DropdownMenuItem>
+    </DropdownMenuGroup>
+  </>
+);
+const realmModerationStoryTime = new Date(Date.now() - 12 * 60 * 60 * 1000);
 
 /** Seeds the embedded poll into the query cache, then renders the post card. */
 function PostCardWithPoll() {
@@ -123,6 +142,8 @@ export const ManagePendingReview: Story = {
     manageMode: true,
     manageRealmId: "realm-story",
     realmModerationState: "pending_review",
+    realmModerationAt: realmModerationStoryTime,
+    moderationMenuContent: realmModerationStoryItems,
   },
 };
 
@@ -132,6 +153,8 @@ export const ManageApproved: Story = {
     manageMode: true,
     manageRealmId: "realm-story",
     realmModerationState: "approved",
+    realmModerationAt: realmModerationStoryTime,
+    moderationMenuContent: realmModerationStoryItems,
   },
 };
 
@@ -141,6 +164,8 @@ export const ManageRejected: Story = {
     manageMode: true,
     manageRealmId: "realm-story",
     realmModerationState: "rejected",
+    realmModerationAt: realmModerationStoryTime,
+    moderationMenuContent: realmModerationStoryItems,
   },
 };
 
@@ -151,6 +176,8 @@ export const ManageRemovedHidden: Story = {
     manageRealmId: "realm-story",
     realmModerationState: "removed",
     realmVisibilityState: "hidden",
+    realmModerationAt: realmModerationStoryTime,
+    moderationMenuContent: realmModerationStoryItems,
   },
 };
 
@@ -163,6 +190,8 @@ export const ManageCompactWrap: Story = {
     manageMode: true,
     manageRealmId: "realm-story",
     realmModerationState: "pending_review",
+    realmModerationAt: realmModerationStoryTime,
+    moderationMenuContent: realmModerationStoryItems,
   },
 };
 
@@ -172,6 +201,8 @@ export const ManageKeyboardFocus: Story = {
     manageMode: true,
     manageRealmId: "realm-story",
     realmModerationState: "approved",
+    realmModerationAt: realmModerationStoryTime,
+    moderationMenuContent: realmModerationStoryItems,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

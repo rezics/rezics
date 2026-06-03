@@ -429,13 +429,14 @@ describe("GovernanceModerationService content moderation state", () => {
       "./moderation.service"
     );
 
-    const result = await governanceModerationService.setRealmUnitVisibilityState({
-      realmUnitId: "realm-1",
-      moderatedUnitId: "reply-1",
-      state: "tombstoned",
-      decidedById: "mod-1",
-      reason: "off-topic",
-    });
+    const result =
+      await governanceModerationService.setRealmUnitVisibilityState({
+        realmUnitId: "realm-1",
+        moderatedUnitId: "reply-1",
+        state: "tombstoned",
+        decidedById: "mod-1",
+        reason: "off-topic",
+      });
 
     expect(unitRealmUpdate).toHaveBeenCalledWith({
       where: {
@@ -582,17 +583,26 @@ describe("GovernanceModerationService content moderation state", () => {
     });
   });
 
-  test("realm feed removal marks publication rows removed for roots", async () => {
+  test("realm content removal marks UnitRealm relation removed", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"
     );
 
     await expect(
-      governanceModerationService.removeRootFromRealm({
+      governanceModerationService.removeFromRealm({
         realmUnitId: "realm-1",
-        targetUnitId: "post-1",
+        moderatedUnitId: "post-1",
+        decidedById: "mod-1",
+        reason: "off-topic",
       }),
-    ).resolves.toEqual({ message: "Content removed from realm feed" });
+    ).resolves.toEqual({
+      realmUnitId: "realm-1",
+      unitId: "post-1",
+      moderationState: "removed",
+      visibilityState: "tombstoned",
+      isLocked: false,
+      createdAt: now,
+    });
 
     expect(unitRealmUpdate).toHaveBeenCalledWith({
       where: {
@@ -606,17 +616,23 @@ describe("GovernanceModerationService content moderation state", () => {
     ]);
   });
 
-  test("realm feed removal does not inspect Post reply topology", async () => {
+  test("realm content removal does not inspect Post reply topology", async () => {
     const { governanceModerationService } = await import(
       "./moderation.service"
     );
 
     await expect(
-      governanceModerationService.removeRootFromRealm({
+      governanceModerationService.removeFromRealm({
         realmUnitId: "realm-1",
-        targetUnitId: "post-1",
+        moderatedUnitId: "post-1",
+        decidedById: "mod-1",
+        reason: "off-topic",
       }),
-    ).resolves.toEqual({ message: "Content removed from realm feed" });
+    ).resolves.toMatchObject({
+      realmUnitId: "realm-1",
+      unitId: "post-1",
+      moderationState: "removed",
+    });
 
     expect(postFindUnique).not.toHaveBeenCalled();
     expect(unitRealmUpdate).toHaveBeenCalledWith({

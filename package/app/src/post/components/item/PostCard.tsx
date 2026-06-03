@@ -1,17 +1,12 @@
-import {
-  useHideRealmContentMutation,
-  useRemoveRealmFeedRootMutation,
-} from "@rezics/api/governance/governance.mutations";
-import { useDeletePostMutation } from "@rezics/api/post/post.mutations";
-import { useAppendRealmPinboardMutation } from "@rezics/api/realm/realm";
+import { useEditorEntry } from "@rezics/api/hooks";
 import {
   extractPollUnitIdsFromContentDoc,
   type PostDTO,
+  PostKind,
   type UnitRealmModerationState,
   type VariantContextSummary,
 } from "@rezics/contract";
 import {
-  Badge,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -22,9 +17,8 @@ import {
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
-import { Pin, Shield } from "lucide-react";
+import { Pencil, Shield } from "lucide-react";
 import type React from "react";
-import { toast } from "sonner";
 import {
   ReactionActionRow,
   ReactionOverflowMenu,
@@ -51,7 +45,10 @@ interface PostCardProps {
   manageMode?: boolean;
   manageRealmId?: string;
   realmModerationState?: UnitRealmModerationState;
+  realmModerationAt?: string | Date | null;
   realmVisibilityState?: "hidden" | "tombstoned" | null;
+  overflowContent?: React.ReactNode;
+  moderationMenuContent?: React.ReactNode;
 }
 
 type StatusBadge = {
@@ -71,36 +68,66 @@ function statusDotClass(tone: StatusBadge["tone"]) {
   }
 }
 
-function ModerationStatusCompact({
+function formatRelativeTime(value?: string | Date | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
+  return date.toLocaleDateString();
+}
+
+function ModerationStatus({
   post,
   statuses,
+  at,
 }: {
   post: PostDTO;
   statuses: StatusBadge[];
+  at?: string | Date | null;
 }) {
   if (statuses.length === 0) return null;
   const [primary, secondary] = statuses;
+  const relativeTime = formatRelativeTime(at);
 
   return (
     <div
-      className="relative shrink-0"
+      className="flex min-w-0 shrink-0 items-center gap-2"
       title={statuses.map((status) => status.label).join(", ")}
     >
-      <PostAuthorAvatar post={post} size="compact" className="size-8" />
-      <span
-        className={cn(
-          "absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-surface-canvas",
-          statusDotClass(primary.tone),
-        )}
-      />
-      {secondary ? (
+      <div className="relative shrink-0">
+        <PostAuthorAvatar
+          post={post}
+          size="compact"
+          className="size-8 rounded-full"
+        />
         <span
           className={cn(
-            "absolute -right-1 top-0 size-2.5 rounded-full border border-surface-canvas",
-            statusDotClass(secondary.tone),
+            "absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-surface-canvas",
+            statusDotClass(primary.tone),
           )}
         />
-      ) : null}
+        {secondary ? (
+          <span
+            className={cn(
+              "absolute -right-1 top-0 size-2.5 rounded-full border border-surface-canvas",
+              statusDotClass(secondary.tone),
+            )}
+          />
+        ) : null}
+      </div>
+      <span className="truncate text-xs leading-ui text-text-secondary">
+        {primary.label}
+        {relativeTime ? ` ${relativeTime}` : ""}
+      </span>
     </div>
   );
 }
@@ -113,30 +140,21 @@ export const PostCard: React.FC<PostCardProps> = ({
   summaryScopeKey,
   reactionScopeKey,
   manageMode = false,
-  manageRealmId,
   realmModerationState,
+  realmModerationAt,
   realmVisibilityState,
+  overflowContent,
+  moderationMenuContent,
 }) => {
   const navigate = useNavigate();
-  const deletePost = useDeletePostMutation({
-    onSuccess: () => toast.success("Post deleted."),
-    onError: (error) => toast.error(error.message),
-  });
-  const pinPost = useAppendRealmPinboardMutation({
-    onSuccess: () => toast.success("Post pinned."),
-    onError: (error) => toast.error(error.message),
-  });
-  const removeFromFeed = useRemoveRealmFeedRootMutation({
-    onSuccess: () => toast.success("Post removed from realm feed."),
-    onError: (error) => toast.error(error.message),
-  });
-  const hideInRealm = useHideRealmContentMutation({
-    onSuccess: () => toast.success("Post hidden in this realm."),
-    onError: (error) => toast.error(error.message),
-  });
   const rootPostUnitId = post.unitId;
   const resolvedVariantContext = variantContext ?? post.variantContext;
   const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
+  const editorEntry = useEditorEntry({
+    surface: post.kind === PostKind.WIKI ? "wikiPost" : "post",
+    ownerUnit: { user: post.author },
+    capabilities: post.kind === PostKind.WIKI ? ["content", "tag"] : undefined,
+  });
 
   const handleReplyInvoke = () => {
     if (onOpen) {
@@ -180,25 +198,11 @@ export const PostCard: React.FC<PostCardProps> = ({
     realmVisibilityState
       ? {
           key: "visibility",
-          label:
-            realmVisibilityState === "hidden"
-              ? "Hidden"
-              : "Tombstoned",
+          label: realmVisibilityState === "hidden" ? "Hidden" : "Tombstoned",
           tone: realmVisibilityState === "tombstoned" ? "error" : "warning",
         }
       : null,
   ].filter(Boolean) as StatusBadge[];
-  const reactionModel = useReactionBarModel({
-    size: "md",
-    variant: "pill",
-    post,
-    policy: postPolicy,
-    summaryScopeKey,
-    reactionScopeKey,
-    actions: postCardActions,
-    overflow: postCardOverflow,
-    onReplyInvoke: handleReplyInvoke,
-  });
 
   const handleCardClick = () => {
     if (onOpen) {
@@ -215,15 +219,45 @@ export const PostCard: React.FC<PostCardProps> = ({
     });
   };
 
-  const runAdminAction = (
-    event: Event | React.MouseEvent,
-    message: string,
-    action: () => void,
-  ) => {
-    if ("stopPropagation" in event) event.stopPropagation();
-    if (!window.confirm(message)) return;
-    action();
-  };
+  const unitOverflowContent = editorEntry.canEnter ? (
+    <>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Unit</DropdownMenuLabel>
+        <DropdownMenuItem
+          onSelect={(event) => {
+            event.stopPropagation();
+            navigate({
+              to: "/post/$rootPostUnitId/edit",
+              params: { rootPostUnitId },
+            });
+          }}
+        >
+          <Pencil className="h-4 w-4" aria-hidden />
+          Edit
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </>
+  ) : null;
+  const composedOverflowContent =
+    unitOverflowContent || overflowContent ? (
+      <>
+        {unitOverflowContent}
+        {overflowContent}
+      </>
+    ) : undefined;
+  const reactionModel = useReactionBarModel({
+    size: "md",
+    variant: "pill",
+    post,
+    policy: postPolicy,
+    summaryScopeKey,
+    reactionScopeKey,
+    actions: postCardActions,
+    overflow: postCardOverflow,
+    onReplyInvoke: handleReplyInvoke,
+    overflowContent: composedOverflowContent,
+  });
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: whole card click is pointer-only; nested actions and links provide keyboard access.
@@ -275,31 +309,19 @@ export const PostCard: React.FC<PostCardProps> = ({
               className="hidden sm:block"
             />
           </div>
-          {manageMode && (statusBadges.length > 0 || manageRealmId) ? (
+          {manageMode && (statusBadges.length > 0 || moderationMenuContent) ? (
             // biome-ignore lint/a11y/noStaticElementInteractions: this wrapper prevents nested moderation controls from triggering the parent card link.
             <div
               className="flex shrink-0 items-center gap-2"
               onClick={(event) => event.stopPropagation()}
               onKeyDown={() => undefined}
             >
-              {statusBadges.length > 0 ? (
-                <>
-                  <div className="hidden flex-wrap gap-1 sm:flex">
-                    {statusBadges.map((badge) => (
-                      <Badge key={badge.key} variant="outline">
-                        {badge.label}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="sm:hidden">
-                    <ModerationStatusCompact
-                      post={post}
-                      statuses={statusBadges}
-                    />
-                  </div>
-                </>
-              ) : null}
-              {manageRealmId ? (
+              <ModerationStatus
+                post={post}
+                statuses={statusBadges}
+                at={realmModerationAt}
+              />
+              {moderationMenuContent ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     nativeButton
@@ -320,83 +342,7 @@ export const PostCard: React.FC<PostCardProps> = ({
                     align="end"
                     onClick={(event) => event.stopPropagation()}
                   >
-                    <DropdownMenuGroup>
-                      <DropdownMenuLabel>Realm moderation</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        disabled={removeFromFeed.isPending}
-                        onSelect={(event) =>
-                          runAdminAction(
-                            event as unknown as Event,
-                            "Remove this post from the realm feed?",
-                            () =>
-                              removeFromFeed.mutate({
-                                realmUnitId: manageRealmId,
-                                targetUnitId: post.unitId,
-                              }),
-                          )
-                        }
-                      >
-                        <Shield className="h-4 w-4" aria-hidden />
-                        Remove from feed
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuLabel>Realm moderation</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        disabled={hideInRealm.isPending}
-                        onSelect={(event) =>
-                          runAdminAction(
-                            event as unknown as Event,
-                            "Hide this post in this realm?",
-                            () =>
-                              hideInRealm.mutate({
-                                realmUnitId: manageRealmId,
-                                targetUnitId: post.unitId,
-                                input: { reason: "moderator_action" },
-                              }),
-                          )
-                        }
-                      >
-                        <Shield className="h-4 w-4" aria-hidden />
-                        Hide in realm
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        disabled={deletePost.isPending}
-                        onSelect={(event) =>
-                          runAdminAction(
-                            event as unknown as Event,
-                            "Delete this post?",
-                            () => deletePost.mutate(post.unitId),
-                          )
-                        }
-                      >
-                        <Shield className="h-4 w-4" aria-hidden />
-                        Delete post
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuLabel>Organization</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        disabled={pinPost.isPending}
-                        onSelect={(event) =>
-                          runAdminAction(
-                            event as unknown as Event,
-                            "Pin this post?",
-                            () =>
-                              pinPost.mutate({
-                                realmUnitId: manageRealmId,
-                                unitId: post.unitId,
-                              }),
-                          )
-                        }
-                      >
-                        <Pin className="h-4 w-4" aria-hidden />
-                        Pin
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
+                    {moderationMenuContent}
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : null}

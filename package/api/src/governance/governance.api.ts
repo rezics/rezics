@@ -350,13 +350,45 @@ export const governanceApi = {
     );
   },
 
-  removeRealmFeedRoot: async (
+  approveRealmContent: async (
     realmUnitId: string,
     targetUnitId: string,
-  ): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/feed/${encodePathPart(targetUnitId)}`,
-      { method: "DELETE" },
+    input: ContentModerationDecisionInput,
+  ): Promise<UnitRealmDTO> => {
+    return apiFetch<UnitRealmDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/approve`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  rejectRealmContent: async (
+    realmUnitId: string,
+    targetUnitId: string,
+    input: ContentModerationDecisionInput,
+  ): Promise<UnitRealmDTO> => {
+    return apiFetch<UnitRealmDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/reject`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  removeRealmContent: async (
+    realmUnitId: string,
+    targetUnitId: string,
+    input: ContentModerationDecisionInput,
+  ): Promise<UnitRealmDTO> => {
+    return apiFetch<UnitRealmDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/remove`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
     );
   },
 

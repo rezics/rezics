@@ -257,10 +257,11 @@ describe("governance contract registry", () => {
         realmOverlays: [
           {
             realmUnitId: "realm-1",
-            moderatedUnitId: "reply-2",
-            state: "tombstoned",
+            unitId: "reply-2",
+            moderationState: "approved",
+            visibilityState: "tombstoned",
+            isLocked: false,
             createdAt: "2026-05-28T00:00:00.000Z",
-            updatedAt: "2026-05-28T00:00:00.000Z",
           },
         ],
       }),

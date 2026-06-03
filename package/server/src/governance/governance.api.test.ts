@@ -92,13 +92,11 @@ const contentStateRow = {
 };
 const realmOverlayRow = {
   realmUnitId: "realm-1",
-  moderatedUnitId: "reply-1",
-  state: "tombstoned",
-  decidedByUserId: "staff-1",
-  caseId: null,
-  reason: "off-topic",
+  unitId: "reply-1",
+  moderationState: "approved",
+  visibilityState: "tombstoned",
+  isLocked: false,
   createdAt: "2026-05-28T00:00:00.000Z",
-  updatedAt: "2026-05-28T00:00:00.000Z",
 };
 const tombstoneGlobalMock = mock(async () => contentStateRow);
 const hideGlobalMock = mock(async () => ({
@@ -112,14 +110,23 @@ const restoreGlobalMock = mock(async () => ({
 const tombstoneInRealmMock = mock(async () => realmOverlayRow);
 const hideInRealmMock = mock(async () => ({
   ...realmOverlayRow,
-  state: "hidden",
+  visibilityState: "hidden",
 }));
 const restoreInRealmMock = mock(async () => ({
   ...realmOverlayRow,
-  state: "visible",
+  visibilityState: "visible",
 }));
-const removeRootFromRealmMock = mock(async () => ({
-  message: "Content removed from realm feed",
+const approveInRealmMock = mock(async () => ({
+  ...realmOverlayRow,
+  moderationState: "approved",
+}));
+const rejectInRealmMock = mock(async () => ({
+  ...realmOverlayRow,
+  moderationState: "rejected",
+}));
+const removeFromRealmMock = mock(async () => ({
+  ...realmOverlayRow,
+  moderationState: "removed",
 }));
 const requestOwnerDelegationMock = mock(async () => ({
   id: "queue-1",
@@ -278,7 +285,9 @@ mock.module("./moderation.service", () => ({
     hideInRealm: hideInRealmMock,
     tombstoneInRealm: tombstoneInRealmMock,
     restoreInRealm: restoreInRealmMock,
-    removeRootFromRealm: removeRootFromRealmMock,
+    approveInRealm: approveInRealmMock,
+    rejectInRealm: rejectInRealmMock,
+    removeFromRealm: removeFromRealmMock,
     requestOwnerDelegation: requestOwnerDelegationMock,
     createRealmQueueItem: createRealmQueueItemMock,
     createRealmQueueItemFromFeedback: createRealmQueueItemFromFeedbackMock,
@@ -313,7 +322,9 @@ describe("governanceApi account enforcement", () => {
     hideInRealmMock.mockClear();
     tombstoneInRealmMock.mockClear();
     restoreInRealmMock.mockClear();
-    removeRootFromRealmMock.mockClear();
+    approveInRealmMock.mockClear();
+    rejectInRealmMock.mockClear();
+    removeFromRealmMock.mockClear();
     requestOwnerDelegationMock.mockClear();
     createRealmQueueItemMock.mockClear();
     createRealmQueueItemFromFeedbackMock.mockClear();
@@ -679,20 +690,27 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
-  test("removes top-level content from realm feed through junction-drop path", async () => {
+  test("removes content from a realm through UnitRealm moderation state", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
-      new Request("http://localhost/governance/realms/realm-1/feed/post-1", {
-        method: "DELETE",
-      }),
+      new Request(
+        "http://localhost/governance/realms/realm-1/content/post-1/remove",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason: "off-topic" }),
+        },
+      ),
     );
 
     expect(response.status).toBe(200);
-    expect(removeRootFromRealmMock).toHaveBeenCalledWith({
+    expect(removeFromRealmMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      targetUnitId: "post-1",
+      moderatedUnitId: "post-1",
+      decidedById: "staff-1",
+      reason: "off-topic",
     });
     expect(tombstoneInRealmMock).not.toHaveBeenCalled();
   });
