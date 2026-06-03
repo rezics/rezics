@@ -5,13 +5,13 @@ import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import { capabilityHintSchema } from "../permission/capability";
 import { postDTOSchema } from "../post/post";
-import { realmExtraSchema } from "./realm-extra";
 import { unitTagDTOSchema } from "../tag/tag";
 import {
   publicUserSchema,
   unitDTOSchema,
   unitTranslationDTOSchema,
 } from "../unit/unit";
+import { realmExtraSchema } from "./realm-extra";
 
 // ============================================================
 // DEFAULT REALM
@@ -239,12 +239,27 @@ export type RealmMembershipMeDTO =
 /**
  * UnitRealm is community/feed membership for a Unit in a realm. It is not
  * semantic tagging and is not a prerequisite for RealmTagApplication.
+ *
+ * Future card-presentation hints such as realm-scoped `spoiler` belong on this
+ * junction as typed `extra`, not on Unit.extra and not in the open tag system.
+ * Keep this dormant until the Prisma field and write API are enabled.
  */
 export const unitRealmDTOSchema = t.Object({
   realmUnitId: t.String(),
   unitId: t.String(),
+  // extra: t.Optional(t.Nullable(realmContentExtraSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
 });
+
+// const realmContentExtraSchema = {
+//   spoiler: t.Optional(
+//     t.Object({
+//       enabled: t.Boolean(),
+//       decidedByUserId: t.Optional(t.String()),
+//       updatedAt: t.Optional(t.String()),
+//     }),
+//   ),
+// };
 
 export type UnitRealmDTO = (typeof unitRealmDTOSchema)["static"];
 

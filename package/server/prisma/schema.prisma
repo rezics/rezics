@@ -1018,6 +1018,11 @@ model UnitRealm {
   realmUnitId String                     @db.Uuid
   unitId      String                     @db.Uuid
   state       ContentModerationStateKind @default(VISIBLE)
+  /// Future presentation-only card hints, such as a realm-scoped spoiler
+  /// overlay, should live on this realm/content junction rather than Unit.extra
+  /// or semantic tags. Disabled until the realm feed publication work adds a
+  /// typed JSON contract and migration.
+  // extra Json?
   createdAt   DateTime                   @default(now())
 
   /// Community/feed membership for a target Unit in a realm.
