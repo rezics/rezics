@@ -1026,7 +1026,18 @@ export const realmApi = new Elysia({ prefix: "/realm" })
           );
         }
       }
-      await realmService.removeMember(params.unitId, params.userId);
+      await realmService.removeMember(
+        params.unitId,
+        params.userId,
+        isSelf
+          ? undefined
+          : {
+              moderation: {
+                actorUserId: identity.userId,
+                reasonCode: "realm.member.removed",
+              },
+            },
+      );
       return { message: "Member removed successfully" };
     },
     {

@@ -206,7 +206,7 @@ describe("GovernanceEnforcementService", () => {
     });
   });
 
-  test("records case events for reversible account enforcement decisions", async () => {
+  test("records moderation actions for reversible account enforcement decisions", async () => {
     const { governanceEnforcementService } = await import(
       "./enforcement.service"
     );
@@ -235,15 +235,7 @@ describe("GovernanceEnforcementService", () => {
       data: { decisionActionId: "action-1" },
     });
     expect(broadcastMock).not.toHaveBeenCalled();
-    expect(staffAuditLogCreate).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        actorUserId: "staff-1",
-        action: "account.enforcement.applied",
-        targetKind: "account",
-        targetId: "user-1",
-        requestId: "case-1",
-      }),
-    });
+    expect(staffAuditLogCreate).not.toHaveBeenCalled();
   });
 
   test("notifies subjects for warning enforcement", async () => {
@@ -266,7 +258,7 @@ describe("GovernanceEnforcementService", () => {
     });
   });
 
-  test("records case events when account enforcement is revoked", async () => {
+  test("records moderation actions when account enforcement is revoked", async () => {
     accountEnforcementFindMany.mockResolvedValueOnce([
       {
         id: "enforcement-1",
@@ -325,14 +317,6 @@ describe("GovernanceEnforcementService", () => {
       actorId: "staff-2",
       extra: { enforcementId: "enforcement-1", state: "REVOKED" },
     });
-    expect(staffAuditLogCreate).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        actorUserId: "staff-2",
-        action: "account.enforcement.revoked",
-        targetKind: "account",
-        targetId: "user-1",
-        requestId: "case-1",
-      }),
-    });
+    expect(staffAuditLogCreate).not.toHaveBeenCalled();
   });
 });

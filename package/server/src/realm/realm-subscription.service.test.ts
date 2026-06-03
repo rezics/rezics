@@ -82,6 +82,8 @@ interface TxOps {
   subCreate?: ReturnType<typeof mock>;
   subDelete?: ReturnType<typeof mock>;
   unitUpdate?: ReturnType<typeof mock>;
+  moderationActionCreate?: ReturnType<typeof mock>;
+  moderationActionFindUnique?: ReturnType<typeof mock>;
 }
 
 function installTx(ops: TxOps) {
@@ -117,6 +119,15 @@ function installTx(ops: TxOps) {
   prismaMock.unit = {
     update: ops.unitUpdate ?? mock(async () => ({})),
   };
+  prismaMock.moderationAction = {
+    create:
+      ops.moderationActionCreate ??
+      mock(async ({ data }: any) => ({
+        id: "moderation-action-1",
+        ...data,
+      })),
+    findUnique: ops.moderationActionFindUnique ?? mock(async () => null),
+  };
 }
 
 afterEach(() => {
@@ -136,6 +147,7 @@ afterEach(() => {
   delete prismaMock.realmCapabilityGrant;
   delete prismaMock.realmRuleAcknowledgement;
   delete prismaMock.unit;
+  delete prismaMock.moderationAction;
   delete prismaMock.unitTranslation;
   delete prismaMock.post;
 });
@@ -308,6 +320,36 @@ describe("realmService.removeMember", () => {
     expect(prismaMock.realm.update).toHaveBeenCalledTimes(1);
     expect(prismaMock.subscription.delete).toHaveBeenCalledTimes(0);
     expect(prismaMock.unit.update).toHaveBeenCalledTimes(0);
+  });
+
+  test("records a realm-member moderation action when a moderator removes a member", async () => {
+    installTx({
+      subFindUnique: mock(async () => null),
+      realmUpdate: mock(async () => ({ memberCount: 0 })),
+    });
+
+    await realmService.removeMember(REALM, USER, {
+      moderation: {
+        actorUserId: "moderator-1",
+        reasonCode: "realm.member.removed",
+        reasonText: "off topic",
+        caseId: "case-1",
+      },
+    });
+
+    expect(prismaMock.moderationAction.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        authority: "REALM",
+        realmUnitId: REALM,
+        targetKind: "REALM_MEMBER",
+        targetId: USER,
+        actionKind: "REMOVE_MEMBER",
+        actorUserId: "moderator-1",
+        reasonCode: "realm.member.removed",
+        reasonText: "off topic",
+        caseId: "case-1",
+      }),
+    });
   });
 });
 

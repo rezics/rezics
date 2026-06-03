@@ -216,7 +216,7 @@ reset + reseed is acceptable; a backfill script is optional.
   `parentCaseId`. Update `decideCase`/`triageCase`/`assignCase` to append
   `ModerationAction` (NOTE for pure workflow, typed action otherwise) instead of
   `ModerationCaseEvent`.
-- [ ] 1.9 Update account enforcement and realm member moderation flows:
+- [x] 1.9 Update account enforcement and realm member moderation flows:
   `governance/enforcement.service.ts` and any realm member mute/remove/ban/restore
   service must append `ModerationAction` rows (`targetKind=ACCOUNT` or
   `REALM_MEMBER`) for apply/revoke/restore. Keep their state tables for active

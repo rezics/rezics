@@ -32,6 +32,7 @@ import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { realmPolicyActions } from "@/governance/action/realm";
 import { governanceAuditService } from "@/governance/audit.service";
 import { governanceCapabilityService } from "@/governance/capability.service";
+import { moderationActionService } from "@/governance/moderation-action.service";
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapPostToDTO } from "@/post/post.mapper";
@@ -610,7 +611,18 @@ export class RealmService {
    * row is missing the corresponding counter is not decremented, so a
    * second call doesn't double-decrement.
    */
-  async removeMember(realmUnitId: string, userId: string): Promise<void> {
+  async removeMember(
+    realmUnitId: string,
+    userId: string,
+    options?: {
+      moderation?: {
+        actorUserId: string;
+        reasonCode?: string;
+        reasonText?: string | null;
+        caseId?: string | null;
+      };
+    },
+  ): Promise<void> {
     await prisma.$transaction(async (tx) => {
       const existingMember = await tx.realmMember.findUnique({
         where: { realmUnitId_userId: { realmUnitId, userId } },
@@ -630,6 +642,20 @@ export class RealmService {
         await tx.realmMember.delete({
           where: { realmUnitId_userId: { realmUnitId, userId } },
         });
+        if (options?.moderation) {
+          await moderationActionService.appendModerationAction(tx, {
+            authority: "REALM",
+            realmUnitId,
+            targetKind: "REALM_MEMBER",
+            targetId: userId,
+            actorKind: "USER",
+            actorUserId: options.moderation.actorUserId,
+            actionKind: "REMOVE_MEMBER",
+            reasonCode: options.moderation.reasonCode ?? "realm.member.removed",
+            reasonText: options.moderation.reasonText,
+            caseId: options.moderation.caseId,
+          });
+        }
       }
       if (existingSub) {
         await tx.subscription.delete({ where: { id: existingSub.id } });

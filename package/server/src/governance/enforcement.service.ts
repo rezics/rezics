@@ -6,7 +6,6 @@ import type {
 import { prisma } from "#/prisma/client";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { revokeAuthSessionsForAuthUser } from "../auth-boundary/auth-internal.client";
-import { governanceAuditService } from "./audit.service";
 import { mapAccountEnforcementToDTO } from "./governance.mapper";
 import { moderationActionService } from "./moderation-action.service";
 import type { GovernanceListOptions } from "./types";
@@ -33,12 +32,6 @@ function notifyEnforcement(input: {
     actorId: input.actorUserId ?? null,
     extra: input.extra,
   }).catch(() => {});
-}
-
-function auditEnforcement(
-  input: Parameters<typeof governanceAuditService.appendPrivilegedMutation>[0],
-) {
-  governanceAuditService.appendPrivilegedMutation(input).catch(() => {});
 }
 
 function basePermissionRole(permission: unknown) {
@@ -184,16 +177,6 @@ export class GovernanceEnforcementService {
         extra: { enforcementId: row.id, reason: input.reason },
       });
     }
-    auditEnforcement({
-      actorUserId: input.decidedById,
-      action: "account.enforcement.applied",
-      targetKind: "account",
-      targetId: input.targetUserId,
-      decisionCode: input.decisionCode,
-      reason: input.reason,
-      correlationId: input.caseId ?? row.id,
-      after: { enforcementId: row.id, kind: row.kind, state: row.state },
-    });
     return mapAccountEnforcementToDTO(row);
   }
 
@@ -350,15 +333,6 @@ export class GovernanceEnforcementService {
         targetUserId,
         actorUserId: input.revokedById,
         extra: { enforcementId: row.id, state: row.state },
-      });
-      auditEnforcement({
-        actorUserId: input.revokedById,
-        action: "account.enforcement.revoked",
-        targetKind: "account",
-        targetId: targetUserId,
-        reason: input.reason,
-        correlationId: input.caseId ?? row.id,
-        after: { enforcementId: row.id, kind: row.kind, state: row.state },
       });
     }
     return rows.map(mapAccountEnforcementToDTO);

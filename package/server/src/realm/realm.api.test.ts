@@ -27,6 +27,7 @@ const updateMemberRoleMock = mock(async (_realmUnitId, userId, roleKey) => ({
   joinedAt: new Date("2026-05-28T00:00:00.000Z"),
   updatedAt: new Date("2026-05-28T00:00:00.000Z"),
 }));
+const removeMemberMock = mock(async () => undefined);
 const listMembersMock = mock(async () => ({
   members: [
     {
@@ -145,6 +146,7 @@ mock.module("./realm.service", () => ({
     getRulePolicy: getRulePolicyMock,
     getMember: getMemberMock,
     listMembers: listMembersMock,
+    removeMember: removeMemberMock,
     resolveRule: resolveRuleMock,
     updateRulePolicy: updateRulePolicyMock,
     updateMemberRole: updateMemberRoleMock,
@@ -170,6 +172,7 @@ describe("realmApi", () => {
     updateRulePolicyMock.mockClear();
     getMemberMock.mockClear();
     listMembersMock.mockClear();
+    removeMemberMock.mockClear();
     updateMemberRoleMock.mockClear();
   });
 
@@ -270,6 +273,23 @@ describe("realmApi", () => {
       "user-2",
       "admin",
     );
+  });
+
+  test("records moderation context when a moderator removes another member", async () => {
+    const { realmApi } = await import("./realm.api");
+    const response = await realmApi.handle(
+      new Request("http://localhost/realm/realm-1/members/user-2", {
+        method: "DELETE",
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(removeMemberMock).toHaveBeenCalledWith("realm-1", "user-2", {
+      moderation: {
+        actorUserId: "moderator-1",
+        reasonCode: "realm.member.removed",
+      },
+    });
   });
 
   test("lists members for moderator roles", async () => {
