@@ -31,6 +31,7 @@ const baseContentDocument = {
   realmIds: [],
   realmTagKeys: [],
   languages: ["en"],
+  isLanguageNeutral: false,
   rating: "GENERAL",
   aiDisclosureMode: "UNKNOWN",
   visibility: "PUBLIC",

@@ -131,6 +131,48 @@ describe("buildPostDocument", () => {
     expect(doc.variantUnitId).toBe("variant-1");
   });
 
+  test("indexes language availability from the post Unit support languages", async () => {
+    setServerEnvForSearchTests();
+    const { buildPostDocument } = await import("./sync");
+    const doc = buildPostDocument({
+      unitId: "post-1",
+      kind: "POST",
+      depth: 0,
+      isLocked: false,
+      replyCount: 0,
+      directReplyCount: 0,
+      lastReplyAt: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      targetUnitId: null,
+      rootPostUnitId: null,
+      parentPostUnitId: null,
+      authorUserId: "user-1",
+      scoreEntryId: null,
+      unit: {
+        user: null,
+        inRealms: [],
+        isLanguageNeutral: false,
+        supportLanguages: [
+          { language: "ja", isPrimary: true, sortOrder: 0 },
+          { language: "en", isPrimary: false, sortOrder: 1 },
+        ],
+        translations: [
+          { language: "en", title: "English title", extra: null },
+          { language: "ko", title: "Translation-only title", extra: null },
+        ],
+      },
+      targetUnit: null,
+      scoreEntry: null,
+    });
+
+    expect(doc.languages).toEqual(["ja", "en"]);
+    expect(doc.supportLanguages).toEqual([
+      { language: "ja", isPrimary: true, sortOrder: 0 },
+      { language: "en", isPrimary: false, sortOrder: 1 },
+    ]);
+  });
+
   test("falls back to null when targetUnitId is missing on the row", async () => {
     setServerEnvForSearchTests();
     const { buildPostDocument } = await import("./sync");
@@ -329,6 +371,7 @@ describe("buildContentDocument realm tag keys", () => {
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       publishedAt: null,
       translations: [{ language: "en", title: "Book", extra: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
       unitTags: [],
       inRealms: [],
       realmTagApplicationsAsTargetUnit: [
@@ -357,6 +400,7 @@ describe("buildContentDocument realm tag keys", () => {
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       publishedAt: null,
       translations: [{ language: "en", title: "Release", extra: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
       unitTags: [],
       seriesContentIndexesAsRelease: [
         {
@@ -485,6 +529,7 @@ describe("buildContentDocument subject attributions", () => {
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       publishedAt: null,
       translations: [{ language: "en", title: "Fanfic", extra: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
       unitTags: [],
       inRealms: [],
       realmTagApplicationsAsTargetUnit: [],
@@ -537,6 +582,7 @@ describe("buildContentDocument containedUnitIds", () => {
       id: "shelf-1",
       type: "SHELF",
       translations: [{ language: "en", title: "My Shelf", extra: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
       shelf: {
         units: [{ unitId: "u-a" }, { unitId: "u-b" }, { unitId: "u-c" }],
       },
@@ -558,12 +604,111 @@ describe("buildContentDocument containedUnitIds", () => {
       id: "book-1",
       type: "BOOK",
       translations: [{ language: "en", title: "Book", extra: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
       book: { textLength: 100, isLicensed: false },
     });
 
     expect(
       (doc as { containedUnitIds?: string[] }).containedUnitIds,
     ).toBeUndefined();
+  });
+});
+
+describe("buildContentDocument language availability", () => {
+  test("indexes preferred-filter languages from UnitSupportLanguage rows only", async () => {
+    setServerEnvForSearchTests();
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "book-1",
+      type: "BOOK",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [
+        { language: "en", title: "English title", extra: null },
+        { language: "ja", title: "Japanese title", extra: null },
+      ],
+      supportLanguages: [
+        { language: "ja", isPrimary: true, sortOrder: 0 },
+        { language: "en", isPrimary: false, sortOrder: 1 },
+        { language: "ja", isPrimary: false, sortOrder: 2 },
+      ],
+      unitTags: [],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      subjectAttributions: [],
+      book: { textLength: 100, isLicensed: false },
+    });
+
+    expect(doc.languages).toEqual(["ja", "en"]);
+    expect(doc.supportLanguages).toEqual([
+      { language: "ja", isPrimary: true, sortOrder: 0 },
+      { language: "en", isPrimary: false, sortOrder: 1 },
+      { language: "ja", isPrimary: false, sortOrder: 2 },
+    ]);
+  });
+
+  test("does not infer preferred-filter languages from translation-only data", async () => {
+    setServerEnvForSearchTests();
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "book-unrepaired",
+      type: "BOOK",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [{ language: "en", title: "Needs repair", extra: null }],
+      supportLanguages: [],
+      unitTags: [],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      subjectAttributions: [],
+      book: { textLength: 100, isLicensed: false },
+    });
+
+    expect(doc.languages).toEqual([]);
+    expect(doc.titles).toEqual(["Needs repair"]);
+  });
+
+  test("preserves language-neutral Units while leaving preferred languages support-backed", async () => {
+    setServerEnvForSearchTests();
+    const { buildContentDocument } = await import("./sync");
+
+    const doc = buildContentDocument({
+      id: "image-essay-1",
+      type: "MEDIA",
+      defaultLanguage: "en",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      isLanguageNeutral: true,
+      userId: "user-1",
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      publishedAt: null,
+      translations: [{ language: "en", title: "Visual essay", extra: null }],
+      supportLanguages: [],
+      unitTags: [],
+      inRealms: [],
+      realmTagApplicationsAsTargetUnit: [],
+      creditAttributions: [],
+      subjectAttributions: [],
+      media: { isLicensed: false },
+    });
+
+    expect(doc.isLanguageNeutral).toBe(true);
+    expect(doc.languages).toEqual([]);
   });
 });
 

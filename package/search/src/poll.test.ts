@@ -14,6 +14,7 @@ describe("buildPollDocument", () => {
       updatedAt: new Date("2026-06-01T00:00:00.000Z"),
       unit: {
         userId: "user-1",
+        supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
         translations: [
           {
             language: "en",
@@ -54,6 +55,7 @@ describe("buildPollDocument", () => {
       updatedAt: new Date("2026-06-01T00:00:00.000Z"),
       unit: {
         userId: "user-2",
+        supportLanguages: [{ language: "ja", isPrimary: true, sortOrder: 0 }],
         translations: [
           {
             language: "ja",
@@ -80,5 +82,33 @@ describe("buildPollDocument", () => {
       titles: ["読書会アンケート"],
       optionLabels: ["Saturday", "Sunday"],
     });
+  });
+
+  test("does not infer preferred-filter languages from translation-only poll data", () => {
+    const doc = buildPollDocument({
+      unitId: "poll-unrepaired",
+      voteMode: "SINGLE",
+      resultVisibility: "LIVE",
+      anonymous: false,
+      closesAt: null,
+      usageCount: 0,
+      createdAt: new Date("2026-06-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-06-01T00:00:00.000Z"),
+      unit: {
+        userId: "user-1",
+        supportLanguages: [],
+        translations: [
+          {
+            language: "en",
+            title: "Translation-only poll",
+            summary: null,
+          },
+        ],
+      },
+      options: [],
+    });
+
+    expect(doc.languages).toEqual([]);
+    expect(doc.titles).toEqual(["Translation-only poll"]);
   });
 });

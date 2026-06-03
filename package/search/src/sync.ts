@@ -303,14 +303,10 @@ function delay(ms: number): Promise<void> {
 
 function indexedLanguages(unit: {
   supportLanguages?: readonly { language?: string | null }[] | null;
-  translations?: readonly { language?: string | null }[] | null;
 }): string[] {
-  const supportLanguages = unit.supportLanguages ?? [];
-  const source =
-    supportLanguages.length > 0 ? supportLanguages : unit.translations;
   return [
     ...new Set(
-      (source ?? [])
+      (unit.supportLanguages ?? [])
         .map((item) => item.language)
         .filter((language): language is string => !!language),
     ),
@@ -1133,7 +1129,7 @@ export async function patchContentTranslations(
     .map((t: any) => mainMarkdownSource(t.description))
     .filter(isNonEmptyString);
   const descriptionText = descriptions.join("\n") || null;
-  const languages = indexedLanguages({ supportLanguages, translations });
+  const languages = indexedLanguages({ supportLanguages });
 
   await patchContentIfEligible(client, unitId, {
     titles,
@@ -2339,7 +2335,7 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
     .map((t: any) => searchDescriptionText(t.description))
     .filter(isNonEmptyString);
   const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
-  const languages = indexedLanguages(unit ?? { translations });
+  const languages = indexedLanguages(unit ?? {});
 
   return {
     id: realm.unitId,
@@ -2408,7 +2404,7 @@ export function buildPollDocument(poll: any): PollSearchDocument {
         : Boolean(closesAt && Date.parse(closesAt) <= now),
     usageCount: poll.usageCount,
     used: poll.usageCount > 0,
-    languages: indexedLanguages(poll.unit ?? { translations }),
+    languages: indexedLanguages(poll.unit ?? {}),
     isLanguageNeutral: Boolean(unit?.isLanguageNeutral),
     createdAt: toIsoString(poll.createdAt) ?? "",
     updatedAt: toIsoString(poll.updatedAt) ?? "",

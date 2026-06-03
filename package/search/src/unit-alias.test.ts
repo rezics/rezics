@@ -34,6 +34,7 @@ const baseUnit = {
   translations: [
     { language: "en", title: "The Three-Body Problem", extra: null },
   ],
+  supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
   aliases: [],
   unitTags: [],
   inRealms: [],
@@ -133,6 +134,7 @@ describe("alias and pinned tag search projection", () => {
       unit: {
         userId: "user-1",
         translations: [{ language: "en", title: "rezics", description: null }],
+        supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
         aliases: [
           {
             value: "Library.Book",
@@ -164,6 +166,10 @@ describe("alias and pinned tag search projection", () => {
       extra: null,
       unit: {
         userId: "user-1",
+        supportLanguages: [
+          { language: "en", isPrimary: true, sortOrder: 0 },
+          { language: "zh-hant", isPrimary: false, sortOrder: 1 },
+        ],
         translations: [
           {
             language: "en",
@@ -187,6 +193,43 @@ describe("alias and pinned tag search projection", () => {
     expect(doc.translations.map((tr) => tr.description)).toEqual([
       "Readable realm summary",
       "Legacy plain summary",
+    ]);
+  });
+
+  test("realm documents index preferred-filter languages from support languages", async () => {
+    setServerEnvForSearchTests();
+    const { buildRealmDocument } = await import("./sync");
+
+    const doc = buildRealmDocument({
+      unitId: "realm-1",
+      isPublic: true,
+      isOfficial: false,
+      memberCount: 1,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+      extra: null,
+      unit: {
+        userId: "user-1",
+        supportLanguages: [
+          { language: "ja", isPrimary: true, sortOrder: 0 },
+          { language: "en", isPrimary: false, sortOrder: 1 },
+        ],
+        translations: [
+          { language: "en", title: "English realm", description: null },
+          {
+            language: "ko",
+            title: "Translation-only realm",
+            description: null,
+          },
+        ],
+        aliases: [],
+      },
+    });
+
+    expect(doc.languages).toEqual(["ja", "en"]);
+    expect(doc.supportLanguages).toEqual([
+      { language: "ja", isPrimary: true, sortOrder: 0 },
+      { language: "en", isPrimary: false, sortOrder: 1 },
     ]);
   });
 });

@@ -115,7 +115,7 @@ remain available only for language switchers and editing surfaces.
   resolve display consistently with SQL mappers.
 - [x] 2.4 Extend search result document/DTO schemas with resolved display fields
   where ordinary UI consumers currently derive display from `translations[]`.
-- [ ] 2.5 Add contract tests for POST body candidates, default
+- [x] 2.5 Add contract tests for POST body candidates, default
   `languageMode`, `appLocale`, and multi-language any-of semantics across direct
   and federated search schemas.
 
@@ -124,7 +124,7 @@ remain available only for language switchers and editing surfaces.
 - [x] 3.1 Update `package/search/src/schema.ts` so content, post, realm, poll,
   and federated-relevant indexes expose `languages` and `isLanguageNeutral` as
   filterable attributes where applicable.
-- [ ] 3.2 Update `package/search/src/sync.ts` document builders to source
+- [x] 3.2 Update `package/search/src/sync.ts` document builders to source
   indexed `languages` from `UnitSupportLanguage`; repair development data
   rather than preserving old-client compatibility branches.
 - [x] 3.3 Update `buildRealmDocument` to include `languages`,
@@ -135,7 +135,7 @@ remain available only for language switchers and editing surfaces.
 - [x] 3.5 Update content and poll document builders only where their current
   language projection is incomplete relative to support-language filtering and
   resolved display requirements.
-- [ ] 3.6 Add `package/search/src/*` tests for support-language-first indexing,
+- [x] 3.6 Add `package/search/src/*` tests for support-language-first indexing,
   language-neutral indexing, repaired development data assumptions, and
   realm/post language fields.
 
@@ -159,7 +159,7 @@ remain available only for language switchers and editing surfaces.
 - [x] 4.6 Preserve existing moderation, visibility, realm membership, tag,
   rating, target/variant, grouping, and scope filters while composing language
   filters.
-- [ ] 4.7 Add server tests for direct content/post/realm/poll search and
+- [x] 4.7 Add server tests for direct content/post/realm/poll search and
   federated search language filters, language-neutral inclusion, empty
   candidate behavior, and missing resolved-language fields.
 
