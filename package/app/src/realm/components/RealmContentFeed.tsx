@@ -2,6 +2,7 @@ import { bookQueries } from "@rezics/api/book/book";
 import { postQueries } from "@rezics/api/post/post";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import {
+  type ModerationActionDTO,
   PostKind,
   type PostListQuery,
   type UnitRealmDTO,
@@ -77,6 +78,14 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     }
     return map;
   }, [moderationOverlayQuery.data, realmId]);
+  const latestActionByUnitId = useMemo(() => {
+    if (!moderationOverlayQuery.data) return null;
+    const map = new Map<string, ModerationActionDTO | null>();
+    for (const row of moderationOverlayQuery.data.overlays) {
+      map.set(row.id, row.latestAction ?? null);
+    }
+    return map;
+  }, [moderationOverlayQuery.data]);
   useReactionHydration(postReactionTargetIds, {
     summaryScopeKey: reactionScopeKey,
     userScopeKey: reactionScopeKey,
@@ -175,6 +184,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
               manageMode ? unitRealm.moderationStatus : undefined
             }
             realmModerationAt={unitRealm.createdAt ?? null}
+            moderationLatestAction={latestActionByUnitId?.get(post.unitId)}
             moderationMenuContent={
               manageMode ? (
                 <RealmContentModerationActions

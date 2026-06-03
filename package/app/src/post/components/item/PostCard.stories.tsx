@@ -1,6 +1,7 @@
 import { pollKeys } from "@rezics/api/poll/poll.keys";
 import {
   markdownContentDocWithPoll,
+  type ModerationActionDTO,
   type PollResultsDTO,
 } from "@rezics/contract";
 import {
@@ -65,6 +66,27 @@ const realmModerationStoryItems = (
   </>
 );
 const realmModerationStoryTime = new Date(Date.now() - 12 * 60 * 60 * 1000);
+const realmModerationStoryAction = {
+  id: "moderation-action-story",
+  authority: "realm",
+  realmUnitId: "realm-story",
+  targetKind: "unit_realm",
+  targetId: postFlat[0].unitId,
+  targetPath: null,
+  actorKind: "user",
+  actorUserId: "realm-mod",
+  actionKind: "remove",
+  resultingStatus: "removed",
+  resultingLocked: null,
+  reasonCode: "realm.content.removed",
+  reasonText: "Off-topic for this realm",
+  publicMessage: null,
+  caseId: null,
+  reversesActionId: null,
+  requestId: null,
+  importedFrom: null,
+  createdAt: realmModerationStoryTime.toISOString(),
+} satisfies ModerationActionDTO;
 
 /** Seeds the embedded poll into the query cache, then renders the post card. */
 function PostCardWithPoll() {
@@ -154,6 +176,7 @@ export const ManageApproved: Story = {
     manageRealmId: "realm-story",
     realmModerationStatus: "approved",
     realmModerationAt: realmModerationStoryTime,
+    moderationLatestAction: null,
     moderationMenuContent: realmModerationStoryItems,
   },
 };
@@ -165,6 +188,7 @@ export const ManageRemoved: Story = {
     manageRealmId: "realm-story",
     realmModerationStatus: "removed",
     realmModerationAt: realmModerationStoryTime,
+    moderationLatestAction: realmModerationStoryAction,
     moderationMenuContent: realmModerationStoryItems,
   },
 };

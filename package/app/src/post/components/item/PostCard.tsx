@@ -1,6 +1,7 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import {
   extractPollUnitIdsFromContentDoc,
+  type ModerationActionDTO,
   type ModerationStatus,
   type PostDTO,
   PostKind,
@@ -47,9 +48,12 @@ interface PostCardProps {
   manageRealmId?: string;
   realmModerationStatus?: ModerationStatus;
   realmModerationAt?: string | Date | null;
+  moderationLatestAction?: ModerationActionDTO | null;
   overflowContent?: React.ReactNode;
   moderationMenuContent?: React.ReactNode;
 }
+
+type CommunityT = ReturnType<typeof useTranslation>["t"];
 
 type StatusBadge = {
   key: string;
@@ -83,6 +87,59 @@ function formatRelativeTime(value?: string | Date | null) {
   const weeks = Math.floor(days / 7);
   if (weeks < 5) return `${weeks} week${weeks === 1 ? "" : "s"} ago`;
   return date.toLocaleDateString();
+}
+
+function moderationLatestActionLabel(
+  t: CommunityT,
+  action: ModerationActionDTO,
+) {
+  switch (action.actionKind) {
+    case "approve":
+      return t("community:moderation_latest_action_approve");
+    case "remove":
+      return t("community:moderation_latest_action_remove");
+    case "restore":
+      return t("community:moderation_latest_action_restore");
+    case "lock":
+      return t("community:moderation_latest_action_lock");
+    case "unlock":
+      return t("community:moderation_latest_action_unlock");
+    default:
+      return action.actionKind.replaceAll("_", " ");
+  }
+}
+
+function moderationActorLabel(t: CommunityT, action: ModerationActionDTO) {
+  if (action.actorUserId) return `@${action.actorUserId}`;
+  switch (action.actorKind) {
+    case "system":
+      return t("community:moderation_actor_system");
+    case "automation":
+      return t("community:moderation_actor_automation");
+    case "import":
+      return t("community:moderation_actor_import");
+    case "user":
+      return t("community:moderation_actor_unknown_user");
+  }
+}
+
+function moderationLatestActionDetail(
+  t: CommunityT,
+  action?: ModerationActionDTO | null,
+) {
+  if (action === undefined) return null;
+  if (!action) return t("community:moderation_auto_approved");
+
+  const reason = action.reasonText ?? action.publicMessage ?? null;
+  const detail = t("community:moderation_latest_action_detail", {
+    action: moderationLatestActionLabel(t, action),
+    actor: moderationActorLabel(t, action),
+  });
+  if (!reason) return detail;
+
+  return `${detail} - ${t("community:moderation_decision_reason_prefix", {
+    reason,
+  })}`;
 }
 
 function ModerationStatusBadge({
@@ -142,6 +199,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   manageMode = false,
   realmModerationStatus,
   realmModerationAt,
+  moderationLatestAction,
   overflowContent,
   moderationMenuContent,
 }) => {
@@ -194,6 +252,9 @@ export const PostCard: React.FC<PostCardProps> = ({
         }
       : null,
   ].filter(Boolean) as StatusBadge[];
+  const moderationDetail = manageMode
+    ? moderationLatestActionDetail(t, moderationLatestAction)
+    : null;
 
   const handleCardClick = () => {
     if (onOpen) {
@@ -340,6 +401,11 @@ export const PostCard: React.FC<PostCardProps> = ({
             </div>
           ) : null}
         </div>
+        {moderationDetail ? (
+          <p className="m-0 truncate text-xs leading-dense text-text-tertiary">
+            {moderationDetail}
+          </p>
+        ) : null}
       </div>
     </div>
   );

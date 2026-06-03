@@ -296,6 +296,18 @@
   "moderation_lock_action": "Lock",
   "moderation_lock_confirm": "Lock this content in this realm?",
   "moderation_lock_success": "Locked in this realm.",
+  "moderation_actor_automation": "automation",
+  "moderation_actor_import": "import",
+  "moderation_actor_system": "system",
+  "moderation_actor_unknown_user": "unknown user",
+  "moderation_auto_approved": "Auto-approved",
+  "moderation_decision_reason_prefix": "Reason: {reason}",
+  "moderation_latest_action_approve": "Approved",
+  "moderation_latest_action_detail": "{action} by {actor}",
+  "moderation_latest_action_lock": "Locked",
+  "moderation_latest_action_remove": "Removed",
+  "moderation_latest_action_restore": "Restored",
+  "moderation_latest_action_unlock": "Unlocked",
   "moderation_organization_label": "Organization",
   "moderation_pin_action": "Pin to realm",
   "moderation_pin_confirm": "Pin this content to this realm?",
@@ -312,5 +324,7 @@
   "moderation_status_removed": "Removed",
   "moderation_unlock_action": "Unlock",
   "moderation_unlock_confirm": "Unlock this content in this realm?",
-  "moderation_unlock_success": "Unlocked in this realm."
+  "moderation_unlock_success": "Unlocked in this realm.",
+  "content_removed_by_moderator": "This content was removed by a moderator.",
+  "content_deleted_by_author": "This content was deleted by its author."
 }

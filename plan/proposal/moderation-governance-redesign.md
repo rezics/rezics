@@ -348,7 +348,7 @@ reset + reseed is acceptable; a backfill script is optional.
   `setLock`; update `governance.queries.ts` for `ModerationActionDTO`/timeline;
   repoint `post.api.ts getModerationOverlays` to the new `ModerationOverlayDTO`.
   Update `@rezics/api/comment` for remove/restore/lock and cache invalidation.
-- [ ] 5.2 `app/src/post/components/item/PostCard.tsx`: render the
+- [x] 5.2 `app/src/post/components/item/PostCard.tsx`: render the
   `moderationStatus` badge (`approved`/`pending`/`removed`) from the snapshot; in mod
   mode render a latest-action detail line from the overlay (`removed by @x · reason`),
   falling back to i18n "auto-approved" when `latestAction` is null. Remove the
@@ -368,7 +368,7 @@ reset + reseed is acceptable; a backfill script is optional.
   `app/src/post/components/item/PostReply.tsx` so redacted comments suppress
   `PostAuthorHeader`, `PostBodyMarkdown`, `PollEmbed`, `ReactionBar`, reply
   affordances, and any author/profile links.
-- [ ] 5.6 `package/i18n/locales/en/`: add moderation keys (new `moderation.json`
+- [x] 5.6 `package/i18n/locales/en/`: add moderation keys (new `moderation.json`
   or extend `community.json`): status labels, action labels,
   `content_removed_by_moderator`, `content_deleted_by_author`, `auto_approved`,
   decision reason prefix.
