@@ -1,11 +1,27 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 
-const contentSearchMock = mock(async (_query: string, _params: any) => ({
-  hits: [],
-  estimatedTotalHits: 0,
-  processingTimeMs: 1,
-  query: _query,
-}));
+type ContentSearchHit = {
+  id: string;
+  catalogEntryKind: string;
+  targetUnitId: string | null;
+};
+
+const contentSearchMock = mock(
+  async (
+    _query: string,
+    _params: any,
+  ): Promise<{
+    hits: ContentSearchHit[];
+    estimatedTotalHits: number;
+    processingTimeMs: number;
+    query: string;
+  }> => ({
+    hits: [],
+    estimatedTotalHits: 0,
+    processingTimeMs: 1,
+    query: _query,
+  }),
+);
 
 mock.module("../search-client", () => ({
   searchClient: {

@@ -1,4 +1,4 @@
-import type { PrismaClient } from "#/prisma/generated/client.js";
+import type { PrismaClient } from "../generated/client.js";
 
 /**
  * Reset database by deleting all data in FK-safe order.

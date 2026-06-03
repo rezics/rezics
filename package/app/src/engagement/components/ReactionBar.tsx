@@ -186,6 +186,7 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
     post,
     policy,
     visible,
+    hidden,
     size,
     variant,
     summaryScopeKey,
@@ -194,6 +195,8 @@ export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
     shareHref,
     shareTitle,
     handleReplyInvoke,
+    handleOverflowInvoke,
+    overflowContent,
   } = model;
 
   const gapClass = reactionBarGapClass(variant, size);
@@ -285,7 +288,12 @@ export const ReactionOverflowMenu: React.FC<ReactionOverflowMenuProps> = ({
   if (!model.hasOverflow) return null;
 
   return (
-    <div className={className} onClick={(event) => event.stopPropagation()}>
+    // biome-ignore lint/a11y/noStaticElementInteractions: this wrapper only prevents parent card navigation while menu buttons handle keyboard input.
+    <div
+      className={className}
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+    >
       <OverflowMenu
         items={model.hidden}
         size={model.size}
@@ -303,6 +311,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = (props) => {
 
   return (
     <ReactionBarProvider value={{ variant: model.variant, size: model.size }}>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: the bar contains interactive buttons and stops parent card navigation. */}
       <div
         className={cn(
           "flex flex-row items-center",
@@ -311,6 +320,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = (props) => {
           props.className,
         )}
         onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
       >
         <ReactionActionRow model={model} />
         <ReactionOverflowMenu model={model} />

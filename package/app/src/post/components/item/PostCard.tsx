@@ -280,6 +280,7 @@ export const PostCard: React.FC<PostCardProps> = ({
             />
           </div>
           {manageMode && (statusBadges.length > 0 || manageRealmId) ? (
+            // biome-ignore lint/a11y/noStaticElementInteractions: this wrapper prevents nested moderation controls from triggering the parent card link.
             <div
               className="flex shrink-0 items-center gap-2"
               onClick={(event) => event.stopPropagation()}

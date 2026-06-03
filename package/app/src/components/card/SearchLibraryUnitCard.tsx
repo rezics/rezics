@@ -10,7 +10,7 @@ type ClampStyle = React.CSSProperties & {
 };
 
 export interface SearchLibraryUnitCardProps
-  extends Omit<React.ComponentProps<typeof Card>, "children"> {
+  extends Omit<React.ComponentProps<typeof Card>, "children" | "title"> {
   title: React.ReactNode;
   titleHref?: string;
   subtitle?: React.ReactNode;

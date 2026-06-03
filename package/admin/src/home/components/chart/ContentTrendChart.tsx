@@ -1,6 +1,5 @@
 import type { AdminStatsResponse } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   BarElement,
   CategoryScale,
@@ -63,13 +62,7 @@ export function ContentTrendChart({ trend }: ContentTrendChartProps) {
         },
       ],
     }),
-    [
-      trend,
-      primary,
-      secondary,
-      getI18nRuntime().i18n.t("admin:dashboard_comments"),
-      getI18nRuntime().i18n.t("admin:nav_books"),
-    ],
+    [trend, primary, secondary, t],
   );
 
   const options = useMemo(

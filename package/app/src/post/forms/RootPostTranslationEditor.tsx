@@ -1,5 +1,9 @@
 import { unitQueries } from "@rezics/api/unit/unit";
-import { mainMarkdownSource, type PostDTO } from "@rezics/contract";
+import {
+  mainMarkdownSource,
+  normalizeLanguage,
+  type PostDTO,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Input } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -72,8 +76,10 @@ export function RootPostTranslationEditor({
   }));
   const contentQuery = useMemo(
     () => ({
-      explicitLanguage: language,
-      appLocale: defaultLanguage ?? undefined,
+      explicitLanguage: normalizeLanguage(language) ?? undefined,
+      appLocale: defaultLanguage
+        ? (normalizeLanguage(defaultLanguage) ?? undefined)
+        : undefined,
     }),
     [defaultLanguage, language],
   );

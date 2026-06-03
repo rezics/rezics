@@ -289,7 +289,7 @@ export function ShelfPage({ unitId }: ShelfPageProps) {
 
   useEffect(() => {
     setPageState({ unitId, page: 1 });
-  }, [normalizedItemSearchText, unitId]);
+  }, [unitId]);
 
   useEffect(() => {
     if (waitingForPageData && !isFetchingNextPage) {

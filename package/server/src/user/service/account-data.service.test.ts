@@ -153,7 +153,7 @@ describe("exportUserData", () => {
         updatedAt: "2026-02-18T00:00:00.000Z",
       },
     ]);
-    expect(data.follows[0]?.subscribedUnitId).toBe("peer");
+    expect(data.follows[0]?.targetUnitId).toBe("peer");
     expect(data.blocks[0]?.blockedId).toBe("blocked-1");
     expect(typeof data.exportedAt).toBe("string");
   });

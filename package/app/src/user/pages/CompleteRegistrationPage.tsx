@@ -1,7 +1,6 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import {
@@ -152,13 +151,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
         : t("auth:flow_setup_slug_invalid", { reason: slugCheck.reason ?? "" });
     }
     return undefined;
-  }, [
-    slug,
-    slugCheck,
-    getI18nRuntime().i18n.t("auth:flow_setup_slug_invalid"),
-    getI18nRuntime().i18n.t("auth:flow_setup_slug_short"),
-    getI18nRuntime().i18n.t("auth:flow_setup_slug_taken"),
-  ]);
+  }, [slug, slugCheck, t]);
 
   const canSubmit = slug.length >= 6 && !slugError && !checkingSlug && !loading;
 

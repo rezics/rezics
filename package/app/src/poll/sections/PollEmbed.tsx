@@ -30,11 +30,10 @@ export const PollEmbed: React.FC<PollEmbedProps> = ({
   if (isLoading || error || !results) return null;
 
   return (
-    <div
+    <fieldset
       className="mt-2 flex flex-col gap-3 rounded-md border border-border-whisper bg-surface-subtle p-4"
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
-      role="group"
     >
       <PollView results={results} realmUnitId={realmUnitId} />
       <Link
@@ -45,6 +44,6 @@ export const PollEmbed: React.FC<PollEmbedProps> = ({
         {t("community:poll_embed_open")}
         <ArrowUpRight className="h-3.5 w-3.5" />
       </Link>
-    </div>
+    </fieldset>
   );
 };

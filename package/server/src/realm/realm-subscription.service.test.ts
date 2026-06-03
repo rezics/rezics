@@ -64,6 +64,10 @@ const currentIdentity = {
   sub: USER,
   userId: USER,
   permission: { role: "USER" as const },
+  tokenType: "member-session" as const,
+  iss: "rezics-server" as const,
+  exp: 1_800_000_000,
+  iat: 1_700_000_000,
 };
 
 interface TxOps {

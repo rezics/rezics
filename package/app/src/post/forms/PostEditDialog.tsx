@@ -8,6 +8,7 @@ import type { CommentDTO, PostDTO } from "@rezics/contract";
 import {
   mainMarkdownSource,
   markdownContentDoc,
+  normalizeLanguage,
   PostKind,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
@@ -142,7 +143,9 @@ export const PostEditDialog: React.FC<PostEditDialogProps> = ({
               defaultLanguage={locale}
               title={title}
               body={text}
-              onLanguageChange={setLanguage}
+              onLanguageChange={(nextLanguage) =>
+                setLanguage(normalizeLanguage(nextLanguage) ?? locale)
+              }
               onTitleChange={setTitle}
               onBodyChange={setText}
               titlePlaceholder={t("community:post_title_placeholder")}

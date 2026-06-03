@@ -1,4 +1,5 @@
 import { subjectAttributionQueries } from "@rezics/api/subject-attribution/subject-attribution";
+import { defaultSupportLanguage } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 
 export function useEntityWorks(entityUnitId: string): {
@@ -15,9 +16,12 @@ export function useEntityWorks(entityUnitId: string): {
   const works =
     query.data?.flatMap((row) => {
       if (!row.unit) return [];
+      const fallbackLanguage =
+        defaultSupportLanguage(row.unit.supportLanguages) ??
+        row.unit.resolvedLanguage;
       const title =
         row.unit.translations?.find(
-          (translation) => translation.language === row.unit?.defaultLanguage,
+          (translation) => translation.language === fallbackLanguage,
         )?.title ??
         row.unit.translations?.[0]?.title ??
         row.unit.id;

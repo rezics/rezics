@@ -64,7 +64,10 @@ describe("GAME/MEDIA library mappers", () => {
       "platform-steam",
     ]);
     expect(dto.game.ageRatingTagUnitIds).toEqual(["tag-esrb-teen"]);
-    expect(dto.contentStructure?.nodes[0]?.contentUnitId).toBe("dlc-1");
+    expect(
+      (dto.contentStructure?.nodes[0] as { contentUnitId?: string } | undefined)
+        ?.contentUnitId,
+    ).toBe("dlc-1");
     expect(dto.game.systemRequirementSummaries).toEqual([
       {
         platformEntityId: "platform-windows",
@@ -105,6 +108,9 @@ describe("GAME/MEDIA library mappers", () => {
 
     expect(dto.media.ageRatingTagUnitIds).toEqual(["tag-esrb-teen"]);
     expect(dto.media.contentStructureAvailable).toBe(true);
-    expect(dto.contentStructure?.nodes[0]?.contentUnitId).toBe("episode-1");
+    expect(
+      (dto.contentStructure?.nodes[0] as { contentUnitId?: string } | undefined)
+        ?.contentUnitId,
+    ).toBe("episode-1");
   });
 });

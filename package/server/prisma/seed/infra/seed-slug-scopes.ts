@@ -1,5 +1,5 @@
 import { SLUG_SCOPES, type SlugScopeName } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client";
+import type { PrismaClient } from "../../generated/client.js";
 
 export type SlugScopesMap = Record<SlugScopeName, string>;
 

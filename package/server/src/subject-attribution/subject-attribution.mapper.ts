@@ -62,7 +62,6 @@ export function mapSubjectAttributionToDTO(
           type: unit.type,
           slug: unit.slug ?? undefined,
           userId: unit.userId ?? undefined,
-          defaultLanguage: unit.defaultLanguage ?? undefined,
           isLanguageNeutral: unit.isLanguageNeutral ?? undefined,
           status: unit.status ?? undefined,
           visibility: unit.visibility ?? undefined,

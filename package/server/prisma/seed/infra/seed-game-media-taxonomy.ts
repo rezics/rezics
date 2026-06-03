@@ -4,7 +4,7 @@ import {
   RATING_TAGS,
   type RatingTagSlug,
 } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client";
+import type { PrismaClient } from "../../generated/client.js";
 import type { SlugScopesMap } from "./seed-slug-scopes";
 
 const GAME_PLATFORMS = [

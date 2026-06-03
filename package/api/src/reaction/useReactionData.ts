@@ -50,12 +50,17 @@ function readBatchEntries<T>(
       }
     }
     if (!prefixOk) continue;
-    const tail = key[key.length - 1] as
-      | { targetIds?: readonly string[]; scopeKey?: string | null }
-      | readonly string[];
-    const ids = Array.isArray(tail) ? tail : tail.targetIds;
+    const tail = key[key.length - 1];
+    if (!Array.isArray(tail) && (!tail || typeof tail !== "object")) continue;
+    const objectTail = tail as {
+      targetIds?: unknown;
+      scopeKey?: string | null;
+    };
+    const ids = Array.isArray(tail) ? tail : objectTail.targetIds;
     if (!Array.isArray(ids)) continue;
-    const entryScopeKey = Array.isArray(tail) ? null : (tail.scopeKey ?? null);
+    const entryScopeKey = Array.isArray(tail)
+      ? null
+      : (objectTail.scopeKey ?? null);
     if (entryScopeKey !== (scopeKey ?? null)) continue;
     matches.push({ ids, data });
   }

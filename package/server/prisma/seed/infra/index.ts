@@ -1,5 +1,5 @@
 import type { SeedTagName, TagGroupIds } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client";
+import type { PrismaClient } from "../../generated/client.js";
 import { seedDefaultRealm } from "./seed-default-realm";
 import {
   type GameMediaTaxonomySeedResult,

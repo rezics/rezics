@@ -230,7 +230,8 @@ describe("post poll content blocks", () => {
       content: null,
       extra: { poll: {} },
     };
-    expect(Value.Clean(postDTOSchema, post).extra).toEqual({});
+    const cleaned = Value.Clean(postDTOSchema, post) as { extra?: unknown };
+    expect(cleaned.extra).toEqual({});
   });
 
   test("extra no longer validates legacy title references", () => {
@@ -240,6 +241,7 @@ describe("post poll content blocks", () => {
       content: null,
       extra: { title: "legacy title" },
     };
-    expect(Value.Clean(postDTOSchema, post).extra).toEqual({});
+    const cleaned = Value.Clean(postDTOSchema, post) as { extra?: unknown };
+    expect(cleaned.extra).toEqual({});
   });
 });

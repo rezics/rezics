@@ -123,8 +123,12 @@ export const SettingsLibrarySection: FC = () => {
             </div>
           ))}
 
-          <label className="flex items-center gap-2 text-sm">
+          <label
+            htmlFor="settings-library-show-title"
+            className="flex items-center gap-2 text-sm"
+          >
             <Checkbox
+              id="settings-library-show-title"
               checked={config.showTitle}
               onCheckedChange={(checked) =>
                 persist({ ...config, showTitle: checked === true })

@@ -4,7 +4,11 @@ import { useCurrentUserId } from "@rezics/api/hooks";
 import { getDefaultRealmId } from "@rezics/api/infra/bootstrap";
 import { useCreatePostMutation } from "@rezics/api/post/post";
 import { useUpsertScoreMutation } from "@rezics/api/score/score";
-import { markdownContentDoc, PostKind } from "@rezics/contract";
+import {
+  markdownContentDoc,
+  normalizeLanguage,
+  PostKind,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -96,7 +100,9 @@ export function ReviewNewPage({ bookUnitId }: { bookUnitId: string }) {
       targetUnitId: primaryTargetUnitId,
       variantUnitId,
       kind,
-      language: reviewData.language ?? authoringLanguage,
+      language:
+        normalizeLanguage(reviewData.language ?? authoringLanguage) ??
+        authoringLanguage,
       title: reviewData._editTitle.trim(),
       status,
       content: markdownContentDoc(reviewData.contentSource || ""),

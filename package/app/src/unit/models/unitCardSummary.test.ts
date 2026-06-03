@@ -18,7 +18,9 @@ describe("unitDtoToUnitCardSummary", () => {
       id: "unit-1",
       type: "BOOK",
       user: { unitId: "user-1", name: "Mina" },
-      defaultLanguage: "en",
+      supportLanguages: [
+        { unitId: "unit-1", language: "en", isPrimary: true, sortOrder: 0 },
+      ],
       translations: [
         {
           unitId: "unit-1",

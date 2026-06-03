@@ -454,17 +454,24 @@ export const postApi = new Elysia({ prefix: "/post" })
         !Array.isArray(body.patch.post)
           ? (body.patch.post as Record<string, unknown>)
           : {};
+      const patchLanguage =
+        typeof postPatch.language === "string"
+          ? (normalizeLanguage(postPatch.language) ?? undefined)
+          : undefined;
+      const currentContent =
+        target.unit.contentTranslations.find(
+          (translation) => translation.language === patchLanguage,
+        )?.content ??
+        target.unit.contentTranslations[0]?.content ??
+        null;
       const updateInput = {
         title:
           typeof postPatch.title === "string" ? postPatch.title : undefined,
         content:
           postPatch.content !== undefined
-            ? applySparsePatch(target.content, postPatch.content)
+            ? applySparsePatch(currentContent, postPatch.content)
             : undefined,
-        language:
-          typeof postPatch.language === "string"
-            ? (normalizeLanguage(postPatch.language) ?? undefined)
-            : undefined,
+        language: patchLanguage,
         isLocked:
           typeof postPatch.isLocked === "boolean"
             ? postPatch.isLocked

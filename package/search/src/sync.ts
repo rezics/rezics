@@ -1137,7 +1137,7 @@ export async function patchContentRealmIds(
       },
     }),
     getSearchPrismaClient().realmContentModeration.findMany({
-      where: { targetUnitId: unitId },
+      where: { moderatedUnitId: unitId },
       select: { realmUnitId: true, state: true },
     }),
   ]);

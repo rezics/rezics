@@ -88,7 +88,6 @@ export const ReportAction: React.FC<ReportActionProps> = ({
       input: {
         targetKind: target.kind,
         targetId: target.id,
-        targetUnitId: target.unitId ?? undefined,
         subjectUserId: target.subjectUserId ?? undefined,
         reason: reason.trim() || undefined,
       },

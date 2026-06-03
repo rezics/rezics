@@ -60,7 +60,7 @@ describe("buildUnitWhereClause", () => {
       AND: [
         {
           OR: [
-            { id: { contains: "spice", mode: "insensitive" } },
+            { id: "spice" },
             { slug: { contains: "spice", mode: "insensitive" } },
             {
               translations: {
@@ -71,7 +71,7 @@ describe("buildUnitWhereClause", () => {
             },
           ],
         },
-        { id: { contains: "unit-1", mode: "insensitive" } },
+        { id: "unit-1" },
         { slug: { contains: "dune", mode: "insensitive" } },
         {
           translations: {
@@ -107,7 +107,7 @@ describe("buildUnitWhereClause", () => {
 
 describe("UnitService catalog identity", () => {
   test("persists catalog identity on create", async () => {
-    const create = mock(async () => ({ id: "variant-1" }));
+    const create = mock(async (_args: any) => ({ id: "variant-1" }));
     const findUniqueOrThrow = mock(async () => ({
       id: "variant-1",
       type: "BOOK",
@@ -137,7 +137,7 @@ describe("UnitService catalog identity", () => {
   });
 
   test("creates a primary support language from the first inline translation", async () => {
-    const create = mock(async () => ({ id: "book-1" }));
+    const create = mock(async (_args: any) => ({ id: "book-1" }));
     const findUniqueOrThrow = mock(async () => ({
       id: "book-1",
       type: "BOOK",
@@ -168,7 +168,7 @@ describe("UnitService catalog identity", () => {
   });
 
   test("patches catalog identity on update for search projection sync", async () => {
-    const update = mock(async () => ({
+    const update = mock(async (_args: any) => ({
       id: "variant-1",
       type: "BOOK",
       catalogEntryKind: "MAIN",

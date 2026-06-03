@@ -1,4 +1,5 @@
 import type {
+  CommentListBody,
   CommentListQuery,
   CreateCommentInput,
   UpdateCommentInput,
@@ -13,6 +14,9 @@ import type { CommentWithRelations } from "./comment.types";
 
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 200;
+type CommentListInput = Omit<CommentListQuery, "ids"> & {
+  ids?: CommentListQuery["ids"] | CommentListBody["ids"];
+};
 
 const commentInclude = {
   unit: {
@@ -31,6 +35,26 @@ function enqueueCommentSync(commentId: string) {
       { type: "server", service: "comment" },
     ),
   );
+}
+
+function firstCommentOrThrow(
+  comments: CommentWithRelations[],
+  unitId: string,
+): CommentWithRelations {
+  const comment = comments[0];
+  if (!comment) {
+    throw new AppError(404, `Comment not found: ${unitId}`);
+  }
+  return comment;
+}
+
+function normalizeIds(ids: CommentListInput["ids"]): string[] | undefined {
+  if (!ids) return undefined;
+  if (Array.isArray(ids)) return ids;
+  return ids
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
 }
 
 async function attachCommentPaths<
@@ -112,7 +136,7 @@ async function applyBlockedAuthorFilter(
 
 export class CommentService {
   async list(
-    query: CommentListQuery,
+    query: CommentListInput,
     options?: { viewerUserId?: string | null },
   ): Promise<{ comments: CommentWithRelations[]; total: number }> {
     const limit = Math.max(
@@ -132,6 +156,8 @@ export class CommentService {
 
     if (query.authorUserId) where.authorUserId = query.authorUserId;
     if (query.state) where.state = query.state;
+    const ids = normalizeIds(query.ids);
+    if (ids?.length) where.unitId = { in: ids };
     if (typeof query.maxDepth === "number")
       where.depth = { lte: query.maxDepth };
 
@@ -179,7 +205,7 @@ export class CommentService {
       prisma.comment.findMany({
         where,
         orderBy,
-        skip: query.start ?? 0,
+        skip: 0,
         take: limit,
         include: commentInclude,
       }),
@@ -199,11 +225,13 @@ export class CommentService {
       where: { unitId },
       include: commentInclude,
     });
-    const [withPath] = await attachCommentPaths([
+    const withPaths = await attachCommentPaths([
       comment as CommentWithRelations,
     ]);
-    const [withPins] = await attachPinOverlays([withPath]);
-    return withPins;
+    const withPins = await attachPinOverlays([
+      firstCommentOrThrow(withPaths, unitId),
+    ]);
+    return firstCommentOrThrow(withPins, unitId);
   }
 
   async create(
@@ -302,8 +330,8 @@ export class CommentService {
     });
 
     await enqueueCommentSync(comment.unitId);
-    const [withPath] = await attachCommentPaths([comment]);
-    return withPath;
+    const withPaths = await attachCommentPaths([comment]);
+    return firstCommentOrThrow(withPaths, comment.unitId);
   }
 
   async update(
@@ -331,10 +359,10 @@ export class CommentService {
       include: commentInclude,
     });
     await enqueueCommentSync(unitId);
-    const [withPath] = await attachCommentPaths([
+    const withPaths = await attachCommentPaths([
       updated as CommentWithRelations,
     ]);
-    return withPath;
+    return firstCommentOrThrow(withPaths, unitId);
   }
 
   async delete(unitId: string, actorUserId: string): Promise<void> {

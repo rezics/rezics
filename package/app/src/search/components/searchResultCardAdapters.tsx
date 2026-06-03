@@ -80,7 +80,7 @@ function compactParts(
   parts: Array<React.ReactNode | null | undefined | false>,
 ): React.ReactNode {
   return parts.filter(Boolean).map((part, index) => (
-    <span key={`${index}`}>
+    <span key={typeof part === "string" ? part : `part-${String(part)}`}>
       {index > 0 ? " · " : null}
       {part}
     </span>

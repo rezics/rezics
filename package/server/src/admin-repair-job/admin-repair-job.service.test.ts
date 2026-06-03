@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import type { EnqueueResult } from "@rezics/job";
+import type { GovernanceAuditService } from "@/governance/audit.service";
 
 mock.module("@/env", () => ({
   env: {
@@ -16,13 +18,15 @@ mock.module("@/diagnostic", () => ({
 
 mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {
-    enqueue: mock(async () => ({
-      kind: "maintenance.search.rebuildIndex",
-      idempotencyKey: "test",
-      lane: "maintenance",
-      status: "created",
-      jobId: "job-default",
-    })),
+    enqueue: mock(
+      async (): Promise<EnqueueResult> => ({
+        kind: "maintenance.search.rebuildIndex",
+        idempotencyKey: "test",
+        lane: "maintenance",
+        status: "created",
+        jobId: "job-default",
+      }),
+    ),
   },
 }));
 
@@ -38,7 +42,7 @@ function auditService(calls: any[] = []) {
       calls.push(input);
       return { id: `audit-${calls.length}` };
     }),
-  };
+  } as unknown as Pick<GovernanceAuditService, "appendPrivilegedMutation">;
 }
 
 describe("adminRepairJobService", () => {
@@ -53,7 +57,7 @@ describe("adminRepairJobService", () => {
     );
     const service = createAdminRepairJobService({
       jobProducer: {
-        enqueue: mock(async (command: any) => {
+        enqueue: mock(async (command: any): Promise<EnqueueResult> => {
           enqueued.push(command);
           return {
             kind: command.kind,

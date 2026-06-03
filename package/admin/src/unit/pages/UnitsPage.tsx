@@ -1,6 +1,7 @@
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import {
+  defaultSupportLanguage,
   type UnitListResponse,
   UnitStatus,
   UnitType,
@@ -34,8 +35,12 @@ function extractUnitTitle(unit: UnitDTO): string {
   if (!translations?.length)
     return getI18nRuntime().i18n.t("admin:unit_no_title");
   const primary =
-    translations.find((t) => t.language === unit.defaultLanguage) ??
-    translations[0];
+    translations.find(
+      (t) =>
+        t.language ===
+        (defaultSupportLanguage(unit.supportLanguages) ??
+          unit.resolvedLanguage),
+    ) ?? translations[0];
   return primary?.title || getI18nRuntime().i18n.t("admin:unit_no_title");
 }
 

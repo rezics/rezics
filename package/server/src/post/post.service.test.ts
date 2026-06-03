@@ -1,5 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
+  type CreatePostInput,
   collectEditorialPatchLeafPaths,
   isEditorialPathInScope,
   markdownContentDoc,
@@ -171,8 +172,10 @@ const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 let generatedPosition = 0;
 const generateBetweenMock = mock(() => `pos-${++generatedPosition}`);
 const assertCanEditCollaborativeMetadataMock = mock(async () => undefined);
-const collectPatchLeafPathsMock = mock(() => []);
-const writeEditorialMetadataHistoryMock = mock(async () => undefined);
+const collectPatchLeafPathsMock = mock((): string[] => []);
+const writeEditorialMetadataHistoryMock = mock(
+  async (_tx: any, _input: any) => undefined,
+);
 const blockedUserIdsMock = mock(async (): Promise<string[]> => []);
 const transactionMock = mock(async (fn: any) =>
   fn({
@@ -390,7 +393,9 @@ mock.module("@/utils/sanitizeUser", () => ({
 const { PostService } = await import("./post.service");
 
 const content = (source: string) => markdownContentDoc(source);
-const postInput = (overrides: Record<string, unknown> = {}) => ({
+const postInput = (
+  overrides: Partial<CreatePostInput> = {},
+): CreatePostInput => ({
   language: "en",
   title: "Test post",
   content: content("hello"),
@@ -1602,7 +1607,10 @@ describe("PostService wiki posts", () => {
       }),
     );
     expect(writeEditorialMetadataHistoryMock).toHaveBeenCalledTimes(1);
-    const patch = writeEditorialMetadataHistoryMock.mock.calls[0]?.[1].patch;
+    const historyInput = writeEditorialMetadataHistoryMock.mock.calls[0]?.[1] as
+      | { patch: unknown }
+      | undefined;
+    const patch = historyInput?.patch;
     expect(
       collectEditorialPatchLeafPaths(patch).every((path) =>
         isEditorialPathInScope("wiki-post", path),
@@ -1690,7 +1698,9 @@ describe("PostService wiki posts", () => {
       ["post.content.main.source"],
     );
     expect(writeEditorialMetadataHistoryMock).toHaveBeenCalledTimes(1);
-    expect(writeEditorialMetadataHistoryMock.mock.calls[0]?.[1]).toMatchObject({
+    const historyCallInput = writeEditorialMetadataHistoryMock.mock
+      .calls[0]?.[1] as Record<string, unknown> | undefined;
+    expect(historyCallInput).toMatchObject({
       unitId: "wiki-post-1",
       actorUserId: "actor-1",
       patch: { post: { content: { main: { source: "edited" } } } },
@@ -1857,7 +1867,8 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       op,
     );
 
-    expect(commentPromotionCreateMock.mock.calls[0][0].data).toMatchObject({
+    const createPromotionArgs = commentPromotionCreateMock.mock.calls[0]?.[0];
+    expect(createPromotionArgs.data).toMatchObject({
       scopeUnitId: "root-1",
       commentUnitId: "reply-1",
       kind: "PINNED",
@@ -1968,9 +1979,8 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
       op,
     );
     expect(pin.kind).toBe("ACCEPTED_ANSWER");
-    expect(commentPromotionCreateMock.mock.calls[0][0].data.kind).toBe(
-      "ACCEPTED_ANSWER",
-    );
+    const createPromotionArgs = commentPromotionCreateMock.mock.calls[0]?.[0];
+    expect(createPromotionArgs.data.kind).toBe("ACCEPTED_ANSWER");
   });
 
   test("multiple accepted answers get distinct positions without renumbering", async () => {

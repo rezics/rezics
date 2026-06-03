@@ -11,6 +11,7 @@ import type {
 } from "@rezics/contract";
 import {
   contentDocMarkdownFallback,
+  defaultSupportLanguage,
   mainMarkdownSource,
   readCoverUrlFromExtra,
 } from "@rezics/contract";
@@ -58,8 +59,8 @@ export interface UnitDtoLike
       | "id"
       | "type"
       | "user"
-      | "defaultLanguage"
       | "resolvedLanguage"
+      | "supportLanguages"
       | "title"
       | "subtitle"
       | "summary"
@@ -72,6 +73,7 @@ export interface UnitDtoLike
   unitId?: string;
   kind?: string;
   coverUrl?: string | null;
+  defaultLanguage?: string | null;
 }
 
 type TagLike =
@@ -90,7 +92,7 @@ export function unitDtoToUnitCardSummary(
   const translation = getTranslation(
     unit.translations,
     options.language,
-    unit.defaultLanguage ?? undefined,
+    defaultUnitLanguage(unit),
   );
   const title =
     text(unit.title) ??
@@ -229,6 +231,15 @@ export function shelfUnitToUnitCardSummary(
     summary,
     shelfUnit.variantContext,
     attachmentCounts,
+  );
+}
+
+function defaultUnitLanguage(unit: UnitDtoLike): string | undefined {
+  return (
+    unit.defaultLanguage ??
+    defaultSupportLanguage(unit.supportLanguages) ??
+    unit.resolvedLanguage ??
+    undefined
   );
 }
 

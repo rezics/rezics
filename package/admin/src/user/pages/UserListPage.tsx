@@ -2,7 +2,6 @@ import { userSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import { userQueries } from "@rezics/api/user/user.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -137,16 +136,7 @@ export default function UserListPage() {
       },
     ];
     return cols;
-  }, [
-    getI18nRuntime().i18n.t("admin:user_actions"),
-    getI18nRuntime().i18n.t("admin:user_join_date"),
-    getI18nRuntime().i18n.t("admin:user_name_label"),
-    getI18nRuntime().i18n.t("admin:user_rezics_email_label"),
-    getI18nRuntime().i18n.t("admin:user_roles"),
-    getI18nRuntime().i18n.t("admin:user_slug"),
-    getI18nRuntime().i18n.t("admin:user_user_id"),
-    getI18nRuntime().i18n.t("common:edit"),
-  ]);
+  }, [t]);
 
   return (
     <Page

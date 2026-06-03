@@ -1,5 +1,5 @@
 import { unitQueries } from "@rezics/api/unit/unit.queries";
-import type { ExcerptSource } from "@rezics/contract";
+import { defaultSupportLanguage, type ExcerptSource } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
@@ -37,7 +37,9 @@ export function ExcerptSourcePicker({
     ? (getTranslation(
         linkedUnit.translations,
         language,
-        linkedUnit.defaultLanguage ?? undefined,
+        defaultSupportLanguage(linkedUnit.supportLanguages) ??
+          linkedUnit.resolvedLanguage ??
+          undefined,
       )?.title ?? undefined)
     : undefined;
 

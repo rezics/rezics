@@ -123,7 +123,10 @@ export class UserTagApplicationService {
         : Promise.resolve(null),
     ]);
 
-    const position = generateBetween(before?.position, after?.position);
+    const position = generateBetween(
+      before?.position ?? undefined,
+      after?.position ?? undefined,
+    );
     return prisma.userTagApplication.update({
       where: {
         userId_unitId_tagUnitId: {

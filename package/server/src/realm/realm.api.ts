@@ -815,11 +815,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .get(
     "/:unitId/rules/resolved",
-    async ({
-      params,
-      query,
-      status,
-    }): Promise<RealmRuleResolvedDTO | string> => {
+    async ({ params, query, status }) => {
       try {
         return await realmService.resolveRule(params.unitId, query.language);
       } catch {
@@ -843,7 +839,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .get(
     "/:unitId/rules",
-    async ({ params, status }): Promise<RealmRuleReferenceDTO | string> => {
+    async ({ params, status }) => {
       try {
         return await realmService.getRulePolicy(params.unitId);
       } catch {
@@ -898,12 +894,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .post(
     "/:unitId/rules/acknowledgement",
-    async ({
-      params,
-      body,
-      identity,
-      status,
-    }): Promise<RealmRuleAcknowledgementDTO | string> => {
+    async ({ params, body, identity, status }) => {
       try {
         return await realmService.acknowledgeCurrentRule(
           params.unitId,

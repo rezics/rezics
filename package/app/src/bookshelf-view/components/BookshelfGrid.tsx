@@ -61,6 +61,7 @@ export const BookshelfGrid: React.FC<BookshelfGridProps> = ({
       }}
     >
       {items.map((item) => (
+        // biome-ignore lint/a11y/noStaticElementInteractions: hover only reveals a pointer preview; the nested BookCard remains the keyboard target.
         <div
           key={item.unitId}
           className="relative"

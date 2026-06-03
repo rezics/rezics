@@ -38,7 +38,7 @@ describe("user unit collection search sync", () => {
       },
     ]);
 
-    findUnique.mockImplementationOnce(async () => null);
+    findUnique.mockImplementationOnce(async () => null as never);
     await syncSingleUserUnitCollection(
       { addOrUpdateCollections, deleteCollections } as any,
       "user-1",

@@ -30,6 +30,16 @@ const ENFORCEMENT_STRENGTH = [
 const AUTH_SESSION_COOKIE_NAME = "better-auth.session_token";
 const DEFAULT_IMPERSONATION_SECONDS = 15 * 60;
 
+type UserAccountSummaryRow = {
+  unitId: string;
+  authUserId: string | null;
+  email: string | null;
+  name: string | null;
+  permission: unknown;
+  unit: { slug: string | null } | null;
+  accountEnforcements: Array<{ kind: unknown; expiresAt: Date | null }>;
+};
+
 function warning(
   input: AuthMainServerReconciliationWarning,
 ): AuthMainServerReconciliationWarning {
@@ -45,7 +55,7 @@ function strongestKind(kinds: string[]) {
 }
 
 function buildMainUserSummary(
-  user: NonNullable<Awaited<ReturnType<typeof prisma.user.findMany>>[number]>,
+  user: UserAccountSummaryRow,
 ): NonNullable<AdminAuthUserAccountSummary["mainUser"]> {
   const role = (user.permission as { role?: string[] } | null)?.role;
   const mainUser: NonNullable<AdminAuthUserAccountSummary["mainUser"]> = {

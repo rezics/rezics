@@ -35,6 +35,12 @@ type ExistingSubmitCandidate = {
   source: "draft" | "published";
 };
 
+function isExistingSubmitCandidate(
+  candidate: ExistingSubmitCandidate | null,
+): candidate is ExistingSubmitCandidate {
+  return candidate !== null;
+}
+
 export interface RealmExistingPostSubmitSectionProps {
   realmId: string;
   contentRequiresApproval?: boolean;
@@ -108,7 +114,9 @@ export function RealmExistingPostSubmitSection({
 
   const candidates = useMemo(() => {
     const draftCandidates =
-      draftsQuery.data?.drafts.map(draftCandidate).filter(Boolean) ?? [];
+      draftsQuery.data?.drafts
+        .map(draftCandidate)
+        .filter(isExistingSubmitCandidate) ?? [];
     const publishedCandidates =
       postsQuery.data?.posts
         .filter((post) => canSubmitPublishedPost(post, realmId))

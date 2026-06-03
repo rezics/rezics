@@ -10,7 +10,6 @@ import {
   type SystemShelfKindKey,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -101,10 +100,7 @@ export function CollectionModal({
       }
       return shelf.title ?? t("common:untitled");
     },
-    [
-      getI18nRuntime().i18n.t("common:untitled"),
-      getI18nRuntime().i18n.t("entity:shelf_system_favorites"),
-    ],
+    [t],
   );
 
   const toggleShelf = useCallback((shelfId: string) => {

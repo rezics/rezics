@@ -14,7 +14,7 @@ import {
   realmExtraReadQuery,
 } from "@rezics/api/realm/realm-extra.queries";
 import { unitDetailQuery } from "@rezics/api/unit/unit.queries";
-import { mainMarkdownSource } from "@rezics/contract";
+import { defaultSupportLanguage, mainMarkdownSource } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -73,20 +73,20 @@ export function usePinboardList(
       const q = unitQueries[index];
       const unit = q?.data;
       if (!unit) return [];
-      const tr = getTranslation(
-        unit.translations,
-        language,
-        unit.defaultLanguage ?? undefined,
-      );
+      const fallbackLanguage =
+        defaultSupportLanguage(unit.supportLanguages) ??
+        unit.resolvedLanguage ??
+        undefined;
+      const tr = getTranslation(unit.translations, language, fallbackLanguage);
       return [
         {
           unitId: unit.id,
-          language: tr?.language ?? unit.defaultLanguage ?? language,
+          language: tr?.language ?? fallbackLanguage ?? language,
           title: tr?.title ?? undefined,
           subtitle: tr?.subtitle ?? undefined,
           summary: tr?.summary ?? undefined,
           description: mainMarkdownSource(tr?.description) ?? undefined,
-          defaultLanguage: unit.defaultLanguage ?? undefined,
+          defaultLanguage: fallbackLanguage,
           updatedAt:
             typeof unit.updatedAt === "string"
               ? unit.updatedAt

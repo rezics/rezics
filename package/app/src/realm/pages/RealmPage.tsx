@@ -235,8 +235,12 @@ export function RealmPage({
                 />
                 {showManage ? (
                   <div className="flex flex-wrap items-center gap-2">
-                    <label className="flex w-fit cursor-pointer items-center gap-2 rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary">
+                    <label
+                      htmlFor="realm-manage-mode-toggle"
+                      className="flex w-fit cursor-pointer items-center gap-2 rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary"
+                    >
                       <Checkbox
+                        id="realm-manage-mode-toggle"
                         checked={manageMode}
                         onCheckedChange={(checked) =>
                           setManageMode(checked === true)

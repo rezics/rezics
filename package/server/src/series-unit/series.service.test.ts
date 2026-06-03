@@ -53,7 +53,7 @@ const unitFindManyMock = mock(async () => [
     type: "SERIES",
   },
 ]);
-const contentNodeFindManyMock = mock(async () => [
+const contentNodeFindManyMock = mock(async (_args: any) => [
   {
     id: "node-release-1",
     contentUnitId: "release-1",
@@ -116,7 +116,8 @@ describe("SeriesService", () => {
   test("reconciles direct release index from release nodes only", async () => {
     await service.reconcileSeriesProjections(txMock as any, "series-1");
 
-    expect(contentNodeFindManyMock.mock.calls[0]?.[0]).toMatchObject({
+    const findManyArgs = contentNodeFindManyMock.mock.calls[0]?.[0] as any;
+    expect(findManyArgs).toMatchObject({
       where: {
         ownerUnitId: "series-1",
         contentUnit: {

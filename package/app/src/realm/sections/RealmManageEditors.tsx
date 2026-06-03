@@ -20,6 +20,7 @@ import type {
 import {
   contentDocMarkdownFallback,
   DEFAULT_LANGUAGE,
+  defaultSupportLanguage,
   markdownContentDoc,
   normalizeLanguage,
 } from "@rezics/contract";
@@ -84,7 +85,9 @@ function unitLabel(unit: UnitDTO) {
   const tr = getTranslation(
     unit.translations,
     undefined,
-    unit.defaultLanguage ?? undefined,
+    defaultSupportLanguage(unit.supportLanguages) ??
+      unit.resolvedLanguage ??
+      undefined,
   );
   return unit.title ?? tr?.title ?? unit.slug ?? unit.id;
 }
@@ -1280,7 +1283,11 @@ export function TagTreeEditor({
           <Input
             id="realm-tag-tree-label-language"
             value={labelLanguage}
-            onChange={(event) => setLabelLanguage(event.target.value)}
+            onChange={(event) =>
+              setLabelLanguage(
+                normalizeLanguage(event.target.value) ?? DEFAULT_LANGUAGE,
+              )
+            }
           />
         </div>
         <div className="flex min-w-0 flex-col gap-2">
@@ -1412,7 +1419,7 @@ export function TagTreeEditor({
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setPendingDeleteIndex(null)}>
+            <Button variant="ghost" onClick={() => setPendingDeleteId(null)}>
               {getI18nRuntime().i18n.t("common:cancel")}
             </Button>
             <Button variant="destructive" onClick={confirmDeleteNode}>

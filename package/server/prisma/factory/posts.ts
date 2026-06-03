@@ -6,7 +6,12 @@ import {
   markdownContentDoc,
 } from "@rezics/contract";
 import type { PrismaClient } from "../generated/client.js";
-import { PostKind, UnitStatus, UnitType } from "../generated/client.js";
+import {
+  ContentTranslationStatus,
+  PostKind,
+  UnitStatus,
+  UnitType,
+} from "../generated/client.js";
 import {
   generatePostBody,
   generatePostContent,
@@ -276,7 +281,9 @@ async function seedPostKindBatch(
     unitId: r.id,
     language: DEFAULT_LANGUAGE,
     content: markdownContentDoc(r.body) as never,
-    status: r.published ? "PUBLISHED" : "DRAFT",
+    status: r.published
+      ? ContentTranslationStatus.PUBLISHED
+      : ContentTranslationStatus.DRAFT,
     authorUserId: r.author.userId,
     provenance: { importedFrom: "factory-post-seed" },
   }));

@@ -45,6 +45,20 @@ export function primaryLanguages(
   );
 }
 
+/** Return the first primary support language, then the first supported language. */
+export function defaultSupportLanguage(
+  supportLanguages: readonly SupportLanguageLike[] | null | undefined = [],
+): Language | null {
+  const ordered = [...(supportLanguages ?? [])].sort(
+    (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
+  );
+  return (
+    primaryLanguages(ordered)[0] ??
+    uniqueLanguages(ordered.map((item) => item.language))[0] ??
+    null
+  );
+}
+
 /**
  * Build the ordered candidate list for localized reads.
  *

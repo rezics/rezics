@@ -270,8 +270,12 @@ export const SettingsPreferencesSection: FC = () => {
             <AlertDescription>Moderation preference saved.</AlertDescription>
           </Alert>
         )}
-        <label className="flex cursor-pointer items-start gap-3">
+        <label
+          htmlFor="settings-realm-manage-mode-default"
+          className="flex cursor-pointer items-start gap-3"
+        >
           <Checkbox
+            id="settings-realm-manage-mode-default"
             checked={settings?.moderation?.realmManageModeDefault !== false}
             disabled={updateSettings.isPending}
             onCheckedChange={(checked) =>

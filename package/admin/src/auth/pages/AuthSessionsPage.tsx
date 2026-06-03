@@ -5,7 +5,6 @@ import {
 } from "@rezics/api/account-operation/account-operation";
 import type { AdminAuthSession } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -161,13 +160,7 @@ export default function AuthSessionsPage() {
       },
     ];
     return cols;
-  }, [
-    getI18nRuntime().i18n.t("admin:auth_actions_title"),
-    getI18nRuntime().i18n.t("common:created"),
-    getI18nRuntime().i18n.t("common:expires"),
-    getI18nRuntime().i18n.t("common:revoke"),
-    getI18nRuntime().i18n.t("common:user_agent"),
-  ]);
+  }, [t]);
 
   return (
     <Page

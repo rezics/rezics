@@ -211,7 +211,7 @@ function SeedRealmCreatePage({
       queryClient.clear();
       useAuthSessionStore.getState().reset();
     };
-  }, [member, mode, queryClient]);
+  }, [member, queryClient]);
 
   if (!ready) return null;
   return <div className="min-h-screen bg-surface-canvas">{children}</div>;

@@ -168,7 +168,7 @@ describe("CommentService", () => {
         contentModerationState: null,
       },
     };
-    const findMany = mock(async () => [commentRow]);
+    const findMany = mock(async (_args: any) => [commentRow]);
     const count = mock(async () => 1);
     const pinFindMany = mock(async () => [
       {
@@ -203,9 +203,8 @@ describe("CommentService", () => {
         }),
       }),
     );
-    expect(findMany.mock.calls[0]?.[0].where).not.toHaveProperty(
-      "parentCommentUnitId",
-    );
+    const findManyArgs = findMany.mock.calls[0]?.[0] as any;
+    expect(findManyArgs.where).not.toHaveProperty("parentCommentUnitId");
     expect(pinFindMany).toHaveBeenCalledWith({
       where: {
         scopeUnitId: { in: ["root-1"] },

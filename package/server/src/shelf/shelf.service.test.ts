@@ -18,12 +18,18 @@ mock.module("@/infra/seed-tags", () => ({
 }));
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
-const contentSearchMock = mock(async (_query: string, _options?: any) => ({
-  hits: [],
-}));
-const collectionSearchMock = mock(async (_query: string, _options?: any) => ({
-  hits: [],
-}));
+type SearchHit = { id?: string; unitId?: string };
+
+const contentSearchMock = mock(
+  async (_query: string, _options?: any): Promise<{ hits: SearchHit[] }> => ({
+    hits: [],
+  }),
+);
+const collectionSearchMock = mock(
+  async (_query: string, _options?: any): Promise<{ hits: SearchHit[] }> => ({
+    hits: [],
+  }),
+);
 
 mock.module("@/meili/content/sync", () => ({
   patchContentMetadataToMeili: async () => undefined,

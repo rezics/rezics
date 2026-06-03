@@ -70,7 +70,7 @@ export const ShelvesTabSection: FC = () => {
       chips.push({ value: k, label });
     }
     return chips;
-  }, [shelves, isCurrentUser, getI18nRuntime().i18n.t("search:category_all")]);
+  }, [shelves, isCurrentUser, t]);
 
   // Filter shelves
   const filtered = useMemo(() => {

@@ -1,6 +1,5 @@
 import { authApi } from "@rezics/api/auth/auth.api";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -82,7 +81,7 @@ export default function AuthEmailPage() {
     return () => {
       cancelled = true;
     };
-  }, [getI18nRuntime().i18n.t("admin:auth_email_failed_load_templates")]);
+  }, [t]);
 
   useEffect(() => {
     if (!currentTemplate) return;
@@ -122,11 +121,7 @@ export default function AuthEmailPage() {
     return () => {
       cancelled = true;
     };
-  }, [
-    selectedTemplate,
-    formValues,
-    getI18nRuntime().i18n.t("admin:auth_email_failed_render_preview"),
-  ]);
+  }, [selectedTemplate, formValues, t]);
 
   const handleSendTest = async () => {
     if (!recipientEmail || !selectedTemplate) return;

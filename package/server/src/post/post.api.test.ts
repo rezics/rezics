@@ -13,12 +13,14 @@ const decideForIdentityMock = mock(async () => ({
   safeMessage: policyAllowed ? "Allowed" : "Denied by policy",
 }));
 
-const getByUnitIdMock = mock(async () => ({
-  unitId: "post-1",
-  unit: {
-    user: { unitId: "owner-1" },
-  },
-}));
+const getByUnitIdMock = mock(
+  async (): Promise<any> => ({
+    unitId: "post-1",
+    unit: {
+      user: { unitId: "owner-1" },
+    },
+  }),
+);
 const createMock = mock(async () => ({ unitId: "created-post-1" }));
 const submitToRealmMock = mock(async () => ({
   unitId: "post-1",
@@ -253,7 +255,15 @@ describe("postApi", () => {
       unitId: "wiki-post-1",
       kind: "WIKI",
       content: { main: { source: "old" } },
-      unit: { user: { unitId: "owner-1" } },
+      unit: {
+        user: { unitId: "owner-1" },
+        contentTranslations: [
+          {
+            language: "en",
+            content: { main: { source: "old" } },
+          },
+        ],
+      },
     });
     const { postApi } = await import("./post.api");
     const response = await postApi.handle(

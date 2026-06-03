@@ -41,7 +41,6 @@ export function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
     title: doc.titleText ?? undefined,
     content: markdownContentDoc(doc.contentText ?? ""),
     kind: doc.kind as PostDTO["kind"],
-    depth: 0,
     replyCount: doc.replyCount,
     directReplyCount: doc.directReplyCount,
     lastReplyAt: doc.lastReplyAt,

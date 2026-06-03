@@ -17,7 +17,6 @@ import type {
   UnitTagDTO,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -286,18 +285,7 @@ export default function LowScoreTagsPage() {
     deleteRealmTagApplication.isPending,
     patchUnitTag.isPending,
     patchRealmTagApplication.isPending,
-    getI18nRuntime().i18n.t("admin:tag_pin"),
-    getI18nRuntime().i18n.t("admin:tag_unpin"),
-    getI18nRuntime().i18n.t("common:actions"),
-    getI18nRuntime().i18n.t("common:delete"),
-    getI18nRuntime().i18n.t("common:pinned"),
-    getI18nRuntime().i18n.t("common:realm"),
-    getI18nRuntime().i18n.t("common:scope"),
-    getI18nRuntime().i18n.t("common:score"),
-    getI18nRuntime().i18n.t("common:tag"),
-    getI18nRuntime().i18n.t("common:unit"),
-    getI18nRuntime().i18n.t("common:votes"),
-    getI18nRuntime().i18n.t("common:yes"),
+    t,
   ]);
 
   return (

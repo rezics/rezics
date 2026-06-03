@@ -145,9 +145,10 @@ export function PostTreeNode({
                   rootUnitId={rootUnitId}
                   realmUnitId={post.realmUnitId}
                   parentCommentUnitId={post.unitId}
-                  onSubmitted={(createdPost) =>
-                    onComposerSubmitted(post.unitId, createdPost)
-                  }
+                  onSubmitted={(createdPost) => {
+                    if (!("rootUnitId" in createdPost)) return;
+                    onComposerSubmitted(post.unitId, createdPost);
+                  }}
                   onCancelled={() => onComposerDone(post.unitId)}
                 />
               ) : null

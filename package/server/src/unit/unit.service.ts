@@ -90,7 +90,7 @@ export function buildUnitWhereClause(
     const q = options.q.trim();
     andWhere.push({
       OR: [
-        { id: { contains: q, mode: "insensitive" } },
+        { id: q },
         { slug: { contains: q, mode: "insensitive" } },
         {
           translations: {
@@ -104,7 +104,7 @@ export function buildUnitWhereClause(
   }
 
   if (options.id?.trim()) {
-    andWhere.push({ id: { contains: options.id.trim(), mode: "insensitive" } });
+    andWhere.push({ id: options.id.trim() });
   }
 
   if (options.slug?.trim()) {

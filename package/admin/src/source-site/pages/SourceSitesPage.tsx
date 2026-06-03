@@ -92,7 +92,7 @@ function RuleEditor({
     <div className="flex flex-col gap-3">
       {rules.map((rule, index) => (
         <div
-          key={`${rule.externalKind}-${index}`}
+          key={`${rule.externalKind}-${rule.externalIdName}-${rule.urlTemplate}-${rule.urlMatchPattern}`}
           className="grid gap-3 rounded-md border border-border-whisper p-3 md:grid-cols-12"
         >
           <div className="md:col-span-2">

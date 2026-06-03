@@ -137,7 +137,7 @@ export async function exportUserData(userId: string): Promise<UserDataExport> {
       updatedAt: row.updatedAt.toISOString(),
     })),
     follows: follows.map((f) => ({
-      subscribedUnitId: f.subscribedUnitId,
+      targetUnitId: f.subscribedUnitId,
       channels: f.channels,
       createdAt: f.createdAt.toISOString(),
     })),

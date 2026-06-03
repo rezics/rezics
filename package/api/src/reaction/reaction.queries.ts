@@ -123,7 +123,12 @@ export const useBatchUserReactions = (
  */
 export const useGivenReactionsInfinite = (
   userId: string | undefined,
-  options?: { reactions?: string; enabled?: boolean; limit?: number },
+  options?: {
+    reactions?: string;
+    scopeKey?: string | null;
+    enabled?: boolean;
+    limit?: number;
+  },
 ) => {
   const enabled = (options?.enabled ?? true) && Boolean(userId);
   return useInfiniteQuery<
@@ -141,7 +146,7 @@ export const useGivenReactionsInfinite = (
     queryFn: ({ pageParam }) =>
       reactionApi.given(userId!, {
         reactions: options?.reactions,
-        scopeKey: options?.scopeKey,
+        scopeKey: options?.scopeKey ?? undefined,
         cursor: pageParam,
         limit: options?.limit,
       }),

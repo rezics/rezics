@@ -11,7 +11,7 @@ type ClampStyle = React.CSSProperties & {
 };
 
 export interface SearchContentResultCardProps
-  extends Omit<React.ComponentProps<typeof Card>, "children"> {
+  extends Omit<React.ComponentProps<typeof Card>, "children" | "title"> {
   user?: UserHoverPreviewUser;
   author?: React.ReactNode;
   time?: React.ReactNode;

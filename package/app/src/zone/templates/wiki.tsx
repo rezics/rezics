@@ -10,6 +10,7 @@ import type {
   WikiZoneTheme,
   WikiZoneTranslatedLabel,
 } from "@rezics/contract";
+import { defaultSupportLanguage } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { EmptyState, SafeLink, Spinner } from "@rezics/ui";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
@@ -41,9 +42,13 @@ function unitTitle(unit: UnitDTO | undefined, locale: Language) {
   const translations = unit?.translations ?? [];
   return (
     translations.find((item) => item.language === locale)?.title ??
-    (unit?.defaultLanguage
-      ? translations.find((item) => item.language === unit.defaultLanguage)
-          ?.title
+    (unit
+      ? translations.find(
+          (item) =>
+            item.language ===
+            (defaultSupportLanguage(unit.supportLanguages) ??
+              unit.resolvedLanguage),
+        )?.title
       : undefined) ??
     translations.find((item) => item.language === "en")?.title ??
     translations.find((item) => item.title)?.title ??
@@ -171,6 +176,35 @@ function navigationItemHref(item: WikiZoneNavigationItem) {
   return null;
 }
 
+function navigationItemKey(
+  sectionId: string,
+  item: WikiZoneNavigationItem,
+  label: string,
+  href: string | null,
+) {
+  if (item.kind === "entity") return `${sectionId}:entity:${item.entityId}`;
+  if (item.kind === "tag") return `${sectionId}:tag:${item.tagUnitId}`;
+  if (item.kind === "wikiUnit") return `${sectionId}:wiki:${item.unitId}`;
+  if (item.kind === "unit") return `${sectionId}:unit:${item.unitId}`;
+  return `${sectionId}:${item.kind}:${href ?? label}`;
+}
+
+function homepageItemKey(item: WikiZoneHomepageItem, locale: Language) {
+  if (item.kind === "navigationItem") {
+    return `nav:${navigationItemKey("home", item.item, itemTitle(item, locale), itemHref(item) ?? null)}`;
+  }
+  if ("unitId" in item && typeof item.unitId === "string") {
+    return `${item.kind}:${item.unitId}`;
+  }
+  if ("entityId" in item && typeof item.entityId === "string") {
+    return `${item.kind}:${item.entityId}`;
+  }
+  if ("tagUnitId" in item && typeof item.tagUnitId === "string") {
+    return `${item.kind}:${item.tagUnitId}`;
+  }
+  return `${item.kind}:${itemTitle(item, locale)}`;
+}
+
 function WikiNavigation({
   navigation,
   placement = "side",
@@ -212,7 +246,7 @@ function WikiNavigation({
               section.id}
           </h2>
           <div className="flex flex-col gap-1">
-            {section.items.map((item, index) => {
+            {section.items.map((item) => {
               const label =
                 navigationItemLabel(item, units, locale) ??
                 navigationItemFallback(item);
@@ -221,7 +255,7 @@ function WikiNavigation({
               if (item.kind === "labelHeading") {
                 return (
                   <p
-                    key={`${section.id}-${item.kind}-${index}`}
+                    key={navigationItemKey(section.id, item, label, href)}
                     className="mt-3 text-xs font-medium uppercase tracking-normal text-text-tertiary first:mt-0"
                   >
                     {label}
@@ -232,7 +266,7 @@ function WikiNavigation({
               if (!href) {
                 return (
                   <span
-                    key={`${section.id}-${item.kind}-${index}`}
+                    key={navigationItemKey(section.id, item, label, href)}
                     className="rounded-sm px-2 py-1.5 text-sm leading-ui text-text-tertiary"
                   >
                     {label}
@@ -242,7 +276,7 @@ function WikiNavigation({
 
               return (
                 <SafeLink
-                  key={`${section.id}-${item.kind}-${index}`}
+                  key={navigationItemKey(section.id, item, label, href)}
                   href={href}
                   className="rounded-sm px-2 py-1.5 text-sm leading-ui text-text-secondary hover:bg-surface-muted hover:text-text-primary"
                 >
@@ -345,11 +379,11 @@ function WikiHomepageSections({
               <EmptyState title={t("search:empty_title")} />
             ) : (
               <div className={gridClass(variant)}>
-                {items.map((item, index) => {
+                {items.map((item) => {
                   const href = itemHref(item);
                   return (
                     <Card
-                      key={`${item.kind}-${index}`}
+                      key={homepageItemKey(item, locale)}
                       surface={variant === "minimal" ? "plain" : "contained"}
                     >
                       <CardContent className="flex min-h-24 flex-col gap-2">

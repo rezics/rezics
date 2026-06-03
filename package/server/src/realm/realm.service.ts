@@ -19,7 +19,7 @@ import type {
   UpdateRealmInput,
   UpdateRealmRulePolicyInput,
 } from "@rezics/contract";
-import { parseIdsCsv, validateSlug } from "@rezics/contract";
+import { normalizeLanguage, parseIdsCsv, validateSlug } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma, RealmTagApplication } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
@@ -38,6 +38,11 @@ import { translationService } from "@/unit/translation.service";
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 
 import { mapPublicUser, publicUserSelect } from "@/utils/sanitizeUser";
+
+function normalizedLanguage(language: string | null | undefined) {
+  return language ? normalizeLanguage(language) : null;
+}
+
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
@@ -757,7 +762,9 @@ export class RealmService {
         acceptedRuleUnitId: latestAcknowledgement?.ruleUnitId ?? null,
         acceptedVersion: latestAcknowledgement?.version ?? null,
         acceptedAt: latestAcknowledgement?.acceptedAt ?? null,
-        acceptedLanguage: latestAcknowledgement?.acceptedLanguage ?? null,
+        acceptedLanguage: normalizedLanguage(
+          latestAcknowledgement?.acceptedLanguage,
+        ),
         acknowledgementRequired:
           requiresAcknowledgement && !acceptedCurrentRule,
       },
@@ -795,11 +802,11 @@ export class RealmService {
         ruleUnitId,
         version: realm.ruleVersion,
         userId,
-        acceptedLanguage: input.acceptedLanguage ?? null,
+        acceptedLanguage: normalizedLanguage(input.acceptedLanguage),
       },
       update: {
         acceptedAt: new Date(),
-        acceptedLanguage: input.acceptedLanguage ?? null,
+        acceptedLanguage: normalizedLanguage(input.acceptedLanguage),
       },
     });
 
@@ -809,7 +816,7 @@ export class RealmService {
       version: row.version,
       userId: row.userId,
       acceptedAt: row.acceptedAt,
-      acceptedLanguage: row.acceptedLanguage,
+      acceptedLanguage: normalizedLanguage(row.acceptedLanguage),
     };
   }
 
@@ -850,7 +857,7 @@ export class RealmService {
     if (!policy.ruleUnitId) {
       return {
         ...policy,
-        requestedLanguage: language ?? null,
+        requestedLanguage: normalizedLanguage(language),
         resolvedLanguage: null,
         translation: null,
         sourceRulePostUnitId: null,
@@ -865,7 +872,7 @@ export class RealmService {
     if (!ruleUnit || ruleUnit.type !== UnitType.POST) {
       return {
         ...policy,
-        requestedLanguage: language ?? null,
+        requestedLanguage: normalizedLanguage(language),
         resolvedLanguage: null,
         translation: null,
         sourceRulePostUnitId: null,
@@ -888,8 +895,8 @@ export class RealmService {
 
     return {
       ...policy,
-      requestedLanguage: language ?? null,
-      resolvedLanguage: translation?.language ?? null,
+      requestedLanguage: normalizedLanguage(language),
+      resolvedLanguage: normalizedLanguage(translation?.language),
       translation: translation ? mapTranslationToDTO(translation) : null,
       sourceRulePostUnitId,
       sourceRulePost: sourceRulePost ? mapPostToDTO(sourceRulePost) : null,

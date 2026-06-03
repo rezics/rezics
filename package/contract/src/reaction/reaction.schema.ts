@@ -1,6 +1,7 @@
 import { t } from "elysia";
 import {
   DIRECT_REACTION_SCOPE_KEY,
+  REALM_REACTION_SCOPE_PREFIX,
   type ReactionScopeKey,
 } from "./reaction.scope";
 
@@ -66,9 +67,15 @@ export const givenResponseSchema = t.Object({
 export type GivenResponse = (typeof givenResponseSchema)["static"];
 
 export function normalizeReactionScopeKey(
-  scopeKey: ReactionScopeKey | null | undefined,
+  scopeKey: string | null | undefined,
 ): ReactionScopeKey {
-  return scopeKey && scopeKey.trim().length > 0
-    ? scopeKey
-    : DIRECT_REACTION_SCOPE_KEY;
+  const normalized = scopeKey?.trim();
+  if (!normalized) return DIRECT_REACTION_SCOPE_KEY;
+  if (normalized === DIRECT_REACTION_SCOPE_KEY)
+    return DIRECT_REACTION_SCOPE_KEY;
+  if (normalized.startsWith(REALM_REACTION_SCOPE_PREFIX)) {
+    const realmUnitId = normalized.slice(REALM_REACTION_SCOPE_PREFIX.length);
+    if (realmUnitId.length > 0) return normalized as ReactionScopeKey;
+  }
+  throw new Error(`Invalid reaction scope: ${normalized}`);
 }

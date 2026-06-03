@@ -7,6 +7,7 @@ import {
   commentParamsSchema,
   commentResponseSchema,
   createCommentSchema,
+  parseIdsCsv,
   updateCommentSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
@@ -38,9 +39,12 @@ export const commentApi = new Elysia({ prefix: "/comment" })
         headers["authorization"],
         headers["cookie"],
       );
-      const { comments, total } = await commentService.list(query, {
-        viewerUserId: identity?.userId,
-      });
+      const { comments, total } = await commentService.list(
+        { ...query, ids: parseIdsCsv(query.ids) },
+        {
+          viewerUserId: identity?.userId,
+        },
+      );
       const signals = await postService.getThreadPromotionSignals(
         query.rootUnitId,
         identity,

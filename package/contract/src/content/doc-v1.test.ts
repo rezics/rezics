@@ -43,7 +43,7 @@ describe("contentDocSchema v1", () => {
   });
 
   test("rejects dynamic v2 slots and layout", () => {
-    const value: ContentDoc = {
+    const value = {
       ...doc(),
       slots: {
         cast: { type: "entity-list", refs: [] },

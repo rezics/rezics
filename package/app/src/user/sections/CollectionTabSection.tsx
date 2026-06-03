@@ -36,11 +36,15 @@ export const CollectionTabSection: FC = () => {
     tagUnitIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
     limit: 100,
   };
-  const collection = useQuery(
-    isCurrentUser
-      ? userUnitCollectionSearchMineQuery(collectionQuery)
-      : userUnitCollectionSearchUserQuery(userId, collectionQuery),
-  );
+  const ownCollection = useQuery({
+    ...userUnitCollectionSearchMineQuery(collectionQuery),
+    enabled: isCurrentUser,
+  });
+  const publicCollection = useQuery({
+    ...userUnitCollectionSearchUserQuery(userId, collectionQuery),
+    enabled: !isCurrentUser && Boolean(userId),
+  });
+  const collection = isCurrentUser ? ownCollection : publicCollection;
   const tagSearch = useQuery(tagSearchQuery(tagSearchText.trim()));
   const tagTranslations = useQuery(
     tagBatchTranslationsQuery(selectedTagIds, locale),
@@ -184,6 +188,7 @@ function CollectionUnitRow({
     <Link
       to="/unit/$unitId"
       params={{ unitId: unit.unitId }}
+      search={{ view: "auto" }}
       className="flex min-w-0 flex-col gap-2 rounded-md border border-border-whisper bg-surface-base px-3 py-3 text-text-primary no-underline transition-colors hover:border-border-defined"
     >
       <div className="flex min-w-0 items-center justify-between gap-3">

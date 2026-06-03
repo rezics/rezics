@@ -2,6 +2,7 @@ import { useUpdatePostMutation } from "@rezics/api/post/post";
 import {
   mainMarkdownSource,
   markdownContentDoc,
+  normalizeLanguage,
   type PostDTO,
   SCORE_MAX,
 } from "@rezics/contract";
@@ -93,7 +94,9 @@ export const RemarkEditDialog: React.FC<RemarkEditDialogProps> = ({
               defaultLanguage={locale}
               title={title}
               body={text}
-              onLanguageChange={setLanguage}
+              onLanguageChange={(nextLanguage) =>
+                setLanguage(normalizeLanguage(nextLanguage) ?? locale)
+              }
               onTitleChange={setTitle}
               onBodyChange={setText}
               titlePlaceholder={t("community:post_title_placeholder")}

@@ -40,7 +40,8 @@ export function mapGameLibraryContentToDTO(
 
   return {
     unitId: row.unitId,
-    translations: row.unit.translations,
+    translations: row.unit
+      .translations as GameLibraryContentDTO["translations"],
     contentStructure: contentStructure
       ? {
           ownerUnitId: contentStructure.ownerUnitId,
@@ -68,7 +69,8 @@ export function mapMediaLibraryContentToDTO(
 
   return {
     unitId: row.unitId,
-    translations: row.unit.translations,
+    translations: row.unit
+      .translations as MediaLibraryContentDTO["translations"],
     contentStructure: contentStructure
       ? {
           ownerUnitId: contentStructure.ownerUnitId,

@@ -3,7 +3,7 @@ import {
   FALLBACK_LANGUAGE,
   markdownContentDoc,
 } from "@rezics/contract";
-import type { PrismaClient } from "#/prisma/generated/client";
+import type { PrismaClient } from "../../generated/client.js";
 import type { SlugScopesMap } from "./seed-slug-scopes";
 
 export interface RealmTaxonomySeedResult {

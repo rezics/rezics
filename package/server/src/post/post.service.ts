@@ -27,7 +27,7 @@ import {
   PinKind as PinKindEnum,
   type PostKind,
   PostKind as PostKindEnum,
-  type Prisma,
+  Prisma,
   prisma,
   UnitStatus,
   UnitType,
@@ -418,17 +418,14 @@ export class PostService {
     const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
     const skipNum = query.start ?? 0;
 
-    const where: Prisma.PostWhereInput = options?.isAdmin
+    const unitWhere: Prisma.UnitWhereInput = options?.isAdmin
       ? {}
-      : { unit: { ...publicUnitEligibilityWhere } };
+      : { ...publicUnitEligibilityWhere };
+    const where: Prisma.PostWhereInput = {};
     if (query.targetUnitId) {
-      where.unit = {
-        ...(typeof where.unit === "object" && !Array.isArray(where.unit)
-          ? where.unit
-          : {}),
-        targetUnitId: query.targetUnitId,
-      };
+      unitWhere.targetUnitId = query.targetUnitId;
     }
+    if (Object.keys(unitWhere).length > 0) where.unit = unitWhere;
     // Weak context lookup only: do not resolve through Unit.targetUnitId and do
     // not validate that the value names a VARIANT.
     if (query.variantUnitId) where.variantUnitId = query.variantUnitId;
@@ -638,7 +635,9 @@ export class PostService {
     ) {
       throw new AppError(404, `Post not found: ${unitId}`);
     }
-    const [withPin] = await attachPinKinds([post as PostWithRelations]);
+    const withPins = await attachPinKinds([post as PostWithRelations]);
+    const withPin = withPins[0];
+    if (!withPin) throw new AppError(404, `Post not found: ${unitId}`);
     return hydrateUnitOwnerUserSlugRow(withPin);
   }
 
@@ -1115,11 +1114,10 @@ export class PostService {
 
     const titleToWrite = input.title?.trim();
     if (input.isLocked !== undefined) data.isLocked = input.isLocked;
-    if (input.extra !== undefined)
-      data.extra = sanitizePostExtraForCreate(input.extra) as
-        | Prisma.InputJsonValue
-        | undefined
-        | null;
+    if (input.extra !== undefined) {
+      const extra = sanitizePostExtraForCreate(input.extra);
+      data.extra = extra === null ? Prisma.JsonNull : extra;
+    }
 
     if (!actor) {
       const updated = await prisma.$transaction(async (tx) => {

@@ -2,7 +2,6 @@ import { useAlertStore } from "@app/states/windowAlertStore";
 import { echoKvGetQuery } from "@rezics/api/echokv/echokv";
 import { parseEchoKVResponse } from "@rezics/api/echokv/util";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { CarouselIndicator } from "@rezics/ui/primitive/carousel/CarouselIndicator.tsx";
 import { useEmblaAutoplay } from "@rezics/ui/primitive/carousel/use-embla-autoplay.ts";
 import { LazyLoadImage } from "@rezics/ui/primitive/image/LazyLoadImage.tsx";
@@ -134,11 +133,7 @@ export const BookCarousel: React.FC<BookCarouselProps> = ({
         t("page:home_carousel_alert_parse_failed", { error: String(error) }),
       );
     }
-  }, [
-    data,
-    showAlert,
-    getI18nRuntime().i18n.t("page:home_carousel_alert_parse_failed"),
-  ]);
+  }, [data, showAlert, t]);
 
   // autoplay using carousel api
   useEmblaAutoplay(carouselApi, {

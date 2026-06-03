@@ -7,14 +7,14 @@ import {
 describe("Series frontend data integration placeholders", () => {
   test("provides Series management query placeholders", () => {
     const data = seriesManagementData("series-1");
-    expect(data.detail.queryKey).toEqual(["series", "detail", "series-1"]);
-    expect(data.contentIndex.queryKey).toEqual([
+    expect([...data.detail.queryKey]).toEqual(["series", "detail", "series-1"]);
+    expect([...data.contentIndex.queryKey]).toEqual([
       "series",
       "detail",
       "series-1",
       "contentIndex",
     ]);
-    expect(data.diagnostics.queryKey).toEqual([
+    expect([...data.diagnostics.queryKey]).toEqual([
       "series",
       "detail",
       "series-1",
@@ -23,8 +23,12 @@ describe("Series frontend data integration placeholders", () => {
   });
 
   test("provides release-level Series add placeholders", () => {
-    expect(releaseSeriesAddData("release-1").containingSeries.queryKey).toEqual(
-      ["series", "list", { containsReleaseUnitId: "release-1", limit: 50 }],
-    );
+    expect([
+      ...releaseSeriesAddData("release-1").containingSeries.queryKey,
+    ]).toEqual([
+      "series",
+      "list",
+      { containsReleaseUnitId: "release-1", limit: 50 },
+    ]);
   });
 });

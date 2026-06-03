@@ -38,18 +38,26 @@ function isBatchKey(key: QueryKey, prefix: readonly unknown[]): boolean {
   for (let i = 0; i < prefix.length; i++) {
     if (key[i] !== prefix[i]) return false;
   }
-  return Array.isArray(key[key.length - 1]);
+  return batchKeyTail(key) !== undefined;
 }
 
 function batchKeyTail(
   key: QueryKey,
 ): { targetIds: readonly string[]; scopeKey: string | null } | undefined {
-  const tail = (key as unknown[])[key.length - 1] as
-    | { targetIds?: readonly string[]; scopeKey?: string | null }
-    | readonly string[];
+  const tail = (key as unknown[])[key.length - 1];
   if (Array.isArray(tail)) return { targetIds: tail, scopeKey: null };
-  if (!Array.isArray(tail?.targetIds)) return undefined;
-  return { targetIds: tail.targetIds, scopeKey: tail.scopeKey ?? null };
+  if (!tail || typeof tail !== "object") return undefined;
+  const objectTail = tail as {
+    targetIds?: unknown;
+    scopeKey?: string | null;
+  };
+  if (!Array.isArray(objectTail.targetIds)) return undefined;
+  return {
+    targetIds: objectTail.targetIds.filter(
+      (id): id is string => typeof id === "string",
+    ),
+    scopeKey: objectTail.scopeKey ?? null,
+  };
 }
 
 function snapshotAffectedBatches(

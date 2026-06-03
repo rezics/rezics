@@ -13,7 +13,6 @@ import { authQueries } from "@rezics/api/auth/auth.queries";
 import { useUnblockAccountEnforcementMutation } from "@rezics/api/governance/governance";
 import type { AdminAuthUserAccountSummary } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { SafeLink, Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -423,23 +422,8 @@ export default function AuthUsersPage() {
     unbanMutation,
     setRoleMutation,
     removeMutation,
-    getI18nRuntime().i18n.t("admin:auth_actions_title"),
-    getI18nRuntime().i18n.t("admin:auth_role_admin"),
-    getI18nRuntime().i18n.t("admin:auth_role_owner"),
-    getI18nRuntime().i18n.t("admin:auth_role_user"),
-    getI18nRuntime().i18n.t("admin:auth_user_name"),
-    getI18nRuntime().i18n.t("admin:auth_user_role"),
-    getI18nRuntime().i18n.t("admin:auth_users_ban"),
-    getI18nRuntime().i18n.t("admin:auth_users_banned"),
-    getI18nRuntime().i18n.t("admin:auth_users_remove_description"),
-    getI18nRuntime().i18n.t("admin:auth_users_remove_title"),
-    getI18nRuntime().i18n.t("admin:auth_users_unban"),
-    getI18nRuntime().i18n.t("common:active"),
-    getI18nRuntime().i18n.t("common:created"),
-    getI18nRuntime().i18n.t("common:email"),
-    getI18nRuntime().i18n.t("common:id"),
-    getI18nRuntime().i18n.t("common:remove"),
     accountSummariesByAuthId,
+    t,
   ]);
 
   return (

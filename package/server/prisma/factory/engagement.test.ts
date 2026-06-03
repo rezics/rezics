@@ -3,11 +3,13 @@ import { UnitType } from "../generated/client.js";
 import { seedEngagement } from "./engagement";
 import type { SeedCtx } from "./strategy";
 
+type CountSpec = { target?: number; max: number };
+
 describe("seedEngagement", () => {
   test("creates Subscription rows with subscribedUnitId", async () => {
-    const subscriptionCreateMany = mock(async () => undefined);
-    const userUpdate = mock(async () => undefined);
-    const unitUpdate = mock(async () => undefined);
+    const subscriptionCreateMany = mock(async (_args: unknown) => undefined);
+    const userUpdate = mock(async (_args: unknown) => undefined);
+    const unitUpdate = mock(async (_args: unknown) => undefined);
 
     const ctx = {
       prisma: {
@@ -15,7 +17,7 @@ describe("seedEngagement", () => {
         user: { update: userUpdate },
         unit: { update: unitUpdate },
       },
-      draw: (spec) => spec.target ?? spec.max,
+      draw: (spec: CountSpec) => spec.target ?? spec.max,
     } as unknown as SeedCtx;
 
     const users = [
@@ -47,27 +49,27 @@ describe("seedEngagement", () => {
         row.subscribedUnitId,
       ]),
     ).toEqual([
-      [users[0].userId, users[1].userId],
-      [users[1].userId, users[0].userId],
+      [users[0]?.userId, users[1]?.userId],
+      [users[1]?.userId, users[0]?.userId],
     ]);
 
     expect(userUpdate).toHaveBeenCalledTimes(2);
     expect(unitUpdate).toHaveBeenCalledTimes(2);
     expect(
-      unitUpdate.mock.calls.map((call) => call[0]?.where.id).sort(),
+      unitUpdate.mock.calls.map((call) => (call[0] as any).where.id).sort(),
     ).toEqual(users.map((user) => user.userId).sort());
   });
 
   test("skips follow seeding when no users can be followed", async () => {
-    const subscriptionCreateMany = mock(async () => undefined);
+    const subscriptionCreateMany = mock(async (_args: unknown) => undefined);
 
     const ctx = {
       prisma: {
         subscription: { createMany: subscriptionCreateMany },
-        user: { update: mock(async () => undefined) },
-        unit: { update: mock(async () => undefined) },
+        user: { update: mock(async (_args: unknown) => undefined) },
+        unit: { update: mock(async (_args: unknown) => undefined) },
       },
-      draw: (spec) => spec.target ?? spec.max,
+      draw: (spec: CountSpec) => spec.target ?? spec.max,
     } as unknown as SeedCtx;
 
     await seedEngagement(

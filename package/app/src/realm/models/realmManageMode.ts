@@ -40,7 +40,7 @@ export function useRealmManageMode(input: {
 
   useEffect(() => {
     setEnabled(getRealmManageModeInitialValue(input));
-  }, [input.realmId, input.settings]);
+  }, [input]);
 
   const setSessionEnabled = (next: boolean) => {
     setRealmManageModeSessionOverride(input.realmId, next);

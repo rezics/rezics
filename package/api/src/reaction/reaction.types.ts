@@ -1,7 +1,4 @@
-import type {
-  AllowedReactionKind,
-  ReactionScopeKey,
-} from "@rezics/contract/reaction";
+import type { AllowedReactionKind } from "@rezics/contract/reaction";
 
 /**
  * Types for Reaction API (aligned with @rezics/contract/reaction)
@@ -19,13 +16,13 @@ export type ReactionDTO = {
 export type ReactionCreateInput = {
   targetId: string;
   reaction: AllowedReactionKind;
-  scopeKey?: ReactionScopeKey;
+  scopeKey?: string;
 };
 
 export type ReactionDeleteQuery = {
   targetId: string;
   reaction: AllowedReactionKind;
-  scopeKey?: ReactionScopeKey;
+  scopeKey?: string;
 };
 
 /** Response shape for GET /reactions/summary */
@@ -75,7 +72,7 @@ export type ReactionHistoryPage<TItem> = {
 
 export type ReactionHistoryQuery = {
   reactions?: string;
-  scopeKey?: ReactionScopeKey;
+  scopeKey?: string;
   cursor?: string;
   limit?: number;
 };

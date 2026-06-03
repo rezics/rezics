@@ -51,20 +51,6 @@ describe("content authority and history API clients", () => {
     });
   });
 
-  test("book create forwards creation work match payload", async () => {
-    await bookApi.create({
-      creationMode: "wiki",
-      workMatch: { releaseUnitId: "release-1" },
-      translations: [{ language: "en", title: "New Release" }],
-    });
-
-    expect(JSON.parse(fetchMock.mock.calls[0]?.[1]?.body as string)).toEqual({
-      creationMode: "wiki",
-      workMatch: { releaseUnitId: "release-1" },
-      translations: [{ language: "en", title: "New Release" }],
-    });
-  });
-
   test("wiki post helpers pin kind and creation mode", async () => {
     const content = markdownContentDoc("body");
     const edited = markdownContentDoc("edited");

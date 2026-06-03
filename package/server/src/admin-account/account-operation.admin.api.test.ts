@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
+import type { AdminAuthUserAccountSummary } from "@rezics/contract";
 import { Elysia } from "elysia";
 
 let currentIdentity = {
@@ -9,23 +10,25 @@ let currentIdentity = {
 let dbAdmin = false;
 let dbRoot = false;
 
-const getAuthUserAccountSummaries = mock(async () => [
-  {
-    authUserId: "auth-user-1",
-    mainUser: {
-      unitId: "main-user-1",
-      slug: "reader",
-      name: "Reader",
-      email: "reader@example.com",
-      role: ["MEMBER"],
+const getAuthUserAccountSummaries = mock(
+  async (): Promise<AdminAuthUserAccountSummary[]> => [
+    {
+      authUserId: "auth-user-1",
+      mainUser: {
+        unitId: "main-user-1",
+        slug: "reader",
+        name: "Reader",
+        email: "reader@example.com",
+        role: ["MEMBER"],
+      },
+      accountEnforcement: {
+        activeCount: 0,
+        activeKinds: [],
+      },
+      reconciliationWarnings: [],
     },
-    accountEnforcement: {
-      activeCount: 0,
-      activeKinds: [],
-    },
-    reconciliationWarnings: [],
-  },
-]);
+  ],
+);
 const listAuthUserSessions = mock(async () => ({
   sessions: [
     {

@@ -343,7 +343,12 @@ export default function UnitEditPage() {
                 </p>
                 <p className="text-sm text-text-secondary">
                   {t("admin:unit_default_language")}:{" "}
-                  <strong>{detailQuery.data?.defaultLanguage ?? "-"}</strong>
+                  <strong>
+                    {detailQuery.data?.supportLanguages
+                      ?.filter((item) => item.isPrimary)
+                      .map((item) => item.language)
+                      .join(", ") || "-"}
+                  </strong>
                 </p>
                 <p className="text-sm text-text-secondary">
                   {t("common:created")}:{" "}
