@@ -93,6 +93,8 @@ export const PostTreeSection: React.FC<PostTreeSectionProps> = ({
     unacceptMutation.isPending;
 
   const renderOverflowContent = (post: CommentDTO) => {
+    if (post.isRedacted) return null;
+
     const decision = computeEditorEntryDecision({
       permission,
       actorUserId,

@@ -4,6 +4,7 @@ import {
   type PostDTO,
 } from "@rezics/contract";
 import type React from "react";
+import { RemovedContentPlaceholder } from "@/components/RemovedContentPlaceholder";
 import { ReactionBar } from "@/engagement";
 import { PollEmbed } from "@/poll";
 import {
@@ -35,6 +36,18 @@ export const PostReply: React.FC<PostReplyProps> = ({
   reactionScopeKey,
 }) => {
   const contentIndentClass = showAvatar ? "pl-10" : "";
+  const isRedacted = "isRedacted" in post && post.isRedacted;
+  const redactionKind = isRedacted ? post.redactionKind : null;
+  if (isRedacted) {
+    return (
+      <div className="flex min-w-0 flex-col gap-1 py-1">
+        <div className={contentIndentClass}>
+          <RemovedContentPlaceholder redactionKind={redactionKind} />
+        </div>
+      </div>
+    );
+  }
+
   const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
 
   return (

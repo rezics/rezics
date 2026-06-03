@@ -356,7 +356,7 @@ reset + reseed is acceptable; a backfill script is optional.
 - [x] 5.3 `app/src/realm/components/RealmContentModerationActions.tsx`: collapse the
   menu to Approve / Remove / Restore / Lock (drop Hide + Tombstone); i18n-ize all
   labels; drive visibility of actions off `moderationStatus`.
-- [ ] 5.4 New `RemovedContentPlaceholder` component (shared, e.g. under
+- [x] 5.4 New `RemovedContentPlaceholder` component (shared, e.g. under
   `app/src/components/`): renders the redacted-stub i18n placeholder for
   referenced `REMOVED`/`deletedAt` content (distinct labels for moderator-removed
   vs author-deleted). Wire references/embeds/threaded parents to it; ensure
