@@ -44,29 +44,24 @@ describe("buildPostDocument", () => {
         inRealms: [
           {
             realmUnitId: "realm-1",
-            moderationState: "APPROVED",
-            visibilityState: "VISIBLE",
+            moderationStatus: "APPROVED",
           },
           {
             realmUnitId: "realm-2",
-            moderationState: "APPROVED",
-            visibilityState: "HIDDEN",
+            moderationStatus: "REMOVED",
           },
           {
             realmUnitId: "realm-3",
-            moderationState: "PENDING_REVIEW",
-            visibilityState: "VISIBLE",
+            moderationStatus: "PENDING",
           },
           {
             realmUnitId: "realm-locked",
-            moderationState: "APPROVED",
-            visibilityState: "VISIBLE",
+            moderationStatus: "APPROVED",
             isLocked: true,
           },
           {
             realmUnitId: "realm-private",
-            moderationState: "APPROVED",
-            visibilityState: "VISIBLE",
+            moderationStatus: "APPROVED",
             realm: { realm: { isPublic: false } },
           },
         ],
@@ -436,7 +431,7 @@ describe("buildContentDocument realm tag keys", () => {
         type: "SERIES",
         status: "PUBLISHED",
         visibility: "PUBLIC",
-        contentModerationState: null,
+        moderationStatus: "APPROVED",
       }),
     ).toBe(true);
   });
@@ -721,6 +716,7 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
       }),
     ).toBe(true);
   });
@@ -733,6 +729,7 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PRIVATE",
+        moderationStatus: "APPROVED",
       }),
     ).toBe(false);
     expect(
@@ -740,6 +737,7 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "DELETED",
         visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
       }),
     ).toBe(false);
     expect(
@@ -747,11 +745,12 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
       }),
     ).toBe(true);
   });
 
-  test("rejects globally removed content states", async () => {
+  test("rejects globally removed content snapshots", async () => {
     setServerEnvForSearchTests();
     const { isPublicIndexableContentUnit, isPublicIndexablePostUnit } =
       await import("./sync");
@@ -761,21 +760,21 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PUBLIC",
-        contentModerationState: { state: "TOMBSTONED" },
+        moderationStatus: "REMOVED",
       }),
     ).toBe(false);
     expect(
       isPublicIndexablePostUnit({
         status: "PUBLISHED",
         visibility: "PUBLIC",
-        contentModerationState: { state: "HIDDEN" },
+        moderationStatus: "REMOVED",
       }),
     ).toBe(false);
     expect(
       isPublicIndexablePostUnit({
         status: "PUBLISHED",
         visibility: "PUBLIC",
-        contentModerationState: { state: "LOCKED" },
+        moderationStatus: "APPROVED",
       }),
     ).toBe(true);
   });
@@ -788,6 +787,7 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
         catalogEntryKind: "VARIANT",
       }),
     ).toBe(false);
@@ -796,6 +796,7 @@ describe("public content indexing eligibility", () => {
         type: "BOOK",
         status: "PUBLISHED",
         visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
         catalogEntryKind: "NONE",
       }),
     ).toBe(false);
@@ -808,18 +809,21 @@ describe("public content indexing eligibility", () => {
       isPublicIndexablePostUnit({
         status: "PUBLISHED",
         visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
       }),
     ).toBe(true);
     expect(
       isPublicIndexablePostUnit({
         status: "PUBLISHED",
         visibility: "PRIVATE",
+        moderationStatus: "APPROVED",
       }),
     ).toBe(false);
     expect(
       isPublicIndexablePostUnit({
         status: "DELETED",
         visibility: "PUBLIC",
+        moderationStatus: "APPROVED",
       }),
     ).toBe(false);
   });
@@ -833,7 +837,7 @@ describe("public content indexing eligibility", () => {
         type: "POST",
         status: "PUBLISHED",
         visibility: "PRIVATE",
-        contentModerationState: null,
+        moderationStatus: "APPROVED",
       }),
     ).toBe(false);
     expect(
@@ -841,14 +845,14 @@ describe("public content indexing eligibility", () => {
         type: "POST",
         status: "PUBLISHED",
         visibility: "PUBLIC",
-        contentModerationState: { state: "HIDDEN" },
+        moderationStatus: "REMOVED",
       }),
     ).toBe(false);
   });
 });
 
 describe("search sync global moderation projection", () => {
-  test("syncSingleContent deletes globally tombstoned content", async () => {
+  test("syncSingleContent deletes globally removed content", async () => {
     setServerEnvForSearchTests();
     const { setSearchPrismaClient, syncSingleContent } = await import("./sync");
     const deleteContent = mock(async (_ids: string[]) => undefined);
@@ -861,7 +865,7 @@ describe("search sync global moderation projection", () => {
           type: "BOOK",
           status: "PUBLISHED",
           visibility: "PUBLIC",
-          contentModerationState: { state: "TOMBSTONED" },
+          moderationStatus: "REMOVED",
           catalogEntryKind: null,
         })),
       },
@@ -876,7 +880,7 @@ describe("search sync global moderation projection", () => {
     expect(addOrUpdateContent).not.toHaveBeenCalled();
   });
 
-  test("syncSinglePost deletes globally hidden posts", async () => {
+  test("syncSinglePost deletes globally removed posts", async () => {
     setServerEnvForSearchTests();
     const { setSearchPrismaClient, syncSinglePost } = await import("./sync");
     const deletePosts = mock(async (_ids: string[]) => undefined);
@@ -889,7 +893,7 @@ describe("search sync global moderation projection", () => {
           unit: {
             status: "PUBLISHED",
             visibility: "PUBLIC",
-            contentModerationState: { state: "HIDDEN" },
+            moderationStatus: "REMOVED",
           },
         })),
       },
@@ -914,7 +918,7 @@ describe("search sync global moderation projection", () => {
           type: "BOOK",
           status: "PUBLISHED",
           visibility: "PUBLIC",
-          contentModerationState: null,
+          moderationStatus: "APPROVED",
           catalogEntryKind: null,
         })),
       },
@@ -922,21 +926,18 @@ describe("search sync global moderation projection", () => {
         findMany: mock(async () => [
           {
             realmUnitId: "realm-a",
-            moderationState: "APPROVED",
-            visibilityState: "VISIBLE",
+            moderationStatus: "APPROVED",
             isLocked: true,
             realm: { realm: { isPublic: true } },
           },
           {
             realmUnitId: "realm-b",
-            moderationState: "APPROVED",
-            visibilityState: "HIDDEN",
+            moderationStatus: "REMOVED",
             realm: { realm: { isPublic: true } },
           },
           {
             realmUnitId: "realm-private",
-            moderationState: "APPROVED",
-            visibilityState: "VISIBLE",
+            moderationStatus: "APPROVED",
             realm: { realm: { isPublic: false } },
           },
         ]),

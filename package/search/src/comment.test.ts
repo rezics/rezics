@@ -22,7 +22,8 @@ describe("comment search sync", () => {
       directReplyCount: 0,
       lastReplyAt: null,
       state: null,
-      visibilityState: "VISIBLE",
+      moderationStatus: "APPROVED",
+      deletedAt: null,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       author: { name: "Ada", slug: "ada", avatar: null },
@@ -45,7 +46,8 @@ describe("comment search sync", () => {
       comment: {
         findUnique: mock(async () => ({
           id: "comment-1",
-          visibilityState: "TOMBSTONED",
+          moderationStatus: "REMOVED",
+          deletedAt: null,
         })),
       },
     } as any);

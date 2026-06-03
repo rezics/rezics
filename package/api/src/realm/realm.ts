@@ -91,7 +91,7 @@ export type {
   RealmTagApplicationDTO,
   RealmView,
   UnitRealmDTO,
-  UnitRealmModerationState,
+  ModerationStatus,
   UpdateMemberRoleInput,
   UpdateRealmInput,
   UpdateRealmRulePolicyInput,
