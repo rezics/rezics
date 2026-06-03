@@ -23,7 +23,122 @@ type ModerationActionCreateInput = {
   importedFrom?: string | null;
 };
 
+type ModerationActionAppendTx =
+  | Pick<Prisma.TransactionClient, "moderationAction">
+  | Pick<typeof prisma, "moderationAction">;
 type ModerationTx = Prisma.TransactionClient | typeof prisma;
+
+type ModerationActionFieldRule = "forbidden" | "allowed" | "required";
+
+type ModerationActionRule = {
+  targets: readonly Prisma.ModerationActionCreateInput["targetKind"][];
+  resultingStatus: ModerationActionFieldRule;
+  resultingLocked: ModerationActionFieldRule;
+};
+
+const allTargets = [
+  "UNIT",
+  "UNIT_REALM",
+  "COMMENT",
+  "UNIT_FIELD",
+  "ACCOUNT",
+  "REALM_MEMBER",
+  "FEEDBACK",
+] as const satisfies readonly Prisma.ModerationActionCreateInput["targetKind"][];
+
+const contentTargets = ["UNIT", "UNIT_REALM", "COMMENT"] as const;
+const snapshotStatusRule = {
+  targets: contentTargets,
+  resultingStatus: "required",
+  resultingLocked: "forbidden",
+} as const satisfies ModerationActionRule;
+const noSnapshotRule = (
+  targets: readonly Prisma.ModerationActionCreateInput["targetKind"][],
+) =>
+  ({
+    targets,
+    resultingStatus: "forbidden",
+    resultingLocked: "forbidden",
+  }) as const satisfies ModerationActionRule;
+const lockRule = (
+  targets: readonly Prisma.ModerationActionCreateInput["targetKind"][],
+) =>
+  ({
+    targets,
+    resultingStatus: "forbidden",
+    resultingLocked: "required",
+  }) as const satisfies ModerationActionRule;
+
+export const moderationActionRules = {
+  APPROVE: snapshotStatusRule,
+  REMOVE: snapshotStatusRule,
+  RESTORE: snapshotStatusRule,
+  LOCK: lockRule(contentTargets),
+  UNLOCK: lockRule(contentTargets),
+  FIELD_LOCK: lockRule(["UNIT_FIELD"] as const),
+  FIELD_UNLOCK: lockRule(["UNIT_FIELD"] as const),
+  WARNING: noSnapshotRule(["ACCOUNT"] as const),
+  SILENCE: noSnapshotRule(["ACCOUNT"] as const),
+  SUSPENSION: noSnapshotRule(["ACCOUNT"] as const),
+  BAN: noSnapshotRule(["ACCOUNT"] as const),
+  RATE_LIMIT: noSnapshotRule(["ACCOUNT"] as const),
+  TRUST_RESTRICTION: noSnapshotRule(["ACCOUNT"] as const),
+  REVOKE_ENFORCEMENT: noSnapshotRule(["ACCOUNT"] as const),
+  MUTE_MEMBER: noSnapshotRule(["REALM_MEMBER"] as const),
+  REMOVE_MEMBER: noSnapshotRule(["REALM_MEMBER"] as const),
+  BAN_MEMBER: noSnapshotRule(["REALM_MEMBER"] as const),
+  RESTORE_MEMBER: noSnapshotRule(["REALM_MEMBER"] as const),
+  ESCALATE: noSnapshotRule(allTargets),
+  REVERSE: noSnapshotRule(allTargets),
+  NOTE: {
+    targets: allTargets,
+    resultingStatus: "allowed",
+    resultingLocked: "allowed",
+  },
+} as const satisfies Record<
+  Prisma.ModerationActionCreateInput["actionKind"],
+  ModerationActionRule
+>;
+
+function validateFieldRule(
+  field: "resultingStatus" | "resultingLocked",
+  rule: ModerationActionFieldRule,
+  value: unknown,
+  actionKind: Prisma.ModerationActionCreateInput["actionKind"],
+) {
+  if (rule === "required" && value === undefined) {
+    throw new Error(`${actionKind} requires ${field}`);
+  }
+  if (rule === "required" && value === null) {
+    throw new Error(`${actionKind} requires ${field}`);
+  }
+  if (rule === "forbidden" && value !== undefined && value !== null) {
+    throw new Error(`${actionKind} must not carry ${field}`);
+  }
+}
+
+export function validateModerationActionInput(
+  input: ModerationActionCreateInput,
+) {
+  const rule = moderationActionRules[input.actionKind];
+  if (!rule.targets.includes(input.targetKind)) {
+    throw new Error(
+      `${input.actionKind} is not allowed for ${input.targetKind}`,
+    );
+  }
+  validateFieldRule(
+    "resultingStatus",
+    rule.resultingStatus,
+    input.resultingStatus,
+    input.actionKind,
+  );
+  validateFieldRule(
+    "resultingLocked",
+    rule.resultingLocked,
+    input.resultingLocked,
+    input.actionKind,
+  );
+}
 
 function actionData(input: ModerationActionCreateInput) {
   return {
@@ -54,9 +169,11 @@ export class ModerationActionService {
    * not derive it only from target+action because repeated cycles are valid.
    */
   async appendModerationAction(
-    tx: ModerationTx,
+    tx: ModerationActionAppendTx,
     input: ModerationActionCreateInput,
   ) {
+    validateModerationActionInput(input);
+
     if (input.idempotencyKey) {
       const existing = await tx.moderationAction.findUnique({
         where: { idempotencyKey: input.idempotencyKey },

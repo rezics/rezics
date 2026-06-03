@@ -51,6 +51,7 @@ import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
+import { moderationActionService } from "../governance/moderation-action.service";
 import { AppError } from "../utils/errors";
 import { mapCommentPromotionToDTO } from "./post.mapper";
 import type { PostWithRelations } from "./types";
@@ -381,20 +382,18 @@ export class PostService {
         metadata: { relationModeration: true } as never,
       },
     });
-    await tx.moderationAction.create({
-      data: {
-        authority: "REALM",
-        realmUnitId: input.realmUnitId,
-        targetKind: "UNIT_REALM",
-        targetId: input.unitId,
-        actionKind: "NOTE",
-        actorKind: "USER",
-        actorUserId: input.actorUserId,
-        reasonCode: "realm.submission.pending_review",
-        reasonText: created.reason,
-        resultingStatus: "PENDING",
-        caseId: created.id,
-      },
+    await moderationActionService.appendModerationAction(tx, {
+      authority: "REALM",
+      realmUnitId: input.realmUnitId,
+      targetKind: "UNIT_REALM",
+      targetId: input.unitId,
+      actionKind: "NOTE",
+      actorKind: "USER",
+      actorUserId: input.actorUserId,
+      reasonCode: "realm.submission.pending_review",
+      reasonText: created.reason,
+      resultingStatus: "PENDING",
+      caseId: created.id,
     });
   }
 

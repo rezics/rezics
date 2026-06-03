@@ -100,6 +100,7 @@ export const bookListQuerySchema = t.Object({
   isbn13: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   status: t.Optional(t.String()),
+  moderationStatus: t.Optional(t.String()),
   sort: t.Optional(
     t.Object({
       type: t.Optional(t.String()),
@@ -130,6 +131,7 @@ export const bookListBodySchema = t.Object({
   isbn13: t.Optional(t.String()),
   visibility: t.Optional(t.String()),
   status: t.Optional(t.String()),
+  moderationStatus: t.Optional(t.String()),
   sort: t.Optional(
     t.Object({
       type: t.Optional(t.String()),

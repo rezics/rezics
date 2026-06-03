@@ -117,8 +117,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
         ? query
         : {
             ...query,
-            status: publicUnitEligibilityWhere.status,
-            visibility: publicUnitEligibilityWhere.visibility,
+            ...publicUnitEligibilityWhere,
           };
 
       const { books, total } = await bookService.list(effectiveQuery);
@@ -154,8 +153,7 @@ export const bookApi = new Elysia({ prefix: "/book" })
         ? query
         : {
             ...query,
-            status: publicUnitEligibilityWhere.status,
-            visibility: publicUnitEligibilityWhere.visibility,
+            ...publicUnitEligibilityWhere,
           };
 
       const { books, total } = await bookService.list(effectiveQuery);

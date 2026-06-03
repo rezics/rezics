@@ -13,6 +13,7 @@ import type { Prisma } from "#/prisma/client";
 import {
   type AiDisclosureMode,
   type ContentRating,
+  type ModerationStatus,
   prisma,
   UnitStatus,
   UnitType,
@@ -165,6 +166,14 @@ export class BookService {
     if (options.status?.trim()) {
       andWhere.push({
         unit: { status: options.status as UnitStatus },
+      });
+    }
+
+    if (options.moderationStatus?.trim()) {
+      andWhere.push({
+        unit: {
+          moderationStatus: options.moderationStatus as ModerationStatus,
+        },
       });
     }
 

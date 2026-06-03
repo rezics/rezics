@@ -3,19 +3,29 @@ import {
   LICENSE_SLUGS,
   type LicenseSlug,
 } from "@rezics/contract";
-import { type Unit, UnitStatus, UnitVisibility } from "#/prisma/client";
+import {
+  ModerationStatus,
+  type Unit,
+  UnitStatus,
+  UnitVisibility,
+} from "#/prisma/client";
 
-type PublicEligibilityUnit = Pick<Unit, "status" | "visibility">;
+type PublicEligibilityUnit = Pick<
+  Unit,
+  "status" | "visibility" | "moderationStatus"
+>;
 
 export const publicUnitEligibilityWhere = {
   status: UnitStatus.PUBLISHED,
   visibility: UnitVisibility.PUBLIC,
+  moderationStatus: ModerationStatus.APPROVED,
 } as const;
 
 export function isPublicEligibleUnit(unit: PublicEligibilityUnit): boolean {
   return (
     unit.status === UnitStatus.PUBLISHED &&
-    unit.visibility === UnitVisibility.PUBLIC
+    unit.visibility === UnitVisibility.PUBLIC &&
+    unit.moderationStatus === ModerationStatus.APPROVED
   );
 }
 

@@ -386,6 +386,20 @@ describe("BookService.list", () => {
     expect(findArgs.skip).toBe(10);
     expect(findArgs.take).toBe(5);
   });
+
+  test("filters by unit moderation status", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.list({
+      moderationStatus: "APPROVED",
+      limit: 5,
+    } as any);
+
+    const findArgs = mockFindManyBook.mock.calls[0]?.[0] as any;
+    expect(findArgs.where).toEqual({
+      AND: [{ unit: { moderationStatus: "APPROVED" } }],
+    });
+  });
 });
 
 describe("BookService.update", () => {

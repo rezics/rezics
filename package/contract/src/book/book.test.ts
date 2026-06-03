@@ -154,6 +154,7 @@ describe("book list schemas", () => {
       Value.Check(bookListQuerySchema, {
         languages: "ja,en",
         languageMode: "preferred",
+        moderationStatus: "APPROVED",
         limit: 20,
       }),
     ).toBe(true);
@@ -161,6 +162,7 @@ describe("book list schemas", () => {
       Value.Check(bookListBodySchema, {
         languages: ["ja", "en"],
         languageMode: "all",
+        moderationStatus: "APPROVED",
         limit: 20,
       }),
     ).toBe(true);

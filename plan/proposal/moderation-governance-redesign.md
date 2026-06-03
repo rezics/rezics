@@ -182,7 +182,7 @@ reset + reseed is acceptable; a backfill script is optional.
   `latestActionsFor(targetKind, ids[])` using deterministic ordering
   `createdAt DESC, id DESC`. Expose `latestEffectiveRemoveFor` for RESTORE
   precedence (`REMOVE` not already reversed by a later RESTORE). `(test)`
-- [ ] 1.2 Centralize moderation target/action validation: every action kind must
+- [x] 1.2 Centralize moderation target/action validation: every action kind must
   declare allowed targets, resulting snapshot field(s), and whether it may carry
   `resultingStatus`/`resultingLocked`. Legacy imported target strings are mapped
   in one place rather than scattered string switches. `(test)`
@@ -191,7 +191,7 @@ reset + reseed is acceptable; a backfill script is optional.
   content/comment actions; owner authority covers only root-unit owner or
   collaborator `owner`/`maintainer`. Add explicit capability keys for any new
   comment, account enforcement, and realm member moderation actions. `(test)`
-- [ ] 1.4 Update canonical public eligibility helpers:
+- [x] 1.4 Update canonical public eligibility helpers:
   `publicUnitEligibilityWhere`, `isPublicEligibleUnit`, and equivalent read-path
   helpers must require `Unit.moderationStatus = APPROVED` in addition to
   `status=PUBLISHED` and `visibility=PUBLIC`. `(test)`
