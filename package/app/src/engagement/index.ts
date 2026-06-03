@@ -10,10 +10,17 @@ export type {
 } from "./components/ReportAction";
 export { ReportAction } from "./components/ReportAction";
 export {
+  ReactionActionRow,
   ReactionBar,
+  ReactionOverflowMenu,
   type ReactionBarPolicy,
   type ReactionBarPost,
   type ReactionBarProps,
+  type ReactionBarModel,
+  type ReactionBarModelArgs,
+  type ReactionActionRowProps,
+  type ReactionOverflowMenuProps,
+  useReactionBarModel,
 } from "./components/ReactionBar";
 export type { ReactionBarContextValue } from "./components/ReactionBarContext";
 export {

@@ -5,6 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
@@ -29,27 +30,33 @@ function DropdownSample() {
         Open menu
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>My account</DropdownMenuLabel>
-        <DropdownMenuItem>
-          Profile <DropdownMenuShortcut>⌘P</DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuItem>Settings</DropdownMenuItem>
-        <DropdownMenuItem variant="destructive">Sign out</DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>My account</DropdownMenuLabel>
+          <DropdownMenuItem>
+            Profile <DropdownMenuShortcut>⌘P</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem variant="destructive">Sign out</DropdownMenuItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuCheckboxItem checked>
           Show keyboard shortcuts
         </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
-        <DropdownMenuRadioGroup value="comfortable">
+        <DropdownMenuGroup>
           <DropdownMenuLabel>Density</DropdownMenuLabel>
-          <DropdownMenuRadioItem value="compact">Compact</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="comfortable">
-            Comfortable
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="spacious">
-            Spacious
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
+          <DropdownMenuRadioGroup value="comfortable">
+            <DropdownMenuRadioItem value="compact">
+              Compact
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="comfortable">
+              Comfortable
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="spacious">
+              Spacious
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

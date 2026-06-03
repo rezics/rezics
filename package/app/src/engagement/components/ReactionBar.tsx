@@ -58,6 +58,38 @@ export type ReactionBarProps = {
   className?: string;
 };
 
+export type ReactionBarModelArgs = Omit<ReactionBarProps, "className">;
+
+export type ReactionBarModel = {
+  post: ReactionBarPost;
+  policy: ReactionBarPolicy;
+  visible: Action[];
+  hidden: Action[];
+  hasOverflow: boolean;
+  size: EngagementSize;
+  variant: ReactionBarVariant;
+  summaryScopeKey?: string | null;
+  reactionScopeKey?: string | null;
+  onReplyInvoke?: () => void;
+  replyMode: "count" | "label";
+  overflowContent?: React.ReactNode;
+  authModal: React.ReactNode;
+  shareHref: string;
+  shareTitle?: string;
+  handleReplyInvoke: () => void;
+  handleOverflowInvoke: (token: Action) => void;
+};
+
+export type ReactionActionRowProps = {
+  model: ReactionBarModel;
+  className?: string;
+};
+
+export type ReactionOverflowMenuProps = {
+  model: ReactionBarModel;
+  className?: string;
+};
+
 function resolvePolicy(
   actions: Action[] | undefined,
   overflow: Action[] | undefined,
@@ -70,7 +102,24 @@ function resolvePolicy(
   return { visible: rawActions, hidden };
 }
 
-export const ReactionBar: React.FC<ReactionBarProps> = ({
+function reactionBarGapClass(
+  variant: ReactionBarVariant,
+  size: EngagementSize,
+) {
+  return variant === "pill"
+    ? size === "sm"
+      ? "gap-1"
+      : size === "lg"
+        ? "gap-2"
+        : "gap-1.5"
+    : size === "sm"
+      ? "gap-0.5"
+      : size === "lg"
+        ? "gap-2"
+        : "gap-1";
+}
+
+export function useReactionBarModel({
   post,
   policy,
   actions,
@@ -83,24 +132,22 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
   onReplyInvoke,
   replyMode = "count",
   overflowContent,
-  className,
-}) => {
+}: ReactionBarModelArgs): ReactionBarModel {
   const authGuard = useAuthGuard();
   const { visible, hidden } = resolvePolicy(actions, overflow, actionPolicy);
   const hasOverflowContent =
     overflowContent !== undefined && overflowContent !== null;
   const hasOverflow = hidden.length > 0 || hasOverflowContent;
-  const visibleActions =
-    hasOverflow && !visible.includes("more")
-      ? [...visible, "more" as Action]
-      : visible;
   const shareHref = policy.getShareHref(post);
   const shareTitle = policy.getShareTitle?.(post);
+  const handleReplyInvoke = () => {
+    if (authGuard.requireAuth()) onReplyInvoke?.();
+  };
 
   const handleOverflowInvoke = (token: Action) => {
     switch (token) {
       case "reply":
-        if (authGuard.requireAuth()) onReplyInvoke?.();
+        handleReplyInvoke();
         break;
       default:
         // share / shelf require their popover roots; if they appear in
@@ -110,18 +157,46 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
     }
   };
 
-  const gapClass =
-    variant === "pill"
-      ? size === "sm"
-        ? "gap-1"
-        : size === "lg"
-          ? "gap-2"
-          : "gap-1.5"
-      : size === "sm"
-        ? "gap-0.5"
-        : size === "lg"
-          ? "gap-2"
-          : "gap-1";
+  return {
+    post,
+    policy,
+    visible: visible.filter((token) => token !== "more"),
+    hidden,
+    hasOverflow,
+    size,
+    variant,
+    summaryScopeKey,
+    reactionScopeKey,
+    onReplyInvoke,
+    replyMode,
+    overflowContent,
+    authModal: authGuard.AuthModal({}),
+    shareHref,
+    shareTitle,
+    handleReplyInvoke,
+    handleOverflowInvoke,
+  };
+}
+
+export const ReactionActionRow: React.FC<ReactionActionRowProps> = ({
+  model,
+  className,
+}) => {
+  const {
+    post,
+    policy,
+    visible,
+    size,
+    variant,
+    summaryScopeKey,
+    reactionScopeKey,
+    replyMode,
+    shareHref,
+    shareTitle,
+    handleReplyInvoke,
+  } = model;
+
+  const gapClass = reactionBarGapClass(variant, size);
 
   const handleBarClick = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -147,7 +222,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
         )}
         onClick={handleBarClick}
       >
-        {visibleActions.map((token) => {
+        {visible.map((token) => {
           switch (token) {
             case "vote":
               return (
@@ -164,9 +239,7 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
                   key="reply"
                   replyCount={post.replyCount ?? 0}
                   mode={replyMode}
-                  onInvoke={() => {
-                    if (authGuard.requireAuth()) onReplyInvoke?.();
-                  }}
+                  onInvoke={handleReplyInvoke}
                 />
               );
             case "share":
@@ -199,7 +272,48 @@ export const ReactionBar: React.FC<ReactionBarProps> = ({
               return null;
           }
         })}
-        {authGuard.AuthModal({})}
+        {model.authModal}
+      </div>
+    </ReactionBarProvider>
+  );
+};
+
+export const ReactionOverflowMenu: React.FC<ReactionOverflowMenuProps> = ({
+  model,
+  className,
+}) => {
+  if (!model.hasOverflow) return null;
+
+  return (
+    <div className={className} onClick={(event) => event.stopPropagation()}>
+      <OverflowMenu
+        items={model.hidden}
+        size={model.size}
+        onInvoke={model.handleOverflowInvoke}
+      >
+        {model.overflowContent}
+      </OverflowMenu>
+    </div>
+  );
+};
+
+export const ReactionBar: React.FC<ReactionBarProps> = (props) => {
+  const model = useReactionBarModel(props);
+  const gapClass = reactionBarGapClass(model.variant, model.size);
+
+  return (
+    <ReactionBarProvider value={{ variant: model.variant, size: model.size }}>
+      <div
+        className={cn(
+          "flex flex-row items-center",
+          gapClass,
+          model.variant === "pill" ? "flex-nowrap" : "flex-wrap",
+          props.className,
+        )}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <ReactionActionRow model={model} />
+        <ReactionOverflowMenu model={model} />
       </div>
     </ReactionBarProvider>
   );
