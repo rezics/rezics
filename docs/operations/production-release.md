@@ -67,7 +67,30 @@ bin/deploy <sha> workers      # job-runner (http) + job-runner-worker + ranking-
 
 Worker units scale independently of HTTP services (replica count + `WORKERS`).
 
-## 6. Ranking Meili backfill
+## 6. Search Meili index refresh
+
+After search document-shape or index-settings changes, check the admin status
+page or `GET /meili/status` for drift before opening the frontend rollout.
+Language-resolution releases that add `languages` or `isLanguageNeutral`
+filtering must refresh these root/admin operations in order:
+
+```text
+POST /meili/content/init
+POST /meili/posts/init
+POST /meili/polls/init
+POST /meili/realms/init
+
+POST /meili/content/sync
+POST /meili/posts/sync
+POST /meili/polls/sync
+POST /meili/realms/sync
+```
+
+Federated search sections read from those same indexes, so no separate
+federated index exists to backfill. Re-check `GET /meili/status` after the syncs
+and confirm the affected indexes have no settings drift or failed Meili tasks.
+
+## 7. Ranking Meili backfill
 
 After ranking-relevant schema or index-settings changes:
 
@@ -75,7 +98,7 @@ After ranking-relevant schema or index-settings changes:
 bin/deploy <sha> backfill     # enqueues ranking.fullSync (idempotent)
 ```
 
-## 7. Frontends (Cloudflare)
+## 8. Frontends (Cloudflare)
 
 Run `deploy-frontend.yml` (or `wrangler pages deploy`) for `app` and `admin`
 **after** backends. `VITE_*` are build-time public config.
