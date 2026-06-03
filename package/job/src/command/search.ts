@@ -32,6 +32,10 @@ export const SEARCH_COMMAND_KINDS = {
   commentDelete: "search.comment.delete",
   commentFullSync: "search.comment.fullSync",
 
+  pollSync: "search.poll.sync",
+  pollDelete: "search.poll.delete",
+  pollFullSync: "search.poll.fullSync",
+
   realmSync: "search.realm.sync",
   realmDelete: "search.realm.delete",
   realmPatchMetadata: "search.realm.patchMetadata",
@@ -71,6 +75,7 @@ export type SearchCommandKind =
 const UnitTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const PostTargetPayloadSchema = v.strictObject({ postId: v.string() });
 const CommentTargetPayloadSchema = v.strictObject({ commentId: v.string() });
+const PollTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const RealmTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const EntityTargetPayloadSchema = v.strictObject({ unitId: v.string() });
 const UserTargetPayloadSchema = v.strictObject({ userId: v.string() });
@@ -217,6 +222,21 @@ export const CommentFullSyncCommandSchema = commandSchema(
   SEARCH_COMMAND_KINDS.commentFullSync,
   JOB_LANES.maintenance,
   FullSyncPayloadSchema,
+);
+export const PollFullSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.pollFullSync,
+  JOB_LANES.maintenance,
+  FullSyncPayloadSchema,
+);
+export const PollSyncCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.pollSync,
+  JOB_LANES.searchSyncFast,
+  PollTargetPayloadSchema,
+);
+export const PollDeleteCommandSchema = commandSchema(
+  SEARCH_COMMAND_KINDS.pollDelete,
+  JOB_LANES.searchSyncFast,
+  PollTargetPayloadSchema,
 );
 
 export const RealmSyncCommandSchema = commandSchema(
@@ -379,6 +399,9 @@ export const SearchCommandSchema = v.union([
   CommentSyncCommandSchema,
   CommentDeleteCommandSchema,
   CommentFullSyncCommandSchema,
+  PollSyncCommandSchema,
+  PollDeleteCommandSchema,
+  PollFullSyncCommandSchema,
   RealmSyncCommandSchema,
   RealmDeleteCommandSchema,
   RealmPatchMetadataCommandSchema,

@@ -29,6 +29,7 @@ import {
   type SearchClient,
   type SearchSegmentOptions,
   type SearchSegmentResult,
+  syncAllPolls,
   syncCommentSegment,
   syncContentSegment,
   syncEntitySegment,
@@ -43,6 +44,7 @@ import {
   syncSingleContent,
   syncSingleEntity,
   syncSingleFeedback,
+  syncSinglePoll,
   syncSinglePost,
   syncSingleProgress,
   syncSingleRealm,
@@ -270,6 +272,16 @@ export function createSearchHandlers(client: SearchClient) {
         deleteAll: () => client.deleteAllComments(),
         syncSegment: (options) => syncCommentSegment(client, options),
       }),
+
+    [SEARCH_COMMAND_KINDS.pollSync]: async (command) =>
+      "unitId" in command.payload
+        ? syncSinglePoll(client, command.payload.unitId)
+        : undefined,
+    [SEARCH_COMMAND_KINDS.pollDelete]: async (command) =>
+      "unitId" in command.payload
+        ? client.deletePolls([command.payload.unitId])
+        : undefined,
+    [SEARCH_COMMAND_KINDS.pollFullSync]: async () => syncAllPolls(client),
 
     [SEARCH_COMMAND_KINDS.realmSync]: async (command) =>
       "unitId" in command.payload

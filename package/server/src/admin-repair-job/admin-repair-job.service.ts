@@ -32,9 +32,12 @@ const SEARCH_INDEX_REBUILD_TARGETS = {
   feedbacks: "feedback",
   users: "user",
   posts: "post",
+  comments: "comment",
+  polls: "poll",
   realms: "realm",
   entities: "entity",
-  progress: "progress",
+  user_unit_progress: "progress",
+  user_unit_collections: "collection",
 } as const;
 
 type SearchIndexUid = keyof typeof SEARCH_INDEX_REBUILD_TARGETS;
@@ -78,13 +81,17 @@ function parseFailedJobTarget(target: string) {
   const separator = target.indexOf(":");
   if (separator <= 0 || separator === target.length - 1) return null;
   return {
-    lane: target.slice(0, separator),
+    lane: baseFailedJobLane(target.slice(0, separator)),
     id: target.slice(separator + 1),
   };
 }
 
 function jobRunnerUrl(baseUrl: string, path: string) {
   return `${baseUrl.replace(/\/+$/, "")}${path}`;
+}
+
+function baseFailedJobLane(lane: string) {
+  return lane.endsWith(".dead") ? lane.slice(0, -".dead".length) : lane;
 }
 
 async function retryFailedJob(
@@ -135,7 +142,7 @@ async function discardFailedJob(
   const response = await options.fetchImpl(
     jobRunnerUrl(
       options.jobRunnerBaseUrl,
-      `/admin/jobs/failed/${encodeURIComponent(input.lane)}/${encodeURIComponent(input.jobId)}/discard`,
+      `/admin/jobs/failed/${encodeURIComponent(baseFailedJobLane(input.lane))}/${encodeURIComponent(input.jobId)}/discard`,
     ),
     {
       method: "POST",
@@ -148,7 +155,7 @@ async function discardFailedJob(
 
   return {
     jobId: input.jobId,
-    lane: input.lane,
+    lane: baseFailedJobLane(input.lane),
     kind: "job-runner.failed.cancel",
     status: "cancelled",
     idempotencyKey: null,
@@ -189,7 +196,11 @@ function createAdminRepairJobService(options: AdminRepairJobServiceOptions) {
 
       if (input.scope === "search") {
         targets = system.meili.indexes
-          .filter((index) => index.settingsDrift?.hasDrift || !index.exists)
+          .filter(
+            (index) =>
+              index.expected.supportsFullSync !== false &&
+              (index.settingsDrift?.hasDrift || !index.exists),
+          )
           .map((index) => index.uid);
       } else if (input.scope === "history-outbox") {
         targets = system.queue.failedJobs

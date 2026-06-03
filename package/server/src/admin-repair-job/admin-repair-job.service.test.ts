@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { EnqueueResult } from "@rezics/job";
+import { EXPECTED_MEILI_INDEX_SCHEMAS } from "@rezics/search";
 import type { GovernanceAuditService } from "@/governance/audit.service";
 
 mock.module("@/env", () => ({
@@ -73,30 +74,54 @@ describe("adminRepairJobService", () => {
       internalSecret: "secret",
       auditService: auditService(),
     });
+    const repairableIndexUids = EXPECTED_MEILI_INDEX_SCHEMAS.filter(
+      (schema) => schema.supportsFullSync !== false,
+    ).map((schema) => schema.uid);
 
     const job = await service.start({
       scope: "search",
-      targetIds: ["content", "users"],
+      targetIds: repairableIndexUids,
       dryRunId: "dryrun-1",
       reason: "repair search drift",
     });
 
     expect(job.status).toBe("pending");
-    expect(job.progress).toEqual({ completed: 0, total: 2 });
+    expect(job.progress).toEqual({
+      completed: 0,
+      total: repairableIndexUids.length,
+    });
     expect(enqueued.map((command) => command.payload.index)).toEqual([
       "content",
+      "feedback",
       "user",
+      "post",
+      "comment",
+      "poll",
+      "collection",
+      "realm",
+      "entity",
+      "progress",
     ]);
     expect(job.queuedOperations?.map((operation) => operation.jobId)).toEqual([
       "job-1",
       "job-2",
+      "job-3",
+      "job-4",
+      "job-5",
+      "job-6",
+      "job-7",
+      "job-8",
+      "job-9",
+      "job-10",
     ]);
   });
 
   test("routes failed history outbox targets to job-runner retry", async () => {
     const auditCalls: any[] = [];
     const fetchImpl = mock(async (url: string, init?: RequestInit) => {
-      expect(url).toBe("http://jobs/admin/jobs/failed/search/job-1/retry");
+      expect(url).toBe(
+        "http://jobs/admin/jobs/failed/search.sync.fast/job-1/retry",
+      );
       expect(init?.method).toBe("POST");
       expect(init?.headers).toEqual({ "x-internal-secret": "secret" });
       return new Response(JSON.stringify({ status: "ok" }), { status: 200 });
@@ -118,7 +143,7 @@ describe("adminRepairJobService", () => {
 
     const job = await service.start({
       scope: "history-outbox",
-      targetIds: ["search:job-1"],
+      targetIds: ["search.sync.fast.dead:job-1"],
       reason: "retry failed job",
       actorUserId: "user-1",
     });
@@ -127,7 +152,7 @@ describe("adminRepairJobService", () => {
     expect(job.queuedOperations).toEqual([
       {
         jobId: "job-1",
-        lane: "search",
+        lane: "search.sync.fast",
         kind: "job-runner.failed.retry",
         status: "retried",
         idempotencyKey: null,
@@ -194,7 +219,7 @@ describe("adminRepairJobService", () => {
       actorUserId: "user-1",
     });
     const cancel = await service.cancelOperation({
-      lane: "maintenance",
+      lane: "search.sync.slow.dead",
       jobId: "job-2",
       reason: "cancel repair job",
       actorUserId: "user-1",
@@ -202,7 +227,7 @@ describe("adminRepairJobService", () => {
 
     expect(urls).toEqual([
       "http://jobs/admin/jobs/failed/maintenance/job-1/retry",
-      "http://jobs/admin/jobs/failed/maintenance/job-2/discard",
+      "http://jobs/admin/jobs/failed/search.sync.slow/job-2/discard",
     ]);
     expect(retry.operation.status).toBe("retried");
     expect(cancel.operation.status).toBe("cancelled");

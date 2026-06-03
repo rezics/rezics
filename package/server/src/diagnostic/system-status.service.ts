@@ -27,9 +27,10 @@ const ROUTED_SEQUIN_TABLES = [
   "SubjectAttribution",
   "UnitRealm",
   "RealmTagApplication",
-  "RealmTagUnit",
   "ShelfUnit",
   "Post",
+  "ScoreEntry",
+  "ScoreAggregate",
   "User",
   "UserUnitProgress",
   "Feedback",
@@ -312,8 +313,8 @@ async function getCdcStatus(options: {
             lag_bytes: bigint | number | null;
           }>
         >(
-          `SELECT slot_name, active, confirmed_flush_lsn,
-                  pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn) AS lag_bytes
+          `SELECT slot_name, active, confirmed_flush_lsn::text AS confirmed_flush_lsn,
+                  pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)::bigint AS lag_bytes
            FROM pg_replication_slots
            WHERE slot_name = $1`,
           slotName,

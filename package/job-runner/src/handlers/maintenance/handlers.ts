@@ -16,6 +16,8 @@ function searchSyncKindForTarget(targetType: string) {
       return SEARCH_COMMAND_KINDS.postSync;
     case "comment":
       return SEARCH_COMMAND_KINDS.commentSync;
+    case "poll":
+      return SEARCH_COMMAND_KINDS.pollSync;
     case "realm":
       return SEARCH_COMMAND_KINDS.realmSync;
     case "entity":
@@ -37,6 +39,8 @@ function fullSyncKindForIndex(index: string) {
       return SEARCH_COMMAND_KINDS.postFullSync;
     case "comment":
       return SEARCH_COMMAND_KINDS.commentFullSync;
+    case "poll":
+      return SEARCH_COMMAND_KINDS.pollFullSync;
     case "realm":
       return SEARCH_COMMAND_KINDS.realmFullSync;
     case "entity":

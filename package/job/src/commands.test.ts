@@ -86,13 +86,39 @@ describe("@rezics/job command contract", () => {
       MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
       { index: "content", cursor: "unit-1", limit: 100 },
     );
+    const commentCommand = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
+      { index: "comment", cursor: "comment-1", limit: 100 },
+    );
+    const collectionCommand = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
+      { index: "collection", cursor: "user-1:unit-1", limit: 100 },
+    );
+    const pollCommand = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
+      { index: "poll", cursor: "poll-1", limit: 100 },
+    );
 
     expect(command.kind).toBe("maintenance.search.rebuildIndex");
     expect(command.lane).toBe(JOB_LANES.maintenance);
     expect(command.idempotencyKey).toBe(
       "maintenance.search.rebuildIndex:content:unit-1",
     );
+    expect(commentCommand.idempotencyKey).toBe(
+      "maintenance.search.rebuildIndex:comment:comment-1",
+    );
+    expect(collectionCommand.idempotencyKey).toBe(
+      "maintenance.search.rebuildIndex:collection:user-1_unit-1",
+    );
+    expect(pollCommand.idempotencyKey).toBe(
+      "maintenance.search.rebuildIndex:poll:poll-1",
+    );
     expect(v.parse(JobCommandSchema, command)).toEqual(command);
+    expect(v.parse(JobCommandSchema, commentCommand)).toEqual(commentCommand);
+    expect(v.parse(JobCommandSchema, collectionCommand)).toEqual(
+      collectionCommand,
+    );
+    expect(v.parse(JobCommandSchema, pollCommand)).toEqual(pollCommand);
   });
 
   test("validates Series repair maintenance commands", () => {

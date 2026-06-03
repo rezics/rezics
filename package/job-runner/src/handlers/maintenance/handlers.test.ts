@@ -45,6 +45,34 @@ describe("maintenance handlers", () => {
     ]);
   });
 
+  test.each([
+    ["content", "search.content.fullSync"],
+    ["post", "search.post.fullSync"],
+    ["comment", "search.comment.fullSync"],
+    ["poll", "search.poll.fullSync"],
+    ["realm", "search.realm.fullSync"],
+    ["entity", "search.entity.fullSync"],
+    ["user", "search.user.fullSync"],
+    ["feedback", "search.feedback.fullSync"],
+    ["progress", "search.progress.fullSync"],
+    ["collection", "search.collection.fullSync"],
+  ] as const)("rebuild maps %s to %s", async (index, expectedKind) => {
+    const enqueued: string[] = [];
+    const handlers = createMaintenanceHandlers();
+    const command = createMaintenanceCommand(
+      MAINTENANCE_COMMAND_KINDS.searchRebuildIndex,
+      { index },
+    );
+
+    await handlers[command.kind]?.(command, {
+      enqueue: async (next) => {
+        enqueued.push(next.kind);
+      },
+    });
+
+    expect(enqueued).toEqual([expectedKind]);
+  });
+
   test("replay by logical target enqueues current-state jobs", async () => {
     const enqueued: string[] = [];
     const handlers = createMaintenanceHandlers();
