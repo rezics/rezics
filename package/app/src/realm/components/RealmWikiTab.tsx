@@ -6,8 +6,8 @@ import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ExternalLink, Settings } from "lucide-react";
-import { PostCard } from "@/post";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { PostCard } from "@/post";
 import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 
 interface RealmWikiTabProps {

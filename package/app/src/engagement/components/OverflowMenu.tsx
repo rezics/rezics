@@ -5,6 +5,7 @@ const i18nMessages = {
   common_share: () => getI18nRuntime().i18n.t("common:share"),
   shelf_title: () => getI18nRuntime().i18n.t("entity:shelf_title"),
 } as const;
+
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,

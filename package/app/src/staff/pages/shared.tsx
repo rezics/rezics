@@ -1,10 +1,10 @@
+import { Link } from "@tanstack/react-router";
+import { ShieldAlert } from "lucide-react";
+import type { ReactNode } from "react";
 import {
   hasGovernanceCapabilityHint,
   useAuthSessionStore,
 } from "@/user/states";
-import { Link } from "@tanstack/react-router";
-import { ShieldAlert } from "lucide-react";
-import type { ReactNode } from "react";
 
 export function useStaffConsoleAccess() {
   return useAuthSessionStore((state) => ({

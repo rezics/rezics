@@ -3,6 +3,7 @@ export {
   REPO_ROOT,
   UI_LOCALES_ROOT,
 } from "../../core/paths";
+
 import { toRepoRelPath } from "../../core/paths";
 
 const EXEMPT_DIR_PATTERNS = [

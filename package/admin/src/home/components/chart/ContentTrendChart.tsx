@@ -1,6 +1,6 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { AdminStatsResponse } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   BarElement,
   CategoryScale,

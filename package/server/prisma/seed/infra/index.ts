@@ -14,15 +14,15 @@ import { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
 
 export { seedDefaultRealm } from "./seed-default-realm";
 export {
+  type GameMediaTaxonomySeedResult,
+  seedGameMediaTaxonomy,
+} from "./seed-game-media-taxonomy";
+export {
   type RealmTaxonomySeedResult,
   seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
 export { type SlugScopesMap, seedSlugScopes } from "./seed-slug-scopes";
 export { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
-export {
-  type GameMediaTaxonomySeedResult,
-  seedGameMediaTaxonomy,
-} from "./seed-game-media-taxonomy";
 
 export interface SeedInfraResult {
   slugScopes: SlugScopesMap;

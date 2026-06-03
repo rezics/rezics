@@ -1,6 +1,6 @@
 import type { BookshelfViewConfig } from "@rezics/contract";
-import { BookshelfGrid } from "@/bookshelf-view";
 import type { BookshelfItem } from "@/bookshelf-view";
+import { BookshelfGrid } from "@/bookshelf-view";
 
 export interface DashboardLibraryShelfBlockProps {
   items: readonly BookshelfItem[];

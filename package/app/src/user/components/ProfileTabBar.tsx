@@ -18,6 +18,7 @@ const i18nMessages = {
   profile_tab_activity: () =>
     getI18nRuntime().i18n.t("settings:profile_tab_activity"),
 } as const;
+
 import { Tabs, TabsList, TabsTrigger } from "@rezics/ui/shadcn";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import type { FC } from "react";

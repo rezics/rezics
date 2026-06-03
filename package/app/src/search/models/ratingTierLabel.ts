@@ -1,5 +1,6 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { ContentRating } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
 const RATING_TIER_LABEL = {
   GENERAL: () => getI18nRuntime().i18n.t("community:rating_tier_GENERAL"),
   R_15: () => getI18nRuntime().i18n.t("community:rating_tier_R_15"),

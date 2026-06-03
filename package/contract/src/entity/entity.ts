@@ -1,10 +1,10 @@
 import { t } from "elysia";
 import { creationModeSchema } from "../content/authority";
 import { contentDocWriteSchema } from "../content/doc-v1";
-import { creditAttributionRoleKeySchema } from "./credit-attribution.roles";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
-import { subjectAttributionRoleKeySchema } from "./subject-attribution.roles";
 import { unitTranslationDTOSchema } from "../unit/unit";
+import { creditAttributionRoleKeySchema } from "./credit-attribution.roles";
+import { subjectAttributionRoleKeySchema } from "./subject-attribution.roles";
 
 // ============================================================
 // KIND REGISTRY

@@ -5,19 +5,18 @@
  * `useLocale()` API used by the app shell.
  */
 
-import { type ReactNode, useEffect, useSyncExternalStore } from "react";
-import {
-  I18nextProvider,
-  Trans,
-  useTranslation,
-  initReactI18next,
-} from "react-i18next";
-
 import {
   DEFAULT_LANGUAGE,
   type Language,
   normalizeLanguage,
 } from "@rezics/contract/language-core";
+import { type ReactNode, useEffect, useSyncExternalStore } from "react";
+import {
+  I18nextProvider,
+  initReactI18next,
+  Trans,
+  useTranslation,
+} from "react-i18next";
 
 import {
   createI18nRuntime,
@@ -98,10 +97,8 @@ export function getLocale(): Language {
   return normalizeLanguage(getI18nRuntime().i18n.language) ?? DEFAULT_LANGUAGE;
 }
 
+export type { RezicsI18nRuntime };
 /**
  * Re-export the typed `useTranslation` and `Trans` from react-i18next.
  */
-export { Trans, useTranslation, initReactI18next };
-
-export { LOCALE_STORAGE_KEY };
-export type { RezicsI18nRuntime };
+export { initReactI18next, LOCALE_STORAGE_KEY, Trans, useTranslation };

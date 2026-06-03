@@ -1,5 +1,5 @@
-import { useEditorEntry } from "@rezics/api/hooks";
 import { commentListQuery, commentQuery } from "@rezics/api/comment/comment";
+import { useEditorEntry } from "@rezics/api/hooks";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";

@@ -3,6 +3,8 @@ export type {
   OwnerBearing,
   UseCanEditArgs,
 } from "./useCanEdit";
+export { useCanEdit } from "./useCanEdit";
+export { useCurrentUserId } from "./useCurrentUserId";
 export type {
   ComputeEditorEntryArgs,
   EditorEntryCapability,
@@ -14,6 +16,4 @@ export {
   computeEditorEntryDecision,
   useEditorEntry,
 } from "./useEditorEntry";
-export { useCanEdit } from "./useCanEdit";
-export { useCurrentUserId } from "./useCurrentUserId";
 export { useServerPermission } from "./useServerPermission";

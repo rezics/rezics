@@ -5,9 +5,9 @@ import type {
   SeriesKind,
   UnitTranslationDTO,
 } from "@rezics/contract";
+import type { SeriesContentIndex, UnitTranslation } from "#/prisma/client";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
-import type { SeriesContentIndex, UnitTranslation } from "#/prisma/client";
 import type { SeriesWithRelations } from "./series.types";
 
 function mapTranslation(tr: UnitTranslation): UnitTranslationDTO {

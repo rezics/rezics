@@ -4,6 +4,7 @@ import type {
   StructureEventDTO,
   UnitRevisionDTO,
 } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { useQuery } from "@tanstack/react-query";
 import {
   Link,
@@ -27,7 +28,6 @@ import {
   type HistoryFieldChange,
 } from "../models/historyCompare";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 type HistoryTab = "editorial" | "structure";
 
 export function BookHistoryPage() {

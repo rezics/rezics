@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { postListQuerySchema } from "../post";
 import {
   contentStructureDTOSchema,
   contentStructureNodeSchema,
 } from "./structure";
-import { postListQuerySchema } from "../post";
 
 describe("contentStructure schemas", () => {
   test("accept generic ownerUnitId and contentUnitId shape", () => {

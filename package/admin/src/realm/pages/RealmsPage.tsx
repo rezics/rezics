@@ -1,5 +1,6 @@
 import { type RealmDTO, realmQueries } from "@rezics/api/realm/realm";
 import type { UnitTranslationDTO } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   Button,
   Input,
@@ -18,7 +19,6 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 type BooleanFilter = "all" | "true" | "false";
 
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {

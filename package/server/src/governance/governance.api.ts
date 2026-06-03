@@ -1,6 +1,6 @@
 import {
-  activeAccountEnforcementSummarySchema,
   accountEnforcementDTOSchema,
+  activeAccountEnforcementSummarySchema,
   appealModerationCaseSchema,
   assignModerationCaseSchema,
   capabilityGrantDTOSchema,
@@ -16,8 +16,8 @@ import {
   duplicateModerationCaseSchema,
   escalateRealmModerationQueueItemSchema,
   grantCapabilitySchema,
-  moderationCaseEventDTOSchema,
   moderationCaseDTOSchema,
+  moderationCaseEventDTOSchema,
   policyDecisionSchema,
   policyInputSchema,
   realmContentModerationDTOSchema,

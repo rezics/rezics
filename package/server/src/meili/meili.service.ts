@@ -1,8 +1,8 @@
 import type {
-  ContentSearchOptions,
-  ContentSearchResult,
   CommentSearchOptions,
   CommentSearchResult,
+  ContentSearchOptions,
+  ContentSearchResult,
   EntitySearchOptions,
   EntitySearchResult,
   FeedbackListQuery,
@@ -17,18 +17,18 @@ import type {
   UserSearchResult,
 } from "@rezics/contract";
 import {
+  syncAllComments,
   syncAllContent,
   syncAllEntities,
   syncAllFeedbacks,
-  syncAllPosts,
   syncAllPolls,
-  syncAllComments,
+  syncAllPosts,
   syncAllRealms,
   syncAllUsers,
   syncSingleContent,
 } from "@rezics/search";
-import { searchContent } from "./content/content.service";
 import { searchComments } from "./comment/comment.service";
+import { searchContent } from "./content/content.service";
 import { searchEntities } from "./entity/entity.service";
 import { searchFeedbacks } from "./feedback/feedback.api";
 import { searchPolls } from "./poll/poll.service";

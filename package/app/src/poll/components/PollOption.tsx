@@ -5,8 +5,8 @@ import { Button } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import type React from "react";
-import { UnitCard, unitDtoToUnitCardSummary } from "@/unit";
 import { cn } from "@/shared/utils/css-util";
+import { UnitCard, unitDtoToUnitCardSummary } from "@/unit";
 import type { PollOptionView } from "../models/pollView";
 
 interface PollOptionProps {

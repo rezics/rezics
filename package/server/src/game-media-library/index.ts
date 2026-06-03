@@ -1,10 +1,10 @@
 export {
   EXPECTED_GAME_PLATFORM_SLUGS,
-  gameMediaAdminReadinessService,
-  GameMediaAdminReadinessService,
   type GameMediaAdminDiagnostics,
   type GameMediaAdminPlatform,
   type GameMediaAdminRatingTag,
+  GameMediaAdminReadinessService,
+  gameMediaAdminReadinessService,
 } from "./admin-readiness";
 export {
   mapGameLibraryContentToDTO,

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
   createObservabilityConfig,
-  createTelemetryConfig,
   createRequestTimingEvent,
+  createTelemetryConfig,
   formatRequestTimingEvent,
   initializeOpenTelemetry,
   redactSensitiveFields,

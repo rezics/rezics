@@ -13,6 +13,7 @@ const i18nMessages = {
   shelf_view_nested: () => getI18nRuntime().i18n.t("entity:shelf_view_nested"),
   shelf_view_list: () => getI18nRuntime().i18n.t("entity:shelf_view_list"),
 } as const;
+
 import {
   closestCenter,
   DndContext,

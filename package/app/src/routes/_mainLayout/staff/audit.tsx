@@ -1,5 +1,5 @@
-import { StaffAuditPage } from "@/staff";
 import { createFileRoute } from "@tanstack/react-router";
+import { StaffAuditPage } from "@/staff";
 
 type StaffAuditSearch = {
   action?: string;

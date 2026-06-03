@@ -40,12 +40,12 @@ export function computeV1RankingScores(
     reads * 0.2 +
     views * 0.05;
   const positiveEngagement = Math.max(engagement, 0);
-  const freshness = 1 / Math.pow(age + 2, 1.15);
+  const freshness = 1 / (age + 2) ** 1.15;
 
   const hotScore = positiveEngagement * freshness;
   const topScore = positiveEngagement;
   const trendingScore =
-    (positiveEngagement + reads * 0.4 + views * 0.08) / Math.pow(age + 6, 0.85);
+    (positiveEngagement + reads * 0.4 + views * 0.08) / (age + 6) ** 0.85;
   const qualityScore =
     scoreCount > 0
       ? scoreTotal / Math.max(scoreCount, 1) + reactions * 0.08 + reads * 0.02

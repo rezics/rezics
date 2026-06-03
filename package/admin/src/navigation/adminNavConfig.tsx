@@ -2,9 +2,8 @@ import { getI18nRuntime } from "@rezics/i18n/runtime";
 
 import {
   Activity as ActivityIcon,
-  Wrench as BuildIcon,
   ShieldUser as AdminPanelSettingsOutlinedIcon,
-  ShieldAlert as ShieldAlertIcon,
+  Wrench as BuildIcon,
   BookMarked as CollectionsBookmarkIcon,
   LayoutDashboard as DashboardIcon,
   Mail as EmailOutlinedIcon,
@@ -16,6 +15,7 @@ import {
   Network as NetworkIcon,
   Users as PeopleIcon,
   Settings as SettingsIcon,
+  ShieldAlert as ShieldAlertIcon,
   ShieldCheck as ShieldCheckIcon,
   Database as StorageOutlinedIcon,
   Tags as StyleOutlinedIcon,

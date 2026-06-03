@@ -1,9 +1,9 @@
 import { useDrafts } from "@rezics/api/draft";
+import { useCurrentUserId } from "@rezics/api/hooks/useCurrentUserId";
 import {
   postListQuery,
   useSubmitPostToRealmMutation,
 } from "@rezics/api/post/post";
-import { useCurrentUserId } from "@rezics/api/hooks/useCurrentUserId";
 import {
   contentDocMarkdownFallback,
   type DraftMetadata,

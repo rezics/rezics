@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { PostKind, postKindLiterals } from "../post";
 import {
   CreationMode,
   creationModeSchema,
@@ -12,7 +13,6 @@ import {
   unitAuthorityRoleKeySchema,
   unitFieldLockSchema,
 } from "./authority";
-import { PostKind, postKindLiterals } from "../post";
 
 describe("content authority vocabulary", () => {
   test("creation mode literals are stable", () => {

@@ -9,7 +9,6 @@ export {
   mapShelfUnitToDTO,
 } from "./shelf.mapper";
 export { ShelfService, shelfService } from "./shelf.service";
-export { applyUserUnitCollectionMetadata } from "./user-unit-collection.service";
 export {
   bootstrapSystemShelves,
   ensureSystemShelf,
@@ -18,3 +17,4 @@ export {
   SYSTEM_KIND_KEYS,
 } from "./system-shelves";
 export * from "./types";
+export { applyUserUnitCollectionMetadata } from "./user-unit-collection.service";

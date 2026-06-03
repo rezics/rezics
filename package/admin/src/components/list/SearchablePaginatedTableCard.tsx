@@ -1,4 +1,5 @@
 import { useTranslation } from "@rezics/i18n/react";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -14,8 +15,6 @@ import {
   type PaginatedColumn,
   PaginatedTable,
 } from "@/components/table/PaginatedTable";
-
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 export function SearchablePaginatedTableCard<T>({
   title,
   description,

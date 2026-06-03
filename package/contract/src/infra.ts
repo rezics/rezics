@@ -1,6 +1,6 @@
 import { t } from "elysia";
-import { SEED_TAG_NAMES, type SeedTagName } from "./tag/seed-tags";
 import { SLUG_SCOPES, type SlugScopeName } from "./slug";
+import { SEED_TAG_NAMES, type SeedTagName } from "./tag/seed-tags";
 
 /**
  * Named-scope unitId map surfaced by `/infra/bootstrap`.

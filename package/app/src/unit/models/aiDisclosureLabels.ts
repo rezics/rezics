@@ -1,5 +1,6 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { AiDisclosureMode } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
 const AI_DISCLOSURE_LABEL: Record<AiDisclosureMode, () => string> = {
   UNKNOWN: () => getI18nRuntime().i18n.t("settings:ai_disclosure_UNKNOWN"),
   NONE: () => getI18nRuntime().i18n.t("settings:ai_disclosure_NONE"),

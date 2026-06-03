@@ -11,8 +11,8 @@ import {
   unitDTOSchema,
   unitTranslationDTOSchema,
 } from "../unit/unit";
-import { realmExtraSchema } from "./realm-extra";
 import { realmFeedPublicationStateSchema } from "./publication";
+import { realmExtraSchema } from "./realm-extra";
 
 // ============================================================
 // DEFAULT REALM

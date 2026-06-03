@@ -1,5 +1,5 @@
-import { userQueries } from "@rezics/api/user/user.queries";
 import { myProgressPageQuery } from "@rezics/api/progress/progress.queries";
+import { userQueries } from "@rezics/api/user/user.queries";
 import type { BookshelfViewConfig } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

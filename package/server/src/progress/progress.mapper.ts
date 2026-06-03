@@ -1,6 +1,6 @@
 import {
-  PROGRESS_EXTRA_KNOWN_KEYS,
   type LastReadAnchor,
+  PROGRESS_EXTRA_KNOWN_KEYS,
   type ProgressExtra,
   type UnitProgressRowDTO,
 } from "@rezics/contract";

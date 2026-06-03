@@ -1,5 +1,5 @@
-import type { NotificationPreference } from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
+import type { NotificationPreference } from "@rezics/contract";
 import {
   type BroadcastEvent,
   filterRecipientsByPreference,

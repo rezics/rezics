@@ -1,7 +1,7 @@
 import {
   createRankingCommand,
-  type RankingCommand,
   RANKING_COMMAND_KINDS,
+  type RankingCommand,
 } from "@rezics/job";
 import {
   patchCommentRankingFields,
@@ -16,10 +16,10 @@ import { computeV1RankingScores, RANKING_FORMULA_VERSION } from "./formulas";
 import { MainStateReader } from "./main-state";
 import { ReactionSummaryClient } from "./reaction-client";
 import {
-  scopeKey,
-  type RankKind,
   type RankingScope,
   type RankingSignalSnapshot,
+  type RankKind,
+  scopeKey,
 } from "./types";
 
 const DEFAULT_SCOPE: RankingScope = { kind: "global" };

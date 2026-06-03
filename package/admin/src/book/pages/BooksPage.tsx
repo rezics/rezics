@@ -1,6 +1,7 @@
 import { type BookDTO, bookQueries } from "@rezics/api/book/book";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { BookListResponse } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   Button,
   Tooltip,
@@ -17,7 +18,6 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 /** Extract the best title from the translations array. */
 function extractTitle(book: BookDTO): string {
   const translations = book.translations;

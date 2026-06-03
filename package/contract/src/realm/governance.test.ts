@@ -1,6 +1,20 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  capabilitySchema,
+  decisionCodeSchema,
+  policyActionSchema,
+  policyInputSchema,
+  realmMemberRoleAtLeast,
+  realmMemberRoleSchema,
+  wouldRemoveLastRealmOwner,
+} from "../permission";
+import {
+  postDTOSchema,
+  postModerationOverlayRequestSchema,
+  postModerationOverlayResponseSchema,
+} from "../post/post";
+import {
   accountEnforcementDTOSchema,
   appealModerationCaseSchema,
   assignModerationCaseSchema,
@@ -22,20 +36,6 @@ import {
   triageModerationCaseSchema,
   unblockAccountEnforcementSchema,
 } from "./governance";
-import {
-  capabilitySchema,
-  decisionCodeSchema,
-  policyActionSchema,
-  policyInputSchema,
-  realmMemberRoleAtLeast,
-  realmMemberRoleSchema,
-  wouldRemoveLastRealmOwner,
-} from "../permission";
-import {
-  postModerationOverlayRequestSchema,
-  postModerationOverlayResponseSchema,
-  postDTOSchema,
-} from "../post/post";
 import { realmMemberDTOSchema } from "./realm";
 
 describe("governance contract registry", () => {

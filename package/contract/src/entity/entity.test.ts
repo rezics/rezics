@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { EntitySearchOptionsSchema } from "../meili/entity";
 import {
   createEntitySchema,
   entityDTOSchema,
   entityKindKeySchema,
   updateEntitySchema,
 } from "./entity";
-import { EntitySearchOptionsSchema } from "../meili/entity";
 
 describe("entity kind registry schemas", () => {
   test("accept registered entity kind keys", () => {

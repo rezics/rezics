@@ -1,4 +1,3 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { getSeedTagId } from "@rezics/api/infra/bootstrap";
 import type {
   CollectionStatusResponse,
@@ -11,6 +10,7 @@ import {
   type SystemShelfKindKey,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Badge,

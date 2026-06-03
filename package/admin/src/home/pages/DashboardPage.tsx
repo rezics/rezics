@@ -8,14 +8,14 @@ import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   Activity,
-  DatabaseZap,
   MessageCircle as CommentIcon,
+  DatabaseZap,
   MessageCircleQuestion as FeedbackIcon,
   History as HistoryIcon,
   BookOpen as MenuBookIcon,
+  Users as PeopleIcon,
   SearchCheck,
   ShieldAlert,
-  Users as PeopleIcon,
   Wrench,
 } from "lucide-react";
 import { Page } from "@/core/layouts/Page";

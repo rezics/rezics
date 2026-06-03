@@ -2,11 +2,11 @@ import type {
   AppealModerationCaseInput,
   AssignModerationCaseInput,
   Capability,
+  ContentModerationDecisionInput,
   CreateAccountEnforcementInput,
   CreateModerationCaseFromFeedbackInput,
   CreateRealmModerationQueueItemFromFeedbackInput,
   CreateRealmModerationQueueItemInput,
-  ContentModerationDecisionInput,
   DecideModerationCaseInput,
   DecideRealmModerationQueueItemInput,
   DuplicateModerationCaseInput,
@@ -21,8 +21,8 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { realmKeys } from "../realm/realm.keys";
 import { postKeys } from "../post/post.keys";
+import { realmKeys } from "../realm/realm.keys";
 import { governanceApi } from "./governance.api";
 import { governanceKeys } from "./governance.keys";
 

@@ -1,6 +1,6 @@
 import { t } from "elysia";
-import { OFFICIAL_QUESTION_TAG_SLUG } from "./post";
 import { OFFICIAL_ISSUE_TAG_SLUG } from "../tag/seed-tags";
+import { OFFICIAL_QUESTION_TAG_SLUG } from "./post";
 
 /**
  * POST STATE SCHEMA REGISTRY

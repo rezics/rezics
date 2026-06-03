@@ -8,6 +8,7 @@ const i18nMessages = {
   realm_feed_sort_hot: () =>
     getI18nRuntime().i18n.t("entity:realm_feed_sort_hot"),
 } as const;
+
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 

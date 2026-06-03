@@ -1,5 +1,5 @@
-import type { PollOptionDTO, PollResultsDTO } from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
+import type { PollOptionDTO, PollResultsDTO } from "@rezics/contract";
 import { selectPollView } from "./pollView";
 
 function option(overrides: Partial<PollOptionDTO> = {}): PollOptionDTO {

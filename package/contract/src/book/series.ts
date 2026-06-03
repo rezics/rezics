@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import {
-  contentStructureNodeSchema,
   type ContentStructureItem,
+  contentStructureNodeSchema,
 } from "../content/structure";
 import { languageSchema } from "../language";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";

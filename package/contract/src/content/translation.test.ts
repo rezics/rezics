@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import { markdownContentDoc } from "./doc-v1";
 import {
-  contentTranslationListResponseSchema,
   contentTranslationDTOSchema,
+  contentTranslationListResponseSchema,
   upsertContentTranslationSchema,
 } from "./translation";
 

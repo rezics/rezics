@@ -4,21 +4,16 @@ export type { DMActionProps } from "./components/DMAction";
 export { DMAction } from "./components/DMAction";
 export type { OverflowMenuProps } from "./components/OverflowMenu";
 export { OverflowMenu } from "./components/OverflowMenu";
-export type {
-  ReportActionProps,
-  ReportTarget,
-} from "./components/ReportAction";
-export { ReportAction } from "./components/ReportAction";
 export {
   ReactionActionRow,
+  type ReactionActionRowProps,
   ReactionBar,
-  ReactionOverflowMenu,
+  type ReactionBarModel,
+  type ReactionBarModelArgs,
   type ReactionBarPolicy,
   type ReactionBarPost,
   type ReactionBarProps,
-  type ReactionBarModel,
-  type ReactionBarModelArgs,
-  type ReactionActionRowProps,
+  ReactionOverflowMenu,
   type ReactionOverflowMenuProps,
   useReactionBarModel,
 } from "./components/ReactionBar";
@@ -29,6 +24,11 @@ export {
 } from "./components/ReactionBarContext";
 export type { ReplyActionProps } from "./components/ReplyAction";
 export { ReplyAction } from "./components/ReplyAction";
+export type {
+  ReportActionProps,
+  ReportTarget,
+} from "./components/ReportAction";
+export { ReportAction } from "./components/ReportAction";
 export type { ShareActionProps } from "./components/ShareAction";
 export { ShareAction } from "./components/ShareAction";
 export type { ShelfActionProps } from "./components/ShelfAction";

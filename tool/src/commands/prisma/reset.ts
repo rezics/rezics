@@ -4,8 +4,8 @@ import {
   PRISMA_PACKAGES,
   type PrismaPackage,
 } from "./packages";
-import { runPrisma, type StepResult } from "./runner";
 import { askOnFailure, pickPackages as promptPackages } from "./prompts";
+import { runPrisma, type StepResult } from "./runner";
 
 interface CliFlags {
   yes: boolean;

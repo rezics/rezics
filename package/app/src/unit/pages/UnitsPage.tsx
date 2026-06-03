@@ -23,6 +23,7 @@ import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
+
 type Unit = UnitDTO;
 
 type UnitsPageMode = "tab" | "single";

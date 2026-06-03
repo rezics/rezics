@@ -1,6 +1,6 @@
 import {
-  dmApi,
   type DmMessage,
+  dmApi,
   dmKeys,
   selectIsPeerTyping,
   useDmBlockState,

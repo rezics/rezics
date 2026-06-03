@@ -1,5 +1,5 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { UserUnitProgressStatus } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type ReadStatus = UserUnitProgressStatus;
 
 export const READ_STATUS_VALUES = [

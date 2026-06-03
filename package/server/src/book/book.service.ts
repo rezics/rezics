@@ -19,6 +19,8 @@ import {
   type UnitVisibility,
 } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { contentStructureService } from "@/content-structure";
+import { countReadableContentStructureItems } from "@/content-structure/types";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { serverJobProducer } from "@/job/job-boundary";
 import {
@@ -30,8 +32,6 @@ import {
   uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
-import { contentStructureService } from "@/content-structure";
-import { countReadableContentStructureItems } from "@/content-structure/types";
 import { assertLicenseSlug } from "@/unit/publication-policy";
 import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import {

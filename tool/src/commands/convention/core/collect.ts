@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { REPO_ROOT, isExemptPackage, isExemptPath } from "./paths";
+import { isExemptPackage, isExemptPath, REPO_ROOT } from "./paths";
 import type { ScanContext } from "./types";
 import {
   getStagedFilePaths,

@@ -6,11 +6,11 @@ import {
   LICENSE_SLUGS,
   licenseSlugSchema,
 } from "./license";
+import { realmExtraSchema } from "./realm/realm-extra";
 import {
   publishableUnitInputSchema,
   unitPublicationMetadataSchema,
 } from "./unit/unit";
-import { realmExtraSchema } from "./realm/realm-extra";
 import { userSettingsSchema } from "./user/user";
 
 describe("licenseSlugSchema", () => {

@@ -3,8 +3,7 @@ import { shelfInfiniteListQuery } from "@rezics/api/shelf";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   resolveCatalogEntryInteractionContext,
   shelfListFiltersForCatalogEntry,

@@ -1,7 +1,7 @@
 import {
   type AnyJobCommand,
-  type RankingCommand,
   RANKING_COMMAND_KINDS,
+  type RankingCommand,
 } from "@rezics/job";
 
 export type RankingCommandDispatcher = {

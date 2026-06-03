@@ -2,8 +2,8 @@
  * React Query configurations for Unit queries
  */
 
-import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import type { UnitLanguageContentQuery } from "@rezics/contract";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { unitApi } from "./unit.api";
 import { unitKeys } from "./unit.keys";
 import type { UnitFilters } from "./unit.types";

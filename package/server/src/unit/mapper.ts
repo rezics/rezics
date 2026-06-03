@@ -1,7 +1,7 @@
 import type {
+  SupportLanguageLike,
   UnitDTO,
   UnitTranslationDTO,
-  SupportLanguageLike,
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
 import { mapPublicUser } from "@/utils/sanitizeUser";

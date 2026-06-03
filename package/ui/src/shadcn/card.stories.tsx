@@ -6,11 +6,11 @@ import {
   CardAction,
   CardContent,
   CardDescription,
+  type CardElevation,
   CardFooter,
   CardHeader,
   CardMedia,
   CardTitle,
-  type CardElevation,
 } from "./card";
 
 const meta = {

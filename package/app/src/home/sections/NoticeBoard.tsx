@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Badge, Separator, Skeleton } from "@rezics/ui/shadcn";
 import { Bell as NotificationsRoundedIcon } from "lucide-react";
 import type React from "react";
@@ -7,7 +8,6 @@ import {
 } from "@/pinboard";
 import { TextLink } from "@/shared/ui/link";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 function formatRelative(dateIso: string): string {
   const ms = Date.now() - new Date(dateIso).getTime();
   const h = Math.floor(ms / 36e5);

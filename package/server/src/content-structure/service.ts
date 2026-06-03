@@ -5,14 +5,14 @@ import type {
 } from "@rezics/contract";
 import { HistoryOutboxPayloadKind } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";
-import { prisma, type ContentRating } from "#/prisma/client";
+import { type ContentRating, prisma } from "#/prisma/client";
+import { between, firstKey } from "@/book/position-index";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
-import { AppError } from "@/utils/errors";
 import {
   buildStructureEventPayload,
   writeSequencedHistoryOutbox,
 } from "@/unit/history-outbox";
-import { between, firstKey } from "@/book/position-index";
+import { AppError } from "@/utils/errors";
 import {
   buildContentStructureTree,
   resolveContentStructurePath,

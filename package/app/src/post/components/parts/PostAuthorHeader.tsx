@@ -1,6 +1,6 @@
 import {
-  contentDocMarkdownFallback,
   type CommentDTO,
+  contentDocMarkdownFallback,
   type PostDTO,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

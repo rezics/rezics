@@ -1,10 +1,10 @@
 import { t } from "elysia";
+import { unitDTOSchema } from "../unit/unit";
 import { entityDTOSchema, type entityKindKeySchema } from "./entity";
 import {
   type SubjectAttributionRole,
   subjectAttributionRoleKeySchema,
 } from "./subject-attribution.roles";
-import { unitDTOSchema } from "../unit/unit";
 
 export {
   type SubjectAttributionRole,

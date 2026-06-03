@@ -1,9 +1,9 @@
 import { t } from "elysia";
-import { bookshelfViewConfigSchema } from "../shelf/bookshelf";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { licenseSlugSchema } from "../license";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
+import { bookshelfViewConfigSchema } from "../shelf/bookshelf";
 import type { ContentRating } from "../unit/unit";
 
 // ============================================================

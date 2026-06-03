@@ -4,17 +4,17 @@ export { PostAuthorHeader } from "./components/parts/PostAuthorHeader";
 export { PostBodyMarkdown } from "./components/parts/PostBodyMarkdown";
 export { PostEditDialog } from "./forms/PostEditDialog";
 export {
-  RootPostTranslationEditor,
-  type RootPostTranslationDraft,
-  type RootPostTranslationEditorProps,
-} from "./forms/RootPostTranslationEditor";
-export {
   ReplyComposer,
   type ReplyComposerHandle,
   type ReplyComposerMode,
   type ReplyComposerProps,
   useBlurRetain,
 } from "./forms/ReplyComposer";
+export {
+  type RootPostTranslationDraft,
+  RootPostTranslationEditor,
+  type RootPostTranslationEditorProps,
+} from "./forms/RootPostTranslationEditor";
 export {
   WikiPostEditor,
   type WikiPostEditorProps,

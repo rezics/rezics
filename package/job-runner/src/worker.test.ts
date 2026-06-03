@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import {
   createSearchCommand,
-  JOB_LANES,
   JOB_LANE_VALUES,
+  JOB_LANES,
   SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
 import { resolveWorkerLanes } from "./lanes";

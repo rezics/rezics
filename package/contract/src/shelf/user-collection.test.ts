@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
   addShelfUnitSchema,
+  collectInputSchema,
   collectionSearchQuerySchema,
   collectionSearchResponseSchema,
-  collectInputSchema,
   patchUserUnitCollectionSchema,
   setUserTagApplicationsSchema,
   shelfUnitsQuerySchema,

@@ -1,4 +1,4 @@
-import { JOB_LANES, JOB_LANE_VALUES, type JobLane } from "@rezics/job";
+import { JOB_LANE_VALUES, JOB_LANES, type JobLane } from "@rezics/job";
 
 /**
  * Which job lanes a worker process consumes.

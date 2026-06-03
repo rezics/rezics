@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type FC, useMemo, useState } from "react";
 import { buildOAuthCallbackTargets } from "../models/authRedirect";
 import { providerIcons } from "./providerIcons";
+
 // TODO 横条文字应该居中一点，更美观
 
 function formatProviderLabel(

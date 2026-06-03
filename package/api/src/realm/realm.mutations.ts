@@ -21,8 +21,8 @@ import type {
   RealmTagContextUpdateResponse,
   UnitRealmDTO,
   UpdateMemberRoleInput,
-  UpdateRealmRulePolicyInput,
   UpdateRealmInput,
+  UpdateRealmRulePolicyInput,
   UpdateRealmTagContextInput,
 } from "@rezics/contract";
 import {
@@ -33,8 +33,8 @@ import {
 import { invalidateForCacheDomain } from "../react-query/cache-coherence";
 import { tagKeys } from "../tag/tag.keys";
 import { realmApi } from "./realm.api";
-import { realmExtraKeys } from "./realm-extra.keys";
 import { realmKeys } from "./realm.keys";
+import { realmExtraKeys } from "./realm-extra.keys";
 
 function invalidateRealmCommunityList(
   queryClient: ReturnType<typeof useQueryClient>,

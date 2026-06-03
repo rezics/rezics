@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { suggestExternalKinds } from "./external-kind";
 import {
   buildCanonicalUrl,
   createSourceSiteSchema,
@@ -8,7 +9,6 @@ import {
   parseSourceUrl,
   sourceSiteRefRulesSchema,
 } from "./site";
-import { suggestExternalKinds } from "./external-kind";
 
 const qidianRules = [
   {

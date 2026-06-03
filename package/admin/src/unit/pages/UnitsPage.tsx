@@ -1,11 +1,12 @@
-import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
+import { type UnitDTO, unitQueries } from "@rezics/api/unit/unit";
 import {
+  type UnitListResponse,
   UnitStatus,
   UnitType,
   UnitVisibility,
-  type UnitListResponse,
 } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   Badge,
   Button,
@@ -27,7 +28,6 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 /** Extract the best title from the translations array on a UnitDTO. */
 function extractUnitTitle(unit: UnitDTO): string {
   const translations = unit.translations;

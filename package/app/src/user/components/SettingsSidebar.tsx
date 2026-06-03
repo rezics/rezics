@@ -16,17 +16,18 @@ const i18nMessages = {
   settings_nav_data: () => getI18nRuntime().i18n.t("settings:nav_data"),
   settings_nav_entities: () => getI18nRuntime().i18n.t("settings:nav_entities"),
 } as const;
+
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  Ban as BlockedIcon,
-  Bell as NotificationsIcon,
   CircleUser as AccountCircleIcon,
+  Ban as BlockedIcon,
   DatabaseBackup as DataIcon,
   Mail as EmailIcon,
   IdCard as IdentityIcon,
   Key as KeyIcon,
   Library as LibraryIcon,
   Link as LinkIcon,
+  Bell as NotificationsIcon,
   ShieldCheck as SecurityIcon,
   SlidersHorizontal as TuneIcon,
 } from "lucide-react";

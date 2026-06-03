@@ -2,12 +2,12 @@ import {
   type Language,
   mainMarkdownSource,
   markdownContentDoc,
+  type WikiZoneConfig,
   type WikiZoneHomepageData,
   type WikiZoneHomepageItem,
   type WikiZoneHomepageSection,
   type WikiZoneNavigationItem,
   type WikiZoneTranslatedLabel,
-  type WikiZoneConfig,
   type ZoneFilters,
 } from "@rezics/contract";
 import type { Prisma } from "#/prisma/client";

@@ -1,5 +1,6 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { SystemShelfKindKey } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
+
 const SYSTEM_SHELF_KIND_LABEL = {
   active: () => getI18nRuntime().i18n.t("entity:shelf_system_active"),
   backlog: () => getI18nRuntime().i18n.t("entity:shelf_system_backlog"),

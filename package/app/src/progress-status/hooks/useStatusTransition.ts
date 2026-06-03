@@ -8,6 +8,7 @@ import {
   useRemoveShelfUnitMutation,
 } from "@rezics/api/shelf/shelf.mutations";
 import type { ProgressExtra, UserUnitProgressStatus } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { useCallback, useMemo } from "react";
 import { useRetryToast } from "@/shared/hooks/useRetryToast";
 import {
@@ -15,8 +16,6 @@ import {
   planTransition,
   type ShelfOp,
 } from "../models/transition";
-
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type StatusTransitionPayload = {
   to: UserUnitProgressStatus;
   progress?: number;

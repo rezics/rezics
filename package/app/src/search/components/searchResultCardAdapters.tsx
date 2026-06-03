@@ -1,4 +1,3 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type {
   CommentSearchDocument,
   ContentSearchDocument,
@@ -9,14 +8,15 @@ import type {
   SearchCategory,
   UserSearchDocument,
 } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
 import {
   SearchContentResultCard,
   SearchLibraryUnitCard,
 } from "@/components/card";
-import { contentHref } from "../models/contentDestination";
 import { unitHref } from "@/shared/ui/link";
+import { contentHref } from "../models/contentDestination";
 
 type ContentCategory = "books" | "shelves";
 type PostCategory = "reviews" | "excerpts" | "remarks" | "posts";

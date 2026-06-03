@@ -1,4 +1,3 @@
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import {
   governanceAuditListQuery,
   governanceRealmQueueListQuery,
@@ -25,6 +24,7 @@ import {
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { toast } from "sonner";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 
 interface RealmModerationQueueSectionProps {
   realmUnitId: string;

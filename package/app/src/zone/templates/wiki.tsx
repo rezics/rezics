@@ -1,16 +1,16 @@
+import { unitDetailQuery } from "@rezics/api/unit";
 import type {
   Language,
   UnitDTO,
   WikiZoneHomepageData,
   WikiZoneHomepageItem,
   WikiZoneHomepageSectionData,
-  WikiZoneTheme,
-  WikiZoneTranslatedLabel,
   WikiZoneNavigation,
   WikiZoneNavigationItem,
+  WikiZoneTheme,
+  WikiZoneTranslatedLabel,
 } from "@rezics/contract";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
-import { unitDetailQuery } from "@rezics/api/unit";
 import { EmptyState, SafeLink, Spinner } from "@rezics/ui";
 import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQueries } from "@tanstack/react-query";

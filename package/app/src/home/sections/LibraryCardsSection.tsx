@@ -8,6 +8,7 @@ const i18nMessages = {
   page_home_sections_library_cards_media_library: () =>
     getI18nRuntime().i18n.t("page:home_sections_library_cards_media_library"),
 } as const;
+
 import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";

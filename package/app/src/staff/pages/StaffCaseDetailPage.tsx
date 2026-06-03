@@ -1,7 +1,7 @@
 import {
+  governanceAuditListQuery,
   governanceCaseDetailQuery,
   governanceCaseEventsQuery,
-  governanceAuditListQuery,
 } from "@rezics/api/governance/governance";
 import { Badge, Card, CardContent, Separator } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";

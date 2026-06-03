@@ -7,26 +7,26 @@ import type {
   RealmExtraOkResponse,
   RealmExtraReadResponse,
   RealmListQuery,
+  RealmMemberDTO,
   RealmMemberListQuery,
   RealmMemberListResponse,
-  RealmMemberDTO,
   RealmMembershipMeDTO,
   RealmRuleAcknowledgementDTO,
   RealmRuleReferenceDTO,
   RealmRuleResolvedDTO,
   RezicsSessionClaims,
   UnitRealmDTO,
-  UpdateRealmRulePolicyInput,
   UpdateRealmInput,
+  UpdateRealmRulePolicyInput,
 } from "@rezics/contract";
 import { parseIdsCsv, validateSlug } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma, RealmTagApplication } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { realmPolicyActions } from "@/governance/action/realm";
 import { governanceAuditService } from "@/governance/audit.service";
 import { governanceCapabilityService } from "@/governance/capability.service";
-import { realmPolicyActions } from "@/governance/action/realm";
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapPostToDTO } from "@/post/post.mapper";
@@ -37,12 +37,12 @@ import { translationService } from "@/unit/translation.service";
 /** Score at or below this threshold hides a RealmTagApplication from regular users. */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
 
+import { mapPublicUser, publicUserSelect } from "@/utils/sanitizeUser";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
   loadUserSlugMap,
 } from "@/utils/userSlugHydration";
-import { mapPublicUser, publicUserSelect } from "@/utils/sanitizeUser";
 import {
   mapRealmListRowToDTO,
   mapRealmMemberToDTO,

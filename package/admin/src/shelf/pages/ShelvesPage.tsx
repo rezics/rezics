@@ -1,5 +1,6 @@
 import { type ShelfDTO, shelfQueries } from "@rezics/api/shelf/shelf";
 import type { UnitTranslationDTO } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Button, Input, Label } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
@@ -9,7 +10,6 @@ import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 import { fmtDate } from "@/utils/format";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 function getPrimaryTitle(translations?: UnitTranslationDTO[] | null): string {
   if (!translations?.length)
     return getI18nRuntime().i18n.t("admin:unit_no_title");

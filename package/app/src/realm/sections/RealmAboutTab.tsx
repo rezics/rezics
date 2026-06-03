@@ -1,5 +1,3 @@
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { PostBodyMarkdown } from "@/post";
 import { postQueries } from "@rezics/api/post/post";
 import { realmRuleResolvedQuery } from "@rezics/api/realm/realm";
 import {
@@ -10,6 +8,8 @@ import {
 import { EmptyState, Spinner } from "@rezics/ui";
 import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { PostBodyMarkdown } from "@/post";
 
 interface RealmAboutTabProps {
   realm: RealmDTO;

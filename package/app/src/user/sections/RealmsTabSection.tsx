@@ -5,6 +5,7 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("settings:profile_realms_joined"),
   common_created: () => getI18nRuntime().i18n.t("common:created"),
 } as const;
+
 import { realmQueries } from "@rezics/api/realm/realm.queries";
 import { contentDocMarkdownFallback, type RealmDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

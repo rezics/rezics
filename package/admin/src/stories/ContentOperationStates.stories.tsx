@@ -1,7 +1,3 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import React from "react";
-import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
-import type { PaginatedColumn } from "@/components/table/PaginatedTable";
 import {
   Alert,
   AlertDescription,
@@ -12,6 +8,10 @@ import {
   Label,
   Textarea,
 } from "@rezics/ui/shadcn";
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import React from "react";
+import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
+import type { PaginatedColumn } from "@/components/table/PaginatedTable";
 
 type DemoRow = {
   id: string;

@@ -1,5 +1,5 @@
-import { ApiError } from "@rezics/api";
 import { describe, expect, test } from "bun:test";
+import { ApiError } from "@rezics/api";
 import { policyDenialFromError } from "./policyDenial";
 
 describe("policyDenialFromError", () => {

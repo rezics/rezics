@@ -8,6 +8,7 @@ import {
   useUpdateShelfMutation,
 } from "@rezics/api/shelf/shelf.mutations";
 import { contentDocMarkdownFallback } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
@@ -28,7 +29,6 @@ import { SeedTagChipGroup } from "../components/SeedTagChipGroup";
 import { useShelfItemsEditor } from "../hooks/useShelfItemsEditor";
 import { ShelfEditorItemsSection } from "../sections/ShelfEditorItemsSection";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 interface ShelfEditPageProps {
   shelfId: string;
 }

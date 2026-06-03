@@ -1,5 +1,4 @@
-import { describe, expect, it } from "bun:test";
-import { mock } from "bun:test";
+import { describe, expect, it, mock } from "bun:test";
 import type { ApiTokenScopes } from "@rezics/contract";
 import { DispatchScope, DispatchType } from "@rezics/contract";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";

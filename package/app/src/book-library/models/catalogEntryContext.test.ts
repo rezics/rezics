@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { PostKind, type BookDTO } from "@rezics/contract";
+import { type BookDTO, PostKind } from "@rezics/contract";
 import {
   postListFiltersForCatalogEntry,
   resolveCatalogEntryInteractionContext,

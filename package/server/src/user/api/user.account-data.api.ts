@@ -1,15 +1,15 @@
 import {
   type DeleteAccountResult,
-  type UserDataExport,
   deleteAccountBodySchema,
   deleteAccountResultSchema,
+  type UserDataExport,
   userDataExportSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
 import { authMacro } from "@/middleware";
 import {
-  deleteAccount,
   DeletionNotConfirmedError,
+  deleteAccount,
   exportUserData,
 } from "../service/account-data.service";
 

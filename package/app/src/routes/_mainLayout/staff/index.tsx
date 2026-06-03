@@ -1,5 +1,5 @@
-import { StaffConsolePage } from "@/staff";
 import { createFileRoute } from "@tanstack/react-router";
+import { StaffConsolePage } from "@/staff";
 
 type StaffConsoleSearch = {
   realmUnitId?: string;

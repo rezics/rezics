@@ -34,8 +34,8 @@ export {
   shelfQueries,
   shelfUnitsInfiniteQuery,
   shelfUnitsQuery,
-  shelvesByVariantContextQuery,
   shelvesByUserQuery,
+  shelvesByVariantContextQuery,
   useCollectionStatusHydration,
   userShelvesQuery,
 } from "./shelf.queries";

@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
 import {
+  ContentSearchDocumentSchema,
+  ContentSearchOptionsSchema,
+} from "../meili";
+import { SearchQuerySchema } from "../search/search";
+import {
   createGameSystemRequirementSchema,
   gameLibraryContentDTOSchema,
   gameSystemRequirementDTOSchema,
@@ -9,11 +14,6 @@ import {
   mediaLibraryContentDTOSchema,
   ratingTagSlugSchema,
 } from "./game-media";
-import {
-  ContentSearchDocumentSchema,
-  ContentSearchOptionsSchema,
-} from "../meili";
-import { SearchQuerySchema } from "../search/search";
 
 const baseSearchDocument = {
   id: "game-release-1",

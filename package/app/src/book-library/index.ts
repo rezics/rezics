@@ -28,8 +28,8 @@ export {
 export { BookHomePage } from "./pages/BookHomePage";
 /** Book library list page. */
 export { BookLibPage } from "./pages/BookLibPage";
-export { BookVariantsPage } from "./pages/BookVariantsPage";
 export { BookReviewPage } from "./pages/BookReviewPage";
+export { BookVariantsPage } from "./pages/BookVariantsPage";
 
 // ============================================================================
 // Section Components (Page-composable modules)

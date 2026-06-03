@@ -1,6 +1,6 @@
 import { define } from "gunshi";
-import { repeatedCsv } from "../../cli/values";
 import { runRepoScript } from "../../cli/command-runner";
+import { repeatedCsv } from "../../cli/values";
 
 export const prismaCommand = define({
   name: "prisma",

@@ -4,9 +4,9 @@
 
 import type {
   AcceptAnswerInput,
+  CommentPromotionDTO,
   EditorialPatchSubmission,
   PinCommentInput,
-  CommentPromotionDTO,
   PostResponse,
   SetPostStateInput,
   SubmitPostToRealmInput,

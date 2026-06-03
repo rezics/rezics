@@ -7,8 +7,8 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma, UnitStatus, UnitType } from "#/prisma/client";
 import { blockService } from "@/block/block.service";
 import { serverJobProducer } from "@/job/job-boundary";
-import { publicUserSelect } from "@/utils/sanitizeUser";
 import { AppError } from "@/utils/errors";
+import { publicUserSelect } from "@/utils/sanitizeUser";
 import type { CommentWithRelations } from "./comment.types";
 
 const DEFAULT_LIMIT = 50;

@@ -18,8 +18,8 @@ import {
 } from "./federation.config";
 import type { FilterContext } from "./filters";
 import {
-  buildContentFilter,
   buildCommentFilter,
+  buildContentFilter,
   buildPostFilter,
   buildRealmFilter,
   buildUserFilter,

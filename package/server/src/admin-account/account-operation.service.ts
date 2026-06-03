@@ -9,6 +9,7 @@ import type {
   AdminStartAuthImpersonationResponse,
   AuthMainServerReconciliationWarning,
 } from "@rezics/contract";
+import { prisma } from "#/prisma/client";
 import {
   listAuthSessionsForAuthUser,
   revokeAuthSessionForAuthUser,
@@ -17,7 +18,6 @@ import {
 } from "@/auth-boundary/auth-internal.client";
 import { env } from "@/env";
 import { governanceAuditService } from "@/governance/audit.service";
-import { prisma } from "#/prisma/client";
 
 const ENFORCEMENT_STRENGTH = [
   "WARNING",

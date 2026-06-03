@@ -9,11 +9,11 @@ import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostCard } from "@/post";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import {
   ReviewCard,
   type ReviewTargetUnit,
 } from "@/review/components/item/ReviewCard";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { getTranslation } from "@/shared/utils/translation-helpers";
 import {
   realmContextPostHref,

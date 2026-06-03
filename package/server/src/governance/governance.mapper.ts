@@ -8,9 +8,9 @@ import type {
   ModerationCaseDTO,
   ModerationCaseEventDTO,
   ModerationCaseState,
+  RealmContentModerationDTO,
   RealmModerationEventDTO,
   RealmModerationQueueItemDTO,
-  RealmContentModerationDTO,
   StaffAuditLogDTO,
 } from "@rezics/contract";
 import type {

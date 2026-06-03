@@ -1,7 +1,7 @@
 import {
   seriesContentIndexQuery,
-  seriesDiagnosticsQuery,
   seriesDetailQuery,
+  seriesDiagnosticsQuery,
   seriesListQuery,
 } from "@rezics/api";
 

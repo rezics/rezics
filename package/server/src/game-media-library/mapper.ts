@@ -1,8 +1,8 @@
 import {
-  RATING_TAGS,
   type GameLibraryContentDTO,
   type GameSystemRequirementSummary,
   type MediaLibraryContentDTO,
+  RATING_TAGS,
 } from "@rezics/contract";
 import { buildContentStructureTree } from "@/content-structure/mapper";
 import type { GameLibraryRow, MediaLibraryRow } from "./types";

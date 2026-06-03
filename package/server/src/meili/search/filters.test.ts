@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import type { SearchQuery, SearchScope } from "@rezics/contract";
 import {
-  buildContentFilter,
   buildCommentFilter,
+  buildContentFilter,
   buildPostFilter,
   buildRealmFilter,
   buildUserFilter,

@@ -2,11 +2,11 @@
  * React Query configurations for Realm queries
  */
 
+import type { RealmMemberListQuery } from "@rezics/contract";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { realmApi } from "./realm.api";
 import { realmKeys } from "./realm.keys";
 import type { RealmFilters } from "./realm.types";
-import type { RealmMemberListQuery } from "@rezics/contract";
 
 /**
  * Query options for listing realms

@@ -5,6 +5,7 @@ import type {
   FeedbackType,
 } from "@rezics/api/feedback/feedback.types";
 import { buildMeiliFeedbackQuery } from "@rezics/api/meili/meili.queries";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   UniversalPaginator,
   type UniversalPaginatorHandle,
@@ -32,8 +33,6 @@ import {
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Link, AppSafeLink as SafeLink } from "@/shared/ui/link";
-
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 export type FeedbackResolvedFilter = boolean | undefined;
 
 export type FeedbackListProps = {

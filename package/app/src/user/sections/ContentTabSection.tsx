@@ -13,6 +13,7 @@ const i18nMessages = {
   profile_sort_most_replies: () =>
     getI18nRuntime().i18n.t("settings:profile_sort_most_replies"),
 } as const;
+
 import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";

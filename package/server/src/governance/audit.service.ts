@@ -1,6 +1,6 @@
-import { Prisma, prisma } from "#/prisma/client";
-import { mapStaffAuditLogToDTO } from "./governance.mapper";
 import type { StaffAuditLogDTO } from "@rezics/contract";
+import { type Prisma, prisma } from "#/prisma/client";
+import { mapStaffAuditLogToDTO } from "./governance.mapper";
 import type { GovernanceAuditListOptions } from "./types";
 
 const REDACTED = "[REDACTED]";

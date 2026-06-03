@@ -1,9 +1,8 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { createFileRoute } from "@tanstack/react-router";
 import { EditConsoleLayout } from "@/core/layouts/EditConsoleLayout";
 import { createMinimalEditConsoleConfig } from "@/core/layouts/editConsoleConfig";
 import { ShelfEditPage } from "@/shelf/pages/ShelfEditPage";
-
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 export const Route = createFileRoute("/_editor/shelf/$shelfId/edit")({
   component: () => {
     const { shelfId } = Route.useParams();

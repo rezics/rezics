@@ -1,6 +1,6 @@
 import {
-  extractPollUnitIdsFromContentDoc,
   type CommentDTO,
+  extractPollUnitIdsFromContentDoc,
   type PostDTO,
 } from "@rezics/contract";
 import type React from "react";

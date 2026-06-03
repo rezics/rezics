@@ -7,12 +7,12 @@
 
 import type {
   AcceptAnswerInput,
+  CommentPromotionDTO,
   EditorialPatchSubmission,
   PinCommentInput,
   PostListResponse,
   PostModerationOverlayRequest,
   PostModerationOverlayResponse,
-  CommentPromotionDTO,
   PostResponse,
   SetPostPublicationInput,
   SetPostStateInput,

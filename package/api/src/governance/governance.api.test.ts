@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { configureApi } from "../config";
 import { governanceApi } from "./governance.api";
+import { governanceKeys } from "./governance.keys";
 import {
   invalidateGovernanceCaseQueries,
   invalidateGovernanceEnforcementQueries,
@@ -8,7 +9,6 @@ import {
   invalidateRealmContentModerationQueries,
   invalidateRealmQueueQueries,
 } from "./governance.mutations";
-import { governanceKeys } from "./governance.keys";
 
 const fetchMock = mock();
 

@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
 import { seedGameMediaTaxonomy } from "./seed-game-media-taxonomy";
 
 function makePrismaMock() {

@@ -5,9 +5,9 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import {
-  zoneApi,
   type CreateZoneInput,
   type UpdateZoneInput,
+  zoneApi,
 } from "./zone.api";
 import { zoneKeys } from "./zone.keys";
 

@@ -3,6 +3,7 @@ import {
   meiliAdminMutations,
   meiliAdminQueries,
 } from "@rezics/api/meili/meili.admin.queries";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Spinner } from "@rezics/ui";
 import {
   Alert,
@@ -26,7 +27,6 @@ import {
   MeiliOperationsSection,
 } from "../components/MeiliOperationsSection";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 type MessageState = {
   type: "success" | "error" | "info";
   text: string;

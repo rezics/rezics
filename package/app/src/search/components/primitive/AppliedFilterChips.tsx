@@ -1,17 +1,16 @@
 import type { SearchQuery } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Badge, Button } from "@rezics/ui/shadcn";
 import { X as CloseIcon } from "lucide-react";
 import type React from "react";
-
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
+  type ChipDescriptor as AppliedFilterChipDescriptor,
   buildAppliedFilterChips,
   buildChips,
-  type ChipDescriptor as AppliedFilterChipDescriptor,
 } from "./chipDescriptors";
 
-export { buildAppliedFilterChips };
 export type { AppliedFilterChipDescriptor };
+export { buildAppliedFilterChips };
 
 export type AppliedFilterChipsProps = {
   query: SearchQuery;

@@ -7,10 +7,10 @@ import {
 import { useEffect } from "react";
 import { collectionApi, shelfApi } from "./shelf.api";
 import {
-  type ShelfContainmentFilters,
-  type ShelfVariantFilters,
   collectionKeys,
   normalizeCollectionIds,
+  type ShelfContainmentFilters,
+  type ShelfVariantFilters,
   shelfKeys,
 } from "./shelf.keys";
 import type { ShelfFilters, ShelfUnitsQuery } from "./shelf.types";

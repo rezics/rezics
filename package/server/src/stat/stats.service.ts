@@ -3,11 +3,11 @@ import type {
   AdminStatsResponse,
 } from "@rezics/contract";
 import { prisma } from "#/prisma/client";
-import { getSystemStatusSummary } from "@/diagnostic/system-status.service";
 import type {
   StatusState,
   SystemStatusSummary,
 } from "@/diagnostic/status.types";
+import { getSystemStatusSummary } from "@/diagnostic/system-status.service";
 import { searchClient } from "@/meili/search-client";
 
 const ADMIN_ROUTES = {

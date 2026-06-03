@@ -2,8 +2,8 @@ import type { Static } from "elysia";
 import { t } from "elysia";
 import { creditAttributionRoleKeySchema } from "../entity/credit-attribution";
 import { entityKindKeySchema } from "../entity/entity";
-import { languageSchema } from "../language";
 import { subjectAttributionRoleKeySchema } from "../entity/subject-attribution";
+import { languageSchema } from "../language";
 
 // ANCHOR: Entity Search Document
 

@@ -10,6 +10,7 @@ const i18nMessages = {
   feedback_type_other: () =>
     getI18nRuntime().i18n.t("community:feedback_type_other"),
 } as const;
+
 import { useCreateFeedbackMutation } from "@rezics/api/feedback/feedback.mutations";
 import type { CreateFeedbackInput } from "@rezics/api/feedback/feedback.types";
 import { useTranslation } from "@rezics/i18n/react";

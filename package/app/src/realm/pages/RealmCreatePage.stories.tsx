@@ -7,9 +7,9 @@ import {
   realmRuleResolvedQuery,
 } from "@rezics/api/realm/realm";
 import {
+  type DraftMetadata,
   LANGUAGES,
   markdownContentDoc,
-  type DraftMetadata,
   type PostDTO,
   PostKind,
   type RealmDTO,
@@ -20,7 +20,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useState } from "react";
 import { withRouter } from "@/stories/decorators/withRouter";
 import { useAuthSessionStore } from "@/user/states";
-import { type RealmCreateMode } from "../models/realmCreateMode";
+import type { RealmCreateMode } from "../models/realmCreateMode";
 import { RealmCreatePage } from "./RealmCreatePage";
 
 const REALM_ID = "realm-create-story";

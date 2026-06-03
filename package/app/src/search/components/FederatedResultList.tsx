@@ -7,16 +7,16 @@ import type {
   SearchCategory,
   SearchScope,
 } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { EmptyState } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import type React from "react";
 import { CATEGORY_LABELS } from "./permittedCategories";
 import {
-  originBadge as renderOriginBadge,
   renderFederatedSearchCard,
+  originBadge as renderOriginBadge,
 } from "./searchResultCardAdapters";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 type ContentRowCategory = "books" | "shelves";
 type PostRowCategory = "reviews" | "excerpts" | "remarks" | "posts";
 type CommentRowCategory = "comments";

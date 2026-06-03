@@ -2,7 +2,7 @@ import type {
   ContentTranslationResponse,
   UpsertContentTranslationInput,
 } from "@rezics/contract";
-import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { contentTranslationApi } from "./content-translation.api";
 
 export type UpsertContentTranslationVariables = {

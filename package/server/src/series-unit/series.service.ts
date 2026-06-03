@@ -2,8 +2,8 @@ import type {
   ContentStructureItem,
   CreateSeriesInput,
   SeriesContentIndexDTO,
-  SeriesDiagnosticsDTO,
   SeriesDetailDTO,
+  SeriesDiagnosticsDTO,
   SeriesListQuery,
   UpdateSeriesInput,
 } from "@rezics/contract";
@@ -14,10 +14,10 @@ import {
   prisma,
   UnitStatus,
   UnitType,
-  UnitVisibility,
+  type UnitVisibility,
 } from "#/prisma/client";
-import { contentStructureService } from "@/content-structure";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
+import { contentStructureService } from "@/content-structure";
 import { pickSlugScope } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";
 import { assertLicenseSlug } from "@/unit/publication-policy";
@@ -25,9 +25,9 @@ import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import { AppError } from "@/utils/errors";
 import { mapSeriesContentIndexToDTO, mapSeriesToDTO } from "./series.mapper";
 import {
+  type SeriesWithRelations,
   seriesInclude,
   seriesOrderBy,
-  type SeriesWithRelations,
 } from "./series.types";
 
 const RELEASE_UNIT_TYPES = [UnitType.BOOK, UnitType.GAME, UnitType.MEDIA];

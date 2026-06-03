@@ -1,3 +1,4 @@
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   ShieldCheck as AuthorityIcon,
   LayoutDashboard as DashboardIcon,
@@ -6,7 +7,6 @@ import {
 } from "lucide-react";
 import type { EditConsoleLayoutProps } from "@/core/layouts/EditConsoleLayout";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 const BOOK_EDIT_RESERVED_SEGMENTS = new Set([
   "authority",
   "chapter",

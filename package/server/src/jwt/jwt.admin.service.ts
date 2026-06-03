@@ -5,8 +5,8 @@ import type {
 } from "@rezics/contract";
 import { defaultJwtCryptoProvider } from "@rezics/jwt";
 import { type Prisma, prisma } from "#/prisma/client";
-import { invalidateJwtService } from "@/jwt";
 import { env } from "@/env";
+import { invalidateJwtService } from "@/jwt";
 
 function mapToDTO(record: {
   id: string;

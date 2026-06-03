@@ -14,9 +14,8 @@ import {
   mainMarkdownSource,
   readCoverUrlFromExtra,
 } from "@rezics/contract";
-import { getTranslation } from "../../shared/utils/translation-helpers";
-
 import { getI18nRuntime } from "@rezics/i18n/runtime";
+import { getTranslation } from "../../shared/utils/translation-helpers";
 export type UnitCardAuthor = PublicUser;
 
 export interface UnitCardTranslationMeta {

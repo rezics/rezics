@@ -4,8 +4,8 @@ import {
   BarChart3,
   BookPlus,
   ListPlus,
-  Users as UsersIcon,
   UserPlus,
+  Users as UsersIcon,
 } from "lucide-react";
 import type React from "react";
 import { Link } from "@/shared/ui/link";

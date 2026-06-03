@@ -1,17 +1,17 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { markdownContentDoc } from "../content/doc-v1";
 import {
-  createPostSchema,
   acceptAnswerSchema,
+  commentPromotionDTOSchema,
+  createPostSchema,
+  excerptSourceSchema,
   pinCommentSchema,
   postDTOSchema,
-  commentPromotionDTOSchema,
-  postListQuerySchema,
   postListBodySchema,
-  excerptSourceSchema,
+  postListQuerySchema,
   submitPostToRealmSchema,
 } from "./post";
-import { markdownContentDoc } from "../content/doc-v1";
 
 describe("excerptSourceSchema", () => {
   test("unit mode passes", () => {

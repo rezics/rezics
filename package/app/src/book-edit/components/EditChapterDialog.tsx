@@ -8,6 +8,7 @@ const i18nMessages = {
   book_chapter_status_archived: () =>
     getI18nRuntime().i18n.t("book:chapter_status_archived"),
 } as const;
+
 import type { ContentRating } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { RatingSelector } from "@rezics/ui";

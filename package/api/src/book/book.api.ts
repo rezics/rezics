@@ -14,9 +14,9 @@ import type {
   ScoreAggregateDTO,
 } from "@rezics/contract";
 import { CreationMode as CreationModeValue } from "@rezics/contract";
+import { contentStructureApi } from "../content-structure/content-structure.api";
 import { apiFetch } from "../react-query/http";
 import { buildQueryString } from "../utils/buildQuery";
-import { contentStructureApi } from "../content-structure/content-structure.api";
 import type { BookFilters } from "./book.types";
 
 /**

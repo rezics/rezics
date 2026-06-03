@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import { ActiveProgressModal } from "../components/ActiveProgressModal";
 import { BacklogRemoveConfirmModal } from "../components/BacklogRemoveConfirmModal";
 import { CompletedConfirmModal } from "../components/CompletedConfirmModal";
+import { ReadingProgressBar } from "../components/ReadingProgressBar";
 import { ReasonModal } from "../components/ReasonModal";
 import { StatusOverflowMenu } from "../components/StatusOverflowMenu";
 import {
@@ -13,7 +14,6 @@ import {
   StatusPrimaryActionButton,
   StatusToggleGroup,
 } from "../components/StatusToggleGroup";
-import { ReadingProgressBar } from "../components/ReadingProgressBar";
 import { useReasonPostMutations } from "../hooks/useReasonPostMutations";
 import { useStatusTransition } from "../hooks/useStatusTransition";
 import {

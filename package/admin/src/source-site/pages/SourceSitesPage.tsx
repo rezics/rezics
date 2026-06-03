@@ -16,9 +16,9 @@ import {
   externalKinds,
   isValidSourceRefRules,
   type SourceSiteCrawlSupport,
-  sourceSiteCrawlSupportValues,
   type SourceSiteDTO,
   type SourceSiteRefRule,
+  sourceSiteCrawlSupportValues,
   suggestExternalKinds,
 } from "@rezics/contract";
 import { Spinner } from "@rezics/ui";

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { OFFICIAL_ISSUE_TAG_SLUG } from "../tag/seed-tags";
 import { OFFICIAL_QUESTION_TAG_SLUG } from "./post";
 import {
   activeSlugs,
@@ -12,7 +13,6 @@ import {
   POST_STATE_SCHEMAS,
   resolveValueTagSlug,
 } from "./state-schema";
-import { OFFICIAL_ISSUE_TAG_SLUG } from "../tag/seed-tags";
 
 describe("post state schema registry", () => {
   test("question schema: initial open, expected values and buckets", () => {

@@ -23,12 +23,12 @@ export {
   CardAction,
   CardContent,
   CardDescription,
+  type CardElevation,
   CardFooter,
   CardHeader,
   CardMedia,
-  CardTitle,
-  type CardElevation,
   type CardSurface,
+  CardTitle,
 } from "./card";
 export {
   Carousel,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { markdownContentDoc, type CommentDTO } from "@rezics/contract";
+import { type CommentDTO, markdownContentDoc } from "@rezics/contract";
 import {
   buildPostTreeNodes,
   getChildBranchPrefix,

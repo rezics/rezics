@@ -1,10 +1,9 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@rezics/ui/shadcn";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { PostPromotionControls } from "./PostPromotionControls";
 
 /**

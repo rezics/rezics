@@ -19,8 +19,8 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import {
-  meiliContentApi,
   meiliCommentApi,
+  meiliContentApi,
   meiliFeedbackApi,
   meiliPollApi,
   meiliPostApi,

@@ -1,4 +1,6 @@
 import {
+  type CommentListResponse,
+  type CommentResponse,
   commentListBodySchema,
   commentListQuerySchema,
   commentListResponseSchema,
@@ -6,8 +8,6 @@ import {
   commentResponseSchema,
   createCommentSchema,
   updateCommentSchema,
-  type CommentListResponse,
-  type CommentResponse,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
 import { authMacro, tryResolveIdentity } from "@/middleware";

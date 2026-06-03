@@ -1,3 +1,10 @@
+export type { FactoryContentStructureNodeInput } from "./content-structure";
+export {
+  createFactoryContentStructureNodes,
+  createFactoryReleasePartStructure,
+  createFactorySeriesMemberStructure,
+  ensureFactoryContentStructure,
+} from "./content-structure";
 export { runFactorySeed } from "./orchestrator";
 export {
   addSpecialSeedTarget,
@@ -9,19 +16,12 @@ export type {
   FactoryScenarioName,
 } from "./scenarios";
 export {
-  createFactoryContentStructureNodes,
-  createFactoryReleasePartStructure,
-  createFactorySeriesMemberStructure,
-  ensureFactoryContentStructure,
-} from "./content-structure";
-export { buildFactorySeriesVerificationPlan } from "./series";
-export type { FactorySeriesVerificationInput } from "./series";
-export type { FactoryContentStructureNodeInput } from "./content-structure";
-export {
   FACTORY_SCENARIO_NAMES,
   FACTORY_SCENARIOS,
   runFactoryScenarios,
 } from "./scenarios";
+export type { FactorySeriesVerificationInput } from "./series";
+export { buildFactorySeriesVerificationPlan } from "./series";
 export type { CountProvider, CountSpec, Mode, SeedCtx } from "./strategy";
 export {
   CountSpecSchema,

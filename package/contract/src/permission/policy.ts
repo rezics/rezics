@@ -1,9 +1,9 @@
 import { t } from "elysia";
 import { activeAccountEnforcementSummarySchema } from "../realm/governance";
+import { policyActionSchema } from "./action";
 import { capabilityHintSchema } from "./capability";
 import { permissionSchema } from "./core";
 import { policyDecisionSchema } from "./decision";
-import { policyActionSchema } from "./action";
 import { realmMemberRoleSchema } from "./realm-role";
 
 export const policyTargetRefSchema = t.Object({
@@ -38,5 +38,5 @@ export const policyInputSchema = t.Object({
 
 export type PolicyInput = (typeof policyInputSchema)["static"];
 
-export { policyDecisionSchema };
 export type { PolicyDecision } from "./decision";
+export { policyDecisionSchema };

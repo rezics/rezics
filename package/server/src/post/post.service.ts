@@ -27,7 +27,7 @@ import {
   PinKind as PinKindEnum,
   type PostKind,
   PostKind as PostKindEnum,
-  Prisma,
+  type Prisma,
   prisma,
   UnitStatus,
   UnitType,

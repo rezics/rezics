@@ -1,5 +1,5 @@
-import { Elysia, t } from "elysia";
 import { randomUUID } from "node:crypto";
+import { Elysia, t } from "elysia";
 import { prisma } from "../auth/prisma";
 import { env } from "../env";
 

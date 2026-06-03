@@ -8,9 +8,9 @@ export {
 export * from "./account-operation/account-operation";
 export * from "./admin-repair-job/admin-repair-job";
 export * from "./comment/comment";
-export * from "./credit-attribution/credit-attribution";
 export * from "./content-structure/content-structure";
 export * from "./content-translation/content-translation";
+export * from "./credit-attribution/credit-attribution";
 export * from "./dashboard";
 export * from "./diagnostic/status";
 export * from "./entity-attribution/entity-attribution";
@@ -25,14 +25,14 @@ export {
   getLockedFieldError,
   type LockedFieldApiError,
 } from "./react-query/errors";
-export * from "./source-site/source-site";
 export * from "./series-unit/series";
+export * from "./source-site/source-site";
 export * from "./subject-attribution/subject-attribution";
 export * from "./subscription/subscription";
 export * from "./tag/tag";
 export * from "./unit/unit";
 export * from "./unit-alias-record/unit-alias";
 export * from "./unit-external-ref/unit-external-ref";
-export * from "./user-unit-collection/user-unit-collection";
 export * from "./user-tag-application/user-tag-application";
+export * from "./user-unit-collection/user-unit-collection";
 export * from "./zone/zone";

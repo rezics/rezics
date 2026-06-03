@@ -1,5 +1,3 @@
-import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
-import { PostBodyMarkdown } from "@/post";
 import { postQueries } from "@rezics/api/post/post";
 import { realmRuleResolvedQuery } from "@rezics/api/realm/realm";
 import {
@@ -14,6 +12,8 @@ import { Button, Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
+import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { PostBodyMarkdown } from "@/post";
 import { RealmRuleDialog } from "./RealmRuleDialog";
 
 interface RealmRuleSummaryCardProps {

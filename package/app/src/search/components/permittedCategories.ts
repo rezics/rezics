@@ -1,5 +1,5 @@
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 import type { SearchCategory, SearchScope } from "@rezics/contract";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 export const ALL_CATEGORIES: readonly SearchCategory[] = [
   "all",
   "mixed",

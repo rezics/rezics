@@ -1,10 +1,10 @@
 import {
   tagBatchTranslationsQuery,
   tagSearchQuery,
-  useSetUserTagApplicationsMutation,
   usePatchUserUnitCollectionMutation,
   userTagApplicationsForUnitQuery,
   userUnitCollectionForUnitQuery,
+  useSetUserTagApplicationsMutation,
 } from "@rezics/api";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
 import {

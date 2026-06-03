@@ -13,6 +13,7 @@ const i18nMessages = {
   shelf_view_nested: () => getI18nRuntime().i18n.t("entity:shelf_view_nested"),
   shelf_view_list: () => getI18nRuntime().i18n.t("entity:shelf_view_list"),
 } as const;
+
 import { useCanEdit } from "@rezics/api/hooks";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type {
@@ -32,8 +33,8 @@ import {
   type BookDTO,
   contentDocMarkdownFallback,
   isLibraryKind,
-  shelfCoverImageSpec,
   type SystemShelfKindKey,
+  shelfCoverImageSpec,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";

@@ -21,8 +21,8 @@ import { join } from "node:path";
 import {
   I18N_LOCALES_ROOT,
   REPO_ROOT,
-  UI_LOCALES_ROOT,
   toRepoRelPath,
+  UI_LOCALES_ROOT,
 } from "../core/paths";
 
 const SCAN_ROOTS = [

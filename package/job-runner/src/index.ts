@@ -9,15 +9,14 @@ import {
 import { createJobRunnerApp } from "./app";
 import { env } from "./env";
 import { createJobHandlers } from "./handlers";
-import { resolveWorkerLanes } from "./lanes";
-import {
-  createServerPrismaRuntime,
-  type ServerPrismaRuntime,
-} from "./handlers/maintenance/runtime";
 import {
   createHistoryRuntime,
   type HistoryRuntime,
 } from "./handlers/history/runtime";
+import {
+  createServerPrismaRuntime,
+  type ServerPrismaRuntime,
+} from "./handlers/maintenance/runtime";
 import {
   createRankingRuntime,
   type RankingRuntime,
@@ -26,6 +25,7 @@ import {
   createSearchRuntime,
   type SearchRuntime,
 } from "./handlers/search/runtime";
+import { resolveWorkerLanes } from "./lanes";
 import { createBoss } from "./queue/boss";
 import { assertSequinHealthAvailable } from "./sequin/preflight";
 import { registerWorkers } from "./worker";

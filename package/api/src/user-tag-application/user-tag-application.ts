@@ -1,9 +1,9 @@
 export { userTagApplicationApi } from "./user-tag-application.api";
 export { userTagApplicationKeys } from "./user-tag-application.keys";
 export {
-  userTagApplicationMutations,
   useDeleteUserTagApplicationMutation,
   useReorderUserTagApplicationMutation,
+  userTagApplicationMutations,
   useSetUserTagApplicationsMutation,
 } from "./user-tag-application.mutations";
 export {

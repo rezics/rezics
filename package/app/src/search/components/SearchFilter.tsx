@@ -11,6 +11,7 @@ const i18nMessages = {
   search_filter_month_votes: () =>
     getI18nRuntime().i18n.t("search:filter_month_votes"),
 } as const;
+
 import { useTranslation } from "@rezics/i18n/react";
 import type { SortControlsProps } from "@rezics/ui/composite/pagination/Pagination.tsx";
 import {

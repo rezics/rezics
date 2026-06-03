@@ -1,5 +1,5 @@
-import { createI18nRuntime } from "@rezics/i18n/runtime";
 import { setLocale } from "@rezics/i18n/react";
+import { createI18nRuntime } from "@rezics/i18n/runtime";
 import {
   basePreviewParameters,
   localeGlobalTypes,

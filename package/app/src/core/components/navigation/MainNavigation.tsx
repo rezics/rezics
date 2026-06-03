@@ -7,8 +7,8 @@
 // into the `NavigationItem[]` the sidebar renders.
 
 import {
-  Activity as ActivityOutlinedIcon,
   CircleUser as AccountCircleOutlinedIcon,
+  Activity as ActivityOutlinedIcon,
   FileText as ArticleOutlinedIcon,
   LayoutDashboard as DashboardOutlinedIcon,
   Files as DraftsOutlinedIcon,

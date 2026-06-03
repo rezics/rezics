@@ -23,8 +23,8 @@ import { RealmExistingPostSubmitSection } from "../components/RealmExistingPostS
 import { RealmPollWorkspace } from "../components/RealmPollWorkspace";
 import { RealmPostCreateForm } from "../components/RealmPostCreateForm";
 import {
-  type RealmCreateMode,
   normalizeRealmCreateMode,
+  type RealmCreateMode,
   realmCreateModeLabel,
   realmCreateModes,
 } from "../models/realmCreateMode";

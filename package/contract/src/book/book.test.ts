@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Value } from "@sinclair/typebox/value";
+import { aiDisclosureDetailsSchema } from "../unit/unit";
 import {
   bookContentStructureDTOSchema,
   bookContentStructureNodeSchema,
@@ -7,7 +8,6 @@ import {
   createBookSchema,
   updateBookSchema,
 } from "./book";
-import { aiDisclosureDetailsSchema } from "../unit/unit";
 
 describe("bookContentStructureNodeSchema", () => {
   test("accepts an unmaterialized node without id", () => {

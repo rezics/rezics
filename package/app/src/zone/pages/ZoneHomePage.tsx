@@ -1,7 +1,7 @@
 import { zoneHomepageByUnitIdQueryOptions } from "@rezics/api/zone/zone";
 import { useLocale, useTranslation } from "@rezics/i18n/react";
-import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useZone } from "../hooks/useZone";
 import { BookZoneTemplate } from "../templates/book";

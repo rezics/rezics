@@ -2,8 +2,8 @@ import type {
   ContentStructureItem,
   ContentStructureResponse,
   SeriesContentIndexDTO,
-  SeriesDiagnosticsDTO,
   SeriesDetailDTO,
+  SeriesDiagnosticsDTO,
   SeriesListResponse,
   SeriesResponse,
 } from "@rezics/contract";

@@ -5,6 +5,7 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { entityKindLabel } from "@rezics/i18n";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import {
   Button,
   Input,
@@ -17,11 +18,10 @@ import {
 } from "@rezics/ui/shadcn";
 import React from "react";
 import { SearchablePaginatedTableCard } from "@/components/list/SearchablePaginatedTableCard";
-import { type PaginatedColumn } from "@/components/table/PaginatedTable";
+import type { PaginatedColumn } from "@/components/table/PaginatedTable";
 import { Page } from "@/core/layouts/Page";
 import { Link } from "@/shared/ui/link";
 
-import { getI18nRuntime } from "@rezics/i18n/runtime";
 function fmtDate(v?: string | Date) {
   if (!v) return "-";
   const d = typeof v === "string" ? new Date(v) : v;

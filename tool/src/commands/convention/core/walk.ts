@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { REPO_ROOT, isExemptPath } from "./paths";
+import { isExemptPath, REPO_ROOT } from "./paths";
 
 export function* walkDirectories(root: string): Generator<string> {
   let entries: string[];

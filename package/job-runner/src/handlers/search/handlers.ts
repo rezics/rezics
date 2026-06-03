@@ -29,8 +29,8 @@ import {
   type SearchClient,
   type SearchSegmentOptions,
   type SearchSegmentResult,
-  syncContentSegment,
   syncCommentSegment,
+  syncContentSegment,
   syncEntitySegment,
   syncFeedbackSegment,
   syncPostRealmIdsSegment,
@@ -38,8 +38,9 @@ import {
   syncPostsByAuthorSegment,
   syncProgressSegment,
   syncRealmSegment,
-  syncSingleContent,
+  syncReleaseContentSegment,
   syncSingleComment,
+  syncSingleContent,
   syncSingleEntity,
   syncSingleFeedback,
   syncSinglePost,
@@ -49,7 +50,6 @@ import {
   syncSingleUserUnitCollection,
   syncUserSegment,
   syncUserUnitCollectionSegment,
-  syncReleaseContentSegment,
 } from "@rezics/search";
 import {
   DEFAULT_FANOUT_SEGMENT_LIMIT,
