@@ -126,6 +126,11 @@ const removeFromRealmMock = mock(async () => ({
   ...realmOverlayRow,
   moderationStatus: "removed",
 }));
+const setLockMock = mock(async () => ({
+  ...realmEventRow,
+  actionKind: "lock",
+  resultingLocked: true,
+}));
 const requestOwnerDelegationMock = mock(async () => ({
   id: "queue-1",
   realmUnitId: "realm-1",
@@ -316,6 +321,7 @@ mock.module("./moderation.service", () => ({
     approveInRealm: approveInRealmMock,
     rejectInRealm: rejectInRealmMock,
     removeFromRealm: removeFromRealmMock,
+    setLock: setLockMock,
     requestOwnerDelegation: requestOwnerDelegationMock,
     createRealmQueueItem: createRealmQueueItemMock,
     createRealmQueueItemFromFeedback: createRealmQueueItemFromFeedbackMock,
@@ -353,6 +359,7 @@ describe("governanceApi account enforcement", () => {
     approveInRealmMock.mockClear();
     rejectInRealmMock.mockClear();
     removeFromRealmMock.mockClear();
+    setLockMock.mockClear();
     requestOwnerDelegationMock.mockClear();
     createRealmQueueItemMock.mockClear();
     createRealmQueueItemFromFeedbackMock.mockClear();
@@ -793,6 +800,71 @@ describe("governanceApi account enforcement", () => {
       reason: "off-topic",
     });
     expect(tombstoneInRealmMock).not.toHaveBeenCalled();
+  });
+
+  test("locks and unlocks realm content through content lock policy", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/content/post-1/lock",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason: "heated thread", caseId: "case-1" }),
+        },
+      ),
+    );
+    await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/realms/realm-1/content/post-1/unlock",
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reason: "resolved" }),
+        },
+      ),
+    );
+
+    expect(setLockMock).toHaveBeenNthCalledWith(1, {
+      targetKind: "UNIT_REALM",
+      targetId: "post-1",
+      realmUnitId: "realm-1",
+      isLocked: true,
+      actorUserId: "staff-1",
+      reasonCode: "realm.content.locked",
+      reasonText: "heated thread",
+      caseId: "case-1",
+    });
+    expect(setLockMock).toHaveBeenNthCalledWith(2, {
+      targetKind: "UNIT_REALM",
+      targetId: "post-1",
+      realmUnitId: "realm-1",
+      isLocked: false,
+      actorUserId: "staff-1",
+      reasonCode: "realm.content.unlocked",
+      reasonText: "resolved",
+    });
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "content.lock",
+      realmMembership: {
+        realmUnitId: "realm-1",
+        role: "moderator",
+        capabilities: [
+          {
+            capability: "queue.realm.decide",
+            scope: { kind: "realm", realmUnitId: "realm-1" },
+          },
+        ],
+      },
+      target: {
+        kind: "realm-content",
+        id: "post-1",
+        realmUnitId: "realm-1",
+      },
+    });
   });
 
   test("creates owner delegation queue item through realm policy", async () => {

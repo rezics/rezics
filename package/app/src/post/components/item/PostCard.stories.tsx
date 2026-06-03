@@ -141,7 +141,7 @@ export const ManagePendingReview: Story = {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmModerationState: "pending_review",
+    realmModerationStatus: "pending",
     realmModerationAt: realmModerationStoryTime,
     moderationMenuContent: realmModerationStoryItems,
   },
@@ -152,30 +152,29 @@ export const ManageApproved: Story = {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmModerationState: "approved",
+    realmModerationStatus: "approved",
     realmModerationAt: realmModerationStoryTime,
     moderationMenuContent: realmModerationStoryItems,
   },
 };
 
-export const ManageRejected: Story = {
+export const ManageRemoved: Story = {
   args: {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmModerationState: "rejected",
+    realmModerationStatus: "removed",
     realmModerationAt: realmModerationStoryTime,
     moderationMenuContent: realmModerationStoryItems,
   },
 };
 
-export const ManageRemovedHidden: Story = {
+export const ManageRemovedLongBody: Story = {
   args: {
-    post: postFlat[0],
+    post: postLongBody,
     manageMode: true,
     manageRealmId: "realm-story",
-    realmModerationState: "removed",
-    realmVisibilityState: "hidden",
+    realmModerationStatus: "removed",
     realmModerationAt: realmModerationStoryTime,
     moderationMenuContent: realmModerationStoryItems,
   },
@@ -189,7 +188,7 @@ export const ManageCompactWrap: Story = {
     post: postLongBody,
     manageMode: true,
     manageRealmId: "realm-story",
-    realmModerationState: "pending_review",
+    realmModerationStatus: "pending",
     realmModerationAt: realmModerationStoryTime,
     moderationMenuContent: realmModerationStoryItems,
   },
@@ -200,7 +199,7 @@ export const ManageKeyboardFocus: Story = {
     post: postFlat[0],
     manageMode: true,
     manageRealmId: "realm-story",
-    realmModerationState: "approved",
+    realmModerationStatus: "approved",
     realmModerationAt: realmModerationStoryTime,
     moderationMenuContent: realmModerationStoryItems,
   },

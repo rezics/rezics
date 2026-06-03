@@ -450,68 +450,6 @@ export function useEscalateRealmQueueItemMutation(
   });
 }
 
-export function useHideRealmContentMutation(
-  options?: Omit<
-    UseMutationOptions<
-      Awaited<ReturnType<typeof governanceApi.hideRealmContent>>,
-      Error,
-      {
-        realmUnitId: string;
-        targetUnitId: string;
-        input: ContentModerationDecisionInput;
-      }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
-      governanceApi.hideRealmContent(realmUnitId, targetUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmUnitStateQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.targetUnitId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
-export function useTombstoneRealmContentMutation(
-  options?: Omit<
-    UseMutationOptions<
-      Awaited<ReturnType<typeof governanceApi.tombstoneRealmContent>>,
-      Error,
-      {
-        realmUnitId: string;
-        targetUnitId: string;
-        input: ContentModerationDecisionInput;
-      }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
-      governanceApi.tombstoneRealmContent(realmUnitId, targetUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmUnitStateQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.targetUnitId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
 export function useRestoreRealmContentMutation(
   options?: Omit<
     UseMutationOptions<
@@ -574,37 +512,6 @@ export function useApproveRealmContentMutation(
   });
 }
 
-export function useRejectRealmContentMutation(
-  options?: Omit<
-    UseMutationOptions<
-      Awaited<ReturnType<typeof governanceApi.rejectRealmContent>>,
-      Error,
-      {
-        realmUnitId: string;
-        targetUnitId: string;
-        input: ContentModerationDecisionInput;
-      }
-    >,
-    "mutationFn"
-  >,
-) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ realmUnitId, targetUnitId, input }) =>
-      governanceApi.rejectRealmContent(realmUnitId, targetUnitId, input),
-    ...options,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmUnitStateQueries(
-        queryClient,
-        variables.realmUnitId,
-        variables.targetUnitId,
-      );
-      options?.onSuccess?.(data, variables, onMutateResult, context);
-    },
-  });
-}
-
 export function useRemoveRealmContentMutation(
   options?: Omit<
     UseMutationOptions<
@@ -624,6 +531,43 @@ export function useRemoveRealmContentMutation(
   return useMutation({
     mutationFn: ({ realmUnitId, targetUnitId, input }) =>
       governanceApi.removeRealmContent(realmUnitId, targetUnitId, input),
+    ...options,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      invalidateRealmUnitStateQueries(
+        queryClient,
+        variables.realmUnitId,
+        variables.targetUnitId,
+      );
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+  });
+}
+
+export function useSetRealmContentLockMutation(
+  options?: Omit<
+    UseMutationOptions<
+      Awaited<ReturnType<typeof governanceApi.setRealmContentLock>>,
+      Error,
+      {
+        realmUnitId: string;
+        targetUnitId: string;
+        isLocked: boolean;
+        input: ContentModerationDecisionInput;
+      }
+    >,
+    "mutationFn"
+  >,
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ realmUnitId, targetUnitId, isLocked, input }) =>
+      governanceApi.setRealmContentLock(
+        realmUnitId,
+        targetUnitId,
+        isLocked,
+        input,
+      ),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
       invalidateRealmUnitStateQueries(
@@ -685,12 +629,10 @@ export const governanceMutations = {
     useCreateRealmQueueItemFromFeedbackMutation,
   useDecideRealmQueueItem: useDecideRealmQueueItemMutation,
   useEscalateRealmQueueItem: useEscalateRealmQueueItemMutation,
-  useHideRealmContent: useHideRealmContentMutation,
-  useTombstoneRealmContent: useTombstoneRealmContentMutation,
   useRestoreRealmContent: useRestoreRealmContentMutation,
   useApproveRealmContent: useApproveRealmContentMutation,
-  useRejectRealmContent: useRejectRealmContentMutation,
   useRemoveRealmContent: useRemoveRealmContentMutation,
+  useSetRealmContentLock: useSetRealmContentLockMutation,
   useRequestRealmContentOwnerDelegation:
     useRequestRealmContentOwnerDelegationMutation,
 };

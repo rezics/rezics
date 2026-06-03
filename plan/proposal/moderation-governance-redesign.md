@@ -353,7 +353,7 @@ reset + reseed is acceptable; a backfill script is optional.
   mode render a latest-action detail line from the overlay (`removed by @x · reason`),
   falling back to i18n "auto-approved" when `latestAction` is null. Remove the
   `realmVisibilityState` rendering.
-- [ ] 5.3 `app/src/realm/components/RealmContentModerationActions.tsx`: collapse the
+- [x] 5.3 `app/src/realm/components/RealmContentModerationActions.tsx`: collapse the
   menu to Approve / Remove / Restore / Lock (drop Hide + Tombstone); i18n-ize all
   labels; drive visibility of actions off `moderationStatus`.
 - [ ] 5.4 New `RemovedContentPlaceholder` component (shared, e.g. under

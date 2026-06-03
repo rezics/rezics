@@ -49,13 +49,14 @@ import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
 import { RuleSection } from "../sections/RuleSection";
 
 export type RealmPageTab = "feed" | "wiki" | "tags" | "about" | "members";
-type RealmModerationFilter = NonNullable<PostListQuery["realmModerationState"]>;
+type RealmModerationFilter = NonNullable<
+  PostListQuery["realmModerationStatus"]
+>;
 
 const realmModerationFilters = [
   "all",
-  "pending_review",
+  "pending",
   "approved",
-  "rejected",
   "removed",
 ] satisfies RealmModerationFilter[];
 
@@ -63,12 +64,10 @@ function realmModerationFilterLabel(value: RealmModerationFilter) {
   switch (value) {
     case "all":
       return "All moderation states";
-    case "pending_review":
+    case "pending":
       return "Pending review";
     case "approved":
       return "Approved";
-    case "rejected":
-      return "Rejected";
     case "removed":
       return "Removed";
   }
@@ -105,7 +104,7 @@ export function RealmPage({
   });
   const permission = useServerPermission();
   const [localTab, setLocalTab] = useState<RealmPageTab>(tab ?? "feed");
-  const [realmModerationState, setRealmModerationState] =
+  const [realmModerationStatus, setRealmModerationStatus] =
     useState<RealmModerationFilter>("all");
 
   useEffect(() => {
@@ -250,9 +249,9 @@ export function RealmPage({
                     </label>
                     {manageMode ? (
                       <Select
-                        value={realmModerationState}
+                        value={realmModerationStatus}
                         onValueChange={(value) =>
-                          setRealmModerationState(
+                          setRealmModerationStatus(
                             value as RealmModerationFilter,
                           )
                         }
@@ -278,8 +277,8 @@ export function RealmPage({
                 sort={feedSort}
                 tagIds={feedTagIds}
                 manageMode={showManage && manageMode}
-                realmModerationState={
-                  showManage && manageMode ? realmModerationState : undefined
+                realmModerationStatus={
+                  showManage && manageMode ? realmModerationStatus : undefined
                 }
               />
             </div>

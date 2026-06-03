@@ -29,7 +29,7 @@ interface RealmContentFeedProps {
   realmId: string;
   sort?: RealmFeedSort;
   tagIds?: string[];
-  realmModerationState?: PostListQuery["realmModerationState"];
+  realmModerationStatus?: PostListQuery["realmModerationStatus"];
   manageMode?: boolean;
 }
 
@@ -37,7 +37,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   realmId,
   sort = "new",
   tagIds = [],
-  realmModerationState,
+  realmModerationStatus,
   manageMode = false,
 }) => {
   const { t } = useTranslation(["entity"]);
@@ -48,7 +48,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
       languages: readContext.languages,
       languageMode: readContext.languageMode,
       ...(tagIds.length > 0 ? { tagIds } : {}),
-      ...(realmModerationState ? { realmModerationState } : {}),
+      ...(realmModerationStatus ? { realmModerationStatus } : {}),
     }),
     enabled: readContext.ready && Boolean(realmId),
   });
@@ -67,11 +67,16 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   });
   const unitRealmByUnitId = useMemo(() => {
     const map = new Map<string, UnitRealmDTO>();
-    for (const row of moderationOverlayQuery.data?.realmOverlays ?? []) {
-      map.set(row.unitId, row);
+    for (const row of moderationOverlayQuery.data?.overlays ?? []) {
+      map.set(row.id, {
+        realmUnitId: realmId,
+        unitId: row.id,
+        moderationStatus: row.moderationStatus,
+        isLocked: false,
+      });
     }
     return map;
-  }, [moderationOverlayQuery.data]);
+  }, [moderationOverlayQuery.data, realmId]);
   useReactionHydration(postReactionTargetIds, {
     summaryScopeKey: reactionScopeKey,
     userScopeKey: reactionScopeKey,
@@ -124,9 +129,9 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     return <EmptyState title={t("entity:realm_content_empty_title")} />;
   }
 
-  const fallbackModerationState =
-    realmModerationState && realmModerationState !== "all"
-      ? realmModerationState
+  const fallbackModerationStatus =
+    realmModerationStatus && realmModerationStatus !== "all"
+      ? realmModerationStatus
       : "approved";
 
   return (
@@ -151,8 +156,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
           ({
             realmUnitId: realmId,
             unitId: post.unitId,
-            moderationState: fallbackModerationState,
-            visibilityState: "visible",
+            moderationStatus: fallbackModerationStatus,
             isLocked: false,
           } satisfies UnitRealmDTO);
 
@@ -167,15 +171,10 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
             summaryScopeKey={reactionScopeKey}
             reactionScopeKey={reactionScopeKey}
             manageMode={manageMode}
-            realmModerationState={
-              manageMode ? unitRealm.moderationState : undefined
+            realmModerationStatus={
+              manageMode ? unitRealm.moderationStatus : undefined
             }
             realmModerationAt={unitRealm.createdAt ?? null}
-            realmVisibilityState={
-              manageMode && unitRealm.visibilityState !== "visible"
-                ? unitRealm.visibilityState
-                : null
-            }
             moderationMenuContent={
               manageMode ? (
                 <RealmContentModerationActions

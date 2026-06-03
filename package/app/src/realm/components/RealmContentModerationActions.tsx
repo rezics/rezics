@@ -1,28 +1,19 @@
 import {
   useApproveRealmContentMutation,
-  useHideRealmContentMutation,
-  useRejectRealmContentMutation,
   useRemoveRealmContentMutation,
   useRestoreRealmContentMutation,
-  useTombstoneRealmContentMutation,
+  useSetRealmContentLockMutation,
 } from "@rezics/api/governance/governance";
 import { useAppendRealmPinboardMutation } from "@rezics/api/realm/realm";
 import type { UnitRealmDTO } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@rezics/ui/shadcn";
-import {
-  ArchiveX,
-  CheckCircle2,
-  EyeOff,
-  Pin,
-  RotateCcw,
-  ShieldX,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Lock, Pin, RotateCcw, ShieldX } from "lucide-react";
 import { toast } from "sonner";
 
 export type RealmContentModerationActionsProps = {
@@ -31,7 +22,10 @@ export type RealmContentModerationActionsProps = {
   unitRealm?: UnitRealmDTO | null;
 };
 
-function stopAndConfirm(event: Event, message: string) {
+function stopAndConfirm(
+  event: { stopPropagation: () => void },
+  message: string,
+) {
   event.stopPropagation();
   return window.confirm(message);
 }
@@ -41,56 +35,55 @@ export function RealmContentModerationActions({
   targetUnitId,
   unitRealm,
 }: RealmContentModerationActionsProps) {
-  const moderationState = unitRealm?.moderationState ?? "approved";
-  const visibilityState = unitRealm?.visibilityState ?? "visible";
+  const { t } = useTranslation(["community"]);
+  const moderationStatus = unitRealm?.moderationStatus ?? "approved";
+  const isLocked = unitRealm?.isLocked ?? false;
   const approve = useApproveRealmContentMutation({
-    onSuccess: () => toast.success("Approved for this realm."),
-    onError: (error) => toast.error(error.message),
-  });
-  const reject = useRejectRealmContentMutation({
-    onSuccess: () => toast.success("Rejected from this realm."),
+    onSuccess: () => toast.success(t("community:moderation_approve_success")),
     onError: (error) => toast.error(error.message),
   });
   const remove = useRemoveRealmContentMutation({
-    onSuccess: () => toast.success("Removed from this realm."),
-    onError: (error) => toast.error(error.message),
-  });
-  const hide = useHideRealmContentMutation({
-    onSuccess: () => toast.success("Hidden in this realm."),
-    onError: (error) => toast.error(error.message),
-  });
-  const tombstone = useTombstoneRealmContentMutation({
-    onSuccess: () => toast.success("Tombstoned in this realm."),
+    onSuccess: () => toast.success(t("community:moderation_remove_success")),
     onError: (error) => toast.error(error.message),
   });
   const restore = useRestoreRealmContentMutation({
-    onSuccess: () => toast.success("Restored in this realm."),
+    onSuccess: () => toast.success(t("community:moderation_restore_success")),
+    onError: (error) => toast.error(error.message),
+  });
+  const setLock = useSetRealmContentLockMutation({
+    onSuccess: (_data, variables) =>
+      toast.success(
+        variables.isLocked
+          ? t("community:moderation_lock_success")
+          : t("community:moderation_unlock_success"),
+      ),
     onError: (error) => toast.error(error.message),
   });
   const pin = useAppendRealmPinboardMutation({
-    onSuccess: () => toast.success("Post pinned."),
+    onSuccess: () => toast.success(t("community:moderation_pin_success")),
     onError: (error) => toast.error(error.message),
   });
 
   const relationInput = { reason: "moderator_action" };
-  const showApprove = moderationState !== "approved";
-  const showReject =
-    moderationState !== "rejected" && moderationState !== "removed";
-  const showRemove = moderationState !== "removed";
-  const showHide = visibilityState !== "hidden";
-  const showTombstone = visibilityState !== "tombstoned";
-  const showRestoreVisibility = visibilityState !== "visible";
+  const showApprove = moderationStatus !== "approved";
+  const showRemove = moderationStatus !== "removed";
+  const showRestore = moderationStatus === "removed";
 
   return (
     <>
       <DropdownMenuGroup>
-        <DropdownMenuLabel>Realm moderation</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {t("community:moderation_realm_label")}
+        </DropdownMenuLabel>
         {showApprove ? (
           <DropdownMenuItem
             disabled={approve.isPending}
             onSelect={(event) => {
               if (
-                !stopAndConfirm(event, "Approve this content for this realm?")
+                !stopAndConfirm(
+                  event,
+                  t("community:moderation_approve_confirm"),
+                )
               ) {
                 return;
               }
@@ -102,27 +95,7 @@ export function RealmContentModerationActions({
             }}
           >
             <CheckCircle2 className="h-4 w-4" aria-hidden />
-            Approve for realm
-          </DropdownMenuItem>
-        ) : null}
-        {showReject ? (
-          <DropdownMenuItem
-            disabled={reject.isPending}
-            onSelect={(event) => {
-              if (
-                !stopAndConfirm(event, "Reject this content from this realm?")
-              ) {
-                return;
-              }
-              reject.mutate({
-                realmUnitId,
-                targetUnitId,
-                input: relationInput,
-              });
-            }}
-          >
-            <XCircle className="h-4 w-4" aria-hidden />
-            Reject from realm
+            {t("community:moderation_approve_action")}
           </DropdownMenuItem>
         ) : null}
         {showRemove ? (
@@ -130,7 +103,7 @@ export function RealmContentModerationActions({
             disabled={remove.isPending}
             onSelect={(event) => {
               if (
-                !stopAndConfirm(event, "Remove this content from this realm?")
+                !stopAndConfirm(event, t("community:moderation_remove_confirm"))
               ) {
                 return;
               }
@@ -142,57 +115,18 @@ export function RealmContentModerationActions({
             }}
           >
             <ShieldX className="h-4 w-4" aria-hidden />
-            Remove from realm
+            {t("community:moderation_remove_action")}
           </DropdownMenuItem>
         ) : null}
-      </DropdownMenuGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuGroup>
-        <DropdownMenuLabel>Realm visibility</DropdownMenuLabel>
-        {showHide ? (
-          <DropdownMenuItem
-            disabled={hide.isPending}
-            onSelect={(event) => {
-              if (!stopAndConfirm(event, "Hide this content in this realm?")) {
-                return;
-              }
-              hide.mutate({
-                realmUnitId,
-                targetUnitId,
-                input: relationInput,
-              });
-            }}
-          >
-            <EyeOff className="h-4 w-4" aria-hidden />
-            Hide in this realm
-          </DropdownMenuItem>
-        ) : null}
-        {showTombstone ? (
-          <DropdownMenuItem
-            disabled={tombstone.isPending}
-            onSelect={(event) => {
-              if (
-                !stopAndConfirm(event, "Tombstone this content in this realm?")
-              ) {
-                return;
-              }
-              tombstone.mutate({
-                realmUnitId,
-                targetUnitId,
-                input: relationInput,
-              });
-            }}
-          >
-            <ArchiveX className="h-4 w-4" aria-hidden />
-            Tombstone in this realm
-          </DropdownMenuItem>
-        ) : null}
-        {showRestoreVisibility ? (
+        {showRestore ? (
           <DropdownMenuItem
             disabled={restore.isPending}
             onSelect={(event) => {
               if (
-                !stopAndConfirm(event, "Restore this content in this realm?")
+                !stopAndConfirm(
+                  event,
+                  t("community:moderation_restore_confirm"),
+                )
               ) {
                 return;
               }
@@ -204,17 +138,46 @@ export function RealmContentModerationActions({
             }}
           >
             <RotateCcw className="h-4 w-4" aria-hidden />
-            Restore in this realm
+            {t("community:moderation_restore_action")}
           </DropdownMenuItem>
         ) : null}
+        <DropdownMenuItem
+          disabled={setLock.isPending}
+          onSelect={(event) => {
+            const nextLocked = !isLocked;
+            if (
+              !stopAndConfirm(
+                event,
+                nextLocked
+                  ? t("community:moderation_lock_confirm")
+                  : t("community:moderation_unlock_confirm"),
+              )
+            ) {
+              return;
+            }
+            setLock.mutate({
+              realmUnitId,
+              targetUnitId,
+              isLocked: nextLocked,
+              input: relationInput,
+            });
+          }}
+        >
+          <Lock className="h-4 w-4" aria-hidden />
+          {isLocked
+            ? t("community:moderation_unlock_action")
+            : t("community:moderation_lock_action")}
+        </DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuLabel>Organization</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {t("community:moderation_organization_label")}
+        </DropdownMenuLabel>
         <DropdownMenuItem
           disabled={pin.isPending}
           onSelect={(event) => {
-            if (!stopAndConfirm(event, "Pin this content to this realm?")) {
+            if (!stopAndConfirm(event, t("community:moderation_pin_confirm"))) {
               return;
             }
             pin.mutate({
@@ -224,7 +187,7 @@ export function RealmContentModerationActions({
           }}
         >
           <Pin className="h-4 w-4" aria-hidden />
-          Pin to realm
+          {t("community:moderation_pin_action")}
         </DropdownMenuItem>
       </DropdownMenuGroup>
     </>

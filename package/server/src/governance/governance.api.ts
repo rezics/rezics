@@ -749,6 +749,80 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
     },
   )
   .post(
+    "/realms/:realmUnitId/content/:targetUnitId/lock",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: contentPolicyActions.lock,
+        target: {
+          kind: "realm-content",
+          id: params.targetUnitId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.setLock({
+        targetKind: "UNIT_REALM",
+        targetId: params.targetUnitId,
+        realmUnitId: params.realmUnitId,
+        isLocked: true,
+        actorUserId: identity.userId,
+        reasonCode: "realm.content.locked",
+        reasonText: body.reason,
+        caseId: body.caseId,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: moderationActionDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Lock content in one realm",
+        tags: ["Governance", "Realms", "Content"],
+      },
+    },
+  )
+  .post(
+    "/realms/:realmUnitId/content/:targetUnitId/unlock",
+    async ({ params, body, identity, status }) => {
+      const denied = await assertRealmGovernancePolicy({
+        identity,
+        status,
+        realmUnitId: params.realmUnitId,
+        action: contentPolicyActions.lock,
+        target: {
+          kind: "realm-content",
+          id: params.targetUnitId,
+          realmUnitId: params.realmUnitId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.setLock({
+        targetKind: "UNIT_REALM",
+        targetId: params.targetUnitId,
+        realmUnitId: params.realmUnitId,
+        isLocked: false,
+        actorUserId: identity.userId,
+        reasonCode: "realm.content.unlocked",
+        reasonText: body.reason,
+        caseId: body.caseId,
+      });
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
+      body: contentModerationDecisionSchema,
+      response: { 200: moderationActionDTOSchema, 403: t.String() },
+      detail: {
+        summary: "Unlock content in one realm",
+        tags: ["Governance", "Realms", "Content"],
+      },
+    },
+  )
+  .post(
     "/realms/:realmUnitId/content/:targetUnitId/owner-delegation",
     async ({ params, body, identity, status }) => {
       const denied = await assertRealmGovernancePolicy({

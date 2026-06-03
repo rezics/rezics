@@ -103,14 +103,14 @@ describe("governanceApi", () => {
     await governanceApi.grantRealmCapability("realm/1", "user/1", {
       capability: "queue.realm.decide",
     });
-    await governanceApi.tombstoneRealmContent("realm/1", "post/1", {
-      reason: "spam",
-    });
     await governanceApi.restoreRealmContent("realm/1", "post/1", {
       reason: "appeal accepted",
     });
     await governanceApi.removeRealmContent("realm/1", "post/1", {
       reason: "off topic",
+    });
+    await governanceApi.setRealmContentLock("realm/1", "post/1", true, {
+      reason: "heated thread",
     });
     await governanceApi.requestRealmContentOwnerDelegation(
       "realm/1",
@@ -134,15 +134,15 @@ describe("governanceApi", () => {
       "http://api.example/governance/realms/realm%2F1/members/user%2F1/capabilities",
     );
     expect(fetchMock.mock.calls[4]?.[0]).toBe(
-      "http://api.example/governance/realms/realm%2F1/content/post%2F1/tombstone",
-    );
-    expect(fetchMock.mock.calls[5]?.[0]).toBe(
       "http://api.example/governance/realms/realm%2F1/content/post%2F1/restore",
     );
-    expect(fetchMock.mock.calls[6]?.[0]).toBe(
+    expect(fetchMock.mock.calls[5]?.[0]).toBe(
       "http://api.example/governance/realms/realm%2F1/content/post%2F1/remove",
     );
-    expect(fetchMock.mock.calls[6]?.[1]).toMatchObject({ method: "POST" });
+    expect(fetchMock.mock.calls[5]?.[1]).toMatchObject({ method: "POST" });
+    expect(fetchMock.mock.calls[6]?.[0]).toBe(
+      "http://api.example/governance/realms/realm%2F1/content/post%2F1/lock",
+    );
     expect(fetchMock.mock.calls[7]?.[0]).toBe(
       "http://api.example/governance/realms/realm%2F1/content/post%2F1/owner-delegation",
     );

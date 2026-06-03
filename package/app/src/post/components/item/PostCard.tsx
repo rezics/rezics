@@ -1,11 +1,12 @@
 import { useEditorEntry } from "@rezics/api/hooks";
 import {
   extractPollUnitIdsFromContentDoc,
+  type ModerationStatus,
   type PostDTO,
   PostKind,
-  type UnitRealmModerationState,
   type VariantContextSummary,
 } from "@rezics/contract";
+import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
   DropdownMenu,
@@ -44,9 +45,8 @@ interface PostCardProps {
   reactionScopeKey?: string | null;
   manageMode?: boolean;
   manageRealmId?: string;
-  realmModerationState?: UnitRealmModerationState;
+  realmModerationStatus?: ModerationStatus;
   realmModerationAt?: string | Date | null;
-  realmVisibilityState?: "hidden" | "tombstoned" | null;
   overflowContent?: React.ReactNode;
   moderationMenuContent?: React.ReactNode;
 }
@@ -85,7 +85,7 @@ function formatRelativeTime(value?: string | Date | null) {
   return date.toLocaleDateString();
 }
 
-function ModerationStatus({
+function ModerationStatusBadge({
   post,
   statuses,
   at,
@@ -140,13 +140,13 @@ export const PostCard: React.FC<PostCardProps> = ({
   summaryScopeKey,
   reactionScopeKey,
   manageMode = false,
-  realmModerationState,
+  realmModerationStatus,
   realmModerationAt,
-  realmVisibilityState,
   overflowContent,
   moderationMenuContent,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation(["community"]);
   const rootPostUnitId = post.unitId;
   const resolvedVariantContext = variantContext ?? post.variantContext;
   const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
@@ -176,30 +176,21 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   const statusBadges = [
-    realmModerationState
+    realmModerationStatus
       ? {
           key: "relation-moderation",
           label:
-            realmModerationState === "pending_review"
-              ? "Pending review"
-              : realmModerationState === "approved"
-                ? "Approved"
-                : realmModerationState === "rejected"
-                  ? "Rejected"
-                  : "Removed",
+            realmModerationStatus === "pending"
+              ? t("community:moderation_status_pending")
+              : realmModerationStatus === "approved"
+                ? t("community:moderation_status_approved")
+                : t("community:moderation_status_removed"),
           tone:
-            realmModerationState === "approved"
+            realmModerationStatus === "approved"
               ? "success"
-              : realmModerationState === "pending_review"
+              : realmModerationStatus === "pending"
                 ? "warning"
                 : "error",
-        }
-      : null,
-    realmVisibilityState
-      ? {
-          key: "visibility",
-          label: realmVisibilityState === "hidden" ? "Hidden" : "Tombstoned",
-          tone: realmVisibilityState === "tombstoned" ? "error" : "warning",
         }
       : null,
   ].filter(Boolean) as StatusBadge[];
@@ -316,7 +307,7 @@ export const PostCard: React.FC<PostCardProps> = ({
               onClick={(event) => event.stopPropagation()}
               onKeyDown={() => undefined}
             >
-              <ModerationStatus
+              <ModerationStatusBadge
                 post={post}
                 statuses={statusBadges}
                 at={realmModerationAt}

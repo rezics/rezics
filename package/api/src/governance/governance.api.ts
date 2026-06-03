@@ -7,7 +7,6 @@ import type {
   CapabilityGrantDTO,
   CapabilityHint,
   ContentModerationDecisionInput,
-  ContentModerationStateDTO,
   CreateAccountEnforcementInput,
   CreateModerationCaseFromFeedbackInput,
   CreateRealmModerationQueueItemFromFeedbackInput,
@@ -338,36 +337,40 @@ export const governanceApi = {
 
   getGlobalContentModeration: async (
     targetUnitId: string,
-  ): Promise<ContentModerationStateDTO | null> => {
-    return apiFetch<ContentModerationStateDTO | null>(
-      `/governance/content/${encodePathPart(targetUnitId)}/moderation`,
-    );
+  ): Promise<ModerationOverlayDTO | null> => {
+    const [overlay] = await governanceApi.getModerationOverlays({
+      targetKind: "unit",
+      targetIds: [targetUnitId],
+    });
+    return overlay ?? null;
   },
 
-  hideGlobalContent: async (
+  removeGlobalContent: async (
     targetUnitId: string,
     input: ContentModerationDecisionInput,
-  ): Promise<ContentModerationStateDTO> => {
-    return apiFetch<ContentModerationStateDTO>(
+  ): Promise<ModerationOverlayDTO | null> => {
+    await apiFetch<unknown>(
       `/governance/content/${encodePathPart(targetUnitId)}/hide`,
       {
         method: "POST",
         body: JSON.stringify(input),
       },
     );
+    return governanceApi.getGlobalContentModeration(targetUnitId);
   },
 
   restoreGlobalContent: async (
     targetUnitId: string,
     input: ContentModerationDecisionInput,
-  ): Promise<ContentModerationStateDTO> => {
-    return apiFetch<ContentModerationStateDTO>(
+  ): Promise<ModerationOverlayDTO | null> => {
+    await apiFetch<unknown>(
       `/governance/content/${encodePathPart(targetUnitId)}/restore`,
       {
         method: "POST",
         body: JSON.stringify(input),
       },
     );
+    return governanceApi.getGlobalContentModeration(targetUnitId);
   },
 
   approveRealmContent: async (
@@ -377,20 +380,6 @@ export const governanceApi = {
   ): Promise<UnitRealmDTO> => {
     return apiFetch<UnitRealmDTO>(
       `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/approve`,
-      {
-        method: "POST",
-        body: JSON.stringify(input),
-      },
-    );
-  },
-
-  rejectRealmContent: async (
-    realmUnitId: string,
-    targetUnitId: string,
-    input: ContentModerationDecisionInput,
-  ): Promise<UnitRealmDTO> => {
-    return apiFetch<UnitRealmDTO>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/reject`,
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -412,34 +401,6 @@ export const governanceApi = {
     );
   },
 
-  hideRealmContent: async (
-    realmUnitId: string,
-    targetUnitId: string,
-    input: ContentModerationDecisionInput,
-  ): Promise<UnitRealmDTO> => {
-    return apiFetch<UnitRealmDTO>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/hide`,
-      {
-        method: "POST",
-        body: JSON.stringify(input),
-      },
-    );
-  },
-
-  tombstoneRealmContent: async (
-    realmUnitId: string,
-    targetUnitId: string,
-    input: ContentModerationDecisionInput,
-  ): Promise<UnitRealmDTO> => {
-    return apiFetch<UnitRealmDTO>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/tombstone`,
-      {
-        method: "POST",
-        body: JSON.stringify(input),
-      },
-    );
-  },
-
   restoreRealmContent: async (
     realmUnitId: string,
     targetUnitId: string,
@@ -447,6 +408,21 @@ export const governanceApi = {
   ): Promise<UnitRealmDTO> => {
     return apiFetch<UnitRealmDTO>(
       `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/restore`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    );
+  },
+
+  setRealmContentLock: async (
+    realmUnitId: string,
+    targetUnitId: string,
+    isLocked: boolean,
+    input: ContentModerationDecisionInput,
+  ): Promise<ModerationActionDTO> => {
+    return apiFetch<ModerationActionDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/${isLocked ? "lock" : "unlock"}`,
       {
         method: "POST",
         body: JSON.stringify(input),
