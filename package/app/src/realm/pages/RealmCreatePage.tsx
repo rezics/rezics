@@ -144,7 +144,10 @@ export function RealmCreatePage({
           </TabsList>
 
           <TabsContent value="post">
-            <RealmPostCreateForm realmId={realmId} />
+            <RealmPostCreateForm
+              realmId={realmId}
+              contentRequiresApproval={realm.contentRequiresApproval}
+            />
           </TabsContent>
           <TabsContent value="wiki">
             <WikiPostEditor realmUnitIds={[realmId]} />
@@ -155,7 +158,10 @@ export function RealmCreatePage({
             />
           </TabsContent>
           <TabsContent value="existing">
-            <RealmExistingPostSubmitSection realmId={realmId} />
+            <RealmExistingPostSubmitSection
+              realmId={realmId}
+              contentRequiresApproval={realm.contentRequiresApproval}
+            />
           </TabsContent>
         </Tabs>
       )}

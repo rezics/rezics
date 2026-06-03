@@ -134,6 +134,11 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
             reactionScopeKey={reactionScopeKey}
             manageMode={manageMode}
             manageRealmId={realmId}
+            realmPublicationState={
+              manageMode && realmLifecycleState !== "all"
+                ? realmLifecycleState
+                : undefined
+            }
           />
         ),
       )}

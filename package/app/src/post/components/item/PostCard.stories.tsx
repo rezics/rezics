@@ -4,6 +4,7 @@ import {
   type PollResultsDTO,
 } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { expect, screen, userEvent, within } from "storybook/test";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -114,4 +115,72 @@ export const Edited: Story = {
 
 export const WithEmbeddedPoll: Story = {
   render: () => <PostCardWithPoll />,
+};
+
+export const ManagePendingReview: Story = {
+  args: {
+    post: postFlat[0],
+    manageMode: true,
+    manageRealmId: "realm-story",
+    realmPublicationState: "pending_review",
+  },
+};
+
+export const ManageApproved: Story = {
+  args: {
+    post: postFlat[0],
+    manageMode: true,
+    manageRealmId: "realm-story",
+    realmPublicationState: "approved",
+  },
+};
+
+export const ManageRejected: Story = {
+  args: {
+    post: postFlat[0],
+    manageMode: true,
+    manageRealmId: "realm-story",
+    realmPublicationState: "rejected",
+  },
+};
+
+export const ManageRemovedHidden: Story = {
+  args: {
+    post: postFlat[0],
+    manageMode: true,
+    manageRealmId: "realm-story",
+    realmPublicationState: "removed",
+    realmModerationState: "hidden",
+  },
+};
+
+export const ManageCompactWrap: Story = {
+  parameters: {
+    viewport: { defaultViewport: "mobile1" },
+  },
+  args: {
+    post: postLongBody,
+    manageMode: true,
+    manageRealmId: "realm-story",
+    realmPublicationState: "pending_review",
+  },
+};
+
+export const ManageKeyboardFocus: Story = {
+  args: {
+    post: postFlat[0],
+    manageMode: true,
+    manageRealmId: "realm-story",
+    realmPublicationState: "approved",
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("button", {
+      name: "Realm moderation actions",
+    });
+    trigger.focus();
+    expect(trigger).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    expect(screen.getByText("Feed publication")).toBeInTheDocument();
+  },
 };

@@ -21,6 +21,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Link2, Vote, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { DraftPublishActions } from "@/draft";
 import { policyDenialFromError } from "@/policy";
 import { PollComposer, PollLibrarySurface } from "@/poll";
@@ -31,11 +32,13 @@ import { RealmPostTagPicker } from "./RealmPostTagPicker";
 
 export interface RealmPostCreateFormProps {
   realmId: string;
+  contentRequiresApproval?: boolean;
   onCreated?: (post: PostDTO) => void;
 }
 
 export function RealmPostCreateForm({
   realmId,
+  contentRequiresApproval = false,
   onCreated,
 }: RealmPostCreateFormProps) {
   const { t } = useTranslation(["common"]);
@@ -93,7 +96,18 @@ export function RealmPostCreateForm({
       {
         onSuccess: (post) => {
           onCreated?.(post);
-          if (status === "PUBLISHED") {
+          if (status === "DRAFT") {
+            toast.success(t("common:save_draft"));
+            return;
+          }
+          if (contentRequiresApproval) {
+            toast.success("Submitted for review.");
+            navigate({
+              to: "/realm/$realmId",
+              params: { realmId },
+            });
+          } else {
+            toast.success("Post published.");
             navigate({
               to: "/realm/$realmId/post/$postUnitId",
               params: { realmId, postUnitId: post.unitId },

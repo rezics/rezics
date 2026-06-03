@@ -4,12 +4,21 @@ import {
   realmDetailQuery,
 } from "@rezics/api/realm/realm";
 import { userQueries } from "@rezics/api/user/user.queries";
-import { contentDocMarkdownFallback, type TagTreeNode } from "@rezics/contract";
+import {
+  contentDocMarkdownFallback,
+  type PostListQuery,
+  type TagTreeNode,
+} from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import {
   Button,
   Checkbox,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Tabs,
   TabsContent,
   TabsList,
@@ -40,6 +49,32 @@ import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
 import { RuleSection } from "../sections/RuleSection";
 
 export type RealmPageTab = "feed" | "wiki" | "tags" | "about" | "members";
+type RealmFeedPublicationFilter = NonNullable<
+  PostListQuery["realmLifecycleState"]
+>;
+
+const realmFeedPublicationFilters = [
+  "all",
+  "pending_review",
+  "approved",
+  "rejected",
+  "removed",
+] satisfies RealmFeedPublicationFilter[];
+
+function realmFeedPublicationFilterLabel(value: RealmFeedPublicationFilter) {
+  switch (value) {
+    case "all":
+      return "All feed states";
+    case "pending_review":
+      return "Pending review";
+    case "approved":
+      return "Approved";
+    case "rejected":
+      return "Rejected";
+    case "removed":
+      return "Removed";
+  }
+}
 
 interface RealmPageProps {
   realmId: string;
@@ -69,6 +104,8 @@ export function RealmPage({
   });
   const permission = useServerPermission();
   const [localTab, setLocalTab] = useState<RealmPageTab>(tab ?? "feed");
+  const [realmLifecycleState, setRealmLifecycleState] =
+    useState<RealmFeedPublicationFilter>("all");
 
   useEffect(() => {
     if (tab) setLocalTab(tab);
@@ -197,15 +234,38 @@ export function RealmPage({
                   onChange={(tagIds) => onFeedTagIdsChange?.(tagIds)}
                 />
                 {showManage ? (
-                  <label className="flex w-fit cursor-pointer items-center gap-2 rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary">
-                    <Checkbox
-                      checked={manageMode}
-                      onCheckedChange={(checked) =>
-                        setManageMode(checked === true)
-                      }
-                    />
-                    Manage mode
-                  </label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="flex w-fit cursor-pointer items-center gap-2 rounded-md bg-surface-subtle px-3 py-2 text-sm leading-ui text-text-primary">
+                      <Checkbox
+                        checked={manageMode}
+                        onCheckedChange={(checked) =>
+                          setManageMode(checked === true)
+                        }
+                      />
+                      Manage mode
+                    </label>
+                    {manageMode ? (
+                      <Select
+                        value={realmLifecycleState}
+                        onValueChange={(value) =>
+                          setRealmLifecycleState(
+                            value as RealmFeedPublicationFilter,
+                          )
+                        }
+                      >
+                        <SelectTrigger className="h-9 w-[12rem]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {realmFeedPublicationFilters.map((value) => (
+                            <SelectItem key={value} value={value}>
+                              {realmFeedPublicationFilterLabel(value)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
               <PinnedFeedSection realmUnitId={realmId} />
@@ -214,6 +274,9 @@ export function RealmPage({
                 sort={feedSort}
                 tagIds={feedTagIds}
                 manageMode={showManage && manageMode}
+                realmLifecycleState={
+                  showManage && manageMode ? realmLifecycleState : undefined
+                }
               />
             </div>
             <aside className="min-w-0">

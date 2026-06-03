@@ -7,9 +7,11 @@ import { useAppendRealmPinboardMutation } from "@rezics/api/realm/realm";
 import {
   extractPollUnitIdsFromContentDoc,
   type PostDTO,
+  type RealmFeedPublicationState,
   type VariantContextSummary,
 } from "@rezics/contract";
 import {
+  Badge,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +44,8 @@ interface PostCardProps {
   reactionScopeKey?: string | null;
   manageMode?: boolean;
   manageRealmId?: string;
+  realmPublicationState?: RealmFeedPublicationState;
+  realmModerationState?: "hidden" | "locked" | "archived" | "removed" | null;
 }
 
 export const PostCard: React.FC<PostCardProps> = ({
@@ -53,6 +57,8 @@ export const PostCard: React.FC<PostCardProps> = ({
   reactionScopeKey,
   manageMode = false,
   manageRealmId,
+  realmPublicationState,
+  realmModerationState,
 }) => {
   const navigate = useNavigate();
   const deletePost = useDeletePostMutation({
@@ -74,6 +80,34 @@ export const PostCard: React.FC<PostCardProps> = ({
   const rootPostUnitId = post.unitId;
   const resolvedVariantContext = variantContext ?? post.variantContext;
   const pollUnitIds = extractPollUnitIdsFromContentDoc(post.content);
+  const statusBadges = [
+    realmPublicationState
+      ? {
+          key: "publication",
+          label:
+            realmPublicationState === "pending_review"
+              ? "Pending review"
+              : realmPublicationState === "approved"
+                ? "Approved"
+                : realmPublicationState === "rejected"
+                  ? "Rejected"
+                  : "Removed",
+        }
+      : null,
+    realmModerationState
+      ? {
+          key: "moderation",
+          label:
+            realmModerationState === "hidden"
+              ? "Hidden"
+              : realmModerationState === "locked"
+                ? "Locked"
+                : realmModerationState === "archived"
+                  ? "Archived"
+                  : "Removed",
+        }
+      : null,
+  ].filter(Boolean) as { key: string; label: string }[];
 
   const handleCardClick = () => {
     if (onOpen) {
@@ -166,6 +200,15 @@ export const PostCard: React.FC<PostCardProps> = ({
           overflow={postCardOverflow}
           onReplyInvoke={handleReplyInvoke}
         />
+        {manageMode && statusBadges.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {statusBadges.map((badge) => (
+              <Badge key={badge.key} variant="outline">
+                {badge.label}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
         {manageMode && manageRealmId ? (
           <div
             className="flex justify-end pt-1"

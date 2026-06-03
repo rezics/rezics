@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { FileText, Send } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { policyDenialFromError } from "@/policy";
 import { buildRealmExistingPostSubmitInput } from "../models/realmCreateMode";
 import { RealmPostTagPicker } from "./RealmPostTagPicker";
@@ -36,6 +37,7 @@ type ExistingSubmitCandidate = {
 
 export interface RealmExistingPostSubmitSectionProps {
   realmId: string;
+  contentRequiresApproval?: boolean;
 }
 
 function draftCandidate(draft: DraftMetadata): ExistingSubmitCandidate | null {
@@ -66,6 +68,7 @@ function canSubmitPublishedPost(post: PostDTO, realmId: string) {
 
 export function RealmExistingPostSubmitSection({
   realmId,
+  contentRequiresApproval = false,
 }: RealmExistingPostSubmitSectionProps) {
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
@@ -85,11 +88,21 @@ export function RealmExistingPostSubmitSection({
     enabled: Boolean(userId),
   });
   const submitMutation = useSubmitPostToRealmMutation({
-    onSuccess: (post) =>
+    onSuccess: (post) => {
+      if (contentRequiresApproval) {
+        toast.success("Submitted for review.");
+        navigate({
+          to: "/realm/$realmId",
+          params: { realmId },
+        });
+        return;
+      }
+      toast.success("Post published to realm.");
       navigate({
         to: "/realm/$realmId/post/$postUnitId",
         params: { realmId, postUnitId: post.unitId },
-      }),
+      });
+    },
   });
   const denial = policyDenialFromError(submitMutation.error);
 
