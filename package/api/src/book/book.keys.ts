@@ -21,7 +21,13 @@ export const bookKeys = {
    * Keys for detail queries
    */
   details: () => [...bookKeys.all(), "detail"] as const,
-  detail: (unitId: string) => [...bookKeys.details(), unitId] as const,
+  detail: (
+    unitId: string,
+    query?: { languages?: string | readonly string[] },
+  ) =>
+    query === undefined
+      ? ([...bookKeys.details(), unitId] as const)
+      : ([...bookKeys.details(), unitId, query] as const),
   rating: (bookUnitId: string) =>
     [...bookKeys.all(), "rating", bookUnitId] as const,
   contentStructure: (bookUnitId: string) =>
@@ -37,13 +43,14 @@ export const bookKeys = {
   /**
    * Keys for user-specific queries
    */
-  byUser: (userId: string) => [...bookKeys.all(), "user", userId] as const,
+  byUser: (userId: string, filters?: BookFilters) =>
+    [...bookKeys.all(), "user", userId, filters ?? null] as const,
 
   /**
    * Keys for entity (attribution) queries
    */
-  byEntity: (entityId: string) =>
-    [...bookKeys.all(), "entity", entityId] as const,
+  byEntity: (entityId: string, filters?: BookFilters) =>
+    [...bookKeys.all(), "entity", entityId, filters ?? null] as const,
 
   /**
    * Keys for ISBN lookup
@@ -53,6 +60,6 @@ export const bookKeys = {
   /**
    * Keys for tag-filtered queries
    */
-  byTags: (tagUnitIds: string) =>
-    [...bookKeys.all(), "tags", tagUnitIds] as const,
+  byTags: (tagUnitIds: string, filters?: BookFilters) =>
+    [...bookKeys.all(), "tags", tagUnitIds, filters ?? null] as const,
 } as const;

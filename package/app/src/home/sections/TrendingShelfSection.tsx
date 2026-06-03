@@ -1,13 +1,12 @@
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { buttonVariants } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { HorizontalShelfCarousel } from "@/shelf/components/HorizontalShelfCarousel";
 
 export type TrendingShelfSectionProps = {
@@ -21,9 +20,11 @@ export const TrendingShelfSection: React.FC<TrendingShelfSectionProps> = ({
 }) => {
   const { t } = useTranslation(["page"]);
   const resolvedTitle = title ?? t("page:home_sections_trending_shelves");
-  const { data, isLoading, error } = useQuery(
-    contentSearchQueryOptions({ type: "SHELF", offset: 0, limit }),
-  );
+  const { data, isLoading, error } = useLocalizedContentSearch({
+    type: "SHELF",
+    offset: 0,
+    limit,
+  });
 
   // Content search items cast to ShelfDTO shape (Meilisearch content index)
   const items = useMemo<ShelfDTO[]>(

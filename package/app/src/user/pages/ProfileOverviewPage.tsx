@@ -1,11 +1,10 @@
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import {
   type ContentSearchDocument,
   contentDocMarkdownFallback,
 } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
-import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { DescriptionBox } from "@/user/components/DescriptionBox";
 import { useProfileContext } from "@/user/components/ProfileLayout";
 import {
@@ -19,39 +18,31 @@ export const ProfileOverviewPage: FC = () => {
   const { user, userId } = useProfileContext();
 
   // MOCK: pinned items — first 6 published units by this user
-  const pinnedQuery = useQuery(
-    contentSearchQueryOptions({
-      userId,
-      sort: { field: "publishedAt", order: "desc" },
-      limit: 6,
-    }),
-  );
-
-  // MOCK: recent activity — latest published units
-  const recentQuery = useQuery(
-    contentSearchQueryOptions({
-      userId,
-      sort: { field: "updatedAt", order: "desc" },
-      limit: 10,
-    }),
-  );
-
-  const shelvesCountQuery = useQuery({
-    ...contentSearchQueryOptions({
-      userId,
-      type: ["SHELF"],
-      sort: { field: "createdAt", order: "desc" },
-      limit: 0,
-    }),
+  const pinnedQuery = useLocalizedContentSearch({
+    userId,
+    sort: { field: "publishedAt", order: "desc" },
+    limit: 6,
   });
 
-  const reviewsCountQuery = useQuery({
-    ...contentSearchQueryOptions({
-      userId,
-      type: ["POST"],
-      sort: { field: "createdAt", order: "desc" },
-      limit: 0,
-    }),
+  // MOCK: recent activity — latest published units
+  const recentQuery = useLocalizedContentSearch({
+    userId,
+    sort: { field: "updatedAt", order: "desc" },
+    limit: 10,
+  });
+
+  const shelvesCountQuery = useLocalizedContentSearch({
+    userId,
+    type: ["SHELF"],
+    sort: { field: "createdAt", order: "desc" },
+    limit: 0,
+  });
+
+  const reviewsCountQuery = useLocalizedContentSearch({
+    userId,
+    type: ["POST"],
+    sort: { field: "createdAt", order: "desc" },
+    limit: 0,
   });
 
   const pinned = pinnedQuery.data?.items ?? [];

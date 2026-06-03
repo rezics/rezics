@@ -4,7 +4,14 @@ import {
   postSearchQueryOptions,
 } from "@rezics/api/meili/meili.queries";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
-import type { BookDTO, PostDTO, ShelfDTO, UnitDTO } from "@rezics/contract";
+import type {
+  BookDTO,
+  ContentSearchOptions,
+  PostDTO,
+  PostSearchOptions,
+  ShelfDTO,
+  UnitDTO,
+} from "@rezics/contract";
 import { PostKind, UnitType } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
@@ -26,6 +33,11 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import {
+  useLocalizedContentSearch,
+  useLocalizedPostSearch,
+} from "@/shared/hooks/useLocalizedMeiliSearch";
 import { ShelfCard } from "@/shelf/components/ShelfCard";
 
 export interface UserUnitsPageProps {
@@ -54,6 +66,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
   const [tab, setTab] = useState<TabKey>("shelf");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const search = useSearchQuery({});
+  const readContext = useReadLanguageContext();
   const keyword = search.query.keyword ?? "";
   const keywordBind = search.bind("keyword");
 
@@ -65,18 +78,17 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   // ======= Shelves =======
 
+  const shelfSearchOptions = {
+    type: "SHELF",
+    keyword: keyword || undefined,
+    offset: startShelf,
+    limit: EXTERNAL_PAGE_SIZE,
+  } satisfies ContentSearchOptions;
   const {
     data: shelfDataRaw,
     isLoading: isLoadingShelf,
     error: errorShelf,
-  } = useQuery(
-    contentSearchQueryOptions({
-      type: "SHELF",
-      keyword: keyword || undefined,
-      offset: startShelf,
-      limit: EXTERNAL_PAGE_SIZE,
-    }),
-  );
+  } = useLocalizedContentSearch(shelfSearchOptions);
 
   const shelfTargetIds = useMemo(
     () =>
@@ -103,38 +115,37 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
     bookQueries.byUser(userId, {
       start: startBook,
       limit: EXTERNAL_PAGE_SIZE,
+      languages: readContext.languages,
     }),
   );
 
   // ======= Reviews / Remarks =======
 
+  const reviewSearchOptions = {
+    kind: PostKind.REVIEW,
+    authorUserId: userId,
+    keyword: keyword || undefined,
+    offset: startReview,
+    limit: EXTERNAL_PAGE_SIZE,
+  } satisfies PostSearchOptions;
   const {
     data: reviewData,
     isLoading: isLoadingReview,
     error: errorReview,
-  } = useQuery(
-    postSearchQueryOptions({
-      kind: PostKind.REVIEW,
-      authorUserId: userId,
-      keyword: keyword || undefined,
-      offset: startReview,
-      limit: EXTERNAL_PAGE_SIZE,
-    }),
-  );
+  } = useLocalizedPostSearch(reviewSearchOptions);
 
+  const remarkSearchOptions = {
+    kind: PostKind.REMARK,
+    authorUserId: userId,
+    keyword: keyword || undefined,
+    offset: startRemark,
+    limit: EXTERNAL_PAGE_SIZE,
+  } satisfies PostSearchOptions;
   const {
     data: remarkData,
     isLoading: isLoadingRemark,
     error: errorRemark,
-  } = useQuery(
-    postSearchQueryOptions({
-      kind: PostKind.REMARK,
-      authorUserId: userId,
-      keyword: keyword || undefined,
-      offset: startRemark,
-      limit: EXTERNAL_PAGE_SIZE,
-    }),
-  );
+  } = useLocalizedPostSearch(remarkSearchOptions);
 
   const activeReviewLikeData = tab === "review" ? reviewData : remarkData;
   const isLoadingReviewLike =
@@ -160,18 +171,17 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
 
   // ======= Excerpts =======
 
+  const excerptSearchOptions = {
+    type: UnitType.QUOTE,
+    keyword: keyword || undefined,
+    offset: startExcerpt,
+    limit: EXTERNAL_PAGE_SIZE,
+  } satisfies ContentSearchOptions;
   const {
     data: excerptData,
     isLoading: isLoadingExcerpt,
     error: errorExcerpt,
-  } = useQuery(
-    contentSearchQueryOptions({
-      type: UnitType.QUOTE,
-      keyword: keyword || undefined,
-      offset: startExcerpt,
-      limit: EXTERNAL_PAGE_SIZE,
-    }),
-  );
+  } = useLocalizedContentSearch(excerptSearchOptions);
 
   const excerptUnits: UnitDTO[] = useMemo(
     () => (excerptData?.items ?? []) as unknown as UnitDTO[],
@@ -209,6 +219,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
             keyword: keyword || undefined,
             offset: start,
             limit: EXTERNAL_PAGE_SIZE,
+            languages: readContext.languages,
+            appLocale: readContext.appLocale,
+            languageMode: readContext.languageMode,
           }),
         );
         return result?.items?.length ?? 0;
@@ -222,6 +235,9 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
             keyword: keyword || undefined,
             offset: start,
             limit: EXTERNAL_PAGE_SIZE,
+            languages: readContext.languages,
+            appLocale: readContext.appLocale,
+            languageMode: readContext.languageMode,
           }),
         );
         return result?.items?.length ?? 0;
@@ -232,6 +248,7 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           bookQueries.byUser(userId, {
             start,
             limit: EXTERNAL_PAGE_SIZE,
+            languages: readContext.languages,
           }),
         );
         return result?.books?.length ?? 0;
@@ -243,11 +260,22 @@ export const UserUnitsPage: FC<UserUnitsPageProps> = ({ userId }) => {
           keyword: keyword || undefined,
           offset: start,
           limit: EXTERNAL_PAGE_SIZE,
+          languages: readContext.languages,
+          appLocale: readContext.appLocale,
+          languageMode: readContext.languageMode,
         }),
       );
       return result?.items?.length ?? 0;
     },
-    [tab, keyword, userId, queryClient],
+    [
+      tab,
+      keyword,
+      userId,
+      queryClient,
+      readContext.languages,
+      readContext.appLocale,
+      readContext.languageMode,
+    ],
   );
 
   // Select data source by current tab

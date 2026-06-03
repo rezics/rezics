@@ -13,6 +13,7 @@ import { ReplyComposer } from "../forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "../hooks/useFocusReplyFromQuery";
 import { resolvePostThreadContext } from "../models/postThreadContext";
 import { PostTreeSection } from "../sections/PostTreeSection";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export type PostThreadPageProps = {
   realmUnitId?: string | null;
@@ -37,7 +38,13 @@ export const PostThreadPage: React.FC<PostThreadPageProps> = ({
     | { focusPostUnitId?: string | null }
     | undefined;
   const composerRef = useFocusReplyFromQuery();
-  const { data: root } = useQuery(postQueries.detail(rootPostUnitId));
+  const readContext = useReadLanguageContext();
+  const { data: root } = useQuery({
+    ...postQueries.detail(rootPostUnitId, {
+      languages: readContext.languages,
+    }),
+    enabled: readContext.ready && Boolean(rootPostUnitId),
+  });
   useReactionHydration(rootPostUnitId ? [rootPostUnitId] : [], {
     summaryScopeKey: reactionScopeKey,
     userScopeKey: reactionScopeKey,

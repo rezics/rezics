@@ -20,10 +20,13 @@ export const bookListQuery = (filters?: BookFilters) =>
 /**
  * Query options for getting a single book
  */
-export const bookDetailQuery = (unitId: string) =>
+export const bookDetailQuery = (
+  unitId: string,
+  query?: { languages?: string | readonly string[] },
+) =>
   queryOptions({
-    queryKey: bookKeys.detail(unitId),
-    queryFn: () => bookApi.get(unitId),
+    queryKey: bookKeys.detail(unitId, query),
+    queryFn: () => bookApi.get(unitId, query),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 
@@ -43,7 +46,7 @@ export const bookSearchQuery = (query: string, filters?: BookFilters) =>
  */
 export const booksByUserQuery = (userId: string, filters?: BookFilters) =>
   queryOptions({
-    queryKey: bookKeys.byUser(userId),
+    queryKey: bookKeys.byUser(userId, filters),
     queryFn: () => bookApi.getByUserId(userId, filters),
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -54,7 +57,7 @@ export const booksByUserQuery = (userId: string, filters?: BookFilters) =>
  */
 export const booksByEntityQuery = (entityId: string, filters?: BookFilters) =>
   queryOptions({
-    queryKey: bookKeys.byEntity(entityId),
+    queryKey: bookKeys.byEntity(entityId, filters),
     queryFn: () => bookApi.getByEntityId(entityId, filters),
     enabled: !!entityId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -76,7 +79,7 @@ export const bookByIsbnQuery = (isbn13: string) =>
  */
 export const booksByTagsQuery = (tagUnitIds: string, filters?: BookFilters) =>
   queryOptions({
-    queryKey: bookKeys.byTags(tagUnitIds),
+    queryKey: bookKeys.byTags(tagUnitIds, filters),
     queryFn: () => bookApi.getByTagUnitIds(tagUnitIds, filters),
     enabled: !!tagUnitIds,
     staleTime: 1000 * 60 * 5, // 5 minutes

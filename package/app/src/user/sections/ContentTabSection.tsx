@@ -14,14 +14,13 @@ const i18nMessages = {
     getI18nRuntime().i18n.t("settings:profile_sort_most_replies"),
 } as const;
 
-import { postSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostSearchDocument, PostSearchOptions } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState } from "@rezics/ui";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useState } from "react";
+import { useLocalizedPostSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { Link } from "@/shared/ui/link";
 import { FilterBar, type FilterBarConfig } from "@/user/components/FilterBar";
 import {
@@ -67,7 +66,7 @@ export const ContentTabSection: FC = () => {
     limit,
   };
 
-  const { data, isLoading } = useQuery(postSearchQueryOptions(searchOpts));
+  const { data, isLoading } = useLocalizedPostSearch(searchOpts);
 
   const filterConfig: FilterBarConfig = {
     showSearch: true,

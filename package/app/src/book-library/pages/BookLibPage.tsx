@@ -5,7 +5,7 @@ import {
   type SearchQuery,
 } from "@rezics/contract";
 import type { UniversalPaginatorHandle } from "@rezics/ui/composite/pagination/Pagination.tsx";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,6 +13,8 @@ import type { BookLibSortKey } from "@/search/components/SearchFilter";
 import { useInjectedTags } from "@/search/hooks/useInjectedTags";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
 import { parseSearchString } from "@/search/models/searchQuery";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 
 import { BookLibSectionRef } from "../sections/BookLibSection";
@@ -61,6 +63,7 @@ export const BookLibPage: React.FC = () => {
 
   const [start, setStart] = useState<number>(0);
   const [searchOpts, setSearchOpts] = useState(() => search.toOptions());
+  const readContext = useReadLanguageContext();
 
   const onSearchSubmit = () => {
     setSearchOpts(search.toOptions());
@@ -68,13 +71,22 @@ export const BookLibPage: React.FC = () => {
     ref.current?.resetPaginationPageNumber();
   };
 
-  const { data, isLoading, error } = useQuery(
-    contentSearchQueryOptions({
+  const { data, isLoading, error } = useLocalizedContentSearch({
+    ...searchOpts,
+    offset: start,
+    limit: EXTERNAL_PAGE_SIZE,
+  });
+
+  function localizedSearchOptions(offset: number) {
+    return {
       ...searchOpts,
-      offset: start,
+      offset,
       limit: EXTERNAL_PAGE_SIZE,
-    }),
-  );
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    };
+  }
 
   function handleNeedMoreData(page: number) {
     setStart((page - 1) * EXTERNAL_PAGE_SIZE);
@@ -83,11 +95,9 @@ export const BookLibPage: React.FC = () => {
   const queryClient = useQueryClient();
   async function handlePreRequestData(page: number) {
     const fetchedData = await queryClient.fetchQuery(
-      contentSearchQueryOptions({
-        ...searchOpts,
-        offset: (page - 1) * EXTERNAL_PAGE_SIZE,
-        limit: EXTERNAL_PAGE_SIZE,
-      }),
+      contentSearchQueryOptions(
+        localizedSearchOptions((page - 1) * EXTERNAL_PAGE_SIZE),
+      ),
     );
     return fetchedData?.items?.length;
   }

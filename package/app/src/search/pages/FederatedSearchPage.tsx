@@ -1,4 +1,3 @@
-import { useFederatedSearch } from "@rezics/api/meili/meili.federated";
 import type {
   FederatedSearchResult,
   SearchCategory,
@@ -18,6 +17,7 @@ import { useInjectedTags } from "../hooks/useInjectedTags";
 import { useSearchHistory } from "../hooks/useSearchHistory";
 import { useSearchQuery } from "../hooks/useSearchQuery";
 import { parseSearchString } from "../models/searchQuery";
+import { useLocalizedFederatedSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 export { isSearchCategory } from "../models/category";
 
@@ -84,7 +84,7 @@ export function FederatedSearchPage({
     initialCategory,
   });
 
-  const { data, isLoading } = useFederatedSearch({
+  const { data, isLoading } = useLocalizedFederatedSearch({
     scope,
     category: search.category,
     query: search.query,

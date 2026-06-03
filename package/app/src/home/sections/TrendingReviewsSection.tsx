@@ -1,14 +1,13 @@
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useMemo } from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { HorizontalReviewCarousel } from "@/review/components/list/HorizontalReviewCarousel";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 export type TrendingReviewsProps = {
   title?: string;
@@ -22,9 +21,11 @@ export const TrendingReviews: React.FC<TrendingReviewsProps> = ({
   const { t } = useTranslation(["page"]);
   const resolvedTitle = title ?? t("page:home_sections_trending_reviews");
   const navigate = useNavigate();
-  const { data, isLoading, error } = useQuery(
-    contentSearchQueryOptions({ type: "POST", offset: 0, limit }),
-  );
+  const { data, isLoading, error } = useLocalizedContentSearch({
+    type: "POST",
+    offset: 0,
+    limit,
+  });
 
   const items = useMemo<PostDTO[]>(
     () => (data?.items ?? []) as unknown as PostDTO[],

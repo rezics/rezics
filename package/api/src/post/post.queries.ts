@@ -24,10 +24,13 @@ export const postListQuery = (filters?: PostFilters) =>
 /**
  * Query options for getting a single post
  */
-export const postDetailQuery = (unitId: string) =>
+export const postDetailQuery = (
+  unitId: string,
+  query?: { languages?: string | readonly string[] },
+) =>
   queryOptions({
-    queryKey: postKeys.detail(unitId),
-    queryFn: () => postApi.get(unitId),
+    queryKey: postKeys.detail(unitId, query),
+    queryFn: () => postApi.get(unitId, query),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 

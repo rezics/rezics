@@ -21,6 +21,8 @@ import type React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { Link } from "@/shared/ui/link";
 import { buildUnitUrl } from "@/shared/utils/build-url";
 
@@ -55,16 +57,12 @@ function defaultChildren(units: Unit[], t: (key: string) => string) {
                 </Tooltip>
               </TooltipProvider>
               <p className="text-base font-semibold truncate mb-1">
-                {item.title ||
-                  item.translations?.[0]?.title ||
-                  t("book:unit_untitled_content")}
+                {item.title || t("book:unit_untitled_content")}
               </p>
             </div>
-            {(item.description || item.translations?.[0]?.description) && (
+            {item.description && (
               <p className="text-sm text-text-secondary line-clamp-4">
-                {contentDocMarkdownFallback(
-                  item.description ?? item.translations?.[0]?.description,
-                )}
+                {contentDocMarkdownFallback(item.description)}
               </p>
             )}
           </div>
@@ -125,6 +123,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   const EXTERNAL_PAGE_SIZE = 50;
 
   const search = useSearchQuery({});
+  const readContext = useReadLanguageContext();
   const keyword = search.query.keyword ?? "";
   const keywordBind = search.bind("keyword");
 
@@ -170,16 +169,30 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [types.forEach]);
 
-  const { data: activeData, isLoading } = useQuery(
-    contentSearchQueryOptions({
+  const searchOptions = {
+    type: tab === "UNIT" ? undefined : tab,
+    userId,
+    ...(targetUnitId ? { containedUnitIds: [targetUnitId] } : {}),
+    keyword: keyword || undefined,
+    offset: startMap[tab] ?? 0,
+    limit: EXTERNAL_PAGE_SIZE,
+  };
+  const { data: activeData, isLoading } =
+    useLocalizedContentSearch(searchOptions);
+
+  function localizedOptions(offset: number) {
+    return {
       type: tab === "UNIT" ? undefined : tab,
       userId,
       ...(targetUnitId ? { containedUnitIds: [targetUnitId] } : {}),
       keyword: keyword || undefined,
-      offset: startMap[tab] ?? 0,
+      offset,
       limit: EXTERNAL_PAGE_SIZE,
-    }),
-  );
+      languages: readContext.languages,
+      appLocale: readContext.appLocale,
+      languageMode: readContext.languageMode,
+    };
+  }
 
   function handleNeedMoreData(page: number) {
     const externalStart = (page - 1) * EXTERNAL_PAGE_SIZE;
@@ -190,14 +203,7 @@ export const UnitsPage: React.FC<UnitsPageProps> = ({
   async function handlePreRequestData(page: number) {
     const start = (page - 1) * EXTERNAL_PAGE_SIZE;
     const nextData = await queryClient.fetchQuery(
-      contentSearchQueryOptions({
-        type: tab === "UNIT" ? undefined : tab,
-        userId,
-        ...(targetUnitId ? { containedUnitIds: [targetUnitId] } : {}),
-        keyword: keyword || undefined,
-        offset: start,
-        limit: EXTERNAL_PAGE_SIZE,
-      }),
+      contentSearchQueryOptions(localizedOptions(start)),
     );
     return nextData?.items?.length ?? 0;
   }

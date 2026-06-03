@@ -24,7 +24,13 @@ export const postKeys = {
    * Keys for detail queries
    */
   details: () => [...postKeys.all(), "detail"] as const,
-  detail: (unitId: string) => [...postKeys.details(), unitId] as const,
+  detail: (
+    unitId: string,
+    query?: { languages?: string | readonly string[] },
+  ) =>
+    query === undefined
+      ? ([...postKeys.details(), unitId] as const)
+      : ([...postKeys.details(), unitId, query] as const),
 
   /**
    * Keys for target-specific queries (posts about a unit).

@@ -3,15 +3,19 @@ import { mainMarkdownSource } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { PostBodyMarkdown } from "@/post";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export interface AboutSectionProps {
   postUnitId?: string | null;
 }
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ postUnitId }) => {
+  const readContext = useReadLanguageContext();
   const { data: post, isError } = useQuery({
-    ...postQueries.detail(postUnitId ?? ""),
-    enabled: Boolean(postUnitId),
+    ...postQueries.detail(postUnitId ?? "", {
+      languages: readContext.languages,
+    }),
+    enabled: readContext.ready && Boolean(postUnitId),
   });
 
   const markdown = mainMarkdownSource(post?.content);

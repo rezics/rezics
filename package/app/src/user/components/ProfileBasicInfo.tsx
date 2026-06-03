@@ -1,14 +1,13 @@
 import { useCanEdit } from "@rezics/api/hooks";
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { UserDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { Pencil as EditOutlined, Settings as SettingsIcon } from "lucide-react";
 import type { FC } from "react";
 import { BlockPeerAction } from "@/engagement/components/BlockPeerAction";
 import { DMAction } from "@/engagement/components/DMAction";
 import FollowButton from "@/engagement/components/FollowButton";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { Link } from "@/shared/ui/link";
 import { ProfileStatLink } from "./ProfileOverviewCards";
 
@@ -28,22 +27,18 @@ export const ProfileBasicInfo: FC<ProfileBasicInfoProps> = ({
     resource: "unit",
     ownerUnit: { user: { unitId: user.unitId } },
   });
-  const shelvesCountQuery = useQuery({
-    ...contentSearchQueryOptions({
-      userId,
-      type: ["SHELF"],
-      sort: { field: "createdAt", order: "desc" },
-      limit: 0,
-    }),
+  const shelvesCountQuery = useLocalizedContentSearch({
+    userId,
+    type: ["SHELF"],
+    sort: { field: "createdAt", order: "desc" },
+    limit: 0,
   });
 
-  const reviewsCountQuery = useQuery({
-    ...contentSearchQueryOptions({
-      userId,
-      type: ["POST"],
-      sort: { field: "createdAt", order: "desc" },
-      limit: 0,
-    }),
+  const reviewsCountQuery = useLocalizedContentSearch({
+    userId,
+    type: ["POST"],
+    sort: { field: "createdAt", order: "desc" },
+    limit: 0,
   });
 
   return (

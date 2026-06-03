@@ -8,6 +8,7 @@ import type React from "react";
 import { ReplyComposer } from "@/post/forms/ReplyComposer";
 import { useFocusReplyFromQuery } from "@/post/hooks/useFocusReplyFromQuery";
 import { PostTreeSection } from "@/post/sections/PostTreeSection";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import { Link } from "@/shared/ui/link";
 import { RemarkDetail } from "../components/detail/RemarkDetail";
 
@@ -20,7 +21,11 @@ export const RemarkDetailSection: React.FC<RemarkDetailSectionProps> = ({
 }) => {
   const { t } = useTranslation(["common"]);
   const composerRef = useFocusReplyFromQuery();
-  const { data: remark, isLoading } = useQuery(postQueries.detail(remarkId));
+  const readContext = useReadLanguageContext();
+  const { data: remark, isLoading } = useQuery({
+    ...postQueries.detail(remarkId, { languages: readContext.languages }),
+    enabled: readContext.ready && Boolean(remarkId),
+  });
   const editorEntry = useEditorEntry({
     surface: "remark",
     ownerUnit: { user: remark?.author },

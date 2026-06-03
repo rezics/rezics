@@ -2,6 +2,7 @@
  * React Query keys for Unit queries
  */
 
+import type { UnitLanguageContentQuery } from "@rezics/contract";
 import type { UnitFilters } from "./unit.types";
 
 export const unitKeys = {
@@ -20,18 +21,27 @@ export const unitKeys = {
    * Keys for detail queries
    */
   details: () => [...unitKeys.all(), "detail"] as const,
-  detail: (unitId: string) => [...unitKeys.details(), unitId] as const,
+  detail: (
+    unitId: string,
+    query?: {
+      explicitLanguage?: string;
+      languages?: string | readonly string[];
+      appLocale?: string;
+    },
+  ) =>
+    query === undefined
+      ? ([...unitKeys.details(), unitId] as const)
+      : ([...unitKeys.details(), unitId, query] as const),
   languages: (unitId: string) =>
     [...unitKeys.details(), unitId, "languages"] as const,
-  languageContent: (
-    unitId: string,
-    query?: { explicitLanguage?: string; appLocale?: string },
-  ) => [...unitKeys.languages(unitId), "content", query] as const,
+  languageContent: (unitId: string, query?: UnitLanguageContentQuery) =>
+    [...unitKeys.languages(unitId), "content", query] as const,
 
   /**
    * Keys for user-specific queries
    */
-  byUser: (userId: string) => [...unitKeys.all(), "user", userId] as const,
+  byUser: (userId: string, filters?: UnitFilters) =>
+    [...unitKeys.all(), "user", userId, filters ?? null] as const,
 
   /**
    * Keys for slug lookup queries

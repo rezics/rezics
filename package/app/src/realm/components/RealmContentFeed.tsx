@@ -17,8 +17,7 @@ import {
   ReviewCard,
   type ReviewTargetUnit,
 } from "@/review/components/item/ReviewCard";
-import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
-import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 import {
   realmContextPostHref,
   realmContextReactionScopeKey,
@@ -42,16 +41,17 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   manageMode = false,
 }) => {
   const { t } = useTranslation(["entity"]);
-  const languages = useReadLanguageCandidates();
-  const { data, error, isError, isLoading } = useQuery(
-    postQueries.byRealm(realmId, {
+  const readContext = useReadLanguageContext();
+  const { data, error, isError, isLoading } = useQuery({
+    ...postQueries.byRealm(realmId, {
       sort,
-      languages,
-      languageMode: "preferred",
+      languages: readContext.languages,
+      languageMode: readContext.languageMode,
       ...(tagIds.length > 0 ? { tagIds } : {}),
       ...(realmModerationState ? { realmModerationState } : {}),
     }),
-  );
+    enabled: readContext.ready && Boolean(realmId),
+  });
   const posts = data?.posts ?? [];
   const reactionScopeKey = realmContextReactionScopeKey(realmId);
   const postReactionTargetIds = useMemo(
@@ -90,8 +90,8 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
   );
   const targetBookQueries = useQueries({
     queries: reviewTargetIds.map((unitId) => ({
-      ...bookQueries.detail(unitId),
-      enabled: Boolean(unitId),
+      ...bookQueries.detail(unitId, { languages: readContext.languages }),
+      enabled: readContext.ready && Boolean(unitId),
     })),
   });
   const targetUnitByUnitId = useMemo(() => {
@@ -99,9 +99,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     for (const result of targetBookQueries) {
       const book = result.data;
       if (!book) continue;
-      const title =
-        getTranslation(book.translations, book.defaultLanguage ?? undefined)
-          ?.title ?? book.unitId;
+      const title = book.title ?? book.unitId;
       map.set(book.unitId, {
         unitId: book.unitId,
         title,

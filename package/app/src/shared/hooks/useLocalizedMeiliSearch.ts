@@ -1,9 +1,11 @@
 import type {
   ContentSearchOptions,
+  FederatedSearchOptions,
   PollSearchOptions,
   PostSearchOptions,
   RealmSearchOptions,
 } from "@rezics/contract";
+import { federatedSearchQueryOptions } from "@rezics/api/meili/meili.federated";
 import {
   contentSearchQueryOptions,
   pollSearchQueryOptions,
@@ -56,6 +58,14 @@ export function useLocalizedRealmSearch(opts: RealmSearchOptions) {
   const { localized, ready } = useLocalizedOptions(opts);
   return useQuery({
     ...realmSearchQueryOptions(localized),
+    enabled: ready,
+  });
+}
+
+export function useLocalizedFederatedSearch(opts: FederatedSearchOptions) {
+  const { localized, ready } = useLocalizedOptions(opts.query);
+  return useQuery({
+    ...federatedSearchQueryOptions({ ...opts, query: localized }),
     enabled: ready,
   });
 }

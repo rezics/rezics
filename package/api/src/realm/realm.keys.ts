@@ -23,7 +23,10 @@ export const realmKeys = {
   detail: (
     unitId: string,
     query?: { languages?: string | readonly string[] },
-  ) => [...realmKeys.details(), unitId, query ?? null] as const,
+  ) =>
+    query === undefined
+      ? ([...realmKeys.details(), unitId] as const)
+      : ([...realmKeys.details(), unitId, query] as const),
 
   /**
    * Keys for search queries

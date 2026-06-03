@@ -10,6 +10,7 @@ import { Card, CardContent } from "@rezics/ui/shadcn";
 import { useQuery } from "@tanstack/react-query";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { PostBodyMarkdown } from "@/post";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 interface RealmAboutTabProps {
   realm: RealmDTO;
@@ -27,9 +28,12 @@ function RealmMarkdownPanel({
   postUnitId?: string | null;
   emptyTitle: string;
 }) {
+  const readContext = useReadLanguageContext();
   const postQuery = useQuery({
-    ...postQueries.detail(postUnitId ?? ""),
-    enabled: Boolean(postUnitId),
+    ...postQueries.detail(postUnitId ?? "", {
+      languages: readContext.languages,
+    }),
+    enabled: readContext.ready && Boolean(postUnitId),
   });
 
   if (!postUnitId) {

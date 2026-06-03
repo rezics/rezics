@@ -34,7 +34,7 @@ export const unitSearchQuery = (query: string, filters?: UnitFilters) =>
  */
 export const unitsByUserQuery = (userId: string, filters?: UnitFilters) =>
   queryOptions({
-    queryKey: unitKeys.byUser(userId),
+    queryKey: unitKeys.byUser(userId, filters),
     queryFn: () => unitApi.getByUserId(userId, filters),
     enabled: !!userId,
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -43,10 +43,17 @@ export const unitsByUserQuery = (userId: string, filters?: UnitFilters) =>
 /**
  * Query options for getting a single unit
  */
-export const unitDetailQuery = (unitId: string) =>
+export const unitDetailQuery = (
+  unitId: string,
+  query?: {
+    explicitLanguage?: string;
+    languages?: string | readonly string[];
+    appLocale?: string;
+  },
+) =>
   queryOptions({
-    queryKey: unitKeys.detail(unitId),
-    queryFn: () => unitApi.get(unitId),
+    queryKey: unitKeys.detail(unitId, query),
+    queryFn: () => unitApi.get(unitId, query),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 

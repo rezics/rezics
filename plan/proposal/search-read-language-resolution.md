@@ -207,7 +207,7 @@ remain available only for language switchers and editing surfaces.
   display with resolved DTO/search fields.
 - [ ] 7.4 Keep explicit language switch/edit views wired to full translation
   availability endpoints or `translations[]`, not list preview fields.
-- [ ] 7.5 Update home, book library, user profile/unit lists, shelves, zone
+- [x] 7.5 Update home, book library, user profile/unit lists, shelves, zone
   search, and federated search consumers that call raw Meilisearch query
   options so they use the localized wrappers.
 - [ ] 7.6 Update Storybook mocks and app tests for PostCard, book detail, realm

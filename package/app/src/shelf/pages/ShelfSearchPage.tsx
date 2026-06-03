@@ -1,12 +1,11 @@
-import { contentSearchQueryOptions } from "@rezics/api/meili/meili.queries";
 import type { ShelfDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
-import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { ShelfCard } from "../components/ShelfCard";
 
 export function ShelfSearchPage() {
@@ -19,13 +18,11 @@ export function ShelfSearchPage() {
   const keywordBind = search.bind("keyword");
   const searchOpts = search.toOptions();
 
-  const { data, isLoading } = useQuery(
-    contentSearchQueryOptions({
-      ...searchOpts,
-      offset,
-      limit,
-    }),
-  );
+  const { data, isLoading } = useLocalizedContentSearch({
+    ...searchOpts,
+    offset,
+    limit,
+  });
 
   const shelves = useMemo<ShelfDTO[]>(
     () => (data?.items ?? []) as unknown as ShelfDTO[],

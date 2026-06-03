@@ -3,6 +3,7 @@ import { mainMarkdownSource, type RealmBannerExtra } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export interface BannerSectionProps {
   banner?: RealmBannerExtra | null;
@@ -27,10 +28,11 @@ function getPostBannerTitle(post: unknown, fallbackTitle: string): string {
 
 export const BannerSection: React.FC<BannerSectionProps> = ({ banner }) => {
   const { t } = useTranslation(["entity"]);
+  const readContext = useReadLanguageContext();
   const postId = banner?.kind === "post" ? banner.unitId : undefined;
   const { data: post, isError } = useQuery({
-    ...postQueries.detail(postId ?? ""),
-    enabled: Boolean(postId),
+    ...postQueries.detail(postId ?? "", { languages: readContext.languages }),
+    enabled: readContext.ready && Boolean(postId),
   });
 
   if (!banner || isError) return null;
