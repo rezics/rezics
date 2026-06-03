@@ -32,8 +32,13 @@ describe("unitApi language reads", () => {
   test("serializes list read languages as comma-separated candidates", async () => {
     const { unitApi } = await import("./unit.api");
 
-    await unitApi.list({ languages: ["zh-Hant", "ja", "en"] });
+    await unitApi.list({
+      languages: ["zh-Hant", "ja", "en"],
+      languageMode: "preferred",
+    });
 
-    expect(calls[0]?.url).toBe("/unit/list?languages=zh-Hant%2Cja%2Cen");
+    expect(calls[0]?.url).toBe(
+      "/unit/list?languages=zh-Hant%2Cja%2Cen&languageMode=preferred",
+    );
   });
 });

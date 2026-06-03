@@ -48,6 +48,7 @@ export const BookHeroStatCards: React.FC<BookHeroStatCardsProps> = ({
       targetUnitId: bookId,
       kind: PostKind.REVIEW,
       languages,
+      languageMode: "preferred",
       limit: 1,
     }),
     enabled: Boolean(bookId),

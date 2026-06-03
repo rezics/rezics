@@ -2,7 +2,11 @@ import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
-import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import {
+  listGetQueryBase,
+  listLanguageModeSchema,
+  listPostBodyBase,
+} from "../list-query-base";
 
 // ============================================================
 // ENUMS
@@ -304,6 +308,7 @@ export const unitListQuerySchema = t.Object({
   userIds: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   languages: t.Optional(t.String()),
+  languageMode: t.Optional(listLanguageModeSchema),
   rating: t.Optional(contentRatingSchema),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
@@ -345,6 +350,7 @@ export const unitListBodySchema = t.Object({
   userIds: t.Optional(t.String()),
   language: t.Optional(languageSchema),
   languages: t.Optional(t.Array(languageSchema)),
+  languageMode: t.Optional(listLanguageModeSchema),
   rating: t.Optional(contentRatingSchema),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),

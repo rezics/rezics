@@ -38,8 +38,11 @@ export const postApi = {
   /**
    * Get single post by unitId
    */
-  get: async (unitId: string): Promise<PostResponse> => {
-    return apiFetch<PostResponse>(`/post/${unitId}`);
+  get: async (
+    unitId: string,
+    query?: { languages?: string | readonly string[] },
+  ): Promise<PostResponse> => {
+    return apiFetch<PostResponse>(`/post/${unitId}${buildQueryString(query)}`);
   },
 
   /**

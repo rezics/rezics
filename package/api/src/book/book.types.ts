@@ -32,7 +32,9 @@ export type {
  */
 export type BookFormData = Omit<CreateBookInput, "userId">;
 
-export type BookFilters = Partial<BookListQuery>;
+export type BookFilters = Omit<Partial<BookListQuery>, "languages"> & {
+  languages?: string | readonly string[];
+};
 
 export type BookSortOption = "createdAt" | "updatedAt" | "publishedAt";
 

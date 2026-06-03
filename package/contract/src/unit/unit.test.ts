@@ -194,4 +194,22 @@ describe("Unit list filters", () => {
     expect(Value.Check(unitListQuerySchema, filters)).toBe(true);
     expect(Value.Check(unitListBodySchema, filters)).toBe(true);
   });
+
+  test("accepts ordered read candidates and language visibility mode", () => {
+    expect(
+      Value.Check(unitListQuerySchema, {
+        languages: "ja,en",
+        languageMode: "preferred",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(unitListBodySchema, {
+        languages: ["ja", "en"],
+        languageMode: "all",
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(unitListQuerySchema, { languageMode: "only-mine" }),
+    ).toBe(false);
+  });
 });

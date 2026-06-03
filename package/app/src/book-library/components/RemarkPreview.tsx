@@ -18,6 +18,7 @@ export const RemarkPreview: React.FC<ShortBookReviewsProps> = ({ bookId }) => {
     ...postQueries.byTarget(bookId, {
       kind: PostKind.REMARK,
       languages,
+      languageMode: "preferred",
       limit: 4,
     }),
     enabled: !!bookId,

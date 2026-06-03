@@ -26,6 +26,7 @@ const hydratedUnitRows = new Map<string, any>([
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-02T00:00:00.000Z"),
       translations: [{ language: "en", title: "English Wiki", summary: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
       post: { kind: "WIKI" },
       contentTranslations: [],
     },
@@ -41,6 +42,9 @@ const hydratedUnitRows = new Map<string, any>([
       translations: [
         { language: "zh-hant", title: "Traditional Wiki", summary: "Summary" },
       ],
+      supportLanguages: [
+        { language: "zh-hant", isPrimary: true, sortOrder: 0 },
+      ],
       post: { kind: "WIKI" },
       contentTranslations: [],
     },
@@ -51,6 +55,7 @@ const hydratedUnitRows = new Map<string, any>([
       id: "tag-1",
       type: "TAG",
       translations: [{ language: "en", title: "Lore", summary: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
     },
   ],
   [
@@ -59,6 +64,7 @@ const hydratedUnitRows = new Map<string, any>([
       id: "entity-1",
       type: "ENTITY",
       translations: [{ language: "en", title: "Aster", summary: null }],
+      supportLanguages: [{ language: "en", isPrimary: true, sortOrder: 0 }],
       entity: { kind: "character" },
     },
   ],

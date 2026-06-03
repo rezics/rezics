@@ -41,7 +41,11 @@ import {
   collectPatchLeafPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
-import { primarySupportLanguageCreate } from "@/unit/language-resolution";
+import {
+  preferredLanguageVisibilityWhere,
+  primarySupportLanguageCreate,
+  resolveEffectiveReadLanguageCandidates,
+} from "@/unit/language-resolution";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import {
   hydrateUnitOwnerUserSlugRow,
@@ -332,9 +336,7 @@ async function attachPinKinds<
     where: { commentId: { in: posts.map((post) => post.unitId) } },
     select: { commentId: true, kind: true, position: true },
   });
-  const pinByCommentId = new Map(
-    pins.map((pin) => [pin.commentId, pin]),
-  );
+  const pinByCommentId = new Map(pins.map((pin) => [pin.commentId, pin]));
   for (const post of posts) {
     const pin = pinByCommentId.get(post.unitId);
     post.pinKind = pin?.kind ?? null;
@@ -418,6 +420,22 @@ export class PostService {
     if (query.targetUnitId) {
       unitWhere.targetUnitId = query.targetUnitId;
     }
+    const readLanguages = resolveEffectiveReadLanguageCandidates({
+      languages: (query as { languages?: string | readonly string[] })
+        .languages,
+    });
+    const languageVisibility = preferredLanguageVisibilityWhere({
+      languageMode: query.languageMode,
+      languages: readLanguages,
+    });
+    if (languageVisibility) {
+      const existingAnd = unitWhere.AND
+        ? Array.isArray(unitWhere.AND)
+          ? unitWhere.AND
+          : [unitWhere.AND]
+        : [];
+      unitWhere.AND = [...existingAnd, languageVisibility];
+    }
     if (Object.keys(unitWhere).length > 0) where.unit = unitWhere;
     // Weak context lookup only: do not resolve through Unit.targetUnitId and do
     // not validate that the value names a VARIANT.
@@ -475,6 +493,13 @@ export class PostService {
     const moderationState = toUnitRealmModerationState(
       opts.realmModerationState,
     );
+    const readLanguages = resolveEffectiveReadLanguageCandidates({
+      languages: (opts as { languages?: string | readonly string[] }).languages,
+    });
+    const languageVisibility = preferredLanguageVisibilityWhere({
+      languageMode: opts.languageMode,
+      languages: readLanguages,
+    });
 
     if (!(await this.canReadRealmFeed(realmUnitId, options))) {
       return { posts: [], total: 0 };
@@ -483,6 +508,7 @@ export class PostService {
     const where: Prisma.PostWhereInput = {
       unit: {
         ...(options?.isAdmin ? {} : publicUnitEligibilityWhere),
+        ...(languageVisibility ? { AND: [languageVisibility] } : {}),
         inRealms: {
           some: {
             realmUnitId,
@@ -811,7 +837,8 @@ export class PostService {
         );
         await Promise.all(
           realmIdsToWrite.map(async (realmUnitId) => {
-            const moderationState = initialStates.get(realmUnitId) ?? "APPROVED";
+            const moderationState =
+              initialStates.get(realmUnitId) ?? "APPROVED";
             await tx.unitRealm.create({
               data: {
                 realmUnitId,
@@ -1022,7 +1049,8 @@ export class PostService {
       const initialStates = await this.initialUnitRealmModerationStates(tx, [
         input.realmUnitId,
       ]);
-      const moderationState = initialStates.get(input.realmUnitId) ?? "APPROVED";
+      const moderationState =
+        initialStates.get(input.realmUnitId) ?? "APPROVED";
       await tx.unitRealm.upsert({
         where: {
           realmUnitId_unitId: {
@@ -1539,11 +1567,7 @@ export class PostService {
     caller: RezicsSessionClaims,
   ): Promise<void> {
     await this.assertCanPromoteInThread(scopeUnitId, caller);
-    await this.deletePin(
-      scopeUnitId,
-      commentId,
-      PinKindEnum.ACCEPTED_ANSWER,
-    );
+    await this.deletePin(scopeUnitId, commentId, PinKindEnum.ACCEPTED_ANSWER);
     await this.maintainSolvedCacheOnUnaccept(scopeUnitId);
   }
 

@@ -19,6 +19,7 @@ import {
   postModerationOverlayRequestSchema,
   postModerationOverlayResponseSchema,
   postParamsSchema,
+  postReadQuerySchema,
   setPostPublicationSchema,
   setPostStateSchema,
   submitPostToRealmSchema,
@@ -34,6 +35,7 @@ import {
   applySparsePatch,
   assertEditorialPatchAllowed,
 } from "@/unit/collaborative-metadata";
+import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
 import { hydrateVariantContextSummaries } from "@/unit/variant-context";
 import { mapPostToDTO } from "./post.mapper";
 import { postService } from "./post.service";
@@ -92,7 +94,7 @@ export const postApi = new Elysia({ prefix: "/post" })
   .use(authMacro)
   .get(
     "/:unitId",
-    async ({ headers, params }): Promise<PostResponse> => {
+    async ({ headers, params, query }): Promise<PostResponse> => {
       const identity = await tryResolveIdentity(
         headers["authorization"],
         headers["cookie"],
@@ -100,10 +102,14 @@ export const postApi = new Elysia({ prefix: "/post" })
       const post = await postService.getByUnitId(params.unitId, {
         isAdmin: isAdminRole(identity),
       });
-      return mapPostToDTO(post);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: query.languages,
+      });
+      return mapPostToDTO(post, undefined, languages);
     },
     {
       params: postParamsSchema,
+      query: postReadQuerySchema,
       detail: {
         summary: "Get post",
         description: "Get a single post by unit ID",
@@ -379,11 +385,7 @@ export const postApi = new Elysia({ prefix: "/post" })
   .delete(
     "/pins/:scopeUnitId/:commentId",
     async ({ params, identity }) => {
-      await postService.unpin(
-        params.scopeUnitId,
-        params.commentId,
-        identity,
-      );
+      await postService.unpin(params.scopeUnitId, params.commentId, identity);
       return { message: "Pin removed" };
     },
     {

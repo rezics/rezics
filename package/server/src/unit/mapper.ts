@@ -11,7 +11,18 @@ import type { UnitWithRelations } from "./types";
 /**
  * Map internal Unit model to UnitDTO
  */
-export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
+export function mapUnitToDTO(
+  unit: UnitWithRelations,
+  languages: readonly string[] = [],
+): UnitDTO {
+  const resolvedLanguage = resolveReadLanguage({
+    languages,
+    supportLanguages: unit.supportLanguages as SupportLanguageLike[],
+  });
+  const translation = resolvedLanguage
+    ? unit.translations?.find((item) => item.language === resolvedLanguage)
+    : undefined;
+
   return {
     id: unit.id,
     type: unit.type,
@@ -30,6 +41,12 @@ export function mapUnitToDTO(unit: UnitWithRelations): UnitDTO {
     createdAt: unit.createdAt,
     updatedAt: unit.updatedAt,
     publishedAt: unit.publishedAt ?? undefined,
+    resolvedLanguage: resolvedLanguage as UnitDTO["resolvedLanguage"],
+    title: translation?.title ?? null,
+    subtitle: translation?.subtitle ?? null,
+    summary: translation?.summary ?? null,
+    description:
+      (translation?.description as UnitDTO["description"] | undefined) ?? null,
     translations: unit.translations?.map(mapTranslationToDTO) ?? [],
     supportLanguages:
       unit.supportLanguages?.map((sl) => ({

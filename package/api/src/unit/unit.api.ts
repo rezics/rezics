@@ -78,8 +78,15 @@ export const unitApi = {
    * This is id-primary API access (`GET /unit/:unitId`), not browser public
    * route construction. Public Unit URLs live in the frontend route contract.
    */
-  get: async (unitId: string): Promise<UnitResponse> => {
-    return apiFetch<UnitResponse>(`/unit/${unitId}`);
+  get: async (
+    unitId: string,
+    query?: {
+      explicitLanguage?: string;
+      languages?: string | readonly string[];
+      appLocale?: string;
+    },
+  ): Promise<UnitResponse> => {
+    return apiFetch<UnitResponse>(`/unit/${unitId}${buildQueryString(query)}`);
   },
 
   /**

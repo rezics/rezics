@@ -17,7 +17,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, FileText, LibraryBig, ListPlus, Vote } from "lucide-react";
 import { useState } from "react";
 import { WikiPostEditor } from "@/post";
-import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
 import { RealmExistingPostSubmitSection } from "../components/RealmExistingPostSubmitSection";
 import { RealmPollWorkspace } from "../components/RealmPollWorkspace";
@@ -49,8 +49,9 @@ export function RealmCreatePage({
   onModeChange,
 }: RealmCreatePageProps) {
   const { t } = useTranslation(["common", "entity"]);
+  const languages = useReadLanguageCandidates();
   const { data: realm, isLoading: realmLoading } = useQuery(
-    realmDetailQuery(realmId),
+    realmDetailQuery(realmId, { languages }),
   );
   const { data: membership, isLoading: membershipLoading } = useQuery(
     myRealmMembershipQuery(realmId),
@@ -80,9 +81,8 @@ export function RealmCreatePage({
     );
   }
 
-  const translation = getTranslation(realm.translations);
-  const title = translation?.title ?? t("entity:realm_untitled");
-  const description = contentDocMarkdownFallback(translation?.description);
+  const title = realm.title ?? t("entity:realm_untitled");
+  const description = contentDocMarkdownFallback(realm.description);
   const isMember = Boolean(membership);
 
   return (

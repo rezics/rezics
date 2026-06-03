@@ -154,9 +154,8 @@ export async function searchContent(
 
   // Language filter
   if (opts.languages?.length) {
-    for (const lang of opts.languages) {
-      filter.push(`languages = "${lang}"`);
-    }
+    const languages = opts.languages.map((lang) => `"${lang}"`).join(", ");
+    filter.push(`languages IN [${languages}]`);
   }
 
   // Rating filter — set-based (ratings: ContentRating[]). When the caller

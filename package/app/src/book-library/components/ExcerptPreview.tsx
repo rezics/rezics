@@ -22,6 +22,7 @@ export const ExcerptPreview: React.FC<ExcerptPreviewProps> = ({
     postQueries.byTarget(id, {
       kind: PostKind.EXCERPT,
       languages,
+      languageMode: "preferred",
       limit: excerptNumber,
     }),
   );

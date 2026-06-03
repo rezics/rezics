@@ -23,6 +23,7 @@ export const RemarkListSection: React.FC<RemarkListSectionProps> = ({
       targetUnitId,
       kind: PostKind.REMARK,
       languages,
+      languageMode: "preferred",
       limit,
     }),
     enabled: !!targetUnitId,

@@ -3,7 +3,11 @@ import { creationModeSchema } from "../content/authority";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
-import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import {
+  listGetQueryBase,
+  listLanguageModeSchema,
+  listPostBodyBase,
+} from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import {
   contentModerationStateDTOSchema,
@@ -234,6 +238,7 @@ export const postListQuerySchema = t.Object({
    */
   stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
   languages: t.Optional(t.String()),
+  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(
     t.Union([
       t.Literal("new"),
@@ -278,6 +283,7 @@ export const postListBodySchema = t.Object({
   /** Derived lifecycle bucket filter: `active` or `closed`. See `postListQuerySchema`. */
   stateBucket: t.Optional(t.Union([t.Literal("active"), t.Literal("closed")])),
   languages: t.Optional(t.Array(languageSchema)),
+  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(
     t.Union([
       t.Literal("new"),
@@ -332,6 +338,12 @@ export const postParamsSchema = t.Object({
 });
 
 export type PostParams = (typeof postParamsSchema)["static"];
+
+export const postReadQuerySchema = t.Object({
+  languages: t.Optional(t.String()),
+});
+
+export type PostReadQuery = (typeof postReadQuerySchema)["static"];
 
 export const postResponseSchema = postDTOSchema;
 export type PostResponse = (typeof postResponseSchema)["static"];

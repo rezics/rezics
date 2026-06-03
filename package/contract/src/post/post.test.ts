@@ -181,6 +181,23 @@ describe("post work-domain contract fields", () => {
     expect("realmUnitIds" in submitPostToRealmSchema.properties).toBe(false);
   });
 
+  test("list schemas accept ordered read candidates and language visibility mode", () => {
+    expect(
+      Value.Check(postListQuerySchema, {
+        languages: "ja,en",
+        languageMode: "preferred",
+        limit: 20,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(postListBodySchema, {
+        languages: ["ja", "en"],
+        languageMode: "all",
+        limit: 20,
+      }),
+    ).toBe(true);
+  });
+
   test("uses comment endpoint naming for promotion contracts", () => {
     expect("commentId" in commentPromotionDTOSchema.properties).toBe(true);
     expect("postUnitId" in commentPromotionDTOSchema.properties).toBe(false);

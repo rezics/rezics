@@ -69,8 +69,13 @@ export const realmApi = {
   /**
    * Get single realm by unitId
    */
-  get: async (unitId: string): Promise<RealmResponse> => {
-    return apiFetch<RealmResponse>(`/realm/${unitId}`);
+  get: async (
+    unitId: string,
+    query?: { languages?: string | readonly string[] },
+  ): Promise<RealmResponse> => {
+    return apiFetch<RealmResponse>(
+      `/realm/${unitId}${buildQueryString(query)}`,
+    );
   },
 
   /**
@@ -263,9 +268,13 @@ export const realmApi = {
   resolveRule: async (
     realmUnitId: string,
     language?: string,
+    query?: { languages?: string | readonly string[] },
   ): Promise<RealmRuleResolvedDTO> => {
     return apiFetch<RealmRuleResolvedDTO>(
-      `/realm/${realmUnitId}/rules/resolved${buildQueryString({ language })}`,
+      `/realm/${realmUnitId}/rules/resolved${buildQueryString({
+        language,
+        ...query,
+      })}`,
     );
   },
 

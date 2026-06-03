@@ -4,11 +4,13 @@ import type {
   RealmMemberState,
   RealmTagApplicationDTO,
   RealmTagContextDTO,
+  SupportLanguageLike,
   UnitRealmDTO,
   UnitRealmModerationState,
   UnitRealmVisibilityState,
   UnitTranslationDTO,
 } from "@rezics/contract";
+import { resolveReadLanguage } from "@rezics/contract";
 import type {
   RealmMember,
   RealmTagApplication,
@@ -24,7 +26,28 @@ function lower<T extends string>(
   return value?.toLowerCase() as T | undefined;
 }
 
-export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
+function resolvedRealmTranslation(
+  row: RealmWithRelations | RealmListSelected,
+  languages: readonly string[],
+) {
+  const resolvedLanguage = resolveReadLanguage({
+    languages,
+    supportLanguages: row.unit?.supportLanguages as SupportLanguageLike[],
+  });
+  const translation = resolvedLanguage
+    ? row.unit?.translations.find((item) => item.language === resolvedLanguage)
+    : undefined;
+  return { resolvedLanguage, translation };
+}
+
+export function mapRealmToDTO(
+  row: RealmWithRelations,
+  languages: readonly string[] = [],
+): RealmDTO {
+  const { resolvedLanguage, translation } = resolvedRealmTranslation(
+    row,
+    languages,
+  );
   return {
     unitId: row.unitId,
     slug: row.unit?.slug ?? undefined,
@@ -35,6 +58,10 @@ export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
     contentRequiresApproval: row.contentRequiresApproval,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
+    resolvedLanguage: resolvedLanguage as RealmDTO["resolvedLanguage"],
+    title: translation?.title ?? null,
+    description:
+      (translation?.description as RealmDTO["description"] | undefined) ?? null,
     translations: (row.unit?.translations ??
       []) as unknown as UnitTranslationDTO[],
     createdAt: row.createdAt,
@@ -42,7 +69,14 @@ export function mapRealmToDTO(row: RealmWithRelations): RealmDTO {
   };
 }
 
-export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
+export function mapRealmListRowToDTO(
+  row: RealmListSelected,
+  languages: readonly string[] = [],
+): RealmDTO {
+  const { resolvedLanguage, translation } = resolvedRealmTranslation(
+    row,
+    languages,
+  );
   return {
     unitId: row.unitId,
     slug: row.unit?.slug ?? undefined,
@@ -53,6 +87,10 @@ export function mapRealmListRowToDTO(row: RealmListSelected): RealmDTO {
     contentRequiresApproval: row.contentRequiresApproval,
     memberCount: row.memberCount,
     extra: (row.extra as Record<string, unknown>) ?? undefined,
+    resolvedLanguage: resolvedLanguage as RealmDTO["resolvedLanguage"],
+    title: translation?.title ?? null,
+    description:
+      (translation?.description as RealmDTO["description"] | undefined) ?? null,
     translations: (row.unit?.translations ??
       []) as unknown as UnitTranslationDTO[],
     createdAt: row.createdAt,

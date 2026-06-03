@@ -31,6 +31,7 @@ import {
   realmMemberListQuerySchema,
   realmMemberListResponseSchema,
   realmParamsSchema,
+  realmReadQuerySchema,
   resolveRealmRuleQuerySchema,
   updateMemberRoleSchema,
   updateRealmRulePolicySchema,
@@ -39,6 +40,7 @@ import {
 import { Elysia, t } from "elysia";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
+import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
 import { unitService } from "@/unit/unit.service";
 import { mapRealmTagApplicationToDTO } from "./realm.mapper";
 import { realmService } from "./realm.service";
@@ -247,6 +249,7 @@ export const realmApi = new Elysia({ prefix: "/realm" })
       params,
       set,
       headers,
+      query,
     }): Promise<RealmDTO | { error: { code: string; message: string } }> => {
       const identity = await tryResolveIdentity(
         headers["authorization"],
@@ -257,10 +260,14 @@ export const realmApi = new Elysia({ prefix: "/realm" })
         set.status = 404;
         return { error: { code: "NOT_FOUND", message: "Realm not found" } };
       }
-      return realmService.getByUnitId(unit.id, identity?.userId);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: query.languages,
+      });
+      return realmService.getByUnitId(unit.id, identity?.userId, languages);
     },
     {
       params: t.Object({ slug: t.String({ minLength: 1 }) }),
+      query: realmReadQuerySchema,
       detail: {
         summary: "Get realm by slug",
         description:
@@ -271,15 +278,23 @@ export const realmApi = new Elysia({ prefix: "/realm" })
   )
   .get(
     "/:unitId",
-    async ({ params, headers }): Promise<RealmDTO> => {
+    async ({ params, headers, query }): Promise<RealmDTO> => {
       const identity = await tryResolveIdentity(
         headers["authorization"],
         headers["cookie"],
       );
-      return realmService.getByUnitId(params.unitId, identity?.userId);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: query.languages,
+      });
+      return realmService.getByUnitId(
+        params.unitId,
+        identity?.userId,
+        languages,
+      );
     },
     {
       params: realmParamsSchema,
+      query: realmReadQuerySchema,
       detail: {
         summary: "Get realm",
         description: "Get a single realm by unit ID",
@@ -817,7 +832,15 @@ export const realmApi = new Elysia({ prefix: "/realm" })
     "/:unitId/rules/resolved",
     async ({ params, query, status }) => {
       try {
-        return await realmService.resolveRule(params.unitId, query.language);
+        const languages = resolveEffectiveReadLanguageCandidates({
+          explicitLanguage: query.language,
+          languages: query.languages,
+        });
+        return await realmService.resolveRule(
+          params.unitId,
+          query.language,
+          languages,
+        );
       } catch {
         return status(404, "Realm not found");
       }

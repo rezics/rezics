@@ -35,8 +35,11 @@ export const bookApi = {
   /**
    * Get single book by unitId
    */
-  get: async (unitId: string): Promise<BookResponse> => {
-    return apiFetch<BookResponse>(`/book/${unitId}`);
+  get: async (
+    unitId: string,
+    query?: { languages?: string | readonly string[] },
+  ): Promise<BookResponse> => {
+    return apiFetch<BookResponse>(`/book/${unitId}${buildQueryString(query)}`);
   },
 
   /**

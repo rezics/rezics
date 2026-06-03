@@ -6,7 +6,6 @@ import {
   editorialPatchSubmissionSchema,
   hasPermissionToDeleteUnit,
   hasPermissionToUpdateUnit,
-  parseReadLanguages,
   translationParamsSchema,
   type UnitLanguageAvailabilityResponse,
   type UnitLanguageContentResponse,
@@ -29,7 +28,10 @@ import {
 import { Elysia, t } from "elysia";
 import { authMacro, verifyAdminFromDb } from "@/middleware";
 import { assertEditorialPatchAllowed } from "./collaborative-metadata";
-import { unitLanguageService } from "./language-resolution";
+import {
+  resolveEffectiveReadLanguageCandidates,
+  unitLanguageService,
+} from "./language-resolution";
 import {
   mapTranslationToDTO,
   mapUnitListItemToDTO,
@@ -75,12 +77,18 @@ export const unitApi = new Elysia({ prefix: "/unit" })
   )
   .get(
     "/:unitId",
-    async ({ params }): Promise<UnitResponse> => {
+    async ({ params, query }): Promise<UnitResponse> => {
       const unit = await unitService.getByUnitId(params.unitId);
-      return mapUnitToDTO(unit);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        explicitLanguage: query.explicitLanguage,
+        languages: query.languages,
+        appLocale: query.appLocale,
+      });
+      return mapUnitToDTO(unit, languages);
     },
     {
       params: unitParamsSchema,
+      query: unitLanguageContentQuerySchema,
       response: unitResponseSchema,
       detail: {
         summary: "Get unit",
@@ -121,7 +129,9 @@ export const unitApi = new Elysia({ prefix: "/unit" })
         );
       }
       const { units, total } = await unitService.list(query as UnitListQuery);
-      const languages = parseReadLanguages(query.languages);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: query.languages,
+      });
       return {
         units: units.map((unit) => mapUnitListItemToDTO(unit, languages)),
         total,
@@ -152,10 +162,11 @@ export const unitApi = new Elysia({ prefix: "/unit" })
         ...body,
         ids: body.ids?.join(","),
       } as UnitListQuery);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: body.languages,
+      });
       return {
-        units: units.map((unit) =>
-          mapUnitListItemToDTO(unit, body.languages ?? []),
-        ),
+        units: units.map((unit) => mapUnitListItemToDTO(unit, languages)),
         total,
       };
     },

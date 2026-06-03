@@ -111,7 +111,11 @@ export function UnitSearchSelect({
   const trimmedQuery = query.trim();
   const languages = useReadLanguageCandidates();
   const { data, isLoading, error } = useQuery(
-    unitQueries.search(trimmedQuery, { languages, limit: 8 }),
+    unitQueries.search(trimmedQuery, {
+      languages,
+      languageMode: "preferred",
+      limit: 8,
+    }),
   );
   const units = (data?.units ?? []) as UnitDTO[];
 

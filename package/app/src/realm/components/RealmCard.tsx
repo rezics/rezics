@@ -4,7 +4,6 @@ import { Badge, Card, CardContent } from "@rezics/ui/shadcn";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { unitHref } from "@/shared/ui/link";
-import { getTranslation } from "@/shared/utils/translation-helpers";
 
 interface RealmCardProps {
   realm: RealmDTO;
@@ -12,9 +11,8 @@ interface RealmCardProps {
 
 export const RealmCard: React.FC<RealmCardProps> = ({ realm }) => {
   const { t } = useTranslation(["common", "entity"]);
-  const translation = getTranslation(realm.translations);
-  const title = translation?.title ?? t("entity:realm_untitled");
-  const description = contentDocMarkdownFallback(translation?.description);
+  const title = realm.title ?? t("entity:realm_untitled");
+  const description = contentDocMarkdownFallback(realm.description);
 
   return (
     <Card surface="plain" className="cursor-pointer">

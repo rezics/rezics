@@ -34,6 +34,7 @@ export const BookReviews: React.FC<BookReviewsProps> = ({
     ...postQueries.byTarget(bookId, {
       kind: PostKind.REVIEW,
       languages,
+      languageMode: "preferred",
       limit: reviewNumber,
     }),
     enabled: !!bookId,

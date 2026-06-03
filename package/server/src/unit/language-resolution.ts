@@ -4,6 +4,7 @@ import type {
   UnitLanguageContentResponse,
 } from "@rezics/contract";
 import {
+  type ListLanguageMode,
   parseReadLanguages,
   resolveAuthoringLanguage,
   resolveReadLanguage,
@@ -31,6 +32,41 @@ export function resolveUnitAuthoringLanguage(input: {
 
 export function primarySupportLanguageCreate(language: string) {
   return { language, isPrimary: true, sortOrder: 0 };
+}
+
+export function resolveEffectiveReadLanguageCandidates(input: {
+  languages?: string | readonly string[] | null;
+  explicitLanguage?: string | null;
+  actorSettings?: ActorLanguageSettings | null;
+  appLocale?: string | null;
+}): string[] {
+  return parseReadLanguages(
+    [
+      input.explicitLanguage,
+      ...parseReadLanguages(input.languages),
+      ...(input.actorSettings?.preferredLanguages ?? []),
+      input.appLocale,
+    ].filter((language): language is string => !!language),
+  );
+}
+
+export function preferredLanguageVisibilityWhere(input: {
+  languageMode?: ListLanguageMode | null;
+  languages?: readonly string[] | null;
+}): Prisma.UnitWhereInput | undefined {
+  if (input.languageMode !== "preferred") return undefined;
+  if (!input.languages?.length) return undefined;
+
+  // Visibility filtering decides whether the Unit appears; display language
+  // resolution remains a separate support-language read on the returned row.
+  return {
+    OR: [
+      { isLanguageNeutral: true },
+      {
+        supportLanguages: { some: { language: { in: [...input.languages] } } },
+      },
+    ],
+  };
 }
 
 export async function ensurePrimarySupportLanguage(

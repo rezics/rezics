@@ -27,6 +27,7 @@ export function RealmWikiTab({
     postQueries.wikiByRealm(realmId, {
       sort: { field: "updatedAt", order: "desc" },
       languages,
+      languageMode: "preferred",
       limit: 24,
     }),
   );

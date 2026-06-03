@@ -5,6 +5,8 @@ import {
   bookContentStructureDTOSchema,
   bookContentStructureNodeSchema,
   bookDTOSchema,
+  bookListBodySchema,
+  bookListQuerySchema,
   createBookSchema,
   updateBookSchema,
 } from "./book";
@@ -128,6 +130,38 @@ describe("bookDTOSchema", () => {
         unitId: "variant-1",
         catalogEntryKind: "VARIANT",
         targetUnitId: "main-1",
+      }),
+    ).toBe(true);
+  });
+
+  test("accepts resolved preview fields", () => {
+    expect(
+      Value.Check(bookDTOSchema, {
+        unitId: "book-1",
+        resolvedLanguage: "ja",
+        title: "日本語タイトル",
+        summary: null,
+        description: null,
+        coverUrl: "https://cdn.example/cover.jpg",
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("book list schemas", () => {
+  test("accept ordered read candidates and language visibility mode", () => {
+    expect(
+      Value.Check(bookListQuerySchema, {
+        languages: "ja,en",
+        languageMode: "preferred",
+        limit: 20,
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(bookListBodySchema, {
+        languages: ["ja", "en"],
+        languageMode: "all",
+        limit: 20,
       }),
     ).toBe(true);
   });

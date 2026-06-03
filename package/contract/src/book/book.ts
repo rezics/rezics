@@ -1,6 +1,6 @@
 import { t } from "elysia";
 import { creationModeSchema } from "../content/authority";
-import { contentDocWriteSchema } from "../content/doc-v1";
+import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import {
   type ContentStructureItem,
   type ContentStructurePath,
@@ -11,7 +11,11 @@ import {
 import { creditAttributionBriefSchema } from "../entity/credit-attribution";
 import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
-import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import {
+  listGetQueryBase,
+  listLanguageModeSchema,
+  listPostBodyBase,
+} from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import {
   aiDisclosureDetailsSchema,
@@ -47,6 +51,11 @@ export const bookDTOSchema = t.Object({
   aiDisclosureDetails: t.Optional(t.Nullable(aiDisclosureDetailsSchema)),
   licenseSlug: t.Optional(t.Nullable(licenseSlugSchema)),
   defaultLanguage: t.Optional(t.Nullable(languageSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  title: t.Optional(t.Nullable(t.String())),
+  subtitle: t.Optional(t.Nullable(t.String())),
+  summary: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocSchema)),
   isLanguageNeutral: t.Optional(t.Boolean()),
   catalogEntryKind: t.Optional(t.Nullable(catalogEntryKindSchema)),
   targetUnitId: t.Optional(t.Nullable(t.String())),
@@ -83,6 +92,8 @@ export const bookListQuerySchema = t.Object({
   ...listGetQueryBase.properties,
   rating: t.Optional(contentRatingSchema),
   language: t.Optional(languageSchema),
+  languages: t.Optional(t.String()),
+  languageMode: t.Optional(listLanguageModeSchema),
   tagUnitIds: t.Optional(t.String()),
   entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
@@ -111,6 +122,8 @@ export const bookListBodySchema = t.Object({
   ...listPostBodyBase.properties,
   rating: t.Optional(contentRatingSchema),
   language: t.Optional(languageSchema),
+  languages: t.Optional(t.Array(languageSchema)),
+  languageMode: t.Optional(listLanguageModeSchema),
   tagUnitIds: t.Optional(t.String()),
   entityId: t.Optional(t.String()),
   userId: t.Optional(t.String()),
@@ -151,6 +164,12 @@ export const bookParamsSchema = t.Object({
 });
 
 export type BookParams = (typeof bookParamsSchema)["static"];
+
+export const bookReadQuerySchema = t.Object({
+  languages: t.Optional(t.String()),
+});
+
+export type BookReadQuery = (typeof bookReadQuerySchema)["static"];
 
 export const bookResponseSchema = bookDTOSchema;
 export type BookResponse = (typeof bookResponseSchema)["static"];

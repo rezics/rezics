@@ -42,6 +42,7 @@ export const RealmContentFeed: React.FC<RealmContentFeedProps> = ({
     postQueries.byRealm(realmId, {
       sort,
       languages,
+      languageMode: "preferred",
       ...(tagIds.length > 0 ? { tagIds } : {}),
       ...(realmModerationState ? { realmModerationState } : {}),
     }),

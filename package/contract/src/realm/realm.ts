@@ -1,7 +1,11 @@
 import { t } from "elysia";
-import { contentDocWriteSchema } from "../content/doc-v1";
+import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
 import { languageSchema } from "../language";
-import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
+import {
+  listGetQueryBase,
+  listLanguageModeSchema,
+  listPostBodyBase,
+} from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
 import { capabilityHintSchema } from "../permission/capability";
 import { postDTOSchema } from "../post/post";
@@ -81,6 +85,9 @@ export const realmDTOSchema = t.Object({
   memberCount: t.Number(),
   extra: t.Optional(t.Nullable(realmExtraSchema)),
   viewerCapabilities: t.Optional(t.Array(capabilityHintSchema)),
+  resolvedLanguage: t.Optional(t.Nullable(languageSchema)),
+  title: t.Optional(t.Nullable(t.String())),
+  description: t.Optional(t.Nullable(contentDocSchema)),
   translations: t.Optional(t.Array(unitTranslationDTOSchema)),
   createdAt: t.Optional(t.Union([t.String(), t.Date()])),
   updatedAt: t.Optional(t.Union([t.String(), t.Date()])),
@@ -177,6 +184,7 @@ export type RealmRuleResolvedDTO =
 
 export const resolveRealmRuleQuerySchema = t.Object({
   language: t.Optional(languageSchema),
+  languages: t.Optional(t.String()),
 });
 
 export const realmRuleAcknowledgementDTOSchema = t.Object({
@@ -469,6 +477,8 @@ export const realmListQuerySchema = t.Object({
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
+  languages: t.Optional(t.String()),
+  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -487,6 +497,8 @@ export const realmListBodySchema = t.Object({
   isOfficial: t.Optional(t.Boolean()),
   userId: t.Optional(t.String()),
   language: t.Optional(languageSchema),
+  languages: t.Optional(t.Array(languageSchema)),
+  languageMode: t.Optional(listLanguageModeSchema),
   sort: t.Optional(
     t.Object({
       field: t.Optional(t.String()),
@@ -515,6 +527,12 @@ export const realmParamsSchema = t.Object({
 });
 
 export type RealmParams = (typeof realmParamsSchema)["static"];
+
+export const realmReadQuerySchema = t.Object({
+  languages: t.Optional(t.String()),
+});
+
+export type RealmReadQuery = (typeof realmReadQuerySchema)["static"];
 
 export const realmResponseSchema = realmDTOSchema;
 export type RealmResponse = (typeof realmResponseSchema)["static"];

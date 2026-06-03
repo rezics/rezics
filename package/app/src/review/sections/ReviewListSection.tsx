@@ -23,6 +23,7 @@ export const ReviewListSection: React.FC<ReviewListSectionProps> = ({
     ...postQueries.byTarget(targetUnitId, {
       kind: PostKind.REVIEW,
       languages,
+      languageMode: "preferred",
       limit,
     }),
     enabled: !!targetUnitId,

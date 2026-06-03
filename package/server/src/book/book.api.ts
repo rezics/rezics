@@ -15,6 +15,7 @@ import {
   bookListBodySchema,
   bookListQuerySchema,
   bookParamsSchema,
+  bookReadQuerySchema,
   createBookSchema,
   editorialPatchSubmissionSchema,
   hasPermissionToUpdateBook,
@@ -25,6 +26,7 @@ import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
 import { mapScoreAggregateToDTO } from "@/score/score.mapper";
 import { scoreService } from "@/score/score.service";
 import { assertEditorialPatchAllowed } from "@/unit/collaborative-metadata";
+import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
 import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import { unitService } from "@/unit/unit.service";
 import { bookService } from "./book.service";
@@ -34,12 +36,16 @@ export const bookApi = new Elysia({ prefix: "/book" })
   .use(authMacro)
   .get(
     "/:unitId",
-    async ({ params }): Promise<BookResponse> => {
+    async ({ params, query }): Promise<BookResponse> => {
       const book = await bookService.getByUnitId(params.unitId);
-      return mapBookToDTO(book);
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: query.languages,
+      });
+      return mapBookToDTO(book, languages);
     },
     {
       params: bookParamsSchema,
+      query: bookReadQuerySchema,
       detail: {
         summary: "Get book",
         description: "Get a single book by unit ID",
@@ -116,7 +122,13 @@ export const bookApi = new Elysia({ prefix: "/book" })
           };
 
       const { books, total } = await bookService.list(effectiveQuery);
-      return { books: books.map(mapBookToDTO), total };
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: query.languages,
+      });
+      return {
+        books: books.map((book) => mapBookToDTO(book, languages)),
+        total,
+      };
     },
     {
       query: bookListQuerySchema,
@@ -147,7 +159,13 @@ export const bookApi = new Elysia({ prefix: "/book" })
           };
 
       const { books, total } = await bookService.list(effectiveQuery);
-      return { books: books.map(mapBookToDTO), total };
+      const languages = resolveEffectiveReadLanguageCandidates({
+        languages: body.languages,
+      });
+      return {
+        books: books.map((book) => mapBookToDTO(book, languages)),
+        total,
+      };
     },
     {
       body: bookListBodySchema,

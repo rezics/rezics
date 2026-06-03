@@ -69,7 +69,9 @@ export type {
  */
 export type RealmFormData = CreateRealmInput;
 
-export type RealmFilters = Partial<RealmListQuery>;
+export type RealmFilters = Omit<Partial<RealmListQuery>, "languages"> & {
+  languages?: string | readonly string[];
+};
 
 export type RealmSortOption = "createdAt" | "updatedAt" | "memberCount";
 

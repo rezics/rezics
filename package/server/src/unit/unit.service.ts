@@ -23,7 +23,11 @@ import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
-import { primarySupportLanguageCreate } from "./language-resolution";
+import {
+  preferredLanguageVisibilityWhere,
+  primarySupportLanguageCreate,
+  resolveEffectiveReadLanguageCandidates,
+} from "./language-resolution";
 import {
   assertLicenseSlug,
   publicUnitEligibilityWhere,
@@ -181,6 +185,16 @@ export function buildUnitWhereClause(
       },
     });
   }
+
+  const readLanguages = resolveEffectiveReadLanguageCandidates({
+    languages: (options as { languages?: string | readonly string[] })
+      .languages,
+  });
+  const languageVisibility = preferredLanguageVisibilityWhere({
+    languageMode: options.languageMode,
+    languages: readLanguages,
+  });
+  if (languageVisibility) andWhere.push(languageVisibility);
 
   // Rating filter
   if (options.rating) {

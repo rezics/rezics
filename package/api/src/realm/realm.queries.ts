@@ -21,10 +21,13 @@ export const realmListQuery = (filters?: RealmFilters) =>
 /**
  * Query options for getting a single realm
  */
-export const realmDetailQuery = (unitId: string) =>
+export const realmDetailQuery = (
+  unitId: string,
+  query?: { languages?: string | readonly string[] },
+) =>
   queryOptions({
-    queryKey: realmKeys.detail(unitId),
-    queryFn: () => realmApi.get(unitId),
+    queryKey: realmKeys.detail(unitId, query),
+    queryFn: () => realmApi.get(unitId, query),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
 

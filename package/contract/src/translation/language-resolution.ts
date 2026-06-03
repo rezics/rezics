@@ -12,6 +12,11 @@ import {
   unitTranslationDTOSchema,
 } from "../unit/unit";
 
+export {
+  type ListLanguageMode,
+  listLanguageModeSchema,
+} from "../list-query-base";
+
 export const languageResolutionInputSchema = t.Object({
   explicitLanguage: t.Optional(languageSchema),
   preferredLanguages: t.Optional(t.Array(languageSchema)),

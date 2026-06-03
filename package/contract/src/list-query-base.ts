@@ -34,6 +34,13 @@ export const listPostBodyBase = t.Object({
 export type ListGetQueryBase = (typeof listGetQueryBase)["static"];
 export type ListPostBodyBase = (typeof listPostBodyBase)["static"];
 
+export const listLanguageModeSchema = t.Union([
+  t.Literal("preferred"),
+  t.Literal("all"),
+]);
+
+export type ListLanguageMode = (typeof listLanguageModeSchema)["static"];
+
 /**
  * Parse the CSV `ids` querystring into a validated `string[]`.
  * Returns `undefined` when the field is absent or empty. Throws when the

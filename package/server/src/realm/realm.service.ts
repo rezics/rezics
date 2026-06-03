@@ -19,7 +19,12 @@ import type {
   UpdateRealmInput,
   UpdateRealmRulePolicyInput,
 } from "@rezics/contract";
-import { normalizeLanguage, parseIdsCsv, validateSlug } from "@rezics/contract";
+import {
+  normalizeLanguage,
+  parseIdsCsv,
+  resolveReadLanguage,
+  validateSlug,
+} from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import type { Prisma, RealmTagApplication } from "#/prisma/client";
 import { prisma, UnitStatus, UnitType } from "#/prisma/client";
@@ -31,8 +36,11 @@ import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapPostToDTO } from "@/post/post.mapper";
 import { postInclude } from "@/post/types";
+import {
+  preferredLanguageVisibilityWhere,
+  resolveEffectiveReadLanguageCandidates,
+} from "@/unit/language-resolution";
 import { mapTranslationToDTO } from "@/unit/mapper";
-import { translationService } from "@/unit/translation.service";
 
 /** Score at or below this threshold hides a RealmTagApplication from regular users. */
 export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
@@ -218,6 +226,18 @@ export class RealmService {
       and.push({ isOfficial: options.isOfficial });
     }
 
+    const readLanguages = resolveEffectiveReadLanguageCandidates({
+      languages: (options as { languages?: string | readonly string[] })
+        .languages,
+    });
+    const languageVisibility = preferredLanguageVisibilityWhere({
+      languageMode: options.languageMode,
+      languages: readLanguages,
+    });
+    if (languageVisibility) {
+      and.push({ unit: languageVisibility });
+    }
+
     const idList = parseIdsCsv(options.ids);
     if (idList && idList.length > 0) {
       and.push({ unitId: { in: idList } });
@@ -277,7 +297,13 @@ export class RealmService {
     return {
       realms: await Promise.all(
         hydratedRows.map(async (row) => {
-          const dto = mapRealmListRowToDTO(row);
+          const dto = mapRealmListRowToDTO(
+            row,
+            resolveEffectiveReadLanguageCandidates({
+              languages: (options as { languages?: string | readonly string[] })
+                .languages,
+            }),
+          );
           return {
             ...dto,
             extra: await filterRealmExtraPublic(dto.extra),
@@ -291,12 +317,16 @@ export class RealmService {
   async getByUnitId(
     unitId: string,
     viewerUserId?: string | null,
+    languages: readonly string[] = [],
   ): Promise<RealmDTO> {
     const row = await prisma.realm.findFirstOrThrow({
       where: { unitId },
       include: realmInclude,
     });
-    const dto = mapRealmToDTO(await hydrateUnitOwnerUserSlugRow(row));
+    const dto = mapRealmToDTO(
+      await hydrateUnitOwnerUserSlugRow(row),
+      languages,
+    );
     return {
       ...dto,
       extra: await filterRealmExtraPublic(dto.extra),
@@ -852,12 +882,14 @@ export class RealmService {
   async resolveRule(
     realmUnitId: string,
     language?: string,
+    languages: readonly string[] = [],
   ): Promise<RealmRuleResolvedDTO> {
     const policy = await this.getRulePolicy(realmUnitId);
+    const requestedLanguage = normalizedLanguage(language ?? languages[0]);
     if (!policy.ruleUnitId) {
       return {
         ...policy,
-        requestedLanguage: normalizedLanguage(language),
+        requestedLanguage,
         resolvedLanguage: null,
         translation: null,
         sourceRulePostUnitId: null,
@@ -867,12 +899,17 @@ export class RealmService {
 
     const ruleUnit = await prisma.unit.findUnique({
       where: { id: policy.ruleUnitId },
-      select: { id: true, type: true, defaultLanguage: true },
+      select: {
+        id: true,
+        type: true,
+        supportLanguages: true,
+        translations: true,
+      },
     });
     if (!ruleUnit || ruleUnit.type !== UnitType.POST) {
       return {
         ...policy,
-        requestedLanguage: normalizedLanguage(language),
+        requestedLanguage,
         resolvedLanguage: null,
         translation: null,
         sourceRulePostUnitId: null,
@@ -880,11 +917,14 @@ export class RealmService {
       };
     }
 
-    const translation = await translationService.resolveTranslation(
-      policy.ruleUnitId,
-      language,
-      ruleUnit.defaultLanguage ?? undefined,
-    );
+    const resolvedLanguage = resolveReadLanguage({
+      explicitLanguage: language,
+      languages,
+      supportLanguages: ruleUnit.supportLanguages,
+    });
+    const translation = resolvedLanguage
+      ? ruleUnit.translations.find((item) => item.language === resolvedLanguage)
+      : undefined;
     const sourceRulePostUnitId = translation?.sourceUnitId ?? null;
     const sourceRulePost = sourceRulePostUnitId
       ? await prisma.post.findUnique({
@@ -895,11 +935,17 @@ export class RealmService {
 
     return {
       ...policy,
-      requestedLanguage: normalizedLanguage(language),
-      resolvedLanguage: normalizedLanguage(translation?.language),
+      requestedLanguage,
+      resolvedLanguage: normalizedLanguage(resolvedLanguage),
       translation: translation ? mapTranslationToDTO(translation) : null,
       sourceRulePostUnitId,
-      sourceRulePost: sourceRulePost ? mapPostToDTO(sourceRulePost) : null,
+      sourceRulePost: sourceRulePost
+        ? mapPostToDTO(
+            sourceRulePost,
+            undefined,
+            [language, ...languages].filter((item): item is string => !!item),
+          )
+        : null,
     };
   }
 

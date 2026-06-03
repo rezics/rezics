@@ -301,6 +301,22 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function indexedLanguages(unit: {
+  supportLanguages?: readonly { language?: string | null }[] | null;
+  translations?: readonly { language?: string | null }[] | null;
+}): string[] {
+  const supportLanguages = unit.supportLanguages ?? [];
+  const source =
+    supportLanguages.length > 0 ? supportLanguages : unit.translations;
+  return [
+    ...new Set(
+      (source ?? [])
+        .map((item) => item.language)
+        .filter((language): language is string => !!language),
+    ),
+  ];
+}
+
 async function runProgressSyncWithRetry(
   operation: () => Promise<unknown>,
   context: { action: "sync" | "remove"; userId: string; unitId: string },
@@ -414,7 +430,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     unit.type === "POST"
       ? mainMarkdownSource(resolvePostContent({ unit }))
       : null;
-  const languages = translations.map((t: any) => t.language);
+  const languages = indexedLanguages(unit);
   const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
 
   // Tags
@@ -1075,6 +1091,10 @@ export async function patchContentTranslations(
   const translations = await getSearchPrismaClient().unitTranslation.findMany({
     where: { unitId },
   });
+  const supportLanguages =
+    await getSearchPrismaClient().unitSupportLanguage.findMany({
+      where: { unitId },
+    });
 
   const titles = translations.map((t: any) => t.title).filter(Boolean);
   const subtitles = translations.map((t: any) => t.subtitle).filter(Boolean);
@@ -1083,7 +1103,7 @@ export async function patchContentTranslations(
     .map((t: any) => mainMarkdownSource(t.description))
     .filter(isNonEmptyString);
   const descriptionText = descriptions.join("\n") || null;
-  const languages = translations.map((t: any) => t.language);
+  const languages = indexedLanguages({ supportLanguages, translations });
 
   await patchContentIfEligible(client, unitId, {
     titles,
@@ -2340,7 +2360,7 @@ export function buildPollDocument(poll: any): PollSearchDocument {
         : Boolean(closesAt && Date.parse(closesAt) <= now),
     usageCount: poll.usageCount,
     used: poll.usageCount > 0,
-    languages: translations.map((translation) => translation.language),
+    languages: indexedLanguages(poll.unit ?? { translations }),
     createdAt: toIsoString(poll.createdAt) ?? "",
     updatedAt: toIsoString(poll.updatedAt) ?? "",
   };
@@ -2353,6 +2373,7 @@ const pollIncludeForSync = {
   unit: {
     include: {
       translations: true,
+      supportLanguages: true,
     },
   },
 } as const;

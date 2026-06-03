@@ -36,6 +36,7 @@ export const PostListSection: React.FC<PostListSectionProps> = ({
       : { targetUnitId: targetUnitId ?? "" }),
     kind,
     languages,
+    languageMode: "preferred",
     limit,
   });
   const { data, isLoading } = useQuery(query);

@@ -62,13 +62,14 @@ describe("buildContentFilter", () => {
     expect(filter).toContain('rating IN ["GENERAL", "R_15"]');
   });
 
-  test("languages list emits per-language clauses", () => {
+  test("languages list emits any-of filter", () => {
     const filter = buildContentFilter(
       { languages: ["en", "ja"] },
       { kind: "global" },
     );
-    expect(filter).toContain('languages = "en"');
-    expect(filter).toContain('languages = "ja"');
+    expect(filter).toContain('languages IN ["en", "ja"]');
+    expect(filter).not.toContain('languages = "en"');
+    expect(filter).not.toContain('languages = "ja"');
   });
 
   test("textLength range emits min and max bounds", () => {

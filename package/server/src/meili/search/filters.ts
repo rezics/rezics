@@ -133,9 +133,7 @@ export function buildContentFilter(
 
   // 5. Languages
   if (query.languages?.length) {
-    for (const lang of query.languages) {
-      filter.push(`languages = "${lang}"`);
-    }
+    filter.push(`languages IN [${quoteList(query.languages)}]`);
   }
 
   // 6. Ratings — intersect query.ratings with allowedRatings if both provided

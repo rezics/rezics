@@ -2,6 +2,7 @@ import {
   type Language,
   mainMarkdownSource,
   markdownContentDoc,
+  resolveReadLanguage,
   type WikiZoneConfig,
   type WikiZoneHomepageData,
   type WikiZoneHomepageItem,
@@ -19,6 +20,7 @@ const zoneInclude = {
   unit: {
     include: {
       translations: true,
+      supportLanguages: true,
     },
   },
 } satisfies Prisma.ZoneInclude;
@@ -49,6 +51,11 @@ type TranslatedUnitRow = {
     summary?: string | null;
     description?: unknown;
   }>;
+  supportLanguages?: Array<{
+    language?: string | null;
+    isPrimary?: boolean | null;
+    sortOrder?: number | null;
+  }>;
   contentTranslations?: Array<{ content?: unknown }>;
   entity?: { kind?: string | null } | null;
 };
@@ -69,16 +76,13 @@ function preferredTranslation(
   preferredLanguages: readonly string[] = [],
 ) {
   const translations = row.translations ?? [];
-  return (
-    preferredLanguages
-      .map((language) => translations.find((tr) => tr.language === language))
-      .find(Boolean) ??
-    (row.defaultLanguage
-      ? translations.find((tr) => tr.language === row.defaultLanguage)
-      : undefined) ??
-    translations[0] ??
-    null
-  );
+  const resolvedLanguage = resolveReadLanguage({
+    languages: preferredLanguages,
+    supportLanguages: row.supportLanguages,
+  });
+  return resolvedLanguage
+    ? (translations.find((tr) => tr.language === resolvedLanguage) ?? null)
+    : null;
 }
 
 function toIsoString(value: Date | string | undefined): string {
@@ -94,9 +98,7 @@ function mapUnitToWikiPostItem(
   return {
     kind: "wikiPost",
     unitId: row.id,
-    language: (translation?.language ??
-      row.defaultLanguage ??
-      null) as Language | null,
+    language: (translation?.language ?? null) as Language | null,
     title: translation?.title ?? null,
     summary: translation?.summary ?? null,
     createdAt: toIsoString(row.createdAt),
@@ -477,7 +479,12 @@ export class ZoneService {
     const limit = sectionLimit(input.section);
     const rows = await prisma.unit.findMany({
       where: this.wikiVisibleUnitWhere(input.realmUnitId),
-      include: { translations: true, contentTranslations: true, post: true },
+      include: {
+        translations: true,
+        supportLanguages: true,
+        contentTranslations: true,
+        post: true,
+      },
       orderBy:
         input.mode === "recent"
           ? [{ createdAt: "desc" }, { id: "asc" }]
@@ -515,7 +522,7 @@ export class ZoneService {
         ...this.wikiVisibleUnitWhere(input.realmUnitId),
         id: { in: unitIds },
       },
-      include: { translations: true, post: true },
+      include: { translations: true, supportLanguages: true, post: true },
     });
     const byId = new Map(rows.map((row) => [row.id, row]));
     return unitIds.flatMap((unitId) => {
@@ -542,7 +549,7 @@ export class ZoneService {
         type: UnitType.TAG,
         status: { not: UnitStatus.DELETED },
       },
-      include: { translations: true },
+      include: { translations: true, supportLanguages: true },
     });
     const byId = new Map(rows.map((row) => [row.id, row]));
     return tagUnitIds.flatMap((tagUnitId) => {
@@ -577,6 +584,7 @@ export class ZoneService {
         entity: {
           include: {
             translations: true,
+            supportLanguages: true,
             entity: true,
           },
         },

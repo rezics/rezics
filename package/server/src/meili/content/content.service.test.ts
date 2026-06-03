@@ -130,6 +130,16 @@ describe("searchContent catalog behavior", () => {
     ]);
   });
 
+  test("filters multiple languages with any-of semantics", async () => {
+    await searchContent({
+      languages: ["ja", "en"],
+    });
+
+    expect(contentSearchMock.mock.calls[0]?.[1].filter).toContain(
+      'languages IN ["ja", "en"]',
+    );
+  });
+
   test("groups catalog variant hits and exposes collapsed alternatives", async () => {
     contentSearchMock.mockResolvedValueOnce({
       hits: [

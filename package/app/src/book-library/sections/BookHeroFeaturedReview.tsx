@@ -42,6 +42,7 @@ export const BookHeroFeaturedReview: React.FC<BookHeroFeaturedReviewProps> = ({
       targetUnitId: bookId,
       kind: PostKind.REVIEW,
       languages,
+      languageMode: "preferred",
       limit: 1,
     }),
     enabled: Boolean(bookId),

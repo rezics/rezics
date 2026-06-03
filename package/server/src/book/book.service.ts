@@ -32,6 +32,10 @@ import {
   uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
+import {
+  preferredLanguageVisibilityWhere,
+  resolveEffectiveReadLanguageCandidates,
+} from "@/unit/language-resolution";
 import { assertLicenseSlug } from "@/unit/publication-policy";
 import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import {
@@ -136,6 +140,18 @@ export class BookService {
           },
         },
       });
+    }
+
+    const readLanguages = resolveEffectiveReadLanguageCandidates({
+      languages: (options as { languages?: string | readonly string[] })
+        .languages,
+    });
+    const languageVisibility = preferredLanguageVisibilityWhere({
+      languageMode: options.languageMode,
+      languages: readLanguages,
+    });
+    if (languageVisibility) {
+      andWhere.push({ unit: languageVisibility });
     }
 
     // Filter by visibility

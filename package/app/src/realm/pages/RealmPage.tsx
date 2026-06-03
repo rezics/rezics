@@ -29,7 +29,7 @@ import { Link } from "@tanstack/react-router";
 import { Plus, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PinnedFeedSection } from "@/pinboard";
-import { getTranslation } from "@/shared/utils/translation-helpers";
+import { useReadLanguageCandidates } from "@/shared/hooks/useReadLanguageCandidates";
 import { JoinButton } from "../components/JoinButton";
 import { RealmContentFeed } from "../components/RealmContentFeed";
 import { RealmMemberList } from "../components/RealmMemberList";
@@ -49,9 +49,7 @@ import { RealmFeedTagFilter } from "../sections/RealmFeedTagFilter";
 import { RuleSection } from "../sections/RuleSection";
 
 export type RealmPageTab = "feed" | "wiki" | "tags" | "about" | "members";
-type RealmModerationFilter = NonNullable<
-  PostListQuery["realmModerationState"]
->;
+type RealmModerationFilter = NonNullable<PostListQuery["realmModerationState"]>;
 
 const realmModerationFilters = [
   "all",
@@ -96,7 +94,10 @@ export function RealmPage({
   onFeedTagIdsChange,
 }: RealmPageProps) {
   const { t } = useTranslation(["common", "entity"]);
-  const { data: realm, isLoading } = useQuery(realmDetailQuery(realmId));
+  const languages = useReadLanguageCandidates();
+  const { data: realm, isLoading } = useQuery(
+    realmDetailQuery(realmId, { languages }),
+  );
   const { data: membership } = useQuery(myRealmMembershipQuery(realmId));
   const { data: settings } = useQuery({
     ...userQueries.settings(),
@@ -135,9 +136,8 @@ export function RealmPage({
     );
   }
 
-  const translation = getTranslation(realm.translations);
-  const title = translation?.title ?? t("entity:realm_untitled");
-  const description = contentDocMarkdownFallback(translation?.description);
+  const title = realm.title ?? t("entity:realm_untitled");
+  const description = contentDocMarkdownFallback(realm.description);
   const tagTree = realm.extra?.tagTree as TagTreeNode[] | undefined;
   const wikiZoneUnitId = realm.extra?.wikiZoneUnitId ?? null;
   const showWikiTab = Boolean(wikiZoneUnitId) || showManage;
@@ -252,7 +252,9 @@ export function RealmPage({
                       <Select
                         value={realmModerationState}
                         onValueChange={(value) =>
-                          setRealmModerationState(value as RealmModerationFilter)
+                          setRealmModerationState(
+                            value as RealmModerationFilter,
+                          )
                         }
                       >
                         <SelectTrigger className="h-9 w-[12rem]">
