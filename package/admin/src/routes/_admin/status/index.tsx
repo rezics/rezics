@@ -5,6 +5,6 @@ const StatusPage = lazyRouteComponent(
   "StatusPage",
 );
 
-export const Route = createFileRoute("/_admin/status")({
+export const Route = createFileRoute("/_admin/status/")({
   component: StatusPage,
 });

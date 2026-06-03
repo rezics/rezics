@@ -13,18 +13,20 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as AdminIndexRouteImport } from './routes/_admin/index'
 import { Route as AdminTokenRouteImport } from './routes/_admin/token'
-import { Route as AdminStatusRouteImport } from './routes/_admin/status'
 import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
 import { Route as AdminRepairRouteImport } from './routes/_admin/repair'
 import { Route as AdminJwtServicesRouteImport } from './routes/_admin/jwt-services'
-import { Route as AdminGovernanceRouteImport } from './routes/_admin/governance'
 import { Route as AdminAuthorityRouteImport } from './routes/_admin/authority'
 import { Route as AdminUserIndexRouteImport } from './routes/_admin/user/index'
 import { Route as AdminUnitIndexRouteImport } from './routes/_admin/unit/index'
+import { Route as AdminStatusIndexRouteImport } from './routes/_admin/status/index'
 import { Route as AdminSourceSiteIndexRouteImport } from './routes/_admin/source-site/index'
 import { Route as AdminShelfIndexRouteImport } from './routes/_admin/shelf/index'
+import { Route as AdminReviewIndexRouteImport } from './routes/_admin/review/index'
 import { Route as AdminRealmIndexRouteImport } from './routes/_admin/realm/index'
+import { Route as AdminPostIndexRouteImport } from './routes/_admin/post/index'
 import { Route as AdminMeiliIndexRouteImport } from './routes/_admin/meili/index'
+import { Route as AdminGovernanceIndexRouteImport } from './routes/_admin/governance/index'
 import { Route as AdminEntityIndexRouteImport } from './routes/_admin/entity/index'
 import { Route as AdminBookIndexRouteImport } from './routes/_admin/book/index'
 import { Route as AdminUserMeiliRouteImport } from './routes/_admin/user/meili'
@@ -34,9 +36,16 @@ import { Route as AdminUnitMeiliRouteImport } from './routes/_admin/unit/meili'
 import { Route as AdminUnitCreateRouteImport } from './routes/_admin/unit/create'
 import { Route as AdminUnitUnitIdRouteImport } from './routes/_admin/unit/$unitId'
 import { Route as AdminTagLowScoreRouteImport } from './routes/_admin/tag/low-score'
+import { Route as AdminStatusServicesRouteImport } from './routes/_admin/status/services'
+import { Route as AdminStatusQueueRouteImport } from './routes/_admin/status/queue'
+import { Route as AdminStatusHistoryRouteImport } from './routes/_admin/status/history'
+import { Route as AdminStatusCdcRouteImport } from './routes/_admin/status/cdc'
 import { Route as AdminSourceSiteEntityUnitIdRouteImport } from './routes/_admin/source-site/$entityUnitId'
 import { Route as AdminMiscEchokvRouteImport } from './routes/_admin/misc/echokv'
 import { Route as AdminMeiliObservabilityRouteImport } from './routes/_admin/meili/observability'
+import { Route as AdminGovernanceEnforcementRouteImport } from './routes/_admin/governance/enforcement'
+import { Route as AdminGovernanceCasesRouteImport } from './routes/_admin/governance/cases'
+import { Route as AdminGovernanceAuditRouteImport } from './routes/_admin/governance/audit'
 import { Route as AdminEntityUnitIdRouteImport } from './routes/_admin/entity/$unitId'
 import { Route as AdminBookMeiliRouteImport } from './routes/_admin/book/meili'
 import { Route as AdminAuthUsersRouteImport } from './routes/_admin/auth/users'
@@ -64,11 +73,6 @@ const AdminTokenRoute = AdminTokenRouteImport.update({
   path: '/token',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminStatusRoute = AdminStatusRouteImport.update({
-  id: '/status',
-  path: '/status',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -82,11 +86,6 @@ const AdminRepairRoute = AdminRepairRouteImport.update({
 const AdminJwtServicesRoute = AdminJwtServicesRouteImport.update({
   id: '/jwt-services',
   path: '/jwt-services',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminGovernanceRoute = AdminGovernanceRouteImport.update({
-  id: '/governance',
-  path: '/governance',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAuthorityRoute = AdminAuthorityRouteImport.update({
@@ -104,6 +103,11 @@ const AdminUnitIndexRoute = AdminUnitIndexRouteImport.update({
   path: '/unit/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminStatusIndexRoute = AdminStatusIndexRouteImport.update({
+  id: '/status/',
+  path: '/status/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSourceSiteIndexRoute = AdminSourceSiteIndexRouteImport.update({
   id: '/source-site/',
   path: '/source-site/',
@@ -114,14 +118,29 @@ const AdminShelfIndexRoute = AdminShelfIndexRouteImport.update({
   path: '/shelf/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminReviewIndexRoute = AdminReviewIndexRouteImport.update({
+  id: '/review/',
+  path: '/review/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRealmIndexRoute = AdminRealmIndexRouteImport.update({
   id: '/realm/',
   path: '/realm/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPostIndexRoute = AdminPostIndexRouteImport.update({
+  id: '/post/',
+  path: '/post/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMeiliIndexRoute = AdminMeiliIndexRouteImport.update({
   id: '/meili/',
   path: '/meili/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGovernanceIndexRoute = AdminGovernanceIndexRouteImport.update({
+  id: '/governance/',
+  path: '/governance/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEntityIndexRoute = AdminEntityIndexRouteImport.update({
@@ -169,6 +188,26 @@ const AdminTagLowScoreRoute = AdminTagLowScoreRouteImport.update({
   path: '/tag/low-score',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminStatusServicesRoute = AdminStatusServicesRouteImport.update({
+  id: '/status/services',
+  path: '/status/services',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStatusQueueRoute = AdminStatusQueueRouteImport.update({
+  id: '/status/queue',
+  path: '/status/queue',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStatusHistoryRoute = AdminStatusHistoryRouteImport.update({
+  id: '/status/history',
+  path: '/status/history',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStatusCdcRoute = AdminStatusCdcRouteImport.update({
+  id: '/status/cdc',
+  path: '/status/cdc',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSourceSiteEntityUnitIdRoute =
   AdminSourceSiteEntityUnitIdRouteImport.update({
     id: '/source-site/$entityUnitId',
@@ -183,6 +222,22 @@ const AdminMiscEchokvRoute = AdminMiscEchokvRouteImport.update({
 const AdminMeiliObservabilityRoute = AdminMeiliObservabilityRouteImport.update({
   id: '/meili/observability',
   path: '/meili/observability',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGovernanceEnforcementRoute =
+  AdminGovernanceEnforcementRouteImport.update({
+    id: '/governance/enforcement',
+    path: '/governance/enforcement',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminGovernanceCasesRoute = AdminGovernanceCasesRouteImport.update({
+  id: '/governance/cases',
+  path: '/governance/cases',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminGovernanceAuditRoute = AdminGovernanceAuditRouteImport.update({
+  id: '/governance/audit',
+  path: '/governance/audit',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEntityUnitIdRoute = AdminEntityUnitIdRouteImport.update({
@@ -225,11 +280,9 @@ export interface FileRoutesByFullPath {
   '/': typeof AdminIndexRoute
   '/login': typeof LoginRoute
   '/authority': typeof AdminAuthorityRoute
-  '/governance': typeof AdminGovernanceRoute
   '/jwt-services': typeof AdminJwtServicesRoute
   '/repair': typeof AdminRepairRoute
   '/settings': typeof AdminSettingsRoute
-  '/status': typeof AdminStatusRoute
   '/token': typeof AdminTokenRoute
   '/auth/email': typeof AdminAuthEmailRoute
   '/auth/jwt-services': typeof AdminAuthJwtServicesRoute
@@ -238,9 +291,16 @@ export interface FileRoutesByFullPath {
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
   '/entity/$unitId': typeof AdminEntityUnitIdRoute
+  '/governance/audit': typeof AdminGovernanceAuditRoute
+  '/governance/cases': typeof AdminGovernanceCasesRoute
+  '/governance/enforcement': typeof AdminGovernanceEnforcementRoute
   '/meili/observability': typeof AdminMeiliObservabilityRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
   '/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
+  '/status/cdc': typeof AdminStatusCdcRoute
+  '/status/history': typeof AdminStatusHistoryRoute
+  '/status/queue': typeof AdminStatusQueueRoute
+  '/status/services': typeof AdminStatusServicesRoute
   '/tag/low-score': typeof AdminTagLowScoreRoute
   '/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/unit/create': typeof AdminUnitCreateRoute
@@ -250,21 +310,23 @@ export interface FileRoutesByFullPath {
   '/user/meili': typeof AdminUserMeiliRoute
   '/book/': typeof AdminBookIndexRoute
   '/entity/': typeof AdminEntityIndexRoute
+  '/governance/': typeof AdminGovernanceIndexRoute
   '/meili/': typeof AdminMeiliIndexRoute
+  '/post/': typeof AdminPostIndexRoute
   '/realm/': typeof AdminRealmIndexRoute
+  '/review/': typeof AdminReviewIndexRoute
   '/shelf/': typeof AdminShelfIndexRoute
   '/source-site/': typeof AdminSourceSiteIndexRoute
+  '/status/': typeof AdminStatusIndexRoute
   '/unit/': typeof AdminUnitIndexRoute
   '/user/': typeof AdminUserIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/authority': typeof AdminAuthorityRoute
-  '/governance': typeof AdminGovernanceRoute
   '/jwt-services': typeof AdminJwtServicesRoute
   '/repair': typeof AdminRepairRoute
   '/settings': typeof AdminSettingsRoute
-  '/status': typeof AdminStatusRoute
   '/token': typeof AdminTokenRoute
   '/': typeof AdminIndexRoute
   '/auth/email': typeof AdminAuthEmailRoute
@@ -274,9 +336,16 @@ export interface FileRoutesByTo {
   '/auth/users': typeof AdminAuthUsersRoute
   '/book/meili': typeof AdminBookMeiliRoute
   '/entity/$unitId': typeof AdminEntityUnitIdRoute
+  '/governance/audit': typeof AdminGovernanceAuditRoute
+  '/governance/cases': typeof AdminGovernanceCasesRoute
+  '/governance/enforcement': typeof AdminGovernanceEnforcementRoute
   '/meili/observability': typeof AdminMeiliObservabilityRoute
   '/misc/echokv': typeof AdminMiscEchokvRoute
   '/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
+  '/status/cdc': typeof AdminStatusCdcRoute
+  '/status/history': typeof AdminStatusHistoryRoute
+  '/status/queue': typeof AdminStatusQueueRoute
+  '/status/services': typeof AdminStatusServicesRoute
   '/tag/low-score': typeof AdminTagLowScoreRoute
   '/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/unit/create': typeof AdminUnitCreateRoute
@@ -286,10 +355,14 @@ export interface FileRoutesByTo {
   '/user/meili': typeof AdminUserMeiliRoute
   '/book': typeof AdminBookIndexRoute
   '/entity': typeof AdminEntityIndexRoute
+  '/governance': typeof AdminGovernanceIndexRoute
   '/meili': typeof AdminMeiliIndexRoute
+  '/post': typeof AdminPostIndexRoute
   '/realm': typeof AdminRealmIndexRoute
+  '/review': typeof AdminReviewIndexRoute
   '/shelf': typeof AdminShelfIndexRoute
   '/source-site': typeof AdminSourceSiteIndexRoute
+  '/status': typeof AdminStatusIndexRoute
   '/unit': typeof AdminUnitIndexRoute
   '/user': typeof AdminUserIndexRoute
 }
@@ -298,11 +371,9 @@ export interface FileRoutesById {
   '/_admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
   '/_admin/authority': typeof AdminAuthorityRoute
-  '/_admin/governance': typeof AdminGovernanceRoute
   '/_admin/jwt-services': typeof AdminJwtServicesRoute
   '/_admin/repair': typeof AdminRepairRoute
   '/_admin/settings': typeof AdminSettingsRoute
-  '/_admin/status': typeof AdminStatusRoute
   '/_admin/token': typeof AdminTokenRoute
   '/_admin/': typeof AdminIndexRoute
   '/_admin/auth/email': typeof AdminAuthEmailRoute
@@ -312,9 +383,16 @@ export interface FileRoutesById {
   '/_admin/auth/users': typeof AdminAuthUsersRoute
   '/_admin/book/meili': typeof AdminBookMeiliRoute
   '/_admin/entity/$unitId': typeof AdminEntityUnitIdRoute
+  '/_admin/governance/audit': typeof AdminGovernanceAuditRoute
+  '/_admin/governance/cases': typeof AdminGovernanceCasesRoute
+  '/_admin/governance/enforcement': typeof AdminGovernanceEnforcementRoute
   '/_admin/meili/observability': typeof AdminMeiliObservabilityRoute
   '/_admin/misc/echokv': typeof AdminMiscEchokvRoute
   '/_admin/source-site/$entityUnitId': typeof AdminSourceSiteEntityUnitIdRoute
+  '/_admin/status/cdc': typeof AdminStatusCdcRoute
+  '/_admin/status/history': typeof AdminStatusHistoryRoute
+  '/_admin/status/queue': typeof AdminStatusQueueRoute
+  '/_admin/status/services': typeof AdminStatusServicesRoute
   '/_admin/tag/low-score': typeof AdminTagLowScoreRoute
   '/_admin/unit/$unitId': typeof AdminUnitUnitIdRoute
   '/_admin/unit/create': typeof AdminUnitCreateRoute
@@ -324,10 +402,14 @@ export interface FileRoutesById {
   '/_admin/user/meili': typeof AdminUserMeiliRoute
   '/_admin/book/': typeof AdminBookIndexRoute
   '/_admin/entity/': typeof AdminEntityIndexRoute
+  '/_admin/governance/': typeof AdminGovernanceIndexRoute
   '/_admin/meili/': typeof AdminMeiliIndexRoute
+  '/_admin/post/': typeof AdminPostIndexRoute
   '/_admin/realm/': typeof AdminRealmIndexRoute
+  '/_admin/review/': typeof AdminReviewIndexRoute
   '/_admin/shelf/': typeof AdminShelfIndexRoute
   '/_admin/source-site/': typeof AdminSourceSiteIndexRoute
+  '/_admin/status/': typeof AdminStatusIndexRoute
   '/_admin/unit/': typeof AdminUnitIndexRoute
   '/_admin/user/': typeof AdminUserIndexRoute
 }
@@ -337,11 +419,9 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/authority'
-    | '/governance'
     | '/jwt-services'
     | '/repair'
     | '/settings'
-    | '/status'
     | '/token'
     | '/auth/email'
     | '/auth/jwt-services'
@@ -350,9 +430,16 @@ export interface FileRouteTypes {
     | '/auth/users'
     | '/book/meili'
     | '/entity/$unitId'
+    | '/governance/audit'
+    | '/governance/cases'
+    | '/governance/enforcement'
     | '/meili/observability'
     | '/misc/echokv'
     | '/source-site/$entityUnitId'
+    | '/status/cdc'
+    | '/status/history'
+    | '/status/queue'
+    | '/status/services'
     | '/tag/low-score'
     | '/unit/$unitId'
     | '/unit/create'
@@ -362,21 +449,23 @@ export interface FileRouteTypes {
     | '/user/meili'
     | '/book/'
     | '/entity/'
+    | '/governance/'
     | '/meili/'
+    | '/post/'
     | '/realm/'
+    | '/review/'
     | '/shelf/'
     | '/source-site/'
+    | '/status/'
     | '/unit/'
     | '/user/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/authority'
-    | '/governance'
     | '/jwt-services'
     | '/repair'
     | '/settings'
-    | '/status'
     | '/token'
     | '/'
     | '/auth/email'
@@ -386,9 +475,16 @@ export interface FileRouteTypes {
     | '/auth/users'
     | '/book/meili'
     | '/entity/$unitId'
+    | '/governance/audit'
+    | '/governance/cases'
+    | '/governance/enforcement'
     | '/meili/observability'
     | '/misc/echokv'
     | '/source-site/$entityUnitId'
+    | '/status/cdc'
+    | '/status/history'
+    | '/status/queue'
+    | '/status/services'
     | '/tag/low-score'
     | '/unit/$unitId'
     | '/unit/create'
@@ -398,10 +494,14 @@ export interface FileRouteTypes {
     | '/user/meili'
     | '/book'
     | '/entity'
+    | '/governance'
     | '/meili'
+    | '/post'
     | '/realm'
+    | '/review'
     | '/shelf'
     | '/source-site'
+    | '/status'
     | '/unit'
     | '/user'
   id:
@@ -409,11 +509,9 @@ export interface FileRouteTypes {
     | '/_admin'
     | '/login'
     | '/_admin/authority'
-    | '/_admin/governance'
     | '/_admin/jwt-services'
     | '/_admin/repair'
     | '/_admin/settings'
-    | '/_admin/status'
     | '/_admin/token'
     | '/_admin/'
     | '/_admin/auth/email'
@@ -423,9 +521,16 @@ export interface FileRouteTypes {
     | '/_admin/auth/users'
     | '/_admin/book/meili'
     | '/_admin/entity/$unitId'
+    | '/_admin/governance/audit'
+    | '/_admin/governance/cases'
+    | '/_admin/governance/enforcement'
     | '/_admin/meili/observability'
     | '/_admin/misc/echokv'
     | '/_admin/source-site/$entityUnitId'
+    | '/_admin/status/cdc'
+    | '/_admin/status/history'
+    | '/_admin/status/queue'
+    | '/_admin/status/services'
     | '/_admin/tag/low-score'
     | '/_admin/unit/$unitId'
     | '/_admin/unit/create'
@@ -435,10 +540,14 @@ export interface FileRouteTypes {
     | '/_admin/user/meili'
     | '/_admin/book/'
     | '/_admin/entity/'
+    | '/_admin/governance/'
     | '/_admin/meili/'
+    | '/_admin/post/'
     | '/_admin/realm/'
+    | '/_admin/review/'
     | '/_admin/shelf/'
     | '/_admin/source-site/'
+    | '/_admin/status/'
     | '/_admin/unit/'
     | '/_admin/user/'
   fileRoutesById: FileRoutesById
@@ -478,13 +587,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTokenRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/_admin/status': {
-      id: '/_admin/status'
-      path: '/status'
-      fullPath: '/status'
-      preLoaderRoute: typeof AdminStatusRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_admin/settings': {
       id: '/_admin/settings'
       path: '/settings'
@@ -504,13 +606,6 @@ declare module '@tanstack/react-router' {
       path: '/jwt-services'
       fullPath: '/jwt-services'
       preLoaderRoute: typeof AdminJwtServicesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_admin/governance': {
-      id: '/_admin/governance'
-      path: '/governance'
-      fullPath: '/governance'
-      preLoaderRoute: typeof AdminGovernanceRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/authority': {
@@ -534,6 +629,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUnitIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/status/': {
+      id: '/_admin/status/'
+      path: '/status'
+      fullPath: '/status/'
+      preLoaderRoute: typeof AdminStatusIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/source-site/': {
       id: '/_admin/source-site/'
       path: '/source-site'
@@ -548,6 +650,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminShelfIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/review/': {
+      id: '/_admin/review/'
+      path: '/review'
+      fullPath: '/review/'
+      preLoaderRoute: typeof AdminReviewIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/realm/': {
       id: '/_admin/realm/'
       path: '/realm'
@@ -555,11 +664,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRealmIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/post/': {
+      id: '/_admin/post/'
+      path: '/post'
+      fullPath: '/post/'
+      preLoaderRoute: typeof AdminPostIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/meili/': {
       id: '/_admin/meili/'
       path: '/meili'
       fullPath: '/meili/'
       preLoaderRoute: typeof AdminMeiliIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/governance/': {
+      id: '/_admin/governance/'
+      path: '/governance'
+      fullPath: '/governance/'
+      preLoaderRoute: typeof AdminGovernanceIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/entity/': {
@@ -625,6 +748,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTagLowScoreRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_admin/status/services': {
+      id: '/_admin/status/services'
+      path: '/status/services'
+      fullPath: '/status/services'
+      preLoaderRoute: typeof AdminStatusServicesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/status/queue': {
+      id: '/_admin/status/queue'
+      path: '/status/queue'
+      fullPath: '/status/queue'
+      preLoaderRoute: typeof AdminStatusQueueRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/status/history': {
+      id: '/_admin/status/history'
+      path: '/status/history'
+      fullPath: '/status/history'
+      preLoaderRoute: typeof AdminStatusHistoryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/status/cdc': {
+      id: '/_admin/status/cdc'
+      path: '/status/cdc'
+      fullPath: '/status/cdc'
+      preLoaderRoute: typeof AdminStatusCdcRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/source-site/$entityUnitId': {
       id: '/_admin/source-site/$entityUnitId'
       path: '/source-site/$entityUnitId'
@@ -644,6 +795,27 @@ declare module '@tanstack/react-router' {
       path: '/meili/observability'
       fullPath: '/meili/observability'
       preLoaderRoute: typeof AdminMeiliObservabilityRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/governance/enforcement': {
+      id: '/_admin/governance/enforcement'
+      path: '/governance/enforcement'
+      fullPath: '/governance/enforcement'
+      preLoaderRoute: typeof AdminGovernanceEnforcementRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/governance/cases': {
+      id: '/_admin/governance/cases'
+      path: '/governance/cases'
+      fullPath: '/governance/cases'
+      preLoaderRoute: typeof AdminGovernanceCasesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/governance/audit': {
+      id: '/_admin/governance/audit'
+      path: '/governance/audit'
+      fullPath: '/governance/audit'
+      preLoaderRoute: typeof AdminGovernanceAuditRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_admin/entity/$unitId': {
@@ -700,11 +872,9 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAuthorityRoute: typeof AdminAuthorityRoute
-  AdminGovernanceRoute: typeof AdminGovernanceRoute
   AdminJwtServicesRoute: typeof AdminJwtServicesRoute
   AdminRepairRoute: typeof AdminRepairRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
-  AdminStatusRoute: typeof AdminStatusRoute
   AdminTokenRoute: typeof AdminTokenRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAuthEmailRoute: typeof AdminAuthEmailRoute
@@ -714,9 +884,16 @@ interface AdminRouteChildren {
   AdminAuthUsersRoute: typeof AdminAuthUsersRoute
   AdminBookMeiliRoute: typeof AdminBookMeiliRoute
   AdminEntityUnitIdRoute: typeof AdminEntityUnitIdRoute
+  AdminGovernanceAuditRoute: typeof AdminGovernanceAuditRoute
+  AdminGovernanceCasesRoute: typeof AdminGovernanceCasesRoute
+  AdminGovernanceEnforcementRoute: typeof AdminGovernanceEnforcementRoute
   AdminMeiliObservabilityRoute: typeof AdminMeiliObservabilityRoute
   AdminMiscEchokvRoute: typeof AdminMiscEchokvRoute
   AdminSourceSiteEntityUnitIdRoute: typeof AdminSourceSiteEntityUnitIdRoute
+  AdminStatusCdcRoute: typeof AdminStatusCdcRoute
+  AdminStatusHistoryRoute: typeof AdminStatusHistoryRoute
+  AdminStatusQueueRoute: typeof AdminStatusQueueRoute
+  AdminStatusServicesRoute: typeof AdminStatusServicesRoute
   AdminTagLowScoreRoute: typeof AdminTagLowScoreRoute
   AdminUnitUnitIdRoute: typeof AdminUnitUnitIdRoute
   AdminUnitCreateRoute: typeof AdminUnitCreateRoute
@@ -726,21 +903,23 @@ interface AdminRouteChildren {
   AdminUserMeiliRoute: typeof AdminUserMeiliRoute
   AdminBookIndexRoute: typeof AdminBookIndexRoute
   AdminEntityIndexRoute: typeof AdminEntityIndexRoute
+  AdminGovernanceIndexRoute: typeof AdminGovernanceIndexRoute
   AdminMeiliIndexRoute: typeof AdminMeiliIndexRoute
+  AdminPostIndexRoute: typeof AdminPostIndexRoute
   AdminRealmIndexRoute: typeof AdminRealmIndexRoute
+  AdminReviewIndexRoute: typeof AdminReviewIndexRoute
   AdminShelfIndexRoute: typeof AdminShelfIndexRoute
   AdminSourceSiteIndexRoute: typeof AdminSourceSiteIndexRoute
+  AdminStatusIndexRoute: typeof AdminStatusIndexRoute
   AdminUnitIndexRoute: typeof AdminUnitIndexRoute
   AdminUserIndexRoute: typeof AdminUserIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuthorityRoute: AdminAuthorityRoute,
-  AdminGovernanceRoute: AdminGovernanceRoute,
   AdminJwtServicesRoute: AdminJwtServicesRoute,
   AdminRepairRoute: AdminRepairRoute,
   AdminSettingsRoute: AdminSettingsRoute,
-  AdminStatusRoute: AdminStatusRoute,
   AdminTokenRoute: AdminTokenRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminAuthEmailRoute: AdminAuthEmailRoute,
@@ -750,9 +929,16 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAuthUsersRoute: AdminAuthUsersRoute,
   AdminBookMeiliRoute: AdminBookMeiliRoute,
   AdminEntityUnitIdRoute: AdminEntityUnitIdRoute,
+  AdminGovernanceAuditRoute: AdminGovernanceAuditRoute,
+  AdminGovernanceCasesRoute: AdminGovernanceCasesRoute,
+  AdminGovernanceEnforcementRoute: AdminGovernanceEnforcementRoute,
   AdminMeiliObservabilityRoute: AdminMeiliObservabilityRoute,
   AdminMiscEchokvRoute: AdminMiscEchokvRoute,
   AdminSourceSiteEntityUnitIdRoute: AdminSourceSiteEntityUnitIdRoute,
+  AdminStatusCdcRoute: AdminStatusCdcRoute,
+  AdminStatusHistoryRoute: AdminStatusHistoryRoute,
+  AdminStatusQueueRoute: AdminStatusQueueRoute,
+  AdminStatusServicesRoute: AdminStatusServicesRoute,
   AdminTagLowScoreRoute: AdminTagLowScoreRoute,
   AdminUnitUnitIdRoute: AdminUnitUnitIdRoute,
   AdminUnitCreateRoute: AdminUnitCreateRoute,
@@ -762,10 +948,14 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminUserMeiliRoute: AdminUserMeiliRoute,
   AdminBookIndexRoute: AdminBookIndexRoute,
   AdminEntityIndexRoute: AdminEntityIndexRoute,
+  AdminGovernanceIndexRoute: AdminGovernanceIndexRoute,
   AdminMeiliIndexRoute: AdminMeiliIndexRoute,
+  AdminPostIndexRoute: AdminPostIndexRoute,
   AdminRealmIndexRoute: AdminRealmIndexRoute,
+  AdminReviewIndexRoute: AdminReviewIndexRoute,
   AdminShelfIndexRoute: AdminShelfIndexRoute,
   AdminSourceSiteIndexRoute: AdminSourceSiteIndexRoute,
+  AdminStatusIndexRoute: AdminStatusIndexRoute,
   AdminUnitIndexRoute: AdminUnitIndexRoute,
   AdminUserIndexRoute: AdminUserIndexRoute,
 }

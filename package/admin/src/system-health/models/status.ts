@@ -107,6 +107,15 @@ export function countStatusStates(
   };
 }
 
+// STATUS_ORDER is worst-first, so the lowest index wins when rolling several
+// checks up into one badge for a status sub-section.
+export function worstStatusState(states: StatusState[]): StatusState {
+  if (states.length === 0) return "unknown";
+  return states.reduce((worst, state) =>
+    STATUS_ORDER.indexOf(state) < STATUS_ORDER.indexOf(worst) ? state : worst,
+  );
+}
+
 export function getMeiliDriftCount(indexes: MeiliIndexStatus[]): number {
   return indexes.filter((index) => index.settingsDrift?.hasDrift).length;
 }

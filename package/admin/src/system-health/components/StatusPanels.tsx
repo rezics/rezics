@@ -6,7 +6,6 @@ import type {
   QueueStatus,
   StatusItem,
   StatusLink,
-  SystemStatusSummary,
 } from "@rezics/api";
 import { Spinner } from "@rezics/ui";
 import {
@@ -35,7 +34,6 @@ import type React from "react";
 import { AdminSafeLink } from "@/shared/ui/link";
 import {
   formatCheckedAt,
-  formatStatusState,
   getMeiliDriftCount,
   type StatusState,
   statusBorderClass,
@@ -594,38 +592,5 @@ export function QueuePanel({ queue }: { queue: QueueStatus }) {
         </div>
       ) : null}
     </StatusCard>
-  );
-}
-
-export function SystemStatusPanels({
-  summary,
-  isLoading,
-  isError,
-}: {
-  summary?: SystemStatusSummary;
-  isLoading?: boolean;
-  isError?: boolean;
-}) {
-  if (!summary) {
-    return <SectionState isLoading={isLoading} isError={isError} empty />;
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-2">
-        <ServiceLinksPanel links={summary.links} />
-        <ServicesPanel
-          services={summary.services}
-          databases={summary.databases}
-          sequin={summary.sequin}
-        />
-      </div>
-      <MeiliSummaryPanel meili={summary.meili} />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <CdcPanel cdc={summary.cdc} />
-        <HistoryOutboxPanel historyOutbox={summary.historyOutbox} />
-      </div>
-      <QueuePanel queue={summary.queue} />
-    </div>
   );
 }

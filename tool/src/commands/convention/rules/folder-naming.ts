@@ -42,7 +42,11 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
 // Singular folder names permitted even when their plural form sits on
 // PLURAL_CONTAINER_ALLOWLIST, or compounds whose head noun is genuinely
 // singular but ends in `s` (e.g. "status", "progress-status").
-const SINGULAR_DOMAIN_EXCEPTIONS = new Set(["token", "progress-status"]);
+const SINGULAR_DOMAIN_EXCEPTIONS = new Set([
+  "token",
+  "status",
+  "progress-status",
+]);
 
 function isLikelyPlural(name: string): boolean {
   if (name.endsWith("ies")) return true;

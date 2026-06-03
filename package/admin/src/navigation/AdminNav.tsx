@@ -1,4 +1,5 @@
 import { useAuthSessionStore } from "@rezics/api/states";
+import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Separator } from "@rezics/ui/shadcn";
 import { useRouterState } from "@tanstack/react-router";
 import clsx from "clsx";
@@ -114,6 +115,11 @@ export function AdminNav({
         >
           <span className="inline-flex items-center min-w-9">{item.icon}</span>
           <span>{item.label()}</span>
+          {item.placeholder ? (
+            <span className="ml-auto rounded-sm bg-surface-subtle px-1.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-wide text-text-tertiary">
+              {getI18nRuntime().i18n.t("admin:nav_soon")}
+            </span>
+          ) : null}
         </Link>
       </li>
     );
