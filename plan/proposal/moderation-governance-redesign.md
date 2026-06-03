@@ -301,7 +301,7 @@ reset + reseed is acceptable; a backfill script is optional.
   removed/deleted; add a clear `isRedacted`/`redactionKind` field if the UI needs
   to distinguish moderator removal from author deletion. Drop `isTombstone`. Add
   `CommentModerationInput`.
-- [ ] 3.4 `engagement/feedback.ts`: replace unit-only report addressing with
+- [x] 3.4 `engagement/feedback.ts`: replace unit-only report addressing with
   polymorphic `targetKind`/`targetId` plus optional `addressedUnitId`; update
   create/list filters and DTOs so targetless feedback, feedback-about-feedback,
   comments, and units are representable without overloading `unitId`.
@@ -327,12 +327,12 @@ reset + reseed is acceptable; a backfill script is optional.
   `isPublicIndexableContentUnit`, `isPublicIndexablePostUnit`,
   `isPublicIndexableComment`, `realmIdsForSearch`, and
   `realmSearchProjectionSelect`. `(test)`
-- [ ] 4.3 Update search schemas and sync payloads for comments/feedback:
+- [x] 4.3 Update search schemas and sync payloads for comments/feedback:
   comment documents carry `moderationStatus` (or omit removed docs entirely);
   feedback sync uses `targetKind`/`targetId`/`addressedUnitId` instead of
   `unitId`. Remove any old `visibilityState`/`unitId` assumptions from
   consumers. `(test)`
-- [ ] 4.4 Implement the batch overlay read behind `POST /moderation/overlays`
+- [x] 4.4 Implement the batch overlay read behind `POST /moderation/overlays`
   (1.12 / 1.1): given visible `(targetKind, ids)`, return `{ id,
   moderationStatus, latestAction|null }`. Used only by mod mode.
 - [x] 4.5 Update `package/server/src/unit/target-semantics.schema.test.ts` and any

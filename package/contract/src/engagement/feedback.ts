@@ -1,4 +1,8 @@
 import { t } from "elysia";
+import {
+  type ModerationTargetKind,
+  moderationTargetKindSchema,
+} from "../realm/governance";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import {
   type OffsetPaginated,
@@ -24,7 +28,9 @@ export type FeedbackType = (typeof feedbackTypeSchema)["static"];
 export type FeedbackDTO = {
   id: string;
   userId: string;
-  unitId?: string | null;
+  targetKind?: ModerationTargetKind | null;
+  targetId?: string | null;
+  addressedUnitId?: string | null;
   url?: string | null;
   content: string;
   type: FeedbackType;
@@ -37,7 +43,10 @@ export type FeedbackDTO = {
 export const feedbackDTOSchema = t.Object({
   id: t.String(),
   userId: t.String(),
-  unitId: t.Optional(t.Nullable(t.String())),
+  targetKind: t.Optional(t.Nullable(moderationTargetKindSchema)),
+  targetId: t.Optional(t.Nullable(t.String())),
+  addressedUnitId: t.Optional(t.Nullable(t.String())),
+  url: t.Optional(t.Nullable(t.String())),
   content: t.String(),
   type: feedbackTypeSchema,
   resolved: t.Boolean(),
@@ -53,13 +62,17 @@ export const feedbackDTOSchema = t.Object({
  */
 export type CreateFeedbackInput = {
   url?: string | null;
-  unitId?: string | null;
+  targetKind?: ModerationTargetKind | null;
+  targetId?: string | null;
+  addressedUnitId?: string | null;
   content: string;
   type?: FeedbackType;
 };
 
 export const createFeedbackSchema = t.Object({
-  unitId: t.Optional(t.Nullable(t.String())),
+  targetKind: t.Optional(t.Nullable(moderationTargetKindSchema)),
+  targetId: t.Optional(t.Nullable(t.String())),
+  addressedUnitId: t.Optional(t.Nullable(t.String())),
   url: t.Optional(t.Nullable(t.String())),
   content: t.String(),
   type: t.Optional(feedbackTypeSchema),
@@ -72,7 +85,9 @@ export type FeedbackListQuery = OffsetPaginationParams & {
   ids?: string;
   q?: string;
   userId?: string;
-  unitId?: string;
+  targetKind?: ModerationTargetKind;
+  targetId?: string;
+  addressedUnitId?: string;
   type?: FeedbackType;
   resolved?: boolean;
   createdAtFrom?: string;
@@ -85,7 +100,9 @@ export const feedbackListQuerySchema = t.Object({
   limit: paginationLimitSchema,
   q: t.Optional(t.String()),
   userId: t.Optional(t.String()),
-  unitId: t.Optional(t.String()),
+  targetKind: t.Optional(moderationTargetKindSchema),
+  targetId: t.Optional(t.String()),
+  addressedUnitId: t.Optional(t.String()),
   type: t.Optional(feedbackTypeSchema),
   resolved: t.Optional(t.Boolean()),
   createdAtFrom: t.Optional(t.String()),
@@ -98,7 +115,9 @@ export const feedbackListBodySchema = t.Object({
   limit: paginationLimitSchema,
   q: t.Optional(t.String()),
   userId: t.Optional(t.String()),
-  unitId: t.Optional(t.String()),
+  targetKind: t.Optional(moderationTargetKindSchema),
+  targetId: t.Optional(t.String()),
+  addressedUnitId: t.Optional(t.String()),
   type: t.Optional(feedbackTypeSchema),
   resolved: t.Optional(t.Boolean()),
   createdAtFrom: t.Optional(t.String()),

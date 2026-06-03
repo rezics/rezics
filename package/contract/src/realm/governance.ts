@@ -277,6 +277,21 @@ export const moderationOverlayDTOSchema = t.Object({
 export type ModerationOverlayDTO =
   (typeof moderationOverlayDTOSchema)["static"];
 
+export const moderationOverlayTargetKindSchema = t.Union([
+  t.Literal("unit"),
+  t.Literal("unit_realm"),
+  t.Literal("comment"),
+]);
+
+export const moderationOverlayRequestSchema = t.Object({
+  targetKind: moderationOverlayTargetKindSchema,
+  realmUnitId: t.Optional(t.Nullable(t.String())),
+  targetIds: t.Array(t.String(), { maxItems: 200 }),
+});
+
+export type ModerationOverlayRequest =
+  (typeof moderationOverlayRequestSchema)["static"];
+
 export const createModerationCaseFromFeedbackSchema = t.Object(
   {
     severity: t.Optional(t.Nullable(t.String())),

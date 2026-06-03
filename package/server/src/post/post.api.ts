@@ -160,16 +160,16 @@ export const postApi = new Elysia({ prefix: "/post" })
     "/moderation-overlays",
     async ({ body }): Promise<PostModerationOverlayResponse> => {
       const targetUnitIds = [...new Set(body.targetUnitIds)];
-      const [globalStates, realmOverlays] = await Promise.all([
-        governanceModerationService.listGlobalContentStates(targetUnitIds),
+      const overlays = await governanceModerationService.listModerationOverlays(
         body.realmUnitId
-          ? governanceModerationService.listRealmUnitStates({
+          ? {
+              targetKind: "unit_realm",
               realmUnitId: body.realmUnitId,
-              unitIds: targetUnitIds,
-            })
-          : [],
-      ]);
-      return { globalStates, realmOverlays };
+              targetIds: targetUnitIds,
+            }
+          : { targetKind: "unit", targetIds: targetUnitIds },
+      );
+      return { overlays };
     },
     {
       body: postModerationOverlayRequestSchema,

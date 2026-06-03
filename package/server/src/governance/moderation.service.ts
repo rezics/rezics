@@ -1,3 +1,8 @@
+import type {
+  ModerationOverlayDTO,
+  ModerationStatus,
+  ModerationTargetKind,
+} from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
@@ -56,6 +61,10 @@ type RealmQueueDecisionKind =
 
 function upper<T extends string>(value: string): T {
   return value.toUpperCase() as T;
+}
+
+function lower<T extends string>(value: string): T {
+  return value.toLowerCase() as T;
 }
 
 function cleanJsonObject(
@@ -209,6 +218,77 @@ export class GovernanceModerationService {
       take: options.limit ?? 50,
     });
     return rows.map(mapModerationActionToDTO);
+  }
+
+  async listModerationOverlays(input: {
+    targetKind: ModerationTargetKind;
+    targetIds: string[];
+    realmUnitId?: string | null;
+  }): Promise<ModerationOverlayDTO[]> {
+    const ids = [...new Set(input.targetIds)].slice(0, 200);
+    if (ids.length === 0) return [];
+
+    const prismaTargetKind = upper<Prisma.ModerationTargetKind>(
+      input.targetKind,
+    );
+    const [snapshots, latestActions] = await Promise.all([
+      this.overlaySnapshots(input.targetKind, ids, input.realmUnitId),
+      this.actions.latestActionsFor({
+        targetKind: prismaTargetKind,
+        targetIds: ids,
+        realmUnitId:
+          input.targetKind === "unit_realm" ? input.realmUnitId : null,
+      }),
+    ]);
+    const latestByTargetId = new Map(
+      latestActions.map((action) => [action.targetId, action]),
+    );
+
+    return snapshots.map((snapshot) => ({
+      id: snapshot.id,
+      moderationStatus: lower<ModerationStatus>(snapshot.moderationStatus),
+      latestAction: latestByTargetId.has(snapshot.id)
+        ? mapModerationActionToDTO(latestByTargetId.get(snapshot.id)!)
+        : null,
+    }));
+  }
+
+  private async overlaySnapshots(
+    targetKind: ModerationTargetKind,
+    ids: string[],
+    realmUnitId?: string | null,
+  ): Promise<Array<{ id: string; moderationStatus: Prisma.ModerationStatus }>> {
+    switch (targetKind) {
+      case "unit":
+        return prisma.unit.findMany({
+          where: { id: { in: ids } },
+          select: { id: true, moderationStatus: true },
+        });
+      case "unit_realm":
+        if (!realmUnitId) {
+          throw new Error("unit_realm moderation overlays require realmUnitId");
+        }
+        return prisma.unitRealm
+          .findMany({
+            where: { realmUnitId, unitId: { in: ids } },
+            select: { unitId: true, moderationStatus: true },
+          })
+          .then((rows) =>
+            rows.map((row) => ({
+              id: row.unitId,
+              moderationStatus: row.moderationStatus,
+            })),
+          );
+      case "comment":
+        return prisma.comment.findMany({
+          where: { id: { in: ids } },
+          select: { id: true, moderationStatus: true },
+        });
+      default:
+        throw new Error(
+          `Moderation overlays require a snapshot-backed target kind: ${targetKind}`,
+        );
+    }
   }
 
   private appendNote(

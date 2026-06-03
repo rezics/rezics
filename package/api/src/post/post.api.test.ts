@@ -48,7 +48,7 @@ describe("post wiki API helpers", () => {
 
   test("requests moderation overlays for rendered post nodes", async () => {
     fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ globalStates: [], realmOverlays: [] }), {
+      new Response(JSON.stringify({ overlays: [] }), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       }),

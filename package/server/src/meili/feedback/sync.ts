@@ -1,5 +1,7 @@
-import type { FeedbackSearchDocument } from "@rezics/contract";
-import { patchFeedbackResolution } from "@rezics/search";
+import {
+  buildFeedbackSearchDocument,
+  patchFeedbackResolution,
+} from "@rezics/search";
 import { prisma } from "#/prisma/client";
 import { searchClient } from "../search-client";
 
@@ -13,20 +15,9 @@ export async function syncFeedbackToMeili(id: string): Promise<void> {
 
   if (!feedback) return;
 
-  const doc: FeedbackSearchDocument = {
-    id: feedback.id,
-    userId: feedback.userId,
-    unitId: feedback.unitId,
-    url: feedback.url,
-    content: feedback.content,
-    type: feedback.type,
-    resolved: feedback.resolved,
-    resolvedAt: feedback.resolvedAt?.toISOString() ?? null,
-    createdAt: feedback.createdAt,
-    updatedAt: feedback.updatedAt,
-  };
-
-  await searchClient.feedbackIndex.addDocuments([doc]);
+  await searchClient.feedbackIndex.addDocuments([
+    buildFeedbackSearchDocument(feedback),
+  ]);
 }
 
 /**

@@ -18,6 +18,8 @@ import {
   grantCapabilitySchema,
   moderationActionDTOSchema,
   moderationCaseDTOSchema,
+  moderationOverlayDTOSchema,
+  moderationOverlayRequestSchema,
   policyDecisionSchema,
   policyInputSchema,
   realmModerationQueueItemDTOSchema,
@@ -267,6 +269,67 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       response: { 200: policyDecisionSchema, 403: t.String() },
       detail: {
         summary: "Evaluate a governance policy decision",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .get(
+    "/moderation/:targetKind/:targetId/actions",
+    async ({ params, query, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.auditRead,
+        target: {
+          kind: params.targetKind,
+          id: params.targetId,
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.listTargetActions(
+        params.targetKind.toUpperCase() as never,
+        params.targetId,
+        query,
+      );
+    },
+    {
+      requireLogin: true,
+      params: t.Object({ targetKind: t.String(), targetId: t.String() }),
+      query: listQuerySchema,
+      response: {
+        200: t.Array(moderationActionDTOSchema),
+        403: t.String(),
+      },
+      detail: {
+        summary: "List moderation actions for a target",
+        tags: ["Governance", "Staff"],
+      },
+    },
+  )
+  .post(
+    "/moderation/overlays",
+    async ({ body, identity, status }) => {
+      const denied = await assertGovernancePolicy({
+        identity,
+        status,
+        action: sitePolicyActions.auditRead,
+        target: {
+          kind: body.targetKind,
+          id: body.realmUnitId ?? body.targetIds.join(","),
+        },
+      });
+      if (denied) return denied;
+      return governanceModerationService.listModerationOverlays(body);
+    },
+    {
+      requireLogin: true,
+      body: moderationOverlayRequestSchema,
+      response: {
+        200: t.Array(moderationOverlayDTOSchema),
+        403: t.String(),
+      },
+      detail: {
+        summary: "Read moderation overlays for visible targets",
         tags: ["Governance", "Staff"],
       },
     },

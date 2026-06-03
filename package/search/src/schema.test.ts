@@ -43,11 +43,7 @@ describe("expected Meilisearch index settings", () => {
     const comments = getExpectedMeiliIndexSchema("comments");
 
     expect(comments.filterableAttributes).toEqual(
-      expect.arrayContaining([
-        "rootUnitId",
-        "realmUnitId",
-        "parentCommentId",
-      ]),
+      expect.arrayContaining(["rootUnitId", "realmUnitId", "parentCommentId"]),
     );
     expect(comments.searchableAttributes).toEqual(
       expect.arrayContaining(["contentText", "authorName"]),
@@ -63,6 +59,15 @@ describe("expected Meilisearch index settings", () => {
     );
     expect(collection.filterableAttributes).not.toContain("titles");
     expect(collection.filterableAttributes).not.toContain("tagUnitIds");
+  });
+
+  test("feedback index exposes polymorphic target filters", () => {
+    const feedbacks = getExpectedMeiliIndexSchema("feedbacks");
+
+    expect(feedbacks.filterableAttributes).toEqual(
+      expect.arrayContaining(["targetKind", "targetId", "addressedUnitId"]),
+    );
+    expect(feedbacks.filterableAttributes).not.toContain("unitId");
   });
 
   test("poll index supports library usage and lifecycle filters", () => {

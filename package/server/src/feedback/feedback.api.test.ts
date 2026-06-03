@@ -23,7 +23,9 @@ const now = new Date("2026-05-28T00:00:00.000Z");
 const feedbackRow = {
   id: "feedback-1",
   userId: "user-1",
-  unitId: null,
+  targetKind: "COMMENT",
+  targetId: "comment-1",
+  addressedUnitId: "post-1",
   url: null,
   content: "Report content",
   type: "REPORT",
@@ -62,7 +64,11 @@ mock.module("@/middleware", () => ({
 
 mock.module("@/governance", () => ({
   contentPolicyActions: {
+    create: "content.create",
     delete: "content.delete",
+  },
+  governanceModerationService: {
+    listModerationOverlays: mock(async () => []),
   },
   governanceRoutePolicyService: {
     decideForIdentity: decideForIdentityMock,

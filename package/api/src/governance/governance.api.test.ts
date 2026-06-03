@@ -34,6 +34,7 @@ describe("governanceApi", () => {
     await governanceApi.listCases({ offset: 5, limit: 10 });
     await governanceApi.getCase("case/1");
     await governanceApi.listEscalatedRealmQueue({ limit: 8 });
+    await governanceApi.listTargetActions("unit", "post/1", { limit: 5 });
     await governanceApi.listAudit({
       action: "session.revoke",
       targetKind: "session",
@@ -51,11 +52,39 @@ describe("governanceApi", () => {
       "http://api.example/governance/realm-queue/escalated?limit=8",
     );
     expect(fetchMock.mock.calls[3]?.[0]).toBe(
-      "http://api.example/governance/audit?action=session.revoke&targetKind=session&targetId=session-1",
+      "http://api.example/governance/moderation/unit/post%2F1/actions?limit=5",
     );
     expect(fetchMock.mock.calls[4]?.[0]).toBe(
+      "http://api.example/governance/audit?action=session.revoke&targetKind=session&targetId=session-1",
+    );
+    expect(fetchMock.mock.calls[5]?.[0]).toBe(
       "http://api.example/governance/audit/audit%2F1",
     );
+  });
+
+  test("requests generic moderation overlays", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify([]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await governanceApi.getModerationOverlays({
+      targetKind: "unit_realm",
+      realmUnitId: "realm-1",
+      targetIds: ["post-2", "post-1"],
+    });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "http://api.example/governance/moderation/overlays",
+    );
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: "POST" });
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
+      targetKind: "unit_realm",
+      realmUnitId: "realm-1",
+      targetIds: ["post-2", "post-1"],
+    });
   });
 
   test("sends governance mutation requests to typed endpoints", async () => {

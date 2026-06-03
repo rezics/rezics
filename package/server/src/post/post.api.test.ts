@@ -40,25 +40,11 @@ const updateMock = mock(async (_unitId: string, input: any) => ({
   ...input,
 }));
 const deleteMock = mock(async () => undefined);
-const listGlobalContentStatesMock = mock(async () => [
+const listModerationOverlaysMock = mock(async () => [
   {
-    moderatedUnitId: "reply-1",
-    state: "hidden",
-    decidedByUserId: null,
-    caseId: null,
-    reason: "abuse",
-    createdAt: "2026-05-28T00:00:00.000Z",
-    updatedAt: "2026-05-28T00:00:00.000Z",
-  },
-]);
-const listRealmUnitStatesMock = mock(async () => [
-  {
-    realmUnitId: "realm-1",
-    unitId: "reply-1",
-    moderationState: "approved",
-    visibilityState: "tombstoned",
-    isLocked: false,
-    createdAt: "2026-05-28T00:00:00.000Z",
+    id: "reply-1",
+    moderationStatus: "removed",
+    latestAction: null,
   },
 ]);
 
@@ -80,8 +66,7 @@ mock.module("@/governance", () => ({
     decideForIdentity: decideForIdentityMock,
   },
   governanceModerationService: {
-    listGlobalContentStates: listGlobalContentStatesMock,
-    listRealmUnitStates: listRealmUnitStatesMock,
+    listModerationOverlays: listModerationOverlaysMock,
   },
   realmPolicyActions: {
     memberRoleChange: "realm.member.role.change",
@@ -96,6 +81,17 @@ mock.module("@/governance", () => ({
 mock.module("@/unit/collaborative-metadata", () => ({
   applySparsePatch: mock((_: unknown, patch: unknown) => patch),
   assertEditorialPatchAllowed: mock(() => undefined),
+}));
+
+mock.module("@/unit/language-resolution", () => ({
+  resolveEffectiveReadLanguageCandidates: mock((input: any) => {
+    const languages = Array.isArray(input.languages)
+      ? input.languages
+      : String(input.languages ?? "")
+          .split(",")
+          .filter(Boolean);
+    return [...new Set([...languages, "en"])];
+  }),
 }));
 
 mock.module("@/unit/variant-context", () => ({
@@ -132,8 +128,7 @@ describe("postApi", () => {
     };
     policyAllowed = false;
     decideForIdentityMock.mockClear();
-    listGlobalContentStatesMock.mockClear();
-    listRealmUnitStatesMock.mockClear();
+    listModerationOverlaysMock.mockClear();
     createMock.mockClear();
     listMock.mockClear();
     byRealmMock.mockClear();
@@ -198,35 +193,14 @@ describe("postApi", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      globalStates: [
-        {
-          moderatedUnitId: "reply-1",
-          state: "hidden",
-          decidedByUserId: null,
-          caseId: null,
-          reason: "abuse",
-          createdAt: "2026-05-28T00:00:00.000Z",
-          updatedAt: "2026-05-28T00:00:00.000Z",
-        },
-      ],
-      realmOverlays: [
-        {
-          realmUnitId: "realm-1",
-          unitId: "reply-1",
-          moderationState: "approved",
-          visibilityState: "tombstoned",
-          isLocked: false,
-          createdAt: "2026-05-28T00:00:00.000Z",
-        },
+      overlays: [
+        { id: "reply-1", moderationStatus: "removed", latestAction: null },
       ],
     });
-    expect(listGlobalContentStatesMock).toHaveBeenCalledWith([
-      "reply-1",
-      "reply-2",
-    ]);
-    expect(listRealmUnitStatesMock).toHaveBeenCalledWith({
+    expect(listModerationOverlaysMock).toHaveBeenCalledWith({
+      targetKind: "unit_realm",
       realmUnitId: "realm-1",
-      unitIds: ["reply-1", "reply-2"],
+      targetIds: ["reply-1", "reply-2"],
     });
   });
 

@@ -1,4 +1,5 @@
 import type { FeedbackType } from "../engagement/feedback";
+import type { ModerationTargetKind } from "../realm/governance";
 
 /**
  * Shape of a feedback document stored in the Meilisearch `feedbacks` index.
@@ -9,7 +10,9 @@ import type { FeedbackType } from "../engagement/feedback";
 export interface FeedbackSearchDocument {
   id: string;
   userId: string;
-  unitId?: string | null;
+  targetKind?: ModerationTargetKind | null;
+  targetId?: string | null;
+  addressedUnitId?: string | null;
   url?: string | null;
   content: string;
   type: FeedbackType;

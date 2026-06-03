@@ -19,6 +19,8 @@ import type {
   GrantCapabilityInput,
   ModerationActionDTO,
   ModerationCaseDTO,
+  ModerationOverlayDTO,
+  ModerationOverlayRequest,
   PolicyDecision,
   PolicyInput,
   RealmModerationQueueItemDTO,
@@ -59,6 +61,25 @@ export const governanceApi = {
 
   decidePolicy: async (input: PolicyInput): Promise<PolicyDecision> => {
     return apiFetch<PolicyDecision>("/governance/policy/decide", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+  },
+
+  listTargetActions: async (
+    targetKind: string,
+    targetId: string,
+    query?: GovernanceListQuery,
+  ): Promise<ModerationActionDTO[]> => {
+    return apiFetch<ModerationActionDTO[]>(
+      `/governance/moderation/${encodePathPart(targetKind)}/${encodePathPart(targetId)}/actions${buildQueryString(query)}`,
+    );
+  },
+
+  getModerationOverlays: async (
+    input: ModerationOverlayRequest,
+  ): Promise<ModerationOverlayDTO[]> => {
+    return apiFetch<ModerationOverlayDTO[]>("/governance/moderation/overlays", {
       method: "POST",
       body: JSON.stringify(input),
     });

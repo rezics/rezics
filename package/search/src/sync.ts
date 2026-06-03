@@ -49,6 +49,10 @@ function isNonEmptyString(value: string | null): value is string {
   return Boolean(value);
 }
 
+function lower<T extends string>(value: string | null | undefined): T | null {
+  return value ? (value.toLowerCase() as T) : null;
+}
+
 function searchDescriptionText(value: unknown): string | null {
   if (typeof value === "string") return value;
   return mainMarkdownSource(value);
@@ -1622,6 +1626,33 @@ export async function patchFeedbackResolutionFromDb(
 
 // ANCHOR: Feedbacks sync
 
+export function buildFeedbackSearchDocument(
+  feedback: any,
+): FeedbackSearchDocument {
+  return {
+    id: feedback.id,
+    userId: feedback.userId,
+    targetKind: lower<NonNullable<FeedbackSearchDocument["targetKind"]>>(
+      feedback.targetKind,
+    ),
+    targetId: feedback.targetId,
+    addressedUnitId: feedback.addressedUnitId,
+    type: feedback.type,
+    content: feedback.content,
+    url: feedback.url,
+    resolved: feedback.resolved,
+    resolvedAt: feedback.resolvedAt,
+    createdAt:
+      feedback.createdAt instanceof Date
+        ? feedback.createdAt.toISOString()
+        : feedback.createdAt,
+    updatedAt:
+      feedback.updatedAt instanceof Date
+        ? feedback.updatedAt.toISOString()
+        : feedback.updatedAt,
+  };
+}
+
 export async function syncSingleFeedback(client: SearchClient, id: string) {
   const feedback = await getSearchPrismaClient().feedback.findUnique({
     where: { id },
@@ -1631,25 +1662,7 @@ export async function syncSingleFeedback(client: SearchClient, id: string) {
     return;
   }
 
-  await client.addOrUpdateFeedbacks([
-    {
-      id: feedback.id,
-      userId: feedback.userId,
-      unitId: feedback.unitId,
-      type: feedback.type,
-      content: feedback.content,
-      url: feedback.url,
-      resolved: feedback.resolved,
-      createdAt:
-        feedback.createdAt instanceof Date
-          ? feedback.createdAt.toISOString()
-          : feedback.createdAt,
-      updatedAt:
-        feedback.updatedAt instanceof Date
-          ? feedback.updatedAt.toISOString()
-          : feedback.updatedAt,
-    },
-  ]);
+  await client.addOrUpdateFeedbacks([buildFeedbackSearchDocument(feedback)]);
 }
 
 export async function syncAllFeedbacks(client: SearchClient) {
@@ -1671,18 +1684,9 @@ export async function syncAllFeedbacks(client: SearchClient) {
 
     if (feedbacks.length === 0) break;
 
-    const formatted: FeedbackSearchDocument[] = feedbacks.map((f) => ({
-      id: f.id,
-      userId: f.userId,
-      unitId: f.unitId,
-      url: f.url,
-      content: f.content,
-      type: f.type,
-      resolved: f.resolved,
-      resolvedAt: f.resolvedAt,
-      createdAt: f.createdAt,
-      updatedAt: f.updatedAt,
-    }));
+    const formatted: FeedbackSearchDocument[] = feedbacks.map(
+      buildFeedbackSearchDocument,
+    );
 
     const addResult = await client.addOrUpdateFeedbacks(formatted);
     console.log("syncAllFeedbacks: added batch", addResult);
@@ -1707,20 +1711,7 @@ export async function syncFeedbackSegment(
   });
   const { current, nextCursor } = segmentRows(feedbacks, limit, "id");
   if (current.length > 0) {
-    await client.addOrUpdateFeedbacks(
-      current.map((f) => ({
-        id: f.id,
-        userId: f.userId,
-        unitId: f.unitId,
-        url: f.url,
-        content: f.content,
-        type: f.type,
-        resolved: f.resolved,
-        resolvedAt: f.resolvedAt,
-        createdAt: f.createdAt,
-        updatedAt: f.updatedAt,
-      })),
-    );
+    await client.addOrUpdateFeedbacks(current.map(buildFeedbackSearchDocument));
   }
   return { processed: current.length, ...(nextCursor ? { nextCursor } : {}) };
 }

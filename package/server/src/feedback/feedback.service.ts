@@ -25,15 +25,35 @@ function enqueueFeedbackResolution(feedbackId: string) {
   );
 }
 
+function upper<T extends string>(value: string): T {
+  return value.toUpperCase() as T;
+}
+
 export class FeedbackService {
   async create(
     input: CreateFeedbackInput & { userId: string },
   ): Promise<Feedback> {
-    const { userId, unitId, url, content, type } = input;
+    const {
+      userId,
+      targetKind,
+      targetId,
+      addressedUnitId,
+      url,
+      content,
+      type,
+    } = input;
+    const prismaTargetKind = targetKind
+      ? upper<Prisma.ModerationTargetKind>(targetKind)
+      : null;
+    const normalizedTargetId = targetId ?? null;
     const created = await prisma.feedback.create({
       data: {
         userId,
-        unitId: unitId ?? null,
+        targetKind: prismaTargetKind,
+        targetId: normalizedTargetId,
+        addressedUnitId:
+          addressedUnitId ??
+          (prismaTargetKind === "UNIT" ? normalizedTargetId : null),
         url: url ?? null,
         content,
         type: type ?? "REPORT",
@@ -68,8 +88,14 @@ export class FeedbackService {
     if (query.userId) {
       where.userId = query.userId;
     }
-    if (query.unitId) {
-      where.unitId = query.unitId;
+    if (query.targetKind) {
+      where.targetKind = upper<Prisma.ModerationTargetKind>(query.targetKind);
+    }
+    if (query.targetId) {
+      where.targetId = query.targetId;
+    }
+    if (query.addressedUnitId) {
+      where.addressedUnitId = query.addressedUnitId;
     }
     if (typeof query.resolved === "boolean") {
       where.resolved = query.resolved;

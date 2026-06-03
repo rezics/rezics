@@ -225,6 +225,14 @@ const moderationCaseEventRow = {
   createdAt: "2026-05-28T00:00:00.000Z",
 };
 const listCaseEventsMock = mock(async () => [moderationCaseEventRow]);
+const listTargetActionsMock = mock(async () => [moderationCaseEventRow]);
+const listModerationOverlaysMock = mock(async () => [
+  {
+    id: "post-1",
+    moderationStatus: "approved",
+    latestAction: moderationCaseEventRow,
+  },
+]);
 const createCaseFromFeedbackMock = mock(async () => moderationCaseRow);
 const duplicateCaseMock = mock(async () => ({
   ...moderationCaseRow,
@@ -290,6 +298,8 @@ mock.module("./moderation.service", () => ({
     listCases: mock(async () => []),
     getCase: mock(async () => null),
     listCaseEvents: listCaseEventsMock,
+    listTargetActions: listTargetActionsMock,
+    listModerationOverlays: listModerationOverlaysMock,
     createCaseFromFeedback: createCaseFromFeedbackMock,
     duplicateCase: duplicateCaseMock,
     assignCase: assignCaseMock,
@@ -351,6 +361,8 @@ describe("governanceApi account enforcement", () => {
     decideRealmQueueItemMock.mockClear();
     escalateRealmQueueItemMock.mockClear();
     listCaseEventsMock.mockClear();
+    listTargetActionsMock.mockClear();
+    listModerationOverlaysMock.mockClear();
     createCaseFromFeedbackMock.mockClear();
     duplicateCaseMock.mockClear();
     assignCaseMock.mockClear();
@@ -398,6 +410,56 @@ describe("governanceApi account enforcement", () => {
       targetKind: "session",
       targetId: "session-1",
       requestId: "req-1",
+    });
+  });
+
+  test("checks audit policy before reading target action timelines", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request(
+        "http://localhost/governance/moderation/unit/post-1/actions?limit=5",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "audit.read",
+      target: { kind: "unit", id: "post-1" },
+    });
+    expect(listTargetActionsMock).toHaveBeenCalledWith("UNIT", "post-1", {
+      limit: 5,
+    });
+  });
+
+  test("checks audit policy before reading moderation overlays", async () => {
+    policyAllowed = true;
+
+    const { governanceApi } = await import("./governance.api");
+    const response = await governanceApi.handle(
+      new Request("http://localhost/governance/moderation/overlays", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          targetKind: "unit_realm",
+          realmUnitId: "realm-1",
+          targetIds: ["post-1"],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(decideForIdentityMock).toHaveBeenCalledWith({
+      identity: currentIdentity,
+      action: "audit.read",
+      target: { kind: "unit_realm", id: "realm-1" },
+    });
+    expect(listModerationOverlaysMock).toHaveBeenCalledWith({
+      targetKind: "unit_realm",
+      realmUnitId: "realm-1",
+      targetIds: ["post-1"],
     });
   });
 

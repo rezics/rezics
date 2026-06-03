@@ -94,12 +94,17 @@ export class ModerationActionService {
   latestActionsFor(input: {
     targetKind: Prisma.ModerationActionCreateInput["targetKind"];
     targetIds: string[];
+    realmUnitId?: string | null;
   }) {
     const targetIds = [...new Set(input.targetIds)];
     if (targetIds.length === 0) return Promise.resolve([]);
     return prisma.moderationAction.findMany({
       distinct: ["targetKind", "targetId"],
-      where: { targetKind: input.targetKind, targetId: { in: targetIds } },
+      where: {
+        targetKind: input.targetKind,
+        targetId: { in: targetIds },
+        ...(input.realmUnitId ? { realmUnitId: input.realmUnitId } : {}),
+      },
       orderBy: [
         { targetKind: "asc" },
         { targetId: "asc" },

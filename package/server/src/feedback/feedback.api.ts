@@ -50,7 +50,7 @@ export const feedbackApi = new Elysia({ prefix: "/feedback" })
       detail: {
         summary: "Create feedback",
         description:
-          "Create a new feedback entry for the current user (optional unitId).",
+          "Create a new feedback entry for the current user with an optional polymorphic target.",
         tags: ["Feedback"],
       },
     },

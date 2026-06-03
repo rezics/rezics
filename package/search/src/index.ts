@@ -30,6 +30,7 @@ export {
   buildCommentDocument,
   buildContentDocument,
   buildEntityDocument,
+  buildFeedbackSearchDocument,
   buildPollDocument,
   buildPostDocument,
   buildRealmDocument,

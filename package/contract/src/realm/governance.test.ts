@@ -30,6 +30,7 @@ import {
   grantCapabilitySchema,
   moderationActionDTOSchema,
   moderationCaseDTOSchema,
+  moderationOverlayRequestSchema,
   staffAuditLogDTOSchema,
   triageModerationCaseSchema,
   unblockAccountEnforcementSchema,
@@ -231,6 +232,14 @@ describe("governance contract registry", () => {
         content: null,
         moderationStatus: "removed",
         isTombstone: true,
+      }),
+    ).toBe(true);
+
+    expect(
+      Value.Check(moderationOverlayRequestSchema, {
+        targetKind: "unit_realm",
+        realmUnitId: "realm-1",
+        targetIds: ["reply-1", "reply-2"],
       }),
     ).toBe(true);
 

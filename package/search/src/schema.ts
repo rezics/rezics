@@ -96,7 +96,9 @@ export const EXPECTED_MEILI_INDEX_SCHEMAS = [
     searchableAttributes: ["id", "content", "url"],
     filterableAttributes: [
       "userId",
-      "unitId",
+      "targetKind",
+      "targetId",
+      "addressedUnitId",
       "type",
       "resolved",
       "createdAt",

@@ -42,8 +42,9 @@ function escapeValue(value: string): string {
  * Higher-level search API for feedbacks.
  *
  * - Input is {@link FeedbackListQuery} from `@rezics/contract`.
- * - It maps contract fields like `userId`, `unitId`, `type`, `resolved`,
- *   `createdAtFrom`, `createdAtTo` into Meilisearch filter expressions.
+ * - It maps contract fields like `userId`, `targetKind`, `targetId`,
+ *   `addressedUnitId`, `type`, `resolved`, `createdAtFrom`, and `createdAtTo`
+ *   into Meilisearch filter expressions.
  *
  * This is the main function you should consume from other packages.
  */
@@ -59,8 +60,16 @@ export async function searchFeedbacks(
     filter.push(`userId = "${escapeValue(opts.userId)}"`);
   }
 
-  if (opts.unitId) {
-    filter.push(`unitId = "${escapeValue(opts.unitId)}"`);
+  if (opts.targetKind) {
+    filter.push(`targetKind = "${escapeValue(opts.targetKind)}"`);
+  }
+
+  if (opts.targetId) {
+    filter.push(`targetId = "${escapeValue(opts.targetId)}"`);
+  }
+
+  if (opts.addressedUnitId) {
+    filter.push(`addressedUnitId = "${escapeValue(opts.addressedUnitId)}"`);
   }
 
   if (opts.type) {
