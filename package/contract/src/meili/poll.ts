@@ -1,6 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { languageSchema } from "../language";
+import { readLanguageBodyBase } from "../list-query-base";
 import { pollResultVisibilitySchema, pollVoteModeSchema } from "../post/poll";
 
 export const PollSearchDocumentSchema = t.Object({
@@ -19,6 +20,7 @@ export const PollSearchDocumentSchema = t.Object({
   usageCount: t.Number(),
   used: t.Boolean(),
   languages: t.Array(languageSchema),
+  isLanguageNeutral: t.Boolean(),
   createdAt: t.String(),
   updatedAt: t.String(),
 });
@@ -26,6 +28,7 @@ export const PollSearchDocumentSchema = t.Object({
 export type PollSearchDocument = Static<typeof PollSearchDocumentSchema>;
 
 export const PollSearchOptionsSchema = t.Object({
+  ...readLanguageBodyBase.properties,
   keyword: t.Optional(t.String()),
   ownerUserId: t.Optional(t.String()),
   used: t.Optional(t.Boolean()),

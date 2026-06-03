@@ -1,4 +1,3 @@
-import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { useReactionHydration } from "@rezics/api/reaction/reaction";
 import type { PostDTO } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
@@ -10,6 +9,7 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { useLocalizedPostSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 type Review = PostDTO;
 
@@ -35,7 +35,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({
 
   const kind = tab === "review" ? "REVIEW" : "REMARK";
 
-  const { data, isLoading } = usePostSearchQuery({
+  const { data, isLoading } = useLocalizedPostSearch({
     kind,
     targetUnitId: targetUnitId || undefined,
     variantUnitId,

@@ -1,11 +1,11 @@
 import { useCurrentUserId } from "@rezics/api/hooks";
-import { usePollSearchQuery } from "@rezics/api/meili/meili";
 import type { PollSearchDocument } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { Badge, Button, Input } from "@rezics/ui/shadcn";
 import { BarChart3, CheckCircle2, Circle, Search, Vote } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
+import { useLocalizedPollSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 type UsageFilter = "all" | "used" | "unused";
 type ClosedFilter = "all" | "open" | "closed";
@@ -61,7 +61,7 @@ export function PollLibrarySurface({
     [closedFilter, keyword, resolvedOwnerUserId, usageFilter],
   );
 
-  const { data, isLoading, error } = usePollSearchQuery(query);
+  const { data, isLoading, error } = useLocalizedPollSearch(query);
   const polls = data?.items ?? [];
 
   return (

@@ -1,5 +1,10 @@
-import type { UserSettings } from "@rezics/contract";
-import { LICENSE_SLUGS, OPT_IN_RATINGS } from "@rezics/contract";
+import type { Language, UserSettings } from "@rezics/contract";
+import {
+  FALLBACK_LANGUAGE,
+  LICENSE_SLUGS,
+  normalizeLanguage,
+  OPT_IN_RATINGS,
+} from "@rezics/contract";
 import { prisma } from "#/prisma/client";
 
 function deepMerge(target: any, source: any): any {
@@ -19,6 +24,30 @@ function deepMerge(target: any, source: any): any {
     }
   }
   return result;
+}
+
+export function normalizePreferredLanguages(
+  input: readonly (string | null | undefined)[] | null | undefined,
+): Language[] {
+  const normalized = [
+    ...new Set(
+      (input ?? [])
+        .map((language) =>
+          typeof language === "string" ? normalizeLanguage(language) : null,
+        )
+        .filter((language): language is Language => !!language),
+    ),
+  ];
+  return normalized.length > 0 ? normalized : [FALLBACK_LANGUAGE];
+}
+
+function normalizeSettings(settings: UserSettings): UserSettings {
+  return {
+    ...settings,
+    preferredLanguages: normalizePreferredLanguages(
+      settings.preferredLanguages,
+    ),
+  };
 }
 
 function validateSettings(settings: UserSettings): void {
@@ -56,7 +85,7 @@ export async function getSettings(userId: string): Promise<UserSettings> {
     where: { unitId: userId },
     select: { settings: true },
   });
-  return (user.settings as UserSettings) ?? {};
+  return normalizeSettings((user.settings as UserSettings | null) ?? {});
 }
 
 export async function updateSettings(
@@ -64,7 +93,7 @@ export async function updateSettings(
   partial: Partial<UserSettings>,
 ): Promise<UserSettings> {
   const current = await getSettings(userId);
-  const merged = deepMerge(current, partial);
+  const merged = normalizeSettings(deepMerge(current, partial));
   validateSettings(merged);
 
   await prisma.user.update({

@@ -1,6 +1,13 @@
+import {
+  FALLBACK_LANGUAGE,
+  LANGUAGE_META,
+  LANGUAGES,
+  type Language,
+  normalizeLanguage,
+} from "@rezics/contract";
 import { authApi } from "@rezics/api/auth/auth.api";
 import { authQueries } from "@rezics/api/auth/auth.queries";
-import { useTranslation } from "@rezics/i18n/react";
+import { useLocale, useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Turnstile } from "@rezics/ui/composite/auth/Turnstile.tsx";
 import {
@@ -44,6 +51,24 @@ function deriveSlugFromName(name: string): string {
     .replace(/[^a-z0-9-]/g, "")
     .replace(/--+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+const SUPPORTED_LANGUAGES = Object.values(LANGUAGES);
+
+function languageLabel(language: Language): string {
+  return LANGUAGE_META[language]?.nativeName ?? language;
+}
+
+function uniqueLanguages(languages: readonly (string | null | undefined)[]) {
+  return [
+    ...new Set(
+      languages
+        .map((language) =>
+          typeof language === "string" ? normalizeLanguage(language) : null,
+        )
+        .filter((language): language is Language => !!language),
+    ),
+  ];
 }
 
 // --- Vertical Stepper primitives (shadcn replacement for MUI Stepper) ---
@@ -113,12 +138,18 @@ const VerticalStepper: FC<{ steps: StepDefinition[] }> = ({ steps }) => (
 
 function IdentityStep({ onComplete }: { onComplete: () => void }) {
   const { t } = useTranslation(["auth", "common"]);
+  const locale = useLocale();
+  const localeLanguage = normalizeLanguage(locale) ?? FALLBACK_LANGUAGE;
   const auth = useAuth();
   const [displayName, setDisplayName] = useState(
     auth.authAccountState?.email?.split("@")[0] ?? "",
   );
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
+  const [languageTouched, setLanguageTouched] = useState(false);
+  const [preferredLanguages, setPreferredLanguages] = useState<Language[]>([
+    localeLanguage,
+  ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -135,6 +166,22 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
       setSlug(deriveSlugFromName(displayName));
     }
   }, [displayName, slugTouched]);
+
+  useEffect(() => {
+    if (!languageTouched) {
+      setPreferredLanguages([localeLanguage]);
+    }
+  }, [languageTouched, localeLanguage]);
+
+  const togglePreferredLanguage = useCallback((language: Language) => {
+    setLanguageTouched(true);
+    setPreferredLanguages((current) => {
+      const next = current.includes(language)
+        ? current.filter((item) => item !== language)
+        : [...current, language];
+      return uniqueLanguages(next);
+    });
+  }, []);
 
   // Slug availability check
   const { data: slugCheck, isFetching: checkingSlug } = useQuery({
@@ -162,6 +209,7 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
       await authApi.setupProfile({
         ...(displayName.trim() ? { displayName: displayName.trim() } : {}),
         slug,
+        preferredLanguages,
       });
       onComplete();
     } catch (err) {
@@ -223,6 +271,28 @@ function IdentityStep({ onComplete }: { onComplete: () => void }) {
             {slugHelper}
           </p>
         )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>{t("auth:flow_setup_preferred_languages")}</Label>
+        <div className="flex flex-wrap gap-2">
+          {SUPPORTED_LANGUAGES.map((language) => {
+            const selected = preferredLanguages.includes(language);
+            return (
+              <Button
+                key={language}
+                type="button"
+                size="sm"
+                variant={selected ? "default" : "outline"}
+                className="h-8 px-3"
+                aria-pressed={selected}
+                onClick={() => togglePreferredLanguage(language)}
+              >
+                {languageLabel(language)}
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       <Button disabled={!canSubmit} onClick={handleSubmit} className="w-full">

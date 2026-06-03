@@ -4,6 +4,8 @@ import type {
 } from "@rezics/contract";
 import { resolveSlugRefs } from "../../shared/slug-ref";
 import { searchClient } from "../search-client";
+import { buildPreferredLanguageFilter } from "../search/filters";
+import { resolveContentHitDisplay } from "../search/read-language";
 
 function displayRank(item: any): number {
   if (item.catalogEntryKind === "MAIN") return 0;
@@ -152,10 +154,9 @@ export async function searchContent(
     }
   }
 
-  // Language filter
-  if (opts.languages?.length) {
-    const languages = opts.languages.map((lang) => `"${lang}"`).join(", ");
-    filter.push(`languages IN [${languages}]`);
+  const languageFilter = buildPreferredLanguageFilter(opts);
+  if (languageFilter) {
+    filter.push(languageFilter);
   }
 
   // Rating filter — set-based (ratings: ContentRating[]). When the caller
@@ -201,9 +202,10 @@ export async function searchContent(
     filter: filter.length > 0 ? filter : undefined,
     sort: sort.length > 0 ? sort : undefined,
   });
-  const items = grouped
-    ? groupReleaseHits(resp.hits as any[]).slice(0, limit)
-    : (resp.hits as any[]);
+  const hits = (resp.hits as any[]).map((hit) =>
+    resolveContentHitDisplay(hit, opts),
+  );
+  const items = grouped ? groupReleaseHits(hits).slice(0, limit) : hits;
 
   return {
     items,

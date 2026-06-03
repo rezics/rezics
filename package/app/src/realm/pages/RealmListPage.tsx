@@ -1,4 +1,3 @@
-import { useRealmSearchQuery } from "@rezics/api/meili/meili.queries";
 import {
   contentDocMarkdownFallback,
   markdownContentDoc,
@@ -9,6 +8,7 @@ import { useTranslation } from "@rezics/i18n/react";
 import { Spinner } from "@rezics/ui";
 import { Button } from "@rezics/ui/shadcn";
 import { useNavigate } from "@tanstack/react-router";
+import { useLocalizedRealmSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { RealmCard } from "../components/RealmCard";
 
 function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
@@ -19,6 +19,11 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
     isOfficial: doc.isOfficial,
     memberCount: doc.memberCount,
     extra: doc.extra as any,
+    resolvedLanguage: doc.resolvedLanguage,
+    title: doc.title,
+    description: doc.description
+      ? markdownContentDoc(contentDocMarkdownFallback(doc.description))
+      : undefined,
     translations: doc.translations.map((tr) => ({
       unitId: doc.id,
       language: tr.language,
@@ -35,7 +40,7 @@ function mapRealmSearchDocToRealmDTO(doc: RealmSearchDocument): RealmDTO {
 export function RealmListPage() {
   const { t } = useTranslation(["common", "entity"]);
   const navigate = useNavigate();
-  const { data, isLoading } = useRealmSearchQuery({
+  const { data, isLoading } = useLocalizedRealmSearch({
     isPublic: true,
     sort: { field: "memberCount", order: "desc" },
     limit: 20,

@@ -1,5 +1,6 @@
 import { t } from "elysia";
 import { contentDocSchema, contentDocWriteSchema } from "../content/doc-v1";
+import { languageSchema } from "../language";
 import { licenseSlugSchema } from "../license";
 import { listGetQueryBase, listPostBodyBase } from "../list-query-base";
 import { paginationLimitSchema } from "../pagination";
@@ -203,7 +204,7 @@ export const userSettingsSchema = t.Object({
   realmTagPreferences: t.Optional(
     t.Record(t.String(), realmTagPreferenceSchema),
   ),
-  preferredLanguages: t.Optional(t.Array(t.String())),
+  preferredLanguages: t.Optional(t.Array(languageSchema)),
   content: t.Optional(contentPreferenceSchema),
   publishing: t.Optional(publishingPreferenceSchema),
   moderation: t.Optional(moderationPreferenceSchema),

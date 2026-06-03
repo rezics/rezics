@@ -24,6 +24,11 @@ import {
   buildRealmFilter,
   buildUserFilter,
 } from "./filters";
+import {
+  resolveContentHitDisplay,
+  resolvePostHitDisplay,
+  resolveRealmHitDisplay,
+} from "./read-language";
 
 // ANCHOR: federatedSearch
 // Single entry point used by `POST /meili/search/federated`. Branches on the
@@ -98,6 +103,23 @@ function permittedFor(scope: SearchScope): PermittedIndexes {
   }
 }
 
+function resolveFederatedHitDisplay(
+  indexUid: string,
+  hit: unknown,
+  query: FederatedSearchOptions["query"],
+): unknown {
+  if (indexUid === "content") {
+    return resolveContentHitDisplay(hit as ContentSearchDocument, query as any);
+  }
+  if (indexUid === "posts") {
+    return resolvePostHitDisplay(hit as PostSearchDocument, query as any);
+  }
+  if (indexUid === "realms") {
+    return resolveRealmHitDisplay(hit as RealmSearchDocument, query as any);
+  }
+  return hit;
+}
+
 interface BuiltQuery {
   indexUid: string;
   q: string;
@@ -163,7 +185,9 @@ async function federatedSingle(
         offset,
         limit: hitsPerPage,
       });
-      items = resp.hits;
+      items = resp.hits.map((hit) =>
+        resolveContentHitDisplay(hit, query as any),
+      );
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
       break;
@@ -179,7 +203,9 @@ async function federatedSingle(
         offset,
         limit: hitsPerPage,
       });
-      items = resp.hits;
+      items = resp.hits.map((hit) =>
+        resolveContentHitDisplay(hit, query as any),
+      );
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
       break;
@@ -198,7 +224,7 @@ async function federatedSingle(
         offset,
         limit: hitsPerPage,
       });
-      items = resp.hits;
+      items = resp.hits.map((hit) => resolvePostHitDisplay(hit, query as any));
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
       break;
@@ -213,7 +239,7 @@ async function federatedSingle(
         offset,
         limit: hitsPerPage,
       });
-      items = resp.hits;
+      items = resp.hits.map((hit) => resolveRealmHitDisplay(hit, query as any));
       totalHits = resp.estimatedTotalHits ?? resp.hits.length;
       processingTimeMs = resp.processingTimeMs;
       break;
@@ -315,7 +341,8 @@ async function federatedRanked(
   const hits = (resp.hits ?? []).map((h: any) => {
     const indexUid: string = h._federation?.indexUid ?? "";
     const category = mapIndexToCategory(indexUid, h);
-    return { ...h, _origin: { indexUid, category } };
+    const resolved = resolveFederatedHitDisplay(indexUid, h, query) as any;
+    return { ...resolved, _origin: { indexUid, category } };
   });
 
   return {
@@ -365,7 +392,9 @@ async function federatedGrouped(
     if (!sectionKey) return;
     sections[sectionKey] = {
       totalHits: r.totalHits ?? r.estimatedTotalHits ?? r.hits.length,
-      items: r.hits,
+      items: r.hits.map((hit: unknown) =>
+        resolveFederatedHitDisplay(meta.indexUid, hit, query),
+      ),
       processingTimeMs: r.processingTimeMs,
     };
   });

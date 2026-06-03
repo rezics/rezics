@@ -8,16 +8,21 @@ import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { QueryErrorDisplay } from "@/core/components/QueryErrorDisplay";
 import { RealmCard } from "@/realm/components/RealmCard";
+import { useReadLanguageContext } from "@/shared/hooks/useReadLanguageCandidates";
 
 export const ActiveRealmsSection: React.FC = () => {
   const { t } = useTranslation(["page"]);
-  const { data, isLoading, error } = useQuery(
-    realmListQuery({
+  const readLanguage = useReadLanguageContext();
+  const { data, isLoading, error } = useQuery({
+    ...realmListQuery({
       isPublic: true,
       sort: { field: "memberCount", order: "desc" },
       limit: 5,
+      languages: readLanguage.languages,
+      languageMode: readLanguage.languageMode,
     }),
-  );
+    enabled: readLanguage.ready,
+  });
 
   const realms = data?.realms ?? [];
 

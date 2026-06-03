@@ -122,6 +122,13 @@ mock.module("@/user/service/user.service", () => ({
   },
 }));
 
+mock.module("@/user/service/settings.service", () => ({
+  normalizePreferredLanguages: (input?: readonly string[] | null) => {
+    const languages = [...new Set(input ?? [])].filter(Boolean);
+    return languages.length > 0 ? languages : ["en"];
+  },
+}));
+
 mock.module("@/user/models/mapper", () => ({
   mapUserToDTO: mock((user: unknown) => user),
 }));
@@ -144,6 +151,10 @@ mock.module("@/unit/collaborative-metadata", () => ({
 
 mock.module("@/infra/slug-scopes", () => ({
   requireSlugScopeId: mock(() => "user"),
+}));
+
+mock.module("@/notify-boundary/notify-boundary.client", () => ({
+  broadcast: mock(async () => undefined),
 }));
 
 function setFetch(
@@ -1166,9 +1177,45 @@ describe("main auth public boundary", () => {
       slug: "reader",
       displayName: "Reader",
       avatar: undefined,
+      preferredLanguages: ["en"],
     });
     expect(response.headers.get("set-cookie")).toContain(
       "rezics-session-token=signed-main-session",
+    );
+  });
+
+  test("profile setup passes submitted preferred languages", async () => {
+    userFindUnique.mockResolvedValueOnce({
+      unitId: "user-1",
+      userId: "user-1",
+      slug: null,
+      authUserId: "user-1",
+      permission: { role: ["MEMBER"] },
+    });
+    unitFindUnique.mockResolvedValueOnce({ slug: null, type: "USER" });
+
+    const { authPublicApi } = await import("./auth-public.api");
+    const response = await authPublicApi.handle(
+      new Request("http://main.test/auth/account/profile-setup", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "http://main.test",
+          cookie: "rezics-profile-setup-token=setup-token",
+        },
+        body: JSON.stringify({
+          displayName: "Reader",
+          slug: "reader",
+          preferredLanguages: ["ja", "en"],
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(completeProfileSetup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        preferredLanguages: ["ja", "en"],
+      }),
     );
   });
 

@@ -1,4 +1,5 @@
 import {
+  contentDocMarkdownFallback,
   markdownContentDoc,
   type PostDTO,
   type PostSearchDocument,
@@ -25,6 +26,13 @@ function mapExtra(doc: PostSearchDocument): PostDTO["extra"] {
 }
 
 export function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
+  const resolvedContent =
+    doc.resolvedLanguage !== undefined
+      ? isRecord(doc.content)
+        ? (doc.content as PostDTO["content"])
+        : markdownContentDoc(contentDocMarkdownFallback(doc.content))
+      : markdownContentDoc(doc.contentText ?? "");
+
   return {
     unitId: doc.id,
     authorUserId: doc.authorUserId,
@@ -38,8 +46,11 @@ export function mapPostSearchDocToPostDTO(doc: PostSearchDocument): PostDTO {
     realmUnitId:
       (doc as PostSearchDocument & { realmUnitId?: string | null })
         .realmUnitId ?? undefined,
-    title: doc.titleText ?? undefined,
-    content: markdownContentDoc(doc.contentText ?? ""),
+    title:
+      doc.resolvedLanguage !== undefined
+        ? (doc.title ?? undefined)
+        : (doc.titleText ?? undefined),
+    content: resolvedContent,
     kind: doc.kind as PostDTO["kind"],
     replyCount: doc.replyCount,
     directReplyCount: doc.directReplyCount,

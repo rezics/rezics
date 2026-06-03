@@ -1,4 +1,3 @@
-import { usePostSearchQuery } from "@rezics/api/meili/meili.queries";
 import { PostKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import { EmptyState, Spinner } from "@rezics/ui";
@@ -7,6 +6,7 @@ import { ReviewList } from "@/review/components/list/ReviewList";
 import { mapPostSearchDocToPostDTO } from "@/review/models/postSearchDocToPostDTO";
 import { KeywordInput } from "@/search/components/primitive";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { useLocalizedPostSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 export function ReviewSearchPage() {
   const { t } = useTranslation(["community"]);
@@ -16,7 +16,7 @@ export function ReviewSearchPage() {
   const keyword = search.query.keyword ?? "";
   const keywordBind = search.bind("keyword");
 
-  const { data, isLoading } = usePostSearchQuery({
+  const { data, isLoading } = useLocalizedPostSearch({
     kind: PostKind.REVIEW,
     keyword,
     offset: start,

@@ -1,10 +1,12 @@
 import type {
   ContentRating,
+  ListLanguageMode,
   PostKind,
   SearchCategory,
   SearchQuery,
   SearchScope,
 } from "@rezics/contract";
+import { normalizeLanguage } from "@rezics/contract";
 
 // ANCHOR: shared filter builders for federated search
 //
@@ -60,6 +62,35 @@ const POST_CATEGORY_TO_KIND: Record<
 
 function quoteList(values: readonly string[]): string {
   return values.map((v) => `"${v}"`).join(", ");
+}
+
+export type ReadLanguageFilterInput = {
+  languages?: readonly (string | null | undefined)[] | null;
+  appLocale?: string | null;
+  languageMode?: ListLanguageMode | null;
+};
+
+export function readLanguageFilterCandidates(
+  input: ReadLanguageFilterInput,
+): string[] {
+  return [
+    ...new Set(
+      [...(input.languages ?? []), input.appLocale]
+        .map((language) =>
+          typeof language === "string" ? normalizeLanguage(language) : null,
+        )
+        .filter((language): language is string => !!language),
+    ),
+  ];
+}
+
+export function buildPreferredLanguageFilter(
+  input: ReadLanguageFilterInput,
+): string | null {
+  if (input.languageMode === "all") return null;
+  const candidates = readLanguageFilterCandidates(input);
+  if (candidates.length === 0) return null;
+  return `(isLanguageNeutral = true OR languages IN [${quoteList(candidates)}])`;
 }
 
 const BOOK_CONTENT_TYPES = ["BOOK", "GAME", "MEDIA", "LINK", "SERIES"];
@@ -131,9 +162,11 @@ export function buildContentFilter(
     filter.push(`tagIds = "${tagId}"`);
   }
 
-  // 5. Languages
-  if (query.languages?.length) {
-    filter.push(`languages IN [${quoteList(query.languages)}]`);
+  // 5. Preferred read languages. Visibility filtering is separate from
+  // resolved-display selection, which happens after each hit is returned.
+  const languageFilter = buildPreferredLanguageFilter(query);
+  if (languageFilter) {
+    filter.push(languageFilter);
   }
 
   // 6. Ratings — intersect query.ratings with allowedRatings if both provided
@@ -217,6 +250,11 @@ export function buildPostFilter(
   // 3. Locked posts excluded by default (per content-search-api default filters).
   filter.push("isLocked = false");
 
+  const languageFilter = buildPreferredLanguageFilter(query);
+  if (languageFilter) {
+    filter.push(languageFilter);
+  }
+
   return filter;
 }
 
@@ -253,11 +291,16 @@ export function buildCommentFilter(
 // inside a single realm). Only `global` permits this index per strict membership.
 
 export function buildRealmFilter(
-  _query: SearchQuery,
+  query: SearchQuery,
   _scope: SearchScope,
 ): string[] {
   // Default visibility filter for realms: public only.
-  return ["isPublic = true"];
+  const filter = ["isPublic = true"];
+  const languageFilter = buildPreferredLanguageFilter(query);
+  if (languageFilter) {
+    filter.push(languageFilter);
+  }
+  return filter;
 }
 
 // ANCHOR: buildUserFilter

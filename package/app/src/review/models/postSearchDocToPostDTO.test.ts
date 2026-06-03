@@ -55,4 +55,19 @@ describe("mapPostSearchDocToPostDTO", () => {
 
     expect(dto.extra).toEqual({ rating: 4 });
   });
+
+  test("uses resolved title/content without falling back to aggregate text", () => {
+    const dto = mapPostSearchDocToPostDTO(
+      makeDoc({
+        resolvedLanguage: "ja",
+        title: null,
+        content: null,
+        titleText: "English fallback title",
+        contentText: "English fallback body",
+      }),
+    );
+
+    expect(dto.title).toBeUndefined();
+    expect(dto.content.main.source).toBe("");
+  });
 });

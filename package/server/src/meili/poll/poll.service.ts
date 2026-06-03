@@ -1,5 +1,6 @@
 import type { PollSearchOptions, PollSearchResult } from "@rezics/contract";
 import { searchClient } from "../search-client";
+import { buildPreferredLanguageFilter } from "../search/filters";
 
 export async function searchPolls(
   opts: PollSearchOptions,
@@ -15,6 +16,10 @@ export async function searchPolls(
   }
   if (typeof opts.closed === "boolean") {
     filter.push(`closed = ${opts.closed}`);
+  }
+  const languageFilter = buildPreferredLanguageFilter(opts);
+  if (languageFilter) {
+    filter.push(languageFilter);
   }
 
   const sort: string[] = [];

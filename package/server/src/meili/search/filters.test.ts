@@ -67,9 +67,21 @@ describe("buildContentFilter", () => {
       { languages: ["en", "ja"] },
       { kind: "global" },
     );
-    expect(filter).toContain('languages IN ["en", "ja"]');
+    expect(filter).toContain(
+      '(isLanguageNeutral = true OR languages IN ["en", "ja"])',
+    );
     expect(filter).not.toContain('languages = "en"');
     expect(filter).not.toContain('languages = "ja"');
+  });
+
+  test("languageMode all skips preferred filtering", () => {
+    const filter = buildContentFilter(
+      { languages: ["en"], languageMode: "all" },
+      { kind: "global" },
+    );
+    expect(filter).not.toContain(
+      '(isLanguageNeutral = true OR languages IN ["en"])',
+    );
   });
 
   test("textLength range emits min and max bounds", () => {
@@ -146,6 +158,16 @@ describe("buildPostFilter", () => {
     expect(filter).toContain("isLocked = false");
   });
 
+  test("preferred language filter includes neutral posts", () => {
+    const filter = buildPostFilter(
+      { languages: ["ja"], appLocale: "en" },
+      { kind: "global" },
+    );
+    expect(filter).toContain(
+      '(isLanguageNeutral = true OR languages IN ["ja", "en"])',
+    );
+  });
+
   test("query.postKind list emits IN clause when no postCategory hint", () => {
     const filter = buildPostFilter(
       { postKind: ["REVIEW", "REMARK"] },
@@ -180,6 +202,12 @@ describe("buildRealmFilter", () => {
     expect(buildRealmFilter(emptyQuery, { kind: "global" })).toEqual([
       "isPublic = true",
     ]);
+  });
+
+  test("preferred language filter includes neutral realms", () => {
+    expect(buildRealmFilter({ languages: ["ko"] }, { kind: "global" })).toEqual(
+      ["isPublic = true", '(isLanguageNeutral = true OR languages IN ["ko"])'],
+    );
   });
 });
 

@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { languageSchema } from "./language";
 
 /**
  * Shared bases for list / batch-by-id endpoints. GET and POST use different
@@ -40,6 +41,14 @@ export const listLanguageModeSchema = t.Union([
 ]);
 
 export type ListLanguageMode = (typeof listLanguageModeSchema)["static"];
+
+export const readLanguageBodyBase = t.Object({
+  languages: t.Optional(t.Array(languageSchema)),
+  appLocale: t.Optional(languageSchema),
+  languageMode: t.Optional(listLanguageModeSchema),
+});
+
+export type ReadLanguageBodyBase = (typeof readLanguageBodyBase)["static"];
 
 /**
  * Parse the CSV `ids` querystring into a validated `string[]`.

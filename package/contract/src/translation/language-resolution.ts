@@ -7,6 +7,7 @@ import {
   type Language,
   normalizeLanguage,
 } from "../language-core";
+import { listLanguageModeSchema } from "../list-query-base";
 import {
   unitSupportLanguageDTOSchema,
   unitTranslationDTOSchema,
@@ -34,6 +35,8 @@ export type SupportLanguageLike = {
 
 export const readLanguageQuerySchema = t.Object({
   languages: t.Optional(t.String()),
+  appLocale: t.Optional(languageSchema),
+  languageMode: t.Optional(listLanguageModeSchema),
 });
 
 export type ReadLanguageQuery = (typeof readLanguageQuerySchema)["static"];

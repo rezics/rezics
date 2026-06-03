@@ -136,8 +136,53 @@ describe("searchContent catalog behavior", () => {
     });
 
     expect(contentSearchMock.mock.calls[0]?.[1].filter).toContain(
-      'languages IN ["ja", "en"]',
+      '(isLanguageNeutral = true OR languages IN ["ja", "en"])',
     );
+  });
+
+  test("resolves display fields from the chosen read language", async () => {
+    contentSearchMock.mockResolvedValueOnce({
+      hits: [
+        {
+          id: "book-1",
+          catalogEntryKind: "MAIN",
+          targetUnitId: null,
+          languages: ["ja", "en"],
+          isLanguageNeutral: false,
+          supportLanguages: [
+            { language: "ja", isPrimary: true, sortOrder: 0 },
+            { language: "en", isPrimary: false, sortOrder: 1 },
+          ],
+          translations: [
+            {
+              language: "ja",
+              title: null,
+              subtitle: null,
+              summary: null,
+              description: null,
+            },
+            {
+              language: "en",
+              title: "English title",
+              subtitle: null,
+              summary: "English summary",
+              description: null,
+            },
+          ],
+        },
+      ],
+      estimatedTotalHits: 1,
+      processingTimeMs: 1,
+      query: "",
+    });
+
+    const result = await searchContent({ languages: ["ja", "en"] });
+
+    expect(result.items[0]).toMatchObject({
+      resolvedLanguage: "ja",
+      title: null,
+      summary: null,
+    });
   });
 
   test("groups catalog variant hits and exposes collapsed alternatives", async () => {

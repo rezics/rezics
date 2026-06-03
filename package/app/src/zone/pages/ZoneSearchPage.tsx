@@ -1,10 +1,10 @@
-import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import type { ContentSearchOptions, SearchQuery } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { AdvancedSearch, SearchResultList } from "@/search";
 import { useSearchQuery } from "@/search/hooks/useSearchQuery";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 import { useAllowedRatings } from "@/user/hooks/useAllowedRatings";
 import { useZone } from "../hooks/useZone";
 
@@ -45,7 +45,7 @@ export const ZoneSearchPage: React.FC<ZoneSearchPageProps> = ({
   const [searchOpts, setSearchOpts] = useState<ContentSearchOptions>({});
   const [hasSearched, setHasSearched] = useState(false);
 
-  const { data, isLoading: searchLoading } = useContentSearch(
+  const { data, isLoading: searchLoading } = useLocalizedContentSearch(
     hasSearched ? searchOpts : ({} as ContentSearchOptions),
   );
 

@@ -317,6 +317,33 @@ function indexedLanguages(unit: {
   ];
 }
 
+function indexedSupportLanguages(unit: {
+  supportLanguages?:
+    | readonly {
+        language?: string | null;
+        isPrimary?: boolean | null;
+        sortOrder?: number | null;
+      }[]
+    | null;
+}): { language: string; isPrimary: boolean; sortOrder: number }[] {
+  return (unit.supportLanguages ?? [])
+    .filter(
+      (
+        item,
+      ): item is {
+        language: string;
+        isPrimary?: boolean | null;
+        sortOrder?: number | null;
+      } => Boolean(item.language),
+    )
+    .map((item) => ({
+      language: item.language,
+      isPrimary: Boolean(item.isPrimary),
+      sortOrder: item.sortOrder ?? 0,
+    }))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
 async function runProgressSyncWithRetry(
   operation: () => Promise<unknown>,
   context: { action: "sync" | "remove"; userId: string; unitId: string },
@@ -431,6 +458,7 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
       ? mainMarkdownSource(resolvePostContent({ unit }))
       : null;
   const languages = indexedLanguages(unit);
+  const supportLanguages = indexedSupportLanguages(unit);
   const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
 
   // Tags
@@ -597,6 +625,8 @@ export function buildContentDocument(unit: any): ContentSearchDocument {
     realmIds,
     realmTagKeys,
     languages,
+    isLanguageNeutral: Boolean(unit.isLanguageNeutral),
+    supportLanguages,
     rating: unit.rating ?? "GENERAL",
     aiDisclosureMode: unit.aiDisclosureMode ?? "UNKNOWN",
     visibility: unit.visibility ?? "PUBLIC",
@@ -1853,6 +1883,8 @@ export function buildPostDocument(post: any): PostSearchDocument {
   const user = post.unit?.user;
   const targetUnit = post.unit?.targetUnit ?? post.targetUnit;
   const scoreEntry = post.scoreEntry;
+  const unitTranslations: any[] = post.unit?.translations ?? [];
+  const contentTranslations: any[] = post.unit?.contentTranslations ?? [];
 
   // Denormalized target unit info
   let targetTitles: string[] | null = null;
@@ -1909,6 +1941,18 @@ export function buildPostDocument(post: any): PostSearchDocument {
     scoreValue: scoreEntry?.value ?? null,
     scoreFields: scoreEntry?.fields ?? null,
     extra: post.extra ?? undefined,
+    languages: indexedLanguages(post.unit ?? {}),
+    isLanguageNeutral: Boolean(post.unit?.isLanguageNeutral),
+    supportLanguages: indexedSupportLanguages(post.unit ?? {}),
+    translations: unitTranslations.map((translation: any) => ({
+      language: translation.language,
+      title: translation.title ?? null,
+      content:
+        contentTranslations.find(
+          (contentTranslation: any) =>
+            contentTranslation.language === translation.language,
+        )?.content ?? null,
+    })),
   };
 }
 
@@ -2295,6 +2339,7 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
     .map((t: any) => searchDescriptionText(t.description))
     .filter(isNonEmptyString);
   const aliasValues = aliases.map((alias: any) => alias.value).filter(Boolean);
+  const languages = indexedLanguages(unit ?? { translations });
 
   return {
     id: realm.unitId,
@@ -2310,6 +2355,9 @@ export function buildRealmDocument(realm: any): RealmSearchDocument {
         ? realm.updatedAt.toISOString()
         : realm.updatedAt,
     userId: unit?.userId ?? null,
+    languages,
+    isLanguageNeutral: Boolean(unit?.isLanguageNeutral),
+    supportLanguages: indexedSupportLanguages(unit ?? {}),
     titles,
     descriptions,
     aliasValues,
@@ -2361,6 +2409,7 @@ export function buildPollDocument(poll: any): PollSearchDocument {
     usageCount: poll.usageCount,
     used: poll.usageCount > 0,
     languages: indexedLanguages(poll.unit ?? { translations }),
+    isLanguageNeutral: Boolean(unit?.isLanguageNeutral),
     createdAt: toIsoString(poll.createdAt) ?? "",
     updatedAt: toIsoString(poll.updatedAt) ?? "",
   };
@@ -2433,6 +2482,7 @@ export async function syncSingleRealm(client: SearchClient, unitId: string) {
       unit: {
         include: {
           translations: true,
+          supportLanguages: true,
           aliases: {
             where: {
               status: "ACTIVE",
@@ -2475,6 +2525,7 @@ export async function syncAllRealms(client: SearchClient) {
         unit: {
           include: {
             translations: true,
+            supportLanguages: true,
             aliases: {
               where: {
                 status: "ACTIVE",

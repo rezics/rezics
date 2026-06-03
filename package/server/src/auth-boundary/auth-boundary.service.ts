@@ -11,6 +11,7 @@ import {
   verifyRezicsProfileSetupToken,
 } from "@/session/jwt/jwt.service";
 import { mapUserToDTO } from "@/user/models/mapper";
+import { normalizePreferredLanguages } from "@/user/service/settings.service";
 import { userService } from "@/user/service/user.service";
 import { governanceEnforcementService } from "../governance/enforcement.service";
 import {
@@ -608,6 +609,7 @@ export async function completeProfileSetupFromMain(
       slug: slugValidation.normalized,
       displayName: body.displayName,
       avatar: body.avatar,
+      preferredLanguages: normalizePreferredLanguages(body.preferredLanguages),
     });
 
     if (user.authUserId) {

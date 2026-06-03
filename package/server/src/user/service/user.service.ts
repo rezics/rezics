@@ -3,6 +3,7 @@
  */
 
 import type { UpdateUser } from "@rezics/contract";
+import type { Language, UserSettings } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { Prisma, prisma } from "#/prisma/client";
 import { getDefaultRealmId } from "@/infra/default-realm";
@@ -34,6 +35,7 @@ export type CompleteProfileSetupInput = {
   slug: string;
   displayName?: string;
   avatar?: string | null;
+  preferredLanguages: Language[];
 };
 
 /**
@@ -324,12 +326,21 @@ export class UserService {
 
     const user = await prisma.$transaction(async (tx) => {
       await ensureUserUnit(tx, payload.userId, payload.slug);
+      const existing = await tx.user.findUnique({
+        where: { unitId: payload.userId },
+        select: { settings: true },
+      });
+      const settings = {
+        ...((existing?.settings as UserSettings | null) ?? {}),
+        preferredLanguages: payload.preferredLanguages,
+      } satisfies UserSettings;
       const updated = await tx.user.update({
         where: { unitId: payload.userId },
         data: {
           name: displayName,
           avatar: payload.avatar ?? undefined,
           joinDate: new Date(),
+          settings,
         },
         include: userInclude,
       });

@@ -1,6 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { languageSchema } from "../language";
+import { readLanguageBodyBase } from "../list-query-base";
 
 // ANCHOR: Realm Search Document
 
@@ -12,6 +13,15 @@ export const RealmSearchDocumentSchema = t.Object({
   createdAt: t.String(),
   updatedAt: t.String(),
   userId: t.Union([t.String(), t.Null()]),
+  languages: t.Array(languageSchema),
+  isLanguageNeutral: t.Boolean(),
+  supportLanguages: t.Array(
+    t.Object({
+      language: languageSchema,
+      isPrimary: t.Optional(t.Boolean()),
+      sortOrder: t.Optional(t.Number()),
+    }),
+  ),
 
   // Searchable arrays (denormalized from UnitTranslation)
   titles: t.Array(t.String()),
@@ -29,6 +39,9 @@ export const RealmSearchDocumentSchema = t.Object({
 
   // Extra
   extra: t.Optional(t.Any()),
+  resolvedLanguage: t.Optional(t.Union([languageSchema, t.Null()])),
+  title: t.Optional(t.Union([t.String(), t.Null()])),
+  description: t.Optional(t.Union([t.String(), t.Null()])),
 });
 
 export type RealmSearchDocument = Static<typeof RealmSearchDocumentSchema>;
@@ -36,6 +49,7 @@ export type RealmSearchDocument = Static<typeof RealmSearchDocumentSchema>;
 // ANCHOR: Realm Search Options
 
 export const RealmSearchOptionsSchema = t.Object({
+  ...readLanguageBodyBase.properties,
   keyword: t.Optional(t.String()),
   isPublic: t.Optional(t.Boolean()),
   isOfficial: t.Optional(t.Boolean()),

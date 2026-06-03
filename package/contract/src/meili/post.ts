@@ -1,5 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
+import { languageSchema } from "../language";
+import { readLanguageBodyBase } from "../list-query-base";
 
 // ANCHOR: Post Search Document
 
@@ -43,6 +45,29 @@ export const PostSearchDocumentSchema = t.Object({
 
   // Extra
   extra: t.Optional(t.Any()),
+  languages: t.Optional(t.Array(languageSchema)),
+  isLanguageNeutral: t.Optional(t.Boolean()),
+  supportLanguages: t.Optional(
+    t.Array(
+      t.Object({
+        language: languageSchema,
+        isPrimary: t.Optional(t.Boolean()),
+        sortOrder: t.Optional(t.Number()),
+      }),
+    ),
+  ),
+  translations: t.Optional(
+    t.Array(
+      t.Object({
+        language: languageSchema,
+        title: t.Union([t.String(), t.Null()]),
+        content: t.Union([t.Any(), t.Null()]),
+      }),
+    ),
+  ),
+  resolvedLanguage: t.Optional(t.Union([languageSchema, t.Null()])),
+  title: t.Optional(t.Union([t.String(), t.Null()])),
+  content: t.Optional(t.Union([t.Any(), t.Null()])),
 });
 
 export type PostSearchDocument = Static<typeof PostSearchDocumentSchema>;
@@ -50,6 +75,7 @@ export type PostSearchDocument = Static<typeof PostSearchDocumentSchema>;
 // ANCHOR: Post Search Options
 
 export const PostSearchOptionsSchema = t.Object({
+  ...readLanguageBodyBase.properties,
   keyword: t.Optional(t.String()),
   kind: t.Optional(t.String()),
   targetUnitId: t.Optional(t.String()),

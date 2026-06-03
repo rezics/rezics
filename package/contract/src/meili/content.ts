@@ -3,6 +3,7 @@ import { t } from "elysia";
 import { TagRefSchema } from "../common/tag-ref";
 import { contentDocSchema } from "../content/doc-v1";
 import { languageSchema } from "../language";
+import { readLanguageBodyBase } from "../list-query-base";
 import { gameSystemRequirementSummarySchema } from "../media/game-media";
 import { postKindLiterals } from "../post";
 import {
@@ -82,6 +83,16 @@ export const ContentSearchDocumentSchema = t.Object({
 
   // Filterable: metadata
   languages: t.Array(t.String()),
+  isLanguageNeutral: t.Boolean(),
+  supportLanguages: t.Optional(
+    t.Array(
+      t.Object({
+        language: languageSchema,
+        isPrimary: t.Optional(t.Boolean()),
+        sortOrder: t.Optional(t.Number()),
+      }),
+    ),
+  ),
   rating: contentRatingSchema,
   aiDisclosureMode: aiDisclosureModeSchema,
   visibility: t.String(),
@@ -104,6 +115,11 @@ export const ContentSearchDocumentSchema = t.Object({
   rankUpdatedAt: t.Union([t.String(), t.Null()]),
 
   // Result display fields
+  resolvedLanguage: t.Optional(t.Union([languageSchema, t.Null()])),
+  title: t.Optional(t.Union([t.String(), t.Null()])),
+  subtitle: t.Optional(t.Union([t.String(), t.Null()])),
+  summary: t.Optional(t.Union([t.String(), t.Null()])),
+  description: t.Optional(t.Union([contentDocSchema, t.Null()])),
   defaultLanguage: t.Union([languageSchema, t.Null()]),
   coverUrl: t.Union([t.String(), t.Null()]),
   userId: t.Union([t.String(), t.Null()]),
@@ -135,6 +151,7 @@ export type ContentSearchDocument = Static<typeof ContentSearchDocumentSchema>;
 // ANCHOR: Content Search Options
 
 export const ContentSearchOptionsSchema = t.Object({
+  ...readLanguageBodyBase.properties,
   keyword: t.Optional(t.String()),
   type: t.Optional(t.Union([t.String(), t.Array(t.String())])),
   userId: t.Optional(t.String()),
@@ -155,7 +172,6 @@ export const ContentSearchOptionsSchema = t.Object({
   ),
   realmId: t.Optional(t.String()),
   realmTagIds: t.Optional(t.Array(t.String())),
-  languages: t.Optional(t.Array(t.String())),
   ratings: t.Optional(t.Array(contentRatingSchema)),
   aiDisclosureModes: t.Optional(t.Array(aiDisclosureModeSchema)),
   isLicensed: t.Optional(t.Boolean()),

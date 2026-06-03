@@ -1,6 +1,7 @@
 import type { Static } from "elysia";
 import { t } from "elysia";
 import { TagRefSchema } from "../common/tag-ref";
+import { readLanguageBodyBase } from "../list-query-base";
 import { postKindLiterals } from "../post/post";
 import { SlugRefSchema } from "../slug/slug-ref";
 import { aiDisclosureModeSchema, contentRatingSchema } from "../unit/unit";
@@ -15,12 +16,12 @@ export const TextLengthRangeSchema = t.Object({
 export type TextLengthRange = Static<typeof TextLengthRangeSchema>;
 
 export const SearchQuerySchema = t.Object({
+  ...readLanguageBodyBase.properties,
   keyword: t.Optional(t.String()),
   tags: t.Optional(t.Array(TagRefSchema)),
   type: t.Optional(t.Array(t.String())),
   postKind: t.Optional(t.Array(postKindLiterals)),
   kind: t.Optional(postKindLiterals),
-  languages: t.Optional(t.Array(t.String())),
   ratings: t.Optional(t.Array(contentRatingSchema)),
   platformEntityIds: t.Optional(t.Array(t.String())),
   ageRatingTagUnitIds: t.Optional(t.Array(t.String())),

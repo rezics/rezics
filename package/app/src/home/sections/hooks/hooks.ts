@@ -1,5 +1,4 @@
 import { bookQueries } from "@rezics/api/book/book";
-import { useContentSearch } from "@rezics/api/meili/meili.queries";
 import {
   type BookDTO,
   type ContentSearchDocument,
@@ -8,6 +7,7 @@ import {
 } from "@rezics/contract";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { useLocalizedContentSearch } from "@/shared/hooks/useLocalizedMeiliSearch";
 
 export type SimpleQueryState<T> = {
   items: T[];
@@ -33,7 +33,7 @@ export function useHomeBooks(limit = 12): SimpleQueryState<BookDTO> {
 
 // Shelves from content search - returns shelf-type content docs
 export function useHomeShelves(limit = 6): SimpleQueryState<ShelfDTO> {
-  const { data, isLoading, error } = useContentSearch({
+  const { data, isLoading, error } = useLocalizedContentSearch({
     type: "SHELF",
     limit,
     sort: { field: "createdAt", order: "desc" },

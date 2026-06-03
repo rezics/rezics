@@ -1,4 +1,5 @@
 import { t } from "elysia";
+import { languageSchema } from "../language";
 import { userDTOSchema } from "../user/user";
 
 export const accountStageSchema = t.Union([
@@ -70,6 +71,7 @@ export const accountSetupBodySchema = t.Object({
   displayName: t.Optional(t.String({ minLength: 1, maxLength: 80 })),
   slug: t.String({ minLength: 1 }),
   avatar: t.Optional(t.String()),
+  preferredLanguages: t.Optional(t.Array(languageSchema)),
 });
 export type AccountSetupBody = (typeof accountSetupBodySchema)["static"];
 

@@ -213,6 +213,7 @@ describe("authApi", () => {
     await authApi.setupProfile({
       displayName: "Reader",
       slug: "reader",
+      preferredLanguages: ["ja", "en"],
     });
 
     expect(fetchMock.mock.calls[0]![0]).toBe(
@@ -227,6 +228,13 @@ describe("authApi", () => {
     expect(fetchMock.mock.calls[3]![0]).toBe(
       "http://api.example/auth/account/profile-setup",
     );
+    expect(fetchMock.mock.calls[3]![1]).toMatchObject({
+      body: JSON.stringify({
+        displayName: "Reader",
+        slug: "reader",
+        preferredLanguages: ["ja", "en"],
+      }),
+    });
   });
 
   test("materializes account and renews profile setup token through main boundary", async () => {

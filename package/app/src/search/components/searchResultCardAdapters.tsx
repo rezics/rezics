@@ -8,6 +8,7 @@ import type {
   SearchCategory,
   UserSearchDocument,
 } from "@rezics/contract";
+import { contentDocMarkdownFallback } from "@rezics/contract";
 import { getI18nRuntime } from "@rezics/i18n/runtime";
 import { Badge } from "@rezics/ui/shadcn";
 import type React from "react";
@@ -119,15 +120,20 @@ export function renderContentSearchCard(
   } = {},
 ) {
   const title =
-    resolveContentSearchTitle(item, options.preferredLanguage) || item.id;
-  const summary = firstText(
-    item.summaries,
-    item.descriptionText,
-    item.descriptions,
-    item.contentText,
-  );
+    item.resolvedLanguage !== undefined
+      ? (item.title ?? item.id)
+      : resolveContentSearchTitle(item, options.preferredLanguage) || item.id;
+  const summary =
+    item.resolvedLanguage !== undefined
+      ? firstText(item.summary, contentDocMarkdownFallback(item.description))
+      : firstText(
+          item.summaries,
+          item.descriptionText,
+          item.descriptions,
+          item.contentText,
+        );
   const subtitle = firstText(
-    item.subtitles,
+    item.resolvedLanguage !== undefined ? item.subtitle : item.subtitles,
     item.creditNames.length > 0 ? item.creditNames.join(" · ") : null,
     item.linkSiteName,
   );
@@ -178,6 +184,10 @@ export function renderPostSearchCard(
   badge?: CardBadge,
 ) {
   const targetTitle = pickSearchTitle(item.targetTitles);
+  const body =
+    item.resolvedLanguage !== undefined
+      ? contentDocMarkdownFallback(item.content)
+      : item.contentText;
   return (
     <SearchContentResultCard
       user={{
@@ -188,9 +198,10 @@ export function renderPostSearchCard(
       }}
       time={formatDate(item.updatedAt)}
       kind={badge ?? item.kind ?? getI18nRuntime().i18n.t("search:origin_post")}
+      title={item.title ?? undefined}
       source={targetTitle || undefined}
       sourceHref={targetHref(item)}
-      body={item.contentText ?? undefined}
+      body={body || undefined}
       meta={postMeta(item)}
       thumbnail={
         item.targetCoverUrl
@@ -242,11 +253,17 @@ export function renderRealmSearchCard(
   item: RealmSearchDocument,
   badge?: CardBadge,
 ) {
-  const title = pickSearchTitle(item.titles) || item.id;
-  const description = firstText(
-    item.translations.map((translation) => translation.description ?? ""),
-    item.descriptions,
-  );
+  const title =
+    item.resolvedLanguage !== undefined
+      ? (item.title ?? item.id)
+      : pickSearchTitle(item.titles) || item.id;
+  const description =
+    item.resolvedLanguage !== undefined
+      ? (item.description ?? "")
+      : firstText(
+          item.translations.map((translation) => translation.description ?? ""),
+          item.descriptions,
+        );
 
   return (
     <SearchContentResultCard

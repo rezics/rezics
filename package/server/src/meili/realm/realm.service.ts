@@ -1,5 +1,7 @@
 import type { RealmSearchOptions, RealmSearchResult } from "@rezics/contract";
 import { searchClient } from "../search-client";
+import { buildPreferredLanguageFilter } from "../search/filters";
+import { resolveRealmHitDisplay } from "../search/read-language";
 
 export async function searchRealms(
   opts: RealmSearchOptions,
@@ -12,6 +14,10 @@ export async function searchRealms(
   }
   if (typeof opts.isOfficial === "boolean") {
     filter.push(`isOfficial = ${opts.isOfficial}`);
+  }
+  const languageFilter = buildPreferredLanguageFilter(opts);
+  if (languageFilter) {
+    filter.push(languageFilter);
   }
 
   const sort: string[] = [];
@@ -33,7 +39,7 @@ export async function searchRealms(
   });
 
   return {
-    items: resp.hits as any[],
+    items: (resp.hits as any[]).map((hit) => resolveRealmHitDisplay(hit, opts)),
     total: resp.estimatedTotalHits ?? resp.hits.length,
     processingTimeMs: resp.processingTimeMs,
     query: resp.query ?? q,

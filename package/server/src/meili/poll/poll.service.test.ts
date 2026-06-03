@@ -47,6 +47,14 @@ describe("searchPolls", () => {
     });
   });
 
+  test("filters preferred poll languages before pagination", async () => {
+    await searchPolls({ languages: ["ko"], appLocale: "en" });
+
+    expect(pollSearchMock.mock.calls[0]?.[1].filter).toEqual([
+      '(isLanguageNeutral = true OR languages IN ["ko", "en"])',
+    ]);
+  });
+
   test("searches over titles and options without forcing a recency sort", async () => {
     await searchPolls({ keyword: "Saturday" });
 
