@@ -18,6 +18,9 @@ function bookRow(overrides: Record<string, unknown> = {}) {
       isLanguageNeutral: false,
       catalogEntryKind: "MAIN",
       targetUnitId: null,
+      supportLanguages: [
+        { unitId: "release-1", language: "en", isPrimary: true, sortOrder: 0 },
+      ],
       translations: [],
       creditAttributions: [],
       publishedAt: null,
@@ -82,5 +85,87 @@ describe("mapBaseBookToDTO", () => {
 
     expect(dto.catalogEntryKind).toBe("VARIANT");
     expect(dto.targetUnitId).toBe("main-1");
+  });
+
+  test("does not fall back to another translation after resolving a supported language", () => {
+    const dto = mapBaseBookToDTO(
+      bookRow({
+        unit: {
+          ...bookRow().unit,
+          supportLanguages: [
+            {
+              unitId: "release-1",
+              language: "ja",
+              isPrimary: true,
+              sortOrder: 0,
+            },
+            {
+              unitId: "release-1",
+              language: "en",
+              isPrimary: false,
+              sortOrder: 1,
+            },
+          ],
+          translations: [
+            {
+              unitId: "release-1",
+              language: "en",
+              title: "English title",
+              summary: "English summary",
+              extra: { coverUrl: "https://cdn.example/en.jpg" },
+            },
+          ],
+        },
+      }),
+      ["ja", "en"],
+    );
+
+    expect(dto.resolvedLanguage).toBe("ja");
+    expect(dto.title).toBeNull();
+    expect(dto.summary).toBeNull();
+    expect(dto.coverUrl).toBe("https://cdn.example/en.jpg");
+  });
+
+  test("prefers the resolved language cover when that translation has one", () => {
+    const dto = mapBaseBookToDTO(
+      bookRow({
+        unit: {
+          ...bookRow().unit,
+          supportLanguages: [
+            {
+              unitId: "release-1",
+              language: "ja",
+              isPrimary: true,
+              sortOrder: 0,
+            },
+            {
+              unitId: "release-1",
+              language: "en",
+              isPrimary: false,
+              sortOrder: 1,
+            },
+          ],
+          translations: [
+            {
+              unitId: "release-1",
+              language: "en",
+              title: "English title",
+              extra: { coverUrl: "https://cdn.example/en.jpg" },
+            },
+            {
+              unitId: "release-1",
+              language: "ja",
+              title: null,
+              extra: { coverUrl: "https://cdn.example/ja.jpg" },
+            },
+          ],
+        },
+      }),
+      ["ja", "en"],
+    );
+
+    expect(dto.resolvedLanguage).toBe("ja");
+    expect(dto.title).toBeNull();
+    expect(dto.coverUrl).toBe("https://cdn.example/ja.jpg");
   });
 });

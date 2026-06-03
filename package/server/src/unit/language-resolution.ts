@@ -82,6 +82,46 @@ export async function ensurePrimarySupportLanguage(
 }
 
 export class UnitLanguageService {
+  async unitsMissingSupportLanguageRows(limit = 100): Promise<
+    Array<{
+      unitId: string;
+      language: string;
+      source: "unit_translation" | "content_translation";
+    }>
+  > {
+    const take = Math.max(1, Math.min(limit, 500));
+    return prisma.$queryRaw<
+      Array<{
+        unitId: string;
+        language: string;
+        source: "unit_translation" | "content_translation";
+      }>
+    >`
+      SELECT missing."unitId", missing."language", missing."source"
+      FROM (
+        SELECT ut."unitId", ut."language", 'unit_translation' AS "source"
+        FROM "UnitTranslation" ut
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM "UnitSupportLanguage" usl
+          WHERE usl."unitId" = ut."unitId"
+            AND usl."language" = ut."language"
+        )
+        UNION ALL
+        SELECT ct."unitId", ct."language", 'content_translation' AS "source"
+        FROM "ContentTranslation" ct
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM "UnitSupportLanguage" usl
+          WHERE usl."unitId" = ct."unitId"
+            AND usl."language" = ct."language"
+        )
+      ) missing
+      ORDER BY missing."unitId" ASC, missing."language" ASC, missing."source" ASC
+      LIMIT ${take}
+    `;
+  }
+
   async availability(
     unitId: string,
   ): Promise<UnitLanguageAvailabilityResponse> {

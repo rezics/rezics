@@ -331,4 +331,36 @@ describe("ZoneService wiki config validation", () => {
       kind: "navigationItem",
     });
   });
+
+  test("preferred candidates choose the first supported display language", async () => {
+    const data = await service.getWikiHomepageData("zone-1", {
+      preferredLanguages: ["en", "zh-hant"],
+    });
+
+    expect(data?.sections[0]?.items[0]).toMatchObject({
+      kind: "wikiPost",
+      unitId: "wiki-zh",
+      language: "zh-hant",
+      title: "Traditional Wiki",
+    });
+    expect(data?.sections[1]?.items[0]).toMatchObject({
+      kind: "tag",
+      tagUnitId: "tag-1",
+      title: "Lore",
+    });
+  });
+
+  test("multi-language candidates are not treated as an all-languages requirement", async () => {
+    await service.getWikiHomepageData("zone-1", {
+      preferredLanguages: ["ja", "en"],
+    });
+
+    const featuredQuery = unitFindManyMock.mock.calls.find((call) => {
+      const where = (call[0] as any).where;
+      return where?.id?.in?.includes("wiki-zh");
+    })?.[0] as any;
+    expect(featuredQuery.where.id).toEqual({ in: ["wiki-zh"] });
+    expect(featuredQuery.where.supportLanguages).toBeUndefined();
+    expect(featuredQuery.where.AND).toBeUndefined();
+  });
 });

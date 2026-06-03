@@ -50,11 +50,38 @@ const postFindFirstMock = mock(async () => null);
 const postUpdateManyMock = mock(async () => ({ count: 1 }));
 
 mock.module("@/unit/language-resolution", () => ({
+  preferredLanguageVisibilityWhere: (input: {
+    languageMode?: string | null;
+    languages?: readonly string[] | null;
+  }) =>
+    input.languageMode === "preferred" && input.languages?.length
+      ? {
+          OR: [
+            { isLanguageNeutral: true },
+            {
+              supportLanguages: {
+                some: { language: { in: [...input.languages] } },
+              },
+            },
+          ],
+        }
+      : undefined,
   primarySupportLanguageCreate: (language: string) => ({
     language,
     isPrimary: true,
     sortOrder: 0,
   }),
+  resolveEffectiveReadLanguageCandidates: (input: {
+    languages?: string | readonly string[] | null;
+  }) => {
+    const raw = input.languages;
+    const parts = Array.isArray(raw) ? raw : (raw ?? "").split(",");
+    return [
+      ...new Set(
+        parts.map((language) => language.trim().toLowerCase()).filter(Boolean),
+      ),
+    ];
+  },
   resolveUnitAuthoringLanguage: (input: {
     explicitLanguage?: string | null;
     appLocale?: string | null;
@@ -1053,6 +1080,64 @@ describe("PostService.byRealm", () => {
     expect(where.variantUnitId).toBe("variant-1");
   });
 
+  test("preferred post list filtering uses Unit support-language availability", async () => {
+    resetMocks();
+
+    await service.list({
+      languageMode: "preferred",
+      languages: "ja,en",
+    });
+
+    expect(firstPostFindManyArgs().where.unit.AND).toEqual([
+      {
+        OR: [
+          { isLanguageNeutral: true },
+          {
+            supportLanguages: {
+              some: { language: { in: ["ja", "en"] } },
+            },
+          },
+        ],
+      },
+    ]);
+    expect((postCountMock.mock.calls as any[])[0]?.[0].where).toEqual(
+      firstPostFindManyArgs().where,
+    );
+  });
+
+  test("realm feed preferred filtering composes with UnitRealm visibility", async () => {
+    resetMocks();
+
+    await service.byRealm("realm-1", {
+      languageMode: "preferred",
+      languages: ["ja", "en"],
+    });
+
+    const unitWhere = firstPostFindManyArgs().where.unit;
+    expect(unitWhere.AND).toEqual([
+      {
+        OR: [
+          { isLanguageNeutral: true },
+          {
+            supportLanguages: {
+              some: { language: { in: ["ja", "en"] } },
+            },
+          },
+        ],
+      },
+    ]);
+    expect(unitWhere.inRealms).toEqual({
+      some: {
+        realmUnitId: "realm-1",
+        moderationState: "APPROVED",
+        visibilityState: "VISIBLE",
+      },
+    });
+    expect((postCountMock.mock.calls as any[])[0]?.[0].where).toEqual(
+      firstPostFindManyArgs().where,
+    );
+  });
+
   test("general post feeds do not carry root-only guards", async () => {
     resetMocks();
 
@@ -1890,10 +1975,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     );
 
     await expect(
-      service.pin(
-        { scopeUnitId: "root-1", commentId: "reply-1" },
-        stranger,
-      ),
+      service.pin({ scopeUnitId: "root-1", commentId: "reply-1" }, stranger),
     ).rejects.toThrow(/moderator\/owner/);
     expect(commentPromotionCreateMock).not.toHaveBeenCalled();
   });
@@ -1947,10 +2029,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     unitFindFirstMock.mockResolvedValueOnce(null); // no official question tag
 
     await expect(
-      service.acceptAnswer(
-        { scopeUnitId: "root-1", commentId: "reply-1" },
-        op,
-      ),
+      service.acceptAnswer({ scopeUnitId: "root-1", commentId: "reply-1" }, op),
     ).rejects.toThrow(/Q&A thread/);
     expect(commentPromotionCreateMock).not.toHaveBeenCalled();
   });
@@ -1963,10 +2042,7 @@ describe("PostService promotion overlay (pin / accepted answer)", () => {
     );
 
     await expect(
-      service.acceptAnswer(
-        { scopeUnitId: "root-1", commentId: "reply-2" },
-        op,
-      ),
+      service.acceptAnswer({ scopeUnitId: "root-1", commentId: "reply-2" }, op),
     ).rejects.toThrow(/direct reply/);
   });
 
@@ -2138,10 +2214,7 @@ describe("PostService.getThreadPromotionSignals (thread read signals)", () => {
       }),
     );
     await expect(
-      service.pin(
-        { scopeUnitId: "root-1", commentId: "reply-1" },
-        stranger,
-      ),
+      service.pin({ scopeUnitId: "root-1", commentId: "reply-1" }, stranger),
     ).rejects.toThrow(/moderator\/owner/);
   });
 

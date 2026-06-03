@@ -391,7 +391,7 @@ describe("realmApi", () => {
       resolvedLanguage: "ja",
       sourceRulePostUnitId: "rule-post-ja",
     });
-    expect(resolveRuleMock).toHaveBeenCalledWith("realm-1", "ja");
+    expect(resolveRuleMock).toHaveBeenCalledWith("realm-1", "ja", ["ja"]);
     expect(decideForIdentityMock).not.toHaveBeenCalled();
   });
 

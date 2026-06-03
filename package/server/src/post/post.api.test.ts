@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { markdownContentDoc } from "@rezics/contract";
 import { Elysia } from "elysia";
 
 let currentIdentity = {
@@ -21,6 +22,14 @@ const getByUnitIdMock = mock(
     },
   }),
 );
+const listMock = mock(async () => ({
+  posts: [{ unitId: "post-1" }],
+  total: 1,
+}));
+const byRealmMock = mock(async () => ({
+  posts: [{ unitId: "realm-post-1" }],
+  total: 1,
+}));
 const createMock = mock(async () => ({ unitId: "created-post-1" }));
 const submitToRealmMock = mock(async () => ({
   unitId: "post-1",
@@ -90,11 +99,16 @@ mock.module("@/unit/collaborative-metadata", () => ({
 }));
 
 mock.module("@/unit/variant-context", () => ({
-  hydrateVariantContextSummaries: mock(async () => undefined),
+  hydrateVariantContextSummaries: mock(async () => new Map()),
+}));
+
+const mapPostToDTOMock = mock((post: any) => ({
+  unitId: post.unitId,
+  authorUserId: post.authorUserId ?? "owner-1",
 }));
 
 mock.module("./post.mapper", () => ({
-  mapPostToDTO: mock((post: unknown) => post),
+  mapPostToDTO: mapPostToDTOMock,
 }));
 
 mock.module("./post.service", () => ({
@@ -102,6 +116,8 @@ mock.module("./post.service", () => ({
     create: createMock,
     submitToRealm: submitToRealmMock,
     getByUnitId: getByUnitIdMock,
+    list: listMock,
+    byRealm: byRealmMock,
     update: updateMock,
     delete: deleteMock,
   },
@@ -119,10 +135,52 @@ describe("postApi", () => {
     listGlobalContentStatesMock.mockClear();
     listRealmUnitStatesMock.mockClear();
     createMock.mockClear();
+    listMock.mockClear();
+    byRealmMock.mockClear();
     submitToRealmMock.mockClear();
     updateMock.mockClear();
     getByUnitIdMock.mockClear();
     deleteMock.mockClear();
+    mapPostToDTOMock.mockClear();
+  });
+
+  test("passes read-language candidates through single post reads", async () => {
+    const { postApi } = await import("./post.api");
+    const response = await postApi.handle(
+      new Request("http://localhost/post/post-1?languages=ja,en"),
+    );
+
+    expect(response.status).toBe(200);
+    expect(getByUnitIdMock).toHaveBeenCalledWith("post-1", {
+      isAdmin: false,
+    });
+    expect(mapPostToDTOMock.mock.calls[0]?.[2]).toEqual(["ja", "en"]);
+  });
+
+  test("passes POST body read-language candidates through list reads", async () => {
+    const { postApi } = await import("./post.api");
+    const response = await postApi.handle(
+      new Request("http://localhost/post/list", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          realmUnitId: "realm-1",
+          languages: ["ja", "en"],
+          languageMode: "preferred",
+          limit: 20,
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(byRealmMock.mock.calls[0]?.[0]).toBe("realm-1");
+    expect(byRealmMock.mock.calls[0]?.[1]).toMatchObject({
+      realmUnitId: "realm-1",
+      languages: ["ja", "en"],
+      languageMode: "preferred",
+    });
+    expect(mapPostToDTOMock.mock.calls[0]?.[1]).toBeInstanceOf(Map);
+    expect(mapPostToDTOMock.mock.calls[0]?.[2]).toEqual(["ja", "en"]);
   });
 
   test("serves bounded moderation overlay sets for rendered post nodes", async () => {
@@ -180,7 +238,9 @@ describe("postApi", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           realmUnitIds: ["realm-1"],
-          content: { body: "hello" },
+          language: "en",
+          title: "Hello",
+          content: markdownContentDoc("hello"),
         }),
       }),
     );

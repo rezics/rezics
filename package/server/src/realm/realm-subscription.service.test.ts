@@ -140,6 +140,48 @@ afterEach(() => {
   delete prismaMock.post;
 });
 
+describe("realmService.list", () => {
+  test("preferred filtering uses support-language availability before pagination", async () => {
+    const findMany = mock(async () => []);
+    const count = mock(async () => 0);
+    prismaMock.realm = {
+      findMany,
+      count,
+    };
+
+    await realmService.list({
+      language: "ko",
+      languageMode: "preferred",
+      languages: "ja,en",
+      start: 10,
+      limit: 5,
+    } as any);
+
+    const findArgs = findMany.mock.calls[0]?.[0] as any;
+    expect(findArgs.where).toEqual({
+      AND: [
+        { unit: { status: "PUBLISHED", type: "REALM" } },
+        {
+          unit: {
+            OR: [
+              { isLanguageNeutral: true },
+              {
+                supportLanguages: {
+                  some: { language: { in: ["ja", "en"] } },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(JSON.stringify(findArgs.where)).not.toContain("translations");
+    expect(count.mock.calls[0]?.[0]).toEqual({ where: findArgs.where });
+    expect(findArgs.skip).toBe(10);
+    expect(findArgs.take).toBe(5);
+  });
+});
+
 describe("realmService.joinRealm", () => {
   test("writes RealmMember, Subscription, and bumps both counters atomically", async () => {
     installTx({});
@@ -559,21 +601,34 @@ describe("realmService.resolveRule", () => {
       findUnique: mock(async () => ({
         id: "rule-unit-1",
         type: "POST",
-        defaultLanguage: "en",
-      })),
-    };
-    prismaMock.unitTranslation = {
-      findUnique: mock(async () => ({
-        unitId: "rule-unit-1",
-        language: "ja",
-        title: "ルール",
-        subtitle: null,
-        summary: null,
-        description: null,
-        extra: null,
-        sourceUnitId: "rule-post-ja",
-        createdAt: now,
-        updatedAt: now,
+        supportLanguages: [
+          {
+            unitId: "rule-unit-1",
+            language: "ja",
+            isPrimary: true,
+            sortOrder: 0,
+          },
+          {
+            unitId: "rule-unit-1",
+            language: "en",
+            isPrimary: false,
+            sortOrder: 1,
+          },
+        ],
+        translations: [
+          {
+            unitId: "rule-unit-1",
+            language: "ja",
+            title: "ルール",
+            subtitle: null,
+            summary: null,
+            description: null,
+            extra: null,
+            sourceUnitId: "rule-post-ja",
+            createdAt: now,
+            updatedAt: now,
+          },
+        ],
       })),
     };
     prismaMock.post = {
@@ -595,10 +650,22 @@ describe("realmService.resolveRule", () => {
         createdAt: now,
         updatedAt: now,
         unit: {
+          targetUnitId: null,
           status: "PUBLISHED",
           visibility: "PUBLIC",
           licenseSlug: null,
           contentModerationState: null,
+          inRealms: [],
+          supportLanguages: [
+            {
+              unitId: "rule-post-ja",
+              language: "ja",
+              isPrimary: true,
+              sortOrder: 0,
+            },
+          ],
+          translations: [],
+          contentTranslations: [],
           user: {
             unitId: USER,
             slug: "owner",

@@ -165,18 +165,18 @@ remain available only for language switchers and editing surfaces.
 
 ## 5. SQL Read Coverage Carried Forward
 
-- [ ] 5.1 Add post API/service/mapper tests for preferred filtering, realm feed
+- [x] 5.1 Add post API/service/mapper tests for preferred filtering, realm feed
   filtering, single read resolution, and missing title/body in the resolved
   supported language.
-- [ ] 5.2 Add book tests for list filtering, detail resolution, cover fallback in
+- [x] 5.2 Add book tests for list filtering, detail resolution, cover fallback in
   the resolved language, and no translation-row fallback after a supported
   language is resolved.
-- [ ] 5.3 Add realm tests for list filtering, detail resolution, rule
+- [x] 5.3 Add realm tests for list filtering, detail resolution, rule
   resolution, language-neutral behavior, and ignored legacy `language` fields
   that were previously declared but not enforced.
-- [ ] 5.4 Add zone/search tests for preferred candidates, language-neutral items,
+- [x] 5.4 Add zone/search tests for preferred candidates, language-neutral items,
   and no accidental all-languages requirement.
-- [ ] 5.5 Add a convention or repair test that flags multilingual Units with
+- [x] 5.5 Add a convention or repair test that flags multilingual Units with
   translation/content rows but no matching support-language rows.
 
 ## 6. Frontend Read-Language Context

@@ -7,6 +7,19 @@ import {
 
 installPrismaClientMock();
 
+const queryRawMock = mock(async () => [
+  {
+    unitId: "post-1",
+    language: "ja",
+    source: "unit_translation",
+  },
+  {
+    unitId: "post-1",
+    language: "ja",
+    source: "content_translation",
+  },
+]);
+
 mock.module("@/content-translation/mapper", () => ({
   mapContentTranslationToDTO: (row: any) => row,
 }));
@@ -20,6 +33,7 @@ mock.module("./publication-policy", () => ({
 
 function resetMocks() {
   Object.assign(prismaMock, {
+    $queryRaw: queryRawMock,
     unit: {
       findUniqueOrThrow: mock(async () => ({
         id: "post-1",
@@ -55,6 +69,7 @@ function resetMocks() {
       })),
     },
   });
+  queryRawMock.mockClear();
 }
 
 describe("UnitLanguageService.content", () => {
@@ -136,5 +151,46 @@ describe("read language visibility helpers", () => {
         languages: ["ja"],
       }),
     ).toBeUndefined();
+  });
+});
+
+describe("UnitLanguageService.unitsMissingSupportLanguageRows", () => {
+  beforeEach(() => {
+    resetMocks();
+  });
+
+  test("flags Unit and content translation rows without matching support languages", async () => {
+    const { UnitLanguageService } = await import("./language-resolution");
+    const service = new UnitLanguageService();
+
+    await expect(service.unitsMissingSupportLanguageRows()).resolves.toEqual([
+      {
+        unitId: "post-1",
+        language: "ja",
+        source: "unit_translation",
+      },
+      {
+        unitId: "post-1",
+        language: "ja",
+        source: "content_translation",
+      },
+    ]);
+
+    const sql = String(queryRawMock.mock.calls[0]?.[0]);
+    expect(sql).toContain('"UnitTranslation"');
+    expect(sql).toContain('"ContentTranslation"');
+    expect(sql).toContain('"UnitSupportLanguage"');
+    expect(queryRawMock.mock.calls[0]?.[1]).toBe(100);
+  });
+
+  test("clamps diagnostic query limits", async () => {
+    const { UnitLanguageService } = await import("./language-resolution");
+    const service = new UnitLanguageService();
+
+    await service.unitsMissingSupportLanguageRows(0);
+    await service.unitsMissingSupportLanguageRows(10_000);
+
+    expect(queryRawMock.mock.calls[0]?.[1]).toBe(1);
+    expect(queryRawMock.mock.calls[1]?.[1]).toBe(500);
   });
 });

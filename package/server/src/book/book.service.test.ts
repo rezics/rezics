@@ -349,6 +349,45 @@ describe("BookService.create", () => {
   });
 });
 
+describe("BookService.list", () => {
+  beforeEach(() => {
+    resetMocks();
+  });
+
+  test("preferred filtering uses support-language availability before pagination", async () => {
+    const { bookService } = await import("./book.service");
+
+    await bookService.list({
+      languageMode: "preferred",
+      languages: "ja,en",
+      start: 10,
+      limit: 5,
+    } as any);
+
+    const findArgs = mockFindManyBook.mock.calls[0]?.[0] as any;
+    const countArgs = mockCountBook.mock.calls[0]?.[0] as any;
+    expect(findArgs.where).toEqual({
+      AND: [
+        {
+          unit: {
+            OR: [
+              { isLanguageNeutral: true },
+              {
+                supportLanguages: {
+                  some: { language: { in: ["ja", "en"] } },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(countArgs.where).toEqual(findArgs.where);
+    expect(findArgs.skip).toBe(10);
+    expect(findArgs.take).toBe(5);
+  });
+});
+
 describe("BookService.update", () => {
   beforeEach(() => {
     resetMocks();
