@@ -253,15 +253,15 @@ databases may be reset and reseeded.
 - [ ] 2.1 Create a shared schema helper module for PostgreSQL columns:
   `uuidv7PrimaryKey`, `uuidv7`, `timestamps`, JSON column helpers, text array
   helpers, enum naming helpers, and nullable timestamp conventions.
-- [ ] 2.2 Create a custom `ltree` Drizzle type for server query typing, while
+- [x] 2.2 Create a custom `ltree` Drizzle type for server query typing, while
   keeping extension creation in custom SQL migration rather than TS schema.
-- [ ] 2.3 Split `package/server` schema under `package/server/src/db/schema/`:
+- [x] 2.3 Split `package/server` schema under `package/server/src/db/schema/`:
   `enums.ts`, `custom-types.ts`, `columns.ts`, `identity.ts`,
   `translation.ts`, `alias.ts`, `content-structure.ts`, `catalog.ts`,
   `discussion.ts`, `shelf.ts`, `collection.ts`, `series.ts`, `realm.ts`,
   `tagging.ts`, `poll.ts`, `attribution.ts`, `user.ts`, `engagement.ts`,
   `score.ts`, `governance.ts`, `jwt.ts`, `misc.ts`, and `index.ts`.
-- [ ] 2.4 Keep the `Unit` / server-side `User` FK cycle in one low-level schema
+- [x] 2.4 Keep the `Unit` / server-side `User` FK cycle in one low-level schema
   area or break it with callback references so import cycles do not leak across
   the whole schema.
 - [ ] 2.5 Put Drizzle RQB v2 relation definitions under
@@ -285,7 +285,7 @@ databases may be reset and reseeded.
   `package/ranking/src/db/schema/`.
 - [ ] 2.10 Each schema package exports `schema`, `relations`, db type aliases,
   enum values, and row insert/select types from a single stable public module.
-- [ ] 2.11 Add a convention check or targeted test that every configured schema
+- [x] 2.11 Add a convention check or targeted test that every configured schema
   folder exports all table/enums required by Drizzle Kit.
 
 ## 3. Baseline migrations and custom SQL
