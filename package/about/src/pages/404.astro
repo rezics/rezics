@@ -1,0 +1,36 @@
+---
+import CatalogConstellation from "../components/CatalogConstellation.astro";
+import { DEFAULT_LOCALE, getCanonicalUrl, getPagePath } from "../i18n/locales";
+import { uiDictionaries } from "../i18n/ui";
+import "../styles/site.css";
+
+const ui = uiDictionaries[DEFAULT_LOCALE];
+---
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{ui.notFound.title} | Rezics</title>
+    <meta name="description" content={ui.notFound.body} />
+    <link rel="canonical" href={getCanonicalUrl(DEFAULT_LOCALE, "home")} />
+  </head>
+  <body>
+    <main>
+      <section class="hero compact">
+        <div class="hero-copy">
+          <p class="eyebrow">404</p>
+          <h1>{ui.notFound.title}</h1>
+          <p>{ui.notFound.body}</p>
+          <div class="hero-actions">
+            <a class="button primary" href={getPagePath(DEFAULT_LOCALE, "home")}>
+              {ui.cta.backHome}
+            </a>
+          </div>
+        </div>
+        <CatalogConstellation />
+      </section>
+    </main>
+  </body>
+</html>

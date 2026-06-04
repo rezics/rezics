@@ -1,0 +1,20 @@
+---
+import AboutLayout from "../../layouts/AboutLayout.astro";
+import { ABOUT_LOCALES, type AboutLocale } from "../../i18n/locales";
+
+const pages = import.meta.glob("../../content/*/product.mdx", { eager: true });
+
+export function getStaticPaths() {
+  return ABOUT_LOCALES.map((locale) => ({ params: { locale } }));
+}
+
+const locale = Astro.params.locale as AboutLocale;
+const Page = pages[
+  `../../content/${locale}/product.mdx`
+] as typeof import("../../content/en/product.mdx");
+const Content = Page.default;
+---
+
+<AboutLayout locale={locale} page="product" frontmatter={Page.frontmatter}>
+  <Content />
+</AboutLayout>

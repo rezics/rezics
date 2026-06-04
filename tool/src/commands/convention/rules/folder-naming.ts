@@ -37,6 +37,7 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "corpus",
   "labels",
   "messages",
+  "zh-hans",
 ]);
 
 // Singular folder names permitted even when their plural form sits on
@@ -76,7 +77,7 @@ export const folderNamingRule: RuleScanner = {
       if (isExemptPath(dirPath)) continue;
       if (isExemptPackage(dirPath)) continue;
       const relPath = relative(REPO_ROOT, dirPath);
-      if (!/^package\/[^/]+\/(src|docs|prisma\/seed)/.test(relPath)) continue;
+      if (!/^package\/[^/]+\/(src|docs)/.test(relPath)) continue;
       if (/^package\/[^/]+\/(src|docs)$/.test(relPath)) continue;
 
       const name = basename(dirPath);

@@ -1,0 +1,18 @@
+---
+import { DEFAULT_LOCALE, getCanonicalUrl, getPagePath } from "../i18n/locales";
+
+const defaultPath = getPagePath(DEFAULT_LOCALE, "home");
+---
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0; url=${defaultPath}`} />
+    <link rel="canonical" href={getCanonicalUrl(DEFAULT_LOCALE, "home")} />
+    <title>Rezics</title>
+  </head>
+  <body>
+    <a href={defaultPath}>Rezics</a>
+  </body>
+</html>
