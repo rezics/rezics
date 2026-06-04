@@ -1,67 +1,80 @@
-import { describe, expect, mock, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { resetDatabase } from "./database";
+import { join } from "node:path";
+import { describe, expect, mock, test } from "bun:test";
+import { RESET_DATABASE_TABLES, resetDatabase } from "./database";
 
-function modelToDelegate(model: string): string {
-  return `${model[0]!.toLowerCase()}${model.slice(1)}`;
+const schemaDir = new URL("../schema", import.meta.url).pathname;
+
+function schemaTableExports(): string[] {
+  return [
+    ...new Bun.Glob("*.ts").scanSync({
+      cwd: schemaDir,
+    }),
+  ].flatMap((file) => {
+    const source = readFileSync(join(schemaDir, file), "utf8");
+    return Array.from(
+      source.matchAll(/^export const (\w+) = pgTable\b/gm),
+      (match) => match[1]!,
+    );
+  });
 }
 
-function schemaDelegates(): string[] {
-  const schema = readFileSync(
-    new URL("../../../prisma/schema.prisma", import.meta.url),
-    "utf8",
+function createMockDb() {
+  const tableNames = new Map(
+    RESET_DATABASE_TABLES.map(([name, table]) => [table, name] as const),
   );
-  return Array.from(schema.matchAll(/^model\s+(\w+)\s+\{/gm), (match) =>
-    modelToDelegate(match[1]!),
-  );
-}
-
-function createMockPrisma(delegates: string[]) {
   const calls: string[] = [];
-  const prisma = Object.fromEntries(
-    delegates.map((delegate) => [
-      delegate,
-      {
-        deleteMany: mock(async () => {
-          calls.push(delegate);
-          return { count: 0 };
-        }),
-      },
-    ]),
-  );
-  return { prisma, calls };
+  return {
+    db: {
+      delete: mock(async (table: unknown) => {
+        const name = tableNames.get(table as never);
+        if (!name) throw new Error("resetDatabase deleted an unknown table");
+        calls.push(name);
+      }),
+    },
+    calls,
+  };
 }
 
 describe("resetDatabase", () => {
-  test("deletes every server schema delegate", async () => {
-    const delegates = schemaDelegates();
-    const { prisma, calls } = createMockPrisma(delegates);
+  test("deletes every server Drizzle schema table", async () => {
+    const { db, calls } = createMockDb();
 
-    await resetDatabase(prisma as never);
+    await resetDatabase(db as never);
 
-    expect(new Set(calls)).toEqual(new Set(delegates));
+    expect(new Set(calls)).toEqual(new Set(schemaTableExports()));
   });
 
   test("deletes FK dependents before their parents", async () => {
-    const delegates = schemaDelegates();
-    const { prisma, calls } = createMockPrisma(delegates);
+    const { db, calls } = createMockDb();
 
-    await resetDatabase(prisma as never);
+    await resetDatabase(db as never);
 
-    const index = (delegate: string) => calls.indexOf(delegate);
-    expect(index("contentStructureAnchor")).toBeLessThan(
-      index("contentStructureNode"),
+    const index = (table: string) => calls.indexOf(table);
+    expect(index("ContentStructureAnchor")).toBeLessThan(
+      index("ContentStructureNode"),
     );
-    expect(index("contentStructureNode")).toBeLessThan(
-      index("contentStructure"),
+    expect(index("ContentStructureNode")).toBeLessThan(
+      index("ContentStructure"),
     );
-    expect(index("creditAttributionEvidence")).toBeLessThan(
-      index("unitExternalRef"),
+    expect(index("CreditAttributionEvidence")).toBeLessThan(
+      index("UnitExternalRef"),
     );
-    expect(index("unitExternalRef")).toBeLessThan(index("sourceSite"));
-    expect(index("sourceSite")).toBeLessThan(index("entity"));
-    expect(index("commentPromotion")).toBeLessThan(index("comment"));
-    expect(index("comment")).toBeLessThan(index("unit"));
-    expect(index("unit")).toBeLessThan(index("user"));
+    expect(index("UnitExternalRef")).toBeLessThan(index("SourceSite"));
+    expect(index("SourceSite")).toBeLessThan(index("Entity"));
+    expect(index("CommentPromotion")).toBeLessThan(index("Comment"));
+    expect(index("Comment")).toBeLessThan(index("Unit"));
+    expect(index("Unit")).toBeLessThan(index("User"));
+  });
+
+  test("does not import Prisma runtime or generated clients", () => {
+    const source = readFileSync(
+      new URL("./database.ts", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).not.toContain("@prisma/");
+    expect(source).not.toContain("/prisma/");
+    expect(source).not.toContain("generated/client");
   });
 });

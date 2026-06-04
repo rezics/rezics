@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import * as p from "@clack/prompts";
 import { SLUG_SCOPES } from "@rezics/contract";
+import { createServerDb } from "@rezics/server/db";
 import {
   FACTORY_SCENARIO_NAMES,
   FACTORY_SCENARIOS,
@@ -242,14 +243,14 @@ function loadPlanFromFile(planFile: string): SeedPlan {
 
 async function runEchoKvOnly(): Promise<void> {
   const env = getEnv();
-  const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
+  const serverDb = createServerDb(env.SERVER_DATABASE_URL);
   try {
-    const { seedEchoKV } = await import(
+    const { seedEchoKVWithDb } = await import(
       "@rezics/server/db/seed-factory/echokv"
     );
-    await seedEchoKV(prisma);
+    await seedEchoKVWithDb(serverDb.db);
   } finally {
-    await prisma.$disconnect();
+    await serverDb.disconnect();
   }
 }
 

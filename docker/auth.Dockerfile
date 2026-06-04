@@ -1,5 +1,6 @@
 # Auth service image. Own schema; compiles the cluster entrypoint
-# (src/cluster.ts → binary named `server`). Engineless Prisma 7 + pg adapter.
+# (src/cluster.ts → binary named `server`). Drizzle uses the pure-JS `pg`
+# driver, so the compiled runtime needs no query engine.
 #
 #   docker build -f docker/base.Dockerfile -t rezics-base:dev .
 #   docker build -f docker/auth.Dockerfile -t rezics-auth:dev .
@@ -9,7 +10,6 @@ FROM rezics-base:dev AS build
 WORKDIR /repo/package/auth
 
 ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
-RUN bunx prisma generate
 RUN bun run build:linux
 
 # --- runtime stage ---------------------------------------------------------

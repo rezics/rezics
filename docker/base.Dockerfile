@@ -12,6 +12,6 @@ WORKDIR /repo
 
 # Copy the whole (dockerignore-trimmed) workspace and install all deps.
 # `--ignore-scripts` keeps third-party postinstall hooks from running during
-# image build; Prisma clients are generated explicitly by each service stage.
+# image build. Schema-owner migrate images run Drizzle Kit from the build stage.
 COPY . .
 RUN bun install --frozen-lockfile --ignore-scripts

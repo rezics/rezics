@@ -18,6 +18,7 @@ import {
 
 export interface RunSeedOptions {
   resetDatabases?: boolean;
+  serverResetDb?: Parameters<typeof resetDatabase>[0];
 }
 
 export interface SeedCredential {
@@ -62,9 +63,12 @@ export async function seedBaseline(
   const resetDatabases = opts.resetDatabases ?? false;
 
   if (resetDatabases) {
+    if (!opts.serverResetDb) {
+      throw new Error("Reset mode requires a Drizzle server database client.");
+    }
     const s = p.spinner();
     s.start("Resetting auth and server databases...");
-    await resetDatabase(serverPrisma);
+    await resetDatabase(opts.serverResetDb);
     await resetAuthDatabase(authPrisma.db);
     s.stop("Databases reset.");
   }
@@ -100,14 +104,23 @@ export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
   const serverPrisma: ServerPrismaClient = createServerPrisma(
     env.SERVER_DATABASE_URL,
   );
+  const serverResetDb = opts.resetDatabases
+    ? (await import("@rezics/server/db")).createServerDb(
+        env.SERVER_DATABASE_URL,
+      )
+    : null;
 
   try {
-    const { credentials } = await seedBaseline(authPrisma, serverPrisma, opts);
+    const { credentials } = await seedBaseline(authPrisma, serverPrisma, {
+      ...opts,
+      ...(serverResetDb ? { serverResetDb: serverResetDb.db } : {}),
+    });
     printSeedCredentials(credentials);
   } finally {
     await Promise.all([
       authPrisma.disconnect().catch(() => {}),
       serverPrisma.$disconnect().catch(() => {}),
+      serverResetDb?.disconnect().catch(() => {}),
     ]);
   }
 }

@@ -352,6 +352,10 @@ databases may be reset and reseeded.
     output. Focused governance/realm/shelf tests pass. `post.service.test.ts`
     still needs assertion/harness cleanup because many cases assert old
     Prisma-shaped query arguments rather than Drizzle query behavior.
+  - Applied progress: converted `package/server/src/db/seed/database.ts` reset
+    deletes from Prisma delegates to Drizzle table deletes; the reset test now
+    derives coverage from Drizzle `pgTable` exports instead of
+    `schema.prisma`.
 - [ ] 4.4 Replace dynamic `Prisma.*WhereInput`, `Include`, `Select`, and payload
   type composition with domain-local Drizzle query builders, explicit
   projections, RQB v2 `with`, joins, and mappers. Prioritize heavily dynamic
@@ -425,6 +429,15 @@ databases may be reset and reseeded.
   `@rezics/auth` exports.
 - [ ] 6.7 Update `package/utils/src/lib/prisma-factory.ts` into a Drizzle db
   factory module, then convert seed/factory orchestration and tests.
+  - Applied progress: `package/utils/src/db/command.ts` `runDbReset()` now
+    creates a server Drizzle db via `@rezics/server/db` and no longer needs the
+    server Prisma client. `seedBaseline({ resetDatabases })` now requires an
+    explicit Drizzle reset db while the broader seed/factory orchestration
+    remains blocked on migrating `@rezics/server/db/seed-factory` and
+    `@rezics/search` sync.
+  - Applied progress: `factory --only echokv` now uses
+    `seedEchoKVWithDb(serverDb.db)` through `createServerDb`; full factory
+    scenarios still use the legacy Prisma-shaped seed context.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
@@ -440,6 +453,10 @@ databases may be reset and reseeded.
   or the repo `tool db deploy --package=<unit>` equivalent.
 - [ ] 7.4 Update Docker build comments and migrate images from "carry Prisma CLI
   + schema" to "carry Bun + Drizzle Kit + migrations".
+  - Applied progress: removed `bunx prisma generate` and Prisma-era Docker
+    comments from auth, notify, history, and ranking images; job-runner now only
+    documents the temporary server Prisma generation needed by search sync.
+    `server` and job-runner remain blocked by server/search runtime cutover.
 - [x] 7.5 Update production release, rollback, troubleshooting, runtime
   inventory, deployment guide, and env/secrets docs to reference Drizzle
   migration flow and Drizzle migration tables instead of Prisma.

@@ -1,7 +1,7 @@
 # Ranking service image. INTERNAL-ONLY (no public proxy route, no public CORS
-# — enforced by Kamal routing, not here). Cross-schema: imports
-# `@rezics/server`'s generated client for the main-DB read, plus its own
-# ranking schema. Engineless Prisma 7 + pg adapter.
+# — enforced by Kamal routing, not here). Cross-schema: reads the main DB via
+# `@rezics/server/db` Drizzle helpers and writes ranking rows through its own
+# Drizzle schema.
 #
 #   docker build -f docker/base.Dockerfile -t rezics-base:dev .
 #   docker build -f docker/ranking.Dockerfile -t rezics-ranking:dev .
@@ -9,13 +9,8 @@
 # --- build stage -----------------------------------------------------------
 FROM rezics-base:dev AS build
 
-WORKDIR /repo/package/server
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/build"
-RUN bunx prisma generate
-
 WORKDIR /repo/package/ranking
 ENV RANKING_DATABASE_URL="postgresql://build:build@localhost:5432/build"
-RUN bunx prisma generate
 RUN bun run build:linux
 
 # --- runtime stage ---------------------------------------------------------

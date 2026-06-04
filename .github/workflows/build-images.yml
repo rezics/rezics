@@ -71,8 +71,8 @@ jobs:
             docker push "${img}:dev"
           done
 
-      # Build-stage "migrate" images (carry Bun + Prisma CLI + schema) for the
-      # one-shot migration jobs. Slim runtime images cannot run migrations.
+      # Build-stage "migrate" images (carry Bun + Drizzle Kit + migrations) for
+      # the one-shot migration jobs. Slim runtime images cannot run migrations.
       - name: Build & push migrate images
         run: |
           set -euo pipefail

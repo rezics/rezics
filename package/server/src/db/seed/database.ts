@@ -1,4 +1,170 @@
-import type { PrismaClient } from "../../../prisma/generated/client.js";
+import type { ServerDb } from "../client";
+import {
+  AccountEnforcement,
+  ApiToken,
+  Book,
+  Comment,
+  CommentPromotion,
+  ContentStructure,
+  ContentStructureAnchor,
+  ContentStructureNode,
+  ContentTranslation,
+  CreditAttribution,
+  CreditAttributionEvidence,
+  EchoKV,
+  EmailVerificationContract,
+  Entity,
+  Feedback,
+  Game,
+  GameSystemRequirement,
+  HistoryOutbox,
+  Jwks,
+  JwtService,
+  Link,
+  Media,
+  ModerationAction,
+  ModerationCase,
+  Poll,
+  PollOption,
+  PollVote,
+  Post,
+  PostPollReference,
+  Realm,
+  RealmCapabilityGrant,
+  RealmMember,
+  RealmRuleAcknowledgement,
+  RealmTagApplication,
+  RealmTagApplicationVote,
+  RealmTagContext,
+  ScoreAggregate,
+  ScoreEntry,
+  ScoreRealmField,
+  Series,
+  SeriesContentIndex,
+  Shelf,
+  ShelfUnit,
+  ShelfUnitRelation,
+  SlugScope,
+  SourceSite,
+  StaffAuditLog,
+  StaffGrant,
+  SubjectAttribution,
+  Subscription,
+  TagVote,
+  Unit,
+  UnitAlias,
+  UnitAliasVote,
+  UnitCollaborator,
+  UnitExternalRef,
+  UnitFieldLock,
+  UnitHistoryClock,
+  UnitRealm,
+  UnitSupportLanguage,
+  UnitTag,
+  UnitTranslation,
+  User,
+  UserBlock,
+  UserContentNodeProgress,
+  UserTagApplication,
+  UserUnitCollection,
+  UserUnitProgress,
+  Zone,
+} from "../schema";
+
+type ResetDatabaseDb = Pick<ServerDb, "delete">;
+type ResetTable = readonly [
+  name: string,
+  table: Parameters<ServerDb["delete"]>[0],
+];
+
+export const RESET_DATABASE_TABLES = [
+  ["StaffAuditLog", StaffAuditLog],
+  ["UserBlock", UserBlock],
+  ["EmailVerificationContract", EmailVerificationContract],
+  ["ApiToken", ApiToken],
+  ["TagVote", TagVote],
+  ["UnitAliasVote", UnitAliasVote],
+  ["PollVote", PollVote],
+  ["Subscription", Subscription],
+  ["UserContentNodeProgress", UserContentNodeProgress],
+  ["UserUnitProgress", UserUnitProgress],
+  ["UserUnitCollection", UserUnitCollection],
+  ["UserTagApplication", UserTagApplication],
+  ["RealmTagApplicationVote", RealmTagApplicationVote],
+  ["RealmRuleAcknowledgement", RealmRuleAcknowledgement],
+  ["StaffGrant", StaffGrant],
+  ["RealmCapabilityGrant", RealmCapabilityGrant],
+  ["UnitCollaborator", UnitCollaborator],
+  ["UnitFieldLock", UnitFieldLock],
+  ["HistoryOutbox", HistoryOutbox],
+  ["UnitHistoryClock", UnitHistoryClock],
+
+  ["AccountEnforcement", AccountEnforcement],
+  ["ModerationAction", ModerationAction],
+  ["ModerationCase", ModerationCase],
+  ["Feedback", Feedback],
+
+  ["CreditAttributionEvidence", CreditAttributionEvidence],
+  ["GameSystemRequirement", GameSystemRequirement],
+  ["UnitExternalRef", UnitExternalRef],
+  ["SubjectAttribution", SubjectAttribution],
+  ["CreditAttribution", CreditAttribution],
+
+  ["ScoreRealmField", ScoreRealmField],
+  ["ScoreAggregate", ScoreAggregate],
+  ["PostPollReference", PostPollReference],
+  ["PollOption", PollOption],
+
+  ["RealmTagApplication", RealmTagApplication],
+  ["RealmTagContext", RealmTagContext],
+
+  ["ShelfUnitRelation", ShelfUnitRelation],
+  ["UnitRealm", UnitRealm],
+  ["RealmMember", RealmMember],
+  ["ShelfUnit", ShelfUnit],
+  ["UnitTag", UnitTag],
+
+  ["SeriesContentIndex", SeriesContentIndex],
+  ["ContentStructureAnchor", ContentStructureAnchor],
+  ["ContentStructureNode", ContentStructureNode],
+  ["ContentStructure", ContentStructure],
+  ["SourceSite", SourceSite],
+
+  ["CommentPromotion", CommentPromotion],
+  ["Comment", Comment],
+  ["Post", Post],
+  ["ScoreEntry", ScoreEntry],
+  ["Poll", Poll],
+  ["Shelf", Shelf],
+  ["Series", Series],
+  ["Realm", Realm],
+  ["Book", Book],
+  ["Game", Game],
+  ["Media", Media],
+  ["Link", Link],
+  ["Zone", Zone],
+  ["Entity", Entity],
+
+  ["ContentTranslation", ContentTranslation],
+  ["UnitAlias", UnitAlias],
+  ["UnitTranslation", UnitTranslation],
+  ["UnitSupportLanguage", UnitSupportLanguage],
+
+  ["SlugScope", SlugScope],
+  ["Unit", Unit],
+  ["User", User],
+
+  ["EchoKV", EchoKV],
+  ["Jwks", Jwks],
+  ["JwtService", JwtService],
+] as const satisfies readonly ResetTable[];
+
+async function deleteTables(
+  db: ResetDatabaseDb,
+  tables: readonly ResetTable[],
+): Promise<void> {
+  await Promise.all(tables.map(([, table]) => db.delete(table)));
+}
 
 /**
  * Reset database by deleting all data in FK-safe order.
@@ -7,121 +173,103 @@ import type { PrismaClient } from "../../../prisma/generated/client.js";
  * This wipes everything. Run the seed CLI afterward to recreate users and
  * infrastructure.
  */
-export async function resetDatabase(prisma: PrismaClient): Promise<void> {
+export async function resetDatabase(db: ResetDatabaseDb): Promise<void> {
   console.log("[Reset] Resetting database...");
 
   // Group 1: Leaf tables with no dependents or only id-shaped references.
-  await Promise.all([
-    prisma.staffAuditLog.deleteMany(),
-    prisma.userBlock.deleteMany(),
-    prisma.emailVerificationContract.deleteMany(),
-    prisma.apiToken.deleteMany(),
-    prisma.tagVote.deleteMany(),
-    prisma.unitAliasVote.deleteMany(),
-    prisma.pollVote.deleteMany(),
-    prisma.subscription.deleteMany(),
-    prisma.userContentNodeProgress.deleteMany(),
-    prisma.userUnitProgress.deleteMany(),
-    prisma.userUnitCollection.deleteMany(),
-    prisma.userTagApplication.deleteMany(),
-    prisma.realmTagApplicationVote.deleteMany(),
-    prisma.realmRuleAcknowledgement.deleteMany(),
-    prisma.staffGrant.deleteMany(),
-    prisma.realmCapabilityGrant.deleteMany(),
-    prisma.unitCollaborator.deleteMany(),
-    prisma.unitFieldLock.deleteMany(),
-    prisma.historyOutbox.deleteMany(),
-    prisma.unitHistoryClock.deleteMany(),
-  ]);
+  await deleteTables(db, RESET_DATABASE_TABLES.slice(0, 20));
 
   // Group 2: Moderation and feedback records.
-  await prisma.accountEnforcement.deleteMany();
-  await prisma.moderationAction.deleteMany();
-  await prisma.moderationCase.deleteMany();
-  await prisma.feedback.deleteMany();
+  await db.delete(AccountEnforcement);
+  await db.delete(ModerationAction);
+  await db.delete(ModerationCase);
+  await db.delete(Feedback);
 
   // Group 3: Attribution and external-reference leaves.
-  await Promise.all([
-    prisma.creditAttributionEvidence.deleteMany(),
-    prisma.gameSystemRequirement.deleteMany(),
+  await deleteTables(db, [
+    ["CreditAttributionEvidence", CreditAttributionEvidence],
+    ["GameSystemRequirement", GameSystemRequirement],
   ]);
-  await Promise.all([
-    prisma.unitExternalRef.deleteMany(),
-    prisma.subjectAttribution.deleteMany(),
-    prisma.creditAttribution.deleteMany(),
+  await deleteTables(db, [
+    ["UnitExternalRef", UnitExternalRef],
+    ["SubjectAttribution", SubjectAttribution],
+    ["CreditAttribution", CreditAttribution],
   ]);
 
   // Group 4: Poll, score, and tag leaves.
-  await Promise.all([
-    prisma.scoreRealmField.deleteMany(),
-    prisma.scoreAggregate.deleteMany(),
-    prisma.postPollReference.deleteMany(),
+  await deleteTables(db, [
+    ["ScoreRealmField", ScoreRealmField],
+    ["ScoreAggregate", ScoreAggregate],
+    ["PostPollReference", PostPollReference],
   ]);
-  await prisma.pollOption.deleteMany();
+  await db.delete(PollOption);
 
   // Group 5: Aggregate / junction leaves.
-  await Promise.all([prisma.realmTagApplication.deleteMany()]);
-  await prisma.realmTagContext.deleteMany();
+  await db.delete(RealmTagApplication);
+  await db.delete(RealmTagContext);
 
   // Group 6: Realm + shelf + tag junctions.
-  await prisma.shelfUnitRelation.deleteMany();
-  await Promise.all([
-    prisma.unitRealm.deleteMany(),
-    prisma.realmMember.deleteMany(),
-    prisma.shelfUnit.deleteMany(),
-    prisma.unitTag.deleteMany(),
+  await db.delete(ShelfUnitRelation);
+  await deleteTables(db, [
+    ["UnitRealm", UnitRealm],
+    ["RealmMember", RealmMember],
+    ["ShelfUnit", ShelfUnit],
+    ["UnitTag", UnitTag],
   ]);
 
   // Group 7: Extension children.
   // ContentStructureNode rows hold FKs to ContentStructure; delete them first
   // so the parent delete in this group doesn't trip a constraint.
-  await prisma.seriesContentIndex.deleteMany();
-  await prisma.contentStructureAnchor.deleteMany();
-  await prisma.contentStructureNode.deleteMany();
-  await Promise.all([
-    prisma.contentStructure.deleteMany(),
-    prisma.sourceSite.deleteMany(),
+  await db.delete(SeriesContentIndex);
+  await db.delete(ContentStructureAnchor);
+  await db.delete(ContentStructureNode);
+  await deleteTables(db, [
+    ["ContentStructure", ContentStructure],
+    ["SourceSite", SourceSite],
   ]);
 
   // Group 8: Type extensions (1:1 with Unit).
   // Post must be deleted before ScoreEntry (FK constraint)
-  await prisma.commentPromotion.deleteMany();
-  await prisma.comment.deleteMany();
-  await prisma.post.deleteMany();
-  await prisma.scoreEntry.deleteMany();
-  await Promise.all([
-    prisma.poll.deleteMany(),
-    prisma.shelf.deleteMany(),
-    prisma.series.deleteMany(),
-    prisma.realm.deleteMany(),
-    prisma.book.deleteMany(),
-    prisma.game.deleteMany(),
-    prisma.media.deleteMany(),
-    prisma.link.deleteMany(),
-    prisma.zone.deleteMany(),
-    prisma.entity.deleteMany(),
+  await db.delete(CommentPromotion);
+  await db.delete(Comment);
+  await db.delete(Post);
+  await db.delete(ScoreEntry);
+  await deleteTables(db, [
+    ["Poll", Poll],
+    ["Shelf", Shelf],
+    ["Series", Series],
+    ["Realm", Realm],
+    ["Book", Book],
+    ["Game", Game],
+    ["Media", Media],
+    ["Link", Link],
+    ["Zone", Zone],
+    ["Entity", Entity],
   ]);
 
   // Group 9: Translation layer.
-  await Promise.all([
-    prisma.contentTranslation.deleteMany(),
-    prisma.unitAlias.deleteMany(),
-    prisma.unitTranslation.deleteMany(),
-    prisma.unitSupportLanguage.deleteMany(),
+  await deleteTables(db, [
+    ["ContentTranslation", ContentTranslation],
+    ["UnitAlias", UnitAlias],
+    ["UnitTranslation", UnitTranslation],
+    ["UnitSupportLanguage", UnitSupportLanguage],
   ]);
 
   // Group 10: Core.
   // Drop SlugScope rows first — they reference SCOPE Units; Unit.deleteMany
   // cascades only declared database FKs, but SlugScope.unitId has no FK.
-  await prisma.slugScope.deleteMany();
-  await prisma.unit.deleteMany();
+  await db.delete(SlugScope);
+  await db.delete(Unit);
 
   // Group 11: Identity.
-  await prisma.user.deleteMany();
+  await db.delete(User);
 
   // Group 12: Platform misc.
-  await Promise.all([prisma.echoKV.deleteMany(), prisma.jwks.deleteMany()]);
-  await prisma.jwtService.deleteMany();
+  await deleteTables(db, [
+    ["EchoKV", EchoKV],
+    ["Jwks", Jwks],
+  ]);
+  await db.delete(JwtService);
 
   console.log("[Reset] Database reset complete.");
 }
