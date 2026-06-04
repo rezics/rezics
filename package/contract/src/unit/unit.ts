@@ -38,11 +38,20 @@ export const UnitStatus = {
   DELETED: "DELETED",
 } as const;
 
+export const unitStatusValues = [
+  "DRAFT",
+  "PUBLISHED",
+  "ARCHIVED",
+  "DELETED",
+] as const;
+
 export const UnitVisibility = {
   PUBLIC: "PUBLIC",
   UNLISTED: "UNLISTED",
   PRIVATE: "PRIVATE",
 } as const;
+
+export const unitVisibilityValues = ["PUBLIC", "UNLISTED", "PRIVATE"] as const;
 
 export const unitTypeSchema = t.Union([
   t.Literal("BOOK"),
@@ -98,6 +107,13 @@ export const ContentRating = {
   R_18G: "R_18G",
 } as const;
 
+export const contentRatingValues = [
+  "GENERAL",
+  "R_15",
+  "R_18",
+  "R_18G",
+] as const;
+
 export type ContentRating = (typeof ContentRating)[keyof typeof ContentRating];
 
 export const contentRatingSchema = t.Union([
@@ -119,6 +135,14 @@ export const AiDisclosureMode = {
   MACHINE_GENERATED: "MACHINE_GENERATED",
 } as const;
 
+export const aiDisclosureModeValues = [
+  "UNKNOWN",
+  "NONE",
+  "AI_ASSISTED",
+  "AI_ORIGINATED",
+  "MACHINE_GENERATED",
+] as const;
+
 export type AiDisclosureMode =
   (typeof AiDisclosureMode)[keyof typeof AiDisclosureMode];
 
@@ -135,6 +159,8 @@ export const CatalogEntryKind = {
   VARIANT: "VARIANT",
   NONE: "NONE",
 } as const;
+
+export const catalogEntryKindValues = ["MAIN", "VARIANT", "NONE"] as const;
 
 export type CatalogEntryKind =
   (typeof CatalogEntryKind)[keyof typeof CatalogEntryKind];

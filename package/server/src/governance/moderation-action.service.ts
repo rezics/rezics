@@ -2,23 +2,23 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import type { ServerDb } from "../db/client";
 import {
   ModerationAction,
-  ModerationActionKind,
-  ModerationActorKind,
-  ModerationAuthority,
-  ModerationStatus,
-  ModerationTargetKind,
+  type ModerationActionKindStorage,
+  type ModerationActorKindStorage,
+  type ModerationAuthorityStorage,
+  type ModerationStatusStorage,
+  type ModerationTargetKindStorage,
 } from "../db/schema";
 
 type ModerationActionCreateInput = {
-  authority: (typeof ModerationAuthority.enumValues)[number];
+  authority: ModerationAuthorityStorage;
   realmUnitId?: string | null;
-  targetKind: (typeof ModerationTargetKind.enumValues)[number];
+  targetKind: ModerationTargetKindStorage;
   targetId: string;
   targetPath?: string | null;
-  actorKind?: (typeof ModerationActorKind.enumValues)[number];
+  actorKind?: ModerationActorKindStorage;
   actorUserId?: string | null;
-  actionKind: (typeof ModerationActionKind.enumValues)[number];
-  resultingStatus?: (typeof ModerationStatus.enumValues)[number] | null;
+  actionKind: ModerationActionKindStorage;
+  resultingStatus?: ModerationStatusStorage | null;
   resultingLocked?: boolean | null;
   reasonCode: string;
   reasonText?: string | null;

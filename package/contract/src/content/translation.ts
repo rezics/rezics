@@ -3,6 +3,12 @@ import { t } from "elysia";
 import { languageSchema } from "../language";
 import { contentDocSchema, contentDocWriteSchema } from "./doc-v1";
 
+export const contentTranslationStatusValues = [
+  "DRAFT",
+  "PUBLISHED",
+  "ARCHIVED",
+] as const;
+
 export const contentTranslationStatusSchema = t.Union([
   t.Literal("DRAFT"),
   t.Literal("PUBLISHED"),

@@ -1,5 +1,22 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import {
+  aiDisclosureModeValues,
+  catalogEntryKindValues,
+  contentRatingValues,
+  contentTranslationStatusValues,
+  feedbackTypeValues,
+  mainEmailVerificationContractStatusValues,
+  pinKindValues,
+  pollResultVisibilityValues,
+  pollVoteModeValues,
+  postKindValues,
+  unitAliasKindValues,
+  unitAliasStatusValues,
+  unitStatusValues,
+  unitVisibilityValues,
+  userUnitProgressStatusValues,
+} from "@rezics/contract";
 import { describe, expect, test } from "bun:test";
 import * as publicSchema from ".";
 import * as schema from "./schema";
@@ -102,14 +119,26 @@ const expectedSchemaExports = [
   "UserUnitProgressStatus",
   "Zone",
   "createdAt",
+  "accountEnforcementKindStorageValues",
+  "accountEnforcementStateStorageValues",
+  "governanceGrantStateStorageValues",
   "jsonData",
   "ltree",
+  "moderationActionKindStorageValues",
+  "moderationActorKindStorageValues",
+  "moderationAuthorityStorageValues",
+  "moderationCaseStateStorageValues",
+  "moderationScopeStorageValues",
+  "moderationStatusStorageValues",
+  "moderationTargetKindStorageValues",
   "nullableTimestamp",
   "pgEnumName",
   "post_path_label_seq",
+  "realmMemberStateStorageValues",
   "textArray",
   "timestampMs",
   "timestamps",
+  "unitTypeStorageValues",
   "updatedAt",
   "uuidv7",
   "uuidv7PrimaryKey",
@@ -161,6 +190,52 @@ describe("server Drizzle schema exports", () => {
       .map((file) => readFileSync(join(schemaDir, file), "utf8"));
 
     expect(schemaSources.join("\n")).not.toContain(".$type<");
+  });
+
+  test("public enum storage values are owned by contract modules", () => {
+    expect(schema.UnitStatus.enumValues).toEqual([...unitStatusValues]);
+    expect(schema.UnitVisibility.enumValues).toEqual([...unitVisibilityValues]);
+    expect(schema.ContentRating.enumValues).toEqual([...contentRatingValues]);
+    expect(schema.UserUnitProgressStatus.enumValues).toEqual([
+      ...userUnitProgressStatusValues,
+    ]);
+    expect(schema.PostKind.enumValues).toEqual([...postKindValues]);
+    expect(schema.EmailVerificationContractStatus.enumValues).toEqual([
+      ...mainEmailVerificationContractStatusValues,
+    ]);
+    expect(schema.FeedbackType.enumValues).toEqual([...feedbackTypeValues]);
+    expect(schema.UnitAliasKind.enumValues).toEqual([...unitAliasKindValues]);
+    expect(schema.UnitAliasStatus.enumValues).toEqual([
+      ...unitAliasStatusValues,
+    ]);
+    expect(schema.AiDisclosureMode.enumValues).toEqual([
+      ...aiDisclosureModeValues,
+    ]);
+    expect(schema.PinKind.enumValues).toEqual([...pinKindValues]);
+    expect(schema.PollVoteMode.enumValues).toEqual([...pollVoteModeValues]);
+    expect(schema.PollResultVisibility.enumValues).toEqual([
+      ...pollResultVisibilityValues,
+    ]);
+    expect(schema.CatalogEntryKind.enumValues).toEqual([
+      ...catalogEntryKindValues,
+    ]);
+    expect(schema.ContentTranslationStatus.enumValues).toEqual([
+      ...contentTranslationStatusValues,
+    ]);
+  });
+
+  test("application code does not derive public types from Drizzle enum objects", () => {
+    const sourceRoots = [
+      join(import.meta.dir, "../../governance"),
+      join(import.meta.dir, "../../unit-alias-record"),
+    ];
+    const sources = sourceRoots.flatMap((dir) =>
+      readdirSync(dir)
+        .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"))
+        .map((file) => readFileSync(join(dir, file), "utf8")),
+    );
+
+    expect(sources.join("\n")).not.toContain(".enumValues");
   });
 
   test("known composite foreign keys use table callback builders", () => {

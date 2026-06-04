@@ -130,6 +130,13 @@ export const mainEmailVerificationContractStatusSchema = t.Union([
   t.Literal("VERIFIED"),
   t.Literal("EXPIRED"),
 ]);
+
+export const mainEmailVerificationContractStatusValues = [
+  "PENDING",
+  "VERIFIED",
+  "EXPIRED",
+] as const;
+
 export type MainEmailVerificationContractStatus =
   (typeof mainEmailVerificationContractStatusSchema)["static"];
 

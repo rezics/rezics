@@ -2,6 +2,7 @@ import type {
   CreateUnitAliasInput,
   PatchUnitAliasPinInput,
   RezicsSessionClaims,
+  UnitAliasStatus,
   UnitAliasListQuery,
   UpdateUnitAliasInput,
 } from "@rezics/contract";
@@ -9,12 +10,7 @@ import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { and, asc, desc, eq, gt, ilike, or, sql, type SQL } from "drizzle-orm";
 import { serverJobProducer } from "../job/job-boundary";
 import { isAdminRole, verifyAdminFromDb } from "../middleware";
-import {
-  Unit,
-  UnitAlias,
-  UnitAliasStatus as UnitAliasStatusEnum,
-  UnitAliasVote,
-} from "../db/schema";
+import { Unit, UnitAlias, UnitAliasVote } from "../db/schema";
 import type { ServerDb } from "../db/client";
 import { hasAuthorityOver } from "../unit/authority";
 import { AppError, forbidden, notFound } from "../utils/errors";
@@ -23,7 +19,7 @@ import { normalizeUnitAliasValue, trimUnitAliasValue } from "./normalizer";
 export const ALIAS_VISIBILITY_THRESHOLD = -100;
 
 type UnitAliasRow = typeof UnitAlias.$inferSelect;
-type UnitAliasStatusStorage = (typeof UnitAliasStatusEnum.enumValues)[number];
+type UnitAliasStatusStorage = UnitAliasStatus;
 type UnitAliasScoreTx = Pick<ServerDb, "select" | "update">;
 
 async function patchAliasSearchDocuments(unitId: string): Promise<void> {

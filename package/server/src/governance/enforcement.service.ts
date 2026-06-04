@@ -8,7 +8,7 @@ import { revokeAuthSessionsForAuthUser } from "../auth-boundary/auth-internal.cl
 import type { ServerDb } from "../db/client";
 import {
   AccountEnforcement,
-  AccountEnforcementKind as AccountEnforcementKindEnum,
+  type AccountEnforcementKindStorage,
   User,
 } from "../db/schema";
 import { broadcast } from "../notify-boundary/notify-boundary.client";
@@ -19,8 +19,7 @@ import {
 } from "./moderation-action.service";
 import type { AccountEnforcementRow, GovernanceListOptions } from "./types";
 
-type EnforcementKindStorage =
-  (typeof AccountEnforcementKindEnum.enumValues)[number];
+type EnforcementKindStorage = AccountEnforcementKindStorage;
 type EnforcementActionResult = { id: string };
 type EnforcementTx = Pick<ServerDb, "select" | "insert" | "update">;
 

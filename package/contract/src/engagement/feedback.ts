@@ -10,9 +10,14 @@ import {
   paginationLimitSchema,
 } from "../pagination";
 
-/**
- * Feedback type enum (mirrors Prisma FeedbackType)
- */
+export const feedbackTypeValues = [
+  "REPORT",
+  "BUG",
+  "FEATURE",
+  "OTHER",
+] as const;
+
+/** Feedback type vocabulary shared by client contracts and storage. */
 export const feedbackTypeSchema = t.Union([
   t.Literal("REPORT"),
   t.Literal("BUG"),

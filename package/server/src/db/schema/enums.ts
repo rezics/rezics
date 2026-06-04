@@ -1,5 +1,23 @@
+import {
+  aiDisclosureModeValues,
+  catalogEntryKindValues,
+  contentRatingValues,
+  contentTranslationStatusValues,
+  feedbackTypeValues,
+  mainEmailVerificationContractStatusValues,
+  pinKindValues,
+  pollResultVisibilityValues,
+  pollVoteModeValues,
+  postKindValues,
+  unitAliasKindValues,
+  unitAliasStatusValues,
+  unitStatusValues,
+  unitVisibilityValues,
+  userUnitProgressStatusValues,
+} from "@rezics/contract";
 import { pgEnum } from "drizzle-orm/pg-core";
-export const UnitType = pgEnum("UnitType", [
+
+export const unitTypeStorageValues = [
   "BOOK",
   "GAME",
   "MEDIA",
@@ -19,99 +37,87 @@ export const UnitType = pgEnum("UnitType", [
   "LABEL",
   "POLL",
   "COMMENT",
-]);
+] as const;
 
-export const UnitStatus = pgEnum("UnitStatus", [
-  "DRAFT",
-  "PUBLISHED",
-  "ARCHIVED",
-  "DELETED",
-]);
+export type UnitTypeStorage = (typeof unitTypeStorageValues)[number];
 
-export const UnitVisibility = pgEnum("UnitVisibility", [
-  "PUBLIC",
-  "UNLISTED",
-  "PRIVATE",
-]);
+export const UnitType = pgEnum("UnitType", unitTypeStorageValues);
 
-export const ContentRating = pgEnum("ContentRating", [
-  "GENERAL",
-  "R_15",
-  "R_18",
-  "R_18G",
-]);
+export const UnitStatus = pgEnum("UnitStatus", unitStatusValues);
 
-export const UserUnitProgressStatus = pgEnum("UserUnitProgressStatus", [
-  "BACKLOG",
-  "ACTIVE",
-  "PAUSED",
-  "COMPLETED",
-  "DROPPED",
-]);
+export const UnitVisibility = pgEnum("UnitVisibility", unitVisibilityValues);
 
-export const PostKind = pgEnum("PostKind", [
-  "REVIEW",
-  "EXCERPT",
-  "REMARK",
-  "POST",
-  "CHAPTER",
-  "WIKI",
-]);
+export const ContentRating = pgEnum("ContentRating", contentRatingValues);
+
+export const UserUnitProgressStatus = pgEnum(
+  "UserUnitProgressStatus",
+  userUnitProgressStatusValues,
+);
+
+export const PostKind = pgEnum("PostKind", postKindValues);
 
 export const EmailVerificationContractStatus = pgEnum(
   "EmailVerificationContractStatus",
-  ["PENDING", "VERIFIED", "EXPIRED"],
+  mainEmailVerificationContractStatusValues,
 );
 
-export const FeedbackType = pgEnum("FeedbackType", [
-  "REPORT",
-  "BUG",
-  "FEATURE",
-  "OTHER",
-]);
+export const FeedbackType = pgEnum("FeedbackType", feedbackTypeValues);
 
-export const UnitAliasKind = pgEnum("UnitAliasKind", [
-  "COMMON",
-  "ABBREVIATION",
-  "TRANSLITERATION",
-  "ALTERNATE_TITLE",
-  "LEGACY_TITLE",
-  "MISSPELLING",
-  "OTHER",
-]);
+export const UnitAliasKind = pgEnum("UnitAliasKind", unitAliasKindValues);
 
-export const UnitAliasStatus = pgEnum("UnitAliasStatus", ["ACTIVE", "HIDDEN"]);
+export const UnitAliasStatus = pgEnum("UnitAliasStatus", unitAliasStatusValues);
 
-export const AiDisclosureMode = pgEnum("AiDisclosureMode", [
-  "UNKNOWN",
-  "NONE",
-  "AI_ASSISTED",
-  "AI_ORIGINATED",
-  "MACHINE_GENERATED",
-]);
+export const AiDisclosureMode = pgEnum(
+  "AiDisclosureMode",
+  aiDisclosureModeValues,
+);
 
-export const GovernanceGrantState = pgEnum("GovernanceGrantState", [
+export const governanceGrantStateStorageValues = [
   "ACTIVE",
   "EXPIRED",
   "REVOKED",
-]);
+] as const;
 
-export const AccountEnforcementKind = pgEnum("AccountEnforcementKind", [
+export type GovernanceGrantStateStorage =
+  (typeof governanceGrantStateStorageValues)[number];
+
+export const GovernanceGrantState = pgEnum(
+  "GovernanceGrantState",
+  governanceGrantStateStorageValues,
+);
+
+export const accountEnforcementKindStorageValues = [
   "WARNING",
   "SILENCE",
   "SUSPENSION",
   "BAN",
   "RATE_LIMIT",
   "TRUST_RESTRICTION",
-]);
+] as const;
 
-export const AccountEnforcementState = pgEnum("AccountEnforcementState", [
+export type AccountEnforcementKindStorage =
+  (typeof accountEnforcementKindStorageValues)[number];
+
+export const AccountEnforcementKind = pgEnum(
+  "AccountEnforcementKind",
+  accountEnforcementKindStorageValues,
+);
+
+export const accountEnforcementStateStorageValues = [
   "ACTIVE",
   "EXPIRED",
   "REVOKED",
-]);
+] as const;
 
-export const ModerationCaseState = pgEnum("ModerationCaseState", [
+export type AccountEnforcementStateStorage =
+  (typeof accountEnforcementStateStorageValues)[number];
+
+export const AccountEnforcementState = pgEnum(
+  "AccountEnforcementState",
+  accountEnforcementStateStorageValues,
+);
+
+export const moderationCaseStateStorageValues = [
   "NEW",
   "TRIAGED",
   "ASSIGNED",
@@ -121,50 +127,76 @@ export const ModerationCaseState = pgEnum("ModerationCaseState", [
   "REJECTED",
   "ESCALATED",
   "REVIEWING",
-]);
+] as const;
 
-export const RealmMemberState = pgEnum("RealmMemberState", [
+export type ModerationCaseStateStorage =
+  (typeof moderationCaseStateStorageValues)[number];
+
+export const ModerationCaseState = pgEnum(
+  "ModerationCaseState",
+  moderationCaseStateStorageValues,
+);
+
+export const realmMemberStateStorageValues = [
   "ACTIVE",
   "PENDING",
   "MUTED",
   "REMOVED",
   "BANNED",
-]);
+] as const;
 
-export const PinKind = pgEnum("PinKind", [
-  "ACCEPTED_ANSWER",
-  "PINNED",
-  "HIGHLIGHT",
-]);
+export type RealmMemberStateStorage =
+  (typeof realmMemberStateStorageValues)[number];
 
-export const PollVoteMode = pgEnum("PollVoteMode", ["SINGLE", "MULTI"]);
+export const RealmMemberState = pgEnum(
+  "RealmMemberState",
+  realmMemberStateStorageValues,
+);
 
-export const PollResultVisibility = pgEnum("PollResultVisibility", [
-  "LIVE",
-  "AFTER_CLOSE",
-]);
+export const PinKind = pgEnum("PinKind", pinKindValues);
 
-export const CatalogEntryKind = pgEnum("CatalogEntryKind", [
-  "MAIN",
-  "VARIANT",
-  "NONE",
-]);
+export const PollVoteMode = pgEnum("PollVoteMode", pollVoteModeValues);
 
-export const ContentTranslationStatus = pgEnum("ContentTranslationStatus", [
-  "DRAFT",
-  "PUBLISHED",
-  "ARCHIVED",
-]);
+export const PollResultVisibility = pgEnum(
+  "PollResultVisibility",
+  pollResultVisibilityValues,
+);
 
-export const ModerationStatus = pgEnum("ModerationStatus", [
+export const CatalogEntryKind = pgEnum(
+  "CatalogEntryKind",
+  catalogEntryKindValues,
+);
+
+export const ContentTranslationStatus = pgEnum(
+  "ContentTranslationStatus",
+  contentTranslationStatusValues,
+);
+
+export const moderationStatusStorageValues = [
   "APPROVED",
   "PENDING",
   "REMOVED",
-]);
+] as const;
 
-export const ModerationScope = pgEnum("ModerationScope", ["PLATFORM", "REALM"]);
+export type ModerationStatusStorage =
+  (typeof moderationStatusStorageValues)[number];
 
-export const ModerationTargetKind = pgEnum("ModerationTargetKind", [
+export const ModerationStatus = pgEnum(
+  "ModerationStatus",
+  moderationStatusStorageValues,
+);
+
+export const moderationScopeStorageValues = ["PLATFORM", "REALM"] as const;
+
+export type ModerationScopeStorage =
+  (typeof moderationScopeStorageValues)[number];
+
+export const ModerationScope = pgEnum(
+  "ModerationScope",
+  moderationScopeStorageValues,
+);
+
+export const moderationTargetKindStorageValues = [
   "UNIT",
   "UNIT_REALM",
   "COMMENT",
@@ -172,22 +204,46 @@ export const ModerationTargetKind = pgEnum("ModerationTargetKind", [
   "ACCOUNT",
   "REALM_MEMBER",
   "FEEDBACK",
-]);
+] as const;
 
-export const ModerationAuthority = pgEnum("ModerationAuthority", [
+export type ModerationTargetKindStorage =
+  (typeof moderationTargetKindStorageValues)[number];
+
+export const ModerationTargetKind = pgEnum(
+  "ModerationTargetKind",
+  moderationTargetKindStorageValues,
+);
+
+export const moderationAuthorityStorageValues = [
   "PLATFORM",
   "REALM",
   "OWNER",
-]);
+] as const;
 
-export const ModerationActorKind = pgEnum("ModerationActorKind", [
+export type ModerationAuthorityStorage =
+  (typeof moderationAuthorityStorageValues)[number];
+
+export const ModerationAuthority = pgEnum(
+  "ModerationAuthority",
+  moderationAuthorityStorageValues,
+);
+
+export const moderationActorKindStorageValues = [
   "USER",
   "SYSTEM",
   "AUTOMATION",
   "IMPORT",
-]);
+] as const;
 
-export const ModerationActionKind = pgEnum("ModerationActionKind", [
+export type ModerationActorKindStorage =
+  (typeof moderationActorKindStorageValues)[number];
+
+export const ModerationActorKind = pgEnum(
+  "ModerationActorKind",
+  moderationActorKindStorageValues,
+);
+
+export const moderationActionKindStorageValues = [
   "APPROVE",
   "REMOVE",
   "RESTORE",
@@ -209,4 +265,12 @@ export const ModerationActionKind = pgEnum("ModerationActionKind", [
   "ESCALATE",
   "REVERSE",
   "NOTE",
-]);
+] as const;
+
+export type ModerationActionKindStorage =
+  (typeof moderationActionKindStorageValues)[number];
+
+export const ModerationActionKind = pgEnum(
+  "ModerationActionKind",
+  moderationActionKindStorageValues,
+);

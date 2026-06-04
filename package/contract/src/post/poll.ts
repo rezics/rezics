@@ -5,6 +5,8 @@ import { t } from "elysia";
 // ============================================================
 
 /** How many options a voter may hold at once. */
+export const pollVoteModeValues = ["SINGLE", "MULTI"] as const;
+
 export const pollVoteModeSchema = t.Union([
   t.Literal("SINGLE"),
   t.Literal("MULTI"),
@@ -13,6 +15,8 @@ export const pollVoteModeSchema = t.Union([
 export type PollVoteMode = (typeof pollVoteModeSchema)["static"];
 
 /** When tallies become readable to non-privileged callers. */
+export const pollResultVisibilityValues = ["LIVE", "AFTER_CLOSE"] as const;
+
 export const pollResultVisibilitySchema = t.Union([
   t.Literal("LIVE"),
   t.Literal("AFTER_CLOSE"),

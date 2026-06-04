@@ -275,7 +275,7 @@ databases may be reset and reseeded.
 - [x] 2.7 Establish JSON column typing rules in schema helpers: default to
   opaque JSON transport; allow `.$type<T>()` only when `T` is imported/inferred
   from `@rezics/contract` or a storage-owned domain type such as JWK.
-- [ ] 2.8 Move public enum value ownership out of ORM-generated types. For every
+- [x] 2.8 Move public enum value ownership out of ORM-generated types. For every
   enum used outside backend implementation, decide whether the canonical values
   live in `@rezics/contract` or a domain-neutral constants module, then make
   Drizzle schema consume that source.
@@ -297,15 +297,15 @@ databases may be reset and reseeded.
   output folder.
 - [x] 3.3 For `server`, create an ordered custom SQL migration before the baseline
   init that runs `CREATE EXTENSION IF NOT EXISTS ltree;`.
-- [ ] 3.4 Preserve required server helper SQL in custom migrations, including
+- [x] 3.4 Preserve required server helper SQL in custom migrations, including
   `rezics_to_base36`, `post_path_label_seq` if still needed, `ltree` path
   operations, partial unique indexes for single-choice poll votes, and special
   GiST/GIN indexes.
-- [ ] 3.5 Decide which indexes can be expressed in Drizzle v1 `index()` /
+- [x] 3.5 Decide which indexes can be expressed in Drizzle v1 `index()` /
   `uniqueIndex()` builders and which must stay as custom SQL. Use official
   index docs as the reference:
   https://orm.drizzle.team/docs/indexes-constraints.
-- [ ] 3.6 Generate a single baseline init migration per package from the Drizzle
+- [x] 3.6 Generate a single baseline init migration per package from the Drizzle
   schema. Inspect generated SQL manually for table names, enum names, FK
   actions, default values, indexes, and casing.
 - [x] 3.7 Ensure `reaction` and `ranking` switch from `gen_random_uuid()` to

@@ -28,6 +28,15 @@ export const PostKind = {
   WIKI: "WIKI",
 } as const;
 
+export const postKindValues = [
+  "REVIEW",
+  "EXCERPT",
+  "REMARK",
+  "POST",
+  "CHAPTER",
+  "WIKI",
+] as const;
+
 export type PostKind = (typeof PostKind)[keyof typeof PostKind];
 
 export const postKindLiterals = t.Union([
@@ -48,6 +57,12 @@ export const PinKind = {
   PINNED: "PINNED",
   HIGHLIGHT: "HIGHLIGHT",
 } as const;
+
+export const pinKindValues = [
+  "ACCEPTED_ANSWER",
+  "PINNED",
+  "HIGHLIGHT",
+] as const;
 
 export type PinKind = (typeof PinKind)[keyof typeof PinKind];
 

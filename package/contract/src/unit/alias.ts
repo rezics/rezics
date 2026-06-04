@@ -1,6 +1,16 @@
 import { t } from "elysia";
 import { paginationLimitSchema } from "../pagination";
 
+export const unitAliasKindValues = [
+  "COMMON",
+  "ABBREVIATION",
+  "TRANSLITERATION",
+  "ALTERNATE_TITLE",
+  "LEGACY_TITLE",
+  "MISSPELLING",
+  "OTHER",
+] as const;
+
 export const unitAliasKindLiterals = t.Union([
   t.Literal("COMMON"),
   t.Literal("ABBREVIATION"),
@@ -12,6 +22,8 @@ export const unitAliasKindLiterals = t.Union([
 ]);
 
 export type UnitAliasKind = (typeof unitAliasKindLiterals)["static"];
+
+export const unitAliasStatusValues = ["ACTIVE", "HIDDEN"] as const;
 
 export const unitAliasStatusLiterals = t.Union([
   t.Literal("ACTIVE"),
