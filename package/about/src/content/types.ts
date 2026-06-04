@@ -6,6 +6,18 @@ export type ContentSection = {
   body: string;
 };
 
+export type ProductFeature = {
+  title: string;
+  body: string;
+};
+
+export type ProductEntry = {
+  eyebrow: string;
+  name: string;
+  summary: string;
+  features: ProductFeature[];
+};
+
 export type AboutPageFrontmatter = {
   title: string;
   description: string;
@@ -16,4 +28,6 @@ export type AboutPageFrontmatter = {
   };
   primaryCtaPage?: AboutPageId;
   sections: ContentSection[];
+  storySections?: ContentSection[];
+  products?: ProductEntry[];
 };

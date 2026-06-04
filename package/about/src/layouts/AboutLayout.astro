@@ -1,5 +1,5 @@
 ---
-import CatalogConstellation from "../components/CatalogConstellation.astro";
+import RezicsArchitectureGraph from "../components/RezicsArchitectureGraph.astro";
 import type { AboutPageFrontmatter } from "../content/types";
 import {
   ABOUT_LOCALE_META,
@@ -93,7 +93,7 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
       </div>
     </header>
     <main>
-      <section class="hero">
+      <section class={`hero hero-${page}`}>
         <div class="hero-copy">
           <p class="eyebrow">{frontmatter.hero.eyebrow}</p>
           <h1>{frontmatter.hero.heading}</h1>
@@ -109,7 +109,7 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
             }
           </div>
         </div>
-        <CatalogConstellation />
+        <RezicsArchitectureGraph />
       </section>
       <div class="section-grid">
         {
@@ -122,6 +122,42 @@ const alternateLinks = ABOUT_LOCALES.map((alternateLocale) => ({
           ))
         }
       </div>
+      {
+        frontmatter.storySections?.length ? (
+          <div class="story-stack">
+            {frontmatter.storySections.map((section) => (
+              <section class="story-section">
+                <p class="eyebrow">{section.eyebrow}</p>
+                <h2>{section.title}</h2>
+                <p>{section.body}</p>
+              </section>
+            ))}
+          </div>
+        ) : null
+      }
+      {
+        frontmatter.products?.length ? (
+          <div class="product-stack">
+            {frontmatter.products.map((product) => (
+              <section class="product-section">
+                <p class="eyebrow">{product.eyebrow}</p>
+                <div class="product-section-header">
+                  <h2>{product.name}</h2>
+                  <p>{product.summary}</p>
+                </div>
+                <div class="product-feature-grid">
+                  {product.features.map((feature) => (
+                    <article class="product-feature">
+                      <h3>{feature.title}</h3>
+                      <p>{feature.body}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : null
+      }
       <article class="mdx-prose">
         <slot />
       </article>

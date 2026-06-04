@@ -19,6 +19,29 @@ const pageCollection = defineCollection({
       })
       .array()
       .min(1),
+    storySections: z
+      .object({
+        eyebrow: z.string(),
+        title: z.string(),
+        body: z.string(),
+      })
+      .array()
+      .optional(),
+    products: z
+      .object({
+        eyebrow: z.string(),
+        name: z.string(),
+        summary: z.string(),
+        features: z
+          .object({
+            title: z.string(),
+            body: z.string(),
+          })
+          .array()
+          .min(1),
+      })
+      .array()
+      .optional(),
   }),
 });
 

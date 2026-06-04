@@ -2,6 +2,10 @@ import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
+  REZICS_ARCHITECTURE_DOT,
+  REZICS_ARCHITECTURE_NODE_LABELS,
+} from "./components/rezicsArchitectureGraph";
+import {
   ABOUT_LOCALES,
   ABOUT_PAGES,
   type AboutLocale,
@@ -57,6 +61,7 @@ describe("@rezics/about locale contract", () => {
         );
         expect(frontmatterBlock(source)).toContain("hero:");
         expect(frontmatterBlock(source)).toContain("sections:");
+        expect(frontmatterBlock(source)).toContain("storySections:");
         expect(source).toContain("\n## ");
       }
     }
@@ -66,7 +71,59 @@ describe("@rezics/about locale contract", () => {
     for (const locale of ABOUT_LOCALES) {
       const source = await readMdxSource(locale, "home");
       expect(frontmatterBlock(source)).toContain('primaryCtaPage: "product"');
+      expect(source).toContain("inherited · create · spread");
+      expect(source.toLowerCase()).toContain("wiki");
     }
+  });
+
+  test("keeps home and product narratives structurally distinct", async () => {
+    for (const locale of ABOUT_LOCALES) {
+      const homeSource = await readMdxSource(locale, "home");
+      const productSource = await readMdxSource(locale, "product");
+
+      expect(frontmatterBlock(homeSource)).not.toContain("products:");
+      expect(frontmatterBlock(productSource)).toContain("products:");
+      expect(productSource).toContain('name: "Rezics"');
+    }
+  });
+
+  test("keeps home narrative focused on born-digital indexing pressure", async () => {
+    const source = await readMdxSource("en", "home");
+
+    expect(source).toContain("Web novels");
+    expect(source).toContain("born-digital books");
+    expect(source).toContain("As creation gets easier");
+    expect(source).toContain("Tag-shelf discovery");
+  });
+
+  test("keeps product narrative focused on Rezics product surfaces", async () => {
+    const source = await readMdxSource("en", "product");
+
+    for (const expected of [
+      "Catalog",
+      "Reviews",
+      "Shelves",
+      "Tags",
+      "Wiki",
+      "Realms",
+    ]) {
+      expect(source).toContain(`title: "${expected}"`);
+    }
+  });
+});
+
+describe("@rezics/about architecture graph", () => {
+  test("contains the required product relationship nodes", () => {
+    for (const label of REZICS_ARCHITECTURE_NODE_LABELS) {
+      expect(REZICS_ARCHITECTURE_DOT).toContain(label);
+    }
+  });
+
+  test("keeps realm and realm-tag relationships explicit", () => {
+    expect(REZICS_ARCHITECTURE_DOT).toContain("Realm -> RealmTag");
+    expect(REZICS_ARCHITECTURE_DOT).toContain("RealmTag -> Tag");
+    expect(REZICS_ARCHITECTURE_DOT).toContain("RealmTag -> WorkUnit");
+    expect(REZICS_ARCHITECTURE_DOT).toContain("does not imply");
   });
 });
 

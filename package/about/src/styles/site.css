@@ -205,13 +205,31 @@ h2 {
   color: var(--colors-text-primary);
 }
 
-.catalog-constellation {
+.architecture-graph {
   margin: 0;
   min-width: 0;
 }
 
-.constellation-shell {
-  position: relative;
+.architecture-graph figcaption {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.architecture-graph figcaption span:first-child {
+  color: var(--colors-text-primary);
+  font-size: clamp(1rem, 1.35vw, 1.12rem);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.architecture-graph figcaption span:last-child {
+  color: var(--colors-text-secondary);
+  font-size: clamp(0.9rem, 1.1vw, 0.96rem);
+  line-height: 1.55;
+}
+
+.architecture-graph-svg {
   min-height: 420px;
   overflow: hidden;
   border: 1px solid var(--colors-border-whisper);
@@ -224,100 +242,43 @@ h2 {
   box-shadow: var(--shadow-soft);
 }
 
-.constellation-shell::before,
-.constellation-shell::after {
-  position: absolute;
-  content: "";
-  inset: 16% 10%;
-  border: 1px solid var(--colors-border-defined);
-  border-radius: 50%;
-  transform: rotate(-11deg);
-}
-
-.constellation-shell::after {
-  inset: 27% 20%;
-  border-color: var(--colors-border-whisper);
-  transform: rotate(18deg);
-}
-
-.constellation-card {
-  position: absolute;
-  z-index: 1;
-  display: grid;
-  width: min(48%, 224px);
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid var(--colors-border-defined);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--colors-surface-base) 94%, transparent);
-  box-shadow: 0 10px 28px rgba(35, 33, 29, 0.1);
-}
-
-.card-work {
-  top: 12%;
-  left: 10%;
-}
-
-.card-realm {
-  top: 42%;
-  right: 9%;
-}
-
-.card-shelf {
-  bottom: 12%;
-  left: 17%;
-}
-
-.card-kicker {
-  color: var(--colors-text-brand);
-  font-size: clamp(0.78rem, 1vw, 0.84rem);
-  font-weight: 650;
-  line-height: 1.4;
-}
-
-.card-title {
-  color: var(--colors-text-primary);
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  font-weight: 650;
-  line-height: 1.4;
-}
-
-.card-line {
+.architecture-graph-svg svg {
   display: block;
   width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--colors-surface-sunken);
+  height: 100%;
+  min-height: 420px;
+  padding: 20px;
 }
 
-.card-line.short {
-  width: 68%;
+.architecture-graph-svg .graph > polygon {
+  fill: transparent;
 }
 
-.constellation-node {
-  position: absolute;
-  z-index: 2;
-  width: 14px;
-  height: 14px;
-  border: 3px solid var(--colors-surface-base);
-  border-radius: 999px;
-  background: var(--colors-brand-fill);
-  box-shadow: 0 0 0 1px var(--colors-border-defined);
+.architecture-graph-svg .node polygon {
+  fill: color-mix(in srgb, var(--colors-surface-base) 95%, transparent);
+  stroke: var(--colors-border-defined);
 }
 
-.node-one {
-  top: 28%;
-  right: 32%;
+.architecture-graph-svg .node text {
+  fill: var(--colors-text-primary);
+  font-family: inherit;
+  font-size: clamp(0.78rem, 0.92vw, 0.88rem);
+  line-height: 1.3;
 }
 
-.node-two {
-  bottom: 30%;
-  left: 38%;
+.architecture-graph-svg .edge path {
+  stroke: var(--colors-text-tertiary);
 }
 
-.node-three {
-  top: 52%;
-  left: 20%;
+.architecture-graph-svg .edge polygon {
+  fill: var(--colors-text-tertiary);
+  stroke: var(--colors-text-tertiary);
+}
+
+.architecture-graph-svg .edge text {
+  fill: var(--colors-text-secondary);
+  font-family: inherit;
+  font-size: clamp(0.7rem, 0.8vw, 0.78rem);
 }
 
 .section-grid {
@@ -331,6 +292,87 @@ h2 {
   min-width: 0;
   padding-top: 28px;
   border-top: 1px solid var(--colors-border-defined);
+}
+
+.story-stack,
+.product-stack {
+  display: grid;
+  gap: 28px;
+  padding: 8px min(7vw, 72px) 72px;
+}
+
+.story-section {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.32fr) minmax(0, 0.68fr);
+  gap: min(6vw, 56px);
+  padding-top: 28px;
+  border-top: 1px solid var(--colors-border-whisper);
+}
+
+.story-section .eyebrow {
+  margin-bottom: 0;
+}
+
+.story-section h2,
+.story-section p:not(.eyebrow),
+.product-section-header h2,
+.product-section-header p,
+.product-feature h3,
+.product-feature p {
+  margin-bottom: 0;
+}
+
+.story-section p:not(.eyebrow),
+.product-section-header p,
+.product-feature p {
+  color: var(--colors-text-secondary);
+}
+
+.story-section p:not(.eyebrow),
+.product-section-header p {
+  font-size: clamp(1rem, 1.45vw, 1.12rem);
+}
+
+.product-section {
+  display: grid;
+  gap: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--colors-border-defined);
+}
+
+.product-section-header {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.36fr) minmax(0, 0.64fr);
+  gap: min(6vw, 56px);
+  align-items: start;
+}
+
+.product-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.product-feature {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--colors-border-whisper);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--colors-surface-base) 82%, transparent);
+}
+
+.product-feature h3 {
+  color: var(--colors-text-primary);
+  font-size: clamp(0.96rem, 1.12vw, 1.04rem);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.product-feature p {
+  font-size: clamp(0.9rem, 1vw, 0.96rem);
+  line-height: 1.55;
 }
 
 .mdx-prose {
@@ -381,13 +423,20 @@ h2 {
     padding-top: 40px;
   }
 
-  .constellation-shell {
+  .architecture-graph-svg,
+  .architecture-graph-svg svg {
     min-height: 300px;
   }
 
   .section-grid {
     grid-template-columns: 1fr;
     gap: 32px;
+  }
+
+  .story-section,
+  .product-section-header,
+  .product-feature-grid {
+    grid-template-columns: 1fr;
   }
 
   .site-footer {
@@ -399,6 +448,8 @@ h2 {
   .site-header,
   .hero,
   .section-grid,
+  .story-stack,
+  .product-stack,
   .mdx-prose,
   .site-footer {
     padding-left: 20px;
@@ -414,11 +465,12 @@ h2 {
     width: 100%;
   }
 
-  .constellation-card {
-    width: 66%;
+  .architecture-graph-svg {
+    min-height: 260px;
   }
 
-  .card-realm {
-    right: 6%;
+  .architecture-graph-svg svg {
+    min-height: 260px;
+    padding: 12px;
   }
 }
