@@ -1,4 +1,4 @@
-import type { Prisma } from "#/prisma/client";
+import type { Link, Unit, UnitTranslation } from "../db/schema";
 
 export const linkInclude = {
   unit: {
@@ -6,8 +6,12 @@ export const linkInclude = {
       translations: true,
     },
   },
-} satisfies Prisma.LinkInclude;
+} as const;
 
-export type LinkWithRelations = Prisma.LinkGetPayload<{
-  include: typeof linkInclude;
-}>;
+export type LinkWithRelations = typeof Link.$inferSelect & {
+  unit?:
+    | (typeof Unit.$inferSelect & {
+        translations?: Array<typeof UnitTranslation.$inferSelect>;
+      })
+    | null;
+};

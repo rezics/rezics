@@ -8,7 +8,6 @@ import {
   logStartupBanner,
 } from "@rezics/shared/observability";
 import { Elysia } from "elysia";
-import { Prisma } from "#/prisma/client";
 import { activityApi } from "./activity";
 import { accountOperationsAdminApi } from "./admin-account";
 import { adminRepairJobApi } from "./admin-repair-job";
@@ -81,6 +80,12 @@ import { zoneApi } from "./zone/zone.api";
 import "dotenv/config";
 
 const { isDev } = getProdState();
+
+function readDatabaseErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== "object") return null;
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : null;
+}
 
 const app = new Elysia();
 const port = env.PORT ? Number(env.PORT) : 3000;
@@ -157,39 +162,45 @@ const configuredApp = app
         message: error.message,
         ...(error.details ? { detail: error.details } : {}),
       };
-    } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      const prismaStatusMap: Record<string, number> = {
-        P2025: 404,
-        P2002: 409,
-        P2003: 400,
-        P2014: 400,
+    }
+
+    const databaseCode = readDatabaseErrorCode(error);
+    if (databaseCode) {
+      const databaseStatusMap: Record<string, number> = {
+        "23505": 409,
+        "23503": 400,
+        "23502": 400,
+        "23514": 400,
+        "22P02": 400,
       };
-      set.status = prismaStatusMap[error.code] ?? 500;
+      const status = databaseStatusMap[databaseCode];
+      if (status) {
+        set.status = status;
 
-      const modelName =
-        (error.meta?.["modelName"] as string | undefined) ??
-        (error.meta?.["model"] as string | undefined);
-      const target = error.meta?.["target"] as string[] | undefined;
+        const constraint = (error as { constraint?: unknown }).constraint;
+        const table = (error as { table?: unknown }).table;
 
-      const humanMessages: Record<string, string> = {
-        P2025: `${modelName ?? "Record"} not found`,
-        P2002: `${modelName ?? "Record"} already exists`,
-        P2003: `Related ${modelName ?? "record"} not found`,
-        P2014: `Required relation on ${modelName ?? "record"} is missing`,
-      };
+        const humanMessages: Record<string, string> = {
+          "23505": "Record already exists",
+          "23503": "Related record not found",
+          "23502": "Required field is missing",
+          "23514": "Database constraint violation",
+          "22P02": "Invalid database input",
+        };
 
-      return {
-        status: set.status,
-        code,
-        message: humanMessages[error.code] ?? "Database error",
-        detail: {
-          prisma: {
-            code: error.code,
-            ...(modelName && { model: modelName }),
-            ...(target && { target }),
+        return {
+          status: set.status,
+          code,
+          message: humanMessages[databaseCode] ?? "Database error",
+          detail: {
+            database: {
+              code: databaseCode,
+              ...(typeof table === "string" && { table }),
+              ...(typeof constraint === "string" && { constraint }),
+            },
           },
-        },
-      };
+        };
+      }
     }
 
     set.status ||= 500;

@@ -1,41 +1,64 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 import { AppError } from "@/utils/errors";
+import type {
+  CollectionRepository,
+  CollectionService,
+} from "./collection.service";
+
+const enqueueMock = mock(async () => ({ status: "created" }));
 
 mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {
-    enqueue: mock(async () => ({ status: "created" })),
+    enqueue: enqueueMock,
   },
 }));
 
-installPrismaClientMock();
+function createRepositoryStub(
+  overrides: Partial<CollectionRepository> = {},
+): CollectionRepository {
+  return {
+    findFavoritesShelfId: mock(async () => null),
+    getUnitTarget: mock(async (_targetId: string) => ({
+      type: "BOOK" as const,
+      targetUnitId: null,
+      postKind: null,
+    })),
+    listUnitTargets: mock(async (targetIds: string[]) =>
+      targetIds.map((id) => ({
+        id,
+        type: "BOOK" as const,
+        targetUnitId: null,
+        postKind: null,
+      })),
+    ),
+    applyCollectionMetadata: mock(async () => {}),
+    collectToShelves: mock(async () => ({ savedTo: [], isNew: false })),
+    hasShelfUnit: mock(async () => false),
+    removeFavorite: mock(async () => {}),
+    addFavorite: mock(async () => {}),
+    listDirectShelfIds: mock(async () => []),
+    listReviewShelfIds: mock(async () => []),
+    listShelfTitles: mock(async () => []),
+    ...overrides,
+  };
+}
 
-const unitFindFirstMock = mock(async () => null as { id: string } | null);
-const unitFindUniqueOrThrowMock = mock(async () => ({
-  type: "BOOK",
-  post: null,
-}));
-
-Object.assign(prismaMock, {
-  unit: {
-    findFirst: unitFindFirstMock,
-    findUniqueOrThrow: unitFindUniqueOrThrowMock,
-  },
-});
+async function createService(repository: CollectionRepository) {
+  const module = await import("./collection.service");
+  return new module.CollectionService(repository) as CollectionService;
+}
 
 afterEach(() => {
-  unitFindFirstMock.mockClear();
-  unitFindUniqueOrThrowMock.mockClear();
-  unitFindFirstMock.mockResolvedValue(null);
+  enqueueMock.mockClear();
 });
 
 describe("CollectionService — missing favorites shelf", () => {
   test("toggleFavorite throws 404 with system_shelf_missing when shelf absent", async () => {
-    const { collectionService } = await import("./collection.service");
+    const service = await createService(createRepositoryStub());
 
     let captured: AppError | null = null;
     try {
-      await collectionService.toggleFavorite("user-x", "unit-x");
+      await service.toggleFavorite("user-x", "unit-x");
     } catch (err) {
       captured = err as AppError;
     }
@@ -47,11 +70,11 @@ describe("CollectionService — missing favorites shelf", () => {
   });
 
   test("getCollectionStatus throws 404 when favorites shelf absent", async () => {
-    const { collectionService } = await import("./collection.service");
+    const service = await createService(createRepositoryStub());
 
     let captured: AppError | null = null;
     try {
-      await collectionService.getCollectionStatus("user-y", "unit-y");
+      await service.getCollectionStatus("user-y", "unit-y");
     } catch (err) {
       captured = err as AppError;
     }
@@ -64,23 +87,10 @@ describe("CollectionService — missing favorites shelf", () => {
 
 describe("CollectionService — user collection metadata", () => {
   test("collect writes metadata to the resolved interaction target", async () => {
-    const upsert = mock(async () => ({}));
-    const deleteMany = mock(async () => ({ count: 0 }));
-    const createMany = mock(async () => ({ count: 1 }));
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
 
-    Object.assign(prismaMock, {
-      unit: {
-        findUniqueOrThrow: unitFindUniqueOrThrowMock,
-      },
-      $transaction: async (fn: any) =>
-        fn({
-          userUnitCollection: { upsert },
-          userTagApplication: { deleteMany, createMany },
-        }),
-    });
-
-    const { collectionService } = await import("./collection.service");
-    const result = await collectionService.collect("user-1", {
+    const result = await service.collect("user-1", {
       targetId: "book-1",
       shelfIds: [],
       tagUnitIds: ["tag-1"],
@@ -88,81 +98,48 @@ describe("CollectionService — user collection metadata", () => {
     });
 
     expect(result).toEqual({ savedTo: [], isNew: false });
-    expect(upsert).toHaveBeenCalledWith({
-      where: { userId_unitId: { userId: "user-1", unitId: "book-1" } },
-      create: {
-        userId: "user-1",
-        unitId: "book-1",
-        searchText: "private alias",
+    expect(repository.applyCollectionMetadata).toHaveBeenCalledWith({
+      userId: "user-1",
+      unitId: "book-1",
+      tagUnitIds: ["tag-1"],
+      searchText: "private alias",
+    });
+    expect(repository.collectToShelves).toHaveBeenCalledWith({
+      userId: "user-1",
+      resolved: {
+        parentUnitId: "book-1",
+        parentKind: "book",
       },
-      update: { searchText: "private alias" },
-    });
-    expect(deleteMany).toHaveBeenCalledWith({
-      where: { userId: "user-1", unitId: "book-1" },
-    });
-    expect(createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          userId: "user-1",
-          unitId: "book-1",
-          tagUnitId: "tag-1",
-          position: "00000000",
-        },
-      ],
-      skipDuplicates: true,
+      variantUnitId: undefined,
+      shelfIds: [],
     });
   });
 
   test("collect stores variant context on the primary shelf unit", async () => {
-    const createMany = mock(async () => ({ count: 1 }));
-    const shelfUpdate = mock(async () => ({}));
-
-    Object.assign(prismaMock, {
-      unit: {
-        findUniqueOrThrow: unitFindUniqueOrThrowMock,
-      },
-      $transaction: async (fn: any) =>
-        fn({
-          userUnitCollection: { upsert: mock(async () => ({})) },
-          userTagApplication: {
-            deleteMany: mock(async () => ({ count: 0 })),
-            createMany: mock(async () => ({ count: 0 })),
-          },
-          shelf: {
-            findFirst: mock(async () => ({ unitId: "shelf-1" })),
-            update: shelfUpdate,
-          },
-          shelfUnit: {
-            findUnique: mock(async () => null),
-            findFirst: mock(async () => null),
-            createMany,
-          },
-        }),
+    const repository = createRepositoryStub({
+      collectToShelves: mock(async () => ({
+        savedTo: ["shelf-1"],
+        isNew: true,
+      })),
     });
+    const service = await createService(repository);
 
-    const { collectionService } = await import("./collection.service");
-    const result = await collectionService.collect("user-1", {
+    const result = await service.collect("user-1", {
       targetId: "main-1",
       variantUnitId: "variant-1",
       shelfIds: ["shelf-1"],
     });
 
     expect(result).toEqual({ savedTo: ["shelf-1"], isNew: true });
-    expect(createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          shelfId: "shelf-1",
-          unitId: "main-1",
-          variantUnitId: "variant-1",
-          kind: "book",
-          position: "V",
-        },
-      ],
-      skipDuplicates: true,
+    expect(repository.collectToShelves).toHaveBeenCalledWith({
+      userId: "user-1",
+      resolved: {
+        parentUnitId: "main-1",
+        parentKind: "book",
+      },
+      variantUnitId: "variant-1",
+      shelfIds: ["shelf-1"],
     });
-    expect(shelfUpdate).toHaveBeenCalledWith({
-      where: { unitId: "shelf-1" },
-      data: { itemCount: { increment: 1 } },
-    });
+    expect(enqueueMock).toHaveBeenCalledTimes(1);
   });
 });

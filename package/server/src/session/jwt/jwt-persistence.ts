@@ -6,22 +6,85 @@ import {
   type JwtPrivateJwk,
   type JwtPublicJwk,
 } from "@rezics/jwt";
-import { type Prisma, prisma } from "#/prisma/client";
-import { getJwtService } from "@/jwt/jwtServiceCache";
+import { desc, eq } from "drizzle-orm";
+import type { CachedJwtService } from "../../jwt/jwtServiceRepository";
+import { getJwtService as getCachedJwtService } from "../../jwt/jwtServiceCache";
+import { Jwks } from "../../db/schema";
 
-function mapRowToRecord(row: {
-  id: string;
-  publicJwk: unknown;
-  privateJwk: unknown;
-  alg: string | null;
-  createdAt: Date;
-  expiresAt: Date | null;
-  jwtService: {
-    issuer: string;
-  };
-}): JwtKeyRecord {
+export type JwksRow = typeof Jwks.$inferSelect;
+
+export type JwksRepository = {
+  list(jwtServiceId: string): Promise<JwksRow[]>;
+  upsert(input: JwksRow): Promise<void>;
+  updateExpiresAt(kid: string, expiresAt: Date | null): Promise<void>;
+  getByKid(kid: string): Promise<JwksRow | undefined>;
+};
+
+export type JwtPersistenceDependencies = {
+  getJwtService?: typeof getCachedJwtService;
+  repository?: JwksRepository;
+};
+
+async function getServerDb() {
+  const { db } = await import("../../db/client");
+  return db;
+}
+
+function createDrizzleJwksRepository(): JwksRepository {
   return {
-    issuer: row.jwtService.issuer,
+    async list(jwtServiceId) {
+      const db = await getServerDb();
+      return db
+        .select()
+        .from(Jwks)
+        .where(eq(Jwks.jwtServiceId, jwtServiceId))
+        .orderBy(desc(Jwks.createdAt));
+    },
+
+    async upsert(input) {
+      const db = await getServerDb();
+      await db
+        .insert(Jwks)
+        .values(input)
+        .onConflictDoUpdate({
+          target: Jwks.id,
+          set: {
+            jwtServiceId: input.jwtServiceId,
+            publicJwk: input.publicJwk,
+            privateJwk: input.privateJwk,
+            alg: input.alg,
+            createdAt: input.createdAt,
+            expiresAt: input.expiresAt,
+          },
+        });
+    },
+
+    async updateExpiresAt(kid, expiresAt) {
+      const db = await getServerDb();
+      await db.update(Jwks).set({ expiresAt }).where(eq(Jwks.id, kid));
+    },
+
+    async getByKid(kid) {
+      const db = await getServerDb();
+      const [row] = await db.select().from(Jwks).where(eq(Jwks.id, kid));
+      return row;
+    },
+  };
+}
+
+function mapRowToRecord(
+  row: {
+    id: string;
+    publicJwk: unknown;
+    privateJwk: unknown;
+    alg: string | null;
+    createdAt: Date;
+    expiresAt: Date | null;
+  },
+  issuer: string,
+): JwtKeyRecord {
+  return {
+    issuer,
     kid: row.id,
     algorithm: (row.alg as JwtAlgorithm | null) ?? JwtAlgorithm.ES256,
     publicJwk: asJwtPublicJwk(row.publicJwk as JwtPublicJwk),
@@ -33,84 +96,59 @@ function mapRowToRecord(row: {
   };
 }
 
-export const serverJwtPersistence: JwtKeyPersistence = {
-  async listKeys({ issuer }) {
-    const service = await getJwtService("server-local");
-    if (issuer !== service.issuer) {
-      return [];
-    }
+export function createServerJwtPersistence(
+  dependencies: JwtPersistenceDependencies = {},
+): JwtKeyPersistence {
+  const getJwtService = dependencies.getJwtService ?? getCachedJwtService;
+  const repository = dependencies.repository ?? createDrizzleJwksRepository();
 
-    const rows = await prisma.jwks.findMany({
-      where: {
-        jwtServiceId: service.id,
-      },
-      include: {
-        jwtService: {
-          select: {
-            issuer: true,
-          },
-        },
-      },
-      orderBy: [{ createdAt: "desc" }],
-    });
+  return {
+    async listKeys({ issuer }) {
+      const service = await getJwtService("server-local");
+      if (issuer !== service.issuer) {
+        return [];
+      }
 
-    return rows.map(mapRowToRecord);
-  },
-  async saveKey({ issuer, key }) {
-    const service = await getJwtService("server-local");
-    if (issuer !== service.issuer) {
-      throw new Error(`Unsupported issuer ${issuer}`);
-    }
+      const rows = await repository.list(service.id);
 
-    await prisma.jwks.upsert({
-      where: { id: key.kid },
-      update: {
-        jwtServiceId: service.id,
-        publicJwk: key.publicJwk as Prisma.InputJsonValue,
-        privateJwk: key.privateJwk as Prisma.InputJsonValue,
-        alg: key.algorithm,
-        createdAt: key.createdAt,
-        expiresAt: key.expiresAt,
-      },
-      create: {
+      return rows.map((row) => mapRowToRecord(row, service.issuer));
+    },
+    async saveKey({ issuer, key }) {
+      const service = await getJwtService("server-local");
+      if (issuer !== service.issuer) {
+        throw new Error(`Unsupported issuer ${issuer}`);
+      }
+
+      await repository.upsert({
         id: key.kid,
         jwtServiceId: service.id,
-        publicJwk: key.publicJwk as Prisma.InputJsonValue,
-        privateJwk: key.privateJwk as Prisma.InputJsonValue,
+        publicJwk: key.publicJwk,
+        privateJwk: key.privateJwk,
         alg: key.algorithm,
         createdAt: key.createdAt,
         expiresAt: key.expiresAt,
-      },
-    });
-  },
-  async markKeyRetiring({ issuer, kid, expiresAt }) {
-    const service = await getJwtService("server-local");
-    if (issuer !== service.issuer) {
-      throw new Error(`Unsupported issuer ${issuer}`);
-    }
+      });
+    },
+    async markKeyRetiring({ issuer, kid, expiresAt }) {
+      const service = await getJwtService("server-local");
+      if (issuer !== service.issuer) {
+        throw new Error(`Unsupported issuer ${issuer}`);
+      }
 
-    await prisma.jwks.update({
-      where: { id: kid },
-      data: { expiresAt },
-    });
-  },
-  async getKeyByKid({ issuer, kid }) {
-    const service = await getJwtService("server-local");
-    if (issuer !== service.issuer) {
-      return null;
-    }
+      await repository.updateExpiresAt(kid, expiresAt);
+    },
+    async getKeyByKid({ issuer, kid }) {
+      const service = await getJwtService("server-local");
+      if (issuer !== service.issuer) {
+        return null;
+      }
 
-    const row = await prisma.jwks.findUnique({
-      where: { id: kid },
-      include: {
-        jwtService: {
-          select: {
-            issuer: true,
-          },
-        },
-      },
-    });
+      const row = await repository.getByKid(kid);
 
-    return row ? mapRowToRecord(row) : null;
-  },
-};
+      return row ? mapRowToRecord(row, service.issuer) : null;
+    },
+  };
+}
+
+export const serverJwtPersistence: JwtKeyPersistence =
+  createServerJwtPersistence();

@@ -4,7 +4,7 @@ import {
   type MediaLibraryContentDTO,
   RATING_TAGS,
 } from "@rezics/contract";
-import { buildContentStructureTree } from "@/content-structure/mapper";
+import { buildContentStructureTree } from "../content-structure/mapper";
 import type { GameLibraryRow, MediaLibraryRow } from "./types";
 
 const RATING_TAG_SLUGS = new Set<string>(RATING_TAGS);

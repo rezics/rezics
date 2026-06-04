@@ -1,5 +1,6 @@
 import type { JwtPrivateJwk, JwtPublicJwk } from "@rezics/jwt";
-import { prisma } from "#/prisma/client";
+import { and, desc, eq, gt, isNull, or } from "drizzle-orm";
+import { Jwks, JwtService } from "../db/schema";
 
 export type CachedJwksEntry = {
   kid: string;
@@ -22,24 +23,35 @@ export type CachedJwtService = {
   jwks: CachedJwksEntry[];
 };
 
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
 export async function fetchJwtService(
   serviceKey: string,
 ): Promise<CachedJwtService> {
-  const record = await prisma.jwtService.findUnique({
-    where: { serviceKey },
-    include: {
-      jwks: {
-        where: {
-          OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
-        },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
+  const db = await getServerDb();
+  const [record] = await db
+    .select()
+    .from(JwtService)
+    .where(eq(JwtService.serviceKey, serviceKey))
+    .limit(1);
 
   if (!record) {
     throw new Error(`JwtService not found for serviceKey: ${serviceKey}`);
   }
+
+  const jwks = await db
+    .select()
+    .from(Jwks)
+    .where(
+      and(
+        eq(Jwks.jwtServiceId, record.id),
+        or(isNull(Jwks.expiresAt), gt(Jwks.expiresAt, new Date())),
+      ),
+    )
+    .orderBy(desc(Jwks.createdAt));
 
   return {
     id: record.id,
@@ -50,7 +62,7 @@ export async function fetchJwtService(
     jwksPath: record.jwksPath,
     isLocalIssuer: record.isLocalIssuer,
     isActive: record.isActive,
-    jwks: record.jwks.map((row) => ({
+    jwks: jwks.map((row) => ({
       kid: row.id,
       publicJwk: row.publicJwk as unknown as JwtPublicJwk,
       privateJwk: row.privateJwk as unknown as JwtPrivateJwk,

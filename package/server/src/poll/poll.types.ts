@@ -1,26 +1,9 @@
 // Server-only types for the Poll voting domain (Poll + PollOption + PollVote).
 
-import type {
-  Poll,
-  PollOption,
-  Prisma,
-  UnitTranslation,
-} from "#/prisma/client";
+import { Poll, PollOption, UnitTranslation } from "../db/schema";
 
 /** A poll extension row with its options resolved, ordered by position. */
-export type PollWithOptions = Poll & {
-  options: PollOption[];
-  unit?: { translations: UnitTranslation[] } | null;
+export type PollWithOptions = typeof Poll.$inferSelect & {
+  options: (typeof PollOption.$inferSelect)[];
+  unit?: { translations: (typeof UnitTranslation.$inferSelect)[] } | null;
 };
-
-/** Prisma include for fetching a poll with its options in display order. */
-export const pollInclude = {
-  options: {
-    orderBy: [{ position: "asc" }, { optionId: "asc" }],
-  },
-  unit: {
-    include: {
-      translations: true,
-    },
-  },
-} satisfies Prisma.PollInclude;

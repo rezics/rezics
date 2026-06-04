@@ -1,49 +1,47 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import type { GameMediaAdminReadinessRepository } from "./admin-readiness";
 
-installPrismaClientMock();
+const listSystemRequirements = mock(async (_filters: unknown) => []);
 
-function freshMocks() {
-  Object.assign(prismaMock, {
-    entity: {
-      findMany: mock(async () => [
-        {
-          unitId: "platform-windows",
-          unit: {
-            slug: "windows",
-            translations: [{ language: "en", title: "Windows" }],
-          },
-        },
-        {
-          unitId: "platform-steam",
-          unit: {
-            slug: "steam",
-            translations: [{ language: "en", title: "Steam" }],
-          },
-        },
-      ]),
+mock.module("../game-system-requirement/service", () => ({
+  gameSystemRequirementService: {
+    list: listSystemRequirements,
+  },
+}));
+
+const repository = {
+  listPlatformEntities: mock(async () => [
+    {
+      entityUnitId: "platform-windows",
+      slug: "windows",
+      label: "Windows",
+      translations: [{ language: "en", title: "Windows" }],
     },
-    unit: {
-      findMany: mock(async () => [
-        {
-          id: "tag-esrb-teen",
-          slug: "esrb-teen",
-          translations: [{ language: "en", title: "ESRB Teen" }],
-        },
-      ]),
+    {
+      entityUnitId: "platform-steam",
+      slug: "steam",
+      label: "Steam",
+      translations: [{ language: "en", title: "Steam" }],
     },
-    gameSystemRequirement: {
-      findMany: mock(async () => []),
+  ]),
+  listRatingTags: mock(async () => [
+    {
+      id: "tag-esrb-teen",
+      slug: "esrb-teen",
+      translations: [{ language: "en", title: "ESRB Teen" }],
     },
-  });
+  ]),
+} satisfies GameMediaAdminReadinessRepository;
+
+async function readinessService() {
+  const { gameMediaAdminReadinessService } = await import("./admin-readiness");
+  gameMediaAdminReadinessService.repository = repository;
+  return gameMediaAdminReadinessService;
 }
 
 describe("GameMediaAdminReadinessService", () => {
   test("lists admin platform and rating taxonomy surfaces", async () => {
-    freshMocks();
-    const { gameMediaAdminReadinessService } = await import(
-      "./admin-readiness"
-    );
+    const gameMediaAdminReadinessService = await readinessService();
 
     await expect(
       gameMediaAdminReadinessService.listPlatformEntities(),
@@ -76,10 +74,7 @@ describe("GameMediaAdminReadinessService", () => {
   });
 
   test("reports missing taxonomy", async () => {
-    freshMocks();
-    const { gameMediaAdminReadinessService } = await import(
-      "./admin-readiness"
-    );
+    const gameMediaAdminReadinessService = await readinessService();
 
     const diagnostics = await gameMediaAdminReadinessService.diagnostics();
 
@@ -88,19 +83,15 @@ describe("GameMediaAdminReadinessService", () => {
   });
 
   test("delegates requirement rows to the requirement service filters", async () => {
-    freshMocks();
-    const { gameMediaAdminReadinessService } = await import(
-      "./admin-readiness"
-    );
+    listSystemRequirements.mockClear();
+    const gameMediaAdminReadinessService = await readinessService();
 
     await gameMediaAdminReadinessService.listSystemRequirements({
       gameUnitId: "game-1",
     });
 
-    expect(prismaMock.gameSystemRequirement.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ gameUnitId: "game-1" }),
-      }),
-    );
+    expect(listSystemRequirements).toHaveBeenCalledWith({
+      gameUnitId: "game-1",
+    });
   });
 });

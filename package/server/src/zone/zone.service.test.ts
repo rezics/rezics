@@ -1,12 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
-
-process.env.NODE_ENV = "test";
-process.env.DATABASE_URL ??=
-  "postgresql://postgres:postgres@localhost:5432/rezics_book";
+import type { ZoneRepository } from "./zone.service";
 
 const unitRows = new Map<string, { id: string; type: string }>([
   ["realm-1", { id: "realm-1", type: "REALM" }],
@@ -15,6 +8,7 @@ const unitRows = new Map<string, { id: string; type: string }>([
   ["label-1", { id: "label-1", type: "LABEL" }],
   ["unit-1", { id: "unit-1", type: "POST" }],
   ["image-1", { id: "image-1", type: "IMAGE" }],
+  ["wiki-zh", { id: "wiki-zh", type: "POST" }],
 ]);
 const hydratedUnitRows = new Map<string, any>([
   [
@@ -70,19 +64,7 @@ const hydratedUnitRows = new Map<string, any>([
   ],
 ]);
 
-const unitFindManyMock = mock(async ({ where }: any): Promise<any[]> => {
-  if (!where.id?.in) {
-    return [...hydratedUnitRows.values()].filter((row) => row.type === "POST");
-  }
-  const ids = where.id.in as string[];
-  return ids.flatMap((id) => {
-    const hydrated = hydratedUnitRows.get(id);
-    if (hydrated) return [hydrated];
-    const row = unitRows.get(id);
-    return row ? [row] : [];
-  });
-});
-const zoneUpdateMock = mock(
+const updateZoneMock = mock(
   async (): Promise<any> => ({
     unitId: "zone-1",
     filters: {},
@@ -91,75 +73,89 @@ const zoneUpdateMock = mock(
     wiki: null,
     startsAt: null,
     endsAt: null,
-    unit: { translations: [] },
+    unit: { translations: [], supportLanguages: [] },
   }),
-);
-const zoneFindUniqueMock = mock(
-  async (): Promise<any> => ({
-    unitId: "zone-1",
-    filters: {},
-    template: "default",
-    styling: null,
-    wiki: {
-      filters: { realmUnitId: "realm-1" },
-      homepage: {
-        template: "wiki-classic-home",
-        sections: [
-          {
-            id: "featured",
-            kind: "wikiUnitCollection",
-            unitIds: ["wiki-zh"],
-          },
-          { id: "tags", kind: "tagCollection", tagUnitIds: ["tag-1"] },
-          {
-            id: "characters",
-            kind: "entityCollection",
-            entityKinds: ["character"],
-            subjectRoles: ["primary_character"],
-          },
-          { id: "recent", kind: "recentWiki", limit: 1 },
-          {
-            id: "manual",
-            kind: "manualLinks",
-            links: [
-              {
-                kind: "manualLink",
-                href: "/wiki",
-                label: { translations: { en: "Wiki" } },
-              },
-            ],
-          },
-        ],
-      },
-    },
-    startsAt: null,
-    endsAt: null,
-    unit: { translations: [] },
-  }),
-);
-const subjectAttributionFindManyMock = mock(
-  async (): Promise<any[]> => [
-    {
-      entityId: "entity-1",
-      sortOrder: 0,
-      entity: hydratedUnitRows.get("entity-1"),
-    },
-  ],
 );
 
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  unit: {
-    findMany: unitFindManyMock,
+const zoneRow: any = {
+  unitId: "zone-1",
+  filters: {},
+  template: "default",
+  styling: null,
+  wiki: {
+    filters: { realmUnitId: "realm-1" },
+    homepage: {
+      template: "wiki-classic-home",
+      sections: [
+        {
+          id: "featured",
+          kind: "wikiUnitCollection",
+          unitIds: ["wiki-zh"],
+        },
+        { id: "tags", kind: "tagCollection", tagUnitIds: ["tag-1"] },
+        {
+          id: "characters",
+          kind: "entityCollection",
+          entityKinds: ["character"],
+          subjectRoles: ["primary_character"],
+        },
+        { id: "recent", kind: "recentWiki", limit: 1 },
+        {
+          id: "manual",
+          kind: "manualLinks",
+          links: [
+            {
+              kind: "manualLink",
+              href: "/wiki",
+              label: { translations: { en: "Wiki" } },
+            },
+          ],
+        },
+      ],
+    },
   },
-  zone: {
-    findUnique: zoneFindUniqueMock,
-    update: zoneUpdateMock,
-  },
-  subjectAttribution: {
-    findMany: subjectAttributionFindManyMock,
-  },
+  startsAt: null,
+  endsAt: null,
+  unit: { translations: [], supportLanguages: [] },
+};
+
+const findWikiPostsMock = mock(async (input: any): Promise<any[]> => {
+  if (input.unitIds) {
+    return input.unitIds.flatMap(
+      (id: string) => hydratedUnitRows.get(id) ?? [],
+    );
+  }
+  return [hydratedUnitRows.get("wiki-en")].filter(Boolean);
 });
+
+const repository: ZoneRepository = {
+  findUnitRefs: mock(async (ids: string[]) =>
+    ids.flatMap((id) => {
+      const hydrated = hydratedUnitRows.get(id);
+      if (hydrated) return [{ id, type: hydrated.type }];
+      const row = unitRows.get(id);
+      return row ? [row] : [];
+    }),
+  ),
+  getByUnitId: mock(async () => zoneRow),
+  findUnitBySlug: mock(async () => null),
+  createZone: mock(async (data) => ({
+    ...data,
+    unit: { translations: [], supportLanguages: [] },
+  })) as any,
+  updateZone: updateZoneMock,
+  findWikiPosts: findWikiPostsMock,
+  findTags: mock(async (ids: string[]) =>
+    ids.flatMap((id) => hydratedUnitRows.get(id) ?? []),
+  ),
+  findEntitySection: mock(async () => [
+    {
+      entityId: "entity-1",
+      entity: hydratedUnitRows.get("entity-1"),
+    },
+  ]),
+  deleteUnit: mock(async () => {}),
+};
 
 mock.module("@/unit", () => ({
   unitService: {
@@ -174,35 +170,20 @@ mock.module("@/job/job-boundary", () => ({
   },
 }));
 
-mock.module("@/utils/errors", () => ({
-  AppError: class AppError extends Error {
-    status: number;
-    code?: string;
-    details?: unknown;
-
-    constructor(
-      status: number,
-      message: string,
-      options?: { code?: string; details?: unknown },
-    ) {
-      super(message);
-      this.status = status;
-      this.code = options?.code;
-      this.details = options?.details;
-    }
-  },
-}));
-
 const { ZoneService } = await import("./zone.service");
 
 describe("ZoneService wiki config validation", () => {
-  const service = new ZoneService();
+  const service = new ZoneService(repository);
 
   beforeEach(() => {
-    unitFindManyMock.mockClear();
-    zoneUpdateMock.mockClear();
-    zoneFindUniqueMock.mockClear();
-    subjectAttributionFindManyMock.mockClear();
+    for (const value of Object.values(repository)) {
+      const maybeMock = value as { mockClear?: () => void };
+      if (typeof maybeMock.mockClear === "function") {
+        maybeMock.mockClear();
+      }
+    }
+    updateZoneMock.mockClear();
+    findWikiPostsMock.mockClear();
   });
 
   test("persists wiki config when references are valid", async () => {
@@ -253,7 +234,7 @@ describe("ZoneService wiki config validation", () => {
       },
     });
 
-    expect(zoneUpdateMock).toHaveBeenCalled();
+    expect(updateZoneMock).toHaveBeenCalled();
   });
 
   test("rejects invalid LABEL references", async () => {
@@ -274,7 +255,7 @@ describe("ZoneService wiki config validation", () => {
       }),
     ).rejects.toThrow("Wiki Zone config references invalid Units");
 
-    expect(zoneUpdateMock).not.toHaveBeenCalled();
+    expect(updateZoneMock).not.toHaveBeenCalled();
   });
 
   test("rejects manual labels without translations", async () => {
@@ -295,7 +276,7 @@ describe("ZoneService wiki config validation", () => {
       }),
     ).rejects.toThrow("Wiki Zone manual labels require translations");
 
-    expect(zoneUpdateMock).not.toHaveBeenCalled();
+    expect(updateZoneMock).not.toHaveBeenCalled();
   });
 
   test("hydrates wiki homepage sections with public section queries", async () => {
@@ -355,12 +336,11 @@ describe("ZoneService wiki config validation", () => {
       preferredLanguages: ["ja", "en"],
     });
 
-    const featuredQuery = unitFindManyMock.mock.calls.find((call) => {
-      const where = (call[0] as any).where;
-      return where?.id?.in?.includes("wiki-zh");
+    const featuredCall = findWikiPostsMock.mock.calls.find((call) => {
+      const input = call[0] as any;
+      return input.unitIds?.includes("wiki-zh");
     })?.[0] as any;
-    expect(featuredQuery.where.id).toEqual({ in: ["wiki-zh"] });
-    expect(featuredQuery.where.supportLanguages).toBeUndefined();
-    expect(featuredQuery.where.AND).toBeUndefined();
+    expect(featuredCall.unitIds).toEqual(["wiki-zh"]);
+    expect(featuredCall.preferredLanguages).toBeUndefined();
   });
 });

@@ -3,9 +3,14 @@ import {
   type SlugScopeName,
   type SlugScopesResponse,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { SlugScope } from "../db/schema";
 
 const cache = new Map<SlugScopeName, string>();
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 /**
  * Look up all five named slug-scope unit ids and cache them in memory.
@@ -14,9 +19,10 @@ const cache = new Map<SlugScopeName, string>();
  * failure rather than as an empty namespace.
  */
 export async function initSlugScopesCache(): Promise<void> {
-  const rows = await prisma.slugScope.findMany({
-    select: { slug: true, unitId: true },
-  });
+  const db = await getServerDb();
+  const rows = await db
+    .select({ slug: SlugScope.slug, unitId: SlugScope.unitId })
+    .from(SlugScope);
 
   const bySlug = new Map<string, string>(
     rows.map((row) => [row.slug, row.unitId]),

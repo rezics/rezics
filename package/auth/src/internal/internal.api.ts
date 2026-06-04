@@ -1,6 +1,19 @@
 import { randomUUID } from "node:crypto";
 import { Elysia, t } from "elysia";
-import { prisma } from "../auth/prisma";
+import {
+  cleanupStaleRegistrations,
+  createImpersonationSession,
+  deleteAuthRegistration,
+  deleteAuthSessionForUser,
+  deleteAuthSessionsForUser,
+  findAuthUserForRegistrationCancel,
+  findAuthUserId,
+  findImpersonationUsers,
+  findStaleUnverifiedUsers,
+  findVerifiedFactsUser,
+  listActiveAuthSessions,
+  updateAuthUserName,
+} from "../auth/storage";
 import { env } from "../env";
 
 export const authInternalApi = new Elysia({ prefix: "/internal" })
@@ -17,10 +30,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/registration/cancel",
     async ({ body, set }) => {
-      const user = await prisma.user.findUnique({
-        where: { id: body.authUserId },
-        select: { id: true, email: true, emailVerified: true },
-      });
+      const user = await findAuthUserForRegistrationCancel(body.authUserId);
 
       if (!user) {
         return { success: true, canceled: false };
@@ -39,23 +49,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
         };
       }
 
-      await prisma.$transaction([
-        prisma.oAuthAccessToken.deleteMany({ where: { userId: user.id } }),
-        prisma.oAuthRefreshToken.deleteMany({ where: { userId: user.id } }),
-        prisma.oAuthConsent.deleteMany({ where: { userId: user.id } }),
-        prisma.session.deleteMany({ where: { userId: user.id } }),
-        prisma.account.deleteMany({ where: { userId: user.id } }),
-        prisma.verification.deleteMany({
-          where: {
-            OR: [
-              { identifier: user.email },
-              { identifier: user.id },
-              { identifier: { contains: user.email } },
-            ],
-          },
-        }),
-        prisma.user.delete({ where: { id: user.id } }),
-      ]);
+      await deleteAuthRegistration(user);
 
       return { success: true, canceled: true };
     },
@@ -69,16 +63,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/registration/verified-facts",
     async ({ body, set }) => {
-      const user = await prisma.user.findUnique({
-        where: { id: body.authUserId },
-        select: {
-          id: true,
-          email: true,
-          emailVerified: true,
-          updatedAt: true,
-          accounts: { select: { providerId: true } },
-        },
-      });
+      const user = await findVerifiedFactsUser(body.authUserId);
 
       if (!user) {
         set.status = 404;
@@ -127,10 +112,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/users/project-slug",
     async ({ body, set }) => {
-      const user = await prisma.user.findUnique({
-        where: { id: body.authUserId },
-        select: { id: true },
-      });
+      const user = await findAuthUserId(body.authUserId);
 
       if (!user) {
         set.status = 404;
@@ -143,10 +125,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
         };
       }
 
-      await prisma.user.update({
-        where: { id: body.authUserId },
-        data: { name: body.slug },
-      });
+      await updateAuthUserName(body.authUserId, body.slug);
 
       return { success: true };
     },
@@ -160,16 +139,10 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/users/impersonate",
     async ({ body, set }) => {
-      const [actor, target] = await Promise.all([
-        prisma.user.findUnique({
-          where: { id: body.actorAuthUserId },
-          select: { id: true, role: true },
-        }),
-        prisma.user.findUnique({
-          where: { id: body.targetAuthUserId },
-          select: { id: true, role: true, banned: true },
-        }),
-      ]);
+      const { actor, target } = await findImpersonationUsers(
+        body.actorAuthUserId,
+        body.targetAuthUserId,
+      );
 
       if (!actor) {
         set.status = 404;
@@ -216,21 +189,11 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
       const durationSeconds = body.durationSeconds ?? 900;
       const expiresAt = new Date(now.getTime() + durationSeconds * 1000);
       const token = `${randomUUID()}${randomUUID()}`;
-      const session = await prisma.session.create({
-        data: {
-          userId: target.id,
-          token,
-          expiresAt,
-          impersonatedBy: actor.id,
-        },
-        select: {
-          id: true,
-          token: true,
-          userId: true,
-          expiresAt: true,
-          impersonatedBy: true,
-          createdAt: true,
-        },
+      const session = await createImpersonationSession({
+        userId: target.id,
+        token,
+        expiresAt,
+        impersonatedBy: actor.id,
       });
 
       return {
@@ -258,10 +221,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/users/list-sessions",
     async ({ body, set }) => {
-      const user = await prisma.user.findUnique({
-        where: { id: body.authUserId },
-        select: { id: true },
-      });
+      const user = await findAuthUserId(body.authUserId);
 
       if (!user) {
         set.status = 404;
@@ -274,20 +234,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
         };
       }
 
-      const sessions = await prisma.session.findMany({
-        where: { userId: user.id, expiresAt: { gt: new Date() } },
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          userId: true,
-          expiresAt: true,
-          ipAddress: true,
-          userAgent: true,
-          impersonatedBy: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      const sessions = await listActiveAuthSessions(user.id);
 
       return {
         success: true,
@@ -312,10 +259,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/users/revoke-session",
     async ({ body, set }) => {
-      const user = await prisma.user.findUnique({
-        where: { id: body.authUserId },
-        select: { id: true },
-      });
+      const user = await findAuthUserId(body.authUserId);
 
       if (!user) {
         set.status = 404;
@@ -328,13 +272,14 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
         };
       }
 
-      const deleted = await prisma.session.deleteMany({
-        where: { id: body.sessionId, userId: user.id },
-      });
+      const revokedSessions = await deleteAuthSessionForUser(
+        user.id,
+        body.sessionId,
+      );
 
       return {
         success: true,
-        revokedSessions: deleted.count,
+        revokedSessions,
       };
     },
     {
@@ -348,10 +293,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
   .post(
     "/users/revoke-sessions",
     async ({ body, set }) => {
-      const user = await prisma.user.findUnique({
-        where: { id: body.authUserId },
-        select: { id: true },
-      });
+      const user = await findAuthUserId(body.authUserId);
 
       if (!user) {
         set.status = 404;
@@ -364,13 +306,11 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
         };
       }
 
-      const deleted = await prisma.session.deleteMany({
-        where: { userId: user.id },
-      });
+      const revokedSessions = await deleteAuthSessionsForUser(user.id);
 
       return {
         success: true,
-        revokedSessions: deleted.count,
+        revokedSessions,
       };
     },
     {
@@ -385,13 +325,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
     async ({ body }) => {
       const olderThanHours = body.olderThanHours ?? 24 * 7;
       const cutoff = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);
-      const users = await prisma.user.findMany({
-        where: {
-          emailVerified: false,
-          createdAt: { lt: cutoff },
-        },
-        select: { id: true, email: true },
-      });
+      const users = await findStaleUnverifiedUsers(cutoff);
 
       const userIds = users.map((user) => user.id);
       const emails = users.map((user) => user.email);
@@ -400,29 +334,7 @@ export const authInternalApi = new Elysia({ prefix: "/internal" })
         return { success: true, deleted: 0, cutoff: cutoff.toISOString() };
       }
 
-      await prisma.$transaction([
-        prisma.oAuthAccessToken.deleteMany({
-          where: { userId: { in: userIds } },
-        }),
-        prisma.oAuthRefreshToken.deleteMany({
-          where: { userId: { in: userIds } },
-        }),
-        prisma.oAuthConsent.deleteMany({ where: { userId: { in: userIds } } }),
-        prisma.session.deleteMany({ where: { userId: { in: userIds } } }),
-        prisma.account.deleteMany({ where: { userId: { in: userIds } } }),
-        prisma.verification.deleteMany({
-          where: {
-            OR: [
-              { identifier: { in: userIds } },
-              { identifier: { in: emails } },
-              ...emails.map((email) => ({
-                identifier: { contains: email },
-              })),
-            ],
-          },
-        }),
-        prisma.user.deleteMany({ where: { id: { in: userIds } } }),
-      ]);
+      await cleanupStaleRegistrations({ userIds, emails });
 
       return {
         success: true,

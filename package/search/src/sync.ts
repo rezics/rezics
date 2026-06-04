@@ -10,14 +10,11 @@ import type {
 } from "@rezics/contract";
 import {
   mainMarkdownSource,
+  normalizeLanguage,
   RATING_TAGS,
   readCoverUrlFromExtra,
+  type Language,
 } from "@rezics/contract";
-import {
-  Prisma,
-  type PrismaClient,
-  UnitType,
-} from "@rezics/server/prisma/generated/client";
 import type { SearchClient } from "./client";
 import {
   buildUserUnitCollectionDocument,
@@ -30,16 +27,18 @@ import {
   type UserUnitProgressRow,
 } from "./progress";
 
-let searchPrismaClient: PrismaClient | null = null;
+type SearchDatabaseClient = any;
 
-export function setSearchPrismaClient(prisma: PrismaClient): void {
+let searchPrismaClient: SearchDatabaseClient | null = null;
+
+export function setSearchPrismaClient(prisma: SearchDatabaseClient): void {
   searchPrismaClient = prisma;
 }
 
-function getSearchPrismaClient(): PrismaClient {
+function getSearchPrismaClient(): SearchDatabaseClient {
   if (!searchPrismaClient) {
     throw new Error(
-      "Search Prisma client is not configured. Call setSearchPrismaClient() before running search sync.",
+      "Search database client is not configured. Call setSearchPrismaClient() before running search sync.",
     );
   }
   return searchPrismaClient;
@@ -125,14 +124,7 @@ const PROGRESS_SYNC_ATTEMPTS = 3;
 const PROGRESS_SYNC_RETRY_BASE_MS = 100;
 const VISIBILITY_THRESHOLD = -100;
 
-const INDEXABLE_TYPES = [
-  UnitType.BOOK,
-  UnitType.GAME,
-  UnitType.MEDIA,
-  UnitType.SERIES,
-  UnitType.SHELF,
-  UnitType.LINK,
-];
+const INDEXABLE_TYPES = ["BOOK", "GAME", "MEDIA", "SERIES", "SHELF", "LINK"];
 
 const PUBLIC_ELIGIBLE_UNIT_WHERE = {
   status: "PUBLISHED",
@@ -142,11 +134,11 @@ const PUBLIC_ELIGIBLE_UNIT_WHERE = {
 
 const RATING_TAG_SLUGS = new Set<string>(RATING_TAGS);
 
-function publicSearchableUnitWhere(): Prisma.UnitWhereInput {
+function publicSearchableUnitWhere(): Record<string, unknown> {
   return { ...PUBLIC_ELIGIBLE_UNIT_WHERE };
 }
 
-function publicCatalogContentWhere(): Prisma.UnitWhereInput {
+function publicCatalogContentWhere(): Record<string, unknown> {
   return {
     ...publicSearchableUnitWhere(),
     OR: [{ catalogEntryKind: null }, { catalogEntryKind: "MAIN" }],
@@ -287,12 +279,13 @@ function delay(ms: number): Promise<void> {
 
 function indexedLanguages(unit: {
   supportLanguages?: readonly { language?: string | null }[] | null;
-}): string[] {
+}): Language[] {
   return [
     ...new Set(
       (unit.supportLanguages ?? [])
         .map((item) => item.language)
-        .filter((language): language is string => !!language),
+        .map((language) => (language ? normalizeLanguage(language) : null))
+        .filter((language): language is Language => !!language),
     ),
   ];
 }
@@ -305,19 +298,26 @@ function indexedSupportLanguages(unit: {
         sortOrder?: number | null;
       }[]
     | null;
-}): { language: string; isPrimary: boolean; sortOrder: number }[] {
+}): { language: Language; isPrimary: boolean; sortOrder: number }[] {
   return (unit.supportLanguages ?? [])
+    .map((item) => ({
+      item,
+      language: item.language ? normalizeLanguage(item.language) : null,
+    }))
     .filter(
       (
-        item,
-      ): item is {
-        language: string;
-        isPrimary?: boolean | null;
-        sortOrder?: number | null;
-      } => Boolean(item.language),
+        entry,
+      ): entry is {
+        item: {
+          language?: string | null;
+          isPrimary?: boolean | null;
+          sortOrder?: number | null;
+        };
+        language: Language;
+      } => Boolean(entry.language),
     )
-    .map((item) => ({
-      language: item.language,
+    .map(({ item, language }) => ({
+      language,
       isPrimary: Boolean(item.isPrimary),
       sortOrder: item.sortOrder ?? 0,
     }))
@@ -737,7 +737,7 @@ export async function syncGameMediaContentSegment(
   const limit = segmentLimit(options);
   const units: any[] = await getSearchPrismaClient().unit.findMany({
     where: {
-      type: { in: [UnitType.GAME, UnitType.MEDIA] },
+      type: { in: ["GAME", "MEDIA"] },
       ...publicCatalogContentWhere(),
     },
     include: contentInclude,
@@ -1008,7 +1008,7 @@ export async function patchContentAliases(
   });
 
   await patchContentIfEligible(client, unitId, {
-    aliasValues: aliases.map((alias) => alias.value).filter(Boolean),
+    aliasValues: aliases.map((alias: any) => alias.value).filter(Boolean),
   });
 }
 
@@ -1205,7 +1205,7 @@ export async function patchContentContainedUnitIds(
     where: { shelfId },
     select: { unitId: true },
   });
-  const containedUnitIds = units.map((u) => u.unitId);
+  const containedUnitIds = units.map((u: any) => u.unitId);
   await patchContentIfEligible(client, shelfId, { containedUnitIds });
 }
 
@@ -1269,7 +1269,7 @@ export async function patchPostsAuthor(
 
     if (posts.length === 0) break;
 
-    const docs = posts.map((p) => ({ id: p.unitId, ...fields }));
+    const docs = posts.map((p: any) => ({ id: p.unitId, ...fields }));
     await client.patchPosts(docs);
 
     cursor = posts[posts.length - 1]!.unitId;
@@ -1360,7 +1360,7 @@ export async function patchPostsTarget(
 
     if (posts.length === 0) break;
 
-    const docs = posts.map((p) => ({
+    const docs = posts.map((p: any) => ({
       id: p.unitId,
       targetTitles,
       targetType,
@@ -1542,7 +1542,7 @@ export async function patchRealmAliases(client: SearchClient, unitId: string) {
   await client.patchRealms([
     {
       id: unitId,
-      aliasValues: aliases.map((alias) => alias.value).filter(Boolean),
+      aliasValues: aliases.map((alias: any) => alias.value).filter(Boolean),
     },
   ]);
 }
@@ -2051,15 +2051,20 @@ export async function syncCommentSegment(
   });
   const { current, nextCursor } = segmentRows(comments, limit, "id");
   if (current.length > 0) {
-    const paths = await getSearchPrismaClient().$queryRaw<
-      { id: string; path: string | null }[]
-    >`
-      SELECT "id", "path"::text AS path
-      FROM "Comment"
-      WHERE "id" IN (${Prisma.join(
-        current.map((comment) => Prisma.sql`${comment.id}::uuid`),
-      )})
-    `;
+    const paths = (
+      await Promise.all(
+        current.map(
+          (comment) =>
+            getSearchPrismaClient().$queryRaw<
+              { id: string; path: string | null }[]
+            >`
+            SELECT "id", "path"::text AS path
+            FROM "Comment"
+            WHERE "id" = ${comment.id}::uuid
+          `,
+        ),
+      )
+    ).flat();
     const pathById = new Map(paths.map((row) => [row.id, row.path]));
     await client.addOrUpdateComments(
       current.map((comment) =>
@@ -2653,7 +2658,7 @@ export async function patchEntityAliases(client: SearchClient, unitId: string) {
   await client.patchEntities([
     {
       id: unitId,
-      aliasValues: aliases.map((alias) => alias.value).filter(Boolean),
+      aliasValues: aliases.map((alias: any) => alias.value).filter(Boolean),
     },
   ]);
 }
@@ -2730,11 +2735,11 @@ export async function syncAllUsers(client: SearchClient) {
     if (users.length === 0) break;
 
     // Slug now lives on the USER Unit. Batch-fetch.
-    const unitSlugs = await getSearchPrismaClient().unit.findMany({
-      where: { id: { in: users.map((u) => u.unitId) } },
+    const unitSlugs: any[] = await getSearchPrismaClient().unit.findMany({
+      where: { id: { in: users.map((u: any) => u.unitId) } },
       select: { id: true, slug: true },
     });
-    const slugById = new Map(unitSlugs.map((u) => [u.id, u.slug ?? null]));
+    const slugById = new Map(unitSlugs.map((u: any) => [u.id, u.slug ?? null]));
 
     const formatted: UserSearchDocument[] = users.map((u) => ({
       id: u.unitId,
@@ -2778,11 +2783,11 @@ export async function syncUserSegment(
   });
   const { current, nextCursor } = segmentRows(users, limit, "unitId");
   if (current.length > 0) {
-    const unitSlugs = await getSearchPrismaClient().unit.findMany({
-      where: { id: { in: current.map((u) => u.unitId) } },
+    const unitSlugs: any[] = await getSearchPrismaClient().unit.findMany({
+      where: { id: { in: current.map((u: any) => u.unitId) } },
       select: { id: true, slug: true },
     });
-    const slugById = new Map(unitSlugs.map((u) => [u.id, u.slug ?? null]));
+    const slugById = new Map(unitSlugs.map((u: any) => [u.id, u.slug ?? null]));
 
     await client.addOrUpdateUsers(
       current.map((u) => ({

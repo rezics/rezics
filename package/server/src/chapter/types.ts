@@ -1,5 +1,12 @@
-import type { Prisma } from "#/prisma/client";
+import type {
+  ContentTranslation,
+  Post,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
 import { publicUserSelect } from "@/utils/sanitizeUser";
+import type { PublicUserSelected } from "@/utils/sanitizeUser";
 
 /**
  * Chapter is a Post(kind=CHAPTER) backed by Unit(type=POST).
@@ -15,8 +22,13 @@ export const chapterPostInclude = {
       supportLanguages: true,
     },
   },
-} satisfies Prisma.PostInclude;
+} as const;
 
-export type ChapterPostWithRelations = Prisma.PostGetPayload<{
-  include: typeof chapterPostInclude;
-}>;
+export type ChapterPostWithRelations = typeof Post.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    user?: PublicUserSelected | null;
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    contentTranslations: Array<typeof ContentTranslation.$inferSelect>;
+    supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+  };
+};

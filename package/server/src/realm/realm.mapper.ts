@@ -9,14 +9,19 @@ import type {
   UnitTranslationDTO,
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
-import type {
+import {
   RealmMember,
   RealmTagApplication,
   RealmTagContext,
   UnitRealm,
-} from "#/prisma/client";
+} from "../db/schema";
 import { mapPublicUser, type PublicUserSelected } from "@/utils/sanitizeUser";
 import type { RealmListSelected, RealmWithRelations } from "./types";
+
+type RealmMemberRow = typeof RealmMember.$inferSelect;
+type UnitRealmRow = typeof UnitRealm.$inferSelect;
+type RealmTagApplicationRow = typeof RealmTagApplication.$inferSelect;
+type RealmTagContextRow = typeof RealmTagContext.$inferSelect;
 
 function lower<T extends string>(
   value: string | null | undefined,
@@ -97,7 +102,7 @@ export function mapRealmListRowToDTO(
 }
 
 export function mapRealmMemberToDTO(
-  row: RealmMember & { user?: PublicUserSelected | null },
+  row: RealmMemberRow & { user?: PublicUserSelected | null },
   options?: Pick<RealmMemberDTO, "capabilities">,
 ): RealmMemberDTO {
   return {
@@ -112,7 +117,7 @@ export function mapRealmMemberToDTO(
   };
 }
 
-export function mapUnitRealmToDTO(row: UnitRealm): UnitRealmDTO {
+export function mapUnitRealmToDTO(row: UnitRealmRow): UnitRealmDTO {
   return {
     realmUnitId: row.realmUnitId,
     unitId: row.unitId,
@@ -125,7 +130,7 @@ export function mapUnitRealmToDTO(row: UnitRealm): UnitRealmDTO {
 }
 
 export function mapRealmTagApplicationToDTO(
-  row: RealmTagApplication,
+  row: RealmTagApplicationRow,
   options?: { belowVisibilityThreshold?: boolean },
 ): RealmTagApplicationDTO {
   return {
@@ -144,7 +149,7 @@ export function mapRealmTagApplicationToDTO(
   };
 }
 
-type RealmTagContextWithIncludes = RealmTagContext & {
+type RealmTagContextWithIncludes = RealmTagContextRow & {
   realm?: RealmWithRelations | null;
   tag?: any;
   contextUnit?: any;

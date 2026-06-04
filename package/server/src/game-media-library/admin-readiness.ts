@@ -3,8 +3,9 @@ import type {
   RatingTagSlug,
 } from "@rezics/contract";
 import { RATING_TAGS } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { gameSystemRequirementService } from "@/game-system-requirement/service";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { gameSystemRequirementService } from "../game-system-requirement/service";
+import { Entity, Unit, UnitTranslation } from "../db/schema";
 
 export const EXPECTED_GAME_PLATFORM_SLUGS = [
   "windows",
@@ -44,52 +45,110 @@ export type GameMediaAdminDiagnostics = {
   missingRatingTagSlugs: RatingTagSlug[];
 };
 
+export interface GameMediaAdminReadinessRepository {
+  listPlatformEntities(): Promise<GameMediaAdminPlatform[]>;
+  listRatingTags(): Promise<
+    Array<{
+      id: string;
+      slug: string | null;
+      translations: TranslationRow[];
+    }>
+  >;
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+async function loadTranslations(
+  unitIds: readonly string[],
+): Promise<Map<string, TranslationRow[]>> {
+  if (unitIds.length === 0) return new Map();
+  const db = await getServerDb();
+  const rows = await db
+    .select({
+      unitId: UnitTranslation.unitId,
+      language: UnitTranslation.language,
+      title: UnitTranslation.title,
+    })
+    .from(UnitTranslation)
+    .where(inArray(UnitTranslation.unitId, [...unitIds]))
+    .orderBy(asc(UnitTranslation.language));
+  const byUnitId = new Map<string, TranslationRow[]>();
+  for (const row of rows) {
+    const translations = byUnitId.get(row.unitId) ?? [];
+    translations.push({ language: row.language, title: row.title });
+    byUnitId.set(row.unitId, translations);
+  }
+  return byUnitId;
+}
+
+function createDrizzleGameMediaAdminReadinessRepository(): GameMediaAdminReadinessRepository {
+  return {
+    async listPlatformEntities() {
+      const db = await getServerDb();
+      const rows = await db
+        .select({
+          unitId: Entity.unitId,
+          slug: Unit.slug,
+        })
+        .from(Entity)
+        .innerJoin(Unit, eq(Unit.id, Entity.unitId))
+        .where(
+          and(
+            eq(Entity.kind, "game_platform"),
+            sql`${Entity.eligibleSubjectRoles} @> ARRAY['available_on']::text[]`,
+          ),
+        )
+        .orderBy(asc(Entity.unitId));
+      const translations = await loadTranslations(
+        rows.map((row) => row.unitId),
+      );
+      return rows.map((row) => {
+        const unitTranslations = translations.get(row.unitId) ?? [];
+        return {
+          entityUnitId: row.unitId,
+          slug: row.slug,
+          label: preferredLabel(unitTranslations),
+          translations: unitTranslations,
+        };
+      });
+    },
+
+    async listRatingTags() {
+      const db = await getServerDb();
+      const rows = await db
+        .select({ id: Unit.id, slug: Unit.slug })
+        .from(Unit)
+        .where(and(eq(Unit.type, "TAG"), inArray(Unit.slug, [...RATING_TAGS])));
+      const translations = await loadTranslations(rows.map((row) => row.id));
+      return rows.map((row) => ({
+        id: row.id,
+        slug: row.slug,
+        translations: translations.get(row.id) ?? [],
+      }));
+    },
+  };
+}
+
+const defaultRepository = createDrizzleGameMediaAdminReadinessRepository();
+
 function preferredLabel(translations: TranslationRow[]): string | null {
   return translations.find((translation) => translation.title)?.title ?? null;
 }
 
 export class GameMediaAdminReadinessService {
-  async listPlatformEntities(): Promise<GameMediaAdminPlatform[]> {
-    const rows = await prisma.entity.findMany({
-      where: {
-        kind: "game_platform",
-        eligibleSubjectRoles: { has: "available_on" },
-      },
-      select: {
-        unitId: true,
-        unit: {
-          select: {
-            slug: true,
-            translations: {
-              select: { language: true, title: true },
-              orderBy: [{ language: "asc" }],
-            },
-          },
-        },
-      },
-      orderBy: { unitId: "asc" },
-    });
+  constructor(
+    public repository: GameMediaAdminReadinessRepository = defaultRepository,
+  ) {}
 
-    return rows.map((row) => ({
-      entityUnitId: row.unitId,
-      slug: row.unit.slug,
-      label: preferredLabel(row.unit.translations),
-      translations: row.unit.translations,
-    }));
+  async listPlatformEntities(): Promise<GameMediaAdminPlatform[]> {
+    return this.repository.listPlatformEntities();
   }
 
   async listRatingTags(): Promise<GameMediaAdminRatingTag[]> {
-    const rows = await prisma.unit.findMany({
-      where: { type: "TAG", slug: { in: [...RATING_TAGS] } },
-      select: {
-        id: true,
-        slug: true,
-        translations: {
-          select: { language: true, title: true },
-          orderBy: [{ language: "asc" }],
-        },
-      },
-    });
+    const rows = await this.repository.listRatingTags();
     const bySlug = new Map(rows.map((row) => [row.slug, row]));
 
     return RATING_TAGS.map((slug) => {

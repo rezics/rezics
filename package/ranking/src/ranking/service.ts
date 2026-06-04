@@ -3,17 +3,14 @@ import {
   RANKING_COMMAND_KINDS,
   type RankingCommand,
 } from "@rezics/job";
-import {
-  patchCommentRankingFields,
-  patchContentRankingFields,
-  patchPostRankingFields,
-  SearchClient,
-  setSearchPrismaClient,
-} from "@rezics/search";
-import { prisma } from "#/prisma/client";
+import { SearchClient } from "@rezics/search";
 import { env } from "../env";
 import { computeV1RankingScores, RANKING_FORMULA_VERSION } from "./formulas";
 import { MainStateReader } from "./main-state";
+import {
+  DrizzleRankingRepository,
+  type RankingRepository,
+} from "./ranking.repository";
 import { ReactionSummaryClient } from "./reaction-client";
 import {
   type RankingScope,
@@ -46,6 +43,29 @@ function rankKindsForState(
   return kinds;
 }
 
+function isPublicIndexableContentUnit(unit: any): boolean {
+  return Boolean(
+    unit &&
+      unit.status === "PUBLISHED" &&
+      unit.visibility === "PUBLIC" &&
+      (unit.moderationStatus === "APPROVED" ||
+        unit.moderationStatus === undefined) &&
+      (unit.catalogEntryKind === null ||
+        unit.catalogEntryKind === undefined ||
+        unit.catalogEntryKind === "MAIN"),
+  );
+}
+
+function isPublicIndexablePostUnit(unit: any): boolean {
+  return Boolean(
+    unit &&
+      unit.status === "PUBLISHED" &&
+      unit.visibility === "PUBLIC" &&
+      (unit.moderationStatus === "APPROVED" ||
+        unit.moderationStatus === undefined),
+  );
+}
+
 function scopesForRankKind(
   rankKind: RankKind,
   state: Awaited<ReturnType<MainStateReader["readUnitState"]>>,
@@ -70,33 +90,47 @@ function scopesForRankKind(
 }
 
 export class RankingService {
-  private readonly mainState = new MainStateReader({
-    serverDatabaseUrl: env.SERVER_DATABASE_URL,
-  });
-  private readonly reactions = new ReactionSummaryClient({
-    baseUrl: env.REACTION_BASE_URL,
-    internalSecret: env.REACTION_INTERNAL_SECRET,
-  });
-  private readonly search = new SearchClient({
-    host: env.MEILI_HOST,
-    apiKey: env.MEILI_MASTER_KEY,
-  });
+  private readonly mainState: MainStateReader;
+  private readonly reactions: ReactionSummaryClient;
+  private readonly search: SearchClient;
+  private readonly repository: RankingRepository;
 
-  constructor() {
-    setSearchPrismaClient(this.mainState.prisma);
+  constructor(
+    options: {
+      mainState?: MainStateReader;
+      reactions?: ReactionSummaryClient;
+      search?: SearchClient;
+      repository?: RankingRepository;
+    } = {},
+  ) {
+    this.mainState =
+      options.mainState ??
+      new MainStateReader({
+        serverDatabaseUrl: env.SERVER_DATABASE_URL,
+      });
+    this.reactions =
+      options.reactions ??
+      new ReactionSummaryClient({
+        baseUrl: env.REACTION_BASE_URL,
+        internalSecret: env.REACTION_INTERNAL_SECRET,
+      });
+    this.search =
+      options.search ??
+      new SearchClient({
+        host: env.MEILI_HOST,
+        apiKey: env.MEILI_MASTER_KEY,
+      });
+    this.repository = options.repository ?? new DrizzleRankingRepository();
   }
 
   async ready() {
-    await prisma.$queryRaw`SELECT 1`;
+    await this.repository.ping();
     const meiliAvailable = await this.search.checkHealth();
     return { status: meiliAvailable ? "ok" : "degraded", meiliAvailable };
   }
 
   async inspectUnit(unitId: string) {
-    const projections = await prisma.unitRankProjection.findMany({
-      where: { unitId },
-      orderBy: [{ rankKind: "asc" }, { scopeKind: "asc" }],
-    });
+    const projections = await this.repository.findProjectionsByUnit(unitId);
     return { unitId, projections };
   }
 
@@ -172,38 +206,20 @@ export class RankingService {
         };
         const scores = computeV1RankingScores(snapshot);
         const rankUpdatedAt = new Date();
-        const projection = await prisma.unitRankProjection.upsert({
-          where: {
-            unitId_scopeKind_scopeKey_rankKind: {
-              unitId,
-              scopeKind: scope.kind,
-              scopeKey: scopeKey(scope),
-              rankKind,
-            },
-          },
-          update: {
-            ...scores,
-            scopeId: scope.id ?? null,
-            formulaVersion: RANKING_FORMULA_VERSION,
-            signalSnapshot: snapshot as any,
-            computedAt: rankUpdatedAt,
-            rankUpdatedAt,
-          },
-          create: {
-            unitId,
-            scopeKind: scope.kind,
-            scopeId: scope.id ?? null,
-            scopeKey: scopeKey(scope),
-            rankKind,
-            ...scores,
-            formulaVersion: RANKING_FORMULA_VERSION,
-            signalSnapshot: snapshot as any,
-            computedAt: rankUpdatedAt,
-            rankUpdatedAt,
-          },
+        const projection = await this.repository.upsertProjection({
+          unitId,
+          scopeKind: scope.kind,
+          scopeId: scope.id ?? null,
+          scopeKey: scopeKey(scope),
+          rankKind,
+          ...scores,
+          formulaVersion: RANKING_FORMULA_VERSION,
+          signalSnapshot: snapshot,
+          computedAt: rankUpdatedAt,
+          rankUpdatedAt,
         });
         projections.push(projection);
-        await this.patchProjection(projection, options.source);
+        await this.patchProjection(projection, options.source, state);
       }
     }
 
@@ -223,42 +239,20 @@ export class RankingService {
     const bucketEnd = new Date(bucketStart.getTime() + 3_600_000);
     const count = Math.max(input.count ?? 1, 1);
 
-    const bucket = await prisma.rankingSignalBucket.upsert({
-      where: {
-        unitId_signalKind_bucketStart: {
-          unitId: input.unitId,
-          signalKind: input.signalKind,
-          bucketStart,
-        },
-      },
-      update: {
-        count: { increment: count },
-        bucketEnd,
-        metadata: input.metadata as any,
-      },
-      create: {
-        unitId: input.unitId,
-        signalKind: input.signalKind,
-        bucketStart,
-        bucketEnd,
-        count,
-        metadata: input.metadata as any,
-      },
+    const bucket = await this.repository.upsertSignalBucket({
+      unitId: input.unitId,
+      signalKind: input.signalKind,
+      bucketStart,
+      bucketEnd,
+      count,
+      metadata: input.metadata,
     });
 
     return { bucket, patchedServing: false };
   }
 
   private async readBucketSignals(unitId: string) {
-    const rows = await prisma.rankingSignalBucket.groupBy({
-      by: ["signalKind"],
-      where: { unitId },
-      _sum: { count: true },
-    });
-    return {
-      views: rows.find((row) => row.signalKind === "view")?._sum.count ?? 0,
-      reads: rows.find((row) => row.signalKind === "read")?._sum.count ?? 0,
-    };
+    return this.repository.readBucketSignals(unitId);
   }
 
   private async patchServing(payload: {
@@ -267,14 +261,11 @@ export class RankingService {
     rankKind?: RankKind;
     limit?: number;
   }) {
-    const projections = await prisma.unitRankProjection.findMany({
-      where: {
-        ...(payload.projectionId ? { id: payload.projectionId } : {}),
-        ...(payload.unitId ? { unitId: payload.unitId } : {}),
-        ...(payload.rankKind ? { rankKind: payload.rankKind } : {}),
-      },
-      orderBy: { computedAt: "asc" },
-      take: Math.min(payload.limit ?? 100, 500),
+    const projections = await this.repository.findProjectionsForPatch({
+      projectionId: payload.projectionId,
+      unitId: payload.unitId,
+      rankKind: payload.rankKind,
+      limit: Math.min(payload.limit ?? 100, 500),
     });
 
     for (const projection of projections) {
@@ -287,52 +278,73 @@ export class RankingService {
   private async patchProjection(
     projection: any,
     source: RankingCommand["source"] | undefined,
+    state?: Awaited<ReturnType<MainStateReader["readUnitState"]>>,
   ) {
     const rankUpdatedAt = toIso(
       projection.rankUpdatedAt ?? projection.computedAt,
     );
+    const rankingState =
+      state ?? (await this.mainState.readUnitState(projection.unitId));
     try {
       if (projection.rankKind === "content") {
-        await patchContentRankingFields(this.search, projection.unitId, {
-          hotScore: projection.hotScore,
-          topScore: projection.topScore,
-          trendingScore: projection.trendingScore,
-          qualityScore: projection.qualityScore,
-          rankUpdatedAt,
-        });
+        if (!isPublicIndexableContentUnit(rankingState.unit)) {
+          await this.search.deleteContent([projection.unitId]);
+        } else {
+          await this.search.patchContent([
+            {
+              id: projection.unitId,
+              hotScore: projection.hotScore,
+              topScore: projection.topScore,
+              trendingScore: projection.trendingScore,
+              qualityScore: projection.qualityScore,
+              rankUpdatedAt,
+            },
+          ]);
+        }
       } else if (projection.rankKind === "post") {
-        await patchPostRankingFields(this.search, projection.unitId, {
-          hotScore: projection.hotScore,
-          topScore: projection.topScore,
-          trendingScore: projection.trendingScore,
-          qualityScore: projection.qualityScore,
-          rankUpdatedAt,
-        });
+        if (
+          !rankingState.post ||
+          !isPublicIndexablePostUnit(rankingState.unit)
+        ) {
+          await this.search.deletePosts([projection.unitId]);
+        } else {
+          await this.search.patchPosts([
+            {
+              id: projection.unitId,
+              hotScore: projection.hotScore,
+              topScore: projection.topScore,
+              trendingScore: projection.trendingScore,
+              qualityScore: projection.qualityScore,
+              rankUpdatedAt,
+            },
+          ]);
+        }
       } else {
-        await patchCommentRankingFields(this.search, projection.unitId, {
-          hotScore: projection.hotScore,
-          topScore: projection.topScore,
-          qualityScore: projection.qualityScore,
-          rankUpdatedAt,
-        });
+        await this.search.patchComments([
+          {
+            id: projection.unitId,
+            hotScore: projection.hotScore,
+            topScore: projection.topScore,
+            qualityScore: projection.qualityScore,
+            rankUpdatedAt,
+          },
+        ]);
       }
 
-      await prisma.servingPatchStatus.create({
-        data: {
-          projectionId: projection.id,
-          unitId: projection.unitId,
-          indexName:
-            projection.rankKind === "content"
-              ? "content"
-              : projection.rankKind === "comment"
-                ? "comments"
-                : "posts",
-          documentId: projection.unitId,
-          status: "patched",
-          patchedAt: new Date(),
-          lastAttemptAt: new Date(),
-          source: source ? (source as any) : undefined,
-        },
+      await this.repository.createServingPatchStatus({
+        projectionId: projection.id,
+        unitId: projection.unitId,
+        indexName:
+          projection.rankKind === "content"
+            ? "content"
+            : projection.rankKind === "comment"
+              ? "comments"
+              : "posts",
+        documentId: projection.unitId,
+        status: "patched",
+        patchedAt: new Date(),
+        lastAttemptAt: new Date(),
+        source,
       });
       console.log("[ranking] patched serving", {
         unitId: projection.unitId,
@@ -340,23 +352,21 @@ export class RankingService {
         formulaVersion: projection.formulaVersion,
       });
     } catch (error) {
-      await prisma.servingPatchStatus.create({
-        data: {
-          projectionId: projection.id,
-          unitId: projection.unitId,
-          indexName:
-            projection.rankKind === "content"
-              ? "content"
-              : projection.rankKind === "comment"
-                ? "comments"
-                : "posts",
-          documentId: projection.unitId,
-          status: "failed",
-          lastAttemptAt: new Date(),
-          retryCount: 1,
-          lastError: error instanceof Error ? error.message : String(error),
-          source: source ? (source as any) : undefined,
-        },
+      await this.repository.createServingPatchStatus({
+        projectionId: projection.id,
+        unitId: projection.unitId,
+        indexName:
+          projection.rankKind === "content"
+            ? "content"
+            : projection.rankKind === "comment"
+              ? "comments"
+              : "posts",
+        documentId: projection.unitId,
+        status: "failed",
+        lastAttemptAt: new Date(),
+        retryCount: 1,
+        lastError: error instanceof Error ? error.message : String(error),
+        source,
       });
       throw error;
     }
@@ -406,15 +416,10 @@ export class RankingService {
     const bucketBefore = payload.bucketBefore
       ? new Date(payload.bucketBefore)
       : new Date();
-    const rows = await prisma.rankingSignalBucket.findMany({
-      where: {
-        flushedAt: null,
-        bucketEnd: { lte: bucketBefore },
-      },
-      orderBy: [{ unitId: "asc" }, { bucketStart: "asc" }],
-      take: limit + 1,
-      skip: payload.cursor ? 1 : 0,
-      cursor: payload.cursor ? { id: payload.cursor } : undefined,
+    const rows = await this.repository.findFlushableBuckets({
+      cursor: payload.cursor,
+      bucketBefore,
+      limit: limit + 1,
     });
     const current = rows.slice(0, limit);
     const unitIds = [...new Set(current.map((row) => row.unitId))];
@@ -424,10 +429,10 @@ export class RankingService {
       });
     }
     if (current.length > 0) {
-      await prisma.rankingSignalBucket.updateMany({
-        where: { id: { in: current.map((row) => row.id) } },
-        data: { flushedAt: new Date() },
-      });
+      await this.repository.markBucketsFlushed(
+        current.map((row) => row.id),
+        new Date(),
+      );
     }
     const last = current.at(-1);
     return {
@@ -439,7 +444,7 @@ export class RankingService {
 
   async disconnect() {
     await this.mainState.disconnect();
-    await prisma.$disconnect();
+    await this.repository.disconnect();
   }
 }
 

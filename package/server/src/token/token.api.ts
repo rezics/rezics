@@ -7,8 +7,9 @@ import {
   DispatchScope,
   updateApiTokenSchema,
 } from "@rezics/contract";
+import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
-import { prisma } from "#/prisma/client";
+import { User } from "../db/schema";
 import { authMacro } from "@/middleware";
 import { signRezicsSessionToken } from "@/session/jwt/jwt.service";
 import { bookRoute } from "./token.book.api";
@@ -19,6 +20,16 @@ import { userRoute } from "./token.user.api";
 const tokenExternalRoutes = new Elysia({ prefix: "/token" })
   .use(bookRoute)
   .use(userRoute);
+
+async function findTokenSessionUser(userId: string) {
+  const { db } = await import("../db/client");
+  const [user] = await db
+    .select({ unitId: User.unitId, permission: User.permission })
+    .from(User)
+    .where(eq(User.unitId, userId))
+    .limit(1);
+  return user;
+}
 
 // Token-auth session exchange route
 const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
@@ -42,10 +53,7 @@ const tokenSessionRoute = new Elysia({ prefix: "/token" }).post(
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { unitId: userId },
-      select: { unitId: true, permission: true },
-    });
+    const user = await findTokenSessionUser(userId);
 
     if (!user) {
       set.status = 404;

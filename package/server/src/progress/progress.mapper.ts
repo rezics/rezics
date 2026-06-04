@@ -4,7 +4,14 @@ import {
   type ProgressExtra,
   type UnitProgressRowDTO,
 } from "@rezics/contract";
-import type { UserUnitProgress } from "#/prisma/client";
+import type { UserUnitProgress } from "../db/schema";
+
+export type ProgressStorageRow = Omit<
+  typeof UserUnitProgress.$inferSelect,
+  "totalTimeMs"
+> & {
+  totalTimeMs: number | bigint;
+};
 
 function sanitizeAnchor(raw: unknown): LastReadAnchor | null {
   if (raw === null || raw === undefined) return null;
@@ -40,7 +47,7 @@ function sanitizeExtra(raw: unknown): ProgressExtra | null {
   return out;
 }
 
-export function mapProgressToDTO(row: UserUnitProgress): UnitProgressRowDTO {
+export function mapProgressToDTO(row: ProgressStorageRow): UnitProgressRowDTO {
   return {
     userId: row.userId,
     unitId: row.unitId,

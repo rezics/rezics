@@ -1,10 +1,9 @@
-import type { Prisma } from "#/prisma/client";
+import type { Entity, Unit, UnitTranslation } from "../db/schema";
 
 /**
- * Prisma include shape for hydrating an Entity row with everything the
- * mapper needs: the parent Unit (for slug, status, visibility, userId,
- * timestamps) and the Unit's translations (for the DTO's `translations`
- * array).
+ * Include shape for hydrating an Entity row with everything the mapper needs:
+ * the parent Unit (for slug, status, visibility, userId, timestamps) and the
+ * Unit's translations (for the DTO's `translations` array).
  */
 export const entityInclude = {
   unit: {
@@ -12,8 +11,10 @@ export const entityInclude = {
       translations: true,
     },
   },
-} satisfies Prisma.EntityInclude;
+} as const;
 
-export type EntityWithRelations = Prisma.EntityGetPayload<{
-  include: typeof entityInclude;
-}>;
+export type EntityWithRelations = typeof Entity.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    translations?: Array<typeof UnitTranslation.$inferSelect>;
+  };
+};

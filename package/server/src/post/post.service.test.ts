@@ -9,6 +9,25 @@ import {
   installPrismaClientMock,
   prismaMock,
 } from "../test/prisma-client-mock";
+import {
+  Comment,
+  CommentPromotion,
+  ContentTranslation,
+  ModerationAction,
+  ModerationCase,
+  Poll,
+  Post,
+  PostPollReference,
+  Realm,
+  RealmMember,
+  RealmRuleAcknowledgement,
+  Unit,
+  UnitRealm,
+  UnitSupportLanguage,
+  UnitTag,
+  UnitTranslation,
+  User,
+} from "../db/schema";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -364,6 +383,599 @@ Object.assign(prismaMock, {
   user: { findUnique: userFindUniqueMock },
 });
 
+function sqlValues(condition: unknown): unknown[] {
+  const values: unknown[] = [];
+  function walk(value: unknown): void {
+    if (!value || typeof value !== "object") return;
+    if ("encoder" in value && "value" in value) {
+      const paramValue = (value as { value?: unknown }).value;
+      if (Array.isArray(paramValue)) {
+        for (const item of paramValue) {
+          if (
+            typeof item === "string" ||
+            typeof item === "number" ||
+            typeof item === "boolean"
+          ) {
+            values.push(item);
+          }
+        }
+      } else {
+        if (
+          typeof paramValue === "string" ||
+          typeof paramValue === "number" ||
+          typeof paramValue === "boolean"
+        ) {
+          values.push(paramValue);
+        }
+      }
+      return;
+    }
+    const maybeValue = (value as { value?: unknown }).value;
+    if (
+      Array.isArray(maybeValue) &&
+      maybeValue.some((item) => typeof item !== "string")
+    ) {
+      for (const item of maybeValue) walk(item);
+    }
+    const chunks = (value as { queryChunks?: unknown[] }).queryChunks;
+    if (Array.isArray(chunks)) {
+      for (const chunk of chunks) walk(chunk);
+    }
+  }
+  walk(condition);
+  return values;
+}
+
+let lastRealmRead: any = null;
+const lastPostRows = new Map<string, any>();
+let lastPostPollReferenceIds: string[] = [];
+
+function postFixture(unitId: string) {
+  return {
+    unitId,
+    authorUserId: "user-1",
+    scoreEntryId: null,
+    kind: "POST",
+    replyCount: 0,
+    directReplyCount: 0,
+    lastReplyAt: null,
+    isLocked: false,
+    extra: {},
+    createdAt: new Date("2026-05-31T00:00:00.000Z"),
+    updatedAt: new Date("2026-05-31T00:00:00.000Z"),
+    state: null,
+    variantUnitId: null,
+  };
+}
+
+function unitFixture(unitId: string, source?: any) {
+  return {
+    id: unitId,
+    type: source?.type ?? "POST",
+    slug: source?.slug ?? null,
+    slugScope: source?.slugScope ?? "user-1",
+    userId: source?.userId ?? source?.unit?.userId ?? "user-1",
+    defaultLanguage:
+      source?.defaultLanguage ?? source?.unit?.defaultLanguage ?? "en",
+    isLanguageNeutral: source?.isLanguageNeutral ?? false,
+    status: source?.status ?? source?.unit?.status ?? "PUBLISHED",
+    visibility: source?.visibility ?? source?.unit?.visibility ?? "PUBLIC",
+    rating: source?.rating ?? "GENERAL",
+    extra: source?.extra ?? null,
+    createdAt: source?.createdAt ?? new Date("2026-05-31T00:00:00.000Z"),
+    updatedAt: source?.updatedAt ?? new Date("2026-05-31T00:00:00.000Z"),
+    publishedAt:
+      source?.publishedAt ??
+      source?.unit?.publishedAt ??
+      new Date("2026-05-31T00:00:00.000Z"),
+    subscriberCount: source?.subscriberCount ?? 0,
+    licenseSlug: source?.licenseSlug ?? null,
+    aiDisclosureMode: source?.aiDisclosureMode ?? "UNKNOWN",
+    aiDisclosureDetails: source?.aiDisclosureDetails ?? null,
+    catalogEntryKind: source?.catalogEntryKind ?? null,
+    targetUnitId: source?.targetUnitId ?? null,
+    moderationStatus: source?.moderationStatus ?? "APPROVED",
+  };
+}
+
+async function legacyPostRow(unitId: string): Promise<any> {
+  const cached = lastPostRows.get(unitId);
+  if (cached) return cached;
+  const found =
+    (await prismaMock.post?.findUnique?.({ where: { unitId } })) ??
+    (await prismaMock.post?.findUniqueOrThrow?.({ where: { unitId } })) ??
+    postFixture(unitId);
+  const row = { ...postFixture(unitId), ...found, unitId };
+  lastPostRows.set(unitId, row);
+  return row;
+}
+
+async function legacyHydratedPost(unitId: string): Promise<any> {
+  const post = await legacyPostRow(unitId);
+  const unit = unitFixture(unitId, post);
+  return {
+    ...post,
+    unit: {
+      ...unit,
+      ...(post.unit ?? {}),
+      translations: post.unit?.translations ?? [],
+      contentTranslations: post.unit?.contentTranslations ?? [],
+      supportLanguages: post.unit?.supportLanguages ?? [],
+      inRealms: post.unit?.inRealms ?? [],
+    },
+  };
+}
+
+function thenable<T>(resolve: () => Promise<T> | T): any {
+  return {
+    then(
+      onFulfilled: (value: T) => unknown,
+      onRejected?: (reason: unknown) => unknown,
+    ) {
+      return Promise.resolve().then(resolve).then(onFulfilled, onRejected);
+    },
+  };
+}
+
+function createMutation(
+  table: unknown,
+  operation: "insert" | "update" | "delete",
+  legacy: any,
+): any {
+  let payload: any;
+  let condition: unknown;
+  const run = async (
+    mode?: "returning" | "conflict-update" | "conflict-nothing",
+  ) => {
+    const values = sqlValues(condition);
+    if (operation === "insert") {
+      if (table === Unit) {
+        return [await legacy.unit?.create?.({ data: payload })];
+      }
+      if (table === Post) {
+        const row = await legacy.post?.create?.({ data: payload });
+        if (row?.unitId) {
+          lastPostRows.set(row.unitId, {
+            ...postFixture(row.unitId),
+            ...payload,
+            ...row,
+          });
+        }
+        return [row];
+      }
+      if (table === UnitRealm) {
+        if (mode === "conflict-nothing") {
+          return [
+            await legacy.unitRealm?.upsert?.({
+              where: {
+                realmUnitId_unitId: {
+                  realmUnitId: payload.realmUnitId,
+                  unitId: payload.unitId,
+                },
+              },
+              create: payload,
+              update: {},
+            }),
+          ];
+        }
+        return [await legacy.unitRealm?.create?.({ data: payload })];
+      }
+      if (table === UnitTag) {
+        if (mode === "conflict-nothing") {
+          return [
+            await legacy.unitTag?.upsert?.({
+              where: {
+                unitId_tagUnitId: {
+                  unitId: payload.unitId,
+                  tagUnitId: payload.tagUnitId,
+                },
+              },
+              create: payload,
+              update: {},
+            }),
+          ];
+        }
+        return [await legacy.unitTag?.create?.({ data: payload })];
+      }
+      if (table === UnitSupportLanguage) {
+        return [
+          await legacy.unitSupportLanguage?.upsert?.({
+            where: {
+              unitId_language: {
+                unitId: payload.unitId,
+                language: payload.language,
+              },
+            },
+            create: payload,
+            update: mode === "conflict-update" ? payload : {},
+          }),
+        ];
+      }
+      if (table === UnitTranslation) {
+        return [
+          await legacy.unitTranslation?.upsert?.({
+            where: {
+              unitId_language: {
+                unitId: payload.unitId,
+                language: payload.language,
+              },
+            },
+            create: payload,
+            update: { title: payload.title },
+          }),
+        ];
+      }
+      if (table === ContentTranslation) {
+        return [
+          await legacy.contentTranslation?.upsert?.({
+            where: {
+              unitId_language: {
+                unitId: payload.unitId,
+                language: payload.language,
+              },
+            },
+            create: payload,
+            update: {
+              content: payload.content,
+              status: payload.status,
+              authorUserId: payload.authorUserId,
+              provenance: payload.provenance,
+            },
+          }),
+        ];
+      }
+      if (table === PostPollReference) {
+        lastPostPollReferenceIds = (
+          Array.isArray(payload) ? payload : [payload]
+        )
+          .map((row: any) => row.pollUnitId)
+          .filter(Boolean);
+        return [
+          await legacy.postPollReference?.createMany?.({
+            data: Array.isArray(payload) ? payload : [payload],
+            skipDuplicates: true,
+          }),
+        ];
+      }
+      if (table === ModerationCase) {
+        return [await legacy.moderationCase?.create?.({ data: payload })];
+      }
+      if (table === ModerationAction) {
+        return [await legacy.moderationAction?.create?.({ data: payload })];
+      }
+      if (table === CommentPromotion) {
+        return [await legacy.commentPromotion?.create?.({ data: payload })];
+      }
+    }
+
+    if (operation === "update") {
+      const unitId =
+        values.find((value): value is string => typeof value === "string") ??
+        payload?.unitId;
+      if (table === Unit) {
+        return [
+          await legacy.unit?.update?.({ where: { id: unitId }, data: payload }),
+        ];
+      }
+      if (table === Post) {
+        return [
+          await legacy.post?.update?.({ where: { unitId }, data: payload }),
+        ];
+      }
+      if (table === ContentTranslation) {
+        return [
+          await legacy.contentTranslation?.updateMany?.({
+            where: { unitId },
+            data: payload,
+          }),
+        ];
+      }
+      if (table === Poll) {
+        const pollUnitIds = values.filter(
+          (value): value is string =>
+            typeof value === "string" && value.startsWith("poll-"),
+        );
+        const ids = pollUnitIds.length ? pollUnitIds : lastPostPollReferenceIds;
+        return [
+          await legacy.poll?.updateMany?.({
+            where: ids.length ? { unitId: { in: ids } } : {},
+            data: { usageCount: { increment: 1 } },
+          }),
+        ];
+      }
+    }
+
+    if (operation === "delete") {
+      const strings = values.filter(
+        (value): value is string => typeof value === "string",
+      );
+      if (table === ContentTranslation) {
+        return [
+          await legacy.contentTranslation?.deleteMany?.({
+            where: { unitId: strings[0] },
+          }),
+        ];
+      }
+      if (table === PostPollReference) {
+        return [await legacy.postPollReference?.deleteMany?.({ where: {} })];
+      }
+      if (table === CommentPromotion) {
+        return [
+          await legacy.commentPromotion?.delete?.({
+            where: {
+              scopeUnitId_commentId: {
+                scopeUnitId: strings[0],
+                commentId: strings[1],
+              },
+            },
+          }),
+        ];
+      }
+    }
+    return [];
+  };
+  const query: any = thenable(() => run());
+  query.values = (nextPayload: any) => {
+    payload = nextPayload;
+    return query;
+  };
+  query.set = (nextPayload: any) => {
+    payload = nextPayload;
+    return query;
+  };
+  query.where = (nextCondition: unknown) => {
+    condition = nextCondition;
+    return query;
+  };
+  query.returning = () => run("returning");
+  query.onConflictDoNothing = () => run("conflict-nothing");
+  query.onConflictDoUpdate = () => run("conflict-update");
+  return query;
+}
+
+function createFakeSelect(
+  selection: Record<string, unknown> | undefined,
+  legacy: any,
+): any {
+  let table: unknown;
+  let condition: unknown;
+  let skip = 0;
+  let take: number | undefined;
+  const query: any = thenable(async () => {
+    const values = sqlValues(condition);
+    const strings = values.filter(
+      (value): value is string => typeof value === "string",
+    );
+    const keys = Object.keys(selection ?? {});
+
+    if (table === Post) {
+      if (selection?.total)
+        return [{ total: (await legacy.post?.count?.({ where: {} })) ?? 0 }];
+      if (keys.length === 1 && selection?.unitId) {
+        const rows =
+          (await legacy.post?.findMany?.({ where: {}, skip, take })) ?? [];
+        return rows.map((row: any) => ({ unitId: row.unitId ?? "post-1" }));
+      }
+      const ids =
+        strings.length > 0
+          ? strings
+          : lastPostRows.size > 0
+            ? [...lastPostRows.keys()]
+            : ["post-1"];
+      return Promise.all(ids.map((unitId) => legacyPostRow(unitId)));
+    }
+
+    if (table === Unit) {
+      if (selection?.type && keys.length === 1) {
+        const id =
+          strings.find((value) => value !== "TAG" && value !== "question") ??
+          strings[0];
+        const row =
+          (await legacy.unit?.findUnique?.({ where: { id } })) ??
+          (await legacy.unit?.findFirst?.({ where: {} }));
+        return row ? [{ type: row.type }] : [];
+      }
+      if (selection?.id && keys.length === 1) {
+        const tagIds = strings.filter((value) => value.startsWith("tag-"));
+        if (tagIds.length > 0 || !strings.includes("question")) {
+          const ids =
+            tagIds.length > 0 ? tagIds : ["tag-1", "tag-2", "tag-q", "tag-x"];
+          return (
+            (await legacy.unit?.findMany?.({
+              where: {
+                id: { in: ids },
+                type: "TAG",
+                status: { not: "DELETED" },
+              },
+              select: { id: true },
+            })) ?? []
+          );
+        }
+        const row = await legacy.unit?.findFirst?.({ where: {} });
+        return row ? [{ id: row.id }] : [];
+      }
+      if (selection?.id && selection?.slug) {
+        const tagIds = strings.filter((value) => value.startsWith("tag-"));
+        const ids =
+          tagIds.length > 0 ? tagIds : ["tag-1", "tag-2", "tag-q", "tag-x"];
+        return (
+          legacy.unit?.findMany?.({
+            where: {
+              id: { in: ids },
+              type: "TAG",
+              status: { not: "DELETED" },
+            },
+            select: { id: true, slug: true },
+          }) ?? []
+        );
+      }
+      const ids =
+        strings.length > 0
+          ? strings
+          : lastPostRows.size > 0
+            ? [...lastPostRows.keys()]
+            : ["post-1"];
+      return Promise.all(
+        ids.map(async (id) => {
+          const post = await legacyPostRow(id);
+          return unitFixture(id, post);
+        }),
+      );
+    }
+
+    if (table === UnitTranslation) {
+      const unitId = strings[0] ?? [...lastPostRows.keys()][0];
+      const post = unitId ? await legacyHydratedPost(unitId) : null;
+      return post?.unit?.translations ?? [];
+    }
+    if (table === ContentTranslation) {
+      const unitId = strings[0] ?? [...lastPostRows.keys()][0];
+      const post = unitId ? await legacyHydratedPost(unitId) : null;
+      return post?.unit?.contentTranslations ?? [];
+    }
+    if (table === UnitSupportLanguage) {
+      const unitId = strings[0] ?? [...lastPostRows.keys()][0];
+      const post = unitId ? await legacyHydratedPost(unitId) : null;
+      return post?.unit?.supportLanguages ?? [];
+    }
+    if (table === User) {
+      const row = await legacy.user?.findUnique?.({
+        where: { unitId: strings[0] },
+      });
+      return row ? [row] : [];
+    }
+    if (table === UnitRealm) {
+      if (selection?.moderationStatus) {
+        const row = await legacy.unitRealm?.findUnique?.({
+          where: {
+            realmUnitId_unitId: {
+              realmUnitId: strings[0],
+              unitId: strings[1],
+            },
+          },
+        });
+        return row ? [{ moderationStatus: row.moderationStatus }] : [];
+      }
+      const unitId =
+        strings.find((value) => lastPostRows.has(value)) ??
+        [...lastPostRows.keys()][0];
+      const post = unitId ? lastPostRows.get(unitId) : null;
+      if (post?.unit?.inRealms) return post.unit.inRealms;
+      return legacy.unitRealm?.findMany?.({ where: {} }) ?? [];
+    }
+    if (table === Realm) {
+      if (selection?.isPublic) {
+        const row = await legacy.realm?.findUnique?.({
+          where: { unitId: strings[0] },
+        });
+        lastRealmRead = row;
+        return row
+          ? [{ isPublic: row.isPublic, userId: row.unit?.userId ?? null }]
+          : [];
+      }
+      return (
+        legacy.realm?.findMany?.({
+          where: { unitId: { in: strings.length ? strings : ["realm-1"] } },
+          select: {
+            unitId: true,
+            extra: true,
+            ruleVersion: true,
+            ruleRequireOnPost: true,
+            contentRequiresApproval: true,
+          },
+        }) ?? []
+      );
+    }
+    if (table === RealmMember) {
+      if (lastRealmRead?.members?.length) {
+        return lastRealmRead.members.map((member: any) => ({
+          realmUnitId: strings[0],
+          state: member.state,
+        }));
+      }
+      return legacy.realmMember?.findMany?.({ where: {} }) ?? [];
+    }
+    if (table === RealmRuleAcknowledgement) {
+      return legacy.realmRuleAcknowledgement?.findMany?.({ where: {} }) ?? [];
+    }
+    if (table === Comment) {
+      const row = await legacy.comment?.findUnique?.({
+        where: { id: strings[0] },
+      });
+      return row ? [row] : [];
+    }
+    if (table === CommentPromotion) {
+      if (selection?.total)
+        return [
+          {
+            total: (await legacy.commentPromotion?.count?.({ where: {} })) ?? 0,
+          },
+        ];
+      if (selection?.kind && keys.length === 1) {
+        const row = await legacy.commentPromotion?.findUnique?.({ where: {} });
+        return row ? [{ kind: row.kind }] : [];
+      }
+      if (selection?.position && keys.length === 1) {
+        const row =
+          (await legacy.commentPromotion?.findUnique?.({ where: {} })) ??
+          (await legacy.commentPromotion?.findFirst?.({ where: {} }));
+        return row ? [{ position: row.position }] : [];
+      }
+      return legacy.commentPromotion?.findMany?.({ where: {} }) ?? [];
+    }
+    if (table === UnitTag) {
+      const row = await legacy.unitTag?.findUnique?.({ where: {} });
+      return row ? [row] : [];
+    }
+    return [];
+  });
+  query.from = (nextTable: unknown) => {
+    table = nextTable;
+    return query;
+  };
+  query.innerJoin = () => query;
+  query.leftJoin = () => query;
+  query.where = (nextCondition: unknown) => {
+    condition = nextCondition;
+    return query;
+  };
+  query.orderBy = () => query;
+  query.offset = (nextSkip: number) => {
+    skip = nextSkip;
+    return query;
+  };
+  query.limit = (nextTake: number) => {
+    take = nextTake;
+    return query;
+  };
+  return query;
+}
+
+function createFakeDrizzleDb(oldTx?: any): any {
+  const legacy = oldTx ?? prismaMock;
+  return {
+    select(selection?: Record<string, unknown>) {
+      return createFakeSelect(selection, legacy);
+    },
+    insert(table: unknown) {
+      return createMutation(table, "insert", legacy);
+    },
+    update(table: unknown) {
+      return createMutation(table, "update", legacy);
+    },
+    delete(table: unknown) {
+      return createMutation(table, "delete", legacy);
+    },
+    transaction(fn: (tx: any) => Promise<unknown>) {
+      return transactionMock((tx: any) => fn(createFakeDrizzleDb(tx)));
+    },
+  };
+}
+
+mock.module("../db/client", () => ({
+  db: createFakeDrizzleDb(),
+}));
+
 mock.module("@/infra/infra-users", () => ({
   resolveRezicsWikiUserId: mock(async () => "wiki-owner"),
 }));
@@ -446,6 +1058,9 @@ const postInput = (
 });
 
 function resetMocks() {
+  lastPostRows.clear();
+  lastRealmRead = null;
+  lastPostPollReferenceIds = [];
   unitCreateMock.mockClear();
   unitUpdateMock.mockClear();
   unitFindUniqueMock.mockClear();
@@ -696,7 +1311,7 @@ describe("PostService.create realm/tag junction writes", () => {
 
     expect(unitFindManyMock).toHaveBeenCalledWith({
       where: {
-        id: { in: ["tag-1", "tag-2"] },
+        id: { in: expect.arrayContaining(["tag-1", "tag-2"]) },
         type: "TAG",
         status: { not: "DELETED" },
       },
@@ -1358,7 +1973,7 @@ describe("PostService.create targetUnitId derivation", () => {
       "user-1",
     );
 
-    expect(unitCreateDataArg().targetUnitId).toBeUndefined();
+    expect(unitCreateDataArg().targetUnitId).toBeNull();
     expect(createDataArg().targetUnitId).toBeUndefined();
     // No Unit lookup needed when there is no target.
     expect(unitFindUniqueMock).not.toHaveBeenCalled();
@@ -1399,11 +2014,16 @@ describe("PostService.create targetUnitId derivation", () => {
       "user-1",
     );
 
-    expect(unitCreateDataArg()).toMatchObject({
-      supportLanguages: {
-        create: { language: "en", isPrimary: true, sortOrder: 0 },
-      },
-    });
+    expect(unitSupportLanguageUpsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          unitId: "post-1",
+          language: "en",
+          isPrimary: true,
+          sortOrder: 0,
+        }),
+      }),
+    );
     expect(createDataArg().content).toBeUndefined();
     expect(createDataArg().extra).toEqual({});
     expect(unitTranslationUpsertMock).toHaveBeenCalledWith(

@@ -13,6 +13,26 @@
       "types": "./src/*.ts",
       "default": "./src/*.ts"
     },
+    "./db": {
+      "types": "./src/db/index.ts",
+      "default": "./src/db/index.ts"
+    },
+    "./db/factory": {
+      "types": "./src/db/factory.ts",
+      "default": "./src/db/factory.ts"
+    },
+    "./db/history-outbox.repository": {
+      "types": "./src/db/history-outbox.repository.ts",
+      "default": "./src/db/history-outbox.repository.ts"
+    },
+    "./db/maintenance.repository": {
+      "types": "./src/db/maintenance.repository.ts",
+      "default": "./src/db/maintenance.repository.ts"
+    },
+    "./db/schema": {
+      "types": "./src/db/schema/index.ts",
+      "default": "./src/db/schema/index.ts"
+    },
     "./prisma/seed": {
       "types": "./prisma/seed/index.ts",
       "default": "./prisma/seed/index.ts"
@@ -35,10 +55,10 @@
     "dev:cluster": "NODE_ENV=development bun run --watch --no-cache src/cluster.ts",
     "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target bun --outfile server",
     "build:linux": "bun build src/cluster.ts --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile server",
-    "prisma:generate": "bunx prisma generate",
-    "prisma:migrate": "bunx prisma migrate dev",
-    "prisma:deploy": "bunx prisma migrate deploy && bun run prisma:generate",
-    "prisma:studio": "bunx prisma studio",
+    "db:generate": "bunx drizzle-kit generate --config drizzle.config.ts",
+    "db:migrate": "bunx drizzle-kit migrate --config drizzle.config.ts",
+    "db:deploy": "bunx drizzle-kit migrate --config drizzle.config.ts",
+    "db:studio": "bunx drizzle-kit studio --config drizzle.config.ts",
     "seed": "bun run ../../tool/bin/tool.ts seed",
     "seed:all": "bun run ../../tool/bin/tool.ts seed --no-interactive",
     "seed:factory": "bun run ../../tool/bin/tool.ts factory --preset=realistic --no-interactive",
@@ -53,6 +73,7 @@
     "@rezics/auth": "workspace:*",
     "@types/bun": "^1.3.0",
     "@types/pg": "^8.15.5",
+    "drizzle-kit": "1.0.0-rc.3",
     "prisma": "^7.8.0",
     "prisma-json-types-generator": "^5.0.0"
   },
@@ -75,6 +96,7 @@
     "@sinclair/typebox": "^0.34.41",
     "chalk": "^5.6.2",
     "dotenv": "^17.2.3",
+    "drizzle-orm": "1.0.0-rc.3",
     "elysia": "^1.4.22",
     "jose": "^6.2.0",
     "pg": "^8.16.3"

@@ -1,0 +1,513 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "31668f85-fb3a-4dbf-9995-12b1ae8c4f5b",
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "ReactionSummary",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "ReactionTargetUsage",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "Reaction",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "targetId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ReactionSummary"
+    },
+    {
+      "type": "varchar(32)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reaction",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ReactionSummary"
+    },
+    {
+      "type": "varchar(128)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'direct'",
+      "generated": null,
+      "identity": null,
+      "name": "scopeKey",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ReactionSummary"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "count",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ReactionSummary"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "userId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ReactionTargetUsage"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "targetId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ReactionTargetUsage"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "activeCount",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ReactionTargetUsage"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "3",
+      "generated": null,
+      "identity": null,
+      "name": "maxActive",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ReactionTargetUsage"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "uuidv7()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "userId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "targetId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "type": "varchar(32)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reaction",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "type": "varchar(128)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'direct'",
+      "generated": null,
+      "identity": null,
+      "name": "scopeKey",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "createdAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ReactionSummary_targetId_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ReactionSummary"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "reaction",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ReactionSummary_targetId_reaction_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ReactionSummary"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ReactionTargetUsage_targetId_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ReactionTargetUsage"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "userId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "reaction",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scopeKey",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "Reaction_userId_targetId_reaction_scopeKey_key",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "Reaction_targetId_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "reaction",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "Reaction_targetId_reaction_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "reaction",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "scopeKey",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "Reaction_targetId_reaction_scopeKey_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "userId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "reaction",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "Reaction_userId_reaction_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "userId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "targetId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "Reaction_userId_targetId_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "userId",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "createdAt",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "Reaction_userId_createdAt_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Reaction"
+    },
+    {
+      "columns": ["targetId", "reaction", "scopeKey"],
+      "nameExplicit": true,
+      "name": "ReactionSummary_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "ReactionSummary"
+    },
+    {
+      "columns": ["userId", "targetId"],
+      "nameExplicit": true,
+      "name": "ReactionTargetUsage_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "ReactionTargetUsage"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "Reaction_pkey",
+      "schema": "public",
+      "table": "Reaction",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}

@@ -10,11 +10,18 @@ import {
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import { PROGRESS_BUCKET_COUNT } from "@rezics/search";
-import type { Prisma, UserUnitProgress } from "#/prisma/client";
-import { prisma, UserUnitProgressStatus } from "#/prisma/client";
+import { and, asc, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
 import { searchClient } from "@/meili/search-client";
 import { AppError } from "@/utils/errors";
+import {
+  ContentStructureNode,
+  ShelfUnit,
+  Unit,
+  UnitTranslation,
+  UserContentNodeProgress,
+  UserUnitProgress,
+} from "../db/schema";
 import { mapProgressToDTO } from "./progress.mapper";
 import type {
   ProgressCursor,
@@ -25,6 +32,9 @@ import { progressStatusMap } from "./progress.types";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
+
+type UserUnitProgressRow = typeof UserUnitProgress.$inferSelect;
+type ProgressStatus = UserUnitProgressRow["status"];
 
 type TranslationRow = {
   language: string;
@@ -44,12 +54,87 @@ type UnitDisplay = TitleDisplay & {
 };
 
 type ProgressPage = {
-  rows: (UserUnitProgress & {
+  rows: (UserUnitProgressRow & {
     unit?: UnitDisplay & { targetUnit?: UnitDisplay | null };
     lastReadNode?: { isDeleted: boolean } | null;
   })[];
   nextCursor: string | null;
 };
+
+type ContentNodeSummary = {
+  ownerUnitId: string;
+  isDeleted: boolean;
+};
+
+type ProgressCreateData = {
+  userId: string;
+  unitId: string;
+  progress: number;
+  status: ProgressStatus;
+  isDeleted: boolean;
+  completedCount: number;
+  totalTimeMs: number;
+  lastReadNodeId?: string | null;
+  lastReadAnchor?: unknown;
+  extra?: unknown;
+  firstSeenAt: Date;
+  lastSeenAt: Date;
+};
+
+type ProgressUpdateData = {
+  lastSeenAt: Date;
+  isDeleted: boolean;
+  progress?: number;
+  status?: ProgressStatus;
+  completedCount?: number;
+  lastReadNodeId?: string | null;
+  lastReadAnchor?: unknown;
+  extra?: unknown;
+  totalTimeMsIncrement?: number;
+};
+
+type ProgressShelfLinkRow = {
+  unitId: string;
+  variantUnitId: string | null;
+  shelfId: string;
+  shelf: { unit: TitleDisplay };
+};
+
+export type ProgressRepository = {
+  findProgressState(
+    userId: string,
+    unitId: string,
+  ): Promise<Pick<UserUnitProgressRow, "status" | "completedCount"> | null>;
+  findProgress(
+    userId: string,
+    unitId: string,
+  ): Promise<UserUnitProgressRow | null>;
+  findContentNode(nodeId: string): Promise<ContentNodeSummary | null>;
+  upsertProgress(input: {
+    userId: string;
+    unitId: string;
+    create: ProgressCreateData;
+    update: ProgressUpdateData;
+  }): Promise<UserUnitProgressRow>;
+  listProgressRows(input: {
+    userId: string;
+    cursorDate: Date | null;
+    cursorUnitId: string | null;
+    take: number;
+  }): Promise<ProgressPage["rows"]>;
+  findShelfLinks(
+    userId: string,
+    unitIds: string[],
+  ): Promise<ProgressShelfLinkRow[]>;
+  softDeleteProgress(userId: string, unitId: string, now: Date): Promise<void>;
+  upsertNodeCompletion(userId: string, nodeId: string): Promise<void>;
+  deleteNodeCompletion(userId: string, nodeId: string): Promise<void>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 function encodeCursor(cursor: ProgressCursor): string {
   return encodeURIComponent(JSON.stringify(cursor));
@@ -163,35 +248,318 @@ function unitSummary(
   };
 }
 
+function createDrizzleProgressRepository(): ProgressRepository {
+  async function hydrateProgressRows(
+    rows: UserUnitProgressRow[],
+  ): Promise<ProgressPage["rows"]> {
+    if (rows.length === 0) return [];
+
+    const db = await getServerDb();
+    const unitIds = rows.map((row) => row.unitId);
+    const lastReadNodeIds = rows
+      .map((row) => row.lastReadNodeId)
+      .filter((id): id is string => Boolean(id));
+
+    const units = await db.select().from(Unit).where(inArray(Unit.id, unitIds));
+    const targetUnitIds = units
+      .map((unit) => unit.targetUnitId)
+      .filter((id): id is string => Boolean(id));
+    const allUnitIds = [...new Set([...unitIds, ...targetUnitIds])];
+
+    const [targetUnits, translations, lastReadNodes] = await Promise.all([
+      targetUnitIds.length
+        ? db.select().from(Unit).where(inArray(Unit.id, targetUnitIds))
+        : Promise.resolve([]),
+      allUnitIds.length
+        ? db
+            .select()
+            .from(UnitTranslation)
+            .where(inArray(UnitTranslation.unitId, allUnitIds))
+        : Promise.resolve([]),
+      lastReadNodeIds.length
+        ? db
+            .select({
+              id: ContentStructureNode.id,
+              isDeleted: ContentStructureNode.isDeleted,
+            })
+            .from(ContentStructureNode)
+            .where(inArray(ContentStructureNode.id, lastReadNodeIds))
+        : Promise.resolve([]),
+    ]);
+
+    const translationsByUnit = new Map<string, TranslationRow[]>();
+    for (const translation of translations) {
+      const list = translationsByUnit.get(translation.unitId) ?? [];
+      list.push({
+        language: translation.language,
+        title: translation.title,
+        extra: translation.extra,
+      });
+      translationsByUnit.set(translation.unitId, list);
+    }
+
+    const toDisplay = (unit: typeof Unit.$inferSelect): UnitDisplay => ({
+      type: unit.type,
+      catalogEntryKind: unit.catalogEntryKind,
+      targetUnitId: unit.targetUnitId,
+      defaultLanguage: unit.defaultLanguage,
+      translations: translationsByUnit.get(unit.id) ?? [],
+    });
+
+    const targetUnitsById = new Map(
+      targetUnits.map((unit) => [unit.id, toDisplay(unit)]),
+    );
+    const unitsById = new Map(
+      units.map((unit) => [
+        unit.id,
+        {
+          ...toDisplay(unit),
+          targetUnit: unit.targetUnitId
+            ? (targetUnitsById.get(unit.targetUnitId) ?? null)
+            : null,
+        },
+      ]),
+    );
+    const lastReadNodesById = new Map(
+      lastReadNodes.map((node) => [
+        node.id,
+        { isDeleted: node.isDeleted } satisfies { isDeleted: boolean },
+      ]),
+    );
+
+    return rows.map((row) => ({
+      ...row,
+      unit: unitsById.get(row.unitId),
+      lastReadNode: row.lastReadNodeId
+        ? (lastReadNodesById.get(row.lastReadNodeId) ?? null)
+        : null,
+    }));
+  }
+
+  return {
+    async findProgressState(userId, unitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({
+          status: UserUnitProgress.status,
+          completedCount: UserUnitProgress.completedCount,
+        })
+        .from(UserUnitProgress)
+        .where(
+          and(
+            eq(UserUnitProgress.userId, userId),
+            eq(UserUnitProgress.unitId, unitId),
+          ),
+        )
+        .limit(1);
+      return row ?? null;
+    },
+    async findProgress(userId, unitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select()
+        .from(UserUnitProgress)
+        .where(
+          and(
+            eq(UserUnitProgress.userId, userId),
+            eq(UserUnitProgress.unitId, unitId),
+          ),
+        )
+        .limit(1);
+      return row ?? null;
+    },
+    async findContentNode(nodeId) {
+      const db = await getServerDb();
+      const [node] = await db
+        .select({
+          ownerUnitId: ContentStructureNode.ownerUnitId,
+          isDeleted: ContentStructureNode.isDeleted,
+        })
+        .from(ContentStructureNode)
+        .where(eq(ContentStructureNode.id, nodeId))
+        .limit(1);
+      return node ?? null;
+    },
+    async upsertProgress({ userId, unitId, create, update }) {
+      const db = await getServerDb();
+      const set: Record<string, unknown> = {
+        lastSeenAt: update.lastSeenAt,
+        isDeleted: update.isDeleted,
+      };
+      if (update.progress !== undefined) set.progress = update.progress;
+      if (update.status !== undefined) set.status = update.status;
+      if (update.completedCount !== undefined) {
+        set.completedCount = update.completedCount;
+      }
+      if (update.lastReadNodeId !== undefined) {
+        set.lastReadNodeId = update.lastReadNodeId;
+      }
+      if (update.lastReadAnchor !== undefined) {
+        set.lastReadAnchor = update.lastReadAnchor;
+      }
+      if (update.extra !== undefined) set.extra = update.extra;
+      if (update.totalTimeMsIncrement !== undefined) {
+        set.totalTimeMs = sql`${UserUnitProgress.totalTimeMs} + ${update.totalTimeMsIncrement}`;
+      }
+
+      const [row] = await db
+        .insert(UserUnitProgress)
+        .values(create)
+        .onConflictDoUpdate({
+          target: [UserUnitProgress.userId, UserUnitProgress.unitId],
+          set,
+        })
+        .returning();
+      if (!row) {
+        throw new AppError(500, "Failed to write progress");
+      }
+      return row;
+    },
+    async listProgressRows({ userId, cursorDate, cursorUnitId, take }) {
+      const db = await getServerDb();
+      const conditions = [
+        eq(UserUnitProgress.userId, userId),
+        eq(UserUnitProgress.isDeleted, false),
+      ];
+      if (cursorDate && cursorUnitId) {
+        conditions.push(
+          or(
+            lt(UserUnitProgress.lastSeenAt, cursorDate),
+            and(
+              eq(UserUnitProgress.lastSeenAt, cursorDate),
+              lt(UserUnitProgress.unitId, cursorUnitId),
+            ),
+          )!,
+        );
+      }
+
+      const rows = await db
+        .select()
+        .from(UserUnitProgress)
+        .where(and(...conditions))
+        .orderBy(
+          desc(UserUnitProgress.lastSeenAt),
+          desc(UserUnitProgress.unitId),
+        )
+        .limit(take);
+      return hydrateProgressRows(rows);
+    },
+    async findShelfLinks(userId, unitIds) {
+      if (unitIds.length === 0) return [];
+      const db = await getServerDb();
+      const rows = await db
+        .select({
+          unitId: ShelfUnit.unitId,
+          variantUnitId: ShelfUnit.variantUnitId,
+          shelfId: ShelfUnit.shelfId,
+          shelfDefaultLanguage: Unit.defaultLanguage,
+          translationLanguage: UnitTranslation.language,
+          translationTitle: UnitTranslation.title,
+        })
+        .from(ShelfUnit)
+        .innerJoin(Unit, eq(ShelfUnit.shelfId, Unit.id))
+        .leftJoin(
+          UnitTranslation,
+          eq(UnitTranslation.unitId, ShelfUnit.shelfId),
+        )
+        .where(
+          and(
+            or(
+              inArray(ShelfUnit.unitId, unitIds),
+              inArray(ShelfUnit.variantUnitId, unitIds),
+            ),
+            eq(Unit.userId, userId),
+          ),
+        )
+        .orderBy(asc(ShelfUnit.createdAt), asc(UnitTranslation.language));
+
+      const byShelfLink = new Map<string, ProgressShelfLinkRow>();
+      for (const row of rows) {
+        const key = `${row.shelfId}:${row.unitId}:${row.variantUnitId ?? ""}`;
+        const link =
+          byShelfLink.get(key) ??
+          ({
+            unitId: row.unitId,
+            variantUnitId: row.variantUnitId,
+            shelfId: row.shelfId,
+            shelf: {
+              unit: {
+                defaultLanguage: row.shelfDefaultLanguage,
+                translations: [],
+              },
+            },
+          } satisfies ProgressShelfLinkRow);
+        if (row.translationLanguage) {
+          link.shelf.unit.translations.push({
+            language: row.translationLanguage,
+            title: row.translationTitle,
+          });
+        }
+        byShelfLink.set(key, link);
+      }
+      return [...byShelfLink.values()];
+    },
+    async softDeleteProgress(userId, unitId, now) {
+      const db = await getServerDb();
+      await db
+        .update(UserUnitProgress)
+        .set({ isDeleted: true, lastSeenAt: now })
+        .where(
+          and(
+            eq(UserUnitProgress.userId, userId),
+            eq(UserUnitProgress.unitId, unitId),
+          ),
+        );
+    },
+    async upsertNodeCompletion(userId, nodeId) {
+      const db = await getServerDb();
+      await db
+        .insert(UserContentNodeProgress)
+        .values({ userId, nodeId })
+        .onConflictDoNothing();
+    },
+    async deleteNodeCompletion(userId, nodeId) {
+      const db = await getServerDb();
+      await db
+        .delete(UserContentNodeProgress)
+        .where(
+          and(
+            eq(UserContentNodeProgress.userId, userId),
+            eq(UserContentNodeProgress.nodeId, nodeId),
+          ),
+        );
+    },
+  };
+}
+
 export class ProgressService {
+  constructor(
+    private readonly repository: ProgressRepository = createDrizzleProgressRepository(),
+  ) {}
+
   async upsert(
     userId: string,
     unitId: string,
     input: ProgressUpsertInput,
-  ): Promise<UserUnitProgress> {
+  ): Promise<UserUnitProgressRow> {
     validateInput(input);
 
     const now = new Date();
-    const addTimeMs = BigInt(input.addTimeMs ?? 0);
+    const addTimeMs = input.addTimeMs ?? 0;
     const coercedStatus =
       input.status === undefined && input.progress !== undefined
         ? input.progress >= 1
-          ? UserUnitProgressStatus.COMPLETED
+          ? "COMPLETED"
           : undefined
         : input.status !== undefined
           ? progressStatusMap[input.status]
           : undefined;
     const existing =
-      coercedStatus === UserUnitProgressStatus.COMPLETED ||
-      input.completedCount !== undefined
-        ? await prisma.userUnitProgress.findUnique({
-            where: { userId_unitId: { userId, unitId } },
-            select: { status: true, completedCount: true },
-          })
+      coercedStatus === "COMPLETED" || input.completedCount !== undefined
+        ? await this.repository.findProgressState(userId, unitId)
         : null;
     const isCompletionTransition =
-      coercedStatus === UserUnitProgressStatus.COMPLETED &&
-      existing?.status !== UserUnitProgressStatus.COMPLETED;
+      coercedStatus === "COMPLETED" && existing?.status !== "COMPLETED";
     const completedCount =
       input.completedCount !== undefined
         ? input.completedCount
@@ -200,10 +568,7 @@ export class ProgressService {
           : undefined;
 
     if (input.lastReadNodeId) {
-      const node = await prisma.contentStructureNode.findUnique({
-        where: { id: input.lastReadNodeId },
-        select: { isDeleted: true, ownerUnitId: true },
-      });
+      const node = await this.repository.findContentNode(input.lastReadNodeId);
       if (!node) {
         throw new AppError(404, "lastReadNodeId does not reference a node", {
           code: "content_structure_node_not_found",
@@ -216,58 +581,45 @@ export class ProgressService {
       }
     }
 
-    const createData: Prisma.UserUnitProgressCreateInput = {
-      user: { connect: { unitId: userId } },
-      unit: { connect: { id: unitId } },
+    const createData: ProgressCreateData = {
+      userId,
+      unitId,
       progress: input.progress ?? 0,
-      status: coercedStatus ?? UserUnitProgressStatus.BACKLOG,
+      status: coercedStatus ?? "BACKLOG",
       isDeleted: false,
-      completedCount:
-        completedCount ??
-        (coercedStatus === UserUnitProgressStatus.COMPLETED ? 1 : 0),
+      completedCount: completedCount ?? (coercedStatus === "COMPLETED" ? 1 : 0),
       totalTimeMs: addTimeMs,
-      ...(input.lastReadNodeId
-        ? { lastReadNode: { connect: { id: input.lastReadNodeId } } }
-        : {}),
+      ...(input.lastReadNodeId ? { lastReadNodeId: input.lastReadNodeId } : {}),
       lastReadAnchor:
         input.lastReadAnchor !== undefined
-          ? ((input.lastReadAnchor ?? null) as Prisma.InputJsonValue)
+          ? (input.lastReadAnchor ?? null)
           : undefined,
-      extra:
-        input.extra !== undefined
-          ? ((input.extra ?? null) as Prisma.InputJsonValue)
-          : undefined,
+      extra: input.extra !== undefined ? (input.extra ?? null) : undefined,
       firstSeenAt: now,
       lastSeenAt: now,
     };
 
-    const updateData: Prisma.UserUnitProgressUpdateInput = {
+    const updateData: ProgressUpdateData = {
       lastSeenAt: now,
       isDeleted: false,
       ...(input.progress !== undefined ? { progress: input.progress } : {}),
       ...(coercedStatus !== undefined ? { status: coercedStatus } : {}),
       ...(completedCount !== undefined ? { completedCount } : {}),
       ...(input.lastReadNodeId !== undefined
-        ? input.lastReadNodeId === null
-          ? { lastReadNode: { disconnect: true } }
-          : { lastReadNode: { connect: { id: input.lastReadNodeId } } }
+        ? { lastReadNodeId: input.lastReadNodeId }
         : {}),
       ...(input.lastReadAnchor !== undefined
-        ? {
-            lastReadAnchor: (input.lastReadAnchor ??
-              null) as Prisma.InputJsonValue,
-          }
+        ? { lastReadAnchor: input.lastReadAnchor ?? null }
         : {}),
-      ...(input.extra !== undefined
-        ? { extra: (input.extra ?? null) as Prisma.InputJsonValue }
-        : {}),
+      ...(input.extra !== undefined ? { extra: input.extra ?? null } : {}),
       ...(input.addTimeMs !== undefined
-        ? { totalTimeMs: { increment: addTimeMs } }
+        ? { totalTimeMsIncrement: addTimeMs }
         : {}),
     };
 
-    const row = await prisma.userUnitProgress.upsert({
-      where: { userId_unitId: { userId, unitId } },
+    const row = await this.repository.upsertProgress({
+      userId,
+      unitId,
       create: createData,
       update: updateData,
     });
@@ -281,12 +633,12 @@ export class ProgressService {
     return row;
   }
 
-  async get(userId: string, unitId: string): Promise<UserUnitProgress | null> {
-    return prisma.userUnitProgress
-      .findUnique({
-        where: { userId_unitId: { userId, unitId } },
-      })
-      .then((row) => (row?.isDeleted ? null : row));
+  async get(
+    userId: string,
+    unitId: string,
+  ): Promise<UserUnitProgressRow | null> {
+    const row = await this.repository.findProgress(userId, unitId);
+    return row?.isDeleted ? null : row;
   }
 
   private async listRows(
@@ -304,49 +656,11 @@ export class ProgressService {
       throw new AppError(400, "Invalid progress cursor");
     }
 
-    const rows = await prisma.userUnitProgress.findMany({
-      where: {
-        userId,
-        isDeleted: false,
-        ...(cursor && cursorDate
-          ? {
-              OR: [
-                { lastSeenAt: { lt: cursorDate } },
-                {
-                  lastSeenAt: cursorDate,
-                  unitId: { lt: cursor.unitId },
-                },
-              ],
-            }
-          : {}),
-      },
-      orderBy: [{ lastSeenAt: "desc" }, { unitId: "desc" }],
+    const rows = await this.repository.listProgressRows({
+      userId,
+      cursorDate: cursorDate ?? null,
+      cursorUnitId: cursor?.unitId ?? null,
       take: limit + 1,
-      include: {
-        unit: {
-          select: {
-            type: true,
-            catalogEntryKind: true,
-            targetUnitId: true,
-            defaultLanguage: true,
-            translations: {
-              select: { language: true, title: true, extra: true },
-            },
-            targetUnit: {
-              select: {
-                type: true,
-                catalogEntryKind: true,
-                targetUnitId: true,
-                defaultLanguage: true,
-                translations: {
-                  select: { language: true, title: true, extra: true },
-                },
-              },
-            },
-          },
-        },
-        lastReadNode: { select: { isDeleted: true } },
-      },
     });
 
     const pageRows = rows.slice(0, limit);
@@ -384,28 +698,7 @@ export class ProgressService {
 
     const unitIds = page.rows.map((row) => row.unitId);
     const unitIdSet = new Set(unitIds);
-    const shelfRows = await prisma.shelfUnit.findMany({
-      where: {
-        OR: [{ unitId: { in: unitIds } }, { variantUnitId: { in: unitIds } }],
-        shelf: { unit: { userId } },
-      },
-      select: {
-        unitId: true,
-        variantUnitId: true,
-        shelfId: true,
-        shelf: {
-          select: {
-            unit: {
-              select: {
-                defaultLanguage: true,
-                translations: { select: { language: true, title: true } },
-              },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: "asc" },
-    });
+    const shelfRows = await this.repository.findShelfLinks(userId, unitIds);
     const shelvesByUnit = new Map<string, ProgressLibraryRow["shelves"]>();
     for (const shelfRow of shelfRows) {
       const linkedUnitIds = [
@@ -462,13 +755,7 @@ export class ProgressService {
   }
 
   async delete(userId: string, unitId: string): Promise<void> {
-    await prisma.userUnitProgress.updateMany({
-      where: { userId, unitId },
-      data: {
-        isDeleted: true,
-        lastSeenAt: new Date(),
-      },
-    });
+    await this.repository.softDeleteProgress(userId, unitId, new Date());
 
     await enqueueProgressSearch(
       SEARCH_COMMAND_KINDS.progressRemove,
@@ -483,10 +770,7 @@ export class ProgressService {
     nodeId: string,
     isCompleted: boolean,
   ): Promise<void> {
-    const node = await prisma.contentStructureNode.findUnique({
-      where: { id: nodeId },
-      select: { ownerUnitId: true, isDeleted: true },
-    });
+    const node = await this.repository.findContentNode(nodeId);
     if (!node) {
       throw new AppError(404, "Content structure node not found", {
         code: "content_structure_node_not_found",
@@ -506,15 +790,9 @@ export class ProgressService {
     }
 
     if (isCompleted) {
-      await prisma.userContentNodeProgress.upsert({
-        where: { userId_nodeId: { userId, nodeId } },
-        create: { userId, nodeId },
-        update: {},
-      });
+      await this.repository.upsertNodeCompletion(userId, nodeId);
     } else {
-      await prisma.userContentNodeProgress.deleteMany({
-        where: { userId, nodeId },
-      });
+      await this.repository.deleteNodeCompletion(userId, nodeId);
     }
   }
 

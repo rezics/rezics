@@ -4,7 +4,7 @@ Standalone authentication service for the Rezics platform. Handles credentials, 
 
 ## Overview
 
-An Elysia-based backend service that serves as the identity provider for the platform. Built on [Better Auth](https://www.better-auth.com) with Prisma for database access, it provides standard auth flows plus admin endpoints. Rezics profile identity, slug ownership, account setup, and developer/team ownership live in the main server.
+An Elysia-based backend service that serves as the identity provider for the platform. Built on [Better Auth](https://www.better-auth.com) with Drizzle-backed PostgreSQL persistence, it provides standard auth flows plus admin endpoints. Rezics profile identity, slug ownership, account setup, and developer/team ownership live in the main server.
 
 `auth.User.email` is the login email. The main server's `server.User.email` is
 the Rezics product email and is not synchronized with auth login email after
@@ -90,15 +90,15 @@ The first admin is bootstrapped manually:
 ```bash
 bun run dev              # Start with --watch
 bun run build            # Compile to standalone binary
-bun run prisma:generate  # Generate Prisma client
-bun run prisma:migrate   # Run migrations + generate
-bun run prisma:studio    # Open Prisma Studio
+bun run db:generate      # Generate Drizzle migration files
+bun run db:migrate       # Run Drizzle migrations
+bun run db:studio        # Open Drizzle Studio
 ```
 
 ## Tech Stack
 
 - [Elysia](https://elysiajs.com) HTTP framework
 - [Better Auth](https://www.better-auth.com) for identity management
-- [Prisma 7](https://www.prisma.io) with PostgreSQL
+- [Drizzle](https://orm.drizzle.team) with PostgreSQL
 - [Jose](https://github.com/panva/jose) for JWT/JWKS operations
 - [Nodemailer](https://nodemailer.com) for email delivery

@@ -1,3 +1,3 @@
-import type { Prisma } from "#/prisma/client";
+import type { ContentTranslation } from "../db/schema";
 
-export type ContentTranslationRow = Prisma.ContentTranslationGetPayload<{}>;
+export type ContentTranslationRow = typeof ContentTranslation.$inferSelect;

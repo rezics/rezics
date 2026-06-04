@@ -1,15 +1,141 @@
 import { mainMarkdownSource } from "@rezics/contract";
 import { parseReactionScopeKey } from "@rezics/contract/reaction";
-import { prisma, type UnitType } from "#/prisma/client";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import {
   listByUser,
   listGivenReactions,
-} from "@/reaction-boundary/reaction-boundary.client";
-import { notFound } from "@/utils/errors";
-import { mapPublicUser, publicUserSelect } from "@/utils/sanitizeUser";
+} from "../reaction-boundary/reaction-boundary.client";
+import { requireSlugScopeId } from "../infra/slug-scopes";
+import { notFound } from "../utils/errors";
+import { mapPublicUser } from "../utils/sanitizeUser";
+import { Unit, UnitTranslation, User } from "../db/schema";
 
 const OWNERSHIP_CHUNK_SIZE = 1000;
 const SNIPPET_LENGTH = 160;
+
+type UnitType = typeof Unit.$inferSelect.type;
+
+type ProfileReactionTargetRow = {
+  id: string;
+  type: UnitType;
+  title: string | null;
+  description: unknown;
+};
+
+type ProfileReactionRealmRow = {
+  id: string;
+  slug: string | null;
+};
+
+type ProfileReactionActorRow = {
+  unitId: string;
+  slug: string | null;
+  name: string | null;
+  avatar: string | null;
+  bio: string | null;
+  description: unknown;
+  followersCount: number;
+  followingsCount: number;
+};
+
+export interface ProfileReactionHistoryRepository {
+  profileExists(profileUserId: string): Promise<boolean>;
+  listTargetRows(unitIds: string[]): Promise<ProfileReactionTargetRow[]>;
+  listRealmRows(realmIds: string[]): Promise<ProfileReactionRealmRow[]>;
+  listActorRows(
+    userIds: string[],
+    userScope: string,
+  ): Promise<ProfileReactionActorRow[]>;
+  listOwnedUnitIds(profileUserId: string): Promise<string[]>;
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleProfileReactionHistoryRepository(): ProfileReactionHistoryRepository {
+  return {
+    async profileExists(profileUserId) {
+      const db = await getServerDb();
+      const [user] = await db
+        .select({ unitId: User.unitId })
+        .from(User)
+        .where(eq(User.unitId, profileUserId))
+        .limit(1);
+      return Boolean(user);
+    },
+
+    async listTargetRows(unitIds) {
+      if (unitIds.length === 0) return [];
+      const db = await getServerDb();
+      const rows = await db
+        .select({
+          id: Unit.id,
+          type: Unit.type,
+          title: UnitTranslation.title,
+          description: UnitTranslation.description,
+        })
+        .from(Unit)
+        .leftJoin(UnitTranslation, eq(UnitTranslation.unitId, Unit.id))
+        .where(inArray(Unit.id, unitIds));
+      const byId = new Map<string, ProfileReactionTargetRow>();
+      for (const row of rows) {
+        if (!byId.has(row.id)) {
+          byId.set(row.id, row);
+        }
+      }
+      return Array.from(byId.values());
+    },
+
+    async listRealmRows(realmIds) {
+      if (realmIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({ id: Unit.id, slug: Unit.slug })
+        .from(Unit)
+        .where(and(inArray(Unit.id, realmIds), eq(Unit.type, "REALM")));
+    },
+
+    async listActorRows(userIds, userScope) {
+      if (userIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          unitId: User.unitId,
+          slug: Unit.slug,
+          name: User.name,
+          avatar: User.avatar,
+          bio: User.bio,
+          description: User.description,
+          followersCount: User.followersCount,
+          followingsCount: User.followingsCount,
+        })
+        .from(User)
+        .leftJoin(
+          Unit,
+          and(
+            eq(Unit.id, User.unitId),
+            eq(Unit.slugScope, userScope),
+            eq(Unit.type, "USER"),
+          ),
+        )
+        .where(inArray(User.unitId, userIds));
+    },
+
+    async listOwnedUnitIds(profileUserId) {
+      const db = await getServerDb();
+      const rows = await db
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(eq(Unit.userId, profileUserId))
+        .orderBy(asc(Unit.id));
+      return rows.map((row) => row.id);
+    },
+  };
+}
+
+const defaultRepository = createDrizzleProfileReactionHistoryRepository();
 
 export interface ProfileReactionTarget {
   unitId: string;
@@ -92,6 +218,7 @@ function snippet(text: string | null | undefined): string | undefined {
 
 async function loadTargets(
   rows: Array<{ targetId: string; scopeKey?: string }>,
+  repository: ProfileReactionHistoryRepository = defaultRepository,
 ) {
   const unitIds = Array.from(new Set(rows.map((row) => row.targetId)));
   const map = new Map<string, ProfileReactionTarget>();
@@ -106,23 +233,8 @@ async function loadTargets(
   );
 
   const [units, realms] = await Promise.all([
-    prisma.unit.findMany({
-      where: { id: { in: unitIds } },
-      select: {
-        id: true,
-        type: true,
-        translations: {
-          select: { title: true, description: true },
-          take: 1,
-        },
-      },
-    }),
-    realmIds.length > 0
-      ? prisma.unit.findMany({
-          where: { id: { in: realmIds }, type: "REALM" },
-          select: { id: true, slug: true },
-        })
-      : Promise.resolve([]),
+    repository.listTargetRows(unitIds),
+    repository.listRealmRows(realmIds),
   ]);
   const realmSlugById = new Map(realms.map((realm) => [realm.id, realm.slug]));
   const scopeKeysByTargetId = new Map<string, Set<string | undefined>>();
@@ -133,12 +245,11 @@ async function loadTargets(
   }
 
   for (const u of units) {
-    const tr = u.translations[0];
     const base = {
       unitId: u.id,
       kind: unitKind(u.type),
-      title: tr?.title ?? undefined,
-      snippet: snippet(mainMarkdownSource(tr?.description)),
+      title: u.title ?? undefined,
+      snippet: snippet(mainMarkdownSource(u.description)),
     };
     for (const scopeKey of scopeKeysByTargetId.get(u.id) ?? [undefined]) {
       map.set(targetScopeMapKey(u.id, scopeKey), {
@@ -152,27 +263,16 @@ async function loadTargets(
 
 async function loadActors(
   userIds: string[],
+  repository: ProfileReactionHistoryRepository = defaultRepository,
 ): Promise<Map<string, ProfileReactionActor>> {
   const map = new Map<string, ProfileReactionActor>();
   if (userIds.length === 0) return map;
 
-  const { requireSlugScopeId } = await import("@/infra/slug-scopes");
   const userScope = requireSlugScopeId("user");
-  const [users, units] = await Promise.all([
-    prisma.user.findMany({
-      where: { unitId: { in: userIds } },
-      select: publicUserSelect,
-    }),
-    prisma.unit.findMany({
-      where: { id: { in: userIds }, slugScope: userScope, type: "USER" },
-      select: { id: true, slug: true },
-    }),
-  ]);
-
-  const slugById = new Map(units.map((u) => [u.id, u.slug ?? null] as const));
+  const users = await repository.listActorRows(userIds, userScope);
 
   for (const u of users) {
-    const pu = mapPublicUser({ ...u, slug: slugById.get(u.unitId) ?? null });
+    const pu = mapPublicUser(u);
     if (!pu) continue;
     const slug = pu.slug ?? pu.unitId;
     map.set(pu.unitId, {
@@ -194,11 +294,9 @@ async function loadActors(
 export async function assertProfileViewable(
   profileUserId: string,
   _viewerUserId: string | null,
+  repository: ProfileReactionHistoryRepository = defaultRepository,
 ): Promise<void> {
-  const exists = await prisma.user.findUnique({
-    where: { unitId: profileUserId },
-    select: { unitId: true },
-  });
+  const exists = await repository.profileExists(profileUserId);
   if (!exists) {
     throw notFound("User");
   }
@@ -206,6 +304,10 @@ export async function assertProfileViewable(
 }
 
 export class ProfileReactionHistoryService {
+  constructor(
+    public repository: ProfileReactionHistoryRepository = defaultRepository,
+  ) {}
+
   async listGiven(opts: {
     profileUserId: string;
     viewerUserId: string | null;
@@ -213,7 +315,11 @@ export class ProfileReactionHistoryService {
     cursor?: string;
     limit?: number;
   }): Promise<ProfileReactionListResult<ProfileReactionGivenItem>> {
-    await assertProfileViewable(opts.profileUserId, opts.viewerUserId);
+    await assertProfileViewable(
+      opts.profileUserId,
+      opts.viewerUserId,
+      this.repository,
+    );
 
     const raw = await listGivenReactions({
       userId: opts.profileUserId,
@@ -222,7 +328,7 @@ export class ProfileReactionHistoryService {
       limit: opts.limit,
     });
 
-    const targets = await loadTargets(raw.items);
+    const targets = await loadTargets(raw.items, this.repository);
 
     return {
       items: raw.items.map((r) => ({
@@ -243,14 +349,13 @@ export class ProfileReactionHistoryService {
     cursor?: string;
     limit?: number;
   }): Promise<ProfileReactionListResult<ProfileReactionReceivedItem>> {
-    await assertProfileViewable(opts.profileUserId, opts.viewerUserId);
+    await assertProfileViewable(
+      opts.profileUserId,
+      opts.viewerUserId,
+      this.repository,
+    );
 
-    const owned = await prisma.unit.findMany({
-      where: { userId: opts.profileUserId },
-      select: { id: true },
-      orderBy: { id: "asc" },
-    });
-    const ownedIds = owned.map((u) => u.id);
+    const ownedIds = await this.repository.listOwnedUnitIds(opts.profileUserId);
     if (ownedIds.length === 0) {
       return { items: [], nextCursor: null };
     }
@@ -299,8 +404,8 @@ export class ProfileReactionHistoryService {
 
     const actorIds = Array.from(new Set(sliced.map((r) => r.userId)));
     const [targets, actors] = await Promise.all([
-      loadTargets(sliced),
-      loadActors(actorIds),
+      loadTargets(sliced, this.repository),
+      loadActors(actorIds, this.repository),
     ]);
 
     const items = sliced.flatMap<ProfileReactionReceivedItem>((r) => {

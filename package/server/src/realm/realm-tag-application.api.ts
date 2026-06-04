@@ -6,10 +6,11 @@ import {
   patchRealmTagApplicationSchema,
   realmTagApplicationPathParamsSchema,
 } from "@rezics/contract";
+import { eq } from "drizzle-orm";
 import { Elysia } from "elysia";
-import { prisma } from "#/prisma/client";
 import { governanceRoutePolicyService, realmPolicyActions } from "@/governance";
 import { authMacro } from "@/middleware";
+import { Unit } from "../db/schema";
 import { mapRealmTagApplicationToDTO } from "./realm.mapper";
 import { realmService } from "./realm.service";
 
@@ -39,10 +40,12 @@ async function canMutateRealmTagApplication(
   realmUnitId: string,
 ): Promise<boolean> {
   if (BasicAdminPermission(actorPermission as any)) return true;
-  const realm = await prisma.unit.findUnique({
-    where: { id: realmUnitId },
-    select: { userId: true },
-  });
+  const { db } = await import("../db/client");
+  const [realm] = await db
+    .select({ userId: Unit.userId })
+    .from(Unit)
+    .where(eq(Unit.id, realmUnitId))
+    .limit(1);
   return realm?.userId != null && realm.userId === actorUserId;
 }
 

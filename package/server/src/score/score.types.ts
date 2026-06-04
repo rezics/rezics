@@ -1,10 +1,8 @@
-import type {
-  ScoreAggregate,
-  ScoreEntry,
-  ScoreRealmField,
-} from "#/prisma/client";
+import type { ScoreAggregate, ScoreEntry, ScoreRealmField } from "../db/schema";
 
-export type { ScoreAggregate, ScoreEntry, ScoreRealmField };
+export type ScoreAggregateRow = typeof ScoreAggregate.$inferSelect;
+export type ScoreEntryRow = typeof ScoreEntry.$inferSelect;
+export type ScoreRealmFieldRow = typeof ScoreRealmField.$inferSelect;
 
 export const SCORE_MIN = 1;
 export const SCORE_MAX = 10;

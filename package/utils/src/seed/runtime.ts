@@ -203,7 +203,7 @@ export function createSeedRuntime(input: {
     },
     async dispose() {
       await Promise.all([
-        input.authPrisma.$disconnect().catch(() => {}),
+        input.authPrisma.disconnect().catch(() => {}),
         input.serverPrisma.$disconnect().catch(() => {}),
       ]);
     },

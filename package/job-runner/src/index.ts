@@ -14,8 +14,8 @@ import {
   type HistoryRuntime,
 } from "./handlers/history/runtime";
 import {
-  createServerPrismaRuntime,
-  type ServerPrismaRuntime,
+  createServerMaintenanceRuntime,
+  type ServerMaintenanceRuntime,
 } from "./handlers/maintenance/runtime";
 import {
   createRankingRuntime,
@@ -57,7 +57,7 @@ let boss: Awaited<ReturnType<typeof createBoss>> | undefined;
 let app: ReturnType<typeof createJobRunnerApp> | undefined;
 let searchRuntime: SearchRuntime | undefined;
 let historyRuntime: HistoryRuntime | undefined;
-let serverPrismaRuntime: ServerPrismaRuntime | undefined;
+let serverMaintenanceRuntime: ServerMaintenanceRuntime | undefined;
 let rankingRuntime: RankingRuntime | undefined;
 
 if (role === "all" || role === "worker" || role === "http") {
@@ -75,11 +75,11 @@ if ((role === "all" || role === "worker") && boss) {
     meiliHost: env.MEILI_HOST,
     meiliMasterKey: env.MEILI_MASTER_KEY,
   });
-  historyRuntime = createHistoryRuntime({
+  historyRuntime = await createHistoryRuntime({
     serverDatabaseUrl: env.SERVER_DATABASE_URL,
     historyDatabaseUrl: env.HISTORY_DATABASE_URL,
   });
-  serverPrismaRuntime = createServerPrismaRuntime({
+  serverMaintenanceRuntime = createServerMaintenanceRuntime({
     serverDatabaseUrl: env.SERVER_DATABASE_URL,
   });
   rankingRuntime = createRankingRuntime({
@@ -91,7 +91,7 @@ if ((role === "all" || role === "worker") && boss) {
     createJobHandlers({
       searchClient: searchRuntime.client,
       historyConsumer: historyRuntime.consumer,
-      serverPrismaRuntime,
+      serverMaintenanceRuntime,
       rankingDispatcher: rankingRuntime,
     }),
     workerLanes,
@@ -121,7 +121,7 @@ if ((role === "all" || role === "http") && boss) {
 async function shutdown() {
   await searchRuntime?.disconnect();
   await historyRuntime?.disconnect();
-  await serverPrismaRuntime?.disconnect();
+  await serverMaintenanceRuntime?.disconnect();
   await rankingRuntime?.disconnect();
   await boss?.stop({ graceful: true, timeout: 30_000 });
   app?.server?.stop();

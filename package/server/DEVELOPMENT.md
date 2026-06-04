@@ -1,29 +1,22 @@
 # Development Notes
 
-## Prisma
+## Drizzle
 
 ```sh
 # Run migrations (dev)
-bunx prisma migrate dev --name init
-
-# Generate Prisma client
-bunx prisma generate
-
-# Seed database
-bun run prisma:seed
 bun run db:migrate
 
+# Generate Drizzle migrations
+bun run db:generate
+
+# Seed database
+bun run seed
+
 # Deploy migrations (production)
-bunx prisma migrate deploy
+bun run db:deploy
 
 # Reset database (destructive)
-bunx prisma migrate reset
-
-# Apply existing migrations
-bunx prisma migrate deploy
-
-# Linux-specific
-npx prisma generate
+bun run ../../tool/bin/tool.ts db ensure
 ```
 
 ### Auth/Main Account Boundary Cutover
@@ -36,8 +29,8 @@ email verification is represented by `EmailVerificationContract` rows.
 For local development data, prefer a reset after applying the schema change:
 
 ```sh
-bunx prisma migrate reset
-bun run prisma:generate
+bun run ../../tool/bin/tool.ts db ensure
+bun run db:migrate
 ```
 
 If a local database must be kept, migrate one way by creating verified

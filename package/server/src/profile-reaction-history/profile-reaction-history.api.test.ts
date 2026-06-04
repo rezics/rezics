@@ -1,4 +1,5 @@
-import { beforeAll, describe, expect, mock, test } from "bun:test";
+import { beforeAll, beforeEach, describe, expect, mock, test } from "bun:test";
+import type { ProfileReactionHistoryRepository } from "./profile-reaction-history.service";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -38,6 +39,7 @@ const givenByUser = new Map<string, FakeReactionRow[]>();
 const reactionsByTarget = new Map<string, FakeReactionRow[]>();
 
 let internalCalls = 0;
+let service: typeof import("./profile-reaction-history.service");
 
 function resetState() {
   users.clear();
@@ -47,57 +49,56 @@ function resetState() {
   internalCalls = 0;
 }
 
-mock.module("#/prisma/client", () => ({
-  prisma: {
-    user: {
-      findUnique: async ({ where, select }: any) => {
-        const u = users.get(where.unitId ?? where.userId);
-        if (!u) return null;
-        if (select?.userId && Object.keys(select).length === 1) {
-          return { userId: u.userId };
-        }
-        return { ...u, unitId: u.userId };
-      },
-      findMany: async ({ where, select: _select }: any) => {
-        const ids = where?.unitId?.in ?? where?.userId?.in;
-        if (ids) {
-          const set = new Set<string>(ids);
-          return Array.from(users.values())
-            .filter((u) => set.has(u.userId))
-            .map((u) => ({ ...u, unitId: u.userId }));
-        }
-        return Array.from(users.values()).map((u) => ({
-          ...u,
+function fakeRepository(): ProfileReactionHistoryRepository {
+  return {
+    async profileExists(profileUserId) {
+      return users.has(profileUserId);
+    },
+    async listTargetRows(unitIds) {
+      const set = new Set(unitIds);
+      return Array.from(units.values())
+        .filter((u) => set.has(u.id))
+        .map((u) => {
+          const translation = u.translations[0];
+          return {
+            id: u.id,
+            type: u.type as any,
+            title: translation?.title ?? null,
+            description: translation?.description ?? null,
+          };
+        });
+    },
+    async listRealmRows(realmIds) {
+      const set = new Set(realmIds);
+      return Array.from(units.values())
+        .filter((u) => set.has(u.id) && u.type === "REALM")
+        .map((u) => ({ id: u.id, slug: u.slug ?? null }));
+    },
+    async listActorRows(userIds, _userScope) {
+      const set = new Set(userIds);
+      return Array.from(users.values())
+        .filter((u) => set.has(u.userId))
+        .map((u) => ({
           unitId: u.userId,
+          slug: units.get(u.userId)?.slug ?? null,
+          name: u.name ?? null,
+          avatar: u.avatar ?? null,
+          bio: u.bio ?? null,
+          description: u.description ?? null,
+          followersCount: 0,
+          followingsCount: 0,
         }));
-      },
     },
-    unit: {
-      findMany: async ({ where, select: _select, orderBy: _orderBy }: any) => {
-        let rows = Array.from(units.values());
-        if (where?.userId) {
-          rows = rows.filter((u) => u.userId === where.userId);
-        }
-        if (where?.id?.in) {
-          const set = new Set<string>(where.id.in);
-          rows = rows.filter((u) => set.has(u.id));
-        }
-        if (where?.type) {
-          rows = rows.filter((u) => u.type === where.type);
-        }
-        return rows.map((u) => ({
-          id: u.id,
-          type: u.type,
-          slug: u.slug ?? null,
-          userId: u.userId,
-          translations: u.translations,
-        }));
-      },
+    async listOwnedUnitIds(profileUserId) {
+      return Array.from(units.values())
+        .filter((u) => u.userId === profileUserId)
+        .map((u) => u.id)
+        .sort();
     },
-  },
-}));
+  };
+}
 
-mock.module("@/middleware", () => ({
+mock.module("../middleware", () => ({
   tryResolveIdentity: async (auth: string | undefined) => {
     if (!auth) return null;
     if (auth === "Bearer alice") return { userId: "alice" };
@@ -106,11 +107,11 @@ mock.module("@/middleware", () => ({
   },
 }));
 
-mock.module("@/infra/slug-scopes", () => ({
+mock.module("../infra/slug-scopes", () => ({
   requireSlugScopeId: () => "user-scope",
 }));
 
-mock.module("@/reaction-boundary/reaction-boundary.client", () => ({
+mock.module("../reaction-boundary/reaction-boundary.client", () => ({
   listGivenReactions: async (q: {
     userId: string;
     cursor?: string;
@@ -153,8 +154,14 @@ mock.module("@/reaction-boundary/reaction-boundary.client", () => ({
 let api: any;
 
 beforeAll(async () => {
+  service = await import("./profile-reaction-history.service");
   const mod = await import("./profile-reaction-history.api");
   api = mod.profileReactionHistoryApi;
+});
+
+beforeEach(() => {
+  resetState();
+  service.profileReactionHistoryService.repository = fakeRepository();
 });
 
 function row(
@@ -174,7 +181,6 @@ function row(
 
 describe("GET /profile/:userId/reaction/given", () => {
   test("public profile returns hydrated rows", async () => {
-    resetState();
     users.set("u1", { userId: "u1", slug: "u1", name: "U One" });
     units.set("t-1", {
       id: "t-1",
@@ -208,29 +214,26 @@ describe("GET /profile/:userId/reaction/given", () => {
   });
 
   test("403 when assertProfileViewable denies access", async () => {
-    resetState();
     users.set("u-private", { userId: "u-private" });
-    const svc = await import("./profile-reaction-history.service");
-    const original = svc.profileReactionHistoryService.listGiven.bind(
-      svc.profileReactionHistoryService,
+    const original = service.profileReactionHistoryService.listGiven.bind(
+      service.profileReactionHistoryService,
     );
     const spy = mock(async () => {
-      const { AppError } = await import("@/utils/errors");
+      const { AppError } = await import("../utils/errors");
       throw new AppError(403, "Forbidden: profile is private");
     });
-    svc.profileReactionHistoryService.listGiven = spy as any;
+    service.profileReactionHistoryService.listGiven = spy as any;
     try {
       const res = await api.handle(
         new Request("http://localhost/profile/u-private/reaction/given"),
       );
       expect(res.status).toBe(403);
     } finally {
-      svc.profileReactionHistoryService.listGiven = original;
+      service.profileReactionHistoryService.listGiven = original;
     }
   });
 
   test("404 when profile user does not exist", async () => {
-    resetState();
     const res = await api.handle(
       new Request("http://localhost/profile/missing/reaction/given"),
     );
@@ -238,7 +241,6 @@ describe("GET /profile/:userId/reaction/given", () => {
   });
 
   test("renders deleted target as null", async () => {
-    resetState();
     users.set("u1", { userId: "u1" });
     givenByUser.set("u1", [
       row(1, { id: "r1", userId: "u1", targetId: "deleted" }),
@@ -253,7 +255,6 @@ describe("GET /profile/:userId/reaction/given", () => {
   });
 
   test("links realm-scoped post reactions to the realm-context route", async () => {
-    resetState();
     users.set("u1", { userId: "u1" });
     units.set("realm-1", {
       id: "realm-1",
@@ -288,7 +289,6 @@ describe("GET /profile/:userId/reaction/given", () => {
 
 describe("GET /profile/:userId/reaction/received", () => {
   test("excludes self-reactions and hydrates actor + target", async () => {
-    resetState();
     users.set("u1", { userId: "u1", slug: "u1", name: "U One" });
     users.set("alice", { userId: "alice", slug: "alice", name: "Alice" });
     units.set("t-1", {
@@ -313,7 +313,6 @@ describe("GET /profile/:userId/reaction/received", () => {
   });
 
   test("returns empty when user owns no units", async () => {
-    resetState();
     users.set("u1", { userId: "u1" });
     const res = await api.handle(
       new Request("http://localhost/profile/u1/reaction/received"),
@@ -324,7 +323,6 @@ describe("GET /profile/:userId/reaction/received", () => {
   });
 
   test("paginates across multiple ownership chunks", async () => {
-    resetState();
     users.set("u1", { userId: "u1" });
     users.set("alice", { userId: "alice", slug: "alice" });
     // Synthesise 1500 owned units to force two ownership chunks.

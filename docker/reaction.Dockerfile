@@ -4,20 +4,13 @@
 #   docker build -f docker/base.Dockerfile -t rezics-base:dev .
 #   docker build -f docker/reaction.Dockerfile -t rezics-reaction:dev .
 #
-# Prisma 7 here is engineless: the `prisma-client` generator emits plain
-# TS/JS and queries run through `@prisma/adapter-pg` (pure-JS `pg`), so the
-# `bun --compile` binary is fully self-contained — no Rust query engine to
-# copy into the runtime stage.
+# Drizzle queries run through the pure-JS `pg` driver, so the `bun --compile`
+# binary is fully self-contained — no external query engine is copied into the
+# runtime stage.
 
 # --- build stage -----------------------------------------------------------
 FROM rezics-base:dev AS build
 WORKDIR /repo/package/reaction
-
-# Generate the engineless Prisma client. The dummy URL only satisfies the
-# Prisma config's `env()` lookup — generate never connects, and the real
-# datasource URL is supplied at runtime via the pg adapter.
-ENV REACTION_DATABASE_URL="postgresql://build:build@localhost:5432/build"
-RUN bunx prisma generate
 
 # Compile the standalone Linux amd64 binary.
 RUN bun run build:linux

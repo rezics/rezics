@@ -7,9 +7,10 @@
     "dev": "bun run dev-script/dev.ts",
     "cli": "bun run bin/tool.ts",
     "service": "bun run bin/service.ts",
-    "prisma:regenerate": "bun run bin/tool.ts prisma generate",
-    "prisma:migrate": "bun run bin/tool.ts prisma migrate",
-    "prisma:reset-db": "bun run bin/tool.ts prisma reset",
+    "db:generate": "bun run bin/tool.ts db generate",
+    "db:migrate": "bun run bin/tool.ts db migrate",
+    "db:deploy": "bun run bin/tool.ts db deploy",
+    "db:reset": "bun run bin/tool.ts db reset",
     "db:ensure": "bun run bin/tool.ts db ensure",
     "generate-barrel": "bun run src/commands/generate-barrel.ts"
   },
@@ -18,9 +19,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
-    "@prisma/adapter-pg": "^7.8.0",
     "@t3-oss/env-core": "^0.13.10",
-    "better-auth": "^1.5.3",
     "dotenv": "^17.2.3",
     "gunshi": "^0.32.0",
     "valibot": "^1.2.0"

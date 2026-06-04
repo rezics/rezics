@@ -1,4 +1,4 @@
-import type { Prisma } from "#/prisma/client";
+import type { SourceSite } from "../db/schema";
 
 export const sourceSiteInclude = {
   entity: {
@@ -10,8 +10,8 @@ export const sourceSiteInclude = {
       },
     },
   },
-} satisfies Prisma.SourceSiteInclude;
+} as const;
 
-export type SourceSiteWithRelations = Prisma.SourceSiteGetPayload<{
-  include: typeof sourceSiteInclude;
-}>;
+export type SourceSiteWithRelations = typeof SourceSite.$inferSelect & {
+  entity?: unknown | null;
+};

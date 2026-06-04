@@ -1,10 +1,20 @@
 // Type only used in server, otherwise use contract
 
-import type { Prisma } from "#/prisma/client";
-import { publicUserSelect } from "@/utils/sanitizeUser";
+import type {
+  Book,
+  CreditAttribution,
+  Entity,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
+import {
+  publicUserSelect,
+  type PublicUserSelected,
+} from "@/utils/sanitizeUser";
 
 /**
- * Prisma include for book relations
+ * Relation shape mirrored by book hydration.
  */
 export const bookInclude = {
   unit: {
@@ -22,11 +32,23 @@ export const bookInclude = {
       },
     },
   },
-} satisfies Prisma.BookInclude;
+} as const;
 
 /**
  * Internal book type with relations
  */
-export type BookWithRelations = Prisma.BookGetPayload<{
-  include: typeof bookInclude;
-}>;
+export type BookWithRelations = typeof Book.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    user?: PublicUserSelected | null;
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+    creditAttributions: Array<
+      typeof CreditAttribution.$inferSelect & {
+        entity: typeof Unit.$inferSelect & {
+          entity?: typeof Entity.$inferSelect | null;
+          translations: Array<typeof UnitTranslation.$inferSelect>;
+        };
+      }
+    >;
+  };
+};

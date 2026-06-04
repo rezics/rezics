@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
 
 const currentIdentity = {
   sub: "sender-1",
@@ -17,23 +13,11 @@ const decideForIdentityMock = mock(async () => ({
   safeMessage: policyAllowed ? "Allowed" : "Denied by policy",
 }));
 const sendDmMock = mock(async () => ({ ok: true, data: { id: "dm-1" } }));
-const subscriptionFindUnique = mock(async () => ({ channels: ["dm.message"] }));
+const getSubscriptionChannels = mock(async () => ["dm.message"]);
 let isBlocked = false;
 // Drives the inline user-to-user block check on the DM send path, consulted
 // before the policy/subscription gates.
-const userBlockFindFirst = mock(async () =>
-  isBlocked ? { id: "block-1" } : null,
-);
-
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  subscription: {
-    findUnique: subscriptionFindUnique,
-  },
-  userBlock: {
-    findFirst: userBlockFindFirst,
-  },
-});
+const isBlockedEitherWay = mock(async () => isBlocked);
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -46,6 +30,9 @@ mock.module("@/governance", () => ({
     create: "content.create",
     delete: "content.delete",
     reactionCreate: "reaction.create",
+  },
+  governanceCapabilityService: {
+    realmMembershipForPolicy: mock(async () => null),
   },
   governanceRoutePolicyService: {
     decideForIdentity: decideForIdentityMock,
@@ -65,12 +52,16 @@ describe("dmBoundaryApi policy", () => {
     isBlocked = false;
     decideForIdentityMock.mockClear();
     sendDmMock.mockClear();
-    subscriptionFindUnique.mockClear();
-    userBlockFindFirst.mockClear();
+    getSubscriptionChannels.mockClear();
+    isBlockedEitherWay.mockClear();
   });
 
   test("denies DM send rejected by policy before subscription checks", async () => {
-    const { dmBoundaryApi } = await import("./dm-boundary.api");
+    const { createDmBoundaryApi } = await import("./dm-boundary.api");
+    const dmBoundaryApi = createDmBoundaryApi({
+      getSubscriptionChannels,
+      isBlockedEitherWay,
+    });
     const response = await dmBoundaryApi.handle(
       new Request("http://localhost/dm/send", {
         method: "POST",
@@ -86,14 +77,18 @@ describe("dmBoundaryApi policy", () => {
       action: "dm.send",
       target: { kind: "direct-message", id: "recipient-1" },
     });
-    expect(subscriptionFindUnique).not.toHaveBeenCalled();
+    expect(getSubscriptionChannels).not.toHaveBeenCalled();
     expect(sendDmMock).not.toHaveBeenCalled();
   });
 
   test("denies DM send when either party has blocked the other", async () => {
     isBlocked = true;
     policyAllowed = true;
-    const { dmBoundaryApi } = await import("./dm-boundary.api");
+    const { createDmBoundaryApi } = await import("./dm-boundary.api");
+    const dmBoundaryApi = createDmBoundaryApi({
+      getSubscriptionChannels,
+      isBlockedEitherWay,
+    });
     const response = await dmBoundaryApi.handle(
       new Request("http://localhost/dm/send", {
         method: "POST",
@@ -108,7 +103,7 @@ describe("dmBoundaryApi policy", () => {
     });
     // Block wins ahead of the policy and subscription gates.
     expect(decideForIdentityMock).not.toHaveBeenCalled();
-    expect(subscriptionFindUnique).not.toHaveBeenCalled();
+    expect(getSubscriptionChannels).not.toHaveBeenCalled();
     expect(sendDmMock).not.toHaveBeenCalled();
   });
 });

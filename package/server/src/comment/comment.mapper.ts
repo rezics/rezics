@@ -15,13 +15,15 @@ export function mapCommentToDTO(comment: CommentWithRelations): CommentDTO {
     moderationStatus:
       comment.moderationStatus.toLowerCase() as CommentDTO["moderationStatus"],
     removedReason: isRemoved ? "content_removed_by_moderator" : null,
-    removedByAuthority: isRemoved ? "platform" : null,
+    removedByAuthority: (isRemoved
+      ? "platform"
+      : null) as CommentDTO["removedByAuthority"],
     isRedacted,
-    redactionKind: isRemoved
+    redactionKind: (isRemoved
       ? "moderator_removed"
       : isDeleted
         ? "author_deleted"
-        : null,
+        : null) as CommentDTO["redactionKind"],
     depth: comment.depth,
     path: comment.path ?? null,
     createdAt: comment.createdAt.toISOString(),

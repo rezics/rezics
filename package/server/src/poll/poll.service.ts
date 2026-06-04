@@ -1,10 +1,17 @@
 import type { CreatePollInput } from "@rezics/contract";
 import { DEFAULT_LANGUAGE } from "@rezics/contract";
-import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { keyAfter } from "@/book/position-index";
+import {
+  Poll,
+  PollOption,
+  PollVote,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
 import { isPollClosed } from "./poll.mapper";
 import type { PollWithOptions } from "./poll.types";
-import { pollInclude } from "./poll.types";
 
 export class PollError extends Error {
   constructor(
@@ -42,7 +49,305 @@ function parseClosesAt(value: CreatePollInput["closesAt"]): Date | null {
   return value instanceof Date ? value : new Date(value);
 }
 
+type PollRow = typeof Poll.$inferSelect;
+type PollVoteRow = typeof PollVote.$inferSelect;
+
+type NewPollOption = {
+  position: string;
+  label: string | null;
+  unitId: string | null;
+};
+
+type CreatePollData = {
+  userId: string;
+  title: string;
+  description: string | null;
+  voteMode: "SINGLE" | "MULTI";
+  resultVisibility: "LIVE" | "AFTER_CLOSE";
+  anonymous: boolean;
+  closesAt: Date | null;
+  language: string;
+  options: NewPollOption[];
+};
+
+type VoteIdentity = {
+  pollUnitId: string;
+  userId: string;
+  optionId: string;
+};
+
+type PollVoteSelection = {
+  optionId: string;
+  realmUnitId: string | null;
+};
+
+type PollTransactionRepository = {
+  findPoll(unitId: string): Promise<PollWithOptions | undefined>;
+  findPollRow(unitId: string): Promise<PollRow | undefined>;
+  updateVoteMode(unitId: string, voteMode: "SINGLE" | "MULTI"): Promise<void>;
+  countVotes(pollUnitId: string): Promise<number>;
+  findOption(
+    pollUnitId: string,
+    optionId: string,
+  ): Promise<typeof PollOption.$inferSelect | undefined>;
+  findVote(identity: VoteIdentity): Promise<PollVoteRow | undefined>;
+  findAnyVoteForUser(
+    pollUnitId: string,
+    userId: string,
+  ): Promise<PollVoteRow | undefined>;
+  createVote(input: {
+    pollUnitId: string;
+    userId: string;
+    optionId: string;
+    voteMode: "SINGLE" | "MULTI";
+    realmUnitId: string | null;
+  }): Promise<void>;
+  deleteVote(identity: VoteIdentity): Promise<void>;
+  incrementOptionVoteCount(
+    pollUnitId: string,
+    optionId: string,
+    delta: 1 | -1,
+  ): Promise<void>;
+};
+
+export type PollRepository = {
+  createPoll(data: CreatePollData): Promise<PollWithOptions>;
+  findPoll(unitId: string): Promise<PollWithOptions | undefined>;
+  findVotesForUser(
+    pollUnitId: string,
+    userId: string,
+  ): Promise<PollVoteSelection[]>;
+  withTransaction<T>(
+    callback: (tx: PollTransactionRepository) => Promise<T>,
+  ): Promise<T>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+async function hydratePoll(
+  database: any,
+  poll: PollRow,
+): Promise<PollWithOptions> {
+  const [unitRows, translationRows, options] = await Promise.all([
+    database.select().from(Unit).where(eq(Unit.id, poll.unitId)).limit(1),
+    database
+      .select()
+      .from(UnitTranslation)
+      .where(eq(UnitTranslation.unitId, poll.unitId)),
+    database
+      .select()
+      .from(PollOption)
+      .where(eq(PollOption.pollUnitId, poll.unitId))
+      .orderBy(asc(PollOption.position), asc(PollOption.optionId)),
+  ]);
+
+  const unit = unitRows[0];
+  return {
+    ...poll,
+    options,
+    unit: unit ? { ...unit, translations: translationRows } : null,
+  };
+}
+
+function createDrizzlePollTransactionRepository(
+  database: any,
+): PollTransactionRepository {
+  return {
+    async findPoll(unitId) {
+      const poll = await this.findPollRow(unitId);
+      return poll ? hydratePoll(database, poll) : undefined;
+    },
+    async findPollRow(unitId) {
+      const [poll] = await database
+        .select()
+        .from(Poll)
+        .where(eq(Poll.unitId, unitId))
+        .limit(1);
+      return poll;
+    },
+    async updateVoteMode(unitId, voteMode) {
+      await database
+        .update(Poll)
+        .set({ voteMode, updatedAt: new Date() })
+        .where(eq(Poll.unitId, unitId));
+    },
+    async countVotes(pollUnitId) {
+      const [row] = await database
+        .select({ value: sql<number>`count(*)::int` })
+        .from(PollVote)
+        .where(eq(PollVote.pollUnitId, pollUnitId));
+      return row?.value ?? 0;
+    },
+    async findOption(pollUnitId, optionId) {
+      const [option] = await database
+        .select()
+        .from(PollOption)
+        .where(
+          and(
+            eq(PollOption.pollUnitId, pollUnitId),
+            eq(PollOption.optionId, optionId),
+          ),
+        )
+        .limit(1);
+      return option;
+    },
+    async findVote({ pollUnitId, userId, optionId }) {
+      const [vote] = await database
+        .select()
+        .from(PollVote)
+        .where(
+          and(
+            eq(PollVote.pollUnitId, pollUnitId),
+            eq(PollVote.userId, userId),
+            eq(PollVote.optionId, optionId),
+          ),
+        )
+        .limit(1);
+      return vote;
+    },
+    async findAnyVoteForUser(pollUnitId, userId) {
+      const [vote] = await database
+        .select()
+        .from(PollVote)
+        .where(
+          and(eq(PollVote.pollUnitId, pollUnitId), eq(PollVote.userId, userId)),
+        )
+        .limit(1);
+      return vote;
+    },
+    async createVote(input) {
+      await database.insert(PollVote).values(input);
+    },
+    async deleteVote({ pollUnitId, userId, optionId }) {
+      await database
+        .delete(PollVote)
+        .where(
+          and(
+            eq(PollVote.pollUnitId, pollUnitId),
+            eq(PollVote.userId, userId),
+            eq(PollVote.optionId, optionId),
+          ),
+        );
+    },
+    async incrementOptionVoteCount(pollUnitId, optionId, delta) {
+      await database
+        .update(PollOption)
+        .set({
+          voteCount: sql`${PollOption.voteCount} + ${delta}`,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(PollOption.pollUnitId, pollUnitId),
+            eq(PollOption.optionId, optionId),
+          ),
+        );
+    },
+  };
+}
+
+function createDrizzlePollRepository(): PollRepository {
+  return {
+    async createPoll(data) {
+      const db = await getServerDb();
+      return db.transaction(async (tx) => {
+        const now = new Date();
+        const [unit] = await tx
+          .insert(Unit)
+          .values({
+            userId: data.userId,
+            slugScope: data.userId,
+            type: "POLL",
+            status: "PUBLISHED",
+            publishedAt: now,
+            defaultLanguage: data.language,
+            updatedAt: now,
+          })
+          .returning({ id: Unit.id });
+        if (!unit) {
+          throw new PollError("POLL_NOT_FOUND", "Poll not found.", 404);
+        }
+
+        await tx.insert(UnitSupportLanguage).values({
+          unitId: unit.id,
+          language: data.language,
+          isPrimary: true,
+        });
+
+        await tx.insert(UnitTranslation).values({
+          unitId: unit.id,
+          language: data.language,
+          title: data.title,
+          summary: data.description,
+          updatedAt: now,
+        });
+
+        await tx.insert(Poll).values({
+          unitId: unit.id,
+          voteMode: data.voteMode,
+          resultVisibility: data.resultVisibility,
+          anonymous: data.anonymous,
+          closesAt: data.closesAt,
+          updatedAt: now,
+        });
+
+        await tx.insert(PollOption).values(
+          data.options.map((option) => ({
+            pollUnitId: unit.id,
+            position: option.position,
+            label: option.label,
+            unitId: option.unitId,
+            updatedAt: now,
+          })),
+        );
+
+        const poll = await createDrizzlePollTransactionRepository(tx).findPoll(
+          unit.id,
+        );
+        if (!poll) {
+          throw new PollError("POLL_NOT_FOUND", "Poll not found.", 404);
+        }
+        return poll;
+      });
+    },
+    async findPoll(unitId) {
+      const db = await getServerDb();
+      const [poll] = await db
+        .select()
+        .from(Poll)
+        .where(eq(Poll.unitId, unitId))
+        .limit(1);
+      return poll ? hydratePoll(db, poll) : undefined;
+    },
+    async findVotesForUser(pollUnitId, userId) {
+      const db = await getServerDb();
+      return db
+        .select({
+          optionId: PollVote.optionId,
+          realmUnitId: PollVote.realmUnitId,
+        })
+        .from(PollVote)
+        .where(
+          and(eq(PollVote.pollUnitId, pollUnitId), eq(PollVote.userId, userId)),
+        );
+    },
+    async withTransaction(callback) {
+      const db = await getServerDb();
+      return db.transaction((tx) =>
+        callback(createDrizzlePollTransactionRepository(tx)),
+      );
+    },
+  };
+}
+
 export class PollService {
+  constructor(
+    private readonly repository: PollRepository = createDrizzlePollRepository(),
+  ) {}
+
   /**
    * Create a poll: a `Unit(type=POLL)` plus its `Poll` extension and ≥2
    * `PollOption` rows. Validates the label-xor-unitId invariant per option and
@@ -66,7 +371,7 @@ export class PollService {
     const language = input.language ?? DEFAULT_LANGUAGE;
 
     let lastPosition: string | null = null;
-    const optionData = input.options.map((option) => {
+    const options = input.options.map((option) => {
       const position = option.position ?? keyAfter(lastPosition);
       lastPosition = position;
       return {
@@ -76,56 +381,22 @@ export class PollService {
       };
     });
 
-    return prisma.$transaction(async (tx) => {
-      const unit = await tx.unit.create({
-        data: {
-          userId,
-          slugScope: userId,
-          type: UnitType.POLL,
-          status: UnitStatus.PUBLISHED,
-          publishedAt: new Date(),
-          defaultLanguage: language,
-          supportLanguages: {
-            create: { language, isPrimary: true },
-          },
-        },
-      });
-
-      await tx.unitTranslation.create({
-        data: {
-          unitId: unit.id,
-          language,
-          title: input.title.trim(),
-          summary: input.description?.trim() || null,
-        },
-      });
-
-      await tx.poll.create({
-        data: {
-          unitId: unit.id,
-          voteMode,
-          resultVisibility: input.resultVisibility ?? "LIVE",
-          anonymous: input.anonymous ?? false,
-          closesAt,
-          options: {
-            create: optionData,
-          },
-        },
-      });
-
-      return tx.poll.findUniqueOrThrow({
-        where: { unitId: unit.id },
-        include: pollInclude,
-      });
+    return this.repository.createPoll({
+      userId,
+      title: input.title.trim(),
+      description: input.description?.trim() || null,
+      voteMode,
+      resultVisibility: input.resultVisibility ?? "LIVE",
+      anonymous: input.anonymous ?? false,
+      closesAt,
+      language,
+      options,
     });
   }
 
   /** Fetch a poll with its options, or throw if it is not a poll. */
   async getPoll(pollUnitId: string): Promise<PollWithOptions> {
-    const poll = await prisma.poll.findUnique({
-      where: { unitId: pollUnitId },
-      include: pollInclude,
-    });
+    const poll = await this.repository.findPoll(pollUnitId);
     if (!poll) {
       throw new PollError("POLL_NOT_FOUND", "Poll not found.", 404);
     }
@@ -140,13 +411,13 @@ export class PollService {
     pollUnitId: string,
     voteMode: "SINGLE" | "MULTI",
   ): Promise<PollWithOptions> {
-    return prisma.$transaction(async (tx) => {
-      const poll = await tx.poll.findUnique({ where: { unitId: pollUnitId } });
+    return this.repository.withTransaction(async (tx) => {
+      const poll = await tx.findPollRow(pollUnitId);
       if (!poll) {
         throw new PollError("POLL_NOT_FOUND", "Poll not found.", 404);
       }
       if (poll.voteMode !== voteMode) {
-        const voteCount = await tx.pollVote.count({ where: { pollUnitId } });
+        const voteCount = await tx.countVotes(pollUnitId);
         if (voteCount > 0) {
           throw new PollError(
             "VOTE_MODE_LOCKED",
@@ -154,15 +425,13 @@ export class PollService {
             409,
           );
         }
-        await tx.poll.update({
-          where: { unitId: pollUnitId },
-          data: { voteMode },
-        });
+        await tx.updateVoteMode(pollUnitId, voteMode);
       }
-      return tx.poll.findUniqueOrThrow({
-        where: { unitId: pollUnitId },
-        include: pollInclude,
-      });
+      const updated = await tx.findPoll(pollUnitId);
+      if (!updated) {
+        throw new PollError("POLL_NOT_FOUND", "Poll not found.", 404);
+      }
+      return updated;
     });
   }
 
@@ -181,8 +450,8 @@ export class PollService {
     optionId: string,
     realmUnitId?: string | null,
   ): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-      const poll = await tx.poll.findUnique({ where: { unitId: pollUnitId } });
+    await this.repository.withTransaction(async (tx) => {
+      const poll = await tx.findPollRow(pollUnitId);
       if (!poll) {
         throw new PollError("POLL_NOT_FOUND", "Poll not found.", 404);
       }
@@ -194,9 +463,7 @@ export class PollService {
         );
       }
 
-      const option = await tx.pollOption.findUnique({
-        where: { pollUnitId_optionId: { pollUnitId, optionId } },
-      });
+      const option = await tx.findOption(pollUnitId, optionId);
       if (!option) {
         throw new PollError(
           "OPTION_NOT_FOUND",
@@ -206,63 +473,42 @@ export class PollService {
       }
 
       if (poll.voteMode === "SINGLE") {
-        const existing = await tx.pollVote.findFirst({
-          where: { pollUnitId, userId },
-        });
+        const existing = await tx.findAnyVoteForUser(pollUnitId, userId);
         if (existing) {
           if (existing.optionId === optionId) return; // no-op
-          await tx.pollVote.delete({
-            where: {
-              pollUnitId_userId_optionId: {
-                pollUnitId,
-                userId,
-                optionId: existing.optionId,
-              },
-            },
-          });
-          await tx.pollOption.update({
-            where: {
-              pollUnitId_optionId: { pollUnitId, optionId: existing.optionId },
-            },
-            data: { voteCount: { decrement: 1 } },
-          });
-        }
-        await tx.pollVote.create({
-          data: {
+          await tx.deleteVote({
             pollUnitId,
             userId,
-            optionId,
-            voteMode: "SINGLE",
-            realmUnitId: realmUnitId ?? null,
-          },
+            optionId: existing.optionId,
+          });
+          await tx.incrementOptionVoteCount(pollUnitId, existing.optionId, -1);
+        }
+        await tx.createVote({
+          pollUnitId,
+          userId,
+          optionId,
+          voteMode: "SINGLE",
+          realmUnitId: realmUnitId ?? null,
         });
-        await tx.pollOption.update({
-          where: { pollUnitId_optionId: { pollUnitId, optionId } },
-          data: { voteCount: { increment: 1 } },
-        });
+        await tx.incrementOptionVoteCount(pollUnitId, optionId, 1);
         return;
       }
 
       // MULTI
-      const existing = await tx.pollVote.findUnique({
-        where: {
-          pollUnitId_userId_optionId: { pollUnitId, userId, optionId },
-        },
+      const existing = await tx.findVote({
+        pollUnitId,
+        userId,
+        optionId,
       });
       if (existing) return; // already voted for this option
-      await tx.pollVote.create({
-        data: {
-          pollUnitId,
-          userId,
-          optionId,
-          voteMode: "MULTI",
-          realmUnitId: realmUnitId ?? null,
-        },
+      await tx.createVote({
+        pollUnitId,
+        userId,
+        optionId,
+        voteMode: "MULTI",
+        realmUnitId: realmUnitId ?? null,
       });
-      await tx.pollOption.update({
-        where: { pollUnitId_optionId: { pollUnitId, optionId } },
-        data: { voteCount: { increment: 1 } },
-      });
+      await tx.incrementOptionVoteCount(pollUnitId, optionId, 1);
     });
   }
 
@@ -277,8 +523,8 @@ export class PollService {
     optionId?: string,
     _realmUnitId?: string | null,
   ): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-      const poll = await tx.poll.findUnique({ where: { unitId: pollUnitId } });
+    await this.repository.withTransaction(async (tx) => {
+      const poll = await tx.findPollRow(pollUnitId);
       if (!poll) {
         throw new PollError("POLL_NOT_FOUND", "Poll not found.", 404);
       }
@@ -299,30 +545,17 @@ export class PollService {
       }
 
       const target = optionId
-        ? await tx.pollVote.findUnique({
-            where: {
-              pollUnitId_userId_optionId: { pollUnitId, userId, optionId },
-            },
-          })
-        : await tx.pollVote.findFirst({ where: { pollUnitId, userId } });
+        ? await tx.findVote({ pollUnitId, userId, optionId })
+        : await tx.findAnyVoteForUser(pollUnitId, userId);
 
       if (!target) return; // nothing to withdraw
 
-      await tx.pollVote.delete({
-        where: {
-          pollUnitId_userId_optionId: {
-            pollUnitId,
-            userId,
-            optionId: target.optionId,
-          },
-        },
+      await tx.deleteVote({
+        pollUnitId,
+        userId,
+        optionId: target.optionId,
       });
-      await tx.pollOption.update({
-        where: {
-          pollUnitId_optionId: { pollUnitId, optionId: target.optionId },
-        },
-        data: { voteCount: { decrement: 1 } },
-      });
+      await tx.incrementOptionVoteCount(pollUnitId, target.optionId, -1);
     });
   }
 
@@ -355,10 +588,10 @@ export class PollService {
     let myVote: string[] = [];
     let myVoteContexts: { optionId: string; realmUnitId: string | null }[] = [];
     if (options?.userId) {
-      const votes = await prisma.pollVote.findMany({
-        where: { pollUnitId, userId: options.userId },
-        select: { optionId: true, realmUnitId: true },
-      });
+      const votes = await this.repository.findVotesForUser(
+        pollUnitId,
+        options.userId,
+      );
       myVote = votes.map((v) => v.optionId);
       myVoteContexts = votes.map((vote) => ({
         optionId: vote.optionId,

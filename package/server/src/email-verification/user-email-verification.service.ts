@@ -3,8 +3,8 @@ import type {
   UserEmailVerificationResponse,
   UserEmailVerificationState,
 } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { EmailVerificationContract, User } from "../db/schema";
 import {
   sendMainEmailVerificationContractEmail,
   USER_EMAIL_CONTRACT_NAME,
@@ -14,11 +14,197 @@ const CODE_TTL_MS = 15 * 60 * 1000;
 const RESEND_COOLDOWN_MS = 60 * 1000;
 
 type UserEmailContract = {
+  id?: string;
   email: string;
   status: "PENDING" | "VERIFIED" | "EXPIRED";
+  codeHash?: string | null;
   expiresAt: Date | null;
   lastSentAt: Date | null;
 };
+
+type EmailContractData = {
+  contractName: string;
+  ownerId: string;
+  email: string;
+  status: "PENDING";
+  codeHash: string;
+  deliveryStatus: string;
+  source: string;
+  expiresAt: Date;
+  lastSentAt: Date;
+};
+
+export type UserEmailVerificationRepository = {
+  findUserEmail(userId: string): Promise<string | null>;
+  findLatestUserEmailContract(
+    userId: string,
+  ): Promise<UserEmailContract | null>;
+  findContract(input: {
+    contractName: string;
+    ownerId: string;
+    email: string;
+  }): Promise<UserEmailContract | null>;
+  upsertPendingContract(data: EmailContractData): Promise<UserEmailContract>;
+  updateContractStatus(
+    id: string,
+    data: Partial<Pick<UserEmailContract, "status" | "codeHash">> & {
+      verifiedAt?: Date;
+    },
+  ): Promise<UserEmailContract>;
+  verifyContractAndUpdateUser(input: {
+    userId: string;
+    email: string;
+    contractId: string;
+    verifiedAt: Date;
+  }): Promise<UserEmailContract>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function toContract(row: typeof EmailVerificationContract.$inferSelect) {
+  return {
+    id: row.id,
+    email: row.email,
+    status: row.status,
+    codeHash: row.codeHash,
+    expiresAt: row.expiresAt,
+    lastSentAt: row.lastSentAt,
+  } satisfies UserEmailContract;
+}
+
+function createDrizzleUserEmailVerificationRepository(): UserEmailVerificationRepository {
+  return {
+    async findUserEmail(userId) {
+      const db = await getServerDb();
+      const [user] = await db
+        .select({ email: User.email })
+        .from(User)
+        .where(eq(User.unitId, userId))
+        .limit(1);
+      if (!user) {
+        throw new Error(`User not found: ${userId}`);
+      }
+      return user.email;
+    },
+
+    async findLatestUserEmailContract(userId) {
+      const db = await getServerDb();
+      const [contract] = await db
+        .select()
+        .from(EmailVerificationContract)
+        .where(
+          and(
+            eq(EmailVerificationContract.ownerId, userId),
+            eq(
+              EmailVerificationContract.contractName,
+              USER_EMAIL_CONTRACT_NAME,
+            ),
+            inArray(EmailVerificationContract.status, ["PENDING", "VERIFIED"]),
+          ),
+        )
+        .orderBy(desc(EmailVerificationContract.updatedAt))
+        .limit(1);
+      return contract ? toContract(contract) : null;
+    },
+
+    async findContract({ contractName, ownerId, email }) {
+      const db = await getServerDb();
+      const [contract] = await db
+        .select()
+        .from(EmailVerificationContract)
+        .where(
+          and(
+            eq(EmailVerificationContract.contractName, contractName),
+            eq(EmailVerificationContract.ownerId, ownerId),
+            eq(EmailVerificationContract.email, email),
+          ),
+        )
+        .limit(1);
+      return contract ? toContract(contract) : null;
+    },
+
+    async upsertPendingContract(data) {
+      const db = await getServerDb();
+      const now = new Date();
+      const [contract] = await db
+        .insert(EmailVerificationContract)
+        .values({
+          id: sql`uuidv7()`,
+          ...data,
+          attempts: 1,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: [
+            EmailVerificationContract.contractName,
+            EmailVerificationContract.ownerId,
+            EmailVerificationContract.email,
+          ],
+          set: {
+            status: data.status,
+            codeHash: data.codeHash,
+            deliveryStatus: data.deliveryStatus,
+            source: data.source,
+            expiresAt: data.expiresAt,
+            lastSentAt: data.lastSentAt,
+            attempts: sql`${EmailVerificationContract.attempts} + 1`,
+            updatedAt: now,
+          },
+        })
+        .returning();
+      if (!contract) {
+        throw new Error("Email verification contract was not saved");
+      }
+      return toContract(contract);
+    },
+
+    async updateContractStatus(id, data) {
+      const db = await getServerDb();
+      const [contract] = await db
+        .update(EmailVerificationContract)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(EmailVerificationContract.id, id))
+        .returning();
+      if (!contract) {
+        throw new Error(`Email verification contract not found: ${id}`);
+      }
+      return toContract(contract);
+    },
+
+    async verifyContractAndUpdateUser({
+      userId,
+      email,
+      contractId,
+      verifiedAt,
+    }) {
+      const db = await getServerDb();
+      return db.transaction(async (tx) => {
+        await tx.update(User).set({ email }).where(eq(User.unitId, userId));
+        const [contract] = await tx
+          .update(EmailVerificationContract)
+          .set({
+            status: "VERIFIED",
+            verifiedAt,
+            codeHash: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(EmailVerificationContract.id, contractId))
+          .returning();
+        if (!contract) {
+          throw new Error(
+            `Email verification contract not found: ${contractId}`,
+          );
+        }
+        return toContract(contract);
+      });
+    },
+  };
+}
+
+const defaultRepository = createDrizzleUserEmailVerificationRepository();
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -61,65 +247,42 @@ function mapState(input: {
 
 async function getLatestUserEmailContract(
   userId: string,
+  repository: UserEmailVerificationRepository = defaultRepository,
 ): Promise<UserEmailContract | null> {
-  const contract = await prisma.emailVerificationContract.findFirst({
-    where: {
-      ownerId: userId,
-      contractName: USER_EMAIL_CONTRACT_NAME,
-      status: { in: ["PENDING", "VERIFIED"] },
-    },
-    orderBy: { updatedAt: "desc" },
-    select: {
-      email: true,
-      status: true,
-      expiresAt: true,
-      lastSentAt: true,
-    },
-  });
-
-  return contract as UserEmailContract | null;
+  return repository.findLatestUserEmailContract(userId);
 }
 
 export async function getUserEmailVerificationState(
   userId: string,
+  repository: UserEmailVerificationRepository = defaultRepository,
 ): Promise<UserEmailVerificationState> {
-  const [user, contract] = await Promise.all([
-    prisma.user.findUniqueOrThrow({
-      where: { unitId: userId },
-      select: { email: true },
-    }),
-    getLatestUserEmailContract(userId),
+  const [email, contract] = await Promise.all([
+    repository.findUserEmail(userId),
+    getLatestUserEmailContract(userId, repository),
   ]);
 
-  return mapState({ email: user.email, contract });
+  return mapState({ email, contract });
 }
 
 export async function requestUserEmailVerification(
   userId: string,
   rawEmail: string,
+  repository: UserEmailVerificationRepository = defaultRepository,
 ): Promise<UserEmailVerificationResponse> {
   const email = normalizeEmail(rawEmail);
   const now = new Date();
 
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { unitId: userId },
-    select: { email: true },
-  });
-  const verifiedContract = await prisma.emailVerificationContract.findUnique({
-    where: {
-      contractName_ownerId_email: {
-        contractName: USER_EMAIL_CONTRACT_NAME,
-        ownerId: userId,
-        email,
-      },
-    },
-    select: { email: true, status: true, expiresAt: true, lastSentAt: true },
+  const userEmail = await repository.findUserEmail(userId);
+  const verifiedContract = await repository.findContract({
+    contractName: USER_EMAIL_CONTRACT_NAME,
+    ownerId: userId,
+    email,
   });
 
-  if (user.email === email && verifiedContract?.status === "VERIFIED") {
+  if (userEmail === email && verifiedContract?.status === "VERIFIED") {
     return {
       success: false,
-      state: mapState({ email: user.email, contract: verifiedContract }),
+      state: mapState({ email: userEmail, contract: verifiedContract }),
       error: {
         code: "EMAIL_ALREADY_VERIFIED",
         message: "This Rezics email is already verified",
@@ -132,7 +295,7 @@ export async function requestUserEmailVerification(
     if (elapsedMs < RESEND_COOLDOWN_MS) {
       return {
         success: false,
-        state: mapState({ email: user.email, contract: verifiedContract }),
+        state: mapState({ email: userEmail, contract: verifiedContract }),
         error: {
           code: "COOLDOWN",
           message: "Please wait before requesting another verification code",
@@ -152,7 +315,7 @@ export async function requestUserEmailVerification(
   if (!delivery.ok) {
     return {
       success: false,
-      state: await getUserEmailVerificationState(userId),
+      state: await getUserEmailVerificationState(userId, repository),
       error: {
         code: "DELIVERY_FAILED",
         message: delivery.error.message,
@@ -160,46 +323,21 @@ export async function requestUserEmailVerification(
     };
   }
 
-  const contract = await prisma.emailVerificationContract.upsert({
-    where: {
-      contractName_ownerId_email: {
-        contractName: USER_EMAIL_CONTRACT_NAME,
-        ownerId: userId,
-        email,
-      },
-    },
-    create: {
-      contractName: USER_EMAIL_CONTRACT_NAME,
-      ownerId: userId,
-      email,
-      status: "PENDING",
-      codeHash: hashCode(code),
-      deliveryStatus: "SENT",
-      source: "main-email-code",
-      expiresAt,
-      lastSentAt: now,
-      attempts: 1,
-    },
-    update: {
-      status: "PENDING",
-      codeHash: hashCode(code),
-      deliveryStatus: "SENT",
-      source: "main-email-code",
-      expiresAt,
-      lastSentAt: now,
-      attempts: { increment: 1 },
-    },
-    select: {
-      email: true,
-      status: true,
-      expiresAt: true,
-      lastSentAt: true,
-    },
+  const contract = await repository.upsertPendingContract({
+    contractName: USER_EMAIL_CONTRACT_NAME,
+    ownerId: userId,
+    email,
+    status: "PENDING",
+    codeHash: hashCode(code),
+    deliveryStatus: "SENT",
+    source: "main-email-code",
+    expiresAt,
+    lastSentAt: now,
   });
 
   return {
     success: true,
-    state: mapState({ email: user.email, contract }),
+    state: mapState({ email: userEmail, contract }),
   };
 }
 
@@ -207,24 +345,22 @@ export async function verifyUserEmailContract(input: {
   userId: string;
   email: string;
   code: string;
+  repository?: UserEmailVerificationRepository;
 }): Promise<UserEmailVerificationResponse> {
   const email = normalizeEmail(input.email);
+  const repository = input.repository ?? defaultRepository;
   const now = new Date();
 
-  const contract = await prisma.emailVerificationContract.findUnique({
-    where: {
-      contractName_ownerId_email: {
-        contractName: USER_EMAIL_CONTRACT_NAME,
-        ownerId: input.userId,
-        email,
-      },
-    },
+  const contract = await repository.findContract({
+    contractName: USER_EMAIL_CONTRACT_NAME,
+    ownerId: input.userId,
+    email,
   });
 
   if (!contract) {
     return {
       success: false,
-      state: await getUserEmailVerificationState(input.userId),
+      state: await getUserEmailVerificationState(input.userId, repository),
       error: {
         code: "CONTRACT_NOT_FOUND",
         message: "No verification contract exists for this email",
@@ -235,7 +371,7 @@ export async function verifyUserEmailContract(input: {
   if (contract.status === "VERIFIED") {
     return {
       success: false,
-      state: await getUserEmailVerificationState(input.userId),
+      state: await getUserEmailVerificationState(input.userId, repository),
       error: {
         code: "EMAIL_ALREADY_VERIFIED",
         message: "This Rezics email is already verified",
@@ -244,23 +380,13 @@ export async function verifyUserEmailContract(input: {
   }
 
   if (contract.expiresAt && contract.expiresAt.getTime() < now.getTime()) {
-    const expired = await prisma.emailVerificationContract.update({
-      where: { id: contract.id },
-      data: { status: "EXPIRED" },
-      select: {
-        email: true,
-        status: true,
-        expiresAt: true,
-        lastSentAt: true,
-      },
+    const expired = await repository.updateContractStatus(contract.id!, {
+      status: "EXPIRED",
     });
-    const user = await prisma.user.findUniqueOrThrow({
-      where: { unitId: input.userId },
-      select: { email: true },
-    });
+    const userEmail = await repository.findUserEmail(input.userId);
     return {
       success: false,
-      state: mapState({ email: user.email, contract: expired }),
+      state: mapState({ email: userEmail, contract: expired }),
       error: {
         code: "EXPIRED_CODE",
         message: "Verification code has expired",
@@ -268,10 +394,10 @@ export async function verifyUserEmailContract(input: {
     };
   }
 
-  if (!codeMatches(input.code, contract.codeHash)) {
+  if (!codeMatches(input.code, contract.codeHash ?? null)) {
     return {
       success: false,
-      state: await getUserEmailVerificationState(input.userId),
+      state: await getUserEmailVerificationState(input.userId, repository),
       error: {
         code: "INVALID_CODE",
         message: "Verification code is invalid",
@@ -279,28 +405,12 @@ export async function verifyUserEmailContract(input: {
     };
   }
 
-  const updated = await prisma.$transaction(
-    async (tx: Prisma.TransactionClient) => {
-      await tx.user.update({
-        where: { unitId: input.userId },
-        data: { email },
-      });
-      return tx.emailVerificationContract.update({
-        where: { id: contract.id },
-        data: {
-          status: "VERIFIED",
-          verifiedAt: now,
-          codeHash: null,
-        },
-        select: {
-          email: true,
-          status: true,
-          expiresAt: true,
-          lastSentAt: true,
-        },
-      });
-    },
-  );
+  const updated = await repository.verifyContractAndUpdateUser({
+    userId: input.userId,
+    email,
+    contractId: contract.id!,
+    verifiedAt: now,
+  });
 
   return {
     success: true,

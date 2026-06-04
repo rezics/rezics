@@ -5,8 +5,10 @@ import {
   pollPathParamsSchema,
   withdrawPollVoteSchema,
 } from "@rezics/contract";
+import { eq } from "drizzle-orm";
 import { Elysia, status } from "elysia";
 import { authMacro, isAdminRole, tryResolveIdentity } from "@/middleware";
+import { Unit } from "../db/schema";
 import { mapPollResultsToDTO, mapPollToDTO } from "./poll.mapper";
 import { PollError, pollService } from "./poll.service";
 
@@ -30,11 +32,12 @@ async function readResults(
 ): Promise<PollResultsDTO> {
   const poll = await pollService.getPoll(pollUnitId);
   const ownerUserId = await (async () => {
-    const { prisma } = await import("#/prisma/client");
-    const unit = await prisma.unit.findUnique({
-      where: { id: pollUnitId },
-      select: { userId: true },
-    });
+    const { db } = await import("../db/client");
+    const [unit] = await db
+      .select({ userId: Unit.userId })
+      .from(Unit)
+      .where(eq(Unit.id, pollUnitId))
+      .limit(1);
     return unit?.userId ?? null;
   })();
   const isPrivileged =

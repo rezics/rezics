@@ -1,4 +1,5 @@
-import { prisma, UnitType } from "#/prisma/client";
+import { eq, inArray, and } from "drizzle-orm";
+import { Unit } from "../db/schema";
 import type { PublicUserSelected } from "./sanitizeUser";
 
 type UserSlugCarrier = {
@@ -14,10 +15,11 @@ export async function loadUserSlugMap(
   const ids = [...new Set(userIds.filter((id): id is string => Boolean(id)))];
   if (ids.length === 0) return new Map();
 
-  const units = await prisma.unit.findMany({
-    where: { id: { in: ids }, type: UnitType.USER },
-    select: { id: true, slug: true },
-  });
+  const { db } = await import("../db/client");
+  const units = await db
+    .select({ id: Unit.id, slug: Unit.slug })
+    .from(Unit)
+    .where(and(inArray(Unit.id, ids), eq(Unit.type, "USER")));
 
   return new Map(units.map((unit) => [unit.id, unit.slug ?? null] as const));
 }

@@ -2,13 +2,23 @@ import type {
   AdminDashboardSummary,
   AdminStatsResponse,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
 import type {
   StatusState,
   SystemStatusSummary,
 } from "@/diagnostic/status.types";
 import { getSystemStatusSummary } from "@/diagnostic/system-status.service";
 import { searchClient } from "@/meili/search-client";
+import {
+  AccountEnforcement,
+  Book,
+  Feedback,
+  HistoryOutbox,
+  ModerationCase,
+  Post,
+  StaffAuditLog,
+  User,
+} from "../db/schema";
 
 const ADMIN_ROUTES = {
   audit: "/governance",
@@ -26,43 +36,63 @@ const OPEN_MODERATION_CASE_STATES = [
   "ESCALATED",
 ] as const;
 
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+type TrendRow = { date: Date; count: bigint };
+
+async function loadContentTrendRows(
+  tableName: "Book" | "Post",
+  startDate: Date,
+): Promise<TrendRow[]> {
+  const db = await getServerDb();
+  const result = await db.execute<TrendRow>(sql`
+    SELECT date_trunc('day', "createdAt")::date AS date, COUNT(*)::bigint AS count
+    FROM ${sql.identifier(tableName)}
+    WHERE "createdAt" >= ${startDate}
+    GROUP BY date
+    ORDER BY date ASC
+  `);
+  return result.rows;
+}
+
 export class StatsService {
   async getStats(): Promise<AdminStatsResponse> {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const db = await getServerDb();
 
     const [
-      users,
-      books,
-      posts,
-      unresolvedFeedback,
-      historyOutboxPending,
-      historyOutboxFailed,
+      userRows,
+      bookRows,
+      postRows,
+      unresolvedFeedbackRows,
+      historyOutboxPendingRows,
+      historyOutboxFailedRows,
       meiliHealthy,
       bookTrend,
       postTrend,
     ] = await Promise.all([
-      prisma.user.count(),
-      prisma.book.count(),
-      prisma.post.count(),
-      prisma.feedback.count({ where: { resolved: false } }),
-      prisma.historyOutbox.count({ where: { status: "pending" } }),
-      prisma.historyOutbox.count({ where: { status: "failed" } }),
+      db.select({ total: count() }).from(User),
+      db.select({ total: count() }).from(Book),
+      db.select({ total: count() }).from(Post),
+      db
+        .select({ total: count() })
+        .from(Feedback)
+        .where(eq(Feedback.resolved, false)),
+      db
+        .select({ total: count() })
+        .from(HistoryOutbox)
+        .where(eq(HistoryOutbox.status, "pending")),
+      db
+        .select({ total: count() })
+        .from(HistoryOutbox)
+        .where(eq(HistoryOutbox.status, "failed")),
       this.checkMeiliHealth(),
-      prisma.$queryRaw<{ date: Date; count: bigint }[]>`
-        SELECT date_trunc('day', "createdAt")::date AS date, COUNT(*)::bigint AS count
-        FROM "Book"
-        WHERE "createdAt" >= ${thirtyDaysAgo}
-        GROUP BY date
-        ORDER BY date ASC
-      `,
-      prisma.$queryRaw<{ date: Date; count: bigint }[]>`
-        SELECT date_trunc('day', "createdAt")::date AS date, COUNT(*)::bigint AS count
-        FROM "Post"
-        WHERE "createdAt" >= ${thirtyDaysAgo}
-        GROUP BY date
-        ORDER BY date ASC
-      `,
+      loadContentTrendRows("Book", thirtyDaysAgo),
+      loadContentTrendRows("Post", thirtyDaysAgo),
     ]);
 
     const contentTrend = this.buildContentTrend(
@@ -73,12 +103,12 @@ export class StatsService {
 
     return {
       counts: {
-        users,
-        books,
-        comments: posts,
-        unresolvedFeedback,
-        historyOutboxPending,
-        historyOutboxFailed,
+        users: userRows[0]?.total ?? 0,
+        books: bookRows[0]?.total ?? 0,
+        comments: postRows[0]?.total ?? 0,
+        unresolvedFeedback: unresolvedFeedbackRows[0]?.total ?? 0,
+        historyOutboxPending: historyOutboxPendingRows[0]?.total ?? 0,
+        historyOutboxFailed: historyOutboxFailedRows[0]?.total ?? 0,
       },
       health: {
         server: "ok",
@@ -215,54 +245,72 @@ export class StatsService {
   private async getGovernanceCounts(): Promise<
     Omit<AdminDashboardSummary["governance"], "link">
   > {
+    const db = await getServerDb();
     const [
-      openCases,
-      escalatedCases,
-      realmCasesOpen,
-      realmCasesEscalated,
-      activeEnforcements,
+      openCaseRows,
+      escalatedCaseRows,
+      realmCasesOpenRows,
+      realmCasesEscalatedRows,
+      activeEnforcementRows,
     ] = await Promise.all([
-      prisma.moderationCase.count({
-        where: { state: { in: [...OPEN_MODERATION_CASE_STATES] } },
-      }),
-      prisma.moderationCase.count({ where: { state: "ESCALATED" } }),
-      prisma.moderationCase.count({
-        where: {
-          scope: "REALM",
-          state: { in: [...OPEN_MODERATION_CASE_STATES] },
-        },
-      }),
-      prisma.moderationCase.count({
-        where: { scope: "REALM", state: "ESCALATED" },
-      }),
-      prisma.accountEnforcement.count({ where: { state: "ACTIVE" } }),
+      db
+        .select({ total: count() })
+        .from(ModerationCase)
+        .where(inArray(ModerationCase.state, [...OPEN_MODERATION_CASE_STATES])),
+      db
+        .select({ total: count() })
+        .from(ModerationCase)
+        .where(eq(ModerationCase.state, "ESCALATED")),
+      db
+        .select({ total: count() })
+        .from(ModerationCase)
+        .where(
+          and(
+            eq(ModerationCase.scope, "REALM"),
+            inArray(ModerationCase.state, [...OPEN_MODERATION_CASE_STATES]),
+          ),
+        ),
+      db
+        .select({ total: count() })
+        .from(ModerationCase)
+        .where(
+          and(
+            eq(ModerationCase.scope, "REALM"),
+            eq(ModerationCase.state, "ESCALATED"),
+          ),
+        ),
+      db
+        .select({ total: count() })
+        .from(AccountEnforcement)
+        .where(eq(AccountEnforcement.state, "ACTIVE")),
     ]);
 
     return {
-      openCases,
-      escalatedCases,
-      realmCasesOpen,
-      realmCasesEscalated,
-      activeEnforcements,
+      openCases: openCaseRows[0]?.total ?? 0,
+      escalatedCases: escalatedCaseRows[0]?.total ?? 0,
+      realmCasesOpen: realmCasesOpenRows[0]?.total ?? 0,
+      realmCasesEscalated: realmCasesEscalatedRows[0]?.total ?? 0,
+      activeEnforcements: activeEnforcementRows[0]?.total ?? 0,
     };
   }
 
   private async getRecentAudit(): Promise<
     AdminDashboardSummary["audit"]["recent"]
   > {
-    const rows = await prisma.staffAuditLog.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        action: true,
-        targetKind: true,
-        targetId: true,
-        actorUserId: true,
-        decisionCode: true,
-        createdAt: true,
-      },
-    });
+    const db = await getServerDb();
+    const rows = await db
+      .select({
+        id: StaffAuditLog.id,
+        action: StaffAuditLog.action,
+        targetKind: StaffAuditLog.targetKind,
+        targetId: StaffAuditLog.targetId,
+        actorUserId: StaffAuditLog.actorUserId,
+        decisionCode: StaffAuditLog.decisionCode,
+        createdAt: StaffAuditLog.createdAt,
+      })
+      .from(StaffAuditLog)
+      .orderBy(desc(StaffAuditLog.createdAt))
+      .limit(5);
 
     return rows.map((row) => ({
       id: row.id,

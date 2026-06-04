@@ -1,4 +1,4 @@
-import type { Prisma } from "#/prisma/client";
+import type { UnitExternalRef } from "../db/schema";
 
 export const unitExternalRefInclude = {
   sourceSite: {
@@ -14,8 +14,9 @@ export const unitExternalRefInclude = {
       },
     },
   },
-} satisfies Prisma.UnitExternalRefInclude;
+} as const;
 
-export type UnitExternalRefWithRelations = Prisma.UnitExternalRefGetPayload<{
-  include: typeof unitExternalRefInclude;
-}>;
+export type UnitExternalRefWithRelations =
+  typeof UnitExternalRef.$inferSelect & {
+    sourceSite?: unknown | null;
+  };

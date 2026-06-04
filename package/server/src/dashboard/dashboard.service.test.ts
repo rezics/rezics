@@ -4,6 +4,7 @@ import {
   type ProgressLibraryRow,
 } from "@rezics/contract";
 import { Value } from "@sinclair/typebox/value";
+import type { DashboardRepository } from "./dashboard.service";
 
 const mockProgressRows: ProgressLibraryRow[] = [
   {
@@ -39,15 +40,13 @@ const mockListLibrary = mock(async () => ({
   nextCursor: "next-page",
 }));
 
-mock.module("#/prisma/client", () => ({
-  prisma: {
-    userUnitProgress: { findMany: mock(async () => []) },
-    contentStructureNode: { groupBy: mock(async () => []) },
-    userContentNodeProgress: { findMany: mock(async () => []) },
-    shelf: { findMany: mock(async () => []) },
-    realmMember: { findMany: mock(async () => []) },
-  },
-}));
+const emptyDashboardRepository = {
+  listContinueReading: mock(async () => []),
+  countChaptersTotal: mock(async () => new Map()),
+  listCompletedChapterOwnerUnitIds: mock(async () => []),
+  listShelves: mock(async () => []),
+  listRealms: mock(async () => []),
+} satisfies DashboardRepository;
 
 mock.module("@/governance/enforcement.service", () => ({
   governanceEnforcementService: {
@@ -64,6 +63,7 @@ mock.module("@/progress", () => ({
 describe("dashboardService", () => {
   test("unwraps progress library pages into dashboard section rows", async () => {
     const { dashboardService } = await import("./dashboard.service");
+    dashboardService.repository = emptyDashboardRepository;
 
     const summary = await dashboardService.summary("user-1");
 

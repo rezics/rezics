@@ -1,8 +1,8 @@
 import type { RealmTagApplicationVoteDTO } from "@rezics/contract";
-import type { RealmTagApplicationVote } from "#/prisma/client";
+import type { RealmTagApplicationVote } from "../db/schema";
 
 export function mapRealmTagApplicationVoteToDTO(
-  row: RealmTagApplicationVote,
+  row: typeof RealmTagApplicationVote.$inferSelect,
 ): RealmTagApplicationVoteDTO {
   return {
     realmUnitId: row.realmUnitId,

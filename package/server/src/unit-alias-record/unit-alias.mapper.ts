@@ -1,8 +1,8 @@
 import type { UnitAliasDTO, UnitAliasVoteDTO } from "@rezics/contract";
-import type { UnitAlias, UnitAliasVote } from "#/prisma/client";
+import type { UnitAlias, UnitAliasVote } from "../db/schema";
 
 export function mapUnitAliasToDTO(
-  alias: UnitAlias,
+  alias: typeof UnitAlias.$inferSelect,
   options?: { belowVisibilityThreshold?: boolean },
 ): UnitAliasDTO {
   return {
@@ -27,7 +27,9 @@ export function mapUnitAliasToDTO(
   };
 }
 
-export function mapUnitAliasVoteToDTO(vote: UnitAliasVote): UnitAliasVoteDTO {
+export function mapUnitAliasVoteToDTO(
+  vote: typeof UnitAliasVote.$inferSelect,
+): UnitAliasVoteDTO {
   return {
     aliasId: vote.aliasId,
     userId: vote.userId,

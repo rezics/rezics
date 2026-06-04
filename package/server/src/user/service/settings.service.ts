@@ -5,7 +5,45 @@ import {
   normalizeLanguage,
   OPT_IN_RATINGS,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { eq } from "drizzle-orm";
+import { User } from "../../db/schema";
+
+export interface UserSettingsRepository {
+  getSettings(userId: string): Promise<unknown>;
+  updateSettings(userId: string, settings: UserSettings): Promise<void>;
+}
+
+async function getServerDb() {
+  const { db } = await import("../../db/client");
+  return db;
+}
+
+function createDrizzleUserSettingsRepository(): UserSettingsRepository {
+  return {
+    async getSettings(userId) {
+      const db = await getServerDb();
+      const [user] = await db
+        .select({ settings: User.settings })
+        .from(User)
+        .where(eq(User.unitId, userId))
+        .limit(1);
+      if (!user) {
+        throw new Error(`User not found: ${userId}`);
+      }
+      return user.settings;
+    },
+
+    async updateSettings(userId, settings) {
+      const db = await getServerDb();
+      await db
+        .update(User)
+        .set({ settings, updatedAt: new Date() })
+        .where(eq(User.unitId, userId));
+    },
+  };
+}
+
+const defaultRepository = createDrizzleUserSettingsRepository();
 
 function deepMerge(target: any, source: any): any {
   const result = { ...target };
@@ -80,26 +118,24 @@ function validateSettings(settings: UserSettings): void {
   }
 }
 
-export async function getSettings(userId: string): Promise<UserSettings> {
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { unitId: userId },
-    select: { settings: true },
-  });
-  return normalizeSettings((user.settings as UserSettings | null) ?? {});
+export async function getSettings(
+  userId: string,
+  repository: UserSettingsRepository = defaultRepository,
+): Promise<UserSettings> {
+  const settings = await repository.getSettings(userId);
+  return normalizeSettings((settings as UserSettings | null) ?? {});
 }
 
 export async function updateSettings(
   userId: string,
   partial: Partial<UserSettings>,
+  repository: UserSettingsRepository = defaultRepository,
 ): Promise<UserSettings> {
-  const current = await getSettings(userId);
+  const current = await getSettings(userId, repository);
   const merged = normalizeSettings(deepMerge(current, partial));
   validateSettings(merged);
 
-  await prisma.user.update({
-    where: { unitId: userId },
-    data: { settings: merged },
-  });
+  await repository.updateSettings(userId, merged);
 
   return merged;
 }

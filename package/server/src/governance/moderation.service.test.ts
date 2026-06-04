@@ -3,6 +3,16 @@ import {
   installPrismaClientMock,
   prismaMock,
 } from "../test/prisma-client-mock";
+import {
+  Comment,
+  Feedback,
+  ModerationAction,
+  ModerationCase,
+  Post,
+  Unit,
+  UnitCollaborator,
+  UnitRealm,
+} from "../db/schema";
 
 installPrismaClientMock();
 
@@ -103,34 +113,42 @@ const feedbackRow = {
   updatedAt: now,
 };
 
-const moderationCaseFindMany = mock(async () => [moderationCaseRow]);
-const moderationCaseFindFirst = mock(async (): Promise<any> => null);
-const moderationCaseFindUniqueOrThrow = mock(async () => moderationCaseRow);
-const moderationCaseCreate = mock(async ({ data }: any) => ({
-  ...moderationCaseRow,
-  ...data,
-  id: data.scope === "REALM" ? "realm-case-1" : "case-1",
-  createdAt: now,
-  updatedAt: now,
-}));
-const moderationCaseUpdate = mock(async ({ data }: any) => ({
-  ...moderationCaseRow,
-  ...data,
-  updatedAt: now,
-}));
-const moderationActionFindMany = mock(async () => [moderationActionRow]);
+const moderationCaseFindMany = mock(async (_args?: any) => [moderationCaseRow]);
+const moderationCaseFindFirst = mock(async (_args?: any): Promise<any> => null);
+const moderationCaseFindUniqueOrThrow = mock(
+  async (_args?: any): Promise<any> => moderationCaseRow,
+);
+const moderationCaseCreate = mock(
+  async ({ data }: any): Promise<any> => ({
+    ...moderationCaseRow,
+    ...data,
+    id: data.scope === "REALM" ? "realm-case-1" : "case-1",
+    createdAt: now,
+    updatedAt: now,
+  }),
+);
+const moderationCaseUpdate = mock(
+  async ({ data }: any): Promise<any> => ({
+    ...moderationCaseRow,
+    ...data,
+    updatedAt: now,
+  }),
+);
+const moderationActionFindMany = mock(async (_args?: any) => [
+  moderationActionRow,
+]);
 const unitUpdate = mock(async ({ data }: any) => ({
   ...unitRow,
   ...data,
   updatedAt: now,
 }));
-const unitFindMany = mock(async () => [unitRow]);
-const unitFindUnique = mock(async () => commentRow.rootUnit);
+const unitFindMany = mock(async (_args?: any) => [unitRow]);
+const unitFindUnique = mock(async (_args?: any) => commentRow.rootUnit);
 const unitRealmUpdate = mock(async ({ data }: any) => ({
   ...unitRealmRow,
   ...data,
 }));
-const unitRealmFindMany = mock(async () => [unitRealmRow]);
+const unitRealmFindMany = mock(async (_args?: any) => [unitRealmRow]);
 const postUpdate = mock(async ({ data }: any) => ({
   unitId: "post-1",
   ...data,
@@ -139,35 +157,11 @@ const commentUpdate = mock(async ({ data }: any) => ({
   ...commentRow,
   ...data,
 }));
-const commentFindMany = mock(async () => [commentRow]);
-const commentFindUniqueOrThrow = mock(async () => commentRow);
-const feedbackFindUniqueOrThrow = mock(async () => feedbackRow);
+const commentFindMany = mock(async (_args?: any) => [commentRow]);
+const commentFindUniqueOrThrow = mock(async (_args?: any) => commentRow);
+const feedbackFindUniqueOrThrow = mock(async (_args?: any) => feedbackRow);
 const queryRawMock = mock(async () => []);
-const transactionMock = mock(async (fn: any) =>
-  fn({
-    $queryRaw: queryRawMock,
-    moderationCase: {
-      create: moderationCaseCreate,
-      findUniqueOrThrow: moderationCaseFindUniqueOrThrow,
-      update: moderationCaseUpdate,
-    },
-    unit: {
-      update: unitUpdate,
-      findUnique: unitFindUnique,
-    },
-    unitRealm: {
-      update: unitRealmUpdate,
-      findMany: unitRealmFindMany,
-    },
-    post: {
-      update: postUpdate,
-    },
-    comment: {
-      update: commentUpdate,
-      findUniqueOrThrow: commentFindUniqueOrThrow,
-    },
-  }),
-);
+const transactionMock = mock(async (fn: any) => fn(fakeDrizzleDb));
 
 const appendModerationActionMock = mock(async (_tx: any, input: any) => ({
   ...moderationActionRow,
@@ -176,11 +170,165 @@ const appendModerationActionMock = mock(async (_tx: any, input: any) => ({
   createdAt: now,
 }));
 const latestActionsForMock = mock(async () => [moderationActionRow]);
-const latestEffectiveRemoveForMock = mock(async () => null);
-const resolveHintsForIdentityMock = mock(async () => []);
-const realmMembershipForPolicyMock = mock(async () => null);
+const latestEffectiveRemoveForMock = mock(async (): Promise<any> => null);
+const resolveHintsForIdentityMock = mock(async (): Promise<any[]> => []);
+const realmMembershipForPolicyMock = mock(async (): Promise<any> => null);
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const broadcastMock = mock(async (_event: any) => ({ ok: true, persisted: 1 }));
+
+let drizzleSelectResults: unknown[][] = [];
+
+function queueDrizzleSelectResults(...results: unknown[][]): void {
+  drizzleSelectResults = [...results];
+}
+
+function conditionHasColumn(condition: unknown, columnName: string): boolean {
+  if (!condition || typeof condition !== "object") return false;
+  const chunks = (condition as { queryChunks?: unknown[] }).queryChunks;
+  if (chunks?.some((chunk) => conditionHasColumn(chunk, columnName))) {
+    return true;
+  }
+  return (condition as { name?: unknown }).name === columnName;
+}
+
+function stripUpdatedAt<T extends Record<string, unknown>>(
+  data: T,
+): Omit<T, "updatedAt"> {
+  const { updatedAt: _updatedAt, ...rest } = data;
+  return rest;
+}
+
+async function resolveDrizzleSelect(table: unknown, condition: unknown) {
+  if (drizzleSelectResults.length > 0)
+    return drizzleSelectResults.shift() ?? [];
+  if (table === ModerationCase) {
+    if (conditionHasColumn(condition, "sourceFeedbackId")) {
+      const row = await moderationCaseFindFirst({
+        where: conditionHasColumn(condition, "realmUnitId")
+          ? {
+              scope: "REALM",
+              realmUnitId: "realm-1",
+              sourceFeedbackId: "feedback-1",
+            }
+          : { sourceFeedbackId: "feedback-1", scope: "PLATFORM" },
+        orderBy: { createdAt: "asc" },
+      });
+      return row ? [row] : [];
+    }
+    return [await moderationCaseFindUniqueOrThrow({ where: { id: "case-1" } })];
+  }
+  if (table === ModerationAction) return moderationActionFindMany();
+  if (table === Feedback) {
+    return [await feedbackFindUniqueOrThrow({ where: { id: "feedback-1" } })];
+  }
+  if (table === Unit) return unitFindMany();
+  if (table === UnitCollaborator) {
+    return commentRow.rootUnit.collaborators;
+  }
+  if (table === UnitRealm) return unitRealmFindMany();
+  if (table === Comment) return commentFindMany();
+  return [];
+}
+
+function createFakeDrizzleSelectQuery() {
+  let table: unknown;
+  let condition: unknown;
+  const query = {
+    from: mock((nextTable: unknown) => {
+      table = nextTable;
+      return query;
+    }),
+    where: mock((nextCondition: unknown) => {
+      condition = nextCondition;
+      return query;
+    }),
+    orderBy: mock(() => query),
+    offset: mock(() => query),
+    limit: mock(() => query),
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return Promise.resolve(resolveDrizzleSelect(table, condition)).then(
+        resolve,
+        reject,
+      );
+    },
+  };
+  return query;
+}
+
+function createFakeDrizzleInsert(table: unknown) {
+  let data: Record<string, unknown> = {};
+  const query = {
+    values: mock((nextData: Record<string, unknown>) => {
+      data = nextData;
+      return query;
+    }),
+    returning: mock(async () => {
+      if (table === ModerationCase) {
+        return [await moderationCaseCreate({ data: stripUpdatedAt(data) })];
+      }
+      return [{ ...data, id: "inserted-1", createdAt: now }];
+    }),
+  };
+  return query;
+}
+
+function createFakeDrizzleUpdate(table: unknown) {
+  let data: Record<string, unknown> = {};
+  const query = {
+    set: mock((nextData: Record<string, unknown>) => {
+      data = nextData;
+      return query;
+    }),
+    where: mock(() => query),
+    returning: mock(async () => {
+      const stripped = stripUpdatedAt(data);
+      if (table === ModerationCase) {
+        return [
+          await moderationCaseUpdate({
+            where: { id: "realm-case-1" },
+            data: stripped,
+          }),
+        ];
+      }
+      if (table === Unit) {
+        return [await unitUpdate({ where: { id: "post-1" }, data: stripped })];
+      }
+      if (table === UnitRealm) {
+        return [
+          await unitRealmUpdate({
+            where: {
+              realmUnitId_unitId: { realmUnitId: "realm-1", unitId: "post-1" },
+            },
+            data: stripped,
+          }),
+        ];
+      }
+      if (table === Post) {
+        return [
+          await postUpdate({ where: { unitId: "post-1" }, data: stripped }),
+        ];
+      }
+      if (table === Comment) {
+        return [
+          await commentUpdate({ where: { id: "comment-1" }, data: stripped }),
+        ];
+      }
+      return [{ ...data, updatedAt: now }];
+    }),
+  };
+  return query;
+}
+
+const fakeDrizzleDb = {
+  select: mock(() => createFakeDrizzleSelectQuery()),
+  insert: mock((table: unknown) => createFakeDrizzleInsert(table)),
+  update: mock((table: unknown) => createFakeDrizzleUpdate(table)),
+  execute: queryRawMock,
+  transaction: transactionMock,
+};
 
 Object.assign(prismaMock, {
   $transaction: transactionMock,
@@ -228,6 +376,10 @@ function installServiceTestModuleMocks() {
 
   mock.module("@/utils/sanitizeUser", () => ({
     mapPublicUser: (user: unknown) => user ?? null,
+  }));
+
+  mock.module("../db/client", () => ({
+    db: fakeDrizzleDb,
   }));
 }
 
@@ -298,6 +450,8 @@ describe("GovernanceModerationService moderation ledger", () => {
     realmMembershipForPolicyMock.mockResolvedValue(null);
     enqueueMock.mockClear();
     broadcastMock.mockClear();
+    fakeDrizzleDb.select.mockClear();
+    queueDrizzleSelectResults();
   });
 
   test("writes platform unit snapshot and ledger action in one transaction", async () => {
@@ -595,6 +749,7 @@ describe("GovernanceModerationService moderation ledger", () => {
 
   test("lists case and target actions from the ledger", async () => {
     const service = await newService();
+    queueDrizzleSelectResults([moderationActionRow], [moderationActionRow]);
 
     const byCase = await service.listCaseActions("case-1", {
       offset: 5,
@@ -604,18 +759,7 @@ describe("GovernanceModerationService moderation ledger", () => {
       limit: 3,
     });
 
-    expect(moderationActionFindMany.mock.calls[0]?.[0]).toEqual({
-      where: { caseId: "case-1" },
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      skip: 5,
-      take: 10,
-    });
-    expect(moderationActionFindMany.mock.calls[1]?.[0]).toEqual({
-      where: { targetKind: "UNIT", targetId: "post-1" },
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      skip: 0,
-      take: 3,
-    });
+    expect(fakeDrizzleDb.select).toHaveBeenCalledTimes(2);
     expect(byCase[0]).toMatchObject({ id: "action-1", actionKind: "remove" });
     expect(byTarget[0]).toMatchObject({
       targetKind: "unit",
@@ -625,16 +769,14 @@ describe("GovernanceModerationService moderation ledger", () => {
 
   test("returns moderation overlays from snapshots and latest actions", async () => {
     const service = await newService();
+    queueDrizzleSelectResults([unitRow]);
 
     const result = await service.listModerationOverlays({
       targetKind: "unit",
       targetIds: ["post-1", "post-1"],
     });
 
-    expect(unitFindMany).toHaveBeenCalledWith({
-      where: { id: { in: ["post-1"] } },
-      select: { id: true, moderationStatus: true },
-    });
+    expect(fakeDrizzleDb.select).toHaveBeenCalledTimes(1);
     expect(latestActionsForMock).toHaveBeenCalledWith({
       targetKind: "UNIT",
       targetIds: ["post-1"],

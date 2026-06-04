@@ -51,6 +51,7 @@ mock.module("@/middleware/permission", () => ({
     resolve: () => ({ identity: currentIdentity }),
   }),
   verifyAdminFromDb: async () => dbAdmin,
+  verifyRootFromDb: async () => false,
 }));
 
 mock.module("./stats.service", () => ({

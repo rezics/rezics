@@ -6,7 +6,7 @@ import type {
   Language,
   SubjectAttributionRole,
 } from "@rezics/contract";
-import { mapEntityToDTO } from "@/entity/entity.mapper";
+import { mapEntityToDTO } from "../entity/entity.mapper";
 import type { CreditAttributionWithRelations } from "./types";
 
 export function mapCreditAttributionToDTO(

@@ -16,4 +16,3 @@ export {
 } from "./poll.mapper";
 export { PollError, PollService, pollService } from "./poll.service";
 export type { PollWithOptions } from "./poll.types";
-export { pollInclude } from "./poll.types";

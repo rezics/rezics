@@ -3,8 +3,8 @@ import type {
   RezicsSessionClaims,
   TranslationSourceResponse,
 } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { eq } from "drizzle-orm";
+import { Unit, UnitTranslation } from "../db/schema";
 import { hasAuthorityOver } from "./authority";
 
 export class TranslationSourceError extends Error {
@@ -16,6 +16,11 @@ export class TranslationSourceError extends Error {
     super(message);
     this.name = "TranslationSourceError";
   }
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
 }
 
 /**
@@ -34,10 +39,12 @@ export async function setTranslationSource(
   language: string,
   sourceUnitId: string | null,
 ): Promise<TranslationSourceResponse> {
-  const unit = await prisma.unit.findUnique({
-    where: { id: unitId },
-    select: { id: true, userId: true },
-  });
+  const db = await getServerDb();
+  const [unit] = await db
+    .select({ id: Unit.id, userId: Unit.userId })
+    .from(Unit)
+    .where(eq(Unit.id, unitId))
+    .limit(1);
   if (!unit) {
     throw new TranslationSourceError("UNIT_NOT_FOUND", "Unit not found", 404);
   }
@@ -54,10 +61,11 @@ export async function setTranslationSource(
   }
 
   if (sourceUnitId !== null) {
-    const sourceUnit = await prisma.unit.findUnique({
-      where: { id: sourceUnitId },
-      select: { id: true },
-    });
+    const [sourceUnit] = await db
+      .select({ id: Unit.id })
+      .from(Unit)
+      .where(eq(Unit.id, sourceUnitId))
+      .limit(1);
     if (!sourceUnit) {
       throw new TranslationSourceError(
         "SOURCE_UNIT_NOT_FOUND",
@@ -67,18 +75,27 @@ export async function setTranslationSource(
     }
   }
 
-  const create: Prisma.UnitTranslationCreateInput = {
-    unit: { connect: { id: unitId } },
-    language,
-    sourceUnitId,
-  };
-
-  const updated = await prisma.unitTranslation.upsert({
-    where: { unitId_language: { unitId, language } },
-    create,
-    update: { sourceUnitId },
-    select: { unitId: true, language: true, sourceUnitId: true },
-  });
+  const now = new Date();
+  const [updated] = await db
+    .insert(UnitTranslation)
+    .values({
+      unitId,
+      language,
+      sourceUnitId,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: [UnitTranslation.unitId, UnitTranslation.language],
+      set: { sourceUnitId, updatedAt: now },
+    })
+    .returning({
+      unitId: UnitTranslation.unitId,
+      language: UnitTranslation.language,
+      sourceUnitId: UnitTranslation.sourceUnitId,
+    });
+  if (!updated) {
+    throw new Error("Translation source was not saved");
+  }
 
   return {
     unitId: updated.unitId,

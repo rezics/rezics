@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { SearchClient, setSearchPrismaClient } from "@rezics/search";
+import { SearchClient } from "@rezics/search/client";
+import { setSearchPrismaClient } from "@rezics/search/sync";
 import { PrismaClient } from "@rezics/server/prisma/generated/client";
 
 export interface SearchRuntime {

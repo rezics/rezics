@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-
-installPrismaClientMock();
+import type {
+  CreditAttributionRepository,
+  CreditAttributionService,
+} from "./credit-attribution.service";
 
 const enqueueMock = mock(async (_command: any) => ({
   status: "created" as const,
 }));
-mock.module("@/job/job-boundary", () => ({
+mock.module("../job/job-boundary", () => ({
   serverJobProducer: {
     enqueue: enqueueMock,
   },
@@ -24,9 +25,24 @@ function makeCreditRow(overrides: Record<string, any> = {}) {
       id: overrides.entityId ?? "entity-1",
       type: "ENTITY",
       slug: "liu-cixin",
+      slugScope: "scope-1",
       userId: "user-1",
+      defaultLanguage: "en",
+      isLanguageNeutral: false,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      extra: null,
       createdAt: now,
       updatedAt: now,
+      publishedAt: now,
+      subscriberCount: 0,
+      licenseSlug: null,
+      aiDisclosureMode: "UNKNOWN",
+      aiDisclosureDetails: null,
+      catalogEntryKind: null,
+      targetUnitId: null,
+      moderationStatus: "APPROVED",
       entity: { kind: "person", verified: false },
       translations: [
         {
@@ -44,30 +60,38 @@ function makeCreditRow(overrides: Record<string, any> = {}) {
       ],
     },
     evidence: overrides.evidence ?? [],
-  };
+  } as any;
 }
 
-function freshMocks() {
-  const creditRow = makeCreditRow();
-  Object.assign(prismaMock, {
-    entity: {
-      findUnique: mock(async () => ({ eligibleCreditRoles: ["author"] })),
-    },
-    creditAttribution: {
-      create: mock(async () => creditRow),
-      delete: mock(async () => creditRow),
-      findMany: mock(async () => [creditRow]),
-      findUniqueOrThrow: mock(async () => creditRow),
-    },
-    unitExternalRef: {
-      findUniqueOrThrow: mock(async () => ({ id: "source-ref-1" })),
-    },
-    creditAttributionEvidence: {
-      create: mock(async () => ({
-        id: "evidence-1",
-      })),
-    },
-  });
+function createRepository() {
+  const repository: CreditAttributionRepository = {
+    getCreditEntity: mock(async () => ({ eligibleCreditRoles: ["author"] })),
+    create: mock(async (input) =>
+      makeCreditRow({
+        unitId: input.unitId,
+        entityId: input.entityId,
+        role: input.role,
+        sortOrder: input.sortOrder,
+      }),
+    ),
+    delete: mock(async () => {}),
+    listByUnit: mock(async () => [makeCreditRow()]),
+    createEvidence: mock(async (input) =>
+      makeCreditRow({
+        unitId: input.unitId,
+        entityId: input.entityId,
+        role: input.role,
+      }),
+    ),
+  };
+  return repository;
+}
+
+async function createService(repository: CreditAttributionRepository) {
+  const { CreditAttributionService } = await import(
+    "./credit-attribution.service"
+  );
+  return new CreditAttributionService(repository);
 }
 
 beforeEach(() => {
@@ -76,12 +100,10 @@ beforeEach(() => {
 
 describe("CreditAttributionService.link", () => {
   test("creates an eligible credit row and enqueues content credit search fields", async () => {
-    freshMocks();
-    const { creditAttributionService } = await import(
-      "./credit-attribution.service"
-    );
+    const repository = createRepository();
+    const service = await createService(repository);
 
-    const row = await creditAttributionService.link({
+    const row = await service.link({
       unitId: "book-1",
       entityId: "entity-1",
       role: "author",
@@ -89,6 +111,14 @@ describe("CreditAttributionService.link", () => {
     });
 
     expect(row.entityId).toBe("entity-1");
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        unitId: "book-1",
+        entityId: "entity-1",
+        role: "author",
+      }),
+      undefined,
+    );
     expect(enqueueMock).toHaveBeenCalledWith(
       expect.objectContaining({
         kind: "search.content.patchCredits",
@@ -99,35 +129,29 @@ describe("CreditAttributionService.link", () => {
   });
 
   test("rejects an ineligible credit role before creating a row", async () => {
-    freshMocks();
-    (prismaMock.entity.findUnique as any).mockImplementation(async () => ({
+    const repository = createRepository();
+    (repository.getCreditEntity as any).mockResolvedValueOnce({
       eligibleCreditRoles: ["translator"],
-    }));
-    const { creditAttributionService } = await import(
-      "./credit-attribution.service"
-    );
+    });
+    const service = await createService(repository);
 
     await expect(
-      creditAttributionService.link({
+      service.link({
         unitId: "book-1",
         entityId: "entity-1",
         role: "author",
       }),
     ).rejects.toThrow(/not eligible for credit role/);
-    expect((prismaMock.creditAttribution.create as any).mock.calls.length).toBe(
-      0,
-    );
+    expect(repository.create).not.toHaveBeenCalled();
   });
 });
 
 describe("CreditAttributionService.createEvidence", () => {
-  test("validates credit attribution and source ref before creating evidence", async () => {
-    freshMocks();
-    const { creditAttributionService } = await import(
-      "./credit-attribution.service"
-    );
+  test("delegates validation and evidence creation to the repository", async () => {
+    const repository = createRepository();
+    const service = await createService(repository);
 
-    await creditAttributionService.createEvidence({
+    await service.createEvidence({
       unitId: "book-1",
       entityId: "entity-1",
       role: "author",
@@ -135,25 +159,13 @@ describe("CreditAttributionService.createEvidence", () => {
       claimPath: "$.bookInfo.author",
     });
 
-    expect(prismaMock.creditAttribution.findUniqueOrThrow).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          unitId_entityId_role: {
-            unitId: "book-1",
-            entityId: "entity-1",
-            role: "author",
-          },
-        },
-      }),
-    );
-    expect(prismaMock.unitExternalRef.findUniqueOrThrow).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "source-ref-1" } }),
-    );
-    expect(prismaMock.creditAttributionEvidence.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ sourceRefId: "source-ref-1" }),
-      }),
-    );
+    expect(repository.createEvidence).toHaveBeenCalledWith({
+      unitId: "book-1",
+      entityId: "entity-1",
+      role: "author",
+      sourceRefId: "source-ref-1",
+      claimPath: "$.bookInfo.author",
+    });
   });
 
   test("hydrates evidence summaries on read DTOs", async () => {
@@ -168,6 +180,8 @@ describe("CreditAttributionService.createEvidence", () => {
         observedUrl: "https://book.qidian.com/info/123",
         observedAt: now,
         confidence: 0.9,
+        createdAt: now,
+        updatedAt: now,
         sourceRef: {
           id: "source-ref-1",
           unitId: "book-1",
@@ -176,9 +190,19 @@ describe("CreditAttributionService.createEvidence", () => {
           externalId: "123",
           canonicalUrl: "https://book.qidian.com/info/123",
           originalUrl: null,
+          firstSeenAt: now,
+          lastSeenAt: now,
+          createdAt: now,
+          updatedAt: now,
           sourceSite: {
             entityUnitId: "source-site-1",
             key: "qidian",
+            crawlSupport: "none",
+            crawlEnabled: false,
+            crawlerAdapterKey: null,
+            refRules: {},
+            createdAt: now,
+            updatedAt: now,
             entity: {
               unitId: "source-site-1",
               kind: "organization",
@@ -190,9 +214,24 @@ describe("CreditAttributionService.createEvidence", () => {
                 id: "source-site-1",
                 type: "ENTITY",
                 slug: "qidian",
+                slugScope: "scope-1",
                 userId: "user-1",
+                defaultLanguage: "en",
+                isLanguageNeutral: false,
+                status: "PUBLISHED",
+                visibility: "PUBLIC",
+                rating: "GENERAL",
+                extra: null,
                 createdAt: now,
                 updatedAt: now,
+                publishedAt: now,
+                subscriberCount: 0,
+                licenseSlug: null,
+                aiDisclosureMode: "UNKNOWN",
+                aiDisclosureDetails: null,
+                catalogEntryKind: null,
+                targetUnitId: null,
+                moderationStatus: "APPROVED",
                 translations: [],
               },
             },
@@ -200,16 +239,13 @@ describe("CreditAttributionService.createEvidence", () => {
         },
       },
     ];
-    Object.assign(prismaMock, {
-      creditAttribution: {
-        findMany: mock(async () => [makeCreditRow({ evidence })]),
-      },
-    });
-    const { creditAttributionService } = await import(
-      "./credit-attribution.service"
-    );
+    const repository = createRepository();
+    (repository.listByUnit as any).mockResolvedValueOnce([
+      makeCreditRow({ evidence }),
+    ]);
+    const service = await createService(repository);
 
-    const [row] = await creditAttributionService.listByUnit("book-1");
+    const [row] = await service.listByUnit("book-1");
 
     expect(row!.evidence?.[0]).toMatchObject({
       sourceRefId: "source-ref-1",

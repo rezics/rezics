@@ -1,112 +1,100 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { JwtAlgorithm } from "@rezics/jwt";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  createServerJwtPersistence,
+  type JwksRepository,
+  type JwksRow,
+} from "./jwt-persistence";
 
 process.env.NODE_ENV = "test";
-process.env.DATABASE_URL ??=
-  "postgresql://postgres:postgres@localhost:5432/rezics_book";
-process.env.AUTH_BASE_URL ??= "http://localhost:3001";
 
-const jwtServiceUpsert = mock();
-const jwksFindMany = mock();
-const jwksFindUnique = mock();
-const jwksUpsert = mock();
-const jwksUpdate = mock();
+const localService = {
+  id: "server-local-id",
+  serviceKey: "server-local",
+  issuer: "http://localhost:3000",
+  audience: "rezics",
+  jwksUrl: "http://localhost:3000/.well-known/jwks.json",
+  jwksPath: "/.well-known/jwks.json",
+  isLocalIssuer: true,
+  isActive: true,
+  jwks: [],
+};
 
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  jwtService: {
-    findUnique: async () => ({
-      id: "server-local-id",
-      serviceKey: "server-local",
-      issuer: "http://localhost:3000",
-      audience: "rezics",
-      jwksUrl: "http://localhost:3000/.well-known/jwks.json",
-      jwksPath: "/.well-known/jwks.json",
-      isLocalIssuer: true,
-      isActive: true,
-      jwks: [],
+const jwksRow: JwksRow = {
+  id: "server-kid",
+  jwtServiceId: "server-local-id",
+  publicJwk: {
+    kid: "server-kid",
+    kty: "EC",
+    crv: "P-256",
+    x: "public-x",
+    y: "public-y",
+    alg: JwtAlgorithm.ES256,
+    use: "sig",
+  },
+  privateJwk: {
+    kid: "server-kid",
+    kty: "EC",
+    crv: "P-256",
+    x: "public-x",
+    y: "public-y",
+    d: "private-d",
+    alg: JwtAlgorithm.ES256,
+    use: "sig",
+  },
+  alg: "ES256",
+  createdAt: new Date("2026-03-17T00:00:00.000Z"),
+  expiresAt: null,
+};
+
+function freshPersistence() {
+  const calls: Array<{ method: string; input: unknown }> = [];
+  const repository: JwksRepository = {
+    async list(jwtServiceId) {
+      calls.push({ method: "list", input: jwtServiceId });
+      return [jwksRow];
+    },
+    async upsert(input) {
+      calls.push({ method: "upsert", input });
+    },
+    async updateExpiresAt(kid, expiresAt) {
+      calls.push({ method: "updateExpiresAt", input: { kid, expiresAt } });
+    },
+    async getByKid(kid) {
+      calls.push({ method: "getByKid", input: kid });
+      return jwksRow;
+    },
+  };
+  return {
+    calls,
+    persistence: createServerJwtPersistence({
+      repository,
+      getJwtService: async () => localService,
     }),
-    upsert: jwtServiceUpsert,
-  },
-  jwks: {
-    findMany: jwksFindMany,
-    findUnique: jwksFindUnique,
-    upsert: jwksUpsert,
-    update: jwksUpdate,
-  },
-});
+  };
+}
 
 describe("server jwt persistence", () => {
   beforeEach(() => {
     process.env.PORT = "3000";
-    jwtServiceUpsert.mockReset();
-    jwksFindMany.mockReset();
-    jwksFindUnique.mockReset();
-    jwksUpsert.mockReset();
-    jwksUpdate.mockReset();
-    jwtServiceUpsert.mockResolvedValue({
-      id: "server-local-id",
-      serviceKey: "server-local",
-      issuer: "http://localhost:3000",
-      audience: "rezics",
-      jwksUrl: "http://localhost:3000/.well-known/jwks.json",
-      jwksPath: "/.well-known/jwks.json",
-      isLocalIssuer: true,
-      isActive: true,
-    });
   });
 
   test("lists local server signing keys via the local jwt service record", async () => {
-    jwksFindMany.mockResolvedValue([
-      {
-        id: "server-kid",
-        publicJwk: {
-          kid: "server-kid",
-          kty: "EC",
-          crv: "P-256",
-          x: "public-x",
-          y: "public-y",
-          alg: JwtAlgorithm.ES256,
-          use: "sig",
-        },
-        privateJwk: {
-          kid: "server-kid",
-          kty: "EC",
-          crv: "P-256",
-          x: "public-x",
-          y: "public-y",
-          d: "private-d",
-          alg: JwtAlgorithm.ES256,
-          use: "sig",
-        },
-        alg: "ES256",
-        createdAt: new Date("2026-03-17T00:00:00.000Z"),
-        expiresAt: null,
-        jwtService: {
-          issuer: "http://localhost:3000",
-        },
-      },
-    ]);
-
-    const { serverJwtPersistence } = await import("./jwt-persistence");
-    const keys = await serverJwtPersistence.listKeys({
+    const { calls, persistence } = freshPersistence();
+    const keys = await persistence.listKeys({
       issuer: "http://localhost:3000",
     });
 
     expect(keys).toHaveLength(1);
-    expect(jwksFindMany.mock.calls[0]?.[0]).toMatchObject({
-      where: {
-        jwtServiceId: "server-local-id",
-      },
+    expect(calls).toContainEqual({
+      method: "list",
+      input: "server-local-id",
     });
   });
 
   test("links saved keys to the local server jwt service record", async () => {
-    jwksUpsert.mockResolvedValue({});
-
-    const { serverJwtPersistence } = await import("./jwt-persistence");
-    await serverJwtPersistence.saveKey({
+    const { calls, persistence } = freshPersistence();
+    await persistence.saveKey({
       issuer: "http://localhost:3000",
       key: {
         issuer: "http://localhost:3000",
@@ -138,31 +126,31 @@ describe("server jwt persistence", () => {
       },
     });
 
-    expect(jwksUpsert.mock.calls[0]?.[0]).toMatchObject({
-      update: {
-        jwtServiceId: "server-local-id",
-      },
-      create: {
-        jwtServiceId: "server-local-id",
-      },
-    });
+    expect(calls).toContainEqual(
+      expect.objectContaining({
+        method: "upsert",
+        input: expect.objectContaining({
+          id: "server-kid",
+          jwtServiceId: "server-local-id",
+        }),
+      }),
+    );
   });
 
   test("marks local keys retiring through the server jwks table", async () => {
     const expiresAt = new Date("2026-03-18T00:00:00.000Z");
 
-    const { serverJwtPersistence } = await import("./jwt-persistence");
-    await serverJwtPersistence.markKeyRetiring({
+    const { calls, persistence } = freshPersistence();
+    await persistence.markKeyRetiring({
       issuer: "http://localhost:3000",
       kid: "server-kid",
       retiresAt: new Date("2026-03-17T23:00:00.000Z"),
       expiresAt,
     });
 
-    expect(jwksUpdate).toHaveBeenCalledTimes(1);
-    expect(jwksUpdate.mock.calls[0]?.[0]).toMatchObject({
-      where: { id: "server-kid" },
-      data: { expiresAt },
+    expect(calls).toContainEqual({
+      method: "updateExpiresAt",
+      input: { kid: "server-kid", expiresAt },
     });
   });
 });

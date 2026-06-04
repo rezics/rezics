@@ -2,13 +2,18 @@ import {
   BasicAdminPermission,
   type RezicsSessionClaims,
 } from "@rezics/contract";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import {
-  type Prisma,
-  prisma,
-  UnitStatus,
-  UnitType,
-  UnitVisibility,
-} from "#/prisma/client";
+  Post,
+  Realm,
+  RealmMember,
+  RealmTagContext,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+  User,
+} from "../db/schema";
+import type { RealmWithRelations } from "./types";
 
 export class RealmTagContextError extends Error {
   constructor(
@@ -23,21 +28,312 @@ export class RealmTagContextError extends Error {
 
 const REALM_CONTEXT_ROLES = ["owner", "admin", "moderator"] as const;
 
-export const realmTagContextInclude = {
-  realm: {
-    include: {
-      unit: {
-        include: {
-          user: true,
-          translations: true,
-        },
+type RealmTagContextRow = typeof RealmTagContext.$inferSelect & {
+  realm?: RealmWithRelations | null;
+  tag?: UnitBundle | null;
+  contextUnit?: UnitBundle | null;
+};
+
+type UnitBundle = typeof Unit.$inferSelect & {
+  translations: Array<typeof UnitTranslation.$inferSelect>;
+  supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+};
+
+type UnitTypeRow = {
+  id: string;
+  type: string;
+  userId?: string | null;
+  realm?: { unitId: string } | null;
+};
+
+type RealmTagContextRepository = {
+  findUnitForType(unitId: string): Promise<UnitTypeRow | null>;
+  isRealmOwner(realmUnitId: string, userId: string): Promise<boolean>;
+  hasRealmContextRole(realmUnitId: string, userId: string): Promise<boolean>;
+  findContext(
+    realmUnitId: string,
+    tagUnitId: string,
+  ): Promise<RealmTagContextRow | null>;
+  upsertContext(
+    realmUnitId: string,
+    tagUnitId: string,
+    input: { contextUnitId?: string | null },
+  ): Promise<RealmTagContextRow>;
+  materializeContext(input: {
+    callerUserId: string;
+    realmUnitId: string;
+    tagUnitId: string;
+  }): Promise<RealmTagContextRow>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+async function loadUnitBundles(
+  database: any,
+  unitIds: readonly string[],
+): Promise<Map<string, UnitBundle>> {
+  const ids = Array.from(new Set(unitIds.filter(Boolean)));
+  if (ids.length === 0) return new Map();
+
+  const [units, translations, supportLanguages] = await Promise.all([
+    database.select().from(Unit).where(inArray(Unit.id, ids)),
+    database
+      .select()
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, ids))
+      .orderBy(asc(UnitTranslation.language)),
+    database
+      .select()
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, ids))
+      .orderBy(
+        asc(UnitSupportLanguage.sortOrder),
+        asc(UnitSupportLanguage.language),
+      ),
+  ]);
+
+  const translationsByUnit = new Map<
+    string,
+    Array<typeof UnitTranslation.$inferSelect>
+  >();
+  for (const row of translations) {
+    const list = translationsByUnit.get(row.unitId) ?? [];
+    list.push(row);
+    translationsByUnit.set(row.unitId, list);
+  }
+
+  const supportByUnit = new Map<
+    string,
+    Array<typeof UnitSupportLanguage.$inferSelect>
+  >();
+  for (const row of supportLanguages) {
+    const list = supportByUnit.get(row.unitId) ?? [];
+    list.push(row);
+    supportByUnit.set(row.unitId, list);
+  }
+
+  return new Map(
+    units.map((unit: typeof Unit.$inferSelect) => [
+      unit.id,
+      {
+        ...unit,
+        translations: translationsByUnit.get(unit.id) ?? [],
+        supportLanguages: supportByUnit.get(unit.id) ?? [],
       },
-      members: true,
+    ]),
+  );
+}
+
+async function hydrateContext(
+  database: any,
+  row: typeof RealmTagContext.$inferSelect | null,
+): Promise<RealmTagContextRow | null> {
+  if (!row) return null;
+
+  const [realm] = await database
+    .select()
+    .from(Realm)
+    .where(eq(Realm.unitId, row.realmUnitId))
+    .limit(1);
+
+  const unitIds = [
+    row.realmUnitId,
+    row.tagUnitId,
+    ...(row.contextUnitId ? [row.contextUnitId] : []),
+  ];
+  const unitBundles = await loadUnitBundles(database, unitIds);
+  const realmUnit = unitBundles.get(row.realmUnitId);
+  const [members, users] = await Promise.all([
+    database
+      .select()
+      .from(RealmMember)
+      .where(eq(RealmMember.realmUnitId, row.realmUnitId))
+      .orderBy(asc(RealmMember.joinedAt)),
+    realmUnit?.userId
+      ? database
+          .select()
+          .from(User)
+          .where(eq(User.unitId, realmUnit.userId))
+          .limit(1)
+      : Promise.resolve([]),
+  ]);
+
+  return {
+    ...row,
+    realm:
+      realm && realmUnit
+        ? {
+            ...realm,
+            unit: {
+              ...realmUnit,
+              user: users[0] ?? null,
+            },
+            members,
+          }
+        : null,
+    tag: unitBundles.get(row.tagUnitId) ?? null,
+    contextUnit: row.contextUnitId
+      ? (unitBundles.get(row.contextUnitId) ?? null)
+      : null,
+  };
+}
+
+function createDrizzleRealmTagContextRepository(): RealmTagContextRepository {
+  return {
+    async findUnitForType(unitId) {
+      const db = await getServerDb();
+      const [unit] = await db
+        .select({
+          id: Unit.id,
+          type: Unit.type,
+          userId: Unit.userId,
+          realmUnitId: Realm.unitId,
+        })
+        .from(Unit)
+        .leftJoin(Realm, eq(Realm.unitId, Unit.id))
+        .where(eq(Unit.id, unitId))
+        .limit(1);
+      if (!unit) return null;
+      return {
+        id: unit.id,
+        type: unit.type,
+        userId: unit.userId,
+        realm: unit.realmUnitId ? { unitId: unit.realmUnitId } : null,
+      };
     },
-  },
-  tag: { include: { translations: true, supportLanguages: true } },
-  contextUnit: { include: { translations: true, supportLanguages: true } },
-} satisfies Prisma.RealmTagContextInclude;
+
+    async isRealmOwner(realmUnitId, userId) {
+      const db = await getServerDb();
+      const [realm] = await db
+        .select({ userId: Unit.userId })
+        .from(Unit)
+        .where(eq(Unit.id, realmUnitId))
+        .limit(1);
+      return realm?.userId === userId;
+    },
+
+    async hasRealmContextRole(realmUnitId, userId) {
+      const db = await getServerDb();
+      const [member] = await db
+        .select({ realmUnitId: RealmMember.realmUnitId })
+        .from(RealmMember)
+        .where(
+          and(
+            eq(RealmMember.realmUnitId, realmUnitId),
+            eq(RealmMember.userId, userId),
+            inArray(RealmMember.roleKey, [...REALM_CONTEXT_ROLES]),
+          ),
+        )
+        .limit(1);
+      return Boolean(member);
+    },
+
+    async findContext(realmUnitId, tagUnitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select()
+        .from(RealmTagContext)
+        .where(
+          and(
+            eq(RealmTagContext.realmUnitId, realmUnitId),
+            eq(RealmTagContext.tagUnitId, tagUnitId),
+          ),
+        )
+        .limit(1);
+      return hydrateContext(db, row ?? null);
+    },
+
+    async upsertContext(realmUnitId, tagUnitId, input) {
+      const db = await getServerDb();
+      const update =
+        input.contextUnitId !== undefined
+          ? { contextUnitId: input.contextUnitId, updatedAt: new Date() }
+          : { updatedAt: new Date() };
+      const [row] = await db
+        .insert(RealmTagContext)
+        .values({
+          realmUnitId,
+          tagUnitId,
+          contextUnitId: input.contextUnitId ?? null,
+          updatedAt: new Date(),
+        })
+        .onConflictDoUpdate({
+          target: [RealmTagContext.realmUnitId, RealmTagContext.tagUnitId],
+          set: update,
+        })
+        .returning();
+      if (!row) throw new Error("Failed to upsert RealmTagContext");
+      const hydrated = await hydrateContext(db, row);
+      if (!hydrated) throw new Error("Failed to load RealmTagContext");
+      return hydrated;
+    },
+
+    async materializeContext({ callerUserId, realmUnitId, tagUnitId }) {
+      const db = await getServerDb();
+      const row = await db.transaction(async (tx) => {
+        const [existing] = await tx
+          .insert(RealmTagContext)
+          .values({ realmUnitId, tagUnitId, updatedAt: new Date() })
+          .onConflictDoUpdate({
+            target: [RealmTagContext.realmUnitId, RealmTagContext.tagUnitId],
+            set: { updatedAt: new Date() },
+          })
+          .returning();
+        if (!existing) throw new Error("Failed to upsert RealmTagContext");
+        if (existing.contextUnitId) return existing;
+
+        const [unit] = await tx
+          .insert(Unit)
+          .values({
+            type: "POST",
+            userId: callerUserId,
+            slugScope: callerUserId,
+            status: "PUBLISHED",
+            visibility: "PUBLIC",
+            extra: {
+              kind: "realmTagContext",
+              realmUnitId,
+              tagUnitId,
+            },
+            updatedAt: new Date(),
+          })
+          .returning();
+        if (!unit) throw new Error("Failed to create context Unit");
+
+        await tx.insert(Post).values({
+          unitId: unit.id,
+          authorUserId: callerUserId,
+          kind: "POST",
+          extra: {
+            kind: "realmTagContext",
+            realmUnitId,
+            tagUnitId,
+          },
+          updatedAt: new Date(),
+        });
+
+        const [updated] = await tx
+          .update(RealmTagContext)
+          .set({ contextUnitId: unit.id, updatedAt: new Date() })
+          .where(
+            and(
+              eq(RealmTagContext.realmUnitId, realmUnitId),
+              eq(RealmTagContext.tagUnitId, tagUnitId),
+            ),
+          )
+          .returning();
+        if (!updated) throw new Error("Failed to update RealmTagContext");
+        return updated;
+      });
+      const hydrated = await hydrateContext(db, row);
+      if (!hydrated) throw new Error("Failed to load RealmTagContext");
+      return hydrated;
+    },
+  };
+}
 
 /**
  * RealmTagContext is a pair-level explanation surface for
@@ -46,30 +342,27 @@ export const realmTagContextInclude = {
  * content carrier.
  */
 export class RealmTagContextService {
+  constructor(
+    private readonly repository: RealmTagContextRepository = createDrizzleRealmTagContextRepository(),
+  ) {}
+
   async assertRealmAndTagTypes(
     realmUnitId: string,
     tagUnitId: string,
-    tx: Pick<typeof prisma, "unit"> = prisma,
   ): Promise<void> {
     const [realm, tag] = await Promise.all([
-      tx.unit.findUnique({
-        where: { id: realmUnitId },
-        select: { id: true, type: true, realm: { select: { unitId: true } } },
-      }),
-      tx.unit.findUnique({
-        where: { id: tagUnitId },
-        select: { id: true, type: true },
-      }),
+      this.repository.findUnitForType(realmUnitId),
+      this.repository.findUnitForType(tagUnitId),
     ]);
 
-    if (!realm || realm.type !== UnitType.REALM || !realm.realm) {
+    if (!realm || realm.type !== "REALM" || !realm.realm) {
       throw new RealmTagContextError(
         "REALM_NOT_FOUND",
         "realmUnitId must reference an existing REALM Unit",
         400,
       );
     }
-    if (!tag || tag.type !== UnitType.TAG) {
+    if (!tag || tag.type !== "TAG") {
       throw new RealmTagContextError(
         "TAG_NOT_FOUND",
         "tagUnitId must reference an existing TAG Unit",
@@ -83,30 +376,15 @@ export class RealmTagContextService {
     realmUnitId: string,
   ): Promise<boolean> {
     if (BasicAdminPermission(caller.permission as any)) return true;
-
-    const realm = await prisma.unit.findUnique({
-      where: { id: realmUnitId },
-      select: { userId: true },
-    });
-    if (realm?.userId && realm.userId === caller.userId) return true;
-
-    const member = await prisma.realmMember.findFirst({
-      where: {
-        realmUnitId,
-        userId: caller.userId,
-        roleKey: { in: [...REALM_CONTEXT_ROLES] },
-      },
-      select: { realmUnitId: true },
-    });
-    return member !== null;
+    if (await this.repository.isRealmOwner(realmUnitId, caller.userId)) {
+      return true;
+    }
+    return this.repository.hasRealmContextRole(realmUnitId, caller.userId);
   }
 
   async get(realmUnitId: string, tagUnitId: string) {
     await this.assertRealmAndTagTypes(realmUnitId, tagUnitId);
-    return prisma.realmTagContext.findUnique({
-      where: { realmUnitId_tagUnitId: { realmUnitId, tagUnitId } },
-      include: realmTagContextInclude,
-    });
+    return this.repository.findContext(realmUnitId, tagUnitId);
   }
 
   async upsert(
@@ -115,21 +393,7 @@ export class RealmTagContextService {
     input: { contextUnitId?: string | null },
   ) {
     await this.assertRealmAndTagTypes(realmUnitId, tagUnitId);
-
-    return prisma.realmTagContext.upsert({
-      where: { realmUnitId_tagUnitId: { realmUnitId, tagUnitId } },
-      update: {
-        ...(input.contextUnitId !== undefined
-          ? { contextUnitId: input.contextUnitId }
-          : {}),
-      },
-      create: {
-        realmUnitId,
-        tagUnitId,
-        contextUnitId: input.contextUnitId ?? null,
-      },
-      include: realmTagContextInclude,
-    });
+    return this.repository.upsertContext(realmUnitId, tagUnitId, input);
   }
 
   /**
@@ -143,55 +407,11 @@ export class RealmTagContextService {
     realmUnitId: string,
     tagUnitId: string,
   ) {
-    return prisma.$transaction(async (tx) => {
-      await this.assertRealmAndTagTypes(realmUnitId, tagUnitId, tx);
-
-      const existing = await tx.realmTagContext.upsert({
-        where: { realmUnitId_tagUnitId: { realmUnitId, tagUnitId } },
-        update: {},
-        create: { realmUnitId, tagUnitId },
-      });
-
-      if (existing.contextUnitId) {
-        return tx.realmTagContext.findUniqueOrThrow({
-          where: { realmUnitId_tagUnitId: { realmUnitId, tagUnitId } },
-          include: realmTagContextInclude,
-        });
-      }
-
-      const unit = await tx.unit.create({
-        data: {
-          type: UnitType.POST,
-          userId: callerUserId,
-          slugScope: callerUserId,
-          status: UnitStatus.PUBLISHED,
-          visibility: UnitVisibility.PUBLIC,
-          extra: {
-            kind: "realmTagContext",
-            realmUnitId,
-            tagUnitId,
-          },
-        },
-      });
-
-      await tx.post.create({
-        data: {
-          unitId: unit.id,
-          authorUserId: callerUserId,
-          kind: "POST",
-          extra: {
-            kind: "realmTagContext",
-            realmUnitId,
-            tagUnitId,
-          },
-        },
-      });
-
-      return tx.realmTagContext.update({
-        where: { realmUnitId_tagUnitId: { realmUnitId, tagUnitId } },
-        data: { contextUnitId: unit.id },
-        include: realmTagContextInclude,
-      });
+    await this.assertRealmAndTagTypes(realmUnitId, tagUnitId);
+    return this.repository.materializeContext({
+      callerUserId,
+      realmUnitId,
+      tagUnitId,
     });
   }
 }

@@ -16,7 +16,6 @@ const EXEMPT_DIR_PATTERNS = [
   ".vite",
   ".turbo",
   "coverage",
-  "prisma/generated",
 ];
 
 const EXEMPT_PACKAGES = new Set(["auth"]);

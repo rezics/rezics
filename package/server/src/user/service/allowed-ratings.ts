@@ -1,7 +1,12 @@
-import type { UserSettings } from "@rezics/contract";
+import type { ContentRating, UserSettings } from "@rezics/contract";
 import { BASELINE_RATINGS, OPT_IN_RATINGS } from "@rezics/contract";
-import type { ContentRating } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { eq } from "drizzle-orm";
+import { User } from "../../db/schema";
+
+async function getServerDb() {
+  const { db } = await import("../../db/client");
+  return db;
+}
 
 /**
  * Allowed rating set for a caller:
@@ -16,9 +21,13 @@ export async function deriveAllowedRatings(
   const base = [...BASELINE_RATINGS] as ContentRating[];
   if (!userId) return base;
 
-  const user = await prisma.user
-    .findUnique({ where: { unitId: userId }, select: { settings: true } })
-    .catch(() => null);
+  const db = await getServerDb();
+  const [user] = await db
+    .select({ settings: User.settings })
+    .from(User)
+    .where(eq(User.unitId, userId))
+    .limit(1)
+    .catch(() => []);
 
   const settings = (user?.settings as UserSettings | null) ?? null;
   const optedIn = settings?.content?.optedInRatings ?? [];

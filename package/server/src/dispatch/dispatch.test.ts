@@ -1,45 +1,30 @@
 import { describe, expect, it, mock } from "bun:test";
 import type { ApiTokenScopes } from "@rezics/contract";
 import { DispatchScope, DispatchType } from "@rezics/contract";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 import { tokenService } from "@/token/token.service";
+import type { DispatchRepository } from "./dispatch.service";
 
-installPrismaClientMock();
-
-async function makeDispatchService() {
+async function makeDispatchService(repository?: DispatchRepository) {
   const { DispatchService } = await import("./dispatch.service");
-  return new DispatchService();
+  return repository ? new DispatchService(repository) : new DispatchService();
 }
 
-function freshDispatchMocks() {
-  Object.assign(prismaMock, {
-    unit: {
-      findUniqueOrThrow: mock(async () => ({ defaultLanguage: "en" })),
-      create: mock(async () => ({ id: "created-unit" })),
-    },
-    unitTranslation: {
-      findUnique: mock(async () => ({ extra: { source: "existing" } })),
-      upsert: mock(async (args: any) => args.create),
-    },
-    creditAttribution: {
-      upsert: mock(async (args: any) => args.create),
-    },
-    game: {
-      update: mock(async (args: any) => args.data),
-    },
-    media: {
-      update: mock(async (args: any) => args.data),
-    },
-    entity: {
-      findMany: mock(async () => []),
-    },
-    subjectAttribution: {
-      createMany: mock(async () => ({ count: 0 })),
-    },
-    unitTag: {
-      createMany: mock(async () => ({ count: 0 })),
-    },
-  });
+function createDispatchRepositoryStub(
+  overrides: Partial<DispatchRepository> = {},
+): DispatchRepository {
+  return {
+    getUnitDefaultLanguage: mock(async () => "en"),
+    getTranslationExtra: mock(async () => ({ source: "existing" })),
+    upsertTranslation: mock(async () => {}),
+    upsertCredit: mock(async () => {}),
+    updateBook: mock(async () => {}),
+    createBookUnit: mock(async () => "book-1"),
+    updateGame: mock(async () => {}),
+    createGameUnit: mock(async () => "game-1"),
+    updateMedia: mock(async () => {}),
+    createMediaUnit: mock(async () => "media-1"),
+    ...overrides,
+  };
 }
 
 describe("dispatch result intake - permission checks", () => {
@@ -106,9 +91,7 @@ describe("dispatch result intake - permission checks", () => {
 describe("dispatch service - config", () => {
   it("returns null when env vars are not set", async () => {
     const service = await makeDispatchService();
-    // In test env without DISPATCH_* vars, getConfig should return null
     const config = service.getConfig();
-    // Config will be null since env vars are not set in test
     expect(config === null || typeof config === "object").toBe(true);
   });
 });
@@ -135,13 +118,12 @@ describe("hub audit notification - HMAC signing", () => {
       await crypto.subtle.sign("HMAC", cryptoKey, data),
     ).toString("hex");
 
-    // Signing again with same input should produce identical result
     const sig2 = Buffer.from(
       await crypto.subtle.sign("HMAC", cryptoKey, data),
     ).toString("hex");
 
     expect(sig1).toBe(sig2);
-    expect(sig1.length).toBe(64); // SHA-256 hex = 64 chars
+    expect(sig1.length).toBe(64);
   });
 
   it("sorts taskIds before signing", () => {
@@ -162,8 +144,8 @@ describe("dispatch type validation", () => {
 
 describe("dispatch service - GAME/MEDIA shared metadata", () => {
   it("stores game display metadata in UnitTranslation and credits in CreditAttribution", async () => {
-    freshDispatchMocks();
-    const service = await makeDispatchService();
+    const repository = createDispatchRepositoryStub();
+    const service = await makeDispatchService(repository);
     const description = { type: "doc", content: [] };
 
     await service.processResult(
@@ -185,57 +167,36 @@ describe("dispatch service - GAME/MEDIA shared metadata", () => {
       "user-1",
     );
 
-    expect(prismaMock.game.update).toHaveBeenCalledWith({
-      where: { unitId: "game-1" },
-      data: { releaseDate: new Date("2024-03-15") },
+    expect(repository.updateGame).toHaveBeenCalledWith("game-1", {
+      releaseDate: new Date("2024-03-15"),
     });
-    expect(prismaMock.unitTranslation.upsert).toHaveBeenCalledWith({
-      where: { unitId_language: { unitId: "game-1", language: "en" } },
-      create: {
-        unitId: "game-1",
-        language: "en",
-        title: "The Legend",
-        subtitle: undefined,
-        summary: undefined,
-        description,
-        extra: {
-          source: "existing",
-          coverUrl: "https://example.test/box.jpg",
-        },
+    expect(repository.upsertTranslation).toHaveBeenCalledWith({
+      unitId: "game-1",
+      language: "en",
+      title: "The Legend",
+      subtitle: undefined,
+      summary: undefined,
+      description,
+      createExtra: {
+        source: "existing",
+        coverUrl: "https://example.test/box.jpg",
       },
-      update: {
-        title: "The Legend",
-        subtitle: undefined,
-        summary: undefined,
-        description,
-        extra: {
-          source: "existing",
-          coverUrl: "https://example.test/box.jpg",
-        },
+      updateExtra: {
+        source: "existing",
+        coverUrl: "https://example.test/box.jpg",
       },
     });
-    expect(prismaMock.creditAttribution.upsert).toHaveBeenCalledWith({
-      where: {
-        unitId_entityId_role: {
-          unitId: "game-1",
-          entityId: "studio-1",
-          role: "developer",
-        },
-      },
-      create: {
-        unitId: "game-1",
-        entityId: "studio-1",
-        role: "developer",
-        sortOrder: 2,
-      },
-      update: { sortOrder: 2 },
+    expect(repository.upsertCredit).toHaveBeenCalledWith({
+      unitId: "game-1",
+      entityId: "studio-1",
+      role: "developer",
+      sortOrder: 2,
     });
   });
 
   it("stores media translations and role-keyed credits outside the Media row", async () => {
-    freshDispatchMocks();
-    prismaMock.unit.create = mock(async () => ({ id: "media-1" }));
-    const service = await makeDispatchService();
+    const repository = createDispatchRepositoryStub();
+    const service = await makeDispatchService(repository);
 
     await service.processResult(
       {
@@ -255,46 +216,27 @@ describe("dispatch service - GAME/MEDIA shared metadata", () => {
       "user-1",
     );
 
-    expect(prismaMock.unit.create).toHaveBeenCalledWith({
-      data: {
-        type: "MEDIA",
-        userId: "user-1",
-        slugScope: "user-1",
-        status: "DRAFT",
-        media: { create: { kindKey: "movie" } },
-      },
+    expect(repository.createMediaUnit).toHaveBeenCalledWith("user-1", {
+      kindKey: "movie",
     });
-    expect(prismaMock.unitTranslation.upsert).toHaveBeenCalledWith({
-      where: { unitId_language: { unitId: "media-1", language: "ja" } },
-      create: {
-        unitId: "media-1",
-        language: "ja",
-        title: "映画",
-        subtitle: undefined,
-        summary: "概要",
-        description: undefined,
-        extra: { source: "existing" },
-      },
-      update: {
-        title: "映画",
-        subtitle: undefined,
-        summary: "概要",
-        description: undefined,
-        extra: { source: "existing" },
-      },
+    expect(repository.upsertTranslation).toHaveBeenCalledWith({
+      unitId: "media-1",
+      language: "ja",
+      title: "映画",
+      subtitle: undefined,
+      summary: "概要",
+      description: undefined,
+      createExtra: { source: "existing" },
+      updateExtra: { source: "existing" },
     });
-    expect(prismaMock.creditAttribution.upsert).toHaveBeenCalledTimes(2);
-    expect(
-      prismaMock.creditAttribution.upsert.mock.calls[0]?.[0].create,
-    ).toEqual({
+    expect(repository.upsertCredit).toHaveBeenCalledTimes(2);
+    expect(repository.upsertCredit).toHaveBeenNthCalledWith(1, {
       unitId: "media-1",
       entityId: "studio-1",
       role: "studio",
       sortOrder: 0,
     });
-    expect(
-      prismaMock.creditAttribution.upsert.mock.calls[1]?.[0].create,
-    ).toEqual({
+    expect(repository.upsertCredit).toHaveBeenNthCalledWith(2, {
       unitId: "media-1",
       entityId: "actor-1",
       role: "actor",

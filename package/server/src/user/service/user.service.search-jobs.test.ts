@@ -1,10 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../../test/prisma-client-mock";
-
-installPrismaClientMock();
+import type { UserRepository } from "./user.service";
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 mock.module("@/job/job-boundary", () => ({
@@ -15,6 +10,7 @@ mock.module("@/job/job-boundary", () => ({
 
 mock.module("@/shelf/system-shelves", () => ({
   bootstrapSystemShelves: mock(async () => undefined),
+  createDrizzleSystemShelfClient: mock(() => ({})),
 }));
 
 mock.module("@/infra/default-realm", () => ({
@@ -36,44 +32,41 @@ const userRow = {
   bio: "Bio",
   description: null,
   joinDate: new Date("2026-01-01T00:00:00.000Z"),
+  permission: null,
+  followersCount: 0,
+  followingsCount: 0,
+  settings: null,
+  extra: null,
+  createdAt: new Date("2026-01-01T00:00:00.000Z"),
+  updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+  slug: "alice",
 };
+
+function createRepository(): UserRepository {
+  return {
+    list: mock(async () => ({ users: [], total: 0 })),
+    getByUserId: mock(async () => userRow),
+    getBySlug: mock(async () => userRow),
+    create: mock(async () => userRow),
+    materializeFromVerifiedAuth: mock(async () => userRow),
+    completeProfileSetup: mock(async () => userRow),
+    update: mock(async () => userRow),
+    delete: mock(async () => undefined),
+    exists: mock(async () => true),
+    listFollowers: mock(async () => ({ users: [], total: 0 })),
+    listFollowings: mock(async () => ({ users: [], total: 0 })),
+    getCanonicalSlug: mock(async () => "alice"),
+  };
+}
 
 beforeEach(() => {
   enqueueMock.mockClear();
-  Object.assign(prismaMock, {
-    $transaction: mock(async (cb: any) =>
-      cb({
-        unit: {
-          upsert: mock(async () => ({})),
-        },
-        user: {
-          create: mock(async () => userRow),
-          findUnique: mock(async () => null),
-          update: mock(async () => userRow),
-        },
-        emailVerificationContract: {
-          upsert: mock(async () => ({})),
-        },
-        realmMember: {
-          create: mock(async () => ({})),
-        },
-      }),
-    ),
-    unit: {
-      findUnique: mock(async () => ({ slug: "alice" })),
-      findMany: mock(async () => []),
-    },
-    user: {
-      update: mock(async () => userRow),
-      delete: mock(async () => ({})),
-      count: mock(async () => 1),
-    },
-  });
 });
 
 describe("UserService search jobs", () => {
   test("update enqueues user field patch and posts-author fanout", async () => {
-    const { userService } = await import("./user.service");
+    const { UserService } = await import("./user.service");
+    const userService = new UserService(createRepository());
 
     await userService.update("user-1", {
       name: "Alice",
@@ -97,7 +90,8 @@ describe("UserService search jobs", () => {
   });
 
   test("delete enqueues user delete", async () => {
-    const { userService } = await import("./user.service");
+    const { UserService } = await import("./user.service");
+    const userService = new UserService(createRepository());
 
     await userService.delete("user-1");
 

@@ -4,7 +4,9 @@ import type {
   UpdateJwtServiceInput,
 } from "@rezics/contract";
 import { defaultJwtCryptoProvider } from "@rezics/jwt";
-import { type Prisma, prisma } from "#prisma/client";
+import { and, asc, eq, gt, isNull, or } from "drizzle-orm";
+import { db } from "../db/client";
+import { jwks, jwtServices } from "../db/schema";
 import { getAuthJwksGracePeriodSeconds } from "../session/jwt/options";
 
 function mapToDTO(record: {
@@ -35,22 +37,29 @@ function mapToDTO(record: {
 
 export const authJwtServiceAdminService = {
   async list(): Promise<JwtServiceDTO[]> {
-    const records = await prisma.jwtService.findMany({
-      orderBy: { createdAt: "asc" },
-    });
+    const records = await db
+      .select()
+      .from(jwtServices)
+      .orderBy(asc(jwtServices.createdAt));
     return records.map(mapToDTO);
   },
 
   async fetch(serviceKey: string): Promise<JwtServiceDTO | null> {
-    const record = await prisma.jwtService.findUnique({
-      where: { serviceKey },
-    });
+    const record =
+      (
+        await db
+          .select()
+          .from(jwtServices)
+          .where(eq(jwtServices.serviceKey, serviceKey))
+          .limit(1)
+      )[0] ?? null;
     return record ? mapToDTO(record) : null;
   },
 
   async create(input: CreateJwtServiceInput): Promise<JwtServiceDTO> {
-    const record = await prisma.jwtService.create({
-      data: {
+    const [record] = await db
+      .insert(jwtServices)
+      .values({
         serviceKey: input.serviceKey,
         issuer: input.issuer,
         audience: input.audience,
@@ -58,8 +67,10 @@ export const authJwtServiceAdminService = {
         jwksPath: input.jwksPath,
         isLocalIssuer: input.isLocalIssuer ?? false,
         isActive: true,
-      },
-    });
+        updatedAt: new Date(),
+      })
+      .returning();
+    if (!record) throw new Error("Failed to create JWT service");
     return mapToDTO(record);
   },
 
@@ -67,9 +78,9 @@ export const authJwtServiceAdminService = {
     serviceKey: string,
     input: UpdateJwtServiceInput,
   ): Promise<JwtServiceDTO> {
-    const record = await prisma.jwtService.update({
-      where: { serviceKey },
-      data: {
+    const [record] = await db
+      .update(jwtServices)
+      .set({
         ...(input.issuer !== undefined ? { issuer: input.issuer } : {}),
         ...(input.audience !== undefined ? { audience: input.audience } : {}),
         ...(input.jwksUrl !== undefined ? { jwksUrl: input.jwksUrl } : {}),
@@ -77,31 +88,43 @@ export const authJwtServiceAdminService = {
         ...(input.isLocalIssuer !== undefined
           ? { isLocalIssuer: input.isLocalIssuer }
           : {}),
-      },
-    });
+        updatedAt: new Date(),
+      })
+      .where(eq(jwtServices.serviceKey, serviceKey))
+      .returning();
+    if (!record) throw new Error(`JwtService not found: ${serviceKey}`);
     return mapToDTO(record);
   },
 
   async activate(serviceKey: string): Promise<JwtServiceDTO> {
-    const record = await prisma.jwtService.update({
-      where: { serviceKey },
-      data: { isActive: true },
-    });
+    const [record] = await db
+      .update(jwtServices)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(eq(jwtServices.serviceKey, serviceKey))
+      .returning();
+    if (!record) throw new Error(`JwtService not found: ${serviceKey}`);
     return mapToDTO(record);
   },
 
   async deactivate(serviceKey: string): Promise<JwtServiceDTO> {
-    const record = await prisma.jwtService.update({
-      where: { serviceKey },
-      data: { isActive: false },
-    });
+    const [record] = await db
+      .update(jwtServices)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(jwtServices.serviceKey, serviceKey))
+      .returning();
+    if (!record) throw new Error(`JwtService not found: ${serviceKey}`);
     return mapToDTO(record);
   },
 
   async rotate(serviceKey: string): Promise<JwtServiceDTO> {
-    const service = await prisma.jwtService.findUnique({
-      where: { serviceKey },
-    });
+    const service =
+      (
+        await db
+          .select()
+          .from(jwtServices)
+          .where(eq(jwtServices.serviceKey, serviceKey))
+          .limit(1)
+      )[0] ?? null;
     if (!service) {
       throw new Error(`JwtService not found: ${serviceKey}`);
     }
@@ -116,30 +139,30 @@ export const authJwtServiceAdminService = {
     const keyPair = await defaultJwtCryptoProvider.generateKey();
     const kid = `jwt-${now.toISOString()}`;
 
-    await prisma.$transaction([
-      prisma.jwks.updateMany({
-        where: {
-          jwtServiceId: service.id,
-          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+    await db.transaction(async (tx) => {
+      await tx
+        .update(jwks)
+        .set({ expiresAt })
+        .where(
+          and(
+            eq(jwks.jwtServiceId, service.id),
+            or(isNull(jwks.expiresAt), gt(jwks.expiresAt, now)),
+          ),
+        );
+      await tx.insert(jwks).values({
+        id: kid,
+        jwtServiceId: service.id,
+        publicJwk: {
+          ...keyPair.publicJwk,
+          kid,
         },
-        data: { expiresAt },
-      }),
-      prisma.jwks.create({
-        data: {
-          id: kid,
-          jwtServiceId: service.id,
-          publicJwk: {
-            ...keyPair.publicJwk,
-            kid,
-          } as unknown as Prisma.InputJsonValue,
-          privateJwk: {
-            ...keyPair.privateJwk,
-            kid,
-          } as unknown as Prisma.InputJsonValue,
-          alg: "ES256",
+        privateJwk: {
+          ...keyPair.privateJwk,
+          kid,
         },
-      }),
-    ]);
+        alg: "ES256",
+      });
+    });
 
     return mapToDTO(service);
   },

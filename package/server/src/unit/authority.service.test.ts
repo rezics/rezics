@@ -3,7 +3,7 @@ import {
   type RezicsSessionClaims,
   UnitAuthorityRoleKey,
 } from "@rezics/contract";
-import { AppError } from "@/utils/errors";
+import { AppError } from "../utils/errors";
 import { UnitAuthorityService } from "./authority.service";
 
 function actor(userId: string, role: "USER" | "ADMIN" | "ROOT" = "USER") {

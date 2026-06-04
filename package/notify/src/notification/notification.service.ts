@@ -1,5 +1,7 @@
 import { isAggregatable, KIND_REGISTRY } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { db } from "../db";
+import { notifications, type NotificationRow } from "../db/schema";
 import { mapToAggregatedItems } from "./notification.mapper";
 
 const AGGREGATABLE_KINDS: string[] = Object.entries(KIND_REGISTRY)
@@ -21,13 +23,8 @@ type AggregatedRow = {
 };
 
 /**
- * Persist N notification rows (one per recipient) via a single batched insert
- * and return the synthesized raw events for SSE fan-out. The raw event uses
- * the input data + a per-row uuid (we generate IDs locally via uuid since
- * createMany on this Prisma version does not return the inserted rows).
- *
- * Caller (the `/internal/event` handler) iterates SSE publish on the returned
- * events.
+ * Persist one notification row per recipient and return the inserted rows for
+ * SSE fan-out. IDs stay database-generated through PostgreSQL 18 `uuidv7()`.
  */
 export async function broadcastNotifications(input: {
   kind: string;
@@ -52,24 +49,19 @@ export async function broadcastNotifications(input: {
   const extra = input.extra ?? null;
   if (recipientIds.length === 0) return [];
 
-  // Use crypto.randomUUID — these IDs are also used for SSE event identity.
-  // We choose IDs client-side so SSE can synthesize the raw event without a
-  // second SELECT round-trip after createMany.
-  const rows = recipientIds.map((recipientId) => ({
-    id: crypto.randomUUID(),
-    recipientId,
-    actorId,
-    kind,
-    sourceUnitId,
-    extra: extra as never,
-  }));
+  const rows = await db
+    .insert(notifications)
+    .values(
+      recipientIds.map((recipientId) => ({
+        recipientId,
+        actorId,
+        kind,
+        sourceUnitId,
+        extra,
+      })),
+    )
+    .returning();
 
-  await prisma.notification.createMany({
-    data: rows,
-    skipDuplicates: false,
-  });
-
-  const createdAt = new Date().toISOString();
   return rows.map((row) => ({
     recipientId: row.recipientId,
     raw: {
@@ -77,22 +69,16 @@ export async function broadcastNotifications(input: {
       kind: row.kind,
       sourceUnitId: row.sourceUnitId,
       actorId: row.actorId,
-      extra,
-      createdAt,
+      extra: row.extra,
+      createdAt: row.createdAt.toISOString(),
     },
   }));
 }
 
-export async function getNotifications(
+async function loadAggregatedRows(
   recipientId: string,
-  page: number,
-  limit: number,
-) {
-  const offset = (page - 1) * limit;
-
-  // Aggregatable rows grouped by (kind, sourceUnitId).
-  const aggregated = await prisma.$queryRawUnsafe<AggregatedRow[]>(
-    `
+): Promise<AggregatedRow[]> {
+  const result = await db.execute(sql<AggregatedRow>`
     SELECT
       kind,
       "sourceUnitId",
@@ -102,23 +88,132 @@ export async function getNotifications(
       bool_and(read) AS "allRead",
       (array_agg(extra ORDER BY "createdAt" DESC))[1] AS extra
     FROM "Notification"
-    WHERE "recipientId" = $1::uuid
-      AND kind = ANY($2::text[])
+    WHERE "recipientId" = ${recipientId}::uuid
+      AND kind = ANY(${AGGREGATABLE_KINDS}::text[])
     GROUP BY kind, "sourceUnitId"
     ORDER BY "latestAt" DESC
-    `,
-    recipientId,
-    AGGREGATABLE_KINDS,
-  );
+  `);
+  return result.rows as AggregatedRow[];
+}
 
-  // Non-aggregatable rows returned individually.
-  const individual = await prisma.notification.findMany({
-    where: {
-      recipientId,
-      kind: { in: NON_AGGREGATABLE_KINDS },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+async function loadIndividualRows(
+  recipientId: string,
+): Promise<NotificationRow[]> {
+  return await db
+    .select()
+    .from(notifications)
+    .where(
+      and(
+        eq(notifications.recipientId, recipientId),
+        inArray(notifications.kind, NON_AGGREGATABLE_KINDS),
+      ),
+    )
+    .orderBy(desc(notifications.createdAt));
+}
+
+async function countAggregatedUnread(recipientId: string): Promise<number> {
+  const result = await db.execute<{ count: bigint }>(sql`
+    SELECT count(*) AS count FROM (
+      SELECT 1
+      FROM "Notification"
+      WHERE "recipientId" = ${recipientId}::uuid
+        AND kind = ANY(${AGGREGATABLE_KINDS}::text[])
+        AND read = false
+      GROUP BY kind, "sourceUnitId"
+    ) sub
+  `);
+
+  return Number(result.rows[0]?.count ?? 0);
+}
+
+async function countIndividualUnread(recipientId: string): Promise<number> {
+  const rows = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(notifications)
+    .where(
+      and(
+        eq(notifications.recipientId, recipientId),
+        inArray(notifications.kind, NON_AGGREGATABLE_KINDS),
+        eq(notifications.read, false),
+      ),
+    );
+
+  return rows[0]?.count ?? 0;
+}
+
+export async function createNotification(input: {
+  recipientId: string;
+  actorId: string | null;
+  kind: string;
+  sourceUnitId: string;
+  extra: unknown;
+}): Promise<NotificationRow> {
+  const [notification] = await db
+    .insert(notifications)
+    .values(input)
+    .returning();
+  if (!notification) throw new Error("Notification insert returned no row");
+  return notification;
+}
+
+export async function findSystemEmailDuplicate(input: {
+  recipientId: string;
+  kind: string;
+  sourceUnitId: string;
+  actorId: string;
+  since: Date;
+}): Promise<NotificationRow | null> {
+  const [row] = await db
+    .select()
+    .from(notifications)
+    .where(
+      and(
+        eq(notifications.recipientId, input.recipientId),
+        eq(notifications.kind, input.kind),
+        eq(notifications.sourceUnitId, input.sourceUnitId),
+        eq(notifications.actorId, input.actorId),
+        sql`${notifications.createdAt} >= ${input.since}`,
+        sql`${notifications.extra}->>'kind' = ${input.kind}`,
+        sql`${notifications.extra}->'payload'->>'actorUserId' = ${input.actorId}`,
+        sql`${notifications.extra}->'payload'->>'sourceUnitId' = ${input.sourceUnitId}`,
+      ),
+    )
+    .orderBy(desc(notifications.createdAt))
+    .limit(1);
+
+  return row ?? null;
+}
+
+export async function refreshNotification(input: {
+  id: string;
+  createdAt: Date;
+  extra: unknown;
+}): Promise<NotificationRow> {
+  const [row] = await db
+    .update(notifications)
+    .set({
+      createdAt: input.createdAt,
+      read: false,
+      readAt: null,
+      extra: input.extra,
+    })
+    .where(eq(notifications.id, input.id))
+    .returning();
+  if (!row) throw new Error("Notification refresh returned no row");
+  return row;
+}
+
+export async function getNotifications(
+  recipientId: string,
+  page: number,
+  limit: number,
+) {
+  const offset = (page - 1) * limit;
+
+  const [aggregated, individual] = await Promise.all([
+    loadAggregatedRows(recipientId),
+    loadIndividualRows(recipientId),
+  ]);
 
   const items = mapToAggregatedItems(aggregated, individual);
 
@@ -133,30 +228,10 @@ export async function getNotifications(
 }
 
 export async function getUnreadCount(recipientId: string): Promise<number> {
-  const aggregatedResult = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
-    `
-    SELECT count(*) AS count FROM (
-      SELECT 1
-      FROM "Notification"
-      WHERE "recipientId" = $1::uuid
-        AND kind = ANY($2::text[])
-        AND read = false
-      GROUP BY kind, "sourceUnitId"
-    ) sub
-    `,
-    recipientId,
-    AGGREGATABLE_KINDS,
-  );
-
-  const individualCount = await prisma.notification.count({
-    where: {
-      recipientId,
-      kind: { in: NON_AGGREGATABLE_KINDS },
-      read: false,
-    },
-  });
-
-  const aggregatedCount = Number(aggregatedResult[0]?.count ?? 0);
+  const [aggregatedCount, individualCount] = await Promise.all([
+    countAggregatedUnread(recipientId),
+    countIndividualUnread(recipientId),
+  ]);
   return aggregatedCount + individualCount;
 }
 
@@ -165,34 +240,43 @@ export async function markAsRead(
   kind: string,
   sourceUnitId: string,
 ) {
-  await prisma.notification.updateMany({
-    where: {
-      recipientId,
-      kind,
-      sourceUnitId,
-      read: false,
-    },
-    data: { read: true, readAt: new Date() },
-  });
+  await db
+    .update(notifications)
+    .set({ read: true, readAt: new Date() })
+    .where(
+      and(
+        eq(notifications.recipientId, recipientId),
+        eq(notifications.kind, kind),
+        eq(notifications.sourceUnitId, sourceUnitId),
+        eq(notifications.read, false),
+      ),
+    );
 }
 
 export async function markAllAsRead(recipientId: string) {
-  await prisma.notification.updateMany({
-    where: { recipientId, read: false },
-    data: { read: true, readAt: new Date() },
-  });
+  await db
+    .update(notifications)
+    .set({ read: true, readAt: new Date() })
+    .where(
+      and(
+        eq(notifications.recipientId, recipientId),
+        eq(notifications.read, false),
+      ),
+    );
 }
 
 export async function deleteNotification(
   notificationId: string,
   userId: string,
 ): Promise<boolean> {
-  const notification = await prisma.notification.findUnique({
-    where: { id: notificationId },
-  });
+  const [notification] = await db
+    .select()
+    .from(notifications)
+    .where(eq(notifications.id, notificationId))
+    .limit(1);
   if (!notification || notification.recipientId !== userId) return false;
 
-  await prisma.notification.delete({ where: { id: notificationId } });
+  await db.delete(notifications).where(eq(notifications.id, notificationId));
   return true;
 }
 

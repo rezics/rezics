@@ -1,4 +1,4 @@
 export * from "./options";
-export * from "./prisma-adapter";
+export * from "./storage-adapter";
 export * from "./routes";
 export * from "./service";

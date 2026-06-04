@@ -43,9 +43,7 @@ export const env = createEnv({
     /** OTLP HTTP traces endpoint. When omitted, telemetry export is disabled. */
     OTEL_EXPORTER_OTLP_ENDPOINT: v.optional(v.string()),
 
-    /**
-     * PostgreSQL connection string for Prisma data persistence. Required at startup.
-     */
+    /** PostgreSQL connection string for auth data persistence. */
     DATABASE_URL: v.string(),
 
     /*

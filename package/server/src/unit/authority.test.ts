@@ -16,21 +16,13 @@ function actor(
   return { userId, permission: { role } } as RezicsSessionClaims;
 }
 
-function prismaStub(input?: {
+function lookupStub(input?: {
   collaboratorRole?: UnitAuthorityRoleKey | string | null;
   locks?: string[];
 }) {
   return {
-    unitCollaborator: {
-      findUnique: mock(async () =>
-        input?.collaboratorRole ? { roleKey: input.collaboratorRole } : null,
-      ),
-    },
-    unitFieldLock: {
-      findMany: mock(async () =>
-        (input?.locks ?? []).map((path) => ({ path })),
-      ),
-    },
+    findCollaboratorRole: mock(async () => input?.collaboratorRole ?? null),
+    listFieldLockPaths: mock(async () => input?.locks ?? []),
   };
 }
 
@@ -40,32 +32,32 @@ const unit = { id: "unit-1", userId: "owner-1" };
 
 describe("canEditUnitFields", () => {
   test("type alone does not grant community edit on non-collaborative surfaces", async () => {
-    const db = prismaStub();
+    const lookup = lookupStub();
 
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
       ["translations.en.title"],
       notCollaborative,
-      { prismaClient: db as never, verifyAdmin: async () => false },
+      { lookup, verifyAdmin: async () => false },
     );
 
     expect(decision).toMatchObject({
       allowed: false,
       code: "SURFACE_NOT_COLLABORATIVE",
     });
-    expect(db.unitFieldLock.findMany).not.toHaveBeenCalled();
+    expect(lookup.listFieldLockPaths).not.toHaveBeenCalled();
   });
 
   test("locked fields block rezics-wiki-owned community edits", async () => {
-    const db = prismaStub({ locks: ["translations.en.title"] });
+    const lookup = lookupStub({ locks: ["translations.en.title"] });
 
     const decision = await canEditUnitFields(
       actor("user-2"),
       { id: "unit-1", userId: "rezics-wiki-user" },
       ["translations.en.title"],
       collaborative,
-      { prismaClient: db as never, verifyAdmin: async () => false },
+      { lookup, verifyAdmin: async () => false },
     );
 
     expect(decision).toMatchObject({
@@ -78,14 +70,14 @@ describe("canEditUnitFields", () => {
   });
 
   test("whole-object lock blocks any community field edit", async () => {
-    const db = prismaStub({ locks: ["*"] });
+    const lookup = lookupStub({ locks: ["*"] });
 
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
       ["post.content.main.source"],
       collaborative,
-      { prismaClient: db as never, verifyAdmin: async () => false },
+      { lookup, verifyAdmin: async () => false },
     );
 
     expect(decision).toMatchObject({
@@ -98,25 +90,25 @@ describe("canEditUnitFields", () => {
   });
 
   test("primary owner bypasses locks", async () => {
-    const db = prismaStub({ locks: ["*"] });
+    const lookup = lookupStub({ locks: ["*"] });
 
     const decision = await canEditUnitFields(
       actor("owner-1"),
       unit,
       ["translations.en.title"],
       collaborative,
-      { prismaClient: db as never, verifyAdmin: async () => false },
+      { lookup, verifyAdmin: async () => false },
     );
 
     expect(decision).toMatchObject({
       allowed: true,
       reason: "primary-owner",
     });
-    expect(db.unitFieldLock.findMany).not.toHaveBeenCalled();
+    expect(lookup.listFieldLockPaths).not.toHaveBeenCalled();
   });
 
   test("maintainer collaborator bypasses locks", async () => {
-    const db = prismaStub({
+    const lookup = lookupStub({
       collaboratorRole: UnitAuthorityRoleKey.MAINTAINER,
       locks: ["*"],
     });
@@ -126,7 +118,7 @@ describe("canEditUnitFields", () => {
       unit,
       ["translations.en.title"],
       collaborative,
-      { prismaClient: db as never, verifyAdmin: async () => false },
+      { lookup, verifyAdmin: async () => false },
     );
 
     expect(decision).toMatchObject({
@@ -134,18 +126,18 @@ describe("canEditUnitFields", () => {
       reason: "collaborator",
       collaboratorRole: UnitAuthorityRoleKey.MAINTAINER,
     });
-    expect(db.unitFieldLock.findMany).not.toHaveBeenCalled();
+    expect(lookup.listFieldLockPaths).not.toHaveBeenCalled();
   });
 
   test("admin override bypasses locks and requests audit metadata", async () => {
-    const db = prismaStub({ locks: ["*"] });
+    const lookup = lookupStub({ locks: ["*"] });
 
     const decision = await canEditUnitFields(
       actor("admin-1", "ADMIN"),
       unit,
       ["translations.en.title"],
       collaborative,
-      { prismaClient: db as never, verifyAdmin: async () => false },
+      { lookup, verifyAdmin: async () => false },
     );
 
     expect(decision).toMatchObject({
@@ -153,44 +145,44 @@ describe("canEditUnitFields", () => {
       reason: "admin-override",
       auditOverride: true,
     });
-    expect(db.unitFieldLock.findMany).not.toHaveBeenCalled();
+    expect(lookup.listFieldLockPaths).not.toHaveBeenCalled();
   });
 
   test("ordinary post-style surfaces short-circuit before lock lookup", async () => {
-    const db = prismaStub({ locks: ["*"] });
+    const lookup = lookupStub({ locks: ["*"] });
 
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
       ["post.content.main.source"],
       notCollaborative,
-      { prismaClient: db as never, verifyAdmin: async () => false },
+      { lookup, verifyAdmin: async () => false },
     );
 
     expect(decision.allowed).toBe(false);
-    expect(db.unitFieldLock.findMany).not.toHaveBeenCalled();
+    expect(lookup.listFieldLockPaths).not.toHaveBeenCalled();
   });
 
   test("community edit is allowed for collaborative unlocked fields", async () => {
-    const db = prismaStub();
+    const lookup = lookupStub();
 
     const decision = await canEditUnitFields(
       actor("user-2"),
       unit,
       ["translations.en.title"],
       collaborative,
-      { prismaClient: db as never, verifyAdmin: async () => false },
+      { lookup, verifyAdmin: async () => false },
     );
 
     expect(decision).toMatchObject({
       allowed: true,
       reason: "community-edit",
     });
-    expect(db.unitFieldLock.findMany).toHaveBeenCalledTimes(1);
+    expect(lookup.listFieldLockPaths).toHaveBeenCalledTimes(1);
   });
 
   test("assert helper throws typed authority errors with blocked field keys", async () => {
-    const db = prismaStub({ locks: ["post.content.main.source"] });
+    const lookup = lookupStub({ locks: ["post.content.main.source"] });
 
     await expect(
       assertCanEditUnitFields(
@@ -198,7 +190,7 @@ describe("canEditUnitFields", () => {
         unit,
         ["post.content.main.source"],
         collaborative,
-        { prismaClient: db as never, verifyAdmin: async () => false },
+        { lookup, verifyAdmin: async () => false },
       ),
     ).rejects.toMatchObject({
       name: "UnitAuthorityError",

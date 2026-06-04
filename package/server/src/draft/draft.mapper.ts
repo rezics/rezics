@@ -1,6 +1,6 @@
 import type { DraftKind, DraftMetadata } from "@rezics/contract";
 
-/** Map a Prisma `PostKind` to the cross-type `DraftKind`, or null if the kind
+/** Map a stored post kind to the cross-type `DraftKind`, or null if the kind
  * does not participate in drafts (e.g. EXCERPT, CHAPTER). */
 export function postKindToDraftKind(kind: string | null): DraftKind | null {
   switch (kind) {

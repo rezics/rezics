@@ -1,24 +1,21 @@
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@rezics/server/prisma/generated/client";
+import { createServerDb } from "@rezics/server/db/factory";
+import {
+  createServerMaintenanceRepository,
+  type ServerMaintenanceRepository,
+} from "@rezics/server/db/maintenance.repository";
 
-export interface ServerPrismaRuntime {
-  prisma: PrismaClient;
+export interface ServerMaintenanceRuntime {
+  maintenance: ServerMaintenanceRepository;
   disconnect(): Promise<void>;
 }
 
-export function createServerPrismaRuntime(options: {
+export function createServerMaintenanceRuntime(options: {
   serverDatabaseUrl: string;
-}): ServerPrismaRuntime {
-  const adapter = new PrismaPg({
-    connectionString: options.serverDatabaseUrl,
-    max: 5,
-    idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 2_000,
-  });
-  const prisma = new PrismaClient({ adapter });
+}): ServerMaintenanceRuntime {
+  const serverDb = createServerDb(options.serverDatabaseUrl, 5);
 
   return {
-    prisma,
-    disconnect: () => prisma.$disconnect(),
+    maintenance: createServerMaintenanceRepository(serverDb.db),
+    disconnect: () => serverDb.disconnect(),
   };
 }

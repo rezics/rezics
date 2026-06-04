@@ -1,14 +1,11 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
+import type { HistoryProxyRepository } from "./history-proxy.api";
 
-mock.module("@/env", () => ({
+mock.module("../env", () => ({
   env: { HISTORY_BASE_URL: "http://history.example" },
 }));
 
-mock.module("@/middleware", () => ({
+mock.module("../middleware", () => ({
   isAdminRole: (identity: any) => identity?.permission?.role === "ADMIN",
   tryResolveIdentity: async (authorization?: string) =>
     authorization === "Bearer owner"
@@ -16,24 +13,24 @@ mock.module("@/middleware", () => ({
       : null,
 }));
 
-const unitFindUnique = mock(async ({ where }: any) => {
-  if (where.id === "unit-public") {
+const findUnit = mock(async (unitId: string) => {
+  if (unitId === "unit-public") {
     return {
       id: "unit-public",
       userId: "owner-1",
-      visibility: "PUBLIC",
-      status: "PUBLISHED",
+      visibility: "PUBLIC" as const,
+      status: "PUBLISHED" as const,
     };
   }
-  if (where.id === "unit-private") {
+  if (unitId === "unit-private") {
     return {
       id: "unit-private",
       userId: "owner-1",
-      visibility: "PRIVATE",
-      status: "PUBLISHED",
+      visibility: "PRIVATE" as const,
+      status: "PUBLISHED" as const,
     };
   }
-  return null;
+  return undefined;
 });
 
 const fetchMock = mock(
@@ -44,20 +41,20 @@ const fetchMock = mock(
     }),
 );
 
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  unit: { findUnique: unitFindUnique },
-});
+function repository(): HistoryProxyRepository {
+  return { findUnit };
+}
 
 describe("historyProxyApi", () => {
   beforeEach(() => {
-    unitFindUnique.mockClear();
+    findUnit.mockClear();
     fetchMock.mockClear();
     globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
   test("allows public Unit history through the app-facing proxy", async () => {
-    const { historyProxyApi } = await import("./history-proxy.api");
+    const { createHistoryProxyApi } = await import("./history-proxy.api");
+    const historyProxyApi = createHistoryProxyApi(repository());
     const response = await historyProxyApi.handle(
       new Request(
         "http://localhost/history/unit/unit-public/revisions?limit=10&includeContent=true",
@@ -71,7 +68,8 @@ describe("historyProxyApi", () => {
   });
 
   test("blocks private Unit history for non-owners before proxying", async () => {
-    const { historyProxyApi } = await import("./history-proxy.api");
+    const { createHistoryProxyApi } = await import("./history-proxy.api");
+    const historyProxyApi = createHistoryProxyApi(repository());
     const response = await historyProxyApi.handle(
       new Request("http://localhost/history/unit/unit-private/revisions"),
     );
@@ -81,7 +79,8 @@ describe("historyProxyApi", () => {
   });
 
   test("allows private Unit history for the owner", async () => {
-    const { historyProxyApi } = await import("./history-proxy.api");
+    const { createHistoryProxyApi } = await import("./history-proxy.api");
+    const historyProxyApi = createHistoryProxyApi(repository());
     const response = await historyProxyApi.handle(
       new Request("http://localhost/history/unit/unit-private/revisions", {
         headers: { authorization: "Bearer owner" },

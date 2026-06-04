@@ -3,7 +3,7 @@ import {
   type SourceSiteDTO,
   type SourceSiteRefRule,
 } from "@rezics/contract";
-import { mapEntityToDTO } from "@/entity/entity.mapper";
+import { mapEntityToDTO } from "../entity/entity.mapper";
 import type { SourceSiteWithRelations } from "./source-site.types";
 
 export function mapSourceSiteToDTO(

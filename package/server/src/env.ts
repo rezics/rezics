@@ -16,7 +16,7 @@ export const env = createEnv({
     ),
 
     /**
-     * PostgreSQL connection string used by Prisma for the main server database.
+     * PostgreSQL connection string used for the main server database.
      * This value is required at startup.
      */
     DATABASE_URL: v.string(),

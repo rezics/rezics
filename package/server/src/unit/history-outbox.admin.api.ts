@@ -1,6 +1,12 @@
 import { Elysia, t } from "elysia";
-import { prisma } from "#/prisma/client";
-import { authMacro, verifyAdminFromDb } from "@/middleware/permission";
+import { and, eq } from "drizzle-orm";
+import { historyOutbox } from "../db/schema";
+import { authMacro, verifyAdminFromDb } from "../middleware/permission";
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 async function assertAdmin(identity: {
   userId: string;
@@ -26,21 +32,26 @@ export const historyOutboxAdminApi = new Elysia({
         return status(403, "Forbidden: Admin role required");
       }
 
-      const result = await prisma.historyOutbox.updateMany({
-        where: {
-          status: "failed",
-          ...(body.unitId ? { unitId: body.unitId } : {}),
-        },
-        data: {
+      const db = await getServerDb();
+      const result = await db
+        .update(historyOutbox)
+        .set({
           status: "pending",
           nextAttemptAt: new Date(),
           processedById: null,
           processedAt: null,
           lastError: null,
-        },
-      });
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(historyOutbox.status, "failed"),
+            body.unitId ? eq(historyOutbox.unitId, body.unitId) : undefined,
+          ),
+        )
+        .returning({ id: historyOutbox.id });
 
-      return { retried: result.count };
+      return { retried: result.length };
     },
     {
       requireLogin: true,

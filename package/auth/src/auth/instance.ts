@@ -1,8 +1,10 @@
 import { oauthProvider } from "@better-auth/oauth-provider";
-import { prismaAdapter } from "@better-auth/prisma-adapter";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
 import { admin, genericOAuth, jwt } from "better-auth/plugins";
 import { emailOTP } from "better-auth/plugins/email-otp";
+import { db } from "../db/client";
+import { betterAuthSchema } from "../db/schema";
 import { env } from "../env";
 import { createAuthNotificationService } from "../notification";
 import {
@@ -14,7 +16,6 @@ import {
   getAuthJwtTtlSeconds,
 } from "../session/jwt/export";
 import { ac, authRoles } from "./permissions";
-import { prisma } from "./prisma";
 import {
   buildSocialProviderOptions,
   getTelegramGenericOAuthConfig,
@@ -33,8 +34,10 @@ export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   basePath: "/api/auth",
   secret: env.BETTER_AUTH_SECRET,
-  database: prismaAdapter(prisma, {
-    provider: "postgresql",
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: betterAuthSchema,
+    camelCase: true,
   }),
   advanced: {
     database: {

@@ -1,31 +1,77 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-
-process.env.NODE_ENV = "test";
-process.env.DATABASE_URL ??=
-  "postgresql://postgres:postgres@localhost:5432/rezics_book";
-
-installPrismaClientMock();
+import type { PollRepository } from "./poll.service";
 
 const { PollService, PollError } = await import("./poll.service");
 const { mapPollResultsToDTO, isPollClosed } = await import("./poll.mapper");
 
-const service = new PollService();
-
-/** Route every $transaction callback at the shared prismaMock as its tx. */
-function useInlineTransaction() {
-  prismaMock.$transaction = mock(async (fn: any) => fn(prismaMock));
-}
+type PollTx = Parameters<Parameters<PollRepository["withTransaction"]>[0]>[0];
 
 const HOUR = 1000 * 60 * 60;
 
-beforeEach(() => {
-  for (const key of Object.keys(prismaMock)) delete prismaMock[key];
-  useInlineTransaction();
-});
+function makePoll(overrides: Record<string, unknown> = {}) {
+  return {
+    unitId: "poll-1",
+    voteMode: "SINGLE",
+    resultVisibility: "LIVE",
+    anonymous: false,
+    closesAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    usageCount: 0,
+    options: [],
+    unit: { translations: [] },
+    ...overrides,
+  } as any;
+}
+
+function makeOption(optionId = "A") {
+  return {
+    pollUnitId: "poll-1",
+    optionId,
+    position: optionId.toLowerCase(),
+    voteCount: 0,
+    label: optionId,
+    unitId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as any;
+}
+
+function createHarness(
+  input: {
+    poll?: any;
+    option?: any;
+    vote?: any;
+    votes?: { optionId: string; realmUnitId: string | null }[];
+  } = {},
+) {
+  const poll = input.poll ?? makePoll();
+  const tx: PollTx = {
+    findPoll: mock(async () => poll),
+    findPollRow: mock(async () => poll),
+    updateVoteMode: mock(async () => {}),
+    countVotes: mock(async () => 0),
+    findOption: mock(async () => input.option ?? makeOption()),
+    findVote: mock(async () => input.vote),
+    findAnyVoteForUser: mock(async () => input.vote),
+    createVote: mock(async () => {}),
+    deleteVote: mock(async () => {}),
+    incrementOptionVoteCount: mock(async () => {}),
+  };
+
+  const repository: PollRepository = {
+    createPoll: mock(async (data) => makePoll({ unitId: "poll-1", data })),
+    findPoll: mock(async () => poll),
+    findVotesForUser: mock(async () => input.votes ?? []),
+    withTransaction: mock(async (callback) => callback(tx)),
+  };
+
+  return { service: new PollService(repository), repository, tx };
+}
 
 describe("PollService.createPoll — option validation (5.3)", () => {
   test("rejects an option with neither label nor unitId", async () => {
+    const { service } = createHarness();
     await expect(
       service.createPoll("user-1", {
         options: [{ label: "A" }, {}],
@@ -34,6 +80,7 @@ describe("PollService.createPoll — option validation (5.3)", () => {
   });
 
   test("rejects an option with both label and unitId", async () => {
+    const { service } = createHarness();
     await expect(
       service.createPoll("user-1", {
         options: [{ label: "A" }, { label: "B", unitId: "unit-x" }],
@@ -42,111 +89,76 @@ describe("PollService.createPoll — option validation (5.3)", () => {
   });
 
   test("rejects fewer than two options", async () => {
+    const { service } = createHarness();
     await expect(
       service.createPoll("user-1", { options: [{ label: "only" }] } as any),
     ).rejects.toBeInstanceOf(PollError);
   });
 
   test("creates poll + options when each option is valid (xor holds)", async () => {
-    const createPoll = mock(async (_args?: any) => ({}));
-    prismaMock.unit = { create: mock(async () => ({ id: "poll-1" })) };
-    prismaMock.unitTranslation = {
-      create: mock(async (args: any) => args.data),
-    };
-    prismaMock.poll = {
-      create: createPoll,
-      findUniqueOrThrow: mock(async () => ({ unitId: "poll-1", options: [] })),
-    };
+    const { service, repository } = createHarness();
 
     await service.createPoll("user-1", {
-      title: "Poll title",
+      title: " Poll title ",
       options: [{ label: "A" }, { unitId: "unit-x" }],
     } as any);
 
-    const data = createPoll.mock.calls[0]?.[0] as any;
-    expect(data.data.options.create).toHaveLength(2);
-    expect(data.data.options.create[0]).toMatchObject({
-      label: "A",
-      unitId: null,
+    expect(repository.createPoll).toHaveBeenCalledTimes(1);
+    const data = (repository.createPoll as any).mock.calls[0]?.[0] as any;
+    expect(data).toMatchObject({
+      userId: "user-1",
+      title: "Poll title",
+      voteMode: "SINGLE",
+      resultVisibility: "LIVE",
+      anonymous: false,
     });
-    expect(data.data.options.create[1]).toMatchObject({
-      label: null,
-      unitId: "unit-x",
-    });
+    expect(data.options).toHaveLength(2);
+    expect(data.options[0]).toMatchObject({ label: "A", unitId: null });
+    expect(data.options[1]).toMatchObject({ label: null, unitId: "unit-x" });
   });
 });
 
 describe("PollService.castVote — single-choice (5.1)", () => {
   test("changing vote moves the row and adjusts both tallies", async () => {
-    const deleteVote = mock(async (_args?: any) => ({}));
-    const createVote = mock(async (_args?: any) => ({}));
-    const updateOption = mock(async (_args?: any) => ({}));
-
-    prismaMock.poll = {
-      findUnique: mock(async () => ({ voteMode: "SINGLE", closesAt: null })),
-    };
-    prismaMock.pollOption = {
-      findUnique: mock(async () => ({ pollUnitId: "poll-1", optionId: "B" })),
-      update: updateOption,
-    };
-    prismaMock.pollVote = {
-      findFirst: mock(async () => ({
-        pollUnitId: "poll-1",
-        userId: "user-1",
-        optionId: "A",
-      })),
-      delete: deleteVote,
-      create: createVote,
-    };
+    const { service, tx } = createHarness({
+      poll: makePoll({ voteMode: "SINGLE" }),
+      option: makeOption("B"),
+      vote: { pollUnitId: "poll-1", userId: "user-1", optionId: "A" },
+    });
 
     await service.castVote("user-1", "poll-1", "B");
 
     // Old vote row removed, new one created — exactly one remains.
-    expect(deleteVote).toHaveBeenCalledTimes(1);
-    expect(createVote).toHaveBeenCalledTimes(1);
-    expect((createVote.mock.calls[0]?.[0] as any).data).toMatchObject({
+    expect(tx.deleteVote).toHaveBeenCalledWith({
+      pollUnitId: "poll-1",
+      userId: "user-1",
+      optionId: "A",
+    });
+    expect(tx.createVote).toHaveBeenCalledWith({
+      pollUnitId: "poll-1",
+      userId: "user-1",
       optionId: "B",
       voteMode: "SINGLE",
+      realmUnitId: null,
     });
 
     // A decremented, B incremented.
-    const updates = updateOption.mock.calls.map((c) => c[0] as any);
-    expect(updates).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          where: {
-            pollUnitId_optionId: { pollUnitId: "poll-1", optionId: "A" },
-          },
-          data: { voteCount: { decrement: 1 } },
-        }),
-        expect.objectContaining({
-          where: {
-            pollUnitId_optionId: { pollUnitId: "poll-1", optionId: "B" },
-          },
-          data: { voteCount: { increment: 1 } },
-        }),
-      ]),
-    );
+    expect((tx.incrementOptionVoteCount as any).mock.calls).toEqual([
+      ["poll-1", "A", -1],
+      ["poll-1", "B", 1],
+    ]);
   });
 
   test("records realm context on a new single-choice vote", async () => {
-    const createVote = mock(async (_args?: any) => ({}));
-
-    prismaMock.poll = {
-      findUnique: mock(async () => ({ voteMode: "SINGLE", closesAt: null })),
-    };
-    prismaMock.pollOption = {
-      findUnique: mock(async () => ({ pollUnitId: "poll-1", optionId: "A" })),
-      update: mock(async (_args?: any) => ({})),
-    };
-    prismaMock.pollVote = {
-      findFirst: mock(async () => null),
-      create: createVote,
-    };
+    const { service, tx } = createHarness({
+      poll: makePoll({ voteMode: "SINGLE" }),
+      option: makeOption("A"),
+      vote: undefined,
+    });
 
     await service.castVote("user-1", "poll-1", "A", "realm-1");
 
-    expect((createVote.mock.calls[0]?.[0] as any).data).toMatchObject({
+    expect(tx.createVote).toHaveBeenCalledWith({
       pollUnitId: "poll-1",
       userId: "user-1",
       optionId: "A",
@@ -156,228 +168,157 @@ describe("PollService.castVote — single-choice (5.1)", () => {
   });
 
   test("re-casting the same option is a no-op (no duplicate row)", async () => {
-    const deleteVote = mock(async (_args?: any) => ({}));
-    const createVote = mock(async (_args?: any) => ({}));
-    const updateOption = mock(async (_args?: any) => ({}));
-
-    prismaMock.poll = {
-      findUnique: mock(async () => ({ voteMode: "SINGLE", closesAt: null })),
-    };
-    prismaMock.pollOption = {
-      findUnique: mock(async () => ({ pollUnitId: "poll-1", optionId: "A" })),
-      update: updateOption,
-    };
-    prismaMock.pollVote = {
-      findFirst: mock(async () => ({
-        pollUnitId: "poll-1",
-        userId: "user-1",
-        optionId: "A",
-      })),
-      delete: deleteVote,
-      create: createVote,
-    };
+    const { service, tx } = createHarness({
+      poll: makePoll({ voteMode: "SINGLE" }),
+      option: makeOption("A"),
+      vote: { pollUnitId: "poll-1", userId: "user-1", optionId: "A" },
+    });
 
     await service.castVote("user-1", "poll-1", "A");
 
-    expect(deleteVote).not.toHaveBeenCalled();
-    expect(createVote).not.toHaveBeenCalled();
-    expect(updateOption).not.toHaveBeenCalled();
+    expect(tx.deleteVote).not.toHaveBeenCalled();
+    expect(tx.createVote).not.toHaveBeenCalled();
+    expect(tx.incrementOptionVoteCount).not.toHaveBeenCalled();
   });
 });
 
 describe("PollService.castVote — multi-choice (5.2)", () => {
   test("a user can hold several option votes; new rows are keyed per option", async () => {
-    const createVote = mock(async (_args?: any) => ({}));
-    const updateOption = mock(async (_args?: any) => ({}));
-
-    prismaMock.poll = {
-      findUnique: mock(async () => ({ voteMode: "MULTI", closesAt: null })),
-    };
-    prismaMock.pollOption = {
-      findUnique: mock(async () => ({ pollUnitId: "poll-1", optionId: "C" })),
-      update: updateOption,
-    };
-    prismaMock.pollVote = {
-      findUnique: mock(async () => null), // no existing vote for this option
-      create: createVote,
-    };
+    const { service, tx } = createHarness({
+      poll: makePoll({ voteMode: "MULTI" }),
+      option: makeOption("C"),
+      vote: undefined,
+    });
 
     await service.castVote("user-1", "poll-1", "C");
 
-    expect((createVote.mock.calls[0]?.[0] as any).data).toMatchObject({
+    expect(tx.createVote).toHaveBeenCalledWith({
       pollUnitId: "poll-1",
       userId: "user-1",
       optionId: "C",
       voteMode: "MULTI",
+      realmUnitId: null,
     });
-    expect(updateOption).toHaveBeenCalledWith({
-      where: { pollUnitId_optionId: { pollUnitId: "poll-1", optionId: "C" } },
-      data: { voteCount: { increment: 1 } },
-    });
+    expect(tx.incrementOptionVoteCount).toHaveBeenCalledWith("poll-1", "C", 1);
   });
 
   test("global option uniqueness checks ignore realm context for now", async () => {
-    const createVote = mock(async (_args?: any) => ({}));
-    const updateOption = mock(async (_args?: any) => ({}));
-    const findUniqueVote = mock(async () => ({
-      pollUnitId: "poll-1",
-      userId: "user-1",
-      optionId: "C",
-      realmUnitId: null,
-    }));
-
-    prismaMock.poll = {
-      findUnique: mock(async () => ({ voteMode: "MULTI", closesAt: null })),
-    };
-    prismaMock.pollOption = {
-      findUnique: mock(async () => ({ pollUnitId: "poll-1", optionId: "C" })),
-      update: updateOption,
-    };
-    prismaMock.pollVote = {
-      findUnique: findUniqueVote,
-      create: createVote,
-    };
+    const { service, tx } = createHarness({
+      poll: makePoll({ voteMode: "MULTI" }),
+      option: makeOption("C"),
+      vote: {
+        pollUnitId: "poll-1",
+        userId: "user-1",
+        optionId: "C",
+        realmUnitId: null,
+      },
+    });
 
     await service.castVote("user-1", "poll-1", "C", "realm-1");
 
-    expect(findUniqueVote).toHaveBeenCalledWith({
-      where: {
-        pollUnitId_userId_optionId: {
-          pollUnitId: "poll-1",
-          userId: "user-1",
-          optionId: "C",
-        },
-      },
+    expect(tx.findVote).toHaveBeenCalledWith({
+      pollUnitId: "poll-1",
+      userId: "user-1",
+      optionId: "C",
     });
-    expect(createVote).not.toHaveBeenCalled();
-    expect(updateOption).not.toHaveBeenCalled();
+    expect(tx.createVote).not.toHaveBeenCalled();
+    expect(tx.incrementOptionVoteCount).not.toHaveBeenCalled();
   });
 });
 
 describe("PollService.withdrawVote (5.6)", () => {
   test("decrements voteCount and removes the vote row", async () => {
-    const deleteVote = mock(async (_args?: any) => ({}));
-    const updateOption = mock(async (_args?: any) => ({}));
-
-    prismaMock.poll = {
-      findUnique: mock(async () => ({ voteMode: "SINGLE", closesAt: null })),
-    };
-    prismaMock.pollVote = {
-      findFirst: mock(async () => ({
-        pollUnitId: "poll-1",
-        userId: "user-1",
-        optionId: "A",
-      })),
-      delete: deleteVote,
-    };
-    prismaMock.pollOption = { update: updateOption };
+    const { service, tx } = createHarness({
+      poll: makePoll({ voteMode: "SINGLE" }),
+      vote: { pollUnitId: "poll-1", userId: "user-1", optionId: "A" },
+    });
 
     await service.withdrawVote("user-1", "poll-1");
 
-    expect(deleteVote).toHaveBeenCalledTimes(1);
-    expect(updateOption).toHaveBeenCalledWith({
-      where: { pollUnitId_optionId: { pollUnitId: "poll-1", optionId: "A" } },
-      data: { voteCount: { decrement: 1 } },
+    expect(tx.deleteVote).toHaveBeenCalledWith({
+      pollUnitId: "poll-1",
+      userId: "user-1",
+      optionId: "A",
     });
+    expect(tx.incrementOptionVoteCount).toHaveBeenCalledWith("poll-1", "A", -1);
   });
 
   test("multi-choice withdraw requires an option id", async () => {
-    prismaMock.poll = {
-      findUnique: mock(async () => ({ voteMode: "MULTI", closesAt: null })),
-    };
+    const { service } = createHarness({
+      poll: makePoll({ voteMode: "MULTI" }),
+    });
+
     await expect(
       service.withdrawVote("user-1", "poll-1"),
     ).rejects.toMatchObject({ code: "WITHDRAW_OPTION_REQUIRED" });
   });
 
   test("withdraw uses the current global vote identity regardless of context", async () => {
-    const deleteVote = mock(async (_args?: any) => ({}));
-
-    prismaMock.poll = {
-      findUnique: mock(async () => ({ voteMode: "SINGLE", closesAt: null })),
-    };
-    prismaMock.pollVote = {
-      findFirst: mock(async () => ({
+    const { service, tx } = createHarness({
+      poll: makePoll({ voteMode: "SINGLE" }),
+      vote: {
         pollUnitId: "poll-1",
         userId: "user-1",
         optionId: "A",
         realmUnitId: "realm-1",
-      })),
-      delete: deleteVote,
-    };
-    prismaMock.pollOption = { update: mock(async (_args?: any) => ({})) };
+      },
+    });
 
     await service.withdrawVote("user-1", "poll-1", undefined, "realm-2");
 
-    expect(deleteVote).toHaveBeenCalledWith({
-      where: {
-        pollUnitId_userId_optionId: {
-          pollUnitId: "poll-1",
-          userId: "user-1",
-          optionId: "A",
-        },
-      },
+    expect(tx.deleteVote).toHaveBeenCalledWith({
+      pollUnitId: "poll-1",
+      userId: "user-1",
+      optionId: "A",
     });
   });
 });
 
 describe("PollService — close behavior (5.4)", () => {
   test("voting is rejected after the poll is closed", async () => {
-    prismaMock.poll = {
-      findUnique: mock(async () => ({
+    const { service } = createHarness({
+      poll: makePoll({
         voteMode: "SINGLE",
         closesAt: new Date(Date.now() - HOUR),
-      })),
-    };
+      }),
+    });
+
     await expect(
       service.castVote("user-1", "poll-1", "A"),
     ).rejects.toMatchObject({ code: "POLL_CLOSED" });
   });
 
   test("AFTER_CLOSE results are hidden before close and revealed after", async () => {
-    prismaMock.pollVote = { findMany: mock(async () => []) };
-
-    // Still open → withheld.
-    prismaMock.poll = {
-      findUnique: mock(async () => ({
-        unitId: "poll-1",
-        voteMode: "SINGLE",
+    const openHarness = createHarness({
+      poll: makePoll({
         resultVisibility: "AFTER_CLOSE",
-        anonymous: false,
         closesAt: new Date(Date.now() + HOUR),
-        options: [],
-      })),
-    };
-    const open = await service.getResults("poll-1", { userId: "user-1" });
+      }),
+    });
+    const open = await openHarness.service.getResults("poll-1", {
+      userId: "user-1",
+    });
     expect(open.resultsVisible).toBe(false);
 
-    // Closed → revealed.
-    prismaMock.poll = {
-      findUnique: mock(async () => ({
-        unitId: "poll-1",
-        voteMode: "SINGLE",
+    const closedHarness = createHarness({
+      poll: makePoll({
         resultVisibility: "AFTER_CLOSE",
-        anonymous: false,
         closesAt: new Date(Date.now() - HOUR),
-        options: [],
-      })),
-    };
-    const closed = await service.getResults("poll-1", { userId: "user-1" });
+      }),
+    });
+    const closed = await closedHarness.service.getResults("poll-1", {
+      userId: "user-1",
+    });
     expect(closed.resultsVisible).toBe(true);
   });
 
   test("AFTER_CLOSE results are visible to a privileged caller before close", async () => {
-    prismaMock.pollVote = { findMany: mock(async () => []) };
-    prismaMock.poll = {
-      findUnique: mock(async () => ({
-        unitId: "poll-1",
-        voteMode: "SINGLE",
+    const { service } = createHarness({
+      poll: makePoll({
         resultVisibility: "AFTER_CLOSE",
-        anonymous: false,
         closesAt: new Date(Date.now() + HOUR),
-        options: [],
-      })),
-    };
+      }),
+    });
     const res = await service.getResults("poll-1", {
       userId: "owner",
       isPrivileged: true,
@@ -431,7 +372,7 @@ describe("poll.mapper — anonymity (5.5)", () => {
     expect(dto.options.map((o) => o.voteCount)).toEqual([3, 5]);
     expect(dto.myVote).toEqual(["B"]);
 
-    // No voter↔option mapping is serialized anywhere in the DTO.
+    // No voter->option mapping is serialized anywhere in the DTO.
     expect(JSON.stringify(dto)).not.toContain("userId");
   });
 

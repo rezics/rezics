@@ -9,20 +9,18 @@ import type {
   SubjectAttributionDTO,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { prisma } from "#/prisma/client";
-import { mapCreditAttributionToDTO } from "@/credit-attribution/credit-attribution.mapper";
-import { creditAttributionInclude } from "@/credit-attribution/types";
-import { serverJobProducer } from "@/job/job-boundary";
-import { mapSubjectAttributionToDTO } from "@/subject-attribution/subject-attribution.mapper";
-import { subjectAttributionInclude } from "@/subject-attribution/types";
+import { and, eq, inArray, notInArray } from "drizzle-orm";
+import { creditAttributionService } from "../credit-attribution/credit-attribution.service";
+import { CreditAttribution, Entity, SubjectAttribution } from "../db/schema";
+import { serverJobProducer } from "../job/job-boundary";
+import { subjectAttributionService } from "../subject-attribution/subject-attribution.service";
 import {
   assertCanEditCollaborativeMetadata,
+  createDrizzleCollaborativeMetadataTx,
   creditRolePatchPath,
   writeEditorialMetadataHistory,
-} from "@/unit/collaborative-metadata";
-import { AppError } from "@/utils/errors";
-
-type BatchTx = any;
+} from "../unit/collaborative-metadata";
+import { AppError } from "../utils/errors";
 
 type CreditEntry = {
   entityId: string;
@@ -145,26 +143,18 @@ function sameSubjectSet(
 }
 
 async function assertCreditEligibility(
-  tx: BatchTx,
+  repository: EntityAttributionBatchRepository,
   role: string,
   entries: readonly CreditEntry[],
 ): Promise<void> {
   if (entries.length === 0) return;
   const entityIds = entries.map((entry) => entry.entityId);
-  const entities = await tx.entity.findMany({
-    where: { unitId: { in: entityIds } },
-    select: { unitId: true, eligibleCreditRoles: true },
-  });
-  const byId = new Map<
-    string,
-    { unitId: string; eligibleCreditRoles: string[] }
-  >(
-    entities.map(
-      (entity: { unitId: string; eligibleCreditRoles: string[] }) => [
-        entity.unitId,
-        entity,
-      ],
-    ),
+  const entities = await repository.listCreditEligibility(entityIds);
+  const byId = new Map(
+    entities.map((entity) => [
+      entity.unitId,
+      { ...entity, eligibleCreditRoles: entity.eligibleCreditRoles ?? [] },
+    ]),
   );
 
   for (const entityId of entityIds) {
@@ -185,26 +175,18 @@ async function assertCreditEligibility(
 }
 
 async function assertSubjectEligibility(
-  tx: BatchTx,
+  repository: EntityAttributionBatchRepository,
   role: string,
   entries: readonly SubjectEntry[],
 ): Promise<void> {
   if (entries.length === 0) return;
   const entityIds = entries.map((entry) => entry.entityId);
-  const entities = await tx.entity.findMany({
-    where: { unitId: { in: entityIds } },
-    select: { unitId: true, eligibleSubjectRoles: true },
-  });
-  const byId = new Map<
-    string,
-    { unitId: string; eligibleSubjectRoles: string[] }
-  >(
-    entities.map(
-      (entity: { unitId: string; eligibleSubjectRoles: string[] }) => [
-        entity.unitId,
-        entity,
-      ],
-    ),
+  const entities = await repository.listSubjectEligibility(entityIds);
+  const byId = new Map(
+    entities.map((entity) => [
+      entity.unitId,
+      { ...entity, eligibleSubjectRoles: entity.eligibleSubjectRoles ?? [] },
+    ]),
   );
 
   for (const entityId of entityIds) {
@@ -225,48 +207,18 @@ async function assertSubjectEligibility(
 }
 
 async function reconcileCredits(
-  tx: BatchTx,
+  repository: EntityAttributionBatchRepository,
   unitId: string,
   op: EntityAttributionBatchSetCreditsOp,
 ): Promise<ReconcileResult> {
   const entries = normalizeCreditEntries(op);
-  await assertCreditEligibility(tx, op.role, entries);
+  await assertCreditEligibility(repository, op.role, entries);
 
-  const existing = await tx.creditAttribution.findMany({
-    where: { unitId, role: op.role },
-    select: { entityId: true, sortOrder: true },
-  });
+  const existing = await repository.listCreditRows(unitId, op.role);
   const changed = !sameCreditSet(existing, entries);
 
   if (changed) {
-    const keepEntityIds = entries.map((entry) => entry.entityId);
-    await tx.creditAttribution.deleteMany({
-      where: {
-        unitId,
-        role: op.role,
-        ...(keepEntityIds.length > 0
-          ? { entityId: { notIn: keepEntityIds } }
-          : {}),
-      },
-    });
-    for (const entry of entries) {
-      await tx.creditAttribution.upsert({
-        where: {
-          unitId_entityId_role: {
-            unitId,
-            entityId: entry.entityId,
-            role: op.role,
-          },
-        },
-        create: {
-          unitId,
-          entityId: entry.entityId,
-          role: op.role,
-          sortOrder: entry.sortOrder,
-        },
-        update: { sortOrder: entry.sortOrder },
-      });
-    }
+    await repository.replaceCredits(unitId, op.role, entries);
   }
 
   return {
@@ -277,49 +229,18 @@ async function reconcileCredits(
 }
 
 async function reconcileSubjects(
-  tx: BatchTx,
+  repository: EntityAttributionBatchRepository,
   unitId: string,
   op: EntityAttributionBatchSetSubjectsOp,
 ): Promise<ReconcileResult> {
   const entries = normalizeSubjectEntries(op);
-  await assertSubjectEligibility(tx, op.role, entries);
+  await assertSubjectEligibility(repository, op.role, entries);
 
-  const existing = await tx.subjectAttribution.findMany({
-    where: { unitId, role: op.role },
-    select: { entityId: true, sortOrder: true, weight: true },
-  });
+  const existing = await repository.listSubjectRows(unitId, op.role);
   const changed = !sameSubjectSet(existing, entries);
 
   if (changed) {
-    const keepEntityIds = entries.map((entry) => entry.entityId);
-    await tx.subjectAttribution.deleteMany({
-      where: {
-        unitId,
-        role: op.role,
-        ...(keepEntityIds.length > 0
-          ? { entityId: { notIn: keepEntityIds } }
-          : {}),
-      },
-    });
-    for (const entry of entries) {
-      await tx.subjectAttribution.upsert({
-        where: {
-          unitId_entityId_role: {
-            unitId,
-            entityId: entry.entityId,
-            role: op.role,
-          },
-        },
-        create: {
-          unitId,
-          entityId: entry.entityId,
-          role: op.role,
-          sortOrder: entry.sortOrder,
-          weight: entry.weight,
-        },
-        update: { sortOrder: entry.sortOrder, weight: entry.weight },
-      });
-    }
+    await repository.replaceSubjects(unitId, op.role, entries);
   }
 
   return {
@@ -340,33 +261,245 @@ function appendSparsePatch(
   patch[root] = rootPatch;
 }
 
-async function loadBatchResponseState(
-  tx: BatchTx,
-  unitId: string,
-): Promise<{
-  credits: CreditAttributionDTO[];
-  subjects: SubjectAttributionDTO[];
-}> {
-  const [credits, subjects] = await Promise.all([
-    tx.creditAttribution.findMany({
-      where: { unitId },
-      include: creditAttributionInclude,
-      orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
-    }),
-    tx.subjectAttribution.findMany({
-      where: { unitId },
-      include: subjectAttributionInclude,
-      orderBy: [{ role: "asc" }, { sortOrder: "asc" }],
-    }),
-  ]);
+type EligibilityRow = {
+  unitId: string;
+  eligibleCreditRoles?: string[];
+  eligibleSubjectRoles?: string[];
+};
+
+export interface EntityAttributionBatchRepository {
+  listCreditEligibility(
+    entityIds: readonly string[],
+  ): Promise<EligibilityRow[]>;
+  listSubjectEligibility(
+    entityIds: readonly string[],
+  ): Promise<EligibilityRow[]>;
+  listCreditRows(
+    unitId: string,
+    role: string,
+  ): Promise<Array<{ entityId: string; sortOrder: number }>>;
+  listSubjectRows(
+    unitId: string,
+    role: string,
+  ): Promise<
+    Array<{ entityId: string; sortOrder: number; weight: number | null }>
+  >;
+  replaceCredits(
+    unitId: string,
+    role: string,
+    entries: readonly CreditEntry[],
+  ): Promise<void>;
+  replaceSubjects(
+    unitId: string,
+    role: string,
+    entries: readonly SubjectEntry[],
+  ): Promise<void>;
+  assertCanEdit(
+    actor: RezicsSessionClaims,
+    unitId: string,
+    patchPaths: readonly string[],
+  ): Promise<void>;
+  writeHistory(input: {
+    unitId: string;
+    actorUserId: string;
+    patch: Record<string, unknown>;
+    message: string;
+  }): Promise<void>;
+  loadState(unitId: string): Promise<{
+    credits: CreditAttributionDTO[];
+    subjects: SubjectAttributionDTO[];
+  }>;
+  transaction<T>(
+    callback: (repository: EntityAttributionBatchRepository) => Promise<T>,
+  ): Promise<T>;
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleEntityAttributionBatchRepository(
+  tx?: any,
+): EntityAttributionBatchRepository {
+  async function database() {
+    return tx ?? (await getServerDb());
+  }
 
   return {
-    credits: credits.map(mapCreditAttributionToDTO),
-    subjects: subjects.map(mapSubjectAttributionToDTO),
+    async listCreditEligibility(entityIds) {
+      if (entityIds.length === 0) return [];
+      const db = await database();
+      return db
+        .select({
+          unitId: Entity.unitId,
+          eligibleCreditRoles: Entity.eligibleCreditRoles,
+        })
+        .from(Entity)
+        .where(inArray(Entity.unitId, [...entityIds]));
+    },
+
+    async listSubjectEligibility(entityIds) {
+      if (entityIds.length === 0) return [];
+      const db = await database();
+      return db
+        .select({
+          unitId: Entity.unitId,
+          eligibleSubjectRoles: Entity.eligibleSubjectRoles,
+        })
+        .from(Entity)
+        .where(inArray(Entity.unitId, [...entityIds]));
+    },
+
+    async listCreditRows(unitId, role) {
+      const db = await database();
+      return db
+        .select({
+          entityId: CreditAttribution.entityId,
+          sortOrder: CreditAttribution.sortOrder,
+        })
+        .from(CreditAttribution)
+        .where(
+          and(
+            eq(CreditAttribution.unitId, unitId),
+            eq(CreditAttribution.role, role),
+          ),
+        );
+    },
+
+    async listSubjectRows(unitId, role) {
+      const db = await database();
+      return db
+        .select({
+          entityId: SubjectAttribution.entityId,
+          sortOrder: SubjectAttribution.sortOrder,
+          weight: SubjectAttribution.weight,
+        })
+        .from(SubjectAttribution)
+        .where(
+          and(
+            eq(SubjectAttribution.unitId, unitId),
+            eq(SubjectAttribution.role, role),
+          ),
+        );
+    },
+
+    async replaceCredits(unitId, role, entries) {
+      const db = await database();
+      const keepEntityIds = entries.map((entry) => entry.entityId);
+      await db
+        .delete(CreditAttribution)
+        .where(
+          and(
+            eq(CreditAttribution.unitId, unitId),
+            eq(CreditAttribution.role, role),
+            keepEntityIds.length > 0
+              ? notInArray(CreditAttribution.entityId, keepEntityIds)
+              : undefined,
+          ),
+        );
+      for (const entry of entries) {
+        await db
+          .insert(CreditAttribution)
+          .values({
+            unitId,
+            entityId: entry.entityId,
+            role,
+            sortOrder: entry.sortOrder,
+          })
+          .onConflictDoUpdate({
+            target: [
+              CreditAttribution.unitId,
+              CreditAttribution.entityId,
+              CreditAttribution.role,
+            ],
+            set: { sortOrder: entry.sortOrder },
+          });
+      }
+    },
+
+    async replaceSubjects(unitId, role, entries) {
+      const db = await database();
+      const keepEntityIds = entries.map((entry) => entry.entityId);
+      await db
+        .delete(SubjectAttribution)
+        .where(
+          and(
+            eq(SubjectAttribution.unitId, unitId),
+            eq(SubjectAttribution.role, role),
+            keepEntityIds.length > 0
+              ? notInArray(SubjectAttribution.entityId, keepEntityIds)
+              : undefined,
+          ),
+        );
+      for (const entry of entries) {
+        await db
+          .insert(SubjectAttribution)
+          .values({
+            unitId,
+            entityId: entry.entityId,
+            role,
+            sortOrder: entry.sortOrder,
+            weight: entry.weight,
+          })
+          .onConflictDoUpdate({
+            target: [
+              SubjectAttribution.unitId,
+              SubjectAttribution.entityId,
+              SubjectAttribution.role,
+            ],
+            set: { sortOrder: entry.sortOrder, weight: entry.weight },
+          });
+      }
+    },
+
+    async assertCanEdit(actor, unitId, patchPaths) {
+      const db = await database();
+      await assertCanEditCollaborativeMetadata(
+        createDrizzleCollaborativeMetadataTx(db),
+        actor,
+        unitId,
+        patchPaths,
+      );
+    },
+
+    async writeHistory(input) {
+      const db = await database();
+      await writeEditorialMetadataHistory(
+        createDrizzleCollaborativeMetadataTx(db),
+        {
+          unitId: input.unitId,
+          actorUserId: input.actorUserId,
+          patch: input.patch,
+          message: input.message,
+        },
+      );
+    },
+
+    async loadState(unitId) {
+      const [credits, subjects] = await Promise.all([
+        creditAttributionService.listByUnit(unitId),
+        subjectAttributionService.listByUnit(unitId),
+      ]);
+      return { credits, subjects };
+    },
+
+    async transaction(callback) {
+      const db = await getServerDb();
+      return db.transaction((inner) =>
+        callback(createDrizzleEntityAttributionBatchRepository(inner)),
+      );
+    },
   };
 }
 
+const defaultRepository = createDrizzleEntityAttributionBatchRepository();
+
 export class EntityAttributionBatchService {
+  constructor(
+    private readonly repository: EntityAttributionBatchRepository = defaultRepository,
+  ) {}
+
   async batchUpdate(
     unitId: string,
     request: EntityAttributionBatchRequest,
@@ -382,14 +515,9 @@ export class EntityAttributionBatchService {
     let touchedCredits = false;
     let touchedSubjects = false;
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await this.repository.transaction(async (repository) => {
       if (patchPaths.length > 0) {
-        await assertCanEditCollaborativeMetadata(
-          tx as never,
-          actor,
-          unitId,
-          patchPaths,
-        );
+        await repository.assertCanEdit(actor, unitId, patchPaths);
       }
 
       const patch: Record<string, unknown> = {};
@@ -398,7 +526,7 @@ export class EntityAttributionBatchService {
       for (const op of request.ops) {
         if (op.op === "setCredits") {
           touchedCredits = true;
-          const opResult = await reconcileCredits(tx, unitId, op);
+          const opResult = await reconcileCredits(repository, unitId, op);
           if (opResult.changed) {
             changed = true;
             appendSparsePatch(patch, opResult);
@@ -407,7 +535,7 @@ export class EntityAttributionBatchService {
         }
 
         touchedSubjects = true;
-        const opResult = await reconcileSubjects(tx, unitId, op);
+        const opResult = await reconcileSubjects(repository, unitId, op);
         if (opResult.changed) {
           changed = true;
           appendSparsePatch(patch, opResult);
@@ -415,7 +543,7 @@ export class EntityAttributionBatchService {
       }
 
       if (changed) {
-        await writeEditorialMetadataHistory(tx as never, {
+        await repository.writeHistory({
           unitId,
           actorUserId: actor.userId,
           patch,
@@ -423,8 +551,7 @@ export class EntityAttributionBatchService {
         });
       }
 
-      const state = await loadBatchResponseState(tx, unitId);
-      return { changed, ...state };
+      return { changed };
     });
 
     if (result.changed) {
@@ -438,7 +565,8 @@ export class EntityAttributionBatchService {
       ]);
     }
 
-    return { unitId, ...result };
+    const state = await this.repository.loadState(unitId);
+    return { unitId, ...result, ...state };
   }
 }
 

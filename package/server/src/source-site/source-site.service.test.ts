@@ -1,8 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
 import { mapSourceSiteToDTO } from "./source-site.mapper";
-
-installPrismaClientMock();
+import {
+  SourceSiteService,
+  type SourceSiteRepository,
+} from "./source-site.service";
 
 const now = new Date("2026-05-25T00:00:00.000Z");
 const refRules = [
@@ -44,30 +45,24 @@ function sourceSiteRow(overrides: Record<string, any> = {}) {
   };
 }
 
-function freshMocks() {
+function freshRepository(): SourceSiteRepository {
   const row = sourceSiteRow();
-  Object.assign(prismaMock, {
-    entity: {
-      findUniqueOrThrow: mock(async () => ({ unitId: "source-site-1" })),
-    },
-    sourceSite: {
-      create: mock(async () => row),
-      update: mock(async () => row),
-      delete: mock(async () => row),
-      findUnique: mock(async () => row),
-      findMany: mock(async () => [row]),
-      count: mock(async () => 1),
-    },
-  });
-  return row;
+  return {
+    list: mock(async () => ({ rows: [row], total: 1 })),
+    getByEntityUnitId: mock(async () => row),
+    entityExists: mock(async () => true),
+    create: mock(async () => row),
+    update: mock(async () => row),
+    delete: mock(async () => undefined),
+  };
 }
 
 describe("SourceSiteService", () => {
   test("creates a SourceSite bound to an existing Entity Unit", async () => {
-    freshMocks();
-    const { sourceSiteService } = await import("./source-site.service");
+    const repository = freshRepository();
+    const service = new SourceSiteService(repository);
 
-    const row = await sourceSiteService.create({
+    const row = await service.create({
       entityUnitId: "source-site-1",
       key: "qidian",
       crawlSupport: "supported",
@@ -77,17 +72,14 @@ describe("SourceSiteService", () => {
     });
 
     expect(row.key).toBe("qidian");
-    expect(prismaMock.entity.findUniqueOrThrow).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { unitId: "source-site-1" } }),
-    );
+    expect(repository.entityExists).toHaveBeenCalledWith("source-site-1");
   });
 
   test("rejects duplicated display fields", async () => {
-    freshMocks();
-    const { sourceSiteService } = await import("./source-site.service");
+    const service = new SourceSiteService(freshRepository());
 
     await expect(
-      sourceSiteService.create({
+      service.create({
         entityUnitId: "source-site-1",
         key: "qidian",
         crawlSupport: "supported",

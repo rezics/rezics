@@ -1,195 +1,152 @@
-import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
-import {
-  installPrismaClientMock,
-  prismaMock,
-  UnitType,
-} from "@/test/prisma-client-mock";
+import type { ChapterRepository, ChapterService } from "./chapter.service";
+import type { ChapterPostWithRelations } from "./types";
 
-installPrismaClientMock();
-
-const mockPostUpdate = mock(async () => ({}));
-const mockUnitUpdate = mock(async () => ({}));
-const mockUnitFindUnique = mock(async () => ({ defaultLanguage: "en" }));
-const mockContentTranslationUpsert = mock(async (args: any) => args.create);
-const mockTranslationFindFirst = mock(
-  async (): Promise<{ language: string; extra: unknown } | null> => ({
-    language: "en",
+function chapterRow(
+  overrides: Partial<ChapterPostWithRelations> = {},
+): ChapterPostWithRelations {
+  const now = new Date("2026-01-01T00:00:00.000Z");
+  return {
+    unitId: "ch-1",
+    authorUserId: "author-1",
+    scoreEntryId: null,
+    kind: "CHAPTER",
+    replyCount: 0,
+    directReplyCount: 0,
+    lastReplyAt: null,
+    isLocked: false,
     extra: null,
-  }),
-);
-const mockTranslationUpdate = mock(async () => ({}));
-const mockTranslationCreate = mock(async () => ({}));
-const mockNodeUpdateMany = mock(async () => ({ count: 0 }));
-const mockNodeFindMany = mock(
-  async (_args: unknown): Promise<Array<{ ownerUnitId: string }>> => [],
-);
-const mockContainerUpdateMany = mock(async () => ({ count: 0 }));
-const mockFindBookForTarget = mock(async () => ({ type: UnitType.BOOK }));
-const mockPostFindUniqueOrThrow = mock(async () => ({
-  unitId: "ch-1",
-  authorUserId: "author-1",
-  unit: { defaultLanguage: "en", status: "PUBLISHED" },
-}));
+    createdAt: now,
+    updatedAt: now,
+    state: null,
+    variantUnitId: null,
+    unit: {
+      id: "ch-1",
+      type: "POST",
+      slug: null,
+      slugScope: "author-1",
+      userId: "author-1",
+      defaultLanguage: "en",
+      isLanguageNeutral: false,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      extra: null,
+      createdAt: now,
+      updatedAt: now,
+      publishedAt: null,
+      subscriberCount: 0,
+      licenseSlug: null,
+      aiDisclosureMode: "UNKNOWN",
+      aiDisclosureDetails: null,
+      catalogEntryKind: null,
+      targetUnitId: "book-1",
+      moderationStatus: "APPROVED",
+      user: null,
+      translations: [],
+      contentTranslations: [],
+      supportLanguages: [],
+    },
+    ...overrides,
+  };
+}
 
-const mockTx = {
-  post: {
-    update: mockPostUpdate,
-    findUniqueOrThrow: mockPostFindUniqueOrThrow,
-  },
-  unit: {
-    update: mockUnitUpdate,
-    findUniqueOrThrow: mockUnitFindUnique,
-  },
-  unitTranslation: {
-    findFirst: mockTranslationFindFirst,
-    update: mockTranslationUpdate,
-    create: mockTranslationCreate,
-  },
-  contentStructureNode: {
-    updateMany: mockNodeUpdateMany,
-    findMany: mockNodeFindMany,
-  },
-  contentStructure: {
-    updateMany: mockContainerUpdateMany,
-  },
-  contentTranslation: {
-    upsert: mockContentTranslationUpsert,
-  },
-};
+function createRepositoryStub(
+  overrides: Partial<ChapterRepository> = {},
+): ChapterRepository {
+  return {
+    list: mock(async () => ({ items: [], total: 0 })),
+    getByUnitId: mock(async (unitId) => chapterRow({ unitId })),
+    getUnitTarget: mock(async () => ({
+      id: "book-1",
+      type: "BOOK",
+      defaultLanguage: "en",
+    })),
+    create: mock(async () => chapterRow()),
+    materializeNode: mock(async (bookUnitId, req) => ({
+      bookUnitId,
+      nodeId: req.nodeId,
+      contentUnitId: "chapter-new",
+      alreadyMaterialized: false,
+      bookContentStructureUpdatedAt: new Date("2026-05-06T00:00:01.000Z"),
+    })),
+    update: mock(async (unitId) => chapterRow({ unitId })),
+    delete: mock(async () => {}),
+    exists: mock(async () => true),
+    ...overrides,
+  };
+}
 
-const mockTransaction = mock(async (fn: (tx: unknown) => unknown) =>
-  fn(mockTx),
-);
-
-Object.assign(prismaMock, {
-  $transaction: mockTransaction,
-  unit: { findUnique: mockFindBookForTarget },
-});
-
-// chapter.api.test.ts registers a global mock for "./chapter.service" to test
-// unauthorized API rejection. That mock persists across test files in Bun,
-// so without intervention this file's `await import("./chapter.service")`
-// would return the stub. Re-register a mock here that returns the real
-// implementation (loaded via the absolute path which is not aliased).
-const REAL_CHAPTER_SERVICE_PATH = new URL(
-  "./chapter.service.ts",
-  import.meta.url,
-).href;
-const realChapterServiceModule = await import(REAL_CHAPTER_SERVICE_PATH);
-mock.module("./chapter.service", () => realChapterServiceModule);
-
-function firstArg(fn: { mock: { calls: unknown[][] } }) {
-  return fn.mock.calls[0]?.[0] as any;
+async function createService(repository: ChapterRepository) {
+  const module = await import("./chapter.service");
+  return new module.ChapterService(repository) as ChapterService;
 }
 
 const content = (source: string) => markdownContentDoc(source);
 
-function resetMocks(): void {
-  mockPostUpdate.mockClear();
-  mockUnitUpdate.mockClear();
-  mockUnitFindUnique.mockClear();
-  mockTranslationFindFirst.mockClear();
-  mockTranslationUpdate.mockClear();
-  mockTranslationCreate.mockClear();
-  mockNodeUpdateMany.mockClear();
-  mockNodeFindMany.mockClear();
-  mockContainerUpdateMany.mockClear();
-  mockContentTranslationUpsert.mockClear();
-  mockFindBookForTarget.mockClear();
-  mockPostFindUniqueOrThrow.mockClear();
-  mockTransaction.mockClear();
-}
+describe("ChapterService.update", () => {
+  test("content-only edit is delegated without target validation", async () => {
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
 
-describe("ChapterService.update propagation", () => {
-  beforeEach(() => {
-    resetMocks();
-    mockTranslationFindFirst.mockResolvedValue({ language: "en", extra: null });
-  });
+    await service.update("ch-1", { content: content("new body") });
 
-  test("content-only edit on a single-link chapter bumps exactly one node updatedAt and no container", async () => {
-    mockNodeUpdateMany.mockResolvedValue({ count: 1 });
-    mockNodeFindMany.mockResolvedValue([]);
-    const { chapterService } = await import("./chapter.service");
-
-    await chapterService.update("ch-1", { content: content("new body") });
-
-    expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
-    const args = firstArg(mockNodeUpdateMany);
-    expect(args.where).toEqual({ contentUnitId: "ch-1" });
-    expect(args.data.updatedAt).toBeInstanceOf(Date);
-    expect(args.data.title).toBeUndefined();
-    expect(mockContentTranslationUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { unitId_language: { unitId: "ch-1", language: "en" } },
-        update: expect.objectContaining({
-          content: content("new body"),
-          status: "PUBLISHED",
-          authorUserId: "author-1",
-        }),
-      }),
-    );
-    expect(mockContainerUpdateMany).not.toHaveBeenCalled();
-    expect(mockNodeFindMany).not.toHaveBeenCalled();
-  });
-
-  test("content edit on a multi-link chapter bumps every linked node via a single updateMany and no container", async () => {
-    mockNodeUpdateMany.mockResolvedValue({ count: 3 });
-    const { chapterService } = await import("./chapter.service");
-
-    await chapterService.update("ch-1", { content: content("edit") });
-
-    expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
-    expect(firstArg(mockNodeUpdateMany).where).toEqual({
-      contentUnitId: "ch-1",
+    expect(repository.getUnitTarget).not.toHaveBeenCalled();
+    expect(repository.update).toHaveBeenCalledWith("ch-1", {
+      content: content("new body"),
     });
-    expect(mockContentTranslationUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { unitId_language: { unitId: "ch-1", language: "en" } },
-        update: expect.objectContaining({
-          content: content("edit"),
-          status: "PUBLISHED",
-          authorUserId: "author-1",
-        }),
-      }),
-    );
-    expect(mockContainerUpdateMany).not.toHaveBeenCalled();
   });
 
-  test("title rename on a multi-link chapter updates title on every linked node and bumps each affected book's container once", async () => {
-    mockNodeFindMany.mockResolvedValue([
-      { ownerUnitId: "book-1" },
-      { ownerUnitId: "book-1" },
-      { ownerUnitId: "book-2" },
-    ]);
+  test("title rename is delegated for propagation in the repository", async () => {
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
 
-    const { chapterService } = await import("./chapter.service");
+    await service.update("ch-1", { title: "Renamed" });
 
-    await chapterService.update("ch-1", { title: "Renamed" });
-
-    expect(mockNodeUpdateMany).toHaveBeenCalledTimes(1);
-    const updateArgs = firstArg(mockNodeUpdateMany);
-    expect(updateArgs.where).toEqual({
-      contentUnitId: "ch-1",
-      isDeleted: false,
+    expect(repository.update).toHaveBeenCalledWith("ch-1", {
+      title: "Renamed",
     });
-    expect(updateArgs.data.title).toBe("Renamed");
-    expect(updateArgs.data.updatedAt).toBeInstanceOf(Date);
-
-    expect(mockContainerUpdateMany).toHaveBeenCalledTimes(1);
-    const containerArgs = firstArg(mockContainerUpdateMany);
-    expect(new Set(containerArgs.where.ownerUnitId.in)).toEqual(
-      new Set(["book-1", "book-2"]),
-    );
   });
 
-  test("no propagation when neither content nor title change", async () => {
-    const { chapterService } = await import("./chapter.service");
+  test("validates retargets must point at a book Unit", async () => {
+    const repository = createRepositoryStub({
+      getUnitTarget: mock(async () => ({ type: "POST" })),
+    });
+    const service = await createService(repository);
 
-    await chapterService.update("ch-1", { status: "DRAFT" });
+    await expect(
+      service.update("ch-1", { targetUnitId: "post-1" }),
+    ).rejects.toThrow(/Unit\(type=BOOK\)/);
+    expect(repository.update).not.toHaveBeenCalled();
+  });
 
-    expect(mockNodeUpdateMany).not.toHaveBeenCalled();
-    expect(mockNodeFindMany).not.toHaveBeenCalled();
-    expect(mockContainerUpdateMany).not.toHaveBeenCalled();
+  test("status-only update delegates without structure propagation work in the service", async () => {
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
+
+    await service.update("ch-1", { status: "DRAFT" });
+
+    expect(repository.update).toHaveBeenCalledWith("ch-1", {
+      status: "DRAFT",
+    });
+  });
+});
+
+describe("ChapterService.create", () => {
+  test("requires targetUnitId to reference a book", async () => {
+    const repository = createRepositoryStub({
+      getUnitTarget: mock(async () => ({ type: "MEDIA" })),
+    });
+    const service = await createService(repository);
+
+    await expect(
+      service.create({
+        userId: "user-1",
+        targetUnitId: "media-1",
+        title: "Chapter",
+      }),
+    ).rejects.toThrow(/Unit\(type=BOOK\)/);
+    expect(repository.create).not.toHaveBeenCalled();
   });
 });

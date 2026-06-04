@@ -4,10 +4,92 @@ import type {
   CreateApiTokenInput,
   UpdateApiTokenInput,
 } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { and, desc, eq } from "drizzle-orm";
+import { ApiToken } from "../db/schema";
 import { type ApiTokenWithScopes, mapApiTokenToDTO } from "./types";
 import { generateSecureToken, hashToken, verifyTokenHash } from "./utils";
+
+type ApiTokenRow = typeof ApiToken.$inferSelect;
+type ApiTokenCreateData = {
+  userId: string;
+  name: string;
+  tokenHash: string;
+  scopes?: ApiTokenScopes;
+  expiresAt?: Date;
+  lastIP?: string;
+  userAgent?: string;
+};
+type ApiTokenUpdateData = Partial<
+  Pick<ApiTokenRow, "name" | "scopes" | "expiresAt" | "revoked" | "revokedAt">
+>;
+
+type TokenRepository = {
+  create(data: ApiTokenCreateData): Promise<ApiTokenRow>;
+  listActiveForUser(userId: string): Promise<ApiTokenRow[]>;
+  getById(id: string): Promise<ApiTokenRow | undefined>;
+  getByHash(tokenHash: string): Promise<ApiTokenRow | undefined>;
+  update(id: string, data: ApiTokenUpdateData): Promise<ApiTokenRow>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleTokenRepository(): TokenRepository {
+  return {
+    async create(data) {
+      const db = await getServerDb();
+      const [row] = await db.insert(ApiToken).values(data).returning();
+      if (!row) {
+        throw new Error("API token was not created");
+      }
+      return row;
+    },
+
+    async listActiveForUser(userId) {
+      const db = await getServerDb();
+      return db
+        .select()
+        .from(ApiToken)
+        .where(and(eq(ApiToken.userId, userId), eq(ApiToken.revoked, false)))
+        .orderBy(desc(ApiToken.createdAt));
+    },
+
+    async getById(id) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select()
+        .from(ApiToken)
+        .where(eq(ApiToken.id, id))
+        .limit(1);
+      return row;
+    },
+
+    async getByHash(tokenHash) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select()
+        .from(ApiToken)
+        .where(eq(ApiToken.tokenHash, tokenHash))
+        .limit(1);
+      return row;
+    },
+
+    async update(id, data) {
+      const db = await getServerDb();
+      const [row] = await db
+        .update(ApiToken)
+        .set(data)
+        .where(eq(ApiToken.id, id))
+        .returning();
+      if (!row) {
+        throw new Error("Token not found or you do not own this token");
+      }
+      return row;
+    },
+  };
+}
 
 /**
  * API Token Service
@@ -18,6 +100,8 @@ import { generateSecureToken, hashToken, verifyTokenHash } from "./utils";
  * - Enforcing simple scope-based access control
  */
 export class TokenService {
+  constructor(private readonly repository = createDrizzleTokenRepository()) {}
+
   /**
    * Generate and persist a new API token for the given user.
    * Returns the raw token string (to be shown once) and its DTO.
@@ -30,22 +114,17 @@ export class TokenService {
     const rawToken = generateSecureToken();
     const tokenHash = hashToken(rawToken);
 
-    const created = await prisma.apiToken.create({
-      data: {
-        userId,
-        name: input.name,
-        tokenHash,
-        scopes:
-          input.scopes != null
-            ? (input.scopes as Prisma.InputJsonValue)
-            : undefined,
-        expiresAt:
-          input.expiresAt && input.expiresAt !== ""
-            ? new Date(input.expiresAt)
-            : undefined,
-        lastIP: opts?.ip ?? undefined,
-        userAgent: opts?.userAgent ?? undefined,
-      },
+    const created = await this.repository.create({
+      userId,
+      name: input.name,
+      tokenHash,
+      scopes: input.scopes ?? undefined,
+      expiresAt:
+        input.expiresAt && input.expiresAt !== ""
+          ? new Date(input.expiresAt)
+          : undefined,
+      lastIP: opts?.ip ?? undefined,
+      userAgent: opts?.userAgent ?? undefined,
     });
 
     const tokenInfo = mapApiTokenToDTO(
@@ -59,13 +138,7 @@ export class TokenService {
    * List all non-revoked tokens for a user.
    */
   async listTokens(userId: string): Promise<ApiTokenDTO[]> {
-    const tokens = await prisma.apiToken.findMany({
-      where: {
-        userId,
-        revoked: false,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const tokens = await this.repository.listActiveForUser(userId);
     return tokens.map((t) => mapApiTokenToDTO(t as ApiTokenWithScopes));
   }
 
@@ -78,29 +151,20 @@ export class TokenService {
     id: string,
     input: UpdateApiTokenInput,
   ): Promise<ApiTokenDTO> {
-    const existing = await prisma.apiToken.findUnique({
-      where: { id },
-    });
+    const existing = await this.repository.getById(id);
     if (!existing || existing.userId !== userId) {
       throw new Error("Token not found or you do not own this token");
     }
 
-    const updated = await prisma.apiToken.update({
-      where: { id },
-      data: {
-        name: input.name ?? existing.name,
-        scopes:
-          input.scopes != null
-            ? (input.scopes as Prisma.InputJsonValue)
-            : ((existing.scopes as Prisma.InputJsonValue | undefined) ??
-              undefined),
-        expiresAt:
-          input.expiresAt === null
-            ? undefined
-            : input.expiresAt
-              ? new Date(input.expiresAt)
-              : (existing.expiresAt ?? undefined),
-      },
+    const updated = await this.repository.update(id, {
+      name: input.name ?? existing.name,
+      scopes: input.scopes != null ? input.scopes : existing.scopes,
+      expiresAt:
+        input.expiresAt === null
+          ? undefined
+          : input.expiresAt
+            ? new Date(input.expiresAt)
+            : (existing.expiresAt ?? undefined),
     });
 
     return mapApiTokenToDTO(updated as ApiTokenWithScopes);
@@ -110,18 +174,16 @@ export class TokenService {
    * Soft-revoke a token so it can no longer be used.
    */
   async revokeToken(userId: string, id: string): Promise<void> {
-    const existing = await prisma.apiToken.findUnique({
-      where: { id },
-    });
+    const existing = await this.repository.getById(id);
     if (!existing || existing.userId !== userId) {
       throw new Error("Token not found or you do not own this token");
     }
 
     if (existing.revoked) return;
 
-    await prisma.apiToken.update({
-      where: { id },
-      data: { revoked: true, revokedAt: new Date() },
+    await this.repository.update(id, {
+      revoked: true,
+      revokedAt: new Date(),
     });
   }
 
@@ -158,9 +220,7 @@ export class TokenService {
 
     // We hash the raw token value and look it up by hash.
     const hashed = hashToken(rawToken);
-    const record = await prisma.apiToken.findUnique({
-      where: { tokenHash: hashed },
-    });
+    const record = await this.repository.getByHash(hashed);
 
     if (!record) {
       set.status = 401;
@@ -185,16 +245,7 @@ export class TokenService {
 
     // Update usage metadata in the background (non-blocking best-effort).
     // We may need this later, but now disabled for performance reasons.
-    // void prisma.apiToken
-    //   .update({
-    //     where: {id: record.id},
-    //     data: {
-    //       lastUsedAt: new Date(),
-    //       lastIP: opts?.ip ?? undefined,
-    //       userAgent: opts?.userAgent ?? undefined,
-    //     },
-    //   })
-    //   .catch(() => {});
+    // When re-enabled, persist lastUsedAt/lastIP/userAgent via the repository.
     // const tokenDto = mapApiTokenToDTO(record as ApiTokenWithScopes);
 
     const scopes =

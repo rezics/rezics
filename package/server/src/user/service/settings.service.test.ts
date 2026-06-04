@@ -1,34 +1,29 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../../test/prisma-client-mock";
+import type { UserSettingsRepository } from "./settings.service";
 
-installPrismaClientMock();
+const getSettingsRow = mock(async () => ({}));
+const updateSettingsRow = mock(
+  async (_userId: string, _settings: unknown) => {},
+);
 
-const userFindUniqueOrThrow = mock(async () => ({
-  settings: {},
-}));
-const userUpdate = mock(async (_input: unknown) => ({}));
+function repository(): UserSettingsRepository {
+  return {
+    getSettings: getSettingsRow,
+    updateSettings: updateSettingsRow,
+  };
+}
 
 beforeEach(() => {
-  userFindUniqueOrThrow.mockReset();
-  userFindUniqueOrThrow.mockResolvedValue({ settings: {} });
-  userUpdate.mockReset();
-
-  Object.assign(prismaMock, {
-    user: {
-      findUniqueOrThrow: userFindUniqueOrThrow,
-      update: userUpdate,
-    },
-  });
+  getSettingsRow.mockReset();
+  getSettingsRow.mockResolvedValue({});
+  updateSettingsRow.mockReset();
 });
 
 describe("settings preferred languages", () => {
   test("normalizes empty settings to the fallback language", async () => {
     const { getSettings } = await import("./settings.service");
 
-    await expect(getSettings("user-1")).resolves.toMatchObject({
+    await expect(getSettings("user-1", repository())).resolves.toMatchObject({
       preferredLanguages: ["en"],
     });
   });
@@ -36,23 +31,30 @@ describe("settings preferred languages", () => {
   test("normalizes and deduplicates preferred language updates", async () => {
     const { updateSettings } = await import("./settings.service");
 
-    const result = await updateSettings("user-1", {
-      preferredLanguages: ["JA", "ja", "en"],
-    } as never);
+    const result = await updateSettings(
+      "user-1",
+      {
+        preferredLanguages: ["JA", "ja", "en"],
+      } as never,
+      repository(),
+    );
 
     expect(result.preferredLanguages).toEqual(["ja", "en"]);
-    expect(userUpdate.mock.calls[0]?.[0]).toMatchObject({
-      where: { unitId: "user-1" },
-      data: { settings: { preferredLanguages: ["ja", "en"] } },
+    expect(updateSettingsRow).toHaveBeenCalledWith("user-1", {
+      preferredLanguages: ["ja", "en"],
     });
   });
 
   test("empty preferred language updates are normalized to the fallback", async () => {
     const { updateSettings } = await import("./settings.service");
 
-    const result = await updateSettings("user-1", {
-      preferredLanguages: [],
-    });
+    const result = await updateSettings(
+      "user-1",
+      {
+        preferredLanguages: [],
+      },
+      repository(),
+    );
 
     expect(result.preferredLanguages).toEqual(["en"]);
   });

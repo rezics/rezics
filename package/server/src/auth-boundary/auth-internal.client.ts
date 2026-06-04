@@ -2,7 +2,7 @@ import type {
   AdminAuthSession,
   VerifiedRegistrationFacts,
 } from "@rezics/contract";
-import { env } from "@/env";
+import { env } from "../env";
 
 function getInternalAuthBaseUrl(): string {
   return env.AUTH_INTERNAL_BASE_URL;

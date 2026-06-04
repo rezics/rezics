@@ -11,7 +11,7 @@ mock.module("@rezics/server/prisma/seed/database", () => ({
   }),
 }));
 
-mock.module("@rezics/auth/prisma/seed", () => ({
+mock.module("@rezics/auth/seed", () => ({
   resetAuthDatabase: mock(async () => {
     calls.resetAuthDatabase += 1;
   }),

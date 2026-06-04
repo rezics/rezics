@@ -1,5 +1,5 @@
 import type { NotificationItem } from "@rezics/contract";
-import type { Notification } from "#/prisma/client";
+import type { NotificationRow } from "../db/schema";
 import { buildNotificationTarget } from "./notification.target";
 
 type AggregatedRow = {
@@ -14,7 +14,7 @@ type AggregatedRow = {
 
 export function mapToAggregatedItems(
   aggregated: AggregatedRow[],
-  individual: Notification[],
+  individual: NotificationRow[],
 ): NotificationItem[] {
   const items: NotificationItem[] = [];
 
@@ -49,7 +49,7 @@ export function mapToAggregatedItems(
   return items;
 }
 
-export function mapNotificationToRawEvent(notification: Notification) {
+export function mapNotificationToRawEvent(notification: NotificationRow) {
   return {
     id: notification.id,
     kind: notification.kind,

@@ -1,5 +1,15 @@
-import type { Prisma } from "#/prisma/client";
-import { publicUserSelect } from "@/utils/sanitizeUser";
+import type {
+  Shelf,
+  ShelfUnit,
+  ShelfUnitRelation,
+  Unit,
+  UnitTag,
+  UnitTranslation,
+} from "../db/schema";
+import {
+  publicUserSelect,
+  type PublicUserSelected,
+} from "@/utils/sanitizeUser";
 
 // Prisma include for shelf metadata. Shelf items are paged separately through
 // `GET /shelf/:unitId/units`.
@@ -11,11 +21,15 @@ export const shelfInclude = {
       unitTags: { orderBy: { score: "desc" as const } },
     },
   },
-} satisfies Prisma.ShelfInclude;
+} as const;
 
-export type ShelfWithMetadata = Prisma.ShelfGetPayload<{
-  include: typeof shelfInclude;
-}>;
+export type ShelfWithMetadata = typeof Shelf.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    user?: PublicUserSelected | null;
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    unitTags: Array<typeof UnitTag.$inferSelect>;
+  };
+};
 
 // Lighter select for list queries (no units/relations)
 export const shelfListSelect = {
@@ -41,11 +55,29 @@ export const shelfListSelect = {
       unitTags: { orderBy: { score: "desc" as const } },
     },
   },
-} satisfies Prisma.ShelfSelect;
+} as const;
 
-export type ShelfListSelected = Prisma.ShelfGetPayload<{
-  select: typeof shelfListSelect;
-}>;
+export type ShelfListSelected = Pick<
+  typeof Shelf.$inferSelect,
+  "unitId" | "kindKey" | "extra" | "itemCount" | "createdAt" | "updatedAt"
+> & {
+  unit: Pick<
+    typeof Unit.$inferSelect,
+    | "id"
+    | "slug"
+    | "userId"
+    | "status"
+    | "visibility"
+    | "licenseSlug"
+    | "defaultLanguage"
+    | "createdAt"
+    | "updatedAt"
+  > & {
+    user?: PublicUserSelected | null;
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    unitTags: Array<typeof UnitTag.$inferSelect>;
+  };
+};
 
-export type ShelfUnitRow = Prisma.ShelfUnitGetPayload<{}>;
-export type ShelfUnitRelationRow = Prisma.ShelfUnitRelationGetPayload<{}>;
+export type ShelfUnitRow = typeof ShelfUnit.$inferSelect;
+export type ShelfUnitRelationRow = typeof ShelfUnitRelation.$inferSelect;

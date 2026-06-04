@@ -1,10 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
-
-installPrismaClientMock();
+import type { UnitRepository, UnitService } from "./unit.service";
+import type { UnitWithRelations } from "./types";
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 const cleanupReactionsMock = mock(async () => undefined);
@@ -22,34 +18,71 @@ mock.module("@/infra/slug-scopes", () => ({
   requireSlugScopeId: () => "global",
 }));
 
-const { UnitService } = await import("./unit.service");
+function unitRow(
+  overrides: Partial<UnitWithRelations> = {},
+): UnitWithRelations {
+  const now = new Date("2026-01-01T00:00:00.000Z");
+  return {
+    id: "unit-1",
+    type: "BOOK",
+    slug: null,
+    slugScope: "global",
+    userId: "user-1",
+    defaultLanguage: null,
+    isLanguageNeutral: false,
+    status: "PUBLISHED",
+    visibility: "PUBLIC",
+    rating: "GENERAL",
+    extra: null,
+    createdAt: now,
+    updatedAt: now,
+    publishedAt: null,
+    subscriberCount: 0,
+    licenseSlug: null,
+    aiDisclosureMode: "UNKNOWN",
+    aiDisclosureDetails: null,
+    catalogEntryKind: null,
+    targetUnitId: null,
+    moderationStatus: "APPROVED",
+    translations: [],
+    supportLanguages: [],
+    ...overrides,
+  };
+}
 
-function resetPrisma() {
-  for (const key of Object.keys(prismaMock)) delete prismaMock[key];
+function createRepositoryStub(): UnitRepository {
+  return {
+    list: mock(async () => ({ units: [], total: 0 })),
+    getByUnitId: mock(async (unitId) => unitRow({ id: unitId })),
+    create: mock(async () => unitRow()),
+    update: mock(async (unitId, input) =>
+      unitRow({
+        id: unitId,
+        rating: (input.rating as UnitWithRelations["rating"]) ?? "GENERAL",
+        visibility:
+          (input.visibility as UnitWithRelations["visibility"]) ?? "PUBLIC",
+      }),
+    ),
+    getBySlug: mock(async () => null),
+    setSlug: mock(async (unitId, slug) => unitRow({ id: unitId, slug })),
+    delete: mock(async () => {}),
+  };
+}
+
+async function createService(repository: UnitRepository) {
+  const module = await import("./unit.service");
+  return new module.UnitService(repository) as UnitService;
+}
+
+function resetMocks() {
   enqueueMock.mockClear();
   cleanupReactionsMock.mockClear();
-  const unit = {
-    create: mock(async () => ({ id: "unit-1" })),
-    update: mock(async () => ({ id: "unit-1" })),
-    delete: mock(async () => ({})),
-    findMany: mock(async () => []),
-    findUnique: mock(async () => ({ slug: "unit-1" })),
-    findUniqueOrThrow: mock(async () => ({ id: "unit-1" })),
-  };
-  prismaMock.unit = {
-    ...unit,
-  };
-  prismaMock.$transaction = mock(async (cb: any) =>
-    cb({
-      unit,
-    }),
-  );
 }
 
 describe("UnitService search job producers", () => {
   test("create enqueues content sync", async () => {
-    resetPrisma();
-    const service = new UnitService();
+    resetMocks();
+    const service = await createService(createRepositoryStub());
 
     await service.create({
       userId: "user-1",
@@ -67,8 +100,8 @@ describe("UnitService search job producers", () => {
   });
 
   test("update enqueues content metadata patch", async () => {
-    resetPrisma();
-    const service = new UnitService();
+    resetMocks();
+    const service = await createService(createRepositoryStub());
 
     await service.update("unit-1", {
       rating: "GENERAL",
@@ -85,8 +118,8 @@ describe("UnitService search job producers", () => {
   });
 
   test("delete enqueues content delete and leaves reaction cleanup fire-and-forget", async () => {
-    resetPrisma();
-    const service = new UnitService();
+    resetMocks();
+    const service = await createService(createRepositoryStub());
 
     await service.delete("unit-1");
 

@@ -30,6 +30,19 @@ const accountFindMany = mock(async () => [
   { providerId: "credential", password: "hashed-password" },
 ]);
 
+function authStorageMock(name: string) {
+  return (...args: unknown[]) => {
+    const mocks = (globalThis as any).__authStorageMocks as
+      | Record<string, (...input: unknown[]) => unknown>
+      | undefined;
+    const fn = mocks?.[name];
+    if (!fn) {
+      throw new Error(`Auth storage mock ${name} is not configured`);
+    }
+    return fn(...args);
+  };
+}
+
 mock.module("../auth/routes", () => ({
   handleAuthRequest,
   handleJwksWellKnownRequest: () =>
@@ -40,12 +53,22 @@ mock.module("../auth/routes", () => ({
     Response.json({ issuer: "http://localhost:35003" }),
 }));
 
-mock.module("../auth/prisma", () => ({
-  prisma: {
-    account: {
-      findMany: accountFindMany,
-    },
-  },
+mock.module("../auth/storage", () => ({
+  cleanupStaleRegistrations: authStorageMock("cleanupStaleRegistrations"),
+  createImpersonationSession: authStorageMock("createImpersonationSession"),
+  deleteAuthRegistration: authStorageMock("deleteAuthRegistration"),
+  deleteAuthSessionForUser: authStorageMock("deleteAuthSessionForUser"),
+  deleteAuthSessionsForUser: authStorageMock("deleteAuthSessionsForUser"),
+  findAuthUserForRegistrationCancel: authStorageMock(
+    "findAuthUserForRegistrationCancel",
+  ),
+  findAuthUserId: authStorageMock("findAuthUserId"),
+  findImpersonationUsers: authStorageMock("findImpersonationUsers"),
+  findStaleUnverifiedUsers: authStorageMock("findStaleUnverifiedUsers"),
+  findVerifiedFactsUser: authStorageMock("findVerifiedFactsUser"),
+  listAuthAccountsForUser: accountFindMany,
+  listActiveAuthSessions: authStorageMock("listActiveAuthSessions"),
+  updateAuthUserName: authStorageMock("updateAuthUserName"),
 }));
 
 mock.module("../session/jwt/routes", () => ({
@@ -251,12 +274,12 @@ describe("auth openapi routes", () => {
 
   test("exposes public session and well-known jwks endpoints", async () => {
     const { sessionRouter } = await import("./session");
-    const { oauthRouter } = await import("./oauth");
+    const { wellKnownApi } = await import("../well-known/well-known.api");
 
     const sessionJwksResponse = await sessionRouter.handle(
       new Request("http://localhost/session/jwks"),
     );
-    const wellKnownJwksResponse = await oauthRouter.handle(
+    const wellKnownJwksResponse = await wellKnownApi.handle(
       new Request("http://localhost/.well-known/jwks.json"),
     );
 
@@ -271,7 +294,7 @@ describe("auth openapi routes", () => {
     });
   });
 
-  test("applies public cors to jwks and credentialed cors to browser session routes", async () => {
+  test("leaves session cors headers to the top-level service app", async () => {
     const { sessionRouter } = await import("./session");
 
     const publicResponse = await sessionRouter.handle(
@@ -289,22 +312,25 @@ describe("auth openapi routes", () => {
       }),
     );
 
-    expect(publicResponse.headers.get("access-control-allow-origin")).toBe(
-      "https://rezics.com",
-    );
+    expect(publicResponse.status).toBe(200);
+    expect(
+      publicResponse.headers.get("access-control-allow-origin"),
+    ).toBeNull();
     expect(
       publicResponse.headers.get("access-control-allow-credentials"),
     ).toBeNull();
+    expect(credentialedResponse.status).toBe(200);
     expect(
       credentialedResponse.headers.get("access-control-allow-origin"),
-    ).toBe("https://rezics.com");
+    ).toBeNull();
     expect(
       credentialedResponse.headers.get("access-control-allow-credentials"),
-    ).toBe("true");
+    ).toBeNull();
   });
 
-  test("keeps oauth and discovery routes on public cors", async () => {
+  test("exposes oauth providers and discovery routes", async () => {
     const { oauthRouter } = await import("./oauth");
+    const { wellKnownApi } = await import("../well-known/well-known.api");
 
     const providersResponse = await oauthRouter.handle(
       new Request("http://localhost/providers", {
@@ -313,7 +339,7 @@ describe("auth openapi routes", () => {
         },
       }),
     );
-    const discoveryResponse = await oauthRouter.handle(
+    const discoveryResponse = await wellKnownApi.handle(
       new Request("http://localhost/.well-known/openid-configuration", {
         headers: {
           Origin: "https://rezics.com",
@@ -321,18 +347,12 @@ describe("auth openapi routes", () => {
       }),
     );
 
-    expect(providersResponse.headers.get("access-control-allow-origin")).toBe(
-      "https://rezics.com",
-    );
-    expect(
-      providersResponse.headers.get("access-control-allow-credentials"),
-    ).toBeNull();
-    expect(discoveryResponse.headers.get("access-control-allow-origin")).toBe(
-      "https://rezics.com",
-    );
-    expect(
-      discoveryResponse.headers.get("access-control-allow-credentials"),
-    ).toBeNull();
+    expect(providersResponse.status).toBe(200);
+    expect(discoveryResponse.status).toBe(200);
+    expect(await providersResponse.json()).toEqual({ providers: [] });
+    expect(await discoveryResponse.json()).toEqual({
+      issuer: "http://localhost:35003",
+    });
   });
 
   test("exposes self-service auth endpoints without runtime validation blockers", async () => {

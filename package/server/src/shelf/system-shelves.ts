@@ -3,13 +3,98 @@ import {
   formatSystemShelfTitle,
   type SystemShelfKindKey,
 } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { prisma, UnitStatus, UnitType, UnitVisibility } from "#/prisma/client";
+import { and, eq } from "drizzle-orm";
+import { Shelf, Unit, UnitTranslation } from "../db/schema";
 
 export const SYSTEM_KIND_KEYS = CONTRACT_SYSTEM_SHELF_KIND_KEYS;
 
-type PrismaTx = Prisma.TransactionClient;
-type PrismaClientLike = typeof prisma | PrismaTx;
+type SystemShelfClientLike = {
+  unit: {
+    findFirst(input: {
+      where: { type: "SHELF"; slug: string; slugScope: string };
+      select: { id: true };
+    }): Promise<{ id: string } | null>;
+    create(input: {
+      data: {
+        userId: string;
+        slug: string;
+        slugScope: string;
+        type: "SHELF";
+        status: "PUBLISHED";
+        visibility: "PRIVATE";
+        translations: {
+          create: { language: "en"; title: string };
+        };
+      };
+    }): Promise<{ id: string }>;
+  };
+  shelf: {
+    create(input: {
+      data: { unitId: string; kindKey: SystemShelfKindKey };
+    }): Promise<unknown>;
+  };
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+export function createDrizzleSystemShelfClient(
+  database: any,
+): SystemShelfClientLike {
+  return {
+    unit: {
+      async findFirst(input) {
+        const [row] = await database
+          .select({ id: Unit.id })
+          .from(Unit)
+          .where(
+            and(
+              eq(Unit.type, input.where.type),
+              eq(Unit.slug, input.where.slug),
+              eq(Unit.slugScope, input.where.slugScope),
+            ),
+          )
+          .limit(1);
+        return row ?? null;
+      },
+      async create(input) {
+        const now = new Date();
+        const [unit] = await database
+          .insert(Unit)
+          .values({
+            userId: input.data.userId,
+            slug: input.data.slug,
+            slugScope: input.data.slugScope,
+            type: input.data.type,
+            status: input.data.status,
+            visibility: input.data.visibility,
+            updatedAt: now,
+          })
+          .returning({ id: Unit.id });
+        if (!unit) throw new Error("Failed to create system shelf Unit");
+
+        await database.insert(UnitTranslation).values({
+          unitId: unit.id,
+          language: input.data.translations.create.language,
+          title: input.data.translations.create.title,
+          updatedAt: now,
+        });
+        return unit;
+      },
+    },
+    shelf: {
+      async create(input) {
+        await database.insert(Shelf).values({
+          unitId: input.data.unitId,
+          kindKey: input.data.kindKey,
+          updatedAt: new Date(),
+        });
+      },
+    },
+  };
+}
 
 export function isSystemKindKey(
   kindKey: string | null | undefined,
@@ -20,11 +105,11 @@ export function isSystemKindKey(
 export async function findSystemShelf(
   userId: string,
   kindKey: SystemShelfKindKey,
-  client: PrismaClientLike,
+  client: SystemShelfClientLike,
 ): Promise<string | null> {
   const existing = await client.unit.findFirst({
     where: {
-      type: UnitType.SHELF,
+      type: "SHELF",
       slug: kindKey,
       slugScope: userId,
     },
@@ -37,16 +122,16 @@ async function createSystemShelf(
   userId: string,
   userSlug: string,
   kindKey: SystemShelfKindKey,
-  client: PrismaClientLike,
+  client: SystemShelfClientLike,
 ): Promise<string> {
   const unit = await client.unit.create({
     data: {
       userId,
       slug: kindKey,
       slugScope: userId,
-      type: UnitType.SHELF,
-      status: UnitStatus.PUBLISHED,
-      visibility: UnitVisibility.PRIVATE,
+      type: "SHELF",
+      status: "PUBLISHED",
+      visibility: "PRIVATE",
       translations: {
         create: {
           language: "en",
@@ -68,7 +153,8 @@ function isUniqueConstraintError(error: unknown): boolean {
     error !== null &&
     typeof error === "object" &&
     "code" in error &&
-    (error as { code?: string }).code === "P2002"
+    ((error as { code?: string }).code === "P2002" ||
+      (error as { code?: string }).code === "23505")
   );
 }
 
@@ -81,7 +167,7 @@ async function findOrCreateSystemShelf(
   userId: string,
   userSlug: string,
   kindKey: SystemShelfKindKey,
-  client: PrismaClientLike,
+  client: SystemShelfClientLike,
   options: { warnOnCreate: boolean },
 ): Promise<FindOrCreateResult> {
   const existing = await findSystemShelf(userId, kindKey, client);
@@ -110,7 +196,7 @@ export async function ensureSystemShelf(
   userId: string,
   userSlug: string,
   kindKey: SystemShelfKindKey,
-  client?: PrismaClientLike,
+  client?: SystemShelfClientLike,
 ): Promise<FindOrCreateResult> {
   if (client) {
     return findOrCreateSystemShelf(userId, userSlug, kindKey, client, {
@@ -118,10 +204,17 @@ export async function ensureSystemShelf(
     });
   }
 
-  return prisma.$transaction((tx) =>
-    findOrCreateSystemShelf(userId, userSlug, kindKey, tx, {
-      warnOnCreate: true,
-    }),
+  const db = await getServerDb();
+  return db.transaction((tx) =>
+    findOrCreateSystemShelf(
+      userId,
+      userSlug,
+      kindKey,
+      createDrizzleSystemShelfClient(tx),
+      {
+        warnOnCreate: true,
+      },
+    ),
   );
 }
 
@@ -133,7 +226,7 @@ export async function ensureSystemShelf(
 export async function bootstrapSystemShelves(
   userId: string,
   userSlug: string,
-  client: PrismaClientLike,
+  client: SystemShelfClientLike,
 ): Promise<void> {
   for (const kindKey of SYSTEM_KIND_KEYS) {
     await findOrCreateSystemShelf(userId, userSlug, kindKey, client, {

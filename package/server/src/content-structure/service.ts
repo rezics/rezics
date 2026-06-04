@@ -1,18 +1,25 @@
 import type {
+  ContentRating,
   ContentStructureBatchOperation,
   ContentStructureItem,
   ContentStructureResponse,
 } from "@rezics/contract";
 import { HistoryOutboxPayloadKind } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { type ContentRating, prisma } from "#/prisma/client";
+import { and, eq, inArray, notInArray, sql } from "drizzle-orm";
 import { between, firstKey } from "@/book/position-index";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import {
   buildStructureEventPayload,
+  type HistoryOutboxWriter,
   writeSequencedHistoryOutbox,
 } from "@/unit/history-outbox";
 import { AppError } from "@/utils/errors";
+import {
+  ContentStructure,
+  ContentStructureAnchor,
+  ContentStructureNode,
+  HistoryOutbox,
+} from "../db/schema";
 import {
   buildContentStructureTree,
   resolveContentStructurePath,
@@ -29,7 +36,7 @@ type SaveOptions = {
   eventType?: string;
   changedFieldKeys?: string[];
   afterMutate?: (
-    tx: Prisma.TransactionClient,
+    tx: unknown,
     context: {
       ownerUnitId: string;
       submitted: readonly ContentStructureItem[];
@@ -45,50 +52,287 @@ type SoftDeleteOptions = {
 
 type RestoreOptions = SoftDeleteOptions;
 
-const EXISTING_ROW_SELECT = {
-  id: true,
-  parentId: true,
-  position: true,
-  contentUnitId: true,
-  title: true,
-  noContent: true,
-  rating: true,
-  isDeleted: true,
-  deletedAt: true,
-} as const;
+type ContentStructureContainerRow = {
+  ownerUnitId: string;
+  createdAt?: Date;
+  updatedAt: Date;
+};
+
+type FindNodesOptions = {
+  isDeleted?: boolean;
+  ids?: readonly string[];
+  excludeIds?: readonly string[];
+  parentIds?: readonly string[];
+};
+
+type UpdateNodeData = Partial<{
+  parentId: string | null;
+  position: string;
+  contentUnitId: string | null;
+  title: string;
+  noContent: boolean;
+  rating: ContentRating | null;
+  isDeleted: boolean;
+  deletedAt: Date | null;
+}>;
+
+export type ContentStructureMutationTx = unknown;
+
+export type ContentStructureTx = HistoryOutboxWriter & {
+  mutationTx: ContentStructureMutationTx;
+  ensureForOwner(ownerUnitId: string): Promise<void>;
+  getContainer(ownerUnitId: string): Promise<ContentStructureContainerRow>;
+  findNodes(
+    ownerUnitId: string,
+    options?: FindNodesOptions,
+  ): Promise<ContentStructureNodeRow[]>;
+  createNode(
+    ownerUnitId: string,
+    row: PlannedContentStructureNode,
+  ): Promise<void>;
+  updateNode(nodeId: string, data: UpdateNodeData): Promise<void>;
+  updateManyNodes(
+    ownerUnitId: string,
+    options: FindNodesOptions,
+    data: UpdateNodeData,
+  ): Promise<void>;
+  updateContainer(ownerUnitId: string): Promise<void>;
+  deleteAnchors(ownerUnitId: string): Promise<void>;
+  createAnchors(rows: readonly ContentStructureAnchorWrite[]): Promise<void>;
+};
+
+export type ContentStructureRepository = {
+  getByOwnerUnitId(ownerUnitId: string): Promise<{
+    container: Required<ContentStructureContainerRow>;
+    nodes: ContentStructureNodeRow[];
+  }>;
+  transaction<T>(fn: (tx: ContentStructureTx) => Promise<T>): Promise<T>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function nodeFilters(ownerUnitId: string, options: FindNodesOptions = {}) {
+  return and(
+    eq(ContentStructureNode.ownerUnitId, ownerUnitId),
+    options.isDeleted === undefined
+      ? undefined
+      : eq(ContentStructureNode.isDeleted, options.isDeleted),
+    options.ids?.length
+      ? inArray(ContentStructureNode.id, [...options.ids])
+      : undefined,
+    options.excludeIds?.length
+      ? notInArray(ContentStructureNode.id, [...options.excludeIds])
+      : undefined,
+    options.parentIds?.length
+      ? inArray(ContentStructureNode.parentId, [...options.parentIds])
+      : undefined,
+  );
+}
+
+function mapContentStructureNodeRow(
+  row: typeof ContentStructureNode.$inferSelect,
+): ContentStructureNodeRow {
+  return {
+    id: row.id,
+    ownerUnitId: row.ownerUnitId,
+    parentId: row.parentId,
+    position: row.position,
+    contentUnitId: row.contentUnitId,
+    title: row.title,
+    noContent: row.noContent,
+    rating: row.rating,
+    isDeleted: row.isDeleted,
+    deletedAt: row.deletedAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function normalizeExecuteRows<T>(result: unknown): T {
+  if (Array.isArray(result)) return result as T;
+  if (result && typeof result === "object" && "rows" in result) {
+    return (result as { rows: unknown }).rows as T;
+  }
+  return result as T;
+}
+
+function createDrizzleContentStructureTx(rawTx: any): ContentStructureTx {
+  return {
+    mutationTx: rawTx,
+    async $queryRaw<T = unknown>(
+      strings: TemplateStringsArray,
+      ...values: unknown[]
+    ): Promise<T> {
+      return normalizeExecuteRows<T>(
+        await rawTx.execute(sql(strings, ...values)),
+      );
+    },
+    historyOutbox: {
+      async create(input) {
+        await rawTx.insert(HistoryOutbox).values({
+          unitId: input.data.unitId,
+          sequence: Number(input.data.sequence),
+          actorUserId: input.data.actorUserId,
+          category: input.data.category,
+          payload: input.data.payload,
+          payloadHash: input.data.payloadHash,
+          updatedAt: new Date(),
+        });
+      },
+    },
+    async ensureForOwner(ownerUnitId) {
+      await rawTx
+        .insert(ContentStructure)
+        .values({ ownerUnitId, updatedAt: new Date() })
+        .onConflictDoNothing();
+    },
+    async getContainer(ownerUnitId) {
+      const [row] = await rawTx
+        .select({
+          ownerUnitId: ContentStructure.ownerUnitId,
+          createdAt: ContentStructure.createdAt,
+          updatedAt: ContentStructure.updatedAt,
+        })
+        .from(ContentStructure)
+        .where(eq(ContentStructure.ownerUnitId, ownerUnitId))
+        .limit(1);
+      if (!row) throw new Error(`ContentStructure not found: ${ownerUnitId}`);
+      return row;
+    },
+    async findNodes(ownerUnitId, options = {}) {
+      const rows = await rawTx
+        .select()
+        .from(ContentStructureNode)
+        .where(nodeFilters(ownerUnitId, options))
+        .orderBy(ContentStructureNode.parentId, ContentStructureNode.position);
+      return rows.map(mapContentStructureNodeRow);
+    },
+    async createNode(ownerUnitId, row) {
+      await rawTx.insert(ContentStructureNode).values({
+        id: row.id,
+        ownerUnitId,
+        parentId: row.parentId,
+        position: row.position,
+        contentUnitId: row.contentUnitId,
+        title: row.title,
+        noContent: row.noContent,
+        rating: row.rating,
+        updatedAt: new Date(),
+      });
+    },
+    async updateNode(nodeId, data) {
+      await rawTx
+        .update(ContentStructureNode)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(ContentStructureNode.id, nodeId));
+    },
+    async updateManyNodes(ownerUnitId, options, data) {
+      await rawTx
+        .update(ContentStructureNode)
+        .set({ ...data, updatedAt: new Date() })
+        .where(nodeFilters(ownerUnitId, options));
+    },
+    async updateContainer(ownerUnitId) {
+      await rawTx
+        .update(ContentStructure)
+        .set({ updatedAt: new Date() })
+        .where(eq(ContentStructure.ownerUnitId, ownerUnitId));
+    },
+    async deleteAnchors(ownerUnitId) {
+      await rawTx
+        .delete(ContentStructureAnchor)
+        .where(eq(ContentStructureAnchor.ownerUnitId, ownerUnitId));
+    },
+    async createAnchors(rows) {
+      if (rows.length === 0) return;
+      await rawTx.insert(ContentStructureAnchor).values(
+        rows.map((anchor) => ({
+          nodeId: anchor.nodeId,
+          ownerUnitId: anchor.ownerUnitId,
+          contentUnitId: anchor.contentUnitId,
+          parentNodeId: anchor.parentNodeId,
+          ancestorNodeIds: anchor.ancestorNodeIds,
+          path: anchor.path,
+          depth: anchor.depth,
+          position: anchor.position,
+          positionPath: anchor.positionPath,
+          titlePath: anchor.titlePath,
+          updatedAt: new Date(),
+        })),
+      );
+    },
+  };
+}
+
+function createDrizzleContentStructureRepository(): ContentStructureRepository {
+  return {
+    async getByOwnerUnitId(ownerUnitId) {
+      const db = await getServerDb();
+      const [container, nodes] = await Promise.all([
+        db
+          .select({
+            ownerUnitId: ContentStructure.ownerUnitId,
+            createdAt: ContentStructure.createdAt,
+            updatedAt: ContentStructure.updatedAt,
+          })
+          .from(ContentStructure)
+          .where(eq(ContentStructure.ownerUnitId, ownerUnitId))
+          .limit(1),
+        db
+          .select()
+          .from(ContentStructureNode)
+          .where(
+            and(
+              eq(ContentStructureNode.ownerUnitId, ownerUnitId),
+              eq(ContentStructureNode.isDeleted, false),
+            ),
+          )
+          .orderBy(
+            ContentStructureNode.parentId,
+            ContentStructureNode.position,
+          ),
+      ]);
+      const row = container[0];
+      if (!row) throw new Error(`ContentStructure not found: ${ownerUnitId}`);
+      return {
+        container: row,
+        nodes: nodes.map(mapContentStructureNodeRow),
+      };
+    },
+    async transaction(fn) {
+      const db = await getServerDb();
+      return db.transaction((tx) => fn(createDrizzleContentStructureTx(tx)));
+    },
+  };
+}
 
 export class ContentStructureService {
+  constructor(
+    private readonly repository: ContentStructureRepository = createDrizzleContentStructureRepository(),
+  ) {}
+
   async getByOwnerUnitId(
     ownerUnitId: string,
   ): Promise<ContentStructureResponse> {
-    const [container, nodeRows] = await Promise.all([
-      prisma.contentStructure.findUniqueOrThrow({
-        where: { ownerUnitId },
-        select: { ownerUnitId: true, createdAt: true, updatedAt: true },
-      }),
-      prisma.contentStructureNode.findMany({
-        where: { ownerUnitId, isDeleted: false },
-        orderBy: [{ parentId: "asc" }, { position: "asc" }],
-      }),
-    ]);
+    const { container, nodes } =
+      await this.repository.getByOwnerUnitId(ownerUnitId);
 
     return {
       ownerUnitId: container.ownerUnitId,
-      nodes: buildContentStructureTree(nodeRows),
+      nodes: buildContentStructureTree(nodes),
       createdAt: container.createdAt,
       updatedAt: container.updatedAt,
     };
   }
 
   async ensureForOwner(
-    tx: Prisma.TransactionClient,
+    tx: ContentStructureTx,
     ownerUnitId: string,
   ): Promise<void> {
-    await tx.contentStructure.upsert({
-      where: { ownerUnitId },
-      create: { ownerUnitId },
-      update: {},
-    });
+    await tx.ensureForOwner(ownerUnitId);
   }
 
   async update(
@@ -96,14 +340,11 @@ export class ContentStructureService {
     submitted: ContentStructureItem[],
     options: SaveOptions = {},
   ): Promise<ContentStructureResponse> {
-    await prisma.$transaction(async (tx) => {
+    await this.repository.transaction(async (tx) => {
       await this.ensureForOwner(tx, ownerUnitId);
       const actorUserId =
         options.actorUserId ?? (await resolveRezicsWikiUserId());
-      const allRows = await tx.contentStructureNode.findMany({
-        where: { ownerUnitId },
-        select: EXISTING_ROW_SELECT,
-      });
+      const allRows = await tx.findNodes(ownerUnitId);
       const current = allRows.filter((row) => !row.isDeleted);
       const deletedById = new Map(
         allRows.filter((row) => row.isDeleted).map((row) => [row.id, row]),
@@ -143,18 +384,7 @@ export class ContentStructureService {
       for (const plan of planned) {
         const existing = currentById.get(plan.id);
         if (!existing) {
-          await tx.contentStructureNode.create({
-            data: {
-              id: plan.id,
-              ownerUnitId,
-              parentId: plan.parentId,
-              position: plan.position,
-              contentUnitId: plan.contentUnitId ?? null,
-              title: plan.title,
-              noContent: plan.noContent,
-              rating: plan.rating ?? null,
-            },
-          });
+          await tx.createNode(ownerUnitId, plan);
           mutated = true;
           continue;
         }
@@ -167,16 +397,13 @@ export class ContentStructureService {
           existing.noContent !== plan.noContent ||
           (existing.rating ?? null) !== (plan.rating ?? null)
         ) {
-          await tx.contentStructureNode.update({
-            where: { id: plan.id },
-            data: {
-              parentId: plan.parentId,
-              position: plan.position,
-              contentUnitId: plan.contentUnitId ?? null,
-              title: plan.title,
-              noContent: plan.noContent,
-              rating: plan.rating ?? null,
-            },
+          await tx.updateNode(plan.id, {
+            parentId: plan.parentId,
+            position: plan.position,
+            contentUnitId: plan.contentUnitId ?? null,
+            title: plan.title,
+            noContent: plan.noContent,
+            rating: plan.rating ?? null,
           });
           mutated = true;
         }
@@ -187,12 +414,9 @@ export class ContentStructureService {
         // (insert/delete/move/rename, rating or noContent toggle) — never on
         // chapter body edits, which propagate to the node's own `updatedAt`
         // separately.
-        await tx.contentStructure.update({
-          where: { ownerUnitId },
-          data: { updatedAt: new Date() },
-        });
+        await tx.updateContainer(ownerUnitId);
         await rebuildContentStructureAnchors(tx, ownerUnitId);
-        await options.afterMutate?.(tx, { ownerUnitId, submitted });
+        await options.afterMutate?.(tx.mutationTx, { ownerUnitId, submitted });
         await writeSequencedHistoryOutbox(tx, {
           unitId: ownerUnitId,
           actorUserId,
@@ -224,33 +448,23 @@ export class ContentStructureService {
   ): Promise<void> {
     const targetIds = [...new Set(nodeIds)];
     if (targetIds.length === 0) return;
-    await prisma.$transaction(async (tx) => {
+    await this.repository.transaction(async (tx) => {
       const actorUserId =
         options.actorUserId ?? (await resolveRezicsWikiUserId());
-      const targets = await tx.contentStructureNode.findMany({
-        where: { ownerUnitId, id: { in: targetIds } },
-        select: EXISTING_ROW_SELECT,
-      });
+      const targets = await tx.findNodes(ownerUnitId, { ids: targetIds });
       const aliveTargets = targets.filter((row) => !row.isDeleted);
       if (aliveTargets.length === 0) return;
       const aliveTargetIds = aliveTargets.map((row) => row.id);
 
-      const promotedChildren = await tx.contentStructureNode.findMany({
-        where: {
-          ownerUnitId,
-          isDeleted: false,
-          parentId: { in: aliveTargetIds },
-          id: { notIn: aliveTargetIds },
-        },
-        select: { id: true },
+      const promotedChildren = await tx.findNodes(ownerUnitId, {
+        isDeleted: false,
+        parentIds: aliveTargetIds,
+        excludeIds: aliveTargetIds,
       });
       const promotedChildIds = promotedChildren.map((row) => row.id);
 
       await softDeleteNodesInTx(tx, ownerUnitId, aliveTargetIds);
-      await tx.contentStructure.update({
-        where: { ownerUnitId },
-        data: { updatedAt: new Date() },
-      });
+      await tx.updateContainer(ownerUnitId);
       await rebuildContentStructureAnchors(tx, ownerUnitId);
 
       await writeSequencedHistoryOutbox(tx, {
@@ -295,13 +509,10 @@ export class ContentStructureService {
   ): Promise<void> {
     const targetIds = [...new Set(nodeIds)];
     if (targetIds.length === 0) return;
-    await prisma.$transaction(async (tx) => {
+    await this.repository.transaction(async (tx) => {
       const actorUserId =
         options.actorUserId ?? (await resolveRezicsWikiUserId());
-      const candidates = await tx.contentStructureNode.findMany({
-        where: { ownerUnitId, id: { in: targetIds } },
-        select: EXISTING_ROW_SELECT,
-      });
+      const candidates = await tx.findNodes(ownerUnitId, { ids: targetIds });
       const deletedTargets = candidates.filter((row) => row.isDeleted);
       if (deletedTargets.length === 0) return;
 
@@ -315,10 +526,7 @@ export class ContentStructureService {
       const parents =
         parentIds.length === 0
           ? []
-          : await tx.contentStructureNode.findMany({
-              where: { id: { in: parentIds } },
-              select: { id: true, isDeleted: true },
-            });
+          : await tx.findNodes(ownerUnitId, { ids: parentIds });
       const parentById = new Map(parents.map((row) => [row.id, row]));
 
       const operations: ContentStructureBatchOperation[] = [];
@@ -330,13 +538,10 @@ export class ContentStructureService {
           target.parentId !== null &&
           (!originalParent || originalParent.isDeleted);
         const restoredParentId = fallbackToRoot ? null : target.parentId;
-        await tx.contentStructureNode.update({
-          where: { id: target.id },
-          data: {
-            isDeleted: false,
-            deletedAt: null,
-            parentId: restoredParentId,
-          },
+        await tx.updateNode(target.id, {
+          isDeleted: false,
+          deletedAt: null,
+          parentId: restoredParentId,
         });
         operations.push({
           op: "node.restore",
@@ -349,10 +554,7 @@ export class ContentStructureService {
         });
       }
 
-      await tx.contentStructure.update({
-        where: { ownerUnitId },
-        data: { updatedAt: new Date() },
-      });
+      await tx.updateContainer(ownerUnitId);
       await rebuildContentStructureAnchors(tx, ownerUnitId);
 
       await writeSequencedHistoryOutbox(tx, {
@@ -375,21 +577,15 @@ export class ContentStructureService {
   }
 
   async getNodeByPath(
-    tx: Prisma.TransactionClient,
+    tx: ContentStructureTx,
     ownerUnitId: string,
     path: readonly number[],
   ): Promise<{
     container: { ownerUnitId: string; updatedAt: Date };
     node: ContentStructureNodeRow | null;
   }> {
-    const container = await tx.contentStructure.findUniqueOrThrow({
-      where: { ownerUnitId },
-      select: { ownerUnitId: true, updatedAt: true },
-    });
-    const nodeRows = await tx.contentStructureNode.findMany({
-      where: { ownerUnitId, isDeleted: false },
-      orderBy: [{ parentId: "asc" }, { position: "asc" }],
-    });
+    const container = await tx.getContainer(ownerUnitId);
+    const nodeRows = await tx.findNodes(ownerUnitId, { isDeleted: false });
     return {
       container,
       node: resolveContentStructurePath(nodeRows, path),
@@ -478,59 +674,32 @@ export function buildContentStructureAnchorRows(
 }
 
 export async function rebuildContentStructureAnchors(
-  tx: Prisma.TransactionClient,
+  tx: ContentStructureTx,
   ownerUnitId: string,
 ): Promise<void> {
-  const rows = await tx.contentStructureNode.findMany({
-    where: { ownerUnitId, isDeleted: false },
-    select: {
-      id: true,
-      parentId: true,
-      position: true,
-      contentUnitId: true,
-      title: true,
-    },
-  });
+  const rows = await tx.findNodes(ownerUnitId, { isDeleted: false });
   const anchors = buildContentStructureAnchorRows(ownerUnitId, rows);
 
-  await tx.contentStructureAnchor.deleteMany({ where: { ownerUnitId } });
-  if (anchors.length === 0) return;
-
-  await tx.contentStructureAnchor.createMany({
-    data: anchors.map((anchor) => ({
-      nodeId: anchor.nodeId,
-      ownerUnitId: anchor.ownerUnitId,
-      contentUnitId: anchor.contentUnitId,
-      parentNodeId: anchor.parentNodeId,
-      ancestorNodeIds: anchor.ancestorNodeIds,
-      path: anchor.path,
-      depth: anchor.depth,
-      position: anchor.position,
-      positionPath: anchor.positionPath,
-      titlePath: anchor.titlePath,
-    })),
-  });
+  await tx.deleteAnchors(ownerUnitId);
+  await tx.createAnchors(anchors);
 }
 
 async function softDeleteNodesInTx(
-  tx: Prisma.TransactionClient,
+  tx: ContentStructureTx,
   ownerUnitId: string,
   nodeIds: readonly string[],
 ): Promise<void> {
   if (nodeIds.length === 0) return;
-  await tx.contentStructureNode.updateMany({
-    where: {
-      ownerUnitId,
-      isDeleted: false,
-      parentId: { in: [...nodeIds] },
-      id: { notIn: [...nodeIds] },
-    },
-    data: { parentId: null },
-  });
-  await tx.contentStructureNode.updateMany({
-    where: { ownerUnitId, id: { in: [...nodeIds] }, isDeleted: false },
-    data: { isDeleted: true, deletedAt: new Date() },
-  });
+  await tx.updateManyNodes(
+    ownerUnitId,
+    { isDeleted: false, parentIds: nodeIds, excludeIds: nodeIds },
+    { parentId: null },
+  );
+  await tx.updateManyNodes(
+    ownerUnitId,
+    { ids: nodeIds, isDeleted: false },
+    { isDeleted: true, deletedAt: new Date() },
+  );
 }
 
 function rejectResurrectedIds(

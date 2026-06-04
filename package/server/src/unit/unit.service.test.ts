@@ -1,10 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
+import type { UnitRepository, UnitService } from "./unit.service";
+import type { UnitWithRelations } from "./types";
 
-installPrismaClientMock();
 mock.module("@/content-doc/prisma-json", () => ({
   nullableContentDocJson: (value: unknown) => value ?? null,
 }));
@@ -39,9 +36,85 @@ mock.module("@/utils/errors", () => ({
       this.status = status;
     }
   },
+  forbidden: (message: string) => new Error(`Forbidden: ${message}`),
+  notFound: (message: string) => new Error(`${message} not found`),
+  unauthorized: (message: string) => new Error(`Unauthorized: ${message}`),
 }));
 
 const { buildUnitWhereClause } = await import("./unit.service");
+
+function unitRow(
+  overrides: Partial<UnitWithRelations> = {},
+): UnitWithRelations {
+  const now = new Date("2026-01-01T00:00:00.000Z");
+  return {
+    id: "unit-1",
+    type: "BOOK",
+    slug: null,
+    slugScope: "global",
+    userId: null,
+    defaultLanguage: null,
+    isLanguageNeutral: false,
+    status: "DRAFT",
+    visibility: "PUBLIC",
+    rating: "GENERAL",
+    extra: null,
+    createdAt: now,
+    updatedAt: now,
+    publishedAt: null,
+    subscriberCount: 0,
+    licenseSlug: null,
+    aiDisclosureMode: "UNKNOWN",
+    aiDisclosureDetails: null,
+    catalogEntryKind: null,
+    targetUnitId: null,
+    moderationStatus: "APPROVED",
+    translations: [],
+    supportLanguages: [],
+    ...overrides,
+  };
+}
+
+function createRepositoryStub(
+  overrides: Partial<UnitRepository> = {},
+): UnitRepository {
+  return {
+    list: mock(async () => ({ units: [], total: 0 })),
+    getByUnitId: mock(async (unitId) => unitRow({ id: unitId })),
+    create: mock(async (input) =>
+      unitRow({
+        id: "unit-1",
+        type: input.type as UnitWithRelations["type"],
+        catalogEntryKind:
+          input.catalogEntryKind === undefined
+            ? null
+            : (input.catalogEntryKind as UnitWithRelations["catalogEntryKind"]),
+        targetUnitId:
+          input.targetUnitId === undefined ? null : input.targetUnitId,
+      }),
+    ),
+    update: mock(async (unitId, input) =>
+      unitRow({
+        id: unitId,
+        catalogEntryKind:
+          input.catalogEntryKind === undefined
+            ? null
+            : (input.catalogEntryKind as UnitWithRelations["catalogEntryKind"]),
+        targetUnitId:
+          input.targetUnitId === undefined ? null : input.targetUnitId,
+      }),
+    ),
+    getBySlug: mock(async () => null),
+    setSlug: mock(async (unitId, slug) => unitRow({ id: unitId, slug })),
+    delete: mock(async () => {}),
+    ...overrides,
+  };
+}
+
+async function createService(repository: UnitRepository) {
+  const module = await import("./unit.service");
+  return new module.UnitService(repository) as UnitService;
+}
 
 describe("buildUnitWhereClause", () => {
   test("searches operator lookup fields and structured filters", () => {
@@ -107,87 +180,49 @@ describe("buildUnitWhereClause", () => {
 
 describe("UnitService catalog identity", () => {
   test("persists catalog identity on create", async () => {
-    const create = mock(async (_args: any) => ({ id: "variant-1" }));
-    const findUniqueOrThrow = mock(async () => ({
-      id: "variant-1",
-      type: "BOOK",
-      catalogEntryKind: "VARIANT",
-      targetUnitId: "main-entry-1",
-      translations: [],
-    }));
-    Object.assign(prismaMock, {
-      $transaction: async (fn: any) =>
-        fn({
-          unit: { create, findUniqueOrThrow },
-        }),
-    });
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
 
-    const { UnitService } = await import("./unit.service");
-    await new UnitService().create({
+    await service.create({
       type: "BOOK",
       catalogEntryKind: "VARIANT",
       targetUnitId: "main-entry-1",
     });
 
-    expect(create.mock.calls[0]?.[0].data).toMatchObject({
+    expect(repository.create).toHaveBeenCalledWith({
       type: "BOOK",
       catalogEntryKind: "VARIANT",
       targetUnitId: "main-entry-1",
     });
   });
 
-  test("creates a primary support language from the first inline translation", async () => {
-    const create = mock(async (_args: any) => ({ id: "book-1" }));
-    const findUniqueOrThrow = mock(async () => ({
-      id: "book-1",
-      type: "BOOK",
-      translations: [],
-      supportLanguages: [],
-    }));
-    Object.assign(prismaMock, {
-      $transaction: async (fn: any) =>
-        fn({
-          unit: { create, findUniqueOrThrow },
-        }),
-    });
+  test("passes inline translations through create for primary support language persistence", async () => {
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
 
-    const { UnitService } = await import("./unit.service");
-    await new UnitService().create({
+    await service.create({
       type: "BOOK",
       translations: [{ language: "ja", title: "銀河鉄道の夜" }],
     });
 
-    expect(create.mock.calls[0]?.[0].data).toMatchObject({
-      supportLanguages: {
-        create: { language: "ja", isPrimary: true, sortOrder: 0 },
-      },
+    expect(repository.create).toHaveBeenCalledWith({
+      type: "BOOK",
+      translations: [{ language: "ja", title: "銀河鉄道の夜" }],
     });
-    expect(create.mock.calls[0]?.[0].data).not.toHaveProperty(
-      "defaultLanguage",
-    );
   });
 
   test("patches catalog identity on update for search projection sync", async () => {
-    const update = mock(async (_args: any) => ({
-      id: "variant-1",
-      type: "BOOK",
-      catalogEntryKind: "MAIN",
-      targetUnitId: null,
-      translations: [],
-    }));
-    Object.assign(prismaMock, {
-      unit: { update },
-    });
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
 
-    const { UnitService } = await import("./unit.service");
-    await new UnitService().update("variant-1", {
+    await service.update("variant-1", {
       catalogEntryKind: "MAIN",
       targetUnitId: null,
     });
 
-    expect(update.mock.calls[0]?.[0]).toMatchObject({
-      where: { id: "variant-1" },
-      data: { catalogEntryKind: "MAIN", targetUnitId: null },
+    expect(repository.update).toHaveBeenCalledWith("variant-1", {
+      catalogEntryKind: "MAIN",
+      targetUnitId: null,
     });
   });
 });

@@ -5,7 +5,15 @@ import {
   isExternallyGoverned,
   type RezicsSessionClaims,
 } from "@rezics/contract";
-import { AppError } from "@/utils/errors";
+import { eq, sql } from "drizzle-orm";
+import {
+  HistoryOutbox,
+  StaffAuditLog,
+  Unit,
+  UnitCollaborator,
+  UnitFieldLock,
+} from "../db/schema";
+import { AppError } from "../utils/errors";
 import { assertCanEditUnitFields, UnitAuthorityError } from "./authority";
 import {
   buildEditorialRevisionPayload,
@@ -42,6 +50,105 @@ export type CollaborativeMetadataTx = HistoryOutboxWriter & {
     }): Promise<unknown>;
   };
 };
+
+type CollaborativeMetadataDrizzleTx = {
+  execute(query: unknown): Promise<{ rows: unknown[] }>;
+  select: typeof import("../db/client").db.select;
+  insert: typeof import("../db/client").db.insert;
+};
+
+export function createDrizzleCollaborativeMetadataTx(
+  tx: CollaborativeMetadataDrizzleTx,
+): CollaborativeMetadataTx {
+  return {
+    async $queryRaw(_strings, ...values) {
+      const [unitId] = values;
+      const result = await tx.execute(sql`
+        INSERT INTO "UnitHistoryClock" ("unitId", "nextSequence", "updatedAt")
+        VALUES (${unitId}::uuid, 2, now())
+        ON CONFLICT ("unitId")
+        DO UPDATE SET
+          "nextSequence" = "UnitHistoryClock"."nextSequence" + 1,
+          "updatedAt" = now()
+        RETURNING "nextSequence" - 1 AS sequence
+      `);
+      return result.rows as never;
+    },
+    historyOutbox: {
+      async create(input) {
+        await tx.insert(HistoryOutbox).values({
+          unitId: input.data.unitId,
+          sequence: Number(input.data.sequence),
+          actorUserId: input.data.actorUserId,
+          category: input.data.category,
+          payload: input.data.payload,
+          payloadHash: input.data.payloadHash,
+          updatedAt: new Date(),
+        });
+      },
+    },
+    unit: {
+      async findUniqueOrThrow(input) {
+        const [unit] = await tx
+          .select({ id: Unit.id, userId: Unit.userId })
+          .from(Unit)
+          .where(eq(Unit.id, input.where.id))
+          .limit(1);
+        if (!unit) throw new Error(`Unit not found: ${input.where.id}`);
+        return unit;
+      },
+    },
+    unitCollaborator: {
+      async findUnique(input) {
+        const { unitId, userId } = (
+          input as {
+            where: { unitId_userId: { unitId: string; userId: string } };
+          }
+        ).where.unitId_userId;
+        const [collaborator] = await tx
+          .select({ roleKey: UnitCollaborator.roleKey })
+          .from(UnitCollaborator)
+          .where(
+            sql`${UnitCollaborator.unitId} = ${unitId}::uuid AND ${UnitCollaborator.userId} = ${userId}::uuid`,
+          )
+          .limit(1);
+        return collaborator ?? null;
+      },
+    },
+    unitFieldLock: {
+      async findMany(input) {
+        const unitId = (input as { where: { unitId: string } }).where.unitId;
+        return tx
+          .select({ path: UnitFieldLock.path })
+          .from(UnitFieldLock)
+          .where(eq(UnitFieldLock.unitId, unitId));
+      },
+    },
+    staffAuditLog: {
+      async create(input) {
+        const data = input.data as typeof input.data & {
+          before?: unknown;
+          after?: unknown;
+        };
+        await tx.insert(StaffAuditLog).values({
+          actorUserId: data.actorUserId,
+          action: data.action,
+          targetKind: data.targetKind,
+          targetId: data.targetId,
+          decisionCode: data.decisionCode,
+          reason: data.reason,
+          metadata: {
+            ...(data.metadata && typeof data.metadata === "object"
+              ? (data.metadata as Record<string, unknown>)
+              : {}),
+            ...(data.before === undefined ? {} : { before: data.before }),
+            ...(data.after === undefined ? {} : { after: data.after }),
+          },
+        });
+      },
+    },
+  };
+}
 
 const COLLABORATIVE_METADATA_POLICY = { collaborative: true } as const;
 
@@ -81,7 +188,25 @@ export async function assertCanEditCollaborativeMetadata(
       unit,
       patchPaths,
       COLLABORATIVE_METADATA_POLICY,
-      { prismaClient: tx as any, verifyAdmin: options.verifyAdmin },
+      {
+        lookup: {
+          async findCollaboratorRole(unitId, userId) {
+            const collaborator = await tx.unitCollaborator.findUnique({
+              where: { unitId_userId: { unitId, userId } },
+              select: { roleKey: true },
+            });
+            return collaborator?.roleKey ?? null;
+          },
+          async listFieldLockPaths(unitId) {
+            const locks = await tx.unitFieldLock.findMany({
+              where: { unitId },
+              select: { path: true },
+            });
+            return locks.map((lock) => lock.path);
+          },
+        },
+        verifyAdmin: options.verifyAdmin,
+      },
     );
   } catch (error) {
     toAppError(error);

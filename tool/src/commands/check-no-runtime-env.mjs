@@ -13,7 +13,6 @@ function shouldSkipFile(relativePath) {
     relativePath.endsWith(".test.js") ||
     relativePath.endsWith(".test.jsx") ||
     relativePath.endsWith(`${join("env.ts")}`) ||
-    relativePath.includes(`${join("prisma", "")}`) ||
     relativePath.endsWith("vite.config.ts") ||
     relativePath.endsWith("vite.config.js") ||
     relativePath.endsWith("vite.config.mjs") ||

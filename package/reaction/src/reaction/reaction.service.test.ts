@@ -1,4 +1,10 @@
-import { beforeAll, describe, expect, mock, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
+import {
+  type CreateReactionInput,
+  type ListReactionRowsInput,
+  type ReactionRepository,
+  type RemoveReactionInput,
+} from "./reaction.repository";
 
 process.env.NODE_ENV = "test";
 process.env.REACTION_DATABASE_URL ??=
@@ -47,101 +53,13 @@ function usageKey(input: { userId: string; targetId: string }) {
   return `${input.userId}|${input.targetId}`;
 }
 
-const findManyMock = mock(async (args: any) => {
-  const where = args?.where ?? {};
-  let rows = [...allRows];
-
-  if (typeof where.userId === "string") {
-    rows = rows.filter((r) => r.userId === where.userId);
-  } else if (where.userId?.not) {
-    rows = rows.filter((r) => r.userId !== where.userId.not);
-  }
-  if (where.targetId?.in) {
-    const set = new Set<string>(where.targetId.in);
-    rows = rows.filter((r) => set.has(r.targetId));
-  }
-  if (where.reaction?.in) {
-    const set = new Set<string>(where.reaction.in);
-    rows = rows.filter((r) => set.has(r.reaction));
-  }
-  if (typeof where.scopeKey === "string") {
-    rows = rows.filter((r) => r.scopeKey === where.scopeKey);
-  }
-
-  if (Array.isArray(where.OR)) {
-    const cursorBranch = where.OR.find((b: any) => b.createdAt?.lt);
-    const cursorEqualBranch = where.OR.find((b: any) => Array.isArray(b.AND));
-    if (cursorBranch && cursorEqualBranch) {
-      const cutoff: Date = cursorBranch.createdAt.lt;
-      const equalAnd = cursorEqualBranch.AND;
-      const equalDate: Date = equalAnd[0].createdAt;
-      const idLt: string = equalAnd[1].id.lt;
-      rows = rows.filter(
-        (r) =>
-          r.createdAt.getTime() < cutoff.getTime() ||
-          (r.createdAt.getTime() === equalDate.getTime() && r.id < idLt),
-      );
-    }
-  }
-
-  rows.sort((a, b) => {
-    const t = b.createdAt.getTime() - a.createdAt.getTime();
-    if (t !== 0) return t;
-    return b.id.localeCompare(a.id);
-  });
-
-  if (typeof args?.take === "number") rows = rows.slice(0, args.take);
-  return rows;
-});
-
-const prismaMock: any = {
-  $transaction: async (fn: any) => fn(prismaMock),
-  reaction: {
-    findMany: findManyMock,
-    findUnique: mock(async ({ where }: any) => {
-      const compound = where.userId_targetId_reaction_scopeKey;
-      return (
-        allRows.find((row) => reactionKey(row) === reactionKey(compound)) ??
-        null
-      );
-    }),
-    create: mock(async ({ data }: any) => {
-      const created = row(allRows.length + 1, {
-        id: `created-${allRows.length + 1}`,
-        userId: data.userId,
-        targetId: data.targetId,
-        reaction: data.reaction,
-        scopeKey: data.scopeKey,
-      });
-      allRows.push(created);
-      return created;
-    }),
-    delete: mock(async ({ where }: any) => {
-      const compound = where.userId_targetId_reaction_scopeKey;
-      const index = allRows.findIndex(
-        (row) => reactionKey(row) === reactionKey(compound),
-      );
-      const [deleted] = allRows.splice(index, 1);
-      return deleted;
-    }),
-  },
-  reactionSummary: {
-    findMany: mock(async ({ where }: any) => {
-      let rows = Array.from(summaries.values());
-      if (where?.targetId?.in) {
-        const ids = new Set(where.targetId.in);
-        rows = rows.filter((row) => ids.has(row.targetId));
-      }
-      if (where?.scopeKey) {
-        rows = rows.filter((row) => row.scopeKey === where.scopeKey);
-      }
-      return rows;
-    }),
-    groupBy: mock(async ({ where }: any) => {
-      const ids = new Set(where.targetId.in);
+class InMemoryReactionRepository implements ReactionRepository {
+  async getSummaryRows(targetIds: string[], scopeKey: string | undefined) {
+    const ids = new Set(targetIds);
+    if (scopeKey === undefined) {
       const grouped = new Map<
         string,
-        { targetId: string; reaction: string; _sum: { count: number } }
+        { targetId: string; reaction: string; count: number }
       >();
       for (const row of summaries.values()) {
         if (!ids.has(row.targetId)) continue;
@@ -149,76 +67,169 @@ const prismaMock: any = {
         const current = grouped.get(key) ?? {
           targetId: row.targetId,
           reaction: row.reaction,
-          _sum: { count: 0 },
+          count: 0,
         };
-        current._sum.count += row.count;
+        current.count += row.count;
         grouped.set(key, current);
       }
       return Array.from(grouped.values());
-    }),
-    upsert: mock(async ({ where, create, update }: any) => {
-      const key = summaryKey(where.targetId_reaction_scopeKey);
-      const current = summaries.get(key);
-      if (current) {
-        current.count += update.count.increment;
-        return current;
-      }
-      summaries.set(key, { ...create });
-      return summaries.get(key);
-    }),
-    update: mock(async ({ where, data }: any) => {
-      const key = summaryKey(where.targetId_reaction_scopeKey);
-      const current = summaries.get(key);
-      if (!current) throw new Error("summary missing");
-      current.count += data.count.decrement;
-      return current;
-    }),
-  },
-  reactionTargetUsage: {
-    fields: { maxActive: Symbol("maxActive") },
-    upsert: mock(async ({ where, create }: any) => {
-      const key = usageKey(where.userId_targetId);
-      const current = usages.get(key);
-      if (current) return current;
-      usages.set(key, { ...create });
-      return usages.get(key);
-    }),
-    updateMany: mock(async ({ where, data }: any) => {
-      const key = usageKey(where);
-      const current = usages.get(key);
-      if (!current || current.activeCount >= current.maxActive)
-        return { count: 0 };
-      current.activeCount += data.activeCount.increment;
-      return { count: 1 };
-    }),
-    update: mock(async ({ where, data }: any) => {
-      const current = usages.get(usageKey(where.userId_targetId));
-      if (!current) throw new Error("usage missing");
-      current.activeCount -= data.activeCount.decrement;
-      return current;
-    }),
-  },
-};
+    }
 
-mock.module("#/prisma/client", () => ({
-  prisma: prismaMock,
-}));
+    return Array.from(summaries.values()).filter(
+      (row) => ids.has(row.targetId) && row.scopeKey === scopeKey,
+    );
+  }
 
-let service: any;
-let TargetIdsOverflowError: any;
-let MalformedCursorError: any;
-let ReactionQuotaExceededError: any;
-let encodeCursor: any;
+  async getUserReactionRows(
+    userId: string,
+    targetIds: string[],
+    scopeKey: string,
+  ) {
+    const ids = new Set(targetIds);
+    return allRows
+      .filter(
+        (row) =>
+          row.userId === userId &&
+          ids.has(row.targetId) &&
+          row.scopeKey === scopeKey,
+      )
+      .map((row) => ({ targetId: row.targetId, reaction: row.reaction }));
+  }
 
-beforeAll(async () => {
-  const mod = await import("./reaction.service");
-  service = mod.reactionService;
-  TargetIdsOverflowError = mod.TargetIdsOverflowError;
-  MalformedCursorError = mod.MalformedCursorError;
-  ReactionQuotaExceededError = mod.ReactionQuotaExceededError;
-  const cursorMod = await import("./cursor");
-  encodeCursor = cursorMod.encodeCursor;
-});
+  async listRows(input: ListReactionRowsInput) {
+    let rows = [...allRows];
+
+    if (input.userId) {
+      rows = rows.filter((row) => row.userId === input.userId);
+    }
+    if (input.excludeUserId) {
+      rows = rows.filter((row) => row.userId !== input.excludeUserId);
+    }
+    if (input.targetIds) {
+      const ids = new Set(input.targetIds);
+      rows = rows.filter((row) => ids.has(row.targetId));
+    }
+    if (input.reactions && input.reactions.length > 0) {
+      const reactions = new Set(input.reactions);
+      rows = rows.filter((row) => reactions.has(row.reaction));
+    }
+    if (input.scopeKey) {
+      rows = rows.filter((row) => row.scopeKey === input.scopeKey);
+    }
+    if (input.cursor) {
+      rows = rows.filter(
+        (row) =>
+          row.createdAt.getTime() < input.cursor!.createdAt.getTime() ||
+          (row.createdAt.getTime() === input.cursor!.createdAt.getTime() &&
+            row.id < input.cursor!.id),
+      );
+    }
+
+    rows.sort((a, b) => {
+      const t = b.createdAt.getTime() - a.createdAt.getTime();
+      if (t !== 0) return t;
+      return b.id.localeCompare(a.id);
+    });
+
+    return rows.slice(0, input.take);
+  }
+
+  async createReaction(input: CreateReactionInput) {
+    const existing =
+      allRows.find((row) => reactionKey(row) === reactionKey(input)) ?? null;
+    if (existing) {
+      return { reaction: existing, created: false, quotaExceeded: false };
+    }
+
+    const key = usageKey(input);
+    const usage =
+      usages.get(key) ??
+      ({
+        userId: input.userId,
+        targetId: input.targetId,
+        activeCount: 0,
+        maxActive: input.defaultQuota,
+      } satisfies {
+        userId: string;
+        targetId: string;
+        activeCount: number;
+        maxActive: number;
+      });
+    usages.set(key, usage);
+    if (usage.activeCount >= usage.maxActive) {
+      return {
+        reaction: null as never,
+        created: false,
+        quotaExceeded: true,
+      };
+    }
+    usage.activeCount += 1;
+
+    const created = row(allRows.length + 1, {
+      id: `created-${allRows.length + 1}`,
+      userId: input.userId,
+      targetId: input.targetId,
+      reaction: input.reaction,
+      scopeKey: input.scopeKey,
+    });
+    allRows.push(created);
+
+    const sk = summaryKey(input);
+    const summary =
+      summaries.get(sk) ??
+      ({
+        targetId: input.targetId,
+        reaction: input.reaction,
+        scopeKey: input.scopeKey,
+        count: 0,
+      } satisfies {
+        targetId: string;
+        reaction: string;
+        scopeKey: string;
+        count: number;
+      });
+    summary.count += 1;
+    summaries.set(sk, summary);
+
+    return { reaction: created, created: true, quotaExceeded: false };
+  }
+
+  async removeReaction(input: RemoveReactionInput) {
+    const index = allRows.findIndex(
+      (row) => reactionKey(row) === reactionKey(input),
+    );
+    if (index < 0) return { deleted: false };
+
+    allRows.splice(index, 1);
+    const summary = summaries.get(summaryKey(input));
+    if (summary) summary.count -= 1;
+    const usage = usages.get(usageKey(input));
+    if (usage) usage.activeCount -= 1;
+    return { deleted: true };
+  }
+
+  async cleanupTarget(targetId: string) {
+    const before = allRows.length;
+    allRows = allRows.filter((row) => row.targetId !== targetId);
+    for (const key of summaries.keys()) {
+      if (key.startsWith(`${targetId}|`)) summaries.delete(key);
+    }
+    for (const [key, usage] of usages) {
+      if (usage.targetId === targetId) usages.delete(key);
+    }
+    return { count: before - allRows.length };
+  }
+}
+
+const {
+  MalformedCursorError,
+  ReactionQuotaExceededError,
+  ReactionService,
+  TargetIdsOverflowError,
+} = await import("./reaction.service");
+const { encodeCursor } = await import("./cursor");
+
+const service = new ReactionService(new InMemoryReactionRepository());
 
 function seed(rows: FakeReactionRow[]) {
   allRows = rows;
@@ -302,7 +313,7 @@ describe("reactionService.listGiven", () => {
     const second = await service.listGiven({
       userId: "u",
       limit: 2,
-      cursor: first.nextCursor,
+      cursor: first.nextCursor ?? undefined,
     });
     expect(second.items.length).toBe(1);
     expect(second.nextCursor).toBeNull();
@@ -396,7 +407,7 @@ describe("reactionService.listByUser", () => {
     const second = await service.listByUser({
       targetIds: ["t-1"],
       limit: 2,
-      cursor: first.nextCursor,
+      cursor: first.nextCursor ?? undefined,
     });
     expect(second.items.length).toBe(1);
     expect(second.nextCursor).toBeNull();

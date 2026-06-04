@@ -1,10 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
-
-installPrismaClientMock();
+import type {
+  GovernanceAuditRepository,
+  GovernanceAuditService,
+} from "./audit.service";
 
 const auditRow = {
   id: "audit-1",
@@ -27,17 +25,34 @@ const auditRow = {
 };
 
 beforeEach(() => {
-  prismaMock.staffAuditLog = {
-    findMany: mock(async () => [auditRow]),
-    findUnique: mock(async () => auditRow),
-  };
+  list.mockClear();
+  get.mockClear();
 });
+
+const list = mock(async () => [auditRow]);
+const get = mock(async () => auditRow);
+
+function createRepository(): GovernanceAuditRepository {
+  return {
+    create: mock(async (input) => ({
+      ...auditRow,
+      ...input,
+      requestId: input.requestId ?? null,
+      metadata: input.metadata ?? null,
+    })),
+    list,
+    get,
+  };
+}
+
+async function createService(): Promise<GovernanceAuditService> {
+  const { GovernanceAuditService } = await import("./audit.service");
+  return new GovernanceAuditService(createRepository());
+}
 
 describe("GovernanceAuditService", () => {
   test("lists audit records with filters and redacts sensitive fields", async () => {
-    const { governanceAuditService } = await import("./audit.service");
-
-    const rows = await governanceAuditService.list({
+    const rows = await (await createService()).list({
       actorUserId: "staff-1",
       action: "session.revoke",
       targetKind: "session",
@@ -48,18 +63,15 @@ describe("GovernanceAuditService", () => {
       limit: 5,
     });
 
-    expect(prismaMock.staffAuditLog.findMany).toHaveBeenCalledWith({
-      where: {
-        actorUserId: "staff-1",
-        action: "session.revoke",
-        targetKind: "session",
-        targetId: "session-1",
-        decisionCode: "ALLOWED",
-        requestId: "req-1",
-      },
-      orderBy: { createdAt: "desc" },
-      skip: 10,
-      take: 5,
+    expect(list).toHaveBeenCalledWith({
+      actorUserId: "staff-1",
+      action: "session.revoke",
+      targetKind: "session",
+      targetId: "session-1",
+      decisionCode: "ALLOWED",
+      requestId: "req-1",
+      offset: 10,
+      limit: 5,
     });
     expect(rows[0]).toMatchObject({
       metadata: {
@@ -74,13 +86,9 @@ describe("GovernanceAuditService", () => {
   });
 
   test("reads one audit record through the same redaction path", async () => {
-    const { governanceAuditService } = await import("./audit.service");
+    const row = await (await createService()).get("audit-1");
 
-    const row = await governanceAuditService.get("audit-1");
-
-    expect(prismaMock.staffAuditLog.findUnique).toHaveBeenCalledWith({
-      where: { id: "audit-1" },
-    });
+    expect(get).toHaveBeenCalledWith("audit-1");
     expect(row?.metadata?.credential).toBe("[REDACTED]");
     expect(
       (row?.metadata?.nested as Record<string, unknown>)?.privateNote,

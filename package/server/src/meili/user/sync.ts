@@ -1,16 +1,24 @@
 import { mainMarkdownSource } from "@rezics/contract";
 import { patchUserFields } from "@rezics/search";
-import { prisma } from "#/prisma/client";
-import { requireSlugScopeId } from "@/infra/slug-scopes";
+import { eq } from "drizzle-orm";
+import { Unit, User } from "../../db/schema";
+import { requireSlugScopeId } from "../../infra/slug-scopes";
 import { searchClient } from "../search-client";
 import type { UserSearchDocument } from "./index";
 
+async function getServerDb() {
+  const { db } = await import("../../db/client");
+  return db;
+}
+
 async function fetchCanonicalSlug(userId: string): Promise<string | null> {
   const userScope = requireSlugScopeId("user");
-  const unit = await prisma.unit.findUnique({
-    where: { id: userId },
-    select: { slug: true, slugScope: true, type: true },
-  });
+  const db = await getServerDb();
+  const [unit] = await db
+    .select({ slug: Unit.slug, slugScope: Unit.slugScope, type: Unit.type })
+    .from(Unit)
+    .where(eq(Unit.id, userId))
+    .limit(1);
   if (!unit || unit.type !== "USER" || unit.slugScope !== userScope) {
     return null;
   }
@@ -21,9 +29,12 @@ async function fetchCanonicalSlug(userId: string): Promise<string | null> {
  * Sync a single user (by unitId) into the Meilisearch `users` index.
  */
 export async function syncUserToMeili(userId: string): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { unitId: userId },
-  });
+  const db = await getServerDb();
+  const [user] = await db
+    .select()
+    .from(User)
+    .where(eq(User.unitId, userId))
+    .limit(1);
 
   if (!user) return;
   if (!user.name) {

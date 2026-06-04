@@ -3,17 +3,17 @@ import {
   type SlugAvailabilityResponse,
   validateSlug,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { env } from "@/env";
+import { and, eq } from "drizzle-orm";
 import {
   signRezicsProfileSetupToken,
   signRezicsSessionToken,
   verifyRezicsProfileSetupToken,
-} from "@/session/jwt/jwt.service";
-import { mapUserToDTO } from "@/user/models/mapper";
-import { normalizePreferredLanguages } from "@/user/service/settings.service";
-import { userService } from "@/user/service/user.service";
-import { governanceEnforcementService } from "../governance/enforcement.service";
+} from "../session/jwt/jwt.service";
+import { mapUserToDTO } from "../user/models/mapper";
+import { normalizePreferredLanguages } from "../user/service/settings.service";
+import { userService } from "../user/service/user.service";
+import { Unit, User } from "../db/schema";
+import { env } from "../env";
 import {
   fetchVerifiedRegistrationFacts,
   projectSlugToAuth,
@@ -263,8 +263,75 @@ function isUniqueConstraintError(error: unknown): boolean {
     error !== null &&
     typeof error === "object" &&
     "code" in error &&
-    (error as { code?: string }).code === "P2002"
+    (error as { code?: string }).code === "23505"
   );
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+async function getGovernanceEnforcementService() {
+  const { governanceEnforcementService } = await import(
+    "../governance/enforcement.service"
+  );
+  return governanceEnforcementService;
+}
+
+async function findUserWithSlugByAuthUser(authUserId: string): Promise<{
+  unitId: string;
+  authUserId: string | null;
+  slug: string | null;
+  permission: unknown;
+} | null> {
+  const db = await getServerDb();
+  const [row] = await db
+    .select({
+      unitId: User.unitId,
+      authUserId: User.authUserId,
+      slug: Unit.slug,
+      permission: User.permission,
+    })
+    .from(User)
+    .innerJoin(Unit, eq(User.unitId, Unit.id))
+    .where(eq(User.authUserId, authUserId))
+    .limit(1);
+  return row ?? null;
+}
+
+async function findUserWithSlugByUnitId(unitId: string): Promise<{
+  unitId: string;
+  authUserId: string | null;
+  slug: string | null;
+  permission: unknown;
+} | null> {
+  const db = await getServerDb();
+  const [row] = await db
+    .select({
+      unitId: User.unitId,
+      authUserId: User.authUserId,
+      slug: Unit.slug,
+      permission: User.permission,
+    })
+    .from(User)
+    .innerJoin(Unit, eq(User.unitId, Unit.id))
+    .where(eq(User.unitId, unitId))
+    .limit(1);
+  return row ?? null;
+}
+
+async function findUnitBySlugScopeAndSlug(input: {
+  slugScope: string;
+  slug: string;
+}): Promise<{ id: string; type: string } | null> {
+  const db = await getServerDb();
+  const [row] = await db
+    .select({ id: Unit.id, type: Unit.type })
+    .from(Unit)
+    .where(and(eq(Unit.slugScope, input.slugScope), eq(Unit.slug, input.slug)))
+    .limit(1);
+  return row ?? null;
 }
 
 async function findMainUserForAuthUser(authUserId: string): Promise<{
@@ -273,23 +340,7 @@ async function findMainUserForAuthUser(authUserId: string): Promise<{
   slug: string | null;
   permission: unknown;
 } | null> {
-  const user = await prisma.user.findUnique({
-    where: { authUserId },
-    select: { unitId: true, authUserId: true, permission: true },
-  });
-  if (!user) return null;
-
-  const unit = await prisma.unit.findUnique({
-    where: { id: user.unitId },
-    select: { slug: true },
-  });
-
-  return {
-    unitId: user.unitId,
-    authUserId: user.authUserId,
-    slug: unit?.slug ?? null,
-    permission: user.permission,
-  };
+  return findUserWithSlugByAuthUser(authUserId);
 }
 
 function buildAuthMainReconciliationDiagnostics(input: {
@@ -407,13 +458,11 @@ export async function checkAccountSlugAvailability(
     };
   }
 
-  const { requireSlugScopeId } = await import("@/infra/slug-scopes");
+  const { requireSlugScopeId } = await import("../infra/slug-scopes");
   const userScope = requireSlugScopeId("user");
-  const existing = await prisma.unit.findUnique({
-    where: {
-      slugScope_slug: { slugScope: userScope, slug: validation.normalized },
-    },
-    select: { id: true, type: true },
+  const existing = await findUnitBySlugScopeAndSlug({
+    slugScope: userScope,
+    slug: validation.normalized,
   });
 
   const taken = !!existing && existing.type === "USER";
@@ -562,21 +611,8 @@ export async function completeProfileSetupFromMain(
     );
   }
 
-  const user = await prisma.user.findUnique({
-    where: { unitId: claims.userId },
-    select: {
-      unitId: true,
-      authUserId: true,
-      permission: true,
-    },
-  });
-  const unit = user
-    ? await prisma.unit.findUnique({
-        where: { id: user.unitId },
-        select: { slug: true },
-      })
-    : null;
-  if (!user || (unit?.slug ?? null) !== null) {
+  const user = await findUserWithSlugByUnitId(claims.userId);
+  if (!user || user.slug !== null) {
     return jsonResponse(
       {
         success: false,
@@ -619,11 +655,9 @@ export async function completeProfileSetupFromMain(
       });
     }
 
-    const projectedPermission =
-      await governanceEnforcementService.projectedPermissionForUser(
-        activated.unitId,
-        activated.permission,
-      );
+    const projectedPermission = await (
+      await getGovernanceEnforcementService()
+    ).projectedPermissionForUser(activated.unitId, activated.permission);
     const token = await signRezicsSessionToken({
       userId: activated.unitId,
       permission: projectedPermission,
@@ -681,10 +715,9 @@ export async function getMainAwareAuthSessionState(
   const memberReady = mainUser?.slug != null;
   const registrationComplete = emailVerified && memberReady;
   const rezicsPermission = registrationComplete
-    ? await governanceEnforcementService.projectedPermissionForUser(
-        mainUser.unitId,
-        mainUser.permission,
-      )
+    ? await (
+        await getGovernanceEnforcementService()
+      ).projectedPermissionForUser(mainUser.unitId, mainUser.permission)
     : null;
   const readinessStatus = !emailVerified
     ? "pending-verification"
@@ -794,11 +827,9 @@ export async function refreshMainSessionFromAuth(
     );
   }
 
-  const permission =
-    await governanceEnforcementService.projectedPermissionForUser(
-      user.unitId,
-      user.permission,
-    );
+  const permission = await (
+    await getGovernanceEnforcementService()
+  ).projectedPermissionForUser(user.unitId, user.permission);
   const token = await signRezicsSessionToken({
     userId: user.unitId,
     permission,

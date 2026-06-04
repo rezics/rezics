@@ -1,8 +1,6 @@
-import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import { describe, expect, test } from "bun:test";
 import { mapGameSystemRequirementToDTO } from "./mapper";
-
-installPrismaClientMock();
+import { GameSystemRequirementService } from "./service";
 
 const now = new Date("2026-05-28T00:00:00.000Z");
 
@@ -22,67 +20,77 @@ function requirementRow(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function freshMocks() {
+function freshRepository() {
   const row = requirementRow();
-  Object.assign(prismaMock, {
-    game: {
-      findUniqueOrThrow: mock(async () => ({ unitId: "game-1" })),
+  const calls: Array<{ method: string; input: unknown }> = [];
+  return {
+    calls,
+    repository: {
+      async findGame(gameUnitId: string) {
+        calls.push({ method: "findGame", input: gameUnitId });
+        return { unitId: "game-1" };
+      },
+      async findPlatformEntity(platformEntityId: string) {
+        calls.push({ method: "findPlatformEntity", input: platformEntityId });
+        return {
+          kind: "game_platform",
+          eligibleSubjectRoles: ["available_on"],
+        };
+      },
+      async findSourceRef(sourceRefId: string) {
+        calls.push({ method: "findSourceRef", input: sourceRefId });
+        return { id: sourceRefId, unitId: "game-1" };
+      },
+      async list(filters: unknown) {
+        calls.push({ method: "list", input: filters });
+        return [row];
+      },
+      async getById(id: string) {
+        calls.push({ method: "getById", input: id });
+        return row;
+      },
+      async create(input: unknown) {
+        calls.push({ method: "create", input });
+        return { ...row, ...(input as Record<string, unknown>) };
+      },
+      async findRequirementGameUnitId(id: string) {
+        calls.push({ method: "findRequirementGameUnitId", input: id });
+        return row.gameUnitId;
+      },
+      async update(id: string, input: unknown) {
+        calls.push({ method: "update", input: { id, input } });
+        return { ...row, ...(input as Record<string, unknown>) };
+      },
+      async delete(id: string) {
+        calls.push({ method: "delete", input: id });
+      },
     },
-    entity: {
-      findUniqueOrThrow: mock(async () => ({
-        kind: "game_platform",
-        eligibleSubjectRoles: ["available_on"],
-      })),
-    },
-    unitExternalRef: {
-      findUniqueOrThrow: mock(async () => ({
-        id: "source-ref-1",
-        unitId: "game-1",
-      })),
-    },
-    gameSystemRequirement: {
-      findMany: mock(async () => [row]),
-      findUnique: mock(async () => row),
-      create: mock(async ({ data }: any) => ({ ...row, ...data })),
-      update: mock(async ({ data }: any) => ({ ...row, ...data })),
-      delete: mock(async () => row),
-    },
-  });
-  return row;
+  };
 }
 
 describe("GameSystemRequirementService", () => {
   test("lists requirements with contract filters", async () => {
-    freshMocks();
-    const { gameSystemRequirementService } = await import("./service");
+    const { repository, calls } = freshRepository();
+    const service = new GameSystemRequirementService(repository);
 
-    const rows = await gameSystemRequirementService.list({
+    const filters = {
       gameUnitId: "game-1",
       platformEntityId: "platform-windows",
       tier: "minimum",
       language: "en",
       sourceRefId: "source-ref-1",
-    });
+    } as const;
+    const rows = await service.list(filters);
 
     expect(rows).toHaveLength(1);
-    expect(prismaMock.gameSystemRequirement.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: {
-          gameUnitId: "game-1",
-          platformEntityId: "platform-windows",
-          tier: "minimum",
-          language: "en",
-          sourceRefId: "source-ref-1",
-        },
-      }),
-    );
+    expect(calls).toContainEqual({ method: "list", input: filters });
   });
 
   test("creates a requirement only for valid game, platform, and source refs", async () => {
-    freshMocks();
-    const { gameSystemRequirementService } = await import("./service");
+    const { repository, calls } = freshRepository();
+    const service = new GameSystemRequirementService(repository);
 
-    await gameSystemRequirementService.create({
+    const input = {
       gameUnitId: "game-1",
       platformEntityId: "platform-windows",
       tier: "recommended",
@@ -90,43 +98,31 @@ describe("GameSystemRequirementService", () => {
       sourceRefId: "source-ref-1",
       hardware: { memory: "16 GB" },
       rawText: "Recommended specs",
-    });
+    } as const;
+    await service.create(input);
 
-    expect(prismaMock.game.findUniqueOrThrow).toHaveBeenCalled();
-    expect(prismaMock.entity.findUniqueOrThrow).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { unitId: "platform-windows" },
-      }),
-    );
-    expect(prismaMock.unitExternalRef.findUniqueOrThrow).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { id: "source-ref-1" },
-        select: { id: true, unitId: true },
-      }),
-    );
-    expect(prismaMock.gameSystemRequirement.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          gameUnitId: "game-1",
-          platformEntityId: "platform-windows",
-          tier: "recommended",
-          sourceRefId: "source-ref-1",
-          hardware: { memory: "16 GB" },
-        }),
-      }),
-    );
+    expect(calls).toContainEqual({ method: "findGame", input: "game-1" });
+    expect(calls).toContainEqual({
+      method: "findPlatformEntity",
+      input: "platform-windows",
+    });
+    expect(calls).toContainEqual({
+      method: "findSourceRef",
+      input: "source-ref-1",
+    });
+    expect(calls).toContainEqual({ method: "create", input });
   });
 
   test("rejects non-platform entities", async () => {
-    freshMocks();
-    prismaMock.entity.findUniqueOrThrow = mock(async () => ({
+    const { repository } = freshRepository();
+    repository.findPlatformEntity = async () => ({
       kind: "organization",
       eligibleSubjectRoles: [],
-    }));
-    const { gameSystemRequirementService } = await import("./service");
+    });
+    const service = new GameSystemRequirementService(repository);
 
     await expect(
-      gameSystemRequirementService.create({
+      service.create({
         gameUnitId: "game-1",
         platformEntityId: "entity-1",
         tier: "minimum",
@@ -136,15 +132,15 @@ describe("GameSystemRequirementService", () => {
   });
 
   test("rejects requirement source refs for another unit", async () => {
-    freshMocks();
-    prismaMock.unitExternalRef.findUniqueOrThrow = mock(async () => ({
-      id: "source-ref-1",
+    const { repository } = freshRepository();
+    repository.findSourceRef = async (sourceRefId: string) => ({
+      id: sourceRefId,
       unitId: "other-game",
-    }));
-    const { gameSystemRequirementService } = await import("./service");
+    });
+    const service = new GameSystemRequirementService(repository);
 
     await expect(
-      gameSystemRequirementService.create({
+      service.create({
         gameUnitId: "game-1",
         platformEntityId: "platform-windows",
         tier: "minimum",

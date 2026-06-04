@@ -1,5 +1,5 @@
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient as ServerPrismaClient } from "@rezics/server/prisma/generated/client";
+import { sql } from "drizzle-orm";
+import { createServerDb } from "@rezics/server/db/factory";
 
 export type MainStateReaderOptions = {
   serverDatabaseUrl: string;
@@ -20,79 +20,89 @@ export type FullSyncSegment = {
 };
 
 export class MainStateReader {
-  readonly prisma: ServerPrismaClient;
+  private readonly serverDb: ReturnType<typeof createServerDb>;
 
   constructor(options: MainStateReaderOptions) {
-    this.prisma = new ServerPrismaClient({
-      adapter: new PrismaPg({
-        connectionString: options.serverDatabaseUrl,
-        max: 20,
-        idleTimeoutMillis: 30_000,
-        connectionTimeoutMillis: 2_000,
-      }),
-    });
+    this.serverDb = createServerDb(options.serverDatabaseUrl);
   }
 
   async readUnitState(unitId: string): Promise<UnitRankingState> {
-    const [unit, post, comment, scoreAggregate, progressCount, realms] =
+    const db = this.serverDb.db;
+    const [unit, post, comment, scoreAggregate, progressRows, realmRows] =
       await Promise.all([
-        this.prisma.unit.findUnique({
-          where: { id: unitId },
-          select: {
-            id: true,
-            type: true,
-            status: true,
-            visibility: true,
-            createdAt: true,
-            updatedAt: true,
-            publishedAt: true,
-          },
-        }),
-        this.prisma.post.findUnique({
-          where: { unitId },
-          select: {
-            unitId: true,
-            rootPostUnitId: true,
-            parentPostUnitId: true,
-            replyCount: true,
-            directReplyCount: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        }),
-        this.prisma.comment.findUnique({
-          where: { unitId },
-          select: {
-            unitId: true,
-            rootUnitId: true,
-            realmUnitId: true,
-            parentCommentId: true,
-            replyCount: true,
-            directReplyCount: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        }),
-        this.prisma.scoreAggregate.findFirst({
-          where: { unitId },
-          orderBy: { updatedAt: "desc" },
-        }),
-        this.prisma.userUnitProgress.count({
-          where: { unitId, isDeleted: false },
-        }),
-        this.prisma.unitRealm.findMany({
-          where: { unitId },
-          select: { realmUnitId: true },
-        }),
+        db.execute(sql`
+          select
+            "id",
+            "type",
+            "status",
+            "visibility",
+            "moderationStatus",
+            "catalogEntryKind",
+            "createdAt",
+            "updatedAt",
+            "publishedAt"
+          from "Unit"
+          where "id" = ${unitId}
+          limit 1
+        `),
+        db.execute(sql`
+          select
+            "unitId",
+            "rootPostUnitId",
+            "parentPostUnitId",
+            "replyCount",
+            "directReplyCount",
+            "createdAt",
+            "updatedAt"
+          from "Post"
+          where "unitId" = ${unitId}
+          limit 1
+        `),
+        db.execute(sql`
+          select
+            "unitId",
+            "rootUnitId",
+            "realmUnitId",
+            "parentCommentId",
+            "replyCount",
+            "directReplyCount",
+            "moderationStatus",
+            "deletedAt",
+            "createdAt",
+            "updatedAt"
+          from "Comment"
+          where "unitId" = ${unitId}
+          limit 1
+        `),
+        db.execute(sql`
+          select *
+          from "ScoreAggregate"
+          where "unitId" = ${unitId}
+          order by "updatedAt" desc
+          limit 1
+        `),
+        db.execute<{ count: string | number | bigint }>(sql`
+          select count(*) as count
+          from "UserUnitProgress"
+          where "unitId" = ${unitId}
+            and "isDeleted" = false
+        `),
+        db.execute<{ realmUnitId: string }>(sql`
+          select "realmUnitId"
+          from "UnitRealm"
+          where "unitId" = ${unitId}
+        `),
       ]);
 
+    const progressCountRaw = progressRows.rows[0]?.count ?? 0;
+
     return {
-      unit,
-      post,
-      comment,
-      scoreAggregate,
-      progressCount,
-      realms: realms.map((realm: { realmUnitId: string }) => realm.realmUnitId),
+      unit: unit.rows[0] ?? null,
+      post: post.rows[0] ?? null,
+      comment: comment.rows[0] ?? null,
+      scoreAggregate: scoreAggregate.rows[0] ?? null,
+      progressCount: Number(progressCountRaw),
+      realms: realmRows.rows.map((realm) => realm.realmUnitId),
     };
   }
 
@@ -100,26 +110,24 @@ export class MainStateReader {
     cursor: string | undefined,
     limit: number,
   ): Promise<FullSyncSegment> {
-    const rows = await this.prisma.unit.findMany({
-      where: {
-        status: "PUBLISHED",
-        visibility: "PUBLIC",
-      },
-      select: { id: true },
-      orderBy: { id: "asc" },
-      take: limit + 1,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { id: cursor } : undefined,
-    });
-    const current = rows.slice(0, limit);
+    const rows = await this.serverDb.db.execute<{ id: string }>(sql`
+      select "id"
+      from "Unit"
+      where "status" = 'PUBLISHED'
+        and "visibility" = 'PUBLIC'
+        ${cursor ? sql`and "id" > ${cursor}` : sql``}
+      order by "id" asc
+      limit ${limit + 1}
+    `);
+    const current = rows.rows.slice(0, limit);
     const last = current.at(-1);
     return {
-      unitIds: current.map((row: { id: string }) => row.id),
-      ...(rows.length > limit && last ? { nextCursor: last.id } : {}),
+      unitIds: current.map((row) => row.id),
+      ...(rows.rows.length > limit && last ? { nextCursor: last.id } : {}),
     };
   }
 
   async disconnect() {
-    await this.prisma.$disconnect();
+    await this.serverDb.disconnect();
   }
 }

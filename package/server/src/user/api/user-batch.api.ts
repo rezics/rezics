@@ -1,6 +1,12 @@
 import { Elysia, t } from "elysia";
-import { prisma } from "#/prisma/client";
-import { requireSlugScopeId } from "@/infra/slug-scopes";
+import { and, eq, inArray } from "drizzle-orm";
+import { requireSlugScopeId } from "../../infra/slug-scopes";
+import { Unit, User } from "../../db/schema";
+
+async function getServerDb() {
+  const { db } = await import("../../db/client");
+  return db;
+}
 
 export const userBatchApi = new Elysia().get(
   "/batch",
@@ -14,15 +20,22 @@ export const userBatchApi = new Elysia().get(
     if (ids.length === 0) return {};
 
     const userScope = requireSlugScopeId("user");
+    const db = await getServerDb();
     const [users, units] = await Promise.all([
-      prisma.user.findMany({
-        where: { unitId: { in: ids } },
-        select: { unitId: true, name: true, avatar: true },
-      }),
-      prisma.unit.findMany({
-        where: { id: { in: ids }, slugScope: userScope, type: "USER" },
-        select: { id: true, slug: true },
-      }),
+      db
+        .select({ unitId: User.unitId, name: User.name, avatar: User.avatar })
+        .from(User)
+        .where(inArray(User.unitId, ids)),
+      db
+        .select({ id: Unit.id, slug: Unit.slug })
+        .from(Unit)
+        .where(
+          and(
+            inArray(Unit.id, ids),
+            eq(Unit.slugScope, userScope),
+            eq(Unit.type, "USER"),
+          ),
+        ),
     ]);
 
     const slugById = new Map(units.map((u) => [u.id, u.slug] as const));

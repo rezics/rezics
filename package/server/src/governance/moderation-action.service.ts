@@ -1,17 +1,24 @@
-import { Prisma, prisma } from "#/prisma/client";
+import { and, desc, eq, inArray } from "drizzle-orm";
+import type { ServerDb } from "../db/client";
+import {
+  ModerationAction,
+  ModerationActionKind,
+  ModerationActorKind,
+  ModerationAuthority,
+  ModerationStatus,
+  ModerationTargetKind,
+} from "../db/schema";
 
 type ModerationActionCreateInput = {
-  authority: Prisma.ModerationActionCreateInput["authority"];
+  authority: (typeof ModerationAuthority.enumValues)[number];
   realmUnitId?: string | null;
-  targetKind: Prisma.ModerationActionCreateInput["targetKind"];
+  targetKind: (typeof ModerationTargetKind.enumValues)[number];
   targetId: string;
   targetPath?: string | null;
-  actorKind?: Prisma.ModerationActionCreateInput["actorKind"];
+  actorKind?: (typeof ModerationActorKind.enumValues)[number];
   actorUserId?: string | null;
-  actionKind: Prisma.ModerationActionCreateInput["actionKind"];
-  resultingStatus?:
-    | Prisma.ModerationActionCreateInput["resultingStatus"]
-    | null;
+  actionKind: (typeof ModerationActionKind.enumValues)[number];
+  resultingStatus?: (typeof ModerationStatus.enumValues)[number] | null;
   resultingLocked?: boolean | null;
   reasonCode: string;
   reasonText?: string | null;
@@ -23,15 +30,14 @@ type ModerationActionCreateInput = {
   importedFrom?: string | null;
 };
 
-type ModerationActionAppendTx =
-  | Pick<Prisma.TransactionClient, "moderationAction">
-  | Pick<typeof prisma, "moderationAction">;
-type ModerationTx = Prisma.TransactionClient | typeof prisma;
+type ModerationActionRow = typeof ModerationAction.$inferSelect;
+type ModerationActionDb = Pick<ServerDb, "select" | "insert">;
+type ModerationTx = Pick<ServerDb, "select">;
 
 type ModerationActionFieldRule = "forbidden" | "allowed" | "required";
 
 type ModerationActionRule = {
-  targets: readonly Prisma.ModerationActionCreateInput["targetKind"][];
+  targets: readonly ModerationActionCreateInput["targetKind"][];
   resultingStatus: ModerationActionFieldRule;
   resultingLocked: ModerationActionFieldRule;
 };
@@ -44,7 +50,7 @@ const allTargets = [
   "ACCOUNT",
   "REALM_MEMBER",
   "FEEDBACK",
-] as const satisfies readonly Prisma.ModerationActionCreateInput["targetKind"][];
+] as const satisfies readonly ModerationActionCreateInput["targetKind"][];
 
 const contentTargets = ["UNIT", "UNIT_REALM", "COMMENT"] as const;
 const snapshotStatusRule = {
@@ -53,7 +59,7 @@ const snapshotStatusRule = {
   resultingLocked: "forbidden",
 } as const satisfies ModerationActionRule;
 const noSnapshotRule = (
-  targets: readonly Prisma.ModerationActionCreateInput["targetKind"][],
+  targets: readonly ModerationActionCreateInput["targetKind"][],
 ) =>
   ({
     targets,
@@ -61,7 +67,7 @@ const noSnapshotRule = (
     resultingLocked: "forbidden",
   }) as const satisfies ModerationActionRule;
 const lockRule = (
-  targets: readonly Prisma.ModerationActionCreateInput["targetKind"][],
+  targets: readonly ModerationActionCreateInput["targetKind"][],
 ) =>
   ({
     targets,
@@ -96,7 +102,7 @@ export const moderationActionRules = {
     resultingLocked: "allowed",
   },
 } as const satisfies Record<
-  Prisma.ModerationActionCreateInput["actionKind"],
+  ModerationActionCreateInput["actionKind"],
   ModerationActionRule
 >;
 
@@ -104,7 +110,7 @@ function validateFieldRule(
   field: "resultingStatus" | "resultingLocked",
   rule: ModerationActionFieldRule,
   value: unknown,
-  actionKind: Prisma.ModerationActionCreateInput["actionKind"],
+  actionKind: ModerationActionCreateInput["actionKind"],
 ) {
   if (rule === "required" && value === undefined) {
     throw new Error(`${actionKind} requires ${field}`);
@@ -121,7 +127,7 @@ export function validateModerationActionInput(
   input: ModerationActionCreateInput,
 ) {
   const rule = moderationActionRules[input.actionKind];
-  if (!rule.targets.includes(input.targetKind)) {
+  if (!(rule.targets as readonly string[]).includes(input.targetKind)) {
     throw new Error(
       `${input.actionKind} is not allowed for ${input.targetKind}`,
     );
@@ -163,35 +169,54 @@ function actionData(input: ModerationActionCreateInput) {
   };
 }
 
+function isUniqueViolation(error: unknown) {
+  return (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "23505"
+  );
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
 export class ModerationActionService {
   /**
    * Appends one moderation fact. `idempotencyKey` is request scoped; callers must
    * not derive it only from target+action because repeated cycles are valid.
    */
   async appendModerationAction(
-    tx: ModerationActionAppendTx,
+    tx: ModerationActionDb,
     input: ModerationActionCreateInput,
   ) {
     validateModerationActionInput(input);
 
     if (input.idempotencyKey) {
-      const existing = await tx.moderationAction.findUnique({
-        where: { idempotencyKey: input.idempotencyKey },
-      });
+      const [existing] = await tx
+        .select()
+        .from(ModerationAction)
+        .where(eq(ModerationAction.idempotencyKey, input.idempotencyKey))
+        .limit(1);
       if (existing) return existing;
     }
 
     try {
-      return await tx.moderationAction.create({ data: actionData(input) });
+      const [row] = await tx
+        .insert(ModerationAction)
+        .values(actionData(input))
+        .returning();
+      if (!row) throw new Error("Failed to append ModerationAction");
+      return row;
     } catch (error) {
-      if (
-        input.idempotencyKey &&
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === "P2002"
-      ) {
-        const existing = await tx.moderationAction.findUnique({
-          where: { idempotencyKey: input.idempotencyKey },
-        });
+      if (input.idempotencyKey && isUniqueViolation(error)) {
+        const [existing] = await tx
+          .select()
+          .from(ModerationAction)
+          .where(eq(ModerationAction.idempotencyKey, input.idempotencyKey))
+          .limit(1);
         if (existing) return existing;
       }
       throw error;
@@ -199,36 +224,55 @@ export class ModerationActionService {
   }
 
   latestActionFor(input: {
-    targetKind: Prisma.ModerationActionCreateInput["targetKind"];
+    targetKind: ModerationActionCreateInput["targetKind"];
     targetId: string;
   }) {
-    return prisma.moderationAction.findFirst({
-      where: input,
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    });
+    return getServerDb().then((db) =>
+      db
+        .select()
+        .from(ModerationAction)
+        .where(
+          and(
+            eq(ModerationAction.targetKind, input.targetKind),
+            eq(ModerationAction.targetId, input.targetId),
+          ),
+        )
+        .orderBy(desc(ModerationAction.createdAt), desc(ModerationAction.id))
+        .limit(1)
+        .then(([row]) => row ?? null),
+    );
   }
 
-  latestActionsFor(input: {
-    targetKind: Prisma.ModerationActionCreateInput["targetKind"];
+  async latestActionsFor(input: {
+    targetKind: ModerationActionCreateInput["targetKind"];
     targetIds: string[];
     realmUnitId?: string | null;
   }) {
     const targetIds = [...new Set(input.targetIds)];
     if (targetIds.length === 0) return Promise.resolve([]);
-    return prisma.moderationAction.findMany({
-      distinct: ["targetKind", "targetId"],
-      where: {
-        targetKind: input.targetKind,
-        targetId: { in: targetIds },
-        ...(input.realmUnitId ? { realmUnitId: input.realmUnitId } : {}),
-      },
-      orderBy: [
-        { targetKind: "asc" },
-        { targetId: "asc" },
-        { createdAt: "desc" },
-        { id: "desc" },
-      ],
-    });
+    const db = await getServerDb();
+    const filters = [
+      eq(ModerationAction.targetKind, input.targetKind),
+      inArray(ModerationAction.targetId, targetIds),
+      input.realmUnitId
+        ? eq(ModerationAction.realmUnitId, input.realmUnitId)
+        : undefined,
+    ].filter(Boolean);
+    const rows = await db
+      .select()
+      .from(ModerationAction)
+      .where(and(...filters))
+      .orderBy(
+        ModerationAction.targetKind,
+        ModerationAction.targetId,
+        desc(ModerationAction.createdAt),
+        desc(ModerationAction.id),
+      );
+    const latest = new Map<string, ModerationActionRow>();
+    for (const row of rows) {
+      if (!latest.has(row.targetId)) latest.set(row.targetId, row);
+    }
+    return [...latest.values()];
   }
 
   /**
@@ -239,24 +283,36 @@ export class ModerationActionService {
   async latestEffectiveRemoveFor(
     tx: ModerationTx,
     input: {
-      targetKind: Prisma.ModerationActionCreateInput["targetKind"];
+      targetKind: ModerationActionCreateInput["targetKind"];
       targetId: string;
     },
   ) {
-    const removes = await tx.moderationAction.findMany({
-      where: { ...input, actionKind: "REMOVE" },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: 20,
-    });
+    const removes = await tx
+      .select()
+      .from(ModerationAction)
+      .where(
+        and(
+          eq(ModerationAction.targetKind, input.targetKind),
+          eq(ModerationAction.targetId, input.targetId),
+          eq(ModerationAction.actionKind, "REMOVE"),
+        ),
+      )
+      .orderBy(desc(ModerationAction.createdAt), desc(ModerationAction.id))
+      .limit(20);
     for (const remove of removes) {
-      const reversal = await tx.moderationAction.findFirst({
-        where: {
-          ...input,
-          actionKind: { in: ["RESTORE", "REVERSE"] },
-          reversesActionId: remove.id,
-        },
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      });
+      const [reversal] = await tx
+        .select()
+        .from(ModerationAction)
+        .where(
+          and(
+            eq(ModerationAction.targetKind, input.targetKind),
+            eq(ModerationAction.targetId, input.targetId),
+            inArray(ModerationAction.actionKind, ["RESTORE", "REVERSE"]),
+            eq(ModerationAction.reversesActionId, remove.id),
+          ),
+        )
+        .orderBy(desc(ModerationAction.createdAt), desc(ModerationAction.id))
+        .limit(1);
       if (!reversal) return remove;
     }
     return null;

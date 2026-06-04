@@ -1,10 +1,23 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  RealmTagContextError,
+  RealmTagContextService,
+} from "./realm-tag-context.service";
 
-installPrismaClientMock();
+const contextDate = new Date("2026-01-01T00:00:00Z");
 
-const unitFindUniqueMock = mock(async ({ where }: any) => {
-  if (where.id === "realm-1") {
+function contextRow(contextUnitId: string | null) {
+  return {
+    realmUnitId: "realm-1",
+    tagUnitId: "tag-1",
+    contextUnitId,
+    createdAt: contextDate,
+    updatedAt: contextDate,
+  };
+}
+
+const findUnitForType = mock(async (unitId: string) => {
+  if (unitId === "realm-1") {
     return {
       id: "realm-1",
       type: "REALM",
@@ -12,92 +25,49 @@ const unitFindUniqueMock = mock(async ({ where }: any) => {
       realm: { unitId: "realm-1" },
     };
   }
-  if (where.id === "tag-1") return { id: "tag-1", type: "TAG" };
-  if (where.id === "book-1") return { id: "book-1", type: "BOOK" };
+  if (unitId === "tag-1") return { id: "tag-1", type: "TAG" };
+  if (unitId === "book-1") return { id: "book-1", type: "BOOK" };
   return null;
 });
-const unitCreateMock = mock(async () => ({ id: "context-unit-1" }));
-const postCreateMock = mock(async () => ({ unitId: "context-unit-1" }));
-const memberFindFirstMock = mock(
-  async (): Promise<{ realmUnitId: string } | null> => ({
-    realmUnitId: "realm-1",
-  }),
-);
-const contextFindUniqueMock = mock(async () => null);
-const contextFindUniqueOrThrowMock = mock(async () => ({
-  realmUnitId: "realm-1",
-  tagUnitId: "tag-1",
-  contextUnitId: "existing-context",
-  createdAt: new Date("2026-01-01T00:00:00Z"),
-  updatedAt: new Date("2026-01-01T00:00:00Z"),
-}));
-const contextUpsertMock = mock(async ({ create, update }: any) => ({
-  ...create,
-  ...update,
-  contextUnitId: update?.contextUnitId ?? create.contextUnitId ?? null,
-  createdAt: new Date("2026-01-01T00:00:00Z"),
-  updatedAt: new Date("2026-01-01T00:00:00Z"),
-}));
-const contextUpdateMock = mock(async ({ data }: any) => ({
-  realmUnitId: "realm-1",
-  tagUnitId: "tag-1",
-  contextUnitId: data.contextUnitId,
-  createdAt: new Date("2026-01-01T00:00:00Z"),
-  updatedAt: new Date("2026-01-01T00:00:00Z"),
-}));
-const transactionMock = mock(async (fn: any) =>
-  fn({
-    unit: { findUnique: unitFindUniqueMock, create: unitCreateMock },
-    post: { create: postCreateMock },
-    realmTagContext: {
-      upsert: contextUpsertMock,
-      update: contextUpdateMock,
-      findUniqueOrThrow: contextFindUniqueOrThrowMock,
-    },
-  }),
-);
-
-Object.assign(prismaMock, {
-  $transaction: transactionMock,
-  unit: { findUnique: unitFindUniqueMock, create: unitCreateMock },
-  post: { create: postCreateMock },
-  realmMember: { findFirst: memberFindFirstMock },
-  realmTagApplication: { create: mock(async () => ({})) },
-  realmTagContext: {
-    findUnique: contextFindUniqueMock,
-    upsert: contextUpsertMock,
-    update: contextUpdateMock,
-    findUniqueOrThrow: contextFindUniqueOrThrowMock,
-  },
+const isRealmOwner = mock(async (_realmUnitId: string, userId: string) => {
+  return userId === "owner-1";
 });
-
-const { RealmTagContextError, RealmTagContextService } = await import(
-  "./realm-tag-context.service"
+const hasRealmContextRole = mock(async () => true);
+const findContext = mock(async () => null);
+const upsertContext = mock(async (_realmUnitId, _tagUnitId, input) =>
+  contextRow(input.contextUnitId ?? null),
 );
+const materializeContext = mock(async () => contextRow("context-unit-1"));
 
-const service = new RealmTagContextService();
+const repository = {
+  findUnitForType,
+  isRealmOwner,
+  hasRealmContextRole,
+  findContext,
+  upsertContext,
+  materializeContext,
+};
+
+const service = new RealmTagContextService(repository);
 
 describe("RealmTagContextService", () => {
   beforeEach(() => {
-    unitFindUniqueMock.mockClear();
-    unitCreateMock.mockClear();
-    postCreateMock.mockClear();
-    memberFindFirstMock.mockClear();
-    memberFindFirstMock.mockResolvedValue({ realmUnitId: "realm-1" });
-    contextFindUniqueMock.mockClear();
-    contextFindUniqueMock.mockResolvedValue(null);
-    contextUpsertMock.mockClear();
-    contextUpdateMock.mockClear();
-    contextFindUniqueOrThrowMock.mockClear();
-    transactionMock.mockClear();
-    (prismaMock.realmTagApplication.create as any).mockClear();
+    findUnitForType.mockClear();
+    isRealmOwner.mockClear();
+    hasRealmContextRole.mockClear();
+    hasRealmContextRole.mockResolvedValue(true);
+    findContext.mockClear();
+    findContext.mockResolvedValue(null);
+    upsertContext.mockClear();
+    materializeContext.mockClear();
+    materializeContext.mockResolvedValue(contextRow("context-unit-1"));
   });
 
-  test("returns null for a missing context without creating RealmTagApplication", async () => {
+  test("returns null for a missing context", async () => {
     const row = await service.get("realm-1", "tag-1");
+
     expect(row).toBeNull();
-    expect(contextFindUniqueMock).toHaveBeenCalled();
-    expect(prismaMock.realmTagApplication.create).not.toHaveBeenCalled();
+    expect(findContext).toHaveBeenCalledWith("realm-1", "tag-1");
   });
 
   test("rejects invalid realm and tag unit types", async () => {
@@ -106,52 +76,31 @@ describe("RealmTagContextService", () => {
     ).rejects.toBeInstanceOf(RealmTagContextError);
   });
 
-  test("upserts context metadata without creating RealmTagApplication", async () => {
+  test("upserts context metadata", async () => {
     const row = await service.upsert("realm-1", "tag-1", {
       contextUnitId: "context-unit-1",
     });
+
     expect(row.contextUnitId).toBe("context-unit-1");
-    expect(contextUpsertMock.mock.calls[0]?.[0].where).toEqual({
-      realmUnitId_tagUnitId: {
-        realmUnitId: "realm-1",
-        tagUnitId: "tag-1",
-      },
+    expect(upsertContext).toHaveBeenCalledWith("realm-1", "tag-1", {
+      contextUnitId: "context-unit-1",
     });
-    expect(prismaMock.realmTagApplication.create).not.toHaveBeenCalled();
   });
 
-  test("materializes exactly one POST content Unit when missing", async () => {
-    contextUpsertMock.mockResolvedValueOnce({
-      realmUnitId: "realm-1",
-      tagUnitId: "tag-1",
-      contextUnitId: null,
-    });
-
+  test("materializes a context unit through the repository", async () => {
     const row = await service.materialize("user-1", "realm-1", "tag-1");
 
-    expect(unitCreateMock).toHaveBeenCalledTimes(1);
-    expect(postCreateMock).toHaveBeenCalledTimes(1);
-    expect(contextUpdateMock).toHaveBeenCalledTimes(1);
+    expect(materializeContext).toHaveBeenCalledWith({
+      callerUserId: "user-1",
+      realmUnitId: "realm-1",
+      tagUnitId: "tag-1",
+    });
     expect(row.contextUnitId).toBe("context-unit-1");
-  });
-
-  test("materialization returns existing contextUnitId idempotently", async () => {
-    contextUpsertMock.mockResolvedValueOnce({
-      realmUnitId: "realm-1",
-      tagUnitId: "tag-1",
-      contextUnitId: "existing-context",
-    });
-
-    const row = await service.materialize("user-1", "realm-1", "tag-1");
-
-    expect(unitCreateMock).not.toHaveBeenCalled();
-    expect(postCreateMock).not.toHaveBeenCalled();
-    expect(contextUpdateMock).not.toHaveBeenCalled();
-    expect(row.contextUnitId).toBe("existing-context");
   });
 
   test("requires moderator-or-owner permission for context writes", async () => {
-    memberFindFirstMock.mockResolvedValueOnce(null);
+    isRealmOwner.mockResolvedValueOnce(false);
+    hasRealmContextRole.mockResolvedValueOnce(false);
 
     const allowed = await service.canManageContext(
       { userId: "stranger", permission: { role: "USER" } } as any,

@@ -6,18 +6,37 @@ import type {
   ShelfUnitKind,
   ToggleFavoriteResponse,
 } from "@rezics/contract";
-import { PostKind, prisma, UnitType } from "#/prisma/client";
+import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { serverJobProducer } from "@/job/job-boundary";
 import { AppError } from "@/utils/errors";
-import { generateBetween } from "./fractional-index";
-import { enqueueContainedUnitIdsSync, mapUnitToKind } from "./shelf.service";
-import { findSystemShelf } from "./system-shelves";
 import {
-  applyUserUnitCollectionMetadata,
-  enqueueUserUnitCollectionSearchSync,
-} from "./user-unit-collection.service";
+  Post,
+  Shelf,
+  ShelfUnit,
+  ShelfUnitRelation,
+  Unit,
+  UnitTranslation,
+  UserTagApplication,
+  UserUnitCollection,
+} from "../db/schema";
+import { generateBetween } from "./fractional-index";
+import {
+  createDrizzleSystemShelfClient,
+  findSystemShelf,
+} from "./system-shelves";
+import { enqueueUserUnitCollectionSearchSync } from "./user-unit-collection.service";
 
 const FAVORITES_KIND_KEY = "favorites" as const;
 const COLLECTION_STATUS_BATCH_CAP = 100;
+
+type UnitKind = typeof Unit.$inferSelect.type;
+type PostKind = NonNullable<typeof Post.$inferSelect.kind>;
+type UnitTargetRow = {
+  type: UnitKind;
+  targetUnitId: string | null;
+  postKind: PostKind | null;
+};
 
 interface ResolvedTarget {
   /** Unit id of the parent shelf unit (the target work, or the target itself). */
@@ -35,9 +54,467 @@ interface BatchResolvedTarget {
   reviewUnitId?: string;
 }
 
+export type CollectionRepository = {
+  findFavoritesShelfId(userId: string): Promise<string | null>;
+  getUnitTarget(targetId: string): Promise<UnitTargetRow>;
+  listUnitTargets(
+    targetIds: string[],
+  ): Promise<Array<UnitTargetRow & { id: string }>>;
+  applyCollectionMetadata(input: {
+    userId: string;
+    unitId: string;
+    tagUnitIds?: string[];
+    searchText?: string | null;
+  }): Promise<void>;
+  collectToShelves(input: {
+    userId: string;
+    resolved: ResolvedTarget;
+    variantUnitId?: string | null;
+    shelfIds: string[];
+  }): Promise<CollectResponse>;
+  hasShelfUnit(shelfId: string, unitId: string): Promise<boolean>;
+  removeFavorite(input: {
+    shelfId: string;
+    resolved: ResolvedTarget;
+  }): Promise<void>;
+  addFavorite(input: {
+    shelfId: string;
+    resolved: ResolvedTarget;
+  }): Promise<void>;
+  listDirectShelfIds(input: {
+    userId: string;
+    unitIds: string[];
+  }): Promise<Array<{ unitId: string; shelfId: string }>>;
+  listReviewShelfIds(input: {
+    userId: string;
+    reviewUnitIds: string[];
+  }): Promise<Array<{ childUnitId: string; shelfId: string }>>;
+  listShelfTitles(
+    shelfIds: string[],
+  ): Promise<Array<{ id: string; title: string | null }>>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function enqueueContainedUnitIdsSync(shelfId: string): Promise<unknown> {
+  return serverJobProducer.enqueue(
+    createSearchCommand(
+      SEARCH_COMMAND_KINDS.contentPatchContainedUnitIds,
+      { unitId: shelfId },
+      { type: "server", service: "shelf" },
+    ),
+  );
+}
+
+function mapUnitToKind(
+  type: UnitKind,
+  postKind: PostKind | null,
+): ShelfUnitKind {
+  if (type === "POST") {
+    if (postKind === "CHAPTER") return "chapter";
+    if (postKind === "REVIEW") return "review";
+    if (postKind === "EXCERPT") return "quote";
+    return "post";
+  }
+  switch (type) {
+    case "BOOK":
+      return "book";
+    case "TAG":
+      return "tag";
+    case "REALM":
+      return "realm";
+    case "SHELF":
+      return "shelf";
+    case "LINK":
+      return "link";
+    case "GAME":
+      return "game";
+    case "MEDIA":
+      return "media";
+    case "IMAGE":
+      return "image";
+    case "VIDEO":
+      return "video";
+    default:
+      return type.toString().toLowerCase() as ShelfUnitKind;
+  }
+}
+
+async function nextShelfPosition(tx: any, shelfId: string): Promise<string> {
+  const [last] = await tx
+    .select({ position: ShelfUnit.position })
+    .from(ShelfUnit)
+    .where(eq(ShelfUnit.shelfId, shelfId))
+    .orderBy(desc(ShelfUnit.position))
+    .limit(1);
+  return generateBetween(last?.position, undefined);
+}
+
+async function findOwnedShelf(tx: any, shelfId: string, userId: string) {
+  const [shelf] = await tx
+    .select({ unitId: Shelf.unitId })
+    .from(Shelf)
+    .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
+    .where(and(eq(Shelf.unitId, shelfId), eq(Unit.userId, userId)))
+    .limit(1);
+  return shelf ?? null;
+}
+
+async function insertShelfUnit(
+  tx: any,
+  input: {
+    shelfId: string;
+    unitId: string;
+    kind: ShelfUnitKind;
+    variantUnitId?: string | null;
+  },
+): Promise<boolean> {
+  const position = await nextShelfPosition(tx, input.shelfId);
+  const rows = await tx
+    .insert(ShelfUnit)
+    .values({
+      shelfId: input.shelfId,
+      unitId: input.unitId,
+      variantUnitId: input.variantUnitId ?? null,
+      kind: input.kind,
+      position,
+      updatedAt: new Date(),
+    })
+    .onConflictDoNothing()
+    .returning({ unitId: ShelfUnit.unitId });
+  if (rows.length > 0) {
+    await tx
+      .update(Shelf)
+      .set({
+        itemCount: sql`${Shelf.itemCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(Shelf.unitId, input.shelfId));
+    return true;
+  }
+  return false;
+}
+
+async function upsertReviewRelation(
+  tx: any,
+  input: {
+    shelfId: string;
+    parentUnitId: string;
+    childUnitId: string;
+  },
+): Promise<void> {
+  await tx
+    .insert(ShelfUnitRelation)
+    .values({
+      shelfId: input.shelfId,
+      parentUnitId: input.parentUnitId,
+      childUnitId: input.childUnitId,
+      role: "review",
+    })
+    .onConflictDoNothing();
+}
+
+function createDrizzleCollectionRepository(): CollectionRepository {
+  return {
+    async findFavoritesShelfId(userId) {
+      const db = await getServerDb();
+      return findSystemShelf(
+        userId,
+        FAVORITES_KIND_KEY,
+        createDrizzleSystemShelfClient(db),
+      );
+    },
+    async getUnitTarget(targetId) {
+      const db = await getServerDb();
+      const [unit] = await db
+        .select({
+          type: Unit.type,
+          targetUnitId: Unit.targetUnitId,
+          postKind: Post.kind,
+        })
+        .from(Unit)
+        .leftJoin(Post, eq(Unit.id, Post.unitId))
+        .where(eq(Unit.id, targetId))
+        .limit(1);
+      if (!unit) throw new Error(`Unit not found: ${targetId}`);
+      return unit;
+    },
+    async listUnitTargets(targetIds) {
+      if (targetIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          id: Unit.id,
+          type: Unit.type,
+          targetUnitId: Unit.targetUnitId,
+          postKind: Post.kind,
+        })
+        .from(Unit)
+        .leftJoin(Post, eq(Unit.id, Post.unitId))
+        .where(inArray(Unit.id, targetIds));
+    },
+    async applyCollectionMetadata(input) {
+      const db = await getServerDb();
+      await db.transaction(async (tx) => {
+        if (input.searchText !== undefined) {
+          await tx
+            .insert(UserUnitCollection)
+            .values({
+              userId: input.userId,
+              unitId: input.unitId,
+              searchText: input.searchText,
+              updatedAt: new Date(),
+            })
+            .onConflictDoUpdate({
+              target: [UserUnitCollection.userId, UserUnitCollection.unitId],
+              set: { searchText: input.searchText, updatedAt: new Date() },
+            });
+        }
+
+        if (input.tagUnitIds !== undefined) {
+          await tx
+            .delete(UserTagApplication)
+            .where(
+              and(
+                eq(UserTagApplication.userId, input.userId),
+                eq(UserTagApplication.unitId, input.unitId),
+              ),
+            );
+          const tagUnitIds = Array.from(
+            new Set(input.tagUnitIds.map((id) => id.trim()).filter(Boolean)),
+          );
+          if (tagUnitIds.length > 0) {
+            await tx.insert(UserTagApplication).values(
+              tagUnitIds.map((tagUnitId, index) => ({
+                userId: input.userId,
+                unitId: input.unitId,
+                tagUnitId,
+                position: String(index).padStart(8, "0"),
+                updatedAt: new Date(),
+              })),
+            );
+          }
+        }
+      });
+    },
+    async collectToShelves(input) {
+      const db = await getServerDb();
+      const savedTo: string[] = [];
+      let isNew = false;
+      await db.transaction(async (tx) => {
+        for (const shelfId of input.shelfIds) {
+          if (shelfId === input.resolved.parentUnitId) {
+            throw new AppError(400, "A shelf cannot contain itself");
+          }
+
+          const shelf = await findOwnedShelf(tx, shelfId, input.userId);
+          if (!shelf) continue;
+
+          const [existingParent] = await tx
+            .select({ unitId: ShelfUnit.unitId })
+            .from(ShelfUnit)
+            .where(
+              and(
+                eq(ShelfUnit.shelfId, shelfId),
+                eq(ShelfUnit.unitId, input.resolved.parentUnitId),
+              ),
+            )
+            .limit(1);
+
+          if (!existingParent) {
+            const created = await insertShelfUnit(tx, {
+              shelfId,
+              unitId: input.resolved.parentUnitId,
+              variantUnitId: input.variantUnitId,
+              kind: input.resolved.parentKind,
+            });
+            if (created) isNew = true;
+          } else if (input.variantUnitId !== undefined) {
+            await tx
+              .update(ShelfUnit)
+              .set({
+                variantUnitId: input.variantUnitId,
+                updatedAt: new Date(),
+              })
+              .where(
+                and(
+                  eq(ShelfUnit.shelfId, shelfId),
+                  eq(ShelfUnit.unitId, input.resolved.parentUnitId),
+                ),
+              );
+          }
+
+          if (input.resolved.reviewUnitId && input.resolved.reviewKind) {
+            const [existingReview] = await tx
+              .select({ unitId: ShelfUnit.unitId })
+              .from(ShelfUnit)
+              .where(
+                and(
+                  eq(ShelfUnit.shelfId, shelfId),
+                  eq(ShelfUnit.unitId, input.resolved.reviewUnitId),
+                ),
+              )
+              .limit(1);
+            if (!existingReview) {
+              await insertShelfUnit(tx, {
+                shelfId,
+                unitId: input.resolved.reviewUnitId,
+                kind: input.resolved.reviewKind,
+              });
+            }
+            await upsertReviewRelation(tx, {
+              shelfId,
+              parentUnitId: input.resolved.parentUnitId,
+              childUnitId: input.resolved.reviewUnitId,
+            });
+          }
+
+          savedTo.push(shelfId);
+        }
+      });
+      return { savedTo, isNew };
+    },
+    async hasShelfUnit(shelfId, unitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ unitId: ShelfUnit.unitId })
+        .from(ShelfUnit)
+        .where(
+          and(eq(ShelfUnit.shelfId, shelfId), eq(ShelfUnit.unitId, unitId)),
+        )
+        .limit(1);
+      return Boolean(row);
+    },
+    async removeFavorite(input) {
+      const db = await getServerDb();
+      await db.transaction(async (tx) => {
+        const deleted = await tx
+          .delete(ShelfUnit)
+          .where(
+            and(
+              eq(ShelfUnit.shelfId, input.shelfId),
+              eq(ShelfUnit.unitId, input.resolved.parentUnitId),
+            ),
+          )
+          .returning({ unitId: ShelfUnit.unitId });
+        if (deleted.length > 0) {
+          await tx
+            .update(Shelf)
+            .set({
+              itemCount: sql`${Shelf.itemCount} - ${deleted.length}`,
+              updatedAt: new Date(),
+            })
+            .where(eq(Shelf.unitId, input.shelfId));
+        }
+        if (input.resolved.reviewUnitId) {
+          const reviewDeleted = await tx
+            .delete(ShelfUnit)
+            .where(
+              and(
+                eq(ShelfUnit.shelfId, input.shelfId),
+                eq(ShelfUnit.unitId, input.resolved.reviewUnitId),
+              ),
+            )
+            .returning({ unitId: ShelfUnit.unitId });
+          if (reviewDeleted.length > 0) {
+            await tx
+              .update(Shelf)
+              .set({
+                itemCount: sql`${Shelf.itemCount} - ${reviewDeleted.length}`,
+                updatedAt: new Date(),
+              })
+              .where(eq(Shelf.unitId, input.shelfId));
+          }
+        }
+      });
+    },
+    async addFavorite(input) {
+      const db = await getServerDb();
+      await db.transaction(async (tx) => {
+        await insertShelfUnit(tx, {
+          shelfId: input.shelfId,
+          unitId: input.resolved.parentUnitId,
+          kind: input.resolved.parentKind,
+        });
+        if (input.resolved.reviewUnitId && input.resolved.reviewKind) {
+          await insertShelfUnit(tx, {
+            shelfId: input.shelfId,
+            unitId: input.resolved.reviewUnitId,
+            kind: input.resolved.reviewKind,
+          });
+          await upsertReviewRelation(tx, {
+            shelfId: input.shelfId,
+            parentUnitId: input.resolved.parentUnitId,
+            childUnitId: input.resolved.reviewUnitId,
+          });
+        }
+      });
+    },
+    async listDirectShelfIds(input) {
+      if (input.unitIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({ unitId: ShelfUnit.unitId, shelfId: ShelfUnit.shelfId })
+        .from(ShelfUnit)
+        .innerJoin(Shelf, eq(ShelfUnit.shelfId, Shelf.unitId))
+        .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
+        .where(
+          and(
+            inArray(ShelfUnit.unitId, input.unitIds),
+            eq(Unit.userId, input.userId),
+          ),
+        );
+    },
+    async listReviewShelfIds(input) {
+      if (input.reviewUnitIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          childUnitId: ShelfUnitRelation.childUnitId,
+          shelfId: ShelfUnitRelation.shelfId,
+        })
+        .from(ShelfUnitRelation)
+        .innerJoin(Shelf, eq(ShelfUnitRelation.shelfId, Shelf.unitId))
+        .innerJoin(Unit, eq(Shelf.unitId, Unit.id))
+        .where(
+          and(
+            inArray(ShelfUnitRelation.childUnitId, input.reviewUnitIds),
+            eq(ShelfUnitRelation.role, "review"),
+            eq(Unit.userId, input.userId),
+          ),
+        );
+    },
+    async listShelfTitles(shelfIds) {
+      if (shelfIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          id: Shelf.unitId,
+          title: UnitTranslation.title,
+        })
+        .from(Shelf)
+        .leftJoin(
+          UnitTranslation,
+          and(
+            eq(UnitTranslation.unitId, Shelf.unitId),
+            eq(UnitTranslation.language, "en"),
+          ),
+        )
+        .where(inArray(Shelf.unitId, shelfIds));
+    },
+  };
+}
+
 export class CollectionService {
+  constructor(
+    private readonly repository: CollectionRepository = createDrizzleCollectionRepository(),
+  ) {}
+
   private async getFavoritesShelfId(userId: string): Promise<string> {
-    const shelfId = await findSystemShelf(userId, FAVORITES_KIND_KEY, prisma);
+    const shelfId = await this.repository.findFavoritesShelfId(userId);
     if (!shelfId) {
       throw new AppError(404, "Favorites shelf not found", {
         code: "system_shelf_missing",
@@ -58,28 +535,18 @@ export class CollectionService {
     targetId: string,
     independent: boolean,
   ): Promise<ResolvedTarget> {
-    const unit = await prisma.unit.findUniqueOrThrow({
-      where: { id: targetId },
-      select: {
-        type: true,
-        targetUnitId: true,
-        post: { select: { kind: true } },
-      },
-    });
+    const unit = await this.repository.getUnitTarget(targetId);
 
     if (
       !independent &&
-      unit.type === UnitType.POST &&
-      unit.post?.kind === PostKind.REVIEW &&
+      unit.type === "POST" &&
+      unit.postKind === "REVIEW" &&
       unit.targetUnitId
     ) {
-      const target = await prisma.unit.findUniqueOrThrow({
-        where: { id: unit.targetUnitId },
-        select: { type: true, post: { select: { kind: true } } },
-      });
+      const target = await this.repository.getUnitTarget(unit.targetUnitId);
       return {
         parentUnitId: unit.targetUnitId,
-        parentKind: mapUnitToKind(target.type, target.post?.kind ?? null),
+        parentKind: mapUnitToKind(target.type, target.postKind),
         reviewUnitId: targetId,
         reviewKind: "review",
       };
@@ -87,7 +554,7 @@ export class CollectionService {
 
     return {
       parentUnitId: targetId,
-      parentKind: mapUnitToKind(unit.type, unit.post?.kind ?? null),
+      parentKind: mapUnitToKind(unit.type, unit.postKind),
     };
   }
 
@@ -105,118 +572,18 @@ export class CollectionService {
     } = input;
     const resolved = await this.resolveTarget(targetId, independent);
 
-    const savedTo: string[] = [];
-    let isNew = false;
+    await this.repository.applyCollectionMetadata({
+      userId,
+      unitId: resolved.parentUnitId,
+      tagUnitIds,
+      searchText,
+    });
 
-    await prisma.$transaction(async (tx) => {
-      await applyUserUnitCollectionMetadata(tx, userId, resolved.parentUnitId, {
-        tagUnitIds,
-        searchText,
-      });
-
-      for (const shelfId of shelfIds) {
-        if (shelfId === resolved.parentUnitId) {
-          throw new AppError(400, "A shelf cannot contain itself");
-        }
-
-        const shelf = await tx.shelf.findFirst({
-          where: { unitId: shelfId, unit: { userId } },
-        });
-        if (!shelf) continue;
-
-        const existingParent = await tx.shelfUnit.findUnique({
-          where: {
-            shelfId_unitId: { shelfId, unitId: resolved.parentUnitId },
-          },
-        });
-
-        if (!existingParent) {
-          const last = await tx.shelfUnit.findFirst({
-            where: { shelfId },
-            orderBy: { position: "desc" },
-            select: { position: true },
-          });
-          const position = generateBetween(last?.position, undefined);
-          const created = await tx.shelfUnit.createMany({
-            data: [
-              {
-                shelfId,
-                unitId: resolved.parentUnitId,
-                variantUnitId: variantUnitId ?? null,
-                kind: resolved.parentKind,
-                position,
-              },
-            ],
-            skipDuplicates: true,
-          });
-          if (created.count > 0) {
-            await tx.shelf.update({
-              where: { unitId: shelfId },
-              data: { itemCount: { increment: 1 } },
-            });
-            isNew = true;
-          }
-        } else if (variantUnitId !== undefined) {
-          await tx.shelfUnit.update({
-            where: {
-              shelfId_unitId: { shelfId, unitId: resolved.parentUnitId },
-            },
-            data: { variantUnitId },
-          });
-        }
-
-        if (resolved.reviewUnitId && resolved.reviewKind) {
-          const existingReview = await tx.shelfUnit.findUnique({
-            where: {
-              shelfId_unitId: { shelfId, unitId: resolved.reviewUnitId },
-            },
-          });
-          if (!existingReview) {
-            const last = await tx.shelfUnit.findFirst({
-              where: { shelfId },
-              orderBy: { position: "desc" },
-              select: { position: true },
-            });
-            const position = generateBetween(last?.position, undefined);
-            const created = await tx.shelfUnit.createMany({
-              data: [
-                {
-                  shelfId,
-                  unitId: resolved.reviewUnitId,
-                  kind: resolved.reviewKind,
-                  position,
-                },
-              ],
-              skipDuplicates: true,
-            });
-            if (created.count > 0) {
-              await tx.shelf.update({
-                where: { unitId: shelfId },
-                data: { itemCount: { increment: 1 } },
-              });
-            }
-          }
-          await tx.shelfUnitRelation.upsert({
-            where: {
-              shelfId_parentUnitId_childUnitId_role: {
-                shelfId,
-                parentUnitId: resolved.parentUnitId,
-                childUnitId: resolved.reviewUnitId,
-                role: "review",
-              },
-            },
-            create: {
-              shelfId,
-              parentUnitId: resolved.parentUnitId,
-              childUnitId: resolved.reviewUnitId,
-              role: "review",
-            },
-            update: {},
-          });
-        }
-
-        savedTo.push(shelfId);
-      }
+    const result = await this.repository.collectToShelves({
+      userId,
+      resolved,
+      variantUnitId,
+      shelfIds,
     });
 
     if (searchText !== undefined) {
@@ -224,10 +591,10 @@ export class CollectionService {
     }
 
     await Promise.all(
-      savedTo.map((shelfId) => enqueueContainedUnitIdsSync(shelfId)),
+      result.savedTo.map((shelfId) => enqueueContainedUnitIdsSync(shelfId)),
     );
 
-    return { savedTo, isNew };
+    return result;
   }
 
   async toggleFavorite(
@@ -241,106 +608,18 @@ export class CollectionService {
       throw new AppError(400, "A shelf cannot contain itself");
     }
 
-    const existing = await prisma.shelfUnit.findUnique({
-      where: {
-        shelfId_unitId: { shelfId: favShelfId, unitId: resolved.parentUnitId },
-      },
-    });
+    const existing = await this.repository.hasShelfUnit(
+      favShelfId,
+      resolved.parentUnitId,
+    );
 
     if (existing) {
-      await prisma.$transaction(async (tx) => {
-        const deleted = await tx.shelfUnit.deleteMany({
-          where: { shelfId: favShelfId, unitId: resolved.parentUnitId },
-        });
-        if (deleted.count > 0) {
-          await tx.shelf.update({
-            where: { unitId: favShelfId },
-            data: { itemCount: { decrement: deleted.count } },
-          });
-        }
-        if (resolved.reviewUnitId) {
-          const reviewDeleted = await tx.shelfUnit.deleteMany({
-            where: { shelfId: favShelfId, unitId: resolved.reviewUnitId },
-          });
-          if (reviewDeleted.count > 0) {
-            await tx.shelf.update({
-              where: { unitId: favShelfId },
-              data: { itemCount: { decrement: reviewDeleted.count } },
-            });
-          }
-        }
-      });
+      await this.repository.removeFavorite({ shelfId: favShelfId, resolved });
       await enqueueContainedUnitIdsSync(favShelfId);
       return { isFavorited: false };
     }
 
-    await prisma.$transaction(async (tx) => {
-      const last = await tx.shelfUnit.findFirst({
-        where: { shelfId: favShelfId },
-        orderBy: { position: "desc" },
-        select: { position: true },
-      });
-      const parentPosition = generateBetween(last?.position, undefined);
-      const parentCreated = await tx.shelfUnit.createMany({
-        data: [
-          {
-            shelfId: favShelfId,
-            unitId: resolved.parentUnitId,
-            kind: resolved.parentKind,
-            position: parentPosition,
-          },
-        ],
-        skipDuplicates: true,
-      });
-      if (parentCreated.count > 0) {
-        await tx.shelf.update({
-          where: { unitId: favShelfId },
-          data: { itemCount: { increment: 1 } },
-        });
-      }
-      if (resolved.reviewUnitId && resolved.reviewKind) {
-        const lastNow = await tx.shelfUnit.findFirst({
-          where: { shelfId: favShelfId },
-          orderBy: { position: "desc" },
-          select: { position: true },
-        });
-        const reviewPosition = generateBetween(lastNow?.position, undefined);
-        const reviewCreated = await tx.shelfUnit.createMany({
-          data: [
-            {
-              shelfId: favShelfId,
-              unitId: resolved.reviewUnitId,
-              kind: resolved.reviewKind,
-              position: reviewPosition,
-            },
-          ],
-          skipDuplicates: true,
-        });
-        if (reviewCreated.count > 0) {
-          await tx.shelf.update({
-            where: { unitId: favShelfId },
-            data: { itemCount: { increment: 1 } },
-          });
-        }
-        await tx.shelfUnitRelation.upsert({
-          where: {
-            shelfId_parentUnitId_childUnitId_role: {
-              shelfId: favShelfId,
-              parentUnitId: resolved.parentUnitId,
-              childUnitId: resolved.reviewUnitId,
-              role: "review",
-            },
-          },
-          create: {
-            shelfId: favShelfId,
-            parentUnitId: resolved.parentUnitId,
-            childUnitId: resolved.reviewUnitId,
-            role: "review",
-          },
-          update: {},
-        });
-      }
-    });
+    await this.repository.addFavorite({ shelfId: favShelfId, resolved });
 
     await enqueueContainedUnitIdsSync(favShelfId);
     return { isFavorited: true };
@@ -353,57 +632,35 @@ export class CollectionService {
     const resolved = await this.resolveTarget(targetId, false);
     const favShelfId = await this.getFavoritesShelfId(userId);
 
-    // If original target is a review, status reflects whether the review
-    // is attached as a child of role='review'. Otherwise, status reflects
-    // direct ShelfUnit containment.
-    let shelfIds: string[];
-    if (resolved.reviewUnitId) {
-      const rows = await prisma.shelfUnitRelation.findMany({
-        where: {
-          childUnitId: resolved.reviewUnitId,
-          role: "review",
-          shelf: { unit: { userId } },
-        },
-        select: { shelfId: true },
-      });
-      shelfIds = rows.map((r) => r.shelfId);
-    } else {
-      const rows = await prisma.shelfUnit.findMany({
-        where: {
-          unitId: resolved.parentUnitId,
-          shelf: { unit: { userId } },
-        },
-        select: { shelfId: true },
-      });
-      shelfIds = rows.map((r) => r.shelfId);
-    }
+    const shelfRows = resolved.reviewUnitId
+      ? await this.repository.listReviewShelfIds({
+          userId,
+          reviewUnitIds: [resolved.reviewUnitId],
+        })
+      : await this.repository.listDirectShelfIds({
+          userId,
+          unitIds: [resolved.parentUnitId],
+        });
+    const shelfIds = shelfRows.map((row) => row.shelfId);
 
     if (shelfIds.length === 0) {
       return { isFavorited: false, shelves: [] };
     }
 
-    const shelfRows = await prisma.shelf.findMany({
-      where: { unitId: { in: shelfIds } },
-      select: {
-        unitId: true,
-        unit: {
-          select: {
-            translations: {
-              where: { language: "en" },
-              select: { title: true },
-            },
-          },
-        },
-      },
-    });
+    const shelfTitleById = new Map(
+      (await this.repository.listShelfTitles(shelfIds)).map((shelf) => [
+        shelf.id,
+        shelf.title,
+      ]),
+    );
 
-    const isFavorited = shelfIds.includes(favShelfId);
-    const shelves = shelfRows.map((s) => ({
-      id: s.unitId,
-      title: s.unit?.translations?.[0]?.title ?? null,
-    }));
-
-    return { isFavorited, shelves };
+    return {
+      isFavorited: shelfIds.includes(favShelfId),
+      shelves: shelfIds.map((shelfId) => ({
+        id: shelfId,
+        title: shelfTitleById.get(shelfId) ?? null,
+      })),
+    };
   }
 
   async getCollectionStatusBatch(
@@ -433,21 +690,12 @@ export class CollectionService {
       return { statusesByTarget };
     }
 
-    const units = await prisma.unit.findMany({
-      where: { id: { in: normalizedTargetIds } },
-      select: {
-        id: true,
-        type: true,
-        targetUnitId: true,
-        post: { select: { kind: true } },
-      },
-    });
-
+    const units = await this.repository.listUnitTargets(normalizedTargetIds);
     const reviewTargetIds = new Set<string>();
     for (const unit of units) {
       if (
-        unit.type === UnitType.POST &&
-        unit.post?.kind === PostKind.REVIEW &&
+        unit.type === "POST" &&
+        unit.postKind === "REVIEW" &&
         unit.targetUnitId
       ) {
         reviewTargetIds.add(unit.targetUnitId);
@@ -456,21 +704,16 @@ export class CollectionService {
 
     const reviewTargets =
       reviewTargetIds.size > 0
-        ? await prisma.unit.findMany({
-            where: { id: { in: [...reviewTargetIds] } },
-            select: {
-              id: true,
-              type: true,
-              post: { select: { kind: true } },
-            },
-          })
+        ? await this.repository.listUnitTargets([...reviewTargetIds])
         : [];
-    const reviewTargetById = new Map(reviewTargets.map((u) => [u.id, u]));
+    const reviewTargetById = new Map(
+      reviewTargets.map((unit) => [unit.id, unit]),
+    );
 
     const resolvedTargets: BatchResolvedTarget[] = units.map((unit) => {
       if (
-        unit.type === UnitType.POST &&
-        unit.post?.kind === PostKind.REVIEW &&
+        unit.type === "POST" &&
+        unit.postKind === "REVIEW" &&
         unit.targetUnitId
       ) {
         const target = reviewTargetById.get(unit.targetUnitId);
@@ -506,25 +749,8 @@ export class CollectionService {
     ];
 
     const [directRows, reviewRows] = await Promise.all([
-      parentUnitIds.length > 0
-        ? prisma.shelfUnit.findMany({
-            where: {
-              unitId: { in: parentUnitIds },
-              shelf: { unit: { userId } },
-            },
-            select: { unitId: true, shelfId: true },
-          })
-        : [],
-      reviewUnitIds.length > 0
-        ? prisma.shelfUnitRelation.findMany({
-            where: {
-              childUnitId: { in: reviewUnitIds },
-              role: "review",
-              shelf: { unit: { userId } },
-            },
-            select: { childUnitId: true, shelfId: true },
-          })
-        : [],
+      this.repository.listDirectShelfIds({ userId, unitIds: parentUnitIds }),
+      this.repository.listReviewShelfIds({ userId, reviewUnitIds }),
     ]);
 
     const directShelfIdsByUnitId = new Map<string, string[]>();
@@ -549,27 +775,10 @@ export class CollectionService {
       for (const shelfId of shelfIds) allShelfIds.add(shelfId);
     }
 
-    const shelfRows =
-      allShelfIds.size > 0
-        ? await prisma.shelf.findMany({
-            where: { unitId: { in: [...allShelfIds] } },
-            select: {
-              unitId: true,
-              unit: {
-                select: {
-                  translations: {
-                    where: { language: "en" },
-                    select: { title: true },
-                  },
-                },
-              },
-            },
-          })
-        : [];
     const shelfTitleById = new Map(
-      shelfRows.map((s) => [
-        s.unitId,
-        s.unit?.translations?.[0]?.title ?? null,
+      (await this.repository.listShelfTitles([...allShelfIds])).map((shelf) => [
+        shelf.id,
+        shelf.title,
       ]),
     );
 

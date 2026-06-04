@@ -68,7 +68,7 @@ run_migration() {
 
 run_migrations() {
   for unit in "${MIGRATIONS[@]}"; do
-    run_migration "${unit}" "bun run --cwd package/${unit} prisma:deploy"
+    run_migration "${unit}" "bun run --cwd package/${unit} db:deploy"
   done
   # job-runner owns no schema: ensure the pg-boss queue database instead.
   run_migration "job-runner" "bun run --cwd package/job-runner db:ensure"

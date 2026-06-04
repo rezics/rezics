@@ -6,7 +6,7 @@ import {
   SEARCH_COMMAND_KINDS,
 } from "@rezics/job";
 import type { HandlerContext, JobHandler } from "../../worker";
-import type { ServerPrismaRuntime } from "./runtime";
+import type { ServerMaintenanceRuntime } from "./runtime";
 
 function searchSyncKindForTarget(targetType: string) {
   switch (targetType) {
@@ -158,46 +158,8 @@ function replayTargetFromKey(scope: string, key: string) {
   }
 }
 
-async function repairSeriesContentIndex(prisma: any, seriesUnitId: string) {
-  const series = await prisma.series.findUnique({
-    where: { unitId: seriesUnitId },
-    select: { unitId: true },
-  });
-  if (!series) return { indexedReleaseCount: 0, skipped: "not_series" };
-
-  const releaseNodes = await prisma.contentStructureNode.findMany({
-    where: {
-      ownerUnitId: seriesUnitId,
-      contentUnit: {
-        type: { in: ["BOOK", "GAME", "MEDIA"] },
-      },
-    },
-    select: {
-      id: true,
-      contentUnitId: true,
-    },
-    orderBy: [{ position: "asc" }, { id: "asc" }],
-  });
-
-  await prisma.seriesContentIndex.deleteMany({ where: { seriesUnitId } });
-  const rows = releaseNodes
-    .filter((node: { contentUnitId: string | null }) => node.contentUnitId)
-    .map((node: { id: string; contentUnitId: string }) => ({
-      seriesUnitId,
-      releaseUnitId: node.contentUnitId,
-      contentNodeId: node.id,
-    }));
-  if (rows.length > 0) {
-    await prisma.seriesContentIndex.createMany({
-      data: rows,
-      skipDuplicates: true,
-    });
-  }
-  return { indexedReleaseCount: rows.length };
-}
-
 export function createMaintenanceHandlers(
-  options: { serverPrismaRuntime?: ServerPrismaRuntime } = {},
+  options: { serverMaintenanceRuntime?: ServerMaintenanceRuntime } = {},
 ) {
   return {
     [MAINTENANCE_COMMAND_KINDS.searchDriftRepair]: async (command, context) => {
@@ -234,11 +196,13 @@ export function createMaintenanceHandlers(
     [MAINTENANCE_COMMAND_KINDS.seriesContentIndexRepair]: async (command) => {
       const maintenance = command as MaintenanceCommand;
       if (!("seriesUnitId" in maintenance.payload)) return;
-      const prisma = options.serverPrismaRuntime?.prisma;
-      if (!prisma) {
-        throw new Error("Server Prisma runtime is not configured");
+      const repository = options.serverMaintenanceRuntime?.maintenance;
+      if (!repository) {
+        throw new Error("Server maintenance runtime is not configured");
       }
-      return repairSeriesContentIndex(prisma, maintenance.payload.seriesUnitId);
+      return repository.repairSeriesContentIndex(
+        maintenance.payload.seriesUnitId,
+      );
     },
     [MAINTENANCE_COMMAND_KINDS.replay]: async (command, context) => {
       const maintenance = command as MaintenanceCommand;

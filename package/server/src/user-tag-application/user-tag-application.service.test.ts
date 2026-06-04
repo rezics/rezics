@@ -1,13 +1,48 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import type { UserSettings } from "@rezics/contract";
+import type {
+  UserTagApplicationRepository,
+  UserTagApplicationService,
+} from "./user-tag-application.service";
+import type { UserTagApplicationRow } from "./user-tag-application.types";
 
-mock.module("@/job/job-boundary", () => ({
-  serverJobProducer: {
-    enqueue: mock(async () => ({ status: "created" })),
-  },
-}));
+function tagRow(
+  patch: Partial<UserTagApplicationRow> = {},
+): UserTagApplicationRow {
+  return {
+    userId: "user-1",
+    unitId: "unit-1",
+    tagUnitId: "tag-1",
+    position: "00000000",
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    ...patch,
+  };
+}
 
-installPrismaClientMock();
+function createRepository(
+  overrides: Partial<UserTagApplicationRepository> = {},
+): UserTagApplicationRepository {
+  return {
+    listForUnit: mock(async () => []),
+    getOwnerSettings: mock(async (): Promise<UserSettings | null> => ({})),
+    isFollower: mock(async () => false),
+    replaceTagsForUnit: mock(async () => {}),
+    getTagPosition: mock(async () => null),
+    updatePosition: mock(async () => tagRow()),
+    deleteOne: mock(async () => {}),
+    ...overrides,
+  };
+}
+
+async function createService(
+  repository: UserTagApplicationRepository,
+): Promise<UserTagApplicationService> {
+  const { UserTagApplicationService } = await import(
+    "./user-tag-application.service"
+  );
+  return new UserTagApplicationService(repository);
+}
 
 describe("UserTagApplicationService", () => {
   test("direct user tag visibility follows profile privacy", async () => {
@@ -54,201 +89,142 @@ describe("UserTagApplicationService", () => {
   });
 
   test("lists caller-scoped tags for one unit", async () => {
-    const findMany = mock(async () => []);
-    Object.assign(prismaMock, {
-      userTagApplication: { findMany },
-    });
+    const listForUnit = mock(async () => []);
+    const repository = createRepository({ listForUnit });
 
-    const { UserTagApplicationService } = await import(
-      "./user-tag-application.service"
-    );
-    await new UserTagApplicationService().listForUnit("user-1", "unit-1");
+    await (await createService(repository)).listForUnit("user-1", "unit-1");
 
-    expect(findMany).toHaveBeenCalledWith({
-      where: { userId: "user-1", unitId: "unit-1" },
-      orderBy: [{ position: "asc" }, { tagUnitId: "asc" }],
-    });
+    expect(listForUnit).toHaveBeenCalledWith("user-1", "unit-1");
   });
 
   test("lists another user's tags only when direct privacy permits", async () => {
-    const tagRows = [
-      {
-        userId: "owner-1",
-        unitId: "unit-1",
-        tagUnitId: "tag-1",
-        position: "00000000",
-        createdAt: new Date("2026-01-01T00:00:00.000Z"),
-        updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      },
-    ];
-    const findMany = mock(async () => tagRows);
-    const userFindUnique = mock(async () => ({
-      settings: { privacy: { userTags: "followers" } },
-    }));
-    const subscriptionFindUnique = mock(async () => ({ id: "sub-1" }));
-    Object.assign(prismaMock, {
-      user: { findUnique: userFindUnique },
-      subscription: { findUnique: subscriptionFindUnique },
-      userTagApplication: { findMany },
+    const tagRows = [tagRow({ userId: "owner-1" })];
+    const getOwnerSettings = mock(
+      async (): Promise<UserSettings> => ({
+        privacy: { userTags: "followers" },
+      }),
+    );
+    const isFollower = mock(async () => true);
+    const listForUnit = mock(async () => tagRows);
+    const repository = createRepository({
+      getOwnerSettings,
+      isFollower,
+      listForUnit,
     });
 
-    const { UserTagApplicationService } = await import(
-      "./user-tag-application.service"
-    );
-    const rows = await new UserTagApplicationService().listForUserUnit(
+    const rows = await (await createService(repository)).listForUserUnit(
       "owner-1",
       "unit-1",
       "viewer-1",
     );
 
-    expect(userFindUnique).toHaveBeenCalledWith({
-      where: { unitId: "owner-1" },
-      select: { settings: true },
-    });
-    expect(subscriptionFindUnique).toHaveBeenCalledWith({
-      where: {
-        subscriberUnitId_subscribedUnitId: {
-          subscriberUnitId: "viewer-1",
-          subscribedUnitId: "owner-1",
-        },
-      },
-      select: { id: true },
-    });
-    expect(findMany).toHaveBeenCalledWith({
-      where: { userId: "owner-1", unitId: "unit-1" },
-      orderBy: [{ position: "asc" }, { tagUnitId: "asc" }],
-    });
+    expect(getOwnerSettings).toHaveBeenCalledWith("owner-1");
+    expect(isFollower).toHaveBeenCalledWith("viewer-1", "owner-1");
+    expect(listForUnit).toHaveBeenCalledWith("owner-1", "unit-1");
     expect(rows).toBe(tagRows);
   });
 
   test("hides another user's direct tags when privacy blocks", async () => {
-    const findMany = mock(async () => []);
-    Object.assign(prismaMock, {
-      user: { findUnique: mock(async () => ({ settings: {} })) },
-      subscription: { findUnique: mock(async () => null) },
-      userTagApplication: { findMany },
+    const listForUnit = mock(async () => []);
+    const repository = createRepository({
+      getOwnerSettings: mock(async () => ({})),
+      isFollower: mock(async () => false),
+      listForUnit,
     });
 
-    const { UserTagApplicationService } = await import(
-      "./user-tag-application.service"
-    );
-    const rows = await new UserTagApplicationService().listForUserUnit(
+    const rows = await (await createService(repository)).listForUserUnit(
       "owner-1",
       "unit-1",
       "viewer-1",
     );
 
     expect(rows).toEqual([]);
-    expect(findMany).not.toHaveBeenCalled();
+    expect(listForUnit).not.toHaveBeenCalled();
   });
 
-  test("setForUnit replaces tags through shared collection metadata helper", async () => {
-    const deleteMany = mock(async () => ({ count: 0 }));
-    const createMany = mock(async () => ({ count: 2 }));
-    const findMany = mock(async () => []);
-    const transaction = mock(async (fn: any) =>
-      fn({
-        userTagApplication: { deleteMany, createMany },
-        userUnitCollection: { upsert: mock(async () => ({})) },
-      }),
-    );
-    Object.assign(prismaMock, {
-      $transaction: transaction,
-      userTagApplication: { findMany },
+  test("setForUnit replaces tags through the repository", async () => {
+    const tagRows = [tagRow({ tagUnitId: "tag-1" })];
+    const replaceTagsForUnit = mock(async () => {});
+    const listForUnit = mock(async () => tagRows);
+    const repository = createRepository({
+      replaceTagsForUnit,
+      listForUnit,
     });
 
-    const { UserTagApplicationService } = await import(
-      "./user-tag-application.service"
-    );
-    await new UserTagApplicationService().setForUnit("user-1", {
+    const rows = await (await createService(repository)).setForUnit("user-1", {
       unitId: "unit-1",
       tagUnitIds: ["tag-1", "tag-2"],
     });
 
-    expect(deleteMany).toHaveBeenCalledWith({
-      where: { userId: "user-1", unitId: "unit-1" },
-    });
-    expect(createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          userId: "user-1",
-          unitId: "unit-1",
-          tagUnitId: "tag-1",
-          position: "00000000",
-        },
-        {
-          userId: "user-1",
-          unitId: "unit-1",
-          tagUnitId: "tag-2",
-          position: "00000001",
-        },
-      ],
-      skipDuplicates: true,
-    });
+    expect(replaceTagsForUnit).toHaveBeenCalledWith("user-1", "unit-1", [
+      "tag-1",
+      "tag-2",
+    ]);
+    expect(listForUnit).toHaveBeenCalledWith("user-1", "unit-1");
+    expect(rows).toBe(tagRows);
   });
 
   test("setForUnit tags the requested unit id without resolving Unit.targetUnitId", async () => {
-    const deleteMany = mock(async () => ({ count: 0 }));
-    const createMany = mock(async () => ({ count: 1 }));
-    const findMany = mock(async () => []);
-    const unitFindUnique = mock(async () => ({
-      id: "unit-1",
-      targetUnitId: "canonical-target",
-    }));
-    const transaction = mock(async (fn: any) =>
-      fn({
-        unit: { findUnique: unitFindUnique },
-        userTagApplication: { deleteMany, createMany },
-        userUnitCollection: { upsert: mock(async () => ({})) },
-      }),
-    );
-    Object.assign(prismaMock, {
-      $transaction: transaction,
-      userTagApplication: { findMany },
+    const replaceTagsForUnit = mock(async () => {});
+    const repository = createRepository({
+      replaceTagsForUnit,
     });
 
-    const { UserTagApplicationService } = await import(
-      "./user-tag-application.service"
-    );
-    await new UserTagApplicationService().setForUnit("user-1", {
+    await (await createService(repository)).setForUnit("user-1", {
       unitId: "unit-1",
       tagUnitIds: ["tag-1"],
     });
 
-    expect(unitFindUnique).not.toHaveBeenCalled();
-    expect(deleteMany).toHaveBeenCalledWith({
-      where: { userId: "user-1", unitId: "unit-1" },
+    expect(replaceTagsForUnit).toHaveBeenCalledWith("user-1", "unit-1", [
+      "tag-1",
+    ]);
+  });
+
+  test("reorder writes a position between neighboring tags", async () => {
+    const getTagPosition = mock(
+      async (_userId: string, _unitId: string, tagUnitId: string) =>
+        tagUnitId === "before-tag" ? "00000010" : "00000020",
+    );
+    const updated = tagRow({ tagUnitId: "tag-1", position: "00000015" });
+    const updatePosition = mock(async () => updated);
+    const repository = createRepository({ getTagPosition, updatePosition });
+
+    const row = await (await createService(repository)).reorder("user-1", {
+      unitId: "unit-1",
+      tagUnitId: "tag-1",
+      beforeTagUnitId: "before-tag",
+      afterTagUnitId: "after-tag",
     });
-    expect(createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          userId: "user-1",
-          unitId: "unit-1",
-          tagUnitId: "tag-1",
-          position: "00000000",
-        },
-      ],
-      skipDuplicates: true,
-    });
+
+    expect(getTagPosition).toHaveBeenCalledWith(
+      "user-1",
+      "unit-1",
+      "before-tag",
+    );
+    expect(getTagPosition).toHaveBeenCalledWith(
+      "user-1",
+      "unit-1",
+      "after-tag",
+    );
+    expect(updatePosition).toHaveBeenCalledWith(
+      "user-1",
+      "unit-1",
+      "tag-1",
+      "00000011",
+    );
+    expect(row).toBe(updated);
   });
 
   test("deleteOne only deletes the caller-owned user tag", async () => {
-    const deleteMany = mock(async () => ({ count: 1 }));
-    Object.assign(prismaMock, {
-      userTagApplication: { deleteMany },
-    });
+    const deleteOne = mock(async () => {});
+    const repository = createRepository({ deleteOne });
 
-    const { UserTagApplicationService } = await import(
-      "./user-tag-application.service"
-    );
-    await new UserTagApplicationService().deleteOne(
+    await (await createService(repository)).deleteOne(
       "user-1",
       "unit-1",
       "tag-1",
     );
 
-    expect(deleteMany).toHaveBeenCalledWith({
-      where: { userId: "user-1", unitId: "unit-1", tagUnitId: "tag-1" },
-    });
+    expect(deleteOne).toHaveBeenCalledWith("user-1", "unit-1", "tag-1");
   });
 });

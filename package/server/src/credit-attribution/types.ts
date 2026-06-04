@@ -1,9 +1,12 @@
-import type { Prisma } from "#/prisma/client";
-
-export type CreditAttributionWithRelations =
-  Prisma.CreditAttributionGetPayload<{
-    include: typeof creditAttributionInclude;
-  }>;
+import type {
+  CreditAttribution,
+  CreditAttributionEvidence,
+  Entity,
+  SourceSite,
+  Unit,
+  UnitExternalRef,
+  UnitTranslation,
+} from "../db/schema";
 
 export const creditAttributionInclude = {
   entity: {
@@ -34,4 +37,35 @@ export const creditAttributionInclude = {
     },
     orderBy: [{ observedAt: "desc" }],
   },
-} satisfies Prisma.CreditAttributionInclude;
+} as const;
+
+export type CreditAttributionWithRelations =
+  typeof CreditAttribution.$inferSelect & {
+    entity?:
+      | (typeof Unit.$inferSelect & {
+          entity?: typeof Entity.$inferSelect | null;
+          translations?: Array<typeof UnitTranslation.$inferSelect>;
+        })
+      | null;
+    evidence?: Array<
+      typeof CreditAttributionEvidence.$inferSelect & {
+        sourceRef?:
+          | (typeof UnitExternalRef.$inferSelect & {
+              sourceSite?:
+                | (typeof SourceSite.$inferSelect & {
+                    entity?:
+                      | (typeof Entity.$inferSelect & {
+                          unit?: typeof Unit.$inferSelect & {
+                            translations?: Array<
+                              typeof UnitTranslation.$inferSelect
+                            >;
+                          };
+                        })
+                      | null;
+                  })
+                | null;
+            })
+          | null;
+      }
+    >;
+  };

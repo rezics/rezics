@@ -1,6 +1,7 @@
-import type { Prisma } from "#/prisma/client";
-
-type JsonValue = Prisma.JsonValue;
+type JsonPrimitive = string | number | boolean | null;
+type JsonArray = JsonValue[];
+type JsonObject = { [key: string]: JsonValue };
+export type JsonValue = JsonPrimitive | JsonArray | JsonObject;
 
 export type EchoKVResponse = {
   value: JsonValue;

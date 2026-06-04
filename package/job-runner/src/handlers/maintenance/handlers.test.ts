@@ -113,26 +113,13 @@ describe("maintenance handlers", () => {
   });
 
   test("repairs Series direct content index from release member nodes only", async () => {
-    const createManyCalls: unknown[] = [];
     const handlers = createMaintenanceHandlers({
-      serverPrismaRuntime: {
-        prisma: {
-          series: {
-            findUnique: async () => ({ unitId: "series-1" }),
-          },
-          contentStructureNode: {
-            findMany: async () => [
-              { id: "node-1", contentUnitId: "release-1" },
-            ],
-          },
-          seriesContentIndex: {
-            deleteMany: async () => ({ count: 0 }),
-            createMany: async (args: unknown) => {
-              createManyCalls.push(args);
-              return { count: 1 };
-            },
-          },
-        } as any,
+      serverMaintenanceRuntime: {
+        maintenance: {
+          repairSeriesContentIndex: async (seriesUnitId) => ({
+            indexedReleaseCount: seriesUnitId === "series-1" ? 1 : 0,
+          }),
+        },
         disconnect: async () => undefined,
       },
     });
@@ -146,17 +133,5 @@ describe("maintenance handlers", () => {
     });
 
     expect(result).toEqual({ indexedReleaseCount: 1 });
-    expect(createManyCalls).toEqual([
-      {
-        data: [
-          {
-            seriesUnitId: "series-1",
-            releaseUnitId: "release-1",
-            contentNodeId: "node-1",
-          },
-        ],
-        skipDuplicates: true,
-      },
-    ]);
   });
 });

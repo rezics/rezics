@@ -4,8 +4,14 @@ import {
   slugResolveResponseSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { prisma } from "#/prisma/client";
-import { resolveScopeId } from "@/shared/slug-ref";
+import { and, eq } from "drizzle-orm";
+import { Unit } from "../db/schema";
+import { resolveScopeId } from "../shared/slug-ref";
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 /**
  * Generic slug-to-unit resolution endpoint.
@@ -22,10 +28,12 @@ export const slugApi = new Elysia({ prefix: "/slug" }).post(
       return { error: { code: "NOT_FOUND", message: "Scope not found" } };
     }
 
-    const unit = await prisma.unit.findUnique({
-      where: { slugScope_slug: { slugScope, slug: body.slug } },
-      select: { id: true, type: true },
-    });
+    const db = await getServerDb();
+    const [unit] = await db
+      .select({ id: Unit.id, type: Unit.type })
+      .from(Unit)
+      .where(and(eq(Unit.slugScope, slugScope), eq(Unit.slug, body.slug)))
+      .limit(1);
 
     if (!unit) {
       set.status = 404;

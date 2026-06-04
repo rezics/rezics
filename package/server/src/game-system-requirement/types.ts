@@ -1,19 +1,7 @@
-import type { Prisma } from "#/prisma/client";
+import type { GameSystemRequirement } from "../db/schema";
 
-export type GameSystemRequirementRow = Prisma.GameSystemRequirementGetPayload<{
-  select: {
-    id: true;
-    gameUnitId: true;
-    platformEntityId: true;
-    tier: true;
-    language: true;
-    sourceRefId: true;
-    hardware: true;
-    rawText: true;
-    createdAt: true;
-    updatedAt: true;
-  };
-}>;
+export type GameSystemRequirementRow =
+  typeof GameSystemRequirement.$inferSelect;
 
 export const gameSystemRequirementSelect = {
   id: true,
@@ -26,4 +14,4 @@ export const gameSystemRequirementSelect = {
   rawText: true,
   createdAt: true,
   updatedAt: true,
-} satisfies Prisma.GameSystemRequirementSelect;
+} as const;

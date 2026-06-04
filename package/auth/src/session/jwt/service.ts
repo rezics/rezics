@@ -3,7 +3,7 @@ import { getAuthJwtIssuer } from "./options";
 import {
   authJwtPersistence,
   getLocalAuthJwtServiceRecord,
-} from "./prisma-adapter";
+} from "./storage-adapter";
 
 export async function listAuthJwtKeys() {
   return authJwtPersistence.listKeys({ issuer: getAuthJwtIssuer() });

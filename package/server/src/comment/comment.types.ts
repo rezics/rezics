@@ -1,7 +1,7 @@
-import type { Comment } from "#/prisma/client";
+import type { Comment } from "../db/schema";
 import type { PublicUserSelected } from "@/utils/sanitizeUser";
 
-export type CommentWithRelations = Comment & {
+export type CommentWithRelations = typeof Comment.$inferSelect & {
   path?: string | null;
   pinKind?: string | null;
   pinPosition?: string | null;

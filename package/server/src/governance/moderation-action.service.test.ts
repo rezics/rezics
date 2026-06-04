@@ -76,20 +76,29 @@ describe("moderation action validation", () => {
 
   test("returns existing idempotent action without appending", async () => {
     const existing = { id: "action-1" };
+    const insert = mock(() => ({
+      values: mock(() => ({
+        returning: mock(async () => [{ id: "created-action" }]),
+      })),
+    }));
     const tx = {
-      moderationAction: {
-        findUnique: mock(async () => existing),
-        create: mock(async () => ({ id: "created-action" })),
-      },
+      select: mock(() => ({
+        from: mock(() => ({
+          where: mock(() => ({
+            limit: mock(async () => [existing]),
+          })),
+        })),
+      })),
+      insert,
     };
     const service = new ModerationActionService();
 
     await expect(
       service.appendModerationAction(
-        tx,
+        tx as any,
         validAction({ idempotencyKey: "request-1" }),
       ),
-    ).resolves.toBe(existing);
-    expect(tx.moderationAction.create).not.toHaveBeenCalled();
+    ).resolves.toBe(existing as never);
+    expect(insert).not.toHaveBeenCalled();
   });
 });

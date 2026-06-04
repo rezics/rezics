@@ -26,8 +26,20 @@ import {
   validateSlug,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import type { Prisma, RealmTagApplication } from "#/prisma/client";
-import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  inArray,
+  lte,
+  ne,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { realmPolicyActions } from "@/governance/action/realm";
 import { governanceAuditService } from "@/governance/audit.service";
@@ -36,29 +48,32 @@ import { moderationActionService } from "@/governance/moderation-action.service"
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
 import { mapPostToDTO } from "@/post/post.mapper";
-import { postInclude } from "@/post/types";
-import {
-  preferredLanguageVisibilityWhere,
-  resolveEffectiveReadLanguageCandidates,
-} from "@/unit/language-resolution";
+import { postService } from "@/post/post.service";
+import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
 import { mapTranslationToDTO } from "@/unit/mapper";
-
-/** Score at or below this threshold hides a RealmTagApplication from regular users. */
-export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
-
-import { mapPublicUser, publicUserSelect } from "@/utils/sanitizeUser";
-
-function normalizedLanguage(language: string | null | undefined) {
-  return language ? normalizeLanguage(language) : null;
-}
-
+import { mapPublicUser } from "@/utils/sanitizeUser";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
   loadUserSlugMap,
 } from "@/utils/userSlugHydration";
+import type { ServerDb } from "../db/client";
 import {
-  mapRealmListRowToDTO,
+  Realm,
+  RealmTagApplication as RealmTagApplicationTable,
+  RealmTagApplicationVote,
+  RealmMember,
+  RealmRuleAcknowledgement,
+  Subscription,
+  TagVote,
+  Unit,
+  UnitRealm,
+  UnitSupportLanguage,
+  UnitTag,
+  UnitTranslation,
+  User,
+} from "../db/schema";
+import {
   mapRealmMemberToDTO,
   mapRealmToDTO,
   mapUnitRealmToDTO,
@@ -73,11 +88,78 @@ import {
   reorderList,
   setSingleExtraKey,
 } from "./realm-extra.service";
-import {
-  type RealmWithRelations,
-  realmInclude,
-  realmListSelect,
-} from "./types";
+import type { RealmWithRelations } from "./types";
+
+/** Score at or below this threshold hides a RealmTagApplication from regular users. */
+export const REALM_TAG_VISIBILITY_THRESHOLD = -100;
+
+function normalizedLanguage(language: string | null | undefined) {
+  return language ? normalizeLanguage(language) : null;
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+type RealmTagApplicationRow = typeof RealmTagApplicationTable.$inferSelect;
+
+const publicUserColumns = {
+  unitId: User.unitId,
+  name: User.name,
+  avatar: User.avatar,
+  bio: User.bio,
+  description: User.description,
+  followersCount: User.followersCount,
+  followingsCount: User.followingsCount,
+};
+
+async function hydrateRealmWithRelations(
+  unitId: string,
+  dbLike?: Pick<ServerDb, "select">,
+): Promise<RealmWithRelations> {
+  const db = dbLike ?? (await getServerDb());
+  const [realm] = await db
+    .select()
+    .from(Realm)
+    .where(eq(Realm.unitId, unitId))
+    .limit(1);
+  if (!realm) throw new Error("Realm not found");
+
+  const [unit] = await db
+    .select()
+    .from(Unit)
+    .where(eq(Unit.id, unitId))
+    .limit(1);
+  if (!unit) throw new Error("Realm Unit not found");
+
+  const [translations, supportLanguages, members, users] = await Promise.all([
+    db.select().from(UnitTranslation).where(eq(UnitTranslation.unitId, unitId)),
+    db
+      .select()
+      .from(UnitSupportLanguage)
+      .where(eq(UnitSupportLanguage.unitId, unitId)),
+    db.select().from(RealmMember).where(eq(RealmMember.realmUnitId, unitId)),
+    unit.userId
+      ? db
+          .select(publicUserColumns)
+          .from(User)
+          .where(eq(User.unitId, unit.userId))
+          .limit(1)
+      : Promise.resolve([]),
+  ]);
+
+  return {
+    ...realm,
+    unit: {
+      ...unit,
+      user: users[0] ?? null,
+      translations,
+      supportLanguages,
+    },
+    members,
+  };
+}
 
 function enqueueRealmSearch(
   kind:
@@ -122,7 +204,7 @@ function enqueueRealmMetadata(unitId: string, fields: Record<string, unknown>) {
   );
 }
 
-function getRuleUnitIdFromExtra(extra: Prisma.JsonValue | null): string | null {
+function getRuleUnitIdFromExtra(extra: unknown): string | null {
   if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
   const rule = (extra as Record<string, unknown>).rule;
   return typeof rule === "string" && rule.length > 0 ? rule : null;
@@ -158,15 +240,18 @@ export class RealmService {
     realmUnitId: string;
     requesterUserId: string;
   }): Promise<void> {
-    const recipients = await prisma.realmMember.findMany({
-      where: {
-        realmUnitId: input.realmUnitId,
-        state: "ACTIVE",
-        roleKey: { in: [...REALM_JOIN_APPROVAL_ROLES] },
-        NOT: { userId: input.requesterUserId },
-      },
-      select: { userId: true },
-    });
+    const db = await getServerDb();
+    const recipients = await db
+      .select({ userId: RealmMember.userId })
+      .from(RealmMember)
+      .where(
+        and(
+          eq(RealmMember.realmUnitId, input.realmUnitId),
+          eq(RealmMember.state, "ACTIVE"),
+          inArray(RealmMember.roleKey, [...REALM_JOIN_APPROVAL_ROLES]),
+          ne(RealmMember.userId, input.requesterUserId),
+        ),
+      );
     const directRecipients = recipients.map((recipient) => recipient.userId);
     if (directRecipients.length === 0) return;
 
@@ -185,78 +270,35 @@ export class RealmService {
   private async assertRealmAndTagTypes(
     realmUnitId: string,
     tagUnitId: string,
-    tx: Pick<typeof prisma, "unit"> = prisma,
+    tx?: Pick<ServerDb, "select">,
   ): Promise<void> {
+    const db = tx ?? (await getServerDb());
     const [realm, tag] = await Promise.all([
-      tx.unit.findUnique({
-        where: { id: realmUnitId },
-        select: { id: true, type: true, realm: { select: { unitId: true } } },
-      }),
-      tx.unit.findUnique({
-        where: { id: tagUnitId },
-        select: { id: true, type: true },
-      }),
+      db
+        .select({ id: Unit.id, type: Unit.type, realmUnitId: Realm.unitId })
+        .from(Unit)
+        .leftJoin(Realm, eq(Realm.unitId, Unit.id))
+        .where(eq(Unit.id, realmUnitId))
+        .limit(1)
+        .then((rows) => rows[0] ?? null),
+      db
+        .select({ id: Unit.id, type: Unit.type })
+        .from(Unit)
+        .where(eq(Unit.id, tagUnitId))
+        .limit(1)
+        .then((rows) => rows[0] ?? null),
     ]);
 
-    if (!realm || realm.type !== UnitType.REALM || !realm.realm) {
+    if (!realm || realm.type !== "REALM" || !realm.realmUnitId) {
       throw new Error("realmUnitId must reference an existing REALM Unit");
     }
-    if (!tag || tag.type !== UnitType.TAG) {
+    if (!tag || tag.type !== "TAG") {
       throw new Error("tagUnitId must reference an existing TAG Unit");
     }
   }
 
   private async patchPostRealmIds(unitId: string): Promise<void> {
     await enqueuePostSync(unitId);
-  }
-
-  private buildWhere(options: RealmListQuery): Prisma.RealmWhereInput {
-    const and: Prisma.RealmWhereInput[] = [
-      { unit: { status: UnitStatus.PUBLISHED, type: UnitType.REALM } },
-    ];
-
-    if (options.userId?.trim()) {
-      and.push({ unit: { userId: options.userId } });
-    }
-
-    if (options.isPublic !== undefined) {
-      and.push({ isPublic: options.isPublic });
-    }
-
-    if (options.isOfficial !== undefined) {
-      and.push({ isOfficial: options.isOfficial });
-    }
-
-    const readLanguages = resolveEffectiveReadLanguageCandidates({
-      languages: (options as { languages?: string | readonly string[] })
-        .languages,
-    });
-    const languageVisibility = preferredLanguageVisibilityWhere({
-      languageMode: options.languageMode,
-      languages: readLanguages,
-    });
-    if (languageVisibility) {
-      and.push({ unit: languageVisibility });
-    }
-
-    const idList = parseIdsCsv(options.ids);
-    if (idList && idList.length > 0) {
-      and.push({ unitId: { in: idList } });
-    }
-
-    return and.length ? { AND: and } : {};
-  }
-
-  private buildOrderBy(
-    options: RealmListQuery,
-  ): Prisma.Enumerable<Prisma.RealmOrderByWithRelationInput> {
-    const order = (options.sort?.order ?? "desc") as "asc" | "desc";
-    const field = options.sort?.field ?? "createdAt";
-    if (field === "memberCount")
-      return [{ memberCount: order }, { unitId: "desc" }];
-    if (field === "updatedAt")
-      return [{ unit: { updatedAt: order } }, { unitId: "desc" }];
-    return [{ unit: { createdAt: order } }, { unitId: "desc" }];
   }
 
   // --- Realm CRUD ---
@@ -280,25 +322,84 @@ export class RealmService {
   ): Promise<{ realms: RealmDTO[]; total: number }> {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skipNum = options.start ?? 0;
-    const where = this.buildWhere(options);
-    const orderBy = this.buildOrderBy(options);
+    const db = await getServerDb();
+    const conditions: SQL[] = [
+      eq(Unit.status, "PUBLISHED"),
+      eq(Unit.type, "REALM"),
+    ];
 
-    const [rows, total] = await Promise.all([
-      prisma.realm.findMany({
-        where,
-        orderBy,
-        skip: skipNum,
-        take: limitNum,
-        select: realmListSelect,
-      }),
-      prisma.realm.count({ where }),
+    if (options.userId?.trim()) {
+      conditions.push(eq(Unit.userId, options.userId));
+    }
+    if (options.isPublic !== undefined) {
+      conditions.push(eq(Realm.isPublic, options.isPublic));
+    }
+    if (options.isOfficial !== undefined) {
+      conditions.push(eq(Realm.isOfficial, options.isOfficial));
+    }
+
+    const readLanguages = resolveEffectiveReadLanguageCandidates({
+      languages: (options as { languages?: string | readonly string[] })
+        .languages,
+    });
+    if (options.languageMode === "preferred" && readLanguages.length > 0) {
+      conditions.push(
+        or(
+          eq(Unit.isLanguageNeutral, true),
+          sql`exists (
+            select 1
+            from "UnitSupportLanguage" usl
+            where usl."unitId" = ${Unit.id}
+              and usl."language" in (${sql.join(
+                readLanguages.map((language) => sql`${language}`),
+                sql`, `,
+              )})
+          )`,
+        )!,
+      );
+    }
+
+    const idList = parseIdsCsv(options.ids);
+    if (idList && idList.length > 0) {
+      conditions.push(inArray(Realm.unitId, idList));
+    }
+
+    const where = and(...conditions);
+    const order = (options.sort?.order ?? "desc") as "asc" | "desc";
+    const direction = order === "asc" ? asc : desc;
+    const sortField = options.sort?.field ?? "createdAt";
+    const sortColumn =
+      sortField === "memberCount"
+        ? Realm.memberCount
+        : sortField === "updatedAt"
+          ? Unit.updatedAt
+          : Unit.createdAt;
+
+    const [rows, totalRows] = await Promise.all([
+      db
+        .select({ unitId: Realm.unitId })
+        .from(Realm)
+        .innerJoin(Unit, eq(Realm.unitId, Unit.id))
+        .where(where)
+        .orderBy(direction(sortColumn), desc(Realm.unitId))
+        .offset(skipNum)
+        .limit(limitNum),
+      db
+        .select({ total: count() })
+        .from(Realm)
+        .innerJoin(Unit, eq(Realm.unitId, Unit.id))
+        .where(where),
     ]);
+    const hydratedRows = await hydrateUnitOwnerUserSlugs(
+      await Promise.all(
+        rows.map((row) => hydrateRealmWithRelations(row.unitId)),
+      ),
+    );
 
-    const hydratedRows = await hydrateUnitOwnerUserSlugs(rows);
     return {
       realms: await Promise.all(
         hydratedRows.map(async (row) => {
-          const dto = mapRealmListRowToDTO(
+          const dto = mapRealmToDTO(
             row,
             resolveEffectiveReadLanguageCandidates({
               languages: (options as { languages?: string | readonly string[] })
@@ -311,7 +412,7 @@ export class RealmService {
           };
         }),
       ),
-      total,
+      total: totalRows[0]?.total ?? 0,
     };
   }
 
@@ -320,10 +421,7 @@ export class RealmService {
     viewerUserId?: string | null,
     languages: readonly string[] = [],
   ): Promise<RealmDTO> {
-    const row = await prisma.realm.findFirstOrThrow({
-      where: { unitId },
-      include: realmInclude,
-    });
+    const row = await hydrateRealmWithRelations(unitId);
     const dto = mapRealmToDTO(
       await hydrateUnitOwnerUserSlugRow(row),
       languages,
@@ -353,47 +451,59 @@ export class RealmService {
 
     const { requireSlugScopeId } = await import("@/infra/slug-scopes");
     const realmScope = requireSlugScopeId("realm");
-    const unit = await prisma.unit.create({
-      data: {
+    const db = await getServerDb();
+    const row = await db.transaction(async (tx) => {
+      const [unit] = await tx
+        .insert(Unit)
+        .values({
+          userId,
+          slugScope: realmScope,
+          type: "REALM",
+          status: "PUBLISHED",
+          updatedAt: new Date(),
+          ...(normalizedSlug ? { slug: normalizedSlug } : {}),
+        })
+        .returning({ id: Unit.id });
+      if (!unit) throw new Error("Failed to create realm Unit");
+
+      if (translations?.length) {
+        await tx.insert(UnitTranslation).values(
+          translations.map((tr) => ({
+            unitId: unit.id,
+            language: tr.language,
+            title: tr.title,
+            subtitle: tr.subtitle,
+            summary: tr.summary,
+            description: nullableContentDocJson(tr.description),
+            updatedAt: new Date(),
+          })),
+        );
+      }
+
+      const [realm] = await tx
+        .insert(Realm)
+        .values({
+          unitId: unit.id,
+          isPublic: isPublic ?? true,
+          contentRequiresApproval: contentRequiresApproval ?? false,
+          extra: extra ?? undefined,
+          memberCount: 1,
+          updatedAt: new Date(),
+        })
+        .returning({ unitId: Realm.unitId });
+      if (!realm) throw new Error("Failed to create realm");
+
+      await tx.insert(RealmMember).values({
+        realmUnitId: unit.id,
         userId,
-        slugScope: realmScope,
-        type: UnitType.REALM,
-        status: UnitStatus.PUBLISHED,
-        ...(normalizedSlug ? { slug: normalizedSlug } : {}),
-        ...(translations?.length
-          ? {
-              translations: {
-                create: translations.map((tr) => ({
-                  language: tr.language,
-                  title: tr.title,
-                  subtitle: tr.subtitle,
-                  summary: tr.summary,
-                  description: nullableContentDocJson(tr.description),
-                })),
-              },
-            }
-          : {}),
-      },
+        roleKey: "owner",
+        updatedAt: new Date(),
+      });
+
+      return hydrateRealmWithRelations(unit.id, tx);
     });
 
-    const row = await prisma.realm.create({
-      data: {
-        unitId: unit.id,
-        isPublic: isPublic ?? true,
-        contentRequiresApproval: contentRequiresApproval ?? false,
-        extra: (extra ?? undefined) as Prisma.InputJsonValue | undefined,
-        memberCount: 1,
-        members: {
-          create: {
-            userId,
-            roleKey: "owner",
-          },
-        },
-      },
-      include: realmInclude,
-    });
-
-    await enqueueRealmSearch(SEARCH_COMMAND_KINDS.realmSync, unit.id);
+    await enqueueRealmSearch(SEARCH_COMMAND_KINDS.realmSync, row.unitId);
 
     const dto = mapRealmToDTO(await hydrateUnitOwnerUserSlugRow(row));
     return {
@@ -405,22 +515,23 @@ export class RealmService {
   async update(unitId: string, req: UpdateRealmInput): Promise<RealmDTO> {
     const { isPublic, isOfficial, contentRequiresApproval, extra } = req;
 
-    const row = await prisma.realm.update({
-      where: { unitId },
-      data: {
+    const db = await getServerDb();
+    const [updated] = await db
+      .update(Realm)
+      .set({
         isPublic: isPublic !== undefined ? isPublic : undefined,
         isOfficial: isOfficial !== undefined ? isOfficial : undefined,
         contentRequiresApproval:
           contentRequiresApproval !== undefined
             ? contentRequiresApproval
             : undefined,
-        extra:
-          extra !== undefined
-            ? ((extra ?? undefined) as Prisma.InputJsonValue | undefined)
-            : undefined,
-      },
-      include: realmInclude,
-    });
+        extra: extra !== undefined ? (extra ?? undefined) : undefined,
+        updatedAt: new Date(),
+      })
+      .where(eq(Realm.unitId, unitId))
+      .returning({ unitId: Realm.unitId });
+    if (!updated) throw new Error("Realm not found");
+    const row = await hydrateRealmWithRelations(unitId);
 
     const patchFields: Record<string, any> = {};
     if (isPublic !== undefined) patchFields.isPublic = isPublic;
@@ -439,7 +550,8 @@ export class RealmService {
   }
 
   async delete(unitId: string): Promise<void> {
-    await prisma.unit.delete({ where: { id: unitId } });
+    const db = await getServerDb();
+    await db.delete(Unit).where(eq(Unit.id, unitId));
   }
 
   // --- Membership ---
@@ -458,36 +570,40 @@ export class RealmService {
     userId: string,
     roleKey?: string,
   ): Promise<RealmMemberDTO> {
-    const { member } = await prisma.$transaction(async (tx) => {
-      const realmPolicy = await tx.realm.findUnique({
-        where: { unitId: realmUnitId },
-        select: {
-          extra: true,
-          ruleVersion: true,
-          ruleRequireOnJoin: true,
-          joinRequiresApproval: true,
-        },
-      });
+    const db = await getServerDb();
+    const { member } = await db.transaction(async (tx) => {
+      const [realmPolicy] = await tx
+        .select({
+          extra: Realm.extra,
+          ruleVersion: Realm.ruleVersion,
+          ruleRequireOnJoin: Realm.ruleRequireOnJoin,
+          joinRequiresApproval: Realm.joinRequiresApproval,
+        })
+        .from(Realm)
+        .where(eq(Realm.unitId, realmUnitId))
+        .limit(1);
       const ruleUnitId = getRuleUnitIdFromExtra(realmPolicy?.extra ?? null);
       if (realmPolicy?.ruleRequireOnJoin && ruleUnitId) {
-        const acknowledgement = await tx.realmRuleAcknowledgement.findUnique({
-          where: {
-            realmUnitId_ruleUnitId_version_userId: {
-              realmUnitId,
-              ruleUnitId,
-              version: realmPolicy.ruleVersion,
-              userId,
-            },
-          },
-          select: { realmUnitId: true },
-        });
+        const [acknowledgement] = await tx
+          .select({ realmUnitId: RealmRuleAcknowledgement.realmUnitId })
+          .from(RealmRuleAcknowledgement)
+          .where(
+            and(
+              eq(RealmRuleAcknowledgement.realmUnitId, realmUnitId),
+              eq(RealmRuleAcknowledgement.ruleUnitId, ruleUnitId),
+              eq(RealmRuleAcknowledgement.version, realmPolicy.ruleVersion),
+              eq(RealmRuleAcknowledgement.userId, userId),
+            ),
+          )
+          .limit(1);
         if (!acknowledgement) {
           throw new Error("Realm rules must be acknowledged before joining");
         }
       }
 
-      const member = await tx.realmMember.create({
-        data: {
+      const [member] = await tx
+        .insert(RealmMember)
+        .values({
           realmUnitId,
           userId,
           roleKey: roleKey ?? "member",
@@ -495,35 +611,45 @@ export class RealmService {
           onboardingCompletedAt: realmPolicy?.joinRequiresApproval
             ? null
             : new Date(),
-        },
-      });
+          updatedAt: new Date(),
+        })
+        .returning();
+      if (!member) throw new Error("Failed to join realm");
 
-      const updatedRealm = await tx.realm.update({
-        where: { unitId: realmUnitId },
-        data: { memberCount: { increment: 1 } },
-      });
+      const [updatedRealm] = await tx
+        .update(Realm)
+        .set({
+          memberCount: sql`${Realm.memberCount} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(Realm.unitId, realmUnitId))
+        .returning({ memberCount: Realm.memberCount });
+      if (!updatedRealm) throw new Error("Realm not found");
 
-      const existingSub = await tx.subscription.findUnique({
-        where: {
-          subscriberUnitId_subscribedUnitId: {
-            subscriberUnitId: userId,
-            subscribedUnitId: realmUnitId,
-          },
-        },
-        select: { id: true },
-      });
+      const [existingSub] = await tx
+        .select({ id: Subscription.id })
+        .from(Subscription)
+        .where(
+          and(
+            eq(Subscription.subscriberUnitId, userId),
+            eq(Subscription.subscribedUnitId, realmUnitId),
+          ),
+        )
+        .limit(1);
       if (!existingSub) {
-        await tx.subscription.create({
-          data: {
-            subscriberUnitId: userId,
-            subscribedUnitId: realmUnitId,
-            channels: ["*"],
-          },
+        await tx.insert(Subscription).values({
+          subscriberUnitId: userId,
+          subscribedUnitId: realmUnitId,
+          channels: ["*"],
+          updatedAt: new Date(),
         });
-        await tx.unit.update({
-          where: { id: realmUnitId },
-          data: { subscriberCount: { increment: 1 } },
-        });
+        await tx
+          .update(Unit)
+          .set({
+            subscriberCount: sql`${Unit.subscriberCount} + 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(Unit.id, realmUnitId));
       }
 
       return { member, memberCount: updatedRealm.memberCount };
@@ -548,12 +674,18 @@ export class RealmService {
     userId: string,
     roleKey: string,
   ): Promise<RealmMemberDTO> {
-    const member = await prisma.realmMember.update({
-      where: {
-        realmUnitId_userId: { realmUnitId, userId },
-      },
-      data: { roleKey },
-    });
+    const db = await getServerDb();
+    const [member] = await db
+      .update(RealmMember)
+      .set({ roleKey, updatedAt: new Date() })
+      .where(
+        and(
+          eq(RealmMember.realmUnitId, realmUnitId),
+          eq(RealmMember.userId, userId),
+        ),
+      )
+      .returning();
+    if (!member) throw new Error("Realm member not found");
 
     return mapRealmMemberToDTO(member);
   }
@@ -564,21 +696,41 @@ export class RealmService {
   ): Promise<RealmMemberListResponse> {
     const limit = Math.max(1, Math.min(Number(options.limit ?? 50), 100));
     const cursorDate = options.cursor ? new Date(options.cursor) : null;
-    const rows = await prisma.realmMember.findMany({
-      where: {
-        realmUnitId,
-        ...(cursorDate && !Number.isNaN(cursorDate.getTime())
-          ? { joinedAt: { lt: cursorDate } }
-          : {}),
-      },
-      orderBy: [{ joinedAt: "desc" }, { userId: "asc" }],
-      take: limit + 1,
-    });
+    const db = await getServerDb();
+    const rows = await db
+      .select()
+      .from(RealmMember)
+      .where(
+        and(
+          eq(RealmMember.realmUnitId, realmUnitId),
+          cursorDate && !Number.isNaN(cursorDate.getTime())
+            ? sql`${RealmMember.joinedAt} < ${cursorDate}`
+            : undefined,
+        ),
+      )
+      .orderBy(desc(RealmMember.joinedAt), RealmMember.userId)
+      .limit(limit + 1);
     const pageRows = rows.slice(0, limit);
-    const users = await prisma.user.findMany({
-      where: { unitId: { in: pageRows.map((row) => row.userId) } },
-      select: publicUserSelect,
-    });
+    const users =
+      pageRows.length === 0
+        ? []
+        : await db
+            .select({
+              unitId: User.unitId,
+              name: User.name,
+              avatar: User.avatar,
+              bio: User.bio,
+              description: User.description,
+              followersCount: User.followersCount,
+              followingsCount: User.followingsCount,
+            })
+            .from(User)
+            .where(
+              inArray(
+                User.unitId,
+                pageRows.map((row) => row.userId),
+              ),
+            );
     const slugByUserId = await loadUserSlugMap(
       users.map((user) => user.unitId),
     );
@@ -623,25 +775,38 @@ export class RealmService {
       };
     },
   ): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-      const existingMember = await tx.realmMember.findUnique({
-        where: { realmUnitId_userId: { realmUnitId, userId } },
-        select: { realmUnitId: true },
-      });
-      const existingSub = await tx.subscription.findUnique({
-        where: {
-          subscriberUnitId_subscribedUnitId: {
-            subscriberUnitId: userId,
-            subscribedUnitId: realmUnitId,
-          },
-        },
-        select: { id: true },
-      });
+    const db = await getServerDb();
+    await db.transaction(async (tx) => {
+      const [existingMember] = await tx
+        .select({ realmUnitId: RealmMember.realmUnitId })
+        .from(RealmMember)
+        .where(
+          and(
+            eq(RealmMember.realmUnitId, realmUnitId),
+            eq(RealmMember.userId, userId),
+          ),
+        )
+        .limit(1);
+      const [existingSub] = await tx
+        .select({ id: Subscription.id })
+        .from(Subscription)
+        .where(
+          and(
+            eq(Subscription.subscriberUnitId, userId),
+            eq(Subscription.subscribedUnitId, realmUnitId),
+          ),
+        )
+        .limit(1);
 
       if (existingMember) {
-        await tx.realmMember.delete({
-          where: { realmUnitId_userId: { realmUnitId, userId } },
-        });
+        await tx
+          .delete(RealmMember)
+          .where(
+            and(
+              eq(RealmMember.realmUnitId, realmUnitId),
+              eq(RealmMember.userId, userId),
+            ),
+          );
         if (options?.moderation) {
           await moderationActionService.appendModerationAction(tx, {
             authority: "REALM",
@@ -658,24 +823,35 @@ export class RealmService {
         }
       }
       if (existingSub) {
-        await tx.subscription.delete({ where: { id: existingSub.id } });
-        await tx.unit.update({
-          where: { id: realmUnitId },
-          data: { subscriberCount: { decrement: 1 } },
-        });
+        await tx
+          .delete(Subscription)
+          .where(eq(Subscription.id, existingSub.id));
+        await tx
+          .update(Unit)
+          .set({
+            subscriberCount: sql`${Unit.subscriberCount} - 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(Unit.id, realmUnitId));
       }
 
       if (!existingMember) {
-        const realm = await tx.realm.findUnique({
-          where: { unitId: realmUnitId },
-          select: { memberCount: true },
-        });
+        const [realm] = await tx
+          .select({ memberCount: Realm.memberCount })
+          .from(Realm)
+          .where(eq(Realm.unitId, realmUnitId))
+          .limit(1);
         return realm?.memberCount ?? 0;
       }
-      const updatedRealm = await tx.realm.update({
-        where: { unitId: realmUnitId },
-        data: { memberCount: { decrement: 1 } },
-      });
+      const [updatedRealm] = await tx
+        .update(Realm)
+        .set({
+          memberCount: sql`${Realm.memberCount} - 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(Realm.unitId, realmUnitId))
+        .returning({ memberCount: Realm.memberCount });
+      if (!updatedRealm) throw new Error("Realm not found");
       return updatedRealm.memberCount;
     });
 
@@ -691,22 +867,27 @@ export class RealmService {
    * and role, only suppresses inbound activity.
    */
   async muteRealm(realmUnitId: string, userId: string): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-      const existingSub = await tx.subscription.findUnique({
-        where: {
-          subscriberUnitId_subscribedUnitId: {
-            subscriberUnitId: userId,
-            subscribedUnitId: realmUnitId,
-          },
-        },
-        select: { id: true },
-      });
+    const db = await getServerDb();
+    await db.transaction(async (tx) => {
+      const [existingSub] = await tx
+        .select({ id: Subscription.id })
+        .from(Subscription)
+        .where(
+          and(
+            eq(Subscription.subscriberUnitId, userId),
+            eq(Subscription.subscribedUnitId, realmUnitId),
+          ),
+        )
+        .limit(1);
       if (!existingSub) return;
-      await tx.subscription.delete({ where: { id: existingSub.id } });
-      await tx.unit.update({
-        where: { id: realmUnitId },
-        data: { subscriberCount: { decrement: 1 } },
-      });
+      await tx.delete(Subscription).where(eq(Subscription.id, existingSub.id));
+      await tx
+        .update(Unit)
+        .set({
+          subscriberCount: sql`${Unit.subscriberCount} - 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(Unit.id, realmUnitId));
     });
   }
 
@@ -718,28 +899,32 @@ export class RealmService {
    * "unmute" is just a generic subscribe).
    */
   async unmuteRealm(realmUnitId: string, userId: string): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-      const existingSub = await tx.subscription.findUnique({
-        where: {
-          subscriberUnitId_subscribedUnitId: {
-            subscriberUnitId: userId,
-            subscribedUnitId: realmUnitId,
-          },
-        },
-        select: { id: true },
-      });
+    const db = await getServerDb();
+    await db.transaction(async (tx) => {
+      const [existingSub] = await tx
+        .select({ id: Subscription.id })
+        .from(Subscription)
+        .where(
+          and(
+            eq(Subscription.subscriberUnitId, userId),
+            eq(Subscription.subscribedUnitId, realmUnitId),
+          ),
+        )
+        .limit(1);
       if (existingSub) return;
-      await tx.subscription.create({
-        data: {
-          subscriberUnitId: userId,
-          subscribedUnitId: realmUnitId,
-          channels: ["*"],
-        },
+      await tx.insert(Subscription).values({
+        subscriberUnitId: userId,
+        subscribedUnitId: realmUnitId,
+        channels: ["*"],
+        updatedAt: new Date(),
       });
-      await tx.unit.update({
-        where: { id: realmUnitId },
-        data: { subscriberCount: { increment: 1 } },
-      });
+      await tx
+        .update(Unit)
+        .set({
+          subscriberCount: sql`${Unit.subscriberCount} + 1`,
+          updatedAt: new Date(),
+        })
+        .where(eq(Unit.id, realmUnitId));
     });
   }
 
@@ -747,11 +932,17 @@ export class RealmService {
     realmUnitId: string,
     userId: string,
   ): Promise<RealmMemberDTO | null> {
-    const member = await prisma.realmMember.findUnique({
-      where: {
-        realmUnitId_userId: { realmUnitId, userId },
-      },
-    });
+    const db = await getServerDb();
+    const [member] = await db
+      .select()
+      .from(RealmMember)
+      .where(
+        and(
+          eq(RealmMember.realmUnitId, realmUnitId),
+          eq(RealmMember.userId, userId),
+        ),
+      )
+      .limit(1);
     if (!member) return null;
 
     const policyMembership =
@@ -768,22 +959,36 @@ export class RealmService {
     realmUnitId: string,
     userId: string,
   ): Promise<RealmMembershipMeDTO> {
+    const db = await getServerDb();
     const [member, realm, latestAcknowledgement] = await Promise.all([
       this.getMember(realmUnitId, userId),
-      prisma.realm.findUnique({
-        where: { unitId: realmUnitId },
-        select: {
-          extra: true,
-          ruleVersion: true,
-          ruleRequireOnJoin: true,
-          ruleRequireOnPost: true,
-          ruleRequireOnUpdate: true,
-        },
-      }),
-      prisma.realmRuleAcknowledgement.findFirst({
-        where: { realmUnitId, userId },
-        orderBy: [{ acceptedAt: "desc" }, { version: "desc" }],
-      }),
+      db
+        .select({
+          extra: Realm.extra,
+          ruleVersion: Realm.ruleVersion,
+          ruleRequireOnJoin: Realm.ruleRequireOnJoin,
+          ruleRequireOnPost: Realm.ruleRequireOnPost,
+          ruleRequireOnUpdate: Realm.ruleRequireOnUpdate,
+        })
+        .from(Realm)
+        .where(eq(Realm.unitId, realmUnitId))
+        .limit(1)
+        .then((rows) => rows[0] ?? null),
+      db
+        .select()
+        .from(RealmRuleAcknowledgement)
+        .where(
+          and(
+            eq(RealmRuleAcknowledgement.realmUnitId, realmUnitId),
+            eq(RealmRuleAcknowledgement.userId, userId),
+          ),
+        )
+        .orderBy(
+          desc(RealmRuleAcknowledgement.acceptedAt),
+          desc(RealmRuleAcknowledgement.version),
+        )
+        .limit(1)
+        .then((rows) => rows[0] ?? null),
     ]);
 
     const currentRuleUnitId = getRuleUnitIdFromExtra(realm?.extra ?? null);
@@ -835,36 +1040,40 @@ export class RealmService {
     userId: string,
     input: AcknowledgeRealmRuleInput = {},
   ): Promise<RealmRuleAcknowledgementDTO> {
-    const realm = await prisma.realm.findUnique({
-      where: { unitId: realmUnitId },
-      select: { extra: true, ruleVersion: true },
-    });
+    const db = await getServerDb();
+    const [realm] = await db
+      .select({ extra: Realm.extra, ruleVersion: Realm.ruleVersion })
+      .from(Realm)
+      .where(eq(Realm.unitId, realmUnitId))
+      .limit(1);
     const ruleUnitId = getRuleUnitIdFromExtra(realm?.extra ?? null);
     if (!realm || !ruleUnitId) {
       throw new Error("Realm does not have a current rule Unit");
     }
 
-    const row = await prisma.realmRuleAcknowledgement.upsert({
-      where: {
-        realmUnitId_ruleUnitId_version_userId: {
-          realmUnitId,
-          ruleUnitId,
-          version: realm.ruleVersion,
-          userId,
-        },
-      },
-      create: {
+    const [row] = await db
+      .insert(RealmRuleAcknowledgement)
+      .values({
         realmUnitId,
         ruleUnitId,
         version: realm.ruleVersion,
         userId,
         acceptedLanguage: normalizedLanguage(input.acceptedLanguage),
-      },
-      update: {
-        acceptedAt: new Date(),
-        acceptedLanguage: normalizedLanguage(input.acceptedLanguage),
-      },
-    });
+      })
+      .onConflictDoUpdate({
+        target: [
+          RealmRuleAcknowledgement.realmUnitId,
+          RealmRuleAcknowledgement.ruleUnitId,
+          RealmRuleAcknowledgement.version,
+          RealmRuleAcknowledgement.userId,
+        ],
+        set: {
+          acceptedAt: new Date(),
+          acceptedLanguage: normalizedLanguage(input.acceptedLanguage),
+        },
+      })
+      .returning();
+    if (!row) throw new Error("Failed to acknowledge realm rule");
 
     return {
       realmUnitId: row.realmUnitId,
@@ -877,18 +1086,20 @@ export class RealmService {
   }
 
   async getRulePolicy(realmUnitId: string): Promise<RealmRuleReferenceDTO> {
-    const row = await prisma.realm.findUnique({
-      where: { unitId: realmUnitId },
-      select: {
-        unitId: true,
-        extra: true,
-        ruleVersion: true,
-        ruleRequireOnJoin: true,
-        ruleRequireOnPost: true,
-        ruleRequireOnUpdate: true,
-        rulePolicyUpdatedAt: true,
-      },
-    });
+    const db = await getServerDb();
+    const [row] = await db
+      .select({
+        unitId: Realm.unitId,
+        extra: Realm.extra,
+        ruleVersion: Realm.ruleVersion,
+        ruleRequireOnJoin: Realm.ruleRequireOnJoin,
+        ruleRequireOnPost: Realm.ruleRequireOnPost,
+        ruleRequireOnUpdate: Realm.ruleRequireOnUpdate,
+        rulePolicyUpdatedAt: Realm.rulePolicyUpdatedAt,
+      })
+      .from(Realm)
+      .where(eq(Realm.unitId, realmUnitId))
+      .limit(1);
     if (!row) {
       throw new Error("Realm not found");
     }
@@ -923,16 +1134,13 @@ export class RealmService {
       };
     }
 
-    const ruleUnit = await prisma.unit.findUnique({
-      where: { id: policy.ruleUnitId },
-      select: {
-        id: true,
-        type: true,
-        supportLanguages: true,
-        translations: true,
-      },
-    });
-    if (!ruleUnit || ruleUnit.type !== UnitType.POST) {
+    const db = await getServerDb();
+    const [ruleUnit] = await db
+      .select()
+      .from(Unit)
+      .where(eq(Unit.id, policy.ruleUnitId))
+      .limit(1);
+    if (!ruleUnit || ruleUnit.type !== "POST") {
       return {
         ...policy,
         requestedLanguage,
@@ -946,16 +1154,22 @@ export class RealmService {
     const resolvedLanguage = resolveReadLanguage({
       explicitLanguage: language,
       languages,
-      supportLanguages: ruleUnit.supportLanguages,
+      supportLanguages: await db
+        .select()
+        .from(UnitSupportLanguage)
+        .where(eq(UnitSupportLanguage.unitId, ruleUnit.id)),
     });
+    const translations = await db
+      .select()
+      .from(UnitTranslation)
+      .where(eq(UnitTranslation.unitId, ruleUnit.id));
     const translation = resolvedLanguage
-      ? ruleUnit.translations.find((item) => item.language === resolvedLanguage)
+      ? translations.find((item) => item.language === resolvedLanguage)
       : undefined;
     const sourceRulePostUnitId = translation?.sourceUnitId ?? null;
     const sourceRulePost = sourceRulePostUnitId
-      ? await prisma.post.findUnique({
-          where: { unitId: sourceRulePostUnitId },
-          include: postInclude,
+      ? await postService.getByUnitId(sourceRulePostUnitId, {
+          allowTombstone: true,
         })
       : null;
 
@@ -988,25 +1202,28 @@ export class RealmService {
       }
     }
 
-    const row = await prisma.realm.update({
-      where: { unitId: realmUnitId },
-      data: {
+    const db = await getServerDb();
+    const [row] = await db
+      .update(Realm)
+      .set({
         ruleVersion: input.version,
         ruleRequireOnJoin: input.requireOnJoin,
         ruleRequireOnPost: input.requireOnPost,
         ruleRequireOnUpdate: input.requireOnUpdate,
         rulePolicyUpdatedAt: new Date(),
-      },
-      select: {
-        unitId: true,
-        extra: true,
-        ruleVersion: true,
-        ruleRequireOnJoin: true,
-        ruleRequireOnPost: true,
-        ruleRequireOnUpdate: true,
-        rulePolicyUpdatedAt: true,
-      },
-    });
+        updatedAt: new Date(),
+      })
+      .where(eq(Realm.unitId, realmUnitId))
+      .returning({
+        unitId: Realm.unitId,
+        extra: Realm.extra,
+        ruleVersion: Realm.ruleVersion,
+        ruleRequireOnJoin: Realm.ruleRequireOnJoin,
+        ruleRequireOnPost: Realm.ruleRequireOnPost,
+        ruleRequireOnUpdate: Realm.ruleRequireOnUpdate,
+        rulePolicyUpdatedAt: Realm.rulePolicyUpdatedAt,
+      });
+    if (!row) throw new Error("Realm not found");
 
     await governanceAuditService.appendPrivilegedMutation({
       actorUserId: caller.userId,
@@ -1129,14 +1346,17 @@ export class RealmService {
     unitId: string,
     input: Pick<AddUnitRealmInput, "moderationStatus" | "isLocked"> = {},
   ): Promise<UnitRealmDTO> {
-    const row = await prisma.unitRealm.create({
-      data: {
+    const db = await getServerDb();
+    const [row] = await db
+      .insert(UnitRealm)
+      .values({
         realmUnitId,
         unitId,
         moderationStatus: input.moderationStatus?.toUpperCase() as any,
         isLocked: input.isLocked,
-      },
-    });
+      })
+      .returning();
+    if (!row) throw new Error("Failed to add unit to realm");
     await Promise.all([
       enqueueContentSearch(SEARCH_COMMAND_KINDS.contentPatchRealmIds, unitId),
       this.patchPostRealmIds(unitId),
@@ -1145,11 +1365,15 @@ export class RealmService {
   }
 
   async removeUnitRealm(realmUnitId: string, unitId: string): Promise<void> {
-    await prisma.unitRealm.delete({
-      where: {
-        realmUnitId_unitId: { realmUnitId, unitId },
-      },
-    });
+    const db = await getServerDb();
+    await db
+      .delete(UnitRealm)
+      .where(
+        and(
+          eq(UnitRealm.realmUnitId, realmUnitId),
+          eq(UnitRealm.unitId, unitId),
+        ),
+      );
     await Promise.all([
       enqueueContentSearch(SEARCH_COMMAND_KINDS.contentPatchRealmIds, unitId),
       this.patchPostRealmIds(unitId),
@@ -1183,88 +1407,134 @@ export class RealmService {
     realmUnitId: string,
     unitId: string,
     tagUnitId: string,
-  ): Promise<RealmTagApplication> {
-    const row = await prisma.$transaction(async (tx) => {
+  ): Promise<RealmTagApplicationRow> {
+    const db = await getServerDb();
+    const row = await db.transaction(async (tx) => {
       await this.assertRealmAndTagTypes(realmUnitId, tagUnitId, tx);
 
-      await tx.realmTagApplication.upsert({
-        where: {
-          realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
-        },
-        update: {},
-        create: {
+      await tx
+        .insert(RealmTagApplicationTable)
+        .values({
           realmUnitId,
           tagUnitId,
           unitId,
           score: 0,
           voteCount: 0,
-        },
-      });
+          updatedAt: new Date(),
+        })
+        .onConflictDoNothing({
+          target: [
+            RealmTagApplicationTable.realmUnitId,
+            RealmTagApplicationTable.tagUnitId,
+            RealmTagApplicationTable.unitId,
+          ],
+        });
 
-      const existing = await tx.realmTagApplicationVote.findUnique({
-        where: {
-          realmUnitId_tagUnitId_unitId_userId: {
-            realmUnitId,
-            tagUnitId,
-            unitId,
-            userId,
-          },
-        },
-      });
+      const [existing] = await tx
+        .select({ userId: RealmTagApplicationVote.userId })
+        .from(RealmTagApplicationVote)
+        .where(
+          and(
+            eq(RealmTagApplicationVote.realmUnitId, realmUnitId),
+            eq(RealmTagApplicationVote.tagUnitId, tagUnitId),
+            eq(RealmTagApplicationVote.unitId, unitId),
+            eq(RealmTagApplicationVote.userId, userId),
+          ),
+        )
+        .limit(1);
 
       if (!existing) {
-        await tx.realmTagApplicationVote.create({
-          data: { realmUnitId, userId, unitId, tagUnitId, value: 1 },
-        });
-      }
-
-      const agg = await tx.realmTagApplicationVote.aggregate({
-        where: { realmUnitId, unitId, tagUnitId },
-        _sum: { value: true },
-        _count: { value: true },
-      });
-
-      const realmTagApplication = await tx.realmTagApplication.update({
-        where: {
-          realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
-        },
-        data: {
-          score: agg._sum.value ?? 0,
-          voteCount: agg._count.value ?? 0,
-        },
-      });
-
-      const globalVote = await tx.tagVote.findUnique({
-        where: {
-          userId_unitId_tagUnitId: { userId, unitId, tagUnitId },
-        },
-      });
-
-      if (!globalVote) {
-        await tx.tagVote.create({
-          data: { userId, unitId, tagUnitId, value: 1 },
-        });
-      }
-
-      const globalAgg = await tx.tagVote.aggregate({
-        where: { unitId, tagUnitId },
-        _sum: { value: true },
-        _count: { value: true },
-      });
-
-      await tx.unitTag.upsert({
-        where: { unitId_tagUnitId: { unitId, tagUnitId } },
-        update: {
-          score: globalAgg._sum.value ?? 0,
-          voteCount: globalAgg._count.value ?? 0,
-        },
-        create: {
+        await tx.insert(RealmTagApplicationVote).values({
+          realmUnitId,
+          userId,
           unitId,
           tagUnitId,
-          score: globalAgg._sum.value ?? 0,
-          voteCount: globalAgg._count.value ?? 0,
-        },
-      });
+          value: 1,
+        });
+      }
+
+      const [agg] = await tx
+        .select({
+          score: sql<number>`coalesce(sum(${RealmTagApplicationVote.value}), 0)::int`,
+          voteCount: count(RealmTagApplicationVote.value),
+        })
+        .from(RealmTagApplicationVote)
+        .where(
+          and(
+            eq(RealmTagApplicationVote.realmUnitId, realmUnitId),
+            eq(RealmTagApplicationVote.unitId, unitId),
+            eq(RealmTagApplicationVote.tagUnitId, tagUnitId),
+          ),
+        );
+
+      const [realmTagApplication] = await tx
+        .update(RealmTagApplicationTable)
+        .set({
+          score: agg?.score ?? 0,
+          voteCount: agg?.voteCount ?? 0,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(RealmTagApplicationTable.realmUnitId, realmUnitId),
+            eq(RealmTagApplicationTable.tagUnitId, tagUnitId),
+            eq(RealmTagApplicationTable.unitId, unitId),
+          ),
+        )
+        .returning();
+      if (!realmTagApplication) {
+        throw new Error("RealmTagApplication not found");
+      }
+
+      const [globalVote] = await tx
+        .select({ userId: TagVote.userId })
+        .from(TagVote)
+        .where(
+          and(
+            eq(TagVote.userId, userId),
+            eq(TagVote.unitId, unitId),
+            eq(TagVote.tagUnitId, tagUnitId),
+          ),
+        )
+        .limit(1);
+
+      if (!globalVote) {
+        await tx.insert(TagVote).values({
+          userId,
+          unitId,
+          tagUnitId,
+          value: 1,
+        });
+      }
+
+      const [globalAgg] = await tx
+        .select({
+          score: sql<number>`coalesce(sum(${TagVote.value}), 0)::int`,
+          voteCount: count(TagVote.value),
+        })
+        .from(TagVote)
+        .where(
+          and(eq(TagVote.unitId, unitId), eq(TagVote.tagUnitId, tagUnitId)),
+        );
+
+      const unitTagValues = {
+        unitId,
+        tagUnitId,
+        score: globalAgg?.score ?? 0,
+        voteCount: globalAgg?.voteCount ?? 0,
+        updatedAt: new Date(),
+      };
+      await tx
+        .insert(UnitTag)
+        .values(unitTagValues)
+        .onConflictDoUpdate({
+          target: [UnitTag.unitId, UnitTag.tagUnitId],
+          set: {
+            score: unitTagValues.score,
+            voteCount: unitTagValues.voteCount,
+            updatedAt: unitTagValues.updatedAt,
+          },
+        });
 
       return realmTagApplication;
     });
@@ -1288,7 +1558,7 @@ export class RealmService {
     unitId: string,
     tagUnitId: string,
     input: { pinned?: boolean; position?: string | null },
-  ): Promise<RealmTagApplication> {
+  ): Promise<RealmTagApplicationRow> {
     const data: { pinned?: boolean; position?: string | null } = {};
     if (input.pinned !== undefined) {
       data.pinned = input.pinned;
@@ -1296,19 +1566,25 @@ export class RealmService {
     }
     if (input.position !== undefined) data.position = input.position;
 
-    const updated = await prisma.realmTagApplication.update({
-      where: {
-        realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
-      },
-      data,
-    });
+    const db = await getServerDb();
+    const [updated] = await db
+      .update(RealmTagApplicationTable)
+      .set({ ...data, updatedAt: new Date() })
+      .where(
+        and(
+          eq(RealmTagApplicationTable.realmUnitId, realmUnitId),
+          eq(RealmTagApplicationTable.unitId, unitId),
+          eq(RealmTagApplicationTable.tagUnitId, tagUnitId),
+        ),
+      )
+      .returning();
+    if (!updated) throw new Error("RealmTagApplication not found");
     await enqueueContentSearch(
       SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
       unitId,
     );
     return updated;
   }
-
   /**
    * Delete a RealmTagApplication and the underlying RealmTagApplicationVote rows for that triple.
    * Does NOT cascade to UnitTag.
@@ -1318,11 +1594,16 @@ export class RealmService {
     unitId: string,
     tagUnitId: string,
   ): Promise<void> {
-    await prisma.realmTagApplication.delete({
-      where: {
-        realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
-      },
-    });
+    const db = await getServerDb();
+    await db
+      .delete(RealmTagApplicationTable)
+      .where(
+        and(
+          eq(RealmTagApplicationTable.realmUnitId, realmUnitId),
+          eq(RealmTagApplicationTable.unitId, unitId),
+          eq(RealmTagApplicationTable.tagUnitId, tagUnitId),
+        ),
+      );
     await enqueueContentSearch(
       SEARCH_COMMAND_KINDS.contentPatchRealmTagKeys,
       unitId,
@@ -1343,35 +1624,49 @@ export class RealmService {
   ): Promise<void> {
     const clamped = value > 0 ? 1 : -1;
 
-    await prisma.$transaction(async (tx) => {
-      await tx.realmTagApplicationVote.upsert({
-        where: {
-          realmUnitId_tagUnitId_unitId_userId: {
-            realmUnitId,
-            userId,
-            unitId,
-            tagUnitId,
-          },
-        },
-        update: { value: clamped },
-        create: { realmUnitId, userId, unitId, tagUnitId, value: clamped },
-      });
+    const db = await getServerDb();
+    await db.transaction(async (tx) => {
+      await tx
+        .insert(RealmTagApplicationVote)
+        .values({ realmUnitId, userId, unitId, tagUnitId, value: clamped })
+        .onConflictDoUpdate({
+          target: [
+            RealmTagApplicationVote.realmUnitId,
+            RealmTagApplicationVote.tagUnitId,
+            RealmTagApplicationVote.unitId,
+            RealmTagApplicationVote.userId,
+          ],
+          set: { value: clamped },
+        });
 
-      const agg = await tx.realmTagApplicationVote.aggregate({
-        where: { realmUnitId, unitId, tagUnitId },
-        _sum: { value: true },
-        _count: { value: true },
-      });
+      const [agg] = await tx
+        .select({
+          score: sql<number>`coalesce(sum(${RealmTagApplicationVote.value}), 0)::int`,
+          voteCount: count(RealmTagApplicationVote.value),
+        })
+        .from(RealmTagApplicationVote)
+        .where(
+          and(
+            eq(RealmTagApplicationVote.realmUnitId, realmUnitId),
+            eq(RealmTagApplicationVote.unitId, unitId),
+            eq(RealmTagApplicationVote.tagUnitId, tagUnitId),
+          ),
+        );
 
-      await tx.realmTagApplication.update({
-        where: {
-          realmUnitId_tagUnitId_unitId: { realmUnitId, tagUnitId, unitId },
-        },
-        data: {
-          score: agg._sum.value ?? 0,
-          voteCount: agg._count.value ?? 0,
-        },
-      });
+      await tx
+        .update(RealmTagApplicationTable)
+        .set({
+          score: agg?.score ?? 0,
+          voteCount: agg?.voteCount ?? 0,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(RealmTagApplicationTable.realmUnitId, realmUnitId),
+            eq(RealmTagApplicationTable.tagUnitId, tagUnitId),
+            eq(RealmTagApplicationTable.unitId, unitId),
+          ),
+        );
     });
 
     await enqueueContentSearch(
@@ -1390,25 +1685,29 @@ export class RealmService {
     realmUnitId: string,
     unitId: string,
     options?: { includeBelowThreshold?: boolean },
-  ): Promise<RealmTagApplication[]> {
-    const where: Prisma.RealmTagApplicationWhereInput =
-      options?.includeBelowThreshold
-        ? { realmUnitId, unitId }
-        : {
-            realmUnitId,
-            unitId,
-            score: { gt: REALM_TAG_VISIBILITY_THRESHOLD },
-          };
-
-    return prisma.realmTagApplication.findMany({
-      where,
-      orderBy: [
-        { pinned: "desc" },
-        { position: "asc" },
-        { score: "desc" },
-        { tagUnitId: "asc" },
-      ],
-    });
+  ): Promise<RealmTagApplicationRow[]> {
+    const db = await getServerDb();
+    return db
+      .select()
+      .from(RealmTagApplicationTable)
+      .where(
+        and(
+          eq(RealmTagApplicationTable.realmUnitId, realmUnitId),
+          eq(RealmTagApplicationTable.unitId, unitId),
+          options?.includeBelowThreshold
+            ? undefined
+            : gt(
+                RealmTagApplicationTable.score,
+                REALM_TAG_VISIBILITY_THRESHOLD,
+              ),
+        ),
+      )
+      .orderBy(
+        desc(RealmTagApplicationTable.pinned),
+        asc(RealmTagApplicationTable.position),
+        desc(RealmTagApplicationTable.score),
+        asc(RealmTagApplicationTable.tagUnitId),
+      );
   }
 
   /**
@@ -1420,50 +1719,59 @@ export class RealmService {
     threshold: number,
     limit: number,
     realmUnitId?: string,
-  ): Promise<RealmTagApplication[]> {
-    return prisma.realmTagApplication.findMany({
-      where: {
-        score: { lte: threshold },
-        ...(realmUnitId ? { realmUnitId } : {}),
-      },
-      orderBy: [
-        { score: "asc" },
-        { realmUnitId: "asc" },
-        { unitId: "asc" },
-        { tagUnitId: "asc" },
-      ],
-      take: Math.max(1, Math.min(limit, 200)),
-    });
+  ): Promise<RealmTagApplicationRow[]> {
+    const db = await getServerDb();
+    return db
+      .select()
+      .from(RealmTagApplicationTable)
+      .where(
+        and(
+          lte(RealmTagApplicationTable.score, threshold),
+          realmUnitId
+            ? eq(RealmTagApplicationTable.realmUnitId, realmUnitId)
+            : undefined,
+        ),
+      )
+      .orderBy(
+        asc(RealmTagApplicationTable.score),
+        asc(RealmTagApplicationTable.realmUnitId),
+        asc(RealmTagApplicationTable.unitId),
+        asc(RealmTagApplicationTable.tagUnitId),
+      )
+      .limit(Math.max(1, Math.min(limit, 200)));
   }
 
   async listByMember(
     userId: string,
     options: { publicOnly?: boolean } = {},
   ): Promise<{ realms: RealmDTO[]; total: number }> {
-    const members = await prisma.realmMember.findMany({
-      where: { userId },
-      select: { realmUnitId: true },
-    });
+    const db = await getServerDb();
+    const members = await db
+      .select({ realmUnitId: RealmMember.realmUnitId })
+      .from(RealmMember)
+      .where(eq(RealmMember.userId, userId));
 
     const realmIds = members.map((m) => m.realmUnitId);
     if (realmIds.length === 0) return { realms: [], total: 0 };
 
-    const where = {
-      unitId: { in: realmIds },
-      ...(options.publicOnly ? { isPublic: true } : {}),
-    };
-
-    const [realms, total] = await Promise.all([
-      prisma.realm.findMany({
-        where,
-        include: realmInclude,
-        orderBy: { unit: { createdAt: "desc" } },
-      }),
-      prisma.realm.count({ where }),
+    const where = and(
+      inArray(Realm.unitId, realmIds),
+      options.publicOnly ? eq(Realm.isPublic, true) : undefined,
+    );
+    const [realms, totalRows] = await Promise.all([
+      db
+        .select({ unitId: Realm.unitId })
+        .from(Realm)
+        .innerJoin(Unit, eq(Realm.unitId, Unit.id))
+        .where(where)
+        .orderBy(desc(Unit.createdAt)),
+      db.select({ total: count() }).from(Realm).where(where),
     ]);
 
     const hydratedRealms = await hydrateUnitOwnerUserSlugs(
-      realms as RealmWithRelations[],
+      await Promise.all(
+        realms.map((realm) => hydrateRealmWithRelations(realm.unitId)),
+      ),
     );
     return {
       realms: await Promise.all(
@@ -1475,7 +1783,7 @@ export class RealmService {
           };
         }),
       ),
-      total,
+      total: totalRows[0]?.total ?? 0,
     };
   }
 }

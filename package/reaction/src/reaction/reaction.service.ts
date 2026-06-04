@@ -1,7 +1,10 @@
 import { normalizeReactionScopeKey } from "@rezics/contract/reaction";
-import type { Prisma, Reaction } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
 import { allowedReactionTypes } from "../env";
+import {
+  DrizzleReactionRepository,
+  type ReactionRepository,
+} from "./reaction.repository";
+import type { ReactionRow } from "../db/schema";
 import {
   CursorDecodeError,
   decodeCursor,
@@ -58,7 +61,7 @@ function decodeOptionalCursor(raw: string | undefined): ReactionCursor | null {
   }
 }
 
-function rowToDto(row: Reaction): {
+function rowToDto(row: ReactionRow): {
   id: string;
   userId: string;
   targetId: string;
@@ -73,21 +76,6 @@ function rowToDto(row: Reaction): {
     reaction: row.reaction,
     scopeKey: row.scopeKey,
     createdAt: row.createdAt.toISOString(),
-  };
-}
-
-function buildCursorPredicate(
-  cursor: ReactionCursor | null,
-): Prisma.ReactionWhereInput | undefined {
-  if (!cursor) return undefined;
-  // (createdAt, id) < (cursor.createdAt, cursor.id) under desc/desc order.
-  return {
-    OR: [
-      { createdAt: { lt: cursor.createdAt } },
-      {
-        AND: [{ createdAt: cursor.createdAt }, { id: { lt: cursor.id } }],
-      },
-    ],
   };
 }
 
@@ -114,6 +102,10 @@ export interface ReactionListResult {
 }
 
 export class ReactionService {
+  constructor(
+    private readonly repository: ReactionRepository = new DrizzleReactionRepository(),
+  ) {}
+
   /** Get aggregated reaction counts for one or more targets. */
   async getSummary(
     targetIds: string[],
@@ -128,24 +120,15 @@ export class ReactionService {
 
     const normalizedScopeKey =
       scopeKey === undefined ? undefined : normalizeReactionScopeKey(scopeKey);
-    const rows =
-      normalizedScopeKey === undefined
-        ? await prisma.reactionSummary.groupBy({
-            by: ["targetId", "reaction"],
-            where: { targetId: { in: targetIds } },
-            _sum: { count: true },
-          })
-        : await prisma.reactionSummary.findMany({
-            where: {
-              targetId: { in: targetIds },
-              scopeKey: normalizedScopeKey,
-            },
-          });
+    const rows = await this.repository.getSummaryRows(
+      targetIds,
+      normalizedScopeKey,
+    );
 
     for (const row of rows) {
       const target = result[row.targetId];
       if (!target) continue;
-      target[row.reaction] = "count" in row ? row.count : (row._sum.count ?? 0);
+      target[row.reaction] = row.count;
     }
     return result;
   }
@@ -159,14 +142,11 @@ export class ReactionService {
     if (!targetIds.length) return {};
     const normalizedScopeKey = normalizeReactionScopeKey(scopeKey);
 
-    const rows = await prisma.reaction.findMany({
-      where: {
-        userId,
-        targetId: { in: targetIds },
-        scopeKey: normalizedScopeKey,
-      },
-      select: { targetId: true, reaction: true },
-    });
+    const rows = await this.repository.getUserReactionRows(
+      userId,
+      targetIds,
+      normalizedScopeKey,
+    );
 
     const result: Record<string, string[]> = {};
     for (const id of targetIds) {
@@ -187,66 +167,21 @@ export class ReactionService {
     targetId: string,
     reaction: string,
     scopeKey?: string,
-  ): Promise<{ reaction: Reaction; created: boolean }> {
+  ): Promise<{ reaction: ReactionRow; created: boolean }> {
     if (!allowedReactionTypes.has(reaction)) {
       throw new Error(`Invalid reaction type: ${reaction}`);
     }
     const normalizedScopeKey = normalizeReactionScopeKey(scopeKey);
 
-    // Scoped reaction identity and active-count quota live together here. The
-    // main server validates realm policy before forwarding scoped writes.
-    const result = await prisma.$transaction(async (tx) => {
-      const existing = await tx.reaction.findUnique({
-        where: {
-          userId_targetId_reaction_scopeKey: {
-            userId,
-            targetId,
-            reaction,
-            scopeKey: normalizedScopeKey,
-          },
-        },
-      });
-      if (existing) return { reaction: existing, created: false };
-
-      await tx.reactionTargetUsage.upsert({
-        where: { userId_targetId: { userId, targetId } },
-        create: {
-          userId,
-          targetId,
-          activeCount: 0,
-          maxActive: DEFAULT_ACTIVE_REACTION_QUOTA,
-        },
-        update: {},
-      });
-      const usage = await tx.reactionTargetUsage.updateMany({
-        where: {
-          userId,
-          targetId,
-          activeCount: { lt: tx.reactionTargetUsage.fields.maxActive },
-        },
-        data: { activeCount: { increment: 1 } },
-      });
-      if (usage.count !== 1) throw new ReactionQuotaExceededError();
-
-      const created = await tx.reaction.create({
-        data: { userId, targetId, reaction, scopeKey: normalizedScopeKey },
-      });
-
-      await tx.reactionSummary.upsert({
-        where: {
-          targetId_reaction_scopeKey: {
-            targetId,
-            reaction,
-            scopeKey: normalizedScopeKey,
-          },
-        },
-        create: { targetId, reaction, scopeKey: normalizedScopeKey, count: 1 },
-        update: { count: { increment: 1 } },
-      });
-
-      return { reaction: created, created: true };
+    const result = await this.repository.createReaction({
+      userId,
+      targetId,
+      reaction,
+      scopeKey: normalizedScopeKey,
+      defaultQuota: DEFAULT_ACTIVE_REACTION_QUOTA,
     });
 
+    if (result.quotaExceeded) throw new ReactionQuotaExceededError();
     return result;
   }
 
@@ -258,20 +193,13 @@ export class ReactionService {
     const limit = clampLimit(input.limit);
     const cursor = decodeOptionalCursor(input.cursor);
 
-    const where: Prisma.ReactionWhereInput = {
+    const rows = await this.repository.listRows({
       userId: input.userId,
-      ...(input.scopeKey
-        ? { scopeKey: normalizeReactionScopeKey(input.scopeKey) }
-        : {}),
-      ...(input.reactions && input.reactions.length > 0
-        ? { reaction: { in: input.reactions } }
-        : {}),
-      ...(buildCursorPredicate(cursor) ?? {}),
-    };
-
-    const rows = await prisma.reaction.findMany({
-      where,
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      scopeKey: input.scopeKey
+        ? normalizeReactionScopeKey(input.scopeKey)
+        : undefined,
+      reactions: input.reactions,
+      cursor,
       take: limit + 1,
     });
 
@@ -301,21 +229,14 @@ export class ReactionService {
     const limit = clampLimit(input.limit);
     const cursor = decodeOptionalCursor(input.cursor);
 
-    const where: Prisma.ReactionWhereInput = {
-      targetId: { in: input.targetIds },
-      ...(input.scopeKey
-        ? { scopeKey: normalizeReactionScopeKey(input.scopeKey) }
-        : {}),
-      ...(input.reactions && input.reactions.length > 0
-        ? { reaction: { in: input.reactions } }
-        : {}),
-      ...(input.excludeUserId ? { userId: { not: input.excludeUserId } } : {}),
-      ...(buildCursorPredicate(cursor) ?? {}),
-    };
-
-    const rows = await prisma.reaction.findMany({
-      where,
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    const rows = await this.repository.listRows({
+      targetIds: input.targetIds,
+      scopeKey: input.scopeKey
+        ? normalizeReactionScopeKey(input.scopeKey)
+        : undefined,
+      reactions: input.reactions,
+      excludeUserId: input.excludeUserId,
+      cursor,
       take: limit + 1,
     });
 
@@ -337,53 +258,16 @@ export class ReactionService {
     reaction: string,
     scopeKey?: string,
   ): Promise<{ deleted: boolean }> {
-    const normalizedScopeKey = normalizeReactionScopeKey(scopeKey);
-    return await prisma.$transaction(async (tx) => {
-      const existing = await tx.reaction.findUnique({
-        where: {
-          userId_targetId_reaction_scopeKey: {
-            userId,
-            targetId,
-            reaction,
-            scopeKey: normalizedScopeKey,
-          },
-        },
-        select: { id: true },
-      });
-      if (!existing) return { deleted: false };
-
-      await tx.reaction.delete({
-        where: {
-          userId_targetId_reaction_scopeKey: {
-            userId,
-            targetId,
-            reaction,
-            scopeKey: normalizedScopeKey,
-          },
-        },
-      });
-
-      await tx.reactionSummary
-        .update({
-          where: {
-            targetId_reaction_scopeKey: {
-              targetId,
-              reaction,
-              scopeKey: normalizedScopeKey,
-            },
-          },
-          data: { count: { decrement: 1 } },
-        })
-        .catch(() => {});
-      await tx.reactionTargetUsage
-        .update({
-          where: { userId_targetId: { userId, targetId } },
-          data: { activeCount: { decrement: 1 } },
-        })
-        .catch(() => {});
-
-      return { deleted: true };
+    return await this.repository.removeReaction({
+      userId,
+      targetId,
+      reaction,
+      scopeKey: normalizeReactionScopeKey(scopeKey),
     });
+  }
+
+  async cleanupTarget(targetId: string): Promise<{ count: number }> {
+    return await this.repository.cleanupTarget(targetId);
   }
 }
 

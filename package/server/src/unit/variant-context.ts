@@ -1,6 +1,7 @@
 import type { VariantContextSummary } from "@rezics/contract";
 import { readLanguageCandidates } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { asc, inArray } from "drizzle-orm";
+import { Unit, UnitSupportLanguage, UnitTranslation } from "../db/schema";
 
 type VariantContextCarrier = {
   variantUnitId?: string | null;
@@ -16,6 +17,11 @@ type VariantTitleRow = {
   translations: { language: string; title: string | null }[];
 };
 
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
 export async function hydrateVariantContextSummaries<
   T extends VariantContextCarrier,
 >(rows: readonly T[]): Promise<Map<string, VariantContextSummary>> {
@@ -30,21 +36,65 @@ export async function hydrateVariantContextSummaries<
   for (const id of ids) summaries.set(id, { unitId: id, title: id });
   if (ids.length === 0) return summaries;
 
-  const units = await prisma.unit.findMany({
-    where: { id: { in: ids } },
-    select: {
-      id: true,
-      supportLanguages: true,
-      translations: {
-        select: { language: true, title: true },
-      },
-    },
-  });
+  const db = await getServerDb();
+  const [unitRows, supportLanguageRows, translationRows] = await Promise.all([
+    db.select({ id: Unit.id }).from(Unit).where(inArray(Unit.id, ids)),
+    db
+      .select({
+        unitId: UnitSupportLanguage.unitId,
+        language: UnitSupportLanguage.language,
+        isPrimary: UnitSupportLanguage.isPrimary,
+        sortOrder: UnitSupportLanguage.sortOrder,
+      })
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, ids))
+      .orderBy(
+        asc(UnitSupportLanguage.unitId),
+        asc(UnitSupportLanguage.sortOrder),
+      ),
+    db
+      .select({
+        unitId: UnitTranslation.unitId,
+        language: UnitTranslation.language,
+        title: UnitTranslation.title,
+      })
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, ids)),
+  ]);
 
-  for (const unit of units) {
+  const supportLanguagesByUnitId = new Map<
+    string,
+    VariantTitleRow["supportLanguages"]
+  >();
+  for (const row of supportLanguageRows) {
+    const items = supportLanguagesByUnitId.get(row.unitId) ?? [];
+    items.push({
+      language: row.language,
+      isPrimary: row.isPrimary,
+      sortOrder: row.sortOrder,
+    });
+    supportLanguagesByUnitId.set(row.unitId, items);
+  }
+
+  const translationsByUnitId = new Map<
+    string,
+    VariantTitleRow["translations"]
+  >();
+  for (const row of translationRows) {
+    const items = translationsByUnitId.get(row.unitId) ?? [];
+    items.push({ language: row.language, title: row.title });
+    translationsByUnitId.set(row.unitId, items);
+  }
+
+  for (const unit of unitRows) {
+    const row = {
+      id: unit.id,
+      supportLanguages: supportLanguagesByUnitId.get(unit.id) ?? [],
+      translations: translationsByUnitId.get(unit.id) ?? [],
+    };
     summaries.set(unit.id, {
       unitId: unit.id,
-      title: pickVariantTitle(unit) ?? unit.id,
+      title: pickVariantTitle(row) ?? unit.id,
     });
   }
   return summaries;

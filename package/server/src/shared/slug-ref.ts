@@ -4,8 +4,37 @@ import {
   type SlugScopeName,
   type TagRef,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { getSlugScopeId } from "@/infra/slug-scopes";
+import { and, eq } from "drizzle-orm";
+import { Unit } from "../db/schema";
+import { getSlugScopeId } from "../infra/slug-scopes";
+
+type SlugRefRepository = {
+  findUnitIdBySlug(input: {
+    slugScope: string;
+    slug: string;
+  }): Promise<string | null>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleSlugRefRepository(): SlugRefRepository {
+  return {
+    async findUnitIdBySlug({ slugScope, slug }) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(and(eq(Unit.slugScope, slugScope), eq(Unit.slug, slug)))
+        .limit(1);
+      return row?.id ?? null;
+    },
+  };
+}
+
+const defaultSlugRefRepository = createDrizzleSlugRefRepository();
 
 /**
  * Resolve a {@link SlugRef.scope} value to the `Unit.slugScope` UUID used in
@@ -34,6 +63,7 @@ export function resolveScopeId(scope: string): string | null {
  */
 export async function resolveSlugRef(
   ref: SlugRef | TagRef,
+  repository: SlugRefRepository = defaultSlugRefRepository,
 ): Promise<string | null> {
   if (ref.unitId) return ref.unitId;
   if (!ref.slug) return null;
@@ -43,12 +73,7 @@ export async function resolveSlugRef(
   const slugScope = resolveScopeId(scope);
   if (!slugScope) return null;
 
-  const unit = await prisma.unit.findUnique({
-    where: { slugScope_slug: { slugScope, slug: ref.slug } },
-    select: { id: true },
-  });
-
-  return unit?.id ?? null;
+  return repository.findUnitIdBySlug({ slugScope, slug: ref.slug });
 }
 
 /**
@@ -57,7 +82,10 @@ export async function resolveSlugRef(
  */
 export async function resolveSlugRefs(
   refs: (SlugRef | TagRef)[],
+  repository: SlugRefRepository = defaultSlugRefRepository,
 ): Promise<string[]> {
-  const results = await Promise.all(refs.map(resolveSlugRef));
+  const results = await Promise.all(
+    refs.map((ref) => resolveSlugRef(ref, repository)),
+  );
   return results.filter((id): id is string => id !== null);
 }

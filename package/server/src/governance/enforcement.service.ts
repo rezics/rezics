@@ -3,14 +3,31 @@ import type {
   CreateAccountEnforcementInput,
   UnblockAccountEnforcementInput,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { broadcast } from "@/notify-boundary/notify-boundary.client";
+import { and, desc, eq, gt, inArray, isNull, or } from "drizzle-orm";
 import { revokeAuthSessionsForAuthUser } from "../auth-boundary/auth-internal.client";
+import type { ServerDb } from "../db/client";
+import {
+  AccountEnforcement,
+  AccountEnforcementKind as AccountEnforcementKindEnum,
+  User,
+} from "../db/schema";
+import { broadcast } from "../notify-boundary/notify-boundary.client";
 import { mapAccountEnforcementToDTO } from "./governance.mapper";
-import { moderationActionService } from "./moderation-action.service";
-import type { GovernanceListOptions } from "./types";
+import {
+  moderationActionService,
+  type ModerationActionService,
+} from "./moderation-action.service";
+import type { AccountEnforcementRow, GovernanceListOptions } from "./types";
 
-const enforcementKindMap: Record<AccountEnforcementKind, any> = {
+type EnforcementKindStorage =
+  (typeof AccountEnforcementKindEnum.enumValues)[number];
+type EnforcementActionResult = { id: string };
+type EnforcementTx = Pick<ServerDb, "select" | "insert" | "update">;
+
+const enforcementKindMap: Record<
+  AccountEnforcementKind,
+  EnforcementKindStorage
+> = {
   warning: "WARNING",
   silence: "SILENCE",
   suspension: "SUSPENSION",
@@ -18,6 +35,14 @@ const enforcementKindMap: Record<AccountEnforcementKind, any> = {
   rate_limit: "RATE_LIMIT",
   trust_restriction: "TRUST_RESTRICTION",
 };
+
+const blockingEnforcementKinds = [
+  "SILENCE",
+  "SUSPENSION",
+  "BAN",
+  "RATE_LIMIT",
+  "TRUST_RESTRICTION",
+] as const;
 
 function notifyEnforcement(input: {
   kind: "moderation.subject.warning" | "moderation.appeal.updated";
@@ -51,17 +76,184 @@ function basePermissionRole(permission: unknown) {
   return role === "BLOCKED" ? "MEMBER" : role;
 }
 
+export interface GovernanceEnforcementRepository {
+  listActive(targetUserId: string, now: Date): Promise<AccountEnforcementRow[]>;
+  list(
+    targetUserId: string,
+    options: GovernanceListOptions,
+  ): Promise<AccountEnforcementRow[]>;
+  getAuthUserId(userId: string): Promise<string | null>;
+  create(input: {
+    targetUserId: string;
+    kind: AccountEnforcementKind;
+    reason: string;
+    safeMessage?: string | null;
+    decidedById: string;
+    decisionCode: string;
+    expiresAt?: Date | null;
+    metadata?: Record<string, unknown>;
+    appendAction: (
+      tx: EnforcementTx,
+      row: AccountEnforcementRow,
+    ) => Promise<EnforcementActionResult>;
+  }): Promise<AccountEnforcementRow>;
+  revokeActive(input: {
+    targetUserId: string;
+    now: Date;
+    safeMessage?: string | null;
+    reason: string;
+    revokedById: string;
+    metadata?: Record<string, unknown>;
+    appendAction: (
+      tx: EnforcementTx,
+      row: AccountEnforcementRow,
+    ) => Promise<EnforcementActionResult>;
+  }): Promise<AccountEnforcementRow[]>;
+}
+
+function activeEnforcementWhere(targetUserId: string, now: Date) {
+  return and(
+    eq(AccountEnforcement.targetUserId, targetUserId),
+    eq(AccountEnforcement.state, "ACTIVE"),
+    or(
+      isNull(AccountEnforcement.expiresAt),
+      gt(AccountEnforcement.expiresAt, now),
+    ),
+  );
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleGovernanceEnforcementRepository(): GovernanceEnforcementRepository {
+  return {
+    async listActive(targetUserId, now) {
+      const db = await getServerDb();
+      return db
+        .select()
+        .from(AccountEnforcement)
+        .where(activeEnforcementWhere(targetUserId, now))
+        .orderBy(desc(AccountEnforcement.createdAt));
+    },
+
+    async list(targetUserId, options) {
+      const db = await getServerDb();
+      return db
+        .select()
+        .from(AccountEnforcement)
+        .where(eq(AccountEnforcement.targetUserId, targetUserId))
+        .orderBy(desc(AccountEnforcement.createdAt))
+        .offset(options.offset ?? 0)
+        .limit(options.limit ?? 50);
+    },
+
+    async getAuthUserId(userId) {
+      const db = await getServerDb();
+      const [user] = await db
+        .select({ authUserId: User.authUserId })
+        .from(User)
+        .where(eq(User.unitId, userId))
+        .limit(1);
+      return user?.authUserId ?? null;
+    },
+
+    async create(input) {
+      const db = await getServerDb();
+      return db.transaction(async (tx) => {
+        const now = new Date();
+        const [created] = await tx
+          .insert(AccountEnforcement)
+          .values({
+            targetUserId: input.targetUserId,
+            kind: enforcementKindMap[input.kind],
+            reason: input.reason,
+            safeMessage: input.safeMessage ?? null,
+            decidedById: input.decidedById,
+            decisionCode: input.decisionCode,
+            expiresAt: input.expiresAt ?? null,
+            metadata: input.metadata,
+            updatedAt: now,
+          })
+          .returning();
+        if (!created) throw new Error("Failed to create AccountEnforcement");
+
+        const action = await input.appendAction(tx, created);
+        const [updated] = await tx
+          .update(AccountEnforcement)
+          .set({ decisionActionId: action.id, updatedAt: new Date() })
+          .where(eq(AccountEnforcement.id, created.id))
+          .returning();
+        if (!updated)
+          throw new Error("Failed to link AccountEnforcement decision action");
+        return updated;
+      });
+    },
+
+    async revokeActive(input) {
+      const db = await getServerDb();
+      const rows = await db
+        .select()
+        .from(AccountEnforcement)
+        .where(
+          and(
+            activeEnforcementWhere(input.targetUserId, input.now),
+            inArray(AccountEnforcement.kind, [...blockingEnforcementKinds]),
+          ),
+        )
+        .orderBy(desc(AccountEnforcement.createdAt));
+
+      return db.transaction(async (tx) => {
+        const revoked: AccountEnforcementRow[] = [];
+        for (const row of rows) {
+          const [updated] = await tx
+            .update(AccountEnforcement)
+            .set({
+              state: "REVOKED",
+              revokedAt: input.now,
+              revokedById: input.revokedById,
+              safeMessage: input.safeMessage ?? row.safeMessage,
+              metadata: {
+                ...(row.metadata &&
+                typeof row.metadata === "object" &&
+                !Array.isArray(row.metadata)
+                  ? row.metadata
+                  : {}),
+                unblockReason: input.reason,
+                ...(input.metadata ?? {}),
+              },
+              updatedAt: new Date(),
+            })
+            .where(eq(AccountEnforcement.id, row.id))
+            .returning();
+          if (!updated) continue;
+
+          const action = await input.appendAction(tx, row);
+          const [withAction] = await tx
+            .update(AccountEnforcement)
+            .set({ revocationActionId: action.id, updatedAt: new Date() })
+            .where(eq(AccountEnforcement.id, updated.id))
+            .returning();
+          if (withAction) revoked.push(withAction);
+        }
+        return revoked;
+      });
+    },
+  };
+}
+
+const defaultRepository = createDrizzleGovernanceEnforcementRepository();
+
 export class GovernanceEnforcementService {
+  constructor(
+    private readonly repository: GovernanceEnforcementRepository = defaultRepository,
+    private readonly actions: ModerationActionService = moderationActionService,
+  ) {}
+
   async activeSummary(targetUserId: string) {
     const now = new Date();
-    const rows = await prisma.accountEnforcement.findMany({
-      where: {
-        targetUserId,
-        state: "ACTIVE",
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const rows = await this.repository.listActive(targetUserId, now);
 
     const activeKinds = rows.map((row) =>
       row.kind.toLowerCase(),
@@ -85,12 +277,7 @@ export class GovernanceEnforcementService {
   }
 
   async list(targetUserId: string, options: GovernanceListOptions = {}) {
-    const rows = await prisma.accountEnforcement.findMany({
-      where: { targetUserId },
-      orderBy: { createdAt: "desc" },
-      skip: options.offset ?? 0,
-      take: options.limit ?? 50,
-    });
+    const rows = await this.repository.list(targetUserId, options);
     return rows.map(mapAccountEnforcementToDTO);
   }
 
@@ -107,13 +294,12 @@ export class GovernanceEnforcementService {
   }) {
     let metadata = input.metadata;
     if (input.kind === "ban") {
-      const user = await prisma.user.findUnique({
-        where: { unitId: input.targetUserId },
-        select: { authUserId: true },
-      });
-      if (user?.authUserId) {
+      const authUserId = await this.repository.getAuthUserId(
+        input.targetUserId,
+      );
+      if (authUserId) {
         const revocation = await revokeAuthSessionsForAuthUser({
-          authUserId: user.authUserId,
+          authUserId,
           reason: input.reason,
         });
         metadata = {
@@ -140,34 +326,27 @@ export class GovernanceEnforcementService {
       }
     }
 
-    const row = await prisma.$transaction(async (tx: any) => {
-      const created = await tx.accountEnforcement.create({
-        data: {
-          targetUserId: input.targetUserId,
-          kind: enforcementKindMap[input.kind],
-          reason: input.reason,
-          safeMessage: input.safeMessage ?? null,
-          decidedById: input.decidedById,
-          decisionCode: input.decisionCode,
-          expiresAt: input.expiresAt ?? null,
-          metadata: metadata as never,
-        },
-      });
-      const action = await moderationActionService.appendModerationAction(tx, {
-        authority: "PLATFORM",
-        targetKind: "ACCOUNT",
-        targetId: input.targetUserId,
-        actorKind: "USER",
-        actorUserId: input.decidedById,
-        actionKind: created.kind,
-        reasonCode: input.decisionCode,
-        reasonText: input.reason,
-        caseId: input.caseId,
-      });
-      return tx.accountEnforcement.update({
-        where: { id: created.id },
-        data: { decisionActionId: action.id },
-      });
+    const row = await this.repository.create({
+      targetUserId: input.targetUserId,
+      kind: input.kind,
+      reason: input.reason,
+      safeMessage: input.safeMessage,
+      decidedById: input.decidedById,
+      decisionCode: input.decisionCode,
+      expiresAt: input.expiresAt,
+      metadata,
+      appendAction: (tx, created) =>
+        this.actions.appendModerationAction(tx, {
+          authority: "PLATFORM",
+          targetKind: "ACCOUNT",
+          targetId: input.targetUserId,
+          actorKind: "USER",
+          actorUserId: input.decidedById,
+          actionKind: created.kind,
+          reasonCode: input.decisionCode,
+          reasonText: input.reason,
+          caseId: input.caseId,
+        }),
     });
     if (input.kind === "warning") {
       notifyEnforcement({
@@ -265,67 +444,27 @@ export class GovernanceEnforcementService {
     input: UnblockAccountEnforcementInput & { revokedById: string },
   ) {
     const now = new Date();
-    const activeRows = await prisma.accountEnforcement.findMany({
-      where: {
-        targetUserId,
-        state: "ACTIVE",
-        kind: {
-          in: [
-            "SILENCE",
-            "SUSPENSION",
-            "BAN",
-            "RATE_LIMIT",
-            "TRUST_RESTRICTION",
-          ],
-        },
-        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    const rows = await prisma.$transaction((tx: any) =>
-      Promise.all(
-        activeRows.map(async (row) => {
-          const updated = await tx.accountEnforcement.update({
-            where: { id: row.id },
-            data: {
-              state: "REVOKED",
-              revokedAt: now,
-              revokedById: input.revokedById,
-              safeMessage: input.safeMessage ?? row.safeMessage,
-              metadata: {
-                ...(row.metadata &&
-                typeof row.metadata === "object" &&
-                !Array.isArray(row.metadata)
-                  ? row.metadata
-                  : {}),
-                unblockReason: input.reason,
-                ...(input.metadata ?? {}),
-              } as never,
-            },
-          });
-          const action = await moderationActionService.appendModerationAction(
-            tx,
-            {
-              authority: "PLATFORM",
-              targetKind: "ACCOUNT",
-              targetId: targetUserId,
-              actorKind: "USER",
-              actorUserId: input.revokedById,
-              actionKind: "REVOKE_ENFORCEMENT",
-              reasonCode: "account.enforcement.revoked",
-              reasonText: input.reason,
-              caseId: input.caseId,
-              reversesActionId: row.decisionActionId,
-            },
-          );
-          return tx.accountEnforcement.update({
-            where: { id: updated.id },
-            data: { revocationActionId: action.id },
-          });
+    const rows = await this.repository.revokeActive({
+      targetUserId,
+      now,
+      safeMessage: input.safeMessage,
+      reason: input.reason,
+      revokedById: input.revokedById,
+      metadata: input.metadata,
+      appendAction: (tx, row) =>
+        this.actions.appendModerationAction(tx, {
+          authority: "PLATFORM",
+          targetKind: "ACCOUNT",
+          targetId: targetUserId,
+          actorKind: "USER",
+          actorUserId: input.revokedById,
+          actionKind: "REVOKE_ENFORCEMENT",
+          reasonCode: "account.enforcement.revoked",
+          reasonText: input.reason,
+          caseId: input.caseId,
+          reversesActionId: row.decisionActionId,
         }),
-      ),
-    );
+    });
 
     for (const row of rows) {
       notifyEnforcement({

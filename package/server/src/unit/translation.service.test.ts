@@ -1,7 +1,4 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-
-installPrismaClientMock();
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
 mock.module("@/meili/content/sync", () => ({
@@ -48,6 +45,7 @@ const previous = {
 
 function freshMocks() {
   enqueueMock.mockClear();
+  const getUnitType = mock(async () => "BOOK");
   const tx = {
     $queryRaw: mock(async () => [{ sequence: 1n }]),
     unit: {
@@ -66,19 +64,27 @@ function freshMocks() {
       findUnique: mock(async () => previous),
       upsert: mock(async ({ update }: any) => ({ ...previous, ...update })),
     },
+    findTranslation: mock(async () => previous),
+    upsertTranslation: mock(async (_unitId, _language, _create, update) => ({
+      ...previous,
+      ...update,
+    })),
     historyOutbox: {
       create: mock(async (args: any) => args.data),
     },
   };
 
-  Object.assign(prismaMock, {
-    $transaction: mock(async (cb: any) => cb(tx)),
-    unit: {
-      findUnique: mock(async () => ({ type: "BOOK" })),
-    },
-  });
+  const repository = {
+    getTranslation: mock(async () => previous),
+    listByUnitId: mock(async () => [previous]),
+    transaction: mock(async (cb: any) => cb(tx)),
+    getUnitType,
+    deleteTranslation: mock(async () => undefined),
+    findTranslation: mock(async () => previous),
+    findFirstTranslation: mock(async () => previous),
+  };
 
-  return { tx };
+  return { tx, repository, getUnitType };
 }
 
 describe("TranslationService history patches", () => {
@@ -87,8 +93,9 @@ describe("TranslationService history patches", () => {
   });
 
   test("title-only edit stores a title-only history patch", async () => {
-    const { tx } = freshMocks();
-    const { translationService } = await import("./translation.service");
+    const { tx, repository } = freshMocks();
+    const { TranslationService } = await import("./translation.service");
+    const translationService = new TranslationService(repository as any);
 
     await translationService.upsertTranslation(
       "book-1",
@@ -119,8 +126,9 @@ describe("TranslationService history patches", () => {
   });
 
   test("unchanged translation submission writes no history outbox row", async () => {
-    const { tx } = freshMocks();
-    const { translationService } = await import("./translation.service");
+    const { tx, repository } = freshMocks();
+    const { TranslationService } = await import("./translation.service");
+    const translationService = new TranslationService(repository as any);
 
     await translationService.upsertTranslation(
       "book-1",
@@ -134,14 +142,15 @@ describe("TranslationService history patches", () => {
       { userId: "user-1", permission: { role: "USER" } } as any,
     );
 
-    expect(tx.unitTranslation.upsert).not.toHaveBeenCalled();
+    expect(tx.upsertTranslation).not.toHaveBeenCalled();
     expect(tx.historyOutbox.create).not.toHaveBeenCalled();
     expect(enqueueMock).not.toHaveBeenCalled();
   });
 
   test("rejects game system requirement raw text in translation extra", async () => {
-    const { tx } = freshMocks();
-    const { translationService } = await import("./translation.service");
+    const { tx, repository } = freshMocks();
+    const { TranslationService } = await import("./translation.service");
+    const translationService = new TranslationService(repository as any);
 
     await expect(
       translationService.upsertTranslation("book-1", "zh-hant", {
@@ -152,14 +161,15 @@ describe("TranslationService history patches", () => {
       }),
     ).rejects.toThrow(/Game system requirement raw text/);
 
-    expect(tx.unitTranslation.upsert).not.toHaveBeenCalled();
+    expect(tx.upsertTranslation).not.toHaveBeenCalled();
     expect(enqueueMock).not.toHaveBeenCalled();
   });
 
   test("realm translation edit enqueues realm translation projection", async () => {
-    const { tx } = freshMocks();
-    prismaMock.unit.findUnique.mockResolvedValueOnce({ type: "REALM" });
-    const { translationService } = await import("./translation.service");
+    const { tx, repository, getUnitType } = freshMocks();
+    getUnitType.mockResolvedValueOnce("REALM");
+    const { TranslationService } = await import("./translation.service");
+    const translationService = new TranslationService(repository as any);
 
     await translationService.upsertTranslation(
       "realm-1",
@@ -180,12 +190,13 @@ describe("TranslationService history patches", () => {
   });
 
   test("cross-owner translation edits write staff audit and revision history", async () => {
-    const { tx } = freshMocks();
+    const { tx, repository } = freshMocks();
     tx.unit.findUniqueOrThrow.mockResolvedValue({
       id: "book-1",
       userId: "owner-1",
     });
-    const { translationService } = await import("./translation.service");
+    const { TranslationService } = await import("./translation.service");
+    const translationService = new TranslationService(repository as any);
 
     await translationService.upsertTranslation(
       "book-1",

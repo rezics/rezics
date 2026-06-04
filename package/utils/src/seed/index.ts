@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts";
-import { resetAuthDatabase } from "@rezics/auth/prisma/seed";
+import { resetAuthDatabase } from "@rezics/auth/seed";
 import { resetDatabase } from "@rezics/server/prisma/seed/database";
 import { getEnv } from "../lib/env";
 import {
@@ -65,7 +65,7 @@ export async function seedBaseline(
     const s = p.spinner();
     s.start("Resetting auth and server databases...");
     await resetDatabase(serverPrisma);
-    await resetAuthDatabase(authPrisma);
+    await resetAuthDatabase(authPrisma.db);
     s.stop("Databases reset.");
   }
 
@@ -106,7 +106,7 @@ export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
     printSeedCredentials(credentials);
   } finally {
     await Promise.all([
-      authPrisma.$disconnect().catch(() => {}),
+      authPrisma.disconnect().catch(() => {}),
       serverPrisma.$disconnect().catch(() => {}),
     ]);
   }
@@ -137,7 +137,7 @@ export async function runResetRoot(): Promise<void> {
     printSeedCredentials([{ result, serverRole }], { singular: true });
   } finally {
     await Promise.all([
-      authPrisma.$disconnect().catch(() => {}),
+      authPrisma.disconnect().catch(() => {}),
       serverPrisma.$disconnect().catch(() => {}),
     ]);
   }

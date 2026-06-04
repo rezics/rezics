@@ -1,7 +1,11 @@
 import type { SystemEmailBody } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
 import { emailTransport } from "../email/transport";
 import { pickLocale, renderKind } from "../kinds";
+import {
+  createNotification,
+  findSystemEmailDuplicate,
+  refreshNotification,
+} from "../notification/notification.service";
 
 const DEDUP_WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -45,34 +49,20 @@ export async function notifySystemAndEmail(
   const since = new Date(Date.now() - DEDUP_WINDOW_MS);
 
   if (actorUserId) {
-    const existing = await prisma.notification.findFirst({
-      where: {
-        recipientId: userId,
-        kind,
-        sourceUnitId,
-        actorId: actorUserId,
-        createdAt: { gte: since },
-        AND: [
-          { extra: { path: ["kind"], equals: kind } },
-          {
-            extra: {
-              path: ["payload", "actorUserId"],
-              equals: actorUserId,
-            },
-          },
-          {
-            extra: { path: ["payload", "sourceUnitId"], equals: sourceUnitId },
-          },
-        ],
-      },
-      orderBy: { createdAt: "desc" },
+    const existing = await findSystemEmailDuplicate({
+      recipientId: userId,
+      kind,
+      sourceUnitId,
+      actorId: actorUserId,
+      since,
     });
 
     if (existing) {
       const now = new Date();
-      const refreshed = await prisma.notification.update({
-        where: { id: existing.id },
-        data: { createdAt: now, read: false, readAt: null, extra },
+      const refreshed = await refreshNotification({
+        id: existing.id,
+        createdAt: now,
+        extra,
       });
       return {
         success: true,
@@ -82,14 +72,12 @@ export async function notifySystemAndEmail(
     }
   }
 
-  const notification = await prisma.notification.create({
-    data: {
-      recipientId: userId,
-      actorId: actorUserId,
-      kind,
-      sourceUnitId,
-      extra: { ...extra, claimId },
-    },
+  const notification = await createNotification({
+    recipientId: userId,
+    actorId: actorUserId,
+    kind,
+    sourceUnitId,
+    extra: { ...extra, claimId },
   });
 
   if (primaryEmail) {

@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import { UnitType } from "@rezics/server/prisma/generated/client";
 import { createSeedRuntime } from "./runtime";
 
 describe("createSeedRuntime", () => {
@@ -10,7 +9,7 @@ describe("createSeedRuntime", () => {
         manifestFormat: "human",
         scenarioNames: [],
       },
-      authPrisma: { $disconnect: async () => {} } as never,
+      authPrisma: { disconnect: async () => {} } as never,
       serverPrisma: { $disconnect: async () => {} } as never,
     });
 
@@ -18,7 +17,7 @@ describe("createSeedRuntime", () => {
     runtime.addSpecialTarget({
       label: "Complex shelf",
       scenario: "complex-shelf",
-      unitType: UnitType.SHELF,
+      unitType: "SHELF",
       unitId: "shelf-1",
     });
 
@@ -27,7 +26,7 @@ describe("createSeedRuntime", () => {
       {
         label: "Complex shelf",
         scenario: "complex-shelf",
-        unitType: UnitType.SHELF,
+        unitType: "SHELF",
         unitId: "shelf-1",
       },
     ]);
@@ -41,7 +40,7 @@ describe("createSeedRuntime", () => {
           manifestFormat: "human",
           scenarioNames: [],
         },
-        authPrisma: { $disconnect: async () => {} } as never,
+        authPrisma: { disconnect: async () => {} } as never,
         serverPrisma: { $disconnect: async () => {} } as never,
       }),
     ).toThrow(/SearchClient/);
@@ -63,7 +62,7 @@ describe("createSeedRuntime", () => {
           manifestFormat: "human",
           scenarioNames: [],
         },
-        authPrisma: { $disconnect: async () => {} } as never,
+        authPrisma: { disconnect: async () => {} } as never,
         serverPrisma: {
           $disconnect: async () => {},
           user: {

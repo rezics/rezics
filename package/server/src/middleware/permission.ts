@@ -1,10 +1,11 @@
 import type { RezicsSessionClaims } from "@rezics/contract";
 import { Elysia, status } from "elysia";
-import { prisma } from "#/prisma/client";
+import { eq } from "drizzle-orm";
 import {
   verifyRezicsProfileSetupToken,
   verifyRezicsSessionToken,
 } from "@/session/jwt/jwt.service";
+import { User } from "../db/schema";
 
 const SESSION_COOKIE_NAME = "rezics-session-token";
 const PROFILE_SETUP_COOKIE_NAME = "rezics-profile-setup-token";
@@ -109,23 +110,34 @@ function isAdminRole(identity: RezicsSessionClaims | null): boolean {
 
 export { isAdminRole };
 
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+async function getUserPermission(userId: string): Promise<unknown> {
+  const db = await getServerDb();
+  const [user] = await db
+    .select({ permission: User.permission })
+    .from(User)
+    .where(eq(User.unitId, userId))
+    .limit(1);
+  return user?.permission;
+}
+
 export async function verifyAdminFromDb(userId: string): Promise<boolean> {
-  const user = await prisma.user.findUnique({
-    where: { unitId: userId },
-    select: { permission: true },
-  });
-  if (!user) return false;
-  const permission = user.permission as { role?: string[] } | null | undefined;
+  const permission = (await getUserPermission(userId)) as
+    | { role?: string[] }
+    | null
+    | undefined;
   const roles = permission?.role ?? [];
   return roles.includes("ADMIN") || roles.includes("ROOT");
 }
 
 export async function verifyRootFromDb(userId: string): Promise<boolean> {
-  const user = await prisma.user.findUnique({
-    where: { unitId: userId },
-    select: { permission: true },
-  });
-  if (!user) return false;
-  const permission = user.permission as { role?: string[] } | null | undefined;
+  const permission = (await getUserPermission(userId)) as
+    | { role?: string[] }
+    | null
+    | undefined;
   return permission?.role?.includes("ROOT") ?? false;
 }

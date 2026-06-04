@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import type { ContentRating } from "@rezics/contract";
+import type {
+  ContentStructureAnchorWrite,
+  ContentStructureRepository,
+  ContentStructureTx,
+} from "./service";
 
 mock.module("@/infra/infra-users", () => ({
   resolveRezicsWikiUserId: async () => "rezics-wiki-user",
@@ -13,7 +18,7 @@ interface FakeNode {
   contentUnitId: string | null;
   title: string;
   noContent: boolean;
-  rating: string | null;
+  rating: ContentRating | null;
   isDeleted: boolean;
   deletedAt: Date | null;
   createdAt: Date;
@@ -39,57 +44,70 @@ function makeNode(partial: Partial<FakeNode> & Pick<FakeNode, "id">): FakeNode {
 
 let store: FakeNode[] = [];
 
-const findManyContentStructureNode = mock(async (args: any): Promise<any[]> => {
-  const where = args?.where ?? {};
+function findNodesInStore(
+  ownerUnitId: string,
+  options: {
+    isDeleted?: boolean;
+    ids?: readonly string[];
+    excludeIds?: readonly string[];
+    parentIds?: readonly string[];
+  } = {},
+): FakeNode[] {
   return store
-    .filter(
-      (row) => !where.ownerUnitId || row.ownerUnitId === where.ownerUnitId,
-    )
+    .filter((row) => row.ownerUnitId === ownerUnitId)
     .filter((row) =>
-      where.isDeleted === undefined ? true : row.isDeleted === where.isDeleted,
+      options.isDeleted === undefined
+        ? true
+        : row.isDeleted === options.isDeleted,
     )
     .filter((row) => {
-      if (!where.id) return true;
-      if (where.id.in) {
-        if (!where.id.in.includes(row.id)) return false;
-      }
-      if (where.id.notIn && where.id.notIn.includes(row.id)) return false;
+      if (options.ids && !options.ids.includes(row.id)) return false;
+      if (options.excludeIds?.includes(row.id)) return false;
       return true;
     })
     .filter((row) => {
-      if (!where.parentId) return true;
-      if (where.parentId.in) {
-        return (
-          row.parentId !== null && where.parentId.in.includes(row.parentId)
-        );
+      if (!options.parentIds) return true;
+      if (row.parentId === null) {
+        return options.parentIds.includes(null as never);
       }
-      return true;
-    });
-});
+      return options.parentIds.includes(row.parentId);
+    })
+    .sort((a, b) =>
+      a.parentId === b.parentId
+        ? a.position.localeCompare(b.position)
+        : String(a.parentId).localeCompare(String(b.parentId)),
+    );
+}
 
-const updateManyContentStructureNode = mock(async (args: any) => {
-  const where = args.where;
-  let count = 0;
-  for (const row of store) {
-    if (where.ownerUnitId && row.ownerUnitId !== where.ownerUnitId) continue;
-    if (where.isDeleted !== undefined && row.isDeleted !== where.isDeleted)
-      continue;
-    if (where.id?.in && !where.id.in.includes(row.id)) continue;
-    if (where.id?.notIn && where.id.notIn.includes(row.id)) continue;
-    if (where.parentId?.in) {
-      if (!row.parentId || !where.parentId.in.includes(row.parentId)) continue;
+const findManyContentStructureNode = mock(
+  async (
+    ownerUnitId: string,
+    options?: Parameters<ContentStructureTx["findNodes"]>[1],
+  ): Promise<FakeNode[]> => findNodesInStore(ownerUnitId, options),
+);
+
+const updateManyContentStructureNode = mock(
+  async (
+    ownerUnitId: string,
+    options: Parameters<ContentStructureTx["updateManyNodes"]>[1],
+    data: Partial<FakeNode>,
+  ) => {
+    let count = 0;
+    for (const row of findNodesInStore(ownerUnitId, options)) {
+      Object.assign(row, data);
+      count++;
     }
-    Object.assign(row, args.data);
-    count++;
-  }
-  return { count };
-});
+    return { count };
+  },
+);
 
-const updateContentStructureNode = mock(async (args: any) => {
-  const row = store.find((r) => r.id === args.where.id);
-  if (row) Object.assign(row, args.data);
-  return row;
-});
+const updateContentStructureNode = mock(
+  async (nodeId: string, data: Partial<FakeNode>) => {
+    const row = store.find((r) => r.id === nodeId);
+    if (row) Object.assign(row, data);
+    return row;
+  },
+);
 
 const updateContainerMock = mock(async (_args: unknown) => ({}));
 const createHistoryOutbox = mock(async (_args: unknown) => ({}));
@@ -106,37 +124,71 @@ const findContainerMock = mock(async (_args: unknown) => ({
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
 }));
 
-const mockTx = {
-  $queryRaw: allocateSequence,
-  contentStructureNode: {
-    findMany: findManyContentStructureNode,
-    update: updateContentStructureNode,
-    updateMany: updateManyContentStructureNode,
-    create: mock(async () => ({})),
-  },
-  contentStructure: {
-    update: updateContainerMock,
-    upsert: upsertContainerMock,
-  },
-  contentStructureAnchor: {
-    deleteMany: deleteManyAnchorsMock,
-    createMany: createManyAnchorsMock,
+const mockTx: ContentStructureTx = {
+  mutationTx: { source: "content-structure-test" },
+  async $queryRaw<T = unknown>(
+    strings: TemplateStringsArray,
+    ..._values: unknown[]
+  ): Promise<T> {
+    return (await allocateSequence(strings)) as T;
   },
   historyOutbox: {
     create: createHistoryOutbox,
   },
+  async ensureForOwner(ownerUnitId) {
+    await upsertContainerMock(ownerUnitId);
+  },
+  getContainer: findContainerMock,
+  findNodes: findManyContentStructureNode,
+  createNode: mock(async (ownerUnitId, row) => {
+    store.push(
+      makeNode({
+        id: row.id,
+        ownerUnitId,
+        parentId: row.parentId,
+        position: row.position,
+        contentUnitId: row.contentUnitId,
+        title: row.title,
+        noContent: row.noContent,
+        rating: row.rating,
+      }),
+    );
+  }),
+  async updateNode(nodeId, data) {
+    await updateContentStructureNode(nodeId, data);
+  },
+  async updateManyNodes(ownerUnitId, options, data) {
+    await updateManyContentStructureNode(ownerUnitId, options, data);
+  },
+  async updateContainer(ownerUnitId) {
+    await updateContainerMock(ownerUnitId);
+  },
+  async deleteAnchors(ownerUnitId) {
+    await deleteManyAnchorsMock(ownerUnitId);
+  },
+  async createAnchors(rows: readonly ContentStructureAnchorWrite[]) {
+    await createManyAnchorsMock(rows);
+  },
 };
 
-const transactionMock = mock(async (fn: (tx: unknown) => unknown) =>
-  fn(mockTx),
-);
+const repository: ContentStructureRepository = {
+  async getByOwnerUnitId(ownerUnitId) {
+    return {
+      container: await findContainerMock({ ownerUnitId }),
+      nodes: await findManyContentStructureNode(ownerUnitId, {
+        isDeleted: false,
+      }),
+    };
+  },
+  async transaction(fn) {
+    return fn(mockTx);
+  },
+};
 
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  $transaction: transactionMock,
-  contentStructure: { findUniqueOrThrow: findContainerMock },
-  contentStructureNode: { findMany: findManyContentStructureNode },
-});
+async function createService() {
+  const { ContentStructureService } = await import("./service");
+  return new ContentStructureService(repository);
+}
 
 function resetMocks(): void {
   store = [];
@@ -150,7 +202,6 @@ function resetMocks(): void {
   allocateSequence.mockClear();
   deleteManyAnchorsMock.mockClear();
   createManyAnchorsMock.mockClear();
-  transactionMock.mockClear();
 }
 
 describe("buildContentStructureAnchorRows", () => {
@@ -220,7 +271,7 @@ describe("ContentStructureService.softDeleteNodes", () => {
       makeNode({ id: "c2", parentId: "p", position: "n", title: "C2" }),
     );
 
-    const { contentStructureService } = await import("./service");
+    const contentStructureService = await createService();
     await contentStructureService.softDeleteNodes("book-1", ["p"]);
 
     expect(store.find((r) => r.id === "p")?.isDeleted).toBe(true);
@@ -243,7 +294,7 @@ describe("ContentStructureService.softDeleteNodes", () => {
       makeNode({ id: "c2", parentId: "p", position: "n", title: "C2" }),
     );
 
-    const { contentStructureService } = await import("./service");
+    const contentStructureService = await createService();
     await contentStructureService.softDeleteNodes("book-1", ["p", "c1"]);
 
     expect(store.find((r) => r.id === "p")?.isDeleted).toBe(true);
@@ -265,7 +316,7 @@ describe("ContentStructureService.softDeleteNodes", () => {
       }),
     );
 
-    const { contentStructureService } = await import("./service");
+    const contentStructureService = await createService();
     await contentStructureService.softDeleteNodes("book-1", ["p"]);
 
     expect(createHistoryOutbox).not.toHaveBeenCalled();
@@ -289,7 +340,7 @@ describe("ContentStructureService.restoreNodes", () => {
       }),
     );
 
-    const { contentStructureService } = await import("./service");
+    const contentStructureService = await createService();
     await contentStructureService.restoreNodes("book-1", ["c"]);
 
     const c = store.find((r) => r.id === "c");
@@ -323,7 +374,7 @@ describe("ContentStructureService.restoreNodes", () => {
       }),
     );
 
-    const { contentStructureService } = await import("./service");
+    const contentStructureService = await createService();
     await contentStructureService.restoreNodes("book-1", ["c"]);
 
     const c = store.find((r) => r.id === "c");
@@ -340,7 +391,7 @@ describe("ContentStructureService.restoreNodes", () => {
       makeNode({ id: "x", parentId: null, position: "g", title: "X" }),
     );
 
-    const { contentStructureService } = await import("./service");
+    const contentStructureService = await createService();
     await contentStructureService.restoreNodes("book-1", ["x"]);
 
     expect(createHistoryOutbox).not.toHaveBeenCalled();
@@ -362,7 +413,7 @@ describe("ContentStructureService.update — soft-delete-aware", () => {
       }),
     );
 
-    const { contentStructureService } = await import("./service");
+    const contentStructureService = await createService();
     await expect(
       contentStructureService.update("book-1", [
         { id: "ghost", title: "Ghost rises" },
@@ -383,7 +434,7 @@ describe("ContentStructureService.update — soft-delete-aware", () => {
       }),
     );
 
-    const { contentStructureService } = await import("./service");
+    const contentStructureService = await createService();
     await contentStructureService.update("book-1", [{ id: "a", title: "A" }]);
 
     // No soft delete should have fired because "buried" was not in baseline diff

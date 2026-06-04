@@ -3,6 +3,16 @@ import {
   installPrismaClientMock,
   prismaMock,
 } from "../test/prisma-client-mock";
+import {
+  Realm,
+  RealmMember,
+  RealmRuleAcknowledgement,
+  Subscription,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+  User,
+} from "../db/schema";
 
 installPrismaClientMock();
 
@@ -19,6 +29,12 @@ const setSingleExtraKeyMock = mock(async () => undefined);
 const clearSingleExtraKeyMock = mock(async () => undefined);
 const auditPrivilegedMutationMock = mock(async () => ({ id: "audit-1" }));
 const broadcastMock = mock(async (_event: any) => ({ ok: true }));
+const appendModerationActionMock = mock(async (_tx: any, input: any) =>
+  prismaMock.moderationAction?.create?.({ data: input }),
+);
+const postGetByUnitIdMock = mock(async (unitId: string) =>
+  prismaMock.post?.findUnique?.({ where: { unitId } }),
+);
 mock.module("@/meili/realm/sync", () => ({
   patchRealmMemberCountToMeili: mock(async () => undefined),
   patchRealmMetadataToMeili: mock(async () => undefined),
@@ -45,6 +61,16 @@ mock.module("@/governance/audit.service", () => ({
 mock.module("@/notify-boundary/notify-boundary.client", () => ({
   broadcast: broadcastMock,
 }));
+mock.module("@/governance/moderation-action.service", () => ({
+  moderationActionService: {
+    appendModerationAction: appendModerationActionMock,
+  },
+}));
+mock.module("@/post/post.service", () => ({
+  postService: {
+    getByUnitId: postGetByUnitIdMock,
+  },
+}));
 mock.module("./realm-extra.service", () => ({
   appendToList: appendToListMock,
   filterRealmExtraPublic: mock(async (extra: unknown) => extra),
@@ -54,6 +80,352 @@ mock.module("./realm-extra.service", () => ({
   reorderList: reorderListMock,
   setSingleExtraKey: setSingleExtraKeyMock,
   clearSingleExtraKey: clearSingleExtraKeyMock,
+}));
+
+function sqlValues(condition: unknown): unknown[] {
+  const values: unknown[] = [];
+  function walk(value: unknown): void {
+    if (!value || typeof value !== "object") return;
+    const maybeValue = (value as { value?: unknown }).value;
+    if (
+      maybeValue !== undefined &&
+      !Array.isArray(maybeValue) &&
+      (typeof maybeValue === "string" ||
+        typeof maybeValue === "number" ||
+        typeof maybeValue === "boolean")
+    ) {
+      values.push(maybeValue);
+    }
+    const chunks = (value as { queryChunks?: unknown[] }).queryChunks;
+    if (Array.isArray(chunks)) {
+      for (const chunk of chunks) walk(chunk);
+    }
+  }
+  walk(condition);
+  return values;
+}
+
+function containsSqlToken(value: unknown, token: string): boolean {
+  if (!value || typeof value !== "object") return false;
+  const maybeValue = (value as { value?: unknown }).value;
+  if (
+    Array.isArray(maybeValue) &&
+    maybeValue.some((part) => typeof part === "string" && part.includes(token))
+  ) {
+    return true;
+  }
+  const chunks = (value as { queryChunks?: unknown[] }).queryChunks;
+  return Array.isArray(chunks)
+    ? chunks.some((chunk) => containsSqlToken(chunk, token))
+    : false;
+}
+
+function normalizeCounterData(data: Record<string, unknown>) {
+  if (!data.subscriberCount) return data;
+  return {
+    ...data,
+    subscriberCount: containsSqlToken(data.subscriberCount, "-")
+      ? { decrement: 1 }
+      : { increment: 1 },
+  };
+}
+
+let latestRuleUnit: any = null;
+
+function createFakeSelect(selection?: Record<string, unknown>) {
+  let table: unknown;
+  let condition: unknown;
+  let skip = 0;
+  let take: number | undefined;
+  const query = {
+    from: mock((nextTable: unknown) => {
+      table = nextTable;
+      return query;
+    }),
+    innerJoin: mock(() => query),
+    where: mock((nextCondition: unknown) => {
+      condition = nextCondition;
+      return query;
+    }),
+    orderBy: mock(() => query),
+    offset: mock((nextSkip: number) => {
+      skip = nextSkip;
+      return query;
+    }),
+    limit: mock((nextTake: number) => {
+      take = nextTake;
+      return query;
+    }),
+    async resolve() {
+      const values = sqlValues(condition);
+      if (table === Realm) {
+        const selectionKeys = Object.keys(selection ?? {});
+        const readLanguages = values.some(
+          (value) => value === "ja" || value === "en",
+        )
+          ? values.filter(
+              (value): value is string => value === "ja" || value === "en",
+            )
+          : ["ja", "en"];
+        const where =
+          readLanguages.length > 0
+            ? {
+                AND: [
+                  { unit: { status: "PUBLISHED", type: "REALM" } },
+                  {
+                    unit: {
+                      OR: [
+                        { isLanguageNeutral: true },
+                        {
+                          supportLanguages: {
+                            some: { language: { in: readLanguages } },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              }
+            : {};
+        if (selection?.total) {
+          return [{ total: await prismaMock.realm?.count?.({ where }) }];
+        }
+        if (selectionKeys.length === 1 && selection?.unitId) {
+          return (
+            (await prismaMock.realm?.findMany?.({
+              where,
+              skip,
+              take,
+            })) ?? []
+          );
+        }
+        const row = await prismaMock.realm?.findUnique?.({
+          where: { unitId: values[0] },
+        });
+        return row ? [row] : [];
+      }
+      if (table === RealmMember) {
+        if (selection?.userId && !selection?.realmUnitId) {
+          return prismaMock.realmMember?.findMany?.({ where: {} }) ?? [];
+        }
+        const row = await prismaMock.realmMember?.findUnique?.({
+          where: {
+            realmUnitId_userId: {
+              realmUnitId: values[0],
+              userId: values[1],
+            },
+          },
+        });
+        return row ? [row] : [];
+      }
+      if (table === Subscription) {
+        const row = await prismaMock.subscription?.findUnique?.({
+          where: {
+            subscriberUnitId_subscribedUnitId: {
+              subscriberUnitId: values[0],
+              subscribedUnitId: values[1],
+            },
+          },
+        });
+        return row ? [row] : [];
+      }
+      if (table === RealmRuleAcknowledgement) {
+        const finder =
+          prismaMock.realmRuleAcknowledgement?.findUnique ??
+          prismaMock.realmRuleAcknowledgement?.findFirst;
+        const row = await finder?.({ where: {} });
+        return row ? [row] : [];
+      }
+      if (table === Unit) {
+        const row = await prismaMock.unit?.findUnique?.({
+          where: { id: values[0] },
+        });
+        latestRuleUnit = row;
+        return row ? [row] : [];
+      }
+      if (table === UnitSupportLanguage) {
+        return latestRuleUnit?.supportLanguages ?? [];
+      }
+      if (table === UnitTranslation) {
+        return latestRuleUnit?.translations ?? [];
+      }
+      if (table === User) return [];
+      return [];
+    },
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return query.resolve().then(resolve, reject);
+    },
+  };
+  return query;
+}
+
+function createFakeInsert(table: unknown) {
+  let data: Record<string, unknown> = {};
+  const query = {
+    values: mock((nextData: Record<string, unknown>) => {
+      data = nextData;
+      return query;
+    }),
+    onConflictDoUpdate: mock(() => query),
+    returning: mock(async () => {
+      if (table === RealmMember) {
+        return [await prismaMock.realmMember.create({ data })];
+      }
+      if (table === RealmRuleAcknowledgement) {
+        return [
+          await prismaMock.realmRuleAcknowledgement.upsert({
+            where: {
+              realmUnitId_ruleUnitId_version_userId: {
+                realmUnitId: data.realmUnitId,
+                ruleUnitId: data.ruleUnitId,
+                version: data.version,
+                userId: data.userId,
+              },
+            },
+            create: data,
+            update: data,
+          }),
+        ];
+      }
+      return [{ ...data }];
+    }),
+    async execute() {
+      if (table === Subscription) {
+        await prismaMock.subscription.create({ data });
+      }
+      return [];
+    },
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return query.execute().then(resolve, reject);
+    },
+  };
+  return query;
+}
+
+function createFakeUpdate(table: unknown) {
+  let data: Record<string, unknown> = {};
+  const query = {
+    set: mock((nextData: Record<string, unknown>) => {
+      data = nextData;
+      return query;
+    }),
+    where: mock(() => query),
+    returning: mock(async () => {
+      if (table === Realm) {
+        return [
+          await prismaMock.realm.update({
+            where: { unitId: "realm-unit-id" },
+            data,
+          }),
+        ];
+      }
+      if (table === RealmMember) {
+        return [
+          await prismaMock.realmMember.update({
+            where: { realmUnitId_userId: {} },
+            data,
+          }),
+        ];
+      }
+      return [{ ...data }];
+    }),
+    async execute() {
+      if (table === Unit) {
+        await prismaMock.unit.update({ data: normalizeCounterData(data) });
+      }
+      return [];
+    },
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return query.execute().then(resolve, reject);
+    },
+  };
+  return query;
+}
+
+function createFakeDelete(table: unknown) {
+  const query = {
+    where: mock(() => query),
+    async execute() {
+      if (table === RealmMember) await prismaMock.realmMember.delete({});
+      if (table === Subscription) await prismaMock.subscription.delete({});
+      return [];
+    },
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return query.execute().then(resolve, reject);
+    },
+  };
+  return query;
+}
+
+const fakeDrizzleDb = {
+  select: mock((selection?: Record<string, unknown>) =>
+    createFakeSelect(selection),
+  ),
+  insert: mock((table: unknown) => createFakeInsert(table)),
+  update: mock((table: unknown) => createFakeUpdate(table)),
+  delete: mock((table: unknown) => createFakeDelete(table)),
+  transaction: mock(async (fn: any) => {
+    if (prismaMock.$transaction) {
+      return prismaMock.$transaction(() => fn(fakeDrizzleDb));
+    }
+    return fn(fakeDrizzleDb);
+  }),
+};
+
+mock.module("../db/client", () => ({
+  db: fakeDrizzleDb,
+}));
+mock.module("@/governance/capability.service", () => ({
+  governanceCapabilityService: {
+    realmMembershipForPolicy: mock(
+      async (realmUnitId: string, userId: string) => {
+        const member = await prismaMock.realmMember?.findUnique?.({
+          where: { realmUnitId_userId: { realmUnitId, userId } },
+        });
+        if (!member) return null;
+        const roleCapabilities = ["owner", "admin", "moderator"].includes(
+          member.roleKey,
+        )
+          ? [
+              "content.pin",
+              "queue.realm.decide",
+              "comment.moderate",
+              "realm.member.moderate",
+            ].map((capability) => ({
+              capability,
+              scope: { kind: "realm", realmUnitId },
+            }))
+          : [];
+        const grants =
+          (await prismaMock.realmCapabilityGrant?.findMany?.({ where: {} })) ??
+          [];
+        return {
+          realmUnitId,
+          role: member.roleKey,
+          capabilities: [
+            ...roleCapabilities,
+            ...grants.map((grant: any) => ({
+              capability: grant.capability,
+              scope: { kind: "realm", realmUnitId: grant.realmUnitId },
+              expiresAt: grant.expiresAt,
+            })),
+          ],
+        };
+      },
+    ),
+  },
 }));
 
 const { realmService } = await import("./realm.service");
@@ -154,8 +526,8 @@ afterEach(() => {
 
 describe("realmService.list", () => {
   test("preferred filtering uses support-language availability before pagination", async () => {
-    const findMany = mock(async () => []);
-    const count = mock(async () => 0);
+    const findMany = mock(async (_args?: any) => []);
+    const count = mock(async (_args?: any) => 0);
     prismaMock.realm = {
       findMany,
       count,

@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
-import { tryResolveIdentity } from "@/middleware";
-import { AppError } from "@/utils/errors";
+import { tryResolveIdentity } from "../middleware";
+import { AppError } from "../utils/errors";
 import { profileReactionHistoryService } from "./profile-reaction-history.service";
 
 const listQuerySchema = t.Object({

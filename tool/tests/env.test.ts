@@ -22,6 +22,15 @@ describe("tool env config boundary", () => {
     );
     expect(config.composeEnv.REACTION_DB_NAME).toBe("rezics_reaction");
     expect(config.composeEnv.REACTION_DB_PASSWORD).toBe("source");
+    expect(config.schemaDatabaseNames).toEqual({
+      auth: "rezics_auth",
+      server: "rezics_server",
+      notify: "rezics_notify",
+      reaction: "rezics_reaction",
+      history: "rezics_history",
+      ranking: "rezics_ranking",
+    });
+    expect(config.jobDatabaseName).toBe("rezics_jobs");
     expect(config.managedDatabaseNames).toEqual([
       "rezics_server",
       "rezics_auth",

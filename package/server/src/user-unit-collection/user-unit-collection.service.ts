@@ -2,12 +2,16 @@ import type {
   CollectionSearchQuery,
   PatchUserUnitCollectionInput,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { searchClient } from "@/meili/search-client";
+import { and, asc, eq, inArray } from "drizzle-orm";
+import { searchClient } from "../meili/search-client";
+import { enqueueUserUnitCollectionSearchSync } from "../shelf/user-unit-collection.service";
 import {
-  applyUserUnitCollectionMetadata,
-  enqueueUserUnitCollectionSearchSync,
-} from "@/shelf/user-unit-collection.service";
+  Shelf,
+  ShelfUnit,
+  Unit,
+  UserTagApplication,
+  UserUnitCollection,
+} from "../db/schema";
 import type {
   CollectionUnitRow,
   UserUnitCollectionRow,
@@ -19,6 +23,187 @@ type CollectionSearchOptions = {
   viewerUserId?: string | null;
   publicOnly?: boolean;
 };
+
+type UserTagApplicationLiteRow = Pick<
+  typeof UserTagApplication.$inferSelect,
+  "unitId" | "tagUnitId"
+>;
+
+type ShelfUnitLiteRow = Pick<
+  typeof ShelfUnit.$inferSelect,
+  "shelfId" | "unitId"
+>;
+
+export interface UserUnitCollectionRepository {
+  get(userId: string, unitId: string): Promise<UserUnitCollectionRow | null>;
+  patchMetadata(
+    userId: string,
+    input: Pick<
+      PatchUserUnitCollectionInput,
+      "unitId" | "searchText" | "tagUnitIds"
+    >,
+  ): Promise<void>;
+  listTagApplicationsByTags(
+    userId: string,
+    tagUnitIds: readonly string[],
+  ): Promise<UserTagApplicationLiteRow[]>;
+  listShelfUnits(input: {
+    ownerUserId: string;
+    unitIds?: readonly string[] | null;
+    publicOnly?: boolean;
+  }): Promise<ShelfUnitLiteRow[]>;
+  listMetadataRows(
+    userId: string,
+    unitIds: readonly string[],
+  ): Promise<UserUnitCollectionRow[]>;
+  listTagRows(
+    userId: string,
+    unitIds: readonly string[],
+  ): Promise<UserTagApplicationLiteRow[]>;
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleUserUnitCollectionRepository(): UserUnitCollectionRepository {
+  return {
+    async get(userId, unitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select()
+        .from(UserUnitCollection)
+        .where(
+          and(
+            eq(UserUnitCollection.userId, userId),
+            eq(UserUnitCollection.unitId, unitId),
+          ),
+        )
+        .limit(1);
+      return row ?? null;
+    },
+
+    async patchMetadata(userId, input) {
+      const db = await getServerDb();
+      await db.transaction(async (tx) => {
+        if (input.searchText !== undefined) {
+          await tx
+            .insert(UserUnitCollection)
+            .values({
+              userId,
+              unitId: input.unitId,
+              searchText: input.searchText,
+              updatedAt: new Date(),
+            })
+            .onConflictDoUpdate({
+              target: [UserUnitCollection.userId, UserUnitCollection.unitId],
+              set: { searchText: input.searchText, updatedAt: new Date() },
+            });
+        }
+
+        if (input.tagUnitIds !== undefined) {
+          await tx
+            .delete(UserTagApplication)
+            .where(
+              and(
+                eq(UserTagApplication.userId, userId),
+                eq(UserTagApplication.unitId, input.unitId),
+              ),
+            );
+          const tagUnitIds = uniqueTrimmed(input.tagUnitIds);
+          if (tagUnitIds.length > 0) {
+            await tx
+              .insert(UserTagApplication)
+              .values(
+                tagUnitIds.map((tagUnitId, index) => ({
+                  userId,
+                  unitId: input.unitId,
+                  tagUnitId,
+                  position: String(index).padStart(8, "0"),
+                  updatedAt: new Date(),
+                })),
+              )
+              .onConflictDoNothing();
+          }
+        }
+      });
+    },
+
+    async listTagApplicationsByTags(userId, tagUnitIds) {
+      if (tagUnitIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          unitId: UserTagApplication.unitId,
+          tagUnitId: UserTagApplication.tagUnitId,
+        })
+        .from(UserTagApplication)
+        .where(
+          and(
+            eq(UserTagApplication.userId, userId),
+            inArray(UserTagApplication.tagUnitId, [...tagUnitIds]),
+          ),
+        );
+    },
+
+    async listShelfUnits(input) {
+      const db = await getServerDb();
+      const conditions = [
+        eq(Unit.userId, input.ownerUserId),
+        input.unitIds?.length
+          ? inArray(ShelfUnit.unitId, [...input.unitIds])
+          : undefined,
+        input.publicOnly ? eq(Unit.status, "PUBLISHED") : undefined,
+        input.publicOnly ? eq(Unit.visibility, "PUBLIC") : undefined,
+      ].filter(Boolean);
+      return db
+        .select({ shelfId: ShelfUnit.shelfId, unitId: ShelfUnit.unitId })
+        .from(ShelfUnit)
+        .innerJoin(Shelf, eq(Shelf.unitId, ShelfUnit.shelfId))
+        .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
+        .where(and(...conditions))
+        .orderBy(asc(ShelfUnit.unitId), asc(ShelfUnit.shelfId));
+    },
+
+    async listMetadataRows(userId, unitIds) {
+      if (unitIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select()
+        .from(UserUnitCollection)
+        .where(
+          and(
+            eq(UserUnitCollection.userId, userId),
+            inArray(UserUnitCollection.unitId, [...unitIds]),
+          ),
+        );
+    },
+
+    async listTagRows(userId, unitIds) {
+      if (unitIds.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          unitId: UserTagApplication.unitId,
+          tagUnitId: UserTagApplication.tagUnitId,
+        })
+        .from(UserTagApplication)
+        .where(
+          and(
+            eq(UserTagApplication.userId, userId),
+            inArray(UserTagApplication.unitId, [...unitIds]),
+          ),
+        )
+        .orderBy(
+          asc(UserTagApplication.unitId),
+          asc(UserTagApplication.position),
+        );
+    },
+  };
+}
+
+const defaultRepository = createDrizzleUserUnitCollectionRepository();
 
 function uniqueTrimmed(values: readonly string[] | undefined): string[] {
   return Array.from(
@@ -34,25 +219,26 @@ function intersectIds(
 }
 
 export class UserUnitCollectionService {
+  constructor(
+    private readonly repository: UserUnitCollectionRepository = defaultRepository,
+  ) {}
+
   async get(
     userId: string,
     unitId: string,
   ): Promise<UserUnitCollectionRow | null> {
-    return prisma.userUnitCollection.findUnique({
-      where: { userId_unitId: { userId, unitId } },
-    });
+    return this.repository.get(userId, unitId);
   }
 
   async patch(
     userId: string,
     input: PatchUserUnitCollectionInput,
   ): Promise<UserUnitCollectionRow | null> {
-    await prisma.$transaction((tx) =>
-      applyUserUnitCollectionMetadata(tx, userId, input.unitId, {
-        tagUnitIds: input.tagUnitIds,
-        searchText: input.searchText,
-      }),
-    );
+    await this.repository.patchMetadata(userId, {
+      unitId: input.unitId,
+      tagUnitIds: input.tagUnitIds,
+      searchText: input.searchText,
+    });
 
     if (input.searchText !== undefined) {
       await enqueueUserUnitCollectionSearchSync(userId, input.unitId);
@@ -99,10 +285,10 @@ export class UserUnitCollectionService {
     }
 
     if (tagUnitIds.length > 0) {
-      const tagRows = await prisma.userTagApplication.findMany({
-        where: { userId: ownerUserId, tagUnitId: { in: tagUnitIds } },
-        select: { unitId: true, tagUnitId: true },
-      });
+      const tagRows = await this.repository.listTagApplicationsByTags(
+        ownerUserId,
+        tagUnitIds,
+      );
       const tagsByUnitId = new Map<string, Set<string>>();
       for (const row of tagRows) {
         const set = tagsByUnitId.get(row.unitId) ?? new Set<string>();
@@ -132,20 +318,10 @@ export class UserUnitCollectionService {
     const limit = Math.max(1, Math.min(Number(query.limit ?? 100), 100));
     const searchIds = await this.resolveSearchIds(ownerUserId, query, options);
 
-    const rows = await prisma.shelfUnit.findMany({
-      where: {
-        ...(searchIds ? { unitId: { in: [...searchIds] } } : {}),
-        shelf: {
-          unit: {
-            userId: ownerUserId,
-            ...(options.publicOnly
-              ? { status: "PUBLISHED", visibility: "PUBLIC" }
-              : {}),
-          },
-        },
-      },
-      select: { shelfId: true, unitId: true },
-      orderBy: [{ unitId: "asc" }, { shelfId: "asc" }],
+    const rows = await this.repository.listShelfUnits({
+      ownerUserId,
+      unitIds: searchIds ? [...searchIds] : null,
+      publicOnly: options.publicOnly,
     });
 
     const shelfIdsByUnitId = new Map<string, string[]>();
@@ -165,13 +341,8 @@ export class UserUnitCollectionService {
     if (pageIds.length === 0) return { units: [], hasMore };
 
     const [metadataRows, tagRows] = await Promise.all([
-      prisma.userUnitCollection.findMany({
-        where: { userId: ownerUserId, unitId: { in: pageIds } },
-      }),
-      prisma.userTagApplication.findMany({
-        where: { userId: ownerUserId, unitId: { in: pageIds } },
-        orderBy: [{ unitId: "asc" }, { position: "asc" }],
-      }),
+      this.repository.listMetadataRows(ownerUserId, pageIds),
+      this.repository.listTagRows(ownerUserId, pageIds),
     ]);
 
     const metadataByUnitId = new Map(

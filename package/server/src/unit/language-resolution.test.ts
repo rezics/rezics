@@ -1,26 +1,24 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
+import type {
+  UnitLanguageRepository,
+  UnitLanguageService,
+} from "./language-resolution";
 
-installPrismaClientMock();
-
-const queryRawMock = mock(async () => [
+const unitsMissingSupportLanguageRows = mock(async (_limit: number) => [
   {
     unitId: "post-1",
     language: "ja",
-    source: "unit_translation",
+    source: "unit_translation" as const,
   },
   {
     unitId: "post-1",
     language: "ja",
-    source: "content_translation",
+    source: "content_translation" as const,
   },
 ]);
 
-mock.module("@/content-translation/mapper", () => ({
+mock.module("../content-translation/mapper", () => ({
   mapContentTranslationToDTO: (row: any) => row,
 }));
 mock.module("@/utils/sanitizeUser", () => ({
@@ -32,44 +30,59 @@ mock.module("./publication-policy", () => ({
 }));
 
 function resetMocks() {
-  Object.assign(prismaMock, {
-    $queryRaw: queryRawMock,
-    unit: {
-      findUniqueOrThrow: mock(async () => ({
-        id: "post-1",
-        supportLanguages: [
-          { unitId: "post-1", language: "ja", isPrimary: true, sortOrder: 0 },
-          { unitId: "post-1", language: "en", isPrimary: false, sortOrder: 1 },
-        ],
-        translations: [
-          {
-            unitId: "post-1",
-            language: "en",
-            title: "English title",
-            description: markdownContentDoc("English description"),
-            extra: null,
-            sourceUnitId: null,
-            createdAt: new Date("2026-06-03T00:00:00.000Z"),
-            updatedAt: new Date("2026-06-03T00:00:00.000Z"),
-          },
-        ],
-        contentTranslations: [
-          {
-            unitId: "post-1",
-            language: "en",
-            content: markdownContentDoc("English body"),
-            status: "PUBLISHED",
-            sourceUnitId: null,
-            authorUserId: "user-1",
-            provenance: null,
-            createdAt: new Date("2026-06-03T00:00:00.000Z"),
-            updatedAt: new Date("2026-06-03T00:00:00.000Z"),
-          },
-        ],
-      })),
-    },
-  });
-  queryRawMock.mockClear();
+  unitsMissingSupportLanguageRows.mockClear();
+}
+
+function createRepository(): UnitLanguageRepository {
+  return {
+    unitsMissingSupportLanguageRows,
+    getAvailabilityUnit: mock(async () => ({
+      id: "post-1",
+      supportLanguages: [
+        { unitId: "post-1", language: "ja", isPrimary: true, sortOrder: 0 },
+        { unitId: "post-1", language: "en", isPrimary: false, sortOrder: 1 },
+      ],
+      translations: [{ language: "en" }],
+      contentTranslations: [{ language: "en" }],
+    })) as any,
+    getContentUnit: mock(async () => ({
+      id: "post-1",
+      supportLanguages: [
+        { unitId: "post-1", language: "ja", isPrimary: true, sortOrder: 0 },
+        { unitId: "post-1", language: "en", isPrimary: false, sortOrder: 1 },
+      ],
+      translations: [
+        {
+          unitId: "post-1",
+          language: "en",
+          title: "English title",
+          description: markdownContentDoc("English description"),
+          extra: null,
+          sourceUnitId: null,
+          createdAt: new Date("2026-06-03T00:00:00.000Z"),
+          updatedAt: new Date("2026-06-03T00:00:00.000Z"),
+        },
+      ],
+      contentTranslations: [
+        {
+          unitId: "post-1",
+          language: "en",
+          content: markdownContentDoc("English body"),
+          status: "PUBLISHED",
+          sourceUnitId: null,
+          authorUserId: "user-1",
+          provenance: null,
+          createdAt: new Date("2026-06-03T00:00:00.000Z"),
+          updatedAt: new Date("2026-06-03T00:00:00.000Z"),
+        },
+      ],
+    })) as any,
+  };
+}
+
+async function createService(): Promise<UnitLanguageService> {
+  const { UnitLanguageService } = await import("./language-resolution");
+  return new UnitLanguageService(createRepository());
 }
 
 describe("UnitLanguageService.content", () => {
@@ -78,8 +91,7 @@ describe("UnitLanguageService.content", () => {
   });
 
   test("resolves supported but missing language rows to null fields", async () => {
-    const { UnitLanguageService } = await import("./language-resolution");
-    const service = new UnitLanguageService();
+    const service = await createService();
 
     const dto = await service.content("post-1", { languages: "ja,en" });
 
@@ -160,8 +172,7 @@ describe("UnitLanguageService.unitsMissingSupportLanguageRows", () => {
   });
 
   test("flags Unit and content translation rows without matching support languages", async () => {
-    const { UnitLanguageService } = await import("./language-resolution");
-    const service = new UnitLanguageService();
+    const service = await createService();
 
     await expect(service.unitsMissingSupportLanguageRows()).resolves.toEqual([
       {
@@ -176,21 +187,16 @@ describe("UnitLanguageService.unitsMissingSupportLanguageRows", () => {
       },
     ]);
 
-    const sql = String(queryRawMock.mock.calls[0]?.[0]);
-    expect(sql).toContain('"UnitTranslation"');
-    expect(sql).toContain('"ContentTranslation"');
-    expect(sql).toContain('"UnitSupportLanguage"');
-    expect(queryRawMock.mock.calls[0]?.[1]).toBe(100);
+    expect(unitsMissingSupportLanguageRows).toHaveBeenCalledWith(100);
   });
 
   test("clamps diagnostic query limits", async () => {
-    const { UnitLanguageService } = await import("./language-resolution");
-    const service = new UnitLanguageService();
+    const service = await createService();
 
     await service.unitsMissingSupportLanguageRows(0);
     await service.unitsMissingSupportLanguageRows(10_000);
 
-    expect(queryRawMock.mock.calls[0]?.[1]).toBe(1);
-    expect(queryRawMock.mock.calls[1]?.[1]).toBe(500);
+    expect(unitsMissingSupportLanguageRows.mock.calls[0]?.[0]).toBe(1);
+    expect(unitsMissingSupportLanguageRows.mock.calls[1]?.[0]).toBe(500);
   });
 });

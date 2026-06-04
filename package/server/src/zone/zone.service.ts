@@ -11,30 +11,38 @@ import {
   type WikiZoneTranslatedLabel,
   type ZoneFilters,
 } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { prisma, UnitStatus, UnitType } from "#/prisma/client";
+import { and, asc, desc, eq, inArray, ne, or } from "drizzle-orm";
 import { unitService } from "@/unit";
 import { AppError } from "@/utils/errors";
+import {
+  ContentTranslation,
+  Entity,
+  Post,
+  SubjectAttribution,
+  Unit,
+  UnitRealm,
+  UnitSupportLanguage,
+  UnitTranslation,
+  Zone,
+} from "../db/schema";
 
-const zoneInclude = {
-  unit: {
-    include: {
-      translations: true,
-      supportLanguages: true,
-    },
-  },
-} satisfies Prisma.ZoneInclude;
+export type ZoneWithRelations = typeof Zone.$inferSelect & {
+  unit?:
+    | (typeof Unit.$inferSelect & {
+        translations: (typeof UnitTranslation.$inferSelect)[];
+        supportLanguages: (typeof UnitSupportLanguage.$inferSelect)[];
+      })
+    | null;
+};
 
-export type ZoneWithRelations = Prisma.ZoneGetPayload<{
-  include: typeof zoneInclude;
-}>;
-
-type UnitRef = { id: string; type: UnitType };
+type UnitRef = { id: string; type: string };
 
 const WIKI_HOMEPAGE_DEFAULT_TEMPLATE = "wiki-classic-home";
 const WIKI_SECTION_DEFAULT_LIMIT = 12;
 type TranslatedUnitRow = {
   id: string;
+  type?: string;
+  slug?: string | null;
   defaultLanguage?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
@@ -45,13 +53,64 @@ type TranslatedUnitRow = {
     description?: unknown;
   }>;
   supportLanguages?: Array<{
-    language?: string | null;
-    isPrimary?: boolean | null;
-    sortOrder?: number | null;
+    language: string;
+    isPrimary?: boolean;
+    sortOrder?: number;
   }>;
   contentTranslations?: Array<{ content?: unknown }>;
+  post?: { kind?: string | null } | null;
   entity?: { kind?: string | null } | null;
 };
+
+type ZoneCreateData = {
+  unitId: string;
+  filters: ZoneFilters;
+  template: string;
+  styling: Record<string, unknown> | null;
+  wiki: WikiZoneConfig | null;
+  startsAt: Date | null;
+  endsAt: Date | null;
+};
+
+type ZoneUpdateData = Partial<{
+  filters: ZoneFilters;
+  template: string;
+  styling: Record<string, unknown> | null;
+  wiki: WikiZoneConfig | null;
+  startsAt: Date | null;
+  endsAt: Date | null;
+}>;
+
+export type ZoneRepository = {
+  findUnitRefs(ids: string[]): Promise<UnitRef[]>;
+  getByUnitId(unitId: string): Promise<ZoneWithRelations | null>;
+  findUnitBySlug(
+    slugScope: string,
+    slug: string,
+  ): Promise<{ id: string; type: string; visibility: string } | null>;
+  createZone(data: ZoneCreateData): Promise<ZoneWithRelations>;
+  updateZone(unitId: string, data: ZoneUpdateData): Promise<ZoneWithRelations>;
+  findWikiPosts(input: {
+    realmUnitId: string;
+    unitIds?: string[];
+    order: "created" | "updated";
+    take: number;
+    includeContent?: boolean;
+  }): Promise<TranslatedUnitRow[]>;
+  findTags(tagUnitIds: string[]): Promise<TranslatedUnitRow[]>;
+  findEntitySection(input: {
+    realmUnitId: string;
+    subjectRoles?: string[];
+    entityKinds?: string[];
+    take: number;
+  }): Promise<Array<{ entityId: string; entity: TranslatedUnitRow }>>;
+  deleteUnit(unitId: string): Promise<void>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 function pushIfPresent(target: Set<string>, value: string | null | undefined) {
   if (value) target.add(value);
@@ -166,21 +225,277 @@ function collectNavigationRefs(input: {
   }
 }
 
+async function hydrateTranslatedUnits(
+  unitIds: string[],
+  options: { includeContent?: boolean; includeEntity?: boolean } = {},
+): Promise<Map<string, TranslatedUnitRow>> {
+  const uniqueIds = [...new Set(unitIds)];
+  if (uniqueIds.length === 0) return new Map();
+  const db = await getServerDb();
+  const [
+    units,
+    translations,
+    supportLanguages,
+    contentTranslations,
+    posts,
+    entities,
+  ] = await Promise.all([
+    db.select().from(Unit).where(inArray(Unit.id, uniqueIds)),
+    db
+      .select()
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, uniqueIds)),
+    db
+      .select()
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, uniqueIds)),
+    options.includeContent
+      ? db
+          .select()
+          .from(ContentTranslation)
+          .where(inArray(ContentTranslation.unitId, uniqueIds))
+      : Promise.resolve([]),
+    db.select().from(Post).where(inArray(Post.unitId, uniqueIds)),
+    options.includeEntity
+      ? db.select().from(Entity).where(inArray(Entity.unitId, uniqueIds))
+      : Promise.resolve([]),
+  ]);
+
+  const translationsByUnit = new Map<string, typeof translations>();
+  for (const translation of translations) {
+    const list = translationsByUnit.get(translation.unitId) ?? [];
+    list.push(translation);
+    translationsByUnit.set(translation.unitId, list);
+  }
+
+  const supportByUnit = new Map<string, typeof supportLanguages>();
+  for (const language of supportLanguages) {
+    const list = supportByUnit.get(language.unitId) ?? [];
+    list.push(language);
+    supportByUnit.set(language.unitId, list);
+  }
+
+  const contentByUnit = new Map<string, Array<{ content?: unknown }>>();
+  for (const translation of contentTranslations) {
+    const list = contentByUnit.get(translation.unitId) ?? [];
+    list.push({ content: translation.content });
+    contentByUnit.set(translation.unitId, list);
+  }
+
+  const postByUnit = new Map(posts.map((post) => [post.unitId, post]));
+  const entityByUnit = new Map(
+    entities.map((entity) => [entity.unitId, entity]),
+  );
+
+  return new Map(
+    units.map((unit) => [
+      unit.id,
+      {
+        id: unit.id,
+        type: unit.type,
+        slug: unit.slug,
+        defaultLanguage: unit.defaultLanguage,
+        createdAt: unit.createdAt,
+        updatedAt: unit.updatedAt,
+        translations: translationsByUnit.get(unit.id) ?? [],
+        supportLanguages: supportByUnit.get(unit.id) ?? [],
+        contentTranslations: contentByUnit.get(unit.id) ?? [],
+        post: postByUnit.get(unit.id) ?? null,
+        entity: entityByUnit.get(unit.id) ?? null,
+      } as TranslatedUnitRow,
+    ]),
+  );
+}
+
+async function hydrateZone(
+  zone: typeof Zone.$inferSelect,
+): Promise<ZoneWithRelations> {
+  const map = await hydrateTranslatedUnits([zone.unitId]);
+  const unit = map.get(zone.unitId);
+  return {
+    ...zone,
+    unit: unit
+      ? ({
+          ...unit,
+          slug: null,
+        } as unknown as ZoneWithRelations["unit"])
+      : null,
+  };
+}
+
+function createDrizzleZoneRepository(): ZoneRepository {
+  async function findWikiUnitIds(input: {
+    realmUnitId: string;
+    unitIds?: string[];
+    order: "created" | "updated";
+    take: number;
+  }): Promise<string[]> {
+    const db = await getServerDb();
+    const conditions = [
+      eq(Unit.type, "POST"),
+      eq(Unit.status, "PUBLISHED"),
+      eq(Unit.visibility, "PUBLIC"),
+      eq(Unit.moderationStatus, "APPROVED"),
+      eq(Post.kind, "WIKI"),
+      eq(UnitRealm.realmUnitId, input.realmUnitId),
+      eq(UnitRealm.moderationStatus, "APPROVED"),
+    ];
+    if (input.unitIds) conditions.push(inArray(Unit.id, input.unitIds));
+
+    const rows = await db
+      .select({ id: Unit.id })
+      .from(Unit)
+      .innerJoin(Post, eq(Post.unitId, Unit.id))
+      .innerJoin(UnitRealm, eq(UnitRealm.unitId, Unit.id))
+      .where(and(...conditions))
+      .orderBy(
+        input.order === "created" ? desc(Unit.createdAt) : desc(Unit.updatedAt),
+        asc(Unit.id),
+      )
+      .limit(input.take);
+    return rows.map((row) => row.id);
+  }
+
+  return {
+    async findUnitRefs(ids) {
+      if (ids.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({ id: Unit.id, type: Unit.type })
+        .from(Unit)
+        .where(and(inArray(Unit.id, ids), ne(Unit.status, "DELETED")));
+    },
+    async getByUnitId(unitId) {
+      const db = await getServerDb();
+      const [zone] = await db
+        .select()
+        .from(Zone)
+        .where(eq(Zone.unitId, unitId))
+        .limit(1);
+      return zone ? hydrateZone(zone) : null;
+    },
+    async findUnitBySlug(slugScope, slug) {
+      const db = await getServerDb();
+      const [unit] = await db
+        .select({ id: Unit.id, type: Unit.type, visibility: Unit.visibility })
+        .from(Unit)
+        .where(and(eq(Unit.slugScope, slugScope), eq(Unit.slug, slug)))
+        .limit(1);
+      return unit ?? null;
+    },
+    async createZone(data) {
+      const db = await getServerDb();
+      const now = new Date();
+      const [zone] = await db
+        .insert(Zone)
+        .values({ ...data, updatedAt: now })
+        .returning();
+      if (!zone) throw new AppError(500, "Failed to create zone");
+      return hydrateZone(zone);
+    },
+    async updateZone(unitId, data) {
+      const db = await getServerDb();
+      const [zone] = await db
+        .update(Zone)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(Zone.unitId, unitId))
+        .returning();
+      if (!zone) throw new AppError(404, "Zone not found");
+      return hydrateZone(zone);
+    },
+    async findWikiPosts(input) {
+      const ids = await findWikiUnitIds(input);
+      const map = await hydrateTranslatedUnits(ids, {
+        includeContent: input.includeContent,
+      });
+      return ids.flatMap((id) => {
+        const row = map.get(id);
+        return row ? [row] : [];
+      });
+    },
+    async findTags(tagUnitIds) {
+      if (tagUnitIds.length === 0) return [];
+      const db = await getServerDb();
+      const rows = await db
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(
+          and(
+            inArray(Unit.id, tagUnitIds),
+            eq(Unit.type, "TAG"),
+            ne(Unit.status, "DELETED"),
+          ),
+        );
+      const validIds = rows.map((row) => row.id);
+      const map = await hydrateTranslatedUnits(validIds);
+      return tagUnitIds.flatMap((id) => {
+        const row = map.get(id);
+        return row ? [row] : [];
+      });
+    },
+    async findEntitySection(input) {
+      const wikiUnitIds = await findWikiUnitIds({
+        realmUnitId: input.realmUnitId,
+        order: "updated",
+        take: 1000,
+      });
+      if (wikiUnitIds.length === 0) return [];
+      const db = await getServerDb();
+      const conditions = [inArray(SubjectAttribution.unitId, wikiUnitIds)];
+      if (input.subjectRoles?.length) {
+        conditions.push(inArray(SubjectAttribution.role, input.subjectRoles));
+      }
+      const rows = await db
+        .select({
+          entityId: SubjectAttribution.entityId,
+          sortOrder: SubjectAttribution.sortOrder,
+        })
+        .from(SubjectAttribution)
+        .where(and(...conditions))
+        .orderBy(
+          asc(SubjectAttribution.sortOrder),
+          asc(SubjectAttribution.entityId),
+        )
+        .limit(input.take * 3);
+      const entityIds = [...new Set(rows.map((row) => row.entityId))];
+      const entities = await hydrateTranslatedUnits(entityIds, {
+        includeEntity: true,
+      });
+      const out: Array<{ entityId: string; entity: TranslatedUnitRow }> = [];
+      for (const row of rows) {
+        const entity = entities.get(row.entityId);
+        if (!entity || entity.type !== "ENTITY") continue;
+        if (
+          input.entityKinds?.length &&
+          !input.entityKinds.includes(entity.entity?.kind ?? "")
+        ) {
+          continue;
+        }
+        out.push({ entityId: row.entityId, entity });
+        if (out.length >= input.take) break;
+      }
+      return out;
+    },
+    async deleteUnit(unitId) {
+      const db = await getServerDb();
+      await db.delete(Unit).where(eq(Unit.id, unitId));
+    },
+  };
+}
+
 export class ZoneService {
+  constructor(
+    private readonly repository: ZoneRepository = createDrizzleZoneRepository(),
+  ) {}
+
   private async assertUnitRefs(
     refs: Set<string>,
-    expectedType: UnitType,
+    expectedType: string,
     code: string,
   ): Promise<void> {
     if (refs.size === 0) return;
     const ids = [...refs];
-    const rows = await prisma.unit.findMany({
-      where: {
-        id: { in: ids },
-        status: { not: UnitStatus.DELETED },
-      },
-      select: { id: true, type: true },
-    });
+    const rows = await this.repository.findUnitRefs(ids);
     const byId = new Map(rows.map((row: UnitRef) => [row.id, row]));
     const invalid = ids.filter((id) => byId.get(id)?.type !== expectedType);
     if (invalid.length > 0) {
@@ -194,13 +509,7 @@ export class ZoneService {
   private async assertAnyUnitRefs(refs: Set<string>): Promise<void> {
     if (refs.size === 0) return;
     const ids = [...refs];
-    const rows = await prisma.unit.findMany({
-      where: {
-        id: { in: ids },
-        status: { not: UnitStatus.DELETED },
-      },
-      select: { id: true },
-    });
+    const rows = await this.repository.findUnitRefs(ids);
     const found = new Set(rows.map((row: { id: string }) => row.id));
     const invalid = ids.filter((id) => !found.has(id));
     if (invalid.length > 0) {
@@ -287,52 +596,29 @@ export class ZoneService {
     await Promise.all([
       this.assertUnitRefs(
         new Set([wiki.filters.realmUnitId]),
-        UnitType.REALM,
+        "REALM",
         "WIKI_ZONE_REALM_REF_INVALID",
       ),
-      this.assertUnitRefs(
-        entityIds,
-        UnitType.ENTITY,
-        "WIKI_ZONE_ENTITY_REF_INVALID",
-      ),
-      this.assertUnitRefs(
-        tagUnitIds,
-        UnitType.TAG,
-        "WIKI_ZONE_TAG_REF_INVALID",
-      ),
-      this.assertUnitRefs(
-        labelUnitIds,
-        UnitType.LABEL,
-        "WIKI_ZONE_LABEL_REF_INVALID",
-      ),
+      this.assertUnitRefs(entityIds, "ENTITY", "WIKI_ZONE_ENTITY_REF_INVALID"),
+      this.assertUnitRefs(tagUnitIds, "TAG", "WIKI_ZONE_TAG_REF_INVALID"),
+      this.assertUnitRefs(labelUnitIds, "LABEL", "WIKI_ZONE_LABEL_REF_INVALID"),
       this.assertAnyUnitRefs(unitIds),
     ]);
   }
 
   async getByUnitId(unitId: string): Promise<ZoneWithRelations | null> {
-    return prisma.zone.findUnique({
-      where: { unitId },
-      include: zoneInclude,
-    });
+    return this.repository.getByUnitId(unitId);
   }
 
   async getBySlug(slug: string): Promise<ZoneWithRelations | null> {
     const { getSlugScopeId } = await import("@/infra/slug-scopes");
     const zoneScope = getSlugScopeId("zone");
     if (!zoneScope) return null;
-    const unit = await prisma.unit.findUnique({
-      where: { slugScope_slug: { slugScope: zoneScope, slug } },
-      select: { id: true, type: true, visibility: true },
-    });
+    const unit = await this.repository.findUnitBySlug(zoneScope, slug);
 
     if (!unit || unit.type !== "ZONE") return null;
 
-    const zone = await prisma.zone.findUnique({
-      where: { unitId: unit.id },
-      include: zoneInclude,
-    });
-
-    return zone;
+    return this.repository.getByUnitId(unit.id);
   }
 
   /**
@@ -385,17 +671,14 @@ export class ZoneService {
 
     await unitService.setSlug(unit.id, input.slug);
 
-    const zone = await prisma.zone.create({
-      data: {
-        unitId: unit.id,
-        filters: input.filters as Prisma.InputJsonValue,
-        template: input.template,
-        styling: (input.styling ?? null) as Prisma.InputJsonValue,
-        wiki: (input.wiki ?? null) as Prisma.InputJsonValue,
-        startsAt: input.startsAt ?? null,
-        endsAt: input.endsAt ?? null,
-      },
-      include: zoneInclude,
+    const zone = await this.repository.createZone({
+      unitId: unit.id,
+      filters: input.filters,
+      template: input.template,
+      styling: input.styling ?? null,
+      wiki: input.wiki ?? null,
+      startsAt: input.startsAt ?? null,
+      endsAt: input.endsAt ?? null,
     });
 
     return zone;
@@ -414,40 +697,9 @@ export class ZoneService {
   ): Promise<ZoneWithRelations> {
     await this.validateWikiConfig(input.wiki);
 
-    const zone = await prisma.zone.update({
-      where: { unitId },
-      data: {
-        filters:
-          input.filters !== undefined
-            ? (input.filters as Prisma.InputJsonValue)
-            : undefined,
-        template: input.template ?? undefined,
-        styling:
-          input.styling !== undefined
-            ? (input.styling as Prisma.InputJsonValue)
-            : undefined,
-        wiki:
-          input.wiki !== undefined
-            ? (input.wiki as Prisma.InputJsonValue)
-            : undefined,
-        startsAt: input.startsAt !== undefined ? input.startsAt : undefined,
-        endsAt: input.endsAt !== undefined ? input.endsAt : undefined,
-      },
-      include: zoneInclude,
-    });
+    const zone = await this.repository.updateZone(unitId, input);
 
     return zone;
-  }
-
-  private wikiVisibleUnitWhere(realmUnitId: string): Prisma.UnitWhereInput {
-    return {
-      type: UnitType.POST,
-      status: UnitStatus.PUBLISHED,
-      visibility: "PUBLIC",
-      moderationStatus: "APPROVED",
-      post: { kind: "WIKI" },
-      inRealms: { some: { realmUnitId, moderationStatus: "APPROVED" } },
-    };
   }
 
   private async hydrateWikiPostSection(input: {
@@ -457,19 +709,11 @@ export class ZoneService {
     mode: "recent" | "updated" | "stub";
   }): Promise<WikiZoneHomepageItem[]> {
     const limit = sectionLimit(input.section);
-    const rows = await prisma.unit.findMany({
-      where: this.wikiVisibleUnitWhere(input.realmUnitId),
-      include: {
-        translations: true,
-        supportLanguages: true,
-        contentTranslations: true,
-        post: true,
-      },
-      orderBy:
-        input.mode === "recent"
-          ? [{ createdAt: "desc" }, { id: "asc" }]
-          : [{ updatedAt: "desc" }, { id: "asc" }],
+    const rows = await this.repository.findWikiPosts({
+      realmUnitId: input.realmUnitId,
+      order: input.mode === "recent" ? "created" : "updated",
       take: input.mode === "stub" ? limit * 3 : limit,
+      includeContent: input.mode === "stub",
     });
 
     const filtered =
@@ -497,12 +741,11 @@ export class ZoneService {
     const unitIds = input.section.unitIds;
     if (unitIds.length === 0) return [];
 
-    const rows = await prisma.unit.findMany({
-      where: {
-        ...this.wikiVisibleUnitWhere(input.realmUnitId),
-        id: { in: unitIds },
-      },
-      include: { translations: true, supportLanguages: true, post: true },
+    const rows = await this.repository.findWikiPosts({
+      realmUnitId: input.realmUnitId,
+      unitIds,
+      order: "created",
+      take: unitIds.length,
     });
     const byId = new Map(rows.map((row) => [row.id, row]));
     return unitIds.flatMap((unitId) => {
@@ -523,14 +766,7 @@ export class ZoneService {
     ];
     if (tagUnitIds.length === 0) return [];
 
-    const rows = await prisma.unit.findMany({
-      where: {
-        id: { in: tagUnitIds },
-        type: UnitType.TAG,
-        status: { not: UnitStatus.DELETED },
-      },
-      include: { translations: true, supportLanguages: true },
-    });
+    const rows = await this.repository.findTags(tagUnitIds);
     const byId = new Map(rows.map((row) => [row.id, row]));
     return tagUnitIds.flatMap((tagUnitId) => {
       const row = byId.get(tagUnitId);
@@ -544,32 +780,10 @@ export class ZoneService {
     preferredLanguages?: string[];
   }): Promise<WikiZoneHomepageItem[]> {
     const realmUnitId = input.section.realmUnitId ?? input.realmUnitId;
-    const rows = await prisma.subjectAttribution.findMany({
-      where: {
-        ...(input.section.subjectRoles?.length
-          ? { role: { in: input.section.subjectRoles } }
-          : {}),
-        unit: {
-          ...this.wikiVisibleUnitWhere(realmUnitId),
-        },
-        entity: {
-          type: UnitType.ENTITY,
-          status: { not: UnitStatus.DELETED },
-          ...(input.section.entityKinds?.length
-            ? { entity: { kind: { in: input.section.entityKinds } } }
-            : {}),
-        },
-      },
-      include: {
-        entity: {
-          include: {
-            translations: true,
-            supportLanguages: true,
-            entity: true,
-          },
-        },
-      },
-      orderBy: [{ sortOrder: "asc" }, { entityId: "asc" }],
+    const rows = await this.repository.findEntitySection({
+      realmUnitId,
+      subjectRoles: input.section.subjectRoles,
+      entityKinds: input.section.entityKinds,
       take: sectionLimit(input.section) * 3,
     });
 
@@ -656,7 +870,7 @@ export class ZoneService {
   }
 
   async delete(unitId: string): Promise<void> {
-    await prisma.unit.delete({ where: { id: unitId } });
+    await this.repository.deleteUnit(unitId);
   }
 }
 

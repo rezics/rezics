@@ -1,3 +1,3 @@
-import type { Prisma } from "#/prisma/client";
+import type { UserTagApplication } from "../db/schema";
 
-export type UserTagApplicationRow = Prisma.UserTagApplicationGetPayload<{}>;
+export type UserTagApplicationRow = typeof UserTagApplication.$inferSelect;

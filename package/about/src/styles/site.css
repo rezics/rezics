@@ -205,80 +205,200 @@ h2 {
   color: var(--colors-text-primary);
 }
 
-.architecture-graph {
+.work-surface {
   margin: 0;
   min-width: 0;
 }
 
-.architecture-graph figcaption {
+.work-surface figcaption {
   display: grid;
   gap: 6px;
   margin-bottom: 16px;
 }
 
-.architecture-graph figcaption span:first-child {
+.work-surface figcaption span:first-child {
   color: var(--colors-text-primary);
   font-size: clamp(1rem, 1.35vw, 1.12rem);
   font-weight: 650;
   line-height: 1.4;
 }
 
-.architecture-graph figcaption span:last-child {
+.work-surface figcaption span:last-child {
   color: var(--colors-text-secondary);
   font-size: clamp(0.9rem, 1.1vw, 0.96rem);
   line-height: 1.55;
 }
 
-.architecture-graph-svg {
+.work-surface-stage {
+  position: relative;
+  display: grid;
   min-height: 420px;
-  overflow: hidden;
+  overflow: visible;
+  align-items: center;
+  padding: clamp(0.85rem, 1.8vw, 1.15rem);
   border: 1px solid var(--colors-border-whisper);
   border-radius: var(--radius-lg);
   background:
-    linear-gradient(90deg, rgba(199, 190, 170, 0.28) 1px, transparent 1px),
-    linear-gradient(rgba(199, 190, 170, 0.28) 1px, transparent 1px),
+    radial-gradient(
+      circle at 32% 26%,
+      color-mix(in srgb, var(--colors-brand-fill) 9%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(
+      145deg,
+      var(--colors-surface-base),
+      var(--colors-surface-subtle)
+    ),
     var(--colors-surface-base);
-  background-size: 48px 48px;
   box-shadow: var(--shadow-soft);
 }
 
-.architecture-graph-svg svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-height: 420px;
-  padding: 20px;
+.work-surface-board {
+  position: relative;
+  display: grid;
+  width: min(100%, 44rem);
+  min-height: 360px;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1.36fr) minmax(9.5rem, 0.84fr);
+  gap: 2px;
+  margin: 0 auto;
 }
 
-.architecture-graph-svg .graph > polygon {
-  fill: transparent;
+.work-surface-left,
+.work-surface-right {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
 }
 
-.architecture-graph-svg .node polygon {
-  fill: color-mix(in srgb, var(--colors-surface-base) 95%, transparent);
-  stroke: var(--colors-border-defined);
+.work-surface-left {
+  grid-template-rows: minmax(0, 1fr) minmax(5.5rem, 0.34fr);
 }
 
-.architecture-graph-svg .node text {
-  fill: var(--colors-text-primary);
-  font-family: inherit;
-  font-size: clamp(0.78rem, 0.92vw, 0.88rem);
+.work-surface-right {
+  grid-template-rows: 0.82fr 0.94fr 1fr 1.22fr;
+}
+
+.work-surface-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 10px;
+  overflow: hidden;
+  padding: clamp(0.9rem, 1.6vw, 1.2rem);
+  border: 1px solid
+    color-mix(in srgb, var(--colors-border-whisper) 82%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--colors-surface-base) 90%, transparent);
+  box-shadow: 0 0.85rem 2.2rem
+    color-mix(in srgb, var(--colors-text-primary) 5%, transparent);
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms ease,
+    background 200ms ease;
+}
+
+.work-surface-card:hover {
+  z-index: 6;
+  background: var(--colors-surface-base);
+  box-shadow: 0 1.25rem 3rem
+    color-mix(in srgb, var(--colors-text-primary) 12%, transparent);
+  transform: scale(1.018);
+}
+
+.work-surface-card span {
+  color: var(--colors-text-brand);
+  font-size: clamp(0.72rem, 0.85vw, 0.78rem);
+  font-weight: 650;
   line-height: 1.3;
 }
 
-.architecture-graph-svg .edge path {
-  stroke: var(--colors-text-tertiary);
+.work-surface-card h2,
+.work-surface-card h3,
+.work-surface-card p {
+  margin-bottom: 0;
 }
 
-.architecture-graph-svg .edge polygon {
-  fill: var(--colors-text-tertiary);
-  stroke: var(--colors-text-tertiary);
+.work-surface-card h2 {
+  color: var(--colors-text-primary);
+  font-size: clamp(1.72rem, 3vw, 2.35rem);
+  font-weight: 620;
+  line-height: 1.06;
 }
 
-.architecture-graph-svg .edge text {
-  fill: var(--colors-text-secondary);
-  font-family: inherit;
-  font-size: clamp(0.7rem, 0.8vw, 0.78rem);
+.work-surface-card h3 {
+  color: var(--colors-text-primary);
+  font-size: clamp(0.96rem, 1.18vw, 1.08rem);
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.work-surface-card p {
+  color: var(--colors-text-secondary);
+  font-size: clamp(0.86rem, 1vw, 0.94rem);
+  line-height: 1.55;
+}
+
+.work-card {
+  align-content: center;
+  gap: 18px;
+  padding: clamp(1.25rem, 2.8vw, 2rem);
+  background: color-mix(in srgb, var(--colors-surface-base) 96%, transparent);
+}
+
+.work-card p {
+  max-width: 23rem;
+}
+
+.work-card-meta,
+.tags-card div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.work-card-meta b,
+.tags-card b {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--colors-surface-subtle);
+  color: var(--colors-text-secondary);
+  font-size: clamp(0.74rem, 0.9vw, 0.82rem);
+  font-weight: 620;
+  line-height: 1.3;
+  padding: 7px 10px;
+}
+
+.realm-card {
+  align-content: end;
+  background: color-mix(
+    in srgb,
+    var(--colors-surface-subtle) 38%,
+    var(--colors-surface-base)
+  );
+}
+
+.realm-card p {
+  color: var(--colors-text-primary);
+  font-weight: 650;
+}
+
+.tags-card,
+.wiki-card {
+  background: color-mix(in srgb, var(--colors-surface-base) 86%, transparent);
+}
+
+.review-card {
+  background: color-mix(
+    in srgb,
+    var(--colors-surface-subtle) 32%,
+    var(--colors-surface-base)
+  );
 }
 
 .section-grid {
@@ -423,9 +543,12 @@ h2 {
     padding-top: 40px;
   }
 
-  .architecture-graph-svg,
-  .architecture-graph-svg svg {
-    min-height: 300px;
+  .work-surface-stage {
+    min-height: 390px;
+  }
+
+  .work-surface-board {
+    min-height: 340px;
   }
 
   .section-grid {
@@ -465,12 +588,26 @@ h2 {
     width: 100%;
   }
 
-  .architecture-graph-svg {
-    min-height: 260px;
+  .work-surface-stage {
+    min-height: auto;
+    padding: 14px;
   }
 
-  .architecture-graph-svg svg {
-    min-height: 260px;
-    padding: 12px;
+  .work-surface-board {
+    min-height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .work-surface-left,
+  .work-surface-right {
+    grid-template-rows: none;
+  }
+
+  .work-card {
+    min-height: 220px;
+  }
+
+  .realm-card {
+    min-height: 116px;
   }
 }

@@ -1,6 +1,6 @@
-import type { UserUnitCollection } from "#/prisma/client";
+import type { UserUnitCollection } from "../db/schema";
 
-export type UserUnitCollectionRow = UserUnitCollection;
+export type UserUnitCollectionRow = typeof UserUnitCollection.$inferSelect;
 
 export type CollectionUnitRow = {
   userId: string;

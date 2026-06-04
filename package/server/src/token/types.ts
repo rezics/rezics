@@ -1,15 +1,15 @@
 import type { ApiTokenDTO, ApiTokenScopes } from "@rezics/contract";
-import type { ApiToken } from "#/prisma/client";
+import type { ApiToken } from "../db/schema";
 
 /**
  * Internal representation of an API token row with normalized scopes.
  */
-export type ApiTokenWithScopes = ApiToken & {
+export type ApiTokenWithScopes = typeof ApiToken.$inferSelect & {
   scopes: ApiTokenScopes | null;
 };
 
 /**
- * Map a Prisma ApiToken record to a DTO returned to clients.
+ * Map an ApiToken row to a DTO returned to clients.
  */
 export function mapApiTokenToDTO(token: ApiTokenWithScopes): ApiTokenDTO {
   return {

@@ -1,7 +1,4 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-
-installPrismaClientMock();
 
 type Row = {
   id: string;
@@ -12,57 +9,62 @@ type Row = {
 
 let rows: Row[] = [];
 
-/** Minimal matcher for the `where` shapes block.service uses. */
-function matches(row: Row, where: any): boolean {
-  if (!where) return true;
-  if (where.OR) return where.OR.some((clause: any) => matches(row, clause));
-  if (where.blockerId !== undefined && row.blockerId !== where.blockerId) {
-    return false;
-  }
-  if (where.blockedId !== undefined && row.blockedId !== where.blockedId) {
-    return false;
-  }
-  return true;
-}
-
 beforeEach(() => {
   rows = [];
-  Object.assign(prismaMock, {
-    userBlock: {
-      findMany: mock(async ({ where }: any = {}) =>
-        rows.filter((r) => matches(r, where)),
-      ),
-      findFirst: mock(
-        async ({ where }: any = {}) =>
-          rows.find((r) => matches(r, where)) ?? null,
-      ),
-      upsert: mock(async ({ create }: any) => {
-        const existing = rows.find(
-          (r) =>
-            r.blockerId === create.blockerId &&
-            r.blockedId === create.blockedId,
-        );
-        if (existing) return existing;
-        const row: Row = {
-          id: `block-${rows.length + 1}`,
-          createdAt: new Date("2026-01-01T00:00:00.000Z"),
-          ...create,
-        };
-        rows.push(row);
-        return row;
-      }),
-      deleteMany: mock(async ({ where }: any = {}) => {
-        const before = rows.length;
-        rows = rows.filter((r) => !matches(r, where));
-        return { count: before - rows.length };
-      }),
-    },
-  });
 });
+
+function inMemoryRepository() {
+  return {
+    listBlocks: mock(async (blockerId: string) =>
+      rows.filter((row) => row.blockerId === blockerId),
+    ),
+    listUsers: mock(async () => []),
+    listUserSlugs: mock(async () => []),
+    add: mock(async (blockerId: string, blockedId: string) => {
+      const existing = rows.find(
+        (row) => row.blockerId === blockerId && row.blockedId === blockedId,
+      );
+      if (existing) return;
+      rows.push({
+        id: `block-${rows.length + 1}`,
+        blockerId,
+        blockedId,
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      });
+    }),
+    remove: mock(async (blockerId: string, blockedId: string) => {
+      rows = rows.filter(
+        (row) => row.blockerId !== blockerId || row.blockedId !== blockedId,
+      );
+    }),
+    blockedUserIds: mock(async (blockerId: string) =>
+      rows
+        .filter((row) => row.blockerId === blockerId)
+        .map((row) => row.blockedId),
+    ),
+    isBlockedEitherWay: mock(async (a: string, b: string) =>
+      rows.some(
+        (row) =>
+          (row.blockerId === a && row.blockedId === b) ||
+          (row.blockerId === b && row.blockedId === a),
+      ),
+    ),
+    removeAllForUser: mock(async (userId: string) => {
+      rows = rows.filter(
+        (row) => row.blockerId !== userId && row.blockedId !== userId,
+      );
+    }),
+  };
+}
+
+async function createService() {
+  const { BlockService } = await import("./block.service");
+  return new BlockService(inMemoryRepository());
+}
 
 describe("BlockService", () => {
   test("blockedUserIds lists who the blocker has blocked", async () => {
-    const { blockService } = await import("./block.service");
+    const blockService = await createService();
     await blockService.add("me", "peer-a");
     await blockService.add("me", "peer-b");
 
@@ -75,14 +77,14 @@ describe("BlockService", () => {
   });
 
   test("add is idempotent", async () => {
-    const { blockService } = await import("./block.service");
+    const blockService = await createService();
     await blockService.add("me", "peer");
     await blockService.add("me", "peer");
     expect(await blockService.blockedUserIds("me")).toEqual(["peer"]);
   });
 
   test("isBlockedEitherWay is symmetric", async () => {
-    const { blockService } = await import("./block.service");
+    const blockService = await createService();
     await blockService.add("me", "peer");
 
     expect(await blockService.isBlockedEitherWay("me", "peer")).toBe(true);
@@ -92,7 +94,7 @@ describe("BlockService", () => {
   });
 
   test("unblock removes the block so content/DM are restored", async () => {
-    const { blockService } = await import("./block.service");
+    const blockService = await createService();
     await blockService.add("me", "peer");
     expect(await blockService.blockedUserIds("me")).toEqual(["peer"]);
     expect(await blockService.isBlockedEitherWay("me", "peer")).toBe(true);
@@ -105,7 +107,7 @@ describe("BlockService", () => {
   });
 
   test("removeAllForUser clears blocks on both sides (account deletion)", async () => {
-    const { blockService } = await import("./block.service");
+    const blockService = await createService();
     await blockService.add("gone", "peer-a");
     await blockService.add("peer-b", "gone");
     await blockService.add("peer-c", "peer-d");

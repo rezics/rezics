@@ -1,4 +1,14 @@
-import type { Prisma } from "#/prisma/client";
+import type {
+  ContentStructure,
+  ContentStructureNode,
+  Game,
+  GameSystemRequirement,
+  Media,
+  SubjectAttribution,
+  Unit,
+  UnitTag,
+  UnitTranslation,
+} from "../db/schema";
 
 export const gameLibraryInclude = {
   unit: {
@@ -23,11 +33,25 @@ export const gameLibraryInclude = {
   systemRequirements: {
     orderBy: [{ platformEntityId: "asc" as const }, { tier: "asc" as const }],
   },
-} satisfies Prisma.GameInclude;
+} as const;
 
-export type GameLibraryRow = Prisma.GameGetPayload<{
-  include: typeof gameLibraryInclude;
-}>;
+type UnitTagWithSlug = typeof UnitTag.$inferSelect & {
+  tag?: Pick<typeof Unit.$inferSelect, "id" | "slug">;
+};
+
+type OwnedContentStructureWithNodes = typeof ContentStructure.$inferSelect & {
+  contentNodes: Array<typeof ContentStructureNode.$inferSelect>;
+};
+
+export type GameLibraryRow = typeof Game.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    subjectAttributions: Array<typeof SubjectAttribution.$inferSelect>;
+    unitTags: Array<UnitTagWithSlug>;
+    ownedContentStructure?: OwnedContentStructureWithNodes | null;
+  };
+  systemRequirements: Array<typeof GameSystemRequirement.$inferSelect>;
+};
 
 export const mediaLibraryInclude = {
   unit: {
@@ -45,8 +69,12 @@ export const mediaLibraryInclude = {
       },
     },
   },
-} satisfies Prisma.MediaInclude;
+} as const;
 
-export type MediaLibraryRow = Prisma.MediaGetPayload<{
-  include: typeof mediaLibraryInclude;
-}>;
+export type MediaLibraryRow = typeof Media.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    unitTags: Array<UnitTagWithSlug>;
+    ownedContentStructure?: OwnedContentStructureWithNodes | null;
+  };
+};

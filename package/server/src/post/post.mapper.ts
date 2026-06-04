@@ -5,11 +5,13 @@ import type {
   VariantContextSummary,
 } from "@rezics/contract";
 import { resolveReadLanguage } from "@rezics/contract";
-import type { CommentPromotion } from "#/prisma/client";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { variantContextForRow } from "@/unit/variant-context";
 import { mapPublicUser } from "@/utils/sanitizeUser";
+import { CommentPromotion } from "../db/schema";
 import type { PostWithRelations } from "./types";
+
+type CommentPromotionRow = typeof CommentPromotion.$inferSelect;
 
 function moderationStatus(post: PostWithRelations) {
   return post.unit.moderationStatus.toLowerCase() as
@@ -75,7 +77,7 @@ function previewContent(
 }
 
 /**
- * Map a PostWithRelations (Prisma result) to the public PostDTO.
+ * Map a hydrated post row to the public PostDTO.
  */
 export function mapPostToDTO(
   post: PostWithRelations,
@@ -119,7 +121,7 @@ export function mapPostToDTO(
 
 /** Map the current promotion storage row to its public comment promotion DTO. */
 export function mapCommentPromotionToDTO(
-  pin: CommentPromotion,
+  pin: CommentPromotionRow,
 ): CommentPromotionDTO {
   return {
     scopeUnitId: pin.scopeUnitId,

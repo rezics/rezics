@@ -1,10 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { faker } from "@faker-js/faker";
-import { seedAuthUser } from "@rezics/auth/prisma/seed";
+import { seedAuthUser } from "@rezics/auth/seed";
+import {
+  accounts,
+  oauthAccessTokens,
+  oauthClients,
+  oauthConsents,
+  oauthRefreshTokens,
+  sessions,
+  users,
+} from "@rezics/auth/db/schema";
 import {
   DEFAULT_PUBLICATION_LICENSE_SLUG,
   markdownContentDoc,
 } from "@rezics/contract";
+import { inArray, like } from "drizzle-orm";
 import type { CountSpec, SeedCtx } from "./strategy.js";
 import { bootstrapSystemShelves } from "./system-shelves.js";
 import type { CreatedUser } from "./types.js";
@@ -43,36 +53,28 @@ interface FactoryUserPlan {
 }
 
 async function deleteExistingFactoryAuthUsers(ctx: SeedCtx): Promise<void> {
-  const authUsers = await ctx.authPrisma.user.findMany({
-    where: { email: { endsWith: FACTORY_AUTH_EMAIL_DOMAIN } },
-    select: { id: true },
-  });
+  const authUsers = await ctx.authPrisma.db
+    .select({ id: users.id })
+    .from(users)
+    .where(like(users.email, `%${FACTORY_AUTH_EMAIL_DOMAIN}`));
 
   if (authUsers.length === 0) return;
 
   const userIds = authUsers.map((user) => user.id);
-  await Promise.all([
-    ctx.authPrisma.session.deleteMany({
-      where: { userId: { in: userIds } },
-    }),
-    ctx.authPrisma.account.deleteMany({
-      where: { userId: { in: userIds } },
-    }),
-    ctx.authPrisma.oAuthRefreshToken.deleteMany({
-      where: { userId: { in: userIds } },
-    }),
-    ctx.authPrisma.oAuthAccessToken.deleteMany({
-      where: { userId: { in: userIds } },
-    }),
-    ctx.authPrisma.oAuthConsent.deleteMany({
-      where: { userId: { in: userIds } },
-    }),
-    ctx.authPrisma.oAuthClient.deleteMany({
-      where: { userId: { in: userIds } },
-    }),
-  ]);
-  await ctx.authPrisma.user.deleteMany({
-    where: { id: { in: userIds } },
+  await ctx.authPrisma.db.transaction(async (tx) => {
+    await tx.delete(sessions).where(inArray(sessions.userId, userIds));
+    await tx.delete(accounts).where(inArray(accounts.userId, userIds));
+    await tx
+      .delete(oauthRefreshTokens)
+      .where(inArray(oauthRefreshTokens.userId, userIds));
+    await tx
+      .delete(oauthAccessTokens)
+      .where(inArray(oauthAccessTokens.userId, userIds));
+    await tx
+      .delete(oauthConsents)
+      .where(inArray(oauthConsents.userId, userIds));
+    await tx.delete(oauthClients).where(inArray(oauthClients.userId, userIds));
+    await tx.delete(users).where(inArray(users.id, userIds));
   });
 
   console.log(`[Seed] Deleted ${authUsers.length} stale factory auth user(s).`);
@@ -120,11 +122,14 @@ export async function seedUsers(
     allPlans,
     AUTH_CHUNK_SIZE,
     async (plan) => {
-      const authResult = await seedAuthUser(ctx.authPrisma, {
-        email: plan.email,
-        name: plan.name,
-        role: plan.permission?.role[0]?.toLowerCase() ?? "user",
-      });
+      const authResult = await seedAuthUser(
+        {
+          email: plan.email,
+          name: plan.name,
+          role: plan.permission?.role[0]?.toLowerCase() ?? "user",
+        },
+        ctx.authPrisma.db,
+      );
 
       await ctx.prisma.unit.upsert({
         where: { id: authResult.userId },

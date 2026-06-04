@@ -4,7 +4,7 @@ Core backend API server for the Rezics platform. Serves books, chapters, reviews
 
 ## Overview
 
-An Elysia-based API server that provides the main business logic for the platform. Uses Prisma with PostgreSQL for data persistence and integrates with `@rezics/auth` for identity, `@rezics/jwt` for token verification, and `@rezics/search` for full-text search.
+An Elysia-based API server that provides the main business logic for the platform. Uses Drizzle with PostgreSQL for data persistence and integrates with `@rezics/auth` for identity, `@rezics/jwt` for token verification, and `@rezics/search` for full-text search.
 
 ## API Domains
 
@@ -44,12 +44,11 @@ Environment variables (`AUTH_JWKS_URL`, `AUTH_JWT_ISSUER`, `MAIN_SESSION_JWT_*`)
 ```bash
 bun run dev              # Start with --watch (development)
 bun run build            # Compile to standalone binary
-bun run prisma:generate  # Generate Prisma client
-bun run prisma:migrate   # Run migrations + generate
-bun run prisma:deploy    # Deploy migrations (production)
-bun run prisma:studio    # Open Prisma Studio
-bun run seed:mock        # Seed mock data
-bun run db:migrate       # Run custom migrations
+bun run db:generate      # Generate Drizzle migrations
+bun run db:migrate       # Run local Drizzle migrations
+bun run db:deploy        # Deploy Drizzle migrations (production)
+bun run db:studio        # Open Drizzle Studio
+bun run seed:factory     # Seed factory data
 ```
 
 ## Factory Seed
@@ -79,7 +78,7 @@ Special scenarios are `large-post-tree`, `large-content-tree`, `large-history`, 
 ## Tech Stack
 
 - [Elysia](https://elysiajs.com) HTTP framework with OpenAPI support
-- [Prisma 7](https://www.prisma.io) with PostgreSQL
+- [Drizzle ORM](https://orm.drizzle.team) with PostgreSQL
 - [AWS S3](https://aws.amazon.com/s3/) for file storage
 - [Jose](https://github.com/panva/jose) for JWT operations
 - Compiles to a standalone Bun binary for deployment

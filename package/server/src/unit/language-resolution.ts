@@ -9,9 +9,15 @@ import {
   resolveAuthoringLanguage,
   resolveReadLanguage,
 } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
-import { mapContentTranslationToDTO } from "@/content-translation/mapper";
+import { asc, eq, sql } from "drizzle-orm";
+import { mapContentTranslationToDTO } from "../content-translation/mapper";
+import {
+  ContentTranslation,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
+import { notFound } from "../utils/errors";
 import { mapTranslationToDTO } from "./mapper";
 
 export type ActorLanguageSettings = {
@@ -30,7 +36,11 @@ export function resolveUnitAuthoringLanguage(input: {
   });
 }
 
-export function primarySupportLanguageCreate(language: string) {
+export function primarySupportLanguageCreate(language: string): {
+  language: string;
+  isPrimary: true;
+  sortOrder: 0;
+} {
   return { language, isPrimary: true, sortOrder: 0 };
 }
 
@@ -53,7 +63,14 @@ export function resolveEffectiveReadLanguageCandidates(input: {
 export function preferredLanguageVisibilityWhere(input: {
   languageMode?: ListLanguageMode | null;
   languages?: readonly string[] | null;
-}): Prisma.UnitWhereInput | undefined {
+}):
+  | {
+      OR: [
+        { isLanguageNeutral: true },
+        { supportLanguages: { some: { language: { in: string[] } } } },
+      ];
+    }
+  | undefined {
   if (input.languageMode !== "preferred") return undefined;
   if (!input.languages?.length) return undefined;
 
@@ -70,7 +87,20 @@ export function preferredLanguageVisibilityWhere(input: {
 }
 
 export async function ensurePrimarySupportLanguage(
-  tx: Prisma.TransactionClient,
+  tx: {
+    unitSupportLanguage: {
+      upsert(input: {
+        where: { unitId_language: { unitId: string; language: string } };
+        create: {
+          unitId: string;
+          language: string;
+          isPrimary: true;
+          sortOrder: 0;
+        };
+        update: { isPrimary: true; sortOrder: 0 };
+      }): Promise<unknown>;
+    };
+  },
   unitId: string,
   language: string,
 ) {
@@ -81,7 +111,140 @@ export async function ensurePrimarySupportLanguage(
   });
 }
 
+type MissingSupportLanguageRow = {
+  unitId: string;
+  language: string;
+  source: "unit_translation" | "content_translation";
+};
+
+type UnitLanguageAvailabilityRow = {
+  id: string;
+  supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+  translations: Array<Pick<typeof UnitTranslation.$inferSelect, "language">>;
+  contentTranslations: Array<
+    Pick<typeof ContentTranslation.$inferSelect, "language">
+  >;
+};
+
+type UnitLanguageContentRow = typeof Unit.$inferSelect & {
+  supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+  translations: Array<typeof UnitTranslation.$inferSelect>;
+  contentTranslations: Array<typeof ContentTranslation.$inferSelect>;
+};
+
+export interface UnitLanguageRepository {
+  unitsMissingSupportLanguageRows(
+    limit: number,
+  ): Promise<MissingSupportLanguageRow[]>;
+  getAvailabilityUnit(unitId: string): Promise<UnitLanguageAvailabilityRow>;
+  getContentUnit(unitId: string): Promise<UnitLanguageContentRow>;
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+async function getUnitOrThrow(unitId: string) {
+  const db = await getServerDb();
+  const [unit] = await db
+    .select()
+    .from(Unit)
+    .where(eq(Unit.id, unitId))
+    .limit(1);
+  if (!unit) throw notFound("Unit");
+  return unit;
+}
+
+function createDrizzleUnitLanguageRepository(): UnitLanguageRepository {
+  return {
+    async unitsMissingSupportLanguageRows(limit) {
+      const db = await getServerDb();
+      const result = await db.execute<MissingSupportLanguageRow>(sql`
+        SELECT missing."unitId", missing."language", missing."source"
+        FROM (
+          SELECT ut."unitId", ut."language", 'unit_translation' AS "source"
+          FROM "UnitTranslation" ut
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM "UnitSupportLanguage" usl
+            WHERE usl."unitId" = ut."unitId"
+              AND usl."language" = ut."language"
+          )
+          UNION ALL
+          SELECT ct."unitId", ct."language", 'content_translation' AS "source"
+          FROM "ContentTranslation" ct
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM "UnitSupportLanguage" usl
+            WHERE usl."unitId" = ct."unitId"
+              AND usl."language" = ct."language"
+          )
+        ) missing
+        ORDER BY missing."unitId" ASC, missing."language" ASC, missing."source" ASC
+        LIMIT ${limit}
+      `);
+      return result.rows;
+    },
+
+    async getAvailabilityUnit(unitId) {
+      const db = await getServerDb();
+      const unit = await getUnitOrThrow(unitId);
+      const [supportLanguages, translations, contentTranslations] =
+        await Promise.all([
+          db
+            .select()
+            .from(UnitSupportLanguage)
+            .where(eq(UnitSupportLanguage.unitId, unitId))
+            .orderBy(asc(UnitSupportLanguage.sortOrder)),
+          db
+            .select({ language: UnitTranslation.language })
+            .from(UnitTranslation)
+            .where(eq(UnitTranslation.unitId, unitId)),
+          db
+            .select({ language: ContentTranslation.language })
+            .from(ContentTranslation)
+            .where(eq(ContentTranslation.unitId, unitId)),
+        ]);
+      return {
+        id: unit.id,
+        supportLanguages,
+        translations,
+        contentTranslations,
+      };
+    },
+
+    async getContentUnit(unitId) {
+      const db = await getServerDb();
+      const unit = await getUnitOrThrow(unitId);
+      const [supportLanguages, translations, contentTranslations] =
+        await Promise.all([
+          db
+            .select()
+            .from(UnitSupportLanguage)
+            .where(eq(UnitSupportLanguage.unitId, unitId))
+            .orderBy(asc(UnitSupportLanguage.sortOrder)),
+          db
+            .select()
+            .from(UnitTranslation)
+            .where(eq(UnitTranslation.unitId, unitId)),
+          db
+            .select()
+            .from(ContentTranslation)
+            .where(eq(ContentTranslation.unitId, unitId)),
+        ]);
+      return { ...unit, supportLanguages, translations, contentTranslations };
+    },
+  };
+}
+
+const defaultRepository = createDrizzleUnitLanguageRepository();
+
 export class UnitLanguageService {
+  constructor(
+    private readonly repository: UnitLanguageRepository = defaultRepository,
+  ) {}
+
   async unitsMissingSupportLanguageRows(limit = 100): Promise<
     Array<{
       unitId: string;
@@ -90,50 +253,13 @@ export class UnitLanguageService {
     }>
   > {
     const take = Math.max(1, Math.min(limit, 500));
-    return prisma.$queryRaw<
-      Array<{
-        unitId: string;
-        language: string;
-        source: "unit_translation" | "content_translation";
-      }>
-    >`
-      SELECT missing."unitId", missing."language", missing."source"
-      FROM (
-        SELECT ut."unitId", ut."language", 'unit_translation' AS "source"
-        FROM "UnitTranslation" ut
-        WHERE NOT EXISTS (
-          SELECT 1
-          FROM "UnitSupportLanguage" usl
-          WHERE usl."unitId" = ut."unitId"
-            AND usl."language" = ut."language"
-        )
-        UNION ALL
-        SELECT ct."unitId", ct."language", 'content_translation' AS "source"
-        FROM "ContentTranslation" ct
-        WHERE NOT EXISTS (
-          SELECT 1
-          FROM "UnitSupportLanguage" usl
-          WHERE usl."unitId" = ct."unitId"
-            AND usl."language" = ct."language"
-        )
-      ) missing
-      ORDER BY missing."unitId" ASC, missing."language" ASC, missing."source" ASC
-      LIMIT ${take}
-    `;
+    return this.repository.unitsMissingSupportLanguageRows(take);
   }
 
   async availability(
     unitId: string,
   ): Promise<UnitLanguageAvailabilityResponse> {
-    const unit = await prisma.unit.findUniqueOrThrow({
-      where: { id: unitId },
-      select: {
-        id: true,
-        supportLanguages: { orderBy: [{ sortOrder: "asc" }] },
-        translations: { select: { language: true } },
-        contentTranslations: { select: { language: true } },
-      },
-    });
+    const unit = await this.repository.getAvailabilityUnit(unitId);
 
     return {
       unitId: unit.id,
@@ -156,14 +282,7 @@ export class UnitLanguageService {
     unitId: string,
     query: UnitLanguageContentQuery = {},
   ): Promise<UnitLanguageContentResponse> {
-    const unit = await prisma.unit.findUniqueOrThrow({
-      where: { id: unitId },
-      include: {
-        supportLanguages: { orderBy: [{ sortOrder: "asc" }] },
-        translations: true,
-        contentTranslations: true,
-      },
-    });
+    const unit = await this.repository.getContentUnit(unitId);
     const resolvedLanguage = resolveReadLanguage({
       explicitLanguage: query.explicitLanguage,
       languages: parseReadLanguages(

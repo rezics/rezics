@@ -1,11 +1,13 @@
 import type { FeedbackDTO } from "@rezics/contract";
-import type { Feedback } from "#/prisma/client";
+import type { Feedback } from "../db/schema";
 
 function lower<T extends string>(value: string | null | undefined): T | null {
   return value ? (value.toLowerCase() as T) : null;
 }
 
-export function mapFeedbackToDTO(model: Feedback): FeedbackDTO {
+export function mapFeedbackToDTO(
+  model: typeof Feedback.$inferSelect,
+): FeedbackDTO {
   return {
     id: model.id,
     userId: model.userId,

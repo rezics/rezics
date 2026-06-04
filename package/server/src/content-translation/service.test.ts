@@ -1,52 +1,72 @@
-import { describe, expect, mock, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
+  ContentTranslationService,
+  type ContentTranslationRepository,
+} from "./service";
+import type { ContentTranslationRow } from "./types";
 
-installPrismaClientMock();
+const now = new Date("2026-05-31T00:00:00.000Z");
+
+function translationRow(
+  overrides: Partial<ContentTranslationRow> = {},
+): ContentTranslationRow {
+  return {
+    unitId: "wiki-1",
+    language: "en",
+    content: { main: { type: "markdown", source: "Body" } },
+    status: "PUBLISHED",
+    sourceUnitId: null,
+    authorUserId: null,
+    provenance: null,
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
+
+function freshRepository() {
+  const calls: Array<{ method: string; input: unknown }> = [];
+  const repository: ContentTranslationRepository = {
+    async get(unitId, language) {
+      calls.push({ method: "get", input: { unitId, language } });
+      return translationRow({ unitId, language });
+    },
+    async list(unitId) {
+      calls.push({ method: "list", input: unitId });
+      return [];
+    },
+    async upsert(input) {
+      calls.push({ method: "upsert", input });
+      return translationRow({
+        unitId: input.unitId,
+        language: input.language,
+        content: input.content,
+        status: input.createStatus,
+        sourceUnitId: input.sourceUnitId ?? null,
+        authorUserId: input.authorUserId ?? null,
+        provenance: input.provenance ?? null,
+      });
+    },
+    async delete(unitId, language) {
+      calls.push({ method: "delete", input: { unitId, language } });
+    },
+  };
+  return { calls, service: new ContentTranslationService(repository) };
+}
 
 describe("ContentTranslationService", () => {
   test("lists body translations by unit", async () => {
-    const findMany = mock(async () => []);
-    Object.assign(prismaMock, {
-      contentTranslation: { findMany },
-    });
+    const { calls, service } = freshRepository();
 
-    const { ContentTranslationService } = await import("./service");
-    await new ContentTranslationService().list("wiki-1");
+    await service.list("wiki-1");
 
-    expect(findMany).toHaveBeenCalledWith({
-      where: { unitId: "wiki-1" },
-      orderBy: { language: "asc" },
-    });
+    expect(calls).toContainEqual({ method: "list", input: "wiki-1" });
   });
 
   test("upserts language-specific body content with actor provenance", async () => {
-    const upsert = mock(async (args: any) => ({
-      unitId: args.create.unit.connect.id,
-      language: args.create.language,
-      content: args.create.content,
-      status: args.create.status,
-      sourceUnitId: args.create.sourceUnitId ?? null,
-      authorUserId: args.create.authorUserId ?? null,
-      provenance: args.create.provenance ?? null,
-      createdAt: new Date("2026-05-31T00:00:00.000Z"),
-      updatedAt: new Date("2026-05-31T00:00:00.000Z"),
-    }));
-    const unitSupportLanguageUpsert = mock(async (args: any) => args.create);
-    const transaction = mock(async (fn: any) =>
-      fn({
-        contentTranslation: { upsert },
-        unitSupportLanguage: { upsert: unitSupportLanguageUpsert },
-      }),
-    );
-    Object.assign(prismaMock, {
-      $transaction: transaction,
-    });
+    const { calls, service } = freshRepository();
 
-    const { ContentTranslationService } = await import("./service");
-    const result = await new ContentTranslationService().upsert(
+    const result = await service.upsert(
       {
         unitId: "wiki-1",
         language: "en",
@@ -56,43 +76,30 @@ describe("ContentTranslationService", () => {
       "user-1",
     );
 
-    expect(upsert).toHaveBeenCalledWith({
-      where: { unitId_language: { unitId: "wiki-1", language: "en" } },
-      create: expect.objectContaining({
-        unit: { connect: { id: "wiki-1" } },
-        language: "en",
-        status: "PUBLISHED",
-        authorUserId: "user-1",
-        provenance: { importedFrom: "legacy-wiki-post" },
-      }),
-      update: expect.objectContaining({
-        content: { main: { type: "markdown", source: "Body" } },
-        authorUserId: "user-1",
-        provenance: { importedFrom: "legacy-wiki-post" },
-      }),
-    });
-    expect(unitSupportLanguageUpsert).toHaveBeenCalledWith({
-      where: { unitId_language: { unitId: "wiki-1", language: "en" } },
-      create: expect.objectContaining({
+    expect(calls).toContainEqual({
+      method: "upsert",
+      input: {
         unitId: "wiki-1",
         language: "en",
-      }),
-      update: {},
+        content: { main: { type: "markdown", source: "Body" } },
+        createStatus: "PUBLISHED",
+        updateStatus: undefined,
+        sourceUnitId: undefined,
+        authorUserId: "user-1",
+        provenance: { importedFrom: "legacy-wiki-post" },
+      },
     });
     expect(result.authorUserId).toBe("user-1");
   });
 
   test("deletes one unit/language content translation", async () => {
-    const deleteMock = mock(async () => ({}));
-    Object.assign(prismaMock, {
-      contentTranslation: { delete: deleteMock },
-    });
+    const { calls, service } = freshRepository();
 
-    const { ContentTranslationService } = await import("./service");
-    await new ContentTranslationService().delete("wiki-1", "ja");
+    await service.delete("wiki-1", "ja");
 
-    expect(deleteMock).toHaveBeenCalledWith({
-      where: { unitId_language: { unitId: "wiki-1", language: "ja" } },
+    expect(calls).toContainEqual({
+      method: "delete",
+      input: { unitId: "wiki-1", language: "ja" },
     });
   });
 });

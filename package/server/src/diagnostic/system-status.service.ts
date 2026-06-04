@@ -1,6 +1,6 @@
-import { prisma } from "#/prisma/client";
-import { env } from "@/env";
-import { getMeiliStatusSummary } from "@/meili/status.service";
+import { sql, type SQL } from "drizzle-orm";
+import { db } from "../db/client";
+import { env } from "../env";
 import type {
   CdcStatus,
   FailedJobSummary,
@@ -12,6 +12,10 @@ import type {
   StatusState,
   SystemStatusSummary,
 } from "./status.types";
+
+type MeiliStatusSummary = Awaited<
+  ReturnType<typeof import("../meili/status.service").getMeiliStatusSummary>
+>;
 
 const DEFAULT_TIMEOUT_MS = 2_500;
 const DEFAULT_LAG_WARNING_BYTES = 256 * 1024 * 1024;
@@ -39,7 +43,15 @@ const ROUTED_SEQUIN_TABLES = [
 type FetchLike = typeof fetch;
 
 interface QueryClient {
-  $queryRawUnsafe<T = unknown>(query: string, ...values: unknown[]): Promise<T>;
+  execute(query: SQL): Promise<{ rows: unknown[] }>;
+}
+
+async function queryRows<T>(
+  queryClient: QueryClient,
+  query: SQL,
+): Promise<T[]> {
+  const result = await queryClient.execute(query);
+  return result.rows as T[];
 }
 
 function checkedAt() {
@@ -288,36 +300,35 @@ async function getCdcStatus(options: {
   try {
     const [walRows, publicationRows, slotRows] = await Promise.all([
       timeout(
-        options.queryClient.$queryRawUnsafe<Array<{ wal_level: string }>>(
-          "SHOW wal_level",
+        queryRows<{ wal_level: string }>(
+          options.queryClient,
+          sql`SHOW wal_level`,
         ),
         options.timeoutMs,
       ),
       timeout(
-        options.queryClient.$queryRawUnsafe<Array<{ tablename: string }>>(
-          `SELECT c.relname AS tablename
+        queryRows<{ tablename: string }>(
+          options.queryClient,
+          sql`SELECT c.relname AS tablename
            FROM pg_publication p
            JOIN pg_publication_rel pr ON pr.prpubid = p.oid
            JOIN pg_class c ON c.oid = pr.prrelid
-           WHERE p.pubname = $1`,
-          publicationName,
+           WHERE p.pubname = ${publicationName}`,
         ),
         options.timeoutMs,
       ),
       timeout(
-        options.queryClient.$queryRawUnsafe<
-          Array<{
-            slot_name: string;
-            active: boolean | null;
-            confirmed_flush_lsn: string | null;
-            lag_bytes: bigint | number | null;
-          }>
-        >(
-          `SELECT slot_name, active, confirmed_flush_lsn::text AS confirmed_flush_lsn,
+        queryRows<{
+          slot_name: string;
+          active: boolean | null;
+          confirmed_flush_lsn: string | null;
+          lag_bytes: bigint | number | null;
+        }>(
+          options.queryClient,
+          sql`SELECT slot_name, active, confirmed_flush_lsn::text AS confirmed_flush_lsn,
                   pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)::bigint AS lag_bytes
            FROM pg_replication_slots
-           WHERE slot_name = $1`,
-          slotName,
+           WHERE slot_name = ${slotName}`,
         ),
         options.timeoutMs,
       ),
@@ -403,14 +414,16 @@ async function getHistoryOutboxStatus(options: {
   try {
     const [countRows, recentRows] = await timeout(
       Promise.all([
-        options.queryClient.$queryRawUnsafe<Record<string, unknown>[]>(
-          `SELECT status, COUNT(*)::int AS count
+        queryRows<Record<string, unknown>>(
+          options.queryClient,
+          sql`SELECT status, COUNT(*)::int AS count
            FROM "HistoryOutbox"
            GROUP BY status
            ORDER BY status ASC`,
         ),
-        options.queryClient.$queryRawUnsafe<Record<string, unknown>[]>(
-          `SELECT id, "unitId", sequence::text AS sequence, category, status,
+        queryRows<Record<string, unknown>>(
+          options.queryClient,
+          sql`SELECT id, "unitId", sequence::text AS sequence, category, status,
                   attempts, "nextAttemptAt", "processedAt", "lastError", "createdAt"
            FROM "HistoryOutbox"
            WHERE status = 'failed'
@@ -496,7 +509,7 @@ export async function getSystemStatusSummary(options?: {
   publicationName?: string;
   slotName?: string;
   lagWarningBytes?: number;
-  meiliSummary?: Awaited<ReturnType<typeof getMeiliStatusSummary>>;
+  meiliSummary?: MeiliStatusSummary;
 }): Promise<SystemStatusSummary> {
   const fetchImpl = options?.fetchImpl ?? fetch;
   const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -525,7 +538,9 @@ export async function getSystemStatusSummary(options?: {
   ] = await Promise.all([
     options?.meiliSummary
       ? Promise.resolve(options.meiliSummary)
-      : getMeiliStatusSummary({ timeoutMs }),
+      : import("../meili/status.service").then(({ getMeiliStatusSummary }) =>
+          getMeiliStatusSummary({ timeoutMs }),
+        ),
     fetchStatusItem({
       id: "auth",
       label: "Auth 服務",
@@ -564,7 +579,7 @@ export async function getSystemStatusSummary(options?: {
         options?.jobRunnerInternalSecret ?? env.JOB_RUNNER_INTERNAL_SECRET,
     }),
     getCdcStatus({
-      queryClient: options?.queryClient ?? prisma,
+      queryClient: options?.queryClient ?? db,
       timeoutMs,
       publicationName:
         options?.publicationName ?? env.STATUS_CDC_PUBLICATION_NAME,
@@ -574,7 +589,7 @@ export async function getSystemStatusSummary(options?: {
         Number(env.STATUS_CDC_LAG_WARNING_BYTES ?? DEFAULT_LAG_WARNING_BYTES),
     }),
     getHistoryOutboxStatus({
-      queryClient: options?.queryClient ?? prisma,
+      queryClient: options?.queryClient ?? db,
       timeoutMs,
     }),
   ]);

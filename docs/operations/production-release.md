@@ -33,12 +33,12 @@ rollout.
 Migrations follow database ownership; `ranking` is parallel-safe:
 
 ```text
-auth      → package/auth     prisma:deploy
-server    → package/server   prisma:deploy
-notify    → package/notify   prisma:deploy
-reaction  → package/reaction prisma:deploy
-history   → package/history  prisma:deploy
-ranking   → package/ranking  prisma:deploy   (no cross-service ordering)
+auth      → package/auth     db:deploy
+server    → package/server   db:deploy
+notify    → package/notify   db:deploy
+reaction  → package/reaction db:deploy
+history   → package/history  db:deploy
+ranking   → package/ranking  db:deploy       (no cross-service ordering)
 job       → package/job-runner db:ensure     (pg-boss queue prep, no schema)
 ```
 

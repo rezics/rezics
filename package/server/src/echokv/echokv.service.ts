@@ -1,12 +1,16 @@
-import { type Prisma, prisma } from "#/prisma/client";
+import { desc, eq, ilike } from "drizzle-orm";
+import { db } from "../db/client";
+import { EchoKV } from "../db/schema";
+import type { JsonValue } from "./types";
 
-type JsonValue = Prisma.JsonValue;
 export class EchoKvService {
   async get(key: string): Promise<JsonValue> {
-    const value = await prisma.echoKV.findUnique({
-      where: { key },
-    });
-    return value?.value as JsonValue;
+    const [record] = await db
+      .select({ value: EchoKV.value })
+      .from(EchoKV)
+      .where(eq(EchoKV.key, key))
+      .limit(1);
+    return record?.value as JsonValue;
   }
 
   /**
@@ -21,12 +25,16 @@ export class EchoKvService {
    * a JSON-formatted string, which is then parsed on the client.
    */
   async set(key: string, value: JsonValue): Promise<JsonValue> {
-    const record = await prisma.echoKV.upsert({
-      where: { key },
-      update: { value: value as Prisma.InputJsonValue },
-      create: { key, value: value as Prisma.InputJsonValue },
-    });
-    return record.value as JsonValue;
+    const now = new Date();
+    const [record] = await db
+      .insert(EchoKV)
+      .values({ key, value, updatedAt: now })
+      .onConflictDoUpdate({
+        target: EchoKV.key,
+        set: { value, updatedAt: now },
+      })
+      .returning({ value: EchoKV.value });
+    return record?.value as JsonValue;
   }
 
   /**
@@ -34,24 +42,11 @@ export class EchoKvService {
    * Newest records come first.
    */
   async listKeys(search?: string): Promise<string[]> {
-    const records = await prisma.echoKV.findMany({
-      ...(search
-        ? {
-            where: {
-              key: {
-                contains: search,
-                mode: "insensitive",
-              },
-            },
-          }
-        : {}),
-      select: {
-        key: true,
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    });
+    const records = await db
+      .select({ key: EchoKV.key })
+      .from(EchoKV)
+      .where(search ? ilike(EchoKV.key, `%${search}%`) : undefined)
+      .orderBy(desc(EchoKV.updatedAt));
 
     return records.map((r) => r.key);
   }

@@ -1,7 +1,7 @@
 // Type only used in server, otherwise use contract
 
 import { t } from "elysia";
-import type { Prisma, Unit, User } from "#/prisma/client";
+import type { Unit, User } from "../../db/schema";
 
 /**
  * Internal user type with relations and the canonical slug attached
@@ -11,8 +11,8 @@ import type { Prisma, Unit, User } from "#/prisma/client";
  * the USER `Unit`. Services that load Users attach `slug` as part of the
  * read path so DTO mappers can read it without re-querying.
  */
-export type UserWithRelations = User & {
-  units?: Unit[];
+export type UserWithRelations = typeof User.$inferSelect & {
+  units?: (typeof Unit.$inferSelect)[];
   /** Canonical slug copied from the matching USER `Unit.slug`. */
   slug?: string | null;
 };
@@ -27,15 +27,13 @@ export type UserFilterOptions = {
   limit?: number;
 };
 
-/**
- * Prisma include for user relations
- */
+/** User relation hydration shape used by services that attach Unit rows. */
 export const userInclude = {
   units: {
     take: 10,
     orderBy: { createdAt: "desc" },
   },
-} satisfies Prisma.UserInclude;
+};
 
 /**
  * JWT Payload type

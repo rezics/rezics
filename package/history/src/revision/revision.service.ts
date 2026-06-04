@@ -37,8 +37,8 @@ type HistoryDb = {
 let defaultDbPromise: Promise<HistoryDb> | null = null;
 
 async function getDefaultDb(): Promise<HistoryDb> {
-  defaultDbPromise ??= import("../../prisma/client").then(
-    ({ prisma }) => prisma as unknown as HistoryDb,
+  defaultDbPromise ??= import("../db/history.repository").then(
+    ({ historyRepository }) => historyRepository as unknown as HistoryDb,
   );
   return defaultDbPromise;
 }

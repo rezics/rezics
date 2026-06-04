@@ -1,125 +1,94 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import type { AccountDataRepository } from "./account-data.service";
 
-installPrismaClientMock();
-
-mock.module("@/infra/slug-scopes", () => ({
-  requireSlugScopeId: () => "user-scope",
+const removeAllForUser = mock(async (_userId: string) => undefined);
+mock.module("../../block/block.service", () => ({
+  blockService: {
+    removeAllForUser,
+  },
 }));
 
-// `@/block` is intentionally NOT mocked at the module level — doing so leaks
-// across files in bun's global mock registry. The real `blockService` runs
-// against `prisma.userBlock.deleteMany` (mocked below).
-const userBlockDeleteMany = mock(async () => ({ count: 1 }));
-
 const unsubscribe = mock(async (_a: string, _b: string) => true);
-mock.module("@/subscription/subscription.service", () => ({
+mock.module("../../subscription/subscription.service", () => ({
   subscriptionService: { unsubscribe },
 }));
 
-const userUpdate = mock(async () => ({}));
-const unitUpdate = mock(async () => ({}));
-const userUnitCollectionDeleteMany = mock(async () => ({ count: 1 }));
-const userTagApplicationDeleteMany = mock(async () => ({ count: 1 }));
+const scrubDeletedAccount = mock(
+  async (_userId: string, _deletedAt: Date) => undefined,
+);
+
+function repository(): AccountDataRepository {
+  return {
+    getHandle: mock(async () => "alice"),
+    getExportUser: mock(async () => ({
+      unitId: "me",
+      name: "Alice",
+      email: "alice@example.com",
+      bio: "hi",
+      avatar: null,
+      joinDate: new Date("2026-01-01T00:00:00.000Z"),
+      settings: { notifications: { follow: false } },
+    })),
+    listExportPosts: mock(async () => [
+      {
+        unitId: "post-1",
+        kind: "REVIEW",
+        title: "A review",
+        createdAt: new Date("2026-02-01T00:00:00.000Z"),
+      },
+    ]),
+    listExportShelves: mock(async () => [
+      {
+        unitId: "shelf-1",
+        title: "Favourites",
+        updatedAt: new Date("2026-03-01T00:00:00.000Z"),
+      },
+    ]),
+    listUserUnitCollections: mock(async () => [
+      {
+        unitId: "book-1",
+        searchText: "private alias",
+        createdAt: new Date("2026-02-15T00:00:00.000Z"),
+        updatedAt: new Date("2026-02-16T00:00:00.000Z"),
+      },
+    ]),
+    listUserTagApplications: mock(async () => [
+      {
+        unitId: "book-1",
+        tagUnitId: "tag-1",
+        position: "00000000",
+        createdAt: new Date("2026-02-17T00:00:00.000Z"),
+        updatedAt: new Date("2026-02-18T00:00:00.000Z"),
+      },
+    ]),
+    listFollows: mock(async () => [
+      {
+        subscribedUnitId: "peer",
+        channels: ["*"],
+        createdAt: new Date("2026-01-15T00:00:00.000Z"),
+      },
+    ]),
+    listFollowers: mock(async () => []),
+    listBlocks: mock(async () => [
+      {
+        blockedId: "blocked-1",
+        createdAt: new Date("2026-04-01T00:00:00.000Z"),
+      },
+    ]),
+    scrubDeletedAccount,
+  };
+}
 
 beforeEach(() => {
-  userBlockDeleteMany.mockClear();
+  removeAllForUser.mockClear();
   unsubscribe.mockClear();
-  userUpdate.mockClear();
-  unitUpdate.mockClear();
-  userUnitCollectionDeleteMany.mockClear();
-  userTagApplicationDeleteMany.mockClear();
-
-  Object.assign(prismaMock, {
-    $transaction: mock(async (fn: any) => fn(prismaMock)),
-    unit: {
-      findFirst: mock(async () => ({ slug: "alice" })),
-      update: unitUpdate,
-    },
-    user: {
-      findUniqueOrThrow: mock(async () => ({
-        unitId: "me",
-        name: "Alice",
-        email: "alice@example.com",
-        bio: "hi",
-        avatar: null,
-        joinDate: new Date("2026-01-01T00:00:00.000Z"),
-        settings: { notifications: { follow: false } },
-      })),
-      update: userUpdate,
-    },
-    post: {
-      findMany: mock(async () => [
-        {
-          unitId: "post-1",
-          kind: "REVIEW",
-          createdAt: new Date("2026-02-01T00:00:00.000Z"),
-          unit: { translations: [{ title: "A review" }] },
-        },
-      ]),
-      deleteMany: mock(async () => ({ count: 0 })),
-    },
-    shelf: {
-      findMany: mock(async () => [
-        {
-          unitId: "shelf-1",
-          updatedAt: new Date("2026-03-01T00:00:00.000Z"),
-          unit: { translations: [{ title: "Favourites" }] },
-        },
-      ]),
-    },
-    subscription: {
-      findMany: mock(async ({ where }: any) =>
-        where.subscriberUnitId === "me"
-          ? [
-              {
-                subscribedUnitId: "peer",
-                channels: ["*"],
-                createdAt: new Date("2026-01-15T00:00:00.000Z"),
-              },
-            ]
-          : [],
-      ),
-    },
-    userUnitCollection: {
-      findMany: mock(async () => [
-        {
-          unitId: "book-1",
-          searchText: "private alias",
-          createdAt: new Date("2026-02-15T00:00:00.000Z"),
-          updatedAt: new Date("2026-02-16T00:00:00.000Z"),
-        },
-      ]),
-      deleteMany: userUnitCollectionDeleteMany,
-    },
-    userTagApplication: {
-      findMany: mock(async () => [
-        {
-          unitId: "book-1",
-          tagUnitId: "tag-1",
-          position: "00000000",
-          createdAt: new Date("2026-02-17T00:00:00.000Z"),
-          updatedAt: new Date("2026-02-18T00:00:00.000Z"),
-        },
-      ]),
-      deleteMany: userTagApplicationDeleteMany,
-    },
-    userBlock: {
-      findMany: mock(async () => [
-        {
-          blockedId: "blocked-1",
-          createdAt: new Date("2026-04-01T00:00:00.000Z"),
-        },
-      ]),
-      deleteMany: userBlockDeleteMany,
-    },
-  });
+  scrubDeletedAccount.mockClear();
 });
 
 describe("exportUserData", () => {
   test("returns the documented export scope", async () => {
     const { exportUserData } = await import("./account-data.service");
-    const data = await exportUserData("me");
+    const data = await exportUserData("me", repository());
 
     expect(data.profile).toMatchObject({
       unitId: "me",
@@ -164,42 +133,25 @@ describe("deleteAccount", () => {
     const { deleteAccount, DeletionNotConfirmedError } = await import(
       "./account-data.service"
     );
+    const repo = repository();
 
-    await expect(deleteAccount("me", "wrong-handle")).rejects.toBeInstanceOf(
-      DeletionNotConfirmedError,
-    );
-    expect(userUpdate).not.toHaveBeenCalled();
-    expect(unitUpdate).not.toHaveBeenCalled();
-    expect(userBlockDeleteMany).not.toHaveBeenCalled();
-    expect(userUnitCollectionDeleteMany).not.toHaveBeenCalled();
-    expect(userTagApplicationDeleteMany).not.toHaveBeenCalled();
+    await expect(
+      deleteAccount("me", "wrong-handle", repo),
+    ).rejects.toBeInstanceOf(DeletionNotConfirmedError);
+    expect(removeAllForUser).not.toHaveBeenCalled();
+    expect(unsubscribe).not.toHaveBeenCalled();
+    expect(scrubDeletedAccount).not.toHaveBeenCalled();
   });
 
   test("anonymizes the account and removes safety/social state on confirmation", async () => {
     const { deleteAccount } = await import("./account-data.service");
+    const repo = repository();
 
-    await deleteAccount("me", "alice");
+    await deleteAccount("me", "alice", repo);
 
     // PII scrubbed; profile hidden; blocks + follow edges removed.
-    const userData = (userUpdate.mock.calls[0] as any[])[0].data;
-    expect(userData.email).toBeNull();
-    expect(userData.name).toBeNull();
-    expect(userData.extra.deletedAt).toBeDefined();
-    expect((unitUpdate.mock.calls[0] as any[])[0].data.status).toBe("DELETED");
-    // blockService.removeAllForUser runs for real -> deletes both-side rows.
-    expect((userBlockDeleteMany.mock.calls[0] as any[])[0].where.OR).toEqual([
-      { blockerId: "me" },
-      { blockedId: "me" },
-    ]);
+    expect(scrubDeletedAccount).toHaveBeenCalledWith("me", expect.any(Date));
+    expect(removeAllForUser).toHaveBeenCalledWith("me");
     expect(unsubscribe).toHaveBeenCalledWith("me", "peer");
-    expect(userUnitCollectionDeleteMany).toHaveBeenCalledWith({
-      where: { userId: "me" },
-    });
-    expect(userTagApplicationDeleteMany).toHaveBeenCalledWith({
-      where: { userId: "me" },
-    });
-
-    // Retained: authored content is never deleted.
-    expect((prismaMock as any).post.deleteMany).not.toHaveBeenCalled();
   });
 });

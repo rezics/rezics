@@ -3,16 +3,139 @@ import {
   type DraftMetadata,
   mainMarkdownSource,
 } from "@rezics/contract";
-import { PostKind, prisma, UnitStatus } from "#/prisma/client";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import {
+  ContentTranslation,
+  Post,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
 import { postKindToDraftKind, toDraftMetadata } from "./draft.mapper";
 
 /** Draft-eligible post kinds (reply/excerpt/chapter never become drafts). */
-const DRAFT_POST_KINDS = [
-  PostKind.REVIEW,
-  PostKind.REMARK,
-  PostKind.POST,
-  PostKind.WIKI,
-];
+const DRAFT_POST_KINDS = ["REVIEW", "REMARK", "POST", "WIKI"] as const;
+const DRAFT_UNIT_STATUS = "DRAFT";
+
+type DraftPostRow = {
+  unitId: string;
+  kind: string | null;
+  updatedAt: Date;
+  unit: {
+    targetUnitId: string | null;
+    defaultLanguage: string | null;
+    supportLanguages: Array<{
+      language: string;
+      isPrimary: boolean;
+      sortOrder: number;
+    }>;
+    translations: Array<{ language: string; title: string | null }>;
+    contentTranslations: Array<{ language: string; content: unknown }>;
+  };
+};
+
+type DraftRepository = {
+  listDraftPosts(userId: string, take: number): Promise<DraftPostRow[]>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function groupRowsByUnitId<T extends { unitId: string }>(
+  rows: readonly T[],
+): Map<string, T[]> {
+  const grouped = new Map<string, T[]>();
+  for (const row of rows) {
+    const list = grouped.get(row.unitId);
+    if (list) {
+      list.push(row);
+    } else {
+      grouped.set(row.unitId, [row]);
+    }
+  }
+  return grouped;
+}
+
+function createDrizzleDraftRepository(): DraftRepository {
+  return {
+    async listDraftPosts(userId, take) {
+      const db = await getServerDb();
+      const posts = await db
+        .select({
+          unitId: Post.unitId,
+          kind: Post.kind,
+          updatedAt: Post.updatedAt,
+          targetUnitId: Unit.targetUnitId,
+          defaultLanguage: Unit.defaultLanguage,
+        })
+        .from(Post)
+        .innerJoin(Unit, eq(Unit.id, Post.unitId))
+        .where(
+          and(
+            inArray(Post.kind, [...DRAFT_POST_KINDS]),
+            eq(Post.authorUserId, userId),
+            eq(Unit.status, DRAFT_UNIT_STATUS),
+          ),
+        )
+        .orderBy(desc(Post.updatedAt))
+        .limit(take);
+
+      const unitIds = posts.map((post) => post.unitId);
+      if (unitIds.length === 0) return [];
+
+      const [translations, contentTranslations, supportLanguages] =
+        await Promise.all([
+          db
+            .select({
+              unitId: UnitTranslation.unitId,
+              language: UnitTranslation.language,
+              title: UnitTranslation.title,
+            })
+            .from(UnitTranslation)
+            .where(inArray(UnitTranslation.unitId, unitIds)),
+          db
+            .select({
+              unitId: ContentTranslation.unitId,
+              language: ContentTranslation.language,
+              content: ContentTranslation.content,
+            })
+            .from(ContentTranslation)
+            .where(inArray(ContentTranslation.unitId, unitIds)),
+          db
+            .select({
+              unitId: UnitSupportLanguage.unitId,
+              language: UnitSupportLanguage.language,
+              isPrimary: UnitSupportLanguage.isPrimary,
+              sortOrder: UnitSupportLanguage.sortOrder,
+            })
+            .from(UnitSupportLanguage)
+            .where(inArray(UnitSupportLanguage.unitId, unitIds))
+            .orderBy(asc(UnitSupportLanguage.sortOrder)),
+        ]);
+
+      const translationsByUnitId = groupRowsByUnitId(translations);
+      const contentTranslationsByUnitId =
+        groupRowsByUnitId(contentTranslations);
+      const supportLanguagesByUnitId = groupRowsByUnitId(supportLanguages);
+
+      return posts.map((post) => ({
+        unitId: post.unitId,
+        kind: post.kind,
+        updatedAt: post.updatedAt,
+        unit: {
+          targetUnitId: post.targetUnitId,
+          defaultLanguage: post.defaultLanguage,
+          translations: translationsByUnitId.get(post.unitId) ?? [],
+          contentTranslations:
+            contentTranslationsByUnitId.get(post.unitId) ?? [],
+          supportLanguages: supportLanguagesByUnitId.get(post.unitId) ?? [],
+        },
+      }));
+    },
+  };
+}
 
 /** Collapse a ContentDoc to a single line of plain text, trimmed. */
 function plainText(content: unknown): string {
@@ -43,7 +166,9 @@ function deriveExcerpt(
   return undefined;
 }
 
-export const draftService = {
+export class DraftService {
+  constructor(private readonly repository = createDrizzleDraftRepository()) {}
+
   /**
    * List the user's draft-status posts across draft-eligible kinds, newest
    * first. Reuses the existing `Unit.status = DRAFT` storage; no separate
@@ -54,32 +179,7 @@ export const draftService = {
     query?: { limit?: number },
   ): Promise<DraftMetadata[]> {
     const take = Math.max(1, Math.min(query?.limit ?? 50, 100));
-    const posts = await prisma.post.findMany({
-      where: {
-        authorUserId: userId,
-        kind: { in: DRAFT_POST_KINDS },
-        unit: { status: UnitStatus.DRAFT },
-      },
-      select: {
-        unitId: true,
-        kind: true,
-        unit: {
-          select: {
-            targetUnitId: true,
-            defaultLanguage: true,
-            supportLanguages: {
-              select: { language: true, isPrimary: true, sortOrder: true },
-              orderBy: { sortOrder: "asc" },
-            },
-            translations: { select: { language: true, title: true } },
-            contentTranslations: { select: { language: true, content: true } },
-          },
-        },
-        updatedAt: true,
-      },
-      orderBy: { updatedAt: "desc" },
-      take,
-    });
+    const posts = await this.repository.listDraftPosts(userId, take);
 
     const drafts: DraftMetadata[] = [];
     for (const post of posts) {
@@ -109,8 +209,10 @@ export const draftService = {
       );
     }
     return drafts;
-  },
-};
+  }
+}
+
+export const draftService = new DraftService();
 
 function orderByPostLanguage<T extends { language: string }>(
   rows: T[],

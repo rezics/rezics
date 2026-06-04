@@ -7,6 +7,7 @@ import {
 } from "@rezics/contract";
 import { listEnabledSocialProviderIds } from "../auth/providers";
 import { handleAuthRequest } from "../auth/routes";
+import { listAuthAccountsForUser } from "../auth/storage";
 import { coreInstance } from "../core";
 import { env } from "../env";
 import { jsonRequestBody, jsonResponse } from "./docs";
@@ -76,16 +77,7 @@ async function getSessionStateResponse(request: Request): Promise<Response> {
     return Response.json(sessionData);
   }
 
-  const { prisma } = await import("../auth/prisma");
-  const accounts = await prisma.account.findMany({
-    where: {
-      userId: sessionData.user.id,
-    },
-    select: {
-      providerId: true,
-      password: true,
-    },
-  });
+  const accounts = await listAuthAccountsForUser(sessionData.user.id);
 
   const providerIds = Array.from(
     new Set(

@@ -4,6 +4,7 @@ import {
   SEARCH_COMMAND_KINDS,
   type SearchCommand,
 } from "@rezics/job";
+import type { SearchClient } from "@rezics/search/client";
 import {
   patchContentAliases,
   patchContentContainedUnitIds,
@@ -26,7 +27,6 @@ import {
   patchUserFields,
   removeProgress,
   removeUserUnitCollection,
-  type SearchClient,
   type SearchSegmentOptions,
   type SearchSegmentResult,
   syncAllPolls,
@@ -52,7 +52,7 @@ import {
   syncSingleUserUnitCollection,
   syncUserSegment,
   syncUserUnitCollectionSegment,
-} from "@rezics/search";
+} from "@rezics/search/sync";
 import {
   DEFAULT_FANOUT_SEGMENT_LIMIT,
   type FanoutPayload,

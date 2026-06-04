@@ -1,10 +1,8 @@
 import type { PublicUser } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
 
 /**
- * Prisma select that returns only PublicUser fields (excluding slug — slug
- * now lives on the USER Unit). Callers attach `slug` separately via a Unit
- * lookup.
+ * Select shape for PublicUser fields (excluding slug — slug now lives on the
+ * USER Unit). Callers attach `slug` separately via a Unit lookup.
  */
 export const publicUserSelect = {
   unitId: true,
@@ -14,7 +12,7 @@ export const publicUserSelect = {
   description: true,
   followersCount: true,
   followingsCount: true,
-} satisfies Prisma.UserSelect;
+} as const;
 
 export type PublicUserSelected = {
   unitId: string;

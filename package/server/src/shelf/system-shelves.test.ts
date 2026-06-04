@@ -1,8 +1,4 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-
-installPrismaClientMock();
-Object.assign(prismaMock, {});
 
 function makeClient() {
   const unitFindFirst = mock(async () => null as { id: string } | null);

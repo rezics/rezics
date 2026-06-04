@@ -7,7 +7,6 @@ import {
   internalRemoveResponseSchema,
 } from "@rezics/contract/reaction";
 import { Elysia, t } from "elysia";
-import { prisma } from "#/prisma/client";
 import { internalGuard } from "../macro/internal";
 import {
   MalformedCursorError,
@@ -21,18 +20,7 @@ export const internalApi = new Elysia({ prefix: "/internal" })
     "/cleanup",
     async ({ body }) => {
       const { targetId } = body;
-
-      const { count } = await prisma.reaction.deleteMany({
-        where: { targetId },
-      });
-
-      await prisma.reactionSummary.deleteMany({
-        where: { targetId },
-      });
-
-      await prisma.reactionTargetUsage.deleteMany({
-        where: { targetId },
-      });
+      const { count } = await reactionService.cleanupTarget(targetId);
 
       return { deleted: true, count };
     },

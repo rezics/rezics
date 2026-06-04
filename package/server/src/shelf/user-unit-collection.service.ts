@@ -1,6 +1,5 @@
 import type { PatchUserUnitCollectionInput } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import type { Prisma } from "#/prisma/client";
 import { serverJobProducer } from "@/job/job-boundary";
 
 type CollectionMetadataPatch = Pick<
@@ -8,13 +7,37 @@ type CollectionMetadataPatch = Pick<
   "tagUnitIds" | "searchText"
 >;
 
+type CollectionMetadataTx = {
+  userUnitCollection: {
+    upsert(input: {
+      where: { userId_unitId: { userId: string; unitId: string } };
+      create: { userId: string; unitId: string; searchText: string | null };
+      update: { searchText: string | null };
+    }): Promise<unknown>;
+  };
+  userTagApplication: {
+    deleteMany(input: {
+      where: { userId: string; unitId: string };
+    }): Promise<unknown>;
+    createMany(input: {
+      data: Array<{
+        userId: string;
+        unitId: string;
+        tagUnitId: string;
+        position: string;
+      }>;
+      skipDuplicates: true;
+    }): Promise<unknown>;
+  };
+};
+
 /**
  * Applies shared per-user/per-unit collection metadata. ShelfUnit remains the
  * only containment source; these rows only enrich Units already selected by a
  * shelf/collection read path.
  */
 export async function applyUserUnitCollectionMetadata(
-  tx: Prisma.TransactionClient,
+  tx: CollectionMetadataTx,
   userId: string,
   unitId: string,
   patch: CollectionMetadataPatch,

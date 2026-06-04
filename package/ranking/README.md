@@ -22,7 +22,7 @@ Required runtime env:
 Run migrations:
 
 ```bash
-bun --filter=@rezics/ranking run prisma:migrate
+bun --filter=@rezics/ranking run db:migrate
 ```
 
 ## Meili Rollout

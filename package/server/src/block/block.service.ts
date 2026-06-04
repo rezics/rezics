@@ -1,7 +1,133 @@
 import type { BlockedUser } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { requireSlugScopeId } from "@/infra/slug-scopes";
+import { and, desc, eq, inArray, or } from "drizzle-orm";
+import { Unit, User, UserBlock } from "../db/schema";
 import { mapBlockedUser } from "./mapper";
+
+type BlockRow = typeof UserBlock.$inferSelect;
+type UserBriefRow = Pick<
+  typeof User.$inferSelect,
+  "unitId" | "name" | "bio" | "avatar"
+>;
+type UnitSlugRow = Pick<typeof Unit.$inferSelect, "id" | "slug">;
+
+type BlockRepository = {
+  listBlocks(blockerId: string): Promise<BlockRow[]>;
+  listUsers(ids: readonly string[]): Promise<UserBriefRow[]>;
+  listUserSlugs(input: {
+    ids: readonly string[];
+    userScope: string;
+  }): Promise<UnitSlugRow[]>;
+  add(blockerId: string, blockedId: string): Promise<void>;
+  remove(blockerId: string, blockedId: string): Promise<void>;
+  blockedUserIds(blockerId: string): Promise<string[]>;
+  isBlockedEitherWay(a: string, b: string): Promise<boolean>;
+  removeAllForUser(userId: string): Promise<void>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleBlockRepository(): BlockRepository {
+  return {
+    async listBlocks(blockerId) {
+      const db = await getServerDb();
+      return db
+        .select()
+        .from(UserBlock)
+        .where(eq(UserBlock.blockerId, blockerId))
+        .orderBy(desc(UserBlock.createdAt));
+    },
+
+    async listUsers(ids) {
+      if (ids.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          unitId: User.unitId,
+          name: User.name,
+          bio: User.bio,
+          avatar: User.avatar,
+        })
+        .from(User)
+        .where(inArray(User.unitId, [...ids]));
+    },
+
+    async listUserSlugs(input) {
+      if (input.ids.length === 0) return [];
+      const db = await getServerDb();
+      return db
+        .select({
+          id: Unit.id,
+          slug: Unit.slug,
+        })
+        .from(Unit)
+        .where(
+          and(
+            inArray(Unit.id, [...input.ids]),
+            eq(Unit.slugScope, input.userScope),
+            eq(Unit.type, "USER"),
+          ),
+        );
+    },
+
+    async add(blockerId, blockedId) {
+      const db = await getServerDb();
+      await db
+        .insert(UserBlock)
+        .values({ blockerId, blockedId })
+        .onConflictDoNothing({
+          target: [UserBlock.blockerId, UserBlock.blockedId],
+        });
+    },
+
+    async remove(blockerId, blockedId) {
+      const db = await getServerDb();
+      await db
+        .delete(UserBlock)
+        .where(
+          and(
+            eq(UserBlock.blockerId, blockerId),
+            eq(UserBlock.blockedId, blockedId),
+          ),
+        );
+    },
+
+    async blockedUserIds(blockerId) {
+      const db = await getServerDb();
+      const rows = await db
+        .select({ blockedId: UserBlock.blockedId })
+        .from(UserBlock)
+        .where(eq(UserBlock.blockerId, blockerId));
+      return rows.map((row) => row.blockedId);
+    },
+
+    async isBlockedEitherWay(a, b) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ id: UserBlock.id })
+        .from(UserBlock)
+        .where(
+          or(
+            and(eq(UserBlock.blockerId, a), eq(UserBlock.blockedId, b)),
+            and(eq(UserBlock.blockerId, b), eq(UserBlock.blockedId, a)),
+          ),
+        )
+        .limit(1);
+      return Boolean(row);
+    },
+
+    async removeAllForUser(userId) {
+      const db = await getServerDb();
+      await db
+        .delete(UserBlock)
+        .where(
+          or(eq(UserBlock.blockerId, userId), eq(UserBlock.blockedId, userId)),
+        );
+    },
+  };
+}
 
 /**
  * User-to-user blocking. A block is directional (`blockerId` blocked
@@ -10,25 +136,19 @@ import { mapBlockedUser } from "./mapper";
  * viewer has blocked).
  */
 export class BlockService {
+  constructor(private readonly repository = createDrizzleBlockRepository()) {}
+
   /** The blocker's blocked users, enriched with public brief + block time. */
   async listBlocked(blockerId: string): Promise<BlockedUser[]> {
-    const blocks = await prisma.userBlock.findMany({
-      where: { blockerId },
-      orderBy: { createdAt: "desc" },
-    });
+    const blocks = await this.repository.listBlocks(blockerId);
     if (blocks.length === 0) return [];
 
     const ids = blocks.map((b) => b.blockedId);
+    const { requireSlugScopeId } = await import("../infra/slug-scopes");
     const userScope = requireSlugScopeId("user");
     const [users, units] = await Promise.all([
-      prisma.user.findMany({
-        where: { unitId: { in: ids } },
-        select: { unitId: true, name: true, bio: true, avatar: true },
-      }),
-      prisma.unit.findMany({
-        where: { id: { in: ids }, slugScope: userScope, type: "USER" },
-        select: { id: true, slug: true },
-      }),
+      this.repository.listUsers(ids),
+      this.repository.listUserSlugs({ ids, userScope }),
     ]);
     const userMap = new Map(users.map((u) => [u.unitId, u] as const));
     const slugMap = new Map(units.map((u) => [u.id, u.slug ?? null] as const));
@@ -44,46 +164,27 @@ export class BlockService {
 
   /** Idempotently record that `blockerId` blocks `blockedId`. */
   async add(blockerId: string, blockedId: string): Promise<void> {
-    await prisma.userBlock.upsert({
-      where: { blockerId_blockedId: { blockerId, blockedId } },
-      update: {},
-      create: { blockerId, blockedId },
-    });
+    await this.repository.add(blockerId, blockedId);
   }
 
   /** Remove the block from `blockerId` to `blockedId` (no-op if absent). */
   async remove(blockerId: string, blockedId: string): Promise<void> {
-    await prisma.userBlock.deleteMany({ where: { blockerId, blockedId } });
+    await this.repository.remove(blockerId, blockedId);
   }
 
   /** unitIds the blocker has blocked — used to hide content in feeds. */
   async blockedUserIds(blockerId: string): Promise<string[]> {
-    const rows = await prisma.userBlock.findMany({
-      where: { blockerId },
-      select: { blockedId: true },
-    });
-    return rows.map((r) => r.blockedId);
+    return this.repository.blockedUserIds(blockerId);
   }
 
   /** True if either user has blocked the other — used to gate DM. */
   async isBlockedEitherWay(a: string, b: string): Promise<boolean> {
-    const row = await prisma.userBlock.findFirst({
-      where: {
-        OR: [
-          { blockerId: a, blockedId: b },
-          { blockerId: b, blockedId: a },
-        ],
-      },
-      select: { id: true },
-    });
-    return row !== null;
+    return this.repository.isBlockedEitherWay(a, b);
   }
 
   /** Remove every block row referencing the user (either side). */
   async removeAllForUser(userId: string): Promise<void> {
-    await prisma.userBlock.deleteMany({
-      where: { OR: [{ blockerId: userId }, { blockedId: userId }] },
-    });
+    await this.repository.removeAllForUser(userId);
   }
 }
 

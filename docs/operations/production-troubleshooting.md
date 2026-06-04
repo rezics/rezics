@@ -22,9 +22,9 @@
 
 - The release aborts before service rollout (see
   [release runbook](./production-release.md)). The migrate image of the same
-  `<sha>` ran `prisma migrate deploy`; read its job output for the failing
-  migration. Fix forward (migrations are forward-only); never hand-edit
-  `_prisma_migrations`.
+  `<sha>` ran the package `db:deploy` command; read its job output for the
+  failing migration. Fix forward (migrations are forward-only); never hand-edit
+  Drizzle migration journal tables.
 
 ## Proxy routing
 

@@ -1,4 +1,12 @@
-import { prisma } from "#/prisma/client";
+import { and, desc, eq, isNotNull, isNull, lte, ne, or } from "drizzle-orm";
+import { db } from "../db";
+import {
+  conversationBlocks,
+  conversations,
+  messages,
+  type ConversationRow,
+  type MessageRow,
+} from "../db/schema";
 
 function orderedParticipants(a: string, b: string): [string, string] {
   return a < b ? [a, b] : [b, a];
@@ -9,14 +17,17 @@ export async function upsertConversation(
   userB: string,
 ): Promise<string> {
   const [participantA, participantB] = orderedParticipants(userA, userB);
+  const now = new Date();
 
-  const conversation = await prisma.conversation.upsert({
-    where: {
-      participantA_participantB: { participantA, participantB },
-    },
-    update: { updatedAt: new Date() },
-    create: { participantA, participantB },
-  });
+  const [conversation] = await db
+    .insert(conversations)
+    .values({ participantA, participantB, updatedAt: now })
+    .onConflictDoUpdate({
+      target: [conversations.participantA, conversations.participantB],
+      set: { updatedAt: now },
+    })
+    .returning({ id: conversations.id });
+  if (!conversation) throw new Error("Conversation upsert returned no row");
 
   return conversation.id;
 }
@@ -25,27 +36,47 @@ export async function insertMessage(
   conversationId: string,
   senderId: string,
   content: string,
-) {
-  const message = await prisma.message.create({
-    data: { conversationId, senderId, content },
-  });
+): Promise<MessageRow> {
+  return await db.transaction(async (tx) => {
+    const [message] = await tx
+      .insert(messages)
+      .values({ conversationId, senderId, content })
+      .returning();
+    if (!message) throw new Error("Message insert returned no row");
 
-  // Touch conversation updatedAt
-  await prisma.conversation.update({
-    where: { id: conversationId },
-    data: { updatedAt: new Date() },
-  });
+    await tx
+      .update(conversations)
+      .set({ updatedAt: new Date() })
+      .where(eq(conversations.id, conversationId));
 
-  return message;
+    return message;
+  });
 }
 
-export async function getConversations(userId: string) {
-  return prisma.conversation.findMany({
-    where: {
-      OR: [{ participantA: userId }, { participantB: userId }],
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+export async function getConversations(
+  userId: string,
+): Promise<ConversationRow[]> {
+  return await db
+    .select()
+    .from(conversations)
+    .where(
+      or(
+        eq(conversations.participantA, userId),
+        eq(conversations.participantB, userId),
+      ),
+    )
+    .orderBy(desc(conversations.updatedAt));
+}
+
+async function getConversation(
+  conversationId: string,
+): Promise<ConversationRow | null> {
+  const [conversation] = await db
+    .select()
+    .from(conversations)
+    .where(eq(conversations.id, conversationId))
+    .limit(1);
+  return conversation ?? null;
 }
 
 export async function getMessages(
@@ -54,10 +85,7 @@ export async function getMessages(
   page: number,
   limit: number,
 ) {
-  // Verify participant
-  const conversation = await prisma.conversation.findUnique({
-    where: { id: conversationId },
-  });
+  const conversation = await getConversation(conversationId);
   if (
     !conversation ||
     (conversation.participantA !== userId &&
@@ -67,31 +95,42 @@ export async function getMessages(
   }
 
   const offset = (page - 1) * limit;
-  const [messages, total] = await Promise.all([
-    prisma.message.findMany({
-      where: { conversationId },
-      orderBy: { createdAt: "desc" },
-      skip: offset,
-      take: limit,
-    }),
-    prisma.message.count({ where: { conversationId } }),
+  const [messageRows, countRows] = await Promise.all([
+    db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(desc(messages.createdAt))
+      .offset(offset)
+      .limit(limit),
+    db
+      .select({ count: db.$count(messages) })
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId)),
   ]);
 
-  return { messages, total, page, limit };
+  return {
+    messages: messageRows,
+    total: countRows[0]?.count ?? 0,
+    page,
+    limit,
+  };
 }
 
 export async function markMessagesAsRead(
   conversationId: string,
   userId: string,
 ) {
-  await prisma.message.updateMany({
-    where: {
-      conversationId,
-      senderId: { not: userId },
-      readAt: null,
-    },
-    data: { readAt: new Date() },
-  });
+  await db
+    .update(messages)
+    .set({ readAt: new Date() })
+    .where(
+      and(
+        eq(messages.conversationId, conversationId),
+        ne(messages.senderId, userId),
+        isNull(messages.readAt),
+      ),
+    );
 }
 
 async function isParticipant(
@@ -106,9 +145,7 @@ export async function getPeerId(
   conversationId: string,
   userId: string,
 ): Promise<string | null> {
-  const conversation = await prisma.conversation.findUnique({
-    where: { id: conversationId },
-  });
+  const conversation = await getConversation(conversationId);
   if (!conversation) return null;
   if (conversation.participantA === userId) return conversation.participantB;
   if (conversation.participantB === userId) return conversation.participantA;
@@ -127,21 +164,30 @@ export async function markReadUpTo(
 ) {
   if (!(await isParticipant(conversationId, userId))) return null;
 
-  const target = await prisma.message.findFirst({
-    where: { id: upToMessageId, conversationId },
-  });
+  const [target] = await db
+    .select()
+    .from(messages)
+    .where(
+      and(
+        eq(messages.id, upToMessageId),
+        eq(messages.conversationId, conversationId),
+      ),
+    )
+    .limit(1);
   if (!target) return null;
 
   const readAt = new Date();
-  await prisma.message.updateMany({
-    where: {
-      conversationId,
-      senderId: { not: userId },
-      readAt: null,
-      createdAt: { lte: target.createdAt },
-    },
-    data: { readAt },
-  });
+  await db
+    .update(messages)
+    .set({ readAt })
+    .where(
+      and(
+        eq(messages.conversationId, conversationId),
+        ne(messages.senderId, userId),
+        isNull(messages.readAt),
+        lte(messages.createdAt, target.createdAt),
+      ),
+    );
 
   return {
     conversationId,
@@ -161,10 +207,19 @@ export async function getReadReceipt(
   userId: string,
   peerId: string,
 ) {
-  const lastRead = await prisma.message.findFirst({
-    where: { conversationId, senderId: userId, readAt: { not: null } },
-    orderBy: { createdAt: "desc" },
-  });
+  const [lastRead] = await db
+    .select()
+    .from(messages)
+    .where(
+      and(
+        eq(messages.conversationId, conversationId),
+        eq(messages.senderId, userId),
+        isNotNull(messages.readAt),
+      ),
+    )
+    .orderBy(desc(messages.createdAt))
+    .limit(1);
+
   return {
     conversationId,
     userId: peerId,
@@ -180,33 +235,52 @@ export async function setBlock(
   blocked: boolean,
 ) {
   if (blocked) {
-    await prisma.conversationBlock.upsert({
-      where: { blockerId_blockedId: { blockerId, blockedId } },
-      update: {},
-      create: { blockerId, blockedId },
-    });
+    await db
+      .insert(conversationBlocks)
+      .values({ blockerId, blockedId })
+      .onConflictDoNothing({
+        target: [conversationBlocks.blockerId, conversationBlocks.blockedId],
+      });
   } else {
-    await prisma.conversationBlock.deleteMany({
-      where: { blockerId, blockedId },
-    });
+    await db
+      .delete(conversationBlocks)
+      .where(
+        and(
+          eq(conversationBlocks.blockerId, blockerId),
+          eq(conversationBlocks.blockedId, blockedId),
+        ),
+      );
   }
   return getBlockState(blockerId, blockedId);
+}
+
+async function findBlock(
+  blockerId: string,
+  blockedId: string,
+): Promise<boolean> {
+  const [row] = await db
+    .select({ id: conversationBlocks.id })
+    .from(conversationBlocks)
+    .where(
+      and(
+        eq(conversationBlocks.blockerId, blockerId),
+        eq(conversationBlocks.blockedId, blockedId),
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
 }
 
 /** Resolve the mutual block state between `userId` and `peerId`. */
 export async function getBlockState(userId: string, peerId: string) {
   const [peerBlocked, blockedByPeer] = await Promise.all([
-    prisma.conversationBlock.findUnique({
-      where: { blockerId_blockedId: { blockerId: userId, blockedId: peerId } },
-    }),
-    prisma.conversationBlock.findUnique({
-      where: { blockerId_blockedId: { blockerId: peerId, blockedId: userId } },
-    }),
+    findBlock(userId, peerId),
+    findBlock(peerId, userId),
   ]);
   return {
     peerId,
-    peerBlocked: !!peerBlocked,
-    blockedByPeer: !!blockedByPeer,
+    peerBlocked,
+    blockedByPeer,
   };
 }
 
@@ -228,14 +302,21 @@ export async function getConversationViewerState(
   userId: string,
   peerId: string,
 ) {
-  const [unreadCount, blockState] = await Promise.all([
-    prisma.message.count({
-      where: { conversationId, senderId: { not: userId }, readAt: null },
-    }),
+  const [unreadRows, blockState] = await Promise.all([
+    db
+      .select({ count: db.$count(messages) })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.conversationId, conversationId),
+          ne(messages.senderId, userId),
+          isNull(messages.readAt),
+        ),
+      ),
     getBlockState(userId, peerId),
   ]);
   return {
-    unreadCount,
+    unreadCount: unreadRows[0]?.count ?? 0,
     peerBlocked: blockState.peerBlocked,
     blockedByPeer: blockState.blockedByPeer,
   };

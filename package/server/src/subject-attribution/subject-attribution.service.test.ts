@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-
-installPrismaClientMock();
+import type {
+  SubjectAttributionRepository,
+  SubjectAttributionService,
+} from "./subject-attribution.service";
 
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
-mock.module("@/job/job-boundary", () => ({
+mock.module("../job/job-boundary", () => ({
   serverJobProducer: {
     enqueue: enqueueMock,
   },
@@ -23,9 +24,24 @@ function makeSubjectRow(overrides: Record<string, any> = {}) {
       id: overrides.entityId ?? "character-1",
       type: "ENTITY",
       slug: "aster",
+      slugScope: "scope-1",
       userId: "user-1",
+      defaultLanguage: "en",
+      isLanguageNeutral: false,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      rating: "GENERAL",
+      extra: null,
       createdAt: now,
       updatedAt: now,
+      publishedAt: now,
+      subscriberCount: 0,
+      licenseSlug: null,
+      aiDisclosureMode: "UNKNOWN",
+      aiDisclosureDetails: null,
+      catalogEntryKind: null,
+      targetUnitId: null,
+      moderationStatus: "APPROVED",
       entity: { kind: "character", verified: false },
       translations: [
         {
@@ -46,6 +62,7 @@ function makeSubjectRow(overrides: Record<string, any> = {}) {
       id: overrides.unitId ?? "work-1",
       type: "BOOK",
       slug: null,
+      slugScope: "scope-1",
       userId: "user-1",
       defaultLanguage: "en",
       isLanguageNeutral: false,
@@ -56,30 +73,46 @@ function makeSubjectRow(overrides: Record<string, any> = {}) {
       createdAt: now,
       updatedAt: now,
       publishedAt: now,
+      subscriberCount: 0,
+      licenseSlug: null,
+      aiDisclosureMode: "UNKNOWN",
+      aiDisclosureDetails: null,
+      catalogEntryKind: null,
+      targetUnitId: null,
+      moderationStatus: "APPROVED",
       translations: [],
       supportLanguages: [],
     },
-  };
+  } as any;
 }
 
-function freshMocks() {
-  const subjectRow = makeSubjectRow();
-  Object.assign(prismaMock, {
-    unit: {
-      findUnique: mock(async () => ({ id: "character-1", type: "ENTITY" })),
-    },
-    entity: {
-      findUnique: mock(async () => ({
-        eligibleSubjectRoles: ["primary_character"],
-      })),
-    },
-    subjectAttribution: {
-      create: mock(async () => subjectRow),
-      delete: mock(async () => subjectRow),
-      findMany: mock(async () => [subjectRow]),
-    },
-  });
-  return { subjectRow };
+function createRepository() {
+  const repository: SubjectAttributionRepository = {
+    getEntityUnit: mock(async () => ({ id: "character-1", type: "ENTITY" })),
+    getSubjectEntity: mock(async () => ({
+      eligibleSubjectRoles: ["primary_character"],
+    })),
+    create: mock(async (input) =>
+      makeSubjectRow({
+        unitId: input.unitId,
+        entityId: input.entityId,
+        role: input.role,
+        sortOrder: input.sortOrder,
+        weight: input.weight,
+      }),
+    ),
+    delete: mock(async () => {}),
+    listByUnit: mock(async () => [makeSubjectRow()]),
+    listBySubject: mock(async () => [makeSubjectRow()]),
+  };
+  return repository;
+}
+
+async function createService(repository: SubjectAttributionRepository) {
+  const { SubjectAttributionService } = await import(
+    "./subject-attribution.service"
+  );
+  return new SubjectAttributionService(repository);
 }
 
 beforeEach(() => {
@@ -88,34 +121,28 @@ beforeEach(() => {
 
 describe("SubjectAttributionService.link", () => {
   test("rejects a subject entityId that does not point at an ENTITY Unit", async () => {
-    freshMocks();
-    (prismaMock.unit.findUnique as any).mockImplementation(async () => ({
+    const repository = createRepository();
+    (repository.getEntityUnit as any).mockResolvedValueOnce({
       id: "book-1",
       type: "BOOK",
-    }));
-    const { subjectAttributionService } = await import(
-      "./subject-attribution.service"
-    );
+    });
+    const service = await createService(repository);
 
     await expect(
-      subjectAttributionService.link({
+      service.link({
         unitId: "work-1",
         entityId: "book-1",
         role: "primary_character",
       }),
     ).rejects.toThrow(/must reference an ENTITY Unit/);
-    expect(
-      (prismaMock.subjectAttribution.create as any).mock.calls.length,
-    ).toBe(0);
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
   test("creates the subject row and patches subject search fields", async () => {
-    freshMocks();
-    const { subjectAttributionService } = await import(
-      "./subject-attribution.service"
-    );
+    const repository = createRepository();
+    const service = await createService(repository);
 
-    const row = await subjectAttributionService.link({
+    const row = await service.link({
       unitId: "work-1",
       entityId: "character-1",
       role: "primary_character",
@@ -124,6 +151,14 @@ describe("SubjectAttributionService.link", () => {
     });
 
     expect(row.entity?.kind).toBe("character");
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        unitId: "work-1",
+        entityId: "character-1",
+        role: "primary_character",
+      }),
+      undefined,
+    );
     expect(enqueueMock.mock.calls[0]?.[0]).toMatchObject({
       kind: "search.content.patchSubjects",
       payload: { unitId: "work-1" },
@@ -132,51 +167,40 @@ describe("SubjectAttributionService.link", () => {
   });
 
   test("rejects an ineligible subject role before creating a row", async () => {
-    freshMocks();
-    (prismaMock.entity.findUnique as any).mockImplementation(async () => ({
+    const repository = createRepository();
+    (repository.getSubjectEntity as any).mockResolvedValueOnce({
       eligibleSubjectRoles: ["about"],
-    }));
-    const { subjectAttributionService } = await import(
-      "./subject-attribution.service"
-    );
+    });
+    const service = await createService(repository);
 
     await expect(
-      subjectAttributionService.link({
+      service.link({
         unitId: "work-1",
         entityId: "character-1",
         role: "primary_character",
       }),
     ).rejects.toThrow(/not eligible for subject role/);
-    expect(
-      (prismaMock.subjectAttribution.create as any).mock.calls.length,
-    ).toBe(0);
+    expect(repository.create).not.toHaveBeenCalled();
   });
 });
 
 describe("SubjectAttributionService.listBySubject", () => {
-  test("passes role and target Unit filters into Prisma", async () => {
-    freshMocks();
-    const { subjectAttributionService } = await import(
-      "./subject-attribution.service"
-    );
+  test("passes role and target Unit filters into repository", async () => {
+    const repository = createRepository();
+    const service = await createService(repository);
 
-    await subjectAttributionService.listBySubject("character-1", {
+    await service.listBySubject("character-1", {
       role: "primary_character",
       unitType: "BOOK",
       status: "PUBLISHED",
       visibility: "PUBLIC",
     });
 
-    const findCall = (prismaMock.subjectAttribution.findMany as any).mock
-      .calls[0]?.[0];
-    expect(findCall.where).toMatchObject({
-      entityId: "character-1",
+    expect(repository.listBySubject).toHaveBeenCalledWith("character-1", {
       role: "primary_character",
-      unit: {
-        type: "BOOK",
-        status: "PUBLISHED",
-        visibility: "PUBLIC",
-      },
+      unitType: "BOOK",
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
     });
   });
 });

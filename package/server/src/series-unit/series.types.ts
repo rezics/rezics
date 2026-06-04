@@ -1,5 +1,11 @@
-import type { Prisma } from "#/prisma/client";
+import type {
+  Series,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
 import { publicUserSelect } from "@/utils/sanitizeUser";
+import type { PublicUserSelected } from "@/utils/sanitizeUser";
 
 export const seriesInclude = {
   unit: {
@@ -12,13 +18,18 @@ export const seriesInclude = {
   _count: {
     select: { directReleaseIndexRows: true },
   },
-} satisfies Prisma.SeriesInclude;
+} as const;
 
-export type SeriesWithRelations = Prisma.SeriesGetPayload<{
-  include: typeof seriesInclude;
-}>;
+export type SeriesWithRelations = typeof Series.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    user?: PublicUserSelected | null;
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+  };
+  _count?: { directReleaseIndexRows: number };
+};
 
 export const seriesOrderBy = [
   { updatedAt: "desc" as const },
   { unitId: "asc" as const },
-] satisfies Prisma.SeriesOrderByWithRelationInput[];
+] as const;

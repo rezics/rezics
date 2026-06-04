@@ -1,4 +1,3 @@
-import { PrismaPg } from "@prisma/adapter-pg";
 import {
   type EditorialRevisionPayload,
   type HistoryOutboxPayload,
@@ -276,29 +275,24 @@ export class HistoryOutboxConsumer {
 }
 
 export async function createDefaultHistoryOutboxConsumer() {
-  const { env } = await import("../env");
-
   const [
-    { PrismaClient: MainPrismaClient },
-    { prisma: historyPrisma },
+    { createServerDb },
+    { createServerHistoryOutboxRepository },
+    { historyRepository },
     { revisionService: defaultRevisionService },
+    { env },
   ] = await Promise.all([
-    import("@rezics/server/prisma/generated/client"),
-    import("../../prisma/client"),
+    import("@rezics/server/db/factory"),
+    import("@rezics/server/db/history-outbox.repository"),
+    import("../db/history.repository"),
     import("../revision/revision.service"),
+    import("../env"),
   ]);
-  const mainPrisma = new MainPrismaClient({
-    adapter: new PrismaPg({
-      connectionString: env.SERVER_DATABASE_URL,
-      max: 20,
-      idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 2_000,
-    }),
-  });
+  const mainDb = createServerDb(env.SERVER_DATABASE_URL);
 
   return new HistoryOutboxConsumer(
-    mainPrisma as unknown as MainOutboxDb,
-    historyPrisma as unknown as HistoryFailureDb,
+    createServerHistoryOutboxRepository(mainDb.db) as unknown as MainOutboxDb,
+    historyRepository as unknown as HistoryFailureDb,
     defaultRevisionService,
   );
 }

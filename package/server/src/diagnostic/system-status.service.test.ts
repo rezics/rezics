@@ -1,6 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
 import { EXPECTED_MEILI_INDEX_SCHEMAS } from "@rezics/search";
-import { installPrismaClientMock } from "../test/prisma-client-mock";
 import type { MeiliStatusSummary } from "./status.types";
 
 process.env.NODE_ENV = "test";
@@ -20,8 +19,6 @@ process.env.NOTIFY_BASE_URL ??= "http://localhost:3010";
 process.env.NOTIFY_INTERNAL_SECRET ??= "notify";
 process.env.REACTION_BASE_URL ??= "http://localhost:3011";
 process.env.REACTION_INTERNAL_SECRET ??= "reaction";
-
-installPrismaClientMock();
 
 const meiliSummary: MeiliStatusSummary = {
   status: "available",
@@ -45,24 +42,35 @@ function queryClient(options?: {
   lagBytes?: number;
 }) {
   return {
-    $queryRawUnsafe: mock(async (query: string) => {
-      if (query === "SHOW wal_level") return [{ wal_level: "logical" }];
-      if (query.includes("pg_publication")) {
-        return (options?.publicationTables ?? ["Unit", "User", "Post"]).map(
-          (tablename) => ({ tablename }),
-        );
+    execute: mock(async (query: { queryChunks?: unknown[] }) => {
+      const queryText = (query.queryChunks ?? [])
+        .map((chunk: any) =>
+          Array.isArray(chunk?.value) ? chunk.value.join("") : String(chunk),
+        )
+        .join("");
+      if (queryText.includes("SHOW wal_level")) {
+        return { rows: [{ wal_level: "logical" }] };
       }
-      if (query.includes("pg_replication_slots")) {
-        return [
-          {
-            slot_name: "rezics_sequin_slot_test",
-            active: options?.slotActive ?? true,
-            confirmed_flush_lsn: "0/16B6C50",
-            lag_bytes: options?.lagBytes ?? 0,
-          },
-        ];
+      if (queryText.includes("pg_publication")) {
+        return {
+          rows: (options?.publicationTables ?? ["Unit", "User", "Post"]).map(
+            (tablename) => ({ tablename }),
+          ),
+        };
       }
-      return [];
+      if (queryText.includes("pg_replication_slots")) {
+        return {
+          rows: [
+            {
+              slot_name: "rezics_sequin_slot_test",
+              active: options?.slotActive ?? true,
+              confirmed_flush_lsn: "0/16B6C50",
+              lag_bytes: options?.lagBytes ?? 0,
+            },
+          ],
+        };
+      }
+      return { rows: [] };
     }),
   } as any;
 }

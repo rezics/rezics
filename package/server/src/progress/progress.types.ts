@@ -3,15 +3,14 @@ import type {
   UnitProgressListQuery,
   UnitProgressUpsertBody,
 } from "@rezics/contract";
-import { UserUnitProgressStatus } from "#/prisma/client";
 
 export const progressStatusMap = {
-  BACKLOG: UserUnitProgressStatus.BACKLOG,
-  ACTIVE: UserUnitProgressStatus.ACTIVE,
-  PAUSED: UserUnitProgressStatus.PAUSED,
-  COMPLETED: UserUnitProgressStatus.COMPLETED,
-  DROPPED: UserUnitProgressStatus.DROPPED,
-} satisfies Record<ContractProgressStatus, UserUnitProgressStatus>;
+  BACKLOG: "BACKLOG",
+  ACTIVE: "ACTIVE",
+  PAUSED: "PAUSED",
+  COMPLETED: "COMPLETED",
+  DROPPED: "DROPPED",
+} as const satisfies Record<ContractProgressStatus, string>;
 
 export type ProgressUpsertInput = UnitProgressUpsertBody;
 export type ProgressListInput = UnitProgressListQuery;

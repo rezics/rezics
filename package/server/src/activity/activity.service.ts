@@ -1,7 +1,14 @@
 import type { ActivityItem } from "@rezics/contract";
-import { PostKind, prisma } from "#/prisma/client";
+import { and, desc, eq, inArray, lt } from "drizzle-orm";
+import { db } from "../db/client";
+import {
+  Post,
+  Shelf,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
 import { profileReactionHistoryService } from "@/profile-reaction-history/profile-reaction-history.service";
-import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import {
   mergeActivity,
   postActivityHref,
@@ -10,7 +17,170 @@ import {
   shelfActivityHref,
 } from "./activity.mapper";
 
-const ACTIVITY_POST_KINDS = [PostKind.POST, PostKind.REVIEW, PostKind.REMARK];
+const ACTIVITY_POST_KINDS = ["POST", "REVIEW", "REMARK"] as const;
+const PUBLIC_UNIT_STATUS = "PUBLISHED";
+const PUBLIC_UNIT_VISIBILITY = "PUBLIC";
+const PUBLIC_UNIT_MODERATION_STATUS = "APPROVED";
+
+type PostActivityRow = {
+  unitId: string;
+  kind: string | null;
+  createdAt: Date;
+  extra: unknown;
+  defaultLanguage: string | null;
+};
+
+type ShelfActivityRow = {
+  unitId: string;
+  updatedAt: Date;
+};
+
+type TranslationRow = {
+  unitId: string;
+  language: string;
+  title: string | null;
+};
+
+type SupportLanguageRow = {
+  unitId: string;
+  language: string;
+  isPrimary: boolean;
+  sortOrder: number;
+};
+
+function publicUnitPredicate() {
+  return and(
+    eq(Unit.status, PUBLIC_UNIT_STATUS),
+    eq(Unit.visibility, PUBLIC_UNIT_VISIBILITY),
+    eq(Unit.moderationStatus, PUBLIC_UNIT_MODERATION_STATUS),
+  );
+}
+
+function groupRowsByUnitId<T extends { unitId: string }>(
+  rows: readonly T[],
+): Map<string, T[]> {
+  const grouped = new Map<string, T[]>();
+  for (const row of rows) {
+    const list = grouped.get(row.unitId);
+    if (list) {
+      list.push(row);
+    } else {
+      grouped.set(row.unitId, [row]);
+    }
+  }
+  return grouped;
+}
+
+async function loadPostActivityRows(options: {
+  profileUserId: string;
+  before: Date | null;
+  take: number;
+}): Promise<{
+  posts: PostActivityRow[];
+  translations: Map<string, TranslationRow[]>;
+  supportLanguages: Map<string, SupportLanguageRow[]>;
+}> {
+  const posts = await db
+    .select({
+      unitId: Post.unitId,
+      kind: Post.kind,
+      createdAt: Post.createdAt,
+      extra: Post.extra,
+      defaultLanguage: Unit.defaultLanguage,
+    })
+    .from(Post)
+    .innerJoin(Unit, eq(Unit.id, Post.unitId))
+    .where(
+      and(
+        eq(Post.authorUserId, options.profileUserId),
+        inArray(Post.kind, [...ACTIVITY_POST_KINDS]),
+        publicUnitPredicate(),
+        options.before ? lt(Post.createdAt, options.before) : undefined,
+      ),
+    )
+    .orderBy(desc(Post.createdAt))
+    .limit(options.take);
+
+  const unitIds = posts.map((post) => post.unitId);
+  if (unitIds.length === 0) {
+    return {
+      posts,
+      translations: new Map(),
+      supportLanguages: new Map(),
+    };
+  }
+
+  const [translations, supportLanguages] = await Promise.all([
+    db
+      .select({
+        unitId: UnitTranslation.unitId,
+        language: UnitTranslation.language,
+        title: UnitTranslation.title,
+      })
+      .from(UnitTranslation)
+      .where(inArray(UnitTranslation.unitId, unitIds)),
+    db
+      .select({
+        unitId: UnitSupportLanguage.unitId,
+        language: UnitSupportLanguage.language,
+        isPrimary: UnitSupportLanguage.isPrimary,
+        sortOrder: UnitSupportLanguage.sortOrder,
+      })
+      .from(UnitSupportLanguage)
+      .where(inArray(UnitSupportLanguage.unitId, unitIds)),
+  ]);
+
+  return {
+    posts,
+    translations: groupRowsByUnitId(translations),
+    supportLanguages: groupRowsByUnitId(supportLanguages),
+  };
+}
+
+async function loadShelfActivityRows(options: {
+  profileUserId: string;
+  before: Date | null;
+  take: number;
+}): Promise<{
+  shelves: ShelfActivityRow[];
+  translations: Map<string, TranslationRow[]>;
+}> {
+  const shelves = await db
+    .select({
+      unitId: Shelf.unitId,
+      updatedAt: Shelf.updatedAt,
+    })
+    .from(Shelf)
+    .innerJoin(Unit, eq(Unit.id, Shelf.unitId))
+    .where(
+      and(
+        eq(Unit.userId, options.profileUserId),
+        publicUnitPredicate(),
+        options.before ? lt(Shelf.updatedAt, options.before) : undefined,
+      ),
+    )
+    .orderBy(desc(Shelf.updatedAt))
+    .limit(options.take);
+
+  const unitIds = shelves.map((shelf) => shelf.unitId);
+  if (unitIds.length === 0) {
+    return { shelves, translations: new Map() };
+  }
+
+  const translations = await db
+    .select({
+      unitId: UnitTranslation.unitId,
+      language: UnitTranslation.language,
+      title: UnitTranslation.title,
+    })
+    .from(UnitTranslation)
+    .where(inArray(UnitTranslation.unitId, unitIds));
+
+  return {
+    shelves,
+    translations: groupRowsByUnitId(translations),
+  };
+}
 
 export const activityService = {
   /**
@@ -35,44 +205,14 @@ export const activityService = {
       before && !Number.isNaN(before.getTime()) ? before : null;
 
     const [posts, shelves, reactionPage] = await Promise.all([
-      prisma.post.findMany({
-        where: {
-          authorUserId: opts.profileUserId,
-          kind: { in: ACTIVITY_POST_KINDS },
-          unit: { ...publicUnitEligibilityWhere },
-          ...(beforeValid ? { createdAt: { lt: beforeValid } } : {}),
-        },
-        select: {
-          unitId: true,
-          kind: true,
-          createdAt: true,
-          extra: true,
-          unit: {
-            select: {
-              defaultLanguage: true,
-              translations: { select: { language: true, title: true } },
-              supportLanguages: {
-                select: { language: true, isPrimary: true, sortOrder: true },
-              },
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
+      loadPostActivityRows({
+        profileUserId: opts.profileUserId,
+        before: beforeValid,
         take: limit + 1,
       }),
-      prisma.shelf.findMany({
-        where: {
-          unit: { userId: opts.profileUserId, ...publicUnitEligibilityWhere },
-          ...(beforeValid ? { updatedAt: { lt: beforeValid } } : {}),
-        },
-        select: {
-          unitId: true,
-          updatedAt: true,
-          unit: {
-            select: { translations: { select: { title: true }, take: 1 } },
-          },
-        },
-        orderBy: { updatedAt: "desc" },
+      loadShelfActivityRows({
+        profileUserId: opts.profileUserId,
+        before: beforeValid,
         take: limit + 1,
       }),
       // Asserts profile viewability and hydrates target title/href.
@@ -83,13 +223,13 @@ export const activityService = {
       }),
     ]);
 
-    const postItems: ActivityItem[] = posts.map((p) => {
+    const postItems: ActivityItem[] = posts.posts.map((p) => {
       const kind = postActivityKind(p.kind);
       const title =
         resolvePostActivityTitle({
-          translations: p.unit?.translations ?? [],
-          defaultLanguage: p.unit?.defaultLanguage,
-          supportLanguages: p.unit?.supportLanguages,
+          translations: posts.translations.get(p.unitId) ?? [],
+          defaultLanguage: p.defaultLanguage,
+          supportLanguages: posts.supportLanguages.get(p.unitId) ?? [],
           extra: p.extra,
         }) ?? "";
       return {
@@ -101,10 +241,10 @@ export const activityService = {
       };
     });
 
-    const shelfItems: ActivityItem[] = shelves.map((s) => ({
+    const shelfItems: ActivityItem[] = shelves.shelves.map((s) => ({
       id: s.unitId,
       kind: "shelf",
-      title: s.unit?.translations[0]?.title ?? "",
+      title: shelves.translations.get(s.unitId)?.[0]?.title ?? "",
       href: shelfActivityHref(s.unitId),
       at: s.updatedAt.toISOString(),
     }));

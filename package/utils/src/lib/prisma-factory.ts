@@ -1,12 +1,12 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient as AuthPrismaClient } from "@rezics/auth/prisma/generated/client";
+import { createAuthDb } from "@rezics/auth/db/factory";
 import { PrismaClient as ServerPrismaClient } from "@rezics/server/prisma/generated/client";
 
-export type { AuthPrismaClient, ServerPrismaClient };
+export type AuthPrismaClient = ReturnType<typeof createAuthDb>;
+export type { ServerPrismaClient };
 
 export function createAuthPrisma(connectionString: string): AuthPrismaClient {
-  const adapter = new PrismaPg({ connectionString });
-  return new AuthPrismaClient({ adapter });
+  return createAuthDb(connectionString);
 }
 
 export function createServerPrisma(

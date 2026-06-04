@@ -1,8 +1,8 @@
 import type { UserDTO } from "@rezics/contract";
-import type { User } from "#/prisma/client";
+import type { User } from "../../db/schema";
 import type { UserWithRelations } from "./types";
 
-type UserLike = (User | UserWithRelations) & {
+type UserLike = (typeof User.$inferSelect | UserWithRelations) & {
   slug?: string | null;
 };
 

@@ -1,86 +1,101 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import type { UserEmailVerificationRepository } from "./user-email-verification.service";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
   "postgresql://postgres:postgres@localhost:5432/rezics_book";
 
 const sendMainEmailVerificationContractEmail = mock(async () => ({ ok: true }));
-const userFindUniqueOrThrow = mock(async () => ({
-  email: "old@example.com",
-}));
-const userUpdate = mock(async () => undefined);
-const contractFindUnique = mock(async () => null);
-const contractFindFirst = mock(async () => null);
-const contractUpdate = mock(async () => ({
+const userEmail = mock(async () => "old@example.com");
+const findContract = mock(
+  async (): Promise<
+    UserEmailVerificationRepository["findContract"] extends (
+      ...args: any
+    ) => Promise<infer Result>
+      ? Result
+      : never
+  > => null,
+);
+const findLatestUserEmailContract = mock(async () => null);
+const updateContractStatus = mock(async () => ({
+  id: "contract-1",
   email: "new@example.com",
-  status: "VERIFIED",
+  status: "VERIFIED" as const,
   expiresAt: new Date(Date.now() + 60_000),
   lastSentAt: new Date(),
+  codeHash: null,
 }));
-const contractUpsert = mock(async (args: any) => ({
-  email: args.create.email,
-  status: "PENDING",
-  expiresAt: args.create.expiresAt,
-  lastSentAt: args.create.lastSentAt,
+const upsertPendingContract = mock(async (data: any) => ({
+  id: "contract-1",
+  email: data.email,
+  status: "PENDING" as const,
+  expiresAt: data.expiresAt,
+  lastSentAt: data.lastSentAt,
+  codeHash: data.codeHash,
 }));
-const transaction = mock(async (callback: any) =>
-  callback({
-    user: { update: userUpdate },
-    emailVerificationContract: { update: contractUpdate },
+const verifyContractAndUpdateUser = mock(
+  async ({ email }: { email: string }) => ({
+    id: "contract-1",
+    email,
+    status: "VERIFIED" as const,
+    expiresAt: new Date(Date.now() + 60_000),
+    lastSentAt: new Date(),
+    codeHash: null,
   }),
 );
-
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  user: {
-    findUniqueOrThrow: userFindUniqueOrThrow,
-    update: userUpdate,
-  },
-  emailVerificationContract: {
-    findFirst: contractFindFirst,
-    findUnique: contractFindUnique,
-    update: contractUpdate,
-    upsert: contractUpsert,
-  },
-  $transaction: transaction,
-});
 
 mock.module("./main-email-verification.service", () => ({
   USER_EMAIL_CONTRACT_NAME: "user.email",
   sendMainEmailVerificationContractEmail,
 }));
 
+function repository(): UserEmailVerificationRepository {
+  return {
+    findUserEmail: userEmail,
+    findLatestUserEmailContract,
+    findContract,
+    upsertPendingContract,
+    updateContractStatus,
+    verifyContractAndUpdateUser,
+  };
+}
+
 beforeEach(() => {
   sendMainEmailVerificationContractEmail.mockReset();
   sendMainEmailVerificationContractEmail.mockResolvedValue({ ok: true });
-  userFindUniqueOrThrow.mockReset();
-  userFindUniqueOrThrow.mockResolvedValue({ email: "old@example.com" });
-  userUpdate.mockReset();
-  userUpdate.mockResolvedValue(undefined);
-  contractFindUnique.mockReset();
-  contractFindUnique.mockResolvedValue(null);
-  contractFindFirst.mockReset();
-  contractFindFirst.mockResolvedValue(null);
-  contractUpdate.mockReset();
-  contractUpdate.mockResolvedValue({
+  userEmail.mockReset();
+  userEmail.mockResolvedValue("old@example.com");
+  findContract.mockReset();
+  findContract.mockResolvedValue(null);
+  findLatestUserEmailContract.mockReset();
+  findLatestUserEmailContract.mockResolvedValue(null);
+  updateContractStatus.mockReset();
+  updateContractStatus.mockResolvedValue({
+    id: "contract-1",
     email: "new@example.com",
     status: "VERIFIED",
     expiresAt: new Date(Date.now() + 60_000),
     lastSentAt: new Date(),
+    codeHash: null,
   });
-  contractUpsert.mockReset();
-  contractUpsert.mockImplementation(async (args: any) => ({
-    email: args.create.email,
+  upsertPendingContract.mockReset();
+  upsertPendingContract.mockImplementation(async (data: any) => ({
+    id: "contract-1",
+    email: data.email,
     status: "PENDING",
-    expiresAt: args.create.expiresAt,
-    lastSentAt: args.create.lastSentAt,
+    expiresAt: data.expiresAt,
+    lastSentAt: data.lastSentAt,
+    codeHash: data.codeHash,
   }));
-  transaction.mockReset();
-  transaction.mockImplementation(async (callback: any) =>
-    callback({
-      user: { update: userUpdate },
-      emailVerificationContract: { update: contractUpdate },
+  verifyContractAndUpdateUser.mockReset();
+  verifyContractAndUpdateUser.mockImplementation(
+    async ({ email }: { email: string }) => ({
+      id: "contract-1",
+      email,
+      status: "VERIFIED",
+      expiresAt: new Date(Date.now() + 60_000),
+      lastSentAt: new Date(),
+      codeHash: null,
     }),
   );
 });
@@ -94,6 +109,7 @@ describe("user email verification contracts", () => {
     const response = await requestUserEmailVerification(
       "user-1",
       " New@Example.com ",
+      repository(),
     );
 
     expect(response).toMatchObject({
@@ -108,52 +124,48 @@ describe("user email verification contracts", () => {
       to: "new@example.com",
       code: expect.stringMatching(/^\d{6}$/),
     });
-    expect(contractUpsert).toHaveBeenCalledWith(
+    expect(upsertPendingContract).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({
-          contractName: "user.email",
-          ownerId: "user-1",
-          email: "new@example.com",
-          status: "PENDING",
-          deliveryStatus: "SENT",
-        }),
+        contractName: "user.email",
+        ownerId: "user-1",
+        email: "new@example.com",
+        status: "PENDING",
+        deliveryStatus: "SENT",
       }),
     );
-    expect(userUpdate).not.toHaveBeenCalled();
+    expect(verifyContractAndUpdateUser).not.toHaveBeenCalled();
   });
 
   test("verifies a pending contract and writes User.email", async () => {
     const { requestUserEmailVerification, verifyUserEmailContract } =
       await import("./user-email-verification.service");
+    const repo = repository();
 
-    await requestUserEmailVerification("user-1", "new@example.com");
+    await requestUserEmailVerification("user-1", "new@example.com", repo);
     const sent = (
       sendMainEmailVerificationContractEmail.mock.calls as any
     )[0][0] as {
       code: string;
     };
-    const upsertArgs = (contractUpsert.mock.calls as any)[0][0] as {
-      create: { codeHash: string; expiresAt: Date; lastSentAt: Date };
+    const upsertArgs = (upsertPendingContract.mock.calls as any)[0][0] as {
+      codeHash: string;
+      expiresAt: Date;
+      lastSentAt: Date;
     };
-    contractFindUnique.mockResolvedValueOnce({
+    findContract.mockResolvedValueOnce({
       id: "contract-1",
       email: "new@example.com",
       status: "PENDING",
-      codeHash: upsertArgs.create.codeHash,
-      expiresAt: upsertArgs.create.expiresAt,
-      lastSentAt: upsertArgs.create.lastSentAt,
-    } as any);
-    contractUpdate.mockResolvedValueOnce({
-      email: "new@example.com",
-      status: "VERIFIED",
-      expiresAt: upsertArgs.create.expiresAt,
-      lastSentAt: upsertArgs.create.lastSentAt,
+      codeHash: upsertArgs.codeHash,
+      expiresAt: upsertArgs.expiresAt,
+      lastSentAt: upsertArgs.lastSentAt,
     });
 
     const response = await verifyUserEmailContract({
       userId: "user-1",
       email: "new@example.com",
       code: sent.code,
+      repository: repo,
     });
 
     expect(response).toMatchObject({
@@ -164,17 +176,11 @@ describe("user email verification contracts", () => {
         contractStatus: "VERIFIED",
       },
     });
-    expect(userUpdate).toHaveBeenCalledWith({
-      where: { userId: "user-1" },
-      data: { email: "new@example.com" },
-    });
-    expect(contractUpdate).toHaveBeenCalledWith(
+    expect(verifyContractAndUpdateUser).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "contract-1" },
-        data: expect.objectContaining({
-          status: "VERIFIED",
-          codeHash: null,
-        }),
+        userId: "user-1",
+        email: "new@example.com",
+        contractId: "contract-1",
       }),
     );
   });

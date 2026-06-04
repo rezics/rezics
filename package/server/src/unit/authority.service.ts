@@ -10,23 +10,93 @@ import {
   HistoryOutboxPayloadKind,
   isExternallyGoverned,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { AppError } from "@/utils/errors";
+import { and, asc, eq } from "drizzle-orm";
+import { Unit, UnitCollaborator, UnitFieldLock } from "../db/schema";
+import { AppError } from "../utils/errors";
 import {
   type AuthorityUnit,
   type CollaborativeSurfacePolicy,
   canEditUnitFields,
 } from "./authority";
+import { createDrizzleCollaborativeMetadataTx } from "./collaborative-metadata";
 import {
   buildEditorialRevisionPayload,
   type HistoryOutboxWriter,
   writeSequencedHistoryOutbox,
 } from "./history-outbox";
 
-type AuthorityDataDb = Pick<
-  typeof prisma,
-  "unit" | "unitCollaborator" | "unitFieldLock"
->;
+type AuthorityUnitRow = {
+  id: string;
+  userId: string;
+};
+
+type AuthorityCollaboratorRow = {
+  unitId: string;
+  userId: string;
+  roleKey: string;
+  addedById: string;
+  createdAt: Date;
+};
+
+type AuthorityFieldLockRow = {
+  unitId: string;
+  path: string;
+  lockedById: string;
+  reason: string | null;
+  createdAt: Date;
+};
+
+type AuthorityDataDb = {
+  unit: {
+    findUnique(input: {
+      where: { id: string };
+      select: { id: true; userId: true };
+    }): Promise<AuthorityUnitRow | null>;
+  };
+  unitCollaborator: {
+    findUnique(input: {
+      where: { unitId_userId: { unitId: string; userId: string } };
+      select?: { roleKey?: true };
+    }): Promise<AuthorityCollaboratorRow | null>;
+    findMany(input: {
+      where: { unitId: string };
+      orderBy?: { createdAt: "asc" };
+    }): Promise<AuthorityCollaboratorRow[]>;
+    upsert(input: {
+      where: { unitId_userId: { unitId: string; userId: string } };
+      update: { roleKey: string; addedById: string };
+      create: {
+        unitId: string;
+        userId: string;
+        roleKey: string;
+        addedById: string;
+      };
+    }): Promise<AuthorityCollaboratorRow>;
+    delete(input: {
+      where: { unitId_userId: { unitId: string; userId: string } };
+    }): Promise<void>;
+  };
+  unitFieldLock: {
+    findMany(input: {
+      where: { unitId: string };
+      select?: { path?: true };
+      orderBy?: { createdAt: "asc" };
+    }): Promise<AuthorityFieldLockRow[]>;
+    upsert(input: {
+      where: { unitId_path: { unitId: string; path: string } };
+      update: { lockedById: string; reason: string | null };
+      create: {
+        unitId: string;
+        path: string;
+        lockedById: string;
+        reason: string | null;
+      };
+    }): Promise<AuthorityFieldLockRow>;
+    delete(input: {
+      where: { unitId_path: { unitId: string; path: string } };
+    }): Promise<void>;
+  };
+};
 
 type AuthorityTransactionDb = AuthorityDataDb & HistoryOutboxWriter;
 
@@ -41,6 +111,155 @@ const MANAGE_AUTHORITY_POLICY: CollaborativeSurfacePolicy = {
   collaborative: false,
   collaboratorRoles: ["owner", "maintainer"] as UnitAuthorityRoleKey[],
 };
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleAuthorityDb(database?: any) {
+  async function db() {
+    return database ?? (await getServerDb());
+  }
+
+  return {
+    unit: {
+      async findUnique(input: {
+        where: { id: string };
+        select: { id: true; userId: true };
+      }) {
+        const store = await db();
+        const [unit] = await store
+          .select({ id: Unit.id, userId: Unit.userId })
+          .from(Unit)
+          .where(eq(Unit.id, input.where.id))
+          .limit(1);
+        return unit ?? null;
+      },
+    },
+    unitCollaborator: {
+      async findUnique(input: {
+        where: { unitId_userId: { unitId: string; userId: string } };
+        select?: { roleKey?: true };
+      }) {
+        const store = await db();
+        const [row] = await store
+          .select()
+          .from(UnitCollaborator)
+          .where(
+            and(
+              eq(UnitCollaborator.unitId, input.where.unitId_userId.unitId),
+              eq(UnitCollaborator.userId, input.where.unitId_userId.userId),
+            ),
+          )
+          .limit(1);
+        return row ?? null;
+      },
+      async findMany(input: { where: { unitId: string } }) {
+        const store = await db();
+        return store
+          .select()
+          .from(UnitCollaborator)
+          .where(eq(UnitCollaborator.unitId, input.where.unitId))
+          .orderBy(asc(UnitCollaborator.createdAt));
+      },
+      async upsert(input: {
+        where: { unitId_userId: { unitId: string; userId: string } };
+        update: { roleKey: string; addedById: string };
+        create: {
+          unitId: string;
+          userId: string;
+          roleKey: string;
+          addedById: string;
+        };
+      }) {
+        const store = await db();
+        const [row] = await store
+          .insert(UnitCollaborator)
+          .values(input.create)
+          .onConflictDoUpdate({
+            target: [UnitCollaborator.unitId, UnitCollaborator.userId],
+            set: input.update,
+          })
+          .returning();
+        if (!row) throw new Error("Failed to upsert UnitCollaborator");
+        return row;
+      },
+      async delete(input: {
+        where: { unitId_userId: { unitId: string; userId: string } };
+      }) {
+        const store = await db();
+        await store
+          .delete(UnitCollaborator)
+          .where(
+            and(
+              eq(UnitCollaborator.unitId, input.where.unitId_userId.unitId),
+              eq(UnitCollaborator.userId, input.where.unitId_userId.userId),
+            ),
+          );
+      },
+    },
+    unitFieldLock: {
+      async findMany(input: {
+        where: { unitId: string };
+        select?: { path?: true };
+      }) {
+        const store = await db();
+        return store
+          .select()
+          .from(UnitFieldLock)
+          .where(eq(UnitFieldLock.unitId, input.where.unitId))
+          .orderBy(asc(UnitFieldLock.createdAt));
+      },
+      async upsert(input: {
+        where: { unitId_path: { unitId: string; path: string } };
+        update: { lockedById: string; reason: string | null };
+        create: {
+          unitId: string;
+          path: string;
+          lockedById: string;
+          reason: string | null;
+        };
+      }) {
+        const store = await db();
+        const [row] = await store
+          .insert(UnitFieldLock)
+          .values(input.create)
+          .onConflictDoUpdate({
+            target: [UnitFieldLock.unitId, UnitFieldLock.path],
+            set: input.update,
+          })
+          .returning();
+        if (!row) throw new Error("Failed to upsert UnitFieldLock");
+        return row;
+      },
+      async delete(input: {
+        where: { unitId_path: { unitId: string; path: string } };
+      }) {
+        const store = await db();
+        await store
+          .delete(UnitFieldLock)
+          .where(
+            and(
+              eq(UnitFieldLock.unitId, input.where.unitId_path.unitId),
+              eq(UnitFieldLock.path, input.where.unitId_path.path),
+            ),
+          );
+      },
+    },
+    async $transaction<T>(
+      callback: (tx: AuthorityTransactionDb) => Promise<T>,
+    ): Promise<T> {
+      const store = await getServerDb();
+      return store.transaction((tx) =>
+        callback(createDrizzleAuthorityDb(tx) as AuthorityTransactionDb),
+      );
+    },
+    ...(database ? createDrizzleCollaborativeMetadataTx(database) : {}),
+  };
+}
+
+const defaultDb = createDrizzleAuthorityDb() as AuthorityDb;
 
 function toCollaboratorDTO(row: {
   unitId: string;
@@ -76,7 +295,7 @@ function toLockDTO(row: {
 
 export class UnitAuthorityService {
   constructor(
-    private readonly db: AuthorityDb = prisma,
+    private readonly db: AuthorityDb = defaultDb,
     private readonly verifyAdmin?: (userId: string) => Promise<boolean>,
   ) {}
 
@@ -101,7 +320,30 @@ export class UnitAuthorityService {
       unit,
       [],
       MANAGE_AUTHORITY_POLICY,
-      { prismaClient: this.db, verifyAdmin: this.verifyAdmin },
+      {
+        lookup: {
+          findCollaboratorRole: async (targetUnitId, targetUserId) => {
+            const collaborator = await this.db.unitCollaborator.findUnique({
+              where: {
+                unitId_userId: {
+                  unitId: targetUnitId,
+                  userId: targetUserId,
+                },
+              },
+              select: { roleKey: true },
+            });
+            return collaborator?.roleKey ?? null;
+          },
+          listFieldLockPaths: async (targetUnitId) => {
+            const locks = await this.db.unitFieldLock.findMany({
+              where: { unitId: targetUnitId },
+              select: { path: true },
+            });
+            return locks.map((lock) => lock.path);
+          },
+        },
+        verifyAdmin: this.verifyAdmin,
+      },
     );
 
     if (!decision.allowed) {

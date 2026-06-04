@@ -24,14 +24,19 @@ import {
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
 import {
-  PinKind as PinKindEnum,
-  type PostKind,
-  PostKind as PostKindEnum,
-  Prisma,
-  prisma,
-  UnitStatus,
-  UnitType,
-} from "#/prisma/client";
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  inArray,
+  ne,
+  notInArray,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { blockService } from "@/block/block.service";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { serverJobProducer } from "@/job/job-boundary";
@@ -42,20 +47,59 @@ import {
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
 import {
-  preferredLanguageVisibilityWhere,
   primarySupportLanguageCreate,
   resolveEffectiveReadLanguageCandidates,
 } from "@/unit/language-resolution";
-import { publicUnitEligibilityWhere } from "@/unit/publication-policy";
 import {
   hydrateUnitOwnerUserSlugRow,
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
+import {
+  Comment,
+  CommentPromotion,
+  ContentTranslation,
+  ModerationCase,
+  Poll,
+  Post,
+  PostPollReference,
+  Realm,
+  RealmMember,
+  RealmRuleAcknowledgement,
+  Unit,
+  UnitRealm,
+  UnitSupportLanguage,
+  UnitTag,
+  UnitTranslation,
+  User,
+} from "../db/schema";
 import { moderationActionService } from "../governance/moderation-action.service";
 import { AppError } from "../utils/errors";
 import { mapCommentPromotionToDTO } from "./post.mapper";
 import type { PostWithRelations } from "./types";
-import { postInclude } from "./types";
+
+const PinKindEnum = {
+  ACCEPTED_ANSWER: "ACCEPTED_ANSWER",
+  PINNED: "PINNED",
+  HIGHLIGHT: "HIGHLIGHT",
+} as const;
+
+const PostKindEnum = {
+  REVIEW: "REVIEW",
+  EXCERPT: "EXCERPT",
+  REMARK: "REMARK",
+  POST: "POST",
+  CHAPTER: "CHAPTER",
+  WIKI: "WIKI",
+} as const;
+
+type DbLike = any;
+type PostKindValue = (typeof PostKindEnum)[keyof typeof PostKindEnum];
+type PinKindValue = (typeof PinKindEnum)[keyof typeof PinKindEnum];
+
+async function getServerDb(): Promise<DbLike> {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 function enqueuePostSync(unitId: string) {
   return serverJobProducer.enqueue(
@@ -87,14 +131,14 @@ function enqueuePostFields(unitId: string, fields: Record<string, unknown>) {
   );
 }
 
-function readRealmRuleUnitId(extra: Prisma.JsonValue | null): string | null {
+function readRealmRuleUnitId(extra: unknown | null): string | null {
   if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
   const rule = (extra as Record<string, unknown>).rule;
   return typeof rule === "string" && rule.length > 0 ? rule : null;
 }
 
 /** Read the snapshotted governing-schema tag slug from a post's `extra`. */
-function readStateSchemaTag(extra: Prisma.JsonValue | null): string | null {
+function readStateSchemaTag(extra: unknown | null): string | null {
   if (!extra || typeof extra !== "object" || Array.isArray(extra)) return null;
   const tag = (extra as Record<string, unknown>).stateSchemaTag;
   return typeof tag === "string" && tag.length > 0 ? tag : null;
@@ -107,13 +151,13 @@ function readStateSchemaTag(extra: Prisma.JsonValue | null): string | null {
  * is a presentation label and gates nothing; this is filtering only.
  */
 function applyStateFilter(
-  where: Prisma.PostWhereInput,
+  conditions: SQL[],
   query: { state?: string; stateBucket?: "active" | "closed" },
 ) {
   if (query.state) {
-    where.state = query.state;
+    conditions.push(eq(Post.state, query.state));
   } else if (query.stateBucket) {
-    where.state = { in: allBucketSlugs(query.stateBucket) };
+    conditions.push(inArray(Post.state, allBucketSlugs(query.stateBucket)));
   }
 }
 
@@ -135,8 +179,8 @@ function postContentTranslationStatus(isDraft: boolean) {
 }
 
 function sanitizePostExtraForCreate(
-  extra: Prisma.JsonValue | undefined | null,
-): Prisma.JsonValue | undefined | null {
+  extra: unknown | undefined | null,
+): unknown | undefined | null {
   if (!extra || typeof extra !== "object" || Array.isArray(extra)) {
     return extra;
   }
@@ -145,7 +189,7 @@ function sanitizePostExtraForCreate(
     poll: _legacyPoll,
     ...rest
   } = extra as Record<string, unknown>;
-  return rest as Prisma.JsonValue;
+  return rest;
 }
 
 function assertExplicitLocalizedWriteLanguage(input: UpdatePostInput): string {
@@ -158,10 +202,158 @@ function assertExplicitLocalizedWriteLanguage(input: UpdatePostInput): string {
   return input.language;
 }
 
-type PostPollReferenceTx = Pick<
-  Prisma.TransactionClient,
-  "postPollReference" | "poll"
->;
+type PostPollReferenceTx = DbLike;
+
+function uniqueValues<T>(values: readonly T[]): T[] {
+  return [...new Set(values)];
+}
+
+function whereAnd(conditions: SQL[]): SQL | undefined {
+  return conditions.length > 0 ? and(...conditions) : undefined;
+}
+
+function sqlInList(values: readonly string[]): SQL {
+  return sql`(${sql.join(
+    values.map((value) => sql`${value}`),
+    sql`, `,
+  )})`;
+}
+
+function publicUnitConditions(): SQL[] {
+  return [
+    eq(Unit.status, "PUBLISHED"),
+    eq(Unit.visibility, "PUBLIC"),
+    eq(Unit.moderationStatus, "APPROVED"),
+  ];
+}
+
+function preferredLanguageCondition(
+  languageMode: PostListQuery["languageMode"],
+  readLanguages: readonly string[],
+): SQL | undefined {
+  if (languageMode !== "preferred" || readLanguages.length === 0) {
+    return undefined;
+  }
+  return or(
+    eq(Unit.isLanguageNeutral, true),
+    sql`exists (
+      select 1 from "UnitSupportLanguage" usl
+      where usl."unitId" = ${Unit.id}
+        and usl."language" in ${sqlInList(readLanguages)}
+    )`,
+  );
+}
+
+async function hydratePostsByUnitIds(
+  unitIds: readonly string[],
+  dbLike?: DbLike,
+): Promise<PostWithRelations[]> {
+  if (unitIds.length === 0) return [];
+  const ids = uniqueValues(unitIds);
+  const db = dbLike ?? (await getServerDb());
+  const [posts, units, translations, contentTranslations, supportLanguages] =
+    (await Promise.all([
+      db.select().from(Post).where(inArray(Post.unitId, ids)),
+      db.select().from(Unit).where(inArray(Unit.id, ids)),
+      db
+        .select()
+        .from(UnitTranslation)
+        .where(inArray(UnitTranslation.unitId, ids)),
+      db
+        .select()
+        .from(ContentTranslation)
+        .where(inArray(ContentTranslation.unitId, ids)),
+      db
+        .select()
+        .from(UnitSupportLanguage)
+        .where(inArray(UnitSupportLanguage.unitId, ids))
+        .orderBy(asc(UnitSupportLanguage.sortOrder)),
+    ])) as [any[], any[], any[], any[], any[]];
+  const userIds = uniqueValues(
+    units
+      .map((unit: any) => unit.userId)
+      .filter((id: string | null): id is string => !!id),
+  );
+  const [users, inRealms] = (await Promise.all([
+    userIds.length > 0
+      ? db.select().from(User).where(inArray(User.unitId, userIds))
+      : [],
+    db
+      .select({ unitId: UnitRealm.unitId, realmUnitId: UnitRealm.realmUnitId })
+      .from(UnitRealm)
+      .where(
+        and(
+          inArray(UnitRealm.unitId, ids),
+          eq(UnitRealm.moderationStatus, "APPROVED"),
+        ),
+      ),
+  ])) as [any[], any[]];
+  const postByUnitId = new Map(posts.map((post: any) => [post.unitId, post]));
+  const unitById = new Map(units.map((unit: any) => [unit.id, unit]));
+  const userById = new Map(users.map((user: any) => [user.unitId, user]));
+  const translationsByUnitId = groupRows(translations, "unitId");
+  const contentTranslationsByUnitId = groupRows(contentTranslations, "unitId");
+  const supportLanguagesByUnitId = groupRows(supportLanguages, "unitId");
+  const inRealmsByUnitId = groupRows(inRealms, "unitId");
+
+  return unitIds.flatMap((unitId) => {
+    const post = postByUnitId.get(unitId);
+    const unit = unitById.get(unitId);
+    if (!post || !unit) return [];
+    return [
+      {
+        ...post,
+        unit: {
+          ...unit,
+          user: unit.userId ? (userById.get(unit.userId) ?? null) : null,
+          translations: translationsByUnitId.get(unitId) ?? [],
+          contentTranslations: contentTranslationsByUnitId.get(unitId) ?? [],
+          supportLanguages: supportLanguagesByUnitId.get(unitId) ?? [],
+          inRealms: (inRealmsByUnitId.get(unitId) ?? []).map((row: any) => ({
+            realmUnitId: row.realmUnitId,
+          })),
+        },
+      } as PostWithRelations,
+    ];
+  });
+}
+
+function groupRows<T extends Record<string, any>>(
+  rows: T[],
+  key: keyof T,
+): Map<string, T[]> {
+  const grouped = new Map<string, T[]>();
+  for (const row of rows) {
+    const value = row[key];
+    if (typeof value !== "string") continue;
+    const existing = grouped.get(value);
+    if (existing) existing.push(row);
+    else grouped.set(value, [row]);
+  }
+  return grouped;
+}
+
+async function getPostByUnitId(
+  unitId: string,
+  dbLike?: DbLike,
+): Promise<PostWithRelations | null> {
+  const [post] = await hydratePostsByUnitIds([unitId], dbLike);
+  return post ?? null;
+}
+
+async function updatePostRow(
+  tx: DbLike,
+  unitId: string,
+  data: Partial<typeof Post.$inferInsert>,
+): Promise<PostWithRelations> {
+  await tx
+    .update(Post)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(Post.unitId, unitId));
+  const row = await getPostByUnitId(unitId, tx);
+  if (!row) throw new AppError(404, `Post not found: ${unitId}`);
+  return row;
+}
 
 async function syncPostPollReferences(
   tx: PostPollReferenceTx,
@@ -181,38 +373,39 @@ async function syncPostPollReferences(
   const removedPollIds = [...oldPollIds].filter((id) => !newPollIds.has(id));
 
   if (addedPollIds.length > 0) {
-    await tx.postPollReference.createMany({
-      data: addedPollIds.map((pollUnitId) => ({
-        postUnitId: input.postUnitId,
-        pollUnitId,
-      })),
-      skipDuplicates: true,
-    });
-    await tx.poll.updateMany({
-      where: { unitId: { in: addedPollIds } },
-      data: { usageCount: { increment: 1 } },
-    });
+    await tx
+      .insert(PostPollReference)
+      .values(
+        addedPollIds.map((pollUnitId) => ({
+          postUnitId: input.postUnitId,
+          pollUnitId,
+        })),
+      )
+      .onConflictDoNothing();
+    await tx
+      .update(Poll)
+      .set({ usageCount: sql`${Poll.usageCount} + 1` })
+      .where(inArray(Poll.unitId, addedPollIds));
   }
 
   if (removedPollIds.length > 0) {
-    await tx.postPollReference.deleteMany({
-      where: {
-        postUnitId: input.postUnitId,
-        pollUnitId: { in: removedPollIds },
-      },
-    });
-    await tx.poll.updateMany({
-      where: { unitId: { in: removedPollIds }, usageCount: { gt: 0 } },
-      data: { usageCount: { decrement: 1 } },
-    });
+    await tx
+      .delete(PostPollReference)
+      .where(
+        and(
+          eq(PostPollReference.postUnitId, input.postUnitId),
+          inArray(PostPollReference.pollUnitId, removedPollIds),
+        ),
+      );
+    await tx
+      .update(Poll)
+      .set({ usageCount: sql`${Poll.usageCount} - 1` })
+      .where(and(inArray(Poll.unitId, removedPollIds), gt(Poll.usageCount, 0)));
   }
 }
 
 async function upsertPostContentTranslation(
-  tx: Pick<
-    Prisma.TransactionClient,
-    "contentTranslation" | "unitSupportLanguage"
-  >,
+  tx: DbLike,
   input: {
     unitId: string;
     language: string;
@@ -221,100 +414,84 @@ async function upsertPostContentTranslation(
     status: "DRAFT" | "PUBLISHED";
   },
 ) {
-  await tx.contentTranslation.upsert({
-    where: {
-      unitId_language: {
-        unitId: input.unitId,
-        language: input.language,
-      },
-    },
-    create: {
+  await tx
+    .insert(ContentTranslation)
+    .values({
       unitId: input.unitId,
       language: input.language,
-      content: input.content as Prisma.InputJsonValue,
+      content: input.content,
       status: input.status,
       authorUserId: input.actorUserId,
       provenance: { source: "post-content" },
-    },
-    update: {
-      content: input.content as Prisma.InputJsonValue,
-      status: input.status,
-      authorUserId: input.actorUserId,
-      provenance: { source: "post-content" },
-    },
-  });
+    })
+    .onConflictDoUpdate({
+      target: [ContentTranslation.unitId, ContentTranslation.language],
+      set: {
+        content: input.content,
+        status: input.status,
+        authorUserId: input.actorUserId,
+        provenance: { source: "post-content" },
+        updatedAt: new Date(),
+      },
+    });
   await ensurePostSupportLanguage(tx, input);
 }
 
 async function ensurePostSupportLanguage(
-  tx: Pick<Prisma.TransactionClient, "unitSupportLanguage">,
+  tx: DbLike,
   input: {
     unitId: string;
     language: string;
   },
 ) {
-  await tx.unitSupportLanguage.upsert({
-    where: {
-      unitId_language: {
-        unitId: input.unitId,
-        language: input.language,
-      },
-    },
-    create: {
+  await tx
+    .insert(UnitSupportLanguage)
+    .values({
       unitId: input.unitId,
       language: input.language,
       isPrimary: false,
-    },
-    update: {},
-  });
+    })
+    .onConflictDoNothing();
 }
 
 async function upsertPostTitleTranslation(
-  tx: Pick<Prisma.TransactionClient, "unitTranslation" | "unitSupportLanguage">,
+  tx: DbLike,
   input: {
     unitId: string;
     language: string;
     title: string;
   },
 ) {
-  await tx.unitTranslation.upsert({
-    where: {
-      unitId_language: {
-        unitId: input.unitId,
-        language: input.language,
-      },
-    },
-    create: {
+  await tx
+    .insert(UnitTranslation)
+    .values({
       unitId: input.unitId,
       language: input.language,
       title: input.title,
-    },
-    update: {
-      title: input.title,
-    },
-  });
+    })
+    .onConflictDoUpdate({
+      target: [UnitTranslation.unitId, UnitTranslation.language],
+      set: {
+        title: input.title,
+        updatedAt: new Date(),
+      },
+    });
   await ensurePostSupportLanguage(tx, input);
 }
 
-/** Realm roles that may pin/accept within a realm's threads. */
-const PROMOTION_ROLES = ["owner", "admin", "moderator"] as const;
-
 async function applyBlockedAuthorFilter(
-  where: Prisma.PostWhereInput,
+  conditions: SQL[],
   options?: { isAdmin?: boolean; viewerUserId?: string | null },
 ) {
   if (options?.isAdmin || !options?.viewerUserId) return;
 
   const blockedIds = await blockService.blockedUserIds(options.viewerUserId);
   if (blockedIds.length === 0) return;
-
-  const existingAnd = where.AND
-    ? Array.isArray(where.AND)
-      ? where.AND
-      : [where.AND]
-    : [];
-  where.AND = [...existingAnd, { authorUserId: { notIn: blockedIds } }];
+  conditions.push(notInArray(Post.authorUserId, blockedIds));
 }
+
+/** Realm roles that may pin/accept within a realm's threads. */
+const PROMOTION_ROLES = ["owner", "admin", "moderator"] as const;
 
 /**
  * Attach the promotion overlay (`pinKind`/`pinPosition`) to thread rows. A
@@ -324,15 +501,29 @@ async function applyBlockedAuthorFilter(
 async function attachPinKinds<
   T extends {
     unitId: string;
-    pinKind?: PinKindEnum | null;
+    pinKind?: PinKindValue | null;
     pinPosition?: string | null;
   },
 >(posts: T[]): Promise<T[]> {
   if (posts.length === 0) return posts;
-  const pins = await prisma.commentPromotion.findMany({
-    where: { commentId: { in: posts.map((post) => post.unitId) } },
-    select: { commentId: true, kind: true, position: true },
-  });
+  const db = await getServerDb();
+  const pins = (await db
+    .select({
+      commentId: CommentPromotion.commentId,
+      kind: CommentPromotion.kind,
+      position: CommentPromotion.position,
+    })
+    .from(CommentPromotion)
+    .where(
+      inArray(
+        CommentPromotion.commentId,
+        posts.map((post) => post.unitId),
+      ),
+    )) as Array<{
+    commentId: string;
+    kind: PinKindValue;
+    position: string;
+  }>;
   const pinByCommentId = new Map(pins.map((pin) => [pin.commentId, pin]));
   for (const post of posts) {
     const pin = pinByCommentId.get(post.unitId);
@@ -344,14 +535,20 @@ async function attachPinKinds<
 
 export class PostService {
   private async initialUnitRealmModerationStatuses(
-    tx: Pick<Prisma.TransactionClient, "realm">,
+    tx: DbLike,
     realmUnitIds: string[],
   ): Promise<Map<string, UnitRealmModerationStatus>> {
     if (realmUnitIds.length === 0) return new Map();
-    const realms = await tx.realm.findMany({
-      where: { unitId: { in: realmUnitIds } },
-      select: { unitId: true, contentRequiresApproval: true },
-    });
+    const realms = (await tx
+      .select({
+        unitId: Realm.unitId,
+        contentRequiresApproval: Realm.contentRequiresApproval,
+      })
+      .from(Realm)
+      .where(inArray(Realm.unitId, realmUnitIds))) as Array<{
+      unitId: string;
+      contentRequiresApproval: boolean;
+    }>;
     return new Map(
       realms.map((realm) => [
         realm.unitId,
@@ -361,15 +558,16 @@ export class PostService {
   }
 
   private async createPendingRealmReviewCase(
-    tx: Pick<Prisma.TransactionClient, "moderationCase" | "moderationAction">,
+    tx: DbLike,
     input: {
       realmUnitId: string;
       unitId: string;
       actorUserId: string;
     },
   ) {
-    const created = await tx.moderationCase.create({
-      data: {
+    const [created] = await tx
+      .insert(ModerationCase)
+      .values({
         scope: "REALM",
         realmUnitId: input.realmUnitId,
         state: "NEW",
@@ -379,9 +577,10 @@ export class PostService {
         targetId: input.unitId,
         addressedUnitId: input.unitId,
         reason: "Content submitted for realm approval",
-        metadata: { relationModeration: true } as never,
-      },
-    });
+        metadata: { relationModeration: true },
+      })
+      .returning();
+    if (!created) throw new Error("Failed to create moderation case");
     await moderationActionService.appendModerationAction(tx, {
       authority: "REALM",
       realmUnitId: input.realmUnitId,
@@ -408,70 +607,67 @@ export class PostService {
     const limitNum = Math.max(1, Math.min(Number(query.limit ?? 50), 200));
     const skipNum = query.start ?? 0;
 
-    const unitWhere: Prisma.UnitWhereInput = options?.isAdmin
-      ? {}
-      : { ...publicUnitEligibilityWhere };
-    const where: Prisma.PostWhereInput = {};
-    if (query.targetUnitId) {
-      unitWhere.targetUnitId = query.targetUnitId;
-    }
+    const conditions: SQL[] = [];
+    if (!options?.isAdmin) conditions.push(...publicUnitConditions());
+    if (query.targetUnitId)
+      conditions.push(eq(Unit.targetUnitId, query.targetUnitId));
     const readLanguages = resolveEffectiveReadLanguageCandidates({
       languages: (query as { languages?: string | readonly string[] })
         .languages,
     });
-    const languageVisibility = preferredLanguageVisibilityWhere({
-      languageMode: query.languageMode,
-      languages: readLanguages,
-    });
-    if (languageVisibility) {
-      const existingAnd = unitWhere.AND
-        ? Array.isArray(unitWhere.AND)
-          ? unitWhere.AND
-          : [unitWhere.AND]
-        : [];
-      unitWhere.AND = [...existingAnd, languageVisibility];
-    }
-    if (Object.keys(unitWhere).length > 0) where.unit = unitWhere;
+    const languageVisibility = preferredLanguageCondition(
+      query.languageMode,
+      readLanguages,
+    );
+    if (languageVisibility) conditions.push(languageVisibility);
     // Weak context lookup only: do not resolve through Unit.targetUnitId and do
     // not validate that the value names a VARIANT.
-    if (query.variantUnitId) where.variantUnitId = query.variantUnitId;
-    if (query.authorUserId) where.authorUserId = query.authorUserId;
-    if (query.kind) where.kind = query.kind;
-    applyStateFilter(where, query);
+    if (query.variantUnitId)
+      conditions.push(eq(Post.variantUnitId, query.variantUnitId));
+    if (query.authorUserId)
+      conditions.push(eq(Post.authorUserId, query.authorUserId));
+    if (query.kind) conditions.push(eq(Post.kind, query.kind));
+    applyStateFilter(conditions, query);
 
     const idList = parseIdsCsv(query.ids);
     if (idList && idList.length > 0) {
-      where.unitId = { in: idList };
+      conditions.push(inArray(Post.unitId, idList));
     }
 
-    await applyBlockedAuthorFilter(where, options);
+    await applyBlockedAuthorFilter(conditions, options);
 
-    const orderBy: Prisma.PostOrderByWithRelationInput[] = [
-      {
-        createdAt:
-          typeof query.sort === "object" &&
-          (query.sort.order === "asc" || query.sort.order === "desc")
-            ? query.sort.order
-            : "desc",
-      },
-    ];
-
-    const [posts, total] = await Promise.all([
-      prisma.post.findMany({
-        where,
-        orderBy,
-        skip: skipNum,
-        take: limitNum,
-        include: postInclude,
-      }),
-      prisma.post.count({ where }),
+    const db = await getServerDb();
+    const where = whereAnd(conditions);
+    const sortOrder =
+      typeof query.sort === "object" &&
+      (query.sort.order === "asc" || query.sort.order === "desc")
+        ? query.sort.order
+        : "desc";
+    const [rows, totalRows] = await Promise.all([
+      db
+        .select({ unitId: Post.unitId })
+        .from(Post)
+        .innerJoin(Unit, eq(Unit.id, Post.unitId))
+        .where(where)
+        .orderBy(
+          sortOrder === "asc" ? asc(Post.createdAt) : desc(Post.createdAt),
+        )
+        .offset(skipNum)
+        .limit(limitNum),
+      db
+        .select({ total: count() })
+        .from(Post)
+        .innerJoin(Unit, eq(Unit.id, Post.unitId))
+        .where(where),
     ]);
+    const posts = await hydratePostsByUnitIds(
+      rows.map((row: { unitId: string }) => row.unitId),
+      db,
+    );
 
     return {
-      posts: await hydrateUnitOwnerUserSlugs(
-        await attachPinKinds(posts as PostWithRelations[]),
-      ),
-      total,
+      posts: await hydrateUnitOwnerUserSlugs(await attachPinKinds(posts)),
+      total: Number(totalRows[0]?.total ?? 0),
     };
   }
 
@@ -491,101 +687,93 @@ export class PostService {
     const readLanguages = resolveEffectiveReadLanguageCandidates({
       languages: (opts as { languages?: string | readonly string[] }).languages,
     });
-    const languageVisibility = preferredLanguageVisibilityWhere({
-      languageMode: opts.languageMode,
-      languages: readLanguages,
-    });
+    const languageVisibility = preferredLanguageCondition(
+      opts.languageMode,
+      readLanguages,
+    );
 
     if (!(await this.canReadRealmFeed(realmUnitId, options))) {
       return { posts: [], total: 0 };
     }
 
-    const where: Prisma.PostWhereInput = {
-      unit: {
-        ...(options?.isAdmin ? {} : publicUnitEligibilityWhere),
-        ...(languageVisibility ? { AND: [languageVisibility] } : {}),
-        inRealms: {
-          some: {
-            realmUnitId,
-            ...(options?.isAdmin && moderationStatus
-              ? { moderationStatus: moderationStatus as any }
-              : options?.isAdmin
-                ? {}
-                : {
-                    moderationStatus: "APPROVED" as const,
-                  }),
-          },
-        },
-        ...(tagIds.length > 0
-          ? {
-              OR: [
-                {
-                  realmTagApplicationsAsTargetUnit: {
-                    some: {
-                      realmUnitId,
-                      tagUnitId: { in: tagIds },
-                    },
-                  },
-                },
-                {
-                  AND: [
-                    {
-                      realmTagApplicationsAsTargetUnit: {
-                        none: { realmUnitId },
-                      },
-                    },
-                    {
-                      unitTags: {
-                        some: { tagUnitId: { in: tagIds } },
-                      },
-                    },
-                  ],
-                },
-              ],
-            }
-          : {}),
-      },
-    };
+    const conditions: SQL[] = [eq(UnitRealm.realmUnitId, realmUnitId)];
+    if (!options?.isAdmin) {
+      conditions.push(...publicUnitConditions());
+      conditions.push(eq(UnitRealm.moderationStatus, "APPROVED"));
+    } else if (moderationStatus) {
+      conditions.push(eq(UnitRealm.moderationStatus, moderationStatus));
+    }
+    if (languageVisibility) conditions.push(languageVisibility);
+    if (tagIds.length > 0) {
+      const tagCondition = or(
+        sql`exists (
+            select 1 from "RealmTagApplication" rta
+            where rta."realmUnitId" = ${realmUnitId}
+              and rta."unitId" = ${Post.unitId}
+              and rta."tagUnitId" in ${sqlInList(tagIds)}
+          )`,
+        sql`(
+            not exists (
+              select 1 from "RealmTagApplication" rta_any
+              where rta_any."realmUnitId" = ${realmUnitId}
+                and rta_any."unitId" = ${Post.unitId}
+            )
+            and exists (
+              select 1 from "UnitTag" ut
+              where ut."unitId" = ${Post.unitId}
+                and ut."tagUnitId" in ${sqlInList(tagIds)}
+            )
+          )`,
+      );
+      if (tagCondition) conditions.push(tagCondition);
+    }
 
-    if (opts.authorUserId) where.authorUserId = opts.authorUserId;
-    if (opts.kind) where.kind = opts.kind;
-    applyStateFilter(where, opts);
+    if (opts.authorUserId)
+      conditions.push(eq(Post.authorUserId, opts.authorUserId));
+    if (opts.kind) conditions.push(eq(Post.kind, opts.kind));
+    applyStateFilter(conditions, opts);
 
-    await applyBlockedAuthorFilter(where, options);
+    await applyBlockedAuthorFilter(conditions, options);
 
     const idList = parseIdsCsv(opts.ids);
     if (idList && idList.length > 0) {
-      where.unitId = { in: idList };
+      conditions.push(inArray(Post.unitId, idList));
     }
 
     if (sort === "hot") {
       // Phase-1 approximation from design.md Decision 5: rank as top posts
       // within the last 7 days instead of the full decay formula.
       const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      where.createdAt = { gte: since };
+      conditions.push(gt(Post.createdAt, since));
     }
 
-    const orderBy: Prisma.PostOrderByWithRelationInput[] =
-      sort === "new"
-        ? [{ createdAt: "desc" }]
-        : [{ scoreEntry: { value: "desc" } }, { createdAt: "desc" }];
-
-    const [posts, total] = await Promise.all([
-      prisma.post.findMany({
-        where,
-        orderBy,
-        skip: skipNum,
-        take: limitNum,
-        include: postInclude,
-      }),
-      prisma.post.count({ where }),
+    const db = await getServerDb();
+    const where = whereAnd(conditions);
+    const [rows, totalRows] = await Promise.all([
+      db
+        .select({ unitId: Post.unitId })
+        .from(Post)
+        .innerJoin(Unit, eq(Unit.id, Post.unitId))
+        .innerJoin(UnitRealm, eq(UnitRealm.unitId, Post.unitId))
+        .where(where)
+        .orderBy(desc(Post.createdAt))
+        .offset(skipNum)
+        .limit(limitNum),
+      db
+        .select({ total: count() })
+        .from(Post)
+        .innerJoin(Unit, eq(Unit.id, Post.unitId))
+        .innerJoin(UnitRealm, eq(UnitRealm.unitId, Post.unitId))
+        .where(where),
     ]);
+    const posts = await hydratePostsByUnitIds(
+      rows.map((row: { unitId: string }) => row.unitId),
+      db,
+    );
 
     return {
-      posts: await hydrateUnitOwnerUserSlugs(
-        await attachPinKinds(posts as PostWithRelations[]),
-      ),
-      total,
+      posts: await hydrateUnitOwnerUserSlugs(await attachPinKinds(posts)),
+      total: Number(totalRows[0]?.total ?? 0),
     };
   }
 
@@ -595,27 +783,36 @@ export class PostService {
   ): Promise<boolean> {
     if (options?.isAdmin) return true;
 
-    const realm = await prisma.realm.findUnique({
-      where: { unitId: realmUnitId },
-      select: {
-        isPublic: true,
-        unit: { select: { userId: true } },
-        members: options?.viewerUserId
-          ? {
-              where: { userId: options.viewerUserId },
-              select: { state: true },
-              take: 1,
-            }
-          : false,
-      },
-    });
+    const db = await getServerDb();
+    const [realm] = await db
+      .select({
+        isPublic: Realm.isPublic,
+        userId: Unit.userId,
+      })
+      .from(Realm)
+      .innerJoin(Unit, eq(Unit.id, Realm.unitId))
+      .where(eq(Realm.unitId, realmUnitId))
+      .limit(1);
     if (!realm) return false;
     if (realm.isPublic) return true;
-    if (realm.unit.userId && realm.unit.userId === options?.viewerUserId) {
+    if (realm.userId && realm.userId === options?.viewerUserId) {
       return true;
     }
 
-    const memberState = realm.members?.[0]?.state;
+    const memberState = options?.viewerUserId
+      ? (
+          await db
+            .select({ state: RealmMember.state })
+            .from(RealmMember)
+            .where(
+              and(
+                eq(RealmMember.realmUnitId, realmUnitId),
+                eq(RealmMember.userId, options.viewerUserId),
+              ),
+            )
+            .limit(1)
+        )[0]?.state
+      : undefined;
     return memberState === "ACTIVE" || memberState === "MUTED";
   }
 
@@ -624,18 +821,14 @@ export class PostService {
     unitId: string,
     options?: { isAdmin?: boolean; allowTombstone?: boolean },
   ): Promise<PostWithRelations> {
-    const post = await prisma.post.findUnique({
-      where: { unitId },
-      include: postInclude,
-    });
+    const post = await getPostByUnitId(unitId);
     if (!post) {
       throw new AppError(404, `Post not found: ${unitId}`);
     }
     if (
       !options?.isAdmin &&
       !options?.allowTombstone &&
-      (post.unit.status !== UnitStatus.PUBLISHED ||
-        post.unit.visibility !== "PUBLIC")
+      (post.unit.status !== "PUBLISHED" || post.unit.visibility !== "PUBLIC")
     ) {
       throw new AppError(404, `Post not found: ${unitId}`);
     }
@@ -650,26 +843,53 @@ export class PostService {
     userId: string,
   ): Promise<void> {
     if (realmUnitIds.length === 0) return;
+    const db = await getServerDb();
 
-    const [realms, memberships, acknowledgements] = await Promise.all([
-      prisma.realm.findMany({
-        where: { unitId: { in: realmUnitIds } },
-        select: {
-          unitId: true,
-          extra: true,
-          ruleVersion: true,
-          ruleRequireOnPost: true,
-        },
-      }),
-      prisma.realmMember.findMany({
-        where: { realmUnitId: { in: realmUnitIds }, userId },
-        select: { realmUnitId: true, state: true },
-      }),
-      prisma.realmRuleAcknowledgement.findMany({
-        where: { realmUnitId: { in: realmUnitIds }, userId },
-        select: { realmUnitId: true, ruleUnitId: true, version: true },
-      }),
-    ]);
+    const [realms, memberships, acknowledgements] = (await Promise.all([
+      db
+        .select({
+          unitId: Realm.unitId,
+          extra: Realm.extra,
+          ruleVersion: Realm.ruleVersion,
+          ruleRequireOnPost: Realm.ruleRequireOnPost,
+        })
+        .from(Realm)
+        .where(inArray(Realm.unitId, realmUnitIds)),
+      db
+        .select({
+          realmUnitId: RealmMember.realmUnitId,
+          state: RealmMember.state,
+        })
+        .from(RealmMember)
+        .where(
+          and(
+            inArray(RealmMember.realmUnitId, realmUnitIds),
+            eq(RealmMember.userId, userId),
+          ),
+        ),
+      db
+        .select({
+          realmUnitId: RealmRuleAcknowledgement.realmUnitId,
+          ruleUnitId: RealmRuleAcknowledgement.ruleUnitId,
+          version: RealmRuleAcknowledgement.version,
+        })
+        .from(RealmRuleAcknowledgement)
+        .where(
+          and(
+            inArray(RealmRuleAcknowledgement.realmUnitId, realmUnitIds),
+            eq(RealmRuleAcknowledgement.userId, userId),
+          ),
+        ),
+    ])) as [
+      Array<{
+        unitId: string;
+        extra: unknown;
+        ruleVersion: number;
+        ruleRequireOnPost: boolean;
+      }>,
+      Array<{ realmUnitId: string; state: string }>,
+      Array<{ realmUnitId: string; ruleUnitId: string; version: number }>,
+    ];
 
     const memberByRealm = new Map(
       memberships.map((member) => [member.realmUnitId, member]),
@@ -738,11 +958,13 @@ export class PostService {
           "Post(kind=CHAPTER) requires targetUnitId pointing to a Unit(type=BOOK)",
         );
       }
-      const target = await prisma.unit.findUnique({
-        where: { id: targetUnitId },
-        select: { type: true },
-      });
-      if (!target || target.type !== UnitType.BOOK) {
+      const db = await getServerDb();
+      const [target] = await db
+        .select({ type: Unit.type })
+        .from(Unit)
+        .where(eq(Unit.id, targetUnitId))
+        .limit(1);
+      if (!target || target.type !== "BOOK") {
         throw new Error(
           `Post(kind=CHAPTER) targetUnitId must reference a Unit(type=BOOK); got ${target?.type ?? "missing"}`,
         );
@@ -751,22 +973,27 @@ export class PostService {
 
     await this.assertRealmPostAllowed(realmIdsToWrite, authorUserId);
 
-    const post = await prisma.$transaction(async (tx) => {
+    const db = await getServerDb();
+    const post = await db.transaction(async (tx: DbLike) => {
       const ownerUserId =
         kind === "WIKI" ? await resolveRezicsWikiUserId() : authorUserId;
       const postLanguage = input.language;
-      const unit = await tx.unit.create({
-        data: {
+      const [unit] = await tx
+        .insert(Unit)
+        .values({
           userId: ownerUserId,
           slugScope: ownerUserId,
-          type: UnitType.POST,
-          targetUnitId: targetUnitId ?? undefined,
-          status: asDraft ? UnitStatus.DRAFT : UnitStatus.PUBLISHED,
+          type: "POST",
+          targetUnitId: targetUnitId ?? null,
+          status: asDraft ? "DRAFT" : "PUBLISHED",
           publishedAt: asDraft ? null : new Date(),
-          supportLanguages: {
-            create: primarySupportLanguageCreate(postLanguage),
-          },
-        },
+        })
+        .returning();
+      if (!unit) throw new Error("Failed to create post unit");
+      const primaryLanguage = primarySupportLanguageCreate(postLanguage);
+      await tx.insert(UnitSupportLanguage).values({
+        unitId: unit.id,
+        ...primaryLanguage,
       });
 
       // Validate the requested tags once (selecting slug), rejecting unknown
@@ -775,14 +1002,16 @@ export class PostService {
       // `state` to the schema's initial value. At most one stateful tag.
       let statefulInit: { tagSlug: string; initial: string } | null = null;
       if (tagIdsToWrite.length > 0) {
-        const validTags = await tx.unit.findMany({
-          where: {
-            id: { in: tagIdsToWrite },
-            type: UnitType.TAG,
-            status: { not: UnitStatus.DELETED },
-          },
-          select: { id: true, slug: true },
-        });
+        const validTags = (await tx
+          .select({ id: Unit.id, slug: Unit.slug })
+          .from(Unit)
+          .where(
+            and(
+              inArray(Unit.id, tagIdsToWrite),
+              eq(Unit.type, "TAG"),
+              ne(Unit.status, "DELETED"),
+            ),
+          )) as Array<{ id: string; slug: string | null }>;
         const validTagIds = new Set(validTags.map((tag) => tag.id));
         const invalidTagIds = tagIdsToWrite.filter(
           (id) => !validTagIds.has(id),
@@ -808,20 +1037,18 @@ export class PostService {
         : extraWithoutLegacyTitle;
       const titleToWrite = title.trim();
 
-      const createData: Prisma.PostUncheckedCreateInput = {
+      const createData = {
         unitId: unit.id,
         authorUserId,
-        kind: (kind as PostKind) ?? undefined,
-        scoreEntryId: scoreEntryId ?? undefined,
-        variantUnitId: variantUnitId ?? undefined,
-        state: statefulInit?.initial ?? undefined,
-        extra: extraToWrite as Prisma.InputJsonValue | undefined,
+        kind: (kind as PostKindValue) ?? null,
+        scoreEntryId: scoreEntryId ?? null,
+        variantUnitId: variantUnitId ?? null,
+        state: statefulInit?.initial ?? null,
+        extra: extraToWrite ?? null,
       };
 
-      const created = (await tx.post.create({
-        data: createData,
-        include: postInclude,
-      })) as PostWithRelations;
+      const [created] = await tx.insert(Post).values(createData).returning();
+      if (!created) throw new Error("Failed to create post");
 
       if (realmIdsToWrite.length > 0) {
         const createdAt = new Date();
@@ -833,14 +1060,12 @@ export class PostService {
           realmIdsToWrite.map(async (realmUnitId) => {
             const moderationStatus =
               initialStatuses.get(realmUnitId) ?? "APPROVED";
-            await tx.unitRealm.create({
-              data: {
-                realmUnitId,
-                unitId: created.unitId,
-                moderationStatus,
-                isLocked: false,
-                createdAt,
-              },
+            await tx.insert(UnitRealm).values({
+              realmUnitId,
+              unitId: created.unitId,
+              moderationStatus,
+              isLocked: false,
+              createdAt,
             });
             if (moderationStatus === "PENDING") {
               await this.createPendingRealmReviewCase(tx, {
@@ -858,11 +1083,9 @@ export class PostService {
         // UnitTag junction rows here.
         await Promise.all(
           tagIdsToWrite.map((tagUnitId) =>
-            tx.unitTag.create({
-              data: {
-                unitId: created.unitId,
-                tagUnitId,
-              },
+            tx.insert(UnitTag).values({
+              unitId: created.unitId,
+              tagUnitId,
             }),
           ),
         );
@@ -897,10 +1120,9 @@ export class PostService {
         });
       }
 
-      return (await tx.post.findUniqueOrThrow({
-        where: { unitId: created.unitId },
-        include: postInclude,
-      })) as PostWithRelations;
+      const hydrated = await getPostByUnitId(created.unitId, tx);
+      if (!hydrated) throw new Error("Failed to hydrate created post");
+      return hydrated;
     });
 
     // Drafts are owner-only and must not enter the search index until they are
@@ -926,47 +1148,43 @@ export class PostService {
     publish: boolean,
     authorUserId: string,
   ): Promise<PostWithRelations> {
-    const existing = await prisma.post.findUniqueOrThrow({
-      where: { unitId },
-      select: {
-        authorUserId: true,
-        kind: true,
-        unit: { select: { status: true, publishedAt: true } },
-      },
-    });
+    const db = await getServerDb();
+    const existing = await getPostByUnitId(unitId, db);
+    if (!existing) throw new AppError(404, `Post not found: ${unitId}`);
     if (existing.authorUserId !== authorUserId) {
       throw new AppError(403, "Only the author can change publication state");
     }
-    if (existing.unit.status === UnitStatus.DELETED) {
+    if (existing.unit.status === "DELETED") {
       throw new AppError(409, "Cannot publish a deleted post");
     }
 
-    const updated = await prisma.post.update({
-      where: { unitId },
-      data: {
-        unit: {
-          update: {
-            status: publish ? UnitStatus.PUBLISHED : UnitStatus.DRAFT,
-            // Preserve the first-publication timestamp; set it on first publish.
-            publishedAt: publish
-              ? (existing.unit.publishedAt ?? new Date())
-              : existing.unit.publishedAt,
-          },
-        },
-      },
-      include: postInclude,
-    });
+    await db
+      .update(Unit)
+      .set({
+        status: publish ? "PUBLISHED" : "DRAFT",
+        // Preserve the first-publication timestamp; set it on first publish.
+        publishedAt: publish
+          ? (existing.unit.publishedAt ?? new Date())
+          : existing.unit.publishedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(Unit.id, unitId));
 
-    await prisma.contentTranslation.updateMany({
-      where: { unitId },
-      data: { status: postContentTranslationStatus(!publish) },
-    });
+    await db
+      .update(ContentTranslation)
+      .set({
+        status: postContentTranslationStatus(!publish),
+        updatedAt: new Date(),
+      })
+      .where(eq(ContentTranslation.unitId, unitId));
 
     // Re-sync either way: publish indexes; unpublish de-lists (the indexer
     // honours `publicUnitEligibilityWhere`).
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
 
-    return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
+    const updated = await getPostByUnitId(unitId, db);
+    if (!updated) throw new AppError(404, `Post not found: ${unitId}`);
+    return hydrateUnitOwnerUserSlugRow(updated);
   }
 
   async submitToRealm(
@@ -975,36 +1193,32 @@ export class PostService {
     authorUserId: string,
   ): Promise<PostWithRelations> {
     const tagIdsToWrite = [...new Set(input.tagIds ?? [])];
-    const existing = await prisma.post.findUniqueOrThrow({
-      where: { unitId },
-      select: {
-        authorUserId: true,
-        kind: true,
-        unit: { select: { status: true, publishedAt: true } },
-      },
-    });
+    const db = await getServerDb();
+    const existing = await getPostByUnitId(unitId, db);
+    if (!existing) throw new AppError(404, `Post not found: ${unitId}`);
     if (existing.authorUserId !== authorUserId) {
       throw new AppError(
         403,
         "Only the author can submit this post to a realm",
       );
     }
-    if (existing.unit.status === UnitStatus.DELETED) {
+    if (existing.unit.status === "DELETED") {
       throw new AppError(409, "Cannot submit a deleted post to a realm");
     }
 
     await this.assertRealmPostAllowed([input.realmUnitId], authorUserId);
 
-    const updated = await prisma.$transaction(async (tx) => {
-      const existingRealmRow = await tx.unitRealm.findUnique({
-        where: {
-          realmUnitId_unitId: {
-            realmUnitId: input.realmUnitId,
-            unitId,
-          },
-        },
-        select: { moderationStatus: true },
-      });
+    const updated = await db.transaction(async (tx: DbLike) => {
+      const [existingRealmRow] = await tx
+        .select({ moderationStatus: UnitRealm.moderationStatus })
+        .from(UnitRealm)
+        .where(
+          and(
+            eq(UnitRealm.realmUnitId, input.realmUnitId),
+            eq(UnitRealm.unitId, unitId),
+          ),
+        )
+        .limit(1);
       if (existingRealmRow?.moderationStatus === "REMOVED") {
         throw new AppError(
           409,
@@ -1013,14 +1227,16 @@ export class PostService {
       }
 
       if (tagIdsToWrite.length > 0) {
-        const validTags = await tx.unit.findMany({
-          where: {
-            id: { in: tagIdsToWrite },
-            type: UnitType.TAG,
-            status: { not: UnitStatus.DELETED },
-          },
-          select: { id: true },
-        });
+        const validTags = (await tx
+          .select({ id: Unit.id })
+          .from(Unit)
+          .where(
+            and(
+              inArray(Unit.id, tagIdsToWrite),
+              eq(Unit.type, "TAG"),
+              ne(Unit.status, "DELETED"),
+            ),
+          )) as Array<{ id: string }>;
         const validTagIds = new Set(validTags.map((tag) => tag.id));
         const invalidTagIds = tagIdsToWrite.filter(
           (id) => !validTagIds.has(id),
@@ -1042,21 +1258,15 @@ export class PostService {
       );
       const moderationStatus =
         initialStatuses.get(input.realmUnitId) ?? "APPROVED";
-      await tx.unitRealm.upsert({
-        where: {
-          realmUnitId_unitId: {
-            realmUnitId: input.realmUnitId,
-            unitId,
-          },
-        },
-        create: {
+      await tx
+        .insert(UnitRealm)
+        .values({
           realmUnitId: input.realmUnitId,
           unitId,
           moderationStatus,
           isLocked: false,
-        },
-        update: {},
-      });
+        })
+        .onConflictDoNothing();
       if (!existingRealmRow && moderationStatus === "PENDING") {
         await this.createPendingRealmReviewCase(tx, {
           realmUnitId: input.realmUnitId,
@@ -1066,44 +1276,41 @@ export class PostService {
       }
 
       for (const tagUnitId of tagIdsToWrite) {
-        await tx.unitTag.upsert({
-          where: {
-            unitId_tagUnitId: {
-              unitId,
-              tagUnitId,
-            },
-          },
-          create: {
+        await tx
+          .insert(UnitTag)
+          .values({
             unitId,
             tagUnitId,
-          },
-          update: {},
-        });
+          })
+          .onConflictDoNothing();
       }
 
-      if (input.publish && existing.unit.status === UnitStatus.DRAFT) {
-        await tx.unit.update({
-          where: { id: unitId },
-          data: {
-            status: UnitStatus.PUBLISHED,
+      if (input.publish && existing.unit.status === "DRAFT") {
+        await tx
+          .update(Unit)
+          .set({
+            status: "PUBLISHED",
             publishedAt: existing.unit.publishedAt ?? new Date(),
-          },
-        });
-        await tx.contentTranslation.updateMany({
-          where: { unitId },
-          data: { status: postContentTranslationStatus(false) },
-        });
+            updatedAt: new Date(),
+          })
+          .where(eq(Unit.id, unitId));
+        await tx
+          .update(ContentTranslation)
+          .set({
+            status: postContentTranslationStatus(false),
+            updatedAt: new Date(),
+          })
+          .where(eq(ContentTranslation.unitId, unitId));
       }
 
-      return tx.post.findUniqueOrThrow({
-        where: { unitId },
-        include: postInclude,
-      });
+      const post = await getPostByUnitId(unitId, tx);
+      if (!post) throw new AppError(404, `Post not found: ${unitId}`);
+      return post;
     });
 
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
 
-    return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
+    return hydrateUnitOwnerUserSlugRow(updated);
   }
 
   /** Update post content, isLocked, and/or extra. */
@@ -1116,45 +1323,28 @@ export class PostService {
       "patch" | "message" | "restoreSource"
     >,
   ): Promise<PostWithRelations> {
-    const data: Prisma.PostUpdateInput = {};
+    const data: Partial<typeof Post.$inferInsert> = {};
 
     const titleToWrite = input.title?.trim();
     if (input.isLocked !== undefined) data.isLocked = input.isLocked;
     if (input.extra !== undefined) {
       const extra = sanitizePostExtraForCreate(input.extra);
-      data.extra = extra === null ? Prisma.JsonNull : extra;
+      data.extra = extra === null ? null : extra;
     }
 
+    const db = await getServerDb();
     if (!actor) {
-      const updated = await prisma.$transaction(async (tx) => {
+      const updated = await db.transaction(async (tx: DbLike) => {
         const language = assertExplicitLocalizedWriteLanguage(input);
-        const existing = await tx.post.findUniqueOrThrow({
-          where: { unitId },
-          select: {
-            authorUserId: true,
-            unit: {
-              select: {
-                supportLanguages: true,
-                status: true,
-                contentTranslations: true,
-              },
-            },
-          },
-        });
+        const existing = await getPostByUnitId(unitId, tx);
+        if (!existing) throw new AppError(404, `Post not found: ${unitId}`);
         const oldContent = (existing.unit.contentTranslations ?? []).find(
           (translation) => translation.language === language,
         )?.content;
         const row =
           Object.keys(data).length > 0
-            ? await tx.post.update({
-                where: { unitId },
-                data,
-                include: postInclude,
-              })
-            : await tx.post.findUniqueOrThrow({
-                where: { unitId },
-                include: postInclude,
-              });
+            ? await updatePostRow(tx, unitId, data)
+            : existing;
         if (titleToWrite) {
           await upsertPostTitleTranslation(tx, {
             unitId,
@@ -1169,7 +1359,7 @@ export class PostService {
             content: input.content,
             actorUserId: existing.authorUserId,
             status: postContentTranslationStatus(
-              existing.unit.status === UnitStatus.DRAFT,
+              existing.unit.status === "DRAFT",
             ),
           });
           await syncPostPollReferences(tx, {
@@ -1189,25 +1379,13 @@ export class PostService {
       await enqueuePostFields(unitId, patchFields);
       if (input.content !== undefined) await enqueueContentSync(unitId);
 
-      return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
+      return hydrateUnitOwnerUserSlugRow(updated);
     }
 
-    const updated = await prisma.$transaction(async (tx) => {
+    const updated = await db.transaction(async (tx: DbLike) => {
       const language = assertExplicitLocalizedWriteLanguage(input);
-      const existing = await tx.post.findUniqueOrThrow({
-        where: { unitId },
-        select: {
-          kind: true,
-          authorUserId: true,
-          unit: {
-            select: {
-              supportLanguages: true,
-              status: true,
-              contentTranslations: true,
-            },
-          },
-        },
-      });
+      const existing = await getPostByUnitId(unitId, tx);
+      if (!existing) throw new AppError(404, `Post not found: ${unitId}`);
       const currentContent = (existing.unit.contentTranslations ?? []).find(
         (translation) => translation.language === language,
       )?.content;
@@ -1241,15 +1419,8 @@ export class PostService {
 
       const row =
         Object.keys(data).length > 0
-          ? await tx.post.update({
-              where: { unitId },
-              data,
-              include: postInclude,
-            })
-          : await tx.post.findUniqueOrThrow({
-              where: { unitId },
-              include: postInclude,
-            });
+          ? await updatePostRow(tx, unitId, data)
+          : existing;
 
       if (titleToWrite) {
         await upsertPostTitleTranslation(tx, {
@@ -1265,7 +1436,7 @@ export class PostService {
           content: input.content,
           actorUserId: actor.userId ?? existing.authorUserId,
           status: postContentTranslationStatus(
-            existing.unit.status === UnitStatus.DRAFT,
+            existing.unit.status === "DRAFT",
           ),
         });
         await syncPostPollReferences(tx, {
@@ -1297,24 +1468,25 @@ export class PostService {
     await enqueuePostFields(unitId, patchFields);
     if (input.content !== undefined) await enqueueContentSync(unitId);
 
-    return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
+    return hydrateUnitOwnerUserSlugRow(updated);
   }
 
   /** Delete a root submission. Comment reply counters are owned by Comment. */
   async delete(unitId: string): Promise<void> {
-    await prisma.$transaction(async (tx) => {
-      await tx.post.findUniqueOrThrow({
-        where: { unitId },
-        select: { unitId: true },
-      });
+    const db = await getServerDb();
+    await db.transaction(async (tx: DbLike) => {
+      const existing = await getPostByUnitId(unitId, tx);
+      if (!existing) throw new AppError(404, `Post not found: ${unitId}`);
 
       // Soft-delete: mark the unit as DELETED
-      await tx.unit.update({
-        where: { id: unitId },
-        data: { status: UnitStatus.DELETED },
-      });
+      await tx
+        .update(Unit)
+        .set({ status: "DELETED", updatedAt: new Date() })
+        .where(eq(Unit.id, unitId));
 
-      await tx.contentTranslation.deleteMany({ where: { unitId } });
+      await tx
+        .delete(ContentTranslation)
+        .where(eq(ContentTranslation.unitId, unitId));
     });
 
     await Promise.all([enqueuePostSync(unitId), enqueueContentSync(unitId)]);
@@ -1362,10 +1534,9 @@ export class PostService {
    * This only changes the label; authorization is the caller's concern.
    */
   async setState(unitId: string, target: string): Promise<PostWithRelations> {
-    const existing = await prisma.post.findUniqueOrThrow({
-      where: { unitId },
-      select: { state: true, extra: true },
-    });
+    const db = await getServerDb();
+    const existing = await getPostByUnitId(unitId, db);
+    if (!existing) throw new AppError(404, `Post not found: ${unitId}`);
     const schemaTag = readStateSchemaTag(existing.extra);
     const schema = schemaTag ? getStateSchema(schemaTag) : undefined;
     if (!schema) {
@@ -1388,13 +1559,14 @@ export class PostService {
       );
     }
 
-    const updated = await prisma.post.update({
-      where: { unitId },
-      data: { state: normalized },
-      include: postInclude,
-    });
+    await db
+      .update(Post)
+      .set({ state: normalized, updatedAt: new Date() })
+      .where(eq(Post.unitId, unitId));
     await enqueuePostFields(unitId, { state: normalized });
-    return hydrateUnitOwnerUserSlugRow(updated as PostWithRelations);
+    const updated = await getPostByUnitId(unitId, db);
+    if (!updated) throw new AppError(404, `Post not found: ${unitId}`);
+    return hydrateUnitOwnerUserSlugRow(updated);
   }
 
   /**
@@ -1406,19 +1578,21 @@ export class PostService {
   private async maintainSolvedCacheOnAccept(
     scopeUnitId: string,
   ): Promise<void> {
-    const root = await prisma.post.findUnique({
-      where: { unitId: scopeUnitId },
-      select: { state: true, extra: true },
-    });
+    const db = await getServerDb();
+    const [root] = await db
+      .select({ state: Post.state, extra: Post.extra })
+      .from(Post)
+      .where(eq(Post.unitId, scopeUnitId))
+      .limit(1);
     if (!root) return;
     const schemaTag = readStateSchemaTag(root.extra);
     const schema = schemaTag ? getStateSchema(schemaTag) : undefined;
     if (!schema || !isLegalStateValue(schema, "solved")) return;
     if (root.state === schema.initial) {
-      await prisma.post.update({
-        where: { unitId: scopeUnitId },
-        data: { state: "solved" },
-      });
+      await db
+        .update(Post)
+        .set({ state: "solved", updatedAt: new Date() })
+        .where(eq(Post.unitId, scopeUnitId));
       await enqueuePostFields(scopeUnitId, { state: "solved" });
     }
   }
@@ -1431,23 +1605,32 @@ export class PostService {
   private async maintainSolvedCacheOnUnaccept(
     scopeUnitId: string,
   ): Promise<void> {
-    const remaining = await prisma.commentPromotion.count({
-      where: { scopeUnitId, kind: PinKindEnum.ACCEPTED_ANSWER },
-    });
+    const db = await getServerDb();
+    const [remainingRow] = await db
+      .select({ total: count() })
+      .from(CommentPromotion)
+      .where(
+        and(
+          eq(CommentPromotion.scopeUnitId, scopeUnitId),
+          eq(CommentPromotion.kind, PinKindEnum.ACCEPTED_ANSWER),
+        ),
+      );
+    const remaining = Number(remainingRow?.total ?? 0);
     if (remaining > 0) return;
-    const root = await prisma.post.findUnique({
-      where: { unitId: scopeUnitId },
-      select: { state: true, extra: true },
-    });
+    const [root] = await db
+      .select({ state: Post.state, extra: Post.extra })
+      .from(Post)
+      .where(eq(Post.unitId, scopeUnitId))
+      .limit(1);
     if (!root) return;
     const schemaTag = readStateSchemaTag(root.extra);
     const schema = schemaTag ? getStateSchema(schemaTag) : undefined;
     if (!schema) return;
     if (root.state === "solved") {
-      await prisma.post.update({
-        where: { unitId: scopeUnitId },
-        data: { state: schema.initial },
-      });
+      await db
+        .update(Post)
+        .set({ state: schema.initial, updatedAt: new Date() })
+        .where(eq(Post.unitId, scopeUnitId));
       await enqueuePostFields(scopeUnitId, { state: schema.initial });
     }
   }
@@ -1461,18 +1644,23 @@ export class PostService {
    * question tag (a `Unit(type=TAG)` whose slug is `OFFICIAL_QUESTION_TAG_SLUG`).
    */
   async isQuestionThread(rootPostUnitId: string): Promise<boolean> {
-    const tag = await prisma.unit.findFirst({
-      where: { type: UnitType.TAG, slug: OFFICIAL_QUESTION_TAG_SLUG },
-      select: { id: true },
-    });
+    const db = await getServerDb();
+    const [tag] = await db
+      .select({ id: Unit.id })
+      .from(Unit)
+      .where(
+        and(eq(Unit.type, "TAG"), eq(Unit.slug, OFFICIAL_QUESTION_TAG_SLUG)),
+      )
+      .limit(1);
     if (!tag) return false;
-    const applied = await prisma.unitTag.findUnique({
-      where: {
-        unitId_tagUnitId: { unitId: rootPostUnitId, tagUnitId: tag.id },
-      },
-      select: { unitId: true },
-    });
-    return applied !== null;
+    const [applied] = await db
+      .select({ unitId: UnitTag.unitId })
+      .from(UnitTag)
+      .where(
+        and(eq(UnitTag.unitId, rootPostUnitId), eq(UnitTag.tagUnitId, tag.id)),
+      )
+      .limit(1);
+    return !!applied;
   }
 
   /** Pin a reply within its thread scope (`kind = PINNED`). */
@@ -1571,25 +1759,16 @@ export class PostService {
     scopeUnitId: string,
     caller: RezicsSessionClaims,
   ): Promise<void> {
-    const scope = await prisma.post.findUnique({
-      where: { unitId: scopeUnitId },
-      select: {
-        authorUserId: true,
-        unit: {
-          select: {
-            type: true,
-            inRealms: { select: { realmUnitId: true } },
-          },
-        },
-      },
-    });
+    const db = await getServerDb();
+    const scope = await getPostByUnitId(scopeUnitId, db);
 
     if (!scope) {
-      const unit = await prisma.unit.findUnique({
-        where: { id: scopeUnitId },
-        select: { type: true },
-      });
-      if (unit?.type === UnitType.REALM) {
+      const [unit] = await db
+        .select({ type: Unit.type })
+        .from(Unit)
+        .where(eq(Unit.id, scopeUnitId))
+        .limit(1);
+      if (unit?.type === "REALM") {
         throw new AppError(
           400,
           "A realm cannot be a comment promotion scope; realm-level featuring belongs to Realm.extra.pinboard",
@@ -1601,9 +1780,7 @@ export class PostService {
     const allowed = await this.canPromoteInThread(
       {
         authorUserId: scope.authorUserId,
-        realmUnitIds: (scope.unit?.inRealms ?? []).map(
-          (row) => row.realmUnitId,
-        ),
+        realmUnitIds: (scope.unit.inRealms ?? []).map((row) => row.realmUnitId),
       },
       caller,
     );
@@ -1633,19 +1810,29 @@ export class PostService {
     if (BasicAdminPermission(caller.permission as never)) return true;
 
     if (scope.realmUnitIds.length > 0) {
-      const ownedRealm = await prisma.unit.findFirst({
-        where: { id: { in: scope.realmUnitIds }, userId: caller.userId },
-        select: { id: true },
-      });
+      const db = await getServerDb();
+      const [ownedRealm] = await db
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(
+          and(
+            inArray(Unit.id, scope.realmUnitIds),
+            eq(Unit.userId, caller.userId),
+          ),
+        )
+        .limit(1);
       if (ownedRealm) return true;
-      const moderator = await prisma.realmMember.findFirst({
-        where: {
-          realmUnitId: { in: scope.realmUnitIds },
-          userId: caller.userId,
-          roleKey: { in: [...PROMOTION_ROLES] },
-        },
-        select: { realmUnitId: true },
-      });
+      const [moderator] = await db
+        .select({ realmUnitId: RealmMember.realmUnitId })
+        .from(RealmMember)
+        .where(
+          and(
+            inArray(RealmMember.realmUnitId, scope.realmUnitIds),
+            eq(RealmMember.userId, caller.userId),
+            inArray(RealmMember.roleKey, [...PROMOTION_ROLES]),
+          ),
+        )
+        .limit(1);
       if (moderator) return true;
     }
 
@@ -1669,13 +1856,7 @@ export class PostService {
       return { viewerCanPromote: false, isQuestionThread: isQuestion };
     }
 
-    const scope = await prisma.post.findUnique({
-      where: { unitId: rootPostUnitId },
-      select: {
-        authorUserId: true,
-        unit: { select: { inRealms: { select: { realmUnitId: true } } } },
-      },
-    });
+    const scope = await getPostByUnitId(rootPostUnitId);
 
     // Only a real thread root post can be promoted into; anything else -> false.
     if (!scope) {
@@ -1685,9 +1866,7 @@ export class PostService {
     const viewerCanPromote = await this.canPromoteInThread(
       {
         authorUserId: scope.authorUserId,
-        realmUnitIds: (scope.unit?.inRealms ?? []).map(
-          (row) => row.realmUnitId,
-        ),
+        realmUnitIds: (scope.unit.inRealms ?? []).map((row) => row.realmUnitId),
       },
       caller,
     );
@@ -1699,14 +1878,16 @@ export class PostService {
     scopeUnitId: string,
     commentId: string,
   ): Promise<{ depth: number; parentCommentId: string | null }> {
-    const comment = await prisma.comment.findUnique({
-      where: { id: commentId },
-      select: {
-        depth: true,
-        rootUnitId: true,
-        parentCommentId: true,
-      },
-    });
+    const db = await getServerDb();
+    const [comment] = await db
+      .select({
+        depth: Comment.depth,
+        rootUnitId: Comment.rootUnitId,
+        parentCommentId: Comment.parentCommentId,
+      })
+      .from(Comment)
+      .where(eq(Comment.id, commentId))
+      .limit(1);
     if (!comment) {
       throw new AppError(404, `Promotable target not found: ${commentId}`);
     }
@@ -1732,21 +1913,23 @@ export class PostService {
    */
   private async mintPinPosition(
     scopeUnitId: string,
-    kind: PinKindEnum,
+    kind: PinKindValue,
     beforeTargetCommentId?: string,
     afterTargetCommentId?: string,
   ): Promise<string> {
+    const db = await getServerDb();
     const positionOf = async (commentId?: string) => {
       if (!commentId) return undefined;
-      const pin = await prisma.commentPromotion.findUnique({
-        where: {
-          scopeUnitId_commentId: {
-            scopeUnitId,
-            commentId: commentId,
-          },
-        },
-        select: { position: true },
-      });
+      const [pin] = await db
+        .select({ position: CommentPromotion.position })
+        .from(CommentPromotion)
+        .where(
+          and(
+            eq(CommentPromotion.scopeUnitId, scopeUnitId),
+            eq(CommentPromotion.commentId, commentId),
+          ),
+        )
+        .limit(1);
       return pin?.position ?? undefined;
     };
     const afterPos = await positionOf(afterTargetCommentId);
@@ -1754,31 +1937,40 @@ export class PostService {
     if (afterPos !== undefined || beforePos !== undefined) {
       return generateBetween(afterPos, beforePos);
     }
-    const last = await prisma.commentPromotion.findFirst({
-      where: { scopeUnitId, kind },
-      orderBy: { position: "desc" },
-      select: { position: true },
-    });
+    const [last] = await db
+      .select({ position: CommentPromotion.position })
+      .from(CommentPromotion)
+      .where(
+        and(
+          eq(CommentPromotion.scopeUnitId, scopeUnitId),
+          eq(CommentPromotion.kind, kind),
+        ),
+      )
+      .orderBy(desc(CommentPromotion.position))
+      .limit(1);
     return generateBetween(last?.position ?? undefined, undefined);
   }
 
   private async createPin(
     scopeUnitId: string,
     commentId: string,
-    kind: PinKindEnum,
+    kind: PinKindValue,
     position: string,
     byUserId: string,
   ): Promise<CommentPromotionDTO> {
     try {
-      const pin = await prisma.commentPromotion.create({
-        data: {
+      const db = await getServerDb();
+      const [pin] = await db
+        .insert(CommentPromotion)
+        .values({
           scopeUnitId,
           commentId: commentId,
           kind,
           position,
           byUserId,
-        },
-      });
+        })
+        .returning();
+      if (!pin) throw new Error("Failed to create comment promotion");
       return mapCommentPromotionToDTO(pin);
     } catch (error) {
       if (
@@ -1798,28 +1990,30 @@ export class PostService {
   private async deletePin(
     scopeUnitId: string,
     commentId: string,
-    kind: PinKindEnum,
+    kind: PinKindValue,
   ): Promise<void> {
-    const existing = await prisma.commentPromotion.findUnique({
-      where: {
-        scopeUnitId_commentId: {
-          scopeUnitId,
-          commentId: commentId,
-        },
-      },
-      select: { kind: true },
-    });
+    const db = await getServerDb();
+    const [existing] = await db
+      .select({ kind: CommentPromotion.kind })
+      .from(CommentPromotion)
+      .where(
+        and(
+          eq(CommentPromotion.scopeUnitId, scopeUnitId),
+          eq(CommentPromotion.commentId, commentId),
+        ),
+      )
+      .limit(1);
     if (!existing || existing.kind !== kind) {
       throw new AppError(404, "Promotion not found for this comment and scope");
     }
-    await prisma.commentPromotion.delete({
-      where: {
-        scopeUnitId_commentId: {
-          scopeUnitId,
-          commentId: commentId,
-        },
-      },
-    });
+    await db
+      .delete(CommentPromotion)
+      .where(
+        and(
+          eq(CommentPromotion.scopeUnitId, scopeUnitId),
+          eq(CommentPromotion.commentId, commentId),
+        ),
+      );
   }
 
   private normalizeTagIds(tagIds: unknown): string[] {

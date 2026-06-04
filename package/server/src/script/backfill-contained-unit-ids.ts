@@ -1,39 +1,40 @@
-import { prisma } from "#/prisma/client";
-import { searchClient } from "@/meili/search-client";
+import { sql } from "drizzle-orm";
+import { db, disconnectServerDb } from "../db/client";
+import { searchClient } from "../meili/search-client";
 
 const BATCH_SIZE = 5000;
 
-interface BackfillRow {
+type BackfillRow = Record<string, unknown> & {
   shelfId: string;
   items: string[] | null;
-}
+};
 
 async function fetchBatch(cursor: string | null): Promise<BackfillRow[]> {
-  if (cursor === null) {
-    return prisma.$queryRaw<BackfillRow[]>`
-      SELECT u.id AS "shelfId",
-             ARRAY_REMOVE(ARRAY_AGG(su."unitId"), NULL) AS "items"
-      FROM "Unit" u
-      LEFT JOIN "ShelfUnit" su ON su."shelfId" = u.id
-      WHERE u.type = 'SHELF'
-        AND u.status = 'PUBLISHED'
-      GROUP BY u.id
-      ORDER BY u.id ASC
-      LIMIT ${BATCH_SIZE};
-    `;
-  }
-  return prisma.$queryRaw<BackfillRow[]>`
-    SELECT u.id AS "shelfId",
-           ARRAY_REMOVE(ARRAY_AGG(su."unitId"), NULL) AS "items"
-    FROM "Unit" u
-    LEFT JOIN "ShelfUnit" su ON su."shelfId" = u.id
-    WHERE u.type = 'SHELF'
-      AND u.status = 'PUBLISHED'
-      AND u.id > ${cursor}::uuid
-    GROUP BY u.id
-    ORDER BY u.id ASC
-    LIMIT ${BATCH_SIZE};
-  `;
+  const result = cursor
+    ? await db.execute<BackfillRow>(sql`
+        SELECT u.id AS "shelfId",
+               ARRAY_REMOVE(ARRAY_AGG(su."unitId"), NULL) AS "items"
+        FROM "Unit" u
+        LEFT JOIN "ShelfUnit" su ON su."shelfId" = u.id
+        WHERE u.type = 'SHELF'
+          AND u.status = 'PUBLISHED'
+          AND u.id > ${cursor}::uuid
+        GROUP BY u.id
+        ORDER BY u.id ASC
+        LIMIT ${BATCH_SIZE};
+      `)
+    : await db.execute<BackfillRow>(sql`
+        SELECT u.id AS "shelfId",
+               ARRAY_REMOVE(ARRAY_AGG(su."unitId"), NULL) AS "items"
+        FROM "Unit" u
+        LEFT JOIN "ShelfUnit" su ON su."shelfId" = u.id
+        WHERE u.type = 'SHELF'
+          AND u.status = 'PUBLISHED'
+        GROUP BY u.id
+        ORDER BY u.id ASC
+        LIMIT ${BATCH_SIZE};
+      `);
+  return result.rows;
 }
 
 try {
@@ -62,5 +63,5 @@ try {
 
   console.log(`[backfill-contained-unit-ids] done. total=${total}`);
 } finally {
-  await prisma.$disconnect();
+  await disconnectServerDb();
 }

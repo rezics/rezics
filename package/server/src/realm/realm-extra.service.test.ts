@@ -1,7 +1,4 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-
-installPrismaClientMock();
 
 const hasAuthorityOverMock = mock(async () => false);
 
@@ -9,95 +6,84 @@ mock.module("@/unit/authority", () => ({
   hasAuthorityOver: hasAuthorityOverMock,
 }));
 
-let storedExtra: Record<string, unknown> = {};
-const queryRawMock = mock(async () => [{ "?column?": 1 }]);
-const realmFindUniqueOrThrowMock = mock(async () => ({ extra: storedExtra }));
-const realmUpdateMock = mock(async ({ data }: any) => {
-  storedExtra = data.extra;
-  return { extra: storedExtra };
-});
-const realmMemberFindFirstMock = mock(async () => ({ realmUnitId: "realm-1" }));
-const unitFindUniqueMock = mock(async ({ where }: any) => {
-  const id = where.id as string;
-  if (id === "realm-1") {
-    return { id, userId: "owner-1", type: "REALM", status: "PUBLISHED" };
-  }
-  if (id.startsWith("post-")) {
-    return { id, type: "POST", status: "PUBLISHED" };
-  }
-  if (id === "book-1") {
-    return { id, type: "BOOK", status: "PUBLISHED" };
-  }
-  if (id === "deleted-post") {
-    return { id, type: "POST", status: "DELETED" };
-  }
-  return null;
-});
-const unitFindManyMock = mock(async ({ where }: any) => {
-  const ids = where.id.in as string[];
-  if (where.type === "POST") {
-    return ids.filter((id) => id.startsWith("post-")).map((id) => ({ id }));
-  }
-  return ids.filter((id) => id.startsWith("tag-")).map((id) => ({ id }));
-});
-const zoneFindUniqueMock = mock(async ({ where }: any) => {
-  const unitId = where.unitId as string;
-  return unitId.startsWith("zone-") ? { unitId } : null;
-});
-const transactionMock = mock(async (fn: any) =>
-  fn({
-    $queryRaw: queryRawMock,
-    realm: {
-      findUniqueOrThrow: realmFindUniqueOrThrowMock,
-      update: realmUpdateMock,
-    },
-  }),
-);
-
-Object.assign(prismaMock, {
-  $transaction: transactionMock,
-  realm: {
-    findUniqueOrThrow: realmFindUniqueOrThrowMock,
-    update: realmUpdateMock,
-  },
-  realmMember: { findFirst: realmMemberFindFirstMock },
-  unit: {
-    findUnique: unitFindUniqueMock,
-    findMany: unitFindManyMock,
-  },
-  zone: {
-    findUnique: zoneFindUniqueMock,
-  },
-});
-
 const {
   clearSingleExtraKey,
   filterRealmExtraPublic,
   readListAdmin,
   readListPublic,
+  setRealmExtraRepositoryForTest,
   setSingleExtraKey,
   setTagTreeExtra,
 } = await import("./realm-extra.service");
 
+let storedExtra: Record<string, unknown> = {};
+let memberRow: { realmUnitId: string } | null = { realmUnitId: "realm-1" };
+
+const updateExtraWithLockMock = mock(
+  async (
+    _realmId: string,
+    mutate: (extra: Record<string, unknown>) => Record<string, unknown>,
+  ) => {
+    storedExtra = mutate(storedExtra);
+    return storedExtra;
+  },
+);
+
+const repository = {
+  findLiveUnitReferenceIds: mock(async (ids: string[]) => {
+    return new Set(ids.filter((id) => id.startsWith("post-")));
+  }),
+  findRealmAuthorityUnit: mock(async (realmId: string) =>
+    realmId === "realm-1"
+      ? { id: realmId, userId: "owner-1", type: "REALM" }
+      : null,
+  ),
+  findRealmAuthorityMember: mock(async () => memberRow),
+  loadExtra: mock(async () => storedExtra),
+  findPostUnit: mock(async (id: string) => {
+    if (id.startsWith("post-")) {
+      return { id, type: "POST", status: "PUBLISHED" };
+    }
+    if (id === "book-1") {
+      return { id, type: "BOOK", status: "PUBLISHED" };
+    }
+    if (id === "deleted-post") {
+      return { id, type: "POST", status: "DELETED" };
+    }
+    return null;
+  }),
+  findValidTagUnitIds: mock(async (ids: string[]) => {
+    return new Set(ids.filter((id) => id.startsWith("tag-")));
+  }),
+  zoneExists: mock(async (unitId: string) => unitId.startsWith("zone-")),
+  updateExtraWithLock: updateExtraWithLockMock,
+  findVisibleUnitIds: mock(async (ids: string[]) => {
+    return new Set(ids.filter((id) => id.startsWith("post-")));
+  }),
+  findLiveUnitIds: mock(async (ids: string[]) => {
+    return new Set(ids.filter((id) => id.startsWith("post-")));
+  }),
+};
+
+setRealmExtraRepositoryForTest(repository);
+
 const caller = {
   unitId: "user-1",
+  userId: "user-1",
   permission: { role: "MEMBER" },
 } as any;
 
 describe("realm extra single-key service", () => {
   beforeEach(() => {
     storedExtra = {};
+    memberRow = { realmUnitId: "realm-1" };
     hasAuthorityOverMock.mockClear();
     hasAuthorityOverMock.mockResolvedValue(false);
-    queryRawMock.mockClear();
-    realmFindUniqueOrThrowMock.mockClear();
-    realmUpdateMock.mockClear();
-    realmMemberFindFirstMock.mockClear();
-    realmMemberFindFirstMock.mockResolvedValue({ realmUnitId: "realm-1" });
-    unitFindUniqueMock.mockClear();
-    unitFindManyMock.mockClear();
-    zoneFindUniqueMock.mockClear();
-    transactionMock.mockClear();
+    for (const value of Object.values(repository)) {
+      if (typeof value === "function" && "mockClear" in value) {
+        value.mockClear();
+      }
+    }
   });
 
   test("sets and replaces rule/about/banner/wiki Zone keys", async () => {
@@ -216,7 +202,7 @@ describe("realm extra single-key service", () => {
   });
 
   test("rejects non-moderator callers", async () => {
-    realmMemberFindFirstMock.mockResolvedValueOnce(null as any);
+    memberRow = null;
 
     await expect(
       setSingleExtraKey(caller, "realm-1", "rule", "post-rule"),
@@ -227,7 +213,7 @@ describe("realm extra single-key service", () => {
     await setSingleExtraKey(caller, "realm-1", "rule", "post-rule");
     await setSingleExtraKey(caller, "realm-1", "about", "post-about");
 
-    expect(queryRawMock).toHaveBeenCalledTimes(2);
+    expect(updateExtraWithLockMock).toHaveBeenCalledTimes(2);
   });
 
   test("public stale filtering removes stale rule/about/banner post references", async () => {

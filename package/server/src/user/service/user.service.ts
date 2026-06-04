@@ -5,13 +5,23 @@
 import type { UpdateUser } from "@rezics/contract";
 import type { Language, UserSettings } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { Prisma, prisma } from "#/prisma/client";
+import { randomUUID } from "node:crypto";
+import { and, count, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { getDefaultRealmId } from "@/infra/default-realm";
 import { requireSlugScopeId } from "@/infra/slug-scopes";
 import { serverJobProducer } from "@/job/job-boundary";
-import { bootstrapSystemShelves } from "@/shelf/system-shelves";
+import {
+  bootstrapSystemShelves,
+  createDrizzleSystemShelfClient,
+} from "@/shelf/system-shelves";
+import {
+  EmailVerificationContract,
+  RealmMember,
+  Subscription,
+  Unit,
+  User,
+} from "../../db/schema";
 import type { UserFilterOptions, UserWithRelations } from "../models/types";
-import { userInclude } from "../models/types";
 
 export type CreateUserProfileInput = {
   userId: string;
@@ -44,58 +54,43 @@ export type CompleteProfileSetupInput = {
  * Called whenever User.unitId becomes known. Idempotent: a re-call with the
  * same `(unitId, slug)` is a no-op.
  */
-async function ensureUserUnit(
-  tx: Prisma.TransactionClient,
-  unitId: string,
-  slug: string | null,
-): Promise<void> {
-  const userScope = requireSlugScopeId("user");
-  await tx.unit.upsert({
-    where: { id: unitId },
-    update: { slug, slugScope: userScope },
-    create: {
-      id: unitId,
-      type: "USER",
-      slug,
-      slugScope: userScope,
-      status: "PUBLISHED",
-      visibility: "PUBLIC",
-      isLanguageNeutral: true,
-    },
-  });
-}
+type UserRow = typeof User.$inferSelect;
 
-async function fetchUnitSlug(unitId: string): Promise<string | null> {
-  const unit = await prisma.unit.findUnique({
-    where: { id: unitId },
-    select: { slug: true },
-  });
-  return unit?.slug ?? null;
-}
+export type UserRepository = {
+  list(input: {
+    q?: string;
+    slug?: string;
+    skip: number;
+    take: number;
+  }): Promise<{ users: UserWithRelations[]; total: number }>;
+  getByUserId(userId: string): Promise<UserWithRelations>;
+  getBySlug(slug: string): Promise<UserWithRelations | null>;
+  create(input: CreateUserProfileInput): Promise<UserWithRelations>;
+  materializeFromVerifiedAuth(
+    input: CreateVerifiedAuthAccountInput,
+  ): Promise<UserWithRelations>;
+  completeProfileSetup(
+    input: CompleteProfileSetupInput,
+  ): Promise<UserWithRelations>;
+  update(userId: string, data: Partial<UserRow>): Promise<UserWithRelations>;
+  delete(userId: string): Promise<void>;
+  exists(userId: string): Promise<boolean>;
+  listFollowers(input: {
+    userId: string;
+    skip: number;
+    take: number;
+  }): Promise<{ users: UserWithRelations[]; total: number }>;
+  listFollowings(input: {
+    userId: string;
+    skip: number;
+    take: number;
+  }): Promise<{ users: UserWithRelations[]; total: number }>;
+  getCanonicalSlug(userId: string): Promise<string | null>;
+};
 
-async function batchUnitSlugs(
-  unitIds: string[],
-): Promise<Map<string, string | null>> {
-  if (unitIds.length === 0) return new Map();
-  const units = await prisma.unit.findMany({
-    where: { id: { in: unitIds } },
-    select: { id: true, slug: true },
-  });
-  return new Map(units.map((u) => [u.id, u.slug ?? null]));
-}
-
-async function attachSlug<T extends { unitId: string }>(
-  user: T,
-): Promise<T & { slug: string | null }> {
-  const slug = await fetchUnitSlug(user.unitId);
-  return { ...user, slug };
-}
-
-async function attachSlugs<T extends { unitId: string }>(
-  users: T[],
-): Promise<(T & { slug: string | null })[]> {
-  const slugMap = await batchUnitSlugs(users.map((u) => u.unitId));
-  return users.map((u) => ({ ...u, slug: slugMap.get(u.unitId) ?? null }));
+async function getServerDb() {
+  const { db } = await import("../../db/client");
+  return db;
 }
 
 function enqueueUserSearch(
@@ -132,51 +127,419 @@ function enqueueUserPostsAuthorFanout(userId: string) {
   );
 }
 
+function createDrizzleUserRepository(): UserRepository {
+  async function hydrateUsers(rows: UserRow[]): Promise<UserWithRelations[]> {
+    if (rows.length === 0) return [];
+    const db = await getServerDb();
+    const userIds = rows.map((row) => row.unitId);
+    const unitRows = await db
+      .select()
+      .from(Unit)
+      .where(inArray(Unit.userId, userIds))
+      .orderBy(desc(Unit.createdAt));
+    const unitsByUser = new Map<string, (typeof Unit.$inferSelect)[]>();
+    for (const unit of unitRows) {
+      if (!unit.userId) continue;
+      const list = unitsByUser.get(unit.userId) ?? [];
+      if (list.length < 10) list.push(unit);
+      unitsByUser.set(unit.userId, list);
+    }
+    const userUnits = await db
+      .select({ id: Unit.id, slug: Unit.slug })
+      .from(Unit)
+      .where(inArray(Unit.id, userIds));
+    const slugById = new Map(userUnits.map((unit) => [unit.id, unit.slug]));
+    return rows.map((row) => ({
+      ...row,
+      units: unitsByUser.get(row.unitId) ?? [],
+      slug: slugById.get(row.unitId) ?? null,
+    }));
+  }
+
+  async function getUserOrThrow(userId: string): Promise<UserWithRelations> {
+    const db = await getServerDb();
+    const [row] = await db
+      .select()
+      .from(User)
+      .where(eq(User.unitId, userId))
+      .limit(1);
+    if (!row) throw new Error("User not found");
+    return (await hydrateUsers([row]))[0]!;
+  }
+
+  async function ensureUserUnit(
+    database: any,
+    unitId: string,
+    slug: string | null,
+  ) {
+    const userScope = requireSlugScopeId("user");
+    const now = new Date();
+    await database
+      .insert(Unit)
+      .values({
+        id: unitId,
+        type: "USER",
+        slug,
+        slugScope: userScope,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        isLanguageNeutral: true,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: Unit.id,
+        set: { slug, slugScope: userScope, updatedAt: now },
+      });
+  }
+
+  async function findUserByAuthId(database: any, authUserId: string) {
+    const [row] = await database
+      .select()
+      .from(User)
+      .where(eq(User.authUserId, authUserId))
+      .limit(1);
+    return row ?? null;
+  }
+
+  async function findUserById(database: any, userId: string) {
+    const [row] = await database
+      .select()
+      .from(User)
+      .where(eq(User.unitId, userId))
+      .limit(1);
+    return row ?? null;
+  }
+
+  return {
+    async list(input) {
+      const db = await getServerDb();
+      const conditions = [];
+      const userScope = requireSlugScopeId("user");
+      if (input.q?.trim()) {
+        const q = input.q.trim();
+        const slugMatches = await db
+          .select({ id: Unit.id })
+          .from(Unit)
+          .where(
+            and(
+              eq(Unit.type, "USER"),
+              eq(Unit.slugScope, userScope),
+              ilike(Unit.slug, `%${q}%`),
+            ),
+          );
+        const slugMatchedIds = slugMatches.map((unit) => unit.id);
+        conditions.push(
+          or(
+            ilike(User.name, `%${q}%`),
+            ...(slugMatchedIds.length
+              ? [inArray(User.unitId, slugMatchedIds)]
+              : []),
+          )!,
+        );
+      }
+      if (input.slug?.trim()) {
+        const [unit] = await db
+          .select({ id: Unit.id })
+          .from(Unit)
+          .where(
+            and(
+              eq(Unit.slugScope, userScope),
+              eq(Unit.slug, input.slug.trim()),
+            ),
+          )
+          .limit(1);
+        conditions.push(eq(User.unitId, unit?.id ?? "no-match"));
+      }
+      const where = conditions.length ? and(...conditions) : undefined;
+      const [rows, totalRows] = await Promise.all([
+        db
+          .select()
+          .from(User)
+          .where(where)
+          .orderBy(desc(User.createdAt))
+          .offset(input.skip)
+          .limit(input.take),
+        db.select({ value: count() }).from(User).where(where),
+      ]);
+      return {
+        users: await hydrateUsers(rows),
+        total: totalRows[0]?.value ?? 0,
+      };
+    },
+    getByUserId: getUserOrThrow,
+    async getBySlug(slug) {
+      const db = await getServerDb();
+      const userScope = requireSlugScopeId("user");
+      const [unit] = await db
+        .select({ id: Unit.id, type: Unit.type })
+        .from(Unit)
+        .where(and(eq(Unit.slugScope, userScope), eq(Unit.slug, slug)))
+        .limit(1);
+      if (!unit || unit.type !== "USER") return null;
+      const row = await findUserById(db, unit.id);
+      return row ? (await hydrateUsers([row]))[0]! : null;
+    },
+    async create(input) {
+      const db = await getServerDb();
+      const row = await db.transaction(async (tx) => {
+        await ensureUserUnit(tx, input.userId, input.slug);
+        const now = new Date();
+        const [created] = await tx
+          .insert(User)
+          .values({
+            unitId: input.userId,
+            name: input.slug,
+            avatar: input.avatar ?? null,
+            bio: input.bio ?? null,
+            joinDate: now,
+            updatedAt: now,
+          })
+          .returning();
+        if (!created) throw new Error("Failed to create user");
+        await bootstrapSystemShelves(
+          input.userId,
+          input.slug,
+          createDrizzleSystemShelfClient(tx),
+        );
+        return created;
+      });
+      return (await hydrateUsers([row]))[0]!;
+    },
+    async materializeFromVerifiedAuth(input) {
+      const db = await getServerDb();
+      const row = await db.transaction(async (tx) => {
+        const existing = await findUserByAuthId(tx, input.authUserId);
+        if (existing) return existing;
+        await ensureUserUnit(tx, input.authUserId, input.slug ?? null);
+        const now = new Date();
+        const [created] = await tx
+          .insert(User)
+          .values({
+            unitId: input.authUserId,
+            authUserId: input.authUserId,
+            email: input.email,
+            name: input.displayName ?? null,
+            avatar: input.avatar ?? null,
+            updatedAt: now,
+          })
+          .returning();
+        if (!created) throw new Error("Failed to create user");
+        await tx
+          .insert(EmailVerificationContract)
+          .values({
+            id: randomUUID(),
+            contractName: "user.email",
+            ownerId: created.unitId,
+            email: input.email,
+            status: "VERIFIED",
+            source: input.verificationSource,
+            verifiedAt: input.verifiedAt ?? now,
+            updatedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: [
+              EmailVerificationContract.contractName,
+              EmailVerificationContract.ownerId,
+              EmailVerificationContract.email,
+            ],
+            set: {
+              status: "VERIFIED",
+              source: input.verificationSource,
+              verifiedAt: input.verifiedAt ?? now,
+              updatedAt: now,
+            },
+          });
+        return created;
+      });
+      return (await hydrateUsers([row]))[0]!;
+    },
+    async completeProfileSetup(input) {
+      const db = await getServerDb();
+      const displayName = input.displayName?.trim() || input.slug;
+      const row = await db.transaction(async (tx) => {
+        await ensureUserUnit(tx, input.userId, input.slug);
+        const existing = await findUserById(tx, input.userId);
+        const settings = {
+          ...((existing?.settings as UserSettings | null) ?? {}),
+          preferredLanguages: input.preferredLanguages,
+        } satisfies UserSettings;
+        const now = new Date();
+        const [updated] = await tx
+          .update(User)
+          .set({
+            name: displayName,
+            avatar: input.avatar ?? undefined,
+            joinDate: now,
+            settings,
+            updatedAt: now,
+          })
+          .where(eq(User.unitId, input.userId))
+          .returning();
+        if (!updated) throw new Error("User not found");
+        await bootstrapSystemShelves(
+          updated.unitId,
+          input.slug,
+          createDrizzleSystemShelfClient(tx),
+        );
+        const defaultRealmId = getDefaultRealmId();
+        if (defaultRealmId) {
+          await tx
+            .insert(RealmMember)
+            .values({
+              realmUnitId: defaultRealmId,
+              userId: updated.unitId,
+              roleKey: "member",
+              updatedAt: now,
+            })
+            .onConflictDoNothing();
+        }
+        return updated;
+      });
+      return (await hydrateUsers([row]))[0]!;
+    },
+    async update(userId, data) {
+      const db = await getServerDb();
+      const [row] = await db
+        .update(User)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(User.unitId, userId))
+        .returning();
+      if (!row) throw new Error("User not found");
+      return (await hydrateUsers([row]))[0]!;
+    },
+    async delete(userId) {
+      const db = await getServerDb();
+      await db.delete(User).where(eq(User.unitId, userId));
+    },
+    async exists(userId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ value: count() })
+        .from(User)
+        .where(eq(User.unitId, userId));
+      return (row?.value ?? 0) > 0;
+    },
+    async listFollowers({ userId, skip, take }) {
+      const db = await getServerDb();
+      const [subs, totalRows] = await Promise.all([
+        db
+          .select({
+            subscriberUnitId: Subscription.subscriberUnitId,
+            createdAt: Subscription.createdAt,
+          })
+          .from(Subscription)
+          .innerJoin(Unit, eq(Subscription.subscriberUnitId, Unit.id))
+          .where(
+            and(
+              eq(Subscription.subscribedUnitId, userId),
+              eq(Unit.type, "USER"),
+            ),
+          )
+          .orderBy(desc(Subscription.createdAt))
+          .offset(skip)
+          .limit(take),
+        db
+          .select({ value: count() })
+          .from(Subscription)
+          .innerJoin(Unit, eq(Subscription.subscriberUnitId, Unit.id))
+          .where(
+            and(
+              eq(Subscription.subscribedUnitId, userId),
+              eq(Unit.type, "USER"),
+            ),
+          ),
+      ]);
+      const orderById = new Map(subs.map((s, i) => [s.subscriberUnitId, i]));
+      const rows = subs.length
+        ? await db
+            .select()
+            .from(User)
+            .where(
+              inArray(
+                User.unitId,
+                subs.map((s) => s.subscriberUnitId),
+              ),
+            )
+        : [];
+      rows.sort(
+        (a, b) =>
+          (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
+      );
+      return {
+        users: await hydrateUsers(rows),
+        total: totalRows[0]?.value ?? 0,
+      };
+    },
+    async listFollowings({ userId, skip, take }) {
+      const db = await getServerDb();
+      const [subs, totalRows] = await Promise.all([
+        db
+          .select({
+            subscribedUnitId: Subscription.subscribedUnitId,
+            createdAt: Subscription.createdAt,
+          })
+          .from(Subscription)
+          .innerJoin(Unit, eq(Subscription.subscribedUnitId, Unit.id))
+          .where(
+            and(
+              eq(Subscription.subscriberUnitId, userId),
+              eq(Unit.type, "USER"),
+            ),
+          )
+          .orderBy(desc(Subscription.createdAt))
+          .offset(skip)
+          .limit(take),
+        db
+          .select({ value: count() })
+          .from(Subscription)
+          .innerJoin(Unit, eq(Subscription.subscribedUnitId, Unit.id))
+          .where(
+            and(
+              eq(Subscription.subscriberUnitId, userId),
+              eq(Unit.type, "USER"),
+            ),
+          ),
+      ]);
+      const orderById = new Map(subs.map((s, i) => [s.subscribedUnitId, i]));
+      const rows = subs.length
+        ? await db
+            .select()
+            .from(User)
+            .where(
+              inArray(
+                User.unitId,
+                subs.map((s) => s.subscribedUnitId),
+              ),
+            )
+        : [];
+      rows.sort(
+        (a, b) =>
+          (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
+      );
+      return {
+        users: await hydrateUsers(rows),
+        total: totalRows[0]?.value ?? 0,
+      };
+    },
+    async getCanonicalSlug(userId) {
+      const db = await getServerDb();
+      const [unit] = await db
+        .select({ slug: Unit.slug })
+        .from(Unit)
+        .where(eq(Unit.id, userId))
+        .limit(1);
+      return unit?.slug ?? null;
+    },
+  };
+}
+
 /**
  * User Service - Business logic layer
  */
 export class UserService {
-  /**
-   * Build where clause for user queries. Slug filters are translated to a
-   * USER Unit match because the slug column lives on Unit now.
-   */
-  private async buildWhereClause(
-    options: UserFilterOptions,
-  ): Promise<Prisma.UserWhereInput> {
-    const andWhere: Prisma.UserWhereInput[] = [];
-    const userScope = requireSlugScopeId("user");
-
-    if (options.q?.trim()) {
-      const q = options.q.trim();
-      const slugMatches = await prisma.unit.findMany({
-        where: {
-          type: "USER",
-          slugScope: userScope,
-          slug: { contains: q, mode: "insensitive" },
-        },
-        select: { id: true },
-      });
-      const slugMatchedIds = slugMatches.map((u) => u.id);
-      andWhere.push({
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          ...(slugMatchedIds.length > 0
-            ? [{ unitId: { in: slugMatchedIds } }]
-            : []),
-        ],
-      });
-    }
-
-    if (options.slug?.trim()) {
-      const slugMatch = await prisma.unit.findUnique({
-        where: { slugScope_slug: { slugScope: userScope, slug: options.slug } },
-        select: { id: true },
-      });
-      andWhere.push({ unitId: slugMatch?.id ?? "no-match" });
-    }
-
-    return andWhere.length > 0 ? { AND: andWhere } : {};
-  }
+  constructor(
+    private readonly repository: UserRepository = createDrizzleUserRepository(),
+  ) {}
 
   /**
    * List users with filters and pagination
@@ -189,81 +552,33 @@ export class UserService {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (pageNum - 1) * limitNum;
 
-    const where = await this.buildWhereClause(options);
-
-    const [users, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limitNum,
-        include: userInclude,
-      }),
-      prisma.user.count({ where }),
-    ]);
-
-    const withSlugs = await attachSlugs(users);
-    return { users: withSlugs as UserWithRelations[], total };
+    return this.repository.list({
+      q: options.q,
+      slug: options.slug,
+      skip,
+      take: limitNum,
+    });
   }
 
   /**
    * Get user by unitId (formerly userId)
    */
   async getByUserId(userId: string): Promise<UserWithRelations> {
-    const user = await prisma.user.findUniqueOrThrow({
-      where: { unitId: userId },
-      include: userInclude,
-    });
-
-    return (await attachSlug(user)) as UserWithRelations;
+    return this.repository.getByUserId(userId);
   }
 
   /**
    * Get user by slug (USER scope on Unit)
    */
   async getBySlug(slug: string): Promise<UserWithRelations | null> {
-    const userScope = requireSlugScopeId("user");
-    const unit = await prisma.unit.findUnique({
-      where: { slugScope_slug: { slugScope: userScope, slug } },
-      select: { id: true, type: true },
-    });
-    if (!unit || unit.type !== "USER") return null;
-
-    const user = await prisma.user.findUnique({
-      where: { unitId: unit.id },
-      include: userInclude,
-    });
-
-    if (!user) return null;
-    return {
-      ...user,
-      slug: unit.type === "USER" ? slug : null,
-    } as UserWithRelations;
+    return this.repository.getBySlug(slug);
   }
 
   /**
    * Create new user
    */
   async create(req: CreateUserProfileInput): Promise<UserWithRelations> {
-    const { userId, slug, avatar, bio } = req;
-
-    const user = await prisma.$transaction(async (tx) => {
-      await ensureUserUnit(tx, userId, slug);
-      const created = await tx.user.create({
-        data: {
-          unitId: userId,
-          name: slug,
-          avatar: avatar ?? null,
-          bio: bio ?? null,
-          joinDate: new Date(),
-        },
-        include: userInclude,
-      });
-      await bootstrapSystemShelves(userId, slug, tx);
-      return created;
-    });
-
-    await enqueueUserSearch(SEARCH_COMMAND_KINDS.userSync, user.unitId);
+    const user = await this.repository.create(req);
 
     await enqueueUserSearch(SEARCH_COMMAND_KINDS.userSync, user.unitId);
 
@@ -273,95 +588,13 @@ export class UserService {
   async materializeFromVerifiedAuth(
     payload: CreateVerifiedAuthAccountInput,
   ): Promise<UserWithRelations> {
-    const user = await prisma.$transaction(async (tx) => {
-      const existing = await tx.user.findUnique({
-        where: { authUserId: payload.authUserId },
-        include: userInclude,
-      });
-      if (existing) return existing;
-
-      await ensureUserUnit(tx, payload.authUserId, payload.slug ?? null);
-      const created = await tx.user.create({
-        data: {
-          unitId: payload.authUserId,
-          authUserId: payload.authUserId,
-          email: payload.email,
-          name: payload.displayName ?? null,
-          avatar: payload.avatar ?? null,
-        },
-        include: userInclude,
-      });
-      await tx.emailVerificationContract.upsert({
-        where: {
-          contractName_ownerId_email: {
-            contractName: "user.email",
-            ownerId: created.unitId,
-            email: payload.email,
-          },
-        },
-        create: {
-          contractName: "user.email",
-          ownerId: created.unitId,
-          email: payload.email,
-          status: "VERIFIED",
-          source: payload.verificationSource,
-          verifiedAt: payload.verifiedAt ?? new Date(),
-        },
-        update: {
-          status: "VERIFIED",
-          source: payload.verificationSource,
-          verifiedAt: payload.verifiedAt ?? new Date(),
-        },
-      });
-      return created;
-    });
-
-    return user as UserWithRelations;
+    return this.repository.materializeFromVerifiedAuth(payload);
   }
 
   async completeProfileSetup(
     payload: CompleteProfileSetupInput,
   ): Promise<UserWithRelations> {
-    const displayName = payload.displayName?.trim() || payload.slug;
-
-    const user = await prisma.$transaction(async (tx) => {
-      await ensureUserUnit(tx, payload.userId, payload.slug);
-      const existing = await tx.user.findUnique({
-        where: { unitId: payload.userId },
-        select: { settings: true },
-      });
-      const settings = {
-        ...((existing?.settings as UserSettings | null) ?? {}),
-        preferredLanguages: payload.preferredLanguages,
-      } satisfies UserSettings;
-      const updated = await tx.user.update({
-        where: { unitId: payload.userId },
-        data: {
-          name: displayName,
-          avatar: payload.avatar ?? undefined,
-          joinDate: new Date(),
-          settings,
-        },
-        include: userInclude,
-      });
-
-      await bootstrapSystemShelves(updated.unitId, payload.slug, tx);
-
-      const defaultRealmId = getDefaultRealmId();
-      if (defaultRealmId) {
-        await tx.realmMember
-          .create({
-            data: {
-              realmUnitId: defaultRealmId,
-              userId: updated.unitId,
-              roleKey: "member",
-            },
-          })
-          .catch(() => {});
-      }
-
-      return updated;
-    });
+    const user = await this.repository.completeProfileSetup(payload);
 
     await enqueueUserSearch(SEARCH_COMMAND_KINDS.userSync, user.unitId);
 
@@ -383,25 +616,14 @@ export class UserService {
 
     const { name, avatar, bio, description } = req;
 
-    const updateData: Prisma.UserUpdateInput = {
+    const updateData: Partial<UserRow> = {
       name: name ?? undefined,
       avatar: avatar !== undefined ? avatar : undefined,
       bio: bio !== undefined ? bio : undefined,
-      description:
-        description !== undefined
-          ? description === null
-            ? Prisma.JsonNull
-            : (description as Prisma.InputJsonValue)
-          : undefined,
+      description: description !== undefined ? description : undefined,
     };
 
-    const user = (await attachSlug(
-      await prisma.user.update({
-        where: { unitId: userId },
-        data: updateData,
-        include: userInclude,
-      }),
-    )) as UserWithRelations;
+    const user = await this.repository.update(userId, updateData);
 
     const userPatchFields: Record<string, any> = {};
     if (name !== undefined) userPatchFields.name = user.name;
@@ -422,7 +644,7 @@ export class UserService {
    * Delete user by unitId
    */
   async delete(userId: string): Promise<void> {
-    await prisma.user.delete({ where: { unitId: userId } });
+    await this.repository.delete(userId);
     await enqueueUserSearch(SEARCH_COMMAND_KINDS.userDelete, userId);
   }
 
@@ -430,8 +652,7 @@ export class UserService {
    * Check if user exists by unitId
    */
   async exists(userId: string): Promise<boolean> {
-    const count = await prisma.user.count({ where: { unitId: userId } });
-    return count > 0;
+    return this.repository.exists(userId);
   }
 
   /**
@@ -449,32 +670,7 @@ export class UserService {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (pageNum - 1) * limitNum;
 
-    const where = {
-      subscribedUnitId: userId,
-      subscriber: { type: "USER" as const },
-    } satisfies Prisma.SubscriptionWhereInput;
-
-    const [subs, total] = await Promise.all([
-      prisma.subscription.findMany({
-        where,
-        select: { subscriberUnitId: true, createdAt: true },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limitNum,
-      }),
-      prisma.subscription.count({ where }),
-    ]);
-
-    const orderById = new Map(subs.map((s, i) => [s.subscriberUnitId, i]));
-    const followers = await prisma.user.findMany({
-      where: { unitId: { in: subs.map((s) => s.subscriberUnitId) } },
-      include: userInclude,
-    });
-    followers.sort(
-      (a, b) => (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
-    );
-    const users = await attachSlugs(followers);
-    return { users: users as UserWithRelations[], total };
+    return this.repository.listFollowers({ userId, skip, take: limitNum });
   }
 
   /**
@@ -489,32 +685,7 @@ export class UserService {
     const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
     const skip = (pageNum - 1) * limitNum;
 
-    const where = {
-      subscriberUnitId: userId,
-      subscribedUnit: { type: "USER" as const },
-    } satisfies Prisma.SubscriptionWhereInput;
-
-    const [subs, total] = await Promise.all([
-      prisma.subscription.findMany({
-        where,
-        select: { subscribedUnitId: true, createdAt: true },
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limitNum,
-      }),
-      prisma.subscription.count({ where }),
-    ]);
-
-    const orderById = new Map(subs.map((s, i) => [s.subscribedUnitId, i]));
-    const followings = await prisma.user.findMany({
-      where: { unitId: { in: subs.map((s) => s.subscribedUnitId) } },
-      include: userInclude,
-    });
-    followings.sort(
-      (a, b) => (orderById.get(a.unitId) ?? 0) - (orderById.get(b.unitId) ?? 0),
-    );
-    const users = await attachSlugs(followings);
-    return { users: users as UserWithRelations[], total };
+    return this.repository.listFollowings({ userId, skip, take: limitNum });
   }
 
   /**
@@ -522,7 +693,7 @@ export class UserService {
    * `null` when no Unit row exists for the user.
    */
   async getCanonicalSlug(userId: string): Promise<string | null> {
-    return fetchUnitSlug(userId);
+    return this.repository.getCanonicalSlug(userId);
   }
 }
 

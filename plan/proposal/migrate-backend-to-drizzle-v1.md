@@ -210,28 +210,28 @@ databases may be reset and reseeded.
 - [ ] 0.5 Remove Prisma dependencies from `server`, `auth`, `notify`,
   `reaction`, `history`, `ranking`, `job-runner`, `utils`, `search`, and `tool`
   once their runtime/tooling imports are gone.
-- [ ] 0.6 Update root scripts from `prisma:*` to `db:*`, keeping command names
+- [x] 0.6 Update root scripts from `prisma:*` to `db:*`, keeping command names
   short and Bun-native: `db:generate`, `db:migrate`, `db:deploy`, `db:reset`,
   and any package-filtered equivalents that are still useful.
-- [ ] 0.7 Update `AGENTS.md` command examples and architecture wording from
+- [x] 0.7 Update `AGENTS.md` command examples and architecture wording from
   Prisma schemas to Drizzle schema ownership.
 
 ## 1. Database tooling and migration runner
 
-- [ ] 1.1 Replace `tool/src/commands/prisma/*` with a Drizzle-oriented
+- [x] 1.1 Replace `tool/src/commands/prisma/*` with a Drizzle-oriented
   `tool/src/commands/db/*` package registry covering schema owners:
   `auth`, `server`, `notify`, `reaction`, `history`, `ranking`; keep
   `job-runner` as `ensureOnly`.
-- [ ] 1.2 Add `tool db generate` to run `bunx drizzle-kit generate --config ...`
+- [x] 1.2 Add `tool db generate` to run `bunx drizzle-kit generate --config ...`
   per selected package. It must support all packages, one package, and
   non-interactive mode.
-- [ ] 1.3 Add `tool db migrate` for local development. Order should be
+- [x] 1.3 Add `tool db migrate` for local development. Order should be
   `auth -> server -> notify -> reaction -> history -> ranking`, with ranking
   remaining conceptually parallel-safe but serialized for simpler local output.
-- [ ] 1.4 Add `tool db deploy` for production-style one-shot migrations. It must
+- [x] 1.4 Add `tool db deploy` for production-style one-shot migrations. It must
   run Drizzle migrations without dev prompts and must be the command used by
   `bin/deploy`.
-- [ ] 1.5 Add `tool db reset` for destructive local resets. It should drop/recreate
+- [x] 1.5 Add `tool db reset` for destructive local resets. It should drop/recreate
   selected schema-owner databases, run Drizzle migrations from scratch, then
   optionally invoke existing seed/factory workflows. Keep headless confirmation
   strict.
@@ -334,6 +334,24 @@ databases may be reset and reseeded.
   unit/catalog, content structure, comments/posts, realm/tagging, poll,
   attribution, user/profile, subscriptions/notify boundary, governance,
   feedback, JWT, EchoKV, scripts.
+  - Applied progress: converted bounded server runtime domains including
+    user tag applications, account export/deletion, game/media library,
+    governance audit/capability/moderation-action/enforcement,
+    unit language resolution/authority/translation, system shelves, user unit
+    collection metadata, unit aliases, subject/credit/entity attribution,
+    score, realm tag context, tag service, poll voting service, progress
+    service, realm extra metadata, zone service, user service, dispatch service,
+    comment service, shelf collection service, entity service, unit service,
+    chapter service, series service, content-structure service, book service,
+    governance moderation service, realm service, shelf service, post service,
+    and server Meili client bootstrap.
+  - Verification on 2026-06-04: server runtime grep for `#/prisma/client`,
+    `@prisma`, `@prisma/`, `Prisma.`, and `prisma.` is clean under
+    `package/server/src` excluding tests; scoped server TypeScript filtering for
+    migrated governance, realm, shelf, post, and `meili/search-client.ts` has no
+    output. Focused governance/realm/shelf tests pass. `post.service.test.ts`
+    still needs assertion/harness cleanup because many cases assert old
+    Prisma-shaped query arguments rather than Drizzle query behavior.
 - [ ] 4.4 Replace dynamic `Prisma.*WhereInput`, `Include`, `Select`, and payload
   type composition with domain-local Drizzle query builders, explicit
   projections, RQB v2 `with`, joins, and mappers. Prioritize heavily dynamic

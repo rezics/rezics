@@ -8,21 +8,30 @@ process.env.BETTER_AUTH_SECRET ??=
   "this-is-a-long-auth-secret-for-tests-123456";
 process.env.AUTH_INTERNAL_TOKEN_GATEWAY_SECRET ??= "internal-test-secret";
 
-const userFindUnique = mock(
+const findAuthUserForRegistrationCancel = mock(
   async (_args?: unknown): Promise<any> => ({
     id: "auth-user-1",
     email: "reader@example.com",
     emailVerified: false,
   }),
 );
-const userFindMany = mock(async (_args?: unknown) => [
+const findStaleUnverifiedUsers = mock(async (_args?: unknown) => [
   { id: "stale-user-1", email: "stale@example.com" },
 ]);
-const userUpdate = mock(async () => ({ id: "auth-user-1", name: "reader" }));
-const userDelete = mock(async () => ({ id: "auth-user-1" }));
-const userDeleteMany = mock(async () => ({ count: 1 }));
-const deleteMany = mock(async () => ({ count: 1 }));
-const sessionFindMany = mock(async () => [
+const deleteAuthRegistration = mock(async () => {});
+const cleanupStaleRegistrations = mock(async () => {});
+const findVerifiedFactsUser = mock(async () => ({
+  id: "auth-user-1",
+  email: "reader@example.com",
+  emailVerified: false,
+  updatedAt: new Date("2026-05-07T00:00:00.000Z"),
+  accounts: [] as Array<{ providerId: string }>,
+}));
+const findAuthUserId = mock(async () => ({ id: "auth-user-1" }));
+const updateAuthUserName = mock(async () => {});
+const deleteAuthSessionForUser = mock(async () => 1);
+const deleteAuthSessionsForUser = mock(async () => 1);
+const listActiveAuthSessions = mock(async () => [
   {
     id: "session-1",
     userId: "auth-user-1",
@@ -34,7 +43,11 @@ const sessionFindMany = mock(async () => [
     updatedAt: new Date("2026-05-28T00:00:00.000Z"),
   },
 ]);
-const sessionCreate = mock(async () => ({
+const findImpersonationUsers = mock(async () => ({
+  actor: { id: "actor-auth-user-1", role: "owner" },
+  target: { id: "target-auth-user-1", role: "user", banned: false },
+}));
+const createImpersonationSession = mock(async () => ({
   id: "session-impersonation-1",
   token: "impersonation-token",
   userId: "target-auth-user-1",
@@ -42,27 +55,20 @@ const sessionCreate = mock(async () => ({
   createdAt: new Date("2026-05-28T00:00:00.000Z"),
   expiresAt: new Date("2026-05-28T00:15:00.000Z"),
 }));
-const transaction = mock(async (operations: Promise<unknown>[]) =>
-  Promise.all(operations),
-);
 
-mock.module("../auth/prisma", () => ({
-  prisma: {
-    user: {
-      findUnique: userFindUnique,
-      findMany: userFindMany,
-      update: userUpdate,
-      delete: userDelete,
-      deleteMany: userDeleteMany,
-    },
-    session: { create: sessionCreate, deleteMany, findMany: sessionFindMany },
-    account: { deleteMany },
-    verification: { deleteMany },
-    oAuthAccessToken: { deleteMany },
-    oAuthRefreshToken: { deleteMany },
-    oAuthConsent: { deleteMany },
-    $transaction: transaction,
-  },
+mock.module("../auth/storage", () => ({
+  cleanupStaleRegistrations,
+  createImpersonationSession,
+  deleteAuthRegistration,
+  deleteAuthSessionForUser,
+  deleteAuthSessionsForUser,
+  findAuthUserForRegistrationCancel,
+  findAuthUserId,
+  findImpersonationUsers,
+  findStaleUnverifiedUsers,
+  findVerifiedFactsUser,
+  listActiveAuthSessions,
+  updateAuthUserName,
 }));
 
 mock.module("../env", () => ({
@@ -73,23 +79,54 @@ mock.module("../env", () => ({
 
 describe("auth internal registration lifecycle", () => {
   beforeEach(() => {
-    userFindUnique.mockReset();
-    userFindUnique.mockResolvedValue({
+    (globalThis as any).__authStorageMocks = {
+      cleanupStaleRegistrations,
+      createImpersonationSession,
+      deleteAuthRegistration,
+      deleteAuthSessionForUser,
+      deleteAuthSessionsForUser,
+      findAuthUserForRegistrationCancel,
+      findAuthUserId,
+      findImpersonationUsers,
+      findStaleUnverifiedUsers,
+      findVerifiedFactsUser,
+      listActiveAuthSessions,
+      updateAuthUserName,
+    };
+    findAuthUserForRegistrationCancel.mockReset();
+    findAuthUserForRegistrationCancel.mockResolvedValue({
       id: "auth-user-1",
       email: "reader@example.com",
       emailVerified: false,
     });
-    userFindMany.mockReset();
-    userFindMany.mockResolvedValue([
+    findStaleUnverifiedUsers.mockReset();
+    findStaleUnverifiedUsers.mockResolvedValue([
       { id: "stale-user-1", email: "stale@example.com" },
     ]);
-    userDelete.mockClear();
-    userUpdate.mockClear();
-    userDeleteMany.mockClear();
-    deleteMany.mockClear();
-    sessionCreate.mockClear();
-    sessionFindMany.mockClear();
-    transaction.mockClear();
+    deleteAuthRegistration.mockClear();
+    cleanupStaleRegistrations.mockClear();
+    findVerifiedFactsUser.mockReset();
+    findVerifiedFactsUser.mockResolvedValue({
+      id: "auth-user-1",
+      email: "reader@example.com",
+      emailVerified: false,
+      updatedAt: new Date("2026-05-07T00:00:00.000Z"),
+      accounts: [] as Array<{ providerId: string }>,
+    });
+    findAuthUserId.mockReset();
+    findAuthUserId.mockResolvedValue({ id: "auth-user-1" });
+    updateAuthUserName.mockClear();
+    deleteAuthSessionForUser.mockReset();
+    deleteAuthSessionForUser.mockResolvedValue(1);
+    deleteAuthSessionsForUser.mockReset();
+    deleteAuthSessionsForUser.mockResolvedValue(1);
+    listActiveAuthSessions.mockClear();
+    findImpersonationUsers.mockReset();
+    findImpersonationUsers.mockResolvedValue({
+      actor: { id: "actor-auth-user-1", role: "owner" },
+      target: { id: "target-auth-user-1", role: "user", banned: false },
+    });
+    createImpersonationSession.mockClear();
   });
 
   test("cancels an unverified registration and invalidates related auth state", async () => {
@@ -111,14 +148,15 @@ describe("auth internal registration lifecycle", () => {
       success: true,
       canceled: true,
     });
-    expect(transaction).toHaveBeenCalledTimes(1);
-    expect(userDelete).toHaveBeenCalledWith({
-      where: { id: "auth-user-1" },
+    expect(deleteAuthRegistration).toHaveBeenCalledWith({
+      id: "auth-user-1",
+      email: "reader@example.com",
+      emailVerified: false,
     });
   });
 
   test("rejects verified cancellation unless main explicitly allows it", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    findAuthUserForRegistrationCancel.mockResolvedValueOnce({
       id: "auth-user-1",
       email: "reader@example.com",
       emailVerified: true,
@@ -138,7 +176,7 @@ describe("auth internal registration lifecycle", () => {
     );
 
     expect(response.status).toBe(409);
-    expect(transaction).not.toHaveBeenCalled();
+    expect(deleteAuthRegistration).not.toHaveBeenCalled();
     expect((await response.json()).error.code).toBe(
       "VERIFIED_ACCOUNT_REQUIRES_MAIN_APPROVAL",
     );
@@ -163,21 +201,16 @@ describe("auth internal registration lifecycle", () => {
       success: true,
       deleted: 1,
     });
-    const findManyArgs = userFindMany.mock.calls[0]?.[0] as unknown as {
-      where: { emailVerified: boolean; createdAt: { lt: Date } };
-      select: { id: boolean; email: boolean };
-    };
-    expect(findManyArgs.where.emailVerified).toBe(false);
-    expect(findManyArgs.where.createdAt.lt).toBeInstanceOf(Date);
-    expect(findManyArgs.select).toEqual({ id: true, email: true });
-    expect(userDeleteMany).toHaveBeenCalledWith({
-      where: { id: { in: ["stale-user-1"] } },
+    expect(findStaleUnverifiedUsers.mock.calls[0]?.[0]).toBeInstanceOf(Date);
+    expect(cleanupStaleRegistrations).toHaveBeenCalledWith({
+      userIds: ["stale-user-1"],
+      emails: ["stale@example.com"],
     });
   });
 
   test("returns verified registration facts for main materialization", async () => {
     const updatedAt = new Date("2026-05-07T00:00:00.000Z");
-    userFindUnique.mockResolvedValueOnce({
+    findVerifiedFactsUser.mockResolvedValueOnce({
       id: "auth-user-1",
       email: "reader@example.com",
       emailVerified: true,
@@ -213,7 +246,7 @@ describe("auth internal registration lifecycle", () => {
   });
 
   test("rejects verified facts before registration verification", async () => {
-    userFindUnique.mockResolvedValueOnce({
+    findVerifiedFactsUser.mockResolvedValueOnce({
       id: "auth-user-1",
       email: "reader@example.com",
       emailVerified: false,
@@ -241,7 +274,7 @@ describe("auth internal registration lifecycle", () => {
   });
 
   test("projects main slug into auth technical name", async () => {
-    userFindUnique.mockResolvedValueOnce({ id: "auth-user-1" });
+    findAuthUserId.mockResolvedValueOnce({ id: "auth-user-1" });
     const { authInternalApi } = await import("./internal.api");
 
     const response = await authInternalApi.handle(
@@ -257,15 +290,12 @@ describe("auth internal registration lifecycle", () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ success: true });
-    expect(userUpdate).toHaveBeenCalledWith({
-      where: { id: "auth-user-1" },
-      data: { name: "reader" },
-    });
+    expect(updateAuthUserName).toHaveBeenCalledWith("auth-user-1", "reader");
   });
 
   test("revokes all sessions for a main-requested auth user", async () => {
-    userFindUnique.mockResolvedValueOnce({ id: "auth-user-1" });
-    deleteMany.mockResolvedValueOnce({ count: 2 });
+    findAuthUserId.mockResolvedValueOnce({ id: "auth-user-1" });
+    deleteAuthSessionsForUser.mockResolvedValueOnce(2);
     const { authInternalApi } = await import("./internal.api");
 
     const response = await authInternalApi.handle(
@@ -287,9 +317,7 @@ describe("auth internal registration lifecycle", () => {
       success: true,
       revokedSessions: 2,
     });
-    expect(deleteMany).toHaveBeenCalledWith({
-      where: { userId: "auth-user-1" },
-    });
+    expect(deleteAuthSessionsForUser).toHaveBeenCalledWith("auth-user-1");
   });
 
   test("lists safe session metadata for a main-requested auth user", async () => {
@@ -347,19 +375,21 @@ describe("auth internal registration lifecycle", () => {
       success: true,
       revokedSessions: 1,
     });
-    expect(deleteMany).toHaveBeenCalledWith({
-      where: { id: "session-1", userId: "auth-user-1" },
-    });
+    expect(deleteAuthSessionForUser).toHaveBeenCalledWith(
+      "auth-user-1",
+      "session-1",
+    );
   });
 
   test("creates an owner impersonation session for a main-requested auth user", async () => {
-    userFindUnique
-      .mockResolvedValueOnce({ id: "actor-auth-user-1", role: "owner" })
-      .mockResolvedValueOnce({
+    findImpersonationUsers.mockResolvedValueOnce({
+      actor: { id: "actor-auth-user-1", role: "owner" },
+      target: {
         id: "target-auth-user-1",
         role: "user",
         banned: false,
-      });
+      },
+    });
     const { authInternalApi } = await import("./internal.api");
 
     const response = await authInternalApi.handle(
@@ -391,23 +421,23 @@ describe("auth internal registration lifecycle", () => {
         durationSeconds: 900,
       },
     });
-    expect(sessionCreate).toHaveBeenCalledWith({
-      data: expect.objectContaining({
-        userId: "target-auth-user-1",
-        impersonatedBy: "actor-auth-user-1",
-      }),
-      select: expect.any(Object),
+    expect(createImpersonationSession).toHaveBeenCalledWith({
+      userId: "target-auth-user-1",
+      token: expect.any(String),
+      expiresAt: expect.any(Date),
+      impersonatedBy: "actor-auth-user-1",
     });
   });
 
   test("denies impersonation when the actor is not an owner", async () => {
-    userFindUnique
-      .mockResolvedValueOnce({ id: "actor-auth-user-1", role: "admin" })
-      .mockResolvedValueOnce({
+    findImpersonationUsers.mockResolvedValueOnce({
+      actor: { id: "actor-auth-user-1", role: "admin" },
+      target: {
         id: "target-auth-user-1",
         role: "user",
         banned: false,
-      });
+      },
+    });
     const { authInternalApi } = await import("./internal.api");
 
     const response = await authInternalApi.handle(
@@ -428,17 +458,18 @@ describe("auth internal registration lifecycle", () => {
 
     expect(response.status).toBe(403);
     expect((await response.json()).error.code).toBe("OWNER_REQUIRED");
-    expect(sessionCreate).not.toHaveBeenCalled();
+    expect(createImpersonationSession).not.toHaveBeenCalled();
   });
 
   test("denies impersonation of banned auth users", async () => {
-    userFindUnique
-      .mockResolvedValueOnce({ id: "actor-auth-user-1", role: "owner" })
-      .mockResolvedValueOnce({
+    findImpersonationUsers.mockResolvedValueOnce({
+      actor: { id: "actor-auth-user-1", role: "owner" },
+      target: {
         id: "target-auth-user-1",
         role: "user",
         banned: true,
-      });
+      },
+    });
     const { authInternalApi } = await import("./internal.api");
 
     const response = await authInternalApi.handle(
@@ -459,6 +490,6 @@ describe("auth internal registration lifecycle", () => {
 
     expect(response.status).toBe(409);
     expect((await response.json()).error.code).toBe("TARGET_AUTH_USER_BANNED");
-    expect(sessionCreate).not.toHaveBeenCalled();
+    expect(createImpersonationSession).not.toHaveBeenCalled();
   });
 });

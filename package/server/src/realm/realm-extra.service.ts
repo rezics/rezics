@@ -4,9 +4,9 @@ import type {
   TagTreeNode,
 } from "@rezics/contract";
 import { LICENSE_SLUGS } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { hasAuthorityOver } from "@/unit/authority";
+import { Realm, RealmMember, Unit, Zone } from "../db/schema";
 
 export class RealmExtraError extends Error {
   constructor(
@@ -43,6 +43,197 @@ const SINGLE_EXTRA_KEYS = new Set<string>([
   "wikiZoneUnitId",
 ]);
 
+type RealmExtraRepository = {
+  findLiveUnitReferenceIds(
+    ids: string[],
+    caller?: RezicsSessionClaims | null,
+  ): Promise<Set<string>>;
+  findRealmAuthorityUnit(
+    realmId: string,
+  ): Promise<{ id: string; userId: string | null; type: string } | null>;
+  findRealmAuthorityMember(
+    realmId: string,
+    userId: string | undefined,
+  ): Promise<{ realmUnitId: string } | null>;
+  loadExtra(realmId: string): Promise<ExtraJson>;
+  findPostUnit(
+    unitId: string,
+  ): Promise<{ id: string; type: string; status: string } | null>;
+  findValidTagUnitIds(tagIds: string[]): Promise<Set<string>>;
+  zoneExists(unitId: string): Promise<boolean>;
+  updateExtraWithLock(
+    realmId: string,
+    mutate: (extra: ExtraJson) => ExtraJson,
+  ): Promise<ExtraJson>;
+  findVisibleUnitIds(
+    ids: string[],
+    caller?: RezicsSessionClaims | null,
+  ): Promise<Set<string>>;
+  findLiveUnitIds(ids: string[]): Promise<Set<string>>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function callerUserId(caller?: RezicsSessionClaims | null): string | undefined {
+  return (caller as { userId?: string; unitId?: string } | null | undefined)
+    ?.userId;
+}
+
+function createDrizzleRealmExtraRepository(): RealmExtraRepository {
+  return {
+    async findLiveUnitReferenceIds(ids, caller) {
+      if (ids.length === 0) return new Set();
+      const db = await getServerDb();
+      const visibilityClauses = [eq(Unit.visibility, "PUBLIC")];
+      const userId = callerUserId(caller);
+      if (userId) visibilityClauses.push(eq(Unit.userId, userId));
+      const rows = await db
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(
+          and(
+            inArray(Unit.id, ids),
+            eq(Unit.type, "POST"),
+            ne(Unit.status, "DELETED"),
+            or(...visibilityClauses),
+          ),
+        );
+      return new Set(rows.map((unit) => unit.id));
+    },
+    async findRealmAuthorityUnit(realmId) {
+      const db = await getServerDb();
+      const [realm] = await db
+        .select({ id: Unit.id, userId: Unit.userId, type: Unit.type })
+        .from(Unit)
+        .where(eq(Unit.id, realmId))
+        .limit(1);
+      return realm ?? null;
+    },
+    async findRealmAuthorityMember(realmId, userId) {
+      if (!userId) return null;
+      const db = await getServerDb();
+      const [member] = await db
+        .select({ realmUnitId: RealmMember.realmUnitId })
+        .from(RealmMember)
+        .where(
+          and(
+            eq(RealmMember.realmUnitId, realmId),
+            eq(RealmMember.userId, userId),
+            inArray(RealmMember.roleKey, [...REALM_AUTHORITY_ROLES]),
+          ),
+        )
+        .limit(1);
+      return member ?? null;
+    },
+    async loadExtra(realmId) {
+      const db = await getServerDb();
+      const [realm] = await db
+        .select({ extra: Realm.extra })
+        .from(Realm)
+        .where(eq(Realm.unitId, realmId))
+        .limit(1);
+      if (!realm) {
+        throw new RealmExtraError("REALM_NOT_FOUND", "Realm not found", 404);
+      }
+      return (realm.extra ?? {}) as ExtraJson;
+    },
+    async findPostUnit(unitId) {
+      const db = await getServerDb();
+      const [unit] = await db
+        .select({ id: Unit.id, type: Unit.type, status: Unit.status })
+        .from(Unit)
+        .where(eq(Unit.id, unitId))
+        .limit(1);
+      return unit ?? null;
+    },
+    async findValidTagUnitIds(tagIds) {
+      if (tagIds.length === 0) return new Set();
+      const db = await getServerDb();
+      const rows = await db
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(
+          and(
+            inArray(Unit.id, tagIds),
+            eq(Unit.type, "TAG"),
+            ne(Unit.status, "DELETED"),
+          ),
+        );
+      return new Set(rows.map((row) => row.id));
+    },
+    async zoneExists(unitId) {
+      const db = await getServerDb();
+      const [zone] = await db
+        .select({ unitId: Zone.unitId })
+        .from(Zone)
+        .where(eq(Zone.unitId, unitId))
+        .limit(1);
+      return Boolean(zone);
+    },
+    async updateExtraWithLock(realmId, mutate) {
+      const db = await getServerDb();
+      return db.transaction(async (tx) => {
+        await tx.execute(
+          sql`SELECT 1 FROM "Realm" WHERE "unitId" = ${realmId}::uuid FOR UPDATE`,
+        );
+        const [realm] = await tx
+          .select({ extra: Realm.extra })
+          .from(Realm)
+          .where(eq(Realm.unitId, realmId))
+          .limit(1);
+        if (!realm) {
+          throw new RealmExtraError("REALM_NOT_FOUND", "Realm not found", 404);
+        }
+        const next = mutate((realm.extra ?? {}) as ExtraJson);
+        await tx
+          .update(Realm)
+          .set({ extra: next })
+          .where(eq(Realm.unitId, realmId));
+        return next;
+      });
+    },
+    async findVisibleUnitIds(ids, caller) {
+      if (ids.length === 0) return new Set();
+      const db = await getServerDb();
+      const visibilityClauses = [eq(Unit.visibility, "PUBLIC")];
+      const userId = callerUserId(caller);
+      if (userId) visibilityClauses.push(eq(Unit.userId, userId));
+      const rows = await db
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(
+          and(
+            inArray(Unit.id, ids),
+            ne(Unit.status, "DELETED"),
+            or(...visibilityClauses),
+          ),
+        );
+      return new Set(rows.map((unit) => unit.id));
+    },
+    async findLiveUnitIds(ids) {
+      if (ids.length === 0) return new Set();
+      const db = await getServerDb();
+      const rows = await db
+        .select({ id: Unit.id })
+        .from(Unit)
+        .where(and(inArray(Unit.id, ids), ne(Unit.status, "DELETED")));
+      return new Set(rows.map((unit) => unit.id));
+    },
+  };
+}
+
+let realmExtraRepository: RealmExtraRepository =
+  createDrizzleRealmExtraRepository();
+
+export function setRealmExtraRepositoryForTest(
+  repository: RealmExtraRepository,
+): void {
+  realmExtraRepository = repository;
+}
+
 function readList(extra: unknown, key: string): string[] {
   if (!extra || typeof extra !== "object") return [];
   const value = (extra as ExtraJson)[key];
@@ -73,20 +264,7 @@ async function findLiveUnitReferenceIds(
   ids: string[],
   caller?: RezicsSessionClaims | null,
 ): Promise<Set<string>> {
-  if (ids.length === 0) return new Set();
-  const visible = await prisma.unit.findMany({
-    where: {
-      id: { in: ids },
-      type: "POST",
-      status: { not: "DELETED" },
-      OR: [
-        { visibility: "PUBLIC" },
-        ...(caller ? [{ userId: caller.userId }] : []),
-      ],
-    },
-    select: { id: true },
-  });
-  return new Set(visible.map((unit) => unit.id));
+  return realmExtraRepository.findLiveUnitReferenceIds(ids, caller);
 }
 
 export async function filterRealmExtraPublic(
@@ -137,10 +315,7 @@ async function authorizeForRealm(
   caller: RezicsSessionClaims,
   realmId: string,
 ): Promise<void> {
-  const realm = await prisma.unit.findUnique({
-    where: { id: realmId },
-    select: { id: true, userId: true, type: true },
-  });
+  const realm = await realmExtraRepository.findRealmAuthorityUnit(realmId);
   if (!realm || realm.type !== "REALM") {
     throw new RealmExtraError("REALM_NOT_FOUND", "Realm not found", 404);
   }
@@ -149,14 +324,10 @@ async function authorizeForRealm(
     return;
   }
 
-  const member = await prisma.realmMember.findFirst({
-    where: {
-      realmUnitId: realmId,
-      userId: caller.userId,
-      roleKey: { in: [...REALM_AUTHORITY_ROLES] },
-    },
-    select: { realmUnitId: true },
-  });
+  const member = await realmExtraRepository.findRealmAuthorityMember(
+    realmId,
+    callerUserId(caller),
+  );
   if (!member) {
     throw new RealmExtraError(
       "FORBIDDEN",
@@ -167,18 +338,11 @@ async function authorizeForRealm(
 }
 
 async function loadExtra(realmId: string): Promise<ExtraJson> {
-  const realm = await prisma.realm.findUniqueOrThrow({
-    where: { unitId: realmId },
-    select: { extra: true },
-  });
-  return (realm.extra ?? {}) as ExtraJson;
+  return realmExtraRepository.loadExtra(realmId);
 }
 
 async function validatePostUnit(unitId: string, label: string): Promise<void> {
-  const unit = await prisma.unit.findUnique({
-    where: { id: unitId },
-    select: { id: true, type: true, status: true },
-  });
+  const unit = await realmExtraRepository.findPostUnit(unitId);
   if (!unit || unit.type !== "POST" || unit.status === "DELETED") {
     throw new RealmExtraError(
       "INVALID_VALUE",
@@ -190,15 +354,7 @@ async function validatePostUnit(unitId: string, label: string): Promise<void> {
 
 async function validateTagUnitIds(tagIds: Set<string>): Promise<void> {
   if (tagIds.size === 0) return;
-  const rows = await prisma.unit.findMany({
-    where: {
-      id: { in: [...tagIds] },
-      type: "TAG",
-      status: { not: "DELETED" },
-    },
-    select: { id: true },
-  });
-  const found = new Set(rows.map((row) => row.id));
+  const found = await realmExtraRepository.findValidTagUnitIds([...tagIds]);
   const missing = [...tagIds].filter((id) => !found.has(id));
   if (missing.length > 0) {
     throw new RealmExtraError(
@@ -210,11 +366,7 @@ async function validateTagUnitIds(tagIds: Set<string>): Promise<void> {
 }
 
 async function validateZoneUnit(unitId: string): Promise<void> {
-  const zone = await prisma.zone.findUnique({
-    where: { unitId },
-    select: { unitId: true },
-  });
-  if (!zone) {
+  if (!(await realmExtraRepository.zoneExists(unitId))) {
     throw new RealmExtraError(
       "INVALID_VALUE",
       "wikiZoneUnitId must reference an existing Zone Unit",
@@ -370,19 +522,7 @@ async function updateExtraWithLock(
 ): Promise<ExtraJson> {
   await authorizeForRealm(caller, realmId);
 
-  return await prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT 1 FROM "Realm" WHERE "unitId" = ${realmId}::uuid FOR UPDATE`;
-    const realm = await tx.realm.findUniqueOrThrow({
-      where: { unitId: realmId },
-      select: { extra: true },
-    });
-    const next = mutate((realm.extra ?? {}) as ExtraJson);
-    await tx.realm.update({
-      where: { unitId: realmId },
-      data: { extra: next as Prisma.InputJsonValue },
-    });
-    return next;
-  });
+  return await realmExtraRepository.updateExtraWithLock(realmId, mutate);
 }
 
 /**
@@ -528,18 +668,10 @@ export async function readListPublic(
   }
   const stored = readList(extra, key);
   if (stored.length === 0) return [];
-  const visible = await prisma.unit.findMany({
-    where: {
-      id: { in: stored },
-      status: { not: "DELETED" },
-      OR: [
-        { visibility: "PUBLIC" },
-        ...(caller ? [{ userId: caller.userId }] : []),
-      ],
-    },
-    select: { id: true },
-  });
-  const visibleSet = new Set(visible.map((u) => u.id));
+  const visibleSet = await realmExtraRepository.findVisibleUnitIds(
+    stored,
+    caller,
+  );
   return stored.filter((id) => visibleSet.has(id));
 }
 
@@ -564,11 +696,7 @@ export async function readListAdmin(
   }
   const stored = readList(extra, key);
   if (stored.length === 0) return { unitIds: [], staleIds: [] };
-  const live = await prisma.unit.findMany({
-    where: { id: { in: stored }, status: { not: "DELETED" } },
-    select: { id: true },
-  });
-  const liveSet = new Set(live.map((u) => u.id));
+  const liveSet = await realmExtraRepository.findLiveUnitIds(stored);
   const staleIds = stored.filter((id) => !liveSet.has(id));
   return { unitIds: stored, staleIds };
 }

@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
 
 let currentIdentity = {
   sub: "user-1",
@@ -16,8 +12,6 @@ const decideForIdentityMock = mock(async () => ({
   code: policyAllowed ? "ALLOWED" : "MISSING_CAPABILITY",
   safeMessage: policyAllowed ? "Allowed" : "Denied by policy",
 }));
-
-installPrismaClientMock();
 
 const now = new Date("2026-05-28T00:00:00.000Z");
 const feedbackRow = {
@@ -35,23 +29,26 @@ const feedbackRow = {
   updatedAt: now,
 };
 
-const feedbackFindMany = mock(async () => [feedbackRow]);
-const feedbackCount = mock(async () => 1);
-const feedbackFindUniqueOrThrow = mock(async () => feedbackRow);
-const feedbackUpdate = mock(async ({ data }: any) => ({
+const feedbackList = mock(async (query: any = {}) => ({
+  items: [feedbackRow],
+  offset: query.offset ?? 0,
+  totalItems: 1,
+}));
+const feedbackGetById = mock(async () => feedbackRow);
+const feedbackSetResolved = mock(async (_id: string, resolved: boolean) => ({
   ...feedbackRow,
-  resolved: data.resolved,
-  resolvedAt: data.resolvedAt,
+  resolved,
+  resolvedAt: resolved ? now : null,
 }));
 
-Object.assign(prismaMock, {
-  feedback: {
-    findMany: feedbackFindMany,
-    count: feedbackCount,
-    findUniqueOrThrow: feedbackFindUniqueOrThrow,
-    update: feedbackUpdate,
+mock.module("./feedback.service", () => ({
+  feedbackService: {
+    create: mock(async () => feedbackRow),
+    getById: feedbackGetById,
+    list: feedbackList,
+    setResolved: feedbackSetResolved,
   },
-});
+}));
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -69,6 +66,9 @@ mock.module("@/governance", () => ({
   },
   governanceModerationService: {
     listModerationOverlays: mock(async () => []),
+  },
+  governanceCapabilityService: {
+    realmMembershipForPolicy: mock(async () => null),
   },
   governanceRoutePolicyService: {
     decideForIdentity: decideForIdentityMock,
@@ -95,10 +95,9 @@ describe("feedbackApi", () => {
     };
     policyAllowed = false;
     decideForIdentityMock.mockClear();
-    feedbackFindMany.mockClear();
-    feedbackCount.mockClear();
-    feedbackFindUniqueOrThrow.mockClear();
-    feedbackUpdate.mockClear();
+    feedbackList.mockClear();
+    feedbackGetById.mockClear();
+    feedbackSetResolved.mockClear();
   });
 
   test("denies policy-rejected admin list callers", async () => {
@@ -114,7 +113,7 @@ describe("feedbackApi", () => {
       action: "audit.read",
       target: { kind: "feedback-list", id: "all" },
     });
-    expect(feedbackFindMany).not.toHaveBeenCalled();
+    expect(feedbackList).not.toHaveBeenCalled();
   });
 
   test("allows policy-approved admin list callers", async () => {
@@ -136,7 +135,7 @@ describe("feedbackApi", () => {
       action: "audit.read",
       target: { kind: "feedback-list", id: "all" },
     });
-    expect(feedbackFindMany).toHaveBeenCalled();
+    expect(feedbackList).toHaveBeenCalled();
     expect(await response.json()).toMatchObject({
       totalItems: 1,
       items: [{ id: "feedback-1" }],
@@ -151,10 +150,8 @@ describe("feedbackApi", () => {
 
     expect(response.status).toBe(200);
     expect(decideForIdentityMock).not.toHaveBeenCalled();
-    expect(feedbackFindMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ userId: "user-1" }),
-      }),
+    expect(feedbackList).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: "user-1" }),
     );
   });
 
@@ -197,6 +194,6 @@ describe("feedbackApi", () => {
       action: "queue.site.decide",
       target: { kind: "feedback", id: "feedback-1" },
     });
-    expect(feedbackUpdate).toHaveBeenCalled();
+    expect(feedbackSetResolved).toHaveBeenCalledWith("feedback-1", true);
   });
 });

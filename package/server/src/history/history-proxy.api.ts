@@ -13,10 +13,11 @@ import {
   unitRevisionTimelinePageSchema,
 } from "@rezics/contract";
 import { Elysia, t } from "elysia";
-import { prisma } from "#/prisma/client";
-import { env } from "@/env";
-import { tryResolveIdentity } from "@/middleware";
-import { AppError, forbidden, notFound } from "@/utils/errors";
+import { eq } from "drizzle-orm";
+import { Unit } from "../db/schema";
+import { env } from "../env";
+import { tryResolveIdentity } from "../middleware";
+import { AppError, forbidden, notFound } from "../utils/errors";
 import { canViewHistoryMetadata } from "./history-authority";
 
 const unitHistoryParamsSchema = t.Object({
@@ -56,6 +57,39 @@ type HistoryQuery = {
   limit?: number;
 };
 
+type HistoryProxyUnit = Pick<
+  typeof Unit.$inferSelect,
+  "id" | "userId" | "visibility" | "status"
+>;
+
+export type HistoryProxyRepository = {
+  findUnit(unitId: string): Promise<HistoryProxyUnit | undefined>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleHistoryProxyRepository(): HistoryProxyRepository {
+  return {
+    async findUnit(unitId) {
+      const db = await getServerDb();
+      const [unit] = await db
+        .select({
+          id: Unit.id,
+          userId: Unit.userId,
+          visibility: Unit.visibility,
+          status: Unit.status,
+        })
+        .from(Unit)
+        .where(eq(Unit.id, unitId))
+        .limit(1);
+      return unit;
+    },
+  };
+}
+
 function appendQuery(path: string, query: HistoryQuery): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
@@ -76,18 +110,11 @@ function historyServiceUrl(path: string): string {
 }
 
 async function assertCanReadHistory(
+  repository: HistoryProxyRepository,
   unitId: string,
   headers: Record<string, string | undefined>,
 ) {
-  const unit = await prisma.unit.findUnique({
-    where: { id: unitId },
-    select: {
-      id: true,
-      userId: true,
-      visibility: true,
-      status: true,
-    },
-  });
+  const unit = await repository.findUnit(unitId);
   if (!unit) throw notFound("Unit");
 
   const identity = await tryResolveIdentity(
@@ -113,129 +140,143 @@ async function fetchHistoryJson<T>(path: string): Promise<T> {
 
 const encodePathPart = (value: string | number) => encodeURIComponent(value);
 
-export const historyProxyApi = new Elysia({ prefix: "/history" })
-  .onError(({ error, set }) => {
-    if (error instanceof AppError) {
-      set.status = error.statusCode;
-      return {
-        status: error.statusCode,
-        code: error.code ?? "HISTORY_PROXY_ERROR",
-        message: error.message,
-        ...(error.details ? { detail: error.details } : {}),
-      };
-    }
-  })
-  .get(
-    "/unit/:unitId/revisions",
-    async ({ headers, params, query }): Promise<UnitRevisionTimelinePage> => {
-      await assertCanReadHistory(params.unitId, headers);
-      return fetchHistoryJson<UnitRevisionTimelinePage>(
-        appendQuery(
-          `/history/unit/${encodePathPart(params.unitId)}/revisions`,
-          {
-            cursor: query.cursor,
-            includeContent: query.includeContent,
-            limit: query.limit,
-          },
-        ),
-      );
-    },
-    {
-      params: unitHistoryParamsSchema,
-      query: timelineQuerySchema,
-      response: unitRevisionTimelinePageSchema,
-      detail: {
-        summary: "List app-facing Unit revision timeline",
-        tags: ["History"],
+export function createHistoryProxyApi(
+  repository: HistoryProxyRepository = createDrizzleHistoryProxyRepository(),
+) {
+  return new Elysia({ prefix: "/history" })
+    .onError(({ error, set }) => {
+      if (error instanceof AppError) {
+        set.status = error.statusCode;
+        return {
+          status: error.statusCode,
+          code: error.code ?? "HISTORY_PROXY_ERROR",
+          message: error.message,
+          ...(error.details ? { detail: error.details } : {}),
+        };
+      }
+    })
+    .get(
+      "/unit/:unitId/revisions",
+      async ({ headers, params, query }): Promise<UnitRevisionTimelinePage> => {
+        await assertCanReadHistory(repository, params.unitId, headers);
+        return fetchHistoryJson<UnitRevisionTimelinePage>(
+          appendQuery(
+            `/history/unit/${encodePathPart(params.unitId)}/revisions`,
+            {
+              cursor: query.cursor,
+              includeContent: query.includeContent,
+              limit: query.limit,
+            },
+          ),
+        );
       },
-    },
-  )
-  .get(
-    "/unit/:unitId/revisions/compare/:baseSequence/:targetSequence",
-    async ({ headers, params }): Promise<UnitRevisionPathCompareResponse> => {
-      await assertCanReadHistory(params.unitId, headers);
-      return fetchHistoryJson<UnitRevisionPathCompareResponse>(
-        `/history/unit/${encodePathPart(params.unitId)}/revisions/compare/${encodePathPart(params.baseSequence)}/${encodePathPart(params.targetSequence)}`,
-      );
-    },
-    {
-      params: revisionCompareParamsSchema,
-      response: unitRevisionPathCompareResponseSchema,
-      detail: {
-        summary: "Compare app-facing Unit revisions",
-        tags: ["History"],
+      {
+        params: unitHistoryParamsSchema,
+        query: timelineQuerySchema,
+        response: unitRevisionTimelinePageSchema,
+        detail: {
+          summary: "List app-facing Unit revision timeline",
+          tags: ["History"],
+        },
       },
-    },
-  )
-  .get(
-    "/unit/:unitId/revisions/:sequence",
-    async ({ headers, params, query }): Promise<SingleUnitRevisionResponse> => {
-      await assertCanReadHistory(params.unitId, headers);
-      return fetchHistoryJson<SingleUnitRevisionResponse>(
-        appendQuery(
-          `/history/unit/${encodePathPart(params.unitId)}/revisions/${encodePathPart(params.sequence)}`,
-          { includeContent: query.includeContent },
-        ),
-      );
-    },
-    {
-      params: unitRevisionParamsSchema,
-      query: timelineQuerySchema,
-      response: singleUnitRevisionResponseSchema,
-      detail: {
-        summary: "Get app-facing Unit revision",
-        tags: ["History"],
+    )
+    .get(
+      "/unit/:unitId/revisions/compare/:baseSequence/:targetSequence",
+      async ({ headers, params }): Promise<UnitRevisionPathCompareResponse> => {
+        await assertCanReadHistory(repository, params.unitId, headers);
+        return fetchHistoryJson<UnitRevisionPathCompareResponse>(
+          `/history/unit/${encodePathPart(params.unitId)}/revisions/compare/${encodePathPart(params.baseSequence)}/${encodePathPart(params.targetSequence)}`,
+        );
       },
-    },
-  )
-  .get(
-    "/unit/:unitId/structure-events",
-    async ({ headers, params, query }): Promise<StructureEventTimelinePage> => {
-      await assertCanReadHistory(params.unitId, headers);
-      return fetchHistoryJson<StructureEventTimelinePage>(
-        appendQuery(
-          `/history/unit/${encodePathPart(params.unitId)}/structure-events`,
-          {
-            cursor: query.cursor,
-            eventType: query.eventType,
-            includePayload: query.includePayload,
-            limit: query.limit,
-          },
-        ),
-      );
-    },
-    {
-      params: unitHistoryParamsSchema,
-      query: timelineQuerySchema,
-      response: structureEventTimelinePageSchema,
-      detail: {
-        summary: "List app-facing Unit structure events",
-        tags: ["History"],
+      {
+        params: revisionCompareParamsSchema,
+        response: unitRevisionPathCompareResponseSchema,
+        detail: {
+          summary: "Compare app-facing Unit revisions",
+          tags: ["History"],
+        },
       },
-    },
-  )
-  .get(
-    "/unit/:unitId/structure-events/:sequence/:eventType",
-    async ({
-      headers,
-      params,
-      query,
-    }): Promise<SingleStructureEventResponse> => {
-      await assertCanReadHistory(params.unitId, headers);
-      return fetchHistoryJson<SingleStructureEventResponse>(
-        appendQuery(
-          `/history/unit/${encodePathPart(params.unitId)}/structure-events/${encodePathPart(params.sequence)}/${encodePathPart(params.eventType)}`,
-          { includePayload: query.includePayload },
-        ),
-      );
-    },
-    {
-      params: structureEventParamsSchema,
-      query: timelineQuerySchema,
-      response: singleStructureEventResponseSchema,
-      detail: {
-        summary: "Get app-facing Unit structure event",
-        tags: ["History"],
+    )
+    .get(
+      "/unit/:unitId/revisions/:sequence",
+      async ({
+        headers,
+        params,
+        query,
+      }): Promise<SingleUnitRevisionResponse> => {
+        await assertCanReadHistory(repository, params.unitId, headers);
+        return fetchHistoryJson<SingleUnitRevisionResponse>(
+          appendQuery(
+            `/history/unit/${encodePathPart(params.unitId)}/revisions/${encodePathPart(params.sequence)}`,
+            { includeContent: query.includeContent },
+          ),
+        );
       },
-    },
-  );
+      {
+        params: unitRevisionParamsSchema,
+        query: timelineQuerySchema,
+        response: singleUnitRevisionResponseSchema,
+        detail: {
+          summary: "Get app-facing Unit revision",
+          tags: ["History"],
+        },
+      },
+    )
+    .get(
+      "/unit/:unitId/structure-events",
+      async ({
+        headers,
+        params,
+        query,
+      }): Promise<StructureEventTimelinePage> => {
+        await assertCanReadHistory(repository, params.unitId, headers);
+        return fetchHistoryJson<StructureEventTimelinePage>(
+          appendQuery(
+            `/history/unit/${encodePathPart(params.unitId)}/structure-events`,
+            {
+              cursor: query.cursor,
+              eventType: query.eventType,
+              includePayload: query.includePayload,
+              limit: query.limit,
+            },
+          ),
+        );
+      },
+      {
+        params: unitHistoryParamsSchema,
+        query: timelineQuerySchema,
+        response: structureEventTimelinePageSchema,
+        detail: {
+          summary: "List app-facing Unit structure events",
+          tags: ["History"],
+        },
+      },
+    )
+    .get(
+      "/unit/:unitId/structure-events/:sequence/:eventType",
+      async ({
+        headers,
+        params,
+        query,
+      }): Promise<SingleStructureEventResponse> => {
+        await assertCanReadHistory(repository, params.unitId, headers);
+        return fetchHistoryJson<SingleStructureEventResponse>(
+          appendQuery(
+            `/history/unit/${encodePathPart(params.unitId)}/structure-events/${encodePathPart(params.sequence)}/${encodePathPart(params.eventType)}`,
+            { includePayload: query.includePayload },
+          ),
+        );
+      },
+      {
+        params: structureEventParamsSchema,
+        query: timelineQuerySchema,
+        response: singleStructureEventResponseSchema,
+        detail: {
+          summary: "Get app-facing Unit structure event",
+          tags: ["History"],
+        },
+      },
+    );
+}
+
+export const historyProxyApi = createHistoryProxyApi();

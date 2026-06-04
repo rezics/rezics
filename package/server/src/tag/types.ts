@@ -1,20 +1,22 @@
 // Types only used in server for Tag (scored UnitTag system)
 
-import type { Prisma, Unit, UnitTag, UnitTranslation } from "#/prisma/client";
+import type { Unit, UnitTag, UnitTranslation } from "../db/schema";
 
 /**
  * A tag Unit with its translations.
  * Tags are Units with type=TAG, isLanguageNeutral=true.
  */
-export type TagWithTranslations = Unit & {
-  translations: UnitTranslation[];
+export type TagWithTranslations = typeof Unit.$inferSelect & {
+  translations: Array<typeof UnitTranslation.$inferSelect>;
 };
 
 /**
  * A UnitTag junction row with the tag Unit and its translations resolved.
  */
-export type UnitTagWithRelations = UnitTag & {
-  tag: Unit & { translations: UnitTranslation[] };
+export type UnitTagWithRelations = typeof UnitTag.$inferSelect & {
+  tag: typeof Unit.$inferSelect & {
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+  };
 };
 
 /**
@@ -22,7 +24,7 @@ export type UnitTagWithRelations = UnitTag & {
  */
 export const tagUnitInclude = {
   translations: true,
-} satisfies Prisma.UnitInclude;
+} as const;
 
 /**
  * Prisma include for fetching UnitTag rows with tag labels.
@@ -31,4 +33,4 @@ export const unitTagInclude = {
   tag: {
     include: { translations: true },
   },
-} satisfies Prisma.UnitTagInclude;
+} as const;

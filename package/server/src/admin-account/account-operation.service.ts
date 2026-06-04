@@ -9,7 +9,7 @@ import type {
   AdminStartAuthImpersonationResponse,
   AuthMainServerReconciliationWarning,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import {
   listAuthSessionsForAuthUser,
   revokeAuthSessionForAuthUser,
@@ -18,6 +18,7 @@ import {
 } from "@/auth-boundary/auth-internal.client";
 import { env } from "@/env";
 import { governanceAuditService } from "@/governance/audit.service";
+import { AccountEnforcement, Unit, User } from "../db/schema";
 
 const ENFORCEMENT_STRENGTH = [
   "WARNING",
@@ -39,6 +40,81 @@ type UserAccountSummaryRow = {
   unit: { slug: string | null } | null;
   accountEnforcements: Array<{ kind: unknown; expiresAt: Date | null }>;
 };
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+async function findUserAccountSummaryRows(
+  authUserIds: readonly string[],
+): Promise<UserAccountSummaryRow[]> {
+  const db = await getServerDb();
+  const users = await db
+    .select({
+      unitId: User.unitId,
+      authUserId: User.authUserId,
+      email: User.email,
+      name: User.name,
+      permission: User.permission,
+      slug: Unit.slug,
+    })
+    .from(User)
+    .leftJoin(Unit, eq(User.unitId, Unit.id))
+    .where(inArray(User.authUserId, authUserIds));
+
+  if (users.length === 0) {
+    return [];
+  }
+
+  const userIds = users.map((user) => user.unitId);
+  const enforcementRows = await db
+    .select({
+      targetUserId: AccountEnforcement.targetUserId,
+      kind: AccountEnforcement.kind,
+      expiresAt: AccountEnforcement.expiresAt,
+    })
+    .from(AccountEnforcement)
+    .where(
+      and(
+        inArray(AccountEnforcement.targetUserId, userIds),
+        eq(AccountEnforcement.state, "ACTIVE"),
+      ),
+    )
+    .orderBy(desc(AccountEnforcement.createdAt));
+
+  const enforcementsByUserId = new Map<
+    string,
+    UserAccountSummaryRow["accountEnforcements"]
+  >();
+  for (const row of enforcementRows) {
+    const list = enforcementsByUserId.get(row.targetUserId) ?? [];
+    list.push({ kind: row.kind, expiresAt: row.expiresAt });
+    enforcementsByUserId.set(row.targetUserId, list);
+  }
+
+  return users.map((user) => ({
+    unitId: user.unitId,
+    authUserId: user.authUserId,
+    email: user.email,
+    name: user.name,
+    permission: user.permission,
+    unit: { slug: user.slug ?? null },
+    accountEnforcements: enforcementsByUserId.get(user.unitId) ?? [],
+  }));
+}
+
+async function findAuthUserIdForMainUser(
+  unitId: string,
+): Promise<string | null> {
+  const db = await getServerDb();
+  const [user] = await db
+    .select({ authUserId: User.authUserId })
+    .from(User)
+    .where(eq(User.unitId, unitId))
+    .limit(1);
+  return user?.authUserId ?? null;
+}
 
 function warning(
   input: AuthMainServerReconciliationWarning,
@@ -76,25 +152,7 @@ export async function getAuthUserAccountSummaries(
   const authUserIds = [...new Set(input.authUserIds.filter(Boolean))];
   if (authUserIds.length === 0) return [];
 
-  const users = await prisma.user.findMany({
-    where: { authUserId: { in: authUserIds } },
-    select: {
-      unitId: true,
-      authUserId: true,
-      email: true,
-      name: true,
-      permission: true,
-      unit: { select: { slug: true } },
-      accountEnforcements: {
-        where: { state: "ACTIVE" },
-        orderBy: { createdAt: "desc" },
-        select: {
-          kind: true,
-          expiresAt: true,
-        },
-      },
-    },
-  });
+  const users = await findUserAccountSummaryRows(authUserIds);
 
   const userByAuthId = new Map(
     users
@@ -256,16 +314,13 @@ export async function startAuthUserImpersonation(
 > {
   const durationSeconds =
     input.durationSeconds ?? DEFAULT_IMPERSONATION_SECONDS;
-  const actor = await prisma.user.findUnique({
-    where: { unitId: input.actorUserId },
-    select: { authUserId: true },
-  });
-  if (!actor?.authUserId) {
+  const actorAuthUserId = await findAuthUserIdForMainUser(input.actorUserId);
+  if (!actorAuthUserId) {
     throw new Error("Actor has no linked auth user for impersonation.");
   }
 
   const result = await startAuthImpersonationSession({
-    actorAuthUserId: actor.authUserId,
+    actorAuthUserId,
     targetAuthUserId: input.targetAuthUserId,
     reason: input.reason,
     durationSeconds,
@@ -283,7 +338,7 @@ export async function startAuthUserImpersonation(
     metadata: {
       durationSeconds,
       authSessionId: result.session.id,
-      actorAuthUserId: actor.authUserId,
+      actorAuthUserId,
     },
   });
 

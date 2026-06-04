@@ -1,10 +1,16 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { setSearchPrismaClient } from "@rezics/search";
-import { createSearchHandlers } from "./handlers";
+
+async function loadSearchHarness() {
+  mock.restore();
+  const [{ setSearchPrismaClient }, { createSearchHandlers }] =
+    await Promise.all([import("@rezics/search/sync"), import("./handlers")]);
+  return { createSearchHandlers, setSearchPrismaClient };
+}
 
 describe("search handlers", () => {
   test("dispatches content delete to the search client delete path", async () => {
+    const { createSearchHandlers } = await loadSearchHarness();
     const deleted: string[][] = [];
     const handlers = createSearchHandlers({
       deleteContent: async (ids: string[]) => {
@@ -23,6 +29,8 @@ describe("search handlers", () => {
   });
 
   test("patch handlers read current DB state instead of CDC event values", async () => {
+    const { createSearchHandlers, setSearchPrismaClient } =
+      await loadSearchHarness();
     const patches: Array<Record<string, unknown>> = [];
     setSearchPrismaClient({
       unit: {
@@ -30,6 +38,7 @@ describe("search handlers", () => {
           type: "BOOK",
           status: "PUBLISHED",
           visibility: "PUBLIC",
+          moderationStatus: "APPROVED",
           catalogEntryKind: null,
         }),
       },
@@ -76,6 +85,8 @@ describe("search handlers", () => {
   });
 
   test("full sync rebuilds one segment and enqueues continuation", async () => {
+    const { createSearchHandlers, setSearchPrismaClient } =
+      await loadSearchHarness();
     const deleted: string[] = [];
     const added: Array<Record<string, unknown>> = [];
     const enqueued: string[] = [];
@@ -142,6 +153,8 @@ describe("search handlers", () => {
   });
 
   test("variant full repair continues by variant cursor", async () => {
+    const { createSearchHandlers, setSearchPrismaClient } =
+      await loadSearchHarness();
     const added: Array<Record<string, unknown>> = [];
     const enqueued: string[] = [];
     setSearchPrismaClient({

@@ -1,4 +1,11 @@
-import { prisma } from "#/prisma/client";
+import { sql } from "drizzle-orm";
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+type ApproxCountRow = { int8: bigint };
 
 /**
  * Get approximate count of Book
@@ -6,20 +13,22 @@ import { prisma } from "#/prisma/client";
  * @returns
  */
 export async function getBookApproxCount() {
-  const query: any = async () => {
-    return await prisma.$queryRaw<[{ int8: bigint }]>`
+  const db = await getServerDb();
+  const query = async () => {
+    const result = await db.execute<ApproxCountRow>(sql`
     SELECT (reltuples / relpages * (pg_relation_size(oid) / 8192))::bigint
     FROM pg_class
     WHERE oid = '"Book"'::regclass;
-  `;
+  `);
+    return result.rows;
   };
-  let result: [{ int8: bigint }] | undefined;
+  let result: ApproxCountRow[] | undefined;
   try {
     result = await query();
   } catch (error) {
     // const isDivisionByZero = error === '22012';
     console.log(error);
-    await prisma.$queryRaw`ANALYZE "Book";`;
+    await db.execute(sql`ANALYZE "Book";`);
     result = await query();
   }
   return Math.round(Number(result?.[0]?.int8 ?? 0));

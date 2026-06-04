@@ -1,7 +1,7 @@
 # Production Runtime Inventory
 
 Authoritative inventory of the packages that make up a production deployment:
-their runtime role, ports, health surface, Prisma-schema ownership, required
+their runtime role, ports, health surface, Drizzle-schema ownership, required
 environment, and external dependencies. This is the factual baseline the
 `establish-production-deployment-foundation` work builds Docker images, Kamal
 units, and migration jobs on top of.
@@ -38,7 +38,7 @@ single-process (`src/index.ts`).
 - **Entrypoint**: `src/index.ts` (single), `src/cluster.ts` (cluster). `build:linux` compiles `cluster.ts`.
 - **Port**: `PORT`, default `3000`.
 - **Health**: `/health` (always 200). System aggregator at `/diagnostic/system`; `/meili/health`. No dedicated `/ready`.
-- **Schema owner**: yes — `package/server/prisma/schema.prisma` (PostgreSQL, the primary application DB; largest schema). `ranking` and `history` read this DB.
+- **Schema owner**: yes — `package/server/src/db/schema` (PostgreSQL, the primary application DB; largest schema). `ranking` and `history` read this DB.
 - **Key env**: `DATABASE_URL`, `AUTH_INTERNAL_BASE_URL`, `AUTH_PUBLIC_BASE_URL`, `AUTH_PUBLIC_ISSUER_URL`, `AUTH_INTERNAL_TOKEN_GATEWAY_SECRET`, `SMTP_HOST/USER/PASSWORD`, `TURNSTILE_SECRET`, `MEILI_HOST`, `MEILI_MASTER_KEY`, `NOTIFY_BASE_URL`, `NOTIFY_INTERNAL_SECRET`, `REACTION_BASE_URL`, `REACTION_INTERNAL_SECRET`. Optional: `HISTORY_BASE_URL`, `JOB_RUNNER_BASE_URL`, `JOB_RUNNER_INTERNAL_SECRET`.
 - **External deps**: PostgreSQL (primary), Meilisearch, SMTP, Cloudflare Turnstile; internal HTTP to auth/notify/reaction/history/job-runner.
 - **Routing**: public.
@@ -48,7 +48,7 @@ single-process (`src/index.ts`).
 - **Entrypoint**: `src/index.ts` / `src/cluster.ts` (build:linux compiles `cluster.ts`).
 - **Port**: `PORT`, default `3001`.
 - **Health**: `/health`. No `/ready`.
-- **Schema owner**: yes — `package/auth/prisma/schema.prisma` (PostgreSQL; Better Auth user/session/account). Separate DB from server.
+- **Schema owner**: yes — `package/auth/src/db/schema` (PostgreSQL; Better Auth user/session/account). Separate DB from server.
 - **Key env**: `DATABASE_URL`, `BETTER_AUTH_URL`, `AUTH_PUBLIC_BASE_URL`, `AUTH_PUBLIC_ISSUER_URL`, `BETTER_AUTH_SECRET`, `AUTH_INTERNAL_TOKEN_GATEWAY_SECRET`, `SMTP_HOST/USER/PASSWORD`, `TURNSTILE_SECRET`. Optional OAuth provider client id/secret pairs (Google, Microsoft, GitHub, Twitter, Telegram).
 - **External deps**: PostgreSQL (auth), SMTP, Turnstile, external OAuth providers.
 - **Routing**: public.
@@ -58,7 +58,7 @@ single-process (`src/index.ts`).
 - **Entrypoint**: `src/index.ts` (single-process).
 - **Port**: `PORT` (no in-code default; must be set).
 - **Health**: `/health`. No `/ready`.
-- **Schema owner**: yes — `package/notify/prisma/schema.prisma` (Notification, Conversation, ConversationMessage). DB via `NOTIFY_DATABASE_URL`.
+- **Schema owner**: yes — `package/notify/src/db/schema` (Notification, Conversation, ConversationMessage). DB via `NOTIFY_DATABASE_URL`.
 - **Key env**: `NOTIFY_DATABASE_URL`, `NOTIFY_INTERNAL_SECRET`, `SERVER_JWKS_URL`, `SERVER_ISSUER` (default `rezics-server`). Optional SMTP (`SMTP_*`).
 - **External deps**: PostgreSQL (notify), optional SMTP, server JWKS for JWT validation.
 - **Routing**: proxied (internal callers + JWT-bearing clients).
@@ -68,7 +68,7 @@ single-process (`src/index.ts`).
 - **Entrypoint**: `src/index.ts` (single-process).
 - **Port**: `PORT` (no in-code default).
 - **Health**: `/health`. No `/ready`.
-- **Schema owner**: yes — `package/reaction/prisma/schema.prisma` (Reaction, ReactionSummary). DB via `REACTION_DATABASE_URL`. **CDC source** (Sequin) alongside the main DB.
+- **Schema owner**: yes — `package/reaction/src/db/schema` (Reaction, ReactionSummary). DB via `REACTION_DATABASE_URL`. **CDC source** (Sequin) alongside the main DB.
 - **Key env**: `REACTION_DATABASE_URL`, `REACTION_INTERNAL_SECRET`, `SERVER_JWKS_URL`, `SERVER_ISSUER`, `REACTION_TYPES` (default `like,dislike`).
 - **External deps**: PostgreSQL (reaction), server JWKS.
 - **Routing**: proxied.
@@ -78,7 +78,7 @@ single-process (`src/index.ts`).
 - **Entrypoint**: `src/index.ts` (single-process).
 - **Port**: `PORT` (no in-code default).
 - **Health**: `/health` **and** `/ready`.
-- **Schema owner**: yes — `package/history/prisma/schema.prisma` (UnitRevision, RevisionContent, UnitRevisionPath). DB via `HISTORY_DATABASE_URL`; also reads the main DB via `SERVER_DATABASE_URL`.
+- **Schema owner**: yes — `package/history/src/db/schema` (UnitRevision, RevisionContent, UnitRevisionPath). DB via `HISTORY_DATABASE_URL`; also reads the main DB via `SERVER_DATABASE_URL`.
 - **Key env**: `HISTORY_DATABASE_URL`, `SERVER_DATABASE_URL`, `HISTORY_INTERNAL_SECRET`.
 - **External deps**: PostgreSQL (history) + read on the main DB.
 - **Routing**: proxied.
@@ -88,7 +88,7 @@ single-process (`src/index.ts`).
 - **Entrypoint**: `src/index.ts` (single-process).
 - **Port**: `PORT`, default `3006`.
 - **Health**: `/health`, `/ready` (observability), and `/ranking/ready` (service readiness; 503 until warm).
-- **Schema owner**: yes — `package/ranking/prisma/schema.prisma` (RankingSignal, RankingRank, RankingScore). DB via `RANKING_DATABASE_URL`; reads the main DB via `SERVER_DATABASE_URL`. The ranking image must also include `@rezics/server`'s generated Prisma client for the main-DB read.
+- **Schema owner**: yes — `package/ranking/src/db/schema` (ranking projections and signal buckets). DB via `RANKING_DATABASE_URL`; reads the main DB via `SERVER_DATABASE_URL`.
 - **Key env**: `RANKING_DATABASE_URL`, `SERVER_DATABASE_URL`, `REACTION_BASE_URL`, `REACTION_INTERNAL_SECRET`, `MEILI_HOST`, `MEILI_MASTER_KEY`. Optional: `RANKING_FULL_SYNC_LIMIT`.
 - **External deps**: PostgreSQL (ranking) + read on main DB, Meilisearch, reaction service.
 - **Routing**: **internal-only** — no public proxy route, no public CORS.
@@ -158,11 +158,8 @@ Spec-assumption corrections surfaced by this inventory:
 - There is **no** separate `job-runner-http` / `job-runner-worker` binary — the split is the `JOB_RUNNER_ROLE` env switch on one image. Kamal should run two roles off the same image rather than two build targets.
 - There is **no** standalone `ranking-worker` today. Ranking is a single internal HTTP service; ranking jobs are dispatched through `job-runner`'s ranking runtime. A dedicated `ranking-worker` role (task 2.4) would be net-new.
 - `notify` and `reaction` have **no in-code default port**; deployment env must set `PORT` explicitly for them.
-- Cross-package `#/prisma/client` self-imports do not bundle under Bun
-  `--compile` (the `#` subpath resolves against the entry package, not the
-  defining one). `history`'s one such self-import was changed to a relative
-  path so `job-runner` (which bundles history source) compiles; keep new
-  self-imports relative when the file may be bundled by another package.
+- Cross-package database reads go through explicit `@rezics/server/db/*`
+  surfaces; do not import generated ORM internals across package boundaries.
 
 ## Image Build Status
 
@@ -179,4 +176,4 @@ Verified locally (`docker build` from repo root, after building `docker/base.Doc
 | job-runner | ✓ | binary runs to DB connect | eager pg-boss connect; needs Postgres |
 
 Runtime images are ~75–110 MB (slim Debian + the self-contained compiled
-binary; engineless Prisma 7 means no query engine to ship).
+binary; Drizzle uses the pure-JS `pg` driver, so no query engine is shipped).

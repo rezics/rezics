@@ -5,20 +5,266 @@ import {
   isSubscribableUnitType,
   type SubscribableUnitType,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { and, desc, eq, sql } from "drizzle-orm";
+import { Realm, RealmMember, Subscription, Unit, User } from "../db/schema";
 import { broadcast } from "../notify-boundary/notify-boundary.client";
 import { AppError } from "../utils/errors";
 import { mapSubscriptionToDTO } from "./subscription.mapper";
 
 const DEFAULT_CHANNELS = ["*"] as const;
 
+type SubscriptionRow = typeof Subscription.$inferSelect;
+type TargetUnit = Pick<typeof Unit.$inferSelect, "id" | "type" | "userId">;
+type BroadcastFollow = typeof broadcast;
+
+export type SubscriptionRepository = {
+  getTargetUnit(unitId: string): Promise<TargetUnit | undefined>;
+  getRealm(unitId: string): Promise<{ isPublic: boolean } | undefined>;
+  isRealmMember(realmUnitId: string, userId: string): Promise<boolean>;
+  createWithCounters(input: {
+    subscriberUnitId: string;
+    subscribedUnitId: string;
+    channels: string[];
+    isUserToUser: boolean;
+  }): Promise<SubscriptionRow>;
+  findSubscriptionId(
+    subscriberUnitId: string,
+    subscribedUnitId: string,
+  ): Promise<string | undefined>;
+  deleteWithCounters(input: {
+    id: string;
+    subscriberUnitId: string;
+    subscribedUnitId: string;
+    isUserToUser: boolean;
+  }): Promise<void>;
+  updateChannels(input: {
+    subscriberUnitId: string;
+    subscribedUnitId: string;
+    channels: string[];
+  }): Promise<SubscriptionRow>;
+  listMine(
+    userId: string,
+    opts: { subscribedType?: string },
+  ): Promise<SubscriptionRow[]>;
+  findChannels(
+    subscriberUnitId: string,
+    subscribedUnitId: string,
+  ): Promise<string[] | undefined>;
+  getSubscriberCount(subscribedUnitId: string): Promise<number | undefined>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleSubscriptionRepository(): SubscriptionRepository {
+  return {
+    async getTargetUnit(unitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ id: Unit.id, type: Unit.type, userId: Unit.userId })
+        .from(Unit)
+        .where(eq(Unit.id, unitId))
+        .limit(1);
+      return row;
+    },
+
+    async getRealm(unitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ isPublic: Realm.isPublic })
+        .from(Realm)
+        .where(eq(Realm.unitId, unitId))
+        .limit(1);
+      return row;
+    },
+
+    async isRealmMember(realmUnitId, userId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ realmUnitId: RealmMember.realmUnitId })
+        .from(RealmMember)
+        .where(
+          and(
+            eq(RealmMember.realmUnitId, realmUnitId),
+            eq(RealmMember.userId, userId),
+          ),
+        )
+        .limit(1);
+      return Boolean(row);
+    },
+
+    async createWithCounters({
+      subscriberUnitId,
+      subscribedUnitId,
+      channels,
+      isUserToUser,
+    }) {
+      const db = await getServerDb();
+      return db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(Subscription)
+          .values({
+            subscriberUnitId,
+            subscribedUnitId,
+            channels,
+            updatedAt: new Date(),
+          })
+          .returning();
+        if (!created) {
+          throw new AppError(500, "Subscription was not created", {
+            code: "subscription_create_failed",
+          });
+        }
+        await tx
+          .update(Unit)
+          .set({
+            subscriberCount: sql`${Unit.subscriberCount} + 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(Unit.id, subscribedUnitId));
+        if (isUserToUser) {
+          await tx
+            .update(User)
+            .set({ followersCount: sql`${User.followersCount} + 1` })
+            .where(eq(User.unitId, subscribedUnitId));
+          await tx
+            .update(User)
+            .set({ followingsCount: sql`${User.followingsCount} + 1` })
+            .where(eq(User.unitId, subscriberUnitId));
+        }
+        return created;
+      });
+    },
+
+    async findSubscriptionId(subscriberUnitId, subscribedUnitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ id: Subscription.id })
+        .from(Subscription)
+        .where(
+          and(
+            eq(Subscription.subscriberUnitId, subscriberUnitId),
+            eq(Subscription.subscribedUnitId, subscribedUnitId),
+          ),
+        )
+        .limit(1);
+      return row?.id;
+    },
+
+    async deleteWithCounters({
+      id,
+      subscriberUnitId,
+      subscribedUnitId,
+      isUserToUser,
+    }) {
+      const db = await getServerDb();
+      await db.transaction(async (tx) => {
+        await tx.delete(Subscription).where(eq(Subscription.id, id));
+        await tx
+          .update(Unit)
+          .set({
+            subscriberCount: sql`${Unit.subscriberCount} - 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(Unit.id, subscribedUnitId));
+        if (isUserToUser) {
+          await tx
+            .update(User)
+            .set({ followersCount: sql`${User.followersCount} - 1` })
+            .where(eq(User.unitId, subscribedUnitId));
+          await tx
+            .update(User)
+            .set({ followingsCount: sql`${User.followingsCount} - 1` })
+            .where(eq(User.unitId, subscriberUnitId));
+        }
+      });
+    },
+
+    async updateChannels({ subscriberUnitId, subscribedUnitId, channels }) {
+      const db = await getServerDb();
+      const [row] = await db
+        .update(Subscription)
+        .set({ channels, updatedAt: new Date() })
+        .where(
+          and(
+            eq(Subscription.subscriberUnitId, subscriberUnitId),
+            eq(Subscription.subscribedUnitId, subscribedUnitId),
+          ),
+        )
+        .returning();
+      if (!row) {
+        throw new AppError(404, "Subscription not found", {
+          code: "subscription_not_found",
+        });
+      }
+      return row;
+    },
+
+    async listMine(userId, opts) {
+      const db = await getServerDb();
+      if (opts.subscribedType) {
+        const rows = await db
+          .select({ subscription: Subscription })
+          .from(Subscription)
+          .innerJoin(Unit, eq(Subscription.subscribedUnitId, Unit.id))
+          .where(
+            and(
+              eq(Subscription.subscriberUnitId, userId),
+              eq(Unit.type, opts.subscribedType as TargetUnit["type"]),
+            ),
+          )
+          .orderBy(desc(Subscription.createdAt));
+        return rows.map((row) => row.subscription);
+      }
+
+      return db
+        .select()
+        .from(Subscription)
+        .where(eq(Subscription.subscriberUnitId, userId))
+        .orderBy(desc(Subscription.createdAt));
+    },
+
+    async findChannels(subscriberUnitId, subscribedUnitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ channels: Subscription.channels })
+        .from(Subscription)
+        .where(
+          and(
+            eq(Subscription.subscriberUnitId, subscriberUnitId),
+            eq(Subscription.subscribedUnitId, subscribedUnitId),
+          ),
+        )
+        .limit(1);
+      return row?.channels ?? undefined;
+    },
+
+    async getSubscriberCount(subscribedUnitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ subscriberCount: Unit.subscriberCount })
+        .from(Unit)
+        .where(eq(Unit.id, subscribedUnitId))
+        .limit(1);
+      return row?.subscriberCount;
+    },
+  };
+}
+
 /**
  * Service for `Subscription` rows — the generic attention edge from a
  * subscriber Unit (USER in v1) to any subscribed Unit. All write paths
  * maintain the denormalized counters on `Unit.subscriberCount` and on
- * `User.followersCount` / `followingsCount` (USER→USER edges) atomically.
+ * `User.followersCount` / `followingsCount` (USER->USER edges) atomically.
  */
 export class SubscriptionService {
+  constructor(
+    private readonly repository = createDrizzleSubscriptionRepository(),
+    private readonly broadcastFollow: BroadcastFollow = broadcast,
+  ) {}
+
   /**
    * Insert a subscription row plus counter updates in one transaction.
    *
@@ -30,8 +276,8 @@ export class SubscriptionService {
    * - Channels are validated against the per-type registry. Default is
    *   `['*']` when omitted; an empty array is rejected (would be a
    *   silent no-op subscription).
-   * - Duplicates surface as Prisma P2002 and map to 409 by the global
-   *   onError handler.
+   * - Database uniqueness on `(subscriberUnitId, subscribedUnitId)` rejects
+   *   duplicates.
    */
   async subscribe(
     subscriberUnitId: string,
@@ -42,10 +288,7 @@ export class SubscriptionService {
       throw new AppError(400, "Cannot subscribe to your own Unit");
     }
 
-    const target = await prisma.unit.findUnique({
-      where: { id: subscribedUnitId },
-      select: { id: true, type: true, userId: true },
-    });
+    const target = await this.repository.getTargetUnit(subscribedUnitId);
     if (!target) {
       throw new AppError(404, "subscribed Unit not found");
     }
@@ -71,65 +314,36 @@ export class SubscriptionService {
     }
 
     if (subscribedType === "REALM") {
-      const realm = await prisma.realm.findUnique({
-        where: { unitId: subscribedUnitId },
-        select: { isPublic: true },
-      });
+      const realm = await this.repository.getRealm(subscribedUnitId);
       if (!realm) {
         throw new AppError(404, "Target Realm not found");
       }
-      if (!realm.isPublic) {
-        const member = await prisma.realmMember.findUnique({
-          where: {
-            realmUnitId_userId: {
-              realmUnitId: subscribedUnitId,
-              userId: subscriberUnitId,
-            },
-          },
-          select: { realmUnitId: true },
-        });
-        if (!member) {
-          throw new AppError(
-            403,
-            "Cannot subscribe to a private realm without membership",
-          );
-        }
+      if (
+        !realm.isPublic &&
+        !(await this.repository.isRealmMember(
+          subscribedUnitId,
+          subscriberUnitId,
+        ))
+      ) {
+        throw new AppError(
+          403,
+          "Cannot subscribe to a private realm without membership",
+        );
       }
     }
 
     const isUserToUser = subscribedType === "USER";
 
-    const row = await prisma.$transaction(async (tx) => {
-      const created = await tx.subscription.create({
-        data: {
-          subscriberUnitId,
-          subscribedUnitId,
-          channels: effectiveChannels,
-        },
-      });
-      await tx.unit.update({
-        where: { id: subscribedUnitId },
-        data: { subscriberCount: { increment: 1 } },
-      });
-      if (isUserToUser) {
-        await tx.user.update({
-          where: { unitId: subscribedUnitId },
-          data: { followersCount: { increment: 1 } },
-        });
-        await tx.user.update({
-          where: { unitId: subscriberUnitId },
-          data: { followingsCount: { increment: 1 } },
-        });
-      }
-      return created;
+    const row = await this.repository.createWithCounters({
+      subscriberUnitId,
+      subscribedUnitId,
+      channels: effectiveChannels,
+      isUserToUser,
     });
 
-    // For USER→USER subscriptions, emit the `follow.new` notification
-    // event so the target user is alerted. Preserves the prior Follow
-    // behaviour now that Follow is retired. Fire-and-forget — a failed
-    // notification must not roll back the subscription write.
+    // A failed notification must not roll back the subscription write.
     if (isUserToUser) {
-      broadcast({
+      this.broadcastFollow({
         kind: "follow.new",
         sourceUnitId: subscribedUnitId,
         directRecipients: [subscribedUnitId],
@@ -149,39 +363,20 @@ export class SubscriptionService {
     subscriberUnitId: string,
     subscribedUnitId: string,
   ): Promise<boolean> {
-    const existing = await prisma.subscription.findUnique({
-      where: {
-        subscriberUnitId_subscribedUnitId: {
-          subscriberUnitId,
-          subscribedUnitId,
-        },
-      },
-      select: { id: true },
-    });
-    if (!existing) return false;
+    const existingId = await this.repository.findSubscriptionId(
+      subscriberUnitId,
+      subscribedUnitId,
+    );
+    if (!existingId) return false;
 
-    const target = await prisma.unit.findUnique({
-      where: { id: subscribedUnitId },
-      select: { type: true },
-    });
+    const target = await this.repository.getTargetUnit(subscribedUnitId);
     const isUserToUser = target?.type === "USER";
 
-    await prisma.$transaction(async (tx) => {
-      await tx.subscription.delete({ where: { id: existing.id } });
-      await tx.unit.update({
-        where: { id: subscribedUnitId },
-        data: { subscriberCount: { decrement: 1 } },
-      });
-      if (isUserToUser) {
-        await tx.user.update({
-          where: { unitId: subscribedUnitId },
-          data: { followersCount: { decrement: 1 } },
-        });
-        await tx.user.update({
-          where: { unitId: subscriberUnitId },
-          data: { followingsCount: { decrement: 1 } },
-        });
-      }
+    await this.repository.deleteWithCounters({
+      id: existingId,
+      subscriberUnitId,
+      subscribedUnitId,
+      isUserToUser,
     });
     return true;
   }
@@ -203,10 +398,7 @@ export class SubscriptionService {
       );
     }
 
-    const target = await prisma.unit.findUnique({
-      where: { id: subscribedUnitId },
-      select: { type: true },
-    });
+    const target = await this.repository.getTargetUnit(subscribedUnitId);
     if (!target) {
       throw new AppError(404, "subscribed Unit not found");
     }
@@ -223,36 +415,24 @@ export class SubscriptionService {
       throw err;
     }
 
-    const row = await prisma.subscription.update({
-      where: {
-        subscriberUnitId_subscribedUnitId: {
-          subscriberUnitId,
-          subscribedUnitId,
-        },
-      },
-      data: { channels: [...channels] },
+    const row = await this.repository.updateChannels({
+      subscriberUnitId,
+      subscribedUnitId,
+      channels: [...channels],
     });
     return mapSubscriptionToDTO(row);
   }
 
   /**
    * List the caller's subscriptions, optionally filtered by the
-   * subscribed unit's UnitType (e.g., `subscribedType=USER` powers the "followings"
-   * view on the profile-followers-tab).
+   * subscribed unit's UnitType (e.g., `subscribedType=USER` powers the
+   * "followings" view on the profile-followers-tab).
    */
   async listMine(
     userId: string,
     opts: { subscribedType?: string } = {},
   ): Promise<SubscriptionDTO[]> {
-    const rows = await prisma.subscription.findMany({
-      where: {
-        subscriberUnitId: userId,
-        ...(opts.subscribedType
-          ? { subscribedUnit: { type: opts.subscribedType as never } }
-          : {}),
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const rows = await this.repository.listMine(userId, opts);
     return rows.map(mapSubscriptionToDTO);
   }
 
@@ -265,17 +445,12 @@ export class SubscriptionService {
     userId: string,
     subscribedUnitId: string,
   ): Promise<{ subscribed: boolean; channels?: string[] }> {
-    const row = await prisma.subscription.findUnique({
-      where: {
-        subscriberUnitId_subscribedUnitId: {
-          subscriberUnitId: userId,
-          subscribedUnitId,
-        },
-      },
-      select: { channels: true },
-    });
-    if (!row) return { subscribed: false };
-    return { subscribed: true, channels: row.channels };
+    const channels = await this.repository.findChannels(
+      userId,
+      subscribedUnitId,
+    );
+    if (!channels) return { subscribed: false };
+    return { subscribed: true, channels };
   }
 
   /**
@@ -285,14 +460,12 @@ export class SubscriptionService {
    * value from a COUNT(*) over the backfilled rows.
    */
   async getSubscriberCount(subscribedUnitId: string): Promise<number> {
-    const unit = await prisma.unit.findUnique({
-      where: { id: subscribedUnitId },
-      select: { subscriberCount: true },
-    });
-    if (!unit) {
+    const subscriberCount =
+      await this.repository.getSubscriberCount(subscribedUnitId);
+    if (subscriberCount === undefined) {
       throw new AppError(404, "subscribed Unit not found");
     }
-    return unit.subscriberCount;
+    return subscriberCount;
   }
 }
 

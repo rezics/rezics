@@ -5,16 +5,15 @@ import {
   userParamsSchema,
 } from "@rezics/contract";
 import { Elysia } from "elysia";
-import { prisma } from "#/prisma/client";
-import { requireSlugScopeId } from "@/infra/slug-scopes";
-import { notFound } from "@/utils/errors";
+import { and, eq, inArray } from "drizzle-orm";
+import { Unit, User } from "../../db/schema";
+import { requireSlugScopeId } from "../../infra/slug-scopes";
+import { notFound } from "../../utils/errors";
 
-const briefSelect = {
-  unitId: true,
-  name: true,
-  bio: true,
-  avatar: true,
-} as const;
+async function getServerDb() {
+  const { db } = await import("../../db/client");
+  return db;
+}
 
 type BriefRow = {
   unitId: string;
@@ -38,10 +37,17 @@ async function fetchSlugMap(
 ): Promise<Map<string, string | null>> {
   if (ids.length === 0) return new Map();
   const userScope = requireSlugScopeId("user");
-  const units = await prisma.unit.findMany({
-    where: { id: { in: ids }, slugScope: userScope, type: "USER" },
-    select: { id: true, slug: true },
-  });
+  const db = await getServerDb();
+  const units = await db
+    .select({ id: Unit.id, slug: Unit.slug })
+    .from(Unit)
+    .where(
+      and(
+        inArray(Unit.id, ids),
+        eq(Unit.slugScope, userScope),
+        eq(Unit.type, "USER"),
+      ),
+    );
   return new Map(units.map((u) => [u.id, u.slug ?? null] as const));
 }
 
@@ -49,10 +55,17 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
   .get(
     "/:userId",
     async ({ params }) => {
-      const user = await prisma.user.findUnique({
-        where: { unitId: params.userId },
-        select: briefSelect,
-      });
+      const db = await getServerDb();
+      const [user] = await db
+        .select({
+          unitId: User.unitId,
+          name: User.name,
+          bio: User.bio,
+          avatar: User.avatar,
+        })
+        .from(User)
+        .where(eq(User.unitId, params.userId))
+        .limit(1);
       if (!user) throw notFound("User");
       const slugMap = await fetchSlugMap([user.unitId]);
       return toBrief(user, slugMap.get(user.unitId) ?? null);
@@ -72,10 +85,16 @@ export const userBriefApi = new Elysia({ prefix: "/user/brief" })
     "/",
     async ({ body }) => {
       if (body.unitIds.length === 0) return { users: [] };
-      const users = await prisma.user.findMany({
-        where: { unitId: { in: body.unitIds } },
-        select: briefSelect,
-      });
+      const db = await getServerDb();
+      const users = await db
+        .select({
+          unitId: User.unitId,
+          name: User.name,
+          bio: User.bio,
+          avatar: User.avatar,
+        })
+        .from(User)
+        .where(inArray(User.unitId, body.unitIds));
       const slugMap = await fetchSlugMap(users.map((u) => u.unitId));
       return {
         users: users.map((u) => toBrief(u, slugMap.get(u.unitId) ?? null)),

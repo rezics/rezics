@@ -5,12 +5,15 @@ import type {
   SeriesKind,
   UnitTranslationDTO,
 } from "@rezics/contract";
-import type { SeriesContentIndex, UnitTranslation } from "#/prisma/client";
+import type { SeriesContentIndex, UnitTranslation } from "../db/schema";
 import { resolveStoredLicenseSlug } from "@/unit/publication-policy";
 import { mapPublicUser } from "@/utils/sanitizeUser";
 import type { SeriesWithRelations } from "./series.types";
 
-function mapTranslation(tr: UnitTranslation): UnitTranslationDTO {
+type SeriesContentIndexRow = typeof SeriesContentIndex.$inferSelect;
+type UnitTranslationRow = typeof UnitTranslation.$inferSelect;
+
+function mapTranslation(tr: UnitTranslationRow): UnitTranslationDTO {
   return {
     unitId: tr.unitId,
     language: tr.language as Language,
@@ -48,7 +51,7 @@ export function mapSeriesToDTO(series: SeriesWithRelations): SeriesDTO {
 }
 
 export function mapSeriesContentIndexToDTO(
-  row: SeriesContentIndex,
+  row: SeriesContentIndexRow,
 ): SeriesContentIndexDTO {
   return {
     seriesUnitId: row.seriesUnitId,

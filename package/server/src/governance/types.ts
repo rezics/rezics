@@ -5,14 +5,14 @@ import type {
   RealmCapabilityGrant,
   StaffAuditLog,
   StaffGrant,
-} from "#/prisma/client";
+} from "../db/schema";
 
-export type StaffGrantRow = StaffGrant;
-export type RealmCapabilityGrantRow = RealmCapabilityGrant;
-export type AccountEnforcementRow = AccountEnforcement;
-export type ModerationCaseRow = ModerationCase;
-export type ModerationActionRow = ModerationAction;
-export type StaffAuditLogRow = StaffAuditLog;
+export type StaffGrantRow = typeof StaffGrant.$inferSelect;
+export type RealmCapabilityGrantRow = typeof RealmCapabilityGrant.$inferSelect;
+export type AccountEnforcementRow = typeof AccountEnforcement.$inferSelect;
+export type ModerationCaseRow = typeof ModerationCase.$inferSelect;
+export type ModerationActionRow = typeof ModerationAction.$inferSelect;
+export type StaffAuditLogRow = typeof StaffAuditLog.$inferSelect;
 
 export type GovernanceListOptions = {
   offset?: number;

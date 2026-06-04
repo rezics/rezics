@@ -1,8 +1,14 @@
 import { DEFAULT_REALM } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { and, eq } from "drizzle-orm";
+import { Unit } from "../db/schema";
 import { getSlugScopeId } from "./slug-scopes";
 
 let cachedDefaultRealmId: string | null = null;
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 /**
  * Look up the default realm by `(realmScope, slug)` and cache its ID in
@@ -17,12 +23,14 @@ export async function initDefaultRealmCache(): Promise<void> {
     return;
   }
 
-  const unit = await prisma.unit.findUnique({
-    where: {
-      slugScope_slug: { slugScope: realmScope, slug: DEFAULT_REALM.slug },
-    },
-    select: { id: true, type: true },
-  });
+  const db = await getServerDb();
+  const [unit] = await db
+    .select({ id: Unit.id, type: Unit.type })
+    .from(Unit)
+    .where(
+      and(eq(Unit.slugScope, realmScope), eq(Unit.slug, DEFAULT_REALM.slug)),
+    )
+    .limit(1);
 
   if (!unit) {
     console.warn(

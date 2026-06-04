@@ -8,16 +8,27 @@ import {
   type SystemEmailBody,
   type UserSettings,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { env } from "../env";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import { Subscription, User } from "../db/schema";
 
-const baseUrl = env.NOTIFY_BASE_URL;
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+async function getNotifyEnv() {
+  const { env } = await import("../env");
+  return {
+    baseUrl: env.NOTIFY_BASE_URL,
+    secret: env.NOTIFY_INTERNAL_SECRET,
+  };
+}
 
 async function postInternal<T>(
   path: string,
   body: T,
 ): Promise<{ ok: boolean; data?: unknown }> {
-  const secret = env.NOTIFY_INTERNAL_SECRET;
+  const { baseUrl, secret } = await getNotifyEnv();
   if (!secret) {
     console.warn(
       "[notify-boundary-client] NOTIFY_INTERNAL_SECRET not set, skipping",
@@ -58,9 +69,8 @@ export type BroadcastEvent = {
  * matches the incoming event. Implements the three-tier wildcard match:
  * exact event, category wildcard, global wildcard.
  *
- * The filter goes through Prisma's `{ has: 'x' }` operator which emits
- * `channels @> ARRAY['x']` under the hood and is served by the GIN
- * index `subscription_channels_gin` created in the migration.
+ * The filter uses PostgreSQL array overlap against the GIN-indexed
+ * `Subscription.channels` column.
  */
 async function defaultFindSubscriptionMatches(
   sourceUnitId: string,
@@ -68,18 +78,22 @@ async function defaultFindSubscriptionMatches(
 ): Promise<string[]> {
   const category = categoryOf(kind);
   const categoryWildcard = category ? `${category}.*` : undefined;
+  const channelCandidates = [
+    kind,
+    ...(categoryWildcard ? [categoryWildcard] : []),
+    "*",
+  ];
 
-  const rows = await prisma.subscription.findMany({
-    where: {
-      subscribedUnitId: sourceUnitId,
-      OR: [
-        { channels: { has: kind } },
-        ...(categoryWildcard ? [{ channels: { has: categoryWildcard } }] : []),
-        { channels: { has: "*" } },
-      ],
-    },
-    select: { subscriberUnitId: true },
-  });
+  const db = await getServerDb();
+  const rows = await db
+    .select({ subscriberUnitId: Subscription.subscriberUnitId })
+    .from(Subscription)
+    .where(
+      and(
+        eq(Subscription.subscribedUnitId, sourceUnitId),
+        sql`${Subscription.channels} && ${channelCandidates}`,
+      ),
+    );
   return rows.map((r) => r.subscriberUnitId);
 }
 
@@ -103,8 +117,8 @@ export type ResolveRecipientsDeps = {
  * Dedupes through an in-memory `Set` so a subscriber who is also a
  * direct recipient receives exactly one notification row.
  *
- * Dependency-injected for unit testing — production callers omit
- * `deps` and get the Prisma-backed `defaultFindSubscriptionMatches`.
+ * Dependency-injected for unit testing — production callers omit `deps` and
+ * get the Drizzle-backed `defaultFindSubscriptionMatches`.
  */
 export async function resolveRecipients(
   event: BroadcastEvent,
@@ -135,10 +149,14 @@ export type LoadRecipientPreferences = (
 async function defaultLoadRecipientPreferences(
   recipientIds: string[],
 ): Promise<Map<string, NotificationPreference | undefined>> {
-  const users = await prisma.user.findMany({
-    where: { unitId: { in: recipientIds } },
-    select: { unitId: true, settings: true },
-  });
+  const db = await getServerDb();
+  const users =
+    recipientIds.length === 0
+      ? []
+      : await db
+          .select({ unitId: User.unitId, settings: User.settings })
+          .from(User)
+          .where(inArray(User.unitId, recipientIds));
   const map = new Map<string, NotificationPreference | undefined>();
   for (const user of users) {
     map.set(user.unitId, (user.settings as UserSettings | null)?.notifications);
@@ -155,7 +173,7 @@ async function defaultLoadRecipientPreferences(
  * preference mapping) pass through untouched.
  *
  * Dependency-injected for unit testing — production callers omit
- * `loadPreferences` and get the Prisma-backed loader.
+ * `loadPreferences` and get the Drizzle-backed loader.
  */
 export async function filterRecipientsByPreference(
   recipientIds: string[],

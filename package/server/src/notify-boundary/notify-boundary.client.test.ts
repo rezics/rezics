@@ -7,7 +7,7 @@ import {
 } from "./notify-boundary.client";
 
 /**
- * Unit tests for the recipient resolver. The Prisma-backed
+ * Unit tests for the recipient resolver. The storage-backed
  * `defaultFindSubscriptionMatches` is replaced with an injected stub so
  * these tests verify the resolver's union/dedup logic without a DB.
  * Integration coverage of the three-tier GIN-indexed match query lives

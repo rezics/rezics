@@ -28,8 +28,8 @@ bun run check:convention            # repo conventions
 bun run check:tokens                # token checks
 bun run knip                        # unused exports/deps
 
-bun --filter=@rezics/server run prisma:generate
-bun --filter=@rezics/server run prisma:migrate
+bun --filter=@rezics/server run db:generate
+bun --filter=@rezics/server run db:migrate
 bun --filter=@rezics/server run seed:factory
 bun --filter=@rezics/server run seed:factory:fast
 
@@ -43,7 +43,7 @@ bun --filter=@rezics/ui run storybook # UI Storybook, port 6007
   Mount domain APIs from `package/server/src/index.ts`.
 - API types are contract-first in `@rezics/contract`; frontend access belongs in
   `@rezics/api`. Do not duplicate API DTOs in app code.
-- `@rezics/server` and `@rezics/auth` use separate Prisma schemas and databases.
+- `@rezics/server` and `@rezics/auth` use separate Drizzle schemas and databases.
 - `package/app` features follow the layered structure in
   `package/app/docs/feature standard.md`. `models/` must not import React,
   hooks, or state modules; external consumers go through the feature `index.ts`.

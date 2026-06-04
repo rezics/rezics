@@ -6,8 +6,13 @@ import {
   UNIT_FIELD_LOCK_ALL,
   UnitAuthorityRoleKey,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
-import { isAdminRole, verifyAdminFromDb } from "@/middleware";
+import { and, eq, inArray } from "drizzle-orm";
+import {
+  RealmMember,
+  UnitCollaborator,
+  UnitFieldLock,
+  UnitRealm,
+} from "../db/schema";
 
 const REALM_AUTHORITY_ROLES = ["owner", "admin", "moderator"] as const;
 
@@ -73,10 +78,80 @@ export class UnitAuthorityError extends Error {
   }
 }
 
-type AuthorityPrisma = Pick<
-  typeof prisma,
-  "unitCollaborator" | "unitFieldLock"
->;
+export interface UnitAuthorityFieldLookup {
+  findCollaboratorRole(unitId: string, userId: string): Promise<string | null>;
+  listFieldLockPaths(unitId: string): Promise<string[]>;
+}
+
+interface UnitAuthorityRealmLookup {
+  listContainingRealmIds(unitId: string): Promise<string[]>;
+  hasAuthorityRealmMembership(
+    userId: string,
+    realmUnitIds: readonly string[],
+  ): Promise<boolean>;
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleAuthorityLookup(): UnitAuthorityFieldLookup &
+  UnitAuthorityRealmLookup {
+  return {
+    async findCollaboratorRole(unitId, userId) {
+      const db = await getServerDb();
+      const [collaborator] = await db
+        .select({ roleKey: UnitCollaborator.roleKey })
+        .from(UnitCollaborator)
+        .where(
+          and(
+            eq(UnitCollaborator.unitId, unitId),
+            eq(UnitCollaborator.userId, userId),
+          ),
+        )
+        .limit(1);
+      return collaborator?.roleKey ?? null;
+    },
+
+    async listFieldLockPaths(unitId) {
+      const db = await getServerDb();
+      const rows = await db
+        .select({ path: UnitFieldLock.path })
+        .from(UnitFieldLock)
+        .where(eq(UnitFieldLock.unitId, unitId));
+      return rows.map((row) => row.path);
+    },
+
+    async listContainingRealmIds(unitId) {
+      const db = await getServerDb();
+      const rows = await db
+        .select({ realmUnitId: UnitRealm.realmUnitId })
+        .from(UnitRealm)
+        .where(eq(UnitRealm.unitId, unitId));
+      return rows.map((row) => row.realmUnitId);
+    },
+
+    async hasAuthorityRealmMembership(userId, realmUnitIds) {
+      if (realmUnitIds.length === 0) return false;
+      const db = await getServerDb();
+      const [member] = await db
+        .select({ realmUnitId: RealmMember.realmUnitId })
+        .from(RealmMember)
+        .where(
+          and(
+            eq(RealmMember.userId, userId),
+            inArray(RealmMember.roleKey, [...REALM_AUTHORITY_ROLES]),
+            inArray(RealmMember.realmUnitId, [...realmUnitIds]),
+          ),
+        )
+        .limit(1);
+      return Boolean(member);
+    },
+  };
+}
+
+const defaultAuthorityLookup = createDrizzleAuthorityLookup();
 
 const DEFAULT_COLLABORATOR_ROLES = [
   UnitAuthorityRoleKey.OWNER,
@@ -88,6 +163,17 @@ const LOCK_BYPASS_ROLES = new Set<UnitAuthorityRoleKey>([
   UnitAuthorityRoleKey.OWNER,
   UnitAuthorityRoleKey.MAINTAINER,
 ]);
+
+function isAdminRole(caller: RezicsSessionClaims): boolean {
+  return (
+    caller.permission.role === "ADMIN" || caller.permission.role === "ROOT"
+  );
+}
+
+async function defaultVerifyAdminFromDb(userId: string): Promise<boolean> {
+  const { verifyAdminFromDb } = await import("../middleware/permission");
+  return verifyAdminFromDb(userId);
+}
 
 function uniquePaths(paths: readonly string[]): string[] {
   return [...new Set(paths)];
@@ -121,7 +207,7 @@ export async function canEditUnitFields(
   patchPaths: readonly string[],
   surfacePolicy: CollaborativeSurfacePolicy,
   options: {
-    prismaClient?: AuthorityPrisma;
+    lookup?: UnitAuthorityFieldLookup;
     verifyAdmin?: (userId: string) => Promise<boolean>;
   } = {},
 ): Promise<UnitFieldEditDecision> {
@@ -129,7 +215,7 @@ export async function canEditUnitFields(
     return denies("AUTHORITY_DENIED", "Login is required to edit this Unit.");
   }
 
-  const verifyAdmin = options.verifyAdmin ?? verifyAdminFromDb;
+  const verifyAdmin = options.verifyAdmin ?? defaultVerifyAdminFromDb;
   if (isAdminRole(caller) || (await verifyAdmin(caller.userId))) {
     return {
       allowed: true,
@@ -146,14 +232,10 @@ export async function canEditUnitFields(
     };
   }
 
-  const db = options.prismaClient ?? prisma;
-  const collaborator = await db.unitCollaborator.findUnique({
-    where: { unitId_userId: { unitId: unit.id, userId: caller.userId } },
-    select: { roleKey: true },
-  });
-  const collaboratorRole = collaborator
-    ? roleFromString(collaborator.roleKey)
-    : null;
+  const lookup = options.lookup ?? defaultAuthorityLookup;
+  const collaboratorRole = roleFromString(
+    (await lookup.findCollaboratorRole(unit.id, caller.userId)) ?? "",
+  );
 
   if (collaboratorRole) {
     const allowedRoles =
@@ -187,17 +269,14 @@ export async function canEditUnitFields(
   const editorialPatchPaths = uniquePaths(patchPaths).filter(
     (path) => !isExternallyGoverned(path),
   );
-  const locks = await db.unitFieldLock.findMany({
-    where: { unitId: unit.id },
-    select: { path: true },
-  });
+  const locks = await lookup.listFieldLockPaths(unit.id);
   const blocked = locks
-    .flatMap((lock) =>
+    .flatMap((lockPath) =>
       editorialPatchPaths
         .filter((patchPath) =>
-          lockPathIntersectsPatchPath(lock.path as LockPath, patchPath),
+          lockPathIntersectsPatchPath(lockPath as LockPath, patchPath),
         )
-        .map((patchPath) => ({ lockPath: lock.path, patchPath })),
+        .map((patchPath) => ({ lockPath, patchPath })),
     )
     .at(0);
 
@@ -271,22 +350,15 @@ export async function hasAuthorityOver(
   if (unit.userId && caller.userId === unit.userId) return true;
 
   if (isAdminRole(caller)) return true;
-  if (await verifyAdminFromDb(caller.userId)) return true;
+  if (await defaultVerifyAdminFromDb(caller.userId)) return true;
 
-  const containingRealms = await prisma.unitRealm.findMany({
-    where: { unitId: unit.id },
-    select: { realmUnitId: true },
-  });
+  const containingRealms = await defaultAuthorityLookup.listContainingRealmIds(
+    unit.id,
+  );
   if (containingRealms.length === 0) return false;
 
-  const realmMember = await prisma.realmMember.findFirst({
-    where: {
-      userId: caller.userId,
-      roleKey: { in: [...REALM_AUTHORITY_ROLES] },
-      realmUnitId: { in: containingRealms.map((r) => r.realmUnitId) },
-    },
-    select: { realmUnitId: true },
-  });
-
-  return realmMember !== null;
+  return defaultAuthorityLookup.hasAuthorityRealmMembership(
+    caller.userId,
+    containingRealms,
+  );
 }

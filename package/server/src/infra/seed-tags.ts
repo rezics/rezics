@@ -3,10 +3,16 @@ import {
   SEED_TAG_SLUGS,
   type SeedTagName,
 } from "@rezics/contract";
-import { prisma } from "#/prisma/client";
+import { and, eq, inArray } from "drizzle-orm";
+import { Unit } from "../db/schema";
 import { getSlugScopeId } from "./slug-scopes";
 
 const cache = new Map<SeedTagName, string>();
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 /**
  * Look up all content-type tags by `(tagScope, slug)` and cache their IDs
@@ -23,10 +29,17 @@ export async function initSeedTagsCache(): Promise<void> {
   }
 
   const slugs = SEED_TAG_NAMES.map((name) => SEED_TAG_SLUGS[name]);
-  const units = await prisma.unit.findMany({
-    where: { slugScope: tagScope, slug: { in: slugs }, type: "TAG" },
-    select: { id: true, slug: true },
-  });
+  const db = await getServerDb();
+  const units = await db
+    .select({ id: Unit.id, slug: Unit.slug })
+    .from(Unit)
+    .where(
+      and(
+        eq(Unit.slugScope, tagScope),
+        inArray(Unit.slug, slugs),
+        eq(Unit.type, "TAG"),
+      ),
+    );
 
   const bySlug = new Map<string, string>();
   for (const unit of units) {

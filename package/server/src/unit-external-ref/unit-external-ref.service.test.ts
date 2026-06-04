@@ -1,7 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
-
-installPrismaClientMock();
+import {
+  UnitExternalRefService,
+  type UnitExternalRefRepository,
+} from "./unit-external-ref.service";
 
 const refRules = [
   {
@@ -12,71 +13,63 @@ const refRules = [
   },
 ] as const;
 
-function freshMocks() {
-  const createdRef = {
-    id: "ref-1",
-    unitId: "unit-1",
-    sourceSiteEntityUnitId: "source-site-1",
-    externalKind: "book",
-    externalId: "123",
-    canonicalUrl: "https://book.qidian.com/info/123",
-    originalUrl: null,
-    firstSeenAt: new Date("2026-05-25T00:00:00.000Z"),
-    lastSeenAt: new Date("2026-05-25T00:00:00.000Z"),
-    createdAt: new Date("2026-05-25T00:00:00.000Z"),
-    updatedAt: new Date("2026-05-25T00:00:00.000Z"),
-    sourceSite: null,
+const createdRef = {
+  id: "ref-1",
+  unitId: "unit-1",
+  sourceSiteEntityUnitId: "source-site-1",
+  externalKind: "book",
+  externalId: "123",
+  canonicalUrl: "https://book.qidian.com/info/123",
+  originalUrl: null,
+  firstSeenAt: new Date("2026-05-25T00:00:00.000Z"),
+  lastSeenAt: new Date("2026-05-25T00:00:00.000Z"),
+  createdAt: new Date("2026-05-25T00:00:00.000Z"),
+  updatedAt: new Date("2026-05-25T00:00:00.000Z"),
+  sourceSite: null,
+};
+
+function freshRepository(): UnitExternalRefRepository {
+  return {
+    list: mock(async () => ({ rows: [createdRef], total: 1 })),
+    unitExists: mock(async () => true),
+    getSourceSiteRules: mock(async () => ({ refRules })),
+    create: mock(async (data) => ({ ...createdRef, ...data })),
+    getCurrent: mock(async () => ({
+      sourceSiteEntityUnitId: "source-site-1",
+      externalKind: "book",
+      externalId: "123",
+      originalUrl: null,
+    })),
+    update: mock(async (_id, data) => ({ ...createdRef, ...data })),
+    delete: mock(async () => undefined),
   };
-  Object.assign(prismaMock, {
-    unit: {
-      findUniqueOrThrow: mock(async () => ({ id: "unit-1" })),
-    },
-    sourceSite: {
-      findUniqueOrThrow: mock(async () => ({ refRules })),
-    },
-    unitExternalRef: {
-      create: mock(async ({ data }: any) => ({ ...createdRef, ...data })),
-      update: mock(async ({ data }: any) => ({ ...createdRef, ...data })),
-      findUniqueOrThrow: mock(async () => createdRef),
-      findMany: mock(async () => [createdRef]),
-      count: mock(async () => 1),
-      delete: mock(async () => createdRef),
-    },
-  });
 }
 
 describe("UnitExternalRefService", () => {
   test("derives and caches canonical URL from source rules", async () => {
-    freshMocks();
-    const { unitExternalRefService } = await import(
-      "./unit-external-ref.service"
-    );
+    const repository = freshRepository();
+    const service = new UnitExternalRefService(repository);
 
-    await unitExternalRefService.create({
+    await service.create({
       unitId: "unit-1",
       sourceSiteEntityUnitId: "source-site-1",
       externalKind: "book",
       externalId: "123",
     });
 
-    expect(prismaMock.unitExternalRef.create).toHaveBeenCalledWith(
+    expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          externalKind: "book",
-          externalId: "123",
-          canonicalUrl: "https://book.qidian.com/info/123",
-        }),
+        externalKind: "book",
+        externalId: "123",
+        canonicalUrl: "https://book.qidian.com/info/123",
       }),
     );
   });
 
   test("reverse parses pasted URLs", async () => {
-    freshMocks();
-    const { unitExternalRefService } = await import(
-      "./unit-external-ref.service"
-    );
+    const service = new UnitExternalRefService(freshRepository());
 
-    const parsed = await unitExternalRefService.parseUrl(
+    const parsed = await service.parseUrl(
       "source-site-1",
       "https://book.qidian.com/info/123?from=share",
     );
@@ -85,13 +78,10 @@ describe("UnitExternalRefService", () => {
   });
 
   test("rejects external kinds not declared by the source", async () => {
-    freshMocks();
-    const { unitExternalRefService } = await import(
-      "./unit-external-ref.service"
-    );
+    const service = new UnitExternalRefService(freshRepository());
 
     await expect(
-      unitExternalRefService.create({
+      service.create({
         unitId: "unit-1",
         sourceSiteEntityUnitId: "source-site-1",
         externalKind: "author",
@@ -101,13 +91,10 @@ describe("UnitExternalRefService", () => {
   });
 
   test("does not validate external kind against Unit kind", async () => {
-    freshMocks();
-    const { unitExternalRefService } = await import(
-      "./unit-external-ref.service"
-    );
+    const service = new UnitExternalRefService(freshRepository());
 
     await expect(
-      unitExternalRefService.create({
+      service.create({
         unitId: "publisher-entity-unit",
         sourceSiteEntityUnitId: "source-site-1",
         externalKind: "book",

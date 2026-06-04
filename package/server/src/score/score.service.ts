@@ -1,5 +1,11 @@
-import type { Prisma } from "#/prisma/client";
-import { prisma } from "#/prisma/client";
+import { and, asc, eq, inArray } from "drizzle-orm";
+import {
+  Post,
+  ScoreAggregate,
+  ScoreEntry,
+  ScoreRealmField,
+  Unit,
+} from "../db/schema";
 import {
   applyDistributionDelta,
   applyFieldsDelta,
@@ -11,6 +17,11 @@ import {
 import type { Distribution, FieldsAggregate } from "./score.types";
 
 const FIELD_KEY_PATTERN = /^[a-z][a-z0-9-]*$/;
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
 
 export class ScoreService {
   // ============================================================
@@ -32,10 +43,11 @@ export class ScoreService {
 
     // Validate fields against realm field registry
     if (fields && Object.keys(fields).length > 0) {
-      const realmFields = await prisma.scoreRealmField.findMany({
-        where: { realm },
-        select: { key: true },
-      });
+      const db = await getServerDb();
+      const realmFields = await db
+        .select({ key: ScoreRealmField.key })
+        .from(ScoreRealmField)
+        .where(eq(ScoreRealmField.realm, realm));
       const allowedKeys = new Set(realmFields.map((f) => f.key));
       if (allowedKeys.size === 0) {
         throw new Error(
@@ -48,30 +60,46 @@ export class ScoreService {
       }
     }
 
-    return prisma.$transaction(async (tx) => {
-      const existing = await tx.scoreEntry.findUnique({
-        where: { userId_unitId_realm: { userId, unitId, realm } },
-      });
+    const db = await getServerDb();
+    return db.transaction(async (tx) => {
+      const [existing] = await tx
+        .select()
+        .from(ScoreEntry)
+        .where(
+          and(
+            eq(ScoreEntry.userId, userId),
+            eq(ScoreEntry.unitId, unitId),
+            eq(ScoreEntry.realm, realm),
+          ),
+        )
+        .limit(1);
 
       const oldValue = existing?.value ?? null;
       const oldFields = (existing?.fields as Record<string, number>) ?? null;
       const newFields =
         fields && Object.keys(fields).length > 0 ? fields : null;
 
-      const entry = await tx.scoreEntry.upsert({
-        where: { userId_unitId_realm: { userId, unitId, realm } },
-        create: {
+      const updateData = {
+        value,
+        ...(newFields ? { fields: newFields } : {}),
+        updatedAt: new Date(),
+      };
+      const [entry] = await tx
+        .insert(ScoreEntry)
+        .values({
           userId,
           unitId,
           realm,
           value,
-          fields: (newFields as Prisma.InputJsonValue) ?? undefined,
-        },
-        update: {
-          value,
-          fields: (newFields as Prisma.InputJsonValue) ?? undefined,
-        },
-      });
+          fields: newFields ?? undefined,
+          updatedAt: new Date(),
+        })
+        .onConflictDoUpdate({
+          target: [ScoreEntry.userId, ScoreEntry.unitId, ScoreEntry.realm],
+          set: updateData,
+        })
+        .returning();
+      if (!entry) throw new Error("Failed to upsert ScoreEntry");
 
       await this.updateAggregate(
         tx,
@@ -88,16 +116,20 @@ export class ScoreService {
   }
 
   async deleteScore(id: string, isAdmin: boolean) {
-    return prisma.$transaction(async (tx) => {
-      const entry = await tx.scoreEntry.findUniqueOrThrow({
-        where: { id },
-      });
+    const db = await getServerDb();
+    return db.transaction(async (tx) => {
+      const [entry] = await tx
+        .select()
+        .from(ScoreEntry)
+        .where(eq(ScoreEntry.id, id))
+        .limit(1);
+      if (!entry) throw new Error("ScoreEntry not found");
 
       // Check for linked posts (reviews/remarks)
-      const linkedPosts = await tx.post.findMany({
-        where: { scoreEntryId: id },
-        select: { unitId: true },
-      });
+      const linkedPosts = await tx
+        .select({ unitId: Post.unitId })
+        .from(Post)
+        .where(eq(Post.scoreEntryId, id));
 
       if (linkedPosts.length > 0 && !isAdmin) {
         const blockingIds = linkedPosts.map((p) => p.unitId);
@@ -109,14 +141,17 @@ export class ScoreService {
 
       // Admin: delete linked posts first
       if (linkedPosts.length > 0) {
-        await tx.post.deleteMany({ where: { scoreEntryId: id } });
+        await tx.delete(Post).where(eq(Post.scoreEntryId, id));
         // Also delete the Unit records for those posts
-        await tx.unit.deleteMany({
-          where: { id: { in: linkedPosts.map((p) => p.unitId) } },
-        });
+        await tx.delete(Unit).where(
+          inArray(
+            Unit.id,
+            linkedPosts.map((p) => p.unitId),
+          ),
+        );
       }
 
-      await tx.scoreEntry.delete({ where: { id } });
+      await tx.delete(ScoreEntry).where(eq(ScoreEntry.id, id));
 
       const oldFields = (entry.fields as Record<string, number>) ?? null;
       await this.updateAggregate(
@@ -134,56 +169,75 @@ export class ScoreService {
   }
 
   async getAggregatesByUnit(unitId: string) {
-    return prisma.scoreAggregate.findMany({
-      where: { unitId },
-    });
+    const db = await getServerDb();
+    return db
+      .select()
+      .from(ScoreAggregate)
+      .where(eq(ScoreAggregate.unitId, unitId));
   }
 
   async getAggregate(unitId: string, realm: string) {
-    return prisma.scoreAggregate.findUnique({
-      where: { unitId_realm: { unitId, realm } },
-    });
+    const db = await getServerDb();
+    const [row] = await db
+      .select()
+      .from(ScoreAggregate)
+      .where(
+        and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm)),
+      )
+      .limit(1);
+    return row ?? null;
   }
 
   async getUserScores(userId: string, unitId: string) {
-    return prisma.scoreEntry.findMany({
-      where: { userId, unitId },
-    });
+    const db = await getServerDb();
+    return db
+      .select()
+      .from(ScoreEntry)
+      .where(and(eq(ScoreEntry.userId, userId), eq(ScoreEntry.unitId, unitId)));
   }
 
   async recalculateAggregate(unitId: string, realm: string) {
-    const entries = await prisma.scoreEntry.findMany({
-      where: { unitId, realm },
-    });
+    const db = await getServerDb();
+    const entries = await db
+      .select()
+      .from(ScoreEntry)
+      .where(and(eq(ScoreEntry.unitId, unitId), eq(ScoreEntry.realm, realm)));
 
     if (entries.length === 0) {
-      await prisma.scoreAggregate.deleteMany({
-        where: { unitId, realm },
-      });
+      await db
+        .delete(ScoreAggregate)
+        .where(
+          and(
+            eq(ScoreAggregate.unitId, unitId),
+            eq(ScoreAggregate.realm, realm),
+          ),
+        );
       return null;
     }
 
     const computed = computeAggregateFromEntries(entries);
 
-    return prisma.scoreAggregate.upsert({
-      where: { unitId_realm: { unitId, realm } },
-      create: {
+    const [row] = await db
+      .insert(ScoreAggregate)
+      .values({
         unitId,
         realm,
         ...computed,
-        distribution: computed.distribution as Prisma.InputJsonValue,
-        fields: (computed.fields ?? undefined) as
-          | Prisma.InputJsonValue
-          | undefined,
-      },
-      update: {
-        ...computed,
-        distribution: computed.distribution as Prisma.InputJsonValue,
-        fields: (computed.fields ?? undefined) as
-          | Prisma.InputJsonValue
-          | undefined,
-      },
-    });
+        distribution: computed.distribution,
+        fields: computed.fields ?? undefined,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [ScoreAggregate.unitId, ScoreAggregate.realm],
+        set: {
+          ...computed,
+          distribution: computed.distribution,
+          fields: computed.fields ?? undefined,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return row ?? null;
   }
 
   // ============================================================
@@ -191,10 +245,12 @@ export class ScoreService {
   // ============================================================
 
   async listRealmFields(realmId: string) {
-    return prisma.scoreRealmField.findMany({
-      where: { realm: realmId },
-      orderBy: { sortOrder: "asc" },
-    });
+    const db = await getServerDb();
+    return db
+      .select()
+      .from(ScoreRealmField)
+      .where(eq(ScoreRealmField.realm, realmId))
+      .orderBy(asc(ScoreRealmField.sortOrder));
   }
 
   async addRealmField(
@@ -209,20 +265,30 @@ export class ScoreService {
       );
     }
 
-    return prisma.scoreRealmField.create({
-      data: {
+    const db = await getServerDb();
+    const [row] = await db
+      .insert(ScoreRealmField)
+      .values({
         realm: realmId,
         key,
         label: label ?? null,
         sortOrder: sortOrder ?? 0,
-      },
-    });
+        updatedAt: new Date(),
+      })
+      .returning();
+    if (!row) throw new Error("Failed to create ScoreRealmField");
+    return row;
   }
 
   async removeRealmField(realmId: string, key: string) {
-    const existing = await prisma.scoreRealmField.findUnique({
-      where: { realm_key: { realm: realmId, key } },
-    });
+    const db = await getServerDb();
+    const [existing] = await db
+      .select()
+      .from(ScoreRealmField)
+      .where(
+        and(eq(ScoreRealmField.realm, realmId), eq(ScoreRealmField.key, key)),
+      )
+      .limit(1);
 
     if (!existing) {
       throw Object.assign(new Error(`Field "${key}" not found for realm`), {
@@ -230,9 +296,13 @@ export class ScoreService {
       });
     }
 
-    return prisma.scoreRealmField.delete({
-      where: { realm_key: { realm: realmId, key } },
-    });
+    const [deleted] = await db
+      .delete(ScoreRealmField)
+      .where(
+        and(eq(ScoreRealmField.realm, realmId), eq(ScoreRealmField.key, key)),
+      )
+      .returning();
+    return deleted;
   }
 
   // ============================================================
@@ -240,7 +310,7 @@ export class ScoreService {
   // ============================================================
 
   private async updateAggregate(
-    tx: Prisma.TransactionClient,
+    tx: any,
     unitId: string,
     realm: string,
     oldValue: number | null,
@@ -248,17 +318,26 @@ export class ScoreService {
     oldFields: Record<string, number> | null,
     newFields: Record<string, number> | null,
   ) {
-    const existing = await tx.scoreAggregate.findUnique({
-      where: { unitId_realm: { unitId, realm } },
-    });
+    const [existing] = await tx
+      .select()
+      .from(ScoreAggregate)
+      .where(
+        and(eq(ScoreAggregate.unitId, unitId), eq(ScoreAggregate.realm, realm)),
+      )
+      .limit(1);
 
     // Deletion case: removing the last entry
     if (newValue === null && existing) {
       const nextCount = existing.totalCount - 1;
       if (nextCount <= 0) {
-        await tx.scoreAggregate.delete({
-          where: { unitId_realm: { unitId, realm } },
-        });
+        await tx
+          .delete(ScoreAggregate)
+          .where(
+            and(
+              eq(ScoreAggregate.unitId, unitId),
+              eq(ScoreAggregate.realm, realm),
+            ),
+          );
         return;
       }
 
@@ -273,15 +352,21 @@ export class ScoreService {
         null,
       );
 
-      await tx.scoreAggregate.update({
-        where: { unitId_realm: { unitId, realm } },
-        data: {
+      await tx
+        .update(ScoreAggregate)
+        .set({
           totalScore: existing.totalScore - (oldValue ?? 0),
           totalCount: nextCount,
-          distribution: distribution as Prisma.InputJsonValue,
-          fields: (fields ?? undefined) as Prisma.InputJsonValue | undefined,
-        },
-      });
+          distribution,
+          fields: fields ?? undefined,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(ScoreAggregate.unitId, unitId),
+            eq(ScoreAggregate.realm, realm),
+          ),
+        );
       return;
     }
 
@@ -296,15 +381,14 @@ export class ScoreService {
         }
       }
 
-      await tx.scoreAggregate.create({
-        data: {
-          unitId,
-          realm,
-          totalScore: newValue,
-          totalCount: 1,
-          distribution: distribution as Prisma.InputJsonValue,
-          fields: (fields ?? undefined) as Prisma.InputJsonValue | undefined,
-        },
+      await tx.insert(ScoreAggregate).values({
+        unitId,
+        realm,
+        totalScore: newValue,
+        totalCount: 1,
+        distribution,
+        fields: fields ?? undefined,
+        updatedAt: new Date(),
       });
       return;
     }
@@ -325,15 +409,21 @@ export class ScoreService {
         newFields,
       );
 
-      await tx.scoreAggregate.update({
-        where: { unitId_realm: { unitId, realm } },
-        data: {
+      await tx
+        .update(ScoreAggregate)
+        .set({
           totalScore: existing.totalScore + deltaScore,
           totalCount: existing.totalCount + deltaCount,
-          distribution: distribution as Prisma.InputJsonValue,
-          fields: (fields ?? undefined) as Prisma.InputJsonValue | undefined,
-        },
-      });
+          distribution,
+          fields: fields ?? undefined,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(ScoreAggregate.unitId, unitId),
+            eq(ScoreAggregate.realm, realm),
+          ),
+        );
     }
   }
 }

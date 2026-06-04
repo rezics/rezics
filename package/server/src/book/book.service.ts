@@ -9,23 +9,27 @@ import type {
 } from "@rezics/contract";
 import { parseIdsCsv, withCoverUrl } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import type { Prisma } from "#/prisma/client";
-import {
-  type AiDisclosureMode,
-  type ContentRating,
-  type ModerationStatus,
-  prisma,
-  UnitStatus,
-  UnitType,
-  type UnitVisibility,
-} from "#/prisma/client";
+import { and, asc, count, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 import { nullableContentDocJson } from "@/content-doc/prisma-json";
 import { contentStructureService } from "@/content-structure";
 import { countReadableContentStructureItems } from "@/content-structure/types";
+import {
+  Book,
+  ContentStructure,
+  CreditAttribution,
+  Entity,
+  Unit,
+  UnitFieldLock,
+  UnitSupportLanguage,
+  UnitTag,
+  UnitTranslation,
+  User,
+} from "@/db/schema";
 import { resolveRezicsWikiUserId } from "@/infra/infra-users";
 import { serverJobProducer } from "@/job/job-boundary";
 import {
   assertCanEditCollaborativeMetadata,
+  createDrizzleCollaborativeMetadataTx,
   hasOwn,
   mapActualTranslationPatchPaths,
   sameJson,
@@ -33,10 +37,7 @@ import {
   uniquePatchPaths,
   writeEditorialMetadataHistory,
 } from "@/unit/collaborative-metadata";
-import {
-  preferredLanguageVisibilityWhere,
-  resolveEffectiveReadLanguageCandidates,
-} from "@/unit/language-resolution";
+import { resolveEffectiveReadLanguageCandidates } from "@/unit/language-resolution";
 import { assertLicenseSlug } from "@/unit/publication-policy";
 import { assertUnitTranslationExtraAllowed } from "@/unit/translation-extra";
 import {
@@ -44,7 +45,560 @@ import {
   hydrateUnitOwnerUserSlugs,
 } from "@/utils/userSlugHydration";
 import type { BookWithRelations } from "./types";
-import { bookInclude } from "./types";
+
+type BookHydrationDb = Awaited<ReturnType<typeof getServerDb>>;
+type BookListOptions = Omit<BookListQuery, "languages"> & {
+  languages?: string | readonly string[];
+};
+
+export type BookRepository = {
+  list(options: BookListOptions): Promise<{
+    books: BookWithRelations[];
+    total: number;
+  }>;
+  getByUnitId(unitId: string): Promise<BookWithRelations>;
+  getByIsbn13(isbn13: string): Promise<BookWithRelations | null>;
+  create(req: CreateBookInput): Promise<BookWithRelations>;
+  update(
+    unitId: string,
+    req: UpdateBookInput,
+    actor?: RezicsSessionClaims,
+    historyInput?: Pick<
+      EditorialPatchSubmission,
+      "patch" | "message" | "restoreSource"
+    >,
+  ): Promise<BookWithRelations>;
+  updateChapterCount(
+    tx: unknown,
+    unitId: string,
+    chapterCount: number,
+  ): Promise<void>;
+  delete(unitId: string): Promise<void>;
+  exists(unitId: string): Promise<boolean>;
+};
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function publicUserColumns() {
+  return {
+    unitId: User.unitId,
+    name: User.name,
+    avatar: User.avatar,
+    bio: User.bio,
+    description: User.description,
+    followersCount: User.followersCount,
+    followingsCount: User.followingsCount,
+  };
+}
+
+async function hydrateBook(
+  database: BookHydrationDb,
+  unitId: string,
+): Promise<BookWithRelations | null> {
+  const [row] = await database
+    .select({ book: Book, unit: Unit, user: publicUserColumns() })
+    .from(Book)
+    .innerJoin(Unit, eq(Book.unitId, Unit.id))
+    .leftJoin(User, eq(Unit.userId, User.unitId))
+    .where(eq(Book.unitId, unitId))
+    .limit(1);
+  if (!row) return null;
+
+  const [translations, supportLanguages, creditRows] = await Promise.all([
+    database
+      .select()
+      .from(UnitTranslation)
+      .where(eq(UnitTranslation.unitId, unitId)),
+    database
+      .select()
+      .from(UnitSupportLanguage)
+      .where(eq(UnitSupportLanguage.unitId, unitId))
+      .orderBy(asc(UnitSupportLanguage.sortOrder)),
+    database
+      .select({
+        credit: CreditAttribution,
+        entityUnit: Unit,
+        entity: Entity,
+      })
+      .from(CreditAttribution)
+      .innerJoin(Unit, eq(CreditAttribution.entityId, Unit.id))
+      .leftJoin(Entity, eq(CreditAttribution.entityId, Entity.unitId))
+      .where(eq(CreditAttribution.unitId, unitId))
+      .orderBy(asc(CreditAttribution.sortOrder)),
+  ]);
+
+  const entityUnitIds = creditRows.map((credit) => credit.entityUnit.id);
+  const entityTranslations =
+    entityUnitIds.length === 0
+      ? []
+      : await database
+          .select()
+          .from(UnitTranslation)
+          .where(inArray(UnitTranslation.unitId, entityUnitIds));
+  const entityTranslationsByUnitId = new Map<
+    string,
+    Array<typeof UnitTranslation.$inferSelect>
+  >();
+  for (const tr of entityTranslations) {
+    const list = entityTranslationsByUnitId.get(tr.unitId) ?? [];
+    list.push(tr);
+    entityTranslationsByUnitId.set(tr.unitId, list);
+  }
+
+  return {
+    ...row.book,
+    unit: {
+      ...row.unit,
+      user: row.user,
+      translations,
+      supportLanguages,
+      creditAttributions: creditRows.map((credit) => ({
+        ...credit.credit,
+        entity: {
+          ...credit.entityUnit,
+          entity: credit.entity,
+          translations:
+            entityTranslationsByUnitId.get(credit.entityUnit.id) ?? [],
+        },
+      })),
+    },
+  };
+}
+
+async function hydrateBookOrThrow(
+  database: BookHydrationDb,
+  unitId: string,
+): Promise<BookWithRelations> {
+  const row = await hydrateBook(database, unitId);
+  if (!row) throw new Error(`Book not found: ${unitId}`);
+  return row;
+}
+
+function bookListWhere(options: BookListOptions) {
+  const conditions = [eq(Unit.type, "BOOK")];
+
+  if (options.rating) conditions.push(eq(Unit.rating, options.rating as never));
+  if (options.isbn13?.trim()) {
+    conditions.push(ilike(Book.isbn13, `%${options.isbn13.trim()}%`));
+  }
+  if (options.userId?.trim()) conditions.push(eq(Unit.userId, options.userId));
+  if (options.entityId?.trim()) {
+    conditions.push(sql`EXISTS (
+      SELECT 1 FROM "CreditAttribution" ca
+      WHERE ca."unitId" = ${Book.unitId}
+        AND ca."entityId" = ${options.entityId}
+    )`);
+  }
+
+  const tagList = (options.tagUnitIds ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (tagList.length > 0) {
+    const tagIds = sql.join(
+      tagList.map((id) => sql`${id}`),
+      sql`, `,
+    );
+    conditions.push(sql`EXISTS (
+      SELECT 1 FROM "UnitTag" tag
+      WHERE tag."unitId" = ${Book.unitId}
+        AND tag."tagUnitId" IN (${tagIds})
+    )`);
+  }
+
+  if (options.language?.trim()) {
+    conditions.push(sql`EXISTS (
+      SELECT 1 FROM "UnitTranslation" tr
+      WHERE tr."unitId" = ${Book.unitId}
+        AND tr."language" = ${options.language}
+    )`);
+  }
+
+  const readLanguages = resolveEffectiveReadLanguageCandidates({
+    languages: options.languages,
+  });
+  if (options.languageMode === "preferred" && readLanguages.length > 0) {
+    const languages = sql.join(
+      readLanguages.map((language) => sql`${language}`),
+      sql`, `,
+    );
+    conditions.push(sql`(
+      ${Unit.isLanguageNeutral} = true
+      OR EXISTS (
+        SELECT 1 FROM "UnitSupportLanguage" sl
+        WHERE sl."unitId" = ${Book.unitId}
+          AND sl."language" IN (${languages})
+      )
+    )`);
+  }
+
+  if (options.visibility?.trim()) {
+    conditions.push(eq(Unit.visibility, options.visibility as never));
+  }
+  if (options.status?.trim()) {
+    conditions.push(eq(Unit.status, options.status as never));
+  }
+  if (options.moderationStatus?.trim()) {
+    conditions.push(
+      eq(Unit.moderationStatus, options.moderationStatus as never),
+    );
+  }
+
+  const idList = parseIdsCsv(options.ids);
+  if (idList && idList.length > 0) {
+    conditions.push(inArray(Book.unitId, idList));
+  }
+
+  return and(...conditions);
+}
+
+function createDrizzleBookRepository(): BookRepository {
+  return {
+    async list(options) {
+      const db = await getServerDb();
+      const cursor = options.cursor;
+      const hasCursor = cursor?.unitId && cursor?.createdAt;
+      const limit = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
+      const where = bookListWhere(options);
+      const sortField =
+        options.sort?.type === "updatedAt" ? Book.updatedAt : Book.createdAt;
+      const sortOrder =
+        options.sort?.order?.toLowerCase() === "asc" ? asc : desc;
+
+      const [rows, totalRows] = await Promise.all([
+        db
+          .select({ unitId: Book.unitId })
+          .from(Book)
+          .innerJoin(Unit, eq(Book.unitId, Unit.id))
+          .where(where)
+          .orderBy(sortOrder(sortField))
+          .offset(hasCursor ? 1 : (options.start ?? 0))
+          .limit(limit),
+        db
+          .select({ value: count() })
+          .from(Book)
+          .innerJoin(Unit, eq(Book.unitId, Unit.id))
+          .where(where),
+      ]);
+
+      return {
+        books: await hydrateUnitOwnerUserSlugs(
+          await Promise.all(
+            rows.map((row) => hydrateBookOrThrow(db, row.unitId)),
+          ),
+        ),
+        total: totalRows[0]?.value ?? 0,
+      };
+    },
+    async getByUnitId(unitId) {
+      const db = await getServerDb();
+      return hydrateUnitOwnerUserSlugRow(await hydrateBookOrThrow(db, unitId));
+    },
+    async getByIsbn13(isbn13) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ unitId: Book.unitId })
+        .from(Book)
+        .where(eq(Book.isbn13, isbn13))
+        .limit(1);
+      if (!row) return null;
+      return hydrateUnitOwnerUserSlugRow(
+        await hydrateBookOrThrow(db, row.unitId),
+      );
+    },
+    async create(req) {
+      const db = await getServerDb();
+      const actorUserId = req.userId || "";
+      const ownerUserId =
+        req.creationMode === "wiki"
+          ? await resolveRezicsWikiUserId()
+          : actorUserId;
+      const language = req.defaultLanguage ?? "en";
+      const providedTranslations = req.translations ?? [];
+      const hasDefault = providedTranslations.some(
+        (tr) => tr.language === language,
+      );
+      const ensuredTranslations = hasDefault
+        ? providedTranslations
+        : req.coverUrl !== undefined
+          ? [...providedTranslations, { language }]
+          : providedTranslations;
+
+      const translationData = ensuredTranslations.map((tr) => {
+        const baseExtra = (tr.extra ?? undefined) as
+          | Record<string, unknown>
+          | undefined;
+        const nextExtra =
+          req.coverUrl !== undefined && tr.language === language
+            ? withCoverUrl(baseExtra, req.coverUrl ?? undefined)
+            : baseExtra;
+        assertUnitTranslationExtraAllowed(nextExtra ?? null);
+        return {
+          language: tr.language,
+          title: tr.title ?? null,
+          subtitle: tr.subtitle ?? null,
+          summary: tr.summary ?? null,
+          description: nullableContentDocJson(tr.description),
+          extra: nextExtra ?? null,
+          sourceUnitId: tr.sourceUnitId ?? null,
+        };
+      });
+
+      const unitId = await db.transaction(async (tx) => {
+        const now = new Date();
+        const [unit] = await tx
+          .insert(Unit)
+          .values({
+            userId: ownerUserId || null,
+            slugScope: ownerUserId,
+            type: "BOOK",
+            status: "PUBLISHED",
+            visibility: req.visibility as typeof Unit.$inferInsert.visibility,
+            licenseSlug: assertLicenseSlug(req.licenseSlug) ?? null,
+            aiDisclosureMode:
+              req.aiDisclosureMode as typeof Unit.$inferInsert.aiDisclosureMode,
+            aiDisclosureDetails: req.aiDisclosureDetails ?? null,
+            defaultLanguage: req.defaultLanguage ?? null,
+            rating: req.rating as typeof Unit.$inferInsert.rating,
+            updatedAt: now,
+          })
+          .returning({ id: Unit.id });
+        if (!unit) throw new Error("Failed to create Book Unit");
+
+        if (translationData.length > 0) {
+          await tx.insert(UnitTranslation).values(
+            translationData.map((tr) => ({
+              unitId: unit.id,
+              ...tr,
+              updatedAt: now,
+            })),
+          );
+        }
+
+        if (req.creationMode !== "wiki" && actorUserId) {
+          await tx.insert(UnitFieldLock).values({
+            unitId: unit.id,
+            path: "*",
+            lockedById: actorUserId,
+            reason: "Personal creation starts closed to community edits.",
+          });
+        }
+
+        await tx.insert(Book).values({
+          unitId: unit.id,
+          isbn13: req.isbn13 ?? null,
+          publicationDate: req.publicationDate
+            ? new Date(req.publicationDate as never)
+            : null,
+          pageCount: req.pageCount ?? null,
+          textLength: req.textLength ?? 0,
+          chapterCount: 0,
+          formatKey: req.formatKey ?? null,
+          isLicensed: req.isLicensed ?? false,
+          extra: req.extra ?? null,
+          updatedAt: now,
+        });
+        await tx
+          .insert(ContentStructure)
+          .values({ ownerUnitId: unit.id, updatedAt: now })
+          .onConflictDoNothing();
+
+        if (actorUserId) {
+          await writeEditorialMetadataHistory(
+            createDrizzleCollaborativeMetadataTx(tx),
+            {
+              unitId: unit.id,
+              actorUserId,
+              patch: buildBookCreatePatch(req, ensuredTranslations, language),
+              message: "book.create",
+            },
+          );
+        }
+
+        return unit.id;
+      });
+
+      return hydrateUnitOwnerUserSlugRow(await hydrateBookOrThrow(db, unitId));
+    },
+    async update(unitId, req, actor, historyInput) {
+      const db = await getServerDb();
+      await db.transaction(async (tx) => {
+        const [current] = await tx
+          .select({
+            isbn13: Book.isbn13,
+            publicationDate: Book.publicationDate,
+            pageCount: Book.pageCount,
+            textLength: Book.textLength,
+            formatKey: Book.formatKey,
+            isLicensed: Book.isLicensed,
+            extra: Book.extra,
+            defaultLanguage: Unit.defaultLanguage,
+            rating: Unit.rating,
+            aiDisclosureMode: Unit.aiDisclosureMode,
+            aiDisclosureDetails: Unit.aiDisclosureDetails,
+            visibility: Unit.visibility,
+            licenseSlug: Unit.licenseSlug,
+          })
+          .from(Book)
+          .innerJoin(Unit, eq(Book.unitId, Unit.id))
+          .where(eq(Book.unitId, unitId))
+          .limit(1);
+        if (!current) throw new Error(`Book not found: ${unitId}`);
+
+        const language = current.defaultLanguage ?? "en";
+        const [existingCoverTranslation] =
+          req.coverUrl !== undefined
+            ? await tx
+                .select({ extra: UnitTranslation.extra })
+                .from(UnitTranslation)
+                .where(
+                  and(
+                    eq(UnitTranslation.unitId, unitId),
+                    eq(UnitTranslation.language, language),
+                  ),
+                )
+                .limit(1)
+            : [null];
+        const currentForPatch = {
+          isbn13: current.isbn13,
+          publicationDate: current.publicationDate,
+          pageCount: current.pageCount,
+          textLength: current.textLength,
+          formatKey: current.formatKey,
+          isLicensed: current.isLicensed,
+          extra: current.extra,
+          unit: {
+            defaultLanguage: current.defaultLanguage,
+            rating: current.rating,
+            aiDisclosureMode: current.aiDisclosureMode,
+            aiDisclosureDetails: current.aiDisclosureDetails,
+            visibility: current.visibility,
+            licenseSlug: current.licenseSlug,
+          },
+        };
+        const patchPaths = mapBookEffectiveUpdatePatchPaths(
+          req,
+          currentForPatch,
+          existingCoverTranslation?.extra ?? null,
+          language,
+        );
+        const patch = buildBookUpdatePatchFromPaths(req, patchPaths, language);
+
+        if (patchPaths.length === 0) return;
+
+        const collaborativeTx = createDrizzleCollaborativeMetadataTx(tx);
+        if (actor) {
+          await assertCanEditCollaborativeMetadata(
+            collaborativeTx,
+            actor,
+            unitId,
+            patchPaths,
+          );
+        }
+
+        if (req.coverUrl !== undefined) {
+          const nextExtra = withCoverUrl(
+            existingCoverTranslation?.extra ?? undefined,
+            req.coverUrl ?? undefined,
+          );
+          assertUnitTranslationExtraAllowed(nextExtra);
+          await tx
+            .insert(UnitTranslation)
+            .values({
+              unitId,
+              language,
+              extra: nextExtra,
+              updatedAt: new Date(),
+            })
+            .onConflictDoUpdate({
+              target: [UnitTranslation.unitId, UnitTranslation.language],
+              set: { extra: nextExtra, updatedAt: new Date() },
+            });
+        }
+
+        const bookPatch: Partial<typeof Book.$inferInsert> = {};
+        if (req.isbn13 !== undefined) bookPatch.isbn13 = req.isbn13;
+        if (req.publicationDate !== undefined) {
+          bookPatch.publicationDate = req.publicationDate
+            ? new Date(req.publicationDate as never)
+            : null;
+        }
+        if (req.pageCount !== undefined) bookPatch.pageCount = req.pageCount;
+        if (req.textLength !== undefined) bookPatch.textLength = req.textLength;
+        if (req.formatKey !== undefined) bookPatch.formatKey = req.formatKey;
+        if (req.isLicensed !== undefined) bookPatch.isLicensed = req.isLicensed;
+        if (req.extra !== undefined) bookPatch.extra = req.extra ?? null;
+        if (Object.keys(bookPatch).length > 0) {
+          await tx
+            .update(Book)
+            .set({ ...bookPatch, updatedAt: new Date() })
+            .where(eq(Book.unitId, unitId));
+        }
+
+        const unitPatch: Partial<typeof Unit.$inferInsert> = {};
+        if (req.rating !== undefined) unitPatch.rating = req.rating as never;
+        if (req.aiDisclosureMode !== undefined) {
+          unitPatch.aiDisclosureMode = req.aiDisclosureMode as never;
+        }
+        if (req.aiDisclosureDetails !== undefined) {
+          unitPatch.aiDisclosureDetails = req.aiDisclosureDetails ?? null;
+        }
+        if (req.visibility !== undefined) {
+          unitPatch.visibility = req.visibility as never;
+        }
+        if (req.licenseSlug !== undefined) {
+          unitPatch.licenseSlug =
+            req.licenseSlug === null
+              ? null
+              : (assertLicenseSlug(req.licenseSlug) ?? null);
+        }
+        if (Object.keys(unitPatch).length > 0) {
+          await tx
+            .update(Unit)
+            .set({ ...unitPatch, updatedAt: new Date() })
+            .where(eq(Unit.id, unitId));
+        }
+
+        if (actor) {
+          await writeEditorialMetadataHistory(collaborativeTx, {
+            unitId,
+            actorUserId: actor.userId,
+            patch: historyInput?.patch ?? patch,
+            message: historyInput?.message ?? "book.metadata.update",
+            restoreSource: historyInput?.restoreSource,
+          });
+        }
+      });
+
+      return hydrateUnitOwnerUserSlugRow(await hydrateBookOrThrow(db, unitId));
+    },
+    async updateChapterCount(tx, unitId, chapterCount) {
+      const inner =
+        tx && typeof tx === "object" && "update" in tx
+          ? (tx as any)
+          : await getServerDb();
+      await inner
+        .update(Book)
+        .set({ chapterCount, updatedAt: new Date() })
+        .where(eq(Book.unitId, unitId));
+    },
+    async delete(unitId) {
+      const db = await getServerDb();
+      await db.delete(Unit).where(eq(Unit.id, unitId));
+    },
+    async exists(unitId) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select({ value: count() })
+        .from(Book)
+        .where(eq(Book.unitId, unitId));
+      return (row?.value ?? 0) > 0;
+    },
+  };
+}
 
 function enqueueContentSync(unitId: string) {
   return serverJobProducer.enqueue(
@@ -83,157 +637,25 @@ function enqueueContentDelete(unitId: string) {
  * Book Service - Business logic layer
  */
 export class BookService {
-  /**
-   * Build where clause for book queries
-   */
-  private buildWhereClause(options: BookListQuery): Prisma.BookWhereInput {
-    const andWhere: Prisma.BookWhereInput[] = [];
-
-    // Rating filter — if specified, narrow by single rating value.
-    if (options.rating) {
-      andWhere.push({ unit: { rating: options.rating as ContentRating } });
-    }
-
-    // Filter by ISBN13
-    if (options.isbn13?.trim()) {
-      andWhere.push({
-        isbn13: { contains: options.isbn13, mode: "insensitive" },
-      });
-    }
-
-    // Filter by user ID (unit owner)
-    if (options.userId?.trim()) {
-      andWhere.push({ unit: { userId: options.userId } });
-    }
-
-    // Filter by entity ID (via credit attribution)
-    if (options.entityId?.trim()) {
-      andWhere.push({
-        unit: {
-          creditAttributions: {
-            some: { entityId: options.entityId },
-          },
-        },
-      });
-    }
-
-    // Filter by tag unit IDs (scored tags)
-    const tagList = (options.tagUnitIds ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (tagList.length > 0) {
-      andWhere.push({
-        unit: {
-          unitTags: {
-            some: { tagUnitId: { in: tagList } },
-          },
-        },
-      });
-    }
-
-    // Filter by language (translations must have this language)
-    if (options.language?.trim()) {
-      andWhere.push({
-        unit: {
-          translations: {
-            some: { language: options.language },
-          },
-        },
-      });
-    }
-
-    const readLanguages = resolveEffectiveReadLanguageCandidates({
-      languages: (options as { languages?: string | readonly string[] })
-        .languages,
-    });
-    const languageVisibility = preferredLanguageVisibilityWhere({
-      languageMode: options.languageMode,
-      languages: readLanguages,
-    });
-    if (languageVisibility) {
-      andWhere.push({ unit: languageVisibility });
-    }
-
-    // Filter by visibility
-    if (options.visibility?.trim()) {
-      andWhere.push({
-        unit: { visibility: options.visibility as UnitVisibility },
-      });
-    }
-
-    // Filter by status
-    if (options.status?.trim()) {
-      andWhere.push({
-        unit: { status: options.status as UnitStatus },
-      });
-    }
-
-    if (options.moderationStatus?.trim()) {
-      andWhere.push({
-        unit: {
-          moderationStatus: options.moderationStatus as ModerationStatus,
-        },
-      });
-    }
-
-    // Intersect with explicit unit id list (from listGetQueryBase)
-    const idList = parseIdsCsv(options.ids);
-    if (idList && idList.length > 0) {
-      andWhere.push({ unitId: { in: idList } });
-    }
-
-    return { AND: andWhere };
-  }
+  constructor(
+    private readonly repository: BookRepository = createDrizzleBookRepository(),
+  ) {}
 
   /**
    * List books with filters and pagination
    */
-  async list(options: BookListQuery = {}): Promise<{
+  async list(options: BookListOptions = {}): Promise<{
     books: BookWithRelations[];
     total: number;
   }> {
-    const cursor = options.cursor;
-    const hasCursor = cursor?.unitId && cursor?.createdAt;
-    const limitNum = Math.max(1, Math.min(Number(options.limit ?? 20), 100));
-    const skipNum = hasCursor ? 1 : (options.start ?? 0);
-    const where = this.buildWhereClause(options);
-
-    const sortField = options.sort?.type ?? "createdAt";
-    const sortOrder = (
-      options.sort?.order?.toLowerCase() === "asc" ? "asc" : "desc"
-    ) as Prisma.SortOrder;
-
-    const [books, total] = await Promise.all([
-      prisma.book.findMany({
-        where,
-        orderBy: { [sortField]: sortOrder },
-        skip: skipNum,
-        cursor: hasCursor
-          ? { unitId: cursor.unitId, createdAt: cursor.createdAt }
-          : undefined,
-        take: limitNum,
-        include: bookInclude,
-      }),
-      prisma.book.count({ where }),
-    ]);
-
-    return {
-      books: await hydrateUnitOwnerUserSlugs(books as BookWithRelations[]),
-      total,
-    };
+    return this.repository.list(options);
   }
 
   /**
    * Get book by unitId
    */
   async getByUnitId(unitId: string): Promise<BookWithRelations> {
-    const book = await prisma.book.findUniqueOrThrow({
-      where: { unitId },
-      include: bookInclude,
-    });
-
-    return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);
+    return this.repository.getByUnitId(unitId);
   }
 
   /**
@@ -258,126 +680,16 @@ export class BookService {
    * Get book by ISBN13
    */
   async getByIsbn13(isbn13: string): Promise<BookWithRelations | null> {
-    const book = await prisma.book.findFirst({
-      where: { isbn13 },
-      include: bookInclude,
-    });
-
-    return book ? hydrateUnitOwnerUserSlugRow(book as BookWithRelations) : null;
+    return this.repository.getByIsbn13(isbn13);
   }
 
   /**
    * Create new book (Unit + Book extension + translations in one transaction)
    */
   async create(req: CreateBookInput): Promise<BookWithRelations> {
-    const actorUserId = req.userId || "";
-    const ownerUserId =
-      req.creationMode === "wiki"
-        ? await resolveRezicsWikiUserId()
-        : actorUserId;
-    const language = req.defaultLanguage ?? "en";
-    const providedTranslations = req.translations ?? [];
-    const hasDefault = providedTranslations.some(
-      (tr) => tr.language === language,
-    );
-    const ensuredTranslations = hasDefault
-      ? providedTranslations
-      : req.coverUrl !== undefined
-        ? [...providedTranslations, { language }]
-        : providedTranslations;
-
-    const translationData = ensuredTranslations.map((tr) => {
-      const baseExtra = (tr.extra ?? undefined) as
-        | Record<string, unknown>
-        | undefined;
-      const nextExtra =
-        req.coverUrl !== undefined && tr.language === language
-          ? withCoverUrl(baseExtra, req.coverUrl ?? undefined)
-          : baseExtra;
-      assertUnitTranslationExtraAllowed(nextExtra ?? null);
-      return {
-        language: tr.language,
-        title: tr.title ?? undefined,
-        subtitle: tr.subtitle ?? undefined,
-        summary: tr.summary ?? undefined,
-        description: nullableContentDocJson(tr.description),
-        extra: (nextExtra ?? null) as Prisma.InputJsonValue,
-        sourceUnitId: tr.sourceUnitId ?? undefined,
-      };
-    });
-
-    const syncAfterCommit = new Set<string>();
-    const book = await prisma.$transaction(async (tx) => {
-      const created = await tx.book.create({
-        data: {
-          unit: {
-            create: {
-              userId: ownerUserId,
-              slugScope: ownerUserId,
-              type: UnitType.BOOK,
-              status: UnitStatus.PUBLISHED,
-              visibility: (req.visibility as UnitVisibility) ?? undefined,
-              licenseSlug: assertLicenseSlug(req.licenseSlug) ?? undefined,
-              aiDisclosureMode:
-                (req.aiDisclosureMode as AiDisclosureMode | undefined) ??
-                undefined,
-              aiDisclosureDetails:
-                req.aiDisclosureDetails === undefined
-                  ? undefined
-                  : ((req.aiDisclosureDetails ??
-                      null) as Prisma.InputJsonValue),
-              defaultLanguage: req.defaultLanguage ?? undefined,
-              rating: (req.rating as ContentRating | undefined) ?? undefined,
-              extra: undefined,
-              translations: translationData.length
-                ? { create: translationData }
-                : undefined,
-              fieldLocks:
-                req.creationMode === "wiki" || !actorUserId
-                  ? undefined
-                  : {
-                      create: {
-                        path: "*",
-                        lockedById: actorUserId,
-                        reason:
-                          "Personal creation starts closed to community edits.",
-                      },
-                    },
-            },
-          },
-          isbn13: req.isbn13 ?? undefined,
-          publicationDate: req.publicationDate
-            ? new Date(req.publicationDate as any)
-            : undefined,
-          pageCount: req.pageCount ?? undefined,
-          textLength: req.textLength ?? 0,
-          chapterCount: 0,
-          formatKey: req.formatKey ?? undefined,
-          isLicensed: req.isLicensed ?? false,
-          extra: (req.extra ?? null) as Prisma.InputJsonValue,
-        },
-        include: bookInclude,
-      });
-      await contentStructureService.ensureForOwner(tx, created.unitId);
-
-      if (actorUserId) {
-        await writeEditorialMetadataHistory(tx as any, {
-          unitId: created.unitId,
-          actorUserId,
-          patch: buildBookCreatePatch(req, ensuredTranslations, language),
-          message: "book.create",
-        });
-      }
-
-      return created;
-    });
-
-    syncAfterCommit.add(book.unitId);
-    await Promise.all(
-      [...syncAfterCommit].map((unitId) => enqueueContentSync(unitId)),
-    );
-
-    return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);
+    const book = await this.repository.create(req);
+    await enqueueContentSync(book.unitId);
+    return book;
   }
 
   /**
@@ -392,123 +704,7 @@ export class BookService {
       "patch" | "message" | "restoreSource"
     >,
   ): Promise<BookWithRelations> {
-    const book = await prisma.$transaction(async (tx) => {
-      const current = await tx.book.findUniqueOrThrow({
-        where: { unitId },
-        select: {
-          isbn13: true,
-          publicationDate: true,
-          pageCount: true,
-          textLength: true,
-          formatKey: true,
-          isLicensed: true,
-          extra: true,
-          unit: {
-            select: {
-              defaultLanguage: true,
-              rating: true,
-              aiDisclosureMode: true,
-              aiDisclosureDetails: true,
-              visibility: true,
-              licenseSlug: true,
-            },
-          },
-        },
-      });
-      const language = current.unit.defaultLanguage ?? "en";
-      const existingCoverTranslation =
-        req.coverUrl !== undefined
-          ? await tx.unitTranslation.findUnique({
-              where: { unitId_language: { unitId, language } },
-              select: { extra: true },
-            })
-          : null;
-      const patchPaths = mapBookEffectiveUpdatePatchPaths(
-        req,
-        current,
-        existingCoverTranslation?.extra ?? null,
-        language,
-      );
-      const patch = buildBookUpdatePatchFromPaths(req, patchPaths, language);
-
-      if (patchPaths.length === 0) {
-        return tx.book.findUniqueOrThrow({
-          where: { unitId },
-          include: bookInclude,
-        });
-      }
-
-      if (actor) {
-        await assertCanEditCollaborativeMetadata(
-          tx as any,
-          actor,
-          unitId,
-          patchPaths,
-        );
-      }
-
-      if (req.coverUrl !== undefined) {
-        const nextExtra = withCoverUrl(
-          existingCoverTranslation?.extra ?? undefined,
-          req.coverUrl ?? undefined,
-        ) as Prisma.InputJsonValue;
-        assertUnitTranslationExtraAllowed(nextExtra);
-        await tx.unitTranslation.upsert({
-          where: { unitId_language: { unitId, language } },
-          create: { unitId, language, extra: nextExtra },
-          update: { extra: nextExtra },
-        });
-      }
-
-      const updated = await tx.book.update({
-        where: { unitId },
-        data: {
-          isbn13: req.isbn13,
-          publicationDate: req.publicationDate
-            ? new Date(req.publicationDate as any)
-            : req.publicationDate === null
-              ? null
-              : undefined,
-          pageCount: req.pageCount,
-          textLength: req.textLength ?? undefined,
-          formatKey: req.formatKey,
-          isLicensed: req.isLicensed ?? undefined,
-          extra: (req.extra ?? undefined) as Prisma.InputJsonValue | undefined,
-          unit: {
-            update: {
-              rating: (req.rating as ContentRating | undefined) ?? undefined,
-              aiDisclosureMode:
-                (req.aiDisclosureMode as AiDisclosureMode | undefined) ??
-                undefined,
-              aiDisclosureDetails:
-                req.aiDisclosureDetails === undefined
-                  ? undefined
-                  : ((req.aiDisclosureDetails ??
-                      null) as Prisma.InputJsonValue),
-              visibility:
-                (req.visibility as UnitVisibility | undefined) ?? undefined,
-              licenseSlug:
-                req.licenseSlug === null
-                  ? null
-                  : (assertLicenseSlug(req.licenseSlug) ?? undefined),
-            },
-          },
-        },
-        include: bookInclude,
-      });
-
-      if (actor) {
-        await writeEditorialMetadataHistory(tx as any, {
-          unitId,
-          actorUserId: actor.userId,
-          patch: historyInput?.patch ?? patch,
-          message: historyInput?.message ?? "book.metadata.update",
-          restoreSource: historyInput?.restoreSource,
-        });
-      }
-
-      return updated;
-    });
+    const book = await this.repository.update(unitId, req, actor, historyInput);
 
     const patchFields: Record<string, any> = {};
     if (req.isLicensed !== undefined) patchFields.isLicensed = req.isLicensed;
@@ -521,7 +717,7 @@ export class BookService {
       patchFields.licenseSlug = req.licenseSlug;
     await enqueueContentMetadata(unitId, patchFields);
 
-    return hydrateUnitOwnerUserSlugRow(book as BookWithRelations);
+    return book;
   }
 
   /**
@@ -545,10 +741,7 @@ export class BookService {
       changedFieldKeys: ["contentStructure"],
       afterMutate: async (tx, { submitted: next }) => {
         const chapterCount = countReadableContentStructureItems(next);
-        await tx.book.update({
-          where: { unitId },
-          data: { chapterCount },
-        });
+        await this.repository.updateChapterCount(tx, unitId, chapterCount);
       },
     });
     return {
@@ -564,7 +757,7 @@ export class BookService {
    * Delete book by unitId (cascades via Unit delete)
    */
   async delete(unitId: string): Promise<void> {
-    await prisma.unit.delete({ where: { id: unitId } });
+    await this.repository.delete(unitId);
     await enqueueContentDelete(unitId);
   }
 
@@ -572,8 +765,7 @@ export class BookService {
    * Check if book exists by unitId
    */
   async exists(unitId: string): Promise<boolean> {
-    const count = await prisma.book.count({ where: { unitId } });
-    return count > 0;
+    return this.repository.exists(unitId);
   }
 }
 

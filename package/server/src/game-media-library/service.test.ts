@@ -1,93 +1,74 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import type {
+  GameMediaLibraryRepository,
+  GameMediaLibraryService,
+} from "./service";
 
-installPrismaClientMock();
+function createRepository(
+  overrides: Partial<GameMediaLibraryRepository> = {},
+): GameMediaLibraryRepository {
+  return {
+    getGame: mock(async () => null),
+    getMedia: mock(async () => null),
+    listValidGamePlatformIds: mock(async () => [
+      "platform-windows",
+      "platform-steam",
+    ]),
+    appendAvailableOnRelations: mock(async () => {}),
+    appendAgeRatingTags: mock(async () => {}),
+    ...overrides,
+  };
+}
 
-function freshMocks() {
-  Object.assign(prismaMock, {
-    entity: {
-      findMany: mock(async () => [
-        { unitId: "platform-windows" },
-        { unitId: "platform-steam" },
-      ]),
-    },
-    subjectAttribution: {
-      createMany: mock(async ({ data }: any) => ({ count: data.length })),
-    },
-    unitTag: {
-      createMany: mock(async ({ data }: any) => ({ count: data.length })),
-    },
-    game: {
-      findUnique: mock(async () => null),
-    },
-    media: {
-      findUnique: mock(async () => null),
-    },
-  });
+async function createService(
+  repository: GameMediaLibraryRepository,
+): Promise<GameMediaLibraryService> {
+  const { GameMediaLibraryService } = await import("./service");
+  return new GameMediaLibraryService(repository);
 }
 
 describe("GameMediaLibraryService", () => {
   test("writes GAME platform Entities and rating tags through canonical relations", async () => {
-    freshMocks();
-    const { gameMediaLibraryService } = await import("./service");
-
-    await gameMediaLibraryService.appendGameMetadataRelations("game-1", {
-      platformEntityIds: ["platform-windows", "platform-steam"],
-      ageRatingTagUnitIds: ["tag-esrb-teen"],
+    const appendAvailableOnRelations = mock(async () => {});
+    const appendAgeRatingTags = mock(async () => {});
+    const repository = createRepository({
+      appendAvailableOnRelations,
+      appendAgeRatingTags,
     });
 
-    expect(prismaMock.entity.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          unitId: { in: ["platform-windows", "platform-steam"] },
-          kind: "game_platform",
-          eligibleSubjectRoles: { has: "available_on" },
-        }),
-      }),
+    await (await createService(repository)).appendGameMetadataRelations(
+      "game-1",
+      {
+        platformEntityIds: ["platform-windows", "platform-steam"],
+        ageRatingTagUnitIds: ["tag-esrb-teen"],
+      },
     );
-    expect(prismaMock.subjectAttribution.createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          unitId: "game-1",
-          entityId: "platform-windows",
-          role: "available_on",
-          sortOrder: 0,
-        },
-        {
-          unitId: "game-1",
-          entityId: "platform-steam",
-          role: "available_on",
-          sortOrder: 1,
-        },
-      ],
-      skipDuplicates: true,
-    });
-    expect(prismaMock.unitTag.createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          unitId: "game-1",
-          tagUnitId: "tag-esrb-teen",
-          score: 0,
-          voteCount: 0,
-          pinned: true,
-        },
-      ],
-      skipDuplicates: true,
-    });
+
+    expect(repository.listValidGamePlatformIds).toHaveBeenCalledWith([
+      "platform-windows",
+      "platform-steam",
+    ]);
+    expect(appendAvailableOnRelations).toHaveBeenCalledWith("game-1", [
+      "platform-windows",
+      "platform-steam",
+    ]);
+    expect(appendAgeRatingTags).toHaveBeenCalledWith("game-1", [
+      "tag-esrb-teen",
+    ]);
   });
 
   test("rejects unknown platform Entity ids before writing relations", async () => {
-    freshMocks();
-    prismaMock.entity.findMany = mock(async () => [
-      { unitId: "platform-windows" },
-    ]);
-    const { gameMediaLibraryService } = await import("./service");
+    const appendAvailableOnRelations = mock(async () => {});
+    const repository = createRepository({
+      listValidGamePlatformIds: mock(async () => ["platform-windows"]),
+      appendAvailableOnRelations,
+    });
 
     await expect(
-      gameMediaLibraryService.appendGameMetadataRelations("game-1", {
+      (await createService(repository)).appendGameMetadataRelations("game-1", {
         platformEntityIds: ["platform-windows", "platform-missing"],
       }),
     ).rejects.toThrow(/platform-missing/);
-    expect(prismaMock.subjectAttribution.createMany).not.toHaveBeenCalled();
+    expect(appendAvailableOnRelations).not.toHaveBeenCalled();
   });
 });

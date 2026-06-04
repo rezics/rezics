@@ -1,9 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { markdownContentDoc } from "@rezics/contract";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
+import type { CommentRepository, CommentService } from "./comment.service";
+import type { CommentWithRelations } from "./comment.types";
 
 const enqueueMock = mock(async () => ({ status: "created" }));
 
@@ -19,94 +17,113 @@ mock.module("@/block/block.service", () => ({
   },
 }));
 
-installPrismaClientMock();
+function commentRow(
+  overrides: Partial<CommentWithRelations> = {},
+): CommentWithRelations {
+  return {
+    id: "comment-1",
+    rootUnitId: "root-1",
+    realmUnitId: "realm-1",
+    parentCommentId: null,
+    authorUserId: "user-1",
+    content: null,
+    depth: 1,
+    path: null,
+    replyCount: 0,
+    directReplyCount: 0,
+    lastReplyAt: null,
+    isLocked: false,
+    state: null,
+    moderationStatus: "APPROVED",
+    deletedAt: null,
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    author: null,
+    ...overrides,
+  };
+}
+
+function createRepositoryStub(
+  overrides: Partial<CommentRepository> = {},
+): CommentRepository {
+  return {
+    list: mock(async () => ({ comments: [], total: 0 })),
+    getById: mock(async (id) => commentRow({ id })),
+    getSubtreeAnchor: mock(async () => null),
+    listSubtreeDescendantIds: mock(async () => []),
+    findRedactedAncestors: mock(async () => []),
+    attachPaths: mock(async (comments) => {
+      for (const comment of comments) comment.path ??= "1";
+      return comments;
+    }),
+    attachPinOverlays: mock(async (comments) => comments),
+    getParentForCreate: mock(async (id) => ({
+      id,
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      depth: 1,
+      isLocked: false,
+    })),
+    create: mock(async (input) =>
+      commentRow({
+        id: "comment-1",
+        rootUnitId: input.rootUnitId,
+        realmUnitId: input.realmUnitId,
+        parentCommentId: input.parentCommentId ?? null,
+        authorUserId: input.authorUserId,
+        content: input.content,
+        depth: input.depth,
+      }),
+    ),
+    getUpdateIdentity: mock(async () => ({
+      authorUserId: "user-1",
+      realmUnitId: "realm-1",
+    })),
+    update: mock(async (id, input) =>
+      commentRow({ id, content: input.content ?? null }),
+    ),
+    getDeleteIdentity: mock(async () => ({ authorUserId: "user-1" })),
+    softDelete: mock(async () => {}),
+    ...overrides,
+  };
+}
+
+async function createService(repository: CommentRepository) {
+  const module = await import("./comment.service");
+  return new module.CommentService(repository) as CommentService;
+}
 
 describe("CommentService", () => {
   test("lists direct children within one root and realm partition", async () => {
-    const findMany = mock(async () => []);
-    const count = mock(async () => 0);
-    const queryRaw = mock(async () => []);
-    Object.assign(prismaMock, {
-      comment: { findMany, count },
-      commentPromotion: { findMany: mock(async () => []) },
-      $queryRaw: queryRaw,
-    });
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
 
-    const { CommentService } = await import("./comment.service");
-    await new CommentService().list({
+    await service.list({
       rootUnitId: "root-1",
       realmUnitId: "realm-1",
       limit: 20,
     });
 
-    expect(findMany).toHaveBeenCalledWith({
-      where: {
-        rootUnitId: "root-1",
-        realmUnitId: "realm-1",
-        moderationStatus: "APPROVED",
-        deletedAt: null,
-        parentCommentId: null,
-      },
-      orderBy: [{ createdAt: "asc" }],
-      skip: 0,
-      take: 20,
-      include: {
-        author: {
-          select: {
-            unitId: true,
-            name: true,
-            avatar: true,
-            bio: true,
-            description: true,
-            followersCount: true,
-            followingsCount: true,
-          },
-        },
-      },
+    expect(repository.list).toHaveBeenCalledWith({
+      rootUnitId: "root-1",
+      realmUnitId: "realm-1",
+      authorUserId: undefined,
+      state: undefined,
+      ids: undefined,
+      maxDepth: undefined,
+      parentCommentId: null,
+      blockedAuthorIds: [],
+      sort: undefined,
+      limit: 20,
     });
-    expect(count).toHaveBeenCalled();
   });
 
   test("creates a direct root comment and enqueues search sync", async () => {
     enqueueMock.mockClear();
-    const commentCreate = mock(async () => ({
-      id: "comment-1",
-      rootUnitId: "post-1",
-      realmUnitId: "realm-1",
-      parentCommentId: null,
-      authorUserId: "user-1",
-      content: markdownContentDoc("hello"),
-      depth: 1,
-      replyCount: 0,
-      directReplyCount: 0,
-      lastReplyAt: null,
-      isLocked: false,
-      state: null,
-      moderationStatus: "APPROVED",
-      deletedAt: null,
-      createdAt: new Date("2026-01-01T00:00:00.000Z"),
-      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      author: null,
-    }));
-    const executeRaw = mock(async () => 1);
-    const updateMany = mock(async () => ({ count: 1 }));
-    const queryRaw = mock(async () => [{ id: "comment-1", path: "1" }]);
-    const transaction = mock(async (fn: any) =>
-      fn({
-        comment: { create: commentCreate },
-        post: { updateMany },
-        $executeRaw: executeRaw,
-      }),
-    );
-    Object.assign(prismaMock, {
-      $transaction: transaction,
-      $queryRaw: queryRaw,
-      comment: { findUniqueOrThrow: mock(async () => null) },
-      commentPromotion: { findMany: mock(async () => []) },
-    });
+    const repository = createRepositoryStub();
+    const service = await createService(repository);
 
-    const { CommentService } = await import("./comment.service");
-    const comment = await new CommentService().create(
+    const comment = await service.create(
       {
         rootUnitId: "post-1",
         realmUnitId: "realm-1",
@@ -115,69 +132,34 @@ describe("CommentService", () => {
       "user-1",
     );
 
-    expect(commentCreate).toHaveBeenCalledWith({
-      data: {
-        rootUnitId: "post-1",
-        realmUnitId: "realm-1",
-        parentCommentId: undefined,
-        authorUserId: "user-1",
-        content: markdownContentDoc("hello"),
-        depth: 1,
-        moderationStatus: "APPROVED",
-      },
-      include: { author: { select: expect.any(Object) } },
-    });
-    expect(updateMany).toHaveBeenCalledWith({
-      where: { unitId: "post-1" },
-      data: {
-        replyCount: { increment: 1 },
-        directReplyCount: { increment: 1 },
-        lastReplyAt: expect.any(Date),
-      },
+    expect(repository.create).toHaveBeenCalledWith({
+      rootUnitId: "post-1",
+      realmUnitId: "realm-1",
+      parentCommentId: undefined,
+      authorUserId: "user-1",
+      content: markdownContentDoc("hello"),
+      depth: 1,
+      parentId: undefined,
     });
     expect(enqueueMock).toHaveBeenCalledTimes(1);
     expect(comment.path).toBe("1");
   });
 
   test("lists a whole threaded partition and hydrates pin overlays", async () => {
-    const commentRow = {
-      id: "comment-1",
-      rootUnitId: "root-1",
-      realmUnitId: "realm-1",
-      parentCommentId: null,
-      authorUserId: "user-1",
-      content: null,
-      depth: 1,
-      replyCount: 0,
-      directReplyCount: 0,
-      lastReplyAt: null,
-      isLocked: false,
-      state: null,
-      moderationStatus: "APPROVED",
-      deletedAt: null,
-      createdAt: new Date("2026-01-01T00:00:00.000Z"),
-      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      author: null,
-    };
-    const findMany = mock(async (_args: any) => [commentRow]);
-    const count = mock(async () => 1);
-    const pinFindMany = mock(async () => [
-      {
-        scopeUnitId: "root-1",
-        commentId: "comment-1",
-        kind: "PINNED",
-        position: "a0",
-      },
-    ]);
-    const queryRaw = mock(async () => [{ id: "comment-1", path: "1" }]);
-    Object.assign(prismaMock, {
-      comment: { findMany, count },
-      commentPromotion: { findMany: pinFindMany },
-      $queryRaw: queryRaw,
+    const row = commentRow({ id: "comment-1" });
+    const repository = createRepositoryStub({
+      list: mock(async () => ({ comments: [row], total: 1 })),
+      attachPinOverlays: mock(async (comments) => {
+        for (const comment of comments) {
+          comment.pinKind = "PINNED";
+          comment.pinPosition = "a0";
+        }
+        return comments;
+      }),
     });
+    const service = await createService(repository);
 
-    const { CommentService } = await import("./comment.service");
-    const result = await new CommentService().list({
+    const result = await service.list({
       rootUnitId: "root-1",
       realmUnitId: "realm-1",
       mode: "threaded",
@@ -185,127 +167,62 @@ describe("CommentService", () => {
       limit: 20,
     });
 
-    expect(findMany).toHaveBeenCalledWith(
+    expect(repository.list).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({
-          rootUnitId: "root-1",
-          realmUnitId: "realm-1",
-          depth: { lte: 4 },
-        }),
+        rootUnitId: "root-1",
+        realmUnitId: "realm-1",
+        maxDepth: 4,
       }),
     );
-    const findManyArgs = findMany.mock.calls[0]?.[0] as any;
-    expect(findManyArgs.where).not.toHaveProperty("parentCommentId");
-    expect(pinFindMany).toHaveBeenCalledWith({
-      where: {
-        scopeUnitId: { in: ["root-1"] },
-        commentId: { in: ["comment-1"] },
-      },
-      select: {
-        scopeUnitId: true,
-        commentId: true,
-        kind: true,
-        position: true,
-      },
-    });
+    const args = (repository.list as any).mock.calls[0]?.[0] as Record<
+      string,
+      unknown
+    >;
+    expect(args).not.toHaveProperty("parentCommentId");
     expect(result.comments[0]?.pinKind).toBe("PINNED");
     expect(result.comments[0]?.pinPosition).toBe("a0");
   });
 
   test("threaded reads include only redacted ancestors needed to preserve the tree", async () => {
-    const childRow = {
+    const child = commentRow({
       id: "comment-child",
-      rootUnitId: "root-1",
-      realmUnitId: "realm-1",
       parentCommentId: "comment-parent",
       authorUserId: "user-2",
       content: markdownContentDoc("visible child"),
       depth: 2,
-      replyCount: 0,
-      directReplyCount: 0,
-      lastReplyAt: null,
-      isLocked: false,
-      state: null,
-      moderationStatus: "APPROVED",
-      deletedAt: null,
       createdAt: new Date("2026-01-02T00:00:00.000Z"),
       updatedAt: new Date("2026-01-02T00:00:00.000Z"),
-      author: null,
-    };
-    const parentRow = {
+    });
+    const parent = commentRow({
       id: "comment-parent",
-      rootUnitId: "root-1",
-      realmUnitId: "realm-1",
       parentCommentId: null,
-      authorUserId: "user-1",
       content: markdownContentDoc("removed parent"),
-      depth: 1,
-      replyCount: 1,
-      directReplyCount: 1,
-      lastReplyAt: new Date("2026-01-02T00:00:00.000Z"),
-      isLocked: false,
-      state: null,
       moderationStatus: "REMOVED",
-      deletedAt: null,
-      createdAt: new Date("2026-01-01T00:00:00.000Z"),
-      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-      author: null,
-    };
-    const findMany = mock(async (args: any) => {
-      if (args.where?.id?.in?.includes("comment-parent")) return [parentRow];
-      return [childRow];
     });
-    const count = mock(async () => 1);
-    const pinFindMany = mock(async () => []);
-    const queryRaw = mock(async () => [
-      { id: "comment-parent", path: "1" },
-      { id: "comment-child", path: "1.1" },
-    ]);
-    Object.assign(prismaMock, {
-      comment: { findMany, count },
-      commentPromotion: { findMany: pinFindMany },
-      $queryRaw: queryRaw,
+    const repository = createRepositoryStub({
+      list: mock(async () => ({ comments: [child], total: 1 })),
+      findRedactedAncestors: mock(async (ids) =>
+        ids.includes("comment-parent") ? [parent] : [],
+      ),
+      attachPaths: mock(async (comments) => {
+        for (const comment of comments) {
+          comment.path = comment.id === "comment-parent" ? "1" : "1.1";
+        }
+        return comments;
+      }),
     });
+    const service = await createService(repository);
 
-    const { CommentService } = await import("./comment.service");
-    const result = await new CommentService().list({
+    const result = await service.list({
       rootUnitId: "root-1",
       realmUnitId: "realm-1",
       mode: "threaded",
       limit: 20,
     });
 
-    expect(findMany).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        where: expect.objectContaining({
-          moderationStatus: "APPROVED",
-          deletedAt: null,
-        }),
-      }),
-    );
-    expect(findMany).toHaveBeenNthCalledWith(2, {
-      where: {
-        id: { in: ["comment-parent"] },
-        OR: [
-          { moderationStatus: { not: "APPROVED" } },
-          { deletedAt: { not: null } },
-        ],
-      },
-      include: {
-        author: {
-          select: expect.any(Object),
-        },
-      },
-    });
-    expect(count).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          moderationStatus: "APPROVED",
-          deletedAt: null,
-        }),
-      }),
-    );
+    expect(repository.findRedactedAncestors).toHaveBeenCalledWith([
+      "comment-parent",
+    ]);
     expect(result.total).toBe(1);
     expect(result.comments.map((comment) => comment.id)).toEqual([
       "comment-parent",

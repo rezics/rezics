@@ -5,9 +5,20 @@ import type {
   RezicsSessionClaims,
 } from "@rezics/contract";
 import { createSearchCommand, SEARCH_COMMAND_KINDS } from "@rezics/job";
-import { Prisma, prisma } from "#/prisma/client";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { serverJobProducer } from "@/job/job-boundary";
 import { broadcast } from "@/notify-boundary/notify-boundary.client";
+import type { ServerDb } from "../db/client";
+import {
+  Comment,
+  Feedback,
+  ModerationAction,
+  ModerationCase,
+  Post,
+  Unit,
+  UnitCollaborator,
+  UnitRealm,
+} from "../db/schema";
 import { mapUnitRealmToDTO } from "../realm/realm.mapper";
 import {
   governanceCapabilityService,
@@ -26,7 +37,7 @@ import type { GovernanceListOptions } from "./types";
 type UnitModerationActionInput = "approve" | "remove" | "restore";
 type CommentModerationActionInput = "remove" | "restore" | "lock" | "unlock";
 type LockTargetKind = "POST" | "COMMENT" | "UNIT_REALM";
-type ModerationTx = Prisma.TransactionClient;
+type ModerationTx = Pick<ServerDb, "select" | "insert" | "update" | "execute">;
 type ModerationIdentity = Pick<RezicsSessionClaims, "userId" | "permission">;
 type CommentModerationAuthority = "PLATFORM" | "REALM" | "OWNER";
 type CommentModerationSubject = {
@@ -46,6 +57,17 @@ type ModerationDecisionInput = {
   caseId?: string | null;
   metadata?: Record<string, unknown>;
 };
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+type ModerationCaseStateValue = typeof ModerationCase.$inferSelect.state;
+type ModerationScopeValue = typeof ModerationCase.$inferSelect.scope;
+type ModerationTargetKindValue =
+  typeof ModerationAction.$inferSelect.targetKind;
+type ModerationStatusValue = typeof Unit.$inferSelect.moderationStatus;
 
 type RealmCaseDecisionKind =
   | "approve_for_realm"
@@ -82,11 +104,216 @@ function lower<T extends string>(value: string): T {
 
 function cleanJsonObject(
   input: Record<string, unknown> | undefined,
-): Prisma.InputJsonObject | undefined {
+): Record<string, unknown> | undefined {
   if (!input) return undefined;
   return Object.fromEntries(
     Object.entries(input).filter(([, value]) => value !== undefined),
-  ) as Prisma.InputJsonObject;
+  );
+}
+
+async function runModerationTransaction<T>(
+  callback: (tx: ModerationTx) => Promise<T>,
+): Promise<T> {
+  const db = await getServerDb();
+  return db.transaction((tx) => callback(tx as ModerationTx));
+}
+
+async function findModerationCaseById(tx: ModerationTx, id: string) {
+  const [row] = await tx
+    .select()
+    .from(ModerationCase)
+    .where(eq(ModerationCase.id, id))
+    .limit(1);
+  if (!row) throw new Error(`ModerationCase not found: ${id}`);
+  return row;
+}
+
+async function firstModerationCaseByFeedback(input: {
+  scope: ModerationScopeValue;
+  feedbackId: string;
+  realmUnitId?: string | null;
+}) {
+  const db = await getServerDb();
+  const [row] = await db
+    .select()
+    .from(ModerationCase)
+    .where(
+      and(
+        eq(ModerationCase.scope, input.scope),
+        input.realmUnitId
+          ? eq(ModerationCase.realmUnitId, input.realmUnitId)
+          : undefined,
+        eq(ModerationCase.sourceFeedbackId, input.feedbackId),
+      ),
+    )
+    .orderBy(asc(ModerationCase.createdAt))
+    .limit(1);
+  return row ?? null;
+}
+
+async function findFeedbackById(feedbackId: string) {
+  const db = await getServerDb();
+  const [row] = await db
+    .select()
+    .from(Feedback)
+    .where(eq(Feedback.id, feedbackId))
+    .limit(1);
+  if (!row) throw new Error(`Feedback not found: ${feedbackId}`);
+  return row;
+}
+
+async function createModerationCase(
+  tx: ModerationTx,
+  data: Omit<typeof ModerationCase.$inferInsert, "updatedAt"> & {
+    updatedAt?: Date;
+  },
+) {
+  const [row] = await tx
+    .insert(ModerationCase)
+    .values({ ...data, updatedAt: data.updatedAt ?? new Date() })
+    .returning();
+  if (!row) throw new Error("Failed to create ModerationCase");
+  return row;
+}
+
+async function updateModerationCase(
+  tx: ModerationTx,
+  id: string,
+  data: Partial<typeof ModerationCase.$inferInsert>,
+) {
+  const [row] = await tx
+    .update(ModerationCase)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(ModerationCase.id, id))
+    .returning();
+  if (!row) throw new Error(`ModerationCase not found: ${id}`);
+  return row;
+}
+
+async function updateUnitModerationStatus(
+  tx: ModerationTx,
+  unitId: string,
+  moderationStatus: ModerationStatusValue,
+) {
+  const [row] = await tx
+    .update(Unit)
+    .set({ moderationStatus, updatedAt: new Date() })
+    .where(eq(Unit.id, unitId))
+    .returning();
+  if (!row) throw new Error(`Unit not found: ${unitId}`);
+  return row;
+}
+
+async function updateUnitRealm(
+  tx: ModerationTx,
+  input: {
+    realmUnitId: string;
+    unitId: string;
+    moderationStatus?: ModerationStatusValue;
+    isLocked?: boolean;
+  },
+) {
+  const [row] = await tx
+    .update(UnitRealm)
+    .set({
+      ...(input.moderationStatus
+        ? { moderationStatus: input.moderationStatus }
+        : {}),
+      ...(input.isLocked !== undefined ? { isLocked: input.isLocked } : {}),
+    })
+    .where(
+      and(
+        eq(UnitRealm.realmUnitId, input.realmUnitId),
+        eq(UnitRealm.unitId, input.unitId),
+      ),
+    )
+    .returning();
+  if (!row) {
+    throw new Error(
+      `UnitRealm not found: ${input.realmUnitId}/${input.unitId}`,
+    );
+  }
+  return row;
+}
+
+async function updatePostLock(
+  tx: ModerationTx,
+  unitId: string,
+  isLocked: boolean,
+) {
+  const [row] = await tx
+    .update(Post)
+    .set({ isLocked, updatedAt: new Date() })
+    .where(eq(Post.unitId, unitId))
+    .returning();
+  if (!row) throw new Error(`Post not found: ${unitId}`);
+  return row;
+}
+
+async function updateCommentSnapshot(
+  tx: ModerationTx,
+  commentId: string,
+  data: {
+    moderationStatus?: typeof Comment.$inferSelect.moderationStatus;
+    isLocked?: boolean;
+  },
+) {
+  const [row] = await tx
+    .update(Comment)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(Comment.id, commentId))
+    .returning();
+  if (!row) throw new Error(`Comment not found: ${commentId}`);
+  return row;
+}
+
+async function findCommentForModeration(
+  tx: ModerationTx,
+  commentId: string,
+  actorUserId: string,
+): Promise<CommentModerationSubject> {
+  await tx.execute(sql`
+    SELECT "id" FROM "Comment"
+    WHERE "id" = ${commentId}::uuid
+    FOR UPDATE
+  `);
+
+  const [comment] = await tx
+    .select()
+    .from(Comment)
+    .where(eq(Comment.id, commentId))
+    .limit(1);
+  if (!comment) throw new Error(`Comment not found: ${commentId}`);
+
+  const [rootUnit] = await tx
+    .select({ userId: Unit.userId })
+    .from(Unit)
+    .where(eq(Unit.id, comment.rootUnitId))
+    .limit(1);
+  const collaborators = await tx
+    .select({
+      userId: UnitCollaborator.userId,
+      roleKey: UnitCollaborator.roleKey,
+    })
+    .from(UnitCollaborator)
+    .where(
+      and(
+        eq(UnitCollaborator.unitId, comment.rootUnitId),
+        eq(UnitCollaborator.userId, actorUserId),
+      ),
+    );
+
+  return {
+    id: comment.id,
+    rootUnitId: comment.rootUnitId,
+    realmUnitId: comment.realmUnitId,
+    rootUnit: rootUnit
+      ? {
+          userId: rootUnit.userId,
+          collaborators,
+        }
+      : null,
+  };
 }
 
 function notifyModeration(input: {
@@ -196,50 +423,73 @@ export class GovernanceModerationService {
   ) {}
 
   async listCases(options: GovernanceListOptions = {}) {
-    const rows = await prisma.moderationCase.findMany({
-      where: {
-        ...(options.scope
-          ? { scope: upper<Prisma.ModerationScope>(options.scope) }
-          : {}),
-        ...(options.state
-          ? { state: upper<Prisma.ModerationCaseState>(options.state) }
-          : {}),
-      },
-      orderBy: { createdAt: "desc" },
-      skip: options.offset ?? 0,
-      take: options.limit ?? 50,
-    });
+    const db = await getServerDb();
+    const rows = await db
+      .select()
+      .from(ModerationCase)
+      .where(
+        and(
+          options.scope
+            ? eq(
+                ModerationCase.scope,
+                upper<ModerationScopeValue>(options.scope),
+              )
+            : undefined,
+          options.state
+            ? eq(
+                ModerationCase.state,
+                upper<ModerationCaseStateValue>(options.state),
+              )
+            : undefined,
+        ),
+      )
+      .orderBy(desc(ModerationCase.createdAt))
+      .offset(options.offset ?? 0)
+      .limit(options.limit ?? 50);
     return rows.map(mapModerationCaseToDTO);
   }
 
   async getCase(caseId: string) {
-    const row = await prisma.moderationCase.findUniqueOrThrow({
-      where: { id: caseId },
-    });
+    const db = await getServerDb();
+    const [row] = await db
+      .select()
+      .from(ModerationCase)
+      .where(eq(ModerationCase.id, caseId))
+      .limit(1);
+    if (!row) throw new Error(`ModerationCase not found: ${caseId}`);
     return mapModerationCaseToDTO(row);
   }
 
   async listCaseActions(caseId: string, options: GovernanceListOptions = {}) {
-    const rows = await prisma.moderationAction.findMany({
-      where: { caseId },
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      skip: options.offset ?? 0,
-      take: options.limit ?? 50,
-    });
+    const db = await getServerDb();
+    const rows = await db
+      .select()
+      .from(ModerationAction)
+      .where(eq(ModerationAction.caseId, caseId))
+      .orderBy(asc(ModerationAction.createdAt), asc(ModerationAction.id))
+      .offset(options.offset ?? 0)
+      .limit(options.limit ?? 50);
     return rows.map(mapModerationActionToDTO);
   }
 
   async listTargetActions(
-    targetKind: Prisma.ModerationTargetKind,
+    targetKind: ModerationTargetKindValue,
     targetId: string,
     options: GovernanceListOptions = {},
   ) {
-    const rows = await prisma.moderationAction.findMany({
-      where: { targetKind, targetId },
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      skip: options.offset ?? 0,
-      take: options.limit ?? 50,
-    });
+    const db = await getServerDb();
+    const rows = await db
+      .select()
+      .from(ModerationAction)
+      .where(
+        and(
+          eq(ModerationAction.targetKind, targetKind),
+          eq(ModerationAction.targetId, targetId),
+        ),
+      )
+      .orderBy(asc(ModerationAction.createdAt), asc(ModerationAction.id))
+      .offset(options.offset ?? 0)
+      .limit(options.limit ?? 50);
     return rows.map(mapModerationActionToDTO);
   }
 
@@ -251,9 +501,7 @@ export class GovernanceModerationService {
     const ids = [...new Set(input.targetIds)].slice(0, 200);
     if (ids.length === 0) return [];
 
-    const prismaTargetKind = upper<Prisma.ModerationTargetKind>(
-      input.targetKind,
-    );
+    const prismaTargetKind = upper<ModerationTargetKindValue>(input.targetKind);
     const [snapshots, latestActions] = await Promise.all([
       this.overlaySnapshots(input.targetKind, ids, input.realmUnitId),
       this.actions.latestActionsFor({
@@ -313,16 +561,7 @@ export class GovernanceModerationService {
 
     const rootUnit =
       comment.rootUnit ??
-      (await prisma.unit.findUnique({
-        where: { id: comment.rootUnitId },
-        select: {
-          userId: true,
-          collaborators: {
-            where: { userId: identity.userId },
-            select: { userId: true, roleKey: true },
-          },
-        },
-      }));
+      (await this.getRootUnitOwnerSubject(comment.rootUnitId, identity.userId));
 
     if (rootUnit?.userId === identity.userId) return "OWNER";
     if (
@@ -354,26 +593,12 @@ export class GovernanceModerationService {
       throw new Error("Comment moderation actor must match identity");
     }
 
-    const row = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`
-        SELECT "id" FROM "Comment"
-        WHERE "id" = ${input.commentId}::uuid
-        FOR UPDATE
-      `;
-      const comment = await tx.comment.findUniqueOrThrow({
-        where: { id: input.commentId },
-        include: {
-          rootUnit: {
-            select: {
-              userId: true,
-              collaborators: {
-                where: { userId: input.actorUserId },
-                select: { userId: true, roleKey: true },
-              },
-            },
-          },
-        },
-      });
+    const row = await runModerationTransaction(async (tx) => {
+      const comment = await findCommentForModeration(
+        tx,
+        input.commentId,
+        input.actorUserId,
+      );
       const authority = await this.resolveCommentModerationAuthority(
         input.identity,
         comment,
@@ -413,14 +638,9 @@ export class GovernanceModerationService {
             ? false
             : undefined;
 
-      const updated = await tx.comment.update({
-        where: { id: input.commentId },
-        data: {
-          ...(resultingStatus ? { moderationStatus: resultingStatus } : {}),
-          ...(resultingLocked !== undefined
-            ? { isLocked: resultingLocked }
-            : {}),
-        },
+      const updated = await updateCommentSnapshot(tx, input.commentId, {
+        ...(resultingStatus ? { moderationStatus: resultingStatus } : {}),
+        ...(resultingLocked !== undefined ? { isLocked: resultingLocked } : {}),
       });
       await this.actions.appendModerationAction(tx, {
         authority,
@@ -451,33 +671,38 @@ export class GovernanceModerationService {
     targetKind: ModerationTargetKind,
     ids: string[],
     realmUnitId?: string | null,
-  ): Promise<Array<{ id: string; moderationStatus: Prisma.ModerationStatus }>> {
+  ): Promise<Array<{ id: string; moderationStatus: ModerationStatusValue }>> {
+    const db = await getServerDb();
     switch (targetKind) {
       case "unit":
-        return prisma.unit.findMany({
-          where: { id: { in: ids } },
-          select: { id: true, moderationStatus: true },
-        });
+        return db
+          .select({ id: Unit.id, moderationStatus: Unit.moderationStatus })
+          .from(Unit)
+          .where(inArray(Unit.id, ids));
       case "unit_realm":
         if (!realmUnitId) {
           throw new Error("unit_realm moderation overlays require realmUnitId");
         }
-        return prisma.unitRealm
-          .findMany({
-            where: { realmUnitId, unitId: { in: ids } },
-            select: { unitId: true, moderationStatus: true },
+        return db
+          .select({
+            id: UnitRealm.unitId,
+            moderationStatus: UnitRealm.moderationStatus,
           })
-          .then((rows) =>
-            rows.map((row) => ({
-              id: row.unitId,
-              moderationStatus: row.moderationStatus,
-            })),
+          .from(UnitRealm)
+          .where(
+            and(
+              eq(UnitRealm.realmUnitId, realmUnitId),
+              inArray(UnitRealm.unitId, ids),
+            ),
           );
       case "comment":
-        return prisma.comment.findMany({
-          where: { id: { in: ids } },
-          select: { id: true, moderationStatus: true },
-        });
+        return db
+          .select({
+            id: Comment.id,
+            moderationStatus: Comment.moderationStatus,
+          })
+          .from(Comment)
+          .where(inArray(Comment.id, ids));
       default:
         throw new Error(
           `Moderation overlays require a snapshot-backed target kind: ${targetKind}`,
@@ -485,12 +710,41 @@ export class GovernanceModerationService {
     }
   }
 
+  private async getRootUnitOwnerSubject(
+    rootUnitId: string,
+    identityUserId: string,
+  ): Promise<NonNullable<CommentModerationSubject["rootUnit"]> | null> {
+    const db = await getServerDb();
+    const [unit] = await db
+      .select({ userId: Unit.userId })
+      .from(Unit)
+      .where(eq(Unit.id, rootUnitId))
+      .limit(1);
+    if (!unit) return null;
+    const collaborators = await db
+      .select({
+        userId: UnitCollaborator.userId,
+        roleKey: UnitCollaborator.roleKey,
+      })
+      .from(UnitCollaborator)
+      .where(
+        and(
+          eq(UnitCollaborator.unitId, rootUnitId),
+          eq(UnitCollaborator.userId, identityUserId),
+        ),
+      );
+    return {
+      userId: unit.userId,
+      collaborators,
+    };
+  }
+
   private appendNote(
     tx: ModerationTx,
     input: {
       caseId: string;
       actorUserId: string;
-      targetKind: Prisma.ModerationTargetKind;
+      targetKind: ModerationTargetKindValue;
       targetId: string;
       realmUnitId?: string | null;
       reasonCode: string;
@@ -521,37 +775,33 @@ export class GovernanceModerationService {
     safeSummary?: string | null;
     metadata?: Record<string, unknown>;
   }) {
-    const existing = await prisma.moderationCase.findFirst({
-      where: { sourceFeedbackId: input.feedbackId, scope: "PLATFORM" },
-      orderBy: { createdAt: "asc" },
+    const existing = await firstModerationCaseByFeedback({
+      scope: "PLATFORM",
+      feedbackId: input.feedbackId,
     });
     if (existing) return mapModerationCaseToDTO(existing);
 
-    const feedback = await prisma.feedback.findUniqueOrThrow({
-      where: { id: input.feedbackId },
-    });
+    const feedback = await findFeedbackById(input.feedbackId);
     const targetKind = feedback.targetKind ?? "FEEDBACK";
     const targetId = feedback.targetId ?? feedback.id;
 
-    const row = await prisma.$transaction(async (tx) => {
-      const created = await tx.moderationCase.create({
-        data: {
-          scope: "PLATFORM",
-          state: "NEW",
-          severity: input.severity ?? null,
-          reporterUserId: feedback.userId,
-          targetKind,
-          targetId,
-          addressedUnitId: feedback.addressedUnitId ?? null,
-          sourceFeedbackId: feedback.id,
-          reason: input.reason ?? feedback.content,
-          safeSummary: input.safeSummary ?? null,
-          metadata: cleanJsonObject({
-            ...(input.metadata ?? {}),
-            feedbackUrl: feedback.url ?? undefined,
-            feedbackType: feedback.type,
-          }),
-        },
+    const row = await runModerationTransaction(async (tx) => {
+      const created = await createModerationCase(tx, {
+        scope: "PLATFORM",
+        state: "NEW",
+        severity: input.severity ?? null,
+        reporterUserId: feedback.userId,
+        targetKind,
+        targetId,
+        addressedUnitId: feedback.addressedUnitId ?? null,
+        sourceFeedbackId: feedback.id,
+        reason: input.reason ?? feedback.content,
+        safeSummary: input.safeSummary ?? null,
+        metadata: cleanJsonObject({
+          ...(input.metadata ?? {}),
+          feedbackUrl: feedback.url ?? undefined,
+          feedbackType: feedback.type,
+        }),
       });
       await this.appendNote(tx, {
         caseId: created.id,
@@ -581,14 +831,11 @@ export class GovernanceModerationService {
     actorUserId: string;
     reason: string;
   }) {
-    const row = await prisma.$transaction(async (tx) => {
-      const updated = await tx.moderationCase.update({
-        where: { id: input.caseId },
-        data: {
-          state: "DUPLICATE",
-          duplicateOfCaseId: input.duplicateOfCaseId,
-          reason: input.reason,
-        },
+    const row = await runModerationTransaction(async (tx) => {
+      const updated = await updateModerationCase(tx, input.caseId, {
+        state: "DUPLICATE",
+        duplicateOfCaseId: input.duplicateOfCaseId,
+        reason: input.reason,
       });
       await this.appendNote(tx, {
         caseId: input.caseId,
@@ -610,16 +857,11 @@ export class GovernanceModerationService {
     assignedToUserId: string | null;
     reason?: string | null;
   }) {
-    const row = await prisma.$transaction(async (tx) => {
-      const current = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.caseId },
-      });
-      const updated = await tx.moderationCase.update({
-        where: { id: input.caseId },
-        data: {
-          state: input.assignedToUserId ? "ASSIGNED" : current.state,
-          assignedToUserId: input.assignedToUserId,
-        },
+    const row = await runModerationTransaction(async (tx) => {
+      const current = await findModerationCaseById(tx, input.caseId);
+      const updated = await updateModerationCase(tx, input.caseId, {
+        state: input.assignedToUserId ? "ASSIGNED" : current.state,
+        assignedToUserId: input.assignedToUserId,
       });
       await this.appendNote(tx, {
         caseId: input.caseId,
@@ -650,22 +892,17 @@ export class GovernanceModerationService {
     reason?: string | null;
     safeSummary?: string | null;
   }) {
-    const row = await prisma.$transaction(async (tx) => {
-      const current = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.caseId },
-      });
-      const updated = await tx.moderationCase.update({
-        where: { id: input.caseId },
-        data: {
-          state: "TRIAGED",
-          severity: input.severity ?? current.severity,
-          assignedToUserId:
-            input.assignedToUserId === undefined
-              ? current.assignedToUserId
-              : input.assignedToUserId,
-          reason: input.reason ?? current.reason,
-          safeSummary: input.safeSummary ?? current.safeSummary,
-        },
+    const row = await runModerationTransaction(async (tx) => {
+      const current = await findModerationCaseById(tx, input.caseId);
+      const updated = await updateModerationCase(tx, input.caseId, {
+        state: "TRIAGED",
+        severity: input.severity ?? current.severity,
+        assignedToUserId:
+          input.assignedToUserId === undefined
+            ? current.assignedToUserId
+            : input.assignedToUserId,
+        reason: input.reason ?? current.reason,
+        safeSummary: input.safeSummary ?? current.safeSummary,
       });
       await this.appendNote(tx, {
         caseId: input.caseId,
@@ -688,13 +925,10 @@ export class GovernanceModerationService {
     reason: string;
     decision?: Record<string, unknown>;
   }) {
-    const row = await prisma.$transaction(async (tx) => {
-      const updated = await tx.moderationCase.update({
-        where: { id: input.caseId },
-        data: {
-          state: upper(input.state),
-          reason: input.reason,
-        },
+    const row = await runModerationTransaction(async (tx) => {
+      const updated = await updateModerationCase(tx, input.caseId, {
+        state: upper(input.state),
+        reason: input.reason,
       });
       await this.appendNote(tx, {
         caseId: input.caseId,
@@ -723,10 +957,9 @@ export class GovernanceModerationService {
     actorUserId: string;
     reason: string;
   }) {
-    const row = await prisma.$transaction(async (tx) => {
-      const updated = await tx.moderationCase.update({
-        where: { id: input.caseId },
-        data: { state: "NEW" },
+    const row = await runModerationTransaction(async (tx) => {
+      const updated = await updateModerationCase(tx, input.caseId, {
+        state: "NEW",
       });
       await this.appendNote(tx, {
         caseId: input.caseId,
@@ -753,22 +986,36 @@ export class GovernanceModerationService {
     realmUnitId: string,
     options: GovernanceListOptions = {},
   ) {
-    const rows = await prisma.moderationCase.findMany({
-      where: { scope: "REALM", realmUnitId },
-      orderBy: { createdAt: "desc" },
-      skip: options.offset ?? 0,
-      take: options.limit ?? 50,
-    });
+    const db = await getServerDb();
+    const rows = await db
+      .select()
+      .from(ModerationCase)
+      .where(
+        and(
+          eq(ModerationCase.scope, "REALM"),
+          eq(ModerationCase.realmUnitId, realmUnitId),
+        ),
+      )
+      .orderBy(desc(ModerationCase.createdAt))
+      .offset(options.offset ?? 0)
+      .limit(options.limit ?? 50);
     return rows.map(mapModerationCaseToDTO);
   }
 
   async listEscalatedRealmCases(options: GovernanceListOptions = {}) {
-    const rows = await prisma.moderationCase.findMany({
-      where: { scope: "REALM", state: "ESCALATED" },
-      orderBy: { updatedAt: "desc" },
-      skip: options.offset ?? 0,
-      take: options.limit ?? 50,
-    });
+    const db = await getServerDb();
+    const rows = await db
+      .select()
+      .from(ModerationCase)
+      .where(
+        and(
+          eq(ModerationCase.scope, "REALM"),
+          eq(ModerationCase.state, "ESCALATED"),
+        ),
+      )
+      .orderBy(desc(ModerationCase.updatedAt))
+      .offset(options.offset ?? 0)
+      .limit(options.limit ?? 50);
     return rows.map(mapModerationCaseToDTO);
   }
 
@@ -795,24 +1042,22 @@ export class GovernanceModerationService {
     safeSummary?: string | null;
     metadata?: Record<string, unknown>;
   }) {
-    const targetKind = upper<Prisma.ModerationTargetKind>(input.targetKind);
-    const row = await prisma.$transaction(async (tx) => {
-      const created = await tx.moderationCase.create({
-        data: {
-          scope: "REALM",
-          realmUnitId: input.realmUnitId,
-          state: "NEW",
-          reporterUserId: input.reporterUserId ?? null,
-          subjectUserId: input.subjectUserId ?? null,
-          targetKind,
-          targetId: input.targetId,
-          addressedUnitId: input.addressedUnitId ?? null,
-          sourceFeedbackId: input.sourceFeedbackId ?? null,
-          assignedToUserId: input.assignedToUserId ?? null,
-          reason: input.reason ?? null,
-          safeSummary: input.safeSummary ?? null,
-          metadata: cleanJsonObject(input.metadata),
-        },
+    const targetKind = upper<ModerationTargetKindValue>(input.targetKind);
+    const row = await runModerationTransaction(async (tx) => {
+      const created = await createModerationCase(tx, {
+        scope: "REALM",
+        realmUnitId: input.realmUnitId,
+        state: "NEW",
+        reporterUserId: input.reporterUserId ?? null,
+        subjectUserId: input.subjectUserId ?? null,
+        targetKind,
+        targetId: input.targetId,
+        addressedUnitId: input.addressedUnitId ?? null,
+        sourceFeedbackId: input.sourceFeedbackId ?? null,
+        assignedToUserId: input.assignedToUserId ?? null,
+        reason: input.reason ?? null,
+        safeSummary: input.safeSummary ?? null,
+        metadata: cleanJsonObject(input.metadata),
       });
       await this.appendNote(tx, {
         caseId: created.id,
@@ -837,19 +1082,14 @@ export class GovernanceModerationService {
     safeSummary?: string | null;
     metadata?: Record<string, unknown>;
   }) {
-    const existing = await prisma.moderationCase.findFirst({
-      where: {
-        scope: "REALM",
-        realmUnitId: input.realmUnitId,
-        sourceFeedbackId: input.feedbackId,
-      },
-      orderBy: { createdAt: "asc" },
+    const existing = await firstModerationCaseByFeedback({
+      scope: "REALM",
+      realmUnitId: input.realmUnitId,
+      feedbackId: input.feedbackId,
     });
     if (existing) return mapModerationCaseToDTO(existing);
 
-    const feedback = await prisma.feedback.findUniqueOrThrow({
-      where: { id: input.feedbackId },
-    });
+    const feedback = await findFeedbackById(input.feedbackId);
     return this.createRealmCase({
       realmUnitId: input.realmUnitId,
       actorUserId: input.actorUserId,
@@ -880,26 +1120,21 @@ export class GovernanceModerationService {
     decision?: Record<string, unknown>;
     metadata?: Record<string, unknown>;
   }) {
-    const row = await prisma.$transaction(async (tx) => {
-      const current = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.caseId },
-      });
-      const updated = await tx.moderationCase.update({
-        where: { id: input.caseId },
-        data: {
-          state: caseStateForDecision(input.decisionKind),
-          parentCaseId: input.parentCaseId ?? current.parentCaseId,
-          reason: input.reason,
-          metadata: cleanJsonObject({
-            ...(current.metadata &&
-            typeof current.metadata === "object" &&
-            !Array.isArray(current.metadata)
-              ? current.metadata
-              : {}),
-            ...(input.metadata ?? {}),
-            duplicateOfCaseId: input.duplicateOfCaseId ?? undefined,
-          }),
-        },
+    const row = await runModerationTransaction(async (tx) => {
+      const current = await findModerationCaseById(tx, input.caseId);
+      const updated = await updateModerationCase(tx, input.caseId, {
+        state: caseStateForDecision(input.decisionKind),
+        parentCaseId: input.parentCaseId ?? current.parentCaseId,
+        reason: input.reason,
+        metadata: cleanJsonObject({
+          ...(current.metadata &&
+          typeof current.metadata === "object" &&
+          !Array.isArray(current.metadata)
+            ? current.metadata
+            : {}),
+          ...(input.metadata ?? {}),
+          duplicateOfCaseId: input.duplicateOfCaseId ?? undefined,
+        }),
       });
 
       if (
@@ -967,29 +1202,25 @@ export class GovernanceModerationService {
     platformCaseId?: string | null;
     safeSummary?: string | null;
   }) {
-    const row = await prisma.$transaction(async (tx) => {
-      const realmCase = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.caseId },
-      });
+    const row = await runModerationTransaction(async (tx) => {
+      const realmCase = await findModerationCaseById(tx, input.caseId);
       let platformCaseId = input.platformCaseId ?? realmCase.parentCaseId;
       if (!platformCaseId) {
-        const platformCase = await tx.moderationCase.create({
-          data: {
-            scope: "PLATFORM",
-            state: "ESCALATED",
-            reporterUserId: realmCase.reporterUserId,
-            subjectUserId: realmCase.subjectUserId,
-            targetKind: realmCase.targetKind,
-            targetId: realmCase.targetId,
-            addressedUnitId: realmCase.addressedUnitId,
-            realmUnitId: input.realmUnitId,
-            sourceFeedbackId: realmCase.sourceFeedbackId,
-            reason: input.reason,
-            safeSummary: input.safeSummary ?? realmCase.safeSummary,
-            metadata: cleanJsonObject({
-              escalatedFromRealmCaseId: realmCase.id,
-            }),
-          },
+        const platformCase = await createModerationCase(tx, {
+          scope: "PLATFORM",
+          state: "ESCALATED",
+          reporterUserId: realmCase.reporterUserId,
+          subjectUserId: realmCase.subjectUserId,
+          targetKind: realmCase.targetKind,
+          targetId: realmCase.targetId,
+          addressedUnitId: realmCase.addressedUnitId,
+          realmUnitId: input.realmUnitId,
+          sourceFeedbackId: realmCase.sourceFeedbackId,
+          reason: input.reason,
+          safeSummary: input.safeSummary ?? realmCase.safeSummary,
+          metadata: cleanJsonObject({
+            escalatedFromRealmCaseId: realmCase.id,
+          }),
         });
         platformCaseId = platformCase.id;
         await this.appendNote(tx, {
@@ -1002,14 +1233,11 @@ export class GovernanceModerationService {
           reasonText: input.reason,
         });
       }
-      const updated = await tx.moderationCase.update({
-        where: { id: input.caseId },
-        data: {
-          state: "ESCALATED",
-          parentCaseId: platformCaseId,
-          reason: input.reason,
-          safeSummary: input.safeSummary ?? realmCase.safeSummary,
-        },
+      const updated = await updateModerationCase(tx, input.caseId, {
+        state: "ESCALATED",
+        parentCaseId: platformCaseId,
+        reason: input.reason,
+        safeSummary: input.safeSummary ?? realmCase.safeSummary,
       });
       await this.actions.appendModerationAction(tx, {
         authority: "REALM",
@@ -1045,7 +1273,7 @@ export class GovernanceModerationService {
     requestId?: string | null;
     idempotencyKey?: string | null;
   }) {
-    const row = await prisma.$transaction(async (tx) =>
+    const row = await runModerationTransaction(async (tx) =>
       this.setUnitModerationStatusInTx(tx, input),
     );
     await enqueueModeratedContentSearch(input.unitId);
@@ -1066,10 +1294,11 @@ export class GovernanceModerationService {
     },
   ) {
     const resultingStatus = snapshotStatusFromAction(input.action);
-    const unit = await tx.unit.update({
-      where: { id: input.unitId },
-      data: { moderationStatus: resultingStatus },
-    });
+    const unit = await updateUnitModerationStatus(
+      tx,
+      input.unitId,
+      resultingStatus,
+    );
     await this.actions.appendModerationAction(tx, {
       authority: "PLATFORM",
       targetKind: "UNIT",
@@ -1091,13 +1320,17 @@ export class GovernanceModerationService {
     const unitIds = [...new Set(input.unitIds)];
     if (unitIds.length === 0) return [];
 
-    const rows = await prisma.unitRealm.findMany({
-      where: {
-        realmUnitId: input.realmUnitId,
-        unitId: { in: unitIds },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const db = await getServerDb();
+    const rows = await db
+      .select()
+      .from(UnitRealm)
+      .where(
+        and(
+          eq(UnitRealm.realmUnitId, input.realmUnitId),
+          inArray(UnitRealm.unitId, unitIds),
+        ),
+      )
+      .orderBy(desc(UnitRealm.createdAt));
     return rows.map(mapUnitRealmToDTO);
   }
 
@@ -1112,7 +1345,7 @@ export class GovernanceModerationService {
     requestId?: string | null;
     idempotencyKey?: string | null;
   }) {
-    const row = await prisma.$transaction(async (tx) =>
+    const row = await runModerationTransaction(async (tx) =>
       this.setRealmUnitModerationStatusInTx(tx, input),
     );
     await enqueueRealmMembershipSearch(input.unitId);
@@ -1134,14 +1367,10 @@ export class GovernanceModerationService {
     },
   ) {
     const resultingStatus = snapshotStatusFromAction(input.action);
-    const row = await tx.unitRealm.update({
-      where: {
-        realmUnitId_unitId: {
-          realmUnitId: input.realmUnitId,
-          unitId: input.unitId,
-        },
-      },
-      data: { moderationStatus: resultingStatus },
+    const row = await updateUnitRealm(tx, {
+      realmUnitId: input.realmUnitId,
+      unitId: input.unitId,
+      moderationStatus: resultingStatus,
     });
     await this.actions.appendModerationAction(tx, {
       authority: "REALM",
@@ -1171,7 +1400,7 @@ export class GovernanceModerationService {
     reasonText?: string | null;
     caseId?: string | null;
   }) {
-    return prisma.$transaction((tx) => this.setLockInTx(tx, input));
+    return runModerationTransaction((tx) => this.setLockInTx(tx, input));
   }
 
   private async setLockInTx(
@@ -1188,24 +1417,16 @@ export class GovernanceModerationService {
     },
   ) {
     if (input.targetKind === "POST") {
-      await tx.post.update({
-        where: { unitId: input.targetId },
-        data: { isLocked: input.isLocked },
-      });
+      await updatePostLock(tx, input.targetId, input.isLocked);
     } else if (input.targetKind === "COMMENT") {
-      await tx.comment.update({
-        where: { id: input.targetId },
-        data: { isLocked: input.isLocked },
+      await updateCommentSnapshot(tx, input.targetId, {
+        isLocked: input.isLocked,
       });
     } else if (input.realmUnitId) {
-      await tx.unitRealm.update({
-        where: {
-          realmUnitId_unitId: {
-            realmUnitId: input.realmUnitId,
-            unitId: input.targetId,
-          },
-        },
-        data: { isLocked: input.isLocked },
+      await updateUnitRealm(tx, {
+        realmUnitId: input.realmUnitId,
+        unitId: input.targetId,
+        isLocked: input.isLocked,
       });
     }
     return this.actions.appendModerationAction(tx, {

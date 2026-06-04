@@ -1,5 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
-import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import type {
+  UserUnitCollectionRepository,
+  UserUnitCollectionService,
+} from "./user-unit-collection.service";
 
 const enqueueMock = mock(async () => ({ status: "created" }));
 type SearchHit = { id?: string; unitId?: string };
@@ -20,83 +23,69 @@ mock.module("@/job/job-boundary", () => ({
     enqueue: enqueueMock,
   },
 }));
-mock.module("@/meili/search-client", () => ({
+mock.module("../meili/search-client", () => ({
   searchClient: {
     contentIndex: { search: contentSearchMock },
     collectionIndex: { search: collectionSearchMock },
   },
 }));
 
-installPrismaClientMock();
+function createRepository(
+  overrides: Partial<UserUnitCollectionRepository> = {},
+): UserUnitCollectionRepository {
+  return {
+    get: mock(async () => null),
+    patchMetadata: mock(async () => {}),
+    listTagApplicationsByTags: mock(async () => []),
+    listShelfUnits: mock(async () => []),
+    listMetadataRows: mock(async () => []),
+    listTagRows: mock(async () => []),
+    ...overrides,
+  };
+}
+
+async function createService(
+  repository: UserUnitCollectionRepository,
+): Promise<UserUnitCollectionService> {
+  const { UserUnitCollectionService } = await import(
+    "./user-unit-collection.service"
+  );
+  return new UserUnitCollectionService(repository);
+}
 
 describe("UserUnitCollectionService", () => {
   test("gets caller-scoped collection metadata", async () => {
-    const findUnique = mock(async () => null);
-    Object.assign(prismaMock, {
-      userUnitCollection: { findUnique },
-    });
+    const get = mock(async () => null);
+    const repository = createRepository({ get });
 
-    const { UserUnitCollectionService } = await import(
-      "./user-unit-collection.service"
-    );
-    await new UserUnitCollectionService().get("user-1", "unit-1");
+    await (await createService(repository)).get("user-1", "unit-1");
 
-    expect(findUnique).toHaveBeenCalledWith({
-      where: { userId_unitId: { userId: "user-1", unitId: "unit-1" } },
-    });
+    expect(get).toHaveBeenCalledWith("user-1", "unit-1");
   });
 
   test("patches shared metadata and syncs search text", async () => {
     enqueueMock.mockClear();
-    const upsert = mock(async () => ({}));
-    const deleteMany = mock(async () => ({ count: 0 }));
-    const createMany = mock(async () => ({ count: 1 }));
-    const findUnique = mock(async () => ({
+    const row = {
       userId: "user-1",
       unitId: "unit-1",
       searchText: "keeper note",
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-    }));
-    const transaction = mock(async (fn: any) =>
-      fn({
-        userUnitCollection: { upsert },
-        userTagApplication: { deleteMany, createMany },
-      }),
-    );
-    Object.assign(prismaMock, {
-      $transaction: transaction,
-      userUnitCollection: { findUnique },
-    });
+    };
+    const patchMetadata = mock(async () => {});
+    const get = mock(async () => row);
+    const repository = createRepository({ patchMetadata, get });
 
-    const { UserUnitCollectionService } = await import(
-      "./user-unit-collection.service"
-    );
-    const result = await new UserUnitCollectionService().patch("user-1", {
+    const result = await (await createService(repository)).patch("user-1", {
       unitId: "unit-1",
       searchText: "keeper note",
       tagUnitIds: ["tag-1"],
     });
 
-    expect(upsert).toHaveBeenCalledWith({
-      where: { userId_unitId: { userId: "user-1", unitId: "unit-1" } },
-      create: {
-        userId: "user-1",
-        unitId: "unit-1",
-        searchText: "keeper note",
-      },
-      update: { searchText: "keeper note" },
-    });
-    expect(createMany).toHaveBeenCalledWith({
-      data: [
-        {
-          userId: "user-1",
-          unitId: "unit-1",
-          tagUnitId: "tag-1",
-          position: "00000000",
-        },
-      ],
-      skipDuplicates: true,
+    expect(patchMetadata).toHaveBeenCalledWith("user-1", {
+      unitId: "unit-1",
+      searchText: "keeper note",
+      tagUnitIds: ["tag-1"],
     });
     expect(enqueueMock).toHaveBeenCalledTimes(1);
     expect(result?.searchText).toBe("keeper note");
@@ -110,38 +99,26 @@ describe("UserUnitCollectionService", () => {
       hits: [{ unitId: "unit-2" }],
     });
 
-    let shelfUnitWhere: any;
-    Object.assign(prismaMock, {
-      shelfUnit: {
-        findMany: async (args: any) => {
-          shelfUnitWhere = args.where;
-          return [
-            { shelfId: "shelf-a", unitId: "unit-1" },
-            { shelfId: "shelf-b", unitId: "unit-1" },
-            { shelfId: "shelf-a", unitId: "unit-2" },
-          ];
+    const listShelfUnits = mock(async () => [
+      { shelfId: "shelf-a", unitId: "unit-1" },
+      { shelfId: "shelf-b", unitId: "unit-1" },
+      { shelfId: "shelf-a", unitId: "unit-2" },
+    ]);
+    const repository = createRepository({
+      listShelfUnits,
+      listMetadataRows: mock(async () => [
+        {
+          userId: "user-1",
+          unitId: "unit-2",
+          searchText: "private alias",
+          createdAt: new Date("2026-01-01T00:00:00.000Z"),
+          updatedAt: new Date("2026-01-02T00:00:00.000Z"),
         },
-      },
-      userUnitCollection: {
-        findMany: async () => [
-          {
-            userId: "user-1",
-            unitId: "unit-2",
-            searchText: "private alias",
-            createdAt: new Date("2026-01-01T00:00:00.000Z"),
-            updatedAt: new Date("2026-01-02T00:00:00.000Z"),
-          },
-        ],
-      },
-      userTagApplication: {
-        findMany: async () => [{ unitId: "unit-1", tagUnitId: "tag-1" }],
-      },
+      ]),
+      listTagRows: mock(async () => [{ unitId: "unit-1", tagUnitId: "tag-1" }]),
     });
 
-    const { UserUnitCollectionService } = await import(
-      "./user-unit-collection.service"
-    );
-    const result = await new UserUnitCollectionService().search(
+    const result = await (await createService(repository)).search(
       "user-1",
       { q: "space", limit: 10 },
       { viewerUserId: "user-1" },
@@ -152,9 +129,10 @@ describe("UserUnitCollectionService", () => {
       filter: 'ownerUserId = "user-1"',
       attributesToRetrieve: ["unitId"],
     });
-    expect(shelfUnitWhere).toMatchObject({
-      unitId: { in: ["unit-1", "unit-2"] },
-      shelf: { unit: { userId: "user-1" } },
+    expect(listShelfUnits).toHaveBeenCalledWith({
+      ownerUserId: "user-1",
+      unitIds: ["unit-1", "unit-2"],
+      publicOnly: undefined,
     });
     expect(result.units).toMatchObject([
       {
@@ -176,47 +154,33 @@ describe("UserUnitCollectionService", () => {
     collectionSearchMock.mockClear();
     contentSearchMock.mockResolvedValueOnce({ hits: [{ id: "unit-1" }] });
 
-    let shelfUnitWhere: any;
-    Object.assign(prismaMock, {
-      shelfUnit: {
-        findMany: async (args: any) => {
-          shelfUnitWhere = args.where;
-          return [{ shelfId: "public-shelf", unitId: "unit-1" }];
+    const listShelfUnits = mock(async () => [
+      { shelfId: "public-shelf", unitId: "unit-1" },
+    ]);
+    const repository = createRepository({
+      listShelfUnits,
+      listMetadataRows: mock(async () => [
+        {
+          userId: "owner-1",
+          unitId: "unit-1",
+          searchText: "private alias",
+          createdAt: new Date("2026-01-01T00:00:00.000Z"),
+          updatedAt: new Date("2026-01-02T00:00:00.000Z"),
         },
-      },
-      userUnitCollection: {
-        findMany: async () => [
-          {
-            userId: "owner-1",
-            unitId: "unit-1",
-            searchText: "private alias",
-            createdAt: new Date("2026-01-01T00:00:00.000Z"),
-            updatedAt: new Date("2026-01-02T00:00:00.000Z"),
-          },
-        ],
-      },
-      userTagApplication: { findMany: async () => [] },
+      ]),
     });
 
-    const { UserUnitCollectionService } = await import(
-      "./user-unit-collection.service"
-    );
-    const result = await new UserUnitCollectionService().search(
+    const result = await (await createService(repository)).search(
       "owner-1",
       { q: "public title" },
       { viewerUserId: "viewer-1", publicOnly: true },
     );
 
     expect(collectionSearchMock).not.toHaveBeenCalled();
-    expect(shelfUnitWhere).toMatchObject({
-      unitId: { in: ["unit-1"] },
-      shelf: {
-        unit: {
-          userId: "owner-1",
-          status: "PUBLISHED",
-          visibility: "PUBLIC",
-        },
-      },
+    expect(listShelfUnits).toHaveBeenCalledWith({
+      ownerUserId: "owner-1",
+      unitIds: ["unit-1"],
+      publicOnly: true,
     });
     expect(result.units[0]?.searchText).toBeNull();
   });

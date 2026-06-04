@@ -1,13 +1,15 @@
 import type { PollDTO, PollOptionDTO, PollResultsDTO } from "@rezics/contract";
-import type { PollOption } from "#/prisma/client";
+import { PollOption } from "../db/schema";
 import type { PollWithOptions } from "./poll.types";
+
+type PollOptionRow = typeof PollOption.$inferSelect;
 
 /**
  * Map a PollOption row to its DTO. `voteCount` is included only when
  * `withTally` is true (results are visible to the caller).
  */
 export function mapPollOptionToDTO(
-  option: PollOption,
+  option: PollOptionRow,
   withTally: boolean,
 ): PollOptionDTO {
   return {

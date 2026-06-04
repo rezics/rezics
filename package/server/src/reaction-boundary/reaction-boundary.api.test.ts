@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { Elysia } from "elysia";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
 
 const currentIdentity = {
   sub: "user-1",
@@ -24,13 +20,18 @@ const createReactionMock = mock(async () => ({
   createdAt: "2026-05-28T00:00:00.000Z",
   created: true,
 }));
+type PolicyRealm = {
+  id: string;
+  type: string;
+  visibility: string;
+};
 
-installPrismaClientMock();
-Object.assign(prismaMock, {
-  unit: {
-    findUnique: mock(async () => null),
-  },
-});
+const findPolicyRealm = mock(
+  async (_realmUnitId: string): Promise<PolicyRealm | undefined> => undefined,
+);
+const findTargetOwner = mock(
+  async (_targetId: string): Promise<string | null> => null,
+);
 
 mock.module("@/middleware", () => ({
   authMacro: new Elysia({ name: "macro/auth" }).macro("requireLogin", {
@@ -66,10 +67,20 @@ describe("reactionBoundaryApi", () => {
     policyAllowed = false;
     decideForIdentityMock.mockClear();
     createReactionMock.mockClear();
+    findPolicyRealm.mockReset();
+    findPolicyRealm.mockResolvedValue(undefined);
+    findTargetOwner.mockReset();
+    findTargetOwner.mockResolvedValue(null);
   });
 
   test("denies reaction creation rejected by policy", async () => {
-    const { reactionBoundaryApi } = await import("./reaction-boundary.api");
+    const { createReactionBoundaryApi } = await import(
+      "./reaction-boundary.api"
+    );
+    const reactionBoundaryApi = createReactionBoundaryApi({
+      findPolicyRealm,
+      findTargetOwner,
+    });
     const response = await reactionBoundaryApi.handle(
       new Request("http://localhost/reaction/", {
         method: "POST",
@@ -90,11 +101,14 @@ describe("reactionBoundaryApi", () => {
 
   test("creates reaction for the requested targetId without resolving Unit.targetUnitId", async () => {
     policyAllowed = true;
-    prismaMock.unit.findUnique = mock(async () => ({
-      userId: "owner-1",
-      targetUnitId: "canonical-target",
-    }));
-    const { reactionBoundaryApi } = await import("./reaction-boundary.api");
+    findTargetOwner.mockResolvedValue("owner-1");
+    const { createReactionBoundaryApi } = await import(
+      "./reaction-boundary.api"
+    );
+    const reactionBoundaryApi = createReactionBoundaryApi({
+      findPolicyRealm,
+      findTargetOwner,
+    });
 
     const response = await reactionBoundaryApi.handle(
       new Request("http://localhost/reaction/", {
@@ -111,21 +125,23 @@ describe("reactionBoundaryApi", () => {
       "like",
       "direct",
     );
-    expect(prismaMock.unit.findUnique).toHaveBeenCalledWith({
-      where: { id: "post-1" },
-      select: { userId: true },
-    });
+    expect(findTargetOwner).toHaveBeenCalledWith("post-1");
   });
 
   test("rejects private realm-scoped reactions without membership", async () => {
     policyAllowed = true;
-    prismaMock.unit.findUnique = mock(async ({ where, select }: any) => {
-      if (where.id === "realm-1" && select?.visibility) {
-        return { id: "realm-1", type: "REALM", visibility: "PRIVATE" };
-      }
-      return null;
+    findPolicyRealm.mockResolvedValue({
+      id: "realm-1",
+      type: "REALM",
+      visibility: "PRIVATE",
     });
-    const { reactionBoundaryApi } = await import("./reaction-boundary.api");
+    const { createReactionBoundaryApi } = await import(
+      "./reaction-boundary.api"
+    );
+    const reactionBoundaryApi = createReactionBoundaryApi({
+      findPolicyRealm,
+      findTargetOwner,
+    });
 
     const response = await reactionBoundaryApi.handle(
       new Request("http://localhost/reaction/", {

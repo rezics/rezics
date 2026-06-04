@@ -1,10 +1,18 @@
 import type { PinKind } from "@rezics/contract";
-import type { Prisma } from "#/prisma/client";
-import { publicUserSelect } from "@/utils/sanitizeUser";
+import {
+  ContentTranslation,
+  Post,
+  Unit,
+  UnitRealm,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
+import {
+  publicUserSelect,
+  type PublicUserSelected,
+} from "@/utils/sanitizeUser";
 
-/**
- * Prisma include for post relations.
- */
+/** Legacy include shape retained for tests while post service migrates. */
 export const postInclude = {
   unit: {
     include: {
@@ -19,7 +27,7 @@ export const postInclude = {
       },
     },
   },
-} satisfies Prisma.PostInclude;
+} as const;
 
 /**
  * Internal post type with relations.
@@ -29,9 +37,14 @@ export const postInclude = {
  * `pinKind`/`pinPosition` are the promotion overlay for the rendered thread
  * scope, attached by the thread read (`attachPinKinds`).
  */
-export type PostWithRelations = Prisma.PostGetPayload<{
-  include: typeof postInclude;
-}> & {
+export type PostWithRelations = typeof Post.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    user?: PublicUserSelected | null;
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    contentTranslations: Array<typeof ContentTranslation.$inferSelect>;
+    supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+    inRealms?: Array<Pick<typeof UnitRealm.$inferSelect, "realmUnitId">>;
+  };
   pinKind?: PinKind | null;
   pinPosition?: string | null;
 };

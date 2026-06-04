@@ -1,14 +1,12 @@
-import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import {
-  installPrismaClientMock,
-  prismaMock,
-} from "../test/prisma-client-mock";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+import type {
+  GovernanceCapabilityRepository,
+  GovernanceCapabilityService,
+} from "./capability.service";
 
-installPrismaClientMock();
-
-beforeEach(() => {
-  prismaMock.staffGrant = {
-    findMany: mock(async () => [
+const listStaffGrants = mock(
+  async () =>
+    [
       {
         capability: "audit.read",
         scopeKind: "global",
@@ -23,10 +21,12 @@ beforeEach(() => {
         state: "EXPIRED",
         expiresAt: null,
       },
-    ]),
-  };
-  prismaMock.realmCapabilityGrant = {
-    findMany: mock(async () => [
+    ] as any[],
+);
+
+const listRealmGrantsForUser = mock(
+  async () =>
+    [
       {
         capability: "queue.realm.decide",
         realmUnitId: "realm-1",
@@ -39,22 +39,38 @@ beforeEach(() => {
         state: "ACTIVE",
         expiresAt: new Date("2000-01-01T00:00:00.000Z"),
       },
-    ]),
-  };
+    ] as any[],
+);
+
+const getRealmMember = mock(async () => null as any);
+
+beforeEach(() => {
+  listStaffGrants.mockClear();
+  listRealmGrantsForUser.mockClear();
+  getRealmMember.mockClear();
+  getRealmMember.mockResolvedValue(null as any);
 });
 
-afterEach(() => {
-  delete prismaMock.staffGrant;
-  delete prismaMock.realmCapabilityGrant;
-  delete prismaMock.realmMember;
-});
+function createRepository(): GovernanceCapabilityRepository {
+  return {
+    listStaffGrants,
+    listRealmGrantsForUser,
+    getRealmMember,
+    listRealmGrants: mock(async () => []),
+    createRealmGrant: mock(async () => ({}) as any),
+    listActiveRealmGrants: mock(async () => []),
+    revokeRealmGrant: mock(async () => ({}) as any),
+  };
+}
+
+async function createService(): Promise<GovernanceCapabilityService> {
+  const { GovernanceCapabilityService } = await import("./capability.service");
+  return new GovernanceCapabilityService(createRepository());
+}
 
 describe("GovernanceCapabilityService", () => {
   test("resolves active staff and realm grants into one scoped hint shape", async () => {
-    const { governanceCapabilityService } = await import(
-      "./capability.service"
-    );
-    const hints = await governanceCapabilityService.resolveForUser("user-1");
+    const hints = await (await createService()).resolveForUser("user-1");
 
     expect(hints).toEqual([
       {
@@ -68,20 +84,12 @@ describe("GovernanceCapabilityService", () => {
         expiresAt: "2099-01-01T00:00:00.000Z",
       },
     ]);
-    expect(prismaMock.staffGrant.findMany).toHaveBeenCalledWith({
-      where: { userId: "user-1" },
-    });
-    expect(prismaMock.realmCapabilityGrant.findMany).toHaveBeenCalledWith({
-      where: { userId: "user-1" },
-    });
+    expect(listStaffGrants).toHaveBeenCalledWith("user-1");
+    expect(listRealmGrantsForUser).toHaveBeenCalledWith("user-1");
   });
 
   test("exposes root staff capability hints without requiring persisted grants", async () => {
-    const { governanceCapabilityService } = await import(
-      "./capability.service"
-    );
-
-    const hints = await governanceCapabilityService.resolveHintsForIdentity({
+    const hints = await (await createService()).resolveHintsForIdentity({
       userId: "root-1",
       permission: { role: "ROOT" },
     });
@@ -102,28 +110,22 @@ describe("GovernanceCapabilityService", () => {
       capability: "comment.moderate",
       scope: { kind: "global" },
     });
-    expect(prismaMock.staffGrant.findMany).not.toHaveBeenCalled();
-    expect(prismaMock.realmCapabilityGrant.findMany).not.toHaveBeenCalled();
+    expect(listStaffGrants).not.toHaveBeenCalled();
+    expect(listRealmGrantsForUser).not.toHaveBeenCalled();
   });
 
   test("realm moderator roles imply comment and member moderation capabilities", async () => {
-    prismaMock.realmMember = {
-      findUnique: mock(async () => ({
-        realmUnitId: "realm-1",
-        userId: "mod-1",
-        roleKey: "moderator",
-        state: "ACTIVE",
-      })),
-    };
+    getRealmMember.mockResolvedValueOnce({
+      realmUnitId: "realm-1",
+      userId: "mod-1",
+      roleKey: "moderator",
+      state: "ACTIVE",
+    } as any);
 
-    const { governanceCapabilityService } = await import(
-      "./capability.service"
+    const membership = await (await createService()).realmMembershipForPolicy(
+      "realm-1",
+      "mod-1",
     );
-    const membership =
-      await governanceCapabilityService.realmMembershipForPolicy(
-        "realm-1",
-        "mod-1",
-      );
 
     expect(membership?.capabilities).toContainEqual({
       capability: "comment.moderate",

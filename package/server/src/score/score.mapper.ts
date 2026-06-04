@@ -4,14 +4,12 @@ import type {
   ScoreRealmFieldDTO,
 } from "@rezics/contract";
 import type {
-  ScoreAggregate,
-  ScoreEntry,
-  ScoreRealmField,
-} from "#/prisma/client";
-import type {
   Distribution,
   FieldAggregate,
   FieldsAggregate,
+  ScoreAggregateRow,
+  ScoreEntryRow,
+  ScoreRealmFieldRow,
 } from "./score.types";
 import { SCORE_MAX, SCORE_MIN } from "./score.types";
 
@@ -19,7 +17,7 @@ import { SCORE_MAX, SCORE_MIN } from "./score.types";
 // DTO MAPPERS
 // ============================================================
 
-export function mapScoreEntryToDTO(entry: ScoreEntry): ScoreEntryDTO {
+export function mapScoreEntryToDTO(entry: ScoreEntryRow): ScoreEntryDTO {
   return {
     id: entry.id,
     userId: entry.userId,
@@ -32,7 +30,9 @@ export function mapScoreEntryToDTO(entry: ScoreEntry): ScoreEntryDTO {
   };
 }
 
-export function mapScoreAggregateToDTO(agg: ScoreAggregate): ScoreAggregateDTO {
+export function mapScoreAggregateToDTO(
+  agg: ScoreAggregateRow,
+): ScoreAggregateDTO {
   return {
     unitId: agg.unitId,
     realm: agg.realm,
@@ -45,7 +45,7 @@ export function mapScoreAggregateToDTO(agg: ScoreAggregate): ScoreAggregateDTO {
 }
 
 export function mapScoreRealmFieldToDTO(
-  field: ScoreRealmField,
+  field: ScoreRealmFieldRow,
 ): ScoreRealmFieldDTO {
   return {
     realm: field.realm,
@@ -155,7 +155,7 @@ export function applyFieldsDelta(
   return Object.keys(result).length > 0 ? result : null;
 }
 
-export function computeAggregateFromEntries(entries: ScoreEntry[]): {
+export function computeAggregateFromEntries(entries: ScoreEntryRow[]): {
   totalScore: number;
   totalCount: number;
   distribution: Distribution;

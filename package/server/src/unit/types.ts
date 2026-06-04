@@ -1,7 +1,10 @@
 // Type only used in server, otherwise use contract
 
-import type { Prisma } from "#/prisma/client";
-import { publicUserSelect } from "@/utils/sanitizeUser";
+import type { Unit, UnitSupportLanguage, UnitTranslation } from "../db/schema";
+import {
+  publicUserSelect,
+  type PublicUserSelected,
+} from "@/utils/sanitizeUser";
 
 /**
  * Prisma include for unit relations
@@ -10,11 +13,13 @@ export const unitInclude = {
   user: { select: publicUserSelect },
   translations: true,
   supportLanguages: true,
-} satisfies Prisma.UnitInclude;
+} as const;
 
 /**
  * Internal Unit type with relations
  */
-export type UnitWithRelations = Prisma.UnitGetPayload<{
-  include: typeof unitInclude;
-}>;
+export type UnitWithRelations = typeof Unit.$inferSelect & {
+  user?: PublicUserSelected | null;
+  translations: Array<typeof UnitTranslation.$inferSelect>;
+  supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+};

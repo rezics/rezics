@@ -2,7 +2,7 @@ import type { HistoryOutboxConsumer } from "@rezics/history/outbox";
 import type { SearchClient } from "@rezics/search";
 import { createHistoryHandlers } from "./history/handlers";
 import { createMaintenanceHandlers } from "./maintenance/handlers";
-import type { ServerPrismaRuntime } from "./maintenance/runtime";
+import type { ServerMaintenanceRuntime } from "./maintenance/runtime";
 import {
   createRankingHandlers,
   type RankingCommandDispatcher,
@@ -12,14 +12,14 @@ import { createSearchHandlers } from "./search/handlers";
 export function createJobHandlers(options: {
   searchClient: SearchClient;
   historyConsumer: HistoryOutboxConsumer;
-  serverPrismaRuntime?: ServerPrismaRuntime;
+  serverMaintenanceRuntime?: ServerMaintenanceRuntime;
   rankingDispatcher?: RankingCommandDispatcher;
 }) {
   return {
     ...createSearchHandlers(options.searchClient),
     ...createHistoryHandlers(options.historyConsumer),
     ...createMaintenanceHandlers({
-      serverPrismaRuntime: options.serverPrismaRuntime,
+      serverMaintenanceRuntime: options.serverMaintenanceRuntime,
     }),
     ...(options.rankingDispatcher
       ? createRankingHandlers(options.rankingDispatcher)

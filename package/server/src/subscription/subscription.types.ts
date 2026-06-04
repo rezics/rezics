@@ -1,15 +1,8 @@
-import type { Prisma } from "#/prisma/client";
+import type { Subscription, Unit } from "../db/schema";
 
-export const subscriptionInclude = {
-  subscribedUnit: {
-    select: {
-      id: true,
-      type: true,
-      slug: true,
-    },
-  },
-} satisfies Prisma.SubscriptionInclude;
-
-export type SubscriptionWithTarget = Prisma.SubscriptionGetPayload<{
-  include: typeof subscriptionInclude;
-}>;
+export type SubscriptionWithTarget = typeof Subscription.$inferSelect & {
+  subscribedUnit?: Pick<
+    typeof Unit.$inferSelect,
+    "id" | "type" | "slug"
+  > | null;
+};

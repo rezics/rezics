@@ -1,7 +1,7 @@
 import type { EntityDTO, Language, UnitTranslationDTO } from "@rezics/contract";
 import type { EntityWithRelations } from "./entity.types";
 
-/** Project a Prisma Entity + Unit + translations row into the public DTO. */
+/** Project an Entity + Unit + translations row into the public DTO. */
 export function mapEntityToDTO(row: EntityWithRelations): EntityDTO {
   return {
     unitId: row.unitId,

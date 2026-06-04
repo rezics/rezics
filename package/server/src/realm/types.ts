@@ -1,5 +1,14 @@
-import type { Prisma } from "#/prisma/client";
-import { publicUserSelect } from "@/utils/sanitizeUser";
+import type {
+  Realm,
+  RealmMember,
+  Unit,
+  UnitSupportLanguage,
+  UnitTranslation,
+} from "../db/schema";
+import {
+  publicUserSelect,
+  type PublicUserSelected,
+} from "@/utils/sanitizeUser";
 
 // Prisma include for realm relations
 export const realmInclude = {
@@ -11,12 +20,17 @@ export const realmInclude = {
     },
   },
   members: true,
-} satisfies Prisma.RealmInclude;
+} as const;
 
 // Internal realm type with relations
-export type RealmWithRelations = Prisma.RealmGetPayload<{
-  include: typeof realmInclude;
-}>;
+export type RealmWithRelations = typeof Realm.$inferSelect & {
+  unit: typeof Unit.$inferSelect & {
+    user?: PublicUserSelected | null;
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+  };
+  members?: Array<typeof RealmMember.$inferSelect>;
+};
 
 // Lighter select for list queries (no members)
 export const realmListSelect = {
@@ -40,8 +54,25 @@ export const realmListSelect = {
       supportLanguages: true,
     },
   },
-} satisfies Prisma.RealmSelect;
+} as const;
 
-export type RealmListSelected = Prisma.RealmGetPayload<{
-  select: typeof realmListSelect;
-}>;
+export type RealmListSelected = Pick<
+  typeof Realm.$inferSelect,
+  | "unitId"
+  | "isPublic"
+  | "isOfficial"
+  | "contentRequiresApproval"
+  | "memberCount"
+  | "extra"
+  | "createdAt"
+  | "updatedAt"
+> & {
+  unit: Pick<
+    typeof Unit.$inferSelect,
+    "id" | "slug" | "userId" | "createdAt" | "updatedAt"
+  > & {
+    user?: PublicUserSelected | null;
+    translations: Array<typeof UnitTranslation.$inferSelect>;
+    supportLanguages: Array<typeof UnitSupportLanguage.$inferSelect>;
+  };
+};

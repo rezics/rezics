@@ -1,4 +1,4 @@
-import { AppError } from "@/utils/errors";
+import { AppError } from "../utils/errors";
 
 const FORBIDDEN_GAME_REQUIREMENT_EXTRA_KEYS = new Set([
   "rawtext",

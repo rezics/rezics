@@ -1,5 +1,14 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { installPrismaClientMock, prismaMock } from "@/test/prisma-client-mock";
+import {
+  Realm,
+  RealmTagApplication as RealmTagApplicationTable,
+  RealmTagApplicationVote,
+  TagVote,
+  Unit,
+  UnitRealm,
+  UnitTag,
+} from "../db/schema";
 
 process.env.NODE_ENV = "test";
 process.env.DATABASE_URL ??=
@@ -19,8 +28,8 @@ const unitFindUniqueMock = mock(async ({ where }: any) => {
   }
   return null;
 });
-const realmUnitCreateMock = mock(async () => ({}));
-const realmUnitDeleteMock = mock(async () => ({}));
+const realmUnitCreateMock = mock(async (_args?: any) => ({}));
+const realmUnitDeleteMock = mock(async (_args?: any) => ({}));
 const realmUnitFindManyMock = mock(async () => []);
 const realmTagApplicationUpsertMock = mock(async ({ create }: any) => ({
   ...create,
@@ -42,53 +51,286 @@ const realmTagApplicationDeleteMock = mock(async () => ({}));
 const realmTagApplicationVoteFindUniqueMock = mock(
   async (): Promise<any> => null,
 );
-const realmTagApplicationVoteCreateMock = mock(async () => ({}));
+const realmTagApplicationVoteCreateMock = mock(async (_args?: any) => ({}));
 const realmTagApplicationVoteDeleteManyMock = mock(async () => ({ count: 0 }));
 const realmTagApplicationVoteAggregateMock = mock(async () => ({
   _sum: { value: 1 },
   _count: { value: 1 },
 }));
 const tagVoteFindUniqueMock = mock(async (): Promise<any> => null);
-const tagVoteCreateMock = mock(async () => ({}));
+const tagVoteCreateMock = mock(async (_args?: any) => ({}));
 const tagVoteAggregateMock = mock(async () => ({
   _sum: { value: 1 },
   _count: { value: 1 },
 }));
-const unitTagUpsertMock = mock(async () => ({}));
-const unitTagUpdateMock = mock(async () => ({}));
+const unitTagUpsertMock = mock(async (_args?: any) => ({}));
+const unitTagUpdateMock = mock(async (_args?: any) => ({}));
 const enqueueMock = mock(async (_command: any) => ({ status: "created" }));
-const transactionMock = mock(async (fn: any) =>
-  fn({
-    unit: { findUnique: unitFindUniqueMock },
-    unitRealm: {
-      create: realmUnitCreateMock,
-      delete: realmUnitDeleteMock,
-      findMany: realmUnitFindManyMock,
+
+function sqlValues(condition: unknown): unknown[] {
+  const values: unknown[] = [];
+  function walk(value: unknown): void {
+    if (!value || typeof value !== "object") return;
+    const maybeValue = (value as { value?: unknown }).value;
+    if (
+      maybeValue !== undefined &&
+      !Array.isArray(maybeValue) &&
+      (typeof maybeValue === "string" ||
+        typeof maybeValue === "number" ||
+        typeof maybeValue === "boolean")
+    ) {
+      values.push(maybeValue);
+    }
+    const chunks = (value as { queryChunks?: unknown[] }).queryChunks;
+    if (Array.isArray(chunks)) {
+      for (const chunk of chunks) walk(chunk);
+    }
+  }
+  walk(condition);
+  return values;
+}
+
+function valuesByTable(values: unknown[]): {
+  realmUnitId?: string;
+  unitId?: string;
+  tagUnitId?: string;
+} {
+  if (typeof values[0] === "number") {
+    return {
+      realmUnitId: typeof values[1] === "string" ? values[1] : undefined,
+    };
+  }
+  if (values[0] === "realm-1" || values[0] === "realm-2") {
+    return {
+      realmUnitId: values[0] as string,
+      unitId: typeof values[1] === "string" ? values[1] : undefined,
+      tagUnitId: typeof values[2] === "string" ? values[2] : undefined,
+    };
+  }
+  return {
+    unitId: values[0] as string | undefined,
+    tagUnitId: typeof values[1] === "string" ? values[1] : undefined,
+  };
+}
+
+function createFakeSelect(selection?: Record<string, unknown>) {
+  let table: unknown;
+  let condition: unknown;
+  let take: number | undefined;
+  const query = {
+    from: mock((nextTable: unknown) => {
+      table = nextTable;
+      return query;
+    }),
+    leftJoin: mock(() => query),
+    where: mock((nextCondition: unknown) => {
+      condition = nextCondition;
+      return query;
+    }),
+    orderBy: mock(() => query),
+    limit: mock((nextLimit: number) => {
+      take = nextLimit;
+      return query;
+    }),
+    async resolve() {
+      const values = sqlValues(condition);
+      if (table === Unit) {
+        const id = values[0] as string | undefined;
+        const unit = await unitFindUniqueMock({ where: { id } });
+        if (!unit) return [];
+        return [
+          selection?.realmUnitId
+            ? {
+                id: unit.id,
+                type: unit.type,
+                realmUnitId: unit.realm?.unitId ?? null,
+              }
+            : unit,
+        ];
+      }
+      if (table === RealmTagApplicationTable) {
+        const ids = valuesByTable(values);
+        const threshold = values.find((value) => typeof value === "number");
+        return findManyMock({
+          where: {
+            ...(ids.realmUnitId ? { realmUnitId: ids.realmUnitId } : {}),
+            ...(ids.unitId ? { unitId: ids.unitId } : {}),
+            ...(ids.tagUnitId ? { tagUnitId: ids.tagUnitId } : {}),
+            ...(threshold !== undefined
+              ? values[0] === threshold
+                ? { score: { lte: threshold } }
+                : { score: { gt: threshold } }
+              : {}),
+          },
+          orderBy:
+            threshold !== undefined && values[0] === threshold
+              ? [
+                  { score: "asc" },
+                  { realmUnitId: "asc" },
+                  { unitId: "asc" },
+                  { tagUnitId: "asc" },
+                ]
+              : [
+                  { pinned: "desc" },
+                  { position: "asc" },
+                  { score: "desc" },
+                  { tagUnitId: "asc" },
+                ],
+          ...(take !== undefined ? { take } : {}),
+        });
+      }
+      if (table === RealmTagApplicationVote) {
+        if (selection?.score) return [{ score: 1, voteCount: 1 }];
+        const row = await realmTagApplicationVoteFindUniqueMock();
+        return row ? [row] : [];
+      }
+      if (table === TagVote) {
+        if (selection?.score) return [{ score: 1, voteCount: 1 }];
+        const row = await tagVoteFindUniqueMock();
+        return row ? [row] : [];
+      }
+      return [];
     },
-    realmTagApplication: {
-      findMany: findManyMock,
-      upsert: realmTagApplicationUpsertMock,
-      update: realmTagApplicationUpdateMock,
-      delete: realmTagApplicationDeleteMock,
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return query.resolve().then(resolve, reject);
     },
-    realmTagApplicationVote: {
-      findUnique: realmTagApplicationVoteFindUniqueMock,
-      create: realmTagApplicationVoteCreateMock,
-      deleteMany: realmTagApplicationVoteDeleteManyMock,
-      aggregate: realmTagApplicationVoteAggregateMock,
-      upsert: mock(async () => ({})),
+  };
+  return query;
+}
+
+function createFakeInsert(table: unknown) {
+  let data: Record<string, unknown> = {};
+  const query = {
+    values: mock((nextData: Record<string, unknown>) => {
+      data = nextData;
+      return query;
+    }),
+    onConflictDoNothing: mock(() => query),
+    onConflictDoUpdate: mock(() => query),
+    returning: mock(async () => {
+      if (table === UnitRealm) {
+        return [await realmUnitCreateMock({ data })];
+      }
+      return [{ ...data, createdAt: new Date("2026-01-01T00:00:00Z") }];
+    }),
+    async execute() {
+      if (table === RealmTagApplicationTable) {
+        await realmTagApplicationUpsertMock({
+          where: {
+            realmUnitId_tagUnitId_unitId: {
+              realmUnitId: data.realmUnitId,
+              tagUnitId: data.tagUnitId,
+              unitId: data.unitId,
+            },
+          },
+          create: data,
+        });
+      }
+      if (table === RealmTagApplicationVote) {
+        await realmTagApplicationVoteCreateMock({ data });
+      }
+      if (table === TagVote) {
+        await tagVoteCreateMock({ data });
+      }
+      if (table === UnitTag) {
+        await unitTagUpsertMock({ create: data, update: data });
+      }
+      return [];
     },
-    tagVote: {
-      findUnique: tagVoteFindUniqueMock,
-      create: tagVoteCreateMock,
-      aggregate: tagVoteAggregateMock,
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return query.execute().then(resolve, reject);
     },
-    unitTag: {
-      upsert: unitTagUpsertMock,
-      update: unitTagUpdateMock,
+  };
+  return query;
+}
+
+function createFakeUpdate(table: unknown) {
+  let data: Record<string, unknown> = {};
+  const query = {
+    set: mock((nextData: Record<string, unknown>) => {
+      data = nextData;
+      return query;
+    }),
+    where: mock(() => query),
+    returning: mock(async () => {
+      if (table === RealmTagApplicationTable) {
+        return [
+          await realmTagApplicationUpdateMock({
+            where: {
+              realmUnitId_tagUnitId_unitId: {
+                realmUnitId: "realm-1",
+                tagUnitId: "tag-1",
+                unitId: "unit-1",
+              },
+            },
+            data,
+          }),
+        ];
+      }
+      return [{ ...data }];
+    }),
+    async execute() {
+      if (table === RealmTagApplicationTable) {
+        await realmTagApplicationUpdateMock({
+          where: {
+            realmUnitId_tagUnitId_unitId: {
+              realmUnitId: "realm-1",
+              tagUnitId: "tag-1",
+              unitId: "unit-1",
+            },
+          },
+          data,
+        });
+      }
+      if (table === UnitTag) await unitTagUpdateMock({ data });
+      return [];
     },
-  }),
-);
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return query.execute().then(resolve, reject);
+    },
+  };
+  return query;
+}
+
+function createFakeDelete(table: unknown) {
+  const query = {
+    where: mock(() => query),
+    async execute() {
+      if (table === RealmTagApplicationTable) {
+        await realmTagApplicationDeleteMock();
+      }
+      if (table === UnitRealm) await realmUnitDeleteMock();
+      return [];
+    },
+    then(
+      resolve: (value: unknown[]) => unknown,
+      reject?: (error: unknown) => unknown,
+    ) {
+      return query.execute().then(resolve, reject);
+    },
+  };
+  return query;
+}
+
+const fakeDrizzleDb = {
+  select: mock((selection?: Record<string, unknown>) =>
+    createFakeSelect(selection),
+  ),
+  insert: mock((table: unknown) => createFakeInsert(table)),
+  update: mock((table: unknown) => createFakeUpdate(table)),
+  delete: mock((table: unknown) => createFakeDelete(table)),
+  transaction: mock(async (fn: any) => fn(fakeDrizzleDb)),
+};
+const transactionMock = fakeDrizzleDb.transaction;
 
 installPrismaClientMock();
 Object.assign(prismaMock, {
@@ -142,6 +384,9 @@ mock.module("@/job/job-boundary", () => ({
   serverJobProducer: {
     enqueue: enqueueMock,
   },
+}));
+mock.module("../db/client", () => ({
+  db: fakeDrizzleDb,
 }));
 
 const { RealmService, REALM_TAG_VISIBILITY_THRESHOLD } = await import(

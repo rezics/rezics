@@ -2,7 +2,7 @@ import {
   type SeedAuthUserResult,
   seedAuthUser,
   slugify,
-} from "@rezics/auth/prisma/seed";
+} from "@rezics/auth/seed";
 import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
 import { bootstrapSystemShelves } from "@rezics/server/prisma/factory/system-shelves";
 import type { SlugScopesMap } from "@rezics/server/prisma/seed/infra/seed-slug-scopes";
@@ -254,12 +254,15 @@ export async function seedAllAuthUsers(
 ): Promise<AuthSeedResults> {
   const results: AuthSeedResults = new Map();
   for (const input of SEED_USERS) {
-    const authResult = await seedAuthUser(authPrisma, {
-      email: input.email,
-      name: input.name,
-      role: input.role,
-      password: input.password,
-    });
+    const authResult = await seedAuthUser(
+      {
+        email: input.email,
+        name: input.name,
+        role: input.role,
+        password: input.password,
+      },
+      authPrisma.db,
+    );
     results.set(input.email, authResult);
   }
   return results;
@@ -326,12 +329,15 @@ export async function resetRootUser(
   const rootInput = SEED_USERS.find((user) => user.email === ROOT_EMAIL);
   if (!rootInput) throw new Error("Root seed user definition is missing.");
 
-  const authResult = await seedAuthUser(authPrisma, {
-    email: rootInput.email,
-    name: rootInput.name,
-    role: rootInput.role,
-    password: rootInput.password,
-  });
+  const authResult = await seedAuthUser(
+    {
+      email: rootInput.email,
+      name: rootInput.name,
+      role: rootInput.role,
+      password: rootInput.password,
+    },
+    authPrisma.db,
+  );
 
   const userScope = slugScopes.user;
   const slug = resolveSeedUserSlug(rootInput);

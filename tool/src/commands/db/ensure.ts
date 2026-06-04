@@ -13,7 +13,7 @@ const SERVICE_DIR = path.join(TOOL_DIR, "service");
 
 export function ensureLocalDatabases() {
   const config = createToolConfig();
-  // Managed startup may create empty databases for convenience; Prisma migrations remain the schema authority.
+  // Managed startup may create empty databases for convenience; Drizzle migrations remain the schema authority.
   const sql = renderCreateDatabaseSql(config.managedDatabaseNames);
   const args = [
     ...DOCKER_COMPOSE_COMMAND,

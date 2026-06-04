@@ -151,6 +151,17 @@ export function assertSequinRuntimeEnv(input: ToolEnv = env) {
 export function createToolConfig(input: ToolEnv = env) {
   const sourceDbPassword =
     input.SOURCE_DB_PASSWORD ?? DEFAULT_TOOL_ENV.SOURCE_DB_PASSWORD;
+  const sourceDbName = input.SOURCE_DB_NAME ?? DEFAULT_TOOL_ENV.SOURCE_DB_NAME;
+  const reactionDbName =
+    input.REACTION_DB_NAME ?? DEFAULT_TOOL_ENV.REACTION_DB_NAME;
+  const schemaDatabaseNames = {
+    auth: DEFAULT_MANAGED_DATABASE_NAMES.auth,
+    server: sourceDbName,
+    notify: DEFAULT_MANAGED_DATABASE_NAMES.notify,
+    reaction: reactionDbName,
+    history: DEFAULT_MANAGED_DATABASE_NAMES.history,
+    ranking: DEFAULT_MANAGED_DATABASE_NAMES.ranking,
+  } as const;
 
   return {
     mode: input.ENV ?? DEFAULT_TOOL_ENV.ENV,
@@ -167,7 +178,7 @@ export function createToolConfig(input: ToolEnv = env) {
       SECRET_KEY_BASE:
         input.SECRET_KEY_BASE ?? DEFAULT_TOOL_ENV.SECRET_KEY_BASE,
       VAULT_KEY: input.VAULT_KEY ?? DEFAULT_TOOL_ENV.VAULT_KEY,
-      SOURCE_DB_NAME: input.SOURCE_DB_NAME ?? DEFAULT_TOOL_ENV.SOURCE_DB_NAME,
+      SOURCE_DB_NAME: sourceDbName,
       SOURCE_DB_USER: input.SOURCE_DB_USER ?? DEFAULT_TOOL_ENV.SOURCE_DB_USER,
       SOURCE_DB_PASSWORD: sourceDbPassword,
       SOURCE_DB_POOL_SIZE:
@@ -179,8 +190,7 @@ export function createToolConfig(input: ToolEnv = env) {
         input.REACTION_DB_HOST ?? DEFAULT_TOOL_ENV.REACTION_DB_HOST,
       REACTION_DB_PORT:
         input.REACTION_DB_PORT ?? DEFAULT_TOOL_ENV.REACTION_DB_PORT,
-      REACTION_DB_NAME:
-        input.REACTION_DB_NAME ?? DEFAULT_TOOL_ENV.REACTION_DB_NAME,
+      REACTION_DB_NAME: reactionDbName,
       REACTION_DB_USER:
         input.REACTION_DB_USER ?? DEFAULT_TOOL_ENV.REACTION_DB_USER,
       REACTION_DB_PASSWORD:
@@ -197,14 +207,16 @@ export function createToolConfig(input: ToolEnv = env) {
         input.SEQUIN_JOB_RUNNER_BASE_URL ??
         DEFAULT_TOOL_ENV.SEQUIN_JOB_RUNNER_BASE_URL,
     },
+    schemaDatabaseNames,
+    jobDatabaseName: DEFAULT_MANAGED_DATABASE_NAMES.job,
     managedDatabaseNames: [
-      input.SOURCE_DB_NAME ?? DEFAULT_TOOL_ENV.SOURCE_DB_NAME,
-      DEFAULT_MANAGED_DATABASE_NAMES.auth,
+      schemaDatabaseNames.server,
+      schemaDatabaseNames.auth,
       DEFAULT_MANAGED_DATABASE_NAMES.job,
-      DEFAULT_MANAGED_DATABASE_NAMES.history,
-      DEFAULT_MANAGED_DATABASE_NAMES.notify,
-      input.REACTION_DB_NAME ?? DEFAULT_TOOL_ENV.REACTION_DB_NAME,
-      DEFAULT_MANAGED_DATABASE_NAMES.ranking,
+      schemaDatabaseNames.history,
+      schemaDatabaseNames.notify,
+      schemaDatabaseNames.reaction,
+      schemaDatabaseNames.ranking,
     ],
     sourceVerifyEnv: {
       ENV: input.ENV ?? DEFAULT_TOOL_ENV.ENV,
@@ -213,7 +225,7 @@ export function createToolConfig(input: ToolEnv = env) {
         input.SOURCE_DB_PORT_PUBLISHED ??
         input.SOURCE_DB_PORT ??
         DEFAULT_TOOL_ENV.SOURCE_DB_PORT,
-      SOURCE_DB_NAME: input.SOURCE_DB_NAME ?? DEFAULT_TOOL_ENV.SOURCE_DB_NAME,
+      SOURCE_DB_NAME: sourceDbName,
       SOURCE_DB_USER: input.SOURCE_DB_USER ?? DEFAULT_TOOL_ENV.SOURCE_DB_USER,
       SOURCE_DB_PASSWORD: sourceDbPassword,
     },

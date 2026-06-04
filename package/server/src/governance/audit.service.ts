@@ -1,7 +1,10 @@
 import type { StaffAuditLogDTO } from "@rezics/contract";
-import { type Prisma, prisma } from "#/prisma/client";
+import { and, desc, eq } from "drizzle-orm";
+import { StaffAuditLog } from "../db/schema";
 import { mapStaffAuditLogToDTO } from "./governance.mapper";
 import type { GovernanceAuditListOptions } from "./types";
+
+type StaffAuditLogRow = typeof StaffAuditLog.$inferSelect;
 
 const REDACTED = "[REDACTED]";
 const SENSITIVE_KEY_PATTERN =
@@ -34,7 +37,90 @@ function redactStaffAuditLog(dto: StaffAuditLogDTO): StaffAuditLogDTO {
   };
 }
 
+export interface GovernanceAuditRepository {
+  create(input: {
+    actorUserId: string;
+    action: string;
+    targetKind: string;
+    targetId: string;
+    decisionCode: string;
+    reason: string;
+    requestId?: string | null;
+    metadata?: Record<string, unknown>;
+  }): Promise<StaffAuditLogRow>;
+  list(options: GovernanceAuditListOptions): Promise<StaffAuditLogRow[]>;
+  get(id: string): Promise<StaffAuditLogRow | null>;
+}
+
+async function getServerDb() {
+  const { db } = await import("../db/client");
+  return db;
+}
+
+function createDrizzleGovernanceAuditRepository(): GovernanceAuditRepository {
+  return {
+    async create(input) {
+      const db = await getServerDb();
+      const [row] = await db
+        .insert(StaffAuditLog)
+        .values({
+          ...input,
+          metadata: input.metadata,
+        })
+        .returning();
+      if (!row) throw new Error("Failed to create StaffAuditLog");
+      return row;
+    },
+
+    async list(options) {
+      const db = await getServerDb();
+      const filters = [
+        options.actorUserId
+          ? eq(StaffAuditLog.actorUserId, options.actorUserId)
+          : undefined,
+        options.action ? eq(StaffAuditLog.action, options.action) : undefined,
+        options.targetKind
+          ? eq(StaffAuditLog.targetKind, options.targetKind)
+          : undefined,
+        options.targetId
+          ? eq(StaffAuditLog.targetId, options.targetId)
+          : undefined,
+        options.decisionCode
+          ? eq(StaffAuditLog.decisionCode, options.decisionCode)
+          : undefined,
+        options.requestId
+          ? eq(StaffAuditLog.requestId, options.requestId)
+          : undefined,
+      ].filter(Boolean);
+
+      return db
+        .select()
+        .from(StaffAuditLog)
+        .where(filters.length > 0 ? and(...filters) : undefined)
+        .orderBy(desc(StaffAuditLog.createdAt))
+        .offset(options.offset ?? 0)
+        .limit(options.limit ?? 50);
+    },
+
+    async get(id) {
+      const db = await getServerDb();
+      const [row] = await db
+        .select()
+        .from(StaffAuditLog)
+        .where(eq(StaffAuditLog.id, id))
+        .limit(1);
+      return row ?? null;
+    },
+  };
+}
+
+const defaultRepository = createDrizzleGovernanceAuditRepository();
+
 export class GovernanceAuditService {
+  constructor(
+    private readonly repository: GovernanceAuditRepository = defaultRepository,
+  ) {}
+
   async append(input: {
     actorUserId: string;
     action: string;
@@ -45,12 +131,7 @@ export class GovernanceAuditService {
     requestId?: string | null;
     metadata?: Record<string, unknown>;
   }) {
-    const row = await prisma.staffAuditLog.create({
-      data: {
-        ...input,
-        metadata: input.metadata as Prisma.InputJsonValue | undefined,
-      },
-    });
+    const row = await this.repository.create(input);
     return mapStaffAuditLogToDTO(row);
   }
 
@@ -80,24 +161,12 @@ export class GovernanceAuditService {
   }
 
   async list(options: GovernanceAuditListOptions = {}) {
-    const rows = await prisma.staffAuditLog.findMany({
-      where: {
-        ...(options.actorUserId ? { actorUserId: options.actorUserId } : {}),
-        ...(options.action ? { action: options.action } : {}),
-        ...(options.targetKind ? { targetKind: options.targetKind } : {}),
-        ...(options.targetId ? { targetId: options.targetId } : {}),
-        ...(options.decisionCode ? { decisionCode: options.decisionCode } : {}),
-        ...(options.requestId ? { requestId: options.requestId } : {}),
-      },
-      orderBy: { createdAt: "desc" },
-      skip: options.offset ?? 0,
-      take: options.limit ?? 50,
-    });
+    const rows = await this.repository.list(options);
     return rows.map((row) => redactStaffAuditLog(mapStaffAuditLogToDTO(row)));
   }
 
   async get(id: string) {
-    const row = await prisma.staffAuditLog.findUnique({ where: { id } });
+    const row = await this.repository.get(id);
     return row ? redactStaffAuditLog(mapStaffAuditLogToDTO(row)) : null;
   }
 }
