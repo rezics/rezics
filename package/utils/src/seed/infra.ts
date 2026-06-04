@@ -13,10 +13,16 @@ export async function seedSlugScopes(db: ServerSeedDb) {
 export async function seedInfra(
   prisma: ServerPrismaClient,
   rootUserId: string,
-  opts: { slugScopes: Awaited<ReturnType<typeof seedSlugScopes>> },
+  opts: {
+    db: ServerSeedDb;
+    slugScopes: Awaited<ReturnType<typeof seedSlugScopes>>;
+  },
 ): Promise<void> {
   const { seedInfra: seedServerInfra } = await import(
     "@rezics/server/db/seed/infra/index"
   );
-  await seedServerInfra(prisma, rootUserId, { slugScopes: opts.slugScopes });
+  await seedServerInfra(prisma, rootUserId, {
+    db: opts.db,
+    slugScopes: opts.slugScopes,
+  });
 }

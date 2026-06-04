@@ -446,6 +446,11 @@ databases may be reset and reseeded.
     `reset-root` now upsert server `Unit`/`User` rows through Drizzle and use
     the Drizzle system-shelf adapter. Full infra taxonomy seed and factory
     scenarios still use the legacy Prisma-shaped seed context.
+  - Applied progress: `seedContentTypeTags()` and `seedSearchTagIds()` now use
+    Drizzle schema tables for `Unit`, translations, support languages,
+    self-tagging, and `EchoKV`; `seedInfra()` temporarily threads both Drizzle db
+    and the remaining Prisma client until realm and game-media taxonomy seeds
+    are migrated.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

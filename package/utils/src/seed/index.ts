@@ -98,7 +98,10 @@ export async function seedBaseline(
 
   const infraSpinner = p.spinner();
   infraSpinner.start("Seeding infrastructure...");
-  await seedInfra(serverPrisma, rootUserId, { slugScopes });
+  await seedInfra(serverPrisma, rootUserId, {
+    db: opts.serverSeedDb,
+    slugScopes,
+  });
   infraSpinner.stop("Infrastructure seeded.");
 
   return { credentials: results, slugScopes };

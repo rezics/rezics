@@ -14,10 +14,88 @@ import {
   type TagGroupName,
   type TagSlug,
 } from "@rezics/contract";
-import type { PrismaClient } from "../../../../prisma/generated/client.js";
+import { and, eq } from "drizzle-orm";
+import type { ServerDb } from "../../client";
+import {
+  EchoKV,
+  Unit,
+  UnitSupportLanguage,
+  UnitTag,
+  UnitTranslation,
+} from "../../schema";
 import type { SlugScopesMap } from "./seed-slug-scopes";
 
 export const SEARCH_TAG_IDS_ECHOKV_KEY = "tagids";
+type TagSeedDb = Pick<ServerDb, "insert" | "select" | "transaction" | "update">;
+
+async function findUnitByScopedSlug(
+  db: TagSeedDb,
+  slugScope: string,
+  slug: string,
+): Promise<{ id: string; type: string } | null> {
+  return (
+    (
+      await db
+        .select({ id: Unit.id, type: Unit.type })
+        .from(Unit)
+        .where(and(eq(Unit.slugScope, slugScope), eq(Unit.slug, slug)))
+        .limit(1)
+    )[0] ?? null
+  );
+}
+
+async function createTagUnit(
+  db: TagSeedDb,
+  input: {
+    slug: string;
+    slugScope: string;
+    translations: Array<{ language: string; title: string }>;
+    supportLanguages: Array<{
+      language: string;
+      isPrimary: boolean;
+      sortOrder: number;
+    }>;
+  },
+): Promise<string> {
+  return db.transaction(async (tx) => {
+    const now = new Date();
+    const [unit] = await tx
+      .insert(Unit)
+      .values({
+        type: "TAG",
+        slug: input.slug,
+        slugScope: input.slugScope,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        isLanguageNeutral: true,
+        publishedAt: now,
+        defaultLanguage: DEFAULT_LANGUAGE,
+        updatedAt: now,
+      })
+      .returning({ id: Unit.id });
+    if (!unit) throw new Error(`Failed to create tag Unit "${input.slug}"`);
+
+    for (const translation of input.translations) {
+      await tx.insert(UnitTranslation).values({
+        unitId: unit.id,
+        language: translation.language,
+        title: translation.title,
+        updatedAt: now,
+      });
+    }
+
+    for (const supportLanguage of input.supportLanguages) {
+      await tx.insert(UnitSupportLanguage).values({
+        unitId: unit.id,
+        language: supportLanguage.language,
+        isPrimary: supportLanguage.isPrimary,
+        sortOrder: supportLanguage.sortOrder,
+      });
+    }
+
+    return unit.id;
+  });
+}
 
 /**
  * Seed content-type tags with DB-generated UUIDv7 IDs and contract slugs.
@@ -25,7 +103,7 @@ export const SEARCH_TAG_IDS_ECHOKV_KEY = "tagids";
  * Returns a name→ID map.
  */
 export async function seedContentTypeTags(
-  prisma: PrismaClient,
+  db: TagSeedDb,
   slugScopes: SlugScopesMap,
 ): Promise<Record<SeedTagName, string>> {
   console.log("[Seed] Seeding content-type tags...");
@@ -37,10 +115,7 @@ export async function seedContentTypeTags(
     const title = SEED_TAG_TITLES[name];
     const slug = SEED_TAG_SLUGS[name];
 
-    const existing = await prisma.unit.findUnique({
-      where: { slugScope_slug: { slugScope: tagScope, slug } },
-      select: { id: true, type: true },
-    });
+    const existing = await findUnitByScopedSlug(db, tagScope, slug);
 
     if (existing) {
       if (existing.type !== "TAG") {
@@ -53,56 +128,44 @@ export async function seedContentTypeTags(
       );
       tagMap[name] = existing.id;
     } else {
-      const unit = await prisma.unit.create({
-        data: {
-          type: "TAG",
-          slug,
-          slugScope: tagScope,
-          status: "PUBLISHED",
-          visibility: "PUBLIC",
-          isLanguageNeutral: true,
-          publishedAt: new Date(),
-          defaultLanguage: DEFAULT_LANGUAGE,
-          translations: {
-            create: [
-              { language: DEFAULT_LANGUAGE, title },
-              { language: FALLBACK_LANGUAGE, title },
-            ],
-          },
-          supportLanguages: {
-            create: [
-              { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
-              { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
-            ],
-          },
-        },
-        select: { id: true },
+      const id = await createTagUnit(db, {
+        slug,
+        slugScope: tagScope,
+        translations: [
+          { language: DEFAULT_LANGUAGE, title },
+          { language: FALLBACK_LANGUAGE, title },
+        ],
+        supportLanguages: [
+          { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
+          { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
+        ],
       });
-      tagMap[name] = unit.id;
+      tagMap[name] = id;
       console.log(
-        `[Seed]   Created content-type tag "${name}" (${unit.id}, slug=${slug})`,
+        `[Seed]   Created content-type tag "${name}" (${id}, slug=${slug})`,
       );
     }
 
     const position = SEED_TAG_POSITIONS[name];
 
-    await prisma.unitTag.upsert({
-      where: {
-        unitId_tagUnitId: { unitId: tagMap[name], tagUnitId: tagMap[name] },
-      },
-      update: { pinned: true, position },
-      create: {
+    await db
+      .insert(UnitTag)
+      .values({
         unitId: tagMap[name],
         tagUnitId: tagMap[name],
         score: 0,
         voteCount: 0,
         pinned: true,
         position,
-      },
-    });
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [UnitTag.unitId, UnitTag.tagUnitId],
+        set: { pinned: true, position, updatedAt: new Date() },
+      });
   }
 
-  await seedOfficialQuestionTag(prisma, tagScope);
+  await seedOfficialQuestionTag(db, tagScope);
 
   return tagMap;
 }
@@ -113,14 +176,11 @@ export async function seedContentTypeTags(
  * Q&A thread, enabling accepted answers. Idempotent on `(tagScope, slug)`.
  */
 async function seedOfficialQuestionTag(
-  prisma: PrismaClient,
+  db: TagSeedDb,
   tagScope: string,
 ): Promise<string> {
   const slug = OFFICIAL_QUESTION_TAG_SLUG;
-  const existing = await prisma.unit.findUnique({
-    where: { slugScope_slug: { slugScope: tagScope, slug } },
-    select: { id: true, type: true },
-  });
+  const existing = await findUnitByScopedSlug(db, tagScope, slug);
 
   if (existing) {
     if (existing.type !== "TAG") {
@@ -132,37 +192,24 @@ async function seedOfficialQuestionTag(
     return existing.id;
   }
 
-  const unit = await prisma.unit.create({
-    data: {
-      type: "TAG",
-      slug,
-      slugScope: tagScope,
-      status: "PUBLISHED",
-      visibility: "PUBLIC",
-      isLanguageNeutral: true,
-      publishedAt: new Date(),
-      defaultLanguage: DEFAULT_LANGUAGE,
-      translations: {
-        create: [
-          { language: DEFAULT_LANGUAGE, title: "Question" },
-          { language: FALLBACK_LANGUAGE, title: "Question" },
-        ],
-      },
-      supportLanguages: {
-        create: [
-          { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
-          { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
-        ],
-      },
-    },
-    select: { id: true },
+  const id = await createTagUnit(db, {
+    slug,
+    slugScope: tagScope,
+    translations: [
+      { language: DEFAULT_LANGUAGE, title: "Question" },
+      { language: FALLBACK_LANGUAGE, title: "Question" },
+    ],
+    supportLanguages: [
+      { language: DEFAULT_LANGUAGE, isPrimary: true, sortOrder: 0 },
+      { language: FALLBACK_LANGUAGE, isPrimary: false, sortOrder: 1 },
+    ],
   });
-  console.log(`[Seed]   Created official question tag (${unit.id})`);
-  return unit.id;
+  console.log(`[Seed]   Created official question tag (${id})`);
+  return id;
 }
 
 async function syncTagTranslations(
-  prisma: PrismaClient,
+  db: TagSeedDb,
   unitId: string,
   slug: TagSlug,
 ): Promise<void> {
@@ -171,38 +218,44 @@ async function syncTagTranslations(
   await Promise.all(
     TAG_REGISTRY_LANGUAGES.map((language, sortOrder) =>
       Promise.all([
-        prisma.unitTranslation.upsert({
-          where: { unitId_language: { unitId, language } },
-          update: { title: entry[language] },
-          create: { unitId, language, title: entry[language] },
-        }),
-        prisma.unitSupportLanguage.upsert({
-          where: { unitId_language: { unitId, language } },
-          update: {
-            isPrimary: language === DEFAULT_LANGUAGE,
-            sortOrder,
-          },
-          create: {
+        db
+          .insert(UnitTranslation)
+          .values({
+            unitId,
+            language,
+            title: entry[language],
+            updatedAt: new Date(),
+          })
+          .onConflictDoUpdate({
+            target: [UnitTranslation.unitId, UnitTranslation.language],
+            set: { title: entry[language], updatedAt: new Date() },
+          }),
+        db
+          .insert(UnitSupportLanguage)
+          .values({
             unitId,
             language,
             isPrimary: language === DEFAULT_LANGUAGE,
             sortOrder,
-          },
-        }),
+          })
+          .onConflictDoUpdate({
+            target: [UnitSupportLanguage.unitId, UnitSupportLanguage.language],
+            set: {
+              isPrimary: language === DEFAULT_LANGUAGE,
+              sortOrder,
+            },
+          }),
       ]),
     ),
   );
 }
 
 async function ensureSearchTag(
-  prisma: PrismaClient,
+  db: TagSeedDb,
   tagScope: string,
   slug: TagSlug,
 ): Promise<string> {
-  const existing = await prisma.unit.findUnique({
-    where: { slugScope_slug: { slugScope: tagScope, slug } },
-    select: { id: true, type: true },
-  });
+  const existing = await findUnitByScopedSlug(db, tagScope, slug);
 
   if (existing) {
     if (existing.type !== "TAG") {
@@ -211,47 +264,33 @@ async function ensureSearchTag(
       );
     }
 
-    await prisma.unit.update({
-      where: { id: existing.id },
-      data: {
+    await db
+      .update(Unit)
+      .set({
         status: "PUBLISHED",
         visibility: "PUBLIC",
         isLanguageNeutral: true,
         defaultLanguage: DEFAULT_LANGUAGE,
-      },
-    });
-    await syncTagTranslations(prisma, existing.id, slug);
+        updatedAt: new Date(),
+      })
+      .where(eq(Unit.id, existing.id));
+    await syncTagTranslations(db, existing.id, slug);
     return existing.id;
   }
 
-  const tag = await prisma.unit.create({
-    data: {
-      type: "TAG",
-      slug,
-      slugScope: tagScope,
-      status: "PUBLISHED",
-      visibility: "PUBLIC",
-      isLanguageNeutral: true,
-      defaultLanguage: DEFAULT_LANGUAGE,
-      publishedAt: new Date(),
-      translations: {
-        create: TAG_REGISTRY_LANGUAGES.map((language) => ({
-          language,
-          title: TAGS[slug][language],
-        })),
-      },
-      supportLanguages: {
-        create: TAG_REGISTRY_LANGUAGES.map((language, sortOrder) => ({
-          language,
-          isPrimary: language === DEFAULT_LANGUAGE,
-          sortOrder,
-        })),
-      },
-    },
-    select: { id: true },
+  return createTagUnit(db, {
+    slug,
+    slugScope: tagScope,
+    translations: TAG_REGISTRY_LANGUAGES.map((language) => ({
+      language,
+      title: TAGS[slug][language],
+    })),
+    supportLanguages: TAG_REGISTRY_LANGUAGES.map((language, sortOrder) => ({
+      language,
+      isPrimary: language === DEFAULT_LANGUAGE,
+      sortOrder,
+    })),
   });
-
-  return tag.id;
 }
 
 function buildSearchTagIds(tagIdBySlug: Record<TagSlug, string>): TagGroupIds {
@@ -273,7 +312,7 @@ function buildSearchTagIds(tagIdBySlug: Record<TagSlug, string>): TagGroupIds {
  * a runtime ID map.
  */
 export async function seedSearchTagIds(
-  prisma: PrismaClient,
+  db: TagSeedDb,
   slugScopes: SlugScopesMap,
 ): Promise<TagGroupIds> {
   console.log("[Seed] Seeding search tag registry...");
@@ -282,19 +321,22 @@ export async function seedSearchTagIds(
   const tagIdBySlug = {} as Record<TagSlug, string>;
 
   for (const slug of Object.keys(TAGS) as TagSlug[]) {
-    tagIdBySlug[slug] = await ensureSearchTag(prisma, tagScope, slug);
+    tagIdBySlug[slug] = await ensureSearchTag(db, tagScope, slug);
   }
 
   const tagIds = buildSearchTagIds(tagIdBySlug);
 
-  await prisma.echoKV.upsert({
-    where: { key: SEARCH_TAG_IDS_ECHOKV_KEY },
-    update: { value: tagIds },
-    create: {
+  await db
+    .insert(EchoKV)
+    .values({
       key: SEARCH_TAG_IDS_ECHOKV_KEY,
       value: tagIds,
-    },
-  });
+      updatedAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: EchoKV.key,
+      set: { value: tagIds, updatedAt: new Date() },
+    });
 
   console.log(
     `[Seed]   EchoKV "${SEARCH_TAG_IDS_ECHOKV_KEY}" updated with ${Object.keys(TAGS).length} unique tags.`,

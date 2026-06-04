@@ -1,5 +1,6 @@
 import type { SeedTagName, TagGroupIds } from "@rezics/contract";
 import type { PrismaClient } from "../../../../prisma/generated/client.js";
+import type { ServerDb } from "../../client";
 import { seedDefaultRealm } from "./seed-default-realm";
 import {
   type GameMediaTaxonomySeedResult,
@@ -34,6 +35,7 @@ export interface SeedInfraResult {
 }
 
 export interface SeedInfraOptions {
+  db: Pick<ServerDb, "insert" | "select" | "transaction" | "update">;
   slugScopes: SlugScopesMap;
 }
 
@@ -49,13 +51,13 @@ export async function seedInfra(
   rootUserId: string,
   opts?: SeedInfraOptions,
 ): Promise<SeedInfraResult> {
-  if (!opts?.slugScopes) {
+  if (!opts?.slugScopes || !opts.db) {
     throw new Error(
-      "seedInfra requires slugScopes from the Drizzle seedSlugScopes() step.",
+      "seedInfra requires a Drizzle db and slugScopes from the Drizzle seedSlugScopes() step.",
     );
   }
-  const { slugScopes } = opts;
-  const tagMap = await seedContentTypeTags(prisma, slugScopes);
+  const { db, slugScopes } = opts;
+  const tagMap = await seedContentTypeTags(db, slugScopes);
   const defaultRealmId = await seedDefaultRealm(prisma, rootUserId, slugScopes);
   const realmTaxonomy = await seedRealmTaxonomy(
     prisma,
@@ -64,7 +66,7 @@ export async function seedInfra(
     slugScopes,
   );
   const gameMediaTaxonomy = await seedGameMediaTaxonomy(prisma, slugScopes);
-  const searchTagIds = await seedSearchTagIds(prisma, slugScopes);
+  const searchTagIds = await seedSearchTagIds(db, slugScopes);
   return {
     slugScopes,
     tagMap,
