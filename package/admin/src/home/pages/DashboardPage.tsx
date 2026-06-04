@@ -138,7 +138,7 @@ function DashboardOperationsSummary({
           title="Governance"
           status={
             summary.governance.escalatedCases > 0 ||
-            summary.governance.realmQueueEscalated > 0
+            summary.governance.realmCasesEscalated > 0
               ? "degraded"
               : "available"
           }
@@ -146,13 +146,13 @@ function DashboardOperationsSummary({
           icon={<ShieldAlert className="size-4" />}
         >
           <p>
-            開啟案件 {summary.governance.openCases} · Realm queue{" "}
-            {summary.governance.realmQueueOpen}
+            開啟案件 {summary.governance.openCases} · Realm cases{" "}
+            {summary.governance.realmCasesOpen}
           </p>
           <p>
             升級{" "}
             {summary.governance.escalatedCases +
-              summary.governance.realmQueueEscalated}{" "}
+              summary.governance.realmCasesEscalated}{" "}
             · 生效處置 {summary.governance.activeEnforcements}
           </p>
         </SummaryMetricCard>

@@ -221,7 +221,7 @@ const moderationCaseEventRow = {
   importedFrom: null,
   createdAt: "2026-05-28T00:00:00.000Z",
 };
-const listCaseEventsMock = mock(async () => [moderationCaseEventRow]);
+const listCaseActionsMock = mock(async () => [moderationCaseEventRow]);
 const listTargetActionsMock = mock(async () => [moderationCaseEventRow]);
 const listModerationOverlaysMock = mock(async () => [
   {
@@ -294,7 +294,7 @@ mock.module("./moderation.service", () => ({
   governanceModerationService: {
     listCases: mock(async () => []),
     getCase: mock(async () => null),
-    listCaseEvents: listCaseEventsMock,
+    listCaseActions: listCaseActionsMock,
     listTargetActions: listTargetActionsMock,
     listModerationOverlays: listModerationOverlaysMock,
     createCaseFromFeedback: createCaseFromFeedbackMock,
@@ -345,7 +345,7 @@ describe("governanceApi account enforcement", () => {
     listRealmCaseActionsMock.mockClear();
     decideRealmCaseMock.mockClear();
     escalateRealmCaseMock.mockClear();
-    listCaseEventsMock.mockClear();
+    listCaseActionsMock.mockClear();
     listTargetActionsMock.mockClear();
     listModerationOverlaysMock.mockClear();
     createCaseFromFeedbackMock.mockClear();
@@ -1049,12 +1049,12 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
-  test("lists moderation case events through case triage policy", async () => {
+  test("lists moderation case actions through case triage policy", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
-      new Request("http://localhost/governance/cases/case-1/events?limit=10"),
+      new Request("http://localhost/governance/cases/case-1/actions?limit=10"),
     );
 
     expect(response.status).toBe(200);
@@ -1063,7 +1063,7 @@ describe("governanceApi account enforcement", () => {
       action: "case.triage",
       target: { kind: "moderation-case", id: "case-1" },
     });
-    expect(listCaseEventsMock).toHaveBeenCalledWith("case-1", {
+    expect(listCaseActionsMock).toHaveBeenCalledWith("case-1", {
       limit: 10,
     });
   });

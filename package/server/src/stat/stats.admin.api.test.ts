@@ -34,8 +34,8 @@ const getDashboardSummary = mock(async () => ({
   governance: {
     openCases: 0,
     escalatedCases: 0,
-    realmQueueOpen: 0,
-    realmQueueEscalated: 0,
+    realmCasesOpen: 0,
+    realmCasesEscalated: 0,
     activeEnforcements: 0,
     link: "/realm",
   },

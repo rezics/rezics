@@ -181,7 +181,7 @@ export function StaffConsolePage({
 
   return (
     <StaffPageShell
-      title="Moderation queue"
+      title="Moderation cases"
       description="Review site cases, check realm case intake, and jump into account safety records."
       actions={
         accountUserId.trim() ? (

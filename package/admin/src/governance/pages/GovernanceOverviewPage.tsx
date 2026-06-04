@@ -373,7 +373,7 @@ function GovernanceMetrics({
 }) {
   const caseSummary = summarizeCases(recentCases);
   const escalations =
-    summary.governance.escalatedCases + summary.governance.realmQueueEscalated;
+    summary.governance.escalatedCases + summary.governance.realmCasesEscalated;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -386,7 +386,7 @@ function GovernanceMetrics({
       <MetricCard
         title="Escalations"
         value={escalations}
-        detail={`${summary.governance.escalatedCases} platform / ${summary.governance.realmQueueEscalated} realm`}
+        detail={`${summary.governance.escalatedCases} platform / ${summary.governance.realmCasesEscalated} realm`}
         icon={<ShieldAlert className="size-4" />}
         tone={escalations > 0 ? "warning" : "neutral"}
       />
@@ -399,7 +399,7 @@ function GovernanceMetrics({
       />
       <MetricCard
         title="Realm Cases"
-        value={summary.governance.realmQueueOpen}
+        value={summary.governance.realmCasesOpen}
         detail="Day-to-day realm cases stay in app; admin tracks escalated load"
         icon={<Gavel className="size-4" />}
       />

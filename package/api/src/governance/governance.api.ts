@@ -165,12 +165,12 @@ export const governanceApi = {
     );
   },
 
-  listCaseEvents: async (
+  listCaseActions: async (
     caseId: string,
     query?: GovernanceListQuery,
   ): Promise<ModerationActionDTO[]> => {
     return apiFetch<ModerationActionDTO[]>(
-      `/governance/cases/${encodePathPart(caseId)}/events${buildQueryString(query)}`,
+      `/governance/cases/${encodePathPart(caseId)}/actions${buildQueryString(query)}`,
     );
   },
 

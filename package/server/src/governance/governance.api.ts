@@ -810,7 +810,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
     },
   )
   .get(
-    "/cases/:caseId/events",
+    "/cases/:caseId/actions",
     async ({ params, query, identity, status }) => {
       const denied = await assertGovernancePolicy({
         identity,
@@ -819,7 +819,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         target: { kind: "moderation-case", id: params.caseId },
       });
       if (denied) return denied;
-      return governanceModerationService.listCaseEvents(params.caseId, query);
+      return governanceModerationService.listCaseActions(params.caseId, query);
     },
     {
       requireLogin: true,
@@ -830,7 +830,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         403: t.String(),
       },
       detail: {
-        summary: "List moderation case events",
+        summary: "List moderation case ledger actions",
         tags: ["Governance", "Staff"],
       },
     },

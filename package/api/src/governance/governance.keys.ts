@@ -19,8 +19,8 @@ export const governanceKeys = {
     [...governanceKeys.cases(), "list", query] as const,
   caseDetail: (caseId: string) =>
     [...governanceKeys.cases(), "detail", caseId] as const,
-  caseEvents: (caseId: string, query?: GovernanceListQuery) =>
-    [...governanceKeys.caseDetail(caseId), "events", query] as const,
+  caseActions: (caseId: string, query?: GovernanceListQuery) =>
+    [...governanceKeys.caseDetail(caseId), "actions", query] as const,
   realmCases: (realmUnitId: string) =>
     [...governanceKeys.all(), "realms", realmUnitId, "cases"] as const,
   realmCaseList: (realmUnitId: string, query?: GovernanceListQuery) =>
@@ -65,6 +65,19 @@ export const governanceKeys = {
       targetKind,
       realmUnitId ?? null,
       [...targetIds].sort(),
+    ] as const,
+  targetActions: (
+    targetKind: string,
+    targetId: string,
+    query?: GovernanceListQuery,
+  ) =>
+    [
+      ...governanceKeys.all(),
+      "moderation",
+      targetKind,
+      targetId,
+      "actions",
+      query,
     ] as const,
   audit: () => [...governanceKeys.all(), "audit"] as const,
   auditList: (query?: GovernanceAuditListQuery) =>

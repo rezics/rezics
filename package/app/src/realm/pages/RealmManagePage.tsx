@@ -332,8 +332,8 @@ export function RealmManagePage({ realmId }: RealmManagePageProps) {
                   Require content approval
                 </Label>
                 <p className="m-0 text-sm leading-body text-text-secondary">
-                  New feed submissions wait in the realm queue before appearing
-                  publicly.
+                  New feed submissions wait for realm case review before
+                  appearing publicly.
                 </p>
               </div>
             </CardContent>

@@ -174,7 +174,7 @@ function MetricCard({
 export function RealmModerationQueueSection({
   realmUnitId,
 }: RealmModerationQueueSectionProps) {
-  const queueQuery = useQuery(
+  const casesQuery = useQuery(
     governanceRealmCaseListQuery(realmUnitId, { limit: 25 }),
   );
   const auditQuery = useQuery(
@@ -185,16 +185,16 @@ export function RealmModerationQueueSection({
     }),
   );
 
-  const queueItems = queueQuery.data ?? [];
-  const openQueueItems = queueItems.filter(
+  const cases = casesQuery.data ?? [];
+  const openCases = cases.filter(
     (item) => item.state !== "resolved" && item.state !== "rejected",
   );
   const linkedCases = new Set(
-    queueItems
+    cases
       .map((item) => item.parentCaseId)
       .filter((caseId): caseId is string => Boolean(caseId)),
   );
-  const subjectUserIds = queueItems
+  const subjectUserIds = cases
     .map((item) => item.subjectUserId)
     .filter((userId): userId is string => Boolean(userId));
   const firstSubjectUserId = subjectUserIds[0];
@@ -211,12 +211,12 @@ export function RealmModerationQueueSection({
         <MetricCard
           icon={ClipboardList}
           title="Reports"
-          value={String(openQueueItems.length)}
+          value={String(openCases.length)}
           detail="Realm-scoped cases for reports, owner delegation, and moderation decisions."
         >
           <Link to="/staff" search={{ realmUnitId, accountUserId: undefined }}>
             <Button variant="outline" size="sm">
-              Staff queue
+              Staff cases
             </Button>
           </Link>
         </MetricCard>
@@ -276,15 +276,15 @@ export function RealmModerationQueueSection({
           <CardTitle>Realm cases</CardTitle>
         </CardHeader>
         <CardContent>
-          {queueQuery.isLoading ? (
+          {casesQuery.isLoading ? (
             <div className="flex justify-center py-8">
               <Spinner />
             </div>
-          ) : queueQuery.isError ? (
-            <QueryErrorDisplay error={queueQuery.error} />
-          ) : queueItems.length ? (
+          ) : casesQuery.isError ? (
+            <QueryErrorDisplay error={casesQuery.error} />
+          ) : cases.length ? (
             <div className="grid gap-3">
-              {queueItems.map((item) => (
+              {cases.map((item) => (
                 <RealmCaseCard
                   key={item.id}
                   item={item}

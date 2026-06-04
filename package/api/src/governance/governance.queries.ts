@@ -55,13 +55,13 @@ export const governanceCaseDetailQuery = (caseId: string) =>
     staleTime: 1000 * 30,
   });
 
-export const governanceCaseEventsQuery = (
+export const governanceCaseActionsQuery = (
   caseId: string,
   query?: GovernanceListQuery,
 ) =>
   queryOptions({
-    queryKey: governanceKeys.caseEvents(caseId, query),
-    queryFn: () => governanceApi.listCaseEvents(caseId, query),
+    queryKey: governanceKeys.caseActions(caseId, query),
+    queryFn: () => governanceApi.listCaseActions(caseId, query),
     enabled: caseId.length > 0,
     staleTime: 1000 * 30,
   });
@@ -107,6 +107,18 @@ export const governanceContentModerationQuery = (targetUnitId: string) =>
     staleTime: 1000 * 30,
   });
 
+export const governanceTargetActionsQuery = (
+  targetKind: string,
+  targetId: string,
+  query?: GovernanceListQuery,
+) =>
+  queryOptions({
+    queryKey: governanceKeys.targetActions(targetKind, targetId, query),
+    queryFn: () => governanceApi.listTargetActions(targetKind, targetId, query),
+    enabled: targetKind.length > 0 && targetId.length > 0,
+    staleTime: 1000 * 30,
+  });
+
 export const governanceAuditListQuery = (query?: GovernanceAuditListQuery) =>
   queryOptions({
     queryKey: governanceKeys.auditList(query),
@@ -129,11 +141,12 @@ export const governanceQueries = {
   enforcementList: governanceEnforcementListQuery,
   caseList: governanceCaseListQuery,
   caseDetail: governanceCaseDetailQuery,
-  caseEvents: governanceCaseEventsQuery,
+  caseActions: governanceCaseActionsQuery,
   realmCaseList: governanceRealmCaseListQuery,
   escalatedRealmCases: governanceEscalatedRealmCasesQuery,
   realmCaseActions: governanceRealmCaseActionsQuery,
   contentModeration: governanceContentModerationQuery,
+  targetActions: governanceTargetActionsQuery,
   auditList: governanceAuditListQuery,
   auditDetail: governanceAuditDetailQuery,
 };

@@ -57,8 +57,8 @@ export const adminDashboardSummarySchema = t.Object({
   governance: t.Object({
     openCases: t.Number(),
     escalatedCases: t.Number(),
-    realmQueueOpen: t.Number(),
-    realmQueueEscalated: t.Number(),
+    realmCasesOpen: t.Number(),
+    realmCasesEscalated: t.Number(),
     activeEnforcements: t.Number(),
     link: t.String(),
   }),

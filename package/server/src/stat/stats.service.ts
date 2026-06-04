@@ -218,8 +218,8 @@ export class StatsService {
     const [
       openCases,
       escalatedCases,
-      realmQueueOpen,
-      realmQueueEscalated,
+      realmCasesOpen,
+      realmCasesEscalated,
       activeEnforcements,
     ] = await Promise.all([
       prisma.moderationCase.count({
@@ -241,8 +241,8 @@ export class StatsService {
     return {
       openCases,
       escalatedCases,
-      realmQueueOpen,
-      realmQueueEscalated,
+      realmCasesOpen,
+      realmCasesEscalated,
       activeEnforcements,
     };
   }
@@ -356,7 +356,7 @@ export class StatsService {
       });
     }
 
-    if (governance.escalatedCases > 0 || governance.realmQueueEscalated > 0) {
+    if (governance.escalatedCases > 0 || governance.realmCasesEscalated > 0) {
       warnings.push({
         id: "governance-escalations",
         severity: "warning",
@@ -364,7 +364,7 @@ export class StatsService {
         description:
           "Escalated site-wide or realm moderation items are waiting.",
         source: "governance",
-        count: governance.escalatedCases + governance.realmQueueEscalated,
+        count: governance.escalatedCases + governance.realmCasesEscalated,
         link: ADMIN_ROUTES.governance,
       });
     }

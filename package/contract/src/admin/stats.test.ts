@@ -31,8 +31,8 @@ describe("admin stats contracts", () => {
         governance: {
           openCases: 4,
           escalatedCases: 1,
-          realmQueueOpen: 3,
-          realmQueueEscalated: 1,
+          realmCasesOpen: 3,
+          realmCasesEscalated: 1,
           activeEnforcements: 2,
           link: "/realm",
         },

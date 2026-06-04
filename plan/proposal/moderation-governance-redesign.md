@@ -372,13 +372,13 @@ reset + reseed is acceptable; a backfill script is optional.
   or extend `community.json`): status labels, action labels,
   `content_removed_by_moderator`, `content_deleted_by_author`, `auto_approved`,
   decision reason prefix.
-- [ ] 5.7 Staff pages (`app/src/staff/`): point `StaffCaseDetailPage`/`StaffAuditPage`
+- [x] 5.7 Staff pages (`app/src/staff/`): point `StaffCaseDetailPage`/`StaffAuditPage`
   at the `ModerationAction` timeline (ledger) instead of case/realm events.
-- [ ] 5.8 Realm pages (`app/src/realm/sections/RealmModerationQueueSection.tsx`,
+- [x] 5.8 Realm pages (`app/src/realm/sections/RealmModerationQueueSection.tsx`,
   realm content actions, realm filters): remove old queue DTO/state assumptions,
   use scoped cases and `moderationStatus`, and update route/search params from
   free-form target strings to typed contract values.
-- [ ] 5.9 Admin governance UI (`package/admin/src/governance/pages/*`) and admin
+- [x] 5.9 Admin governance UI (`package/admin/src/governance/pages/*`) and admin
   stats cards: replace `RealmModerationQueueItemDTO`, old staff-audit moderation
   rows, and old target/status labels with `ModerationCase`,
   `ModerationAction`, and slim `StaffAuditLogDTO` where appropriate.

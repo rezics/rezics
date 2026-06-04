@@ -219,10 +219,6 @@ export class GovernanceModerationService {
     return mapModerationCaseToDTO(row);
   }
 
-  async listCaseEvents(caseId: string, options: GovernanceListOptions = {}) {
-    return this.listCaseActions(caseId, options);
-  }
-
   async listCaseActions(caseId: string, options: GovernanceListOptions = {}) {
     const rows = await prisma.moderationAction.findMany({
       where: { caseId },
