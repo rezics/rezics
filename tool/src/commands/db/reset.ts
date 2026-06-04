@@ -6,6 +6,7 @@ import { createToolConfig } from "../../env";
 import { renderResetDatabaseSql } from "../../env/repo-database-registry";
 import { DOCKER_COMPOSE_COMMAND } from "../service/runtime";
 import { resolveDbSchemaPackages, type DbSchemaPackage } from "./packages";
+import { runDbPreflight } from "./preflight";
 import { runDbPackageScript } from "./runner";
 
 const TOOL_DIR = path.resolve(
@@ -142,10 +143,12 @@ export async function resetLocalDatabases(
 
   for (const pkg of selection.packages) {
     console.log(`-> @rezics/${pkg} db:migrate`);
+    await runDbPreflight(pkg, "beforeMigration");
     const result = await runDbPackageScript(pkg, "db:migrate");
     if (result !== "ok") {
       process.exit(1);
     }
+    await runDbPreflight(pkg, "afterMigration");
   }
 
   if (flags.seed) {

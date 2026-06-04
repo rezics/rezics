@@ -235,16 +235,16 @@ databases may be reset and reseeded.
   selected schema-owner databases, run Drizzle migrations from scratch, then
   optionally invoke existing seed/factory workflows. Keep headless confirmation
   strict.
-- [ ] 1.6 Add preflight checks used by `migrate` and `deploy`: connection URL
+- [x] 1.6 Add preflight checks used by `migrate` and `deploy`: connection URL
   sanity, PostgreSQL 18+, `SELECT uuidv7()`, and package-specific checks such as
   `ltree` expected only for server after custom migration.
-- [ ] 1.7 Decide the Drizzle migration table config in every `drizzle.config.ts`.
+- [x] 1.7 Decide the Drizzle migration table config in every `drizzle.config.ts`.
   Prefer the default or a uniform `drizzle.__drizzle_migrations`, but document
   the choice in CONTRIBUTING and deployment troubleshooting.
-- [ ] 1.8 Surface managed Postgres `ltree` privilege failures separately from
+- [x] 1.8 Surface managed Postgres `ltree` privilege failures separately from
   missing-extension failures, with deploy troubleshooting text for creating the
   extension through a DBA/elevated role.
-- [ ] 1.9 Add tests for package selection, ordering, failure handling, preflight
+- [x] 1.9 Add tests for package selection, ordering, failure handling, preflight
   rejection on non-PG18, and no accidental use of the removed Prisma command
   path.
 
@@ -430,22 +430,22 @@ databases may be reset and reseeded.
 
 ## 7. Tooling, deployment, and docs
 
-- [ ] 7.1 Update `CONTRIBUTING.md` with a new database workflow section:
+- [x] 7.1 Update `CONTRIBUTING.md` with a new database workflow section:
   Drizzle v1 rc dependency rule, package ownership, `db:*` commands, custom SQL
   pre migration policy, PostgreSQL 18 requirement, reset/reseed expectations,
   and the pg-boss exception.
-- [ ] 7.2 Update `tool/README.md` and `tool/service/README.md` so fresh managed
+- [x] 7.2 Update `tool/README.md` and `tool/service/README.md` so fresh managed
   Postgres setup says Drizzle migrations run through repo db tooling.
-- [ ] 7.3 Update `bin/deploy` to run `bun run --cwd package/<unit> db:deploy`
+- [x] 7.3 Update `bin/deploy` to run `bun run --cwd package/<unit> db:deploy`
   or the repo `tool db deploy --package=<unit>` equivalent.
 - [ ] 7.4 Update Docker build comments and migrate images from "carry Prisma CLI
   + schema" to "carry Bun + Drizzle Kit + migrations".
 - [ ] 7.5 Update production release, rollback, troubleshooting, runtime
   inventory, deployment guide, and env/secrets docs to reference Drizzle
   migration flow and Drizzle migration tables instead of Prisma.
-- [ ] 7.6 Update `config/README.md` migration wording and any Kamal/deploy docs
+- [x] 7.6 Update `config/README.md` migration wording and any Kamal/deploy docs
   that mention `prisma:deploy`.
-- [ ] 7.7 Update `.github` instructions only where they carry repo-specific
+- [x] 7.7 Update `.github` instructions only where they carry repo-specific
   Prisma guidance; avoid changing third-party copied docs unless they are
   actively misleading.
 - [ ] 7.8 Add or update `knip`/convention expectations so removed Prisma exports

@@ -40,8 +40,8 @@ docker compose -p rezics-external-services -f tool/service/compose.yml down
 ```
 
 The source PostgreSQL init scripts recreate local development databases on
-first boot. Package Prisma migrations remain owned by the existing package
-commands.
+first boot. Run schema-owner migrations through `bun run db:migrate`; run
+`bun run db:ensure` for `job-runner` because pg-boss owns its internal schema.
 
 Run health checks after startup:
 

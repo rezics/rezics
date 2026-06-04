@@ -30,8 +30,9 @@ The managed source Postgres container starts with logical replication enabled:
 `wal_level=logical`, `max_replication_slots=10`, and `max_wal_senders=10`.
 On a fresh Docker volume it also creates the local development databases used
 by package env examples: `rezics_server`, `rezics_auth`, `rezics_jobs`,
-`rezics_history`, `rezics_notify`, and `reaction`. Prisma migrations still run
-through the package workflows.
+`rezics_history`, `rezics_notify`, and `reaction`. Schema-owning package
+migrations run through the repo `db:*` tooling; `job-runner` only runs
+`db:ensure` because pg-boss owns its internal schema.
 
 Validate the compose plan without starting services:
 

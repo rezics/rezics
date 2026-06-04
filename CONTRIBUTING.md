@@ -111,6 +111,41 @@ These conventions are enforced by `bun run check:convention`; each rule
 (`tool/src/commands/convention/rules/`) states its own normative rule and is
 the authoritative source.
 
+## Database Workflow
+
+Backend schema ownership is package-local. `@rezics/server` and `@rezics/auth`
+use separate Drizzle schemas and databases; `notify`, `reaction`, `history`,
+and `ranking` also own package-specific Drizzle schemas. `job-runner` is the
+exception: its database is pg-boss-owned, so it uses `db:ensure` rather than
+Drizzle schema migrations.
+
+Use the Drizzle v1 rc line intentionally. Pin `drizzle-orm` and `drizzle-kit`
+to exact compatible `1.0.0-rc.*` versions where they are declared; do not
+switch to broad `latest`/`^` ranges during this migration.
+
+```bash
+bun run db:generate
+bun run db:migrate
+bun run db:deploy
+bun run db:reset -- --yes
+bun run db:ensure
+```
+
+`db:migrate`, `db:deploy`, and `db:reset` run schema owners in package order:
+`auth -> server -> notify -> reaction -> history -> ranking`. The tool preflight
+requires a reachable PostgreSQL 18+ database with built-in `uuidv7()`. Each
+schema owner keeps migrations in its package-local `drizzle/` folder and uses
+Drizzle Kit's default migration journal table; do not introduce a second Rezics
+ledger unless custom SQL ordering proves Drizzle's journal insufficient. New
+database capabilities that cannot be expressed in Drizzle schema, including
+extensions such as `ltree`, helper SQL, partial indexes, and special GiST/GIN
+indexes, must be represented as ordered Drizzle custom SQL migrations before
+dependent baseline or schema migrations.
+
+Resetting local databases is destructive and development-only. After a reset,
+run the required seed and optional factory workflows explicitly; never depend on
+application startup to backfill seed/factory data.
+
 ## Seeding
 
 The unified CLI is `bun run seed` (entry: `package/utils/bin/cli.ts`). It covers users, infrastructure, and factory (synthetic dev) data.

@@ -1,5 +1,6 @@
 import { repeatedCsv } from "../../cli/values";
 import { resolveDbSchemaPackages, type DbSchemaPackage } from "./packages";
+import { runDbPreflight } from "./preflight";
 import { runDbPackageScript, type DbScript } from "./runner";
 
 interface DbCliFlags {
@@ -27,6 +28,9 @@ async function runForPackage(
   script: DbScript,
 ): Promise<boolean> {
   console.log(`-> @rezics/${pkg} ${script}`);
+  if (script === "db:migrate" || script === "db:deploy") {
+    await runDbPreflight(pkg, "beforeMigration");
+  }
   const result = await runDbPackageScript(pkg, script);
   if (result === "ok") return true;
   console.error(`x @rezics/${pkg} ${actionName(script)} failed`);
@@ -54,5 +58,8 @@ export async function runSchemaDbScript(
   for (const pkg of selection.packages) {
     const ok = await runForPackage(pkg, script);
     if (!ok) process.exit(1);
+    if (script === "db:migrate" || script === "db:deploy") {
+      await runDbPreflight(pkg, "afterMigration");
+    }
   }
 }

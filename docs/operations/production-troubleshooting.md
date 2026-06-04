@@ -24,7 +24,13 @@
   [release runbook](./production-release.md)). The migrate image of the same
   `<sha>` ran the package `db:deploy` command; read its job output for the
   failing migration. Fix forward (migrations are forward-only); never hand-edit
-  Drizzle migration journal tables.
+  Drizzle migration journal tables. Schema owners use Drizzle Kit's default
+  migration journal table; there is no separate Rezics migration ledger.
+- For `server` migrations, `ltree extension is missing` means the custom SQL
+  migration did not create the required extension. If preflight also says the
+  connected role cannot create extensions, ask a DBA/elevated role to run
+  `CREATE EXTENSION IF NOT EXISTS ltree;` on the server database, then rerun
+  `db:deploy`.
 
 ## Proxy routing
 

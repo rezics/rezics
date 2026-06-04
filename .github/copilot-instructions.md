@@ -8,8 +8,8 @@ tests, comments), not in a parallel spec corpus.
 1. Plan a change in `plan/proposal/<change>.md` (`/rezics-propose`): context,
    durable constraints/decisions, and a task checklist.
 2. Implement with `/rezics-apply`, routing each durable item to its home —
-   shape to types/Valibot/Prisma, behavior to a test, the irreducible *why* to a
-   concise comment at the owning code, history to the commit message.
+   shape to types/Valibot/Drizzle schema, behavior to a test, the irreducible
+   *why* to a concise comment at the owning code, history to the commit message.
 3. The plan file is a disposable scaffold; once its work lands and its durable
    content has migrated into code, it can be deleted (git keeps the history).
 
