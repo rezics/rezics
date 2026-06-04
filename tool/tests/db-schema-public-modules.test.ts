@@ -130,4 +130,23 @@ describe("database schema public modules", () => {
     expect(dbIndexSource).toContain('export * from "./relations";');
     expect(publicRelations.relations).toBeDefined();
   });
+
+  test("small schema-owner runtime sources do not import Prisma", () => {
+    for (const packageName of ["notify", "reaction", "history", "ranking"]) {
+      const sourceFiles = [
+        ...new Bun.Glob("src/**/*.ts").scanSync({
+          cwd: join(repoRoot, "package", packageName),
+        }),
+      ].filter((file) => !file.endsWith(".test.ts"));
+
+      for (const file of sourceFiles) {
+        const source = readFileSync(
+          join(repoRoot, "package", packageName, file),
+          "utf8",
+        );
+        expect(source).not.toContain("@prisma/client");
+        expect(source).not.toContain("/prisma/");
+      }
+    }
+  });
 });

@@ -356,9 +356,9 @@ databases may be reset and reseeded.
   type composition with domain-local Drizzle query builders, explicit
   projections, RQB v2 `with`, joins, and mappers. Prioritize heavily dynamic
   search/catalog/unit/book/realm/post/listing queries before small CRUD paths.
-- [ ] 4.5 Convert `package/auth/src` to Drizzle db access, including internal
+- [x] 4.5 Convert `package/auth/src` to Drizzle db access, including internal
   APIs, JWT service persistence, admin user/session operations, and tests.
-- [ ] 4.6 Convert `notify`, `reaction`, `history`, and `ranking` services to
+- [x] 4.6 Convert `notify`, `reaction`, `history`, and `ranking` services to
   Drizzle clients and query helpers.
 - [ ] 4.7 Replace Prisma transaction usage with Drizzle transaction helpers.
   Preserve atomicity around multi-table domain writes, especially moderation,
@@ -381,27 +381,27 @@ databases may be reset and reseeded.
 
 ## 5. Auth and Better Auth
 
-- [ ] 5.1 Replace `@better-auth/prisma-adapter` usage in
+- [x] 5.1 Replace `@better-auth/prisma-adapter` usage in
   `package/auth/src/auth/instance.ts` with `@better-auth/drizzle-adapter`.
-- [ ] 5.2 Model Better Auth tables in the auth Drizzle schema with existing table
+- [x] 5.2 Model Better Auth tables in the auth Drizzle schema with existing table
   names and field names, including plugin tables for OAuth provider and JWT
   support.
-- [ ] 5.3 Pass the schema mapping required by the Better Auth Drizzle adapter
+- [x] 5.3 Pass the schema mapping required by the Better Auth Drizzle adapter
   when model/table names differ from Better Auth defaults.
-- [ ] 5.4 Preserve database-generated IDs: keep Better Auth configured so it does
+- [x] 5.4 Preserve database-generated IDs: keep Better Auth configured so it does
   not generate application IDs for rows where the DB default should call
   `uuidv7()`.
-- [ ] 5.5 Add a focused Better Auth adapter test/spike proving inserts for core
+- [x] 5.5 Add a focused Better Auth adapter test/spike proving inserts for core
   auth tables omit IDs when `generateId: false` is active and the database
   supplies UUIDv7 IDs.
-- [ ] 5.6 Convert the custom JWT/JWKS persistence layer in
+- [x] 5.6 Convert the custom JWT/JWKS persistence layer in
   `package/auth/src/session/jwt/prisma-adapter.ts` to Drizzle. Preserve `kid` as
   `Jwks.id`, key encryption/decryption, rotation, grace period calculation, and
   local issuer service upsert behavior.
-- [ ] 5.7 Convert auth seed helpers and reset helpers from Prisma to Drizzle.
-- [ ] 5.8 Re-run auth route/session/JWT tests and add coverage for Drizzle
+- [x] 5.7 Convert auth seed helpers and reset helpers from Prisma to Drizzle.
+- [x] 5.8 Re-run auth route/session/JWT tests and add coverage for Drizzle
   adapter wiring if existing tests only mock Prisma.
-- [ ] 5.9 Add or update JWT/JWKS tests that cover list/save/get/retire behavior
+- [x] 5.9 Add or update JWT/JWKS tests that cover list/save/get/retire behavior
   through the migrated persistence layer, including non-uuid `kid` IDs and
   private key encryption when enabled.
 
@@ -410,7 +410,7 @@ databases may be reset and reseeded.
 - [ ] 6.1 Convert `package/search` from `setSearchPrismaClient` to an explicit
   Drizzle-backed main DB dependency. Update sync functions, row mappers, raw
   path queries, and tests.
-- [ ] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
+- [x] 6.2 Convert `package/ranking/src/ranking/main-state.ts` from importing the
   server Prisma generated client to importing server Drizzle schema/db helpers.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
   maintenance from Prisma clients to Drizzle db clients. Keep pg-boss DB ensure

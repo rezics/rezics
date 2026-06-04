@@ -319,6 +319,67 @@ describe("auth jwt storage adapter", () => {
     });
   });
 
+  test("marks persisted jwks rows as retiring", async () => {
+    const { getAuthJwtIssuer } = await import("./options");
+    const { authJwtPersistence } = await import("./storage-adapter");
+    const expiresAt = new Date("2026-03-21T00:00:00.000Z");
+
+    await authJwtPersistence.markKeyRetiring({
+      issuer: getAuthJwtIssuer(),
+      kid: "kid-auth",
+      expiresAt,
+    });
+
+    expect(markKeyRetiring).toHaveBeenCalledWith("kid-auth", expiresAt);
+  });
+
+  test("gets persisted jwks rows by kid", async () => {
+    getKeyByKid.mockResolvedValueOnce({
+      id: "kid-auth",
+      alg: JwtAlgorithm.ES256,
+      createdAt: new Date("2026-03-20T04:31:47.000Z"),
+      expiresAt: null,
+      publicJwk: {
+        kid: "kid-auth",
+        kty: "EC",
+        crv: "P-256",
+        x: "public-x",
+        y: "public-y",
+        alg: JwtAlgorithm.ES256,
+        use: "sig",
+      },
+      privateJwk: {
+        kid: "kid-auth",
+        kty: "EC",
+        crv: "P-256",
+        x: "public-x",
+        y: "public-y",
+        d: "private-d",
+        alg: JwtAlgorithm.ES256,
+        use: "sig",
+      },
+      jwtService: {
+        issuer: "http://localhost:35003",
+      },
+    });
+    const { getAuthJwtIssuer } = await import("./options");
+    const { authJwtPersistence } = await import("./storage-adapter");
+
+    const key = await authJwtPersistence.getKeyByKid({
+      issuer: getAuthJwtIssuer(),
+      kid: "kid-auth",
+    });
+
+    expect(getKeyByKid).toHaveBeenCalledWith("kid-auth");
+    expect(key).toMatchObject({
+      issuer: "http://localhost:35003",
+      kid: "kid-auth",
+      algorithm: JwtAlgorithm.ES256,
+      publicJwk: expect.objectContaining({ x: "public-x" }),
+      privateJwk: expect.objectContaining({ d: "private-d" }),
+    });
+  });
+
   test("keeps migration bootstrap for jwks rows", () => {
     const migrationPath = join(
       import.meta.dir,
