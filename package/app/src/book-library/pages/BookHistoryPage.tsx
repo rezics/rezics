@@ -742,7 +742,8 @@ export function CompareChange({
 function UnifiedMarkdownDiff({ parts }: { parts: DiffPart[] }) {
   const rows = createMarkdownDiffRows(parts);
   return (
-    <div className="overflow-auto rounded-md bg-surface-subtle text-sm leading-ui text-text-primary">
+    <div className="rezics-history-diff overflow-auto rounded-md bg-surface-subtle text-sm leading-ui text-text-primary">
+      <HistoryDiffStyles />
       {rows.map((row) => (
         <DiffLine key={diffRowKey(row)} row={row} variant="unified" />
       ))}
@@ -753,7 +754,8 @@ function UnifiedMarkdownDiff({ parts }: { parts: DiffPart[] }) {
 function SplitMarkdownDiff({ parts }: { parts: DiffPart[] }) {
   const rows = createMarkdownDiffRows(parts);
   return (
-    <div className="grid gap-2 md:grid-cols-2">
+    <div className="rezics-history-diff grid gap-2 md:grid-cols-2">
+      <HistoryDiffStyles />
       <DiffPane
         label={getI18nRuntime().i18n.t("search:history_compare_before")}
         rows={rows.filter((row) => row.type !== "added")}
@@ -765,6 +767,42 @@ function SplitMarkdownDiff({ parts }: { parts: DiffPart[] }) {
         side="new"
       />
     </div>
+  );
+}
+
+function HistoryDiffStyles() {
+  return (
+    <style>{`
+      .rezics-history-diff {
+        --history-diff-added-bg: color-mix(in srgb, var(--colors-semantic-success-fill) 16%, transparent);
+        --history-diff-added-gutter-bg: color-mix(in srgb, var(--colors-semantic-success-fill) 24%, transparent);
+        --history-diff-removed-bg: color-mix(in srgb, var(--colors-semantic-error-fill) 14%, transparent);
+        --history-diff-removed-gutter-bg: color-mix(in srgb, var(--colors-semantic-error-fill) 22%, transparent);
+      }
+
+      :where(html.dark, html[data-theme="dark"]) .rezics-history-diff {
+        --history-diff-added-bg: color-mix(in srgb, var(--colors-semantic-success-fill) 24%, transparent);
+        --history-diff-added-gutter-bg: color-mix(in srgb, var(--colors-semantic-success-fill) 34%, transparent);
+        --history-diff-removed-bg: color-mix(in srgb, var(--colors-semantic-error-fill) 22%, transparent);
+        --history-diff-removed-gutter-bg: color-mix(in srgb, var(--colors-semantic-error-fill) 32%, transparent);
+      }
+
+      .rezics-history-diff-line--added {
+        background: var(--history-diff-added-bg);
+      }
+
+      .rezics-history-diff-line--removed {
+        background: var(--history-diff-removed-bg);
+      }
+
+      .rezics-history-diff-sign--added {
+        background: var(--history-diff-added-gutter-bg);
+      }
+
+      .rezics-history-diff-sign--removed {
+        background: var(--history-diff-removed-gutter-bg);
+      }
+    `}</style>
   );
 }
 
@@ -864,15 +902,15 @@ function DiffLine({
   const sign = row.type === "added" ? "+" : row.type === "removed" ? "-" : " ";
   const rowClass =
     row.type === "added"
-      ? "bg-success-fill/10"
+      ? "rezics-history-diff-line--added"
       : row.type === "removed"
-        ? "bg-error-fill/10"
+        ? "rezics-history-diff-line--removed"
         : "";
   const signClass =
     row.type === "added"
-      ? "text-success-text"
+      ? "rezics-history-diff-sign--added text-success-text"
       : row.type === "removed"
-        ? "text-error-text"
+        ? "rezics-history-diff-sign--removed text-error-text"
         : "text-text-tertiary";
 
   if (variant === "split") {
