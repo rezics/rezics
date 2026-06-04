@@ -1,13 +1,27 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 
 const bootstrapMock = mock(async () => {});
+const seedAuthUserMock = mock(async () => ({
+  userId: "auth-user",
+  email: "auth@example.test",
+  name: "Auth User",
+  authUserId: "auth-user",
+  slug: "auth-user",
+  password: "password",
+}));
 
-mock.module("@rezics/server/prisma/factory/system-shelves", () => ({
+mock.module("@rezics/auth/seed", () => ({
+  seedAuthUser: seedAuthUserMock,
+  slugify: (value: string) => value.toLowerCase().replace(/\s+/g, "-"),
+}));
+
+mock.module("@rezics/server/db/seed-factory/system-shelves", () => ({
   bootstrapSystemShelves: bootstrapMock,
 }));
 
 afterEach(() => {
   bootstrapMock.mockClear();
+  seedAuthUserMock.mockClear();
 });
 
 function makePrismaStub() {

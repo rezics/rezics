@@ -45,5 +45,5 @@ bun run meilisearch:wsl   # Start Meilisearch (WSL, binds to 0.0.0.0:7700)
 ## Tech Stack
 
 - [Meilisearch](https://www.meilisearch.com) for full-text search
-- Data from `@rezics/server` (Prisma)
+- Data from the `@rezics/server` main database
 - Types from `@rezics/contract`

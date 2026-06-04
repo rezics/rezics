@@ -13,7 +13,7 @@ import {
   SeedPlanSchema,
   type SeedPreset,
   type SeedResult,
-} from "@rezics/server/prisma/factory";
+} from "@rezics/server/db/seed-factory";
 import * as v from "valibot";
 import { getEnv } from "../lib/env";
 import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
@@ -244,7 +244,9 @@ async function runEchoKvOnly(): Promise<void> {
   const env = getEnv();
   const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
   try {
-    const { seedEchoKV } = await import("@rezics/server/prisma/factory/echokv");
+    const { seedEchoKV } = await import(
+      "@rezics/server/db/seed-factory/echokv"
+    );
     await seedEchoKV(prisma);
   } finally {
     await prisma.$disconnect();
@@ -308,7 +310,7 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   });
   try {
     if (meiliMode === "init-and-sync") {
-      const { initMeiliSearch } = await import("@rezics/server/prisma/seed");
+      const { initMeiliSearch } = await import("@rezics/server/db/seed");
       await initMeiliSearch(searchClient, { clean: true });
     }
     const { credentials } = await seedBaseline(authPrisma, prisma);

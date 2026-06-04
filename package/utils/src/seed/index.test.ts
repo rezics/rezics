@@ -5,7 +5,7 @@ const calls = {
   resetAuthDatabase: 0,
 };
 
-mock.module("@rezics/server/prisma/seed/database", () => ({
+mock.module("@rezics/server/db/seed/database", () => ({
   resetDatabase: mock(async () => {
     calls.resetDatabase += 1;
   }),

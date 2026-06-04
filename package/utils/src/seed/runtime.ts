@@ -13,7 +13,7 @@ import type {
   SeedSyncSummary,
   SeedSyncTarget,
   SpecialSeedTarget,
-} from "@rezics/server/prisma/factory";
+} from "@rezics/server/db/seed-factory";
 import type {
   AuthPrismaClient,
   ServerPrismaClient,

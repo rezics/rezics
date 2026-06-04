@@ -279,7 +279,7 @@ databases may be reset and reseeded.
   enum used outside backend implementation, decide whether the canonical values
   live in `@rezics/contract` or a domain-neutral constants module, then make
   Drizzle schema consume that source.
-- [ ] 2.9 Add focused schema folders for smaller packages:
+- [x] 2.9 Add focused schema folders for smaller packages:
   `package/auth/src/db/schema/`, `package/notify/src/db/schema/`,
   `package/reaction/src/db/schema/`, `package/history/src/db/schema/`, and
   `package/ranking/src/db/schema/`.
@@ -290,12 +290,12 @@ databases may be reset and reseeded.
 
 ## 3. Baseline migrations and custom SQL
 
-- [ ] 3.1 Delete old Prisma migration folders for all six schema owners after
+- [x] 3.1 Delete old Prisma migration folders for all six schema owners after
   the corresponding Drizzle baseline exists.
-- [ ] 3.2 Create Drizzle config files for every schema owner with `dialect:
+- [x] 3.2 Create Drizzle config files for every schema owner with `dialect:
   "postgresql"`, schema folder/file, package-specific DB URL, and migration
   output folder.
-- [ ] 3.3 For `server`, create an ordered custom SQL migration before the baseline
+- [x] 3.3 For `server`, create an ordered custom SQL migration before the baseline
   init that runs `CREATE EXTENSION IF NOT EXISTS ltree;`.
 - [ ] 3.4 Preserve required server helper SQL in custom migrations, including
   `rezics_to_base36`, `post_path_label_seq` if still needed, `ltree` path
@@ -308,12 +308,12 @@ databases may be reset and reseeded.
 - [ ] 3.6 Generate a single baseline init migration per package from the Drizzle
   schema. Inspect generated SQL manually for table names, enum names, FK
   actions, default values, indexes, and casing.
-- [ ] 3.7 Ensure `reaction` and `ranking` switch from `gen_random_uuid()` to
+- [x] 3.7 Ensure `reaction` and `ranking` switch from `gen_random_uuid()` to
   native `uuidv7()` in the baseline.
-- [ ] 3.8 Ensure `server.EmailVerificationContract.id` switches from Prisma
+- [x] 3.8 Ensure `server.EmailVerificationContract.id` switches from Prisma
   `uuid()` / application-generated UUID default to database `uuidv7()` in the
   Drizzle baseline.
-- [ ] 3.9 Keep `auth.Jwks.id` as the JWT `kid` string primary key with no
+- [x] 3.9 Keep `auth.Jwks.id` as the JWT `kid` string primary key with no
   `uuidv7()` default, and add baseline review coverage so the global UUID rule
   does not rewrite it.
 - [ ] 3.10 Add migration smoke tests or scripts that run on fresh databases and
@@ -415,13 +415,13 @@ databases may be reset and reseeded.
 - [ ] 6.3 Convert `package/job-runner` runtime factories for search, history, and
   maintenance from Prisma clients to Drizzle db clients. Keep pg-boss DB ensure
   separate.
-- [ ] 6.4 Move `package/server/prisma/seed` to a Drizzle-appropriate path such as
+- [x] 6.4 Move `package/server/prisma/seed` to a Drizzle-appropriate path such as
   `package/server/src/db/seed` or `package/server/db/seed`, then update package
   exports and seed CLI imports.
-- [ ] 6.5 Move `package/server/prisma/factory` to a Drizzle-appropriate path such
+- [x] 6.5 Move `package/server/prisma/factory` to a Drizzle-appropriate path such
   as `package/server/src/db/factory` or `package/server/db/factory`, then update
   `@rezics/utils` factory imports.
-- [ ] 6.6 Move `package/auth/prisma/seed` to an auth db seed path and update
+- [x] 6.6 Move `package/auth/prisma/seed` to an auth db seed path and update
   `@rezics/auth` exports.
 - [ ] 6.7 Update `package/utils/src/lib/prisma-factory.ts` into a Drizzle db
   factory module, then convert seed/factory orchestration and tests.

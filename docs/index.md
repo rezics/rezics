@@ -21,7 +21,7 @@ features:
   - title: Reading & Authoring
     details: A native ebook reader (@rezics/folio) and a CodeMirror-based content editor (@rezics/editor), built in.
   - title: Elysia Backend
-    details: Domain-driven API server with Prisma ORM and PostgreSQL, plus standalone auth, history, job-runner, and preview services.
+    details: Domain-driven API server with Drizzle ORM and PostgreSQL, plus standalone auth, history, job-runner, and preview services.
   - title: React Frontend
     details: Vite + TanStack Router & Query with UnoCSS styling, and Meilisearch-powered search.
 ---

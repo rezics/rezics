@@ -4,8 +4,8 @@ import {
   slugify,
 } from "@rezics/auth/seed";
 import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
-import { bootstrapSystemShelves } from "@rezics/server/prisma/factory/system-shelves";
-import type { SlugScopesMap } from "@rezics/server/prisma/seed/infra/seed-slug-scopes";
+import { bootstrapSystemShelves } from "@rezics/server/db/seed-factory/system-shelves";
+import type { SlugScopesMap } from "@rezics/server/db/seed/infra/seed-slug-scopes";
 import type {
   AuthPrismaClient,
   ServerPrismaClient,

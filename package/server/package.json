@@ -33,13 +33,21 @@
       "types": "./src/db/schema/index.ts",
       "default": "./src/db/schema/index.ts"
     },
-    "./prisma/seed": {
-      "types": "./prisma/seed/index.ts",
-      "default": "./prisma/seed/index.ts"
+    "./db/seed": {
+      "types": "./src/db/seed/index.ts",
+      "default": "./src/db/seed/index.ts"
     },
-    "./prisma/factory": {
-      "types": "./prisma/factory/index.ts",
-      "default": "./prisma/factory/index.ts"
+    "./db/seed/*": {
+      "types": "./src/db/seed/*.ts",
+      "default": "./src/db/seed/*.ts"
+    },
+    "./db/seed-factory": {
+      "types": "./src/db/factory/index.ts",
+      "default": "./src/db/factory/index.ts"
+    },
+    "./db/seed-factory/*": {
+      "types": "./src/db/factory/*.ts",
+      "default": "./src/db/factory/*.ts"
     },
     "./prisma/generated/*": {
       "types": "./prisma/generated/*.ts",

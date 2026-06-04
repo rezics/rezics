@@ -180,6 +180,6 @@ before frontends so the API contract a new bundle expects already exists.
 ## Migration Jobs
 
 One-shot jobs reuse their service's `*_DATABASE_URL` (secret) and run
-`prisma migrate deploy` from the same image revision before the service rolls
-out. `job-runner` has no schema; its DB prep is the pg-boss `db:ensure` step
-against `JOB_DATABASE_URL`.
+Drizzle migrations from the same image revision before the service rolls out.
+`job-runner` has no application schema; its DB prep is the pg-boss `db:ensure`
+step against `JOB_DATABASE_URL`.

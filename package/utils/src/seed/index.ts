@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { resetAuthDatabase } from "@rezics/auth/seed";
-import { resetDatabase } from "@rezics/server/prisma/seed/database";
+import { resetDatabase } from "@rezics/server/db/seed/database";
 import { getEnv } from "../lib/env";
 import {
   type AuthPrismaClient,

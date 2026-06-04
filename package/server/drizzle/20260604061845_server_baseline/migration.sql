@@ -1,4 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS ltree;--> statement-breakpoint
 CREATE TYPE "AccountEnforcementKind" AS ENUM('WARNING', 'SILENCE', 'SUSPENSION', 'BAN', 'RATE_LIMIT', 'TRUST_RESTRICTION');--> statement-breakpoint
 CREATE TYPE "AccountEnforcementState" AS ENUM('ACTIVE', 'EXPIRED', 'REVOKED');--> statement-breakpoint
 CREATE TYPE "AiDisclosureMode" AS ENUM('UNKNOWN', 'NONE', 'AI_ASSISTED', 'AI_ORIGINATED', 'MACHINE_GENERATED');--> statement-breakpoint
@@ -185,7 +184,7 @@ CREATE TABLE "EchoKV" (
 );
 --> statement-breakpoint
 CREATE TABLE "EmailVerificationContract" (
-	"id" uuid PRIMARY KEY,
+	"id" uuid PRIMARY KEY DEFAULT uuidv7(),
 	"contractName" varchar(96) NOT NULL,
 	"ownerId" uuid NOT NULL,
 	"email" varchar(320) NOT NULL,

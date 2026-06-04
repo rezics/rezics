@@ -3,7 +3,7 @@
 Shared job command contract and enqueue client for Rezics background work.
 
 This package does not run jobs. It has no worker process, queue connection,
-Prisma client, Meilisearch client, or runtime env. It exists so producers and
+database client, Meilisearch client, or runtime env. It exists so producers and
 consumers agree on the exact command shape before a job is placed on the queue.
 
 ## What It Owns
@@ -40,4 +40,4 @@ HTTP endpoints, Sequin webhooks, and workers.
 ## Boundaries
 
 `@rezics/job` must stay lightweight and contract-only. Do not add dependencies
-on pg-boss, Elysia, Prisma clients, Meilisearch clients, or env modules here.
+on pg-boss, Elysia, database clients, Meilisearch clients, or env modules here.

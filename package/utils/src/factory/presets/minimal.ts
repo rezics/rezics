@@ -1,4 +1,4 @@
-import type { SeedPreset } from "@rezics/server/prisma/factory";
+import type { SeedPreset } from "@rezics/server/db/seed-factory";
 
 export const minimal: SeedPreset = {
   mode: "fixed",

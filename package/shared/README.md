@@ -15,8 +15,8 @@ should live here — kept small, pure, and free of Prisma / React dependencies.
 
 ## Out of scope
 
-- Prisma-coupled generators (anything referencing `UnitType` / `PostKind` /
-  `Prisma.InputJsonValue`) stay in `package/server/prisma/factory/`.
+- Seed/factory generators (anything referencing `UnitType` / `PostKind` /
+  storage-specific JSON input shapes) stay in `package/server/src/db/factory/`.
 - Storybook intentful fixtures (`bookEmpty`, `bookLongTitle`, `bookCJK`, …) stay
   in `package/app/src/stories/fixtures/`; they may import the primitives above
   for locale-aware string generation.

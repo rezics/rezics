@@ -11,7 +11,7 @@ import {
   type SeedPlan,
   SeedPlanSchema,
   type SeedPreset,
-} from "@rezics/server/prisma/factory";
+} from "@rezics/server/db/seed-factory";
 import * as v from "valibot";
 import { SEED_CACHE_DIR } from "../lib/cache-dir";
 

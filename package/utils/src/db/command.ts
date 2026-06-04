@@ -3,7 +3,7 @@ import { createAuthPrisma, createServerPrisma } from "../lib/prisma-factory";
 import { createSeedSearchClient } from "../lib/search";
 
 export async function runDbReset(): Promise<void> {
-  const { resetDatabase } = await import("@rezics/server/prisma/seed/database");
+  const { resetDatabase } = await import("@rezics/server/db/seed/database");
   const { resetAuthDatabase } = await import("@rezics/auth/seed");
   const env = getEnv();
   const serverPrisma = createServerPrisma(env.SERVER_DATABASE_URL);
@@ -23,7 +23,7 @@ export async function runDbReset(): Promise<void> {
 
 export async function runInitMeili(): Promise<void> {
   const { initMeiliSearch } = await import(
-    "@rezics/server/prisma/seed/init-meili-search"
+    "@rezics/server/db/seed/init-meili-search"
   );
   const env = getEnv();
   const searchClient = createSeedSearchClient({

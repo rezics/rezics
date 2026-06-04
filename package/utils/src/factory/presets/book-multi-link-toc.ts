@@ -1,4 +1,4 @@
-import type { SeedPreset } from "@rezics/server/prisma/factory";
+import type { SeedPreset } from "@rezics/server/db/seed-factory";
 
 /**
  * Multi-link TOC preset. Seeds one or two small books where a sizeable share

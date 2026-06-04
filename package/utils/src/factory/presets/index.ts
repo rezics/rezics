@@ -1,4 +1,4 @@
-import type { SeedPreset } from "@rezics/server/prisma/factory";
+import type { SeedPreset } from "@rezics/server/db/seed-factory";
 import { bookMultiLinkToc } from "./book-multi-link-toc";
 import { fast } from "./fast";
 import { medium } from "./medium";

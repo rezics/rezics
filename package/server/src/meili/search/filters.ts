@@ -16,7 +16,7 @@ import { normalizeLanguage } from "@rezics/contract";
 //
 // The federated endpoint (`POST /meili/search/federated`) is the single
 // caller; each sub-query for a permitted index is built via one of these.
-// They are pure so they can be unit-tested without a Prisma client or live
+// They are pure so they can be unit-tested without a database client or live
 // Meilisearch instance.
 
 export interface FilterContext {

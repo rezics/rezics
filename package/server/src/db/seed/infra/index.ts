@@ -1,0 +1,66 @@
+import type { SeedTagName, TagGroupIds } from "@rezics/contract";
+import type { PrismaClient } from "../../../../prisma/generated/client.js";
+import { seedDefaultRealm } from "./seed-default-realm";
+import {
+  type GameMediaTaxonomySeedResult,
+  seedGameMediaTaxonomy,
+} from "./seed-game-media-taxonomy";
+import {
+  type RealmTaxonomySeedResult,
+  seedRealmTaxonomy,
+} from "./seed-realm-taxonomy";
+import { type SlugScopesMap, seedSlugScopes } from "./seed-slug-scopes";
+import { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
+
+export { seedDefaultRealm } from "./seed-default-realm";
+export {
+  type GameMediaTaxonomySeedResult,
+  seedGameMediaTaxonomy,
+} from "./seed-game-media-taxonomy";
+export {
+  type RealmTaxonomySeedResult,
+  seedRealmTaxonomy,
+} from "./seed-realm-taxonomy";
+export { type SlugScopesMap, seedSlugScopes } from "./seed-slug-scopes";
+export { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
+
+export interface SeedInfraResult {
+  slugScopes: SlugScopesMap;
+  tagMap: Record<SeedTagName, string>;
+  defaultRealmId: string;
+  realmTaxonomy: RealmTaxonomySeedResult;
+  searchTagIds: TagGroupIds;
+  gameMediaTaxonomy: GameMediaTaxonomySeedResult;
+}
+
+/**
+ * Shared infrastructure seeder.
+ *
+ * Order is significant: slug scopes are seeded first so every subsequent
+ * slug-bearing seed (tags, default realm, taxonomy) can stamp `slugScope`
+ * on inserted Units. Each step is idempotent.
+ */
+export async function seedInfra(
+  prisma: PrismaClient,
+  rootUserId: string,
+): Promise<SeedInfraResult> {
+  const slugScopes = await seedSlugScopes(prisma);
+  const tagMap = await seedContentTypeTags(prisma, slugScopes);
+  const defaultRealmId = await seedDefaultRealm(prisma, rootUserId, slugScopes);
+  const realmTaxonomy = await seedRealmTaxonomy(
+    prisma,
+    rootUserId,
+    defaultRealmId,
+    slugScopes,
+  );
+  const gameMediaTaxonomy = await seedGameMediaTaxonomy(prisma, slugScopes);
+  const searchTagIds = await seedSearchTagIds(prisma, slugScopes);
+  return {
+    slugScopes,
+    tagMap,
+    defaultRealmId,
+    realmTaxonomy,
+    searchTagIds,
+    gameMediaTaxonomy,
+  };
+}

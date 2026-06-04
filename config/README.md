@@ -67,7 +67,7 @@ immutable git-SHA tag and never rebuilds.
 ```bash
 bin/deploy <git-sha>            # full sequence: validate → infra → migrate → services → workers → backfill
 bin/deploy <git-sha> validate   # secret-presence gate only (fails before any mutation)
-bin/deploy <git-sha> migrations  # one-shot prisma migrate deploy / db:ensure
+bin/deploy <git-sha> migrations  # one-shot Drizzle migrations / db:ensure
 bin/deploy <git-sha> services    # backend HTTP services
 bin/deploy <git-sha> workers     # job-runner web + worker + ranking-worker
 bin/deploy <git-sha> backfill    # ranking Meili full-sync
@@ -81,7 +81,7 @@ Migrations run from the build-stage migrate image
 (`ghcr.io/rezics/rezics-<unit>-migrate:<sha>`, built with `--target build`)
 because the slim runtime images carry only the compiled binary. Migration order
 follows database ownership; `ranking` is parallel-safe and `job-runner` runs
-`db:ensure` instead of a Prisma migration.
+`db:ensure` instead of schema migrations.
 
 See `docs/reference/production-runtime-inventory.md` and
 `docs/reference/production-env-and-secrets.md` for the per-unit contract, and the

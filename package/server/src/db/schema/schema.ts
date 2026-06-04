@@ -745,7 +745,7 @@ export const EchoKV = pgTable("EchoKV", {
 export const EmailVerificationContract = pgTable(
   "EmailVerificationContract",
   {
-    id: uuid().primaryKey(),
+    id: uuid().default(sql`uuidv7()`).primaryKey(),
     contractName: varchar({ length: 96 }).notNull(),
     ownerId: uuid().notNull(),
     email: varchar({ length: 320 }).notNull(),
