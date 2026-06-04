@@ -62,7 +62,7 @@ the routed tables.
 - slot names use `rezics_sequin_slot_${ENV}` to avoid dev/staging/prod
   collisions;
 - publication names use `rezics_sequin_pub_${ENV}`;
-- Prisma PascalCase table names are quoted in `init_sql`;
+- Rezics PascalCase table names are quoted in `init_sql`;
 - `source.include_tables` is a sink-level defense-in-depth filter, not the
   authoritative table boundary.
 
@@ -197,7 +197,8 @@ Queue database expectations:
   `bun --filter=@rezics/job-runner run db:ensure` to create it from
   `JOB_DATABASE_URL` when missing.
 - pg-boss owns its internal schema, tables, functions, and version migrations
-  inside that database. Do not add Prisma migrations for the job queue schema.
+  inside that database. Do not add Rezics schema-owner migrations for the job
+  queue schema.
 - Back up the queue database with normal Postgres backups.
 - Do not expose `JOB_DATABASE_URL` to `@rezics/server`.
 

@@ -192,7 +192,7 @@ databases may be reset and reseeded.
 
 ## 0. Version spike and dependency decision
 
-- [ ] 0.1 Re-check npm dist-tags for `drizzle-orm` and `drizzle-kit`; select the
+- [x] 0.1 Re-check npm dist-tags for `drizzle-orm` and `drizzle-kit`; select the
   newest compatible `1.0.0-rc.*` pair and pin exact versions in the root/package
   manifests. Record the chosen versions in the commit message or code comments
   near the dependency declaration if the tag situation is non-obvious.
@@ -204,7 +204,7 @@ databases may be reset and reseeded.
 - [ ] 0.3 If the spike fails because Drizzle v1 rc or RQB v2 is not stable enough,
   stop and revise this proposal for pinned 0.x stable / legacy relations before
   changing the full runtime surface.
-- [ ] 0.4 Add Drizzle dependencies where they are actually used:
+- [x] 0.4 Add Drizzle dependencies where they are actually used:
   `drizzle-orm`, `drizzle-kit`, `pg`, and `@types/pg`; avoid duplicated
   dependency declarations in packages that only consume exported db surfaces.
 - [ ] 0.5 Remove Prisma dependencies from `server`, `auth`, `notify`,
@@ -316,7 +316,7 @@ databases may be reset and reseeded.
 - [x] 3.9 Keep `auth.Jwks.id` as the JWT `kid` string primary key with no
   `uuidv7()` default, and add baseline review coverage so the global UUID rule
   does not rewrite it.
-- [ ] 3.10 Add migration smoke tests or scripts that run on fresh databases and
+- [x] 3.10 Add migration smoke tests or scripts that run on fresh databases and
   assert representative tables, enum values, extension availability, UUID
   version 7 extraction, partial indexes, and `ltree` path indexes.
 
@@ -326,7 +326,7 @@ databases may be reset and reseeded.
   module under `src/db/client.ts` or `src/db/index.ts`, preserving existing pool
   limits, timeouts, graceful shutdown, and development query logging where
   useful.
-- [ ] 4.2 Expose stable package exports for db clients and schema types, for
+- [x] 4.2 Expose stable package exports for db clients and schema types, for
   example `@rezics/server/db`, `@rezics/server/db/schema`, and
   `@rezics/server/db/relations`.
 - [ ] 4.3 Convert runtime code in `package/server/src` from Prisma method calls
@@ -425,7 +425,7 @@ databases may be reset and reseeded.
   `@rezics/auth` exports.
 - [ ] 6.7 Update `package/utils/src/lib/prisma-factory.ts` into a Drizzle db
   factory module, then convert seed/factory orchestration and tests.
-- [ ] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
+- [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
 ## 7. Tooling, deployment, and docs
@@ -440,7 +440,7 @@ databases may be reset and reseeded.
   or the repo `tool db deploy --package=<unit>` equivalent.
 - [ ] 7.4 Update Docker build comments and migrate images from "carry Prisma CLI
   + schema" to "carry Bun + Drizzle Kit + migrations".
-- [ ] 7.5 Update production release, rollback, troubleshooting, runtime
+- [x] 7.5 Update production release, rollback, troubleshooting, runtime
   inventory, deployment guide, and env/secrets docs to reference Drizzle
   migration flow and Drizzle migration tables instead of Prisma.
 - [x] 7.6 Update `config/README.md` migration wording and any Kamal/deploy docs

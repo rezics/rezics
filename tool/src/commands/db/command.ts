@@ -99,5 +99,23 @@ export const dbCommand = define({
           ...(ctx.values.factory ? ["--factory"] : []),
         ]),
     }),
+    smoke: define({
+      name: "smoke",
+      description:
+        "Assert representative migrated database objects after migrations.",
+      args: {
+        package: {
+          type: "string",
+          multiple: true,
+          description:
+            "Database package to smoke test. Repeat or comma-separate.",
+        },
+      },
+      run: (ctx) =>
+        runRepoScript([
+          "tool/src/commands/db/smoke.ts",
+          ...dbPackageArgs(ctx.values.package as string[] | undefined),
+        ]),
+    }),
   },
 });

@@ -20,14 +20,14 @@ export type UnitTagWithRelations = typeof UnitTag.$inferSelect & {
 };
 
 /**
- * Prisma include for fetching a tag Unit with translations.
+ * Relation payload shape for fetching a tag Unit with translations.
  */
 export const tagUnitInclude = {
   translations: true,
 } as const;
 
 /**
- * Prisma include for fetching UnitTag rows with tag labels.
+ * Relation payload shape for fetching UnitTag rows with tag labels.
  */
 export const unitTagInclude = {
   tag: {

@@ -40,7 +40,7 @@ All schemas are re-exported from the package root.
 
 ## Decision
 
-- Don't use prisma box
+- Keep contracts independent of database ORM model types.
 
 ## Tech Stack
 

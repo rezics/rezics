@@ -29,6 +29,10 @@
       "types": "./src/db/maintenance.repository.ts",
       "default": "./src/db/maintenance.repository.ts"
     },
+    "./db/relations": {
+      "types": "./src/db/relations/index.ts",
+      "default": "./src/db/relations/index.ts"
+    },
     "./db/schema": {
       "types": "./src/db/schema/index.ts",
       "default": "./src/db/schema/index.ts"

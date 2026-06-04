@@ -7,7 +7,7 @@ import {
 } from "@/utils/sanitizeUser";
 
 /**
- * Prisma include for unit relations
+ * Relation payload shape for unit reads.
  */
 export const unitInclude = {
   user: { select: publicUserSelect },

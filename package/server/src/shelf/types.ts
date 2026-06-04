@@ -11,7 +11,7 @@ import {
   type PublicUserSelected,
 } from "@/utils/sanitizeUser";
 
-// Prisma include for shelf metadata. Shelf items are paged separately through
+// Relation payload shape for shelf metadata. Shelf items are paged separately through
 // `GET /shelf/:unitId/units`.
 export const shelfInclude = {
   unit: {

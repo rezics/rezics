@@ -11,6 +11,7 @@
     "db:deploy": "bun run tool/bin/tool.ts db deploy",
     "db:reset": "bun run tool/bin/tool.ts db reset",
     "db:ensure": "bun run tool/bin/tool.ts db ensure",
+    "db:smoke": "bun run tool/bin/tool.ts db smoke",
     "db:ensure:job-runner": "bun --filter=@rezics/job-runner run db:ensure",
     "check:runtime-env": "node tool/src/commands/check-no-runtime-env.mjs",
     "service": "bun run tool/bin/service.ts",

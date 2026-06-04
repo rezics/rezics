@@ -2,7 +2,7 @@
 
 Cross-package primitives that have no domain or runtime allegiance. Anything that
 both backend seed/factory code and frontend story fixtures legitimately need
-should live here — kept small, pure, and free of Prisma / React dependencies.
+should live here — kept small, pure, and free of database / React dependencies.
 
 ## Entry points
 

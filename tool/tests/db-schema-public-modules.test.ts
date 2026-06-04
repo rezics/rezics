@@ -95,4 +95,39 @@ describe("database schema public modules", () => {
       expect(rowSource).toContain(schemaModule.newRowAlias);
     });
   }
+
+  test("schema owner package manifests expose db and schema subpaths", () => {
+    for (const schemaModule of schemaModules) {
+      const manifest = JSON.parse(
+        readFileSync(
+          join(repoRoot, `package/${schemaModule.packageName}/package.json`),
+          "utf8",
+        ),
+      ) as {
+        exports?: Record<string, unknown>;
+      };
+
+      expect(Object.hasOwn(manifest.exports ?? {}, "./db")).toBe(true);
+      expect(Object.hasOwn(manifest.exports ?? {}, "./db/schema")).toBe(true);
+    }
+  });
+
+  test("server exposes relations as a stable public db subpath", async () => {
+    const manifest = JSON.parse(
+      readFileSync(join(repoRoot, "package/server/package.json"), "utf8"),
+    ) as {
+      exports?: Record<string, unknown>;
+    };
+    const dbIndexSource = readFileSync(
+      join(repoRoot, "package/server/src/db/index.ts"),
+      "utf8",
+    );
+    const publicRelations = await import(
+      "../../package/server/src/db/relations/index.ts"
+    );
+
+    expect(Object.hasOwn(manifest.exports ?? {}, "./db/relations")).toBe(true);
+    expect(dbIndexSource).toContain('export * from "./relations";');
+    expect(publicRelations.relations).toBeDefined();
+  });
 });

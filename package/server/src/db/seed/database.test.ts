@@ -33,7 +33,7 @@ function createMockPrisma(delegates: string[]) {
 }
 
 describe("resetDatabase", () => {
-  test("deletes every server Prisma model", async () => {
+  test("deletes every server schema delegate", async () => {
     const delegates = schemaDelegates();
     const { prisma, calls } = createMockPrisma(delegates);
 

@@ -45,11 +45,11 @@ main DB authorization check before delegating auth session invalidation to auth.
 ## Token Wallet Boundary
 
 The main token wallet boundary is `package/server/src/token` backed by the
-server Prisma `ApiToken` model. This module owns API token creation, update,
+server `ApiToken` table. This module owns API token creation, update,
 revocation, listing, and verification for `/token/*` and `/dispatch/*` API
 token flows.
 
-Auth must not import this module, query the server `ApiToken` model, or mutate
+Auth must not import this module, query the server `ApiToken` table, or mutate
 main token wallet storage. If an auth-owned flow needs token-wallet context,
 main must authorize the operation first and pass only the required context to
 auth through an internal call.

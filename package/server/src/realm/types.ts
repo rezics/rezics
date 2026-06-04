@@ -10,7 +10,7 @@ import {
   type PublicUserSelected,
 } from "@/utils/sanitizeUser";
 
-// Prisma include for realm relations
+// Relation payload shape for realm metadata.
 export const realmInclude = {
   unit: {
     include: {

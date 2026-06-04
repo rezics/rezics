@@ -122,6 +122,9 @@ Drizzle schema migrations.
 Use the Drizzle v1 rc line intentionally. Pin `drizzle-orm` and `drizzle-kit`
 to exact compatible `1.0.0-rc.*` versions where they are declared; do not
 switch to broad `latest`/`^` ranges during this migration.
+As of 2026-06-04, npm's `rc` dist-tag for both packages resolves to
+`1.0.0-rc.3`; newer `rc4` tags are branch prereleases, not the selected exact
+pair.
 
 ```bash
 bun run db:generate
@@ -129,6 +132,7 @@ bun run db:migrate
 bun run db:deploy
 bun run db:reset -- --yes
 bun run db:ensure
+bun run db:smoke
 ```
 
 `db:migrate`, `db:deploy`, and `db:reset` run schema owners in package order:

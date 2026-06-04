@@ -1,7 +1,9 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
 import {
   DB_MIGRATION_ORDER,
+  DB_SCHEMA_PACKAGES,
   resolveDbSchemaPackages,
 } from "../src/commands/db/packages";
 import {
@@ -21,6 +23,15 @@ function createPreflightClient(
       return { rows: await handler(query) };
     },
   };
+}
+
+const repoRoot = new URL("../..", import.meta.url).pathname;
+
+function readPackageJson(packagePath: string): {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+} {
+  return JSON.parse(readFileSync(join(repoRoot, packagePath), "utf8"));
 }
 
 describe("db package registry", () => {
@@ -48,6 +59,32 @@ describe("db package registry", () => {
     expect(existsSync(new URL("../src/commands/prisma", import.meta.url))).toBe(
       false,
     );
+  });
+
+  test("schema owners pin the selected Drizzle rc pair where Drizzle is used", () => {
+    for (const packageName of DB_SCHEMA_PACKAGES) {
+      const manifest = readPackageJson(`package/${packageName}/package.json`);
+
+      expect(manifest.devDependencies?.["drizzle-kit"]).toBe("1.0.0-rc.3");
+      expect(manifest.dependencies?.["drizzle-orm"]).toBe("1.0.0-rc.3");
+      expect(manifest.dependencies?.pg).toBeDefined();
+      expect(manifest.devDependencies?.["@types/pg"]).toBeDefined();
+    }
+  });
+
+  test("Drizzle Kit is declared only by schema owners", () => {
+    const packageDirs = [
+      ...new Bun.Glob("package/*/package.json").scanSync({ cwd: repoRoot }),
+    ];
+    const owners = packageDirs
+      .filter((packageJsonPath) => {
+        const manifest = readPackageJson(packageJsonPath);
+        return Boolean(manifest.devDependencies?.["drizzle-kit"]);
+      })
+      .map((packageJsonPath) => packageJsonPath.split("/")[1])
+      .sort();
+
+    expect(owners).toEqual([...DB_SCHEMA_PACKAGES].sort());
   });
 });
 

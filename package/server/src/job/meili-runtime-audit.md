@@ -22,7 +22,8 @@ Generated for OpenSpec change `introduce-job-runner-sync-infrastructure`.
 ## Approved Non-Runtime Locations
 
 - `package/server/src/meili/**`: direct wrapper implementations and explicit search/admin APIs.
-- `package/server/prisma/**`: seed/factory/local setup flows that intentionally remain direct.
+- `package/server/src/db/seed/**` and `package/server/src/db/factory/**`:
+  setup-time flows that intentionally remain direct.
 - `*.test.ts`: test mocks and assertions for current behavior; update alongside migration.
 - `package/server/src/meili/search/**`: search read support.
 
