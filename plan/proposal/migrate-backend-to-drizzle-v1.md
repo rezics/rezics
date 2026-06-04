@@ -34,6 +34,12 @@ databases may be reset and reseeded.
   dist-tags and pin exact `drizzle-orm` / `drizzle-kit` `1.0.0-rc.*` versions
   with no broad `^` range. Current registry state seen during proposal:
   `latest` is still 0.x; the v1 channel is exposed through rc/beta tags. `(type)`
+- **Add an explicit rc go/no-go gate before broad migration work.** The first
+  spike must prove Drizzle v1 rc, RQB v2, schema generation, migrations, and the
+  Better Auth adapter are stable enough for Rezics. If docs/API churn or RQB v2
+  gaps block representative queries, fall back to pinned 0.x stable plus legacy
+  relation/query syntax, or re-scope this proposal before touching every
+  service. `(comment)` `(test)`
 - **Use current v1 relation/query syntax.** Do not write legacy Drizzle
   `relations(table, ...)` RQB v1 definitions. Use RQB v2
   `defineRelations` / `defineRelationsPart` and `db.query.<table>` shapes from
@@ -48,6 +54,13 @@ databases may be reset and reseeded.
   imports from `drizzle-orm/pg-core` as `p` and the callback-style
   `pgTable` form shown in the official docs. Do not copy stale blog examples if
   they conflict with the official docs. `(comment)`
+- **Composite and cyclic foreign keys are first-class schema work.** Multi-column
+  FKs must use Drizzle's table-callback `foreignKey({ columns,
+  foreignColumns })` builder, not inline `.references()`. This applies to known
+  composite FK tables such as `ShelfUnitRelation`, `RealmCapabilityGrant`,
+  `CreditAttributionEvidence`, `PollVote`, and
+  `RealmTagApplicationVote`, and to any self/cycle FK that needs callback
+  typing. `(type)` `(test)`
 - **PostgreSQL 18 is required.** Migration preflight must reject databases where
   `server_version_num < 180000` or `uuidv7()` is unavailable. PostgreSQL 18
   documents `uuidv7()` as a built-in UUID generation function:
@@ -57,6 +70,12 @@ databases may be reset and reseeded.
   UUID generation for table IDs that are meant to be database-generated.
   PostgreSQL documents `uuid-ossp` as only needed beyond built-in UUID support:
   https://www.postgresql.org/docs/18/uuid-ossp.html. `(comment)` `(test)`
+- **Normalize existing UUID default exceptions unless they are semantic IDs.**
+  `EmailVerificationContract.id` is a normal UUID primary key and must move from
+  Prisma `@default(uuid())` to database `uuidv7()`. `reaction` and `ranking`
+  IDs currently using `gen_random_uuid()` also move to `uuidv7()`. The explicit
+  exception is JWKS key storage: `Jwks.id` is the JWT `kid`, not a
+  database-generated UUID. `(type)` `(test)`
 - **`ltree` remains an extension and is package-local to server.** Server must
   keep `CREATE EXTENSION IF NOT EXISTS ltree;` as an explicit pre/baseline
   migration before any `ltree` column or operator/index is created. PostgreSQL
@@ -77,6 +96,11 @@ databases may be reset and reseeded.
   available, required extensions absent/present as expected, and package env URL
   sanity. Schema-mutating pre SQL should be Drizzle-tracked custom migrations
   unless a spike proves Drizzle's ordering is insufficient. `(test)`
+- **Managed Postgres extension privileges must be surfaced.** `ltree` creation
+  may require an elevated role on managed Postgres. Preflight/deploy
+  troubleshooting must clearly distinguish "extension missing" from "connected
+  role cannot create extension" and tell operators to create it with a DBA or
+  elevated role before rerunning migrations. `(comment)` `(test)`
 - **No second migration ledger unless necessary.** Start with Drizzle's own
   migrations table and ordered custom SQL files. Add a Rezics-owned
   `__rezics_pre_migrations` ledger only if Drizzle custom migrations cannot
@@ -97,15 +121,49 @@ databases may be reset and reseeded.
   `$inferSelect` / `$inferInsert`, focused query result types, and contract
   mappers. Do not rebuild a generated-client facade that preserves Prisma-shaped
   APIs. `(type)`
+- **JSON column shapes are contract-owned unless storage owns the shape.** Do
+  not hand-author arbitrary `json/jsonb().$type<T>()` shapes in Drizzle schema
+  just to replace `prisma-json-types-generator`. Most JSON columns stay opaque
+  transport and are typed/validated at contract or domain boundaries. If a JSON
+  column needs a Drizzle `$type<T>()`, import or infer `T` from
+  `@rezics/contract` schemas or from a storage-owned domain type such as JWK;
+  changing that TypeScript type alone must not be treated as a migration-worthy
+  database schema change. `(type)` `(test)`
+- **Public enum values must not become ORM-coupled.** Where Prisma enum values
+  leaked into contracts or shared packages, move the canonical value set to
+  `@rezics/contract` or a domain-neutral constants module. Drizzle schema should
+  consume those values, not become the public enum source. `(type)` `(test)`
+- **Prisma dynamic query shapes must be rewritten, not translated mechanically.**
+  `Prisma.*WhereInput`, `Include`, `Select`, and payload helper types do not
+  have generated Drizzle equivalents. Conditional filters become local
+  `and(...)` / `or(...)` / `sql` composition helpers; include/select behavior
+  becomes explicit RQB v2 `with`, joins, projections, and mappers. `(type)`
+  `(test)`
+- **Transaction threading must use repo-local db/tx types.** Helpers that
+  currently accept `Prisma.TransactionClient` should accept a minimal Rezics
+  Drizzle `DbLike`/`TxLike` interface or package-local equivalent so callers can
+  pass either the root db or a transaction handle without preserving
+  Prisma-shaped signatures. `(type)` `(test)`
 - **Raw SQL is allowed but centralized.** `ltree` operations, aggregate-heavy
   queries, bulk CTEs, partial indexes, and array containment can use Drizzle
   `sql` helpers. Avoid ad hoc string concatenation; identifiers and values must
   go through typed helpers or parameterized SQL. `(comment)` `(test)`
+- **Existing raw SQL must be triaged, not blindly carried forward.** Some
+  `$queryRaw` sites exist only because Prisma could not express partial
+  indexes, array containment, `ltree`, or bulk CTE patterns. During migration,
+  classify each raw query as "keep raw SQL", "wrap in typed Drizzle sql helper",
+  or "replace with Drizzle builder/RQB". `(comment)` `(test)`
 - **Better Auth moves to the Drizzle adapter.** Replace
   `@better-auth/prisma-adapter` with `@better-auth/drizzle-adapter`, pass the
   auth Drizzle db and schema mapping, and keep `generateId: false` semantics so
   database `uuidv7()` remains authoritative. Official reference:
   https://better-auth.com/docs/adapters/drizzle. `(test)`
+- **Custom JWT/JWKS persistence is separate from the standard Better Auth
+  adapter swap.** `package/auth/src/session/jwt/prisma-adapter.ts` is a
+  hand-written persistence layer for `JwtService`/`Jwks`, key encryption, `kid`
+  identity, rotation, and grace periods. It must be migrated and tested as its
+  own auth task, not treated as covered by `@better-auth/drizzle-adapter`.
+  `(comment)` `(test)`
 - **Search/history/ranking read the main DB through Drizzle, not generated
   server Prisma clients.** Cross-package consumers must import explicit db/schema
   surfaces from `@rezics/server`, not `@rezics/server/prisma/generated/client`.
@@ -126,6 +184,11 @@ databases may be reset and reseeded.
   all internal callsites in the same change; no compatibility adapter layer is
   required unless it materially reduces apply risk and is removed before the plan
   is marked done. `(comment)`
+- **Task sections are grouped by concern, not a strict linear timeline.** Apply
+  should respect dependencies: the §0 spike gate comes first; schema, migrations,
+  runtime, auth, and cross-package work iterate together by package/domain; §8
+  cleanup can only complete after runtime, tests, and deployment/docs are
+  migrated. `(comment)`
 
 ## 0. Version spike and dependency decision
 
@@ -133,16 +196,24 @@ databases may be reset and reseeded.
   newest compatible `1.0.0-rc.*` pair and pin exact versions in the root/package
   manifests. Record the chosen versions in the commit message or code comments
   near the dependency declaration if the tag situation is non-obvious.
-- [ ] 0.2 Add Drizzle dependencies where they are actually used:
+- [ ] 0.2 Run a representative spike before broad edits: one schema with a
+  composite FK, one cyclic FK, one RQB v2 relation query with nested `with`, one
+  dynamic filter helper, one transaction helper, one custom SQL migration, and
+  one Better Auth Drizzle adapter insert using `generateId: false`. Record the
+  go/no-go decision in this proposal or in the commit message before continuing.
+- [ ] 0.3 If the spike fails because Drizzle v1 rc or RQB v2 is not stable enough,
+  stop and revise this proposal for pinned 0.x stable / legacy relations before
+  changing the full runtime surface.
+- [ ] 0.4 Add Drizzle dependencies where they are actually used:
   `drizzle-orm`, `drizzle-kit`, `pg`, and `@types/pg`; avoid duplicated
   dependency declarations in packages that only consume exported db surfaces.
-- [ ] 0.3 Remove Prisma dependencies from `server`, `auth`, `notify`,
+- [ ] 0.5 Remove Prisma dependencies from `server`, `auth`, `notify`,
   `reaction`, `history`, `ranking`, `job-runner`, `utils`, `search`, and `tool`
   once their runtime/tooling imports are gone.
-- [ ] 0.4 Update root scripts from `prisma:*` to `db:*`, keeping command names
+- [ ] 0.6 Update root scripts from `prisma:*` to `db:*`, keeping command names
   short and Bun-native: `db:generate`, `db:migrate`, `db:deploy`, `db:reset`,
   and any package-filtered equivalents that are still useful.
-- [ ] 0.5 Update `AGENTS.md` command examples and architecture wording from
+- [ ] 0.7 Update `AGENTS.md` command examples and architecture wording from
   Prisma schemas to Drizzle schema ownership.
 
 ## 1. Database tooling and migration runner
@@ -170,7 +241,10 @@ databases may be reset and reseeded.
 - [ ] 1.7 Decide the Drizzle migration table config in every `drizzle.config.ts`.
   Prefer the default or a uniform `drizzle.__drizzle_migrations`, but document
   the choice in CONTRIBUTING and deployment troubleshooting.
-- [ ] 1.8 Add tests for package selection, ordering, failure handling, preflight
+- [ ] 1.8 Surface managed Postgres `ltree` privilege failures separately from
+  missing-extension failures, with deploy troubleshooting text for creating the
+  extension through a DBA/elevated role.
+- [ ] 1.9 Add tests for package selection, ordering, failure handling, preflight
   rejection on non-PG18, and no accidental use of the removed Prisma command
   path.
 
@@ -193,13 +267,25 @@ databases may be reset and reseeded.
 - [ ] 2.5 Put Drizzle RQB v2 relation definitions under
   `package/server/src/db/relations/`, using `defineRelations` and
   `defineRelationsPart` where files become too large.
-- [ ] 2.6 Add focused schema folders for smaller packages:
+- [ ] 2.6 Inventory and model all composite/multi-column FKs with table-callback
+  `foreignKey({ columns, foreignColumns })`, including
+  `ShelfUnitRelation`, `RealmCapabilityGrant`, `CreditAttributionEvidence`,
+  `PollVote`, `RealmTagApplicationVote`, and any additional composite FK found
+  during schema conversion.
+- [ ] 2.7 Establish JSON column typing rules in schema helpers: default to
+  opaque JSON transport; allow `.$type<T>()` only when `T` is imported/inferred
+  from `@rezics/contract` or a storage-owned domain type such as JWK.
+- [ ] 2.8 Move public enum value ownership out of ORM-generated types. For every
+  enum used outside backend implementation, decide whether the canonical values
+  live in `@rezics/contract` or a domain-neutral constants module, then make
+  Drizzle schema consume that source.
+- [ ] 2.9 Add focused schema folders for smaller packages:
   `package/auth/src/db/schema/`, `package/notify/src/db/schema/`,
   `package/reaction/src/db/schema/`, `package/history/src/db/schema/`, and
   `package/ranking/src/db/schema/`.
-- [ ] 2.7 Each schema package exports `schema`, `relations`, db type aliases,
+- [ ] 2.10 Each schema package exports `schema`, `relations`, db type aliases,
   enum values, and row insert/select types from a single stable public module.
-- [ ] 2.8 Add a convention check or targeted test that every configured schema
+- [ ] 2.11 Add a convention check or targeted test that every configured schema
   folder exports all table/enums required by Drizzle Kit.
 
 ## 3. Baseline migrations and custom SQL
@@ -224,7 +310,13 @@ databases may be reset and reseeded.
   actions, default values, indexes, and casing.
 - [ ] 3.7 Ensure `reaction` and `ranking` switch from `gen_random_uuid()` to
   native `uuidv7()` in the baseline.
-- [ ] 3.8 Add migration smoke tests or scripts that run on fresh databases and
+- [ ] 3.8 Ensure `server.EmailVerificationContract.id` switches from Prisma
+  `uuid()` / application-generated UUID default to database `uuidv7()` in the
+  Drizzle baseline.
+- [ ] 3.9 Keep `auth.Jwks.id` as the JWT `kid` string primary key with no
+  `uuidv7()` default, and add baseline review coverage so the global UUID rule
+  does not rewrite it.
+- [ ] 3.10 Add migration smoke tests or scripts that run on fresh databases and
   assert representative tables, enum values, extension availability, UUID
   version 7 extraction, partial indexes, and `ltree` path indexes.
 
@@ -242,19 +334,30 @@ databases may be reset and reseeded.
   unit/catalog, content structure, comments/posts, realm/tagging, poll,
   attribution, user/profile, subscriptions/notify boundary, governance,
   feedback, JWT, EchoKV, scripts.
-- [ ] 4.4 Convert `package/auth/src` to Drizzle db access, including internal
+- [ ] 4.4 Replace dynamic `Prisma.*WhereInput`, `Include`, `Select`, and payload
+  type composition with domain-local Drizzle query builders, explicit
+  projections, RQB v2 `with`, joins, and mappers. Prioritize heavily dynamic
+  search/catalog/unit/book/realm/post/listing queries before small CRUD paths.
+- [ ] 4.5 Convert `package/auth/src` to Drizzle db access, including internal
   APIs, JWT service persistence, admin user/session operations, and tests.
-- [ ] 4.5 Convert `notify`, `reaction`, `history`, and `ranking` services to
+- [ ] 4.6 Convert `notify`, `reaction`, `history`, and `ranking` services to
   Drizzle clients and query helpers.
-- [ ] 4.6 Replace Prisma transaction usage with Drizzle transaction helpers.
+- [ ] 4.7 Replace Prisma transaction usage with Drizzle transaction helpers.
   Preserve atomicity around multi-table domain writes, especially moderation,
   seed, factory, reaction summary updates, history outbox, and ranking flushes.
-- [ ] 4.7 Replace Prisma raw SQL helpers (`Prisma.sql`, `Prisma.join`,
+- [ ] 4.8 Introduce package-local `DbLike`/`TxLike` or equivalent minimal
+  interfaces, then update helpers that currently thread
+  `Prisma.TransactionClient` so each can run against either root db or a Drizzle
+  transaction handle.
+- [ ] 4.9 Replace Prisma raw SQL helpers (`Prisma.sql`, `Prisma.join`,
   `$queryRaw`) with Drizzle `sql` and parameterized helpers. Add local helpers
   for UUID array interpolation and `ltree` casts.
-- [ ] 4.8 Replace Prisma-specific duplicate/error handling with database error
+- [ ] 4.10 Triage every `$queryRaw` site before rewriting: keep true special SQL
+  raw, wrap reusable SQL in typed Drizzle helpers, and replace Prisma-workaround
+  raw queries with Drizzle builders/RQB where practical.
+- [ ] 4.11 Replace Prisma-specific duplicate/error handling with database error
   mapping based on PostgreSQL SQLSTATE codes.
-- [ ] 4.9 Replace Prisma mock helpers in server tests with either focused
+- [ ] 4.12 Replace Prisma mock helpers in server tests with either focused
   repository mocks or a Drizzle test db abstraction. Do not keep a
   Prisma-shaped mock just to minimize test edits.
 
@@ -270,9 +373,19 @@ databases may be reset and reseeded.
 - [ ] 5.4 Preserve database-generated IDs: keep Better Auth configured so it does
   not generate application IDs for rows where the DB default should call
   `uuidv7()`.
-- [ ] 5.5 Convert auth seed helpers and reset helpers from Prisma to Drizzle.
-- [ ] 5.6 Re-run auth route/session/JWT tests and add coverage for Drizzle
+- [ ] 5.5 Add a focused Better Auth adapter test/spike proving inserts for core
+  auth tables omit IDs when `generateId: false` is active and the database
+  supplies UUIDv7 IDs.
+- [ ] 5.6 Convert the custom JWT/JWKS persistence layer in
+  `package/auth/src/session/jwt/prisma-adapter.ts` to Drizzle. Preserve `kid` as
+  `Jwks.id`, key encryption/decryption, rotation, grace period calculation, and
+  local issuer service upsert behavior.
+- [ ] 5.7 Convert auth seed helpers and reset helpers from Prisma to Drizzle.
+- [ ] 5.8 Re-run auth route/session/JWT tests and add coverage for Drizzle
   adapter wiring if existing tests only mock Prisma.
+- [ ] 5.9 Add or update JWT/JWKS tests that cover list/save/get/retire behavior
+  through the migrated persistence layer, including non-uuid `kid` IDs and
+  private key encryption when enabled.
 
 ## 6. Cross-package consumers and data workflows
 
