@@ -61,6 +61,14 @@ export const UnitVisibility = {
   PRIVATE: "PRIVATE",
 } as const;
 
+export const ModerationStatus = {
+  APPROVED: "APPROVED",
+  PENDING: "PENDING",
+  LIMITED: "LIMITED",
+  HIDDEN: "HIDDEN",
+  REMOVED: "REMOVED",
+} as const;
+
 export const AiDisclosureMode = {
   UNKNOWN: "UNKNOWN",
   NONE: "NONE",
@@ -101,6 +109,7 @@ export const prismaClientMock = {
   UnitAliasStatus,
   UnitType,
   UnitVisibility,
+  ModerationStatus,
   AiDisclosureMode,
   UserUnitProgressStatus,
 };

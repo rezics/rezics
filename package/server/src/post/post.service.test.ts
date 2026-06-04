@@ -109,7 +109,7 @@ const commentCreateMock = mock(
       visibility: "PUBLIC",
       licenseSlug: null,
       user: null,
-      contentModerationState: null,
+      moderationStatus: "APPROVED",
     },
   }),
 );
@@ -155,11 +155,21 @@ const realmUnitCreateMock = mock(async (args: any) => {
 const realmUnitUpsertMock = mock(async (args: any) => args.create);
 const realmUnitFindUniqueMock = mock(async (): Promise<any> => null);
 const realmUnitFindManyMock = mock(async () => [{ realmUnitId: "realm-1" }]);
-const realmModerationQueueItemCreateMock = mock(
-  async (args: any): Promise<any> => ({ id: "queue-1", ...args.data }),
+const moderationCaseCreateMock = mock(
+  async (args: any): Promise<any> => ({
+    id: "realm-case-1",
+    ...args.data,
+    createdAt: new Date("2026-05-31T00:00:00.000Z"),
+    updatedAt: new Date("2026-05-31T00:00:00.000Z"),
+  }),
 );
-const realmModerationEventCreateMock = mock(
-  async (args: any): Promise<any> => args.data,
+const moderationActionFindUniqueMock = mock(async (): Promise<any> => null);
+const moderationActionCreateMock = mock(
+  async (args: any): Promise<any> => ({
+    id: "action-1",
+    ...args.data,
+    createdAt: new Date("2026-05-31T00:00:00.000Z"),
+  }),
 );
 const unitTagCreateMock = mock(async (args: any) => args.data);
 const unitTagUpsertMock = mock(async (args: any) => args.create);
@@ -237,8 +247,11 @@ const transactionMock = mock(async (fn: any) =>
       upsert: realmUnitUpsertMock,
       findUnique: realmUnitFindUniqueMock,
     },
-    realmModerationQueueItem: { create: realmModerationQueueItemCreateMock },
-    realmModerationEvent: { create: realmModerationEventCreateMock },
+    moderationCase: { create: moderationCaseCreateMock },
+    moderationAction: {
+      findUnique: moderationActionFindUniqueMock,
+      create: moderationActionCreateMock,
+    },
     unitTag: {
       create: unitTagCreateMock,
       upsert: unitTagUpsertMock,
@@ -311,8 +324,11 @@ Object.assign(prismaMock, {
     findUnique: realmUnitFindUniqueMock,
     findMany: realmUnitFindManyMock,
   },
-  realmModerationQueueItem: { create: realmModerationQueueItemCreateMock },
-  realmModerationEvent: { create: realmModerationEventCreateMock },
+  moderationCase: { create: moderationCaseCreateMock },
+  moderationAction: {
+    findUnique: moderationActionFindUniqueMock,
+    create: moderationActionCreateMock,
+  },
   realm: { findMany: realmFindManyMock, findUnique: realmFindUniqueMock },
   realmMember: {
     findMany: realmMemberFindManyMock,
@@ -503,8 +519,10 @@ function resetMocks() {
   realmUnitFindUniqueMock.mockResolvedValue(null);
   realmUnitFindManyMock.mockClear();
   realmUnitFindManyMock.mockResolvedValue([{ realmUnitId: "realm-1" }]);
-  realmModerationQueueItemCreateMock.mockClear();
-  realmModerationEventCreateMock.mockClear();
+  moderationCaseCreateMock.mockClear();
+  moderationActionFindUniqueMock.mockClear();
+  moderationActionFindUniqueMock.mockResolvedValue(null);
+  moderationActionCreateMock.mockClear();
   unitTagCreateMock.mockClear();
   unitTagUpsertMock.mockClear();
   unitTagFindManyMock.mockClear();
@@ -585,13 +603,12 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(realmUnitCreateMock.mock.calls[0]?.[0].data).toMatchObject({
       realmUnitId: "realm-1",
       unitId: "post-1",
-      moderationState: "APPROVED",
-      visibilityState: "VISIBLE",
+      moderationStatus: "APPROVED",
       isLocked: false,
     });
   });
 
-  test("creates pending UnitRealm rows and queue items when content approval is required", async () => {
+  test("creates pending UnitRealm rows and realm cases when content approval is required", async () => {
     resetMocks();
     realmFindManyMock.mockImplementation(async (args: any) =>
       (args.where.unitId.in as string[]).map((unitId) => ({
@@ -608,16 +625,27 @@ describe("PostService.create realm/tag junction writes", () => {
     expect(realmUnitCreateMock.mock.calls[0]?.[0].data).toMatchObject({
       realmUnitId: "realm-1",
       unitId: "post-1",
-      moderationState: "PENDING_REVIEW",
-      visibilityState: "VISIBLE",
+      moderationStatus: "PENDING",
       isLocked: false,
     });
-    expect(realmModerationQueueItemCreateMock).toHaveBeenCalledWith({
+    expect(moderationCaseCreateMock).toHaveBeenCalledWith({
       data: expect.objectContaining({
+        scope: "REALM",
         realmUnitId: "realm-1",
-        targetKind: "realm-unit-submission",
+        targetKind: "UNIT_REALM",
         targetId: "post-1",
         addressedUnitId: "post-1",
+      }),
+    });
+    expect(moderationActionCreateMock).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        authority: "REALM",
+        realmUnitId: "realm-1",
+        targetKind: "UNIT_REALM",
+        targetId: "post-1",
+        actionKind: "NOTE",
+        resultingStatus: "PENDING",
+        caseId: "realm-case-1",
       }),
     });
   });
@@ -801,8 +829,7 @@ describe("PostService.submitToRealm", () => {
       create: {
         realmUnitId: "realm-1",
         unitId: "post-1",
-        moderationState: "APPROVED",
-        visibilityState: "VISIBLE",
+        moderationStatus: "APPROVED",
         isLocked: false,
       },
       update: {},
@@ -849,13 +876,12 @@ describe("PostService.submitToRealm", () => {
       create: {
         realmUnitId: "realm-1",
         unitId: "post-1",
-        moderationState: "PENDING_REVIEW",
-        visibilityState: "VISIBLE",
+        moderationStatus: "PENDING",
         isLocked: false,
       },
       update: {},
     });
-    expect(realmModerationQueueItemCreateMock).toHaveBeenCalledTimes(1);
+    expect(moderationCaseCreateMock).toHaveBeenCalledTimes(1);
   });
 
   test("does not silently re-approve rejected realm submissions", async () => {
@@ -867,7 +893,7 @@ describe("PostService.submitToRealm", () => {
       unit: { status: "PUBLISHED", publishedAt: new Date() },
     });
     realmUnitFindUniqueMock.mockResolvedValueOnce({
-      moderationState: "REJECTED",
+      moderationStatus: "REMOVED",
     });
 
     await expect(
@@ -953,8 +979,7 @@ describe("PostService.byRealm", () => {
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
       some: {
         realmUnitId: "realm-1",
-        moderationState: "APPROVED",
-        visibilityState: "VISIBLE",
+        moderationStatus: "APPROVED",
       },
     });
   });
@@ -1032,12 +1057,12 @@ describe("PostService.byRealm", () => {
 
     await service.byRealm(
       "realm-1",
-      { realmModerationState: "pending_review" },
+      { realmModerationStatus: "pending" },
       { isAdmin: true },
     );
 
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
-      some: { realmUnitId: "realm-1", moderationState: "PENDING_REVIEW" },
+      some: { realmUnitId: "realm-1", moderationStatus: "PENDING" },
     });
   });
 
@@ -1046,12 +1071,12 @@ describe("PostService.byRealm", () => {
 
     await service.byRealm(
       "realm-1",
-      { realmModerationState: "approved" },
+      { realmModerationStatus: "approved" },
       { isAdmin: true },
     );
 
     expect(firstPostFindManyArgs().where.unit.inRealms).toEqual({
-      some: { realmUnitId: "realm-1", moderationState: "APPROVED" },
+      some: { realmUnitId: "realm-1", moderationStatus: "APPROVED" },
     });
   });
 
@@ -1129,8 +1154,7 @@ describe("PostService.byRealm", () => {
     expect(unitWhere.inRealms).toEqual({
       some: {
         realmUnitId: "realm-1",
-        moderationState: "APPROVED",
-        visibilityState: "VISIBLE",
+        moderationStatus: "APPROVED",
       },
     });
     expect((postCountMock.mock.calls as any[])[0]?.[0].where).toEqual(

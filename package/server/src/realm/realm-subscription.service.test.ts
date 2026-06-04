@@ -56,7 +56,7 @@ mock.module("./realm-extra.service", () => ({
   clearSingleExtraKey: clearSingleExtraKeyMock,
 }));
 
-import { realmService } from "./realm.service";
+const { realmService } = await import("./realm.service");
 
 const REALM = "realm-unit-id";
 const USER = "user-unit-id";
@@ -444,6 +444,14 @@ describe("realmService.getMember", () => {
           scope: { kind: "realm", realmUnitId: REALM },
         },
         {
+          capability: "comment.moderate",
+          scope: { kind: "realm", realmUnitId: REALM },
+        },
+        {
+          capability: "realm.member.moderate",
+          scope: { kind: "realm", realmUnitId: REALM },
+        },
+        {
           capability: "tag.curate",
           scope: { kind: "realm", realmUnitId: REALM },
           expiresAt: null,
@@ -695,8 +703,8 @@ describe("realmService.resolveRule", () => {
           targetUnitId: null,
           status: "PUBLISHED",
           visibility: "PUBLIC",
+          moderationStatus: "APPROVED",
           licenseSlug: null,
-          contentModerationState: null,
           inRealms: [],
           supportLanguages: [
             {

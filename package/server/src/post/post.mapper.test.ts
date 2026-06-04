@@ -34,9 +34,9 @@ const basePost = {
     targetUnitId: null,
     status: "PUBLISHED",
     visibility: "PUBLIC",
+    moderationStatus: "APPROVED",
     licenseSlug: null,
     user: null,
-    contentModerationState: null,
     inRealms: [],
     supportLanguages: [
       { unitId: "post-1", language: "en", isPrimary: true, sortOrder: 0 },

@@ -88,13 +88,9 @@ describe("post work-domain contract fields", () => {
     expect("maxDepth" in postListQuerySchema.properties).toBe(false);
 
     expect("realmLifecycleState" in postListQuerySchema.properties).toBe(false);
-    expect(
-      Value.Check(postListQuerySchema, {
-        realmUnitId: "realm-1",
-        realmModerationState: "quarantined",
-        limit: 20,
-      }),
-    ).toBe(false);
+    expect("realmModerationState" in postListQuerySchema.properties).toBe(
+      false,
+    );
   });
 
   test("does not accept comment topology on post creation", () => {
