@@ -442,6 +442,10 @@ databases may be reset and reseeded.
     transaction, `sql`, and schema tables; `seedBaseline()` returns the
     Drizzle-seeded scope map so factory no longer re-queries `SlugScope` through
     Prisma before creating the factory seed context.
+  - Applied progress: baseline server user seed, infra user seed, and
+    `reset-root` now upsert server `Unit`/`User` rows through Drizzle and use
+    the Drizzle system-shelf adapter. Full infra taxonomy seed and factory
+    scenarios still use the legacy Prisma-shaped seed context.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 

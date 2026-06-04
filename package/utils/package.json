@@ -33,6 +33,7 @@
     "@rezics/search": "workspace:*",
     "@rezics/server": "workspace:*",
     "@t3-oss/env-core": "^0.13.10",
+    "drizzle-orm": "1.0.0-rc.3",
     "dotenv": "^17.2.3",
     "valibot": "^1.2.0"
   }

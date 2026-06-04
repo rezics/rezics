@@ -4,12 +4,15 @@ import {
   slugify,
 } from "@rezics/auth/seed";
 import { DEFAULT_PUBLICATION_LICENSE_SLUG } from "@rezics/contract";
-import { bootstrapSystemShelves } from "@rezics/server/db/seed-factory/system-shelves";
 import type { SlugScopesMap } from "@rezics/server/db/seed/infra/seed-slug-scopes";
-import type {
-  AuthPrismaClient,
-  ServerPrismaClient,
-} from "../lib/prisma-factory";
+import { Unit, User } from "@rezics/server/db/schema";
+import {
+  bootstrapSystemShelves,
+  createDrizzleSystemShelfClient,
+} from "@rezics/server/shelf/system-shelves";
+import { and, eq, sql } from "drizzle-orm";
+import type { AuthPrismaClient } from "../lib/prisma-factory";
+import type { ServerSeedDb } from "./infra";
 
 export const ROOT_EMAIL = "root@rezics.com";
 export const ROOT_SLUG = "root-user";
@@ -92,65 +95,80 @@ interface SeedServerUserInput {
   settings?: unknown;
 }
 
+type ServerUserSeedDb = ServerSeedDb & {
+  insert: any;
+  update: any;
+};
+
 /**
  * Idempotently upsert the matching USER Unit (carrying the user-scope slug)
  * and the User extension row.
  */
 async function seedServerUser(
-  prisma: ServerPrismaClient,
+  db: ServerUserSeedDb,
   userScope: string,
   input: SeedServerUserInput,
 ): Promise<void> {
-  await prisma.unit.upsert({
-    where: { id: input.unitId },
-    update: { slug: input.slug, slugScope: userScope },
-    create: {
-      id: input.unitId,
-      type: "USER",
-      slug: input.slug,
-      slugScope: userScope,
-      status: "PUBLISHED",
-      visibility: "PUBLIC",
-      isLanguageNeutral: true,
-    },
-  });
+  await db.transaction(async (tx) => {
+    const now = new Date();
+    await tx
+      .insert(Unit)
+      .values({
+        id: input.unitId,
+        type: "USER",
+        slug: input.slug,
+        slugScope: userScope,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        isLanguageNeutral: true,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: Unit.id,
+        set: { slug: input.slug, slugScope: userScope, updatedAt: now },
+      });
 
-  await prisma.user.upsert({
-    where: { unitId: input.unitId },
-    update: {
+    const userData = {
       authUserId: input.unitId,
       email: input.email,
       name: input.name,
-      avatar: input.avatar,
-      bio: input.bio,
-      permission: input.permission as never,
-      settings: input.settings as never,
-    },
-    create: {
-      unitId: input.unitId,
-      authUserId: input.unitId,
-      email: input.email,
-      name: input.name,
-      avatar: input.avatar,
-      bio: input.bio,
-      permission: input.permission as never,
-      settings: input.settings as never,
-      joinDate: new Date(),
-    },
-  });
+      avatar: input.avatar ?? null,
+      bio: input.bio ?? null,
+      permission: input.permission,
+      settings: input.settings,
+      updatedAt: now,
+    };
 
-  await bootstrapSystemShelves(input.unitId, input.slug, prisma);
+    await tx
+      .insert(User)
+      .values({
+        ...userData,
+        unitId: input.unitId,
+        joinDate: now,
+      })
+      .onConflictDoUpdate({
+        target: User.unitId,
+        set: userData,
+      });
+
+    await bootstrapSystemShelves(
+      input.unitId,
+      input.slug,
+      createDrizzleSystemShelfClient(tx),
+    );
+  });
 }
 
 async function resolveOrCreateInfraUserUnit(
-  prisma: ServerPrismaClient,
+  db: ServerUserSeedDb,
   userScope: string,
   input: InfraUserSeedInput,
 ): Promise<string> {
-  const existingUnit = await prisma.unit.findUnique({
-    where: { slugScope_slug: { slugScope: userScope, slug: input.slug } },
-    select: { id: true, type: true },
-  });
+  const [existingUnit] = await db
+    .select({ id: Unit.id, type: Unit.type })
+    .from(Unit)
+    .where(and(eq(Unit.slugScope, userScope), eq(Unit.slug, input.slug)))
+    .limit(1);
 
   if (existingUnit) {
     if (existingUnit.type !== "USER") {
@@ -161,25 +179,24 @@ async function resolveOrCreateInfraUserUnit(
     return existingUnit.id;
   }
 
-  return prisma.$transaction(async (tx) => {
-    const rows = await tx.$queryRaw<{ id: string }[]>`SELECT uuidv7() as id`;
-    const id = rows[0]?.id;
+  return db.transaction(async (tx) => {
+    const result = await tx.execute(sql`SELECT uuidv7() as id`);
+    const id = (result.rows as Array<{ id?: string }>)[0]?.id;
     if (!id) {
       throw new Error(
         `[Seed] uuidv7() returned no row when creating infra user "${input.slug}"`,
       );
     }
 
-    await tx.unit.create({
-      data: {
-        id,
-        type: "USER",
-        slug: input.slug,
-        slugScope: userScope,
-        status: "PUBLISHED",
-        visibility: "PUBLIC",
-        isLanguageNeutral: true,
-      },
+    await tx.insert(Unit).values({
+      id,
+      type: "USER",
+      slug: input.slug,
+      slugScope: userScope,
+      status: "PUBLISHED",
+      visibility: "PUBLIC",
+      isLanguageNeutral: true,
+      updatedAt: new Date(),
     });
 
     return id;
@@ -187,55 +204,138 @@ async function resolveOrCreateInfraUserUnit(
 }
 
 export async function seedInfraUsers(
-  prisma: ServerPrismaClient,
+  db: ServerUserSeedDb,
   slugScopes: SlugScopesMap,
 ): Promise<Record<(typeof INFRA_USERS)[number]["slug"], string>> {
   const results: Record<string, string> = {};
 
   for (const input of INFRA_USERS) {
     const unitId = await resolveOrCreateInfraUserUnit(
-      prisma,
+      db,
       slugScopes.user,
       input,
     );
+    const now = new Date();
 
-    await prisma.unit.update({
-      where: { id: unitId },
-      data: {
+    await db
+      .update(Unit)
+      .set({
         slug: input.slug,
         slugScope: slugScopes.user,
         status: "PUBLISHED",
         visibility: "PUBLIC",
         isLanguageNeutral: true,
-      },
-    });
+        updatedAt: now,
+      })
+      .where(eq(Unit.id, unitId));
 
-    await prisma.user.upsert({
-      where: { unitId },
-      update: {
-        authUserId: null,
-        email: null,
-        name: input.name,
-        bio: input.bio,
-        permission: null as never,
-        settings: null as never,
-      },
-      create: {
+    const userData = {
+      authUserId: null,
+      email: null,
+      name: input.name,
+      bio: input.bio,
+      permission: null,
+      settings: null,
+      updatedAt: now,
+    };
+    await db
+      .insert(User)
+      .values({
+        ...userData,
         unitId,
-        authUserId: null,
-        email: null,
-        name: input.name,
-        bio: input.bio,
-        permission: null as never,
-        settings: null as never,
-        joinDate: new Date(),
-      },
-    });
+        joinDate: now,
+      })
+      .onConflictDoUpdate({
+        target: User.unitId,
+        set: userData,
+      });
 
     results[input.slug] = unitId;
   }
 
   return results;
+}
+
+export async function seedAllMainUsers(
+  serverDb: ServerUserSeedDb,
+  authResults: AuthSeedResults,
+  slugScopes: SlugScopesMap,
+): Promise<SeedAllUsersResult> {
+  let rootUserId: string | undefined;
+  const results: SeedAllUsersResult["results"] = [];
+
+  for (const input of SEED_USERS) {
+    const authResult = authResults.get(input.email);
+    if (!authResult) {
+      throw new Error(`Auth result missing for seed user ${input.email}`);
+    }
+    const slug = resolveSeedUserSlug(input);
+
+    await seedServerUser(serverDb, slugScopes.user, {
+      unitId: authResult.userId,
+      slug,
+      email: authResult.email,
+      name: authResult.name,
+      bio: input.bio,
+      permission: input.permission,
+      settings: input.settings,
+    });
+
+    const result: CrossSeedUserResult = { ...authResult, slug };
+    const serverRole = getServerRole(input);
+    results.push({ result, serverRole });
+    if (input.email === ROOT_EMAIL) {
+      rootUserId = result.userId;
+    }
+  }
+
+  if (!rootUserId) {
+    throw new Error("Root user not found after seeding.");
+  }
+
+  const infraUserIds = await seedInfraUsers(serverDb, slugScopes);
+
+  return { rootUserId, infraUserIds, results };
+}
+
+async function findUserByUnitId(db: ServerUserSeedDb, unitId: string) {
+  return (
+    (
+      await db
+        .select({ unitId: User.unitId })
+        .from(User)
+        .where(eq(User.unitId, unitId))
+        .limit(1)
+    )[0] ?? null
+  );
+}
+
+async function findUserByAuthUserId(db: ServerUserSeedDb, authUserId: string) {
+  return (
+    (
+      await db
+        .select({ unitId: User.unitId })
+        .from(User)
+        .where(eq(User.authUserId, authUserId))
+        .limit(1)
+    )[0] ?? null
+  );
+}
+
+async function findUserUnitBySlug(
+  db: ServerUserSeedDb,
+  userScope: string,
+  slug: string,
+) {
+  return (
+    (
+      await db
+        .select({ id: Unit.id, type: Unit.type })
+        .from(Unit)
+        .where(and(eq(Unit.slugScope, userScope), eq(Unit.slug, slug)))
+        .limit(1)
+    )[0] ?? null
+  );
 }
 
 export type CrossSeedUserResult = SeedAuthUserResult & {
@@ -274,48 +374,6 @@ export interface SeedAllUsersResult {
   results: Array<{ result: CrossSeedUserResult; serverRole: string }>;
 }
 
-export async function seedAllMainUsers(
-  serverPrisma: ServerPrismaClient,
-  authResults: AuthSeedResults,
-  slugScopes: SlugScopesMap,
-): Promise<SeedAllUsersResult> {
-  let rootUserId: string | undefined;
-  const results: SeedAllUsersResult["results"] = [];
-
-  for (const input of SEED_USERS) {
-    const authResult = authResults.get(input.email);
-    if (!authResult) {
-      throw new Error(`Auth result missing for seed user ${input.email}`);
-    }
-    const slug = resolveSeedUserSlug(input);
-
-    await seedServerUser(serverPrisma, slugScopes.user, {
-      unitId: authResult.userId,
-      slug,
-      email: authResult.email,
-      name: authResult.name,
-      bio: input.bio,
-      permission: input.permission,
-      settings: input.settings,
-    });
-
-    const result: CrossSeedUserResult = { ...authResult, slug };
-    const serverRole = getServerRole(input);
-    results.push({ result, serverRole });
-    if (input.email === ROOT_EMAIL) {
-      rootUserId = result.userId;
-    }
-  }
-
-  if (!rootUserId) {
-    throw new Error("Root user not found after seeding.");
-  }
-
-  const infraUserIds = await seedInfraUsers(serverPrisma, slugScopes);
-
-  return { rootUserId, infraUserIds, results };
-}
-
 export interface ResetRootUserResult {
   result: CrossSeedUserResult;
   serverRole: string;
@@ -323,7 +381,7 @@ export interface ResetRootUserResult {
 
 export async function resetRootUser(
   authPrisma: AuthPrismaClient,
-  serverPrisma: ServerPrismaClient,
+  serverDb: ServerUserSeedDb,
   slugScopes: SlugScopesMap,
 ): Promise<ResetRootUserResult> {
   const rootInput = SEED_USERS.find((user) => user.email === ROOT_EMAIL);
@@ -343,18 +401,9 @@ export async function resetRootUser(
   const slug = resolveSeedUserSlug(rootInput);
 
   const [byUnitId, byAuthUserId, byUnitSlug] = await Promise.all([
-    serverPrisma.user.findUnique({
-      where: { unitId: authResult.userId },
-      select: { unitId: true },
-    }),
-    serverPrisma.user.findUnique({
-      where: { authUserId: authResult.userId },
-      select: { unitId: true },
-    }),
-    serverPrisma.unit.findUnique({
-      where: { slugScope_slug: { slugScope: userScope, slug } },
-      select: { id: true, type: true },
-    }),
+    findUserByUnitId(serverDb, authResult.userId),
+    findUserByAuthUserId(serverDb, authResult.userId),
+    findUserUnitBySlug(serverDb, userScope, slug),
   ]);
 
   const candidateIds = [
@@ -376,11 +425,11 @@ export async function resetRootUser(
   }
 
   const targetUnitId = candidateIds[0] ?? authResult.userId;
+  const now = new Date();
 
-  await serverPrisma.unit.upsert({
-    where: { id: targetUnitId },
-    update: { slug, slugScope: userScope },
-    create: {
+  await serverDb
+    .insert(Unit)
+    .values({
       id: targetUnitId,
       type: "USER",
       slug,
@@ -388,27 +437,34 @@ export async function resetRootUser(
       status: "PUBLISHED",
       visibility: "PUBLIC",
       isLanguageNeutral: true,
-    },
-  });
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: Unit.id,
+      set: { slug, slugScope: userScope, updatedAt: now },
+    });
 
   const data = {
     authUserId: authResult.userId,
     email: authResult.email,
     name: authResult.name,
-    bio: rootInput.bio,
-    permission: rootInput.permission as never,
-    settings: rootInput.settings as never,
+    bio: rootInput.bio ?? null,
+    permission: rootInput.permission,
+    settings: rootInput.settings,
+    updatedAt: now,
   };
 
-  await serverPrisma.user.upsert({
-    where: { unitId: targetUnitId },
-    update: data,
-    create: {
+  await serverDb
+    .insert(User)
+    .values({
       ...data,
       unitId: targetUnitId,
-      joinDate: new Date(),
-    },
-  });
+      joinDate: now,
+    })
+    .onConflictDoUpdate({
+      target: User.unitId,
+      set: data,
+    });
 
   return {
     result: { ...authResult, slug },

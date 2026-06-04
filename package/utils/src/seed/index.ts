@@ -89,7 +89,7 @@ export async function seedBaseline(
 
   const authResults = await seedAllAuthUsers(authPrisma);
   const { rootUserId, results } = await seedAllMainUsers(
-    serverPrisma,
+    opts.serverSeedDb,
     authResults,
     slugScopes,
   );
@@ -133,9 +133,6 @@ export async function runResetRoot(): Promise<void> {
   const env = getEnv();
   const { createServerDb } = await import("@rezics/server/db/factory");
   const authPrisma: AuthPrismaClient = createAuthPrisma(env.AUTH_DATABASE_URL);
-  const serverPrisma: ServerPrismaClient = createServerPrisma(
-    env.SERVER_DATABASE_URL,
-  );
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);
 
   try {
@@ -148,7 +145,7 @@ export async function runResetRoot(): Promise<void> {
     rootSpinner.start("Resetting root user...");
     const { result, serverRole } = await resetRootUser(
       authPrisma,
-      serverPrisma,
+      serverDb.db,
       slugScopes,
     );
     rootSpinner.stop("Root user reset.");
@@ -157,7 +154,6 @@ export async function runResetRoot(): Promise<void> {
   } finally {
     await Promise.all([
       authPrisma.disconnect().catch(() => {}),
-      serverPrisma.$disconnect().catch(() => {}),
       serverDb.disconnect().catch(() => {}),
     ]);
   }
