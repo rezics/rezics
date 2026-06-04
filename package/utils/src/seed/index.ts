@@ -8,7 +8,7 @@ import {
   createServerPrisma,
   type ServerPrismaClient,
 } from "../lib/prisma-factory";
-import { seedInfra, seedSlugScopes } from "./infra";
+import { type ServerSeedDb, seedInfra, seedSlugScopes } from "./infra";
 import {
   type CrossSeedUserResult,
   resetRootUser,
@@ -18,6 +18,7 @@ import {
 
 export interface RunSeedOptions {
   resetDatabases?: boolean;
+  serverSeedDb?: ServerSeedDb;
   serverResetDb?: Parameters<typeof resetDatabase>[0];
 }
 
@@ -28,6 +29,7 @@ export interface SeedCredential {
 
 export interface SeedBaselineResult {
   credentials: SeedCredential[];
+  slugScopes: Awaited<ReturnType<typeof seedSlugScopes>>;
 }
 
 export function printSeedCredentials(
@@ -62,6 +64,10 @@ export async function seedBaseline(
 ): Promise<SeedBaselineResult> {
   const resetDatabases = opts.resetDatabases ?? false;
 
+  if (!opts.serverSeedDb) {
+    throw new Error("Seed baseline requires a Drizzle server database client.");
+  }
+
   if (resetDatabases) {
     if (!opts.serverResetDb) {
       throw new Error("Reset mode requires a Drizzle server database client.");
@@ -75,7 +81,7 @@ export async function seedBaseline(
 
   const scopeSpinner = p.spinner();
   scopeSpinner.start("Seeding slug scopes...");
-  const slugScopes = await seedSlugScopes(serverPrisma);
+  const slugScopes = await seedSlugScopes(opts.serverSeedDb);
   scopeSpinner.stop("Slug scopes seeded.");
 
   const userSpinner = p.spinner();
@@ -92,50 +98,50 @@ export async function seedBaseline(
 
   const infraSpinner = p.spinner();
   infraSpinner.start("Seeding infrastructure...");
-  await seedInfra(serverPrisma, rootUserId);
+  await seedInfra(serverPrisma, rootUserId, { slugScopes });
   infraSpinner.stop("Infrastructure seeded.");
 
-  return { credentials: results };
+  return { credentials: results, slugScopes };
 }
 
 export async function runSeed(opts: RunSeedOptions = {}): Promise<void> {
   const env = getEnv();
+  const { createServerDb } = await import("@rezics/server/db/factory");
   const authPrisma: AuthPrismaClient = createAuthPrisma(env.AUTH_DATABASE_URL);
   const serverPrisma: ServerPrismaClient = createServerPrisma(
     env.SERVER_DATABASE_URL,
   );
-  const serverResetDb = opts.resetDatabases
-    ? (await import("@rezics/server/db")).createServerDb(
-        env.SERVER_DATABASE_URL,
-      )
-    : null;
+  const serverDb = createServerDb(env.SERVER_DATABASE_URL);
 
   try {
     const { credentials } = await seedBaseline(authPrisma, serverPrisma, {
       ...opts,
-      ...(serverResetDb ? { serverResetDb: serverResetDb.db } : {}),
+      serverSeedDb: serverDb.db,
+      ...(opts.resetDatabases ? { serverResetDb: serverDb.db } : {}),
     });
     printSeedCredentials(credentials);
   } finally {
     await Promise.all([
       authPrisma.disconnect().catch(() => {}),
       serverPrisma.$disconnect().catch(() => {}),
-      serverResetDb?.disconnect().catch(() => {}),
+      serverDb.disconnect().catch(() => {}),
     ]);
   }
 }
 
 export async function runResetRoot(): Promise<void> {
   const env = getEnv();
+  const { createServerDb } = await import("@rezics/server/db/factory");
   const authPrisma: AuthPrismaClient = createAuthPrisma(env.AUTH_DATABASE_URL);
   const serverPrisma: ServerPrismaClient = createServerPrisma(
     env.SERVER_DATABASE_URL,
   );
+  const serverDb = createServerDb(env.SERVER_DATABASE_URL);
 
   try {
     const s = p.spinner();
     s.start("Seeding slug scopes...");
-    const slugScopes = await seedSlugScopes(serverPrisma);
+    const slugScopes = await seedSlugScopes(serverDb.db);
     s.stop("Slug scopes ready.");
 
     const rootSpinner = p.spinner();
@@ -152,6 +158,7 @@ export async function runResetRoot(): Promise<void> {
     await Promise.all([
       authPrisma.disconnect().catch(() => {}),
       serverPrisma.$disconnect().catch(() => {}),
+      serverDb.disconnect().catch(() => {}),
     ]);
   }
 }

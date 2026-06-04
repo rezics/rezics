@@ -9,7 +9,7 @@ import {
   type RealmTaxonomySeedResult,
   seedRealmTaxonomy,
 } from "./seed-realm-taxonomy";
-import { type SlugScopesMap, seedSlugScopes } from "./seed-slug-scopes";
+import type { SlugScopesMap } from "./seed-slug-scopes";
 import { seedContentTypeTags, seedSearchTagIds } from "./seed-tags";
 
 export { seedDefaultRealm } from "./seed-default-realm";
@@ -33,6 +33,10 @@ export interface SeedInfraResult {
   gameMediaTaxonomy: GameMediaTaxonomySeedResult;
 }
 
+export interface SeedInfraOptions {
+  slugScopes: SlugScopesMap;
+}
+
 /**
  * Shared infrastructure seeder.
  *
@@ -43,8 +47,14 @@ export interface SeedInfraResult {
 export async function seedInfra(
   prisma: PrismaClient,
   rootUserId: string,
+  opts?: SeedInfraOptions,
 ): Promise<SeedInfraResult> {
-  const slugScopes = await seedSlugScopes(prisma);
+  if (!opts?.slugScopes) {
+    throw new Error(
+      "seedInfra requires slugScopes from the Drizzle seedSlugScopes() step.",
+    );
+  }
+  const { slugScopes } = opts;
   const tagMap = await seedContentTypeTags(prisma, slugScopes);
   const defaultRealmId = await seedDefaultRealm(prisma, rootUserId, slugScopes);
   const realmTaxonomy = await seedRealmTaxonomy(

@@ -1,7 +1,5 @@
 import { readFileSync } from "node:fs";
 import * as p from "@clack/prompts";
-import { SLUG_SCOPES } from "@rezics/contract";
-import { createServerDb } from "@rezics/server/db";
 import {
   FACTORY_SCENARIO_NAMES,
   FACTORY_SCENARIOS,
@@ -243,6 +241,7 @@ function loadPlanFromFile(planFile: string): SeedPlan {
 
 async function runEchoKvOnly(): Promise<void> {
   const env = getEnv();
+  const { createServerDb } = await import("@rezics/server/db/factory");
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);
   try {
     const { seedEchoKVWithDb } = await import(
@@ -293,7 +292,9 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
   }
 
   const env = getEnv();
+  const { createServerDb } = await import("@rezics/server/db/factory");
   const prisma = createServerPrisma(env.SERVER_DATABASE_URL);
+  const serverDb = createServerDb(env.SERVER_DATABASE_URL);
   const authPrisma = createAuthPrisma(env.AUTH_DATABASE_URL);
   const searchClient = createSeedSearchClient({
     host: env.MEILI_HOST,
@@ -314,21 +315,9 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
       const { initMeiliSearch } = await import("@rezics/server/db/seed");
       await initMeiliSearch(searchClient, { clean: true });
     }
-    const { credentials } = await seedBaseline(authPrisma, prisma);
-    const slugScopeRows = await prisma.slugScope.findMany({
-      select: { slug: true, unitId: true },
+    const { credentials, slugScopes } = await seedBaseline(authPrisma, prisma, {
+      serverSeedDb: serverDb.db,
     });
-    const scopeMap = new Map(
-      slugScopeRows.map((r) => [r.slug, r.unitId] as const),
-    );
-    const slugScopes = {} as Record<string, string>;
-    for (const name of SLUG_SCOPES) {
-      const id = scopeMap.get(name);
-      if (!id) {
-        throw new Error(`Slug scope "${name}" is missing — seed first.`);
-      }
-      slugScopes[name] = id;
-    }
     const ctx = makeSeedCtx(
       prisma,
       authPrisma,
@@ -350,6 +339,9 @@ export async function runFactory(opts: RunFactoryOptions): Promise<void> {
     printSpecialTargets(result, runtime.config.manifestFormat);
     printSeedCredentials(credentials);
   } finally {
-    await runtime.dispose();
+    await Promise.all([
+      runtime.dispose(),
+      serverDb.disconnect().catch(() => {}),
+    ]);
   }
 }

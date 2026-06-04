@@ -1,10 +1,10 @@
-import { createServerDb } from "@rezics/server/db";
 import { getEnv } from "../lib/env";
 import { createAuthPrisma } from "../lib/prisma-factory";
 import { createSeedSearchClient } from "../lib/search";
 
 export async function runDbReset(): Promise<void> {
   const { resetDatabase } = await import("@rezics/server/db/seed/database");
+  const { createServerDb } = await import("@rezics/server/db/factory");
   const { resetAuthDatabase } = await import("@rezics/auth/seed");
   const env = getEnv();
   const serverDb = createServerDb(env.SERVER_DATABASE_URL);

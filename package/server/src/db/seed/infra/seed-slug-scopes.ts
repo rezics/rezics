@@ -1,7 +1,10 @@
 import { SLUG_SCOPES, type SlugScopeName } from "@rezics/contract";
-import type { PrismaClient } from "../../../../prisma/generated/client.js";
+import { eq, sql } from "drizzle-orm";
+import type { ServerDb } from "../../client";
+import { SlugScope, Unit } from "../../schema";
 
 export type SlugScopesMap = Record<SlugScopeName, string>;
+type SlugScopeSeedDb = Pick<ServerDb, "select" | "transaction">;
 
 /**
  * Seed the five named slug-scope placeholder Units and their `SlugScope`
@@ -17,17 +20,18 @@ export type SlugScopesMap = Record<SlugScopeName, string>;
  * Runs before any other slug-bearing seed.
  */
 export async function seedSlugScopes(
-  prisma: PrismaClient,
+  db: SlugScopeSeedDb,
 ): Promise<SlugScopesMap> {
   console.log("[Seed] Seeding slug scopes...");
 
   const map = {} as SlugScopesMap;
 
   for (const name of SLUG_SCOPES) {
-    const existing = await prisma.slugScope.findUnique({
-      where: { slug: name },
-      select: { unitId: true },
-    });
+    const [existing] = await db
+      .select({ unitId: SlugScope.unitId })
+      .from(SlugScope)
+      .where(eq(SlugScope.slug, name))
+      .limit(1);
 
     if (existing) {
       map[name] = existing.unitId;
@@ -37,30 +41,27 @@ export async function seedSlugScopes(
       continue;
     }
 
-    const unitId = await prisma.$transaction(async (tx) => {
-      const rows = await tx.$queryRaw<{ id: string }[]>`SELECT uuidv7() as id`;
-      const id = rows[0]?.id;
+    const unitId = await db.transaction(async (tx) => {
+      const result = await tx.execute(sql`SELECT uuidv7() as id`);
+      const id = (result.rows as Array<{ id?: string }>)[0]?.id;
       if (!id) {
         throw new Error(
           `[Seed] uuidv7() returned no row when creating slug scope "${name}"`,
         );
       }
 
-      await tx.unit.create({
-        data: {
-          id,
-          type: "SCOPE",
-          slug: null,
-          slugScope: id,
-          status: "PUBLISHED",
-          visibility: "PUBLIC",
-          isLanguageNeutral: true,
-        },
+      await tx.insert(Unit).values({
+        id,
+        type: "SCOPE",
+        slug: null,
+        slugScope: id,
+        status: "PUBLISHED",
+        visibility: "PUBLIC",
+        isLanguageNeutral: true,
+        updatedAt: new Date(),
       });
 
-      await tx.slugScope.create({
-        data: { slug: name, unitId: id },
-      });
+      await tx.insert(SlugScope).values({ slug: name, unitId: id });
 
       return id;
     });

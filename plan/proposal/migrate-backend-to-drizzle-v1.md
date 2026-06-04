@@ -438,6 +438,10 @@ databases may be reset and reseeded.
   - Applied progress: `factory --only echokv` now uses
     `seedEchoKVWithDb(serverDb.db)` through `createServerDb`; full factory
     scenarios still use the legacy Prisma-shaped seed context.
+  - Applied progress: `seedSlugScopes()` now uses Drizzle `select`,
+    transaction, `sql`, and schema tables; `seedBaseline()` returns the
+    Drizzle-seeded scope map so factory no longer re-queries `SlugScope` through
+    Prisma before creating the factory seed context.
 - [x] 6.8 Update comments and package READMEs that refer to "Prisma-backed"
   behavior, especially search, job, shared, server, auth, ranking, and tool docs.
 
