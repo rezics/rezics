@@ -250,7 +250,7 @@ databases may be reset and reseeded.
 
 ## 2. Drizzle schema layout
 
-- [ ] 2.1 Create a shared schema helper module for PostgreSQL columns:
+- [x] 2.1 Create a shared schema helper module for PostgreSQL columns:
   `uuidv7PrimaryKey`, `uuidv7`, `timestamps`, JSON column helpers, text array
   helpers, enum naming helpers, and nullable timestamp conventions.
 - [x] 2.2 Create a custom `ltree` Drizzle type for server query typing, while
@@ -264,15 +264,15 @@ databases may be reset and reseeded.
 - [x] 2.4 Keep the `Unit` / server-side `User` FK cycle in one low-level schema
   area or break it with callback references so import cycles do not leak across
   the whole schema.
-- [ ] 2.5 Put Drizzle RQB v2 relation definitions under
+- [x] 2.5 Put Drizzle RQB v2 relation definitions under
   `package/server/src/db/relations/`, using `defineRelations` and
   `defineRelationsPart` where files become too large.
-- [ ] 2.6 Inventory and model all composite/multi-column FKs with table-callback
+- [x] 2.6 Inventory and model all composite/multi-column FKs with table-callback
   `foreignKey({ columns, foreignColumns })`, including
   `ShelfUnitRelation`, `RealmCapabilityGrant`, `CreditAttributionEvidence`,
   `PollVote`, `RealmTagApplicationVote`, and any additional composite FK found
   during schema conversion.
-- [ ] 2.7 Establish JSON column typing rules in schema helpers: default to
+- [x] 2.7 Establish JSON column typing rules in schema helpers: default to
   opaque JSON transport; allow `.$type<T>()` only when `T` is imported/inferred
   from `@rezics/contract` or a storage-owned domain type such as JWK.
 - [ ] 2.8 Move public enum value ownership out of ORM-generated types. For every
@@ -283,7 +283,7 @@ databases may be reset and reseeded.
   `package/auth/src/db/schema/`, `package/notify/src/db/schema/`,
   `package/reaction/src/db/schema/`, `package/history/src/db/schema/`, and
   `package/ranking/src/db/schema/`.
-- [ ] 2.10 Each schema package exports `schema`, `relations`, db type aliases,
+- [x] 2.10 Each schema package exports `schema`, `relations`, db type aliases,
   enum values, and row insert/select types from a single stable public module.
 - [x] 2.11 Add a convention check or targeted test that every configured schema
   folder exports all table/enums required by Drizzle Kit.

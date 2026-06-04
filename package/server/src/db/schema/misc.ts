@@ -1,34 +1,37 @@
 import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   bigint,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
 import { EmailVerificationContractStatus } from "./enums";
 import { User } from "./identity";
 
 export const EchoKV = pgTable("EchoKV", {
   key: text().primaryKey(),
-  value: jsonb().notNull(),
-  createdAt: timestamp({ precision: 3 })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp({ precision: 3 }).notNull(),
+  value: jsonData().notNull(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 export const EmailVerificationContract = pgTable(
   "EmailVerificationContract",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     contractName: varchar({ length: 96 }).notNull(),
     ownerId: uuid().notNull(),
     email: varchar({ length: 320 }).notNull(),
@@ -36,14 +39,12 @@ export const EmailVerificationContract = pgTable(
     codeHash: text(),
     deliveryStatus: varchar({ length: 64 }),
     source: varchar({ length: 64 }),
-    verifiedAt: timestamp({ precision: 3 }),
-    expiresAt: timestamp({ precision: 3 }),
-    lastSentAt: timestamp({ precision: 3 }),
+    verifiedAt: nullableTimestamp(),
+    expiresAt: nullableTimestamp(),
+    lastSentAt: nullableTimestamp(),
     attempts: integer().default(0).notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     uniqueIndex(
@@ -70,7 +71,7 @@ export const EmailVerificationContract = pgTable(
 export const HistoryOutbox = pgTable(
   "HistoryOutbox",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     unitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -82,21 +83,19 @@ export const HistoryOutbox = pgTable(
         onUpdate: "cascade",
       }),
     category: varchar({ length: 64 }).notNull(),
-    payload: jsonb().notNull(),
+    payload: jsonData().notNull(),
     payloadHash: varchar({ length: 64 }),
     status: varchar({ length: 32 }).default("pending").notNull(),
     attempts: integer().default(0).notNull(),
-    nextAttemptAt: timestamp({ precision: 3 }),
-    processedAt: timestamp({ precision: 3 }),
+    nextAttemptAt: nullableTimestamp(),
+    processedAt: nullableTimestamp(),
     processedById: uuid().references(() => User.unitId, {
       onDelete: "set null",
       onUpdate: "cascade",
     }),
     lastError: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("HistoryOutbox_actorUserId_createdAt_idx").using(
@@ -132,5 +131,5 @@ export const UnitHistoryClock = pgTable("UnitHistoryClock", {
     .primaryKey()
     .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
   nextSequence: bigint({ mode: "number" }).default(1).notNull(),
-  updatedAt: timestamp({ precision: 3 }).notNull(),
+  updatedAt: updatedAt(),
 });

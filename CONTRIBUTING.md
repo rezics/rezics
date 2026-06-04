@@ -80,7 +80,7 @@ Every `*ListQuerySchema` spreads `listGetQueryBase.properties` from `@rezics/con
 ### Folder Convention (dual-track)
 
 - **Domain / feature folders** are **singular**: `book/`, `user/`, `translation-group/`
-- **Container folders** are **plural** from a fixed allowlist: `hooks`, `utils`, `components`, `pages`, `sections`, `states`, `models`, `types`, `routes`, `handlers`, `providers`, `plugins`, `styles`, `helpers`, `constants`, `fixtures`, `mocks`, `layouts`, `assets`, `docs`, `templates`
+- **Container folders** are **plural** from a fixed allowlist: `hooks`, `utils`, `components`, `pages`, `sections`, `states`, `models`, `types`, `routes`, `relations`, `handlers`, `providers`, `plugins`, `styles`, `helpers`, `constants`, `fixtures`, `mocks`, `layouts`, `assets`, `docs`, `templates`
 - Everything else is singular. Allowlist changes require a spec amendment.
 
 ### Enforcement

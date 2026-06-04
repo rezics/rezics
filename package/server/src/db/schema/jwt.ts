@@ -1,15 +1,20 @@
 import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   index,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 export const Jwks = pgTable(
   "Jwks",
   {
@@ -20,13 +25,11 @@ export const Jwks = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    publicJwk: jsonb().notNull(),
-    privateJwk: jsonb().notNull(),
+    publicJwk: jsonData().notNull(),
+    privateJwk: jsonData().notNull(),
     alg: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    expiresAt: timestamp({ precision: 3 }),
+    createdAt: createdAt(),
+    expiresAt: nullableTimestamp(),
   },
   (table) => [
     index("Jwks_jwtServiceId_idx").using(
@@ -39,7 +42,7 @@ export const Jwks = pgTable(
 export const JwtService = pgTable(
   "JwtService",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     serviceKey: text().notNull(),
     issuer: text().notNull(),
     audience: text().notNull(),
@@ -47,10 +50,8 @@ export const JwtService = pgTable(
     jwksPath: text().notNull(),
     isLocalIssuer: boolean().default(false).notNull(),
     isActive: boolean().default(true).notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("JwtService_isLocalIssuer_isActive_idx").using(

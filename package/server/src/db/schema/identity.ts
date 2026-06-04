@@ -1,17 +1,22 @@
 import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 export const User = pgTable(
   "User",
   {
@@ -21,17 +26,15 @@ export const User = pgTable(
     name: text(),
     avatar: text(),
     bio: text(),
-    description: jsonb(),
-    joinDate: timestamp({ precision: 3 }),
-    permission: jsonb(),
+    description: jsonData(),
+    joinDate: nullableTimestamp(),
+    permission: jsonData(),
     followersCount: integer().default(0).notNull(),
     followingsCount: integer().default(0).notNull(),
-    settings: jsonb(),
-    extra: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    settings: jsonData(),
+    extra: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     uniqueIndex("User_authUserId_key").using(
@@ -45,7 +48,7 @@ export const User = pgTable(
 export const ApiToken = pgTable(
   "ApiToken",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     userId: uuid()
       .notNull()
       .references(() => User.unitId, {
@@ -54,16 +57,14 @@ export const ApiToken = pgTable(
       }),
     name: text().notNull(),
     tokenHash: text().notNull(),
-    scopes: jsonb().default({}).notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    expiresAt: timestamp({ precision: 3 }),
-    lastUsedAt: timestamp({ precision: 3 }),
+    scopes: jsonData().default({}).notNull(),
+    createdAt: createdAt(),
+    expiresAt: nullableTimestamp(),
+    lastUsedAt: nullableTimestamp(),
     lastIP: text(),
     userAgent: text(),
     revoked: boolean().default(false).notNull(),
-    revokedAt: timestamp({ precision: 3 }),
+    revokedAt: nullableTimestamp(),
   },
   (table) => [
     index("ApiToken_expiresAt_idx").using(

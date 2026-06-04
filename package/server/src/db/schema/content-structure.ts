@@ -1,13 +1,19 @@
 import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   foreignKey,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -21,10 +27,8 @@ export const ContentStructure = pgTable(
     ownerUnitId: uuid()
       .primaryKey()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("ContentStructure_updatedAt_idx").using(
@@ -53,16 +57,14 @@ export const ContentStructureAnchor = pgTable(
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     parentNodeId: uuid(),
-    ancestorNodeIds: jsonb().notNull(),
-    path: jsonb().notNull(),
+    ancestorNodeIds: jsonData().notNull(),
+    path: jsonData().notNull(),
     depth: integer().notNull(),
     position: text().notNull(),
     positionPath: text().notNull(),
-    titlePath: jsonb().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    titlePath: jsonData().notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("ContentStructureAnchor_contentUnitId_ownerUnitId_idx").using(
@@ -92,7 +94,7 @@ export const ContentStructureAnchor = pgTable(
 export const ContentStructureNode = pgTable(
   "ContentStructureNode",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     ownerUnitId: uuid()
       .notNull()
       .references(() => ContentStructure.ownerUnitId, {
@@ -108,12 +110,10 @@ export const ContentStructureNode = pgTable(
     title: text().notNull(),
     noContent: boolean().default(false).notNull(),
     rating: ContentRating(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
     isDeleted: boolean().default(false).notNull(),
-    deletedAt: timestamp({ precision: 3 }),
+    deletedAt: nullableTimestamp(),
   },
   (table) => [
     foreignKey({
@@ -165,9 +165,7 @@ export const UserContentNodeProgress = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    completedAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    completedAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
   },
   (table) => [
     primaryKey({

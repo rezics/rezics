@@ -1,16 +1,14 @@
+import { createdAt, jsonData, updatedAt } from "./columns";
 import {
   boolean,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
 import { ContentTranslationStatus } from "./enums";
 
@@ -24,13 +22,11 @@ export const UnitTranslation = pgTable(
     title: text(),
     subtitle: text(),
     summary: text(),
-    description: jsonb(),
-    extra: jsonb(),
+    description: jsonData(),
+    extra: jsonData(),
     sourceUnitId: uuid(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
@@ -75,15 +71,13 @@ export const ContentTranslation = pgTable(
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     language: varchar({ length: 16 }).notNull(),
-    content: jsonb().notNull(),
+    content: jsonData().notNull(),
     status: ContentTranslationStatus().default("PUBLISHED").notNull(),
     sourceUnitId: uuid(),
     authorUserId: uuid(),
-    provenance: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    provenance: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({

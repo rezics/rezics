@@ -1,3 +1,4 @@
+import { createdAt, timestampMs, updatedAt, uuidv7PrimaryKey } from "./columns";
 import {
   doublePrecision,
   foreignKey,
@@ -6,7 +7,6 @@ import {
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -47,7 +47,7 @@ export const CreditAttribution = pgTable(
 export const CreditAttributionEvidence = pgTable(
   "CreditAttributionEvidence",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     unitId: uuid().notNull(),
     entityId: uuid().notNull(),
     role: varchar({ length: 64 }).notNull(),
@@ -59,14 +59,10 @@ export const CreditAttributionEvidence = pgTable(
       }),
     claimPath: text(),
     observedUrl: text(),
-    observedAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    observedAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
     confidence: doublePrecision(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     foreignKey({

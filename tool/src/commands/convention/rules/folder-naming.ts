@@ -15,6 +15,7 @@ const PLURAL_CONTAINER_ALLOWLIST = new Set([
   "models",
   "types",
   "routes",
+  "relations",
   "handlers",
   "providers",
   "plugins",

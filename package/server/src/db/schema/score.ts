@@ -1,16 +1,14 @@
+import { createdAt, jsonData, updatedAt, uuidv7PrimaryKey } from "./columns";
 import {
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 export const ScoreAggregate = pgTable(
   "ScoreAggregate",
   {
@@ -18,9 +16,9 @@ export const ScoreAggregate = pgTable(
     realm: uuid().notNull(),
     totalScore: integer().default(0).notNull(),
     totalCount: integer().default(0).notNull(),
-    distribution: jsonb().notNull(),
-    fields: jsonb(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    distribution: jsonData().notNull(),
+    fields: jsonData(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
@@ -33,16 +31,14 @@ export const ScoreAggregate = pgTable(
 export const ScoreEntry = pgTable(
   "ScoreEntry",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     userId: uuid().notNull(),
     unitId: uuid().notNull(),
     realm: uuid().notNull(),
     value: integer().notNull(),
-    fields: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    fields: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("ScoreEntry_unitId_realm_idx").using(
@@ -71,10 +67,8 @@ export const ScoreRealmField = pgTable(
     key: varchar({ length: 64 }).notNull(),
     label: text(),
     sortOrder: integer().default(0).notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({

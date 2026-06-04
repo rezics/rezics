@@ -1,32 +1,35 @@
 import {
+  createdAt,
+  nullableTimestamp,
+  textArray,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   index,
   pgTable,
-  primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
 import { FeedbackType, ModerationTargetKind } from "./enums";
 
 export const Feedback = pgTable(
   "Feedback",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     userId: uuid().notNull(),
     url: text(),
     content: text().notNull(),
     type: FeedbackType().default("REPORT").notNull(),
     resolved: boolean().default(false).notNull(),
-    resolvedAt: timestamp({ precision: 3 }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    resolvedAt: nullableTimestamp(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
     addressedUnitId: uuid(),
     targetId: varchar({ length: 128 }),
     targetKind: ModerationTargetKind(),
@@ -53,18 +56,16 @@ export const Feedback = pgTable(
 export const Subscription = pgTable(
   "Subscription",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     subscriberUnitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     subscribedUnitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    channels: text().array(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    channels: textArray(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("subscription_channels_gin").using(

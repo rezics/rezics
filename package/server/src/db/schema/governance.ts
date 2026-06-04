@@ -1,12 +1,18 @@
 import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   foreignKey,
   index,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
@@ -31,7 +37,7 @@ import { User } from "./identity";
 export const AccountEnforcement = pgTable(
   "AccountEnforcement",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     targetUserId: uuid()
       .notNull()
       .references(() => User.unitId, {
@@ -49,20 +55,16 @@ export const AccountEnforcement = pgTable(
         onUpdate: "cascade",
       }),
     decisionCode: varchar({ length: 64 }).notNull(),
-    startsAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    expiresAt: timestamp({ precision: 3 }),
-    revokedAt: timestamp({ precision: 3 }),
+    startsAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
+    expiresAt: nullableTimestamp(),
+    revokedAt: nullableTimestamp(),
     revokedById: uuid().references(() => User.unitId, {
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    metadata: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    metadata: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
     decisionActionId: uuid().references(() => ModerationAction.id, {
       onDelete: "set null",
       onUpdate: "cascade",
@@ -109,7 +111,7 @@ export const AccountEnforcement = pgTable(
 export const ModerationAction = pgTable(
   "ModerationAction",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     authority: ModerationAuthority().notNull(),
     realmUnitId: uuid().references(() => Unit.id, {
       onDelete: "set null",
@@ -137,9 +139,7 @@ export const ModerationAction = pgTable(
     requestId: varchar({ length: 128 }),
     idempotencyKey: varchar({ length: 256 }),
     importedFrom: varchar({ length: 128 }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: createdAt(),
   },
   (table) => [
     foreignKey({
@@ -204,7 +204,7 @@ export const ModerationAction = pgTable(
 export const ModerationCase = pgTable(
   "ModerationCase",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     state: ModerationCaseState().default("NEW").notNull(),
     severity: varchar({ length: 32 }),
     reporterUserId: uuid().references(() => User.unitId, {
@@ -235,11 +235,9 @@ export const ModerationCase = pgTable(
     duplicateOfCaseId: uuid(),
     reason: text(),
     safeSummary: text(),
-    metadata: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    metadata: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
     parentCaseId: uuid(),
     scope: ModerationScope().default("PLATFORM").notNull(),
     targetKind: ModerationTargetKind().notNull(),
@@ -322,7 +320,7 @@ export const ModerationCase = pgTable(
 export const StaffAuditLog = pgTable(
   "StaffAuditLog",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     actorUserId: uuid()
       .notNull()
       .references(() => User.unitId, {
@@ -335,10 +333,8 @@ export const StaffAuditLog = pgTable(
     decisionCode: varchar({ length: 64 }).notNull(),
     requestId: varchar({ length: 128 }),
     reason: text().notNull(),
-    metadata: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    metadata: jsonData(),
+    createdAt: createdAt(),
   },
   (table) => [
     index("StaffAuditLog_action_createdAt_idx").using(
@@ -372,7 +368,7 @@ export const StaffAuditLog = pgTable(
 export const StaffGrant = pgTable(
   "StaffGrant",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     userId: uuid()
       .notNull()
       .references(() => User.unitId, {
@@ -396,12 +392,10 @@ export const StaffGrant = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    expiresAt: timestamp({ precision: 3 }),
-    revokedAt: timestamp({ precision: 3 }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    expiresAt: nullableTimestamp(),
+    revokedAt: nullableTimestamp(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("StaffGrant_capability_scopeKind_realmUnitId_idx").using(
@@ -447,9 +441,7 @@ export const UnitCollaborator = pgTable(
         onDelete: "restrict",
         onUpdate: "cascade",
       }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: createdAt(),
   },
   (table) => [
     primaryKey({
@@ -483,9 +475,7 @@ export const UnitFieldLock = pgTable(
         onUpdate: "cascade",
       }),
     reason: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: createdAt(),
   },
   (table) => [
     primaryKey({

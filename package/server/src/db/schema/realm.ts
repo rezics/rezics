@@ -1,12 +1,18 @@
 import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   foreignKey,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
@@ -27,16 +33,14 @@ export const Realm = pgTable("Realm", {
   isPublic: boolean().default(true).notNull(),
   isOfficial: boolean().default(false).notNull(),
   memberCount: integer().default(0).notNull(),
-  extra: jsonb(),
-  createdAt: timestamp({ precision: 3 })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp({ precision: 3 }).notNull(),
+  extra: jsonData(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
   ruleVersion: integer().default(1).notNull(),
   ruleRequireOnJoin: boolean().default(false).notNull(),
   ruleRequireOnPost: boolean().default(false).notNull(),
   ruleRequireOnUpdate: boolean().default(true).notNull(),
-  rulePolicyUpdatedAt: timestamp({ precision: 3 }),
+  rulePolicyUpdatedAt: nullableTimestamp(),
   joinRequiresApproval: boolean().default(false).notNull(),
   contentRequiresApproval: boolean().default(false).notNull(),
 });
@@ -52,12 +56,10 @@ export const RealmMember = pgTable(
       }),
     userId: uuid().notNull(),
     roleKey: varchar({ length: 32 }).notNull(),
-    joinedAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    joinedAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
+    updatedAt: updatedAt(),
     state: RealmMemberState().default("ACTIVE").notNull(),
-    onboardingCompletedAt: timestamp({ precision: 3 }),
+    onboardingCompletedAt: nullableTimestamp(),
   },
   (table) => [
     primaryKey({
@@ -84,7 +86,7 @@ export const RealmMember = pgTable(
 export const RealmCapabilityGrant = pgTable(
   "RealmCapabilityGrant",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     realmUnitId: uuid()
       .notNull()
       .references(() => Realm.unitId, {
@@ -104,12 +106,10 @@ export const RealmCapabilityGrant = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    expiresAt: timestamp({ precision: 3 }),
-    revokedAt: timestamp({ precision: 3 }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    expiresAt: nullableTimestamp(),
+    revokedAt: nullableTimestamp(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     foreignKey({
@@ -169,12 +169,8 @@ export const RealmRuleAcknowledgement = pgTable(
         onUpdate: "cascade",
       }),
     acceptedLanguage: varchar({ length: 16 }),
-    acceptedAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    acceptedAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
+    createdAt: createdAt(),
   },
   (table) => [
     primaryKey({
@@ -216,10 +212,8 @@ export const RealmTagContext = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
@@ -246,9 +240,7 @@ export const UnitRealm = pgTable(
     unitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: createdAt(),
     isLocked: boolean().default(false).notNull(),
     moderationStatus: ModerationStatus().default("APPROVED").notNull(),
   },

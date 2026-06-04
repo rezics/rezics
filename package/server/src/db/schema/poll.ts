@@ -1,4 +1,12 @@
 import {
+  createdAt,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   foreignKey,
   index,
@@ -6,7 +14,6 @@ import {
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
@@ -22,11 +29,9 @@ export const Poll = pgTable("Poll", {
   voteMode: PollVoteMode().default("SINGLE").notNull(),
   resultVisibility: PollResultVisibility().default("LIVE").notNull(),
   anonymous: boolean().default(false).notNull(),
-  closesAt: timestamp({ precision: 3 }),
-  createdAt: timestamp({ precision: 3 })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp({ precision: 3 }).notNull(),
+  closesAt: nullableTimestamp(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
   usageCount: integer().default(0).notNull(),
 });
 
@@ -47,10 +52,8 @@ export const PollOption = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
@@ -81,10 +84,8 @@ export const PollVote = pgTable(
     userId: uuid().notNull(),
     optionId: uuid().notNull(),
     voteMode: PollVoteMode().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    createdAt: createdAt(),
+    id: uuidv7PrimaryKey(),
     realmUnitId: uuid(),
   },
   (table) => [

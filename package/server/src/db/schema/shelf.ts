@@ -1,15 +1,13 @@
+import { createdAt, jsonData, updatedAt } from "./columns";
 import {
   foreignKey,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
-  timestamp,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
 
 export const Shelf = pgTable("Shelf", {
@@ -17,12 +15,10 @@ export const Shelf = pgTable("Shelf", {
     .primaryKey()
     .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
   kindKey: varchar({ length: 64 }),
-  extra: jsonb(),
+  extra: jsonData(),
   itemCount: integer().default(0).notNull(),
-  createdAt: timestamp({ precision: 3 })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp({ precision: 3 }).notNull(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 export const ShelfUnit = pgTable(
@@ -37,10 +33,8 @@ export const ShelfUnit = pgTable(
     unitId: uuid().notNull(),
     kind: varchar({ length: 32 }).notNull(),
     position: varchar({ length: 64 }).notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
     variantUnitId: uuid(),
   },
   (table) => [

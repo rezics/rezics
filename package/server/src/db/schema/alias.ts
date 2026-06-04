@@ -1,3 +1,4 @@
+import { createdAt, updatedAt, uuidv7PrimaryKey } from "./columns";
 import {
   boolean,
   index,
@@ -5,12 +6,10 @@ import {
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
 import { UnitAliasKind, UnitAliasStatus } from "./enums";
 import { User } from "./identity";
@@ -32,7 +31,7 @@ export const SlugScope = pgTable(
 export const UnitAlias = pgTable(
   "UnitAlias",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     unitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -53,10 +52,8 @@ export const UnitAlias = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("UnitAlias_createdById_createdAt_idx").using(
@@ -109,10 +106,8 @@ export const UnitAliasVote = pgTable(
         onUpdate: "cascade",
       }),
     value: integer().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({

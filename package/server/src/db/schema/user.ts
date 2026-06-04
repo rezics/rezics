@@ -1,21 +1,12 @@
-import {
-  index,
-  pgTable,
-  primaryKey,
-  timestamp,
-  uniqueIndex,
-  uuid,
-} from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { createdAt, uuidv7PrimaryKey } from "./columns";
+import { index, pgTable, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 export const UserBlock = pgTable(
   "UserBlock",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     blockerId: uuid().notNull(),
     blockedId: uuid().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: createdAt(),
   },
   (table) => [
     index("UserBlock_blockedId_idx").using(

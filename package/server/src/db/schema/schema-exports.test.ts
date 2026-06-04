@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
 import * as publicSchema from ".";
 import * as schema from "./schema";
@@ -99,8 +101,46 @@ const expectedSchemaExports = [
   "UserUnitProgress",
   "UserUnitProgressStatus",
   "Zone",
+  "createdAt",
+  "jsonData",
   "ltree",
+  "nullableTimestamp",
+  "pgEnumName",
   "post_path_label_seq",
+  "textArray",
+  "timestampMs",
+  "timestamps",
+  "updatedAt",
+  "uuidv7",
+  "uuidv7PrimaryKey",
+] as const;
+
+const schemaDir = import.meta.dir;
+const compositeForeignKeys = [
+  {
+    file: "shelf.ts",
+    constraintName: "ShelfUnitRelation_shelfId_childUnitId_fkey",
+  },
+  {
+    file: "shelf.ts",
+    constraintName: "ShelfUnitRelation_shelfId_parentUnitId_fkey",
+  },
+  {
+    file: "realm.ts",
+    constraintName: "RealmCapabilityGrant_realmUnitId_userId_fkey",
+  },
+  {
+    file: "attribution.ts",
+    constraintName: "CreditAttributionEvidence_unitId_entityId_role_fkey",
+  },
+  {
+    file: "poll.ts",
+    constraintName: "PollVote_pollUnitId_optionId_fkey",
+  },
+  {
+    file: "tagging.ts",
+    constraintName: "RealmTagApplicationVote_realmUnitId_tagUnitId_unitId_fkey",
+  },
 ] as const;
 
 describe("server Drizzle schema exports", () => {
@@ -113,5 +153,24 @@ describe("server Drizzle schema exports", () => {
   test("public schema index keeps runtime aliases outside the Drizzle Kit entry", () => {
     expect(publicSchema.historyOutbox).toBe(schema.HistoryOutbox);
     expect("historyOutbox" in schema).toBe(false);
+  });
+
+  test("JSON columns stay opaque in Drizzle schema", () => {
+    const schemaSources = readdirSync(schemaDir)
+      .filter((file) => file.endsWith(".ts") && !file.endsWith(".test.ts"))
+      .map((file) => readFileSync(join(schemaDir, file), "utf8"));
+
+    expect(schemaSources.join("\n")).not.toContain(".$type<");
+  });
+
+  test("known composite foreign keys use table callback builders", () => {
+    for (const { file, constraintName } of compositeForeignKeys) {
+      const source = readFileSync(join(schemaDir, file), "utf8");
+      const constraintIndex = source.indexOf(`name: "${constraintName}"`);
+      const builderIndex = source.lastIndexOf("foreignKey({", constraintIndex);
+
+      expect(constraintIndex).toBeGreaterThan(-1);
+      expect(builderIndex).toBeGreaterThan(-1);
+    }
   });
 });

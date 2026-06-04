@@ -1,14 +1,13 @@
+import { createdAt, jsonData, timestampMs, updatedAt } from "./columns";
 import {
   bigint,
   boolean,
   doublePrecision,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -30,10 +29,8 @@ export const UserUnitCollection = pgTable(
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     searchText: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
@@ -69,18 +66,14 @@ export const UserUnitProgress = pgTable(
     isDeleted: boolean().default(false).notNull(),
     completedCount: integer().default(0).notNull(),
     totalTimeMs: bigint({ mode: "number" }).default(0).notNull(),
-    extra: jsonb(),
-    firstSeenAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    lastSeenAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    extra: jsonData(),
+    firstSeenAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
+    lastSeenAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
     lastReadNodeId: uuid().references(() => ContentStructureNode.id, {
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    lastReadAnchor: jsonb(),
+    lastReadAnchor: jsonData(),
   },
   (table) => [
     primaryKey({

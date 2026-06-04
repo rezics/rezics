@@ -1,17 +1,22 @@
 import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   foreignKey,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
 import { ltree } from "./custom-types";
 import { ModerationStatus, PinKind, PostKind } from "./enums";
@@ -32,13 +37,11 @@ export const Post = pgTable(
     kind: PostKind(),
     replyCount: integer().default(0).notNull(),
     directReplyCount: integer().default(0).notNull(),
-    lastReplyAt: timestamp({ precision: 3 }),
+    lastReplyAt: nullableTimestamp(),
     isLocked: boolean().default(false).notNull(),
-    extra: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    extra: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
     state: text(),
     variantUnitId: uuid(),
   },
@@ -69,10 +72,8 @@ export const PostPollReference = pgTable(
   {
     postUnitId: uuid().notNull(),
     pollUnitId: uuid().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
@@ -93,7 +94,7 @@ export const PostPollReference = pgTable(
 export const Comment = pgTable(
   "Comment",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     rootUnitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -108,19 +109,17 @@ export const Comment = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    content: jsonb(),
+    content: jsonData(),
     depth: integer().default(1).notNull(),
     path: ltree(),
     replyCount: integer().default(0).notNull(),
     directReplyCount: integer().default(0).notNull(),
-    lastReplyAt: timestamp({ precision: 3 }),
+    lastReplyAt: nullableTimestamp(),
     isLocked: boolean().default(false).notNull(),
     state: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
-    deletedAt: timestamp({ precision: 3 }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+    deletedAt: nullableTimestamp(),
     moderationStatus: ModerationStatus().default("APPROVED").notNull(),
   },
   (table) => [
@@ -182,9 +181,7 @@ export const CommentPromotion = pgTable(
     kind: PinKind().notNull(),
     position: varchar({ length: 64 }).notNull(),
     byUserId: uuid().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: createdAt(),
   },
   (table) => [
     primaryKey({

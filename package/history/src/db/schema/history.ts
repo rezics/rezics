@@ -116,9 +116,16 @@ export const outboxProcessingFailures = p.pgTable("OutboxProcessingFailure", {
 });
 
 export type RevisionContentRow = typeof revisionContents.$inferSelect;
+export type NewRevisionContentRow = typeof revisionContents.$inferInsert;
 export type UnitRevisionRow = typeof unitRevisions.$inferSelect;
+export type NewUnitRevisionRow = typeof unitRevisions.$inferInsert;
 export type UnitRevisionPathRow = typeof unitRevisionPaths.$inferSelect;
+export type NewUnitRevisionPathRow = typeof unitRevisionPaths.$inferInsert;
 export type StructureEventRow = typeof structureEvents.$inferSelect;
+export type NewStructureEventRow = typeof structureEvents.$inferInsert;
 export type IngestionCursorRow = typeof ingestionCursors.$inferSelect;
+export type NewIngestionCursorRow = typeof ingestionCursors.$inferInsert;
 export type OutboxProcessingFailureRow =
   typeof outboxProcessingFailures.$inferSelect;
+export type NewOutboxProcessingFailureRow =
+  typeof outboxProcessingFailures.$inferInsert;

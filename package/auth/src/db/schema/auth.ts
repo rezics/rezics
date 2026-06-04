@@ -282,12 +282,22 @@ export const betterAuthSchema = {
 };
 
 export type UserRow = typeof users.$inferSelect;
+export type NewUserRow = typeof users.$inferInsert;
 export type SessionRow = typeof sessions.$inferSelect;
+export type NewSessionRow = typeof sessions.$inferInsert;
 export type AccountRow = typeof accounts.$inferSelect;
+export type NewAccountRow = typeof accounts.$inferInsert;
 export type VerificationRow = typeof verifications.$inferSelect;
+export type NewVerificationRow = typeof verifications.$inferInsert;
 export type JwtServiceRow = typeof jwtServices.$inferSelect;
+export type NewJwtServiceRow = typeof jwtServices.$inferInsert;
 export type JwksRow = typeof jwks.$inferSelect;
+export type NewJwksRow = typeof jwks.$inferInsert;
 export type OAuthClientRow = typeof oauthClients.$inferSelect;
+export type NewOAuthClientRow = typeof oauthClients.$inferInsert;
 export type OAuthRefreshTokenRow = typeof oauthRefreshTokens.$inferSelect;
+export type NewOAuthRefreshTokenRow = typeof oauthRefreshTokens.$inferInsert;
 export type OAuthAccessTokenRow = typeof oauthAccessTokens.$inferSelect;
+export type NewOAuthAccessTokenRow = typeof oauthAccessTokens.$inferInsert;
 export type OAuthConsentRow = typeof oauthConsents.$inferSelect;
+export type NewOAuthConsentRow = typeof oauthConsents.$inferInsert;

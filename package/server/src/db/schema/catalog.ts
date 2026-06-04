@@ -1,14 +1,21 @@
 import {
+  createdAt,
+  jsonData,
+  nullableTimestamp,
+  textArray,
+  timestampMs,
+  updatedAt,
+  uuidv7PrimaryKey,
+} from "./columns";
+import {
   boolean,
   check,
   foreignKey,
   index,
   integer,
-  jsonb,
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
@@ -28,7 +35,7 @@ import { User } from "./identity";
 export const Unit = pgTable(
   "Unit",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     type: UnitType().notNull(),
     slug: text(),
     slugScope: uuid().notNull(),
@@ -41,16 +48,14 @@ export const Unit = pgTable(
     status: UnitStatus().default("DRAFT").notNull(),
     visibility: UnitVisibility().default("PUBLIC").notNull(),
     rating: ContentRating().default("GENERAL").notNull(),
-    extra: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
-    publishedAt: timestamp({ precision: 3 }),
+    extra: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+    publishedAt: nullableTimestamp(),
     subscriberCount: integer().default(0).notNull(),
     licenseSlug: text(),
     aiDisclosureMode: AiDisclosureMode().default("UNKNOWN").notNull(),
-    aiDisclosureDetails: jsonb(),
+    aiDisclosureDetails: jsonData(),
     catalogEntryKind: CatalogEntryKind(),
     targetUnitId: uuid(),
     moderationStatus: ModerationStatus().default("APPROVED").notNull(),
@@ -124,16 +129,14 @@ export const Book = pgTable(
       .primaryKey()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     isbn13: varchar({ length: 32 }),
-    publicationDate: timestamp({ precision: 3 }),
+    publicationDate: nullableTimestamp(),
     pageCount: integer(),
     textLength: integer().default(0).notNull(),
     formatKey: varchar({ length: 32 }),
     isLicensed: boolean().default(false).notNull(),
-    extra: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    extra: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
     chapterCount: integer().default(0).notNull(),
   },
   (table) => [
@@ -149,14 +152,12 @@ export const Game = pgTable("Game", {
   unitId: uuid()
     .primaryKey()
     .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  releaseDate: timestamp({ precision: 3 }),
+  releaseDate: nullableTimestamp(),
   versionLabel: text(),
   isLicensed: boolean().default(false).notNull(),
-  extra: jsonb(),
-  createdAt: timestamp({ precision: 3 })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp({ precision: 3 }).notNull(),
+  extra: jsonData(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 export const Media = pgTable(
@@ -166,16 +167,14 @@ export const Media = pgTable(
       .primaryKey()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     kindKey: varchar({ length: 32 }).notNull(),
-    releaseDate: timestamp({ precision: 3 }),
+    releaseDate: nullableTimestamp(),
     runtimeMinutes: integer(),
     episodeCount: integer(),
     seasonCount: integer(),
     isLicensed: boolean().default(false).notNull(),
-    extra: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    extra: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("Media_kindKey_releaseDate_idx").using(
@@ -193,11 +192,9 @@ export const Link = pgTable("Link", {
   url: text().notNull(),
   siteName: varchar({ length: 128 }),
   faviconUrl: text(),
-  extra: jsonb(),
-  createdAt: timestamp({ precision: 3 })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp({ precision: 3 }).notNull(),
+  extra: jsonData(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
 });
 
 export const Entity = pgTable("Entity", {
@@ -207,24 +204,22 @@ export const Entity = pgTable("Entity", {
   kind: varchar({ length: 32 }),
   verified: boolean().default(false).notNull(),
   avatar: text(),
-  eligibleCreditRoles: text().array().default(sql`ARRAY[]`).notNull(),
-  eligibleSubjectRoles: text().array().default(sql`ARRAY[]`).notNull(),
+  eligibleCreditRoles: textArray().default(sql`ARRAY[]`).notNull(),
+  eligibleSubjectRoles: textArray().default(sql`ARRAY[]`).notNull(),
 });
 
 export const Zone = pgTable("Zone", {
   unitId: uuid()
     .primaryKey()
     .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
-  filters: jsonb().notNull(),
+  filters: jsonData().notNull(),
   template: varchar({ length: 64 }).notNull(),
-  styling: jsonb(),
-  startsAt: timestamp({ precision: 3 }),
-  endsAt: timestamp({ precision: 3 }),
-  createdAt: timestamp({ precision: 3 })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  updatedAt: timestamp({ precision: 3 }).notNull(),
-  wiki: jsonb(),
+  styling: jsonData(),
+  startsAt: nullableTimestamp(),
+  endsAt: nullableTimestamp(),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+  wiki: jsonData(),
 });
 
 export const SourceSite = pgTable(
@@ -240,11 +235,9 @@ export const SourceSite = pgTable(
     crawlSupport: varchar({ length: 32 }).notNull(),
     crawlEnabled: boolean().default(false).notNull(),
     crawlerAdapterKey: varchar({ length: 64 }),
-    refRules: jsonb().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    refRules: jsonData().notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("SourceSite_crawlSupport_crawlEnabled_idx").using(
@@ -262,7 +255,7 @@ export const SourceSite = pgTable(
 export const UnitExternalRef = pgTable(
   "UnitExternalRef",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     unitId: uuid()
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
@@ -276,16 +269,10 @@ export const UnitExternalRef = pgTable(
     externalId: text().notNull(),
     canonicalUrl: text().notNull(),
     originalUrl: text(),
-    firstSeenAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    lastSeenAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    firstSeenAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
+    lastSeenAt: timestampMs().default(sql`CURRENT_TIMESTAMP`).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     uniqueIndex(
@@ -315,7 +302,7 @@ export const UnitExternalRef = pgTable(
 export const GameSystemRequirement = pgTable(
   "GameSystemRequirement",
   {
-    id: uuid().default(sql`uuidv7()`).primaryKey(),
+    id: uuidv7PrimaryKey(),
     gameUnitId: uuid()
       .notNull()
       .references(() => Game.unitId, {
@@ -332,12 +319,10 @@ export const GameSystemRequirement = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
-    hardware: jsonb().notNull(),
+    hardware: jsonData().notNull(),
     rawText: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("GameSystemRequirement_gameUnitId_idx").using(

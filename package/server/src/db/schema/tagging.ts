@@ -1,3 +1,4 @@
+import { createdAt, updatedAt } from "./columns";
 import {
   boolean,
   foreignKey,
@@ -6,10 +7,8 @@ import {
   pgTable,
   primaryKey,
   text,
-  timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
 import { User } from "./identity";
 import { Realm } from "./realm";
@@ -27,10 +26,8 @@ export const UnitTag = pgTable(
     voteCount: integer().default(0).notNull(),
     pinned: boolean().default(false).notNull(),
     position: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
@@ -67,9 +64,7 @@ export const TagVote = pgTable(
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     value: integer().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: createdAt(),
   },
   (table) => [
     primaryKey({
@@ -103,10 +98,8 @@ export const RealmTagApplication = pgTable(
     voteCount: integer().default(0).notNull(),
     pinned: boolean().default(false).notNull(),
     position: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
@@ -150,9 +143,7 @@ export const RealmTagApplicationVote = pgTable(
     unitId: uuid().notNull(),
     userId: uuid().notNull(),
     value: integer().notNull(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
+    createdAt: createdAt(),
   },
   (table) => [
     primaryKey({
@@ -193,10 +184,8 @@ export const UserTagApplication = pgTable(
       .notNull()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     position: text(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({

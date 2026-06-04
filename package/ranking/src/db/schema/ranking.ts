@@ -154,7 +154,13 @@ export const servingPatchStatuses = p.pgTable(
 );
 
 export type UnitRankProjectionRow = typeof unitRankProjections.$inferSelect;
+export type NewUnitRankProjectionRow = typeof unitRankProjections.$inferInsert;
 export type RankingSignalBucketRow = typeof rankingSignalBuckets.$inferSelect;
+export type NewRankingSignalBucketRow =
+  typeof rankingSignalBuckets.$inferInsert;
 export type RankingFormulaVersionRow =
   typeof rankingFormulaVersions.$inferSelect;
+export type NewRankingFormulaVersionRow =
+  typeof rankingFormulaVersions.$inferInsert;
 export type ServingPatchStatusRow = typeof servingPatchStatuses.$inferSelect;
+export type NewServingPatchStatusRow = typeof servingPatchStatuses.$inferInsert;

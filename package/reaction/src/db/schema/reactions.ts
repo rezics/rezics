@@ -74,4 +74,7 @@ export const reactionTargetUsages = p.pgTable(
 export type ReactionRow = typeof reactions.$inferSelect;
 export type NewReactionRow = typeof reactions.$inferInsert;
 export type ReactionSummaryRow = typeof reactionSummaries.$inferSelect;
+export type NewReactionSummaryRow = typeof reactionSummaries.$inferInsert;
 export type ReactionTargetUsageRow = typeof reactionTargetUsages.$inferSelect;
+export type NewReactionTargetUsageRow =
+  typeof reactionTargetUsages.$inferInsert;

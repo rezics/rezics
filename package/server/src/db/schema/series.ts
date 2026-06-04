@@ -1,14 +1,12 @@
+import { createdAt, jsonData, updatedAt } from "./columns";
 import {
   index,
-  jsonb,
   pgTable,
   primaryKey,
-  timestamp,
   uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 import { Unit } from "./catalog";
 import { ContentStructureNode } from "./content-structure";
 
@@ -19,11 +17,9 @@ export const Series = pgTable(
       .primaryKey()
       .references(() => Unit.id, { onDelete: "cascade", onUpdate: "cascade" }),
     kindKey: varchar({ length: 64 }).notNull(),
-    extra: jsonb(),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    extra: jsonData(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     index("Series_kindKey_idx").using("btree", table.kindKey.asc().nullsLast()),
@@ -52,10 +48,8 @@ export const SeriesContentIndex = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    createdAt: timestamp({ precision: 3 })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp({ precision: 3 }).notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     primaryKey({
