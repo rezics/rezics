@@ -1,4 +1,5 @@
-import { useCreateRealmQueueItemMutation } from "@rezics/api/governance/governance";
+import { useCreateRealmCaseMutation } from "@rezics/api/governance/governance";
+import type { ModerationTargetKind } from "@rezics/contract";
 import { useTranslation } from "@rezics/i18n/react";
 import {
   Button,
@@ -22,8 +23,8 @@ import { cn } from "@/shared/utils/css-util";
 import { selectHasMemberSession, useAuthSessionStore } from "@/user/states";
 
 export interface ReportTarget {
-  /** Moderation target discriminator, e.g. `"post"`, `"review"`, `"unit"`. */
-  kind: string;
+  /** Closed moderation target discriminator for the reported entity. */
+  kind: ModerationTargetKind;
   /** Stable id of the reported entity. */
   id: string;
   /** Backing Unit id when the target is Unit-shaped. */
@@ -35,8 +36,8 @@ export interface ReportTarget {
 export interface ReportActionProps {
   target: ReportTarget;
   /**
-   * Realm the report is filed against. Reports route to the realm moderation
-   * queue, so a realm context is required; surfaces without one should not
+   * Realm the report is filed against. Reports create a scoped moderation case,
+   * so a realm context is required; surfaces without one should not
    * render the action.
    */
   realmUnitId: string;
@@ -46,8 +47,8 @@ export interface ReportActionProps {
 }
 
 /**
- * Report entry point backed by the realm moderation queue
- * (`useCreateRealmQueueItemMutation`). This is moderation, not product
+ * Report entry point backed by a realm-scoped moderation case
+ * (`useCreateRealmCaseMutation`). This is moderation, not product
  * feedback — it intentionally does not reuse `feedback/FeedbackDialog`.
  *
  * States: signed-out (prompts sign-in), allowed (reason form), rate-limited or
@@ -66,7 +67,7 @@ export const ReportAction: React.FC<ReportActionProps> = ({
   const [reason, setReason] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const mutation = useCreateRealmQueueItemMutation({
+  const mutation = useCreateRealmCaseMutation({
     onSuccess: () => setSubmitted(true),
   });
 

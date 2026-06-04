@@ -61,7 +61,7 @@ export const ReviewDetail: React.FC<ReviewDetailProps> = ({
         {review.realmUnitId ? (
           <ReportAction
             target={{
-              kind: "review",
+              kind: "unit",
               id: review.unitId,
               unitId: review.unitId,
               subjectUserId: review.authorUserId,

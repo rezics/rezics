@@ -7,7 +7,6 @@ import { adminDashboardSummaryQueryOptions } from "@rezics/api/stat/stats.querie
 import type {
   DecisionCode,
   ModerationCaseDTO,
-  RealmModerationQueueItemDTO,
   StaffAuditLogDTO,
 } from "@rezics/contract";
 import {
@@ -178,20 +177,16 @@ function RecentCasesTable({ cases }: { cases: ModerationCaseDTO[] }) {
   );
 }
 
-function RealmEscalationsTable({
-  items,
-}: {
-  items: RealmModerationQueueItemDTO[];
-}) {
+function RealmEscalationsTable({ items }: { items: ModerationCaseDTO[] }) {
   return (
     <div className="overflow-x-auto">
       <Table className="text-sm">
         <TableHeader>
           <TableRow>
-            <TableHead>Queue Item</TableHead>
+            <TableHead>Case</TableHead>
             <TableHead>Realm</TableHead>
             <TableHead>Target</TableHead>
-            <TableHead>Case</TableHead>
+            <TableHead>Parent Case</TableHead>
             <TableHead>Updated</TableHead>
           </TableRow>
         </TableHeader>
@@ -216,7 +211,7 @@ function RealmEscalationsTable({
                     {item.target.id}
                   </div>
                 </TableCell>
-                <TableCell>{item.linkedCaseId ?? "-"}</TableCell>
+                <TableCell>{item.parentCaseId ?? "-"}</TableCell>
                 <TableCell className="whitespace-nowrap text-xs text-text-secondary">
                   {formatDate(item.updatedAt)}
                 </TableCell>
@@ -225,7 +220,7 @@ function RealmEscalationsTable({
           ) : (
             <TableRow>
               <TableCell colSpan={5} className="py-6 text-center text-sm">
-                No escalated realm queue items.
+                No escalated realm cases.
               </TableCell>
             </TableRow>
           )}
@@ -391,7 +386,7 @@ function GovernanceMetrics({
       <MetricCard
         title="Escalations"
         value={escalations}
-        detail={`${summary.governance.escalatedCases} cases / ${summary.governance.realmQueueEscalated} realm queue`}
+        detail={`${summary.governance.escalatedCases} platform / ${summary.governance.realmQueueEscalated} realm`}
         icon={<ShieldAlert className="size-4" />}
         tone={escalations > 0 ? "warning" : "neutral"}
       />
@@ -403,9 +398,9 @@ function GovernanceMetrics({
         tone={summary.governance.activeEnforcements > 0 ? "warning" : "neutral"}
       />
       <MetricCard
-        title="Realm Queue"
+        title="Realm Cases"
         value={summary.governance.realmQueueOpen}
-        detail="Day-to-day realm queues stay in app; admin tracks escalated load"
+        detail="Day-to-day realm cases stay in app; admin tracks escalated load"
         icon={<Gavel className="size-4" />}
       />
     </div>
@@ -419,8 +414,8 @@ export default function GovernanceOverviewPage() {
   const recentCasesQuery = useSuspenseQuery(
     governanceQueries.caseList({ limit: 10 }),
   );
-  const escalatedRealmQueueQuery = useSuspenseQuery(
-    governanceQueries.escalatedRealmQueue({ limit: 8 }),
+  const escalatedRealmCasesQuery = useSuspenseQuery(
+    governanceQueries.escalatedRealmCases({ limit: 8 }),
   );
   const auditQuery = useQuery(governanceQueries.auditList({ limit: 10 }));
   const policyExceptionQuery = useQueries({
@@ -526,21 +521,21 @@ export default function GovernanceOverviewPage() {
               </CardTitle>
               <Badge
                 variant={
-                  escalatedRealmQueueQuery.data.length
+                  escalatedRealmCasesQuery.data.length
                     ? "destructive"
                     : "outline"
                 }
               >
-                {escalatedRealmQueueQuery.data.length} operator-relevant
+                {escalatedRealmCasesQuery.data.length} operator-relevant
               </Badge>
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-2">
             <p className="mb-3 text-sm leading-[1.4] text-text-secondary">
-              Ordinary realm queue work remains in the app realm console. Admin
-              lists only escalated queue items that need site staff visibility.
+              Ordinary realm case work remains in the app realm console. Admin
+              lists only escalated cases that need site staff visibility.
             </p>
-            <RealmEscalationsTable items={escalatedRealmQueueQuery.data} />
+            <RealmEscalationsTable items={escalatedRealmCasesQuery.data} />
           </CardContent>
         </Card>
 

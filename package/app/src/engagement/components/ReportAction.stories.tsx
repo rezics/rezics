@@ -1,6 +1,6 @@
 import { ApiError } from "@rezics/api";
 import { governanceApi } from "@rezics/api/governance/governance.api";
-import type { Permission, RealmModerationQueueItemDTO } from "@rezics/contract";
+import type { ModerationCaseDTO, Permission } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { type ReactNode, useEffect, useState } from "react";
 import { expect, screen, userEvent, waitFor, within } from "storybook/test";
@@ -10,7 +10,7 @@ import { useAuthSessionStore } from "@/user/states";
 import { ReportAction } from "./ReportAction";
 
 const REALM_UNIT_ID = "realm-fixture";
-const TARGET = { kind: "post", id: "unit-post-1" } as const;
+const TARGET = { kind: "unit", id: "unit-post-1" } as const;
 const now = "2026-05-29T00:00:00.000Z";
 
 function authenticate(isAuthenticated: boolean) {
@@ -44,29 +44,31 @@ function authenticate(isAuthenticated: boolean) {
 
 type Outcome = "success" | "rate-limited";
 
-function mockCreateQueueItem(outcome: Outcome) {
+function mockCreateRealmCase(outcome: Outcome) {
   if (outcome === "rate-limited") {
-    governanceApi.createRealmQueueItem = async () => {
+    governanceApi.createRealmCase = async () => {
       throw new ApiError(429, "RATE_LIMITED", "Too many reports");
     };
     return;
   }
-  governanceApi.createRealmQueueItem = async (realmUnitId) =>
+  governanceApi.createRealmCase = async (realmUnitId) =>
     ({
-      id: "queue-story-1",
-      realmUnitId,
+      id: "case-story-1",
+      scope: "realm",
       state: "new",
+      severity: null,
       reporterUserId: "story-user",
       subjectUserId: null,
       target: { ...TARGET, realmUnitId },
       sourceFeedbackId: null,
-      linkedCaseId: null,
       assignedToUserId: null,
+      parentCaseId: null,
+      duplicateOfCaseId: null,
       reason: "Story report",
       safeSummary: null,
       createdAt: now,
       updatedAt: now,
-    }) as RealmModerationQueueItemDTO;
+    }) as ModerationCaseDTO;
 }
 
 function StoryHost({
@@ -80,12 +82,12 @@ function StoryHost({
 }) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    const original = governanceApi.createRealmQueueItem;
+    const original = governanceApi.createRealmCase;
     authenticate(isAuthenticated);
-    mockCreateQueueItem(outcome);
+    mockCreateRealmCase(outcome);
     setReady(true);
     return () => {
-      governanceApi.createRealmQueueItem = original;
+      governanceApi.createRealmCase = original;
       useAuthSessionStore.getState().reset();
     };
   }, [isAuthenticated, outcome]);

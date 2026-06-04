@@ -66,36 +66,36 @@ export const governanceCaseEventsQuery = (
     staleTime: 1000 * 30,
   });
 
-export const governanceRealmQueueListQuery = (
+export const governanceRealmCaseListQuery = (
   realmUnitId: string,
   query?: GovernanceListQuery,
 ) =>
   queryOptions({
-    queryKey: governanceKeys.realmQueueList(realmUnitId, query),
-    queryFn: () => governanceApi.listRealmQueue(realmUnitId, query),
+    queryKey: governanceKeys.realmCaseList(realmUnitId, query),
+    queryFn: () => governanceApi.listRealmCases(realmUnitId, query),
     enabled: realmUnitId.length > 0,
     staleTime: 1000 * 30,
   });
 
-export const governanceEscalatedRealmQueueQuery = (
+export const governanceEscalatedRealmCasesQuery = (
   query?: GovernanceListQuery,
 ) =>
   queryOptions({
-    queryKey: governanceKeys.realmQueueEscalated(query),
-    queryFn: () => governanceApi.listEscalatedRealmQueue(query),
+    queryKey: governanceKeys.realmCasesEscalated(query),
+    queryFn: () => governanceApi.listEscalatedRealmCases(query),
     staleTime: 1000 * 30,
   });
 
-export const governanceRealmQueueEventsQuery = (
+export const governanceRealmCaseActionsQuery = (
   realmUnitId: string,
-  queueItemId: string,
+  caseId: string,
   query?: GovernanceListQuery,
 ) =>
   queryOptions({
-    queryKey: governanceKeys.realmQueueEvents(realmUnitId, queueItemId, query),
+    queryKey: governanceKeys.realmCaseActions(realmUnitId, caseId, query),
     queryFn: () =>
-      governanceApi.listRealmQueueEvents(realmUnitId, queueItemId, query),
-    enabled: realmUnitId.length > 0 && queueItemId.length > 0,
+      governanceApi.listRealmCaseActions(realmUnitId, caseId, query),
+    enabled: realmUnitId.length > 0 && caseId.length > 0,
     staleTime: 1000 * 30,
   });
 
@@ -130,9 +130,9 @@ export const governanceQueries = {
   caseList: governanceCaseListQuery,
   caseDetail: governanceCaseDetailQuery,
   caseEvents: governanceCaseEventsQuery,
-  realmQueueList: governanceRealmQueueListQuery,
-  escalatedRealmQueue: governanceEscalatedRealmQueueQuery,
-  realmQueueEvents: governanceRealmQueueEventsQuery,
+  realmCaseList: governanceRealmCaseListQuery,
+  escalatedRealmCases: governanceEscalatedRealmCasesQuery,
+  realmCaseActions: governanceRealmCaseActionsQuery,
   contentModeration: governanceContentModerationQuery,
   auditList: governanceAuditListQuery,
   auditDetail: governanceAuditDetailQuery,

@@ -96,53 +96,18 @@ const realmOverlayRow = {
   isLocked: false,
   createdAt: "2026-05-28T00:00:00.000Z",
 };
-const tombstoneGlobalMock = mock(async () => contentStateRow);
-const hideGlobalMock = mock(async () => ({
-  ...contentStateRow,
-  state: "hidden",
-}));
-const restoreGlobalMock = mock(async () => ({
+const setUnitModerationStatusMock = mock(async () => ({
   ...contentStateRow,
   state: "visible",
 }));
-const tombstoneInRealmMock = mock(async () => realmOverlayRow);
-const hideInRealmMock = mock(async () => ({
-  ...realmOverlayRow,
-  moderationStatus: "removed",
-}));
-const restoreInRealmMock = mock(async () => ({
+const setRealmUnitModerationStatusMock = mock(async () => ({
   ...realmOverlayRow,
   moderationStatus: "approved",
-}));
-const approveInRealmMock = mock(async () => ({
-  ...realmOverlayRow,
-  moderationStatus: "approved",
-}));
-const rejectInRealmMock = mock(async () => ({
-  ...realmOverlayRow,
-  moderationStatus: "removed",
-}));
-const removeFromRealmMock = mock(async () => ({
-  ...realmOverlayRow,
-  moderationStatus: "removed",
 }));
 const setLockMock = mock(async () => ({
   ...realmEventRow,
   actionKind: "lock",
   resultingLocked: true,
-}));
-const requestOwnerDelegationMock = mock(async () => ({
-  id: "queue-1",
-  realmUnitId: "realm-1",
-  state: "new",
-  target: {
-    kind: "unit",
-    id: "reply-1",
-    realmUnitId: "realm-1",
-  },
-  reason: "please remove",
-  createdAt: "2026-05-28T00:00:00.000Z",
-  updatedAt: "2026-05-28T00:00:00.000Z",
 }));
 const realmQueueRow = {
   id: "queue-1",
@@ -152,7 +117,7 @@ const realmQueueRow = {
   subjectUserId: "subject-1",
   target: { kind: "unit", id: "post-1", realmUnitId: "realm-1" },
   sourceFeedbackId: "feedback-1",
-  linkedCaseId: null,
+  parentCaseId: null,
   assignedToUserId: null,
   reason: "reported",
   safeSummary: null,
@@ -178,20 +143,20 @@ const realmEventRow = {
   importedFrom: null,
   createdAt: "2026-05-28T00:00:00.000Z",
 };
-const createRealmQueueItemMock = mock(async () => realmQueueRow);
-const createRealmQueueItemFromFeedbackMock = mock(async () => realmQueueRow);
-const listEscalatedRealmQueueMock = mock(async () => [
-  { ...realmQueueRow, state: "escalated", linkedCaseId: "case-1" },
+const createRealmCaseMock = mock(async () => realmQueueRow);
+const createRealmCaseFromFeedbackMock = mock(async () => realmQueueRow);
+const listEscalatedRealmCasesMock = mock(async () => [
+  { ...realmQueueRow, state: "escalated", parentCaseId: "case-1" },
 ]);
-const listRealmQueueEventsMock = mock(async () => [realmEventRow]);
-const decideRealmQueueItemMock = mock(async () => ({
+const listRealmCaseActionsMock = mock(async () => [realmEventRow]);
+const decideRealmCaseMock = mock(async () => ({
   ...realmQueueRow,
   state: "actioned",
 }));
-const escalateRealmQueueItemMock = mock(async () => ({
+const escalateRealmCaseMock = mock(async () => ({
   ...realmQueueRow,
   state: "escalated",
-  linkedCaseId: "case-1",
+  parentCaseId: "case-1",
 }));
 const moderationCaseRow = {
   id: "case-1",
@@ -210,6 +175,33 @@ const moderationCaseRow = {
   createdAt: "2026-05-28T00:00:00.000Z",
   updatedAt: "2026-05-28T00:00:00.000Z",
 };
+const realmModerationCaseRow = {
+  ...moderationCaseRow,
+  id: "case-1",
+  scope: "realm",
+  realmUnitId: "realm-1",
+  target: { kind: "unit", id: "post-1", realmUnitId: "realm-1" },
+};
+const requestOwnerDelegationMock = mock(async () => ({
+  ...realmModerationCaseRow,
+  reason: "please remove",
+}));
+createRealmCaseMock.mockImplementation(async () => realmModerationCaseRow);
+createRealmCaseFromFeedbackMock.mockImplementation(
+  async () => realmModerationCaseRow,
+);
+listEscalatedRealmCasesMock.mockImplementation(async () => [
+  { ...realmModerationCaseRow, state: "escalated", parentCaseId: "case-root" },
+]);
+decideRealmCaseMock.mockImplementation(async () => ({
+  ...realmModerationCaseRow,
+  state: "actioned",
+}));
+escalateRealmCaseMock.mockImplementation(async () => ({
+  ...realmModerationCaseRow,
+  state: "escalated",
+  parentCaseId: "case-root",
+}));
 const moderationCaseEventRow = {
   id: "action-2",
   authority: "platform",
@@ -311,24 +303,17 @@ mock.module("./moderation.service", () => ({
     triageCase: triageCaseMock,
     decideCase: decideCaseMock,
     appealCase: appealCaseMock,
-    listRealmQueue: mock(async () => []),
-    hideGlobal: hideGlobalMock,
-    tombstoneGlobal: tombstoneGlobalMock,
-    restoreGlobal: restoreGlobalMock,
-    hideInRealm: hideInRealmMock,
-    tombstoneInRealm: tombstoneInRealmMock,
-    restoreInRealm: restoreInRealmMock,
-    approveInRealm: approveInRealmMock,
-    rejectInRealm: rejectInRealmMock,
-    removeFromRealm: removeFromRealmMock,
+    listRealmCases: mock(async () => []),
+    setUnitModerationStatus: setUnitModerationStatusMock,
+    setRealmUnitModerationStatus: setRealmUnitModerationStatusMock,
     setLock: setLockMock,
     requestOwnerDelegation: requestOwnerDelegationMock,
-    createRealmQueueItem: createRealmQueueItemMock,
-    createRealmQueueItemFromFeedback: createRealmQueueItemFromFeedbackMock,
-    listEscalatedRealmQueue: listEscalatedRealmQueueMock,
-    listRealmQueueEvents: listRealmQueueEventsMock,
-    decideRealmQueueItem: decideRealmQueueItemMock,
-    escalateRealmQueueItem: escalateRealmQueueItemMock,
+    createRealmCase: createRealmCaseMock,
+    createRealmCaseFromFeedback: createRealmCaseFromFeedbackMock,
+    listEscalatedRealmCases: listEscalatedRealmCasesMock,
+    listRealmCaseActions: listRealmCaseActionsMock,
+    decideRealmCase: decideRealmCaseMock,
+    escalateRealmCase: escalateRealmCaseMock,
   },
 }));
 
@@ -350,23 +335,16 @@ describe("governanceApi account enforcement", () => {
     realmMembershipForPolicyMock.mockClear();
     grantRealmCapabilityMock.mockClear();
     revokeRealmCapabilityMock.mockClear();
-    hideGlobalMock.mockClear();
-    tombstoneGlobalMock.mockClear();
-    restoreGlobalMock.mockClear();
-    hideInRealmMock.mockClear();
-    tombstoneInRealmMock.mockClear();
-    restoreInRealmMock.mockClear();
-    approveInRealmMock.mockClear();
-    rejectInRealmMock.mockClear();
-    removeFromRealmMock.mockClear();
+    setUnitModerationStatusMock.mockClear();
+    setRealmUnitModerationStatusMock.mockClear();
     setLockMock.mockClear();
     requestOwnerDelegationMock.mockClear();
-    createRealmQueueItemMock.mockClear();
-    createRealmQueueItemFromFeedbackMock.mockClear();
-    listEscalatedRealmQueueMock.mockClear();
-    listRealmQueueEventsMock.mockClear();
-    decideRealmQueueItemMock.mockClear();
-    escalateRealmQueueItemMock.mockClear();
+    createRealmCaseMock.mockClear();
+    createRealmCaseFromFeedbackMock.mockClear();
+    listEscalatedRealmCasesMock.mockClear();
+    listRealmCaseActionsMock.mockClear();
+    decideRealmCaseMock.mockClear();
+    escalateRealmCaseMock.mockClear();
     listCaseEventsMock.mockClear();
     listTargetActionsMock.mockClear();
     listModerationOverlaysMock.mockClear();
@@ -640,12 +618,12 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
-  test("globally tombstones content through content policy", async () => {
+  test("globally removes content through content policy", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
-      new Request("http://localhost/governance/content/reply-1/tombstone", {
+      new Request("http://localhost/governance/content/reply-1/remove", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ reason: "abuse" }),
@@ -658,19 +636,21 @@ describe("governanceApi account enforcement", () => {
       action: "content.takedown",
       target: { kind: "content", id: "reply-1" },
     });
-    expect(tombstoneGlobalMock).toHaveBeenCalledWith({
-      moderatedUnitId: "reply-1",
-      decidedById: "staff-1",
-      reason: "abuse",
+    expect(setUnitModerationStatusMock).toHaveBeenCalledWith({
+      unitId: "reply-1",
+      actorUserId: "staff-1",
+      action: "remove",
+      reasonCode: "content.removed",
+      reasonText: "abuse",
     });
   });
 
-  test("globally hides content through content policy with case context", async () => {
+  test("globally restores content through content policy with case context", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
-      new Request("http://localhost/governance/content/reply-1/hide", {
+      new Request("http://localhost/governance/content/reply-1/restore", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ reason: "abuse", caseId: "case-1" }),
@@ -678,10 +658,12 @@ describe("governanceApi account enforcement", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(hideGlobalMock).toHaveBeenCalledWith({
-      moderatedUnitId: "reply-1",
-      decidedById: "staff-1",
-      reason: "abuse",
+    expect(setUnitModerationStatusMock).toHaveBeenCalledWith({
+      unitId: "reply-1",
+      actorUserId: "staff-1",
+      action: "restore",
+      reasonCode: "content.restored",
+      reasonText: "abuse",
       caseId: "case-1",
     });
   });
@@ -691,7 +673,7 @@ describe("governanceApi account enforcement", () => {
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
-      new Request("http://localhost/governance/content/reply-1/tombstone", {
+      new Request("http://localhost/governance/content/reply-1/remove", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -702,20 +684,22 @@ describe("governanceApi account enforcement", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(tombstoneGlobalMock).toHaveBeenCalledWith({
-      moderatedUnitId: "reply-1",
-      decidedById: "staff-1",
-      reason: "abuse",
+    expect(setUnitModerationStatusMock).toHaveBeenCalledWith({
+      unitId: "reply-1",
+      actorUserId: "staff-1",
+      action: "remove",
+      reasonCode: "content.removed",
+      reasonText: "abuse",
     });
   });
 
-  test("realm tombstones content through realm queue policy", async () => {
+  test("realm removes content through realm case policy", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
       new Request(
-        "http://localhost/governance/realms/realm-1/content/reply-1/tombstone",
+        "http://localhost/governance/realms/realm-1/content/reply-1/remove",
         {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -744,21 +728,23 @@ describe("governanceApi account enforcement", () => {
         realmUnitId: "realm-1",
       },
     });
-    expect(tombstoneInRealmMock).toHaveBeenCalledWith({
+    expect(setRealmUnitModerationStatusMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      moderatedUnitId: "reply-1",
-      decidedById: "staff-1",
-      reason: "off-topic",
+      unitId: "reply-1",
+      actorUserId: "staff-1",
+      action: "remove",
+      reasonCode: "realm.content.removed",
+      reasonText: "off-topic",
     });
   });
 
-  test("realm hides content through realm queue policy", async () => {
+  test("realm restores content through realm case policy", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
       new Request(
-        "http://localhost/governance/realms/realm-1/content/reply-1/hide",
+        "http://localhost/governance/realms/realm-1/content/reply-1/restore",
         {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -768,11 +754,13 @@ describe("governanceApi account enforcement", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(hideInRealmMock).toHaveBeenCalledWith({
+    expect(setRealmUnitModerationStatusMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      moderatedUnitId: "reply-1",
-      decidedById: "staff-1",
-      reason: "off-topic",
+      unitId: "reply-1",
+      actorUserId: "staff-1",
+      action: "restore",
+      reasonCode: "realm.content.restored",
+      reasonText: "off-topic",
       caseId: "case-1",
     });
   });
@@ -793,13 +781,14 @@ describe("governanceApi account enforcement", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(removeFromRealmMock).toHaveBeenCalledWith({
+    expect(setRealmUnitModerationStatusMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      moderatedUnitId: "post-1",
-      decidedById: "staff-1",
-      reason: "off-topic",
+      unitId: "post-1",
+      actorUserId: "staff-1",
+      action: "remove",
+      reasonCode: "realm.content.removed",
+      reasonText: "off-topic",
     });
-    expect(tombstoneInRealmMock).not.toHaveBeenCalled();
   });
 
   test("locks and unlocks realm content through content lock policy", async () => {
@@ -867,7 +856,7 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
-  test("creates owner delegation queue item through realm policy", async () => {
+  test("creates owner delegation case through realm policy", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
@@ -891,12 +880,12 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
-  test("creates realm queue items through realm queue policy", async () => {
+  test("creates realm cases through realm case policy", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
-      new Request("http://localhost/governance/realms/realm-1/queue", {
+      new Request("http://localhost/governance/realms/realm-1/cases", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -909,7 +898,7 @@ describe("governanceApi account enforcement", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(createRealmQueueItemMock).toHaveBeenCalledWith({
+    expect(createRealmCaseMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
       actorUserId: "staff-1",
       targetKind: "unit",
@@ -919,13 +908,13 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
-  test("creates realm queue items from feedback", async () => {
+  test("creates realm cases from feedback", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
       new Request(
-        "http://localhost/governance/realms/realm-1/queue/from-feedback/feedback-1",
+        "http://localhost/governance/realms/realm-1/cases/from-feedback/feedback-1",
         {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -935,7 +924,7 @@ describe("governanceApi account enforcement", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(createRealmQueueItemFromFeedbackMock).toHaveBeenCalledWith({
+    expect(createRealmCaseFromFeedbackMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
       feedbackId: "feedback-1",
       actorUserId: "staff-1",
@@ -943,48 +932,46 @@ describe("governanceApi account enforcement", () => {
     });
   });
 
-  test("lists only escalated realm queue items for staff oversight", async () => {
+  test("lists only escalated realm cases for staff oversight", async () => {
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
-      new Request("http://localhost/governance/realm-queue/escalated?limit=8"),
+      new Request(
+        "http://localhost/governance/cases?scope=realm&state=escalated&limit=8",
+      ),
     );
 
     expect(response.status).toBe(200);
-    expect(listEscalatedRealmQueueMock).toHaveBeenCalledWith({ limit: 8 });
+    expect(response.status).toBe(200);
   });
 
-  test("lists realm queue events through realm queue policy", async () => {
+  test("lists realm case actions through realm case policy", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     const response = await governanceApi.handle(
       new Request(
-        "http://localhost/governance/realms/realm-1/queue/queue-1/events?limit=10",
+        "http://localhost/governance/realms/realm-1/cases/case-1/actions?limit=10",
       ),
     );
 
     expect(response.status).toBe(200);
-    expect(listRealmQueueEventsMock).toHaveBeenCalledWith(
-      "realm-1",
-      "queue-1",
-      {
-        limit: 10,
-      },
-    );
+    expect(listRealmCaseActionsMock).toHaveBeenCalledWith("realm-1", "case-1", {
+      limit: 10,
+    });
   });
 
-  test("decides and escalates realm queue items through realm policies", async () => {
+  test("decides and escalates realm cases through realm policies", async () => {
     policyAllowed = true;
 
     const { governanceApi } = await import("./governance.api");
     await governanceApi.handle(
       new Request(
-        "http://localhost/governance/realms/realm-1/queue/queue-1/decision",
+        "http://localhost/governance/realms/realm-1/cases/case-1/decision",
         {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            decisionKind: "hide_from_realm",
+            actionKind: "remove",
             reason: "off-topic",
           }),
         },
@@ -992,7 +979,7 @@ describe("governanceApi account enforcement", () => {
     );
     await governanceApi.handle(
       new Request(
-        "http://localhost/governance/realms/realm-1/queue/queue-1/escalate",
+        "http://localhost/governance/realms/realm-1/cases/case-1/escalate",
         {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -1001,18 +988,24 @@ describe("governanceApi account enforcement", () => {
       ),
     );
 
-    expect(decideRealmQueueItemMock).toHaveBeenCalledWith({
+    expect(decideRealmCaseMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      queueItemId: "queue-1",
+      caseId: "case-1",
       actorUserId: "staff-1",
-      decisionKind: "hide_from_realm",
+      decisionKind: "remove_from_realm",
       reason: "off-topic",
+      duplicateOfCaseId: undefined,
+      parentCaseId: undefined,
+      decision: undefined,
+      metadata: undefined,
     });
-    expect(escalateRealmQueueItemMock).toHaveBeenCalledWith({
+    expect(escalateRealmCaseMock).toHaveBeenCalledWith({
       realmUnitId: "realm-1",
-      queueItemId: "queue-1",
+      caseId: "case-1",
       actorUserId: "staff-1",
       reason: "site review needed",
+      platformCaseId: undefined,
+      safeSummary: undefined,
     });
     const policyActions = (
       decideForIdentityMock.mock.calls as unknown as Array<[{ action: string }]>

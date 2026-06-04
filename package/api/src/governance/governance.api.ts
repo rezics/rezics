@@ -9,12 +9,12 @@ import type {
   ContentModerationDecisionInput,
   CreateAccountEnforcementInput,
   CreateModerationCaseFromFeedbackInput,
-  CreateRealmModerationQueueItemFromFeedbackInput,
-  CreateRealmModerationQueueItemInput,
+  CreateRealmModerationCaseFromFeedbackInput,
+  CreateRealmModerationCaseInput,
   DecideModerationCaseInput,
-  DecideRealmModerationQueueItemInput,
+  DecideRealmModerationCaseInput,
   DuplicateModerationCaseInput,
-  EscalateRealmModerationQueueItemInput,
+  EscalateRealmModerationCaseInput,
   GrantCapabilityInput,
   ModerationActionDTO,
   ModerationCaseDTO,
@@ -22,7 +22,6 @@ import type {
   ModerationOverlayRequest,
   PolicyDecision,
   PolicyInput,
-  RealmModerationQueueItemDTO,
   StaffAuditLogDTO,
   TriageModerationCaseInput,
   UnblockAccountEnforcementInput,
@@ -253,29 +252,29 @@ export const governanceApi = {
     );
   },
 
-  listRealmQueue: async (
+  listRealmCases: async (
     realmUnitId: string,
     query?: GovernanceListQuery,
-  ): Promise<RealmModerationQueueItemDTO[]> => {
-    return apiFetch<RealmModerationQueueItemDTO[]>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/queue${buildQueryString(query)}`,
+  ): Promise<ModerationCaseDTO[]> => {
+    return apiFetch<ModerationCaseDTO[]>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/cases${buildQueryString(query)}`,
     );
   },
 
-  listEscalatedRealmQueue: async (
+  listEscalatedRealmCases: async (
     query?: GovernanceListQuery,
-  ): Promise<RealmModerationQueueItemDTO[]> => {
-    return apiFetch<RealmModerationQueueItemDTO[]>(
-      `/governance/realm-queue/escalated${buildQueryString(query)}`,
+  ): Promise<ModerationCaseDTO[]> => {
+    return apiFetch<ModerationCaseDTO[]>(
+      `/governance/cases?scope=realm&state=escalated${query ? `&${buildQueryString(query).slice(1)}` : ""}`,
     );
   },
 
-  createRealmQueueItem: async (
+  createRealmCase: async (
     realmUnitId: string,
-    input: CreateRealmModerationQueueItemInput,
-  ): Promise<RealmModerationQueueItemDTO> => {
-    return apiFetch<RealmModerationQueueItemDTO>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/queue`,
+    input: CreateRealmModerationCaseInput,
+  ): Promise<ModerationCaseDTO> => {
+    return apiFetch<ModerationCaseDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/cases`,
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -283,13 +282,13 @@ export const governanceApi = {
     );
   },
 
-  createRealmQueueItemFromFeedback: async (
+  createRealmCaseFromFeedback: async (
     realmUnitId: string,
     feedbackId: string,
-    input: CreateRealmModerationQueueItemFromFeedbackInput,
-  ): Promise<RealmModerationQueueItemDTO> => {
-    return apiFetch<RealmModerationQueueItemDTO>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/queue/from-feedback/${encodePathPart(feedbackId)}`,
+    input: CreateRealmModerationCaseFromFeedbackInput,
+  ): Promise<ModerationCaseDTO> => {
+    return apiFetch<ModerationCaseDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/cases/from-feedback/${encodePathPart(feedbackId)}`,
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -297,23 +296,23 @@ export const governanceApi = {
     );
   },
 
-  listRealmQueueEvents: async (
+  listRealmCaseActions: async (
     realmUnitId: string,
-    queueItemId: string,
+    caseId: string,
     query?: GovernanceListQuery,
   ): Promise<ModerationActionDTO[]> => {
     return apiFetch<ModerationActionDTO[]>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/queue/${encodePathPart(queueItemId)}/events${buildQueryString(query)}`,
+      `/governance/realms/${encodePathPart(realmUnitId)}/cases/${encodePathPart(caseId)}/actions${buildQueryString(query)}`,
     );
   },
 
-  decideRealmQueueItem: async (
+  decideRealmCase: async (
     realmUnitId: string,
-    queueItemId: string,
-    input: DecideRealmModerationQueueItemInput,
-  ): Promise<RealmModerationQueueItemDTO> => {
-    return apiFetch<RealmModerationQueueItemDTO>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/queue/${encodePathPart(queueItemId)}/decision`,
+    caseId: string,
+    input: DecideRealmModerationCaseInput,
+  ): Promise<ModerationCaseDTO> => {
+    return apiFetch<ModerationCaseDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/cases/${encodePathPart(caseId)}/decision`,
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -321,13 +320,13 @@ export const governanceApi = {
     );
   },
 
-  escalateRealmQueueItem: async (
+  escalateRealmCase: async (
     realmUnitId: string,
-    queueItemId: string,
-    input: EscalateRealmModerationQueueItemInput,
-  ): Promise<RealmModerationQueueItemDTO> => {
-    return apiFetch<RealmModerationQueueItemDTO>(
-      `/governance/realms/${encodePathPart(realmUnitId)}/queue/${encodePathPart(queueItemId)}/escalate`,
+    caseId: string,
+    input: EscalateRealmModerationCaseInput,
+  ): Promise<ModerationCaseDTO> => {
+    return apiFetch<ModerationCaseDTO>(
+      `/governance/realms/${encodePathPart(realmUnitId)}/cases/${encodePathPart(caseId)}/escalate`,
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -350,7 +349,7 @@ export const governanceApi = {
     input: ContentModerationDecisionInput,
   ): Promise<ModerationOverlayDTO | null> => {
     await apiFetch<unknown>(
-      `/governance/content/${encodePathPart(targetUnitId)}/hide`,
+      `/governance/content/${encodePathPart(targetUnitId)}/remove`,
       {
         method: "POST",
         body: JSON.stringify(input),
@@ -434,8 +433,8 @@ export const governanceApi = {
     realmUnitId: string,
     targetUnitId: string,
     input: ContentModerationDecisionInput,
-  ): Promise<RealmModerationQueueItemDTO> => {
-    return apiFetch<RealmModerationQueueItemDTO>(
+  ): Promise<ModerationCaseDTO> => {
+    return apiFetch<ModerationCaseDTO>(
       `/governance/realms/${encodePathPart(realmUnitId)}/content/${encodePathPart(targetUnitId)}/owner-delegation`,
       {
         method: "POST",

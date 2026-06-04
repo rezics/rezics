@@ -1,11 +1,8 @@
 import {
   governanceCaseListQuery,
-  governanceRealmQueueListQuery,
+  governanceRealmCaseListQuery,
 } from "@rezics/api/governance/governance";
-import type {
-  ModerationCaseDTO,
-  RealmModerationQueueItemDTO,
-} from "@rezics/contract";
+import type { ModerationCaseDTO } from "@rezics/contract";
 import {
   Badge,
   Button,
@@ -96,11 +93,11 @@ function CaseTable({ cases }: { cases: ModerationCaseDTO[] }) {
   );
 }
 
-function RealmQueueList({ items }: { items: RealmModerationQueueItemDTO[] }) {
+function RealmCaseList({ items }: { items: ModerationCaseDTO[] }) {
   if (items.length === 0) {
     return (
       <div className="rounded-md bg-surface-subtle p-6 text-sm leading-body text-text-secondary">
-        No realm queue items are available for this realm.
+        No realm cases are available for this realm.
       </div>
     );
   }
@@ -121,10 +118,10 @@ function RealmQueueList({ items }: { items: RealmModerationQueueItemDTO[] }) {
                 {item.reason ?? item.safeSummary ?? "No summary recorded."}
               </p>
             </div>
-            {item.linkedCaseId ? (
+            {item.parentCaseId ? (
               <Link
                 to="/staff/case/$caseId"
-                params={{ caseId: item.linkedCaseId }}
+                params={{ caseId: item.parentCaseId }}
               >
                 <Button variant="outline" size="sm">
                   Open case
@@ -156,8 +153,8 @@ export function StaffConsolePage({
     ...governanceCaseListQuery({ limit: 50 }),
     enabled: allowed,
   });
-  const realmQueueQuery = useQuery({
-    ...governanceRealmQueueListQuery(realmUnitId, { limit: 25 }),
+  const realmCasesQuery = useQuery({
+    ...governanceRealmCaseListQuery(realmUnitId, { limit: 25 }),
     enabled: allowed && realmUnitId.trim().length > 0,
   });
 
@@ -185,7 +182,7 @@ export function StaffConsolePage({
   return (
     <StaffPageShell
       title="Moderation queue"
-      description="Review site cases, check realm queue intake, and jump into account safety records."
+      description="Review site cases, check realm case intake, and jump into account safety records."
       actions={
         accountUserId.trim() ? (
           <Link
@@ -280,7 +277,7 @@ export function StaffConsolePage({
 
       <section className="flex flex-col gap-3">
         <div className="flex max-w-xl flex-col gap-1">
-          <Label htmlFor="staff-realm-id">Realm queue</Label>
+          <Label htmlFor="staff-realm-id">Realm cases</Label>
           <Input
             id="staff-realm-id"
             value={realmUnitId}
@@ -289,14 +286,14 @@ export function StaffConsolePage({
           />
         </div>
         {realmUnitId.trim() ? (
-          realmQueueQuery.isLoading ? (
+          realmCasesQuery.isLoading ? (
             <div className="h-32 rounded-md bg-surface-subtle" />
-          ) : realmQueueQuery.isError ? (
+          ) : realmCasesQuery.isError ? (
             <div className="rounded-md bg-error-fill/10 p-4 text-sm leading-body text-error-text">
-              Unable to load realm queue.
+              Unable to load realm cases.
             </div>
           ) : (
-            <RealmQueueList items={realmQueueQuery.data ?? []} />
+            <RealmCaseList items={realmCasesQuery.data ?? []} />
           )
         ) : null}
       </section>

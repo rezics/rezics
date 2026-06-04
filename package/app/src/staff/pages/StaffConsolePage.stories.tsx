@@ -1,12 +1,9 @@
 import {
   governanceCaseListQuery,
-  governanceRealmQueueListQuery,
+  governanceRealmCaseListQuery,
 } from "@rezics/api/governance/governance";
 import { governanceApi } from "@rezics/api/governance/governance.api";
-import type {
-  ModerationCaseDTO,
-  RealmModerationQueueItemDTO,
-} from "@rezics/contract";
+import type { ModerationCaseDTO } from "@rezics/contract";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { QueryClient } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
@@ -24,13 +21,15 @@ const now = "2026-05-27T08:30:00.000Z";
 const openCases: ModerationCaseDTO[] = [
   {
     id: "case-1001",
+    scope: "platform",
     state: "new",
     severity: "high",
     reporterUserId: "reporter-1",
     subjectUserId: ACCOUNT_USER_ID,
-    target: { kind: "post", id: "unit-post-91" },
+    target: { kind: "unit", id: "unit-post-91" },
     sourceFeedbackId: "feedback-21",
     assignedToUserId: null,
+    parentCaseId: null,
     duplicateOfCaseId: null,
     reason: "Repeated harassment reports on a discussion thread.",
     safeSummary: "Thread needs staff review.",
@@ -39,13 +38,15 @@ const openCases: ModerationCaseDTO[] = [
   },
   {
     id: "case-1002",
+    scope: "platform",
     state: "assigned",
     severity: "medium",
     reporterUserId: "reporter-2",
     subjectUserId: "user-42",
-    target: { kind: "review", id: "unit-review-33" },
+    target: { kind: "unit", id: "unit-review-33" },
     sourceFeedbackId: null,
     assignedToUserId: "staff-lin",
+    parentCaseId: null,
     duplicateOfCaseId: null,
     reason: "Potential review spam cluster.",
     safeSummary: null,
@@ -54,6 +55,7 @@ const openCases: ModerationCaseDTO[] = [
   },
   {
     id: "case-1003",
+    scope: "platform",
     state: "actioned",
     severity: "low",
     reporterUserId: null,
@@ -61,6 +63,7 @@ const openCases: ModerationCaseDTO[] = [
     target: { kind: "account", id: "user-57" },
     sourceFeedbackId: null,
     assignedToUserId: "staff-lin",
+    parentCaseId: null,
     duplicateOfCaseId: null,
     reason: "Account warning was issued.",
     safeSummary: "Action completed.",
@@ -69,19 +72,21 @@ const openCases: ModerationCaseDTO[] = [
   },
 ];
 
-const realmQueueItems: RealmModerationQueueItemDTO[] = [
+const realmCases: ModerationCaseDTO[] = [
   {
-    id: "queue-7001",
-    realmUnitId: REALM_UNIT_ID,
+    id: "case-7001",
+    scope: "realm",
     state: "new",
+    severity: "medium",
     reporterUserId: "realm-reporter",
     subjectUserId: ACCOUNT_USER_ID,
-    target: { kind: "post", id: "unit-post-91", realmUnitId: REALM_UNIT_ID },
+    target: { kind: "unit", id: "unit-post-91", realmUnitId: REALM_UNIT_ID },
     sourceFeedbackId: "feedback-22",
-    linkedCaseId: "case-1001",
     assignedToUserId: null,
+    parentCaseId: "case-1001",
+    duplicateOfCaseId: null,
     reason: "Realm moderators escalated this thread for site staff review.",
-    safeSummary: "Escalated from realm queue.",
+    safeSummary: "Escalated from realm case.",
     createdAt: now,
     updatedAt: now,
   },
@@ -160,8 +165,8 @@ function seedConsoleQueries(
       openCases,
     );
     queryClient.setQueryData(
-      governanceRealmQueueListQuery(REALM_UNIT_ID, { limit: 25 }).queryKey,
-      realmQueueItems,
+      governanceRealmCaseListQuery(REALM_UNIT_ID, { limit: 25 }).queryKey,
+      realmCases,
     );
   }
 }

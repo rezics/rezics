@@ -23,7 +23,6 @@ import {
 } from "./moderation-action.service";
 import type { GovernanceListOptions } from "./types";
 
-type ModerationStatusInput = "approved" | "pending" | "removed";
 type UnitModerationActionInput = "approve" | "remove" | "restore";
 type CommentModerationActionInput = "remove" | "restore" | "lock" | "unlock";
 type LockTargetKind = "POST" | "COMMENT" | "UNIT_REALM";
@@ -48,21 +47,7 @@ type ModerationDecisionInput = {
   metadata?: Record<string, unknown>;
 };
 
-type ContentModerationStateInput = {
-  moderatedUnitId: string;
-  state: "visible" | "hidden" | "tombstoned" | "removed";
-  decidedById?: string | null;
-  caseId?: string | null;
-  reason?: string | null;
-  metadata?: Record<string, unknown>;
-};
-
-type RealmUnitModerationStateInput = ModerationDecisionInput & {
-  realmUnitId: string;
-  state: "pending_review" | "approved" | "rejected" | "removed";
-};
-
-type RealmQueueDecisionKind =
+type RealmCaseDecisionKind =
   | "approve_for_realm"
   | "reject_from_realm"
   | "hide_from_realm"
@@ -197,21 +182,7 @@ function commentActionKindFromAction(
   return "REMOVE";
 }
 
-function stateFromContentState(
-  state: ContentModerationStateInput["state"],
-): UnitModerationActionInput {
-  return state === "visible" ? "restore" : "remove";
-}
-
-function realmStatusFromLegacyState(
-  state: RealmUnitModerationStateInput["state"],
-): ModerationStatusInput {
-  if (state === "pending_review") return "pending";
-  if (state === "approved") return "approved";
-  return "removed";
-}
-
-function caseStateForDecision(kind: RealmQueueDecisionKind) {
+function caseStateForDecision(kind: RealmCaseDecisionKind) {
   if (kind === "reject_from_realm" || kind === "reject") return "REJECTED";
   if (kind === "duplicate") return "DUPLICATE";
   if (kind === "escalate") return "ESCALATED";
@@ -226,6 +197,14 @@ export class GovernanceModerationService {
 
   async listCases(options: GovernanceListOptions = {}) {
     const rows = await prisma.moderationCase.findMany({
+      where: {
+        ...(options.scope
+          ? { scope: upper<Prisma.ModerationScope>(options.scope) }
+          : {}),
+        ...(options.state
+          ? { state: upper<Prisma.ModerationCaseState>(options.state) }
+          : {}),
+      },
       orderBy: { createdAt: "desc" },
       skip: options.offset ?? 0,
       take: options.limit ?? 50,
@@ -774,7 +753,7 @@ export class GovernanceModerationService {
     return mapModerationCaseToDTO(row);
   }
 
-  async listRealmQueue(
+  async listRealmCases(
     realmUnitId: string,
     options: GovernanceListOptions = {},
   ) {
@@ -787,7 +766,7 @@ export class GovernanceModerationService {
     return rows.map(mapModerationCaseToDTO);
   }
 
-  async listEscalatedRealmQueue(options: GovernanceListOptions = {}) {
+  async listEscalatedRealmCases(options: GovernanceListOptions = {}) {
     const rows = await prisma.moderationCase.findMany({
       where: { scope: "REALM", state: "ESCALATED" },
       orderBy: { updatedAt: "desc" },
@@ -797,16 +776,16 @@ export class GovernanceModerationService {
     return rows.map(mapModerationCaseToDTO);
   }
 
-  async listRealmQueueEvents(
+  async listRealmCaseActions(
     realmUnitId: string,
-    queueItemId: string,
+    caseId: string,
     options: GovernanceListOptions = {},
   ) {
     void realmUnitId;
-    return this.listCaseActions(queueItemId, options);
+    return this.listCaseActions(caseId, options);
   }
 
-  async createRealmQueueItem(input: {
+  async createRealmCase(input: {
     realmUnitId: string;
     actorUserId: string;
     reporterUserId?: string | null;
@@ -853,7 +832,7 @@ export class GovernanceModerationService {
     return mapModerationCaseToDTO(row);
   }
 
-  async createRealmQueueItemFromFeedback(input: {
+  async createRealmCaseFromFeedback(input: {
     realmUnitId: string;
     feedbackId: string;
     actorUserId: string;
@@ -875,7 +854,7 @@ export class GovernanceModerationService {
     const feedback = await prisma.feedback.findUniqueOrThrow({
       where: { id: input.feedbackId },
     });
-    return this.createRealmQueueItem({
+    return this.createRealmCase({
       realmUnitId: input.realmUnitId,
       actorUserId: input.actorUserId,
       reporterUserId: feedback.userId,
@@ -894,26 +873,26 @@ export class GovernanceModerationService {
     });
   }
 
-  async decideRealmQueueItem(input: {
+  async decideRealmCase(input: {
     realmUnitId: string;
-    queueItemId: string;
+    caseId: string;
     actorUserId: string;
-    decisionKind: RealmQueueDecisionKind;
+    decisionKind: RealmCaseDecisionKind;
     reason: string;
-    duplicateOfQueueItemId?: string | null;
-    linkedCaseId?: string | null;
+    duplicateOfCaseId?: string | null;
+    parentCaseId?: string | null;
     decision?: Record<string, unknown>;
     metadata?: Record<string, unknown>;
   }) {
     const row = await prisma.$transaction(async (tx) => {
       const current = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.queueItemId },
+        where: { id: input.caseId },
       });
       const updated = await tx.moderationCase.update({
-        where: { id: input.queueItemId },
+        where: { id: input.caseId },
         data: {
           state: caseStateForDecision(input.decisionKind),
-          parentCaseId: input.linkedCaseId ?? current.parentCaseId,
+          parentCaseId: input.parentCaseId ?? current.parentCaseId,
           reason: input.reason,
           metadata: cleanJsonObject({
             ...(current.metadata &&
@@ -922,7 +901,7 @@ export class GovernanceModerationService {
               ? current.metadata
               : {}),
             ...(input.metadata ?? {}),
-            duplicateOfQueueItemId: input.duplicateOfQueueItemId ?? undefined,
+            duplicateOfCaseId: input.duplicateOfCaseId ?? undefined,
           }),
         },
       });
@@ -984,19 +963,19 @@ export class GovernanceModerationService {
     return mapModerationCaseToDTO(row);
   }
 
-  async escalateRealmQueueItem(input: {
+  async escalateRealmCase(input: {
     realmUnitId: string;
-    queueItemId: string;
+    caseId: string;
     actorUserId: string;
     reason: string;
-    caseId?: string | null;
+    platformCaseId?: string | null;
     safeSummary?: string | null;
   }) {
     const row = await prisma.$transaction(async (tx) => {
       const realmCase = await tx.moderationCase.findUniqueOrThrow({
-        where: { id: input.queueItemId },
+        where: { id: input.caseId },
       });
-      let platformCaseId = input.caseId ?? realmCase.parentCaseId;
+      let platformCaseId = input.platformCaseId ?? realmCase.parentCaseId;
       if (!platformCaseId) {
         const platformCase = await tx.moderationCase.create({
           data: {
@@ -1028,7 +1007,7 @@ export class GovernanceModerationService {
         });
       }
       const updated = await tx.moderationCase.update({
-        where: { id: input.queueItemId },
+        where: { id: input.caseId },
         data: {
           state: "ESCALATED",
           parentCaseId: platformCaseId,
@@ -1058,52 +1037,6 @@ export class GovernanceModerationService {
       extra: { caseId: row.id, parentCaseId: row.parentCaseId },
     });
     return mapModerationCaseToDTO(row);
-  }
-
-  async getGlobalContentState(moderatedUnitId: string) {
-    const row = await prisma.unit.findUnique({
-      where: { id: moderatedUnitId },
-      select: {
-        id: true,
-        moderationStatus: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-    });
-    if (!row) return null;
-    return {
-      moderatedUnitId: row.id,
-      state: row.moderationStatus === "REMOVED" ? "removed" : "visible",
-      decidedByUserId: null,
-      caseId: null,
-      reason: null,
-      createdAt: row.createdAt.toISOString(),
-      updatedAt: row.updatedAt.toISOString(),
-    };
-  }
-
-  async listGlobalContentStates(moderatedUnitIds: string[]) {
-    const ids = [...new Set(moderatedUnitIds)];
-    if (ids.length === 0) return [];
-    const rows = await prisma.unit.findMany({
-      where: { id: { in: ids } },
-      select: {
-        id: true,
-        moderationStatus: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-      orderBy: { updatedAt: "desc" },
-    });
-    return rows.map((row) => ({
-      moderatedUnitId: row.id,
-      state: row.moderationStatus === "REMOVED" ? "removed" : "visible",
-      decidedByUserId: null,
-      caseId: null,
-      reason: null,
-      createdAt: row.createdAt.toISOString(),
-      updatedAt: row.updatedAt.toISOString(),
-    }));
   }
 
   async setUnitModerationStatus(input: {
@@ -1156,39 +1089,6 @@ export class GovernanceModerationService {
       idempotencyKey: input.idempotencyKey,
     });
     return unit;
-  }
-
-  async setGlobalContentState(input: ContentModerationStateInput) {
-    const unit = await this.setUnitModerationStatus({
-      unitId: input.moderatedUnitId,
-      actorUserId: input.decidedById ?? "",
-      action: stateFromContentState(input.state),
-      reasonCode: input.state,
-      reasonText: input.reason,
-      caseId: input.caseId,
-    });
-    return {
-      moderatedUnitId: unit.id,
-      state: unit.moderationStatus === "REMOVED" ? "removed" : "visible",
-      decidedByUserId: input.decidedById ?? null,
-      caseId: input.caseId ?? null,
-      reason: input.reason ?? null,
-      metadata: input.metadata,
-      createdAt: unit.createdAt.toISOString(),
-      updatedAt: unit.updatedAt.toISOString(),
-    };
-  }
-
-  async hideGlobal(input: ModerationDecisionInput) {
-    return this.setGlobalContentState({ ...input, state: "hidden" });
-  }
-
-  async tombstoneGlobal(input: ModerationDecisionInput) {
-    return this.setGlobalContentState({ ...input, state: "tombstoned" });
-  }
-
-  async restoreGlobal(input: ModerationDecisionInput) {
-    return this.setGlobalContentState({ ...input, state: "visible" });
   }
 
   async listRealmUnitStates(input: { realmUnitId: string; unitIds: string[] }) {
@@ -1265,67 +1165,6 @@ export class GovernanceModerationService {
     return row;
   }
 
-  async setRealmUnitVisibilityState(
-    input: ContentModerationStateInput & { realmUnitId: string },
-  ) {
-    return this.setRealmUnitModerationStatus({
-      realmUnitId: input.realmUnitId,
-      unitId: input.moderatedUnitId,
-      actorUserId: input.decidedById ?? "",
-      action: stateFromContentState(input.state),
-      reasonCode: input.state,
-      reasonText: input.reason,
-      caseId: input.caseId,
-    });
-  }
-
-  async hideInRealm(input: ModerationDecisionInput & { realmUnitId: string }) {
-    return this.setRealmUnitVisibilityState({ ...input, state: "hidden" });
-  }
-
-  async tombstoneInRealm(
-    input: ModerationDecisionInput & { realmUnitId: string },
-  ) {
-    return this.setRealmUnitVisibilityState({ ...input, state: "tombstoned" });
-  }
-
-  async restoreInRealm(
-    input: ModerationDecisionInput & { realmUnitId: string },
-  ) {
-    return this.setRealmUnitVisibilityState({ ...input, state: "visible" });
-  }
-
-  async setRealmUnitModerationState(input: RealmUnitModerationStateInput) {
-    const status = realmStatusFromLegacyState(input.state);
-    return this.setRealmUnitModerationStatus({
-      realmUnitId: input.realmUnitId,
-      unitId: input.moderatedUnitId,
-      actorUserId: input.decidedById,
-      action: status === "removed" ? "remove" : "approve",
-      reasonCode: input.state,
-      reasonText: input.reason,
-      caseId: input.caseId,
-    });
-  }
-
-  async approveInRealm(
-    input: ModerationDecisionInput & { realmUnitId: string },
-  ) {
-    return this.setRealmUnitModerationState({ ...input, state: "approved" });
-  }
-
-  async rejectInRealm(
-    input: ModerationDecisionInput & { realmUnitId: string },
-  ) {
-    return this.setRealmUnitModerationState({ ...input, state: "rejected" });
-  }
-
-  async removeFromRealm(
-    input: ModerationDecisionInput & { realmUnitId: string },
-  ) {
-    return this.setRealmUnitModerationState({ ...input, state: "removed" });
-  }
-
   async setLock(input: {
     targetKind: LockTargetKind;
     targetId: string;
@@ -1396,7 +1235,7 @@ export class GovernanceModerationService {
   async requestOwnerDelegation(
     input: ModerationDecisionInput & { realmUnitId: string },
   ) {
-    return this.createRealmQueueItem({
+    return this.createRealmCase({
       realmUnitId: input.realmUnitId,
       actorUserId: input.decidedById,
       targetKind: "unit",

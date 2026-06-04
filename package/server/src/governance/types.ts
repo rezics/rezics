@@ -17,6 +17,8 @@ export type StaffAuditLogRow = StaffAuditLog;
 export type GovernanceListOptions = {
   offset?: number;
   limit?: number;
+  scope?: string;
+  state?: string;
 };
 
 export type GovernanceAuditListOptions = GovernanceListOptions & {

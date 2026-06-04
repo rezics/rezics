@@ -6,7 +6,7 @@ import {
   invalidateGovernanceCaseQueries,
   invalidateGovernanceEnforcementQueries,
   invalidateRealmCapabilityQueries,
-  invalidateRealmQueueQueries,
+  invalidateRealmCaseQueries,
   invalidateRealmUnitStateQueries,
 } from "./governance.mutations";
 
@@ -33,7 +33,7 @@ describe("governanceApi", () => {
   test("builds staff case and audit read requests", async () => {
     await governanceApi.listCases({ offset: 5, limit: 10 });
     await governanceApi.getCase("case/1");
-    await governanceApi.listEscalatedRealmQueue({ limit: 8 });
+    await governanceApi.listEscalatedRealmCases({ limit: 8 });
     await governanceApi.listTargetActions("unit", "post/1", { limit: 5 });
     await governanceApi.listAudit({
       action: "session.revoke",
@@ -49,7 +49,7 @@ describe("governanceApi", () => {
       "http://api.example/governance/cases/case%2F1",
     );
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
-      "http://api.example/governance/realm-queue/escalated?limit=8",
+      "http://api.example/governance/cases?scope=realm&state=escalated&limit=8",
     );
     expect(fetchMock.mock.calls[3]?.[0]).toBe(
       "http://api.example/governance/moderation/unit/post%2F1/actions?limit=5",
@@ -96,8 +96,8 @@ describe("governanceApi", () => {
       assignedToUserId: "staff-2",
       reason: "handoff",
     });
-    await governanceApi.decideRealmQueueItem("realm/1", "queue/1", {
-      decisionKind: "hide_from_realm",
+    await governanceApi.decideRealmCase("realm/1", "case/1", {
+      actionKind: "remove",
       reason: "off topic",
     });
     await governanceApi.grantRealmCapability("realm/1", "user/1", {
@@ -128,7 +128,7 @@ describe("governanceApi", () => {
       "http://api.example/governance/cases/case%2F1/assign",
     );
     expect(fetchMock.mock.calls[2]?.[0]).toBe(
-      "http://api.example/governance/realms/realm%2F1/queue/queue%2F1/decision",
+      "http://api.example/governance/realms/realm%2F1/cases/case%2F1/decision",
     );
     expect(fetchMock.mock.calls[3]?.[0]).toBe(
       "http://api.example/governance/realms/realm%2F1/members/user%2F1/capabilities",
@@ -161,9 +161,10 @@ describe("governanceApi", () => {
       "list",
       { action: "session.revoke" },
     ]);
-    expect(governanceKeys.realmQueueEscalated({ limit: 8 })).toEqual([
+    expect(governanceKeys.realmCasesEscalated({ limit: 8 })).toEqual([
       "governance",
-      "realm-queue",
+      "cases",
+      "realm",
       "escalated",
       { limit: 8 },
     ]);
@@ -175,7 +176,7 @@ describe("governanceApi", () => {
     invalidateGovernanceCaseQueries(queryClient, "case-1");
     invalidateGovernanceEnforcementQueries(queryClient, "user-1");
     invalidateRealmCapabilityQueries(queryClient, "realm-1");
-    invalidateRealmQueueQueries(queryClient, "realm-1", "queue-1");
+    invalidateRealmCaseQueries(queryClient, "realm-1", "case-1");
     invalidateRealmUnitStateQueries(queryClient, "realm-1", "post-1");
 
     expect(
@@ -189,15 +190,15 @@ describe("governanceApi", () => {
       { queryKey: ["governance", "enforcement", "active", "user-1"] },
       { queryKey: ["governance", "capability-hints"] },
       { queryKey: ["realms", "members", "realm-1"] },
-      { queryKey: ["governance", "realms", "realm-1", "queue"] },
+      { queryKey: ["governance", "realms", "realm-1", "cases"] },
       {
         queryKey: [
           "governance",
           "realms",
           "realm-1",
-          "queue",
+          "cases",
           "detail",
-          "queue-1",
+          "case-1",
         ],
       },
       {

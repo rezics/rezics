@@ -5,12 +5,12 @@ import type {
   ContentModerationDecisionInput,
   CreateAccountEnforcementInput,
   CreateModerationCaseFromFeedbackInput,
-  CreateRealmModerationQueueItemFromFeedbackInput,
-  CreateRealmModerationQueueItemInput,
+  CreateRealmModerationCaseFromFeedbackInput,
+  CreateRealmModerationCaseInput,
   DecideModerationCaseInput,
-  DecideRealmModerationQueueItemInput,
+  DecideRealmModerationCaseInput,
   DuplicateModerationCaseInput,
-  EscalateRealmModerationQueueItemInput,
+  EscalateRealmModerationCaseInput,
   GrantCapabilityInput,
   TriageModerationCaseInput,
   UnblockAccountEnforcementInput,
@@ -58,21 +58,17 @@ export function invalidateRealmCapabilityQueries(
   queryClient.invalidateQueries({ queryKey: realmKeys.members(realmUnitId) });
 }
 
-export function invalidateRealmQueueQueries(
+export function invalidateRealmCaseQueries(
   queryClient: Pick<QueryClient, "invalidateQueries">,
   realmUnitId: string,
-  queueItemId?: string,
+  caseId?: string,
 ) {
   queryClient.invalidateQueries({
-    queryKey: governanceKeys.realmQueue(realmUnitId),
+    queryKey: governanceKeys.realmCases(realmUnitId),
   });
-  if (queueItemId) {
+  if (caseId) {
     queryClient.invalidateQueries({
-      queryKey: [
-        ...governanceKeys.realmQueue(realmUnitId),
-        "detail",
-        queueItemId,
-      ],
+      queryKey: [...governanceKeys.realmCases(realmUnitId), "detail", caseId],
     });
   }
 }
@@ -326,12 +322,12 @@ export function useAppealModerationCaseMutation(
   });
 }
 
-export function useCreateRealmQueueItemMutation(
+export function useCreateRealmCaseMutation(
   options?: Omit<
     UseMutationOptions<
-      Awaited<ReturnType<typeof governanceApi.createRealmQueueItem>>,
+      Awaited<ReturnType<typeof governanceApi.createRealmCase>>,
       Error,
-      { realmUnitId: string; input: CreateRealmModerationQueueItemInput }
+      { realmUnitId: string; input: CreateRealmModerationCaseInput }
     >,
     "mutationFn"
   >,
@@ -340,26 +336,24 @@ export function useCreateRealmQueueItemMutation(
 
   return useMutation({
     mutationFn: ({ realmUnitId, input }) =>
-      governanceApi.createRealmQueueItem(realmUnitId, input),
+      governanceApi.createRealmCase(realmUnitId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmQueueQueries(queryClient, variables.realmUnitId, data.id);
+      invalidateRealmCaseQueries(queryClient, variables.realmUnitId, data.id);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useCreateRealmQueueItemFromFeedbackMutation(
+export function useCreateRealmCaseFromFeedbackMutation(
   options?: Omit<
     UseMutationOptions<
-      Awaited<
-        ReturnType<typeof governanceApi.createRealmQueueItemFromFeedback>
-      >,
+      Awaited<ReturnType<typeof governanceApi.createRealmCaseFromFeedback>>,
       Error,
       {
         realmUnitId: string;
         feedbackId: string;
-        input: CreateRealmModerationQueueItemFromFeedbackInput;
+        input: CreateRealmModerationCaseFromFeedbackInput;
       }
     >,
     "mutationFn"
@@ -369,28 +363,24 @@ export function useCreateRealmQueueItemFromFeedbackMutation(
 
   return useMutation({
     mutationFn: ({ realmUnitId, feedbackId, input }) =>
-      governanceApi.createRealmQueueItemFromFeedback(
-        realmUnitId,
-        feedbackId,
-        input,
-      ),
+      governanceApi.createRealmCaseFromFeedback(realmUnitId, feedbackId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmQueueQueries(queryClient, variables.realmUnitId, data.id);
+      invalidateRealmCaseQueries(queryClient, variables.realmUnitId, data.id);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useDecideRealmQueueItemMutation(
+export function useDecideRealmCaseMutation(
   options?: Omit<
     UseMutationOptions<
-      Awaited<ReturnType<typeof governanceApi.decideRealmQueueItem>>,
+      Awaited<ReturnType<typeof governanceApi.decideRealmCase>>,
       Error,
       {
         realmUnitId: string;
-        queueItemId: string;
-        input: DecideRealmModerationQueueItemInput;
+        caseId: string;
+        input: DecideRealmModerationCaseInput;
       }
     >,
     "mutationFn"
@@ -399,32 +389,32 @@ export function useDecideRealmQueueItemMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ realmUnitId, queueItemId, input }) =>
-      governanceApi.decideRealmQueueItem(realmUnitId, queueItemId, input),
+    mutationFn: ({ realmUnitId, caseId, input }) =>
+      governanceApi.decideRealmCase(realmUnitId, caseId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmQueueQueries(
+      invalidateRealmCaseQueries(
         queryClient,
         variables.realmUnitId,
-        variables.queueItemId,
+        variables.caseId,
       );
-      if (data.linkedCaseId) {
-        invalidateGovernanceCaseQueries(queryClient, data.linkedCaseId);
+      if (data.parentCaseId) {
+        invalidateGovernanceCaseQueries(queryClient, data.parentCaseId);
       }
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
 }
 
-export function useEscalateRealmQueueItemMutation(
+export function useEscalateRealmCaseMutation(
   options?: Omit<
     UseMutationOptions<
-      Awaited<ReturnType<typeof governanceApi.escalateRealmQueueItem>>,
+      Awaited<ReturnType<typeof governanceApi.escalateRealmCase>>,
       Error,
       {
         realmUnitId: string;
-        queueItemId: string;
-        input: EscalateRealmModerationQueueItemInput;
+        caseId: string;
+        input: EscalateRealmModerationCaseInput;
       }
     >,
     "mutationFn"
@@ -433,17 +423,17 @@ export function useEscalateRealmQueueItemMutation(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ realmUnitId, queueItemId, input }) =>
-      governanceApi.escalateRealmQueueItem(realmUnitId, queueItemId, input),
+    mutationFn: ({ realmUnitId, caseId, input }) =>
+      governanceApi.escalateRealmCase(realmUnitId, caseId, input),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmQueueQueries(
+      invalidateRealmCaseQueries(
         queryClient,
         variables.realmUnitId,
-        variables.queueItemId,
+        variables.caseId,
       );
-      if (data.linkedCaseId) {
-        invalidateGovernanceCaseQueries(queryClient, data.linkedCaseId);
+      if (data.parentCaseId) {
+        invalidateGovernanceCaseQueries(queryClient, data.parentCaseId);
       }
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
@@ -607,7 +597,7 @@ export function useRequestRealmContentOwnerDelegationMutation(
       ),
     ...options,
     onSuccess: (data, variables, onMutateResult, context) => {
-      invalidateRealmQueueQueries(queryClient, variables.realmUnitId, data.id);
+      invalidateRealmCaseQueries(queryClient, variables.realmUnitId, data.id);
       options?.onSuccess?.(data, variables, onMutateResult, context);
     },
   });
@@ -624,11 +614,10 @@ export const governanceMutations = {
   useTriageCase: useTriageModerationCaseMutation,
   useDecideCase: useDecideModerationCaseMutation,
   useAppealCase: useAppealModerationCaseMutation,
-  useCreateRealmQueueItem: useCreateRealmQueueItemMutation,
-  useCreateRealmQueueItemFromFeedback:
-    useCreateRealmQueueItemFromFeedbackMutation,
-  useDecideRealmQueueItem: useDecideRealmQueueItemMutation,
-  useEscalateRealmQueueItem: useEscalateRealmQueueItemMutation,
+  useCreateRealmCase: useCreateRealmCaseMutation,
+  useCreateRealmCaseFromFeedback: useCreateRealmCaseFromFeedbackMutation,
+  useDecideRealmCase: useDecideRealmCaseMutation,
+  useEscalateRealmCase: useEscalateRealmCaseMutation,
   useRestoreRealmContent: useRestoreRealmContentMutation,
   useApproveRealmContent: useApproveRealmContentMutation,
   useRemoveRealmContent: useRemoveRealmContentMutation,

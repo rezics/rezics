@@ -21,22 +21,22 @@ export const governanceKeys = {
     [...governanceKeys.cases(), "detail", caseId] as const,
   caseEvents: (caseId: string, query?: GovernanceListQuery) =>
     [...governanceKeys.caseDetail(caseId), "events", query] as const,
-  realmQueue: (realmUnitId: string) =>
-    [...governanceKeys.all(), "realms", realmUnitId, "queue"] as const,
-  realmQueueList: (realmUnitId: string, query?: GovernanceListQuery) =>
-    [...governanceKeys.realmQueue(realmUnitId), "list", query] as const,
-  realmQueueEscalated: (query?: GovernanceListQuery) =>
-    [...governanceKeys.all(), "realm-queue", "escalated", query] as const,
-  realmQueueEvents: (
+  realmCases: (realmUnitId: string) =>
+    [...governanceKeys.all(), "realms", realmUnitId, "cases"] as const,
+  realmCaseList: (realmUnitId: string, query?: GovernanceListQuery) =>
+    [...governanceKeys.realmCases(realmUnitId), "list", query] as const,
+  realmCasesEscalated: (query?: GovernanceListQuery) =>
+    [...governanceKeys.cases(), "realm", "escalated", query] as const,
+  realmCaseActions: (
     realmUnitId: string,
-    queueItemId: string,
+    caseId: string,
     query?: GovernanceListQuery,
   ) =>
     [
-      ...governanceKeys.realmQueue(realmUnitId),
+      ...governanceKeys.realmCases(realmUnitId),
       "detail",
-      queueItemId,
-      "events",
+      caseId,
+      "actions",
       query,
     ] as const,
   contentModeration: (targetUnitId: string) =>

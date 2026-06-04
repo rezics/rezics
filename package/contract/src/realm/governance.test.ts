@@ -21,12 +21,12 @@ import {
   contentModerationDecisionSchema,
   createAccountEnforcementSchema,
   createModerationCaseFromFeedbackSchema,
-  createRealmModerationQueueItemFromFeedbackSchema,
-  createRealmModerationQueueItemSchema,
+  createRealmModerationCaseFromFeedbackSchema,
+  createRealmModerationCaseSchema,
   decideModerationCaseSchema,
-  decideRealmModerationQueueItemSchema,
+  decideRealmModerationCaseSchema,
   duplicateModerationCaseSchema,
-  escalateRealmModerationQueueItemSchema,
+  escalateRealmModerationCaseSchema,
   grantCapabilitySchema,
   moderationActionDTOSchema,
   moderationCaseDTOSchema,
@@ -128,7 +128,7 @@ describe("governance contract registry", () => {
     ).toBe(true);
   });
 
-  test("account enforcement, cases, realm queue, and audit DTOs validate", () => {
+  test("account enforcement, moderation cases, actions, and audit DTOs validate", () => {
     expect(
       Value.Check(accountEnforcementDTOSchema, {
         id: "enforcement-1",
@@ -208,7 +208,7 @@ describe("governance contract registry", () => {
       Value.Check(contentModerationDecisionSchema, {
         reason: "off-topic",
         caseId: "case-1",
-        metadata: { source: "realm-queue" },
+        metadata: { source: "realm-case" },
       }),
     ).toBe(true);
     expect(
@@ -334,9 +334,9 @@ describe("governance contract registry", () => {
     ).toBe(true);
   });
 
-  test("realm moderation queue command contracts validate", () => {
+  test("realm scoped case command contracts validate", () => {
     expect(
-      Value.Check(createRealmModerationQueueItemSchema, {
+      Value.Check(createRealmModerationCaseSchema, {
         reporterUserId: "reporter-1",
         subjectUserId: "subject-1",
         targetKind: "unit",
@@ -346,19 +346,19 @@ describe("governance contract registry", () => {
       }),
     ).toBe(true);
     expect(
-      Value.Check(createRealmModerationQueueItemFromFeedbackSchema, {
+      Value.Check(createRealmModerationCaseFromFeedbackSchema, {
         reason: "reported",
         metadata: { source: "feedback" },
       }),
     ).toBe(true);
     expect(
-      Value.Check(decideRealmModerationQueueItemSchema, {
-        decisionKind: "hide_from_realm",
+      Value.Check(decideRealmModerationCaseSchema, {
+        actionKind: "remove",
         reason: "off-topic",
       }),
     ).toBe(true);
     expect(
-      Value.Check(escalateRealmModerationQueueItemSchema, {
+      Value.Check(escalateRealmModerationCaseSchema, {
         reason: "site review needed",
         caseId: "case-1",
       }),

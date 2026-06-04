@@ -210,7 +210,7 @@ reset + reseed is acceptable; a backfill script is optional.
 - [x] 1.7 Add lock actions: `setLock({ targetKind, targetId, isLocked, ... })`
   writing `Post.isLocked`/`Comment.isLocked`/`UnitRealm.isLocked` + LOCK/UNLOCK
   ledger in one tx.
-- [ ] 1.8 Merge realm queue into cases: fold `createRealmQueueItem*`,
+- [x] 1.8 Merge realm queue into cases: fold `createRealmQueueItem*`,
   `decideRealmQueueItem`, `escalateRealmQueueItem`, `listRealmQueue*` into case
   methods with `scope=REALM`; escalation creates/links a platform case through
   `parentCaseId`. Update `decideCase`/`triageCase`/`assignCase` to append
@@ -231,7 +231,7 @@ reset + reseed is acceptable; a backfill script is optional.
   `mapModerationActionToDTO`; update `mapModerationCaseToDTO` for
   `scope`/`parentCaseId`. Keep/update `mapStaffAuditLogToDTO` only if 0.9 keeps
   the slim log. Update `types.ts` row aliases accordingly.
-- [ ] 1.12 Update `governance.api.ts`: collapse `/content/.../hide|tombstone` and
+- [x] 1.12 Update `governance.api.ts`: collapse `/content/.../hide|tombstone` and
   realm `hide|tombstone|reject` into `approve|remove|restore`; replace
   `/realm-queue` + `/realms/:id/queue*` routes with scoped `/cases` routes; add
   `GET /moderation/:targetKind/:targetId/actions` (ledger timeline) and a batch
@@ -284,7 +284,7 @@ reset + reseed is acceptable; a backfill script is optional.
 
 ## 3. Contract (`package/contract/src/`)
 
-- [ ] 3.1 `realm/governance.ts`: add `moderationStatusSchema` (approved|pending|
+- [x] 3.1 `realm/governance.ts`: add `moderationStatusSchema` (approved|pending|
   removed), `moderationScopeSchema`, `moderationAuthoritySchema`,
   `moderationTargetKindSchema`, `moderationActionKindSchema`,
   `ModerationActionDTO`, and a `ModerationOverlayDTO` ({ moderationStatus,
@@ -343,7 +343,7 @@ reset + reseed is acceptable; a backfill script is optional.
 
 ## 5. Frontend (`package/api` + `package/app` + `package/admin` + `package/i18n`)
 
-- [ ] 5.1 `@rezics/api/governance/*`: replace `hide/tombstone/approve/reject/remove/
+- [x] 5.1 `@rezics/api/governance/*`: replace `hide/tombstone/approve/reject/remove/
   restore` content mutations with `approve/remove/restore` + `moderateComment` +
   `setLock`; update `governance.queries.ts` for `ModerationActionDTO`/timeline;
   repoint `post.api.ts getModerationOverlays` to the new `ModerationOverlayDTO`.

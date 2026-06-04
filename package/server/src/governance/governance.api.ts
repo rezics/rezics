@@ -6,15 +6,14 @@ import {
   capabilityGrantDTOSchema,
   capabilityHintSchema,
   contentModerationDecisionSchema,
-  contentModerationStateDTOSchema,
   createAccountEnforcementSchema,
   createModerationCaseFromFeedbackSchema,
-  createRealmModerationQueueItemFromFeedbackSchema,
-  createRealmModerationQueueItemSchema,
+  createRealmModerationCaseFromFeedbackSchema,
+  createRealmModerationCaseSchema,
   decideModerationCaseSchema,
-  decideRealmModerationQueueItemSchema,
+  decideRealmModerationCaseSchema,
   duplicateModerationCaseSchema,
-  escalateRealmModerationQueueItemSchema,
+  escalateRealmModerationCaseSchema,
   grantCapabilitySchema,
   moderationActionDTOSchema,
   moderationCaseDTOSchema,
@@ -22,7 +21,6 @@ import {
   moderationOverlayRequestSchema,
   policyDecisionSchema,
   policyInputSchema,
-  realmModerationQueueItemDTOSchema,
   staffAuditLogDTOSchema,
   triageModerationCaseSchema,
   unblockAccountEnforcementSchema,
@@ -51,6 +49,8 @@ async function assertStaff(identity: any, status: any) {
 const listQuerySchema = t.Object({
   offset: t.Optional(t.Number()),
   limit: t.Optional(t.Number()),
+  scope: t.Optional(t.String()),
+  state: t.Optional(t.String()),
 });
 
 const auditListQuerySchema = t.Object({
@@ -79,6 +79,21 @@ function accountEnforcementAction(kind: string) {
       return accountPolicyActions.rateLimit;
     default:
       return accountPolicyActions.warn;
+  }
+}
+
+function realmCaseDecisionKind(actionKind: string) {
+  switch (actionKind) {
+    case "approve":
+      return "approve_for_realm";
+    case "remove":
+      return "remove_from_realm";
+    case "warning":
+      return "warn";
+    case "ban_member":
+      return "ban_from_realm";
+    default:
+      return actionKind;
   }
 }
 
@@ -440,37 +455,43 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       },
     },
   )
-  .get(
-    "/content/:targetUnitId/moderation",
-    async ({ params, identity, status }) => {
-      // Route param name is compatibility surface; service storage uses
-      // moderatedUnitId and never follows Unit.targetUnitId.
+  .post(
+    "/content/:targetUnitId/approve",
+    async ({ params, body, identity, status }) => {
       const denied = await assertGovernancePolicy({
         identity,
         status,
-        action: sitePolicyActions.auditRead,
-        target: { kind: "content-moderation", id: params.targetUnitId },
+        action: contentPolicyActions.restore,
+        target: { kind: "content", id: params.targetUnitId },
       });
       if (denied) return denied;
-      return governanceModerationService.getGlobalContentState(
+      await governanceModerationService.setUnitModerationStatus({
+        unitId: params.targetUnitId,
+        actorUserId: identity.userId,
+        action: "approve",
+        reasonCode: "content.approved",
+        reasonText: body.reason,
+        caseId: body.caseId,
+      });
+      return governanceModerationService.listTargetActions(
+        "UNIT",
         params.targetUnitId,
+        { limit: 1 },
       );
     },
     {
       requireLogin: true,
       params: t.Object({ targetUnitId: t.String() }),
-      response: {
-        200: t.Nullable(contentModerationStateDTOSchema),
-        403: t.String(),
-      },
+      body: contentModerationDecisionSchema,
+      response: { 200: t.Array(moderationActionDTOSchema), 403: t.String() },
       detail: {
-        summary: "Read global content moderation state",
+        summary: "Approve content globally",
         tags: ["Governance", "Content"],
       },
     },
   )
   .post(
-    "/content/:targetUnitId/hide",
+    "/content/:targetUnitId/remove",
     async ({ params, body, identity, status }) => {
       const denied = await assertGovernancePolicy({
         identity,
@@ -479,46 +500,27 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         target: { kind: "content", id: params.targetUnitId },
       });
       if (denied) return denied;
-      return governanceModerationService.hideGlobal({
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
+      await governanceModerationService.setUnitModerationStatus({
+        unitId: params.targetUnitId,
+        actorUserId: identity.userId,
+        action: "remove",
+        reasonCode: "content.removed",
+        reasonText: body.reason,
+        caseId: body.caseId,
       });
+      return governanceModerationService.listTargetActions(
+        "UNIT",
+        params.targetUnitId,
+        { limit: 1 },
+      );
     },
     {
       requireLogin: true,
       params: t.Object({ targetUnitId: t.String() }),
       body: contentModerationDecisionSchema,
-      response: { 200: contentModerationStateDTOSchema, 403: t.String() },
+      response: { 200: t.Array(moderationActionDTOSchema), 403: t.String() },
       detail: {
-        summary: "Globally hide content",
-        tags: ["Governance", "Content"],
-      },
-    },
-  )
-  .post(
-    "/content/:targetUnitId/tombstone",
-    async ({ params, body, identity, status }) => {
-      const denied = await assertGovernancePolicy({
-        identity,
-        status,
-        action: contentPolicyActions.takedown,
-        target: { kind: "content", id: params.targetUnitId },
-      });
-      if (denied) return denied;
-      return governanceModerationService.tombstoneGlobal({
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
-      });
-    },
-    {
-      requireLogin: true,
-      params: t.Object({ targetUnitId: t.String() }),
-      body: contentModerationDecisionSchema,
-      response: { 200: contentModerationStateDTOSchema, 403: t.String() },
-      detail: {
-        summary: "Globally tombstone content",
+        summary: "Remove content globally",
         tags: ["Governance", "Content"],
       },
     },
@@ -533,86 +535,28 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         target: { kind: "content", id: params.targetUnitId },
       });
       if (denied) return denied;
-      return governanceModerationService.restoreGlobal({
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
+      await governanceModerationService.setUnitModerationStatus({
+        unitId: params.targetUnitId,
+        actorUserId: identity.userId,
+        action: "restore",
+        reasonCode: "content.restored",
+        reasonText: body.reason,
+        caseId: body.caseId,
       });
+      return governanceModerationService.listTargetActions(
+        "UNIT",
+        params.targetUnitId,
+        { limit: 1 },
+      );
     },
     {
       requireLogin: true,
       params: t.Object({ targetUnitId: t.String() }),
       body: contentModerationDecisionSchema,
-      response: { 200: contentModerationStateDTOSchema, 403: t.String() },
+      response: { 200: t.Array(moderationActionDTOSchema), 403: t.String() },
       detail: {
         summary: "Restore global content moderation state",
         tags: ["Governance", "Content"],
-      },
-    },
-  )
-  .post(
-    "/realms/:realmUnitId/content/:targetUnitId/hide",
-    async ({ params, body, identity, status }) => {
-      const denied = await assertRealmGovernancePolicy({
-        identity,
-        status,
-        realmUnitId: params.realmUnitId,
-        action: realmPolicyActions.queueDecide,
-        target: {
-          kind: "realm-content",
-          id: params.targetUnitId,
-          realmUnitId: params.realmUnitId,
-        },
-      });
-      if (denied) return denied;
-      return governanceModerationService.hideInRealm({
-        realmUnitId: params.realmUnitId,
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
-      });
-    },
-    {
-      requireLogin: true,
-      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
-      body: contentModerationDecisionSchema,
-      response: { 200: unitRealmDTOSchema, 403: t.String() },
-      detail: {
-        summary: "Hide content in one realm",
-        tags: ["Governance", "Realms", "Content"],
-      },
-    },
-  )
-  .post(
-    "/realms/:realmUnitId/content/:targetUnitId/tombstone",
-    async ({ params, body, identity, status }) => {
-      const denied = await assertRealmGovernancePolicy({
-        identity,
-        status,
-        realmUnitId: params.realmUnitId,
-        action: realmPolicyActions.queueDecide,
-        target: {
-          kind: "realm-content",
-          id: params.targetUnitId,
-          realmUnitId: params.realmUnitId,
-        },
-      });
-      if (denied) return denied;
-      return governanceModerationService.tombstoneInRealm({
-        realmUnitId: params.realmUnitId,
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
-      });
-    },
-    {
-      requireLogin: true,
-      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
-      body: contentModerationDecisionSchema,
-      response: { 200: unitRealmDTOSchema, 403: t.String() },
-      detail: {
-        summary: "Tombstone content in one realm",
-        tags: ["Governance", "Realms", "Content"],
       },
     },
   )
@@ -631,11 +575,14 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         },
       });
       if (denied) return denied;
-      return governanceModerationService.approveInRealm({
+      return governanceModerationService.setRealmUnitModerationStatus({
         realmUnitId: params.realmUnitId,
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
+        unitId: params.targetUnitId,
+        actorUserId: identity.userId,
+        action: "approve",
+        reasonCode: "realm.content.approved",
+        reasonText: body.reason,
+        caseId: body.caseId,
       });
     },
     {
@@ -645,39 +592,6 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       response: { 200: unitRealmDTOSchema, 403: t.String() },
       detail: {
         summary: "Approve content for one realm",
-        tags: ["Governance", "Realms", "Content"],
-      },
-    },
-  )
-  .post(
-    "/realms/:realmUnitId/content/:targetUnitId/reject",
-    async ({ params, body, identity, status }) => {
-      const denied = await assertRealmGovernancePolicy({
-        identity,
-        status,
-        realmUnitId: params.realmUnitId,
-        action: realmPolicyActions.queueDecide,
-        target: {
-          kind: "realm-content",
-          id: params.targetUnitId,
-          realmUnitId: params.realmUnitId,
-        },
-      });
-      if (denied) return denied;
-      return governanceModerationService.rejectInRealm({
-        realmUnitId: params.realmUnitId,
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
-      });
-    },
-    {
-      requireLogin: true,
-      params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
-      body: contentModerationDecisionSchema,
-      response: { 200: unitRealmDTOSchema, 403: t.String() },
-      detail: {
-        summary: "Reject content from one realm",
         tags: ["Governance", "Realms", "Content"],
       },
     },
@@ -697,11 +611,14 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         },
       });
       if (denied) return denied;
-      return governanceModerationService.restoreInRealm({
+      return governanceModerationService.setRealmUnitModerationStatus({
         realmUnitId: params.realmUnitId,
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
+        unitId: params.targetUnitId,
+        actorUserId: identity.userId,
+        action: "restore",
+        reasonCode: "realm.content.restored",
+        reasonText: body.reason,
+        caseId: body.caseId,
       });
     },
     {
@@ -730,11 +647,14 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         },
       });
       if (denied) return denied;
-      return governanceModerationService.removeFromRealm({
+      return governanceModerationService.setRealmUnitModerationStatus({
         realmUnitId: params.realmUnitId,
-        moderatedUnitId: params.targetUnitId,
-        decidedById: identity.userId,
-        ...body,
+        unitId: params.targetUnitId,
+        actorUserId: identity.userId,
+        action: "remove",
+        reasonCode: "realm.content.removed",
+        reasonText: body.reason,
+        caseId: body.caseId,
       });
     },
     {
@@ -848,30 +768,10 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       requireLogin: true,
       params: t.Object({ realmUnitId: t.String(), targetUnitId: t.String() }),
       body: contentModerationDecisionSchema,
-      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
       detail: {
         summary: "Request owner delegation for realm content removal",
         tags: ["Governance", "Realms", "Content"],
-      },
-    },
-  )
-  .get(
-    "/realm-queue/escalated",
-    async ({ query, identity, status }) => {
-      const denied = await assertStaff(identity, status);
-      if (denied) return denied;
-      return governanceModerationService.listEscalatedRealmQueue(query);
-    },
-    {
-      requireLogin: true,
-      query: listQuerySchema,
-      response: {
-        200: t.Array(realmModerationQueueItemDTOSchema),
-        403: t.String(),
-      },
-      detail: {
-        summary: "List escalated realm moderation queue items",
-        tags: ["Governance", "Staff", "Realms"],
       },
     },
   )
@@ -1098,11 +998,11 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
     },
   )
   .get(
-    "/realms/:realmUnitId/queue",
+    "/realms/:realmUnitId/cases",
     async ({ params, query, identity, status }) => {
       const denied = await assertStaff(identity, status);
       if (denied) return denied;
-      return governanceModerationService.listRealmQueue(
+      return governanceModerationService.listRealmCases(
         params.realmUnitId,
         query,
       );
@@ -1112,17 +1012,17 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
       params: t.Object({ realmUnitId: t.String() }),
       query: listQuerySchema,
       response: {
-        200: t.Array(realmModerationQueueItemDTOSchema),
+        200: t.Array(moderationCaseDTOSchema),
         403: t.String(),
       },
       detail: {
-        summary: "List realm moderation queue items",
+        summary: "List realm moderation cases",
         tags: ["Governance", "Staff"],
       },
     },
   )
   .post(
-    "/realms/:realmUnitId/queue",
+    "/realms/:realmUnitId/cases",
     async ({ params, body, identity, status }) => {
       const denied = await assertRealmGovernancePolicy({
         identity,
@@ -1130,13 +1030,13 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         realmUnitId: params.realmUnitId,
         action: realmPolicyActions.queueDecide,
         target: {
-          kind: "realm-moderation-queue",
+          kind: "realm-moderation-case",
           id: params.realmUnitId,
           realmUnitId: params.realmUnitId,
         },
       });
       if (denied) return denied;
-      return governanceModerationService.createRealmQueueItem({
+      return governanceModerationService.createRealmCase({
         realmUnitId: params.realmUnitId,
         actorUserId: identity.userId,
         ...body,
@@ -1145,16 +1045,16 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
     {
       requireLogin: true,
       params: t.Object({ realmUnitId: t.String() }),
-      body: createRealmModerationQueueItemSchema,
-      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      body: createRealmModerationCaseSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
       detail: {
-        summary: "Create a realm moderation queue item",
+        summary: "Create a realm moderation case",
         tags: ["Governance", "Realms", "Staff"],
       },
     },
   )
   .post(
-    "/realms/:realmUnitId/queue/from-feedback/:feedbackId",
+    "/realms/:realmUnitId/cases/from-feedback/:feedbackId",
     async ({ params, body, identity, status }) => {
       const denied = await assertRealmGovernancePolicy({
         identity,
@@ -1168,7 +1068,7 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         },
       });
       if (denied) return denied;
-      return governanceModerationService.createRealmQueueItemFromFeedback({
+      return governanceModerationService.createRealmCaseFromFeedback({
         realmUnitId: params.realmUnitId,
         feedbackId: params.feedbackId,
         actorUserId: identity.userId,
@@ -1178,16 +1078,16 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
     {
       requireLogin: true,
       params: t.Object({ realmUnitId: t.String(), feedbackId: t.String() }),
-      body: createRealmModerationQueueItemFromFeedbackSchema,
-      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      body: createRealmModerationCaseFromFeedbackSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
       detail: {
-        summary: "Create a realm moderation queue item from feedback",
+        summary: "Create a realm moderation case from feedback",
         tags: ["Governance", "Realms", "Staff"],
       },
     },
   )
   .get(
-    "/realms/:realmUnitId/queue/:queueItemId/events",
+    "/realms/:realmUnitId/cases/:caseId/actions",
     async ({ params, query, identity, status }) => {
       const denied = await assertRealmGovernancePolicy({
         identity,
@@ -1195,70 +1095,75 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         realmUnitId: params.realmUnitId,
         action: realmPolicyActions.queueDecide,
         target: {
-          kind: "realm-moderation-queue",
-          id: params.queueItemId,
+          kind: "realm-moderation-case",
+          id: params.caseId,
           realmUnitId: params.realmUnitId,
         },
       });
       if (denied) return denied;
-      return governanceModerationService.listRealmQueueEvents(
+      return governanceModerationService.listRealmCaseActions(
         params.realmUnitId,
-        params.queueItemId,
+        params.caseId,
         query,
       );
     },
     {
       requireLogin: true,
-      params: t.Object({ realmUnitId: t.String(), queueItemId: t.String() }),
+      params: t.Object({ realmUnitId: t.String(), caseId: t.String() }),
       query: listQuerySchema,
       response: {
         200: t.Array(moderationActionDTOSchema),
         403: t.String(),
       },
       detail: {
-        summary: "List realm moderation queue events",
+        summary: "List realm moderation case actions",
         tags: ["Governance", "Realms", "Staff"],
       },
     },
   )
   .post(
-    "/realms/:realmUnitId/queue/:queueItemId/decision",
+    "/realms/:realmUnitId/cases/:caseId/decision",
     async ({ params, body, identity, status }) => {
       const denied = await assertRealmGovernancePolicy({
         identity,
         status,
         realmUnitId: params.realmUnitId,
         action:
-          body.decisionKind === "escalate"
+          body.actionKind === "escalate"
             ? realmPolicyActions.reportEscalate
             : realmPolicyActions.queueDecide,
         target: {
-          kind: "realm-moderation-queue",
-          id: params.queueItemId,
+          kind: "realm-moderation-case",
+          id: params.caseId,
           realmUnitId: params.realmUnitId,
         },
       });
       if (denied) return denied;
-      return governanceModerationService.decideRealmQueueItem({
+      return governanceModerationService.decideRealmCase({
         realmUnitId: params.realmUnitId,
-        queueItemId: params.queueItemId,
+        caseId: params.caseId,
         actorUserId: identity.userId,
-        ...body,
+        decisionKind: realmCaseDecisionKind(body.actionKind) as never,
+        reason: body.reason,
+        duplicateOfCaseId: body.duplicateOfCaseId,
+        parentCaseId: body.parentCaseId,
+        decision: body.decision,
+        metadata: body.metadata,
       });
     },
     {
       requireLogin: true,
-      params: t.Object({ realmUnitId: t.String(), queueItemId: t.String() }),
-      body: decideRealmModerationQueueItemSchema,
-      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      params: t.Object({ realmUnitId: t.String(), caseId: t.String() }),
+      body: decideRealmModerationCaseSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
       detail: {
-        summary: "Decide a realm moderation queue item",
+        summary: "Decide a realm moderation case",
         tags: ["Governance", "Realms", "Staff"],
       },
     },
   )
   .post(
-    "/realms/:realmUnitId/queue/:queueItemId/escalate",
+    "/realms/:realmUnitId/cases/:caseId/escalate",
     async ({ params, body, identity, status }) => {
       const denied = await assertRealmGovernancePolicy({
         identity,
@@ -1266,26 +1171,28 @@ export const governanceApi = new Elysia({ prefix: "/governance" })
         realmUnitId: params.realmUnitId,
         action: realmPolicyActions.reportEscalate,
         target: {
-          kind: "realm-moderation-queue",
-          id: params.queueItemId,
+          kind: "realm-moderation-case",
+          id: params.caseId,
           realmUnitId: params.realmUnitId,
         },
       });
       if (denied) return denied;
-      return governanceModerationService.escalateRealmQueueItem({
+      return governanceModerationService.escalateRealmCase({
         realmUnitId: params.realmUnitId,
-        queueItemId: params.queueItemId,
+        caseId: params.caseId,
         actorUserId: identity.userId,
-        ...body,
+        reason: body.reason,
+        platformCaseId: body.caseId,
+        safeSummary: body.safeSummary,
       });
     },
     {
       requireLogin: true,
-      params: t.Object({ realmUnitId: t.String(), queueItemId: t.String() }),
-      body: escalateRealmModerationQueueItemSchema,
-      response: { 200: realmModerationQueueItemDTOSchema, 403: t.String() },
+      params: t.Object({ realmUnitId: t.String(), caseId: t.String() }),
+      body: escalateRealmModerationCaseSchema,
+      response: { 200: moderationCaseDTOSchema, 403: t.String() },
       detail: {
-        summary: "Escalate a realm moderation queue item to site staff",
+        summary: "Escalate a realm moderation case to site staff",
         tags: ["Governance", "Realms", "Staff"],
       },
     },

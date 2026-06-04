@@ -1,4 +1,4 @@
-import { governanceRealmQueueListQuery } from "@rezics/api/governance/governance";
+import { governanceRealmCaseListQuery } from "@rezics/api/governance/governance";
 import { postQueries } from "@rezics/api/post/post";
 import {
   myRealmMembershipQuery,
@@ -226,24 +226,26 @@ function SeededRealmPage({
       sourceRulePost: rulePost,
     });
     queryClient.setQueryData(
-      governanceRealmQueueListQuery(REALM_ID, { limit: 25 }).queryKey,
+      governanceRealmCaseListQuery(REALM_ID, { limit: 25 }).queryKey,
       [
         {
-          id: "queue-story-1",
-          realmUnitId: REALM_ID,
+          id: "case-story-1",
+          scope: "realm",
           state: "new",
+          severity: "medium",
           reporterUserId: "reporter-1",
           subjectUserId: "subject-1",
           target: {
-            kind: "post",
+            kind: "unit",
             id: "post-needs-review",
             realmUnitId: REALM_ID,
           },
           sourceFeedbackId: null,
-          linkedCaseId: null,
           assignedToUserId: null,
+          parentCaseId: null,
+          duplicateOfCaseId: null,
           reason: "A realm moderator should review this report.",
-          safeSummary: "Fixture report for moderator queue.",
+          safeSummary: "Fixture report for moderator cases.",
           createdAt: "2026-05-27T08:30:00.000Z",
           updatedAt: "2026-05-27T08:30:00.000Z",
         },

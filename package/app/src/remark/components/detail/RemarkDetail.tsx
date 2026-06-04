@@ -68,7 +68,7 @@ export const RemarkDetail: React.FC<RemarkDetailProps> = ({
         {remark.realmUnitId ? (
           <ReportAction
             target={{
-              kind: "remark",
+              kind: "unit",
               id: remark.unitId,
               unitId: remark.unitId,
               subjectUserId: remark.authorUserId,

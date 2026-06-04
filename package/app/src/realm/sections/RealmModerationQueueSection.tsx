@@ -1,9 +1,9 @@
 import {
   governanceAuditListQuery,
-  governanceRealmQueueListQuery,
-  useDecideRealmQueueItemMutation,
+  governanceRealmCaseListQuery,
+  useDecideRealmCaseMutation,
 } from "@rezics/api/governance/governance";
-import type { RealmModerationQueueItemDTO } from "@rezics/contract";
+import type { ModerationCaseDTO } from "@rezics/contract";
 import { EmptyState, Spinner } from "@rezics/ui";
 import {
   Badge,
@@ -30,7 +30,7 @@ interface RealmModerationQueueSectionProps {
   realmUnitId: string;
 }
 
-function queueStateVariant(state: string) {
+function caseStateVariant(state: string) {
   if (state === "new" || state === "triaged") return "secondary";
   if (state === "resolved" || state === "actioned") return "default";
   return "outline";
@@ -43,40 +43,36 @@ function formatDate(value?: string | null) {
   return date.toLocaleString();
 }
 
-function QueueItemCard({
+function RealmCaseCard({
   item,
   realmUnitId,
 }: {
-  item: RealmModerationQueueItemDTO;
+  item: ModerationCaseDTO;
   realmUnitId: string;
 }) {
   const summary = item.reason ?? item.safeSummary ?? "No summary recorded.";
   const updatedAt = formatDate(item.updatedAt);
-  const decideQueueItem = useDecideRealmQueueItemMutation({
-    onSuccess: () => toast.success("Queue item updated."),
+  const decideCase = useDecideRealmCaseMutation({
+    onSuccess: () => toast.success("Case updated."),
     onError: (error) => toast.error(error.message),
   });
-  const isPendingReview =
-    item.target.kind === "realm-unit-submission" && item.state === "new";
-  const decide = (
-    decisionKind: "approve_for_realm" | "reject_from_realm",
-    reason: string,
-  ) =>
-    decideQueueItem.mutate({
+  const isPendingReview = item.target.kind === "unit" && item.state === "new";
+  const decide = (actionKind: "approve" | "remove", reason: string) =>
+    decideCase.mutate({
       realmUnitId,
-      queueItemId: item.id,
-      input: { decisionKind, reason },
+      caseId: item.id,
+      input: { actionKind, reason },
     });
 
   return (
     <Card surface="plain">
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={queueStateVariant(item.state)}>{item.state}</Badge>
+          <Badge variant={caseStateVariant(item.state)}>{item.state}</Badge>
           <span className="text-sm font-medium leading-ui text-text-primary">
             {item.target.kind}:{item.target.id}
           </span>
-          {item.linkedCaseId ? (
+          {item.parentCaseId ? (
             <Badge variant="outline">case linked</Badge>
           ) : null}
         </div>
@@ -98,36 +94,32 @@ function QueueItemCard({
           ) : null}
           {updatedAt ? <span>Updated {updatedAt}</span> : null}
         </div>
-        {isPendingReview || item.linkedCaseId ? (
+        {isPendingReview || item.parentCaseId ? (
           <div className="flex flex-wrap gap-2">
             {isPendingReview ? (
               <>
                 <Button
                   variant="default"
                   size="sm"
-                  disabled={decideQueueItem.isPending}
-                  onClick={() =>
-                    decide("approve_for_realm", "approved_for_realm")
-                  }
+                  disabled={decideCase.isPending}
+                  onClick={() => decide("approve", "approved_for_realm")}
                 >
                   Approve
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={decideQueueItem.isPending}
-                  onClick={() =>
-                    decide("reject_from_realm", "rejected_from_realm")
-                  }
+                  disabled={decideCase.isPending}
+                  onClick={() => decide("remove", "removed_from_realm")}
                 >
-                  Reject
+                  Remove
                 </Button>
               </>
             ) : null}
-            {item.linkedCaseId ? (
+            {item.parentCaseId ? (
               <Link
                 to="/staff/case/$caseId"
-                params={{ caseId: item.linkedCaseId }}
+                params={{ caseId: item.parentCaseId }}
               >
                 <Button variant="outline" size="sm">
                   Open case
@@ -183,7 +175,7 @@ export function RealmModerationQueueSection({
   realmUnitId,
 }: RealmModerationQueueSectionProps) {
   const queueQuery = useQuery(
-    governanceRealmQueueListQuery(realmUnitId, { limit: 25 }),
+    governanceRealmCaseListQuery(realmUnitId, { limit: 25 }),
   );
   const auditQuery = useQuery(
     governanceAuditListQuery({
@@ -199,7 +191,7 @@ export function RealmModerationQueueSection({
   );
   const linkedCases = new Set(
     queueItems
-      .map((item) => item.linkedCaseId)
+      .map((item) => item.parentCaseId)
       .filter((caseId): caseId is string => Boolean(caseId)),
   );
   const subjectUserIds = queueItems
@@ -220,7 +212,7 @@ export function RealmModerationQueueSection({
           icon={ClipboardList}
           title="Reports"
           value={String(openQueueItems.length)}
-          detail="Realm queue intake for reports, owner delegation, and moderation decisions."
+          detail="Realm-scoped cases for reports, owner delegation, and moderation decisions."
         >
           <Link to="/staff" search={{ realmUnitId, accountUserId: undefined }}>
             <Button variant="outline" size="sm">
@@ -232,7 +224,7 @@ export function RealmModerationQueueSection({
           icon={Scale}
           title="Cases"
           value={String(linkedCases.size)}
-          detail="Escalated queue items that have a linked foundation moderation case."
+          detail="Realm cases escalated to a linked platform moderation case."
         >
           {Array.from(linkedCases)
             .slice(0, 1)
@@ -248,7 +240,7 @@ export function RealmModerationQueueSection({
           icon={UserRoundCheck}
           title="Sanctions"
           value={String(new Set(subjectUserIds).size)}
-          detail="Subject accounts connected to this realm's queue and enforcement history."
+          detail="Subject accounts connected to this realm's cases and enforcement history."
         >
           {firstSubjectUserId ? (
             <Link
@@ -281,7 +273,7 @@ export function RealmModerationQueueSection({
       </div>
       <Card surface="contained">
         <CardHeader>
-          <CardTitle>Realm reports</CardTitle>
+          <CardTitle>Realm cases</CardTitle>
         </CardHeader>
         <CardContent>
           {queueQuery.isLoading ? (
@@ -293,7 +285,7 @@ export function RealmModerationQueueSection({
           ) : queueItems.length ? (
             <div className="grid gap-3">
               {queueItems.map((item) => (
-                <QueueItemCard
+                <RealmCaseCard
                   key={item.id}
                   item={item}
                   realmUnitId={realmUnitId}
@@ -301,7 +293,7 @@ export function RealmModerationQueueSection({
               ))}
             </div>
           ) : (
-            <EmptyState title="No realm queue items" />
+            <EmptyState title="No realm cases" />
           )}
         </CardContent>
       </Card>

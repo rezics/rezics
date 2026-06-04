@@ -366,96 +366,11 @@ export const appealModerationCaseSchema = t.Object(
 export type AppealModerationCaseInput =
   (typeof appealModerationCaseSchema)["static"];
 
-export const realmModerationQueueStates = [
-  "new",
-  "reviewing",
-  "actioned",
-  "resolved",
-  "duplicate",
-  "rejected",
-  "escalated",
-] as const;
-
-export const realmModerationQueueStateSchema = t.Union([
-  t.Literal("new"),
-  t.Literal("reviewing"),
-  t.Literal("actioned"),
-  t.Literal("resolved"),
-  t.Literal("duplicate"),
-  t.Literal("rejected"),
-  t.Literal("escalated"),
-]);
-
-export const realmModerationDecisionKinds = [
-  "approve_for_realm",
-  "reject_from_realm",
-  "hide_from_realm",
-  "remove_from_realm",
-  "lock",
-  "warn",
-  "mute_in_realm",
-  "remove_member",
-  "ban_from_realm",
-  "reject",
-  "duplicate",
-  "escalate",
-] as const;
-
-export const realmModerationDecisionKindSchema = t.Union([
-  t.Literal("approve_for_realm"),
-  t.Literal("reject_from_realm"),
-  t.Literal("hide_from_realm"),
-  t.Literal("remove_from_realm"),
-  t.Literal("lock"),
-  t.Literal("warn"),
-  t.Literal("mute_in_realm"),
-  t.Literal("remove_member"),
-  t.Literal("ban_from_realm"),
-  t.Literal("reject"),
-  t.Literal("duplicate"),
-  t.Literal("escalate"),
-]);
-
-export const realmModerationQueueItemDTOSchema = t.Object({
-  id: t.String(),
-  realmUnitId: t.String(),
-  state: realmModerationQueueStateSchema,
-  reporterUserId: t.Optional(t.Nullable(t.String())),
-  subjectUserId: t.Optional(t.Nullable(t.String())),
-  target: moderationTargetRefSchema,
-  sourceFeedbackId: t.Optional(t.Nullable(t.String())),
-  linkedCaseId: t.Optional(t.Nullable(t.String())),
-  assignedToUserId: t.Optional(t.Nullable(t.String())),
-  reason: t.Optional(t.Nullable(t.String())),
-  safeSummary: t.Optional(t.Nullable(t.String())),
-  createdAt: t.String(),
-  updatedAt: t.String(),
-});
-
-export type RealmModerationQueueItemDTO =
-  (typeof realmModerationQueueItemDTOSchema)["static"];
-
-export const realmModerationEventDTOSchema = t.Object({
-  id: t.String(),
-  queueItemId: t.String(),
-  realmUnitId: t.String(),
-  actorUserId: t.String(),
-  decisionKind: t.Optional(t.Nullable(realmModerationDecisionKindSchema)),
-  decision: t.Optional(t.Nullable(decisionSchema)),
-  reason: t.Optional(t.Nullable(t.String())),
-  before: t.Optional(auditMetadataSchema),
-  after: t.Optional(auditMetadataSchema),
-  createdAt: t.String(),
-});
-
-export type RealmModerationEventDTO =
-  (typeof realmModerationEventDTOSchema)["static"];
-
-export const createRealmModerationQueueItemSchema = t.Object(
+export const createRealmModerationCaseSchema = t.Object(
   {
     reporterUserId: t.Optional(t.Nullable(t.String())),
     subjectUserId: t.Optional(t.Nullable(t.String())),
-    targetKind: t.String(),
+    targetKind: moderationTargetKindSchema,
     targetId: t.String(),
     addressedUnitId: t.Optional(t.Nullable(t.String())),
     sourceFeedbackId: t.Optional(t.Nullable(t.String())),
@@ -467,10 +382,10 @@ export const createRealmModerationQueueItemSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type CreateRealmModerationQueueItemInput =
-  (typeof createRealmModerationQueueItemSchema)["static"];
+export type CreateRealmModerationCaseInput =
+  (typeof createRealmModerationCaseSchema)["static"];
 
-export const createRealmModerationQueueItemFromFeedbackSchema = t.Object(
+export const createRealmModerationCaseFromFeedbackSchema = t.Object(
   {
     assignedToUserId: t.Optional(t.Nullable(t.String())),
     reason: t.Optional(t.Nullable(t.String())),
@@ -480,25 +395,36 @@ export const createRealmModerationQueueItemFromFeedbackSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type CreateRealmModerationQueueItemFromFeedbackInput =
-  (typeof createRealmModerationQueueItemFromFeedbackSchema)["static"];
+export type CreateRealmModerationCaseFromFeedbackInput =
+  (typeof createRealmModerationCaseFromFeedbackSchema)["static"];
 
-export const decideRealmModerationQueueItemSchema = t.Object(
+export const decideRealmModerationCaseSchema = t.Object(
   {
-    decisionKind: realmModerationDecisionKindSchema,
+    actionKind: t.Union([
+      t.Literal("approve"),
+      t.Literal("remove"),
+      t.Literal("lock"),
+      t.Literal("warning"),
+      t.Literal("mute_member"),
+      t.Literal("remove_member"),
+      t.Literal("ban_member"),
+      t.Literal("reject"),
+      t.Literal("duplicate"),
+      t.Literal("escalate"),
+    ]),
     reason: t.String({ minLength: 1 }),
-    duplicateOfQueueItemId: t.Optional(t.Nullable(t.String())),
-    linkedCaseId: t.Optional(t.Nullable(t.String())),
+    duplicateOfCaseId: t.Optional(t.Nullable(t.String())),
+    parentCaseId: t.Optional(t.Nullable(t.String())),
     decision: t.Optional(decisionSchema),
     metadata: t.Optional(auditMetadataSchema),
   },
   { additionalProperties: false },
 );
 
-export type DecideRealmModerationQueueItemInput =
-  (typeof decideRealmModerationQueueItemSchema)["static"];
+export type DecideRealmModerationCaseInput =
+  (typeof decideRealmModerationCaseSchema)["static"];
 
-export const escalateRealmModerationQueueItemSchema = t.Object(
+export const escalateRealmModerationCaseSchema = t.Object(
   {
     reason: t.String({ minLength: 1 }),
     caseId: t.Optional(t.Nullable(t.String())),
@@ -507,39 +433,8 @@ export const escalateRealmModerationQueueItemSchema = t.Object(
   { additionalProperties: false },
 );
 
-export type EscalateRealmModerationQueueItemInput =
-  (typeof escalateRealmModerationQueueItemSchema)["static"];
-
-export const contentModerationStateKinds = [
-  "visible",
-  "hidden",
-  "tombstoned",
-  "removed",
-] as const;
-
-export const contentModerationStateKindSchema = t.Union([
-  t.Literal("visible"),
-  t.Literal("hidden"),
-  t.Literal("tombstoned"),
-  t.Literal("removed"),
-]);
-
-export type ContentModerationStateKind =
-  (typeof contentModerationStateKindSchema)["static"];
-
-export const contentModerationStateDTOSchema = t.Object({
-  moderatedUnitId: t.String(),
-  state: contentModerationStateKindSchema,
-  decidedByUserId: t.Optional(t.Nullable(t.String())),
-  caseId: t.Optional(t.Nullable(t.String())),
-  reason: t.Optional(t.Nullable(t.String())),
-  metadata: t.Optional(auditMetadataSchema),
-  createdAt: t.String(),
-  updatedAt: t.String(),
-});
-
-export type ContentModerationStateDTO =
-  (typeof contentModerationStateDTOSchema)["static"];
+export type EscalateRealmModerationCaseInput =
+  (typeof escalateRealmModerationCaseSchema)["static"];
 
 export const contentModerationDecisionSchema = t.Object(
   {
