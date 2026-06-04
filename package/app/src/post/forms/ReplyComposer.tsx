@@ -108,9 +108,7 @@ export const ReplyComposer = forwardRef<
   const variantUnitId = isRealmPostMode ? undefined : props.variantUnitId;
   const rootUnitId = isRealmPostMode ? undefined : props.rootUnitId;
   const realmUnitId = isRealmPostMode ? undefined : props.realmUnitId;
-  const parentCommentId = isRealmPostMode
-    ? undefined
-    : props.parentCommentId;
+  const parentCommentId = isRealmPostMode ? undefined : props.parentCommentId;
   const isCommentReplyMode = !isRealmPostMode && Boolean(parentCommentId);
   const canAttachPoll = !isCommentReplyMode;
   const initialTagIds = props.tagIds;
@@ -151,9 +149,7 @@ export const ReplyComposer = forwardRef<
             rootUnitId,
             realmUnitId,
             parentCommentId:
-              parentCommentId === rootUnitId
-                ? undefined
-                : parentCommentId,
+              parentCommentId === rootUnitId ? undefined : parentCommentId,
             content,
           },
           {

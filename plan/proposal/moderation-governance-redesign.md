@@ -170,7 +170,7 @@ reset + reseed is acceptable; a backfill script is optional.
   `ModerationCase.parentCase`, feedback target fields, and any kept slim
   `StaffAuditLog` relations. Update seed delete/reset order for the new ledger
   and removed tables.
-- [ ] 0.12 `bun --filter=@rezics/server run prisma:generate` then
+- [x] 0.12 `bun --filter=@rezics/server run prisma:generate` then
   `prisma:migrate` (dev reset acceptable).
 
 ## 1. Backend write path, policy & ledger (`package/server/src/`)
@@ -312,7 +312,7 @@ reset + reseed is acceptable; a backfill script is optional.
 
 ## 4. Read paths & search
 
-- [ ] 4.1 Grep every read query that filtered on the old enums
+- [x] 4.1 Grep every read query that filtered on the old enums
   (`moderationState`, `visibilityState`, `ContentModerationState`) across
   `package/server/src`, `package/search/src`, `package/api`, `package/app`, and
   `package/admin`. Known server targets include post reads/mappers,
@@ -385,7 +385,7 @@ reset + reseed is acceptable; a backfill script is optional.
 
 ## 6. Migration, tests & cleanup
 
-- [ ] 6.1 Dev cutover: migrate (reset) + `bun --filter=@rezics/server run
+- [x] 6.1 Dev cutover: migrate (reset) + `bun --filter=@rezics/server run
   seed:factory`. Optional best-effort backfill script (snapshot from old enums;
   import old events into `ModerationAction` with `importedFrom`) only if preserving
   dev data; otherwise skip. Update seed reset/delete order for
@@ -397,7 +397,7 @@ reset + reseed is acceptable; a backfill script is optional.
   `RealmModerationEvent`, `ModerationCaseEvent`, `UnitRealmModerationState`,
   `UnitRealmVisibilityState`, `visibilityState`, `realmVisibilityState`,
   `realmModerationState`, and feedback `unitId` callsites.
-- [ ] 6.3 Tests: rewrite `moderation.service.test.ts`, `governance.api.test.ts`,
+- [x] 6.3 Tests: rewrite `moderation.service.test.ts`, `governance.api.test.ts`,
   `enforcement.service.test.ts`, contract governance/comment/feedback tests,
   search sync tests, target-semantics schema tests, and comment service/mapper
   tests. Add coverage for comment authority + precedence (2.4/2.5),
