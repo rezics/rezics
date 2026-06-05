@@ -15,8 +15,12 @@ import {
   markdownContentDoc,
 } from "@rezics/contract";
 import { inArray, like } from "drizzle-orm";
+import { Unit, User } from "../schema";
 import type { CountSpec, SeedCtx } from "./strategy.js";
-import { bootstrapSystemShelves } from "./system-shelves.js";
+import {
+  bootstrapSystemShelves,
+  createDrizzleSystemShelfClient,
+} from "./system-shelves.js";
 import type { CreatedUser } from "./types.js";
 import {
   chunkedParallel,
@@ -131,10 +135,9 @@ export async function seedUsers(
         ctx.authDb.db,
       );
 
-      await ctx.prisma.unit.upsert({
-        where: { id: authResult.userId },
-        update: { slug: plan.slug, slugScope: ctx.slugScopes.user },
-        create: {
+      await ctx.db
+        .insert(Unit)
+        .values({
           id: authResult.userId,
           type: "USER",
           slug: plan.slug,
@@ -142,24 +145,29 @@ export async function seedUsers(
           status: "PUBLISHED",
           visibility: "PUBLIC",
           isLanguageNeutral: true,
-        },
-      });
-      await ctx.prisma.user.create({
-        data: {
-          unitId: authResult.userId,
-          authUserId: authResult.userId,
-          email: plan.email,
-          name: plan.name,
-          avatar: plan.avatar,
-          bio: plan.bio,
-          description: markdownContentDoc(plan.description),
-          joinDate: plan.joinDate,
-          settings: plan.settings,
-          ...(plan.permission ? { permission: plan.permission } : {}),
-        },
+        })
+        .onConflictDoUpdate({
+          target: Unit.id,
+          set: { slug: plan.slug, slugScope: ctx.slugScopes.user },
+        });
+      await ctx.db.insert(User).values({
+        unitId: authResult.userId,
+        authUserId: authResult.userId,
+        email: plan.email,
+        name: plan.name,
+        avatar: plan.avatar,
+        bio: plan.bio,
+        description: markdownContentDoc(plan.description),
+        joinDate: plan.joinDate,
+        settings: plan.settings,
+        ...(plan.permission ? { permission: plan.permission } : {}),
       });
 
-      await bootstrapSystemShelves(authResult.userId, plan.slug, ctx.prisma);
+      await bootstrapSystemShelves(
+        authResult.userId,
+        plan.slug,
+        createDrizzleSystemShelfClient(ctx.db),
+      );
 
       return {
         userId: authResult.userId,
