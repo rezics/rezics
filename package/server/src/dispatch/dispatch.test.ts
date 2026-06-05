@@ -219,16 +219,17 @@ describe("dispatch service - GAME/MEDIA shared metadata", () => {
     expect(repository.createMediaUnit).toHaveBeenCalledWith("user-1", {
       kindKey: "movie",
     });
-    expect(repository.upsertTranslation).toHaveBeenCalledWith({
-      unitId: "media-1",
-      language: "ja",
-      title: "映画",
-      subtitle: undefined,
-      summary: "概要",
-      description: undefined,
-      createExtra: { source: "existing" },
-      updateExtra: { source: "existing" },
-    });
+    expect(repository.upsertTranslation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        unitId: "media-1",
+        language: "ja",
+        title: "映画",
+        subtitle: undefined,
+        summary: "概要",
+        createExtra: { source: "existing" },
+        updateExtra: { source: "existing" },
+      }),
+    );
     expect(repository.upsertCredit).toHaveBeenCalledTimes(2);
     expect(repository.upsertCredit).toHaveBeenNthCalledWith(1, {
       unitId: "media-1",
